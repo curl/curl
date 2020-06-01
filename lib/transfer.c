@@ -688,7 +688,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     /* This is not an 'else if' since it may be a rest from the header
        parsing, where the beginning of the buffer is headers and the end
        is non-headers. */
-    if(k->str && !k->header && (nread > 0 || is_empty_data)) {
+    if(!k->header && (nread > 0 || is_empty_data)) {
 
       if(data->set.opt_no_body) {
         /* data arrives although we want none, bail out */
