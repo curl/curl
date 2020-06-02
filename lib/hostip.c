@@ -530,6 +530,7 @@ enum resolve_t Curl_resolv(struct connectdata *conn,
         return CURLRESOLV_ERROR;
     }
 
+#ifndef USE_RESOLVE_ON_IPS
     /* First check if this is an IPv4 address string */
     if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
       /* This is a dotted IP address 123.123.123.123-style */
@@ -544,14 +545,22 @@ enum resolve_t Curl_resolv(struct connectdata *conn,
     }
 #endif /* ENABLE_IPV6 */
 
-#ifdef USE_RESOLVE_ON_IPS
-    /* If given a numerical IP, USE_RESOLVE_ON_IPS means this still needs to
-       get "resolved" but not with DoH */
-    if(addr) {
-      addr = NULL;
+#else /* if USE_RESOLVE_ON_IPS */
+    /* First check if this is an IPv4 address string */
+    if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
+      /* This is a dotted IP address 123.123.123.123-style */
       ipnum = TRUE;
+#ifdef ENABLE_IPV6
+    else {
+      struct in6_addr in6;
+      /* check if this is an IPv6 address string */
+      if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0)
+        /* This is an IPv6 address literal */
+        ipnum = TRUE;
     }
-#endif /* USE_RESOLVE_ON_IPS */
+#endif /* ENABLE_IPV6 */
+
+#endif /* !USE_RESOLVE_ON_IPS */
 
     if(!addr) {
       /* Check what IP specifics the app has requested and if we can provide
