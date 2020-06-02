@@ -33,6 +33,7 @@ http
 </server>
 <features>
 debug
+proxy
 </features>
 <setenv>
 CURL_TIME=13
