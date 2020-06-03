@@ -478,7 +478,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
       dstalpnid = alpn2alpnid(alpnbuf);
       p++;
       if(*p == '\"') {
-        const char *dsthost;
+        const char *dsthost = "";
         const char *value_ptr;
         char option[32];
         unsigned long num;
