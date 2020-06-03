@@ -47,10 +47,13 @@ jobs:
           configure: --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
           tflags: -n -t --shallow=25 !FTP
     steps:
-    - uses: actions/checkout@v2
+    - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+      name: 'brew bundle'
 
-    - run: brew update && brew install libtool autoconf automake pkg-config ${{ matrix.build.install }}
+    - run: brew update && brew bundle install --no-lock --file /tmp/Brewfile
       name: 'brew install'
+
+    - uses: actions/checkout@v2
 
     - run: ./buildconf && ./configure ${{ matrix.build.configure }}
       name: 'configure'
@@ -85,10 +88,13 @@ jobs:
           install: nghttp2 libressl
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
     steps:
-    - uses: actions/checkout@v2
+    - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+      name: 'brew bundle'
 
-    - run: brew update && brew install libtool autoconf automake pkg-config ${{ matrix.build.install }}
+    - run: brew update && brew bundle install --no-lock --file /tmp/Brewfile
       name: 'brew install'
+
+    - uses: actions/checkout@v2
 
     - run: cmake -H. -Bbuild ${{ matrix.build.generate }}
       name: 'cmake generate'
