@@ -1413,7 +1413,15 @@ set(libdir                  "${CMAKE_INSTALL_PREFIX}/lib")
 foreach(_lib ${CMAKE_C_IMPLICIT_LINK_LIBRARIES} ${CURL_LIBS})
   if(TARGET "${_lib}")
     set(_libname "${_lib}")
-    get_target_property(_lib "${_lib}" LOCATION)
+    get_target_property(_libtype "${_libname}" TYPE)
+    if(_libtype STREQUAL INTERFACE_LIBRARY)
+      # Interface libraries can occur when an external project embeds curl and
+      # defined targets such as ZLIB::ZLIB by themselves. Ignore these as
+      # reading the LOCATION property will error out. Assume the user won't need
+      # this information in the .pc file.
+      continue()
+    endif()
+    get_target_property(_lib "${_libname}" LOCATION)
     if(NOT _lib)
       message(WARNING "Bad lib in library list: ${_libname}")
       continue()
