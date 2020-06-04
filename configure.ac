@@ -1056,7 +1056,7 @@ if test X"$OPT_BROTLI" != Xno; then
       LD_BROTLI=`$PKGCONFIG --libs-only-L libbrotlidec`
       CPP_BROTLI=`$PKGCONFIG --cflags-only-I libbrotlidec`
       version=`$PKGCONFIG --modversion libbrotlidec`
-      DIR_BROTLI=`echo $LD_BROTLI | $SED -e 's/-L//'`
+      DIR_BROTLI=`echo $LD_BROTLI | $SED -e 's/^-L//'`
     fi
 
     ;;
@@ -1721,7 +1721,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
       AC_MSG_NOTICE([pkg-config: SSL_LDFLAGS: "$SSL_LDFLAGS"])
       AC_MSG_NOTICE([pkg-config: SSL_CPPFLAGS: "$SSL_CPPFLAGS"])
 
-      LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/-L//g'`
+      LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/^-L//'`
 
       dnl use the values pkg-config reported.  This is here
       dnl instead of below with CPPFLAGS and LDFLAGS because we only
@@ -2040,7 +2040,7 @@ if test -z "$ssl_backends" -o "x$OPT_GNUTLS" != xno; then
         addld=`$PKGCONFIG --libs-only-L gnutls`
         addcflags=`$PKGCONFIG --cflags-only-I gnutls`
         version=`$PKGCONFIG --modversion gnutls`
-        gtlslib=`echo $addld | $SED -e 's/-L//'`
+        gtlslib=`echo $addld | $SED -e 's/^-L//'`
       else
         dnl without pkg-config, we try libgnutls-config as that was how it
         dnl used to be done
@@ -2790,7 +2790,7 @@ if test X"$OPT_LIBMETALINK" != Xno; then
       $PKGCONFIG --cflags-only-I libmetalink`
     version=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
       $PKGCONFIG --modversion libmetalink`
-    libmetalinklib=`echo $addld | $SED -e 's/-L//'`
+    libmetalinklib=`echo $addld | $SED -e 's/^-L//'`
   fi
   if test -n "$addlib"; then
 
@@ -2880,7 +2880,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
       LD_SSH2=`$PKGCONFIG --libs-only-L libssh2`
       CPP_SSH2=`$PKGCONFIG --cflags-only-I libssh2`
       version=`$PKGCONFIG --modversion libssh2`
-      DIR_SSH2=`echo $LD_SSH2 | $SED -e 's/-L//'`
+      DIR_SSH2=`echo $LD_SSH2 | $SED -e 's/^-L//'`
     fi
 
     ;;
@@ -2953,7 +2953,7 @@ elif test X"$OPT_LIBSSH" != Xno; then
       LD_SSH=`$PKGCONFIG --libs-only-L libssh`
       CPP_SSH=`$PKGCONFIG --cflags-only-I libssh`
       version=`$PKGCONFIG --modversion libssh`
-      DIR_SSH=`echo $LD_SSH | $SED -e 's/-L//'`
+      DIR_SSH=`echo $LD_SSH | $SED -e 's/^-L//'`
     fi
 
     ;;
@@ -3061,7 +3061,7 @@ if test X"$OPT_LIBRTMP" != Xno; then
       LD_RTMP=`$PKGCONFIG --libs-only-L librtmp`
       CPP_RTMP=`$PKGCONFIG --cflags-only-I librtmp`
       version=`$PKGCONFIG --modversion librtmp`
-      DIR_RTMP=`echo $LD_RTMP | $SED -e 's/-L//'`
+      DIR_RTMP=`echo $LD_RTMP | $SED -e 's/^-L//'`
     else
       dnl To avoid link errors, we do not allow --librtmp without
       dnl a pkgconfig file
@@ -3297,7 +3297,7 @@ if test "$want_idn" = "yes"; then
         $PKGCONFIG --libs-only-L libidn2 2>/dev/null`
       IDN_CPPFLAGS=`CURL_EXPORT_PCDIR([$IDN_PCDIR]) dnl
         $PKGCONFIG --cflags-only-I libidn2 2>/dev/null`
-      IDN_DIR=`echo $IDN_LDFLAGS | $SED -e 's/-L//'`
+      IDN_DIR=`echo $IDN_LDFLAGS | $SED -e 's/^-L//'`
     else
       dnl pkg-config not available or provides no info
       IDN_LIBS="-lidn2"
@@ -3312,7 +3312,7 @@ if test "$want_idn" = "yes"; then
       IDN_LIBS=`$PKGCONFIG --libs-only-l libidn2 2>/dev/null`
       IDN_LDFLAGS=`$PKGCONFIG --libs-only-L libidn2 2>/dev/null`
       IDN_CPPFLAGS=`$PKGCONFIG --cflags-only-I libidn2 2>/dev/null`
-      IDN_DIR=`echo $IDN_LDFLAGS | $SED -e 's/-L//'`
+      IDN_DIR=`echo $IDN_LDFLAGS | $SED -e 's/^-L//'`
     else
       dnl pkg-config not available or provides no info
       IDN_LIBS="-lidn2"
@@ -3519,7 +3519,7 @@ if test X"$want_tcp2" != Xno; then
     LIBS="$LIB_TCP2 $LIBS"
 
     if test "x$cross_compiling" != "xyes"; then
-      DIR_TCP2=`echo $LD_TCP2 | $SED -e 's/-L//'`
+      DIR_TCP2=`echo $LD_TCP2 | $SED -e 's/^-L//'`
     fi
     AC_CHECK_LIB(ngtcp2, ngtcp2_conn_client_new,
       [
@@ -3575,7 +3575,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1"; then
     LIBS="$LIB_NGTCP2_CRYPTO_OPENSSL $LIBS"
 
     if test "x$cross_compiling" != "xyes"; then
-      DIR_NGTCP2_CRYPTO_OPENSSL=`echo $LD_NGTCP2_CRYPTO_OPENSSL | $SED -e 's/-L//'`
+      DIR_NGTCP2_CRYPTO_OPENSSL=`echo $LD_NGTCP2_CRYPTO_OPENSSL | $SED -e 's/^-L//'`
     fi
     AC_CHECK_LIB(ngtcp2_crypto_openssl, ngtcp2_crypto_ctx_initial,
       [
@@ -3630,7 +3630,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
     LIBS="$LIB_NGTCP2_CRYPTO_GNUTLS $LIBS"
 
     if test "x$cross_compiling" != "xyes"; then
-      DIR_NGTCP2_CRYPTO_GNUTLS=`echo $LD_NGTCP2_CRYPTO_GNUTLS | $SED -e 's/-L//'`
+      DIR_NGTCP2_CRYPTO_GNUTLS=`echo $LD_NGTCP2_CRYPTO_GNUTLS | $SED -e 's/^-L//'`
     fi
     AC_CHECK_LIB(ngtcp2_crypto_gnutls, ngtcp2_crypto_ctx_initial,
       [
@@ -3718,7 +3718,7 @@ if test X"$want_nghttp3" != Xno; then
     LIBS="$LIB_NGHTTP3 $LIBS"
 
     if test "x$cross_compiling" != "xyes"; then
-      DIR_NGHTTP3=`echo $LD_NGHTTP3 | $SED -e 's/-L//'`
+      DIR_NGHTTP3=`echo $LD_NGHTTP3 | $SED -e 's/^-L//'`
     fi
     AC_CHECK_LIB(nghttp3, nghttp3_conn_client_new,
       [
@@ -3808,7 +3808,7 @@ if test X"$want_quiche" != Xno; then
     LIBS="$LIB_QUICHE $LIBS"
 
     if test "x$cross_compiling" != "xyes"; then
-      DIR_QUICHE=`echo $LD_QUICHE | $SED -e 's/-L//'`
+      DIR_QUICHE=`echo $LD_QUICHE | $SED -e 's/^-L//'`
     fi
     AC_CHECK_LIB(quiche, quiche_connect,
       [
