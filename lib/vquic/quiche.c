@@ -234,8 +234,20 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   /* for connection reuse purposes: */
   conn->ssl[FIRSTSOCKET].state = ssl_connection_complete;
 
-  infof(data, "Sent QUIC client Initial, ALPN: %s\n",
-        QUICHE_H3_APPLICATION_PROTOCOL + 1);
+  {
+    unsigned char alpn_protocols[] = QUICHE_H3_APPLICATION_PROTOCOL;
+    unsigned alpn_len, offset = 0;
+
+    /* Replace each ALPN length prefix by a comma. */
+    while(offset < sizeof(alpn_protocols) - 1) {
+      alpn_len = alpn_protocols[offset];
+      alpn_protocols[offset] = ',';
+      offset += 1 + alpn_len;
+    }
+
+    infof(data, "Sent QUIC client Initial, ALPN: %s\n",
+          alpn_protocols + 1);
+  }
 
   return CURLE_OK;
 }

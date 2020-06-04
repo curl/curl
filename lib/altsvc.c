@@ -51,7 +51,7 @@
 #define MAX_ALTSVC_ALPNLEN 10
 
 #if defined(USE_QUICHE) && !defined(UNITTESTS)
-#define H3VERSION "h3-27"
+#define H3VERSION "h3-28"
 #elif defined(USE_NGTCP2) && !defined(UNITTESTS)
 #define H3VERSION "h3-28"
 #else
