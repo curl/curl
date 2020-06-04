@@ -65,6 +65,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.5 NTLM doesn't support password with § character
  6.6 libcurl can fail to try alternatives with --proxy-any
  6.7 Don't clear digest for single realm
+ 6.8 RTSP authentication breaks without redirect support
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -511,6 +512,15 @@ problems may have been fixed or changed somewhat since this was written!
 6.7 Don't clear digest for single realm
 
  https://github.com/curl/curl/issues/3267
+
+6.8 RTSP authentication breaks without redirect support
+
+ RTSP authentication broke in 7.66.0. A work-around is to enable RTSP in
+ CURLOPT_REDIR_PROTOCOLS. Authentication should however not be considered an
+ actual redirect so a "proper" fix needs to be different and not require users
+ to allow redirects to RTSP to work.
+
+ See https://github.com/curl/curl/pull/4750
 
 7. FTP
 
