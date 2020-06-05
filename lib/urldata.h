@@ -1064,10 +1064,8 @@ struct connectdata {
   /* data used for the asynch name resolve callback */
   struct Curl_async async;
 
-  /* These three are used for chunked-encoding trailer support */
-  char *trailer; /* allocated buffer to store trailer in */
-  int trlMax;    /* allocated buffer size */
-  int trlPos;    /* index of where to store data */
+  /* for chunked-encoded trailer */
+  struct dynbuf trailer;
 
   union {
     struct ftp_conn ftpc;

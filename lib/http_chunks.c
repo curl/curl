@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,7 +26,7 @@
 
 #include "urldata.h" /* it includes http_chunks.h */
 #include "sendf.h"   /* for the client write stuff */
-
+#include "dynbuf.h"
 #include "content_encoding.h"
 #include "http.h"
 #include "non-ascii.h" /* for Curl_convert_to_network prototype */
@@ -93,6 +93,7 @@ void Curl_httpchunk_init(struct connectdata *conn)
   chunk->hexindex = 0;      /* start at 0 */
   chunk->dataleft = 0;      /* no data left yet! */
   chunk->state = CHUNK_HEX; /* we get hex first! */
+  Curl_dyn_init(&conn->trailer, DYN_H1_TRAILER);
 }
 
 /*
@@ -177,7 +178,6 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         /* we're now expecting data to come, unless size was zero! */
         if(0 == ch->datasize) {
           ch->state = CHUNK_TRAILER; /* now check for trailers */
-          conn->trlPos = 0;
         }
         else
           ch->state = CHUNK_DATA;
@@ -229,32 +229,33 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
 
     case CHUNK_TRAILER:
       if((*datap == 0x0d) || (*datap == 0x0a)) {
+        char *tr = Curl_dyn_ptr(&conn->trailer);
         /* this is the end of a trailer, but if the trailer was zero bytes
            there was no trailer and we move on */
 
-        if(conn->trlPos) {
-          /* we allocate trailer with 3 bytes extra room to fit this */
-          conn->trailer[conn->trlPos++] = 0x0d;
-          conn->trailer[conn->trlPos++] = 0x0a;
-          conn->trailer[conn->trlPos] = 0;
+        if(tr) {
+          size_t trlen;
+          result = Curl_dyn_add(&conn->trailer, (char *)"\x0d\x0a");
+          if(result)
+            return CHUNKE_OUT_OF_MEMORY;
 
+          tr = Curl_dyn_ptr(&conn->trailer);
+          trlen = Curl_dyn_len(&conn->trailer);
           /* Convert to host encoding before calling Curl_client_write */
-          result = Curl_convert_from_network(conn->data, conn->trailer,
-                                             conn->trlPos);
+          result = Curl_convert_from_network(conn->data, tr, trlen);
           if(result)
             /* Curl_convert_from_network calls failf if unsuccessful */
             /* Treat it as a bad chunk */
             return CHUNKE_BAD_CHUNK;
 
           if(!data->set.http_te_skip) {
-            result = Curl_client_write(conn, CLIENTWRITE_HEADER,
-                                       conn->trailer, conn->trlPos);
+            result = Curl_client_write(conn, CLIENTWRITE_HEADER, tr, trlen);
             if(result) {
               *extrap = result;
               return CHUNKE_PASSTHRU_ERROR;
             }
           }
-          conn->trlPos = 0;
+          Curl_dyn_reset(&conn->trailer);
           ch->state = CHUNK_TRAILER_CR;
           if(*datap == 0x0a)
             /* already on the LF */
@@ -267,25 +268,9 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         }
       }
       else {
-        /* conn->trailer is assumed to be freed in url.c on a
-           connection basis */
-        if(conn->trlPos >= conn->trlMax) {
-          /* we always allocate three extra bytes, just because when the full
-             header has been received we append CRLF\0 */
-          char *ptr;
-          if(conn->trlMax) {
-            conn->trlMax *= 2;
-            ptr = realloc(conn->trailer, conn->trlMax + 3);
-          }
-          else {
-            conn->trlMax = 128;
-            ptr = malloc(conn->trlMax + 3);
-          }
-          if(!ptr)
-            return CHUNKE_OUT_OF_MEMORY;
-          conn->trailer = ptr;
-        }
-        conn->trailer[conn->trlPos++]=*datap;
+        result = Curl_dyn_addn(&conn->trailer, datap, 1);
+        if(result)
+          return CHUNKE_OUT_OF_MEMORY;
       }
       datap++;
       length--;
