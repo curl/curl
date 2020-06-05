@@ -59,4 +59,5 @@ size_t Curl_dyn_len(const struct dynbuf *s);
 #define DYN_TRAILERS        (64*1024)
 #define DYN_PROXY_CONNECT_HEADERS 16384
 #define DYN_QLOG_NAME       1024
+#define DYN_H1_TRAILER      DYN_H2_TRAILER
 #endif
