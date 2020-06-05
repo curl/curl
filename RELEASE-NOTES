@@ -4,7 +4,7 @@ curl and libcurl 7.71.0
  Command line options:         232
  curl_easy_setopt() options:   277
  Public functions in libcurl:  82
- Contributors:                 2189
+ Contributors:                 2192
 
 This release includes the following changes:
 
@@ -17,6 +17,7 @@ This release includes the following bugfixes:
 
  o *_sspi: fix bad uses of CURLE_NOT_BUILT_IN [21]
  o all: fix codespell errors [75]
+ o altsvc: fix 'dsthost' may be used uninitialized in this function
  o altsvc: fix parser for lines ending with CRLF [74]
  o appveyor: add non-debug plain autotools-based build [90]
  o appveyor: disable flaky test 1501 and ignore broken 1056
@@ -25,6 +26,7 @@ This release includes the following bugfixes:
  o azure: use matrix strategy to avoid configuration redundancy [83]
  o build: disable more code/data when built without proxy support [84]
  o checksrc: enhance the ASTERISKSPACE and update code accordingly [52]
+ o CI/macos: fix 'is already installed' errors by using bundle [94]
  o cirrus: disable SFTP and SCP tests [7]
  o CMake: add ENABLE_ALT_SVC option
  o CMake: add HTTP/3 support (ngtcp2+nghttp3, quiche) [34]
@@ -33,11 +35,13 @@ This release includes the following bugfixes:
  o CMake: fix runtests.pl with CMake, add new test targets [29]
  o CMake: rebuild Makefile.inc.cmake when Makefile.inc changes [58]
  o configure: fix pthread check with static boringssl
+ o configure: only strip first -L from LDFLAGS [89]
  o configure: repair the check if argv can be written to [47]
  o configure: the wolfssh backend does not provide SCP [57]
  o connect: make happy eyeballs work for QUIC (again) [16]
  o curl.1: Quote globbed URLs [51]
  o curl: remove -J "informational" written on stdout [36]
+ o CURLINFO_ACTIVESOCKET.3: clarify the description [87]
  o doc: add missing closing parenthesis in CURLINFO_SSL_VERIFYRESULT.3 [5]
  o doc: Rename VERSIONS to VERSIONS.md as it already has Markdown syntax [20]
  o docs/HTTP3: add qlog to the quiche build instruction
@@ -57,6 +61,7 @@ This release includes the following bugfixes:
  o hostip: on macOS avoid DoH when given a numerical IP address [69]
  o http2: keep trying to send pending frames after req.upload_done [40]
  o http2: simplify and clean up trailer handling [6]
+ o HTTP3.md: clarify cargo build directory [77]
  o libcurl.pc: Merge Libs.private into Libs for static-only builds [28]
  o libssh2: improved error output for wrong quote syntax [39]
  o libssh2: set the expected total size in SCP upload init [2]
@@ -66,6 +71,8 @@ This release includes the following bugfixes:
  o ngtcp2: fix build with current ngtcp2 master implementing draft 28 [76]
  o ngtcp2: introduce qlog support [23]
  o OpenSSL: have CURLOPT_CRLFILE imply CURLSSLOPT_NO_PARTIALCHAIN [55]
+ o projects: Add crypt32.lib to dependencies for all OpenSSL configs [93]
+ o quiche: advertise draft 28 support [91]
  o quiche: clean up memory properly when failing to connect [71]
  o quiche: enable qlog output [14]
  o Revert "buildconf: use find -execdir" [38]
@@ -78,6 +85,7 @@ This release includes the following bugfixes:
  o server/sws: fix asan warning on use of uninitialized variable
  o sha256: fixed potentially uninitialized variable [61]
  o sockfilt: make select_ws stop waiting on exit signal event
+ o socks: fix expected length of SOCKS5 reply [68]
  o source cleanup: remove all custom typedef structs [42]
  o test1167: fixes in badsymbols.pl [73]
  o test1177: look for curl.h in source directory [1]
@@ -94,6 +102,7 @@ This release includes the following bugfixes:
  o tool: support UTF-16 command line on Windows [46]
  o tool_operate: fixed potentially uninitialized variables [60]
  o tool_paramhlp: fixed potentially uninitialized strtol() variable [59]
+ o trailers: switch h1-trailer logic to use dynbuf [81]
  o transfer: close connection after excess data has been read [66]
  o travis: add "qlog" as feature in the quiche build
  o travis: Add ngtcp2 and quiche tests for CMake
@@ -107,6 +116,7 @@ This release includes the following bugfixes:
  o url: sort the protocol schemes in rough popularity order [32]
  o urlapi: accept :: as a valid IPv6 address [15]
  o urldata: leave the HTTP method untouched in the set.* struct [45]
+ o user-agent.d: spell out what happens given a blank argument [80]
  o vauth/cleartext: fix theoretical integer overflow [50]
  o vtls: Extract and simplify key log file handling from OpenSSL
  o wolfssl: add SSLKEYLOGFILE support [65]
@@ -119,16 +129,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Billyzou0741326 on github, Brian Carpenter, Dan Fandrich, Daniel Stenberg,
-  Emil Engler, Estanislau Augé-Pujadas, Gilles Vollant, Gregory Jefferis,
-  huzunhao on github, James Le Cuirot, Jeroen Ooms, John Simpson, Kamil Dudka,
-  Kane York, Lucas Pardue, Maksim Stsepanenka, Marcel Raad, Marc Hörsken,
-  Max Peal, Michael Kaufmann, Murugan Balraj, Neal Poole, Pavel Volgarev,
-  Peter Wang, Peter Wu, Radoslav Georgiev, Ray Satiro, Rikard Falkeborn,
-  rl1987 on github, Saleem Abdulrasool, Samuel Marks, Siva Sivaraman,
-  therealhirudo on github, Thomas Bouzerar, Viktor Szakats, Vyron Tsingaras,
-  Werner Stolz, Will Roberts, Коваленко Анатолий Викторович, kotoriのねこ
-  (40 contributors)
+  Adnan Khan, Billyzou0741326 on github, Brian Carpenter, Cherish98 on github,
+  Dan Fandrich, Daniel Stenberg, Emil Engler, Estanislau Augé-Pujadas,
+  Gilles Vollant, Gregory Jefferis, huzunhao on github, James Le Cuirot,
+  Jeroen Ooms, John Simpson, Kamil Dudka, Kane York, Lucas Pardue,
+  Maksim Stsepanenka, Marcel Raad, Marc Hörsken, Max Peal, Michael Kaufmann,
+  Mohamed Osama, Murugan Balraj, Neal Poole, Pavel Volgarev, Peter Wang,
+  Peter Wu, Radoslav Georgiev, Ray Satiro, Rikard Falkeborn, rl1987 on github,
+  Saleem Abdulrasool, Samuel Marks, Siva Sivaraman, therealhirudo on github,
+  Thomas Bouzerar, Viktor Szakats, Vyron Tsingaras, Werner Stolz, Will Roberts,
+  Коваленко Анатолий Викторович, kotoriのねこ
+  (43 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -201,6 +212,7 @@ References to bug reports and discussions on issues:
  [65] = https://curl.haxx.se/bug/?i=5327
  [66] = https://curl.haxx.se/bug/?i=5440
  [67] = https://curl.haxx.se/mail/lib-2020-05/0068.html
+ [68] = https://curl.haxx.se/bug/?i=5527
  [69] = https://curl.haxx.se/bug/?i=5454
  [70] = https://curl.haxx.se/bug/?i=5447
  [71] = https://curl.haxx.se/bug/?i=5450
@@ -209,12 +221,20 @@ References to bug reports and discussions on issues:
  [74] = https://curl.haxx.se/bug/?i=5445
  [75] = https://curl.haxx.se/bug/?i=5452
  [76] = https://curl.haxx.se/bug/?i=5444
+ [77] = https://curl.haxx.se/bug/?i=5522
  [78] = https://curl.haxx.se/bug/?i=5463
  [79] = https://curl.haxx.se/bug/?i=5485
+ [80] = https://curl.haxx.se/bug/?i=5525
+ [81] = https://curl.haxx.se/bug/?i=5524
  [82] = https://curl.haxx.se/bug/?i=5489
  [83] = https://curl.haxx.se/bug/?i=5468
  [84] = https://curl.haxx.se/bug/?i=5466
  [85] = https://curl.haxx.se/bug/?i=5472
  [86] = https://curl.haxx.se/bug/?i=5479
+ [87] = https://curl.haxx.se/bug/?i=5299
  [88] = https://curl.haxx.se/bug/?i=5476
+ [89] = https://curl.haxx.se/bug/?i=5519
  [90] = https://curl.haxx.se/bug/?i=5477
+ [91] = https://curl.haxx.se/bug/?i=5518
+ [93] = https://curl.haxx.se/bug/?i=5516
+ [94] = https://curl.haxx.se/bug/?i=5513
