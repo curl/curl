@@ -237,7 +237,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
           size_t trlen;
           result = Curl_dyn_add(&conn->trailer, (char *)"\x0d\x0a");
           if(result)
-            return result;
+            return CHUNKE_OUT_OF_MEMORY;
 
           tr = Curl_dyn_ptr(&conn->trailer);
           trlen = Curl_dyn_len(&conn->trailer);
@@ -270,7 +270,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       else {
         result = Curl_dyn_addn(&conn->trailer, datap, 1);
         if(result)
-          return result;
+          return CHUNKE_OUT_OF_MEMORY;
       }
       datap++;
       length--;
