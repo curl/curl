@@ -3052,12 +3052,11 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   if(verifypeer) {
     /* Try building a chain using issuers in the trusted store first to avoid
        problems with server-sent legacy intermediates.  Newer versions of
-       OpenSSL do alternate chain checking by default which gives us the same
-       fix without as much of a performance hit (slight), so we prefer that if
-       available.
+       OpenSSL do alternate chain checking by default but we do not know how to
+       determine that in a reliable manner.
        https://rt.openssl.org/Ticket/Display.html?id=3621&user=guest&pass=guest
     */
-#if defined(X509_V_FLAG_TRUSTED_FIRST) && !defined(X509_V_FLAG_NO_ALT_CHAINS)
+#if defined(X509_V_FLAG_TRUSTED_FIRST)
     X509_STORE_set_flags(SSL_CTX_get_cert_store(backend->ctx),
                          X509_V_FLAG_TRUSTED_FIRST);
 #endif
