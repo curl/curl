@@ -880,7 +880,7 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       return CURLE_COULDNT_CONNECT;
     }
 #endif
-    sx->outstanding = 10; /* minimum packet size is 10 */
+    len = sx->outstanding = 10; /* minimum packet size is 10 */
     sx->outp = socksreq;
     sxstate(conn, CONNECT_REQ_READ);
     /* FALLTHROUGH */
