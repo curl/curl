@@ -290,7 +290,7 @@ int write_pidfile(const char *filename)
 #endif
   fprintf(pidfile, "%" CURL_FORMAT_CURL_OFF_T "\n", pid);
   fclose(pidfile);
-  logmsg("Wrote pid %ld to %s", pid, filename);
+  logmsg("Wrote pid %" CURL_FORMAT_CURL_OFF_T " to %s", pid, filename);
   return 1; /* success */
 }
 
