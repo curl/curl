@@ -93,14 +93,12 @@
 #define HAS_STATVFS_SUPPORT 1
 #endif
 
-#define sftp_libssh2_last_error(s) curlx_ultosi(libssh2_sftp_last_error(s))
-
-#define sftp_libssh2_realpath(s,p,t,m) \
-        libssh2_sftp_symlink_ex((s), (p), curlx_uztoui(strlen(p)), \
-                                (t), (m), LIBSSH2_SFTP_REALPATH)
+#define sftp_libssh2_realpath(s,p,t,m)                          \
+  libssh2_sftp_symlink_ex((s), (p), curlx_uztoui(strlen(p)),    \
+                          (t), (m), LIBSSH2_SFTP_REALPATH)
 
 /* Local functions: */
-static const char *sftp_libssh2_strerror(int err);
+static const char *sftp_libssh2_strerror(unsigned long err);
 static LIBSSH2_ALLOC_FUNC(my_libssh2_malloc);
 static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc);
 static LIBSSH2_FREE_FUNC(my_libssh2_free);
@@ -212,7 +210,7 @@ kbd_callback(const char *name, int name_len, const char *instruction,
   (void)abstract;
 } /* kbd_callback */
 
-static CURLcode sftp_libssh2_error_to_CURLE(int err)
+static CURLcode sftp_libssh2_error_to_CURLE(unsigned long err)
 {
   switch(err) {
     case LIBSSH2_FX_OK:
@@ -795,7 +793,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
   struct ssh_conn *sshc = &conn->proto.sshc;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc = LIBSSH2_ERROR_NONE;
-  int err;
+  int ssherr;
+  unsigned long sftperr;
   int seekerr = CURL_SEEKFUNC_OK;
   size_t readdir_len;
   *block = 0; /* we're not blocking by default */
@@ -873,12 +872,12 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           state(conn, SSH_AUTH_DONE);
           break;
         }
-        err = libssh2_session_last_errno(sshc->ssh_session);
-        if(err == LIBSSH2_ERROR_EAGAIN)
+        ssherr = libssh2_session_last_errno(sshc->ssh_session);
+        if(ssherr == LIBSSH2_ERROR_EAGAIN)
           rc = LIBSSH2_ERROR_EAGAIN;
         else {
           state(conn, SSH_SESSION_FREE);
-          sshc->actualcode = libssh2_session_error_to_CURLE(err);
+          sshc->actualcode = libssh2_session_error_to_CURLE(ssherr);
         }
         break;
       }
@@ -1248,16 +1247,16 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
       else {
         /* Return the error type */
-        err = sftp_libssh2_last_error(sshc->sftp_session);
-        if(err)
-          result = sftp_libssh2_error_to_CURLE(err);
+        sftperr = libssh2_sftp_last_error(sshc->sftp_session);
+        if(sftperr)
+          result = sftp_libssh2_error_to_CURLE(sftperr);
         else
           /* in this case, the error wasn't in the SFTP level but for example
              a time-out or similar */
           result = CURLE_SSH;
         sshc->actualcode = result;
         DEBUGF(infof(data, "error = %d makes libcurl = %d\n",
-                     err, (int)result));
+                     ssherr, (int)result));
         state(conn, SSH_STOP);
         break;
       }
@@ -1532,11 +1531,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         if(rc != 0 && !sshc->acceptfail) { /* get those attributes */
-          err = sftp_libssh2_last_error(sshc->sftp_session);
+          sftperr = libssh2_sftp_last_error(sshc->sftp_session);
           Curl_safefree(sshc->quote_path1);
           Curl_safefree(sshc->quote_path2);
           failf(data, "Attempt to get SFTP stats failed: %s",
-                sftp_libssh2_strerror(err));
+                sftp_libssh2_strerror(sftperr));
           state(conn, SSH_SFTP_CLOSE);
           sshc->nextstate = SSH_NO_STATE;
           sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -1603,11 +1602,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         break;
       }
       if(rc != 0 && !sshc->acceptfail) {
-        err = sftp_libssh2_last_error(sshc->sftp_session);
+        sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
         Curl_safefree(sshc->quote_path2);
         failf(data, "Attempt to set SFTP stats failed: %s",
-              sftp_libssh2_strerror(err));
+              sftp_libssh2_strerror(sftperr));
         state(conn, SSH_SFTP_CLOSE);
         sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -1626,11 +1625,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         break;
       }
       if(rc != 0 && !sshc->acceptfail) {
-        err = sftp_libssh2_last_error(sshc->sftp_session);
+        sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
         Curl_safefree(sshc->quote_path2);
         failf(data, "symlink command failed: %s",
-              sftp_libssh2_strerror(err));
+              sftp_libssh2_strerror(sftperr));
         state(conn, SSH_SFTP_CLOSE);
         sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -1647,9 +1646,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         break;
       }
       if(rc != 0 && !sshc->acceptfail) {
-        err = sftp_libssh2_last_error(sshc->sftp_session);
+        sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
-        failf(data, "mkdir command failed: %s", sftp_libssh2_strerror(err));
+        failf(data, "mkdir command failed: %s",
+              sftp_libssh2_strerror(sftperr));
         state(conn, SSH_SFTP_CLOSE);
         sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -1671,10 +1671,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         break;
       }
       if(rc != 0 && !sshc->acceptfail) {
-        err = sftp_libssh2_last_error(sshc->sftp_session);
+        sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
         Curl_safefree(sshc->quote_path2);
-        failf(data, "rename command failed: %s", sftp_libssh2_strerror(err));
+        failf(data, "rename command failed: %s",
+              sftp_libssh2_strerror(sftperr));
         state(conn, SSH_SFTP_CLOSE);
         sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -1690,9 +1691,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         break;
       }
       if(rc != 0 && !sshc->acceptfail) {
-        err = sftp_libssh2_last_error(sshc->sftp_session);
+        sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
-        failf(data, "rmdir command failed: %s", sftp_libssh2_strerror(err));
+        failf(data, "rmdir command failed: %s",
+              sftp_libssh2_strerror(sftperr));
         state(conn, SSH_SFTP_CLOSE);
         sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -1708,9 +1710,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         break;
       }
       if(rc != 0 && !sshc->acceptfail) {
-        err = sftp_libssh2_last_error(sshc->sftp_session);
+        sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
-        failf(data, "rm command failed: %s", sftp_libssh2_strerror(err));
+        failf(data, "rm command failed: %s", sftp_libssh2_strerror(sftperr));
         state(conn, SSH_SFTP_CLOSE);
         sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -1731,9 +1733,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         break;
       }
       if(rc != 0 && !sshc->acceptfail) {
-        err = sftp_libssh2_last_error(sshc->sftp_session);
+        sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
-        failf(data, "statvfs command failed: %s", sftp_libssh2_strerror(err));
+        failf(data, "statvfs command failed: %s",
+              sftp_libssh2_strerror(sftperr));
         state(conn, SSH_SFTP_CLOSE);
         sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -1870,21 +1873,21 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         if(LIBSSH2_ERROR_SFTP_PROTOCOL == rc)
           /* only when there was an SFTP protocol error can we extract
              the sftp error! */
-          err = sftp_libssh2_last_error(sshc->sftp_session);
+          sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         else
-          err = -1; /* not an sftp error at all */
+          sftperr = LIBSSH2_FX_OK; /* not an sftp error at all */
 
         if(sshc->secondCreateDirs) {
           state(conn, SSH_SFTP_CLOSE);
-          sshc->actualcode = err>= LIBSSH2_FX_OK?
-            sftp_libssh2_error_to_CURLE(err):CURLE_SSH;
+          sshc->actualcode = sftperr != LIBSSH2_FX_OK ?
+            sftp_libssh2_error_to_CURLE(sftperr):CURLE_SSH;
           failf(data, "Creating the dir/file failed: %s",
-                sftp_libssh2_strerror(err));
+                sftp_libssh2_strerror(sftperr));
           break;
         }
-        if(((err == LIBSSH2_FX_NO_SUCH_FILE) ||
-            (err == LIBSSH2_FX_FAILURE) ||
-            (err == LIBSSH2_FX_NO_SUCH_PATH)) &&
+        if(((sftperr == LIBSSH2_FX_NO_SUCH_FILE) ||
+            (sftperr == LIBSSH2_FX_FAILURE) ||
+            (sftperr == LIBSSH2_FX_NO_SUCH_PATH)) &&
            (data->set.ftp_create_missing_dirs &&
             (strlen(sftp_scp->path) > 1))) {
           /* try to create the path remotely */
@@ -1894,18 +1897,19 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualcode = err>= LIBSSH2_FX_OK?
-          sftp_libssh2_error_to_CURLE(err):CURLE_SSH;
+        sshc->actualcode = sftperr != LIBSSH2_FX_OK ?
+          sftp_libssh2_error_to_CURLE(sftperr):CURLE_SSH;
         if(!sshc->actualcode) {
-          /* Sometimes, for some reason libssh2_sftp_last_error() returns
-             zero even though libssh2_sftp_open() failed previously! We need
-             to work around that! */
+          /* Sometimes, for some reason libssh2_sftp_last_error() returns zero
+             even though libssh2_sftp_open() failed previously! We need to
+             work around that! */
           sshc->actualcode = CURLE_SSH;
-          err = -1;
+          sftperr = LIBSSH2_FX_OK;
         }
         failf(data, "Upload failed: %s (%d/%d)",
-              err>= LIBSSH2_FX_OK?sftp_libssh2_strerror(err):"ssh error",
-              err, rc);
+              sftperr != LIBSSH2_FX_OK ?
+              sftp_libssh2_strerror(sftperr):"ssh error",
+              sftperr, rc);
         break;
       }
 
@@ -2032,11 +2036,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
          * permission was denied (creation might succeed further down the
          * path) - retry on unspecific FAILURE also
          */
-        err = sftp_libssh2_last_error(sshc->sftp_session);
-        if((err != LIBSSH2_FX_FILE_ALREADY_EXISTS) &&
-           (err != LIBSSH2_FX_FAILURE) &&
-           (err != LIBSSH2_FX_PERMISSION_DENIED)) {
-          result = sftp_libssh2_error_to_CURLE(err);
+        sftperr = libssh2_sftp_last_error(sshc->sftp_session);
+        if((sftperr != LIBSSH2_FX_FILE_ALREADY_EXISTS) &&
+           (sftperr != LIBSSH2_FX_FAILURE) &&
+           (sftperr != LIBSSH2_FX_PERMISSION_DENIED)) {
+          result = sftp_libssh2_error_to_CURLE(sftperr);
           state(conn, SSH_SFTP_CLOSE);
           sshc->actualcode = result?result:CURLE_SSH;
           break;
@@ -2068,11 +2072,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           rc = LIBSSH2_ERROR_EAGAIN;
           break;
         }
-        err = sftp_libssh2_last_error(sshc->sftp_session);
+        sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         failf(data, "Could not open directory for reading: %s",
-              sftp_libssh2_strerror(err));
+              sftp_libssh2_strerror(sftperr));
         state(conn, SSH_SFTP_CLOSE);
-        result = sftp_libssh2_error_to_CURLE(err);
+        result = sftp_libssh2_error_to_CURLE(sftperr);
         sshc->actualcode = result?result:CURLE_SSH;
         break;
       }
@@ -2159,11 +2163,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         break;
       }
       else if(rc < 0) {
-        err = sftp_libssh2_last_error(sshc->sftp_session);
-        result = sftp_libssh2_error_to_CURLE(err);
+        sftperr = libssh2_sftp_last_error(sshc->sftp_session);
+        result = sftp_libssh2_error_to_CURLE(sftperr);
         sshc->actualcode = result?result:CURLE_SSH;
         failf(data, "Could not open remote file for reading: %s :: %d",
-              sftp_libssh2_strerror(err),
+              sftp_libssh2_strerror(sftperr),
               libssh2_session_last_errno(sshc->ssh_session));
         Curl_safefree(sshc->readdir_filename);
         Curl_safefree(sshc->readdir_longentry);
@@ -2257,11 +2261,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           rc = LIBSSH2_ERROR_EAGAIN;
           break;
         }
-        err = sftp_libssh2_last_error(sshc->sftp_session);
+        sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         failf(data, "Could not open remote file for reading: %s",
-              sftp_libssh2_strerror(err));
+              sftp_libssh2_strerror(sftperr));
         state(conn, SSH_SFTP_CLOSE);
-        result = sftp_libssh2_error_to_CURLE(err);
+        result = sftp_libssh2_error_to_CURLE(sftperr);
         sshc->actualcode = result?result:CURLE_SSH;
         break;
       }
@@ -3401,7 +3405,7 @@ static ssize_t sftp_recv(struct connectdata *conn, int sockindex,
   return nread;
 }
 
-static const char *sftp_libssh2_strerror(int err)
+static const char *sftp_libssh2_strerror(unsigned long err)
 {
   switch(err) {
     case LIBSSH2_FX_NO_SUCH_FILE:
