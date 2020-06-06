@@ -803,6 +803,7 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
 #endif
   CURLcode result = CURLE_OK;
   int i;
+  size_t hostlen = strlen(hostname) + 1; /* include zero terminator */
 
   if(!de)
     /* no input == no output! */
@@ -825,24 +826,14 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
       addrtype = AF_INET;
     }
 
-    ai = calloc(1, sizeof(struct Curl_addrinfo));
+    ai = calloc(1, sizeof(struct Curl_addrinfo) + ss_size + hostlen);
     if(!ai) {
       result = CURLE_OUT_OF_MEMORY;
       break;
     }
-    ai->ai_canonname = strdup(hostname);
-    if(!ai->ai_canonname) {
-      result = CURLE_OUT_OF_MEMORY;
-      free(ai);
-      break;
-    }
-    ai->ai_addr = calloc(1, ss_size);
-    if(!ai->ai_addr) {
-      result = CURLE_OUT_OF_MEMORY;
-      free(ai->ai_canonname);
-      free(ai);
-      break;
-    }
+    ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
+    ai->ai_canonname = (void *)((char *)ai->ai_addr + ss_size);
+    memcpy(ai->ai_canonname, hostname, hostlen);
 
     if(!firstai)
       /* store the pointer we want to return from this function */
