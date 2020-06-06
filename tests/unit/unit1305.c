@@ -76,23 +76,18 @@ static void unit_stop(void)
 static struct Curl_addrinfo *fake_ai(void)
 {
   static struct Curl_addrinfo *ai;
+  static const char dummy[]="dummy";
+  size_t namelen = sizeof(dummy); /* including the zero terminator */
 
-  ai = calloc(1, sizeof(struct Curl_addrinfo));
+  ai = calloc(1, sizeof(struct Curl_addrinfo) + sizeof(struct sockaddr_in) +
+              namelen);
   if(!ai)
     return NULL;
 
-  ai->ai_canonname = strdup("dummy");
-  if(!ai->ai_canonname) {
-    free(ai);
-    return NULL;
-  }
-
-  ai->ai_addr = calloc(1, sizeof(struct sockaddr_in));
-  if(!ai->ai_addr) {
-    free(ai->ai_canonname);
-    free(ai);
-    return NULL;
-  }
+  ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
+  ai->ai_canonname = (void *)((char *)ai->ai_addr +
+                              sizeof(struct sockaddr_in));
+  memcpy(ai->ai_canonname, dummy, namelen);
 
   ai->ai_family = AF_INET;
   ai->ai_addrlen = sizeof(struct sockaddr_in);
