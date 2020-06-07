@@ -112,6 +112,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->cert_type);
   Curl_safefree(config->proxy_cert_type);
   Curl_safefree(config->cacert);
+  Curl_safefree(config->login_options);
   Curl_safefree(config->proxy_cacert);
   Curl_safefree(config->capath);
   Curl_safefree(config->proxy_capath);
