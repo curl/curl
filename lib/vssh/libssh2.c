@@ -793,7 +793,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
   struct ssh_conn *sshc = &conn->proto.sshc;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc = LIBSSH2_ERROR_NONE;
-  int err;
+  int ssherr;
   unsigned long sftperr;
   int seekerr = CURL_SEEKFUNC_OK;
   size_t readdir_len;
@@ -872,12 +872,12 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           state(conn, SSH_AUTH_DONE);
           break;
         }
-        err = libssh2_session_last_errno(sshc->ssh_session);
-        if(err == LIBSSH2_ERROR_EAGAIN)
+        ssherr = libssh2_session_last_errno(sshc->ssh_session);
+        if(ssherr == LIBSSH2_ERROR_EAGAIN)
           rc = LIBSSH2_ERROR_EAGAIN;
         else {
           state(conn, SSH_SESSION_FREE);
-          sshc->actualcode = libssh2_session_error_to_CURLE(err);
+          sshc->actualcode = libssh2_session_error_to_CURLE(ssherr);
         }
         break;
       }
@@ -1256,7 +1256,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           result = CURLE_SSH;
         sshc->actualcode = result;
         DEBUGF(infof(data, "error = %d makes libcurl = %d\n",
-                     err, (int)result));
+                     ssherr, (int)result));
         state(conn, SSH_STOP);
         break;
       }
@@ -1882,12 +1882,12 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           sshc->actualcode = sftperr != LIBSSH2_FX_OK ?
             sftp_libssh2_error_to_CURLE(sftperr):CURLE_SSH;
           failf(data, "Creating the dir/file failed: %s",
-                sftp_libssh2_strerror(err));
+                sftp_libssh2_strerror(sftperr));
           break;
         }
-        if(((err == LIBSSH2_FX_NO_SUCH_FILE) ||
-            (err == LIBSSH2_FX_FAILURE) ||
-            (err == LIBSSH2_FX_NO_SUCH_PATH)) &&
+        if(((sftperr == LIBSSH2_FX_NO_SUCH_FILE) ||
+            (sftperr == LIBSSH2_FX_FAILURE) ||
+            (sftperr == LIBSSH2_FX_NO_SUCH_PATH)) &&
            (data->set.ftp_create_missing_dirs &&
             (strlen(sftp_scp->path) > 1))) {
           /* try to create the path remotely */
@@ -1897,14 +1897,14 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         state(conn, SSH_SFTP_CLOSE);
-        sshc->actualcode = err >= (int)LIBSSH2_FX_OK ?
-          sftp_libssh2_error_to_CURLE(err):CURLE_SSH;
+        sshc->actualcode = sftperr != LIBSSH2_FX_OK ?
+          sftp_libssh2_error_to_CURLE(sftperr):CURLE_SSH;
         if(!sshc->actualcode) {
-          /* Sometimes, for some reason libssh2_sftp_last_error() returns
-             zero even though libssh2_sftp_open() failed previously! We need
-             to work around that! */
+          /* Sometimes, for some reason libssh2_sftp_last_error() returns zero
+             even though libssh2_sftp_open() failed previously! We need to
+             work around that! */
           sshc->actualcode = CURLE_SSH;
-          err = -1;
+          sftperr = LIBSSH2_FX_OK;
         }
         failf(data, "Upload failed: %s (%d/%d)",
               sftperr != LIBSSH2_FX_OK ?
