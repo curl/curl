@@ -595,7 +595,6 @@ static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
         switch(qp_lookahead_eol(st, ateof, consumed)) {
         case -1:        /* Need more data. */
           return cursize;
-          break;
         case 0:         /* Not followed by a CRLF. */
           softlinebreak = 1;
           break;
