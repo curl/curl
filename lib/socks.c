@@ -382,6 +382,11 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
             curl_easy_strerror(result));
       return CURLE_COULDNT_CONNECT;
     }
+    else if(!result && !actualread) {
+      /* connection closed */
+      failf(data, "connection to proxy closed");
+      return CURLE_COULDNT_CONNECT;
+    }
     else if(actualread != sx->outstanding) {
       /* remain in reading state */
       sx->outstanding -= actualread;
@@ -592,6 +597,11 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       failf(data, "Unable to receive initial SOCKS5 response.");
       return CURLE_COULDNT_CONNECT;
     }
+    else if(!result && !actualread) {
+      /* connection closed */
+      failf(data, "Connection to proxy closed");
+      return CURLE_COULDNT_CONNECT;
+    }
     else if(actualread != sx->outstanding) {
       /* remain in reading state */
       sx->outstanding -= actualread;
@@ -717,15 +727,19 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       failf(data, "Unable to receive SOCKS5 sub-negotiation response.");
       return CURLE_COULDNT_CONNECT;
     }
-    if(actualread != sx->outstanding) {
+    else if(!result && !actualread) {
+      /* connection closed */
+      failf(data, "connection to proxy closed");
+      return CURLE_COULDNT_CONNECT;
+    }
+    else if(actualread != sx->outstanding) {
       /* remain in state */
       sx->outstanding -= actualread;
       sx->outp += actualread;
       return CURLE_OK;
     }
-
     /* ignore the first (VER) byte */
-    if(socksreq[1] != 0) { /* status */
+    else if(socksreq[1] != 0) { /* status */
       failf(data, "User was rejected by the SOCKS5 server (%d %d).",
             socksreq[0], socksreq[1]);
       return CURLE_COULDNT_CONNECT;
@@ -890,6 +904,11 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       failf(data, "Failed to receive SOCKS5 connect request ack.");
       return CURLE_COULDNT_CONNECT;
     }
+    else if(!result && !actualread) {
+      /* connection closed */
+      failf(data, "connection to proxy closed");
+      return CURLE_COULDNT_CONNECT;
+    }
     else if(actualread != sx->outstanding) {
       /* remain in state */
       sx->outstanding -= actualread;
@@ -967,7 +986,12 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       failf(data, "Failed to receive SOCKS5 connect request ack.");
       return CURLE_COULDNT_CONNECT;
     }
-    if(actualread != sx->outstanding) {
+    else if(!result && !actualread) {
+      /* connection closed */
+      failf(data, "connection to proxy closed");
+      return CURLE_COULDNT_CONNECT;
+    }
+    else if(actualread != sx->outstanding) {
       /* remain in state */
       sx->outstanding -= actualread;
       sx->outp += actualread;
