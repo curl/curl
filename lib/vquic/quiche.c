@@ -158,6 +158,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   CURLcode result;
   struct quicsocket *qs = &conn->hequic[sockindex];
   struct Curl_easy *data = conn->data;
+  char *keylog_file = NULL;
 
 #ifdef DEBUG_QUICHE
   /* initialize debug log callback only once */
@@ -195,7 +196,9 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   if(result)
     return result;
 
-  if(getenv("SSLKEYLOGFILE"))
+  keylog_file = getenv("SSLKEYLOGFILE");
+
+  if(keylog_file)
     quiche_config_log_keys(qs->cfg);
 
   qs->conn = quiche_connect(conn->host.name, (const uint8_t *) qs->scid,
@@ -204,6 +207,9 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
     failf(data, "can't create quiche connection");
     return CURLE_OUT_OF_MEMORY;
   }
+
+  if(keylog_file)
+    quiche_conn_set_keylog_path(qs->conn, keylog_file);
 
   /* Known to not work on Windows */
 #if !defined(WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
