@@ -584,13 +584,14 @@ static void extend_stream_window(ngtcp2_conn *tconn,
 }
 
 
-static int cb_recv_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
-                               int fin, uint64_t offset,
+static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
+                               int64_t stream_id, uint64_t offset,
                                const uint8_t *buf, size_t buflen,
                                void *user_data, void *stream_user_data)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
   ssize_t nconsumed;
+  int fin = flags & NGTCP2_STREAM_DATA_FLAG_FIN ? 1 : 0;
   (void)offset;
   (void)stream_user_data;
 
@@ -756,7 +757,8 @@ static ngtcp2_conn_callbacks ng_callbacks = {
   NULL, /* extend_max_remote_streams_uni */
   cb_extend_max_stream_data,
   NULL, /* dcid_status */
-  NULL  /* handshake_confirmed */
+  NULL, /* handshake_confirmed */
+  NULL  /* recv_new_token */
 };
 
 /*
@@ -1792,11 +1794,12 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
         return CURLE_SEND_ERROR;
       }
       else if(veccnt > 0) {
+        uint32_t flags = NGTCP2_WRITE_STREAM_FLAG_MORE |
+          (fin ? NGTCP2_WRITE_STREAM_FLAG_FIN : 0);
         outlen =
           ngtcp2_conn_writev_stream(qs->qconn, &ps.path,
                                     out, pktlen, &ndatalen,
-                                    NGTCP2_WRITE_STREAM_FLAG_MORE,
-                                    stream_id, fin,
+                                    flags, stream_id,
                                     (const ngtcp2_vec *)vec, veccnt, ts);
         if(outlen == 0) {
           break;
