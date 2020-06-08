@@ -168,9 +168,11 @@ static void mstate(struct Curl_easy *data, CURLMstate state
   }
 #endif
 
-  if(state == CURLM_STATE_COMPLETED)
+  if(state == CURLM_STATE_COMPLETED) {
     /* changing to COMPLETED means there's one less easy handle 'alive' */
+    DEBUGASSERT(data->multi->num_alive > 0);
     data->multi->num_alive--;
+  }
 
   /* if this state has an init-function, run it */
   if(finit[state])
