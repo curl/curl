@@ -633,11 +633,10 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
         failf(data, "No authentication method was acceptable.");
         return CURLE_COULDNT_CONNECT;
       }
-      failf(data,
-            "Undocumented SOCKS5 mode attempted to be used by server.");
-      return CURLE_COULDNT_CONNECT;
     }
-    break;
+    failf(data,
+          "Undocumented SOCKS5 mode attempted to be used by server.");
+    return CURLE_COULDNT_CONNECT;
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   case CONNECT_GSSAPI_INIT:
     /* GSSAPI stuff done non-blocking */
