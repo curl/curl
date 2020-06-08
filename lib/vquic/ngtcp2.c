@@ -1795,7 +1795,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
       }
       else if(veccnt > 0) {
         uint32_t flags = NGTCP2_WRITE_STREAM_FLAG_MORE |
-          (fin ? NGTCP2_STREAM_DATA_FLAG_FIN : 0);
+          (fin ? NGTCP2_WRITE_STREAM_FLAG_FIN : 0);
         outlen =
           ngtcp2_conn_writev_stream(qs->qconn, &ps.path,
                                     out, pktlen, &ndatalen,
