@@ -123,6 +123,7 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   CLONE_STRING(cipher_list);
   CLONE_STRING(cipher_list13);
   CLONE_STRING(pinned_key);
+  CLONE_STRING(curves);
 
   return TRUE;
 }
@@ -137,6 +138,7 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
   Curl_safefree(sslc->cipher_list);
   Curl_safefree(sslc->cipher_list13);
   Curl_safefree(sslc->pinned_key);
+  Curl_safefree(sslc->curves);
 }
 
 #ifdef USE_SSL
