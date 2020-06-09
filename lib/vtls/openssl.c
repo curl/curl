@@ -200,6 +200,10 @@
      !defined(OPENSSL_IS_BORINGSSL))
 #define HAVE_SSL_CTX_SET_CIPHERSUITES
 #define HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
+/* SET_EC_CURVES available under the same preconditions: see
+ * https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set1_groups.html
+ */
+#define HAVE_SSL_CTX_SET_EC_CURVES
 #endif
 
 #if defined(LIBRESSL_VERSION_NUMBER)
@@ -2791,6 +2795,18 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
         return CURLE_SSL_CIPHER;
       }
       infof(data, "TLS 1.3 cipher selection: %s\n", ciphers13);
+    }
+  }
+#endif
+
+#ifdef HAVE_SSL_CTX_SET_EC_CURVES
+  {
+    char *curves = SSL_CONN_CONFIG(curves);
+    if(curves) {
+      if(!SSL_CTX_set1_curves_list(backend->ctx, curves)) {
+        failf(data, "failed setting curves list: '%s'", curves);
+        return CURLE_SSL_CIPHER;
+      }
     }
   }
 #endif
