@@ -377,12 +377,10 @@ typedef enum {
      will not be considered for pipelining */
   CURLOPT(CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, CURLOPTTYPE_OFF_T, 10),
 
-  /* a list of site names(+port) that are blacklisted from
-     pipelining */
+  /* a list of site names(+port) that are blocked from pipelining */
   CURLOPT(CURLMOPT_PIPELINING_SITE_BL, CURLOPTTYPE_OBJECTPOINT, 11),
 
-  /* a list of server types that are blacklisted from
-     pipelining */
+  /* a list of server types that are blocked from pipelining */
   CURLOPT(CURLMOPT_PIPELINING_SERVER_BL, CURLOPTTYPE_OBJECTPOINT, 12),
 
   /* maximum number of open connections in total */

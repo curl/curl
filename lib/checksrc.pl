@@ -31,14 +31,14 @@ my $warnings = 0;
 my $swarnings = 0;
 my $errors = 0;
 my $serrors = 0;
-my $suppressed; # whitelisted problems
+my $suppressed; # skipped problems
 my $file;
 my $dir=".";
 my $wlist="";
 my @alist;
 my $windows_os = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys';
 my $verbose;
-my %whitelist;
+my %skiplist;
 
 my %ignore;
 my %ignore_set;
@@ -84,12 +84,12 @@ my %warnings = (
     'TYPEDEFSTRUCT'    => 'typedefed struct',
     );
 
-sub readwhitelist {
-    open(W, "<$dir/checksrc.whitelist") or return;
+sub readskiplist {
+    open(W, "<$dir/checksrc.skip") or return;
     my @all=<W>;
     for(@all) {
         $windows_os ? $_ =~ s/\r?\n$// : chomp;
-        $whitelist{$_}=1;
+        $skiplist{$_}=1;
     }
     close(W);
 }
@@ -142,8 +142,8 @@ sub checkwarn {
     #    print STDERR "Dev! there's no description for $name!\n";
     #}
 
-    # checksrc.whitelist
-    if($whitelist{$line}) {
+    # checksrc.skip
+    if($skiplist{$line}) {
         $nowarn = 1;
     }
     # !checksrc! controlled
@@ -228,7 +228,7 @@ if(!$file) {
     print "  -A[rule]  Accept this violation, can be used multiple times\n";
     print "  -D[DIR]   Directory to prepend file names\n";
     print "  -h        Show help output\n";
-    print "  -W[file]  Whitelist the given file - ignore all its flaws\n";
+    print "  -W[file]  Skip the given file - ignore all its flaws\n";
     print "  -i<n>     Indent spaces. Default: 2\n";
     print "  -m<n>     Maximum line length. Default: 79\n";
     print "\nDetects and warns for these problems:\n";
@@ -238,7 +238,7 @@ if(!$file) {
     exit;
 }
 
-readwhitelist();
+readskiplist();
 readlocalfile();
 
 do {

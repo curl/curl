@@ -346,7 +346,7 @@ before_script:
 script:
 - ./scripts/travis/script.sh || travis_terminate 1
 
-# whitelist branches to avoid testing feature branches twice (as branch and as pull request)
+# select branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
   only:
   - master

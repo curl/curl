@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2019, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) 2013 - 2020, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,16 +27,16 @@
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 #define MAX_URLS 200
-#define MAX_BLACKLIST 20
+#define MAX_BLOCKLIST 20
 
 static int urltime[MAX_URLS];
 static char *urlstring[MAX_URLS];
 static CURL *handles[MAX_URLS];
-static char *site_blacklist[MAX_BLACKLIST];
-static char *server_blacklist[MAX_BLACKLIST];
+static char *site_blocklist[MAX_BLOCKLIST];
+static char *server_blocklist[MAX_BLOCKLIST];
 static int num_handles;
-static int blacklist_num_servers;
-static int blacklist_num_sites;
+static int blocklist_num_servers;
+static int blocklist_num_sites;
 
 static size_t
 write_callback(void *contents, size_t size, size_t nmemb, void *userp)
@@ -55,8 +55,8 @@ static int parse_url_file(const char *filename)
   char buf[200];
 
   num_handles = 0;
-  blacklist_num_sites = 0;
-  blacklist_num_servers = 0;
+  blocklist_num_sites = 0;
+  blocklist_num_servers = 0;
 
   f = fopen(filename, "rb");
   if(!f)
@@ -70,9 +70,9 @@ static int parse_url_file(const char *filename)
       continue;
     }
 
-    if(fscanf(f, "blacklist_site %199s\n", buf)) {
-      site_blacklist[blacklist_num_sites] = strdup(buf);
-      blacklist_num_sites++;
+    if(fscanf(f, "blocklist_site %199s\n", buf)) {
+      site_blocklist[blocklist_num_sites] = strdup(buf);
+      blocklist_num_sites++;
       continue;
     }
 
@@ -80,8 +80,8 @@ static int parse_url_file(const char *filename)
   }
   fclose(f);
 
-  site_blacklist[blacklist_num_sites] = NULL;
-  server_blacklist[blacklist_num_servers] = NULL;
+  site_blocklist[blocklist_num_sites] = NULL;
+  server_blocklist[blocklist_num_servers] = NULL;
   return num_handles;
 }
 
@@ -91,11 +91,11 @@ static void free_urls(void)
   for(i = 0; i < num_handles; i++) {
     Curl_safefree(urlstring[i]);
   }
-  for(i = 0; i < blacklist_num_servers; i++) {
-    Curl_safefree(server_blacklist[i]);
+  for(i = 0; i < blocklist_num_servers; i++) {
+    Curl_safefree(server_blocklist[i]);
   }
-  for(i = 0; i < blacklist_num_sites; i++) {
-    Curl_safefree(site_blacklist[i]);
+  for(i = 0; i < blocklist_num_sites; i++) {
+    Curl_safefree(site_blocklist[i]);
   }
 }
 
@@ -159,8 +159,8 @@ int test(char *URL)
   multi_setopt(m, CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE, 15000L);
   multi_setopt(m, CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, 10000L);
 
-  multi_setopt(m, CURLMOPT_PIPELINING_SITE_BL, site_blacklist);
-  multi_setopt(m, CURLMOPT_PIPELINING_SERVER_BL, server_blacklist);
+  multi_setopt(m, CURLMOPT_PIPELINING_SITE_BL, site_blocklist);
+  multi_setopt(m, CURLMOPT_PIPELINING_SERVER_BL, server_blocklist);
 
   last_handle_add = tutil_tvnow();
 
