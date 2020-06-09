@@ -3698,9 +3698,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         else if(conn->httpversion == 20 ||
                 (k->upgr101 == UPGR101_REQUESTED && k->httpcode == 101)) {
           DEBUGF(infof(data, "HTTP/2 found, allow multiplexing\n"));
-
-          /* HTTP/2 cannot blacklist multiplexing since it is a core
-             functionality of the protocol */
+          /* HTTP/2 cannot avoid multiplexing since it is a core functionality
+             of the protocol */
           conn->bundle->multiuse = BUNDLE_MULTIPLEX;
         }
         else if(conn->httpversion >= 11 &&

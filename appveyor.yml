@@ -285,7 +285,7 @@ test_script:
         echo APPVEYOR_API_URL=%APPVEYOR_API_URL% &&
         bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -b$(($(echo '%APPVEYOR_API_URL%' | cut -d'/' -f3 | cut -d':' -f2)+1)) -p !flaky %DISABLED_TESTS%" )
 
-# whitelist branches to avoid testing feature branches twice (as branch and as pull request)
+# select branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
     only:
         - master

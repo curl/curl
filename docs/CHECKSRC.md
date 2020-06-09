@@ -9,7 +9,7 @@ check that it adheres to our [Source Code Style guide](CODE_STYLE.md).
 
 ## Command line options
 
-`-W[file]` whitelists that file and excludes it from being checked. Helpful
+`-W[file]` skip that file and excludes it from being checked. Helpful
 when, for example, one of the files is generated.
 
 `-D[dir]` directory name to prepend to file names when accessing them.
@@ -158,5 +158,5 @@ instances are ignored and nothing extra.
 This is a method we've transitioned away from. Use inline ignores as far as
 possible.
 
-Make a `checksrc.whitelist` file in the directory of the source code with the
+Make a `checksrc.skip` file in the directory of the source code with the
 false positive, and include the full offending line into this file.

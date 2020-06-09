@@ -28,7 +28,7 @@
 #
 
 # regexes of files to not scan
-my @whitelist=(
+my @skiplist=(
     '^tests\/data\/test(\d+)$', # test case data
     '^docs\/cmdline-opts\/[a-z]+(.*)\.d$', # curl.1 pieces
     '(\/|^)[A-Z0-9_.-]+$', # all uppercase file name, possibly with dot and dash
@@ -168,10 +168,10 @@ else {
 for my $f (@all) {
     chomp $f;
     my $skipped = 0;
-    for my $skip (@whitelist) {
+    for my $skip (@skiplist) {
         #print "$f matches $skip ?\n";
         if($f =~ /$skip/) {
-            $whitelisted++;
+            $skiplisted++;
             $skipped = 1;
             #print "$f: SKIPPED ($skip)\n";
             last;
@@ -186,6 +186,6 @@ for my $f (@all) {
 
 print STDERR "$missing files have no copyright\n" if($missing);
 print STDERR "$wrong files have wrong copyright year\n" if ($wrong);
-print STDERR "$whitelisted files are whitelisted\n" if ($whitelisted);
+print STDERR "$skiplisted files are skipped\n" if ($skiplisted);
 
 exit 1 if($missing || $wrong);
