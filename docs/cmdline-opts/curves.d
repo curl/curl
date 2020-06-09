@@ -1,6 +1,6 @@
 Long: curves
 Arg: <algorithm list>
-Help: key exchange algorithm(s) to request during session setup
+Help: (EC) TLS key exchange algorithm(s) to request 
 Protocols: TLS
 ---
 Tells curl to request specific curves to use during SSL session
