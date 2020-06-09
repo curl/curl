@@ -2302,6 +2302,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       result = getparameter("--url", orig_opt, &used, global,
                             config);
     }
+
+    curlx_unicodefree(orig_opt);
   }
 
   if(result && result != PARAM_HELP_REQUESTED &&
