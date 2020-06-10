@@ -64,7 +64,7 @@ findtool(){
 #
 removethis(){
   if test "$#" = "1"; then
-    find . -depth -name $1 -print -exec rm -rf {} \;
+    find . -depth -name $1 -exec rm -rf {} \;
   fi
 }
 
