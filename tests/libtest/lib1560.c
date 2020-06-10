@@ -138,13 +138,13 @@ static struct testcase get_parts_list[] ={
   {"https://[::1]",
    "https | [11] | [12] | [13] | [::1] | [15] | / | [16] | [17]",
    0, 0, CURLUE_OK },
-  {"user:moo@ftp.example.com/color/#green?no-black",
+  {"user:moo@ftp.example.com/color/#green?no-red",
    "ftp | user | moo | [13] | ftp.example.com | [15] | /color/ | [16] | "
-   "green?no-black",
+   "green?no-red",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK },
-  {"ftp.user:moo@example.com/color/#green?no-black",
+  {"ftp.user:moo@example.com/color/#green?no-red",
    "http | ftp.user | moo | [13] | example.com | [15] | /color/ | [16] | "
-   "green?no-black",
+   "green?no-red",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK },
 #ifdef WIN32
   {"file:/C:\\programs\\foo",
@@ -157,25 +157,25 @@ static struct testcase get_parts_list[] ={
    "file | [11] | [12] | [13] | [14] | [15] | C:\\programs\\foo | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
 #endif
-  {"https://example.com/color/#green?no-black",
+  {"https://example.com/color/#green?no-red",
    "https | [11] | [12] | [13] | example.com | [15] | /color/ | [16] | "
-   "green?no-black",
+   "green?no-red",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK },
-  {"https://example.com/color/#green#no-black",
+  {"https://example.com/color/#green#no-red",
    "https | [11] | [12] | [13] | example.com | [15] | /color/ | [16] | "
-   "green#no-black",
+   "green#no-red",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK },
-  {"https://example.com/color/?green#no-black",
+  {"https://example.com/color/?green#no-red",
    "https | [11] | [12] | [13] | example.com | [15] | /color/ | green | "
-   "no-black",
+   "no-red",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK },
-  {"https://example.com/#color/?green#no-black",
+  {"https://example.com/#color/?green#no-red",
    "https | [11] | [12] | [13] | example.com | [15] | / | [16] | "
-   "color/?green#no-black",
+   "color/?green#no-red",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK },
-  {"https://example.#com/color/?green#no-black",
+  {"https://example.#com/color/?green#no-red",
    "https | [11] | [12] | [13] | example. | [15] | / | [16] | "
-   "com/color/?green#no-black",
+   "com/color/?green#no-red",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK },
   {"http://[ab.be:1]/x", "",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_MALFORMED_INPUT},
