@@ -22,6 +22,8 @@
 
 #use strict;
 
+use Fcntl qw(:flock);
+
 my @xml;
 my $xmlfile;
 
@@ -297,9 +299,11 @@ sub loadarray {
     my @array;
 
     open(TEMP, "<$filename");
+    flock(TEMP, LOCK_EX);
     while(<TEMP>) {
         push @array, $_;
     }
+    flock(TEMP, LOCK_UN);
     close(TEMP);
     return @array;
 }
