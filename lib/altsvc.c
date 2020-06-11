@@ -629,6 +629,7 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
       /* an expired entry, remove */
       Curl_llist_remove(&asi->list, e, NULL);
       altsvc_free(as);
+      asi->num--;
       continue;
     }
     if((as->src.alpnid == srcalpnid) &&
