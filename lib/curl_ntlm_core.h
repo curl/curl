@@ -29,6 +29,7 @@
 /* If NSS is the first available SSL backend (see order in curl_ntlm_core.c)
    then it must be initialized to be used by NTLM. */
 #if !defined(USE_OPENSSL) && \
+    !defined(USE_WOLFSSL) && \
     !defined(USE_GNUTLS_NETTLE) && \
     !defined(USE_GNUTLS) && \
     defined(USE_NSS)
@@ -37,7 +38,10 @@
 
 #if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
 
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
+#ifdef USE_WOLFSSL
+#  include <wolfssl/options.h>
+#endif
 #  include <openssl/ssl.h>
 #endif
 
