@@ -2275,6 +2275,15 @@ AC_HELP_STRING([--with-wolfssl=PATH],[where to look for WolfSSL, PATH points to 
 AC_HELP_STRING([--without-wolfssl], [disable WolfSSL detection]),
   OPT_WOLFSSL=$withval)
 
+case "$OPT_WOLFSSL" in
+  yes|no)
+    wolfpkg=""
+    ;;
+  *)
+    wolfpkg="$withval/lib/pkgconfig"
+    ;;
+esac
+
 if test -z "$ssl_backends" -o "x$OPT_WOLFSSL" != xno; then
   ssl_msg=
 
@@ -2284,22 +2293,41 @@ if test -z "$ssl_backends" -o "x$OPT_WOLFSSL" != xno; then
       OPT_WOLFSSL=""
     fi
 
+    CURL_CHECK_PKGCONFIG(wolfssl, [$wolfpkg])
+    AC_MSG_NOTICE([Check dir $wolfpkg])
+
     addld=""
     addlib=""
     addcflags=""
-
-    if test "x$USE_WOLFSSL" != "xyes"; then
+    if test "$PKGCONFIG" != "no" ; then
+      addlib=`CURL_EXPORT_PCDIR([$wolfpkg])
+        $PKGCONFIG --libs-only-l wolfssl`
+      addld=`CURL_EXPORT_PCDIR([$wolfpkg])
+        $PKGCONFIG --libs-only-L wolfssl`
+      addcflags=`CURL_EXPORT_PCDIR([$wolfpkg])
+        $PKGCONFIG --cflags-only-I wolfssl`
+      version=`CURL_EXPORT_PCDIR([$wolfpkg])
+        $PKGCONFIG --modversion wolfssl`
+      wolfssllibpath=`echo $addld | $SED -e 's/^-L//'`
+    else
+      addlib=-lwolfssl
       addld=-L$OPT_WOLFSSL/lib$libsuff
       addcflags=-I$OPT_WOLFSSL/include
       wolfssllibpath=$OPT_WOLFSSL/lib$libsuff
+    fi
+
+    if test "x$USE_WOLFSSL" != "xyes"; then
 
       LDFLAGS="$LDFLAGS $addld"
+      AC_MSG_NOTICE([Add $addld to LDFLAGS])
       if test "$addcflags" != "-I/usr/include"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
+         AC_MSG_NOTICE([Add $addcflags to CPPFLAGS])
       fi
 
       my_ac_save_LIBS="$LIBS"
-      LIBS="-lwolfssl -lm $LIBS"
+      LIBS="$addlib $LIBS"
+      AC_MSG_NOTICE([Add $addlib to LIBS])
 
       AC_MSG_CHECKING([for wolfSSL_Init in -lwolfssl])
       AC_LINK_IFELSE([
@@ -2341,9 +2369,23 @@ if test -z "$ssl_backends" -o "x$OPT_WOLFSSL" != xno; then
 
       dnl Recent WolfSSL versions build without SSLv3 by default
       dnl WolfSSL needs configure --enable-opensslextra to have *get_peer*
+      dnl DES* is needed for NTLM support and lives in the OpenSSL compatibility
+      dnl layer
       AC_CHECK_FUNCS(wolfSSLv3_client_method \
                      wolfSSL_get_peer_certificate \
-                     wolfSSL_UseALPN)
+                     wolfSSL_UseALPN )
+
+      dnl if this symbol is present, we want the include path to include the
+      dnl OpenSSL API root as well
+      AC_CHECK_FUNC(wolfSSL_DES_set_odd_parity,
+        [
+            AC_DEFINE(HAVE_WOLFSSL_DES_SET_ODD_PARITY, 1,
+                      [if you have wolfSSL_DES_set_odd_parity])
+            CPPFLAGS="$addcflags/wolfssl $CPPFLAGS"
+            AC_MSG_NOTICE([Add $addcflags/wolfssl to CPPFLAGS])
+            WOLFSSL_NTLM=1
+        ]
+        )
 
       if test -n "$wolfssllibpath"; then
         dnl when shared libs were found in a path that the run-time
@@ -4819,7 +4861,8 @@ fi
 if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
   if test "x$OPENSSL_ENABLED" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
-      -o "x$NSS_ENABLED" = "x1" -o "x$SECURETRANSPORT_ENABLED" = "x1"; then
+      -o "x$NSS_ENABLED" = "x1" -o "x$SECURETRANSPORT_ENABLED" = "x1" \
+      -o "x$WOLFSSL_NTLM" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
 
     if test "x$CURL_DISABLE_HTTP" != "x1" -a \
@@ -4912,7 +4955,8 @@ if test "x$CURL_DISABLE_SMB" != "x1" \
     -a "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" \
     -a \( "x$OPENSSL_ENABLED" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
-      -o "x$NSS_ENABLED" = "x1" -o "x$SECURETRANSPORT_ENABLED" = "x1" \); then
+      -o "x$NSS_ENABLED" = "x1" -o "x$SECURETRANSPORT_ENABLED" = "x1" \
+      -o "x$WOLFSSL_NTLM" = "x1" \); then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMB"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMBS"
