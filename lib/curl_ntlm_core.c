@@ -52,13 +52,18 @@
 
 #if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
 
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
+
+#ifdef USE_WOLFSSL
+#include <wolfssl/options.h>
+#endif
 
 #  include <openssl/des.h>
 #  include <openssl/md5.h>
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
-#  if (OPENSSL_VERSION_NUMBER < 0x00907001L)
+#  if (defined(OPENSSL_VERSION_NUMBER) && \
+       (OPENSSL_VERSION_NUMBER < 0x00907001L)) && !defined(USE_WOLFSSL)
 #    define DES_key_schedule des_key_schedule
 #    define DES_cblock des_cblock
 #    define DES_set_odd_parity des_set_odd_parity
@@ -78,14 +83,12 @@
 #elif defined(USE_GNUTLS)
 
 #  include <gcrypt.h>
-#  define MD5_DIGEST_LENGTH 16
 
 #elif defined(USE_NSS)
 
 #  include <nss.h>
 #  include <pk11pub.h>
 #  include <hasht.h>
-#  define MD5_DIGEST_LENGTH MD5_LENGTH
 
 #elif defined(USE_MBEDTLS)
 
@@ -138,7 +141,7 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
   key[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
 }
 
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
 /*
  * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.  The
  * key schedule ks is also set.
@@ -387,7 +390,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results)
 {
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
   DES_key_schedule ks;
 
   setup_des_key(keys, DESKEY(ks));
@@ -462,7 +465,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(struct Curl_easy *data,
   {
     /* Create LanManager hashed password. */
 
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
     DES_key_schedule ks;
 
     setup_des_key(pw, DESKEY(ks));

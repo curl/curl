@@ -113,12 +113,6 @@ CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
 #define MAX_PINNED_PUBKEY_SIZE 1048576 /* 1MB */
 #endif
 
-#ifndef MD5_DIGEST_LENGTH
-#ifndef LIBWOLFSSL_VERSION_HEX /* because WolfSSL borks this */
-#define MD5_DIGEST_LENGTH 16 /* fixed size */
-#endif
-#endif
-
 #ifndef CURL_SHA256_DIGEST_LENGTH
 #define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
 #endif
