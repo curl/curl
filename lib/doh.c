@@ -353,7 +353,6 @@ static CURLcode dohprobe(struct Curl_easy *data,
         data->set.str[STRING_SSL_EC_CURVES]);
     }
 
-
     doh->set.fmultidone = Curl_doh_done;
     doh->set.dohfor = data; /* identify for which transfer this is done */
     p->easy = doh;
