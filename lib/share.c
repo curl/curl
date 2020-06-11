@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -70,7 +70,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
   case CURLSHOPT_SHARE:
     /* this is a type this share will share */
     type = va_arg(param, int);
-    share->specifier |= (1<<type);
+
     switch(type) {
     case CURL_LOCK_DATA_DNS:
       break;
@@ -102,7 +102,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
 #endif
       break;
 
-    case CURL_LOCK_DATA_CONNECT:     /* not supported (yet) */
+    case CURL_LOCK_DATA_CONNECT:
       if(Curl_conncache_init(&share->conn_cache, 103))
         res = CURLSHE_NOMEM;
       break;
@@ -116,6 +116,8 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
     default:
       res = CURLSHE_BAD_OPTION;
     }
+    if(!res)
+      share->specifier |= (1<<type);
     break;
 
   case CURLSHOPT_UNSHARE:
