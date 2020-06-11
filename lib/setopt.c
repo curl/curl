@@ -2244,7 +2244,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
                             va_arg(param, char *));
     break;
 
-
 #endif
   case CURLOPT_IPRESOLVE:
     arg = va_arg(param, long);
