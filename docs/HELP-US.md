@@ -15,6 +15,23 @@ found yourself or perhaps got annoyed at in the past. It can be a spelling
 error in an error text or a weirdly phrased section in a man page. Hunt it
 down and report the bug. Or make your first pull request with a fix for that.
 
+## Smaller tasks
+
+Some projects mark small issues as "beginner friendly", "bite-sized" or
+similar. We don't do that in curl since such issues never linger around long
+enough. Simple issues get handled very fast.
+
+If you're looking for a smaller or simpler task in the project to help out
+with as an entry-point into the project, perhaps because you are a newcomer or
+even maybe not a terribly experienced developer, here's our advice:
+
+ - Read through this document to get a grasp on a general approach to use
+ - Consider adding a test case for something not currentled tested (correctly)
+ - Consider updating or adding documentation
+ - One way to get your feet wet gently in the project, is to participate in an
+   existing issue/PR and help out by reproducing the issue, review the code in
+   the PR etc.
+
 ## Help wanted
 
 In the issue tracker we occasionally mark bugs with [help
