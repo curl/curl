@@ -52,7 +52,6 @@ struct altsvc {
 struct altsvcinfo {
   char *filename;
   struct curl_llist list; /* list of entries */
-  size_t num; /* number of alt-svc entries */
   long flags; /* the publicly set bitmask */
 };
 
