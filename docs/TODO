@@ -156,6 +156,7 @@
  18.18 retry on network is unreachable
  18.19 expand ~/ in config files
  18.20 host name sections in config files
+ 18.21 retry on the redirected-to URL
 
  19. Build
  19.1 roffit
@@ -1086,6 +1087,17 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  default .curlrc could a specific user-agent only when doing requests against
  a certain site.
 
+18.21 retry on the redirected-to URL
+
+ When curl is told to --retry a failed transfer and follows redirects, it
+ might get a HTTP 429 response from the redirected-to URL and not the original
+ one, which then could make curl decide to rather retry the transfer on that
+ URL only instead of the original operation to the original URL.
+
+ Perhaps extra emphasized if the original transfer is a large POST that
+ redirects to a separate GET, and that GET is what gets the 529
+
+ See https://github.com/curl/curl/issues/5462
 
 19. Build
 
