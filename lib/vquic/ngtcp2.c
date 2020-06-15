@@ -452,8 +452,8 @@ static int tp_send_func(gnutls_session_t ssl, gnutls_buffer_t extdata)
     paramsbuf, sizeof(paramsbuf), NGTCP2_TRANSPORT_PARAMS_TYPE_CLIENT_HELLO,
     &params);
   if(nwrite < 0) {
-    fprintf(stderr, "ngtcp2_encode_transport_params: %s\n",
-          ngtcp2_strerror((int)nwrite));
+    H3BUGF(fprintf(stderr, "ngtcp2_encode_transport_params: %s\n",
+                   ngtcp2_strerror((int)nwrite)));
     return -1;
   }
 
@@ -479,8 +479,8 @@ static int quic_init_ssl(struct quicsocket *qs)
 
   rc = gnutls_priority_set_direct(qs->ssl, QUIC_PRIORITY, NULL);
   if(rc < 0) {
-    fprintf(stderr, "gnutls_priority_set_direct failed: %s\n",
-            gnutls_strerror(rc));
+    H3BUGF(fprintf(stderr, "gnutls_priority_set_direct failed: %s\n",
+                   gnutls_strerror(rc)));
     return 1;
   }
 
@@ -496,8 +496,8 @@ static int quic_init_ssl(struct quicsocket *qs)
                                    GNUTLS_EXT_FLAG_CLIENT_HELLO |
                                    GNUTLS_EXT_FLAG_EE);
   if(rc < 0) {
-    fprintf(stderr, "gnutls_session_ext_register failed: %s\n",
-            gnutls_strerror(rc));
+    H3BUGF(fprintf(stderr, "gnutls_session_ext_register failed: %s\n",
+                   gnutls_strerror(rc)));
     return 1;
   }
 
@@ -512,22 +512,24 @@ static int quic_init_ssl(struct quicsocket *qs)
 
   rc = gnutls_certificate_allocate_credentials(&qs->cred);
   if(rc < 0) {
-    fprintf(stderr, "gnutls_certificate_allocate_credentials failed: %s\n",
-            gnutls_strerror(rc));
+    H3BUGF(fprintf(stderr,
+                   "gnutls_certificate_allocate_credentials failed: %s\n",
+                   gnutls_strerror(rc)));
     return 1;
   }
 
   rc = gnutls_certificate_set_x509_system_trust(qs->cred);
   if(rc < 0) {
-    fprintf(stderr, "gnutls_certificate_set_x509_system_trust failed: %s\n",
-            gnutls_strerror(rc));
+    H3BUGF(fprintf(stderr,
+                   "gnutls_certificate_set_x509_system_trust failed: %s\n",
+                   gnutls_strerror(rc)));
     return 1;
   }
 
   rc = gnutls_credentials_set(qs->ssl, GNUTLS_CRD_CERTIFICATE, qs->cred);
   if(rc < 0) {
-    fprintf(stderr, "gnutls_credentials_set failed: %s\n",
-            gnutls_strerror(rc));
+    H3BUGF(fprintf(stderr, "gnutls_credentials_set failed: %s\n",
+                   gnutls_strerror(rc)));
     return 1;
   }
 
