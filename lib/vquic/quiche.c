@@ -107,6 +107,14 @@ static CURLcode quiche_disconnect(struct connectdata *conn,
   (void)dead_connection;
   return qs_disconnect(qs);
 }
+
+void Curl_quic_disconnect(struct connectdata *conn,
+                          int tempindex)
+{
+  if(conn->transport == TRNSPRT_QUIC)
+    qs_disconnect(&conn->hequic[tempindex]);
+}
+
 static unsigned int quiche_conncheck(struct connectdata *conn,
                                      unsigned int checks_to_perform)
 {
