@@ -176,6 +176,7 @@ stages:
       image: $(container_img)
       env:
         MSYS2_PATH_TYPE: inherit
+        LOGONSERVER: \\LOCALHOST
     steps:
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && ./buildconf && ./configure $(configure)"
       displayName: 'configure $(name)'
