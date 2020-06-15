@@ -981,8 +981,10 @@ struct connectdata {
   struct curltime connecttime;
   /* The two fields below get set in Curl_connecthost */
   int num_addr; /* number of addresses to try to connect to */
-  timediff_t timeoutms_per_addr; /* how long time in milliseconds to spend on
-                                    trying to connect to each IP address */
+
+  /* how long time in milliseconds to spend on trying to connect to each IP
+     address, per family */
+  timediff_t timeoutms_per_addr[2];
 
   const struct Curl_handler *handler; /* Connection's protocol handler */
   const struct Curl_handler *given;   /* The protocol first given */
@@ -1245,7 +1247,8 @@ typedef enum {
   EXPIRE_100_TIMEOUT,
   EXPIRE_ASYNC_NAME,
   EXPIRE_CONNECTTIMEOUT,
-  EXPIRE_DNS_PER_NAME,
+  EXPIRE_DNS_PER_NAME, /* family1 */
+  EXPIRE_DNS_PER_NAME2, /* family2 */
   EXPIRE_HAPPY_EYEBALLS_DNS, /* See asyn-ares.c */
   EXPIRE_HAPPY_EYEBALLS,
   EXPIRE_MULTI_PENDING,
