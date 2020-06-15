@@ -293,7 +293,7 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
 
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-    userp = &conn->allocptr.proxyuserpwd;
+    userp = &data->state.aptr.proxyuserpwd;
     user = conn->http_proxy.user;
     pwd = conn->http_proxy.passwd;
 #else
@@ -301,7 +301,7 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
 #endif
   }
   else {
-    userp = &conn->allocptr.userpwd;
+    userp = &data->state.aptr.userpwd;
     user = conn->user;
     pwd = conn->passwd;
   }
@@ -344,8 +344,9 @@ static CURLcode http_output_bearer(struct connectdata *conn)
 {
   char **userp;
   CURLcode result = CURLE_OK;
+  struct Curl_easy *data = conn->data;
 
-  userp = &conn->allocptr.userpwd;
+  userp = &data->state.aptr.userpwd;
   free(*userp);
   *userp = aprintf("Authorization: Bearer %s\r\n",
                    conn->data->set.str[STRING_BEARER]);
@@ -1769,7 +1770,7 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
           CURLcode result = CURLE_OK;
           char *compare = semicolonp ? semicolonp : headers->data;
 
-          if(conn->allocptr.host &&
+          if(data->state.aptr.host &&
              /* a Host: header was sent already, don't pass on any custom Host:
                 header as that will produce *two* in the same request! */
              checkprefix("Host:", compare))
@@ -1787,7 +1788,7 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
                      we will force length zero then */
                   checkprefix("Content-Length:", compare))
             ;
-          else if(conn->allocptr.te &&
+          else if(data->state.aptr.te &&
                   /* when asking for Transfer-Encoding, don't pass on a custom
                      Connection: */
                   checkprefix("Connection:", compare))
@@ -2030,8 +2031,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      with the user-agent string specified, we erase the previously made string
      here. */
   if(Curl_checkheaders(conn, "User-Agent")) {
-    free(conn->allocptr.uagent);
-    conn->allocptr.uagent = NULL;
+    free(data->state.aptr.uagent);
+    data->state.aptr.uagent = NULL;
   }
 
   /* setup the authentication headers */
@@ -2059,14 +2060,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   else
     conn->bits.authneg = FALSE;
 
-  Curl_safefree(conn->allocptr.ref);
+  Curl_safefree(data->state.aptr.ref);
   if(data->change.referer && !Curl_checkheaders(conn, "Referer")) {
-    conn->allocptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
-    if(!conn->allocptr.ref)
+    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
+    if(!data->state.aptr.ref)
       return CURLE_OUT_OF_MEMORY;
   }
   else
-    conn->allocptr.ref = NULL;
+    data->state.aptr.ref = NULL;
 
 #if !defined(CURL_DISABLE_COOKIES)
   if(data->set.str[STRING_COOKIE] && !Curl_checkheaders(conn, "Cookie"))
@@ -2075,15 +2076,15 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   if(!Curl_checkheaders(conn, "Accept-Encoding") &&
      data->set.str[STRING_ENCODING]) {
-    Curl_safefree(conn->allocptr.accept_encoding);
-    conn->allocptr.accept_encoding =
+    Curl_safefree(data->state.aptr.accept_encoding);
+    data->state.aptr.accept_encoding =
       aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
-    if(!conn->allocptr.accept_encoding)
+    if(!data->state.aptr.accept_encoding)
       return CURLE_OUT_OF_MEMORY;
   }
   else {
-    Curl_safefree(conn->allocptr.accept_encoding);
-    conn->allocptr.accept_encoding = NULL;
+    Curl_safefree(data->state.aptr.accept_encoding);
+    data->state.aptr.accept_encoding = NULL;
   }
 
 #ifdef HAVE_LIBZ
@@ -2099,7 +2100,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     char *cptr = Curl_checkheaders(conn, "Connection");
 #define TE_HEADER "TE: gzip\r\n"
 
-    Curl_safefree(conn->allocptr.te);
+    Curl_safefree(data->state.aptr.te);
 
     if(cptr) {
       cptr = Curl_copy_header_value(cptr);
@@ -2108,11 +2109,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
 
     /* Create the (updated) Connection: header */
-    conn->allocptr.te = aprintf("Connection: %s%sTE\r\n" TE_HEADER,
+    data->state.aptr.te = aprintf("Connection: %s%sTE\r\n" TE_HEADER,
                                 cptr ? cptr : "", (cptr && *cptr) ? ", ":"");
 
     free(cptr);
-    if(!conn->allocptr.te)
+    if(!data->state.aptr.te)
       return CURLE_OUT_OF_MEMORY;
   }
 #endif
@@ -2195,7 +2196,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       te = "Transfer-Encoding: chunked\r\n";
   }
 
-  Curl_safefree(conn->allocptr.host);
+  Curl_safefree(data->state.aptr.host);
 
   ptr = Curl_checkheaders(conn, "Host");
   if(ptr && (!data->state.this_is_a_follow ||
@@ -2230,19 +2231,19 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         if(colon)
           *colon = 0; /* The host must not include an embedded port number */
       }
-      Curl_safefree(conn->allocptr.cookiehost);
-      conn->allocptr.cookiehost = cookiehost;
+      Curl_safefree(data->state.aptr.cookiehost);
+      data->state.aptr.cookiehost = cookiehost;
     }
 #endif
 
     if(strcmp("Host:", ptr)) {
-      conn->allocptr.host = aprintf("Host:%s\r\n", &ptr[5]);
-      if(!conn->allocptr.host)
+      data->state.aptr.host = aprintf("Host:%s\r\n", &ptr[5]);
+      if(!data->state.aptr.host)
         return CURLE_OUT_OF_MEMORY;
     }
     else
       /* when clearing the header */
-      conn->allocptr.host = NULL;
+      data->state.aptr.host = NULL;
   }
   else {
     /* When building Host: headers, we must put the host name within
@@ -2254,18 +2255,18 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         (conn->remote_port == PORT_HTTP)) )
       /* if(HTTPS on port 443) OR (HTTP on port 80) then don't include
          the port number in the host string */
-      conn->allocptr.host = aprintf("Host: %s%s%s\r\n",
+      data->state.aptr.host = aprintf("Host: %s%s%s\r\n",
                                     conn->bits.ipv6_ip?"[":"",
                                     host,
                                     conn->bits.ipv6_ip?"]":"");
     else
-      conn->allocptr.host = aprintf("Host: %s%s%s:%d\r\n",
+      data->state.aptr.host = aprintf("Host: %s%s%s:%d\r\n",
                                     conn->bits.ipv6_ip?"[":"",
                                     host,
                                     conn->bits.ipv6_ip?"]":"",
                                     conn->remote_port);
 
-    if(!conn->allocptr.host)
+    if(!data->state.aptr.host)
       /* without Host: we can't make a nice request */
       return CURLE_OUT_OF_MEMORY;
   }
@@ -2436,21 +2437,21 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(((httpreq == HTTPREQ_GET) || (httpreq == HTTPREQ_HEAD)) &&
        !Curl_checkheaders(conn, "Range")) {
       /* if a line like this was already allocated, free the previous one */
-      free(conn->allocptr.rangeline);
-      conn->allocptr.rangeline = aprintf("Range: bytes=%s\r\n",
+      free(data->state.aptr.rangeline);
+      data->state.aptr.rangeline = aprintf("Range: bytes=%s\r\n",
                                          data->state.range);
     }
     else if((httpreq == HTTPREQ_POST || httpreq == HTTPREQ_PUT) &&
             !Curl_checkheaders(conn, "Content-Range")) {
 
       /* if a line like this was already allocated, free the previous one */
-      free(conn->allocptr.rangeline);
+      free(data->state.aptr.rangeline);
 
       if(data->set.set_resume_from < 0) {
         /* Upload resume was asked for, but we don't know the size of the
            remote part so we tell the server (and act accordingly) that we
            upload the whole file (again) */
-        conn->allocptr.rangeline =
+        data->state.aptr.rangeline =
           aprintf("Content-Range: bytes 0-%" CURL_FORMAT_CURL_OFF_T
                   "/%" CURL_FORMAT_CURL_OFF_T "\r\n",
                   data->state.infilesize - 1, data->state.infilesize);
@@ -2460,7 +2461,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* This is because "resume" was selected */
         curl_off_t total_expected_size =
           data->state.resume_from + data->state.infilesize;
-        conn->allocptr.rangeline =
+        data->state.aptr.rangeline =
           aprintf("Content-Range: bytes %s%" CURL_FORMAT_CURL_OFF_T
                   "/%" CURL_FORMAT_CURL_OFF_T "\r\n",
                   data->state.range, total_expected_size-1,
@@ -2469,11 +2470,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       else {
         /* Range was selected and then we just pass the incoming range and
            append total size */
-        conn->allocptr.rangeline =
+        data->state.aptr.rangeline =
           aprintf("Content-Range: bytes %s/%" CURL_FORMAT_CURL_OFF_T "\r\n",
                   data->state.range, data->state.infilesize);
       }
-      if(!conn->allocptr.rangeline)
+      if(!data->state.aptr.rangeline)
         return CURLE_OUT_OF_MEMORY;
     }
   }
@@ -2545,24 +2546,24 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
                   ftp_typecode,
                   httpstring,
-                  (conn->allocptr.host?conn->allocptr.host:""),
-                  conn->allocptr.proxyuserpwd?
-                  conn->allocptr.proxyuserpwd:"",
-                  conn->allocptr.userpwd?conn->allocptr.userpwd:"",
-                  (data->state.use_range && conn->allocptr.rangeline)?
-                  conn->allocptr.rangeline:"",
+                  (data->state.aptr.host?data->state.aptr.host:""),
+                  data->state.aptr.proxyuserpwd?
+                  data->state.aptr.proxyuserpwd:"",
+                  data->state.aptr.userpwd?data->state.aptr.userpwd:"",
+                  (data->state.use_range && data->state.aptr.rangeline)?
+                  data->state.aptr.rangeline:"",
                   (data->set.str[STRING_USERAGENT] &&
                    *data->set.str[STRING_USERAGENT] &&
-                   conn->allocptr.uagent)?
-                  conn->allocptr.uagent:"",
+                   data->state.aptr.uagent)?
+                  data->state.aptr.uagent:"",
                   http->p_accept?http->p_accept:"",
-                  conn->allocptr.te?conn->allocptr.te:"",
+                  data->state.aptr.te?data->state.aptr.te:"",
                   (data->set.str[STRING_ENCODING] &&
                    *data->set.str[STRING_ENCODING] &&
-                   conn->allocptr.accept_encoding)?
-                  conn->allocptr.accept_encoding:"",
-                  (data->change.referer && conn->allocptr.ref)?
-                  conn->allocptr.ref:"" /* Referer: <data> */,
+                   data->state.aptr.accept_encoding)?
+                  data->state.aptr.accept_encoding:"",
+                  (data->change.referer && data->state.aptr.ref)?
+                  data->state.aptr.ref:"" /* Referer: <data> */,
 #ifndef CURL_DISABLE_PROXY
                   (conn->bits.httpproxy &&
                    !conn->bits.tunnel_proxy &&
@@ -2577,8 +2578,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   /* clear userpwd and proxyuserpwd to avoid re-using old credentials
    * from re-used connections */
-  Curl_safefree(conn->allocptr.userpwd);
-  Curl_safefree(conn->allocptr.proxyuserpwd);
+  Curl_safefree(data->state.aptr.userpwd);
+  Curl_safefree(data->state.aptr.proxyuserpwd);
   free(altused);
 
   if(result)
@@ -2602,8 +2603,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(data->cookies && data->state.cookie_engine) {
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       co = Curl_cookie_getlist(data->cookies,
-                               conn->allocptr.cookiehost?
-                               conn->allocptr.cookiehost:host,
+                               data->state.aptr.cookiehost?
+                               data->state.aptr.cookiehost:host,
                                data->state.up.path,
                                (conn->handler->protocol&CURLPROTO_HTTPS)?
                                TRUE:FALSE);
@@ -3915,8 +3916,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                       data->cookies, TRUE, FALSE, headp + 11,
                       /* If there is a custom-set Host: name, use it
                          here, or else use real peer host name. */
-                      conn->allocptr.cookiehost?
-                      conn->allocptr.cookiehost:conn->host.name,
+                      data->state.aptr.cookiehost?
+                      data->state.aptr.cookiehost:conn->host.name,
                       data->state.up.path,
                       (conn->handler->protocol&CURLPROTO_HTTPS)?
                       TRUE:FALSE);

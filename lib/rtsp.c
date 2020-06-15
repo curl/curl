@@ -333,12 +333,12 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   if(rtspreq == RTSPREQ_SETUP && !p_transport) {
     /* New Transport: setting? */
     if(data->set.str[STRING_RTSP_TRANSPORT]) {
-      Curl_safefree(conn->allocptr.rtsp_transport);
+      Curl_safefree(data->state.aptr.rtsp_transport);
 
-      conn->allocptr.rtsp_transport =
+      data->state.aptr.rtsp_transport =
         aprintf("Transport: %s\r\n",
                 data->set.str[STRING_RTSP_TRANSPORT]);
-      if(!conn->allocptr.rtsp_transport)
+      if(!data->state.aptr.rtsp_transport)
         return CURLE_OUT_OF_MEMORY;
     }
     else {
@@ -347,7 +347,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
 
-    p_transport = conn->allocptr.rtsp_transport;
+    p_transport = data->state.aptr.rtsp_transport;
   }
 
   /* Accept Headers for DESCRIBE requests */
@@ -359,14 +359,14 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
     /* Accept-Encoding header */
     if(!Curl_checkheaders(conn, "Accept-Encoding") &&
        data->set.str[STRING_ENCODING]) {
-      Curl_safefree(conn->allocptr.accept_encoding);
-      conn->allocptr.accept_encoding =
+      Curl_safefree(data->state.aptr.accept_encoding);
+      data->state.aptr.accept_encoding =
         aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
 
-      if(!conn->allocptr.accept_encoding)
+      if(!data->state.aptr.accept_encoding)
         return CURLE_OUT_OF_MEMORY;
 
-      p_accept_encoding = conn->allocptr.accept_encoding;
+      p_accept_encoding = data->state.aptr.accept_encoding;
     }
   }
 
@@ -374,13 +374,13 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
      it might have been used in the proxy connect, but if we have got a header
      with the user-agent string specified, we erase the previously made string
      here. */
-  if(Curl_checkheaders(conn, "User-Agent") && conn->allocptr.uagent) {
-    Curl_safefree(conn->allocptr.uagent);
-    conn->allocptr.uagent = NULL;
+  if(Curl_checkheaders(conn, "User-Agent") && data->state.aptr.uagent) {
+    Curl_safefree(data->state.aptr.uagent);
+    data->state.aptr.uagent = NULL;
   }
   else if(!Curl_checkheaders(conn, "User-Agent") &&
           data->set.str[STRING_USERAGENT]) {
-    p_uagent = conn->allocptr.uagent;
+    p_uagent = data->state.aptr.uagent;
   }
 
   /* setup the authentication headers */
@@ -388,17 +388,17 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  p_proxyuserpwd = conn->allocptr.proxyuserpwd;
-  p_userpwd = conn->allocptr.userpwd;
+  p_proxyuserpwd = data->state.aptr.proxyuserpwd;
+  p_userpwd = data->state.aptr.userpwd;
 
   /* Referrer */
-  Curl_safefree(conn->allocptr.ref);
+  Curl_safefree(data->state.aptr.ref);
   if(data->change.referer && !Curl_checkheaders(conn, "Referer"))
-    conn->allocptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
+    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
   else
-    conn->allocptr.ref = NULL;
+    data->state.aptr.ref = NULL;
 
-  p_referrer = conn->allocptr.ref;
+  p_referrer = data->state.aptr.ref;
 
   /*
    * Range Header
@@ -411,9 +411,9 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
 
     /* Check to see if there is a range set in the custom headers */
     if(!Curl_checkheaders(conn, "Range") && data->state.range) {
-      Curl_safefree(conn->allocptr.rangeline);
-      conn->allocptr.rangeline = aprintf("Range: %s\r\n", data->state.range);
-      p_range = conn->allocptr.rangeline;
+      Curl_safefree(data->state.aptr.rangeline);
+      data->state.aptr.rangeline = aprintf("Range: %s\r\n", data->state.range);
+      p_range = data->state.aptr.rangeline;
     }
   }
 
@@ -476,8 +476,8 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
    * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
    * with basic and digest, it will be freed anyway by the next request
    */
-  Curl_safefree(conn->allocptr.userpwd);
-  conn->allocptr.userpwd = NULL;
+  Curl_safefree(data->state.aptr.userpwd);
+  data->state.aptr.userpwd = NULL;
 
   if(result)
     return result;

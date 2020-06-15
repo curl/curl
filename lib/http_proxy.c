@@ -72,6 +72,7 @@ static CURLcode https_proxy_connect(struct connectdata *conn, int sockindex)
 
 CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex)
 {
+  struct Curl_easy *data = conn->data;
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS) {
     const CURLcode result = https_proxy_connect(conn, sockindex);
     if(result)
@@ -127,7 +128,7 @@ CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex)
     conn->data->req.protop = prot_save;
     if(CURLE_OK != result)
       return result;
-    Curl_safefree(conn->allocptr.proxyuserpwd);
+    Curl_safefree(data->state.aptr.proxyuserpwd);
 #else
     return CURLE_NOT_BUILT_IN;
 #endif
@@ -234,8 +235,8 @@ static CURLcode CONNECT(struct connectdata *conn,
         char *host = NULL;
         const char *proxyconn = "";
         const char *useragent = "";
-        const char *http = (conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ?
-          "1.0" : "1.1";
+        const char *httpv =
+          (conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ? "1.0" : "1.1";
         bool ipv6_ip = conn->bits.ipv6_ip;
         char *hostheader;
 
@@ -263,7 +264,7 @@ static CURLcode CONNECT(struct connectdata *conn,
 
         if(!Curl_checkProxyheaders(conn, "User-Agent") &&
            data->set.str[STRING_USERAGENT])
-          useragent = conn->allocptr.uagent;
+          useragent = data->state.aptr.uagent;
 
         result =
           Curl_dyn_addf(&req,
@@ -273,10 +274,10 @@ static CURLcode CONNECT(struct connectdata *conn,
                         "%s"  /* User-Agent */
                         "%s", /* Proxy-Connection */
                         hostheader,
-                        http,
+                        httpv,
                         host?host:"",
-                        conn->allocptr.proxyuserpwd?
-                        conn->allocptr.proxyuserpwd:"",
+                        data->state.aptr.proxyuserpwd?
+                        data->state.aptr.proxyuserpwd:"",
                         useragent,
                         proxyconn);
 
@@ -615,8 +616,8 @@ static CURLcode CONNECT(struct connectdata *conn,
   /* If a proxy-authorization header was used for the proxy, then we should
      make sure that it isn't accidentally used for the document request
      after we've connected. So let's free and clear it here. */
-  Curl_safefree(conn->allocptr.proxyuserpwd);
-  conn->allocptr.proxyuserpwd = NULL;
+  Curl_safefree(data->state.aptr.proxyuserpwd);
+  data->state.aptr.proxyuserpwd = NULL;
 
   data->state.authproxy.done = TRUE;
   data->state.authproxy.multipass = FALSE;
