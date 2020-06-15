@@ -416,6 +416,17 @@ CURLcode Curl_close(struct Curl_easy **datap)
     Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
   }
 
+  Curl_safefree(data->state.aptr.proxyuserpwd);
+  Curl_safefree(data->state.aptr.uagent);
+  Curl_safefree(data->state.aptr.userpwd);
+  Curl_safefree(data->state.aptr.accept_encoding);
+  Curl_safefree(data->state.aptr.te);
+  Curl_safefree(data->state.aptr.rangeline);
+  Curl_safefree(data->state.aptr.ref);
+  Curl_safefree(data->state.aptr.host);
+  Curl_safefree(data->state.aptr.cookiehost);
+  Curl_safefree(data->state.aptr.rtsp_transport);
+
 #ifndef CURL_DISABLE_DOH
   Curl_dyn_free(&data->req.doh.probe[0].serverdoh);
   Curl_dyn_free(&data->req.doh.probe[1].serverdoh);
@@ -723,16 +734,6 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->passwd);
   Curl_safefree(conn->sasl_authzid);
   Curl_safefree(conn->options);
-  Curl_safefree(conn->allocptr.proxyuserpwd);
-  Curl_safefree(conn->allocptr.uagent);
-  Curl_safefree(conn->allocptr.userpwd);
-  Curl_safefree(conn->allocptr.accept_encoding);
-  Curl_safefree(conn->allocptr.te);
-  Curl_safefree(conn->allocptr.rangeline);
-  Curl_safefree(conn->allocptr.ref);
-  Curl_safefree(conn->allocptr.host);
-  Curl_safefree(conn->allocptr.cookiehost);
-  Curl_safefree(conn->allocptr.rtsp_transport);
   Curl_dyn_free(&conn->trailer);
   Curl_safefree(conn->host.rawalloc); /* host name buffer */
   Curl_safefree(conn->conn_to_host.rawalloc); /* host name buffer */
@@ -3884,10 +3885,10 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
    * protocol.
    */
   if(data->set.str[STRING_USERAGENT]) {
-    Curl_safefree(conn->allocptr.uagent);
-    conn->allocptr.uagent =
+    Curl_safefree(data->state.aptr.uagent);
+    data->state.aptr.uagent =
       aprintf("User-Agent: %s\r\n", data->set.str[STRING_USERAGENT]);
-    if(!conn->allocptr.uagent)
+    if(!data->state.aptr.uagent)
       return CURLE_OUT_OF_MEMORY;
   }
 

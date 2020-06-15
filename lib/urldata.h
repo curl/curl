@@ -1003,21 +1003,6 @@ struct connectdata {
                                 well be the same we read from.
                                 CURL_SOCKET_BAD disables */
 
-  /** Dynamically allocated strings, MUST be freed before this **/
-  /** struct is killed.                                      **/
-  struct dynamically_allocated_data {
-    char *proxyuserpwd;
-    char *uagent;
-    char *accept_encoding;
-    char *userpwd;
-    char *rangeline;
-    char *ref;
-    char *host;
-    char *cookiehost;
-    char *rtsp_transport;
-    char *te; /* TE: request header */
-  } allocptr;
-
 #ifdef HAVE_GSSAPI
   BIT(sec_complete); /* if Kerberos is enabled for this connection */
   enum protection_level command_prot;
@@ -1396,6 +1381,22 @@ struct UrlState {
 #endif
   trailers_state trailers_state; /* whether we are sending trailers
                                        and what stage are we at */
+
+  /* Dynamically allocated strings, MUST be freed before this struct is
+     killed. */
+  struct dynamically_allocated_data {
+    char *proxyuserpwd;
+    char *uagent;
+    char *accept_encoding;
+    char *userpwd;
+    char *rangeline;
+    char *ref;
+    char *host;
+    char *cookiehost;
+    char *rtsp_transport;
+    char *te; /* TE: request header */
+  } aptr;
+
 #ifdef CURLDEBUG
   BIT(conncache_lock);
 #endif
