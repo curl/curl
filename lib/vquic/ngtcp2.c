@@ -889,12 +889,13 @@ static CURLcode qs_disconnect(struct quicsocket *qs)
 #elif defined(USE_GNUTLS)
     gnutls_deinit(qs->ssl);
 #endif
+  qs->ssl = NULL;
 #ifdef USE_GNUTLS
   if(qs->cred)
     gnutls_certificate_free_credentials(qs->cred);
 #endif
   for(i = 0; i < 3; i++)
-    free(qs->crypto_data[i].buf);
+    Curl_safefree(qs->crypto_data[i].buf);
   nghttp3_conn_del(qs->h3conn);
   ngtcp2_conn_del(qs->qconn);
 #ifdef USE_OPENSSL
