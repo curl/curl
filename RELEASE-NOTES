@@ -4,7 +4,7 @@ curl and libcurl 7.71.0
  Command line options:         232
  curl_easy_setopt() options:   277
  Public functions in libcurl:  82
- Contributors:                 2194
+ Contributors:                 2198
 
 This release includes the following changes:
 
@@ -19,12 +19,14 @@ This release includes the following bugfixes:
  o all: fix codespell errors [75]
  o altsvc: fix 'dsthost' may be used uninitialized in this function
  o altsvc: fix parser for lines ending with CRLF [74]
+ o altsvc: remove the num field from the altsvc struct [109]
  o appveyor: add non-debug plain autotools-based build [90]
  o appveyor: disable flaky test 1501 and ignore broken 1056
  o appveyor: disable test 1139 instead of ignoring it
  o asyn-*: remove support for never-used NULL entry pointers [19]
  o azure: use matrix strategy to avoid configuration redundancy [83]
  o build: disable more code/data when built without proxy support [84]
+ o buildconf: remove -print from the find command that removes files
  o checksrc: enhance the ASTERISKSPACE and update code accordingly [52]
  o CI/macos: fix 'is already installed' errors by using bundle [94]
  o cirrus: disable SFTP and SCP tests [7]
@@ -34,7 +36,9 @@ This release includes the following bugfixes:
  o CMake: do not build test programs by default [30]
  o CMake: fix runtests.pl with CMake, add new test targets [29]
  o CMake: rebuild Makefile.inc.cmake when Makefile.inc changes [58]
+ o CODE_REVIEW.md: how to do code reviews in curl [108]
  o configure: fix pthread check with static boringssl
+ o configure: for wolfSSL, check for the DES func needed for NTLM
  o configure: only strip first -L from LDFLAGS [89]
  o configure: repair the check if argv can be written to [47]
  o configure: the wolfssh backend does not provide SCP [57]
@@ -63,6 +67,7 @@ This release includes the following bugfixes:
  o http2: keep trying to send pending frames after req.upload_done [40]
  o http2: simplify and clean up trailer handling [6]
  o HTTP3.md: clarify cargo build directory [77]
+ o http: move header storage to Curl_easy from connectdata [107]
  o libcurl.pc: Merge Libs.private into Libs for static-only builds [28]
  o libssh2: improved error output for wrong quote syntax [39]
  o libssh2: keep sftp errors as 'unsigned long' [103]
@@ -74,6 +79,7 @@ This release includes the following bugfixes:
  o ngtcp2: fix build with current ngtcp2 master implementing draft 28 [76]
  o ngtcp2: introduce qlog support [23]
  o ngtcp2: update with recent API changes [100]
+ o ntlm: enable NTLM support with wolfSSL [81]
  o OpenSSL: have CURLOPT_CRLFILE imply CURLSSLOPT_NO_PARTIALCHAIN [55]
  o openssl: set FLAG_TRUSTED_FIRST unconditionally [105]
  o projects: Add crypt32.lib to dependencies for all OpenSSL configs [93]
@@ -91,6 +97,7 @@ This release includes the following bugfixes:
  o server/sws: fix asan warning on use of uninitialized variable
  o server/util: fix logmsg format using curl_off_t argument [106]
  o sha256: fixed potentially uninitialized variable [61]
+ o share: don't set the share flag it something fails [116]
  o sockfilt: make select_ws stop waiting on exit signal event
  o socks: detect connection close during handshake [95]
  o socks: fix expected length of SOCKS5 reply [68]
@@ -130,6 +137,7 @@ This release includes the following bugfixes:
  o urldata: leave the HTTP method untouched in the set.* struct [45]
  o user-agent.d: spell out what happens given a blank argument [80]
  o vauth/cleartext: fix theoretical integer overflow [50]
+ o version.d: expanded and alpha-sorted [110]
  o vtls: Extract and simplify key log file handling from OpenSSL
  o wolfssl: add SSLKEYLOGFILE support [65]
  o wording: avoid blacklist/whitelist stereotypes [92]
@@ -143,18 +151,19 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Adnan Khan, Alessandro Ghedini, Billyzou0741326 on github, Brian Carpenter,
-  Cherish98 on github, Dan Fandrich, Daniel Stenberg, Emil Engler,
-  Estanislau Augé-Pujadas, François Rigault, Geeknik Labs, Gilles Vollant,
-  Gregory Jefferis, huzunhao on github, James Fuller, James Le Cuirot,
-  Jeroen Ooms, John Simpson, Kamil Dudka, Kane York, Lucas Pardue,
-  Maksim Stsepanenka, Marcel Raad, Marc Hörsken, Max Peal, Michael Kaufmann,
-  Mohamed Osama, Murugan Balraj, Neal Poole, Pavel Volgarev, Peter Wang,
-  Peter Wu, Radoslav Georgiev, Ray Satiro, Rikard Falkeborn, rl1987 on github,
-  Saleem Abdulrasool, Samuel Marks, Siva Sivaraman, Tatsuhiro Tsujikawa,
-  therealhirudo on github, Thomas Bouzerar, Viktor Szakats, Vyron Tsingaras,
-  Werner Stolz, Will Roberts, zloi-user on github,
-  Коваленко Анатолий Викторович, kotoriのねこ
-  (49 contributors)
+  Cherish98 on github, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  Emil Engler, Estanislau Augé-Pujadas, François Rigault, Geeknik Labs,
+  Gilles Vollant, Gregory Jefferis, Hugo van Kemenade, huzunhao on github,
+  James Fuller, James Le Cuirot, Jeroen Ooms, John Simpson, Kamil Dudka,
+  Kane York, Lucas Pardue, Maksim Stsepanenka, Marcel Raad, Marc Hörsken,
+  Martin V, Max Peal, Michael Kaufmann, Mohamed Osama, Murugan Balraj,
+  Neal Poole, Nicolas Sterchele, Pavel Volgarev, Peter Wang, Peter Wu,
+  Radoslav Georgiev, Ray Satiro, Rich Salz, Rikard Falkeborn, rl1987 on github,
+  Ruurd Beerstra, Saleem Abdulrasool, Samuel Marks, Siva Sivaraman,
+  Tatsuhiro Tsujikawa, therealhirudo on github, Thomas Bouzerar,
+  Viktor Szakats, Vyron Tsingaras, Werner Stolz, Will Roberts,
+  zloi-user on github, Коваленко Анатолий Викторович, kotoriのねこ
+  (55 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -240,6 +249,7 @@ References to bug reports and discussions on issues:
  [78] = https://curl.haxx.se/bug/?i=5463
  [79] = https://curl.haxx.se/bug/?i=5485
  [80] = https://curl.haxx.se/bug/?i=5525
+ [81] = https://curl.haxx.se/bug/?i=5548
  [82] = https://curl.haxx.se/bug/?i=5489
  [83] = https://curl.haxx.se/bug/?i=5468
  [84] = https://curl.haxx.se/bug/?i=5466
@@ -265,3 +275,8 @@ References to bug reports and discussions on issues:
  [104] = https://curl.haxx.se/bug/?i=5490
  [105] = https://curl.haxx.se/bug/?i=5530
  [106] = https://curl.haxx.se/bug/?i=5529
+ [107] = https://curl.haxx.se/bug/?i=5566
+ [108] = https://curl.haxx.se/bug/?i=5555
+ [109] = https://curl.haxx.se/bug/?i=5553
+ [110] = https://curl.haxx.se/bug/?i=5558
+ [116] = https://curl.haxx.se/bug/?i=5554
