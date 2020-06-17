@@ -2303,7 +2303,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
                             config);
     }
 
-    curlx_unicodefree(orig_opt);
+    if(!result)
+      curlx_unicodefree(orig_opt);
   }
 
   if(result && result != PARAM_HELP_REQUESTED &&
