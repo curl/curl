@@ -58,7 +58,7 @@ struct pingpong {
                      server */
   size_t sendleft; /* number of bytes left to send from the sendthis buffer */
   size_t sendsize; /* total size of the sendthis buffer */
-  struct curltime response; /* set to Curl_now() when a command has been sent
+  struct curltime response; /* set to curren time when a command has been sent
                                off, used to time-out response reading */
   timediff_t response_time; /* When no timeout is given, this is the amount of
                                milliseconds we await for a server response. */
@@ -89,7 +89,6 @@ void Curl_pp_init(struct pingpong *pp);
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */
 timediff_t Curl_pp_state_timeout(struct pingpong *pp, bool disconnecting);
-
 
 /***********************************************************************
  *

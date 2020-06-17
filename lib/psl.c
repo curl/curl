@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,7 @@
 
 #include "psl.h"
 #include "share.h"
+#include "multiif.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -44,33 +45,32 @@ void Curl_psl_destroy(struct PslCache *pslcache)
   }
 }
 
-static time_t now_seconds(void)
+static time_t now_seconds(struct Curl_easy *data)
 {
-  struct curltime now = Curl_now();
-
+  struct curltime now = Curl_mnow(data->multi);
   return now.tv_sec;
 }
 
-const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
+const psl_ctx_t *Curl_psl_use(struct Curl_easy *data)
 {
-  struct PslCache *pslcache = easy->psl;
+  struct PslCache *pslcache = data->psl;
   const psl_ctx_t *psl;
   time_t now;
 
   if(!pslcache)
     return NULL;
 
-  Curl_share_lock(easy, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SHARED);
-  now = now_seconds();
+  Curl_share_lock(data, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SHARED);
+  now = now_seconds(data);
   if(!pslcache->psl || pslcache->expires <= now) {
     /* Let a chance to other threads to do the job: avoids deadlock. */
-    Curl_share_unlock(easy, CURL_LOCK_DATA_PSL);
+    Curl_share_unlock(data, CURL_LOCK_DATA_PSL);
 
     /* Update cache: this needs an exclusive lock. */
-    Curl_share_lock(easy, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SINGLE);
+    Curl_share_lock(data, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SINGLE);
 
     /* Recheck in case another thread did the job. */
-    now = now_seconds();
+    now = now_seconds(data);
     if(!pslcache->psl || pslcache->expires <= now) {
       bool dynamic = FALSE;
       time_t expires = TIME_T_MAX;
@@ -94,18 +94,18 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
         pslcache->expires = expires;
       }
     }
-    Curl_share_unlock(easy, CURL_LOCK_DATA_PSL);  /* Release exclusive lock. */
-    Curl_share_lock(easy, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SHARED);
+    Curl_share_unlock(data, CURL_LOCK_DATA_PSL);  /* Release exclusive lock. */
+    Curl_share_lock(data, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SHARED);
   }
   psl = pslcache->psl;
   if(!psl)
-    Curl_share_unlock(easy, CURL_LOCK_DATA_PSL);
+    Curl_share_unlock(data, CURL_LOCK_DATA_PSL);
   return psl;
 }
 
-void Curl_psl_release(struct Curl_easy *easy)
+void Curl_psl_release(struct Curl_easy *data)
 {
-  Curl_share_unlock(easy, CURL_LOCK_DATA_PSL);
+  Curl_share_unlock(data, CURL_LOCK_DATA_PSL);
 }
 
 #endif /* USE_LIBPSL */

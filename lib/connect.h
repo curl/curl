@@ -36,9 +36,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,
 
 /* generic function that returns how much time there's left to run, according
    to the timeouts set */
-timediff_t Curl_timeleft(struct Curl_easy *data,
-                         struct curltime *nowp,
-                         bool duringconnect);
+timediff_t Curl_timeleft(struct Curl_easy *data, bool duringconnect);
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
 

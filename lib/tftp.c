@@ -205,7 +205,7 @@ static CURLcode tftp_set_timeouts(struct tftp_state_data *state)
   time(&state->start_time);
 
   /* Compute drop-dead time */
-  timeout_ms = Curl_timeleft(state->conn->data, NULL, start);
+  timeout_ms = Curl_timeleft(state->conn->data, start);
 
   if(timeout_ms < 0) {
     /* time-out, bail out, go home */
@@ -1315,7 +1315,7 @@ static CURLcode tftp_doing(struct connectdata *conn, bool *dophase_done)
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(conn->data, Curl_now());
+      result = Curl_speedcheck(conn->data);
   }
   return result;
 }

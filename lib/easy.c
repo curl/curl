@@ -507,12 +507,10 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     }
 
     /* get the time stamp to use to figure out how long poll takes */
-    before = Curl_now();
-
+    before = Curl_mnow(multi);
     /* wait for activity or timeout */
     pollrc = Curl_poll(fds, numfds, ev->ms);
-
-    after = Curl_now();
+    after = Curl_now_update(multi);
 
     ev->msbump = FALSE; /* reset here */
 

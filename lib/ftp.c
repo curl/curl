@@ -329,15 +329,13 @@ static timediff_t ftp_timeleft_accept(struct Curl_easy *data)
 {
   timediff_t timeout_ms = DEFAULT_ACCEPT_TIMEOUT;
   timediff_t other;
-  struct curltime now;
+  struct curltime now = Curl_mnow(data->multi);
 
   if(data->set.accepttimeout > 0)
     timeout_ms = data->set.accepttimeout;
 
-  now = Curl_now();
-
   /* check if the generic timeout possibly is set shorter */
-  other = Curl_timeleft(data, &now, FALSE);
+  other = Curl_timeleft(data, FALSE);
   if(other && (other < timeout_ms))
     /* note that this also works fine for when other happens to be negative
        due to it already having elapsed */
@@ -677,11 +675,13 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
         return CURLE_RECV_ERROR;
 
       case 0: /* timeout */
+        Curl_now_update(data->multi);
         if(Curl_pgrsUpdate(conn))
           return CURLE_ABORTED_BY_CALLBACK;
         continue; /* just continue in our loop for the timeout duration */
 
       default: /* for clarity */
+        Curl_now_update(data->multi);
         break;
       }
     }
@@ -3268,7 +3268,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     timediff_t old_time = pp->response_time;
 
     pp->response_time = 60*1000; /* give it only a minute for now */
-    pp->response = Curl_now(); /* timeout relative now */
+    pp->response = Curl_mnow(data->multi); /* timeout relative now */
 
     result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
 
@@ -3387,8 +3387,7 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
       }
 
       PPSENDF(&conn->proto.ftpc.pp, "%s", cmd);
-
-      pp->response = Curl_now(); /* timeout relative now */
+      pp->response = Curl_mnow(conn->data->multi); /* timeout relative now */
 
       result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
       if(result)

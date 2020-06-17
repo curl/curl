@@ -224,7 +224,7 @@ static unsigned int http2_conncheck(struct connectdata *check,
   }
 
   if(checks_to_perform & CONNCHECK_KEEPALIVE) {
-    struct curltime now = Curl_now();
+    struct curltime now = Curl_mnow(check->data->multi);
     timediff_t elapsed = Curl_timediff(now, check->keepalive);
 
     if(elapsed > check->upkeep_interval_ms) {

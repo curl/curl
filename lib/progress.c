@@ -168,7 +168,7 @@ void Curl_pgrsResetTransferSizes(struct Curl_easy *data)
  */
 void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 {
-  struct curltime now = Curl_now();
+  struct curltime now = Curl_mnow(data->multi);
   timediff_t *delta = NULL;
 
   switch(timer) {
@@ -233,7 +233,7 @@ void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 void Curl_pgrsStartNow(struct Curl_easy *data)
 {
   data->progress.speeder_c = 0; /* reset the progress meter display */
-  data->progress.start = Curl_now();
+  data->progress.start = Curl_mnow(data->multi);
   data->progress.is_t_startransfer_set = false;
   data->progress.ul_limit_start.tv_sec = 0;
   data->progress.ul_limit_start.tv_usec = 0;
@@ -243,7 +243,7 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
   data->progress.uploaded = 0;
   /* clear all bits except HIDE and HEADERS_OUT */
   data->progress.flags &= PGRS_HIDE|PGRS_HEADERS_OUT;
-  Curl_ratelimit(data, data->progress.start);
+  Curl_ratelimit(data);
 }
 
 /*
@@ -316,8 +316,9 @@ void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 /*
  * Update the timestamp and sizestamp to use for rate limit calculations.
  */
-void Curl_ratelimit(struct Curl_easy *data, struct curltime now)
+void Curl_ratelimit(struct Curl_easy *data)
 {
+  struct curltime now = Curl_mnow(data->multi);
   /* don't set a new stamp unless the time since last update is long enough */
   if(data->set.max_recv_speed > 0) {
     if(Curl_timediff(now, data->progress.dl_limit_start) >=
@@ -581,7 +582,7 @@ static void progress_meter(struct connectdata *conn)
 int Curl_pgrsUpdate(struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
-  struct curltime now = Curl_now(); /* what time is it */
+  struct curltime now = Curl_mnow(data->multi); /* what time is it */
   bool showprogress = progress_calc(conn, now);
   if(!(data->progress.flags & PGRS_HIDE)) {
     if(data->set.fxferinfo) {

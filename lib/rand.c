@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,6 +30,7 @@
 #include "vtls/vtls.h"
 #include "sendf.h"
 #include "rand.h"
+#include "multiif.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -86,7 +87,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 #endif
 
   if(!seeded) {
-    struct curltime now = Curl_now();
+    struct curltime now = Curl_mnow(data->multi);
     infof(data, "WARNING: Using weak random seed\n");
     randseed += (unsigned int)now.tv_usec + (unsigned int)now.tv_sec;
     randseed = randseed * 1103515245 + 12345;

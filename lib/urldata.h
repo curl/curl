@@ -606,7 +606,6 @@ struct SingleRequest {
                                    CURLE_GOT_NOTHING error code */
 
   struct curltime start;         /* transfer started at this time */
-  struct curltime now;           /* current time */
   enum {
     HEADER_NORMAL,              /* no bad header at all */
     HEADER_PARTHEADER,          /* part of the chunk is a bad header, the rest
@@ -949,7 +948,6 @@ struct connectdata {
   int httpversion;        /* the HTTP version*10 reported by the server */
   int rtspversion;        /* the RTSP version*10 reported by the server */
 
-  struct curltime now;     /* "current" time */
   struct curltime created; /* creation time */
   struct curltime lastused; /* when returned to the connection cache */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data

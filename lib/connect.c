@@ -184,13 +184,11 @@ singleipconnect(struct connectdata *conn,
  *
  * @unittest: 1303
  */
-timediff_t Curl_timeleft(struct Curl_easy *data,
-                         struct curltime *nowp,
-                         bool duringconnect)
+timediff_t Curl_timeleft(struct Curl_easy *data, bool duringconnect)
 {
   int timeout_set = 0;
   timediff_t timeout_ms = duringconnect?DEFAULT_CONNECT_TIMEOUT:0;
-  struct curltime now;
+  struct curltime now = Curl_mnow(data->multi);
 
   /* if a timeout is set, use the most restrictive one */
 
@@ -222,18 +220,13 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
     break;
   }
 
-  if(!nowp) {
-    now = Curl_now();
-    nowp = &now;
-  }
-
   /* subtract elapsed time */
   if(duringconnect)
     /* since this most recent connect started */
-    timeout_ms -= Curl_timediff(*nowp, data->progress.t_startsingle);
+    timeout_ms -= Curl_timediff(now, data->progress.t_startsingle);
   else
     /* since the entire operation started */
-    timeout_ms -= Curl_timediff(*nowp, data->progress.t_startop);
+    timeout_ms -= Curl_timediff(now, data->progress.t_startop);
   if(!timeout_ms)
     /* avoid returning 0 as that means no timeout! */
     return -1;
@@ -836,10 +829,10 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  now = Curl_now();
+  now = Curl_mnow(data->multi);
 
   /* figure out how long time we have left to connect */
-  allow = Curl_timeleft(data, &now, TRUE);
+  allow = Curl_timeleft(data, TRUE);
 
   if(allow < 0) {
     /* time-out, bail out, go home */
@@ -1205,7 +1198,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
   /* set socket non-blocking */
   (void)curlx_nonblock(sockfd, TRUE);
 
-  conn->connecttime = Curl_now();
+  conn->connecttime = Curl_mnow(data->multi);
   if(conn->num_addr > 1)
     Curl_expire(data, conn->timeoutms_per_addr, EXPIRE_DNS_PER_NAME);
 
@@ -1314,10 +1307,9 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
                           const struct Curl_dns_entry *remotehost)
 {
   struct Curl_easy *data = conn->data;
-  struct curltime before = Curl_now();
   CURLcode result = CURLE_COULDNT_CONNECT;
   int i;
-  timediff_t timeout_ms = Curl_timeleft(data, &before, TRUE);
+  timediff_t timeout_ms = Curl_timeleft(data, TRUE);
 
   if(timeout_ms < 0) {
     /* a precaution, no need to continue if time already is up */

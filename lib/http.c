@@ -2973,6 +2973,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(data->req.writebytecount) {
     /* if a request-body has been sent off, we make sure this progress is noted
        properly */
+    Curl_now_update(data->multi); /* sending that data could be slow */
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;

@@ -944,7 +944,7 @@ static bool extract_if_dead(struct connectdata *conn,
     /* The check for a dead socket makes sense only if the connection isn't in
        use */
     bool dead;
-    struct curltime now = Curl_now();
+    struct curltime now = Curl_mnow(data->multi);
     if(conn_maxage(data, conn, now)) {
       dead = TRUE;
     }
@@ -999,7 +999,7 @@ static int call_extract_if_dead(struct connectdata *conn, void *param)
  */
 static void prune_dead_connections(struct Curl_easy *data)
 {
-  struct curltime now = Curl_now();
+  struct curltime now = Curl_mnow(data->multi);
   timediff_t elapsed;
 
   CONNCACHE_LOCK(data);
@@ -1624,10 +1624,10 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   connclose(conn, "Default to force-close");
 
   /* Store creation time to help future close decision making */
-  conn->created = Curl_now();
+  conn->created = Curl_mnow(data->multi);
 
   /* Store current time to give a baseline to keepalive connection times. */
-  conn->keepalive = Curl_now();
+  conn->keepalive = Curl_mnow(data->multi);
 
   /* Store off the configured connection upkeep time. */
   conn->upkeep_interval_ms = data->set.upkeep_interval_ms;
@@ -1705,7 +1705,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
      it may live on without (this specific) Curl_easy */
   conn->fclosesocket = data->set.fclosesocket;
   conn->closesocket_client = data->set.closesocket_client;
-  conn->lastused = Curl_now(); /* used now */
+  conn->lastused = Curl_mnow(data->multi); /* used now */
 
   return conn;
   error:
@@ -3145,7 +3145,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
                                bool *async)
 {
   CURLcode result = CURLE_OK;
-  timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
+  timediff_t timeout_ms = Curl_timeleft(data, TRUE);
 
   DEBUGASSERT(conn);
   DEBUGASSERT(data);
@@ -3898,10 +3898,6 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
   data->state.crlf_conversions = 0; /* reset CRLF conversion counter */
 #endif /* CURL_DO_LINEEND_CONV */
 
-  /* set start time here for timeout purposes in the connect procedure, it
-     is later set again for the progress meter purpose */
-  conn->now = Curl_now();
-
   if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
     conn->bits.tcpconnect[FIRSTSOCKET] = FALSE;
     result = Curl_connecthost(conn, conn->dns_entry);
@@ -3919,8 +3915,6 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
     Curl_verboseconnect(conn);
   }
 
-  conn->now = Curl_now(); /* time this *after* the connect is done, we set
-                             this here perhaps a second time */
   return result;
 }
 
@@ -3997,8 +3991,7 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
     /* in HTTP lingo, no body means using the HEAD request... */
     data->state.httpreq = HTTPREQ_HEAD;
 
-  k->start = Curl_now(); /* start time */
-  k->now = k->start;   /* current time is now */
+  k->start = Curl_mnow(data->multi); /* start time */
   k->header = TRUE; /* assume header */
   k->bytecount = 0;
   k->ignorebody = FALSE;

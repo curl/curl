@@ -366,7 +366,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
      /* This is only set to non-zero if the timer was started. */
      && (res->happy_eyeballs_dns_time.tv_sec
          || res->happy_eyeballs_dns_time.tv_usec)
-     && (Curl_timediff(Curl_now(), res->happy_eyeballs_dns_time)
+     && (Curl_timediff(Curl_mnow(data->multi), res->happy_eyeballs_dns_time)
          >= HAPPY_EYEBALLS_DNS_TIMEOUT)) {
     /* Remember that the EXPIRE_HAPPY_EYEBALLS_DNS timer is no longer
        running. */
@@ -419,12 +419,12 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   timediff_t timeout;
-  struct curltime now = Curl_now();
+  struct curltime now = Curl_mnow(data->multi);
 
   DEBUGASSERT(entry);
   *entry = NULL; /* clear on entry */
 
-  timeout = Curl_timeleft(data, &now, TRUE);
+  timeout = Curl_timeleft(data, TRUE);
   if(timeout < 0) {
     /* already expired! */
     connclose(conn, "Timed out before name resolve started");
@@ -467,7 +467,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
     else {
-      struct curltime now2 = Curl_now();
+      struct curltime now2 = Curl_mnow(data->multi);
       timediff_t timediff = Curl_timediff(now2, now); /* spent time */
       if(timediff <= 0)
         timeout -= 1; /* always deduct at least 1 */
@@ -527,6 +527,7 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
                                struct hostent *hostent)
 {
   struct connectdata *conn = (struct connectdata *)arg;
+  struct Curl_easy *data = conn->data;
   struct ResolverResults *res;
 
 #ifdef HAVE_CARES_CALLBACK_TIMEOUTS
@@ -607,7 +608,7 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
          timeout to prevent it.  After all, we don't even know where in the
          c-ares retry cycle each request is.
       */
-      res->happy_eyeballs_dns_time = Curl_now();
+      res->happy_eyeballs_dns_time = Curl_mnow(data->multi);
       Curl_expire(
         conn->data, HAPPY_EYEBALLS_DNS_TIMEOUT, EXPIRE_HAPPY_EYEBALLS_DNS);
     }

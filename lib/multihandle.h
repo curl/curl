@@ -85,6 +85,15 @@ struct Curl_multi {
   struct Curl_easy *easyp;
   struct Curl_easy *easylp; /* last node */
 
+  /* Update time with Curl_now_update(), read time with Curl_mnow(). Never
+     access this variable directly. */
+  struct curltime mulnow;
+#ifdef CURLDEBUG
+  /* for debug-logging where the now time was updated last */
+  const char *now_file;
+  int now_lineno;
+#endif
+
   int num_easy; /* amount of entries in the linked list above. */
   int num_alive; /* amount of easy handles that are added but have not yet
                     reached COMPLETE state */

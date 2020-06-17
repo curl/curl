@@ -62,7 +62,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
   int result;
   *n = 0;
   for(;;) {
-    timediff_t timeout_ms = Curl_timeleft(conn->data, NULL, TRUE);
+    timediff_t timeout_ms = Curl_timeleft(conn->data, TRUE);
     if(timeout_ms < 0) {
       /* we already got the timeout */
       result = CURLE_OPERATION_TIMEDOUT;

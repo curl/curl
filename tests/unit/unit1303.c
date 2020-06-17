@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,7 +49,7 @@ static void unit_stop(void)
 #define BASE 1000000
 
 /* macro to set the pretended current time */
-#define NOW(x,y) now.tv_sec = x; now.tv_usec = y
+#define NOW(x,y) nowp->tv_sec = x; nowp->tv_usec = y
 /* macro to set the millisecond based timeouts to use */
 #define TIMEOUTS(x,y) data->set.timeout = x; data->set.connecttimeout = y
 
@@ -74,7 +74,7 @@ struct timetest {
 
 UNITTEST_START
 {
-  struct curltime now;
+  struct curltime *nowp = &data->multi->mulnow;
   unsigned int i;
 
   const struct timetest run[] = {
@@ -141,7 +141,7 @@ UNITTEST_START
     timediff_t timeout;
     NOW(run[i].now_s, run[i].now_us);
     TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);
-    timeout =  Curl_timeleft(data, &now, run[i].connecting);
+    timeout =  Curl_timeleft(data, run[i].connecting);
     if(timeout != run[i].result)
       fail(run[i].comment);
   }

@@ -625,7 +625,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
     /* should be fine even if this converts to 32 bit */
-    timediff_t elapsed = Curl_timediff(Curl_now(),
+    timediff_t elapsed = Curl_timediff(data->multi->mnow,
                                        data->progress.t_startsingle);
     if(elapsed < 0)
       elapsed = 0;
@@ -671,7 +671,7 @@ int Curl_resolver_getsock(struct connectdata *conn,
   }
   else {
 #endif
-    ms = Curl_timediff(Curl_now(), reslv->start);
+    ms = Curl_timediff(data->multi->mnow, reslv->start);
     if(ms < 3)
       milli = 0;
     else if(ms <= 50)
@@ -703,7 +703,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
   *waitp = 0; /* default to synchronous response */
 
-  reslv->start = Curl_now();
+  reslv->start = data->multi->mnow;
 
   /* fire up a new resolver thread! */
   if(init_resolve_thread(conn, hostname, port, NULL)) {
@@ -759,7 +759,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   hints.ai_socktype = (conn->transport == TRNSPRT_TCP)?
     SOCK_STREAM : SOCK_DGRAM;
 
-  reslv->start = Curl_now();
+  reslv->start = data->multi->mnow;
   /* fire up a new resolver thread! */
   if(init_resolve_thread(conn, hostname, port, &hints)) {
     *waitp = 1; /* expect asynchronous response */

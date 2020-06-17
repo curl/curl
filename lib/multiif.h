@@ -38,6 +38,24 @@ bool Curl_multiplex_wanted(const struct Curl_multi *multi);
 void Curl_set_in_callback(struct Curl_easy *data, bool value);
 bool Curl_is_in_callback(struct Curl_easy *easy);
 
+struct curltime Curl_now_update_func(struct Curl_multi *m);
+#ifdef CURLDEBUG
+struct curltime Curl_now_update_debug(struct Curl_multi *multi,
+                                      const char *file, int fileno);
+#define Curl_now_update(x) Curl_now_update_debug(x, __FILE__, __LINE__)
+#else
+#define Curl_now_update(x) Curl_now_update_func(x)
+#endif
+
+struct curltime Curl_mnow_func(const struct Curl_multi *multi);
+#ifdef CURLDEBUG
+struct curltime Curl_mnow_debug(struct Curl_multi *multi,
+                                const char *file, int fileno);
+#define Curl_mnow(x) Curl_mnow_debug(x, __FILE__, __LINE__)
+#else
+#define Curl_mnow(x) Curl_mnow_func(x)
+#endif
+
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket and connection hashes */
 struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize);

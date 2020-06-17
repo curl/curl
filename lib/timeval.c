@@ -24,6 +24,12 @@
 
 #if defined(WIN32) && !defined(MSDOS)
 
+/*
+ * Curl_now() returns the current time with microsecond accuracy - but it
+ * SHOULD BE AVOIDED. Instead use Curl_mnow(). To force a time refresh, use
+ * Curl_now_update().
+ */
+
 /* set in win32_init() */
 extern LARGE_INTEGER Curl_freq;
 extern bool Curl_isVistaOrGreater;

@@ -2942,7 +2942,6 @@ static CURLcode ssh_block_statemach(struct connectdata *conn,
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
     timediff_t left = 1000;
-    struct curltime now = Curl_now();
 
     result = ssh_statemach_act(conn, &block);
     if(result)
@@ -2951,11 +2950,11 @@ static CURLcode ssh_block_statemach(struct connectdata *conn,
     if(Curl_pgrsUpdate(conn))
       return CURLE_ABORTED_BY_CALLBACK;
 
-    result = Curl_speedcheck(data, now);
+    result = Curl_speedcheck(data);
     if(result)
       break;
 
-    left = Curl_timeleft(data, NULL, duringconnect);
+    left = Curl_timeleft(data, duringconnect);
     if(left < 0) {
       failf(data, "Operation timed out");
       return CURLE_OPERATION_TIMEDOUT;

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,7 +49,6 @@ static int runawhile(long time_limit,
                      int dec)
 {
   int counter = 1;
-  struct curltime now = {1, 0};
   CURLcode result;
   int finaltime;
 
@@ -57,18 +56,20 @@ static int runawhile(long time_limit,
   curl_easy_setopt(easy, CURLOPT_LOW_SPEED_TIME, time_limit);
   Curl_speedinit(easy);
 
+  easy->multi->mulnow.tv_sec = 1;
+  easy->multi->mulnow.tv_usec = 0;
   do {
     /* fake the current transfer speed */
     easy->progress.current_speed = speed;
-    result = Curl_speedcheck(easy, now);
+    result = Curl_speedcheck(easy);
     if(result)
       break;
     /* step the time */
-    now.tv_sec = ++counter;
+    easy->multi->mulnow.tv_sec = ++counter;
     speed -= dec;
   } while(counter < 100);
 
-  finaltime = (int)(now.tv_sec - 1);
+  finaltime = (int)(easy->multi->mulnow.tv_sec - 1);
 
   return finaltime;
 }

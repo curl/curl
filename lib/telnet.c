@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,6 +56,7 @@
 #include "select.h"
 #include "strcase.h"
 #include "warnless.h"
+#include "multiif.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1559,7 +1560,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     }
 
     if(data->set.timeout) {
-      now = Curl_now();
+      now = data->multi->mnow;
       if(Curl_timediff(now, conn->created) >= data->set.timeout) {
         failf(data, "Time-out");
         result = CURLE_OPERATION_TIMEDOUT;
@@ -1677,7 +1678,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     } /* poll switch statement */
 
     if(data->set.timeout) {
-      now = Curl_now();
+      now = Curl_mnow(data->multi);
       if(Curl_timediff(now, conn->created) >= data->set.timeout) {
         failf(data, "Time-out");
         result = CURLE_OPERATION_TIMEDOUT;

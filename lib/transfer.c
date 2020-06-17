@@ -614,7 +614,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       Curl_pgrsTime(data, TIMER_STARTTRANSFER);
       if(k->exp100 > EXP100_SEND_DATA)
         /* set time stamp to compare with when waiting for the 100 */
-        k->start100 = Curl_now();
+        k->start100 = Curl_mnow(data->multi);
     }
 
     *didwhat |= KEEP_RECV;
@@ -1033,7 +1033,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
              go into the Expect: 100 state and await such a header */
           k->exp100 = EXP100_AWAITING_CONTINUE; /* wait for the header */
           k->keepon &= ~KEEP_SEND;         /* disable writing */
-          k->start100 = Curl_now();       /* timeout count starts now */
+          k->start100 = Curl_mnow(data->multi); /* timeout count starts now */
           *didwhat &= ~KEEP_SEND;  /* we didn't write anything actually */
           /* set a timeout for the multi interface */
           Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
@@ -1209,7 +1209,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   struct SingleRequest *k = &data->req;
   CURLcode result;
   int didwhat = 0;
-
+  struct curltime now = Curl_mnow(data->multi);
   curl_socket_t fd_read;
   curl_socket_t fd_write;
   int select_res = conn->cselect_bits;
@@ -1261,7 +1261,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       return result;
   }
 
-  k->now = Curl_now();
   if(didwhat) {
     ;
   }
@@ -1281,7 +1280,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
       */
 
-      timediff_t ms = Curl_timediff(k->now, k->start100);
+      timediff_t ms = Curl_timediff(now, k->start100);
       if(ms >= data->set.expect_100_timeout) {
         /* we've waited long enough, continue anyway */
         k->exp100 = EXP100_SEND_DATA;
@@ -1295,23 +1294,23 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   if(Curl_pgrsUpdate(conn))
     result = CURLE_ABORTED_BY_CALLBACK;
   else
-    result = Curl_speedcheck(data, k->now);
+    result = Curl_speedcheck(data);
   if(result)
     return result;
 
   if(k->keepon) {
-    if(0 > Curl_timeleft(data, &k->now, FALSE)) {
+    if(0 > Curl_timeleft(data, FALSE)) {
       if(k->size != -1) {
         failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
               " milliseconds with %" CURL_FORMAT_CURL_OFF_T " out of %"
               CURL_FORMAT_CURL_OFF_T " bytes received",
-              Curl_timediff(k->now, data->progress.t_startsingle),
+              Curl_timediff(now, data->progress.t_startsingle),
               k->bytecount, k->size);
       }
       else {
         failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
               " milliseconds with %" CURL_FORMAT_CURL_OFF_T " bytes received",
-              Curl_timediff(k->now, data->progress.t_startsingle),
+              Curl_timediff(now, data->progress.t_startsingle),
               k->bytecount);
       }
       return CURLE_OPERATION_TIMEDOUT;
@@ -1902,7 +1901,7 @@ Curl_setup_transfer(
          (http->sending == HTTPSEND_BODY)) {
         /* wait with write until we either got 100-continue or a timeout */
         k->exp100 = EXP100_AWAITING_CONTINUE;
-        k->start100 = Curl_now();
+        k->start100 = Curl_mnow(data->multi);
 
         /* Set a timeout for the multi interface. Add the inaccuracy margin so
            that we don't fire slightly too early and get denied to run. */

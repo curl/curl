@@ -400,7 +400,7 @@ bool Curl_conncache_return_conn(struct Curl_easy *data,
     data->multi->maxconnects;
   struct connectdata *conn_candidate = NULL;
 
-  conn->lastused = Curl_now(); /* it was used up until now */
+  conn->lastused = Curl_mnow(data->multi); /* it was used up until now */
   if(maxconnects > 0 &&
      Curl_conncache_size(data) > maxconnects) {
     infof(data, "Connection cache is full, closing the oldest one.\n");
@@ -438,7 +438,7 @@ Curl_conncache_extract_bundle(struct Curl_easy *data,
 
   (void)data;
 
-  now = Curl_now();
+  now = Curl_mnow(data->multi);
 
   curr = bundle->conn_list.head;
   while(curr) {
@@ -487,7 +487,7 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
   struct connectbundle *bundle;
   struct connectbundle *bundle_candidate = NULL;
 
-  now = Curl_now();
+  now = Curl_mnow(data->multi);
 
   CONNCACHE_LOCK(data);
   Curl_hash_start_iterate(&connc->hash, &iter);

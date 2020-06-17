@@ -487,6 +487,10 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   /* make the Curl_easy refer back to this multi handle */
   data->multi = multi;
 
+  /* refresh the time before we call expire or anything else that need the
+     time */
+  Curl_now_update(multi);
+
   /* Set the timeout for this handle to expire really soon so that it will
      be taken care of even when this handle is added in the midst of operation
      when only the curl_multi_socket() API is used. During that flow, only
@@ -1116,6 +1120,8 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
     data = data->next; /* check next handle */
   }
 
+  Curl_now_update(multi);
+
   /* If the internally desired timeout is actually shorter than requested from
      the outside, then use the shorter time! But only if the internal timer
      is actually larger than -1! */
@@ -1355,7 +1361,7 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
     long sleep_ms = 0;
 
     /* Avoid busy-looping when there's nothing particular to wait for */
-    if(!curl_multi_timeout(multi, &sleep_ms) && sleep_ms) {
+    if(!multi_timeout(multi, &sleep_ms) && sleep_ms) {
       if(sleep_ms > timeout_ms)
         sleep_ms = timeout_ms;
       /* when there are no easy handles in the multi, this holds a -1
@@ -1465,6 +1471,8 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
 
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
+
+  Curl_now_update(multi);
 
   rc = curl_multi_add_handle(multi, data);
   if(!rc) {
@@ -1655,31 +1663,88 @@ static CURLcode preconnect(struct Curl_easy *data)
   return CURLE_OK;
 }
 
+/*
+ * Curl_now_update() updates the "now" time stamp in the multi handle and
+ * returns it. Call this only after a "time gap" risk of more than a few
+ * milliseconds.
+ *
+ * Sometimes used without a multi handle!
+ */
+struct curltime Curl_now_update_func(struct Curl_multi *multi)
+{
+  struct curltime now = Curl_now();
+  if(multi)
+    multi->mulnow = now;
+  return now;
+}
+
+#ifdef CURLDEBUG
+struct curltime Curl_now_update_debug(struct Curl_multi *multi,
+                                      const char *file,
+                                      int lineno)
+{
+  multi->now_file = file;
+  multi->now_lineno = lineno;
+  return Curl_now_update_func(multi);
+}
+
+/*
+ * Curl_mnow_debug() is a debug-only helper function to help us identify
+ * places in the code where we risk a time lag: when Curl_mnow() returns a
+ * time what differs 5000 microseconds or more from what Curl_now() returns.
+ */
+struct curltime Curl_mnow_debug(struct Curl_multi *multi,
+                                const char *file, int fileno)
+{
+  if(multi) {
+    struct curltime now = Curl_now();
+    timediff_t delta = Curl_timediff_us(now, multi->mulnow);
+    if(delta >= 5000) {
+      fprintf(stderr, "time lag %ldus at %s:%d (updated at %s:%d)\n",
+              (long)delta, file, fileno,
+              multi->now_file, multi->now_lineno);
+    }
+    DEBUGASSERT(delta < 5000);
+  }
+  return Curl_mnow_func(multi);
+}
+#endif
+
+/*
+ * Sometimes used without a multi handle!
+ */
+struct curltime Curl_mnow_func(const struct Curl_multi *multi)
+{
+  if(multi)
+    return multi->mulnow;
+  return Curl_now();
+}
+
 
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
-                                 struct curltime now,
                                  struct Curl_easy *data)
 {
-  struct Curl_message *msg = NULL;
-  bool connected;
-  bool async;
-  bool protocol_connected = FALSE;
-  bool dophase_done = FALSE;
-  bool done = FALSE;
   CURLMcode rc;
   CURLcode result = CURLE_OK;
-  timediff_t timeout_ms;
-  timediff_t recv_timeout_ms;
-  timediff_t send_timeout_ms;
-  int control;
-
   if(!GOOD_EASY_HANDLE(data))
     return CURLM_BAD_EASY_HANDLE;
 
   do {
+    struct Curl_message *msg = NULL;
+    bool connected;
+    bool async;
+    bool protocol_connected = FALSE;
+    bool dophase_done = FALSE;
+    bool done = FALSE;
+    timediff_t timeout_ms;
+    timediff_t recv_timeout_ms;
+    timediff_t send_timeout_ms;
+    int control;
+
     /* A "stream" here is a logical stream if the protocol can handle that
        (HTTP/2), or the full connection for older protocols */
     bool stream_error = FALSE;
+    struct curltime now = Curl_now_update(multi); /* refresh in the loop */
     rc = CURLM_OK;
 
     if(multi_ischanged(multi, TRUE)) {
@@ -1698,8 +1763,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        (data->mstate < CURLM_STATE_COMPLETED)) {
       /* we need to wait for the connect state as only then is the start time
          stored, but we must not check already completed handles */
-      timeout_ms = Curl_timeleft(data, &now,
-                                 (data->mstate <= CURLM_STATE_DO)?
+      timeout_ms = Curl_timeleft(data, (data->mstate <= CURLM_STATE_DO)?
                                  TRUE:FALSE);
 
       if(timeout_ms < 0) {
@@ -2175,7 +2239,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(Curl_pgrsUpdate(data->conn))
         result = CURLE_ABORTED_BY_CALLBACK;
       else
-        result = Curl_speedcheck(data, now);
+        result = Curl_speedcheck(data);
 
       if(!result) {
         send_timeout_ms = 0;
@@ -2198,7 +2262,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         if(!send_timeout_ms && !recv_timeout_ms) {
           multistate(data, CURLM_STATE_PERFORM);
-          Curl_ratelimit(data, now);
+          Curl_ratelimit(data);
         }
         else if(send_timeout_ms >= recv_timeout_ms)
           Curl_expire(data, send_timeout_ms, EXPIRE_TOOFAST);
@@ -2232,7 +2296,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                                  now);
 
       if(send_timeout_ms || recv_timeout_ms) {
-        Curl_ratelimit(data, now);
+        Curl_ratelimit(data);
         multistate(data, CURLM_STATE_TOOFAST);
         if(send_timeout_ms >= recv_timeout_ms)
           Curl_expire(data, send_timeout_ms, EXPIRE_TOOFAST);
@@ -2498,7 +2562,7 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
   struct Curl_easy *data;
   CURLMcode returncode = CURLM_OK;
   struct Curl_tree *t;
-  struct curltime now = Curl_now();
+  struct curltime now = Curl_now_update(multi);
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -2512,7 +2576,7 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
     SIGPIPE_VARIABLE(pipe_st);
 
     sigpipe_ignore(data, &pipe_st);
-    result = multi_runsingle(multi, now, data);
+    result = multi_runsingle(multi, data);
     sigpipe_restore(&pipe_st);
 
     if(result)
@@ -2908,7 +2972,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   CURLMcode result = CURLM_OK;
   struct Curl_easy *data = NULL;
   struct Curl_tree *t;
-  struct curltime now = Curl_now();
+  struct curltime now;
 
   if(checkall) {
     /* *perform() deals with running_handles on its own */
@@ -2927,6 +2991,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     /* or should we fall-through and do the timer-based stuff? */
     return result;
   }
+  now = Curl_now_update(multi);
   if(s != CURL_SOCKET_TIMEOUT) {
     struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
 
@@ -2962,8 +3027,6 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
       data = NULL; /* set data to NULL again to avoid calling
                       multi_runsingle() in case there's no need to */
-      now = Curl_now(); /* get a newer time since the multi_runsingle() loop
-                           may have taken some time */
     }
   }
   else {
@@ -2986,7 +3049,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       SIGPIPE_VARIABLE(pipe_st);
 
       sigpipe_ignore(data, &pipe_st);
-      result = multi_runsingle(multi, now, data);
+      result = multi_runsingle(multi, data);
       sigpipe_restore(&pipe_st);
 
       if(CURLM_OK >= result) {
@@ -3134,7 +3197,7 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
 
   if(multi->timetree) {
     /* we have a tree of expire times */
-    struct curltime now = Curl_now();
+    struct curltime now = Curl_mnow(multi);
 
     /* splay the lowest to the bottom */
     multi->timetree = Curl_splay(tv_zero, multi->timetree);
@@ -3175,6 +3238,8 @@ CURLMcode curl_multi_timeout(struct Curl_multi *multi,
 
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
+
+  Curl_now_update(multi);
 
   return multi_timeout(multi, timeout_ms);
 }
@@ -3303,7 +3368,7 @@ void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
 
   DEBUGASSERT(id < EXPIRE_LAST);
 
-  set = Curl_now();
+  set = Curl_mnow(data->multi);
   set.tv_sec += (time_t)(milli/1000); /* might be a 64 to 32 bit conversion */
   set.tv_usec += (unsigned int)(milli%1000)*1000;
 

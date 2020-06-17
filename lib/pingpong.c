@@ -51,6 +51,7 @@ timediff_t Curl_pp_state_timeout(struct pingpong *pp, bool disconnecting)
   timediff_t timeout_ms; /* in milliseconds */
   timediff_t response_time = (data->set.server_response_timeout)?
     data->set.server_response_timeout: pp->response_time;
+  struct curltime now = Curl_mnow(data->multi);
 
   /* if CURLOPT_SERVER_RESPONSE_TIMEOUT is set, use that to determine
      remaining time, or use pp->response because SERVER_RESPONSE_TIMEOUT is
@@ -60,12 +61,12 @@ timediff_t Curl_pp_state_timeout(struct pingpong *pp, bool disconnecting)
   /* Without a requested timeout, we only wait 'response_time' seconds for the
      full response to arrive before we bail out */
   timeout_ms = response_time -
-    Curl_timediff(Curl_now(), pp->response); /* spent time */
+    Curl_timediff(now, pp->response); /* spent time */
 
   if(data->set.timeout && !disconnecting) {
     /* if timeout is requested, find out how much remaining time we have */
     timediff_t timeout2_ms = data->set.timeout - /* timeout time */
-      Curl_timediff(Curl_now(), conn->now); /* spent time */
+      Curl_timediff(now, data->req.start); /* spent time */
 
     /* pick the lowest number */
     timeout_ms = CURLMIN(timeout_ms, timeout2_ms);
@@ -84,8 +85,8 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block,
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc;
   timediff_t interval_ms;
-  timediff_t timeout_ms = Curl_pp_state_timeout(pp, disconnecting);
   struct Curl_easy *data = conn->data;
+  timediff_t timeout_ms = Curl_pp_state_timeout(pp, disconnecting);
   CURLcode result = CURLE_OK;
 
   if(timeout_ms <= 0) {
@@ -117,10 +118,11 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block,
 
   if(block) {
     /* if we didn't wait, we don't have to spend time on this now */
+    Curl_now_update(data->multi);
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(data, Curl_now());
+      result = Curl_speedcheck(data);
 
     if(result)
       return result;
@@ -143,7 +145,7 @@ void Curl_pp_init(struct pingpong *pp)
   pp->nread_resp = 0;
   pp->linestart_resp = conn->data->state.buffer;
   pp->pending_resp = TRUE;
-  pp->response = Curl_now(); /* start response time-out now! */
+  pp->response = Curl_mnow(conn->data->multi);
 }
 
 
@@ -234,7 +236,7 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
     free(s);
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
-    pp->response = Curl_now();
+    pp->response = Curl_mnow(data->multi);
   }
 
   return CURLE_OK;
@@ -496,7 +498,7 @@ CURLcode Curl_pp_flushsend(struct pingpong *pp)
     free(pp->sendthis);
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
-    pp->response = Curl_now();
+    pp->response = Curl_mnow(conn->data->multi);
   }
   return CURLE_OK;
 }
