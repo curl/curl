@@ -55,9 +55,6 @@
 #include "timeval.h"
 #include "warnless.h"
 
-/* Convenience local macros */
-#define ELAPSED_MS() (int)Curl_timediff(Curl_now(), initial_tv)
-
 /*
  * Internal function used for waiting a specific amount of ms
  * in Curl_socket_check() and Curl_poll() when no file descriptor
