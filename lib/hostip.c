@@ -783,7 +783,7 @@ clean_up:
      the time we spent until now! */
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
-    timediff_t elapsed_secs = Curl_timediff(data->multi->mnow,
+    timediff_t elapsed_secs = Curl_timediff(Curl_mnow(data->multi),
                                             conn->created) / 1000;
 
     /* the alarm period is counted in even number of seconds */

@@ -2089,7 +2089,7 @@ static CURLcode myssh_block_statemach(struct connectdata *conn,
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
     timediff_t left = 1000;
-    struct curltime now = data->multi->mnow;
+    struct curltime now = Curl_mnow(data->multi);
 
     result = myssh_statemach_act(conn, &block);
     if(result)
