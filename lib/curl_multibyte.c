@@ -129,15 +129,15 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   return result;
 }
 
-int curlx_win32_access(const char* path, int mode)
+int curlx_win32_access(const char *path, int mode)
 {
     int result = -1;
 #ifdef _UNICODE
-    wchar_t* path_w = curlx_convert_UTF8_to_wchar(path);
+    wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
 #endif /* _UNICODE */
 
 #if defined(_UNICODE)
-    if (path_w)
+    if(path_w)
         result = _waccess(path_w, mode);
     else
 #endif /* _UNICODE */
