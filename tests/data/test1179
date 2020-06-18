@@ -31,7 +31,7 @@ error when using unknown command line option
 <errorcode>
 2
 </errorcode>
-<stderr>
+<stderr mode="text">
 curl: option --never-implemented: is unknown
 curl: try 'curl --help' or 'curl --manual' for more information
 </stderr>
