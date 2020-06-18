@@ -319,6 +319,8 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
   return CURLE_OK;
 }
 
+#define MAX_IP6LEN 128
+
 static bool peek_ipv6(const char *str, size_t *skip)
 {
   /*
@@ -326,27 +328,32 @@ static bool peek_ipv6(const char *str, size_t *skip)
    * - Valid globs contain a hyphen and <= 1 colon.
    * - IPv6 literals contain no hyphens and >= 2 colons.
    */
-  size_t i = 0;
-  size_t colons = 0;
-  if(str[i++] != '[') {
+  char hostname[MAX_IP6LEN];
+  CURLU *u;
+  char *endbr = strchr(str, ']');
+  size_t hlen;
+  CURLUcode rc;
+  if(!endbr)
     return FALSE;
-  }
-  for(;;) {
-    const char c = str[i++];
-    if(ISALNUM(c) || c == '.' || c == '%') {
-      /* ok */
-    }
-    else if(c == ':') {
-      colons++;
-    }
-    else if(c == ']') {
-      *skip = i;
-      return colons >= 2 ? TRUE : FALSE;
-    }
-    else {
-      return FALSE;
-    }
-  }
+
+  hlen = endbr - str + 1;
+  if(hlen >= MAX_IP6LEN)
+    return FALSE;
+
+  u = curl_url();
+  if(!u)
+    return FALSE;
+
+  memcpy(hostname, str, hlen);
+  hostname[hlen] = 0;
+
+  /* ask to "guess scheme" as then it works without a https:// prefix */
+  rc = curl_url_set(u, CURLUPART_URL, hostname, CURLU_GUESS_SCHEME);
+
+  curl_url_cleanup(u);
+  if(!rc)
+    *skip = hlen;
+  return rc ? FALSE : TRUE;
 }
 
 static CURLcode glob_parse(struct URLGlob *glob, char *pattern,
