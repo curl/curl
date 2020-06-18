@@ -17,10 +17,14 @@ wrong option
 <server>
 none
 </server>
- <name>
+# make this test require manual as the error message is different without it
+<features>
+manual
+</features>
+<name>
 error when using unknown command line option
- </name>
- <command>
+</name>
+<command>
 --never-implemented http://never.use.this.example.com/1179
 </command>
 </client>
