@@ -444,6 +444,15 @@ server is used), if 'nonewline' is set, we will cut off the trailing newline
 of this given data before comparing with the one actually sent by the client
 The `<strip>` and `<strippart>` rules are applied before comparisons are made.
 
+### `<stderr [mode="text"] [nonewline="yes"]>`
+This verifies that this data was passed to stderr.
+
+Use the mode="text" attribute if the output is in text mode on platforms that
+have a text/binary difference.
+
+If 'nonewline' is set, we will cut off the trailing newline of this given data
+before comparing with the one actually received by the client
+
 ### `<stdout [mode="text"] [nonewline="yes"]>`
 This verifies that this data was passed to stdout.
 
