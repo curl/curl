@@ -129,4 +129,25 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   return result;
 }
 
+int curlx_win32_access(const char *path, int mode)
+{
+    int result = -1;
+#ifdef _UNICODE
+    wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
+#endif /* _UNICODE */
+
+#if defined(_UNICODE)
+    if(path_w)
+        result = _waccess(path_w, mode);
+    else
+#endif /* _UNICODE */
+        result = _access(path, mode);
+
+#ifdef _UNICODE
+    free(path_w);
+#endif
+
+    return result;
+}
+
 #endif /* USE_WIN32_LARGE_FILES || USE_WIN32_SMALL_FILES */

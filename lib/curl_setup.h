@@ -335,8 +335,10 @@
 #  define struct_stat                struct _stati64
 #  define LSEEK_ERROR                (__int64)-1
 #  define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
+#  define access(fname,mode)         curlx_win32_access(fname, mode)
    int curlx_win32_stat(const char *path, struct_stat *buffer);
    FILE *curlx_win32_fopen(const char *filename, const char *mode);
+   int curlx_win32_access(const char *path, int mode);
 #endif
 
 /*
@@ -354,8 +356,10 @@
 #    define stat(fname,stp)            curlx_win32_stat(fname, stp)
 #    define struct_stat                struct _stat
 #    define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
+#    define access(fname,mode)         curlx_win32_access(fname, mode)
      int curlx_win32_stat(const char *path, struct_stat *buffer);
      FILE *curlx_win32_fopen(const char *filename, const char *mode);
+     int curlx_win32_access(const char *path, int mode);
 #  endif
 #  define LSEEK_ERROR                (long)-1
 #endif
