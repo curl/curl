@@ -1014,6 +1014,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
   char portbuf[7];
   bool urldecode = (flags & CURLU_URLDECODE)?1:0;
   bool plusdecode = FALSE;
+  bool allowdecodedctrl = TRUE;
   (void)flags;
   if(!u)
     return CURLUE_BAD_HANDLE;
@@ -1077,6 +1078,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       if(!u->path)
         return CURLUE_OUT_OF_MEMORY;
     }
+    allowdecodedctrl = TRUE;
     break;
   case CURLUPART_QUERY:
     ptr = u->query;
@@ -1185,7 +1187,8 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
     if(urldecode) {
       char *decoded;
       size_t dlen;
-      CURLcode res = Curl_urldecode(NULL, *part, 0, &decoded, &dlen, TRUE);
+      CURLcode res = Curl_urldecode(NULL, *part, 0, &decoded, &dlen,
+                                    allowdecodedctrl);
       free(*part);
       if(res) {
         *part = NULL;
