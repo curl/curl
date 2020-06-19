@@ -1027,6 +1027,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
     ptr = u->scheme;
     ifmissing = CURLUE_NO_SCHEME;
     urldecode = FALSE; /* never for schemes */
+    allowdecodedctrl = FALSE;
     break;
   case CURLUPART_USER:
     ptr = u->user;
@@ -1043,9 +1044,11 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
   case CURLUPART_HOST:
     ptr = u->host;
     ifmissing = CURLUE_NO_HOST;
+    allowdecodedctrl = FALSE;
     break;
   case CURLUPART_ZONEID:
     ptr = u->zoneid;
+    allowdecodedctrl = FALSE;
     break;
   case CURLUPART_PORT:
     ptr = u->port;
