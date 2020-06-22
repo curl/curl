@@ -21,3 +21,4 @@ Experimental support in curl means:
  - HTTP/3 support and options
  - alt-svc support and options
  - MQTT
+ - CURLSSLOPT_NATIVE_CA (No configure option, feature built in when supported)

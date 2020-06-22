@@ -2488,6 +2488,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   const char * const ssl_crlfile = SSL_SET_OPTION(CRLfile);
   char error_buffer[256];
   struct ssl_backend_data *backend = connssl->backend;
+  bool imported_native_ca = false;
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
 
@@ -2940,9 +2941,8 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
         if(X509_STORE_add_cert(store, x509) == 1) {
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
           infof(data, "SSL: Imported cert \"%s\"\n", cert_name);
-#else
-          do {} while(0);
 #endif
+          imported_native_ca = true;
         }
         X509_free(x509);
       }
@@ -2953,16 +2953,12 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
       if(result)
         return result;
-
-      infof(data, "successfully set certificate verify locations "
-            "to windows ca store\n");
     }
-    else {
-      infof(data, "error setting certificate verify locations "
-            "to windows ca store, continuing anyway\n");
-    }
+    if(imported_native_ca)
+      infof(data, "successfully imported windows ca store\n");
+    else
+      infof(data, "error importing windows ca store, continuing anyway\n");
   }
-  else
 #endif
 
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
@@ -2998,7 +2994,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     /* tell SSL where to find CA certificates that are used to verify
        the servers certificate. */
     if(!SSL_CTX_load_verify_locations(backend->ctx, ssl_cafile, ssl_capath)) {
-      if(verifypeer) {
+      if(verifypeer && !imported_native_ca) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data, "error setting certificate verify locations:\n"
               "  CAfile: %s\n  CApath: %s",
@@ -3006,7 +3002,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
               ssl_capath ? ssl_capath : "none");
         return CURLE_SSL_CACERT_BADFILE;
       }
-      /* Just continue with a warning if no strict  certificate verification
+      /* Just continue with a warning if no strict certificate verification
          is required. */
       infof(data, "error setting certificate verify locations,"
             " continuing anyway:\n");
@@ -3024,7 +3020,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 #endif
 
 #ifdef CURL_CA_FALLBACK
-  if(verifypeer && !ssl_cafile && !ssl_capath) {
+  if(verifypeer && !ssl_cafile && !ssl_capath && !imported_native_ca) {
     /* verifying the peer without any CA certificates won't
        work so use openssl's built in default as fallback */
     SSL_CTX_set_default_verify_paths(backend->ctx);
