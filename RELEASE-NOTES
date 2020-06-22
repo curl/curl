@@ -4,7 +4,7 @@ curl and libcurl 7.71.0
  Command line options:         232
  curl_easy_setopt() options:   277
  Public functions in libcurl:  82
- Contributors:                 2198
+ Contributors:                 2202
 
 This release includes the following changes:
 
@@ -15,8 +15,11 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2020-8177: curl overwrite local file with -J [111]
+ o CVE-2020-8169: Partial password leak over DNS on HTTP redirect [48]
  o *_sspi: fix bad uses of CURLE_NOT_BUILT_IN [21]
  o all: fix codespell errors [75]
+ o altsvc: bump to h3-29 [114]
  o altsvc: fix 'dsthost' may be used uninitialized in this function
  o altsvc: fix parser for lines ending with CRLF [74]
  o altsvc: remove the num field from the altsvc struct [109]
@@ -35,6 +38,7 @@ This release includes the following bugfixes:
  o CMake: add libssh build support [37]
  o CMake: do not build test programs by default [30]
  o CMake: fix runtests.pl with CMake, add new test targets [29]
+ o CMake: ignore INTERFACE_LIBRARY targets for pkg-config file [112]
  o CMake: rebuild Makefile.inc.cmake when Makefile.inc changes [58]
  o CODE_REVIEW.md: how to do code reviews in curl [108]
  o configure: fix pthread check with static boringssl
@@ -42,6 +46,7 @@ This release includes the following bugfixes:
  o configure: only strip first -L from LDFLAGS [89]
  o configure: repair the check if argv can be written to [47]
  o configure: the wolfssh backend does not provide SCP [57]
+ o connect: improve happy eyeballs handling [118]
  o connect: make happy eyeballs work for QUIC (again) [16]
  o curl.1: Quote globbed URLs [51]
  o curl: remove -J "informational" written on stdout [36]
@@ -58,6 +63,7 @@ This release includes the following bugfixes:
  o examples/http2-down/upload: add error checks [78]
  o examples: remove asiohiper.cpp [4]
  o FILEFORMAT: add more features that tests can depend on
+ o FILEFORMAT: describe verify/stderr
  o ftp: make domore_getsock() return the secondary socket properly
  o ftp: mark return-ignoring calls to Curl_GetFTPResponse with (void) [64]
  o ftp: shut down the secondary connection properly when SSL is used [43]
@@ -74,16 +80,19 @@ This release includes the following bugfixes:
  o libssh2: set the expected total size in SCP upload init [2]
  o libtest/cmake: Remove commented code [13]
  o list-only.d: this option existed already in 4.0
+ o manpage: add three missing environment variables [121]
  o multi: add defensive check on data->multi->num_alive [96]
+ o multi: implement wait using winsock events [120]
  o ngtcp2: cleanup memory when failing to connect [70]
  o ngtcp2: fix build with current ngtcp2 master implementing draft 28 [76]
+ o ngtcp2: fix happy eyeballs quic connect crash [118]
  o ngtcp2: introduce qlog support [23]
+ o ngtcp2: never call fprintf() in lib code in release version
  o ngtcp2: update with recent API changes [100]
  o ntlm: enable NTLM support with wolfSSL [81]
  o OpenSSL: have CURLOPT_CRLFILE imply CURLSSLOPT_NO_PARTIALCHAIN [55]
  o openssl: set FLAG_TRUSTED_FIRST unconditionally [105]
  o projects: Add crypt32.lib to dependencies for all OpenSSL configs [93]
- o quiche: advertise draft 28 support [91]
  o quiche: clean up memory properly when failing to connect [71]
  o quiche: enable qlog output [14]
  o quiche: update SSLKEYLOGFILE support [98]
@@ -130,11 +139,11 @@ This release includes the following bugfixes:
  o unit1604.c: fix implicit conv from 'SANITIZEcode' to 'CURLcode' [88]
  o url: accept "any length" credentials for proxy auth [72]
  o url: alloc the download buffer at transfer start [85]
- o url: make the updated credentials URL-encoded in the URL [48]
  o url: reject too long input when parsing credentials [25]
  o url: sort the protocol schemes in rough popularity order [32]
  o urlapi: accept :: as a valid IPv6 address [15]
  o urldata: leave the HTTP method untouched in the set.* struct [45]
+ o urlglob: treat literal IPv6 addresses with zone IDs as a host name [115]
  o user-agent.d: spell out what happens given a blank argument [80]
  o vauth/cleartext: fix theoretical integer overflow [50]
  o version.d: expanded and alpha-sorted [110]
@@ -153,17 +162,18 @@ advice from friends like these:
   Adnan Khan, Alessandro Ghedini, Billyzou0741326 on github, Brian Carpenter,
   Cherish98 on github, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
   Emil Engler, Estanislau Augé-Pujadas, François Rigault, Geeknik Labs,
-  Gilles Vollant, Gregory Jefferis, Hugo van Kemenade, huzunhao on github,
-  James Fuller, James Le Cuirot, Jeroen Ooms, John Simpson, Kamil Dudka,
-  Kane York, Lucas Pardue, Maksim Stsepanenka, Marcel Raad, Marc Hörsken,
-  Martin V, Max Peal, Michael Kaufmann, Mohamed Osama, Murugan Balraj,
-  Neal Poole, Nicolas Sterchele, Pavel Volgarev, Peter Wang, Peter Wu,
-  Radoslav Georgiev, Ray Satiro, Rich Salz, Rikard Falkeborn, rl1987 on github,
-  Ruurd Beerstra, Saleem Abdulrasool, Samuel Marks, Siva Sivaraman,
-  Tatsuhiro Tsujikawa, therealhirudo on github, Thomas Bouzerar,
+  Gergely Nagy, Gilles Vollant, Gregory Jefferis, Hugo van Kemenade,
+  huzunhao on github, James Fuller, James Le Cuirot, Jeroen Ooms, John Simpson,
+  Kamil Dudka, Kane York, Lucas Pardue, Maksim Stsepanenka, Marcel Raad,
+  Marc Hörsken, Martin V, Max Peal, Michael Kaufmann, Mohamed Osama,
+  Murugan Balraj, Neal Poole, Nicolas Sterchele, Pavel Volgarev, Peter Wang,
+  Peter Wu, puckipedia on github, Radoslav Georgiev, Ray Satiro, Rich Salz,
+  Rikard Falkeborn, rl1987 on github, Ruurd Beerstra, Saleem Abdulrasool,
+  Samuel Marks, Siva Sivaraman, sn on hackerone, Tatsuhiro Tsujikawa,
+  therealhirudo on github, Thomas Bouzerar, Valentyn Korniienko,
   Viktor Szakats, Vyron Tsingaras, Werner Stolz, Will Roberts,
   zloi-user on github, Коваленко Анатолий Викторович, kotoriのねこ
-  (55 contributors)
+  (59 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -216,7 +226,7 @@ References to bug reports and discussions on issues:
  [45] = https://curl.haxx.se/bug/?i=5499
  [46] = https://curl.haxx.se/bug/?i=3784
  [47] = https://curl.haxx.se/bug/?i=5470
- [48] = https://github.com/jeroen/curl/issues/224
+ [48] = https://curl.haxx.se/docs/CVE-2020-8169.html
  [49] = https://curl.haxx.se/bug/?i=5399
  [50] = https://curl.haxx.se/bug/?i=5391
  [51] = https://github.com/curl/curl/issues/5388
@@ -259,7 +269,6 @@ References to bug reports and discussions on issues:
  [88] = https://curl.haxx.se/bug/?i=5476
  [89] = https://curl.haxx.se/bug/?i=5519
  [90] = https://curl.haxx.se/bug/?i=5477
- [91] = https://curl.haxx.se/bug/?i=5518
  [92] = https://curl.haxx.se/bug/?i=5546
  [93] = https://curl.haxx.se/bug/?i=5516
  [94] = https://curl.haxx.se/bug/?i=5513
@@ -279,4 +288,11 @@ References to bug reports and discussions on issues:
  [108] = https://curl.haxx.se/bug/?i=5555
  [109] = https://curl.haxx.se/bug/?i=5553
  [110] = https://curl.haxx.se/bug/?i=5558
+ [111] = https://curl.haxx.se/docs/CVE-2020-8177.html
+ [112] = https://curl.haxx.se/bug/?i=5512
+ [114] = https://curl.haxx.se/bug/?i=5584
+ [115] = https://curl.haxx.se/bug/?i=5576
  [116] = https://curl.haxx.se/bug/?i=5554
+ [118] = https://curl.haxx.se/bug/?i=5565
+ [120] = https://curl.haxx.se/bug/?i=5397
+ [121] = https://curl.haxx.se/bug/?i=5571
