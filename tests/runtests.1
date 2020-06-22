@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH runtests.pl 1 "2 Feb 2010" "Curl 7.69.0" "runtests"
+.TH runtests.pl 1 "25 Jun 2020" "Curl 7.72.0" "runtests"
 .SH NAME
 runtests.pl \- run one or more test cases
 .SH SYNOPSIS
@@ -129,6 +129,8 @@ Enable verbose output. Speaks more than default.
 Provide a path to a custom curl binary to run when verifying that the servers
 running are indeed our test servers. Default is the curl executable in the
 build tree.
+.IP "-%"
+Shows a percentage value based on how many tests are still left.
 .SH "RUNNING TESTS"
 Many tests have conditions that must be met before the test case can run
 fine. They could depend on built-in features in libcurl or features present in

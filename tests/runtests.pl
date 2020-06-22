@@ -334,6 +334,7 @@ my $keepoutfiles; # keep stdout and stderr files after tests
 my $listonly;     # only list the tests
 my $postmortem;   # display detailed info about failed tests
 my $run_event_based; # run curl with --test-event to test the event API
+my $show_percentage; # Show a percentage value based on how many tests are still left.
 
 my %run;          # running server
 my %doesntrun;    # servers that don't work, identified by pidfile
@@ -4498,9 +4499,16 @@ sub singletest {
     my $took = $timevrfyend{$testnum} - $timeprepini{$testnum};
     my $duration = sprintf("duration: %02d:%02d",
                            $sofar/60, $sofar%60);
+    my $percent = ($count / $total) * 100;
     if(!$automakestyle) {
+        if($show_percentage) {
+        logmsg sprintf("OK (%-3d out of %-3d, %s, took %.3fs, %s, completion: %.2f%%)\n",
+                       $count, $total, $left, $took, $duration, $percent);
+        }
+        else {
         logmsg sprintf("OK (%-3d out of %-3d, %s, took %.3fs, %s)\n",
                        $count, $total, $left, $took, $duration);
+        }
     }
     else {
         logmsg "PASS: $testnum - $testname\n";
@@ -5215,6 +5223,9 @@ while(@ARGV) {
 
         $VCURL="\"$ARGV[1]\"";
         shift @ARGV;
+    }
+    elsif ($ARGV[0] eq "-%") {
+        $show_percentage = 1;
     }
     elsif ($ARGV[0] eq "-d") {
         # have the servers display protocol output
