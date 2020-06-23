@@ -766,6 +766,8 @@ struct Curl_handler {
                                          HTTP proxy as HTTP proxies may know
                                          this protocol and act as a gateway */
 #define PROTOPT_WILDCARD (1<<12) /* protocol supports wildcard matching */
+#define PROTOPT_USERPWDCTRL (1<<13) /* Allow "control bytes" (< 32 ascii) in
+                                       user name and password */
 
 #define CONNCHECK_NONE 0                 /* No checks */
 #define CONNCHECK_ISDEAD (1<<0)          /* Check if the connection is dead. */
