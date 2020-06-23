@@ -1894,23 +1894,32 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   if(result)
     return result;
 
-  uc = curl_url_get(uh, CURLUPART_USER, &data->state.up.user,
-                    CURLU_URLDECODE);
+  /* we don't use the URL API's URL decoder option here since it rejects
+     control codes and we want to allow them for some schemes in the user and
+     password fields */
+  uc = curl_url_get(uh, CURLUPART_USER, &data->state.up.user, 0);
   if(!uc) {
-    conn->user = strdup(data->state.up.user);
-    if(!conn->user)
-      return CURLE_OUT_OF_MEMORY;
+    char *decoded;
+    result = Curl_urldecode(NULL, data->state.up.user, 0, &decoded, NULL,
+                            conn->handler->flags&PROTOPT_USERPWDCTRL ?
+                            REJECT_ZERO : REJECT_CTRL);
+    if(result)
+      return result;
+    conn->user = decoded;
     conn->bits.user_passwd = TRUE;
   }
   else if(uc != CURLUE_NO_USER)
     return Curl_uc_to_curlcode(uc);
 
-  uc = curl_url_get(uh, CURLUPART_PASSWORD, &data->state.up.password,
-                    CURLU_URLDECODE);
+  uc = curl_url_get(uh, CURLUPART_PASSWORD, &data->state.up.password, 0);
   if(!uc) {
-    conn->passwd = strdup(data->state.up.password);
-    if(!conn->passwd)
-      return CURLE_OUT_OF_MEMORY;
+    char *decoded;
+    result = Curl_urldecode(NULL, data->state.up.password, 0, &decoded, NULL,
+                            conn->handler->flags&PROTOPT_USERPWDCTRL ?
+                            REJECT_ZERO : REJECT_CTRL);
+    if(result)
+      return result;
+    conn->passwd = decoded;
     conn->bits.user_passwd = TRUE;
   }
   else if(uc != CURLUE_NO_PASSWORD)
