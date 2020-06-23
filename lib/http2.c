@@ -469,6 +469,46 @@ static struct Curl_easy *duphandle(struct Curl_easy *data)
   return second;
 }
 
+static int set_transfer_url(struct Curl_easy *data,
+                            struct curl_pushheaders *hp)
+{
+  const char *v;
+  CURLU *u = curl_url();
+  CURLUcode uc;
+  char *url;
+
+  v = curl_pushheader_byname(hp, ":scheme");
+  if(v) {
+    uc = curl_url_set(u, CURLUPART_SCHEME, v, 0);
+    if(uc)
+      return 1;
+  }
+
+  v = curl_pushheader_byname(hp, ":authority");
+  if(v) {
+    uc = curl_url_set(u, CURLUPART_HOST, v, 0);
+    if(uc)
+      return 2;
+  }
+
+  v = curl_pushheader_byname(hp, ":path");
+  if(v) {
+    uc = curl_url_set(u, CURLUPART_PATH, v, 0);
+    if(uc)
+      return 3;
+  }
+
+  uc = curl_url_get(u, CURLUPART_URL, &url, 0);
+  if(uc)
+    return 4;
+  curl_url_cleanup(u);
+
+  if(data->change.url_alloc)
+    free(data->change.url);
+  data->change.url_alloc = TRUE;
+  data->change.url = url;
+  return 0;
+}
 
 static int push_promise(struct Curl_easy *data,
                         struct connectdata *conn,
@@ -504,6 +544,10 @@ static int push_promise(struct Curl_easy *data,
       rv = 1;
       goto fail;
     }
+
+    rv = set_transfer_url(newhandle, &heads);
+    if(rv)
+      goto fail;
 
     Curl_set_in_callback(data, true);
     rv = data->multi->push_cb(data, newhandle,
