@@ -120,19 +120,26 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
 /*
  * Curl_urldecode() URL decodes the given string.
  *
- * Optionally detects control characters (byte codes lower than 32) in the
- * data and rejects such data.
- *
  * Returns a pointer to a malloced string in *ostring with length given in
  * *olen. If length == 0, the length is assumed to be strlen(string).
  *
  * 'data' can be set to NULL but then this function can't convert network
  * data to host for non-ascii.
+ *
+ * ctrl options:
+ * - REJECT_NADA: accept everything
+ * - REJECT_CTRL: rejects control characters (byte codes lower than 32) in
+ *                the data
+ * - REJECT_ZERO: rejects decoded zero bytes
+ *
+ * The values for the enum starts at 2, to make the assert detect legacy
+ * invokes that used TRUE/FALSE (0 and 1).
  */
+
 CURLcode Curl_urldecode(struct Curl_easy *data,
                         const char *string, size_t length,
                         char **ostring, size_t *olen,
-                        bool reject_ctrl)
+                        enum urlreject ctrl)
 {
   size_t alloc;
   char *ns;
@@ -141,6 +148,7 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(string);
+  DEBUGASSERT(ctrl >= REJECT_NADA); /* crash on TRUE/FALSE */
 
   alloc = (length?length:strlen(string)) + 1;
   ns = malloc(alloc);
@@ -176,7 +184,8 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
       alloc -= 2;
     }
 
-    if(reject_ctrl && (in < 0x20)) {
+    if(((ctrl == REJECT_CTRL) && (in < 0x20)) ||
+       ((ctrl == REJECT_ZERO) && (in == 0))) {
       free(ns);
       return CURLE_URL_MALFORMAT;
     }
@@ -210,7 +219,7 @@ char *curl_easy_unescape(struct Curl_easy *data, const char *string,
     size_t inputlen = length;
     size_t outputlen;
     CURLcode res = Curl_urldecode(data, string, inputlen, &str, &outputlen,
-                                  FALSE);
+                                  REJECT_NADA);
     if(res)
       return NULL;
 

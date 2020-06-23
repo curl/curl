@@ -1452,7 +1452,7 @@ static CURLcode ftp_state_list(struct connectdata *conn)
     /* url-decode before evaluation: e.g. paths starting/ending with %2f */
     const char *slashPos = NULL;
     char *rawPath = NULL;
-    result = Curl_urldecode(data, ftp->path, 0, &rawPath, NULL, TRUE);
+    result = Curl_urldecode(data, ftp->path, 0, &rawPath, NULL, REJECT_CTRL);
     if(result)
       return result;
 
@@ -3194,7 +3194,8 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
 
   if(!result)
     /* get the url-decoded "raw" path */
-    result = Curl_urldecode(data, ftp->path, 0, &rawPath, &pathLen, TRUE);
+    result = Curl_urldecode(data, ftp->path, 0, &rawPath, &pathLen,
+                            REJECT_CTRL);
   if(result) {
     /* We can limp along anyway (and should try to since we may already be in
      * the error path) */
@@ -4110,7 +4111,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   ftpc->cwdfail = FALSE;
 
   /* url-decode ftp path before further evaluation */
-  result = Curl_urldecode(data, ftp->path, 0, &rawPath, &pathLen, TRUE);
+  result = Curl_urldecode(data, ftp->path, 0, &rawPath, &pathLen, REJECT_CTRL);
   if(result)
     return result;
 

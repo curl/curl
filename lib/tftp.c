@@ -487,7 +487,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
        file name so we skip the always-present first letter of the path
        string. */
     result = Curl_urldecode(data, &state->conn->data->state.up.path[1], 0,
-                            &filename, NULL, FALSE);
+                            &filename, NULL, REJECT_ZERO);
     if(result)
       return result;
 

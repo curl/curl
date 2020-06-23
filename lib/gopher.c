@@ -116,7 +116,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
     newp += 2;
 
     /* ... and finally unescape */
-    result = Curl_urldecode(data, newp, 0, &sel, &len, FALSE);
+    result = Curl_urldecode(data, newp, 0, &sel, &len, REJECT_ZERO);
     free(gopherpath);
     if(result)
       return result;
