@@ -3981,6 +3981,11 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 {
   struct SingleRequest *k = &data->req;
 
+  /* if this is a pushed stream, we need this: */
+  CURLcode result = Curl_preconnect(data);
+  if(result)
+    return result;
+
   if(conn) {
     conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to
                                    use */

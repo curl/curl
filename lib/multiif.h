@@ -37,6 +37,7 @@ void Curl_detach_connnection(struct Curl_easy *data);
 bool Curl_multiplex_wanted(const struct Curl_multi *multi);
 void Curl_set_in_callback(struct Curl_easy *data, bool value);
 bool Curl_is_in_callback(struct Curl_easy *easy);
+CURLcode Curl_preconnect(struct Curl_easy *data);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket and connection hashes */
