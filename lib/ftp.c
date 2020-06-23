@@ -1043,6 +1043,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   } /* data->set.ftpport */
 
   if(!host) {
+    const char *r;
     /* not an interface and not a host name, get default by extracting
        the IP from the control connection */
     sslen = sizeof(ss);
@@ -1055,13 +1056,15 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     switch(sa->sa_family) {
 #ifdef ENABLE_IPV6
     case AF_INET6:
-      Curl_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, sizeof(hbuf));
+      r = Curl_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, sizeof(hbuf));
       break;
 #endif
     default:
-      Curl_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, sizeof(hbuf));
+      r = Curl_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, sizeof(hbuf));
       break;
     }
+    if(!r)
+      return CURLE_FTP_PORT_FAILED;
     host = hbuf; /* use this host name */
     possibly_non_local = FALSE; /* we know it is local now */
   }
