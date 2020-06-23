@@ -1185,7 +1185,10 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
     if(urldecode) {
       char *decoded;
       size_t dlen;
-      CURLcode res = Curl_urldecode(NULL, *part, 0, &decoded, &dlen, TRUE);
+      /* this unconditional rejection of control bytes is documented
+         API behavior */
+      CURLcode res = Curl_urldecode(NULL, *part, 0, &decoded, &dlen,
+                                    REJECT_CTRL);
       free(*part);
       if(res) {
         *part = NULL;

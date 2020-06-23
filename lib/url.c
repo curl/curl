@@ -2373,10 +2373,10 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
 
   if(proxyuser)
     result = Curl_urldecode(data, proxyuser, 0, &conn->http_proxy.user, NULL,
-                            FALSE);
+                            REJECT_ZERO);
   if(!result && proxypasswd)
     result = Curl_urldecode(data, proxypasswd, 0, &conn->http_proxy.passwd,
-                            NULL, FALSE);
+                            NULL, REJECT_ZERO);
   return result;
 }
 

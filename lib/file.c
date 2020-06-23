@@ -144,7 +144,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   size_t real_path_len;
 
   CURLcode result = Curl_urldecode(data, data->state.up.path, 0, &real_path,
-                                   &real_path_len, FALSE);
+                                   &real_path_len, REJECT_ZERO);
   if(result)
     return result;
 

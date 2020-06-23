@@ -211,7 +211,8 @@ static CURLcode mqtt_get_topic(struct connectdata *conn,
   char *path = conn->data->state.up.path;
 
   if(strlen(path) > 1) {
-    result = Curl_urldecode(conn->data, path + 1, 0, topic, topiclen, FALSE);
+    result = Curl_urldecode(conn->data, path + 1, 0, topic, topiclen,
+                            REJECT_NADA);
   }
   else {
     failf(conn->data, "Error: No topic specified.");

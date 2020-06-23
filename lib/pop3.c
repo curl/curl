@@ -1390,7 +1390,7 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
   const char *path = &data->state.up.path[1]; /* skip leading path */
 
   /* URL decode the path for the message ID */
-  return Curl_urldecode(data, path, 0, &pop3->id, NULL, TRUE);
+  return Curl_urldecode(data, path, 0, &pop3->id, NULL, REJECT_CTRL);
 }
 
 /***********************************************************************
@@ -1408,7 +1408,7 @@ static CURLcode pop3_parse_custom_request(struct connectdata *conn)
 
   /* URL decode the custom request */
   if(custom)
-    result = Curl_urldecode(data, custom, 0, &pop3->custom, NULL, TRUE);
+    result = Curl_urldecode(data, custom, 0, &pop3->custom, NULL, REJECT_CTRL);
 
   return result;
 }

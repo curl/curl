@@ -1957,7 +1957,7 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
       end--;
 
     result = Curl_urldecode(data, begin, end - begin, &imap->mailbox, NULL,
-                            TRUE);
+                            REJECT_CTRL);
     if(result)
       return result;
   }
@@ -1979,7 +1979,8 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
       return CURLE_URL_MALFORMAT;
 
     /* Decode the name parameter */
-    result = Curl_urldecode(data, begin, ptr - begin, &name, NULL, TRUE);
+    result = Curl_urldecode(data, begin, ptr - begin, &name, NULL,
+                            REJECT_CTRL);
     if(result)
       return result;
 
@@ -1989,7 +1990,8 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
       ptr++;
 
     /* Decode the value parameter */
-    result = Curl_urldecode(data, begin, ptr - begin, &value, &valuelen, TRUE);
+    result = Curl_urldecode(data, begin, ptr - begin, &value, &valuelen,
+                            REJECT_CTRL);
     if(result) {
       free(name);
       return result;
@@ -2077,7 +2079,7 @@ static CURLcode imap_parse_custom_request(struct connectdata *conn)
 
   if(custom) {
     /* URL decode the custom request */
-    result = Curl_urldecode(data, custom, 0, &imap->custom, NULL, TRUE);
+    result = Curl_urldecode(data, custom, 0, &imap->custom, NULL, REJECT_CTRL);
 
     /* Extract the parameters if specified */
     if(!result) {

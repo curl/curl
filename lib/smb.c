@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2014, Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
- * Copyright (C) 2016-2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2016-2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -964,7 +964,7 @@ static CURLcode smb_parse_url_path(struct connectdata *conn)
 
   /* URL decode the path */
   CURLcode result = Curl_urldecode(data, data->state.up.path, 0, &path, NULL,
-                                   TRUE);
+                                   REJECT_CTRL);
   if(result)
     return result;
 
