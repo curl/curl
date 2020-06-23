@@ -68,6 +68,10 @@ int test(char *URL)
   /* Purposely omit to set CURLOPT_POSTFIELDSIZE */
   easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
   easy_setopt(curl, CURLOPT_READDATA, &pooh);
+#ifdef LIB1539
+  /* speak HTTP 1.0 - no chunked! */
+  easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+#endif
 
   result = curl_easy_perform(curl);
 
