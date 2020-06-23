@@ -593,7 +593,7 @@ static CURLcode chop_write(struct connectdata *conn,
         return pausewrite(data, type, ptr, len);
       }
       if(wrote != chunklen) {
-        failf(data, "Failed writing body (%zu != %zu)", wrote, chunklen);
+        failf(data, "Failed writing response data to the destination");
         return CURLE_WRITE_ERROR;
       }
     }
