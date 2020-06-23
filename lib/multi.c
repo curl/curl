@@ -1642,10 +1642,11 @@ static CURLcode protocol_connect(struct connectdata *conn,
 }
 
 /*
- * preconnect() is called immediately before a connect starts. When a redirect
- * is followed, this is then called multiple times during a single transfer.
+ * Curl_preconnect() is called immediately before a connect starts. When a
+ * redirect is followed, this is then called multiple times during a single
+ * transfer.
  */
-static CURLcode preconnect(struct Curl_easy *data)
+CURLcode Curl_preconnect(struct Curl_easy *data)
 {
   if(!data->state.buffer) {
     data->state.buffer = malloc(data->set.buffer_size + 1);
@@ -1763,7 +1764,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case CURLM_STATE_CONNECT:
       /* Connect. We want to get a connection identifier filled in. */
       /* init this transfer. */
-      result = preconnect(data);
+      result = Curl_preconnect(data);
       if(result)
         break;
 
