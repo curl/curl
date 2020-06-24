@@ -89,6 +89,9 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
   Curl_dyn_init(&d, CURL_MAX_INPUT_LENGTH);
 
   length = (inlength?(size_t)inlength:strlen(string));
+  if(!length)
+    return strdup("");
+
   while(length--) {
     unsigned char in = *string; /* we need to treat the characters unsigned */
 
