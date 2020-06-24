@@ -50,7 +50,7 @@ Reset the buffer length, but leave the allocation.
 
 ## tail
 
-    CURLcode Curl_dyn_trail(struct dynbuf *s, size_t length)
+    CURLcode Curl_dyn_tail(struct dynbuf *s, size_t length)
 
 Keep `length` bytes of the buffer tail (the last `length` bytes of the
 buffer). The rest of the buffer is dropped. The specified `length` must not be
