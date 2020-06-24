@@ -470,7 +470,6 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->convfromutf8    = ZERO_NULL;
 
   set->filesize = -1;        /* we don't know the size */
-  set->postfieldsize = -1;   /* unknown size */
   set->maxredirs = -1;       /* allow any amount by default */
 
   set->method = HTTPREQ_GET; /* Default HTTP request */

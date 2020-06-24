@@ -1612,9 +1612,6 @@ struct UserDefined {
                         bit represents a request, from 301 to 303 */
   void *postfields;  /* if POST, set the fields' values here */
   curl_seek_callback seek_func;      /* function that seeks the input */
-  curl_off_t postfieldsize; /* if POST, this might have a size to use instead
-                               of strlen(), and then the data *may* be binary
-                               (contain zero bytes) */
   unsigned short localport; /* local port number to bind to */
   int localportrange; /* number of additional port numbers to test in case the
                          'localport' one can't be bind()ed */

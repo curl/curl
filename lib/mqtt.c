@@ -319,7 +319,7 @@ static CURLcode mqtt_publish(struct connectdata *conn)
 {
   CURLcode result;
   char *payload = conn->data->set.postfields;
-  size_t payloadlen = (size_t)conn->data->set.postfieldsize;
+  size_t payloadlen = (size_t)conn->data->set.filesize;
   char *topic = NULL;
   size_t topiclen;
   unsigned char *pkt = NULL;

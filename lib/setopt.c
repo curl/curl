@@ -534,16 +534,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     argptr = va_arg(param, char *);
 
-    if(!argptr || data->set.postfieldsize == -1)
+    if(!argptr || data->set.filesize == -1)
       result = Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], argptr);
     else {
       /*
        *  Check that requested length does not overflow the size_t type.
        */
 
-      if((data->set.postfieldsize < 0) ||
+      if((data->set.filesize < 0) ||
          ((sizeof(curl_off_t) != sizeof(size_t)) &&
-          (data->set.postfieldsize > (curl_off_t)((size_t)-1))))
+          (data->set.filesize > (curl_off_t)((size_t)-1))))
         result = CURLE_OUT_OF_MEMORY;
       else {
         char *p;
@@ -555,14 +555,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
            to mark that postfields is used rather than read function or
            form data.
         */
-        p = malloc((size_t)(data->set.postfieldsize?
-                            data->set.postfieldsize:1));
+        p = malloc((size_t)(data->set.filesize?
+                            data->set.filesize:1));
 
         if(!p)
           result = CURLE_OUT_OF_MEMORY;
         else {
-          if(data->set.postfieldsize)
-            memcpy(p, argptr, (size_t)data->set.postfieldsize);
+          if(data->set.filesize)
+            memcpy(p, argptr, (size_t)data->set.filesize);
 
           data->set.str[STRING_COPYPOSTFIELDS] = p;
         }
@@ -583,6 +583,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.method = HTTPREQ_POST;
     break;
 
+  case CURLOPT_INFILESIZE:
   case CURLOPT_POSTFIELDSIZE:
     /*
      * The size of the POSTFIELD data to prevent libcurl to do strlen() to
@@ -592,16 +593,17 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     if(bigsize < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
-    if(data->set.postfieldsize < bigsize &&
+    if(data->set.filesize < bigsize &&
        data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS]) {
       /* Previous CURLOPT_COPYPOSTFIELDS is no longer valid. */
       (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
       data->set.postfields = NULL;
     }
 
-    data->set.postfieldsize = bigsize;
+    data->set.filesize = bigsize;
     break;
 
+  case CURLOPT_INFILESIZE_LARGE:
   case CURLOPT_POSTFIELDSIZE_LARGE:
     /*
      * The size of the POSTFIELD data to prevent libcurl to do strlen() to
@@ -611,14 +613,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     if(bigsize < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
-    if(data->set.postfieldsize < bigsize &&
+    if(data->set.filesize < bigsize &&
        data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS]) {
       /* Previous CURLOPT_COPYPOSTFIELDS is no longer valid. */
       (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
       data->set.postfields = NULL;
     }
 
-    data->set.postfieldsize = bigsize;
+    data->set.filesize = bigsize;
     break;
 
   case CURLOPT_HTTPPOST:
@@ -1242,26 +1244,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * used as argument to the read callback.
      */
     data->set.in_set = va_arg(param, void *);
-    break;
-  case CURLOPT_INFILESIZE:
-    /*
-     * If known, this should inform curl about the file size of the
-     * to-be-uploaded file.
-     */
-    arg = va_arg(param, long);
-    if(arg < -1)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.filesize = arg;
-    break;
-  case CURLOPT_INFILESIZE_LARGE:
-    /*
-     * If known, this should inform curl about the file size of the
-     * to-be-uploaded file.
-     */
-    bigsize = va_arg(param, curl_off_t);
-    if(bigsize < -1)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.filesize = bigsize;
     break;
   case CURLOPT_LOW_SPEED_LIMIT:
     /*
