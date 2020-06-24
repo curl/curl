@@ -35,7 +35,6 @@ hej
 http
 </server>
 
-# require debug so that alt-svc can work over plain old HTTP
 <name>
 HTTP credentials with newline and redirect
 </name>
