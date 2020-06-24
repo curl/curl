@@ -31,6 +31,10 @@
 
 #include <limits.h>
 
+#if defined(USE_WIN32_CRYPTO)
+#include <wincrypt.h> /* must appear before all other includes below */
+#endif
+
 #include "urldata.h"
 #include "sendf.h"
 #include "formdata.h" /* for the boundary function */
@@ -47,10 +51,6 @@
 #include "multiif.h"
 #include "strerror.h"
 #include "curl_printf.h"
-
-#if defined(USE_WIN32_CRYPTO)
-#include <wincrypt.h>
-#endif
 
 #include <openssl/ssl.h>
 #include <openssl/rand.h>
