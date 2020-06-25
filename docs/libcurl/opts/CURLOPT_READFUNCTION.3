@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_READFUNCTION 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_READFUNCTION 3 "25 Jun 2020" "libcurl 7.71.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_READFUNCTION \- read callback for data uploads
 .SH SYNOPSIS
@@ -64,6 +64,11 @@ server end and the transfer will end there.
 If you set this callback pointer to NULL, or don't set it at all, the default
 internal read function will be used. It is doing an fread() on the FILE *
 userdata set with \fICURLOPT_READDATA(3)\fP.
+
+You can set the total size of the data you are sending by using
+\fICURLOPT_INFILESIZE_LARGE(3)\fP or \fICURLOPT_POSTFIELDSIZE_LARGE(3)\fP,
+depending on the type of transfer. For some transfer types it may be required
+and it allows for better error checking.
 .SH DEFAULT
 The default internal read callback is fread().
 .SH PROTOCOLS
