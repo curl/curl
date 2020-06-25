@@ -28,7 +28,7 @@ CURLOPT_SSLKEYTYPE \- set type of the private key file
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLKEYTYPE, char *type);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. The string should be
+Pass a pointer to a null-terminated string as parameter. The string should be
 the format of your private key. Supported formats are "PEM", "DER" and "ENG".
 
 The format "ENG" enables you to load the private key from a crypto engine. In

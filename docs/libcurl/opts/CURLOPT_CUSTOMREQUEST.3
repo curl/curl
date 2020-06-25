@@ -28,7 +28,7 @@ CURLOPT_CUSTOMREQUEST \- custom string for request
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CUSTOMREQUEST, char *request);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter.
+Pass a pointer to a null-terminated string as parameter.
 
 When you change the request method by setting \fICURLOPT_CUSTOMREQUEST(3)\fP
 to something, you don't actually change how libcurl behaves or acts in regards

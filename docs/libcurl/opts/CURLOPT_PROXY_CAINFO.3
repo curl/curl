@@ -30,7 +30,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_CAINFO, char *path);
 .SH DESCRIPTION
 This option is for connecting to an HTTPS proxy, not an HTTPS server.
 
-Pass a char * to a zero terminated string naming a file holding one or more
+Pass a char * to a null-terminated string naming a file holding one or more
 certificates to verify the HTTPS proxy with.
 
 If \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP is zero and you avoid verifying the

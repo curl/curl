@@ -29,7 +29,7 @@ CURLOPT_PROXY \- set proxy to use
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY, char *proxy);
 .SH DESCRIPTION
 Set the \fIproxy\fP to use for the upcoming request. The parameter should be a
-char * to a zero terminated string holding the host name or dotted numerical
+char * to a null-terminated string holding the host name or dotted numerical
 IP address. A numerical IPv6 address must be written within [brackets].
 
 To specify port number in this string, append :[port] to the end of the host

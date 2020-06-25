@@ -2827,7 +2827,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
             store++;
             ptr++;
           }
-          *store = '\0'; /* zero terminate */
+          *store = '\0'; /* null-terminate */
         }
         if(entry_extracted) {
           /* If the path name does not look like an absolute path (i.e.: it
@@ -2891,7 +2891,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
           ptr++;
         for(store = os; *ptr && *ptr != ' ';)
           *store++ = *ptr++;
-        *store = '\0'; /* zero terminate */
+        *store = '\0'; /* null-terminate */
 
         /* Check for special servers here. */
 

@@ -29,7 +29,7 @@ CURLOPT_URL \- provide the URL to use in the request
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_URL, char *URL);
 .SH DESCRIPTION
 Pass in a pointer to the \fIURL\fP to work with. The parameter should be a
-char * to a zero terminated string which must be URL-encoded in the following
+char * to a null-terminated string which must be URL-encoded in the following
 format:
 
 scheme://host:port/path

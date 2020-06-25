@@ -28,7 +28,7 @@ CURLOPT_TLS13_CIPHERS \- specify ciphers suites to use for TLS 1.3
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TLS13_CIPHERS, char *list);
 .SH DESCRIPTION
-Pass a char *, pointing to a zero terminated string holding the list of cipher
+Pass a char *, pointing to a null-terminated string holding the list of cipher
 suites to use for the TLS 1.3 connection. The list must be syntactically
 correct, it consists of one or more cipher suite strings separated by colons.
 

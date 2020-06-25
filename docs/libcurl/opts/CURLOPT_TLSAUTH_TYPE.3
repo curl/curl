@@ -28,7 +28,7 @@ CURLOPT_TLSAUTH_TYPE \- set TLS authentication methods
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TLSAUTH_TYPE, char *type);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. The string should be
+Pass a pointer to a null-terminated string as parameter. The string should be
 the method of the TLS authentication. Supported method is "SRP".
 
 .IP SRP

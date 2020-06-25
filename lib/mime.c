@@ -1419,7 +1419,7 @@ CURLcode curl_mime_data(curl_mimepart *part,
 
     if(datasize)
       memcpy(part->data, data, datasize);
-    part->data[datasize] = '\0';    /* Set a nul terminator as sentinel. */
+    part->data[datasize] = '\0';    /* Set a null terminator as sentinel. */
 
     part->readfunc = mime_mem_read;
     part->seekfunc = mime_mem_seek;

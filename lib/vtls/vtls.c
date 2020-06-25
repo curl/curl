@@ -706,7 +706,7 @@ CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num)
 }
 
 /*
- * 'value' is NOT a zero terminated string
+ * 'value' is NOT a null-terminated string
  */
 CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
                                     int certnum,
@@ -728,10 +728,10 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
   /* sprintf the label and colon */
   msnprintf(output, outlen, "%s:", label);
 
-  /* memcpy the value (it might not be zero terminated) */
+  /* memcpy the value (it might not be null-terminated) */
   memcpy(&output[labellen + 1], value, valuelen);
 
-  /* zero terminate the output */
+  /* null-terminate the output */
   output[labellen + 1 + valuelen] = 0;
 
   nl = Curl_slist_append_nodup(ci->certinfo[certnum], output);

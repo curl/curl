@@ -755,7 +755,7 @@ Curl_cookie_add(struct Curl_easy *data,
         co->path = malloc(pathlen + 1); /* one extra for the zero byte */
         if(co->path) {
           memcpy(co->path, path, pathlen);
-          co->path[pathlen] = 0; /* zero terminate */
+          co->path[pathlen] = 0; /* null-terminate */
           co->spath = sanitize_cookie_path(co->path);
           if(!co->spath)
             badcookie = TRUE; /* out of memory bad */

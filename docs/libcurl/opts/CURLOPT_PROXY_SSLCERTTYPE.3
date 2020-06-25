@@ -28,7 +28,7 @@ CURLOPT_PROXY_SSLCERTTYPE \- specify type of the proxy client SSL certificate
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLCERTTYPE, char *type);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. The string should be
+Pass a pointer to a null-terminated string as parameter. The string should be
 the format of your client certificate used when connecting to an HTTPS proxy.
 
 Supported formats are "PEM" and "DER", except with Secure Transport. OpenSSL

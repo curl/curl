@@ -225,7 +225,7 @@ static void strcpy_url(char *output, const char *url, bool relative)
       break;
     }
   }
-  *optr = 0; /* zero terminate output buffer */
+  *optr = 0; /* null-terminate output buffer */
 
 }
 
@@ -584,7 +584,7 @@ static CURLUcode junkscan(const char *part)
       0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
       0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
       0x7f,
-      0x00 /* zero terminate */
+      0x00 /* null-terminate */
     };
     size_t n = strlen(part);
     size_t nfine = strcspn(part, badbytes);
@@ -1398,7 +1398,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
         i = (const unsigned char *)part;
         for(o = enc; *i; ++o, ++i)
           *o = (*i == ' ') ? '+' : *i;
-        *o = 0; /* zero terminate */
+        *o = 0; /* null-terminate */
         part = strdup(enc);
         if(!part) {
           free(enc);
@@ -1422,7 +1422,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
           o += 3;
         }
       }
-      *o = 0; /* zero terminate */
+      *o = 0; /* null-terminate */
       newp = enc;
       if(free_part)
         free((char *)part);

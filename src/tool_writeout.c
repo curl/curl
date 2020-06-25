@@ -131,7 +131,7 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
             continue;
           }
           keepit = *end;
-          *end = 0; /* zero terminate */
+          *end = 0; /* null-terminate */
           for(i = 0; variables[i].name; i++) {
             if(curl_strequal(ptr, variables[i].name)) {
               match = TRUE;

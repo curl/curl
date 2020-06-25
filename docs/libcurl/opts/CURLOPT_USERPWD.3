@@ -28,7 +28,7 @@ CURLOPT_USERPWD \- user name and password to use in authentication
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USERPWD, char *userpwd);
 .SH DESCRIPTION
-Pass a char * as parameter, pointing to a zero terminated login details string
+Pass a char * as parameter, pointing to a null-terminated login details string
 for the connection. The format of which is: [user name]:[password].
 
 When using Kerberos V5 authentication with a Windows based server, you should

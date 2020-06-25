@@ -30,7 +30,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_KEYPASSWD, char *pwd);
 .SH DESCRIPTION
 This option is for connecting to an HTTPS proxy, not an HTTPS server.
 
-Pass a pointer to a zero terminated string as parameter. It will be used as
+Pass a pointer to a null-terminated string as parameter. It will be used as
 the password required to use the \fICURLOPT_PROXY_SSLKEY(3)\fP private key.
 You never needed a pass phrase to load a certificate but you need one to load
 your private key.

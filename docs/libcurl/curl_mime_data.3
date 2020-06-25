@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -34,7 +34,7 @@ curl_mime_data - set a mime part's body data from memory
 \fIdata\fP points to the data bytes: those are copied to the part and their
 storage may safely be reused after call.
 \fIdatasize\fP is the number of data bytes: it can be set to
-\fICURL_ZERO_TERMINATED\fP to indicate \fIdata\fP is a nul-terminated
+\fICURL_ZERO_TERMINATED\fP to indicate \fIdata\fP is a null-terminated
 character string.
 \fIpart\fP is the part's to assign contents to.
 

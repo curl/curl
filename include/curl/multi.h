@@ -267,7 +267,7 @@ CURL_EXTERN CURLMsg *curl_multi_info_read(CURLM *multi_handle,
  *          value into the equivalent human readable error string.  This is
  *          useful for printing meaningful error messages.
  *
- * Returns: A pointer to a zero-terminated error message.
+ * Returns: A pointer to a null-terminated error message.
  */
 CURL_EXTERN const char *curl_multi_strerror(CURLMcode);
 

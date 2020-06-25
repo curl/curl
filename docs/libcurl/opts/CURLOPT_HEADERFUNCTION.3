@@ -41,7 +41,7 @@ data. The header callback will be called once for each header and only
 complete header lines are passed on to the callback. Parsing headers is very
 easy using this. \fIbuffer\fP points to the delivered data, and the size of
 that data is \fInitems\fP; \fIsize\fP is always 1. Do not assume that the
-header line is zero terminated!
+header line is null-terminated!
 
 The pointer named \fIuserdata\fP is the one you set with the
 \fICURLOPT_HEADERDATA(3)\fP option.

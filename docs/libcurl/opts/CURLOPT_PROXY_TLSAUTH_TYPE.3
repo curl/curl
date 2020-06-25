@@ -28,7 +28,7 @@ CURLOPT_PROXY_TLSAUTH_TYPE \- set proxy TLS authentication methods
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_TLSAUTH_TYPE, char *type);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. The string should be
+Pass a pointer to a null-terminated string as parameter. The string should be
 the method of the TLS authentication used for the HTTPS connection. Supported
 method is "SRP".
 

@@ -28,7 +28,7 @@ CURLOPT_SASL_AUTHZID \- authorisation identity (identity to act as)
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SASL_AUTHZID, char *authzid);
 .SH DESCRIPTION
-Pass a char * as parameter, which should be pointing to the zero terminated
+Pass a char * as parameter, which should be pointing to the null-terminated
 authorisation identity (authzid) for the transfer. Only applicable to the PLAIN
 SASL authentication mechanism where it is optional.
 
