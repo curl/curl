@@ -173,7 +173,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       /* ... and has ended here */
 
       if(*line)
-        *line++ = '\0'; /* zero terminate, we have a local copy of the data */
+        *line++ = '\0'; /* null-terminate, we have a local copy of the data */
 
 #ifdef DEBUG_CONFIG
       fprintf(stderr, "GOT: %s\n", option);
@@ -203,7 +203,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
           line++;
 
         if(*line) {
-          *line = '\0'; /* zero terminate */
+          *line = '\0'; /* null-terminate */
 
           /* to detect mistakes better, see if there's data following */
           line++;
@@ -329,7 +329,7 @@ static const char *unslashquote(const char *line, char *param)
     else
       *param++ = *line++;
   }
-  *param = '\0'; /* always zero terminate */
+  *param = '\0'; /* always null-terminate */
   return line;
 }
 

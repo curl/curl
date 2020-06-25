@@ -28,7 +28,7 @@ CURLOPT_CRLFILE \- specify a Certificate Revocation List file
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CRLFILE, char *file);
 .SH DESCRIPTION
-Pass a char * to a zero terminated string naming a \fIfile\fP with the
+Pass a char * to a null-terminated string naming a \fIfile\fP with the
 concatenation of CRL (in PEM format) to use in the certificate validation that
 occurs during the SSL exchange.
 

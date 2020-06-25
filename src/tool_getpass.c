@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -238,7 +238,7 @@ char *getpass_r(const char *prompt, /* prompt to display */
   fputs(prompt, stderr);
   nread = read(fd, password, buflen);
   if(nread > 0)
-    password[--nread] = '\0'; /* zero terminate where enter is stored */
+    password[--nread] = '\0'; /* null-terminate where enter is stored */
   else
     password[0] = '\0'; /* got nothing */
 

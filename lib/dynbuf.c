@@ -161,7 +161,7 @@ CURLcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
 }
 
 /*
- * Append a zero terminated string at the end.
+ * Append a null-terminated string at the end.
  */
 CURLcode Curl_dyn_add(struct dynbuf *s, const char *str)
 {

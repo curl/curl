@@ -28,7 +28,7 @@ CURLOPT_NOPROXY \- disable proxy use for specific hosts
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOPROXY, char *noproxy);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string. The string consists of a comma
+Pass a pointer to a null-terminated string. The string consists of a comma
 separated list of host names that do not require a proxy to get reached, even
 if one is specified.  The only wildcard available is a single * character,
 which matches all hosts, and effectively disables the proxy. Each name in this

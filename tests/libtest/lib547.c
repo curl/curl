@@ -101,7 +101,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_HEADER, 1L);
 #ifdef LIB548
-  /* set the data to POST with a mere pointer to a zero-terminated string */
+  /* set the data to POST with a mere pointer to a null-terminated string */
   test_setopt(curl, CURLOPT_POSTFIELDS, UPLOADTHIS);
 #else
   /* 547 style, which means reading the POST data from a callback */

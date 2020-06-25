@@ -54,7 +54,7 @@ shown above.
 \fICURLOPT_VERBOSE(3)\fP is in effect. This callback receives debug
 information, as specified in the \fItype\fP argument. This function must
 return 0. The \fIdata\fP pointed to by the char * passed to this function WILL
-NOT be zero terminated, but will be exactly of the \fIsize\fP as told by the
+NOT be null-terminated, but will be exactly of the \fIsize\fP as told by the
 \fIsize\fP argument.
 
 The \fIuserptr\fP argument is the pointer set with \fICURLOPT_DEBUGDATA(3)\fP.

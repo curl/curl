@@ -28,7 +28,7 @@ CURLINFO_SCHEME \- get the URL scheme (sometimes called protocol) used in the co
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SCHEME, char **scheme);
 .SH DESCRIPTION
-Pass a pointer to a char pointer to receive the pointer to a zero-terminated
+Pass a pointer to a char pointer to receive the pointer to a null-terminated
 string holding the URL scheme used for the most recent connection done with
 this CURL \fBhandle\fP.
 

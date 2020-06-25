@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 struct dynbuf {
-  char *bufr;    /* point to a zero terminated allocated buffer */
+  char *bufr;    /* point to a null-terminated allocated buffer */
   size_t leng;   /* number of bytes *EXCLUDING* the zero terminator */
   size_t allc;   /* size of the current allocation */
   size_t toobig; /* size limit for the buffer */

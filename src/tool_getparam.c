@@ -966,7 +966,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         if(*p) {
           /* if there's anything more than a plain decimal number */
           rc = sscanf(p, " - %6s", lrange);
-          *p = 0; /* zero terminate to make str2unum() work below */
+          *p = 0; /* null-terminate to make str2unum() work below */
         }
         else
           rc = 0;
@@ -1517,7 +1517,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         /* Automatic referer requested, this may be combined with a
            set initial one */
         config->autoreferer = TRUE;
-        *ptr = 0; /* zero terminate here */
+        *ptr = 0; /* null-terminate here */
       }
       else
         config->autoreferer = FALSE;

@@ -29,7 +29,7 @@ CURLOPT_DOH_URL \- provide the DNS-over-HTTPS URL
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_URL, char *URL);
 .SH DESCRIPTION
 Pass in a pointer to a \fIURL\fP for the DOH server to use for name
-resolving. The parameter should be a char * to a zero terminated string which
+resolving. The parameter should be a char * to a null-terminated string which
 must be URL-encoded in the following format: "https://host:port/path". It MUST
 specify a HTTPS URL.
 

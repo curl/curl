@@ -28,7 +28,7 @@ CURLINFO_LOCAL_IP \- get local IP address of last connection
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_LOCAL_IP, char **ip);
 .SH DESCRIPTION
-Pass a pointer to a char pointer to receive the pointer to a zero-terminated
+Pass a pointer to a char pointer to receive the pointer to a null-terminated
 string holding the IP address of the local end of most recent connection done
 with this \fBcurl\fP handle. This string may be IPv6 when that is
 enabled. Note that you get a pointer to a memory area that will be re-used at

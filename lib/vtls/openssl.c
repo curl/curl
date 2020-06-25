@@ -1636,7 +1636,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
              type itself: for example for an IA5String the data will be ASCII"
 
              It has been however verified that in 0.9.6 and 0.9.7, IA5String
-             is always zero-terminated.
+             is always null-terminated.
           */
           if((altlen == strlen(altptr)) &&
              /* if this isn't true, there was an embedded zero in the name

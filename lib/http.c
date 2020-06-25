@@ -270,7 +270,7 @@ char *Curl_copy_header_value(const char *header)
     return NULL;
 
   memcpy(value, start, len);
-  value[len] = 0; /* zero terminate */
+  value[len] = 0; /* null-terminate */
 
   return value;
 }

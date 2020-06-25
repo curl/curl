@@ -774,7 +774,7 @@ enum curl_khtype {
 };
 
 struct curl_khkey {
-  const char *key; /* points to a zero-terminated string encoded with base64
+  const char *key; /* points to a null-terminated string encoded with base64
                       if len is zero, otherwise to the "raw" data */
   size_t len;
   enum curl_khtype keytype;
@@ -1446,7 +1446,7 @@ typedef enum {
   /* 132 OBSOLETE. Gone in 7.16.0 */
   /* 133 OBSOLETE. Gone in 7.16.0 */
 
-  /* zero terminated string for pass on to the FTP server when asked for
+  /* null-terminated string for pass on to the FTP server when asked for
      "account" info */
   CURLOPT(CURLOPT_FTP_ACCOUNT, CURLOPTTYPE_STRINGPOINT, 134),
 
@@ -2118,7 +2118,7 @@ typedef enum {
   CURL_TIMECOND_LAST
 } curl_TimeCond;
 
-/* Special size_t value signaling a zero-terminated string. */
+/* Special size_t value signaling a null-terminated string. */
 #define CURL_ZERO_TERMINATED ((size_t) -1)
 
 /* curl_strequal() and curl_strnequal() are subject for removal in a future

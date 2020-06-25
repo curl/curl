@@ -795,7 +795,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
 
 #endif /* end of not Windows */
 
-  buf[max] = '\0'; /* make sure the string is zero terminated */
+  buf[max] = '\0'; /* make sure the string is null-terminated */
 
   /* strip trailing '\r\n' or '\n'. */
   p = strrchr(buf, '\n');

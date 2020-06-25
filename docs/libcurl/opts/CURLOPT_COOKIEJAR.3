@@ -28,7 +28,7 @@ CURLOPT_COOKIEJAR \- file name to store cookies to
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIEJAR, char *filename);
 .SH DESCRIPTION
-Pass a \fIfilename\fP as char *, zero terminated. This will make libcurl write
+Pass a \fIfilename\fP as char *, null-terminated. This will make libcurl write
 all internally known cookies to the specified file when
 \fIcurl_easy_cleanup(3)\fP is called. If no cookies are known, no file will be
 created. Specify "-" as filename to instead have the cookies written to

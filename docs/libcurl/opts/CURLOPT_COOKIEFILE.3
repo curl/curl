@@ -28,7 +28,7 @@ CURLOPT_COOKIEFILE \- file name to read cookies from
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIEFILE, char *filename);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. It should point to
+Pass a pointer to a null-terminated string as parameter. It should point to
 the file name of your file holding cookie data to read. The cookie data can be
 in either the old Netscape / Mozilla cookie data format or just regular HTTP
 headers (Set-Cookie style) dumped to a file.

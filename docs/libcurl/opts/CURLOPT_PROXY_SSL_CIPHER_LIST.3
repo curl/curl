@@ -28,7 +28,7 @@ CURLOPT_PROXY_SSL_CIPHER_LIST \- specify ciphers to use for proxy TLS
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSL_CIPHER_LIST, char *list);
 .SH DESCRIPTION
-Pass a char *, pointing to a zero terminated string holding the list of
+Pass a char *, pointing to a null-terminated string holding the list of
 ciphers to use for the connection to the HTTPS proxy. The list must be
 syntactically correct, it consists of one or more cipher strings separated by
 colons. Commas or spaces are also acceptable separators but colons are

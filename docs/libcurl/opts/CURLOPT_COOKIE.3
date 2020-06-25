@@ -28,7 +28,7 @@ CURLOPT_COOKIE \- set contents of HTTP Cookie header
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIE, char *cookie);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. It will be used to
+Pass a pointer to a null-terminated string as parameter. It will be used to
 set a cookie in the HTTP request. The format of the string should be
 NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie
 should contain.
