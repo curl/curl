@@ -1382,6 +1382,7 @@ static bool Curl_gtls_data_pending(const struct connectdata *conn,
     res = TRUE;
 
   connssl = &conn->proxy_ssl[connindex];
+  backend = connssl->backend;
   if(backend->session &&
      0 != gnutls_record_check_pending(backend->session))
     res = TRUE;
