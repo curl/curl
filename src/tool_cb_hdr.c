@@ -119,8 +119,8 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
       if(!first) {
         warnf(per->config->global,
-              "\nReceived header etag is missing double quote/s\n");
-        return 1;
+              "Received header etag is missing double quote/s\n");
+        return failure;
       }
       else {
         /* discard first double quote */
@@ -132,8 +132,8 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
       if(!last) {
         warnf(per->config->global,
-              "\nReceived header etag is missing double quote/s\n");
-        return 1;
+              "Received header etag is missing double quote/s\n");
+        return failure;
       }
 
       /* get length of desired etag */
