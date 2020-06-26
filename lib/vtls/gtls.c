@@ -399,10 +399,15 @@ gtls_connect_step1(struct connectdata *conn,
 #endif
   const char *prioritylist;
   const char *err = NULL;
+#ifndef CURL_DISABLE_PROXY
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   long * const certverifyresult = SSL_IS_PROXY() ?
     &data->set.proxy_ssl.certverifyresult : &data->set.ssl.certverifyresult;
+#else
+  const char * const hostname = conn->host.name;
+  long * const certverifyresult = &data->set.ssl.certverifyresult;
+#endif
 
   if(connssl->state == ssl_connection_complete)
     /* to make us tolerant against being called more than once for the
@@ -620,8 +625,11 @@ gtls_connect_step1(struct connectdata *conn,
     gnutls_datum_t protocols[2];
 
 #ifdef USE_NGHTTP2
-    if(data->set.httpversion >= CURL_HTTP_VERSION_2 &&
-       (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)) {
+    if(data->set.httpversion >= CURL_HTTP_VERSION_2
+#ifndef CURL_DISABLE_PROXY
+       && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
+#endif
+       ) {
       protocols[cur].data = (unsigned char *)NGHTTP2_PROTO_VERSION_ID;
       protocols[cur].size = NGHTTP2_PROTO_VERSION_ID_LEN;
       cur++;
@@ -694,12 +702,15 @@ gtls_connect_step1(struct connectdata *conn,
     }
   }
 
+#ifndef CURL_DISABLE_PROXY
   if(conn->proxy_ssl[sockindex].use) {
     transport_ptr = conn->proxy_ssl[sockindex].backend->session;
     gnutls_transport_push = Curl_gtls_push_ssl;
     gnutls_transport_pull = Curl_gtls_pull_ssl;
   }
-  else {
+  else
+#endif
+  {
     /* file descriptor for the socket */
     transport_ptr = &conn->sock[sockindex];
     gnutls_transport_push = Curl_gtls_push;
@@ -828,10 +839,15 @@ gtls_connect_step3(struct connectdata *conn,
   unsigned int bits;
   gnutls_protocol_t version = gnutls_protocol_get_version(session);
 #endif
+#ifndef CURL_DISABLE_PROXY
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   long * const certverifyresult = SSL_IS_PROXY() ?
     &data->set.proxy_ssl.certverifyresult : &data->set.ssl.certverifyresult;
+#else
+  const char * const hostname = conn->host.name;
+  long * const certverifyresult = &data->set.ssl.certverifyresult;
+#endif
 
   /* the name of the cipher suite used, e.g. ECDHE_RSA_AES_256_GCM_SHA384. */
   ptr = gnutls_cipher_suite_get_name(gnutls_kx_get(session),
@@ -1112,8 +1128,12 @@ gtls_connect_step3(struct connectdata *conn,
   }
 #endif
   if(!rc) {
+#ifndef CURL_DISABLE_PROXY
     const char * const dispname = SSL_IS_PROXY() ?
       conn->http_proxy.host.dispname : conn->host.dispname;
+#else
+    const char * const dispname = conn->host.dispname;
+#endif
 
     if(SSL_CONN_CONFIG(verifyhost)) {
       failf(data, "SSL: certificate subject name (%s) does not match "
@@ -1381,11 +1401,13 @@ static bool Curl_gtls_data_pending(const struct connectdata *conn,
      0 != gnutls_record_check_pending(backend->session))
     res = TRUE;
 
+#ifndef CURL_DISABLE_PROXY
   connssl = &conn->proxy_ssl[connindex];
   backend = connssl->backend;
   if(backend->session &&
      0 != gnutls_record_check_pending(backend->session))
     res = TRUE;
+#endif
 
   return res;
 }
@@ -1434,7 +1456,9 @@ static void close_one(struct ssl_connect_data *connssl)
 static void Curl_gtls_close(struct connectdata *conn, int sockindex)
 {
   close_one(&conn->ssl[sockindex]);
+#ifndef CURL_DISABLE_PROXY
   close_one(&conn->proxy_ssl[sockindex]);
+#endif
 }
 
 /*
