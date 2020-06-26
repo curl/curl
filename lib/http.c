@@ -308,7 +308,7 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
     pwd = conn->passwd;
   }
 
-  out = aprintf("%s:%s", user, pwd);
+  out = aprintf("%s:%s", user, pwd ? pwd : "");
   if(!out)
     return CURLE_OUT_OF_MEMORY;
 
