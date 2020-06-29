@@ -56,6 +56,7 @@
 #include <openssl/ssl.h>
 #include <openssl/rand.h>
 #include <openssl/x509v3.h>
+#include <openssl/x509.h>
 #ifndef OPENSSL_NO_DSA
 #include <openssl/dsa.h>
 #endif
