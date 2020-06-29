@@ -158,6 +158,7 @@
  18.19 expand ~/ in config files
  18.20 host name sections in config files
  18.21 retry on the redirected-to URL
+ 18.22 Add flag to specify download directory
 
  19. Build
  19.1 roffit
@@ -1106,6 +1107,12 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  redirects to a separate GET, and that GET is what gets the 529
 
  See https://github.com/curl/curl/issues/5462
+
+18.22 Add flag to specify download directory
+
+ A directory name to basically prepend to the file name -O and -o use. Saves
+ user from having to manually "cd" to the directory. Especially useful for
+ command lines with multiple -O and different download directories.
 
 19. Build
 
