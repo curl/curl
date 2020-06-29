@@ -757,7 +757,9 @@ static ngtcp2_conn_callbacks ng_callbacks = {
   cb_extend_max_stream_data,
   NULL, /* dcid_status */
   NULL, /* handshake_confirmed */
-  NULL  /* recv_new_token */
+  NULL, /* recv_new_token */
+  ngtcp2_crypto_delete_crypto_aead_ctx_cb,
+  ngtcp2_crypto_delete_crypto_cipher_ctx_cb
 };
 
 /*
