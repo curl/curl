@@ -2493,8 +2493,8 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 #ifdef HAVE_OPENSSL_SRP
   const enum CURL_TLSAUTH ssl_authtype = SSL_SET_OPTION(authtype);
 #endif
-  char * const ssl_cert = SSL_SET_OPTION(cert);
-  const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(cert_blob);
+  char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
+  const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(primary.cert_blob);
   const char * const ssl_cert_type = SSL_SET_OPTION(cert_type);
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);

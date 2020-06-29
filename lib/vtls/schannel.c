@@ -590,7 +590,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 
 #ifdef HAS_CLIENT_CERT_PATH
     /* client certificate */
-    if(data->set.ssl.cert || data->set.ssl.cert_blob) {
+    if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
       DWORD cert_store_name = 0;
       TCHAR *cert_store_path = NULL;
       TCHAR *cert_thumbprint_str = NULL;
@@ -600,27 +600,28 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       FILE *fInCert = NULL;
       void *certdata = NULL;
       size_t certsize = 0;
-      bool blob = data->set.ssl.cert_blob != NULL;
+      bool blob = data->set.ssl.primary.cert_blob != NULL;
       TCHAR *cert_path = NULL;
       if(blob) {
-        certdata = data->set.ssl.cert_blob->data;
-        certsize = data->set.ssl.cert_blob->len;
+        certdata = data->set.ssl.primary.cert_blob->data;
+        certsize = data->set.ssl.primary.cert_blob->len;
       }
       else {
-        cert_path = curlx_convert_UTF8_to_tchar(data->set.ssl.cert);
+        cert_path = curlx_convert_UTF8_to_tchar(
+          data->set.ssl.primary.clientcert);
         if(!cert_path)
           return CURLE_OUT_OF_MEMORY;
 
         result = get_cert_location(cert_path, &cert_store_name,
           &cert_store_path, &cert_thumbprint_str);
 
-        if(result && (data->set.ssl.cert[0]!='\0'))
-          fInCert = fopen(data->set.ssl.cert, "rb");
+        if(result && (data->set.ssl.primary.clientcert[0]!='\0'))
+          fInCert = fopen(data->set.ssl.primary.clientcert, "rb");
 
         if(result && !fInCert) {
           failf(data, "schannel: Failed to get certificate location"
                 " or file for %s",
-                data->set.ssl.cert);
+                data->set.ssl.primary.clientcert);
           curlx_unicodefree(cert_path);
           return result;
         }
@@ -630,7 +631,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
           (!strcasecompare(data->set.ssl.cert_type, "P12"))) {
         failf(data, "schannel: certificate format compatibility error "
                 " for %s",
-                blob ? "(memory blob)" : data->set.ssl.cert);
+                blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
         curlx_unicodefree(cert_path);
         return CURLE_SSL_CERTPROBLEM;
       }
@@ -645,7 +646,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         size_t pwd_len = 0;
         int str_w_len = 0;
         const char *cert_showfilename_error = blob ?
-          "(memory blob)" : data->set.ssl.cert;
+          "(memory blob)" : data->set.ssl.primary.clientcert;
         curlx_unicodefree(cert_path);
         if(fInCert) {
           long cert_tell = 0;
@@ -666,7 +667,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
           fclose(fInCert);
           if(!continue_reading) {
             failf(data, "schannel: Failed to read cert file %s",
-                data->set.ssl.cert);
+                data->set.ssl.primary.clientcert);
             free(certdata);
             return CURLE_SSL_CERTPROBLEM;
           }
@@ -773,7 +774,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       CertCloseStore(cert_store, 0);
     }
 #else
-    if(data->set.ssl.cert) {
+    if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
       failf(data, "schannel: client cert support not built in");
       return CURLE_NOT_BUILT_IN;
     }

@@ -1981,14 +1981,15 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     infof(data, "  CRLfile: %s\n", SSL_SET_OPTION(CRLfile));
   }
 
-  if(SSL_SET_OPTION(cert)) {
-    char *nickname = dup_nickname(data, SSL_SET_OPTION(cert));
+  if(SSL_SET_OPTION(primary.clientcert)) {
+    char *nickname = dup_nickname(data, SSL_SET_OPTION(primary.clientcert));
     if(nickname) {
       /* we are not going to use libnsspem.so to read the client cert */
       backend->obj_clicert = NULL;
     }
     else {
-      CURLcode rv = cert_stuff(conn, sockindex, SSL_SET_OPTION(cert),
+      CURLcode rv = cert_stuff(conn, sockindex,
+                               SSL_SET_OPTION(primary.clientcert),
                                SSL_SET_OPTION(key));
       if(rv) {
         /* failf() is already done in cert_stuff() */

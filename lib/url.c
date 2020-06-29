@@ -3635,18 +3635,15 @@ static CURLcode create_conn(struct Curl_easy *data,
   data->set.proxy_ssl.primary.cert_blob = data->set.blobs[BLOB_CERT_PROXY];
   data->set.proxy_ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_PROXY];
   data->set.proxy_ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT_PROXY];
-  data->set.proxy_ssl.cert = data->set.str[STRING_CERT_PROXY];
   data->set.proxy_ssl.cert_type = data->set.str[STRING_CERT_TYPE_PROXY];
   data->set.proxy_ssl.key = data->set.str[STRING_KEY_PROXY];
   data->set.proxy_ssl.key_type = data->set.str[STRING_KEY_TYPE_PROXY];
   data->set.proxy_ssl.key_passwd = data->set.str[STRING_KEY_PASSWD_PROXY];
   data->set.proxy_ssl.primary.clientcert = data->set.str[STRING_CERT_PROXY];
-  data->set.proxy_ssl.cert_blob = data->set.blobs[BLOB_CERT_PROXY];
   data->set.proxy_ssl.key_blob = data->set.blobs[BLOB_KEY_PROXY];
 #endif
   data->set.ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_ORIG];
   data->set.ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT_ORIG];
-  data->set.ssl.cert = data->set.str[STRING_CERT_ORIG];
   data->set.ssl.cert_type = data->set.str[STRING_CERT_TYPE_ORIG];
   data->set.ssl.key = data->set.str[STRING_KEY_ORIG];
   data->set.ssl.key_type = data->set.str[STRING_KEY_TYPE_ORIG];
@@ -3661,7 +3658,6 @@ static CURLcode create_conn(struct Curl_easy *data,
 #endif
 #endif
 
-  data->set.ssl.cert_blob = data->set.blobs[BLOB_CERT_ORIG];
   data->set.ssl.key_blob = data->set.blobs[BLOB_KEY_ORIG];
   data->set.ssl.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT_ORIG];
 

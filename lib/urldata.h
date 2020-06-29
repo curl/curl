@@ -245,8 +245,6 @@ struct ssl_config_data {
   struct curl_blob *issuercert_blob;
   curl_ssl_ctx_callback fsslctx; /* function to initialize ssl ctx */
   void *fsslctxp;        /* parameter for call back */
-  char *cert; /* client certificate file name */
-  struct curl_blob *cert_blob;
   char *cert_type; /* format for certificate (default: PEM)*/
   char *key; /* private key file name */
   struct curl_blob *key_blob;

@@ -379,11 +379,12 @@ wolfssl_connect_step1(struct connectdata *conn,
   }
 
   /* Load the client certificate, and private key */
-  if(SSL_SET_OPTION(cert) && SSL_SET_OPTION(key)) {
+  if(SSL_SET_OPTION(primary.clientcert) && SSL_SET_OPTION(key)) {
     int file_type = do_file_type(SSL_SET_OPTION(cert_type));
 
-    if(SSL_CTX_use_certificate_file(backend->ctx, SSL_SET_OPTION(cert),
-                                     file_type) != 1) {
+    if(SSL_CTX_use_certificate_file(backend->ctx,
+                                    SSL_SET_OPTION(primary.clientcert),
+                                    file_type) != 1) {
       failf(data, "unable to use client certificate (no key or wrong pass"
             " phrase?)");
       return CURLE_SSL_CONNECT_ERROR;
