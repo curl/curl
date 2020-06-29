@@ -645,7 +645,7 @@ gtls_connect_step1(struct connectdata *conn,
     gnutls_alpn_set_protocols(session, protocols, cur, 0);
   }
 
-  if(SSL_SET_OPTION(cert)) {
+  if(SSL_SET_OPTION(primary.clientcert)) {
     if(SSL_SET_OPTION(key_passwd)) {
       const unsigned int supported_key_encryption_algorithms =
         GNUTLS_PKCS_USE_PKCS12_3DES | GNUTLS_PKCS_USE_PKCS12_ARCFOUR |
@@ -654,9 +654,9 @@ gtls_connect_step1(struct connectdata *conn,
         GNUTLS_PKCS_USE_PBES2_AES_256;
       rc = gnutls_certificate_set_x509_key_file2(
            backend->cred,
-           SSL_SET_OPTION(cert),
+           SSL_SET_OPTION(primary.clientcert),
            SSL_SET_OPTION(key) ?
-           SSL_SET_OPTION(key) : SSL_SET_OPTION(cert),
+           SSL_SET_OPTION(key) : SSL_SET_OPTION(primary.clientcert),
            do_file_type(SSL_SET_OPTION(cert_type)),
            SSL_SET_OPTION(key_passwd),
            supported_key_encryption_algorithms);
@@ -670,9 +670,9 @@ gtls_connect_step1(struct connectdata *conn,
     else {
       if(gnutls_certificate_set_x509_key_file(
            backend->cred,
-           SSL_SET_OPTION(cert),
+           SSL_SET_OPTION(primary.clientcert),
            SSL_SET_OPTION(key) ?
-           SSL_SET_OPTION(key) : SSL_SET_OPTION(cert),
+           SSL_SET_OPTION(key) : SSL_SET_OPTION(primary.clientcert),
            do_file_type(SSL_SET_OPTION(cert_type)) ) !=
          GNUTLS_E_SUCCESS) {
         failf(data, "error reading X.509 key or certificate file");
