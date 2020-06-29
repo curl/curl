@@ -37,6 +37,7 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 static char *parse_filename(const char *ptr, size_t len);
+static bool is_etag_btw_double_quotes(char *ptr);
 
 #ifdef WIN32
 #define BOLD
@@ -103,45 +104,34 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   if(per->config->etag_save_file && etag_save->stream) {
     /* match only header that start with etag (case insensitive) */
     if(curl_strnequal(str, "etag:", 5)) {
-      char *etag_h = NULL;
+      char *etag_v = NULL;
       char *first = NULL;
       char *last = NULL;
       size_t etag_length = 0;
 
-      etag_h = ptr;
-      /* point to first occurrence of double quote */
-      first = memchr(etag_h, '\"', cb);
-
       /*
-       * if server side messed with the etag header and doesn't include
-       * double quotes around the etag, kindly exit with a warning
+       * move etag pointer to header's value
+       * we have to go to the semicolon and trim all the LWS preceding
+       * the field value https://tools.ietf.org/html/rfc2616#section-4.2
        */
+      etag_v = &ptr[5];
+      while(*etag_v && ISSPACE(*etag_v))
+        etag_v++;
 
-      if(!first) {
-        warnf(per->config->global,
-              "Received header etag is missing double quote/s\n");
-        return failure;
+      if(is_etag_btw_double_quotes(etag_v)) {
+        first = ++etag_v;
+        last = strchr(first, '\"');
+
+        /* get length of desired etag */
+        etag_length = last - first;
+
+        fwrite(first, size, etag_length, etag_save->stream);
+        fputc('\n', etag_save->stream);
       }
       else {
-        /* discard first double quote */
-        first++;
-      }
-
-      /* point to last occurrence of double quote */
-      last = memchr(first, '\"', cb);
-
-      if(!last) {
         warnf(per->config->global,
-              "Received header etag is missing double quote/s\n");
-        return failure;
+              "Received header etag with missing double quote/s\n");
       }
-
-      /* get length of desired etag */
-      etag_length = (size_t)last - (size_t)first;
-
-      fwrite(first, size, etag_length, etag_save->stream);
-      /* terminate with new line */
-      fputc('\n', etag_save->stream);
     }
 
     (void)fflush(etag_save->stream);
@@ -326,4 +316,35 @@ static char *parse_filename(const char *ptr, size_t len)
 #endif
 
   return copy;
+}
+
+static bool is_etag_btw_double_quotes(char *ptr)
+{
+  int i = 0, count = 0;
+  const char double_quote = '\"';
+  const unsigned char max_double_quotes = 2;
+
+  /* first character must be a double quote */
+  if(ptr[i] != double_quote) {
+    return FALSE;
+  }
+  i++;
+  count++;
+
+  while(ptr[i] != '\0') {
+    if(ptr[i] == double_quote) {
+      count++;
+    }
+
+    if(count > max_double_quotes) {
+      break;
+    }
+    i++;
+  }
+
+  if(count != max_double_quotes) {
+    return FALSE;
+  }
+
+  return TRUE;
 }
