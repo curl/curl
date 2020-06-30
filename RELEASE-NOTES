@@ -4,27 +4,28 @@ curl and libcurl 7.71.1
  Command line options:         232
  curl_easy_setopt() options:   277
  Public functions in libcurl:  82
- Contributors:                 2207
-
-This release includes the following changes:
-
- o
+ Contributors:                 2210
 
 This release includes the following bugfixes:
 
+ o cirrus-ci: disable FreeBSD 13 (again) [14]
  o Curl_inet_ntop: always check the return code [12]
  o CURLOPT_READFUNCTION.3: provide the upload data size up front [5]
  o DYNBUF.md: fix a typo: trail => tail [2]
  o escape: make the URL decode able to reject only %00-bytes
  o escape: zero length input should return a zero length output [11]
+ o examples/multithread.c: call curl_global_cleanup() [16]
  o http2: set the correct URL in pushed transfers [9]
  o http: fix proxy auth with blank password [3]
  o mbedtls: fix build with disabled proxy support [7]
+ o ngtcp2: sync with current master [15]
  o openssl: Fix compilation on Windows when ngtcp2 is enabled [10]
+ o Revert "multi: implement wait using winsock events" [6]
  o sendf: improve the message on client write errors [13]
  o terminology: call them null-terminated strings [1]
  o tool_cb_hdr: Fix etag warning output and return code [4]
  o url: allow user + password to contain "control codes" for HTTP(S) [8]
+ o vtls: compare cert blob when finding a connection to reuse [17]
 
 This release includes the following known bugs:
 
@@ -34,9 +35,10 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alexandre Pion, Baruch Siach, coinhubs on github, Daniel Stenberg,
-  Denis Baručić, Javier Blazquez, Jonathan Cardoso Machado, Jon Johnson Jr,
-  Kristoffer Gleditsch, Nicolas Sterchele, Ray Satiro, Siva Sivaraman,
-  (12 contributors)
+  Denis Baručić, Gergely Nagy, Javier Blazquez, Jonathan Cardoso Machado,
+  Jon Johnson Jr, Kristoffer Gleditsch, Lucien Zürcher, Nicolas Sterchele,
+  qiandu2006 on github, Ray Satiro, Siva Sivaraman, tmkk on github,
+  (16 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -47,6 +49,7 @@ References to bug reports and discussions on issues:
  [3] = https://curl.haxx.se/bug/?i=5613
  [4] = https://curl.haxx.se/bug/?i=5612
  [5] = https://curl.haxx.se/bug/?i=5607
+ [6] = https://curl.haxx.se/bug/?i=5631
  [7] = https://curl.haxx.se/bug/?i=5615
  [8] = https://curl.haxx.se/bug/?i=5582
  [9] = https://curl.haxx.se/bug/?i=5589
@@ -54,3 +57,7 @@ References to bug reports and discussions on issues:
  [11] = https://curl.haxx.se/bug/?i=5601
  [12] = https://curl.haxx.se/bug/?i=5412
  [13] = https://curl.haxx.se/bug/?i=5594
+ [14] = https://curl.haxx.se/bug/?i=5628
+ [15] = https://curl.haxx.se/bug/?i=5624
+ [16] = https://curl.haxx.se/bug/?i=5622
+ [17] = https://curl.haxx.se/bug/?i=5617
