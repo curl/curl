@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<name>
+SMTP with "funny" --mail-from
+</name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/3008 --mail-rcpt hello@example.com --mail-from "DI-Programme (Entwicklungssystem) <username@localhost>" -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO 3008
+MAIL FROM:<DI-Programme (Entwicklungssystem) <username@localhost>>
+RCPT TO:<hello@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+From: different
+To: another
+
+body
+.
+</upload>
+</verify>
+</testcase>

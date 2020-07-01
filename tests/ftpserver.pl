@@ -835,13 +835,8 @@ sub MAIL_smtp {
             }
         }
 
-        # Validate the from address (only <> and a valid email address inside
-        # <> are allowed, such as <user@example.com>)
-        if (($from eq "<>") ||
-            (!$smtputf8 && $from =~
-              /^<([a-zA-Z0-9._%+-]+)\@(([a-zA-Z0-9-]+)\.)+([a-zA-Z]{2,4})>$/) ||
-            ($smtputf8 && $from =~
-              /^<([a-zA-Z0-9\x{80}-\x{ff}._%+-]+)\@(([a-zA-Z0-9\x{80}-\x{ff}-]+)\.)+([a-zA-Z]{2,4})>$/)) {
+        # this server doesn't "validate" MAIL FROM addresses
+        if (length($from)) {
             my @found;
             my $valid = 1;
 
