@@ -1203,6 +1203,13 @@ void Curl_http2_done(struct Curl_easy *data, bool premature)
     }
     http->stream_id = 0;
   }
+
+  if (0 == nghttp2_session_check_request_allowed(httpc->h2)) {
+    // No more requests are allowedi, indicating that this connection
+    // may no be reused. This is set when GOAWAY has been received or
+    // when no more stream identifiers can be allocated.
+    connclose(data->conn, "http/2: No new requests allowed");
+  }
 }
 
 /*
@@ -2074,6 +2081,9 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   }
 
   h2_pri_spec(conn->data, &pri_spec);
+
+  H2BUGF(infof(conn->data, "http2_send request allowed %d (easy handle %p)\n",
+         nghttp2_session_check_request_allowed(h2), (void*)conn->data));
 
   switch(conn->data->state.httpreq) {
   case HTTPREQ_POST:
