@@ -86,6 +86,9 @@ the ownership of the CURL handle has been taken over by the application.
 .IP "CURL_PUSH_DENY (1)"
 The callback denies the stream and no data for this will reach the
 application, the easy handle will be destroyed by libcurl.
+.IP "CURL_PUSH_ERROROUT (2)"
+Returning this will reject the pushed stream and return an error back on the
+parent stream making it get closed with an error. (Added in curl 7.72.0)
 .IP *
 All other return codes are reserved for future use.
 .SH DEFAULT
