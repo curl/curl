@@ -839,7 +839,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
       return 0;
     }
     H2BUGF(infof(data_s, "on_stream_close(), %s (err %d), stream %u\n",
-                 nghttp2_strerror(error_code), error_code, stream_id));
+                 nghttp2_http2_strerror(error_code), error_code, stream_id));
     stream = data_s->req.protop;
     if(!stream)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -1456,7 +1456,7 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
   }
   else if(httpc->error_code != NGHTTP2_NO_ERROR) {
     failf(data, "HTTP/2 stream %d was not closed cleanly: %s (err %u)",
-          stream->stream_id, nghttp2_strerror(httpc->error_code),
+          stream->stream_id, nghttp2_http2_strerror(httpc->error_code),
           httpc->error_code);
     *err = CURLE_HTTP2_STREAM;
     return -1;
