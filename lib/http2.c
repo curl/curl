@@ -1205,9 +1205,10 @@ void Curl_http2_done(struct Curl_easy *data, bool premature)
   }
 
   if (0 == nghttp2_session_check_request_allowed(httpc->h2)) {
-    // No more requests are allowedi, indicating that this connection
-    // may no be reused. This is set when GOAWAY has been received or
-    // when no more stream identifiers can be allocated.
+    /* No more requests are allowed in the current session, so
+       the connection may not be reused. This is set when a
+       GOAWAY frame has been received or when the limit of stream
+       identifiers has been reached. */
     connclose(data->conn, "http/2: No new requests allowed");
   }
 }
