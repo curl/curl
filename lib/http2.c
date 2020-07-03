@@ -1331,7 +1331,7 @@ static int h2_process_pending_input(struct connectdata *conn,
   inbuf = httpc->inbuf + httpc->nread_inbuf;
 
   rv = nghttp2_session_mem_recv(httpc->h2, (const uint8_t *)inbuf, nread);
-  if(rv < 0 ) {
+  if(rv < 0) {
     failf(data,
           "h2_process_pending_input: nghttp2_session_mem_recv() returned "
           "%zd:%s\n", rv, nghttp2_strerror((int)rv));
@@ -1692,7 +1692,8 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     }
     else {
       nread = httpc->inbuflen - httpc->nread_inbuf;
-      H2BUGF(infof(data, "Use data left in connection buffer, nread=%zd\n", nread));
+      H2BUGF(infof(data, "Use data left in connection buffer, nread=%zd\n",
+                   nread));
     }
 
     if(h2_process_pending_input(conn, httpc, err) != 0)
@@ -2049,7 +2050,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   h2_pri_spec(conn->data, &pri_spec);
 
   H2BUGF(infof(conn->data, "http2_send request allowed %d (easy handle %p)\n",
-         nghttp2_session_check_request_allowed(h2), (void*)conn->data));
+         nghttp2_session_check_request_allowed(h2), (void *)conn->data));
 
   switch(conn->data->state.httpreq) {
   case HTTPREQ_POST:
@@ -2075,8 +2076,9 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   Curl_safefree(nva);
 
   if(stream_id < 0) {
-    H2BUGF(infof(conn->data, "http2_send() nghttp2_submit_request error (%s)%d\n",
-        nghttp2_strerror(stream_id), stream_id));
+    H2BUGF(infof(conn->data,
+                 "http2_send() nghttp2_submit_request error (%s)%d\n",
+                 nghttp2_strerror(stream_id), stream_id));
     *err = CURLE_SEND_ERROR;
     return -1;
   }
@@ -2089,8 +2091,9 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
    * priority update since the nghttp2_submit_request() call above */
   rv = nghttp2_session_send(h2);
   if(rv != 0) {
-    H2BUGF(infof(conn->data, "http2_send() nghttp2_session_send error (%s)%d\n",
-        nghttp2_strerror(rv), rv));
+    H2BUGF(infof(conn->data,
+                 "http2_send() nghttp2_session_send error (%s)%d\n",
+                 nghttp2_strerror(rv), rv));
 
     *err = CURLE_SEND_ERROR;
     return -1;
