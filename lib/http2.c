@@ -1203,14 +1203,6 @@ void Curl_http2_done(struct Curl_easy *data, bool premature)
     }
     http->stream_id = 0;
   }
-
-  if (0 == nghttp2_session_check_request_allowed(httpc->h2)) {
-    /* No more requests are allowed in the current session, so
-       the connection may not be reused. This is set when a
-       GOAWAY frame has been received or when the limit of stream
-       identifiers has been reached. */
-    connclose(data->conn, "http/2: No new requests allowed");
-  }
 }
 
 /*
@@ -1339,7 +1331,7 @@ static int h2_process_pending_input(struct connectdata *conn,
   inbuf = httpc->inbuf + httpc->nread_inbuf;
 
   rv = nghttp2_session_mem_recv(httpc->h2, (const uint8_t *)inbuf, nread);
-  if (rv < 0 ) {
+  if(rv < 0 ) {
     failf(data,
           "h2_process_pending_input: nghttp2_session_mem_recv() returned "
           "%zd:%s\n", rv, nghttp2_strerror((int)rv));
@@ -1368,7 +1360,7 @@ static int h2_process_pending_input(struct connectdata *conn,
     return -1;
   }
 
-  if (nghttp2_session_check_request_allowed(httpc->h2) == 0) {
+  if(nghttp2_session_check_request_allowed(httpc->h2) == 0) {
     /* No more requests are allowed in the current session, so
        the connection may not be reused. This is set when a
        GOAWAY frame has been received or when the limit of stream
@@ -1703,7 +1695,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       H2BUGF(infof(data, "Use data left in connection buffer, nread=%zd\n", nread));
     }
 
-    if (h2_process_pending_input(conn, httpc, err) != 0)
+    if(h2_process_pending_input(conn, httpc, err) != 0)
       return -1;
   }
   if(stream->memlen) {
@@ -2262,7 +2254,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
 
   DEBUGASSERT(httpc->nread_inbuf == 0);
 
-  if (-1 == h2_process_pending_input(conn, httpc, &result))
+  if(-1 == h2_process_pending_input(conn, httpc, &result))
     return CURLE_HTTP2;
 
   return CURLE_OK;
