@@ -288,4 +288,4 @@ foreach my $o (keys %opts) {
     }
 }
 
-exit $errors;
+print STDERR "$errors\n";
