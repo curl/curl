@@ -24,6 +24,9 @@
  ***************************************************************************/
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
+#include "curl_hmac.h"
+
+extern const struct HMAC_params Curl_HMAC_SHA256[1];
 
 #define SHA256_DIGEST_LENGTH 32
 
