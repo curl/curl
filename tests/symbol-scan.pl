@@ -178,3 +178,6 @@ if($summary) {
 if($misses) {
     exit 2; # there are stuff to attend to!
 }
+else {
+    print "OK\n";
+}
