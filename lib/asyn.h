@@ -164,7 +164,6 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 #define Curl_resolver_kill(x) Curl_nop_stmt
 #define Curl_resolver_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_resolver_wait_resolv(x,y) CURLE_COULDNT_RESOLVE_HOST
-#define Curl_resolver_getsock(x,y,z) 0
 #define Curl_resolver_duphandle(x,y,z) CURLE_OK
 #define Curl_resolver_init(x,y) CURLE_OK
 #define Curl_resolver_global_init() CURLE_OK
