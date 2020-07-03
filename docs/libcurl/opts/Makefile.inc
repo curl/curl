@@ -382,6 +382,7 @@ man_MANS =                                      \
   CURLOPT_USERNAME.3                            \
   CURLOPT_USERPWD.3                             \
   CURLOPT_USE_SSL.3                             \
+  CURLOPT_AWS_SIGV4.3                           \
   CURLOPT_VERBOSE.3                             \
   CURLOPT_WILDCARDMATCH.3                       \
   CURLOPT_WRITEDATA.3                           \

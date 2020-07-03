@@ -1,0 +1,82 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_AWS_SIGV4 3 "03 Jun 2020" "libcurl 7.72.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_AWS_SIGV4 \- V4 signature
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_AWS_SIGV4,
+                          char *providers_infos);
+.SH DESCRIPTION
+provides AWS V4 signature authentication on HTTPS header
+
+The provider argument is a string that is merged to some authentication
+parameters use by the algorithm.
+It's used by "Algorithm", "date", "request type", "signed headers" arguments,
+
+NOTE: This call set CURLOPT_HTTPAUTH to CURLAUTH_AWS_SIGV4.
+Calling CURLOPT_HTTPAUTH with CURLAUTH_AWS_SIGV4 is the same as calling
+this with "aws:amz" in paramater.
+
+Example with "Test:Try", when curl will do the algorithm, it will Generate:
+"TEST-HMAC-SHA256" for "Algorithm"
+"x-try-date" and "X-Try-Date" for "date"
+"test4_request" for "request type"
+"SignedHeaders=content-type;host;x-try-date" for "signed headers"
+
+If you use just "test", instead of "test:try",
+test will be use for every strings generated
+
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+
+struct curl_slist *list = NULL;
+
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL,
+  "https://api_type.region.example.com/uri");
+
+  curl_easy_setopt(c, CURLOPT_AWS_SIGV4, "xxx:yyy");
+  curl_easy_setopt(c, CURLOPT_USERPWD, "MY_ACCESS_KEY:MY_SECRET_KEY");
+  curl_easy_perform(curl);
+}
+.fi
+
+.SH AVAILABILITY
+Added in 7.75.0
+
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+
+.SH NOTES
+this option overrides the other auth types you might have set in CURL_HTTPAUTH which should be highlighted as this makes this auth method special. It could probably also be mentioned that this method can't be combined with other auth types.
+
+.SH "SEE ALSO"
+.BR CURLOPT_HEADEROPT "(3), " CURLOPT_HTTPHEADER "(3), "
