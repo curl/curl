@@ -27,6 +27,7 @@
 
 #include "warnless.h"
 #include "curl_sha256.h"
+#include "curl_hmac.h"
 
 #if defined(USE_OPENSSL)
 
@@ -490,5 +491,24 @@ void Curl_sha256it(unsigned char *output, const unsigned char *input,
   SHA256_Update(&ctx, input, curlx_uztoui(length));
   SHA256_Final(output, &ctx);
 }
+
+
+const struct HMAC_params Curl_HMAC_SHA256[] = {
+  {
+    /* Hash initialization function. */
+    CURLX_FUNCTION_CAST(HMAC_hinit_func, SHA256_Init),
+    /* Hash update function. */
+    CURLX_FUNCTION_CAST(HMAC_hupdate_func, SHA256_Update),
+    /* Hash computation end function. */
+    CURLX_FUNCTION_CAST(HMAC_hfinal_func, SHA256_Final),
+    /* Size of hash context structure. */
+    sizeof(SHA256_CTX),
+    /* Maximum key length. */
+    64,
+    /* Result size. */
+    32
+  }
+};
+
 
 #endif /* CURL_DISABLE_CRYPTO_AUTH */
