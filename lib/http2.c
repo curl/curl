@@ -1535,7 +1535,6 @@ static int h2_session_send(struct Curl_easy *data,
 static ssize_t http2_recv(struct connectdata *conn, int sockindex,
                           char *mem, size_t len, CURLcode *err)
 {
-  ssize_t rv;
   ssize_t nread;
   struct http_conn *httpc = &conn->proto.httpc;
   struct Curl_easy *data = conn->data;
@@ -1656,7 +1655,6 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     return -1;
   }
   else {
-    char *inbuf;
     /* remember where to store incoming data for this stream and how big the
        buffer is */
     stream->mem = mem;
@@ -1686,7 +1684,6 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       H2BUGF(infof(data, "nread=%zd\n", nread));
 
       httpc->inbuflen = nread;
-      inbuf = httpc->inbuf;
 
       DEBUGASSERT(httpc->nread_inbuf == 0);
     }
@@ -2178,7 +2175,6 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   CURLcode result;
   struct http_conn *httpc = &conn->proto.httpc;
   int rv;
-  ssize_t nproc;
   struct Curl_easy *data = conn->data;
   struct HTTP *stream = conn->data->req.protop;
 
