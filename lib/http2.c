@@ -1174,7 +1174,8 @@ void Curl_http2_done(struct Curl_easy *data, bool premature)
     http->push_headers = NULL;
   }
 
-  if(!httpc->h2) /* not HTTP/2 ? */
+  if(!(data->conn->handler->protocol&PROTO_FAMILY_HTTP) ||
+     !httpc->h2) /* not HTTP/2 ? */
     return;
 
   if(premature) {
