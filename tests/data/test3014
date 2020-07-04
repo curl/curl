@@ -15,7 +15,7 @@ HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
-ETag: "21025-dc7-11113
+ETag: "21025-"dc7"
 Accept-Ranges: bytes
 Content-Length: 0
 Connection: close
@@ -32,10 +32,10 @@ Funny-head: yesyes
 http
 </server>
 <name>
-ignore etag header with a missing double quote
+ignore etag header with too much double quotes
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/3011 --etag-save log/etag-out3011
+http://%HOSTIP:%HTTPPORT/3014 --etag-save log/etag-out3014
 </command>
 </client>
 
@@ -46,12 +46,12 @@ http://%HOSTIP:%HTTPPORT/3011 --etag-save log/etag-out3011
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /3011 HTTP/1.1
+GET /3014 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
-<file name="log/etag-out3011">
+<file name="log/etag-out3014">
 </file>
 <errorcode>
 0
