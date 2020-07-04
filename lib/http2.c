@@ -1689,6 +1689,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     }
     else {
       nread = httpc->inbuflen - httpc->nread_inbuf;
+      (void)nread;  /* silence warning, used in debug */
       H2BUGF(infof(data, "Use data left in connection buffer, nread=%zd\n",
                    nread));
     }
