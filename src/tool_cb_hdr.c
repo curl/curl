@@ -320,26 +320,33 @@ static char *parse_filename(const char *ptr, size_t len)
 
 static bool is_etag_btw_double_quotes(char *ptr)
 {
-  int i = 0, count = 0;
+  unsigned int count = 0;
   const char double_quote = '\"';
   const unsigned char max_double_quotes = 2;
 
   /* first character must be a double quote */
-  if(ptr[i] != double_quote) {
+  if(*ptr != double_quote) {
     return FALSE;
   }
-  i++;
+  ptr++;
   count++;
 
-  while(ptr[i] != '\0') {
-    if(ptr[i] == double_quote) {
+  while(*ptr != '\0') {
+    /* only spaces after latest authorized double quotes */
+    if(count == max_double_quotes) {
+      while(*ptr && ISSPACE(*ptr))
+        ptr++;
+      return strlen(ptr) == 0;
+    }
+
+    if(*ptr == double_quote) {
       count++;
     }
 
     if(count > max_double_quotes) {
       break;
     }
-    i++;
+    ptr++;
   }
 
   if(count != max_double_quotes) {
