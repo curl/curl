@@ -1801,14 +1801,14 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
     dnl This is only reasonable to do if crypto actually is there: check for
     dnl SSL libs NOTE: it is important to do this AFTER the crypto lib
 
-    AC_CHECK_LIB(ssl, SSL_connect)
+    AC_CHECK_LIB(ssl, SSL_connect, , , -lpthread)
 
     if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
         dnl we didn't find the SSL lib, try the RSAglue/rsaref stuff
         AC_MSG_CHECKING(for ssl with RSAglue/rsaref libs in use);
         OLIBS=$LIBS
         LIBS="-lRSAglue -lrsaref $LIBS"
-        AC_CHECK_LIB(ssl, SSL_connect)
+        AC_CHECK_LIB(ssl, SSL_connect , , -lpthread)
         if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
             dnl still no SSL_connect
             AC_MSG_RESULT(no)
