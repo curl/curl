@@ -327,18 +327,18 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
      * Make connection
      */
     {
-      ssize_t packetsize = 9 +
+      size_t packetsize = 9 +
         strlen((char *)socksreq + 8); /* size including NUL */
 
       /* If SOCKS4a, set special invalid IP address 0.0.0.x */
       if(protocol4a) {
-        ssize_t hostnamelen = 0;
+        size_t hostnamelen = 0;
         socksreq[4] = 0;
         socksreq[5] = 0;
         socksreq[6] = 0;
         socksreq[7] = 1;
         /* append hostname */
-        hostnamelen = (ssize_t)strlen(hostname) + 1; /* length including NUL */
+        hostnamelen = strlen(hostname) + 1; /* length including NUL */
         if(hostnamelen <= 255)
           strcpy((char *)socksreq + packetsize, hostname);
         else {
