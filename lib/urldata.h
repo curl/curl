@@ -239,6 +239,7 @@ struct ssl_primary_config {
 struct ssl_config_data {
   struct ssl_primary_config primary;
   long certverifyresult; /* result from the certificate verification */
+  struct curl_blob *cainfo_blob;
   char *CRLfile;   /* CRL to check certificate revocation */
   char *issuercert;/* optional issuer certificate filename */
   struct curl_blob *issuercert_blob;
@@ -1584,6 +1585,7 @@ enum dupblob {
   BLOB_KEY_PROXY,
   BLOB_SSL_ISSUERCERT_ORIG,
   BLOB_SSL_ISSUERCERT_PROXY,
+  BLOB_SSL_CAINFO_ORIG,
   BLOB_LAST
 };
 

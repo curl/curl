@@ -3652,6 +3652,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 #endif
 #endif
 
+  data->set.ssl.cainfo_blob = data->set.blobs[BLOB_SSL_CAINFO_ORIG];
   data->set.ssl.cert_blob = data->set.blobs[BLOB_CERT_ORIG];
   data->set.ssl.key_blob = data->set.blobs[BLOB_KEY_ORIG];
   data->set.ssl.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT_ORIG];

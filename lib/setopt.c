@@ -2060,6 +2060,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
                              va_arg(param, struct curl_blob *));
     break;
 #endif
+  case CURLOPT_CAINFO_BLOB:
+    /*
+     * Set CA info for SSL connection. Specify blob of the CA certificate
+     */
+    result = Curl_setblobopt(&data->set.blobs[BLOB_SSL_CAINFO_ORIG],
+                             va_arg(param, struct curl_blob *));
+    break;
 #ifndef CURL_DISABLE_TELNET
   case CURLOPT_TELNETOPTIONS:
     /*

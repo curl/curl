@@ -2482,6 +2482,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 #endif
   char * const ssl_cert = SSL_SET_OPTION(cert);
   const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(cert_blob);
+  const struct curl_blob *ssl_cainfo_blob = SSL_SET_OPTION(cainfo_blob);
   const char * const ssl_cert_type = SSL_SET_OPTION(cert_type);
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
@@ -3019,6 +3020,17 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
           ssl_capath ? ssl_capath : "none");
   }
 #endif
+
+  if (ssl_cainfo_blob) {
+    X509 *cert;
+    BIO *ssl_cainfo_bio = BIO_new_mem_buf(ssl_cainfo_blob->data, (int)ssl_cainfo_blob->len);
+    if(!ssl_cainfo_bio)
+        return CURLE_SSL_CERTPROBLEM;
+    while (cert = PEM_read_bio_X509(ssl_cainfo_bio, NULL, 0, NULL)) {
+      X509_STORE_add_cert(SSL_CTX_get_cert_store(backend->ctx), cert);
+    }
+    BIO_free(ssl_cainfo_bio);
+  }
 
 #ifdef CURL_CA_FALLBACK
   if(verifypeer && !ssl_cafile && !ssl_capath && !imported_native_ca) {

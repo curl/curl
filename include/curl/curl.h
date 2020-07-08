@@ -1971,6 +1971,10 @@ typedef enum {
   CURLOPT(CURLOPT_PROXY_ISSUERCERT, CURLOPTTYPE_STRINGPOINT, 296),
   CURLOPT(CURLOPT_PROXY_ISSUERCERT_BLOB, CURLOPTTYPE_BLOB, 297),
 
+  /* The CAinfo blob used to validate the peer certificate
+     this option is used only if SSL_VERIFYPEER is true */
+  CURLOPT(CURLOPT_CAINFO_BLOB, CURLOPTTYPE_BLOB, 298),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
