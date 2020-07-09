@@ -284,6 +284,7 @@ struct OperationConfig {
                                      0 is valid. default: CURL_HET_DEFAULT. */
   bool haproxy_protocol;          /* whether to send HAProxy protocol v1 */
   bool disallow_username_in_url;  /* disallow usernames in URLs */
+  char *aws_sigv4_provider;
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */
