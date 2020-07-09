@@ -817,6 +817,8 @@ static const struct helptxt helptext[] = {
   {"-A, --user-agent <name>",
    "Send User-Agent <name> to server",
    CURLHELP_IMPORTANT | CURLHELP_HTTP},
+  {"    --aws-sigv4 <provider1[:provider2]>",
+   "Use HTTP AWS V4 Signature", CURLHELP_HTTP},
   {"-v, --verbose",
    "Make the operation more talkative",
    CURLHELP_IMPORTANT | CURLHELP_VERBOSE},
