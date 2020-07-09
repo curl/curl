@@ -787,6 +787,7 @@ typedef enum {
 #define CURLAUTH_DIGEST_IE    (((unsigned long)1)<<4)
 #define CURLAUTH_NTLM_WB      (((unsigned long)1)<<5)
 #define CURLAUTH_BEARER       (((unsigned long)1)<<6)
+#define CURLAUTH_AWS_SIGV4 (((unsigned long)1)<<7)
 #define CURLAUTH_ONLY         (((unsigned long)1)<<31)
 #define CURLAUTH_ANY          (~CURLAUTH_DIGEST_IE)
 #define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC|CURLAUTH_DIGEST_IE))
@@ -2072,6 +2073,9 @@ typedef enum {
   /* HSTS write callback */
   CURLOPT(CURLOPT_HSTSWRITEFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 303),
   CURLOPT(CURLOPT_HSTSWRITEDATA, CURLOPTTYPE_CBPOINT, 304),
+
+  /* Provider for V4 signature */
+  CURLOPT(CURLOPT_AWS_SIGV4, CURLOPTTYPE_STRINGPOINT, 305),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
