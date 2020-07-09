@@ -105,6 +105,7 @@ LIB_CFILES =         \
   http_negotiate.c   \
   http_ntlm.c        \
   http_proxy.c       \
+  http_aws_sigv4.c   \
   idn_win32.c        \
   if2ip.c            \
   imap.c             \
@@ -229,6 +230,7 @@ LIB_HFILES =         \
   http_negotiate.h   \
   http_ntlm.h        \
   http_proxy.h       \
+  http_aws_sigv4.h   \
   if2ip.h            \
   imap.h             \
   inet_ntop.h        \

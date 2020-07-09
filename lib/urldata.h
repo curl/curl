@@ -1592,6 +1592,7 @@ enum dupstring {
 
   STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
 
+  STRING_AWS_SIGV4, /* Provider for V4 signature */
 
   STRING_LAST /* not used, just an end-of-list marker */
 };
