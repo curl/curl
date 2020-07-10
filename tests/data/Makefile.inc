@@ -225,4 +225,4 @@ test2080 \
 test2100 \
 \
 test3000 test3001 \
-test3002 test3003 test3004 test3005 test3006 test3007
+test3002 test3003 test3004 test3005 test3006 test3007 test3010

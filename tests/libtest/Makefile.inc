@@ -59,7 +59,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  lib1558 lib1559 lib1560 lib1564 lib1565 \
  lib1591 lib1592 lib1593 lib1594 lib1596 \
  lib1900 lib1905 lib1906 lib1907 lib1908 lib1910 \
- lib2033
+ lib2033 lib3010
 
 chkdecimalpoint_SOURCES = chkdecimalpoint.c ../../lib/mprintf.c \
  ../../lib/curl_ctype.c  ../../lib/dynbuf.c ../../lib/strdup.c
@@ -649,3 +649,7 @@ lib1910_CPPFLAGS = $(AM_CPPFLAGS)
 lib2033_SOURCES = libntlmconnect.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib2033_LDADD = $(TESTUTIL_LIBS)
 lib2033_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_PIPELINING
+
+lib3010_SOURCES = lib3010.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib3010_LDADD = $(TESTUTIL_LIBS)
+lib3010_CPPFLAGS = $(AM_CPPFLAGS)

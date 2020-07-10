@@ -78,6 +78,7 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   info->conn_local_ip[0] = '\0';
   info->conn_primary_port = 0;
   info->conn_local_port = 0;
+  info->retry_after = 0;
 
   info->conn_scheme = 0;
   info->conn_protocol = 0;
