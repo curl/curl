@@ -1,4 +1,4 @@
-curl and libcurl 7.71.2
+curl and libcurl 7.72.0
 
  Public curl releases:         193
  Command line options:         232
@@ -9,18 +9,23 @@ curl and libcurl 7.71.2
 
 This release includes the following changes:
 
- o
+ o content_encoding: add zstd decoding support [1]
 
 This release includes the following bugfixes:
 
+ o bearssl: fix build with disabled proxy support [16]
  o cirrus-ci: upgrade 11-STABLE to 11.4 [2]
+ o cmake: fix windows xp build [13]
+ o configure.ac: Sort features name in summary [6]
  o curl_version_info.3: CURL_VERSION_KERBEROS4 is deprecated [9]
  o CURLINFO_CERTINFO.3: fix typo [3]
  o ftpserver: don't verify SMTP MAIL FROM names [8]
  o gnutls: repair the build with `CURL_DISABLE_PROXY` [5]
  o http2: close the http2 connection when no more requests may be sent [7]
  o http2: fix nghttp2_strerror -> nghttp2_http2_strerror in debug messages [11]
+ o ngtcp2: update to modified qlog callback prototype [14]
  o tool_getparam: make --krb option work again [10]
+ o transfer: fix memory-leak with CURLOPT_CURLU in a duped handle [15]
  o url: silence MSVC warning [12]
 
 This release includes the following known bugs:
@@ -30,20 +35,28 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alex Kiernan, Carlo Marcelo Arenas Belón, Daniel Stenberg, Filip Salomonsson,
-  Jeremy Maitin-Shepard, Kamil Dudka, Laramie Leavitt, Marcel Raad, Ray Satiro,
-  (9 contributors)
+  Alex Kiernan, Baruch Siach, Carlo Marcelo Arenas Belón, Daniel Stenberg,
+  Filip Salomonsson, Gilles Vollant, Jeremy Maitin-Shepard, Kamil Dudka,
+  Laramie Leavitt, Marcel Raad, Matthias Naegler, Nicolas Sterchele,
+  NobodyXu on github, Peter Wu, Ray Satiro, Viktor Szakats,
+  (16 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.haxx.se/bug/?i=5453
  [2] = https://curl.haxx.se/bug/?i=5668
  [3] = https://curl.haxx.se/bug/?i=5655
  [5] = https://curl.haxx.se/bug/?i=5645
+ [6] = https://curl.haxx.se/bug/?i=5656
  [7] = https://curl.haxx.se/bug/?i=5643
  [8] = https://curl.haxx.se/bug/?i=5639
  [9] = https://curl.haxx.se/bug/?i=5642
  [10] = https://bugzilla.redhat.com/1833193
  [11] = https://curl.haxx.se/bug/?i=5641
  [12] = https://curl.haxx.se/bug/?i=5638
+ [13] = https://curl.haxx.se/bug/?i=5662
+ [14] = https://curl.haxx.se/bug/?i=5675
+ [15] = https://curl.haxx.se/bug/?i=5665
+ [16] = https://curl.haxx.se/bug/?i=5666
