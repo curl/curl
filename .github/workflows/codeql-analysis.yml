@@ -1,16 +1,21 @@
-name: "Code scanning - action"
+name: CI
 
 on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
   push:
+    branches:
+      - master
+      - '*/ci'
   pull_request:
+    branches:
+      - master
   schedule:
     - cron: '0 0 * * 4'
 
 jobs:
-  CodeQL-Build:
-
+  codeql:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
