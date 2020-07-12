@@ -1808,7 +1808,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             multistate(data, CURLM_STATE_SENDPROTOCONNECT);
           }
         }
-      else if(result)
+      else
         stream_error = TRUE;
       break;
 #endif
@@ -1858,7 +1858,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multistate(data, CURLM_STATE_DO);
         rc = CURLM_CALL_MULTI_PERFORM;
       }
-      else if(result) {
+      else {
         /* failure detected */
         Curl_posttransfer(data);
         multi_done(data, result, TRUE);
