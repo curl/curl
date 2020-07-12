@@ -294,5 +294,5 @@ branches:
 artifacts:
   - path: '**/curl.exe'
     name: curl
-  - path: '**/libcurl.dll'
+  - path: '**/*curl*.dll'
     name: libcurl
