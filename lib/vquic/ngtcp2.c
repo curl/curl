@@ -150,9 +150,11 @@ quic_from_gtls_level(gnutls_record_encryption_level_t gtls_level)
 }
 #endif
 
-static void qlog_callback(void *user_data, const void *data, size_t datalen)
+static void qlog_callback(void *user_data, uint32_t flags,
+                          const void *data, size_t datalen)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
+  (void)flags;
   if(qs->qlogfd != -1) {
     ssize_t rc = write(qs->qlogfd, data, datalen);
     if(rc == -1) {
