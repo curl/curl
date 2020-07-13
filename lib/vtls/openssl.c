@@ -2476,6 +2476,61 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   return res;
 }
 
+static CURLcode load_cacert_from_memory(SSL_CTX *ctx,
+                                        const char * const ca_info_pem)
+{
+  /* these need freed at the end */
+  BIO *cbio = NULL;
+  STACK_OF(X509_INFO) *inf = NULL;
+
+  /* everything else is just a reference */
+  int i, count = 0;
+  X509_STORE *cts = NULL;
+  X509_INFO *itmp = NULL;
+
+  CURLcode result = CURLE_SSL_CACERT_BADFILE;
+
+  do {
+    /* casting strlen to int feels wrong, but what to do with this API? */
+    cbio = BIO_new_mem_buf(ca_info_pem, (int) strlen(ca_info_pem));
+    if(!cbio)
+      return CURLE_OUT_OF_MEMORY;
+
+    cts = SSL_CTX_get_cert_store(ctx);
+    if(!cts)
+      break;
+
+    inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
+    if(!inf)
+      break;
+
+    /* add each entry from PEM file to x509_store */
+    for(i = 0; i < (int)sk_X509_INFO_num(inf); ++i) {
+      itmp = sk_X509_INFO_value(inf, i);
+      if(itmp->x509) {
+        X509_STORE_add_cert(cts, itmp->x509);
+        ++count;
+      }
+      if(itmp->crl) {
+        X509_STORE_add_crl(cts, itmp->crl);
+        ++count;
+      }
+    }
+
+    /* if we didn't end up importing anything, treat that as an error */
+    if(count > 0)
+      result = CURLE_OK;
+  } while(0);
+
+  if(inf)
+    sk_X509_INFO_pop_free(inf, X509_INFO_free);
+
+  if(cbio)
+    BIO_free(cbio);
+
+  return result;
+}
+
 static CURLcode ossl_connect_step1(struct Curl_easy *data,
                                    struct connectdata *conn, int sockindex)
 {
@@ -2506,6 +2561,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
   const char * const ssl_cert_type = SSL_SET_OPTION(cert_type);
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
+  const char * const ca_info_pem = SSL_CONN_CONFIG(ca_info_pem);
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char * const ssl_crlfile = SSL_SET_OPTION(CRLfile);
   char error_buffer[256];
@@ -3052,8 +3108,20 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
   }
 #endif
 
+  if(ca_info_pem) {
+    result = load_cacert_from_memory(backend->ctx, ca_info_pem);
+    if(result == CURLE_OUT_OF_MEMORY) {
+      failf(data, "memory error importing CA certificate");
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    /* Only warning if no certificate verification is required. */
+    infof(data, "error importing CA certificate, continuing anyway");
+  }
+
 #ifdef CURL_CA_FALLBACK
-  if(verifypeer && !ssl_cafile && !ssl_capath && !imported_native_ca) {
+  if(verifypeer &&
+     !ca_info_pem && !ssl_cafile && !ssl_capath && !imported_native_ca) {
     /* verifying the peer without any CA certificates won't
        work so use openssl's built in default as fallback */
     SSL_CTX_set_default_verify_paths(backend->ctx);

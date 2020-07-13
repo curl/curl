@@ -3722,6 +3722,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   */
   data->set.ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH];
   data->set.ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE];
+  data->set.ssl.primary.ca_info_pem = data->set.str[STRING_SSL_CAFILE_PEM];
   data->set.ssl.primary.random_file = data->set.str[STRING_SSL_RANDOM_FILE];
   data->set.ssl.primary.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
   data->set.ssl.primary.cipher_list =
@@ -3736,6 +3737,8 @@ static CURLcode create_conn(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
   data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
   data->set.proxy_ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
+  data->set.proxy_ssl.primary.ca_info_pem =
+    data->set.str[STRING_SSL_CAFILE_PEM_PROXY];
   data->set.proxy_ssl.primary.random_file =
     data->set.str[STRING_SSL_RANDOM_FILE];
   data->set.proxy_ssl.primary.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
