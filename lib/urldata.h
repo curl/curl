@@ -253,6 +253,7 @@ struct ssl_primary_config {
   char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
   char *pinned_key;
   struct curl_blob *cert_blob;
+  struct curl_blob *ca_info_blob;
   char *curves;          /* list of curves to use */
   BIT(verifypeer);       /* set TRUE if this is desired */
   BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
@@ -1604,6 +1605,8 @@ enum dupblob {
   BLOB_KEY_PROXY,
   BLOB_SSL_ISSUERCERT,
   BLOB_SSL_ISSUERCERT_PROXY,
+  BLOB_CAINFO,
+  BLOB_CAINFO_PROXY,
   BLOB_LAST
 };
 
