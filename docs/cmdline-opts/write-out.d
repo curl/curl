@@ -60,6 +60,9 @@ either IPv4 or IPv6 (Added in 7.29.0)
 .B local_port
 The local port number of the most recently done connection (Added in 7.29.0)
 .TP
+.B method
+The http method used in the most recent HTTP request (Added in 7.72.0)
+.TP
 .B num_connects
 Number of new connects made in the recent transfer. (Added in 7.12.3)
 .TP
