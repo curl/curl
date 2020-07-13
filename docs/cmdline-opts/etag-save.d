@@ -3,6 +3,7 @@ Arg: <file>
 Help: Parse ETag from a request and save it to a file
 Protocols: HTTP
 Added: 7.68.0
+Category: http
 ---
 This option saves an HTTP ETag to the specified file. Etag is
 usually part of headers returned by a request. When server sends an

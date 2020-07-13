@@ -2,6 +2,7 @@ Long: socks5
 Arg: <host[:port]>
 Help: SOCKS5 proxy on given host + port
 Added: 7.18.0
+Category: proxy
 ---
 Use the specified SOCKS5 proxy - but resolve the host name locally. If the
 port number is not specified, it is assumed at port 1080.

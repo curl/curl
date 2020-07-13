@@ -3,6 +3,7 @@ Tags: Versions
 Protocols: HTTP
 Added:
 Help: Allow HTTP 0.9 responses
+Category: http
 ---
 Tells curl to be fine with HTTP version 0.9 response.
 

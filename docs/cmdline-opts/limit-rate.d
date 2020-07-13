@@ -1,6 +1,7 @@
 Long: limit-rate
 Arg: <speed>
 Help: Limit transfer speed to RATE
+Category: connection
 ---
 Specify the maximum transfer rate you want curl to use - for both downloads
 and uploads. This feature is useful if you have a limited pipe and you'd like

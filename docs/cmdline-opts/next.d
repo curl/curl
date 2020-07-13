@@ -5,6 +5,7 @@ Protocols:
 Added: 7.36.0
 Magic: divider
 Help: Make next URL use its separate set of options
+Category: curl
 ---
 Tells curl to use a separate operation for the following URL and associated
 options. This allows you to send several URL requests, each with their own

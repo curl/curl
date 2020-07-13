@@ -2,6 +2,7 @@ Long: happy-eyeballs-timeout-ms
 Arg: <milliseconds>
 Help: Time for IPv6 before trying IPv4
 Added: 7.59.0
+Category: connection
 ---
 Happy eyeballs is an algorithm that attempts to connect to both IPv4 and IPv6
 addresses for dual-stack hosts, preferring IPv6 first for the number of

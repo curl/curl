@@ -3,6 +3,7 @@ Arg: <dir>
 Help: Directory to save files in
 Added: 7.73.0
 See-also: remote-name remote-header-name
+Category: curl
 ---
 
 This option specifies the directory in which files should be stored, when

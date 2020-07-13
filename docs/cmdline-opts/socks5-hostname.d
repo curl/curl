@@ -2,6 +2,7 @@ Long: socks5-hostname
 Arg: <host[:port]>
 Help: SOCKS5 proxy, pass host name to proxy
 Added: 7.18.0
+Category: proxy
 ---
 Use the specified SOCKS5 proxy (and let the proxy resolve the host name). If
 the port number is not specified, it is assumed at port 1080.

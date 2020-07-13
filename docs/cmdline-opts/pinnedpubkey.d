@@ -2,6 +2,7 @@ Long: pinnedpubkey
 Arg: <hashes>
 Help: FILE/HASHES Public key to verify peer against
 Protocols: TLS
+Category: tls
 ---
 Tells curl to use the specified public key file (or hashes) to verify the
 peer. This can be a path to a file which contains a single public key in PEM

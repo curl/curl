@@ -2,6 +2,7 @@ Long: write-out
 Short: w
 Arg: <format>
 Help: Use output FORMAT after completion
+Category: verbose
 ---
 Make curl display information on stdout after a completed transfer. The format
 is a string that may contain plain text mixed with any number of

@@ -2,6 +2,7 @@ Long: data-binary
 Arg: <data>
 Help: HTTP POST binary data
 Protocols: HTTP
+Category: http post upload
 ---
 This posts data exactly as specified with no extra processing whatsoever.
 

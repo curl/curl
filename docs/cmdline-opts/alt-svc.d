@@ -3,6 +3,7 @@ Arg: <file name>
 Protocols: HTTPS
 Help: Enable alt-svc with this cache file
 Added: 7.64.1
+Category: http
 ---
 WARNING: this option is experimental. Do not use in production.
 

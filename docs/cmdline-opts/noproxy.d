@@ -2,6 +2,7 @@ Long: noproxy
 Arg: <no-proxy-list>
 Help: List of hosts which do not use proxy
 Added: 7.19.4
+Category: proxy
 ---
 Comma-separated list of hosts which do not use a proxy, if one is specified.
 The only wildcard is a single * character, which matches all hosts, and

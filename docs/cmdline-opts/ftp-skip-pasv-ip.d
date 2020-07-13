@@ -3,6 +3,7 @@ Help: Skip the IP address for PASV
 Protocols: FTP
 Added: 7.14.2
 See-also: ftp-pasv
+Category: ftp
 ---
 Tell curl to not use the IP address the server suggests in its response
 to curl's PASV command when curl connects the data connection. Instead curl

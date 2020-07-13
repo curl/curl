@@ -1,5 +1,6 @@
 Long: xattr
 Help: Store metadata in extended file attributes
+Category: misc
 ---
 When saving output to a file, this option tells curl to store certain file
 metadata in extended file attributes. Currently, the URL is stored in the
