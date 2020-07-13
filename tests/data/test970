@@ -61,7 +61,7 @@ Accept: */*
 
 </protocol>
 <stdout nonewline="yes">
-{"url_effective":"http://%HOSTIP:%HTTPPORT/970","http_code":200,"response_code":200,"http_connect":0,"time_total":0.000013,"time_namelookup":0.000013,"time_connect":0.000013,"time_appconnect":0.000013,"time_pretransfer":0.000013,"time_starttransfer":0.000013,"size_header":4019,"size_request":4019,"size_download":445,"size_upload":0,"speed_download":13,"speed_upload":13,"content_type":"text/html","num_connects":1,"time_redirect":0.000013,"num_redirects":0,"ssl_verify_result":0,"proxy_ssl_verify_result":0,"filename_effective":"log/out970","remote_ip":"%HOSTIP","remote_port":%HTTPPORT,"local_ip":"127.0.0.1","local_port":13,"http_version":"1.1","scheme":"HTTP","curl_version":"curl-unit-test-fake-version"}
+{"url_effective":"http://%HOSTIP:%HTTPPORT/970","method":"GET","http_code":200,"response_code":200,"http_connect":0,"time_total":0.000013,"time_namelookup":0.000013,"time_connect":0.000013,"time_appconnect":0.000013,"time_pretransfer":0.000013,"time_starttransfer":0.000013,"size_header":4019,"size_request":4019,"size_download":445,"size_upload":0,"speed_download":13,"speed_upload":13,"content_type":"text/html","num_connects":1,"time_redirect":0.000013,"num_redirects":0,"ssl_verify_result":0,"proxy_ssl_verify_result":0,"filename_effective":"log/out970","remote_ip":"%HOSTIP","remote_port":%HTTPPORT,"local_ip":"127.0.0.1","local_port":13,"http_version":"1.1","scheme":"HTTP","curl_version":"curl-unit-test-fake-version"}
 </stdout>
 </verify>
 </testcase>
