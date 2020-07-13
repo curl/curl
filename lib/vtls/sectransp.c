@@ -1660,7 +1660,7 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
-  const struct curl_blob *ssl_cablob = NULL;
+  const struct curl_blob *ssl_cablob = SSL_CONN_CONFIG(ca_info_blob);
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
   const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(primary.cert_blob);
@@ -2007,7 +2007,8 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
     bool is_cert_file = (!is_cert_data) && is_file(ssl_cafile);
 
     if(!(is_cert_file || is_cert_data)) {
-      failf(data, "SSL: can't load CA certificate file %s", ssl_cafile);
+      failf(data, "SSL: can't load CA certificate file %s",
+            ssl_cafile ? ssl_cafile : "(blob memory)");
       return CURLE_SSL_CACERT_BADFILE;
     }
   }
@@ -2084,7 +2085,8 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
     else {
       CURLcode result;
       ssl_sessionid =
-        aprintf("%s:%d:%d:%s:%ld", ssl_cafile,
+        aprintf("%s:%d:%d:%s:%ld",
+                ssl_cafile ? ssl_cafile : "(blob memory)",
                 verifypeer, SSL_CONN_CONFIG(verifyhost), hostname, port);
       ssl_sessionid_len = strlen(ssl_sessionid);
 
@@ -2224,7 +2226,7 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
 }
 
 static int append_cert_to_array(struct Curl_easy *data,
-                                unsigned char *buf, size_t buflen,
+                                const unsigned char *buf, size_t buflen,
                                 CFMutableArrayRef array)
 {
     CFDataRef certdata = CFDataCreate(kCFAllocatorDefault, buf, buflen);
@@ -2262,18 +2264,14 @@ static int append_cert_to_array(struct Curl_easy *data,
     return CURLE_OK;
 }
 
-static CURLcode verify_cert(const char *cafile, struct Curl_easy *data,
-                            SSLContextRef ctx)
+static CURLcode verify_cert_buf(struct Curl_easy *data,
+                                const unsigned char *certbuf, size_t buflen,
+                                SSLContextRef ctx)
 {
   int n = 0, rc;
   long res;
-  unsigned char *certbuf, *der;
-  size_t buflen, derlen, offset = 0;
-
-  if(read_cert(cafile, &certbuf, &buflen) < 0) {
-    failf(data, "SSL: failed to read or invalid CA certificate");
-    return CURLE_SSL_CACERT_BADFILE;
-  }
+  unsigned char *der;
+  size_t derlen, offset = 0;
 
   /*
    * Certbuf now contains the contents of the certificate file, which can be
@@ -2384,6 +2382,38 @@ static CURLcode verify_cert(const char *cafile, struct Curl_easy *data,
       return CURLE_PEER_FAILED_VERIFICATION;
   }
 }
+
+static CURLcode verify_cert(struct Curl_easy *data, const char *cafile,
+                            const struct curl_blob *ca_info_blob,
+                            SSLContextRef ctx)
+{
+  int result;
+  unsigned char *certbuf;
+  size_t buflen;
+
+  if(ca_info_blob) {
+    certbuf = (unsigned char *)malloc(ca_info_blob->len + 1);
+    if(!certbuf) {
+      return CURLE_OUT_OF_MEMORY;
+    }
+    buflen = ca_info_blob->len;
+    memcpy(certbuf, ca_info_blob->data, ca_info_blob->len);
+    certbuf[ca_info_blob->len]='\0';
+  }
+  else if(cafile) {
+    if(read_cert(cafile, &certbuf, &buflen) < 0) {
+      failf(data, "SSL: failed to read or invalid CA certificate");
+      return CURLE_SSL_CACERT_BADFILE;
+    }
+  }
+  else
+    return CURLE_SSL_CACERT_BADFILE;
+
+  result = verify_cert_buf(data, certbuf, buflen, ctx);
+  free(certbuf);
+  return result;
+}
+
 
 #ifdef SECTRANSP_PINNEDPUBKEY
 static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
@@ -2520,8 +2550,10 @@ sectransp_connect_step2(struct Curl_easy *data, struct connectdata *conn,
       /* The below is errSSLServerAuthCompleted; it's not defined in
         Leopard's headers */
       case -9841:
-        if(SSL_CONN_CONFIG(CAfile) && SSL_CONN_CONFIG(verifypeer)) {
-          CURLcode result = verify_cert(SSL_CONN_CONFIG(CAfile), data,
+        if((SSL_CONN_CONFIG(CAfile) || SSL_CONN_CONFIG(ca_info_blob)) &&
+           SSL_CONN_CONFIG(verifypeer)) {
+          CURLcode result = verify_cert(data, SSL_CONN_CONFIG(CAfile),
+                                        SSL_CONN_CONFIG(ca_info_blob),
                                         backend->ssl_ctx);
           if(result)
             return result;
@@ -3365,8 +3397,10 @@ static ssize_t sectransp_recv(struct Curl_easy *data,
         /* The below is errSSLPeerAuthCompleted; it's not defined in
            Leopard's headers */
       case -9841:
-        if(SSL_CONN_CONFIG(CAfile) && SSL_CONN_CONFIG(verifypeer)) {
-          CURLcode result = verify_cert(SSL_CONN_CONFIG(CAfile), data,
+        if((SSL_CONN_CONFIG(CAfile) || SSL_CONN_CONFIG(ca_info_blob)) &&
+           SSL_CONN_CONFIG(verifypeer)) {
+          CURLcode result = verify_cert(data, SSL_CONN_CONFIG(CAfile),
+                                        SSL_CONN_CONFIG(ca_info_blob),
                                         backend->ssl_ctx);
           if(result)
             return result;

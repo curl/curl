@@ -135,6 +135,7 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      (data->verifyhost == needle->verifyhost) &&
      (data->verifystatus == needle->verifystatus) &&
      blobcmp(data->cert_blob, needle->cert_blob) &&
+     blobcmp(data->ca_info_blob, needle->ca_info_blob) &&
      Curl_safe_strcasecompare(data->CApath, needle->CApath) &&
      Curl_safe_strcasecompare(data->CAfile, needle->CAfile) &&
      Curl_safe_strcasecompare(data->clientcert, needle->clientcert) &&
@@ -161,6 +162,7 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   dest->sessionid = source->sessionid;
 
   CLONE_BLOB(cert_blob);
+  CLONE_BLOB(ca_info_blob);
   CLONE_STRING(CApath);
   CLONE_STRING(CAfile);
   CLONE_STRING(clientcert);
@@ -185,6 +187,7 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
   Curl_safefree(sslc->cipher_list13);
   Curl_safefree(sslc->pinned_key);
   Curl_safefree(sslc->cert_blob);
+  Curl_safefree(sslc->ca_info_blob);
   Curl_safefree(sslc->curves);
 }
 
