@@ -473,7 +473,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 #endif
 #else
 #ifdef HAS_MANUAL_VERIFY_API
-  if(SSL_CONN_CONFIG(CAfile)) {
+  if(SSL_CONN_CONFIG(CAfile) || SSL_CONN_CONFIG(ca_info_blob)) {
     if(curlx_verify_windows_version(6, 1, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
       BACKEND->use_manual_cred_validation = true;
@@ -487,7 +487,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   else
     BACKEND->use_manual_cred_validation = false;
 #else
-  if(SSL_CONN_CONFIG(CAfile)) {
+  if(SSL_CONN_CONFIG(CAfile) || SSL_CONN_CONFIG(ca_info_blob)) {
     failf(data, "schannel: CA cert support not built in");
     return CURLE_NOT_BUILT_IN;
   }
@@ -2403,6 +2403,9 @@ const struct Curl_ssl Curl_ssl_schannel = {
   { CURLSSLBACKEND_SCHANNEL, "schannel" }, /* info */
 
   SSLSUPP_CERTINFO |
+#ifdef HAS_MANUAL_VERIFY_API
+  SSLSUPP_CAINFO_BLOB |
+#endif
   SSLSUPP_PINNEDPUBKEY,
 
   sizeof(struct ssl_backend_data),

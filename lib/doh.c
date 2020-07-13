@@ -313,6 +313,10 @@ static CURLcode dohprobe(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_CAINFO,
                          data->set.str[STRING_SSL_CAFILE]);
     }
+    if(data->set.blobs[BLOB_CAINFO]) {
+      ERROR_CHECK_SETOPT(CURLOPT_CAINFO_BLOB,
+                         data->set.blobs[BLOB_CAINFO]);
+    }
     if(data->set.str[STRING_SSL_CAPATH]) {
       ERROR_CHECK_SETOPT(CURLOPT_CAPATH,
                          data->set.str[STRING_SSL_CAPATH]);

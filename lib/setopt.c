@@ -2041,6 +2041,20 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setstropt(&data->set.str[STRING_SSL_CAFILE],
                             va_arg(param, char *));
     break;
+  case CURLOPT_CAINFO_BLOB:
+    /*
+     * Blob that holds CA info for SSL connection.
+     * Specify entire PEM of the CA certificate
+     */
+#ifdef USE_SSL
+    if(Curl_ssl->supports & SSLSUPP_CAINFO_BLOB)
+      result = Curl_setblobopt(&data->set.blobs[BLOB_CAINFO],
+                               va_arg(param, struct curl_blob *));
+    else
+#endif
+      return CURLE_NOT_BUILT_IN;
+
+    break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_CAINFO:
     /*
@@ -2049,6 +2063,19 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     result = Curl_setstropt(&data->set.str[STRING_SSL_CAFILE_PROXY],
                             va_arg(param, char *));
+    break;
+  case CURLOPT_PROXY_CAINFO_BLOB:
+    /*
+     * Blob that holds CA info for SSL connection proxy.
+     * Specify entire PEM of the CA certificate
+     */
+#ifdef USE_SSL
+    if(Curl_ssl->supports & SSLSUPP_CAINFO_BLOB)
+      result = Curl_setblobopt(&data->set.blobs[BLOB_CAINFO_PROXY],
+                               va_arg(param, struct curl_blob *));
+    else
+#endif
+      return CURLE_NOT_BUILT_IN;
     break;
 #endif
   case CURLOPT_CAPATH:
