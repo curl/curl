@@ -2,6 +2,7 @@ Long: quote
 Short: Q
 Help: Send command(s) to server before transfer
 Protocols: FTP SFTP
+Category: ftp sftp
 ---
 
 Send an arbitrary command to the remote FTP or SFTP server. Quote commands are

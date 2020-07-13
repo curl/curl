@@ -3,6 +3,7 @@ Arg: <method>
 Help: Control CWD usage
 Protocols: FTP
 Added: 7.15.1
+Category: ftp
 ---
 Control what method curl should use to reach a file on an FTP(S)
 server. The method argument should be one of the following alternatives:

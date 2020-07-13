@@ -2,6 +2,7 @@ Long: resolve
 Arg: <host:port:addr[,addr]...>
 Help: Resolve the host+port to this address
 Added: 7.21.3
+Category: connection
 ---
 Provide a custom address for a specific host and port pair. Using this, you
 can make the curl requests(s) use a specified address and prevent the

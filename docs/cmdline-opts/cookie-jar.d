@@ -3,6 +3,7 @@ Long: cookie-jar
 Arg: <filename>
 Protocols: HTTP
 Help: Write cookies to <filename> after operation
+Category: http
 ---
 Specify to which file you want curl to write all cookies after a completed
 operation. Curl writes all cookies from its in-memory cookie storage to the

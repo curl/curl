@@ -2,6 +2,7 @@ Long: max-redirs
 Arg: <num>
 Help: Maximum number of redirects allowed
 Protocols: HTTP
+Category: http
 ---
 Set maximum number of redirection-followings allowed. When --location is used,
 is used to prevent curl from following redirections too much. By default, the

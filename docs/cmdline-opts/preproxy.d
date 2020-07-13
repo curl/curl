@@ -2,6 +2,7 @@ Long: preproxy
 Arg: [protocol://]host[:port]
 Help: Use this proxy first
 Added: 7.52.0
+Category: proxy
 ---
 Use the specified SOCKS proxy before connecting to an HTTP or HTTPS --proxy. In
 such a case curl first connects to the SOCKS proxy and then connects (through

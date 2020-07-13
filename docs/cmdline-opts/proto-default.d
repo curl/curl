@@ -2,6 +2,7 @@ Long: proto-default
 Help: Use PROTOCOL for any URL missing a scheme
 Arg: <protocol>
 Added: 7.45.0
+Category: connection curl
 ---
 Tells curl to use \fIprotocol\fP for any URL missing a scheme name.
 

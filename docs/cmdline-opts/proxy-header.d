@@ -3,6 +3,7 @@ Arg: <header/@file>
 Help: Pass custom header(s) to proxy
 Protocols: HTTP
 Added: 7.37.0
+Category: proxy
 ---
 Extra header to include in the request when sending HTTP to a proxy. You may
 specify any number of extra headers. This is the equivalent option to --header

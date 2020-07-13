@@ -1,5 +1,6 @@
 Long: create-dirs
 Help: Create necessary local directory hierarchy
+Category: curl
 ---
 When used in conjunction with the --output option, curl will create the
 necessary local directory hierarchy as needed. This option creates the dirs

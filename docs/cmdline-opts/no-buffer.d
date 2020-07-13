@@ -1,6 +1,7 @@
 Long: no-buffer
 Short: N
 Help: Disable buffering of the output stream
+Category: curl
 ---
 Disables the buffering of the output stream. In normal work situations, curl
 will use a standard buffered output stream that will have the effect that it

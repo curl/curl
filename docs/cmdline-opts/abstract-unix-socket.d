@@ -3,6 +3,7 @@ Arg: <path>
 Help: Connect via abstract Unix domain socket
 Added: 7.53.0
 Protocols: HTTP
+Category: connection
 ---
 Connect through an abstract Unix domain socket, instead of using the network.
 Note: netstat shows the path of an abstract socket prefixed with '@', however

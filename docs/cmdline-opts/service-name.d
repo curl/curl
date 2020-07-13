@@ -2,6 +2,7 @@ Long: service-name
 Help: SPNEGO service name
 Arg: <name>
 Added: 7.43.0
+Category: misc
 ---
 This option allows you to change the service name for SPNEGO.
 

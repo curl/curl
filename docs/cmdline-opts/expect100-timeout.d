@@ -4,6 +4,7 @@ Help: How long to wait for 100-continue
 Protocols: HTTP
 Added: 7.47.0
 See-also: connect-timeout
+Category: http
 ---
 Maximum time in seconds that you allow curl to wait for a 100-continue
 response when curl emits an Expects: 100-continue header in its request. By

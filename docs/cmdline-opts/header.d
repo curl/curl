@@ -3,6 +3,7 @@ Short: H
 Arg: <header/@file>
 Help: Pass custom header(s) to server
 Protocols: HTTP
+Category: http
 ---
 Extra header to include in the request when sending HTTP to a server. You may
 specify any number of extra headers. Note that if you should add a custom

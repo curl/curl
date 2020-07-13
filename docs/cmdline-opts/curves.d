@@ -3,6 +3,7 @@ Arg: <algorithm list>
 Help: (EC) TLS key exchange algorithm(s) to request
 Protocols: TLS
 Added: 7.73.0
+Category: tls
 ---
 Tells curl to request specific curves to use during SSL session establishment
 according to RFC 8422, 5.1.  Multiple algorithms can be provided by separating

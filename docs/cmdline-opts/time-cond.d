@@ -3,6 +3,7 @@ Short: z
 Arg: <time>
 Help: Transfer based on a time condition
 Protocols: HTTP FTP
+Category: http ftp
 ---
 Request a file that has been modified later than the given time and date, or
 one that has been modified before that time. The <date expression> can be all

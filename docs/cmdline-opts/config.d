@@ -2,6 +2,7 @@ Long: config
 Arg: <file>
 Help: Read config from a file
 Short: K
+Category: curl
 ---
 
 Specify a text file to read curl arguments from. The command line arguments

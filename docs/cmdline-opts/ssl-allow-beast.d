@@ -1,6 +1,7 @@
 Long: ssl-allow-beast
 Help: Allow security flaw to improve interop
 Added: 7.25.0
+Category: tls
 ---
 This option tells curl to not work around a security flaw in the SSL3 and
 TLS1.0 protocols known as BEAST.  If this option isn't used, the SSL layer may
