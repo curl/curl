@@ -2457,6 +2457,61 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   return res;
 }
 
+static CURLcode load_cacert_from_memory(SSL_CTX *ctx,
+                                        const char * const ca_file_pem)
+{
+  /* these need freed at the end */
+  BIO *cbio = NULL;
+  STACK_OF(X509_INFO) *inf = NULL;
+
+  /* everything else is just a reference */
+  int i, count = 0;
+  X509_STORE *cts = NULL;
+  X509_INFO *itmp = NULL;
+
+  CURLcode result = CURLE_SSL_CACERT_BADFILE;
+
+  do {
+    /* casting strlen to int feels wrong, but what to do with this API? */
+    cbio = BIO_new_mem_buf(ca_file_pem, (int) strlen(ca_file_pem));
+    if(!cbio)
+      break;
+
+    cts = SSL_CTX_get_cert_store(ctx);
+    if(!cts)
+      break;
+
+    inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
+    if(!inf)
+      break;
+
+    /* add each entry from PEM file to x509_store */
+    for(i = 0; i < sk_X509_INFO_num(inf); ++i) {
+      itmp = sk_X509_INFO_value(inf, i);
+      if(itmp->x509) {
+        X509_STORE_add_cert(cts, itmp->x509);
+        ++count;
+      }
+      if(itmp->crl) {
+        X509_STORE_add_crl(cts, itmp->crl);
+        ++count;
+      }
+    }
+
+    /* if we didn't end up importing anything, treat that as an error */
+    if(count > 0)
+      result = CURLE_OK;
+  } while(0);
+
+  if(inf)
+    sk_X509_INFO_pop_free(inf, X509_INFO_free);
+
+  if(cbio)
+    BIO_free(cbio);
+
+  return result;
+}
+
 static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 {
   CURLcode result = CURLE_OK;
@@ -2498,6 +2553,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   const char * const ssl_cert_type = SSL_SET_OPTION(cert_type);
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
+  const char * const ca_file_pem = SSL_CONN_CONFIG(ca_file_pem);
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char * const ssl_crlfile = SSL_SET_OPTION(CRLfile);
   char error_buffer[256];
@@ -2987,6 +3043,15 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
       infof(data, "error importing windows ca store, continuing anyway\n");
   }
 #endif
+  if(ca_file_pem && load_cacert_from_memory(backend->ctx, ca_file_pem)) {
+    if(verifypeer) {
+      /* Fail if we insist on successfully verifying the server. */
+      failf(data, "error setting certificate from memory");
+      return CURLE_SSL_CACERT_BADFILE;
+    }
+    /* Continue with a warning if no certificate verification is required. */
+    infof(data, "error setting certificate file, continuing anyway\n");
+  }
 
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
   /* OpenSSL 3.0.0 has deprecated SSL_CTX_load_verify_locations */

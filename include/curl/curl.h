@@ -2031,6 +2031,14 @@ typedef enum {
    */
   CURLOPT(CURLOPT_SSL_EC_CURVES, CURLOPTTYPE_STRINGPOINT, 298),
 
+  /* The CAfile in memory as PEM used to validate the proxy certificate
+     this option is used only if PROXY_SSL_VERIFYPEER is true */
+  CURLOPT(CURLOPT_CAINFO_PEM, CURLOPTTYPE_STRINGPOINT, 299),
+
+  /* The CAfile in memory as PEM used to validate the proxy certificate
+     this option is used only if PROXY_SSL_VERIFYPEER is true */
+  CURLOPT(CURLOPT_PROXY_CAINFO_PEM, CURLOPTTYPE_STRINGPOINT, 300),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

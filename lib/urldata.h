@@ -231,6 +231,7 @@ struct ssl_primary_config {
   char *pinned_key;
   struct curl_blob *cert_blob;
   char *curves;          /* list of curves to use */
+  char *ca_file_pem;
   BIT(verifypeer);       /* set TRUE if this is desired */
   BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
   BIT(verifystatus);     /* set TRUE if certificate status must be checked */
@@ -1509,6 +1510,8 @@ enum dupstring {
   STRING_SSL_CAPATH_PROXY, /* CA directory name (doesn't work on windows) */
   STRING_SSL_CAFILE_ORIG, /* certificate file to verify peer against */
   STRING_SSL_CAFILE_PROXY, /* certificate file to verify peer against */
+  STRING_SSL_CAFILE_PEM_ORIG, /* PEM certificate to verify peer against */
+  STRING_SSL_CAFILE_PEM_PROXY, /* PEM certificate to verify peer against */
   STRING_SSL_PINNEDPUBLICKEY_ORIG, /* public key file to verify peer against */
   STRING_SSL_PINNEDPUBLICKEY_PROXY, /* public key file to verify proxy */
   STRING_SSL_CIPHER_LIST_ORIG, /* list of ciphers to use */

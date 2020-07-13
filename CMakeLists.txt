@@ -804,6 +804,8 @@ set(CURL_CA_FALLBACK OFF CACHE BOOL
     "Set ON to use built-in CA store of TLS backend. Defaults to OFF")
 set(CURL_CA_PATH "auto" CACHE STRING
     "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+set(CURL_CA_BUNDLE_PEM OFF CACHE BOOL
+    "Set ON to use built-in CACERT_PEM from generated cacert.h. Defaults to OFF")
 
 if("${CURL_CA_BUNDLE}" STREQUAL "")
   message(FATAL_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or file path.")

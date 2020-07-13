@@ -133,6 +133,7 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      blobcmp(data->cert_blob, needle->cert_blob) &&
      Curl_safe_strcasecompare(data->CApath, needle->CApath) &&
      Curl_safe_strcasecompare(data->CAfile, needle->CAfile) &&
+     Curl_safe_strcasecompare(data->ca_file_pem, needle->ca_file_pem) &&
      Curl_safe_strcasecompare(data->clientcert, needle->clientcert) &&
      Curl_safe_strcasecompare(data->random_file, needle->random_file) &&
      Curl_safe_strcasecompare(data->egdsocket, needle->egdsocket) &&
@@ -159,6 +160,7 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   CLONE_BLOB(cert_blob);
   CLONE_STRING(CApath);
   CLONE_STRING(CAfile);
+  CLONE_STRING(ca_file_pem);
   CLONE_STRING(clientcert);
   CLONE_STRING(random_file);
   CLONE_STRING(egdsocket);
@@ -174,6 +176,7 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
 {
   Curl_safefree(sslc->CApath);
   Curl_safefree(sslc->CAfile);
+  Curl_safefree(sslc->ca_file_pem);
   Curl_safefree(sslc->clientcert);
   Curl_safefree(sslc->random_file);
   Curl_safefree(sslc->egdsocket);
