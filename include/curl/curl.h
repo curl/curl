@@ -2634,10 +2634,6 @@ typedef enum {
   CURLINFO_PROXY_SSL_VERIFYRESULT = CURLINFO_LONG + 47,
   CURLINFO_PROTOCOL         = CURLINFO_LONG   + 48,
   CURLINFO_SCHEME           = CURLINFO_STRING + 49,
-  /* Fill in new entries below here! */
-
-  /* Preferably these would be defined conditionally based on the
-     sizeof curl_off_t being 64-bits */
   CURLINFO_TOTAL_TIME_T     = CURLINFO_OFF_T + 50,
   CURLINFO_NAMELOOKUP_TIME_T = CURLINFO_OFF_T + 51,
   CURLINFO_CONNECT_TIME_T   = CURLINFO_OFF_T + 52,
@@ -2646,6 +2642,7 @@ typedef enum {
   CURLINFO_REDIRECT_TIME_T  = CURLINFO_OFF_T + 55,
   CURLINFO_APPCONNECT_TIME_T = CURLINFO_OFF_T + 56,
   CURLINFO_RETRY_AFTER      = CURLINFO_OFF_T + 57,
+  CURLINFO_EFFECTIVE_METHOD = CURLINFO_STRING + 58,
 
   CURLINFO_LASTONE          = 57
 } CURLINFO;

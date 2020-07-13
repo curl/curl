@@ -229,6 +229,7 @@ CURLINFO_COOKIELIST             7.14.1
 CURLINFO_DATA_IN                7.9.6
 CURLINFO_DATA_OUT               7.9.6
 CURLINFO_DOUBLE                 7.4.1
+CURLINFO_EFFECTIVE_METHOD       7.72.0
 CURLINFO_EFFECTIVE_URL          7.4
 CURLINFO_END                    7.9.6
 CURLINFO_FILETIME               7.5
