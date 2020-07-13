@@ -1195,7 +1195,6 @@ typedef enum {
   HTTPREQ_POST_MIME, /* we make a difference internally */
   HTTPREQ_PUT,
   HTTPREQ_HEAD,
-  HTTPREQ_OPTIONS,
   HTTPREQ_LAST /* last in list */
 } Curl_HttpReq;
 

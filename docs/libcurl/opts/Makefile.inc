@@ -35,6 +35,7 @@ man_MANS =                                      \
   CURLINFO_CONTENT_LENGTH_UPLOAD_T.3            \
   CURLINFO_CONTENT_TYPE.3                       \
   CURLINFO_COOKIELIST.3                         \
+  CURLINFO_EFFECTIVE_METHOD.3                   \
   CURLINFO_EFFECTIVE_URL.3                      \
   CURLINFO_FILETIME.3                           \
   CURLINFO_FILETIME_T.3                         \
