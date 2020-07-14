@@ -2380,8 +2380,13 @@ if test -z "$ssl_backends" -o "x$OPT_WOLFSSL" != xno; then
       OPT_WOLFSSL=""
     fi
 
-    CURL_CHECK_PKGCONFIG(wolfssl, [$wolfpkg])
-    AC_MSG_NOTICE([Check dir $wolfpkg])
+    if test x$cross_compiling != xyes; then
+      dnl only do pkg-config magic when not cross-compiling
+      CURL_CHECK_PKGCONFIG(wolfssl, [$wolfpkg])
+      AC_MSG_NOTICE([Check dir $wolfpkg])
+    else
+      PKGCONFIG="no"
+    fi
 
     addld=""
     addlib=""
