@@ -537,6 +537,7 @@ static const struct feat feats[] = {
   {"IDN",            CURL_VERSION_IDN},
   {"IPv6",           CURL_VERSION_IPV6},
   {"Largefile",      CURL_VERSION_LARGEFILE},
+  {"Unicode",        CURL_VERSION_UNICODE},
   {"SSPI",           CURL_VERSION_SSPI},
   {"GSS-API",        CURL_VERSION_GSSAPI},
   {"Kerberos",       CURL_VERSION_KERBEROS5},
