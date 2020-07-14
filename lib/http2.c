@@ -742,7 +742,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     rv = push_promise(data_s, conn, &frame->push_promise);
     if(rv) { /* deny! */
       int h2;
-      DEBUGASSERT((rv > CURL_PUSH_OK) && (rv < CURL_PUSH_ERROROUT));
+      DEBUGASSERT((rv > CURL_PUSH_OK) && (rv <= CURL_PUSH_ERROROUT));
       h2 = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
                                      frame->push_promise.promised_stream_id,
                                      NGHTTP2_CANCEL);
