@@ -783,6 +783,7 @@ struct curl_khkey {
 /* this is the set of return values expected from the curl_sshkeycallback
    callback */
 enum curl_khstat {
+  CURLKHSTAT_FINE_REPLACE_TO_FILE,
   CURLKHSTAT_FINE_ADD_TO_FILE,
   CURLKHSTAT_FINE,
   CURLKHSTAT_REJECT, /* reject the connection, return an error */

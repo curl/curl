@@ -442,6 +442,8 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
   if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
     /* we're asked to verify the host against a file */
     struct ssh_conn *sshc = &conn->proto.sshc;
+	
+    struct libssh2_knownhost *host = NULL;
     int rc;
     int keytype;
     size_t keylen;
@@ -456,7 +458,6 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
        * What host name does OpenSSH store in its file if an IDN name is
        * used?
        */
-      struct libssh2_knownhost *host;
       enum curl_khmatch keymatch;
       curl_sshkeycallback func =
         data->set.ssh_keyfunc?data->set.ssh_keyfunc:sshkeycallback;
@@ -568,6 +569,9 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
       /* DEFER means bail out but keep the SSH_HOSTKEY state */
       result = sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
       break;
+	case CURLKHSTAT_FINE_REPLACE_TO_FILE:
+      /* remove old host+key that doesn't match */
+      if(host)libssh2_knownhost_del(sshc->kh, host);
     case CURLKHSTAT_FINE:
     case CURLKHSTAT_FINE_ADD_TO_FILE:
       /* proceed */
@@ -583,7 +587,8 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
         if(addrc)
           infof(data, "Warning adding the known host %s failed!\n",
                 conn->host.name);
-        else if(rc == CURLKHSTAT_FINE_ADD_TO_FILE) {
+        else if( rc == CURLKHSTAT_FINE_ADD_TO_FILE || 
+		  rc == CURLKHSTAT_FINE_REPLACE_TO_FILE ) {
           /* now we write the entire in-memory list of known hosts to the
              known_hosts file */
           int wrc =
