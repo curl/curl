@@ -25,7 +25,7 @@ problems may have been fixed or changed somewhat since this was written!
  2. TLS
  2.1 CURLINFO_SSL_VERIFYRESULT has limited support
  2.2 DER in keychain
- 2.4 DarwinSSL won't import PKCS#12 client certificates without a password
+ 2.4 Secure Transport won't import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
  2.6 CURL_GLOBAL_SSL
  2.7 Client cert (MTLS) issues with Schannel
@@ -209,7 +209,7 @@ problems may have been fixed or changed somewhat since this was written!
  Curl doesn't recognize certificates in DER format in keychain, but it works
  with PEM.  https://curl.haxx.se/bug/view.cgi?id=1065
 
-2.4 DarwinSSL won't import PKCS#12 client certificates without a password
+2.4 Secure Transport won't import PKCS#12 client certificates without a password
 
  libcurl calls SecPKCS12Import with the PKCS#12 client certificate, but that
  function rejects certificates that do not have a password.
