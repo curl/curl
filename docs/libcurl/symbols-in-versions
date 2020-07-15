@@ -892,6 +892,7 @@ CURL_PROGRESSFUNC_CONTINUE      7.68.0
 CURL_PROGRESS_BAR               7.1.1         -           7.4.1
 CURL_PROGRESS_STATS             7.1.1         -           7.4.1
 CURL_PUSH_DENY                  7.44.0
+CURL_PUSH_ERROROUT              7.72.0
 CURL_PUSH_OK                    7.44.0
 CURL_READFUNC_ABORT             7.12.1
 CURL_READFUNC_PAUSE             7.18.0

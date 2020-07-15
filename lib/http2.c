@@ -514,7 +514,7 @@ static int push_promise(struct Curl_easy *data,
                         struct connectdata *conn,
                         const nghttp2_push_promise *frame)
 {
-  int rv;
+  int rv; /* one of the CURL_PUSH_* defines */
   H2BUGF(infof(data, "PUSH_PROMISE received, stream %u!\n",
                frame->promised_stream_id));
   if(data->multi->push_cb) {
@@ -528,7 +528,7 @@ static int push_promise(struct Curl_easy *data,
     struct Curl_easy *newhandle = duphandle(data);
     if(!newhandle) {
       infof(data, "failed to duplicate handle\n");
-      rv = 1; /* FAIL HARD */
+      rv = CURL_PUSH_DENY; /* FAIL HARD */
       goto fail;
     }
 
@@ -541,13 +541,15 @@ static int push_promise(struct Curl_easy *data,
     if(!stream) {
       failf(data, "Internal NULL stream!\n");
       (void)Curl_close(&newhandle);
-      rv = 1;
+      rv = CURL_PUSH_DENY;
       goto fail;
     }
 
     rv = set_transfer_url(newhandle, &heads);
-    if(rv)
+    if(rv) {
+      rv = CURL_PUSH_DENY;
       goto fail;
+    }
 
     Curl_set_in_callback(data, true);
     rv = data->multi->push_cb(data, newhandle,
@@ -563,6 +565,7 @@ static int push_promise(struct Curl_easy *data,
     stream->push_headers_used = 0;
 
     if(rv) {
+      DEBUGASSERT((rv > CURL_PUSH_OK) && (rv <= CURL_PUSH_ERROROUT));
       /* denied, kill off the new handle again */
       http2_stream_free(newhandle->req.protop);
       newhandle->req.protop = NULL;
@@ -583,7 +586,7 @@ static int push_promise(struct Curl_easy *data,
       http2_stream_free(newhandle->req.protop);
       newhandle->req.protop = NULL;
       Curl_close(&newhandle);
-      rv = 1;
+      rv = CURL_PUSH_DENY;
       goto fail;
     }
 
@@ -595,12 +598,13 @@ static int push_promise(struct Curl_easy *data,
       infof(data, "failed to set user_data for stream %d\n",
             frame->promised_stream_id);
       DEBUGASSERT(0);
+      rv = CURL_PUSH_DENY;
       goto fail;
     }
   }
   else {
     H2BUGF(infof(data, "Got PUSH_PROMISE, ignore it!\n"));
-    rv = 1;
+    rv = CURL_PUSH_DENY;
   }
   fail:
   return rv;
@@ -737,11 +741,16 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   case NGHTTP2_PUSH_PROMISE:
     rv = push_promise(data_s, conn, &frame->push_promise);
     if(rv) { /* deny! */
-      rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
+      int h2;
+      DEBUGASSERT((rv > CURL_PUSH_OK) && (rv <= CURL_PUSH_ERROROUT));
+      h2 = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
                                      frame->push_promise.promised_stream_id,
                                      NGHTTP2_CANCEL);
-      if(nghttp2_is_fatal(rv)) {
-        return rv;
+      if(nghttp2_is_fatal(h2))
+        return NGHTTP2_ERR_CALLBACK_FAILURE;
+      else if(rv == CURL_PUSH_ERROROUT) {
+        DEBUGF(infof(data_s, "Fail the parent stream (too)\n"));
+        return NGHTTP2_ERR_CALLBACK_FAILURE;
       }
     }
     break;
