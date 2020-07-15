@@ -641,7 +641,7 @@ int netware_init(void);
   defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) ||  \
   defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
   defined(USE_MBEDTLS) ||                                               \
-  (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_SET_ODD_PARITY))
+  (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
 
 #define USE_NTLM
 
