@@ -789,6 +789,7 @@ enum curl_khstat {
   CURLKHSTAT_DEFER,  /* do not accept it, but we can't answer right now so
                         this causes a CURLE_DEFER error but otherwise the
                         connection will be left intact etc */
+  CURLKHSTAT_FINE_REPLACE, /* accept and replace the wrong key*/
   CURLKHSTAT_LAST    /* not for use, only a marker for last-in-list */
 };
 
