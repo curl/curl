@@ -124,7 +124,7 @@ without using TLS.
 curl can do directory lookups for you, with or without TLS.
 .IP MQTT
 curl supports MQTT version 3. Downloading over MQTT equals "subscribe" to a
-topic while uploading/posting equals "publishe" on a topic. MQTT support is
+topic while uploading/posting equals "publish" on a topic. MQTT support is
 experimental and TLS based MQTT is not supported (yet).
 .IP POP3(S)
 Downloading from a pop3 server means getting a mail. With or without using
