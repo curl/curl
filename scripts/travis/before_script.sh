@@ -96,8 +96,8 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   source $HOME/.cargo/env
   cd $HOME/quiche
   cargo build -v --release --features pkg-config-meta,qlog
-  mkdir -v deps/boringssl/lib
-  ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/lib/
+  mkdir -v deps/boringssl/src/lib
+  ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
 fi
 
 # Install common libraries.
