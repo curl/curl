@@ -176,6 +176,31 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
       }
     }
   }
+#elif WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_GAMES)
+  const unsigned int winMajorV = 10;
+  const unsigned int winMinorV = 0;
+
+  //majorVersion
+  //minorVersion
+  switch (condition) {
+  case VERSION_LESS_THAN:
+      return (winMajorV == majorVersion) ? (winMinorV < minorVersion) : (winMajorV < majorVersion);
+
+  case VERSION_LESS_THAN_EQUAL:
+      return (winMajorV == majorVersion) ? (winMinorV <= minorVersion) : (winMajorV < majorVersion);
+
+  case VERSION_EQUAL:
+      return (winMajorV == majorVersion) && (winMinorV == minorVersion);
+
+  case VERSION_GREATER_THAN_EQUAL:
+      return (winMajorV == majorVersion) ? (winMinorV >= minorVersion) : (winMajorV > majorVersion);
+
+  case VERSION_GREATER_THAN:
+      return (winMajorV == majorVersion) ? (winMinorV > minorVersion) : (winMajorV > majorVersion);
+
+  default:
+      return FALSE;
+  }
 #else
   ULONGLONG cm = 0;
   OSVERSIONINFOEX osver;

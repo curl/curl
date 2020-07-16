@@ -50,7 +50,7 @@
 #  endif
 #endif
 
-#if defined(macintosh) && defined(__MRC__)
+#if defined(__MACH__)
 #  include "config-mac.h"
 #endif
 
