@@ -139,7 +139,9 @@ static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 }
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
-              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
+              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
+       defined(__MAC_OS_X_VERSION_MIN_ALLOWED) && \
+              (__MAC_OS_X_VERSION_MIN_ALLOWED < 101500)) || \
       (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
               (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000))
 
