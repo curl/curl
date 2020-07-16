@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -64,8 +64,8 @@ This option controls checking the server's certificate's claimed identity.
 The server could be lying.  To control lying, see
 \fICURLOPT_SSL_VERIFYPEER(3)\fP.
 .SH LIMITATIONS
-DarwinSSL: If \fIverify\fP value is 0, then SNI is also disabled. SNI is a TLS
-extension that sends the hostname to the server. The server may use that
+Secure Transport: If \fIverify\fP value is 0, then SNI is also disabled. SNI is
+a TLS extension that sends the hostname to the server. The server may use that
 information to do such things as sending back a specific certificate for the
 hostname, or forwarding the request to a specific origin server. Some hostnames
 may be inaccessible if SNI is not sent.
