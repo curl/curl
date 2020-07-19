@@ -81,8 +81,10 @@ jobs:
           CXX: clang++
         - CC: gcc-8
           CXX: g++-8
+          CFLAGS: "-Wno-error=undef -Wno-error=conversion"
         - CC: gcc-9
           CXX: g++-9
+          CFLAGS: "-Wno-error=undef -Wno-error=conversion"
         build:
         - name: OpenSSL
           install: nghttp2 openssl
@@ -99,7 +101,7 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - run: cmake -H. -Bbuild ${{ matrix.build.generate }}
+    - run: cmake -H. -Bbuild -DCURL_WERROR=ON -DPICKY_COMPILER=ON ${{ matrix.build.generate }}
       name: 'cmake generate'
 
     - run: cmake --build build
