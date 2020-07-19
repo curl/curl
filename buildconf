@@ -363,13 +363,6 @@ ${AUTOHEADER:-autoheader} || die "autoheader command failed"
 echo "buildconf: running autoconf"
 ${AUTOCONF:-autoconf} || die "autoconf command failed"
 
-if test -d ares; then
-  cd ares
-  echo "buildconf: running in ares"
-  ./buildconf
-  cd ..
-fi
-
 echo "buildconf: running automake"
 ${AUTOMAKE:-automake} --add-missing --copy || die "automake command failed"
 
