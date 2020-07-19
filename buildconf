@@ -351,6 +351,7 @@ if test -f m4/libtool.m4; then
 fi
 
 echo "buildconf: running aclocal"
+#shellcheck disable=SC2154
 ${ACLOCAL:-aclocal} -I m4 $ACLOCAL_FLAGS || die "aclocal command failed"
 
 echo "buildconf: converting all mv to mv -f in local aclocal.m4"
