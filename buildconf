@@ -25,7 +25,7 @@
 # die prints argument string to stdout and exits this shell script.
 #
 die(){
-  echo "buildconf: $@"
+  echo "buildconf: $*"
   exit 1
 }
 
