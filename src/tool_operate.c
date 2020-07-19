@@ -137,7 +137,7 @@ static bool is_fatal_error(CURLcode code)
  */
 static bool is_pkcs11_uri(const char *string)
 {
-  if(curl_strnequal(string, "pkcs11:", 7)) {
+  if(checkprefix("pkcs11:", string)) {
     return TRUE;
   }
   else {
@@ -592,7 +592,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       char *effective_url = NULL;
       curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective_url);
       if(effective_url &&
-         curl_strnequal(effective_url, "http", 4)) {
+         checkprefix("http", effective_url)) {
         /* This was HTTP(S) */
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
         if(response != 200 && response != 206) {
