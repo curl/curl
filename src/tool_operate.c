@@ -924,23 +924,21 @@ static CURLcode single_transfer(struct GlobalConfig *global,
              etag_from_file) {
             header = aprintf("If-None-Match: \"%s\"", etag_from_file);
             Curl_safefree(etag_from_file);
+
+            if(!header) {
+              if(file)
+                fclose(file);
+              errorf(config->global,
+                     "Failed to allocate memory for custom etag header\n");
+              result = CURLE_OUT_OF_MEMORY;
+              break;
+            }
+
+            /* add Etag from file to list of custom headers */
+            add2list(&config->headers, header);
+
+            Curl_safefree(header);
           }
-          else
-            header = aprintf("If-None-Match: \"\"");
-
-          if(!header) {
-            if(file)
-              fclose(file);
-            errorf(config->global,
-                   "Failed to allocate memory for custom etag header\n");
-            result = CURLE_OUT_OF_MEMORY;
-            break;
-          }
-
-          /* add Etag from file to list of custom headers */
-          add2list(&config->headers, header);
-
-          Curl_safefree(header);
 
           if(file) {
             fclose(file);
