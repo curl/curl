@@ -104,42 +104,17 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     /* match only header that start with etag (case insensitive) */
     if(curl_strnequal(str, "etag:", 5)) {
       char *etag_h = NULL;
-      char *first = NULL;
-      char *last = NULL;
       size_t etag_length = 0;
+      etag_h = ptr + strlen("ETag:");
 
-      etag_h = ptr;
-      /* point to first occurrence of double quote */
-      first = memchr(etag_h, '\"', cb);
-
-      /*
-       * if server side messed with the etag header and doesn't include
-       * double quotes around the etag, kindly exit with a warning
-       */
-
-      if(!first) {
-        warnf(per->config->global,
-              "Received header etag is missing double quote/s\n");
-        return failure;
-      }
-      else {
-        /* discard first double quote */
-        first++;
-      }
-
-      /* point to last occurrence of double quote */
-      last = memchr(first, '\"', cb);
-
-      if(!last) {
-        warnf(per->config->global,
-              "Received header etag is missing double quote/s\n");
-        return failure;
-      }
+      /* pass all spaces */
+      while(*etag_h && ISSPACE(*etag_h))
+        etag_h++;
 
       /* get length of desired etag */
-      etag_length = (size_t)last - (size_t)first;
+      etag_length = (size_t)end - strlen("\r\n") - (size_t)etag_h;
 
-      fwrite(first, size, etag_length, etag_save->stream);
+      fwrite(etag_h, size, etag_length, etag_save->stream);
       /* terminate with new line */
       fputc('\n', etag_save->stream);
     }

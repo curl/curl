@@ -923,7 +923,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
              etag_from_file) {
             if (strlen(etag_from_file)) {
               char *header = NULL;
-              header = aprintf("If-None-Match: \"%s\"", etag_from_file);
+              header = aprintf("If-None-Match: %s", etag_from_file);
               Curl_safefree(etag_from_file);
 
               if(!header) {
