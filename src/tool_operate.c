@@ -909,7 +909,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         /* --etag-compare */
         if(config->etag_compare_file) {
           char *etag_from_file = NULL;
-          char *header = NULL;
 
           /* open file for reading: */
           FILE *file = fopen(config->etag_compare_file, FOPEN_READTEXT);
@@ -922,22 +921,27 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
           if((PARAM_OK == file2string(&etag_from_file, file)) &&
              etag_from_file) {
-            header = aprintf("If-None-Match: \"%s\"", etag_from_file);
-            Curl_safefree(etag_from_file);
+            if (strlen(etag_from_file)) {
+              char *header = NULL;
+              header = aprintf("If-None-Match: \"%s\"", etag_from_file);
+              Curl_safefree(etag_from_file);
 
-            if(!header) {
-              if(file)
-                fclose(file);
-              errorf(config->global,
-                     "Failed to allocate memory for custom etag header\n");
-              result = CURLE_OUT_OF_MEMORY;
-              break;
+              if(!header) {
+                if(file)
+                  fclose(file);
+                errorf(config->global,
+                       "Failed to allocate memory for custom etag header\n");
+                result = CURLE_OUT_OF_MEMORY;
+                break;
+              }
+
+              /* add Etag from file to list of custom headers */
+              add2list(&config->headers, header);
+
+              Curl_safefree(header);
+            } else {
+              Curl_safefree(etag_from_file);
             }
-
-            /* add Etag from file to list of custom headers */
-            add2list(&config->headers, header);
-
-            Curl_safefree(header);
           }
 
           if(file) {
