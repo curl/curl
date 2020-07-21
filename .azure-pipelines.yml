@@ -57,7 +57,7 @@ stages:
       matrix:
         default:
           name: default
-          configure: --enable-debug --enable-werror
+          configure: --enable-debug
         disable_ipv6:
           name: w/o IPv6
           configure: --disable-ipv6
@@ -79,7 +79,7 @@ stages:
     - script: sudo apt-get update && sudo apt-get install -y stunnel4 python-impacket libzstd-dev libbrotli-dev $(install)
       displayName: 'apt install'
 
-    - script: ./buildconf && ./configure $(configure)
+    - script: ./buildconf && ./configure --enable-warnings --enable-werror $(configure)
       displayName: 'configure $(name)'
 
     - script: make
