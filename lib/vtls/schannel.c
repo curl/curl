@@ -448,7 +448,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
      Also it doesn't seem to be supported for Wine, see curl bug #983. */
   BACKEND->use_alpn = conn->bits.tls_enable_alpn &&
-    !GetProcAddress(GetModuleHandleA("ntdll"),
+    !GetProcAddress(GetModuleHandle(TEXT("ntdll")),
                     "wine_get_version") &&
     Curl_verify_windows_version(6, 3, PLATFORM_WINNT,
                                 VERSION_GREATER_THAN_EQUAL);
