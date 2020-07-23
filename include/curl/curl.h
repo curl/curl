@@ -2644,7 +2644,7 @@ typedef enum {
   CURLINFO_RETRY_AFTER      = CURLINFO_OFF_T + 57,
   CURLINFO_EFFECTIVE_METHOD = CURLINFO_STRING + 58,
 
-  CURLINFO_LASTONE          = 57
+  CURLINFO_LASTONE          = 58
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
