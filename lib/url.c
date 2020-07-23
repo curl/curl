@@ -1836,11 +1836,12 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   CURLU *uh;
   CURLUcode uc;
   char *hostname;
+  bool use_set_uh = (data->set.uh && !data->state.this_is_a_follow);
 
   up_free(data); /* cleanup previous leftovers first */
 
   /* parse the URL */
-  if(data->set.uh) {
+  if(use_set_uh) {
     uh = data->state.uh = curl_url_dup(data->set.uh);
   }
   else {
@@ -1863,7 +1864,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     data->change.url_alloc = TRUE;
   }
 
-  if(!data->set.uh) {
+  if(!use_set_uh) {
     char *newurl;
     uc = curl_url_set(uh, CURLUPART_URL, data->change.url,
                     CURLU_GUESS_SCHEME |

@@ -189,7 +189,7 @@ test1540 test1541 \
 \
 test1550 test1551 test1552 test1553 test1554 test1555 test1556 test1557 \
 test1558 test1559 test1560 test1561 test1562 test1563 test1564 test1565 \
-test1566 \
+test1566 test1567 \
 \
 test1590 test1591 test1592 test1593 test1594 test1595 test1596 \
 \
