@@ -2415,7 +2415,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
 #ifdef WIN32
       else {
         result = FindWin32CACert(config, tls_backend_info->backend,
-                                 "curl-ca-bundle.crt");
+                                 TEXT("curl-ca-bundle.crt"));
       }
 #endif
     }
