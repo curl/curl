@@ -178,12 +178,14 @@ static long dprintf_DollarString(char *input, char **end)
 {
   int number = 0;
   while(ISDIGIT(*input)) {
-    number *= 10;
-    number += *input-'0';
+    if(number < MAX_PARAMETERS) {
+      number *= 10;
+      number += *input - '0';
+    }
     input++;
   }
-  if(number && ('$'==*input++)) {
-    *end = input;
+  if(number <= MAX_PARAMETERS && ('$' == *input)) {
+    *end = ++input;
     return number;
   }
   return 0;
@@ -377,6 +379,8 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
           if(width > max_param)
             max_param = width;
           break;
+        case '\0':
+          fmt--;
         default:
           break;
         }
@@ -458,6 +462,9 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
         /* we have the width specified from a parameter, so we make that
            parameter's info setup properly */
         long k = width - 1;
+        if((k < 0) || (k >= MAX_PARAMETERS))
+          /* out of allowed range */
+          return 1;
         vto[i].width = k;
         vto[k].type = FORMAT_WIDTH;
         vto[k].flags = FLAGS_NEW;
@@ -469,6 +476,9 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
         /* we have the precision specified from a parameter, so we make that
            parameter's info setup properly */
         long k = precision - 1;
+        if((k < 0) || (k >= MAX_PARAMETERS))
+          /* out of allowed range */
+          return 1;
         vto[i].precision = k;
         vto[k].type = FORMAT_WIDTH;
         vto[k].flags = FLAGS_NEW;
@@ -476,7 +486,7 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
         vto[k].width = 0;
         vto[k].precision = 0;
       }
-      *endpos++ = fmt + 1; /* end of this sequence */
+      *endpos++ = fmt + ((*fmt == '\0') ? 0 : 1); /* end of this sequence */
     }
   }
 
