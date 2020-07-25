@@ -764,7 +764,7 @@ static int dprintf_formatf(
 
       if(prec > 0) {
         width -= prec;
-        while(prec-- > 0)
+        while(prec-- > 0 && w >= work)
           *w-- = '0';
       }
 
@@ -928,6 +928,8 @@ static int dprintf_formatf(
              precision */
           size_t maxprec = sizeof(work) - 2;
           double val = p->data.dnum;
+          if(width > 0 && prec <= width)
+            maxprec -= width;
           while(val >= 10.0) {
             val /= 10;
             maxprec--;
@@ -935,6 +937,8 @@ static int dprintf_formatf(
 
           if(prec > (long)maxprec)
             prec = (long)maxprec-1;
+          if(prec < 0)
+            prec = 0;
           /* RECURSIVE USAGE */
           len = curl_msnprintf(fptr, left, ".%ld", prec);
           fptr += len;

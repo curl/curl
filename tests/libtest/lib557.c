@@ -1537,6 +1537,17 @@ static int test_weird_arguments(void)
 
   errors += string_check(buf, "");
 
+  /* Do not skip sanity checks with parameters! */
+  buf[0] = 0;
+  rc = curl_msnprintf(buf, sizeof(buf), "%d, %.*1$d", 500, 1);
+
+  if(rc != 256) {
+    printf("curl_mprintf() returned %d and not 256!\n", rc);
+    errors++;
+  }
+
+  errors += strlen_check(buf, 255);
+
   if(errors)
     printf("Some curl_mprintf() weird arguments tests failed!\n");
 
