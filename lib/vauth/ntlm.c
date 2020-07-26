@@ -191,6 +191,7 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
         return CURLE_BAD_CONTENT_ENCODING;
       }
 
+      free(ntlm->target_info); /* replace any previous data */
       ntlm->target_info = malloc(target_info_len);
       if(!ntlm->target_info)
         return CURLE_OUT_OF_MEMORY;
