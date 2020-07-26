@@ -1094,7 +1094,7 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
   struct pollfd *ufds = &a_few_on_stack[0];
   bool ufds_malloc = FALSE;
 #else
-  int already_writable = 0;
+  struct pollfd pre_poll;
   DEBUGASSERT(multi->wsa_event != WSA_INVALID_EVENT);
 #endif
 
@@ -1175,13 +1175,15 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
     while(data) {
       bitmap = multi_getsock(data, sockbunch);
 
-      for(i = 0; i< MAX_SOCKSPEREASYHANDLE; i++) {
+      for(i = 0; i < MAX_SOCKSPEREASYHANDLE; i++) {
         curl_socket_t s = CURL_SOCKET_BAD;
 #ifdef USE_WINSOCK
         long mask = 0;
 #endif
         if(bitmap & GETSOCK_READSOCK(i)) {
 #ifdef USE_WINSOCK
+          if(SOCKET_READABLE(sockbunch[i], 0) > 0)
+            timeout_ms = 0;
           mask |= FD_READ;
 #else
           ufds[nfds].fd = sockbunch[i];
@@ -1192,15 +1194,8 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
         }
         if(bitmap & GETSOCK_WRITESOCK(i)) {
 #ifdef USE_WINSOCK
-          struct timeval timeout;
-          fd_set writefds;
-          timeout.tv_sec = 0;
-          timeout.tv_usec = 0;
-          FD_ZERO(&writefds);
-          FD_SET(sockbunch[i], &writefds);
-          if(select((int)sockbunch[i] + 1, NULL, &writefds, NULL,
-                    &timeout) == 1)
-            already_writable++;
+          if(SOCKET_WRITABLE(sockbunch[i], 0) > 0)
+            timeout_ms = 0;
           mask |= FD_WRITE;
 #else
           ufds[nfds].fd = sockbunch[i];
@@ -1227,23 +1222,30 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
 #ifdef USE_WINSOCK
     long events = 0;
     extra_fds[i].revents = 0;
-    if(extra_fds[i].events & CURL_WAIT_POLLIN)
+    pre_poll.fd = extra_fds[i].fd;
+    pre_poll.events = 0;
+    pre_poll.revents = 0;
+    if(extra_fds[i].events & CURL_WAIT_POLLIN) {
       events |= FD_READ;
-    if(extra_fds[i].events & CURL_WAIT_POLLPRI)
+      pre_poll.events |= POLLIN;
+    }
+    if(extra_fds[i].events & CURL_WAIT_POLLPRI) {
       events |= FD_OOB;
+      pre_poll.events |= POLLPRI;
+    }
     if(extra_fds[i].events & CURL_WAIT_POLLOUT) {
-      struct timeval timeout;
-      fd_set writefds;
-      timeout.tv_sec = 0;
-      timeout.tv_usec = 0;
-      FD_ZERO(&writefds);
-      FD_SET(extra_fds[i].fd, &writefds);
-      if(select((int)extra_fds[i].fd + 1, NULL, &writefds, NULL,
-                &timeout) == 1) {
-        extra_fds[i].revents = CURL_WAIT_POLLOUT;
-        already_writable++;
-      }
       events |= FD_WRITE;
+      pre_poll.events |= POLLOUT;
+    }
+    if(Curl_poll(&pre_poll, 1, 0) > 0) {
+      if(pre_poll.revents & POLLIN)
+        extra_fds[i].revents |= CURL_WAIT_POLLIN;
+      if(pre_poll.revents & POLLOUT)
+        extra_fds[i].revents |= CURL_WAIT_POLLOUT;
+      if(pre_poll.revents & POLLPRI)
+        extra_fds[i].revents |= CURL_WAIT_POLLPRI;
+      if(extra_fds[i].revents)
+        timeout_ms = 0;
     }
     if(WSAEventSelect(extra_fds[i].fd, multi->wsa_event, events) != 0)
       return CURLM_INTERNAL_ERROR;
@@ -1273,8 +1275,6 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
   if(nfds) {
     /* wait... */
 #ifdef USE_WINSOCK
-    if(already_writable > 0)
-      timeout_ms = 0;
     WSAWaitForMultipleEvents(1, &multi->wsa_event, FALSE, timeout_ms, FALSE);
 #else
     int pollrc = Curl_poll(ufds, nfds, timeout_ms);
@@ -1306,7 +1306,7 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
           if(events.lNetworkEvents & FD_OOB)
             mask |= CURL_WAIT_POLLPRI;
 
-          if(events.lNetworkEvents != 0)
+          if(ret && events.lNetworkEvents != 0)
             retcode++;
         }
         WSAEventSelect(extra_fds[i].fd, multi->wsa_event, 0);
@@ -1337,19 +1337,15 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
               WSANETWORKEVENTS events = {0};
               if(WSAEnumNetworkEvents(sockbunch[i], multi->wsa_event,
                                       &events) == 0) {
-                if(events.lNetworkEvents != 0)
+                if(ret && events.lNetworkEvents != 0)
                   retcode++;
               }
-              if(ret && !events.lNetworkEvents &&
-                 (bitmap & GETSOCK_WRITESOCK(i))) {
-                struct timeval timeout;
-                fd_set writefds;
-                timeout.tv_sec = 0;
-                timeout.tv_usec = 0;
-                FD_ZERO(&writefds);
-                FD_SET(sockbunch[i], &writefds);
-                if(select((int)sockbunch[i] + 1, NULL, &writefds, NULL,
-                          &timeout) == 1)
+              if(ret && !timeout_ms && !events.lNetworkEvents) {
+                if((bitmap & GETSOCK_READSOCK(i)) &&
+                   SOCKET_READABLE(sockbunch[i], 0) > 0)
+                  retcode++;
+                else if((bitmap & GETSOCK_WRITESOCK(i)) &&
+                   SOCKET_WRITABLE(sockbunch[i], 0) > 0)
                   retcode++;
               }
               WSAEventSelect(sockbunch[i], multi->wsa_event, 0);
