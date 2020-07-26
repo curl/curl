@@ -522,6 +522,11 @@ push @cfgarr, '#';
 # and do not support quotes around values for some unknown reason.
 if ($sshdid =~ /OpenSSH-Windows/) {
     my $username_lc = lc $username;
+    if (exists $ENV{USERDOMAIN}) {
+        my $userdomain_lc = lc $ENV{USERDOMAIN};
+        $username_lc = "$userdomain_lc\\$username_lc";
+    }
+    $username_lc =~ s/ /\?/g; # replace space with ?
     push @cfgarr, "DenyUsers !$username_lc";
     push @cfgarr, "AllowUsers $username_lc";
 } else {
