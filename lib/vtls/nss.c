@@ -1027,12 +1027,7 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
   CERTCertificate *cert;
 
   /* remember the cert verification result */
-#ifndef CURL_DISABLE_PROXY
-  if(SSL_IS_PROXY())
-    data->set.proxy_ssl.certverifyresult = err;
-  else
-#endif
-    data->set.ssl.certverifyresult = err;
+  SSL_SET_OPTION_LVALUE(certverifyresult) = err;
 
   if(err == SSL_ERROR_BAD_CERT_DOMAIN && !SSL_CONN_CONFIG(verifyhost))
     /* we are asked not to verify the host name */
@@ -1838,12 +1833,6 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   CURLcode result;
   bool second_layer = FALSE;
   SSLVersionRange sslver_supported;
-#ifndef CURL_DISABLE_PROXY
-  const char *hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
-    conn->host.name;
-#else
-  const char *hostname = conn->host.name;
-#endif
 
   SSLVersionRange sslver = {
     SSL_LIBRARY_VERSION_TLS_1_0,  /* min */
@@ -1948,12 +1937,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     goto error;
 
   /* not checked yet */
-#ifndef CURL_DISABLE_PROXY
-  if(SSL_IS_PROXY())
-    data->set.proxy_ssl.certverifyresult = 0;
-  else
-#endif
-    data->set.ssl.certverifyresult = 0;
+  SSL_SET_OPTION_LVALUE(certverifyresult) = 0;
 
   if(SSL_BadCertHook(model, BadCertHandler, conn) != SECSuccess)
     goto error;
@@ -2125,11 +2109,11 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     goto error;
 
   /* propagate hostname to the TLS layer */
-  if(SSL_SetURL(backend->handle, hostname) != SECSuccess)
+  if(SSL_SetURL(backend->handle, SSL_HOST_NAME()) != SECSuccess)
     goto error;
 
   /* prevent NSS from re-using the session for a different hostname */
-  if(SSL_SetSockPeerID(backend->handle, hostname) != SECSuccess)
+  if(SSL_SetSockPeerID(backend->handle, SSL_HOST_NAME()) != SECSuccess)
     goto error;
 
   return CURLE_OK;
@@ -2148,18 +2132,6 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_SSL_CONNECT_ERROR;
   PRUint32 timeout;
-#ifndef CURL_DISABLE_PROXY
-  long * const certverifyresult = SSL_IS_PROXY() ?
-    &data->set.proxy_ssl.certverifyresult : &data->set.ssl.certverifyresult;
-  const char * const pinnedpubkey = SSL_IS_PROXY() ?
-              data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-              data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
-#else
-  long * const certverifyresult = &data->set.ssl.certverifyresult;
-  const char * const pinnedpubkey =
-              data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
-#endif
-
 
   /* check timeout situation */
   const timediff_t time_left = Curl_timeleft(data, NULL, TRUE);
@@ -2175,9 +2147,9 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
     if(PR_GetError() == PR_WOULD_BLOCK_ERROR)
       /* blocking direction is updated by nss_update_connecting_state() */
       return CURLE_AGAIN;
-    else if(*certverifyresult == SSL_ERROR_BAD_CERT_DOMAIN)
+    else if(SSL_SET_OPTION(certverifyresult) == SSL_ERROR_BAD_CERT_DOMAIN)
       result = CURLE_PEER_FAILED_VERIFICATION;
-    else if(*certverifyresult != 0)
+    else if(SSL_SET_OPTION(certverifyresult) != 0)
       result = CURLE_PEER_FAILED_VERIFICATION;
     goto error;
   }
@@ -2205,7 +2177,7 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
     }
   }
 
-  result = cmp_peer_pubkey(connssl, pinnedpubkey);
+  result = cmp_peer_pubkey(connssl, SSL_PINNED_PUB_KEY());
   if(result)
     /* status already printed */
     goto error;

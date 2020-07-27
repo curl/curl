@@ -1582,16 +1582,8 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
   CURLcode result = CURLE_OK;
   bool dNSName = FALSE; /* if a dNSName field exists in the cert */
   bool iPAddress = FALSE; /* if a iPAddress field exists in the cert */
-#ifndef CURL_DISABLE_PROXY
-  const char * const hostname = SSL_IS_PROXY() ?
-    conn->http_proxy.host.name : conn->host.name;
-  const char * const dispname = SSL_IS_PROXY() ?
-    conn->http_proxy.host.dispname : conn->host.dispname;
-#else
-  /* disabled proxy support */
-  const char * const hostname = conn->host.name;
-  const char * const dispname = conn->host.dispname;
-#endif
+  const char * const hostname = SSL_HOST_NAME();
+  const char * const dispname = SSL_HOST_DISPNAME();
 
 #ifdef ENABLE_IPV6
   if(conn->bits.ipv6_ip &&
@@ -2470,24 +2462,13 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
   bool sni;
-#ifndef CURL_DISABLE_PROXY
-  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
-    conn->host.name;
-#else
-  const char * const hostname = conn->host.name;
-#endif
+  const char * const hostname = SSL_HOST_NAME();
 
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
   struct in_addr addr;
 #endif
-#endif
-#ifndef CURL_DISABLE_PROXY
-  long * const certverifyresult = SSL_IS_PROXY() ?
-    &data->set.proxy_ssl.certverifyresult : &data->set.ssl.certverifyresult;
-#else
-  long * const certverifyresult = &data->set.ssl.certverifyresult;
 #endif
   const long int ssl_version = SSL_CONN_CONFIG(version);
 #ifdef HAVE_OPENSSL_SRP
@@ -2511,7 +2492,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   if(result)
     return result;
 
-  *certverifyresult = !X509_V_OK;
+  SSL_SET_OPTION_LVALUE(certverifyresult) = !X509_V_OK;
 
   /* check to see if we've been told to use an explicit SSL/TLS version */
 
@@ -3221,12 +3202,6 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
   struct Curl_easy *data = conn->data;
   int err;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-#ifndef CURL_DISABLE_PROXY
-  long * const certverifyresult = SSL_IS_PROXY() ?
-    &data->set.proxy_ssl.certverifyresult : &data->set.ssl.certverifyresult;
-#else
-  long * const certverifyresult = &data->set.ssl.certverifyresult;
-#endif
   struct ssl_backend_data *backend = connssl->backend;
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
               || ssl_connect_2_reading == connssl->connecting_state
@@ -3291,7 +3266,7 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
 
         lerr = SSL_get_verify_result(backend->handle);
         if(lerr != X509_V_OK) {
-          *certverifyresult = lerr;
+          SSL_SET_OPTION_LVALUE(certverifyresult) = lerr;
           msnprintf(error_buffer, sizeof(error_buffer),
                     "SSL certificate problem: %s",
                     X509_verify_cert_error_string(lerr));
@@ -3313,12 +3288,10 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
        * the SO_ERROR is also lost.
        */
       if(CURLE_SSL_CONNECT_ERROR == result && errdetail == 0) {
+        const char * const hostname = SSL_HOST_NAME();
 #ifndef CURL_DISABLE_PROXY
-        const char * const hostname = SSL_IS_PROXY() ?
-          conn->http_proxy.host.name : conn->host.name;
         const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
 #else
-        const char * const hostname = conn->host.name;
         const long int port = conn->remote_port;
 #endif
         char extramsg[80]="";
@@ -3773,12 +3746,6 @@ static CURLcode servercert(struct connectdata *conn,
   char error_buffer[256]="";
   char buffer[2048];
   const char *ptr;
-#ifndef CURL_DISABLE_PROXY
-  long * const certverifyresult = SSL_IS_PROXY() ?
-    &data->set.proxy_ssl.certverifyresult : &data->set.ssl.certverifyresult;
-#else
-  long * const certverifyresult = &data->set.ssl.certverifyresult;
-#endif
   BIO *mem = BIO_new(BIO_s_mem());
   struct ssl_backend_data *backend = connssl->backend;
 
@@ -3899,9 +3866,9 @@ static CURLcode servercert(struct connectdata *conn,
       X509_free(issuer);
     }
 
-    lerr = *certverifyresult = SSL_get_verify_result(backend->handle);
-
-    if(*certverifyresult != X509_V_OK) {
+    lerr = SSL_get_verify_result(backend->handle);
+    SSL_SET_OPTION_LVALUE(certverifyresult) = lerr;
+    if(lerr != X509_V_OK) {
       if(SSL_CONN_CONFIG(verifypeer)) {
         /* We probably never reach this, because SSL_connect() will fail
            and we return earlier if verifypeer is set? */
