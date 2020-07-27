@@ -21,6 +21,11 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+#ifdef HAVE_FCNTL_H
+/* for open() */
+#include <fcntl.h>
+#endif
+
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
 #include "curlx.h"
@@ -37,7 +42,7 @@ bool tool_create_output_file(struct OutStruct *outs,
                              struct OperationConfig *config)
 {
   struct GlobalConfig *global;
-  FILE *file;
+  FILE *file = NULL;
   DEBUGASSERT(outs);
   DEBUGASSERT(config);
   global = config->global;
@@ -48,17 +53,14 @@ bool tool_create_output_file(struct OutStruct *outs,
 
   if(outs->is_cd_filename) {
     /* don't overwrite existing files */
-    file = fopen(outs->filename, "rb");
-    if(file) {
-      fclose(file);
-      warnf(global, "Refusing to overwrite %s: %s\n", outs->filename,
-            strerror(EEXIST));
-      return FALSE;
-    }
+    int fd = open(outs->filename, O_CREAT | O_WRONLY | O_EXCL, 0666);
+    if(fd != -1)
+      file = fdopen(fd, "wb");
   }
+  else
+    /* open file for writing */
+    file = fopen(outs->filename, "wb");
 
-  /* open file for writing */
-  file = fopen(outs->filename, "wb");
   if(!file) {
     warnf(global, "Failed to create the file %s: %s\n", outs->filename,
           strerror(errno));
