@@ -81,7 +81,7 @@ struct Curl_multi {
      this multi handle with an easy handle. Set this to CURL_MULTI_HANDLE. */
   long type;
 
-  /* We have a doubly-linked circular list with easy handles */
+  /* We have a doubly-linked list with easy handles */
   struct Curl_easy *easyp;
   struct Curl_easy *easylp; /* last node */
 
