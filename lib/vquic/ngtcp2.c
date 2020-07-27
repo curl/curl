@@ -1725,7 +1725,7 @@ static CURLcode ng_process_ingress(struct connectdata *conn, int sockfd,
   int rv;
   uint8_t buf[65536];
   size_t bufsize = sizeof(buf);
-  struct sockaddr remote_addr;
+  struct sockaddr_storage remote_addr;
   socklen_t remote_addrlen;
   ngtcp2_path path;
   ngtcp2_tstamp ts = timestamp();
@@ -1747,7 +1747,8 @@ static CURLcode ng_process_ingress(struct connectdata *conn, int sockfd,
 
     ngtcp2_addr_init(&path.local, &qs->local_addr,
                      qs->local_addrlen, NULL);
-    ngtcp2_addr_init(&path.remote, &remote_addr, remote_addrlen, NULL);
+    ngtcp2_addr_init(&path.remote, (struct sockaddr *)&remote_addr,
+                     remote_addrlen, NULL);
 
     rv = ngtcp2_conn_read_pkt(qs->qconn, &path, buf, recvd, ts);
     if(rv != 0) {
