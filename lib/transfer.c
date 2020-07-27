@@ -487,6 +487,12 @@ CURLcode Curl_readrewind(struct connectdata *conn)
 static int data_pending(const struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
+
+#ifdef ENABLE_QUIC
+  if(conn->transport == TRNSPRT_QUIC)
+    return Curl_quic_data_pending(data);
+#endif
+
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
   return conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP) ||
@@ -500,8 +506,6 @@ static int data_pending(const struct Curl_easy *data)
        be called and we cannot signal the HTTP/2 stream has closed. As
        a workaround, we return nonzero here to call http2_recv. */
     ((conn->handler->protocol&PROTO_FAMILY_HTTP) && conn->httpversion >= 20);
-#elif defined(ENABLE_QUIC)
-    Curl_ssl_data_pending(conn, FIRSTSOCKET) || Curl_quic_data_pending(data);
 #else
     Curl_ssl_data_pending(conn, FIRSTSOCKET);
 #endif
