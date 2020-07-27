@@ -592,7 +592,8 @@ sub scanfile {
 
         # scan for use of banned functions
         if($l =~ /^(.*\W)
-                   (gets|
+                   (gmtime|localtime|
+                    gets|
                     strtok|
                     v?sprintf|
                     (str|_mbs|_tcs|_wcs)n?cat|
