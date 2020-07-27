@@ -119,6 +119,7 @@ void logmsg(const char *msg, ...)
     known_offset = 1;
   }
   sec = epoch_offset + tv.tv_sec;
+  /* !checksrc! disable BANNEDFUNC 1 */
   now = localtime(&sec); /* not thread safe but we don't care */
 
   msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
