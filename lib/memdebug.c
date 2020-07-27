@@ -456,6 +456,16 @@ FILE *curl_dbg_fopen(const char *file, const char *mode,
   return res;
 }
 
+FILE *curl_dbg_fdopen(int filedes, const char *mode,
+                      int line, const char *source)
+{
+  FILE *res = fdopen(filedes, mode);
+  if(source)
+    curl_dbg_log("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
+                 source, line, filedes, mode, (void *)res);
+  return res;
+}
+
 int curl_dbg_fclose(FILE *file, int line, const char *source)
 {
   int res;
