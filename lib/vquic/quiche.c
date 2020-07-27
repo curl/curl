@@ -95,8 +95,14 @@ static CURLcode qs_disconnect(struct quicsocket *qs)
     quiche_h3_config_free(qs->h3config);
   if(qs->h3c)
     quiche_h3_conn_free(qs->h3c);
-  quiche_config_free(qs->cfg);
-  quiche_conn_free(qs->conn);
+  if(qs->cfg) {
+    quiche_config_free(qs->cfg);
+    qs->cfg = NULL;
+  }
+  if(qs->conn) {
+    quiche_conn_free(qs->conn);
+    qs->conn = NULL;
+  }
   return CURLE_OK;
 }
 
