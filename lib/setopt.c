@@ -274,6 +274,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     if(data->set.opt_no_body)
       /* in HTTP lingo, no body means using the HEAD request... */
       data->set.method = HTTPREQ_HEAD;
+    else if(data->set.method == HTTPREQ_HEAD)
+      data->set.method = HTTPREQ_GET;
     break;
   case CURLOPT_FAILONERROR:
     /*
