@@ -921,7 +921,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
           if((PARAM_OK == file2string(&etag_from_file, file)) &&
              etag_from_file) {
-            if (strlen(etag_from_file)) {
+            if(strlen(etag_from_file)) {
               char *header = NULL;
               header = aprintf("If-None-Match: %s", etag_from_file);
               Curl_safefree(etag_from_file);
@@ -939,7 +939,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               add2list(&config->headers, header);
 
               Curl_safefree(header);
-            } else {
+            }
+            else {
               Curl_safefree(etag_from_file);
             }
           }
