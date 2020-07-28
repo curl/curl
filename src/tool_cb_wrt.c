@@ -53,9 +53,20 @@ bool tool_create_output_file(struct OutStruct *outs,
 
   if(outs->is_cd_filename) {
     /* don't overwrite existing files */
-    int fd = open(outs->filename, O_CREAT | O_WRONLY | O_EXCL, 0666);
-    if(fd != -1)
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+    int fd = open(outs->filename, O_CREAT | O_WRONLY | O_EXCL | O_BINARY,
+                  S_IRUSR | S_IWUSR
+#ifdef S_IRGRP
+                  | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
+#endif
+      );
+    if(fd != -1) {
       file = fdopen(fd, "wb");
+      if(!file)
+        close(fd);
+    }
   }
   else
     /* open file for writing */
