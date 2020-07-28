@@ -934,10 +934,10 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
         return CURLE_OK;
       }
-      infof(data, "Connection failed\n");
     }
-    else if(rc & CURL_CSELECT_ERR)
+    else if(rc & CURL_CSELECT_ERR) {
       (void)verifyconnect(conn->tempsock[i], &error);
+    }
 
     /*
      * The connection failed here, we should attempt to connect to the "next
