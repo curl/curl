@@ -107,7 +107,7 @@ stages:
       container_cmd: ''
       configure: ''
       tflags: ''
-    timeoutInMinutes: 90
+    timeoutInMinutes: 120
     pool:
       vmImage: 'windows-2019'
     strategy:
