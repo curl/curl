@@ -4,7 +4,7 @@ curl and libcurl 7.72.0
  Command line options:         232
  curl_easy_setopt() options:   277
  Public functions in libcurl:  82
- Contributors:                 2219
+ Contributors:                 2226
 
 This release includes the following changes:
 
@@ -16,39 +16,56 @@ This release includes the following bugfixes:
 
  o appveyor: collect libcurl.dll variants with prefix or suffix [38]
  o bearssl: fix build with disabled proxy support [16]
+ o checksrc: ban gmtime/localtime [40]
  o CI/azure: unconditionally enable warnings-as-errors with autotools [19]
  o CI/macos: enable warnings as errors for CMake builds [4]
+ o CI/macos: set minimum macOS version [56]
  o CI/macos: unconditionally enable warnings-as-errors with autotools [21]
  o cirrus-ci: upgrade 11-STABLE to 11.4 [2]
  o CMake: fix test for warning suppressions [17]
  o cmake: fix windows xp build [13]
  o configure.ac: Sort features name in summary [6]
  o configure: allow disabling warnings [26]
+ o configure: cleanup wolfssl + pkg-config conflicts when cross compiling. [48]
+ o configure: show zstd "no" in summary when built without it [49]
  o curl: add %{method} to the -w variables
+ o curl: improve the existing file check with -J [43]
+ o curl_multi_setopt: fix compiler warning "result is always false" [42]
  o curl_version_info.3: CURL_VERSION_KERBEROS4 is deprecated [9]
  o CURLINFO_CERTINFO.3: fix typo [3]
+ o CURLOPT_NOBODY.3: clarify what setting to 0 means [46]
+ o docs: add date of 7.20 to CURLM_CALL_MULTI_PERFORM mentions [18]
  o docs: Update a few leftover mentions of DarwinSSL [29]
  o doh: remove redundant cast [20]
  o file2memory: use a define instead of -1 unsigned value [30]
  o ftpserver: don't verify SMTP MAIL FROM names [8]
+ o getinfo: reset retry-after value in initinfo [51]
  o gnutls: repair the build with `CURL_DISABLE_PROXY` [5]
  o http2: close the http2 connection when no more requests may be sent [7]
  o http2: fix nghttp2_strerror -> nghttp2_http2_strerror in debug messages [11]
  o md(4|5): don't use deprecated macOS functions [23]
+ o mprintf: Fix dollar string handling [54]
+ o mprintf: Fix stack overflows [53]
  o multi: remove two checks always true [36]
+ o multi: update comment to say easyp list is linear [44]
  o ngtcp2: adjust to recent sockaddr updates [27]
  o ngtcp2: update to modified qlog callback prototype [14]
  o nss: fix build with disabled proxy support [32]
+ o ntlm: free target_info before (re-)malloc [55]
  o page-header: provide protocol details in the curl.1 man page [28]
+ o quiche: handle calling disconnect twice [50]
+ o setopt: unset NOBODY switches to GET if still HEAD [47]
  o socks: use size_t for size variable [39]
  o strdup: remove the odd strlen check [24]
  o test1119: verify stdout in the test [33]
  o test1139: make it display the difference on test failures
  o tool_getparam: make --krb option work again [10]
+ o transfer: fix data_pending for builds with both h2 and h3 enabled [41]
  o transfer: fix memory-leak with CURLOPT_CURLU in a duped handle [15]
  o travis: update quiche builds for new boringssl layout [25]
  o url: silence MSVC warning [12]
  o util: silence conversion warnings [22]
+ o WIN32: stop forcing narrow-character API [52]
  o windows: add unicode to feature list [35]
 
 This release includes the following known bugs:
@@ -58,13 +75,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Alex Kiernan, Baruch Siach, Carlo Marcelo Arenas Belón,
-  Daniel Gustafsson, Daniel Stenberg, Erik Johansson, Filip Salomonsson,
-  Gilles Vollant, ihsinme on github, Jeremy Maitin-Shepard,
-  Jonathan Cardoso Machado, Kamil Dudka, Laramie Leavitt, Marcel Raad,
-  Marc Hörsken, Matthias Naegler, Nicolas Sterchele, NobodyXu on github,
-  Peter Wu, Ray Satiro, tbugfinder on github, Viktor Szakats, xwxbug on github,
-  (24 contributors)
+  Alessandro Ghedini, Alex Kiernan, Baruch Siach, BrumBrum on hackerone,
+  Carlo Marcelo Arenas Belón, causal-agent on github, Daniel Gustafsson,
+  Daniel Stenberg, divinity76 on github, Ehren Bendler, Erik Johansson,
+  Filip Salomonsson, Gilles Vollant, Gisle Vanem, ihsinme on github,
+  Jeremy Maitin-Shepard, joey-l-us on github, Jonathan Cardoso Machado,
+  Jonathan Nieder, Kamil Dudka, Laramie Leavitt, lilongyan-huawei on github,
+  Marcel Raad, Marc Hörsken, Masaya Suzuki, Matthias Naegler,
+  Nicolas Sterchele, NobodyXu on github, Peter Wu, Ray Satiro,
+  Tatsuhiro Tsujikawa, tbugfinder on github, Tobias Stoeckmann, Viktor Szakats,
+  xwxbug on github,
+  (35 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -87,6 +108,7 @@ References to bug reports and discussions on issues:
  [15] = https://curl.haxx.se/bug/?i=5665
  [16] = https://curl.haxx.se/bug/?i=5666
  [17] = https://curl.haxx.se/bug/?i=5714
+ [18] = https://curl.haxx.se/bug/?i=5744
  [19] = https://curl.haxx.se/bug/?i=5706
  [20] = https://curl.haxx.se/bug/?i=5704
  [21] = https://curl.haxx.se/bug/?i=5694
@@ -107,3 +129,19 @@ References to bug reports and discussions on issues:
  [36] = https://curl.haxx.se/bug/?i=5676
  [38] = https://curl.haxx.se/bug/?i=5659
  [39] = https://curl.haxx.se/bug/?i=5654
+ [40] = https://curl.haxx.se/bug/?i=5732
+ [41] = https://curl.haxx.se/bug/?i=5734
+ [42] = https://github.com/curl/curl/commit/61a08508f6a458fe21bbb18cd2a9bac2f039452b#commitcomment-40941232
+ [43] = https://hackerone.com/reports/926638
+ [44] = https://curl.haxx.se/bug/?i=5737
+ [46] = https://curl.haxx.se/bug/?i=5729
+ [47] = https://curl.haxx.se/bug/?i=5725
+ [48] = https://curl.haxx.se/bug/?i=5605
+ [49] = https://curl.haxx.se/bug/?i=5720
+ [50] = https://curl.haxx.se/bug/?i=5726
+ [51] = https://curl.haxx.se/bug/?i=5661
+ [52] = https://curl.haxx.se/bug/?i=5658
+ [53] = https://curl.haxx.se/bug/?i=5722
+ [54] = https://curl.haxx.se/bug/?i=5722
+ [55] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=24379
+ [56] = https://curl.haxx.se/bug/?i=5723
