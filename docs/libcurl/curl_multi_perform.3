@@ -103,7 +103,7 @@ default:
 .SH "RETURN VALUE"
 CURLMcode type, general libcurl multi interface error code.
 
-Before version 7.20.0: If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this
+Before version 7.20.0 (released on February 9 2010): If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this
 basically means that you should call \fIcurl_multi_perform(3)\fP again, before
 you select() on more actions. You don't have to do it immediately, but the
 return code means that libcurl may have more data available to return or that
