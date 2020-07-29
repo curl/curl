@@ -26,6 +26,8 @@
 #include <fcntl.h>
 #endif
 
+#include <sys/stat.h>
+
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
 #include "curlx.h"
@@ -57,9 +59,10 @@ bool tool_create_output_file(struct OutStruct *outs,
 #define O_BINARY 0
 #endif
     int fd = open(outs->filename, O_CREAT | O_WRONLY | O_EXCL | O_BINARY,
-                  S_IRUSR | S_IWUSR
-#ifdef S_IRGRP
-                  | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
+#ifdef WIN32
+                  S_IREAD | S_IWRITE
+#else
+                  S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
 #endif
       );
     if(fd != -1) {
