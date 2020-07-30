@@ -689,6 +689,26 @@ static CURLcode multi_done(struct Curl_easy *data,
   return result;
 }
 
+static int close_connect_only(struct connectdata *conn, void *param)
+{
+  struct Curl_easy *data = param;
+
+  if(data->state.lastconnect != conn)
+    return 0;
+
+  if(conn->data != data)
+    return 1;
+  conn->data = NULL;
+
+  if(!conn->bits.connect_only)
+    return 1;
+
+  connclose(conn, "Removing connect-only easy handle");
+  conn->bits.connect_only = FALSE;
+
+  return 1;
+}
+
 CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
                                    struct Curl_easy *data)
 {
@@ -776,10 +796,6 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
      multi_done() as that may actually call Curl_expire that uses this */
   Curl_llist_destroy(&data->state.timeoutlist, NULL);
 
-  /* as this was using a shared connection cache we clear the pointer to that
-     since we're not part of that multi handle anymore */
-  data->state.conn_cache = NULL;
-
   /* change state without using multistate(), only to make singlesocket() do
      what we want */
   data->mstate = CURLM_STATE_COMPLETED;
@@ -789,11 +805,21 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   /* Remove the association between the connection and the handle */
   Curl_detach_connnection(data);
 
+  if(data->state.lastconnect) {
+    /* Mark any connect-only connection for closure */
+    Curl_conncache_foreach(data, data->state.conn_cache,
+                           data, &close_connect_only);
+  }
+
 #ifdef USE_LIBPSL
   /* Remove the PSL association. */
   if(data->psl == &multi->psl)
     data->psl = NULL;
 #endif
+
+  /* as this was using a shared connection cache we clear the pointer to that
+     since we're not part of that multi handle anymore */
+  data->state.conn_cache = NULL;
 
   data->multi = NULL; /* clear the association to this multi handle */
 
