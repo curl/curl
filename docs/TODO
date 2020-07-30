@@ -123,6 +123,7 @@
  15.1 Extend support for client certificate authentication
  15.2 Extend support for the --ciphers option
  15.3 Add option to disable client certificate auto-send
+ 15.4 Add option to allow abrupt server closure
 
  16. SASL
  16.1 Other authentication mechanisms
@@ -841,6 +842,15 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Schannel auto-send behavior.
 
  https://github.com/curl/curl/issues/2262
+
+15.4 Add option to allow abrupt server closure
+
+ libcurl w/schannel will error without a known termination point from the
+ server (such as length of transfer, or SSL "close notify" alert) to prevent
+ against a truncation attack. Really old servers may neglect to send any
+ termination point. An option could be added to ignore such abrupt closures.
+
+ https://github.com/curl/curl/issues/4427
 
 16. SASL
 
