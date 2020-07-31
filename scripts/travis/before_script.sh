@@ -119,7 +119,7 @@ if [ $TRAVIS_OS_NAME = linux ]; then
   cd $HOME/wolfssl-4.4.0-stable
   sudo make install
 
-  if [ $MESALINK = "yes" ]; then
+  if [ "$MESALINK" = "yes" ]; then
     if [ ! -e $HOME/mesalink-1.0.0/Makefile ]; then
       cd $HOME
       curl https://sh.rustup.rs -sSf | sh -s -- -y
