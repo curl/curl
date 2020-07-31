@@ -50,7 +50,7 @@
 #include "x509asn1.h"
 #include "curl_printf.h"
 #include "multiif.h"
-#include "system_win32.h"
+#include "version_win32.h"
 
 /* The last #include file should be: */
 #include "curl_memory.h"
@@ -436,8 +436,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
                "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
                hostname, conn->remote_port));
 
-  if(Curl_verify_windows_version(5, 1, PLATFORM_WINNT,
-                                 VERSION_LESS_THAN_EQUAL)) {
+  if(curlx_verify_windows_version(5, 1, PLATFORM_WINNT,
+                                  VERSION_LESS_THAN_EQUAL)) {
     /* Schannel in Windows XP (OS version 5.1) uses legacy handshakes and
        algorithms that may not be supported by all servers. */
     infof(data, "schannel: Windows version is old and may not be able to "
@@ -450,8 +450,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   BACKEND->use_alpn = conn->bits.tls_enable_alpn &&
     !GetProcAddress(GetModuleHandle(TEXT("ntdll")),
                     "wine_get_version") &&
-    Curl_verify_windows_version(6, 3, PLATFORM_WINNT,
-                                VERSION_GREATER_THAN_EQUAL);
+    curlx_verify_windows_version(6, 3, PLATFORM_WINNT,
+                                 VERSION_GREATER_THAN_EQUAL);
 #else
   BACKEND->use_alpn = false;
 #endif
@@ -467,8 +467,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #else
 #ifdef HAS_MANUAL_VERIFY_API
   if(SSL_CONN_CONFIG(CAfile)) {
-    if(Curl_verify_windows_version(6, 1, PLATFORM_WINNT,
-                                   VERSION_GREATER_THAN_EQUAL)) {
+    if(curlx_verify_windows_version(6, 1, PLATFORM_WINNT,
+                                    VERSION_GREATER_THAN_EQUAL)) {
       BACKEND->use_manual_cred_validation = true;
     }
     else {
@@ -2015,8 +2015,8 @@ schannel_recv(struct connectdata *conn, int sockindex,
   */
   if(len && !BACKEND->decdata_offset && BACKEND->recv_connection_closed &&
      !BACKEND->recv_sspi_close_notify) {
-    bool isWin2k = Curl_verify_windows_version(5, 0, PLATFORM_WINNT,
-                                               VERSION_EQUAL);
+    bool isWin2k = curlx_verify_windows_version(5, 0, PLATFORM_WINNT,
+                                                VERSION_EQUAL);
 
     if(isWin2k && sspi_status == SEC_E_OK)
       BACKEND->recv_sspi_close_notify = true;
