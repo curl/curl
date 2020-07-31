@@ -63,6 +63,9 @@
   curlx_unicodefree()
 */
 
+#include "version_win32.h"
+/* "version_win32.h" provides curlx_verify_windows_version() */
+
 /* Now setup curlx_ * names for the functions that are to become curlx_ and
    be removed from a future libcurl official API:
    curlx_getenv
