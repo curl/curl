@@ -155,7 +155,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug-mesalink C="--with-mesalink --without-ssl"
+    - T=debug-mesalink C="--with-mesalink --without-ssl" MESALINK=yes
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
