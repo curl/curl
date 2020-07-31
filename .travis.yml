@@ -349,6 +349,42 @@ jobs:
         - pkg-config
         - zlib1g-dev
 
+  - env:
+    - T=debug C="--enable-alt-svc"
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    arch: ppc64le
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libev-dev
+        - libssl-dev
+        - libtool
+        - pkg-config
+        - zlib1g-dev
+
+  - env:
+    - T=debug C="--enable-alt-svc"
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    arch: s390x
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libev-dev
+        - libssl-dev
+        - libtool
+        - pkg-config
+        - zlib1g-dev
+
 before_install:
 - export "${OVERRIDE_CC-blank=}"
 - export "${OVERRIDE_CXX-blank=}"
