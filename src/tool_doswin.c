@@ -707,22 +707,11 @@ bool tool_isVistaOrGreater;
 
 CURLcode win32_init(void)
 {
-  OSVERSIONINFOEX osvi;
-  unsigned __int64 mask = 0;
-  unsigned char op = VER_GREATER_EQUAL;
-
-  memset(&osvi, 0, sizeof(osvi));
-  osvi.dwOSVersionInfoSize = sizeof(osvi);
-  osvi.dwMajorVersion = 6;
-  VER_SET_CONDITION(mask, VER_MAJORVERSION, op);
-  VER_SET_CONDITION(mask, VER_MINORVERSION, op);
-
-  if(VerifyVersionInfo(&osvi, (VER_MAJORVERSION | VER_MINORVERSION), mask))
+  if(curlx_verify_windows_version(6, 0, PLATFORM_WINNT,
+                                  VERSION_GREATER_THAN_EQUAL))
     tool_isVistaOrGreater = true;
-  else if(GetLastError() == ERROR_OLD_WIN_VERSION)
-    tool_isVistaOrGreater = false;
   else
-    return CURLE_FAILED_INIT;
+    tool_isVistaOrGreater = false;
 
   QueryPerformanceFrequency(&tool_freq);
   return CURLE_OK;
