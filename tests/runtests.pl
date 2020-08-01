@@ -2817,7 +2817,7 @@ sub setupfeatures {
     $feature{"NSS"} = $has_nss;
     $feature{"NTLM"} = $has_ntlm;
     $feature{"NTLM_WB"} = $has_ntlm_wb;
-    $feature{"OpenSSL"} = $has_openssl;
+    $feature{"OpenSSL"} = $has_openssl || $has_libressl || $has_boringssl;
     $feature{"PSL"} = $has_psl;
     $feature{"Schannel"} = $has_winssl; # alias
     $feature{"sectransp"} = $has_darwinssl;
