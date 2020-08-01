@@ -619,7 +619,9 @@ SSL_CTX_use_certificate_chain_bio(SSL_CTX *ctx, BIO* in,
                                   const char *key_passwd)
 {
 /* SSL_CTX_add1_chain_cert introduced in OpenSSL 1.0.2 */
-#if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) /* 1.0.2 or later */
+#if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) && /* OpenSSL 1.0.2 or later */ \
+    !(defined(LIBRESSL_VERSION_NUMBER) && \
+      (LIBRESSL_VERSION_NUMBER < 0x2090100fL)) /* LibreSSL 2.9.1 or later */
   int ret = 0;
   X509 *x = NULL;
   void *passwd_callback_userdata = (void *)key_passwd;
