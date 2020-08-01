@@ -1281,7 +1281,7 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
         sleep_ms = timeout_ms;
       /* when there are no easy handles in the multi, this holds a -1
          timeout */
-      else if((sleep_ms < 0) && extrawait)
+      else if(sleep_ms < 0)
         sleep_ms = timeout_ms;
       Curl_wait_ms(sleep_ms);
     }
