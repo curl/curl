@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM)
+#if defined(USE_CURL_NTLM_CORE)
 
 /* If NSS is the first available SSL backend (see order in curl_ntlm_core.c)
    then it must be initialized to be used by NTLM. */
@@ -35,8 +35,6 @@
     defined(USE_NSS)
 #define NTLM_NEEDS_NSS_INIT
 #endif
-
-#if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
 
 #if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
 #ifdef USE_WOLFSSL
@@ -102,8 +100,6 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
 
 #endif /* USE_NTRESPONSES */
 
-#endif /* !USE_WINDOWS_SSPI || USE_WIN32_CRYPTO */
-
-#endif /* USE_NTLM */
+#endif /* USE_CURL_NTLM_CORE */
 
 #endif /* HEADER_CURL_NTLM_CORE_H */
