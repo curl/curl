@@ -44,6 +44,7 @@ Available substitute variables include:
 - `%HOSTIP` - IPv4 address of the host running this test
 - `%HTTP6PORT` - IPv6 port number of the HTTP server
 - `%HTTPPORT` - Port number of the HTTP server
+- `%HTTP2PORT` - Port number of the HTTP/2 server
 - `%HTTPSPORT` - Port number of the HTTPS server
 - `%HTTPSPROXYPORT` - Port number of the HTTPS-proxy
 - `%HTTPTLS6PORT` - IPv6 port number of the HTTP TLS server
