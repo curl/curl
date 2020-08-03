@@ -53,11 +53,11 @@ size_t Curl_dyn_len(const struct dynbuf *s);
 #define DYN_HAXPROXY        2048
 #define DYN_HTTP_REQUEST    (128*1024)
 #define DYN_H2_HEADERS      (128*1024)
-#define DYN_H2_TRAILER      4096
+#define DYN_H2_TRAILERS     (128*1024)
 #define DYN_APRINTF         8000000
 #define DYN_RTSP_REQ_HEADER (64*1024)
 #define DYN_TRAILERS        (64*1024)
 #define DYN_PROXY_CONNECT_HEADERS 16384
 #define DYN_QLOG_NAME       1024
-#define DYN_H1_TRAILER      DYN_H2_TRAILER
+#define DYN_H1_TRAILER      4096
 #endif
