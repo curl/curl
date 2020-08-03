@@ -718,17 +718,21 @@ Vista
 #define USE_WIN32_CRYPTO
 #endif
 
+/* On MinGW the ADDRESS_FAMILY typedef was committed alongside LUP_SECURE,
+   so we use it to check for the presence of the typedef. */
+#include <ws2tcpip.h>
+#if !defined(__MINGW32__) || defined(LUP_SECURE)
 /* Define to use Unix sockets. */
 #define USE_UNIX_SOCKETS
 #if !defined(UNIX_PATH_MAX)
   /* Replicating logic present in afunix.h of newer Windows 10 SDK versions */
 # define UNIX_PATH_MAX 108
-# include <ws2tcpip.h>
   /* !checksrc! disable TYPEDEFSTRUCT 1 */
   typedef struct sockaddr_un {
     ADDRESS_FAMILY sun_family;
     char sun_path[UNIX_PATH_MAX];
   } SOCKADDR_UN, *PSOCKADDR_UN;
+#endif
 #endif
 
 /* ---------------------------------------------------------------- */
