@@ -129,7 +129,8 @@ e93: API function called from within callback
 e94: An authentication function returned an error
 e95: HTTP/3 error
 e96: QUIC connection error
-e97: Unknown error
+e97: proxy handshake error
+e98: Unknown error
 m-1: Please call curl_multi_perform() soon
 m0: No error
 m1: Invalid multi handle

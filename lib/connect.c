@@ -746,8 +746,8 @@ static CURLcode connect_SOCKS(struct connectdata *conn, int sockindex,
                               bool *done)
 {
   CURLcode result = CURLE_OK;
-
 #ifndef CURL_DISABLE_PROXY
+  CURLproxycode pxresult = CURLPX_OK;
   if(conn->bits.socksproxy) {
     /* for the secondary socket (FTP), use the "connect to host"
      * but ignore the "connect to port" (use the secondary port)
@@ -767,20 +767,24 @@ static CURLcode connect_SOCKS(struct connectdata *conn, int sockindex,
     switch(conn->socks_proxy.proxytype) {
     case CURLPROXY_SOCKS5:
     case CURLPROXY_SOCKS5_HOSTNAME:
-      result = Curl_SOCKS5(conn->socks_proxy.user, conn->socks_proxy.passwd,
-                           host, port, sockindex, conn, done);
+      pxresult = Curl_SOCKS5(conn->socks_proxy.user, conn->socks_proxy.passwd,
+                             host, port, sockindex, conn, done);
       break;
 
     case CURLPROXY_SOCKS4:
     case CURLPROXY_SOCKS4A:
-      result = Curl_SOCKS4(conn->socks_proxy.user, host, port, sockindex,
-                           conn, done);
+      pxresult = Curl_SOCKS4(conn->socks_proxy.user, host, port, sockindex,
+                             conn, done);
       break;
 
     default:
       failf(conn->data, "unknown proxytype option given");
       result = CURLE_COULDNT_CONNECT;
     } /* switch proxytype */
+    if(pxresult) {
+      result = CURLE_PROXY;
+      conn->data->info.pxcode = pxresult;
+    }
   }
   else
 #else
