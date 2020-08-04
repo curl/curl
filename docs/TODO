@@ -160,6 +160,7 @@
  18.21 retry on the redirected-to URL
  18.22 Add flag to specify download directory
  18.23 Set the modification date on an uploaded file
+ 18.24 Use multiple parallel transfers for a single download
 
  19. Build
  19.1 roffit
@@ -1123,6 +1124,27 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  modification time for the uploaded file.
 
  See https://github.com/curl/curl/issues/5768
+
+18.24 Use multiple parallel transfers for a single download
+
+ To enhance transfer speed, downloading a single URL can be split up into
+ multiple separate range downloads that get combined into a single final
+ result.
+
+ An ideal implementation would not use a specified number of parallel
+ transfers, but curl could:
+ - First start getting the full file as transfer A
+ - If after N seconds have passed and the transfer is expected to continue for
+   M seconds or more, add a new transfer (B) that asks for the second half of
+   A's content (and stop A at the middle).
+ - If splitting up the work improves the transfer rate, it could then be done
+   again. Then again, etc up to a limit.
+
+ This way, if transfer B fails (because Range: isn't supported) it will let
+ transfer A remain the single one. N and M could be set to some sensible
+ defaults.
+
+ See https://github.com/curl/curl/issues/5774
 
 19. Build
 
