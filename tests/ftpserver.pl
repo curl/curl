@@ -83,6 +83,7 @@ my $proto = 'ftp';  # default server protocol
 my $srcdir;         # directory where ftpserver.pl is located
 my $srvrname;       # server name for presentation purposes
 my $cwd_testno;     # test case numbers extracted from CWD command
+my $testno = 0;     # test case number (read from ftpserver.cmd)
 my $path   = '.';
 my $logdir = $path .'/log';
 
@@ -449,16 +450,13 @@ sub startsf {
 # Returns the given test's reply data
 #
 sub getreplydata {
-    my ($testno) = @_;
+    my ($num) = @_;
     my $testpart = "";
 
-    $testno =~ s/^([^0-9]*)//;
-    if($testno > 10000) {
-       $testpart = $testno % 10000;
-       $testno = int($testno / 10000);
+    $num =~ s/^([^0-9]*)//;
+    if($num > 10000) {
+       $testpart = $num % 10000;
     }
-
-    loadtest("$srcdir/data/test$testno");
 
     my @data = getpart("reply", "data$testpart");
     if((!@data) && ($testpart ne "")) {
@@ -2093,7 +2091,8 @@ my @ftpdir=("total 20\r\n",
     logmsg "pass LIST data on data connection\n";
 
     if($cwd_testno) {
-        loadtest("$srcdir/data/test$cwd_testno");
+        loadtest("$logdir/test$cwd_testno") ||
+            loadtest("$srcdir/data/test$cwd_testno");
 
         my @data = getpart("reply", "data");
         for(@data) {
@@ -2156,7 +2155,8 @@ sub MDTM_ftp {
         $testno = int($testno / 10000);
     }
 
-    loadtest("$srcdir/data/test$testno");
+    loadtest("$logdir/test$testno") ||
+        loadtest("$srcdir/data/test$testno");
 
     my @data = getpart("reply", "mdtm");
 
@@ -2209,7 +2209,8 @@ sub SIZE_ftp {
         $testno = int($testno / 10000);
     }
 
-    loadtest("$srcdir/data/test$testno");
+    loadtest("$logdir/test$testno") ||
+        loadtest("$srcdir/data/test$testno");
 
     my @data = getpart("reply", "size");
 
@@ -2298,7 +2299,8 @@ sub RETR_ftp {
         $testno = int($testno / 10000);
     }
 
-    loadtest("$srcdir/data/test$testno");
+    loadtest("$logdir/test$testno") ||
+        loadtest("$srcdir/data/test$testno");
 
     my @data = getpart("reply", "data$testpart");
 
@@ -2881,6 +2883,10 @@ sub customize {
             $nosave = 1;
             logmsg "FTPD: NOSAVE prevents saving of uploaded data\n";
         }
+        elsif($_ =~ /^Testnum (\d+)/){
+            $testno = $1;
+            logmsg "FTPD: run test case number: $testno\n";
+        }
     }
     close(CUSTOM);
 }
@@ -3069,6 +3075,8 @@ while(1) {
     $| = 1;
 
     &customize(); # read test control instructions
+    loadtest("$logdir/test$testno") ||
+        loadtest("$srcdir/data/test$testno");
 
     my $welcome = $commandreply{"welcome"};
     if(!$welcome) {

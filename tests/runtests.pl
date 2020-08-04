@@ -76,6 +76,7 @@ use strict;
 use warnings;
 use Cwd;
 use Digest::MD5 qw(md5);
+use MIME::Base64;
 
 # Subs imported from serverhelp module
 use serverhelp qw(
@@ -3338,6 +3339,20 @@ sub subVariables {
     $$thing =~ s/${prefix}H2CVER/$h2cver/g;
 }
 
+sub subBase64 {
+    my ($thing) = @_;
+
+    # cut out the base64 piece
+    if($$thing =~ s/%b64\[(.*)\]b64%/%%B64%%/i) {
+        my $d = $1;
+        # encode %NN characters
+        $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+        my $enc = encode_base64($d, "");
+        # put the result into there
+        $$thing =~ s/%%B64%%/$enc/;
+    }
+}
+
 sub fixarray {
     my @in = @_;
 
@@ -3560,15 +3575,20 @@ sub singletest {
     for my $s (@entiretest) {
         my $f = $s;
         subVariables(\$s, "%");
+        subBase64(\$s);
         if($f ne $s) {
             $diff++;
         }
         print D $s;
     }
     close(D);
+
     # remove the separate test file again if nothing was updated to keep
     # things simpler
     unlink($otest) if(!$diff);
+
+    # in case the process changed the file, reload it
+    loadtest("log/test${testnum}") if($diff);
 
     # timestamp required servers verification end
     $timesrvrend{$testnum} = Time::HiRes::time();

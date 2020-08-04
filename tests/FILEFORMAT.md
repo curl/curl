@@ -21,6 +21,25 @@ variables are substituted by the their respective contents and the output
 version of the test file is stored as `log/testNUM`. That version is what will
 be read and used by the test servers.
 
+## Base64 Encoding
+
+In the preprocess stage, a special instruction can be used to have runtests.pl
+base64 encode a certain section and insert in the generated output file. This
+is in particular good for test cases where the test tool is expected to pass
+in base64 encoded content that might use dynamic information that is unique
+for this particular test invocation, like the server port number.
+
+To insert a base64 encoded string into the output, use this syntax:
+
+    %b64[ data to encode ]b64%
+
+The data to encode can then use any of the existing variables mentioned below,
+or even percent-encoded individual bytes. As an example, insert the HTTP
+server's port number (in ASCII) followed by a space and the hexadecimal byte
+9a:
+
+    %b64[%HTTPPORT %9a]b64%
+
 # Variables
 
 When the test is preprocessed, a range of "variables" in the test file will be
