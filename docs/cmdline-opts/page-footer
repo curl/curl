@@ -259,6 +259,16 @@ SSL public key does not matched pinned public key
 Invalid SSL certificate status.
 .IP 92
 Stream error in HTTP/2 framing layer.
+.IP 93
+An API function was called from inside a callback.
+.IP 94
+An authentication function returned an error.
+.IP 95
+A problem was detected in the HTTP/3 layer. This is somewhat generic and can
+be one out of several problems, see the error message for details.
+.IP 96
+QUIC connection error. This error may be caused by an SSL library error. QUIC
+is the protocol used for HTTP/3 transfers.
 .IP XX
 More error codes will appear here in future releases. The existing ones
 are meant to never change.
