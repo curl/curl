@@ -84,7 +84,7 @@ if [ "$T" = "normal" ]; then
   if [ -z $NOTESTS ]; then
     make test-nonflaky
   fi
-  if [ -n $CHECKSRC ]; then
+  if [ -n "$CHECKSRC" ]; then
     make checksrc
   fi
 fi
