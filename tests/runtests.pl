@@ -1434,7 +1434,7 @@ sub responsiveserver {
 # start the http2 server
 #
 sub runhttp2server {
-    my ($verbose, $port) = @_;
+    my ($verbose) = @_;
     my $server;
     my $srvrname;
     my $pidfile;
@@ -1466,26 +1466,34 @@ sub runhttp2server {
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
-    $flags .= "--port $HTTP2PORT ";
     $flags .= "--connect $HOSTIP:$HTTPPORT ";
     $flags .= $verbose_flag if($debugprotocol);
 
-    my $cmd = "$exe $flags";
-    my ($http2pid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+    my ($http2pid, $pid2);
+    my $port = 23113;
+    for(1 .. 10) {
+        $port += int(rand(900));
+        my $aflags = "--port $port $flags";
 
-    if($http2pid <= 0 || !pidexists($http2pid)) {
-        # it is NOT alive
-        logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver($server, "$pid2");
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
+        my $cmd = "$exe $aflags";
+        ($http2pid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+
+        if($http2pid <= 0 || !pidexists($http2pid)) {
+            # it is NOT alive
+            logmsg "RUN: failed to start the $srvrname server\n";
+            stopserver($server, "$pid2");
+            $doesntrun{$pidfile} = 1;
+            next;
+        }
+        $doesntrun{$pidfile} = 0;
+
+        if($verbose) {
+            logmsg "RUN: $srvrname server PID $http2pid port $port\n";
+        }
+        last;
     }
 
-    if($verbose) {
-        logmsg "RUN: $srvrname server is now running PID $http2pid\n";
-    }
-
-    return ($http2pid, $pid2);
+    return ($http2pid, $pid2, $port);
 }
 
 #######################################################################
@@ -4657,7 +4665,7 @@ sub startservers {
         }
         elsif($what eq "http/2") {
             if(!$run{'http/2'}) {
-                ($pid, $pid2) = runhttp2server($verbose, $HTTP2PORT);
+                ($pid, $pid2, $HTTP2PORT) = runhttp2server($verbose);
                 if($pid <= 0) {
                     return "failed starting HTTP/2 server";
                 }
@@ -5486,7 +5494,6 @@ if ($gdbthis) {
 }
 
 $minport         = $base; # original base port number
-$HTTP2PORT       = $base++; # HTTP/2 port
 $DICTPORT        = $base++; # DICT port
 $SMBPORT         = $base++; # SMB port
 $SMBSPORT        = $base++; # SMBS port
