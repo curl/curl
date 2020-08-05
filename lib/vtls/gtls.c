@@ -1236,20 +1236,23 @@ gtls_connect_step3(struct connectdata *conn,
 
 
   rc = gnutls_x509_crt_get_dn2(x509_cert, &certfields);
-  if(rc != 0)
-    return CURLE_OUT_OF_MEMORY;
-  infof(data, "\t subject: %s\n", certfields.data);
+  if(rc)
+    infof(data, "Failed to get certificate name\n");
+  else {
+    infof(data, "\t subject: %s\n", certfields.data);
 
-  certclock = gnutls_x509_crt_get_activation_time(x509_cert);
-  showtime(data, "start date", certclock);
+    certclock = gnutls_x509_crt_get_activation_time(x509_cert);
+    showtime(data, "start date", certclock);
 
-  certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
-  showtime(data, "expire date", certclock);
+    certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
+    showtime(data, "expire date", certclock);
+  }
 
   rc = gnutls_x509_crt_get_issuer_dn2(x509_cert, &certfields);
-  if(rc != 0)
-    return CURLE_OUT_OF_MEMORY;
-  infof(data, "\t issuer: %s\n", certfields.data);
+  if(rc)
+    infof(data, "Failed to get certificate issuer\n");
+  else
+    infof(data, "\t issuer: %s\n", certfields.data);
 #endif
 
   gnutls_x509_crt_deinit(x509_cert);
