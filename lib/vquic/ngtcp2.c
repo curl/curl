@@ -1835,7 +1835,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
             }
             continue;
           }
-          else if(outlen == NGTCP2_ERR_WRITE_STREAM_MORE) {
+          else if(outlen == NGTCP2_ERR_WRITE_MORE) {
             assert(ndatalen > 0);
             rv = nghttp3_conn_add_write_offset(qs->h3conn, stream_id,
                                                ndatalen);
