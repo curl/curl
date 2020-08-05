@@ -163,7 +163,7 @@ my $HTTP2PORT=$noport;   # HTTP/2 server port
 my $DICTPORT=$noport;    # DICT server port
 my $SMBPORT=$noport;     # SMB server port
 my $SMBSPORT=$noport;    # SMBS server port
-my $NEGTELNETPORT=$noport; # TELNET server port with negotiation
+my $TELNETPORT=$noport;  # TELNET server port with negotiation
 my $HTTPUNIXPATH;        # HTTP server Unix domain socket path
 
 my $SSHSRVMD5 = "[uninitialized]"; # MD5 of ssh server public key
@@ -2552,7 +2552,7 @@ sub runsmbserver {
 # start the telnet server
 #
 sub runnegtelnetserver {
-    my ($verbose, $alt, $port) = @_;
+    my ($verbose, $alt) = @_;
     my $proto = "telnet";
     my $ip = $HOSTIP;
     my $ipvnum = 4;
@@ -2589,37 +2589,34 @@ sub runnegtelnetserver {
     $flags .= "--verbose 1 " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
-    $flags .= "--port $port --srcdir \"$srcdir\"";
+    $flags .= "--srcdir \"$srcdir\"";
 
-    my $cmd = "$srcdir/negtelnetserver.py $flags";
-    my ($ntelpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+    my ($ntelpid, $pid2);
+    my $port = 32000;
+    for(1 .. 10) {
+        $port += int(rand(800));
+        my $aflags = "--port $port $flags";
+        my $cmd = "$srcdir/negtelnetserver.py $aflags";
+        ($ntelpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-    if($ntelpid <= 0 || !pidexists($ntelpid)) {
-        # it is NOT alive
-        logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver($server, "$pid2");
-        displaylogs($testnumcheck);
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
+        if($ntelpid <= 0 || !pidexists($ntelpid)) {
+            # it is NOT alive
+            logmsg "RUN: failed to start the $srvrname server\n";
+            stopserver($server, "$pid2");
+            displaylogs($testnumcheck);
+            $doesntrun{$pidfile} = 1;
+            $ntelpid = $pid2 = 0;
+            next;
+        }
+        $doesntrun{$pidfile} = 0;
+
+        if($verbose) {
+            logmsg "RUN: $srvrname server PID $ntelpid port $port\n";
+        }
+        last;
     }
 
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$ntelpid $pid2");
-        displaylogs($testnumcheck);
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-    $pid2 = $pid3;
-
-    if($verbose) {
-        logmsg "RUN: $srvrname server is now running PID $ntelpid\n";
-    }
-
-    return ($ntelpid, $pid2);
+    return ($ntelpid, $pid2, $port);
 }
 
 
@@ -3281,7 +3278,7 @@ sub subVariables {
     $$thing =~ s/${prefix}DICTPORT/$DICTPORT/g;
     $$thing =~ s/${prefix}SMBPORT/$SMBPORT/g;
     $$thing =~ s/${prefix}SMBSPORT/$SMBSPORT/g;
-    $$thing =~ s/${prefix}NEGTELNETPORT/$NEGTELNETPORT/g;
+    $$thing =~ s/${prefix}TELNETPORT/$TELNETPORT/g;
     $$thing =~ s/${prefix}NOLISTENPORT/$NOLISTENPORT/g;
 
     # server Unix domain socket paths
@@ -4985,9 +4982,8 @@ sub startservers {
         }
         elsif($what eq "telnet") {
             if(!$run{'telnet'}) {
-                ($pid, $pid2) = runnegtelnetserver($verbose,
-                                                   "",
-                                                   $NEGTELNETPORT);
+                ($pid, $pid2, $TELNETPORT) =
+                    runnegtelnetserver($verbose, "");
                 if($pid <= 0) {
                     return "failed starting neg TELNET server";
                 }
@@ -5490,7 +5486,6 @@ if ($gdbthis) {
 
 $minport         = $base; # original base port number
 $DICTPORT        = $base++; # DICT port
-$NEGTELNETPORT   = $base++; # TELNET port with negotiation
 $HTTPUNIXPATH    = "http$$.sock"; # HTTP server Unix domain socket path
 
 $maxport         = $base-1; # updated base port number
