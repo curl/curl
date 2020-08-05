@@ -2472,7 +2472,7 @@ sub rundictserver {
 # start the SMB server
 #
 sub runsmbserver {
-    my ($verbose, $alt, $port) = @_;
+    my ($verbose, $alt) = @_;
     my $proto = "smb";
     my $ip = $HOSTIP;
     my $ipvnum = 4;
@@ -2509,38 +2509,35 @@ sub runsmbserver {
     $flags .= "--verbose 1 " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
-    $flags .= "--port $port --srcdir \"$srcdir\" ";
+    $flags .= "--srcdir \"$srcdir\" ";
     $flags .= "--host $HOSTIP";
 
-    my $cmd = "$srcdir/smbserver.py $flags";
-    my ($smbpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+    my ($smbpid, $pid2);
+    my $port = 31923;
+    for(1 .. 10) {
+        $port += int(rand(760));
+        my $aflags = "--port $port $flags";
+        my $cmd = "$srcdir/smbserver.py $aflags";
+        ($smbpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-    if($smbpid <= 0 || !pidexists($smbpid)) {
-        # it is NOT alive
-        logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver($server, "$pid2");
-        displaylogs($testnumcheck);
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
+        if($smbpid <= 0 || !pidexists($smbpid)) {
+            # it is NOT alive
+            logmsg "RUN: failed to start the $srvrname server\n";
+            stopserver($server, "$pid2");
+            displaylogs($testnumcheck);
+            $doesntrun{$pidfile} = 1;
+            $smbpid = $pid2 = 0;
+            next;
+        }
+        $doesntrun{$pidfile} = 0;
+
+        if($verbose) {
+            logmsg "RUN: $srvrname server PID $smbpid port $port\n";
+        }
+        last;
     }
 
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$smbpid $pid2");
-        displaylogs($testnumcheck);
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-    $pid2 = $pid3;
-
-    if($verbose) {
-        logmsg "RUN: $srvrname server is now running PID $smbpid\n";
-    }
-
-    return ($smbpid, $pid2);
+    return ($smbpid, $pid2, $port);
 }
 
 #######################################################################
@@ -3218,8 +3215,6 @@ sub checksystem {
     logmsg ("* Port range: $minport-$maxport\n");
 
     if($verbose) {
-        logmsg "* Ports: ";
-
         if($has_unix) {
             logmsg "* Unix socket paths:\n";
             if($http_unix) {
@@ -4971,7 +4966,7 @@ sub startservers {
         }
         elsif($what eq "smb") {
             if(!$run{'smb'}) {
-                ($pid, $pid2) = runsmbserver($verbose, "", $SMBPORT);
+                ($pid, $pid2, $SMBPORT) = runsmbserver($verbose, "");
                 if($pid <= 0) {
                     return "failed starting SMB server";
                 }
@@ -5488,8 +5483,6 @@ if ($gdbthis) {
 $minport         = $base; # original base port number
 $HTTP2PORT       = $base++; # HTTP/2 port
 $DICTPORT        = $base++; # DICT port
-$SMBPORT         = $base++; # SMB port
-$SMBSPORT        = $base++; # SMBS port
 $NEGTELNETPORT   = $base++; # TELNET port with negotiation
 $HTTPUNIXPATH    = "http$$.sock"; # HTTP server Unix domain socket path
 
