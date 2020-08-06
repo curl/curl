@@ -1760,8 +1760,10 @@ static CURLcode smtp_parse_address(struct connectdata *conn, const char *fqma,
     return CURLE_OUT_OF_MEMORY;
 
   length = strlen(dup);
-  if(dup[length - 1] == '>')
-    dup[length - 1] = '\0';
+  if(length) {
+    if(dup[length - 1] == '>')
+      dup[length - 1] = '\0';
+  }
 
   /* Extract the host name from the address (if we can) */
   host->name = strpbrk(dup, "@");
