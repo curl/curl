@@ -1753,9 +1753,12 @@ static CURLcode smtp_parse_address(struct connectdata *conn, const char *fqma,
   CURLcode result = CURLE_OK;
   size_t length;
 
+  /* Skip optional sender name - allows support for "John Doe <john@doe>" */
+  const char *bracket_pos = strchr(fqma, '<');
+
   /* Duplicate the fully qualified email address so we can manipulate it,
      ensuring it doesn't contain the delimiters if specified */
-  char *dup = strdup(fqma[0] == '<' ? fqma + 1  : fqma);
+  char *dup = strdup(bracket_pos ? bracket_pos + 1 : fqma);
   if(!dup)
     return CURLE_OUT_OF_MEMORY;
 
