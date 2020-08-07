@@ -309,14 +309,17 @@ endif()
 
 # check SSL libraries
 # TODO support GnuTLS
+if(CMAKE_USE_WINSSL)
+  message(FATAL_ERROR "The cmake option CMAKE_USE_WINSSL was renamed to CMAKE_USE_SCHANNEL.")
+endif()
 
 if(APPLE)
   option(CMAKE_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF)
 endif()
 if(WIN32)
-  option(CMAKE_USE_WINSSL "enable Windows native SSL/TLS" OFF)
+  option(CMAKE_USE_SCHANNEL "enable Windows native SSL/TLS" OFF)
   cmake_dependent_option(CURL_WINDOWS_SSPI "Use windows libraries to allow NTLM authentication without openssl" ON
-    CMAKE_USE_WINSSL OFF)
+    CMAKE_USE_SCHANNEL OFF)
 endif()
 option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF)
 option(CMAKE_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF)
@@ -324,13 +327,13 @@ option(CMAKE_USE_NSS "Enable NSS for SSL/TLS" OFF)
 option(CMAKE_USE_WOLFSSL "enable wolfSSL for SSL/TLS" OFF)
 
 set(openssl_default ON)
-if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS OR CMAKE_USE_NSS OR CMAKE_USE_WOLFSSL)
+if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_SCHANNEL OR CMAKE_USE_MBEDTLS OR CMAKE_USE_NSS OR CMAKE_USE_WOLFSSL)
   set(openssl_default OFF)
 endif()
 option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default})
 
 count_true(enabled_ssl_options_count
-  CMAKE_USE_WINSSL
+  CMAKE_USE_SCHANNEL
   CMAKE_USE_SECTRANSP
   CMAKE_USE_OPENSSL
   CMAKE_USE_MBEDTLS
@@ -342,10 +345,10 @@ if(enabled_ssl_options_count GREATER "1")
   set(CURL_WITH_MULTI_SSL ON)
 endif()
 
-if(CMAKE_USE_WINSSL)
+if(CMAKE_USE_SCHANNEL)
   set(SSL_ENABLED ON)
   set(USE_SCHANNEL ON) # Windows native SSL/TLS support
-  set(USE_WINDOWS_SSPI ON) # CMAKE_USE_WINSSL implies CURL_WINDOWS_SSPI
+  set(USE_WINDOWS_SSPI ON) # CMAKE_USE_SCHANNEL implies CURL_WINDOWS_SSPI
   list(APPEND CURL_LIBS "crypt32")
 endif()
 if(CURL_WINDOWS_SSPI)
@@ -1353,7 +1356,7 @@ _add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
 _add_if("IDN"           HAVE_LIBIDN2)
 _add_if("Largefile"     (CURL_SIZEOF_CURL_OFF_T GREATER 4) AND
                         ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
-# TODO SSP1 (WinSSL) check is missing
+# TODO SSP1 (Schannel) check is missing
 _add_if("SSPI"          USE_WINDOWS_SSPI)
 _add_if("GSS-API"       HAVE_GSSAPI)
 _add_if("alt-svc"       ENABLE_ALT_SVC)
@@ -1415,7 +1418,7 @@ message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS}")
 
 # Clear list and collect SSL backends
 set(_items)
-_add_if("WinSSL"           SSL_ENABLED AND USE_WINDOWS_SSPI)
+_add_if("Schannel"         SSL_ENABLED AND USE_WINDOWS_SSPI)
 _add_if("OpenSSL"          SSL_ENABLED AND USE_OPENSSL)
 _add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
 _add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)

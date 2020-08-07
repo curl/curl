@@ -40,7 +40,7 @@ jobs:
           macosx-version-min: 10.15
         - name: SecureTransport metalink
           install: nghttp2 openssl libmetalink
-          configure: --enable-debug --without-ssl --with-darwinssl --with-libmetalink
+          configure: --enable-debug --without-ssl --with-secure-transport --with-libmetalink
           macosx-version-min: 10.8
         - name: OpenSSL metalink
           install: nghttp2 openssl libmetalink
