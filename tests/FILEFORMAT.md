@@ -328,6 +328,7 @@ Features testable here are:
 - `parsedate`
 - `proxy`
 - `PSL`
+- `Schannel`
 - `shuffle-dns`
 - `socks`
 - `SPNEGO`
@@ -342,7 +343,6 @@ Features testable here are:
 - `unix-sockets`
 - `verbose-strings`
 - `win32`
-- `WinSSL`
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server

@@ -91,7 +91,7 @@ where <options> is one or many of:
   ENABLE_IPV6=<yes or no>        - Enable IPv6, defaults to yes
   ENABLE_IDN=<yes or no>         - Enable use of Windows IDN APIs, defaults to yes
                                    Requires Windows Vista or later
-  ENABLE_WINSSL=<yes or no>      - Enable native Windows SSL support, defaults to yes
+  ENABLE_SCHANNEL=<yes or no>      - Enable native Windows SSL support, defaults to yes
   GEN_PDB=<yes or no>            - Generate Program Database (debug symbols for release build)
   DEBUG=<yes or no>              - Debug builds
   MACHINE=<x86 or x64>           - Target architecture (default is x86)
@@ -123,8 +123,8 @@ import symbols.
 Legacy Windows and SSL
 ======================
 When you build curl using the build files in this directory the default SSL
-backend will be WinSSL (Windows SSPI, more specifically Schannel), the native
-SSL library that comes with the Windows OS. WinSSL in Windows <= XP is not able
-to connect to servers that no longer support the legacy handshakes and
-algorithms used by those versions. If you will be using curl in one of those
-earlier versions of Windows you should choose another SSL backend like OpenSSL.
+backend will be Schannel (Windows SSPI), the native SSL library that comes
+with the Windows OS. Schannel in Windows <= XP is not able to connect to
+servers that no longer support the legacy handshakes and algorithms used by
+those versions. If you will be using curl in one of those earlier versions of
+Windows you should choose another SSL backend like OpenSSL.

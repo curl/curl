@@ -24,7 +24,7 @@ MooMoo
 # Client-side
 <client>
 <features>
-WinSSL
+Schannel
 !MinGW
 </features>
 <server>

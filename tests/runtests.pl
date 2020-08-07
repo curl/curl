@@ -268,8 +268,8 @@ my $has_openssl;    # built with a lib using an OpenSSL-like API
 my $has_gnutls;     # built with GnuTLS
 my $has_nss;        # built with NSS
 my $has_wolfssl;    # built with wolfSSL
-my $has_winssl;     # built with WinSSL    (Secure Channel aka Schannel)
-my $has_darwinssl;  # built with DarwinSSL (Secure Transport)
+my $has_schannel;   # built with Schannel
+my $has_sectransp;  # built with Secure Transport
 my $has_boringssl;  # built with BoringSSL
 my $has_libressl;   # built with libressl
 my $has_mbedtls;    # built with mbedTLS
@@ -2788,7 +2788,6 @@ sub setupfeatures {
     $feature{"alt-svc"} = $has_altsvc;
     $feature{"brotli"} = $has_brotli;
     $feature{"crypto"} = $has_crypto;
-    $feature{"DarwinSSL"} = $has_darwinssl; # alias
     $feature{"debug"} = $debug_build;
     $feature{"getrlimit"} = $has_getrlimit;
     $feature{"GnuTLS"} = $has_gnutls;
@@ -2810,8 +2809,8 @@ sub setupfeatures {
     $feature{"NTLM_WB"} = $has_ntlm_wb;
     $feature{"OpenSSL"} = $has_openssl || $has_libressl || $has_boringssl;
     $feature{"PSL"} = $has_psl;
-    $feature{"Schannel"} = $has_winssl; # alias
-    $feature{"sectransp"} = $has_darwinssl;
+    $feature{"Schannel"} = $has_schannel;
+    $feature{"sectransp"} = $has_sectransp;
     $feature{"SPNEGO"} = $has_spnego;
     $feature{"SSL"} = $has_ssl;
     $feature{"SSLpinning"} = $has_sslpinning;
@@ -2822,7 +2821,6 @@ sub setupfeatures {
     $feature{"unittest"} = $debug_build;
     $feature{"unix-sockets"} = $has_unix;
     $feature{"win32"} = $has_win32;
-    $feature{"WinSSL"} = $has_winssl;
     $feature{"zstd"} = $has_zstd;
 
     # make each protocol an enabled "feature"
@@ -2907,7 +2905,7 @@ sub checksystem {
                 $has_mingw = 1 if ($curl =~ /-pc-mingw32/);
             }
            if ($libcurl =~ /(winssl|schannel)/i) {
-               $has_winssl=1;
+               $has_schannel=1;
                $has_sslpinning=1;
            }
            elsif ($libcurl =~ /openssl/i) {
@@ -2927,7 +2925,7 @@ sub checksystem {
                $has_sslpinning=1;
            }
            elsif ($libcurl =~ /securetransport/i) {
-               $has_darwinssl=1;
+               $has_sectransp=1;
                $has_sslpinning=1;
            }
            elsif ($libcurl =~ /BoringSSL/i) {

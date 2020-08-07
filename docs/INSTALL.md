@@ -258,9 +258,9 @@ Windows you should choose another SSL backend such as OpenSSL.
 
 On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
 implementation, Secure Transport, instead of OpenSSL. To build with Secure
-Transport for SSL/TLS, use the configure option `--with-darwinssl`. (It is not
-necessary to use the option `--without-ssl`.) This feature requires iOS 5.0 or
-later, or OS X 10.5 ("Leopard") or later.
+Transport for SSL/TLS, use the configure option `--with-secure-transport`. (It
+is not necessary to use the option `--without-ssl`.) This feature requires iOS
+5.0 or later, or OS X 10.5 ("Leopard") or later.
 
 When Secure Transport is in use, the curl options `--cacert` and `--capath`
 and their libcurl equivalents, will be ignored, because Secure Transport uses
@@ -281,7 +281,7 @@ commands in curl's directory in the shell will build the code such that it
 will run on cats as old as OS X 10.6 ("Snow Leopard") (using bash):
 
     export MACOSX_DEPLOYMENT_TARGET="10.6"
-    ./configure --with-darwinssl
+    ./configure --with-secure-transport
     make
 
 # Android

@@ -1611,29 +1611,29 @@ dnl -------------------------------------------------
 dnl check winssl option before other SSL libraries
 dnl -------------------------------------------------
 
-OPT_WINSSL=no
+OPT_SCHANNEL=no
 AC_ARG_WITH(winssl,dnl
 AC_HELP_STRING([--with-winssl],[enable Windows native SSL/TLS])
 AC_HELP_STRING([--without-winssl], [disable Windows native SSL/TLS]),
-  OPT_WINSSL=$withval)
+  OPT_SCHANNEL=$withval)
 
 AC_ARG_WITH(schannel,dnl
 AC_HELP_STRING([--with-schannel],[enable Windows native SSL/TLS])
 AC_HELP_STRING([--without-schannel], [disable Windows native SSL/TLS]),
-  OPT_WINSSL=$withval)
+  OPT_SCHANNEL=$withval)
 
 AC_MSG_CHECKING([whether to enable Windows native SSL/TLS (Windows native builds only)])
-if test -z "$ssl_backends" -o "x$OPT_WINSSL" != xno; then
+if test -z "$ssl_backends" -o "x$OPT_SCHANNEL" != xno; then
   ssl_msg=
-  if test "x$OPT_WINSSL" != "xno"  &&
+  if test "x$OPT_SCHANNEL" != "xno"  &&
      test "x$curl_cv_native_windows" = "xyes"; then
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_SCHANNEL, 1, [to enable Windows native SSL/TLS support])
     AC_SUBST(USE_SCHANNEL, [1])
     ssl_msg="Windows-native"
     test schannel != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-    WINSSL_ENABLED=1
-    # --with-winssl implies --enable-sspi
+    SCHANNEL_ENABLED=1
+    # --with-schannel implies --enable-sspi
     AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
     AC_SUBST(USE_WINDOWS_SSPI, [1])
     curl_sspi_msg="enabled"
@@ -2819,7 +2819,7 @@ if test -z "$ssl_backends" -o "x$OPT_NSS" != xno; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$WINSSL_ENABLED$SECURETRANSPORT_ENABLED$MESALINK_ENABLED$BEARSSL_ENABLED$AMISSL_ENABLED" in
+case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$MESALINK_ENABLED$BEARSSL_ENABLED$AMISSL_ENABLED" in
 x)
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
   AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss, --with-schannel, --with-secure-transport, --with-mesalink, --with-amissl or --with-bearssl to address this.])
@@ -3282,7 +3282,7 @@ AC_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
           versioned_symbols_flavour="NSS_"
         elif test "x$WOLFSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="WOLFSSL_"
-        elif test "x$WINSSL_ENABLED" = "x1"; then
+        elif test "x$SCHANNEL_ENABLED" = "x1"; then
           versioned_symbols_flavour="SCHANNEL_"
         elif test "x$SECURETRANSPORT_ENABLED" = "x1"; then
           versioned_symbols_flavour="SECURE_TRANSPORT_"
@@ -4566,16 +4566,16 @@ AC_HELP_STRING([--disable-sspi],[Disable SSPI]),
        fi
        ;;
   *)
-       if test "x$WINSSL_ENABLED" = "x1"; then
-         # --with-winssl implies --enable-sspi
+       if test "x$SCHANNEL_ENABLED" = "x1"; then
+         # --with-schannel implies --enable-sspi
          AC_MSG_RESULT(yes)
        else
          AC_MSG_RESULT(no)
        fi
        ;;
   esac ],
-       if test "x$WINSSL_ENABLED" = "x1"; then
-         # --with-winssl implies --enable-sspi
+       if test "x$SCHANNEL_ENABLED" = "x1"; then
+         # --with-schannel implies --enable-sspi
          AC_MSG_RESULT(yes)
        else
          AC_MSG_RESULT(no)
