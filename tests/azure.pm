@@ -48,7 +48,7 @@ sub azure_create_test_run {
             'build': {'id': '$ENV{'BUILD_BUILDID'}'}
         }
     " \\
-    "$azure_baseurl/_apis/test/runs?api-version=5.0"`;
+    "$azure_baseurl/_apis/test/runs?api-version=5.1"`;
     if($azure_run =~ /"id":(\d+)/) {
         return $1;
     }
@@ -75,7 +75,7 @@ sub azure_create_test_result {
             }
         ]
     " \\
-    "$azure_baseurl/_apis/test/runs/$azure_run_id/results?api-version=5.0"`;
+    "$azure_baseurl/_apis/test/runs/$azure_run_id/results?api-version=5.1"`;
     if($azure_result =~ /\[\{"id":(\d+)/) {
         return $1;
     }
@@ -92,10 +92,10 @@ sub azure_update_test_result {
     my $azure_duration = sprintf("%.0f", ($stop-$start)*1000);
     my $azure_outcome;
     if($error == 2) {
-        $azure_outcome = 'Not applicable';
+        $azure_outcome = 'NotApplicable';
     }
     elsif($error < 0) {
-        $azure_outcome = 'Not executed';
+        $azure_outcome = 'NotExecuted';
     }
     elsif(!$error) {
         $azure_outcome = 'Passed';
@@ -118,7 +118,7 @@ sub azure_update_test_result {
             }
         ]
     " \\
-    "$azure_baseurl/_apis/test/runs/$azure_run_id/results?api-version=5.0"`;
+    "$azure_baseurl/_apis/test/runs/$azure_run_id/results?api-version=5.1"`;
     if($azure_result =~ /\[\{"id":(\d+)/) {
         return $1;
     }
@@ -136,7 +136,7 @@ sub azure_update_test_run {
             'state': 'Completed'
         }
     " \\
-    "$azure_baseurl/_apis/test/runs/$azure_run_id?api-version=5.0"`;
+    "$azure_baseurl/_apis/test/runs/$azure_run_id?api-version=5.1"`;
     if($azure_run =~ /"id":(\d+)/) {
         return $1;
     }
