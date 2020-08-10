@@ -1804,12 +1804,14 @@ CURLcode Curl_retry_request(struct connectdata *conn,
   }
   if(retry) {
 #define CONN_MAX_RETRIES 5
-    if(conn->retrycount++ >= CONN_MAX_RETRIES) {
+    if(data->state.retrycount++ >= CONN_MAX_RETRIES) {
       failf(data, "Connection died, tried %d times before giving up",
             CONN_MAX_RETRIES);
+      data->state.retrycount = 0;
       return CURLE_SEND_ERROR;
     }
-    infof(conn->data, "Connection died, retrying a fresh connect\n");
+    infof(conn->data, "Connection died, retrying a fresh connect\
+(retry count: %d)\n", data->state.retrycount);
     *url = strdup(conn->data->change.url);
     if(!*url)
       return CURLE_OUT_OF_MEMORY;
