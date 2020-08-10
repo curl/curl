@@ -56,7 +56,7 @@ Accept: */*
 
 </protocol>
 <file name="log/etag339">
-asdf
+"asdf"
 </file>
 </verify>
 
