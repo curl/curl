@@ -1090,7 +1090,6 @@ struct connectdata {
   struct http_connect_state *connect_state; /* for HTTP CONNECT */
   struct connectbundle *bundle; /* The bundle we are member of */
   int negnpn; /* APLN or NPN TLS negotiated protocol, CURL_HTTP_VERSION* */
-  int retrycount; /* number of retries on a new connection */
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;
 #endif
@@ -1295,6 +1294,8 @@ struct urlpieces {
 struct UrlState {
   /* Points to the connection cache */
   struct conncache *conn_cache;
+
+  int retrycount; /* number of retries on a new connection */
 
   /* buffers to store authentication data in, as parsed from input options */
   struct curltime keeps_speed; /* for the progress meter really */
