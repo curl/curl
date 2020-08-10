@@ -621,6 +621,7 @@ void Curl_ssl_close(struct connectdata *conn, int sockindex)
 {
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
   Curl_ssl->close_one(conn, sockindex);
+  conn->ssl[sockindex].state = ssl_connection_none;
 }
 
 CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
