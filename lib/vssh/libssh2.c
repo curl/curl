@@ -1256,7 +1256,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           result = CURLE_SSH;
         sshc->actualcode = result;
         DEBUGF(infof(data, "error = %d makes libcurl = %d\n",
-                     ssherr, (int)result));
+                     sftperr, (int)result));
         state(conn, SSH_STOP);
         break;
       }
