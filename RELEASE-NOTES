@@ -4,7 +4,7 @@ curl and libcurl 7.72.0
  Command line options:         232
  curl_easy_setopt() options:   277
  Public functions in libcurl:  82
- Contributors:                 2230
+ Contributors:                 2233
 
 This release includes the following changes:
 
@@ -45,6 +45,7 @@ This release includes the following bugfixes:
  o docs: Update a few leftover mentions of DarwinSSL [29]
  o doh: remove redundant cast [20]
  o file2memory: use a define instead of -1 unsigned value [30]
+ o ftp: don't do ssl_shutdown instead of ssl_close [85]
  o ftpserver: don't verify SMTP MAIL FROM names [8]
  o getinfo: reset retry-after value in initinfo [51]
  o gnutls: repair the build with `CURL_DISABLE_PROXY` [5]
@@ -52,6 +53,7 @@ This release includes the following bugfixes:
  o h2: repair trailer handling [81]
  o http2: close the http2 connection when no more requests may be sent [7]
  o http2: fix nghttp2_strerror -> nghttp2_http2_strerror in debug messages [11]
+ o libssh2: s/ssherr/sftperr/ [78]
  o md(4|5): don't use deprecated macOS functions [23]
  o mprintf: Fix dollar string handling [54]
  o mprintf: Fix stack overflows [53]
@@ -71,9 +73,11 @@ This release includes the following bugfixes:
  o runtests: move the gnutls-serv tests to a dynamic port [74]
  o runtests: move the smbserver to use a dynamic port number [71]
  o runtests: move the TELNET server to a dynamic port [68]
+ o runtests: run the DICT server on a random port number [90]
  o runtests: run the http2 tests on a random port number [72]
  o runtests: support dynamicly base64 encoded sections in tests [75]
  o setopt: unset NOBODY switches to GET if still HEAD [47]
+ o smtp_parse_address: handle blank input string properly [89]
  o socks: use size_t for size variable [39]
  o strdup: remove the odd strlen check [24]
  o test1119: verify stdout in the test [33]
@@ -81,6 +85,7 @@ This release includes the following bugfixes:
  o test1908: treat file as text [83]
  o tests/FILEFORMAT.md: mention %HTTP2PORT
  o tests/sshserver.pl: fix compatibility with OpenSSH for Windows
+ o TLS naming: fix more Winssl and Darwinssl leftovers [88]
  o tls-max.d: this option is only for TLS-using connections [45]
  o tlsv1.3.d. only for TLS-using connections [37]
  o tool_doswin: Simplify Windows version detection [57]
@@ -88,6 +93,7 @@ This release includes the following bugfixes:
  o TrackMemory tests: ignore realloc and free in getenv.c [84]
  o transfer: fix data_pending for builds with both h2 and h3 enabled [41]
  o transfer: fix memory-leak with CURLOPT_CURLU in a duped handle [15]
+ o transfer: move retrycount from connect struct to easy handle [77]
  o travis/script.sh: fix use of `-n' with unquoted envvar [80]
  o travis: add ppc64le and s390x builds [65]
  o travis: update quiche builds for new boringssl layout [25]
@@ -108,16 +114,17 @@ advice from friends like these:
 
   Alessandro Ghedini, Alex Kiernan, Baruch Siach, BrumBrum on hackerone,
   Cameron Cawley, Carlo Marcelo Arenas Belón, causal-agent on github,
-  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, divinity76 on github,
-  Ehren Bendler, Erik Johansson, Filip Salomonsson, Gilles Vollant,
-  Gisle Vanem, ihsinme on github, Jeremy Maitin-Shepard, joey-l-us on github,
+  Cherish98 on github, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  Denis Goleshchikhin, divinity76 on github, Ehren Bendler, Emil Engler,
+  Erik Johansson, Filip Salomonsson, Gilles Vollant, Gisle Vanem,
+  ihsinme on github, Jeremy Maitin-Shepard, joey-l-us on github,
   Jonathan Cardoso Machado, Jonathan Nieder, Kamil Dudka, Laramie Leavitt,
   lilongyan-huawei on github, Marc Aldorasi, Marcel Raad, Marc Hörsken,
   Masaya Suzuki, Matthias Naegler, Nicolas Sterchele, NobodyXu on github,
-  Peter Wu, Ray Satiro, sspiri on github, Tadej Vengust, Tatsuhiro Tsujikawa,
-  tbugfinder on github, Thomas M. DuBuisson, Tobias Stoeckmann, Viktor Szakats,
-  xwxbug on github,
-  (41 contributors)
+  Peter Wu, Rasmus Melchior Jacobsen, Ray Satiro, sspiri on github,
+  Stefan Yohansson, Tadej Vengust, Tatsuhiro Tsujikawa, tbugfinder on github,
+  Thomas M. DuBuisson, Tobias Stoeckmann, Viktor Szakats, xwxbug on github,
+  (46 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -199,9 +206,15 @@ References to bug reports and discussions on issues:
  [74] = https://curl.haxx.se/bug/?i=5778
  [75] = https://curl.haxx.se/bug/?i=5761
  [76] = https://curl.haxx.se/bug/?i=5777
+ [77] = https://curl.haxx.se/bug/?i=5794
+ [78] = https://github.com/curl/curl/commit/7370b4e39f1390e701f5b68d910c619151daf72b#r41334700
  [79] = https://curl.haxx.se/bug/?i=5772
  [80] = https://curl.haxx.se/bug/?i=5773
  [81] = https://curl.haxx.se/bug/?i=5663
  [82] = https://curl.haxx.se/bug/?i=5674
  [83] = https://curl.haxx.se/bug/?i=5767
  [84] = https://curl.haxx.se/bug/?i=5767
+ [85] = https://curl.haxx.se/bug/?i=5797
+ [88] = https://curl.haxx.se/bug/?i=5795
+ [89] = https://curl.haxx.se/bug/?i=5792
+ [90] = https://curl.haxx.se/bug/?i=5783
