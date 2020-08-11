@@ -103,18 +103,16 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   if(per->config->etag_save_file && etag_save->stream) {
     /* match only header that start with etag (case insensitive) */
     if(curl_strnequal(str, "etag:", 5)) {
-      char *etag_h = NULL;
-      size_t etag_length = 0;
-      etag_h = ptr + strlen("ETag:");
+      char *etag_start = ptr + strlen("ETag:");
 
-      /* pass all spaces */
-      while(*etag_h && ISSPACE(*etag_h))
-        etag_h++;
+      /* pass all spaces from start */
+      while(*etag_start && ISSPACE(*etag_start))
+        etag_start++;
 
       /* get length of desired etag */
-      etag_length = (size_t)end - strlen("\r\n") - (size_t)etag_h;
+      size_t etag_length = (size_t)end - strlen("\r\n") - (size_t)etag_start;
 
-      fwrite(etag_h, size, etag_length, etag_save->stream);
+      fwrite(etag_start, size, etag_length, etag_save->stream);
       /* terminate with new line */
       fputc('\n', etag_save->stream);
     }
