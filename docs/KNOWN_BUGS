@@ -102,6 +102,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.8 DoH leaks memory after followlocation
  11.9 DoH doesn't inherit all transfer options
  11.10 Blocking socket operations in non-blocking API
+ 11.11 A shared connection cache is not thread-safe
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
@@ -743,6 +744,14 @@ problems may have been fixed or changed somewhat since this was written!
 11.10 Blocking socket operations in non-blocking API
 
  The list of blocking socket operations is in TODO section "More non-blocking".
+
+11.11 A shared connection cache is not thread-safe
+
+ The share interface offers CURL_LOCK_DATA_CONNECT to have multiple easy
+ handle share a connection cache, but due to how connections are used they are
+ still not thread-safe when used shared.
+
+ See https://github.com/curl/curl/issues/4915
 
 12. LDAP and OpenLDAP
 
