@@ -240,7 +240,7 @@ AC_SUBST([CPPFLAG_CURL_STATICLIB])
 
 
 # Determine whether all dependent libraries must be specified when linking
-if test "X$enable_shared" = "Xyes" -a "X$link_all_deplibs" = "Xno"
+if test "X$enable_shared" = "Xyes" -a "X$link_all_deplibs" != "Xyes"
 then
     REQUIRE_LIB_DEPS=no
 else
