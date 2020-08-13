@@ -1390,7 +1390,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
          */
         if(strncasecompare(cmd, "chgrp ", 6) ||
            strncasecompare(cmd, "chmod ", 6) ||
-           strncasecompare(cmd, "chown ", 6) ) {
+           strncasecompare(cmd, "chown ", 6) ||
+           strncasecompare(cmd, "atime ", 6) ||
+           strncasecompare(cmd, "mtime ", 6)) {
           /* attribute change */
 
           /* sshc->quote_path1 contains the mode to set */
@@ -1586,6 +1588,34 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           sshc->actualcode = CURLE_QUOTE_ERROR;
           break;
         }
+      }
+      else if(strncasecompare(cmd, "atime", 5)) {
+        time_t date = Curl_getdate_capped(sshc->quote_path1);
+        if(date == -1) {
+          Curl_safefree(sshc->quote_path1);
+          Curl_safefree(sshc->quote_path2);
+          failf(data, "Syntax error: incorrect access date format");
+          state(conn, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
+          sshc->actualcode = CURLE_QUOTE_ERROR;
+          break;
+        }
+        sshc->quote_attrs.atime = (unsigned long)date;
+        sshc->quote_attrs.flags = LIBSSH2_SFTP_ATTR_ACMODTIME;
+      }
+      else if(strncasecompare(cmd, "mtime", 5)) {
+        time_t date = Curl_getdate_capped(sshc->quote_path1);
+        if(date == -1) {
+          Curl_safefree(sshc->quote_path1);
+          Curl_safefree(sshc->quote_path2);
+          failf(data, "Syntax error: incorrect modification date format");
+          state(conn, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
+          sshc->actualcode = CURLE_QUOTE_ERROR;
+          break;
+        }
+        sshc->quote_attrs.mtime = (unsigned long)date;
+        sshc->quote_attrs.flags = LIBSSH2_SFTP_ATTR_ACMODTIME;
       }
 
       /* Now send the completed structure... */
