@@ -275,3 +275,6 @@ For Windows:
 
  - [https://gnuwin32.sourceforge.io/packages/patch.htm](https://gnuwin32.sourceforge.io/packages/patch.htm)
  - [https://gnuwin32.sourceforge.io/packages/diffutils.htm](https://gnuwin32.sourceforge.io/packages/diffutils.htm)
+
+### Useful resources
+* [Webinar on getting code into cURL](https://www.youtube.com/watch?v=QmZ3W1d6LQI)
