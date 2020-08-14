@@ -97,6 +97,11 @@ Disable the SMB(S) protocols
 
 Disable the SMTP(S) protocols
 
+## CURL_DISABLE_SOCKETPAIR
+
+Disable the use of socketpair internally to allow waking up and canceling
+curl_multi_poll().
+
 ## CURL_DISABLE_TELNET
 
 Disable the TELNET protocol
