@@ -31,7 +31,7 @@ EXTRA_DIST = Makefile.m32 config-win32.h config-win32ce.h           \
  config-tpf.h mk-ca-bundle.pl mk-ca-bundle.vbs $(CMAKE_DIST)        \
  firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl    \
  setup-win32.h \
- config-freertos.h
+ config-freertos.h config-micrium.h
 
 lib_LTLIBRARIES = libcurl.la
 
