@@ -369,6 +369,27 @@
 #  define CURL_AVOID_SYS_TYPES_H 1
 #  define CURL_AVOID_SYS_SOCKET_H 1
 
+#elif defined(MICRIUM)
+
+#if (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 4)  ||      \
+  (defined(__LONG_MAX__) && __LONG_MAX__ == 2147483647L)
+#    define CURL_TYPEOF_CURL_OFF_T     long long
+#    define CURL_FORMAT_CURL_OFF_T     "lld"
+#    define CURL_FORMAT_CURL_OFF_TU    "llu"
+#    define CURL_SUFFIX_CURL_OFF_T     LL
+#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#else
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#  endif
+#  define CURL_TYPEOF_CURL_SOCKLEN_T CPU_INT32S
+#  define CURL_AVOID_SYS_TYPES_H 1
+#  define CURL_AVOID_SYS_SOCKET_H 1
+#  define CURL_AVOID_SYS_TIME_H 1
+
 /* ===================================== */
 /*    KEEP MSVC THE PENULTIMATE ENTRY    */
 /* ===================================== */
@@ -472,7 +493,18 @@ typedef SocketSet_t curl_fd_set;
 #define sa_family sin_family
 /* use our private pollfd struct alternative */
 #define curl_pollfd curl_waitfd
+#elif defined(MICRIUM)
+#include <net/include/net_bsd.h>
+
+/* make use of the types from net_bsd.h */
+typedef _size_t size_t;
+typedef _time_t time_t;
+
+#define curl_fd_set_typedefed
+typedef struct fd_set curl_fd_set;
+
 #endif
+
 
 /* CURL_PULL_SYS_SOCKET_H is defined above when inclusion of header file  */
 /* sys/socket.h is required here to properly make type definitions below. */
