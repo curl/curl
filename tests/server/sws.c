@@ -2064,6 +2064,10 @@ int main(int argc, char *argv[])
   case AF_UNIX:
     memset(&me.sau, 0, sizeof(me.sau));
     me.sau.sun_family = AF_UNIX;
+    if(!unix_socket) {
+      logmsg("unix_socket is unexpectedly NULL");
+      goto sws_cleanup;
+    }
     strncpy(me.sau.sun_path, unix_socket, sizeof(me.sau.sun_path) - 1);
     rc = bind(sock, &me.sa, sizeof(me.sau));
     if(0 != rc && errno == EADDRINUSE) {

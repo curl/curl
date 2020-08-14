@@ -960,9 +960,14 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   /* store input protocol */
   fclose(server);
 
-  for(pf = formata; pf->f_mode; pf++)
+  for(pf = formata; pf->f_mode; pf++) {
+    if(!mode) {
+      logmsg("mode is unexpectedly NULL");
+      return -1;
+    }
     if(strcmp(pf->f_mode, mode) == 0)
       break;
+  }
   if(!pf->f_mode) {
     nak(EBADOP);
     return 2;

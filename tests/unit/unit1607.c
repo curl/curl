@@ -188,6 +188,11 @@ UNITTEST_START
         break;
       }
 
+      if(!dns) {
+        fprintf(stderr, "dns variable is NULL");
+        problem = true;
+        break;
+      }
       if(dns->timestamp != 0) {
         fprintf(stderr, "%s:%d tests[%d] failed. the timestamp is not zero. "
                 "for tests[%d].address[%d\n",
