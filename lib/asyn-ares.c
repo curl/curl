@@ -633,7 +633,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
   *waitp = 0; /* default to synchronous response */
 
-#ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
+#ifdef ENABLE_IPV6
   switch(conn->ip_version) {
   default:
 #if ARES_VERSION >= 0x010601
@@ -649,7 +649,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     family = PF_INET6;
     break;
   }
-#endif /* CURLRES_IPV6 */
+#endif /* ENABLE_IPV6 */
 
   bufp = strdup(hostname);
   if(bufp) {
@@ -670,7 +670,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
     /* initial status - failed */
     res->last_status = ARES_ENOTFOUND;
-#ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
+#ifdef ENABLE_IPV6
     if(family == PF_UNSPEC) {
       if(Curl_ipv6works(conn)) {
         res->num_pending = 2;
@@ -690,7 +690,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
       }
     }
     else
-#endif /* CURLRES_IPV6 */
+#endif /* ENABLE_IPV6 */
     {
       res->num_pending = 1;
 
