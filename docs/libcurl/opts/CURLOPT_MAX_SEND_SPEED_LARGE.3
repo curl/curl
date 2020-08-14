@@ -39,7 +39,7 @@ This is not an exact science. libcurl attempts to keep the average speed below
 the given threshold over a period time.
 
 If you set \fImaxspeed\fP to a value lower than
-\fBCURLOPT_UPLOAD_BUFFERSIZE(3)\fP, libcurl might "shoot over" the limit on
+\fICURLOPT_UPLOAD_BUFFERSIZE(3)\fP, libcurl might "shoot over" the limit on
 its first send and still send off a full buffer.
 
 This option doesn't affect transfer speeds done with FILE:// URLs.
