@@ -455,6 +455,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     data->state.conn_cache = &data->share->conn_cache;
   else
     data->state.conn_cache = &multi->conn_cache;
+  data->state.lastconnect_id = -1;
 
 #ifdef USE_LIBPSL
   /* Do the same for PSL. */
@@ -677,11 +678,11 @@ static CURLcode multi_done(struct Curl_easy *data,
     CONNCACHE_UNLOCK(data);
     if(Curl_conncache_return_conn(data, conn)) {
       /* remember the most recently used connection */
-      data->state.lastconnect = conn;
+      data->state.lastconnect_id = conn->connection_id;
       infof(data, "%s\n", buffer);
     }
     else
-      data->state.lastconnect = NULL;
+      data->state.lastconnect_id = -1;
   }
 
   Curl_safefree(data->state.buffer);
@@ -693,7 +694,7 @@ static int close_connect_only(struct connectdata *conn, void *param)
 {
   struct Curl_easy *data = param;
 
-  if(data->state.lastconnect != conn)
+  if(data->state.lastconnect_id != conn->connection_id)
     return 0;
 
   if(conn->data != data)
@@ -805,7 +806,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   /* Remove the association between the connection and the handle */
   Curl_detach_connnection(data);
 
-  if(data->state.lastconnect) {
+  if(data->state.lastconnect_id != -1) {
     /* Mark any connect-only connection for closure */
     Curl_conncache_foreach(data, data->state.conn_cache,
                            data, &close_connect_only);

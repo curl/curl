@@ -838,8 +838,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
 
   /* the connection cache is setup on demand */
   outcurl->state.conn_cache = NULL;
-
-  outcurl->state.lastconnect = NULL;
+  outcurl->state.lastconnect_id = -1;
 
   outcurl->progress.flags    = data->progress.flags;
   outcurl->progress.callback = data->progress.callback;
