@@ -630,7 +630,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
     Curl_initinfo(data);
 
     /* most recent connection is not yet defined */
-    data->state.lastconnect = NULL;
+    data->state.lastconnect_id = -1;
 
     data->progress.flags |= PGRS_HIDE;
     data->state.current_speed = -1; /* init to negative == impossible */

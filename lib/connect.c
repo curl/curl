@@ -1363,15 +1363,15 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 }
 
 struct connfind {
-  struct connectdata *tofind;
-  bool found;
+  long id_tofind;
+  struct connectdata *found;
 };
 
 static int conn_is_conn(struct connectdata *conn, void *param)
 {
   struct connfind *f = (struct connfind *)param;
-  if(conn == f->tofind) {
-    f->found = TRUE;
+  if(conn->connection_id == f->id_tofind) {
+    f->found = conn;
     return 1;
   }
   return 0;
@@ -1393,21 +1393,22 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
    * - that is associated with a multi handle, and whose connection
    *   was detached with CURLOPT_CONNECT_ONLY
    */
-  if(data->state.lastconnect && (data->multi_easy || data->multi)) {
-    struct connectdata *c = data->state.lastconnect;
+  if((data->state.lastconnect_id != -1) && (data->multi_easy || data->multi)) {
+    struct connectdata *c;
     struct connfind find;
-    find.tofind = data->state.lastconnect;
-    find.found = FALSE;
+    find.id_tofind = data->state.lastconnect_id;
+    find.found = NULL;
 
     Curl_conncache_foreach(data, data->multi_easy?
                            &data->multi_easy->conn_cache:
                            &data->multi->conn_cache, &find, conn_is_conn);
 
     if(!find.found) {
-      data->state.lastconnect = NULL;
+      data->state.lastconnect_id = -1;
       return CURL_SOCKET_BAD;
     }
 
+    c = find.found;
     if(connp) {
       /* only store this if the caller cares for it */
       *connp = c;
