@@ -189,7 +189,7 @@ FAQ
   curl's development, have we intended curl to replace wget or compete on its
   market. Curl is targeted at single-shot file transfers.
 
-  Curl is not a web site mirroring program. If you want to use curl to mirror
+  Curl is not a website mirroring program. If you want to use curl to mirror
   something: fine, go ahead and write a script that wraps around curl to make
   it reality (like curlmirror.pl does).
 
@@ -253,7 +253,7 @@ FAQ
   up to each company and developer. This is not controlled by nor supervised in
   any way by the project.
 
-  We still get help from companies. Haxx provides web site, bandwidth, mailing
+  We still get help from companies. Haxx provides website, bandwidth, mailing
   lists etc, GitHub hosts the primary git repository and other services like
   the bug tracker at https://github.com/curl/curl. Also again, some companies
   have sponsored certain parts of the development in the past and I hope some
