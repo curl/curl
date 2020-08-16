@@ -42,7 +42,7 @@ in the curl-www repo
 
 - make sure all relevant changes are committed and pushed on the master branch
 
-  (the web site then updates its contents automatically)
+  (the website then updates its contents automatically)
 
 on github
 ---------

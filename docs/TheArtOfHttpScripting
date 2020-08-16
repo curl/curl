@@ -185,7 +185,7 @@ The Art Of Scripting HTTP Requests Using Curl
       curl -u user:password http://example.org/
 
  You need to pay attention that this kind of HTTP authentication is not what
- is usually done and requested by user-oriented web sites these days. They
+ is usually done and requested by user-oriented websites these days. They
  tend to use forms and cookies instead.
 
  2.5 Path part
@@ -268,7 +268,7 @@ The Art Of Scripting HTTP Requests Using Curl
 
  4.1 Forms explained
 
- Forms are the general way a web site can present a HTML page with fields for
+ Forms are the general way a website can present a HTML page with fields for
  the user to enter data in, and then press some kind of 'OK' or 'Submit'
  button to get that data sent to the server. The server then typically uses
  the posted data to decide how to act. Like using the entered words to search
@@ -457,7 +457,7 @@ The Art Of Scripting HTTP Requests Using Curl
  options. There are ways to circumvent this.
 
  It is worth noting that while this is how HTTP Authentication works, very
- many web sites will not use this concept when they provide logins etc. See
+ many websites will not use this concept when they provide logins etc. See
  the Web Login chapter further below for more details on that.
 
 7. More HTTP Headers

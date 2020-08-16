@@ -189,7 +189,7 @@ FAQ
   curl's development, have we intended curl to replace wget or compete on its
   market. Curl is targeted at single-shot file transfers.
 
-  Curl is not a web site mirroring program. If you want to use curl to mirror
+  Curl is not a website mirroring program. If you want to use curl to mirror
   something: fine, go ahead and write a script that wraps around curl to make
   it reality (like curlmirror.pl does).
 
@@ -253,7 +253,7 @@ FAQ
   up to each company and developer. This is not controlled by nor supervised in
   any way by the project.
 
-  We still get help from companies. Haxx provides web site, bandwidth, mailing
+  We still get help from companies. Haxx provides website, bandwidth, mailing
   lists etc, GitHub hosts the primary git repository and other services like
   the bug tracker at https://github.com/curl/curl. Also again, some companies
   have sponsored certain parts of the development in the past and I hope some
@@ -302,7 +302,7 @@ FAQ
   curl is fully open source. It means you can hire any skilled engineer to fix
   your curl-related problems.
 
-  We list available alternatives on the curl web site:
+  We list available alternatives on the curl website:
   https://curl.haxx.se/support.html
 
   1.10 How many are using curl?
@@ -458,7 +458,7 @@ FAQ
 
   Curl can be built with OpenSSL to do the SSL stuff. The LIBEAY32.DLL is then
   what curl needs on a windows machine to do https:// etc. Check out the curl
-  web site to find accurate and up-to-date pointers to recent OpenSSL DLLs and
+  website to find accurate and up-to-date pointers to recent OpenSSL DLLs and
   other binary packages.
 
   2.4 Does curl support SOCKS (RFC 1928) ?
@@ -563,7 +563,7 @@ FAQ
   a language, you may prefer to use one of these interfaces instead.
 
   Find out more about which languages that support curl directly, and how to
-  install and use them, in the libcurl section of the curl web site:
+  install and use them, in the libcurl section of the curl website:
   https://curl.haxx.se/libcurl/
 
   All the various bindings to libcurl are made by other projects and people,
@@ -724,7 +724,7 @@ FAQ
 
   3.19 How do I get HTTP from a host using a specific IP address?
 
-  For example, you may be trying out a web site installation that isn't yet in
+  For example, you may be trying out a website installation that isn't yet in
   the DNS. Or you have a site using multiple IP addresses for a given host
   name and you want to address a specific one out of the set.
 

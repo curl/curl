@@ -129,6 +129,6 @@
   Since curl and libcurl are plain HTTP clients without any knowledge of or
   capability to handle javascript, such cookies will not be detected or used.
 
-  Often, if you want to mimic what a browser does on such web sites, you can
+  Often, if you want to mimic what a browser does on such websites, you can
   record web browser HTTP traffic when using such a site and then repeat the
   cookie operations using curl or libcurl.
