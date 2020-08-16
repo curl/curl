@@ -40,7 +40,7 @@ document](https://curl.haxx.se/docs/thanks.html).
 
 ## Website
 
-Visit the [curl web site](https://curl.haxx.se/) for the latest news and
+Visit the [curl website](https://curl.haxx.se/) for the latest news and
 downloads.
 
 ## Git
