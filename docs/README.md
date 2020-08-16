@@ -7,6 +7,6 @@ subdirectories, using several different formats. Some of them are not ideal
 for reading directly in your browser.
 
 If you'd rather see the rendered version of the documentation, check out the
-curl web site's [documentation section](https://curl.haxx.se/docs/) for
+curl website's [documentation section](https://curl.haxx.se/docs/) for
 general curl stuff or the [libcurl section](https://curl.haxx.se/libcurl/) for
 libcurl related documentation.
