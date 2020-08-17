@@ -810,7 +810,6 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     /* Mark any connect-only connection for closure */
     Curl_conncache_foreach(data, data->state.conn_cache,
                            data, &close_connect_only);
-    data->state.lastconnect_id = -1;
   }
 
 #ifdef USE_LIBPSL
