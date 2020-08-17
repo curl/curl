@@ -158,8 +158,8 @@ mesalink_connect_step1(struct connectdata *conn, int sockindex)
                                                     SSL_CONN_CONFIG(CApath))) {
       if(SSL_CONN_CONFIG(verifypeer)) {
         failf(data,
-              "error setting certificate verify locations:\n"
-              "  CAfile: %s\n  CApath: %s",
+              "error setting certificate verify locations: "
+              " CAfile: %s CApath: %s",
               SSL_CONN_CONFIG(CAfile) ?
               SSL_CONN_CONFIG(CAfile) : "none",
               SSL_CONN_CONFIG(CApath) ?
@@ -173,13 +173,10 @@ mesalink_connect_step1(struct connectdata *conn, int sockindex)
     else {
       infof(data, "successfully set certificate verify locations:\n");
     }
-    infof(data,
-          "  CAfile: %s\n"
-          "  CApath: %s\n",
-          SSL_CONN_CONFIG(CAfile)?
-          SSL_CONN_CONFIG(CAfile): "none",
-          SSL_CONN_CONFIG(CApath)?
-          SSL_CONN_CONFIG(CApath): "none");
+    infof(data, " CAfile: %s\n",
+          SSL_CONN_CONFIG(CAfile) ? SSL_CONN_CONFIG(CAfile): "none");
+    infof(data, " CApath: %s\n",
+          SSL_CONN_CONFIG(CApath) ? SSL_CONN_CONFIG(CApath): "none");
   }
 
   if(SSL_SET_OPTION(cert) && SSL_SET_OPTION(key)) {
