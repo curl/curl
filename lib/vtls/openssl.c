@@ -2978,7 +2978,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
         /* Continue with a warning if no certificate verif is required. */
         infof(data, "error setting certificate file, continuing anyway\n");
       }
-      infof(data, "  CAfile: %s\n", ssl_cafile);
+      infof(data, " CAfile: %s\n", ssl_cafile);
     }
     if(ssl_capath) {
       if(!SSL_CTX_load_verify_dir(backend->ctx, ssl_capath)) {
@@ -2990,7 +2990,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
         /* Continue with a warning if no certificate verif is required. */
         infof(data, "error setting certificate path, continuing anyway\n");
       }
-      infof(data, "  CApath: %s\n", ssl_capath);
+      infof(data, " CApath: %s\n", ssl_capath);
     }
   }
 #else
@@ -3000,8 +3000,8 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     if(!SSL_CTX_load_verify_locations(backend->ctx, ssl_cafile, ssl_capath)) {
       if(verifypeer && !imported_native_ca) {
         /* Fail if we insist on successfully verifying the server. */
-        failf(data, "error setting certificate verify locations:\n"
-              "  CAfile: %s\n  CApath: %s",
+        failf(data, "error setting certificate verify locations:"
+              "  CAfile: %s CApath: %s",
               ssl_cafile ? ssl_cafile : "none",
               ssl_capath ? ssl_capath : "none");
         return CURLE_SSL_CACERT_BADFILE;
@@ -3015,11 +3015,8 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
       /* Everything is fine. */
       infof(data, "successfully set certificate verify locations:\n");
     }
-    infof(data,
-          "  CAfile: %s\n"
-          "  CApath: %s\n",
-          ssl_cafile ? ssl_cafile : "none",
-          ssl_capath ? ssl_capath : "none");
+    infof(data, " CAfile: %s\n", ssl_cafile ? ssl_cafile : "none");
+    infof(data, " CApath: %s\n", ssl_capath ? ssl_capath : "none");
   }
 #endif
 

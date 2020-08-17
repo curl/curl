@@ -1631,9 +1631,8 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
   if(capath && !capath[0])
     capath = NULL;
 
-  infof(data, "  CAfile: %s\n  CApath: %s\n",
-      cafile ? cafile : "none",
-      capath ? capath : "none");
+  infof(data, " CAfile: %s\n", cafile ? cafile : "none");
+  infof(data, " CApath: %s\n", capath ? capath : "none");
 
   /* load libnssckbi.so if no other trust roots were specified */
   use_trust_module = !cafile && !capath;
