@@ -35,7 +35,7 @@ http
 http://%HOSTIP:%HTTPPORT/1566 -o log/output1566 --etag-compare log/etag1566
 </command>
 <file name="log/etag1566">
-123456
+"123456"
 </file>
 <file1 name="log/output1566">
 downloaded already
