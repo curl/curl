@@ -53,6 +53,19 @@ static char *parse_filename(const char *ptr, size_t len);
 ** callback for CURLOPT_HEADERFUNCTION
 */
 
+/* Skip CR, LF or CRLF */
+static const char *skip_eol_at_end(const char *line)
+{
+  const char *line_end = line - 1;
+  if(*line_end == '\n')
+    line_end--;
+  if(*line_end == '\r')
+    line_end--;
+  /* step back to end */
+  line_end++;
+  return line_end;
+}
+
 size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   struct per_transfer *per = userdata;
@@ -103,14 +116,26 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   if(per->config->etag_save_file && etag_save->stream) {
     /* match only header that start with etag (case insensitive) */
     if(curl_strnequal(str, "etag:", 5)) {
-      char *etag_start = ptr + strlen("ETag:");
+      const char *etag_start = ptr + strlen("ETag:");
+      const char *expected_etag_end, *etag_end;
+      size_t etag_length;
 
       /* pass all spaces from start */
       while(*etag_start && ISSPACE(*etag_start))
         etag_start++;
 
+      /* We expect CRLF as EOL but when called from tests it may be CR or LF */
+      expected_etag_end = end - strlen("\"\r\n");
+      if(*expected_etag_end == '"') {
+        /* step back to quote */
+        etag_end = expected_etag_end + 1;
+      }
+      else {
+        etag_end = skip_eol_at_end(end);
+      }
+
       /* get length of desired etag */
-      size_t etag_length = (size_t)end - strlen("\r\n") - (size_t)etag_start;
+      etag_length = (size_t) etag_end - (size_t) etag_start;
 
       fwrite(etag_start, size, etag_length, etag_save->stream);
       /* terminate with new line */
