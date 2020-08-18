@@ -173,7 +173,7 @@ mesalink_connect_step1(struct connectdata *conn, int sockindex)
     else {
       infof(data, "successfully set certificate verify locations:\n");
     }
-    infof(data, " CAfile: %s\n"
+    infof(data, " CAfile: %s\n",
           SSL_CONN_CONFIG(CAfile) ? SSL_CONN_CONFIG(CAfile): "none");
     infof(data, " CApath: %s\n",
           SSL_CONN_CONFIG(CApath) ? SSL_CONN_CONFIG(CApath): "none");
