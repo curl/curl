@@ -32,6 +32,7 @@ problems may have been fixed or changed somewhat since this was written!
  2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
  2.9 TLS session cache doesn't work with TFO
  2.10 Store TLS context per transfer instead of per connection
+ 2.11 Schannel TLS 1.2 handshake bug in old Windows versions
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -275,6 +276,14 @@ problems may have been fixed or changed somewhat since this was written!
  memory consumption.
 
  https://github.com/curl/curl/issues/5102
+
+2.11 Schannel TLS 1.2 handshake bug in old Windows versions
+
+ In old versions of Windows such as 7 and 8.1 the Schannel TLS 1.2 handshake
+ implementation likely has a bug that can rarely cause the key exchange to
+ fail, resulting in error SEC_E_BUFFER_TOO_SMALL or SEC_E_MESSAGE_ALTERED.
+
+ https://github.com/curl/curl/issues/5488
 
 3. Email protocols
 
