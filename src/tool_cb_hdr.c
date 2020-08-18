@@ -102,7 +102,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
    */
   if(per->config->etag_save_file && etag_save->stream) {
     /* match only header that start with etag (case insensitive) */
-    if(curl_strnequal(str, "etag:", 5)) {
+    if(checkprefix("ETag:", str)) {
       char *etag_h = NULL;
       char *first = NULL;
       char *last = NULL;
@@ -156,7 +156,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
   curl_easy_getinfo(per->curl, CURLINFO_PROTOCOL, &protocol);
   if(hdrcbdata->honor_cd_filename &&
-     (cb > 20) && checkprefix("Content-disposition:", str) &&
+     (cb > 20) && checkprefix("Content-Disposition:", str) &&
      (protocol & (CURLPROTO_HTTPS|CURLPROTO_HTTP))) {
     const char *p = str + 20;
 
