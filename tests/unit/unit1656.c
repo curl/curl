@@ -29,24 +29,24 @@ static void unit_stop(void) {}
 
 UNITTEST_START
 
-        const char *rc;
+const char *rc;
 
-        rc = Curl_prefixed_val("iii", "III", strlen("iii"));
-        fail_unless(!strcmp(rc, ""), "return code should be non-zero");
+rc = Curl_prefixed_val("iii", "III", strlen("iii"));
+fail_unless(rc == NULL, "return val should be non-zero");
 
-        rc = Curl_prefixed_val("iiia", "III", strlen("iiia"));
-        fail_unless(rc == NULL, "return should be null");
+rc = Curl_prefixed_val("iiia", "III", strlen("iiia"));
+fail_unless(rc == NULL, "return val should be null");
 
-        rc = Curl_prefixed_val("iii", "IIIa", strlen("iii"));
-        fail_unless(!strcmp(rc, "a"), "return code should be zero");
+rc = Curl_prefixed_val("iii", "IIIa", strlen("iii"));
+fail_unless(!strcmp(rc, "a"), "return val should be zero");
 
-        rc = Curl_prefixed_val("iiiA", "IIIa", strlen("iiiA"));
-        fail_unless(!strcmp(rc, ""), "return code should be non-zero");
+rc = Curl_prefixed_val("iiiA", "IIIa", strlen("iiiA"));
+fail_unless(rc == NULL, "return val should be null");
 
-        rc = Curl_prefixed_val("iiiABC", "IIIcba", 3);
-        fail_unless(!strcmp(rc, "cba"), "return code should be non-zero");
+rc = Curl_prefixed_val("iiiABC", "IIIcba", 3);
+fail_unless(!strcmp(rc, "cba"), "return val should be non-zero");
 
-        rc = Curl_prefixed_val("ii", "II", 3);
-        fail_unless(rc == NULL,"return code should be null");
+rc = Curl_prefixed_val("ii", "II", 3);
+fail_unless(rc == NULL,"return val should be null");
 
 UNITTEST_STOP
