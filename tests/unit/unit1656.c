@@ -47,6 +47,6 @@ rc = Curl_prefixed_val("iiiABC", "IIIcba", 3);
 fail_unless(!strcmp(rc, "cba"), "return val should be non-zero");
 
 rc = Curl_prefixed_val("ii", "II", 3);
-fail_unless(rc == NULL,"return val should be null");
+fail_unless(rc == NULL, "return val should be null");
 
 UNITTEST_STOP
