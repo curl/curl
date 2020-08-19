@@ -98,53 +98,27 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
   /*
    * Write etag to file when --etag-save option is given.
-   * etag string that we want is enveloped in double quotes
    */
   if(per->config->etag_save_file && etag_save->stream) {
     /* match only header that start with etag (case insensitive) */
     if(curl_strnequal(str, "etag:", 5)) {
-      char *etag_h = NULL;
-      char *first = NULL;
-      char *last = NULL;
-      size_t etag_length = 0;
+      const char *etag_h = &str[5];
+      const char *eot = end - 1;
+      if(*eot == '\n') {
+        while(ISSPACE(*etag_h) && (etag_h < eot))
+          etag_h++;
+        while(ISSPACE(*eot))
+          eot--;
 
-      etag_h = ptr;
-      /* point to first occurrence of double quote */
-      first = memchr(etag_h, '\"', cb);
-
-      /*
-       * if server side messed with the etag header and doesn't include
-       * double quotes around the etag, kindly exit with a warning
-       */
-
-      if(!first) {
-        warnf(per->config->global,
-              "Received header etag is missing double quote/s\n");
-        return failure;
+        if(eot >= etag_h) {
+          size_t etag_length = eot - etag_h + 1;
+          fwrite(etag_h, size, etag_length, etag_save->stream);
+          /* terminate with newline */
+          fputc('\n', etag_save->stream);
+          (void)fflush(etag_save->stream);
+        }
       }
-      else {
-        /* discard first double quote */
-        first++;
-      }
-
-      /* point to last occurrence of double quote */
-      last = memchr(first, '\"', cb);
-
-      if(!last) {
-        warnf(per->config->global,
-              "Received header etag is missing double quote/s\n");
-        return failure;
-      }
-
-      /* get length of desired etag */
-      etag_length = (size_t)last - (size_t)first;
-
-      fwrite(first, size, etag_length, etag_save->stream);
-      /* terminate with new line */
-      fputc('\n', etag_save->stream);
     }
-
-    (void)fflush(etag_save->stream);
   }
 
   /*
