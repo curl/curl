@@ -35,7 +35,7 @@ UNITTEST_START
         fail_unless(!strcmp(rc, ""), "return code should be non-zero");
 
         rc = Curl_prefixed_val("iiia", "III", strlen("iiia"));
-        fail_unless(rc == NULL, "return code should be zero");
+        fail_unless(rc == NULL, "return should be null");
 
         rc = Curl_prefixed_val("iii", "IIIa", strlen("iii"));
         fail_unless(!strcmp(rc, "a"), "return code should be zero");
@@ -47,6 +47,6 @@ UNITTEST_START
         fail_unless(!strcmp(rc, "cba"), "return code should be non-zero");
 
         rc = Curl_prefixed_val("ii", "II", 3);
-        fail_unless(!strcmp(rc, ""), "return code should be non-zero");
+        fail_unless(rc == NULL,"return code should be null");
 
 UNITTEST_STOP
