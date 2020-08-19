@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+Curl_prefixed_val
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+Curl_prefixed_val unit tests
+ </name>
+</client>
+</testcase>

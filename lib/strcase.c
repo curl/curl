@@ -221,6 +221,31 @@ int Curl_strncasecompare(const char *first, const char *second, size_t max)
   return Curl_raw_toupper(*first) == Curl_raw_toupper(*second);
 }
 
+/*
+ * The same as Curl_strncasecompare but prefix must be a constant.
+ * Returns value after prefix or a NULL and can be casted as bool.
+ * See https://github.com/stokito/prefixed_str_bench
+ * @unittest: 1656
+ */
+const char *Curl_prefixed_val(const char *prefix, const char *str, size_t max)
+{
+  char ch_prefix;
+  char ch_str;
+  do{
+    ch_prefix = *prefix;
+    ch_str = *str;
+    if(raw_tolower(ch_prefix) != raw_tolower(ch_str)) {
+      return NULL;
+    }
+    else {
+      max--;
+      prefix++;
+      str++;
+    }
+  }while(max);
+  return str;
+}
+
 /* Copy an upper case version of the string from src to dest.  The
  * strings may overlap.  No more than n characters of the string are copied
  * (including any NUL) and the destination string will NOT be

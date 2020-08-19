@@ -38,12 +38,33 @@
 int Curl_strcasecompare(const char *first, const char *second);
 int Curl_safe_strcasecompare(const char *first, const char *second);
 int Curl_strncasecompare(const char *first, const char *second, size_t max);
+const char *Curl_prefixed_val(const char *prefix, const char *str, size_t max);
 
 char Curl_raw_toupper(char in);
 
-/* checkprefix() is a shorter version of the above, used when the first
-   argument is zero-byte terminated */
+/* checkprefix() is a shorter version of the curl_strnequal,
+ * used when the first argument is zero-byte terminated */
 #define checkprefix(a,b)    curl_strnequal(a,b,strlen(a))
+
+/* Check if str is prefixed with case insensitive prefix.
+ * Returns value after prefix or a NULL and can be casted as bool.
+ * Similar to curl_strnequal but returns a pointer to value */
+#define prefixed(prefix, str) Curl_prefixed_val(prefix, str, strlen(prefix))
+
+/* Check if str is prefixed with case insensitive prefix.
+ * Returns value after prefix or a NULL and can be casted as bool.
+ * The same value stored to val variable to avoid assigment inside if statement
+ * Usage example:
+ *
+ *   const char *header = "Date: Wed, 21 Oct 2015 07:28:00 GMT"
+ *   const char *header_value = NULL;
+ *   if(prefixed_val("Date:", header, header_value)) {
+ *     printf(header_value) //=> " Wed, 21 Oct 2015 07:28:00 GMT"
+ *   }
+ *
+ */
+#define prefixed_val(prefix, str, val)  \
+  (val = Curl_prefixed_val(prefix, str, strlen(prefix)))
 
 void Curl_strntoupper(char *dest, const char *src, size_t n);
 void Curl_strntolower(char *dest, const char *src, size_t n);

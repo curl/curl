@@ -898,7 +898,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
 
   while(*auth) {
 #ifdef USE_SPNEGO
-    if(checkprefix("Negotiate", auth)) {
+    if(prefixed("Negotiate", auth)) {
       if((authp->avail & CURLAUTH_NEGOTIATE) ||
          Curl_auth_is_spnego_supported()) {
         *availp |= CURLAUTH_NEGOTIATE;
@@ -924,7 +924,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
 #endif
 #ifdef USE_NTLM
       /* NTLM support requires the SSL crypto libs */
-      if(checkprefix("NTLM", auth)) {
+      if(prefixed("NTLM", auth)) {
         if((authp->avail & CURLAUTH_NTLM) ||
            (authp->avail & CURLAUTH_NTLM_WB) ||
            Curl_auth_is_ntlm_supported()) {
@@ -962,7 +962,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
       else
 #endif
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-        if(checkprefix("Digest", auth)) {
+        if(prefixed("Digest", auth)) {
           if((authp->avail & CURLAUTH_DIGEST) != 0)
             infof(data, "Ignoring duplicate digest auth header.\n");
           else if(Curl_auth_is_digest_supported()) {
@@ -984,7 +984,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
         }
         else
 #endif
-          if(checkprefix("Basic", auth)) {
+          if(prefixed("Basic", auth)) {
             *availp |= CURLAUTH_BASIC;
             authp->avail |= CURLAUTH_BASIC;
             if(authp->picked == CURLAUTH_BASIC) {
@@ -997,7 +997,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
             }
           }
           else
-            if(checkprefix("Bearer", auth)) {
+            if(prefixed("Bearer", auth)) {
               *availp |= CURLAUTH_BEARER;
               authp->avail |= CURLAUTH_BEARER;
               if(authp->picked == CURLAUTH_BEARER) {
@@ -1775,32 +1775,32 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
           if(data->state.aptr.host &&
              /* a Host: header was sent already, don't pass on any custom Host:
                 header as that will produce *two* in the same request! */
-             checkprefix("Host:", compare))
+             prefixed("Host:", compare))
             ;
           else if(data->state.httpreq == HTTPREQ_POST_FORM &&
                   /* this header (extended by formdata.c) is sent later */
-                  checkprefix("Content-Type:", compare))
+                  prefixed("Content-Type:", compare))
             ;
           else if(data->state.httpreq == HTTPREQ_POST_MIME &&
                   /* this header is sent later */
-                  checkprefix("Content-Type:", compare))
+                  prefixed("Content-Type:", compare))
             ;
           else if(conn->bits.authneg &&
                   /* while doing auth neg, don't allow the custom length since
                      we will force length zero then */
-                  checkprefix("Content-Length:", compare))
+                  prefixed("Content-Length:", compare))
             ;
           else if(data->state.aptr.te &&
                   /* when asking for Transfer-Encoding, don't pass on a custom
                      Connection: */
-                  checkprefix("Connection:", compare))
+                  prefixed("Connection:", compare))
             ;
           else if((conn->httpversion >= 20) &&
-                  checkprefix("Transfer-Encoding:", compare))
+                  prefixed("Transfer-Encoding:", compare))
             /* HTTP/2 doesn't support chunked requests */
             ;
-          else if((checkprefix("Authorization:", compare) ||
-                   checkprefix("Cookie:", compare)) &&
+          else if((prefixed("Authorization:", compare) ||
+                   prefixed("Cookie:", compare)) &&
                   /* be careful of sending this potentially sensitive header to
                      other hosts */
                   (data->state.this_is_a_follow &&
@@ -3153,6 +3153,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
   char *headp;
   char *str_start;
   char *end_ptr;
+  /* header value after header name */
+  const char *hv;
 
   /* header line within buffer loop */
   do {
@@ -3746,9 +3748,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
     /* Check for Content-Length: header lines to get size */
     if(!k->http_bodyless &&
-       !data->set.ignorecl && checkprefix("Content-Length:", headp)) {
+       !data->set.ignorecl && prefixed_val("Content-Length:", headp, hv)) {
       curl_off_t contentlength;
-      CURLofft offt = curlx_strtoofft(headp + 15, NULL, 10, &contentlength);
+      CURLofft offt = curlx_strtoofft(hv, NULL, 10, &contentlength);
 
       if(offt == CURL_OFFT_OK) {
         if(data->set.max_filesize &&
@@ -3779,7 +3781,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       }
     }
     /* check for Content-Type: header lines to get the MIME-type */
-    else if(checkprefix("Content-Type:", headp)) {
+    else if(prefixed_val("Content-Type:", headp, hv)) {
       char *contenttype = Curl_copy_header_value(headp);
       if(!contenttype)
         return CURLE_OUT_OF_MEMORY;
@@ -3835,7 +3837,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
        */
       streamclose(conn, "Connection: close used");
     }
-    else if(!k->http_bodyless && checkprefix("Transfer-Encoding:", headp)) {
+    else if(!k->http_bodyless &&
+            prefixed_val("Transfer-Encoding:", headp, hv)) {
       /* One or more encodings. We check for chunked and/or a compression
          algorithm. */
       /*
@@ -3847,11 +3850,12 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
        * of chunks, and a chunk-data set to zero signals the
        * end-of-chunks. */
 
-      result = Curl_build_unencoding_stack(conn, headp + 18, TRUE);
+      result = Curl_build_unencoding_stack(conn, hv, TRUE);
       if(result)
         return result;
     }
-    else if(!k->http_bodyless && checkprefix("Content-Encoding:", headp) &&
+    else if(!k->http_bodyless &&
+        prefixed_val("Content-Encoding:", headp, hv) &&
             data->set.str[STRING_ENCODING]) {
       /*
        * Process Content-Encoding. Look for the values: identity,
@@ -3860,24 +3864,24 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
        * 2616). zlib cannot handle compress.  However, errors are
        * handled further down when the response body is processed
        */
-      result = Curl_build_unencoding_stack(conn, headp + 17, FALSE);
+      result = Curl_build_unencoding_stack(conn, hv, FALSE);
       if(result)
         return result;
     }
-    else if(checkprefix("Retry-After:", headp)) {
+    else if(prefixed_val("Retry-After:", headp, hv)) {
       /* Retry-After = HTTP-date / delay-seconds */
       curl_off_t retry_after = 0; /* zero for unknown or "now" */
-      time_t date = Curl_getdate_capped(&headp[12]);
+      time_t date = Curl_getdate_capped(hv);
       if(-1 == date) {
         /* not a date, try it as a decimal number */
-        (void)curlx_strtoofft(&headp[12], NULL, 10, &retry_after);
+        (void)curlx_strtoofft(hv, NULL, 10, &retry_after);
       }
       else
         /* convert date to number of seconds into the future */
         retry_after = date - time(NULL);
       data->info.retry_after = retry_after; /* store it */
     }
-    else if(!k->http_bodyless && checkprefix("Content-Range:", headp)) {
+    else if(!k->http_bodyless && prefixed_val("Content-Range:", headp, hv)) {
       /* Content-Range: bytes [num]-
          Content-Range: bytes: [num]-
          Content-Range: [num]-
@@ -3889,7 +3893,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
          The forth means the requested range was unsatisfied.
       */
 
-      char *ptr = headp + 14;
+      const char *ptr = hv;
 
       /* Move forward until first digit or asterisk */
       while(*ptr && !ISDIGIT(*ptr) && *ptr != '*')
@@ -3908,11 +3912,11 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     }
 #if !defined(CURL_DISABLE_COOKIES)
     else if(data->cookies && data->state.cookie_engine &&
-            checkprefix("Set-Cookie:", headp)) {
+        prefixed_val("Set-Cookie:", headp, hv)) {
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
                       CURL_LOCK_ACCESS_SINGLE);
       Curl_cookie_add(data,
-                      data->cookies, TRUE, FALSE, headp + 11,
+                      data->cookies, TRUE, FALSE, hv,
                       /* If there is a custom-set Host: name, use it
                          here, or else use real peer host name. */
                       data->state.aptr.cookiehost?
@@ -3923,15 +3927,15 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
 #endif
-    else if(!k->http_bodyless && checkprefix("Last-Modified:", headp) &&
+    else if(!k->http_bodyless && prefixed_val("Last-Modified:", headp, hv) &&
             (data->set.timecondition || data->set.get_filetime) ) {
-      k->timeofdoc = Curl_getdate_capped(headp + strlen("Last-Modified:"));
+      k->timeofdoc = Curl_getdate_capped(hv);
       if(data->set.get_filetime)
         data->info.filetime = k->timeofdoc;
     }
-    else if((checkprefix("WWW-Authenticate:", headp) &&
+    else if((prefixed("WWW-Authenticate:", headp) &&
              (401 == k->httpcode)) ||
-            (checkprefix("Proxy-authenticate:", headp) &&
+            (prefixed("Proxy-authenticate:", headp) &&
              (407 == k->httpcode))) {
 
       bool proxy = (k->httpcode == 407) ? TRUE : FALSE;
@@ -3947,14 +3951,14 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         return result;
     }
 #ifdef USE_SPNEGO
-    else if(checkprefix("Persistent-Auth", headp)) {
+    else if(prefixed("Persistent-Auth", headp)) {
       struct negotiatedata *negdata = &conn->negotiate;
       struct auth *authp = &data->state.authhost;
       if(authp->picked == CURLAUTH_NEGOTIATE) {
         char *persistentauth = Curl_copy_header_value(headp);
         if(!persistentauth)
           return CURLE_OUT_OF_MEMORY;
-        negdata->noauthpersist = checkprefix("false", persistentauth)?
+        negdata->noauthpersist = prefixed("false", persistentauth)?
           TRUE:FALSE;
         negdata->havenoauthpersist = TRUE;
         infof(data, "Negotiate: noauthpersist -> %d, header part: %s",
@@ -3964,7 +3968,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     }
 #endif
     else if((k->httpcode >= 300 && k->httpcode < 400) &&
-            checkprefix("Location:", headp) &&
+            prefixed("Location:", headp) &&
             !data->req.location) {
       /* this is the URL that the server advises us to use instead */
       char *location = Curl_copy_header_value(headp);
@@ -3992,7 +3996,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     }
 #ifdef USE_ALTSVC
     /* If enabled, the header is incoming and this is over HTTPS */
-    else if(data->asi && checkprefix("Alt-Svc:", headp) &&
+    else if(data->asi && prefixed_val("Alt-Svc:", headp, hv) &&
             ((conn->handler->flags & PROTOPT_SSL) ||
 #ifdef CURLDEBUG
              /* allow debug builds to circumvent the HTTPS restriction */
@@ -4004,7 +4008,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       /* the ALPN of the current request */
       enum alpnid id = (conn->httpversion == 20) ? ALPN_h2 : ALPN_h1;
       result = Curl_altsvc_parse(data, data->asi,
-                                 &headp[ strlen("Alt-Svc:") ],
+                                 hv,
                                  id, conn->host.name,
                                  curlx_uitous(conn->remote_port));
       if(result)
