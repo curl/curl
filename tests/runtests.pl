@@ -1448,7 +1448,7 @@ sub runhttp2server {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $pid = processexists($pidfile);
@@ -1479,6 +1479,7 @@ sub runhttp2server {
             logmsg "RUN: failed to start the $srvrname server\n";
             stopserver($server, "$pid2");
             $doesntrun{$pidfile} = 1;
+            $http2pid = $pid2 = 0;
             next;
         }
         $doesntrun{$pidfile} = 0;
@@ -1529,7 +1530,7 @@ sub runhttpserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $pid = processexists($pidfile);
@@ -1564,7 +1565,7 @@ sub runhttpserver {
         stopserver($server, "$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
-        return (0,0);
+        return (0, 0, 0);
     }
 
     # where is it?
@@ -1581,7 +1582,7 @@ sub runhttpserver {
         stopserver($server, "$httppid $pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
-        return (0,0);
+        return (0, 0, 0);
     }
     $pid2 = $pid3;
 
@@ -1613,7 +1614,7 @@ sub runhttpsserver {
     }
 
     if(!$stunnel) {
-        return (0,0);
+        return (0, 0, 0);
     }
 
     $server = servername_id($proto, $ipvnum, $idnum);
@@ -1622,7 +1623,7 @@ sub runhttpsserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $pid = processexists($pidfile);
@@ -1668,17 +1669,7 @@ sub runhttpsserver {
             stopserver($server, "$pid2");
             displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
-            next;
-        }
-
-        # Server is up. Verify that we can speak to it.
-        $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-        if(!$pid3) {
-            logmsg "RUN: $srvrname server failed verification\n";
-            # failed to talk to it properly. Kill the server and return failure
-            stopserver($server, "$httpspid $pid2");
-            displaylogs($testnumcheck);
-            $doesntrun{$pidfile} = 1;
+            $httpspid = $pid2 = 0;
             next;
         }
         # we have a server!
@@ -1720,7 +1711,7 @@ sub runhttptlsserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $pid = processexists($pidfile);
@@ -1877,7 +1868,7 @@ sub runpingpongserver {
     }
     else {
         print STDERR "Unsupported protocol $proto!!\n";
-        return 0;
+        return (0,0);
     }
 
     return ($pid2, $ftppid);
@@ -1908,7 +1899,7 @@ sub runftpsserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $pid = processexists($pidfile);
@@ -1947,20 +1938,11 @@ sub runftpsserver {
             stopserver($server, "$pid2");
             displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
+            $ftpspid = $pid2 = 0;
             next;
         }
 
-        $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-        if(!$pid3) {
-            logmsg "RUN: $srvrname server failed verification\n";
-            # failed to talk to it properly. Kill the server and return failure
-            stopserver($server, "$ftpspid $pid2");
-            displaylogs($testnumcheck);
-            $doesntrun{$pidfile} = 1;
-            next;
-        }
-        # Here pid3 is actually the pid returned by the unsecure-ftp server.
-
+        $doesntrun{$pidfile} = 0;
         $runcert{$server} = $certfile;
 
         if($verbose) {
@@ -2000,7 +1982,7 @@ sub runtftpserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $pid = processexists($pidfile);
@@ -2029,7 +2011,7 @@ sub runtftpserver {
         stopserver($server, "$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $port = pidfromfile($portfile);
@@ -2042,7 +2024,7 @@ sub runtftpserver {
         stopserver($server, "$tftppid $pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
-        return (0,0);
+        return (0, 0, 0);
     }
     $pid2 = $pid3;
 
@@ -2082,7 +2064,7 @@ sub runrtspserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $pid = processexists($pidfile);
@@ -2111,7 +2093,7 @@ sub runrtspserver {
         stopserver($server, "$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $port = pidfromfile($portfile);
@@ -2124,7 +2106,7 @@ sub runrtspserver {
         stopserver($server, "$rtsppid $pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
-        return (0,0);
+        return (0, 0, 0);
     }
     $pid2 = $pid3;
 
@@ -2157,7 +2139,7 @@ sub runsshserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $sshd = find_sshd();
@@ -2210,23 +2192,9 @@ sub runsshserver {
             logmsg "RUN: failed to start the $srvrname server on $port\n";
             stopserver($server, "$pid2");
             $doesntrun{$pidfile} = 1;
+            $sshpid = $pid2 = 0;
             next;
         }
-
-        # ssh server verification allows some extra time for the server to
-        # start up and gives us the opportunity of recovering the pid from the
-        # pidfile, when this verification succeeds the recovered pid is
-        # assigned to pid2.
-
-        my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-        if(!$pid3) {
-            logmsg "RUN: $srvrname server failed verification\n";
-            # failed to fetch server pid. Kill the server and return failure
-            stopserver($server, "$sshpid $pid2");
-            $doesntrun{$pidfile} = 1;
-            next;
-        }
-        $pid2 = $pid3;
 
         # once it is known that the ssh server is alive, sftp server
         # verification is performed actually connecting to it, authenticating
@@ -2245,9 +2213,11 @@ sub runsshserver {
             display_sshdconfig();
             stopserver($server, "$sshpid $pid2");
             $doesntrun{$pidfile} = 1;
+            $sshpid = $pid2 = 0;
             next;
         }
         # we're happy, no need to loop anymore!
+        $doesntrun{$pidfile} = 0;
         $wport = $port;
         last;
     }
@@ -2358,7 +2328,7 @@ sub runsocksserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $pid = processexists($pidfile);
@@ -2385,7 +2355,7 @@ sub runsocksserver {
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
         $doesntrun{$pidfile} = 1;
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $port = pidfromfile($portfile);
@@ -2422,7 +2392,7 @@ sub rundictserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $pid = processexists($pidfile);
@@ -2494,7 +2464,7 @@ sub runsmbserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $pid = processexists($pidfile);
@@ -2566,7 +2536,7 @@ sub runnegtelnetserver {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        return (0,0);
+        return (0, 0, 0);
     }
 
     my $pid = processexists($pidfile);
