@@ -1,10 +1,10 @@
 curl and libcurl 7.72.0
 
- Public curl releases:         193
+ Public curl releases:         194
  Command line options:         232
  curl_easy_setopt() options:   277
  Public functions in libcurl:  82
- Contributors:                 2233
+ Contributors:                 2239
 
 This release includes the following changes:
 
@@ -14,7 +14,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2020-8231: libcurl: wrong connect-only connection [98]
  o appveyor: collect libcurl.dll variants with prefix or suffix [38]
+ o asyn-ares: correct some bad comments [94]
  o bearssl: fix build with disabled proxy support [16]
  o buildconf: avoid array concatenation in die() [64]
  o buildconf: retire ares buildconf invocation
@@ -27,6 +29,7 @@ This release includes the following bugfixes:
  o CI/macos: unconditionally enable warnings-as-errors with autotools [21]
  o CI: Add muse CI analyzer [79]
  o cirrus-ci: upgrade 11-STABLE to 11.4 [2]
+ o CMake: don't complain about missing nroff [87]
  o CMake: fix test for warning suppressions [17]
  o cmake: fix windows xp build [13]
  o configure.ac: Sort features name in summary [6]
@@ -34,6 +37,7 @@ This release includes the following bugfixes:
  o configure: cleanup wolfssl + pkg-config conflicts when cross compiling. [48]
  o configure: show zstd "no" in summary when built without it [49]
  o connect: remove redundant message about connect failure [66]
+ o curl-config: ignore REQUIRE_LIB_DEPS in --libs output [96]
  o curl.1: add a few missing valid exit codes [76]
  o curl: add %{method} to the -w variables
  o curl: improve the existing file check with -J [43]
@@ -42,6 +46,9 @@ This release includes the following bugfixes:
  o CURLINFO_CERTINFO.3: fix typo [3]
  o CURLOPT_NOBODY.3: clarify what setting to 0 means [46]
  o docs: add date of 7.20 to CURLM_CALL_MULTI_PERFORM mentions [18]
+ o docs: Add video link to docs/CONTRIBUTE.md [95]
+ o docs: change "web site" to "website" [86]
+ o docs: clarify MAX_SEND/RECV_SPEED functionality [92]
  o docs: Update a few leftover mentions of DarwinSSL [29]
  o doh: remove redundant cast [20]
  o file2memory: use a define instead of -1 unsigned value [30]
@@ -54,10 +61,12 @@ This release includes the following bugfixes:
  o http2: close the http2 connection when no more requests may be sent [7]
  o http2: fix nghttp2_strerror -> nghttp2_http2_strerror in debug messages [11]
  o libssh2: s/ssherr/sftperr/ [78]
+ o libtest/Makefile.am: add -no-undefined for libstubgss for Cygwin [91]
  o md(4|5): don't use deprecated macOS functions [23]
  o mprintf: Fix dollar string handling [54]
  o mprintf: Fix stack overflows [53]
  o multi: Condition 'extrawait' is always true [60]
+ o multi: Remove 10-year old out-commented code [97]
  o multi: remove two checks always true [36]
  o multi: update comment to say easyp list is linear [44]
  o multi_remove_handle: close unused connect-only connections [62]
@@ -82,6 +91,7 @@ This release includes the following bugfixes:
  o strdup: remove the odd strlen check [24]
  o test1119: verify stdout in the test [33]
  o test1139: make it display the difference on test failures
+ o test1140: compare stdout [93]
  o test1908: treat file as text [83]
  o tests/FILEFORMAT.md: mention %HTTP2PORT
  o tests/sshserver.pl: fix compatibility with OpenSSH for Windows
@@ -112,19 +122,21 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Alex Kiernan, Baruch Siach, BrumBrum on hackerone,
-  Cameron Cawley, Carlo Marcelo Arenas Belón, causal-agent on github,
-  Cherish98 on github, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Denis Goleshchikhin, divinity76 on github, Ehren Bendler, Emil Engler,
-  Erik Johansson, Filip Salomonsson, Gilles Vollant, Gisle Vanem,
-  ihsinme on github, Jeremy Maitin-Shepard, joey-l-us on github,
-  Jonathan Cardoso Machado, Jonathan Nieder, Kamil Dudka, Laramie Leavitt,
-  lilongyan-huawei on github, Marc Aldorasi, Marcel Raad, Marc Hörsken,
-  Masaya Suzuki, Matthias Naegler, Nicolas Sterchele, NobodyXu on github,
-  Peter Wu, Rasmus Melchior Jacobsen, Ray Satiro, sspiri on github,
-  Stefan Yohansson, Tadej Vengust, Tatsuhiro Tsujikawa, tbugfinder on github,
-  Thomas M. DuBuisson, Tobias Stoeckmann, Viktor Szakats, xwxbug on github,
-  (46 contributors)
+  Alessandro Ghedini, Alex Kiernan, Baruch Siach, Bevan Weiss, Brian Inglis,
+  BrumBrum on hackerone, Cameron Cawley, Carlo Marcelo Arenas Belón,
+  causal-agent on github, Cherish98 on github, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, Denis Goleshchikhin, divinity76 on github, Ehren Bendler,
+  Emil Engler, Erik Johansson, Filip Salomonsson, Gilles Vollant, Gisle Vanem,
+  H3RSKO on github, ihsinme on github, Jeremy Maitin-Shepard,
+  joey-l-us on github, Jonathan Cardoso Machado, Jonathan Nieder, Kamil Dudka,
+  Ken Brown, Laramie Leavitt, lilongyan-huawei on github, Marc Aldorasi,
+  Marcel Raad, Marc Hörsken, Masaya Suzuki, Matthias Naegler,
+  Nicolas Sterchele, NobodyXu on github, Peter Wu, ramsay-jones on github,
+  Rasmus Melchior Jacobsen, Ray Satiro, sspiri on github, Stefan Yohansson,
+  Tadej Vengust, Tatsuhiro Tsujikawa, tbugfinder on github,
+  Thomas M. DuBuisson, Tobias Stoeckmann, Tomas Berger, Viktor Szakats,
+  xwxbug on github,
+  (52 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -215,6 +227,16 @@ References to bug reports and discussions on issues:
  [83] = https://curl.haxx.se/bug/?i=5767
  [84] = https://curl.haxx.se/bug/?i=5767
  [85] = https://curl.haxx.se/bug/?i=5797
+ [86] = https://curl.haxx.se/bug/?i=5822
+ [87] = https://curl.haxx.se/bug/?i=5817
  [88] = https://curl.haxx.se/bug/?i=5795
  [89] = https://curl.haxx.se/bug/?i=5792
  [90] = https://curl.haxx.se/bug/?i=5783
+ [91] = https://curl.haxx.se/bug/?i=5819
+ [92] = https://curl.haxx.se/bug/?i=5788
+ [93] = https://curl.haxx.se/bug/?i=5814
+ [94] = https://curl.haxx.se/bug/?i=5812
+ [95] = https://curl.haxx.se/bug/?i=5811
+ [96] = https://curl.haxx.se/bug/?i=5793
+ [97] = https://curl.haxx.se/bug/?i=5805
+ [98] = https://curl.haxx.se/docs/CVE-2020-8231.html
