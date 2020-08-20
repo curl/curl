@@ -31,6 +31,7 @@ CMAKE_DIST =                                    \
  CMake/CurlSymbolHiding.cmake                   \
  CMake/CurlTests.c                              \
  CMake/FindBearSSL.cmake                        \
+ CMake/FindBrotli.cmake                         \
  CMake/FindCARES.cmake                          \
  CMake/FindGSS.cmake                            \
  CMake/FindLibSSH2.cmake                        \
@@ -38,8 +39,10 @@ CMAKE_DIST =                                    \
  CMake/FindNGHTTP2.cmake                        \
  CMake/FindNGHTTP3.cmake                        \
  CMake/FindNGTCP2.cmake                         \
+ CMake/FindNSS.cmake                            \
  CMake/FindQUICHE.cmake                         \
  CMake/FindWolfSSL.cmake                        \
+ CMake/FindZstd.cmake                           \
  CMake/Macros.cmake                             \
  CMake/OtherTests.cmake                         \
  CMake/Platforms/WindowsCache.cmake             \
