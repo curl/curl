@@ -116,7 +116,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   if(per->config->etag_save_file && etag_save->stream) {
     /* match only header that start with etag (case insensitive) */
     if(curl_strnequal(str, "etag:", 5)) {
-      const char *etag_start = ptr + strlen("ETag:");
+      const char *etag_start = ptr + 5;
       const char *expected_etag_end, *etag_end;
       size_t etag_length;
 
@@ -124,7 +124,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       while(*etag_start && ISSPACE(*etag_start))
         etag_start++;
 
-      /* We expect CRLF as EOL but when called from tests it may be CR or LF */
+      /* We expect CRLF as EOL but it may be also CR or LF */
       expected_etag_end = end - strlen("\"\r\n");
       if(*expected_etag_end == '"') {
         /* step back to quote */
