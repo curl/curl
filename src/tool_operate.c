@@ -1696,7 +1696,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             char *home;
             char *file;
             result = CURLE_FAILED_INIT;
-            home = homedir();
+            home = homedir(NULL);
             if(home) {
               file = aprintf("%s/.ssh/known_hosts", home);
               if(file) {

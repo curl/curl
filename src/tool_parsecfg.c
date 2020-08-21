@@ -82,7 +82,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   if(!filename || !*filename) {
     /* NULL or no file name attempts to load .curlrc from the homedir! */
 
-    char *home = homedir();    /* portable homedir finder */
+    char *home = homedir(".curlrc");
 #ifndef WIN32
     if(home) {
       pathalloc = curl_maprintf("%s%s.curlrc", home, DIR_CHAR);
