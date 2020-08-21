@@ -1476,7 +1476,6 @@ sub runhttp2server {
 
         if($http2pid <= 0 || !pidexists($http2pid)) {
             # it is NOT alive
-            logmsg "RUN: failed to start the $srvrname server\n";
             stopserver($server, "$pid2");
             $doesntrun{$pidfile} = 1;
             $http2pid = $pid2 = 0;
@@ -1489,6 +1488,8 @@ sub runhttp2server {
         }
         last;
     }
+
+    logmsg "RUN: failed to start the $srvrname server\n" if(!$http2pid);
 
     return ($http2pid, $pid2, $port);
 }
@@ -1665,7 +1666,6 @@ sub runhttpsserver {
 
         if($httpspid <= 0 || !pidexists($httpspid)) {
             # it is NOT alive
-            logmsg "RUN: failed to start the $srvrname server\n";
             stopserver($server, "$pid2");
             displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
@@ -1673,15 +1673,13 @@ sub runhttpsserver {
             next;
         }
         # we have a server!
+        if($verbose) {
+            logmsg "RUN: $srvrname server is PID $httpspid port $port\n";
+        }
         last;
     }
-    # Here pid3 is actually the pid returned by the unsecure-http server.
-
     $runcert{$server} = $certfile;
-
-    if($verbose) {
-        logmsg "RUN: $srvrname server is PID $httpspid port $port\n";
-    }
+    logmsg "RUN: failed to start the $srvrname server\n" if(!$httpspid);
 
     return ($httpspid, $pid2, $port);
 }
@@ -1741,7 +1739,6 @@ sub runhttptlsserver {
 
         if($httptlspid <= 0 || !pidexists($httptlspid)) {
             # it is NOT alive
-            logmsg "RUN: failed to start the $srvrname server\n";
             stopserver($server, "$pid2");
             displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
@@ -1755,6 +1752,7 @@ sub runhttptlsserver {
         }
         last;
     }
+    logmsg "RUN: failed to start the $srvrname server\n" if(!$httptlspid);
     return ($httptlspid, $pid2, $port);
 }
 
@@ -1934,7 +1932,6 @@ sub runftpsserver {
 
         if($ftpspid <= 0 || !pidexists($ftpspid)) {
             # it is NOT alive
-            logmsg "RUN: failed to start the $srvrname server\n";
             stopserver($server, "$pid2");
             displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
@@ -1950,6 +1947,8 @@ sub runftpsserver {
         }
         last;
     }
+
+    logmsg "RUN: failed to start the $srvrname server\n" if(!$ftpspid);
 
     return ($ftpspid, $pid2, $port);
 }
@@ -2189,7 +2188,6 @@ sub runsshserver {
         # zero pid2 above.
         if($sshpid <= 0 || !pidexists($sshpid)) {
             # it is NOT alive
-            logmsg "RUN: failed to start the $srvrname server on $port\n";
             stopserver($server, "$pid2");
             $doesntrun{$pidfile} = 1;
             $sshpid = $pid2 = 0;
@@ -2221,6 +2219,7 @@ sub runsshserver {
         $wport = $port;
         last;
     }
+    logmsg "RUN: failed to start the $srvrname server on $port\n" if(!$sshpid);
 
     if(!$wport) {
         logmsg "RUN: couldn't start $srvrname. Tried these ports:";
@@ -2421,7 +2420,6 @@ sub rundictserver {
 
         if($dictpid <= 0 || !pidexists($dictpid)) {
             # it is NOT alive
-            logmsg "RUN: failed to start the $srvrname server\n";
             stopserver($server, "$pid2");
             displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
@@ -2435,6 +2433,7 @@ sub rundictserver {
         }
         last;
     }
+    logmsg "RUN: failed to start the $srvrname server\n" if(!$dictpid);
 
     return ($dictpid, $pid2, $port);
 }
@@ -2493,7 +2492,6 @@ sub runsmbserver {
 
         if($smbpid <= 0 || !pidexists($smbpid)) {
             # it is NOT alive
-            logmsg "RUN: failed to start the $srvrname server\n";
             stopserver($server, "$pid2");
             displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
@@ -2507,6 +2505,7 @@ sub runsmbserver {
         }
         last;
     }
+    logmsg "RUN: failed to start the $srvrname server\n" if(!$smbpid);
 
     return ($smbpid, $pid2, $port);
 }
@@ -2564,7 +2563,6 @@ sub runnegtelnetserver {
 
         if($ntelpid <= 0 || !pidexists($ntelpid)) {
             # it is NOT alive
-            logmsg "RUN: failed to start the $srvrname server\n";
             stopserver($server, "$pid2");
             displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
@@ -2578,6 +2576,7 @@ sub runnegtelnetserver {
         }
         last;
     }
+    logmsg "RUN: failed to start the $srvrname server\n" if(!$ntelpid);
 
     return ($ntelpid, $pid2, $port);
 }
