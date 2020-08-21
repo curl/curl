@@ -2747,7 +2747,7 @@ sub cleardir {
     opendir(DIR, $dir) ||
         return 0; # can't open dir
     while($file = readdir(DIR)) {
-        if(($file !~ /^\./)) {
+        if(($file !~ /^\.(|\.)$/)) {
             unlink("$dir/$file");
             $count++;
         }
