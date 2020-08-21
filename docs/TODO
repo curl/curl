@@ -52,6 +52,7 @@
  2.4 Split connect and authentication process
  2.5 Edge-triggered sockets should work
  2.6 multi upkeep
+ 2.7 Virtual external sockets
 
  3. Documentation
  3.2 Provide cmake config-file
@@ -480,6 +481,15 @@
  connection pool when the multi handle is in used.
 
  See https://github.com/curl/curl/issues/3199
+
+2.7 Virtual external sockets
+
+ libcurl performs operations on the given file descriptor that presumes it is
+ a socket and an application cannot replace them at the moment. Allowing an
+ application to fully replace those would allow a larger degree of freedom and
+ flexibility.
+
+ See https://github.com/curl/curl/issues/5835
 
 3. Documentation
 
