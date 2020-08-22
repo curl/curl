@@ -31,6 +31,7 @@ environment:
         PRJ_CFG: Release
         OPENSSL: OFF
         SCHANNEL: ON
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: OFF
         SHARED: ON
@@ -43,6 +44,7 @@ environment:
         PRJ_CFG: Release
         OPENSSL: ON
         SCHANNEL: OFF
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: OFF
         SHARED: ON
@@ -55,6 +57,7 @@ environment:
         PRJ_CFG: Release
         OPENSSL: OFF
         SCHANNEL: ON
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: OFF
         SHARED: OFF
@@ -67,6 +70,7 @@ environment:
         PRJ_CFG: Debug
         OPENSSL: OFF
         SCHANNEL: OFF
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
@@ -79,6 +83,7 @@ environment:
         PRJ_CFG: Debug
         OPENSSL: OFF
         SCHANNEL: ON
+        ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
@@ -91,6 +96,7 @@ environment:
         PRJ_CFG: Debug
         OPENSSL: OFF
         SCHANNEL: OFF
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
@@ -103,6 +109,7 @@ environment:
         PRJ_CFG: Debug
         OPENSSL: OFF
         SCHANNEL: OFF
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: ON
         TESTING: ON
         SHARED: OFF
@@ -115,6 +122,7 @@ environment:
         PRJ_CFG: Debug
         OPENSSL: OFF
         SCHANNEL: ON
+        ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
@@ -128,6 +136,7 @@ environment:
         PRJ_CFG: Debug
         OPENSSL: OFF
         SCHANNEL: ON
+        ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
@@ -141,6 +150,7 @@ environment:
         PRJ_CFG: Debug
         OPENSSL: OFF
         SCHANNEL: ON
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
@@ -154,6 +164,7 @@ environment:
         PRJ_CFG: Debug
         OPENSSL: OFF
         SCHANNEL: OFF
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
@@ -250,6 +261,7 @@ build_script:
         -DBUILD_TESTING=%TESTING%
         -DCURL_WERROR=ON
         -DENABLE_DEBUG=ON
+        -DENABLE_UNICODE=%ENABLE_UNICODE%
         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=""
         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
         -DCMAKE_INSTALL_PREFIX="C:/CURL"
