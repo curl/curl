@@ -312,7 +312,12 @@ endif
 ifdef ZSTD
   INCLUDES += -I"$(ZSTD_PATH)/include"
   CFLAGS += -DHAVE_ZSTD
-  curl_LDADD += -L"$(ZSTD_PATH)/lib" -lzstd
+  curl_LDADD += -L"$(ZSTD_PATH)/lib"
+  ifdef ZSTD_LIBS
+    curl_LDADD += $(ZSTD_LIBS)
+  else
+    curl_LDADD += -lzstd
+  endif
 endif
 ifdef BROTLI
   INCLUDES += -I"$(BROTLI_PATH)/include"
