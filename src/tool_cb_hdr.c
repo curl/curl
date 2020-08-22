@@ -98,7 +98,6 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
   /*
    * Write etag to file when --etag-save option is given.
-   * etag string that we want is enveloped in double quotes
    */
   if(per->config->etag_save_file && etag_save->stream) {
     /* match only header that start with etag (case insensitive) */
@@ -114,7 +113,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
         if(eot >= etag_h) {
           size_t etag_length = eot - etag_h + 1;
           fwrite(etag_h, size, etag_length, etag_save->stream);
-          /* terminate with new line */
+          /* terminate with newline */
           fputc('\n', etag_save->stream);
           (void)fflush(etag_save->stream);
         }
