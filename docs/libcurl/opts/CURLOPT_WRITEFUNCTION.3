@@ -76,7 +76,7 @@ Support for the CURL_WRITEFUNC_PAUSE return code was added in version 7.18.0.
 .SH RETURN VALUE
 This will return CURLE_OK.
 .SH EXAMPLE
-.NF
+.nf
  struct memory {
    char *response;
    size_t size;
@@ -106,7 +106,7 @@ This will return CURLE_OK.
 
  /* we pass our 'chunk' struct to the callback function */
  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
-.FI
+.fi
 .SH "SEE ALSO"
 .BR CURLOPT_WRITEDATA "(3), " CURLOPT_READFUNCTION "(3), "
 .BR CURLOPT_HEADERFUNCTION "(3), "
