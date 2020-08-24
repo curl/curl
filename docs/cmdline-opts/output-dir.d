@@ -1,7 +1,7 @@
 Long: output-dir
 Arg: <dir>
 Help: Directory to save files in
-Added: 7.72.0
+Added: 7.73.0
 See-also: remote-name remote-header-name
 ---
 
