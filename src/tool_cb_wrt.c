@@ -39,6 +39,15 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+#ifdef WIN32
+#define OPENMODE S_IREAD | S_IWRITE
+#else
+#define OPENMODE S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
+#endif
+
 /* create a local file for writing, return TRUE on success */
 bool tool_create_output_file(struct OutStruct *outs,
                              struct OperationConfig *config)
@@ -55,21 +64,24 @@ bool tool_create_output_file(struct OutStruct *outs,
 
   if(outs->is_cd_filename) {
     /* don't overwrite existing files */
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
-    int fd = open(outs->filename, O_CREAT | O_WRONLY | O_EXCL | O_BINARY,
-#ifdef WIN32
-                  S_IREAD | S_IWRITE
-#else
-                  S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
-#endif
-      );
+    int fd;
+    char *name = outs->filename;
+    char *aname = NULL;
+    if(config->output_dir) {
+      aname = aprintf("%s/%s", config->output_dir, name);
+      if(!aname) {
+        errorf(global, "out of memory\n");
+        return FALSE;
+      }
+      name = aname;
+    }
+    fd = open(name, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
     if(fd != -1) {
       file = fdopen(fd, "wb");
       if(!file)
         close(fd);
     }
+    free(aname);
   }
   else
     /* open file for writing */

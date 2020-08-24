@@ -2713,15 +2713,21 @@ sub cleardir {
     my $file;
 
     # Get all files
-    opendir(DIR, $dir) ||
+    opendir(my $dh, $dir) ||
         return 0; # can't open dir
-    while($file = readdir(DIR)) {
-        if(($file !~ /^\.(|\.)$/)) {
-            unlink("$dir/$file");
+    while($file = readdir($dh)) {
+        if(($file !~ /^(\.|\.\.)\z/)) {
+            if(-d "$dir/$file") {
+                cleardir("$dir/$file");
+                rmdir("$dir/$file");
+            }
+            else {
+                unlink("$dir/$file");
+            }
             $count++;
         }
     }
-    closedir DIR;
+    closedir $dh;
     return $count;
 }
 

@@ -1,0 +1,69 @@
+<testcase>
+<info>
+<keywords>
+-O
+-J
+--output-dir
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Disposition: inline; filename="MMM3013MMM"
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<name>
+Two --output-dir with --next in between
+</name>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/this/is/the/3013 -O --output-dir %PWD/log http://%HOSTIP:%HTTPPORT/another/3013 -o second3013 --output-dir %PWD/log
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /this/is/the/3013 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /another/3013 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<file name="log/3013">
+-foo-
+</file>
+<file2 name="log/second3013">
+-foo-
+</file2>
+</verify>
+</testcase>

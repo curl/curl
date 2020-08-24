@@ -127,6 +127,7 @@ DPAGES =					\
   ntlm.d ntlm-wb.d				\
   oauth2-bearer.d				\
   output.d                                      \
+  output-dir.d                                  \
   parallel-immediate.d                          \
   parallel-max.d                                \
   parallel.d                                    \

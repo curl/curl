@@ -284,6 +284,8 @@ static const struct helptxt helptext[] = {
    "OAuth 2 Bearer Token"},
   {"-o, --output <file>",
    "Write to file instead of stdout"},
+  {"    --output-dir <dir>",
+   "Directory to save files in"},
   {"-Z, --parallel",
    "Perform transfers in parallel"},
   {"    --parallel-immediate",
