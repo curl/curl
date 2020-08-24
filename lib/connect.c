@@ -1317,10 +1317,9 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
                           const struct Curl_dns_entry *remotehost)
 {
   struct Curl_easy *data = conn->data;
-  struct curltime before = Curl_now();
   CURLcode result = CURLE_COULDNT_CONNECT;
   int i;
-  timediff_t timeout_ms = Curl_timeleft(data, &before, TRUE);
+  timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
   if(timeout_ms < 0) {
     /* a precaution, no need to continue if time already is up */

@@ -1702,7 +1702,7 @@ CURLcode Curl_preconnect(struct Curl_easy *data)
 
 
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
-                                 struct curltime now,
+                                 struct curltime *nowp,
                                  struct Curl_easy *data)
 {
   struct Curl_message *msg = NULL;
@@ -1743,7 +1743,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        (data->mstate < CURLM_STATE_COMPLETED)) {
       /* we need to wait for the connect state as only then is the start time
          stored, but we must not check already completed handles */
-      timeout_ms = Curl_timeleft(data, &now,
+      timeout_ms = Curl_timeleft(data, nowp,
                                  (data->mstate <= CURLM_STATE_DO)?
                                  TRUE:FALSE);
 
@@ -1752,25 +1752,25 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         if(data->mstate == CURLM_STATE_WAITRESOLVE)
           failf(data, "Resolving timed out after %" CURL_FORMAT_TIMEDIFF_T
                 " milliseconds",
-                Curl_timediff(now, data->progress.t_startsingle));
+                Curl_timediff(*nowp, data->progress.t_startsingle));
         else if(data->mstate == CURLM_STATE_WAITCONNECT)
           failf(data, "Connection timed out after %" CURL_FORMAT_TIMEDIFF_T
                 " milliseconds",
-                Curl_timediff(now, data->progress.t_startsingle));
+                Curl_timediff(*nowp, data->progress.t_startsingle));
         else {
           struct SingleRequest *k = &data->req;
           if(k->size != -1) {
             failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
                   " milliseconds with %" CURL_FORMAT_CURL_OFF_T " out of %"
                   CURL_FORMAT_CURL_OFF_T " bytes received",
-                  Curl_timediff(now, data->progress.t_startsingle),
+                  Curl_timediff(*nowp, data->progress.t_startsingle),
                   k->bytecount, k->size);
           }
           else {
             failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
                   " milliseconds with %" CURL_FORMAT_CURL_OFF_T
                   " bytes received",
-                  Curl_timediff(now, data->progress.t_startsingle),
+                  Curl_timediff(*nowp, data->progress.t_startsingle),
                   k->bytecount);
           }
         }
@@ -1795,7 +1795,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(!result) {
         /* after init, go CONNECT */
         multistate(data, CURLM_STATE_CONNECT);
-        Curl_pgrsTime(data, TIMER_STARTOP);
+        *nowp = Curl_pgrsTime(data, TIMER_STARTOP);
         rc = CURLM_CALL_MULTI_PERFORM;
       }
       break;
@@ -1812,7 +1812,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(result)
         break;
 
-      Curl_pgrsTime(data, TIMER_STARTSINGLE);
+      *nowp = Curl_pgrsTime(data, TIMER_STARTSINGLE);
       if(data->set.timeout)
         Curl_expire(data, data->set.timeout, EXPIRE_TIMEOUT);
 
@@ -2220,7 +2220,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(Curl_pgrsUpdate(data->conn))
         result = CURLE_ABORTED_BY_CALLBACK;
       else
-        result = Curl_speedcheck(data, now);
+        result = Curl_speedcheck(data, *nowp);
 
       if(!result) {
         send_timeout_ms = 0;
@@ -2230,7 +2230,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                    data->progress.ul_limit_size,
                                    data->set.max_send_speed,
                                    data->progress.ul_limit_start,
-                                   now);
+                                   *nowp);
 
         recv_timeout_ms = 0;
         if(data->set.max_recv_speed > 0)
@@ -2239,11 +2239,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                    data->progress.dl_limit_size,
                                    data->set.max_recv_speed,
                                    data->progress.dl_limit_start,
-                                   now);
+                                   *nowp);
 
         if(!send_timeout_ms && !recv_timeout_ms) {
           multistate(data, CURLM_STATE_PERFORM);
-          Curl_ratelimit(data, now);
+          Curl_ratelimit(data, *nowp);
         }
         else if(send_timeout_ms >= recv_timeout_ms)
           Curl_expire(data, send_timeout_ms, EXPIRE_TOOFAST);
@@ -2265,7 +2265,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                                  data->progress.ul_limit_size,
                                                  data->set.max_send_speed,
                                                  data->progress.ul_limit_start,
-                                                 now);
+                                                 *nowp);
 
       /* check if over recv speed */
       recv_timeout_ms = 0;
@@ -2274,10 +2274,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                                  data->progress.dl_limit_size,
                                                  data->set.max_recv_speed,
                                                  data->progress.dl_limit_start,
-                                                 now);
+                                                 *nowp);
 
       if(send_timeout_ms || recv_timeout_ms) {
-        Curl_ratelimit(data, now);
+        Curl_ratelimit(data, *nowp);
         multistate(data, CURLM_STATE_TOOFAST);
         if(send_timeout_ms >= recv_timeout_ms)
           Curl_expire(data, send_timeout_ms, EXPIRE_TOOFAST);
@@ -2557,7 +2557,7 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
     SIGPIPE_VARIABLE(pipe_st);
 
     sigpipe_ignore(data, &pipe_st);
-    result = multi_runsingle(multi, now, data);
+    result = multi_runsingle(multi, &now, data);
     sigpipe_restore(&pipe_st);
 
     if(result)
@@ -3031,7 +3031,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       SIGPIPE_VARIABLE(pipe_st);
 
       sigpipe_ignore(data, &pipe_st);
-      result = multi_runsingle(multi, now, data);
+      result = multi_runsingle(multi, &now, data);
       sigpipe_restore(&pipe_st);
 
       if(CURLM_OK >= result) {

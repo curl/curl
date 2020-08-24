@@ -164,9 +164,13 @@ void Curl_pgrsResetTransferSizes(struct Curl_easy *data)
 }
 
 /*
+ *
+ * Curl_pgrsTime(). Store the current time at the given label. This fetches a
+ * fresh "now" and returns it.
+ *
  * @unittest: 1399
  */
-void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
+struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 {
   struct curltime now = Curl_now();
   timediff_t *delta = NULL;
@@ -209,7 +213,7 @@ void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
      * changing the t_starttransfer time.
      */
     if(data->progress.is_t_startransfer_set) {
-      return;
+      return now;
     }
     else {
       data->progress.is_t_startransfer_set = true;
@@ -228,6 +232,7 @@ void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
       us = 1; /* make sure at least one microsecond passed */
     *delta += us;
   }
+  return now;
 }
 
 void Curl_pgrsStartNow(struct Curl_easy *data)
