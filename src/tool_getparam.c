@@ -303,6 +303,7 @@ static const struct LongShort aliases[]= {
   {"o",  "output",                   ARG_FILENAME},
   {"O",  "remote-name",              ARG_NONE},
   {"Oa", "remote-name-all",          ARG_BOOL},
+  {"Ob", "output-dir",               ARG_STRING},
   {"p",  "proxytunnel",              ARG_BOOL},
   {"P",  "ftp-port",                 ARG_STRING},
   {"q",  "disable",                  ARG_BOOL},
@@ -1909,6 +1910,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case 'O': /* --remote-name */
       if(subletter == 'a') { /* --remote-name-all */
         config->default_node_flags = toggle?GETOUT_USEREMOTE:0;
+        break;
+      }
+      else if(subletter == 'b') { /* --output-dir */
+        GetStr(&config->output_dir, nextarg);
         break;
       }
       /* FALLTHROUGH */

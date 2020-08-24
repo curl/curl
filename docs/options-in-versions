@@ -127,6 +127,7 @@
 --ntlm-wb                            7.22.0
 --oauth2-bearer                      7.33.0
 --output (-o)                        4.0
+--output-dir                         7.72.0
 --parallel (-Z)                      7.66.0
 --parallel-immediate                 7.68.0
 --parallel-max                       7.66.0
