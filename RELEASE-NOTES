@@ -1,17 +1,26 @@
-curl and libcurl 7.72.1
+curl and libcurl 7.73.0
 
  Public curl releases:         195
  Command line options:         232
  curl_easy_setopt() options:   277
  Public functions in libcurl:  82
- Contributors:                 2240
+ Contributors:                 2242
 
 This release includes the following changes:
 
- o
+ o curl: support XDG_CONFIG_HOME to find .curlrc [3]
+ o CURLE_PROXY: new error code [7]
+ o sftp: add new quote commands 'atime' and 'mtime' [6]
 
 This release includes the following bugfixes:
 
+ o checksrc: verify do-while and spaces between the braces [2]
+ o dist: add missing CMake Find modules to the distribution [14]
+ o etag: save and use the full received contents [4]
+ o Makefile.m32: add ability to override zstd libs [ci skip] [10]
+ o runtests: clear pid variables when failing to start a server [12]
+ o runtests: make cleardir() erase dot files too [8]
+ o setopt: if the buffer exists, refuse the new BUFFERSIZE [5]
  o tls: provide the CApath verbose log on its own line [1]
 
 This release includes the following known bugs:
@@ -21,11 +30,23 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, jmdavitt on github, Viktor Szakats,
-  (3 contributors)
+  Andrew Barnes, Christian Weisgerber, COFFEETALES on github, Daniel Stenberg,
+  Don J Olmstead, Eli Schwartz, Harry Sintonen, jmdavitt on github, Ray Satiro,
+  Viktor Szakats,
+  (10 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.haxx.se/bug/?i=5826
+ [2] = https://curl.haxx.se/bug/?i=5845
+ [3] = https://curl.haxx.se/bug/?i=5829
+ [4] = https://curl.haxx.se/bug/?i=5610
+ [5] = https://curl.haxx.se/bug/?i=5842
+ [6] = https://curl.haxx.se/bug/?i=5810
+ [7] = https://curl.haxx.se/bug/?i=5770
+ [8] = https://curl.haxx.se/bug/?i=5838
+ [10] = https://curl.haxx.se/bug/?i=5840
+ [12] = https://curl.haxx.se/mail/lib-2020-08/0018.html
+ [14] = https://curl.haxx.se/bug/?i=5836
