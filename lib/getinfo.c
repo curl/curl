@@ -269,6 +269,9 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     /* Return the local port of the most recent (primary) connection */
     *param_longp = data->info.conn_local_port;
     break;
+  case CURLINFO_PROXY_ERROR:
+    *param_longp = (long)data->info.pxcode;
+    break;
   case CURLINFO_CONDITION_UNMET:
     if(data->info.httpcode == 304)
       *param_longp = 1L;

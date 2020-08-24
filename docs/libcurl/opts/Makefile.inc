@@ -57,8 +57,9 @@ man_MANS =                                      \
   CURLINFO_PRIMARY_PORT.3                       \
   CURLINFO_PRIVATE.3                            \
   CURLINFO_PROTOCOL.3                           \
-  CURLINFO_PROXYAUTH_AVAIL.3                    \
+  CURLINFO_PROXY_ERROR.3                        \
   CURLINFO_PROXY_SSL_VERIFYRESULT.3             \
+  CURLINFO_PROXYAUTH_AVAIL.3                    \
   CURLINFO_REDIRECT_COUNT.3                     \
   CURLINFO_REDIRECT_TIME.3                      \
   CURLINFO_REDIRECT_TIME_T.3                    \
