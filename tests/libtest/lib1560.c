@@ -686,6 +686,14 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
 }
 
 static struct redircase set_url_list[] = {
+  {"http://example.org/static/favicon/wikipedia.ico",
+   "//fake.example.com/licenses/by-sa/3.0/",
+   "http://fake.example.com/licenses/by-sa/3.0/",
+   0, 0, 0},
+  {"https://example.org/static/favicon/wikipedia.ico",
+   "//fake.example.com/licenses/by-sa/3.0/",
+   "https://fake.example.com/licenses/by-sa/3.0/",
+   0, 0, 0},
   {"file://localhost/path?query#frag",
    "foo#another",
    "file:///foo#another",
