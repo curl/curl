@@ -385,9 +385,9 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
     if(ufds[i].fd == CURL_SOCKET_BAD)
       continue;
     if(ufds[i].revents & POLLHUP)
-      ufds[i].revents |= POLLIN;
+      ufds[i].revents |= (POLLRDNORM|POLLIN);
     if(ufds[i].revents & POLLERR)
-      ufds[i].revents |= (POLLIN|POLLOUT);
+      ufds[i].revents |= (POLLRDNORM|POLLIN|POLLWRNORM|POLLOUT);
   }
 
 #else  /* HAVE_POLL_FINE */
@@ -403,7 +403,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
       continue;
     VERIFY_SOCK(ufds[i].fd);
     if(ufds[i].events & (POLLIN|POLLOUT|POLLPRI|
-                          POLLRDNORM|POLLWRNORM|POLLRDBAND)) {
+                         POLLRDNORM|POLLWRNORM|POLLRDBAND)) {
       if(ufds[i].fd > maxfd)
         maxfd = ufds[i].fd;
       if(ufds[i].events & (POLLRDNORM|POLLIN))
@@ -431,11 +431,11 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
     if(ufds[i].fd == CURL_SOCKET_BAD)
       continue;
     if(FD_ISSET(ufds[i].fd, &fds_read))
-      ufds[i].revents |= POLLIN;
+      ufds[i].revents |= (POLLRDNORM|POLLIN);
     if(FD_ISSET(ufds[i].fd, &fds_write))
-      ufds[i].revents |= POLLOUT;
+      ufds[i].revents |= (POLLWRNORM|POLLOUT);
     if(FD_ISSET(ufds[i].fd, &fds_err))
-      ufds[i].revents |= POLLPRI;
+      ufds[i].revents |= (POLLRDBAND|POLLPRI);
     if(ufds[i].revents != 0)
       r++;
   }
