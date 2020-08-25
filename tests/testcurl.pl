@@ -481,21 +481,13 @@ if ($git) {
     open(LOG, ">$buildlog") or die;
     while (<F>) {
       my $ll = $_;
-      # ignore messages pertaining to third party m4 files we don't care
-      next if ($ll =~ /aclocal\/gtk\.m4/);
-      next if ($ll =~ /aclocal\/gtkextra\.m4/);
       print $ll;
       print LOG $ll;
     }
     close(F);
     close(LOG);
 
-    if (grepfile("^buildconf: OK", $buildlog)) {
-      logit "buildconf was successful";
-    }
-    else {
-      mydie "buildconf was NOT successful";
-    }
+    logit "buildconf was successful";
   }
   else {
     logit "buildconf was successful (dummy message)";
