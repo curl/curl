@@ -2536,7 +2536,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 
       /* Check if we were asked for the help */
       if(res == PARAM_HELP_REQUESTED)
-        tool_help();
+        tool_help(global->help_category);
       /* Check if we were asked for the manual */
       else if(res == PARAM_MANUAL_REQUESTED)
         hugehelp();

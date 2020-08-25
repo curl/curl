@@ -76,33 +76,33 @@ struct category_descriptors {
 };
 
 static const struct category_descriptors categories[] = {
-  {"auth", "Options related to authentication of any kind", CURLHELP_AUTH},
-  {"connection", "Options related to low level network operations",
+  {"auth", "Different types of authentication methods", CURLHELP_AUTH},
+  {"connection", "Low level networking operations",
    CURLHELP_CONNECTION},
-  {"curl", "Options related to the behaviour of curl itself", CURLHELP_CURL},
-  {"dns", "Options related to DNS", CURLHELP_DNS},
-  {"file", "Options related to the FILE protocol", CURLHELP_FILE},
-  {"ftp", "Options related to the FTP protocol", CURLHELP_FTP},
-  {"http", "Options related to the HTTP and HTTPS protocols", CURLHELP_HTTP},
-  {"imap", "Options related to the IMAP protocol", CURLHELP_IMAP},
+  {"curl", "The command line tool itself", CURLHELP_CURL},
+  {"dns", "General DNS options", CURLHELP_DNS},
+  {"file", "FILE protocol options", CURLHELP_FILE},
+  {"ftp", "FTP protocol options", CURLHELP_FTP},
+  {"http", "HTTP and HTTPS protocol options", CURLHELP_HTTP},
+  {"imap", "IMAP protocol options", CURLHELP_IMAP},
   /* important is left out because it is the default help page */
-  {"misc", "Options that don't fit in any other category", CURLHELP_MISC},
-  {"output", "Options that handle the output of the downloaded content",
-   CURLHELP_OUTPUT},
-  {"pop3", "Options related to the POP3 protocol", CURLHELP_POP3},
-  {"post", "Optons related to HTTP Post", CURLHELP_POST},
-  {"proxy", "Options related to proxy settings of any kind", CURLHELP_PROXY},
-  {"scp", "Options related to the SCP protocol", CURLHELP_SCP},
-  {"sftp", "Options related to the SFTP protocol", CURLHELP_SFTP},
-  {"smtp", "Options related to the SMTP protocol", CURLHELP_SMTP},
-  {"ssh", "Options related to the SSH protocol", CURLHELP_SSH},
-  {"telnet", "Options related to the Telnet protocol", CURLHELP_TELNET},
-  {"tftp", "Options related to the TFTP protocol", CURLHELP_TFTP},
-  {"tls", "Options related to any kind of TLS/SSL operation", CURLHELP_TLS},
-  {"upload", "Options related to uploads of any kind",
+  {"misc", "Options that don't fit into any other category", CURLHELP_MISC},
+  {"output", "The output of curl", CURLHELP_OUTPUT},
+  {"pop3", "POP3 protocol options", CURLHELP_POP3},
+  {"post", "HTTP Post specific options", CURLHELP_POST},
+  {"proxy", "All options related to proxies", CURLHELP_PROXY},
+  {"scp", "SCP protocol options", CURLHELP_SCP},
+  {"sftp", "SFTP protocol options", CURLHELP_SFTP},
+  {"smtp", "SMTP protocol options", CURLHELP_SMTP},
+  {"ssh", "SSH protocol options", CURLHELP_SSH},
+  {"telnet", "TELNET protocol options", CURLHELP_TELNET},
+  {"tftp", "TFTP protocol options", CURLHELP_TFTP},
+  {"tls", "All TLS/SSL related options", CURLHELP_TLS},
+  {"upload", "All options for uploads",
    CURLHELP_UPLOAD},
   {"verbose", "Options related to any kind of command line output of curl",
-   CURLHELP_VERBOSE}
+   CURLHELP_VERBOSE},
+  {NULL, NULL, CURLHELP_HIDDEN}
 };
 
 /*
@@ -868,16 +868,65 @@ static const struct feat feats[] = {
   {"alt-svc",        CURL_VERSION_ALTSVC},
 };
 
-void tool_help(void)
+static void print_category(curlhelp_t category)
 {
-  int i;
+  unsigned int i;
+  for(i = 0; helptext[i].opt; ++i)
+    if(helptext[i].categories & category) {
+      printf(" %-19s %s\n", helptext[i].opt, helptext[i].desc);
+    }
+}
+
+/* Prints category if found. If not, it returns 1 */
+static int get_category_content(const char *category)
+{
+  unsigned int i;
+  for(i = 0; categories[i].opt; ++i)
+    if(curl_strequal(categories[i].opt, category)) {
+      printf("%s: %s\n", categories[i].opt, categories[i].desc);
+      print_category(categories[i].category);
+      return 0;
+    }
+  return 1;
+}
+
+/* Prints all categories and their description */
+static void get_categories(void)
+{
+  unsigned int i;
+  for(i = 0; categories[i].opt; ++i)
+    printf(" %-11s %s\n", categories[i].opt, categories[i].desc);
+}
+
+
+void tool_help(const char *category)
+{
   puts("Usage: curl [options...] <url>");
-  for(i = 0; helptext[i].opt; i++) {
-    printf(" %-19s %s\n", helptext[i].opt, helptext[i].desc);
-#ifdef PRINT_LINES_PAUSE
-    if(i && ((i % PRINT_LINES_PAUSE) == 0))
-      tool_pressanykey();
-#endif
+  /* If no category was provided */
+  if(!category) {
+    const char *category_note = "\nThis is not the full help, this "
+    "menu is stripped into categories.\nUse \"--help category\" to get "
+    "an overview of all categories.\nFor all options use the manual"
+    " or \"--help all\".";
+    print_category(CURLHELP_IMPORTANT);
+    puts(category_note);
+    return;
+  }
+  /* Lets print everything if "all" was provided */
+  if(curl_strequal(category, "all")) {
+    /* Print everything except hidden */
+    print_category(~(CURLHELP_HIDDEN));
+    return;
+  }
+  /* Lets handle the string "category" differently to not print an errormsg */
+  if(curl_strequal(category, "category")) {
+    get_categories();
+    return;
+  }
+  /* Otherwise print category and handle the case if the cat was not found */
+  if(get_category_content(category)) {
+    puts("Invalid category provided, here is a list of all categories:\n");
+    get_categories();
   }
 }
 

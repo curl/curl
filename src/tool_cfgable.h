@@ -312,6 +312,7 @@ struct GlobalConfig {
   bool parallel;
   long parallel_max;
   bool parallel_connect;
+  char *help_category;            /* The help category, if set */
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;   /* Always last in the struct */
