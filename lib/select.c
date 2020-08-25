@@ -219,6 +219,8 @@ int Curl_select(curl_socket_t maxfd,   /* highest socket number */
 #else
   r = select((int)maxfd + 1, fds_read, fds_write, fds_err, ptimeout);
 #endif
+  if(r < 0)
+    r = -1;
 
   return r;
 }
@@ -374,7 +376,6 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
   else
     pending_ms = 0;
   r = poll(ufds, nfds, pending_ms);
-
   if(r < 0)
     return -1;
   if(r == 0)
@@ -421,11 +422,8 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
      value).
   */
   r = Curl_select(maxfd, &fds_read, &fds_write, &fds_err, timeout_ms);
-
-  if(r < 0)
-    return -1;
-  if(r == 0)
-    return 0;
+  if(r <= 0)
+    return r;
 
   r = 0;
   for(i = 0; i < nfds; i++) {
