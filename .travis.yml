@@ -81,8 +81,6 @@ jobs:
     - T=normal C="--enable-ares"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
   - env:
-    - T=normal C="--enable-mqtt"
-  - env:
     - T=normal C="--disable-proxy"
   - env:
     - T=normal C="--disable-verbose" CPPFLAGS="-Wno-variadic-macros" NOTESTS=1

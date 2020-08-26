@@ -62,6 +62,10 @@ Disable the --libcurl option from the curl tool.
 
 Disable MIME support.
 
+## CURL_DISABLE_MQTT
+
+Disable MQTT support.
+
 ## CURL_DISABLE_NETRC
 
 Disable the netrc parser.
