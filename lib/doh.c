@@ -57,12 +57,13 @@ static const char * const errors[]={
   "Unexpected TYPE",
   "Unexpected CLASS",
   "No content",
-  "Bad ID"
+  "Bad ID",
+  "Name too long"
 };
 
 static const char *doh_strerror(DOHcode code)
 {
-  if((code >= DOH_OK) && (code <= DOH_DNS_BAD_ID))
+  if((code >= DOH_OK) && (code <= DOH_DNS_NAME_TOO_LONG))
     return errors[code];
   return "bad error code";
 }
