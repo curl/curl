@@ -153,3 +153,6 @@ TIDY:=clang-tidy
 
 tidy:
 	$(TIDY) $(CSOURCES) $(TIDYFLAGS) -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H
+
+optiontable:
+	perl optiontable.pl < $(top_srcdir)/include/curl/curl.h > easyoptions.c
