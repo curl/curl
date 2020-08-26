@@ -1184,7 +1184,7 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
 #ifdef USE_WINSOCK
           if(SOCKET_READABLE(sockbunch[i], 0) > 0)
             timeout_ms = 0;
-          mask |= FD_READ;
+          mask |= (FD_READ|FD_ACCEPT|FD_CLOSE);
 #else
           ufds[nfds].fd = sockbunch[i];
           ufds[nfds].events = POLLIN;
@@ -1196,7 +1196,7 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
 #ifdef USE_WINSOCK
           if(SOCKET_WRITABLE(sockbunch[i], 0) > 0)
             timeout_ms = 0;
-          mask |= FD_WRITE;
+          mask |= (FD_WRITE|FD_CONNECT|FD_CLOSE);
 #else
           ufds[nfds].fd = sockbunch[i];
           ufds[nfds].events = POLLOUT;
@@ -1226,7 +1226,7 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
     pre_poll.events = 0;
     pre_poll.revents = 0;
     if(extra_fds[i].events & CURL_WAIT_POLLIN) {
-      events |= FD_READ;
+      events |= (FD_READ|FD_ACCEPT|FD_CLOSE);
       pre_poll.events |= POLLIN;
     }
     if(extra_fds[i].events & CURL_WAIT_POLLPRI) {
@@ -1234,7 +1234,7 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
       pre_poll.events |= POLLPRI;
     }
     if(extra_fds[i].events & CURL_WAIT_POLLOUT) {
-      events |= FD_WRITE;
+      events |= (FD_WRITE|FD_CONNECT|FD_CLOSE);
       pre_poll.events |= POLLOUT;
     }
     if(Curl_poll(&pre_poll, 1, 0) > 0) {
@@ -1299,9 +1299,9 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
         mask = extra_fds[i].revents;
         if(WSAEnumNetworkEvents(extra_fds[i].fd, multi->wsa_event,
                                 &events) == 0) {
-          if(events.lNetworkEvents & FD_READ)
+          if(events.lNetworkEvents & (FD_READ|FD_ACCEPT|FD_CLOSE))
             mask |= CURL_WAIT_POLLIN;
-          if(events.lNetworkEvents & FD_WRITE)
+          if(events.lNetworkEvents & (FD_WRITE|FD_CONNECT|FD_CLOSE))
             mask |= CURL_WAIT_POLLOUT;
           if(events.lNetworkEvents & FD_OOB)
             mask |= CURL_WAIT_POLLPRI;
