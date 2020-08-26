@@ -24,6 +24,8 @@
 #include "strcase.h"
 #include "easyoptions.h"
 
+#ifndef CURL_DISABLE_GETOPTIONS
+
 /* Lookups easy options at runtime */
 static struct curl_easyoption *lookup(const char *name, CURLoption id)
 {
@@ -71,3 +73,23 @@ curl_easy_option_next(const struct curl_easyoption *prev)
   return NULL;
 }
 
+#else
+const struct curl_easyoption *curl_easy_option_by_name(const char *name)
+{
+  (void)name;
+  return NULL;
+}
+
+const struct curl_easyoption *curl_easy_option_by_id (CURLoption id)
+{
+  (void)id;
+  return NULL;
+}
+
+const struct curl_easyoption *
+curl_easy_option_next(const struct curl_easyoption *prev)
+{
+  (void)prev;
+  return NULL;
+}
+#endif
