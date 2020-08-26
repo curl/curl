@@ -71,7 +71,7 @@ Open a Visual Studio Command prompt:
 
     nmake /f Makefile.vc mode=<static or dll> <options>
 
-where <options> is one or many of:
+where `<options>` is one or many of:
 
  - `VC=<6,7,8,9,10,11,12,14,15>` - VC version
  - `WITH_DEVEL=<path>`           - Paths for the development files (SSL, zlib, etc.)
