@@ -346,6 +346,8 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
 }
 
 #ifdef HAS_CLIENT_CERT_PATH
+
+/* Function allocates memory for store_path only if CURLE_OK is returned */
 static CURLcode
 get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
                   TCHAR **thumbprint)
@@ -388,15 +390,15 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   if(sep == NULL)
     return CURLE_SSL_CERTPROBLEM;
 
+  *thumbprint = sep + 1;
+  if(_tcslen(*thumbprint) != CERT_THUMBPRINT_STR_LEN)
+    return CURLE_SSL_CERTPROBLEM;
+
   *sep = TEXT('\0');
   *store_path = _tcsdup(store_path_start);
   *sep = TEXT('\\');
   if(*store_path == NULL)
     return CURLE_OUT_OF_MEMORY;
-
-  *thumbprint = sep + 1;
-  if(_tcslen(*thumbprint) != CERT_THUMBPRINT_STR_LEN)
-    return CURLE_SSL_CERTPROBLEM;
 
   return CURLE_OK;
 }
