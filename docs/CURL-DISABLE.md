@@ -24,6 +24,11 @@ Disable the FILE protocol
 
 Disable the FTP (and FTPS) protocol
 
+## CURL_DISABLE_GETOPTIONS
+
+Disable the `curl_easy_options` API calls that lets users get information
+about existing options to `curl_easy_setopt`.
+
 ## CURL_DISABLE_GOPHER
 
 Disable the GOPHER protocol.
