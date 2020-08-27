@@ -35,7 +35,7 @@ if($start eq "-h") {
     exit;
 }
 elsif($start eq "") {
-    $start = `git tag --sort=taggerdate | tail -1`;
+    $start = `git tag --sort=taggerdate | grep "^curl-" | tail -1`;
     chomp $start;
 }
 

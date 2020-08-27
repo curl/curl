@@ -33,7 +33,7 @@ if test "$start" = "-h"; then
   exit
 fi
 if test -z "$start"; then
-  start=`git tag --sort=taggerdate | tail -1`;
+  start=`git tag --sort=taggerdate | grep "^curl-" | tail -1`;
 fi
 
 
