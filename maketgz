@@ -24,7 +24,7 @@
 #
 ###########################################################################
 
-CURL="tiny-curl-0.11"
+CURL="tiny-curl"
 version=$1
 
 if [ -z "$version" ]; then
@@ -148,7 +148,7 @@ fi
 #
 
 echo "update man pages"
-./scripts/updatemanpages.pl $version
+./scripts/updatemanpages.pl $version >/dev/null
 
 # make the generated file newer than the man page
 touch src/tool_hugehelp.c
@@ -162,8 +162,8 @@ make -s vc-ide
 echo "produce CHANGES"
 git log --pretty=fuller --no-color --date=short --decorate=full -1000 | ./scripts/log2changes.pl > CHANGES.dist
 
-echo "generate patch set"
-git diff origin/master >$CURL.patch.dist
+echo "generate patch set from ${major}.${minor}.${patch}"
+git diff curl-${major}_${minor}_${patch} >$CURL-${major}.${minor}.${patch}.patch.dist
 
 ############################################################################
 #
