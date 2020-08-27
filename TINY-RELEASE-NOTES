@@ -1,0 +1,15 @@
+# tiny-curl 7.79.1
+
+This tiny-curl version includes the following changes (delta from curl
+7.79.1):
+
+ o FreeRTOS support
+ o Micrium OS support
+
+## Full changelog
+
+See RELEASE-NOTES for all changes done since the previous curl release.
+
+## Website
+
+https://curl.se/tiny/
