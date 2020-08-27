@@ -292,6 +292,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_PROXY_CAINFO ||                                        \
    (option) == CURLOPT_PROXY_CAPATH ||                                        \
    (option) == CURLOPT_PROXY_CRLFILE ||                                       \
+   (option) == CURLOPT_PROXY_ISSUERCERT ||                                    \
    (option) == CURLOPT_PROXY_KEYPASSWD ||                                     \
    (option) == CURLOPT_PROXY_PINNEDPUBLICKEY ||                               \
    (option) == CURLOPT_PROXY_SERVICE_NAME ||                                  \
@@ -357,7 +358,6 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_INTERLEAVEDATA ||                                      \
    (option) == CURLOPT_IOCTLDATA ||                                           \
    (option) == CURLOPT_OPENSOCKETDATA ||                                      \
-   (option) == CURLOPT_PRIVATE ||                                             \
    (option) == CURLOPT_PROGRESSDATA ||                                        \
    (option) == CURLOPT_READDATA ||                                            \
    (option) == CURLOPT_SEEKDATA ||                                            \
