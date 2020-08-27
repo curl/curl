@@ -1,0 +1,17 @@
+# tiny-curl 7.72.0
+
+This tiny-curl version includes the following changes (delta from curl
+7.72.0):
+
+ o FreeRTOS support
+ o Micrium OS support
+ o socketpair: allow CURL_DISABLE_SOCKETPAIR
+ o curl_get_line: only build if cookies or alt-svc are enabled
+
+## Full changelog
+
+See RELEASE-NOTES for all changes done since the previous curl release.
+
+## Website
+
+https://curl.haxx.se/tiny/
