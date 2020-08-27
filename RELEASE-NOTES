@@ -4,24 +4,41 @@ curl and libcurl 7.73.0
  Command line options:         232
  curl_easy_setopt() options:   277
  Public functions in libcurl:  82
- Contributors:                 2242
+ Contributors:                 2244
 
 This release includes the following changes:
 
+ o curl: add --output-dir [25]
  o curl: support XDG_CONFIG_HOME to find .curlrc [3]
  o CURLE_PROXY: new error code [7]
  o sftp: add new quote commands 'atime' and 'mtime' [6]
+ o sftp: add the option CURLKHSTAT_FINE_REPLACE [27]
 
 This release includes the following bugfixes:
 
  o checksrc: verify do-while and spaces between the braces [2]
+ o configure: fix pkg-config detecting wolfssl [26]
+ o curl_get_line: build only if cookies or alt-svc are enabled [13]
  o dist: add missing CMake Find modules to the distribution [14]
+ o doh: add error message for DOH_DNS_NAME_TOO_LONG [17]
  o etag: save and use the full received contents [4]
+ o git: ignore libtests in 3XXX area [16]
+ o lib1560: verify "redirect" to double-slash leading URL [20]
  o Makefile.m32: add ability to override zstd libs [ci skip] [10]
+ o multi: expand pre-check for socket readiness [21]
+ o multi: implement wait using winsock events [22]
+ o ngtcp2: adapt to the new pkt_info arguments [18]
+ o openssl: Fix wincrypt symbols conflict with BoringSSL [9]
  o runtests: clear pid variables when failing to start a server [12]
  o runtests: make cleardir() erase dot files too [8]
+ o schannel: fix memory leak when using get_cert_location [15]
+ o select.h: make socket validation macros test for INVALID_SOCKET [24]
+ o select: fix poll-based check not detecting connect failure
+ o select: reduce duplication of Curl_poll in Curl_socket_check [23]
  o setopt: if the buffer exists, refuse the new BUFFERSIZE [5]
+ o socketpair: allow CURL_DISABLE_SOCKETPAIR [11]
  o tls: provide the CApath verbose log on its own line [1]
+ o winbuild: convert the instruction text to README.md [19]
 
 This release includes the following known bugs:
 
@@ -31,9 +48,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Andrew Barnes, Christian Weisgerber, COFFEETALES on github, Daniel Stenberg,
-  Don J Olmstead, Eli Schwartz, Harry Sintonen, jmdavitt on github, Ray Satiro,
+  Don J Olmstead, Eli Schwartz, Emil Engler, fullincome on github,
+  Gergely Nagy, Harry Sintonen, Javier Blazquez, jmdavitt on github,
+  Marcel Raad, Marc Hörsken, Michael Musset, Rasmus Melchior Jacobsen,
+  Ray Satiro, Samuel Tranchet, Tatsuhiro Tsujikawa, Tomas Berger,
   Viktor Szakats,
-  (10 contributors)
+  (21 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -47,6 +67,22 @@ References to bug reports and discussions on issues:
  [6] = https://curl.haxx.se/bug/?i=5810
  [7] = https://curl.haxx.se/bug/?i=5770
  [8] = https://curl.haxx.se/bug/?i=5838
+ [9] = https://curl.haxx.se/bug/?i=5669
  [10] = https://curl.haxx.se/bug/?i=5840
+ [11] = https://curl.haxx.se/bug/?i=5850
  [12] = https://curl.haxx.se/mail/lib-2020-08/0018.html
+ [13] = https://curl.haxx.se/bug/?i=5851
  [14] = https://curl.haxx.se/bug/?i=5836
+ [15] = https://curl.haxx.se/bug/?i=5855
+ [16] = https://curl.haxx.se/bug/?i=5859
+ [17] = https://curl.haxx.se/bug/?i=5863
+ [18] = https://curl.haxx.se/bug/?i=5864
+ [19] = https://curl.haxx.se/bug/?i=5861
+ [20] = https://curl.haxx.se/bug/?i=5849
+ [21] = https://curl.haxx.se/bug/?i=5634
+ [22] = https://curl.haxx.se/bug/?i=5634
+ [23] = https://curl.haxx.se/bug/?i=5707
+ [24] = https://curl.haxx.se/bug/?i=5760
+ [25] = https://curl.haxx.se/bug/?i=5637
+ [26] = https://curl.haxx.se/bug/?i=5848
+ [27] = https://curl.haxx.se/bug/?i=5685
