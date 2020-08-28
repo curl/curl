@@ -25,10 +25,8 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-static void print_err(const char *name, const char *exp)
-{
-  fprintf(stderr, "Type mismatch for 'CURLOPT_%s' (expected %s)\n", name, exp);
-}
+#define print_err(name, exp) \
+  fprintf(stderr, "Type mismatch for CURLOPT_%s (expected %s)\n", name, exp);
 
 int test(char *URL)
 {
