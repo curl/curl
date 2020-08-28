@@ -149,15 +149,14 @@ int Curl_select(curl_socket_t maxfd,   /* highest socket number */
 {
   struct timeval pending_tv;
   struct timeval *ptimeout;
-  int r;
 
 #ifdef USE_WINSOCK
   /* WinSock select() can't handle zero events.  See the comment below. */
   if((!fds_read || fds_read->fd_count == 0) &&
      (!fds_write || fds_write->fd_count == 0) &&
      (!fds_err || fds_err->fd_count == 0)) {
-    r = Curl_wait_ms(timeout_ms);
-    return r;
+    /* no sockets, just wait */
+    return Curl_wait_ms(timeout_ms);
   }
 #endif
 
@@ -212,15 +211,13 @@ int Curl_select(curl_socket_t maxfd,   /* highest socket number */
     calling this an error. Luckily, with WinSock, we can _also_ ask how
     many bits are set on an fd_set. So, let's just check it beforehand.
   */
-  r = select((int)maxfd + 1,
-             fds_read && fds_read->fd_count ? fds_read : NULL,
-             fds_write && fds_write->fd_count ? fds_write : NULL,
-             fds_err && fds_err->fd_count ? fds_err : NULL, ptimeout);
+  return select((int)maxfd + 1,
+                fds_read && fds_read->fd_count ? fds_read : NULL,
+                fds_write && fds_write->fd_count ? fds_write : NULL,
+                fds_err && fds_err->fd_count ? fds_err : NULL, ptimeout);
 #else
-  r = select((int)maxfd + 1, fds_read, fds_write, fds_err, ptimeout);
+  return select((int)maxfd + 1, fds_read, fds_write, fds_err, ptimeout);
 #endif
-
-  return r;
 }
 
 /*
@@ -255,8 +252,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   if((readfd0 == CURL_SOCKET_BAD) && (readfd1 == CURL_SOCKET_BAD) &&
      (writefd == CURL_SOCKET_BAD)) {
     /* no sockets, just wait */
-    r = Curl_wait_ms(timeout_ms);
-    return r;
+    return Curl_wait_ms(timeout_ms);
   }
 
   /* Avoid initial timestamp, avoid Curl_now() call, when elapsed
@@ -351,8 +347,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
   }
   if(fds_none) {
     /* no sockets, just wait */
-    r = Curl_wait_ms(timeout_ms);
-    return r;
+    return Curl_wait_ms(timeout_ms);
   }
 
   /* Avoid initial timestamp, avoid Curl_now() call, when elapsed
@@ -374,11 +369,8 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
   else
     pending_ms = 0;
   r = poll(ufds, nfds, pending_ms);
-
-  if(r < 0)
-    return -1;
-  if(r == 0)
-    return 0;
+  if(r <= 0)
+    return r;
 
   for(i = 0; i < nfds; i++) {
     if(ufds[i].fd == CURL_SOCKET_BAD)
@@ -421,11 +413,8 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
      value).
   */
   r = Curl_select(maxfd, &fds_read, &fds_write, &fds_err, timeout_ms);
-
-  if(r < 0)
-    return -1;
-  if(r == 0)
-    return 0;
+  if(r <= 0)
+    return r;
 
   r = 0;
   for(i = 0; i < nfds; i++) {
