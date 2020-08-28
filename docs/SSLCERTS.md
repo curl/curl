@@ -60,8 +60,8 @@ server, do one of the following:
     With the curl command line tool: --cacert [file]
 
  3. Add the CA cert for your server to the existing default CA certificate
-    store. The default CA certificate store can changed at compile time with the
-    following configure options:
+    store. The default CA certificate store can be changed at compile time with
+    the following configure options:
 
     --with-ca-bundle=FILE: use the specified file as CA certificate store. CA
     certificates need to be concatenated in PEM format into this file.
