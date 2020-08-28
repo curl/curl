@@ -29,7 +29,7 @@
 /* generated table with all easy options */
 extern struct curl_easyoption Curl_easyopts[];
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
 int Curl_easyopts_check(void);
 #endif
 #endif
