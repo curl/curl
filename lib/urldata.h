@@ -230,6 +230,7 @@ struct ssl_primary_config {
   char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
   char *pinned_key;
   struct curl_blob *cert_blob;
+  char *curves;          /* list of curves to use */
   BIT(verifypeer);       /* set TRUE if this is desired */
   BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
   BIT(verifystatus);     /* set TRUE if certificate status must be checked */
@@ -1565,6 +1566,7 @@ enum dupstring {
   STRING_DNS_INTERFACE,
   STRING_DNS_LOCAL_IP4,
   STRING_DNS_LOCAL_IP6,
+  STRING_SSL_EC_CURVES,
 
   /* -- end of null-terminated strings -- */
 

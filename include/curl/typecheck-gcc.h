@@ -335,6 +335,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_USERNAME ||                                            \
    (option) == CURLOPT_USERPWD ||                                             \
    (option) == CURLOPT_XOAUTH2_BEARER ||                                      \
+   (option) == CURLOPT_SSL_EC_CURVES ||                                       \
    0)
 
 /* evaluates to true if option takes a curl_write_callback argument */

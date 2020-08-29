@@ -349,6 +349,10 @@ static CURLcode dohprobe(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl.fsslctx);
     if(data->set.ssl.fsslctxp)
       ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_DATA, data->set.ssl.fsslctxp);
+    if(data->set.str[STRING_SSL_EC_CURVES]) {
+      ERROR_CHECK_SETOPT(CURLOPT_SSL_EC_CURVES,
+        data->set.str[STRING_SSL_EC_CURVES]);
+    }
 
     doh->set.fmultidone = Curl_doh_done;
     doh->set.dohfor = data; /* identify for which transfer this is done */
