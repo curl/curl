@@ -1120,6 +1120,12 @@ ConnectionExists(struct Curl_easy *data,
         /* connect-only or to-be-closed connections will not be reused */
         continue;
 
+      if(extract_if_dead(check, data)) {
+        /* disconnect it */
+        (void)Curl_disconnect(data, check, /* dead_connection */TRUE);
+        continue;
+      }
+
       if(bundle->multiuse == BUNDLE_MULTIPLEX)
         multiplexed = CONN_INUSE(check);
 
