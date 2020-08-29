@@ -28,6 +28,7 @@ CURLX_SRCS = \
  ../../lib/nonblock.c \
  ../../lib/strtoofft.c \
  ../../lib/warnless.c \
+ ../../lib/timediff.c \
  ../../lib/curl_ctype.c \
  ../../lib/dynbuf.c \
  ../../lib/strdup.c \
@@ -38,6 +39,7 @@ CURLX_HDRS = \
  ../../lib/nonblock.h \
  ../../lib/strtoofft.h \
  ../../lib/warnless.h \
+ ../../lib/timediff.h \
  ../../lib/curl_ctype.h \
  ../../lib/dynbuf.h \
  ../../lib/strdup.h \

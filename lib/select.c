@@ -43,7 +43,7 @@
 #include "urldata.h"
 #include "connect.h"
 #include "select.h"
-#include "timeval.h"
+#include "timediff.h"
 #include "warnless.h"
 
 /*
@@ -93,26 +93,7 @@ int Curl_wait_ms(timediff_t timeout_ms)
 #else
   {
     struct timeval pending_tv;
-    timediff_t tv_sec = timeout_ms / 1000;
-    timediff_t tv_usec = (timeout_ms % 1000) * 1000; /* max=999999 */
-#ifdef HAVE_SUSECONDS_T
-#if TIMEDIFF_T_MAX > TIME_T_MAX
-    /* tv_sec overflow check in case time_t is signed */
-    if(tv_sec > TIME_T_MAX)
-      tv_sec = TIME_T_MAX;
-#endif
-    pending_tv.tv_sec = (time_t)tv_sec;
-    pending_tv.tv_usec = (suseconds_t)tv_usec;
-#else
-#if TIMEDIFF_T_MAX > INT_MAX
-    /* tv_sec overflow check in case time_t is signed */
-    if(tv_sec > INT_MAX)
-      tv_sec = INT_MAX;
-#endif
-    pending_tv.tv_sec = (int)tv_sec;
-    pending_tv.tv_usec = (int)tv_usec;
-#endif
-    r = select(0, NULL, NULL, NULL, &pending_tv);
+    r = select(0, NULL, NULL, NULL, curlx_mstotv(&pending_tv, timeout_ms));
   }
 #endif /* HAVE_POLL_FINE */
 #endif /* USE_WINSOCK */
@@ -152,43 +133,7 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
   }
 #endif
 
-  ptimeout = &pending_tv;
-  if(timeout_ms < 0) {
-    ptimeout = NULL;
-  }
-  else if(timeout_ms > 0) {
-    timediff_t tv_sec = timeout_ms / 1000;
-    timediff_t tv_usec = (timeout_ms % 1000) * 1000; /* max=999999 */
-#ifdef HAVE_SUSECONDS_T
-#if TIMEDIFF_T_MAX > TIME_T_MAX
-    /* tv_sec overflow check in case time_t is signed */
-    if(tv_sec > TIME_T_MAX)
-      tv_sec = TIME_T_MAX;
-#endif
-    pending_tv.tv_sec = (time_t)tv_sec;
-    pending_tv.tv_usec = (suseconds_t)tv_usec;
-#elif defined(WIN32) /* maybe also others in the future */
-#if TIMEDIFF_T_MAX > LONG_MAX
-    /* tv_sec overflow check on Windows there we know it is long */
-    if(tv_sec > LONG_MAX)
-      tv_sec = LONG_MAX;
-#endif
-    pending_tv.tv_sec = (long)tv_sec;
-    pending_tv.tv_usec = (long)tv_usec;
-#else
-#if TIMEDIFF_T_MAX > INT_MAX
-    /* tv_sec overflow check in case time_t is signed */
-    if(tv_sec > INT_MAX)
-      tv_sec = INT_MAX;
-#endif
-    pending_tv.tv_sec = (int)tv_sec;
-    pending_tv.tv_usec = (int)tv_usec;
-#endif
-  }
-  else {
-    pending_tv.tv_sec = 0;
-    pending_tv.tv_usec = 0;
-  }
+  ptimeout = curlx_mstotv(&pending_tv, timeout_ms);
 
 #ifdef USE_WINSOCK
   /* WinSock select() must not be called with an fd_set that contains zero

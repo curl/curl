@@ -207,6 +207,7 @@ LIB_CFILES =         \
   system_win32.c     \
   telnet.c           \
   tftp.c             \
+  timediff.c         \
   timeval.c          \
   transfer.c         \
   url.c              \
@@ -327,6 +328,7 @@ LIB_HFILES =         \
   system_win32.h     \
   telnet.h           \
   tftp.h             \
+  timediff.h         \
   timeval.h          \
   transfer.h         \
   url.h              \

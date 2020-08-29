@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TIMEVAL_H
-#define HEADER_CURL_TIMEVAL_H
+#ifndef HEADER_CURL_TIMEDIFF_H
+#define HEADER_CURL_TIMEDIFF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,29 +24,27 @@
 
 #include "curl_setup.h"
 
-#include "timediff.h"
+/* Use a larger type even for 32 bit time_t systems so that we can keep
+   microsecond accuracy in it */
+typedef curl_off_t timediff_t;
+#define CURL_FORMAT_TIMEDIFF_T CURL_FORMAT_CURL_OFF_T
 
-struct curltime {
-  time_t tv_sec; /* seconds */
-  int tv_usec;   /* microseconds */
-};
-
-struct curltime Curl_now(void);
-
-/*
- * Make sure that the first argument (t1) is the more recent time and t2 is
- * the older time, as otherwise you get a weird negative time-diff back...
- *
- * Returns: the time difference in number of milliseconds.
- */
-timediff_t Curl_timediff(struct curltime t1, struct curltime t2);
+#define TIMEDIFF_T_MAX CURL_OFF_T_MAX
+#define TIMEDIFF_T_MIN CURL_OFF_T_MIN
 
 /*
- * Make sure that the first argument (t1) is the more recent time and t2 is
- * the older time, as otherwise you get a weird negative time-diff back...
+ * Converts number of milliseconds into a timeval structure.
  *
- * Returns: the time difference in number of microseconds.
+ * Return values:
+ *    NULL IF tv is NULL or ms < 0 (eg. no timeout -> blocking select)
+ *    tv with 0 in both fields IF ms == 0 (eg. 0ms timeout -> polling select)
+ *    tv with converted fields IF ms > 0 (eg. >0ms timeout -> waiting select)
  */
-timediff_t Curl_timediff_us(struct curltime newer, struct curltime older);
+struct timeval *curlx_mstotv(struct timeval *tv, timediff_t ms);
 
-#endif /* HEADER_CURL_TIMEVAL_H */
+/*
+ * Converts a timeval structure into number of milliseconds.
+ */
+timediff_t curlx_tvtoms(struct timeval *tv);
+
+#endif /* HEADER_CURL_TIMEDIFF_H */
