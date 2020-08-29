@@ -23,6 +23,7 @@
 
 #include "testutil.h"
 #include "warnless.h"
+#include "timeval.h"
 #include "memdebug.h"
 
 int test(char *URL)
@@ -68,8 +69,7 @@ int test(char *URL)
     curl_multi_timeout(cm, &max_tout);
 
     if(max_tout > 0) {
-      timeout.tv_sec = max_tout / 1000;
-      timeout.tv_usec = (max_tout % 1000) * 1000;
+      curlx_mstotv(&timeout, max_tout);
     }
     else {
       timeout.tv_sec = 0;

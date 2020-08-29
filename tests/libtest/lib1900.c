@@ -23,6 +23,7 @@
 
 #include "testutil.h"
 #include "warnless.h"
+#include "timeval.h"
 #include "memdebug.h"
 
 #define TEST_HANG_TIMEOUT 60 * 1000
@@ -218,16 +219,18 @@ int test(char *URL)
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
-    curl_multi_timeout(m, &timeout);
-
-    if(timeout < 0)
-      timeout = 1;
-
-    interval.tv_sec = timeout / 1000;
-    interval.tv_usec = (timeout % 1000) * 1000;
-
+    /* set a suitable timeout to play around with */
     interval.tv_sec = 0;
     interval.tv_usec = 1000;
+
+    curl_multi_timeout(m, &timeout);
+    if(timeout >= 0) {
+      curlx_mstotv(&interval, timeout);
+      if(interval.tv_sec > 0 || interval.tv_usec > 1000) {
+        interval.tv_sec = 0;
+        interval.tv_usec = 1000;
+      }
+    }
 
     select_test(maxfd + 1, &rd, &wr, &exc, &interval);
 

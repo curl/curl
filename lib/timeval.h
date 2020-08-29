@@ -55,4 +55,14 @@ timediff_t Curl_timediff(struct curltime t1, struct curltime t2);
  */
 timediff_t Curl_timediff_us(struct curltime newer, struct curltime older);
 
+/*
+ * Converts number of milliseconds into a timeval structure.
+ *
+ * Return values:
+ *    NULL = tv is NULL or ms < 0 (eg. no timeout -> blocking select)
+ *    tv with 0 in both fields = ms == 0 (eg. 0ms timeout -> polling select)
+ *    tv with converted fields = ms > 0 (eg. >0ms timeout -> waiting select)
+ */
+struct timeval *curlx_mstotv(struct timeval *tv, timediff_t ms);
+
 #endif /* HEADER_CURL_TIMEVAL_H */

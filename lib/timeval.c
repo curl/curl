@@ -204,3 +204,57 @@ timediff_t Curl_timediff_us(struct curltime newer, struct curltime older)
     return TIMEDIFF_T_MIN;
   return diff * 1000000 + newer.tv_usec-older.tv_usec;
 }
+
+
+/*
+ * Converts number of milliseconds into a timeval structure.
+ *
+ * Return values:
+ *    NULL = tv is NULL or ms < 0 (eg. no timeout -> blocking select)
+ *    tv with 0 in both fields = ms == 0 (eg. 0ms timeout -> polling select)
+ *    tv with converted fields = ms > 0 (eg. >0ms timeout -> waiting select)
+ */
+struct timeval *curlx_mstotv(struct timeval *tv, timediff_t ms)
+{
+  if(!tv)
+    return NULL;
+
+  if(ms < 0)
+    return NULL;
+
+  if(ms > 0) {
+    timediff_t tv_sec = ms / 1000;
+    timediff_t tv_usec = (ms % 1000) * 1000; /* max=999999 */
+#ifdef HAVE_SUSECONDS_T
+#if TIMEDIFF_T_MAX > TIME_T_MAX
+    /* tv_sec overflow check in case time_t is signed */
+    if(tv_sec > TIME_T_MAX)
+      tv_sec = TIME_T_MAX;
+#endif
+    tv->tv_sec = (time_t)tv_sec;
+    tv->tv_usec = (suseconds_t)tv_usec;
+#elif defined(WIN32) /* maybe also others in the future */
+#if TIMEDIFF_T_MAX > LONG_MAX
+    /* tv_sec overflow check on Windows there we know it is long */
+    if(tv_sec > LONG_MAX)
+      tv_sec = LONG_MAX;
+#endif
+    tv->tv_sec = (long)tv_sec;
+    tv->tv_usec = (long)tv_usec;
+#else
+#if TIMEDIFF_T_MAX > INT_MAX
+    /* tv_sec overflow check in case time_t is signed */
+    if(tv_sec > INT_MAX)
+      tv_sec = INT_MAX;
+#endif
+    tv->tv_sec = (int)tv_sec;
+    tv->tv_usec = (int)tv_usec;
+#endif
+  }
+  else {
+    tv->tv_sec = 0;
+    tv->tv_usec = 0;
+  }
+
+  return tv;
+}
