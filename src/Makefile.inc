@@ -31,6 +31,7 @@
 # the official API, but we re-use the code here to avoid duplication.
 CURLX_CFILES = \
   ../lib/strtoofft.c \
+  ../lib/timediff.c \
   ../lib/nonblock.c \
   ../lib/warnless.c \
   ../lib/curl_ctype.c \
@@ -41,6 +42,7 @@ CURLX_CFILES = \
 CURLX_HFILES = \
   ../lib/curl_setup.h \
   ../lib/strtoofft.h \
+  ../lib/timediff.h \
   ../lib/nonblock.h \
   ../lib/warnless.h \
   ../lib/curl_ctype.h \

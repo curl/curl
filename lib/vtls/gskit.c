@@ -74,6 +74,7 @@
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "strcase.h"
+#include "timediff.h"
 #include "x509asn1.h"
 #include "curl_printf.h"
 
@@ -975,11 +976,12 @@ static CURLcode gskit_connect_step2(struct Curl_easy *data,
 
   for(;;) {
     timediff_t timeout_ms = nonblocking? 0: Curl_timeleft(data, NULL, TRUE);
+    stmv.tv_sec = 0;
+    stmv.tv_usec = 0;
     if(timeout_ms < 0)
       timeout_ms = 0;
-    stmv.tv_sec = timeout_ms / 1000;
-    stmv.tv_usec = (timeout_ms - stmv.tv_sec * 1000) * 1000;
-    switch(QsoWaitForIOCompletion(BACKEND->iocport, &cstat, &stmv)) {
+    switch(QsoWaitForIOCompletion(BACKEND->iocport, &cstat,
+                                  curlx_mstotv(&stmv, timeout_ms))) {
     case 1:             /* Operation complete. */
       break;
     case -1:            /* An error occurred: handshake still in progress. */

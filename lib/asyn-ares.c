@@ -65,6 +65,7 @@
 #include "connect.h"
 #include "select.h"
 #include "progress.h"
+#include "timediff.h"
 
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
   defined(WIN32)
@@ -290,7 +291,7 @@ int Curl_resolver_getsock(struct Curl_easy *data,
 
   timeout = ares_timeout((ares_channel)data->state.async.resolver, &maxtime,
                          &timebuf);
-  milli = (timeout->tv_sec * 1000) + (timeout->tv_usec/1000);
+  milli = (long)curlx_tvtoms(timeout);
   if(milli == 0)
     milli += 10;
   Curl_expire(data, milli, EXPIRE_ASYNC_NAME);

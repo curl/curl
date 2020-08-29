@@ -22,6 +22,7 @@
 #include "test.h"
 
 #include "testutil.h"
+#include "timediff.h"
 #include "warnless.h"
 #include "memdebug.h"
 
@@ -102,11 +103,11 @@ int test(char *URL)
 
     curl_multi_timeout(mcurl, &curl_timeo);
     if(curl_timeo >= 0) {
-      timeout.tv_sec = curl_timeo / 1000;
-      if(timeout.tv_sec > 1)
+      curlx_mstotv(&timeout, curl_timeo);
+      if(timeout.tv_sec > 1) {
         timeout.tv_sec = 1;
-      else
-        timeout.tv_usec = (curl_timeo % 1000) * 1000;
+        timeout.tv_usec = 0;
+      }
     }
 
     /* get file descriptors from the transfers */

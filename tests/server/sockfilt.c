@@ -107,6 +107,7 @@
 #include "inet_pton.h"
 #include "util.h"
 #include "server_sockaddr.h"
+#include "timediff.h"
 #include "warnless.h"
 
 /* include memdebug.h last */
@@ -639,7 +640,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* convert struct timeval to milliseconds */
   if(tv) {
-    timeout_ms = (tv->tv_sec*1000) + (DWORD)(((double)tv->tv_usec)/1000.0);
+    timeout_ms = (DWORD)curlx_tvtoms(tv);
   }
   else {
     timeout_ms = INFINITE;
