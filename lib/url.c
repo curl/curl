@@ -3610,6 +3610,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   data->set.ssl.primary.pinned_key =
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
   data->set.ssl.primary.cert_blob = data->set.blobs[BLOB_CERT_ORIG];
+  data->set.ssl.primary.curves = data->set.str[STRING_SSL_EC_CURVES];
 
 #ifndef CURL_DISABLE_PROXY
   data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];

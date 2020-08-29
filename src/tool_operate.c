@@ -1520,6 +1520,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->pinnedpubkey)
           my_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY, config->pinnedpubkey);
 
+        if(config->ssl_ec_curves)
+          my_setopt_str(curl, CURLOPT_SSL_EC_CURVES, config->ssl_ec_curves);
+
         if(curlinfo->features & CURL_VERSION_SSL) {
           /* Check if config->cert is a PKCS#11 URI and set the
            * config->cert_type if necessary */

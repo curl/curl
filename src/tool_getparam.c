@@ -272,6 +272,7 @@ static const struct LongShort aliases[]= {
   {"EB", "socks5-gssapi",            ARG_BOOL},
   {"EC", "etag-save",                ARG_FILENAME},
   {"ED", "etag-compare",             ARG_FILENAME},
+  {"EE", "curves",                   ARG_STRING},
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
   {"fb", "styled-output",            ARG_BOOL},
@@ -1724,6 +1725,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       case 'D':
         GetStr(&config->etag_compare_file, nextarg);
+        break;
+
+      case 'E':
+        GetStr(&config->ssl_ec_curves, nextarg);
         break;
 
       default: /* unknown flag */

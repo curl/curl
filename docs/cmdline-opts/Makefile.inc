@@ -41,6 +41,7 @@ DPAGES =					\
   cookie.d					\
   create-dirs.d					\
   crlf.d crlfile.d				\
+  curves.d					\
   data-ascii.d					\
   data-binary.d					\
   data-urlencode.d				\
