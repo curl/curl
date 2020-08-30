@@ -60,7 +60,6 @@
 
 /*
  * Define USE_WINSOCK to 2 if we have and use WINSOCK2 API, else
- * define USE_WINSOCK to 1 if we have and use WINSOCK  API, else
  * undefine USE_WINSOCK.
  */
 
@@ -70,7 +69,7 @@
 #  define USE_WINSOCK 2
 #else
 #  ifdef HAVE_WINSOCK_H
-#    define USE_WINSOCK 1
+#    error "WinSock version 1 is no longer supported, version 2 is required!"
 #  endif
 #endif
 
