@@ -1018,7 +1018,7 @@ static void prune_dead_connections(struct Curl_easy *data)
       Curl_conncache_remove_conn(data, prune.extracted, TRUE);
 
       /* disconnect it */
-      (void)Curl_disconnect(data, prune.extracted, /* dead_connection */TRUE);
+      (void)Curl_disconnect(data, prune.extracted, TRUE);
     }
     CONNCACHE_LOCK(data);
     data->state.conn_cache->last_cleanup = now;
@@ -1122,7 +1122,7 @@ ConnectionExists(struct Curl_easy *data,
 
       if(extract_if_dead(check, data)) {
         /* disconnect it */
-        (void)Curl_disconnect(data, check, /* dead_connection */TRUE);
+        (void)Curl_disconnect(data, check, TRUE);
         continue;
       }
 
@@ -3757,8 +3757,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         CONNCACHE_UNLOCK(data);
 
         if(conn_candidate)
-          (void)Curl_disconnect(data, conn_candidate,
-                                /* dead_connection */ FALSE);
+          (void)Curl_disconnect(data, conn_candidate, FALSE);
         else {
           infof(data, "No more connections allowed to host %s: %zu\n",
                 bundlehost, max_host_connections);
@@ -3778,8 +3777,7 @@ static CURLcode create_conn(struct Curl_easy *data,
       /* The cache is full. Let's see if we can kill a connection. */
       conn_candidate = Curl_conncache_extract_oldest(data);
       if(conn_candidate)
-        (void)Curl_disconnect(data, conn_candidate,
-                              /* dead_connection */ FALSE);
+        (void)Curl_disconnect(data, conn_candidate, FALSE);
       else {
         infof(data, "No connections available in cache\n");
         connections_available = FALSE;
