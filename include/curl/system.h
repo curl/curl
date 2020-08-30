@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -196,8 +196,13 @@
 
 #elif defined(__MINGW32__)
 #  define CURL_TYPEOF_CURL_OFF_T     long long
-#  define CURL_FORMAT_CURL_OFF_T     "I64d"
-#  define CURL_FORMAT_CURL_OFF_TU    "I64u"
+#  if defined(__GNUC__) && (__GNUC__ >= 10)
+#    define CURL_FORMAT_CURL_OFF_T   "lld"
+#    define CURL_FORMAT_CURL_OFF_TU  "llu"
+#  else
+#    define CURL_FORMAT_CURL_OFF_T   "I64d"
+#    define CURL_FORMAT_CURL_OFF_TU  "I64u"
+#  endif
 #  define CURL_SUFFIX_CURL_OFF_T     LL
 #  define CURL_SUFFIX_CURL_OFF_TU    ULL
 #  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
