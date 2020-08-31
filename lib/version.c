@@ -298,7 +298,7 @@ static const char * const protocols[] = {
   "ldaps",
 #endif
 #endif
-#ifdef CURL_ENABLE_MQTT
+#ifndef CURL_DISABLE_MQTT
   "mqtt",
 #endif
 #ifndef CURL_DISABLE_POP3

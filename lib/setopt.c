@@ -434,100 +434,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
     break;
 
-#ifndef CURL_DISABLE_HTTP
-  case CURLOPT_AUTOREFERER:
-    /*
-     * Switch on automatic referer that gets set if curl follows locations.
-     */
-    data->set.http_auto_referer = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    break;
-
-  case CURLOPT_ACCEPT_ENCODING:
-    /*
-     * String to use at the value of Accept-Encoding header.
-     *
-     * If the encoding is set to "" we use an Accept-Encoding header that
-     * encompasses all the encodings we support.
-     * If the encoding is set to NULL we don't send an Accept-Encoding header
-     * and ignore an received Content-Encoding header.
-     *
-     */
-    argptr = va_arg(param, char *);
-    if(argptr && !*argptr) {
-      argptr = Curl_all_content_encodings();
-      if(!argptr)
-        result = CURLE_OUT_OF_MEMORY;
-      else {
-        result = Curl_setstropt(&data->set.str[STRING_ENCODING], argptr);
-        free(argptr);
-      }
-    }
-    else
-      result = Curl_setstropt(&data->set.str[STRING_ENCODING], argptr);
-    break;
-
-  case CURLOPT_TRANSFER_ENCODING:
-    data->set.http_transfer_encoding = (0 != va_arg(param, long)) ?
-      TRUE : FALSE;
-    break;
-
-  case CURLOPT_FOLLOWLOCATION:
-    /*
-     * Follow Location: header hints on a HTTP-server.
-     */
-    data->set.http_follow_location = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    break;
-
-  case CURLOPT_UNRESTRICTED_AUTH:
-    /*
-     * Send authentication (user+password) when following locations, even when
-     * hostname changed.
-     */
-    data->set.allow_auth_to_other_hosts =
-      (0 != va_arg(param, long)) ? TRUE : FALSE;
-    break;
-
-  case CURLOPT_MAXREDIRS:
-    /*
-     * The maximum amount of hops you allow curl to follow Location:
-     * headers. This should mostly be used to detect never-ending loops.
-     */
-    arg = va_arg(param, long);
-    if(arg < -1)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.maxredirs = arg;
-    break;
-
-  case CURLOPT_POSTREDIR:
-    /*
-     * Set the behaviour of POST when redirecting
-     * CURL_REDIR_GET_ALL - POST is changed to GET after 301 and 302
-     * CURL_REDIR_POST_301 - POST is kept as POST after 301
-     * CURL_REDIR_POST_302 - POST is kept as POST after 302
-     * CURL_REDIR_POST_303 - POST is kept as POST after 303
-     * CURL_REDIR_POST_ALL - POST is kept as POST after 301, 302 and 303
-     * other - POST is kept as POST after 301 and 302
-     */
-    arg = va_arg(param, long);
-    if(arg < CURL_REDIR_GET_ALL)
-      /* no return error on too high numbers since the bitmask could be
-         extended in a future */
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.keep_post = arg & CURL_REDIR_POST_ALL;
-    break;
-
-  case CURLOPT_POST:
-    /* Does this option serve a purpose anymore? Yes it does, when
-       CURLOPT_POSTFIELDS isn't used and the POST data is read off the
-       callback! */
-    if(va_arg(param, long)) {
-      data->set.method = HTTPREQ_POST;
-      data->set.opt_no_body = FALSE; /* this is implied */
-    }
-    else
-      data->set.method = HTTPREQ_GET;
-    break;
-
+    /* MQTT "borrows" some of the HTTP options */
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
   case CURLOPT_COPYPOSTFIELDS:
     /*
      * A string with POST data. Makes curl HTTP POST. Even if it is NULL.
@@ -621,6 +529,100 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     }
 
     data->set.postfieldsize = bigsize;
+    break;
+#endif
+#ifndef CURL_DISABLE_HTTP
+  case CURLOPT_AUTOREFERER:
+    /*
+     * Switch on automatic referer that gets set if curl follows locations.
+     */
+    data->set.http_auto_referer = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+
+  case CURLOPT_ACCEPT_ENCODING:
+    /*
+     * String to use at the value of Accept-Encoding header.
+     *
+     * If the encoding is set to "" we use an Accept-Encoding header that
+     * encompasses all the encodings we support.
+     * If the encoding is set to NULL we don't send an Accept-Encoding header
+     * and ignore an received Content-Encoding header.
+     *
+     */
+    argptr = va_arg(param, char *);
+    if(argptr && !*argptr) {
+      argptr = Curl_all_content_encodings();
+      if(!argptr)
+        result = CURLE_OUT_OF_MEMORY;
+      else {
+        result = Curl_setstropt(&data->set.str[STRING_ENCODING], argptr);
+        free(argptr);
+      }
+    }
+    else
+      result = Curl_setstropt(&data->set.str[STRING_ENCODING], argptr);
+    break;
+
+  case CURLOPT_TRANSFER_ENCODING:
+    data->set.http_transfer_encoding = (0 != va_arg(param, long)) ?
+      TRUE : FALSE;
+    break;
+
+  case CURLOPT_FOLLOWLOCATION:
+    /*
+     * Follow Location: header hints on a HTTP-server.
+     */
+    data->set.http_follow_location = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+
+  case CURLOPT_UNRESTRICTED_AUTH:
+    /*
+     * Send authentication (user+password) when following locations, even when
+     * hostname changed.
+     */
+    data->set.allow_auth_to_other_hosts =
+      (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+
+  case CURLOPT_MAXREDIRS:
+    /*
+     * The maximum amount of hops you allow curl to follow Location:
+     * headers. This should mostly be used to detect never-ending loops.
+     */
+    arg = va_arg(param, long);
+    if(arg < -1)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.maxredirs = arg;
+    break;
+
+  case CURLOPT_POSTREDIR:
+    /*
+     * Set the behaviour of POST when redirecting
+     * CURL_REDIR_GET_ALL - POST is changed to GET after 301 and 302
+     * CURL_REDIR_POST_301 - POST is kept as POST after 301
+     * CURL_REDIR_POST_302 - POST is kept as POST after 302
+     * CURL_REDIR_POST_303 - POST is kept as POST after 303
+     * CURL_REDIR_POST_ALL - POST is kept as POST after 301, 302 and 303
+     * other - POST is kept as POST after 301 and 302
+     */
+    arg = va_arg(param, long);
+    if(arg < CURL_REDIR_GET_ALL)
+      /* no return error on too high numbers since the bitmask could be
+         extended in a future */
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.keep_post = arg & CURL_REDIR_POST_ALL;
+    break;
+
+  case CURLOPT_POST:
+    /* Does this option serve a purpose anymore? Yes it does, when
+       CURLOPT_POSTFIELDS isn't used and the POST data is read off the
+       callback! */
+    if(va_arg(param, long)) {
+      data->set.method = HTTPREQ_POST;
+      data->set.opt_no_body = FALSE; /* this is implied */
+    }
+    else
+      data->set.method = HTTPREQ_GET;
     break;
 
   case CURLOPT_HTTPPOST:
