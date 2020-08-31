@@ -499,6 +499,13 @@ wolfssl_connect_step1(struct connectdata *conn,
   }
 #endif /* OPENSSL_EXTRA */
 
+#ifdef HAVE_SECURE_RENEGOTIATION
+  if(wolfSSL_UseSecureRenegotiation(backend->handle) != SSL_SUCCESS) {
+    failf(data, "SSL: failed setting secure renegotiation");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+#endif /* HAVE_SECURE_RENEGOTIATION */
+
   /* Check if there's a cached ID we can/should use here! */
   if(SSL_SET_OPTION(primary.sessionid)) {
     void *ssl_sessionid = NULL;
