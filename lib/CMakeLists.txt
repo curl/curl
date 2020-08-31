@@ -105,6 +105,25 @@ if(NOT BUILD_SHARED_LIBS)
     set_target_properties(${LIB_NAME} PROPERTIES INTERFACE_COMPILE_DEFINITIONS CURL_STATICLIB)
 endif()
 
+file(READ ${CURL_SOURCE_DIR}/include/curl/curlver.h _version_data)
+string(REGEX MATCH "LIBCURL_VERSION_MAJOR ([0-9]*)" _ ${_version_data})
+set(LIBCURL_VERSION_MAJOR ${CMAKE_MATCH_1})
+
+string(REGEX MATCH "LIBCURL_VERSION_MINOR ([0-9]*)" _ ${_version_data})
+set(LIBCURL_VERSION_MINOR ${CMAKE_MATCH_1})
+
+string(REGEX MATCH "LIBCURL_VERSION_PATCH ([0-9]*)" _ ${_version_data})
+set(LIBCURL_VERSION_PATCH ${CMAKE_MATCH_1})
+set(LIBCURL_VERSION "${LIBCURL_VERSION_MAJOR}.${LIBCURL_VERSION_MINOR}.${LIBCURL_VERSION_PATCH}")
+
+message(STATUS "libcurl version=[${LIBCURL_VERSION}]")
+
+if (NOT WIN32)
+  set_target_properties(${LIB_NAME} PROPERTIES
+    VERSION ${LIBCURL_VERSION}
+    SOVERSION ${LIBCURL_VERSION_MAJOR})
+endif()
+
 target_link_libraries(${LIB_NAME} ${CURL_LIBS})
 
 if(WIN32)
