@@ -30,7 +30,7 @@ EXTRA_DIST = Makefile.m32 config-win32.h config-win32ce.h           \
  config-os400.h setup-os400.h config-symbian.h Makefile.Watcom      \
  config-tpf.h mk-ca-bundle.pl mk-ca-bundle.vbs $(CMAKE_DIST)        \
  firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl    \
- setup-win32.h
+ setup-win32.h libcurl.soname
 
 lib_LTLIBRARIES = libcurl.la
 
@@ -66,19 +66,8 @@ endif
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-VERSIONINFO=-version-info 10:0:6
-# This flag accepts an argument of the form current[:revision[:age]]. So,
-# passing -version-info 3:12:1 sets current to 3, revision to 12, and age to
-# 1.
-#
-# Here's the simplified rule guide on how to change -version-info:
-# (current version is C:R:A)
-#
-# 1. if there are only source changes, use C:R+1:A
-# 2. if interfaces were added use C+1:0:A+1
-# 3. if interfaces were removed, then use C+1:0:0
-#
-# For the full guide on libcurl ABI rules, see docs/libcurl/ABI
+include libcurl.soname
+VERSIONINFO=-version-info $(SONAME)
 
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 AM_LDFLAGS =
