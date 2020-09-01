@@ -104,7 +104,7 @@ print <<FOOT
   {NULL, 0, 0, 0} /* end of table */
 };
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
 /*
  * Curl_easyopts_check() is a debug-only function that returns non-zero
  * if this source file is not in sync with the options listed in curl/curl.h
