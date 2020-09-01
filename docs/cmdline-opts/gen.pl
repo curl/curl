@@ -216,12 +216,24 @@ sub single {
     if($seealso) {
         my @m=split(/ /, $seealso);
         my $mstr;
+        my $and = 0;
+        my $num = scalar(@m);
+        if($num > 2) {
+            # use commas up to this point
+            $and = $num - 1;
+        }
+        my $i = 0;
         for my $k (@m) {
             if(!$helplong{$k}) {
                 print STDERR "WARN: $f see-alsos a non-existing option: $k\n";
             }
             my $l = manpageify($k);
-            $mstr .= sprintf "%s$l", $mstr?" and ":"";
+            my $sep = " and";
+            if($and && ($i < $and)) {
+                $sep = ",";
+            }
+            $mstr .= sprintf "%s$l", $mstr?"$sep ":"";
+            $i++;
         }
         push @foot, seealso($standalone, $mstr);
     }
