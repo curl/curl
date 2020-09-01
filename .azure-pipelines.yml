@@ -117,14 +117,14 @@ stages:
           container_img: mback2k/curl-docker-winbuildenv-msys2-mingw32:ltsc2019
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2
-          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --enable-mqtt --with-libssh2
+          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --with-libssh2
           tests: ~612 ~1056 ~1299 !SCP
         msys2_mingw64_debug_openssl:
           name: 64-bit OpenSSL and MQTT
           container_img: mback2k/curl-docker-winbuildenv-msys2-mingw64:ltsc2019
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
-          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --enable-mqtt --with-libssh2
+          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --with-libssh2
           tests: ~612 ~1056 ~1299 !SCP
         msys1_mingw_debug_openssl:
           name: 32-bit OpenSSL (legacy)
