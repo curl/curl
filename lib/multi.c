@@ -190,7 +190,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
  */
 
 struct Curl_sh_entry {
-  struct curl_hash transfers; /* hash of transfers using this socket */
+  struct Curl_hash transfers; /* hash of transfers using this socket */
   unsigned int action;  /* what combined action READ/WRITE this socket waits
                            for */
   void *socketp; /* settable by users with curl_multi_assign() */
@@ -204,7 +204,7 @@ struct Curl_sh_entry {
 #define SH_WRITE 2
 
 /* look up a given socket in the socket hash, skip invalid sockets */
-static struct Curl_sh_entry *sh_getentry(struct curl_hash *sh,
+static struct Curl_sh_entry *sh_getentry(struct Curl_hash *sh,
                                          curl_socket_t s)
 {
   if(s != CURL_SOCKET_BAD) {
@@ -238,7 +238,7 @@ static void trhash_dtor(void *nada)
 
 
 /* make sure this socket is present in the hash for this handle */
-static struct Curl_sh_entry *sh_addentry(struct curl_hash *sh,
+static struct Curl_sh_entry *sh_addentry(struct Curl_hash *sh,
                                          curl_socket_t s)
 {
   struct Curl_sh_entry *there = sh_getentry(sh, s);
@@ -273,7 +273,7 @@ static struct Curl_sh_entry *sh_addentry(struct curl_hash *sh,
 
 /* delete the given socket + handle from the hash */
 static void sh_delentry(struct Curl_sh_entry *entry,
-                        struct curl_hash *sh, curl_socket_t s)
+                        struct Curl_hash *sh, curl_socket_t s)
 {
   Curl_hash_destroy(&entry->transfers);
 
@@ -325,7 +325,7 @@ static size_t hash_fd(void *key, size_t key_length, size_t slots_num)
  * per call."
  *
  */
-static int sh_init(struct curl_hash *hash, int hashsize)
+static int sh_init(struct Curl_hash *hash, int hashsize)
 {
   return Curl_hash_init(hash, hashsize, hash_fd, fd_key_compare,
                         sh_freeentry);
@@ -2983,8 +2983,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
          and just move on. */
       ;
     else {
-      struct curl_hash_iterator iter;
-      struct curl_hash_element *he;
+      struct Curl_hash_iterator iter;
+      struct Curl_hash_element *he;
 
       /* the socket can be shared by many transfers, iterate */
       Curl_hash_start_iterate(&entry->transfers, &iter);

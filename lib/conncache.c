@@ -206,8 +206,8 @@ static bool conncache_add_bundle(struct conncache *connc,
 static void conncache_remove_bundle(struct conncache *connc,
                                     struct connectbundle *bundle)
 {
-  struct curl_hash_iterator iter;
-  struct curl_hash_element *he;
+  struct Curl_hash_iterator iter;
+  struct Curl_hash_element *he;
 
   if(!connc)
     return;
@@ -320,9 +320,9 @@ bool Curl_conncache_foreach(struct Curl_easy *data,
                             void *param,
                             int (*func)(struct connectdata *conn, void *param))
 {
-  struct curl_hash_iterator iter;
+  struct Curl_hash_iterator iter;
   struct Curl_llist_element *curr;
-  struct curl_hash_element *he;
+  struct Curl_hash_element *he;
 
   if(!connc)
     return FALSE;
@@ -363,8 +363,8 @@ bool Curl_conncache_foreach(struct Curl_easy *data,
 static struct connectdata *
 conncache_find_first_connection(struct conncache *connc)
 {
-  struct curl_hash_iterator iter;
-  struct curl_hash_element *he;
+  struct Curl_hash_iterator iter;
+  struct Curl_hash_element *he;
   struct connectbundle *bundle;
 
   Curl_hash_start_iterate(&connc->hash, &iter);
@@ -477,9 +477,9 @@ struct connectdata *
 Curl_conncache_extract_oldest(struct Curl_easy *data)
 {
   struct conncache *connc = data->state.conn_cache;
-  struct curl_hash_iterator iter;
+  struct Curl_hash_iterator iter;
   struct Curl_llist_element *curr;
-  struct curl_hash_element *he;
+  struct Curl_hash_element *he;
   timediff_t highscore =- 1;
   timediff_t score;
   struct curltime now;
@@ -571,9 +571,9 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
 /* Useful for debugging the connection cache */
 void Curl_conncache_print(struct conncache *connc)
 {
-  struct curl_hash_iterator iter;
+  struct Curl_hash_iterator iter;
   struct Curl_llist_element *curr;
-  struct curl_hash_element *he;
+  struct Curl_hash_element *he;
 
   if(!connc)
     return;

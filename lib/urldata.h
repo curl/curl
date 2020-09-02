@@ -1842,7 +1842,7 @@ struct UserDefined {
 };
 
 struct Names {
-  struct curl_hash *hostcache;
+  struct Curl_hash *hostcache;
   enum {
     HCACHE_NONE,    /* not pointing to anything */
     HCACHE_MULTI,   /* points to a shared one in the multi handle */
