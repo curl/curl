@@ -2993,7 +2993,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   {
     if(ssl_cafile) {
       if(!SSL_CTX_load_verify_file(backend->ctx, ssl_cafile)) {
-        if(verifypeer) {
+        if(verifypeer && !imported_native_ca) {
           /* Fail if we insist on successfully verifying the server. */
           failf(data, "error setting certificate file: %s", ssl_cafile);
           return CURLE_SSL_CACERT_BADFILE;
@@ -3005,7 +3005,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     }
     if(ssl_capath) {
       if(!SSL_CTX_load_verify_dir(backend->ctx, ssl_capath)) {
-        if(verifypeer) {
+        if(verifypeer && !imported_native_ca) {
           /* Fail if we insist on successfully verifying the server. */
           failf(data, "error setting certificate path: %s", ssl_capath);
           return CURLE_SSL_CACERT_BADFILE;
