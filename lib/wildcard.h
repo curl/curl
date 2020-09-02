@@ -39,18 +39,18 @@ typedef enum {
   CURLWC_ERROR, /* error cases */
   CURLWC_DONE   /* if is wildcard->state == CURLWC_DONE wildcard loop
                    will end */
-} curl_wildcard_states;
+} wildcard_states;
 
-typedef void (*curl_wildcard_dtor)(void *ptr);
+typedef void (*wildcard_dtor)(void *ptr);
 
 /* struct keeping information about wildcard download process */
 struct WildcardData {
-  curl_wildcard_states state;
+  wildcard_states state;
   char *path; /* path to the directory, where we trying wildcard-match */
   char *pattern; /* wildcard pattern */
   struct Curl_llist filelist; /* llist with struct Curl_fileinfo */
   void *protdata; /* pointer to protocol specific temporary data */
-  curl_wildcard_dtor dtor;
+  wildcard_dtor dtor;
   void *customptr;  /* for CURLOPT_CHUNK_DATA pointer */
 };
 
