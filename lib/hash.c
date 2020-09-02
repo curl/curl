@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -70,11 +70,11 @@ Curl_hash_init(struct curl_hash *h,
   h->size = 0;
   h->slots = slots;
 
-  h->table = malloc(slots * sizeof(struct curl_llist));
+  h->table = malloc(slots * sizeof(struct Curl_llist));
   if(h->table) {
     int i;
     for(i = 0; i < slots; ++i)
-      Curl_llist_init(&h->table[i], (curl_llist_dtor) hash_element_dtor);
+      Curl_llist_init(&h->table[i], (Curl_llist_dtor) hash_element_dtor);
     return 0; /* fine */
   }
   h->slots = 0;
@@ -109,8 +109,8 @@ void *
 Curl_hash_add(struct curl_hash *h, void *key, size_t key_len, void *p)
 {
   struct curl_hash_element  *he;
-  struct curl_llist_element *le;
-  struct curl_llist *l = FETCH_LIST(h, key, key_len);
+  struct Curl_llist_element *le;
+  struct Curl_llist *l = FETCH_LIST(h, key, key_len);
 
   for(le = l->head; le; le = le->next) {
     he = (struct curl_hash_element *) le->ptr;
@@ -138,8 +138,8 @@ Curl_hash_add(struct curl_hash *h, void *key, size_t key_len, void *p)
  */
 int Curl_hash_delete(struct curl_hash *h, void *key, size_t key_len)
 {
-  struct curl_llist_element *le;
-  struct curl_llist *l = FETCH_LIST(h, key, key_len);
+  struct Curl_llist_element *le;
+  struct Curl_llist *l = FETCH_LIST(h, key, key_len);
 
   for(le = l->head; le; le = le->next) {
     struct curl_hash_element *he = le->ptr;
@@ -159,8 +159,8 @@ int Curl_hash_delete(struct curl_hash *h, void *key, size_t key_len)
 void *
 Curl_hash_pick(struct curl_hash *h, void *key, size_t key_len)
 {
-  struct curl_llist_element *le;
-  struct curl_llist *l;
+  struct Curl_llist_element *le;
+  struct Curl_llist *l;
 
   if(h) {
     l = FETCH_LIST(h, key, key_len);
@@ -180,7 +180,7 @@ void
 Curl_hash_apply(curl_hash *h, void *user,
                 void (*cb)(void *user, void *ptr))
 {
-  struct curl_llist_element  *le;
+  struct Curl_llist_element  *le;
   int                  i;
 
   for(i = 0; i < h->slots; ++i) {
@@ -230,9 +230,9 @@ void
 Curl_hash_clean_with_criterium(struct curl_hash *h, void *user,
                                int (*comp)(void *, void *))
 {
-  struct curl_llist_element *le;
-  struct curl_llist_element *lnext;
-  struct curl_llist *list;
+  struct Curl_llist_element *le;
+  struct Curl_llist_element *lnext;
+  struct Curl_llist *list;
   int i;
 
   if(!h)

@@ -27,7 +27,7 @@
 #include "socketpair.h"
 
 struct Curl_message {
-  struct curl_llist_element list;
+  struct Curl_llist_element list;
   /* the 'CURLMsg' is the part that is visible to the external user */
   struct CURLMsg extmsg;
 };
@@ -89,9 +89,9 @@ struct Curl_multi {
   int num_alive; /* amount of easy handles that are added but have not yet
                     reached COMPLETE state */
 
-  struct curl_llist msglist; /* a list of messages from completed transfers */
+  struct Curl_llist msglist; /* a list of messages from completed transfers */
 
-  struct curl_llist pending; /* Curl_easys that are in the
+  struct Curl_llist pending; /* Curl_easys that are in the
                                 CURLM_STATE_CONNECT_PEND state */
 
   /* callback function and user data pointer for the *socket() API */

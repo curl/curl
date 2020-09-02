@@ -83,7 +83,7 @@ struct ssl_backend_data {
   PRFileDesc *handle;
   char *client_nickname;
   struct Curl_easy *data;
-  struct curl_llist obj_list;
+  struct Curl_llist obj_list;
   PK11GenericObject *obj_clicert;
 };
 
@@ -91,14 +91,14 @@ static PRLock *nss_initlock = NULL;
 static PRLock *nss_crllock = NULL;
 static PRLock *nss_findslot_lock = NULL;
 static PRLock *nss_trustload_lock = NULL;
-static struct curl_llist nss_crl_list;
+static struct Curl_llist nss_crl_list;
 static NSSInitContext *nss_context = NULL;
 static volatile int initialized = 0;
 
 /* type used to wrap pointers as list nodes */
 struct ptr_list_wrap {
   void *ptr;
-  struct curl_llist_element node;
+  struct Curl_llist_element node;
 };
 
 struct cipher_s {
@@ -430,7 +430,7 @@ static PK11SlotInfo* nss_find_slot_by_name(const char *slot_name)
 }
 
 /* wrap 'ptr' as list node and tail-insert into 'list' */
-static CURLcode insert_wrapped_ptr(struct curl_llist *list, void *ptr)
+static CURLcode insert_wrapped_ptr(struct Curl_llist *list, void *ptr)
 {
   struct ptr_list_wrap *wrap = malloc(sizeof(*wrap));
   if(!wrap)

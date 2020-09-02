@@ -46,12 +46,12 @@ struct altsvc {
   time_t expires;
   bool persist;
   int prio;
-  struct curl_llist_element node;
+  struct Curl_llist_element node;
 };
 
 struct altsvcinfo {
   char *filename;
-  struct curl_llist list; /* list of entries */
+  struct Curl_llist list; /* list of entries */
   long flags; /* the publicly set bitmask */
 };
 

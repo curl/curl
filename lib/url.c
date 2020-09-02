@@ -1074,7 +1074,7 @@ ConnectionExists(struct Curl_easy *data,
                                       &hostbundle);
   if(bundle) {
     /* Max pipe length is zero (unlimited) for multiplexed connections */
-    struct curl_llist_element *curr;
+    struct Curl_llist_element *curr;
 
     infof(data, "Found bundle for host %s: %p [%s]\n",
           hostbundle, (void *)bundle, (bundle->multiuse == BUNDLE_MULTIPLEX ?
