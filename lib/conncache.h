@@ -30,7 +30,7 @@
  */
 
 struct conncache {
-  struct curl_hash hash;
+  struct Curl_hash hash;
   size_t num_conn;
   long next_connection_id;
   struct curltime last_cleanup;

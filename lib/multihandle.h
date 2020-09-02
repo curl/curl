@@ -103,7 +103,7 @@ struct Curl_multi {
   void *push_userp;
 
   /* Hostname cache */
-  struct curl_hash hostcache;
+  struct Curl_hash hostcache;
 
 #ifdef USE_LIBPSL
   /* PSL cache. */
@@ -117,7 +117,7 @@ struct Curl_multi {
   /* 'sockhash' is the lookup hash for socket descriptor => easy handles (note
      the pluralis form, there can be more than one easy handle waiting on the
      same actual socket) */
-  struct curl_hash sockhash;
+  struct Curl_hash sockhash;
 
   /* Shared connection cache (bundles)*/
   struct conncache conn_cache;
