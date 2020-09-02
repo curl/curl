@@ -101,7 +101,7 @@ for my $c (sort @cmdopts) {
         versioncheck($c, $oiv{$c});
     }
     else {
-        print STDERR "$c is in the directory but not in file!\n";
+        print STDERR "--$c is in the option directory but not in $opts!\n";
         $error++;
     }
 }
@@ -116,5 +116,7 @@ for my $v (sort @veropts) {
         $error++;
     }
 }
+
+print STDERR "ok\n" if(!$error);
 
 exit $error;

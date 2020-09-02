@@ -22,4 +22,9 @@ Verify that options-in-versions and docs/cmdline-opts are in sync
 </command>
 </client>
 
+<verify>
+<stderr>
+ok
+</stderr>
+</verify>
 </testcase>
