@@ -221,7 +221,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
  * take sessionid object ownership from sessionid cache
  * (e.g. decrement refcount).
  */
-void Curl_ssl_kill_session(struct curl_ssl_session *session);
+void Curl_ssl_kill_session(struct Curl_ssl_session *session);
 /* delete a session from the cache
  * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
  * This will call engine-specific curlssl_session_free function, which must

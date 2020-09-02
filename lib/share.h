@@ -54,7 +54,7 @@ struct Curl_share {
   struct PslCache psl;
 #endif
 
-  struct curl_ssl_session *sslsession;
+  struct Curl_ssl_session *sslsession;
   size_t max_ssl_sessions;
   long sessionage;
 };
