@@ -59,7 +59,7 @@ static CURLcode bundle_create(struct connectbundle **bundlep)
   (*bundlep)->num_connections = 0;
   (*bundlep)->multiuse = BUNDLE_UNKNOWN;
 
-  Curl_llist_init(&(*bundlep)->conn_list, (curl_llist_dtor) conn_llist_dtor);
+  Curl_llist_init(&(*bundlep)->conn_list, (Curl_llist_dtor) conn_llist_dtor);
   return CURLE_OK;
 }
 
@@ -87,7 +87,7 @@ static void bundle_add_conn(struct connectbundle *bundle,
 static int bundle_remove_conn(struct connectbundle *bundle,
                               struct connectdata *conn)
 {
-  struct curl_llist_element *curr;
+  struct Curl_llist_element *curr;
 
   curr = bundle->conn_list.head;
   while(curr) {
@@ -321,7 +321,7 @@ bool Curl_conncache_foreach(struct Curl_easy *data,
                             int (*func)(struct connectdata *conn, void *param))
 {
   struct curl_hash_iterator iter;
-  struct curl_llist_element *curr;
+  struct Curl_llist_element *curr;
   struct curl_hash_element *he;
 
   if(!connc)
@@ -371,7 +371,7 @@ conncache_find_first_connection(struct conncache *connc)
 
   he = Curl_hash_next_element(&iter);
   while(he) {
-    struct curl_llist_element *curr;
+    struct Curl_llist_element *curr;
     bundle = he->ptr;
 
     curr = bundle->conn_list.head;
@@ -429,7 +429,7 @@ struct connectdata *
 Curl_conncache_extract_bundle(struct Curl_easy *data,
                               struct connectbundle *bundle)
 {
-  struct curl_llist_element *curr;
+  struct Curl_llist_element *curr;
   timediff_t highscore = -1;
   timediff_t score;
   struct curltime now;
@@ -478,7 +478,7 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
 {
   struct conncache *connc = data->state.conn_cache;
   struct curl_hash_iterator iter;
-  struct curl_llist_element *curr;
+  struct Curl_llist_element *curr;
   struct curl_hash_element *he;
   timediff_t highscore =- 1;
   timediff_t score;
@@ -572,7 +572,7 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
 void Curl_conncache_print(struct conncache *connc)
 {
   struct curl_hash_iterator iter;
-  struct curl_llist_element *curr;
+  struct Curl_llist_element *curr;
   struct curl_hash_element *he;
 
   if(!connc)

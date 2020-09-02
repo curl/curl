@@ -861,7 +861,7 @@ struct connectdata {
      connection is used! */
   struct Curl_easy *data;
   struct connstate cnnct;
-  struct curl_llist_element bundle_node; /* conncache */
+  struct Curl_llist_element bundle_node; /* conncache */
 
   /* chunk is for HTTP chunked encoding, but is in the general connectdata
      struct only because we can do just about any protocol through a HTTP proxy
@@ -1025,7 +1025,7 @@ struct connectdata {
   struct kerberos5data krb5;  /* variables into the structure definition, */
 #endif                        /* however, some of them are ftp specific. */
 
-  struct curl_llist easyq;    /* List of easy handles using this connection */
+  struct Curl_llist easyq;    /* List of easy handles using this connection */
   curl_seek_callback seek_func; /* function that seeks the input */
   void *seek_client;            /* pointer to pass to the seek() above */
 
@@ -1276,7 +1276,7 @@ typedef enum {
  * One instance for each timeout an easy handle can set.
  */
 struct time_node {
-  struct curl_llist_element list;
+  struct Curl_llist_element list;
   struct curltime time;
   expire_id eid;
 };
@@ -1340,7 +1340,7 @@ struct UrlState {
 #endif /* USE_OPENSSL */
   struct curltime expiretime; /* set this with Curl_expire() only */
   struct Curl_tree timenode; /* for the splay stuff */
-  struct curl_llist timeoutlist; /* list of pending timeouts */
+  struct Curl_llist timeoutlist; /* list of pending timeouts */
   struct time_node expires[EXPIRE_LAST]; /* nodes for each expire type */
 
   /* a place to store the most recently set FTP entrypath */
@@ -1866,8 +1866,8 @@ struct Curl_easy {
   struct Curl_easy *prev;
 
   struct connectdata *conn;
-  struct curl_llist_element connect_queue;
-  struct curl_llist_element conn_queue; /* list per connectdata */
+  struct Curl_llist_element connect_queue;
+  struct Curl_llist_element conn_queue; /* list per connectdata */
 
   CURLMstate mstate;  /* the handle's state */
   CURLcode result;   /* previous result */
