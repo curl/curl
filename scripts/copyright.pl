@@ -48,6 +48,7 @@ my @skiplist=(
     '^.github/', # github instruction files
     '^.dcignore', # deepcode.ai instruction file
     '^.muse/', # muse-CI control files
+    "buildconf", # its nothing to copyright
 
     # docs/ files we're okay with without copyright
     'INSTALL.cmake',
