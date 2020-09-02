@@ -2521,9 +2521,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set the RTSP request method (OPTIONS, SETUP, PLAY, etc...)
      * Would this be better if the RTSPREQ_* were just moved into here?
      */
-    long curl_rtspreq = va_arg(param, long);
+    long in_rtspreq = va_arg(param, long);
     Curl_RtspReq rtspreq = RTSPREQ_NONE;
-    switch(curl_rtspreq) {
+    switch(in_rtspreq) {
     case CURL_RTSPREQ_OPTIONS:
       rtspreq = RTSPREQ_OPTIONS;
       break;
