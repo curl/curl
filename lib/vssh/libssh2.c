@@ -821,6 +821,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       result = ssh_force_knownhost_key_type(conn);
       if(result) {
         state(conn, SSH_SESSION_FREE);
+        sshc->actualcode = result;
         break;
       }
 
