@@ -4,7 +4,7 @@ curl and libcurl 7.73.0
  Command line options:         234
  curl_easy_setopt() options:   278
  Public functions in libcurl:  85
- Contributors:                 2250
+ Contributors:                 2252
 
 This release includes the following changes:
 
@@ -21,10 +21,17 @@ This release includes the following bugfixes:
 
  o buildconf: invoke 'autoreconf -fi' instead [37]
  o checksrc: verify do-while and spaces between the braces [2]
+ o CI/azure: MQTT is now enabled by default [64]
  o CI/azure: no longer ignore results of test 1013 [43]
+ o CI/travis: add a CI job with openssl3 (from git master) [51]
+ o cleanups: avoid curl_ on local variables [53]
  o CMake: add option to enable Unicode on Windows [48]
+ o CMake: remove explicit `CMAKE_ANSI_CFLAGS` [45]
+ o cmdline-opts/gen.pl: generate nicer "See Also" in curl.1 [66]
  o configure: fix pkg-config detecting wolfssl [26]
  o conn: check for connection being dead before reuse [39]
+ o connect.c: remove superfluous 'else' in Curl_getconnectinfo [42]
+ o curl.1: add see also no-progress-meter on two spots [67]
  o curl.1: fix typo invokved -> invoked [36]
  o curl_get_line: build only if cookies or alt-svc are enabled [13]
  o Curl_pgrsTime - return new time to avoid timeout integer overflow [32]
@@ -35,20 +42,25 @@ This release includes the following bugfixes:
  o etag: save and use the full received contents [4]
  o git: ignore libtests in 3XXX area [16]
  o HTTP/3: update to OpenSSL_1_1_1g-quic-draft-29 [41]
+ o http_proxy: do not crash with HTTPS_PROXY and NO_PROXY set [50]
+ o lib/Makefile.am: bump VERSIONINFO due to new functions [65]
  o lib1560: verify "redirect" to double-slash leading URL [20]
  o lib: make Curl_gethostname accept a const pointer [38]
+ o libssh2: pass on the error from ssh_force_knownhost_key_type [47]
  o Makefile.m32: add ability to override zstd libs [ci skip] [10]
  o multi: expand pre-check for socket readiness [21]
  o multi: handle connection state winsock events [31]
  o multi: implement wait using winsock events [22]
  o ngtcp2: adapt to the new pkt_info arguments [18]
  o ntlm: fix condition for curl_ntlm_core usage [46]
+ o openssl: avoid error conditions when importing native CA [52]
  o openssl: Fix wincrypt symbols conflict with BoringSSL [9]
  o runtests: clear pid variables when failing to start a server [12]
  o runtests: make cleardir() erase dot files too [8]
  o schannel: fix memory leak when using get_cert_location [15]
  o scripts: improve the "get latest curl release tag" logic
  o select.h: make socket validation macros test for INVALID_SOCKET [24]
+ o select: align poll emulation to return all relevant events [63]
  o select: fix poll-based check not detecting connect failure
  o select: reduce duplication of Curl_poll in Curl_socket_check [23]
  o select: simplify return code handling for poll and select [49]
@@ -56,8 +68,11 @@ This release includes the following bugfixes:
  o socketpair: allow CURL_DISABLE_SOCKETPAIR [11]
  o sockfilt: handle FD_CLOSE winsock event on write socket [30]
  o SSLCERTS: fix English syntax [34]
- o TLS: fix SRP detection by using the proper #ifdefs [33]
+ o telnet.c: depend on static requirement of WinSock version 2 [61]
+ o test971: show test mismatches "inline"
+ o tls: fix SRP detection by using the proper #ifdefs [33]
  o tls: provide the CApath verbose log on its own line [1]
+ o win32: drop support for WinSock version 1, require version 2 [62]
  o winbuild: convert the instruction text to README.md [19]
 
 This release includes the following known bugs:
@@ -67,14 +82,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Andrew Barnes, Chris Paulson-Ellis, Christian Weisgerber,
-  COFFEETALES on github, Daniel Stenberg, Dan Kenigsberg, Don J Olmstead,
-  Eli Schwartz, Emil Engler, Eric Curtin, fullincome on github, Gergely Nagy,
-  Harry Sintonen, Ionuț-Francisc Oancea, Javier Blazquez, Jeroen Ooms,
-  jmdavitt on github, Marcel Raad, Marc Hörsken, Michael Baentsch,
-  Michael Musset, Rasmus Melchior Jacobsen, Ray Satiro, Samuel Tranchet,
+  Alessandro Ghedini, Andrew Barnes, beckenc on github, Chris Paulson-Ellis,
+  Christian Weisgerber, COFFEETALES on github, Daniel Stenberg, Dan Kenigsberg,
+  Don J Olmstead, Eli Schwartz, Emil Engler, Eric Curtin, fullincome on github,
+  Gergely Nagy, Harry Sintonen, ihsinme on github, Ionuț-Francisc Oancea,
+  Javier Blazquez, Jeroen Ooms, jmdavitt on github, Kamil Dudka, Marcel Raad,
+  Marc Hörsken, Martin Bašti, Michael Baentsch, Michael Musset, Peter Wu,
+  Rasmus Melchior Jacobsen, Ray Satiro, Samuel Marks, Samuel Tranchet,
   Stefan Strogin, Tatsuhiro Tsujikawa, Tomas Berger, Viktor Szakats,
-  (29 contributors)
+  (35 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -121,8 +137,22 @@ References to bug reports and discussions on issues:
  [39] = https://curl.haxx.se/bug/?i=5884
  [40] = https://curl.haxx.se/bug/?i=5365
  [41] = https://curl.haxx.se/bug/?i=5871
+ [42] = https://curl.haxx.se/bug/?i=5912
  [43] = https://curl.haxx.se/bug/?i=5889
  [44] = https://curl.haxx.se/bug/?i=5882
+ [45] = https://curl.haxx.se/bug/?i=5439
  [46] = https://curl.haxx.se/bug/?i=1262
+ [47] = https://curl.haxx.se/bug/?i=5909
  [48] = https://curl.haxx.se/bug/?i=5843
  [49] = https://curl.haxx.se/bug/?i=5880
+ [50] = https://bugzilla.redhat.com/1873327
+ [51] = https://curl.haxx.se/bug/?i=5908
+ [52] = https://curl.haxx.se/bug/?i=5907
+ [53] = https://curl.haxx.se/bug/?i=5906
+ [61] = https://curl.haxx.se/bug/?i=5854
+ [62] = https://curl.haxx.se/bug/?i=5854
+ [63] = https://curl.haxx.se/bug/?i=5883
+ [64] = https://curl.haxx.se/bug/?i=5903
+ [65] = https://curl.haxx.se/bug/?i=5899
+ [66] = https://curl.haxx.se/bug/?i=5898
+ [67] = https://curl.haxx.se/bug/?i=5897
