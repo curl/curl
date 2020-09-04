@@ -901,6 +901,11 @@ static void get_categories(void)
 
 void tool_help(const char *category)
 {
+  /* Lets handle the string "category" differently to not print an errormsg */
+  if(curl_strequal(category, "category")) {
+    get_categories();
+    return;
+  }
   puts("Usage: curl [options...] <url>");
   /* If no category was provided */
   if(!category) {
@@ -916,11 +921,6 @@ void tool_help(const char *category)
   if(curl_strequal(category, "all")) {
     /* Print everything except hidden */
     print_category(~(CURLHELP_HIDDEN));
-    return;
-  }
-  /* Lets handle the string "category" differently to not print an errormsg */
-  if(curl_strequal(category, "category")) {
-    get_categories();
     return;
   }
   /* Otherwise print category and handle the case if the cat was not found */
