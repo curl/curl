@@ -1419,8 +1419,7 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
     }
     return c->sock[FIRSTSOCKET];
   }
-  else
-    return CURL_SOCKET_BAD;
+  return CURL_SOCKET_BAD;
 }
 
 /*
