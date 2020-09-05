@@ -2235,12 +2235,13 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
           curl_multi_remove_handle(multi, easy);
 
           result = post_per_transfer(global, ended, result, &retry);
-          if(retry)
-            continue;
           progress_finalize(ended); /* before it goes away */
           all_added--; /* one fewer added */
           removed = TRUE;
-          (void)del_per_transfer(ended);
+          if(retry)
+            ended->added = FALSE; /* add it again */
+          else
+            (void)del_per_transfer(ended);
         }
       } while(msg);
       if(removed) {
