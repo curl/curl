@@ -51,7 +51,8 @@ static struct curl_easyoption *lookup(const char *name, CURLoption id)
 
 const struct curl_easyoption *curl_easy_option_by_name(const char *name)
 {
-  return lookup(name, 0);
+  /* when name is used, the id argument is ignored */
+  return lookup(name, CURLOPT_LASTENTRY);
 }
 
 const struct curl_easyoption *curl_easy_option_by_id(CURLoption id)
