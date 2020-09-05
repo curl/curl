@@ -333,7 +333,8 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
 static CURLcode post_per_transfer(struct GlobalConfig *global,
                                   struct per_transfer *per,
                                   CURLcode result,
-                                  bool *retryp)
+                                  bool *retryp,
+                                  long *delay) /* milliseconds! */
 {
   struct OutStruct *outs = &per->outs;
   CURL *curl = per->curl;
@@ -343,6 +344,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     return result;
 
   *retryp = FALSE;
+  *delay = 0; /* for no retry, keep it zero */
 
   if(per->infdopen)
     close(per->infd);
@@ -535,7 +537,6 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
             m[retry], sleeptime/1000L, per->retry_numretries);
 
       per->retry_numretries--;
-      tool_go_sleep(sleeptime);
       if(!config->retry_delay) {
         per->retry_sleep *= 2;
         if(per->retry_sleep > RETRY_SLEEP_MAX)
@@ -578,7 +579,8 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         }
         outs->bytes = 0; /* clear for next round */
       }
-      *retryp = TRUE; /* curl_easy_perform loop */
+      *retryp = TRUE;
+      *delay = sleeptime;
       return CURLE_OK;
     }
   } /* if retry_numretries */
@@ -2152,6 +2154,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
   struct per_transfer *per;
   CURLcode result = CURLE_OK;
   CURLMcode mcode;
+  bool sleeping = FALSE;
   *addedp = FALSE;
   *morep = FALSE;
   result = create_transfer(global, share, addedp);
@@ -2163,6 +2166,11 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     if(per->added)
       /* already added */
       continue;
+    if(per->startat && (time(NULL) < per->startat)) {
+      /* this is still delaying */
+      sleeping = TRUE;
+      continue;
+    }
 
     result = pre_transfer(global, per);
     if(result)
@@ -2187,7 +2195,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     all_added++;
     *addedp = TRUE;
   }
-  *morep = per ? TRUE : FALSE;
+  *morep = (per || sleeping) ? TRUE : FALSE;
   return CURLE_OK;
 }
 
@@ -2201,6 +2209,7 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
   struct timeval start = tvnow();
   bool more_transfers;
   bool added_transfers;
+  time_t tick = time(NULL);
 
   multi = curl_multi_init();
   if(!multi)
@@ -2223,28 +2232,39 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
     if(!mcode) {
       int rc;
       CURLMsg *msg;
-      bool removed = FALSE;
+      bool checkmore = FALSE;
       do {
         msg = curl_multi_info_read(multi, &rc);
         if(msg) {
           bool retry;
+          long delay;
           struct per_transfer *ended;
           CURL *easy = msg->easy_handle;
           result = msg->data.result;
           curl_easy_getinfo(easy, CURLINFO_PRIVATE, (void *)&ended);
           curl_multi_remove_handle(multi, easy);
 
-          result = post_per_transfer(global, ended, result, &retry);
+          result = post_per_transfer(global, ended, result, &retry, &delay);
           progress_finalize(ended); /* before it goes away */
           all_added--; /* one fewer added */
-          removed = TRUE;
-          if(retry)
+          checkmore = TRUE;
+          if(retry) {
             ended->added = FALSE; /* add it again */
+            /* we delay retries in full integer seconds only */
+            ended->startat = delay ? time(NULL) + delay/1000 : 0;
+          }
           else
             (void)del_per_transfer(ended);
         }
       } while(msg);
-      if(removed) {
+      if(!checkmore) {
+        time_t tock = time(NULL);
+        if(tick != tock) {
+          checkmore = TRUE;
+          tick = tock;
+        }
+      }
+      if(checkmore) {
         /* one or more transfers completed, add more! */
         (void)add_parallel_transfers(global, multi, share,
                                      &more_transfers,
@@ -2284,6 +2304,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     return result;
   for(per = transfers; per;) {
     bool retry;
+    long delay;
     bool bailout = FALSE;
     result = pre_transfer(global, per);
     if(result)
@@ -2306,9 +2327,11 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     /* store the result of the actual transfer */
     returncode = result;
 
-    result = post_per_transfer(global, per, result, &retry);
-    if(retry)
+    result = post_per_transfer(global, per, result, &retry, &delay);
+    if(retry) {
+      tool_go_sleep(delay);
       continue;
+    }
 
     /* Bail out upon critical errors or --fail-early */
     if(result || is_fatal_error(returncode) ||
@@ -2483,7 +2506,8 @@ static CURLcode run_all_transfers(struct GlobalConfig *global,
   /* cleanup if there are any left */
   for(per = transfers; per;) {
     bool retry;
-    CURLcode result2 = post_per_transfer(global, per, result, &retry);
+    long delay;
+    CURLcode result2 = post_per_transfer(global, per, result, &retry, &delay);
     if(!result)
       /* don't overwrite the original error */
       result = result2;
