@@ -512,10 +512,10 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       static const char * const m[]={
         NULL,
         "(retrying all errors)",
-        "timeout",
-        "connection refused",
-        "HTTP error",
-        "FTP error"
+        ": timeout",
+        ": connection refused",
+        ": HTTP error",
+        ": FTP error"
       };
 
       sleeptime = per->retry_sleep;
@@ -529,7 +529,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
             sleeptime = (long)retry_after * 1000; /* milliseconds */
         }
       }
-      warnf(config->global, "Transient problem: %s "
+      warnf(config->global, "Problem %s. "
             "Will retry in %ld seconds. "
             "%ld retries left.\n",
             m[retry], sleeptime/1000L, per->retry_numretries);
