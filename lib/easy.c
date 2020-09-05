@@ -78,6 +78,7 @@
 #include "system_win32.h"
 #include "http2.h"
 #include "dynbuf.h"
+#include "altsvc.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -883,6 +884,15 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
       goto fail;
   }
 
+#ifdef USE_ALTSVC
+  if(data->asi) {
+    outcurl->asi = Curl_altsvc_init();
+    if(!outcurl->asi)
+      goto fail;
+    if(outcurl->set.str[STRING_ALTSVC])
+      (void)Curl_altsvc_load(outcurl->asi, outcurl->set.str[STRING_ALTSVC]);
+  }
+#endif
   /* Clone the resolver handle, if present, for the new handle */
   if(Curl_resolver_duphandle(outcurl,
                              &outcurl->state.resolver,
@@ -930,6 +940,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
     Curl_dyn_free(&outcurl->state.headerb);
     Curl_safefree(outcurl->change.url);
     Curl_safefree(outcurl->change.referer);
+    Curl_altsvc_cleanup(&outcurl->asi);
     Curl_freeset(outcurl);
     free(outcurl);
   }

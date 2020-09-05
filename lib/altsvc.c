@@ -302,11 +302,12 @@ CURLcode Curl_altsvc_ctrl(struct altsvcinfo *asi, const long ctrl)
  * Curl_altsvc_cleanup() frees an altsvc cache instance and all associated
  * resources.
  */
-void Curl_altsvc_cleanup(struct altsvcinfo *altsvc)
+void Curl_altsvc_cleanup(struct altsvcinfo **altsvcp)
 {
   struct Curl_llist_element *e;
   struct Curl_llist_element *n;
-  if(altsvc) {
+  if(*altsvcp) {
+    struct altsvcinfo *altsvc = *altsvcp;
     for(e = altsvc->list.head; e; e = n) {
       struct altsvc *as = e->ptr;
       n = e->next;
@@ -314,6 +315,7 @@ void Curl_altsvc_cleanup(struct altsvcinfo *altsvc)
     }
     free(altsvc->filename);
     free(altsvc);
+    *altsvcp = NULL; /* clear the pointer */
   }
 }
 
