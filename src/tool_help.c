@@ -67,11 +67,11 @@
 #define CURLHELP_UPLOAD 1u << 22u
 #define CURLHELP_VERBOSE 1u << 23u
 
-typedef unsigned int curlhelp_t;
+typedef const unsigned int curlhelp_t;
 
 struct category_descriptors {
-  const char *opt;
-  const char *desc;
+  const char * const opt;
+  const char * const desc;
   curlhelp_t category;
 };
 
@@ -114,8 +114,8 @@ static const struct category_descriptors categories[] = {
  */
 
 struct helptxt {
-  const char *opt;
-  const char *desc;
+  const char * const opt;
+  const char * const desc;
   curlhelp_t categories;
 };
 
@@ -835,8 +835,8 @@ static const struct helptxt helptext[] = {
 #endif
 
 struct feat {
-  const char *name;
-  int bitmask;
+  const char * const name;
+  const int bitmask;
 };
 
 static const struct feat feats[] = {
@@ -878,7 +878,7 @@ static void print_category(curlhelp_t category)
 }
 
 /* Prints category if found. If not, it returns 1 */
-static int get_category_content(const char *category)
+static int get_category_content(const char * const category)
 {
   unsigned int i;
   for(i = 0; categories[i].opt; ++i)
@@ -899,12 +899,12 @@ static void get_categories(void)
 }
 
 
-void tool_help(const char *category)
+void tool_help(const char * const category)
 {
   puts("Usage: curl [options...] <url>");
   /* If no category was provided */
   if(!category) {
-    const char *category_note = "\nThis is not the full help, this "
+    const char * const category_note = "\nThis is not the full help, this "
     "menu is stripped into categories.\nUse \"--help category\" to get "
     "an overview of all categories.\nFor all options use the manual"
     " or \"--help all\".";
