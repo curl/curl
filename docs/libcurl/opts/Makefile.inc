@@ -66,6 +66,7 @@ man_MANS =                                      \
   CURLINFO_REDIRECT_URL.3                       \
   CURLINFO_REQUEST_SIZE.3                       \
   CURLINFO_RESPONSE_CODE.3                      \
+  CURLINFO_RESPONSE_STRING.3                    \
   CURLINFO_RETRY_AFTER.3                        \
   CURLINFO_RTSP_CLIENT_CSEQ.3                   \
   CURLINFO_RTSP_CSEQ_RECV.3                     \

@@ -57,6 +57,8 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   pro->is_t_startransfer_set = false;
 
   info->httpcode = 0;
+  free(info->httpresponse);
+  info->httpresponse = NULL;
   info->httpproxycode = 0;
   info->httpversion = 0;
   info->filetime = -1; /* -1 is an illegal time and thus means unknown */
@@ -157,6 +159,9 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_SCHEME:
     *param_charp = data->info.conn_scheme;
+    break;
+  case CURLINFO_RESPONSE_STRING:
+    *param_charp = data->info.httpresponse;
     break;
 
   default:

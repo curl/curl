@@ -3655,7 +3655,16 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       }
 
       if(nc) {
+        size_t header1len = strlen(HEADER1);
         data->info.httpcode = k->httpcode;
+        /* strdup(HEADER1) is not called because buf contains an undesired
+           line feed character at just before the null-terminator */
+        Curl_safefree(data->info.httpresponse);
+        data->info.httpresponse = malloc(header1len);
+        if(!data->info.httpresponse)
+          return CURLE_OUT_OF_MEMORY;
+        memcpy(data->info.httpresponse, HEADER1, header1len - 1);
+        data->info.httpresponse[header1len - 1] = 0; /* null-terminate */
 
         data->info.httpversion = conn->httpversion;
         if(!data->state.httpversion ||

@@ -555,7 +555,8 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
   char * const buf = data->state.buffer;
 #endif
   int code;
-  CURLcode result = Curl_pp_readresp(sockfd, pp, &code, size);
+  char *response;
+  CURLcode result = Curl_pp_readresp(sockfd, pp, &code, &response, size);
 
 #if defined(HAVE_GSSAPI)
   /* handle the security-oriented responses 6xx ***/
@@ -577,6 +578,8 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 
   /* store the latest code for later retrieval */
   data->info.httpcode = code;
+  Curl_safefree(data->info.httpresponse);
+  data->info.httpresponse = response;
 
   if(ftpcode)
     *ftpcode = code;

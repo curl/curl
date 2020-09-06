@@ -953,7 +953,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 
  do {
     /* Read the response from the server */
-    result = Curl_pp_readresp(sock, pp, &pop3code, &nread);
+    result = Curl_pp_readresp(sock, pp, &pop3code, NULL, &nread);
     if(result)
       return result;
 

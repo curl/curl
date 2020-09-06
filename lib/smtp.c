@@ -1161,6 +1161,7 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   struct Curl_easy *data = conn->data;
   int smtpcode;
+  char *smtpresponse;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   struct pingpong *pp = &smtpc->pp;
   size_t nread = 0;
@@ -1175,13 +1176,19 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
 
   do {
     /* Read the response from the server */
-    result = Curl_pp_readresp(sock, pp, &smtpcode, &nread);
+    result = Curl_pp_readresp(sock, pp, &smtpcode, &smtpresponse, &nread);
     if(result)
       return result;
 
     /* Store the latest response for later retrieval if necessary */
-    if(smtpc->state != SMTP_QUIT && smtpcode != 1)
+    if(smtpc->state != SMTP_QUIT && smtpcode != 1) {
       data->info.httpcode = smtpcode;
+      Curl_safefree(data->info.httpresponse);
+      data->info.httpresponse = smtpresponse;
+    }
+    else {
+      Curl_safefree(smtpresponse);
+    }
 
     if(!smtpcode)
       break;

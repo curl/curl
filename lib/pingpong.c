@@ -273,6 +273,8 @@ CURLcode Curl_pp_sendf(struct pingpong *pp,
 CURLcode Curl_pp_readresp(curl_socket_t sockfd,
                           struct pingpong *pp,
                           int *code, /* return the server code if done */
+                          char **response, /* return a pointer to copy of
+                                              the response line */
                           size_t *size) /* size of the response */
 {
   ssize_t perline; /* count bytes per line */
@@ -285,6 +287,8 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
   CURLcode result = CURLE_OK;
 
   *code = 0; /* 0 for errors or not done */
+  if(response)
+    *response = NULL;
   *size = 0;
 
   ptr = buf + pp->nread_resp;
@@ -388,6 +392,19 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
             size_t n = ptr - pp->linestart_resp;
             memmove(buf, pp->linestart_resp, n);
             buf[n] = 0; /* null-terminate */
+
+            if(response) {
+              /* The caller will pass a non-NULL pointer-to-pointer if the
+                 response string is desired. strdup(buf) is not called
+                 because buf contains an undesired carriage return character
+                 at just before the null-terminator */
+              *response = malloc(n);
+              if(!*response)
+                return CURLE_OUT_OF_MEMORY;
+              memcpy(*response, pp->linestart_resp, n - 1);
+              (*response)[n - 1] = 0; /* null-terminate */
+            }
+
             keepon = FALSE;
             pp->linestart_resp = ptr + 1; /* advance pointer */
             i++; /* skip this before getting out */

@@ -38,6 +38,10 @@ static const struct writeoutvar variables[] = {
    CURLINFO_RESPONSE_CODE, JSON_LONG},
   {"response_code", VAR_HTTP_CODE, 0,
    CURLINFO_RESPONSE_CODE, JSON_LONG},
+  {"http_response", VAR_HTTP_RESPONSE, 0,
+   CURLINFO_RESPONSE_STRING, JSON_STRING},
+  {"response_string", VAR_HTTP_RESPONSE, 0,
+   CURLINFO_RESPONSE_STRING, JSON_STRING},
   {"http_connect", VAR_HTTP_CODE_PROXY, 0,
    CURLINFO_HTTP_CONNECTCODE, JSON_LONG},
   {"time_total", VAR_TOTAL_TIME, 0,
@@ -155,6 +159,13 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &longinfo))
                   fprintf(stream, "%03ld", longinfo);
+                break;
+              case VAR_HTTP_RESPONSE:
+                if((CURLE_OK ==
+                    curl_easy_getinfo(curl, CURLINFO_RESPONSE_STRING,
+                                      &stringp))
+                   && stringp)
+                  fputs(stringp, stream);
                 break;
               case VAR_HTTP_CODE_PROXY:
                 if(CURLE_OK ==

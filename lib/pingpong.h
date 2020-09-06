@@ -126,6 +126,8 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
 CURLcode Curl_pp_readresp(curl_socket_t sockfd,
                           struct pingpong *pp,
                           int *code, /* return the server code if done */
+                          char **response, /* return a pointer to copy of
+                                              the response line */
                           size_t *size); /* size of the response */
 
 

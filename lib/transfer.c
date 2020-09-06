@@ -756,6 +756,10 @@ static CURLcode readwrite_data(struct Curl_easy *data,
               /* We're simulating a http 304 from server so we return
                  what should have been returned from the server */
               data->info.httpcode = 304;
+              Curl_safefree(data->info.httpresponse);
+              data->info.httpresponse = strdup("304 Not Modified");
+              if(!data->info.httpresponse)
+                return CURLE_OUT_OF_MEMORY;
               infof(data, "Simulate a HTTP 304 response!\n");
               /* we abort the transfer before it is completed == we ruin the
                  re-use ability. Close the connection */

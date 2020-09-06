@@ -44,6 +44,11 @@ The numerical response code that was found in the last retrieved HTTP(S) or
 FTP(s) transfer. In 7.18.2 the alias \fBresponse_code\fP was added to show the
 same info.
 .TP
+.B http_response
+The response string from the last retrieved FTP(s), HTTP(S), (S)RTSP or
+SMTP(S) transfer. This is an alias for \fBresponse_string\fP for naming
+consistency with \fBhttp_code\fP. (Added in 7.73.0)
+.TP
 .B http_connect
 The numerical code that was found in the last response (from a proxy) to a
 curl CONNECT request. (Added in 7.12.4)
@@ -89,6 +94,10 @@ The remote port number of the most recently done connection (Added in 7.29.0)
 .B response_code
 The numerical response code that was found in the last transfer (formerly
 known as "http_code"). (Added in 7.18.2)
+.TP
+.B response_string
+The response string from the last retrieved FTP(s), HTTP(S), (S)RTSP or
+SMTP(S) transfer. (Added in 7.73.0)
 .TP
 .B scheme
 The URL scheme (sometimes called protocol) that was effectively used (Added in 7.52.0)
