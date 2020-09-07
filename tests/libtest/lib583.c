@@ -35,7 +35,7 @@ int test(char *URL)
   int stillRunning;
   CURLM *multiHandle = NULL;
   CURL *curl = NULL;
-  CURLMcode res = CURLM_OK;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
