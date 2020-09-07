@@ -247,20 +247,21 @@ FAQ
 
   1.6 What do you get for making curl?
 
-  Project cURL is entirely free and open. No person gets paid for developing
-  curl full time. We do this voluntarily, mostly in our spare time.
-  Occasionally companies pay individual developers to work on curl, but that's
-  up to each company and developer. This is not controlled by nor supervised in
-  any way by the project.
+  Project cURL is entirely free and open. We do this voluntarily, mostly in
+  our spare time.  Companies may pay individual developers to work on curl,
+  but that's up to each company and developer. This is not controlled by nor
+  supervised in any way by the curl project.
 
-  We still get help from companies. Haxx provides website, bandwidth, mailing
-  lists etc, GitHub hosts the primary git repository and other services like
-  the bug tracker at https://github.com/curl/curl. Also again, some companies
-  have sponsored certain parts of the development in the past and I hope some
-  will continue to do so in the future.
+  We get help from companies. Haxx provides website, bandwidth, mailing lists
+  etc, GitHub hosts the primary git repository and other services like the bug
+  tracker at https://github.com/curl/curl. Also again, some companies have
+  sponsored certain parts of the development in the past and I hope some will
+  continue to do so in the future.
 
   If you want to support our project, consider a donation or a banner-program
   or even better: by helping us with coding, documenting or testing etc.
+
+  See also: https://curl.haxx.se/sponsors.html
 
   1.7 What about CURL from curl.com?
 
@@ -317,21 +318,14 @@ FAQ
   We don't know how many users that downloaded or installed curl and then
   never use it.
 
-  In May 2012 Daniel did a counting game and came up with a number that may
-  be completely wrong or somewhat accurate. Over 500 million!
-
-  See https://daniel.haxx.se/blog/2012/05/16/300m-users/
+  In 2020, we estimate that curl runs in rougly ten billion installations
+  world wide.
 
   1.11 Why don't you update ca-bundle.crt
 
-  The ca cert bundle that used to be shipped with curl was very outdated and
-  must be replaced with an up-to-date version by anyone who wants to verify
-  peers. It is no longer provided by curl. The last curl release that ever
-  shipped a ca cert bundle was curl 7.18.0.
-
   In the cURL project we've decided not to attempt to keep this file updated
-  (or even present anymore) since deciding what to add to a ca cert bundle is
-  an undertaking we've not been ready to accept, and the one we can get from
+  (or even present) since deciding what to add to a ca cert bundle is an
+  undertaking we've not been ready to accept, and the one we can get from
   Mozilla is perfectly fine so there's no need to duplicate that work.
 
   Today, with many services performed over HTTPS, every operating system
@@ -374,16 +368,13 @@ FAQ
 
   1.14 How do I submit my patch?
 
-  When you have made a patch or a change of whatever sort, and want to submit
-  that to the project, there are a few different ways we prefer:
+  We strongly encourage you to submit changes and improvements directly as
+  "pull requests" on github: https://github.com/curl/curl/pulls
 
-  o send a patch to the curl-library mailing list. We're many subscribers
-    there and there are lots of people who can review patches, comment on them
-    and "receive" them properly.
-
-  o if your patch changes or fixes a bug, you can also opt to submit a bug
-    report in the bug tracker and attach your patch there. There are less
-    people involved there.
+  If you for any reason can't or won't deal with github, send your patch to
+  the curl-library mailing list. We're many subscribers there and there are
+  lots of people who can review patches, comment on them and "receive" them
+  properly.
 
   Lots of more details are found in the CONTRIBUTE and INTERNALS docs.
 
