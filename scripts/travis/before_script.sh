@@ -98,6 +98,16 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$OPENSSL3" ]; then
   make install_sw
 fi
 
+if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
+  cd $HOME
+  git clone --depth=1 https://github.com/libressl-portable/portable.git libressl-git
+  cd libressl-git
+  ./autogen.sh
+  ./configure --prefix=$HOME/libressl
+  make
+  make install
+fi
+
 if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   cd $HOME
   git clone --depth=1 --recursive https://github.com/cloudflare/quiche.git
