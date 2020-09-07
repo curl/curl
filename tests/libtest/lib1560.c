@@ -638,7 +638,7 @@ static CURLUPart part2id(char *part)
     return CURLUPART_FRAGMENT;
   if(!strcmp("zoneid", part))
     return CURLUPART_ZONEID;
-  return 9999; /* bad input => bad output */
+  return (CURLUPart)9999; /* bad input => bad output */
 }
 
 static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)

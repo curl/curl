@@ -297,7 +297,7 @@ while(<STDIN>) {
 
 
 print <<FOOTER
-  curl_easy_setopt(curl, 1, 0);
+  curl_easy_setopt(curl, (CURLoption)1, 0);
   res = CURLE_OK;
 test_cleanup:
   curl_easy_cleanup(curl);

@@ -304,7 +304,7 @@ static gnutls_x509_crt_fmt_t do_file_type(const char *type)
     return GNUTLS_X509_FMT_PEM;
   if(strcasecompare(type, "DER"))
     return GNUTLS_X509_FMT_DER;
-  return -1;
+  return GNUTLS_X509_FMT_PEM; /* default to PEM */
 }
 
 #define GNUTLS_CIPHERS "NORMAL:-ARCFOUR-128:-CTYPE-ALL:+CTYPE-X509"

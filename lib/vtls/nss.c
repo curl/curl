@@ -1672,7 +1672,8 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
       if(!dir)
         return CURLE_SSL_CACERT_BADFILE;
 
-      while((entry = PR_ReadDir(dir, PR_SKIP_BOTH | PR_SKIP_HIDDEN))) {
+      while((entry =
+             PR_ReadDir(dir, (PRDirFlags)(PR_SKIP_BOTH | PR_SKIP_HIDDEN)))) {
         char *fullpath = aprintf("%s/%s", capath, entry->name);
         if(!fullpath) {
           PR_CloseDir(dir);
