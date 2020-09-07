@@ -16,3 +16,4 @@ jobs:
         cards: '${{ steps.glo-parse.outputs.cards }}'
         label: 'middle'
       id: glo-label
+
