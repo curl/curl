@@ -238,7 +238,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
 
       if(rc == CURLRESOLV_ERROR)
         return CURLPX_RESOLVE_HOST;
-      else if(rc == CURLRESOLV_PENDING) {
+      if(rc == CURLRESOLV_PENDING) {
         sxstate(conn, CONNECT_RESOLVING);
         infof(data, "SOCKS4 non-blocking resolve of %s\n", hostname);
         return CURLPX_OK;
@@ -385,12 +385,12 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
             curl_easy_strerror(result));
       return CURLPX_RECV_CONNECT;
     }
-    else if(!result && !actualread) {
+    if(!result && !actualread) {
       /* connection closed */
       failf(data, "connection to proxy closed");
       return CURLPX_CLOSED;
     }
-    else if(actualread != sx->outstanding) {
+    if(actualread != sx->outstanding) {
       /* remain in reading state */
       sx->outstanding -= actualread;
       sx->outp += actualread;
@@ -642,7 +642,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
               "SOCKS5 GSSAPI per-message authentication is not supported.");
         return CURLPX_GSSAPI_PERMSG;
       }
-      else if(socksreq[1] == 255) {
+      if(socksreq[1] == 255) {
         failf(data, "No authentication method was acceptable.");
         return CURLPX_NO_AUTH;
       }
@@ -927,7 +927,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
             "SOCKS5 reply has wrong version, version should be 5.");
       return CURLPX_BAD_VERSION;
     }
-    else if(socksreq[1] != 0) { /* Anything besides 0 is an error */
+    if(socksreq[1] != 0) { /* Anything besides 0 is an error */
       CURLproxycode rc = CURLPX_REPLY_UNASSIGNED;
       int code = socksreq[1];
       failf(data, "Can't complete SOCKS5 connection to %s. (%d)",
