@@ -214,11 +214,9 @@ struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
      */
     if(data->progress.is_t_startransfer_set) {
       return now;
-    }
-    else {
-      data->progress.is_t_startransfer_set = true;
-      break;
-    }
+    } 
+    data->progress.is_t_startransfer_set = true;
+    break;
   case TIMER_POSTRANSFER:
     /* this is the normal end-of-transfer thing */
     break;
