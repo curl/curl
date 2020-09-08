@@ -271,7 +271,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
 
     return CURLE_OK; /* nothing was read */
   }
-  else if(nread > buffersize) {
+  if(nread > buffersize) {
     /* the read function returned a too large value */
     *nreadp = 0;
     failf(data, "read function returned funny value");
