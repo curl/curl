@@ -1831,7 +1831,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         result = CURLE_OK;
         break;
       }
-      
       if(data->state.previouslypending) {
         /* this transfer comes from the pending queue so try move another */
         infof(data, "Transfer was pending, now try another\n");
