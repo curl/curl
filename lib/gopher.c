@@ -161,7 +161,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
       result = CURLE_SEND_ERROR;
       break;
     }
-    else if(!what) {
+    if(!what) {
       result = CURLE_OPERATION_TIMEDOUT;
       break;
     }
