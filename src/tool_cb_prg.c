@@ -159,7 +159,7 @@ int tool_progress_cb(void *clientp,
       if(bar->prev == point)
         /* progress didn't change since last invoke */
         return 0;
-      else if((tvdiff(now, bar->prevtime) < 100L) && point < total)
+      if((tvdiff(now, bar->prevtime) < 100L) && point < total)
         /* limit progress-bar updating to 10 Hz except when we're at 100% */
         return 0;
     }
