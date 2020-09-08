@@ -355,6 +355,10 @@ static char *my_get_line(FILE *fp)
     else {
       char *ptr;
       size_t linelen = strlen(line);
+      if(linelen >= (size_t)(SIZE_T_MAX-sizeof(buf)-2)) {
+        Curl_safefree(line);
+        return NULL;
+      }
       ptr = realloc(line, linelen + strlen(buf) + 1);
       if(!ptr) {
         Curl_safefree(line);
