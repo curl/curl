@@ -39,7 +39,18 @@
 #define ISSEP(x,dash) (!dash && (((x) == '=') || ((x) == ':')))
 
 static const char *unslashquote(const char *line, char *param);
-static char *my_get_line(FILE *fp);
+
+#define MAX_CONFIG_LINE_LENGTH (100*1024)
+/*
+ * Reads a line from the given file, ensure the buffer is NUL terminated.
+ * Returns TRUE on error.
+ */
+static bool my_get_line(FILE *fp, char *buf, int buflen)
+{
+  if(!fgets(buf, buflen, fp))
+    return FALSE; /* error */
+  return TRUE;
+}
 
 #ifdef WIN32
 static FILE *execpath(const char *filename)
@@ -135,13 +146,18 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 
   if(file) {
     char *line;
-    char *aline;
     char *option;
     char *param;
     int lineno = 0;
     bool dashed_option;
+    char *aline = malloc(MAX_CONFIG_LINE_LENGTH);
+    if(!aline) {
+      if(file != stdin)
+        fclose(file);
+      return 1;
+    }
 
-    while(NULL != (aline = my_get_line(file))) {
+    while(my_get_line(file, aline, MAX_CONFIG_LINE_LENGTH)) {
       int res;
       bool alloced_param = FALSE;
       lineno++;
@@ -158,7 +174,6 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       case '\n':
       case '*':
       case '\0':
-        Curl_safefree(aline);
         continue;
       }
 
@@ -190,7 +205,6 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
         param = malloc(strlen(line) + 1); /* parameter */
         if(!param) {
           /* out of memory */
-          Curl_safefree(aline);
           rc = 1;
           break;
         }
@@ -279,9 +293,8 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 
       if(alloced_param)
         Curl_safefree(param);
-
-      Curl_safefree(aline);
     }
+    free(aline);
     if(file != stdin)
       fclose(file);
   }
@@ -333,41 +346,3 @@ static const char *unslashquote(const char *line, char *param)
   return line;
 }
 
-/*
- * Reads a line from the given file, ensuring is NUL terminated.
- * The pointer must be freed by the caller.
- * NULL is returned on an out of memory condition.
- */
-static char *my_get_line(FILE *fp)
-{
-  char buf[4096];
-  char *nl = NULL;
-  char *line = NULL;
-
-  do {
-    if(NULL == fgets(buf, sizeof(buf), fp))
-      break;
-    if(!line) {
-      line = strdup(buf);
-      if(!line)
-        return NULL;
-    }
-    else {
-      char *ptr;
-      size_t linelen = strlen(line);
-      ptr = realloc(line, linelen + strlen(buf) + 1);
-      if(!ptr) {
-        Curl_safefree(line);
-        return NULL;
-      }
-      line = ptr;
-      strcpy(&line[linelen], buf);
-    }
-    nl = strchr(line, '\n');
-  } while(!nl);
-
-  if(nl)
-    *nl = '\0';
-
-  return line;
-}
