@@ -73,7 +73,6 @@ bool Curl_ipv6works(struct connectdata *conn)
     DEBUGASSERT(conn->data->multi);
     return conn->data->multi->ipv6_works;
   }
-  
   int ipv6_works = -1;
   /* probe to see if we have a working IPv6 stack */
   curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
