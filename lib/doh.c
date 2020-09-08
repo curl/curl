@@ -916,7 +916,7 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
     return conn->bits.proxy?CURLE_COULDNT_RESOLVE_PROXY:
       CURLE_COULDNT_RESOLVE_HOST;
   }
-  else if(!data->req.doh.pending) {
+  if(!data->req.doh.pending) {
     DOHcode rc[DOH_PROBE_SLOTS] = {
       DOH_OK, DOH_OK
     };
