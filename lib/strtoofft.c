@@ -233,7 +233,7 @@ CURLofft curlx_strtoofft(const char *str, char **endp, int base,
   if(errno == ERANGE)
     /* overflow/underflow */
     return CURL_OFFT_FLOW;
-  else if(str == end)
+  if(str == end)
     /* nothing parsed */
     return CURL_OFFT_INVAL;
 
