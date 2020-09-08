@@ -1508,7 +1508,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
         }
         /* returned zero but actually received 0 or less here,
            the server closed the connection and we bail out */
-        else if(nread <= 0) {
+        if(nread <= 0) {
           keepon = FALSE;
           break;
         }
