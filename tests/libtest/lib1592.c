@@ -44,6 +44,7 @@ int test(char *URL)
   CURLM *multiHandle = NULL;
   CURL *curl = NULL;
   CURLcode res = CURLE_OK;
+  CURLMcode mres;
   int timeout;
 
   global_init(CURL_GLOBAL_ALL);
@@ -97,10 +98,11 @@ int test(char *URL)
   /* Start measuring how long it takes to remove the handle. */
   fprintf(stderr, "curl_multi_remove_handle()...\n");
   start_test_timing();
-  res = curl_multi_remove_handle(multiHandle, curl);
-  if(res) {
+  mres = curl_multi_remove_handle(multiHandle, curl);
+  if(mres) {
     fprintf(stderr, "curl_multi_remove_handle() failed, "
             "with code %d\n", (int)res);
+    res = TEST_ERR_MULTI;
     goto test_cleanup;
   }
   fprintf(stderr, "curl_multi_remove_handle() succeeded\n");

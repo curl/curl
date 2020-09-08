@@ -36,6 +36,7 @@ int test(char *URL)
   CURLM *multiHandle = NULL;
   CURL *curl = NULL;
   CURLcode res = CURLE_OK;
+  CURLMcode mres = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -65,10 +66,12 @@ int test(char *URL)
   fprintf(stderr, "curl_multi_perform() succeeded\n");
 
   fprintf(stderr, "curl_multi_remove_handle()...\n");
-  res = curl_multi_remove_handle(multiHandle, curl);
-  if(res)
+  mres = curl_multi_remove_handle(multiHandle, curl);
+  if(mres) {
     fprintf(stderr, "curl_multi_remove_handle() failed, "
-            "with code %d\n", (int)res);
+            "with code %d\n", (int)mres);
+    res = TEST_ERR_MULTI;
+  }
   else
     fprintf(stderr, "curl_multi_remove_handle() succeeded\n");
 
