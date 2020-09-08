@@ -80,7 +80,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
     Curl_dyn_free(s);
     return CURLE_OUT_OF_MEMORY;
   }
-  else if(!a) {
+  if(!a) {
     DEBUGASSERT(!indx);
     /* first invoke */
     if(fit < MIN_FIRST_ALLOC)
