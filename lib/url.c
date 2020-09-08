@@ -1409,11 +1409,9 @@ ConnectionExists(struct Curl_easy *data,
           infof(data, "Multiplexed connection found!\n");
           break;
         }
-        else {
-          /* We have found a connection. Let's stop searching. */
-          chosen = check;
-          break;
-        }
+        /* We have found a connection. Let's stop searching. */
+        chosen = check;
+        break;
       }
     }
   }
@@ -3974,7 +3972,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
   if(result == CURLE_NO_CONNECTION_AVAILABLE) {
     return result;
   }
-  else if(result && conn) {
+  if(result && conn) {
     /* We're not allowed to return failure with memory left allocated in the
        connectdata struct, free those here */
     Curl_detach_connnection(data);
