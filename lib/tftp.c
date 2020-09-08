@@ -364,7 +364,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_state_data *state,
               TFTP_BLKSIZE_MAX);
         return CURLE_TFTP_ILLEGAL;
       }
-      else if(blksize < TFTP_BLKSIZE_MIN) {
+      if(blksize < TFTP_BLKSIZE_MIN) {
         failf(data, "%s (%d)", "blksize is smaller than min supported",
               TFTP_BLKSIZE_MIN);
         return CURLE_TFTP_ILLEGAL;
