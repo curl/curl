@@ -1,5 +1,7 @@
 ### File to be included in the build ###
 
+### Note: This file is also used by lib/CMakeLists.txt to generate SONAME for libcurl.
+
 SONAME = 10:0:6
 
 # This variable is set to current[:revision[:age]].
