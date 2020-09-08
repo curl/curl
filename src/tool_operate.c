@@ -140,9 +140,7 @@ static bool is_pkcs11_uri(const char *string)
   if(curl_strnequal(string, "pkcs11:", 7)) {
     return TRUE;
   }
-  else {
-    return FALSE;
-  }
+  return FALSE;
 }
 
 #ifdef __VMS
@@ -883,12 +881,10 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               result = CURLE_WRITE_ERROR;
               break;
             }
-            else {
-              heads->filename = config->headerfile;
-              heads->s_isreg = TRUE;
-              heads->fopened = TRUE;
-              heads->stream = newfile;
-            }
+            heads->filename = config->headerfile;
+            heads->s_isreg = TRUE;
+            heads->fopened = TRUE;
+            heads->stream = newfile;
           }
           else {
             /* always use binary mode for protocol header output */
@@ -965,12 +961,10 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               result = CURLE_WRITE_ERROR;
               break;
             }
-            else {
-              etag_save->filename = config->etag_save_file;
-              etag_save->s_isreg = TRUE;
-              etag_save->fopened = TRUE;
-              etag_save->stream = newfile;
-            }
+            etag_save->filename = config->etag_save_file;
+            etag_save->s_isreg = TRUE;
+            etag_save->fopened = TRUE;
+            etag_save->stream = newfile;
           }
           else {
             /* always use binary mode for protocol header output */
