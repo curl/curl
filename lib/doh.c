@@ -528,11 +528,10 @@ static DOHcode store_cname(const unsigned char *doh,
       index = newpos;
       continue;
     }
-    else if(length & 0xc0)
+    if(length & 0xc0)
       return DOH_DNS_BAD_LABEL; /* bad input */
-    else
-      index++;
 
+    index++;
     if(length) {
       if(Curl_dyn_len(c)) {
         if(Curl_dyn_add(c, "."))
