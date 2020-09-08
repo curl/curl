@@ -342,7 +342,8 @@ static CURLcode CONNECT(struct connectdata *conn,
           s->keepon = FALSE;
           break;
         }
-        else if(gotbytes <= 0) {
+        
+        if(gotbytes <= 0) {
           if(data->set.proxyauth && data->state.authproxy.avail) {
             /* proxy auth was requested and there was proxy auth available,
                then deem this as "mere" proxy disconnect */
