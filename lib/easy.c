@@ -1224,7 +1224,6 @@ CURLcode curl_easy_upkeep(struct Curl_easy *data)
     /* Use the common function to keep connections alive. */
     return upkeep(&data->multi_easy->conn_cache, data);
   }
-  
   /* No connections, so just return success */
   return CURLE_OK;
 }
