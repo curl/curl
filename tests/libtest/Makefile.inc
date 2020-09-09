@@ -65,7 +65,7 @@ chkdecimalpoint_SOURCES = chkdecimalpoint.c ../../lib/mprintf.c \
  ../../lib/curl_ctype.c  ../../lib/dynbuf.c ../../lib/strdup.c
 chkdecimalpoint_LDADD =
 chkdecimalpoint_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB \
- -DCURLX_NO_MEMORY_CALLBACKS
+ -DCURLX_NO_MEMORY_CALLBACKS -DBUILDING_LIBCURL
 
 chkhostname_SOURCES = chkhostname.c ../../lib/curl_gethostname.c
 chkhostname_LDADD = @CURL_NETWORK_LIBS@
