@@ -22,6 +22,22 @@
  *
  ***************************************************************************/
 
+#ifndef BUILDING_LIBCURL
+/* this renames the functions so that the tool code can use the same code
+   without getting symbol collisions */
+#define Curl_dyn_init(a,b) curlx_dyn_init(a,b)
+#define Curl_dyn_add(a,b) curlx_dyn_add(a,b)
+#define Curl_dyn_addn(a,b,c) curlx_dyn_addn(a,b,c)
+#define Curl_dyn_addf curlx_dyn_addf
+#define Curl_dyn_free(a) curlx_dyn_free(a)
+#define Curl_dyn_ptr(a) curlx_dyn_ptr(a)
+#define Curl_dyn_uptr(a) curlx_dyn_uptr(a)
+#define Curl_dyn_len(a) curlx_dyn_len(a)
+#define Curl_dyn_reset(a) curlx_dyn_reset(a)
+#define Curl_dyn_tail(a,b) curlx_dyn_tail(a,b)
+#define curlx_dynbuf dynbuf /* for the struct name */
+#endif
+
 struct dynbuf {
   char *bufr;    /* point to a null-terminated allocated buffer */
   size_t leng;   /* number of bytes *EXCLUDING* the zero terminator */
