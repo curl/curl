@@ -80,12 +80,12 @@ ParameterError file2string(char **bufp, FILE *file)
       buflen = strlen(buffer);
       alloc_needed = stringlen + buflen + 1;
       if(alloc < alloc_needed) {
-#if SIZEOF_SIZE_T < 8
+
         if(alloc >= (size_t)SIZE_T_MAX/2) {
           Curl_safefree(string);
           return PARAM_NO_MEM;
         }
-#endif
+
         /* doubling is enough since the string to add is always max 256 bytes
            and the alloc size start at 512 */
         alloc *= 2;
