@@ -622,7 +622,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     fputs("\n", per->progressbar.out);
 
   if(config->writeout)
-    ourWriteOut(per->curl, &per->outs, config->writeout);
+    ourWriteOut(per->curl, per, config->writeout);
 
   /* Close the outs file */
   if(outs->fopened && outs->stream) {

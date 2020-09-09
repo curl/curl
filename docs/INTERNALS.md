@@ -503,7 +503,7 @@ Client
  status and exits.
 
  When the operation is done, the `ourWriteOut()` function in `src/writeout.c`
- may be called to report about the operation. That function is using the
+ may be called to report about the operation. That function is mostly using the
  `curl_easy_getinfo()` function to extract useful information from the curl
  session.
 

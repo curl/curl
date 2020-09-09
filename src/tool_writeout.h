@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+#include "tool_operate.h"
 
 typedef enum {
   VAR_NONE,       /* must be the first */
@@ -38,6 +39,7 @@ typedef enum {
   VAR_HTTP_CODE,
   VAR_HTTP_CODE_PROXY,
   VAR_HEADER_SIZE,
+  VAR_NUM_HEADERS,
   VAR_REQUEST_SIZE,
   VAR_EFFECTIVE_METHOD,
   VAR_EFFECTIVE_URL,
@@ -80,6 +82,6 @@ struct writeoutvar {
   jsontype jsontype;
 };
 
-void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo);
+void ourWriteOut(CURL *curl, struct per_transfer *per, const char *writeinfo);
 
 #endif /* HEADER_CURL_TOOL_WRITEOUT_H */

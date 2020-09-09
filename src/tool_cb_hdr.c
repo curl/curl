@@ -179,7 +179,17 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     if(!outs->stream && !tool_create_output_file(outs, per->config))
       return failure;
   }
-
+  if(hdrcbdata->config->writeout) {
+    char *value = memchr(ptr, ':', cb);
+    if(value) {
+      if(per->was_last_header_empty)
+        per->num_headers = 0;
+      per->was_last_header_empty = FALSE;
+      per->num_headers++;
+    }
+    else if(ptr[0] == '\r' || ptr[0] == '\n')
+      per->was_last_header_empty = TRUE;
+  }
   if(hdrcbdata->config->show_headers &&
     (protocol &
      (CURLPROTO_HTTP|CURLPROTO_HTTPS|CURLPROTO_RTSP|CURLPROTO_FILE))) {

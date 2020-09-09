@@ -67,6 +67,10 @@ The http method used in the most recent HTTP request (Added in 7.72.0)
 .B num_connects
 Number of new connects made in the recent transfer. (Added in 7.12.3)
 .TP
+.B num_headers
+The number of response headers in the most recent request (restarted at each
+ redirect). Note that the status line IS NOT a header. (Added in 7.73.0)
+.TP
 .B num_redirects
 Number of redirects that were followed in the request. (Added in 7.12.3)
 .TP
