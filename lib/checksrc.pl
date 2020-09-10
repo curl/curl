@@ -53,7 +53,7 @@ my %warnings = (
     'LONGLINE'         => "Line longer than $max_column",
     'TABS'             => 'TAB characters not allowed',
     'TRAILINGSPACE'    => 'Trailing white space on the line',
-    'CPPCOMMENTS'      => '// comment detected',
+    'C99COMMENTS'      => '// comment detected',
     'SPACEBEFOREPAREN' => 'space before an open parenthesis',
     'SPACEAFTERPAREN'  => 'space after open parenthesis',
     'SPACEBEFORECLOSE' => 'space before a close parenthesis',
@@ -442,7 +442,7 @@ sub scanfile {
         # crude attempt to detect // comments without too many false
         # positives
         if($l =~ /^([^"\*]*)[^:"]\/\//) {
-            checkwarn("CPPCOMMENTS",
+            checkwarn("C99COMMENTS",
                       $line, length($1), $file, $l, "\/\/ comment");
         }
 

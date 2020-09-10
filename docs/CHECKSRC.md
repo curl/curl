@@ -55,7 +55,7 @@ warnings are:
 
 - `COPYRIGHT`: the file is missing a copyright statement!
 
-- `CPPCOMMENTS`: `//` comment detected, that's not C89 compliant
+- `C99COMMENTS`: `//` comment detected, that's not C89 compliant
 
 - `FOPENMODE`: `fopen()` needs a macro for the mode string, use it
 
