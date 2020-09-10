@@ -49,6 +49,22 @@ my %warnings_extended = (
     'COPYRIGHTYEAR'    => 'copyright year incorrect',
     );
 
+my @legal_stdint = (
+    './http.h',
+    './http2.h',
+    './http2.c',
+    './setup-os400.h',
+    './timeval.c',
+    './version.c',
+    './vssh',
+    './vquic',
+    './vtls',
+    './content_encoding.c',
+    './curl_ntlm_core.c',
+    './stub_gssapi.h',
+    './ephiperfifo.c',
+);
+
 my %warnings = (
     'LONGLINE'         => "Line longer than $max_column",
     'TABS'             => 'TAB characters not allowed',
@@ -84,6 +100,7 @@ my %warnings = (
     'TYPEDEFSTRUCT'    => 'typedefed struct',
     'DOBRACE'          => 'A single space between do and open brace',
     'BRACEWHILE'       => 'A single space between open brace and while',
+    'C99TYPES'         => 'Use of a C99 fixed width integer type',
     );
 
 sub readskiplist {
@@ -620,6 +637,21 @@ sub scanfile {
             checkwarn("SNPRINTF",
                       $line, length($1), $file, $ol,
                       "use of $2 is banned");
+        }
+
+        # scan for use of C99 fixed width integer types
+        if($l =~ /u?int(\d*)_t /) {
+            my $continue = 1;
+            foreach(@legal_stdint) {
+                if($_ eq substr($file, 0, length($_))) {
+                    $continue = 0;
+                }
+            }
+            if($continue) {
+                checkwarn("C99TYPES",
+                          $line, length($1), $file, $ol,
+                          $warnings{"C99TYPES"});
+            }
         }
 
         # scan for use of non-binary fopen without the macro
