@@ -7,9 +7,12 @@ currency-exchange calculations available to Internet Relay Chat (IRC)
 users. All the necessary data were published on the Web; he just needed to
 automate their retrieval.
 
-Daniel simply adopted an existing command-line open-source tool, httpget, that
-Brazilian Rafael Sagula had written and recently released version 0.1 of. After
-a few minor adjustments, it did just what he needed.
+1996
+----
+
+Daniel adopted an existing command-line open-source tool, httpget, that
+Brazilian Rafael Sagula had written and recently released version 0.1
+of. After a few minor adjustments, it did just what he needed.
 
 1997
 ----
@@ -353,6 +356,8 @@ April: added the cyassl backend (later renamed to WolfSSL)
 
 2019
 ----
+
+ March: added experimental alt-svc support
 
  August: the first HTTP/3 requests with curl.
 
