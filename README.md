@@ -26,9 +26,7 @@ You can find answers to the most frequent questions we get in [the FAQ
 document](https://curl.haxx.se/docs/faq.html).
 
 Study [the COPYING file](https://curl.haxx.se/docs/copyright.html) for
-distribution terms and similar. If you distribute curl binaries or other
-binaries that involve libcurl, you might enjoy [the LICENSE-MIXING
-document](https://curl.haxx.se/legal/licmix.html).
+distribution terms.
 
 ## Contact
 

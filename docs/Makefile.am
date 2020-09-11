@@ -71,7 +71,6 @@ EXTRA_DIST =                                    \
  INSTALL.md                                     \
  INTERNALS.md                                   \
  KNOWN_BUGS                                     \
- LICENSE-MIXING.md                              \
  MAIL-ETIQUETTE                                 \
  MQTT.md                                        \
  options-in-versions                            \
