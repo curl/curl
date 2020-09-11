@@ -81,52 +81,28 @@ ParameterError file2string(char **bufp, FILE *file)
   return PARAM_OK;
 }
 
+#define MAX_FILE2MEMORY (1024*1024*1024) /* big enough ? */
+
 ParameterError file2memory(char **bufp, size_t *size, FILE *file)
 {
-  char *newbuf;
-  char *buffer = NULL;
-  size_t nused = 0;
-
   if(file) {
     size_t nread;
-    size_t alloc = 512;
+    struct curlx_dynbuf dyn;
+    curlx_dyn_init(&dyn, MAX_FILE2MEMORY);
     do {
-      if(!buffer || (alloc == nused)) {
-        /* size_t overflow detection and avoiding huge files */
-        if(alloc >= (SIZE_T_MAX/4)) {
-          Curl_safefree(buffer);
+      char buffer[4096];
+      nread = fread(buffer, 1, sizeof(buffer), file);
+      if(nread)
+        if(curlx_dyn_addn(&dyn, buffer, nread))
           return PARAM_NO_MEM;
-        }
-        alloc *= 2;
-        /* allocate an extra char, reserved space, for null termination */
-        newbuf = realloc(buffer, alloc + 1);
-        if(!newbuf) {
-          Curl_safefree(buffer);
-          return PARAM_NO_MEM;
-        }
-        buffer = newbuf;
-      }
-      nread = fread(buffer + nused, 1, alloc-nused, file);
-      nused += nread;
     } while(nread);
-    /* null terminate the buffer in case it's used as a string later */
-    buffer[nused] = '\0';
-    /* free trailing slack space, if possible */
-    if(alloc != nused) {
-      newbuf = realloc(buffer, nused + 1);
-      if(!newbuf) {
-        Curl_safefree(buffer);
-        return PARAM_NO_MEM;
-      }
-      buffer = newbuf;
-    }
-    /* discard buffer if nothing was read */
-    if(!nused) {
-      Curl_safefree(buffer); /* no string */
-    }
+    *size = curlx_dyn_len(&dyn);
+    *bufp = curlx_dyn_ptr(&dyn);
   }
-  *size = nused;
-  *bufp = buffer;
+  else {
+    *size = 0;
+    *bufp = NULL;
+  }
   return PARAM_OK;
 }
 
