@@ -35,9 +35,9 @@ ftp://%HOSTIP:%FTPPORT/511
 #
 # Verify data after the test has been "shot"
 <verify>
-# CURLE_FTP_COULDNT_RETR_FILE
+# CURLE_REMOTE_FILE_NOT_FOUND
 <errorcode>
-19
+78
 </errorcode>
 <protocol>
 USER anonymous

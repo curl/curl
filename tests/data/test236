@@ -11,6 +11,7 @@ FTP
 REPLY SIZE 550 access to this file is very much denied
 REPLY APPE 550 I said: access to this file is very much denied
 REPLY STOR 550 I said: access to this file is very much denied
+REPLY SIZE 500 command not understood
 </servercmd>
 </reply>
 

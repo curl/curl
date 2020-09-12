@@ -21,7 +21,7 @@ works
 <servercmd>
 REPLY RETR 550 the file doesn't exist
 COUNT RETR 1
-REPLY SIZE 550 Can't check for file existence
+REPLY SIZE 500 Can't check for file existence
 COUNT SIZE 1
 </servercmd>
 </reply>

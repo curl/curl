@@ -16,7 +16,7 @@ non-existing host
 
 <servercmd>
 REPLY RETR 550 the file doesn't exist
-REPLY SIZE 550 Can't check for file existence
+REPLY SIZE 500 Can't check for file existence
 </servercmd>
 </reply>
 
