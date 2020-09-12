@@ -2092,7 +2092,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
     break;
   case 550: /* "No such file or directory" */
     failf(data, "Given file does not exist");
-    result = CURLE_FTP_COULDNT_RETR_FILE;
+    result = CURLE_REMOTE_FILE_NOT_FOUND;
     break;
   }
 
@@ -2271,6 +2271,10 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
     /* ignores parsing errors, which will make the size remain unknown */
     (void)curlx_strtoofft(fdigit, NULL, 0, &filesize);
 
+  }
+  else if(ftpcode == 550) { /* "No such file or directory" */
+    failf(data, "The file does not exist");
+    return CURLE_REMOTE_FILE_NOT_FOUND;
   }
 
   if(instate == FTP_SIZE) {
