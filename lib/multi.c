@@ -1095,6 +1095,7 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
   bool ufds_malloc = FALSE;
 #else
   struct pollfd pre_poll;
+  WSANETWORKEVENTS wsa_events;
   DEBUGASSERT(multi->wsa_event != WSA_INVALID_EVENT);
 #endif
 
@@ -1295,18 +1296,17 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
       for(i = 0; i < extra_nfds; i++) {
         unsigned short mask = 0;
 #ifdef USE_WINSOCK
-        WSANETWORKEVENTS events = {0};
+        wsa_events.lNetworkEvents = 0;
         mask = extra_fds[i].revents;
         if(WSAEnumNetworkEvents(extra_fds[i].fd, multi->wsa_event,
-                                &events) == 0) {
-          if(events.lNetworkEvents & (FD_READ|FD_ACCEPT|FD_CLOSE))
+                                &wsa_events) == 0) {
+          if(wsa_events.lNetworkEvents & (FD_READ|FD_ACCEPT|FD_CLOSE))
             mask |= CURL_WAIT_POLLIN;
-          if(events.lNetworkEvents & (FD_WRITE|FD_CONNECT|FD_CLOSE))
+          if(wsa_events.lNetworkEvents & (FD_WRITE|FD_CONNECT|FD_CLOSE))
             mask |= CURL_WAIT_POLLOUT;
-          if(events.lNetworkEvents & FD_OOB)
+          if(wsa_events.lNetworkEvents & FD_OOB)
             mask |= CURL_WAIT_POLLPRI;
-
-          if(ret && events.lNetworkEvents != 0)
+          if(ret && wsa_events.lNetworkEvents != 0)
             retcode++;
         }
         WSAEventSelect(extra_fds[i].fd, multi->wsa_event, 0);
@@ -1320,7 +1320,6 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
         if(r & POLLPRI)
           mask |= CURL_WAIT_POLLPRI;
 #endif
-
         extra_fds[i].revents = mask;
       }
 
@@ -1334,13 +1333,13 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
 
           for(i = 0; i < MAX_SOCKSPEREASYHANDLE; i++) {
             if(bitmap & (GETSOCK_READSOCK(i) | GETSOCK_WRITESOCK(i))) {
-              WSANETWORKEVENTS events = {0};
+              wsa_events.lNetworkEvents = 0;
               if(WSAEnumNetworkEvents(sockbunch[i], multi->wsa_event,
-                                      &events) == 0) {
-                if(ret && events.lNetworkEvents != 0)
+                                      &wsa_events) == 0) {
+                if(ret && wsa_events.lNetworkEvents != 0)
                   retcode++;
               }
-              if(ret && !timeout_ms && !events.lNetworkEvents) {
+              if(ret && !timeout_ms && wsa_events.lNetworkEvents == 0) {
                 if((bitmap & GETSOCK_READSOCK(i)) &&
                    SOCKET_READABLE(sockbunch[i], 0) > 0)
                   retcode++;
