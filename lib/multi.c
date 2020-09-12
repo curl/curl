@@ -1183,9 +1183,9 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
 #endif
         if(bitmap & GETSOCK_READSOCK(i)) {
 #ifdef USE_WINSOCK
-          if(SOCKET_READABLE(sockbunch[i], 0) > 0)
+          if(timeout_ms && SOCKET_READABLE(sockbunch[i], 0) > 0)
             timeout_ms = 0;
-          mask |= (FD_READ|FD_ACCEPT|FD_CLOSE);
+          mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
 #else
           ufds[nfds].fd = sockbunch[i];
           ufds[nfds].events = POLLIN;
@@ -1195,9 +1195,9 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
         }
         if(bitmap & GETSOCK_WRITESOCK(i)) {
 #ifdef USE_WINSOCK
-          if(SOCKET_WRITABLE(sockbunch[i], 0) > 0)
+          if(timeout_ms && SOCKET_WRITABLE(sockbunch[i], 0) > 0)
             timeout_ms = 0;
-          mask |= (FD_WRITE|FD_CONNECT|FD_CLOSE);
+          mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
 #else
           ufds[nfds].fd = sockbunch[i];
           ufds[nfds].events = POLLOUT;
@@ -1221,34 +1221,34 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
   /* Add external file descriptions from poll-like struct curl_waitfd */
   for(i = 0; i < extra_nfds; i++) {
 #ifdef USE_WINSOCK
-    long events = 0;
+    long mask = 0;
     extra_fds[i].revents = 0;
     pre_poll.fd = extra_fds[i].fd;
     pre_poll.events = 0;
     pre_poll.revents = 0;
     if(extra_fds[i].events & CURL_WAIT_POLLIN) {
-      events |= (FD_READ|FD_ACCEPT|FD_CLOSE);
+      mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
       pre_poll.events |= POLLIN;
     }
     if(extra_fds[i].events & CURL_WAIT_POLLPRI) {
-      events |= FD_OOB;
+      mask |= FD_OOB;
       pre_poll.events |= POLLPRI;
     }
     if(extra_fds[i].events & CURL_WAIT_POLLOUT) {
-      events |= (FD_WRITE|FD_CONNECT|FD_CLOSE);
+      mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
       pre_poll.events |= POLLOUT;
     }
     if(Curl_poll(&pre_poll, 1, 0) > 0) {
       if(pre_poll.revents & POLLIN)
         extra_fds[i].revents |= CURL_WAIT_POLLIN;
-      if(pre_poll.revents & POLLOUT)
-        extra_fds[i].revents |= CURL_WAIT_POLLOUT;
       if(pre_poll.revents & POLLPRI)
         extra_fds[i].revents |= CURL_WAIT_POLLPRI;
+      if(pre_poll.revents & POLLOUT)
+        extra_fds[i].revents |= CURL_WAIT_POLLOUT;
       if(extra_fds[i].revents)
         timeout_ms = 0;
     }
-    if(WSAEventSelect(extra_fds[i].fd, multi->wsa_event, events) != 0)
+    if(WSAEventSelect(extra_fds[i].fd, multi->wsa_event, mask) != 0)
       return CURLM_INTERNAL_ERROR;
 #else
     ufds[nfds].fd = extra_fds[i].fd;
