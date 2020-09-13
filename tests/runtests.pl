@@ -3753,6 +3753,10 @@ sub singletest {
             subVariables(\$fileContent);
             open(OUTFILE, ">$filename");
             binmode OUTFILE; # for crapage systems, use binary
+            if($fileattr{'nonewline'}) {
+                # cut off the final newline
+                chomp($fileContent);
+            }
             print OUTFILE $fileContent;
             close(OUTFILE);
         }
