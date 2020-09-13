@@ -123,6 +123,23 @@ void Curl_dyn_reset(struct dynbuf *s)
   s->leng = 0;
 }
 
+/*
+ * Truncate the buffer starting at `pos`
+ */
+CURLcode Curl_dyn_truncate(struct dynbuf *s, size_t pos)
+{
+  DEBUGASSERT(s);
+  DEBUGASSERT(s->init == DYNINIT);
+  DEBUGASSERT(!s->leng || s->bufr);
+  if(pos && pos > s->leng)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(pos == s->leng)
+    return CURLE_OK;
+  s->leng = pos;
+  s->bufr[s->leng] = 0;
+  return CURLE_OK;
+}
+
 #ifdef USE_NGTCP2
 /*
  * Specify the size of the tail to keep (number of bytes from the end of the

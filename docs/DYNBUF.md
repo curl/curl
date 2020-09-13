@@ -48,6 +48,13 @@ Append a `printf()`-style string to the end of the buffer.
 
 Reset the buffer length, but leave the allocation.
 
+## truncate
+
+    CURLcode Curl_dyn_truncate(struct dynbuf *s, size_t pos);
+
+Truncate the buffer starting at `pos`, which must not be larger than the buffer
+length. The new length is `pos`.
+
 ## tail
 
     CURLcode Curl_dyn_tail(struct dynbuf *s, size_t length)
