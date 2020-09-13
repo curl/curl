@@ -143,6 +143,7 @@ CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
   else {
     memmove(&s->bufr[0], &s->bufr[s->leng - trail], trail);
     s->leng = trail;
+    s->bufr[s->leng] = 0;
   }
   return CURLE_OK;
 
