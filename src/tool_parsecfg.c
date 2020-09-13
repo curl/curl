@@ -356,7 +356,8 @@ static bool my_get_line(FILE *fp, struct curlx_dynbuf *db,
     /* fgets() returns s on success, and NULL on error or when end of file
        occurs while no characters have been read. */
     if(!fgets(buf, sizeof(buf), fp))
-      return FALSE; /* stop reading */
+      /* only if there's data in the line, return TRUE */
+      return curlx_dyn_len(db) ? TRUE : FALSE;
     if(curlx_dyn_add(db, buf)) {
       *error = TRUE; /* error */
       return FALSE; /* stop reading */
