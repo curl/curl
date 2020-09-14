@@ -4,7 +4,7 @@ curl and libcurl 7.73.0
  Command line options:         234
  curl_easy_setopt() options:   278
  Public functions in libcurl:  85
- Contributors:                 2254
+ Contributors:                 2257
 
 This release includes the following changes:
 
@@ -21,6 +21,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o altsvc: clone setting in curl_easy_duphandle [60]
+ o base64: also build for smtp, pop3 and imap [81]
  o buildconf: invoke 'autoreconf -fi' instead [37]
  o checksrc: verify do-while and spaces between the braces [2]
  o CI/azure: MQTT is now enabled by default [64]
@@ -39,20 +40,28 @@ This release includes the following bugfixes:
  o curl.1: fix typo invokved -> invoked [36]
  o curl: in retry output don't call all problems "transient" [74]
  o curl: retry delays in parallel mode no longer sleeps blocking [70]
+ o curl: use curlx_dynbuf for realloc when loading config files [73]
  o curl:parallel_transfers: make sure retry readds the transfer [71]
  o curl_get_line: build only if cookies or alt-svc are enabled [13]
+ o curl_mime_headers.3: fix the example's use of curl_slist_append [83]
  o Curl_pgrsTime - return new time to avoid timeout integer overflow [32]
  o dist: add missing CMake Find modules to the distribution [14]
+ o docs/LICENSE-MIXING: remove [79]
  o docs: add description about CI platforms to CONTRIBUTE.md [44]
  o docs: correct non-existing macros in man pages [35]
  o doh: add error message for DOH_DNS_NAME_TOO_LONG [17]
+ o dynbuf: make sure Curl_dyn_tail() zero terminates [78]
  o easygetopt: pass a valid enum to avoid compiler warning [75]
  o etag: save and use the full received contents [4]
  o git: ignore libtests in 3XXX area [16]
+ o HISTORY: mention alt-svc added in 2019
  o HTTP/3: update to OpenSSL_1_1_1g-quic-draft-29 [41]
+ o http: consolidate nghttp2_session_mem_recv() call paths [80]
  o http_proxy: do not crash with HTTPS_PROXY and NO_PROXY set [50]
  o lib/Makefile.am: bump VERSIONINFO due to new functions [65]
  o lib1560: verify "redirect" to double-slash leading URL [20]
+ o lib583: fix enum mixup
+ o lib: fix -Wassign-enum warnings [84]
  o lib: make Curl_gethostname accept a const pointer [38]
  o libssh2: pass on the error from ssh_force_knownhost_key_type [47]
  o Makefile.m32: add ability to override zstd libs [ci skip] [10]
@@ -64,6 +73,7 @@ This release includes the following bugfixes:
  o openssl: avoid error conditions when importing native CA [52]
  o openssl: consider ALERT_CERTIFICATE_EXPIRED a failed verification [57]
  o openssl: Fix wincrypt symbols conflict with BoringSSL [9]
+ o runtests: allow creating files without newlines [72]
  o runtests: clear pid variables when failing to start a server [12]
  o runtests: make cleardir() erase dot files too [8]
  o schannel: fix memory leak when using get_cert_location [15]
@@ -79,6 +89,7 @@ This release includes the following bugfixes:
  o SSLCERTS: fix English syntax [34]
  o telnet.c: depend on static requirement of WinSock version 2 [61]
  o test1541: remove since it is a known bug [68]
+ o test434: test -K use in a single line without newline [59]
  o test971: show test mismatches "inline"
  o tests: remove pipelining tests [69]
  o tls: fix SRP detection by using the proper #ifdefs [33]
@@ -100,11 +111,12 @@ advice from friends like these:
   Diven Qi, Don J Olmstead, Eli Schwartz, Emil Engler, Eric Curtin,
   fullincome on github, Gergely Nagy, Gisle Vanem, Harry Sintonen,
   htasta on github, ihsinme on github, Ionuț-Francisc Oancea, Javier Blazquez,
-  Jeroen Ooms, jmdavitt on github, Kamil Dudka, Marcel Raad, Marc Hörsken,
-  Martin Bašti, Michael Baentsch, Michael Musset, Peter Wu,
-  Rasmus Melchior Jacobsen, Ray Satiro, Samuel Marks, Samuel Tranchet,
+  Jeroen Ooms, jmdavitt on github, Kamil Dudka, Laramie Leavitt, Marcel Raad,
+  Marc Hörsken, Martin Bašti, Michael Baentsch, Michael Musset,
+  Michael Olbrich, Peter Körner, Peter Wu, Rasmus Melchior Jacobsen,
+  Ray Satiro, Samuel Marks, Samuel Tranchet, sofaboss on github,
   Stefan Strogin, Tatsuhiro Tsujikawa, Tomas Berger, Viktor Szakats,
-  (38 contributors)
+  (42 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -168,6 +180,7 @@ References to bug reports and discussions on issues:
  [56] = https://curl.haxx.se/bug/?i=5930
  [57] = https://curl.haxx.se/bug/?i=5934
  [58] = https://curl.haxx.se/bug/?i=5931
+ [59] = https://curl.haxx.se/bug/?i=5946
  [60] = https://curl.haxx.se/bug/?i=5923
  [61] = https://curl.haxx.se/bug/?i=5854
  [62] = https://curl.haxx.se/bug/?i=5854
@@ -180,6 +193,14 @@ References to bug reports and discussions on issues:
  [69] = https://curl.haxx.se/bug/?i=5921
  [70] = https://curl.haxx.se/bug/?i=5917
  [71] = https://curl.haxx.se/bug/?i=5905
+ [72] = https://curl.haxx.se/bug/?i=5946
+ [73] = https://curl.haxx.se/bug/?i=5946
  [74] = https://curl.haxx.se/bug/?i=5916
  [75] = https://github.com/curl/curl/commit/6ebe63fac23f38df911edc348e8ccc72280f9434#commitcomment-42042843
  [77] = https://curl.haxx.se/bug/?i=5680
+ [78] = https://curl.haxx.se/bug/?i=5959
+ [79] = https://curl.haxx.se/bug/?i=5955
+ [80] = https://curl.haxx.se/bug/?i=5648
+ [81] = https://curl.haxx.se/bug/?i=5937
+ [83] = https://curl.haxx.se/bug/?i=5942
+ [84] = https://github.com/curl/curl/commit/879007f8118771f4896334731aaca5850a154675#commitcomment-42087553
