@@ -698,8 +698,8 @@ CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
     *result = sanitized;
     return CURLE_OK;
   }
-#endif /* MSDOS || WIN32 */
-
+#else
   *result = curlx_dyn_ptr(&dyn);
   return CURLE_OK;
+#endif /* MSDOS || WIN32 */
 }
