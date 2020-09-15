@@ -380,7 +380,7 @@ Brief test case description, shown when the test runs.
 Set the given environment variables to the specified value before the actual
 command is run. They are cleared again after the command has been run.
 
-### `<command [option="no-output/no-include/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl"]>`
+### `<command [option="no-output/no-include/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl/shell"]>`
 Command line to run.
 
 Note that the URL that gets passed to the server actually controls what data
@@ -396,6 +396,9 @@ hexadecimal group in the address will be used as the test number! For example
 the address "[1234::ff]" would be treated as test case 255.
 
 Set `type="perl"` to write the test case as a perl script. It implies that
+there's no memory debugging and valgrind gets shut off for this test.
+
+Set `type="shell"` to write the test case as a shell script. It implies that
 there's no memory debugging and valgrind gets shut off for this test.
 
 Set `option="no-output"` to prevent the test script to slap on the `--output`
