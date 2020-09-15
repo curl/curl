@@ -100,7 +100,7 @@ fi
 
 if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
   cd $HOME
-  git clone --depth=1 https://github.com/libressl-portable/portable.git libressl-git
+  git clone --depth=1 -b v3.1.4 https://github.com/libressl-portable/portable.git libressl-git
   cd libressl-git
   ./autogen.sh
   ./configure --prefix=$HOME/libressl
