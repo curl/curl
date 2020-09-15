@@ -71,7 +71,7 @@ Accept: */*
 
 </protocol>
 
-<stdout>
+<stdout mode="text">
 4
 </stdout>
 
