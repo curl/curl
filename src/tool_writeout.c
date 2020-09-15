@@ -284,9 +284,8 @@ void ourWriteOut(CURL *curl, struct per_transfer *per, const char *writeinfo)
                   fputs(per->outs.filename, stream);
                 break;
               case VAR_PRIMARY_IP:
-                if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP,
-                                     &stringp))
+                if((CURLE_OK == curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP,
+                                                  &stringp)) && stringp)
                   fputs(stringp, stream);
                 break;
               case VAR_PRIMARY_PORT:
@@ -296,9 +295,8 @@ void ourWriteOut(CURL *curl, struct per_transfer *per, const char *writeinfo)
                   fprintf(stream, "%ld", longinfo);
                 break;
               case VAR_LOCAL_IP:
-                if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_LOCAL_IP,
-                                     &stringp))
+                if((CURLE_OK == curl_easy_getinfo(curl, CURLINFO_LOCAL_IP,
+                                                  &stringp)) && stringp)
                   fputs(stringp, stream);
                 break;
               case VAR_LOCAL_PORT:
@@ -331,9 +329,8 @@ void ourWriteOut(CURL *curl, struct per_transfer *per, const char *writeinfo)
                 }
                 break;
               case VAR_SCHEME:
-                if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SCHEME,
-                                     &stringp))
+                if((CURLE_OK == curl_easy_getinfo(curl, CURLINFO_SCHEME,
+                                                  &stringp)) && stringp)
                   fputs(stringp, stream);
                 break;
               case VAR_STDOUT:
