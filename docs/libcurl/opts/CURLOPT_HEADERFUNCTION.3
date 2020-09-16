@@ -102,7 +102,7 @@ static size_t header_callback(char *buffer, size_t size,
 
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
 

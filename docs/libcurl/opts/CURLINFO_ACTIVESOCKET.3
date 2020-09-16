@@ -47,7 +47,7 @@ All
 CURL *curl = curl_easy_init();
 if(curl) {
   curl_socket_t sockfd;
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* Do not do the transfer - only connect to host */
   curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);

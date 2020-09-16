@@ -102,7 +102,7 @@ CURL *curl = curl_easy_init();
 struct curl_slist *list = NULL;
 
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   list = curl_slist_append(list, "Shoesize: 10");
   list = curl_slist_append(list, "Accept:");

@@ -45,7 +45,7 @@ Used for all protocols that speak to a port number.
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/foo.bin");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
   curl_easy_setopt(curl, CURLOPT_PORT, 8080L);
   ret = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
