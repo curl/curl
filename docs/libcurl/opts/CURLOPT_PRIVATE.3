@@ -42,7 +42,7 @@ CURL *curl = curl_easy_init();
 struct private secrets;
 if(curl) {
   struct private *extracted;
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* store a pointer to our private struct */
   curl_easy_setopt(curl, CURLOPT_PRIVATE, &secrets);

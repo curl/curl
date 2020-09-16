@@ -41,7 +41,7 @@ HTTP and some
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* January 1, 2020 is 1577833200 */
   curl_easy_setopt(curl, CURLOPT_TIMEVALUE, 1577833200L);

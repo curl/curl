@@ -50,7 +50,7 @@ CURLU *urlp = curl_url();
 int res = 0;
 if(curl) {
 
-  res = curl_url_set(urlp, CURLUPART_URL, "http://example.com", 0);
+  res = curl_url_set(urlp, CURLUPART_URL, "https://example.com", 0);
 
   curl_easy_setopt(handle, CURLOPT_CURLU, urlp);
 

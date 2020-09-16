@@ -45,7 +45,7 @@ HTTP
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/foo.bin");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
 
   /* new "session", don't load session cookies */
   curl_easy_setopt(curl, CURLOPT_COOKIESESSION, 1L);
