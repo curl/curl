@@ -238,6 +238,8 @@
  This could be used by curl on macOS when built without a separate IDN library
  and an IDN host name is used in a URL.
 
+ See initial work in https://github.com/curl/curl/pull/5371
+
 1.7 Support HTTP/2 for HTTP(S) proxies
 
  Support for doing HTTP/2 to HTTP and HTTPS proxies is still missing.
