@@ -1255,8 +1255,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       return CURLUE_UNKNOWN_PART;
     }
     if(storep && *storep) {
-      free(*storep);
-      *storep = NULL;
+      Curl_safefree(*storep);
     }
     return CURLUE_OK;
   }
@@ -1284,8 +1283,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     break;
   case CURLUPART_HOST:
     storep = &u->host;
-    free(u->zoneid);
-    u->zoneid = NULL;
+    Curl_safefree(u->zoneid);
     break;
   case CURLUPART_ZONEID:
     storep = &u->zoneid;
