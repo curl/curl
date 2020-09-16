@@ -63,9 +63,10 @@ unsigned char *Curl_dyn_uptr(const struct dynbuf *s);
 size_t Curl_dyn_len(const struct dynbuf *s);
 
 /* Dynamic buffer max sizes */
+#define DYN_NO_LIMIT        ((size_t)-1)
 #define DYN_DOH_RESPONSE    3000
 #define DYN_DOH_CNAME       256
-#define DYN_PAUSE_BUFFER    (64 * 1024 * 1024)
+#define DYN_PAUSE_BUFFER    DYN_NO_LIMIT
 #define DYN_HAXPROXY        2048
 #define DYN_HTTP_REQUEST    (128*1024)
 #define DYN_H2_HEADERS      (128*1024)
