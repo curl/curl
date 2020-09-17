@@ -1860,8 +1860,8 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   else if((ftpc->count1 == 1) &&
           (ftpcode == 227)) {
     /* positive PASV response */
-    unsigned int ip[4];
-    unsigned int port[2];
+    unsigned int ip[4] = {0, 0, 0, 0};
+    unsigned int port[2] = {0, 0};
 
     /*
      * Scan for a sequence of six comma-separated numbers and use them as
