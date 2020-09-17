@@ -3366,7 +3366,6 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
   struct curl_slist *item;
   ssize_t nread;
   int ftpcode;
-  CURLcode result;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct pingpong *pp = &ftpc->pp;
 
@@ -3375,6 +3374,7 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
     if(item->data) {
       char *cmd = item->data;
       bool acceptfail = FALSE;
+      CURLcode result;
 
       /* if a command starts with an asterisk, which a legal FTP command never
          can, the command will be allowed to fail without it causing any
@@ -3387,10 +3387,10 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
       }
 
       result = Curl_pp_sendf(&ftpc->pp, "%s", cmd);
-
-      pp->response = Curl_now(); /* timeout relative now */
-
-      result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+      if(!result) {
+        pp->response = Curl_now(); /* timeout relative now */
+        result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+      }
       if(result)
         return result;
 
