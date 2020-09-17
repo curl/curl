@@ -969,6 +969,7 @@ void curl_easy_reset(struct Curl_easy *data)
 
   data->progress.flags |= PGRS_HIDE;
   data->state.current_speed = -1; /* init to negative == impossible */
+  data->state.retrycount = 0;     /* reset the retry counter */
 
   /* zero out authentication data: */
   memset(&data->state.authhost, 0, sizeof(struct auth));
