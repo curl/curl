@@ -3,9 +3,6 @@ contact_links:
   - name: Feature request
     url: https://curl.haxx.se/mail/
     about: To propose new features or enhancements, please bring that discussion to a suitable curl mailing list.
-  - name: Security vulnerability
-    url: https://hackerone.com/curl
-    about: Please report security problems or just suspected security problems to the curl-security team, to allow us to assess and work on it privately before we release a fix and inform the public.
   - name: Question
     url: https://curl.haxx.se/mail/
     about: Questions should go to the mailing list
