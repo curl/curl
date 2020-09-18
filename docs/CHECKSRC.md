@@ -70,6 +70,8 @@ warnings are:
 - `NOSPACEEQUALS`: An equals sign was found without preceding space. We prefer
   `a = 2` and *not* `a=2`.
 
+- `ONELINECONDITION`: do not put the conditional block on the same line as `if()`
+
 - `OPENCOMMENT`: File ended with a comment (`/*`) still "open".
 
 - `PARENBRACE`: `){` was used without sufficient space in between.
@@ -99,6 +101,8 @@ warnings are:
 - `TABS`: TAB characters are not allowed!
 
 - `TRAILINGSPACE`: Trailing white space on the line
+
+- `TYPEDEFSTRUCT`: we frown upon (most) typedefed structs
 
 - `UNUSEDIGNORE`: a checksrc inlined warning ignore was asked for but not used,
    that's an ignore that should be removed or changed to get used.
