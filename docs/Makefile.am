@@ -84,7 +84,7 @@ EXTRA_DIST =                                    \
  SSLCERTS.md                                    \
  THANKS                                         \
  TODO                                           \
- TheArtOfHttpScripting                          \
+ TheArtOfHttpScripting.md                       \
  VERSIONS.md
 
 MAN2HTML= roffit $< >$@
