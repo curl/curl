@@ -45,7 +45,7 @@ EXTRA_DIST =                                    \
  ALTSVC.md                                      \
  BINDINGS.md                                    \
  BUG-BOUNTY.md                                  \
- BUGS                                           \
+ BUGS.md                                        \
  CHECKSRC.md                                    \
  CIPHERS.md                                     \
  CMakeLists.txt                                 \
