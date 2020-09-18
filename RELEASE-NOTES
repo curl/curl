@@ -4,7 +4,7 @@ curl and libcurl 7.73.0
  Command line options:         234
  curl_easy_setopt() options:   278
  Public functions in libcurl:  85
- Contributors:                 2257
+ Contributors:                 2261
 
 This release includes the following changes:
 
@@ -24,6 +24,7 @@ This release includes the following bugfixes:
  o base64: also build for smtp, pop3 and imap [81]
  o buildconf: invoke 'autoreconf -fi' instead [37]
  o checksrc: verify do-while and spaces between the braces [2]
+ o CI/azure: disable test 571 in the msys2 builds [93]
  o CI/azure: MQTT is now enabled by default [64]
  o CI/azure: no longer ignore results of test 1013 [43]
  o CI/travis: add a CI job with openssl3 (from git master) [51]
@@ -39,6 +40,10 @@ This release includes the following bugfixes:
  o curl.1: add see also no-progress-meter on two spots [67]
  o curl.1: fix typo invokved -> invoked [36]
  o curl: in retry output don't call all problems "transient" [74]
+ o curl: make checkpasswd use dynbuf [100]
+ o curl: make file2memory use dynbuf [102]
+ o curl: make file2string use dynbuf [103]
+ o curl: make glob_match_url use dynbuf [101]
  o curl: retry delays in parallel mode no longer sleeps blocking [70]
  o curl: use curlx_dynbuf for realloc when loading config files [73]
  o curl:parallel_transfers: make sure retry readds the transfer [71]
@@ -51,13 +56,19 @@ This release includes the following bugfixes:
  o docs: correct non-existing macros in man pages [35]
  o doh: add error message for DOH_DNS_NAME_TOO_LONG [17]
  o dynbuf: make sure Curl_dyn_tail() zero terminates [78]
+ o easy_reset: clear retry counter [82]
  o easygetopt: pass a valid enum to avoid compiler warning [75]
  o etag: save and use the full received contents [4]
+ o ftp: a 550 response to SIZE returns CURLE_REMOTE_FILE_NOT_FOUND [99]
+ o ftp: avoid risk of reading uninitialized integers [76]
+ o ftp: get rid of the PPSENDF macro [85]
  o git: ignore libtests in 3XXX area [16]
+ o github: use new issue template feature [88]
  o HISTORY: mention alt-svc added in 2019
  o HTTP/3: update to OpenSSL_1_1_1g-quic-draft-29 [41]
  o http: consolidate nghttp2_session_mem_recv() call paths [80]
  o http_proxy: do not crash with HTTPS_PROXY and NO_PROXY set [50]
+ o imap: set cselect_bits to CURL_CSELECT_IN initially [104]
  o lib/Makefile.am: bump VERSIONINFO due to new functions [65]
  o lib1560: verify "redirect" to double-slash leading URL [20]
  o lib583: fix enum mixup
@@ -65,6 +76,7 @@ This release includes the following bugfixes:
  o lib: make Curl_gethostname accept a const pointer [38]
  o libssh2: pass on the error from ssh_force_knownhost_key_type [47]
  o Makefile.m32: add ability to override zstd libs [ci skip] [10]
+ o man pages: switch to https://example.com URLs [86]
  o multi: expand pre-check for socket readiness [21]
  o multi: handle connection state winsock events [31]
  o multi: implement wait using winsock events [22]
@@ -91,11 +103,16 @@ This release includes the following bugfixes:
  o test1541: remove since it is a known bug [68]
  o test434: test -K use in a single line without newline [59]
  o test971: show test mismatches "inline"
+ o tests/FILEFORMAT: document nonewline support for <file>
+ o tests/FILEFORMAT: document type=shell for <command>
  o tests: remove pipelining tests [69]
  o tls: fix SRP detection by using the proper #ifdefs [33]
  o tls: provide the CApath verbose log on its own line [1]
+ o tool_writeout: add new writeout variable, %{num_headers} [97]
  o travis: add a build using libressl (from git master) [55]
  o url: use blank credentials when using proxy w/o username and password [54]
+ o urlapi: use more Curl_safefree [89]
+ o vtls: deduplicate client certificates in ssl_config_data [98]
  o win32: drop support for WinSock version 1, require version 2 [62]
  o winbuild: convert the instruction text to README.md [19]
 
@@ -106,17 +123,19 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Andrew Barnes, beckenc on github, Chris Paulson-Ellis,
+  Alessandro Ghedini, Anders Bakken, Andrew Barnes, anio on github,
+  Antarpreet Singh, beckenc on github, Chris Paulson-Ellis,
   Christian Weisgerber, COFFEETALES on github, Daniel Stenberg, Dan Kenigsberg,
   Diven Qi, Don J Olmstead, Eli Schwartz, Emil Engler, Eric Curtin,
   fullincome on github, Gergely Nagy, Gisle Vanem, Harry Sintonen,
   htasta on github, ihsinme on github, Ionuț-Francisc Oancea, Javier Blazquez,
   Jeroen Ooms, jmdavitt on github, Kamil Dudka, Laramie Leavitt, Marcel Raad,
   Marc Hörsken, Martin Bašti, Michael Baentsch, Michael Musset,
-  Michael Olbrich, Peter Körner, Peter Wu, Rasmus Melchior Jacobsen,
-  Ray Satiro, Samuel Marks, Samuel Tranchet, sofaboss on github,
-  Stefan Strogin, Tatsuhiro Tsujikawa, Tomas Berger, Viktor Szakats,
-  (42 contributors)
+  Michael Olbrich, Peter Körner, Peter Wu, Quentin Balland,
+  Rasmus Melchior Jacobsen, Ray Satiro, rcombs on github, Samuel Marks,
+  Samuel Tranchet, sofaboss on github, Stefan Strogin, Tatsuhiro Tsujikawa,
+  Tomas Berger, Viktor Szakats,
+  (47 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -197,10 +216,25 @@ References to bug reports and discussions on issues:
  [73] = https://curl.haxx.se/bug/?i=5946
  [74] = https://curl.haxx.se/bug/?i=5916
  [75] = https://github.com/curl/curl/commit/6ebe63fac23f38df911edc348e8ccc72280f9434#commitcomment-42042843
+ [76] = https://curl.haxx.se/bug/?i=5972
  [77] = https://curl.haxx.se/bug/?i=5680
  [78] = https://curl.haxx.se/bug/?i=5959
  [79] = https://curl.haxx.se/bug/?i=5955
  [80] = https://curl.haxx.se/bug/?i=5648
  [81] = https://curl.haxx.se/bug/?i=5937
+ [82] = https://curl.haxx.se/bug/?i=5974
  [83] = https://curl.haxx.se/bug/?i=5942
  [84] = https://github.com/curl/curl/commit/879007f8118771f4896334731aaca5850a154675#commitcomment-42087553
+ [85] = https://curl.haxx.se/bug/?i=5971
+ [86] = https://curl.haxx.se/bug/?i=5969
+ [88] = https://curl.haxx.se/bug/?i=5936
+ [89] = https://curl.haxx.se/bug/?i=5968
+ [93] = https://curl.haxx.se/bug/?i=5954
+ [97] = https://curl.haxx.se/bug/?i=5947
+ [98] = https://curl.haxx.se/bug/?i=5629
+ [99] = https://curl.haxx.se/bug/?i=5953
+ [100] = https://curl.haxx.se/bug/?i=5952
+ [101] = https://curl.haxx.se/bug/?i=5952
+ [102] = https://curl.haxx.se/bug/?i=5952
+ [103] = https://curl.haxx.se/bug/?i=5952
+ [104] = https://curl.haxx.se/bug/?i=5961
