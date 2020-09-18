@@ -899,7 +899,7 @@ static void get_categories(void)
 }
 
 
-void tool_help(const char *category)
+void tool_help(char *category)
 {
   puts("Usage: curl [options...] <url>");
   /* If no category was provided */
@@ -923,7 +923,7 @@ void tool_help(const char *category)
     puts("Invalid category provided, here is a list of all categories:\n");
     get_categories();
   }
-  free((char *)category);
+  free(category);
 }
 
 static int
