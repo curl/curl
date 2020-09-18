@@ -928,6 +928,7 @@ void tool_help(const char *category)
     puts("Invalid category provided, here is a list of all categories:\n");
     get_categories();
   }
+  free((char *)category);
 }
 
 static int
