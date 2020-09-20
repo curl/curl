@@ -231,7 +231,7 @@ const char *Curl_prefixed_val(const char *prefix, const char *str, size_t max)
 {
   char ch_prefix;
   char ch_str;
-  do{
+  do {
     ch_prefix = *prefix;
     ch_str = *str;
     if(raw_tolower(ch_prefix) != raw_tolower(ch_str)) {
@@ -242,7 +242,11 @@ const char *Curl_prefixed_val(const char *prefix, const char *str, size_t max)
       prefix++;
       str++;
     }
-  }while(max);
+  } while(max);
+  // if we reached end of string then return NULL
+  if (!*str) {
+    return NULL;
+  }
   return str;
 }
 
