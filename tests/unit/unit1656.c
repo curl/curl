@@ -29,24 +29,24 @@ static void unit_stop(void) {}
 
 UNITTEST_START
 
-const char *rc;
+const char *returned;
 
-rc = Curl_prefixed_val("iii", "III", strlen("iii"));
-fail_unless(rc == NULL, "return val should be non-zero");
+returned = Curl_prefixed_val("abc", "ABC", strlen("abc"));
+fail_unless(returned == NULL, "return val should be null");
 
-rc = Curl_prefixed_val("iiia", "III", strlen("iiia"));
-fail_unless(rc == NULL, "return val should be null");
+returned = Curl_prefixed_val("abcd", "ABC", strlen("abcd"));
+fail_unless(returned == NULL, "return val should be null");
 
-rc = Curl_prefixed_val("iii", "IIIa", strlen("iii"));
-fail_unless(!strcmp(rc, "a"), "return val should be zero");
+returned = Curl_prefixed_val("abc", "ABCd", strlen("abc"));
+fail_unless(!strcmp(returned, "d"), "returned val should be after prefix");
 
-rc = Curl_prefixed_val("iiiA", "IIIa", strlen("iiiA"));
-fail_unless(rc == NULL, "return val should be null");
+returned = Curl_prefixed_val("abcD", "ABCd", strlen("abcD"));
+fail_unless(returned == NULL, "return val should be null");
 
-rc = Curl_prefixed_val("iiiABC", "IIIcba", 3);
-fail_unless(!strcmp(rc, "cba"), "return val should be non-zero");
+returned = Curl_prefixed_val("abcDEF", "ABCfed", 3);
+fail_unless(!strcmp(returned, "fed"), "return val should be be after prefix");
 
-rc = Curl_prefixed_val("ii", "II", 3);
-fail_unless(rc == NULL, "return val should be null");
+returned = Curl_prefixed_val("ab", "AB", 3);
+fail_unless(returned == NULL, "return val should be null");
 
 UNITTEST_STOP
