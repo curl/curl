@@ -243,8 +243,8 @@ const char *Curl_prefixed_val(const char *prefix, const char *str, size_t max)
       str++;
     }
   } while(max);
-  // if we reached end of string then return NULL
-  if (!*str) {
+  /* if we reached end of string then return NULL */
+  if(!*str) {
     return NULL;
   }
   return str;
