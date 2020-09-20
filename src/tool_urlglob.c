@@ -28,6 +28,7 @@
 #include "tool_doswin.h"
 #include "tool_urlglob.h"
 #include "tool_vms.h"
+#include "dynbuf.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -607,26 +608,21 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
   return CURLE_OK;
 }
 
+#define MAX_OUTPUT_GLOB_LENGTH (10*1024)
+
 CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
 {
-  char *target;
-  size_t allocsize;
   char numbuf[18];
   char *appendthis = (char *)"";
   size_t appendlen = 0;
-  size_t stringlen = 0;
+  struct curlx_dynbuf dyn;
 
   *result = NULL;
 
-  /* We cannot use the glob_buffer for storage here since the filename may
-   * be longer than the URL we use. We allocate a good start size, then
-   * we need to realloc in case of need.
+  /* We cannot use the glob_buffer for storage since the filename may be
+   * longer than the URL we use.
    */
-  allocsize = strlen(filename) + 1; /* make it at least one byte to store the
-                                       trailing zero */
-  target = malloc(allocsize);
-  if(!target)
-    return CURLE_OUT_OF_MEMORY;
+  curlx_dyn_init(&dyn, MAX_OUTPUT_GLOB_LENGTH);
 
   while(*filename) {
     if(*filename == '#' && ISDIGIT(filename[1])) {
@@ -671,7 +667,7 @@ CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
         default:
           fprintf(stderr, "internal error: invalid pattern type (%d)\n",
                   (int)pat->type);
-          Curl_safefree(target);
+          curlx_dyn_free(&dyn);
           return CURLE_FAILED_INIT;
         }
       }
@@ -686,36 +682,24 @@ CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
       appendthis = filename++;
       appendlen = 1;
     }
-    if(appendlen + stringlen >= allocsize) {
-      char *newstr;
-      /* we append a single byte to allow for the trailing byte to be appended
-         at the end of this function outside the while() loop */
-      allocsize = (appendlen + stringlen) * 2;
-      newstr = realloc(target, allocsize + 1);
-      if(!newstr) {
-        Curl_safefree(target);
-        return CURLE_OUT_OF_MEMORY;
-      }
-      target = newstr;
-    }
-    memcpy(&target[stringlen], appendthis, appendlen);
-    stringlen += appendlen;
+    if(curlx_dyn_addn(&dyn, appendthis, appendlen))
+      return CURLE_OUT_OF_MEMORY;
   }
-  target[stringlen]= '\0';
 
 #if defined(MSDOS) || defined(WIN32)
   {
     char *sanitized;
-    SANITIZEcode sc = sanitize_file_name(&sanitized, target,
+    SANITIZEcode sc = sanitize_file_name(&sanitized, curlx_dyn_ptr(&dyn),
                                          (SANITIZE_ALLOW_PATH |
                                           SANITIZE_ALLOW_RESERVED));
-    Curl_safefree(target);
+    curlx_dyn_free(&dyn);
     if(sc)
       return CURLE_URL_MALFORMAT;
-    target = sanitized;
+    *result = sanitized;
+    return CURLE_OK;
   }
-#endif /* MSDOS || WIN32 */
-
-  *result = target;
+#else
+  *result = curlx_dyn_ptr(&dyn);
   return CURLE_OK;
+#endif /* MSDOS || WIN32 */
 }

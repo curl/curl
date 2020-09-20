@@ -2,6 +2,7 @@ Long: mail-rcpt-allowfails
 Help: Allow RCPT TO command to fail for some recipients
 Protocols: SMTP
 Added: 7.69.0
+Category: smtp
 ---
 When sending data to multiple recipients, by default curl will abort SMTP
 conversation if at least one of the recipients causes RCPT TO command to

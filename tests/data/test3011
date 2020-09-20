@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+-O
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<name>
+--output-dir with --create-dirs
+</name>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/this/is/the/3011 -O --output-dir %PWD/log/tmp --create-dirs
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /this/is/the/3011 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<file name="log/tmp/3011">
+-foo-
+</file>
+</verify>
+</testcase>

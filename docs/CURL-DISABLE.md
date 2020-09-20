@@ -24,6 +24,11 @@ Disable the FILE protocol
 
 Disable the FTP (and FTPS) protocol
 
+## CURL_DISABLE_GETOPTIONS
+
+Disable the `curl_easy_options` API calls that lets users get information
+about existing options to `curl_easy_setopt`.
+
 ## CURL_DISABLE_GOPHER
 
 Disable the GOPHER protocol.
@@ -56,6 +61,10 @@ Disable the --libcurl option from the curl tool.
 ## CURL_DISABLE_MIME
 
 Disable MIME support.
+
+## CURL_DISABLE_MQTT
+
+Disable MQTT support.
 
 ## CURL_DISABLE_NETRC
 
@@ -96,6 +105,11 @@ Disable the SMB(S) protocols
 ## CURL_DISABLE_SMTP
 
 Disable the SMTP(S) protocols
+
+## CURL_DISABLE_SOCKETPAIR
+
+Disable the use of socketpair internally to allow waking up and canceling
+curl_multi_poll().
 
 ## CURL_DISABLE_TELNET
 

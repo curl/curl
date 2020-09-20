@@ -36,7 +36,8 @@ CURLX_CFILES = \
   ../lib/warnless.c \
   ../lib/curl_ctype.c \
   ../lib/curl_multibyte.c \
-  ../lib/version_win32.c
+  ../lib/version_win32.c \
+  ../lib/dynbuf.c
 
 CURLX_HFILES = \
   ../lib/curl_setup.h \
@@ -45,7 +46,8 @@ CURLX_HFILES = \
   ../lib/warnless.h \
   ../lib/curl_ctype.h \
   ../lib/curl_multibyte.h \
-  ../lib/version_win32.h
+  ../lib/version_win32.h \
+  ../lib/dynbuf.h
 
 CURL_CFILES = \
   slist_wc.c \

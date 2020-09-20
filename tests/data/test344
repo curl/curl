@@ -52,7 +52,7 @@ If-None-Match: ""
 
 </protocol>
 <file name="log/etag344">
-21025-dc7-11111
+"21025-dc7-11111"
 </file>
 </verify>
 </testcase>

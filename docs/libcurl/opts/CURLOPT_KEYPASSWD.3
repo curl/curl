@@ -43,7 +43,7 @@ All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/foo.bin");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
   curl_easy_setopt(curl, CURLOPT_SSLCERT, "client.pem");
   curl_easy_setopt(curl, CURLOPT_SSLKEY, "key.pem");
   curl_easy_setopt(curl, CURLOPT_KEYPASSWD, "superman");

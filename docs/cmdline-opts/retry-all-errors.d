@@ -1,6 +1,7 @@
 Long: retry-all-errors
 Help: Retry all errors (use with --retry)
 Added: 7.71.0
+Category: curl
 ---
 Retry on any error. This option is used together with --retry.
 

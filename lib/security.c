@@ -7,10 +7,10 @@
  * rewrite to work around the paragraph 2 in the BSD licenses as explained
  * below.
  *
- * Copyright (c) 1998, 1999, 2017 Kungliga Tekniska Högskolan
+ * Copyright (c) 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
- * Copyright (C) 2001 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * All rights reserved.
  *
@@ -529,7 +529,7 @@ static CURLcode choose_mech(struct connectdata *conn)
   if(ret != AUTH_CONTINUE) {
     if(ret != AUTH_OK) {
       /* Mechanism has dumped the error to stderr, don't error here. */
-      return -1;
+      return CURLE_USE_SSL_FAILED;
     }
     DEBUGASSERT(ret == AUTH_OK);
 

@@ -44,11 +44,11 @@ my @skiplist=(
     '^projects/Windows/.*.vcxproj.filters$', # generated MSVC file
     '^m4/ax_compile_check_sizeof.m4$', # imported, leave be
     '^.mailmap', # git control file
-    '^winbuild/BUILD.WINDOWS.txt$', # instructions
     '\/readme',
     '^.github/', # github instruction files
     '^.dcignore', # deepcode.ai instruction file
     '^.muse/', # muse-CI control files
+    "buildconf", # its nothing to copyright
 
     # docs/ files we're okay with without copyright
     'INSTALL.cmake',

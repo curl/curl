@@ -167,8 +167,8 @@ void win32_init(void)
   WORD wVersionRequested;
   WSADATA wsaData;
   int err;
-  wVersionRequested = MAKEWORD(USE_WINSOCK, USE_WINSOCK);
 
+  wVersionRequested = MAKEWORD(2, 2);
   err = WSAStartup(wVersionRequested, &wsaData);
 
   if(err != 0) {
@@ -177,8 +177,8 @@ void win32_init(void)
     exit(1);
   }
 
-  if(LOBYTE(wsaData.wVersion) != USE_WINSOCK ||
-     HIBYTE(wsaData.wVersion) != USE_WINSOCK) {
+  if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
+     HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
     WSACleanup();
     perror("Winsock init failed");
     logmsg("No suitable winsock.dll found -- aborting");

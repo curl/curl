@@ -36,11 +36,15 @@ accesses the target URL through the proxy.
 
 The list of host names can also be include numerical IP addresses, and IPv6
 versions should then be given without enclosing brackets.
+
+IPv6 numerical addresses are compared as strings, so they will only match if
+the representations are the same: "::1" is the same as "::0:1" but they don't
+match.
 .IP "CURL_SSL_BACKEND <TLS backend>"
 If curl was built with support for "MultiSSL", meaning that it has built-in
 support for more than one TLS backend, this environment variable can be set to
 the case insensitive name of the particular backend to use when curl is
-invokved. Setting a name that isn't a built-in alternative, will make curl
+invoked. Setting a name that isn't a built-in alternative, will make curl
 stay with the default.
 .IP "QLOGDIR <directory name>"
 If curl was built with HTTP/3 support, setting this environment variable to a

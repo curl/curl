@@ -55,12 +55,7 @@ CURLcode Curl_win32_init(long flags)
     WSADATA wsaData;
     int res;
 
-#if defined(ENABLE_IPV6) && (USE_WINSOCK < 2)
-#error IPV6_requires_winsock2
-#endif
-
-    wVersionRequested = MAKEWORD(USE_WINSOCK, USE_WINSOCK);
-
+    wVersionRequested = MAKEWORD(2, 2);
     res = WSAStartup(wVersionRequested, &wsaData);
 
     if(res != 0)
@@ -83,9 +78,9 @@ CURLcode Curl_win32_init(long flags)
       return CURLE_FAILED_INIT;
     }
     /* The Windows Sockets DLL is acceptable. Proceed. */
-  #elif defined(USE_LWIPSOCK)
+#elif defined(USE_LWIPSOCK)
     lwip_init();
-  #endif
+#endif
   } /* CURL_GLOBAL_WIN32 */
 
 #ifdef USE_WINDOWS_SSPI

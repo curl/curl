@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#ifdef CURL_ENABLE_MQTT
+#ifndef CURL_DISABLE_MQTT
 extern const struct Curl_handler Curl_handler_mqtt;
 #endif
 

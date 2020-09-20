@@ -43,7 +43,7 @@ if [ "$NGTCP2" = yes ]; then
     make install
   else
     cd $HOME
-    git clone --depth 1 -b OpenSSL_1_1_1d-quic-draft-27 https://github.com/tatsuhiro-t/openssl possl
+    git clone --depth 1 -b OpenSSL_1_1_1g-quic-draft-29 https://github.com/tatsuhiro-t/openssl possl
     cd possl
     ./config enable-tls1_3 --prefix=$HOME/ngbuild
     make
@@ -87,6 +87,25 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
   CXX="g++" CC="gcc" cmake -DCMAKE_POSITION_INDEPENDENT_CODE=on ..
   make
   export LIBS=-lpthread
+fi
+
+if [ "$TRAVIS_OS_NAME" = linux -a "$OPENSSL3" ]; then
+  cd $HOME
+  git clone --depth=1 https://github.com/openssl/openssl
+  cd openssl
+  ./config enable-tls1_3 --prefix=$HOME/openssl3
+  make
+  make install_sw
+fi
+
+if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
+  cd $HOME
+  git clone --depth=1 -b v3.1.4 https://github.com/libressl-portable/portable.git libressl-git
+  cd libressl-git
+  ./autogen.sh
+  ./configure --prefix=$HOME/libressl
+  make
+  make install
 fi
 
 if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then

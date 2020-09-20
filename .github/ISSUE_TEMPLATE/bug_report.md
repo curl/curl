@@ -1,3 +1,12 @@
+---
+name: Bug report
+about: Create a report to help us improve
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 <!-- Only file bugs here! Ask questions on the mailing lists https://curl.haxx.se/mail/
 
      SECURITY RELATED? Post it here: https://hackerone.com/curl

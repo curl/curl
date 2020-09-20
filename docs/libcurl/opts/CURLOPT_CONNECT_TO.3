@@ -93,7 +93,7 @@ connect_to = curl_slist_append(NULL, "example.com::server1.example.com:");
 curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   curl_easy_perform(curl);
 

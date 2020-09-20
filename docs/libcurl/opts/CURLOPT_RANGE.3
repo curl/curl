@@ -63,7 +63,7 @@ HTTP, FTP, FILE, RTSP and SFTP.
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* get the first 200 bytes */
   curl_easy_setopt(curl, CURLOPT_RANGE, "0-199");

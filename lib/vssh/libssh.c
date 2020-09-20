@@ -2692,7 +2692,9 @@ static void sftp_quote(struct connectdata *conn)
    */
   if(strncasecompare(cmd, "chgrp ", 6) ||
      strncasecompare(cmd, "chmod ", 6) ||
-     strncasecompare(cmd, "chown ", 6)) {
+     strncasecompare(cmd, "chown ", 6) ||
+     strncasecompare(cmd, "atime ", 6) ||
+     strncasecompare(cmd, "mtime ", 6)) {
     /* attribute change */
 
     /* sshc->quote_path1 contains the mode to set */
@@ -2702,7 +2704,7 @@ static void sftp_quote(struct connectdata *conn)
       if(result == CURLE_OUT_OF_MEMORY)
         failf(data, "Out of memory");
       else
-        failf(data, "Syntax error in chgrp/chmod/chown: "
+        failf(data, "Syntax error in chgrp/chmod/chown/atime/mtime: "
               "Bad second parameter");
       Curl_safefree(sshc->quote_path1);
       state(conn, SSH_SFTP_CLOSE);
@@ -2862,6 +2864,34 @@ static void sftp_quote_stat(struct connectdata *conn)
       return;
     }
     sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_UIDGID;
+  }
+  else if(strncasecompare(cmd, "atime", 5)) {
+    time_t date = Curl_getdate_capped(sshc->quote_path1);
+    if(date == -1) {
+      Curl_safefree(sshc->quote_path1);
+      Curl_safefree(sshc->quote_path2);
+      failf(data, "Syntax error: incorrect access date format");
+      state(conn, SSH_SFTP_CLOSE);
+      sshc->nextstate = SSH_NO_STATE;
+      sshc->actualcode = CURLE_QUOTE_ERROR;
+      return;
+    }
+    sshc->quote_attrs->atime = (uint32_t)date;
+    sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_ACMODTIME;
+  }
+  else if(strncasecompare(cmd, "mtime", 5)) {
+    time_t date = Curl_getdate_capped(sshc->quote_path1);
+    if(date == -1) {
+      Curl_safefree(sshc->quote_path1);
+      Curl_safefree(sshc->quote_path2);
+      failf(data, "Syntax error: incorrect modification date format");
+      state(conn, SSH_SFTP_CLOSE);
+      sshc->nextstate = SSH_NO_STATE;
+      sshc->actualcode = CURLE_QUOTE_ERROR;
+      return;
+    }
+    sshc->quote_attrs->mtime = (uint32_t)date;
+    sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_ACMODTIME;
   }
 
   /* Now send the completed structure... */

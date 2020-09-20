@@ -54,7 +54,7 @@ UNITTEST_START
     return 1;
   result = Curl_altsvc_load(asi, arg);
   if(result) {
-    Curl_altsvc_cleanup(asi);
+    Curl_altsvc_cleanup(&asi);
     return result;
   }
   curl = curl_easy_init();
@@ -131,7 +131,7 @@ UNITTEST_START
 
   curl_easy_cleanup(curl);
   fail:
-  Curl_altsvc_cleanup(asi);
+  Curl_altsvc_cleanup(&asi);
   return unitfail;
 }
 UNITTEST_STOP

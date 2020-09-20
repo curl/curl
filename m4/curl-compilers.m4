@@ -945,6 +945,10 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
               tmp_CFLAGS="$tmp_CFLAGS -Wno-varargs"
             fi
           fi
+          dnl clang 7 or later
+          if test "$compiler_num" -ge "700"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [assign-enum])
+          fi
         fi
         ;;
         #
@@ -1118,6 +1122,10 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
               tmp_CFLAGS="$tmp_CFLAGS -Wno-missing-prototypes"
             fi
           fi
+        fi
+        dnl Only gcc 10 or later
+        if test "$compiler_num" -ge "1000"; then
+          CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [enum-conversion])
         fi
         ;;
         #

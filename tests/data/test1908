@@ -8,7 +8,7 @@ CURLINFO_EFFECTIVE_URL
 # Server-side
 <reply>
 <data nocheck="yes">
-HTTP/1.1 200 OK
+HTTP/1.1 200 OK swsbounce
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
@@ -17,6 +17,15 @@ Content-Length: 0
 alt-svc: h2="3dbbdetxoyw4nsp6c3cc456oj2ays6s43ezxzsfxxri3h5xqd.example:443"; ma=315360000; persist=1
 
 </data>
+
+# This is the second response
+<data1 nocheck="yes">
+HTTP/1.1 200 OK
+Connection: close
+Content-Length: 0
+alt-svc: h2="second.example:443"; ma=315360000;
+
+</data1>
 </reply>
 
 # Client-side
@@ -52,6 +61,10 @@ lib1908
 ^User-Agent:.*
 </strip>
 <protocol>
+GET /1908 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
 GET /1908 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

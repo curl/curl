@@ -99,12 +99,12 @@ static const char lower_digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 /* Upper-case digits.  */
 static const char upper_digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-#define OUTCHAR(x) \
-  do{ \
+#define OUTCHAR(x)                                     \
+  do {                                                 \
     if(stream((unsigned char)(x), (FILE *)data) != -1) \
-      done++; \
-    else \
-     return done; /* return immediately on failure */ \
+      done++;                                          \
+    else                                               \
+      return done; /* return immediately on failure */ \
   } while(0)
 
 /* Data type to read from the arglist */

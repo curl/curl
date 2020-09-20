@@ -39,7 +39,7 @@ All
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* enable TCP keep-alive for this transfer */
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);

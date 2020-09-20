@@ -1729,6 +1729,7 @@ static CURLcode ng_process_ingress(struct connectdata *conn, int sockfd,
   socklen_t remote_addrlen;
   ngtcp2_path path;
   ngtcp2_tstamp ts = timestamp();
+  ngtcp2_pkt_info pi = { 0 };
 
   for(;;) {
     remote_addrlen = sizeof(remote_addr);
@@ -1750,7 +1751,7 @@ static CURLcode ng_process_ingress(struct connectdata *conn, int sockfd,
     ngtcp2_addr_init(&path.remote, (struct sockaddr *)&remote_addr,
                      remote_addrlen, NULL);
 
-    rv = ngtcp2_conn_read_pkt(qs->qconn, &path, buf, recvd, ts);
+    rv = ngtcp2_conn_read_pkt(qs->qconn, &path, &pi, buf, recvd, ts);
     if(rv != 0) {
       /* TODO Send CONNECTION_CLOSE if possible */
       return CURLE_RECV_ERROR;
@@ -1815,7 +1816,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
         uint32_t flags = NGTCP2_WRITE_STREAM_FLAG_MORE |
           (fin ? NGTCP2_WRITE_STREAM_FLAG_FIN : 0);
         outlen =
-          ngtcp2_conn_writev_stream(qs->qconn, &ps.path,
+          ngtcp2_conn_writev_stream(qs->qconn, &ps.path, NULL,
                                     out, pktlen, &ndatalen,
                                     flags, stream_id,
                                     (const ngtcp2_vec *)vec, veccnt, ts);
@@ -1860,7 +1861,8 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
       }
     }
     if(outlen < 0) {
-      outlen = ngtcp2_conn_write_pkt(qs->qconn, &ps.path, out, pktlen, ts);
+      outlen = ngtcp2_conn_write_pkt(qs->qconn, &ps.path, NULL,
+                                     out, pktlen, ts);
       if(outlen < 0) {
         failf(conn->data, "ngtcp2_conn_write_pkt returned error: %s\n",
               ngtcp2_strerror((int)outlen));

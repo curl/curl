@@ -2,6 +2,7 @@ Long: config
 Arg: <file>
 Help: Read config from a file
 Short: K
+Category: curl
 ---
 
 Specify a text file to read curl arguments from. The command line arguments
@@ -34,13 +35,19 @@ When curl is invoked, it (unless --disable is used) checks for a default
 config file and uses it if found. The default config file is checked for in
 the following places in this order:
 
-1) curl tries to find the "home dir": It first checks for the CURL_HOME and
-then the HOME environment variables. Failing that, it uses getpwuid() on
-Unix-like systems (which returns the home dir given the current user in your
-system). On Windows, it then checks for the APPDATA variable, or as a last
-resort the '%USERPROFILE%\\Application Data'.
+1) Use the CURL_HOME environment variable if set
 
-2) On windows, if there is no .curlrc file in the home dir, it checks for one
+2) Use the XDG_CONFIG_HOME environment variable if set (Added in 7.73.0)
+
+3) Use the HOME environment variable if set
+
+4) Non-windows: use getpwuid to find the home directory
+
+5) Windows: use APPDATA if set
+
+6) Windows: use "USERPROFILE\Application Data" if set
+
+7) On windows, if there is no .curlrc file in the home dir, it checks for one
 in the same dir the curl executable is placed. On Unix-like systems, it will
 simply try to load .curlrc from the determined home dir.
 

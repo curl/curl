@@ -705,7 +705,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
   int rc;
   const char * const keyringfile = SSL_CONN_CONFIG(CAfile);
   const char * const keyringpwd = SSL_SET_OPTION(key_passwd);
-  const char * const keyringlabel = SSL_SET_OPTION(cert);
+  const char * const keyringlabel = SSL_SET_OPTION(primary.clientcert);
   const long int ssl_version = SSL_CONN_CONFIG(version);
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char * const hostname = SSL_IS_PROXY()? conn->http_proxy.host.name:

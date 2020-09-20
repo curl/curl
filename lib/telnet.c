@@ -87,12 +87,6 @@
 #define printoption(a,b,c,d)  Curl_nop_stmt
 #endif
 
-#ifdef USE_WINSOCK
-typedef WSAEVENT (WINAPI *WSOCK2_EVENT)(void);
-typedef FARPROC WSOCK2_FUNC;
-static CURLcode check_wsock2(struct Curl_easy *data);
-#endif
-
 static
 CURLcode telrcv(struct connectdata *,
                 const unsigned char *inbuf, /* Data received from socket */
@@ -197,46 +191,6 @@ const struct Curl_handler Curl_handler_telnet = {
   PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
 };
 
-
-#ifdef USE_WINSOCK
-static CURLcode
-check_wsock2(struct Curl_easy *data)
-{
-  int err;
-  WORD wVersionRequested;
-  WSADATA wsaData;
-
-  DEBUGASSERT(data);
-
-  /* telnet requires at least WinSock 2.0 so ask for it. */
-  wVersionRequested = MAKEWORD(2, 0);
-
-  err = WSAStartup(wVersionRequested, &wsaData);
-
-  /* We must've called this once already, so this call */
-  /* should always succeed.  But, just in case... */
-  if(err != 0) {
-    failf(data,"WSAStartup failed (%d)",err);
-    return CURLE_FAILED_INIT;
-  }
-
-  /* We have to have a WSACleanup call for every successful */
-  /* WSAStartup call. */
-  WSACleanup();
-
-  /* Check that our version is supported */
-  if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
-      HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested)) {
-      /* Our version isn't supported */
-    failf(data, "insufficient winsock version to support "
-          "telnet");
-    return CURLE_FAILED_INIT;
-  }
-
-  /* Our version is supported */
-  return CURLE_OK;
-}
-#endif
 
 static
 CURLcode init_telnet(struct connectdata *conn)
@@ -1301,11 +1255,6 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   struct Curl_easy *data = conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 #ifdef USE_WINSOCK
-  HMODULE wsock2;
-  WSOCK2_FUNC close_event_func;
-  WSOCK2_EVENT create_event_func;
-  WSOCK2_FUNC event_select_func;
-  WSOCK2_FUNC enum_netevents_func;
   WSAEVENT event_handle;
   WSANETWORKEVENTS events;
   HANDLE stdin_handle;
@@ -1340,75 +1289,21 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     return result;
 
 #ifdef USE_WINSOCK
-  /*
-  ** This functionality only works with WinSock >= 2.0.  So,
-  ** make sure we have it.
-  */
-  result = check_wsock2(data);
-  if(result)
-    return result;
-
-  /* OK, so we have WinSock 2.0.  We need to dynamically */
-  /* load ws2_32.dll and get the function pointers we need. */
-  wsock2 = Curl_load_library(TEXT("WS2_32.DLL"));
-  if(wsock2 == NULL) {
-    failf(data, "failed to load WS2_32.DLL (%u)", GetLastError());
-    return CURLE_FAILED_INIT;
-  }
-
-  /* Grab a pointer to WSACreateEvent */
-  create_event_func =
-    CURLX_FUNCTION_CAST(WSOCK2_EVENT,
-                        (GetProcAddress(wsock2, "WSACreateEvent")));
-  if(create_event_func == NULL) {
-    failf(data, "failed to find WSACreateEvent function (%u)", GetLastError());
-    FreeLibrary(wsock2);
-    return CURLE_FAILED_INIT;
-  }
-
-  /* And WSACloseEvent */
-  close_event_func = GetProcAddress(wsock2, "WSACloseEvent");
-  if(close_event_func == NULL) {
-    failf(data, "failed to find WSACloseEvent function (%u)", GetLastError());
-    FreeLibrary(wsock2);
-    return CURLE_FAILED_INIT;
-  }
-
-  /* And WSAEventSelect */
-  event_select_func = GetProcAddress(wsock2, "WSAEventSelect");
-  if(event_select_func == NULL) {
-    failf(data, "failed to find WSAEventSelect function (%u)", GetLastError());
-    FreeLibrary(wsock2);
-    return CURLE_FAILED_INIT;
-  }
-
-  /* And WSAEnumNetworkEvents */
-  enum_netevents_func = GetProcAddress(wsock2, "WSAEnumNetworkEvents");
-  if(enum_netevents_func == NULL) {
-    failf(data, "failed to find WSAEnumNetworkEvents function (%u)",
-          GetLastError());
-    FreeLibrary(wsock2);
-    return CURLE_FAILED_INIT;
-  }
-
   /* We want to wait for both stdin and the socket. Since
   ** the select() function in winsock only works on sockets
   ** we have to use the WaitForMultipleObjects() call.
   */
 
   /* First, create a sockets event object */
-  event_handle = (WSAEVENT)create_event_func();
+  event_handle = WSACreateEvent();
   if(event_handle == WSA_INVALID_EVENT) {
     failf(data, "WSACreateEvent failed (%d)", SOCKERRNO);
-    FreeLibrary(wsock2);
     return CURLE_FAILED_INIT;
   }
 
   /* Tell winsock what events we want to listen to */
-  if(event_select_func(sockfd, event_handle, FD_READ|FD_CLOSE) ==
-     SOCKET_ERROR) {
-    close_event_func(event_handle);
-    FreeLibrary(wsock2);
+  if(WSAEventSelect(sockfd, event_handle, FD_READ|FD_CLOSE) == SOCKET_ERROR) {
+    WSACloseEvent(event_handle);
     return CURLE_OK;
   }
 
@@ -1439,6 +1334,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     DWORD waitret = WaitForMultipleObjects(obj_count, objs,
                                            FALSE, wait_timeout);
     switch(waitret) {
+
     case WAIT_TIMEOUT:
     {
       for(;;) {
@@ -1508,9 +1404,9 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     break;
 
     case WAIT_OBJECT_0:
-
+    {
       events.lNetworkEvents = 0;
-      if(SOCKET_ERROR == enum_netevents_func(sockfd, event_handle, &events)) {
+      if(WSAEnumNetworkEvents(sockfd, event_handle, &events) == SOCKET_ERROR) {
         err = SOCKERRNO;
         if(err != EINPROGRESS) {
           infof(data, "WSAEnumNetworkEvents failed (%d)", err);
@@ -1554,7 +1450,8 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       if(events.lNetworkEvents & FD_CLOSE) {
         keepon = FALSE;
       }
-      break;
+    }
+    break;
 
     }
 
@@ -1569,19 +1466,9 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   }
 
   /* We called WSACreateEvent, so call WSACloseEvent */
-  if(!close_event_func(event_handle)) {
+  if(!WSACloseEvent(event_handle)) {
     infof(data, "WSACloseEvent failed (%d)", SOCKERRNO);
   }
-
-  /* "Forget" pointers into the library we're about to free */
-  create_event_func = NULL;
-  close_event_func = NULL;
-  event_select_func = NULL;
-  enum_netevents_func = NULL;
-
-  /* We called LoadLibrary, so call FreeLibrary */
-  if(!FreeLibrary(wsock2))
-    infof(data, "FreeLibrary(wsock2) failed (%u)", GetLastError());
 #else
   pfd[0].fd = sockfd;
   pfd[0].events = POLLIN;

@@ -560,14 +560,6 @@
 /* ---------------------------------------------------------------- */
 
 /*
- * When using WINSOCK, TELNET protocol requires WINSOCK2 API.
- */
-
-#if defined(USE_WINSOCK) && (USE_WINSOCK != 2)
-#  define CURL_DISABLE_TELNET 1
-#endif
-
-/*
  * msvc 6.0 does not have struct sockaddr_storage and
  * does not define IPPROTO_ESP in winsock2.h. But both
  * are available if PSDK is properly installed.
@@ -637,19 +629,22 @@ int netware_init(void);
 
 /* Single point where USE_NTLM definition might be defined */
 #if !defined(CURL_DISABLE_NTLM) && !defined(CURL_DISABLE_CRYPTO_AUTH)
-#if defined(USE_OPENSSL) || defined(USE_WINDOWS_SSPI) ||                \
+#if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                     \
   defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) ||  \
   defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
-  defined(USE_MBEDTLS) ||                                               \
   (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
 
-#define USE_NTLM
+#define USE_CURL_NTLM_CORE
 
 #  if defined(USE_MBEDTLS)
 /* Get definition of MBEDTLS_MD4_C */
 #  include <mbedtls/md4.h>
 #  endif
 
+#endif
+
+#if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
+#define USE_NTLM
 #endif
 #endif
 
@@ -702,7 +697,7 @@ int netware_init(void);
      defined(HAVE_WINSOCK_H) || \
      defined(HAVE_WINSOCK2_H) || \
      defined(HAVE_WS2TCPIP_H)
-#    error "Winsock and lwIP TCP/IP stack definitions shall not coexist!"
+#    error "WinSock and lwIP TCP/IP stack definitions shall not coexist!"
 #  endif
 #endif
 

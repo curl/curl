@@ -2,6 +2,7 @@ Long: fail
 Short: f
 Protocols: HTTP
 Help: Fail silently (no output at all) on HTTP errors
+Category: important http
 ---
 Fail silently (no output at all) on server errors. This is mostly done to
 better enable scripts etc to better deal with failed attempts. In normal cases

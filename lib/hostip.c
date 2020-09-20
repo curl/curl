@@ -206,7 +206,7 @@ hostcache_timestamp_remove(void *datap, void *hc)
  * Prune the DNS cache. This assumes that a lock has already been taken.
  */
 static void
-hostcache_prune(struct curl_hash *hostcache, long cache_timeout, time_t now)
+hostcache_prune(struct Curl_hash *hostcache, long cache_timeout, time_t now)
 {
   struct hostcache_prune_data user;
 
@@ -843,7 +843,7 @@ static void freednsentry(void *freethis)
 /*
  * Curl_mk_dnscache() inits a new DNS cache and returns success/failure.
  */
-int Curl_mk_dnscache(struct curl_hash *hash)
+int Curl_mk_dnscache(struct Curl_hash *hash)
 {
   return Curl_hash_init(hash, 7, Curl_hash_str, Curl_str_key_compare,
                         freednsentry);
@@ -857,7 +857,7 @@ int Curl_mk_dnscache(struct curl_hash *hash)
  */
 
 void Curl_hostcache_clean(struct Curl_easy *data,
-                          struct curl_hash *hash)
+                          struct Curl_hash *hash)
 {
   if(data && data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);

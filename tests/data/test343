@@ -34,7 +34,7 @@ http
 Both --etag-compare and --etag-save to save new Etag
 </name>
 <file name="log/etag343">
-21025-dc7-39462498
+"21025-dc7-39462498"
 </file>
 <command>
 http://%HOSTIP:%HTTPPORT/343 --etag-compare log/etag343 --etag-save log/out343
@@ -55,7 +55,7 @@ If-None-Match: "21025-dc7-39462498"
 
 </protocol>
 <file name="log/out343">
-21025-dc7-11111
+"21025-dc7-11111"
 </file>
 </verify>
 </testcase>

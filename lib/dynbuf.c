@@ -21,12 +21,11 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
-#include "strdup.h"
 #include "dynbuf.h"
-
-/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
+#ifdef BUILDING_LIBCURL
 #include "curl_memory.h"
+#endif
 #include "memdebug.h"
 
 #define MIN_FIRST_ALLOC 32
@@ -94,11 +93,15 @@ static CURLcode dyn_nappend(struct dynbuf *s,
   }
 
   if(a != s->allc) {
-    s->bufr = Curl_saferealloc(s->bufr, a);
-    if(!s->bufr) {
+    /* this logic is not using Curl_saferealloc() to make the tool not have to
+       include that as well when it uses this code */
+    void *p = realloc(s->bufr, a);
+    if(!p) {
+      Curl_safefree(s->bufr);
       s->leng = s->allc = 0;
       return CURLE_OUT_OF_MEMORY;
     }
+    s->bufr = p;
     s->allc = a;
   }
 
@@ -143,6 +146,7 @@ CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
   else {
     memmove(&s->bufr[0], &s->bufr[s->leng - trail], trail);
     s->leng = trail;
+    s->bufr[s->leng] = 0;
   }
   return CURLE_OK;
 

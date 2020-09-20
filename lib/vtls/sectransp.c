@@ -1397,8 +1397,8 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
   const struct curl_blob *ssl_cablob = NULL;
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
-  char * const ssl_cert = SSL_SET_OPTION(cert);
-  const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(cert_blob);
+  char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
+  const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(primary.cert_blob);
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;

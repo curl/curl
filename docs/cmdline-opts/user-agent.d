@@ -3,6 +3,7 @@ Long: user-agent
 Arg: <name>
 Help: Send User-Agent <name> to server
 Protocols: HTTP
+Category: important http
 ---
 
 Specify the User-Agent string to send to the HTTP server. To encode blanks in

@@ -80,6 +80,7 @@ struct OperationConfig {
   double connecttimeout;
   long maxredirs;
   curl_off_t max_filesize;
+  char *output_dir;
   char *headerfile;
   char *ftpport;
   char *iface;
@@ -161,6 +162,7 @@ struct OperationConfig {
   char *etag_compare_file;
   bool crlf;
   char *customrequest;
+  char *ssl_ec_curves;
   char *krblevel;
   char *request_target;
   long httpversion;
@@ -310,6 +312,7 @@ struct GlobalConfig {
   bool parallel;
   long parallel_max;
   bool parallel_connect;
+  char *help_category;            /* The help category, if set */
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;   /* Always last in the struct */

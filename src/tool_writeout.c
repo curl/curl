@@ -38,6 +38,8 @@ static const struct writeoutvar variables[] = {
    CURLINFO_RESPONSE_CODE, JSON_LONG},
   {"response_code", VAR_HTTP_CODE, 0,
    CURLINFO_RESPONSE_CODE, JSON_LONG},
+  {"num_headers", VAR_NUM_HEADERS, 0,
+   0, JSON_LONG},
   {"http_connect", VAR_HTTP_CODE_PROXY, 0,
    CURLINFO_HTTP_CONNECTCODE, JSON_LONG},
   {"time_total", VAR_TOTAL_TIME, 0,
@@ -104,7 +106,7 @@ static const struct writeoutvar variables[] = {
    0, JSON_NONE}
 };
 
-void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
+void ourWriteOut(CURL *curl, struct per_transfer *per, const char *writeinfo)
 {
   FILE *stream = stdout;
   const char *ptr = writeinfo;
@@ -155,6 +157,9 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &longinfo))
                   fprintf(stream, "%03ld", longinfo);
+                break;
+              case VAR_NUM_HEADERS:
+                fprintf(stream, "%ld", per->num_headers);
                 break;
               case VAR_HTTP_CODE_PROXY:
                 if(CURLE_OK ==
@@ -275,14 +280,13 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                   fprintf(stream, "%ld", longinfo);
                 break;
               case VAR_EFFECTIVE_FILENAME:
-                if(outs->filename)
-                  fprintf(stream, "%s", outs->filename);
+                if(per->outs.filename)
+                  fputs(per->outs.filename, stream);
                 break;
               case VAR_PRIMARY_IP:
-                if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP,
-                                     &stringp))
-                  fprintf(stream, "%s", stringp);
+                if((CURLE_OK == curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP,
+                                                  &stringp)) && stringp)
+                  fputs(stringp, stream);
                 break;
               case VAR_PRIMARY_PORT:
                 if(CURLE_OK ==
@@ -291,10 +295,9 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                   fprintf(stream, "%ld", longinfo);
                 break;
               case VAR_LOCAL_IP:
-                if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_LOCAL_IP,
-                                     &stringp))
-                  fprintf(stream, "%s", stringp);
+                if((CURLE_OK == curl_easy_getinfo(curl, CURLINFO_LOCAL_IP,
+                                                  &stringp)) && stringp)
+                  fputs(stringp, stream);
                 break;
               case VAR_LOCAL_PORT:
                 if(CURLE_OK ==
@@ -326,10 +329,9 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                 }
                 break;
               case VAR_SCHEME:
-                if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SCHEME,
-                                     &stringp))
-                  fprintf(stream, "%s", stringp);
+                if((CURLE_OK == curl_easy_getinfo(curl, CURLINFO_SCHEME,
+                                                  &stringp)) && stringp)
+                  fputs(stringp, stream);
                 break;
               case VAR_STDOUT:
                 stream = stdout;
@@ -338,7 +340,7 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                 stream = stderr;
                 break;
               case VAR_JSON:
-                ourWriteOutJSON(variables, curl, outs, stream);
+                ourWriteOutJSON(variables, curl, per, stream);
               default:
                 break;
               }

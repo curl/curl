@@ -1,0 +1,41 @@
+<testcase>
+<info>
+<keywords>
+FTP
+CURLOPT_NOBODY
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<servercmd>
+REPLY SIZE 550 no such file
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+
+# require debug so that alt-svc can work over plain old HTTP
+<name>
+FTP with NOBODY set, getting a missing file
+</name>
+<tool>
+lib1913
+</tool>
+
+<command>
+ftp://%HOSTIP:%FTPPORT/not-there/1913
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+78
+</errorcode>
+</verify>
+</testcase>

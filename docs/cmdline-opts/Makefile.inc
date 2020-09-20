@@ -41,6 +41,7 @@ DPAGES =					\
   cookie.d					\
   create-dirs.d					\
   crlf.d crlfile.d				\
+  curves.d					\
   data-ascii.d					\
   data-binary.d					\
   data-urlencode.d				\
@@ -127,6 +128,7 @@ DPAGES =					\
   ntlm.d ntlm-wb.d				\
   oauth2-bearer.d				\
   output.d                                      \
+  output-dir.d                                  \
   parallel-immediate.d                          \
   parallel-max.d                                \
   parallel.d                                    \

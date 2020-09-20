@@ -23,7 +23,7 @@
 
 #include "curl_setup.h"
 
-#ifdef CURL_ENABLE_MQTT
+#ifndef CURL_DISABLE_MQTT
 
 #include "urldata.h"
 #include <curl/curl.h>
@@ -142,7 +142,7 @@ static CURLcode mqtt_connect(struct connectdata *conn)
   const size_t client_id_offset = 14;
   const size_t packetlen = client_id_offset + MQTT_CLIENTID_LEN;
   char client_id[MQTT_CLIENTID_LEN + 1] = "curl";
-  const size_t curl_len = strlen("curl");
+  const size_t clen = strlen("curl");
   char packet[32] = {
     MQTT_MSG_CONNECT,  /* packet type */
     0x00,              /* remaining length */
@@ -156,8 +156,8 @@ static CURLcode mqtt_connect(struct connectdata *conn)
   packet[1] = (packetlen - 2) & 0x7f;
   packet[client_id_offset - 1] = MQTT_CLIENTID_LEN;
 
-  result = Curl_rand_hex(conn->data, (unsigned char *)&client_id[curl_len],
-                         MQTT_CLIENTID_LEN - curl_len + 1);
+  result = Curl_rand_hex(conn->data, (unsigned char *)&client_id[clen],
+                         MQTT_CLIENTID_LEN - clen + 1);
   memcpy(&packet[client_id_offset], client_id, MQTT_CLIENTID_LEN);
   infof(conn->data, "Using client id '%s'\n", client_id);
   if(!result)
@@ -625,4 +625,4 @@ static CURLcode mqtt_doing(struct connectdata *conn, bool *done)
   return result;
 }
 
-#endif /* CURL_ENABLE_MQTT */
+#endif /* CURL_DISABLE_MQTT */

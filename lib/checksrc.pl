@@ -82,6 +82,8 @@ my %warnings = (
     'SNPRINTF'         => 'use of snprintf',
     'ONELINECONDITION' => 'conditional block on the same line as the if()',
     'TYPEDEFSTRUCT'    => 'typedefed struct',
+    'DOBRACE'          => 'A single space between do and open brace',
+    'BRACEWHILE'       => 'A single space between open brace and while',
     );
 
 sub readskiplist {
@@ -468,6 +470,14 @@ sub scanfile {
             }
         }
 
+        # check spaces in 'do {'
+        if($nostr =~ /^( *)do( *)\{/ && length($2) != 1) {
+            checkwarn("DOBRACE", $line, length($1) + 2, $file, $l, "one space after do before brace");
+        }
+        # check spaces in 'do {'
+        elsif($nostr =~ /^( *)\}( *)while/ && length($2) != 1) {
+            checkwarn("BRACEWHILE", $line, length($1) + 2, $file, $l, "one space between brace and while");
+        }
         if($nostr =~ /^((.*\s)(if) *\()(.*)\)(.*)/) {
             my $pos = length($1);
             my $postparen = $5;

@@ -14,7 +14,7 @@ Server: fakeit/0.9 fakeitbad/1.0
 Transfer-Encoding: chunked
 Trailer: chunky-trailer
 Connection: mooo
-ETag: "asdf"
+ETag: W/"asdf"
 
 40
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -56,7 +56,7 @@ Accept: */*
 
 </protocol>
 <file name="log/etag339">
-asdf
+W/"asdf"
 </file>
 </verify>
 

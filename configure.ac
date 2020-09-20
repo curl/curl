@@ -645,11 +645,10 @@ AC_HELP_STRING([--disable-mqtt],[Disable MQTT support]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_MQTT, 1, [to disable MQTT])
+       AC_SUBST(CURL_DISABLE_MQTT, [1])
        ;;
   *)   AC_MSG_RESULT(yes)
-       experimental="$experimental MQTT"
-       AC_DEFINE(CURL_ENABLE_MQTT, 1, [to enable MQTT])
-       AC_SUBST(CURL_ENABLE_MQTT, [1])
        ;;
   esac ],
        AC_MSG_RESULT(no)
@@ -2474,8 +2473,12 @@ if test -z "$ssl_backends" -o "x$OPT_WOLFSSL" != xno; then
             AC_DEFINE(HAVE_WOLFSSL_DES_ECB_ENCRYPT, 1,
                       [if you have wolfSSL_DES_ecb_encrypt])
             if test -n "$addcflags"; then
-              CPPFLAGS="$addcflags/wolfssl $CPPFLAGS"
-              AC_MSG_NOTICE([Add $addcflags/wolfssl to CPPFLAGS])
+              dnl use a for loop to strip off whitespace
+              for f in $addcflags; do
+                CPPFLAGS="$f/wolfssl $CPPFLAGS"
+                AC_MSG_NOTICE([Add $f/wolfssl to CPPFLAGS])
+                break
+              done
             else
               dnl user didn't give a path, so guess/hope they installed wolfssl
               dnl headers to system default location
@@ -4683,6 +4686,24 @@ AC_HELP_STRING([--disable-cookies],[Disable cookies support]),
 )
 
 dnl ************************************************************
+dnl disable socketpair
+dnl
+AC_MSG_CHECKING([whether to support socketpair])
+AC_ARG_ENABLE(socketpair,
+AC_HELP_STRING([--enable-socketpair],[Enable socketpair support])
+AC_HELP_STRING([--disable-socketpair],[Disable socketpair support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_SOCKETPAIR, 1, [to disable socketpair support])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
 dnl disable HTTP authentication support
 dnl
 AC_MSG_CHECKING([whether to support HTTP authentication])
@@ -4801,6 +4822,24 @@ AC_HELP_STRING([--disable-dnsshuffle],[Disable DNS shuffling]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_SHUFFLE_DNS, 1, [disable DNS shuffling])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable the curl_easy_options API
+dnl
+AC_MSG_CHECKING([whether to support curl_easy_option*])
+AC_ARG_ENABLE(get-easy-option,
+AC_HELP_STRING([--enable-get-easy-options],[Enable curl_easy_options])
+AC_HELP_STRING([--disable-get-easy-options],[Disable curl_easy_options]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_GETOPTIONS, 1, [to disable curl_easy_options])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -5042,7 +5081,7 @@ fi
 if test "x$CURL_DISABLE_GOPHER" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS GOPHER"
 fi
-if test "x$CURL_ENABLE_MQTT" = "x1"; then
+if test "x$CURL_DISABLE_MQTT" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS MQTT"
 fi
 if test "x$CURL_DISABLE_POP3" != "x1"; then
@@ -5059,7 +5098,7 @@ if test "x$CURL_DISABLE_IMAP" != "x1"; then
 fi
 if test "x$CURL_DISABLE_SMB" != "x1" \
     -a "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" \
-    -a \( "x$OPENSSL_ENABLED" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
+    -a \( "x$OPENSSL_ENABLED" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
       -o "x$NSS_ENABLED" = "x1" -o "x$SECURETRANSPORT_ENABLED" = "x1" \
       -o "x$WOLFSSL_NTLM" = "x1" \); then

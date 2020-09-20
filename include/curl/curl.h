@@ -610,6 +610,7 @@ typedef enum {
                                     error */
   CURLE_HTTP3,                   /* 95 - An HTTP/3 layer problem */
   CURLE_QUIC_CONNECT_ERROR,      /* 96 - QUIC connection error */
+  CURLE_PROXY,                   /* 97 - proxy handshake error */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -688,6 +689,48 @@ typedef enum {
 #define CURLOPT_CLOSEPOLICY CURLOPT_OBSOLETE72
 
 #endif /*!CURL_NO_OLDIES*/
+
+/*
+ * Proxy error codes. Returned in CURLINFO_PROXY_ERROR if CURLE_PROXY was
+ * return for the transfers.
+ */
+typedef enum {
+  CURLPX_OK,
+  CURLPX_BAD_ADDRESS_TYPE,
+  CURLPX_BAD_VERSION,
+  CURLPX_CLOSED,
+  CURLPX_GSSAPI,
+  CURLPX_GSSAPI_PERMSG,
+  CURLPX_GSSAPI_PROTECTION,
+  CURLPX_IDENTD,
+  CURLPX_IDENTD_DIFFER,
+  CURLPX_LONG_HOSTNAME,
+  CURLPX_LONG_PASSWD,
+  CURLPX_LONG_USER,
+  CURLPX_NO_AUTH,
+  CURLPX_RECV_ADDRESS,
+  CURLPX_RECV_AUTH,
+  CURLPX_RECV_CONNECT,
+  CURLPX_RECV_REQACK,
+  CURLPX_REPLY_ADDRESS_TYPE_NOT_SUPPORTED,
+  CURLPX_REPLY_COMMAND_NOT_SUPPORTED,
+  CURLPX_REPLY_CONNECTION_REFUSED,
+  CURLPX_REPLY_GENERAL_SERVER_FAILURE,
+  CURLPX_REPLY_HOST_UNREACHABLE,
+  CURLPX_REPLY_NETWORK_UNREACHABLE,
+  CURLPX_REPLY_NOT_ALLOWED,
+  CURLPX_REPLY_TTL_EXPIRED,
+  CURLPX_REPLY_UNASSIGNED,
+  CURLPX_REQUEST_FAILED,
+  CURLPX_RESOLVE_HOST,
+  CURLPX_SEND_AUTH,
+  CURLPX_SEND_CONNECT,
+  CURLPX_SEND_REQUEST,
+  CURLPX_UNKNOWN_FAIL,
+  CURLPX_UNKNOWN_MODE,
+  CURLPX_USER_REJECTED,
+  CURLPX_LAST /* never use */
+} CURLproxycode;
 
 /* This prototype applies to all conversion callbacks */
 typedef CURLcode (*curl_conv_callback)(char *buffer, size_t length);
@@ -789,6 +832,7 @@ enum curl_khstat {
   CURLKHSTAT_DEFER,  /* do not accept it, but we can't answer right now so
                         this causes a CURLE_DEFER error but otherwise the
                         connection will be left intact etc */
+  CURLKHSTAT_FINE_REPLACE, /* accept and replace the wrong key*/
   CURLKHSTAT_LAST    /* not for use, only a marker for last-in-list */
 };
 
@@ -958,9 +1002,19 @@ typedef enum {
 
 #define CURLOPT(na,t,nu) na = t + nu
 
-/* handy aliases that make no run-time difference */
-#define CURLOPTTYPE_STRINGPOINT  CURLOPTTYPE_OBJECTPOINT
+/* CURLOPT aliases that make no run-time difference */
+
+/* 'char *' argument to a string with a trailing zero */
+#define CURLOPTTYPE_STRINGPOINT CURLOPTTYPE_OBJECTPOINT
+
+/* 'struct curl_slist *' argument */
 #define CURLOPTTYPE_SLISTPOINT  CURLOPTTYPE_OBJECTPOINT
+
+/* 'void *' argument passed untouched to callback */
+#define CURLOPTTYPE_CBPOINT     CURLOPTTYPE_OBJECTPOINT
+
+/* 'long' argument with a set of values/bitmask */
+#define CURLOPTTYPE_VALUES      CURLOPTTYPE_LONG
 
 /*
  * All CURLOPT_* values.
@@ -968,7 +1022,7 @@ typedef enum {
 
 typedef enum {
   /* This is the FILE * or void * the regular output should be written to. */
-  CURLOPT(CURLOPT_WRITEDATA, CURLOPTTYPE_OBJECTPOINT, 1),
+  CURLOPT(CURLOPT_WRITEDATA, CURLOPTTYPE_CBPOINT, 1),
 
   /* The full URL to get/put */
   CURLOPT(CURLOPT_URL, CURLOPTTYPE_STRINGPOINT, 2),
@@ -991,7 +1045,7 @@ typedef enum {
   /* not used */
 
   /* Specified file stream to upload from (use as input): */
-  CURLOPT(CURLOPT_READDATA, CURLOPTTYPE_OBJECTPOINT, 9),
+  CURLOPT(CURLOPT_READDATA, CURLOPTTYPE_CBPOINT, 9),
 
   /* Buffer to receive error messages in, must be at least CURL_ERROR_SIZE
    * bytes big. */
@@ -1076,7 +1130,7 @@ typedef enum {
 
   /* send FILE * or void * to store headers to, if you use a callback it
      is simply passed to the callback unmodified */
-  CURLOPT(CURLOPT_HEADERDATA, CURLOPTTYPE_OBJECTPOINT, 29),
+  CURLOPT(CURLOPT_HEADERDATA, CURLOPTTYPE_CBPOINT, 29),
 
   /* point to a file to read the initial cookies from, also enables
      "cookie awareness" */
@@ -1084,10 +1138,10 @@ typedef enum {
 
   /* What version to specifically try to use.
      See CURL_SSLVERSION defines below. */
-  CURLOPT(CURLOPT_SSLVERSION, CURLOPTTYPE_LONG, 32),
+  CURLOPT(CURLOPT_SSLVERSION, CURLOPTTYPE_VALUES, 32),
 
   /* What kind of HTTP time condition to use, see defines */
-  CURLOPT(CURLOPT_TIMECONDITION, CURLOPTTYPE_LONG, 33),
+  CURLOPT(CURLOPT_TIMECONDITION, CURLOPTTYPE_VALUES, 33),
 
   /* Time to use with the above condition. Specified in number of seconds
      since 1 Jan 1970 */
@@ -1141,7 +1195,7 @@ typedef enum {
 
   /* Specify whether to read the user+password from the .netrc or the URL.
    * This must be one of the CURL_NETRC_* enums below. */
-  CURLOPT(CURLOPT_NETRC, CURLOPTTYPE_LONG, 51),
+  CURLOPT(CURLOPT_NETRC, CURLOPTTYPE_VALUES, 51),
 
   /* use Location: Luke! */
   CURLOPT(CURLOPT_FOLLOWLOCATION, CURLOPTTYPE_LONG, 52),
@@ -1162,8 +1216,8 @@ typedef enum {
 
   /* Data passed to the CURLOPT_PROGRESSFUNCTION and CURLOPT_XFERINFOFUNCTION
      callbacks */
-  CURLOPT(CURLOPT_PROGRESSDATA, CURLOPTTYPE_OBJECTPOINT, 57),
-#define CURLOPT_XFERINFODATA CURLOPT_PROGRESSDATA
+  CURLOPT(CURLOPT_XFERINFODATA, CURLOPTTYPE_CBPOINT, 57),
+#define CURLOPT_PROGRESSDATA CURLOPT_XFERINFODATA
 
   /* We want the referrer field set automatically when following locations */
   CURLOPT(CURLOPT_AUTOREFERER, CURLOPTTYPE_LONG, 58),
@@ -1258,7 +1312,7 @@ typedef enum {
 
   /* Specify which HTTP version to use! This must be set to one of the
      CURL_HTTP_VERSION* enums set below. */
-  CURLOPT(CURLOPT_HTTP_VERSION, CURLOPTTYPE_LONG, 84),
+  CURLOPT(CURLOPT_HTTP_VERSION, CURLOPTTYPE_VALUES, 84),
 
   /* Specifically switch on or off the FTP engine's use of the EPSV command. By
      default, that one will always be attempted before the more traditional
@@ -1296,7 +1350,7 @@ typedef enum {
   CURLOPT(CURLOPT_DEBUGFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 94),
 
   /* set the data for the debug function */
-  CURLOPT(CURLOPT_DEBUGDATA, CURLOPTTYPE_OBJECTPOINT, 95),
+  CURLOPT(CURLOPT_DEBUGDATA, CURLOPTTYPE_CBPOINT, 95),
 
   /* mark this as start of a cookie session */
   CURLOPT(CURLOPT_COOKIESESSION, CURLOPTTYPE_LONG, 96),
@@ -1319,7 +1373,7 @@ typedef enum {
   /* indicates type of proxy. accepted values are CURLPROXY_HTTP (default),
      CURLPROXY_HTTPS, CURLPROXY_SOCKS4, CURLPROXY_SOCKS4A and
      CURLPROXY_SOCKS5. */
-  CURLOPT(CURLOPT_PROXYTYPE, CURLOPTTYPE_LONG, 101),
+  CURLOPT(CURLOPT_PROXYTYPE, CURLOPTTYPE_VALUES, 101),
 
   /* Set the Accept-Encoding string. Use this to tell a server you would like
      the response to be compressed. Before 7.21.6, this was known as
@@ -1345,7 +1399,7 @@ typedef enum {
   /* Set this to a bitmask value to enable the particular authentications
      methods you like. Use this in combination with CURLOPT_USERPWD.
      Note that setting multiple bits may cause extra network round-trips. */
-  CURLOPT(CURLOPT_HTTPAUTH, CURLOPTTYPE_LONG, 107),
+  CURLOPT(CURLOPT_HTTPAUTH, CURLOPTTYPE_VALUES, 107),
 
   /* Set the ssl context callback function, currently only for OpenSSL or
      WolfSSL ssl_ctx, or mbedTLS mbedtls_ssl_config in the second argument.
@@ -1354,7 +1408,7 @@ typedef enum {
 
   /* Set the userdata for the ssl context callback function's third
      argument */
-  CURLOPT(CURLOPT_SSL_CTX_DATA, CURLOPTTYPE_OBJECTPOINT, 109),
+  CURLOPT(CURLOPT_SSL_CTX_DATA, CURLOPTTYPE_CBPOINT, 109),
 
   /* FTP Option that causes missing dirs to be created on the remote server.
      In 7.19.4 we introduced the convenience enums for this option using the
@@ -1365,7 +1419,7 @@ typedef enum {
   /* Set this to a bitmask value to enable the particular authentications
      methods you like. Use this in combination with CURLOPT_PROXYUSERPWD.
      Note that setting multiple bits may cause extra network round-trips. */
-  CURLOPT(CURLOPT_PROXYAUTH, CURLOPTTYPE_LONG, 111),
+  CURLOPT(CURLOPT_PROXYAUTH, CURLOPTTYPE_VALUES, 111),
 
   /* FTP option that changes the timeout, in seconds, associated with
      getting a response.  This is different from transfer timeout time and
@@ -1377,7 +1431,7 @@ typedef enum {
   /* Set this option to one of the CURL_IPRESOLVE_* defines (see below) to
      tell libcurl to resolve names to those IP versions only. This only has
      affect on systems with support for more than one, i.e IPv4 _and_ IPv6. */
-  CURLOPT(CURLOPT_IPRESOLVE, CURLOPTTYPE_LONG, 113),
+  CURLOPT(CURLOPT_IPRESOLVE, CURLOPTTYPE_VALUES, 113),
 
   /* Set this option to limit the size of a file that will be downloaded from
      an HTTP or FTP server.
@@ -1412,7 +1466,7 @@ typedef enum {
      CURLUSESSL_CONTROL - SSL for the control connection or fail
      CURLUSESSL_ALL     - SSL for all communication or fail
   */
-  CURLOPT(CURLOPT_USE_SSL, CURLOPTTYPE_LONG, 119),
+  CURLOPT(CURLOPT_USE_SSL, CURLOPTTYPE_VALUES, 119),
 
   /* The _LARGE version of the standard POSTFIELDSIZE option */
   CURLOPT(CURLOPT_POSTFIELDSIZE_LARGE, CURLOPTTYPE_OFF_T, 120),
@@ -1438,10 +1492,10 @@ typedef enum {
      CURLFTPAUTH_SSL     - try "AUTH SSL" first, then TLS
      CURLFTPAUTH_TLS     - try "AUTH TLS" first, then SSL
   */
-  CURLOPT(CURLOPT_FTPSSLAUTH, CURLOPTTYPE_LONG, 129),
+  CURLOPT(CURLOPT_FTPSSLAUTH, CURLOPTTYPE_VALUES, 129),
 
   CURLOPT(CURLOPT_IOCTLFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 130),
-  CURLOPT(CURLOPT_IOCTLDATA, CURLOPTTYPE_OBJECTPOINT, 131),
+  CURLOPT(CURLOPT_IOCTLDATA, CURLOPTTYPE_CBPOINT, 131),
 
   /* 132 OBSOLETE. Gone in 7.16.0 */
   /* 133 OBSOLETE. Gone in 7.16.0 */
@@ -1464,7 +1518,7 @@ typedef enum {
 
   /* Select "file method" to use when doing FTP, see the curl_ftpmethod
      above. */
-  CURLOPT(CURLOPT_FTP_FILEMETHOD, CURLOPTTYPE_LONG, 138),
+  CURLOPT(CURLOPT_FTP_FILEMETHOD, CURLOPTTYPE_VALUES, 138),
 
   /* Local port number to bind the socket to */
   CURLOPT(CURLOPT_LOCALPORT, CURLOPTTYPE_LONG, 139),
@@ -1501,14 +1555,14 @@ typedef enum {
 
   /* callback function for setting socket options */
   CURLOPT(CURLOPT_SOCKOPTFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 148),
-  CURLOPT(CURLOPT_SOCKOPTDATA, CURLOPTTYPE_OBJECTPOINT, 149),
+  CURLOPT(CURLOPT_SOCKOPTDATA, CURLOPTTYPE_CBPOINT, 149),
 
   /* set to 0 to disable session ID re-use for this transfer, default is
      enabled (== 1) */
   CURLOPT(CURLOPT_SSL_SESSIONID_CACHE, CURLOPTTYPE_LONG, 150),
 
   /* allowed SSH authentication methods */
-  CURLOPT(CURLOPT_SSH_AUTH_TYPES, CURLOPTTYPE_LONG, 151),
+  CURLOPT(CURLOPT_SSH_AUTH_TYPES, CURLOPTTYPE_VALUES, 151),
 
   /* Used by scp/sftp to do public/private key authentication */
   CURLOPT(CURLOPT_SSH_PUBLIC_KEYFILE, CURLOPTTYPE_STRINGPOINT, 152),
@@ -1533,7 +1587,7 @@ typedef enum {
 
   /* Set the behaviour of POST when redirecting. Values must be set to one
      of CURL_REDIR* defines below. This used to be called CURLOPT_POST301 */
-  CURLOPT(CURLOPT_POSTREDIR, CURLOPTTYPE_LONG, 161),
+  CURLOPT(CURLOPT_POSTREDIR, CURLOPTTYPE_VALUES, 161),
 
   /* used by scp/sftp to verify the host's public key */
   CURLOPT(CURLOPT_SSH_HOST_PUBLIC_KEY_MD5, CURLOPTTYPE_STRINGPOINT, 162),
@@ -1543,7 +1597,7 @@ typedef enum {
      CURL_SOCKET_BAD.  The callback should have type
      curl_opensocket_callback */
   CURLOPT(CURLOPT_OPENSOCKETFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 163),
-  CURLOPT(CURLOPT_OPENSOCKETDATA, CURLOPTTYPE_OBJECTPOINT, 164),
+  CURLOPT(CURLOPT_OPENSOCKETDATA, CURLOPTTYPE_CBPOINT, 164),
 
   /* POST volatile input fields. */
   CURLOPT(CURLOPT_COPYPOSTFIELDS, CURLOPTTYPE_OBJECTPOINT, 165),
@@ -1553,7 +1607,7 @@ typedef enum {
 
   /* Callback function for seeking in the input stream */
   CURLOPT(CURLOPT_SEEKFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 167),
-  CURLOPT(CURLOPT_SEEKDATA, CURLOPTTYPE_OBJECTPOINT, 168),
+  CURLOPT(CURLOPT_SEEKDATA, CURLOPTTYPE_CBPOINT, 168),
 
   /* CRL file */
   CURLOPT(CURLOPT_CRLFILE, CURLOPTTYPE_STRINGPOINT, 169),
@@ -1614,7 +1668,7 @@ typedef enum {
   CURLOPT(CURLOPT_SSH_KEYFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 184),
 
   /* set the SSH host key callback custom pointer */
-  CURLOPT(CURLOPT_SSH_KEYDATA, CURLOPTTYPE_OBJECTPOINT, 185),
+  CURLOPT(CURLOPT_SSH_KEYDATA, CURLOPTTYPE_CBPOINT, 185),
 
   /* set the SMTP mail originator */
   CURLOPT(CURLOPT_MAIL_FROM, CURLOPTTYPE_STRINGPOINT, 186),
@@ -1626,7 +1680,7 @@ typedef enum {
   CURLOPT(CURLOPT_FTP_USE_PRET, CURLOPTTYPE_LONG, 188),
 
   /* RTSP request method (OPTIONS, SETUP, PLAY, etc...) */
-  CURLOPT(CURLOPT_RTSP_REQUEST, CURLOPTTYPE_LONG, 189),
+  CURLOPT(CURLOPT_RTSP_REQUEST, CURLOPTTYPE_VALUES, 189),
 
   /* The RTSP session identifier */
   CURLOPT(CURLOPT_RTSP_SESSION_ID, CURLOPTTYPE_STRINGPOINT, 190),
@@ -1644,7 +1698,7 @@ typedef enum {
   CURLOPT(CURLOPT_RTSP_SERVER_CSEQ, CURLOPTTYPE_LONG, 194),
 
   /* The stream to pass to INTERLEAVEFUNCTION. */
-  CURLOPT(CURLOPT_INTERLEAVEDATA, CURLOPTTYPE_OBJECTPOINT, 195),
+  CURLOPT(CURLOPT_INTERLEAVEDATA, CURLOPTTYPE_CBPOINT, 195),
 
   /* Let the application define a custom write method for RTP data */
   CURLOPT(CURLOPT_INTERLEAVEFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 196),
@@ -1664,10 +1718,10 @@ typedef enum {
   CURLOPT(CURLOPT_FNMATCH_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 200),
 
   /* Let the application define custom chunk data pointer */
-  CURLOPT(CURLOPT_CHUNK_DATA, CURLOPTTYPE_OBJECTPOINT, 201),
+  CURLOPT(CURLOPT_CHUNK_DATA, CURLOPTTYPE_CBPOINT, 201),
 
   /* FNMATCH_FUNCTION user pointer */
-  CURLOPT(CURLOPT_FNMATCH_DATA, CURLOPTTYPE_OBJECTPOINT, 202),
+  CURLOPT(CURLOPT_FNMATCH_DATA, CURLOPTTYPE_CBPOINT, 202),
 
   /* send linked-list of name:port:address sets */
   CURLOPT(CURLOPT_RESOLVE, CURLOPTTYPE_SLISTPOINT, 203),
@@ -1696,10 +1750,10 @@ typedef enum {
   /* Callback function for closing socket (instead of close(2)). The callback
      should have type curl_closesocket_callback */
   CURLOPT(CURLOPT_CLOSESOCKETFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 208),
-  CURLOPT(CURLOPT_CLOSESOCKETDATA, CURLOPTTYPE_OBJECTPOINT, 209),
+  CURLOPT(CURLOPT_CLOSESOCKETDATA, CURLOPTTYPE_CBPOINT, 209),
 
   /* allow GSSAPI credential delegation */
-  CURLOPT(CURLOPT_GSSAPI_DELEGATION, CURLOPTTYPE_LONG, 210),
+  CURLOPT(CURLOPT_GSSAPI_DELEGATION, CURLOPTTYPE_VALUES, 210),
 
   /* Set the name servers to use for DNS resolution */
   CURLOPT(CURLOPT_DNS_SERVERS, CURLOPTTYPE_STRINGPOINT, 211),
@@ -1716,7 +1770,7 @@ typedef enum {
   CURLOPT(CURLOPT_TCP_KEEPINTVL, CURLOPTTYPE_LONG, 215),
 
   /* Enable/disable specific SSL features with a bitmask, see CURLSSLOPT_* */
-  CURLOPT(CURLOPT_SSL_OPTIONS, CURLOPTTYPE_LONG, 216),
+  CURLOPT(CURLOPT_SSL_OPTIONS, CURLOPTTYPE_VALUES, 216),
 
   /* Set the SMTP auth originator */
   CURLOPT(CURLOPT_MAIL_AUTH, CURLOPTTYPE_STRINGPOINT, 217),
@@ -1763,7 +1817,7 @@ typedef enum {
   CURLOPT(CURLOPT_PROXYHEADER, CURLOPTTYPE_SLISTPOINT, 228),
 
   /* Pass in a bitmask of "header options" */
-  CURLOPT(CURLOPT_HEADEROPT, CURLOPTTYPE_LONG, 229),
+  CURLOPT(CURLOPT_HEADEROPT, CURLOPTTYPE_VALUES, 229),
 
   /* The public key in DER form used to validate the peer public key
      this option is used only if SSL_VERIFYPEER is true */
@@ -1835,7 +1889,7 @@ typedef enum {
 
   /* What version to specifically try to use for proxy.
      See CURL_SSLVERSION defines below. */
-  CURLOPT(CURLOPT_PROXY_SSLVERSION, CURLOPTTYPE_LONG, 250),
+  CURLOPT(CURLOPT_PROXY_SSLVERSION, CURLOPTTYPE_VALUES, 250),
 
   /* Set a username for authenticated TLS for proxy */
   CURLOPT(CURLOPT_PROXY_TLSAUTH_USERNAME, CURLOPTTYPE_STRINGPOINT, 251),
@@ -1909,7 +1963,7 @@ typedef enum {
   CURLOPT(CURLOPT_RESOLVER_START_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 272),
 
   /* User data to pass to the resolver start callback. */
-  CURLOPT(CURLOPT_RESOLVER_START_DATA, CURLOPTTYPE_OBJECTPOINT, 273),
+  CURLOPT(CURLOPT_RESOLVER_START_DATA, CURLOPTTYPE_CBPOINT, 273),
 
   /* send HAProxy PROXY protocol header? */
   CURLOPT(CURLOPT_HAPROXYPROTOCOL, CURLOPTTYPE_LONG, 274),
@@ -1940,7 +1994,7 @@ typedef enum {
   CURLOPT(CURLOPT_TRAILERFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 283),
 
   /* pointer to be passed to HTTP_TRAILER_FUNCTION */
-  CURLOPT(CURLOPT_TRAILERDATA, CURLOPTTYPE_OBJECTPOINT, 284),
+  CURLOPT(CURLOPT_TRAILERDATA, CURLOPTTYPE_CBPOINT, 284),
 
   /* set this to 1L to allow HTTP/0.9 responses or 0L to disallow */
   CURLOPT(CURLOPT_HTTP09_ALLOWED, CURLOPTTYPE_LONG, 285),
@@ -1970,6 +2024,12 @@ typedef enum {
   /* Issuer certificate for proxy */
   CURLOPT(CURLOPT_PROXY_ISSUERCERT, CURLOPTTYPE_STRINGPOINT, 296),
   CURLOPT(CURLOPT_PROXY_ISSUERCERT_BLOB, CURLOPTTYPE_BLOB, 297),
+
+  /* the EC curves requested by the TLS client (RFC 8422, 5.1);
+   * OpenSSL support via 'set_groups'/'set_curves':
+   * https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set1_groups.html
+   */
+  CURLOPT(CURLOPT_SSL_EC_CURVES, CURLOPTTYPE_STRINGPOINT, 298),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
@@ -2643,8 +2703,9 @@ typedef enum {
   CURLINFO_APPCONNECT_TIME_T = CURLINFO_OFF_T + 56,
   CURLINFO_RETRY_AFTER      = CURLINFO_OFF_T + 57,
   CURLINFO_EFFECTIVE_METHOD = CURLINFO_STRING + 58,
+  CURLINFO_PROXY_ERROR      = CURLINFO_LONG + 59,
 
-  CURLINFO_LASTONE          = 58
+  CURLINFO_LASTONE          = 59
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
@@ -2903,6 +2964,7 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #include "easy.h" /* nothing in curl is fun without the easy stuff */
 #include "multi.h"
 #include "urlapi.h"
+#include "options.h"
 
 /* the typechecker doesn't work in C++ (yet) */
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && \

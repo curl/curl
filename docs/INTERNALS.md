@@ -97,6 +97,7 @@ Dependencies
  - NSS          3.14.x
  - Heimdal      ?
  - nghttp2      1.12.0
+ - WinSock      2.2 (on Windows 95+ and Windows CE .NET 4.1+)
 
 Operating Systems
 -----------------
@@ -145,6 +146,8 @@ Windows vs Unix
    That's taken care of by the `curl_global_init()` call, but if other libs
    also do it etc there might be reasons for applications to alter that
    behaviour.
+
+   We require WinSock version 2.2 and load this version during global init.
 
  3. The file descriptors for network communication and file operations are
     not as easily interchangeable as in Unix.
@@ -500,7 +503,7 @@ Client
  status and exits.
 
  When the operation is done, the `ourWriteOut()` function in `src/writeout.c`
- may be called to report about the operation. That function is using the
+ may be called to report about the operation. That function is mostly using the
  `curl_easy_getinfo()` function to extract useful information from the curl
  session.
 

@@ -302,11 +302,12 @@ CURLcode Curl_altsvc_ctrl(struct altsvcinfo *asi, const long ctrl)
  * Curl_altsvc_cleanup() frees an altsvc cache instance and all associated
  * resources.
  */
-void Curl_altsvc_cleanup(struct altsvcinfo *altsvc)
+void Curl_altsvc_cleanup(struct altsvcinfo **altsvcp)
 {
-  struct curl_llist_element *e;
-  struct curl_llist_element *n;
-  if(altsvc) {
+  struct Curl_llist_element *e;
+  struct Curl_llist_element *n;
+  if(*altsvcp) {
+    struct altsvcinfo *altsvc = *altsvcp;
     for(e = altsvc->list.head; e; e = n) {
       struct altsvc *as = e->ptr;
       n = e->next;
@@ -314,6 +315,7 @@ void Curl_altsvc_cleanup(struct altsvcinfo *altsvc)
     }
     free(altsvc->filename);
     free(altsvc);
+    *altsvcp = NULL; /* clear the pointer */
   }
 }
 
@@ -323,8 +325,8 @@ void Curl_altsvc_cleanup(struct altsvcinfo *altsvc)
 CURLcode Curl_altsvc_save(struct Curl_easy *data,
                           struct altsvcinfo *altsvc, const char *file)
 {
-  struct curl_llist_element *e;
-  struct curl_llist_element *n;
+  struct Curl_llist_element *e;
+  struct Curl_llist_element *n;
   CURLcode result = CURLE_OK;
   FILE *out;
   char *tempstore;
@@ -399,8 +401,8 @@ static CURLcode getalnum(const char **ptr, char *alpnbuf, size_t buflen)
 static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
                          const char *srchost, unsigned short srcport)
 {
-  struct curl_llist_element *e;
-  struct curl_llist_element *n;
+  struct Curl_llist_element *e;
+  struct Curl_llist_element *n;
   for(e = asi->list.head; e; e = n) {
     struct altsvc *as = e->ptr;
     n = e->next;
@@ -612,8 +614,8 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
                         struct altsvc **dstentry,
                         const int versions) /* one or more bits */
 {
-  struct curl_llist_element *e;
-  struct curl_llist_element *n;
+  struct Curl_llist_element *e;
+  struct Curl_llist_element *n;
   time_t now = time(NULL);
   DEBUGASSERT(asi);
   DEBUGASSERT(srchost);

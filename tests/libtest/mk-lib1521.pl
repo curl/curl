@@ -184,13 +184,15 @@ while(<STDIN>) {
             print "${pref} \"string\");\n$check";
             print "${pref} NULL);\n$check";
         }
-        elsif($type eq "CURLOPTTYPE_LONG") {
+        elsif(($type eq "CURLOPTTYPE_LONG") ||
+              ($type eq "CURLOPTTYPE_VALUES")) {
             print "${pref} 0L);\n$check";
             print "${pref} 22L);\n$check";
             print "${pref} LO);\n$check";
             print "${pref} HI);\n$check";
         }
-        elsif($type eq "CURLOPTTYPE_OBJECTPOINT") {
+        elsif(($type eq "CURLOPTTYPE_OBJECTPOINT") ||
+              ($type eq "CURLOPTTYPE_CBPOINT")) {
             if($name =~ /DEPENDS/) {
               print "${pref} dep);\n$check";
             }
@@ -244,8 +246,8 @@ while(<STDIN>) {
             print "${pref} &blob);\n$check";
         }
         else {
-            print STDERR "\n---- $type\n";
-            exit; # exit to make this noticed!
+            print STDERR "\nUnknown type: $type\n";
+            exit 22; # exit to make this noticed!
         }
     }
     elsif($_ =~ /^  CURLINFO_NONE/) {
@@ -295,7 +297,7 @@ while(<STDIN>) {
 
 
 print <<FOOTER
-  curl_easy_setopt(curl, 1, 0);
+  curl_easy_setopt(curl, (CURLoption)1, 0);
   res = CURLE_OK;
 test_cleanup:
   curl_easy_cleanup(curl);

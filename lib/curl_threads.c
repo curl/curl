@@ -41,14 +41,14 @@
 
 #if defined(USE_THREADS_POSIX)
 
-struct curl_actual_call {
+struct Curl_actual_call {
   unsigned int (*func)(void *);
   void *arg;
 };
 
 static void *curl_thread_create_thunk(void *arg)
 {
-  struct curl_actual_call *ac = arg;
+  struct Curl_actual_call *ac = arg;
   unsigned int (*func)(void *) = ac->func;
   void *real_arg = ac->arg;
 
@@ -62,7 +62,7 @@ static void *curl_thread_create_thunk(void *arg)
 curl_thread_t Curl_thread_create(unsigned int (*func) (void *), void *arg)
 {
   curl_thread_t t = malloc(sizeof(pthread_t));
-  struct curl_actual_call *ac = malloc(sizeof(struct curl_actual_call));
+  struct Curl_actual_call *ac = malloc(sizeof(struct Curl_actual_call));
   if(!(ac && t))
     goto err;
 

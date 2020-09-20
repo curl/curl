@@ -39,7 +39,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  chkdecimalpoint                                                         \
  lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 lib508 lib509   \
  lib510 lib511 lib512 lib513 lib514 lib515 lib516 lib517 lib518 lib519   \
- lib520 lib521 lib523 lib524 lib525 lib526 lib527 lib529 lib530 lib532   \
+ lib520 lib521 lib523 lib524 lib525 lib526 lib527 lib529        lib532   \
  lib533        lib537 lib539 lib540 lib541 lib542 lib543 lib544 lib545   \
  lib547 lib548 lib549 lib552 lib553 lib554 lib555 lib556 lib557 lib558   \
  lib559 lib560 lib562 lib564 lib565 lib566 lib567 lib568 lib569 lib570   \
@@ -54,18 +54,18 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  lib1518         lib1520 lib1521 lib1522 lib1523 \
  lib1525 lib1526 lib1527 lib1528 lib1529 lib1530 lib1531 lib1532 lib1533 \
  lib1534 lib1535 lib1536 lib1537 lib1538 lib1539 \
- lib1540 lib1541 \
+ lib1540         \
  lib1550 lib1551 lib1552 lib1553 lib1554 lib1555 lib1556 lib1557 \
  lib1558 lib1559 lib1560 lib1564 lib1565 lib1567 \
  lib1591 lib1592 lib1593 lib1594 lib1596 \
- lib1900 lib1905 lib1906 lib1907 lib1908 lib1910 \
- lib2033 lib3010
+         lib1905 lib1906 lib1907 lib1908 lib1910 lib1911 lib1912 lib1913 \
+         lib3010
 
 chkdecimalpoint_SOURCES = chkdecimalpoint.c ../../lib/mprintf.c \
  ../../lib/curl_ctype.c  ../../lib/dynbuf.c ../../lib/strdup.c
 chkdecimalpoint_LDADD =
 chkdecimalpoint_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB \
- -DCURLX_NO_MEMORY_CALLBACKS
+ -DCURLX_NO_MEMORY_CALLBACKS -DBUILDING_LIBCURL
 
 chkhostname_SOURCES = chkhostname.c ../../lib/curl_gethostname.c
 chkhostname_LDADD = @CURL_NETWORK_LIBS@
@@ -171,10 +171,6 @@ lib527_CPPFLAGS = $(AM_CPPFLAGS) -DLIB527
 lib529_SOURCES = lib525.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS) $(MULTIBYTE)
 lib529_LDADD = $(TESTUTIL_LIBS)
 lib529_CPPFLAGS = $(AM_CPPFLAGS) -DLIB529
-
-lib530_SOURCES = lib530.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
-lib530_LDADD = $(TESTUTIL_LIBS)
-lib530_CPPFLAGS = $(AM_CPPFLAGS) -DLIB530
 
 lib532_SOURCES = lib526.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib532_LDADD = $(TESTUTIL_LIBS)
@@ -554,10 +550,6 @@ lib1540_SOURCES = lib1540.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1540_LDADD = $(TESTUTIL_LIBS)
 lib1540_CPPFLAGS = $(AM_CPPFLAGS)
 
-lib1541_SOURCES = lib1541.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
-lib1541_LDADD = $(TESTUTIL_LIBS)
-lib1541_CPPFLAGS = $(AM_CPPFLAGS)
-
 lib1550_SOURCES = lib1550.c $(SUPPORTFILES)
 lib1550_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1517
 
@@ -625,10 +617,6 @@ lib1596_SOURCES = lib1594.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1596_LDADD = $(TESTUTIL_LIBS)
 lib1596_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1596
 
-lib1900_SOURCES = lib1900.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS) $(MULTIBYTE)
-lib1900_LDADD = $(TESTUTIL_LIBS)
-lib1900_CPPFLAGS = $(AM_CPPFLAGS)
-
 lib1905_SOURCES = lib1905.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1905_LDADD = $(TESTUTIL_LIBS)
 lib1905_CPPFLAGS = $(AM_CPPFLAGS)
@@ -649,9 +637,17 @@ lib1910_SOURCES = lib1910.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1910_LDADD = $(TESTUTIL_LIBS)
 lib1910_CPPFLAGS = $(AM_CPPFLAGS)
 
-lib2033_SOURCES = libntlmconnect.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
-lib2033_LDADD = $(TESTUTIL_LIBS)
-lib2033_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_PIPELINING
+lib1911_SOURCES = lib1911.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib1911_LDADD = $(TESTUTIL_LIBS)
+lib1911_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib1912_SOURCES = lib1912.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib1912_LDADD = $(TESTUTIL_LIBS)
+lib1912_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib1913_SOURCES = lib1913.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib1913_LDADD = $(TESTUTIL_LIBS)
+lib1913_CPPFLAGS = $(AM_CPPFLAGS)
 
 lib3010_SOURCES = lib3010.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib3010_LDADD = $(TESTUTIL_LIBS)

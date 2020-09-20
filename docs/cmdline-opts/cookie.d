@@ -3,6 +3,7 @@ Long: cookie
 Arg: <data|filename>
 Protocols: HTTP
 Help: Send cookies from string/file
+Category: http
 ---
 Pass the data to the HTTP server in the Cookie header. It is supposedly
 the data previously received from the server in a "Set-Cookie:" line.  The

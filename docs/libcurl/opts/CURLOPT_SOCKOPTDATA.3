@@ -48,7 +48,7 @@ curl = curl_easy_init();
 if(curl) {
   int recvbuffersize = 256 * 1024;
 
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
 
   /* call this function to set options for the socket */
   curl_easy_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);

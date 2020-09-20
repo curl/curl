@@ -346,6 +346,8 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
 }
 
 #ifdef HAS_CLIENT_CERT_PATH
+
+/* Function allocates memory for store_path only if CURLE_OK is returned */
 static CURLcode
 get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
                   TCHAR **thumbprint)
@@ -388,15 +390,15 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   if(sep == NULL)
     return CURLE_SSL_CERTPROBLEM;
 
+  *thumbprint = sep + 1;
+  if(_tcslen(*thumbprint) != CERT_THUMBPRINT_STR_LEN)
+    return CURLE_SSL_CERTPROBLEM;
+
   *sep = TEXT('\0');
   *store_path = _tcsdup(store_path_start);
   *sep = TEXT('\\');
   if(*store_path == NULL)
     return CURLE_OUT_OF_MEMORY;
-
-  *thumbprint = sep + 1;
-  if(_tcslen(*thumbprint) != CERT_THUMBPRINT_STR_LEN)
-    return CURLE_SSL_CERTPROBLEM;
 
   return CURLE_OK;
 }
@@ -418,7 +420,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   SCHANNEL_CRED schannel_cred;
   PCCERT_CONTEXT client_certs[1] = { NULL };
   SECURITY_STATUS sspi_status = SEC_E_OK;
-  struct curl_schannel_cred *old_cred = NULL;
+  struct Curl_schannel_cred *old_cred = NULL;
   struct in_addr addr;
 #ifdef ENABLE_IPV6
   struct in6_addr addr6;
@@ -588,7 +590,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 
 #ifdef HAS_CLIENT_CERT_PATH
     /* client certificate */
-    if(data->set.ssl.cert || data->set.ssl.cert_blob) {
+    if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
       DWORD cert_store_name = 0;
       TCHAR *cert_store_path = NULL;
       TCHAR *cert_thumbprint_str = NULL;
@@ -598,27 +600,28 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       FILE *fInCert = NULL;
       void *certdata = NULL;
       size_t certsize = 0;
-      bool blob = data->set.ssl.cert_blob != NULL;
+      bool blob = data->set.ssl.primary.cert_blob != NULL;
       TCHAR *cert_path = NULL;
       if(blob) {
-        certdata = data->set.ssl.cert_blob->data;
-        certsize = data->set.ssl.cert_blob->len;
+        certdata = data->set.ssl.primary.cert_blob->data;
+        certsize = data->set.ssl.primary.cert_blob->len;
       }
       else {
-        cert_path = curlx_convert_UTF8_to_tchar(data->set.ssl.cert);
+        cert_path = curlx_convert_UTF8_to_tchar(
+          data->set.ssl.primary.clientcert);
         if(!cert_path)
           return CURLE_OUT_OF_MEMORY;
 
         result = get_cert_location(cert_path, &cert_store_name,
           &cert_store_path, &cert_thumbprint_str);
 
-        if(result && (data->set.ssl.cert[0]!='\0'))
-          fInCert = fopen(data->set.ssl.cert, "rb");
+        if(result && (data->set.ssl.primary.clientcert[0]!='\0'))
+          fInCert = fopen(data->set.ssl.primary.clientcert, "rb");
 
         if(result && !fInCert) {
           failf(data, "schannel: Failed to get certificate location"
                 " or file for %s",
-                data->set.ssl.cert);
+                data->set.ssl.primary.clientcert);
           curlx_unicodefree(cert_path);
           return result;
         }
@@ -628,7 +631,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
           (!strcasecompare(data->set.ssl.cert_type, "P12"))) {
         failf(data, "schannel: certificate format compatibility error "
                 " for %s",
-                blob ? "(memory blob)" : data->set.ssl.cert);
+                blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
         curlx_unicodefree(cert_path);
         return CURLE_SSL_CERTPROBLEM;
       }
@@ -643,7 +646,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         size_t pwd_len = 0;
         int str_w_len = 0;
         const char *cert_showfilename_error = blob ?
-          "(memory blob)" : data->set.ssl.cert;
+          "(memory blob)" : data->set.ssl.primary.clientcert;
         curlx_unicodefree(cert_path);
         if(fInCert) {
           long cert_tell = 0;
@@ -664,7 +667,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
           fclose(fInCert);
           if(!continue_reading) {
             failf(data, "schannel: Failed to read cert file %s",
-                data->set.ssl.cert);
+                data->set.ssl.primary.clientcert);
             free(certdata);
             return CURLE_SSL_CERTPROBLEM;
           }
@@ -771,15 +774,15 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       CertCloseStore(cert_store, 0);
     }
 #else
-    if(data->set.ssl.cert) {
+    if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
       failf(data, "schannel: client cert support not built in");
       return CURLE_NOT_BUILT_IN;
     }
 #endif
 
     /* allocate memory for the re-usable credential handle */
-    BACKEND->cred = (struct curl_schannel_cred *)
-      calloc(1, sizeof(struct curl_schannel_cred));
+    BACKEND->cred = (struct Curl_schannel_cred *)
+      calloc(1, sizeof(struct Curl_schannel_cred));
     if(!BACKEND->cred) {
       failf(data, "schannel: unable to allocate memory");
 
@@ -893,8 +896,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     ISC_REQ_STREAM;
 
   /* allocate memory for the security context handle */
-  BACKEND->ctxt = (struct curl_schannel_ctxt *)
-    calloc(1, sizeof(struct curl_schannel_ctxt));
+  BACKEND->ctxt = (struct Curl_schannel_ctxt *)
+    calloc(1, sizeof(struct Curl_schannel_ctxt));
   if(!BACKEND->ctxt) {
     failf(data, "schannel: unable to allocate memory");
     return CURLE_OUT_OF_MEMORY;
@@ -1401,7 +1404,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   /* save the current session data for possible re-use */
   if(SSL_SET_OPTION(primary.sessionid)) {
     bool incache;
-    struct curl_schannel_cred *old_cred = NULL;
+    struct Curl_schannel_cred *old_cred = NULL;
 
     Curl_ssl_sessionid_lock(conn);
     incache = !(Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL,
@@ -1417,7 +1420,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
     }
     if(!incache) {
       result = Curl_ssl_addsessionid(conn, (void *)BACKEND->cred,
-                                     sizeof(struct curl_schannel_cred),
+                                     sizeof(struct Curl_schannel_cred),
                                      sockindex);
       if(result) {
         Curl_ssl_sessionid_unlock(conn);
@@ -2099,7 +2102,7 @@ static void Curl_schannel_close(struct connectdata *conn, int sockindex)
 static void Curl_schannel_session_free(void *ptr)
 {
   /* this is expected to be called under sessionid lock */
-  struct curl_schannel_cred *cred = ptr;
+  struct Curl_schannel_cred *cred = ptr;
 
   cred->refcount--;
   if(cred->refcount == 0) {

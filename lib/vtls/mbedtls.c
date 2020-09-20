@@ -244,7 +244,7 @@ mbed_connect_step1(struct connectdata *conn,
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
-  char * const ssl_cert = SSL_SET_OPTION(cert);
+  char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
   const char * const ssl_crlfile = SSL_SET_OPTION(CRLfile);
 #ifndef CURL_DISABLE_PROXY
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :

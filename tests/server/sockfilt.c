@@ -705,7 +705,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
     if(FD_ISSET(wsasock, writefds)) {
       FD_SET(wsasock, &writesock);
-      wsaevents.lNetworkEvents |= FD_WRITE|FD_CONNECT;
+      wsaevents.lNetworkEvents |= FD_WRITE|FD_CONNECT|FD_CLOSE;
     }
 
     if(FD_ISSET(wsasock, exceptfds)) {
@@ -835,11 +835,11 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
             FD_CLR(wsasock, readfds);
 
           /* remove from descriptor set if not ready for write/connect */
-          if(!(wsaevents.lNetworkEvents & (FD_WRITE|FD_CONNECT)))
+          if(!(wsaevents.lNetworkEvents & (FD_WRITE|FD_CONNECT|FD_CLOSE)))
             FD_CLR(wsasock, writefds);
 
           /* remove from descriptor set if not exceptional */
-          if(!(wsaevents.lNetworkEvents & (FD_OOB)))
+          if(!(wsaevents.lNetworkEvents & FD_OOB))
             FD_CLR(wsasock, exceptfds);
         }
       }

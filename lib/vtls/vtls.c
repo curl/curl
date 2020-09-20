@@ -138,6 +138,7 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      Curl_safe_strcasecompare(data->egdsocket, needle->egdsocket) &&
      Curl_safe_strcasecompare(data->cipher_list, needle->cipher_list) &&
      Curl_safe_strcasecompare(data->cipher_list13, needle->cipher_list13) &&
+     Curl_safe_strcasecompare(data->curves, needle->curves) &&
      Curl_safe_strcasecompare(data->pinned_key, needle->pinned_key))
     return TRUE;
 
@@ -164,6 +165,7 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   CLONE_STRING(cipher_list);
   CLONE_STRING(cipher_list13);
   CLONE_STRING(pinned_key);
+  CLONE_STRING(curves);
 
   return TRUE;
 }
@@ -179,6 +181,7 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
   Curl_safefree(sslc->cipher_list13);
   Curl_safefree(sslc->pinned_key);
   Curl_safefree(sslc->cert_blob);
+  Curl_safefree(sslc->curves);
 }
 
 #ifdef USE_SSL
@@ -362,7 +365,7 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
                            size_t *idsize, /* set 0 if unknown */
                            int sockindex)
 {
-  struct curl_ssl_session *check;
+  struct Curl_ssl_session *check;
   struct Curl_easy *data = conn->data;
   size_t i;
   long *general_age;
@@ -429,7 +432,7 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
 /*
  * Kill a single session ID entry in the cache.
  */
-void Curl_ssl_kill_session(struct curl_ssl_session *session)
+void Curl_ssl_kill_session(struct Curl_ssl_session *session)
 {
   if(session->sessionid) {
     /* defensive check */
@@ -456,7 +459,7 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
   struct Curl_easy *data = conn->data;
 
   for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
-    struct curl_ssl_session *check = &data->state.session[i];
+    struct Curl_ssl_session *check = &data->state.session[i];
 
     if(check->sessionid == ssl_sessionid) {
       Curl_ssl_kill_session(check);
@@ -478,7 +481,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
 {
   size_t i;
   struct Curl_easy *data = conn->data; /* the mother of all structs */
-  struct curl_ssl_session *store = &data->state.session[0];
+  struct Curl_ssl_session *store = &data->state.session[0];
   long oldest_age = data->state.session[0].age; /* zero if unused */
   char *clone_host;
   char *clone_conn_to_host;
@@ -664,13 +667,13 @@ struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data)
  */
 CURLcode Curl_ssl_initsessions(struct Curl_easy *data, size_t amount)
 {
-  struct curl_ssl_session *session;
+  struct Curl_ssl_session *session;
 
   if(data->state.session)
     /* this is just a precaution to prevent multiple inits */
     return CURLE_OK;
 
-  session = calloc(amount, sizeof(struct curl_ssl_session));
+  session = calloc(amount, sizeof(struct Curl_ssl_session));
   if(!session)
     return CURLE_OUT_OF_MEMORY;
 

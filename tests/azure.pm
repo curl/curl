@@ -60,6 +60,7 @@ sub azure_create_test_result {
     $testname =~ s/\\/\\\\/g;
     $testname =~ s/\'/\\\'/g;
     $testname =~ s/\"/\\\"/g;
+    my $title_testnum=sprintf("%04d", $testnum);
     my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
     my $azure_result=`curl --silent --noproxy "*" \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
@@ -69,7 +70,8 @@ sub azure_create_test_result {
             {
                 'build': {'id': '$ENV{'BUILD_BUILDID'}'},
                 'testCase': {'id': $testnum},
-                'testCaseTitle': '$testname',
+                'testCaseTitle': '$title_testnum: $testname',
+                'testCaseRevision': 2,
                 'automatedTestName': 'curl.tests.$testnum',
                 'outcome': 'InProgress'
             }

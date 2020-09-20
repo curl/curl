@@ -1,31 +1,28 @@
 <testcase>
 <info>
 <keywords>
-HTTP
-HTTP GET
-multi-threaded
-connection-sharing
+curl_easy_option
 </keywords>
 </info>
 
 # Server-side
 <reply>
+
+</data>
 </reply>
 
 # Client-side
 <client>
 <server>
-http
+none
 </server>
+<name>
+verify that curl_easy_setopt() rejects too long string inputs
+</name>
 <tool>
-lib1541
+lib1911
 </tool>
- <name>
-connection sharing using 67 parallel threads for 7 seconds
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1
-</command>
+
 </client>
 
 # Verify data after the test has been "shot"

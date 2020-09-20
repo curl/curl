@@ -51,9 +51,14 @@ struct per_transfer {
   struct OutStruct etag_save;
   struct InStruct input;
   struct HdrCbData hdrcbdata;
+  long num_headers;
+  bool was_last_header_empty;
   char errorbuffer[CURL_ERROR_SIZE];
 
   bool added; /* set TRUE when added to the multi handle */
+  time_t startat; /* when doing parallel transfers, this is a retry transfer
+                     that has been set to sleep until this time before it
+                     should get started (again) */
 
   /* for parallel progress bar */
   curl_off_t dltotal;
