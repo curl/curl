@@ -221,12 +221,6 @@ environment:
         PATHPART: release
         TESTING: OFF
         ENABLE_UNICODE: yes
-      # generated VisualStudioSolution-based builds
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
-        BUILD_SYSTEM: VisualStudioSolution
-        PRJ_CFG: "DLL Debug - DLL Windows SSPI - DLL WinIDN"
-        TESTING: OFF
-        VC_VERSION: VC15
       # autotools-based builds (NOT mingw cross-compiling, but msys2 native)
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: autotools
@@ -268,10 +262,7 @@ build_script:
         -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
         cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT%
       ) else (
-      if %BUILD_SYSTEM%==VisualStudioSolution (
-        cd projects &&
-        .\\generate.bat %VC_VERSION% &&
-        msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln"
+      if %BUILD_SYSTEM%==xxxxxx (
       ) else (
       if %BUILD_SYSTEM%==winbuild_vs2015 (
         call buildconf.bat &&
