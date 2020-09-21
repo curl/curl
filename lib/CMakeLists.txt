@@ -50,15 +50,6 @@ endif()
 # # strtoofft.c - specify later
 # )
 
-# # if we have Kerberos 4, right now this is never on
-# #OPTION(CURL_KRB4 "Use Kerberos 4" OFF)
-# IF(CURL_KRB4)
-# SET(CSOURCES ${CSOURCES}
-# krb4.c
-# security.c
-# )
-# ENDIF(CURL_KRB4)
-
 # #OPTION(CURL_MALLOC_DEBUG "Debug mallocs in Curl" OFF)
 # MARK_AS_ADVANCED(CURL_MALLOC_DEBUG)
 # IF(CURL_MALLOC_DEBUG)

@@ -326,9 +326,9 @@ FTP
 Kerberos
 ========
 
- Kerberos support is mainly in `lib/krb5.c` and `lib/security.c` but also
- `curl_sasl_sspi.c` and `curl_sasl_gssapi.c` for the email protocols and
- `socks_gssapi.c` and `socks_sspi.c` for SOCKS5 proxy specifics.
+ Kerberos support is mainly in `lib/krb5.c` but also `curl_sasl_sspi.c` and
+ `curl_sasl_gssapi.c` for the email protocols and `socks_gssapi.c` and
+ `socks_sspi.c` for SOCKS5 proxy specifics.
 
 <a name="telnet"></a>
 TELNET
