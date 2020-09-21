@@ -1201,21 +1201,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * An FTP/SFTP option that modifies an upload to create missing
      * directories on the server.
      */
-    switch(arg) {
-    case 0:
-      data->set.ftp_create_missing_dirs = 0;
-      break;
-    case 1:
-      data->set.ftp_create_missing_dirs = 1;
-      break;
-    case 2:
-      data->set.ftp_create_missing_dirs = 2;
-      break;
-    default:
-      /* reserve other values for future use */
+    if((arg < CURLFTP_CREATE_DIR_NONE) ||
+       (arg > CURLFTP_CREATE_DIR_RETRY))
       result = CURLE_UNKNOWN_OPTION;
-      break;
-    }
+    else
+      data->set.ftp_create_missing_dirs = (int)arg;
     break;
   case CURLOPT_READDATA:
     /*
