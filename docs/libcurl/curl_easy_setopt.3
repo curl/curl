@@ -645,6 +645,9 @@ Strings passed on to libcurl must be shorter than 8000000 bytes, otherwise
 \fIcurl_easy_setopt(3)\fP returns \fBCURLE_BAD_FUNCTION_ARGUMENT\fP (added in
 7.65.0).
 
+\fBCURLE_BAD_FUNCTION_ARGUMENT\fP is returned when the argument to an option
+is invalid, like perhaps out of range.a
+
 If you try to set an option that libcurl doesn't know about, perhaps because
 the library is too old to support it or the option was removed in a recent
 version, this function will return \fICURLE_UNKNOWN_OPTION\fP. If support for
