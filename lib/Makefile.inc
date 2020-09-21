@@ -56,7 +56,7 @@ LIB_CFILES = altsvc.c amigaos.c asyn-ares.c asyn-thread.c base64.c            \
   http_ntlm.c http_proxy.c idn_win32.c if2ip.c imap.c inet_ntop.c inet_pton.c \
   krb5.c ldap.c llist.c md4.c md5.c memdebug.c mime.c mprintf.c mqtt.c        \
   multi.c netrc.c non-ascii.c nonblock.c openldap.c parsedate.c pingpong.c    \
-  pop3.c progress.c psl.c doh.c rand.c rename.c rtsp.c security.c select.c    \
+  pop3.c progress.c psl.c doh.c rand.c rename.c rtsp.c select.c               \
   sendf.c setopt.c sha256.c share.c slist.c smb.c smtp.c socketpair.c socks.c \
   socks_gssapi.c socks_sspi.c speedcheck.c splay.c strcase.c strdup.c         \
   strerror.c strtok.c strtoofft.c system_win32.c telnet.c tftp.c timeval.c    \
@@ -68,7 +68,7 @@ LIB_HFILES = altsvc.h amigaos.h arpa_telnet.h asyn.h conncache.h connect.h    \
   curl_des.h curl_endian.h curl_fnmatch.h curl_get_line.h curl_gethostname.h  \
   curl_gssapi.h curl_hmac.h curl_ldap.h curl_md4.h curl_md5.h curl_memory.h   \
   curl_memrchr.h curl_multibyte.h curl_ntlm_core.h curl_ntlm_wb.h curl_path.h \
-  curl_printf.h curl_range.h curl_rtmp.h curl_sasl.h curl_sec.h curl_setup.h  \
+  curl_printf.h curl_range.h curl_rtmp.h curl_sasl.h krb5.h     curl_setup.h  \
   curl_setup_once.h curl_sha256.h curl_sspi.h curl_threads.h curlx.h dict.h   \
   dotdot.h easyif.h escape.h file.h fileinfo.h formdata.h ftp.h url.h         \
   ftplistparser.h getinfo.h gopher.h hash.h hostcheck.h hostip.h http.h       \

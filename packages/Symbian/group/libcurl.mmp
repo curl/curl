@@ -24,7 +24,7 @@ SOURCE \
   file.c timeval.c base64.c hostip.c progress.c formdata.c             \
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c      \
   ldap.c vtls/openssl.c version.c getenv.c escape.c mprintf.c telnet.c \
-  netrc.c getinfo.c transfer.c strequal.c easy.c security.c krb4.c     \
+  netrc.c getinfo.c transfer.c strequal.c easy.c krb4.c                \
   curl_fnmatch.c fileinfo.c ftplistparser.c wildcard.c krb5.c          \
   memdebug.c http_chunks.c strtok.c connect.c llist.c hash.c multi.c   \
   content_encoding.c share.c http_digest.c md4.c md5.c curl_rand.c     \

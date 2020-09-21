@@ -59,7 +59,7 @@
 #include "fileinfo.h"
 #include "ftplistparser.h"
 #include "curl_range.h"
-#include "curl_sec.h"
+#include "krb5.h"
 #include "strtoofft.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
@@ -3945,64 +3945,6 @@ static CURLcode ftp_do(struct connectdata *conn, bool *done)
   return result;
 }
 
-
-CURLcode Curl_ftpsend(struct connectdata *conn, const char *cmd)
-{
-  ssize_t bytes_written;
-#define SBUF_SIZE 1024
-  char s[SBUF_SIZE];
-  size_t write_len;
-  char *sptr = s;
-  CURLcode result = CURLE_OK;
-#ifdef HAVE_GSSAPI
-  enum protection_level data_sec = conn->data_prot;
-#endif
-
-  if(!cmd)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  write_len = strlen(cmd);
-  if(!write_len || write_len > (sizeof(s) -3))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  memcpy(&s, cmd, write_len);
-  strcpy(&s[write_len], "\r\n"); /* append a trailing CRLF */
-  write_len += 2;
-  bytes_written = 0;
-
-  result = Curl_convert_to_network(conn->data, s, write_len);
-  /* Curl_convert_to_network calls failf if unsuccessful */
-  if(result)
-    return result;
-
-  for(;;) {
-#ifdef HAVE_GSSAPI
-    conn->data_prot = PROT_CMD;
-#endif
-    result = Curl_write(conn, conn->sock[FIRSTSOCKET], sptr, write_len,
-                        &bytes_written);
-#ifdef HAVE_GSSAPI
-    DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
-    conn->data_prot = data_sec;
-#endif
-
-    if(result)
-      break;
-
-    if(conn->data->set.verbose)
-      Curl_debug(conn->data, CURLINFO_HEADER_OUT, sptr, (size_t)bytes_written);
-
-    if(bytes_written != (ssize_t)write_len) {
-      write_len -= bytes_written;
-      sptr += bytes_written;
-    }
-    else
-      break;
-  }
-
-  return result;
-}
-
 /***********************************************************************
  *
  * ftp_quit()
@@ -4066,22 +4008,14 @@ static CURLcode ftp_disconnect(struct connectdata *conn, bool dead_connection)
     if(data->state.most_recent_ftp_entrypath == ftpc->entrypath) {
       data->state.most_recent_ftp_entrypath = NULL;
     }
-    free(ftpc->entrypath);
-    ftpc->entrypath = NULL;
+    Curl_safefree(ftpc->entrypath);
   }
 
   freedirs(ftpc);
-  free(ftpc->prevpath);
-  ftpc->prevpath = NULL;
-  free(ftpc->server_os);
-  ftpc->server_os = NULL;
-
+  Curl_safefree(ftpc->prevpath);
+  Curl_safefree(ftpc->server_os);
   Curl_pp_disconnect(pp);
-
-#ifdef HAVE_GSSAPI
   Curl_sec_end(conn);
-#endif
-
   return CURLE_OK;
 }
 
