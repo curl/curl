@@ -146,7 +146,7 @@ static void conn_free(struct connectdata *conn);
 *
 * Parameters:
 *
-* protocol  [in]  - A single bit protocol identifier such as HTTP or HTTPS.
+* 'h'  [in]  - struct Curl_handler pointer.
 *
 * Returns the family as a single bit protocol identifier.
 */
