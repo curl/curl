@@ -2508,7 +2508,7 @@ static CURLcode ftp_state_loggedin(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
-  if(conn->ssl[FIRSTSOCKET].use) {
+  if(conn->bits.ftp_use_control_ssl) {
     /* PBSZ = PROTECTION BUFFER SIZE.
 
     The 'draft-murray-auth-ftp-ssl' (draft 12, page 7) says:
@@ -2659,14 +2659,8 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       }
 #endif
 
-      if(data->set.use_ssl &&
-         (!conn->ssl[FIRSTSOCKET].use
-#ifndef CURL_DISABLE_PROXY
-          || (conn->bits.proxy_ssl_connected[FIRSTSOCKET] &&
-              !conn->proxy_ssl[FIRSTSOCKET].use)
-#endif
-           )) {
-        /* We don't have a SSL/TLS connection yet, but FTPS is
+      if(data->set.use_ssl && !conn->bits.ftp_use_control_ssl) {
+        /* We don't have a SSL/TLS control connection yet, but FTPS is
            requested. Try a FTPS connection now */
 
         ftpc->count3 = 0;
@@ -2708,6 +2702,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         result = Curl_ssl_connect(conn, FIRSTSOCKET);
         if(!result) {
           conn->bits.ftp_use_data_ssl = FALSE; /* clear-text data */
+          conn->bits.ftp_use_control_ssl = TRUE; /* SSL on control */
           result = ftp_state_user(conn);
         }
       }
@@ -3089,7 +3084,7 @@ static CURLcode ftp_block_statemach(struct connectdata *conn)
  *
  */
 static CURLcode ftp_connect(struct connectdata *conn,
-                                 bool *done) /* see description above */
+                            bool *done) /* see description above */
 {
   CURLcode result;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
@@ -3110,6 +3105,7 @@ static CURLcode ftp_connect(struct connectdata *conn,
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(result)
       return result;
+    conn->bits.ftp_use_control_ssl = TRUE;
   }
 
   Curl_pp_setup(pp); /* once per transfer */

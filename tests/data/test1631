@@ -74,8 +74,6 @@ Proxy-Connection: Keep-Alive
 <protocol>
 USER anonymous
 PASS ftp@example.com
-PBSZ 0
-PROT P
 PWD
 EPSV
 TYPE I
