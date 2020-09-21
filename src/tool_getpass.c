@@ -100,11 +100,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #define DONE
 #endif /* __VMS */
 
-#ifdef __SYMBIAN32__
-#  define getch() getchar()
-#endif
-
-#if defined(WIN32) || defined(__SYMBIAN32__)
+#if defined(WIN32)
 
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
@@ -123,10 +119,8 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
            previous one as well */
         i = i - (i >= 1 ? 2 : 1);
   }
-#ifndef __SYMBIAN32__
   /* since echo is disabled, print a newline */
   fputs("\n", stderr);
-#endif
   /* if user didn't hit ENTER, terminate buffer */
   if(i == buflen)
     buffer[buflen-1] = '\0';
@@ -134,7 +128,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   return buffer; /* we always return success */
 }
 #define DONE
-#endif /* WIN32 || __SYMBIAN32__ */
+#endif /* WIN32 */
 
 #ifdef NETWARE
 /* NetWare implementation */

@@ -63,17 +63,6 @@ my @skiplist=(
     '^lib\/libcurl.plist',
     '^lib\/libcurl.vers.in',
 
-    # symbian build files we know little about
-    '^packages\/Symbian\/bwins\/libcurlu.def',
-    '^packages\/Symbian\/eabi\/libcurlu.def',
-    '^packages\/Symbian\/group\/bld.inf',
-    '^packages\/Symbian\/group\/curl.iby',
-    '^packages\/Symbian\/group\/curl.mmp',
-    '^packages\/Symbian\/group\/curl.pkg',
-    '^packages\/Symbian\/group\/libcurl.iby',
-    '^packages\/Symbian\/group\/libcurl.mmp',
-    '^packages\/Symbian\/group\/libcurl.pkg',
-
     # vms files
     '^packages\/vms\/build_vms.com',
     '^packages\/vms\/curl_release_note_start.txt',

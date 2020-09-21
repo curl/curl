@@ -76,9 +76,7 @@
 /* length of longest IPv6 address string including the trailing null */
 #define MAX_IPADR_LEN sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")
 
-/* Default FTP/IMAP etc response timeout in milliseconds.
-   Symbian OS panics when given a timeout much greater than 1/2 hour.
-*/
+/* Default FTP/IMAP etc response timeout in milliseconds */
 #define RESP_TIMEOUT (120*1000)
 
 /* Max string input length is a precaution against abuse and to detect junk
@@ -1349,8 +1347,7 @@ struct UrlState {
   int httpversion;       /* the lowest HTTP version*10 reported by any server
                             involved in this request */
 
-#if !defined(WIN32) && !defined(MSDOS) && !defined(__EMX__) && \
-    !defined(__SYMBIAN32__)
+#if !defined(WIN32) && !defined(MSDOS) && !defined(__EMX__)
 /* do FTP line-end conversions on most platforms */
 #define CURL_DO_LINEEND_CONV
   /* for FTP downloads: track CRLF sequences that span blocks */

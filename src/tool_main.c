@@ -322,11 +322,6 @@ int main(int argc, char *argv[])
     /* Start our curl operation */
     result = operate(&global, argc, argv);
 
-#ifdef __SYMBIAN32__
-    if(global.showerror)
-      tool_pressanykey();
-#endif
-
     /* Perform the main cleanup */
     main_free(&global);
   }

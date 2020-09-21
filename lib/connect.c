@@ -83,11 +83,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifdef __SYMBIAN32__
-/* This isn't actually supported under Symbian OS */
-#undef SO_NOSIGPIPE
-#endif
-
 static bool verifyconnect(curl_socket_t sockfd, int *error);
 
 #if defined(__DragonFly__) || defined(HAVE_WINSOCK_H)
