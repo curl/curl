@@ -469,6 +469,7 @@ struct ConnectBits {
                          EPRT doesn't work we disable it for the forthcoming
                          requests */
   BIT(ftp_use_data_ssl); /* Enabled SSL for the data connection */
+  BIT(ftp_use_control_ssl); /* Enabled SSL for the control connection */
 #endif
   BIT(netrc);         /* name+password provided by netrc */
   BIT(bound); /* set true if bind() has already been done on this socket/
