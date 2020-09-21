@@ -437,7 +437,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       primary->version_max = version_max;
     }
 #else
-    result = CURLE_UNKNOWN_OPTION;
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
 #endif
     break;
 
@@ -1055,7 +1055,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       break;
     default:
       /* reserve other values for future use */
-      result = CURLE_UNKNOWN_OPTION;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
       break;
     }
     break;
