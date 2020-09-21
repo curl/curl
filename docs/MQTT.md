@@ -1,25 +1,5 @@
 # MQTT in curl
 
-## Experimental!
-
-MQTT support in curl is considered **EXPERIMENTAL** until further notice. It
-needs to be enabled at build-time. See below.
-
-After the initial merge, further development and tweaking of the MQTT support
-in curl will happen in the master branch using pull-requests, just like
-ordinary changes.
-
-Experimental support for MQTT means that we **do not guarantee** that the
-current protocol functionality will remain or remain this way going forward.
-There are no API or ABI promises for experimental features as for regular curl
-features.
-
-Do not ship anything with this enabled.
-
-## Build
-
-    ./configure --enable-mqtt
-
 ## Usage
 
 A plain "GET" subscribes to the topic and prints all published messages.
