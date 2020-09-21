@@ -86,6 +86,7 @@ const struct Curl_handler Curl_handler_smb = {
   ZERO_NULL,                            /* connection_check */
   PORT_SMB,                             /* defport */
   CURLPROTO_SMB,                        /* protocol */
+  CURLPROTO_SMB,                        /* family */
   PROTOPT_NONE                          /* flags */
 };
 
@@ -111,6 +112,7 @@ const struct Curl_handler Curl_handler_smbs = {
   ZERO_NULL,                            /* connection_check */
   PORT_SMBS,                            /* defport */
   CURLPROTO_SMBS,                       /* protocol */
+  CURLPROTO_SMB,                        /* family */
   PROTOPT_SSL                           /* flags */
 };
 #endif

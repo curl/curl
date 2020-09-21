@@ -739,6 +739,8 @@ struct Curl_handler {
   long defport;           /* Default port. */
   unsigned int protocol;  /* See CURLPROTO_* - this needs to be the single
                              specific protocol bit */
+  unsigned int family;    /* single bit for protocol family; basically the
+                             non-TLS name of the protocol this is */
   unsigned int flags;     /* Extra particular characteristics, see PROTOPT_* */
 };
 

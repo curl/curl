@@ -128,6 +128,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   ZERO_NULL,                        /* connection_check */
   PORT_POP3,                        /* defport */
   CURLPROTO_POP3,                   /* protocol */
+  CURLPROTO_POP3,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
   PROTOPT_URLOPTIONS
 };
@@ -155,6 +156,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   ZERO_NULL,                        /* connection_check */
   PORT_POP3S,                       /* defport */
   CURLPROTO_POP3S,                  /* protocol */
+  CURLPROTO_POP3,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_SSL
   | PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS /* flags */
 };

@@ -130,7 +130,6 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "memdebug.h"
 
 static void conn_free(struct connectdata *conn);
-static unsigned int get_protocol_family(unsigned int protocol);
 
 /* Some parts of the code (e.g. chunked encoding) assume this buffer has at
  * more than just a few bytes to play with. Don't let it become too small or
@@ -139,6 +138,24 @@ static unsigned int get_protocol_family(unsigned int protocol);
 #if READBUFFER_SIZE < READBUFFER_MIN
 # error READBUFFER_SIZE is too small
 #endif
+
+/*
+* get_protocol_family()
+*
+* This is used to return the protocol family for a given protocol.
+*
+* Parameters:
+*
+* protocol  [in]  - A single bit protocol identifier such as HTTP or HTTPS.
+*
+* Returns the family as a single bit protocol identifier.
+*/
+static unsigned int get_protocol_family(const struct Curl_handler *h)
+{
+  DEBUGASSERT(h);
+  DEBUGASSERT(h->family);
+  return h->family;
+}
 
 
 /*
@@ -273,6 +290,7 @@ static const struct Curl_handler Curl_handler_dummy = {
   ZERO_NULL,                            /* connection_check */
   0,                                    /* defport */
   0,                                    /* protocol */
+  0,                                    /* family */
   PROTOPT_NONE                          /* flags */
 };
 
@@ -1173,7 +1191,7 @@ ConnectionExists(struct Curl_easy *data,
       if((needle->handler->flags&PROTOPT_SSL) !=
          (check->handler->flags&PROTOPT_SSL))
         /* don't do mixed SSL and non-SSL connections */
-        if(get_protocol_family(check->handler->protocol) !=
+        if(get_protocol_family(check->handler) !=
            needle->handler->protocol || !check->bits.tls_upgraded)
           /* except protocols that have been upgraded via TLS */
           continue;
@@ -1278,7 +1296,7 @@ ConnectionExists(struct Curl_easy *data,
            is allowed to be upgraded via TLS */
 
         if((strcasecompare(needle->handler->scheme, check->handler->scheme) ||
-            (get_protocol_family(check->handler->protocol) ==
+            (get_protocol_family(check->handler) ==
              needle->handler->protocol && check->bits.tls_upgraded)) &&
            (!needle->bits.conn_to_host || strcasecompare(
             needle->conn_to_host.name, check->conn_to_host.name)) &&
@@ -4027,114 +4045,4 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   Curl_pgrsSetDownloadCounter(data, 0);
 
   return CURLE_OK;
-}
-
-/*
-* get_protocol_family()
-*
-* This is used to return the protocol family for a given protocol.
-*
-* Parameters:
-*
-* protocol  [in]  - A single bit protocol identifier such as HTTP or HTTPS.
-*
-* Returns the family as a single bit protocol identifier.
-*/
-
-static unsigned int get_protocol_family(unsigned int protocol)
-{
-  unsigned int family;
-
-  switch(protocol) {
-  case CURLPROTO_HTTP:
-  case CURLPROTO_HTTPS:
-    family = CURLPROTO_HTTP;
-    break;
-
-  case CURLPROTO_FTP:
-  case CURLPROTO_FTPS:
-    family = CURLPROTO_FTP;
-    break;
-
-  case CURLPROTO_SCP:
-    family = CURLPROTO_SCP;
-    break;
-
-  case CURLPROTO_SFTP:
-    family = CURLPROTO_SFTP;
-    break;
-
-  case CURLPROTO_TELNET:
-    family = CURLPROTO_TELNET;
-    break;
-
-  case CURLPROTO_LDAP:
-  case CURLPROTO_LDAPS:
-    family = CURLPROTO_LDAP;
-    break;
-
-  case CURLPROTO_DICT:
-    family = CURLPROTO_DICT;
-    break;
-
-  case CURLPROTO_FILE:
-    family = CURLPROTO_FILE;
-    break;
-
-  case CURLPROTO_TFTP:
-    family = CURLPROTO_TFTP;
-    break;
-
-  case CURLPROTO_IMAP:
-  case CURLPROTO_IMAPS:
-    family = CURLPROTO_IMAP;
-    break;
-
-  case CURLPROTO_POP3:
-  case CURLPROTO_POP3S:
-    family = CURLPROTO_POP3;
-    break;
-
-  case CURLPROTO_SMTP:
-  case CURLPROTO_SMTPS:
-      family = CURLPROTO_SMTP;
-      break;
-
-  case CURLPROTO_RTSP:
-    family = CURLPROTO_RTSP;
-    break;
-
-  case CURLPROTO_RTMP:
-  case CURLPROTO_RTMPS:
-    family = CURLPROTO_RTMP;
-    break;
-
-  case CURLPROTO_RTMPT:
-  case CURLPROTO_RTMPTS:
-    family = CURLPROTO_RTMPT;
-    break;
-
-  case CURLPROTO_RTMPE:
-    family = CURLPROTO_RTMPE;
-    break;
-
-  case CURLPROTO_RTMPTE:
-    family = CURLPROTO_RTMPTE;
-    break;
-
-  case CURLPROTO_GOPHER:
-    family = CURLPROTO_GOPHER;
-    break;
-
-  case CURLPROTO_SMB:
-  case CURLPROTO_SMBS:
-    family = CURLPROTO_SMB;
-    break;
-
-  default:
-      family = 0;
-      break;
-  }
-
-  return family;
 }

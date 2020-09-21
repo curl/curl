@@ -90,7 +90,8 @@ const struct Curl_handler Curl_handler_dict = {
   ZERO_NULL,                            /* connection_check */
   PORT_DICT,                            /* defport */
   CURLPROTO_DICT,                       /* protocol */
-  PROTOPT_NONE | PROTOPT_NOURLQUERY      /* flags */
+  CURLPROTO_DICT,                       /* family */
+  PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
 };
 
 static char *unescape_word(struct Curl_easy *data, const char *inputbuff)

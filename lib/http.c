@@ -125,6 +125,7 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* connection_check */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
+  CURLPROTO_HTTP,                       /* family */
   PROTOPT_CREDSPERREQUEST |             /* flags */
   PROTOPT_USERPWDCTRL
 };
@@ -151,6 +152,7 @@ const struct Curl_handler Curl_handler_https = {
   ZERO_NULL,                            /* connection_check */
   PORT_HTTPS,                           /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
+  CURLPROTO_HTTP,                       /* family */
   PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | PROTOPT_ALPN_NPN | /* flags */
   PROTOPT_USERPWDCTRL
 };
