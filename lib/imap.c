@@ -132,6 +132,7 @@ const struct Curl_handler Curl_handler_imap = {
   ZERO_NULL,                        /* connection_check */
   PORT_IMAP,                        /* defport */
   CURLPROTO_IMAP,                   /* protocol */
+  CURLPROTO_IMAP,                   /* family */
   PROTOPT_CLOSEACTION|              /* flags */
   PROTOPT_URLOPTIONS
 };
@@ -159,6 +160,7 @@ const struct Curl_handler Curl_handler_imaps = {
   ZERO_NULL,                        /* connection_check */
   PORT_IMAPS,                       /* defport */
   CURLPROTO_IMAPS,                  /* protocol */
+  CURLPROTO_IMAP,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
   PROTOPT_URLOPTIONS
 };

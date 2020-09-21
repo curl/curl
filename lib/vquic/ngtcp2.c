@@ -954,6 +954,7 @@ static const struct Curl_handler Curl_handler_http3 = {
   ng_conncheck,                         /* connection_check */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
+  CURLPROTO_HTTP,                       /* family */
   PROTOPT_SSL | PROTOPT_STREAM          /* flags */
 };
 

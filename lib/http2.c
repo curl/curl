@@ -300,6 +300,7 @@ static const struct Curl_handler Curl_handler_http2 = {
   http2_conncheck,                      /* connection_check */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
+  CURLPROTO_HTTP,                       /* family */
   PROTOPT_STREAM                        /* flags */
 };
 
@@ -321,6 +322,7 @@ static const struct Curl_handler Curl_handler_http2_ssl = {
   http2_conncheck,                      /* connection_check */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
+  CURLPROTO_HTTP,                       /* family */
   PROTOPT_SSL | PROTOPT_STREAM          /* flags */
 };
 

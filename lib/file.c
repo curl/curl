@@ -112,6 +112,7 @@ const struct Curl_handler Curl_handler_file = {
   ZERO_NULL,                            /* connection_check */
   0,                                    /* defport */
   CURLPROTO_FILE,                       /* protocol */
+  CURLPROTO_FILE,                       /* family */
   PROTOPT_NONETWORK | PROTOPT_NOURLQUERY /* flags */
 };
 

@@ -86,6 +86,7 @@ const struct Curl_handler Curl_handler_mqtt = {
   ZERO_NULL,                          /* connection_check */
   PORT_MQTT,                          /* defport */
   CURLPROTO_MQTT,                     /* protocol */
+  CURLPROTO_MQTT,                     /* family */
   PROTOPT_NONE                        /* flags */
 };
 
