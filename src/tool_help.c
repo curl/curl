@@ -830,10 +830,6 @@ static const struct helptxt helptext[] = {
 #  define PRINT_LINES_PAUSE 23
 #endif
 
-#ifdef __SYMBIAN32__
-#  define PRINT_LINES_PAUSE 16
-#endif
-
 struct feat {
   const char *name;
   int bitmask;

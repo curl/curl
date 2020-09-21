@@ -38,8 +38,7 @@
  * Define WIN32 when build target is Win32 API
  */
 
-#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32) && \
-    !defined(__SYMBIAN32__)
+#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32)
 #define WIN32
 #endif
 
@@ -86,10 +85,6 @@
 
 #ifdef __AMIGA__
 #  include "config-amigaos.h"
-#endif
-
-#ifdef __SYMBIAN32__
-#  include "config-symbian.h"
 #endif
 
 #ifdef __OS400__

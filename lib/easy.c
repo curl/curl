@@ -106,7 +106,6 @@ static long          init_flags;
 #  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
 #endif
 
-#ifndef __SYMBIAN32__
 /*
  * If a memory-using function (like curl_getenv) is used before
  * curl_global_init() is called, we need to have these pointers set already.
@@ -118,17 +117,6 @@ curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 #if defined(WIN32) && defined(UNICODE)
 curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
-#endif
-#else
-/*
- * Symbian OS doesn't support initialization to code in writable static data.
- * Initialization will occur in the curl_global_init() call.
- */
-curl_malloc_callback Curl_cmalloc;
-curl_free_callback Curl_cfree;
-curl_realloc_callback Curl_crealloc;
-curl_strdup_callback Curl_cstrdup;
-curl_calloc_callback Curl_ccalloc;
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL) && !defined(__POCC__)

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,14 +23,10 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#if defined(__SYMBIAN32__) || defined(NETWARE)
-
+#if defined(NETWARE)
 void tool_pressanykey(void);
-
 #else
-
 #define tool_pressanykey() Curl_nop_stmt
-
 #endif
 
 #endif /* HEADER_CURL_TOOL_PANYKEY_H */
