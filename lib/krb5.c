@@ -45,7 +45,7 @@
 #include "ftp.h"
 #include "curl_gssapi.h"
 #include "sendf.h"
-#include "krb5.h"
+#include "curl_krb5.h"
 #include "warnless.h"
 #include "non-ascii.h"
 #include "strcase.h"

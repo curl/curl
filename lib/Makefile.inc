@@ -68,7 +68,7 @@ LIB_HFILES = altsvc.h amigaos.h arpa_telnet.h asyn.h conncache.h connect.h    \
   curl_des.h curl_endian.h curl_fnmatch.h curl_get_line.h curl_gethostname.h  \
   curl_gssapi.h curl_hmac.h curl_ldap.h curl_md4.h curl_md5.h curl_memory.h   \
   curl_memrchr.h curl_multibyte.h curl_ntlm_core.h curl_ntlm_wb.h curl_path.h \
-  curl_printf.h curl_range.h curl_rtmp.h curl_sasl.h krb5.h     curl_setup.h  \
+  curl_printf.h curl_range.h curl_rtmp.h curl_sasl.h curl_krb5.h curl_setup.h \
   curl_setup_once.h curl_sha256.h curl_sspi.h curl_threads.h curlx.h dict.h   \
   dotdot.h easyif.h escape.h file.h fileinfo.h formdata.h ftp.h url.h         \
   ftplistparser.h getinfo.h gopher.h hash.h hostcheck.h hostip.h http.h       \

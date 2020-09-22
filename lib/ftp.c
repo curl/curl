@@ -59,7 +59,7 @@
 #include "fileinfo.h"
 #include "ftplistparser.h"
 #include "curl_range.h"
-#include "krb5.h"
+#include "curl_krb5.h"
 #include "strtoofft.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
