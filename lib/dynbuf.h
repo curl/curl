@@ -62,6 +62,10 @@ char *Curl_dyn_ptr(const struct dynbuf *s);
 unsigned char *Curl_dyn_uptr(const struct dynbuf *s);
 size_t Curl_dyn_len(const struct dynbuf *s);
 
+/* returns 0 on success, -1 on error */
+/* The implementation of this function exists in mprintf.c */
+int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save);
+
 /* Dynamic buffer max sizes */
 #define DYN_DOH_RESPONSE    3000
 #define DYN_DOH_CNAME       256
