@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SECURITY_H
-#define HEADER_CURL_SECURITY_H
+#ifndef HEADER_CURL_KRB5_H
+#define HEADER_CURL_KRB5_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -48,4 +48,4 @@ int Curl_sec_request_prot(struct connectdata *conn, const char *level);
 #define Curl_sec_end(x)
 #endif
 
-#endif /* HEADER_CURL_SECURITY_H */
+#endif /* HEADER_CURL_KRB5_H */
