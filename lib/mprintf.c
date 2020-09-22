@@ -169,7 +169,7 @@ struct nsprintf {
 };
 
 struct asprintf {
-  struct dynbuf b;
+  struct dynbuf *b;
   bool fail; /* if an alloc has failed and thus the output is not the complete
                 data */
 };
@@ -1042,48 +1042,59 @@ static int alloc_addbyter(int output, FILE *data)
   struct asprintf *infop = (struct asprintf *)data;
   unsigned char outc = (unsigned char)output;
 
-  if(Curl_dyn_addn(&infop->b, &outc, 1)) {
+  if(Curl_dyn_addn(infop->b, &outc, 1)) {
     infop->fail = 1;
     return -1; /* fail */
   }
   return outc; /* fputc() returns like this on success */
 }
 
-char *curl_maprintf(const char *format, ...)
+extern int Curl_dyn_vprintf(struct dynbuf *dyn,
+                            const char *format, va_list ap_save);
+
+/* appends the formatted string, returns 0 on success, 1 on error */
+int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
 {
-  va_list ap_save; /* argument pointer */
   int retcode;
   struct asprintf info;
-  Curl_dyn_init(&info.b, DYN_APRINTF);
+  info.b = dyn;
   info.fail = 0;
 
-  va_start(ap_save, format);
   retcode = dprintf_formatf(&info, alloc_addbyter, format, ap_save);
-  va_end(ap_save);
   if((-1 == retcode) || info.fail) {
-    Curl_dyn_free(&info.b);
-    return NULL;
+    Curl_dyn_free(info.b);
+    return 1;
   }
-  if(Curl_dyn_len(&info.b))
-    return Curl_dyn_ptr(&info.b);
-  return strdup("");
+  return 0;
 }
 
 char *curl_mvaprintf(const char *format, va_list ap_save)
 {
   int retcode;
   struct asprintf info;
-  Curl_dyn_init(&info.b, DYN_APRINTF);
+  struct dynbuf dyn;
+  info.b = &dyn;
+  Curl_dyn_init(info.b, DYN_APRINTF);
   info.fail = 0;
 
   retcode = dprintf_formatf(&info, alloc_addbyter, format, ap_save);
   if((-1 == retcode) || info.fail) {
-    Curl_dyn_free(&info.b);
+    Curl_dyn_free(info.b);
     return NULL;
   }
-  if(Curl_dyn_len(&info.b))
-    return Curl_dyn_ptr(&info.b);
+  if(Curl_dyn_len(info.b))
+    return Curl_dyn_ptr(info.b);
   return strdup("");
+}
+
+char *curl_maprintf(const char *format, ...)
+{
+  va_list ap_save;
+  char *s;
+  va_start(ap_save, format);
+  s = curl_mvaprintf(format, ap_save);
+  va_end(ap_save);
+  return s;
 }
 
 static int storebuffer(int output, FILE *data)
