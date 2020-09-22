@@ -162,9 +162,10 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
                         const char *fmt,
                         va_list args)
 {
-  ssize_t bytes_written;
+  ssize_t bytes_written = 0;
   size_t write_len;
-  char *fmt_crlf;
+  char fmt_crlf[128];
+  size_t fmtlen;
   char *s;
   CURLcode result;
   struct connectdata *conn = pp->conn;
@@ -184,16 +185,17 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
 
   data = conn->data;
 
-  fmt_crlf = aprintf("%s\r\n", fmt); /* append a trailing CRLF */
-  if(!fmt_crlf)
-    return CURLE_OUT_OF_MEMORY;
-
-  s = vaprintf(fmt_crlf, args); /* trailing CRLF appended */
-  free(fmt_crlf);
+  fmtlen = strlen(fmt);
+  DEBUGASSERT(fmtlen < sizeof(fmt_crlf)-3);
+  if(fmtlen >= sizeof(fmt_crlf)-3)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  memcpy(fmt_crlf, fmt, fmtlen);
+  /* append a trailing CRLF+null to the format string */
+  memcpy(&fmt_crlf[fmtlen], "\r\n", 3);
+  s = vaprintf(fmt_crlf, args);
   if(!s)
     return CURLE_OUT_OF_MEMORY;
 
-  bytes_written = 0;
   write_len = strlen(s);
 
   Curl_pp_init(pp);
