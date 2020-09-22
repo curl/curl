@@ -425,7 +425,6 @@ static CURLcode CONNECT(struct connectdata *conn,
         }
 
         data->info.header_size += (long)perline;
-        data->req.headerbytecount += (long)perline;
 
         /* Newlines are CRLF, so the CR is ignored as the line isn't
            really terminated until the LF comes. Treat a following CR
