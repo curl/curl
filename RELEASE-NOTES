@@ -22,6 +22,7 @@ This release includes the following bugfixes:
 
  o altsvc: clone setting in curl_easy_duphandle [60]
  o base64: also build for smtp, pop3 and imap [81]
+ o BUGS: convert document to markdown [107]
  o buildconf: invoke 'autoreconf -fi' instead [37]
  o checksrc: verify do-while and spaces between the braces [2]
  o CI/azure: disable test 571 in the msys2 builds [93]
@@ -32,6 +33,7 @@ This release includes the following bugfixes:
  o CMake: add option to enable Unicode on Windows [48]
  o cmake: make HTTP_ONLY also disable MQTT [58]
  o CMake: remove explicit `CMAKE_ANSI_CFLAGS` [45]
+ o cmake: remove scary warning [96]
  o cmdline-opts/gen.pl: generate nicer "See Also" in curl.1 [66]
  o configure: fix pkg-config detecting wolfssl [26]
  o configure: let --enable-debug set -Wenum-conversion with gcc >= 10 [56]
@@ -52,6 +54,8 @@ This release includes the following bugfixes:
  o Curl_pgrsTime - return new time to avoid timeout integer overflow [32]
  o dist: add missing CMake Find modules to the distribution [14]
  o docs/LICENSE-MIXING: remove [79]
+ o docs/RESOURCES: remove [105]
+ o docs/TheArtOfHttpScripting: convert to markdown [106]
  o docs: add description about CI platforms to CONTRIBUTE.md [44]
  o docs: correct non-existing macros in man pages [35]
  o doh: add error message for DOH_DNS_NAME_TOO_LONG [17]
@@ -67,6 +71,7 @@ This release includes the following bugfixes:
  o HISTORY: mention alt-svc added in 2019
  o HTTP/3: update to OpenSSL_1_1_1g-quic-draft-29 [41]
  o http: consolidate nghttp2_session_mem_recv() call paths [80]
+ o http_proxy: do not count proxy headers in the header bytecount [90]
  o http_proxy: do not crash with HTTPS_PROXY and NO_PROXY set [50]
  o imap: set cselect_bits to CURL_CSELECT_IN initially [104]
  o lib/Makefile.am: bump VERSIONINFO due to new functions [65]
@@ -85,6 +90,7 @@ This release includes the following bugfixes:
  o openssl: avoid error conditions when importing native CA [52]
  o openssl: consider ALERT_CERTIFICATE_EXPIRED a failed verification [57]
  o openssl: Fix wincrypt symbols conflict with BoringSSL [9]
+ o parsedate: tune the date to epoch conversion [95]
  o runtests: allow creating files without newlines [72]
  o runtests: clear pid variables when failing to start a server [12]
  o runtests: make cleardir() erase dot files too [8]
@@ -96,6 +102,7 @@ This release includes the following bugfixes:
  o select: reduce duplication of Curl_poll in Curl_socket_check [23]
  o select: simplify return code handling for poll and select [49]
  o setopt: if the buffer exists, refuse the new BUFFERSIZE [5]
+ o setopt: return CURLE_BAD_FUNCTION_ARGUMENT on bad argument [91]
  o socketpair: allow CURL_DISABLE_SOCKETPAIR [11]
  o sockfilt: handle FD_CLOSE winsock event on write socket [30]
  o SSLCERTS: fix English syntax [34]
@@ -134,8 +141,8 @@ advice from friends like these:
   Michael Olbrich, Peter Körner, Peter Wu, Quentin Balland,
   Rasmus Melchior Jacobsen, Ray Satiro, rcombs on github, Samuel Marks,
   Samuel Tranchet, sofaboss on github, Stefan Strogin, Tatsuhiro Tsujikawa,
-  Tomas Berger, Viktor Szakats,
-  (47 contributors)
+  Tomas Berger, Tom van der Woerdt, Viktor Szakats, xwxbug on github,
+  (49 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -229,7 +236,11 @@ References to bug reports and discussions on issues:
  [86] = https://curl.haxx.se/bug/?i=5969
  [88] = https://curl.haxx.se/bug/?i=5936
  [89] = https://curl.haxx.se/bug/?i=5968
+ [90] = https://curl.haxx.se/bug/?i=5992
+ [91] = https://curl.haxx.se/bug/?i=5993
  [93] = https://curl.haxx.se/bug/?i=5954
+ [95] = https://curl.haxx.se/bug/?i=5985
+ [96] = https://curl.haxx.se/bug/?i=5984
  [97] = https://curl.haxx.se/bug/?i=5947
  [98] = https://curl.haxx.se/bug/?i=5629
  [99] = https://curl.haxx.se/bug/?i=5953
@@ -238,3 +249,6 @@ References to bug reports and discussions on issues:
  [102] = https://curl.haxx.se/bug/?i=5952
  [103] = https://curl.haxx.se/bug/?i=5952
  [104] = https://curl.haxx.se/bug/?i=5961
+ [105] = https://curl.haxx.se/bug/?i=5980
+ [106] = https://curl.haxx.se/bug/?i=5981
+ [107] = https://curl.haxx.se/bug/?i=5979
