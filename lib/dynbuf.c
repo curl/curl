@@ -182,6 +182,7 @@ CURLcode Curl_dyn_add(struct dynbuf *s, const char *str)
 CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
 {
   va_list ap;
+#ifdef BUILDING_LIBCURL
   int rc;
   va_start(ap, fmt);
   rc = Curl_dyn_vprintf(s, fmt, ap);
@@ -189,9 +190,24 @@ CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
 
   if(!rc)
     return CURLE_OK;
+#else
+  char *str;
+  va_start(ap, fmt);
+  str = vaprintf(fmt, ap); /* this allocs a new string to append */
+  va_end(ap);
 
+  if(str) {
+    CURLcode result = dyn_nappend(s, (unsigned char *)str, strlen(str));
+    free(str);
+    return result;
+  }
+  /* If we failed, we cleanup the whole buffer and return error */
+  Curl_dyn_free(s);
+#endif
   return CURLE_OUT_OF_MEMORY;
 }
+
+
 
 /*
  * Returns a pointer to the buffer.
