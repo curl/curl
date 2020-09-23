@@ -42,6 +42,12 @@ Append a C string to the end of the buffer.
 
 Append a `printf()`-style string to the end of the buffer.
 
+## vaddf
+
+    CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap);
+
+Append a `vprintf()`-style string to the end of the buffer.
+
 ## reset
 
     void Curl_dyn_reset(struct dynbuf *s);
