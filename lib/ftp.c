@@ -3112,6 +3112,7 @@ static CURLcode ftp_connect(struct connectdata *conn,
       return result;
   }
 
+  Curl_pp_setup(pp); /* once per transfer */
   Curl_pp_init(pp); /* init the generic pingpong data */
 
   /* When we connect, we start in the state where we await the 220

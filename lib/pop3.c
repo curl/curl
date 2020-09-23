@@ -1093,6 +1093,7 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
   Curl_sasl_init(&pop3c->sasl, &saslpop3);
 
   /* Initialise the pingpong layer */
+  Curl_pp_setup(pp);
   Curl_pp_init(pp);
 
   /* Parse the URL options */
