@@ -1324,6 +1324,7 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   Curl_sasl_init(&smtpc->sasl, &saslsmtp);
 
   /* Initialise the pingpong layer */
+  Curl_pp_setup(pp);
   Curl_pp_init(pp);
 
   /* Parse the URL options */

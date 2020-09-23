@@ -1430,6 +1430,7 @@ static CURLcode imap_connect(struct connectdata *conn, bool *done)
   Curl_sasl_init(&imapc->sasl, &saslimap);
 
   /* Initialise the pingpong layer */
+  Curl_pp_setup(pp);
   Curl_pp_init(pp);
 
   /* Parse the URL options */

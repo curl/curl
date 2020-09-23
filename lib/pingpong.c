@@ -146,7 +146,11 @@ void Curl_pp_init(struct pingpong *pp)
   pp->response = Curl_now(); /* start response time-out now! */
 }
 
-
+/* setup for the coming transfer */
+void Curl_pp_setup(struct pingpong *pp)
+{
+  Curl_dyn_init(&pp->sendbuf, DYN_PINGPPONG_CMD);
+}
 
 /***********************************************************************
  *
@@ -164,8 +168,6 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
 {
   ssize_t bytes_written = 0;
   size_t write_len;
-  char fmt_crlf[128];
-  size_t fmtlen;
   char *s;
   CURLcode result;
   struct connectdata *conn = pp->conn;
@@ -182,49 +184,42 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
   if(!conn)
     /* can't send without a connection! */
     return CURLE_SEND_ERROR;
-
   data = conn->data;
 
-  fmtlen = strlen(fmt);
-  DEBUGASSERT(fmtlen < sizeof(fmt_crlf)-3);
-  if(fmtlen >= sizeof(fmt_crlf)-3)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  memcpy(fmt_crlf, fmt, fmtlen);
-  /* append a trailing CRLF+null to the format string */
-  memcpy(&fmt_crlf[fmtlen], "\r\n", 3);
-  s = vaprintf(fmt_crlf, args);
-  if(!s)
-    return CURLE_OUT_OF_MEMORY;
+  Curl_dyn_reset(&pp->sendbuf);
+  result = Curl_dyn_vaddf(&pp->sendbuf, fmt, args);
+  if(result)
+    return result;
 
-  write_len = strlen(s);
+  /* append CRLF */
+  result = Curl_dyn_addn(&pp->sendbuf, "\r\n", 2);
+  if(result)
+    return result;
 
+  write_len = Curl_dyn_len(&pp->sendbuf);
+  s = Curl_dyn_ptr(&pp->sendbuf);
   Curl_pp_init(pp);
 
   result = Curl_convert_to_network(data, s, write_len);
   /* Curl_convert_to_network calls failf if unsuccessful */
-  if(result) {
-    free(s);
+  if(result)
     return result;
-  }
 
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CMD;
 #endif
   result = Curl_write(conn, conn->sock[FIRSTSOCKET], s, write_len,
-                     &bytes_written);
+                      &bytes_written);
+  if(result)
+    return result;
 #ifdef HAVE_GSSAPI
   data_sec = conn->data_prot;
   DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
   conn->data_prot = data_sec;
 #endif
 
-  if(result) {
-    free(s);
-    return result;
-  }
-
-  if(conn->data->set.verbose)
-    Curl_debug(conn->data, CURLINFO_HEADER_OUT, s, (size_t)bytes_written);
+  if(data->set.verbose)
+    Curl_debug(data, CURLINFO_HEADER_OUT, s, (size_t)bytes_written);
 
   if(bytes_written != (ssize_t)write_len) {
     /* the whole chunk was not sent, keep it around and adjust sizes */
@@ -233,7 +228,6 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
     pp->sendleft = write_len - bytes_written;
   }
   else {
-    free(s);
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
     pp->response = Curl_now();
@@ -495,7 +489,6 @@ CURLcode Curl_pp_flushsend(struct pingpong *pp)
     pp->sendleft -= written;
   }
   else {
-    free(pp->sendthis);
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
     pp->response = Curl_now();
@@ -505,15 +498,15 @@ CURLcode Curl_pp_flushsend(struct pingpong *pp)
 
 CURLcode Curl_pp_disconnect(struct pingpong *pp)
 {
-  free(pp->cache);
-  pp->cache = NULL;
+  Curl_dyn_free(&pp->sendbuf);
+  Curl_safefree(pp->cache);
   return CURLE_OK;
 }
 
 bool Curl_pp_moredata(struct pingpong *pp)
 {
   return (!pp->sendleft && pp->cache && pp->nread_resp < pp->cache_size) ?
-         TRUE : FALSE;
+    TRUE : FALSE;
 }
 
 #endif
