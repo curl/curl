@@ -177,24 +177,22 @@ CURLcode Curl_dyn_add(struct dynbuf *s, const char *str)
 }
 
 /*
- * Append a string printf()-style
+ * Append a string vprintf()-style
  */
-CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
+CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
 {
-  va_list ap;
 #ifdef BUILDING_LIBCURL
   int rc;
-  va_start(ap, fmt);
+  DEBUGASSERT(s);
+  DEBUGASSERT(s->init == DYNINIT);
+  DEBUGASSERT(!s->leng || s->bufr);
   rc = Curl_dyn_vprintf(s, fmt, ap);
-  va_end(ap);
 
   if(!rc)
     return CURLE_OK;
 #else
   char *str;
-  va_start(ap, fmt);
   str = vaprintf(fmt, ap); /* this allocs a new string to append */
-  va_end(ap);
 
   if(str) {
     CURLcode result = dyn_nappend(s, (unsigned char *)str, strlen(str));
@@ -207,7 +205,21 @@ CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
   return CURLE_OUT_OF_MEMORY;
 }
 
-
+/*
+ * Append a string printf()-style
+ */
+CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
+{
+  CURLcode result;
+  va_list ap;
+  DEBUGASSERT(s);
+  DEBUGASSERT(s->init == DYNINIT);
+  DEBUGASSERT(!s->leng || s->bufr);
+  va_start(ap, fmt);
+  result = Curl_dyn_vaddf(s, fmt, ap);
+  va_end(ap);
+  return result;
+}
 
 /*
  * Returns a pointer to the buffer.
