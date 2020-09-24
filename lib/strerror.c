@@ -44,6 +44,7 @@
 #endif
 
 #include "strerror.h"
+#include "curl_multibyte.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -661,28 +662,19 @@ get_winapi_error(int err, char *buf, size_t buflen)
 
   *buf = '\0';
 
-#ifdef _WIN32_WCE
   {
-    wchar_t wbuf[256];
+    TCHAR wbuf[256];
     wbuf[0] = L'\0';
 
     if(FormatMessage((FORMAT_MESSAGE_FROM_SYSTEM |
                       FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
-                     LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(wchar_t), NULL)) {
-      size_t written = wcstombs(buf, wbuf, buflen - 1);
-      if(written != (size_t)-1)
-        buf[written] = '\0';
-      else
-        *buf = '\0';
+                     LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(TCHAR), NULL)) {
+      char *msg = curlx_convert_tchar_to_UTF8(wbuf);
+      strncpy(buf, msg, buflen - 1);
+      buf[buflen-1] = '\0';
+      curlx_unicodefree(msg);
     }
   }
-#else
-  if(!FormatMessageA((FORMAT_MESSAGE_FROM_SYSTEM |
-                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
-                     LANG_NEUTRAL, buf, (DWORD)buflen, NULL)) {
-    *buf = '\0';
-  }
-#endif
 
   /* Truncate multiple lines */
   p = strchr(buf, '\n');
