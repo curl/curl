@@ -34,8 +34,12 @@ struct conncache {
   size_t num_conn;
   long next_connection_id;
   struct curltime last_cleanup;
-  /* handle used for closing cached connections */
-  struct Curl_easy *closure_handle;
+
+  /* settings the "closure handle" wants */
+  long timeout;
+  long server_response_timeout;
+  bool no_signal;
+  bool update_values; /* if these settings are set */
 };
 
 #define BUNDLE_NO_MULTIUSE -1
@@ -101,7 +105,8 @@ Curl_conncache_extract_bundle(struct Curl_easy *data,
                               struct connectbundle *bundle);
 struct connectdata *
 Curl_conncache_extract_oldest(struct Curl_easy *data);
-void Curl_conncache_close_all_connections(struct conncache *connc);
+void Curl_conncache_close_all_connections(struct conncache *connc,
+                                          struct Curl_easy *data);
 void Curl_conncache_print(struct conncache *connc);
 
 #endif /* HEADER_CURL_CONNCACHE_H */

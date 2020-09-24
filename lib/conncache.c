@@ -112,21 +112,8 @@ static void free_bundle_hash_entry(void *freethis)
 
 int Curl_conncache_init(struct conncache *connc, int size)
 {
-  int rc;
-
-  /* allocate a new easy handle to use when closing cached connections */
-  connc->closure_handle = curl_easy_init();
-  if(!connc->closure_handle)
-    return 1; /* bad */
-
-  rc = Curl_hash_init(&connc->hash, size, Curl_hash_str,
-                      Curl_str_key_compare, free_bundle_hash_entry);
-  if(rc)
-    Curl_close(&connc->closure_handle);
-  else
-    connc->closure_handle->state.conn_cache = connc;
-
-  return rc;
+  return Curl_hash_init(&connc->hash, size, Curl_hash_str,
+                        Curl_str_key_compare, free_bundle_hash_entry);
 }
 
 void Curl_conncache_destroy(struct conncache *connc)
@@ -531,38 +518,52 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
   return conn_candidate;
 }
 
-void Curl_conncache_close_all_connections(struct conncache *connc)
+void Curl_conncache_close_all_connections(struct conncache *connc,
+                                          struct Curl_easy *data)
 {
-  struct connectdata *conn;
   char buffer[READBUFFER_MIN + 1];
-  if(!connc->closure_handle)
-    return;
-  connc->closure_handle->state.buffer = buffer;
-  connc->closure_handle->set.buffer_size = READBUFFER_MIN;
+  struct Curl_easy *chandle;
+  struct connectdata *conn = conncache_find_first_connection(connc);
+  if(!conn)
+    return; /* no connection, we're done here */
 
-  conn = conncache_find_first_connection(connc);
+  /* No existing handle to use, allocate a new */
+  if(!data && Curl_open(&chandle))
+    return; /* BAD! */
+  else if(data)
+    chandle = data;
+  else {
+    chandle->state.conn_cache = connc;
+    chandle->state.buffer = buffer;
+    chandle->set.buffer_size = READBUFFER_MIN;
+    if(connc->update_values) {
+      /* we have updated settings to use */
+      chandle->set.timeout = connc->timeout;
+      chandle->set.server_response_timeout = connc->server_response_timeout;
+      chandle->set.no_signal = connc->no_signal;
+    }
+  }
+
   while(conn) {
     SIGPIPE_VARIABLE(pipe_st);
-    conn->data = connc->closure_handle;
+    conn->data = chandle;
 
     sigpipe_ignore(conn->data, &pipe_st);
     /* This will remove the connection from the cache */
     connclose(conn, "kill all");
     Curl_conncache_remove_conn(conn->data, conn, TRUE);
-    (void)Curl_disconnect(connc->closure_handle, conn, FALSE);
+    (void)Curl_disconnect(chandle, conn, FALSE);
     sigpipe_restore(&pipe_st);
 
     conn = conncache_find_first_connection(connc);
   }
 
-  connc->closure_handle->state.buffer = NULL;
-  if(connc->closure_handle) {
+  if(!data) {
     SIGPIPE_VARIABLE(pipe_st);
-    sigpipe_ignore(connc->closure_handle, &pipe_st);
-
-    Curl_hostcache_clean(connc->closure_handle,
-                         connc->closure_handle->dns.hostcache);
-    Curl_close(&connc->closure_handle);
+    chandle->state.buffer = NULL;
+    sigpipe_ignore(chandle, &pipe_st);
+    Curl_hostcache_clean(chandle, chandle->dns.hostcache);
+    Curl_close(&chandle);
     sigpipe_restore(&pipe_st);
   }
 }

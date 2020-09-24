@@ -519,11 +519,11 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
      state somewhat we clone the timeouts from each added handle so that the
      closure handle always has the same timeouts as the most recently added
      easy handle. */
-  data->state.conn_cache->closure_handle->set.timeout = data->set.timeout;
-  data->state.conn_cache->closure_handle->set.server_response_timeout =
+  data->state.conn_cache->timeout = data->set.timeout;
+  data->state.conn_cache->server_response_timeout =
     data->set.server_response_timeout;
-  data->state.conn_cache->closure_handle->set.no_signal =
-    data->set.no_signal;
+  data->state.conn_cache->no_signal = data->set.no_signal;
+  data->state.conn_cache->update_values = TRUE;
   CONNCACHE_UNLOCK(data);
 
   Curl_update_timer(multi);
@@ -574,10 +574,8 @@ static CURLcode multi_done(struct Curl_easy *data,
   case CURLE_ABORTED_BY_CALLBACK:
   case CURLE_READ_ERROR:
   case CURLE_WRITE_ERROR:
-    /* When we're aborted due to a callback return code it basically have to
-       be counted as premature as there is trouble ahead if we don't. We have
-       many callbacks and protocols work differently, we could potentially do
-       this more fine-grained in the future. */
+  case CURLE_OUT_OF_MEMORY:
+  case CURLE_SEND_ERROR:
     premature = TRUE;
   default:
     break;
@@ -2602,8 +2600,12 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
 
     multi->type = 0; /* not good anymore */
 
-    /* Firsrt remove all remaining easy handles */
+    /* First remove all remaining easy handles */
     data = multi->easyp;
+
+    /* Close all the connections in the connection cache */
+    Curl_conncache_close_all_connections(&multi->conn_cache, data);
+
     while(data) {
       nextdata = data->next;
       if(!data->state.done && data->conn)
@@ -2627,9 +2629,6 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
 
       data = nextdata;
     }
-
-    /* Close all the connections in the connection cache */
-    Curl_conncache_close_all_connections(&multi->conn_cache);
 
     Curl_hash_destroy(&multi->sockhash);
     Curl_conncache_destroy(&multi->conn_cache);
