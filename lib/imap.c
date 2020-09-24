@@ -1429,6 +1429,7 @@ static CURLcode imap_connect(struct connectdata *conn, bool *done)
   imapc->preftype = IMAP_TYPE_ANY;
   Curl_sasl_init(&imapc->sasl, &saslimap);
 
+  Curl_dyn_init(&imapc->dyn, DYN_IMAP_CMD);
   /* Initialise the pingpong layer */
   Curl_pp_setup(pp);
   Curl_pp_init(pp);
@@ -1632,6 +1633,7 @@ static CURLcode imap_disconnect(struct connectdata *conn, bool dead_connection)
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&imapc->pp);
+  Curl_dyn_free(&imapc->dyn);
 
   /* Cleanup the SASL module */
   Curl_sasl_cleanup(conn, imapc->sasl.authused);
@@ -1733,30 +1735,25 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
 {
   CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
-  char *taggedfmt;
-  va_list ap;
 
   DEBUGASSERT(fmt);
 
-  /* Calculate the next command ID wrapping at 3 digits */
-  imapc->cmdid = (imapc->cmdid + 1) % 1000;
-
   /* Calculate the tag based on the connection ID and command ID */
   msnprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
-            'A' + curlx_sltosi(conn->connection_id % 26), imapc->cmdid);
+            'A' + curlx_sltosi(conn->connection_id % 26),
+            (++imapc->cmdid)%1000);
 
-  /* Prefix the format with the tag */
-  taggedfmt = aprintf("%s %s", imapc->resptag, fmt);
-  if(!taggedfmt)
-    return CURLE_OUT_OF_MEMORY;
+  /* start with a blank buffer */
+  Curl_dyn_reset(&imapc->dyn);
 
-  /* Send the data with the tag */
-  va_start(ap, fmt);
-  result = Curl_pp_vsendf(&imapc->pp, taggedfmt, ap);
-  va_end(ap);
-
-  free(taggedfmt);
-
+  /* append tag + space + fmt */
+  result = Curl_dyn_addf(&imapc->dyn, "%s %s", imapc->resptag, fmt);
+  if(!result) {
+    va_list ap;
+    va_start(ap, fmt);
+    result = Curl_pp_vsendf(&imapc->pp, Curl_dyn_ptr(&imapc->dyn), ap);
+    va_end(ap);
+  }
   return result;
 }
 

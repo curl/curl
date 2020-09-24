@@ -84,4 +84,5 @@ int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save);
 #define DYN_QLOG_NAME       1024
 #define DYN_H1_TRAILER      4096
 #define DYN_PINGPPONG_CMD   (64*1024)
+#define DYN_IMAP_CMD        (64*1024)
 #endif
