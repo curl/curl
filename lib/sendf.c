@@ -140,7 +140,7 @@ bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
          psnd->recv_size > psnd->recv_processed;
 }
 
-static void pre_receive_plain(struct connectdata *conn, int num)
+static CURLcode pre_receive_plain(struct connectdata *conn, int num)
 {
   const curl_socket_t sockfd = conn->sock[num];
   struct postponed_data * const psnd = &(conn->postponed[num]);
@@ -161,6 +161,8 @@ static void pre_receive_plain(struct connectdata *conn, int num)
         /* Use buffer double default size for intermediate buffer */
         psnd->allocated_size = 2 * conn->data->set.buffer_size;
         psnd->buffer = malloc(psnd->allocated_size);
+        if(!psnd->buffer)
+          return CURLE_OUT_OF_MEMORY;
         psnd->recv_size = 0;
         psnd->recv_processed = 0;
 #ifdef DEBUGBUILD
@@ -180,6 +182,7 @@ static void pre_receive_plain(struct connectdata *conn, int num)
         psnd->allocated_size = 0;
     }
   }
+  return CURLE_OK;
 }
 
 static ssize_t get_pre_recved(struct connectdata *conn, int num, char *buf,
@@ -225,7 +228,7 @@ bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
   (void)sockindex;
   return false;
 }
-#define pre_receive_plain(c,n) do {} while(0)
+#define pre_receive_plain(c,n) CURLE_OK
 #define get_pre_recved(c,n,b,l) 0
 #endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
 
@@ -379,7 +382,10 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
      To avoid lossage of received data, recv() must be
      performed before every send() if any incoming data is
      available. */
-  pre_receive_plain(conn, num);
+  if(pre_receive_plain(conn, num)) {
+    *code = CURLE_OUT_OF_MEMORY;
+    return -1;
+  }
 
 #if defined(MSG_FASTOPEN) && !defined(TCP_FASTOPEN_CONNECT) /* Linux */
   if(conn->bits.tcp_fastopen) {
