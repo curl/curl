@@ -237,6 +237,7 @@ about to issue.
    POP3 `CAPA` and SMTP `EHLO` commands
 - `AUTH [mechanisms]` - Enables support for SASL authentication and specifies
    a list of space separated mechanisms for IMAP, POP3 and SMTP
+- `STOR [num]` respond with this instead of a 226 after `STOR`
 
 #### For HTTP/HTTPS
 

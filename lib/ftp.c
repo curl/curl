@@ -3292,9 +3292,18 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
 
     if(!ftpc->dont_check) {
       /* 226 Transfer complete, 250 Requested file action okay, completed. */
-      if((ftpcode != 226) && (ftpcode != 250)) {
+      switch(ftpcode) {
+      case 226:
+      case 250:
+        break;
+      case 552:
+        failf(data, "Exceeded storage allocation");
+        result = CURLE_REMOTE_DISK_FULL;
+        break;
+      default:
         failf(data, "server did not report OK, got %d", ftpcode);
         result = CURLE_PARTIAL_FILE;
+        break;
       }
     }
   }

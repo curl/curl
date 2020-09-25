@@ -145,6 +145,7 @@ my $nodataconn;    # set if ftp srvr doesn't establish or accepts data channel
 my $nodataconn425; # set if ftp srvr doesn't establish data ch and replies 425
 my $nodataconn421; # set if ftp srvr doesn't establish data ch and replies 421
 my $nodataconn150; # set if ftp srvr doesn't establish data ch and replies 150
+my $storeresp;
 my @capabilities;  # set if server supports capability commands
 my @auth_mechs;    # set if server supports authentication commands
 my %fulltextreply; #
@@ -2413,6 +2414,10 @@ sub STOR_ftp {
             logmsg "No support for: $line";
             last;
         }
+        if($storeresp) {
+            # abort early
+            last;
+        }
     }
     if($nosave) {
         print FILE "$ulsize bytes would've been stored here\n";
@@ -2420,7 +2425,12 @@ sub STOR_ftp {
     close(FILE);
     close_dataconn($disc);
     logmsg "received $ulsize bytes upload\n";
-    sendcontrol "226 File transfer complete\r\n";
+    if($storeresp) {
+        sendcontrol "$storeresp\r\n";
+    }
+    else {
+        sendcontrol "226 File transfer complete\r\n";
+    }
     return 0;
 }
 
@@ -2784,6 +2794,7 @@ sub customize {
     $nodataconn425 = 0; # default is to not send 425 without data channel
     $nodataconn421 = 0; # default is to not send 421 without data channel
     $nodataconn150 = 0; # default is to not send 150 without data channel
+    $storeresp = "";    # send as ultimate STOR response
     @capabilities = (); # default is to not support capability commands
     @auth_mechs = ();   # default is to not support authentication commands
     %fulltextreply = ();#
@@ -2865,6 +2876,10 @@ sub customize {
             # applies to both active and passive FTP modes
             logmsg "FTPD: instructed to use NODATACONN\n";
             $nodataconn=1;
+        }
+        elsif($_ =~ /^STOR (.*)/) {
+            $storeresp=$1;
+            logmsg "FTPD: instructed to use respond to STOR with '$storeresp'\n";
         }
         elsif($_ =~ /CAPA (.*)/) {
             logmsg "FTPD: instructed to support CAPABILITY command\n";
