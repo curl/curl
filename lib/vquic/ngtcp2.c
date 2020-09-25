@@ -798,7 +798,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   infof(data, "Connect socket %d over QUIC to %s:%ld\n",
         sockfd, ipbuf, port);
 
-  qs->version = NGTCP2_PROTO_VER;
+  qs->version = NGTCP2_PROTO_VER_MAX;
 #ifdef USE_OPENSSL
   qs->sslctx = quic_ssl_ctx(data);
   if(!qs->sslctx)
@@ -831,13 +831,9 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   ngtcp2_addr_init(&path.local, &qs->local_addr, qs->local_addrlen, NULL);
   ngtcp2_addr_init(&path.remote, addr, addrlen, NULL);
 
-#ifdef NGTCP2_PROTO_VER
-#define QUICVER NGTCP2_PROTO_VER
-#else
-#error "unsupported ngtcp2 version"
-#endif
-  rc = ngtcp2_conn_client_new(&qs->qconn, &qs->dcid, &qs->scid, &path, QUICVER,
-                              &ng_callbacks, &qs->settings, NULL, qs);
+  rc = ngtcp2_conn_client_new(&qs->qconn, &qs->dcid, &qs->scid, &path,
+                              NGTCP2_PROTO_VER_MAX, &ng_callbacks,
+                              &qs->settings, NULL, qs);
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
 
