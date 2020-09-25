@@ -1067,9 +1067,10 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
      (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) {
     Curl_expire(data, 0, EXPIRE_RUN_NOW); /* get this handle going again */
 
-    /* force a recv/send check of this connection, as the data might've been
-       read off the socket already */
-    data->conn->cselect_bits = CURL_CSELECT_IN | CURL_CSELECT_OUT;
+    if(!data->state.tempcount)
+      /* if not pausing again, force a recv/send check of this connection as
+         the data might've been read off the socket already */
+      data->conn->cselect_bits = CURL_CSELECT_IN | CURL_CSELECT_OUT;
     if(data->multi)
       Curl_update_timer(data->multi);
   }
