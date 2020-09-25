@@ -1062,15 +1062,16 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   }
 
   /* if there's no error and we're not pausing both directions, we want
-     to have this handle checked soon */
-  if((newstate & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
+     to have this handle checked soon
+     NOTE: 'k->keepon' might have gotten updated in the client_write call
+     above */
+  if((k->keepon & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
      (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) {
     Curl_expire(data, 0, EXPIRE_RUN_NOW); /* get this handle going again */
 
-    if(!data->state.tempcount)
-      /* if not pausing again, force a recv/send check of this connection as
-         the data might've been read off the socket already */
-      data->conn->cselect_bits = CURL_CSELECT_IN | CURL_CSELECT_OUT;
+    /* force a recv/send check of this connection, as the data might've been
+       read off the socket already */
+    data->conn->cselect_bits = CURL_CSELECT_IN | CURL_CSELECT_OUT;
     if(data->multi)
       Curl_update_timer(data->multi);
   }
