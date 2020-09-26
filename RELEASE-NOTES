@@ -4,7 +4,7 @@ curl and libcurl 7.73.0
  Command line options:         234
  curl_easy_setopt() options:   278
  Public functions in libcurl:  85
- Contributors:                 2261
+ Contributors:                 2264
 
 This release includes the following changes:
 
@@ -52,6 +52,7 @@ This release includes the following bugfixes:
  o curl_get_line: build only if cookies or alt-svc are enabled [13]
  o curl_mime_headers.3: fix the example's use of curl_slist_append [83]
  o Curl_pgrsTime - return new time to avoid timeout integer overflow [32]
+ o Curl_send: return error when pre_receive_plain can't malloc [111]
  o dist: add missing CMake Find modules to the distribution [14]
  o docs/LICENSE-MIXING: remove [79]
  o docs/RESOURCES: remove [105]
@@ -66,6 +67,8 @@ This release includes the following bugfixes:
  o ftp: a 550 response to SIZE returns CURLE_REMOTE_FILE_NOT_FOUND [99]
  o ftp: avoid risk of reading uninitialized integers [76]
  o ftp: get rid of the PPSENDF macro [85]
+ o ftp: make a 552 response return CURLE_REMOTE_DISK_FULL [87]
+ o ftp: separate FTPS from FTP over "HTTPS proxy" [112]
  o git: ignore libtests in 3XXX area [16]
  o github: use new issue template feature [88]
  o HISTORY: mention alt-svc added in 2019
@@ -73,6 +76,7 @@ This release includes the following bugfixes:
  o http: consolidate nghttp2_session_mem_recv() call paths [80]
  o http_proxy: do not count proxy headers in the header bytecount [90]
  o http_proxy: do not crash with HTTPS_PROXY and NO_PROXY set [50]
+ o imap: make imap_send use dynbuf for the send buffer management [110]
  o imap: set cselect_bits to CURL_CSELECT_IN initially [104]
  o lib/Makefile.am: bump VERSIONINFO due to new functions [65]
  o lib1560: verify "redirect" to double-slash leading URL [20]
@@ -85,12 +89,15 @@ This release includes the following bugfixes:
  o multi: expand pre-check for socket readiness [21]
  o multi: handle connection state winsock events [31]
  o multi: implement wait using winsock events [22]
+ o ngtcp2: adapt to new NGTCP2_PROTO_VER_MAX define [108]
  o ngtcp2: adapt to the new pkt_info arguments [18]
  o ntlm: fix condition for curl_ntlm_core usage [46]
  o openssl: avoid error conditions when importing native CA [52]
  o openssl: consider ALERT_CERTIFICATE_EXPIRED a failed verification [57]
  o openssl: Fix wincrypt symbols conflict with BoringSSL [9]
  o parsedate: tune the date to epoch conversion [95]
+ o pause: only trigger a reread if the unpause sticks [92]
+ o pingpong: use a dynbuf for the *_pp_sendf() function [113]
  o runtests: allow creating files without newlines [72]
  o runtests: clear pid variables when failing to start a server [12]
  o runtests: make cleardir() erase dot files too [8]
@@ -106,10 +113,14 @@ This release includes the following bugfixes:
  o socketpair: allow CURL_DISABLE_SOCKETPAIR [11]
  o sockfilt: handle FD_CLOSE winsock event on write socket [30]
  o SSLCERTS: fix English syntax [34]
+ o strerror: honor Unicode API choice on Windows [109]
+ o symbian: drop support [118]
  o telnet.c: depend on static requirement of WinSock version 2 [61]
  o test1541: remove since it is a known bug [68]
+ o test163[12]: require http to be built-in to run [94]
  o test434: test -K use in a single line without newline [59]
  o test971: show test mismatches "inline"
+ o tests/data: Fix some mismatched XML tags in test cases
  o tests/FILEFORMAT: document nonewline support for <file>
  o tests/FILEFORMAT: document type=shell for <command>
  o tests: remove pipelining tests [69]
@@ -132,17 +143,18 @@ advice from friends like these:
 
   Alessandro Ghedini, Anders Bakken, Andrew Barnes, anio on github,
   Antarpreet Singh, beckenc on github, Chris Paulson-Ellis,
-  Christian Weisgerber, COFFEETALES on github, Daniel Stenberg, Dan Kenigsberg,
-  Diven Qi, Don J Olmstead, Eli Schwartz, Emil Engler, Eric Curtin,
-  fullincome on github, Gergely Nagy, Gisle Vanem, Harry Sintonen,
-  htasta on github, ihsinme on github, Ionuț-Francisc Oancea, Javier Blazquez,
-  Jeroen Ooms, jmdavitt on github, Kamil Dudka, Laramie Leavitt, Marcel Raad,
-  Marc Hörsken, Martin Bašti, Michael Baentsch, Michael Musset,
-  Michael Olbrich, Peter Körner, Peter Wu, Quentin Balland,
-  Rasmus Melchior Jacobsen, Ray Satiro, rcombs on github, Samuel Marks,
-  Samuel Tranchet, sofaboss on github, Stefan Strogin, Tatsuhiro Tsujikawa,
-  Tomas Berger, Tom van der Woerdt, Viktor Szakats, xwxbug on github,
-  (49 contributors)
+  Christian Weisgerber, COFFEETALES on github, Dan Fandrich, Daniel Stenberg,
+  Dan Kenigsberg, Diven Qi, Don J Olmstead, Duncan Wilcox, Eli Schwartz,
+  Emil Engler, Eric Curtin, fullincome on github, Gergely Nagy, Gisle Vanem,
+  Harry Sintonen, htasta on github, ihsinme on github, Ionuț-Francisc Oancea,
+  Javier Blazquez, Jeroen Ooms, jmdavitt on github, Kamil Dudka,
+  Kunal Chandarana, Laramie Leavitt, Marcel Raad, Marc Hörsken, Martin Bašti,
+  Michael Baentsch, Michael Musset, Michael Olbrich, Mingtao Yang,
+  Peter Körner, Peter Wu, Quentin Balland, Rasmus Melchior Jacobsen,
+  Ray Satiro, rcombs on github, Samuel Marks, Samuel Tranchet,
+  sofaboss on github, Stefan Strogin, Tatsuhiro Tsujikawa, Tomas Berger,
+  Tom van der Woerdt, Viktor Szakats, xwxbug on github,
+  (53 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -234,11 +246,14 @@ References to bug reports and discussions on issues:
  [84] = https://github.com/curl/curl/commit/879007f8118771f4896334731aaca5850a154675#commitcomment-42087553
  [85] = https://curl.haxx.se/bug/?i=5971
  [86] = https://curl.haxx.se/bug/?i=5969
+ [87] = https://curl.haxx.se/bug/?i=6016
  [88] = https://curl.haxx.se/bug/?i=5936
  [89] = https://curl.haxx.se/bug/?i=5968
  [90] = https://curl.haxx.se/bug/?i=5992
  [91] = https://curl.haxx.se/bug/?i=5993
+ [92] = https://curl.haxx.se/mail/lib-2020-09/0081.html
  [93] = https://curl.haxx.se/bug/?i=5954
+ [94] = https://curl.haxx.se/bug/?i=6014
  [95] = https://curl.haxx.se/bug/?i=5985
  [96] = https://curl.haxx.se/bug/?i=5984
  [97] = https://curl.haxx.se/bug/?i=5947
@@ -252,3 +267,10 @@ References to bug reports and discussions on issues:
  [105] = https://curl.haxx.se/bug/?i=5980
  [106] = https://curl.haxx.se/bug/?i=5981
  [107] = https://curl.haxx.se/bug/?i=5979
+ [108] = https://curl.haxx.se/bug/?i=6012
+ [109] = https://curl.haxx.se/bug/?i=6005
+ [110] = https://curl.haxx.se/bug/?i=6010
+ [111] = https://curl.haxx.se/bug/?i=6011
+ [112] = https://curl.haxx.se/bug/?i=5523
+ [113] = https://curl.haxx.se/bug/?i=6004
+ [118] = https://curl.haxx.se/bug/?i=5989
