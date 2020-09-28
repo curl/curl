@@ -1181,6 +1181,10 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
         failf(data, "schannel: SNI or certificate check failed: %s",
               Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
         return CURLE_PEER_FAILED_VERIFICATION;
+      case SEC_E_UNTRUSTED_ROOT:
+        failf(data, "schannel: %s",
+              Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+        return CURLE_PEER_FAILED_VERIFICATION;
         /*
           case SEC_E_INVALID_HANDLE:
           case SEC_E_INVALID_TOKEN:
