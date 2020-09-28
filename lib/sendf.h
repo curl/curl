@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,8 +24,6 @@
 
 #include "curl_setup.h"
 
-CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *,
-                    const char *fmt, ...);
 void Curl_infof(struct Curl_easy *, const char *fmt, ...);
 void Curl_failf(struct Curl_easy *, const char *fmt, ...);
 
