@@ -137,6 +137,7 @@
  17.2 Handle growing SFTP files
  17.3 Support better than MD5 hostkey hash
  17.4 Support CURLOPT_PREQUOTE
+ 17.5 SSH over HTTPS proxy with more backends
 
  18. Command line tool
  18.1 sync
@@ -929,6 +930,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  The two other QUOTE options are supported for SFTP, but this was left out for
  unknown reasons!
+
+17.5 SSH over HTTPS proxy with more backends
+
+ The SSH based protocols SFTP and SCP didn't work over HTTPS proxy at
+ all until PR https://github.com/curl/curl/pull/6021 brought the
+ functionality with the libssh2 backend. Presumably, this support
+ can/could be added for the other backends as well.
 
 18. Command line tool
 
