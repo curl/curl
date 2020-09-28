@@ -1182,7 +1182,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
               Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
         return CURLE_PEER_FAILED_VERIFICATION;
       case SEC_E_UNTRUSTED_ROOT:
-        failf(data, "schannel: untrusted root: %s",
+        failf(data, "schannel: %s",
               Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
         return CURLE_PEER_FAILED_VERIFICATION;
         /*
