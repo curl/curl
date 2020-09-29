@@ -49,7 +49,7 @@ CURL_CHECK_OPTION_CURLDEBUG
 CURL_CHECK_OPTION_SYMBOL_HIDING
 CURL_CHECK_OPTION_ARES
 CURL_CHECK_OPTION_RT
-CURL_CHECK_OPTION_ESNI
+CURL_CHECK_OPTION_ECH
 
 XC_CHECK_PATH_SEPARATOR
 
@@ -4873,32 +4873,32 @@ if test "$enable_altsvc" = "yes"; then
 fi
 
 dnl *************************************************************
-dnl check whether ESNI support, if desired, is actually available
+dnl check whether ECH support, if desired, is actually available
 dnl
-if test "x$want_esni" != "xno"; then
-  AC_MSG_CHECKING([whether ESNI support is available])
+if test "x$want_ech" != "xno"; then
+  AC_MSG_CHECKING([whether ECH support is available])
 
   dnl assume NOT and look for sufficient condition
-  ESNI_ENABLED=0
-  ESNI_SUPPORT=''
+  ECH_ENABLED=0
+  ECH_SUPPORT=''
 
-  dnl OpenSSL with a chosen ESNI function should be enough
+  dnl OpenSSL with a chosen ECH function should be enough
   dnl so more exhaustive checking seems unnecessary for now
   if test "x$OPENSSL_ENABLED" = "x1"; then
-    AC_CHECK_FUNCS(SSL_get_esni_status,
-      ESNI_SUPPORT="ESNI support available (OpenSSL with SSL_get_esni_status)"
-      ESNI_ENABLED=1)
+    AC_CHECK_FUNCS(SSL_get_ech_status,
+      ECH_SUPPORT="ECH support available (OpenSSL with SSL_get_ech_status)"
+      ECH_ENABLED=1)
 
   dnl add 'elif' chain here for additional implementations
   fi
 
   dnl now deal with whatever we found
-  if test "x$ESNI_ENABLED" = "x1"; then
-    AC_DEFINE(USE_ESNI, 1, [if ESNI support is available])
-    AC_MSG_RESULT($ESNI_SUPPORT)
-    experimental="$experimental ESNI"
+  if test "x$ECH_ENABLED" = "x1"; then
+    AC_DEFINE(USE_ECH, 1, [if ECH support is available])
+    AC_MSG_RESULT($ECH_SUPPORT)
+    experimental="$experimental ECH"
   else
-    AC_MSG_ERROR([--enable-esni ignored: No ESNI support found])
+    AC_MSG_ERROR([--enable-ech ignored: No ECH support found])
   fi
 fi
 
@@ -5034,8 +5034,8 @@ if test "x$OPENSSL_ENABLED" = "x1" -o "x$GNUTLS_ENABLED" = "x1" \
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPS-proxy"
 fi
 
-if test "x$ESNI_ENABLED" = "x1"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES ESNI"
+if test "x$ECH_ENABLED" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES ECH"
 fi
 
 dnl replace spaces with newlines
@@ -5233,7 +5233,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Alt-svc:          ${curl_altsvc_msg}
   HTTP2:            ${curl_h2_msg}
   HTTP3:            ${curl_h3_msg}
-  ESNI:             ${curl_esni_msg}
+  ECH:              ${curl_ech_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
   Features:         ${SUPPORT_FEATURES}
 ])
