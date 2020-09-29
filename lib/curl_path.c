@@ -168,7 +168,7 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, char *homedir)
     *cpp = cp + i + strspn(cp + i, WHITESPACE);
   }
   else {
-    /* Read to end of filename - either to white space or terminator */
+    /* Read to end of filename - either to whitespace or terminator */
     end = strpbrk(cp, WHITESPACE);
     if(end == NULL)
       end = strchr(cp, '\0');
@@ -184,7 +184,7 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, char *homedir)
       (*path)[pathLength] = '\0';
       cp += 3;
     }
-    /* Copy path name up until first "white space" */
+    /* Copy path name up until first "whitespace" */
     memcpy(&(*path)[pathLength], cp, (int)(end - cp));
     pathLength += (int)(end - cp);
     (*path)[pathLength] = '\0';

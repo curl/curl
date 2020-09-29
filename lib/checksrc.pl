@@ -52,7 +52,7 @@ my %warnings_extended = (
 my %warnings = (
     'LONGLINE'         => "Line longer than $max_column",
     'TABS'             => 'TAB characters not allowed',
-    'TRAILINGSPACE'    => 'Trailing white space on the line',
+    'TRAILINGSPACE'    => 'Trailing whitespace on the line',
     'CPPCOMMENTS'      => '// comment detected',
     'SPACEBEFOREPAREN' => 'space before an open parenthesis',
     'SPACEAFTERPAREN'  => 'space after open parenthesis',
@@ -399,7 +399,7 @@ sub scanfile {
             checkwarn("TABS",
                       $line, length($1), $file, $l, "Contains TAB character", 1);
         }
-        # detect trailing white space
+        # detect trailing whitespace
         if($l =~ /^(.*)[ \t]+\z/) {
             checkwarn("TRAILINGSPACE",
                       $line, length($1), $file, $l, "Trailing whitespace");
