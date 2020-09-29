@@ -3549,7 +3549,7 @@ case "$OPT_H2" in
     ;;
 esac
 
-curl_h2_msg="disabled (--with-nghttp2)"
+curl_h2_msg="no      (--with-nghttp2)"
 if test X"$want_h2" != Xno; then
   dnl backup the pre-nghttp2 variables
   CLEANLDFLAGS="$LDFLAGS"
@@ -3608,7 +3608,7 @@ dnl Check for ngtcp2 (QUIC)
 dnl **********************************************************************
 
 OPT_TCP2="yes"
-curl_h3_msg="disabled (--with-ngtcp2, --with-quiche)"
+curl_h3_msg="no      (--with-ngtcp2, --with-quiche)"
 
 if test "x$disable_http" = "xyes"; then
   # without HTTP, ngtcp2 is no use
@@ -3636,7 +3636,7 @@ case "$OPT_TCP2" in
     ;;
 esac
 
-curl_tcp2_msg="disabled (--with-ngtcp2)"
+curl_tcp2_msg="no      (--with-ngtcp2)"
 if test X"$want_tcp2" != Xno; then
   dnl backup the pre-ngtcp2 variables
   CLEANLDFLAGS="$LDFLAGS"
@@ -3835,7 +3835,7 @@ case "$OPT_NGHTTP3" in
     ;;
 esac
 
-curl_http3_msg="disabled (--with-nghttp3)"
+curl_http3_msg="no      (--with-nghttp3)"
 if test X"$want_nghttp3" != Xno; then
   dnl backup the pre-nghttp3 variables
   CLEANLDFLAGS="$LDFLAGS"
