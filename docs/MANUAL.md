@@ -556,7 +556,7 @@ Example, set default time out and proxy in a config file:
     # ... and we use a proxy for all accesses:
     proxy = proxy.our.domain.com:8080
 
-White spaces ARE significant at the end of lines, but all white spaces leading
+Whitespaces ARE significant at the end of lines, but all whitespace leading
 up to the first characters of each line are ignored.
 
 Prevent curl from reading the default file by using -q as the first command

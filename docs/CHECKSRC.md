@@ -100,7 +100,7 @@ warnings are:
 
 - `TABS`: TAB characters are not allowed!
 
-- `TRAILINGSPACE`: Trailing white space on the line
+- `TRAILINGSPACE`: Trailing whitespace on the line
 
 - `TYPEDEFSTRUCT`: we frown upon (most) typedefed structs
 

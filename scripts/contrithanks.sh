@@ -64,7 +64,7 @@ sed -e 's/^ //' -e 's/ $//g' -e 's/@users.noreply.github.com$/ on github/'
 
 # grep out the list of names from RELEASE-NOTES
 # split on ", "
-# remove leading white spaces
+# remove leading whitespace
 grep -a "^  [^ (]" RELEASE-NOTES| \
 sed 's/, */\n/g'| \
 sed 's/^ *//'

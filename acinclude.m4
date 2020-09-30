@@ -661,7 +661,7 @@ dnl -------------------------------------------------
 dnl Check for libraries needed for WINLDAP support,
 dnl and prepended to LIBS any needed libraries.
 dnl This macro can take an optional parameter with a
-dnl white space separated list of libraries to check
+dnl whitespace separated list of libraries to check
 dnl before the WINLDAP default ones.
 
 AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
@@ -755,7 +755,7 @@ dnl -------------------------------------------------
 dnl Check for libraries needed for LDAP support,
 dnl and prepended to LIBS any needed libraries.
 dnl This macro can take an optional parameter with a
-dnl white space separated list of libraries to check
+dnl whitespace separated list of libraries to check
 dnl before the default ones.
 
 AC_DEFUN([CURL_CHECK_LIBS_LDAP], [

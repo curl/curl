@@ -1355,7 +1355,7 @@ Curl_compareheader(const char *headerline, /* line to check */
   /* pass the header */
   start = &headerline[hlen];
 
-  /* pass all white spaces */
+  /* pass all whitespace */
   while(*start && ISSPACE(*start))
     start++;
 
