@@ -2,9 +2,9 @@
 
 ## Simple Usage
 
-Get the main page from Netscape's web-server:
+Get the main page from a web-server:
 
-    curl http://www.netscape.com/
+    curl https://www.example.com/
 
 Get the README file the user's home directory at funet's ftp-server:
 
@@ -16,7 +16,7 @@ Get a web page from a server using port 8000:
 
 Get a directory listing of an FTP site:
 
-    curl ftp://cool.haxx.se/
+    curl ftp://ftp.funet.fi
 
 Get the definition of curl from a dictionary:
 
@@ -24,7 +24,7 @@ Get the definition of curl from a dictionary:
 
 Fetch two documents at once:
 
-    curl ftp://cool.haxx.se/ http://www.weirdserver.com:8000/
+    curl ftp://ftp.funet.fi/ http://www.weirdserver.com:8000/
 
 Get a file off an FTPS server:
 
@@ -61,13 +61,13 @@ Get a file from an SMB server:
 
 Get a web page and store in a local file with a specific name:
 
-    curl -o thatpage.html http://www.netscape.com/
+    curl -o thatpage.html http://www.example.com/
 
 Get a web page and store in a local file, make the local file get the name of
 the remote document (if no file name part is specified in the URL, this will
 fail):
 
-    curl -O http://www.netscape.com/index.html
+    curl -O http://www.example.com/index.html
 
 Fetch two files and store them with their remote names:
 
@@ -657,11 +657,11 @@ Download with `PORT` but use 192.168.0.10 as our IP address to use:
 
 Get a web page from a server using a specified port for the interface:
 
-    curl --interface eth0:1 http://www.netscape.com/
+    curl --interface eth0:1 http://www.example.com/
 
 or
 
-    curl --interface 192.168.1.10 http://www.netscape.com/
+    curl --interface 192.168.1.10 http://www.example.com/
 
 ## HTTPS
 
