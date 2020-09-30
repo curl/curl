@@ -325,6 +325,8 @@ April: added the cyassl backend (later renamed to WolfSSL)
 
  October: SSLKEYLOGFILE support, new MIME API
 
+ October: Daniel received the Polhem Prize for his work on curl
+
  November: brotli
 
 2018
@@ -354,6 +356,8 @@ April: added the cyassl backend (later renamed to WolfSSL)
     Public functions in libcurl:  80
     Contributors:                 1808
 
+ December: removed axTLS support
+
 2019
 ----
 
@@ -362,3 +366,17 @@ April: added the cyassl backend (later renamed to WolfSSL)
  August: the first HTTP/3 requests with curl.
 
  September: 7.66.0 is released and the tool offers parallel downloads
+
+2020
+----
+
+ curl and libcurl are installed in an estimated 10 *billion* instances
+ world-wide.
+
+ January: added BearSSL support
+
+ March: removed support for PolarSSL, added wolfSSH support
+
+ April: experimental MQTT support
+
+ August: zstd support
