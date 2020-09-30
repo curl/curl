@@ -21,6 +21,6 @@
 ###########################################################################
 SUBDIRS = curl
 
-EXTRA_DIST = README
+EXTRA_DIST = README.md
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
