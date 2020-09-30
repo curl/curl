@@ -167,6 +167,7 @@
  19. Build
  19.1 roffit
  19.2 Enable PIE and RELRO by default
+ 19.3 Don't use GNU libtool on OpenBSD
 
  20. Test suite
  20.1 SSL tunnel
@@ -1187,6 +1188,15 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  to no impact, neither on the performance nor on the general functionality of
  curl.
 
+19.3 Don't use GNU libtool on OpenBSD
+ When compiling curl on OpenBSD with "--enable-debug" it will give linking
+ errors when you use GNU libtool. This can be fixed by using the libtool
+ provided by OpenBSD itself. However for this the user always needs to invoke
+ make with "LIBTOOL=/usr/bin/libtool". It would be nice if the script could
+ have some magic to detect if this system is an OpenBSD host and then use the
+ OpenBSD libtool instead.
+
+ See https://github.com/curl/curl/issues/5862
 
 20. Test suite
 
