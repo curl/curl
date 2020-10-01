@@ -670,9 +670,11 @@ get_winapi_error(int err, char *buf, size_t buflen)
                       FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
                      LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(TCHAR), NULL)) {
       char *msg = curlx_convert_tchar_to_UTF8(wbuf);
-      strncpy(buf, msg, buflen - 1);
-      buf[buflen-1] = '\0';
-      curlx_unicodefree(msg);
+      if(msg) {
+        strncpy(buf, msg, buflen - 1);
+        buf[buflen-1] = '\0';
+        curlx_unicodefree(msg);
+      }
     }
   }
 
