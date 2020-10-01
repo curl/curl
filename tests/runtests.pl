@@ -3304,6 +3304,13 @@ sub subBase64 {
         # put the result into there
         $$thing =~ s/%%B64%%/$enc/;
     }
+    # hex decode
+    if($$thing =~ s/%hex\[(.*)\]hex%/%%HEX%%/i) {
+        # decode %NN characters
+        my $d = $1;
+        $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+        $$thing =~ s/%%HEX%%/$d/;
+    }
 }
 
 sub fixarray {
