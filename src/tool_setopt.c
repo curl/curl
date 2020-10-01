@@ -268,7 +268,7 @@ static char *c_escape(const char *str, curl_off_t len)
       e += 2;
     }
     else if(! isprint(c)) {
-      msnprintf(e, 5, "\\%03o", (unsigned)c);
+      msnprintf(e, 5, "\\x%02x", (unsigned)c);
       e += 4;
     }
     else
