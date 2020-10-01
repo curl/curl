@@ -4,7 +4,7 @@ curl and libcurl 7.73.0
  Command line options:         234
  curl_easy_setopt() options:   278
  Public functions in libcurl:  85
- Contributors:                 2264
+ Contributors:                 2267
 
 This release includes the following changes:
 
@@ -35,6 +35,7 @@ This release includes the following bugfixes:
  o CMake: remove explicit `CMAKE_ANSI_CFLAGS` [45]
  o cmake: remove scary warning [96]
  o cmdline-opts/gen.pl: generate nicer "See Also" in curl.1 [66]
+ o configure: don't say HTTPS-proxy is enabled when disabled [120]
  o configure: fix pkg-config detecting wolfssl [26]
  o configure: let --enable-debug set -Wenum-conversion with gcc >= 10 [56]
  o conn: check for connection being dead before reuse [39]
@@ -83,9 +84,12 @@ This release includes the following bugfixes:
  o lib583: fix enum mixup
  o lib: fix -Wassign-enum warnings [84]
  o lib: make Curl_gethostname accept a const pointer [38]
+ o libssh2: handle the SSH protocols done over HTTPS proxy [125]
  o libssh2: pass on the error from ssh_force_knownhost_key_type [47]
  o Makefile.m32: add ability to override zstd libs [ci skip] [10]
  o man pages: switch to https://example.com URLs [86]
+ o MANUAL: update examples to resolve without redirects [122]
+ o memdebug: remove 9 year old unused debug function [126]
  o multi: expand pre-check for socket readiness [21]
  o multi: handle connection state winsock events [31]
  o multi: implement wait using winsock events [22]
@@ -98,11 +102,14 @@ This release includes the following bugfixes:
  o parsedate: tune the date to epoch conversion [95]
  o pause: only trigger a reread if the unpause sticks [92]
  o pingpong: use a dynbuf for the *_pp_sendf() function [113]
+ o READMEs: convert several to markdown [115]
  o runtests: allow creating files without newlines [72]
  o runtests: clear pid variables when failing to start a server [12]
  o runtests: make cleardir() erase dot files too [8]
  o schannel: fix memory leak when using get_cert_location [15]
+ o schannel: return CURLE_PEER_FAILED_VERIFICATION for untrusted root [128]
  o scripts: improve the "get latest curl release tag" logic
+ o sectransp: make it build with --disable-proxy [123]
  o select.h: make socket validation macros test for INVALID_SOCKET [24]
  o select: align poll emulation to return all relevant events [63]
  o select: fix poll-based check not detecting connect failure
@@ -112,6 +119,7 @@ This release includes the following bugfixes:
  o setopt: return CURLE_BAD_FUNCTION_ARGUMENT on bad argument [91]
  o socketpair: allow CURL_DISABLE_SOCKETPAIR [11]
  o sockfilt: handle FD_CLOSE winsock event on write socket [30]
+ o src: spell whitespace without whitespace [121]
  o SSLCERTS: fix English syntax [34]
  o strerror: honor Unicode API choice on Windows [109]
  o symbian: drop support [118]
@@ -143,18 +151,20 @@ advice from friends like these:
 
   Alessandro Ghedini, Anders Bakken, Andrew Barnes, anio on github,
   Antarpreet Singh, beckenc on github, Chris Paulson-Ellis,
-  Christian Weisgerber, COFFEETALES on github, Dan Fandrich, Daniel Stenberg,
-  Dan Kenigsberg, Diven Qi, Don J Olmstead, Duncan Wilcox, Eli Schwartz,
-  Emil Engler, Eric Curtin, fullincome on github, Gergely Nagy, Gisle Vanem,
-  Harry Sintonen, htasta on github, ihsinme on github, Ionuț-Francisc Oancea,
-  Javier Blazquez, Jeroen Ooms, jmdavitt on github, Kamil Dudka,
-  Kunal Chandarana, Laramie Leavitt, Marcel Raad, Marc Hörsken, Martin Bašti,
-  Michael Baentsch, Michael Musset, Michael Olbrich, Mingtao Yang,
-  Peter Körner, Peter Wu, Quentin Balland, Rasmus Melchior Jacobsen,
-  Ray Satiro, rcombs on github, Samuel Marks, Samuel Tranchet,
-  sofaboss on github, Stefan Strogin, Tatsuhiro Tsujikawa, Tomas Berger,
-  Tom van der Woerdt, Viktor Szakats, xwxbug on github,
-  (53 contributors)
+  Christian Weisgerber, COFFEETALES on github, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, Dan Kenigsberg, Diven Qi, Don J Olmstead, Duncan Wilcox,
+  Eli Schwartz, Emil Engler, Eric Curtin, fullincome on github,
+  Gaurav Malhotra, Gergely Nagy, Gisle Vanem, Harry Sintonen, htasta on github,
+  iammrtau on github, ihsinme on github, Ionuț-Francisc Oancea,
+  Javier Blazquez, Javier Navarro, Jeroen Ooms, jmdavitt on github,
+  Kamil Dudka, Kunal Chandarana, Laramie Leavitt, Marcel Raad, Marc Hörsken,
+  Martin Bašti, Michael Baentsch, Michael Musset, Michael Olbrich,
+  Mingtao Yang, Peter Körner, Peter Wu, Quentin Balland,
+  Rasmus Melchior Jacobsen, Ray Satiro, rcombs on github, Robin Douine,
+  Samuel Marks, Samuel Tranchet, sofaboss on github, Stefan Strogin,
+  Tatsuhiro Tsujikawa, Tomas Berger, Tom van der Woerdt, Viktor Szakats,
+  xwxbug on github,
+  (58 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -273,4 +283,12 @@ References to bug reports and discussions on issues:
  [111] = https://curl.haxx.se/bug/?i=6011
  [112] = https://curl.haxx.se/bug/?i=5523
  [113] = https://curl.haxx.se/bug/?i=6004
+ [115] = https://curl.haxx.se/bug/?i=6028
  [118] = https://curl.haxx.se/bug/?i=5989
+ [120] = https://github.com/curl/curl/pull/5735#issuecomment-701376388
+ [121] = https://curl.haxx.se/bug/?i=6023
+ [122] = https://curl.haxx.se/bug/?i=6024
+ [123] = https://curl.haxx.se/bug/?i=6025
+ [125] = https://curl.haxx.se/bug/?i=4295
+ [126] = https://curl.haxx.se/bug/?i=5973
+ [128] = https://curl.haxx.se/bug/?i=6003
