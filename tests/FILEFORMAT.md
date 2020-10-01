@@ -40,6 +40,19 @@ server's port number (in ASCII) followed by a space and the hexadecimal byte
 
     %b64[%HTTPPORT %9a]b64%
 
+## Hexadecimal decoding
+
+In the preprocess stage, a special instruction can be used to have runtests.pl
+generate a sequence of binary bytes.
+
+To insert a sequence of bytes from a hex encoded string, use this syntax:
+
+    %hex[ %XX-encoded data to decode ]hex%
+
+For example, to insert the binary octets 0, 1 and 255 into the test file:
+
+    %hex[ %00%01%FF ]hex%
+
 # Variables
 
 When the test is preprocessed, a range of "variables" in the test file will be
