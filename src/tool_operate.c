@@ -320,8 +320,10 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
     if(S_ISREG(fileinfo.st_mode))
       uploadfilesize = fileinfo.st_size;
 
-    if(uploadfilesize != -1)
+    if(uploadfilesize != -1) {
+      struct OperationConfig *config = per->config; /* for the macro below */
       my_setopt(per->curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
+    }
     per->input.fd = per->infd;
   }
   return result;
