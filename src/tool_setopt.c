@@ -228,7 +228,7 @@ static char *c_escape(const char *str, curl_off_t len)
   const char *s;
   unsigned char c;
   char *escaped, *e;
-  int cutoff = 0;
+  unsigned int cutoff = 0;
 
   if(len == ZERO_TERMINATED)
     len = strlen(str);
