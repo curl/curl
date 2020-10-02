@@ -44,14 +44,12 @@ HTTP GET over proxy with credentials using blank passwords
 
 #
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET http://remote.example/346 HTTP/1.1
 Host: remote.example
 Proxy-Authorization: Basic cHVzZXI6
 Authorization: Basic c3VzZXI6
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

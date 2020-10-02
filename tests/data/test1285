@@ -72,18 +72,17 @@ four is the number of lines
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 PUT /1285 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 0
 
 PUT /1285 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/1285", response="dc185587d5e8391b347eef194c2a3cd6"
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 85
 Expect: 100-continue

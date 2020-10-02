@@ -74,18 +74,17 @@ Content-Type: text/html
 
 FAILURE2
 </stdout>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 PUT /1131 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 100
 Expect: 100-continue
 
 PUT /11310001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 100
 Expect: 100-continue

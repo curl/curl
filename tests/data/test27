@@ -33,21 +33,21 @@ Get same cookie page several times
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl.*
-</strip>
 <protocol>
 GET /want/27 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /want/27 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: thewinneris=nowayyouwin
 
 GET /want/27 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: thewinneris=nowayyouwin
 

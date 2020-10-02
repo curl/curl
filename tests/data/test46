@@ -59,12 +59,10 @@ domain..tld	FALSE	/want	FALSE	0	empty
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /want/46 HTTP/1.1
 Host: domain..tld:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: empty=; mooo2=indeed2; mooo=indeed
 

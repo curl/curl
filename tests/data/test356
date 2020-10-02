@@ -47,12 +47,10 @@ http://%HOSTIP:%HTTPPORT/356 --alt-svc "log/altsvc-356"
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /356 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -43,9 +43,6 @@ http://0 http://%HOSTIP:%HTTPPORT/1293 -F=
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <strippart>
 s/^--------------------------[a-z0-9]*/------------------------------/
 s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
@@ -53,6 +50,7 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 <protocol>
 POST /1293 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 126
 Content-Type: multipart/form-data; boundary=----------------------------

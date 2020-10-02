@@ -68,18 +68,17 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <proxy>
 CONNECT test.1287:%HTTPPORT HTTP/1.1
 Host: test.1287:%HTTPPORT
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol>
 GET /we/want/that/page/1287 HTTP/1.1
 Host: test.1287:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

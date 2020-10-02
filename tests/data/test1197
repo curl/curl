@@ -50,18 +50,17 @@ http://%HOSTIP:%HTTPPORT/1197 -w "%{method}\n" -L -d "twinkle twinkle little sta
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 POST /1197 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 27
 Content-Type: application/x-www-form-urlencoded
 
 twinkle twinkle little starGET /11970001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

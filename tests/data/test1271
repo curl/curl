@@ -35,12 +35,10 @@ http://%HOSTIP:%HTTPPORT/we/want/our/1271 -w @log/blank1271
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /we/want/our/1271 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

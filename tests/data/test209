@@ -101,23 +101,22 @@ chkhostname curlhost
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
 CONNECT test.remote.example.com.209:%HTTPPORT HTTP/1.1
 Host: test.remote.example.com.209:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 CONNECT test.remote.example.com.209:%HTTPPORT HTTP/1.1
 Host: test.remote.example.com.209:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 GET /path/2090002 HTTP/1.1
-User-Agent: curl/7.12.3-CVS (i686-pc-linux-gnu) libcurl/7.12.3-CVS OpenSSL/0.9.6b zlib/1.1.4
 Host: test.remote.example.com.209:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

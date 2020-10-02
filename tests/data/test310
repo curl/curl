@@ -44,12 +44,10 @@ perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /310 HTTP/1.1
 Host: localhost:%HTTPSPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

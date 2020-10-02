@@ -35,12 +35,10 @@ http://%HOSTIP:%HTTPPORT/we/want/that/page/6 -b "name=contents;name2=content2"
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /we/want/that/page/6 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: name=contents;name2=content2
 

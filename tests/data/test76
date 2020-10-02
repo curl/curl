@@ -29,9 +29,6 @@ http://%HOSTIP:%NOLISTENPORT/76/ -O
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <errorcode>
 23
 </errorcode>

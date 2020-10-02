@@ -46,9 +46,6 @@ http://%HOSTIP:%HTTPPORT/341 --etag-compare log/etag341
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <errorcode>
 26
 </errorcode>

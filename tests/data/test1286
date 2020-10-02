@@ -77,9 +77,7 @@ HTTP GET --digest increasing nonce-count
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
+
 # Reorder the fields in 'Authorization: Digest' header.
 # Since regular and SSPI digest auth header fields may not have the same order
 # or whitespace we homogenize so that both may be tested. Also:
@@ -93,16 +91,19 @@ if(s/^(Authorization: Digest )([^\r\n]+)(\r?\n)$//) { $_ = $1 . join(', ', map {
 <protocol>
 GET /1286 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /1286 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest cnonce=REMOVED, nc=00000001, nonce="1053604144", qop=auth, realm="testrealm", response=REMOVED, uri="/1286", username="auser"
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /12860001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest cnonce=REMOVED, nc=00000002, nonce="1053604144", qop=auth, realm="testrealm", response=REMOVED, uri="/12860001", username="auser"
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

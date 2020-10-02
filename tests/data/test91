@@ -99,25 +99,22 @@ chkhostname curlhost
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /91 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /91 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /91 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAgACABwAAAABgAGAHgAAAAIAAgAfgAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAAKBS3rdGYZEGsqW8otYHWXWBxC5mCuFmYm15ZG9tYWlubXlzZWxmY3VybGhvc3Q=
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

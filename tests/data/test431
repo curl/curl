@@ -64,12 +64,10 @@ Two -K uses with --next and then one on cmdline
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
 POST /4310001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 a: a
 Content-Length: 1
@@ -77,6 +75,7 @@ Content-Type: application/x-www-form-urlencoded
 
 aPOST /4310002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 b: b
 Content-Length: 1
@@ -84,6 +83,7 @@ Content-Type: application/x-www-form-urlencoded
 
 bPOST /4310003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 c: c
 Content-Length: 1

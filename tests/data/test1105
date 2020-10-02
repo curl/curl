@@ -41,12 +41,10 @@ perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
 POST /we/want/1105?parm1=this*that/other/thing&parm2=foobar/1105 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 33
 Content-Type: application/x-www-form-urlencoded

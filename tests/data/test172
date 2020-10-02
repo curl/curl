@@ -42,12 +42,10 @@ http://%HOSTIP:%HTTPPORT/we/want/172 -b log/jar172.txt -b "tool=curl; name=fool"
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /we/want/172 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: nodomain=value; partmatch=present; tool=curl; name=fool
 

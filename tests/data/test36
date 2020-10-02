@@ -52,12 +52,10 @@ http://%HOSTIP:%HTTPPORT/36
 <errorcode>
 56
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /36 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

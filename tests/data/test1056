@@ -60,16 +60,15 @@ http://%HOSTIP:%HTTPPORT/we/are/all/twits/1056 -L
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /we/are/all/twits/1056 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /moo/10560002 HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

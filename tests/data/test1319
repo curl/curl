@@ -63,9 +63,6 @@ pop3://pop.1319:%POP3PORT/1319 -p -x %HOSTIP:%PROXYPORT -u user:secret
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:
-</strip>
 <protocol>
 CAPA
 USER user
@@ -76,7 +73,7 @@ QUIT
 <proxy>
 CONNECT pop.1319:%POP3PORT HTTP/1.1
 Host: pop.1319:%POP3PORT
-User-Agent: curl/7.24.0-DEV (i686-pc-linux-gnu) libcurl/7.24.0-DEV OpenSSL/1.0.0e zlib/1.2.3.4 c-ares/1.7.6-DEV libidn/1.23 libssh2/1.4.0_DEV librtmp/2.2e
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>

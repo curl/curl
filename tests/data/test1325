@@ -58,18 +58,17 @@ http://%HOSTIP:%HTTPPORT/we/1325 -L -d "moo"
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
 POST /we/1325 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 3
 Content-Type: application/x-www-form-urlencoded
 
 mooPOST /we/13250002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 3
 Content-Type: application/x-www-form-urlencoded

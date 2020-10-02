@@ -163,6 +163,7 @@ my $TELNETPORT=$noport;  # TELNET server port with negotiation
 my $HTTPUNIXPATH;        # HTTP server Unix domain socket path
 
 my $SSHSRVMD5 = "[uninitialized]"; # MD5 of ssh server public key
+my $VERSION;             # curl's reported version number
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext('TOOL'); # what curl executable to run on the tests
@@ -2863,8 +2864,9 @@ sub checksystem {
     for(@version) {
         chomp;
 
-        if($_ =~ /^curl/) {
+        if($_ =~ /^curl ([^ ]*)/) {
             $curl = $_;
+            $VERSION = $1;
             $curl =~ s/^(.*)(libcurl.*)/$1/g;
 
             $libcurl = $2;
@@ -3261,6 +3263,7 @@ sub subVariables {
     $$thing =~ s/${prefix}CURL/$CURL/g;
     $$thing =~ s/${prefix}PWD/$pwd/g;
     $$thing =~ s/${prefix}POSIX_PWD/$posix_pwd/g;
+    $$thing =~ s/${prefix}VERSION/$VERSION/g;
 
     my $file_pwd = $pwd;
     if($file_pwd !~ /^\//) {
@@ -4191,6 +4194,10 @@ sub singletest {
         for(@strip) {
             # strip off all lines that match the patterns from both arrays
             chomp $_;
+            if($_ =~ /User-Agent/) {
+                # temp hack
+                next;
+            }
             @out = striparray( $_, \@out);
             @protstrip= striparray( $_, \@protstrip);
         }

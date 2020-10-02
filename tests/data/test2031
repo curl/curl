@@ -263,9 +263,6 @@ chkhostname curlhost
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /20310100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT

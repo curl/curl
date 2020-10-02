@@ -46,17 +46,16 @@ http://%HOSTIP:%HTTPPORT/we/want/62 http://%HOSTIP:%HTTPPORT/we/want/62?hoge=fug
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /we/want/62 HTTP/1.1
 Host: www.host.foo.com
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: test2=yes; test=yes
 
 GET /we/want/62?hoge=fuga HTTP/1.1
 Host: www.host.foo.com
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: test2=yes; test=yes
 

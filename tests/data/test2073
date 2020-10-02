@@ -42,11 +42,12 @@ http://%HOSTIP:%HTTPPORT/2073 -F 'name=a;filename=a.pdf' --next http://%HOSTIP:%
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^(User-Agent:|Content-Type: multipart/form-data;|------------).*
+^(Content-Type: multipart/form-data;|------------).*
 </strip>
 <protocol>
 POST /2073 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 189
 
@@ -56,6 +57,7 @@ Content-Type: application/pdf
 a
 POST /2073 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 184
 

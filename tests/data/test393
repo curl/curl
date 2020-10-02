@@ -47,12 +47,10 @@ http://%HOSTIP:%HTTPPORT/393 --max-filesize 2000000
 <errorcode>
 63
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /393 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

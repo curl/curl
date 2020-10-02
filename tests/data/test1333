@@ -38,12 +38,10 @@ HTTP POST zero length, chunked-encoded
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 POST /1333 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Transfer-Encoding: chunked
 Content-Type: application/x-www-form-urlencoded

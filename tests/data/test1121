@@ -34,12 +34,10 @@ HTTP multiple provided Host: headers
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1121 HTTP/1.1
 Host: host1
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

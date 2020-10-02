@@ -44,12 +44,10 @@ HTTP with --resolve and hostname with trailing dot
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1322 HTTP/1.1
 Host: example.com:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

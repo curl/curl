@@ -39,13 +39,11 @@ http://%HOSTIP:%HTTPPORT/want/1058 -r -101
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /want/1058 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=-101
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

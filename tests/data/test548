@@ -100,13 +100,9 @@ chkhostname curlhost
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
 POST http://test.remote.example.com/path/548 HTTP/1.1
 Host: test.remote.example.com
-User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 36
@@ -116,7 +112,6 @@ this is the blurb we want to upload
 POST http://test.remote.example.com/path/548 HTTP/1.1
 Host: test.remote.example.com
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
@@ -125,7 +120,6 @@ Content-Type: application/x-www-form-urlencoded
 POST http://test.remote.example.com/path/548 HTTP/1.1
 Host: test.remote.example.com
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
-User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 36
