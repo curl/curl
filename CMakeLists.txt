@@ -1325,11 +1325,13 @@ if(BUILD_CURL_EXE)
   add_subdirectory(src)
 endif()
 
-option(BUILD_TESTING "Build tests" "${PERL_FOUND}")
-if(NOT PERL_FOUND)
-  message(STATUS "Perl not found, testing disabled.")
-elseif(BUILD_TESTING)
-  add_subdirectory(tests)
+if(CURL_BUILD_TESTING OR CMAKE_SOURCE_DIR STREQUAL CURL_SOURCE_DIR)
+  option(BUILD_TESTING "Build tests" "${PERL_FOUND}")
+  if(NOT PERL_FOUND)
+    message(STATUS "Perl not found, testing disabled.")
+  elseif(BUILD_TESTING)
+    add_subdirectory(tests)
+  endif()
 endif()
 
 # NTLM support requires crypto function adaptions from various SSL libs
