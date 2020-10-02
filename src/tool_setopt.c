@@ -267,7 +267,7 @@ static char *c_escape(const char *str, curl_off_t len)
       strcpy(e, "\\\"");
       e += 2;
     }
-    else if(! isprint(c)) {
+    else if(!isprint(c)) {
       msnprintf(e, 5, "\\x%02x", (unsigned)c);
       e += 4;
     }
@@ -299,7 +299,7 @@ CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
       if(nv->value == lval)
         break; /* found it */
     }
-    if(! nv->name) {
+    if(!nv->name) {
       /* If no definition was found, output an explicit value.
        * This could happen if new values are defined and used
        * but the NameValue list is not updated. */
