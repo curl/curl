@@ -106,6 +106,7 @@ Available substitute variables include:
 - `%TFTP6PORT` - IPv6 port number of the TFTP server
 - `%TFTPPORT` - Port number of the TFTP server
 - `%USER` - Login ID of the user running the test
+- `%VERSION` - the full version number of the tested curl
 
 # `<testcase>`
 

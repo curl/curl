@@ -67,12 +67,10 @@ perl %SRCDIR/libtest/notexists.pl log/2009 log/name2009 log/outfile2009
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /2009 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

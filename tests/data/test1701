@@ -45,13 +45,13 @@ http://%HOSTIP:%HTTP2PORT/1701 --http2 -d "datatosend"
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^X-Forwarded-Proto:.*
 ^Via:.*
 </strip>
 <protocol nonewline="yes">
 POST /1701 HTTP/1.1
 Host: %HOSTIP:%HTTP2PORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 10
 Content-Type: application/x-www-form-urlencoded

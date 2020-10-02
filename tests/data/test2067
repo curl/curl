@@ -66,12 +66,10 @@ HTTP POST --digest with SHA256 and user-specified Content-Length header
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
 POST /2067 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
@@ -79,6 +77,7 @@ Content-Type: application/x-www-form-urlencoded
 POST /2067 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/2067", response="67b97af219c92fa7e8685e5bebb8e74892f6c6792e911c52bd2dfbf0b49272eb", algorithm=SHA-256
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 11
 Content-Type: application/x-www-form-urlencoded

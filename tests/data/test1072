@@ -55,12 +55,10 @@ which is impossible in HTTP/1.0
 <errorcode>
 25
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 PUT /1072 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Transfer-Encoding: chunked
 Expect: 100-continue

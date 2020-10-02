@@ -44,12 +44,10 @@ ftp://%HOSTIP:23456/1106
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET ftp://%HOSTIP:23456/1106 HTTP/1.1
 Host: %HOSTIP:23456
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

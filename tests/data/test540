@@ -79,9 +79,6 @@ http://test.remote.example.com/path/540 http://%HOSTIP:%HTTPPORT silly:person cu
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
 GET http://test.remote.example.com/path/540 HTTP/1.1
 Host: custom.set.host.name

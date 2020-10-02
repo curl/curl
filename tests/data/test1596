@@ -36,9 +36,6 @@ http://%HOSTIP:%HTTPPORT/1596
 </client>
 
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1596 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT

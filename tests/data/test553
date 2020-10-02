@@ -41,9 +41,6 @@ http://%HOSTIP:%HTTPPORT/path/553
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol nonewline="yes">
 POST /path/553 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT

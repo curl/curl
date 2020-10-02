@@ -48,9 +48,6 @@ http://%HOSTIP:%HTTPPORT/1567
 </client>
 
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1567 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT

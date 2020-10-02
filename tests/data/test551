@@ -75,9 +75,6 @@ http://test.remote.example.com/path/551 http://%HOSTIP:%HTTPPORT s1lly:pers0n
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
 POST http://test.remote.example.com/path/551 HTTP/1.1
 Host: test.remote.example.com

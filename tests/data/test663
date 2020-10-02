@@ -63,17 +63,16 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET http://example.com/gimme/663?foobar HTTP/1.1
 Host: example.com
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://example.net/there/tes%20t%20case=/6630002?+yes+no HTTP/1.1
 Host: example.net
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

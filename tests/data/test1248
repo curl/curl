@@ -35,13 +35,11 @@ http://user:secret@%HOSTIP:%HTTPPORT/1248 --proxy http://dummy:%NOLISTENPORT/ --
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1248 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dXNlcjpzZWNyZXQ=
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

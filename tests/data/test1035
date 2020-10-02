@@ -42,9 +42,6 @@ http://too-long-IDN-name-cürl-rüles-la-la-la-dee-da-flooby-nooby.local/page/10
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <errorcode>
 3
 </errorcode>

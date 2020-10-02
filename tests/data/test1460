@@ -47,9 +47,6 @@ initial content
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 # Warning: --include and --remote-header-name cannot be combined.
 <errorcode>
 2

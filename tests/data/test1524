@@ -55,20 +55,18 @@ moo
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
 PUT /blah/1524 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 4
 Expect: 100-continue
 
 moo
 GET /blah/moo.html&testcase=/15240002 HTTP/1.1
-User-Agent: this should be ignored
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 

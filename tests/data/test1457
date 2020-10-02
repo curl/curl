@@ -51,11 +51,9 @@ line2
 <protocol>
 GET /1457 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<strip>
-^User-Agent:.*
-</strip>
 </verify>
 </testcase>

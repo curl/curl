@@ -41,12 +41,10 @@ HTTP-IPv6 GET with proxy specified using IPv6-numerical address
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:
-</strip>
 <protocol>
 GET http://veryveryremotesite.com/263 HTTP/1.1
 Host: veryveryremotesite.com
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

@@ -39,17 +39,16 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
 GET http://test.remote.example.com.1150:150/path HTTP/1.1
 Host: test.remote.example.com.1150:150
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://test.remote.example.com.1150:1234/path/ HTTP/1.1
 Host: test.remote.example.com.1150:1234
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

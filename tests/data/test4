@@ -37,12 +37,10 @@ Replaced internal and added custom HTTP headers
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /4 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 extra-header: here
 Accept: replaced
 X-Custom-Header:
@@ -51,6 +49,7 @@ X-Test2: foo;
 
 GET /4 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 extra-header: here
 Accept: replaced
 X-Custom-Header:

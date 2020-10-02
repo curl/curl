@@ -59,9 +59,6 @@ IMAP FETCH tunneled through HTTP proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user secret
@@ -72,7 +69,7 @@ A005 LOGOUT
 <proxy>
 CONNECT imap.1321:%IMAPPORT HTTP/1.1
 Host: imap.1321:%IMAPPORT
-User-Agent: curl/7.24.0-DEV (i686-pc-linux-gnu) libcurl/7.24.0-DEV OpenSSL/1.0.0e zlib/1.2.3.4 c-ares/1.7.6-DEV libidn/1.23 libssh2/1.4.0_DEV librtmp/2.2e
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>

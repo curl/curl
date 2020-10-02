@@ -57,12 +57,10 @@ Funny-head: yesyes
 -foo-
 234
 </stdout>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1429 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

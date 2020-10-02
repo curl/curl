@@ -45,12 +45,10 @@ surprise!
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 PUT /490 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 10
 Expect: 100-continue
@@ -58,6 +56,7 @@ Expect: 100-continue
 surprise!
 PUT /490 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 10
 Expect: 100-continue

@@ -41,12 +41,10 @@ http://%HOSTIP:%HTTPPORT/344 --etag-compare log/etag344 --etag-save log/etag344
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /344 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 If-None-Match: ""
 

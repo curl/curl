@@ -42,12 +42,10 @@ ftp://%HOSTIP:%HTTPPORT/we/want/that/page/79 -x %HOSTIP:%HTTPPORT
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/79 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
