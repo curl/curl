@@ -4194,10 +4194,6 @@ sub singletest {
         for(@strip) {
             # strip off all lines that match the patterns from both arrays
             chomp $_;
-            if($_ =~ /User-Agent/) {
-                # temp hack
-                next;
-            }
             @out = striparray( $_, \@out);
             @protstrip= striparray( $_, \@protstrip);
         }
