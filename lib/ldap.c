@@ -259,6 +259,13 @@ static int ldap_win_bind(struct connectdata *conn, LDAP *server,
 }
 #endif /* #if defined(USE_WIN32_LDAP) */
 
+#if defined(USE_WIN32_LDAP)
+#define FREE_ON_WINLDAP(x) curlx_unicodefree(x)
+#else
+#define FREE_ON_WINLDAP(x)
+#endif
+
+
 static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 {
   CURLcode result = CURLE_OK;
@@ -465,9 +472,6 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   }
 #ifdef USE_WIN32_LDAP
   ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
-#endif
-
-#ifdef USE_WIN32_LDAP
   rc = ldap_win_bind(conn, server, user, passwd);
 #else
   rc = ldap_simple_bind_s(server, user, passwd);
@@ -509,7 +513,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 #if defined(USE_WIN32_LDAP)
     TCHAR *attribute;
 #else
-    char  *attribute;       /*! suspicious that this isn't 'const' */
+    char *attribute;
 #endif
     int i;
 
@@ -534,30 +538,22 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 
       result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
       if(result) {
-#if defined(USE_WIN32_LDAP)
-        curlx_unicodefree(name);
-#endif
+        FREE_ON_WINLDAP(name);
         ldap_memfree(dn);
-
         goto quit;
       }
 
       result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *) name,
                                  name_len);
       if(result) {
-#if defined(USE_WIN32_LDAP)
-        curlx_unicodefree(name);
-#endif
+        FREE_ON_WINLDAP(name);
         ldap_memfree(dn);
-
         goto quit;
       }
 
       result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
       if(result) {
-#if defined(USE_WIN32_LDAP)
-        curlx_unicodefree(name);
-#endif
+        FREE_ON_WINLDAP(name);
         ldap_memfree(dn);
 
         goto quit;
@@ -565,9 +561,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 
       dlsize += name_len + 5;
 
-#if defined(USE_WIN32_LDAP)
-      curlx_unicodefree(name);
-#endif
+      FREE_ON_WINLDAP(name);
       ldap_memfree(dn);
     }
 
@@ -598,9 +592,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
           result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\t", 1);
           if(result) {
             ldap_value_free_len(vals);
-#if defined(USE_WIN32_LDAP)
-            curlx_unicodefree(attr);
-#endif
+            FREE_ON_WINLDAP(attr);
             ldap_memfree(attribute);
             if(ber)
               ber_free(ber, 0);
@@ -612,9 +604,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
                                      (char *) attr, attr_len);
           if(result) {
             ldap_value_free_len(vals);
-#if defined(USE_WIN32_LDAP)
-            curlx_unicodefree(attr);
-#endif
+            FREE_ON_WINLDAP(attr);
             ldap_memfree(attribute);
             if(ber)
               ber_free(ber, 0);
@@ -625,9 +615,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
           result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)": ", 2);
           if(result) {
             ldap_value_free_len(vals);
-#if defined(USE_WIN32_LDAP)
-            curlx_unicodefree(attr);
-#endif
+            FREE_ON_WINLDAP(attr);
             ldap_memfree(attribute);
             if(ber)
               ber_free(ber, 0);
@@ -647,9 +635,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
                                         &val_b64_sz);
             if(result) {
               ldap_value_free_len(vals);
-#if defined(USE_WIN32_LDAP)
-              curlx_unicodefree(attr);
-#endif
+              FREE_ON_WINLDAP(attr);
               ldap_memfree(attribute);
               if(ber)
                 ber_free(ber, 0);
@@ -663,9 +649,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
               free(val_b64);
               if(result) {
                 ldap_value_free_len(vals);
-#if defined(USE_WIN32_LDAP)
-                curlx_unicodefree(attr);
-#endif
+                FREE_ON_WINLDAP(attr);
                 ldap_memfree(attribute);
                 if(ber)
                   ber_free(ber, 0);
@@ -681,9 +665,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
                                        vals[i]->bv_len);
             if(result) {
               ldap_value_free_len(vals);
-#if defined(USE_WIN32_LDAP)
-              curlx_unicodefree(attr);
-#endif
+              FREE_ON_WINLDAP(attr);
               ldap_memfree(attribute);
               if(ber)
                 ber_free(ber, 0);
@@ -697,9 +679,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
           result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
           if(result) {
             ldap_value_free_len(vals);
-#if defined(USE_WIN32_LDAP)
-            curlx_unicodefree(attr);
-#endif
+            FREE_ON_WINLDAP(attr);
             ldap_memfree(attribute);
             if(ber)
               ber_free(ber, 0);
@@ -715,9 +695,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       }
 
       /* Free the attribute as we are done with it */
-#if defined(USE_WIN32_LDAP)
-      curlx_unicodefree(attr);
-#endif
+      FREE_ON_WINLDAP(attr);
       ldap_memfree(attribute);
 
       result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
@@ -747,9 +725,7 @@ quit:
     ldapssl_client_deinit();
 #endif /* HAVE_LDAP_SSL && CURL_HAS_NOVELL_LDAPSDK */
 
-#if defined(USE_WIN32_LDAP)
-  curlx_unicodefree(host);
-#endif
+  FREE_ON_WINLDAP(host);
 
   /* no data to transfer */
   Curl_setup_transfer(data, -1, -1, FALSE, -1);
