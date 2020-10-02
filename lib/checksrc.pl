@@ -84,6 +84,7 @@ my %warnings = (
     'TYPEDEFSTRUCT'    => 'typedefed struct',
     'DOBRACE'          => 'A single space between do and open brace',
     'BRACEWHILE'       => 'A single space between open brace and while',
+    'EXCLAMATIONSPACE' => 'Whitespace after exclamation mark in expression',
     );
 
 sub readskiplist {
@@ -723,6 +724,12 @@ sub scanfile {
             checkwarn("TYPEDEFSTRUCT",
                       $line, length($1)+1, $file, $ol,
                       "typedef'ed struct");
+        }
+
+        if($nostr =~ /(.*)! +(\w|\()/) {
+            checkwarn("EXCLAMATIONSPACE",
+                      $line, length($1)+1, $file, $ol,
+                      "space after exclamation mark");
         }
 
         # check for more than one consecutive space before open brace or

@@ -1,6 +1,6 @@
 /* This is from the BIND 4.9.4 release, modified to compile by itself */
 
-/* Copyright (c) 1996 - 2019 by Internet Software Consortium.
+/* Copyright (c) 1996 - 2020 by Internet Software Consortium.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -112,7 +112,7 @@ inet_pton4(const char *src, unsigned char *dst)
       if(val > 255)
         return (0);
       *tp = (unsigned char)val;
-      if(! saw_digit) {
+      if(!saw_digit) {
         if(++octets > 4)
           return (0);
         saw_digit = 1;

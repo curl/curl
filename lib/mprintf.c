@@ -878,7 +878,7 @@ static int dprintf_formatf(
               OUTCHAR(' ');
           for(point = strnil; *point != '\0'; ++point)
             OUTCHAR(*point);
-          if(! (p->flags & FLAGS_LEFT))
+          if(!(p->flags & FLAGS_LEFT))
             while(width-- > 0)
               OUTCHAR(' ');
         }
