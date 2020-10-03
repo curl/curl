@@ -82,7 +82,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
   struct curl_slist *headers = NULL;
-  headers = curl_slist_append(headers, "Trailer: My-super-awsome-trailer");
+  headers = curl_slist_append(headers, "Trailer: My-super-awesome-trailer");
   res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
   /* Set the trailers filling callback */
