@@ -29,7 +29,7 @@ CURLINFO_RETRY_AFTER \- returns the Retry-After retry delay
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_RETRY_AFTER, curl_off_t *retry);
 .SH DESCRIPTION
 Pass a pointer to a curl_off_t variable to receive the number of seconds the
-HTTP server suggesets the client should wait until the next request is
+HTTP server suggests the client should wait until the next request is
 issued. The information from the "Retry-After:" header.
 
 While the HTTP header might contain a fixed date string, the
