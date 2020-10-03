@@ -53,6 +53,21 @@ For example, to insert the binary octets 0, 1 and 255 into the test file:
 
     %hex[ %00%01%FF ]hex%
 
+## Repeat content
+
+In the preprocess stage, a special instruction can be used to have runtests.pl
+generate a repetetive sequence of bytes.
+
+To insert a sequence of repeat bytes, use this syntax to make the `<string>`
+get repeated `<number>` of times. The number has to be 1 or large and the
+string may contain `%HH` hexadecimal codes:
+
+    %repeat[<number> x <string>]%
+
+For example, to insert the word hello a 100 times:
+
+    %repeat[100 x hello]%
+
 # Variables
 
 When the test is preprocessed, a range of "variables" in the test file will be

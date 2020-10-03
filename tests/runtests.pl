@@ -3314,6 +3314,13 @@ sub subBase64 {
         $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
         $$thing =~ s/%%HEX%%/$d/;
     }
+    if($$thing =~ s/%repeat\[(\d+) x (.*)\]%/%%REPEAT%%/i) {
+        # decode %NN characters
+        my ($d, $n) = ($2, $1);
+        $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+        my $all = $d x $n;
+        $$thing =~ s/%%REPEAT%%/$all/;
+    }
 }
 
 sub fixarray {
