@@ -1,0 +1,32 @@
+--- ltmain.sh	2020-10-04 21:20:40.766518900 +0200
++++ ltmain.sh-patched	2020-10-04 21:20:23.267205500 +0200
+@@ -5555,6 +5555,7 @@
+ 
+ /* declarations of non-ANSI functions */
+ #if defined __MINGW32__
++#include <windows.h>
+ # if defined(__STRICT_ANSI__) && !defined(__MINGW64_VERSION_MAJOR) || defined(_POSIX_)
+ int _putenv (const char *);
+ # endif
+@@ -5903,6 +5904,21 @@
+ 		cat <<"EOF"
+   /* execv doesn't actually work on mingw as expected on unix */
+   newargz = prepare_spawn (newargz);
++#if defined __MINGW32__
++  while (1) {
++    JOBOBJECT_EXTENDED_LIMIT_INFORMATION jInf;
++    HANDLE hProcess, hJob;
++    hProcess = GetCurrentProcess();
++    hJob = CreateJobObject(NULL, NULL);
++    if (!hJob) { break; };
++    if (!AssignProcessToJobObject(hJob, hProcess)) { break; };
++    ZeroMemory(&jInf, sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
++    jInf.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
++    SetInformationJobObject(hJob, JobObjectExtendedLimitInformation, &jInf,
++                            sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
++    break;
++  }
++#endif
+   rval = (int) _spawnv (_P_WAIT, lt_argv_zero, (const char * const *) newargz);
+   if (rval == -1)
+     {
