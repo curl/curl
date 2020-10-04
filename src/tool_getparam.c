@@ -1269,11 +1269,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case '4':
       /* IPv4 */
-      config->ip_version = 4;
+      config->ip_version = CURL_IPRESOLVE_V4;
       break;
     case '6':
       /* IPv6 */
-      config->ip_version = 6;
+      config->ip_version = CURL_IPRESOLVE_V6;
       break;
     case 'a':
       /* This makes the FTP sessions use APPE instead of STOR */
