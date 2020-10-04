@@ -37,6 +37,8 @@ unpacked the source archive):
 
 You probably need to be root when doing the last command.
 
+If `configure` does not exists yet, just run `autoreconf -fi`.
+
 Get a full listing of all available configure options by invoking it like:
 
     ./configure --help
