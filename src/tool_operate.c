@@ -1855,12 +1855,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_MAXFILESIZE_LARGE,
                     config->max_filesize);
 
-        if(4 == config->ip_version)
-          my_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-        else if(6 == config->ip_version)
-          my_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6);
-        else
-          my_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_WHATEVER);
+        my_setopt(curl, CURLOPT_IPRESOLVE, config->ip_version);
 
         /* new in curl 7.15.5 */
         if(config->ftp_ssl_reqd)
