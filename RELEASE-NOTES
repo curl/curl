@@ -4,7 +4,7 @@ curl and libcurl 7.73.0
  Command line options:         234
  curl_easy_setopt() options:   278
  Public functions in libcurl:  85
- Contributors:                 2267
+ Contributors:                 2269
 
 This release includes the following changes:
 
@@ -23,8 +23,10 @@ This release includes the following bugfixes:
  o altsvc: clone setting in curl_easy_duphandle [60]
  o base64: also build for smtp, pop3 and imap [81]
  o BUGS: convert document to markdown [107]
+ o build-wolfssl: fix build with Visual Studio 2019 [114]
  o buildconf: invoke 'autoreconf -fi' instead [37]
  o checksrc: verify do-while and spaces between the braces [2]
+ o checksrc: warn on space after exclamation mark [129]
  o CI/azure: disable test 571 in the msys2 builds [93]
  o CI/azure: MQTT is now enabled by default [64]
  o CI/azure: no longer ignore results of test 1013 [43]
@@ -43,6 +45,7 @@ This release includes the following bugfixes:
  o curl.1: add see also no-progress-meter on two spots [67]
  o curl.1: fix typo invokved -> invoked [36]
  o curl: in retry output don't call all problems "transient" [74]
+ o curl: make --libcurl show binary posts correctly [130]
  o curl: make checkpasswd use dynbuf [100]
  o curl: make file2memory use dynbuf [102]
  o curl: make file2string use dynbuf [103]
@@ -56,6 +59,7 @@ This release includes the following bugfixes:
  o Curl_send: return error when pre_receive_plain can't malloc [111]
  o dist: add missing CMake Find modules to the distribution [14]
  o docs/LICENSE-MIXING: remove [79]
+ o docs/opts: fix typos in two manual pages [119]
  o docs/RESOURCES: remove [105]
  o docs/TheArtOfHttpScripting: convert to markdown [106]
  o docs: add description about CI platforms to CONTRIBUTE.md [44]
@@ -79,6 +83,7 @@ This release includes the following bugfixes:
  o http_proxy: do not crash with HTTPS_PROXY and NO_PROXY set [50]
  o imap: make imap_send use dynbuf for the send buffer management [110]
  o imap: set cselect_bits to CURL_CSELECT_IN initially [104]
+ o ldap: reduce the amount of #ifdefs needed [124]
  o lib/Makefile.am: bump VERSIONINFO due to new functions [65]
  o lib1560: verify "redirect" to double-slash leading URL [20]
  o lib583: fix enum mixup
@@ -103,9 +108,12 @@ This release includes the following bugfixes:
  o pause: only trigger a reread if the unpause sticks [92]
  o pingpong: use a dynbuf for the *_pp_sendf() function [113]
  o READMEs: convert several to markdown [115]
+ o runtests: add %repeat[]% for test files [116]
  o runtests: allow creating files without newlines [72]
+ o runtests: allow generating a binary sequence from hex
  o runtests: clear pid variables when failing to start a server [12]
  o runtests: make cleardir() erase dot files too [8]
+ o runtests: provide curl's version string as %VERSION for tests [127]
  o schannel: fix memory leak when using get_cert_location [15]
  o schannel: return CURLE_PEER_FAILED_VERIFICATION for untrusted root [128]
  o scripts: improve the "get latest curl release tag" logic
@@ -134,6 +142,7 @@ This release includes the following bugfixes:
  o tests: remove pipelining tests [69]
  o tls: fix SRP detection by using the proper #ifdefs [33]
  o tls: provide the CApath verbose log on its own line [1]
+ o tool_setopt: escape binary data to hex, not octal
  o tool_writeout: add new writeout variable, %{num_headers} [97]
  o travis: add a build using libressl (from git master) [55]
  o url: use blank credentials when using proxy w/o username and password [54]
@@ -159,12 +168,12 @@ advice from friends like these:
   Javier Blazquez, Javier Navarro, Jeroen Ooms, jmdavitt on github,
   Kamil Dudka, Kunal Chandarana, Laramie Leavitt, Marcel Raad, Marc Hörsken,
   Martin Bašti, Michael Baentsch, Michael Musset, Michael Olbrich,
-  Mingtao Yang, Peter Körner, Peter Wu, Quentin Balland,
+  Mingtao Yang, M.R.T on github, Peter Körner, Peter Wu, Quentin Balland,
   Rasmus Melchior Jacobsen, Ray Satiro, rcombs on github, Robin Douine,
-  Samuel Marks, Samuel Tranchet, sofaboss on github, Stefan Strogin,
-  Tatsuhiro Tsujikawa, Tomas Berger, Tom van der Woerdt, Viktor Szakats,
-  xwxbug on github,
-  (58 contributors)
+  Samanta Navarro, Samuel Marks, Samuel Tranchet, sofaboss on github,
+  Stefan Strogin, Stephan Mühlstrasser, Tatsuhiro Tsujikawa, Tomas Berger,
+  Tom van der Woerdt, Viktor Szakats, xwxbug on github,
+  (61 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -283,12 +292,19 @@ References to bug reports and discussions on issues:
  [111] = https://curl.haxx.se/bug/?i=6011
  [112] = https://curl.haxx.se/bug/?i=5523
  [113] = https://curl.haxx.se/bug/?i=6004
+ [114] = https://curl.haxx.se/bug/?i=6033
  [115] = https://curl.haxx.se/bug/?i=6028
+ [116] = https://curl.haxx.se/bug/?i=6040
  [118] = https://curl.haxx.se/bug/?i=5989
+ [119] = https://curl.haxx.se/bug/?i=6039
  [120] = https://github.com/curl/curl/pull/5735#issuecomment-701376388
  [121] = https://curl.haxx.se/bug/?i=6023
  [122] = https://curl.haxx.se/bug/?i=6024
  [123] = https://curl.haxx.se/bug/?i=6025
+ [124] = https://curl.haxx.se/bug/?i=6035
  [125] = https://curl.haxx.se/bug/?i=4295
  [126] = https://curl.haxx.se/bug/?i=5973
+ [127] = https://curl.haxx.se/bug/?i=6037
  [128] = https://curl.haxx.se/bug/?i=6003
+ [129] = https://curl.haxx.se/bug/?i=6034
+ [130] = https://curl.haxx.se/bug/?i=6031
