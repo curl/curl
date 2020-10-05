@@ -156,7 +156,8 @@ for my $l (@releasenotes) {
         push @o, $l;
         push @o, "\n";
         for my $f (@line) {
-            push @o, sprintf " o $f%s\n", $moreinfo{$f}? sprintf(" [%d]", $moreinfo{$f}): "";
+            push @o, sprintf " o %s%s\n", $f,
+                $moreinfo{$f}? sprintf(" [%d]", $moreinfo{$f}): "";
             $refused[$moreinfo{$f}]=3;
         }
         push @o, " --- new entries are listed above this ---";
@@ -208,6 +209,6 @@ exit;
 # Debug: show unused references
 for my $r (1 .. $#refs) {
     if($refused[$r] != 3) {
-        printf "$r is %d!\n", $refused[$r];
+        printf "%s is %d!\n", $r, $refused[$r];
     }
 }
