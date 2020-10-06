@@ -32,7 +32,7 @@
 #ifdef USE_MBEDTLS
 
 /* Define this to enable lots of debugging for mbedTLS */
-#undef MBEDTLS_DEBUG
+//#define MBEDTLS_DEBUG
 
 #include <mbedtls/version.h>
 #if MBEDTLS_VERSION_NUMBER >= 0x02040000
