@@ -46,6 +46,8 @@
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/sha256.h>
 
+#include <mbedtls/debug.h>
+
 #include "urldata.h"
 #include "sendf.h"
 #include "inet_pton.h"
