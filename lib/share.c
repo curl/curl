@@ -72,6 +72,9 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
     type = va_arg(param, int);
 
     switch(type) {
+    case CURL_LOCK_DATA_KNOWNHOSTS:
+      share->known_hosts = NULL;
+      break;
     case CURL_LOCK_DATA_DNS:
       break;
 

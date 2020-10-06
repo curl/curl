@@ -43,6 +43,11 @@ sure that the callback uses a different lock for each kind of data.
 \fIaccess\fP defines what access type libcurl wants, shared or single.
 
 \fIuserptr\fP is the pointer you set with \fICURLSHOPT_USERDATA\fP.
+
+.IP CURL_LOCK_DATA_KNOWNHOSTS
+Share the known_hosts handle for SFTP and SCP transfers. 
+Only works with the libssh2 backend. Added in 7.74.0
+
 .IP CURLSHOPT_UNLOCKFUNC
 The \fIparameter\fP must be a pointer to a function matching the following
 prototype:

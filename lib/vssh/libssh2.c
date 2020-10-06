@@ -87,6 +87,7 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+#include "share.h"
 
 #if LIBSSH2_VERSION_NUM >= 0x010206
 /* libssh2_sftp_statvfs and friends were added in 1.2.6 */
@@ -453,6 +454,12 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
     int keycheck = LIBSSH2_KNOWNHOST_CHECK_FAILURE;
     int keybit = 0;
 
+    if(data->share &&
+      (data->share->specifier & (1<< CURL_LOCK_DATA_KNOWNHOSTS)) ) {
+      Curl_share_lock(data, CURL_LOCK_DATA_KNOWNHOSTS,
+        CURL_LOCK_ACCESS_SINGLE);
+    }
+
     if(remotekey) {
       /*
        * A subject to figure out is what host name we need to pass in here.
@@ -606,6 +613,10 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
         }
       }
       break;
+    }
+    if(data->share &&
+      (data->share->specifier & (1<< CURL_LOCK_DATA_KNOWNHOSTS)) ) {
+      Curl_share_unlock(data, CURL_LOCK_DATA_KNOWNHOSTS);
     }
   }
 #else /* HAVE_LIBSSH2_KNOWNHOST_API */
@@ -2782,7 +2793,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
     case SSH_SESSION_FREE:
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
-      if(sshc->kh) {
+      if(sshc->kh && !(data->share &&
+        data->share->specifier & (1<< CURL_LOCK_DATA_KNOWNHOSTS)) ) {
         libssh2_knownhost_free(sshc->kh);
         sshc->kh = NULL;
       }
@@ -3173,7 +3185,16 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
   if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
     int rc;
-    ssh->kh = libssh2_knownhost_init(ssh->ssh_session);
+
+    if(data->share &&
+      (data->share->specifier & (1<< CURL_LOCK_DATA_KNOWNHOSTS)) ) {
+      Curl_share_lock(data, CURL_LOCK_DATA_KNOWNHOSTS,
+        CURL_LOCK_ACCESS_SINGLE);
+      ssh->kh = data->share->known_hosts;
+    }
+    if(!ssh->kh) {
+      ssh->kh = libssh2_knownhost_init(ssh->ssh_session);
+    }
     if(!ssh->kh) {
       libssh2_session_free(ssh->ssh_session);
       return CURLE_FAILED_INIT;
@@ -3183,6 +3204,14 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
     rc = libssh2_knownhost_readfile(ssh->kh,
                                     data->set.str[STRING_SSH_KNOWNHOSTS],
                                     LIBSSH2_KNOWNHOST_FILE_OPENSSH);
+
+    if(data->share &&
+      (data->share->specifier & (1<< CURL_LOCK_DATA_KNOWNHOSTS)) ) {
+      if(data->share->known_hosts == NULL)
+        data->share->known_hosts = ssh->kh;
+      Curl_share_unlock(data, CURL_LOCK_DATA_KNOWNHOSTS);
+    }
+
     if(rc < 0)
       infof(data, "Failed to read known hosts from %s\n",
             data->set.str[STRING_SSH_KNOWNHOSTS]);
