@@ -191,7 +191,7 @@ stages:
       displayName: 'prepare'
       condition: variables.prepare
 
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && ./buildconf && patch < ltmain.sh.patch && ./configure $(configure)"
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && ./buildconf && cat ltmain.sh && patch < ltmain.sh.patch && ./configure $(configure)"
       displayName: 'configure $(name)'
 
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make"
