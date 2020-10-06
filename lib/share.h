@@ -57,6 +57,7 @@ struct Curl_share {
   struct curl_ssl_session *sslsession;
   size_t max_ssl_sessions;
   long sessionage;
+  void *known_hosts_shared;
 };
 
 CURLSHcode Curl_share_lock(struct Curl_easy *, curl_lock_data,

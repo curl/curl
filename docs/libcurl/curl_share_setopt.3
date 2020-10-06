@@ -94,6 +94,11 @@ The Public Suffix List stored in the share object is made available to all
 easy handle bound to the later. Since the Public Suffix List is periodically
 refreshed, this avoids updates in too many different contexts.
 
+.IP CURL_LOCK_DATA_HOSTS_NAME
+When Transfering multiple file with SSH2, the access of the known_host file is not protected. 
+To protect the access of the file, use this option to protect the access of the file
+Be careful, only one file is authorized. Because the handle of the file is shared across connections
+
 \fBCURL_LOCK_DATA_PSL\fP exists since 7.61.0.
 
 Note that when you use the multi interface, all easy handles added to the same

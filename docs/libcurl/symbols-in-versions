@@ -873,6 +873,7 @@ CURL_LOCK_DATA_NONE             7.10.3
 CURL_LOCK_DATA_PSL              7.61.0
 CURL_LOCK_DATA_SHARE            7.10.4
 CURL_LOCK_DATA_SSL_SESSION      7.10.3
+CURL_LOCK_DATA_HOSTS_NAME       7.72.1
 CURL_LOCK_TYPE_CONNECT          7.10          -           7.10.2
 CURL_LOCK_TYPE_COOKIE           7.10          -           7.10.2
 CURL_LOCK_TYPE_DNS              7.10          -           7.10.2
