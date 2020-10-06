@@ -50,7 +50,9 @@
 #include <mbedtls/sha256.h>
 
 #if MBEDTLS_VERSION_MAJOR >= 2
-#include <mbedtls/debug.h>
+#  ifdef MBEDTLS_DEBUG
+#    include <mbedtls/debug.h>
+#  endif
 #endif
 
 #include "urldata.h"
