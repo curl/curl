@@ -37,7 +37,12 @@
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.2...3.16 FATAL_ERROR)
+
+# Revert CMake bug triggered by curl's defined max CMake policy version, see https://gitlab.kitware.com/cmake/cmake/-/issues/21288
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 OLD)
+endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
@@ -246,9 +251,9 @@ if(ENABLE_MANUAL)
 endif()
 
 if(CURL_STATIC_CRT)
-  foreach (build_suffix "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
-    set (flags_var CMAKE_C_FLAGS_${build_suffix})
-    if ("${${flags_var}}" MATCHES "/MD")
+  foreach(build_suffix "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
+    set(flags_var CMAKE_C_FLAGS${build_suffix})
+    if("${${flags_var}}" MATCHES "/MD")
       string(REGEX REPLACE "/MD" "/MT" ${flags_var} "${${flags_var}}")
     endif()
   endforeach()
