@@ -442,7 +442,7 @@ sub scanfile {
 
         # crude attempt to detect // comments without too many false
         # positives
-        if($l =~ /^([^"\*]*)[^:"]\/\//) {
+        if($l =~ /^(([^"\*]*)[^:"]|)\/\//) {
             checkwarn("CPPCOMMENTS",
                       $line, length($1), $file, $l, "\/\/ comment");
         }
