@@ -5775,11 +5775,11 @@ if($total) {
                    $ok/$total*100);
 
     if($ok != $total) {
-        logmsg "TESTFAIL: These test cases failed: $failed\n";
+        logmsg "\nTESTFAIL: These test cases failed: $failed\n\n";
     }
 }
 else {
-    logmsg "TESTFAIL: No tests were performed\n";
+    logmsg "\nTESTFAIL: No tests were performed\n\n";
 }
 
 if($all) {
@@ -5816,6 +5816,6 @@ if($skipped && !$short) {
     }
 }
 
-if($total && (($ok+$ign) != $total)) {
+if(($total && (($ok+$ign) != $total)) || !$total) {
     exit 1;
 }
