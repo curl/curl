@@ -37,7 +37,7 @@
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
-cmake_minimum_required(VERSION 3.2...3.16 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
@@ -246,9 +246,12 @@ if(ENABLE_MANUAL)
 endif()
 
 if(CURL_STATIC_CRT)
-  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
+  foreach (build_suffix "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
+    set (flags_var CMAKE_C_FLAGS_${build_suffix})
+    if ("${${flags_var}}" MATCHES "/MD")
+      string(REGEX REPLACE "/MD" "/MT" ${flags_var} "${${flags_var}}")
+    endif()
+  endforeach()
 endif()
 
 # Disable warnings on Borland to avoid changing 3rd party code.
