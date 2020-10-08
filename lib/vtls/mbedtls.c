@@ -31,6 +31,9 @@
 
 #ifdef USE_MBEDTLS
 
+/* Define this to enable lots of debugging for mbedTLS */
+/* #define MBEDTLS_DEBUG */
+
 #include <mbedtls/version.h>
 #if MBEDTLS_VERSION_NUMBER >= 0x02040000
 #include <mbedtls/net_sockets.h>
@@ -45,6 +48,12 @@
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/sha256.h>
+
+#if MBEDTLS_VERSION_MAJOR >= 2
+#  ifdef MBEDTLS_DEBUG
+#    include <mbedtls/debug.h>
+#  endif
+#endif
 
 #include "urldata.h"
 #include "sendf.h"
@@ -112,9 +121,6 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 /* end of entropy_func_mutex() */
 
 #endif /* THREADING_SUPPORT */
-
-/* Define this to enable lots of debugging for mbedTLS */
-#undef MBEDTLS_DEBUG
 
 #ifdef MBEDTLS_DEBUG
 static void mbed_debug(void *context, int level, const char *f_name,
