@@ -267,7 +267,7 @@ build_script:
         -DCMAKE_INSTALL_PREFIX="C:/CURL"
         -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
         cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT% &&
-        cmake --build . --config %PRJ_CFG% --parallel 2 -- testdeps
+        cmake --build . --parallel 2 -- testdeps
       ) else (
       if %BUILD_SYSTEM%==VisualStudioSolution (
         cd projects &&
