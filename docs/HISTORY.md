@@ -129,8 +129,10 @@ impossible. Around 5000 downloaded packages each week from the main site gives
 a hint, but the packages are mirrored extensively, bundled with numerous OS
 distributions and otherwise retrieved as part of other software.
 
-September: with the release of curl 7.10 it is released under the MIT license
+October 1: with the release of curl 7.10 it is released under the MIT license
 only.
+
+Starting with 7.10, curl verifies SSL server certificates by default.
 
 2003
 ----
