@@ -4,7 +4,7 @@ curl and libcurl 7.73.0
  Command line options:         234
  curl_easy_setopt() options:   278
  Public functions in libcurl:  85
- Contributors:                 2269
+ Contributors:                 2270
 
 This release includes the following changes:
 
@@ -15,7 +15,7 @@ This release includes the following changes:
  o CURLE_PROXY: new error code [7]
  o mqtt: enable by default [28]
  o sftp: add new quote commands 'atime' and 'mtime' [6]
- o sftp: add the option CURLKHSTAT_FINE_REPLACE [27]
+ o ssh: add the option CURLKHSTAT_FINE_REPLACE [27]
  o tls: add CURLOPT_SSL_EC_CURVES and --curves [29]
 
 This release includes the following bugfixes:
@@ -25,11 +25,13 @@ This release includes the following bugfixes:
  o BUGS: convert document to markdown [107]
  o build-wolfssl: fix build with Visual Studio 2019 [114]
  o buildconf: invoke 'autoreconf -fi' instead [37]
+ o checksrc: detect // comments on column 0 [132]
  o checksrc: verify do-while and spaces between the braces [2]
  o checksrc: warn on space after exclamation mark [129]
  o CI/azure: disable test 571 in the msys2 builds [93]
  o CI/azure: MQTT is now enabled by default [64]
  o CI/azure: no longer ignore results of test 1013 [43]
+ o CI/tests: fix invocation of tests for CMake builds [117]
  o CI/travis: add a CI job with openssl3 (from git master) [51]
  o cleanups: avoid curl_ on local variables [53]
  o CMake: add option to enable Unicode on Windows [48]
@@ -50,6 +52,7 @@ This release includes the following bugfixes:
  o curl: make file2memory use dynbuf [102]
  o curl: make file2string use dynbuf [103]
  o curl: make glob_match_url use dynbuf [101]
+ o curl: make sure setopt CURLOPT_IPRESOLVE passes on a long [134]
  o curl: retry delays in parallel mode no longer sleeps blocking [70]
  o curl: use curlx_dynbuf for realloc when loading config files [73]
  o curl:parallel_transfers: make sure retry readds the transfer [71]
@@ -94,6 +97,7 @@ This release includes the following bugfixes:
  o Makefile.m32: add ability to override zstd libs [ci skip] [10]
  o man pages: switch to https://example.com URLs [86]
  o MANUAL: update examples to resolve without redirects [122]
+ o mbedtls: add missing header when defining MBEDTLS_DEBUG [133]
  o memdebug: remove 9 year old unused debug function [126]
  o multi: expand pre-check for socket readiness [21]
  o multi: handle connection state winsock events [31]
@@ -139,6 +143,7 @@ This release includes the following bugfixes:
  o tests/data: Fix some mismatched XML tags in test cases
  o tests/FILEFORMAT: document nonewline support for <file>
  o tests/FILEFORMAT: document type=shell for <command>
+ o tests/server/util.c: fix support for Windows Unicode builds [131]
  o tests: remove pipelining tests [69]
  o tls: fix SRP detection by using the proper #ifdefs [33]
  o tls: provide the CApath verbose log on its own line [1]
@@ -162,18 +167,19 @@ advice from friends like these:
   Antarpreet Singh, beckenc on github, Chris Paulson-Ellis,
   Christian Weisgerber, COFFEETALES on github, Dan Fandrich, Daniel Gustafsson,
   Daniel Stenberg, Dan Kenigsberg, Diven Qi, Don J Olmstead, Duncan Wilcox,
-  Eli Schwartz, Emil Engler, Eric Curtin, fullincome on github,
-  Gaurav Malhotra, Gergely Nagy, Gisle Vanem, Harry Sintonen, htasta on github,
-  iammrtau on github, ihsinme on github, Ionuț-Francisc Oancea,
-  Javier Blazquez, Javier Navarro, Jeroen Ooms, jmdavitt on github,
-  Kamil Dudka, Kunal Chandarana, Laramie Leavitt, Marcel Raad, Marc Hörsken,
-  Martin Bašti, Michael Baentsch, Michael Musset, Michael Olbrich,
-  Mingtao Yang, M.R.T on github, Peter Körner, Peter Wu, Quentin Balland,
-  Rasmus Melchior Jacobsen, Ray Satiro, rcombs on github, Robin Douine,
-  Samanta Navarro, Samuel Marks, Samuel Tranchet, sofaboss on github,
-  Stefan Strogin, Stephan Mühlstrasser, Tatsuhiro Tsujikawa, Tomas Berger,
-  Tom van der Woerdt, Viktor Szakats, xwxbug on github,
-  (61 contributors)
+  Eli Schwartz, Emil Engler, Eric Curtin, Frederik Wedel-Heinen,
+  fullincome on github, Gaurav Malhotra, Gergely Nagy, Gisle Vanem,
+  Harry Sintonen, htasta on github, iammrtau on github, ihsinme on github,
+  Ionuț-Francisc Oancea, Javier Blazquez, Javier Navarro, Jeroen Ooms,
+  jmdavitt on github, Kamil Dudka, Kunal Chandarana, Laramie Leavitt,
+  Marcel Raad, Marc Hörsken, Martin Bašti, Michael Baentsch, Michael Musset,
+  Michael Olbrich, Mingtao Yang, M.R.T on github, Peter Körner, Peter Wu,
+  Quentin Balland, Rasmus Melchior Jacobsen, Ray Satiro, rcombs on github,
+  Robin Douine, Samanta Navarro, Samuel Marks, Samuel Tranchet, Sergei Nikulov,
+  sofaboss on github, Stefan Strogin, Stephan Mühlstrasser,
+  Tatsuhiro Tsujikawa, Tomas Berger, Tom van der Woerdt, Viktor Szakats,
+  xwxbug on github,
+  (63 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -295,6 +301,7 @@ References to bug reports and discussions on issues:
  [114] = https://curl.haxx.se/bug/?i=6033
  [115] = https://curl.haxx.se/bug/?i=6028
  [116] = https://curl.haxx.se/bug/?i=6040
+ [117] = https://curl.haxx.se/bug/?i=6052
  [118] = https://curl.haxx.se/bug/?i=5989
  [119] = https://curl.haxx.se/bug/?i=6039
  [120] = https://github.com/curl/curl/pull/5735#issuecomment-701376388
@@ -308,3 +315,7 @@ References to bug reports and discussions on issues:
  [128] = https://curl.haxx.se/bug/?i=6003
  [129] = https://curl.haxx.se/bug/?i=6034
  [130] = https://curl.haxx.se/bug/?i=6031
+ [131] = https://curl.haxx.se/bug/?i=6070
+ [132] = https://curl.haxx.se/bug/?i=6048
+ [133] = https://curl.haxx.se/bug/?i=6045
+ [134] = https://curl.haxx.se/bug/?i=6042
