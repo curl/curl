@@ -23,10 +23,10 @@
 # This should most probably benefit from getting a "Requires:" field added
 # dynamically by configure.
 #
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@
+prefix=${pcfiledir}/@pkgconf_to_prefix@
+exec_prefix=${pcfiledir}/@pkgconf_to_exec_prefix@
+libdir=${exec_prefix}/@exec_prefix_to_libdir@
+includedir=${prefix}/@prefix_to_includedir@
 supported_protocols="@SUPPORT_PROTOCOLS@"
 supported_features="@SUPPORT_FEATURES@"
 
