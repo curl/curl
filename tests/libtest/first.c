@@ -138,8 +138,13 @@ int main(int argc, char **argv)
 #  ifdef __HIGHC__
   _setmode(stdout, O_BINARY);
 #  else
-  setmode(fileno(stdout), O_BINARY);
+  (void)setmode(fileno(stdout), O_BINARY);
 #  endif
+#endif
+
+#if defined(HAVE_SETVBUF) && defined(_IONBF) && defined(WIN32)
+  (void)setvbuf(stdout, NULL, _IONBF, 0);
+  (void)setvbuf(stderr, NULL, _IONBF, 0);
 #endif
 
   memory_tracking_init();

@@ -46,6 +46,11 @@ void set_binmode(FILE *stream)
 #else
   (void)stream;
 #endif
+
+#if defined(HAVE_SETVBUF) && defined(_IONBF) && defined(WIN32)
+  (void)setvbuf(stdout, NULL, _IONBF, 0);
+  (void)setvbuf(stderr, NULL, _IONBF, 0);
+#endif
 }
 
 #endif /* HAVE_SETMODE */
