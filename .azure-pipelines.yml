@@ -83,7 +83,7 @@ stages:
       displayName: 'configure $(name)'
 
     - script: make
-      displayName: 'make'
+      displayName: 'make && cd tests && make'
 
     - script: make test-nonflaky
       displayName: 'test'
@@ -188,11 +188,14 @@ stages:
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && ./buildconf && ./configure $(configure)"
       displayName: 'configure $(name)'
 
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make"
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make && cd tests && make"
       displayName: 'make'
+
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
+      displayName: 'install'
 
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make test-nonflaky"
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "-r $(tests)"
+        TFLAGS: "-vc /usr/bin/curl.exe -r $(tests)"
