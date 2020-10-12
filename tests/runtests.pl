@@ -5180,9 +5180,9 @@ disabledtests("$TESTDIR/DISABLED.local");
 # Check options to this test program
 #
 
-# Special case for CMake: replace '${TFLAGS}' by the contents of the
+# Special case for CMake: replace '$TFLAGS' by the contents of the
 # environment variable (if any).
-if(@ARGV && $ARGV[-1] eq '${TFLAGS}') {
+if(@ARGV && $ARGV[-1] eq '$TFLAGS') {
     pop @ARGV;
     push(@ARGV, split(' ', $ENV{'TFLAGS'})) if defined($ENV{'TFLAGS'});
 }

@@ -291,11 +291,19 @@ build_script:
       if %BUILD_SYSTEM%==autotools (
         bash.exe -e -l -c "cd /c/projects/curl && ./buildconf && ./configure %CONFIG_ARGS% && make && make examples && cd tests && make"
       )))))
+    - if %TESTING%==ON (
+        if %BUILD_SYSTEM%==CMake (
+          cmake --build . --config %PRJ_CFG% --parallel 2 --target testdeps
+      ))
 
 test_script:
     - if %TESTING%==ON (
-        echo APPVEYOR_API_URL=%APPVEYOR_API_URL% &&
-        bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -b$(($(echo '%APPVEYOR_API_URL%' | cut -d'/' -f3 | cut -d':' -f2)+1)) -p !flaky %DISABLED_TESTS%" )
+        if %BUILD_SYSTEM%==CMake (
+          set TFLAGS=%DISABLED_TESTS% &&
+          cmake --build . --config %PRJ_CFG% --target test-nonflaky
+        ) else (
+          echo APPVEYOR_API_URL=%APPVEYOR_API_URL% &&
+          bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -b$(($(echo '%APPVEYOR_API_URL%' | cut -d'/' -f3 | cut -d':' -f2)+1)) -p !flaky %DISABLED_TESTS%" ))
 
 # select branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
