@@ -3520,10 +3520,10 @@ sub singletest {
 
     # create test result in CI services
     if(azure_check_environment() && $AZURE_RUN_ID) {
-        $AZURE_RESULT_ID = azure_create_test_result($AZURE_RUN_ID, $testnum, $testname);
+        $AZURE_RESULT_ID = azure_create_test_result($VCURL, $AZURE_RUN_ID, $testnum, $testname);
     }
     elsif(appveyor_check_environment()) {
-        appveyor_create_test_result($testnum, $testname);
+        appveyor_create_test_result($VCURL, $testnum, $testname);
     }
 
     # remove test server commands file before servers are started/verified
@@ -5683,7 +5683,7 @@ sub displaylogs {
 #
 
 if(azure_check_environment()) {
-    $AZURE_RUN_ID = azure_create_test_run();
+    $AZURE_RUN_ID = azure_create_test_run($VCURL);
     logmsg "Azure Run ID: $AZURE_RUN_ID\n" if ($verbose);
 }
 
@@ -5711,11 +5711,11 @@ foreach $testnum (@at) {
 
     # update test result in CI services
     if(azure_check_environment() && $AZURE_RUN_ID && $AZURE_RESULT_ID) {
-        $AZURE_RESULT_ID = azure_update_test_result($AZURE_RUN_ID, $AZURE_RESULT_ID, $testnum, $error,
+        $AZURE_RESULT_ID = azure_update_test_result($VCURL, $AZURE_RUN_ID, $AZURE_RESULT_ID, $testnum, $error,
                                                     $timeprepini{$testnum}, $timevrfyend{$testnum});
     }
     elsif(appveyor_check_environment()) {
-        appveyor_update_test_result($testnum, $error, $timeprepini{$testnum}, $timevrfyend{$testnum});
+        appveyor_update_test_result($VCURL, $testnum, $error, $timeprepini{$testnum}, $timevrfyend{$testnum});
     }
 
     if($error < 0) {
@@ -5760,7 +5760,7 @@ my $sofar = time() - $start;
 #
 
 if(azure_check_environment() && $AZURE_RUN_ID) {
-    $AZURE_RUN_ID = azure_update_test_run($AZURE_RUN_ID);
+    $AZURE_RUN_ID = azure_update_test_run($VCURL, $AZURE_RUN_ID);
 }
 
 # Tests done, stop the servers
