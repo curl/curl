@@ -2914,7 +2914,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
               /* "If GetLastError returns CRYPT_E_NOT_FOUND, the certificate is
                  good for all uses. If it returns zero, the certificate has no
                  valid uses." */
-              if(GetLastError() != CRYPT_E_NOT_FOUND)
+              if((HRESULT)GetLastError() != CRYPT_E_NOT_FOUND)
                 continue;
             }
             else {
