@@ -26,7 +26,7 @@ add_subdirectory(server)
 add_subdirectory(unit)
 
 function(add_runtests targetname test_flags)
-  # Use a special '${TFLAGS}' placeholder as last argument which will be
+  # Use a special '$TFLAGS' placeholder as last argument which will be
   # replaced by the contents of the environment variable in runtests.pl.
   # This is a workaround for CMake's limitation where commands executed by
   # 'make' or 'ninja' cannot portably reference environment variables.
@@ -35,7 +35,7 @@ function(add_runtests targetname test_flags)
     COMMAND
       "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runtests.pl"
       ${test_flags_list}
-      "\${TFLAGS}"
+      "\$TFLAGS"
     DEPENDS testdeps
     VERBATIM USES_TERMINAL
   )
