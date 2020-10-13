@@ -1,21 +1,18 @@
-                                  _   _ ____  _
-                              ___| | | |  _ \| |
-                             / __| | | | |_) | |
-                            | (__| |_| |  _ <| |___
-                             \___|\___/|_| \_\_____|
+# Features -- what curl can do
 
-FEATURES
+## curl tool
 
-curl tool
  - config file support
  - multiple URLs in a single command line
  - range "globbing" support: [0-13], {one,two,three}
  - multiple file upload on a single command line
  - custom maximum transfer rate
  - redirectable stderr
- - metalink support (*13)
+ - metalink support (13)
+ - parallel transfers
 
-libcurl
+## libcurl
+
  - full URL syntax with no length limit
  - custom maximum download time
  - custom least download speed acceptable
@@ -24,28 +21,31 @@ libcurl
  - uses .netrc
  - progress bar with time statistics while downloading
  - "standard" proxy environment variables support
- - compiles on win32 (reported builds on 40+ operating systems)
+ - compiles on win32 (reported builds on 70+ operating systems)
  - selectable network interface for outgoing traffic
  - IPv6 support on unix and Windows
+ - happy eyeballs dual-stack connects
  - persistent connections
- - socks 4 + 5 support, with or without local name resolving
+ - SOCKS 4 + 5 support, with or without local name resolving
  - supports user name and password in proxy environment variables
- - operations through proxy "tunnel" (using CONNECT)
- - support for large files (>2GB and >4GB) during upload and download
+ - operations through HTTP proxy "tunnel" (using CONNECT)
  - replaceable memory functions (malloc, free, realloc, etc)
- - asynchronous name resolving (*6)
+ - asynchronous name resolving (6)
  - both a push and a pull style interface
- - international domain names (*11)
+ - international domain names (11)
 
-HTTP
- - HTTP/1.1 compliant (optionally uses 1.0)
+## HTTP
+
+ - HTTP/0.9 responses are optionally accepted
+ - HTTP/1.0
+ - HTTP/1.1
+ - HTTP/2, including multiplexing and server push (5)
  - GET
  - PUT
  - HEAD
  - POST
- - Pipelining
  - multipart formpost (RFC1867-style)
- - authentication: Basic, Digest, NTLM (*9) and Negotiate (SPNEGO) (*3)
+ - authentication: Basic, Digest, NTLM (9) and Negotiate (SPNEGO) (3)
    to server and proxy
  - resume (both GET and PUT)
  - follow redirects
@@ -59,25 +59,27 @@ HTTP
  - range
  - proxy authentication
  - time conditions
- - via http-proxy
+ - via HTTP proxy, HTTPS proxy or SOCKS proxy
  - retrieve file modification date
  - Content-Encoding support for deflate and gzip
  - "Transfer-Encoding: chunked" support in uploads
- - data compression (*12)
- - HTTP/2 (*5)
+ - automatic data compression (12)
 
-HTTPS (*1)
+## HTTPS (1)
+
  - (all the HTTP features)
+ - HTTP/3 experimental support
  - using client certificates
  - verify server certificate
- - via http-proxy
+ - via HTTP proxy, HTTPS proxy or SOCKS proxy
  - select desired encryption
- - force usage of a specific SSL version (SSLv2 (*7), SSLv3 (*10) or TLSv1)
+ - select usage of a specific SSL version
 
-FTP
+## FTP
+
  - download
  - authentication
- - Kerberos 5 (*14)
+ - Kerberos 5 (14)
  - active/passive using PORT, EPRT, PASV or EPSV
  - single file size information (compare to HTTP HEAD)
  - 'type=' URL support
@@ -90,52 +92,62 @@ FTP
  - upload resume
  - custom ftp commands (before and/or after the transfer)
  - simple "range" support
- - via http-proxy
- - all operations can be tunneled through a http-proxy
+ - via HTTP proxy, HTTPS proxy or SOCKS proxy
+ - all operations can be tunneled through proxy
  - customizable to retrieve file modification date
  - no dir depth limit
 
-FTPS (*1)
- - implicit ftps:// support that use SSL on both connections
- - explicit "AUTH TLS" and "AUTH SSL" usage to "upgrade" plain ftp://
+## FTPS (1)
+
+ - implicit `ftps://` support that use SSL on both connections
+ - explicit "AUTH TLS" and "AUTH SSL" usage to "upgrade" plain `ftp://`
    connection to use SSL for both or one of the connections
 
-SCP (*8)
+## SCP (8)
+
  - both password and public key auth
 
-SFTP (*8)
+## SFTP (7)
+
  - both password and public key auth
  - with custom commands sent before/after the transfer
 
-TFTP
+## TFTP
+
  - download
  - upload
 
-TELNET
+## TELNET
+
  - connection negotiation
  - custom telnet options
  - stdin/stdout I/O
 
-LDAP (*2)
+## LDAP (2)
+
  - full LDAP URL support
 
-DICT
+## DICT
+
  - extended DICT URL support
 
-FILE
+## FILE
+
  - URL support
  - upload
  - resume
 
-SMB
+## SMB
+
  - SMBv1 over TCP and SSL
  - download
  - upload
  - authentication with NTLMv1
 
-SMTP
- - authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (*9), Kerberos 5
-   (*4) and External.
+## SMTP
+
+ - authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (9), Kerberos 5
+   (4) and External.
  - send e-mails
  - mail from support
  - mail size support
@@ -143,30 +155,34 @@ SMTP
  - multiple recipients
  - via http-proxy
 
-SMTPS (*1)
- - implicit smtps:// support
- - explicit "STARTTLS" usage to "upgrade" plain smtp:// connections to use SSL
+## SMTPS (1)
+
+ - implicit `smtps://` support
+ - explicit "STARTTLS" usage to "upgrade" plain `smtp://` connections to use SSL
  - via http-proxy
 
-POP3
+## POP3
+
  - authentication: Clear Text, APOP and SASL
- - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (*9),
-   Kerberos 5 (*4) and External.
+ - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (9),
+   Kerberos 5 (4) and External.
  - list e-mails
  - retrieve e-mails
  - enhanced command support for: CAPA, DELE, TOP, STAT, UIDL and NOOP via
    custom requests
  - via http-proxy
 
-POP3S (*1)
- - implicit pop3s:// support
- - explicit "STLS" usage to "upgrade" plain pop3:// connections to use SSL
+## POP3S (1)
+
+ - implicit `pop3s://` support
+ - explicit "STLS" usage to "upgrade" plain `pop3://` connections to use SSL
  - via http-proxy
 
-IMAP
+## IMAP
+
  - authentication: Clear Text and SASL
- - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (*9),
-   Kerberos 5 (*4) and External.
+ - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (9),
+   Kerberos 5 (4) and External.
  - list the folders of a mailbox
  - select a mailbox with support for verifying the UIDVALIDITY
  - fetch e-mails with support for specifying the UID and SECTION
@@ -175,33 +191,33 @@ IMAP
    STORE, COPY and UID via custom requests
  - via http-proxy
 
-IMAPS (*1)
- - implicit imaps:// support
- - explicit "STARTTLS" usage to "upgrade" plain imap:// connections to use SSL
+## IMAPS (1)
+
+ - implicit `imaps://` support
+ - explicit "STARTTLS" usage to "upgrade" plain `imap://` connections to use SSL
  - via http-proxy
 
-MQTT
- - Subscribe to and publish topics using url scheme mqtt://broker/topic
+## MQTT
 
-FOOTNOTES
-=========
+ - Subscribe to and publish topics using url scheme `mqtt://broker/topic`
 
-  *1 = requires a TLS library
-  *2 = requires OpenLDAP or WinLDAP
-  *3 = requires a GSS-API implementation (such as Heimdal or MIT Kerberos) or
-       SSPI (native Windows)
-  *4 = requires a GSS-API implementation, however, only Windows SSPI is
-       currently supported
-  *5 = requires nghttp2 and possibly a recent TLS library
-  *6 = requires c-ares
-  *7 = requires OpenSSL, NSS, GSKit, Schannel or Secure Transport; GnuTLS, for
-       example, only supports SSLv3 and TLSv1
-  *8 = requires libssh2
-  *9 = requires OpenSSL, GnuTLS, mbedTLS, NSS, yassl, Secure Transport or SSPI
-       (native Windows)
-  *10 = requires an SSL library that supports SSLv3
-  *11 = requires libidn or Windows
-  *12 = requires libz
-  *13 = requires libmetalink, and either an Apple or Microsoft operating
-        system, or OpenSSL, or GnuTLS, or NSS
-  *14 = requires a GSS-API implementation (such as Heimdal or MIT Kerberos)
+## Footnotes
+
+  1. requires a TLS library
+  2. requires OpenLDAP or WinLDAP
+  3. requires a GSS-API implementation (such as Heimdal or MIT Kerberos) or
+     SSPI (native Windows)
+  4. requires a GSS-API implementation, however, only Windows SSPI is
+     currently supported
+  5. requires nghttp2
+  6. requires c-ares
+  7. requires libssh2, libssh or wolfSSH
+  8. requires libssh2 or libssh
+  9. requires OpenSSL, GnuTLS, mbedTLS, NSS, yassl, Secure Transport or SSPI
+     (native Windows)
+  10. -
+  11. requires libidn2 or Windows
+  12. requires libz, brotli and/or zstd
+  13. requires libmetalink, and either an Apple or Microsoft operating
+      system, or OpenSSL, or GnuTLS, or NSS
+  14. requires a GSS-API implementation (such as Heimdal or MIT Kerberos)
