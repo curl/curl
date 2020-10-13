@@ -59,7 +59,7 @@ EXTRA_DIST =                                    \
  ECH.md                                         \
  EXPERIMENTAL.md                                \
  FAQ                                            \
- FEATURES                                       \
+ FEATURES.md                                    \
  GOVERNANCE.md                                  \
  HELP-US.md                                     \
  HISTORY.md                                     \
