@@ -44,7 +44,6 @@
 #endif
 
 #include "strerror.h"
-#include "curl_multibyte.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -656,26 +655,26 @@ static const char *
 get_winapi_error(int err, char *buf, size_t buflen)
 {
   char *p;
+  wchar_t wbuf[256];
 
   if(!buflen)
     return NULL;
 
   *buf = '\0';
+  *wbuf = L'\0';
 
-  {
-    TCHAR wbuf[256];
-    wbuf[0] = L'\0';
-
-    if(FormatMessage((FORMAT_MESSAGE_FROM_SYSTEM |
-                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
-                     LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(TCHAR), NULL)) {
-      char *msg = curlx_convert_tchar_to_UTF8(wbuf);
-      if(msg) {
-        strncpy(buf, msg, buflen - 1);
-        buf[buflen-1] = '\0';
-        curlx_unicodefree(msg);
-      }
-    }
+  /* We return the local codepage version of the error string because if it is
+     output to the user's terminal it will likely be with functions which
+     expect the local codepage (eg fprintf, failf, infof).
+     FormatMessageW -> wcstombs is used for Windows CE compatibility. */
+  if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
+                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
+                    LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(wchar_t), NULL)) {
+    size_t written = wcstombs(buf, wbuf, buflen - 1);
+    if(written != (size_t)-1)
+      buf[written] = '\0';
+    else
+      *buf = '\0';
   }
 
   /* Truncate multiple lines */
