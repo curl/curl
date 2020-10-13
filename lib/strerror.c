@@ -781,7 +781,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   }
 #else
   {
-    char *msg = strerror(err);
+    const char *msg = strerror(err);
     if(msg)
       strncpy(buf, msg, max);
     else
