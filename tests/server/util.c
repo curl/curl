@@ -682,13 +682,14 @@ static DWORD WINAPI main_window_loop(LPVOID lpParameter)
   ZeroMemory(&wc, sizeof(wc));
   wc.lpfnWndProc = (WNDPROC)main_window_proc;
   wc.hInstance = (HINSTANCE)lpParameter;
-  wc.lpszClassName = "MainWClass";
+  wc.lpszClassName = TEXT("MainWClass");
   if(!RegisterClass(&wc)) {
     perror("RegisterClass failed");
     return (DWORD)-1;
   }
 
-  hidden_main_window = CreateWindowEx(0, "MainWClass", "Recv WM_CLOSE msg",
+  hidden_main_window = CreateWindowEx(0, TEXT("MainWClass"),
+                                      TEXT("Recv WM_CLOSE msg"),
                                       WS_OVERLAPPEDWINDOW,
                                       CW_USEDEFAULT, CW_USEDEFAULT,
                                       CW_USEDEFAULT, CW_USEDEFAULT,
