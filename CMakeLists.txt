@@ -1324,10 +1324,10 @@ if(BUILD_CURL_EXE)
   add_subdirectory(src)
 endif()
 
-option(BUILD_TESTING "Build tests" "${PERL_FOUND}")
-if(NOT PERL_FOUND)
-  message(STATUS "Perl not found, testing disabled.")
-elseif(BUILD_TESTING)
+cmake_dependent_option(BUILD_TESTING "Build tests"
+  ON "PERL_FOUND;NOT CURL_DISABLE_TESTS"
+  OFF)
+if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
