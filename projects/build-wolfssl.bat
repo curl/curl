@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2012 - 2018, Steve Holme, <steve_holme@hotmail.com>.
+rem * Copyright (C) 2012 - 2020, Steve Holme, <steve_holme@hotmail.com>.
 rem * Copyright (C) 2015, Jay Satiro, <raysatiro@yahoo.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
