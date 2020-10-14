@@ -46,6 +46,7 @@ addons:
     - libidn2-dev
     - gnutls-bin
     - python-impacket
+    - ninja-build
 
 jobs:
   include:
@@ -79,6 +80,7 @@ jobs:
         - gnutls-bin
         # The above list is common_packages minus impacket.
         - libssh-dev
+        - ninja-build
   - env:
     - T=normal C="--enable-ares"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
@@ -246,7 +248,7 @@ jobs:
     - T=iconv
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
   - env:
-    - T=cmake BORINGSSL=yes QUICHE=yes C="-DUSE_QUICHE=1 -DOPENSSL_ROOT_DIR=$HOME/boringssl -DCURL_BROTLI=1 -DCURL_ZSTD=1"
+    - T=cmake BORINGSSL=yes QUICHE=yes C="-GNinja -DUSE_QUICHE=1 -DOPENSSL_ROOT_DIR=$HOME/boringssl -DCURL_BROTLI=1 -DCURL_ZSTD=1"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     - PKG_CONFIG_PATH="$HOME/quiche/target/release"
     before_install:
@@ -260,7 +262,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=cmake NGTCP2=yes C="-DUSE_NGTCP2=ON -DCURL_BROTLI=1 -DCURL_ZSTD=1"
+    - T=cmake NGTCP2=yes C="-GNinja -DUSE_NGTCP2=ON -DCURL_BROTLI=1 -DCURL_ZSTD=1"
     - *clang
     - PKG_CONFIG_PATH="$HOME/ngbuild/lib/pkgconfig"
     compiler: clang
