@@ -31,7 +31,6 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl           \
  CMakeLists.txt mem-include-scan.pl valgrind.supp extern-scan.pl              \
  manpage-scan.pl nroff-scan.pl http2-server.pl dictserver.py                  \
  negtelnetserver.py smbserver.py curl_test_data.py                            \
- objnames-test08.sh objnames-test10.sh objnames.inc                           \
  disable-scan.pl manpage-syntax.pl error-codes.pl badsymbols.pl               \
  azure.pm appveyor.pm version-scan.pl options-scan.pl
 
