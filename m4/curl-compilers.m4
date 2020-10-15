@@ -1074,19 +1074,9 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           fi
           #
           dnl only gcc 4.8 or later
-          case $host_os in
-          mingw*)
-            dnl for mingw, switch it off!
-            if test "$compiler_num" -ge "408"; then
-              tmp_CFLAGS="$tmp_CFLAGS -Wno-format"
-            fi
-            ;;
-          *)
-            if test "$compiler_num" -ge "408"; then
-              tmp_CFLAGS="$tmp_CFLAGS -Wformat=2"
-            fi
-            ;;
-          esac
+          if test "$compiler_num" -ge "408"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wformat=2"
+          fi
           #
           dnl Only gcc 5 or later
           if test "$compiler_num" -ge "500"; then
