@@ -2471,7 +2471,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 #endif
 #endif
   const long int ssl_version = SSL_CONN_CONFIG(version);
-#ifdef HAVE_OPENSSL_SRP
+#ifdef USE_TLS_SRP
   const enum CURL_TLSAUTH ssl_authtype = SSL_SET_OPTION(authtype);
 #endif
   char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
@@ -2516,7 +2516,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     failf(data, OSSL_PACKAGE " was built without SSLv2 support");
     return CURLE_NOT_BUILT_IN;
 #else
-#ifdef HAVE_OPENSSL_SRP
+#ifdef USE_TLS_SRP
     if(ssl_authtype == CURL_TLSAUTH_SRP)
       return CURLE_SSL_CONNECT_ERROR;
 #endif
@@ -2529,7 +2529,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     failf(data, OSSL_PACKAGE " was built without SSLv3 support");
     return CURLE_NOT_BUILT_IN;
 #else
-#ifdef HAVE_OPENSSL_SRP
+#ifdef USE_TLS_SRP
     if(ssl_authtype == CURL_TLSAUTH_SRP)
       return CURLE_SSL_CONNECT_ERROR;
 #endif
@@ -2797,7 +2797,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   }
 #endif
 
-#ifdef HAVE_OPENSSL_SRP
+#ifdef USE_TLS_SRP
   if(ssl_authtype == CURL_TLSAUTH_SRP) {
     char * const ssl_username = SSL_SET_OPTION(username);
 
