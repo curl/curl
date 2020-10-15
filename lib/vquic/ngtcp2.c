@@ -1715,7 +1715,8 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn,
 
 }
 
-static CURLcode ng_process_ingress(struct connectdata *conn, int sockfd,
+static CURLcode ng_process_ingress(struct connectdata *conn,
+                                   curl_socket_t sockfd,
                                    struct quicsocket *qs)
 {
   ssize_t recvd;
@@ -1730,7 +1731,7 @@ static CURLcode ng_process_ingress(struct connectdata *conn, int sockfd,
 
   for(;;) {
     remote_addrlen = sizeof(remote_addr);
-    while((recvd = recvfrom(sockfd, buf, bufsize, 0,
+    while((recvd = recvfrom(sockfd, (char *)buf, bufsize, 0,
                             (struct sockaddr *)&remote_addr,
                             &remote_addrlen)) == -1 &&
           SOCKERRNO == EINTR)
@@ -1870,7 +1871,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
     }
 
     memcpy(&remote_addr, ps.path.remote.addr, ps.path.remote.addrlen);
-    while((sent = send(sockfd, out, outlen, 0)) == -1 &&
+    while((sent = send(sockfd, (const char *)out, outlen, 0)) == -1 &&
           SOCKERRNO == EINTR)
       ;
 
