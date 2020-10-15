@@ -1334,8 +1334,12 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
   conn->tempfamily[0] = conn->tempaddr[0]?
     conn->tempaddr[0]->ai_family:0;
+#ifdef ENABLE_IPV6
   conn->tempfamily[1] = conn->tempfamily[0] == AF_INET6 ?
     AF_INET : AF_INET6;
+#else
+  conn->tempfamily[1] = AF_UNSPEC;
+#endif
   ainext(conn, 1, FALSE); /* assigns conn->tempaddr[1] accordingly */
 
   DEBUGF(infof(data, "family0 == %s, family1 == %s\n",
