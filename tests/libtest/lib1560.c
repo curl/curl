@@ -479,6 +479,13 @@ static int checkurl(const char *url, const char *out)
 /* !checksrc! disable SPACEBEFORECOMMA 1 */
 static struct setcase set_parts_list[] = {
   {"https://example.com/",
+   "query=Al2cO3tDkcDZ3EWE5Lh+LX8TPHs,", /* contains '+' */
+   "https://example.com/?Al2cO3tDkcDZ3EWE5Lh%2bLX8TPHs",
+   CURLU_URLDECODE, /* decode on get */
+   CURLU_URLENCODE, /* encode on set */
+   CURLUE_OK, CURLUE_OK},
+
+  {"https://example.com/",
    /* Set a 41 bytes scheme. That's too long so the old scheme remains set. */
    "scheme=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbc,",
    "https://example.com/",
