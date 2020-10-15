@@ -41,3 +41,11 @@ EXTRA_DIST = README \
   TPF/maketpf.env_curl \
   TPF/maketpf.env_curllib \
   Android/Android.mk
+
+CHECKSRC = $(CS_$(V))
+CS_0 = @echo "  RUN     " $@;
+CS_1 =
+CS_ = $(CS_0)
+
+checksrc:
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(srcdir) $(srcdir)/OS400/*.[ch])

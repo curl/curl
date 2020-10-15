@@ -328,6 +328,7 @@ checksrc:
 	(cd tests && $(MAKE) checksrc)
 	(cd include/curl && $(MAKE) checksrc)
 	(cd docs/examples && $(MAKE) checksrc)
+	(cd packages && $(MAKE) checksrc)
 
 .PHONY: vc-ide
 
