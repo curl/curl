@@ -3453,7 +3453,6 @@ typedef int numcert_t;
 
 static CURLcode get_cert_chain(struct connectdata *conn,
                                struct ssl_connect_data *connssl)
-
 {
   CURLcode result;
   STACK_OF(X509) *sk;

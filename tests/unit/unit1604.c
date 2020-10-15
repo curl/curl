@@ -82,7 +82,6 @@ struct data {
 };
 
 UNITTEST_START
-
 { /* START sanitize_file_name */
   struct data data[] = {
     { "", 0,
@@ -349,7 +348,6 @@ UNITTEST_START
 
 #else
 UNITTEST_START
-
 {
   fprintf(stderr, "Skipped test not for this platform\n");
 }
