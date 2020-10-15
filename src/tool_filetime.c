@@ -29,6 +29,11 @@
 #  include <sys/utime.h>
 #endif
 
+#if defined(__GNUC__) && defined(__MINGW32__)
+/* GCC 10 on mingw has issues with this, disable */
+#pragma GCC diagnostic ignored "-Wformat"
+#endif
+
 curl_off_t getfiletime(const char *filename, FILE *error_stream)
 {
   curl_off_t result = -1;
