@@ -2,6 +2,7 @@ Long: telnet-option
 Short: t
 Arg: <opt=val>
 Help: Set telnet option
+Category: telnet
 ---
 Pass options to the telnet protocol. Supported options are:
 

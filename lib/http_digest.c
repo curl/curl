@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -94,15 +94,19 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   struct auth *authp;
 
   if(proxy) {
+#ifdef CURL_DISABLE_PROXY
+    return CURLE_NOT_BUILT_IN;
+#else
     digest = &data->state.proxydigest;
-    allocuserpwd = &conn->allocptr.proxyuserpwd;
+    allocuserpwd = &data->state.aptr.proxyuserpwd;
     userp = conn->http_proxy.user;
     passwdp = conn->http_proxy.passwd;
     authp = &data->state.authproxy;
+#endif
   }
   else {
     digest = &data->state.digest;
-    allocuserpwd = &conn->allocptr.userpwd;
+    allocuserpwd = &data->state.aptr.userpwd;
     userp = conn->user;
     passwdp = conn->passwd;
     authp = &data->state.authhost;

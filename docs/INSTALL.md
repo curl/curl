@@ -115,11 +115,11 @@ libressl.
  - GnuTLS: `--without-ssl --with-gnutls`.
  - wolfSSL: `--without-ssl --with-wolfssl`
  - NSS: `--without-ssl --with-nss`
- - PolarSSL: `--without-ssl --with-polarssl`
  - mbedTLS: `--without-ssl --with-mbedtls`
  - schannel: `--without-ssl --with-schannel`
  - secure transport: `--without-ssl --with-secure-transport`
  - MesaLink: `--without-ssl --with-mesalink`
+ - BearSSL: `--without-ssl --with-bearssl`
 
 # Windows
 
@@ -195,20 +195,8 @@ The configure utility, unfortunately, is not available for the Windows
 environment, therefore, you cannot use the various disable-protocol options of
 the configure utility on this platform.
 
-However, you can use the following defines to disable specific
-protocols:
-
- - `HTTP_ONLY`             disables all protocols except HTTP
- - `CURL_DISABLE_FTP`      disables FTP
- - `CURL_DISABLE_LDAP`     disables LDAP
- - `CURL_DISABLE_TELNET`   disables TELNET
- - `CURL_DISABLE_DICT`     disables DICT
- - `CURL_DISABLE_FILE`     disables FILE
- - `CURL_DISABLE_TFTP`     disables TFTP
- - `CURL_DISABLE_HTTP`     disables HTTP
- - `CURL_DISABLE_IMAP`     disables IMAP
- - `CURL_DISABLE_POP3`     disables POP3
- - `CURL_DISABLE_SMTP`     disables SMTP
+You can use specific defines to disable specific protocols and features. See
+[CURL-DISABLE.md](CURL-DISABLE-md) for the full list.
 
 If you want to set any of these defines you have the following options:
 
@@ -270,9 +258,9 @@ Windows you should choose another SSL backend such as OpenSSL.
 
 On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
 implementation, Secure Transport, instead of OpenSSL. To build with Secure
-Transport for SSL/TLS, use the configure option `--with-darwinssl`. (It is not
-necessary to use the option `--without-ssl`.) This feature requires iOS 5.0 or
-later, or OS X 10.5 ("Leopard") or later.
+Transport for SSL/TLS, use the configure option `--with-secure-transport`. (It
+is not necessary to use the option `--without-ssl`.) This feature requires iOS
+5.0 or later, or OS X 10.5 ("Leopard") or later.
 
 When Secure Transport is in use, the curl options `--cacert` and `--capath`
 and their libcurl equivalents, will be ignored, because Secure Transport uses
@@ -293,8 +281,49 @@ commands in curl's directory in the shell will build the code such that it
 will run on cats as old as OS X 10.6 ("Snow Leopard") (using bash):
 
     export MACOSX_DEPLOYMENT_TARGET="10.6"
-    ./configure --with-darwinssl
+    ./configure --with-secure-transport
     make
+
+# Android
+
+When building curl for Android it's recommended to use a Linux environment
+since using curl's `configure` script is the easiest way to build curl
+for Android. Before you can build curl for Android, you need to install the
+Android NDK first. This can be done using the SDK Manager that is part of
+Android Studio. Once you have installed the Android NDK, you need to figure out
+where it has been installed and then set up some environment variables before
+launching `configure`. On macOS, those variables could look like this to compile
+for `aarch64` and API level 29:
+
+    export NDK=~/Library/Android/sdk/ndk/20.1.5948944
+    export HOST_TAG=darwin-x86_64
+    export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/$HOST_TAG
+    export AR=$TOOLCHAIN/bin/aarch64-linux-android-ar
+    export AS=$TOOLCHAIN/bin/aarch64-linux-android-as
+    export CC=$TOOLCHAIN/bin/aarch64-linux-android29-clang
+    export CXX=$TOOLCHAIN/bin/aarch64-linux-android29-clang++
+    export LD=$TOOLCHAIN/bin/aarch64-linux-android-ld
+    export RANLIB=$TOOLCHAIN/bin/aarch64-linux-android-ranlib
+    export STRIP=$TOOLCHAIN/bin/aarch64-linux-android-strip
+
+When building on Linux or targeting other API levels or architectures, you need
+to adjust those variables accordingly. After that you can build curl like this:
+
+    ./configure --host aarch64-linux-android --with-pic --disable-shared
+
+Note that this won't give you SSL/TLS support. If you need SSL/TLS, you have
+to build curl against a SSL/TLS layer, e.g. OpenSSL, because it's impossible for
+curl to access Android's native SSL/TLS layer. To build curl for Android using
+OpenSSL, follow the OpenSSL build instructions and then install `libssl.a` and
+`libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy `include/openssl` to
+`$TOOLCHAIN/sysroot/usr/include`. Now you can build curl for Android using
+OpenSSL like this:
+    
+    ./configure --host aarch64-linux-android --with-pic --disable-shared --with-ssl="$TOOLCHAIN/sysroot/usr"
+
+Note, however, that you must target at least Android M (API level 23) or `configure`
+won't be able to detect OpenSSL since `stderr` (and the like) weren't defined
+before Android M.
 
 # Cross compile
 

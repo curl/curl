@@ -81,7 +81,7 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-20c
+1af
 ------------------------------
 Content-Disposition: form-data; name="greeting"
 Content-Type: application/X-Greeting
@@ -98,7 +98,21 @@ This is data from a file
 ------------------------------
 Content-Disposition: form-data
 
-this is what we post to the silly web server
+
+1
+d
+1
+u
+1
+m
+1
+m
+1
+y
+1
+
+
+30
 
 --------------------------------
 

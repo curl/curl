@@ -40,12 +40,10 @@ http://%HOST6IP:%HTTP6PORT/1265
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1265 HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

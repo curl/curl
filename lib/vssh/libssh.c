@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2017 - 2019 Red Hat, Inc.
+ * Copyright (C) 2017 - 2020 Red Hat, Inc.
  *
  * Authors: Nikos Mavrogiannopoulos, Tomas Mraz, Stanislav Zidek,
  *          Robert Kolcun, Andreas Schneider
@@ -97,9 +97,13 @@
 
 /* A recent macro provided by libssh. Or make our own. */
 #ifndef SSH_STRING_FREE_CHAR
-/* !checksrc! disable ASSIGNWITHINCONDITION 1 */
-#define SSH_STRING_FREE_CHAR(x) \
-    do { if((x) != NULL) { ssh_string_free_char(x); x = NULL; } } while(0)
+#define SSH_STRING_FREE_CHAR(x)                 \
+  do {                                          \
+    if(x) {                                     \
+      ssh_string_free_char(x);                  \
+      x = NULL;                                 \
+    }                                           \
+  } while(0)
 #endif
 
 /* Local functions: */
@@ -154,6 +158,7 @@ const struct Curl_handler Curl_handler_scp = {
   ZERO_NULL,                    /* connection_check */
   PORT_SSH,                     /* defport */
   CURLPROTO_SCP,                /* protocol */
+  CURLPROTO_SCP,                /* family */
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY    /* flags */
 };
 
@@ -179,6 +184,7 @@ const struct Curl_handler Curl_handler_sftp = {
   ZERO_NULL,                            /* connection_check */
   PORT_SSH,                             /* defport */
   CURLPROTO_SFTP,                       /* protocol */
+  CURLPROTO_SFTP,                       /* family */
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION
   | PROTOPT_NOURLQUERY                  /* flags */
 };
@@ -318,25 +324,50 @@ static int myssh_is_known(struct connectdata *conn)
   ssh_key pubkey;
   size_t hlen;
   unsigned char *hash = NULL;
-  char *base64 = NULL;
+  char *found_base64 = NULL;
+  char *known_base64 = NULL;
   int vstate;
   enum curl_khmatch keymatch;
   struct curl_khkey foundkey;
+  struct curl_khkey *knownkeyp = NULL;
   curl_sshkeycallback func =
     data->set.ssh_keyfunc;
 
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
+  struct ssh_knownhosts_entry *knownhostsentry = NULL;
+  struct curl_khkey knownkey;
+#endif
+
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,8,0)
+  rc = ssh_get_server_publickey(sshc->ssh_session, &pubkey);
+#else
   rc = ssh_get_publickey(sshc->ssh_session, &pubkey);
+#endif
   if(rc != SSH_OK)
     return rc;
 
   if(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) {
+    int i;
+    char md5buffer[33];
+    const char *pubkey_md5 = data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5];
+
     rc = ssh_get_publickey_hash(pubkey, SSH_PUBLICKEY_HASH_MD5,
                                 &hash, &hlen);
-    if(rc != SSH_OK)
+    if(rc != SSH_OK || hlen != 16) {
+      failf(data,
+            "Denied establishing ssh session: md5 fingerprint not available");
       goto cleanup;
+    }
 
-    if(hlen != strlen(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) ||
-       memcmp(&data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5], hash, hlen)) {
+    for(i = 0; i < 16; i++)
+      msnprintf(&md5buffer[i*2], 3, "%02x", (unsigned char)hash[i]);
+
+    infof(data, "SSH MD5 fingerprint: %s\n", md5buffer);
+
+    if(!strcasecompare(md5buffer, pubkey_md5)) {
+      failf(data,
+            "Denied establishing ssh session: mismatch md5 fingerprint. "
+            "Remote %s is not equal to %s", md5buffer, pubkey_md5);
       rc = SSH_ERROR;
       goto cleanup;
     }
@@ -350,6 +381,68 @@ static int myssh_is_known(struct connectdata *conn)
     goto cleanup;
   }
 
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
+  /* Get the known_key from the known hosts file */
+  vstate = ssh_session_get_known_hosts_entry(sshc->ssh_session,
+                                             &knownhostsentry);
+
+  /* Case an entry was found in a known hosts file */
+  if(knownhostsentry) {
+    if(knownhostsentry->publickey) {
+      rc = ssh_pki_export_pubkey_base64(knownhostsentry->publickey,
+                                        &known_base64);
+      if(rc != SSH_OK) {
+        goto cleanup;
+      }
+      knownkey.key = known_base64;
+      knownkey.len = strlen(known_base64);
+
+      switch(ssh_key_type(knownhostsentry->publickey)) {
+        case SSH_KEYTYPE_RSA:
+          knownkey.keytype = CURLKHTYPE_RSA;
+          break;
+        case SSH_KEYTYPE_RSA1:
+          knownkey.keytype = CURLKHTYPE_RSA1;
+          break;
+        case SSH_KEYTYPE_ECDSA:
+        case SSH_KEYTYPE_ECDSA_P256:
+        case SSH_KEYTYPE_ECDSA_P384:
+        case SSH_KEYTYPE_ECDSA_P521:
+          knownkey.keytype = CURLKHTYPE_ECDSA;
+          break;
+        case SSH_KEYTYPE_ED25519:
+          knownkey.keytype = CURLKHTYPE_ED25519;
+          break;
+        case SSH_KEYTYPE_DSS:
+          knownkey.keytype = CURLKHTYPE_DSS;
+          break;
+        default:
+          rc = SSH_ERROR;
+          goto cleanup;
+      }
+      knownkeyp = &knownkey;
+    }
+  }
+
+  switch(vstate) {
+    case SSH_KNOWN_HOSTS_OK:
+      keymatch = CURLKHMATCH_OK;
+      break;
+    case SSH_KNOWN_HOSTS_OTHER:
+      /* fallthrough */
+    case SSH_KNOWN_HOSTS_NOT_FOUND:
+      /* fallthrough */
+    case SSH_KNOWN_HOSTS_UNKNOWN:
+      /* fallthrough */
+    case SSH_KNOWN_HOSTS_ERROR:
+      keymatch = CURLKHMATCH_MISSING;
+      break;
+  default:
+      keymatch = CURLKHMATCH_MISMATCH;
+      break;
+  }
+
+#else
   vstate = ssh_is_server_known(sshc->ssh_session);
   switch(vstate) {
     case SSH_SERVER_KNOWN_OK:
@@ -364,14 +457,15 @@ static int myssh_is_known(struct connectdata *conn)
       keymatch = CURLKHMATCH_MISMATCH;
       break;
   }
+#endif
 
   if(func) { /* use callback to determine action */
-    rc = ssh_pki_export_pubkey_base64(pubkey, &base64);
+    rc = ssh_pki_export_pubkey_base64(pubkey, &found_base64);
     if(rc != SSH_OK)
       goto cleanup;
 
-    foundkey.key = base64;
-    foundkey.len = strlen(base64);
+    foundkey.key = found_base64;
+    foundkey.len = strlen(found_base64);
 
     switch(ssh_key_type(pubkey)) {
       case SSH_KEYTYPE_RSA:
@@ -381,6 +475,11 @@ static int myssh_is_known(struct connectdata *conn)
         foundkey.keytype = CURLKHTYPE_RSA1;
         break;
       case SSH_KEYTYPE_ECDSA:
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
+      case SSH_KEYTYPE_ECDSA_P256:
+      case SSH_KEYTYPE_ECDSA_P384:
+      case SSH_KEYTYPE_ECDSA_P521:
+#endif
         foundkey.keytype = CURLKHTYPE_ECDSA;
         break;
 #if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,7,0)
@@ -396,15 +495,19 @@ static int myssh_is_known(struct connectdata *conn)
         goto cleanup;
     }
 
-    /* we don't have anything equivalent to knownkey. Always NULL */
     Curl_set_in_callback(data, true);
-    rc = func(data, NULL, &foundkey, /* from the remote host */
+    rc = func(data, knownkeyp, /* from the knownhosts file */
+              &foundkey, /* from the remote host */
               keymatch, data->set.ssh_keyfunc_userp);
     Curl_set_in_callback(data, false);
 
     switch(rc) {
       case CURLKHSTAT_FINE_ADD_TO_FILE:
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,8,0)
+        rc = ssh_session_update_known_hosts(sshc->ssh_session);
+#else
         rc = ssh_write_knownhost(sshc->ssh_session);
+#endif
         if(rc != SSH_OK) {
           goto cleanup;
         }
@@ -425,9 +528,20 @@ static int myssh_is_known(struct connectdata *conn)
   rc = SSH_OK;
 
 cleanup:
+  if(found_base64) {
+    free(found_base64);
+  }
+  if(known_base64) {
+    free(known_base64);
+  }
   if(hash)
     ssh_clean_pubkey_hash(&hash);
   ssh_key_free(pubkey);
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
+  if(knownhostsentry) {
+    ssh_knownhosts_entry_free(knownhostsentry);
+  }
+#endif
   return rc;
 }
 
@@ -1582,7 +1696,6 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
         }
-        /* Does a completed file need to be seeked and started or closed ? */
         /* Now store the number of bytes we are expected to download */
         data->req.size = size - data->state.resume_from;
         data->req.maxdownload = size - data->state.resume_from;
@@ -2038,6 +2151,7 @@ static CURLcode myssh_connect(struct connectdata *conn, bool *done)
   CURLcode result;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   struct Curl_easy *data = conn->data;
+  int rc;
 
   /* initialize per-handle data if not already */
   if(!data->req.protop)
@@ -2064,38 +2178,70 @@ static CURLcode myssh_connect(struct connectdata *conn, bool *done)
     return CURLE_FAILED_INIT;
   }
 
-  ssh_options_set(ssh->ssh_session, SSH_OPTIONS_FD, &sock);
+  rc = ssh_options_set(ssh->ssh_session, SSH_OPTIONS_HOST, conn->host.name);
+  if(rc != SSH_OK) {
+    failf(data, "Could not set remote host");
+    return CURLE_FAILED_INIT;
+  }
 
-  if(conn->user) {
+  rc = ssh_options_parse_config(ssh->ssh_session, NULL);
+  if(rc != SSH_OK) {
+    infof(data, "Could not parse SSH configuration files");
+    /* ignore */
+  }
+
+  rc = ssh_options_set(ssh->ssh_session, SSH_OPTIONS_FD, &sock);
+  if(rc != SSH_OK) {
+    failf(data, "Could not set socket");
+    return CURLE_FAILED_INIT;
+  }
+
+  if(conn->user && conn->user[0] != '\0') {
     infof(data, "User: %s\n", conn->user);
-    ssh_options_set(ssh->ssh_session, SSH_OPTIONS_USER, conn->user);
+    rc = ssh_options_set(ssh->ssh_session, SSH_OPTIONS_USER, conn->user);
+    if(rc != SSH_OK) {
+      failf(data, "Could not set user");
+      return CURLE_FAILED_INIT;
+    }
   }
 
   if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
     infof(data, "Known hosts: %s\n", data->set.str[STRING_SSH_KNOWNHOSTS]);
-    ssh_options_set(ssh->ssh_session, SSH_OPTIONS_KNOWNHOSTS,
-                    data->set.str[STRING_SSH_KNOWNHOSTS]);
+    rc = ssh_options_set(ssh->ssh_session, SSH_OPTIONS_KNOWNHOSTS,
+                         data->set.str[STRING_SSH_KNOWNHOSTS]);
+    if(rc != SSH_OK) {
+      failf(data, "Could not set known hosts file path");
+      return CURLE_FAILED_INIT;
+    }
   }
 
-  ssh_options_set(ssh->ssh_session, SSH_OPTIONS_HOST, conn->host.name);
-  if(conn->remote_port)
-    ssh_options_set(ssh->ssh_session, SSH_OPTIONS_PORT,
-                    &conn->remote_port);
+  if(conn->remote_port) {
+    rc = ssh_options_set(ssh->ssh_session, SSH_OPTIONS_PORT,
+                         &conn->remote_port);
+    if(rc != SSH_OK) {
+      failf(data, "Could not set remote port");
+      return CURLE_FAILED_INIT;
+    }
+  }
 
   if(data->set.ssh_compression) {
-    ssh_options_set(ssh->ssh_session, SSH_OPTIONS_COMPRESSION,
-                    "zlib,zlib@openssh.com,none");
+    rc = ssh_options_set(ssh->ssh_session, SSH_OPTIONS_COMPRESSION,
+                         "zlib,zlib@openssh.com,none");
+    if(rc != SSH_OK) {
+      failf(data, "Could not set compression");
+      return CURLE_FAILED_INIT;
+    }
   }
 
   ssh->privkey = NULL;
   ssh->pubkey = NULL;
 
   if(data->set.str[STRING_SSH_PUBLIC_KEY]) {
-    int rc = ssh_pki_import_pubkey_file(data->set.str[STRING_SSH_PUBLIC_KEY],
-                                        &ssh->pubkey);
+    rc = ssh_pki_import_pubkey_file(data->set.str[STRING_SSH_PUBLIC_KEY],
+                                    &ssh->pubkey);
     if(rc != SSH_OK) {
       failf(data, "Could not load public key file");
-      /* ignore */
+      return CURLE_FAILED_INIT;
     }
   }
 
@@ -2548,7 +2694,9 @@ static void sftp_quote(struct connectdata *conn)
    */
   if(strncasecompare(cmd, "chgrp ", 6) ||
      strncasecompare(cmd, "chmod ", 6) ||
-     strncasecompare(cmd, "chown ", 6)) {
+     strncasecompare(cmd, "chown ", 6) ||
+     strncasecompare(cmd, "atime ", 6) ||
+     strncasecompare(cmd, "mtime ", 6)) {
     /* attribute change */
 
     /* sshc->quote_path1 contains the mode to set */
@@ -2558,7 +2706,7 @@ static void sftp_quote(struct connectdata *conn)
       if(result == CURLE_OUT_OF_MEMORY)
         failf(data, "Out of memory");
       else
-        failf(data, "Syntax error in chgrp/chmod/chown: "
+        failf(data, "Syntax error in chgrp/chmod/chown/atime/mtime: "
               "Bad second parameter");
       Curl_safefree(sshc->quote_path1);
       state(conn, SSH_SFTP_CLOSE);
@@ -2718,6 +2866,34 @@ static void sftp_quote_stat(struct connectdata *conn)
       return;
     }
     sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_UIDGID;
+  }
+  else if(strncasecompare(cmd, "atime", 5)) {
+    time_t date = Curl_getdate_capped(sshc->quote_path1);
+    if(date == -1) {
+      Curl_safefree(sshc->quote_path1);
+      Curl_safefree(sshc->quote_path2);
+      failf(data, "Syntax error: incorrect access date format");
+      state(conn, SSH_SFTP_CLOSE);
+      sshc->nextstate = SSH_NO_STATE;
+      sshc->actualcode = CURLE_QUOTE_ERROR;
+      return;
+    }
+    sshc->quote_attrs->atime = (uint32_t)date;
+    sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_ACMODTIME;
+  }
+  else if(strncasecompare(cmd, "mtime", 5)) {
+    time_t date = Curl_getdate_capped(sshc->quote_path1);
+    if(date == -1) {
+      Curl_safefree(sshc->quote_path1);
+      Curl_safefree(sshc->quote_path2);
+      failf(data, "Syntax error: incorrect modification date format");
+      state(conn, SSH_SFTP_CLOSE);
+      sshc->nextstate = SSH_NO_STATE;
+      sshc->actualcode = CURLE_QUOTE_ERROR;
+      return;
+    }
+    sshc->quote_attrs->mtime = (uint32_t)date;
+    sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_ACMODTIME;
   }
 
   /* Now send the completed structure... */

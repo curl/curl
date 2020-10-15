@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -33,7 +33,8 @@ default values. This puts back the handle to the same state as it was in when
 it was just created with \fIcurl_easy_init(3)\fP.
 
 It does not change the following information kept in the handle: live
-connections, the Session ID cache, the DNS cache, the cookies and shares.
+connections, the Session ID cache, the DNS cache, the cookies, the shares or
+the alt-svc cache.
 .SH AVAILABILITY
 This function was added in libcurl 7.12.1
 .SH RETURN VALUE

@@ -15,7 +15,7 @@ $! Parameter P1: REALCLEAN
 $!   This removes all build products and brings the environment back to
 $!   the point where the gnv_curl_configure.sh procedure needs to be run again.
 $!
-$! Copyright 2009, John Malmberg
+$! Copyright 2009 - 2020, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above

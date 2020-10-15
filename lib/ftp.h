@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,7 +31,6 @@ extern const struct Curl_handler Curl_handler_ftp;
 extern const struct Curl_handler Curl_handler_ftps;
 #endif
 
-CURLcode Curl_ftpsend(struct connectdata *, const char *cmd);
 CURLcode Curl_GetFTPResponse(ssize_t *nread, struct connectdata *conn,
                              int *ftpcode);
 #endif /* CURL_DISABLE_FTP */
@@ -102,8 +101,6 @@ typedef enum {
    perhaps the Curl_easy is changed between the times the connection is
    used. */
 struct FTP {
-  char *user;    /* user name string */
-  char *passwd;  /* password string */
   char *path;    /* points to the urlpieces struct field */
   char *pathalloc; /* if non-NULL a pointer to an allocated path */
 
@@ -152,7 +149,6 @@ struct ftp_conn {
      connection to */
   char *newhost;          /* this is the pair to connect the DATA... */
   unsigned short newport; /* connection to */
-
 };
 
 #define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */

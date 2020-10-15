@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -201,138 +201,6 @@ static const char *doc404_RTSP = "RTSP/1.0 404 Not Found\r\n"
 #define RTP_DATA_SIZE 12
 static const char *RTP_DATA = "$_1234\n\0asdf";
 
-/* do-nothing macro replacement for systems which lack siginterrupt() */
-
-#ifndef HAVE_SIGINTERRUPT
-#define siginterrupt(x,y) do {} while(0)
-#endif
-
-/* vars used to keep around previous signal handlers */
-
-typedef RETSIGTYPE (*SIGHANDLER_T)(int);
-
-#ifdef SIGHUP
-static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
-#endif
-
-#ifdef SIGPIPE
-static SIGHANDLER_T old_sigpipe_handler = SIG_ERR;
-#endif
-
-#ifdef SIGALRM
-static SIGHANDLER_T old_sigalrm_handler = SIG_ERR;
-#endif
-
-#ifdef SIGINT
-static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
-#endif
-
-#ifdef SIGTERM
-static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
-#endif
-
-#if defined(SIGBREAK) && defined(WIN32)
-static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
-#endif
-
-/* var which if set indicates that the program should finish execution */
-
-SIG_ATOMIC_T got_exit_signal = 0;
-
-/* if next is set indicates the first signal handled in exit_signal_handler */
-
-static volatile int exit_signal = 0;
-
-/* signal handler that will be triggered to indicate that the program
-  should finish its execution in a controlled manner as soon as possible.
-  The first time this is called it will set got_exit_signal to one and
-  store in exit_signal the signal that triggered its execution. */
-
-static RETSIGTYPE exit_signal_handler(int signum)
-{
-  int old_errno = errno;
-  if(got_exit_signal == 0) {
-    got_exit_signal = 1;
-    exit_signal = signum;
-  }
-  (void)signal(signum, exit_signal_handler);
-  errno = old_errno;
-}
-
-static void install_signal_handlers(void)
-{
-#ifdef SIGHUP
-  /* ignore SIGHUP signal */
-  old_sighup_handler = signal(SIGHUP, SIG_IGN);
-  if(old_sighup_handler == SIG_ERR)
-    logmsg("cannot install SIGHUP handler: %s", strerror(errno));
-#endif
-#ifdef SIGPIPE
-  /* ignore SIGPIPE signal */
-  old_sigpipe_handler = signal(SIGPIPE, SIG_IGN);
-  if(old_sigpipe_handler == SIG_ERR)
-    logmsg("cannot install SIGPIPE handler: %s", strerror(errno));
-#endif
-#ifdef SIGALRM
-  /* ignore SIGALRM signal */
-  old_sigalrm_handler = signal(SIGALRM, SIG_IGN);
-  if(old_sigalrm_handler == SIG_ERR)
-    logmsg("cannot install SIGALRM handler: %s", strerror(errno));
-#endif
-#ifdef SIGINT
-  /* handle SIGINT signal with our exit_signal_handler */
-  old_sigint_handler = signal(SIGINT, exit_signal_handler);
-  if(old_sigint_handler == SIG_ERR)
-    logmsg("cannot install SIGINT handler: %s", strerror(errno));
-  else
-    siginterrupt(SIGINT, 1);
-#endif
-#ifdef SIGTERM
-  /* handle SIGTERM signal with our exit_signal_handler */
-  old_sigterm_handler = signal(SIGTERM, exit_signal_handler);
-  if(old_sigterm_handler == SIG_ERR)
-    logmsg("cannot install SIGTERM handler: %s", strerror(errno));
-  else
-    siginterrupt(SIGTERM, 1);
-#endif
-#if defined(SIGBREAK) && defined(WIN32)
-  /* handle SIGBREAK signal with our exit_signal_handler */
-  old_sigbreak_handler = signal(SIGBREAK, exit_signal_handler);
-  if(old_sigbreak_handler == SIG_ERR)
-    logmsg("cannot install SIGBREAK handler: %s", strerror(errno));
-  else
-    siginterrupt(SIGBREAK, 1);
-#endif
-}
-
-static void restore_signal_handlers(void)
-{
-#ifdef SIGHUP
-  if(SIG_ERR != old_sighup_handler)
-    (void)signal(SIGHUP, old_sighup_handler);
-#endif
-#ifdef SIGPIPE
-  if(SIG_ERR != old_sigpipe_handler)
-    (void)signal(SIGPIPE, old_sigpipe_handler);
-#endif
-#ifdef SIGALRM
-  if(SIG_ERR != old_sigalrm_handler)
-    (void)signal(SIGALRM, old_sigalrm_handler);
-#endif
-#ifdef SIGINT
-  if(SIG_ERR != old_sigint_handler)
-    (void)signal(SIGINT, old_sigint_handler);
-#endif
-#ifdef SIGTERM
-  if(SIG_ERR != old_sigterm_handler)
-    (void)signal(SIGTERM, old_sigterm_handler);
-#endif
-#if defined(SIGBREAK) && defined(WIN32)
-  if(SIG_ERR != old_sigbreak_handler)
-    (void)signal(SIGBREAK, old_sigbreak_handler);
-#endif
-}
-
 static int ProcessRequest(struct httprequest *req)
 {
   char *line = &req->reqbuf[req->checkindex];
@@ -379,8 +247,6 @@ static int ProcessRequest(struct httprequest *req)
     /* get the number after it */
     if(ptr) {
       FILE *stream;
-      char *filename;
-
       if((strlen(doc) + strlen(request)) < 200)
         msnprintf(logbuf, sizeof(logbuf), "Got request: %s %s %s/%d.%d",
                   request, doc, prot_str, prot_major, prot_minor);
@@ -420,13 +286,11 @@ static int ProcessRequest(struct httprequest *req)
                 req->testno, req->partno);
       logmsg("%s", logbuf);
 
-      filename = test2file(req->testno);
+      stream = test2fopen(req->testno);
 
-      stream = fopen(filename, "rb");
       if(!stream) {
         int error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
-        logmsg("Error opening file: %s", filename);
         logmsg("Couldn't open test file %ld", req->testno);
         req->open = FALSE; /* closes connection */
         return 1; /* done */
@@ -981,17 +845,13 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     count = strlen(buffer);
   }
   else {
-    char *filename = test2file(req->testno);
+    FILE *stream = test2fopen(req->testno);
     char partbuf[80]="data";
-    FILE *stream;
     if(0 != req->partno)
       msnprintf(partbuf, sizeof(partbuf), "data%ld", req->partno);
-
-    stream = fopen(filename, "rb");
     if(!stream) {
       error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
-      logmsg("Error opening file: %s", filename);
       logmsg("Couldn't open test file");
       return 0;
     }
@@ -1011,11 +871,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     }
 
     /* re-open the same file again */
-    stream = fopen(filename, "rb");
+    stream = test2fopen(req->testno);
     if(!stream) {
       error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
-      logmsg("Error opening file: %s", filename);
       logmsg("Couldn't open test file");
       free(ptr);
       return 0;
@@ -1190,6 +1049,7 @@ int main(int argc, char *argv[])
   int flag;
   unsigned short port = DEFAULT_PORT;
   const char *pidname = ".rtsp.pid";
+  const char *portfile = NULL;
   struct httprequest req;
   int rc;
   int error;
@@ -1216,6 +1076,11 @@ int main(int argc, char *argv[])
       if(argc>arg)
         pidname = argv[arg++];
     }
+    else if(!strcmp("--portfile", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        portfile = argv[arg++];
+    }
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
       if(argc>arg)
@@ -1240,12 +1105,6 @@ int main(int argc, char *argv[])
       if(argc>arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (ulnum < 1025UL) || (ulnum > 65535UL)) {
-          fprintf(stderr, "rtspd: invalid --port argument (%s)\n",
-                  argv[arg]);
-          return 0;
-        }
         port = curlx_ultous(ulnum);
         arg++;
       }
@@ -1262,6 +1121,7 @@ int main(int argc, char *argv[])
            " --version\n"
            " --logfile [file]\n"
            " --pidfile [file]\n"
+           " --portfile [file]\n"
            " --ipv4\n"
            " --ipv6\n"
            " --port [port]\n"
@@ -1275,7 +1135,7 @@ int main(int argc, char *argv[])
   atexit(win32_cleanup);
 #endif
 
-  install_signal_handlers();
+  install_signal_handlers(false);
 
   pid = (long)getpid();
 
@@ -1329,6 +1189,49 @@ int main(int argc, char *argv[])
     goto server_cleanup;
   }
 
+  if(!port) {
+    /* The system was supposed to choose a port number, figure out which
+       port we actually got and update the listener port value with it. */
+    curl_socklen_t la_size;
+    srvr_sockaddr_union_t localaddr;
+#ifdef ENABLE_IPV6
+    if(!use_ipv6)
+#endif
+      la_size = sizeof(localaddr.sa4);
+#ifdef ENABLE_IPV6
+    else
+      la_size = sizeof(localaddr.sa6);
+#endif
+    memset(&localaddr.sa, 0, (size_t)la_size);
+    if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
+      error = SOCKERRNO;
+      logmsg("getsockname() failed with error: (%d) %s",
+             error, strerror(error));
+      sclose(sock);
+      goto server_cleanup;
+    }
+    switch(localaddr.sa.sa_family) {
+    case AF_INET:
+      port = ntohs(localaddr.sa4.sin_port);
+      break;
+#ifdef ENABLE_IPV6
+    case AF_INET6:
+      port = ntohs(localaddr.sa6.sin6_port);
+      break;
+#endif
+    default:
+      break;
+    }
+    if(!port) {
+      /* Real failure, listener port shall not be zero beyond this point. */
+      logmsg("Apparently getsockname() succeeded, with listener port zero.");
+      logmsg("A valid reason for this failure is a binary built without");
+      logmsg("proper network library linkage. This might not be the only");
+      logmsg("reason, but double check it before anything else.");
+      sclose(sock);
+      goto server_cleanup;
+    }
+  }
   logmsg("Running %s version on port %d", ipv_inuse, (int)port);
 
   /* start accepting connections */
@@ -1348,6 +1251,12 @@ int main(int argc, char *argv[])
   wrotepidfile = write_pidfile(pidname);
   if(!wrotepidfile)
     goto server_cleanup;
+
+  if(portfile) {
+    wrotepidfile = write_portfile(portfile, port);
+    if(!wrotepidfile)
+      goto server_cleanup;
+  }
 
   for(;;) {
     msgsock = accept(sock, NULL, NULL);
@@ -1465,7 +1374,7 @@ server_cleanup:
     clear_advisor_read_lock(SERVERLOGS_LOCK);
   }
 
-  restore_signal_handlers();
+  restore_signal_handlers(false);
 
   if(got_exit_signal) {
     logmsg("========> %s rtspd (port: %d pid: %ld) exits with signal (%d)",

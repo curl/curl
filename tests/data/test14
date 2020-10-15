@@ -30,13 +30,10 @@ http://%HOSTIP:%HTTPPORT/want/14 -i --head
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 HEAD /want/14 HTTP/1.1
-User-Agent: curl/7.4.2-pre4 (sparc-sun-solaris2.7) libcurl 7.4.2-pre4
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

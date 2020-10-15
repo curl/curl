@@ -28,7 +28,7 @@ file
 file:// with (unsupported) proxy, authentication and range
  </name>
 <setenv>
-all_proxy=http://fake:user@%HOSTIP:%HTTPPORT/
+all_proxy=http://fake:user@%HOSTIP:%NOLISTENPORT/
 </setenv>
 <command option="no-include">
 file://localhost%FILE_PWD/log/test288.txt

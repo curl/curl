@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,5 +47,6 @@ bool Curl_connect_ongoing(struct connectdata *conn);
 #endif
 
 void Curl_connect_free(struct Curl_easy *data);
+void Curl_connect_done(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_HTTP_PROXY_H */

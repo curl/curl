@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,7 @@
 extern LARGE_INTEGER Curl_freq;
 extern bool Curl_isVistaOrGreater;
 
+/* In case of bug fix this function has a counterpart in tool_util.c */
 struct curltime Curl_now(void)
 {
   struct curltime now;

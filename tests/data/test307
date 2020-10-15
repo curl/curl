@@ -43,12 +43,10 @@ simple HTTPS GET with openssl engine
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /307 HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

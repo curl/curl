@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -35,7 +35,7 @@ Given the \fIurl\fP handle of an already parsed URL, this function lets the
 user set/update individual pieces of it.
 
 The \fIpart\fP argument should identify the particular URL part (see list
-below) to set or change, with \fIcontent\fP pointing to a zero terminated
+below) to set or change, with \fIcontent\fP pointing to a null-terminated
 string with the new contents for that URL part. The contents should be in the
 form and encoding they'd use in a URL: URL encoded.
 
@@ -51,7 +51,7 @@ populated with a URL, the new URL can be relative to the previous.
 When successfully setting a new URL, relative or absolute, the handle contents
 will be replaced with the information of the newly set URL.
 
-Pass a pointer to a zero terminated string to the \fIurl\fP parameter. The
+Pass a pointer to a null-terminated string to the \fIurl\fP parameter. The
 string must point to a correctly formatted "RFC 3986+" URL or be a NULL
 pointer.
 .IP CURLUPART_SCHEME
@@ -121,6 +121,10 @@ permits empty authority sections, similar to how file scheme is handled.
 .SH RETURN VALUE
 Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
 fine.
+
+A URL string passed on to \fIcurl_url_set(3)\fP for the \fBCURLUPART_URL\fP
+part, must be shorter than 8000000 bytes otherwise it returns
+\fBCURLUE_MALFORMED_INPUT\fP (added in 7.65.0).
 
 If this function returns an error, no URL part is returned.
 .SH EXAMPLE

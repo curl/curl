@@ -48,10 +48,16 @@ total number of file descriptors on which interesting events occurred. This
 number can include both libcurl internal descriptors as well as descriptors
 provided in \fIextra_fds\fP.
 
+The \fIcurl_multi_wakeup(3)\fP function can be used from another thread to
+wake up this function and return faster. This is one of the details
+that makes this function different than \fIcurl_multi_wait(3)\fP which cannot
+be woken up this way.
+
 If no extra file descriptors are provided and libcurl has no file descriptor
 to offer to wait for, this function will instead wait during \fItimeout_ms\fP
 milliseconds (or shorter if an internal timer indicates so). This is the
-detail that makes this function different than \fIcurl_multi_wait(3)\fP.
+other detail that makes this function different than
+\fIcurl_multi_wait(3)\fP.
 
 This function is encouraged to be used instead of select(3) when using the
 multi interface to allow applications to easier circumvent the common problem
@@ -107,4 +113,5 @@ CURLMcode type, general libcurl multi interface error code. See
 .SH AVAILABILITY
 This function was added in libcurl 7.66.0.
 .SH "SEE ALSO"
-.BR curl_multi_fdset "(3), " curl_multi_perform "(3), " curl_multi_wait "(3)"
+.BR curl_multi_fdset "(3), " curl_multi_perform "(3), "
+.BR curl_multi_wait "(3), " curl_multi_wakeup "(3)"

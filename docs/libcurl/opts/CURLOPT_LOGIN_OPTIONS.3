@@ -28,7 +28,7 @@ CURLOPT_LOGIN_OPTIONS \- set login options
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_LOGIN_OPTIONS, char *options);
 .SH DESCRIPTION
-Pass a char * as parameter, which should be pointing to the zero terminated
+Pass a char * as parameter, which should be pointing to the null-terminated
 \fIoptions\fP string to use for the transfer.
 
 For more information about the login options please see RFC2384, RFC5092 and

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,7 +26,7 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-void config_init(struct OperationConfig* config)
+void config_init(struct OperationConfig *config)
 {
   memset(config, 0, sizeof(struct OperationConfig));
 
@@ -89,6 +89,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->mail_auth);
 
   Curl_safefree(config->netrc_file);
+  Curl_safefree(config->output_dir);
 
   urlnode = config->url_list;
   while(urlnode) {
@@ -112,6 +113,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->cert_type);
   Curl_safefree(config->proxy_cert_type);
   Curl_safefree(config->cacert);
+  Curl_safefree(config->login_options);
   Curl_safefree(config->proxy_cacert);
   Curl_safefree(config->capath);
   Curl_safefree(config->proxy_capath);
@@ -128,6 +130,8 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->pubkey);
   Curl_safefree(config->hostpubmd5);
   Curl_safefree(config->engine);
+  Curl_safefree(config->etag_save_file);
+  Curl_safefree(config->etag_compare_file);
   Curl_safefree(config->request_target);
   Curl_safefree(config->customrequest);
   Curl_safefree(config->krblevel);

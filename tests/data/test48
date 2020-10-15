@@ -36,16 +36,15 @@ HTTP with -d and -G and -I
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 HEAD /48?foo=moo&moo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 HEAD /48?foo=moo&moo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 [DISCONNECT]

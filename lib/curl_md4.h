@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,7 +28,8 @@
 
 #define MD4_DIGEST_LENGTH 16
 
-void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len);
+void Curl_md4it(unsigned char *output, const unsigned char *input,
+                const size_t len);
 
 #endif /* !defined(CURL_DISABLE_CRYPTO_AUTH) */
 

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -45,15 +45,18 @@ EXTRA_DIST =                                    \
  ALTSVC.md                                      \
  BINDINGS.md                                    \
  BUG-BOUNTY.md                                  \
- BUGS                                           \
+ BUGS.md                                        \
  CHECKSRC.md                                    \
  CIPHERS.md                                     \
  CMakeLists.txt                                 \
  CODE_OF_CONDUCT.md                             \
+ CODE_REVIEW.md                                 \
  CODE_STYLE.md                                  \
  CONTRIBUTE.md                                  \
+ CURL-DISABLE.md                                \
  DEPRECATE.md                                   \
- ESNI.md                                        \
+ DYNBUF.md                                      \
+ ECH.md                                         \
  EXPERIMENTAL.md                                \
  FAQ                                            \
  FEATURES                                       \
@@ -68,23 +71,20 @@ EXTRA_DIST =                                    \
  INSTALL.md                                     \
  INTERNALS.md                                   \
  KNOWN_BUGS                                     \
- LICENSE-MIXING.md                              \
  MAIL-ETIQUETTE                                 \
+ MQTT.md                                        \
+ options-in-versions                            \
  PARALLEL-TRANSFERS.md                          \
- README.cmake                                   \
  README.md                                      \
- README.netware                                 \
- README.win32                                   \
  RELEASE-PROCEDURE.md                           \
- RESOURCES                                      \
  ROADMAP.md                                     \
  SECURITY-PROCESS.md                            \
  SSL-PROBLEMS.md                                \
  SSLCERTS.md                                    \
  THANKS                                         \
  TODO                                           \
- TheArtOfHttpScripting                          \
- VERSIONS
+ TheArtOfHttpScripting.md                       \
+ VERSIONS.md
 
 MAN2HTML= roffit $< >$@
 

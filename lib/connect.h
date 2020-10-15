@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -105,7 +105,7 @@ struct Curl_sockaddr_ex {
  *
  */
 CURLcode Curl_socket(struct connectdata *conn,
-                     const Curl_addrinfo *ai,
+                     const struct Curl_addrinfo *ai,
                      struct Curl_sockaddr_ex *addr,
                      curl_socket_t *sockfd);
 

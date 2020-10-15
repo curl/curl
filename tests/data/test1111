@@ -34,12 +34,10 @@ http://%HOSTIP:%HTTPPORT/1111?q=foobar#fragment#fragment2
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1111?q=foobar HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

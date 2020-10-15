@@ -44,13 +44,13 @@ http://%HOSTIP:%HTTP2PORT/1702 --http2 --head
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^X-Forwarded-Proto:.*
 ^Via:.*
 </strip>
 <protocol>
 HEAD /1702 HTTP/1.1
 Host: %HOSTIP:%HTTP2PORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

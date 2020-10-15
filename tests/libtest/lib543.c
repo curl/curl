@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,11 +49,21 @@ int test(char *URL)
 
   s = curl_easy_escape(easy, (const char *)a, asize);
 
-  if(s)
+  if(s) {
     printf("%s\n", s);
-
-  if(s)
     curl_free(s);
+  }
+
+  s = curl_easy_escape(easy, "", 0);
+  if(s) {
+    printf("IN: '' OUT: '%s'\n", s);
+    curl_free(s);
+  }
+  s = curl_easy_escape(easy, " 123", 3);
+  if(s) {
+    printf("IN: ' 12' OUT: '%s'\n", s);
+    curl_free(s);
+  }
 
   curl_easy_cleanup(easy);
   curl_global_cleanup();

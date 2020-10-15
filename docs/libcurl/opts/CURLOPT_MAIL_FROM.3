@@ -28,7 +28,7 @@ CURLOPT_MAIL_FROM \- SMTP sender address
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAIL_FROM, char *from);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. This should be used
+Pass a pointer to a null-terminated string as parameter. This should be used
 to specify the sender's email address when sending SMTP mail with libcurl.
 
 An originator email address should be specified with angled brackets (<>)

@@ -29,7 +29,7 @@ CURLOPT_ABSTRACT_UNIX_SOCKET \- set an abstract Unix domain socket
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ABSTRACT_UNIX_SOCKET, char *path);
 .SH DESCRIPTION
 Enables the use of an abstract Unix domain socket instead of establishing a TCP
-connection to a host. The parameter should be a char * to a zero terminated string
+connection to a host. The parameter should be a char * to a null-terminated string
 holding the path of the socket. The path will be set to \fIpath\fP prefixed by a
 NULL byte (this is the convention for abstract sockets, however it should be stressed
 that the path passed to this function should not contain a leading NULL).

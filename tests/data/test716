@@ -39,7 +39,7 @@ http://hohoho.example.com:99/716 -x socks5://AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-43
+97
 </errorcode>
 </verify>
 </testcase>

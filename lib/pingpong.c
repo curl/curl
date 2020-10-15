@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,12 +44,12 @@
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */
-time_t Curl_pp_state_timeout(struct pingpong *pp, bool disconnecting)
+timediff_t Curl_pp_state_timeout(struct pingpong *pp, bool disconnecting)
 {
   struct connectdata *conn = pp->conn;
   struct Curl_easy *data = conn->data;
-  time_t timeout_ms; /* in milliseconds */
-  long response_time = (data->set.server_response_timeout)?
+  timediff_t timeout_ms; /* in milliseconds */
+  timediff_t response_time = (data->set.server_response_timeout)?
     data->set.server_response_timeout: pp->response_time;
 
   /* if CURLOPT_SERVER_RESPONSE_TIMEOUT is set, use that to determine
@@ -60,12 +60,12 @@ time_t Curl_pp_state_timeout(struct pingpong *pp, bool disconnecting)
   /* Without a requested timeout, we only wait 'response_time' seconds for the
      full response to arrive before we bail out */
   timeout_ms = response_time -
-    (time_t)Curl_timediff(Curl_now(), pp->response); /* spent time */
+    Curl_timediff(Curl_now(), pp->response); /* spent time */
 
   if(data->set.timeout && !disconnecting) {
     /* if timeout is requested, find out how much remaining time we have */
-    time_t timeout2_ms = data->set.timeout - /* timeout time */
-      (time_t)Curl_timediff(Curl_now(), conn->now); /* spent time */
+    timediff_t timeout2_ms = data->set.timeout - /* timeout time */
+      Curl_timediff(Curl_now(), conn->now); /* spent time */
 
     /* pick the lowest number */
     timeout_ms = CURLMIN(timeout_ms, timeout2_ms);
@@ -83,8 +83,8 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block,
   struct connectdata *conn = pp->conn;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc;
-  time_t interval_ms;
-  time_t timeout_ms = Curl_pp_state_timeout(pp, disconnecting);
+  timediff_t interval_ms;
+  timediff_t timeout_ms = Curl_pp_state_timeout(pp, disconnecting);
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
 
@@ -146,7 +146,11 @@ void Curl_pp_init(struct pingpong *pp)
   pp->response = Curl_now(); /* start response time-out now! */
 }
 
-
+/* setup for the coming transfer */
+void Curl_pp_setup(struct pingpong *pp)
+{
+  Curl_dyn_init(&pp->sendbuf, DYN_PINGPPONG_CMD);
+}
 
 /***********************************************************************
  *
@@ -162,9 +166,8 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
                         const char *fmt,
                         va_list args)
 {
-  ssize_t bytes_written;
+  ssize_t bytes_written = 0;
   size_t write_len;
-  char *fmt_crlf;
   char *s;
   CURLcode result;
   struct connectdata *conn = pp->conn;
@@ -181,48 +184,42 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
   if(!conn)
     /* can't send without a connection! */
     return CURLE_SEND_ERROR;
-
   data = conn->data;
 
-  fmt_crlf = aprintf("%s\r\n", fmt); /* append a trailing CRLF */
-  if(!fmt_crlf)
-    return CURLE_OUT_OF_MEMORY;
+  Curl_dyn_reset(&pp->sendbuf);
+  result = Curl_dyn_vaddf(&pp->sendbuf, fmt, args);
+  if(result)
+    return result;
 
-  s = vaprintf(fmt_crlf, args); /* trailing CRLF appended */
-  free(fmt_crlf);
-  if(!s)
-    return CURLE_OUT_OF_MEMORY;
+  /* append CRLF */
+  result = Curl_dyn_addn(&pp->sendbuf, "\r\n", 2);
+  if(result)
+    return result;
 
-  bytes_written = 0;
-  write_len = strlen(s);
-
+  write_len = Curl_dyn_len(&pp->sendbuf);
+  s = Curl_dyn_ptr(&pp->sendbuf);
   Curl_pp_init(pp);
 
   result = Curl_convert_to_network(data, s, write_len);
   /* Curl_convert_to_network calls failf if unsuccessful */
-  if(result) {
-    free(s);
+  if(result)
     return result;
-  }
 
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CMD;
 #endif
   result = Curl_write(conn, conn->sock[FIRSTSOCKET], s, write_len,
-                     &bytes_written);
+                      &bytes_written);
+  if(result)
+    return result;
 #ifdef HAVE_GSSAPI
   data_sec = conn->data_prot;
   DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
   conn->data_prot = data_sec;
 #endif
 
-  if(result) {
-    free(s);
-    return result;
-  }
-
-  if(conn->data->set.verbose)
-    Curl_debug(conn->data, CURLINFO_HEADER_OUT, s, (size_t)bytes_written);
+  if(data->set.verbose)
+    Curl_debug(data, CURLINFO_HEADER_OUT, s, (size_t)bytes_written);
 
   if(bytes_written != (ssize_t)write_len) {
     /* the whole chunk was not sent, keep it around and adjust sizes */
@@ -231,7 +228,6 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
     pp->sendleft = write_len - bytes_written;
   }
   else {
-    free(s);
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
     pp->response = Curl_now();
@@ -384,10 +380,10 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
 
           if(pp->endofresp(conn, pp->linestart_resp, perline, code)) {
             /* This is the end of the last line, copy the last line to the
-               start of the buffer and zero terminate, for old times sake */
+               start of the buffer and null-terminate, for old times sake */
             size_t n = ptr - pp->linestart_resp;
             memmove(buf, pp->linestart_resp, n);
-            buf[n] = 0; /* zero terminate */
+            buf[n] = 0; /* null-terminate */
             keepon = FALSE;
             pp->linestart_resp = ptr + 1; /* advance pointer */
             i++; /* skip this before getting out */
@@ -493,7 +489,6 @@ CURLcode Curl_pp_flushsend(struct pingpong *pp)
     pp->sendleft -= written;
   }
   else {
-    free(pp->sendthis);
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
     pp->response = Curl_now();
@@ -503,15 +498,15 @@ CURLcode Curl_pp_flushsend(struct pingpong *pp)
 
 CURLcode Curl_pp_disconnect(struct pingpong *pp)
 {
-  free(pp->cache);
-  pp->cache = NULL;
+  Curl_dyn_free(&pp->sendbuf);
+  Curl_safefree(pp->cache);
   return CURLE_OK;
 }
 
 bool Curl_pp_moredata(struct pingpong *pp)
 {
   return (!pp->sendleft && pp->cache && pp->nread_resp < pp->cache_size) ?
-         TRUE : FALSE;
+    TRUE : FALSE;
 }
 
 #endif

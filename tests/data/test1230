@@ -62,16 +62,15 @@ http://[1234:1234:1234::4ce]:%HTTPPORT/wanted/page/1230 -p -x %HOSTIP:%HTTPPORT
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 CONNECT [1234:1234:1234::4ce]:%HTTPPORT HTTP/1.1
 Host: [1234:1234:1234::4ce]:%HTTPPORT
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 GET /wanted/page/1230 HTTP/1.1
 Host: [1234:1234:1234::4ce]:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

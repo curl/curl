@@ -3,7 +3,6 @@
 <keywords>
 TELNET
 UPLOAD
-flaky
 </keywords>
 </info>
 
@@ -30,13 +29,15 @@ Basic TELNET negotiation
 test1452
 </stdin>
  <command>
-telnet://%HOSTIP:%NEGTELNETPORT --upload-file -
+telnet://%HOSTIP:%TELNETPORT --upload-file -
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout>test1452</stdout>
+<stdout nonewline="yes">
+test1452
+</stdout>
 </verify>
 </testcase>

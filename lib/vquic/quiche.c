@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,6 +34,7 @@
 #include "multiif.h"
 #include "connect.h"
 #include "strerror.h"
+#include "vquic.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -45,7 +46,7 @@
 #ifdef DEBUG_HTTP3
 #define H3BUGF(x) x
 #else
-#define H3BUGF(x) do { } WHILE_FALSE
+#define H3BUGF(x) do { } while(0)
 #endif
 
 #define QUIC_MAX_STREAMS (256*1024)
@@ -63,7 +64,6 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
                              size_t len);
 static Curl_recv h3_stream_recv;
 static Curl_send h3_stream_send;
-
 
 static int quiche_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
@@ -89,16 +89,36 @@ static int quiche_perform_getsock(const struct connectdata *conn,
   return quiche_getsock((struct connectdata *)conn, socks);
 }
 
+static CURLcode qs_disconnect(struct quicsocket *qs)
+{
+  if(qs->h3config)
+    quiche_h3_config_free(qs->h3config);
+  if(qs->h3c)
+    quiche_h3_conn_free(qs->h3c);
+  if(qs->cfg) {
+    quiche_config_free(qs->cfg);
+    qs->cfg = NULL;
+  }
+  if(qs->conn) {
+    quiche_conn_free(qs->conn);
+    qs->conn = NULL;
+  }
+  return CURLE_OK;
+}
+
 static CURLcode quiche_disconnect(struct connectdata *conn,
                                   bool dead_connection)
 {
   struct quicsocket *qs = conn->quic;
   (void)dead_connection;
-  quiche_h3_config_free(qs->h3config);
-  quiche_h3_conn_free(qs->h3c);
-  quiche_config_free(qs->cfg);
-  quiche_conn_free(qs->conn);
-  return CURLE_OK;
+  return qs_disconnect(qs);
+}
+
+void Curl_quic_disconnect(struct connectdata *conn,
+                          int tempindex)
+{
+  if(conn->transport == TRNSPRT_QUIC)
+    qs_disconnect(&conn->hequic[tempindex]);
 }
 
 static unsigned int quiche_conncheck(struct connectdata *conn,
@@ -134,6 +154,7 @@ static const struct Curl_handler Curl_handler_http3 = {
   quiche_conncheck,                     /* connection_check */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
+  CURLPROTO_HTTP,                       /* family */
   PROTOPT_SSL | PROTOPT_STREAM          /* flags */
 };
 
@@ -152,6 +173,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   CURLcode result;
   struct quicsocket *qs = &conn->hequic[sockindex];
   struct Curl_easy *data = conn->data;
+  char *keylog_file = NULL;
 
 #ifdef DEBUG_QUICHE
   /* initialize debug log callback only once */
@@ -171,7 +193,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
     return CURLE_FAILED_INIT;
   }
 
-  quiche_config_set_idle_timeout(qs->cfg, QUIC_IDLE_TIMEOUT);
+  quiche_config_set_max_idle_timeout(qs->cfg, QUIC_IDLE_TIMEOUT);
   quiche_config_set_initial_max_data(qs->cfg, QUIC_MAX_DATA);
   quiche_config_set_initial_max_stream_data_bidi_local(qs->cfg, QUIC_MAX_DATA);
   quiche_config_set_initial_max_stream_data_bidi_remote(qs->cfg,
@@ -189,7 +211,9 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   if(result)
     return result;
 
-  if(getenv("SSLKEYLOGFILE"))
+  keylog_file = getenv("SSLKEYLOGFILE");
+
+  if(keylog_file)
     quiche_config_log_keys(qs->cfg);
 
   qs->conn = quiche_connect(conn->host.name, (const uint8_t *) qs->scid,
@@ -198,6 +222,20 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
     failf(data, "can't create quiche connection");
     return CURLE_OUT_OF_MEMORY;
   }
+
+  if(keylog_file)
+    quiche_conn_set_keylog_path(qs->conn, keylog_file);
+
+  /* Known to not work on Windows */
+#if !defined(WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
+  {
+    int qfd;
+    (void)Curl_qlogdir(data, qs->scid, sizeof(qs->scid), &qfd);
+    if(qfd != -1)
+      quiche_conn_set_qlog_fd(qs->conn, qfd,
+                              "qlog title", "curl qlog");
+  }
+#endif
 
   result = flush_egress(conn, sockfd, qs);
   if(result)
@@ -217,8 +255,20 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   /* for connection reuse purposes: */
   conn->ssl[FIRSTSOCKET].state = ssl_connection_complete;
 
-  infof(data, "Sent QUIC client Initial, ALPN: %s\n",
-        QUICHE_H3_APPLICATION_PROTOCOL + 1);
+  {
+    unsigned char alpn_protocols[] = QUICHE_H3_APPLICATION_PROTOCOL;
+    unsigned alpn_len, offset = 0;
+
+    /* Replace each ALPN length prefix by a comma. */
+    while(offset < sizeof(alpn_protocols) - 1) {
+      alpn_len = alpn_protocols[offset];
+      alpn_protocols[offset] = ',';
+      offset += 1 + alpn_len;
+    }
+
+    infof(data, "Sent QUIC client Initial, ALPN: %s\n",
+          alpn_protocols + 1);
+  }
 
   return CURLE_OK;
 }
@@ -273,11 +323,11 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
 
   result = process_ingress(conn, sockfd, qs);
   if(result)
-    return result;
+    goto error;
 
   result = flush_egress(conn, sockfd, qs);
   if(result)
-    return result;
+    goto error;
 
   if(quiche_conn_is_established(qs->conn)) {
     *done = TRUE;
@@ -285,6 +335,9 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
     DEBUGF(infof(conn->data, "quiche established connection!\n"));
   }
 
+  return result;
+  error:
+  qs_disconnect(qs);
   return result;
 }
 
@@ -379,6 +432,9 @@ static int cb_each_header(uint8_t *name, size_t name_len,
               headers->destlen, "HTTP/3 %.*s\n",
               (int) value_len, value);
   }
+  else if(!headers->nlen) {
+    return CURLE_HTTP3;
+  }
   else {
     msnprintf(headers->dest,
               headers->destlen, "%.*s: %.*s\n",
@@ -433,7 +489,9 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
     case QUICHE_H3_EVENT_HEADERS:
       rc = quiche_h3_event_for_each_header(ev, cb_each_header, &headers);
       if(rc) {
-        /* what do we do about this? */
+        *curlcode = rc;
+        failf(data, "Error in HTTP/3 response header");
+        break;
       }
       recvd = headers.nlen;
       break;
@@ -527,7 +585,7 @@ static ssize_t h3_stream_send(struct connectdata *conn,
  */
 int Curl_quic_ver(char *p, size_t len)
 {
-  return msnprintf(p, len, " quiche/%s", quiche_version());
+  return msnprintf(p, len, "quiche/%s", quiche_version());
 }
 
 /* Index where :authority header field will appear in request header
@@ -709,7 +767,7 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
     }
   }
 
-  switch(data->set.httpreq) {
+  switch(data->state.httpreq) {
   case HTTPREQ_POST:
   case HTTPREQ_POST_FORM:
   case HTTPREQ_POST_MIME:
@@ -778,6 +836,25 @@ CURLcode Curl_quic_done_sending(struct connectdata *conn)
   }
 
   return CURLE_OK;
+}
+
+/*
+ * Called from http.c:Curl_http_done when a request completes.
+ */
+void Curl_quic_done(struct Curl_easy *data, bool premature)
+{
+  (void)data;
+  (void)premature;
+}
+
+/*
+ * Called from transfer.c:data_pending to know if we should keep looping
+ * to receive more data from the connection.
+ */
+bool Curl_quic_data_pending(const struct Curl_easy *data)
+{
+  (void)data;
+  return FALSE;
 }
 
 #endif

@@ -108,7 +108,7 @@ submit a small description of your fix or your new features with every
 contribution so that it can be swiftly added to the package documentation.
 
 The documentation is always made in man pages (nroff formatted) or plain
-ASCII files. All HTML files on the web site and in the release archives are
+ASCII files. All HTML files on the website and in the release archives are
 generated from the nroff/ASCII versions.
 
 ### Test Cases
@@ -172,6 +172,33 @@ you are expected to fix the problem. If you don't understand when the issue is
 or have other problems to fix the complaint, just ask and other project
 members will likely be able to help out.
 
+Consider the following table while looking at pull request failures:
+
+ | CI platform as shown in PR          | State  | What to look at next       |
+ | ----------------------------------- | ------ | -------------------------- |
+ | CI / codeql                         | stable | quality check results      |
+ | CI / fuzzing                        | stable | fuzzing results            |
+ | CI / macos ...                      | stable | all errors and failures    |
+ | Code scanning results / CodeQL      | stable | quality check results      |
+ | FreeBSD FreeBSD: ...                | stable | all errors and failures    |
+ | LGTM analysis: Python               | stable | new findings               |
+ | LGTM analysis:  C/C++               | stable | new findings               |
+ | buildbot/curl_winssl_ ...           | stable | all errors and failures    |
+ | continuous-integration/appveyor/pr  | stable | all errors and failures    |
+ | continuous-integration/travis-ci/pr | stable | all errors and failures    |
+ | curl.curl (linux ...)               | stable | all errors and failures    |
+ | curl.curl (windows ...)             | flaky  | repetitive errors/failures |
+ | deepcode-ci-bot                     | stable | new findings               |
+ | musedev                             | stable | new findings               |
+
+Sometimes the tests fail due to a dependency service temporarily being offline
+or otherwise unavailable, eg. package downloads. In this case you can just
+try to update your pull requests to rerun the tests later as described below.
+
+You can update your pull requests by pushing new commits or force-pushing
+changes to existing commits. Force-pushing an amended commit without any
+actual content changed also allows you to retrigger the tests for that commit.
+
 When you adjust your pull requests after review, consider squashing the
 commits so that we can review the full updated version more easily.
 
@@ -199,6 +226,16 @@ A short guide to how to write commit messages in the curl project.
     [Reported-by: John Doe - credit the reporter]
     [whatever-else-by: credit all helpers, finders, doers]
     ---- stop ----
+
+The first line is a succinct description of the change:
+
+ - use the imperative, present tense: "change" not "changed" nor "changes"
+ - don't capitalize first letter
+ - no dot (.) at the end
+
+The `[area]` in the first line can be `http2`, `cookies`, `openssl` or
+similar. There's no fixed list to select from but using the same "area" as
+other related changes could make sense.
 
 Don't forget to use commit --author="" if you commit someone else's work, and
 make sure that you have your own user and email setup correctly in git before
@@ -265,3 +302,6 @@ For Windows:
 
  - [https://gnuwin32.sourceforge.io/packages/patch.htm](https://gnuwin32.sourceforge.io/packages/patch.htm)
  - [https://gnuwin32.sourceforge.io/packages/diffutils.htm](https://gnuwin32.sourceforge.io/packages/diffutils.htm)
+
+### Useful resources
+* [Webinar on getting code into cURL](https://www.youtube.com/watch?v=QmZ3W1d6LQI)

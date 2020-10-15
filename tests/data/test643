@@ -69,18 +69,18 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 POST /643 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 718
+Content-Length: 640
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
 Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
 
-this is what we post to the silly web server
+dummy
 
 ------------------------------
 Content-Disposition: form-data; name="callbackdata"
 
-this is what we post to the silly web server
+dummy
 
 ------------------------------
 Content-Disposition: form-data; name="filename"
@@ -99,18 +99,18 @@ blah blah
 POST /643 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 732
+Content-Length: 654
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
 Content-Disposition: form-data; name="sendfile alternative"; filename="file name 2"
 
-this is what we post to the silly web server
+dummy
 
 ------------------------------
 Content-Disposition: form-data; name="callbackdata"
 
-this is what we post to the silly web server
+dummy
 
 ------------------------------
 Content-Disposition: form-data; name="filename"

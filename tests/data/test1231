@@ -44,16 +44,15 @@ http://%HOSTIP:%HTTPPORT/../../hej/but/who/../1231?stupid=me/../1231#soo/../1231
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /hej/but/1231?stupid=me/../1231 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /hej/but/12310001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

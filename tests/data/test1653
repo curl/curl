@@ -16,8 +16,5 @@ unittest
 <name>
 urlapi
 </name>
-<tool>
-unit1653
-</tool>
 </client>
 </testcase>

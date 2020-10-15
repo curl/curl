@@ -55,12 +55,10 @@ http://%HOSTIP:%HTTPPORT/1171 --tr-encoding -H "Connection;"
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1171 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Connection: TE
 TE: gzip

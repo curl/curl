@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -132,6 +132,7 @@ const struct Curl_handler Curl_handler_imap = {
   ZERO_NULL,                        /* connection_check */
   PORT_IMAP,                        /* defport */
   CURLPROTO_IMAP,                   /* protocol */
+  CURLPROTO_IMAP,                   /* family */
   PROTOPT_CLOSEACTION|              /* flags */
   PROTOPT_URLOPTIONS
 };
@@ -159,6 +160,7 @@ const struct Curl_handler Curl_handler_imaps = {
   ZERO_NULL,                        /* connection_check */
   PORT_IMAPS,                       /* defport */
   CURLPROTO_IMAPS,                  /* protocol */
+  CURLPROTO_IMAP,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
   PROTOPT_URLOPTIONS
 };
@@ -187,7 +189,7 @@ static void imap_to_imaps(struct connectdata *conn)
   conn->handler = &Curl_handler_imaps;
 
   /* Set the connection's upgraded to TLS flag */
-  conn->tls_upgraded = TRUE;
+  conn->bits.tls_upgraded = TRUE;
 }
 #else
 #define imap_to_imaps(x) Curl_nop_stmt
@@ -1176,6 +1178,9 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
     else {
       /* IMAP download */
       data->req.maxdownload = size;
+      /* force a recv/send check of this connection, as the data might've been
+       read off the socket already */
+      data->conn->cselect_bits = CURL_CSELECT_IN;
       Curl_setup_transfer(data, FIRSTSOCKET, size, FALSE, -1);
     }
   }
@@ -1424,7 +1429,9 @@ static CURLcode imap_connect(struct connectdata *conn, bool *done)
   imapc->preftype = IMAP_TYPE_ANY;
   Curl_sasl_init(&imapc->sasl, &saslimap);
 
+  Curl_dyn_init(&imapc->dyn, DYN_IMAP_CMD);
   /* Initialise the pingpong layer */
+  Curl_pp_setup(pp);
   Curl_pp_init(pp);
 
   /* Parse the URL options */
@@ -1626,6 +1633,7 @@ static CURLcode imap_disconnect(struct connectdata *conn, bool dead_connection)
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&imapc->pp);
+  Curl_dyn_free(&imapc->dyn);
 
   /* Cleanup the SASL module */
   Curl_sasl_cleanup(conn, imapc->sasl.authused);
@@ -1710,7 +1718,7 @@ static CURLcode imap_setup_connection(struct connectdata *conn)
     return result;
 
   /* Clear the TLS upgraded flag */
-  conn->tls_upgraded = FALSE;
+  conn->bits.tls_upgraded = FALSE;
 
   return CURLE_OK;
 }
@@ -1727,30 +1735,25 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
 {
   CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
-  char *taggedfmt;
-  va_list ap;
 
   DEBUGASSERT(fmt);
 
-  /* Calculate the next command ID wrapping at 3 digits */
-  imapc->cmdid = (imapc->cmdid + 1) % 1000;
-
   /* Calculate the tag based on the connection ID and command ID */
   msnprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
-            'A' + curlx_sltosi(conn->connection_id % 26), imapc->cmdid);
+            'A' + curlx_sltosi(conn->connection_id % 26),
+            (++imapc->cmdid)%1000);
 
-  /* Prefix the format with the tag */
-  taggedfmt = aprintf("%s %s", imapc->resptag, fmt);
-  if(!taggedfmt)
-    return CURLE_OUT_OF_MEMORY;
+  /* start with a blank buffer */
+  Curl_dyn_reset(&imapc->dyn);
 
-  /* Send the data with the tag */
-  va_start(ap, fmt);
-  result = Curl_pp_vsendf(&imapc->pp, taggedfmt, ap);
-  va_end(ap);
-
-  free(taggedfmt);
-
+  /* append tag + space + fmt */
+  result = Curl_dyn_addf(&imapc->dyn, "%s %s", imapc->resptag, fmt);
+  if(!result) {
+    va_list ap;
+    va_start(ap, fmt);
+    result = Curl_pp_vsendf(&imapc->pp, Curl_dyn_ptr(&imapc->dyn), ap);
+    va_end(ap);
+  }
   return result;
 }
 
@@ -1957,7 +1960,7 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
       end--;
 
     result = Curl_urldecode(data, begin, end - begin, &imap->mailbox, NULL,
-                            TRUE);
+                            REJECT_CTRL);
     if(result)
       return result;
   }
@@ -1979,7 +1982,8 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
       return CURLE_URL_MALFORMAT;
 
     /* Decode the name parameter */
-    result = Curl_urldecode(data, begin, ptr - begin, &name, NULL, TRUE);
+    result = Curl_urldecode(data, begin, ptr - begin, &name, NULL,
+                            REJECT_CTRL);
     if(result)
       return result;
 
@@ -1989,7 +1993,8 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
       ptr++;
 
     /* Decode the value parameter */
-    result = Curl_urldecode(data, begin, ptr - begin, &value, &valuelen, TRUE);
+    result = Curl_urldecode(data, begin, ptr - begin, &value, &valuelen,
+                            REJECT_CTRL);
     if(result) {
       free(name);
       return result;
@@ -2077,7 +2082,7 @@ static CURLcode imap_parse_custom_request(struct connectdata *conn)
 
   if(custom) {
     /* URL decode the custom request */
-    result = Curl_urldecode(data, custom, 0, &imap->custom, NULL, TRUE);
+    result = Curl_urldecode(data, custom, 0, &imap->custom, NULL, REJECT_CTRL);
 
     /* Extract the parameters if specified */
     if(!result) {

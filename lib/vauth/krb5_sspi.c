@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2019, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2014 - 2020, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -125,7 +125,8 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                                 TEXT(SP_NAME_KERBEROS),
                                                 &SecurityPackage);
     if(status != SEC_E_OK) {
-      return CURLE_NOT_BUILT_IN;
+      failf(data, "SSPI: couldn't get auth info\n");
+      return CURLE_AUTH_ERROR;
     }
 
     krb5->token_max = SecurityPackage->cbMaxToken;
@@ -395,7 +396,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   /* Convert the user name to UTF8 when operating with Unicode */
-  user_name = Curl_convert_tchar_to_UTF8(names.sUserName);
+  user_name = curlx_convert_tchar_to_UTF8(names.sUserName);
   if(!user_name) {
     free(trailer);
 
@@ -407,7 +408,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   message = malloc(messagelen);
   if(!message) {
     free(trailer);
-    Curl_unicodefree(user_name);
+    curlx_unicodefree(user_name);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -420,7 +421,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   outdata = htonl(max_size) | sec_layer;
   memcpy(message, &outdata, sizeof(outdata));
   strcpy((char *) message + sizeof(outdata), user_name);
-  Curl_unicodefree(user_name);
+  curlx_unicodefree(user_name);
 
   /* Allocate the padding */
   padding = malloc(sizes.cbBlockSize);

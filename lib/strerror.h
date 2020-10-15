@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,9 +24,12 @@
 
 #include "urldata.h"
 
-#define STRERROR_LEN 128 /* a suitable length */
+#define STRERROR_LEN 256 /* a suitable length */
 
 const char *Curl_strerror(int err, char *buf, size_t buflen);
+#if defined(WIN32) || defined(_WIN32_WCE)
+const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen);
+#endif
 #ifdef USE_WINDOWS_SSPI
 const char *Curl_sspi_strerror(int err, char *buf, size_t buflen);
 #endif

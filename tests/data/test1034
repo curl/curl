@@ -43,7 +43,7 @@ HTTP over proxy with malformatted IDN host name
 url = "http://invalid-utf8-‚ê.local/page/1034"
 </stdin>
  <command>
--K - -x %HOSTIP:%HTTPPORT
+-K - -x %HOSTIP:%NOLISTENPORT
 </command>
 </client>
 

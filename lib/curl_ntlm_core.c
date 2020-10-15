@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM)
+#if defined(USE_CURL_NTLM_CORE)
 
 /*
  * NTLM details:
@@ -50,15 +50,18 @@
      in NTLM type-3 messages.
  */
 
-#if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
+#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
 
-#ifdef USE_OPENSSL
+#ifdef USE_WOLFSSL
+#include <wolfssl/options.h>
+#endif
 
 #  include <openssl/des.h>
 #  include <openssl/md5.h>
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
-#  if (OPENSSL_VERSION_NUMBER < 0x00907001L)
+#  if (defined(OPENSSL_VERSION_NUMBER) && \
+       (OPENSSL_VERSION_NUMBER < 0x00907001L)) && !defined(USE_WOLFSSL)
 #    define DES_key_schedule des_key_schedule
 #    define DES_cblock des_cblock
 #    define DES_set_odd_parity des_set_odd_parity
@@ -78,14 +81,12 @@
 #elif defined(USE_GNUTLS)
 
 #  include <gcrypt.h>
-#  define MD5_DIGEST_LENGTH 16
 
 #elif defined(USE_NSS)
 
 #  include <nss.h>
 #  include <pk11pub.h>
 #  include <hasht.h>
-#  define MD5_DIGEST_LENGTH MD5_LENGTH
 
 #elif defined(USE_MBEDTLS)
 
@@ -120,7 +121,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define NTLM_HMAC_MD5_LEN     (16)
 #define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
 #define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
 
@@ -139,7 +139,7 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
   key[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
 }
 
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
 /*
  * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.  The
  * key schedule ks is also set.
@@ -343,7 +343,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
 
   /* Acquire the crypto provider */
   if(!CryptAcquireContext(&hprov, NULL, NULL, PROV_RSA_FULL,
-                          CRYPT_VERIFYCONTEXT))
+                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     return FALSE;
 
   /* Setup the key blob structure */
@@ -388,7 +388,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results)
 {
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
   DES_key_schedule ks;
 
   setup_des_key(keys, DESKEY(ks));
@@ -463,7 +463,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(struct Curl_easy *data,
   {
     /* Create LanManager hashed password. */
 
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
     DES_key_schedule ks;
 
     setup_des_key(pw, DESKEY(ks));
@@ -567,25 +567,6 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
 
 #if defined(USE_NTLM_V2) && !defined(USE_WINDOWS_SSPI)
 
-/* This returns the HMAC MD5 digest */
-static CURLcode hmac_md5(const unsigned char *key, unsigned int keylen,
-                         const unsigned char *data, unsigned int datalen,
-                         unsigned char *output)
-{
-  HMAC_context *ctxt = Curl_HMAC_init(Curl_HMAC_MD5, key, keylen);
-
-  if(!ctxt)
-    return CURLE_OUT_OF_MEMORY;
-
-  /* Update the digest with the given challenge */
-  Curl_HMAC_update(ctxt, data, datalen);
-
-  /* Finalise the digest */
-  Curl_HMAC_final(ctxt, output);
-
-  return CURLE_OK;
-}
-
 /* This creates the NTLMv2 hash by using NTLM hash as the key and Unicode
  * (uppercase UserName + Domain) as the data
  */
@@ -615,8 +596,8 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
   ascii_uppercase_to_unicode_le(identity, user, userlen);
   ascii_to_unicode_le(identity + (userlen << 1), domain, domlen);
 
-  result = hmac_md5(ntlmhash, 16, identity, curlx_uztoui(identity_len),
-                    ntlmv2hash);
+  result = Curl_hmacit(Curl_HMAC_MD5, ntlmhash, 16, identity, identity_len,
+                       ntlmv2hash);
   free(identity);
 
   return result;
@@ -662,7 +643,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 
   unsigned int len = 0;
   unsigned char *ptr = NULL;
-  unsigned char hmac_output[NTLM_HMAC_MD5_LEN];
+  unsigned char hmac_output[HMAC_MD5_LENGTH];
   curl_off_t tw;
 
   CURLcode result = CURLE_OK;
@@ -681,7 +662,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
     tw = ((curl_off_t)time(NULL) + CURL_OFF_T_C(11644473600)) * 10000000;
 
   /* Calculate the response len */
-  len = NTLM_HMAC_MD5_LEN + NTLMv2_BLOB_LEN;
+  len = HMAC_MD5_LENGTH + NTLMv2_BLOB_LEN;
 
   /* Allocate the response */
   ptr = calloc(1, len);
@@ -689,7 +670,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
     return CURLE_OUT_OF_MEMORY;
 
   /* Create the BLOB structure */
-  msnprintf((char *)ptr + NTLM_HMAC_MD5_LEN, NTLMv2_BLOB_LEN,
+  msnprintf((char *)ptr + HMAC_MD5_LENGTH, NTLMv2_BLOB_LEN,
             "%c%c%c%c"   /* NTLMv2_BLOB_SIGNATURE */
             "%c%c%c%c",  /* Reserved = 0 */
             NTLMv2_BLOB_SIGNATURE[0], NTLMv2_BLOB_SIGNATURE[1],
@@ -702,7 +683,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 
   /* Concatenate the Type 2 challenge with the BLOB and do HMAC MD5 */
   memcpy(ptr + 8, &ntlm->nonce[0], 8);
-  result = hmac_md5(ntlmv2hash, NTLM_HMAC_MD5_LEN, ptr + 8,
+  result = Curl_hmacit(Curl_HMAC_MD5, ntlmv2hash, HMAC_MD5_LENGTH, ptr + 8,
                     NTLMv2_BLOB_LEN + 8, hmac_output);
   if(result) {
     free(ptr);
@@ -710,7 +691,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   }
 
   /* Concatenate the HMAC MD5 output  with the BLOB */
-  memcpy(ptr, hmac_output, NTLM_HMAC_MD5_LEN);
+  memcpy(ptr, hmac_output, HMAC_MD5_LENGTH);
 
   /* Return the response */
   *ntresp = ptr;
@@ -745,7 +726,8 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
   memcpy(&data[0], challenge_server, 8);
   memcpy(&data[8], challenge_client, 8);
 
-  result = hmac_md5(ntlmv2hash, 16, &data[0], 16, hmac_output);
+  result = Curl_hmacit(Curl_HMAC_MD5, ntlmv2hash, 16, &data[0], 16,
+                       hmac_output);
   if(result)
     return result;
 
@@ -760,6 +742,4 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
 
 #endif /* USE_NTRESPONSES */
 
-#endif /* !USE_WINDOWS_SSPI || USE_WIN32_CRYPTO */
-
-#endif /* USE_NTLM */
+#endif /* USE_CURL_NTLM_CORE */

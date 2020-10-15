@@ -53,22 +53,22 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <proxy>
 CONNECT %HOSTIP.1078:%HTTPPORT HTTP/1.0
 Host: %HOSTIP.1078:%HTTPPORT
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol>
 GET /we/want/that/page/1078 HTTP/1.1
 Host: %HOSTIP.1078:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /we/want/that/page/1078 HTTP/1.0
 Host: %HOSTIP.1078:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

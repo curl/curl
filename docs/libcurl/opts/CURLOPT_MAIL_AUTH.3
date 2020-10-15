@@ -28,7 +28,7 @@ CURLOPT_MAIL_AUTH \- SMTP authentication address
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAIL_AUTH, char *auth);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. This will be used to
+Pass a pointer to a null-terminated string as parameter. This will be used to
 specify the authentication address (identity) of a submitted message that is
 being relayed to another server.
 

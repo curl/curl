@@ -46,12 +46,10 @@ http://%HOSTIP:%HTTPPORT/394
 <errorcode>
 8
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /394 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

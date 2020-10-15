@@ -48,17 +48,16 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET http://test.remote.haxx.se.1241:8990/../../hej/but/who/../1241?stupid=me/../1241 HTTP/1.1
 Host: test.remote.haxx.se.1241:8990
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://test.remote.haxx.se.1241:8990/../../hej/but/who/../12410001 HTTP/1.1
 Host: test.remote.haxx.se.1241:8990
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

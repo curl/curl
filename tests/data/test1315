@@ -40,12 +40,12 @@ dummy data
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-(^User-Agent:.*|-----+\w+)
+-----+\w+
 </strip>
 <protocol>
 POST /we/want/1315 HTTP/1.1
-User-Agent: curl/7.18.2 (i686-pc-linux-gnu) libcurl/7.18.2 OpenSSL/0.9.7a ipv6 zlib/1.1.4
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 797
 Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763

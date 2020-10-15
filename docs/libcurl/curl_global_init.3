@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -87,9 +87,11 @@ Initialise nothing extra. This sets no bit.
 A sensible default. It will init both SSL and Win32. Right now, this equals
 the functionality of the \fBCURL_GLOBAL_ALL\fP mask.
 .IP CURL_GLOBAL_ACK_EINTR
-When this flag is set, curl will acknowledge EINTR condition when connecting
-or when waiting for data.  Otherwise, curl waits until full timeout
-elapses. (Added in 7.30.0)
+This bit has no point since 7.69.0 but its behavior is instead the default.
+
+Before 7.69.0: when this flag is set, curl will acknowledge EINTR condition
+when connecting or when waiting for data.  Otherwise, curl waits until full
+timeout elapses. (Added in 7.30.0)
 .SH RETURN VALUE
 If this function returns non-zero, something went wrong and you cannot use the
 other curl functions.

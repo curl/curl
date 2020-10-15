@@ -42,12 +42,10 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET http://we.want.that.site.com.1213/ HTTP/1.1
 Host: we.want.that.site.com.1213
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

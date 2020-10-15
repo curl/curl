@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -661,7 +661,7 @@ dnl -------------------------------------------------
 dnl Check for libraries needed for WINLDAP support,
 dnl and prepended to LIBS any needed libraries.
 dnl This macro can take an optional parameter with a
-dnl white space separated list of libraries to check
+dnl whitespace separated list of libraries to check
 dnl before the WINLDAP default ones.
 
 AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
@@ -755,7 +755,7 @@ dnl -------------------------------------------------
 dnl Check for libraries needed for LDAP support,
 dnl and prepended to LIBS any needed libraries.
 dnl This macro can take an optional parameter with a
-dnl white space separated list of libraries to check
+dnl whitespace separated list of libraries to check
 dnl before the default ones.
 
 AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
@@ -1887,6 +1887,8 @@ struct Library *SocketBase = NULL;
 #endif
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#elif defined(HAVE_UNISTD_H)
+#include <unistd.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -1950,6 +1952,8 @@ struct Library *SocketBase = NULL;
 #endif
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#elif defined(HAVE_UNISTD_H)
+#include <unistd.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -2174,8 +2178,8 @@ AC_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   AC_ARG_WITH(ca-path,
 AC_HELP_STRING([--with-ca-path=DIRECTORY],
 [Path to a directory containing CA certificates stored individually, with \
-their filenames in a hash format. This option can be used with OpenSSL, \
-GnuTLS and PolarSSL backends. Refer to OpenSSL c_rehash for details. \
+their filenames in a hash format. This option can be used with the OpenSSL, \
+GnuTLS and mbedTLS backends. Refer to OpenSSL c_rehash for details. \
 (example: /etc/certificates)])
 AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   [
@@ -2201,8 +2205,8 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     capath="no"
   elif test "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
     dnl --with-ca-path given
-    if test "x$OPENSSL_ENABLED" != "x1" -a "x$GNUTLS_ENABLED" != "x1" -a "x$POLARSSL_ENABLED" != "x1"; then
-      AC_MSG_ERROR([--with-ca-path only works with OpenSSL, GnuTLS or PolarSSL])
+    if test "x$OPENSSL_ENABLED" != "x1" -a "x$GNUTLS_ENABLED" != "x1" -a "x$MBEDTLS_ENABLED" != "x1"; then
+      AC_MSG_ERROR([--with-ca-path only works with OpenSSL, GnuTLS or mbedTLS])
     fi
     capath="$want_capath"
     ca="no"

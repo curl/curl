@@ -18,7 +18,7 @@ completely different than the regular one used for each single transfer.
 
  o percent download (if known, which means *all* transfers need to have a
    known size)
- o precent upload (if known, with the same caveat as for download)
+ o percent upload (if known, with the same caveat as for download)
  o total amount of downloaded data
  o total amount of uploaded data
  o number of transfers to perform

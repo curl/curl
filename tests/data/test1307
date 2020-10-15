@@ -20,9 +20,5 @@ ftp
  <name>
 internal Curl_fnmatch() testing
  </name>
-<tool>
-unit1307
-</tool>
 </client>
-
 </testcase>

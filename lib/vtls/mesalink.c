@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2017 - 2018, Yiming Jing, <jingyiming@baidu.com>
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -158,8 +158,8 @@ mesalink_connect_step1(struct connectdata *conn, int sockindex)
                                                     SSL_CONN_CONFIG(CApath))) {
       if(SSL_CONN_CONFIG(verifypeer)) {
         failf(data,
-              "error setting certificate verify locations:\n"
-              "  CAfile: %s\n  CApath: %s",
+              "error setting certificate verify locations: "
+              " CAfile: %s CApath: %s",
               SSL_CONN_CONFIG(CAfile) ?
               SSL_CONN_CONFIG(CAfile) : "none",
               SSL_CONN_CONFIG(CApath) ?
@@ -173,20 +173,18 @@ mesalink_connect_step1(struct connectdata *conn, int sockindex)
     else {
       infof(data, "successfully set certificate verify locations:\n");
     }
-    infof(data,
-          "  CAfile: %s\n"
-          "  CApath: %s\n",
-          SSL_CONN_CONFIG(CAfile)?
-          SSL_CONN_CONFIG(CAfile): "none",
-          SSL_CONN_CONFIG(CApath)?
-          SSL_CONN_CONFIG(CApath): "none");
+    infof(data, " CAfile: %s\n",
+          SSL_CONN_CONFIG(CAfile) ? SSL_CONN_CONFIG(CAfile): "none");
+    infof(data, " CApath: %s\n",
+          SSL_CONN_CONFIG(CApath) ? SSL_CONN_CONFIG(CApath): "none");
   }
 
-  if(SSL_SET_OPTION(cert) && SSL_SET_OPTION(key)) {
+  if(SSL_SET_OPTION(primary.clientcert) && SSL_SET_OPTION(key)) {
     int file_type = do_file_type(SSL_SET_OPTION(cert_type));
 
-    if(SSL_CTX_use_certificate_chain_file(BACKEND->ctx, SSL_SET_OPTION(cert),
-                                     file_type) != 1) {
+    if(SSL_CTX_use_certificate_chain_file(BACKEND->ctx,
+                                          SSL_SET_OPTION(primary.clientcert),
+                                          file_type) != 1) {
       failf(data, "unable to use client certificate (no key or wrong pass"
             " phrase?)");
       return CURLE_SSL_CONNECT_ERROR;
@@ -542,9 +540,8 @@ mesalink_connect_common(struct connectdata *conn, int sockindex,
                                ? sockfd
                                : CURL_SOCKET_BAD;
 
-      what = Curl_socket_check(
-        readfd, CURL_SOCKET_BAD, writefd,
-        nonblocking ? 0 : (time_t)timeout_ms);
+      what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
+                               nonblocking ? 0 : timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);

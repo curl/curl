@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2019, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2014 - 2020, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -89,7 +89,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
   }
 
   /* Allocate our TCHAR based SPN */
-  tchar_spn = Curl_convert_UTF8_to_tchar(utf8_spn);
+  tchar_spn = curlx_convert_UTF8_to_tchar(utf8_spn);
   if(!tchar_spn) {
     free(utf8_spn);
 
@@ -97,7 +97,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
   }
 
   /* Release the UTF8 variant when operating with Unicode */
-  Curl_unicodefree(utf8_spn);
+  curlx_unicodefree(utf8_spn);
 
   /* Return our newly allocated SPN */
   return tchar_spn;

@@ -5,6 +5,7 @@ Protocols: DNS
 See-also: dns-interface dns-ipv4-addr
 Added: 7.33.0
 Requires: c-ares
+Category: dns
 ---
 Tell curl to bind to <ip-address> when making IPv6 DNS requests, so that
 the DNS requests originate from this address. The argument should be a

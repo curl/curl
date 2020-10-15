@@ -38,12 +38,10 @@ more than one byte
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 PUT /bzz/1068 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Transfer-Encoding: chunked
 Expect: 100-continue

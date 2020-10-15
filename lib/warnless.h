@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -93,19 +93,6 @@ void curlx_FD_ZERO(fd_set *fdset);
 unsigned short curlx_htons(unsigned short usnum);
 
 unsigned short curlx_ntohs(unsigned short usnum);
-
-#ifndef BUILDING_WARNLESS_C
-#  undef  FD_ISSET
-#  define FD_ISSET(a,b) curlx_FD_ISSET((a),(b))
-#  undef  FD_SET
-#  define FD_SET(a,b)   curlx_FD_SET((a),(b))
-#  undef  FD_ZERO
-#  define FD_ZERO(a)    curlx_FD_ZERO((a))
-#  undef  htons
-#  define htons(a)      curlx_htons((a))
-#  undef  ntohs
-#  define ntohs(a)      curlx_ntohs((a))
-#endif
 
 #endif /* __INTEL_COMPILER && __unix__ */
 

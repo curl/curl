@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -6350,7 +6350,7 @@ dnl glibc-style strerror_r:
 dnl
 dnl      char *strerror_r(int errnum, char *workbuf, size_t bufsize);
 dnl
-dnl  glibc-style strerror_r returns a pointer to the the error string,
+dnl  glibc-style strerror_r returns a pointer to the error string,
 dnl  and might use the provided workbuf as a scratch area if needed. A
 dnl  quick test on a few systems shows that it's usually not used at all.
 dnl
@@ -7289,8 +7289,6 @@ dnl CURL_LIBRARY_PATH variable. It keeps the LD_LIBRARY_PATH
 dnl changes contained within this macro.
 
 AC_DEFUN([CURL_RUN_IFELSE], [
-   AC_REQUIRE([AC_RUN_IFELSE])dnl
-
    old=$LD_LIBRARY_PATH
    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
    export LD_LIBRARY_PATH

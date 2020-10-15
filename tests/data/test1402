@@ -38,13 +38,10 @@ http://%HOSTIP:%HTTPPORT/we/want/1402 --libcurl log/test1402.c -d "foo=bar" -d "
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
 POST /we/want/1402 HTTP/1.1
-User-Agent: curl/7.18.2 (i686-pc-linux-gnu) libcurl/7.18.2 OpenSSL/0.9.7a ipv6 zlib/1.1.4
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 16
 Content-Type: application/x-www-form-urlencoded

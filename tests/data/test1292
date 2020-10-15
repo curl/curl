@@ -37,12 +37,10 @@ Replaced internal headers with a blank one
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1292 HTTP/1.1
 Host:
+User-Agent: curl/%VERSION
 Accept:
 
 </protocol>

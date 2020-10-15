@@ -2,6 +2,7 @@ Long: write-out
 Short: w
 Arg: <format>
 Help: Use output FORMAT after completion
+Category: verbose
 ---
 Make curl display information on stdout after a completed transfer. The format
 is a string that may contain plain text mixed with any number of
@@ -50,6 +51,9 @@ curl CONNECT request. (Added in 7.12.4)
 .B http_version
 The http version that was effectively used. (Added in 7.50.0)
 .TP
+.B json
+A JSON object with all available keys.
+.TP
 .B local_ip
 The IP address of the local end of the most recently done connection - can be
 either IPv4 or IPv6 (Added in 7.29.0)
@@ -57,8 +61,15 @@ either IPv4 or IPv6 (Added in 7.29.0)
 .B local_port
 The local port number of the most recently done connection (Added in 7.29.0)
 .TP
+.B method
+The http method used in the most recent HTTP request (Added in 7.72.0)
+.TP
 .B num_connects
 Number of new connects made in the recent transfer. (Added in 7.12.3)
+.TP
+.B num_headers
+The number of response headers in the most recent request (restarted at each
+ redirect). Note that the status line IS NOT a header. (Added in 7.73.0)
 .TP
 .B num_redirects
 Number of redirects that were followed in the request. (Added in 7.12.3)
@@ -78,6 +89,10 @@ IPv4 or IPv6 (Added in 7.29.0)
 .TP
 .B remote_port
 The remote port number of the most recently done connection (Added in 7.29.0)
+.TP
+.B response_code
+The numerical response code that was found in the last transfer (formerly
+known as "http_code"). (Added in 7.18.2)
 .TP
 .B scheme
 The URL scheme (sometimes called protocol) that was effectively used (Added in 7.52.0)

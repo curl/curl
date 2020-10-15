@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,7 +71,6 @@
 #include "strerror.h"
 #include "url.h"
 #include "multiif.h"
-#include "inet_pton.h"
 #include "inet_ntop.h"
 #include "curl_threads.h"
 #include "connect.h"
@@ -159,7 +158,7 @@ static bool init_resolve_thread(struct connectdata *conn,
 
 /* Data for synchronization between resolver thread and its parent */
 struct thread_sync_data {
-  curl_mutex_t * mtx;
+  curl_mutex_t *mtx;
   int done;
 
   char *hostname;        /* hostname to resolve, Curl_async.hostname
@@ -170,7 +169,7 @@ struct thread_sync_data {
   curl_socket_t sock_pair[2]; /* socket pair */
 #endif
   int sock_error;
-  Curl_addrinfo *res;
+  struct Curl_addrinfo *res;
 #ifdef HAVE_GETADDRINFO
   struct addrinfo hints;
 #endif
@@ -180,7 +179,7 @@ struct thread_sync_data {
 struct thread_data {
   curl_thread_t thread_hnd;
   unsigned int poll_interval;
-  time_t interval_end;
+  timediff_t interval_end;
   struct thread_sync_data tsd;
 };
 
@@ -191,7 +190,7 @@ static struct thread_sync_data *conn_thread_sync_data(struct connectdata *conn)
 
 /* Destroy resolver thread synchronization data */
 static
-void destroy_thread_sync_data(struct thread_sync_data * tsd)
+void destroy_thread_sync_data(struct thread_sync_data *tsd)
 {
   if(tsd->mtx) {
     Curl_mutex_destroy(tsd->mtx);
@@ -217,7 +216,7 @@ void destroy_thread_sync_data(struct thread_sync_data * tsd)
 
 /* Initialize resolver thread synchronization data */
 static
-int init_thread_sync_data(struct thread_data * td,
+int init_thread_sync_data(struct thread_data *td,
                            const char *hostname,
                            int port,
                            const struct addrinfo *hints)
@@ -495,11 +494,14 @@ static CURLcode resolver_error(struct connectdata *conn)
   const char *host_or_proxy;
   CURLcode result;
 
+#ifndef CURL_DISABLE_PROXY
   if(conn->bits.httpproxy) {
     host_or_proxy = "proxy";
     result = CURLE_COULDNT_RESOLVE_PROXY;
   }
-  else {
+  else
+#endif
+  {
     host_or_proxy = "host";
     result = CURLE_COULDNT_RESOLVE_HOST;
   }
@@ -510,6 +512,9 @@ static CURLcode resolver_error(struct connectdata *conn)
   return result;
 }
 
+/*
+ * 'entry' may be NULL and then no data is returned
+ */
 static CURLcode thread_wait_resolv(struct connectdata *conn,
                                    struct Curl_dns_entry **entry,
                                    bool report)
@@ -594,6 +599,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
   int done = 0;
 
+  DEBUGASSERT(entry);
   *entry = NULL;
 
   if(!td) {
@@ -619,8 +625,8 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
     /* should be fine even if this converts to 32 bit */
-    time_t elapsed = (time_t)Curl_timediff(Curl_now(),
-                                           data->progress.t_startsingle);
+    timediff_t elapsed = Curl_timediff(Curl_now(),
+                                       data->progress.t_startsingle);
     if(elapsed < 0)
       elapsed = 0;
 
@@ -645,7 +651,7 @@ int Curl_resolver_getsock(struct connectdata *conn,
                           curl_socket_t *socks)
 {
   int ret_val = 0;
-  time_t milli;
+  timediff_t milli;
   timediff_t ms;
   struct Curl_easy *data = conn->data;
   struct resdata *reslv = (struct resdata *)data->state.resolver;
@@ -669,7 +675,7 @@ int Curl_resolver_getsock(struct connectdata *conn,
     if(ms < 3)
       milli = 0;
     else if(ms <= 50)
-      milli = (time_t)ms/3;
+      milli = ms/3;
     else if(ms <= 250)
       milli = 50;
     else
@@ -687,20 +693,15 @@ int Curl_resolver_getsock(struct connectdata *conn,
 /*
  * Curl_getaddrinfo() - for platforms without getaddrinfo
  */
-Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
-                                         const char *hostname,
-                                         int port,
-                                         int *waitp)
+struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
+                                                const char *hostname,
+                                                int port,
+                                                int *waitp)
 {
-  struct in_addr in;
   struct Curl_easy *data = conn->data;
   struct resdata *reslv = (struct resdata *)data->state.resolver;
 
   *waitp = 0; /* default to synchronous response */
-
-  if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
-    /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(AF_INET, &in, hostname, port);
 
   reslv->start = Curl_now();
 
@@ -720,37 +721,17 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 /*
  * Curl_resolver_getaddrinfo() - for getaddrinfo
  */
-Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
-                                         const char *hostname,
-                                         int port,
-                                         int *waitp)
+struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
+                                                const char *hostname,
+                                                int port,
+                                                int *waitp)
 {
   struct addrinfo hints;
-  char sbuf[12];
   int pf = PF_INET;
   struct Curl_easy *data = conn->data;
   struct resdata *reslv = (struct resdata *)data->state.resolver;
 
   *waitp = 0; /* default to synchronous response */
-
-#ifndef USE_RESOLVE_ON_IPS
-  {
-    struct in_addr in;
-    /* First check if this is an IPv4 address string */
-    if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
-      /* This is a dotted IP address 123.123.123.123-style */
-      return Curl_ip2addr(AF_INET, &in, hostname, port);
-  }
-#ifdef CURLRES_IPV6
-  {
-    struct in6_addr in6;
-    /* check if this is an IPv6 address string */
-    if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0)
-      /* This is an IPv6 address literal */
-      return Curl_ip2addr(AF_INET6, &in6, hostname, port);
-  }
-#endif /* CURLRES_IPV6 */
-#endif /* !USE_RESOLVE_ON_IPS */
 
 #ifdef CURLRES_IPV6
   /*
@@ -768,7 +749,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     break;
   }
 
-  if((pf != PF_INET) && !Curl_ipv6works())
+  if((pf != PF_INET) && !Curl_ipv6works(conn))
     /* The stack seems to be a non-IPv6 one */
     pf = PF_INET;
 #endif /* CURLRES_IPV6 */
@@ -777,8 +758,6 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   hints.ai_family = pf;
   hints.ai_socktype = (conn->transport == TRNSPRT_TCP)?
     SOCK_STREAM : SOCK_DGRAM;
-
-  msnprintf(sbuf, sizeof(sbuf), "%d", port);
 
   reslv->start = Curl_now();
   /* fire up a new resolver thread! */

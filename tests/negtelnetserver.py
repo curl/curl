@@ -1,6 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2017 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
 """ A telnet server which negotiates"""
 
 from __future__ import (absolute_import, division, print_function,
@@ -9,11 +27,10 @@ import argparse
 import os
 import sys
 import logging
-try:  # Python 2
-    import SocketServer as socketserver
-except ImportError:  # Python 3
+if sys.version_info.major >= 3:
     import socketserver
-
+else:
+    import SocketServer as socketserver
 
 log = logging.getLogger(__name__)
 HOST = "localhost"
@@ -32,6 +49,9 @@ def telnetserver(options):
     """
     if options.pidfile:
         pid = os.getpid()
+        # see tests/server/util.c function write_pidfile
+        if os.name == "nt":
+            pid += 65536
         with open(options.pidfile, "w") as f:
             f.write(str(pid))
 
@@ -67,13 +87,17 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
             data = neg.recv(1024)
             log.debug("Incoming data: %r", data)
 
-            if VERIFIED_REQ.encode('ascii') in data:
+            if VERIFIED_REQ.encode('utf-8') in data:
                 log.debug("Received verification request from test framework")
-                response = VERIFIED_RSP.format(pid=os.getpid())
-                response_data = response.encode('ascii')
+                pid = os.getpid()
+                # see tests/server/util.c function write_pidfile
+                if os.name == "nt":
+                    pid += 65536
+                response = VERIFIED_RSP.format(pid=pid)
+                response_data = response.encode('utf-8')
             else:
                 log.debug("Received normal request - echoing back")
-                response_data = data.strip()
+                response_data = data.decode('utf-8').strip().encode('utf-8')
 
             if response_data:
                 log.debug("Sending %r", response_data)

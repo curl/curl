@@ -85,7 +85,7 @@ Dependencies
 ------------
 
  - OpenSSL      0.9.7
- - GnuTLS       2.11.3
+ - GnuTLS       3.1.10
  - zlib         1.1.4
  - libssh2      0.16
  - c-ares       1.6.0
@@ -95,9 +95,9 @@ Dependencies
  - MIT Kerberos 1.2.4
  - GSKit        V5R3M0
  - NSS          3.14.x
- - PolarSSL     1.3.0
  - Heimdal      ?
- - nghttp2      1.0.0
+ - nghttp2      1.12.0
+ - WinSock      2.2 (on Windows 95+ and Windows CE .NET 4.1+)
 
 Operating Systems
 -----------------
@@ -146,6 +146,8 @@ Windows vs Unix
    That's taken care of by the `curl_global_init()` call, but if other libs
    also do it etc there might be reasons for applications to alter that
    behaviour.
+
+   We require WinSock version 2.2 and load this version during global init.
 
  3. The file descriptors for network communication and file operations are
     not as easily interchangeable as in Unix.
@@ -324,9 +326,9 @@ FTP
 Kerberos
 ========
 
- Kerberos support is mainly in `lib/krb5.c` and `lib/security.c` but also
- `curl_sasl_sspi.c` and `curl_sasl_gssapi.c` for the email protocols and
- `socks_gssapi.c` and `socks_sspi.c` for SOCKS5 proxy specifics.
+ Kerberos support is mainly in `lib/krb5.c` but also `curl_sasl_sspi.c` and
+ `curl_sasl_gssapi.c` for the email protocols and `socks_gssapi.c` and
+ `socks_sspi.c` for SOCKS5 proxy specifics.
 
 <a name="telnet"></a>
 TELNET
@@ -501,7 +503,7 @@ Client
  status and exits.
 
  When the operation is done, the `ourWriteOut()` function in `src/writeout.c`
- may be called to report about the operation. That function is using the
+ may be called to report about the operation. That function is mostly using the
  `curl_easy_getinfo()` function to extract useful information from the curl
  session.
 

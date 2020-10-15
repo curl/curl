@@ -1,0 +1,46 @@
+<testcase>
+
+<info>
+<keywords>
+--config
+</keywords>
+</info>
+
+#
+<reply>
+<data>
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/1
+
+-foo-
+</data>
+</reply>
+
+#
+<client>
+<file name="log/config434" nonewline="yes">
+url = %HOSTIP:%HTTPPORT/434
+</file>
+<server>
+http
+</server>
+<name>
+-K with a single line without newline
+</name>
+<command>
+-K log/config434
+</command>
+</client>
+
+#
+<verify>
+<protocol>
+GET /434 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

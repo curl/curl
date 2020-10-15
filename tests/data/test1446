@@ -24,7 +24,7 @@ perl %SRCDIR/libtest/test613.pl prepare %PWD/log/test1446.dir
 SFTP with --remote-time
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/test1446.dir/rofile.txt --insecure --remote-time
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/test1446.dir/rofile.txt --insecure --remote-time
 </command>
 <postcheck>
 perl %SRCDIR/libtest/test613.pl postprocess %PWD/log/test1446.dir && \

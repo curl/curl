@@ -231,6 +231,7 @@ Finally, this is the real page!
 <client>
 <features>
 NTLM
+SSL
 !SSPI
 </features>
 <server>
@@ -259,9 +260,6 @@ chkhostname curlhost
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /20280100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT

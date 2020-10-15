@@ -2,6 +2,7 @@ Long: max-filesize
 Arg: <bytes>
 Help: Maximum file size to download
 See-also: limit-rate
+Category: connection
 ---
 Specify the maximum size (in bytes) of a file to download. If the file
 requested is larger than this value, the transfer will not start and curl will

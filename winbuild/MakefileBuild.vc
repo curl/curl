@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -61,11 +61,11 @@ CC = cl.exe
 !IF "$(VC)"=="6"
 CC_NODEBUG  = $(CC) /O2 /DNDEBUG
 CC_DEBUG    = $(CC) /Od /Gm /Zi /D_DEBUG /GZ
-CFLAGS      = /I. /I../lib /I../include /nologo /W4 /wd4127 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
+CFLAGS      = /I. /I../lib /I../include /nologo /W4 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
 !ELSE
 CC_NODEBUG  = $(CC) /O2 /DNDEBUG
 CC_DEBUG    = $(CC) /Od /D_DEBUG /RTC1 /Z7 /LDd
-CFLAGS      = /I. /I ../lib /I../include /nologo /W4 /wd4127 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
+CFLAGS      = /I. /I ../lib /I../include /nologo /W4 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
 !ENDIF
 
 LFLAGS     = /nologo /machine:$(MACHINE)
@@ -222,6 +222,9 @@ CARES          = static
 
 !IFDEF USE_CARES
 CARES_CFLAGS   = /DUSE_ARES /I"$(CARES_INC_DIR)"
+!IF "$(CARES)"=="static"
+CARES_CFLAGS   = $(CARES_CFLAGS) /DCARES_STATICLIB
+!ENDIF
 !ENDIF
 
 
@@ -330,20 +333,20 @@ SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_WINDOWS_SSPI
 !ENDIF
 
 
-!IFNDEF USE_WINSSL
+!IFNDEF USE_SCHANNEL
 !IF "$(USE_SSL)"=="true"
-USE_WINSSL  = false
+USE_SCHANNEL  = false
 !ELSE
-USE_WINSSL  = $(USE_SSPI)
+USE_SCHANNEL  = $(USE_SSPI)
 !ENDIF
-!ELSEIF "$(USE_WINSSL)"=="yes"
-USE_WINSSL  = true
+!ELSEIF "$(USE_SCHANNEL)"=="yes"
+USE_SCHANNEL  = true
 !ENDIF
 
 
-!IF "$(USE_WINSSL)"=="true"
+!IF "$(USE_SCHANNEL)"=="true"
 !IF "$(USE_SSPI)"!="true"
-!ERROR cannot build with WinSSL without SSPI
+!ERROR cannot build with Schannel without SSPI
 !ENDIF
 SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_SCHANNEL
 WIN_LIBS    = $(WIN_LIBS) Crypt32.lib
@@ -479,9 +482,9 @@ CFLAGS = $(CFLAGS) $(CFLAGS_PDB) /Fd"$(LIB_DIROBJ)\$(PDB)"
 LFLAGS = $(LFLAGS) $(LFLAGS_PDB)
 !ENDIF
 
-!IF ( "$(USE_SSL)"=="true" && "$(USE_WINSSL)"=="true" ) \
+!IF ( "$(USE_SSL)"=="true" && "$(USE_SCHANNEL)"=="true" ) \
  || ( "$(USE_SSL)"=="true" && "$(USE_MBEDTLS)"=="true" ) \
- || ( "$(USE_MBEDTLS)"=="true" && "$(USE_WINSSL)"=="true" )
+ || ( "$(USE_MBEDTLS)"=="true" && "$(USE_SCHANNEL)"=="true" )
 CFLAGS = $(CFLAGS) /DCURL_WITH_MULTI_SSL
 !ENDIF
 
@@ -533,7 +536,7 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DIRDIST)
 	@echo Using IDN:  $(USE_IDN)
 	@echo Using IPv6: $(USE_IPV6)
 	@echo Using SSPI: $(USE_SSPI)
-	@echo Using WinSSL: $(USE_WINSSL)
+	@echo Using Schannel: $(USE_SCHANNEL)
 	@echo CFLAGS:     $(CFLAGS)
 	@echo LFLAGS:     $(LFLAGS)
 	@echo GenPDB:     $(GEN_PDB)
@@ -615,7 +618,10 @@ CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
  $(CURL_DIROBJ)\nonblock.obj \
  $(CURL_DIROBJ)\strtoofft.obj \
  $(CURL_DIROBJ)\warnless.obj \
- $(CURL_DIROBJ)\curl_ctype.obj
+ $(CURL_DIROBJ)\curl_ctype.obj \
+ $(CURL_DIROBJ)\curl_multibyte.obj \
+ $(CURL_DIROBJ)\version_win32.obj \
+ $(CURL_DIROBJ)\dynbuf.obj
  
 $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(CURL_LINK) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(WIN_LIBS) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
@@ -634,6 +640,12 @@ $(CURL_DIROBJ)\warnless.obj: ../lib/warnless.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/warnless.c
 $(CURL_DIROBJ)\curl_ctype.obj: ../lib/curl_ctype.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_ctype.c
+$(CURL_DIROBJ)\curl_multibyte.obj: ../lib/curl_multibyte.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_multibyte.c
+$(CURL_DIROBJ)\version_win32.obj: ../lib/version_win32.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/version_win32.c
+$(CURL_DIROBJ)\dynbuf.obj: ../lib/dynbuf.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/dynbuf.c
 $(CURL_DIROBJ)\curl.res: $(CURL_SRC_DIR)\curl.rc
 	rc $(CURL_RC_FLAGS)
 

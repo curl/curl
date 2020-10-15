@@ -36,6 +36,7 @@ imap
 </server>
 <features>
 NTLM
+SSL
 !SSPI
 debug
 </features>

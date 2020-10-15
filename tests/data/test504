@@ -32,7 +32,7 @@ lib504
 simple multi through local proxy without listener
  </name>
  <command>
-http://%HOSTIP:%HTTPSPORT/504 %HOSTIP:55555
+http://%HOSTIP:%NOLISTENPORT/504 %HOSTIP:%NOLISTENPORT
 </command>
 </client>
 

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,15 +28,18 @@ CURLOPT_CRLFILE \- specify a Certificate Revocation List file
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CRLFILE, char *file);
 .SH DESCRIPTION
-Pass a char * to a zero terminated string naming a \fIfile\fP with the
+Pass a char * to a null-terminated string naming a \fIfile\fP with the
 concatenation of CRL (in PEM format) to use in the certificate validation that
 occurs during the SSL exchange.
 
 When curl is built to use NSS or GnuTLS, there is no way to influence the use
-of CRL passed to help in the verification process. When libcurl is built with
-OpenSSL support, X509_V_FLAG_CRL_CHECK and X509_V_FLAG_CRL_CHECK_ALL are both
-set, requiring CRL check against all the elements of the certificate chain if
-a CRL file is passed.
+of CRL passed to help in the verification process.
+
+When libcurl is built with OpenSSL support, X509_V_FLAG_CRL_CHECK and
+X509_V_FLAG_CRL_CHECK_ALL are both set, requiring CRL check against all the
+elements of the certificate chain if a CRL file is passed. Also note that
+\fICURLOPT_CRLFILE(3)\fP will imply \fBCURLSSLOPT_NO_PARTIALCHAIN\fP (see
+\fICURLOPT_SSL_OPTIONS(3)\fP) since curl 7.71.0 due to an OpenSSL bug.
 
 This option makes sense only when used in combination with the
 \fICURLOPT_SSL_VERIFYPEER(3)\fP option.

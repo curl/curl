@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -42,7 +42,7 @@ my $TESTCASES; # start with no test cases
 for(@cmds) {
     $_ =~ s/[a-z\/\.]*//g;
 }
-# the the numbers from low to high
+# the numbers from low to high
 for(sort { $a <=> $b } @cmds) {
     $TESTCASES .= " $_";
 }

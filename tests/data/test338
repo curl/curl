@@ -1,5 +1,5 @@
-# See https://github.com/curl/curl/issues/4499
 <testcase>
+# See https://github.com/curl/curl/issues/4499
 <info>
 <keywords>
 HTTP
@@ -45,16 +45,15 @@ http://%HOSTIP:%HTTPPORT/338 --next http://%HOSTIP:%HTTPPORT/338 --anyauth -u fo
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /338 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /338 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 [DISCONNECT]

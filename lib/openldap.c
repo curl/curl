@@ -6,7 +6,7 @@
  *                 \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, Howard Chu, <hyc@openldap.org>
- * Copyright (C) 2011 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -107,6 +107,7 @@ const struct Curl_handler Curl_handler_ldap = {
   ZERO_NULL,                            /* connection_check */
   PORT_LDAP,                            /* defport */
   CURLPROTO_LDAP,                       /* protocol */
+  CURLPROTO_LDAP,                       /* family */
   PROTOPT_NONE                          /* flags */
 };
 
@@ -132,7 +133,8 @@ const struct Curl_handler Curl_handler_ldaps = {
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
   PORT_LDAPS,                           /* defport */
-  CURLPROTO_LDAP,                       /* protocol */
+  CURLPROTO_LDAPS,                      /* protocol */
+  CURLPROTO_LDAP,                       /* family */
   PROTOPT_SSL                           /* flags */
 };
 #endif
@@ -162,10 +164,10 @@ struct ldapconninfo {
   bool didbind;
 };
 
-typedef struct ldapreqinfo {
+struct ldapreqinfo {
   int msgid;
   int nument;
-} ldapreqinfo;
+};
 
 static CURLcode ldap_setup_connection(struct connectdata *conn)
 {
@@ -374,7 +376,7 @@ static CURLcode ldap_disconnect(struct connectdata *conn, bool dead_connection)
 static CURLcode ldap_do(struct connectdata *conn, bool *done)
 {
   struct ldapconninfo *li = conn->proto.ldapc;
-  ldapreqinfo *lr;
+  struct ldapreqinfo *lr;
   CURLcode status = CURLE_OK;
   int rc = 0;
   LDAPURLDesc *ludp = NULL;
@@ -406,7 +408,7 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done)
     failf(data, "LDAP local: ldap_search_ext %s", ldap_err2string(rc));
     return CURLE_LDAP_SEARCH_FAILED;
   }
-  lr = calloc(1, sizeof(ldapreqinfo));
+  lr = calloc(1, sizeof(struct ldapreqinfo));
   if(!lr)
     return CURLE_OUT_OF_MEMORY;
   lr->msgid = msgid;
@@ -419,7 +421,7 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done)
 static CURLcode ldap_done(struct connectdata *conn, CURLcode res,
                           bool premature)
 {
-  ldapreqinfo *lr = conn->data->req.protop;
+  struct ldapreqinfo *lr = conn->data->req.protop;
 
   (void)res;
   (void)premature;
@@ -443,7 +445,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
 {
   struct ldapconninfo *li = conn->proto.ldapc;
   struct Curl_easy *data = conn->data;
-  ldapreqinfo *lr = data->req.protop;
+  struct ldapreqinfo *lr = data->req.protop;
   int rc, ret;
   LDAPMessage *msg = NULL;
   LDAPMessage *ent;

@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+    - master
+    - '*/ci'
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  autotools:
+    name: macos ${{ matrix.build.name }}
+    runs-on: 'macos-latest'
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: normal
+          install: nghttp2
+          macosx-version-min: 10.9
+        - name: debug
+          install: nghttp2
+          configure: --enable-debug --enable-mqtt
+          macosx-version-min: 10.9
+        - name: libssh2
+          install: nghttp2 libssh2
+          configure: --enable-debug --with-libssh2
+          macosx-version-min: 10.9
+        - name: c-ares
+          install: nghttp2
+          configure: --enable-debug --enable-ares
+          macosx-version-min: 10.9
+        - name: HTTP only
+          install: nghttp2
+          configure: --enable-debug --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libmetalink --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
+          macosx-version-min: 10.15
+        - name: SecureTransport metalink
+          install: nghttp2 openssl libmetalink
+          configure: --enable-debug --without-ssl --with-secure-transport --with-libmetalink
+          macosx-version-min: 10.8
+        - name: OpenSSL metalink
+          install: nghttp2 openssl libmetalink
+          configure: --enable-debug --with-ssl=/usr/local/opt/openssl --with-libmetalink
+          macosx-version-min: 10.9
+        - name: LibreSSL metalink
+          install: nghttp2 libressl libmetalink
+          configure: --enable-debug --with-ssl=/usr/local/opt/libressl --with-libmetalink
+          macosx-version-min: 10.9
+        - name: torture
+          install: nghttp2 openssl
+          configure: --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
+          tflags: -n -t --shallow=25 !FTP
+          macosx-version-min: 10.9
+        - name: macOS 10.15
+          install: nghttp2 libmetalink libssh2
+          configure: --enable-debug --disable-ldap
+          macosx-version-min: 10.15
+    steps:
+    - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+      name: 'brew bundle'
+
+    - run: brew update && brew bundle install --no-lock --file /tmp/Brewfile
+      name: 'brew install'
+
+    - uses: actions/checkout@v2
+
+    - run: ./buildconf && ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      name: 'configure'
+      env:
+        # -Wvla is caused by brotli
+        CFLAGS: "-Wno-vla -mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
+
+    - run: make
+      name: 'make'
+
+    - run: make test-nonflaky
+      name: 'test'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }} ~1452"
+
+  cmake:
+    name: macos cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
+    runs-on: 'macos-latest'
+    env: ${{ matrix.compiler }}
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler:
+        - CC: clang
+          CXX: clang++
+          CFLAGS: "-mmacosx-version-min=10.15"
+        - CC: gcc-8
+          CXX: g++-8
+          CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
+        - CC: gcc-9
+          CXX: g++-9
+          CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
+        build:
+        - name: OpenSSL
+          install: nghttp2 openssl
+          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+        - name: LibreSSL
+          install: nghttp2 libressl
+          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+    steps:
+    - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+      name: 'brew bundle'
+
+    - run: brew update && brew bundle install --no-lock --file /tmp/Brewfile
+      name: 'brew install'
+
+    - uses: actions/checkout@v2
+
+    - run: cmake -H. -Bbuild -DCURL_WERROR=ON -DPICKY_COMPILER=ON ${{ matrix.build.generate }}
+      name: 'cmake generate'
+
+    - run: cmake --build build
+      name: 'cmake build'

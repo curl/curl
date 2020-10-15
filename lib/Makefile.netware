@@ -6,7 +6,7 @@
 #                             \___|\___/|_| \_\_____|
 #
 # Copyright (C) 2004 - 2015, Guenter Knauf
-# Copyright (C) 2001 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2001 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -639,7 +639,6 @@ ifdef WITH_SSL
 	@echo $(DL)#define HAVE_OPENSSL_PEM_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_ERR_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_CRYPTO_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_OPENSSL_ENGINE_H 1$(DL) >> $@
 	@echo $(DL)#define OPENSSL_NO_KRB5 1$(DL) >> $@
 ifdef WITH_SRP
 	@echo $(DL)#define USE_TLS_SRP 1$(DL) >> $@
@@ -670,8 +669,6 @@ endif
 	@echo $(DL)#endif$(DL) >> $@
 ifdef CABUNDLE
 	@echo $(DL)#define CURL_CA_BUNDLE "$(CABUNDLE)"$(DL) >> $@
-else
-	@echo $(DL)#define CURL_CA_BUNDLE getenv("CURL_CA_BUNDLE")$(DL) >> $@
 endif
 
 $(EXPORTF): $(CURL_INC)/curl/curl.h $(CURL_INC)/curl/easy.h $(CURL_INC)/curl/multi.h $(CURL_INC)/curl/mprintf.h

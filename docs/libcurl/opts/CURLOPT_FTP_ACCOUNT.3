@@ -28,7 +28,7 @@ CURLOPT_FTP_ACCOUNT \- set account info for FTP
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_ACCOUNT, char *account);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string (or NULL to disable). When an FTP
+Pass a pointer to a null-terminated string (or NULL to disable). When an FTP
 server asks for "account data" after user name and password has been provided,
 this data is sent off using the ACCT command.
 

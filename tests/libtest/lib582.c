@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,7 +44,7 @@ struct ReadWriteSockets
 /**
  * Remove a file descriptor from a sockets array.
  */
-static void removeFd(struct Sockets* sockets, curl_socket_t fd, int mention)
+static void removeFd(struct Sockets *sockets, curl_socket_t fd, int mention)
 {
   int i;
 
@@ -64,7 +64,7 @@ static void removeFd(struct Sockets* sockets, curl_socket_t fd, int mention)
 /**
  * Add a file descriptor to a sockets array.
  */
-static void addFd(struct Sockets* sockets, curl_socket_t fd, const char *what)
+static void addFd(struct Sockets *sockets, curl_socket_t fd, const char *what)
 {
   /**
    * To ensure we only have each file descriptor once, we remove it then add
@@ -105,7 +105,7 @@ static void addFd(struct Sockets* sockets, curl_socket_t fd, const char *what)
 static int curlSocketCallback(CURL *easy, curl_socket_t s, int action,
                               void *userp, void *socketp)
 {
-  struct ReadWriteSockets* sockets = userp;
+  struct ReadWriteSockets *sockets = userp;
 
   (void)easy; /* unused */
   (void)socketp; /* unused */
@@ -129,7 +129,7 @@ static int curlSocketCallback(CURL *easy, curl_socket_t s, int action,
  */
 static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 {
-  struct timeval* timeout = userp;
+  struct timeval *timeout = userp;
 
   (void)multi; /* unused */
   if(timeout_ms != -1) {
@@ -169,7 +169,7 @@ static int checkForCompletion(CURLM *curl, int *success)
   return result;
 }
 
-static int getMicroSecondTimeout(struct timeval* timeout)
+static int getMicroSecondTimeout(struct timeval *timeout)
 {
   struct timeval now;
   ssize_t result;
@@ -185,7 +185,7 @@ static int getMicroSecondTimeout(struct timeval* timeout)
 /**
  * Update a fd_set with all of the sockets in use.
  */
-static void updateFdSet(struct Sockets* sockets, fd_set* fdset,
+static void updateFdSet(struct Sockets *sockets, fd_set* fdset,
                         curl_socket_t *maxFd)
 {
   int i;

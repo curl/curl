@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2015 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2015 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2012 - 2014, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
@@ -30,7 +30,7 @@
  */
 
 struct conncache {
-  struct curl_hash hash;
+  struct Curl_hash hash;
   size_t num_conn;
   long next_connection_id;
   struct curltime last_cleanup;
@@ -42,10 +42,31 @@ struct conncache {
 #define BUNDLE_UNKNOWN     0  /* initial value */
 #define BUNDLE_MULTIPLEX   2
 
+#ifdef CURLDEBUG
+/* the debug versions of these macros make extra certain that the lock is
+   never doubly locked or unlocked */
+#define CONNCACHE_LOCK(x) if((x)->share) {                              \
+    Curl_share_lock((x), CURL_LOCK_DATA_CONNECT, CURL_LOCK_ACCESS_SINGLE); \
+    DEBUGASSERT(!(x)->state.conncache_lock);                            \
+    (x)->state.conncache_lock = TRUE;                                   \
+  }
+
+#define CONNCACHE_UNLOCK(x) if((x)->share) {                            \
+    DEBUGASSERT((x)->state.conncache_lock);                             \
+    (x)->state.conncache_lock = FALSE;                                  \
+    Curl_share_unlock((x), CURL_LOCK_DATA_CONNECT);                     \
+  }
+#else
+#define CONNCACHE_LOCK(x) if((x)->share)                                \
+    Curl_share_lock((x), CURL_LOCK_DATA_CONNECT, CURL_LOCK_ACCESS_SINGLE)
+#define CONNCACHE_UNLOCK(x) if((x)->share)              \
+    Curl_share_unlock((x), CURL_LOCK_DATA_CONNECT)
+#endif
+
 struct connectbundle {
   int multiuse;                 /* supports multi-use */
   size_t num_connections;       /* Number of connections in the bundle */
-  struct curl_llist conn_list;  /* The connectdata members of the bundle */
+  struct Curl_llist conn_list;  /* The connectdata members of the bundle */
 };
 
 /* returns 1 on error, 0 is fine */
@@ -56,12 +77,11 @@ void Curl_conncache_destroy(struct conncache *connc);
 struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
                                                  struct conncache *connc,
                                                  const char **hostp);
-void Curl_conncache_unlock(struct Curl_easy *data);
 /* returns number of connections currently held in the connection cache */
 size_t Curl_conncache_size(struct Curl_easy *data);
-size_t Curl_conncache_bundle_size(struct connectdata *conn);
 
-bool Curl_conncache_return_conn(struct connectdata *conn);
+bool Curl_conncache_return_conn(struct Curl_easy *data,
+                                struct connectdata *conn);
 CURLcode Curl_conncache_add_conn(struct conncache *connc,
                                  struct connectdata *conn) WARN_UNUSED_RESULT;
 void Curl_conncache_remove_conn(struct Curl_easy *data,

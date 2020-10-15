@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -101,7 +101,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_HEADER, 1L);
 #ifdef LIB548
-  /* set the data to POST with a mere pointer to a zero-terminated string */
+  /* set the data to POST with a mere pointer to a null-terminated string */
   test_setopt(curl, CURLOPT_POSTFIELDS, UPLOADTHIS);
 #else
   /* 547 style, which means reading the POST data from a callback */

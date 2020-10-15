@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2009, 2011, Markus Moeller, <markus_moeller@compuserve.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -153,12 +153,14 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     return CURLE_COULDNT_CONNECT;
   }
 
+  (void)curlx_nonblock(sock, FALSE);
+
   /* As long as we need to keep sending some context info, and there's no  */
   /* errors, keep sending it...                                            */
   for(;;) {
     TCHAR *sname;
 
-    sname = Curl_convert_UTF8_to_tchar(service_name);
+    sname = curlx_convert_UTF8_to_tchar(service_name);
     if(!sname)
       return CURLE_OUT_OF_MEMORY;
 
@@ -178,7 +180,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                                  &sspi_ret_flags,
                                                  &expiry);
 
-    Curl_unicodefree(sname);
+    curlx_unicodefree(sname);
 
     if(sspi_recv_token.pvBuffer) {
       s_pSecFn->FreeContextBuffer(sspi_recv_token.pvBuffer);
@@ -325,7 +327,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     failf(data, "Failed to determine user name.");
     return CURLE_COULDNT_CONNECT;
   }
-  infof(data, "SOCKS5 server authencticated user %s with GSS-API.\n",
+  infof(data, "SOCKS5 server authenticated user %s with GSS-API.\n",
         names.sUserName);
   s_pSecFn->FreeContextBuffer(names.sUserName);
 
@@ -587,6 +589,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     memcpy(socksreq, sspi_w_token[0].pvBuffer, sspi_w_token[0].cbBuffer);
     s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
   }
+  (void)curlx_nonblock(sock, TRUE);
 
   infof(data, "SOCKS5 access with%s protection granted.\n",
         (socksreq[0] == 0)?"out GSS-API data":

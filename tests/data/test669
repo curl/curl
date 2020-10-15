@@ -1,0 +1,60 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP MIME POST
+HTTP FORMPOST
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.0 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+blablabla
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP custom Content-Type with parameter
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/669 -H 'Content-type: multipart/form-data; charset=utf-8' -F name=daniel -F tool=curl
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+<protocol>
+POST /we/want/669 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 242
+Content-Type: multipart/form-data; charset=utf-8; boundary=----------------------------
+
+------------------------------
+Content-Disposition: form-data; name="name"
+
+daniel
+------------------------------
+Content-Disposition: form-data; name="tool"
+
+curl
+--------------------------------
+</protocol>
+</verify>
+</testcase>

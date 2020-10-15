@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,15 +28,16 @@
 #include "tool_doswin.h"
 #include "tool_urlglob.h"
 #include "tool_vms.h"
+#include "dynbuf.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
 #define GLOBERROR(string, column, code) \
   glob->error = string, glob->pos = column, code
 
-static CURLcode glob_fixed(URLGlob *glob, char *fixed, size_t len)
+static CURLcode glob_fixed(struct URLGlob *glob, char *fixed, size_t len)
 {
-  URLPattern *pat = &glob->pattern[glob->size];
+  struct URLPattern *pat = &glob->pattern[glob->size];
   pat->type = UPTSet;
   pat->content.Set.size = 1;
   pat->content.Set.ptr_s = 0;
@@ -74,14 +75,14 @@ static int multiply(unsigned long *amount, long with)
   return 0;
 }
 
-static CURLcode glob_set(URLGlob *glob, char **patternp,
+static CURLcode glob_set(struct URLGlob *glob, char **patternp,
                          size_t *posp, unsigned long *amount,
                          int globindex)
 {
   /* processes a set expression with the point behind the opening '{'
      ','-separated elements are collected until the next closing '}'
   */
-  URLPattern *pat;
+  struct URLPattern *pat;
   bool done = FALSE;
   char *buf = glob->glob_buffer;
   char *pattern = *patternp;
@@ -168,7 +169,7 @@ static CURLcode glob_set(URLGlob *glob, char **patternp,
   return CURLE_OK;
 }
 
-static CURLcode glob_range(URLGlob *glob, char **patternp,
+static CURLcode glob_range(struct URLGlob *glob, char **patternp,
                            size_t *posp, unsigned long *amount,
                            int globindex)
 {
@@ -178,7 +179,7 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
      - num range with leading zeros: e.g. "001-999]"
      expression is checked for well-formedness and collected until the next ']'
   */
-  URLPattern *pat;
+  struct URLPattern *pat;
   int rc;
   char *pattern = *patternp;
   char *c;
@@ -319,6 +320,8 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
   return CURLE_OK;
 }
 
+#define MAX_IP6LEN 128
+
 static bool peek_ipv6(const char *str, size_t *skip)
 {
   /*
@@ -326,30 +329,35 @@ static bool peek_ipv6(const char *str, size_t *skip)
    * - Valid globs contain a hyphen and <= 1 colon.
    * - IPv6 literals contain no hyphens and >= 2 colons.
    */
-  size_t i = 0;
-  size_t colons = 0;
-  if(str[i++] != '[') {
+  char hostname[MAX_IP6LEN];
+  CURLU *u;
+  char *endbr = strchr(str, ']');
+  size_t hlen;
+  CURLUcode rc;
+  if(!endbr)
     return FALSE;
-  }
-  for(;;) {
-    const char c = str[i++];
-    if(ISALNUM(c) || c == '.' || c == '%') {
-      /* ok */
-    }
-    else if(c == ':') {
-      colons++;
-    }
-    else if(c == ']') {
-      *skip = i;
-      return colons >= 2 ? TRUE : FALSE;
-    }
-    else {
-      return FALSE;
-    }
-  }
+
+  hlen = endbr - str + 1;
+  if(hlen >= MAX_IP6LEN)
+    return FALSE;
+
+  u = curl_url();
+  if(!u)
+    return FALSE;
+
+  memcpy(hostname, str, hlen);
+  hostname[hlen] = 0;
+
+  /* ask to "guess scheme" as then it works without a https:// prefix */
+  rc = curl_url_set(u, CURLUPART_URL, hostname, CURLU_GUESS_SCHEME);
+
+  curl_url_cleanup(u);
+  if(!rc)
+    *skip = hlen;
+  return rc ? FALSE : TRUE;
 }
 
-static CURLcode glob_parse(URLGlob *glob, char *pattern,
+static CURLcode glob_parse(struct URLGlob *glob, char *pattern,
                            size_t pos, unsigned long *amount)
 {
   /* processes a literal string component of a URL
@@ -427,14 +435,14 @@ static CURLcode glob_parse(URLGlob *glob, char *pattern,
   return res;
 }
 
-CURLcode glob_url(URLGlob **glob, char *url, unsigned long *urlnum,
+CURLcode glob_url(struct URLGlob **glob, char *url, unsigned long *urlnum,
                   FILE *error)
 {
   /*
    * We can deal with any-size, just make a buffer with the same length
    * as the specified URL!
    */
-  URLGlob *glob_expand;
+  struct URLGlob *glob_expand;
   unsigned long amount = 0;
   char *glob_buffer;
   CURLcode res;
@@ -446,7 +454,7 @@ CURLcode glob_url(URLGlob **glob, char *url, unsigned long *urlnum,
     return CURLE_OUT_OF_MEMORY;
   glob_buffer[0] = 0;
 
-  glob_expand = calloc(1, sizeof(URLGlob));
+  glob_expand = calloc(1, sizeof(struct URLGlob));
   if(!glob_expand) {
     Curl_safefree(glob_buffer);
     return CURLE_OUT_OF_MEMORY;
@@ -483,7 +491,7 @@ CURLcode glob_url(URLGlob **glob, char *url, unsigned long *urlnum,
   return CURLE_OK;
 }
 
-void glob_cleanup(URLGlob* glob)
+void glob_cleanup(struct URLGlob *glob)
 {
   size_t i;
   int elem;
@@ -506,9 +514,9 @@ void glob_cleanup(URLGlob* glob)
   Curl_safefree(glob);
 }
 
-CURLcode glob_next_url(char **globbed, URLGlob *glob)
+CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
 {
-  URLPattern *pat;
+  struct URLPattern *pat;
   size_t i;
   size_t len;
   size_t buflen = glob->urllen + 1;
@@ -600,34 +608,29 @@ CURLcode glob_next_url(char **globbed, URLGlob *glob)
   return CURLE_OK;
 }
 
-CURLcode glob_match_url(char **result, char *filename, URLGlob *glob)
+#define MAX_OUTPUT_GLOB_LENGTH (10*1024)
+
+CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
 {
-  char *target;
-  size_t allocsize;
   char numbuf[18];
   char *appendthis = (char *)"";
   size_t appendlen = 0;
-  size_t stringlen = 0;
+  struct curlx_dynbuf dyn;
 
   *result = NULL;
 
-  /* We cannot use the glob_buffer for storage here since the filename may
-   * be longer than the URL we use. We allocate a good start size, then
-   * we need to realloc in case of need.
+  /* We cannot use the glob_buffer for storage since the filename may be
+   * longer than the URL we use.
    */
-  allocsize = strlen(filename) + 1; /* make it at least one byte to store the
-                                       trailing zero */
-  target = malloc(allocsize);
-  if(!target)
-    return CURLE_OUT_OF_MEMORY;
+  curlx_dyn_init(&dyn, MAX_OUTPUT_GLOB_LENGTH);
 
   while(*filename) {
     if(*filename == '#' && ISDIGIT(filename[1])) {
       char *ptr = filename;
       unsigned long num = strtoul(&filename[1], &filename, 10);
-      URLPattern *pat = NULL;
+      struct URLPattern *pat = NULL;
 
-      if(num < glob->size) {
+      if(num && (num < glob->size)) {
         unsigned long i;
         num--; /* make it zero based */
         /* find the correct glob entry */
@@ -664,7 +667,7 @@ CURLcode glob_match_url(char **result, char *filename, URLGlob *glob)
         default:
           fprintf(stderr, "internal error: invalid pattern type (%d)\n",
                   (int)pat->type);
-          Curl_safefree(target);
+          curlx_dyn_free(&dyn);
           return CURLE_FAILED_INIT;
         }
       }
@@ -679,36 +682,24 @@ CURLcode glob_match_url(char **result, char *filename, URLGlob *glob)
       appendthis = filename++;
       appendlen = 1;
     }
-    if(appendlen + stringlen >= allocsize) {
-      char *newstr;
-      /* we append a single byte to allow for the trailing byte to be appended
-         at the end of this function outside the while() loop */
-      allocsize = (appendlen + stringlen) * 2;
-      newstr = realloc(target, allocsize + 1);
-      if(!newstr) {
-        Curl_safefree(target);
-        return CURLE_OUT_OF_MEMORY;
-      }
-      target = newstr;
-    }
-    memcpy(&target[stringlen], appendthis, appendlen);
-    stringlen += appendlen;
+    if(curlx_dyn_addn(&dyn, appendthis, appendlen))
+      return CURLE_OUT_OF_MEMORY;
   }
-  target[stringlen]= '\0';
 
 #if defined(MSDOS) || defined(WIN32)
   {
     char *sanitized;
-    SANITIZEcode sc = sanitize_file_name(&sanitized, target,
+    SANITIZEcode sc = sanitize_file_name(&sanitized, curlx_dyn_ptr(&dyn),
                                          (SANITIZE_ALLOW_PATH |
                                           SANITIZE_ALLOW_RESERVED));
-    Curl_safefree(target);
+    curlx_dyn_free(&dyn);
     if(sc)
       return CURLE_URL_MALFORMAT;
-    target = sanitized;
+    *result = sanitized;
+    return CURLE_OK;
   }
-#endif /* MSDOS || WIN32 */
-
-  *result = target;
+#else
+  *result = curlx_dyn_ptr(&dyn);
   return CURLE_OK;
+#endif /* MSDOS || WIN32 */
 }

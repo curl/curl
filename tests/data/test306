@@ -52,12 +52,10 @@ HTTPS GET, receive no headers only data!
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /306 HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

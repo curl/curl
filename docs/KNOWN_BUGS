@@ -12,6 +12,7 @@ check the changelog of the current development status, as one or more of these
 problems may have been fixed or changed somewhat since this was written!
 
  1. HTTP
+ 1.2 Multiple methods in a single WWW-Authenticate: header
  1.3 STARTTRANSFER time is wrong for HTTP POSTs
  1.4 multipart formposts file name encoding
  1.5 Expect-100 meets 417
@@ -24,37 +25,39 @@ problems may have been fixed or changed somewhat since this was written!
  2. TLS
  2.1 CURLINFO_SSL_VERIFYRESULT has limited support
  2.2 DER in keychain
- 2.3 GnuTLS backend skips really long certificate fields
- 2.4 DarwinSSL won't import PKCS#12 client certificates without a password
+ 2.3 Unable to use PKCS12 certificate with Secure Transport
+ 2.4 Secure Transport won't import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
  2.6 CURL_GLOBAL_SSL
  2.7 Client cert (MTLS) issues with Schannel
  2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
+ 2.9 TLS session cache doesn't work with TFO
+ 2.10 Store TLS context per transfer instead of per connection
+ 2.11 Schannel TLS 1.2 handshake bug in old Windows versions
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
  3.2 No disconnect command
- 3.3 SMTP to multiple recipients
- 3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
+ 3.3 POP3 expects "CRLF.CRLF" eob for some single-line responses
+ 3.4 AUTH PLAIN for SMTP is not working on all servers
 
  4. Command line
  4.1 -J and -O with %-encoded file names
  4.2 -J with -C - fails
  4.3 --retry and transfer timeouts
- 4.4 --upload-file . hang if delay in STDIN
- 4.5 Improve --data-urlencode space encoding
+ 4.4 Improve --data-urlencode space encoding
 
  5. Build and portability issues
- 5.1 USE_UNIX_SOCKETS on Windows
+ 5.1 OS400 port requires deprecated IBM library
  5.2 curl-config --libs contains private details
  5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
- 5.4 Cannot compile against a static build of OpenLDAP
- 5.5 can't handle Unicode arguments in Windows
+ 5.4 Build with statically built dependency
+ 5.5 can't handle Unicode arguments in non-Unicode builds on Windows
  5.6 cmake support gaps
  5.7 Visual Studio project gaps
  5.8 configure finding libs in wrong directory
  5.9 Utilize Requires.private directives in libcurl.pc
- 5.10 IDN tests failing on Windows / MSYS2
+ 5.11 configure --with-gssapi with Heimdal is ignored on macOS
 
  6. Authentication
  6.1 NTLM authentication and unicode
@@ -64,6 +67,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.5 NTLM doesn't support password with § character
  6.6 libcurl can fail to try alternatives with --proxy-any
  6.7 Don't clear digest for single realm
+ 6.8 RTSP authentication breaks without redirect support
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -75,7 +79,7 @@ problems may have been fixed or changed somewhat since this was written!
  7.7 FTP and empty path parts in the URL
  7.8 Premature transfer end but healthy control channel
  7.9 Passive transfer tries only one IP address
- 7.10 Stick to same family over SOCKS proxy
+ 7.10 FTPS needs session reuse
 
  8. TELNET
  8.1 TELNET and time limitations don't work
@@ -83,10 +87,9 @@ problems may have been fixed or changed somewhat since this was written!
 
  9. SFTP and SCP
  9.1 SFTP doesn't do CURLOPT_POSTQUOTE correct
+ 9.2 wolfssh: publickey auth doesn't work
 
  10. SOCKS
- 10.1 SOCKS proxy connections are done blocking
- 10.2 SOCKS don't support timeouts
  10.3 FTPS over SOCKS
  10.4 active FTP over a SOCKS
 
@@ -98,10 +101,16 @@ problems may have been fixed or changed somewhat since this was written!
  11.5 Connection information when using TCP Fast Open
  11.6 slow connect to localhost on Windows
  11.7 signal-based resolver timeouts
+ 11.8 DoH leaks memory after followlocation
+ 11.9 DoH doesn't inherit all transfer options
+ 11.10 Blocking socket operations in non-blocking API
+ 11.11 A shared connection cache is not thread-safe
+ 11.12 'no_proxy' string-matches IPv6 numerical addreses
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
  12.2 LDAP on Windows does authentication wrong?
+ 12.3 LDAP on Windows doesn't work
 
  13. TCP/IP
  13.1 --interface for ipv6 binds to unusable IP address
@@ -112,6 +121,13 @@ problems may have been fixed or changed somewhat since this was written!
 ==============================================================================
 
 1. HTTP
+
+1.2 Multiple methods in a single WWW-Authenticate: header
+
+ The HTTP responses headers WWW-Authenticate: can provide information about
+ multiple authentication methods as multiple headers or as several methods
+ within a single header. The latter way, several methods in the same physical
+ line, is not supported by libcurl's parser. (For no good reason.)
 
 1.3 STARTTRANSFER time is wrong for HTTP POSTs
 
@@ -141,7 +157,7 @@ problems may have been fixed or changed somewhat since this was written!
 1.6 Unnecessary close when 401 received waiting for 100
 
  libcurl closes the connection if an HTTP 401 reply is received while it is
- waiting for the the 100-continue response.
+ waiting for the 100-continue response.
  https://curl.haxx.se/mail/lib-2008-08/0462.html
 
 1.7 Deflate error after all content was received
@@ -189,21 +205,19 @@ problems may have been fixed or changed somewhat since this was written!
 
 2.1 CURLINFO_SSL_VERIFYRESULT has limited support
 
- CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL and NSS
- backends, so relying on this information in a generic app is flaky.
+ CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL, NSS and
+ GnuTLS backends, so relying on this information in a generic app is flaky.
 
 2.2 DER in keychain
 
  Curl doesn't recognize certificates in DER format in keychain, but it works
  with PEM.  https://curl.haxx.se/bug/view.cgi?id=1065
 
-2.3 GnuTLS backend skips really long certificate fields
+2.3 Unable to use PKCS12 certificate with Secure Transport
 
- libcurl calls gnutls_x509_crt_get_dn() with a fixed buffer size and if the
- field is too long in the cert, it'll just return an error and the field will
- be displayed blank.
+ See https://github.com/curl/curl/issues/5403
 
-2.4 DarwinSSL won't import PKCS#12 client certificates without a password
+2.4 Secure Transport won't import PKCS#12 client certificates without a password
 
  libcurl calls SecPKCS12Import with the PKCS#12 client certificate, but that
  function rejects certificates that do not have a password.
@@ -255,6 +269,28 @@ problems may have been fixed or changed somewhat since this was written!
 
  https://github.com/curl/curl/issues/3284
 
+2.9 TLS session cache doesn't work with TFO
+
+ See https://github.com/curl/curl/issues/4301
+
+2.10 Store TLS context per transfer instead of per connection
+
+ The GnuTLS `backend->cred` and the OpenSSL `backend->ctx` data and their
+ proxy versions (and possibly other TLS backends), could be better moved to be
+ stored in the Curl_easy handle instead of in per connection so that a single
+ transfer that makes multiple connections can reuse the context and reduce
+ memory consumption.
+
+ https://github.com/curl/curl/issues/5102
+
+2.11 Schannel TLS 1.2 handshake bug in old Windows versions
+
+ In old versions of Windows such as 7 and 8.1 the Schannel TLS 1.2 handshake
+ implementation likely has a bug that can rarely cause the key exchange to
+ fail, resulting in error SEC_E_BUFFER_TOO_SMALL or SEC_E_MESSAGE_ALTERED.
+
+ https://github.com/curl/curl/issues/5488
+
 3. Email protocols
 
 3.1 IMAP SEARCH ALL truncated response
@@ -269,20 +305,18 @@ problems may have been fixed or changed somewhat since this was written!
  The disconnect commands (LOGOUT and QUIT) may not be sent by IMAP, POP3 and
  SMTP if a failure occurs during the authentication phase of a connection.
 
-3.3 SMTP to multiple recipients
-
- When sending data to multiple recipients, curl will abort and return failure
- if one of the recipients indicate failure (on the "RCPT TO"
- command). Ordinary mail programs would proceed and still send to the ones
- that can receive data. This is subject for change in the future.
- https://curl.haxx.se/bug/view.cgi?id=1116
-
-3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
+3.3 POP3 expects "CRLF.CRLF" eob for some single-line responses
 
  You have to tell libcurl not to expect a body, when dealing with one line
  response commands. Please see the POP3 examples and test cases which show
  this for the NOOP and DELE commands. https://curl.haxx.se/bug/?i=740
 
+3.4 AUTH PLAIN for SMTP is not working on all servers
+
+ Specifying "--login-options AUTH=PLAIN" on the command line doesn't seem to
+ work correctly.
+
+ See https://github.com/curl/curl/issues/4080
 
 4. Command line
 
@@ -320,15 +354,7 @@ problems may have been fixed or changed somewhat since this was written!
  https://curl.haxx.se/mail/lib-2008-01/0080.html and Mandriva bug report
  https://qa.mandriva.com/show_bug.cgi?id=22565
 
-4.4 --upload-file . hangs if delay in STDIN
-
- "(echo start; sleep 1; echo end) | curl --upload-file . http://mywebsite -vv"
-
- ... causes a hang when it shouldn't.
-
- See https://github.com/curl/curl/issues/2051
-
-4.5 Improve --data-urlencode space encoding
+4.4 Improve --data-urlencode space encoding
 
  ASCII space characters in --data-urlencode are currently encoded as %20
  rather than +, which RFC 1866 says should be used.
@@ -337,12 +363,13 @@ problems may have been fixed or changed somewhat since this was written!
 
 5. Build and portability issues
 
-5.1 USE_UNIX_SOCKETS on Windows
+5.1 OS400 port requires deprecated IBM library
 
- Due to incorrect CMake checks for the presense of the feature, it will never
- be enabled for windows in a cmake build.
+ curl for OS400 requires QADRT to build, which provides ASCII wrappers for
+ libc/POSIX functions in the ILE, but IBM no longer supports or even offers
+ this library to download.
 
- See https://github.com/curl/curl/issues/4040
+ See https://github.com/curl/curl/issues/5176
 
 5.2 curl-config --libs contains private details
 
@@ -354,20 +381,40 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/2905
 
-5.4 Cannot compile against a static build of OpenLDAP
+5.4 Build with statically built dependency
 
- See https://github.com/curl/curl/issues/2367
+ The build scripts in curl (autotools, cmake and others) are primarily done to
+ work with shared/dynamic third party dependencies. When linking with shared
+ libraries, the dependency "chain" is handled automatically by the library
+ loader - on all modern systems.
 
-5.5 can't handle Unicode arguments in Windows
+ If you instead link with a static library, we need to provide all the
+ dependency libraries already at the link command line.
+
+ Figuring out all the dependency libraries for a given library is hard, as it
+ might also involve figuring out the dependencies of the dependencies and they
+ may vary between platforms and even change between versions.
+
+ When using static dependencies, the build scripts will mostly assume that
+ you, the user, will provide all the necessary additional dependency libraries
+ as additional arguments in the build. With configure, by setting LIBS/LDFLAGS
+ on the command line.
+
+ We welcome help to improve curl's ability to link with static libraries, but
+ it is likely a task that we can never fully support.
+
+5.5 can't handle Unicode arguments in non-Unicode builds on Windows
 
  If a URL or filename can't be encoded using the user's current codepage then
  it can only be encoded properly in the Unicode character set. Windows uses
  UTF-16 encoding for Unicode and stores it in wide characters, however curl
- and libcurl are not equipped for that at the moment. And, except for Cygwin,
- Windows can't use UTF-8 as a locale.
+ and libcurl are not equipped for that at the moment except when built with
+ _UNICODE and UNICODE defined. And, except for Cygwin, Windows can't use UTF-8
+ as a locale.
 
   https://curl.haxx.se/bug/?i=345
   https://curl.haxx.se/bug/?i=731
+  https://curl.haxx.se/bug/?i=3747
 
 5.6 cmake support gaps
 
@@ -420,24 +467,23 @@ problems may have been fixed or changed somewhat since this was written!
 
  https://github.com/curl/curl/issues/864
 
-5.10 IDN tests failing on Windows / MSYS2
+5.11 configure --with-gssapi with Heimdal is ignored on macOS
 
- It seems like MSYS2 does some UTF-8-to-something-else conversion for Windows
- compatibility.
+ ... unless you also pass --with-gssapi-libs
 
- https://github.com/curl/curl/issues/3747
+ https://github.com/curl/curl/issues/3841
 
 6. Authentication
 
 6.1 NTLM authentication and unicode
 
  NTLM authentication involving unicode user name or password only works
- properly if built with UNICODE defined together with the WinSSL/Schannel
+ properly if built with UNICODE defined together with the Schannel
  backend. The original problem was mentioned in:
  https://curl.haxx.se/mail/lib-2009-10/0024.html
  https://curl.haxx.se/bug/view.cgi?id=896
 
- The WinSSL/Schannel version verified to work as mentioned in
+ The Schannel version verified to work as mentioned in
  https://curl.haxx.se/mail/lib-2012-07/0073.html
 
 6.2 MIT Kerberos for Windows build
@@ -482,6 +528,15 @@ problems may have been fixed or changed somewhat since this was written!
 6.7 Don't clear digest for single realm
 
  https://github.com/curl/curl/issues/3267
+
+6.8 RTSP authentication breaks without redirect support
+
+ RTSP authentication broke in 7.66.0. A work-around is to enable RTSP in
+ CURLOPT_REDIR_PROTOCOLS. Authentication should however not be considered an
+ actual redirect so a "proper" fix needs to be different and not require users
+ to allow redirects to RTSP to work.
+
+ See https://github.com/curl/curl/pull/4750
 
 7. FTP
 
@@ -572,15 +627,13 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/1508
 
-7.10 Stick to same family over SOCKS proxy
+7.10 FTPS needs session reuse
 
- When asked to do FTP over a SOCKS proxy, it might connect to the proxy (and
- then subsequently to the remote server) using for example IPv4. When doing
- the second connection, curl should make sure that the second connection is
- using the same IP protocol version as the first connection did and not try
- others, since the remote server will only accept the same.
+ When the control connection is reused for a subsequent transfer, some FTPS
+ servers complain about "missing session reuse" for the data channel for the
+ second transfer.
 
- See https://curl.haxx.se/mail/archive-2018-07/0000.html
+ https://github.com/curl/curl/issues/4654
 
 8. TELNET
 
@@ -606,23 +659,15 @@ problems may have been fixed or changed somewhat since this was written!
  report but it cannot be accepted as-is. See
  https://curl.haxx.se/bug/view.cgi?id=748
 
+9.2 wolfssh: publickey auth doesn't work
+
+ When building curl to use the wolfSSH backend for SFTP, the publickey
+ authentication doesn't work. This is simply functionality not written for curl
+ yet, the necessary API for make this work is provided by wolfSSH.
+
+ See https://github.com/curl/curl/issues/4820
 
 10. SOCKS
-
-10.1 SOCKS proxy connections are done blocking
-
- Both SOCKS5 and SOCKS4 proxy connections are done blocking, which is very bad
- when used with the multi interface.
-
-10.2 SOCKS don't support timeouts
-
- The SOCKS4 connection codes don't properly acknowledge (connect) timeouts.
- According to bug #1556528, even the SOCKS5 connect code does not do it right:
- https://curl.haxx.se/bug/view.cgi?id=604
-
- When connecting to a SOCK proxy, the (connect) timeout is not properly
- acknowledged after the actual TCP connect (during the SOCKS "negotiate"
- phase).
 
 10.3 FTPS over SOCKS
 
@@ -674,7 +719,8 @@ problems may have been fixed or changed somewhat since this was written!
  CURLINFO_LOCAL_PORT (and possibly a few other) fails when TCP Fast Open is
  enabled.
 
- See https://github.com/curl/curl/issues/1332
+ See https://github.com/curl/curl/issues/1332 and
+ https://github.com/curl/curl/issues/4296
 
 11.6 slow connect to localhost on Windows
 
@@ -702,6 +748,32 @@ problems may have been fixed or changed somewhat since this was written!
  Also, alarm() provides timeout resolution only to the nearest second. alarm
  ought to be replaced by setitimer on systems that support it.
 
+11.8 DoH leaks memory after followlocation
+
+ https://github.com/curl/curl/issues/4592
+
+11.9 DoH doesn't inherit all transfer options
+
+ https://github.com/curl/curl/issues/4578
+
+11.10 Blocking socket operations in non-blocking API
+
+ The list of blocking socket operations is in TODO section "More non-blocking".
+
+11.11 A shared connection cache is not thread-safe
+
+ The share interface offers CURL_LOCK_DATA_CONNECT to have multiple easy
+ handle share a connection cache, but due to how connections are used they are
+ still not thread-safe when used shared.
+
+ See https://github.com/curl/curl/issues/4915 and lib1541.c
+
+11.12 'no_proxy' string-matches IPv6 numerical addreses
+
+ This has the downside that "::1" for example doesn't match "::0:1" even
+ though they are in fact the same address.
+
+ See https://github.com/curl/curl/issues/5745
 
 12. LDAP and OpenLDAP
 
@@ -727,6 +799,13 @@ problems may have been fixed or changed somewhat since this was written!
 12.2 LDAP on Windows does authentication wrong?
 
  https://github.com/curl/curl/issues/3116
+
+12.3 LDAP on Windows doesn't work
+
+ A simple curl command line getting "ldap://ldap.forumsys.com" returns an
+ error that says "no memory" !
+
+ https://github.com/curl/curl/issues/4261
 
 13. TCP/IP
 

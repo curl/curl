@@ -9,7 +9,7 @@ check that it adheres to our [Source Code Style guide](CODE_STYLE.md).
 
 ## Command line options
 
-`-W[file]` whitelists that file and excludes it from being checked. Helpful
+`-W[file]` skip that file and excludes it from being checked. Helpful
 when, for example, one of the files is generated.
 
 `-D[dir]` directory name to prepend to file names when accessing them.
@@ -70,6 +70,8 @@ warnings are:
 - `NOSPACEEQUALS`: An equals sign was found without preceding space. We prefer
   `a = 2` and *not* `a=2`.
 
+- `ONELINECONDITION`: do not put the conditional block on the same line as `if()`
+
 - `OPENCOMMENT`: File ended with a comment (`/*`) still "open".
 
 - `PARENBRACE`: `){` was used without sufficient space in between.
@@ -98,7 +100,9 @@ warnings are:
 
 - `TABS`: TAB characters are not allowed!
 
-- `TRAILINGSPACE`: Trailing white space on the line
+- `TRAILINGSPACE`: Trailing whitespace on the line
+
+- `TYPEDEFSTRUCT`: we frown upon (most) typedefed structs
 
 - `UNUSEDIGNORE`: a checksrc inlined warning ignore was asked for but not used,
    that's an ignore that should be removed or changed to get used.
@@ -158,5 +162,5 @@ instances are ignored and nothing extra.
 This is a method we've transitioned away from. Use inline ignores as far as
 possible.
 
-Make a `checksrc.whitelist` file in the directory of the source code with the
+Make a `checksrc.skip` file in the directory of the source code with the
 false positive, and include the full offending line into this file.

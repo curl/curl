@@ -4,8 +4,8 @@
 [![Coverity passed](https://scan.coverity.com/projects/curl/badge.svg)](https://scan.coverity.com/projects/curl)
 [![Travis-CI Build Status](https://travis-ci.org/curl/curl.svg?branch=master)](https://travis-ci.org/curl/curl)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/l1vv31029huhf4g4?svg=true)](https://ci.appveyor.com/project/curlorg/curl)
+[![Azure DevOps Build Status](https://dev.azure.com/daniel0244/curl/_apis/build/status/curl.curl?branchName=master)](https://dev.azure.com/daniel0244/curl/_build/latest?definitionId=1&branchName=master)
 [![Cirrus Build Status](https://api.cirrus-ci.com/github/curl/curl.svg?branch=master)](https://cirrus-ci.com/github/curl/curl)
-[![Coverage Status](https://coveralls.io/repos/github/curl/curl/badge.svg)](https://coveralls.io/github/curl/curl)
 [![Backers on Open Collective](https://opencollective.com/curl/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/curl/sponsors/badge.svg)](#sponsors)
 [![Language Grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/curl/curl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/curl/curl/context:cpp)
@@ -26,9 +26,7 @@ You can find answers to the most frequent questions we get in [the FAQ
 document](https://curl.haxx.se/docs/faq.html).
 
 Study [the COPYING file](https://curl.haxx.se/docs/copyright.html) for
-distribution terms and similar. If you distribute curl binaries or other
-binaries that involve libcurl, you might enjoy [the LICENSE-MIXING
-document](https://curl.haxx.se/legal/licmix.html).
+distribution terms.
 
 ## Contact
 
@@ -40,7 +38,7 @@ document](https://curl.haxx.se/docs/thanks.html).
 
 ## Website
 
-Visit the [curl web site](https://curl.haxx.se/) for the latest news and
+Visit the [curl website](https://curl.haxx.se/) for the latest news and
 downloads.
 
 ## Git

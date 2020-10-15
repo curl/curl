@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -49,7 +49,6 @@ The curl_version_info_data struct looks like this
 typedef struct {
   CURLversion age;          /* see description below */
 
-  /* when 'age' is 0 or higher, the members below also exist: */
   const char *version;      /* human readable string */
   unsigned int version_num; /* numeric representation */
   const char *host;         /* human readable string */
@@ -59,27 +58,27 @@ typedef struct {
   const char *libz_version; /* human readable string */
   const char * const *protocols; /* protocols */
 
-  /* when 'age' is 1 or higher, the members below also exist: */
+  /* when 'age' is CURLVERSION_SECOND or higher, the members below exist */
   const char *ares;         /* human readable string */
   int ares_num;             /* number */
 
-  /* when 'age' is 2 or higher, the member below also exists: */
+  /* when 'age' is CURLVERSION_THIRD or higher, the members below exist */
   const char *libidn;       /* human readable string */
 
-  /* when 'age' is 3 or higher (7.16.1 or later), the members below also
-     exist  */
+  /* when 'age' is CURLVERSION_FOURTH or higher (>= 7.16.1), the members
+     below exist */
   int iconv_ver_num;       /* '_libiconv_version' if iconv support enabled */
 
   const char *libssh_version; /* human readable string */
 
-  /* when 'age' is 4 or higher (7.57.0 or later), the members below also
-     exist  */
+  /* when 'age' is CURLVERSION_FIFTH or higher (>= 7.57.0), the members
+     below exist */
   unsigned int brotli_ver_num; /* Numeric Brotli version
                                   (MAJOR << 24) | (MINOR << 12) | PATCH */
   const char *brotli_version; /* human readable string. */
 
-  /* when 'age is CURLVERSION_SIXTH or alter (7.66.0 or later), these fields
-     also exist */
+  /* when 'age' is CURLVERSION_SIXTH or higher (>= 7.66.0), the members
+     below exist */
   unsigned int nghttp2_ver_num; /* Numeric nghttp2 version
                                    (MAJOR << 16) | (MINOR << 8) | PATCH */
   const char *nghttp2_version; /* human readable string. */
@@ -87,6 +86,17 @@ typedef struct {
   const char *quic_version;    /* human readable quic (+ HTTP/3) library +
                                   version or NULL */
 
+  /* when 'age' is CURLVERSION_SEVENTH or higher (>= 7.70.0), the members
+     below exist */
+  const char *cainfo;          /* the built-in default CURLOPT_CAINFO, might
+                                  be NULL */
+  const char *capath;          /* the built-in default CURLOPT_CAPATH, might
+                                  be NULL */
+  /* when 'age' is CURLVERSION_EIGHTH or higher (>= 7.71.0), the members
+     below exist */
+  unsigned int zstd_ver_num; /* Numeric Zstd version
+                                  (MAJOR << 24) | (MINOR << 12) | PATCH */
+  const char *zstd_version; /* human readable string. */
 } curl_version_info_data;
 .fi
 
@@ -116,6 +126,8 @@ more exact timeouts (even on Windows) and less blocking when using the multi
 interface. (added in 7.10.7)
 .IP CURL_VERSION_BROTLI
 supports HTTP Brotli content encoding using libbrotlidec (Added in 7.57.0)
+.IP CURL_VERSION_ZSTD
+supports HTTP zstd content encoding using zstd library (Added in 7.72.0)
 .IP CURL_VERSION_CONV
 libcurl was built with support for character conversions, as provided by the
 CURLOPT_CONV_* callbacks. (Added in 7.15.4)
@@ -145,12 +157,15 @@ letters. (Added in 7.12.0)
 .IP CURL_VERSION_IPV6
 supports IPv6
 .IP CURL_VERSION_KERBEROS4
-supports Kerberos V4 (when using FTP)
+supports Kerberos V4 (when using FTP). Legacy bit. Deprecated since 7.33.0.
 .IP CURL_VERSION_KERBEROS5
 supports Kerberos V5 authentication for FTP, IMAP, POP3, SMTP and SOCKSv5 proxy
 (Added in 7.40.0)
 .IP CURL_VERSION_LARGEFILE
 libcurl was built with support for large files. (Added in 7.11.1)
+.IP CURL_VERSION_UNICODE
+libcurl was built with Unicode support on Windows. This makes non-ASCII
+characters work in filenames and options passed to libcurl. (Added in 7.72.0)
 .IP CURL_VERSION_LIBZ
 supports HTTP deflate using libz (Added in 7.10)
 .IP CURL_VERSION_MULTI_SSL
@@ -177,7 +192,8 @@ makes libcurl use Windows-provided functions for Kerberos, NTLM, SPNEGO and
 Digest authentication. It also allows libcurl to use the current user
 credentials without the app having to pass them on. (Added in 7.13.2)
 .IP CURL_VERSION_TLSAUTH_SRP
-libcurl was built with support for TLS-SRP. (Added in 7.21.4)
+libcurl was built with support for TLS-SRP (in one or more of the built-in TLS
+backends). (Added in 7.21.4)
 .IP CURL_VERSION_UNIX_SOCKETS
 libcurl was built with support for Unix domain sockets.
 (Added in 7.40.0)

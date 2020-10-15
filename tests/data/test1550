@@ -20,10 +20,10 @@ lib1550
 </tool>
 
  <name>
-verify setting pipeling blacklisting options
+verify setting pipeling blocklisting options
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1550
+http://%HOSTIP:%NOLISTENPORT/1550
 </command>
 </client>
 </testcase>

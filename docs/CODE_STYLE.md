@@ -244,3 +244,22 @@ depending on a build-time conditional:
     #endif
 
     int content = magic(3);
+
+## No typedefed structs
+
+Use structs by all means, but do not typedef them. Use the `struct name` way
+of identifying them:
+
+    struct something {
+       void *valid;
+       size_t way_to_write;
+    };
+    struct something instance;
+
+**Not okay**:
+
+    typedef struct {
+       void *wrong;
+       size_t way_to_write;
+    } something;
+    something instance;

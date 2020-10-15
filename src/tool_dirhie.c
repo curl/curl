@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -125,6 +125,7 @@ CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
   tempdir = strtok(outdup, PATH_DELIMITERS);
 
   while(tempdir != NULL) {
+    bool skip = false;
     tempdir2 = strtok(NULL, PATH_DELIMITERS);
     /* since strtok returns a token for the last word even
        if not ending with DIR_CHAR, we need to prune it */
@@ -133,13 +134,27 @@ CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
       if(dlen)
         msnprintf(&dirbuildup[dlen], outlen - dlen, "%s%s", DIR_CHAR, tempdir);
       else {
-        if(outdup == tempdir)
+        if(outdup == tempdir) {
+#if defined(MSDOS) || defined(WIN32)
+          /* Skip creating a drive's current directory.
+             It may seem as though that would harmlessly fail but it could be
+             a corner case if X: did not exist, since we would be creating it
+             erroneously.
+             eg if outfile is X:\foo\bar\filename then don't mkdir X:
+             This logic takes into account unsupported drives !:, 1:, etc. */
+          char *p = strchr(tempdir, ':');
+          if(p && !p[1])
+            skip = true;
+#endif
           /* the output string doesn't start with a separator */
           strcpy(dirbuildup, tempdir);
+        }
         else
           msnprintf(dirbuildup, outlen, "%s%s", DIR_CHAR, tempdir);
       }
-      if((-1 == mkdir(dirbuildup, (mode_t)0000750)) && (errno != EEXIST)) {
+      /* Create directory. Ignore access denied error to allow traversal. */
+      if(!skip && (-1 == mkdir(dirbuildup, (mode_t)0000750)) &&
+         (errno != EACCES) && (errno != EEXIST)) {
         show_dir_errno(errors, dirbuildup);
         result = CURLE_WRITE_ERROR;
         break; /* get out of loop */

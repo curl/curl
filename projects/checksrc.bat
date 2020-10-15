@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2014 - 2016, Steve Holme, <steve_holme@hotmail.com>.
+rem * Copyright (C) 2014 - 2020, Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
@@ -31,6 +31,9 @@ rem ***************************************************************************
   set CHECK_SRC=TRUE
   set CHECK_TESTS=TRUE
   set CHECK_EXAMPLES=TRUE
+  set SRC_DIR=
+  set CUR_DIR=%cd%
+  set ARG0_DIR=%~dp0
 
 :parseArgs
   if "%~1" == "" goto prerequisites
@@ -88,7 +91,22 @@ rem ***************************************************************************
   )
 
 :configure
-  if "%SRC_DIR%" == "" set SRC_DIR=..
+  if "%SRC_DIR%" == "" (
+    rem Are we being executed from the "projects" or main directory?
+    if "%CUR_DIR%\" == "%ARG0_DIR%" (
+      set SRC_DIR=..
+    ) else if exist projects (
+      if exist docs (
+        if exist lib (
+          if exist src (
+            if exist tests (
+              set SRC_DIR=.
+            )
+          )
+        )
+      )
+    )
+  )
   if not exist "%SRC_DIR%" goto nosrc
 
 :start
@@ -111,6 +129,18 @@ rem ***************************************************************************
     if exist %SRC_DIR%\lib\vauth (
       for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vauth\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vauth" "%%i"
       for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vauth\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vauth" "%%i"
+    )
+
+    rem Check the lib\vquic directory
+    if exist %SRC_DIR%\lib\vquic (
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vquic\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vquic" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vquic\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vquic" "%%i"
+    )
+
+    rem Check the lib\vssh directory
+    if exist %SRC_DIR%\lib\vssh (
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vssh\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vssh" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vssh\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vssh" "%%i"
     )
 
     rem Check the lib\vtls directory

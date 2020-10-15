@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -123,11 +123,11 @@ AddHttpPost(char *name, size_t namelength,
  * parent_form_info is NULL.
  *
  ***************************************************************************/
-static FormInfo * AddFormInfo(char *value,
-                              char *contenttype,
-                              FormInfo *parent_form_info)
+static struct FormInfo *AddFormInfo(char *value,
+                                    char *contenttype,
+                                    struct FormInfo *parent_form_info)
 {
-  FormInfo *form_info;
+  struct FormInfo *form_info;
   form_info = calloc(1, sizeof(struct FormInfo));
   if(form_info) {
     if(value)
@@ -204,7 +204,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
                      struct curl_httppost **last_post,
                      va_list params)
 {
-  FormInfo *first_form, *current_form, *form = NULL;
+  struct FormInfo *first_form, *current_form, *form = NULL;
   CURLFORMcode return_value = CURL_FORMADD_OK;
   const char *prevtype = NULL;
   struct curl_httppost *post = NULL;
@@ -521,7 +521,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   if(CURL_FORMADD_OK != return_value) {
     /* On error, free allocated fields for all nodes of the FormInfo linked
        list without deallocating nodes. List nodes are deallocated later on */
-    FormInfo *ptr;
+    struct FormInfo *ptr;
     for(ptr = first_form; ptr != NULL; ptr = ptr->more) {
       if(ptr->name_alloc) {
         Curl_safefree(ptr->name);
@@ -602,7 +602,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         /* Note that there's small risk that form->name is NULL here if the
            app passed in a bad combo, so we better check for that first. */
         if(form->name) {
-          /* copy name (without strdup; possibly not nul-terminated) */
+          /* copy name (without strdup; possibly not null-terminated) */
           form->name = Curl_memdup(form->name, form->namelength?
                                    form->namelength:
                                    strlen(form->name) + 1);
@@ -650,7 +650,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       /* On error, free allocated fields for nodes of the FormInfo linked
          list which are not already owned by the httppost linked list
          without deallocating nodes. List nodes are deallocated later on */
-      FormInfo *ptr;
+      struct FormInfo *ptr;
       for(ptr = form; ptr != NULL; ptr = ptr->more) {
         if(ptr->name_alloc) {
           Curl_safefree(ptr->name);
@@ -676,7 +676,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
      fields given that these have either been deallocated or are owned
      now by the httppost linked list */
   while(first_form) {
-    FormInfo *ptr = first_form->more;
+    struct FormInfo *ptr = first_form->more;
     free(first_form);
     first_form = ptr;
   }
@@ -728,14 +728,10 @@ int curl_formget(struct curl_httppost *form, void *arg,
     if(!nread)
       break;
 
-    switch(nread) {
-    default:
-      if(append(arg, buffer, nread) != nread)
-        result = CURLE_READ_ERROR;
-      break;
-    case CURL_READFUNC_ABORT:
-    case CURL_READFUNC_PAUSE:
-      break;
+    if(nread > sizeof(buffer) || append(arg, buffer, nread) != nread) {
+      result = CURLE_READ_ERROR;
+      if(nread == CURL_READFUNC_ABORT)
+        result = CURLE_ABORTED_BY_CALLBACK;
     }
   }
 
@@ -775,7 +771,7 @@ void curl_formfree(struct curl_httppost *form)
 }
 
 
-/* Set mime part name, taking care of non nul-terminated name string. */
+/* Set mime part name, taking care of non null-terminated name string. */
 static CURLcode setname(curl_mimepart *part, const char *name, size_t len)
 {
   char *zname;

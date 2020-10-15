@@ -33,15 +33,13 @@ http://%HOSTIP:%HTTPPORT/15630001 -L -H "Host: www.example.com"
 </command>
 </client>
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <errorcode>
 1
 </errorcode>
 <protocol>
 GET /15630001 HTTP/1.1
 Host: www.example.com
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

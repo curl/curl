@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_READFUNCTION 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_READFUNCTION 3 "25 Jun 2020" "libcurl 7.71.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_READFUNCTION \- read callback for data uploads
 .SH SYNOPSIS
@@ -64,6 +64,11 @@ server end and the transfer will end there.
 If you set this callback pointer to NULL, or don't set it at all, the default
 internal read function will be used. It is doing an fread() on the FILE *
 userdata set with \fICURLOPT_READDATA(3)\fP.
+
+You can set the total size of the data you are sending by using
+\fICURLOPT_INFILESIZE_LARGE(3)\fP or \fICURLOPT_POSTFIELDSIZE_LARGE(3)\fP,
+depending on the type of transfer. For some transfer types it may be required
+and it allows for better error checking.
 .SH DEFAULT
 The default internal read callback is fread().
 .SH PROTOCOLS
@@ -88,14 +93,14 @@ size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
 
 void setup(char *uploadthis)
 {
-  FILE *file = fopen("rb", uploadthis);
+  FILE *file = fopen(uploadthis, "rb");
   CURLcode result;
 
   /* set callback to use */
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 
   /* pass in suitable argument to callback */
-  curl_easy_setopt(curl, CURLOPT_READDATA, uploadthis);
+  curl_easy_setopt(curl, CURLOPT_READDATA, (void *)file);
 
   result = curl_easy_perform(curl);
 }

@@ -34,6 +34,9 @@ int test(char *URL)
   CURLU *u;
   (void)URL;
 
+  if(!longurl)
+    return 1;
+
   memset(longurl, 'a', EXCESSIVE);
   longurl[EXCESSIVE-1] = 0;
 
@@ -62,15 +65,8 @@ int test(char *URL)
     curl_url_cleanup(u);
   }
 
-  free(longurl);
-
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
-
-  return 0;
-
 test_cleanup:
-
+  free(longurl);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 

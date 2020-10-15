@@ -39,6 +39,7 @@ imap
 </server>
 <features>
 NTLM
+SSL
 !SSPI
 </features>
  <name>

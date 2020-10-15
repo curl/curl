@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -173,7 +173,7 @@ if ($^O eq 'MSWin32' || $targetos) {
   }
 }
 
-if (($^O eq 'MSWin32' || $^O eq 'msys') &&
+if (($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') &&
     ($targetos =~ /vc/ || $targetos =~ /mingw32/ ||
      $targetos =~ /borland/ || $targetos =~ /watcom/)) {
 
@@ -481,21 +481,13 @@ if ($git) {
     open(LOG, ">$buildlog") or die;
     while (<F>) {
       my $ll = $_;
-      # ignore messages pertaining to third party m4 files we don't care
-      next if ($ll =~ /aclocal\/gtk\.m4/);
-      next if ($ll =~ /aclocal\/gtkextra\.m4/);
       print $ll;
       print LOG $ll;
     }
     close(F);
     close(LOG);
 
-    if (grepfile("^buildconf: OK", $buildlog)) {
-      logit "buildconf was successful";
-    }
-    else {
-      mydie "buildconf was NOT successful";
-    }
+    logit "buildconf was successful";
   }
   else {
     logit "buildconf was successful (dummy message)";

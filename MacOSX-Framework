@@ -1,4 +1,25 @@
 #!/bin/bash
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
 # This script performs all of the steps needed to build a
 # universal binary libcurl.framework for Mac OS X 10.4 or greater.
 #
@@ -82,7 +103,7 @@ MINVER64='-mmacosx-version-min='$MACVER64
 if test ! -z $SDK32; then
   echo "----Configuring libcurl for 32 bit universal framework..."
   make clean
-  ./configure --disable-dependency-tracking --disable-static --with-gssapi --with-darwinssl \
+  ./configure --disable-dependency-tracking --disable-static --with-gssapi --with-secure-transport \
     CFLAGS="-Os -isysroot $SDK32_DIR $ARCHES32" \
     LDFLAGS="-Wl,-syslibroot,$SDK32_DIR $ARCHES32 -Wl,-headerpad_max_install_names" \
     CC=$CC
@@ -111,7 +132,7 @@ if test ! -z $SDK32; then
     popd
     make clean
     echo "----Configuring libcurl for 64 bit universal framework..."
-    ./configure --disable-dependency-tracking --disable-static --with-gssapi --with-darwinssl \
+    ./configure --disable-dependency-tracking --disable-static --with-gssapi --with-secure-transport \
       CFLAGS="-Os -isysroot $SDK64_DIR $ARCHES64" \
       LDFLAGS="-Wl,-syslibroot,$SDK64_DIR $ARCHES64 -Wl,-headerpad_max_install_names" \
       CC=$CC

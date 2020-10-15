@@ -11,6 +11,7 @@ FAILURE
 <reply>
 <servercmd>
 REPLY RETR 550 no such file!
+REPLY SIZE 500 command not understood
 </servercmd>
 </reply>
 

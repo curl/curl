@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
+ * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2009, Markus Moeller, <markus_moeller@compuserve.com>
- * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -115,7 +115,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   gss_buffer_desc  gss_send_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc  gss_recv_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc  gss_w_token = GSS_C_EMPTY_BUFFER;
-  gss_buffer_desc* gss_token = GSS_C_NO_BUFFER;
+  gss_buffer_desc *gss_token = GSS_C_NO_BUFFER;
   gss_name_t       server = GSS_C_NO_NAME;
   gss_name_t       gss_client_name = GSS_C_NO_NAME;
   unsigned short   us_length;
@@ -166,6 +166,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     gss_release_name(&gss_status, &server);
     return CURLE_COULDNT_CONNECT;
   }
+
+  (void)curlx_nonblock(sock, FALSE);
 
   /* As long as we need to keep sending some context info, and there's no  */
   /* errors, keep sending it...                                            */
@@ -225,7 +227,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
     gss_release_buffer(&gss_status, &gss_send_token);
     gss_release_buffer(&gss_status, &gss_recv_token);
-    if(gss_major_status != GSS_S_CONTINUE_NEEDED) break;
+    if(gss_major_status != GSS_S_CONTINUE_NEEDED)
+      break;
 
     /* analyse response */
 
@@ -325,7 +328,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   user[gss_send_token.length] = '\0';
   gss_release_name(&gss_status, &gss_client_name);
   gss_release_buffer(&gss_status, &gss_send_token);
-  infof(data, "SOCKS5 server authencticated user %s with GSS-API.\n",user);
+  infof(data, "SOCKS5 server authenticated user %s with GSS-API.\n",user);
   free(user);
   user = NULL;
 
@@ -512,6 +515,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     memcpy(socksreq, gss_recv_token.value, gss_recv_token.length);
     gss_release_buffer(&gss_status, &gss_recv_token);
   }
+
+  (void)curlx_nonblock(sock, TRUE);
 
   infof(data, "SOCKS5 access with%s protection granted.\n",
         (socksreq[0] == 0)?"out GSS-API data":

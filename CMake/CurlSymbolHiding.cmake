@@ -1,3 +1,24 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
 include(CheckCSourceCompiles)
 
 option(CURL_HIDDEN_SYMBOLS "Set to ON to hide libcurl internal symbols (=hide all symbols that aren't officially external)." ON)
@@ -11,13 +32,7 @@ if(CURL_HIDDEN_SYMBOLS)
     set(_SYMBOL_EXTERN "__attribute__ ((__visibility__ (\"default\")))")
     set(_CFLAG_SYMBOLS_HIDE "-fvisibility=hidden")
   elseif(CMAKE_COMPILER_IS_GNUCC)
-    if(NOT CMAKE_VERSION VERSION_LESS 2.8.10)
-      set(GCC_VERSION ${CMAKE_C_COMPILER_VERSION})
-    else()
-      execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
-                      OUTPUT_VARIABLE GCC_VERSION)
-    endif()
-    if(NOT GCC_VERSION VERSION_LESS 3.4)
+    if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 3.4)
       # note: this is considered buggy prior to 4.0 but the autotools don't care, so let's ignore that fact
       set(SUPPORTS_SYMBOL_HIDING TRUE)
       set(_SYMBOL_EXTERN "__attribute__ ((__visibility__ (\"default\")))")

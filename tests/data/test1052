@@ -69,9 +69,6 @@ the
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 
 # The primary reason libcurl sends the data part twice in this test is that
 # the test HTTP server is blocking until it has read the entire request,
@@ -80,6 +77,7 @@ the
 <protocol>
 PUT /want/1052 HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 78
 
@@ -94,6 +92,7 @@ the
       feature
 PUT /want/data/10520002.txt?coolsite=yes HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 78
 

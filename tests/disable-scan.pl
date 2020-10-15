@@ -29,9 +29,12 @@ use warnings;
 my %disable;
 # the DISABLE options that are used in C files
 my %file;
+# the DISABLE options that are documented
+my %docs;
 
 # we may get the dir root pointed out
 my $root=$ARGV[0] || ".";
+my $DOCS="CURL-DISABLE.md";
 
 sub scan_configure {
     open S, "<$root/configure.ac";
@@ -73,8 +76,22 @@ sub scan_sources {
     scan_dir("$root/lib/vauth");
 }
 
+sub scan_docs {
+    open F, "<$root/docs/$DOCS";
+    my $line = 0;
+    while(<F>) {
+        $line++;
+        if(/^## (CURL_DISABLE_[A-Z_]+)/g) {
+            my ($sym)=($1);
+            $docs{$sym} = $line;
+        }
+    }
+    close F;
+}
+
 scan_configure();
 scan_sources();
+scan_docs();
 
 
 my $error = 0;
@@ -84,12 +101,32 @@ for my $s (sort keys %disable) {
         printf "Present in configure.ac, not used by code: %s\n", $s;
         $error++;
     }
+    if(!$docs{$s}) {
+        printf "Present in configure.ac, not documented in $DOCS: %s\n", $s;
+        $error++;
+    }
 }
 
 # Check the code symbols for use in configure
 for my $s (sort keys %file) {
     if(!$disable{$s}) {
         printf "Not set by configure: %s (%s)\n", $s, $file{$s};
+        $error++;
+    }
+    if(!$docs{$s}) {
+        printf "Used in code, not documented in $DOCS: %s\n", $s;
+        $error++;
+    }
+}
+
+# Check the documented symbols
+for my $s (sort keys %docs) {
+    if(!$disable{$s}) {
+        printf "Documented but not in configure: %s\n", $s;
+        $error++;
+    }
+    if(!$file{$s}) {
+        printf "Documented, but not used by code: %s\n", $s;
         $error++;
     }
 }

@@ -63,7 +63,7 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-60a
+361
 ------------------------------
 Content-Disposition: form-data; name="fieldname"
 Content-Type: text/plain
@@ -89,12 +89,16 @@ This is data from a file.
 Content-Disposition: attachment; filename="test650.filedata"
 Content-Type: text/whatever
 
+
+a5
 This is data from a file.
 
 ------------------------------
 Content-Disposition: attachment; filename="test650.filedata"
 Content-Type: text/whatever
 
+
+af
 This is data from a file.
 
 --------------------------------
@@ -102,6 +106,8 @@ This is data from a file.
 ------------------------------
 Content-Disposition: form-data; name="filecontents"
 
+
+10f
 This is data from a file.
 
 ------------------------------
@@ -112,7 +118,11 @@ Content-Disposition: form-data; name="formlength"
 Content-Disposition: form-data; name="standardinput"
 Content-Type: application/octet-stream
 
+
+16
  Some data from stdin
+
+30
 
 --------------------------------
 

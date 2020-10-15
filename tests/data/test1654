@@ -26,9 +26,6 @@ alt-svc
 <command>
 log/1654
 </command>
-<tool>
-unit1654
-</tool>
 <file name="log/1654" mode="text">
 h2 example.com 443 h3 shiny.example.com 8443 "20191231 00:00:00" 0 1
 # a comment

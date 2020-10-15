@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -56,7 +56,7 @@ CFGSET=true
 !MESSAGE                                    Requires Windows Vista or later
 !MESSAGE   ENABLE_IPV6=<yes or no>        - Enable IPv6, defaults to yes
 !MESSAGE   ENABLE_SSPI=<yes or no>        - Enable SSPI support, defaults to yes
-!MESSAGE   ENABLE_WINSSL=<yes or no>      - Enable native Windows SSL support, defaults to yes
+!MESSAGE   ENABLE_SCHANNEL=<yes or no>      - Enable native Windows SSL support, defaults to yes
 !MESSAGE   ENABLE_OPENSSL_AUTO_LOAD_CONFIG=<yes or no>
 !MESSAGE                                  - Whether the OpenSSL configuration will be loaded automatically, defaults to yes
 !MESSAGE   ENABLE_UNICODE=<yes or no>     - Enable UNICODE support, defaults to no
@@ -125,16 +125,16 @@ USE_SSPI = true
 USE_SSPI = false
 !ENDIF
 
-!IFNDEF ENABLE_WINSSL
+!IFNDEF ENABLE_SCHANNEL
 !IF DEFINED(WITH_SSL) || DEFINED(WITH_MBEDTLS)
-USE_WINSSL = false
+USE_SCHANNEL = false
 !ELSE
-USE_WINSSL = $(USE_SSPI)
+USE_SCHANNEL = $(USE_SSPI)
 !ENDIF
-!ELSEIF "$(ENABLE_WINSSL)"=="yes"
-USE_WINSSL = true
-!ELSEIF "$(ENABLE_WINSSL)"=="no"
-USE_WINSSL = false
+!ELSEIF "$(ENABLE_SCHANNEL)"=="yes"
+USE_SCHANNEL = true
+!ELSEIF "$(ENABLE_SCHANNEL)"=="no"
+USE_SCHANNEL = false
 !ENDIF
 
 !IFNDEF ENABLE_OPENSSL_AUTO_LOAD_CONFIG
@@ -253,8 +253,8 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ipv6
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi
 !ENDIF
 
-!IF "$(USE_WINSSL)"=="true"
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-winssl
+!IF "$(USE_SCHANNEL)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-schannel
 !ENDIF
 
 !IF "$(USE_NGHTTP2)"=="true"
@@ -285,7 +285,7 @@ $(MODE):
 	@SET USE_IDN=$(USE_IDN)
 	@SET USE_IPV6=$(USE_IPV6)
 	@SET USE_SSPI=$(USE_SSPI)
-	@SET USE_WINSSL=$(USE_WINSSL)
+	@SET USE_SCHANNEL=$(USE_SCHANNEL)
 	@SET USE_UNICODE=$(USE_UNICODE)
 # compatibility bit
 	@SET WITH_NGHTTP2=$(WITH_NGHTTP2)

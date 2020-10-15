@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -85,12 +85,12 @@ returns back to the calling application.
 
 Your application extracts info from libcurl about when it would like to get
 invoked to transfer data or do other work. The most convenient way is to use
-\fIcurl_multi_wait(3)\fP that will help you wait until the application should
+\fIcurl_multi_poll(3)\fP that will help you wait until the application should
 call libcurl again. The older API to accomplish the same thing is
 \fIcurl_multi_fdset(3)\fP that extracts fd_sets from libcurl to use in
 select() or poll() calls in order to get to know when the transfers in the
 multi stack might need attention. Both these APIs allow for your program to
-wait for input on your own private file descriptors at the same time
+wait for input on your own private file descriptors at the same time.
 \fIcurl_multi_timeout(3)\fP also helps you with providing a suitable timeout
 period for your select() calls.
 

@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2019 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -116,9 +116,11 @@ my %api = (
     'curl_multi_socket' => 'API',
     'curl_multi_socket_action' => 'API',
     'curl_multi_socket_all' => 'API',
+    'curl_multi_poll' => 'API',
     'curl_multi_strerror' => 'API',
     'curl_multi_timeout' => 'API',
     'curl_multi_wait' => 'API',
+    'curl_multi_wakeup' => 'API',
     'curl_mvaprintf' => 'API',
     'curl_mvfprintf' => 'API',
     'curl_mvprintf' => 'API',
@@ -179,15 +181,15 @@ for(sort keys %exist) {
     #printf "%s is defined in %s, used by: %s\n", $_, $exist{$_}, $uses{$_};
     if(!$uses{$_}) {
         # this is a symbol with no "global" user
-        if($_ =~ /^curl_/) {
+        if($_ =~ /^curl_dbg_/) {
+            # we ignore the memdebug symbols
+        }
+        elsif($_ =~ /^curl_/) {
             if(!$api{$_}) {
                 # not present in the API, or for debug-builds
                 print STDERR "Bad curl-prefix: $_\n";
                 $err++;
             }
-        }
-        elsif($_ =~ /^curl_dbg_/) {
-            # we ignore the memdebug symbols
         }
         elsif($wl{$_}) {
             #print "$_ is WL\n";
@@ -201,8 +203,11 @@ for(sort keys %exist) {
         # global prefix, make sure it is "blessed"
         if(!$api{$_}) {
             # not present in the API, or for debug-builds
-            print STDERR "Bad curl-prefix $_\n";
-            $err++;
+            if($_ !~ /^curl_dbg_/) {
+                # ignore the memdebug symbols
+                print STDERR "Bad curl-prefix $_\n";
+                $err++;
+            }
         }
     }
 }

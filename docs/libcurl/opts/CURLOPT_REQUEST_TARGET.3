@@ -38,7 +38,7 @@ HTTP
 .nf
 curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/*");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/*");
   curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "OPTIONS");
 
   /* issue an OPTIONS * request (no leading slash) */

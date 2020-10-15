@@ -68,18 +68,17 @@ Content-Type: text/plain
 partial body
 </stdout>
 
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /want/1117 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=10-22
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /wantmore/11170001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=10-22
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

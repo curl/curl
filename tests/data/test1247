@@ -17,7 +17,7 @@ HTTP
 # Client-side
 <client>
 <server>
-none
+http
 </server>
  <name>
 --fail-early

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -264,14 +264,20 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   size_t len = 0;
   saslstate state1 = SASL_STOP;
   saslstate state2 = SASL_FINAL;
+#ifndef CURL_DISABLE_PROXY
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
+#else
+  const char * const hostname = conn->host.name;
+  const long int port = conn->remote_port;
+#endif
 #if defined(USE_KERBEROS5) || defined(USE_NTLM)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
     data->set.str[STRING_SERVICE_NAME] :
     sasl->params->service;
 #endif
+  const char *oauth_bearer = data->set.str[STRING_BEARER];
 
   sasl->force_ir = force_ir;    /* Latch for future use */
   sasl->authused = 0;           /* No mechanism used yet */
@@ -341,7 +347,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       }
     else
 #endif
-    if((enabledmechs & SASL_MECH_OAUTHBEARER) && conn->oauth_bearer) {
+    if((enabledmechs & SASL_MECH_OAUTHBEARER) && oauth_bearer) {
       mech = SASL_MECH_STRING_OAUTHBEARER;
       state1 = SASL_OAUTH2;
       state2 = SASL_OAUTH2_RESP;
@@ -351,17 +357,17 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
         result = Curl_auth_create_oauth_bearer_message(data, conn->user,
                                                        hostname,
                                                        port,
-                                                       conn->oauth_bearer,
+                                                       oauth_bearer,
                                                        &resp, &len);
     }
-    else if((enabledmechs & SASL_MECH_XOAUTH2) && conn->oauth_bearer) {
+    else if((enabledmechs & SASL_MECH_XOAUTH2) && oauth_bearer) {
       mech = SASL_MECH_STRING_XOAUTH2;
       state1 = SASL_OAUTH2;
       sasl->authused = SASL_MECH_XOAUTH2;
 
       if(force_ir || data->set.sasl_ir)
         result = Curl_auth_create_xoauth_bearer_message(data, conn->user,
-                                                        conn->oauth_bearer,
+                                                        oauth_bearer,
                                                         &resp, &len);
     }
     else if(enabledmechs & SASL_MECH_PLAIN) {
@@ -416,21 +422,27 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   saslstate newstate = SASL_FINAL;
   char *resp = NULL;
+#ifndef CURL_DISABLE_PROXY
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
+#else
+  const char * const hostname = conn->host.name;
+  const long int port = conn->remote_port;
+#endif
 #if !defined(CURL_DISABLE_CRYPTO_AUTH)
   char *chlg = NULL;
   size_t chlglen = 0;
 #endif
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
-    defined(USE_NTLM)
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) ||     \
+  defined(USE_NTLM)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
-                        data->set.str[STRING_SERVICE_NAME] :
-                        sasl->params->service;
+    data->set.str[STRING_SERVICE_NAME] :
+    sasl->params->service;
   char *serverdata;
 #endif
   size_t len = 0;
+  const char *oauth_bearer = data->set.str[STRING_BEARER];
 
   *progress = SASL_INPROGRESS;
 
@@ -558,7 +570,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
       result = Curl_auth_create_oauth_bearer_message(data, conn->user,
                                                      hostname,
                                                      port,
-                                                     conn->oauth_bearer,
+                                                     oauth_bearer,
                                                      &resp, &len);
 
       /* Failures maybe sent by the server as continuations for OAUTHBEARER */
@@ -566,7 +578,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     }
     else
       result = Curl_auth_create_xoauth_bearer_message(data, conn->user,
-                                                      conn->oauth_bearer,
+                                                      oauth_bearer,
                                                       &resp, &len);
     break;
 

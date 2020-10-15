@@ -46,12 +46,10 @@ ftp://test-number:1059/wanted/page -p -x %HOSTIP:%HTTPPORT
 <errorcode>
 56
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 CONNECT test-number:1059 HTTP/1.1
 Host: test-number:1059
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </protocol>

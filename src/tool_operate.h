@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,20 +38,27 @@ struct per_transfer {
   struct timeval retrystart;
   bool metalink; /* nonzero for metalink download. */
   bool metalink_next_res;
-  metalinkfile *mlfile;
-  metalink_resource *mlres;
+  struct metalinkfile *mlfile;
+  struct metalink_resource *mlres;
   char *this_url;
   char *outfile;
   bool infdopen; /* TRUE if infd needs closing */
   int infd;
+  bool noprogress;
   struct ProgressData progressbar;
   struct OutStruct outs;
   struct OutStruct heads;
+  struct OutStruct etag_save;
   struct InStruct input;
   struct HdrCbData hdrcbdata;
+  long num_headers;
+  bool was_last_header_empty;
   char errorbuffer[CURL_ERROR_SIZE];
 
   bool added; /* set TRUE when added to the multi handle */
+  time_t startat; /* when doing parallel transfers, this is a retry transfer
+                     that has been set to sleep until this time before it
+                     should get started (again) */
 
   /* for parallel progress bar */
   curl_off_t dltotal;

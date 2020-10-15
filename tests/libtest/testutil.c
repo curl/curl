@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -55,7 +55,7 @@ struct timeval tutil_tvnow(void)
   struct timespec tsnow;
   if(0 == clock_gettime(CLOCK_MONOTONIC, &tsnow)) {
     now.tv_sec = tsnow.tv_sec;
-    now.tv_usec = tsnow.tv_nsec / 1000;
+    now.tv_usec = (int)(tsnow.tv_nsec / 1000);
   }
   /*
   ** Even when the configure process has truly detected monotonic clock

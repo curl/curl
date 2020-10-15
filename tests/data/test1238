@@ -24,6 +24,14 @@ writedelay: 2
 <server>
 tftp
 </server>
+# Always kill the TFTP server to not affect following tests, due
+# to this test potentially keeping the TFTP server busy waiting
+# for another 5 seconds after this test has already terminated.
+# On some platforms and CI not enough time passes between this
+# test and the next tests 1242 and 1243, causing them to fail.
+<killserver>
+tftp
+</killserver>
  <name>
 slow TFTP retrieve cancel due to -Y and -y
  </name>

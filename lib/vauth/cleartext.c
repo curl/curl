@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -81,7 +81,8 @@ CURLcode Curl_auth_create_plain_message(struct Curl_easy *data,
   plen = strlen(passwd);
 
   /* Compute binary message length. Check for overflows. */
-  if(((zlen + clen) > SIZE_T_MAX/4) || (plen > (SIZE_T_MAX/2 - 2)))
+  if((zlen > SIZE_T_MAX/4) || (clen > SIZE_T_MAX/4) ||
+     (plen > (SIZE_T_MAX/2 - 2)))
     return CURLE_OUT_OF_MEMORY;
   plainlen = zlen + clen + plen + 2;
 

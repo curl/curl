@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,7 +28,7 @@ CURLOPT_CAPATH \- specify directory holding CA certificates
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CAPATH, char *capath);
 .SH DESCRIPTION
-Pass a char * to a zero terminated string naming a directory holding multiple
+Pass a char * to a null-terminated string naming a directory holding multiple
 CA certificates to verify the peer with. If libcurl is built against OpenSSL,
 the certificate directory must be prepared using the openssl c_rehash utility.
 This makes sense only when used in combination with the
@@ -54,9 +54,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-This option is supported by the OpenSSL, GnuTLS, PolarSSL and mbedTLS
-(since 7.56.0) backends. The NSS backend provides the option only for
-backward compatibility.
+This option is supported by the OpenSSL, GnuTLS and mbedTLS (since 7.56.0)
+backends. The NSS backend provides the option only for backward compatibility.
 .SH RETURN VALUE
 CURLE_OK if supported; or an error such as:
 

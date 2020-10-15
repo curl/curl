@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2016, Evgeny Grin (Karlson2k), <k2k@narod.ru>.
+# Copyright (C) 2016 - 2020, Evgeny Grin (Karlson2k), <k2k@narod.ru>.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms

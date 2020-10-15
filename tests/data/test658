@@ -38,9 +38,6 @@ http://%HOSTIP:%HTTPPORT/658
 </client>
 
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /658 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT

@@ -136,8 +136,9 @@ FAQ
   libcurl
 
     A free and easy-to-use client-side URL transfer library, supporting DICT,
-    FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3,
-    POP3S, RTMP, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET and TFTP.
+    FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT,
+    POP3, POP3S, RTMP, RTMPS, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET
+    and TFTP.
 
     libcurl supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading,
     Kerberos, SPNEGO, HTTP form based upload, proxies, cookies, user+password
@@ -188,7 +189,7 @@ FAQ
   curl's development, have we intended curl to replace wget or compete on its
   market. Curl is targeted at single-shot file transfers.
 
-  Curl is not a web site mirroring program. If you want to use curl to mirror
+  Curl is not a website mirroring program. If you want to use curl to mirror
   something: fine, go ahead and write a script that wraps around curl to make
   it reality (like curlmirror.pl does).
 
@@ -246,20 +247,21 @@ FAQ
 
   1.6 What do you get for making curl?
 
-  Project cURL is entirely free and open. No person gets paid for developing
-  curl full time. We do this voluntarily, mostly in our spare time.
-  Occasionally companies pay individual developers to work on curl, but that's
-  up to each company and developer. This is not controlled by nor supervised in
-  any way by the project.
+  Project cURL is entirely free and open. We do this voluntarily, mostly in
+  our spare time.  Companies may pay individual developers to work on curl,
+  but that's up to each company and developer. This is not controlled by nor
+  supervised in any way by the curl project.
 
-  We still get help from companies. Haxx provides web site, bandwidth, mailing
-  lists etc, GitHub hosts the primary git repository and other services like
-  the bug tracker at https://github.com/curl/curl. Also again, some companies
-  have sponsored certain parts of the development in the past and I hope some
-  will continue to do so in the future.
+  We get help from companies. Haxx provides website, bandwidth, mailing lists
+  etc, GitHub hosts the primary git repository and other services like the bug
+  tracker at https://github.com/curl/curl. Also again, some companies have
+  sponsored certain parts of the development in the past and I hope some will
+  continue to do so in the future.
 
   If you want to support our project, consider a donation or a banner-program
   or even better: by helping us with coding, documenting or testing etc.
+
+  See also: https://curl.haxx.se/sponsors.html
 
   1.7 What about CURL from curl.com?
 
@@ -301,7 +303,7 @@ FAQ
   curl is fully open source. It means you can hire any skilled engineer to fix
   your curl-related problems.
 
-  We list available alternatives on the curl web site:
+  We list available alternatives on the curl website:
   https://curl.haxx.se/support.html
 
   1.10 How many are using curl?
@@ -316,21 +318,14 @@ FAQ
   We don't know how many users that downloaded or installed curl and then
   never use it.
 
-  In May 2012 Daniel did a counting game and came up with a number that may
-  be completely wrong or somewhat accurate. Over 500 million!
-
-  See https://daniel.haxx.se/blog/2012/05/16/300m-users/
+  In 2020, we estimate that curl runs in rougly ten billion installations
+  world wide.
 
   1.11 Why don't you update ca-bundle.crt
 
-  The ca cert bundle that used to be shipped with curl was very outdated and
-  must be replaced with an up-to-date version by anyone who wants to verify
-  peers. It is no longer provided by curl. The last curl release that ever
-  shipped a ca cert bundle was curl 7.18.0.
-
   In the cURL project we've decided not to attempt to keep this file updated
-  (or even present anymore) since deciding what to add to a ca cert bundle is
-  an undertaking we've not been ready to accept, and the one we can get from
+  (or even present) since deciding what to add to a ca cert bundle is an
+  undertaking we've not been ready to accept, and the one we can get from
   Mozilla is perfectly fine so there's no need to duplicate that work.
 
   Today, with many services performed over HTTPS, every operating system
@@ -373,16 +368,13 @@ FAQ
 
   1.14 How do I submit my patch?
 
-  When you have made a patch or a change of whatever sort, and want to submit
-  that to the project, there are a few different ways we prefer:
+  We strongly encourage you to submit changes and improvements directly as
+  "pull requests" on github: https://github.com/curl/curl/pulls
 
-  o send a patch to the curl-library mailing list. We're many subscribers
-    there and there are lots of people who can review patches, comment on them
-    and "receive" them properly.
-
-  o if your patch changes or fixes a bug, you can also opt to submit a bug
-    report in the bug tracker and attach your patch there. There are less
-    people involved there.
+  If you for any reason can't or won't deal with github, send your patch to
+  the curl-library mailing list. We're many subscribers there and there are
+  lots of people who can review patches, comment on them and "receive" them
+  properly.
 
   Lots of more details are found in the CONTRIBUTE and INTERNALS docs.
 
@@ -447,9 +439,9 @@ FAQ
 
   curl can be built to use one of the following SSL alternatives: OpenSSL,
   libressl, BoringSSL, GnuTLS, wolfSSL, NSS, mbedTLS, MesaLink, Secure
-  Transport (native iOS/OS X), Schannel (native Windows) or GSKit (native IBM
-  i). They all have their pros and cons, and we try to maintain a comparison
-  of them here: https://curl.haxx.se/docs/ssl-compared.html
+  Transport (native iOS/OS X), Schannel (native Windows), GSKit (native IBM
+  i), or BearSSL. They all have their pros and cons, and we try to maintain a
+  comparison of them here: https://curl.haxx.se/docs/ssl-compared.html
 
   2.3 Where can I find a copy of LIBEAY32.DLL?
 
@@ -457,7 +449,7 @@ FAQ
 
   Curl can be built with OpenSSL to do the SSL stuff. The LIBEAY32.DLL is then
   what curl needs on a windows machine to do https:// etc. Check out the curl
-  web site to find accurate and up-to-date pointers to recent OpenSSL DLLs and
+  website to find accurate and up-to-date pointers to recent OpenSSL DLLs and
   other binary packages.
 
   2.4 Does curl support SOCKS (RFC 1928) ?
@@ -562,7 +554,7 @@ FAQ
   a language, you may prefer to use one of these interfaces instead.
 
   Find out more about which languages that support curl directly, and how to
-  install and use them, in the libcurl section of the curl web site:
+  install and use them, in the libcurl section of the curl website:
   https://curl.haxx.se/libcurl/
 
   All the various bindings to libcurl are made by other projects and people,
@@ -723,7 +715,7 @@ FAQ
 
   3.19 How do I get HTTP from a host using a specific IP address?
 
-  For example, you may be trying out a web site installation that isn't yet in
+  For example, you may be trying out a website installation that isn't yet in
   the DNS. Or you have a site using multiple IP addresses for a given host
   name and you want to address a specific one out of the set.
 

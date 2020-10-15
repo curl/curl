@@ -45,12 +45,10 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET http://supertrooper.fake/c/179 HTTP/1.1
 Host: supertrooper.fake
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: moo2=indeed
