@@ -3158,7 +3158,6 @@ CURLMcode curl_multi_socket_action(struct Curl_multi *multi, curl_socket_t s,
 }
 
 CURLMcode curl_multi_socket_all(struct Curl_multi *multi, int *running_handles)
-
 {
   CURLMcode result;
   if(multi->in_callback)

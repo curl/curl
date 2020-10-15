@@ -85,6 +85,7 @@ my %warnings = (
     'DOBRACE'          => 'A single space between do and open brace',
     'BRACEWHILE'       => 'A single space between open brace and while',
     'EXCLAMATIONSPACE' => 'Whitespace after exclamation mark in expression',
+    'EMPTYLINEBRACE'   => 'Empty line before the open brace',
     );
 
 sub readskiplist {
@@ -593,6 +594,11 @@ sub scanfile {
         if($l =~ /^(.*)\)\{/) {
             checkwarn("PARENBRACE",
                       $line, length($1)+1, $file, $l, "missing space after close paren");
+        }
+        # check for "^{" with an empty line before it
+        if(($l =~ /^\{/) && ($prevl =~ /^[ \t]*\z/)) {
+            checkwarn("EMPTYLINEBRACE",
+                      $line, 0, $file, $l, "empty line before open brace");
         }
 
         # check for space before the semicolon last in a line
