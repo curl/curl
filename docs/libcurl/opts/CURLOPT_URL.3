@@ -220,8 +220,8 @@ For more information about the individual components of an IMAP URL please
 see RFC5092.
 
 .IP SCP
-The path part of a SCP request specifies the file to retrieve and from what
-directory. The file part may not be omitted. The file is taken as an absolute
+The path part of an SCP URL specifies the path and file to retrieve or
+upload. The file part may not be omitted. The file is taken as an absolute
 path from the root directory on the server. To specify a path relative to the
 user's home directory on the server, prepend ~/ to the path portion.  If the
 user name is not embedded in the URL, it can be set with the
@@ -232,13 +232,12 @@ scp://user@example.com/etc/issue - This specifies the file /etc/issue
 scp://example.com/~/my-file - This specifies the file my-file in the
 user's home directory on the server
 .IP SFTP
-The path part of a SFTP request specifies the file to retrieve and from what
-directory. If the file part is omitted then libcurl downloads the directory
-listing for the directory specified.  If the path ends in a / then a directory
-listing is returned instead of a file.  If the path is omitted entirely then
-the directory listing for the root / home directory will be returned.  If the
-user name is not embedded in the URL, it can be set with the
-\fICURLOPT_USERPWD(3)\fP or \fICURLOPT_USERNAME(3)\fP option.
+The path part of an SFTP URL specifies the file to retrieve or upload. If the
+path ends in a / then a directory listing is returned instead of a file.  If
+the path is omitted entirely then the directory listing for the root / home
+directory will be returned.  If the user name is not embedded in the URL, it
+can be set with the \fICURLOPT_USERPWD(3)\fP or \fICURLOPT_USERNAME(3)\fP
+option.
 
 sftp://user:password@example.com/etc/issue - This specifies the file
 /etc/issue
