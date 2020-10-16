@@ -89,6 +89,14 @@ endif
 ifndef NGHTTP2_PATH
 NGHTTP2_PATH = ../../../nghttp2-1.0.0
 endif
+# Edit the path below to point to the base of your nghttp3 package.
+ifndef NGHTTP3_PATH
+NGHTTP3_PATH = ../../../nghttp3-1.0.0
+endif
+# Edit the path below to point to the base of your ngtcp2 package.
+ifndef NGTCP2_PATH
+NGTCP2_PATH = ../../../ngtcp2-1.0.0
+endif
 
 PROOT = ../..
 
@@ -215,6 +223,12 @@ endif
 ifeq ($(findstring -nghttp2,$(CFG)),-nghttp2)
 NGHTTP2 = 1
 endif
+ifeq ($(findstring -nghttp3,$(CFG)),-nghttp3)
+NGHTTP3 = 1
+endif
+ifeq ($(findstring -ngtcp2,$(CFG)),-ngtcp2)
+NGTCP2 = 1
+endif
 
 INCLUDES = -I. -I$(PROOT) -I$(PROOT)/include -I$(PROOT)/lib
 
@@ -252,6 +266,15 @@ ifdef SSH2
   endif
 endif
 ifdef SSL
+  ifdef NGHTTP3
+    CFLAGS += -DUSE_NGHTTP3
+    curl_LDADD += -L"$(NGHTTP3_PATH)/lib" -lnghttp3
+    ifdef NGTCP2
+      CFLAGS += -DUSE_NGTCP2
+      curl_LDADD += -L"$(NGTCP2_PATH)/lib" -lngtcp2 -lngtcp2_crypto_openssl
+    endif
+  endif
+
   ifndef OPENSSL_INCLUDE
     ifeq "$(wildcard $(OPENSSL_PATH)/outinc)" "$(OPENSSL_PATH)/outinc"
       OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc
