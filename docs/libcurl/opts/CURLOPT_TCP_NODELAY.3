@@ -51,7 +51,7 @@ All
 CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  /* disable Nagle */
+  /* leave Nagle enabled */
   curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 0);
   curl_easy_perform(curl);
 }
