@@ -126,7 +126,7 @@ A URL string passed on to \fIcurl_url_set(3)\fP for the \fBCURLUPART_URL\fP
 part, must be shorter than 8000000 bytes otherwise it returns
 \fBCURLUE_MALFORMED_INPUT\fP (added in 7.65.0).
 
-If this function returns an error, no URL part is returned.
+If this function returns an error, no URL part is set.
 .SH EXAMPLE
 .nf
   CURLUcode rc;
