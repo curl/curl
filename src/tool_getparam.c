@@ -1919,7 +1919,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case 'O': /* --remote-name */
       if(subletter == 'a') { /* --remote-name-all */
-        config->default_node_flags = toggle?GETOUT_USEREMOTE:0;
+        config->default_node_flags = toggle?GETOUT_USER_REMOTE:0;
         break;
       }
       else if(subletter == 'b') { /* --output-dir */
@@ -1955,14 +1955,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* fill in the outfile */
       if('o' == letter) {
         GetStr(&url->outfile, nextarg);
-        url->flags &= ~GETOUT_USEREMOTE; /* switch off */
+        url->flags &= ~GETOUT_USER_REMOTE; /* switch off */
       }
       else {
         url->outfile = NULL; /* leave it */
         if(toggle)
-          url->flags |= GETOUT_USEREMOTE;  /* switch on */
+          url->flags |= GETOUT_USER_REMOTE;  /* switch on */
         else
-          url->flags &= ~GETOUT_USEREMOTE; /* switch off */
+          url->flags &= ~GETOUT_USER_REMOTE; /* switch off */
       }
       url->flags |= GETOUT_OUTFILE;
     }

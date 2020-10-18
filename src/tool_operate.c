@@ -1025,7 +1025,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           }
         }
 
-        if(((urlnode->flags&GETOUT_USEREMOTE) ||
+        if(((urlnode->flags&GETOUT_USER_REMOTE) ||
             (per->outfile && strcmp("-", per->outfile))) &&
            (metalink || !config->use_metalink)) {
 
@@ -1076,7 +1076,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               break;
           }
 
-          if((urlnode->flags & GETOUT_USEREMOTE)
+          if((urlnode->flags & GETOUT_USER_REMOTE)
              && config->content_disposition) {
             /* Our header callback MIGHT set the filename */
             DEBUGASSERT(!outs->filename);
@@ -1963,7 +1963,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt_flags(curl, CURLOPT_REDIR_PROTOCOLS, config->proto_redir);
 
         if(config->content_disposition
-           && (urlnode->flags & GETOUT_USEREMOTE))
+           && (urlnode->flags & GETOUT_USER_REMOTE))
           hdrcbdata->honor_cd_filename = TRUE;
         else
           hdrcbdata->honor_cd_filename = FALSE;

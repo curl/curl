@@ -107,12 +107,12 @@ struct getout {
   int            flags;     /* options - composed of GETOUT_* bits */
 };
 
-#define GETOUT_OUTFILE    (1<<0)  /* set when outfile is deemed done */
-#define GETOUT_URL        (1<<1)  /* set when URL is deemed done */
-#define GETOUT_USEREMOTE  (1<<2)  /* use remote file name locally */
-#define GETOUT_UPLOAD     (1<<3)  /* if set, -T has been used */
-#define GETOUT_NOUPLOAD   (1<<4)  /* if set, -T "" has been used */
-#define GETOUT_METALINK   (1<<5)  /* set when Metalink download */
+#define GETOUT_OUTFILE     (1<<0)  /* set when outfile is deemed done */
+#define GETOUT_URL         (1<<1)  /* set when URL is deemed done */
+#define GETOUT_USER_REMOTE (1<<2)  /* use remote file name locally */
+#define GETOUT_UPLOAD      (1<<3)  /* if set, -T has been used */
+#define GETOUT_NOUPLOAD    (1<<4)  /* if set, -T "" has been used */
+#define GETOUT_METALINK    (1<<5)  /* set when Metalink download */
 
 /*
  * 'trace' enumeration represents curl's output look'n feel possibilities.
