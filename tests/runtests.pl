@@ -837,597 +837,6 @@ sub stopserver {
 }
 
 #######################################################################
-# Verify that the server that runs on $ip, $port is our server.  This also
-# implies that we can speak with it, as there might be occasions when the
-# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
-# assign requested address")
-#
-sub verifyhttp {
-    my ($proto, $ipvnum, $idnum, $ip, $port_or_path) = @_;
-    my $server = servername_id($proto, $ipvnum, $idnum);
-    my $pid = 0;
-    my $bonus="";
-    # $port_or_path contains a path for Unix sockets, sws ignores the port
-    my $port = ($ipvnum eq "unix") ? 80 : $port_or_path;
-
-    my $verifyout = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.out';
-    unlink($verifyout) if(-f $verifyout);
-
-    my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
-    unlink($verifylog) if(-f $verifylog);
-
-    if($proto eq "gopher") {
-        # gopher is funny
-        $bonus="1/";
-    }
-
-    my $flags = "--max-time $server_response_maxtime ";
-    $flags .= "--output $verifyout ";
-    $flags .= "--silent ";
-    $flags .= "--verbose ";
-    $flags .= "--globoff ";
-    $flags .= "--unix-socket '$port_or_path' " if $ipvnum eq "unix";
-    $flags .= "--insecure " if($proto eq 'https');
-    $flags .= "\"$proto://$ip:$port/${bonus}verifiedserver\"";
-
-    my $cmd = "$VCURL $flags 2>$verifylog";
-
-    # verify if our/any server is running on this port
-    logmsg "RUN: $cmd\n" if($verbose);
-    my $res = runclient($cmd);
-
-    $res >>= 8; # rotate the result
-    if($res & 128) {
-        logmsg "RUN: curl command died with a coredump\n";
-        return -1;
-    }
-
-    if($res && $verbose) {
-        logmsg "RUN: curl command returned $res\n";
-        if(open(FILE, "<$verifylog")) {
-            while(my $string = <FILE>) {
-                logmsg "RUN: $string" if($string !~ /^([ \t]*)$/);
-            }
-            close(FILE);
-        }
-    }
-
-    my $data;
-    if(open(FILE, "<$verifyout")) {
-        while(my $string = <FILE>) {
-            $data = $string;
-            last; # only want first line
-        }
-        close(FILE);
-    }
-
-    if($data && ($data =~ /WE ROOLZ: (\d+)/)) {
-        $pid = 0+$1;
-    }
-    elsif($res == 6) {
-        # curl: (6) Couldn't resolve host '::1'
-        logmsg "RUN: failed to resolve host ($proto://$ip:$port/verifiedserver)\n";
-        return -1;
-    }
-    elsif($data || ($res && ($res != 7))) {
-        logmsg "RUN: Unknown server on our $server port: $port ($res)\n";
-        return -1;
-    }
-    return $pid;
-}
-
-#######################################################################
-# Verify that the server that runs on $ip, $port is our server.  This also
-# implies that we can speak with it, as there might be occasions when the
-# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
-# assign requested address")
-#
-sub verifyftp {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $server = servername_id($proto, $ipvnum, $idnum);
-    my $pid = 0;
-    my $time=time();
-    my $extra="";
-
-    my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
-    unlink($verifylog) if(-f $verifylog);
-
-    if($proto eq "ftps") {
-        $extra .= "--insecure --ftp-ssl-control ";
-    }
-
-    my $flags = "--max-time $server_response_maxtime ";
-    $flags .= "--silent ";
-    $flags .= "--verbose ";
-    $flags .= "--globoff ";
-    $flags .= $extra;
-    $flags .= "\"$proto://$ip:$port/verifiedserver\"";
-
-    my $cmd = "$VCURL $flags 2>$verifylog";
-
-    # check if this is our server running on this port:
-    logmsg "RUN: $cmd\n" if($verbose);
-    my @data = runclientoutput($cmd);
-
-    my $res = $? >> 8; # rotate the result
-    if($res & 128) {
-        logmsg "RUN: curl command died with a coredump\n";
-        return -1;
-    }
-
-    foreach my $line (@data) {
-        if($line =~ /WE ROOLZ: (\d+)/) {
-            # this is our test server with a known pid!
-            $pid = 0+$1;
-            last;
-        }
-    }
-    if($pid <= 0 && @data && $data[0]) {
-        # this is not a known server
-        logmsg "RUN: Unknown server on our $server port: $port\n";
-        return 0;
-    }
-    # we can/should use the time it took to verify the FTP server as a measure
-    # on how fast/slow this host/FTP is.
-    my $took = int(0.5+time()-$time);
-
-    if($verbose) {
-        logmsg "RUN: Verifying our test $server server took $took seconds\n";
-    }
-    $ftpchecktime = $took>=1?$took:1; # make sure it never is below 1
-
-    return $pid;
-}
-
-#######################################################################
-# Verify that the server that runs on $ip, $port is our server.  This also
-# implies that we can speak with it, as there might be occasions when the
-# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
-# assign requested address")
-#
-sub verifyrtsp {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $server = servername_id($proto, $ipvnum, $idnum);
-    my $pid = 0;
-
-    my $verifyout = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.out';
-    unlink($verifyout) if(-f $verifyout);
-
-    my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
-    unlink($verifylog) if(-f $verifylog);
-
-    my $flags = "--max-time $server_response_maxtime ";
-    $flags .= "--output $verifyout ";
-    $flags .= "--silent ";
-    $flags .= "--verbose ";
-    $flags .= "--globoff ";
-    # currently verification is done using http
-    $flags .= "\"http://$ip:$port/verifiedserver\"";
-
-    my $cmd = "$VCURL $flags 2>$verifylog";
-
-    # verify if our/any server is running on this port
-    logmsg "RUN: $cmd\n" if($verbose);
-    my $res = runclient($cmd);
-
-    $res >>= 8; # rotate the result
-    if($res & 128) {
-        logmsg "RUN: curl command died with a coredump\n";
-        return -1;
-    }
-
-    if($res && $verbose) {
-        logmsg "RUN: curl command returned $res\n";
-        if(open(FILE, "<$verifylog")) {
-            while(my $string = <FILE>) {
-                logmsg "RUN: $string" if($string !~ /^([ \t]*)$/);
-            }
-            close(FILE);
-        }
-    }
-
-    my $data;
-    if(open(FILE, "<$verifyout")) {
-        while(my $string = <FILE>) {
-            $data = $string;
-            last; # only want first line
-        }
-        close(FILE);
-    }
-
-    if($data && ($data =~ /RTSP_SERVER WE ROOLZ: (\d+)/)) {
-        $pid = 0+$1;
-    }
-    elsif($res == 6) {
-        # curl: (6) Couldn't resolve host '::1'
-        logmsg "RUN: failed to resolve host ($proto://$ip:$port/verifiedserver)\n";
-        return -1;
-    }
-    elsif($data || ($res != 7)) {
-        logmsg "RUN: Unknown server on our $server port: $port\n";
-        return -1;
-    }
-    return $pid;
-}
-
-#######################################################################
-# Verify that the ssh server has written out its pidfile, recovering
-# the pid from the file and returning it if a process with that pid is
-# actually alive.
-#
-sub verifyssh {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $server = servername_id($proto, $ipvnum, $idnum);
-    my $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
-    my $pid = 0;
-    if(open(FILE, "<$pidfile")) {
-        $pid=0+<FILE>;
-        close(FILE);
-    }
-    if($pid > 0) {
-        # if we have a pid it is actually our ssh server,
-        # since runsshserver() unlinks previous pidfile
-        if(!pidexists($pid)) {
-            logmsg "RUN: SSH server has died after starting up\n";
-            checkdied($pid);
-            unlink($pidfile);
-            $pid = -1;
-        }
-    }
-    return $pid;
-}
-
-#######################################################################
-# Verify that we can connect to the sftp server, properly authenticate
-# with generated config and key files and run a simple remote pwd.
-#
-sub verifysftp {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $server = servername_id($proto, $ipvnum, $idnum);
-    my $verified = 0;
-    # Find out sftp client canonical file name
-    my $sftp = find_sftp();
-    if(!$sftp) {
-        logmsg "RUN: SFTP server cannot find $sftpexe\n";
-        return -1;
-    }
-    # Find out ssh client canonical file name
-    my $ssh = find_ssh();
-    if(!$ssh) {
-        logmsg "RUN: SFTP server cannot find $sshexe\n";
-        return -1;
-    }
-    # Connect to sftp server, authenticate and run a remote pwd
-    # command using our generated configuration and key files
-    my $cmd = "\"$sftp\" -b $sftpcmds -F $sftpconfig -S \"$ssh\" $ip > $sftplog 2>&1";
-    my $res = runclient($cmd);
-    # Search for pwd command response in log file
-    if(open(SFTPLOGFILE, "<$sftplog")) {
-        while(<SFTPLOGFILE>) {
-            if(/^Remote working directory: /) {
-                $verified = 1;
-                last;
-            }
-        }
-        close(SFTPLOGFILE);
-    }
-    return $verified;
-}
-
-#######################################################################
-# Verify that the non-stunnel HTTP TLS extensions capable server that runs
-# on $ip, $port is our server.  This also implies that we can speak with it,
-# as there might be occasions when the server runs fine but we cannot talk
-# to it ("Failed to connect to ::1: Can't assign requested address")
-#
-sub verifyhttptls {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $server = servername_id($proto, $ipvnum, $idnum);
-    my $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
-    my $pid = 0;
-
-    my $verifyout = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.out';
-    unlink($verifyout) if(-f $verifyout);
-
-    my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
-    unlink($verifylog) if(-f $verifylog);
-
-    my $flags = "--max-time $server_response_maxtime ";
-    $flags .= "--output $verifyout ";
-    $flags .= "--verbose ";
-    $flags .= "--globoff ";
-    $flags .= "--insecure ";
-    $flags .= "--tlsauthtype SRP ";
-    $flags .= "--tlsuser jsmith ";
-    $flags .= "--tlspassword abc ";
-    $flags .= "\"https://$ip:$port/verifiedserver\"";
-
-    my $cmd = "$VCURL $flags 2>$verifylog";
-
-    # verify if our/any server is running on this port
-    logmsg "RUN: $cmd\n" if($verbose);
-    my $res = runclient($cmd);
-
-    $res >>= 8; # rotate the result
-    if($res & 128) {
-        logmsg "RUN: curl command died with a coredump\n";
-        return -1;
-    }
-
-    if($res && $verbose) {
-        logmsg "RUN: curl command returned $res\n";
-        if(open(FILE, "<$verifylog")) {
-            while(my $string = <FILE>) {
-                logmsg "RUN: $string" if($string !~ /^([ \t]*)$/);
-            }
-            close(FILE);
-        }
-    }
-
-    my $data;
-    if(open(FILE, "<$verifyout")) {
-        while(my $string = <FILE>) {
-            $data .= $string;
-        }
-        close(FILE);
-    }
-
-    if($data && ($data =~ /(GNUTLS|GnuTLS)/) && open(FILE, "<$pidfile")) {
-        $pid=0+<FILE>;
-        close(FILE);
-        if($pid > 0) {
-            # if we have a pid it is actually our httptls server,
-            # since runhttptlsserver() unlinks previous pidfile
-            if(!pidexists($pid)) {
-                logmsg "RUN: $server server has died after starting up\n";
-                checkdied($pid);
-                unlink($pidfile);
-                $pid = -1;
-            }
-        }
-        return $pid;
-    }
-    elsif($res == 6) {
-        # curl: (6) Couldn't resolve host '::1'
-        logmsg "RUN: failed to resolve host (https://$ip:$port/verifiedserver)\n";
-        return -1;
-    }
-    elsif($data || ($res && ($res != 7))) {
-        logmsg "RUN: Unknown server on our $server port: $port ($res)\n";
-        return -1;
-    }
-    return $pid;
-}
-
-#######################################################################
-# STUB for verifying socks
-#
-sub verifysocks {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $server = servername_id($proto, $ipvnum, $idnum);
-    my $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
-    my $pid = 0;
-    if(open(FILE, "<$pidfile")) {
-        $pid=0+<FILE>;
-        close(FILE);
-    }
-    if($pid > 0) {
-        # if we have a pid it is actually our socks server,
-        # since runsocksserver() unlinks previous pidfile
-        if(!pidexists($pid)) {
-            logmsg "RUN: SOCKS server has died after starting up\n";
-            checkdied($pid);
-            unlink($pidfile);
-            $pid = -1;
-        }
-    }
-    return $pid;
-}
-
-#######################################################################
-# Verify that the server that runs on $ip, $port is our server.  This also
-# implies that we can speak with it, as there might be occasions when the
-# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
-# assign requested address")
-#
-sub verifysmb {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $server = servername_id($proto, $ipvnum, $idnum);
-    my $pid = 0;
-    my $time=time();
-    my $extra="";
-
-    my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
-    unlink($verifylog) if(-f $verifylog);
-
-    my $flags = "--max-time $server_response_maxtime ";
-    $flags .= "--silent ";
-    $flags .= "--verbose ";
-    $flags .= "--globoff ";
-    $flags .= "-u 'curltest:curltest' ";
-    $flags .= $extra;
-    $flags .= "\"$proto://$ip:$port/SERVER/verifiedserver\"";
-
-    my $cmd = "$VCURL $flags 2>$verifylog";
-
-    # check if this is our server running on this port:
-    logmsg "RUN: $cmd\n" if($verbose);
-    my @data = runclientoutput($cmd);
-
-    my $res = $? >> 8; # rotate the result
-    if($res & 128) {
-        logmsg "RUN: curl command died with a coredump\n";
-        return -1;
-    }
-
-    foreach my $line (@data) {
-        if($line =~ /WE ROOLZ: (\d+)/) {
-            # this is our test server with a known pid!
-            $pid = 0+$1;
-            last;
-        }
-    }
-    if($pid <= 0 && @data && $data[0]) {
-        # this is not a known server
-        logmsg "RUN: Unknown server on our $server port: $port\n";
-        return 0;
-    }
-    # we can/should use the time it took to verify the server as a measure
-    # on how fast/slow this host is.
-    my $took = int(0.5+time()-$time);
-
-    if($verbose) {
-        logmsg "RUN: Verifying our test $server server took $took seconds\n";
-    }
-    $ftpchecktime = $took>=1?$took:1; # make sure it never is below 1
-
-    return $pid;
-}
-
-#######################################################################
-# Verify that the server that runs on $ip, $port is our server.  This also
-# implies that we can speak with it, as there might be occasions when the
-# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
-# assign requested address")
-#
-sub verifytelnet {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $server = servername_id($proto, $ipvnum, $idnum);
-    my $pid = 0;
-    my $time=time();
-    my $extra="";
-
-    my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
-    unlink($verifylog) if(-f $verifylog);
-
-    my $flags = "--max-time $server_response_maxtime ";
-    $flags .= "--silent ";
-    $flags .= "--verbose ";
-    $flags .= "--globoff ";
-    $flags .= "--upload-file - ";
-    $flags .= $extra;
-    $flags .= "\"$proto://$ip:$port\"";
-
-    my $cmd = "echo 'verifiedserver' | $VCURL $flags 2>$verifylog";
-
-    # check if this is our server running on this port:
-    logmsg "RUN: $cmd\n" if($verbose);
-    my @data = runclientoutput($cmd);
-
-    my $res = $? >> 8; # rotate the result
-    if($res & 128) {
-        logmsg "RUN: curl command died with a coredump\n";
-        return -1;
-    }
-
-    foreach my $line (@data) {
-        if($line =~ /WE ROOLZ: (\d+)/) {
-            # this is our test server with a known pid!
-            $pid = 0+$1;
-            last;
-        }
-    }
-    if($pid <= 0 && @data && $data[0]) {
-        # this is not a known server
-        logmsg "RUN: Unknown server on our $server port: $port\n";
-        return 0;
-    }
-    # we can/should use the time it took to verify the server as a measure
-    # on how fast/slow this host is.
-    my $took = int(0.5+time()-$time);
-
-    if($verbose) {
-        logmsg "RUN: Verifying our test $server server took $took seconds\n";
-    }
-
-    return $pid;
-}
-
-
-#######################################################################
-# Verify that the server that runs on $ip, $port is our server.
-# Retry over several seconds before giving up.  The ssh server in
-# particular can take a long time to start if it needs to generate
-# keys on a slow or loaded host.
-#
-# Just for convenience, test harness uses 'https' and 'httptls' literals
-# as values for 'proto' variable in order to differentiate different
-# servers. 'https' literal is used for stunnel based https test servers,
-# and 'httptls' is used for non-stunnel https test servers.
-#
-
-my %protofunc = ('http' => \&verifyhttp,
-                 'https' => \&verifyhttp,
-                 'rtsp' => \&verifyrtsp,
-                 'ftp' => \&verifyftp,
-                 'pop3' => \&verifyftp,
-                 'imap' => \&verifyftp,
-                 'smtp' => \&verifyftp,
-                 'ftps' => \&verifyftp,
-                 'tftp' => \&verifyftp,
-                 'ssh' => \&verifyssh,
-                 'socks' => \&verifysocks,
-                 'gopher' => \&verifyhttp,
-                 'httptls' => \&verifyhttptls,
-                 'dict' => \&verifyftp,
-                 'smb' => \&verifysmb,
-                 'telnet' => \&verifytelnet);
-
-sub verifyserver {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-
-    my $count = 30; # try for this many seconds
-    my $pid;
-
-    while($count--) {
-        my $fun = $protofunc{$proto};
-
-        $pid = &$fun($proto, $ipvnum, $idnum, $ip, $port);
-
-        if($pid > 0) {
-            last;
-        }
-        elsif($pid < 0) {
-            # a real failure, stop trying and bail out
-            return 0;
-        }
-        sleep(1);
-    }
-    return $pid;
-}
-
-#######################################################################
-# Single shot server responsiveness test. This should only be used
-# to verify that a server present in %run hash is still functional
-#
-sub responsiveserver {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $prev_verbose = $verbose;
-
-    $verbose = 0;
-    my $fun = $protofunc{$proto};
-    my $pid = &$fun($proto, $ipvnum, $idnum, $ip, $port);
-    $verbose = $prev_verbose;
-
-    if($pid > 0) {
-        return 1; # responsive
-    }
-
-    my $srvrname = servername_str($proto, $ipvnum, $idnum);
-    logmsg " server precheck FAILED (unresponsive $srvrname server)\n";
-    return 0;
-}
-
-#######################################################################
 # start the http2 server
 #
 sub runhttp2server {
@@ -1575,18 +984,6 @@ sub runhttpserver {
     if(!$port_or_path) {
         $port = $port_or_path = pidfromfile($portfile);
     }
-
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port_or_path);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$httppid $pid2");
-        displaylogs($testnumcheck);
-        $doesntrun{$pidfile} = 1;
-        return (0, 0, 0);
-    }
-    $pid2 = $pid3;
 
     if($verbose) {
         logmsg "RUN: $srvrname server is on PID $httppid port $port\n";
@@ -1816,19 +1213,6 @@ sub runpingpongserver {
 
     logmsg "PINGPONG runs on port $port ($portfile)\n" if($verbose);
 
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$ftppid $pid2");
-        displaylogs($testnumcheck);
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-
-    $pid2 = $pid3;
-
     logmsg "RUN: $srvrname server is PID $ftppid port $port\n" if($verbose);
 
     # Assign the correct port variable!
@@ -2016,18 +1400,6 @@ sub runtftpserver {
 
     my $port = pidfromfile($portfile);
 
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$tftppid $pid2");
-        displaylogs($testnumcheck);
-        $doesntrun{$pidfile} = 1;
-        return (0, 0, 0);
-    }
-    $pid2 = $pid3;
-
     if($verbose) {
         logmsg "RUN: $srvrname server on PID $tftppid port $port\n";
     }
@@ -2097,18 +1469,6 @@ sub runrtspserver {
     }
 
     my $port = pidfromfile($portfile);
-
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$rtsppid $pid2");
-        displaylogs($testnumcheck);
-        $doesntrun{$pidfile} = 1;
-        return (0, 0, 0);
-    }
-    $pid2 = $pid3;
 
     if($verbose) {
         logmsg "RUN: $srvrname server PID $rtsppid port $port\n";
@@ -2203,18 +1563,6 @@ sub runsshserver {
         $sshdlog = server_logfilename($LOGDIR, 'ssh', $ipvnum, $idnum);
         $sftplog = server_logfilename($LOGDIR, 'sftp', $ipvnum, $idnum);
 
-        if(verifysftp('sftp', $ipvnum, $idnum, $ip, $port) < 1) {
-            logmsg "RUN: SFTP server failed verification\n";
-            # failed to talk to it properly. Kill the server and return failure
-            display_sftplog();
-            display_sftpconfig();
-            display_sshdlog();
-            display_sshdconfig();
-            stopserver($server, "$sshpid $pid2");
-            $doesntrun{$pidfile} = 1;
-            $sshpid = $pid2 = 0;
-            next;
-        }
         # we're happy, no need to loop anymore!
         $doesntrun{$pidfile} = 0;
         $wport = $port;
@@ -2580,129 +1928,6 @@ sub runnegtelnetserver {
     logmsg "RUN: failed to start the $srvrname server\n" if(!$ntelpid);
 
     return ($ntelpid, $pid2, $port);
-}
-
-
-#######################################################################
-# Single shot http and gopher server responsiveness test. This should only
-# be used to verify that a server present in %run hash is still functional
-#
-sub responsive_http_server {
-    my ($proto, $verbose, $alt, $port_or_path) = @_;
-    my $ip = $HOSTIP;
-    my $ipvnum = 4;
-    my $idnum = 1;
-
-    if($alt eq "ipv6") {
-        # if IPv6, use a different setup
-        $ipvnum = 6;
-        $ip = $HOST6IP;
-    }
-    elsif($alt eq "proxy") {
-        $idnum = 2;
-    }
-    elsif($alt eq "unix") {
-        # IP (protocol) is mutually exclusive with Unix sockets
-        $ipvnum = "unix";
-    }
-
-    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port_or_path);
-}
-
-#######################################################################
-# Single shot pingpong server responsiveness test. This should only be
-# used to verify that a server present in %run hash is still functional
-#
-sub responsive_pingpong_server {
-    my ($proto, $id, $verbose, $ipv6) = @_;
-    my $port;
-    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
-    my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
-    my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
-
-    if($proto eq "ftp") {
-        $port = $FTPPORT;
-
-        if($ipvnum==6) {
-            # if IPv6, use a different setup
-            $port = $FTP6PORT;
-        }
-    }
-    elsif($proto eq "pop3") {
-        $port = ($ipvnum==6) ? $POP36PORT : $POP3PORT;
-    }
-    elsif($proto eq "imap") {
-        $port = ($ipvnum==6) ? $IMAP6PORT : $IMAPPORT;
-    }
-    elsif($proto eq "smtp") {
-        $port = ($ipvnum==6) ? $SMTP6PORT : $SMTPPORT;
-    }
-    else {
-        print STDERR "Unsupported protocol $proto!!\n";
-        return 0;
-    }
-
-    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
-}
-
-#######################################################################
-# Single shot rtsp server responsiveness test. This should only be
-# used to verify that a server present in %run hash is still functional
-#
-sub responsive_rtsp_server {
-    my ($verbose, $ipv6) = @_;
-    my $port = $RTSPPORT;
-    my $ip = $HOSTIP;
-    my $proto = 'rtsp';
-    my $ipvnum = 4;
-    my $idnum = 1;
-
-    if($ipv6) {
-        # if IPv6, use a different setup
-        $ipvnum = 6;
-        $port = $RTSP6PORT;
-        $ip = $HOST6IP;
-    }
-
-    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
-}
-
-#######################################################################
-# Single shot tftp server responsiveness test. This should only be
-# used to verify that a server present in %run hash is still functional
-#
-sub responsive_tftp_server {
-    my ($id, $verbose, $ipv6) = @_;
-    my $port = $TFTPPORT;
-    my $ip = $HOSTIP;
-    my $proto = 'tftp';
-    my $ipvnum = 4;
-    my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
-
-    if($ipv6) {
-        # if IPv6, use a different setup
-        $ipvnum = 6;
-        $port = $TFTP6PORT;
-        $ip = $HOST6IP;
-    }
-
-    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
-}
-
-#######################################################################
-# Single shot non-stunnel HTTP TLS extensions capable server
-# responsiveness test. This should only be used to verify that a
-# server present in %run hash is still functional
-#
-sub responsive_httptls_server {
-    my ($verbose, $ipv6) = @_;
-    my $proto = "httptls";
-    my $port = ($ipv6 && ($ipv6 =~ /6$/)) ? $HTTPTLS6PORT : $HTTPTLSPORT;
-    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
-    my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
-    my $idnum = 1;
-
-    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
 }
 
 #######################################################################
@@ -4580,10 +3805,6 @@ sub startservers {
            ($what eq "ftp") ||
            ($what eq "imap") ||
            ($what eq "smtp")) {
-            if($torture && $run{$what} &&
-               !responsive_pingpong_server($what, "", $verbose)) {
-                stopserver($what);
-            }
             if(!$run{$what}) {
                 ($pid, $pid2) = runpingpongserver($what, "", $verbose);
                 if($pid <= 0) {
@@ -4594,10 +3815,6 @@ sub startservers {
             }
         }
         elsif($what eq "ftp-ipv6") {
-            if($torture && $run{'ftp-ipv6'} &&
-               !responsive_pingpong_server("ftp", "", $verbose, "ipv6")) {
-                stopserver('ftp-ipv6');
-            }
             if(!$run{'ftp-ipv6'}) {
                 ($pid, $pid2) = runpingpongserver("ftp", "", $verbose, "ipv6");
                 if($pid <= 0) {
@@ -4609,10 +3826,6 @@ sub startservers {
             }
         }
         elsif($what eq "gopher") {
-            if($torture && $run{'gopher'} &&
-               !responsive_http_server("gopher", $verbose, 0, $GOPHERPORT)) {
-                stopserver('gopher');
-            }
             if(!$run{'gopher'}) {
                 ($pid, $pid2, $GOPHERPORT) =
                     runhttpserver("gopher", $verbose, 0);
@@ -4625,11 +3838,6 @@ sub startservers {
             }
         }
         elsif($what eq "gopher-ipv6") {
-            if($torture && $run{'gopher-ipv6'} &&
-               !responsive_http_server("gopher", $verbose, "ipv6",
-                                       $GOPHER6PORT)) {
-                stopserver('gopher-ipv6');
-            }
             if(!$run{'gopher-ipv6'}) {
                 ($pid, $pid2, $GOPHER6PORT) =
                     runhttpserver("gopher", $verbose, "ipv6");
@@ -4653,10 +3861,6 @@ sub startservers {
             }
         }
         elsif($what eq "http") {
-            if($torture && $run{'http'} &&
-               !responsive_http_server("http", $verbose, 0, $HTTPPORT)) {
-                stopserver('http');
-            }
             if(!$run{'http'}) {
                 ($pid, $pid2, $HTTPPORT) =
                     runhttpserver("http", $verbose, 0);
@@ -4669,11 +3873,6 @@ sub startservers {
             }
         }
         elsif($what eq "http-proxy") {
-            if($torture && $run{'http-proxy'} &&
-               !responsive_http_server("http", $verbose, "proxy",
-                                       $HTTPPROXYPORT)) {
-                stopserver('http-proxy');
-            }
             if(!$run{'http-proxy'}) {
                 ($pid, $pid2, $HTTPPROXYPORT) =
                     runhttpserver("http", $verbose, "proxy");
@@ -4686,10 +3885,6 @@ sub startservers {
             }
         }
         elsif($what eq "http-ipv6") {
-            if($torture && $run{'http-ipv6'} &&
-               !responsive_http_server("http", $verbose, "ipv6", $HTTP6PORT)) {
-                stopserver('http-ipv6');
-            }
             if(!$run{'http-ipv6'}) {
                 ($pid, $pid2, $HTTP6PORT) =
                     runhttpserver("http", $verbose, "ipv6");
@@ -4702,10 +3897,6 @@ sub startservers {
             }
         }
         elsif($what eq "rtsp") {
-            if($torture && $run{'rtsp'} &&
-               !responsive_rtsp_server($verbose)) {
-                stopserver('rtsp');
-            }
             if(!$run{'rtsp'}) {
                 ($pid, $pid2, $RTSPPORT) = runrtspserver($verbose);
                 if($pid <= 0) {
@@ -4716,10 +3907,6 @@ sub startservers {
             }
         }
         elsif($what eq "rtsp-ipv6") {
-            if($torture && $run{'rtsp-ipv6'} &&
-               !responsive_rtsp_server($verbose, "ipv6")) {
-                stopserver('rtsp-ipv6');
-            }
             if(!$run{'rtsp-ipv6'}) {
                 ($pid, $pid2, $RTSP6PORT) = runrtspserver($verbose, "ipv6");
                 if($pid <= 0) {
@@ -4738,10 +3925,6 @@ sub startservers {
             if($runcert{'ftps'} && ($runcert{'ftps'} ne $certfile)) {
                 # stop server when running and using a different cert
                 stopserver('ftps');
-            }
-            if($torture && $run{'ftp'} &&
-               !responsive_pingpong_server("ftp", "", $verbose)) {
-                stopserver('ftp');
             }
             if(!$run{'ftp'}) {
                 ($pid, $pid2) = runpingpongserver("ftp", "", $verbose);
@@ -4773,10 +3956,6 @@ sub startservers {
             if($runcert{'https'} && ($runcert{'https'} ne $certfile)) {
                 # stop server when running and using a different cert
                 stopserver('https');
-            }
-            if($torture && $run{'http'} &&
-               !responsive_http_server("http", $verbose, 0, $HTTPPORT)) {
-                stopserver('http');
             }
             if(!$run{'http'}) {
                 ($pid, $pid2, $HTTPPORT) =
@@ -4832,10 +4011,6 @@ sub startservers {
                 # for now, we can't run http TLS-EXT tests without gnutls-serv
                 return "no gnutls-serv";
             }
-            if($torture && $run{'httptls'} &&
-               !responsive_httptls_server($verbose, "IPv4")) {
-                stopserver('httptls');
-            }
             if(!$run{'httptls'}) {
                 ($pid, $pid2, $HTTPTLSPORT) =
                     runhttptlsserver($verbose, "IPv4");
@@ -4852,10 +4027,6 @@ sub startservers {
                 # for now, we can't run http TLS-EXT tests without gnutls-serv
                 return "no gnutls-serv";
             }
-            if($torture && $run{'httptls-ipv6'} &&
-               !responsive_httptls_server($verbose, "ipv6")) {
-                stopserver('httptls-ipv6');
-            }
             if(!$run{'httptls-ipv6'}) {
                 ($pid, $pid2, $HTTPTLS6PORT) =
                     runhttptlsserver($verbose, "ipv6");
@@ -4868,10 +4039,6 @@ sub startservers {
             }
         }
         elsif($what eq "tftp") {
-            if($torture && $run{'tftp'} &&
-               !responsive_tftp_server("", $verbose)) {
-                stopserver('tftp');
-            }
             if(!$run{'tftp'}) {
                 ($pid, $pid2, $TFTPPORT) =
                     runtftpserver("", $verbose);
@@ -4883,10 +4050,6 @@ sub startservers {
             }
         }
         elsif($what eq "tftp-ipv6") {
-            if($torture && $run{'tftp-ipv6'} &&
-               !responsive_tftp_server("", $verbose, "ipv6")) {
-                stopserver('tftp-ipv6');
-            }
             if(!$run{'tftp-ipv6'}) {
                 ($pid, $pid2, $TFTP6PORT) =
                     runtftpserver("", $verbose, "ipv6");
@@ -4928,10 +4091,6 @@ sub startservers {
             }
         }
         elsif($what eq "http-unix") {
-            if($torture && $run{'http-unix'} &&
-               !responsive_http_server("http", $verbose, "unix", $HTTPUNIXPATH)) {
-                stopserver('http-unix');
-            }
             if(!$run{'http-unix'}) {
                 my $unused;
                 ($pid, $pid2, $unused) =
