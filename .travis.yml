@@ -59,6 +59,8 @@ jobs:
         - *common_packages
         - krb5-user
         - libssh2-1-dev
+        - libbrotli-dev
+        - libzstd-dev
   - env:
     - T=normal C=--with-libssh
     # Avoid bionic, its pre-release libssh version triggers deprecation warnings.

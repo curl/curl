@@ -1,4 +1,36 @@
 {
+   zstd_decompression-1.3.3-on-Ubuntu-18.04
+   Memcheck:Cond
+   fun:ZSTD_decompressStream
+   fun:zstd_unencode_write
+   fun:Curl_unencode_write
+   fun:readwrite_data
+   fun:Curl_readwrite
+   fun:multi_runsingle
+   fun:curl_multi_perform
+   fun:easy_transfer
+   fun:easy_perform
+   fun:curl_easy_perform
+   fun:serial_transfers
+   fun:run_all_transfers
+   fun:operate
+   fun:main
+}
+
+{
+   zstd_decompression-1.3.3-on-Ubuntu-18.04-nondebug
+   Memcheck:Cond
+   fun:ZSTD_decompressStream
+   fun:zstd_unencode_write
+   fun:Curl_readwrite
+   fun:multi_runsingle
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:operate
+   fun:main
+}
+
+{
    libidn-idna_to_ascii-error
    Memcheck:Addr4
    fun:idna_to_ascii_4z
