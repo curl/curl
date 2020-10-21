@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -47,15 +47,16 @@ int test(char *URL)
   FILE *sdpf = NULL;
   struct_stat file_info;
   char *stream_uri = NULL;
-  int request=1;
-  struct curl_slist *custom_headers=NULL;
+  int request = 1;
+  struct curl_slist *custom_headers = NULL;
 
-  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if ((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -66,7 +67,8 @@ int test(char *URL)
 
   test_setopt(curl, CURLOPT_URL, URL);
 
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -100,7 +102,8 @@ int test(char *URL)
   sdpf = NULL;
 
   /* Make sure we can do a normal request now */
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -115,7 +118,8 @@ int test(char *URL)
 
   /* Now do a POST style one */
 
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -131,7 +135,8 @@ int test(char *URL)
   }
   test_setopt(curl, CURLOPT_RTSPHEADER, custom_headers);
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_ANNOUNCE);
-  test_setopt(curl, CURLOPT_POSTFIELDS, "postyfield=postystuff&project=curl\n");
+  test_setopt(curl, CURLOPT_POSTFIELDS,
+              "postyfield=postystuff&project=curl\n");
 
   res = curl_easy_perform(curl);
   if(res)
@@ -143,7 +148,8 @@ int test(char *URL)
   custom_headers = NULL;
 
   /* Make sure we can do a normal request now */
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -169,4 +175,3 @@ test_cleanup:
 
   return res;
 }
-

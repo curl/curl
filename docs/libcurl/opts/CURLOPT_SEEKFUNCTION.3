@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -45,7 +45,7 @@ input stream and can be used to fast forward a file in a resumed upload
 (instead of reading all uploaded bytes with the normal read
 function/callback). It is also called to rewind a stream when data has already
 been sent to the server and needs to be sent again. This may happen when doing
-a HTTP PUT or POST with a multi-pass authentication method, or when an
+an HTTP PUT or POST with a multi-pass authentication method, or when an
 existing HTTP connection is reused too late and the server closes the
 connection. The function shall work like fseek(3) or lseek(3) and it gets
 SEEK_SET, SEEK_CUR or SEEK_END as argument for \fIorigin\fP, although libcurl
@@ -67,7 +67,20 @@ By default, this is NULL and unused.
 .SH PROTOCOLS
 HTTP, FTP, SFTP
 .SH EXAMPLE
-TODO
+.nf
+static int seek_cb(void *userp, curl_off_t offset, int origin)
+{
+  struct data *d = (struct data *)userp;
+  lseek(our_fd, offset, origin);
+  return CURL_SEEKFUNC_OK;
+}
+
+{
+  struct data seek_data;
+  curl_easy_setopt(CURL *handle, CURLOPT_SEEKFUNCTION, seek_cb);
+  curl_easy_setopt(CURL *handle, CURLOPT_SEEKDATA, &seek_data);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.18.0
 .SH RETURN VALUE

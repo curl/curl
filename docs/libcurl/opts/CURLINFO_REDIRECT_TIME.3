@@ -1,15 +1,15 @@
-!.\" **************************************************************************
+.\" **************************************************************************
 .\" *                                  _   _ ____  _
 .\" *  Project                     ___| | | |  _ \| |
 .\" *                             / __| | | | |_) | |
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -37,10 +37,25 @@ See also the TIMES overview in the \fIcurl_easy_getinfo(3)\fP man page.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-TODO
+.nf
+curl = curl_easy_init();
+if(curl) {
+  double redirect;
+  curl_easy_setopt(curl, CURLOPT_URL, url);
+  res = curl_easy_perform(curl);
+  if(CURLE_OK == res) {
+    res = curl_easy_getinfo(curl, CURLINFO_REDIRECT_TIME, &redirect);
+    if(CURLE_OK == res) {
+      printf("Time: %.1f", redirect);
+    }
+  }
+  /* always cleanup */
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.9.7
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "
+.BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), " CURLINFO_REDIRECT_TIME_T "(3)"

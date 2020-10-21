@@ -1,0 +1,56 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLMOPT_MAX_CONCURRENT_STREAMS 3 "06 Nov 2019" "libcurl 7.67.0" "curl_multi_setopt options"
+.SH NAME
+CURLMOPT_MAX_CONCURRENT_STREAMS \- set max concurrent streams for http2
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_CONCURRENT_STREAMS,
+                            long max);
+.fi
+.SH DESCRIPTION
+Pass a long indicating the \fBmax\fP. The set number will be used as the
+maximum number of concurrent streams for a connections that libcurl should
+support on connections done using HTTP/2.
+
+Valid values range from 1 to 2147483647 (2^31 - 1) and defaults to 100.  The
+value passed here would be honoured based on other system resources
+properties.
+.SH DEFAULT
+100
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+  CURLM *m = curl_multi_init();
+  /* max concurrent streams 200 */
+  curl_multi_setopt(m, CURLMOPT_MAX_CONCURRENT_STREAMS, 200L);
+.fi
+.SH AVAILABILITY
+Added in 7.67.0
+.SH RETURN VALUE
+Returns CURLM_OK if the option is supported, and CURLM_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_MAXCONNECTS "(3), " CURLMOPT_MAXCONNECTS "(3), "

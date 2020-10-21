@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,48 +26,37 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-
 #include <curl/curl.h>
 
-#if defined(_MSC_VER) && (_MSC_VER < 1300)
-#  error _snscanf requires MSVC 7.0 or later.
-#endif
-
-/* The MinGW headers are missing a few Win32 function definitions,
-   you shouldn't need this if you use VC++ */
-#if defined(__MINGW32__) && !defined(__MINGW64__)
-int __cdecl _snscanf(const char * input, size_t length, const char * format, ...);
-#endif
-
-
 /* parse headers for Content-Length */
-size_t getcontentlengthfunc(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t getcontentlengthfunc(void *ptr, size_t size, size_t nmemb,
+                                   void *stream)
 {
   int r;
   long len = 0;
 
-  /* _snscanf() is Win32 specific */
-  r = _snscanf(ptr, size * nmemb, "Content-Length: %ld\n", &len);
-
-  if (r) /* Microsoft: we don't read the specs */
+  r = sscanf(ptr, "Content-Length: %ld\n", &len);
+  if(r)
     *((long *) stream) = len;
 
   return size * nmemb;
 }
 
 /* discard downloaded data */
-size_t discardfunc(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t discardfunc(void *ptr, size_t size, size_t nmemb, void *stream)
 {
+  (void)ptr;
+  (void)stream;
   return size * nmemb;
 }
 
 /* read data to upload */
-size_t readfunc(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t readfunc(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   FILE *f = stream;
   size_t n;
 
-  if (ferror(f))
+  if(ferror(f))
     return CURL_READFUNC_ABORT;
 
   n = fread(ptr, size, nmemb, f) * size;
@@ -76,8 +65,8 @@ size_t readfunc(void *ptr, size_t size, size_t nmemb, void *stream)
 }
 
 
-int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
-           long timeout, long tries)
+static int upload(CURL *curlhandle, const char *remotepath,
+                  const char *localpath, long timeout, long tries)
 {
   FILE *f;
   long uploaded_len = 0;
@@ -85,7 +74,7 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
   int c;
 
   f = fopen(localpath, "rb");
-  if (f == NULL) {
+  if(!f) {
     perror(NULL);
     return 0;
   }
@@ -94,7 +83,7 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
 
   curl_easy_setopt(curlhandle, CURLOPT_URL, remotepath);
 
-  if (timeout)
+  if(timeout)
     curl_easy_setopt(curlhandle, CURLOPT_FTP_RESPONSE_TIMEOUT, timeout);
 
   curl_easy_setopt(curlhandle, CURLOPT_HEADERFUNCTION, getcontentlengthfunc);
@@ -105,14 +94,15 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
   curl_easy_setopt(curlhandle, CURLOPT_READFUNCTION, readfunc);
   curl_easy_setopt(curlhandle, CURLOPT_READDATA, f);
 
-  curl_easy_setopt(curlhandle, CURLOPT_FTPPORT, "-"); /* disable passive mode */
+  /* disable passive mode */
+  curl_easy_setopt(curlhandle, CURLOPT_FTPPORT, "-");
   curl_easy_setopt(curlhandle, CURLOPT_FTP_CREATE_MISSING_DIRS, 1L);
 
   curl_easy_setopt(curlhandle, CURLOPT_VERBOSE, 1L);
 
-  for (c = 0; (r != CURLE_OK) && (c < tries); c++) {
+  for(c = 0; (r != CURLE_OK) && (c < tries); c++) {
     /* are we resuming? */
-    if (c) { /* yes */
+    if(c) { /* yes */
       /* determine the length of the file already written */
 
       /*
@@ -127,7 +117,7 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
       curl_easy_setopt(curlhandle, CURLOPT_HEADER, 1L);
 
       r = curl_easy_perform(curlhandle);
-      if (r != CURLE_OK)
+      if(r != CURLE_OK)
         continue;
 
       curl_easy_setopt(curlhandle, CURLOPT_NOBODY, 0L);
@@ -146,7 +136,7 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
 
   fclose(f);
 
-  if (r == CURLE_OK)
+  if(r == CURLE_OK)
     return 1;
   else {
     fprintf(stderr, "%s\n", curl_easy_strerror(r));
@@ -154,14 +144,15 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
   }
 }
 
-int main(int c, char **argv)
+int main(void)
 {
   CURL *curlhandle = NULL;
 
   curl_global_init(CURL_GLOBAL_ALL);
   curlhandle = curl_easy_init();
 
-  upload(curlhandle, "ftp://user:pass@example.com/path/file", "C:\\file", 0, 3);
+  upload(curlhandle, "ftp://user:pass@example.com/path/file", "C:\\file",
+         0, 3);
 
   curl_easy_cleanup(curlhandle);
   curl_global_cleanup();

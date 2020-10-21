@@ -1,0 +1,64 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SASL_AUTHZID 3 "11 Sep 2019" "libcurl 7.66.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SASL_AUTHZID \- authorisation identity (identity to act as)
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SASL_AUTHZID, char *authzid);
+.SH DESCRIPTION
+Pass a char * as parameter, which should be pointing to the null-terminated
+authorisation identity (authzid) for the transfer. Only applicable to the PLAIN
+SASL authentication mechanism where it is optional.
+
+When not specified only the authentication identity (authcid) as specified by
+the username will be sent to the server, along with the password. The server
+will derive a authzid from the authcid when not provided, which it will then
+uses internally.
+
+When the authzid is specified, the use of which is server dependent, it can be
+used to access another user's inbox, that the user has been granted access to,
+or a shared mailbox for example.
+.SH DEFAULT
+blank
+.SH PROTOCOLS
+IMAP, POP3 and SMTP
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "imap://example.com/");
+  curl_easy_setopt(curl, CURLOPT_USERNAME, "Kurt");
+  curl_easy_setopt(curl, CURLOPT_PASSWORD, "xipj3plmq");
+  curl_easy_setopt(curl, CURLOPT_SASL_AUTHZID, "Ursel");
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.66.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_USERNAME "(3), " CURLOPT_PASSWORD "(3), ".BR CURLOPT_USERPWD "(3)"

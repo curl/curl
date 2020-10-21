@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,15 +28,26 @@ CURLOPT_PROXYTYPE \- proxy protocol type
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXYTYPE, long type);
 .SH DESCRIPTION
-Pass a long with this option to set type of the proxy. Available options for
-this are \fICURLPROXY_HTTP\fP, \fICURLPROXY_HTTP_1_0\fP
-\fICURLPROXY_SOCKS4\fP, \fICURLPROXY_SOCKS5\fP, \fICURLPROXY_SOCKS4A\fP and
-\fICURLPROXY_SOCKS5_HOSTNAME\fP. The HTTP type is default.
+Pass one of the values below to set the type of the proxy.
 
-If you set \fBCURLOPT_PROXYTYPE(3)\fP to \fICURLPROXY_HTTP_1_0\fP, it will
-only affect how libcurl speaks to a proxy when CONNECT is used. The HTTP
-version used for "regular" HTTP requests is instead controlled with
-\fICURLOPT_HTTP_VERSION(3)\fP.
+.RS
+.IP CURLPROXY_HTTP
+HTTP Proxy. Default.
+.IP CURLPROXY_HTTPS
+HTTPS Proxy. (Added in 7.52.0 for OpenSSL, GnuTLS and NSS)
+.IP CURLPROXY_HTTP_1_0
+HTTP 1.0 Proxy. This is very similar to CURLPROXY_HTTP except it uses HTTP/1.0
+for any CONNECT tunnelling. It does not change the HTTP version of the actual
+HTTP requests, controlled by \fICURLOPT_HTTP_VERSION(3)\fP.
+.IP CURLPROXY_SOCKS4
+SOCKS4 Proxy.
+.IP CURLPROXY_SOCKS4A
+SOCKS4a Proxy. Proxy resolves URL hostname.
+.IP CURLPROXY_SOCKS5
+SOCKS5 Proxy.
+.IP CURLPROXY_SOCKS5_HOSTNAME
+SOCKS5 Proxy. Proxy resolves URL hostname.
+.RE
 
 Often it is more convenient to specify the proxy type with the scheme part of
 the \fICURLOPT_PROXY(3)\fP string.
@@ -45,7 +56,18 @@ CURLPROXY_HTTP
 .SH PROTOCOLS
 Most
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode ret;
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  curl_easy_setopt(curl, CURLOPT_PROXY, "local.example.com:1080");
+  /* set the proxy type */
+  curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Always
 .SH RETURN VALUE

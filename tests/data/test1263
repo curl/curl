@@ -1,0 +1,37 @@
+<testcase>
+# similar to test 1260
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+http
+</features>
+ <name>
+HTTP URL with rubbish after IPv6 bracket
+ </name>
+ <command>
+-g "http://[%HOSTIP]test:%NOLISTENPORT/we/want/1263" "http://[%HOSTIP][%HOSTIP]:%NOLISTENPORT/we/want/1263" "http://user@[::1]@localhost"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# CURLE_URL_MALFORMAT == 3
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

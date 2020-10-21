@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -31,9 +31,16 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAX_SEND_SPEED_LARGE,
                           curl_off_t maxspeed);
 .SH DESCRIPTION
 Pass a curl_off_t as parameter with the \fImaxspeed\fP.  If an upload exceeds
-this speed (counted in bytes per second) on cumulative average during the
-transfer, the transfer will pause to keep the average rate less than or equal
-to the parameter value.  Defaults to unlimited speed.
+this speed (counted in bytes per second) the transfer will pause to keep the
+speed less than or equal to the parameter value.  Defaults to unlimited
+speed.
+
+This is not an exact science. libcurl attempts to keep the average speed below
+the given threshold over a period time.
+
+If you set \fImaxspeed\fP to a value lower than
+\fICURLOPT_UPLOAD_BUFFERSIZE(3)\fP, libcurl might "shoot over" the limit on
+its first send and still send off a full buffer.
 
 This option doesn't affect transfer speeds done with FILE:// URLs.
 .SH DEFAULT
@@ -41,7 +48,17 @@ This option doesn't affect transfer speeds done with FILE:// URLs.
 .SH PROTOCOLS
 All except file://
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode ret;
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  /* cap the upload speed to 1000 bytes/sec */
+  curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, (curl_off_t)1000);
+  /* (set some upload options as well!) */
+  ret = curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.15.5
 .SH RETURN VALUE

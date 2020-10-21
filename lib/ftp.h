@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,7 +31,6 @@ extern const struct Curl_handler Curl_handler_ftp;
 extern const struct Curl_handler Curl_handler_ftps;
 #endif
 
-CURLcode Curl_ftpsendf(struct connectdata *, const char *fmt, ...);
 CURLcode Curl_GetFTPResponse(ssize_t *nread, struct connectdata *conn,
                              int *ftpcode);
 #endif /* CURL_DISABLE_FTP */
@@ -81,7 +80,7 @@ typedef enum {
 
 struct ftp_parselist_data; /* defined later in ftplistparser.c */
 
-struct ftp_wc_tmpdata {
+struct ftp_wc {
   struct ftp_parselist_data *parser;
 
   struct {
@@ -97,14 +96,13 @@ typedef enum {
                             file */
 } curl_ftpfile;
 
-/* This FTP struct is used in the SessionHandle. All FTP data that is
+/* This FTP struct is used in the Curl_easy. All FTP data that is
    connection-oriented must be in FTP_conn to properly deal with the fact that
-   perhaps the SessionHandle is changed between the times the connection is
+   perhaps the Curl_easy is changed between the times the connection is
    used. */
 struct FTP {
-  curl_off_t *bytecountp;
-  char *user;    /* user name string */
-  char *passwd;  /* password string */
+  char *path;    /* points to the urlpieces struct field */
+  char *pathalloc; /* if non-NULL a pointer to an allocated path */
 
   /* transfer a file/body or not, done as a typedefed enum just to make
      debuggers display the full symbol and not just the numerical value */
@@ -120,8 +118,7 @@ struct ftp_conn {
   char *entrypath; /* the PWD reply when we logged on */
   char **dirs;   /* realloc()ed array for path components */
   int dirdepth;  /* number of entries used in the 'dirs' array */
-  int diralloc;  /* number of entries allocated for the 'dirs' array */
-  char *file;    /* decoded file */
+  char *file;    /* url-decoded file name (or path) */
   bool dont_check;  /* Set to TRUE to prevent the final (post-transfer)
                        file size and 226/250 status check. It should still
                        read the line, just ignore the result. */
@@ -130,10 +127,11 @@ struct ftp_conn {
                        should be FALSE when it gets to Curl_ftp_quit() */
   bool cwddone;     /* if it has been determined that the proper CWD combo
                        already has been done */
+  int cwdcount;     /* number of CWD commands issued */
   bool cwdfail;     /* set TRUE if a CWD command fails, as then we must prevent
                        caching the current directory */
   bool wait_data_conn; /* this is set TRUE if data connection is waited */
-  char *prevpath;   /* conn->path from the previous transfer */
+  char *prevpath;   /* url-decoded conn->path from the previous transfer */
   char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
                         and others (A/I or zero) */
   int count1; /* general purpose counter for the state machine */
@@ -143,7 +141,7 @@ struct ftp_conn {
   ftpstate state_saved; /* transfer type saved to be reloaded after
                            data connection is established */
   curl_off_t retr_size_saved; /* Size of retrieved file saved */
-  char * server_os;     /* The target server operating system. */
+  char *server_os;     /* The target server operating system. */
   curl_off_t known_filesize; /* file size is different from -1, if wildcard
                                 LIST parsing was done and wc_statemach set
                                 it */
@@ -151,7 +149,6 @@ struct ftp_conn {
      connection to */
   char *newhost;          /* this is the pair to connect the DATA... */
   unsigned short newport; /* connection to */
-
 };
 
 #define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */

@@ -1,0 +1,81 @@
+<testcase>
+#
+# This test is crafted to reproduce oss-fuzz bug
+# https://crbug.com/oss-fuzz/17954
+#
+<info>
+<keywords>
+HTTP
+HTTP GET
+followlocation
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 302 OK
+Location: http://example.net/there/it/is/../../tes t case=/6630002? yes no
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 0
+
+</data>
+<data2>
+HTTP/1.1 200 OK
+Location: this should be ignored
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 5
+
+body
+</data2>
+<datacheck>
+HTTP/1.1 302 OK
+Location: http://example.net/there/it/is/../../tes t case=/6630002? yes no
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 0
+
+HTTP/1.1 200 OK
+Location: this should be ignored
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 5
+
+body
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP redirect with dotdots and whitespaces in absolute Location: URL
+ </name>
+ <command>
+http://example.com/please/../gimme/663?foobar#hello -L -x http://%HOSTIP:%HTTPPORT
+</command>
+<features>
+proxy
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET http://example.com/gimme/663?foobar HTTP/1.1
+Host: example.com
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://example.net/there/tes%20t%20case=/6630002?+yes+no HTTP/1.1
+Host: example.net
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

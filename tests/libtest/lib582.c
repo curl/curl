@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -44,16 +44,16 @@ struct ReadWriteSockets
 /**
  * Remove a file descriptor from a sockets array.
  */
-static void removeFd(struct Sockets* sockets, curl_socket_t fd, int mention)
+static void removeFd(struct Sockets *sockets, curl_socket_t fd, int mention)
 {
   int i;
 
   if(mention)
     fprintf(stderr, "Remove socket fd %d\n", (int) fd);
 
-  for (i = 0; i < sockets->count; ++i) {
-    if (sockets->sockets[i] == fd) {
-      if (i < sockets->count - 1)
+  for(i = 0; i < sockets->count; ++i) {
+    if(sockets->sockets[i] == fd) {
+      if(i < sockets->count - 1)
         memmove(&sockets->sockets[i], &sockets->sockets[i + 1],
               sizeof(curl_socket_t) * (sockets->count - (i + 1)));
       --sockets->count;
@@ -64,7 +64,7 @@ static void removeFd(struct Sockets* sockets, curl_socket_t fd, int mention)
 /**
  * Add a file descriptor to a sockets array.
  */
-static void addFd(struct Sockets* sockets, curl_socket_t fd, const char *what)
+static void addFd(struct Sockets *sockets, curl_socket_t fd, const char *what)
 {
   /**
    * To ensure we only have each file descriptor once, we remove it then add
@@ -105,15 +105,15 @@ static void addFd(struct Sockets* sockets, curl_socket_t fd, const char *what)
 static int curlSocketCallback(CURL *easy, curl_socket_t s, int action,
                               void *userp, void *socketp)
 {
-  struct ReadWriteSockets* sockets = userp;
+  struct ReadWriteSockets *sockets = userp;
 
   (void)easy; /* unused */
   (void)socketp; /* unused */
 
-  if (action == CURL_POLL_IN || action == CURL_POLL_INOUT)
+  if(action == CURL_POLL_IN || action == CURL_POLL_INOUT)
     addFd(&sockets->read, s, "read");
 
-  if (action == CURL_POLL_OUT || action == CURL_POLL_INOUT)
+  if(action == CURL_POLL_OUT || action == CURL_POLL_INOUT)
     addFd(&sockets->write, s, "write");
 
   if(action == CURL_POLL_REMOVE) {
@@ -129,10 +129,10 @@ static int curlSocketCallback(CURL *easy, curl_socket_t s, int action,
  */
 static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 {
-  struct timeval* timeout = userp;
+  struct timeval *timeout = userp;
 
   (void)multi; /* unused */
-  if (timeout_ms != -1) {
+  if(timeout_ms != -1) {
     *timeout = tutil_tvnow();
     timeout->tv_usec += timeout_ms * 1000;
   }
@@ -145,16 +145,16 @@ static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 /**
  * Check for curl completion.
  */
-static int checkForCompletion(CURLM* curl, int* success)
+static int checkForCompletion(CURLM *curl, int *success)
 {
   int numMessages;
-  CURLMsg* message;
+  CURLMsg *message;
   int result = 0;
   *success = 0;
-  while ((message = curl_multi_info_read(curl, &numMessages)) != NULL) {
-    if (message->msg == CURLMSG_DONE) {
+  while((message = curl_multi_info_read(curl, &numMessages)) != NULL) {
+    if(message->msg == CURLMSG_DONE) {
       result = 1;
-      if (message->data.result == CURLE_OK)
+      if(message->data.result == CURLE_OK)
         *success = 1;
       else
         *success = 0;
@@ -169,14 +169,14 @@ static int checkForCompletion(CURLM* curl, int* success)
   return result;
 }
 
-static int getMicroSecondTimeout(struct timeval* timeout)
+static int getMicroSecondTimeout(struct timeval *timeout)
 {
   struct timeval now;
   ssize_t result;
   now = tutil_tvnow();
-  result = (timeout->tv_sec - now.tv_sec) * 1000000 +
-    timeout->tv_usec - now.tv_usec;
-  if (result < 0)
+  result = (ssize_t)((timeout->tv_sec - now.tv_sec) * 1000000 +
+    timeout->tv_usec - now.tv_usec);
+  if(result < 0)
     result = 0;
 
   return curlx_sztosi(result);
@@ -185,13 +185,13 @@ static int getMicroSecondTimeout(struct timeval* timeout)
 /**
  * Update a fd_set with all of the sockets in use.
  */
-static void updateFdSet(struct Sockets* sockets, fd_set* fdset,
+static void updateFdSet(struct Sockets *sockets, fd_set* fdset,
                         curl_socket_t *maxFd)
 {
   int i;
-  for (i = 0; i < sockets->count; ++i) {
+  for(i = 0; i < sockets->count; ++i) {
     FD_SET(sockets->sockets[i], fdset);
-    if (*maxFd < sockets->sockets[i] + 1) {
+    if(*maxFd < sockets->sockets[i] + 1) {
       *maxFd = sockets->sockets[i] + 1;
     }
   }
@@ -202,7 +202,7 @@ static void notifyCurl(CURLM *curl, curl_socket_t s, int evBitmask,
 {
   int numhandles = 0;
   CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
-  if (result != CURLM_OK) {
+  if(result != CURLM_OK) {
     fprintf(stderr, "Curl error on %s: %i (%s)\n",
             info, result, curl_multi_strerror(result));
   }
@@ -215,8 +215,8 @@ static void checkFdSet(CURLM *curl, struct Sockets *sockets, fd_set *fdset,
                        int evBitmask, const char *name)
 {
   int i;
-  for (i = 0; i < sockets->count; ++i) {
-    if (FD_ISSET(sockets->sockets[i], fdset)) {
+  for(i = 0; i < sockets->count; ++i) {
+    if(FD_ISSET(sockets->sockets[i], fdset)) {
       notifyCurl(curl, sockets->sockets[i], evBitmask, name);
     }
   }
@@ -227,8 +227,7 @@ int test(char *URL)
   int res = 0;
   CURL *curl = NULL;
   FILE *hd_src = NULL;
-  int hd ;
-  int error;
+  int hd;
   struct_stat file_info;
   CURLM *m = NULL;
   struct ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
@@ -237,16 +236,15 @@ int test(char *URL)
 
   start_test_timing();
 
-  if (!libtest_arg3) {
+  if(!libtest_arg3) {
     fprintf(stderr, "Usage: lib582 [url] [filename] [username]\n");
     return TEST_ERR_USAGE;
   }
 
   hd_src = fopen(libtest_arg2, "rb");
   if(NULL == hd_src) {
-    error = ERRNO;
     fprintf(stderr, "fopen() failed with error: %d (%s)\n",
-            error, strerror(error));
+            errno, strerror(errno));
     fprintf(stderr, "Error opening file: (%s)\n", libtest_arg2);
     return TEST_ERR_FOPEN;
   }
@@ -255,9 +253,8 @@ int test(char *URL)
   hd = fstat(fileno(hd_src), &file_info);
   if(hd == -1) {
     /* can't open file, bail out */
-    error = ERRNO;
     fprintf(stderr, "fstat() failed with error: %d (%s)\n",
-            error, strerror(error));
+            errno, strerror(errno));
     fprintf(stderr, "ERROR: cannot open file (%s)\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_FSTAT;
@@ -276,7 +273,7 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
   /* specify target */
-  easy_setopt(curl,CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   /* go verbose */
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -287,6 +284,7 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_USERPWD, libtest_arg3);
   easy_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, "curl_client_key.pub");
   easy_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, "curl_client_key");
+  easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
   easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
 
@@ -300,8 +298,7 @@ int test(char *URL)
 
   multi_add_handle(m, curl);
 
-  while (!checkForCompletion(m, &success))
-  {
+  while(!checkForCompletion(m, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
     struct timeval tv = {10, 0};
@@ -311,26 +308,23 @@ int test(char *URL)
     updateFdSet(&sockets.read, &readSet, &maxFd);
     updateFdSet(&sockets.write, &writeSet, &maxFd);
 
-    if (timeout.tv_sec != -1)
-    {
+    if(timeout.tv_sec != -1) {
       int usTimeout = getMicroSecondTimeout(&timeout);
       tv.tv_sec = usTimeout / 1000000;
       tv.tv_usec = usTimeout % 1000000;
     }
-    else if (maxFd <= 0)
-    {
+    else if(maxFd <= 0) {
       tv.tv_sec = 0;
       tv.tv_usec = 100000;
     }
 
-    select_test(maxFd, &readSet, &writeSet, NULL, &tv);
+    select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
     checkFdSet(m, &sockets.read, &readSet, CURL_CSELECT_IN, "read");
     checkFdSet(m, &sockets.write, &writeSet, CURL_CSELECT_OUT, "write");
 
-    if (timeout.tv_sec != -1 && getMicroSecondTimeout(&timeout) == 0)
-    {
+    if(timeout.tv_sec != -1 && getMicroSecondTimeout(&timeout) == 0) {
       /* Curl's timer has elapsed. */
       notifyCurl(m, CURL_SOCKET_TIMEOUT, 0, "timeout");
     }
@@ -338,8 +332,7 @@ int test(char *URL)
     abort_on_test_timeout();
   }
 
-  if (!success)
-  {
+  if(!success) {
     fprintf(stderr, "Error uploading file.\n");
     res = TEST_ERR_MAJOR_BAD;
   }

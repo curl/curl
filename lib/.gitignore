@@ -4,9 +4,6 @@
 *.orig
 *.rej
 *.res
-Makefile.vc10.dist
-Makefile.vc8.dist
-Makefile.vc9.dist
 TAGS
 curl_config.h
 curl_config.h.in

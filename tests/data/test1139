@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+symbols-in-versions
+documentation
+--manual
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+
+<name>
+Verify that all libcurl options have man pages
+</name>
+
+<command type="perl">
+%SRCDIR/manpage-scan.pl %SRCDIR/.. %PWD/..
+</command>
+</client>
+
+<verify>
+<stderr>
+0
+</stderr>
+</verify>
+
+</testcase>

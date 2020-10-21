@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,7 +25,29 @@
 
 #if defined(MSDOS) || defined(WIN32)
 
-char *sanitize_dos_name(char *file_name);
+#define SANITIZE_ALLOW_COLONS    (1<<0)  /* Allow colons */
+#define SANITIZE_ALLOW_PATH      (1<<1)  /* Allow path separators and colons */
+#define SANITIZE_ALLOW_RESERVED  (1<<2)  /* Allow reserved device names */
+#define SANITIZE_ALLOW_TRUNCATE  (1<<3)  /* Allow truncating a long filename */
+
+typedef enum {
+  SANITIZE_ERR_OK = 0,           /* 0 - OK */
+  SANITIZE_ERR_INVALID_PATH,     /* 1 - the path is invalid */
+  SANITIZE_ERR_BAD_ARGUMENT,     /* 2 - bad function parameter */
+  SANITIZE_ERR_OUT_OF_MEMORY,    /* 3 - out of memory */
+  SANITIZE_ERR_LAST /* never use! */
+} SANITIZEcode;
+
+SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
+                                int flags);
+#ifdef UNITTESTS
+SANITIZEcode truncate_dryrun(const char *path, const size_t truncate_pos);
+SANITIZEcode msdosify(char **const sanitized, const char *file_name,
+                      int flags);
+SANITIZEcode rename_if_reserved_dos_device_name(char **const sanitized,
+                                                const char *file_name,
+                                                int flags);
+#endif /* UNITTESTS */
 
 #if defined(MSDOS) && (defined(__DJGPP__) || defined(__GO32__))
 
@@ -36,11 +58,13 @@ char **__crt0_glob_function(char *arg);
 #ifdef WIN32
 
 CURLcode FindWin32CACert(struct OperationConfig *config,
-                         const char *bundle_file);
+                         curl_sslbackend backend,
+                         const TCHAR *bundle_file);
+struct curl_slist *GetLoadedModulePaths(void);
+CURLcode win32_init(void);
 
 #endif /* WIN32 */
 
 #endif /* MSDOS || WIN32 */
 
 #endif /* HEADER_CURL_TOOL_DOSWIN_H */
-

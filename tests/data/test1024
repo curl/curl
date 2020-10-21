@@ -81,20 +81,20 @@ http://%HOSTIP:%HTTPPORT/want/1024 -L -c log/jar1024
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /want/1024 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /data/10240002.txt HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /want/10240003.txt HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: firstcookie=want
 

@@ -1,0 +1,38 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+--fail-early
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+--fail-early
+ </name>
+ <command>
+--fail-early h1234://%HOSTIP:%HTTPPORT/1247 http://%HOSTIP:%HTTPPORT/1247
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# Protocol "h1234" not supported or disabled in libcurl
+<errorcode>
+1
+</errorcode>
+</verify>
+</testcase>

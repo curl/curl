@@ -6,7 +6,6 @@ FTP
 PASV
 RETR
 SOCKS5
-all_proxy
 </keywords>
 </info>
 #

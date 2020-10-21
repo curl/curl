@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+CURLOPT_RESOLVE
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+CURLOPT_RESOLVE parsing
+ </name>
+</client>
+</testcase>

@@ -15,7 +15,8 @@
  */
 
 /*
- * Copyright (c) 1983 Regents of the University of California.
+ * Copyright (C) 2005 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (c) 1983, Regents of the University of California.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +78,9 @@
 #include <sys/filio.h>
 #endif
 
+#ifdef HAVE_SETJMP_H
 #include <setjmp.h>
+#endif
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>
@@ -199,8 +202,8 @@ static curl_socklen_t fromlen;
 
 static curl_socket_t peer = CURL_SOCKET_BAD;
 
-static int timeout;
-static int maxtimeout = 5 * TIMEOUT;
+static unsigned int timeout;
+static unsigned int maxtimeout = 5 * TIMEOUT;
 
 #ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;
@@ -208,7 +211,8 @@ static bool use_ipv6 = FALSE;
 static const char *ipv_inuse = "IPv4";
 
 const  char *serverlogfile = DEFAULT_LOGFILE;
-static char *pidname= (char *)".tftpd.pid";
+static const char *pidname = ".tftpd.pid";
+static const char *portfile = NULL;
 static int serverlogslocked = 0;
 static int wrotepidfile = 0;
 
@@ -217,46 +221,8 @@ static sigjmp_buf timeoutbuf;
 #endif
 
 #if defined(HAVE_ALARM) && defined(SIGALRM)
-static int rexmtval = TIMEOUT;
+static const unsigned int rexmtval = TIMEOUT;
 #endif
-
-/* do-nothing macro replacement for systems which lack siginterrupt() */
-
-#ifndef HAVE_SIGINTERRUPT
-#define siginterrupt(x,y) do {} while(0)
-#endif
-
-/* vars used to keep around previous signal handlers */
-
-typedef RETSIGTYPE (*SIGHANDLER_T)(int);
-
-#ifdef SIGHUP
-static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
-#endif
-
-#ifdef SIGPIPE
-static SIGHANDLER_T old_sigpipe_handler = SIG_ERR;
-#endif
-
-#ifdef SIGINT
-static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
-#endif
-
-#ifdef SIGTERM
-static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
-#endif
-
-#if defined(SIGBREAK) && defined(WIN32)
-static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
-#endif
-
-/* var which if set indicates that the program should finish execution */
-
-SIG_ATOMIC_T got_exit_signal = 0;
-
-/* if next is set indicates the first signal handled in exit_signal_handler */
-
-static volatile int exit_signal = 0;
 
 /*****************************************************************************
 *                            FUNCTION PROTOTYPES                             *
@@ -293,12 +259,6 @@ static void timer(int signum);
 static void justtimeout(int signum);
 
 #endif /* HAVE_ALARM && SIGALRM */
-
-static RETSIGTYPE exit_signal_handler(int signum);
-
-static void install_signal_handlers(void);
-
-static void restore_signal_handlers(void);
 
 /*****************************************************************************
 *                          FUNCTION IMPLEMENTATIONS                          *
@@ -347,81 +307,6 @@ static void justtimeout(int signum)
 
 #endif /* HAVE_ALARM && SIGALRM */
 
-/* signal handler that will be triggered to indicate that the program
-  should finish its execution in a controlled manner as soon as possible.
-  The first time this is called it will set got_exit_signal to one and
-  store in exit_signal the signal that triggered its execution. */
-
-static RETSIGTYPE exit_signal_handler(int signum)
-{
-  int old_errno = errno;
-  if(got_exit_signal == 0) {
-    got_exit_signal = 1;
-    exit_signal = signum;
-  }
-  (void)signal(signum, exit_signal_handler);
-  errno = old_errno;
-}
-
-static void install_signal_handlers(void)
-{
-#ifdef SIGHUP
-  /* ignore SIGHUP signal */
-  if((old_sighup_handler = signal(SIGHUP, SIG_IGN)) == SIG_ERR)
-    logmsg("cannot install SIGHUP handler: %s", strerror(errno));
-#endif
-#ifdef SIGPIPE
-  /* ignore SIGPIPE signal */
-  if((old_sigpipe_handler = signal(SIGPIPE, SIG_IGN)) == SIG_ERR)
-    logmsg("cannot install SIGPIPE handler: %s", strerror(errno));
-#endif
-#ifdef SIGINT
-  /* handle SIGINT signal with our exit_signal_handler */
-  if((old_sigint_handler = signal(SIGINT, exit_signal_handler)) == SIG_ERR)
-    logmsg("cannot install SIGINT handler: %s", strerror(errno));
-  else
-    siginterrupt(SIGINT, 1);
-#endif
-#ifdef SIGTERM
-  /* handle SIGTERM signal with our exit_signal_handler */
-  if((old_sigterm_handler = signal(SIGTERM, exit_signal_handler)) == SIG_ERR)
-    logmsg("cannot install SIGTERM handler: %s", strerror(errno));
-  else
-    siginterrupt(SIGTERM, 1);
-#endif
-#if defined(SIGBREAK) && defined(WIN32)
-  /* handle SIGBREAK signal with our exit_signal_handler */
-  if((old_sigbreak_handler = signal(SIGBREAK, exit_signal_handler)) == SIG_ERR)
-    logmsg("cannot install SIGBREAK handler: %s", strerror(errno));
-  else
-    siginterrupt(SIGBREAK, 1);
-#endif
-}
-
-static void restore_signal_handlers(void)
-{
-#ifdef SIGHUP
-  if(SIG_ERR != old_sighup_handler)
-    (void)signal(SIGHUP, old_sighup_handler);
-#endif
-#ifdef SIGPIPE
-  if(SIG_ERR != old_sigpipe_handler)
-    (void)signal(SIGPIPE, old_sigpipe_handler);
-#endif
-#ifdef SIGINT
-  if(SIG_ERR != old_sigint_handler)
-    (void)signal(SIGINT, old_sigint_handler);
-#endif
-#ifdef SIGTERM
-  if(SIG_ERR != old_sigterm_handler)
-    (void)signal(SIGTERM, old_sigterm_handler);
-#endif
-#if defined(SIGBREAK) && defined(WIN32)
-  if(SIG_ERR != old_sigbreak_handler)
-    (void)signal(SIGBREAK, old_sigbreak_handler);
-#endif
-}
-
 /*
  * init for either read-ahead or write-behind.
  * zero for write-behind, one for read-head.
@@ -459,7 +344,7 @@ static int readit(struct testcase *test, struct tftphdr **dpp,
   current = !current;             /* "incr" current */
 
   b = &bfs[current];              /* look at new buffer */
-  if (b->counter == BF_FREE)      /* if it's empty */
+  if(b->counter == BF_FREE)      /* if it's empty */
     read_ahead(test, convert);    /* fill it */
 
   *dpp = &b->buf.hdr;             /* set caller's ptr */
@@ -468,7 +353,7 @@ static int readit(struct testcase *test, struct tftphdr **dpp,
 
 /*
  * fill the input buffer, doing ascii conversions if requested
- * conversions are  lf -> cr,lf  and cr -> cr, nul
+ * conversions are  lf -> cr, lf  and cr -> cr, nul
  */
 static void read_ahead(struct testcase *test,
                        int convert /* if true, convert to ascii */)
@@ -480,13 +365,13 @@ static void read_ahead(struct testcase *test,
   struct tftphdr *dp;
 
   b = &bfs[nextone];              /* look at "next" buffer */
-  if (b->counter != BF_FREE)      /* nop if not free */
+  if(b->counter != BF_FREE)      /* nop if not free */
     return;
   nextone = !nextone;             /* "incr" next buffer ptr */
 
   dp = &b->buf.hdr;
 
-  if (convert == 0) {
+  if(convert == 0) {
     /* The former file reading code did this:
        b->counter = read(fileno(file), dp->th_data, SEGSIZE); */
     size_t copy_n = MIN(SEGSIZE, test->rcount);
@@ -500,9 +385,9 @@ static void read_ahead(struct testcase *test,
   }
 
   p = dp->th_data;
-  for (i = 0 ; i < SEGSIZE; i++) {
-    if (newline) {
-      if (prevchar == '\n')
+  for(i = 0 ; i < SEGSIZE; i++) {
+    if(newline) {
+      if(prevchar == '\n')
         c = '\n';       /* lf to cr,lf */
       else
         c = '\0';       /* cr to cr,nul */
@@ -510,13 +395,13 @@ static void read_ahead(struct testcase *test,
     }
     else {
       if(test->rcount) {
-        c=test->rptr[0];
+        c = test->rptr[0];
         test->rptr++;
         test->rcount--;
       }
       else
         break;
-      if (c == '\n' || c == '\r') {
+      if(c == '\n' || c == '\r') {
         prevchar = c;
         c = '\r';
         newline = 1;
@@ -535,7 +420,7 @@ static int writeit(struct testcase *test, struct tftphdr * volatile *dpp,
 {
   bfs[current].counter = ct;      /* set size of data to write */
   current = !current;             /* switch to other buffer */
-  if (bfs[current].counter != BF_FREE)     /* if not free */
+  if(bfs[current].counter != BF_FREE)     /* if not free */
     write_behind(test, convert);     /* flush it */
   bfs[current].counter = BF_ALLOC;        /* mark as alloc'd */
   *dpp =  &bfs[current].buf.hdr;
@@ -544,7 +429,7 @@ static int writeit(struct testcase *test, struct tftphdr * volatile *dpp,
 
 /*
  * Output a buffer to a file, converting from netascii if requested.
- * CR,NUL -> CR  and CR,LF => LF.
+ * CR, NUL -> CR  and CR, LF => LF.
  * Note spec is undefined if we get CR as last byte of file or a
  * CR followed by anything else.  In this case we leave it alone.
  */
@@ -559,13 +444,17 @@ static ssize_t write_behind(struct testcase *test, int convert)
   struct tftphdr *dp;
 
   b = &bfs[nextone];
-  if (b->counter < -1)            /* anything to flush? */
+  if(b->counter < -1)            /* anything to flush? */
     return 0;                     /* just nop if nothing to do */
 
   if(!test->ofile) {
     char outfile[256];
-    snprintf(outfile, sizeof(outfile), "log/upload.%ld", test->testno);
-    test->ofile=open(outfile, O_CREAT|O_RDWR, 0777);
+    msnprintf(outfile, sizeof(outfile), "log/upload.%ld", test->testno);
+#ifdef WIN32
+    test->ofile = open(outfile, O_CREAT|O_RDWR|O_BINARY, 0777);
+#else
+    test->ofile = open(outfile, O_CREAT|O_RDWR, 0777);
+#endif
     if(test->ofile == -1) {
       logmsg("Couldn't create and/or open file %s for upload!", outfile);
       return -1; /* failure! */
@@ -578,21 +467,21 @@ static ssize_t write_behind(struct testcase *test, int convert)
   nextone = !nextone;             /* incr for next time */
   writebuf = dp->th_data;
 
-  if (count <= 0)
+  if(count <= 0)
     return -1;                    /* nak logic? */
 
-  if (convert == 0)
+  if(convert == 0)
     return write(test->ofile, writebuf, count);
 
   p = writebuf;
   ct = count;
-  while (ct--) {                  /* loop over the buffer */
+  while(ct--) {                   /* loop over the buffer */
     c = *p++;                     /* pick up a character */
-    if (prevchar == '\r') {       /* if prev char was cr */
-      if (c == '\n')              /* if have cr,lf then just */
+    if(prevchar == '\r') {        /* if prev char was cr */
+      if(c == '\n')               /* if have cr,lf then just */
         lseek(test->ofile, -1, SEEK_CUR); /* smash lf on top of the cr */
       else
-        if (c == '\0')            /* if have cr,nul then */
+        if(c == '\0')             /* if have cr,nul then */
           goto skipit;            /* just skip over the putc */
       /* else just fall through and allow it */
     }
@@ -630,13 +519,13 @@ static int synchnet(curl_socket_t f /* socket to flush */)
   srvr_sockaddr_union_t fromaddr;
   curl_socklen_t fromaddrlen;
 
-  for (;;) {
+  for(;;) {
 #if defined(HAVE_IOCTLSOCKET)
     (void) ioctlsocket(f, FIONREAD, &i);
 #else
     (void) ioctl(f, FIONREAD, &i);
 #endif
-    if (i) {
+    if(i) {
       j++;
 #ifdef ENABLE_IPV6
       if(!use_ipv6)
@@ -688,6 +577,11 @@ int main(int argc, char **argv)
       if(argc>arg)
         pidname = argv[arg++];
     }
+    else if(!strcmp("--portfile", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        portfile = argv[arg++];
+    }
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
       if(argc>arg)
@@ -712,12 +606,6 @@ int main(int argc, char **argv)
       if(argc>arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (ulnum < 1025UL) || (ulnum > 65535UL)) {
-          fprintf(stderr, "tftpd: invalid --port argument (%s)\n",
-                  argv[arg]);
-          return 0;
-        }
         port = curlx_ultous(ulnum);
         arg++;
       }
@@ -747,7 +635,7 @@ int main(int argc, char **argv)
   atexit(win32_cleanup);
 #endif
 
-  install_signal_handlers();
+  install_signal_handlers(true);
 
   pid = (long)getpid();
 
@@ -769,7 +657,7 @@ int main(int argc, char **argv)
   }
 
   flag = 1;
-  if (0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+  if(0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
             (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
@@ -804,15 +692,67 @@ int main(int argc, char **argv)
     goto tftpd_cleanup;
   }
 
+  if(!port) {
+    /* The system was supposed to choose a port number, figure out which
+       port we actually got and update the listener port value with it. */
+    curl_socklen_t la_size;
+    srvr_sockaddr_union_t localaddr;
+#ifdef ENABLE_IPV6
+    if(!use_ipv6)
+#endif
+      la_size = sizeof(localaddr.sa4);
+#ifdef ENABLE_IPV6
+    else
+      la_size = sizeof(localaddr.sa6);
+#endif
+    memset(&localaddr.sa, 0, (size_t)la_size);
+    if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
+      error = SOCKERRNO;
+      logmsg("getsockname() failed with error: (%d) %s",
+             error, strerror(error));
+      sclose(sock);
+      goto tftpd_cleanup;
+    }
+    switch(localaddr.sa.sa_family) {
+    case AF_INET:
+      port = ntohs(localaddr.sa4.sin_port);
+      break;
+#ifdef ENABLE_IPV6
+    case AF_INET6:
+      port = ntohs(localaddr.sa6.sin6_port);
+      break;
+#endif
+    default:
+      break;
+    }
+    if(!port) {
+      /* Real failure, listener port shall not be zero beyond this point. */
+      logmsg("Apparently getsockname() succeeded, with listener port zero.");
+      logmsg("A valid reason for this failure is a binary built without");
+      logmsg("proper network library linkage. This might not be the only");
+      logmsg("reason, but double check it before anything else.");
+      result = 2;
+      goto tftpd_cleanup;
+    }
+  }
+
   wrotepidfile = write_pidfile(pidname);
   if(!wrotepidfile) {
     result = 1;
     goto tftpd_cleanup;
   }
 
+  if(portfile) {
+    wrotepidfile = write_portfile(portfile, port);
+    if(!wrotepidfile) {
+      result = 1;
+      goto tftpd_cleanup;
+    }
+  }
+
   logmsg("Running %s version on port UDP/%d", ipv_inuse, (int)port);
 
-  for (;;) {
+  for(;;) {
     fromlen = sizeof(from);
 #ifdef ENABLE_IPV6
     if(!use_ipv6)
@@ -826,7 +766,7 @@ int main(int argc, char **argv)
                           &from.sa, &fromlen);
     if(got_exit_signal)
       break;
-    if (n < 0) {
+    if(n < 0) {
       logmsg("recvfrom");
       result = 3;
       break;
@@ -872,9 +812,9 @@ int main(int argc, char **argv)
 
     tp = &buf.hdr;
     tp->th_opcode = ntohs(tp->th_opcode);
-    if (tp->th_opcode == opcode_RRQ || tp->th_opcode == opcode_WRQ) {
+    if(tp->th_opcode == opcode_RRQ || tp->th_opcode == opcode_WRQ) {
       memset(&test, 0, sizeof(test));
-      if (do_tftp(&test, tp, n) < 0)
+      if(do_tftp(&test, tp, n) < 0)
         break;
       free(test.buffer);
     }
@@ -914,13 +854,15 @@ tftpd_cleanup:
 
   if(wrotepidfile)
     unlink(pidname);
+  if(portfile)
+    unlink(portfile);
 
   if(serverlogslocked) {
     serverlogslocked = 0;
     clear_advisor_read_lock(SERVERLOGS_LOCK);
   }
 
-  restore_signal_handlers();
+  restore_signal_handlers(true);
 
   if(got_exit_signal) {
     logmsg("========> %s tftpd (port: %d pid: %ld) exits with signal (%d)",
@@ -946,16 +888,16 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   int first = 1, ecode;
   struct formats *pf;
   char *filename, *mode = NULL;
-  int error;
-  FILE *server;
 #ifdef USE_WINSOCK
   DWORD recvtimeout, recvtimeoutbak;
 #endif
+  const char *option = "mode"; /* mode is implicit */
+  int toggle = 1;
 
   /* Open request dump file. */
-  server = fopen(REQUEST_DUMP, "ab");
+  FILE *server = fopen(REQUEST_DUMP, "ab");
   if(!server) {
-    error = errno;
+    int error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
     logmsg("Error opening file: %s", REQUEST_DUMP);
     return -1;
@@ -966,42 +908,67 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
 
   cp = (char *)&tp->th_stuff;
   filename = cp;
-again:
-  while (cp < &buf.storage[size]) {
-    if (*cp == '\0')
+  do {
+    bool endofit = true;
+    while(cp < &buf.storage[size]) {
+      if(*cp == '\0') {
+        endofit = false;
+        break;
+      }
+      cp++;
+    }
+    if(endofit)
+      /* no more options */
       break;
-    cp++;
-  }
-  if (*cp) {
+
+    /* before increasing pointer, make sure it is still within the legal
+       space */
+    if((cp + 1) < &buf.storage[size]) {
+      ++cp;
+      if(first) {
+        /* store the mode since we need it later */
+        mode = cp;
+        first = 0;
+      }
+      if(toggle)
+        /* name/value pair: */
+        fprintf(server, "%s: %s\n", option, cp);
+      else {
+        /* store the name pointer */
+        option = cp;
+      }
+      toggle ^= 1;
+    }
+    else
+      /* No more options */
+      break;
+  } while(1);
+
+  if(*cp) {
     nak(EBADOP);
     fclose(server);
     return 3;
   }
-  if (first) {
-    mode = ++cp;
-    first = 0;
-    goto again;
-  }
+
   /* store input protocol */
   fprintf(server, "filename: %s\n", filename);
 
-  for (cp = mode; cp && *cp; cp++)
+  for(cp = mode; cp && *cp; cp++)
     if(ISUPPER(*cp))
       *cp = (char)tolower((int)*cp);
 
   /* store input protocol */
-  fprintf(server, "mode: %s\n", mode);
   fclose(server);
 
-  for (pf = formata; pf->f_mode; pf++)
-    if (strcmp(pf->f_mode, mode) == 0)
+  for(pf = formata; pf->f_mode; pf++)
+    if(strcmp(pf->f_mode, mode) == 0)
       break;
-  if (!pf->f_mode) {
+  if(!pf->f_mode) {
     nak(EBADOP);
     return 2;
   }
   ecode = validate_access(test, filename, tp->th_opcode);
-  if (ecode) {
+  if(ecode) {
     nak(ecode);
     return 1;
   }
@@ -1009,13 +976,13 @@ again:
 #ifdef USE_WINSOCK
   recvtimeout = sizeof(recvtimeoutbak);
   getsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
-             (char*)&recvtimeoutbak, (int*)&recvtimeout);
+             (char *)&recvtimeoutbak, (int *)&recvtimeout);
   recvtimeout = TIMEOUT*1000;
   setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
-             (const char*)&recvtimeout, sizeof(recvtimeout));
+             (const char *)&recvtimeout, sizeof(recvtimeout));
 #endif
 
-  if (tp->th_opcode == opcode_WRQ)
+  if(tp->th_opcode == opcode_WRQ)
     recvtftp(test, pf);
   else
     sendtftp(test, pf);
@@ -1023,7 +990,7 @@ again:
 #ifdef USE_WINSOCK
   recvtimeout = recvtimeoutbak;
   setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
-             (const char*)&recvtimeout, sizeof(recvtimeout));
+             (const char *)&recvtimeout, sizeof(recvtimeout));
 #endif
 
   return 0;
@@ -1033,16 +1000,12 @@ again:
 static int parse_servercmd(struct testcase *req)
 {
   FILE *stream;
-  char *filename;
   int error;
 
-  filename = test2file(req->testno);
-
-  stream=fopen(filename, "rb");
+  stream = test2fopen(req->testno);
   if(!stream) {
     error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
-    logmsg("  [1] Error opening file: %s", filename);
     logmsg("  Couldn't open test file %ld", req->testno);
     return 1; /* done */
   }
@@ -1050,7 +1013,7 @@ static int parse_servercmd(struct testcase *req)
     char *orgcmd = NULL;
     char *cmd = NULL;
     size_t cmdsize = 0;
-    int num=0;
+    int num = 0;
 
     /* get the custom server control "commands" */
     error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
@@ -1102,15 +1065,13 @@ static int validate_access(struct testcase *test,
                            const char *filename, int mode)
 {
   char *ptr;
-  long testno, partno;
-  int error;
-  char partbuf[80]="data";
 
   logmsg("trying to get file: %s mode %x", filename, mode);
 
   if(!strncmp("verifiedserver", filename, 14)) {
     char weare[128];
-    size_t count = sprintf(weare, "WE ROOLZ: %ld\r\n", (long)getpid());
+    size_t count = msnprintf(weare, sizeof(weare),
+                             "WE ROOLZ: %ld\r\n", (long)getpid());
 
     logmsg("Are-we-friendly question received");
     test->buffer = strdup(weare);
@@ -1124,7 +1085,10 @@ static int validate_access(struct testcase *test,
   ptr = strrchr(filename, '/');
 
   if(ptr) {
-    char *file;
+    char partbuf[80]="data";
+    long partno;
+    long testno;
+    FILE *stream;
 
     ptr++; /* skip the slash */
 
@@ -1149,40 +1113,33 @@ static int validate_access(struct testcase *test,
 
     (void)parse_servercmd(test);
 
-    file = test2file(testno);
+    stream = test2fopen(testno);
 
     if(0 != partno)
-      sprintf(partbuf, "data%ld", partno);
+      msnprintf(partbuf, sizeof(partbuf), "data%ld", partno);
 
-    if(file) {
-      FILE *stream=fopen(file, "rb");
-      if(!stream) {
-        error = errno;
-        logmsg("fopen() failed with error: %d %s", error, strerror(error));
-        logmsg("Error opening file: %s", file);
-        logmsg("Couldn't open test file: %s", file);
+    if(!stream) {
+      int error = errno;
+      logmsg("fopen() failed with error: %d %s", error, strerror(error));
+      logmsg("Couldn't open test file for test : %d", testno);
+      return EACCESS;
+    }
+    else {
+      size_t count;
+      int error = getpart(&test->buffer, &count, "reply", partbuf, stream);
+      fclose(stream);
+      if(error) {
+        logmsg("getpart() failed with error: %d", error);
         return EACCESS;
       }
-      else {
-        size_t count;
-        error = getpart(&test->buffer, &count, "reply", partbuf, stream);
-        fclose(stream);
-        if(error) {
-          logmsg("getpart() failed with error: %d", error);
-          return EACCESS;
-        }
-        if(test->buffer) {
-          test->rptr = test->buffer; /* set read pointer */
-          test->bufsize = count;    /* set total count */
-          test->rcount = count;     /* set data left to read */
-        }
-        else
-          return EACCESS;
+      if(test->buffer) {
+        test->rptr = test->buffer; /* set read pointer */
+        test->bufsize = count;    /* set total count */
+        test->rcount = count;     /* set data left to read */
       }
-
+      else
+        return EACCESS;
     }
-    else
-      return EACCESS;
   }
   else {
     logmsg("no slash found in path");
@@ -1200,20 +1157,18 @@ static void sendtftp(struct testcase *test, struct formats *pf)
 {
   int size;
   ssize_t n;
-  /* This is volatile to live through a siglongjmp */
+  /* These are volatile to live through a siglongjmp */
   volatile unsigned short sendblock; /* block count */
-  struct tftphdr *sdp;      /* data buffer */
-  struct tftphdr *sap;      /* ack buffer */
+  struct tftphdr * volatile sdp = r_init(); /* data buffer */
+  struct tftphdr * const sap = &ackbuf.hdr; /* ack buffer */
 
   sendblock = 1;
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, timer);
 #endif
-  sdp = r_init();
-  sap = &ackbuf.hdr;
   do {
-    size = readit(test, &sdp, pf->f_convert);
-    if (size < 0) {
+    size = readit(test, (struct tftphdr **)&sdp, pf->f_convert);
+    if(size < 0) {
       nak(errno + 100);
       return;
     }
@@ -1230,47 +1185,50 @@ static void sendtftp(struct testcase *test, struct formats *pf)
     }
 
     send_data:
-    if (swrite(peer, sdp, size + 4) != size + 4) {
-      logmsg("write");
+    logmsg("write");
+    if(swrite(peer, sdp, size + 4) != size + 4) {
+      logmsg("write: fail");
       return;
     }
     read_ahead(test, pf->f_convert);
-    for ( ; ; ) {
+    for(;;) {
 #ifdef HAVE_ALARM
       alarm(rexmtval);        /* read the ack */
 #endif
+      logmsg("read");
       n = sread(peer, &ackbuf.storage[0], sizeof(ackbuf.storage));
+      logmsg("read: %zd", n);
 #ifdef HAVE_ALARM
       alarm(0);
 #endif
       if(got_exit_signal)
         return;
-      if (n < 0) {
+      if(n < 0) {
         logmsg("read: fail");
         return;
       }
       sap->th_opcode = ntohs((unsigned short)sap->th_opcode);
       sap->th_block = ntohs(sap->th_block);
 
-      if (sap->th_opcode == opcode_ERROR) {
+      if(sap->th_opcode == opcode_ERROR) {
         logmsg("got ERROR");
         return;
       }
 
-      if (sap->th_opcode == opcode_ACK) {
-        if (sap->th_block == sendblock) {
+      if(sap->th_opcode == opcode_ACK) {
+        if(sap->th_block == sendblock) {
           break;
         }
         /* Re-synchronize with the other side */
         (void) synchnet(peer);
-        if (sap->th_block == (sendblock-1)) {
+        if(sap->th_block == (sendblock-1)) {
           goto send_data;
         }
       }
 
     }
     sendblock++;
-  } while (size == SEGSIZE);
+  } while(size == SEGSIZE);
 }
 
 /*
@@ -1299,52 +1257,56 @@ static void recvtftp(struct testcase *test, struct formats *pf)
     (void) sigsetjmp(timeoutbuf, 1);
 #endif
 send_ack:
-    if (swrite(peer, &ackbuf.storage[0], 4) != 4) {
-      logmsg("write: fail\n");
+    logmsg("write");
+    if(swrite(peer, &ackbuf.storage[0], 4) != 4) {
+      logmsg("write: fail");
       goto abort;
     }
     write_behind(test, pf->f_convert);
-    for ( ; ; ) {
+    for(;;) {
 #ifdef HAVE_ALARM
       alarm(rexmtval);
 #endif
+      logmsg("read");
       n = sread(peer, rdp, PKTSIZE);
+      logmsg("read: %zd", n);
 #ifdef HAVE_ALARM
       alarm(0);
 #endif
       if(got_exit_signal)
         goto abort;
-      if (n < 0) {                       /* really? */
-        logmsg("read: fail\n");
+      if(n < 0) {                       /* really? */
+        logmsg("read: fail");
         goto abort;
       }
       rdp->th_opcode = ntohs((unsigned short)rdp->th_opcode);
       rdp->th_block = ntohs(rdp->th_block);
-      if (rdp->th_opcode == opcode_ERROR)
+      if(rdp->th_opcode == opcode_ERROR)
         goto abort;
-      if (rdp->th_opcode == opcode_DATA) {
-        if (rdp->th_block == recvblock) {
+      if(rdp->th_opcode == opcode_DATA) {
+        if(rdp->th_block == recvblock) {
           break;                         /* normal */
         }
         /* Re-synchronize with the other side */
         (void) synchnet(peer);
-        if (rdp->th_block == (recvblock-1))
+        if(rdp->th_block == (recvblock-1))
           goto send_ack;                 /* rexmit */
       }
     }
 
     size = writeit(test, &rdp, (int)(n - 4), pf->f_convert);
-    if (size != (n-4)) {                 /* ahem */
-      if (size < 0)
+    if(size != (n-4)) {                 /* ahem */
+      if(size < 0)
         nak(errno + 100);
       else
         nak(ENOSPACE);
       goto abort;
     }
-  } while (size == SEGSIZE);
+  } while(size == SEGSIZE);
   write_behind(test, pf->f_convert);
 
-  rap->th_opcode = htons((unsigned short)opcode_ACK);  /* send the "final" ack */
+  rap->th_opcode = htons((unsigned short)opcode_ACK);  /* send the "final"
+                                                          ack */
   rap->th_block = htons(recvblock);
   (void) swrite(peer, &ackbuf.storage[0], 4);
 #if defined(HAVE_ALARM) && defined(SIGALRM)
@@ -1358,9 +1320,9 @@ send_ack:
 #endif
   if(got_exit_signal)
     goto abort;
-  if (n >= 4 &&                               /* if read some data */
-      rdp->th_opcode == opcode_DATA &&        /* and got a data block */
-      recvblock == rdp->th_block) {           /* then my last ack was lost */
+  if(n >= 4 &&                               /* if read some data */
+     rdp->th_opcode == opcode_DATA &&        /* and got a data block */
+     recvblock == rdp->th_block) {           /* then my last ack was lost */
     (void) swrite(peer, &ackbuf.storage[0], 4);  /* resend final ack */
   }
 abort:
@@ -1380,10 +1342,10 @@ static void nak(int error)
   tp = &buf.hdr;
   tp->th_opcode = htons((unsigned short)opcode_ERROR);
   tp->th_code = htons((unsigned short)error);
-  for (pe = errmsgs; pe->e_code >= 0; pe++)
-    if (pe->e_code == error)
+  for(pe = errmsgs; pe->e_code >= 0; pe++)
+    if(pe->e_code == error)
       break;
-  if (pe->e_code < 0) {
+  if(pe->e_code < 0) {
     pe->e_msg = strerror(error - 100);
     tp->th_code = EUNDEF;   /* set 'undef' errorcode */
   }
@@ -1393,6 +1355,6 @@ static void nak(int error)
    * report from glibc with FORTIFY_SOURCE */
   memcpy(tp->th_msg, pe->e_msg, length + 1);
   length += 5;
-  if (swrite(peer, &buf.storage[0], length) != length)
+  if(swrite(peer, &buf.storage[0], length) != length)
     logmsg("nak: fail\n");
 }

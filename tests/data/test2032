@@ -5,6 +5,7 @@ HTTP
 HTTP GET
 HTTP Basic auth
 HTTP NTLM auth
+flaky
 </keywords>
 </info>
 # Server-side
@@ -22,7 +23,7 @@ WWW-Authenticate: Basic realm="testrealm"
 This is a bad password page!
 </data100>
 
-<!-- NTML auth -->
+<!-- NTLM auth -->
 <data200>
 HTTP/1.1 401 Need Basic or NTLM auth (2)
 Server: Microsoft-IIS/5.0
@@ -39,7 +40,7 @@ HTTP/1.1 401 NTLM intermediate (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
 Content-Length: 33
-WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAAAGggEAq6U1NAWaJCIAAAAAAAAAAAAAAAA4AAAATlRMTUF1dGg=
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAAAA4AAAATlRMTUF1dGg=
 
 This is still not the real page!
 </data1201>
@@ -54,34 +55,9 @@ Finally, this is the real page!
 </data1202>
 
 <datacheck>
-HTTP/1.1 401 Need Basic or NTLM auth
-Server: Microsoft-IIS/5.0
-Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
-WWW-Authenticate: NTLM
-WWW-Authenticate: Basic realm="testrealm"
-
-This is a bad password page!
-HTTP/1.1 401 Need Basic or NTLM auth
-Server: Microsoft-IIS/5.0
-Content-Type: text/html; charset=iso-8859-1
-Content-Length: 29
-WWW-Authenticate: NTLM
-WWW-Authenticate: Basic realm="testrealm"
-
-This is a bad password page!
-HTTP/1.1 401 NTLM intermediate (2)
-Server: Microsoft-IIS/5.0
-Content-Type: text/html; charset=iso-8859-1
-Content-Length: 33
-WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAAAGggEAq6U1NAWaJCIAAAAAAAAAAAAAAAA4AAAATlRMTUF1dGg=
-
-HTTP/1.1 200 Things are fine in server land
-Server: Microsoft-IIS/5.0
-Content-Type: text/html; charset=iso-8859-1
-Content-Length: 32
-
-Finally, this is the real page!
+Data connection 0: 228
+Data connection 1: 228
+Data connection 2: 402
 </datacheck>
 
 </reply>
@@ -90,6 +66,7 @@ Finally, this is the real page!
 <client>
 <features>
 NTLM
+SSL
 !SSPI
 </features>
 <server>
@@ -118,28 +95,25 @@ chkhostname curlhost
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /20320100 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Accept: */*
 
 GET /20320100 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Accept: */*
 
 GET /20320200 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Accept: */*
 
 GET /20320200 HTTP/1.1
-Host: 127.0.0.1:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAABoIBAI+/Fp9IERAQ74OsdNPbBpg7o8CVwLSO4DtFyIcZHUMKVktWIu92s2892OVpd2JzqnRlc3R1c2VyY3VybGhvc3Q=
+Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoABAI+/Fp9IERAQ74OsdNPbBpg7o8CVwLSO4DtFyIcZHUMKVktWIu92s2892OVpd2JzqnRlc3R1c2VyY3VybGhvc3Q=
 Accept: */*
 
 </protocol>

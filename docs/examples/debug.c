@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,39 +38,41 @@ void dump(const char *text,
   size_t i;
   size_t c;
 
-  unsigned int width=0x10;
+  unsigned int width = 0x10;
 
   if(nohex)
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s, %10.10ld bytes (0x%8.8lx)\n",
-          text, (long)size, (long)size);
+  fprintf(stream, "%s, %10.10lu bytes (0x%8.8lx)\n",
+          text, (unsigned long)size, (unsigned long)size);
 
-  for(i=0; i<size; i+= width) {
+  for(i = 0; i<size; i += width) {
 
-    fprintf(stream, "%4.4lx: ", (long)i);
+    fprintf(stream, "%4.4lx: ", (unsigned long)i);
 
     if(!nohex) {
       /* hex not disabled, show it */
       for(c = 0; c < width; c++)
-        if(i+c < size)
-          fprintf(stream, "%02x ", ptr[i+c]);
+        if(i + c < size)
+          fprintf(stream, "%02x ", ptr[i + c]);
         else
           fputs("   ", stream);
     }
 
-    for(c = 0; (c < width) && (i+c < size); c++) {
+    for(c = 0; (c < width) && (i + c < size); c++) {
       /* check for 0D0A; if found, skip past and start a new line of output */
-      if (nohex && (i+c+1 < size) && ptr[i+c]==0x0D && ptr[i+c+1]==0x0A) {
-        i+=(c+2-width);
+      if(nohex && (i + c + 1 < size) && ptr[i + c] == 0x0D &&
+         ptr[i + c + 1] == 0x0A) {
+        i += (c + 2 - width);
         break;
       }
       fprintf(stream, "%c",
-              (ptr[i+c]>=0x20) && (ptr[i+c]<0x80)?ptr[i+c]:'.');
+              (ptr[i + c] >= 0x20) && (ptr[i + c]<0x80)?ptr[i + c]:'.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
-      if (nohex && (i+c+2 < size) && ptr[i+c+1]==0x0D && ptr[i+c+2]==0x0A) {
-        i+=(c+3-width);
+      if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
+         ptr[i + c + 2] == 0x0A) {
+        i += (c + 3 - width);
         break;
       }
     }
@@ -88,9 +90,10 @@ int my_trace(CURL *handle, curl_infotype type,
   const char *text;
   (void)handle; /* prevent compiler warning */
 
-  switch (type) {
+  switch(type) {
   case CURLINFO_TEXT:
     fprintf(stderr, "== Info: %s", data);
+    /* FALLTHROUGH */
   default: /* in case a new one is introduced to shock us */
     return 0;
 
@@ -137,7 +140,7 @@ int main(void)
     /* example.com is redirected, so we tell libcurl to follow redirection */
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)

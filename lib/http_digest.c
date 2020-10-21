@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,12 +25,12 @@
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 
 #include "urldata.h"
-#include "rawstr.h"
-#include "curl_sasl.h"
+#include "strcase.h"
+#include "vauth/vauth.h"
 #include "http_digest.h"
-#include "curl_printf.h"
 
-/* The last #include files should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -46,7 +46,7 @@ CURLcode Curl_input_digest(struct connectdata *conn,
                            const char *header) /* rest of the *-authenticate:
                                                   header */
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   /* Point to the correct struct with this */
   struct digestdata *digest;
@@ -65,7 +65,7 @@ CURLcode Curl_input_digest(struct connectdata *conn,
   while(*header && ISSPACE(*header))
     header++;
 
-  return Curl_sasl_decode_digest_http_message(header, digest);
+  return Curl_auth_decode_digest_http_message(header, digest);
 }
 
 CURLcode Curl_output_digest(struct connectdata *conn,
@@ -74,9 +74,9 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                             const unsigned char *uripath)
 {
   CURLcode result;
-  struct SessionHandle *data = conn->data;
-  unsigned char *path;
-  char *tmp;
+  struct Curl_easy *data = conn->data;
+  unsigned char *path = NULL;
+  char *tmp = NULL;
   char *response;
   size_t len;
   bool have_chlg;
@@ -94,15 +94,19 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   struct auth *authp;
 
   if(proxy) {
+#ifdef CURL_DISABLE_PROXY
+    return CURLE_NOT_BUILT_IN;
+#else
     digest = &data->state.proxydigest;
-    allocuserpwd = &conn->allocptr.proxyuserpwd;
-    userp = conn->proxyuser;
-    passwdp = conn->proxypasswd;
+    allocuserpwd = &data->state.aptr.proxyuserpwd;
+    userp = conn->http_proxy.user;
+    passwdp = conn->http_proxy.passwd;
     authp = &data->state.authproxy;
+#endif
   }
   else {
     digest = &data->state.digest;
-    allocuserpwd = &conn->allocptr.userpwd;
+    allocuserpwd = &data->state.aptr.userpwd;
     userp = conn->user;
     passwdp = conn->passwd;
     authp = &data->state.authhost;
@@ -135,24 +139,26 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 
      Apache servers can be set to do the Digest IE-style automatically using
      the BrowserMatch feature:
-     http://httpd.apache.org/docs/2.2/mod/mod_auth_digest.html#msie
+     https://httpd.apache.org/docs/2.2/mod/mod_auth_digest.html#msie
 
      Further details on Digest implementation differences:
      http://www.fngtps.com/2006/09/http-authentication
   */
 
-  if(authp->iestyle && ((tmp = strchr((char *)uripath, '?')) != NULL)) {
-    size_t urilen = tmp - (char *)uripath;
-
-    path = (unsigned char *) aprintf("%.*s", urilen, uripath);
+  if(authp->iestyle) {
+    tmp = strchr((char *)uripath, '?');
+    if(tmp) {
+      size_t urilen = tmp - (char *)uripath;
+      path = (unsigned char *) aprintf("%.*s", urilen, uripath);
+    }
   }
-  else
+  if(!tmp)
     path = (unsigned char *) strdup((char *) uripath);
 
   if(!path)
     return CURLE_OUT_OF_MEMORY;
 
-  result = Curl_sasl_create_digest_http_message(data, userp, passwdp, request,
+  result = Curl_auth_create_digest_http_message(data, userp, passwdp, request,
                                                 path, digest, &response, &len);
   free(path);
   if(result)
@@ -170,10 +176,10 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   return CURLE_OK;
 }
 
-void Curl_digest_cleanup(struct SessionHandle *data)
+void Curl_http_auth_cleanup_digest(struct Curl_easy *data)
 {
-  Curl_sasl_digest_cleanup(&data->state.digest);
-  Curl_sasl_digest_cleanup(&data->state.proxydigest);
+  Curl_auth_digest_cleanup(&data->state.digest);
+  Curl_auth_digest_cleanup(&data->state.proxydigest);
 }
 
 #endif

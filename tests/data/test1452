@@ -1,0 +1,43 @@
+<testcase>
+<info>
+<keywords>
+TELNET
+UPLOAD
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+telnet
+</server>
+<features>
+telnet
+</features>
+ <name>
+Basic TELNET negotiation
+ </name>
+<stdin>
+test1452
+</stdin>
+ <command>
+telnet://%HOSTIP:%TELNETPORT --upload-file -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout nonewline="yes">
+test1452
+</stdout>
+</verify>
+</testcase>

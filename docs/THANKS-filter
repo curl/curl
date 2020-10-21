@@ -1,3 +1,25 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
+#
 # This is a list of names we have recorded that already are thanked
 # appropriately in THANKS. This list contains variations of their names and
 # their "canonical" name. This file is used for scripting purposes to avoid
@@ -14,7 +36,7 @@ s/John Malmberg/John E. Malmberg/
 s/Luca Alteas/Luca Altea/
 s/Michal Gorny/Michał Górny/
 s/Michal Górny/Michał Górny/
-s/Moonesamy/S. Moonesamy/
+s/^Moonesamy$/S. Moonesamy/
 s/Pete Su$/Peter Su/
 s/Sam Listopad/Samuel Listopad/
 s/Sebastien Willemijns/Sébastien Willemijns/
@@ -25,14 +47,14 @@ s/upstream tests 305 and 404//
 s/Gaël PORTAY/Gaël Portay/
 s/Romulo Ceccon/Romulo A. Ceccon/
 s/Nach M. S$/Nach M. S./
-s/Jay Satiro/Ray Satiro/
+s/Ja[yt] Satiro/Ray Satiro/
 s/Richard J. Moore/Richard Moore/
 s/Sergey Nikulov/Sergei Nikulov/
 s/Petr Písař/Petr Pisar/
 s/Nick Zitzmann (originally)/Nick Zitzmann/
 s/product-security at Apple//
 s/IT DOES NOT WORK//
-s/Albert Chin/Albert Chin-A-Young/
+s/Albert Chin$/Albert Chin-A-Young/
 s/Paras S\z/Paras Sethia/
 s/Paras Sethiaethia/Paras Sethia/
 s/Дмитрий Фалько/Dmitry Falko/
@@ -47,7 +69,56 @@ s/Frank Van Uffelen and Fabian Hiernaux//
 s/Rodrigo Silva (MestreLion)/Rodrigo Silva/
 s/tetetest tetetest//
 s/Jiří Hruška/Jiri Hruska/
-s/Viktor Szakats/Viktor Szakáts/
-s/Jonathan Cardoso/Jonathan Cardoso Machado/
-s/Linus Nielsen/Linus Nielsen Feltzing/
+s/Viktor Szakáts/Viktor Szakats/
+s/Jonathan Cardoso$/Jonathan Cardoso Machado/
+s/Linus Nielsen$/Linus Nielsen Feltzing/
 s/Todd Ouska$/Todd A Ouska/
+s/Tim Ruehsen/Tim Rühsen/
+s/Michael Koenig/Michael König/
+s/moparisthebest/Travis Burtrum/
+s/Jan-E/Jan Ehrhardt/
+s/Paras S$/Paras Sethia/
+s/Cristian Rodr\xEDguez$/Cristian Rodríguez/
+s/Sidney San Mart\xEDn$/Sidney San Martín/
+s/Sidney San Martin$/Sidney San Martín/
+s/Taneli V\xE4h\xE4kangas$/Taneli Vähäkangas/
+s/Taneli Vahakangas$/Taneli Vähäkangas/
+s/Никита Дорохин./Никита Дорохин/
+s/upstream tests 305//
+s/ (edited)//
+s/Jean-Philippe Barette-LaPierre$/Jean-Philippe Barrette-LaPierre/
+s/Joern Hartroth$/Jörn Hartroth/
+s/Hongli Lai (Phusion)$/Hongli Lai/
+s/github user 'kreshano'$/kreshano on github/
+s/Marc Hoersken$/Marc Hörsken/
+s/Martin Storsjo$/Martin Storsjö/
+s/Jiri Malak$/Jiří Malák/
+s/JDepooter$/Joel Depooter/
+s/ERAMOTO Masaya$/Eramoto Masaya/
+s/shachaf on github$/Shachaf Ben-Kiki/
+s/CarloCannas on github$/Carlo Cannas/
+s/Henrik S. Gaßmann$/Henrik Gaßmann/
+s/moteus on github/Alexey Melnichuk/
+s/Rich Moore/Richard Moore/
+s/kdekker/Kees Dekker/
+s/Daniel Jelinski/Daniel Jeliński/
+s/Dario Weisser/Dario Weißer/
+s/Github user @jakirkham/jakirkham on github/
+s/Guenter Knauf/Gunter Knauf/
+s/Matteo B.$/Matteo Bignotti/
+s/Dan C$/Dan Cristian/
+s/Mark Eichin/Mark W. Eichin/
+s/Andreas Faerber/Andreas Farber/
+s/paulharris on github/Paul Harris/
+s/Warp Kawada/Yukihiro Kawada/
+s/Lau Hang Kin/Hang Kin Lau/
+s/Jonathan Cardoso Machado Machado/Jonathan Cardoso Machado/
+s/David Meyer/David J Meyer/
+s/Ramana Mokkapati/Venkataramana Mokkapati/
+s/wyattoday on github/Wyatt O'Day/
+s/Jason Priebe/Jason S. Priebe/
+s/Ale Vesely/Alessandro Vesely/
+s/Yamada Yasuharu/Yasuharu Yamada/
+s/Jim Gallagher/James Gallagher/
+s/Steve Brokenshire/Stephen Brokenshire/
+s/wangp on github/Peter Wang/

@@ -1,23 +1,424 @@
-os:
-  - linux
-  - osx
-
-sudo: false
-
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
 language: c
+os: linux
+dist: bionic
+cache:
+  directories:
+  - $HOME/wolfssl-4.4.0-stable
+  - $HOME/mesalink-1.0.0
+  - $HOME/nghttp2-1.39.2
+
+env:
+  global:
+  - LD_LIBRARY_PATH=/usr/local/lib
+
+addons:
+  apt: &common_apt
+    config:
+      retries: true
+    packages: &common_packages
+    - cmake
+    - valgrind
+    - libev-dev
+    - libc-ares-dev
+    - g++-8
+    - stunnel4
+    - libidn2-dev
+    - gnutls-bin
+    - python-impacket
+
+jobs:
+  include:
+  - env:
+    - T=normal C="--with-gssapi --with-libssh2" CHECKSRC=1
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - krb5-user
+        - libssh2-1-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=normal C=--with-libssh
+    # Avoid bionic, its pre-release libssh version triggers deprecation warnings.
+    dist: focal
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - cmake
+        - valgrind
+        - libev-dev
+        - libc-ares-dev
+        - g++-8
+        - stunnel4
+        - libidn2-dev
+        - gnutls-bin
+        # The above list is common_packages minus impacket.
+        - libssh-dev
+  - env:
+    - T=normal C="--enable-ares"
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+  - env:
+    - T=normal C="--disable-proxy"
+  - env:
+    - T=normal C="--disable-verbose" CPPFLAGS="-Wno-variadic-macros" NOTESTS=1
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=novalgrind BORINGSSL=yes C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    before_install:
+    - eval "$(gimme stable)"; gimme --list  # Install latest Go (for boringssl)
+  - env:
+    - T=novalgrind QUICHE="yes" C="--with-ssl=$HOME/quiche/deps/boringssl/src --with-quiche=$HOME/quiche/target/release --enable-alt-svc" LD_LIBRARY_PATH=$HOME/quiche/target/release:/usr/local/lib
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=novalgrind LIBRESSL=yes C="--with-ssl=$HOME/libressl" LD_LIBRARY_PATH=/home/travis/libressl/lib:/usr/local/lib
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+  - env:
+    - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild --enable-alt-svc" NOTESTS=
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=novalgrind NGTCP2=yes GNUTLS=yes C="PKG_CONFIG_PATH=$HOME/ngbuild --without-ssl --with-gnutls=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild --enable-alt-svc" NOTESTS=
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - autogen
+        - automake
+        - autopoint
+        - bison
+        - gperf
+        - libgmp-dev
+        - libopts25-dev
+        - libp11-kit-dev
+        - libtasn1-6-dev
+        - nettle-dev
+  - env:
+    - T=debug-wolfssl C="--with-wolfssl --without-ssl"
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=debug OPENSSL3="yes" C="--with-ssl=$HOME/openssl3" LD_LIBRARY_PATH=/home/travis/openssl3/lib:/usr/local/lib
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=debug-mesalink C="--with-mesalink --without-ssl" MESALINK=yes
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=debug
+    - &clang OVERRIDE_CC="CC=clang-9" OVERRIDE_CXX="CXX=clang++-9"
+    compiler: clang
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - &clang_packages [*common_packages, clang-9]
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=debug C="--enable-alt-svc"
+    - *clang
+    compiler: clang
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *clang_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=debug C="--with-mbedtls --without-ssl"
+    - *clang
+    compiler: clang
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *clang_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libmbedtls-dev
+  - env:
+    - T=debug C="--with-gnutls --without-ssl"
+    - *clang
+    compiler: clang
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *clang_packages
+        - libgnutls28-dev
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=debug C="--with-nss --without-ssl" NOTESTS=1 CPPFLAGS="-isystem /usr/include/nss"
+    - *clang
+    compiler: clang
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *clang_packages
+        - libnss3-dev
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=iconv
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+  - env:
+    - T=cmake BORINGSSL=yes QUICHE=yes C="-DUSE_QUICHE=1 -DOPENSSL_ROOT_DIR=$HOME/boringssl -DCURL_BROTLI=1 -DCURL_ZSTD=1"
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    - PKG_CONFIG_PATH="$HOME/quiche/target/release"
+    before_install:
+    - eval "$(gimme stable)"; gimme --list  # Install latest Go (for boringssl)
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=cmake NGTCP2=yes C="-DUSE_NGTCP2=ON -DCURL_BROTLI=1 -DCURL_ZSTD=1"
+    - *clang
+    - PKG_CONFIG_PATH="$HOME/ngbuild/lib/pkgconfig"
+    compiler: clang
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *clang_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=torture
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - lcov
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libssh2-1-dev
+  - env:
+    - T=distcheck
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=fuzzer
+    - *clang
+    compiler: clang
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *clang_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=tidy
+    - *clang
+    compiler: clang
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *clang_packages
+        - clang-tidy-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=scan-build
+    - *clang
+    compiler: clang
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *clang_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan"
+    - *clang
+    compiler: clang
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *clang_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=debug C="--enable-alt-svc"
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    arch: arm64
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libev-dev
+        - libssl-dev
+        - libtool
+        - pkg-config
+        - zlib1g-dev
+
+  - env:
+    - T=debug C="--enable-alt-svc"
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    arch: ppc64le
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libev-dev
+        - libssl-dev
+        - libtool
+        - pkg-config
+        - zlib1g-dev
+
+  - env:
+    - T=debug C="--enable-alt-svc"
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    arch: s390x
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libev-dev
+        - libssl-dev
+        - libtool
+        - pkg-config
+        - zlib1g-dev
+
+before_install:
+- export "${OVERRIDE_CC-blank=}"
+- export "${OVERRIDE_CXX-blank=}"
 
 install:
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update > /dev/null; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install openssl libidn rtmpdump libssh2 c-ares libmetalink libressl nghttp2; fi
+- if [ "$T" = "coverage" ]; then pip2 install --user cpp-coveralls; fi
 
+# before_script and script:
+# Travis isn't reliable catching errors in inline script commands (#3730).
+# Do not add anything here, instead add to the respective script.
 before_script:
-  - ./buildconf
+- ./scripts/travis/before_script.sh || travis_terminate 1
+script:
+- ./scripts/travis/script.sh || travis_terminate 1
 
-script: ./configure --enable-debug && make && make test-full
-
-compiler:
-  - clang
-  - gcc
+# select branches to avoid testing feature branches twice (as branch and as pull request)
+branches:
+  only:
+  - master
+  - /\/ci$/
 
 notifications:
   email: false

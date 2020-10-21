@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -45,39 +45,41 @@ void dump(const char *text,
   size_t i;
   size_t c;
 
-  unsigned int width=0x10;
+  unsigned int width = 0x10;
 
   if(nohex)
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s, %10.10ld bytes (0x%8.8lx)\n",
-          text, (long)size, (long)size);
+  fprintf(stream, "%s, %10.10lu bytes (0x%8.8lx)\n",
+          text, (unsigned long)size, (unsigned long)size);
 
-  for(i=0; i<size; i+= width) {
+  for(i = 0; i<size; i += width) {
 
-    fprintf(stream, "%4.4lx: ", (long)i);
+    fprintf(stream, "%4.4lx: ", (unsigned long)i);
 
     if(!nohex) {
       /* hex not disabled, show it */
       for(c = 0; c < width; c++)
-        if(i+c < size)
-          fprintf(stream, "%02x ", ptr[i+c]);
+        if(i + c < size)
+          fprintf(stream, "%02x ", ptr[i + c]);
         else
           fputs("   ", stream);
     }
 
-    for(c = 0; (c < width) && (i+c < size); c++) {
+    for(c = 0; (c < width) && (i + c < size); c++) {
       /* check for 0D0A; if found, skip past and start a new line of output */
-      if (nohex && (i+c+1 < size) && ptr[i+c]==0x0D && ptr[i+c+1]==0x0A) {
-        i+=(c+2-width);
+      if(nohex && (i + c + 1 < size) && ptr[i + c] == 0x0D &&
+         ptr[i + c + 1] == 0x0A) {
+        i += (c + 2 - width);
         break;
       }
       fprintf(stream, "%c",
-              (ptr[i+c]>=0x20) && (ptr[i+c]<0x80)?ptr[i+c]:'.');
+              (ptr[i + c] >= 0x20) && (ptr[i + c]<0x80)?ptr[i + c]:'.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
-      if (nohex && (i+c+2 < size) && ptr[i+c+1]==0x0D && ptr[i+c+2]==0x0A) {
-        i+=(c+3-width);
+      if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
+         ptr[i + c + 2] == 0x0A) {
+        i += (c + 3 - width);
         break;
       }
     }
@@ -96,9 +98,10 @@ int my_trace(CURL *handle, curl_infotype type,
   (void)userp;
   (void)handle; /* prevent compiler warning */
 
-  switch (type) {
+  switch(type) {
   case CURLINFO_TEXT:
     fprintf(stderr, "== Info: %s", data);
+    /* FALLTHROUGH */
   default: /* in case a new one is introduced to shock us */
     return 0;
 
@@ -128,12 +131,12 @@ int main(void)
   CURL *http_handle;
   CURLM *multi_handle;
 
-  int still_running; /* keep number of running handles */
+  int still_running = 0; /* keep number of running handles */
 
   http_handle = curl_easy_init();
 
   /* set the options (I left out a few, you'll get the point anyway) */
-  curl_easy_setopt(http_handle, CURLOPT_URL, "http://www.example.com/");
+  curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
 
   curl_easy_setopt(http_handle, CURLOPT_DEBUGFUNCTION, my_trace);
   curl_easy_setopt(http_handle, CURLOPT_VERBOSE, 1L);
@@ -147,7 +150,7 @@ int main(void)
   /* we start some action by calling perform right away */
   curl_multi_perform(multi_handle, &still_running);
 
-  do {
+  while(still_running) {
     struct timeval timeout;
     int rc; /* select() return code */
     CURLMcode mc; /* curl_multi_fdset() return code */
@@ -179,8 +182,7 @@ int main(void)
     /* get file descriptors from the transfers */
     mc = curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    if(mc != CURLM_OK)
-    {
+    if(mc != CURLM_OK) {
       fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
       break;
     }
@@ -204,7 +206,7 @@ int main(void)
     else {
       /* Note that on some platforms 'timeout' may be modified by select().
          If you need access to the original value save a copy beforehand. */
-      rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+      rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
     }
 
     switch(rc) {
@@ -219,7 +221,7 @@ int main(void)
       curl_multi_perform(multi_handle, &still_running);
       break;
     }
-  } while(still_running);
+  }
 
   curl_multi_cleanup(multi_handle);
 

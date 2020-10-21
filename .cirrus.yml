@@ -1,0 +1,77 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
+# Cirrus CI configuration
+# https://cirrus-ci.com/github/curl/curl
+
+task:
+  name: FreeBSD
+  freebsd_instance:
+    matrix:
+      # A stable 13.0 image likely won't be available before early 2021
+      # image_family: freebsd-13-0-snap
+      image_family: freebsd-12-1
+      image_family: freebsd-11-4
+
+  env:
+    CIRRUS_CLONE_DEPTH: 10
+    MAKE_FLAGS: -j 2
+
+  pkginstall_script:
+    - pkg update -f
+    - pkg install -y autoconf automake libtool pkgconf brotli openldap-client heimdal libpsl libmetalink libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
+    - case `python -V` in
+        Python?3.7*) pkg install -y py37-impacket ;;
+        Python?2.7*) pkg install -y py27-impacket ;;
+      esac
+    - pkg delete -y curl
+  configure_script:
+    - ./buildconf
+    - case `uname -r` in
+        12.1*)
+        export CC=clang;
+        export CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
+        export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
+        export LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" ;;
+      esac
+    - ./configure --prefix="${HOME}"/install --enable-debug --with-libssh2 --with-brotli --with-gssapi --with-libidn2 --enable-manual --enable-ldap --enable-ldaps --with-librtmp --with-libmetalink --with-libpsl --with-nghttp2 || { tail -300 config.log; false; }
+  compile_script:
+    - make V=1
+  test_script:
+    # blackhole?
+    - sysctl net.inet.tcp.blackhole
+    # make sure we don't run blackhole != 0
+    - sudo sysctl net.inet.tcp.blackhole=0
+    # Some tests won't run if run as root so run them as another user.
+    # Make directories world writable so the test step can write wherever it needs.
+    - find . -type d -exec chmod 777 {} \;
+    # TODO: A number of tests are failing on different FreeBSD versions and so
+    # are disabled.  This should be investigated.
+    - SKIP_TESTS=''
+    - uname -r
+    - case `uname -r` in
+        13.0*) SKIP_TESTS='!SFTP !SCP';;
+        12.1*) SKIP_TESTS='!SFTP !SCP';;
+        11.*) SKIP_TESTS='!SFTP !SCP';;
+      esac
+    - sudo -u nobody make V=1 TFLAGS="-n -a -p !flaky ${SKIP_TESTS}" test-nonflaky
+  install_script:
+    - make V=1 install

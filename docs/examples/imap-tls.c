@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,6 +19,12 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
+/* <DESC>
+ * IMAP example using TLS
+ * </DESC>
+ */
+
 #include <stdio.h>
 #include <curl/curl.h>
 
@@ -41,7 +47,8 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
     /* This will fetch message 1 from the user's inbox */
-    curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/INBOX/;UID=1");
+    curl_easy_setopt(curl, CURLOPT_URL,
+                     "imap://imap.example.com/INBOX/;UID=1");
 
     /* In this example, we'll start with a plain text connection, and upgrade
      * to Transport Layer Security (TLS) using the STARTTLS command. Be careful
@@ -55,12 +62,13 @@ int main(void)
      * CURLOPT_SSL_VERIFYPEER and CURLOPT_SSL_VERIFYHOST options to 0 (false).
      *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
      *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+     *
      * That is, in general, a bad idea. It is still better than sending your
-     * authentication details in plain text though.
-     * Instead, you should get the issuer certificate (or the host certificate
-     * if the certificate is self-signed) and add it to the set of certificates
-     * that are known to libcurl using CURLOPT_CAINFO and/or CURLOPT_CAPATH. See
-     * docs/SSLCERTS for more information. */
+     * authentication details in plain text though.  Instead, you should get
+     * the issuer certificate (or the host certificate if the certificate is
+     * self-signed) and add it to the set of certificates that are known to
+     * libcurl using CURLOPT_CAINFO and/or CURLOPT_CAPATH. See docs/SSLCERTS
+     * for more information. */
     curl_easy_setopt(curl, CURLOPT_CAINFO, "/path/to/certificate.pem");
 
     /* Since the traffic will be encrypted, it is very useful to turn on debug

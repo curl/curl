@@ -23,8 +23,8 @@ file
  <name>
 basic file:// file
  </name>
- <command>
-file://localhost/%PWD/log/test200.txt
+<command option="no-include">
+file://localhost%FILE_PWD/log/test200.txt
 </command>
 <file name="log/test200.txt">
 foo

@@ -10,7 +10,7 @@ TFTP RRQ
 # Server-side
 <reply>
 <servercmd>
-writedelay: 1
+writedelay: 2
 </servercmd>
 # ~1200 bytes (so that they don't fit in two 512 byte chunks)
 <data nocheck="yes">
@@ -24,6 +24,14 @@ writedelay: 1
 <server>
 tftp
 </server>
+# Always kill the TFTP server to not affect following tests, due
+# to this test potentially keeping the TFTP server busy waiting
+# for another 5 seconds after this test has already terminated.
+# On some platforms and CI not enough time passes between this
+# test and the next tests 1242 and 1243, causing them to fail.
+<killserver>
+tftp
+</killserver>
  <name>
 slow TFTP retrieve cancel due to -Y and -y
  </name>
@@ -38,8 +46,11 @@ tftp://%HOSTIP:%TFTPPORT//1238 -Y1000 -y2
 <verify>
 <protocol>
 opcode: 1
-filename: /1238
 mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /1238
 </protocol>
 # 28 = CURLE_OPERATION_TIMEDOUT
 <errorcode>

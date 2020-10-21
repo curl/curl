@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+unittest
+URL API
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+file
+https
+http
+pop3
+smtp
+imap
+ldap
+dict
+ftp
+ipv6
+</features>
+ <name>
+URL API
+ </name>
+<tool>
+lib1560
+</tool>
+</client>
+
+<verify>
+<stdout>
+we got [fe80::20c:29ff:fe9c:409b]
+we got https://[::1]/hello.html
+we got https://example.com/hello.html
+we got https://[fe80::20c:29ff:fe9c:409b%25eth0]/hello.html
+we got [fe80::20c:29ff:fe9c:409b]
+we got eth0
+we got https://[fe80::20c:29ff:fe9c:409b%25clown]/hello.html
+success
+</stdout>
+</verify>
+</testcase>

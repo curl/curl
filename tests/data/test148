@@ -42,6 +42,7 @@ PASS ftp@example.com
 PWD
 CWD attempt
 MKD attempt
+CWD attempt
 QUIT
 </protocol>
 </verify>

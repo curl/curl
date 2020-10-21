@@ -1,0 +1,98 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 301 OK
+Accept-Ranges: bytes
+Content-Length: 0
+Connection: close
+Location: /16330002
+
+</data>
+<data2>
+HTTP/1.1 429 too many requests
+Retry-After: 1
+Content-Length: 0
+Connection: close
+
+</data2>
+
+<datacheck>
+HTTP/1.1 301 OK
+Accept-Ranges: bytes
+Content-Length: 0
+Connection: close
+Location: /16330002
+
+HTTP/1.1 429 too many requests
+Retry-After: 1
+Content-Length: 0
+Connection: close
+
+HTTP/1.1 301 OK
+Accept-Ranges: bytes
+Content-Length: 0
+Connection: close
+Location: /16330002
+
+HTTP/1.1 429 too many requests
+Retry-After: 1
+Content-Length: 0
+Connection: close
+
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP GET
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1633 -d moo --retry 1 -L
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+POST /1633 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 3
+Content-Type: application/x-www-form-urlencoded
+
+mooGET /16330002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+POST /1633 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 3
+Content-Type: application/x-www-form-urlencoded
+
+mooGET /16330002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

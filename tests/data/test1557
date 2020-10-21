@@ -1,0 +1,36 @@
+<testcase>
+<info>
+<keywords>
+multi
+crash
+</keywords>
+</info>
+
+<reply>
+</reply>
+
+<client>
+<server>
+none
+</server>
+<tool>
+lib1557
+</tool>
+
+<name>
+Removing easy handle that's in the pending connections list doesn't leave behind a dangling entry
+</name>
+<command>
+nothing
+</command>
+</client>
+
+#
+# Verify that the test runs to completion without crashing
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+
+</testcase>

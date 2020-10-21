@@ -1,0 +1,72 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP proxy
+followlocation
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 302 This is a weirdo text message
+Connection: close
+Location: http:///foo.example.com/want/11410001
+
+This server reply is for testing
+</data>
+<data1>
+HTTP/1.1 200 hello
+Connection: close
+Content-Length: 4
+
+hej
+</data1>
+<datacheck>
+HTTP/1.1 302 This is a weirdo text message
+Connection: close
+Location: http:///foo.example.com/want/11410001
+
+HTTP/1.1 200 hello
+Connection: close
+Content-Length: 4
+
+hej
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP redirect to http:/// (three slashes!)
+ </name>
+ <command>
+%HOSTIP:%HTTPPORT/want/1141 -L -x http://%HOSTIP:%HTTPPORT
+</command>
+<features>
+proxy
+</features>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET http://%HOSTIP:%HTTPPORT/want/1141 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://foo.example.com/want/11410001 HTTP/1.1
+Host: foo.example.com
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

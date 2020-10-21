@@ -42,12 +42,10 @@ http://%HOSTIP:%HTTPPORT?email=name@example.com/1118
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /?email=name@example.com/1118 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

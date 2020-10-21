@@ -17,7 +17,7 @@ scp
 SCP incorrect host key
  </name>
  <command>
---hostpubmd5 00000000000000000000000000000000 --key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%PWD/log/irrelevant-file --insecure
+--hostpubmd5 00000000000000000000000000000000 --key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%SSH_PWD/log/irrelevant-file --insecure
 </command>
 </client>
 
@@ -25,7 +25,7 @@ SCP incorrect host key
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-51
+60
 </errorcode>
 <valgrind>
 disable

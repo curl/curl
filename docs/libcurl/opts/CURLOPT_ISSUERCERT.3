@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_ISSUERCERT \- issuer SSL certificate filename
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ISSUERCERT, char *file);
 .SH DESCRIPTION
-Pass a char * to a zero terminated string naming a \fIfile\fP holding a CA
+Pass a char * to a null-terminated string naming a \fIfile\fP holding a CA
 certificate in PEM format. If the option is set, an additional check against
 the peer certificate is performed to verify the issuer is indeed the one
 associated with the certificate provided by the option. This additional check
@@ -43,12 +43,23 @@ A specific error code (CURLE_SSL_ISSUER_ERROR) is defined with the option,
 which is returned if the setup of the SSL/TLS session has failed due to a
 mismatch with the issuer of peer certificate (\fICURLOPT_SSL_VERIFYPEER(3)\fP
 has to be set too for the check to fail). (Added in 7.19.0)
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
 All TLS-based protocols
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  curl_easy_setopt(curl, CURLOPT_ISSUERCERT, "/etc/certs/cacert.pem");
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 If built TLS enabled
 .SH RETURN VALUE

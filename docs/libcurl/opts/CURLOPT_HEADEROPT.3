@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -44,11 +44,30 @@ headers. When doing CONNECT, libcurl will send \fICURLOPT_PROXYHEADER(3)\fP
 headers only to the proxy and then \fICURLOPT_HTTPHEADER(3)\fP headers only to
 the server.
 .SH DEFAULT
-CURLHEADER_SEPARATE (changed in 7.42.1, ased CURLHEADER_UNIFIED before then)
+CURLHEADER_SEPARATE (changed in 7.42.1, used CURLHEADER_UNIFIED before then)
 .SH PROTOCOLS
 HTTP
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode ret;
+  struct curl_slist *list;
+  list = curl_slist_append(NULL, "Shoesize: 10");
+  list = curl_slist_append(list, "Accept:");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  curl_easy_setopt(curl, CURLOPT_PROXY, "http://localhost:8080");
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+
+  /* HTTPS over a proxy makes a separate CONNECT to the proxy, so tell
+     libcurl to not send the custom headers to the proxy. Keep them
+     separate! */
+  curl_easy_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
+  ret = curl_easy_perform(curl);
+  curl_slist_free_all(list);
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.37.0
 .SH RETURN VALUE

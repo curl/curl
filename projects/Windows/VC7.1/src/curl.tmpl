@@ -26,7 +26,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
 			<Tool
@@ -81,7 +81,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
 			<Tool
@@ -136,7 +136,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
 			<Tool
@@ -144,7 +144,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FIXED:NO"
-				AdditionalDependencies="wldap32.lib ws2_32.lib libcurl.lib"
+				AdditionalDependencies="wldap32.lib ws2_32.lib libcurl.lib crypt32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -190,7 +190,7 @@
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;DEBUGBUILD;CURL_STATICLIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
@@ -199,7 +199,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FIXED:NO"
-				AdditionalDependencies="wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib"
+				AdditionalDependencies="crypt32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -247,7 +247,7 @@
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;DEBUGBUILD;CURL_STATICLIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
@@ -304,7 +304,7 @@
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;DEBUGBUILD"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
@@ -361,7 +361,7 @@
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;DEBUGBUILD;CURL_STATICLIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
@@ -419,7 +419,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
 			<Tool
@@ -427,7 +427,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FIXED:NO"
-				AdditionalDependencies="wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="crypt32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -474,7 +474,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
 			<Tool
@@ -482,7 +482,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FIXED:NO"
-				AdditionalDependencies="wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib libssh2.lib"
+				AdditionalDependencies="crypt32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib libssh2.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -529,7 +529,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
 			<Tool
@@ -584,7 +584,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
 			<Tool
@@ -638,7 +638,7 @@
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;DEBUGBUILD;CURL_STATICLIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
@@ -647,7 +647,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FIXED:NO"
-				AdditionalDependencies="wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="crypt32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -695,7 +695,7 @@
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;DEBUGBUILD;CURL_STATICLIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
@@ -752,7 +752,7 @@
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;DEBUGBUILD"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
@@ -810,7 +810,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
 			<Tool
@@ -865,7 +865,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
 			<Tool
@@ -919,7 +919,7 @@
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;DEBUGBUILD"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
@@ -976,7 +976,7 @@
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;DEBUGBUILD;CURL_STATICLIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
@@ -985,7 +985,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FIXED:NO"
-				AdditionalDependencies="wldap32.lib ws2_32.lib libcurld.lib"
+				AdditionalDependencies="wldap32.lib ws2_32.lib libcurld.lib crypt32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -1034,7 +1034,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
 			<Tool
@@ -1088,7 +1088,7 @@
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;DEBUGBUILD"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
@@ -1145,7 +1145,7 @@
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;DEBUGBUILD"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
@@ -1203,7 +1203,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
 			<Tool
@@ -1257,7 +1257,7 @@
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;DEBUGBUILD;CURL_STATICLIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
@@ -1266,7 +1266,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FIXED:NO"
-				AdditionalDependencies="normaliz.lib wldap32.lib ws2_32.lib libcurld.lib"
+				AdditionalDependencies="normaliz.lib wldap32.lib ws2_32.lib crypt32.lib libcurld.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -1315,7 +1315,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
 			<Tool
@@ -1323,7 +1323,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FIXED:NO"
-				AdditionalDependencies="normaliz.lib wldap32.lib ws2_32.lib libcurl.lib"
+				AdditionalDependencies="normaliz.lib wldap32.lib ws2_32.lib crypt32.lib libcurl.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"

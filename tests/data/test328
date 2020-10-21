@@ -1,0 +1,55 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Content-Encoding
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Type: text/html
+Content-Encoding: none
+Content-Length: 38
+
+Q: What did 0 say to 8? A: Nice Belt!
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+
+# we're actually more interested in any compression support but this is the
+# best we can do right now
+<features>
+libz
+</features>
+ <name>
+HTTP with "Content-Encoding: none
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/hello/328 --compressed
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^Accept-Encoding:.*
+</strip>
+<protocol>
+GET /hello/328 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

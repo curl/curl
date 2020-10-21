@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,6 +21,11 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
+/***********************************************************************
+ * Only for builds using synchronous name resolves
+ **********************************************************************/
+#ifdef CURLRES_SYNCH
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -51,15 +56,10 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-/***********************************************************************
- * Only for builds using synchronous name resolves
- **********************************************************************/
-#ifdef CURLRES_SYNCH
-
 /*
  * Function provided by the resolver backend to set DNS servers to use.
  */
-CURLcode Curl_set_dns_servers(struct SessionHandle *data,
+CURLcode Curl_set_dns_servers(struct Curl_easy *data,
                               char *servers)
 {
   (void)data;
@@ -72,7 +72,7 @@ CURLcode Curl_set_dns_servers(struct SessionHandle *data,
  * Function provided by the resolver backend to set
  * outgoing interface to use for DNS requests
  */
-CURLcode Curl_set_dns_interface(struct SessionHandle *data,
+CURLcode Curl_set_dns_interface(struct Curl_easy *data,
                                 const char *interf)
 {
   (void)data;
@@ -84,7 +84,7 @@ CURLcode Curl_set_dns_interface(struct SessionHandle *data,
  * Function provided by the resolver backend to set
  * local IPv4 address to use as source address for DNS requests
  */
-CURLcode Curl_set_dns_local_ip4(struct SessionHandle *data,
+CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
                                 const char *local_ip4)
 {
   (void)data;
@@ -96,7 +96,7 @@ CURLcode Curl_set_dns_local_ip4(struct SessionHandle *data,
  * Function provided by the resolver backend to set
  * local IPv6 address to use as source address for DNS requests
  */
-CURLcode Curl_set_dns_local_ip6(struct SessionHandle *data,
+CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
                                 const char *local_ip6)
 {
   (void)data;

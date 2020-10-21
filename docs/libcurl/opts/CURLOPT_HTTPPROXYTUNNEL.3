@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,24 +28,38 @@ CURLOPT_HTTPPROXYTUNNEL \- tunnel through HTTP proxy
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPPROXYTUNNEL, long tunnel);
 .SH DESCRIPTION
-Set the parameter to 1 to make libcurl tunnel all operations through the HTTP
-proxy. There is a big difference between using a proxy and to tunnel through
-it. If you don't know what this means, you probably don't want this tunneling
-option.
+Set the \fBtunnel\fP parameter to 1L to make libcurl tunnel all operations
+through the HTTP proxy (set with \fICURLOPT_PROXY(3)\fP). There is a big
+difference between using a proxy and to tunnel through it.
 
-Tunneling essentially means that a CONNECT is sent to the proxy, asking it to
-connect to a remote host on a specific port number and then the traffic is
-just passed through the proxy. Proxies tend to whitelist specific port numbers
+Tunneling means that an HTTP CONNECT request is sent to the proxy, asking it
+to connect to a remote host on a specific port number and then the traffic is
+just passed through the proxy. Proxies tend to white-list specific port numbers
 it allows CONNECT requests to and often only port 80 and 443 are allowed.
 
-When using this, it only makes sense to use \fICURLOPT_PROXYTYPE(3)\fP set to
-a HTTP proxy.
+To suppress proxy CONNECT response headers from user callbacks use
+\fICURLOPT_SUPPRESS_CONNECT_HEADERS(3)\fP.
+
+HTTP proxies can generally only speak HTTP (for obvious reasons), which makes
+libcurl convert non-HTTP requests to HTTP when using an HTTP proxy without
+this tunnel option set. For example, asking for an FTP URL and specifying an
+HTTP proxy will make libcurl send an FTP URL in an HTTP GET request to the
+proxy. By instead tunneling through the proxy, you avoid that conversion (that
+rarely works through the proxy anyway).
 .SH DEFAULT
 0
 .SH PROTOCOLS
 All network protocols
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
+  curl_easy_setopt(curl, CURLOPT_PROXY, "http://127.0.0.1:80");
+  curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Always
 .SH RETURN VALUE

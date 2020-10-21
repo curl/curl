@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,10 +19,13 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-/* Stream-parse a document using the streaming Expat parser.
- * Written by David Strauss
+/* <DESC>
+ * Stream-parse a document using the streaming Expat parser.
+ * </DESC>
+ */
+/* Written by David Strauss
  *
- * Expat => http://www.libexpat.org/
+ * Expat => https://libexpat.github.io/
  *
  * gcc -Wall -I/usr/local/include xmlstream.c -lcurl -lexpat -o xmlstream
  *
@@ -48,7 +51,8 @@ struct ParserStruct {
   struct MemoryStruct characters;
 };
 
-static void startElement(void *userData, const XML_Char *name, const XML_Char **atts)
+static void startElement(void *userData, const XML_Char *name,
+                         const XML_Char **atts)
 {
   struct ParserStruct *state = (struct ParserStruct *) userData;
   state->tags++;
@@ -65,14 +69,15 @@ static void characterDataHandler(void *userData, const XML_Char *s, int len)
   struct ParserStruct *state = (struct ParserStruct *) userData;
   struct MemoryStruct *mem = &state->characters;
 
-  mem->memory = realloc(mem->memory, mem->size + len + 1);
-  if(mem->memory == NULL) {
+  char *ptr = realloc(mem->memory, mem->size + len + 1);
+  if(!ptr) {
     /* Out of memory. */
     fprintf(stderr, "Not enough memory (realloc returned NULL).\n");
     state->ok = 0;
     return;
   }
 
+  mem->memory = ptr;
   memcpy(&(mem->memory[mem->size]), s, len);
   mem->size += len;
   mem->memory[mem->size] = 0;
@@ -86,16 +91,18 @@ static void endElement(void *userData, const XML_Char *name)
   printf("%5lu   %10lu   %s\n", state->depth, state->characters.size, name);
 }
 
-static size_t parseStreamCallback(void *contents, size_t length, size_t nmemb, void *userp)
+static size_t parseStreamCallback(void *contents, size_t length, size_t nmemb,
+                                  void *userp)
 {
   XML_Parser parser = (XML_Parser) userp;
   size_t real_size = length * nmemb;
   struct ParserStruct *state = (struct ParserStruct *) XML_GetUserData(parser);
 
   /* Only parse if we're not already in a failure state. */
-  if (state->ok && XML_Parse(parser, contents, real_size, 0) == 0) {
+  if(state->ok && XML_Parse(parser, contents, real_size, 0) == 0) {
     int error_code = XML_GetErrorCode(parser);
-    fprintf(stderr, "Parsing response buffer of length %lu failed with error code %d (%s).\n",
+    fprintf(stderr, "Parsing response buffer of length %lu failed"
+            " with error code %d (%s).\n",
             real_size, error_code, XML_ErrorString(error_code));
     state->ok = 0;
   }
@@ -121,9 +128,10 @@ int main(void)
   XML_SetCharacterDataHandler(parser, characterDataHandler);
 
   /* Initialize a libcurl handle. */
-  curl_global_init(CURL_GLOBAL_ALL ^ CURL_GLOBAL_SSL);
+  curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_handle = curl_easy_init();
-  curl_easy_setopt(curl_handle, CURLOPT_URL, "http://www.w3schools.com/xml/simple.xml");
+  curl_easy_setopt(curl_handle, CURLOPT_URL,
+                   "https://www.w3schools.com/xml/simple.xml");
   curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, parseStreamCallback);
   curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)parser);
 
@@ -135,9 +143,9 @@ int main(void)
     fprintf(stderr, "curl_easy_perform() failed: %s\n",
             curl_easy_strerror(res));
   }
-  else if (state.ok) {
+  else if(state.ok) {
     /* Expat requires one final call to finalize parsing. */
-    if (XML_Parse(parser, NULL, 0, 1) == 0) {
+    if(XML_Parse(parser, NULL, 0, 1) == 0) {
       int error_code = XML_GetErrorCode(parser);
       fprintf(stderr, "Finalizing parsing failed with error code %d (%s).\n",
               error_code, XML_ErrorString(error_code));

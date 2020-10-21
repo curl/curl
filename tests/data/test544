@@ -40,9 +40,6 @@ http://%HOSTIP:%HTTPPORT/544
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
 POST /544 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT

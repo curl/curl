@@ -1,0 +1,49 @@
+<testcase>
+<info>
+<keywords>
+CURLINFO_LOW_SPEED_LIMIT
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 3
+Connection: close
+Funny-head: yesyes
+
+AA
+</data>
+<servercmd>
+writedelay: 1
+</servercmd>
+</reply>
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<tool>
+lib1523
+</tool>
+
+<name>
+CURLINFO_LOW_SPEED_LIMIT
+</name>
+
+<command>
+http://%HOSTIP:%HTTPPORT/1523
+</command>
+<killserver>
+http
+</killserver>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

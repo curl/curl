@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,8 @@ CURLOPT_PROXYPORT \- port number the proxy listens on
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXYPORT, long port);
 .SH DESCRIPTION
 Pass a long with this option to set the proxy port to connect to unless it is
-specified in the proxy string \fICURLOPT_PROXY(3)\fP or uses the default one.
+specified in the proxy string \fICURLOPT_PROXY(3)\fP or uses 443 for https
+proxies and 1080 for all others as default.
 
 While this accepts a 'long', the port number is 16 bit so it can't be larger
 than 65535.
@@ -38,7 +39,16 @@ than 65535.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
+  curl_easy_setopt(curl, CURLOPT_PROXY, "localhost");
+  curl_easy_setopt(curl, CURLOPT_PROXYPORT, 8080L);
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Always
 .SH RETURN VALUE

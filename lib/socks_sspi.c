@@ -5,12 +5,12 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2009, 2011, Markus Moeller, <markus_moeller@compuserve.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,9 +34,10 @@
 #include "curl_sspi.h"
 #include "curl_multibyte.h"
 #include "warnless.h"
+#include "strdup.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 /*
@@ -44,14 +45,15 @@
  */
 static int check_sspi_err(struct connectdata *conn,
                           SECURITY_STATUS status,
-                          const char* function)
+                          const char *function)
 {
   if(status != SEC_E_OK &&
      status != SEC_I_COMPLETE_AND_CONTINUE &&
      status != SEC_I_COMPLETE_NEEDED &&
      status != SEC_I_CONTINUE_NEEDED) {
+    char buffer[STRERROR_LEN];
     failf(conn->data, "SSPI error: %s failed: %s", function,
-          Curl_sspi_strerror(conn, status));
+          Curl_sspi_strerror(status, buffer, sizeof(buffer)));
     return 1;
   }
   return 0;
@@ -61,7 +63,7 @@ static int check_sspi_err(struct connectdata *conn,
 CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                       struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   curl_socket_t sock = conn->sock[sockindex];
   CURLcode code;
   ssize_t actualread;
@@ -70,7 +72,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   /* Needs GSS-API authentication */
   SECURITY_STATUS status;
   unsigned long sspi_ret_flags = 0;
-  int gss_enc;
+  unsigned char gss_enc;
   SecBuffer sspi_send_token, sspi_recv_token, sspi_w_token[3];
   SecBufferDesc input_desc, output_desc, wrap_desc;
   SecPkgContext_Sizes sspi_sizes;
@@ -83,7 +85,9 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   unsigned short us_length;
   unsigned long qop;
   unsigned char socksreq[4]; /* room for GSS-API exchange header only */
-  char *service = data->set.str[STRING_SOCKS5_GSSAPI_SERVICE];
+  const char *service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
+                        data->set.str[STRING_PROXY_SERVICE_NAME]  : "rcmd";
+  const size_t service_length = strlen(service);
 
   /*   GSS-API request looks like
    * +----+------+-----+----------------+
@@ -95,17 +99,18 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
   /* prepare service name */
   if(strchr(service, '/')) {
-    service_name = malloc(strlen(service));
+    service_name = strdup(service);
     if(!service_name)
       return CURLE_OUT_OF_MEMORY;
-    memcpy(service_name, service, strlen(service));
   }
   else {
-    service_name = malloc(strlen(service) + strlen(conn->proxy.name) + 2);
+    service_name = malloc(service_length +
+                          strlen(conn->socks_proxy.host.name) + 2);
     if(!service_name)
       return CURLE_OUT_OF_MEMORY;
-    snprintf(service_name, strlen(service) +strlen(conn->proxy.name)+2,
-             "%s/%s", service, conn->proxy.name);
+    msnprintf(service_name, service_length +
+              strlen(conn->socks_proxy.host.name) + 2, "%s/%s",
+              service, conn->socks_proxy.host.name);
   }
 
   input_desc.cBuffers = 1;
@@ -148,12 +153,14 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     return CURLE_COULDNT_CONNECT;
   }
 
+  (void)curlx_nonblock(sock, FALSE);
+
   /* As long as we need to keep sending some context info, and there's no  */
   /* errors, keep sending it...                                            */
   for(;;) {
     TCHAR *sname;
 
-    sname = Curl_convert_UTF8_to_tchar(service_name);
+    sname = curlx_convert_UTF8_to_tchar(service_name);
     if(!sname)
       return CURLE_OUT_OF_MEMORY;
 
@@ -173,7 +180,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                                  &sspi_ret_flags,
                                                  &expiry);
 
-    Curl_unicodefree(sname);
+    curlx_unicodefree(sname);
 
     if(sspi_recv_token.pvBuffer) {
       s_pSecFn->FreeContextBuffer(sspi_recv_token.pvBuffer);
@@ -195,7 +202,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       socksreq[0] = 1;    /* GSS-API subnegotiation version */
       socksreq[1] = 1;    /* authentication message type */
       us_length = htons((short)sspi_send_token.cbBuffer);
-      memcpy(socksreq+2, &us_length, sizeof(short));
+      memcpy(socksreq + 2, &us_length, sizeof(short));
 
       code = Curl_write_plain(conn, sock, (char *)socksreq, 4, &written);
       if(code || (4 != written)) {
@@ -279,7 +286,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       return CURLE_COULDNT_CONNECT;
     }
 
-    memcpy(&us_length, socksreq+2, sizeof(short));
+    memcpy(&us_length, socksreq + 2, sizeof(short));
     us_length = ntohs(us_length);
 
     sspi_recv_token.cbBuffer = us_length;
@@ -320,7 +327,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     failf(data, "Failed to determine user name.");
     return CURLE_COULDNT_CONNECT;
   }
-  infof(data, "SOCKS5 server authencticated user %s with GSS-API.\n",
+  infof(data, "SOCKS5 server authenticated user %s with GSS-API.\n",
         names.sUserName);
   s_pSecFn->FreeContextBuffer(names.sUserName);
 
@@ -337,7 +344,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     gss_enc = 1;
 
   infof(data, "SOCKS5 server supports GSS-API %s data protection.\n",
-        (gss_enc==0)?"no":((gss_enc==1)?"integrity":"confidentiality") );
+        (gss_enc == 0)?"no":((gss_enc == 1)?"integrity":"confidentiality") );
   /* force to no data protection, avoid encryption/decryption for now */
   gss_enc = 0;
   /*
@@ -373,7 +380,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
   if(data->set.socks5_gssapi_nec) {
     us_length = htons((short)1);
-    memcpy(socksreq+2, &us_length, sizeof(short));
+    memcpy(socksreq + 2, &us_length, sizeof(short));
   }
   else {
     status = s_pSecFn->QueryContextAttributes(&sspi_context,
@@ -441,8 +448,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     memcpy((PUCHAR) sspi_send_token.pvBuffer +(int)sspi_w_token[0].cbBuffer,
            sspi_w_token[1].pvBuffer, sspi_w_token[1].cbBuffer);
     memcpy((PUCHAR) sspi_send_token.pvBuffer
-           +sspi_w_token[0].cbBuffer
-           +sspi_w_token[1].cbBuffer,
+           + sspi_w_token[0].cbBuffer
+           + sspi_w_token[1].cbBuffer,
            sspi_w_token[2].pvBuffer, sspi_w_token[2].cbBuffer);
 
     s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
@@ -456,7 +463,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     sspi_w_token[2].cbBuffer = 0;
 
     us_length = htons((short)sspi_send_token.cbBuffer);
-    memcpy(socksreq+2, &us_length, sizeof(short));
+    memcpy(socksreq + 2, &us_length, sizeof(short));
   }
 
   code = Curl_write_plain(conn, sock, (char *)socksreq, 4, &written);
@@ -513,7 +520,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     return CURLE_COULDNT_CONNECT;
   }
 
-  memcpy(&us_length, socksreq+2, sizeof(short));
+  memcpy(&us_length, socksreq + 2, sizeof(short));
   us_length = ntohs(us_length);
 
   sspi_w_token[0].cbBuffer = us_length;
@@ -582,10 +589,11 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     memcpy(socksreq, sspi_w_token[0].pvBuffer, sspi_w_token[0].cbBuffer);
     s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
   }
+  (void)curlx_nonblock(sock, TRUE);
 
   infof(data, "SOCKS5 access with%s protection granted.\n",
-        (socksreq[0]==0)?"out GSS-API data":
-        ((socksreq[0]==1)?" GSS-API integrity":" GSS-API confidentiality"));
+        (socksreq[0] == 0)?"out GSS-API data":
+        ((socksreq[0] == 1)?" GSS-API integrity":" GSS-API confidentiality"));
 
   /* For later use if encryption is required
      conn->socks5_gssapi_enctype = socksreq[0];

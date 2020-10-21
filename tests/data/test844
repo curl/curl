@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+SASL
+SASL AUTH OAUTH2
+RFC6749
+RFC7628
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+AUTH OAUTHBEARER
+REPLY AUTHENTICATE +
+REPLY %b64[n,a=user,%01host=127.0.0.1%01port=%IMAPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64% A002 NO Authentication failed
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP OAuth 2.0 (OAUTHBEARER) failure as continuation
+ </name>
+ <command>
+'imap://%HOSTIP:%IMAPPORT/844/;MAILINDEX=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 67 - CURLE_LOGIN_DENIED
+<errorcode>
+67
+</errorcode>
+#
+# The multi interface considers a broken "CONNECT" as a prematurely broken
+# transfer and such a connection will not get a "LOGOUT"
+<protocol>
+A001 CAPABILITY
+A002 AUTHENTICATE OAUTHBEARER
+%b64[n,a=user,%01host=127.0.0.1%01port=%IMAPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
+</protocol>
+</verify>
+</testcase>

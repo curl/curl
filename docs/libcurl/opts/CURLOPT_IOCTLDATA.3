@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,23 @@ By default, the value of this parameter is NULL.
 .SH PROTOCOLS
 Used with HTTP
 .SH EXAMPLE
-TODO
+.nf
+static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
+{
+  struct data *io = (struct data *)clientp;
+  if(cmd == CURLIOCMD_RESTARTREAD) {
+    lseek(fd, 0, SEEK_SET);
+    current_offset = 0;
+    return CURLIOE_OK;
+  }
+  return CURLIOE_UNKNOWNCMD;
+}
+{
+  struct data ioctl_data;
+  curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctl_callback);
+  curl_easy_setopt(curl, CURLOPT_IOCTLDATA, &ioctl_data);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.12.3
 .SH RETURN VALUE

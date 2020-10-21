@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -35,8 +35,9 @@ input in the 4th argument to the callback.
 If you don't specify a read callback but instead rely on the default internal
 read function, this data must be a valid readable FILE * (cast to 'void *').
 
-If you're using libcurl as a win32 DLL, you MUST use a
-\fICURLOPT_READFUNCTION(3)\fP if you set this option.
+If you're using libcurl as a win32 DLL, you \fBMUST\fP use a
+\fICURLOPT_READFUNCTION(3)\fP if you set this option or you will experience
+crashes.
 .SH DEFAULT
 By default, this is a FILE * to stdin.
 .SH PROTOCOLS
@@ -46,7 +47,7 @@ This is used for all protocols when sending data.
 CURL *curl = curl_easy_init();
 struct MyData this;
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* pass pointer that gets passed in to the
      CURLOPT_READFUNCTION callback */
@@ -56,8 +57,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-This option was once known by the older name \fICURLOPT_INFILE\fP, the name
-\fICURLOPT_READDATA\fP was introduced in 7.9.7.
+This option was once known by the older name CURLOPT_INFILE, the name
+\fICURLOPT_READDATA(3)\fP was introduced in 7.9.7.
 .SH RETURN VALUE
 This will return CURLE_OK.
 .SH "SEE ALSO"

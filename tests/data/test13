@@ -31,12 +31,10 @@ http://%HOSTIP:%HTTPPORT/want/13 -X DELETE
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 DELETE /want/13 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

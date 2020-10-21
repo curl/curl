@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -57,8 +57,11 @@ Unknown/unused argument values passed to the callback will be set to zero
 the callback will be called one or more times first, before it knows the data
 sizes so a program must be made to handle that.
 
-Returning a non-zero value from this callback will cause libcurl to abort the
-transfer and return \fICURLE_ABORTED_BY_CALLBACK\fP.
+If your callback function returns CURL_PROGRESSFUNC_CONTINUE it will cause
+libcurl to continue executing the default progress function.
+
+Returning any other non-zero value from this callback will cause libcurl to
+abort the transfer and return \fICURLE_ABORTED_BY_CALLBACK\fP.
 
 If you transfer data with the multi interface, this function will not be
 called during periods of idleness unless you call the appropriate libcurl
@@ -72,7 +75,7 @@ users.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-http://curl.haxx.se/libcurl/c/progressfunc.html
+https://curl.haxx.se/libcurl/c/progressfunc.html
 .SH AVAILABILITY
 Added in 7.32.0. This callback replaces \fICURLOPT_PROGRESSFUNCTION(3)\fP
 .SH RETURN VALUE

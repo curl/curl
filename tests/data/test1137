@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PASV
+RETR
+--ignore-content-length
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+<servercmd>
+REPLY EPSV 500 no such command
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP RETR --ignore-content-length
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/1137 --ignore-content-length
+</command>
+
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+PASV
+TYPE I
+RETR 1137
+QUIT
+</protocol>
+</verify>
+</testcase>

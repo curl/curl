@@ -36,12 +36,10 @@ HTTP POST with custom content-type
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
 POST /97 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Type: silly/type
 Content-Length: 14

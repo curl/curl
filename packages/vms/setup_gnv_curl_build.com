@@ -7,7 +7,7 @@ $!
 $! GNV needs some files moved into the other directories to help with
 $! the configure script and the build.
 $!
-$! Copyright 2009, John Malmberg
+$! Copyright 2009 - 2020, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -60,7 +60,7 @@ $!
 $! We want detailed build logs.
 $ clist = "/list/show=(expan,includ)"
 $!
-$! We want full symbol names in exact case.  Need a commmon
+$! We want full symbol names in exact case.  Need a common
 $! repository for all directories.
 $ cnames = "/names=(shortened,as_is)/repository=''base_dir'"
 $!
@@ -207,7 +207,7 @@ $   example_apps = example_apps + ",ftpupload,getinfo,getinmemory"
 $   example_apps = example_apps + ",http-post,httpcustomheader,httpput"
 $   example_apps = example_apps + ",https,multi-app,multi-debugcallback"
 $   example_apps = example_apps + ",multi-double,multi-post,multi-single"
-$   example_apps = example_apps + ",persistant,post-callback,postit2"
+$   example_apps = example_apps + ",persistent,post-callback,postit2"
 $   example_apps = example_apps + ",sendrecv,sepheaders,simple,simplepost"
 $   example_apps = example_apps + ",simplessl"
 $!

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,6 +19,12 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
+/* <DESC>
+ * SMTP example using the multi interface
+ * </DESC>
+ */
+
 #include <string.h>
 #include <curl/curl.h>
 
@@ -38,9 +44,10 @@
 static const char *payload_text[] = {
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n",
   "To: " TO "\r\n",
-  "From: " FROM "(Example User)\r\n",
-  "Cc: " CC "(Another example User)\r\n",
-  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n",
+  "From: " FROM " (Example User)\r\n",
+  "Cc: " CC " (Another example User)\r\n",
+  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
+  "rfcpedant.example.org>\r\n",
   "Subject: SMTP multi example message\r\n",
   "\r\n", /* empty line to divide headers from body, see RFC5322 */
   "The body of the message starts here.\r\n",
@@ -180,8 +187,7 @@ int main(void)
     /* get file descriptors from the transfers */
     mc = curl_multi_fdset(mcurl, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    if(mc != CURLM_OK)
-    {
+    if(mc != CURLM_OK) {
       fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
       break;
     }
@@ -205,7 +211,7 @@ int main(void)
     else {
       /* Note that on some platforms 'timeout' may be modified by select().
          If you need access to the original value save a copy beforehand. */
-      rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+      rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
     }
 
     if(tvdiff(tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {

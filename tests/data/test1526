@@ -51,6 +51,9 @@ CURLOPT_PROXYHEADER: separate host/proxy headers
  <command>
  http://the.old.moo.1526:%HTTPPORT/1526 %HOSTIP:%PROXYPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,21 +36,19 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-typedef struct
-{
+struct libthreaddata {
   int     _errno;
   void    *twentybytes;
-} libthreaddata_t;
+};
 
-typedef struct
-{
+struct libdata {
   int         x;
   int         y;
   int         z;
   void        *tenbytes;
   NXKey_t     perthreadkey;   /* if -1, no key obtained... */
   NXMutex_t   *lock;
-} libdata_t;
+};
 
 int         gLibId      = -1;
 void        *gLibHandle = (void *) NULL;
@@ -58,26 +56,27 @@ rtag_t      gAllocTag   = (rtag_t) NULL;
 NXMutex_t   *gLibLock   = (NXMutex_t *) NULL;
 
 /* internal library function prototypes... */
-int  DisposeLibraryData( void * );
-void DisposeThreadData( void * );
-int  GetOrSetUpData( int id, libdata_t **data, libthreaddata_t **threaddata );
+int  DisposeLibraryData(void *);
+void DisposeThreadData(void *);
+int  GetOrSetUpData(int id, struct libdata **data,
+                    struct libthreaddata **threaddata);
 
 
-int _NonAppStart( void        *NLMHandle,
-                  void        *errorScreen,
-                  const char  *cmdLine,
-                  const char  *loadDirPath,
-                  size_t      uninitializedDataLength,
-                  void        *NLMFileHandle,
-                  int         (*readRoutineP)( int conn,
-                                               void *fileHandle, size_t offset,
-                                               size_t nbytes,
-                                               size_t *bytesRead,
-                                               void *buffer ),
+int _NonAppStart(void        *NLMHandle,
+                 void        *errorScreen,
+                 const char  *cmdLine,
+                 const char  *loadDirPath,
+                 size_t      uninitializedDataLength,
+                 void        *NLMFileHandle,
+                 int         (*readRoutineP)(int conn,
+                                             void *fileHandle, size_t offset,
+                                             size_t nbytes,
+                                             size_t *bytesRead,
+                                             void *buffer),
                   size_t      customDataOffset,
                   size_t      customDataSize,
                   int         messageCount,
-                  const char  **messages )
+                  const char  **messages)
 {
   NX_LOCK_INFO_ALLOC(liblock, "Per-Application Data Lock", 0);
 
@@ -132,7 +131,7 @@ int _NonAppStart( void        *NLMHandle,
  * Here we clean up any resources we allocated. Resource tags is a big part
  * of what we created, but NetWare doesn't ask us to free those.
  */
-void _NonAppStop( void )
+void _NonAppStop(void)
 {
   (void) unregister_library(gLibId);
   NXMutexFree(gLibLock);
@@ -149,29 +148,29 @@ void _NonAppStop( void )
  * we return a non-zero value. Right now, there isn't any reason not to allow
  * it.
  */
-int _NonAppCheckUnload( void )
+int _NonAppCheckUnload(void)
 {
     return 0;
 }
 
-int GetOrSetUpData(int id, libdata_t **appData,
-                   libthreaddata_t **threadData )
+int GetOrSetUpData(int id, struct libdata **appData,
+                   struct libthreaddata **threadData)
 {
   int                 err;
-  libdata_t           *app_data;
-  libthreaddata_t *thread_data;
+  struct libdata      *app_data;
+  struct libthreaddata *thread_data;
   NXKey_t             key;
   NX_LOCK_INFO_ALLOC(liblock, "Application Data Lock", 0);
 
   err         = 0;
-  thread_data = (libthreaddata_t *) NULL;
+  thread_data = (struct libthreaddata_t *) NULL;
 
   /*
    * Attempt to get our data for the application calling us. This is where we
    * store whatever application-specific information we need to carry in
    * support of calling applications.
    */
-  app_data = (libdata_t *) get_app_data(id);
+  app_data = (struct libdata *) get_app_data(id);
 
   if(!app_data) {
     /*
@@ -184,19 +183,18 @@ int GetOrSetUpData(int id, libdata_t **appData,
      */
     NXLock(gLibLock);
 
-    if(!(app_data = (libdata_t *) get_app_data(id))) {
-      app_data = malloc(sizeof(libdata_t));
+    app_data = (struct libdata *) get_app_data(id);
+    if(!app_data) {
+      app_data = calloc(1, sizeof(struct libdata));
 
       if(app_data) {
-        memset(app_data, 0, sizeof(libdata_t));
-
         app_data->tenbytes = malloc(10);
         app_data->lock     = NXMutexAlloc(0, 0, &liblock);
 
         if(!app_data->tenbytes || !app_data->lock) {
           if(app_data->lock)
             NXMutexFree(app_data->lock);
-
+          free(app_data->tenbytes);
           free(app_data);
           app_data = (libdata_t *) NULL;
           err      = ENOMEM;
@@ -214,6 +212,9 @@ int GetOrSetUpData(int id, libdata_t **appData,
           err = set_app_data(gLibId, app_data);
 
           if(err) {
+            if(app_data->lock)
+              NXMutexFree(app_data->lock);
+            free(app_data->tenbytes);
             free(app_data);
             app_data = (libdata_t *) NULL;
             err      = ENOMEM;
@@ -247,7 +248,7 @@ int GetOrSetUpData(int id, libdata_t **appData,
        * a pointer is not very important, this just helps to demonstrate that
        * we can have arbitrarily complex per-thread data.
        */
-      thread_data = malloc(sizeof(libthreaddata_t));
+      thread_data = malloc(sizeof(struct libthreaddata));
 
       if(thread_data) {
         thread_data->_errno      = 0;
@@ -255,14 +256,15 @@ int GetOrSetUpData(int id, libdata_t **appData,
 
         if(!thread_data->twentybytes) {
           free(thread_data);
-          thread_data = (libthreaddata_t *) NULL;
+          thread_data = (struct libthreaddata *) NULL;
           err         = ENOMEM;
         }
 
-        if((err = NXKeySetValue(key, thread_data))) {
+        err = NXKeySetValue(key, thread_data);
+        if(err) {
           free(thread_data->twentybytes);
           free(thread_data);
-          thread_data = (libthreaddata_t *) NULL;
+          thread_data = (struct libthreaddata *) NULL;
         }
       }
     }
@@ -277,7 +279,7 @@ int GetOrSetUpData(int id, libdata_t **appData,
   return err;
 }
 
-int DisposeLibraryData( void *data )
+int DisposeLibraryData(void *data)
 {
   if(data) {
     void *tenbytes = ((libdata_t *) data)->tenbytes;
@@ -289,10 +291,10 @@ int DisposeLibraryData( void *data )
   return 0;
 }
 
-void DisposeThreadData( void *data )
+void DisposeThreadData(void *data)
 {
   if(data) {
-    void *twentybytes = ((libthreaddata_t *) data)->twentybytes;
+    void *twentybytes = ((struct libthreaddata *) data)->twentybytes;
 
     free(twentybytes);
     free(data);
@@ -303,14 +305,14 @@ void DisposeThreadData( void *data )
 /* For native CLib-based NLM seems we can do a bit more simple. */
 #include <nwthread.h>
 
-int main ( void )
+int main(void)
 {
   /* initialize any globals here... */
 
   /* do this if any global initializing was done
   SynchronizeStart();
   */
-  ExitThread (TSR_THREAD, 0);
+  ExitThread(TSR_THREAD, 0);
   return 0;
 }
 

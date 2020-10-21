@@ -41,12 +41,10 @@ http://%HOSTIP:%HTTPPORT/1239 -z "-dec 12 12:00:00 1999 GMT" -w '%{response_code
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1239 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 If-Unmodified-Since: Sun, 12 Dec 1999 12:00:00 GMT
 

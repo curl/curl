@@ -1,7 +1,7 @@
 <testcase>
 # Test case inspired by this question on stackoverflow:
 #
-# http://stackoverflow.com/questions/10017165/use-libcurl-with-bluecoat-cookie-proxy
+# https://stackoverflow.com/questions/10017165/use-libcurl-with-bluecoat-cookie-proxy
 #
 <info>
 <keywords>
@@ -64,22 +64,24 @@ HTTP --proxy-anyauth and 407 with cookies
  <command>
 -U myname:mypassword -x %HOSTIP:%HTTPPORT http://z.x.com/1331 --proxy-anyauth -c log/dump1331
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET http://z.x.com/1331 HTTP/1.1
 Host: z.x.com
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://z.x.com/1331 HTTP/1.1
 Host: z.x.com
 Proxy-Authorization: Basic bXluYW1lOm15cGFzc3dvcmQ=
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: proxycookie=weirdo

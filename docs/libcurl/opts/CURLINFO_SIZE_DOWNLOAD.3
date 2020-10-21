@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -26,20 +26,42 @@ CURLINFO_SIZE_DOWNLOAD \- get the number of downloaded bytes
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SIZE_DOWNLOAD, long *dlp);
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SIZE_DOWNLOAD, double *dlp);
 .SH DESCRIPTION
 Pass a pointer to a double to receive the total amount of bytes that were
 downloaded.  The amount is only for the latest transfer and will be reset
 again for each new transfer. This counts actual payload data, what's also
 commonly called body. All meta and header data are excluded and will not be
 counted in this number.
+
+\fICURLINFO_SIZE_DOWNLOAD_T(3)\fP is a newer replacement that returns a more
+sensible variable type.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+
+  /* Perform the request */
+  res = curl_easy_perform(curl);
+
+  if(!res) {
+    /* check the size */
+    double dl;
+    res = curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD, &dl);
+    if(!res) {
+      printf("Downloaded %.0f bytes\\n", cl);
+    }
+  }
+}
+.fi
 .SH AVAILABILITY
 Added in 7.4.1
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "
+.BR CURLINFO_SIZE_DOWNLOAD_T "(3), "
+.BR CURLINFO_SIZE_UPLOAD_T "(3), "

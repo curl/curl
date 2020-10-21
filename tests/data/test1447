@@ -1,0 +1,39 @@
+<testcase>
+<info>
+<keywords>
+HTTP proxy
+FAILURE
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+http
+proxy
+</features>
+ <name>
+Provide illegal proxy name 
+ </name>
+ <command>
+--proxy "http://a:b@/x" http://%HOSTIP:%NOLISTENPORT
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# Couldn't resolve proxy name
+<errorcode>
+5
+</errorcode>
+</verify>
+</testcase>

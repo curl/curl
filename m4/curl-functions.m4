@@ -5,11 +5,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -43,6 +43,10 @@ curl_includes_arpa_inet="\
 #endif
 #ifdef HAVE_ARPA_INET_H
 #  include <arpa/inet.h>
+#endif
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(
@@ -541,6 +545,42 @@ curl_includes_ws2tcpip="\
 ])
 
 
+dnl CURL_INCLUDES_BSDSOCKET
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when bsdsocket.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_BSDSOCKET], [
+curl_includes_bsdsocket="\
+/* includes start */
+#ifdef HAVE_PROTO_BSDSOCKET_H
+#  include <proto/bsdsocket.h>
+  struct Library *SocketBase = NULL;
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    proto/bsdsocket.h,
+    [], [], [      $curl_includes_bsdsocket])
+])
+
+dnl CURL_INCLUDES_NETIF
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when net/if.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_NETIF], [
+curl_includes_netif="\
+/* includes start */
+#ifdef HAVE_NET_IF_H
+#  include <net/if.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    net/if.h,
+    [], [], [$curl_includes_netif])
+])
+
+
 dnl CURL_PREPROCESS_CALLCONV
 dnl -------------------------------------------------
 dnl Set up variable with a preprocessor block which
@@ -635,10 +675,10 @@ AC_DEFUN([CURL_CHECK_FUNC_ALARM], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_ALARM, 1,
       [Define to 1 if you have the alarm function.])
-    ac_cv_func_alarm="yes"
+    curl_cv_func_alarm="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_alarm="no"
+    curl_cv_func_alarm="no"
   fi
 ])
 
@@ -726,10 +766,10 @@ AC_DEFUN([CURL_CHECK_FUNC_BASENAME], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_BASENAME, 1,
       [Define to 1 if you have the basename function.])
-    ac_cv_func_basename="yes"
+    curl_cv_func_basename="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_basename="no"
+    curl_cv_func_basename="no"
   fi
 ])
 
@@ -755,6 +795,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_socket
     ]],[[
       if(0 != closesocket(0))
@@ -772,6 +813,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_MSG_CHECKING([if closesocket is prototyped])
     AC_EGREP_CPP([closesocket],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_socket
     ],[
       AC_MSG_RESULT([yes])
@@ -787,6 +829,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_socket
       ]],[[
         if(0 != closesocket(0))
@@ -820,10 +863,10 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_CLOSESOCKET, 1,
       [Define to 1 if you have the closesocket function.])
-    ac_cv_func_closesocket="yes"
+    curl_cv_func_closesocket="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_closesocket="no"
+    curl_cv_func_closesocket="no"
   fi
 ])
 
@@ -910,10 +953,10 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_CLOSESOCKET_CAMEL, 1,
       [Define to 1 if you have the CloseSocket camel case function.])
-    ac_cv_func_closesocket_camel="yes"
+    curl_cv_func_closesocket_camel="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_closesocket_camel="no"
+    curl_cv_func_closesocket_camel="no"
   fi
 ])
 
@@ -940,6 +983,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CONNECT], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
       $curl_includes_socket
     ]],[[
@@ -958,6 +1002,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CONNECT], [
     AC_MSG_CHECKING([if connect is prototyped])
     AC_EGREP_CPP([connect],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
       $curl_includes_socket
     ],[
@@ -974,6 +1019,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CONNECT], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_sys_socket
         $curl_includes_socket
       ]],[[
@@ -1008,10 +1054,10 @@ AC_DEFUN([CURL_CHECK_FUNC_CONNECT], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_CONNECT, 1,
       [Define to 1 if you have the connect function.])
-    ac_cv_func_connect="yes"
+    curl_cv_func_connect="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_connect="no"
+    curl_cv_func_connect="no"
   fi
 ])
 
@@ -1093,11 +1139,11 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_FCNTL, 1,
       [Define to 1 if you have the fcntl function.])
-    ac_cv_func_fcntl="yes"
+    curl_cv_func_fcntl="yes"
     CURL_CHECK_FUNC_FCNTL_O_NONBLOCK
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_fcntl="no"
+    curl_cv_func_fcntl="no"
   fi
 ])
 
@@ -1121,7 +1167,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL_O_NONBLOCK], [
       ;;
   esac
   #
-  if test "$ac_cv_func_fcntl" = "yes"; then
+  if test "$curl_cv_func_fcntl" = "yes"; then
     AC_MSG_CHECKING([if fcntl O_NONBLOCK is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -1157,98 +1203,12 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL_O_NONBLOCK], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_FCNTL_O_NONBLOCK, 1,
       [Define to 1 if you have a working fcntl O_NONBLOCK function.])
-    ac_cv_func_fcntl_o_nonblock="yes"
+    curl_cv_func_fcntl_o_nonblock="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_fcntl_o_nonblock="no"
+    curl_cv_func_fcntl_o_nonblock="no"
   fi
 ])
-
-
-dnl CURL_CHECK_FUNC_FDOPEN
-dnl -------------------------------------------------
-dnl Verify if fdopen is available, prototyped, and
-dnl can be compiled. If all of these are true, and
-dnl usage has not been previously disallowed with
-dnl shell variable curl_disallow_fdopen, then
-dnl HAVE_FDOPEN will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_FDOPEN], [
-  AC_REQUIRE([CURL_INCLUDES_STDIO])dnl
-  #
-  tst_links_fdopen="unknown"
-  tst_proto_fdopen="unknown"
-  tst_compi_fdopen="unknown"
-  tst_allow_fdopen="unknown"
-  #
-  AC_MSG_CHECKING([if fdopen can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([fdopen])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_fdopen="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_fdopen="no"
-  ])
-  #
-  if test "$tst_links_fdopen" = "yes"; then
-    AC_MSG_CHECKING([if fdopen is prototyped])
-    AC_EGREP_CPP([fdopen],[
-      $curl_includes_stdio
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_fdopen="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_fdopen="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_fdopen" = "yes"; then
-    AC_MSG_CHECKING([if fdopen is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_stdio
-      ]],[[
-        if(0 != fdopen(0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_fdopen="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_fdopen="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_fdopen" = "yes"; then
-    AC_MSG_CHECKING([if fdopen usage allowed])
-    if test "x$curl_disallow_fdopen" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_fdopen="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_fdopen="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if fdopen might be used])
-  if test "$tst_links_fdopen" = "yes" &&
-     test "$tst_proto_fdopen" = "yes" &&
-     test "$tst_compi_fdopen" = "yes" &&
-     test "$tst_allow_fdopen" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_FDOPEN, 1,
-      [Define to 1 if you have the fdopen function.])
-    ac_cv_func_fdopen="yes"
-  else
-    AC_MSG_RESULT([no])
-    ac_cv_func_fdopen="no"
-  fi
-])
-
 
 dnl CURL_CHECK_FUNC_FGETXATTR
 dnl -------------------------------------------------
@@ -1364,10 +1324,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FGETXATTR], [
       AC_DEFINE(HAVE_FGETXATTR_6, 1, [fgetxattr() takes 6 args])
     fi
     #
-    ac_cv_func_fgetxattr="yes"
+    curl_cv_func_fgetxattr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_fgetxattr="no"
+    curl_cv_func_fgetxattr="no"
   fi
 ])
 
@@ -1486,10 +1446,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FLISTXATTR], [
       AC_DEFINE(HAVE_FLISTXATTR_4, 1, [flistxattr() takes 4 args])
     fi
     #
-    ac_cv_func_flistxattr="yes"
+    curl_cv_func_flistxattr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_flistxattr="no"
+    curl_cv_func_flistxattr="no"
   fi
 ])
 
@@ -1582,10 +1542,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FREEADDRINFO], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_FREEADDRINFO, 1,
       [Define to 1 if you have the freeaddrinfo function.])
-    ac_cv_func_freeaddrinfo="yes"
+    curl_cv_func_freeaddrinfo="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_freeaddrinfo="no"
+    curl_cv_func_freeaddrinfo="no"
   fi
 ])
 
@@ -1666,10 +1626,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FREEIFADDRS], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_FREEIFADDRS, 1,
       [Define to 1 if you have the freeifaddrs function.])
-    ac_cv_func_freeifaddrs="yes"
+    curl_cv_func_freeifaddrs="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_freeifaddrs="no"
+    curl_cv_func_freeifaddrs="no"
   fi
 ])
 
@@ -1788,10 +1748,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FREMOVEXATTR], [
       AC_DEFINE(HAVE_FREMOVEXATTR_3, 1, [fremovexattr() takes 3 args])
     fi
     #
-    ac_cv_func_fremovexattr="yes"
+    curl_cv_func_fremovexattr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_fremovexattr="no"
+    curl_cv_func_fremovexattr="no"
   fi
 ])
 
@@ -1910,10 +1870,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FSETXATTR], [
       AC_DEFINE(HAVE_FSETXATTR_6, 1, [fsetxattr() takes 6 args])
     fi
     #
-    ac_cv_func_fsetxattr="yes"
+    curl_cv_func_fsetxattr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_fsetxattr="no"
+    curl_cv_func_fsetxattr="no"
   fi
 ])
 
@@ -1995,10 +1955,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FTRUNCATE], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_FTRUNCATE, 1,
       [Define to 1 if you have the ftruncate function.])
-    ac_cv_func_ftruncate="yes"
+    curl_cv_func_ftruncate="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ftruncate="no"
+    curl_cv_func_ftruncate="no"
   fi
 ])
 
@@ -2086,7 +2046,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_ws2tcpip
         $curl_includes_stdlib
@@ -2097,6 +2057,12 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         struct addrinfo hints;
         struct addrinfo *ai = 0;
         int error;
+
+        #ifdef HAVE_WINSOCK2_H
+        WSADATA wsa;
+        if (WSAStartup(MAKEWORD(2,2), &wsa))
+                exit(2);
+        #endif
 
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_NUMERICHOST;
@@ -2138,14 +2104,14 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GETADDRINFO, 1,
       [Define to 1 if you have a working getaddrinfo function.])
-    ac_cv_func_getaddrinfo="yes"
+    curl_cv_func_getaddrinfo="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_getaddrinfo="no"
-    ac_cv_func_getaddrinfo_threadsafe="no"
+    curl_cv_func_getaddrinfo="no"
+    curl_cv_func_getaddrinfo_threadsafe="no"
   fi
   #
-  if test "$ac_cv_func_getaddrinfo" = "yes"; then
+  if test "$curl_cv_func_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo is threadsafe])
     case $host_os in
       aix[[1234]].* | aix5.[[01]].*)
@@ -2198,7 +2164,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         ;;
     esac
     if test "$tst_tsafe_getaddrinfo" = "unknown" &&
-       test "$ac_cv_native_windows" = "yes"; then
+       test "$curl_cv_native_windows" = "yes"; then
       tst_tsafe_getaddrinfo="yes"
     fi
     if test "$tst_tsafe_getaddrinfo" = "unknown"; then
@@ -2253,9 +2219,9 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
     if test "$tst_tsafe_getaddrinfo" = "yes"; then
       AC_DEFINE_UNQUOTED(HAVE_GETADDRINFO_THREADSAFE, 1,
         [Define to 1 if the getaddrinfo function is threadsafe.])
-      ac_cv_func_getaddrinfo_threadsafe="yes"
+      curl_cv_func_getaddrinfo_threadsafe="yes"
     else
-      ac_cv_func_getaddrinfo_threadsafe="no"
+      curl_cv_func_getaddrinfo_threadsafe="no"
     fi
   fi
 ])
@@ -2282,6 +2248,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ]],[[
       if(0 != gethostbyaddr(0, 0, 0))
@@ -2299,6 +2266,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR], [
     AC_MSG_CHECKING([if gethostbyaddr is prototyped])
     AC_EGREP_CPP([gethostbyaddr],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ],[
       AC_MSG_RESULT([yes])
@@ -2314,6 +2282,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_netdb
       ]],[[
         if(0 != gethostbyaddr(0, 0, 0))
@@ -2347,10 +2316,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GETHOSTBYADDR, 1,
       [Define to 1 if you have the gethostbyaddr function.])
-    ac_cv_func_gethostbyaddr="yes"
+    curl_cv_func_gethostbyaddr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_gethostbyaddr="no"
+    curl_cv_func_gethostbyaddr="no"
   fi
 ])
 
@@ -2375,6 +2344,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GAI_STRERROR], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ]],[[
       if(0 != gai_strerror(0))
@@ -2392,6 +2362,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GAI_STRERROR], [
     AC_MSG_CHECKING([if gai_strerror is prototyped])
     AC_EGREP_CPP([gai_strerror],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ],[
       AC_MSG_RESULT([yes])
@@ -2407,6 +2378,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GAI_STRERROR], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_netdb
       ]],[[
         if(0 != gai_strerror(0))
@@ -2440,10 +2412,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GAI_STRERROR], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GAI_STRERROR, 1,
       [Define to 1 if you have the gai_strerror function.])
-    ac_cv_func_gai_strerror="yes"
+    curl_cv_func_gai_strerror="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_gai_strerror="no"
+    curl_cv_func_gai_strerror="no"
   fi
 ])
 
@@ -2582,10 +2554,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR_R], [
       AC_DEFINE(HAVE_GETHOSTBYADDR_R_8, 1, [gethostbyaddr_r() takes 8 args])
     fi
     #
-    ac_cv_func_gethostbyaddr_r="yes"
+    curl_cv_func_gethostbyaddr_r="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_gethostbyaddr_r="no"
+    curl_cv_func_gethostbyaddr_r="no"
   fi
 ])
 
@@ -2611,6 +2583,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ]],[[
       if(0 != gethostbyname(0))
@@ -2628,6 +2601,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME], [
     AC_MSG_CHECKING([if gethostbyname is prototyped])
     AC_EGREP_CPP([gethostbyname],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ],[
       AC_MSG_RESULT([yes])
@@ -2643,6 +2617,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_netdb
       ]],[[
         if(0 != gethostbyname(0))
@@ -2676,10 +2651,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GETHOSTBYNAME, 1,
       [Define to 1 if you have the gethostbyname function.])
-    ac_cv_func_gethostbyname="yes"
+    curl_cv_func_gethostbyname="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_gethostbyname="no"
+    curl_cv_func_gethostbyname="no"
   fi
 ])
 
@@ -2818,10 +2793,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
       AC_DEFINE(HAVE_GETHOSTBYNAME_R_6, 1, [gethostbyname_r() takes 6 args])
     fi
     #
-    ac_cv_func_gethostbyname_r="yes"
+    curl_cv_func_gethostbyname_r="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_gethostbyname_r="no"
+    curl_cv_func_gethostbyname_r="no"
   fi
 ])
 
@@ -2838,6 +2813,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
   AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
   AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   #
   tst_links_gethostname="unknown"
   tst_proto_gethostname="unknown"
@@ -2848,6 +2824,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_unistd
     ]],[[
       if(0 != gethostname(0, 0))
@@ -2865,6 +2842,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
     AC_MSG_CHECKING([if gethostname is prototyped])
     AC_EGREP_CPP([gethostname],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_unistd
     ],[
       AC_MSG_RESULT([yes])
@@ -2880,6 +2858,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_unistd
       ]],[[
         if(0 != gethostname(0, 0))
@@ -2903,6 +2882,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
           AC_COMPILE_IFELSE([
             AC_LANG_PROGRAM([[
               $curl_includes_winsock2
+      $curl_includes_bsdsocket
               $curl_includes_unistd
               $curl_preprocess_callconv
               extern int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
@@ -2942,10 +2922,301 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GETHOSTNAME, 1,
       [Define to 1 if you have the gethostname function.])
-    ac_cv_func_gethostname="yes"
+    curl_cv_func_gethostname="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_gethostname="no"
+    curl_cv_func_gethostname="no"
+  fi
+])
+
+dnl CURL_CHECK_FUNC_GETPEERNAME
+dnl -------------------------------------------------
+dnl Verify if getpeername is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_getpeername, then
+dnl HAVE_GETPEERNAME will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_GETPEERNAME], [
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
+  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
+  #
+  tst_links_getpeername="unknown"
+  tst_proto_getpeername="unknown"
+  tst_compi_getpeername="unknown"
+  tst_allow_getpeername="unknown"
+  #
+  AC_MSG_CHECKING([if getpeername can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_winsock2
+      $curl_includes_bsdsocket
+      $curl_includes_sys_socket
+    ]],[[
+      if(0 != getpeername(0, (void *)0, (void *)0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_getpeername="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_getpeername="no"
+  ])
+  #
+  if test "$tst_links_getpeername" = "yes"; then
+    AC_MSG_CHECKING([if getpeername is prototyped])
+    AC_EGREP_CPP([getpeername],[
+      $curl_includes_winsock2
+      $curl_includes_bsdsocket
+      $curl_includes_sys_socket
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_getpeername="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_getpeername="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_getpeername" = "yes"; then
+    AC_MSG_CHECKING([if getpeername is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_winsock2
+        $curl_includes_bsdsocket
+        $curl_includes_sys_socket
+      ]],[[
+        if(0 != getpeername(0, (void *)0, (void *)0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_getpeername="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_getpeername="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_getpeername" = "yes"; then
+    AC_MSG_CHECKING([if getpeername usage allowed])
+    if test "x$curl_disallow_getpeername" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_getpeername="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_getpeername="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if getpeername might be used])
+  if test "$tst_links_getpeername" = "yes" &&
+     test "$tst_proto_getpeername" = "yes" &&
+     test "$tst_compi_getpeername" = "yes" &&
+     test "$tst_allow_getpeername" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_GETPEERNAME, 1,
+      [Define to 1 if you have the getpeername function.])
+    curl_cv_func_getpeername="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_getpeername="no"
+  fi
+])
+
+dnl CURL_CHECK_FUNC_GETSOCKNAME
+dnl -------------------------------------------------
+dnl Verify if getsockname is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_getsockname, then
+dnl HAVE_GETSOCKNAME will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
+  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
+  #
+  tst_links_getsockname="unknown"
+  tst_proto_getsockname="unknown"
+  tst_compi_getsockname="unknown"
+  tst_allow_getsockname="unknown"
+  #
+  AC_MSG_CHECKING([if getsockname can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_winsock2
+      $curl_includes_bsdsocket
+      $curl_includes_sys_socket
+    ]],[[
+      if(0 != getsockname(0, (void *)0, (void *)0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_getsockname="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_getsockname="no"
+  ])
+  #
+  if test "$tst_links_getsockname" = "yes"; then
+    AC_MSG_CHECKING([if getsockname is prototyped])
+    AC_EGREP_CPP([getsockname],[
+      $curl_includes_winsock2
+      $curl_includes_bsdsocket
+      $curl_includes_sys_socket
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_getsockname="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_getsockname="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_getsockname" = "yes"; then
+    AC_MSG_CHECKING([if getsockname is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_winsock2
+        $curl_includes_bsdsocket
+        $curl_includes_sys_socket
+      ]],[[
+        if(0 != getsockname(0, (void *)0, (void *)0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_getsockname="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_getsockname="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_getsockname" = "yes"; then
+    AC_MSG_CHECKING([if getsockname usage allowed])
+    if test "x$curl_disallow_getsockname" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_getsockname="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_getsockname="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if getsockname might be used])
+  if test "$tst_links_getsockname" = "yes" &&
+     test "$tst_proto_getsockname" = "yes" &&
+     test "$tst_compi_getsockname" = "yes" &&
+     test "$tst_allow_getsockname" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_GETSOCKNAME, 1,
+      [Define to 1 if you have the getsockname function.])
+    curl_cv_func_getsockname="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_getsockname="no"
+  fi
+])
+
+dnl CURL_CHECK_FUNC_IF_NAMETOINDEX
+dnl -------------------------------------------------
+dnl Verify if if_nametoindex is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_if_nametoindex, then
+dnl HAVE_IF_NAMETOINDEX will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_IF_NAMETOINDEX], [
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_NETIF])dnl
+  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
+  #
+  tst_links_if_nametoindex="unknown"
+  tst_proto_if_nametoindex="unknown"
+  tst_compi_if_nametoindex="unknown"
+  tst_allow_if_nametoindex="unknown"
+  #
+  AC_MSG_CHECKING([if if_nametoindex can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_winsock2
+      $curl_includes_bsdsocket
+      #include <net/if.h>
+    ]],[[
+      if(0 != if_nametoindex(""))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_if_nametoindex="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_if_nametoindex="no"
+  ])
+  #
+  if test "$tst_links_if_nametoindex" = "yes"; then
+    AC_MSG_CHECKING([if if_nametoindex is prototyped])
+    AC_EGREP_CPP([if_nametoindex],[
+      $curl_includes_winsock2
+      $curl_includes_netif
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_if_nametoindex="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_if_nametoindex="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_if_nametoindex" = "yes"; then
+    AC_MSG_CHECKING([if if_nametoindex is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_winsock2
+        $curl_includes_netif
+      ]],[[
+        if(0 != if_nametoindex(""))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_if_nametoindex="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_if_nametoindex="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_if_nametoindex" = "yes"; then
+    AC_MSG_CHECKING([if if_nametoindex usage allowed])
+    if test "x$curl_disallow_if_nametoindex" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_if_nametoindex="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_if_nametoindex="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if if_nametoindex might be used])
+  if test "$tst_links_if_nametoindex" = "yes" &&
+     test "$tst_proto_if_nametoindex" = "yes" &&
+     test "$tst_compi_if_nametoindex" = "yes" &&
+     test "$tst_allow_if_nametoindex" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_IF_NAMETOINDEX, 1,
+      [Define to 1 if you have the if_nametoindex function.])
+    curl_cv_func_if_nametoindex="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_if_nametoindex="no"
   fi
 ])
 
@@ -3014,7 +3285,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_getifaddrs" = "yes"; then
     AC_MSG_CHECKING([if getifaddrs seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_ifaddrs
@@ -3058,10 +3329,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GETIFADDRS, 1,
       [Define to 1 if you have a working getifaddrs function.])
-    ac_cv_func_getifaddrs="yes"
+    curl_cv_func_getifaddrs="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_getifaddrs="no"
+    curl_cv_func_getifaddrs="no"
   fi
 ])
 
@@ -3198,10 +3469,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETSERVBYPORT_R], [
       AC_DEFINE(GETSERVBYPORT_R_BUFSIZE, 4096,
         [Specifies the size of the buffer to pass to getservbyport_r])
     fi
-    ac_cv_func_getservbyport_r="yes"
+    curl_cv_func_getservbyport_r="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_getservbyport_r="no"
+    curl_cv_func_getservbyport_r="no"
   fi
 ])
 
@@ -3320,10 +3591,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETXATTR], [
       AC_DEFINE(HAVE_GETXATTR_6, 1, [getxattr() takes 6 args])
     fi
     #
-    ac_cv_func_getxattr="yes"
+    curl_cv_func_getxattr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_getxattr="no"
+    curl_cv_func_getxattr="no"
   fi
 ])
 
@@ -3392,7 +3663,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_gmtime_r" = "yes"; then
     AC_MSG_CHECKING([if gmtime_r seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_time
@@ -3436,10 +3707,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GMTIME_R, 1,
       [Define to 1 if you have a working gmtime_r function.])
-    ac_cv_func_gmtime_r="yes"
+    curl_cv_func_gmtime_r="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_gmtime_r="no"
+    curl_cv_func_gmtime_r="no"
   fi
 ])
 
@@ -3560,10 +3831,10 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOA_R], [
       AC_DEFINE(HAVE_INET_NTOA_R_3, 1, [inet_ntoa_r() takes 3 args])
     fi
     #
-    ac_cv_func_inet_ntoa_r="yes"
+    curl_cv_func_inet_ntoa_r="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_inet_ntoa_r="no"
+    curl_cv_func_inet_ntoa_r="no"
   fi
 ])
 
@@ -3633,7 +3904,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_inet_ntop" = "yes"; then
     AC_MSG_CHECKING([if inet_ntop seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_arpa_inet
@@ -3719,10 +3990,10 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_INET_NTOP, 1,
       [Define to 1 if you have a IPv6 capable working inet_ntop function.])
-    ac_cv_func_inet_ntop="yes"
+    curl_cv_func_inet_ntop="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_inet_ntop="no"
+    curl_cv_func_inet_ntop="no"
   fi
 ])
 
@@ -3792,7 +4063,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_inet_pton" = "yes"; then
     AC_MSG_CHECKING([if inet_pton seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_arpa_inet
@@ -3871,10 +4142,10 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_INET_PTON, 1,
       [Define to 1 if you have a IPv6 capable working inet_pton function.])
-    ac_cv_func_inet_pton="yes"
+    curl_cv_func_inet_pton="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_inet_pton="no"
+    curl_cv_func_inet_pton="no"
   fi
 ])
 
@@ -3956,12 +4227,12 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTL, 1,
       [Define to 1 if you have the ioctl function.])
-    ac_cv_func_ioctl="yes"
+    curl_cv_func_ioctl="yes"
     CURL_CHECK_FUNC_IOCTL_FIONBIO
     CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctl="no"
+    curl_cv_func_ioctl="no"
   fi
 ])
 
@@ -3978,7 +4249,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_FIONBIO], [
   tst_compi_ioctl_fionbio="unknown"
   tst_allow_ioctl_fionbio="unknown"
   #
-  if test "$ac_cv_func_ioctl" = "yes"; then
+  if test "$curl_cv_func_ioctl" = "yes"; then
     AC_MSG_CHECKING([if ioctl FIONBIO is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -4014,10 +4285,10 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_FIONBIO], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTL_FIONBIO, 1,
       [Define to 1 if you have a working ioctl FIONBIO function.])
-    ac_cv_func_ioctl_fionbio="yes"
+    curl_cv_func_ioctl_fionbio="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctl_fionbio="no"
+    curl_cv_func_ioctl_fionbio="no"
   fi
 ])
 
@@ -4034,7 +4305,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR], [
   tst_compi_ioctl_siocgifaddr="unknown"
   tst_allow_ioctl_siocgifaddr="unknown"
   #
-  if test "$ac_cv_func_ioctl" = "yes"; then
+  if test "$curl_cv_func_ioctl" = "yes"; then
     AC_MSG_CHECKING([if ioctl SIOCGIFADDR is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -4071,10 +4342,10 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTL_SIOCGIFADDR, 1,
       [Define to 1 if you have a working ioctl SIOCGIFADDR function.])
-    ac_cv_func_ioctl_siocgifaddr="yes"
+    curl_cv_func_ioctl_siocgifaddr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctl_siocgifaddr="no"
+    curl_cv_func_ioctl_siocgifaddr="no"
   fi
 ])
 
@@ -4099,6 +4370,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
     ]],[[
       if(0 != ioctlsocket(0, 0, 0))
         return 1;
@@ -4115,6 +4387,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
     AC_MSG_CHECKING([if ioctlsocket is prototyped])
     AC_EGREP_CPP([ioctlsocket],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
     ],[
       AC_MSG_RESULT([yes])
       tst_proto_ioctlsocket="yes"
@@ -4129,6 +4402,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
       ]],[[
         if(0 != ioctlsocket(0, 0, 0))
           return 1;
@@ -4161,11 +4435,11 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET, 1,
       [Define to 1 if you have the ioctlsocket function.])
-    ac_cv_func_ioctlsocket="yes"
+    curl_cv_func_ioctlsocket="yes"
     CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctlsocket="no"
+    curl_cv_func_ioctlsocket="no"
   fi
 ])
 
@@ -4182,11 +4456,12 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
   tst_compi_ioctlsocket_fionbio="unknown"
   tst_allow_ioctlsocket_fionbio="unknown"
   #
-  if test "$ac_cv_func_ioctlsocket" = "yes"; then
+  if test "$curl_cv_func_ioctlsocket" = "yes"; then
     AC_MSG_CHECKING([if ioctlsocket FIONBIO is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
       ]],[[
         int flags = 0;
         if(0 != ioctlsocket(0, FIONBIO, &flags))
@@ -4218,10 +4493,10 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET_FIONBIO, 1,
       [Define to 1 if you have a working ioctlsocket FIONBIO function.])
-    ac_cv_func_ioctlsocket_fionbio="yes"
+    curl_cv_func_ioctlsocket_fionbio="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctlsocket_fionbio="no"
+    curl_cv_func_ioctlsocket_fionbio="no"
   fi
 ])
 
@@ -4303,11 +4578,11 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET_CAMEL, 1,
       [Define to 1 if you have the IoctlSocket camel case function.])
-    ac_cv_func_ioctlsocket_camel="yes"
+    curl_cv_func_ioctlsocket_camel="yes"
     CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctlsocket_camel="no"
+    curl_cv_func_ioctlsocket_camel="no"
   fi
 ])
 
@@ -4323,7 +4598,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
   tst_compi_ioctlsocket_camel_fionbio="unknown"
   tst_allow_ioctlsocket_camel_fionbio="unknown"
   #
-  if test "$ac_cv_func_ioctlsocket_camel" = "yes"; then
+  if test "$curl_cv_func_ioctlsocket_camel" = "yes"; then
     AC_MSG_CHECKING([if IoctlSocket FIONBIO is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -4359,10 +4634,10 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET_CAMEL_FIONBIO, 1,
       [Define to 1 if you have a working IoctlSocket camel case FIONBIO function.])
-    ac_cv_func_ioctlsocket_camel_fionbio="yes"
+    curl_cv_func_ioctlsocket_camel_fionbio="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctlsocket_camel_fionbio="no"
+    curl_cv_func_ioctlsocket_camel_fionbio="no"
   fi
 ])
 
@@ -4481,10 +4756,10 @@ AC_DEFUN([CURL_CHECK_FUNC_LISTXATTR], [
       AC_DEFINE(HAVE_LISTXATTR_4, 1, [listxattr() takes 4 args])
     fi
     #
-    ac_cv_func_listxattr="yes"
+    curl_cv_func_listxattr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_listxattr="no"
+    curl_cv_func_listxattr="no"
   fi
 ])
 
@@ -4553,7 +4828,7 @@ AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_localtime_r" = "yes"; then
     AC_MSG_CHECKING([if localtime_r seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_time
@@ -4597,10 +4872,10 @@ AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_LOCALTIME_R, 1,
       [Define to 1 if you have a working localtime_r function.])
-    ac_cv_func_localtime_r="yes"
+    curl_cv_func_localtime_r="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_localtime_r="no"
+    curl_cv_func_localtime_r="no"
   fi
 ])
 
@@ -4702,10 +4977,10 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_MEMRCHR, 1,
       [Define to 1 if you have the memrchr function or macro.])
-    ac_cv_func_memrchr="yes"
+    curl_cv_func_memrchr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_memrchr="no"
+    curl_cv_func_memrchr="no"
   fi
 ])
 
@@ -4729,12 +5004,15 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   tst_allow_poll="unknown"
   #
   case $host_os in
-    darwin[[123456789]].*|darwin10.*|darwin11.*|darwin12.*|interix*)
+    darwin*|interix*)
       dnl poll() does not work on these platforms
       dnl Interix: "does provide poll(), but the implementing developer must
       dnl have been in a bad mood, because poll() only works on the /proc
       dnl filesystem here"
+      dnl macOS: poll() first didn't exist, then was broken until fixed in 10.9
+      dnl only to break again in 10.12.
       curl_disallow_poll="yes"
+      tst_compi_poll="no"
       ;;
   esac
   #
@@ -4789,15 +5067,31 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_poll" = "yes"; then
     AC_MSG_CHECKING([if poll seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_poll
+        $curl_includes_time
       ]],[[
+        /* detect the original poll() breakage */
         if(0 != poll(0, 0, 10))
           exit(1); /* fail */
-        else
-          exit(0);
+        else {
+          /* detect the 10.12 poll() breakage */
+          struct timeval before, after;
+          int rc;
+          size_t us;
+
+          gettimeofday(&before, NULL);
+          rc = poll(NULL, 0, 500);
+          gettimeofday(&after, NULL);
+
+          us = (after.tv_sec - before.tv_sec) * 1000000 +
+            (after.tv_usec - before.tv_usec);
+
+          if(us < 400000)
+            exit(1);
+        }
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -4831,10 +5125,10 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
       [Define to 1 if you have a working poll function.])
     AC_DEFINE_UNQUOTED(HAVE_POLL_FINE, 1,
       [If you have a fine poll])
-    ac_cv_func_poll="yes"
+    curl_cv_func_poll="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_poll="no"
+    curl_cv_func_poll="no"
   fi
 ])
 
@@ -4953,10 +5247,10 @@ AC_DEFUN([CURL_CHECK_FUNC_REMOVEXATTR], [
       AC_DEFINE(HAVE_REMOVEXATTR_3, 1, [removexattr() takes 3 args])
     fi
     #
-    ac_cv_func_removexattr="yes"
+    curl_cv_func_removexattr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_removexattr="no"
+    curl_cv_func_removexattr="no"
   fi
 ])
 
@@ -4982,6 +5276,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ]],[[
       if(0 != setsockopt(0, 0, 0, 0, 0))
@@ -4999,6 +5294,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT], [
     AC_MSG_CHECKING([if setsockopt is prototyped])
     AC_EGREP_CPP([setsockopt],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ],[
       AC_MSG_RESULT([yes])
@@ -5014,6 +5310,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
         if(0 != setsockopt(0, 0, 0, 0, 0))
@@ -5047,11 +5344,11 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SETSOCKOPT, 1,
       [Define to 1 if you have the setsockopt function.])
-    ac_cv_func_setsockopt="yes"
+    curl_cv_func_setsockopt="yes"
     CURL_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_setsockopt="no"
+    curl_cv_func_setsockopt="no"
   fi
 ])
 
@@ -5068,11 +5365,12 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK], [
   tst_compi_setsockopt_so_nonblock="unknown"
   tst_allow_setsockopt_so_nonblock="unknown"
   #
-  if test "$ac_cv_func_setsockopt" = "yes"; then
+  if test "$curl_cv_func_setsockopt" = "yes"; then
     AC_MSG_CHECKING([if setsockopt SO_NONBLOCK is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
         if(0 != setsockopt(0, SOL_SOCKET, SO_NONBLOCK, 0, 0))
@@ -5104,10 +5402,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SETSOCKOPT_SO_NONBLOCK, 1,
       [Define to 1 if you have a working setsockopt SO_NONBLOCK function.])
-    ac_cv_func_setsockopt_so_nonblock="yes"
+    curl_cv_func_setsockopt_so_nonblock="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_setsockopt_so_nonblock="no"
+    curl_cv_func_setsockopt_so_nonblock="no"
   fi
 ])
 
@@ -5226,10 +5524,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SETXATTR], [
       AC_DEFINE(HAVE_SETXATTR_6, 1, [setxattr() takes 6 args])
     fi
     #
-    ac_cv_func_setxattr="yes"
+    curl_cv_func_setxattr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_setxattr="no"
+    curl_cv_func_setxattr="no"
   fi
 ])
 
@@ -5311,10 +5609,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGACTION], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SIGACTION, 1,
       [Define to 1 if you have the sigaction function.])
-    ac_cv_func_sigaction="yes"
+    curl_cv_func_sigaction="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_sigaction="no"
+    curl_cv_func_sigaction="no"
   fi
 ])
 
@@ -5396,10 +5694,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGINTERRUPT], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SIGINTERRUPT, 1,
       [Define to 1 if you have the siginterrupt function.])
-    ac_cv_func_siginterrupt="yes"
+    curl_cv_func_siginterrupt="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_siginterrupt="no"
+    curl_cv_func_siginterrupt="no"
   fi
 ])
 
@@ -5481,10 +5779,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGNAL], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SIGNAL, 1,
       [Define to 1 if you have the signal function.])
-    ac_cv_func_signal="yes"
+    curl_cv_func_signal="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_signal="no"
+    curl_cv_func_signal="no"
   fi
 ])
 
@@ -5588,10 +5886,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGSETJMP], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SIGSETJMP, 1,
       [Define to 1 if you have the sigsetjmp function or macro.])
-    ac_cv_func_sigsetjmp="yes"
+    curl_cv_func_sigsetjmp="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_sigsetjmp="no"
+    curl_cv_func_sigsetjmp="no"
   fi
 ])
 
@@ -5618,6 +5916,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
       $curl_includes_socket
     ]],[[
@@ -5636,6 +5935,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
     AC_MSG_CHECKING([if socket is prototyped])
     AC_EGREP_CPP([socket],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
       $curl_includes_socket
     ],[
@@ -5652,6 +5952,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_sys_socket
         $curl_includes_socket
       ]],[[
@@ -5686,10 +5987,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SOCKET, 1,
       [Define to 1 if you have the socket function.])
-    ac_cv_func_socket="yes"
+    curl_cv_func_socket="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_socket="no"
+    curl_cv_func_socket="no"
   fi
 ])
 
@@ -5775,10 +6076,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SOCKETPAIR, 1,
       [Define to 1 if you have the socketpair function.])
-    ac_cv_func_socketpair="yes"
+    curl_cv_func_socketpair="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_socketpair="no"
+    curl_cv_func_socketpair="no"
   fi
 ])
 
@@ -5860,10 +6161,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRCASECMP], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRCASECMP, 1,
       [Define to 1 if you have the strcasecmp function.])
-    ac_cv_func_strcasecmp="yes"
+    curl_cv_func_strcasecmp="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_strcasecmp="no"
+    curl_cv_func_strcasecmp="no"
   fi
 ])
 
@@ -5944,10 +6245,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRCMPI], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRCMPI, 1,
       [Define to 1 if you have the strcmpi function.])
-    ac_cv_func_strcmpi="yes"
+    curl_cv_func_strcmpi="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_strcmpi="no"
+    curl_cv_func_strcmpi="no"
   fi
 ])
 
@@ -6029,10 +6330,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRDUP], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRDUP, 1,
       [Define to 1 if you have the strdup function.])
-    ac_cv_func_strdup="yes"
+    curl_cv_func_strdup="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_strdup="no"
+    curl_cv_func_strdup="no"
   fi
 ])
 
@@ -6049,7 +6350,7 @@ dnl glibc-style strerror_r:
 dnl
 dnl      char *strerror_r(int errnum, char *workbuf, size_t bufsize);
 dnl
-dnl  glibc-style strerror_r returns a pointer to the the error string,
+dnl  glibc-style strerror_r returns a pointer to the error string,
 dnl  and might use the provided workbuf as a scratch area if needed. A
 dnl  quick test on a few systems shows that it's usually not used at all.
 dnl
@@ -6152,7 +6453,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_glibc_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_string
@@ -6213,7 +6514,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_posix_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_string
@@ -6288,10 +6589,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
       AC_DEFINE_UNQUOTED(STRERROR_R_TYPE_ARG3, $tst_posix_strerror_r_type_arg3,
         [Define to the type of arg 3 for strerror_r.])
     fi
-    ac_cv_func_strerror_r="yes"
+    curl_cv_func_strerror_r="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_strerror_r="no"
+    curl_cv_func_strerror_r="no"
   fi
   #
   if test "$tst_compi_strerror_r" = "yes" &&
@@ -6379,10 +6680,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRICMP], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRICMP, 1,
       [Define to 1 if you have the stricmp function.])
-    ac_cv_func_stricmp="yes"
+    curl_cv_func_stricmp="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_stricmp="no"
+    curl_cv_func_stricmp="no"
   fi
 ])
 
@@ -6463,10 +6764,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRNCASECMP], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRNCASECMP, 1,
       [Define to 1 if you have the strncasecmp function.])
-    ac_cv_func_strncasecmp="yes"
+    curl_cv_func_strncasecmp="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_strncasecmp="no"
+    curl_cv_func_strncasecmp="no"
   fi
 ])
 
@@ -6548,10 +6849,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRNCMPI], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRNCMPI, 1,
       [Define to 1 if you have the strncmpi function.])
-    ac_cv_func_strncmpi="yes"
+    curl_cv_func_strncmpi="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_strncmpi="no"
+    curl_cv_func_strncmpi="no"
   fi
 ])
 
@@ -6633,10 +6934,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRNICMP], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRNICMP, 1,
       [Define to 1 if you have the strnicmp function.])
-    ac_cv_func_strnicmp="yes"
+    curl_cv_func_strnicmp="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_strnicmp="no"
+    curl_cv_func_strnicmp="no"
   fi
 ])
 
@@ -6718,10 +7019,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRSTR], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRSTR, 1,
       [Define to 1 if you have the strstr function.])
-    ac_cv_func_strstr="yes"
+    curl_cv_func_strstr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_strstr="no"
+    curl_cv_func_strstr="no"
   fi
 ])
 
@@ -6803,10 +7104,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRTOK_R], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRTOK_R, 1,
       [Define to 1 if you have the strtok_r function.])
-    ac_cv_func_strtok_r="yes"
+    curl_cv_func_strtok_r="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_strtok_r="no"
+    curl_cv_func_strtok_r="no"
   fi
 ])
 
@@ -6888,10 +7189,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRTOLL], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRTOLL, 1,
       [Define to 1 if you have the strtoll function.])
-    ac_cv_func_strtoll="yes"
+    curl_cv_func_strtoll="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_strtoll="no"
+    curl_cv_func_strtoll="no"
   fi
 ])
 
@@ -6973,9 +7274,63 @@ AC_DEFUN([CURL_CHECK_FUNC_WRITEV], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_WRITEV, 1,
       [Define to 1 if you have the writev function.])
-    ac_cv_func_writev="yes"
+    curl_cv_func_writev="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_writev="no"
+    curl_cv_func_writev="no"
+  fi
+])
+
+dnl CURL_RUN_IFELSE
+dnl -------------------------------------------------
+dnl Wrapper macro to use instead of AC_RUN_IFELSE. It
+dnl sets LD_LIBRARY_PATH locally for this run only, from the
+dnl CURL_LIBRARY_PATH variable. It keeps the LD_LIBRARY_PATH
+dnl changes contained within this macro.
+
+AC_DEFUN([CURL_RUN_IFELSE], [
+   old=$LD_LIBRARY_PATH
+   LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+   export LD_LIBRARY_PATH
+   AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
+   LD_LIBRARY_PATH=$old # restore
+])
+
+dnl CURL_COVERAGE
+dnl --------------------------------------------------
+dnl Switch on options and libs to build with gcc's code coverage.
+dnl
+
+AC_DEFUN([CURL_COVERAGE],[
+  AC_REQUIRE([AC_PROG_SED])
+  AC_REQUIRE([AC_ARG_ENABLE])
+  AC_MSG_CHECKING([for code coverage support])
+  coverage="no"
+  curl_coverage_msg="disabled"
+
+  dnl check if enabled by argument
+  AC_ARG_ENABLE(code-coverage,
+     AC_HELP_STRING([--enable-code-coverage], [Provide code coverage]),
+     coverage="$enableval")
+
+  dnl if not gcc switch off again
+  AS_IF([ test "$GCC" != "yes" ], coverage="no" )
+  AC_MSG_RESULT($coverage)
+
+  if test "x$coverage" = "xyes"; then
+    curl_coverage_msg="enabled"
+
+    AC_CHECK_TOOL([GCOV], [gcov], [gcov])
+    if test -z "$GCOV"; then
+      AC_MSG_ERROR([needs gcov for code coverage])
+    fi
+    AC_CHECK_PROG([LCOV], [lcov], [lcov])
+    if test -z "$LCOV"; then
+      AC_MSG_ERROR([needs lcov for code coverage])
+    fi
+
+    CPPFLAGS="$CPPFLAGS -DNDEBUG"
+    CFLAGS="$CLAGS -O0 -g -fprofile-arcs -ftest-coverage"
+    LIBS="$LIBS -lgcov"
   fi
 ])

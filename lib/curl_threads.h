@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,7 +38,8 @@
 #  define curl_thread_t          HANDLE
 #  define curl_thread_t_null     (HANDLE)0
 #  if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_VISTA) || \
-      (_WIN32_WINNT < _WIN32_WINNT_VISTA)
+      (_WIN32_WINNT < _WIN32_WINNT_VISTA) || \
+      (defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR))
 #    define Curl_mutex_init(m)   InitializeCriticalSection(m)
 #  else
 #    define Curl_mutex_init(m)   InitializeCriticalSectionEx(m, 0, 1)
@@ -50,7 +51,8 @@
 
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 
-curl_thread_t Curl_thread_create(unsigned int (CURL_STDCALL *func) (void*),
+/* !checksrc! disable SPACEBEFOREPAREN 1 */
+curl_thread_t Curl_thread_create(unsigned int (CURL_STDCALL *func) (void *),
                                  void *arg);
 
 void Curl_thread_destroy(curl_thread_t hnd);

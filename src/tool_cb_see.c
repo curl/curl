@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -88,7 +88,7 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
   return CURL_SEEKFUNC_OK;
 }
 
-#if defined(WIN32) && !defined(__MINGW64__)
+#ifdef USE_TOOL_FTRUNCATE
 
 #ifdef __BORLANDC__
 /* 64-bit lseek-like function unavailable */
@@ -118,14 +118,15 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
 
 int tool_ftruncate64(int fd, curl_off_t where)
 {
+  intptr_t handle = _get_osfhandle(fd);
+
   if(_lseeki64(fd, where, SEEK_SET) < 0)
     return -1;
 
-  if(!SetEndOfFile((HANDLE)_get_osfhandle(fd)))
+  if(!SetEndOfFile((HANDLE)handle))
     return -1;
 
   return 0;
 }
 
-#endif /* WIN32  && ! __MINGW64__ */
-
+#endif /* USE_TOOL_FTRUNCATE */

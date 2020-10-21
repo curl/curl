@@ -19,7 +19,7 @@ In the broken scenario curl would use HTTP to talk to our FTP server. We handle
 that by replying with something that both protocols can understand. Our FTP
 server allows a custom welcome message, so we use that feature to make an HTTP
 reply that contains an FTP reply (think polyglot). In the case of FTP we expect
-curl will return CURLE_FTP_WEIRD_SERVER_REPLY so we test for that return code.
+curl will return CURLE_WEIRD_SERVER_REPLY so we test for that return code.
 -->
 <servercmd>
 REPLY welcome HTTP/1.1 200 OK\r\nContent-Length: 21\r\n\r\n500 Weird FTP Reply
@@ -46,7 +46,7 @@ Set the default protocol to ftp for a schemeless URL
 #
 # Verify data after the test has been "shot"
 <verify>
-# CURLE_FTP_WEIRD_SERVER_REPLY is error code 8
+# CURLE_WEIRD_SERVER_REPLY is error code 8
 <errorcode>
 8
 </errorcode>

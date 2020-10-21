@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,31 +27,46 @@
 
 int test(char *URL)
 {
-  unsigned char a[] = {0x9c, 0x26, 0x4b, 0x3d, 0x49, 0x4, 0xa1, 0x1,
-                       0xe0, 0xd8, 0x7c,  0x20, 0xb7, 0xef, 0x53, 0x29, 0xfa,
-                       0x1d, 0x57, 0xe1};
+  static const unsigned char a[] = {
+      0x9c, 0x26, 0x4b, 0x3d, 0x49, 0x4, 0xa1, 0x1,
+      0xe0, 0xd8, 0x7c,  0x20, 0xb7, 0xef, 0x53, 0x29, 0xfa,
+      0x1d, 0x57, 0xe1};
 
   CURL *easy;
   int asize;
   char *s;
+  CURLcode res = CURLE_OK;
   (void)URL;
 
-  if ((easy = curl_easy_init()) == NULL) {
+  global_init(CURL_GLOBAL_ALL);
+  easy = curl_easy_init();
+  if(!easy) {
     fprintf(stderr, "curl_easy_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   asize = (int)sizeof(a);
 
-  s = curl_easy_escape(easy, (char*)a, asize);
+  s = curl_easy_escape(easy, (const char *)a, asize);
 
-  if(s)
+  if(s) {
     printf("%s\n", s);
-
-  if(s)
     curl_free(s);
+  }
+
+  s = curl_easy_escape(easy, "", 0);
+  if(s) {
+    printf("IN: '' OUT: '%s'\n", s);
+    curl_free(s);
+  }
+  s = curl_easy_escape(easy, " 123", 3);
+  if(s) {
+    printf("IN: ' 12' OUT: '%s'\n", s);
+    curl_free(s);
+  }
 
   curl_easy_cleanup(easy);
+  curl_global_cleanup();
 
   return 0;
 }

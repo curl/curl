@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -22,15 +22,20 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_OPENSSL) || defined(USE_AXTLS) || defined(USE_GSKIT)
+#if defined(USE_OPENSSL)                                \
+  || defined(USE_GSKIT)                                 \
+  || defined(USE_SCHANNEL)
 /* these backends use functions from this file */
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#ifdef HAVE_NETINET_IN6_H
+#include <netinet/in6.h>
+#endif
 
 #include "hostcheck.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "inet_pton.h"
 
 #include "curl_memory.h"
@@ -43,7 +48,7 @@
  *  "foo.host.com" matches "*.host.com".
  *
  * We use the matching rule described in RFC6125, section 6.4.3.
- * http://tools.ietf.org/html/rfc6125#section-6.4.3
+ * https://tools.ietf.org/html/rfc6125#section-6.4.3
  *
  * In addition: ignore trailing dots in the host names and wildcards, so that
  * the names are used normalized. This is what the browsers do.
@@ -70,21 +75,21 @@ static int hostmatch(char *hostname, char *pattern)
   /* normalize pattern and hostname by stripping off trailing dots */
   size_t len = strlen(hostname);
   if(hostname[len-1]=='.')
-    hostname[len-1]=0;
+    hostname[len-1] = 0;
   len = strlen(pattern);
   if(pattern[len-1]=='.')
-    pattern[len-1]=0;
+    pattern[len-1] = 0;
 
   pattern_wildcard = strchr(pattern, '*');
   if(pattern_wildcard == NULL)
-    return Curl_raw_equal(pattern, hostname) ?
+    return strcasecompare(pattern, hostname) ?
       CURL_HOST_MATCH : CURL_HOST_NOMATCH;
 
   /* detect IP address as hostname and fail the match if so */
   if(Curl_inet_pton(AF_INET, hostname, &ignored) > 0)
     return CURL_HOST_NOMATCH;
 #ifdef ENABLE_IPV6
-  else if(Curl_inet_pton(AF_INET6, hostname, &si6.sin6_addr) > 0)
+  if(Curl_inet_pton(AF_INET6, hostname, &si6.sin6_addr) > 0)
     return CURL_HOST_NOMATCH;
 #endif
 
@@ -92,18 +97,18 @@ static int hostmatch(char *hostname, char *pattern)
      match. */
   wildcard_enabled = 1;
   pattern_label_end = strchr(pattern, '.');
-  if(pattern_label_end == NULL || strchr(pattern_label_end+1, '.') == NULL ||
+  if(pattern_label_end == NULL || strchr(pattern_label_end + 1, '.') == NULL ||
      pattern_wildcard > pattern_label_end ||
-     Curl_raw_nequal(pattern, "xn--", 4)) {
+     strncasecompare(pattern, "xn--", 4)) {
     wildcard_enabled = 0;
   }
   if(!wildcard_enabled)
-    return Curl_raw_equal(pattern, hostname) ?
+    return strcasecompare(pattern, hostname) ?
       CURL_HOST_MATCH : CURL_HOST_NOMATCH;
 
   hostname_label_end = strchr(hostname, '.');
   if(hostname_label_end == NULL ||
-     !Curl_raw_equal(pattern_label_end, hostname_label_end))
+     !strcasecompare(pattern_label_end, hostname_label_end))
     return CURL_HOST_NOMATCH;
 
   /* The wildcard must match at least one character, so the left-most
@@ -113,28 +118,26 @@ static int hostmatch(char *hostname, char *pattern)
     return CURL_HOST_NOMATCH;
 
   prefixlen = pattern_wildcard - pattern;
-  suffixlen = pattern_label_end - (pattern_wildcard+1);
-  return Curl_raw_nequal(pattern, hostname, prefixlen) &&
-    Curl_raw_nequal(pattern_wildcard+1, hostname_label_end - suffixlen,
+  suffixlen = pattern_label_end - (pattern_wildcard + 1);
+  return strncasecompare(pattern, hostname, prefixlen) &&
+    strncasecompare(pattern_wildcard + 1, hostname_label_end - suffixlen,
                     suffixlen) ?
     CURL_HOST_MATCH : CURL_HOST_NOMATCH;
 }
 
 int Curl_cert_hostcheck(const char *match_pattern, const char *hostname)
 {
-  char *matchp;
-  char *hostp;
   int res = 0;
   if(!match_pattern || !*match_pattern ||
       !hostname || !*hostname) /* sanity check */
     ;
   else {
-    matchp = strdup(match_pattern);
+    char *matchp = strdup(match_pattern);
     if(matchp) {
-      hostp = strdup(hostname);
+      char *hostp = strdup(hostname);
       if(hostp) {
         if(hostmatch(hostp, matchp) == CURL_HOST_MATCH)
-          res= 1;
+          res = 1;
         free(hostp);
       }
       free(matchp);
@@ -144,4 +147,4 @@ int Curl_cert_hostcheck(const char *match_pattern, const char *hostname)
   return res;
 }
 
-#endif /* OPENSSL or AXTLS or GSKIT */
+#endif /* OPENSSL, GSKIT or schannel+wince */

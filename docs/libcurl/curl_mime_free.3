@@ -1,0 +1,50 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_mime_free 3 "22 August 2017" "libcurl 7.56.0" "libcurl Manual"
+.SH NAME
+curl_mime_free - free a previously built mime structure
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "void curl_mime_free(curl_mime *" mime);
+.ad
+.SH DESCRIPTION
+\fIcurl_mime_free(3)\fP is used to clean up data previously built/appended
+with \fIcurl_mime_addpart(3)\fP and other mime-handling functions.  This must
+be called when the data has been used, which typically means after
+\fIcurl_easy_perform(3)\fP has been called.
+
+The handle to free is the one you passed to
+the \fICURLOPT_MIMEPOST(3)\fP option: attached subparts mime structures must
+not be explicitly freed as they are by the top structure freeing.
+
+\fBmime\fP is the handle as returned from a previous call to
+\fIcurl_mime_init(3)\fP and may be NULL.
+
+Passing in a NULL pointer in \fImime\fP will make this function return
+immediately with no action.
+.SH AVAILABILITY
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+.SH RETURN VALUE
+None
+.SH "SEE ALSO"
+.BR curl_mime_init "(3)"

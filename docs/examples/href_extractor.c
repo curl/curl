@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,7 +26,7 @@
  * </DESC>
  */
 /*
- * The HTML parser is found at http://code.google.com/p/htmlstreamparser/
+ * The HTML parser is found at https://github.com/arjunc77/htmlstreamparser
  */
 
 #include <stdio.h>
@@ -38,11 +38,11 @@ static size_t write_callback(void *buffer, size_t size, size_t nmemb,
                              void *hsp)
 {
   size_t realsize = size * nmemb, p;
-  for (p = 0; p < realsize; p++) {
+  for(p = 0; p < realsize; p++) {
     html_parser_char_parse(hsp, ((char *)buffer)[p]);
-    if (html_parser_cmp_tag(hsp, "a", 1))
-      if (html_parser_cmp_attr(hsp, "href", 4))
-        if (html_parser_is_in(hsp, HTML_VALUE_ENDED)) {
+    if(html_parser_cmp_tag(hsp, "a", 1))
+      if(html_parser_cmp_attr(hsp, "href", 4))
+        if(html_parser_is_in(hsp, HTML_VALUE_ENDED)) {
           html_parser_val(hsp)[html_parser_val_length(hsp)] = '\0';
           printf("%s\n", html_parser_val(hsp));
         }
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
   CURL *curl;
   HTMLSTREAMPARSER *hsp;
 
-  if (argc != 2) {
+  if(argc != 2) {
     printf("Usage: %s URL\n", argv[0]);
     return EXIT_FAILURE;
   }

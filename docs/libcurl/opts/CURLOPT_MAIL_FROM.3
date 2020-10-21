@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_MAIL_FROM \- SMTP sender address
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAIL_FROM, char *from);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. This should be used
+Pass a pointer to a null-terminated string as parameter. This should be used
 to specify the sender's email address when sending SMTP mail with libcurl.
 
 An originator email address should be specified with angled brackets (<>)
@@ -36,12 +36,23 @@ around it, which if not specified will be added automatically.
 
 If this parameter is not specified then an empty address will be sent to the
 mail server which may cause the email to be rejected.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 blank
 .SH PROTOCOLS
 SMTP
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "smtp://example.com/");
+  curl_easy_setopt(curl, CURLOPT_MAIL_FROM, "president@example.com");
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.20.0
 .SH RETURN VALUE

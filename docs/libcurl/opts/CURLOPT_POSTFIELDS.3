@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_POSTFIELDS \- specify data to POST to server
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POSTFIELDS, char *postdata);
 .SH DESCRIPTION
-Pass a char * as parameter, pointing to the full data to send in a HTTP POST
+Pass a char * as parameter, pointing to the full data to send in an HTTP POST
 operation. You must make sure that the data is formatted the way you want the
 server to receive it. libcurl will not convert or encode it for you in any
 way. For example, the web server may assume that this data is url-encoded.
@@ -42,19 +42,20 @@ This POST is a normal application/x-www-form-urlencoded kind (and libcurl will
 set that Content-Type by default when this option is used), which is commonly
 used by HTML forms. Change Content-Type with \fICURLOPT_HTTPHEADER(3)\fP.
 
-Using \fICURLOPT_POSTFIELDS(3)\fP implies \fICURLOPT_POST(3)\fP.
-
 You can use \fIcurl_easy_escape(3)\fP to url-encode your data, if necessary. It
 returns a pointer to an encoded string that can be passed as \fIpostdata\fP.
 
-If you want to do a zero-byte POST, you need to set
-\fICURLOPT_POSTFIELDSIZE(3)\fP explicitly to zero, as simply setting
-\fICURLOPT_POSTFIELDS(3)\fP to NULL or "" just effectively disables the
-sending of the specified string. libcurl will instead assume that you'll send
-the POST data using the read callback!
+Using \fICURLOPT_POSTFIELDS(3)\fP implies setting \fICURLOPT_POST(3)\fP to 1.
 
-Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
-You can disable this header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
+If \fICURLOPT_POSTFIELDS(3)\fP is explicitly set to NULL then libcurl will get
+the POST data from the read callback. If you want to send a zero-byte POST set
+\fICURLOPT_POSTFIELDS(3)\fP to an empty string, or set \fICURLOPT_POST(3)\fP to
+1 and \fICURLOPT_POSTFIELDSIZE(3)\fP to 0.
+
+Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header,
+and libcurl will add that header automatically if the POST is either known to
+be larger than 1MB or if the expected size is unknown. You can disable this
+header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
 
 To make multipart/formdata posts (aka RFC2388-posts), check out the
 \fICURLOPT_HTTPPOST(3)\fP option combined with \fIcurl_formadd(3)\fP.
@@ -68,7 +69,7 @@ CURL *curl = curl_easy_init();
 if(curl) {
   const char *data = "data to send";
 
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* size of the POST data */
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 12L);

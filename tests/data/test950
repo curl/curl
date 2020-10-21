@@ -1,0 +1,43 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+VRFY
+--request
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+250 <recipient@example.com>
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP VRFY with custom request
+ </name>
+
+# the custom request just does it lowercase to remain the same command
+<command>
+smtp://%HOSTIP:%SMTPPORT/950 --mail-rcpt recipient --request "vrfy"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO 950
+vrfy recipient
+QUIT
+</protocol>
+</verify>
+</testcase>

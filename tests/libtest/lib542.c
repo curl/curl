@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,13 +36,14 @@ int test(char *URL)
   CURL *curl;
   CURLcode res = CURLE_OK;
 
-  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   /* get a curl handle */
-  if ((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -58,7 +59,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_HEADER, 0L);
 
   /* specify target */
-  test_setopt(curl,CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_URL, URL);
 
   /* Now run off and do what you've been told! */
   res = curl_easy_perform(curl);

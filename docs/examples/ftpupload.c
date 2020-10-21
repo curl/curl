@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -71,13 +71,13 @@ int main(void)
   struct stat file_info;
   curl_off_t fsize;
 
-  struct curl_slist *headerlist=NULL;
+  struct curl_slist *headerlist = NULL;
   static const char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
   static const char buf_2 [] = "RNTO " RENAME_FILE_TO;
 
   /* get the file size of the local file */
   if(stat(LOCAL_FILE, &file_info)) {
-    printf("Couldnt open '%s': %s\n", LOCAL_FILE, strerror(errno));
+    printf("Couldn't open '%s': %s\n", LOCAL_FILE, strerror(errno));
     return 1;
   }
   fsize = (curl_off_t)file_info.st_size;
@@ -104,7 +104,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
     /* specify target */
-    curl_easy_setopt(curl,CURLOPT_URL, REMOTE_URL);
+    curl_easy_setopt(curl, CURLOPT_URL, REMOTE_URL);
 
     /* pass in that last of FTP commands to run after the transfer */
     curl_easy_setopt(curl, CURLOPT_POSTQUOTE, headerlist);
@@ -127,7 +127,7 @@ int main(void)
               curl_easy_strerror(res));
 
     /* clean up the FTP commands list */
-    curl_slist_free_all (headerlist);
+    curl_slist_free_all(headerlist);
 
     /* always cleanup */
     curl_easy_cleanup(curl);

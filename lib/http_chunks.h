@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,6 +21,9 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
+struct connectdata;
+
 /*
  * The longest possible hexadecimal number we support in a chunked transfer.
  * Weird enough, RFC2616 doesn't set a maximum size! Since we use strtoul()
@@ -71,9 +74,9 @@ typedef enum {
   CHUNKE_TOO_LONG_HEX = 1,
   CHUNKE_ILLEGAL_HEX,
   CHUNKE_BAD_CHUNK,
-  CHUNKE_WRITE_ERROR,
   CHUNKE_BAD_ENCODING,
   CHUNKE_OUT_OF_MEMORY,
+  CHUNKE_PASSTHRU_ERROR, /* Curl_httpchunk_read() returns a CURLcode to use */
   CHUNKE_LAST
 } CHUNKcode;
 
@@ -87,5 +90,10 @@ struct Curl_chunker {
   size_t dataleft; /* untouched data amount at the end of the last buffer */
 };
 
-#endif /* HEADER_CURL_HTTP_CHUNKS_H */
+/* The following functions are defined in http_chunks.c */
+void Curl_httpchunk_init(struct connectdata *conn);
+CHUNKcode Curl_httpchunk_read(struct connectdata *conn, char *datap,
+                              ssize_t length, ssize_t *wrote,
+                              CURLcode *passthru);
 
+#endif /* HEADER_CURL_HTTP_CHUNKS_H */

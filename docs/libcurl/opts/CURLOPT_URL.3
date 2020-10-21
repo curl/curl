@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,7 @@ CURLOPT_URL \- provide the URL to use in the request
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_URL, char *URL);
 .SH DESCRIPTION
 Pass in a pointer to the \fIURL\fP to work with. The parameter should be a
-char * to a zero terminated string which must be URL-encoded in the following
+char * to a null-terminated string which must be URL-encoded in the following
 format:
 
 scheme://host:port/path
@@ -58,7 +58,10 @@ use for this transfer, independent of what libcurl has been compiled to
 support. That may be useful if you accept the URL from an external source and
 want to limit the accessibility.
 
-\fICURLOPT_URL(3)\fP is the only option that \fBmust\fP be set before a
+The \fICURLOPT_URL(3)\fP string will be ignored if \fICURLOPT_CURLU(3)\fP is
+set.
+
+\fICURLOPT_URL(3)\fP or \fICURLOPT_CURLU(3)\fP \fBmust\fP be set before a
 transfer is started.
 
 The host part of the URL contains the address of the server that you want to
@@ -108,7 +111,7 @@ The path part of the URL is protocol specific and whilst some examples are
 given below this list is not conclusive:
 
 .IP HTTP
-The path part of a HTTP request specifies the file to retrieve and from what
+The path part of an HTTP request specifies the file to retrieve and from what
 directory. If the directory is not specified then the web server's root
 directory is used. If the file is omitted then the default document will be
 retrieved for either the directory specified or the root directory. The exact
@@ -149,6 +152,10 @@ path.
 ftp://user:password@ftp.example.com//readme.txt - This retrieves the readme.txt
 from the root directory when logging in as a specified user.
 
+.IP FILE
+When a FILE:// URL is accessed on Windows systems, it can be crafted in a way
+so that Windows attempts to connect to a (remote) machine when curl wants to
+read or write such a path.
 .IP SMTP
 The path part of a SMTP request specifies the host name to present during
 communication with the mail server. If the path is omitted then libcurl will
@@ -187,7 +194,10 @@ imap://user:password@mail.example.com/INBOX - Performs a folder list on the
 user's inbox
 
 imap://user:password@mail.example.com/INBOX/;UID=1 - Selects the user's inbox
-and fetches message 1
+and fetches message with uid = 1
+
+imap://user:password@mail.example.com/INBOX/;MAILINDEX=1 - Selects the user's inbox
+and fetches the first message in the mail box
 
 imap://user:password@mail.example.com/INBOX;UIDVALIDITY=50/;UID=2 - Selects
 the user's inbox, checks the UIDVALIDITY of the mailbox is 50 and fetches
@@ -210,8 +220,8 @@ For more information about the individual components of an IMAP URL please
 see RFC5092.
 
 .IP SCP
-The path part of a SCP request specifies the file to retrieve and from what
-directory. The file part may not be omitted. The file is taken as an absolute
+The path part of an SCP URL specifies the path and file to retrieve or
+upload. The file part may not be omitted. The file is taken as an absolute
 path from the root directory on the server. To specify a path relative to the
 user's home directory on the server, prepend ~/ to the path portion.  If the
 user name is not embedded in the URL, it can be set with the
@@ -221,15 +231,13 @@ scp://user@example.com/etc/issue - This specifies the file /etc/issue
 
 scp://example.com/~/my-file - This specifies the file my-file in the
 user's home directory on the server
-
 .IP SFTP
-The path part of a SFTP request specifies the file to retrieve and from what
-directory. If the file part is omitted then libcurl downloads the directory
-listing for the directory specified.  If the path ends in a / then a directory
-listing is returned instead of a file.  If the path is omitted entirely then
-the directory listing for the root / home directory will be returned.  If the
-user name is not embedded in the URL, it can be set with the
-\fICURLOPT_USERPWD(3)\fP or \fICURLOPT_USERNAME(3)\fP option.
+The path part of an SFTP URL specifies the file to retrieve or upload. If the
+path ends in a / then a directory listing is returned instead of a file.  If
+the path is omitted entirely then the directory listing for the root / home
+directory will be returned.  If the user name is not embedded in the URL, it
+can be set with the \fICURLOPT_USERPWD(3)\fP or \fICURLOPT_USERNAME(3)\fP
+option.
 
 sftp://user:password@example.com/etc/issue - This specifies the file
 /etc/issue
@@ -254,6 +262,7 @@ in the root of the "files" share
 smb://server.example.com/files/ -T issue - This specifies the file "issue" will
 be uploaded to the root of the "files" share.
 
+curl supports SMB version 1 (only)
 .IP LDAP
 The path part of a LDAP request can be used to specify the: Distinguished
 Name, Attributes, Scope, Filter and Extension for a LDAP search. Each field
@@ -283,6 +292,20 @@ user wants to pass in a '#' (hash) character it will be treated as a fragment
 and get cut off by libcurl if provided literally. You will instead have to
 escape it by providing it as backslash and its ASCII value in hexadecimal:
 "\\23".
+
+.RS 0
+The application does not have to keep the string around after setting this
+option.
+.SH ENCODING
+The string pointed to in the \fICURLOPT_URL(3)\fP argument is generally
+expected to be a sequence of characters using an ASCII compatible encoding.
+
+If libcurl is built with IDN support, the server name part of the URL can use
+an "international name" by using the current encoding (according to locale) or
+UTF-8 (when winidn is used).
+
+If libcurl is built without IDN support, the server name is used exactly as
+specified when passed to the name resolver functions.
 .SH DEFAULT
 There is no default URL. If this option isn't set, no transfer can be
 performed.
@@ -315,7 +338,7 @@ All
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   curl_easy_perform(curl);
 }
@@ -333,4 +356,4 @@ similar is called.
 .BR CURLOPT_VERBOSE "(3), " CURLOPT_PROTOCOLS "(3), "
 .BR CURLOPT_FORBID_REUSE "(3), " CURLOPT_FRESH_CONNECT "(3), "
 .BR curl_easy_perform "(3), "
-.BR CURLINFO_REDIRECT_URL "(3), "
+.BR CURLINFO_REDIRECT_URL "(3), " CURLOPT_PATH_AS_IS "(3), " CURLOPT_CURLU "(3), "

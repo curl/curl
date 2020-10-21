@@ -1,4 +1,25 @@
 #!/bin/sh
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
 #
 #       libcurl compilation script for the OS/400.
 #
@@ -20,7 +41,7 @@ fi
 echo '#pragma comment(user, "libcurl version '"${LIBCURL_VERSION}"'")' > os400.c
 echo '#pragma comment(user, __DATE__)' >> os400.c
 echo '#pragma comment(user, __TIME__)' >> os400.c
-echo '#pragma comment(copyright, "Copyright (C) 1998-2014 Daniel Stenberg et al. OS/400 version by P. Monnerat")' >> os400.c
+echo '#pragma comment(copyright, "Copyright (C) 1998-2016 Daniel Stenberg et al. OS/400 version by P. Monnerat")' >> os400.c
 make_module     OS400           os400.c
 LINK=                           # No need to rebuild service program yet.
 MODULES=
@@ -45,6 +66,26 @@ sed -e ':begin'                                                         \
 #       Compile the sources into modules.
 
 INCLUDES="'`pwd`'"
+
+# Create a small C program to check ccsidcurl.c is up to date
+if action_needed "${LIBIFSNAME}/CHKSTRINGS.PGM"
+then
+  CMD="CRTBNDC PGM(${TARGETLIB}/CHKSTRINGS) SRCSTMF('${SCRIPTDIR}/chkstrings.c')"
+  CMD="${CMD} INCDIR('${TOPDIR}/include/curl' '${TOPDIR}/include' '${SRCDIR}' ${INCLUDES})"
+  system -i "${CMD}"
+  if [ $? -ne 0 ]
+  then
+    echo "ERROR: Failed to build CHKSTRINGS *PGM object!"
+    exit 2
+  else
+    ${LIBIFSNAME}/CHKSTRINGS.PGM
+    if [ $? -ne 0 ]
+    then
+      echo "ERROR: CHKSTRINGS failed!"
+      exit 2
+    fi
+  fi
+fi
 
 make_module     OS400SYS        "${SCRIPTDIR}/os400sys.c"
 make_module     CCSIDCURL       "${SCRIPTDIR}/ccsidcurl.c"
@@ -128,6 +169,11 @@ then    CMD="CRTSRVPGM SRVPGM(${TARGETLIB}/${SRVPGM})"
         CMD="${CMD} BNDDIR(${TARGETLIB}/${STATBNDDIR}"
         if [ "${WITH_ZLIB}" != 0 ]
         then    CMD="${CMD} ${ZLIB_LIB}/${ZLIB_BNDDIR}"
+                liblist -a "${ZLIB_LIB}"
+        fi
+        if [ "${WITH_LIBSSH2}" != 0 ]
+        then    CMD="${CMD} ${LIBSSH2_LIB}/${LIBSSH2_BNDDIR}"
+                liblist -a "${LIBSSH2_LIB}"
         fi
         CMD="${CMD})"
         CMD="${CMD} BNDSRVPGM(QADRTTS QGLDCLNT QGLDBRDR)"

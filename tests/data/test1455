@@ -1,0 +1,63 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+proxy
+haproxy
+</keywords>
+</info>
+
+#
+# Server-side
+<reply name="1455">
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: barkbark
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP GET when PROXY Protocol enabled
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/1455 --haproxy-protocol -H "Testno: 1455"
+</command>
+<features>
+proxy
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^PROXY TCP4 %CLIENTIP %HOSTIP (\d*) %HTTPPORT/proxy-line/
+</strippart>
+<protocol>
+proxy-line
+GET /1455 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Testno: 1455
+
+</protocol>
+</verify>
+</testcase>

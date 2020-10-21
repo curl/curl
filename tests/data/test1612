@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+HMAC
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+HMAC unit tests
+ </name>
+</client>
+</testcase>

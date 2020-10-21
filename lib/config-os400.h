@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -97,9 +97,6 @@
 /* Define if you have the <crypto.h> header file. */
 #undef HAVE_CRYPTO_H
 
-/* Define if you have the <des.h> header file. */
-#undef HAVE_DES_H
-
 /* Define if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H
 
@@ -127,11 +124,17 @@
 /* Define if you have the `getpass_r' function. */
 #undef HAVE_GETPASS_R
 
+/* Define to 1 if you have the getpeername function. */
+#define HAVE_GETPEERNAME 1
+
 /* Define if you have the `getpwuid' function. */
 #define HAVE_GETPWUID
 
 /* Define if you have the `getservbyname' function. */
 #define HAVE_GETSERVBYNAME
+
+/* Define to 1 if you have the getsockname function. */
+#define HAVE_GETSOCKNAME 1
 
 /* Define if you have the `gettimeofday' function. */
 #define HAVE_GETTIMEOFDAY
@@ -154,9 +157,6 @@
 /* Define if you have the <krb.h> header file. */
 #undef HAVE_KRB_H
 
-/* Define if you have the `crypto' library (-lcrypto). */
-#undef HAVE_LIBCRYPTO
-
 /* Define if you have the `nsl' library (-lnsl). */
 #undef HAVE_LIBNSL
 
@@ -168,9 +168,6 @@
 
 /* Define if you have the `socket' library (-lsocket). */
 #undef HAVE_LIBSOCKET
-
-/* Define if you have the `ssl' library (-lssl). */
-#undef HAVE_LIBSSL
 
 /* Define if you have GSS API. */
 #define HAVE_GSSAPI
@@ -403,8 +400,14 @@
 /* The size of `short', as computed by sizeof. */
 #define SIZEOF_SHORT            2
 
+/* The size of `long', as computed by sizeof. */
+#define SIZEOF_LONG             4
+
 /* The size of `size_t', as computed by sizeof. */
-#define SIZEOF_SIZE_T           8
+#define SIZEOF_SIZE_T           4
+
+/* The size of `curl_off_t', as computed by sizeof. */
+#define SIZEOF_CURL_OFF_T       8
 
 /* Whether long long constants must be suffixed by LL. */
 
@@ -418,6 +421,12 @@
 
 /* Define if you can safely include both <sys/time.h> and <time.h>. */
 #define TIME_WITH_SYS_TIME
+
+/* Define to enable alt-svc support (experimental) */
+#undef USE_ALTSVC
+
+/* Define to enable HTTP3 support (experimental, requires NGTCP2 or QUICHE) */
+#undef ENABLE_QUIC
 
 /* Version number of package */
 #undef VERSION

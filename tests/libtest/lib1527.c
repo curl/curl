@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Vijay Panghal, <vpanghal@maginatics.com>, et al.
+ * Copyright (C) 1998 - 2020, Vijay Panghal, <vpanghal@maginatics.com>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,7 +34,7 @@ static char data [] = "Hello Cloud!\n";
 static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t  amount = nmemb * size; /* Total bytes curl wants */
-  if (amount < strlen(data)) {
+  if(amount < strlen(data)) {
     return strlen(data);
   }
   (void)stream;
@@ -55,18 +55,19 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   hhl = curl_slist_append(hhl, "User-Agent: Http Agent");
-  if (!hhl) {
+  if(!hhl) {
     goto test_cleanup;
   }
   tmp = curl_slist_append(hhl, "Expect: 100-continue");
-  if (!tmp) {
+  if(!tmp) {
     goto test_cleanup;
   }
   hhl = tmp;
@@ -82,7 +83,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
   test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
   test_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
-  test_setopt(curl, CURLOPT_INFILESIZE, strlen(data));
+  test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(data));
   test_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_UNIFIED);
 
   res = curl_easy_perform(curl);

@@ -1,61 +1,68 @@
-Curl and libcurl 7.45.0
+curl and libcurl 7.73.1
 
- Public curl releases:         149
- Command line options:         177
- curl_easy_setopt() options:   219
- Public functions in libcurl:  61
- Contributors:                 1303
+ Public curl releases:         196
+ Command line options:         234
+ curl_easy_setopt() options:   278
+ Public functions in libcurl:  85
+ Contributors:                 2275
 
 This release includes the following changes:
 
- o added CURLOPT_DEFAULT_PROTOCOL [6]
- o added new tool option --proto-default [6]
+ o
 
 This release includes the following bugfixes:
 
- o curl_global_init_mem.3: Stronger thread safety warning [1]
- o buildconf.bat: Fixed issues when ran in directories with special chars [2]
- o cmake: Fix CurlTests check for gethostbyname_r with 5 arguments
- o generate.bat: Fixed issues when ran in directories with special chars
- o generate.bat: Only call buildconf.bat if it exists
- o generate.bat: Added support for generating only the prerequisite files
- o curl.1: Document weaknesses in SSLv2 and SSLv3
- o CURLOPT_HTTP_VERSION.3: connection re-use goes before version
- o docs: Update the redirect protocols disabled by default
- o inet_pton.c: Fix MSVC run-time check failure
- o CURLMOPT_PUSHFUNCTION.3: fix argument types
- o rtsp: support basic/digest authentication
- o rtsp: stop reading empty DESCRIBE responses
- o travis: Upgrading to container based build [3]
- o travis.yml: Add OS X testbot
- o FTP: make state machine not get stuck in state
- o openssl: handle lack of server cert when strict checking disabled [4]
- o configure: change functions to detect openssl (clones) [5]
- o configure: detect latest boringssl [5]
- o runtests: Allow for spaces in server-verify curl custom path
+ o checksrc: warn on empty line before open brace [13]
+ o CI/azure: improve on flakiness by avoiding libtool wrappers [7]
+ o connect: repair build without ipv6 availability [19]
+ o curl_url_set.3: fix typo in the RETURN VALUE section [3]
+ o CURLOPT_NOBODY.3: fix typo [6]
+ o CURLOPT_TCP_NODELAY.3: fix comment in example code [8]
+ o CURLOPT_URL.3: clarify SCP/SFTP URLs are for uploads as well
+ o http3: fix two build errors, silence warnings [10]
+ o libcurl.pc: make it relocatable [15]
+ o Makefile.m32: add support for HTTP/3 via ngtcp2+nghttp3 [11]
+ o openssl: acknowledge SRP disabling in configure properly [9]
+ o os400: Sync libcurl API options [5]
+ o packages/OS400: make the source code-style compliant [4]
+ o runtests: return error if no tests ran [16]
+ o src/tool_filetime: disable -Wformat on mingw for this file [2]
+ o strerror: use 'const' as the string should never be modified [18]
+ o test122[12]: remove these two tests [1]
+ o tool_operate: fix compiler warning when --libcurl is disabled [12]
+ o urlapi: URL encode a '+' in the query part [14]
 
 This release includes the following known bugs:
 
- o see docs/KNOWN_BUGS (http://curl.haxx.se/docs/knownbugs.html)
+ o see docs/KNOWN_BUGS (https://curl.haxx.se/docs/knownbugs.html)
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Bertrand Simonnet, Brad King, Dan Fandrich,
-  Daniel Kahn Gillmor, Daniel Seither, Daniel Stenberg, Eric Ridge,
-  Erik Janssen, Jactry Zeng, Jim Hollinger, Marcel Raad, Nathaniel Waisbrot,
-  Patricia Muscalu, Ray Satiro, Rémy Léone, Sam Roth, Steve Holme,
-  Svyatoslav Mishyn,
-  (19 contributors)
+  b9a1 on github, Basuke Suzuki, Cristian Morales Vega, Daniel Stenberg,
+  Dietmar Hauser, Jon Rumsey, Marc Hörsken, Philipp Klaus Krause, Ray Satiro,
+  Tom G. Christensen, Viktor Szakats,
+  (11 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/mail/lib-2015-08/0016.html
- [2] = https://github.com/bagder/curl/pull/379
- [3] = http://curl.haxx.se/bug/?i=388
- [4] = http://curl.haxx.se/bug/?i=392
- [5] = https://android.googlesource.com/platform/external/curl/+/f551028d5caab
-29d4b4a4ae8c159c76c3cfd4887%5E!/
- [6] = http://curl.haxx.se/bug/?i=351
+ [1] = https://curl.haxx.se/bug/?i=6080
+ [2] = https://curl.haxx.se/bug/?i=6079
+ [3] = https://curl.haxx.se/bug/?i=6102
+ [4] = https://curl.haxx.se/bug/?i=6085
+ [5] = https://curl.haxx.se/bug/?i=6083
+ [6] = https://curl.haxx.se/bug/?i=6097
+ [7] = https://curl.haxx.se/bug/?i=6049
+ [8] = https://curl.haxx.se/bug/?i=6096
+ [9] = https://curl.haxx.se/mail/lib-2020-10/0037.html
+ [10] = https://curl.haxx.se/bug/?i=6093
+ [11] = https://curl.haxx.se/bug/?i=6092
+ [12] = https://curl.haxx.se/bug/?i=6095
+ [13] = https://curl.haxx.se/bug/?i=6088
+ [14] = https://curl.haxx.se/bug/?i=6086
+ [15] = https://curl.haxx.se/bug/?i=6061
+ [16] = https://curl.haxx.se/bug/?i=6053
+ [18] = https://curl.haxx.se/bug/?i=6068
+ [19] = https://curl.haxx.se/bug/?i=6069

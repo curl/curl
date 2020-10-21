@@ -22,8 +22,8 @@ file
  <name>
 file:// with resume
  </name>
- <command>
-file://localhost/%PWD/log/test231.txt -C 10
+<command option="no-include">
+file://localhost%FILE_PWD/log/test231.txt -C 10
 </command>
 <file name="log/test231.txt">
 A01234567

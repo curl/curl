@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -22,9 +22,14 @@
  *
  ***************************************************************************/
 
-CURLcode Curl_pretransfer(struct SessionHandle *data);
-CURLcode Curl_second_connect(struct connectdata *conn);
-CURLcode Curl_posttransfer(struct SessionHandle *data);
+#define Curl_headersep(x) ((((x)==':') || ((x)==';')))
+char *Curl_checkheaders(const struct connectdata *conn,
+                        const char *thisheader);
+
+void Curl_init_CONNECT(struct Curl_easy *data);
+
+CURLcode Curl_pretransfer(struct Curl_easy *data);
+CURLcode Curl_posttransfer(struct Curl_easy *data);
 
 typedef enum {
   FOLLOW_NONE,  /* not used within the function, just a placeholder to
@@ -36,36 +41,32 @@ typedef enum {
   FOLLOW_LAST   /* never used */
 } followtype;
 
-CURLcode Curl_follow(struct SessionHandle *data, char *newurl,
+CURLcode Curl_follow(struct Curl_easy *data, char *newurl,
                      followtype type);
-
-
 CURLcode Curl_readwrite(struct connectdata *conn,
-                        struct SessionHandle *data, bool *done);
+                        struct Curl_easy *data, bool *done,
+                        bool *comeback);
 int Curl_single_getsock(const struct connectdata *conn,
-                        curl_socket_t *socks,
-                        int numsocks);
+                        curl_socket_t *socks);
 CURLcode Curl_readrewind(struct connectdata *conn);
-CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp);
-CURLcode Curl_reconnect_request(struct connectdata **connp);
+CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
+                             size_t *nreadp);
 CURLcode Curl_retry_request(struct connectdata *conn, char **url);
-bool Curl_meets_timecondition(struct SessionHandle *data, time_t timeofdoc);
+bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
+CURLcode Curl_get_upload_buffer(struct Curl_easy *data);
+
+CURLcode Curl_done_sending(struct connectdata *conn,
+                           struct SingleRequest *k);
 
 /* This sets up a forthcoming transfer */
 void
-Curl_setup_transfer (struct connectdata *data,
-               int sockindex,           /* socket index to read from or -1 */
-               curl_off_t size,         /* -1 if unknown at this point */
-               bool getheader,          /* TRUE if header parsing is wanted */
-               curl_off_t *bytecountp,  /* return number of bytes read */
-               int writesockindex,      /* socket index to write to, it may
-                                           very well be the same we read from.
-                                           -1 disables */
-               curl_off_t *writecountp /* return number of bytes written */
-);
-
-long Curl_sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
-                     int pkt_size);
+Curl_setup_transfer (struct Curl_easy *data,
+                     int sockindex,     /* socket index to read from or -1 */
+                     curl_off_t size,   /* -1 if unknown at this point */
+                     bool getheader,    /* TRUE if header parsing is wanted */
+                     int writesockindex /* socket index to write to. May be
+                                           the same we read from. -1
+                                           disables */
+  );
 
 #endif /* HEADER_CURL_TRANSFER_H */
-

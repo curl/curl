@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -50,37 +50,54 @@ This doesn't just mean no other thread that is using libcurl.  Because
 similarly thread unsafe, it could conflict with any other thread that uses
 these other libraries.
 
-See the description in \fBlibcurl(3)\fP of global environment requirements for
-details of how to use this function.
+If you are initializing libcurl from a Windows DLL you should not initialize it
+from DllMain or a static initializer because Windows holds the loader lock
+during that time and it could cause a deadlock.
 
+See the description in \fIlibcurl(3)\fP of global environment requirements for
+details of how to use this function.
 .SH FLAGS
-.TP 5
-.B CURL_GLOBAL_ALL
+.IP CURL_GLOBAL_ALL
 Initialize everything possible. This sets all known bits except
 \fBCURL_GLOBAL_ACK_EINTR\fP.
-.TP
-.B CURL_GLOBAL_SSL
-Initialize SSL
-.TP
-.B CURL_GLOBAL_WIN32
+
+.IP CURL_GLOBAL_SSL
+(This flag's presence or absence serves no meaning since 7.57.0. The
+description below is for older libcurl versions.)
+
+Initialize SSL.
+
+The implication here is that if this bit is not set, the initialization of the
+SSL layer needs to be done by the application or at least outside of
+libcurl. The exact procedure how to do SSL initialization depends on the TLS
+backend libcurl uses.
+
+Doing TLS based transfers without having the TLS layer initialized may lead to
+unexpected behaviors.
+.IP CURL_GLOBAL_WIN32
 Initialize the Win32 socket libraries.
-.TP
-.B CURL_GLOBAL_NOTHING
+
+The implication here is that if this bit is not set, the initialization of
+winsock has to be done by the application or you risk getting undefined
+behaviors. This option exists for when the initialization is handled outside
+of libcurl so there's no need for libcurl to do it again.
+.IP CURL_GLOBAL_NOTHING
 Initialise nothing extra. This sets no bit.
-.TP
-.B CURL_GLOBAL_DEFAULT
+.IP CURL_GLOBAL_DEFAULT
 A sensible default. It will init both SSL and Win32. Right now, this equals
 the functionality of the \fBCURL_GLOBAL_ALL\fP mask.
-.TP
-.B CURL_GLOBAL_ACK_EINTR
-When this flag is set, curl will acknowledge EINTR condition when connecting
-or when waiting for data.  Otherwise, curl waits until full timeout
-elapses. (Added in 7.30.0)
+.IP CURL_GLOBAL_ACK_EINTR
+This bit has no point since 7.69.0 but its behavior is instead the default.
+
+Before 7.69.0: when this flag is set, curl will acknowledge EINTR condition
+when connecting or when waiting for data.  Otherwise, curl waits until full
+timeout elapses. (Added in 7.30.0)
 .SH RETURN VALUE
 If this function returns non-zero, something went wrong and you cannot use the
 other curl functions.
 .SH "SEE ALSO"
 .BR curl_global_init_mem "(3), "
 .BR curl_global_cleanup "(3), "
+.BR curl_global_sslset "(3), "
 .BR curl_easy_init "(3) "
 .BR libcurl "(3) "

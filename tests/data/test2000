@@ -31,8 +31,8 @@ file
  <name>
 FTP RETR followed by FILE
  </name>
- <command>
-ftp://%HOSTIP:%FTPPORT/2000 file://localhost/%PWD/log/test2000.txt
+<command option="no-include">
+ftp://%HOSTIP:%FTPPORT/2000 file://localhost%FILE_PWD/log/test2000.txt
 </command>
 <file name="log/test2000.txt">
 foo

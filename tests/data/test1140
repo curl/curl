@@ -1,0 +1,32 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+symbols-in-versions
+documentation
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+
+ <name>
+Verify the nroff of man pages
+ </name>
+
+<command type="perl">
+%SRCDIR/nroff-scan.pl %SRCDIR/../docs/ %SRCDIR/../docs/libcurl/*.3 %SRCDIR/../docs/libcurl/opts/*.3 %SRCDIR/../docs/*.1
+</command>
+</client>
+
+<verify>
+<stdout>
+OK
+</stdout>
+</verify>
+
+</testcase>

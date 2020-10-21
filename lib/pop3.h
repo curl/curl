@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2009 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -45,9 +45,9 @@ typedef enum {
   POP3_LAST          /* never used */
 } pop3state;
 
-/* This POP3 struct is used in the SessionHandle. All POP3 data that is
+/* This POP3 struct is used in the Curl_easy. All POP3 data that is
    connection-oriented must be in pop3_conn to properly deal with the fact that
-   perhaps the SessionHandle is changed between the times the connection is
+   perhaps the Curl_easy is changed between the times the connection is
    used. */
 struct POP3 {
   curl_pp_transfer transfer;

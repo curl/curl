@@ -8,11 +8,11 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012, Marc Hoersken, <info@marc-hoersken.de>, et al.
- * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,93 +26,83 @@
 
 #ifdef USE_SCHANNEL
 
+#include <schnlsp.h>
+#include <schannel.h>
+#include "curl_sspi.h"
+
 #include "urldata.h"
 
-#ifndef UNISP_NAME_A
-#define UNISP_NAME_A "Microsoft Unified Security Protocol Provider"
+/* <wincrypt.h> has been included via the above <schnlsp.h>.
+ * Or in case of ldap.c, it was included via <winldap.h>.
+ * And since <wincrypt.h> has this:
+ *   #define X509_NAME  ((LPCSTR) 7)
+ *
+ * And in BoringSSL's <openssl/base.h> there is:
+ *  typedef struct X509_name_st X509_NAME;
+ *  etc.
+ *
+ * this will cause all kinds of C-preprocessing paste errors in
+ * BoringSSL's <openssl/x509.h>: So just undefine those defines here
+ * (and only here).
+ */
+#if defined(HAVE_BORINGSSL) || defined(OPENSSL_IS_BORINGSSL)
+# undef X509_NAME
+# undef X509_CERT_PAIR
+# undef X509_EXTENSIONS
 #endif
 
-#ifndef UNISP_NAME_W
-#define UNISP_NAME_W L"Microsoft Unified Security Protocol Provider"
-#endif
+extern const struct Curl_ssl Curl_ssl_schannel;
 
-#ifndef UNISP_NAME
-#ifdef UNICODE
-#define UNISP_NAME  UNISP_NAME_W
+CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex);
+
+/* structs to expose only in schannel.c and schannel_verify.c */
+#ifdef EXPOSE_SCHANNEL_INTERNAL_STRUCTS
+
+#ifdef __MINGW32__
+#include <_mingw.h>
+#ifdef __MINGW64_VERSION_MAJOR
+#define HAS_MANUAL_VERIFY_API
+#endif
 #else
-#define UNISP_NAME  UNISP_NAME_A
+#include <wincrypt.h>
+#ifdef CERT_CHAIN_REVOCATION_CHECK_CHAIN
+#define HAS_MANUAL_VERIFY_API
 #endif
 #endif
 
-#ifndef SP_PROT_SSL2_CLIENT
-#define SP_PROT_SSL2_CLIENT             0x00000008
+struct Curl_schannel_cred {
+  CredHandle cred_handle;
+  TimeStamp time_stamp;
+  int refcount;
+};
+
+struct Curl_schannel_ctxt {
+  CtxtHandle ctxt_handle;
+  TimeStamp time_stamp;
+};
+
+struct ssl_backend_data {
+  struct Curl_schannel_cred *cred;
+  struct Curl_schannel_ctxt *ctxt;
+  SecPkgContext_StreamSizes stream_sizes;
+  size_t encdata_length, decdata_length;
+  size_t encdata_offset, decdata_offset;
+  unsigned char *encdata_buffer, *decdata_buffer;
+  /* encdata_is_incomplete: if encdata contains only a partial record that
+     can't be decrypted without another Curl_read_plain (that is, status is
+     SEC_E_INCOMPLETE_MESSAGE) then set this true. after Curl_read_plain writes
+     more bytes into encdata then set this back to false. */
+  bool encdata_is_incomplete;
+  unsigned long req_flags, ret_flags;
+  CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
+  bool recv_sspi_close_notify; /* true if connection closed by close_notify */
+  bool recv_connection_closed; /* true if connection closed, regardless how */
+  bool use_alpn; /* true if ALPN is used for this connection */
+#ifdef HAS_MANUAL_VERIFY_API
+  bool use_manual_cred_validation; /* true if manual cred validation is used */
 #endif
-
-#ifndef SP_PROT_SSL3_CLIENT
-#define SP_PROT_SSL3_CLIENT             0x00000008
-#endif
-
-#ifndef SP_PROT_TLS1_CLIENT
-#define SP_PROT_TLS1_CLIENT             0x00000080
-#endif
-
-#ifndef SP_PROT_TLS1_0_CLIENT
-#define SP_PROT_TLS1_0_CLIENT           SP_PROT_TLS1_CLIENT
-#endif
-
-#ifndef SP_PROT_TLS1_1_CLIENT
-#define SP_PROT_TLS1_1_CLIENT           0x00000200
-#endif
-
-#ifndef SP_PROT_TLS1_2_CLIENT
-#define SP_PROT_TLS1_2_CLIENT           0x00000800
-#endif
-
-#ifndef SECBUFFER_ALERT
-#define SECBUFFER_ALERT                 17
-#endif
-
-/* Both schannel buffer sizes must be > 0 */
-#define CURL_SCHANNEL_BUFFER_INIT_SIZE   4096
-#define CURL_SCHANNEL_BUFFER_FREE_SIZE   1024
-
-
-CURLcode Curl_schannel_connect(struct connectdata *conn, int sockindex);
-
-CURLcode Curl_schannel_connect_nonblocking(struct connectdata *conn,
-                                           int sockindex,
-                                           bool *done);
-
-bool Curl_schannel_data_pending(const struct connectdata *conn, int sockindex);
-void Curl_schannel_close(struct connectdata *conn, int sockindex);
-int Curl_schannel_shutdown(struct connectdata *conn, int sockindex);
-void Curl_schannel_session_free(void *ptr);
-
-int Curl_schannel_init(void);
-void Curl_schannel_cleanup(void);
-size_t Curl_schannel_version(char *buffer, size_t size);
-
-int Curl_schannel_random(unsigned char *entropy, size_t length);
-
-/* Set the API backend definition to Schannel */
-#define CURL_SSL_BACKEND CURLSSLBACKEND_SCHANNEL
-
-/* API setup for Schannel */
-#define curlssl_init Curl_schannel_init
-#define curlssl_cleanup Curl_schannel_cleanup
-#define curlssl_connect Curl_schannel_connect
-#define curlssl_connect_nonblocking Curl_schannel_connect_nonblocking
-#define curlssl_session_free Curl_schannel_session_free
-#define curlssl_close_all(x) ((void)x)
-#define curlssl_close Curl_schannel_close
-#define curlssl_shutdown Curl_schannel_shutdown
-#define curlssl_set_engine(x,y) ((void)x, (void)y, CURLE_NOT_BUILT_IN)
-#define curlssl_set_engine_default(x) ((void)x, CURLE_NOT_BUILT_IN)
-#define curlssl_engines_list(x) ((void)x, (struct curl_slist *)NULL)
-#define curlssl_version Curl_schannel_version
-#define curlssl_check_cxn(x) ((void)x, -1)
-#define curlssl_data_pending Curl_schannel_data_pending
-#define curlssl_random(x,y,z) ((void)x, Curl_schannel_random(y,z))
+};
+#endif /* EXPOSE_SCHANNEL_INTERNAL_STRUCTS */
 
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_CURL_SCHANNEL_H */

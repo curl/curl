@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,6 +30,7 @@
 #include "formdata.h"
 #include "sendf.h"
 #include "urldata.h"
+#include "multiif.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -51,7 +52,7 @@
  * Curl_convert_clone() returns a malloced copy of the source string (if
  * returning CURLE_OK), with the data converted to network format.
  */
-CURLcode Curl_convert_clone(struct SessionHandle *data,
+CURLcode Curl_convert_clone(struct Curl_easy *data,
                            const char *indata,
                            size_t insize,
                            char **outbuf)
@@ -77,14 +78,17 @@ CURLcode Curl_convert_clone(struct SessionHandle *data,
 
 /*
  * Curl_convert_to_network() is an internal function for performing ASCII
- * conversions on non-ASCII platforms. It convers the buffer _in place_.
+ * conversions on non-ASCII platforms. It converts the buffer _in place_.
  */
-CURLcode Curl_convert_to_network(struct SessionHandle *data,
+CURLcode Curl_convert_to_network(struct Curl_easy *data,
                                  char *buffer, size_t length)
 {
-  if(data->set.convtonetwork) {
+  if(data && data->set.convtonetwork) {
     /* use translation callback */
-    CURLcode result = data->set.convtonetwork(buffer, length);
+    CURLcode result;
+    Curl_set_in_callback(data, true);
+    result = data->set.convtonetwork(buffer, length);
+    Curl_set_in_callback(data, false);
     if(result) {
       failf(data,
             "CURLOPT_CONV_TO_NETWORK_FUNCTION callback returned %d: %s",
@@ -96,34 +100,37 @@ CURLcode Curl_convert_to_network(struct SessionHandle *data,
   else {
 #ifdef HAVE_ICONV
     /* do the translation ourselves */
+    iconv_t tmpcd = (iconv_t) -1;
+    iconv_t *cd = &tmpcd;
     char *input_ptr, *output_ptr;
     size_t in_bytes, out_bytes, rc;
-    int error;
 
     /* open an iconv conversion descriptor if necessary */
-    if(data->outbound_cd == (iconv_t)-1) {
-      data->outbound_cd = iconv_open(CURL_ICONV_CODESET_OF_NETWORK,
-                                     CURL_ICONV_CODESET_OF_HOST);
-      if(data->outbound_cd == (iconv_t)-1) {
-        error = ERRNO;
+    if(data)
+      cd = &data->outbound_cd;
+    if(*cd == (iconv_t)-1) {
+      *cd = iconv_open(CURL_ICONV_CODESET_OF_NETWORK,
+                       CURL_ICONV_CODESET_OF_HOST);
+      if(*cd == (iconv_t)-1) {
         failf(data,
               "The iconv_open(\"%s\", \"%s\") call failed with errno %i: %s",
               CURL_ICONV_CODESET_OF_NETWORK,
               CURL_ICONV_CODESET_OF_HOST,
-              error, strerror(error));
+              errno, strerror(errno));
         return CURLE_CONV_FAILED;
       }
     }
     /* call iconv */
     input_ptr = output_ptr = buffer;
     in_bytes = out_bytes = length;
-    rc = iconv(data->outbound_cd, (const char**)&input_ptr, &in_bytes,
+    rc = iconv(*cd, &input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
+    if(!data)
+      iconv_close(tmpcd);
     if((rc == ICONV_ERROR) || (in_bytes != 0)) {
-      error = ERRNO;
       failf(data,
             "The Curl_convert_to_network iconv call failed with errno %i: %s",
-            error, strerror(error));
+            errno, strerror(errno));
       return CURLE_CONV_FAILED;
     }
 #else
@@ -137,14 +144,17 @@ CURLcode Curl_convert_to_network(struct SessionHandle *data,
 
 /*
  * Curl_convert_from_network() is an internal function for performing ASCII
- * conversions on non-ASCII platforms. It convers the buffer _in place_.
+ * conversions on non-ASCII platforms. It converts the buffer _in place_.
  */
-CURLcode Curl_convert_from_network(struct SessionHandle *data,
+CURLcode Curl_convert_from_network(struct Curl_easy *data,
                                    char *buffer, size_t length)
 {
-  if(data->set.convfromnetwork) {
+  if(data && data->set.convfromnetwork) {
     /* use translation callback */
-    CURLcode result = data->set.convfromnetwork(buffer, length);
+    CURLcode result;
+    Curl_set_in_callback(data, true);
+    result = data->set.convfromnetwork(buffer, length);
+    Curl_set_in_callback(data, false);
     if(result) {
       failf(data,
             "CURLOPT_CONV_FROM_NETWORK_FUNCTION callback returned %d: %s",
@@ -156,34 +166,37 @@ CURLcode Curl_convert_from_network(struct SessionHandle *data,
   else {
 #ifdef HAVE_ICONV
     /* do the translation ourselves */
+    iconv_t tmpcd = (iconv_t) -1;
+    iconv_t *cd = &tmpcd;
     char *input_ptr, *output_ptr;
     size_t in_bytes, out_bytes, rc;
-    int error;
 
     /* open an iconv conversion descriptor if necessary */
-    if(data->inbound_cd == (iconv_t)-1) {
-      data->inbound_cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
-                                    CURL_ICONV_CODESET_OF_NETWORK);
-      if(data->inbound_cd == (iconv_t)-1) {
-        error = ERRNO;
+    if(data)
+      cd = &data->inbound_cd;
+    if(*cd == (iconv_t)-1) {
+      *cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
+                       CURL_ICONV_CODESET_OF_NETWORK);
+      if(*cd == (iconv_t)-1) {
         failf(data,
               "The iconv_open(\"%s\", \"%s\") call failed with errno %i: %s",
               CURL_ICONV_CODESET_OF_HOST,
               CURL_ICONV_CODESET_OF_NETWORK,
-              error, strerror(error));
+              errno, strerror(errno));
         return CURLE_CONV_FAILED;
       }
     }
     /* call iconv */
     input_ptr = output_ptr = buffer;
     in_bytes = out_bytes = length;
-    rc = iconv(data->inbound_cd, (const char **)&input_ptr, &in_bytes,
+    rc = iconv(*cd, &input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
+    if(!data)
+      iconv_close(tmpcd);
     if((rc == ICONV_ERROR) || (in_bytes != 0)) {
-      error = ERRNO;
       failf(data,
             "Curl_convert_from_network iconv call failed with errno %i: %s",
-            error, strerror(error));
+            errno, strerror(errno));
       return CURLE_CONV_FAILED;
     }
 #else
@@ -199,12 +212,15 @@ CURLcode Curl_convert_from_network(struct SessionHandle *data,
  * Curl_convert_from_utf8() is an internal function for performing UTF-8
  * conversions on non-ASCII platforms.
  */
-CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
+CURLcode Curl_convert_from_utf8(struct Curl_easy *data,
                                 char *buffer, size_t length)
 {
-  if(data->set.convfromutf8) {
+  if(data && data->set.convfromutf8) {
     /* use translation callback */
-    CURLcode result = data->set.convfromutf8(buffer, length);
+    CURLcode result;
+    Curl_set_in_callback(data, true);
+    result = data->set.convfromutf8(buffer, length);
+    Curl_set_in_callback(data, false);
     if(result) {
       failf(data,
             "CURLOPT_CONV_FROM_UTF8_FUNCTION callback returned %d: %s",
@@ -216,35 +232,38 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
   else {
 #ifdef HAVE_ICONV
     /* do the translation ourselves */
-    const char *input_ptr;
+    iconv_t tmpcd = (iconv_t) -1;
+    iconv_t *cd = &tmpcd;
+    char *input_ptr;
     char *output_ptr;
     size_t in_bytes, out_bytes, rc;
-    int error;
 
     /* open an iconv conversion descriptor if necessary */
-    if(data->utf8_cd == (iconv_t)-1) {
-      data->utf8_cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
-                                 CURL_ICONV_CODESET_FOR_UTF8);
-      if(data->utf8_cd == (iconv_t)-1) {
-        error = ERRNO;
+    if(data)
+      cd = &data->utf8_cd;
+    if(*cd == (iconv_t)-1) {
+      *cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
+                       CURL_ICONV_CODESET_FOR_UTF8);
+      if(*cd == (iconv_t)-1) {
         failf(data,
               "The iconv_open(\"%s\", \"%s\") call failed with errno %i: %s",
               CURL_ICONV_CODESET_OF_HOST,
               CURL_ICONV_CODESET_FOR_UTF8,
-              error, strerror(error));
+              errno, strerror(errno));
         return CURLE_CONV_FAILED;
       }
     }
     /* call iconv */
     input_ptr = output_ptr = buffer;
     in_bytes = out_bytes = length;
-    rc = iconv(data->utf8_cd, &input_ptr, &in_bytes,
+    rc = iconv(*cd, &input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
+    if(!data)
+      iconv_close(tmpcd);
     if((rc == ICONV_ERROR) || (in_bytes != 0)) {
-      error = ERRNO;
       failf(data,
             "The Curl_convert_from_utf8 iconv call failed with errno %i: %s",
-            error, strerror(error));
+            errno, strerror(errno));
       return CURLE_CONV_FAILED;
     }
     if(output_ptr < input_ptr) {
@@ -261,9 +280,9 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
 }
 
 /*
- * Init conversion stuff for a SessionHandle
+ * Init conversion stuff for a Curl_easy
  */
-void Curl_convert_init(struct SessionHandle *data)
+void Curl_convert_init(struct Curl_easy *data)
 {
 #if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
   /* conversion descriptors for iconv calls */
@@ -276,9 +295,9 @@ void Curl_convert_init(struct SessionHandle *data)
 }
 
 /*
- * Setup conversion stuff for a SessionHandle
+ * Setup conversion stuff for a Curl_easy
  */
-void Curl_convert_setup(struct SessionHandle *data)
+void Curl_convert_setup(struct Curl_easy *data)
 {
   data->inbound_cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
                                 CURL_ICONV_CODESET_OF_NETWORK);
@@ -289,10 +308,10 @@ void Curl_convert_setup(struct SessionHandle *data)
 }
 
 /*
- * Close conversion stuff for a SessionHandle
+ * Close conversion stuff for a Curl_easy
  */
 
-void Curl_convert_close(struct SessionHandle *data)
+void Curl_convert_close(struct Curl_easy *data)
 {
 #ifdef HAVE_ICONV
   /* close iconv conversion descriptors */
@@ -308,31 +327,6 @@ void Curl_convert_close(struct SessionHandle *data)
 #else
   (void)data;
 #endif /* HAVE_ICONV */
-}
-
-/*
- * Curl_convert_form() is used from http.c, this converts any form items that
-   need to be sent in the network encoding.  Returns CURLE_OK on success.
- */
-CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form)
-{
-  CURLcode result;
-
-  if(!data)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  while(form) {
-    if(form->type == FORM_DATA) {
-      result = Curl_convert_to_network(data, form->line, form->length);
-      /* Curl_convert_to_network calls failf if unsuccessful */
-      if(result)
-        return result;
-    }
-
-    form = form->next;
-  }
-
-  return CURLE_OK;
 }
 
 #endif /* CURL_DOES_CONVERSIONS */

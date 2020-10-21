@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,31 +24,41 @@
 
 #if defined(WIN32) && !defined(MSDOS)
 
-struct timeval curlx_tvnow(void)
+/* set in win32_init() */
+extern LARGE_INTEGER Curl_freq;
+extern bool Curl_isVistaOrGreater;
+
+/* In case of bug fix this function has a counterpart in tool_util.c */
+struct curltime Curl_now(void)
 {
-  /*
-  ** GetTickCount() is available on _all_ Windows versions from W95 up
-  ** to nowadays. Returns milliseconds elapsed since last system boot,
-  ** increases monotonically and wraps once 49.7 days have elapsed.
-  */
-  struct timeval now;
-#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_VISTA) || \
-    (_WIN32_WINNT < _WIN32_WINNT_VISTA)
-  DWORD milliseconds = GetTickCount();
-  now.tv_sec = milliseconds / 1000;
-  now.tv_usec = (milliseconds % 1000) * 1000;
-#else
-  ULONGLONG milliseconds = GetTickCount64();
-  now.tv_sec = (long) (milliseconds / 1000);
-  now.tv_usec = (long) (milliseconds % 1000) * 1000;
+  struct curltime now;
+  if(Curl_isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
+    LARGE_INTEGER count;
+    QueryPerformanceCounter(&count);
+    now.tv_sec = (time_t)(count.QuadPart / Curl_freq.QuadPart);
+    now.tv_usec = (int)((count.QuadPart % Curl_freq.QuadPart) * 1000000 /
+                        Curl_freq.QuadPart);
+  }
+  else {
+    /* Disable /analyze warning that GetTickCount64 is preferred  */
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:28159)
+#endif
+    DWORD milliseconds = GetTickCount();
+#if defined(_MSC_VER)
+#pragma warning(pop)
 #endif
 
+    now.tv_sec = milliseconds / 1000;
+    now.tv_usec = (milliseconds % 1000) * 1000;
+  }
   return now;
 }
 
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC)
 
-struct timeval curlx_tvnow(void)
+struct curltime Curl_now(void)
 {
   /*
   ** clock_gettime() is granted to be increased monotonically when the
@@ -57,11 +67,30 @@ struct timeval curlx_tvnow(void)
   ** in any case the time starting point does not change once that the
   ** system has started up.
   */
+#ifdef HAVE_GETTIMEOFDAY
   struct timeval now;
+#endif
+  struct curltime cnow;
   struct timespec tsnow;
-  if(0 == clock_gettime(CLOCK_MONOTONIC, &tsnow)) {
-    now.tv_sec = tsnow.tv_sec;
-    now.tv_usec = tsnow.tv_nsec / 1000;
+
+  /*
+  ** clock_gettime() may be defined by Apple's SDK as weak symbol thus
+  ** code compiles but fails during run-time if clock_gettime() is
+  ** called on unsupported OS version.
+  */
+#if defined(__APPLE__) && (HAVE_BUILTIN_AVAILABLE == 1)
+  bool have_clock_gettime = FALSE;
+  if(__builtin_available(macOS 10.12, iOS 10, tvOS 10, watchOS 3, *))
+    have_clock_gettime = TRUE;
+#endif
+
+  if(
+#if defined(__APPLE__) && (HAVE_BUILTIN_AVAILABLE == 1)
+    have_clock_gettime &&
+#endif
+    (0 == clock_gettime(CLOCK_MONOTONIC, &tsnow))) {
+    cnow.tv_sec = tsnow.tv_sec;
+    cnow.tv_usec = (unsigned int)(tsnow.tv_nsec / 1000);
   }
   /*
   ** Even when the configure process has truly detected monotonic clock
@@ -69,20 +98,54 @@ struct timeval curlx_tvnow(void)
   ** run-time. When this occurs simply fallback to other time source.
   */
 #ifdef HAVE_GETTIMEOFDAY
-  else
+  else {
     (void)gettimeofday(&now, NULL);
+    cnow.tv_sec = now.tv_sec;
+    cnow.tv_usec = (unsigned int)now.tv_usec;
+  }
 #else
   else {
-    now.tv_sec = (long)time(NULL);
-    now.tv_usec = 0;
+    cnow.tv_sec = time(NULL);
+    cnow.tv_usec = 0;
   }
 #endif
-  return now;
+  return cnow;
+}
+
+#elif defined(HAVE_MACH_ABSOLUTE_TIME)
+
+#include <stdint.h>
+#include <mach/mach_time.h>
+
+struct curltime Curl_now(void)
+{
+  /*
+  ** Monotonic timer on Mac OS is provided by mach_absolute_time(), which
+  ** returns time in Mach "absolute time units," which are platform-dependent.
+  ** To convert to nanoseconds, one must use conversion factors specified by
+  ** mach_timebase_info().
+  */
+  static mach_timebase_info_data_t timebase;
+  struct curltime cnow;
+  uint64_t usecs;
+
+  if(0 == timebase.denom)
+    (void) mach_timebase_info(&timebase);
+
+  usecs = mach_absolute_time();
+  usecs *= timebase.numer;
+  usecs /= timebase.denom;
+  usecs /= 1000;
+
+  cnow.tv_sec = usecs / 1000000;
+  cnow.tv_usec = (int)(usecs % 1000000);
+
+  return cnow;
 }
 
 #elif defined(HAVE_GETTIMEOFDAY)
 
-struct timeval curlx_tvnow(void)
+struct curltime Curl_now(void)
 {
   /*
   ** gettimeofday() is not granted to be increased monotonically, due to
@@ -90,19 +153,22 @@ struct timeval curlx_tvnow(void)
   ** forward or backward in time.
   */
   struct timeval now;
+  struct curltime ret;
   (void)gettimeofday(&now, NULL);
-  return now;
+  ret.tv_sec = now.tv_sec;
+  ret.tv_usec = (int)now.tv_usec;
+  return ret;
 }
 
 #else
 
-struct timeval curlx_tvnow(void)
+struct curltime Curl_now(void)
 {
   /*
   ** time() returns the value of time in seconds since the Epoch.
   */
-  struct timeval now;
-  now.tv_sec = (long)time(NULL);
+  struct curltime now;
+  now.tv_sec = time(NULL);
   now.tv_usec = 0;
   return now;
 }
@@ -110,33 +176,31 @@ struct timeval curlx_tvnow(void)
 #endif
 
 /*
- * Make sure that the first argument is the more recent time, as otherwise
- * we'll get a weird negative time-diff back...
+ * Returns: time difference in number of milliseconds. For too large diffs it
+ * returns max value.
  *
- * Returns: the time difference in number of milliseconds.
+ * @unittest: 1323
  */
-long curlx_tvdiff(struct timeval newer, struct timeval older)
+timediff_t Curl_timediff(struct curltime newer, struct curltime older)
 {
-  return (newer.tv_sec-older.tv_sec)*1000+
-    (long)(newer.tv_usec-older.tv_usec)/1000;
+  timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
+  if(diff >= (TIMEDIFF_T_MAX/1000))
+    return TIMEDIFF_T_MAX;
+  else if(diff <= (TIMEDIFF_T_MIN/1000))
+    return TIMEDIFF_T_MIN;
+  return diff * 1000 + (newer.tv_usec-older.tv_usec)/1000;
 }
 
 /*
- * Same as curlx_tvdiff but with full usec resolution.
- *
- * Returns: the time difference in seconds with subsecond resolution.
+ * Returns: time difference in number of microseconds. For too large diffs it
+ * returns max value.
  */
-double curlx_tvdiff_secs(struct timeval newer, struct timeval older)
+timediff_t Curl_timediff_us(struct curltime newer, struct curltime older)
 {
-  if(newer.tv_sec != older.tv_sec)
-    return (double)(newer.tv_sec-older.tv_sec)+
-      (double)(newer.tv_usec-older.tv_usec)/1000000.0;
-  else
-    return (double)(newer.tv_usec-older.tv_usec)/1000000.0;
-}
-
-/* return the number of seconds in the given input timeval struct */
-long Curl_tvlong(struct timeval t1)
-{
-  return t1.tv_sec;
+  timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
+  if(diff >= (TIMEDIFF_T_MAX/1000000))
+    return TIMEDIFF_T_MAX;
+  else if(diff <= (TIMEDIFF_T_MIN/1000000))
+    return TIMEDIFF_T_MIN;
+  return diff * 1000000 + newer.tv_usec-older.tv_usec;
 }

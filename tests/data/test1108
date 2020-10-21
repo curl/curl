@@ -11,7 +11,7 @@ PRET
 <reply>
 
 <servercmd>
-REPLY PRET 550 unkown command
+REPLY PRET 550 unknown command
 </servercmd>
 </reply>
 

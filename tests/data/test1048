@@ -16,7 +16,7 @@ IPv6
 <reply>
 # When doing LIST, we get the default list output hard-coded in the test
 # FTP server
-<datacheck>
+<datacheck mode="text">
 total 20
 drwxr-xr-x   8 98       98           512 Oct 22 13:06 .
 drwxr-xr-x   8 98       98           512 Oct 22 13:06 ..
@@ -48,7 +48,7 @@ FTP-IPv6 dir list PASV with localhost --interface
 </command>
 # --interface doesn't accept an address surrounded by [] so %CLIENT6IP is out
 <precheck>
-perl -e "print 'Test requires default test server host address' if ( '%CLIENT6IP' ne '[::1]' );"
+perl -e "print 'Test requires default test client host address' if ( '%CLIENT6IP' ne '[::1]' );"
 </precheck>
 </client>
 

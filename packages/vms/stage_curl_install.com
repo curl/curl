@@ -11,8 +11,6 @@ $!     [usr.bin]curl-config.
 $!     [usr.lib]gnv$libcurl.exe
 $!     [usr.bin]curl. hard link for [usr.bin]gnv$curl.exe
 $!     [usr.include.curl]curl.h
-$!     [usr.include.curl]curlbuild.h
-$!     [usr.include.curl]curlrules.h
 $!     [usr.include.curl]curlver.h
 $!     [usr.include.curl]easy.h
 $!     [usr.include.curl]mprintf.h
@@ -26,7 +24,7 @@ $!     [usr.share.man.man3]curl*.3
 $!     [usr.share.man.man3]libcurl*.3
 $! Future: A symbolic link to the release notes?
 $!
-$! Copyright 2012, John Malmberg
+$! Copyright 2012 - 2020, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -132,10 +130,8 @@ $!
 $ if remove_files .eq. 0
 $ then
 $   copy [--.include.curl]curl.h 'new_gnu'[usr.include.curl]curl.h
-$   copy [--.include.curl]curlbuild.h -
-         'new_gnu'[usr.include.curl]curlbuild.h
-$   copy [--.include.curl]curlrules.h -
-         'new_gnu'[usr.include.curl]curlrules.h
+$   copy [--.include.curl]system.h -
+         'new_gnu'[usr.include.curl]system.h
 $   copy [--.include.curl]curlver.h -
          'new_gnu'[usr.include.curl]curlver.h
 $   copy [--.include.curl]easy.h -

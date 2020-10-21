@@ -51,11 +51,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -136,11 +136,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -221,11 +221,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -304,11 +304,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -380,11 +380,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -447,11 +447,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -514,11 +514,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -581,11 +581,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -651,11 +651,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_OPENSSL"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_OPENSSL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -671,7 +671,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win32\VC9\DLL Debug"
@@ -736,11 +736,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_OPENSSL"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_OPENSSL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -756,7 +756,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win64\VC9\DLL Debug"
@@ -821,11 +821,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_OPENSSL"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_OPENSSL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -840,7 +840,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win32\VC9\DLL Release"
@@ -904,11 +904,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_OPENSSL"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_OPENSSL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -923,7 +923,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win64\VC9\DLL Release"
@@ -985,11 +985,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_WINDOWS_SSPI;USE_SCHANNEL"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -1005,7 +1005,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib"
+				AdditionalDependencies="ws2_32.lib wldap32.lib crypt32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
@@ -1070,11 +1070,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_WINDOWS_SSPI;USE_SCHANNEL"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -1090,7 +1090,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib"
+				AdditionalDependencies="ws2_32.lib wldap32.lib crypt32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
@@ -1155,11 +1155,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_WINDOWS_SSPI;USE_SCHANNEL"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1174,7 +1174,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib"
+				AdditionalDependencies="ws2_32.lib wldap32.lib crypt32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
@@ -1238,11 +1238,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_WINDOWS_SSPI;USE_SCHANNEL"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1257,7 +1257,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib"
+				AdditionalDependencies="ws2_32.lib wldap32.lib crypt32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
@@ -1319,11 +1319,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_OPENSSL;USE_LIBSSH2;HAVE_LIBSSH2_H"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -1339,7 +1339,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib libssh2d.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib libssh2d.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win32\VC9\DLL Debug;..\..\..\..\..\libssh2\build\Win32\VC9\DLL Debug"
@@ -1404,11 +1404,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_OPENSSL;USE_LIBSSH2;HAVE_LIBSSH2_H"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -1424,7 +1424,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib libssh2d.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib libssh2d.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win64\VC9\DLL Debug;..\..\..\..\..\libssh2\build\Win64\VC9\DLL Debug"
@@ -1489,11 +1489,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_OPENSSL;USE_LIBSSH2;HAVE_LIBSSH2_H"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1508,7 +1508,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib libssh2.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib libssh2.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win32\VC9\DLL Release;..\..\..\..\..\libssh2\build\Win32\VC9\DLL Release"
@@ -1572,11 +1572,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_OPENSSL;USE_LIBSSH2;HAVE_LIBSSH2_H"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1591,7 +1591,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib libssh2.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib libssh2.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win64\VC9\DLL Release;..\..\..\..\..\libssh2\build\Win64\VC9\DLL Release"
@@ -1648,11 +1648,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -1715,11 +1715,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -1781,11 +1781,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;HAVE_LIBSSH2_H"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -1848,11 +1848,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;HAVE_LIBSSH2_H"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -1914,11 +1914,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -1981,11 +1981,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -2047,11 +2047,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -2114,11 +2114,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -2180,11 +2180,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;HAVE_LIBSSH2_H"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -2247,11 +2247,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;HAVE_LIBSSH2_H"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -2314,11 +2314,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -2381,11 +2381,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -2447,11 +2447,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;HAVE_LIBSSH2_H"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -2514,11 +2514,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;HAVE_LIBSSH2_H"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -2580,11 +2580,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -2647,11 +2647,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -2713,11 +2713,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -2780,11 +2780,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -2846,11 +2846,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;HAVE_LIBSSH2_H"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -2913,11 +2913,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;HAVE_LIBSSH2_H"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -2983,11 +2983,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;USE_IPV6;WANT_IDN_PROTOTYPES"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -3003,7 +3003,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib normaliz.lib"
+				AdditionalDependencies="ws2_32.lib wldap32.lib crypt32.lib normaliz.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
@@ -3068,11 +3068,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;USE_IPV6;WANT_IDN_PROTOTYPES"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -3088,7 +3088,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib normaliz.lib"
+				AdditionalDependencies="ws2_32.lib wldap32.lib crypt32.lib normaliz.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
@@ -3153,11 +3153,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;USE_IPV6;WANT_IDN_PROTOTYPES"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -3172,7 +3172,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib normaliz.lib"
+				AdditionalDependencies="ws2_32.lib wldap32.lib crypt32.lib normaliz.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
@@ -3236,11 +3236,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;USE_IPV6;WANT_IDN_PROTOTYPES"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -3255,7 +3255,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wldap32.lib normaliz.lib"
+				AdditionalDependencies="ws2_32.lib wldap32.lib crypt32.lib normaliz.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
@@ -3312,11 +3312,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;USE_IPV6;WANT_IDN_PROTOTYPES"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -3379,11 +3379,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES"
+				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;USE_IPV6;WANT_IDN_PROTOTYPES"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -3446,11 +3446,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;USE_IPV6;WANT_IDN_PROTOTYPES"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -3513,11 +3513,11 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib"
-				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES"
+				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;USE_IPV6;WANT_IDN_PROTOTYPES"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				WarningLevel="3"
+				WarningLevel="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -3568,6 +3568,48 @@ CURL_LIB_H_FILES
 			Name="Resource Files"
 			>
 CURL_LIB_RC_FILES
+		</Filter>
+		<Filter
+			Name="vauth"
+			>
+			<Filter
+				Name="Source Files"
+				>
+CURL_LIB_VAUTH_C_FILES
+			</Filter>
+			<Filter
+				Name="Header Files"
+				>
+CURL_LIB_VAUTH_H_FILES
+			</Filter>
+		</Filter>
+		<Filter
+			Name="vquic"
+			>
+			<Filter
+				Name="Source Files"
+				>
+CURL_LIB_VQUIC_C_FILES
+			</Filter>
+			<Filter
+				Name="Header Files"
+				>
+CURL_LIB_VQUIC_H_FILES
+			</Filter>
+		</Filter>
+		<Filter
+			Name="vssh"
+			>
+			<Filter
+				Name="Source Files"
+				>
+CURL_LIB_VSSH_C_FILES
+			</Filter>
+			<Filter
+				Name="Header Files"
+				>
+CURL_LIB_VSSH_H_FILES
+			</Filter>
 		</Filter>
 		<Filter
 			Name="vtls"

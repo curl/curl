@@ -50,7 +50,9 @@ http-proxy
 <tool>
 lib503
 </tool>
-
+<features>
+proxy
+</features>
  <name>
 simple multi http:// through proxytunnel with authentication info
  </name>

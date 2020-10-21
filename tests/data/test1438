@@ -1,0 +1,56 @@
+<testcase>
+<info>
+<keywords>
+protocol
+--write-out
+</keywords>
+</info>
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 9
+Connection: close
+Content-Type: text/plain
+
+testdata
+</data>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+
+<name>
+Check if %{scheme} returns HTTP
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/1438 --write-out '%{scheme}'
+</command>
+</client>
+
+# Verify data
+<verify>
+<stdout nonewline="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 9
+Connection: close
+Content-Type: text/plain
+
+testdata
+HTTP
+</stdout>
+<protocol>
+GET /1438 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

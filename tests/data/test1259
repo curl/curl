@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.0 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Type: text/html
+Set-Cookie: I-am=here; domain=localhost;
+
+boo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP URL with semicolon in password
+ </name>
+ <command>
+"http://user:pass;word@%HOSTIP:%HTTPPORT/we/want/1259"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /we/want/1259 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dXNlcjpwYXNzO3dvcmQ=
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

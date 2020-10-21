@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- *  Copyright (c) 2000 David Odin (aka DindinX) for MandrakeSoft
+ *  Copyright (c) 2000 - 2019 David Odin (aka DindinX) for MandrakeSoft
  */
 /* <DESC>
  * use the libcurl in a gtk-threaded application
@@ -45,14 +45,12 @@ int my_progress_func(GtkWidget *bar,
 void *my_thread(void *ptr)
 {
   CURL *curl;
-  CURLcode res;
-  FILE *outfile;
-  gchar *url = ptr;
 
   curl = curl_easy_init();
-  if(curl)
-  {
-    outfile = fopen("test.curl", "w");
+  if(curl) {
+    gchar *url = ptr;
+    const char *filename = "test.curl";
+    FILE *outfile = fopen(filename, "wb");
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, outfile);
@@ -62,7 +60,7 @@ void *my_thread(void *ptr)
     curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, my_progress_func);
     curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, Bar);
 
-    res = curl_easy_perform(curl);
+    curl_easy_perform(curl);
 
     fclose(outfile);
     /* always cleanup */
@@ -97,7 +95,7 @@ int main(int argc, char **argv)
   gtk_container_add(GTK_CONTAINER(Frame2), Bar);
   gtk_widget_show_all(Window);
 
-  if (!g_thread_create(&my_thread, argv[1], FALSE, NULL) != 0)
+  if(!g_thread_create(&my_thread, argv[1], FALSE, NULL) != 0)
     g_warning("can't create the thread");
 
 
@@ -106,4 +104,3 @@ int main(int argc, char **argv)
   gdk_threads_leave();
   return 0;
 }
-

@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2008 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 2008 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -20,18 +20,18 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH mk-ca-bundle 1 "5 Jan 2013" "version 1.20" "mk-ca-bundle manual"
+.TH mk-ca-bundle 1 "24 Oct 2016" "version 1.27" "mk-ca-bundle manual"
 .SH NAME
 mk-ca-bundle \- convert mozilla's certdata.txt to PEM format
 .SH SYNOPSIS
-mk-ca-bundle [bilnpqstuv]
+mk-ca-bundle [options]
 .I [outputfile]
 .SH DESCRIPTION
 The mk-ca-bundle tool downloads the certdata.txt file from Mozilla's source
-tree over HTTP, then parses certdata.txt and extracts certificates
-into PEM format.  By default, only CA root certificates trusted to issue SSL
-server authentication certificates are extracted. These are then processed with
-the OpenSSL commandline tool to produce the final ca-bundle file.
+tree over HTTPS, then parses certdata.txt and extracts certificates into PEM
+format. By default, only CA root certificates trusted to issue SSL server
+authentication certificates are extracted. These are then processed with the
+OpenSSL commandline tool to produce the final ca-bundle file.
 
 The default \fIoutputfile\fP name is \fBca-bundle.crt\fP. By setting it to '-'
 (a single dash) you will get the output sent to STDOUT instead of a file.
@@ -51,8 +51,17 @@ shortcuts for which source tree to get the cert data from.
 force rebuild even if certdata.txt is current (Added in version 1.17)
 .IP -i
 print version info about used modules
+.IP -k
+Allow insecure data transfer. By default (since 1.27) this command will fail
+if the HTTPS transfer fails. This overrides that decision (and opens for
+man-in-the-middle attacks).
 .IP -l
 print license info about certdata.txt
+.IP -m
+(Added in 1.26) Include meta data comments in the output. The meta data is
+specific information about each certificate that is stored in the original
+file as comments and using this option will make those comments get passed on
+to the output file. The meta data is not parsed in any way by mk-ca-bundle.
 .IP -n
 no download of certdata.txt (to use existing)
 .IP "-p [purposes]:[levels]"
@@ -98,13 +107,13 @@ Returns 0 on success. Returns 1 if it fails to download data.
 .SH CERTDATA FORMAT
 The file format used by Mozilla for this trust information seems to be documented here:
 .nf
-http://p11-glue.freedesktop.org/doc/storing-trust-policy/storing-trust-existing.html
+https://p11-glue.freedesktop.org/doc/storing-trust-policy/storing-trust-existing.html
 .fi
 .SH SEE ALSO
 .BR curl (1)
 .SH HISTORY
 \fBmk-ca-bundle\fP is a command line tool that is shipped as part of every
-curl and libcurl release (see http://curl.haxx.se/). It was originally based
+curl and libcurl release (see https://curl.haxx.se/). It was originally based
 on the parse-certs script written by Roland Krikava and was later much
 improved by Guenter Knauf.  This manual page was initially written by Jan
 Schaumann \&<jschauma@netmeister.org>.

@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -31,7 +31,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PRIVATE, void *pointer);
 Pass a void * as parameter, pointing to data that should be associated with
 this curl handle.  The pointer can subsequently be retrieved using
 \fIcurl_easy_getinfo(3)\fP with the CURLINFO_PRIVATE option. libcurl itself
-never does nothing with this data.
+never does anything with this data.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
@@ -42,7 +42,7 @@ CURL *curl = curl_easy_init();
 struct private secrets;
 if(curl) {
   struct private *extracted;
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* store a pointer to our private struct */
   curl_easy_setopt(curl, CURLOPT_PRIVATE, &secrets);

@@ -1,13 +1,37 @@
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.haxx.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ ***************************************************************************/
 /* lib/curl_config.h.in.  Generated somehow by cmake.  */
 
 /* when building libcurl itself */
 #cmakedefine BUILDING_LIBCURL 1
 
 /* Location of default ca bundle */
-#cmakedefine CURL_CA_BUNDLE ${CURL_CA_BUNDLE}
+#cmakedefine CURL_CA_BUNDLE "${CURL_CA_BUNDLE}"
+
+/* define "1" to use built-in ca store of TLS backend */
+#cmakedefine CURL_CA_FALLBACK 1
 
 /* Location of default ca path */
-#cmakedefine CURL_CA_PATH ${CURL_CA_PATH}
+#cmakedefine CURL_CA_PATH "${CURL_CA_PATH}"
 
 /* to disable cookies support */
 #cmakedefine CURL_DISABLE_COOKIES 1
@@ -24,6 +48,12 @@
 /* to disable FTP */
 #cmakedefine CURL_DISABLE_FTP 1
 
+/* to disable GOPHER */
+#cmakedefine CURL_DISABLE_GOPHER 1
+
+/* to disable IMAP */
+#cmakedefine CURL_DISABLE_IMAP 1
+
 /* to disable HTTP */
 #cmakedefine CURL_DISABLE_HTTP 1
 
@@ -33,8 +63,23 @@
 /* to disable LDAPS */
 #cmakedefine CURL_DISABLE_LDAPS 1
 
+/* to disable MQTT */
+#cmakedefine CURL_DISABLE_MQTT 1
+
+/* to disable POP3 */
+#cmakedefine CURL_DISABLE_POP3 1
+
 /* to disable proxies */
 #cmakedefine CURL_DISABLE_PROXY 1
+
+/* to disable RTSP */
+#cmakedefine CURL_DISABLE_RTSP 1
+
+/* to disable SMB */
+#cmakedefine CURL_DISABLE_SMB 1
+
+/* to disable SMTP */
+#cmakedefine CURL_DISABLE_SMTP 1
 
 /* to disable TELNET */
 #cmakedefine CURL_DISABLE_TELNET 1
@@ -46,20 +91,20 @@
 #cmakedefine CURL_DISABLE_VERBOSE_STRINGS 1
 
 /* to make a symbol visible */
-#cmakedefine CURL_EXTERN_SYMBOL 1
+#cmakedefine CURL_EXTERN_SYMBOL ${CURL_EXTERN_SYMBOL}
 /* Ensure using CURL_EXTERN_SYMBOL is possible */
 #ifndef CURL_EXTERN_SYMBOL
 #define CURL_EXTERN_SYMBOL
 #endif
+
+/* Allow SMB to work on Windows */
+#cmakedefine USE_WIN32_CRYPTO
 
 /* Use Windows LDAP implementation */
 #cmakedefine USE_WIN32_LDAP 1
 
 /* when not building a shared library */
 #cmakedefine CURL_STATICLIB 1
-
-/* Set to explicitly specify we don't want to use thread-safe functions */
-#cmakedefine DISABLED_THREADSAFE 1
 
 /* your Entropy Gathering Daemon socket pathname */
 #cmakedefine EGD_SOCKET ${EGD_SOCKET}
@@ -109,6 +154,9 @@
 /* Define to 1 if bool is an available type. */
 #cmakedefine HAVE_BOOL_T 1
 
+/* Define to 1 if you have the __builtin_available function. */
+#cmakedefine HAVE_BUILTIN_AVAILABLE 1
+
 /* Define to 1 if you have the clock_gettime function and monotonic timer. */
 #cmakedefine HAVE_CLOCK_GETTIME_MONOTONIC 1
 
@@ -121,14 +169,8 @@
 /* Define to 1 if you have the <crypto.h> header file. */
 #cmakedefine HAVE_CRYPTO_H 1
 
-/* Define to 1 if you have the <des.h> header file. */
-#cmakedefine HAVE_DES_H 1
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #cmakedefine HAVE_DLFCN_H 1
-
-/* Define to 1 if you have the `ENGINE_load_builtin_engines' function. */
-#cmakedefine HAVE_ENGINE_LOAD_BUILTIN_ENGINES 1
 
 /* Define to 1 if you have the <errno.h> header file. */
 #cmakedefine HAVE_ERRNO_H 1
@@ -214,8 +256,20 @@
 /* Define to 1 if you have the `getprotobyname' function. */
 #cmakedefine HAVE_GETPROTOBYNAME 1
 
+/* Define to 1 if you have the `getpeername' function. */
+#cmakedefine HAVE_GETPEERNAME 1
+
+/* Define to 1 if you have the `getsockname' function. */
+#cmakedefine HAVE_GETSOCKNAME 1
+
+/* Define to 1 if you have the `if_nametoindex' function. */
+#cmakedefine HAVE_IF_NAMETOINDEX 1
+
 /* Define to 1 if you have the `getpwuid' function. */
 #cmakedefine HAVE_GETPWUID 1
+
+/* Define to 1 if you have the `getpwuid_r' function. */
+#cmakedefine HAVE_GETPWUID_R 1
 
 /* Define to 1 if you have the `getrlimit' function. */
 #cmakedefine HAVE_GETRLIMIT 1
@@ -341,8 +395,11 @@
 /* Define to 1 if you have the <libgen.h> header file. */
 #cmakedefine HAVE_LIBGEN_H 1
 
-/* Define to 1 if you have the `idn' library (-lidn). */
-#cmakedefine HAVE_LIBIDN 1
+/* Define to 1 if you have the `idn2' library (-lidn2). */
+#cmakedefine HAVE_LIBIDN2 1
+
+/* Define to 1 if you have the idn2.h header file. */
+#cmakedefine HAVE_IDN2_H 1
 
 /* Define to 1 if you have the `resolv' library (-lresolv). */
 #cmakedefine HAVE_LIBRESOLV 1
@@ -374,14 +431,17 @@
 /* Define to 1 if you have the <libssh2.h> header file. */
 #cmakedefine HAVE_LIBSSH2_H 1
 
-/* Define to 1 if you have the `ssl' library (-lssl). */
-#cmakedefine HAVE_LIBSSL 1
+/* Define to 1 if you have the <libssh/libssh.h> header file. */
+#cmakedefine HAVE_LIBSSH_LIBSSH_H 1
 
 /* if zlib is available */
 #cmakedefine HAVE_LIBZ 1
 
-/* Define to 1 if you have the <limits.h> header file. */
-#cmakedefine HAVE_LIMITS_H 1
+/* if brotli is available */
+#cmakedefine HAVE_BROTLI 1
+
+/* if zstd is available */
+#cmakedefine HAVE_ZSTD 1
 
 /* if your compiler supports LL */
 #cmakedefine HAVE_LL 1
@@ -424,9 +484,6 @@
 
 /* Define to 1 if you have the <openssl/crypto.h> header file. */
 #cmakedefine HAVE_OPENSSL_CRYPTO_H 1
-
-/* Define to 1 if you have the <openssl/engine.h> header file. */
-#cmakedefine HAVE_OPENSSL_ENGINE_H 1
 
 /* Define to 1 if you have the <openssl/err.h> header file. */
 #cmakedefine HAVE_OPENSSL_ERR_H 1
@@ -497,6 +554,15 @@
 /* Define to 1 if you have the send function. */
 #cmakedefine HAVE_SEND 1
 
+/* Define to 1 if you have the 'fsetxattr' function. */
+#cmakedefine HAVE_FSETXATTR 1
+
+/* fsetxattr() takes 5 args */
+#cmakedefine HAVE_FSETXATTR_5 1
+
+/* fsetxattr() takes 6 args */
+#cmakedefine HAVE_FSETXATTR_6 1
+
 /* Define to 1 if you have the <setjmp.h> header file. */
 #cmakedefine HAVE_SETJMP_H 1
 
@@ -544,9 +610,6 @@
 
 /* Define to 1 if you have the `socket' function. */
 #cmakedefine HAVE_SOCKET 1
-
-/* Define to 1 if you have the `SSL_get_shutdown' function. */
-#cmakedefine HAVE_SSL_GET_SHUTDOWN 1
 
 /* Define to 1 if you have the <ssl.h> header file. */
 #cmakedefine HAVE_SSL_H 1
@@ -849,26 +912,35 @@
 /* Define to the function return type for send. */
 #cmakedefine SEND_TYPE_RETV ${SEND_TYPE_RETV}
 
+/*
+ Note: SIZEOF_* variables are fetched with CMake through check_type_size().
+ As per CMake documentation on CheckTypeSize, C preprocessor code is
+ generated by CMake into SIZEOF_*_CODE. This is what we use in the
+ following statements.
+
+ Reference: https://cmake.org/cmake/help/latest/module/CheckTypeSize.html
+*/
+
 /* The size of `int', as computed by sizeof. */
-#cmakedefine SIZEOF_INT ${SIZEOF_INT}
+${SIZEOF_INT_CODE}
 
 /* The size of `short', as computed by sizeof. */
-#cmakedefine SIZEOF_SHORT ${SIZEOF_SHORT}
+${SIZEOF_SHORT_CODE}
 
 /* The size of `long', as computed by sizeof. */
-#cmakedefine SIZEOF_LONG ${SIZEOF_LONG}
+${SIZEOF_LONG_CODE}
 
 /* The size of `off_t', as computed by sizeof. */
-#cmakedefine SIZEOF_OFF_T ${SIZEOF_OFF_T}
+${SIZEOF_OFF_T_CODE}
+
+/* The size of `curl_off_t', as computed by sizeof. */
+${SIZEOF_CURL_OFF_T_CODE}
 
 /* The size of `size_t', as computed by sizeof. */
-#cmakedefine SIZEOF_SIZE_T ${SIZEOF_SIZE_T}
+${SIZEOF_SIZE_T_CODE}
 
 /* The size of `time_t', as computed by sizeof. */
-#cmakedefine SIZEOF_TIME_T ${SIZEOF_TIME_T}
-
-/* The size of `void*', as computed by sizeof. */
-#cmakedefine SIZEOF_VOIDP ${SIZEOF_VOIDP}
+${SIZEOF_TIME_T_CODE}
 
 /* Define to 1 if you have the ANSI C header files. */
 #cmakedefine STDC_HEADERS 1
@@ -885,14 +957,29 @@
 /* Define if you want to enable POSIX threaded DNS lookup */
 #cmakedefine USE_THREADS_POSIX 1
 
+/* Define if you want to enable WIN32 threaded DNS lookup */
+#cmakedefine USE_THREADS_WIN32 1
+
 /* Define to disable non-blocking sockets. */
 #cmakedefine USE_BLOCKING_SOCKETS 1
 
 /* if GnuTLS is enabled */
 #cmakedefine USE_GNUTLS 1
 
-/* if PolarSSL is enabled */
-#cmakedefine USE_POLARSSL 1
+/* if Secure Transport is enabled */
+#cmakedefine USE_SECTRANSP 1
+
+/* if mbedTLS is enabled */
+#cmakedefine USE_MBEDTLS 1
+
+/* if BearSSL is enabled */
+#cmakedefine USE_BEARSSL 1
+
+/* if WolfSSL is enabled */
+#cmakedefine USE_WOLFSSL 1
+
+/* if libSSH is in use */
+#cmakedefine USE_LIBSSH 1
 
 /* if libSSH2 is in use */
 #cmakedefine USE_LIBSSH2 1
@@ -903,17 +990,37 @@
 /* if NSS is enabled */
 #cmakedefine USE_NSS 1
 
+/* if you have the PK11_CreateManagedGenericObject function */
+#cmakedefine HAVE_PK11_CREATEMANAGEDGENERICOBJECT 1
+
 /* if you want to use OpenLDAP code instead of legacy ldap implementation */
 #cmakedefine USE_OPENLDAP 1
 
 /* if OpenSSL is in use */
 #cmakedefine USE_OPENSSL 1
 
+/* to enable NGHTTP2  */
+#cmakedefine USE_NGHTTP2 1
+
+/* to enable NGTCP2 */
+#cmakedefine USE_NGTCP2 1
+
+/* to enable NGHTTP3  */
+#cmakedefine USE_NGHTTP3 1
+
+/* to enable quiche */
+#cmakedefine USE_QUICHE 1
+
+/* Define to 1 if you have the quiche_conn_set_qlog_fd function. */
+#cmakedefine HAVE_QUICHE_CONN_SET_QLOG_FD 1
+
 /* if Unix domain sockets are enabled  */
 #cmakedefine USE_UNIX_SOCKETS
 
-/* Define to 1 if you are building a Windows target without large file
-   support. */
+/* to enable alt-svc */
+#cmakedefine USE_ALTSVC 1
+
+/* Define to 1 if you are building a Windows target with large file support. */
 #cmakedefine USE_WIN32_LARGE_FILES 1
 
 /* to enable SSPI support */
@@ -922,14 +1029,14 @@
 /* to enable Windows SSL  */
 #cmakedefine USE_SCHANNEL 1
 
+/* enable multiple SSL backends */
+#cmakedefine CURL_WITH_MULTI_SSL 1
+
 /* Define to 1 if using yaSSL in OpenSSL compatibility mode. */
 #cmakedefine USE_YASSLEMUL 1
 
 /* Version number of package */
 #cmakedefine VERSION ${VERSION}
-
-/* Define to avoid automatic inclusion of winsock.h */
-#cmakedefine WIN32_LEAN_AND_MEAN 1
 
 /* Define to 1 if OS is AIX. */
 #ifndef _ALL_SOURCE
@@ -962,3 +1069,6 @@
 
 /* the signed version of size_t */
 #cmakedefine ssize_t ${ssize_t}
+
+/* Define to 1 if you have the mach_absolute_time function. */
+#cmakedefine HAVE_MACH_ABSOLUTE_TIME 1

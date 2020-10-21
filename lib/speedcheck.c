@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,47 +28,46 @@
 #include "multiif.h"
 #include "speedcheck.h"
 
-void Curl_speedinit(struct SessionHandle *data)
+void Curl_speedinit(struct Curl_easy *data)
 {
-  memset(&data->state.keeps_speed, 0, sizeof(struct timeval));
+  memset(&data->state.keeps_speed, 0, sizeof(struct curltime));
 }
 
-CURLcode Curl_speedcheck(struct SessionHandle *data,
-                         struct timeval now)
+/*
+ * @unittest: 1606
+ */
+CURLcode Curl_speedcheck(struct Curl_easy *data,
+                         struct curltime now)
 {
-  if((data->progress.current_speed >= 0) &&
-     data->set.low_speed_time &&
-     (Curl_tvlong(data->state.keeps_speed) != 0) &&
-     (data->progress.current_speed < data->set.low_speed_limit)) {
-    long howlong = Curl_tvdiff(now, data->state.keeps_speed);
-    long nextcheck = (data->set.low_speed_time * 1000) - howlong;
+  if((data->progress.current_speed >= 0) && data->set.low_speed_time) {
+    if(data->progress.current_speed < data->set.low_speed_limit) {
+      if(!data->state.keeps_speed.tv_sec)
+        /* under the limit at this very moment */
+        data->state.keeps_speed = now;
+      else {
+        /* how long has it been under the limit */
+        timediff_t howlong = Curl_timediff(now, data->state.keeps_speed);
 
-    /* We are now below the "low speed limit". If we are below it
-       for "low speed time" seconds we consider that enough reason
-       to abort the download. */
-    if(nextcheck <= 0) {
-      /* we have been this slow for long enough, now die */
-      failf(data,
-            "Operation too slow. "
-            "Less than %ld bytes/sec transferred the last %ld seconds",
-            data->set.low_speed_limit,
-            data->set.low_speed_time);
-      return CURLE_OPERATION_TIMEDOUT;
+        if(howlong >= data->set.low_speed_time * 1000) {
+          /* too long */
+          failf(data,
+                "Operation too slow. "
+                "Less than %ld bytes/sec transferred the last %ld seconds",
+                data->set.low_speed_limit,
+                data->set.low_speed_time);
+          return CURLE_OPERATION_TIMEDOUT;
+        }
+      }
     }
-    else {
-      /* wait complete low_speed_time */
-      Curl_expire_latest(data, nextcheck);
-    }
+    else
+      /* faster right now */
+      data->state.keeps_speed.tv_sec = 0;
   }
-  else {
-    /* we keep up the required speed all right */
-    data->state.keeps_speed = now;
 
-    if(data->set.low_speed_limit)
-      /* if there is a low speed limit enabled, we set the expire timer to
-         make this connection's speed get checked again no later than when
-         this time is up */
-      Curl_expire_latest(data, data->set.low_speed_time*1000);
-  }
+  if(data->set.low_speed_limit)
+    /* if low speed limit is enabled, set the expire timer to make this
+       connection's speed get checked again in a second */
+    Curl_expire(data, 1000, EXPIRE_SPEEDCHECK);
+
   return CURLE_OK;
 }

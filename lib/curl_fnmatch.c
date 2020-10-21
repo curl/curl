@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,12 +21,16 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+#ifndef CURL_DISABLE_FTP
+#include <curl/curl.h>
 
 #include "curl_fnmatch.h"
 #include "curl_memory.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
+
+#ifndef HAVE_FNMATCH
 
 #define CURLFNM_CHARSET_LEN (sizeof(char) * 256)
 #define CURLFNM_CHSET_SIZE (CURLFNM_CHARSET_LEN + 15)
@@ -45,14 +49,7 @@
 #define CURLFNM_UPPER   (CURLFNM_CHARSET_LEN + 10)
 
 typedef enum {
-  CURLFNM_LOOP_DEFAULT = 0,
-  CURLFNM_LOOP_BACKSLASH
-} loop_state;
-
-typedef enum {
   CURLFNM_SCHS_DEFAULT = 0,
-  CURLFNM_SCHS_MAYRANGE,
-  CURLFNM_SCHS_MAYRANGE2,
   CURLFNM_SCHS_RIGHTBR,
   CURLFNM_SCHS_RIGHTBRLEFTBR
 } setcharset_state;
@@ -61,6 +58,13 @@ typedef enum {
   CURLFNM_PKW_INIT = 0,
   CURLFNM_PKW_DDOT
 } parsekey_state;
+
+typedef enum {
+  CCLASS_OTHER = 0,
+  CCLASS_DIGIT,
+  CCLASS_UPPER,
+  CCLASS_LOWER
+} char_class;
 
 #define SETCHARSET_OK     1
 #define SETCHARSET_FAIL   0
@@ -79,12 +83,12 @@ static int parsekeyword(unsigned char **pattern, unsigned char *charset)
       return SETCHARSET_FAIL;
     switch(state) {
     case CURLFNM_PKW_INIT:
-      if(ISALPHA(c) && ISLOWER(c))
+      if(ISLOWER(c))
         keyword[i] = c;
       else if(c == ':')
         state = CURLFNM_PKW_DDOT;
       else
-        return 0;
+        return SETCHARSET_FAIL;
       break;
     case CURLFNM_PKW_DDOT:
       if(c == ']')
@@ -121,54 +125,73 @@ static int parsekeyword(unsigned char **pattern, unsigned char *charset)
   return SETCHARSET_OK;
 }
 
+/* Return the character class. */
+static char_class charclass(unsigned char c)
+{
+  if(ISUPPER(c))
+    return CCLASS_UPPER;
+  if(ISLOWER(c))
+    return CCLASS_LOWER;
+  if(ISDIGIT(c))
+    return CCLASS_DIGIT;
+  return CCLASS_OTHER;
+}
+
+/* Include a character or a range in set. */
+static void setcharorrange(unsigned char **pp, unsigned char *charset)
+{
+  unsigned char *p = (*pp)++;
+  unsigned char c = *p++;
+
+  charset[c] = 1;
+  if(ISALNUM(c) && *p++ == '-') {
+    char_class cc = charclass(c);
+    unsigned char endrange = *p++;
+
+    if(endrange == '\\')
+      endrange = *p++;
+    if(endrange >= c && charclass(endrange) == cc) {
+      while(c++ != endrange)
+        if(charclass(c) == cc)  /* Chars in class may be not consecutive. */
+          charset[c] = 1;
+      *pp = p;
+    }
+  }
+}
+
 /* returns 1 (true) if pattern is OK, 0 if is bad ("p" is pattern pointer) */
 static int setcharset(unsigned char **p, unsigned char *charset)
 {
   setcharset_state state = CURLFNM_SCHS_DEFAULT;
-  unsigned char rangestart = 0;
-  unsigned char lastchar   = 0;
   bool something_found = FALSE;
   unsigned char c;
+
+  memset(charset, 0, CURLFNM_CHSET_SIZE);
   for(;;) {
     c = **p;
+    if(!c)
+      return SETCHARSET_FAIL;
+
     switch(state) {
     case CURLFNM_SCHS_DEFAULT:
-      if(ISALNUM(c)) { /* ASCII value */
-        rangestart = c;
-        charset[c] = 1;
-        (*p)++;
-        state = CURLFNM_SCHS_MAYRANGE;
-        something_found = TRUE;
-      }
-      else if(c == ']') {
+      if(c == ']') {
         if(something_found)
           return SETCHARSET_OK;
-        else
-          something_found = TRUE;
+        something_found = TRUE;
         state = CURLFNM_SCHS_RIGHTBR;
         charset[c] = 1;
         (*p)++;
       }
       else if(c == '[') {
-        char c2 = *((*p)+1);
-        if(c2 == ':') { /* there has to be a keyword */
-          (*p) += 2;
-          if(parsekeyword(p, charset)) {
-            state = CURLFNM_SCHS_DEFAULT;
-          }
-          else
-            return SETCHARSET_FAIL;
-        }
+        unsigned char *pp = *p + 1;
+
+        if(*pp++ == ':' && parsekeyword(&pp, charset))
+          *p = pp;
         else {
           charset[c] = 1;
           (*p)++;
         }
         something_found = TRUE;
-      }
-      else if(c == '?' || c == '*') {
-        something_found = TRUE;
-        charset[c] = 1;
-        (*p)++;
       }
       else if(c == '^' || c == '!') {
         if(!something_found) {
@@ -185,86 +208,15 @@ static int setcharset(unsigned char **p, unsigned char *charset)
       }
       else if(c == '\\') {
         c = *(++(*p));
-        if(ISPRINT((c))) {
-          something_found = TRUE;
-          state = CURLFNM_SCHS_MAYRANGE;
-          charset[c] = 1;
-          rangestart = c;
-          (*p)++;
-        }
+        if(c)
+          setcharorrange(p, charset);
         else
-          return SETCHARSET_FAIL;
-      }
-      else if(c == '\0') {
-        return SETCHARSET_FAIL;
-      }
-      else {
-        charset[c] = 1;
-        (*p)++;
+          charset['\\'] = 1;
         something_found = TRUE;
       }
-      break;
-    case CURLFNM_SCHS_MAYRANGE:
-      if(c == '-') {
-        charset[c] = 1;
-        (*p)++;
-        lastchar = '-';
-        state = CURLFNM_SCHS_MAYRANGE2;
-      }
-      else if(c == '[') {
-        state = CURLFNM_SCHS_DEFAULT;
-      }
-      else if(ISALNUM(c)) {
-        charset[c] = 1;
-        (*p)++;
-      }
-      else if(c == '\\') {
-        c = *(++(*p));
-        if(ISPRINT(c)) {
-          charset[c] = 1;
-          (*p)++;
-        }
-        else
-          return SETCHARSET_FAIL;
-      }
-      else if(c == ']') {
-        return SETCHARSET_OK;
-      }
-      else
-        return SETCHARSET_FAIL;
-      break;
-    case CURLFNM_SCHS_MAYRANGE2:
-      if(c == '\\') {
-        c = *(++(*p));
-        if(!ISPRINT(c))
-          return SETCHARSET_FAIL;
-      }
-      if(c == ']') {
-        return SETCHARSET_OK;
-      }
-      else if(c == '\\') {
-        c = *(++(*p));
-        if(ISPRINT(c)) {
-          charset[c] = 1;
-          state = CURLFNM_SCHS_DEFAULT;
-          (*p)++;
-        }
-        else
-          return SETCHARSET_FAIL;
-      }
-      if(c >= rangestart) {
-        if((ISLOWER(c) && ISLOWER(rangestart)) ||
-           (ISDIGIT(c) && ISDIGIT(rangestart)) ||
-           (ISUPPER(c) && ISUPPER(rangestart))) {
-          charset[lastchar] = 0;
-          rangestart++;
-          while(rangestart++ <= c)
-            charset[rangestart-1] = 1;
-          (*p)++;
-          state = CURLFNM_SCHS_DEFAULT;
-        }
-        else
-          return SETCHARSET_FAIL;
+      else {
+        setcharorrange(p, charset);
+        something_found = TRUE;
       }
       break;
     case CURLFNM_SCHS_RIGHTBR:
@@ -275,9 +227,6 @@ static int setcharset(unsigned char **p, unsigned char *charset)
       }
       else if(c == ']') {
         return SETCHARSET_OK;
-      }
-      else if(c == '\0') {
-        return SETCHARSET_FAIL;
       }
       else if(ISPRINT(c)) {
         charset[c] = 1;
@@ -291,14 +240,11 @@ static int setcharset(unsigned char **p, unsigned char *charset)
         goto fail;
       break;
     case CURLFNM_SCHS_RIGHTBRLEFTBR:
-      if(c == ']') {
+      if(c == ']')
         return SETCHARSET_OK;
-      }
-      else {
-        state  = CURLFNM_SCHS_DEFAULT;
-        charset[c] = 1;
-        (*p)++;
-      }
+      state  = CURLFNM_SCHS_DEFAULT;
+      charset[c] = 1;
+      (*p)++;
       break;
     }
   }
@@ -306,105 +252,96 @@ fail:
   return SETCHARSET_FAIL;
 }
 
-static int loop(const unsigned char *pattern, const unsigned char *string)
+static int loop(const unsigned char *pattern, const unsigned char *string,
+                int maxstars)
 {
-  loop_state state = CURLFNM_LOOP_DEFAULT;
   unsigned char *p = (unsigned char *)pattern;
   unsigned char *s = (unsigned char *)string;
   unsigned char charset[CURLFNM_CHSET_SIZE] = { 0 };
-  int rc = 0;
 
   for(;;) {
-    switch(state) {
-    case CURLFNM_LOOP_DEFAULT:
-      if(*p == '*') {
-        while(*(p+1) == '*') /* eliminate multiple stars */
-          p++;
-        if(*s == '\0' && *(p+1) == '\0')
-          return CURL_FNMATCH_MATCH;
-        rc = loop(p + 1, s); /* *.txt matches .txt <=> .txt matches .txt */
-        if(rc == CURL_FNMATCH_MATCH)
-          return CURL_FNMATCH_MATCH;
-        if(*s) /* let the star eat up one character */
-          s++;
-        else
-          return CURL_FNMATCH_NOMATCH;
-      }
-      else if(*p == '?') {
-        if(ISPRINT(*s)) {
-          s++;
-          p++;
-        }
-        else if(*s == '\0')
-          return CURL_FNMATCH_NOMATCH;
-        else
-          return CURL_FNMATCH_FAIL; /* cannot deal with other character */
-      }
-      else if(*p == '\0') {
-        if(*s == '\0')
-          return CURL_FNMATCH_MATCH;
-        else
-          return CURL_FNMATCH_NOMATCH;
-      }
-      else if(*p == '\\') {
-        state = CURLFNM_LOOP_BACKSLASH;
-        p++;
-      }
-      else if(*p == '[') {
-        unsigned char *pp = p+1; /* cannot handle with pointer to register */
-        if(setcharset(&pp, charset)) {
-          int found = FALSE;
-          if(charset[(unsigned int)*s])
-            found = TRUE;
-          else if(charset[CURLFNM_ALNUM])
-            found = ISALNUM(*s);
-          else if(charset[CURLFNM_ALPHA])
-            found = ISALPHA(*s);
-          else if(charset[CURLFNM_DIGIT])
-            found = ISDIGIT(*s);
-          else if(charset[CURLFNM_XDIGIT])
-            found = ISXDIGIT(*s);
-          else if(charset[CURLFNM_PRINT])
-            found = ISPRINT(*s);
-          else if(charset[CURLFNM_SPACE])
-            found = ISSPACE(*s);
-          else if(charset[CURLFNM_UPPER])
-            found = ISUPPER(*s);
-          else if(charset[CURLFNM_LOWER])
-            found = ISLOWER(*s);
-          else if(charset[CURLFNM_BLANK])
-            found = ISBLANK(*s);
-          else if(charset[CURLFNM_GRAPH])
-            found = ISGRAPH(*s);
+    unsigned char *pp;
 
-          if(charset[CURLFNM_NEGATE])
-            found = !found;
-
-          if(found) {
-            p = pp+1;
-            s++;
-            memset(charset, 0, CURLFNM_CHSET_SIZE);
-          }
-          else
+    switch(*p) {
+    case '*':
+      if(!maxstars)
+        return CURL_FNMATCH_NOMATCH;
+      /* Regroup consecutive stars and question marks. This can be done because
+         '*?*?*' can be expressed as '??*'. */
+      for(;;) {
+        if(*++p == '\0')
+          return CURL_FNMATCH_MATCH;
+        if(*p == '?') {
+          if(!*s++)
             return CURL_FNMATCH_NOMATCH;
         }
-        else
-          return CURL_FNMATCH_FAIL;
+        else if(*p != '*')
+          break;
       }
-      else {
-        if(*p++ != *s++)
-          return CURL_FNMATCH_NOMATCH;
+      /* Skip string characters until we find a match with pattern suffix. */
+      for(maxstars--; *s; s++) {
+        if(loop(p, s, maxstars) == CURL_FNMATCH_MATCH)
+          return CURL_FNMATCH_MATCH;
       }
+      return CURL_FNMATCH_NOMATCH;
+    case '?':
+      if(!*s)
+        return CURL_FNMATCH_NOMATCH;
+      s++;
+      p++;
       break;
-    case CURLFNM_LOOP_BACKSLASH:
-      if(ISPRINT(*p)) {
-        if(*p++ == *s++)
-          state = CURLFNM_LOOP_DEFAULT;
-        else
+    case '\0':
+      return *s? CURL_FNMATCH_NOMATCH: CURL_FNMATCH_MATCH;
+    case '\\':
+      if(p[1])
+        p++;
+      if(*s++ != *p++)
+        return CURL_FNMATCH_NOMATCH;
+      break;
+    case '[':
+      pp = p + 1; /* Copy in case of syntax error in set. */
+      if(setcharset(&pp, charset)) {
+        int found = FALSE;
+        if(!*s)
           return CURL_FNMATCH_NOMATCH;
+        if(charset[(unsigned int)*s])
+          found = TRUE;
+        else if(charset[CURLFNM_ALNUM])
+          found = ISALNUM(*s);
+        else if(charset[CURLFNM_ALPHA])
+          found = ISALPHA(*s);
+        else if(charset[CURLFNM_DIGIT])
+          found = ISDIGIT(*s);
+        else if(charset[CURLFNM_XDIGIT])
+          found = ISXDIGIT(*s);
+        else if(charset[CURLFNM_PRINT])
+          found = ISPRINT(*s);
+        else if(charset[CURLFNM_SPACE])
+          found = ISSPACE(*s);
+        else if(charset[CURLFNM_UPPER])
+          found = ISUPPER(*s);
+        else if(charset[CURLFNM_LOWER])
+          found = ISLOWER(*s);
+        else if(charset[CURLFNM_BLANK])
+          found = ISBLANK(*s);
+        else if(charset[CURLFNM_GRAPH])
+          found = ISGRAPH(*s);
+
+        if(charset[CURLFNM_NEGATE])
+          found = !found;
+
+        if(!found)
+          return CURL_FNMATCH_NOMATCH;
+        p = pp + 1;
+        s++;
+        break;
       }
-      else
-        return CURL_FNMATCH_FAIL;
+      /* Syntax error in set; mismatch! */
+      return CURL_FNMATCH_NOMATCH;
+
+    default:
+      if(*p++ != *s++)
+        return CURL_FNMATCH_NOMATCH;
       break;
     }
   }
@@ -420,5 +357,33 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
   if(!pattern || !string) {
     return CURL_FNMATCH_FAIL;
   }
-  return loop((unsigned char *)pattern, (unsigned char *)string);
+  return loop((unsigned char *)pattern, (unsigned char *)string, 2);
 }
+#else
+#include <fnmatch.h>
+/*
+ * @unittest: 1307
+ */
+int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
+{
+  int rc;
+  (void)ptr; /* the argument is specified by the curl_fnmatch_callback
+                prototype, but not used by Curl_fnmatch() */
+  if(!pattern || !string) {
+    return CURL_FNMATCH_FAIL;
+  }
+  rc = fnmatch(pattern, string, 0);
+  switch(rc) {
+  case 0:
+    return CURL_FNMATCH_MATCH;
+  case FNM_NOMATCH:
+    return CURL_FNMATCH_NOMATCH;
+  default:
+    return CURL_FNMATCH_FAIL;
+  }
+  /* not reached */
+}
+
+#endif
+
+#endif /* if FTP is disabled */

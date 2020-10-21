@@ -2,7 +2,7 @@
 #
 # xc-val-flgs.m4
 #
-# Copyright (c) 2013 Daniel Stenberg <daniel@haxx.se>
+# Copyright (c) 2013 - 2020, Daniel Stenberg <daniel@haxx.se>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -240,4 +240,3 @@ AC_DEFUN([XC_CHECK_BUILD_FLAGS], [
      AC_MSG_WARN([Continuing even with errors mentioned immediately above this line.])
   fi
 ])
-

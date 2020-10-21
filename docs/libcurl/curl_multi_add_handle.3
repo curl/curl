@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -46,11 +46,11 @@ connection cache owned by the multi handle. Removing and adding new easy
 handles will not affect the pool of connections or the ability to do
 connection re-use.
 
-If you have CURLMOPT_TIMERFUNCTION set in the multi handle (and you really
-should if you're working event-based with \fIcurl_multi_socket_action(3)\fP
-and friends), that callback will be called from within this function to ask
-for an updated timer so that your main event loop will get the activity on
-this handle to get started.
+If you have \fICURLMOPT_TIMERFUNCTION(3)\fP set in the multi handle (and you
+really should if you're working event-based with
+\fIcurl_multi_socket_action(3)\fP and friends), that callback will be called
+from within this function to ask for an updated timer so that your main event
+loop will get the activity on this handle to get started.
 
 The easy handle will remain added to the multi handle until you remove it
 again with \fIcurl_multi_remove_handle(3)\fP - even when a transfer with that

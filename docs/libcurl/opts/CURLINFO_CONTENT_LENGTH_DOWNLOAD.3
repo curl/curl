@@ -1,0 +1,65 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLINFO_CONTENT_LENGTH_DOWNLOAD 3 "1 Sep 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
+.SH NAME
+CURLINFO_CONTENT_LENGTH_DOWNLOAD \- get content-length of download
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD,
+                           double *content_length);
+.SH DESCRIPTION
+Pass a pointer to a double to receive the content-length of the download. This
+is the value read from the Content-Length: field. Since 7.19.4, this returns
+-1 if the size isn't known.
+
+\fICURLINFO_CONTENT_LENGTH_DOWNLOAD_T(3)\fP is a newer replacement that returns a more
+sensible variable type.
+.SH PROTOCOLS
+HTTP(S)
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+
+  /* Perform the request */
+  res = curl_easy_perform(curl);
+
+  if(!res) {
+    /* check the size */
+    double cl;
+    res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &cl);
+    if(!res) {
+      printf("Size: %.0f\\n", cl);
+    }
+  }
+}
+.fi
+.SH AVAILABILITY
+Added in 7.6.1
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "
+.BR CURLINFO_CONTENT_LENGTH_UPLOAD "(3), "

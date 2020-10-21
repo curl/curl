@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -137,6 +137,12 @@ Data pointer to pass to the chunk callbacks. See \fICURLOPT_CHUNK_DATA(3)\fP
 Callback for wildcard matching. See \fICURLOPT_FNMATCH_FUNCTION(3)\fP
 .IP CURLOPT_FNMATCH_DATA
 Data pointer to pass to the wildcard matching callback. See \fICURLOPT_FNMATCH_DATA(3)\fP
+.IP CURLOPT_SUPPRESS_CONNECT_HEADERS
+Suppress proxy CONNECT response headers from user callbacks. See \fICURLOPT_SUPPRESS_CONNECT_HEADERS(3)\fP
+.IP CURLOPT_RESOLVER_START_FUNCTION
+Callback to be called before a new resolve request is started. See \fICURLOPT_RESOLVER_START_FUNCTION(3)\fP
+.IP CURLOPT_RESOLVER_START_DATA
+Data pointer to pass to resolver start callback. See \fICURLOPT_RESOLVER_START_DATA(3)\fP
 .SH ERROR OPTIONS
 .IP CURLOPT_ERRORBUFFER
 Error message buffer. See \fICURLOPT_ERRORBUFFER(3)\fP
@@ -144,6 +150,8 @@ Error message buffer. See \fICURLOPT_ERRORBUFFER(3)\fP
 stderr replacement stream. See \fICURLOPT_STDERR(3)\fP
 .IP CURLOPT_FAILONERROR
 Fail on HTTP 4xx errors. \fICURLOPT_FAILONERROR(3)\fP
+.IP CURLOPT_KEEP_SENDING_ON_ERROR
+Keep sending on HTTP >= 300 errors. \fICURLOPT_KEEP_SENDING_ON_ERROR(3)\fP
 .SH NETWORK OPTIONS
 .IP CURLOPT_URL
 URL to work on. See \fICURLOPT_URL(3)\fP
@@ -157,6 +165,8 @@ Protocols to allow redirects to. See \fICURLOPT_REDIR_PROTOCOLS(3)\fP
 Default protocol. See \fICURLOPT_DEFAULT_PROTOCOL(3)\fP
 .IP CURLOPT_PROXY
 Proxy to use. See \fICURLOPT_PROXY(3)\fP
+.IP CURLOPT_PRE_PROXY
+Socks proxy to use. See \fICURLOPT_PRE_PROXY(3)\fP
 .IP CURLOPT_PROXYPORT
 Proxy port to use. See \fICURLOPT_PROXYPORT(3)\fP
 .IP CURLOPT_PROXYTYPE
@@ -165,14 +175,20 @@ Proxy type. See \fICURLOPT_PROXYTYPE(3)\fP
 Filter out hosts from proxy use. \fICURLOPT_NOPROXY(3)\fP
 .IP CURLOPT_HTTPPROXYTUNNEL
 Tunnel through the HTTP proxy. \fICURLOPT_HTTPPROXYTUNNEL(3)\fP
+.IP CURLOPT_CONNECT_TO
+Connect to a specific host and port. See \fICURLOPT_CONNECT_TO(3)\fP
+.IP CURLOPT_SOCKS5_AUTH
+Socks5 authentication methods. See \fICURLOPT_SOCKS5_AUTH(3)\fP
 .IP CURLOPT_SOCKS5_GSSAPI_SERVICE
 Socks5 GSSAPI service name. \fICURLOPT_SOCKS5_GSSAPI_SERVICE(3)\fP
 .IP CURLOPT_SOCKS5_GSSAPI_NEC
 Socks5 GSSAPI NEC mode. See \fICURLOPT_SOCKS5_GSSAPI_NEC(3)\fP
 .IP CURLOPT_PROXY_SERVICE_NAME
-Proxy service name. \fICURLOPT_PROXY_SERVICE_NAME(3)\fP
+Proxy authentication service name. \fICURLOPT_PROXY_SERVICE_NAME(3)\fP
+.IP CURLOPT_HAPROXYPROTOCOL
+Send an HAProxy PROXY protocol v1 header. See \fICURLOPT_HAPROXYPROTOCOL(3)\fP
 .IP CURLOPT_SERVICE_NAME
-SPNEGO service name. \fICURLOPT_SERVICE_NAME(3)\fP
+Authentication service name. \fICURLOPT_SERVICE_NAME(3)\fP
 .IP CURLOPT_INTERFACE
 Bind connection locally to this. See \fICURLOPT_INTERFACE(3)\fP
 .IP CURLOPT_LOCALPORT
@@ -183,10 +199,14 @@ Bind connection locally to port range. See \fICURLOPT_LOCALPORTRANGE(3)\fP
 Timeout for DNS cache. See \fICURLOPT_DNS_CACHE_TIMEOUT(3)\fP
 .IP CURLOPT_DNS_USE_GLOBAL_CACHE
 OBSOLETE Enable global DNS cache. See \fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP
+.IP CURLOPT_DOH_URL
+Use this DOH server for name resolves. See \fICURLOPT_DOH_URL(3)\fP
 .IP CURLOPT_BUFFERSIZE
-Ask for smaller buffer size. See \fICURLOPT_BUFFERSIZE(3)\fP
+Ask for alternate buffer size. See \fICURLOPT_BUFFERSIZE(3)\fP
 .IP CURLOPT_PORT
 Port number to connect to. See \fICURLOPT_PORT(3)\fP
+.IP CURLOPT_TCP_FASTOPEN
+Enable TFO, TCP Fast Open. See \fICURLOPT_TCP_FASTOPEN(3)\fP
 .IP CURLOPT_TCP_NODELAY
 Disable the Nagle algorithm. See \fICURLOPT_TCP_NODELAY(3)\fP
 .IP CURLOPT_ADDRESS_SCOPE
@@ -199,6 +219,8 @@ Idle time before sending keep-alive. See \fICURLOPT_TCP_KEEPIDLE(3)\fP
 Interval between keep-alive probes. See \fICURLOPT_TCP_KEEPINTVL(3)\fP
 .IP CURLOPT_UNIX_SOCKET_PATH
 Path to a Unix domain socket. See \fICURLOPT_UNIX_SOCKET_PATH(3)\fP
+.IP CURLOPT_ABSTRACT_UNIX_SOCKET
+Path to an abstract Unix domain socket. See \fICURLOPT_ABSTRACT_UNIX_SOCKET(3)\fP
 .SH NAMES and PASSWORDS OPTIONS (Authentication)
 .IP CURLOPT_NETRC
 Enable .netrc parsing. See \fICURLOPT_NETRC(3)\fP
@@ -222,16 +244,26 @@ Proxy password. See \fICURLOPT_PROXYPASSWORD(3)\fP
 HTTP server authentication methods. See \fICURLOPT_HTTPAUTH(3)\fP
 .IP CURLOPT_TLSAUTH_USERNAME
 TLS authentication user name. See \fICURLOPT_TLSAUTH_USERNAME(3)\fP
+.IP CURLOPT_PROXY_TLSAUTH_USERNAME
+Proxy TLS authentication user name. See \fICURLOPT_PROXY_TLSAUTH_USERNAME(3)\fP
 .IP CURLOPT_TLSAUTH_PASSWORD
 TLS authentication password. See \fICURLOPT_TLSAUTH_PASSWORD(3)\fP
+.IP CURLOPT_PROXY_TLSAUTH_PASSWORD
+Proxy TLS authentication password. See \fICURLOPT_PROXY_TLSAUTH_PASSWORD(3)\fP
 .IP CURLOPT_TLSAUTH_TYPE
 TLS authentication methods. See \fICURLOPT_TLSAUTH_TYPE(3)\fP
+.IP CURLOPT_PROXY_TLSAUTH_TYPE
+Proxy TLS authentication methods. See \fICURLOPT_PROXY_TLSAUTH_TYPE(3)\fP
 .IP CURLOPT_PROXYAUTH
 HTTP proxy authentication methods. See \fICURLOPT_PROXYAUTH(3)\fP
+.IP CURLOPT_SASL_AUTHZID
+SASL authorisation identity (identity to act as). See \fICURLOPT_SASL_AUTHZID(3)\fP
 .IP CURLOPT_SASL_IR
 Enable SASL initial response. See \fICURLOPT_SASL_IR(3)\fP
 .IP CURLOPT_XOAUTH2_BEARER
 OAuth2 bearer token. See \fICURLOPT_XOAUTH2_BEARER(3)\fP
+.IP CURLOPT_DISALLOW_USERNAME_IN_URL
+Don't allow username in URL. See \fICURLOPT_DISALLOW_USERNAME_IN_URL(3)\fP
 .SH HTTP OPTIONS
 .IP CURLOPT_AUTOREFERER
 Automatically set Referer: header. See \fICURLOPT_AUTOREFERER(3)\fP
@@ -248,9 +280,9 @@ Maximum number of redirects to follow. See \fICURLOPT_MAXREDIRS(3)\fP
 .IP CURLOPT_POSTREDIR
 How to act on redirects after POST. See \fICURLOPT_POSTREDIR(3)\fP
 .IP CURLOPT_PUT
-Issue a HTTP PUT request. See \fICURLOPT_PUT(3)\fP
+Issue an HTTP PUT request. See \fICURLOPT_PUT(3)\fP
 .IP CURLOPT_POST
-Issue a HTTP POST request. See \fICURLOPT_POST(3)\fP
+Issue an HTTP POST request. See \fICURLOPT_POST(3)\fP
 .IP CURLOPT_POSTFIELDS
 Send a POST with this data. See \fICURLOPT_POSTFIELDS(3)\fP
 .IP CURLOPT_POSTFIELDSIZE
@@ -283,10 +315,18 @@ File to write cookies to. See \fICURLOPT_COOKIEJAR(3)\fP
 Start a new cookie session. See \fICURLOPT_COOKIESESSION(3)\fP
 .IP CURLOPT_COOKIELIST
 Add or control cookies. See \fICURLOPT_COOKIELIST(3)\fP
+.IP CURLOPT_ALTSVC
+Specify the Alt-Svc: cache file name. See \fICURLOPT_ALTSVC(3)\fP
+.IP CURLOPT_ALTSVC_CTRL
+Enable and configure Alt-Svc: treatment. See \fICURLOPT_ALTSVC_CTRL(3)\fP
 .IP CURLOPT_HTTPGET
-Do a HTTP GET request. See \fICURLOPT_HTTPGET(3)\fP
+Do an HTTP GET request. See \fICURLOPT_HTTPGET(3)\fP
+.IP CURLOPT_REQUEST_TARGET
+Set the request target. \fICURLOPT_REQUEST_TARGET(3)\fP
 .IP CURLOPT_HTTP_VERSION
 HTTP version to use. \fICURLOPT_HTTP_VERSION(3)\fP
+.IP CURLOPT_HTTP09_ALLOWED
+Allow HTTP/0.9 responses. \fICURLOPT_HTTP09_ALLOWED(3)\fP
 .IP CURLOPT_IGNORE_CONTENT_LENGTH
 Ignore Content-Length. See \fICURLOPT_IGNORE_CONTENT_LENGTH(3)\fP
 .IP CURLOPT_HTTP_CONTENT_DECODING
@@ -295,8 +335,21 @@ Disable Content decoding. See \fICURLOPT_HTTP_CONTENT_DECODING(3)\fP
 Disable Transfer decoding. See \fICURLOPT_HTTP_TRANSFER_DECODING(3)\fP
 .IP CURLOPT_EXPECT_100_TIMEOUT_MS
 100-continue timeout. See \fICURLOPT_EXPECT_100_TIMEOUT_MS(3)\fP
+.IP CURLOPT_TRAILERFUNCTION
+Set callback for sending trailing headers. See
+\fICURLOPT_TRAILERFUNCTION(3)\fP
+.IP CURLOPT_TRAILERDATA
+Custom pointer passed to the trailing headers callback. See
+\fICURLOPT_TRAILERDATA(3)\fP
 .IP CURLOPT_PIPEWAIT
 Wait on connection to pipeline on it. See \fICURLOPT_PIPEWAIT(3)\fP
+.IP CURLOPT_STREAM_DEPENDS
+This HTTP/2 stream depends on another. See \fICURLOPT_STREAM_DEPENDS(3)\fP
+.IP CURLOPT_STREAM_DEPENDS_E
+This HTTP/2 stream depends on another exclusively. See
+\fICURLOPT_STREAM_DEPENDS_E(3)\fP
+.IP CURLOPT_STREAM_WEIGHT
+Set this HTTP/2 stream's weight. See \fICURLOPT_STREAM_WEIGHT(3)\fP
 .SH SMTP OPTIONS
 .IP CURLOPT_MAIL_FROM
 Address of the sender. See \fICURLOPT_MAIL_FROM(3)\fP
@@ -304,9 +357,13 @@ Address of the sender. See \fICURLOPT_MAIL_FROM(3)\fP
 Address of the recipients. See \fICURLOPT_MAIL_RCPT(3)\fP
 .IP CURLOPT_MAIL_AUTH
 Authentication address. See \fICURLOPT_MAIL_AUTH(3)\fP
+.IP CURLOPT_MAIL_RCPT_ALLLOWFAILS
+Allow RCPT TO command to fail for some recipients. See \fICURLOPT_MAIL_RCPT_ALLLOWFAILS(3)\fP
 .SH TFTP OPTIONS
 .IP CURLOPT_TFTP_BLKSIZE
 TFTP block size. See \fICURLOPT_TFTP_BLKSIZE(3)\fP
+.IP CURLOPT_TFTP_NO_OPTIONS
+Do not send TFTP options requests. See \fICURLOPT_TFTP_NO_OPTIONS(3)\fP
 .SH FTP OPTIONS
 .IP CURLOPT_FTPPORT
 Use active FTP. See \fICURLOPT_FTPPORT(3)\fP
@@ -366,6 +423,8 @@ Range requests. See \fICURLOPT_RANGE(3)\fP
 Resume a transfer. See \fICURLOPT_RESUME_FROM(3)\fP
 .IP CURLOPT_RESUME_FROM_LARGE
 Resume a transfer. See \fICURLOPT_RESUME_FROM_LARGE(3)\fP
+.IP CURLOPT_CURLU
+Set URL to work on with CURLU *. See \fICURLOPT_CURLU(3)\fP
 .IP CURLOPT_CUSTOMREQUEST
 Custom request/method. See \fICURLOPT_CUSTOMREQUEST(3)\fP
 .IP CURLOPT_FILETIME
@@ -380,6 +439,10 @@ Size of file to send. \fICURLOPT_INFILESIZE(3)\fP
 Size of file to send. \fICURLOPT_INFILESIZE_LARGE(3)\fP
 .IP CURLOPT_UPLOAD
 Upload data. See \fICURLOPT_UPLOAD(3)\fP
+.IP CURLOPT_UPLOAD_BUFFERSIZE
+Set upload buffer size. See \fICURLOPT_UPLOAD_BUFFERSIZE(3)\fP
+.IP CURLOPT_MIMEPOST
+Post/send MIME data. See \fICURLOPT_MIMEPOST(3)\fP
 .IP CURLOPT_MAXFILESIZE
 Maximum file size to get. See \fICURLOPT_MAXFILESIZE(3)\fP
 .IP CURLOPT_MAXFILESIZE_LARGE
@@ -388,6 +451,8 @@ Maximum file size to get. See \fICURLOPT_MAXFILESIZE_LARGE(3)\fP
 Make a time conditional request. See \fICURLOPT_TIMECONDITION(3)\fP
 .IP CURLOPT_TIMEVALUE
 Time value for the time conditional request. See \fICURLOPT_TIMEVALUE(3)\fP
+.IP CURLOPT_TIMEVALUE_LARGE
+Time value for the time conditional request. See \fICURLOPT_TIMEVALUE_LARGE(3)\fP
 .SH CONNECTION OPTIONS
 .IP CURLOPT_TIMEOUT
 Timeout for the entire request. See \fICURLOPT_TIMEOUT(3)\fP
@@ -407,6 +472,8 @@ Maximum number of connections in the connection pool. See \fICURLOPT_MAXCONNECTS
 Use a new connection. \fICURLOPT_FRESH_CONNECT(3)\fP
 .IP CURLOPT_FORBID_REUSE
 Prevent subsequent connections from re-using this. See \fICURLOPT_FORBID_REUSE(3)\fP
+.IP CURLOPT_MAXAGE_CONN
+Limit the age of connections for reuse. See \fICURLOPT_MAXAGE_CONN(3)\fP
 .IP CURLOPT_CONNECTTIMEOUT
 Timeout for the connection phase. See \fICURLOPT_CONNECTTIMEOUT(3)\fP
 .IP CURLOPT_CONNECTTIMEOUT_MS
@@ -427,19 +494,46 @@ Bind name resolves to this IP4 address. See \fICURLOPT_DNS_LOCAL_IP4(3)\fP
 Bind name resolves to this IP6 address. See \fICURLOPT_DNS_LOCAL_IP6(3)\fP
 .IP CURLOPT_DNS_SERVERS
 Preferred DNS servers. See \fICURLOPT_DNS_SERVERS(3)\fP
+.IP CURLOPT_DNS_SHUFFLE_ADDRESSES
+Shuffle addresses before use. See \fICURLOPT_DNS_SHUFFLE_ADDRESSES(3)\fP
 .IP CURLOPT_ACCEPTTIMEOUT_MS
 Timeout for waiting for the server's connect back to be accepted. See \fICURLOPT_ACCEPTTIMEOUT_MS(3)\fP
+.IP CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS
+Timeout for happy eyeballs. See \fICURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS(3)\fP
+.IP CURLOPT_UPKEEP_INTERVAL_MS
+Sets the interval at which connection upkeep are performed. See
+\fICURLOPT_UPKEEP_INTERVAL_MS(3)\fP
 .SH SSL and SECURITY OPTIONS
 .IP CURLOPT_SSLCERT
 Client cert. See \fICURLOPT_SSLCERT(3)\fP
+.IP CURLOPT_SSLCERT_BLOB
+Client cert memory buffer. See \fICURLOPT_SSLCERT_BLOB(3)\fP
+.IP CURLOPT_PROXY_SSLCERT
+Proxy client cert. See \fICURLOPT_PROXY_SSLCERT(3)\fP
+.IP CURLOPT_PROXY_SSLCERT_BLOB
+Proxy client cert memory buffer. See \fICURLOPT_PROXY_SSLCERT_BLOB(3)\fP
 .IP CURLOPT_SSLCERTTYPE
 Client cert type.  See \fICURLOPT_SSLCERTTYPE(3)\fP
+.IP CURLOPT_PROXY_SSLCERTTYPE
+Proxy client cert type.  See \fICURLOPT_PROXY_SSLCERTTYPE(3)\fP
 .IP CURLOPT_SSLKEY
 Client key. See \fICURLOPT_SSLKEY(3)\fP
+.IP CURLOPT_SSLKEY_BLOB
+Client key memory buffer. See \fICURLOPT_SSLKEY_BLOB(3)\fP
+.IP CURLOPT_PROXY_SSLKEY
+Proxy client key. See \fICURLOPT_PROXY_SSLKEY(3)\fP
+.IP CURLOPT_PROXY_SSLKEY_BLOB
+Proxy client key. See \fICURLOPT_PROXY_SSLKEY_BLOB(3)\fP
 .IP CURLOPT_SSLKEYTYPE
 Client key type. See \fICURLOPT_SSLKEYTYPE(3)\fP
+.IP CURLOPT_PROXY_SSLKEYTYPE
+Proxy client key type. See \fICURLOPT_PROXY_SSLKEYTYPE(3)\fP
 .IP CURLOPT_KEYPASSWD
 Client key password. See \fICURLOPT_KEYPASSWD(3)\fP
+.IP CURLOPT_PROXY_KEYPASSWD
+Proxy client key password. See \fICURLOPT_PROXY_KEYPASSWD(3)\fP
+.IP CURLOPT_SSL_EC_CURVES
+Set key exchange curves. See \fICURLOPT_SSL_EC_CURVES(3)\fP
 .IP CURLOPT_SSL_ENABLE_ALPN
 Enable use of ALPN. See \fICURLOPT_SSL_ENABLE_ALPN(3)\fP
 .IP CURLOPT_SSL_ENABLE_NPN
@@ -452,34 +546,63 @@ Default SSL engine. See \fICURLOPT_SSLENGINE_DEFAULT(3)\fP
 Enable TLS False Start. See \fICURLOPT_SSL_FALSESTART(3)\fP
 .IP CURLOPT_SSLVERSION
 SSL version to use. See \fICURLOPT_SSLVERSION(3)\fP
+.IP CURLOPT_PROXY_SSLVERSION
+Proxy SSL version to use. See \fICURLOPT_PROXY_SSLVERSION(3)\fP
 .IP CURLOPT_SSL_VERIFYHOST
 Verify the host name in the SSL certificate. See \fICURLOPT_SSL_VERIFYHOST(3)\fP
+.IP CURLOPT_PROXY_SSL_VERIFYHOST
+Verify the host name in the proxy SSL certificate. See \fICURLOPT_PROXY_SSL_VERIFYHOST(3)\fP
 .IP CURLOPT_SSL_VERIFYPEER
 Verify the SSL certificate. See \fICURLOPT_SSL_VERIFYPEER(3)\fP
+.IP CURLOPT_PROXY_SSL_VERIFYPEER
+Verify the proxy SSL certificate. See \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP
 .IP CURLOPT_SSL_VERIFYSTATUS
 Verify the SSL certificate's status. See \fICURLOPT_SSL_VERIFYSTATUS(3)\fP
 .IP CURLOPT_CAINFO
 CA cert bundle. See \fICURLOPT_CAINFO(3)\fP
+.IP CURLOPT_PROXY_CAINFO
+Proxy CA cert bundle. See \fICURLOPT_PROXY_CAINFO(3)\fP
 .IP CURLOPT_ISSUERCERT
 Issuer certificate. See \fICURLOPT_ISSUERCERT(3)\fP
+.IP CURLOPT_ISSUERCERT_BLOB
+Issuer certificate memory buffer. See \fICURLOPT_ISSUERCERT_BLOB(3)\fP
+.IP CURLOPT_PROXY_ISSUERCERT
+Proxy issuer certificate. See \fICURLOPT_PROXY_ISSUERCERT(3)\fP
+.IP CURLOPT_PROXY_ISSUERCERT_BLOB
+Proxy issuer certificate memory buffer. See \fICURLOPT_PROXY_ISSUERCERT_BLOB(3)\fP
 .IP CURLOPT_CAPATH
 Path to CA cert bundle. See \fICURLOPT_CAPATH(3)\fP
+.IP CURLOPT_PROXY_CAPATH
+Path to proxy CA cert bundle. See \fICURLOPT_PROXY_CAPATH(3)\fP
 .IP CURLOPT_CRLFILE
 Certificate Revocation List. See \fICURLOPT_CRLFILE(3)\fP
+.IP CURLOPT_PROXY_CRLFILE
+Proxy Certificate Revocation List. See \fICURLOPT_PROXY_CRLFILE(3)\fP
 .IP CURLOPT_CERTINFO
 Extract certificate info. See \fICURLOPT_CERTINFO(3)\fP
 .IP CURLOPT_PINNEDPUBLICKEY
 Set pinned SSL public key . See \fICURLOPT_PINNEDPUBLICKEY(3)\fP
+.IP CURLOPT_PROXY_PINNEDPUBLICKEY
+Set the proxy's pinned SSL public key. See
+\fICURLOPT_PROXY_PINNEDPUBLICKEY(3)\fP
 .IP CURLOPT_RANDOM_FILE
 Provide source for entropy random data. See \fICURLOPT_RANDOM_FILE(3)\fP
 .IP CURLOPT_EGDSOCKET
 Identify EGD socket for entropy. See \fICURLOPT_EGDSOCKET(3)\fP
 .IP CURLOPT_SSL_CIPHER_LIST
 Ciphers to use. See \fICURLOPT_SSL_CIPHER_LIST(3)\fP
+.IP CURLOPT_PROXY_SSL_CIPHER_LIST
+Proxy ciphers to use. See \fICURLOPT_PROXY_SSL_CIPHER_LIST(3)\fP
+.IP CURLOPT_TLS13_CIPHERS
+TLS 1.3 cipher suites to use. See \fICURLOPT_TLS13_CIPHERS(3)\fP
+.IP CURLOPT_PROXY_TLS13_CIPHERS
+Proxy TLS 1.3 cipher suites to use. See \fICURLOPT_PROXY_TLS13_CIPHERS(3)\fP
 .IP CURLOPT_SSL_SESSIONID_CACHE
 Disable SSL session-id cache. See \fICURLOPT_SSL_SESSIONID_CACHE(3)\fP
 .IP CURLOPT_SSL_OPTIONS
 Control SSL behavior. See \fICURLOPT_SSL_OPTIONS(3)\fP
+.IP CURLOPT_PROXY_SSL_OPTIONS
+Control proxy SSL behavior. See \fICURLOPT_PROXY_SSL_OPTIONS(3)\fP
 .IP CURLOPT_KRBLEVEL
 Kerberos security level. See \fICURLOPT_KRBLEVEL(3)\fP
 .IP CURLOPT_GSSAPI_DELEGATION
@@ -487,6 +610,8 @@ Disable GSS-API delegation. See \fICURLOPT_GSSAPI_DELEGATION(3)\fP
 .SH SSH OPTIONS
 .IP CURLOPT_SSH_AUTH_TYPES
 SSH authentication types. See \fICURLOPT_SSH_AUTH_TYPES(3)\fP
+.IP CURLOPT_SSH_COMPRESSION
+Enable SSH compression. See \fICURLOPT_SSH_COMPRESSION(3)\fP
 .IP CURLOPT_SSH_HOST_PUBLIC_KEY_MD5
 MD5 of host's public key. See \fICURLOPT_SSH_HOST_PUBLIC_KEY_MD5(3)\fP
 .IP CURLOPT_SSH_PUBLIC_KEYFILE
@@ -516,6 +641,13 @@ TELNET options. See \fICURLOPT_TELNETOPTIONS(3)\fP
 error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors(3)\fP
 man page for the full list with descriptions.
 
+Strings passed on to libcurl must be shorter than 8000000 bytes, otherwise
+\fIcurl_easy_setopt(3)\fP returns \fBCURLE_BAD_FUNCTION_ARGUMENT\fP (added in
+7.65.0).
+
+\fBCURLE_BAD_FUNCTION_ARGUMENT\fP is returned when the argument to an option
+is invalid, like perhaps out of range.a
+
 If you try to set an option that libcurl doesn't know about, perhaps because
 the library is too old to support it or the option was removed in a recent
 version, this function will return \fICURLE_UNKNOWN_OPTION\fP. If support for
@@ -526,7 +658,7 @@ the option was disabled at compile-time, it will return
 CURL *curl = curl_easy_init();
 if(curl) {
   CURLcode res;
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
   res = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 }

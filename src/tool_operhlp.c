@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "rawstr.h"
+#include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -29,6 +29,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_convert.h"
+#include "tool_doswin.h"
 #include "tool_operhlp.h"
 #include "tool_metalink.h"
 
@@ -36,18 +37,20 @@
 
 void clean_getout(struct OperationConfig *config)
 {
-  struct getout *next;
-  struct getout *node = config->url_list;
+  if(config) {
+    struct getout *next;
+    struct getout *node = config->url_list;
 
-  while(node) {
-    next = node->next;
-    Curl_safefree(node->url);
-    Curl_safefree(node->outfile);
-    Curl_safefree(node->infile);
-    Curl_safefree(node);
-    node = next;
+    while(node) {
+      next = node->next;
+      Curl_safefree(node->url);
+      Curl_safefree(node->outfile);
+      Curl_safefree(node->infile);
+      Curl_safefree(node);
+      node = next;
+    }
+    config->url_list = NULL;
   }
-  config->url_list = NULL;
 }
 
 bool output_expected(const char *url, const char *uploadfile)
@@ -62,24 +65,27 @@ bool output_expected(const char *url, const char *uploadfile)
 
 bool stdin_upload(const char *uploadfile)
 {
-  return (curlx_strequal(uploadfile, "-") ||
-          curlx_strequal(uploadfile, ".")) ? TRUE : FALSE;
+  return (!strcmp(uploadfile, "-") ||
+          !strcmp(uploadfile, ".")) ? TRUE : FALSE;
 }
 
 /*
  * Adds the file name to the URL if it doesn't already have one.
  * url will be freed before return if the returned pointer is different
  */
-char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
+char *add_file_name_to_url(char *url, const char *filename)
 {
   /* If no file name part is given in the URL, we add this file name */
   char *ptr = strstr(url, "://");
+  CURL *curl = curl_easy_init(); /* for url escaping */
+  if(!curl)
+    return NULL; /* error! */
   if(ptr)
     ptr += 3;
   else
     ptr = url;
   ptr = strrchr(ptr, '/');
-  if(!ptr || !strlen(++ptr)) {
+  if(!ptr || !*++ptr) {
     /* The URL has no file name part, add the local file name. In order
        to be able to do so, we have to create a new URL in another
        buffer.*/
@@ -109,16 +115,18 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
         urlbuffer = aprintf("%s/%s", url, encfile);
 
       curl_free(encfile);
+
+      if(!urlbuffer) {
+        url = NULL;
+        goto end;
+      }
+
       Curl_safefree(url);
-
-      if(!urlbuffer)
-        return NULL;
-
       url = urlbuffer; /* use our new URL instead! */
     }
-    else
-      Curl_safefree(url);
   }
+  end:
+  curl_easy_cleanup(curl);
   return url;
 }
 
@@ -128,7 +136,7 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
  */
 CURLcode get_url_file_name(char **filename, const char *url)
 {
-  const char *pc;
+  const char *pc, *pc2;
 
   *filename = NULL;
 
@@ -138,7 +146,11 @@ CURLcode get_url_file_name(char **filename, const char *url)
     pc += 3;
   else
     pc = url;
+
+  pc2 = strrchr(pc, '\\');
   pc = strrchr(pc, '/');
+  if(pc2 && (!pc || pc < pc2))
+    pc = pc2;
 
   if(pc)
     /* duplicate the string beyond the slash */
@@ -151,6 +163,17 @@ CURLcode get_url_file_name(char **filename, const char *url)
   if(!*filename)
     return CURLE_OUT_OF_MEMORY;
 
+#if defined(MSDOS) || defined(WIN32)
+  {
+    char *sanitized;
+    SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
+    Curl_safefree(*filename);
+    if(sc)
+      return CURLE_URL_MALFORMAT;
+    *filename = sanitized;
+  }
+#endif /* MSDOS || WIN32 */
+
   /* in case we built debug enabled, we allow an environment variable
    * named CURL_TESTDIR to prefix the given file name to put it into a
    * specific directory
@@ -160,7 +183,7 @@ CURLcode get_url_file_name(char **filename, const char *url)
     char *tdir = curlx_getenv("CURL_TESTDIR");
     if(tdir) {
       char buffer[512]; /* suitably large */
-      snprintf(buffer, sizeof(buffer), "%s/%s", tdir, *filename);
+      msnprintf(buffer, sizeof(buffer), "%s/%s", tdir, *filename);
       Curl_safefree(*filename);
       *filename = strdup(buffer); /* clone the buffer */
       curl_free(tdir);

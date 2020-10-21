@@ -25,7 +25,7 @@ ftp
 FTP CWD with --ftp-method nocwd
  </name>
  <command>
---ftp-method nocwd ftp://%HOSTIP:%FTPPORT/first/second/third/298
+--ftp-method nocwd ftp://%HOSTIP:%FTPPORT/first/second/th%69rd/298
 </command>
 </client>
 

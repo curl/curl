@@ -1,0 +1,43 @@
+<testcase>
+<info>
+<keywords>
+TFTP
+TFTP RRQ
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+a chunk of
+data
+returned
+ to client
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+tftp
+</server>
+ <name>
+TFTP retrieve without TFTP options requests
+ </name>
+ <command>
+tftp://%HOSTIP:%TFTPPORT//1242 --tftp-no-options
+</command>
+</client>
+
+#
+# Verify pseudo protocol after the test has been "shot"
+<verify>
+<protocol>
+opcode: 1
+mode: octet
+filename: /1242
+</protocol>
+</verify>
+</testcase>

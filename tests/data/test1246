@@ -1,0 +1,66 @@
+<testcase>
+<info>
+# verify URL with hostname ending in pound sign
+<keywords>
+HTTP
+HTTP GET
+HTTP proxy
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Content-Length: 6
+Connection: close
+
+-foo-
+</data>
+
+<data1>
+HTTP/1.1 200 OK
+Content-Length: 7
+Connection: close
+
+-cool-
+</data1>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+URL with '#' at end of host name instead of '/'
+ </name>
+ <command>
+--proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.1246:%HTTPPORT#@127.0.0.1/tricked.html no-scheme-url.com.1246:%HTTPPORT#@127.127.127.127/again.html
+</command>
+<features>
+proxy
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET http://test.remote.haxx.se.1246:%HTTPPORT/ HTTP/1.1
+Host: test.remote.haxx.se.1246:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://no-scheme-url.com.1246:%HTTPPORT/ HTTP/1.1
+Host: no-scheme-url.com.1246:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

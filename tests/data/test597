@@ -31,7 +31,6 @@ ftp://%HOSTIP:%FTPPORT
 USER anonymous
 PASS ftp@example.com
 PWD
-QUIT
 </protocol>
 </verify>
 </testcase>

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,6 +21,11 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
+/***********************************************************************
+ * Only for builds using asynchronous name resolves
+ **********************************************************************/
+#ifdef CURLRES_ASYNCH
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -51,11 +56,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-/***********************************************************************
- * Only for builds using asynchronous name resolves
- **********************************************************************/
-#ifdef CURLRES_ASYNCH
-
 /*
  * Curl_addrinfo_callback() gets called by ares, gethostbyname_thread()
  * or getaddrinfo_thread() when we got the name resolved (or not!).
@@ -77,7 +77,7 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
 
   if(CURL_ASYNC_SUCCESS == status) {
     if(ai) {
-      struct SessionHandle *data = conn->data;
+      struct Curl_easy *data = conn->data;
 
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
@@ -85,14 +85,14 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
       dns = Curl_cache_addr(data, ai,
                             conn->async.hostname,
                             conn->async.port);
+      if(data->share)
+        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+
       if(!dns) {
         /* failed to store, cleanup and return error */
         Curl_freeaddrinfo(ai);
         result = CURLE_OUT_OF_MEMORY;
       }
-
-      if(data->share)
-        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
     }
     else {
       result = CURLE_OUT_OF_MEMORY;
@@ -111,41 +111,16 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
   return result;
 }
 
-/* Call this function after Curl_connect() has returned async=TRUE and
-   then a successful name resolve has been received.
-
-   Note: this function disconnects and frees the conn data in case of
-   resolve failure */
-CURLcode Curl_async_resolved(struct connectdata *conn,
-                             bool *protocol_done)
-{
-  CURLcode result;
-
-  if(conn->async.dns) {
-    conn->dns_entry = conn->async.dns;
-    conn->async.dns = NULL;
-  }
-
-  result = Curl_setup_conn(conn, protocol_done);
-
-  if(result)
-    /* We're not allowed to return failure with memory left allocated
-       in the connectdata struct, free those here */
-    Curl_disconnect(conn, FALSE); /* close the connection */
-
-  return result;
-}
-
 /*
  * Curl_getaddrinfo() is the generic low-level name resolve API within this
  * source file. There are several versions of this function - for different
  * name resolve layers (selected at build-time). They all take this same set
  * of arguments
  */
-Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
-                                const char *hostname,
-                                int port,
-                                int *waitp)
+struct Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
+                                       const char *hostname,
+                                       int port,
+                                       int *waitp)
 {
   return Curl_resolver_getaddrinfo(conn, hostname, port, waitp);
 }

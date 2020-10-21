@@ -47,17 +47,16 @@ HTTP Basic authorization, then without authorization
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /20400100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /20400200 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

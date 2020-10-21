@@ -1,0 +1,72 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+MIME
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</data>
+<datacheck>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib671
+</tool>
+
+ <name>
+Request pause from mime read callback: easy
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/671
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+<protocol>
+POST /671 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 142
+Content-Type: multipart/form-data; boundary=----------------------------
+
+------------------------------
+Content-Disposition: form-data; name="field"
+
+AB
+--------------------------------
+</protocol>
+</verify>
+</testcase>

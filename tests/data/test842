@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+SASL
+SASL AUTH OAUTH2
+RFC6749
+RFC7628
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+AUTH OAUTHBEARER
+REPLY AUTHENTICATE +
+REPLY %b64[n,a=user,%01host=127.0.0.1%01port=%IMAPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64% A002 OK AUTHENTICATE completed
+</servercmd>
+<data>
+From: me@somewhere
+To: fake@nowhere
+
+body
+
+--
+  yours sincerely
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP OAuth 2.0 (OAUTHBEARER) authentication
+ </name>
+ <command>
+'imap://%HOSTIP:%IMAPPORT/842/;MAILINDEX=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
+</command>
+# The protocol section doesn't support ways of specifying the raw data in the
+# base64 encoded message so we must assert this
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 AUTHENTICATE OAUTHBEARER
+%b64[n,a=user,%01host=127.0.0.1%01port=%IMAPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
+A003 SELECT 842
+A004 FETCH 1 BODY[]
+A005 LOGOUT
+</protocol>
+</verify>
+</testcase>

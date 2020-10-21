@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+globbing
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+
+bytes
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+simple [a-d] globbing
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/[a-d]/1280
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /a/1280 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /b/1280 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /c/1280 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /d/1280 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

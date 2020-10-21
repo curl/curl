@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -22,20 +22,29 @@
 
 #include "curl_setup.h"
 
-#if defined(__AMIGA__) && !defined(__ixemul__)
+#ifdef __AMIGA__
+#  include "amigaos.h"
+#  if defined(HAVE_PROTO_BSDSOCKET_H) && !defined(USE_AMISSL)
+#    include <amitcp/socketbasetags.h>
+#  endif
+#  ifdef __libnix__
+#    include <stabs.h>
+#  endif
+#endif
 
-#include <amitcp/socketbasetags.h>
+/* The last #include files should be: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
-#include "amigaos.h"
-
+#ifdef __AMIGA__
+#if defined(HAVE_PROTO_BSDSOCKET_H) && !defined(USE_AMISSL)
 struct Library *SocketBase = NULL;
 extern int errno, h_errno;
 
 #ifdef __libnix__
-#include <stabs.h>
 void __request(const char *msg);
 #else
-# define __request( msg )       Printf( msg "\n\a")
+# define __request(msg)       Printf(msg "\n\a")
 #endif
 
 void Curl_amiga_cleanup()
@@ -57,7 +66,7 @@ bool Curl_amiga_init()
   }
 
   if(SocketBaseTags(SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG) &errno,
-                    SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG) "cURL",
+                    SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG) "curl",
                     TAG_DONE)) {
     __request("SocketBaseTags ERROR");
     return FALSE;
@@ -74,4 +83,13 @@ bool Curl_amiga_init()
 ADD2EXIT(Curl_amiga_cleanup, -50);
 #endif
 
-#endif /* __AMIGA__ && ! __ixemul__ */
+#endif /* HAVE_PROTO_BSDSOCKET_H */
+
+#ifdef USE_AMISSL
+void Curl_amiga_X509_free(X509 *a)
+{
+  X509_free(a);
+}
+#endif /* USE_AMISSL */
+#endif /* __AMIGA__ */
+

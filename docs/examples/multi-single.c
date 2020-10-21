@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -51,7 +51,7 @@ int main(void)
   CURL *http_handle;
   CURLM *multi_handle;
 
-  int still_running; /* keep number of running handles */
+  int still_running = 0; /* keep number of running handles */
   int repeats = 0;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -59,7 +59,7 @@ int main(void)
   http_handle = curl_easy_init();
 
   /* set the options (I left out a few, you'll get the point anyway) */
-  curl_easy_setopt(http_handle, CURLOPT_URL, "http://www.example.com/");
+  curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
 
   /* init a multi stack */
   multi_handle = curl_multi_init();
@@ -70,15 +70,14 @@ int main(void)
   /* we start some action by calling perform right away */
   curl_multi_perform(multi_handle, &still_running);
 
-  do {
+  while(still_running) {
     CURLMcode mc; /* curl_multi_wait() return code */
     int numfds;
 
     /* wait for activity, timeout or "nothing" */
     mc = curl_multi_wait(multi_handle, NULL, 0, 1000, &numfds);
 
-    if(mc != CURLM_OK)
-    {
+    if(mc != CURLM_OK) {
       fprintf(stderr, "curl_multi_wait() failed, code %d.\n", mc);
       break;
     }
@@ -98,7 +97,7 @@ int main(void)
       repeats = 0;
 
     curl_multi_perform(multi_handle, &still_running);
-  } while(still_running);
+  }
 
   curl_multi_remove_handle(multi_handle, http_handle);
 

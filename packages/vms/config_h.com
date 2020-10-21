@@ -28,7 +28,7 @@ $!
 $! This procedure may not guess the options correctly for all architectures,
 $! and is a work in progress.
 $!
-$! Copyright 2011, John Malmberg
+$! Copyright 2011 - 2020, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -803,41 +803,6 @@ $	    write tf "#endif"
 $	    goto cfgh_in_loop1
 $	endif
 $!
-$	if key2 .eqs. "HAVE_ENGINE_LOAD_BUILTIN_ENGINES"
-$	then
-$	    if f$search("''ssl_header_dir'engine.h") .nes. ""
-$	    then
-$		search_key = key2 - "HAVE_"
-$		define/user sys$output nl:
-$		define/user sys$error nl:
-$		search/output=nl: 'ssl_header_dir'engine.h 'search_key'
-$		if '$severity' .eq. 1
-$		then
-$		    write tf "#ifndef ''key2'"
-$		    write tf "#define ''key2' 1"
-$		    write tf "#endif"
-$		else
-$		    write tf "/* #undef ''key2' */"
-$		endif
-$	    else
-$		write tf "/* #undef ''key2' */"
-$	    endif
-$	    goto cfgh_in_loop1
-$	endif
-$!
-$	if key2 .eqs. "HAVE_SSL_GET_SHUTDOWN"
-$	then
-$	    if f$search("''ssl_header_dir'ssl.h") .nes. ""
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' 1"
-$		write tf "#endif"
-$	    else
-$		write tf "/* #undef ''key2' */"
-$	    endif
-$	    goto cfgh_in_loop1
-$	endif
-$!
 $	if key2b .eqs. "RAND" .and. key2c .nes. "" .and. key2d .eqs. ""
 $	then
 $	    if (key2c .eqs. "EGD") .or. -
@@ -1382,7 +1347,7 @@ $!			search/out 'tfile1' "$_''keyterm'"
 $			severity = '$severity'
 $		    endif
 $!
-$!		    Unix compatability routines
+$!		    Unix compatibility routines
 $!---------------------------------------------
 $		    if severity .ne. 1
 $		    then

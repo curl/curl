@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -23,7 +23,8 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(HAVE_SIGNAL_H) && defined(HAVE_SIGACTION) && defined(USE_OPENSSL)
+#if defined(HAVE_SIGNAL_H) && defined(HAVE_SIGACTION) &&        \
+  (defined(USE_OPENSSL) || defined(USE_MBEDTLS))
 #include <signal.h>
 
 struct sigpipe_ignore {
@@ -38,10 +39,10 @@ struct sigpipe_ignore {
  * internals, and then sigpipe_restore() will restore the situation when we
  * return from libcurl again.
  */
-static void sigpipe_ignore(struct SessionHandle *data,
+static void sigpipe_ignore(struct Curl_easy *data,
                            struct sigpipe_ignore *ig)
 {
-  /* get a local copy of no_signal because the SessionHandle might not be
+  /* get a local copy of no_signal because the Curl_easy might not be
      around when we restore */
   ig->no_signal = data->set.no_signal;
   if(!data->set.no_signal) {

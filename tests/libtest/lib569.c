@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,23 +37,23 @@ int test(char *URL)
   CURL *curl;
   char *stream_uri = NULL;
   char *rtsp_session_id;
-  int request=1;
+  int request = 1;
   int i;
-  FILE *idfile = NULL;
 
-  idfile = fopen(libtest_arg2, "wb");
+  FILE *idfile = fopen(libtest_arg2, "wb");
   if(idfile == NULL) {
     fprintf(stderr, "couldn't open the Session ID File\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
     fclose(idfile);
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if ((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     fclose(idfile);
@@ -77,7 +77,8 @@ int test(char *URL)
 
   /* Go through the various Session IDs */
   for(i = 0; i < 3; i++) {
-    if((stream_uri = suburl(URL, request++)) == NULL) {
+    stream_uri = suburl(URL, request++);
+    if(!stream_uri) {
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
@@ -86,7 +87,8 @@ int test(char *URL)
     stream_uri = NULL;
 
     test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
-    test_setopt(curl, CURLOPT_RTSP_TRANSPORT, "Fake/NotReal/JustATest;foo=baz");
+    test_setopt(curl, CURLOPT_RTSP_TRANSPORT,
+                "Fake/NotReal/JustATest;foo=baz");
     res = curl_easy_perform(curl);
     if(res)
       goto test_cleanup;
@@ -95,7 +97,8 @@ int test(char *URL)
     fprintf(idfile, "Got Session ID: [%s]\n", rtsp_session_id);
     rtsp_session_id = NULL;
 
-    if((stream_uri = suburl(URL, request++)) == NULL) {
+    stream_uri = suburl(URL, request++);
+    if(!stream_uri) {
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
@@ -121,4 +124,3 @@ test_cleanup:
 
   return res;
 }
-

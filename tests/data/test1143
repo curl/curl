@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+followlocation
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 hello
+Connection: close
+Content-Length: 4
+
+hej
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP URL with http:/ (one slash!)
+ </name>
+ <command>
+http:/%HOSTIP:%HTTPPORT/want/1143
+</command>
+<setenv>
+# Needed for MSYS2 to not treat the argument as a POSIX path list
+# that has to be converted to Windows paths
+MSYS2_ARG_CONV_EXCL=http:/
+</setenv>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /want/1143 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

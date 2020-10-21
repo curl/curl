@@ -1,0 +1,80 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+CURLOPT_CONNECT_TO
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<connect>
+HTTP/1.1 200 Connection established
+
+</connect>
+
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 3
+Content-Type: text/plain
+
+OK
+</data>
+
+<datacheck>
+HTTP/1.1 200 Connection established
+
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 3
+Content-Type: text/plain
+
+OK
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+http-proxy
+</server>
+ <name>
+Connect to specific host via HTTP proxy (switch to tunnel mode automatically)
+ </name>
+
+ <command>
+http://www.example.com.2050/2050 --connect-to ::connect.example.com.2050:%HTTPPORT -x %HOSTIP:%PROXYPORT
+</command>
+<features>
+proxy
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<proxy>
+CONNECT connect.example.com.2050:%HTTPPORT HTTP/1.1
+Host: connect.example.com.2050:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</proxy>
+<protocol>
+GET /2050 HTTP/1.1
+Host: www.example.com.2050
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+</verify>
+</testcase>

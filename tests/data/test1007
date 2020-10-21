@@ -17,7 +17,7 @@ tftp
 TFTP send with invalid permission on server
  </name>
  <command>
--T log/test1007.txt tftp://%HOSTIP:%TFTPPORT//invalid-file --trace-ascii log/traceit
+-T log/test1007.txt tftp://%HOSTIP:%TFTPPORT//invalid-file
 </command>
 <file name="log/test1007.txt">
 This data will not be sent
@@ -32,8 +32,11 @@ This data will not be sent
 </errorcode>
 <protocol>
 opcode: 2
-filename: /invalid-file
 mode: octet
+tsize: 27
+blksize: 512
+timeout: 6
+filename: /invalid-file
 </protocol>
 </verify>
 </testcase>

@@ -35,16 +35,17 @@ HTTP with proxy and host-only URL
  <command>
 -x %HOSTIP:%HTTPPORT we.want.that.site.com.1213
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET HTTP://we.want.that.site.com.1213/ HTTP/1.1
+GET http://we.want.that.site.com.1213/ HTTP/1.1
 Host: we.want.that.site.com.1213
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

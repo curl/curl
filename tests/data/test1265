@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP proxy
+NO_PROXY
+noproxy
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+Content-Type: text/html
+
+foo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http-ipv6
+</server>
+<name>
+NO_PROXY with IPv6 numerical address
+</name>
+<setenv>
+http_proxy=http://%HOSTIP:%HTTPPORT
+NO_PROXY=::1
+</setenv>
+<command>
+http://%HOST6IP:%HTTP6PORT/1265
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /1265 HTTP/1.1
+Host: %HOST6IP:%HTTP6PORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

@@ -64,12 +64,10 @@ four is the number of lines
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 PUT /1075 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 85
 Expect: 100-continue
@@ -81,6 +79,7 @@ four is the number of lines
 PUT /1075 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 85
 Expect: 100-continue

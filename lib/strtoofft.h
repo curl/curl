@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,36 +40,13 @@
  * of 'long' the conversion function to use is strtol().
  */
 
-#if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
-#  ifdef HAVE_STRTOLL
-#    define curlx_strtoofft strtoll
-#  else
-#    if defined(_MSC_VER) && (_MSC_VER >= 1300) && (_INTEGRAL_MAX_BITS >= 64)
-#      if defined(_SAL_VERSION)
-         _Check_return_ _CRTIMP __int64 __cdecl _strtoi64(
-             _In_z_ const char *_String,
-             _Out_opt_ _Deref_post_z_ char **_EndPtr, _In_ int _Radix);
-#      else
-         _CRTIMP __int64 __cdecl _strtoi64(const char *_String,
-                                           char **_EndPtr, int _Radix);
-#      endif
-#      define curlx_strtoofft _strtoi64
-#    else
-       curl_off_t curlx_strtoll(const char *nptr, char **endptr, int base);
-#      define curlx_strtoofft curlx_strtoll
-#      define NEED_CURL_STRTOLL 1
-#    endif
-#  endif
-#else
-#  define curlx_strtoofft strtol
-#endif
+typedef enum {
+  CURL_OFFT_OK,    /* parsed fine */
+  CURL_OFFT_FLOW,  /* over or underflow */
+  CURL_OFFT_INVAL  /* nothing was parsed */
+} CURLofft;
 
-#if (CURL_SIZEOF_CURL_OFF_T == 4)
-#  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFF)
-#else
-   /* assume CURL_SIZEOF_CURL_OFF_T == 8 */
-#  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
-#endif
-#define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - CURL_OFF_T_C(1))
+CURLofft curlx_strtoofft(const char *str, char **endp, int base,
+                         curl_off_t *num);
 
 #endif /* HEADER_CURL_STRTOOFFT_H */

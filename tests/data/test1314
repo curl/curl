@@ -56,21 +56,23 @@ HTTP Location: following a // prefixed url
  <command>
 http://firstplace.example.com/want/1314 -L -x http://%HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
 GET http://firstplace.example.com/want/1314 HTTP/1.1
 Host: firstplace.example.com
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://somewhere.example.com/reply/1314 HTTP/1.1
 Host: somewhere.example.com
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

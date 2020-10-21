@@ -32,8 +32,8 @@ ftp://%HOSTIP:%FTPPORT/161
 
 # Verify data after the test has been "shot"
 <verify>
-# This gets QUIT sent because CURLE_PARTIAL_FILE does NOT mark the control
-# connection as bad
+# This doesn't send QUIT because of known bug:
+# "7.8 Premature transfer end but healthy control channel"
 <protocol>
 USER anonymous
 PASS ftp@example.com
@@ -42,8 +42,8 @@ EPSV
 TYPE I
 SIZE 161
 RETR 161
-QUIT
 </protocol>
+# CURLE_PARTIAL_FILE = 18
 <errorcode>
 18
 </errorcode>

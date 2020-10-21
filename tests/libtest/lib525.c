@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,8 +34,7 @@ int test(char *URL)
   int res = 0;
   CURL *curl = NULL;
   FILE *hd_src = NULL;
-  int hd ;
-  int error;
+  int hd;
   struct_stat file_info;
   CURLM *m = NULL;
   int running;
@@ -55,9 +54,8 @@ int test(char *URL)
 
   hd_src = fopen(libtest_arg2, "rb");
   if(NULL == hd_src) {
-    error = ERRNO;
-    fprintf(stderr, "fopen() failed with error: %d (%s)\n",
-            error, strerror(error));
+    fprintf(stderr, "fopen failed with error: %d (%s)\n",
+            errno, strerror(errno));
     fprintf(stderr, "Error opening file: (%s)\n", libtest_arg2);
     return TEST_ERR_FOPEN;
   }
@@ -66,9 +64,8 @@ int test(char *URL)
   hd = fstat(fileno(hd_src), &file_info);
   if(hd == -1) {
     /* can't open file, bail out */
-    error = ERRNO;
     fprintf(stderr, "fstat() failed with error: %d (%s)\n",
-            error, strerror(error));
+            errno, strerror(errno));
     fprintf(stderr, "ERROR: cannot open file (%s)\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_FSTAT;
@@ -86,7 +83,7 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
   /* specify target */
-  easy_setopt(curl,CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   /* go verbose */
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -135,7 +132,7 @@ int test(char *URL)
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
-    select_test(maxfd+1, &rd, &wr, &exc, &interval);
+    select_test(maxfd + 1, &rd, &wr, &exc, &interval);
 
     abort_on_test_timeout();
   }

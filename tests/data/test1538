@@ -1,0 +1,157 @@
+<testcase>
+<info>
+<keywords>
+strerror
+verbose logs
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<tool>
+lib1538
+</tool>
+
+<name>
+libcurl strerror API call tests
+</name>
+<command>
+nothing
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+e0: No error
+e1: Unsupported protocol
+e2: Failed initialization
+e3: URL using bad/illegal format or missing URL
+e4: A requested feature, protocol or option was not found built-in in this libcurl due to a build-time decision.
+e5: Couldn't resolve proxy name
+e6: Couldn't resolve host name
+e7: Couldn't connect to server
+e8: Weird server reply
+e9: Access denied to remote resource
+e10: FTP: The server failed to connect to data port
+e11: FTP: unknown PASS reply
+e12: FTP: Accepting server connect has timed out
+e13: FTP: unknown PASV reply
+e14: FTP: unknown 227 response format
+e15: FTP: can't figure out the host in the PASV response
+e16: Error in the HTTP2 framing layer
+e17: FTP: couldn't set file type
+e18: Transferred a partial file
+e19: FTP: couldn't retrieve (RETR failed) the specified file
+e20: Unknown error
+e21: Quote command returned error
+e22: HTTP response code said error
+e23: Failed writing received data to disk/application
+e24: Unknown error
+e25: Upload failed (at start/before it took off)
+e26: Failed to open/read local data from file/application
+e27: Out of memory
+e28: Timeout was reached
+e29: Unknown error
+e30: FTP: command PORT failed
+e31: FTP: command REST failed
+e32: Unknown error
+e33: Requested range was not delivered by the server
+e34: Internal problem setting up the POST
+e35: SSL connect error
+e36: Couldn't resume download
+e37: Couldn't read a file:// file
+e38: LDAP: cannot bind
+e39: LDAP: search failed
+e40: Unknown error
+e41: A required function in the library was not found
+e42: Operation was aborted by an application callback
+e43: A libcurl function was given a bad argument
+e44: Unknown error
+e45: Failed binding local connection end
+e46: Unknown error
+e47: Number of redirects hit maximum amount
+e48: An unknown option was passed in to libcurl
+e49: Malformed telnet option
+e50: Unknown error
+e51: Unknown error
+e52: Server returned nothing (no headers, no data)
+e53: SSL crypto engine not found
+e54: Can not set SSL crypto engine as default
+e55: Failed sending data to the peer
+e56: Failure when receiving data from the peer
+e57: Unknown error
+e58: Problem with the local SSL certificate
+e59: Couldn't use specified SSL cipher
+e60: SSL peer certificate or SSH remote key was not OK
+e61: Unrecognized or bad HTTP Content or Transfer-Encoding
+e62: Invalid LDAP URL
+e63: Maximum file size exceeded
+e64: Requested SSL level failed
+e65: Send failed since rewinding of the data stream failed
+e66: Failed to initialise SSL crypto engine
+e67: Login denied
+e68: TFTP: File Not Found
+e69: TFTP: Access Violation
+e70: Disk full or allocation exceeded
+e71: TFTP: Illegal operation
+e72: TFTP: Unknown transfer ID
+e73: Remote file already exists
+e74: TFTP: No such user
+e75: Conversion failed
+e76: Caller must register CURLOPT_CONV_ callback options
+e77: Problem with the SSL CA cert (path? access rights?)
+e78: Remote file not found
+e79: Error in the SSH layer
+e80: Failed to shut down the SSL connection
+e81: Socket not ready for send/recv
+e82: Failed to load CRL file (path? access rights?, format?)
+e83: Issuer check against peer certificate failed
+e84: FTP: The server did not accept the PRET command.
+e85: RTSP CSeq mismatch or invalid CSeq
+e86: RTSP session error
+e87: Unable to parse FTP file list
+e88: Chunk callback failed
+e89: The max connection limit is reached
+e90: SSL public key does not match pinned public key
+e91: SSL server certificate status verification FAILED
+e92: Stream error in the HTTP/2 framing layer
+e93: API function called from within callback
+e94: An authentication function returned an error
+e95: HTTP/3 error
+e96: QUIC connection error
+e97: proxy handshake error
+e98: Unknown error
+m-1: Please call curl_multi_perform() soon
+m0: No error
+m1: Invalid multi handle
+m2: Invalid easy handle
+m3: Out of memory
+m4: Internal error
+m5: Invalid socket argument
+m6: Unknown option
+m7: The easy handle is already added to a multi handle
+m8: API function called from within callback
+m9: Wakeup is unavailable or failed
+m10: A libcurl function was given a bad argument
+m11: Unknown error
+s0: No error
+s1: Unknown share option
+s2: Share currently in use
+s3: Invalid share handle
+s4: Out of memory
+s5: Feature not enabled in this library
+s6: CURLSHcode unknown
+</stdout>
+</verify>
+
+</testcase>

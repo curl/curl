@@ -2,7 +2,7 @@
 #
 # zz50-xc-ovr.m4
 #
-# Copyright (c) 2011 Daniel Stenberg <daniel@haxx.se>
+# Copyright (c) 2011 - 2020, Daniel Stenberg <daniel@haxx.se>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -31,7 +31,7 @@ dnl file may override those provided in other files.
 dnl Override some language related macros
 dnl -------------------------------------------------
 dnl This is done to prevent Libtool 1.5.X from doing
-dnl unnecesary C++, Fortran and Java tests when only
+dnl unnecessary C++, Fortran and Java tests when only
 dnl using C language and reduce resulting configure
 dnl script by nearly 300 Kb.
 
@@ -57,4 +57,3 @@ dnl provided elsewhere.
 
 AC_DEFUN([XC_OVR_ZZ50],
   [AC_BEFORE([$0],[AC_PROG_LIBTOOL])])
-

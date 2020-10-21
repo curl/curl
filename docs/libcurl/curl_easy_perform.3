@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -55,7 +55,7 @@ While the \fBeasy_handle\fP is added to a multi handle, it cannot be used by
 .SH RETURN VALUE
 CURLE_OK (0) means everything was ok, non-zero means an error occurred as
 .I <curl/curl.h>
-defines - see \fIlibcurl-errors(3)\fP. If the \fBCURLOPT_ERRORBUFFER(3)\fP was
+defines - see \fIlibcurl-errors(3)\fP. If the \fICURLOPT_ERRORBUFFER(3)\fP was
 set with \fIcurl_easy_setopt(3)\fP there will be a readable error message in
 the error buffer when non-zero is returned.
 .SH EXAMPLE
@@ -63,7 +63,7 @@ the error buffer when non-zero is returned.
 CURL *curl = curl_easy_init();
 if(curl) {
   CURLcode res;
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
   res = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 }
@@ -72,4 +72,3 @@ if(curl) {
 .BR curl_easy_init "(3), " curl_easy_setopt "(3), "
 .BR curl_multi_add_handle "(3), " curl_multi_perform "(3), "
 .BR libcurl-errors "(3), "
-

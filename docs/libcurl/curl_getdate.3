@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -96,13 +96,15 @@ only ones RFC 7231 says HTTP applications may use.
 This function returns -1 when it fails to parse the date string. Otherwise it
 returns the number of seconds as described.
 
-If the year is larger than 2037 on systems with 32 bit time_t, this function
-will return 0x7fffffff (since that is the largest possible signed 32 bit
-number).
+On systems with a signed 32 bit time_t: if the year is larger than 2037 or
+less than 1903, this function will return -1.
 
-Having a 64 bit time_t is not a guarantee that dates beyond 03:14:07 UTC,
-January 19, 2038 will work fine. On systems with a 64 bit time_t but with a
-crippled mktime(), \fIcurl_getdate(3)\fP will return -1 in this case.
+On systems with an unsigned 32 bit time_t: if the year is larger than 2106 or
+less than 1970, this function will return -1.
+
+On systems with 64 bit time_t: if the year is less than 1583, this function
+will return -1. (The Gregorian calendar was first introduced 1582 so no "real"
+dates in this way of doing dates existed before then.)
 .SH "SEE ALSO"
 .BR curl_easy_escape "(3), " curl_easy_unescape "(3), "
 .BR CURLOPT_TIMECONDITION "(3), " CURLOPT_TIMEVALUE "(3) "

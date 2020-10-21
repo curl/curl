@@ -1,0 +1,89 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_PROXY_SSL_VERIFYPEER 3 "16 Nov 2016" "libcurl 7.52.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_PROXY_SSL_VERIFYPEER \- verify the proxy's SSL certificate
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSL_VERIFYPEER, long verify);
+.SH DESCRIPTION
+Pass a long as parameter set to 1L to enable or 0L to disable.
+
+This option tells curl to verifies the authenticity of the HTTPS proxy's
+certificate. A value of 1 means curl verifies; 0 (zero) means it doesn't.
+
+This is the proxy version of \fICURLOPT_SSL_VERIFYPEER(3)\fP that's used for
+ordinary HTTPS servers.
+
+When negotiating a TLS or SSL connection, the server sends a certificate
+indicating its identity. Curl verifies whether the certificate is authentic,
+i.e. that you can trust that the server is who the certificate says it is.
+This trust is based on a chain of digital signatures, rooted in certification
+authority (CA) certificates you supply.  curl uses a default bundle of CA
+certificates (the path for that is determined at build time) and you can
+specify alternate certificates with the \fICURLOPT_PROXY_CAINFO(3)\fP option
+or the \fICURLOPT_PROXY_CAPATH(3)\fP option.
+
+When \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP is enabled, and the verification
+fails to prove that the certificate is authentic, the connection fails.  When
+the option is zero, the peer certificate verification succeeds regardless.
+
+Authenticating the certificate is not enough to be sure about the server. You
+typically also want to ensure that the server is the server you mean to be
+talking to.  Use \fICURLOPT_PROXY_SSL_VERIFYHOST(3)\fP for that. The check
+that the host name in the certificate is valid for the host name you're
+connecting to is done independently of the
+\fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP option.
+
+WARNING: disabling verification of the certificate allows bad guys to
+man-in-the-middle the communication without you knowing it. Disabling
+verification makes the communication insecure. Just having encryption on a
+transfer is not enough as you cannot be sure that you are communicating with
+the correct end-point.
+.SH DEFAULT
+1
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+
+  /* Set the default value: strict certificate check please */
+  curl_easy_setopt(curl, CURLOPT_PROXY_SSL_VERIFYPEER, 1L);
+
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.52.0
+
+If built TLS enabled.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_PROXY_SSL_VERIFYHOST "(3), "
+.BR CURLOPT_SSL_VERIFYPEER "(3), "
+.BR CURLOPT_SSL_VERIFYHOST "(3), "

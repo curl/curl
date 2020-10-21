@@ -1,9 +1,6 @@
 *.a
 *.nlm
 *.res
-Makefile.vc10.dist
-Makefile.vc8.dist
-Makefile.vc9.dist
 config-win32.h
 curl
 curl_config.h

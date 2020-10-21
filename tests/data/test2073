@@ -1,0 +1,70 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP FORMPOST
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 10
+
+contents1
+</data>
+<data1>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 10
+
+contents2
+</data1>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP form posts with handle reset
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/2073 -F 'name=a;filename=a.pdf' --next http://%HOSTIP:%HTTPPORT/2073 -F 'name=b;filename=b.jpg'
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^(Content-Type: multipart/form-data;|------------).*
+</strip>
+<protocol>
+POST /2073 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 189
+
+Content-Disposition: form-data; name="name"; filename="a.pdf"
+Content-Type: application/pdf
+
+a
+POST /2073 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 184
+
+Content-Disposition: form-data; name="name"; filename="b.jpg"
+Content-Type: image/jpeg
+
+b
+</protocol>
+</verify>
+</testcase>

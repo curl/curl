@@ -5,11 +5,11 @@
       *                            | (__| |_| |  _ <| |___
       *                             \___|\___/|_| \_\_____|
       *
-      * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+      * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
-      * are also available at http://curl.haxx.se/docs/copyright.html.
+      * are also available at https://curl.haxx.se/docs/copyright.html.
       *
       * You may opt to use, copy, modify, merge, publish, distribute and/or sell
       * copies of the Software, and permit persons to whom the Software is
@@ -66,8 +66,11 @@
      d CURLINFO_DOUBLE...
      d                 c                   X'00300000'
      d CURLINFO_SLIST  c                   X'00400000'
+     d CURLINFO_PTR    c                   X'00400000'
      d CURLINFO_SOCKET...
      d                 c                   X'00500000'
+     d CURLINFO_OFF_T...
+     d                 c                   X'00600000'
      d CURLINFO_MASK   c                   X'000FFFFF'
      d CURLINFO_TYPEMASK...
      d                 c                   X'00F00000'
@@ -125,21 +128,37 @@
      d                 c                   X'00040000'
      d CURL_VERSION_UNIX_SOCKETS...
      d                 c                   X'00080000'
+     d CURL_VERSION_PSL...
+     d                 c                   X'00100000'
+     d CURL_VERSION_HTTPS_PROXY...
+     d                 c                   X'00200000'
+     d CURL_VERSION_MULTI_SSL...
+     d                 c                   X'00400000'
+     d CURL_VERSION_BROTLI...
+     d                 c                   X'00800000'
+     d CURL_VERSION_ALTSVC...
+     d                 c                   X'01000000'
+     d CURL_VERSION_HTTP3...
+     d                 c                   X'02000000'
+     d CURL_VERSION_UNICODE...
+     d                 c                   X'04000000'
       *
-     d HTTPPOST_FILENAME...
+     d CURL_HTTPPOST_FILENAME...
      d                 c                   X'00000001'
-     d HTTPPOST_READFILE...
+     d CURL_HTTPPOST_READFILE...
      d                 c                   X'00000002'
-     d HTTPPOST_PTRNAME...
+     d CURL_HTTPPOST_PTRNAME...
      d                 c                   X'00000004'
-     d HTTPPOST_PTRCONTENTS...
+     d CURL_HTTPPOST_PTRCONTENTS...
      d                 c                   X'00000008'
-     d HTTPPOST_BUFFER...
+     d CURL_HTTPPOST_BUFFER...
      d                 c                   X'00000010'
-     d HTTPPOST_PTRBUFFER...
+     d CURL_HTTPPOST_PTRBUFFER...
      d                 c                   X'00000020'
-     d HTTPPOST_CALLBACK...
+     d CURL_HTTPPOST_CALLBACK...
      d                 c                   X'00000040'
+     d CURL_HTTPPOST_LARGE...
+     d                 c                   X'00000080'
       *
      d CURL_SEEKFUNC_OK...
      d                 c                   0
@@ -156,6 +175,11 @@
      d CURL_WRITEFUNC_PAUSE...
      d                 c                   X'10000001'
       *
+     d CURL_TRAILERFUNC_OK...
+     d                 c                   0
+     d CURL_TRAILERFUNC_ABORT...
+     d                 c                   1
+      *
      d CURLAUTH_NONE   c                   X'00000000'
      d CURLAUTH_BASIC  c                   X'00000001'
      d CURLAUTH_DIGEST...
@@ -167,6 +191,8 @@
      d                 c                   X'00000010'
      d CURLAUTH_NTLM_WB...
      d                 c                   X'00000020'
+     d CURLAUTH_BEARER...
+     d                 c                   X'00000040'
      d CURLAUTH_ONLY...
      d                 c                   X'80000000'
      d CURLAUTH_ANY    c                   X'7FFFFFEF'
@@ -204,10 +230,14 @@
      d                 c                   0
      d CURLOPTTYPE_OBJECTPOINT...
      d                 c                   10000
+     d CURLOPTTYPE_STRINGPOINT...
+     d                 c                   10000
      d CURLOPTTYPE_FUNCTIONPOINT...
      d                 c                   20000
      d CURLOPTTYPE_OFF_T...
      d                 c                   30000
+     d CURLOPTTYPE_BLOB...
+     d                 c                   40000
       *
      d CURL_IPRESOLVE_WHATEVER...
      d                 c                   0
@@ -226,6 +256,10 @@
      d                 c                   3
      d CURL_HTTP_VERSION_2...
      d                 c                   3
+     d CURL_HTTP_VERSION_2TLS...
+     d                 c                   4
+     d CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE...
+     d                 c                   5
       *
      d CURL_NETRC_IGNORED...
      d                 c                   0
@@ -248,6 +282,18 @@
      d                 c                   5
      d CURL_SSLVERSION_TLSv1_2...
      d                 c                   6
+     d CURL_SSLVERSION_TLSv1_3...
+     d                 c                   7
+     d CURL_SSLVERSION_MAX_DEFAULT...
+     d                 c                   X'00010000'
+     d CURL_SSLVERSION_MAX_TLSv1_0...
+     d                 c                   X'00040000'
+     d CURL_SSLVERSION_MAX_TLSv1_1...
+     d                 c                   X'00050000'
+     d CURL_SSLVERSION_MAX_TLSv1_2...
+     d                 c                   X'00060000'
+     d CURL_SSLVERSION_MAX_TLSv1_3...
+     d                 c                   X'00070000'
       *
      d CURL_TLSAUTH_NONE...
      d                 c                   0
@@ -264,6 +310,9 @@
      d                 c                   4
      d CURL_REDIR_POST_ALL...
      d                 c                   7
+      *
+     d CURL_ZERO_TERMINATED...
+     d                 c                   -1
       *
      d CURL_POLL_NONE  c                   0
      d CURL_POLL_IN    c                   1
@@ -335,6 +384,27 @@
      d CURL_WAIT_POLLOUT...
      d                 c                   X'0004'
       *
+     d CURLU_DEFAULT_PORT...
+     d                 c                   X'00000001'
+     d CURLU_NO_DEFAULT_PORT...
+     d                 c                   X'00000002'
+     d CURLU_DEFAULT_SCHEME...
+     d                 c                   X'00000004'
+     d CURLU_NON_SUPPORT_SCHEME...
+     d                 c                   X'00000008'
+     d CURLU_PATH_AS_IS...
+     d                 c                   X'00000010'
+     d CURLU_DISALLOW_USER...
+     d                 c                   X'00000020'
+     d CURLU_URLDECODE...
+     d                 c                   X'00000040'
+     d CURLU_URLENCODE...
+     d                 c                   X'00000080'
+     d CURLU_APPENDQUERY...
+     d                 c                   X'00000100'
+     d CURLU_GUESS_SCHEME...
+     d                 c                   X'00000200'
+      *
       **************************************************************************
       *                                Types
       **************************************************************************
@@ -359,6 +429,8 @@
      d                 c                   6
      d  CURLE_COULDNT_CONNECT...
      d                 c                   7
+     d  CURLE_WEIRD_SERVER_REPLY...
+     d                 c                   8
      d  CURLE_FTP_WEIRD_SERVER_REPLY...
      d                 c                   8
      d  CURLE_REMOTE_ACCESS_DENIED...
@@ -444,7 +516,7 @@
      d                 c                   49
      d  CURLE_OBSOLETE50...
      d                 c                   50
-     d  CURLE_PEER_FAILED_VERIFICATION...
+     d  CURLE_OBSOLETE51...
      d                 c                   51
      d  CURLE_GOT_NOTHING...
      d                 c                   52
@@ -462,7 +534,7 @@
      d                 c                   58
      d  CURLE_SSL_CIPHER...
      d                 c                   59
-     d  CURLE_SSL_CACERT...
+     d  CURLE_PEER_FAILED_VERIFICATION...
      d                 c                   60
      d  CURLE_BAD_CONTENT_ENCODING...
      d                 c                   61
@@ -526,6 +598,16 @@
      d                 c                   90
      d  CURLE_SSL_INVALIDCERTSTATUS...
      d                 c                   91
+     d  CURLE_HTTP2_STREAM...
+     d                 c                   92
+     d  CURLE_RECURSIVE_API_CALL...
+     d                 c                   93
+     d  CURLE_AUTH_ERROR...
+     d                 c                   94
+     d  CURLE_HTTP3...
+     d                 c                   95
+     d  CURLE_QUIC_CONNECT_ERROR...
+     d                 c                   96
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLE_URL_MALFORMAT_USER...
@@ -578,6 +660,8 @@
      d                 c                   51
      d  CURLE_SHARE_IN_USE...
      d                 c                   57
+     d  CURLE_SSL_CACERT...
+     d                 c                   60
      d  CURLE_FTP_SSL_FAILED...
      d                 c                   64
      d  CURLE_TFTP_DISKFULL...
@@ -641,6 +725,8 @@
      d                 c                   0
      d  CURLPROXY_HTTP_1_0...
      d                 c                   1
+     d  CURLPROXY_HTTPS...
+     d                 c                   2
      d  CURLPROXY_SOCKS4...
      d                 c                   4
      d  CURLPROXY_SOCKS5...
@@ -686,6 +772,16 @@
      d                 c                   X'0001'
      d CURLSSLOPT_NO_REVOKE...
      d                 c                   X'0002'
+     d CURLSSLOPT_NO_PARTIALCHAIN...
+     d                 c                   X'0004'
+     d CURLSSLOPT_REVOKE_BEST_EFFORT...
+     d                 c                   X'0008'
+      *
+     d CURL_HET_DEFAULT...
+     d                 c                   200
+      *
+     d CURL_UPKEEP_INTERVAL_DEFAULT...
+     d                 c                   60000
       *
       /if not defined(CURL_NO_OLDIES)
      d curl_ftpssl     s                   like(curl_usessl)
@@ -739,6 +835,19 @@
      d                 c                   X'00000000'
      d  CURLHEADER_SEPARATE...
      d                 c                   X'00000001'
+      *
+     d  CURLALTSVC_IMMEDIATELY...
+     d                 c                   X'00000001'
+     d  CURLALTSVC_ALTUSED...
+     d                 c                   X'00000002'
+     d  CURLALTSVC_READONLYFILE...
+     d                 c                   X'00000004'
+     d  CURLALTSVC_H1...
+     d                 c                   X'00000008'
+     d  CURLALTSVC_H2...
+     d                 c                   X'00000010'
+     d  CURLALTSVC_H3...
+     d                 c                   X'00000020'
       *
      d  CURLPROTO_HTTP...
      d                 c                   X'00000001'
@@ -1228,6 +1337,125 @@
      d                 c                   00237
      d  CURLOPT_DEFAULT_PROTOCOL...
      d                 c                   10238
+     d  CURLOPT_STREAM_WEIGHT...
+     d                 c                   00239
+     d  CURLOPT_STREAM_DEPENDS...
+     d                 c                   10240
+     d  CURLOPT_STREAM_DEPENDS_E...
+     d                 c                   10241
+     d  CURLOPT_TFTP_NO_OPTIONS...
+     d                 c                   00242
+     d  CURLOPT_CONNECT_TO...
+     d                 c                   10243
+     d  CURLOPT_TCP_FASTOPEN...
+     d                 c                   00244
+     d  CURLOPT_KEEP_SENDING_ON_ERROR...
+     d                 c                   00245
+     d  CURLOPT_PROXY_CAINFO...
+     d                 c                   10246
+     d  CURLOPT_PROXY_CAPATH...
+     d                 c                   10247
+     d  CURLOPT_PROXY_SSL_VERIFYPEER...
+     d                 c                   00248
+     d  CURLOPT_PROXY_SSL_VERIFYHOST...
+     d                 c                   00249
+     d  CURLOPT_PROXY_SSLVERSION...
+     d                 c                   00250
+     d  CURLOPT_PROXY_TLSAUTH_USERNAME...
+     d                 c                   10251
+     d  CURLOPT_PROXY_TLSAUTH_PASSWORD...
+     d                 c                   10252
+     d  CURLOPT_PROXY_TLSAUTH_TYPE...
+     d                 c                   10253
+     d  CURLOPT_PROXY_SSLCERT...
+     d                 c                   10254
+     d  CURLOPT_PROXY_SSLCERTTYPE...
+     d                 c                   10255
+     d  CURLOPT_PROXY_SSLKEY...
+     d                 c                   10256
+     d  CURLOPT_PROXY_SSLKEYTYPE...
+     d                 c                   10257
+     d  CURLOPT_PROXY_KEYPASSWD...
+     d                 c                   10258
+     d  CURLOPT_PROXY_SSL_CIPHER_LIST...
+     d                 c                   10259
+     d  CURLOPT_PROXY_CRLFILE...
+     d                 c                   10260
+     d  CURLOPT_PROXY_SSL_OPTIONS...
+     d                 c                   00261
+     d  CURLOPT_PRE_PROXY...
+     d                 c                   10262
+     d  CURLOPT_PROXY_PINNEDPUBLICKEY...
+     d                 c                   10263
+     d  CURLOPT_ABSTRACT_UNIX_SOCKET...
+     d                 c                   10264
+     d  CURLOPT_SUPPRESS_CONNECT_HEADERS...
+     d                 c                   00265
+     d  CURLOPT_REQUEST_TARGET...
+     d                 c                   10266
+     d  CURLOPT_SOCKS5_AUTH...
+     d                 c                   00267
+     d  CURLOPT_SSH_COMPRESSION...
+     d                 c                   00268
+     d  CURLOPT_MIMEPOST...
+     d                 c                   10269
+     d  CURLOPT_TIMEVALUE_LARGE...
+     d                 c                   30270
+     d  CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS...
+     d                 c                   00271
+     d  CURLOPT_RESOLVER_START_FUNCTION...
+     d                 c                   20272
+     d  CURLOPT_RESOLVER_START_DATA...
+     d                 c                   10273
+     d  CURLOPT_HAPROXYPROTOCOL...
+     d                 c                   00274
+     d  CURLOPT_DNS_SHUFFLE_ADDRESSES...
+     d                 c                   00275
+     d  CURLOPT_TLS13_CIPHERS...
+     d                 c                   10276
+     d  CURLOPT_PROXY_TLS13_CIPHERS...
+     d                 c                   10277
+     d  CURLOPT_DISALLOW_USERNAME_IN_URL...
+     d                 c                   00278
+     d  CURLOPT_DOH_URL...
+     d                 c                   10279
+     d  CURLOPT_UPLOAD_BUFFERSIZE...
+     d                 c                   00280
+     d  CURLOPT_UPKEEP_INTERVAL_MS...
+     d                 c                   00281
+     d  CURLOPT_CURLU  c                   10282
+     d  CURLOPT_TRAILERFUNCTION...
+     d                 c                   20283
+     d  CURLOPT_TRAILERDATA...
+     d                 c                   10284
+     d  CURLOPT_HTTP09_ALLOWED...
+     d                 c                   00285
+     d  CURLOPT_ALTSVC_CTRL...
+     d                 c                   00286
+     d  CURLOPT_ALTSVC...
+     d                 c                   10287
+     d  CURLOPT_MAXAGE_CONN...
+     d                 c                   00288
+     d  CURLOPT_SASL_AUTHZID...
+     d                 c                   10289
+     d  CURLOPT_MAIL_RCPT_ALLLOWFAILS...
+     d                 c                   00290
+     d  CURLOPT_SSLCERT_BLOB...
+     d                 c                   40291
+     d  CURLOPT_SSLKEY_BLOB...
+     d                 c                   40292
+     d  CURLOPT_PROXY_SSLCERT_BLOB...
+     d                 c                   40293
+     d  CURLOPT_PROXY_SSLKEY_BLOB...
+     d                 c                   40294
+     d  CURLOPT_ISSUERCERT_BLOB...
+     d                 c                   40295
+     d  CURLOPT_PROXY_ISSUERCERT...
+     d                 c                   10296
+     d  CURLOPT_PROXY_ISSUERCERT_BLOB...
+     d                 c                   40297
+     d  CURLOPT_SSL_EC_CURVES...
+     d                 c                   10298
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -1318,6 +1546,8 @@
      d                 c                   18
      d  CURLFORM_STREAM...
      d                 c                   19
+     d  CURLFORM_CONTENTLEN...
+     d                 c                   20
       *
      d CURLINFO        s             10i 0 based(######ptr######)               Enum
      d  CURLINFO_EFFECTIVE_URL...                                               CURLINFO_STRING + 1
@@ -1334,12 +1564,20 @@
      d                 c                   X'00300006'
      d  CURLINFO_SIZE_UPLOAD...                                                 CURLINFO_DOUBLE + 7
      d                 c                   X'00300007'
+     d  CURLINFO_SIZE_UPLOAD_T...                                               CURLINFO_OFF_T  + 7
+     d                 c                   X'00600007'
      d  CURLINFO_SIZE_DOWNLOAD...                                               CURLINFO_DOUBLE + 8
      d                 c                   X'00300008'
+     d  CURLINFO_SIZE_DOWNLOAD_T...                                             CURLINFO_OFF_T  + 8
+     d                 c                   X'00600008'
      d  CURLINFO_SPEED_DOWNLOAD...                                              CURLINFO_DOUBLE + 9
      d                 c                   X'00300009'
+     d  CURLINFO_SPEED_DOWNLOAD_T...                                            CURLINFO_OFF_T  + 9
+     d                 c                   X'00600009'
      d  CURLINFO_SPEED_UPLOAD...                                                CURLINFO_DOUBLE + 10
      d                 c                   X'0030000A'
+     d  CURLINFO_SPEED_UPLOAD_T...                                              CURLINFO_OFF_T  + 10
+     d                 c                   X'0060000A'
      d  CURLINFO_HEADER_SIZE...                                                 CURLINFO_LONG   + 11
      d                 c                   X'0020000B'
      d  CURLINFO_REQUEST_SIZE...                                                CURLINFO_LONG   + 12
@@ -1348,10 +1586,16 @@
      d                 c                   X'0020000D'
      d  CURLINFO_FILETIME...                                                    CURLINFO_LONG   + 14
      d                 c                   X'0020000E'
+     d  CURLINFO_FILETIME_T...                                                  CURLINFO_OFF_T  + 14
+     d                 c                   X'0060000E'
      d  CURLINFO_CONTENT_LENGTH_DOWNLOAD...                                     CURLINFO_DOUBLE + 15
      d                 c                   X'0030000F'
+     d  CURLINFO_CONTENT_LENGTH_DOWNLOAD_T...                                   CURLINFO_OFF_T  + 15
+     d                 c                   X'0060000F'
      d  CURLINFO_CONTENT_LENGTH_UPLOAD...                                       CURLINFO_DOUBLE + 16
      d                 c                   X'00300010'
+     d  CURLINFO_CONTENT_LENGTH_UPLOAD_T...                                     CURLINFO_OFF_T  + 16
+     d                 c                   X'00600010'
      d  CURLINFO_STARTTRANSFER_TIME...                                          CURLINFO_DOUBLE + 17
      d                 c                   X'00300011'
      d  CURLINFO_CONTENT_TYPE...                                                CURLINFO_STRING + 18
@@ -1408,6 +1652,36 @@
      d                 c                   X'0040002B'
      d  CURLINFO_ACTIVESOCKET...                                                CURLINFO_SOCKET + 44
      d                 c                   X'0050002C'
+     d  CURLINFO_TLS_SSL_PTR...                                                 CURLINFO_SLIST + 45
+     d                 c                   X'0040002D'
+     d  CURLINFO_HTTP_VERSION...                                                CURLINFO_LONG + 46
+     d                 c                   X'0020002E'
+     d  CURLINFO_PROXY_SSL_VERIFYRESULT...                                      CURLINFO_LONG + 47
+     d                 c                   X'0020002F'
+     d  CURLINFO_PROTOCOL...                                                    CURLINFO_LONG + 48
+     d                 c                   X'00200030'
+     d  CURLINFO_SCHEME...                                                      CURLINFO_STRING + 49
+     d                 c                   X'00100031'
+     d  CURLINFO_TOTAL_TIME_T...                                                CURLINFO_OFF_T  + 50
+     d                 c                   X'00600032'
+     d  CURLINFO_NAMELOOKUP_TIME_T...                                           CURLINFO_OFF_T  + 51
+     d                 c                   X'00600033'
+     d  CURLINFO_CONNECT_TIME_T...                                              CURLINFO_OFF_T  + 52
+     d                 c                   X'00600034'
+     d  CURLINFO_PRETRANSFER_TIME_T...                                          CURLINFO_OFF_T  + 53
+     d                 c                   X'00600035'
+     d  CURLINFO_STARTTRANSFER_TIME_T...                                        CURLINFO_OFF_T  + 54
+     d                 c                   X'00600036'
+     d  CURLINFO_REDIRECT_TIME_T...                                             CURLINFO_OFF_T  + 55
+     d                 c                   X'00600037'
+     d  CURLINFO_APPCONNECT_TIME_T...                                           CURLINFO_OFF_T  + 56
+     d                 c                   X'00600038'
+     d  CURLINFO_RETRY_AFTER...                                                 CURLINFO_OFF_T  + 57
+     d                 c                   X'00600039'
+     d  CURLINFO_EFFECTIVE_METHOD...                                            CURLINFO_STRING + 58
+     d                 c                   X'0010003A'
+     d  CURLINFO_PROXY_ERROR...                                                 CURLINFO_LONG + 59
+     d                 c                   X'0020003B'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
@@ -1434,6 +1708,19 @@
      d                 c                   8
      d  CURLSSLBACKEND_DARWINSSL...
      d                 c                   9
+     d  CURLSSLBACKEND_AXTLS...
+     d                 c                   10
+     d  CURLSSLBACKEND_MBEDTLS...
+     d                 c                   11
+     d  CURLSSLBACKEND_MESALINK...
+     d                 c                   12
+      * Aliases for clones.
+     d  CURLSSLBACKEND_LIBRESSL...
+     d                 c                   1
+     d  CURLSSLBACKEND_BORINGSSL...
+     d                 c                   1
+     d  CURLSSLBACKEND_WOLFSSL...
+     d                 c                   6
       *
      d curl_closepolicy...
      d                 s             10i 0 based(######ptr######)               Enum
@@ -1462,8 +1749,10 @@
      d                 c                   4
      d  CURL_LOCK_DATA_CONNECT...
      d                 c                   5
-     d  CURL_LOCK_DATA_LAST...
+     d  CURL_LOCK_DATA_PSL...
      d                 c                   6
+     d  CURL_LOCK_DATA_LAST...
+     d                 c                   7
       *
      d curl_lock_access...
      d                 s             10i 0 based(######ptr######)               Enum
@@ -1555,7 +1844,13 @@
      d                 c                   6
      d  CURLM_ADDED_ALREADY...
      d                 c                   7
-     d  CURLM_LAST     c                   8
+     d  CURLM_RECURSIVE_API_CALL...
+     d                 c                   8
+     d  CURLM_WAKEUP_FAILURE...
+     d                 c                   9
+     d  CURLM_BAD_FUNCTION_ARGUMENT...
+     d                 c                   10
+     d  CURLM_LAST     c                   11
       *
      d CURLMSG         s             10i 0 based(######ptr######)               Enum
      d  CURLMSG_NONE   c                   0
@@ -1592,6 +1887,8 @@
      d                 c                   20014
      d  CURLMOPT_PUSHDATA...
      d                 c                   10015
+     d  CURLMOPT_MAX_CONCURRENT_STREAMS...
+     d                 c                   10016
       *
       * Bitmask bits for CURLMOPT_PIPELING.
       *
@@ -1629,7 +1926,64 @@
      d                 c                   12
      d CURL_RTSPREQ_LAST...
      d                 c                   13
-
+      *
+     d CURLUcode       s             10i 0 based(######ptr######)               Enum
+     d  CURLUE_OK      c                   0
+     d  CURLUE_BAD_HANDLE...
+     d                 c                   1
+     d  CURLUE_BAD_PARTPOINTER...
+     d                 c                   2
+     d  CURLUE_MALFORMED_INPUT...
+     d                 c                   3
+     d  CURLUE_BAD_PORT_NUMBER...
+     d                 c                   4
+     d  CURLUE_UNSUPPORTED_SCHEME...
+     d                 c                   5
+     d  CURLUE_URLDECODE...
+     d                 c                   6
+     d  CURLUE_OUT_OF_MEMORY...
+     d                 c                   7
+     d  CURLUE_USER_NOT_ALLOWED...
+     d                 c                   8
+     d  CURLUE_UNKNOWN_PART...
+     d                 c                   9
+     d  CURLUE_NO_SCHEME...
+     d                 c                   10
+     d  CURLUE_NO_USER...
+     d                 c                   11
+     d  CURLUE_NO_PASSWORD...
+     d                 c                   12
+     d  CURLUE_NO_OPTIONS...
+     d                 c                   13
+     d  CURLUE_NO_HOST...
+     d                 c                   14
+     d  CURLUE_NO_PORT...
+     d                 c                   15
+     d  CURLUE_NO_QUERY...
+     d                 c                   16
+     d  CURLUE_NO_FRAGMENT...
+     d                 c                   17
+      *
+     d CURLUPart       s             10i 0 based(######ptr######)               Enum
+     d  CURLUPART_URL  c                   0
+     d  CURLUPART_SCHEME...
+     d                 c                   1
+     d  CURLUPART_USER...
+     d                 c                   2
+     d  CURLUPART_PASSWORD...
+     d                 c                   3
+     d  CURLUPART_OPTIONS...
+     d                 c                   4
+     d  CURLUPART_HOST...
+     d                 c                   5
+     d  CURLUPART_PORT...
+     d                 c                   6
+     d  CURLUPART_PATH...
+     d                 c                   7
+     d  CURLUPART_QUERY...
+     d                 c                   8
+     d  CURLUPART_FRAGMENT...
+     d                 c                   9
       *
       *  Renaming CURLMsg to CURL_Msg to avoid case-insensivity name clash.
       *
@@ -1699,6 +2053,7 @@
      d   value_ptr                     *   overlay(value)
      d   value_procptr...
      d                                 *   overlay(value) procptr
+     d   value_num                         overlay(value: 8) like(curl_off_t)
       *
      d curl_slist      ds                  based(######ptr######)
      d                                     qualified
@@ -1794,6 +2149,9 @@
      d curl_read_callback...
      d                 s               *   based(######ptr######) procptr
       *
+     d curl_trailer_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
      d curl_write_callback...
      d                 s               *   based(######ptr######) procptr
       *
@@ -1842,9 +2200,80 @@
      d curl_closesocket_callback...
      d                 s               *   based(######ptr######) procptr
       *
+     d curl_resolver_start_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
       **************************************************************************
       *                              Prototypes
       **************************************************************************
+      *
+     d curl_mime_init  pr              *   extproc('curl_mime_init')            curl_mime *
+     d  easy                           *   value                                CURL *
+      *
+     d curl_mime_free  pr                  extproc('curl_mime_free')
+     d  mime                           *   value                                curl_mime *
+      *
+     d curl_mime_addpart...
+     d                 pr              *   extproc('curl_mime_addpart')         curl_mimepart *
+     d  mime                           *   value                                curl_mime *
+      *
+     d curl_mime_name  pr                  extproc('curl_mime_name')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  name                           *   value options(*string)
+      *
+     d curl_mime_filename...
+     d                 pr                  extproc('curl_mime_filename')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  filename                       *   value options(*string)
+      *
+     d curl_mime_type  pr                  extproc('curl_mime_type')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  mimetype                       *   value options(*string)
+      *
+     d curl_mime_encoder...
+     d                 pr                  extproc('curl_mime_encoder')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  encoding                       *   value options(*string)
+      *
+     d curl_mime_data  pr                  extproc('curl_mime_data')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  data                           *   value options(*string)
+     d  datasize                     10u 0                                      size_t
+      *
+     d curl_mime_filedata...
+     d                 pr                  extproc('curl_mime_filedata')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  filename                       *   value options(*string)
+      *
+     d curl_mime_data_cb...
+     d                 pr                  extproc('curl_mime_data_cb')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  datasize                           value like(curl_off_t)
+     d  readfunc                           value like(curl_read_callback)
+     d  seekfunc                           value like(curl_seek_callback)
+     d  freefunc                           value like(curl_free_callback)
+     d  arg                            *   value                                void *
+      *
+     d curl_mime_subparts...
+     d                 pr                  extproc('curl_mime_subparts')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  subparts                       *   value                                curl_mime *
+      *
+     d curl_mime_headers...
+     d                 pr                  extproc('curl_mime_headers')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  headers                        *   value                                curl_slist *
+     d  take_ownership...
+     d                               10i 0 value
       *
       *  This procedure as a variable parameter list.
       *  This prototype allows use of an option array, or a single "object"
@@ -2055,6 +2484,27 @@
      d  info                               value like(CURLINFO)
      d  slistarg                       *   options(*nopass)                     struct curl_slist *
       *
+     d curl_easy_getinfo_ptr...
+     d                 pr                  extproc('curl_easy_getinfo')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  info                               value like(CURLINFO)
+     d  ptrarg                         *   options(*nopass)                     void *
+      *
+     d curl_easy_getinfo_socket...
+     d                 pr                  extproc('curl_easy_getinfo')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  info                               value like(CURLINFO)
+     d  socketarg                          like(curl_socket_t) options(*nopass)
+      *
+     d curl_easy_getinfo_off_t...
+     d                 pr                  extproc('curl_easy_getinfo')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  info                               value like(CURLINFO)
+     d  offsetarg                          like(curl_off_t) options(*nopass)
+      *
       *
      d curl_easy_duphandle...
      d                 pr              *   extproc('curl_easy_duphandle')       CURL *
@@ -2082,8 +2532,14 @@
       *
      d curl_easy_pause...
      d                 pr                  extproc('curl_easy_pause')
+     d                                     like(CURLcode)
      d  curl                           *   value                                CURL *
      d  bitmask                      10i 0 value
+      *
+     d curl_easy_upkeep...
+     d                 pr                  extproc('curl_easy_upkeep')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
       *
      d curl_multi_init...
      d                 pr              *   extproc('curl_multi_init')           CURLM *
@@ -2218,6 +2674,29 @@
      d  sockfd                             value like(curl_socket_t)
      d  sockp                          *   value                                void *
       *
+     d curl_url        pr              *   extproc('curl_url')                  CURLU *
+      *
+     d curl_url_cleanup...
+     d                 pr                  extproc('curl_url_cleanup')
+     d  handle                         *   value                                CURLU *
+      *
+     d curl_url_dup    pr              *   extproc('curl_url_dup')              CURLU *
+     d  in                             *   value                                CURLU *
+      *
+     d curl_url_get    pr                  extproc('curl_url_get')
+     d                                     like(CURLUcode)
+     d  handle                         *   value                                CURLU *
+     d  what                               value like(CURLUPart)
+     d  part                           *                                        char **
+     d  flags                        10u 0 value
+      *
+     d curl_url_set    pr                  extproc('curl_url_set')
+     d                                     like(CURLUcode)
+     d  handle                         *   value                                CURLU *
+     d  what                               value like(CURLUPart)
+     d  part                           *   value options(*string)
+     d  flags                        10u 0 value
+      *
       **************************************************************************
       *                CCSID wrapper procedure prototypes
       **************************************************************************
@@ -2330,5 +2809,66 @@
      d  header                         *   value options(*string)               const char *
      d  ccsidin                      10u 0 value
      d  ccsidout                     10u 0 value
+      *
+     d curl_mime_name_ccsid...
+     d                 pr                  extproc('curl_mime_name_ccsid')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  name                           *   value options(*string)
+     d  ccsid                        10u 0 value
+      *
+     d curl_mime_filename_ccsid...
+     d                 pr                  extproc('curl_mime_filename_ccsid')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  filename                       *   value options(*string)
+     d  ccsid                        10u 0 value
+      *
+     d curl_mime_type_ccsid...
+     d                 pr                  extproc('curl_mime_type_ccsid')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  mimetype                       *   value options(*string)
+     d  ccsid                        10u 0 value
+      *
+     d curl_mime_encoder_ccsid...
+     d                 pr                  extproc('curl_mime_encoder_ccsid')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  encoding                       *   value options(*string)
+     d  ccsid                        10u 0 value
+      *
+     d curl_mime_data_ccsid...
+     d                 pr                  extproc('curl_mime_data_ccsid')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  data                           *   value options(*string)
+     d  datasize                     10u 0                                      size_t
+     d  ccsid                        10u 0 value
+      *
+     d curl_mime_filedata_ccsid...
+     d                 pr                  extproc('curl_mime_filedata_ccsid')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  filename                       *   value options(*string)
+     d  ccsid                        10u 0 value
+      *
+     d curl_url_get_ccsid...
+     d                 pr                  extproc('curl_url_get_ccsid')
+     d                                     like(CURLUcode)
+     d  handle                         *   value                                CURLU *
+     d  what                               value like(CURLUPart)
+     d  part                           *                                        char **
+     d  flags                        10u 0 value
+     d  ccsid                        10u 0 value
+      *
+     d curl_url_set_ccsid...
+     d                 pr                  extproc('curl_url_set_ccsid')
+     d                                     like(CURLUcode)
+     d  handle                         *   value                                CURLU *
+     d  what                               value like(CURLUPart)
+     d  part                           *   value options(*string)
+     d  flags                        10u 0 value
+     d  ccsid                        10u 0 value
       *
       /endif

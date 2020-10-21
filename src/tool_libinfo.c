@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "rawstr.h"
+#include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -76,7 +76,6 @@ CURLcode get_libcurl_info(void)
     {  NULL,    0                }
   };
 
-  struct proto_name_pattern const *p;
   const char *const *proto;
 
   /* Pointer to libcurl's run-time version information */
@@ -88,8 +87,9 @@ CURLcode get_libcurl_info(void)
   built_in_protos = 0;
   if(curlinfo->protocols) {
     for(proto = curlinfo->protocols; *proto; proto++) {
+      struct proto_name_pattern const *p;
       for(p = possibly_built_in; p->proto_name; p++) {
-        if(curlx_raw_equal(*proto, p->proto_name)) {
+        if(curl_strequal(*proto, p->proto_name)) {
           built_in_protos |= p->proto_pattern;
           break;
         }
@@ -99,4 +99,3 @@ CURLcode get_libcurl_info(void)
 
   return CURLE_OK;
 }
-

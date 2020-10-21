@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -29,10 +29,12 @@ curl_formadd - add a section to a multipart/formdata HTTP POST
 .BI "struct curl_httppost ** " lastitem, " ...);"
 .ad
 .SH DESCRIPTION
+This function is deprecated. Do not use! See \fIcurl_mime_init(3)\fP instead!
+
 curl_formadd() is used to append sections when building a multipart/formdata
 HTTP POST (sometimes referred to as RFC2388-style posts). Append one section
 at a time until you've added all the sections you want included and then you
-pass the \fIfirstitem\fP pointer as parameter to \fBCURLOPT_HTTPPOST(3)\fP.
+pass the \fIfirstitem\fP pointer as parameter to \fICURLOPT_HTTPPOST(3)\fP.
 \fIlastitem\fP is set after each \fIcurl_formadd(3)\fP call and on repeated
 invokes it should be left as set to allow repeated invokes to find the end of
 the list faster.
@@ -60,16 +62,15 @@ parts.
 .IP CURLFORM_COPYNAME
 followed by a string which provides the \fIname\fP of this part. libcurl
 copies the string so your application doesn't need to keep it around after
-this function call. If the name isn't NUL-terminated, or if you'd
-like it to contain zero bytes, you must set its length with
-\fBCURLFORM_NAMELENGTH\fP. The copied data will be freed by
-\fIcurl_formfree(3)\fP.
+this function call. If the name isn't NUL-terminated, you must set its length
+with \fBCURLFORM_NAMELENGTH\fP. The \fIname\fP is not allowed to contain
+zero-valued bytes. The copied data will be freed by \fIcurl_formfree(3)\fP.
 .IP CURLFORM_PTRNAME
 followed by a string which provides the \fIname\fP of this part. libcurl
 will use the pointer and refer to the data in your application, so you
 must make sure it remains until curl no longer needs it. If the name
-isn't NUL-terminated, or if you'd like it to contain zero
-bytes, you must set its length with \fBCURLFORM_NAMELENGTH\fP.
+isn't NUL-terminated, you must set its length with \fBCURLFORM_NAMELENGTH\fP.
+The \fIname\fP is not allowed to contain zero-valued bytes.
 .IP CURLFORM_COPYCONTENTS
 followed by a pointer to the contents of this part, the actual data
 to send away. libcurl copies the provided data, so your application doesn't
@@ -83,7 +84,18 @@ to send away. libcurl will use the pointer and refer to the data in your
 application, so you must make sure it remains until curl no longer needs it.
 If the data isn't NUL-terminated, or if you'd like it to contain zero bytes,
 you must set its length  with \fBCURLFORM_CONTENTSLENGTH\fP.
+.IP CURLFORM_CONTENTLEN
+followed by a curl_off_t value giving the length of the contents. Note that
+for \fICURLFORM_STREAM\fP contents, this option is mandatory.
+
+If you pass a 0 (zero) for this option, libcurl will instead do a strlen() on
+the contents to figure out the size. If you really want to send a zero byte
+content then you must make sure strlen() on the data pointer returns zero.
+
+(Option added in 7.46.0)
 .IP CURLFORM_CONTENTSLENGTH
+(This option is deprecated. Use \fICURLFORM_CONTENTLEN\fP instead!)
+
 followed by a long giving the length of the contents. Note that for
 \fICURLFORM_STREAM\fP contents, this option is mandatory.
 
@@ -94,6 +106,8 @@ content then you must make sure strlen() on the data pointer returns zero.
 followed by a filename, causes that file to be read and its contents used
 as data in this part. This part does \fInot\fP automatically become a file
 upload part simply because its data was read from a file.
+
+The specified file needs to kept around until the associated transfer is done.
 .IP CURLFORM_FILE
 followed by a filename, makes this part a file upload part. It sets the
 \fIfilename\fP field to the basename of the provided filename, it reads the
@@ -106,6 +120,8 @@ providing multiple \fBCURLFORM_FILE\fP arguments each followed by the filename
 
 The given upload file has to exist in its full in the file system already when
 the upload starts, as libcurl needs to read the correct file size beforehand.
+
+The specified file needs to kept around until the associated transfer is done.
 .IP CURLFORM_CONTENTTYPE
 is used in combination with \fICURLFORM_FILE\fP. Followed by a pointer to a
 string which provides the content-type for this part, possibly instead of an
@@ -133,8 +149,8 @@ data. The parameter you pass to \fICURLFORM_STREAM\fP is the pointer passed on
 to the read callback's fourth argument. If you want the part to look like a
 file upload one, set the \fICURLFORM_FILENAME\fP parameter as well. Note that
 when using \fICURLFORM_STREAM\fP, \fICURLFORM_CONTENTSLENGTH\fP must also be
-set with the total expected length of the part. (Option added in libcurl
-7.18.2)
+set with the total expected length of the part unless the formpost is sent
+chunked encoded. (Option added in libcurl 7.18.2)
 .IP CURLFORM_ARRAY
 Another possibility to send options to curl_formadd() is the
 \fBCURLFORM_ARRAY\fP option, that passes a struct curl_forms array pointer as
@@ -154,6 +170,13 @@ the \fICURLOPT_HTTPPOST(3)\fP option), you must not free the list until after
 you've called \fIcurl_easy_cleanup(3)\fP for the curl handle.
 
 See example below.
+.SH AVAILABILITY
+Deprecated in 7.56.0. Before this release, field names were allowed to
+contain zero-valued bytes. The pseudo-filename "-" to read stdin is
+discouraged although still supported, but data is not read before being
+actually sent: the effective data size can then not be automatically
+determined, resulting in a chunked encoding transfer. Backslashes and
+double quotes in field and file names are now escaped before transmission.
 .SH RETURN VALUE
 0 means everything was ok, non-zero means an error occurred corresponding
 to a CURL_FORMADD_* constant defined in
@@ -239,5 +262,6 @@ to a CURL_FORMADD_* constant defined in
  curl_easy_setopt(curl, CURLOPT_HTTPPOST, post);
 
 .SH "SEE ALSO"
-.BR curl_easy_setopt "(3), "
-.BR curl_formfree "(3)"
+.BR curl_easy_setopt "(3),"
+.BR curl_formfree "(3),"
+.BR curl_mime_init "(3)"

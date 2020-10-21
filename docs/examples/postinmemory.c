@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,6 +19,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+/* <DESC>
+ * Make a HTTP POST with data from memory and receive response in memory.
+ * </DESC>
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,13 +39,14 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
 
-  mem->memory = realloc(mem->memory, mem->size + realsize + 1);
-  if(mem->memory == NULL) {
+  char *ptr = realloc(mem->memory, mem->size + realsize + 1);
+  if(!ptr) {
     /* out of memory! */
     printf("not enough memory (realloc returned NULL)\n");
     return 0;
   }
 
+  mem->memory = ptr;
   memcpy(&(mem->memory[mem->size]), contents, realsize);
   mem->size += realsize;
   mem->memory[mem->size] = 0;
@@ -54,7 +59,7 @@ int main(void)
   CURL *curl;
   CURLcode res;
   struct MemoryStruct chunk;
-  static const char *postthis="Field=1&Field=2&Field=3";
+  static const char *postthis = "Field=1&Field=2&Field=3";
 
   chunk.memory = malloc(1);  /* will be grown as needed by realloc above */
   chunk.size = 0;    /* no data at this point */
@@ -62,8 +67,7 @@ int main(void)
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(curl) {
-
-    curl_easy_setopt(curl, CURLOPT_URL, "http://www.example.org/");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.org/");
 
     /* send all data to this function  */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
@@ -100,11 +104,9 @@ int main(void)
 
     /* always cleanup */
     curl_easy_cleanup(curl);
-
-    free(chunk.memory);
-
-    /* we're done with libcurl, so clean it up */
-    curl_global_cleanup();
   }
+
+  free(chunk.memory);
+  curl_global_cleanup();
   return 0;
 }

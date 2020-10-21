@@ -8,7 +8,7 @@ CURLOPT_URL
 </info>
 
 # Server-side
-<reply name="1">
+<reply>
 <data>
 HTTP/1.1 200 OK
 Content-Length: 6
@@ -33,12 +33,10 @@ http://%HOSTIP:%HTTPPORT/1109#test
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1109 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2009 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -47,14 +47,17 @@ typedef enum {
   SMTP_LAST         /* never used */
 } smtpstate;
 
-/* This SMTP struct is used in the SessionHandle. All SMTP data that is
+/* This SMTP struct is used in the Curl_easy. All SMTP data that is
    connection-oriented must be in smtp_conn to properly deal with the fact that
-   perhaps the SessionHandle is changed between the times the connection is
+   perhaps the Curl_easy is changed between the times the connection is
    used. */
 struct SMTP {
   curl_pp_transfer transfer;
   char *custom;            /* Custom Request */
   struct curl_slist *rcpt; /* Recipient list */
+  bool rcpt_had_ok;        /* Whether any of RCPT TO commands (depends on
+                              total number of recipients) succeeded so far */
+  int rcpt_last_error;     /* The last error received for RCPT TO command */
   size_t eob;              /* Number of bytes of the EOB (End Of Body) that
                               have been received so far */
   bool trailing_crlf;      /* Specifies if the tailing CRLF is present */
@@ -71,6 +74,8 @@ struct smtp_conn {
   bool tls_supported;      /* StartTLS capability supported by server */
   bool size_supported;     /* If server supports SIZE extension according to
                               RFC 1870 */
+  bool utf8_supported;     /* If server supports SMTPUTF8 extension according
+                              to RFC 6531 */
   bool auth_supported;     /* AUTH capability supported by server */
 };
 
