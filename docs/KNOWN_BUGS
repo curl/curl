@@ -53,11 +53,14 @@ problems may have been fixed or changed somewhat since this was written!
  5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
  5.4 Build with statically built dependency
  5.5 can't handle Unicode arguments in non-Unicode builds on Windows
- 5.6 cmake support gaps
+ 5.6 cmake: use correct SONAME for shared library
  5.7 Visual Studio project gaps
  5.8 configure finding libs in wrong directory
  5.9 Utilize Requires.private directives in libcurl.pc
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
+ 5.12 cmake: support build with GnuTLS
+ 5.13 cmake: unusable tool_hugehelp.c with MinGW
+ 5.14 cmake: build docs/curl.1
 
  6. Authentication
  6.1 NTLM authentication and unicode
@@ -416,21 +419,12 @@ problems may have been fixed or changed somewhat since this was written!
   https://curl.haxx.se/bug/?i=731
   https://curl.haxx.se/bug/?i=3747
 
-5.6 cmake support gaps
+5.6 cmake: use correct SONAME for shared library
 
- The cmake build setup lacks several features that the autoconf build
- offers. This includes:
+ The autotools build sets the SONAME properly according to VERSIONINFO in
+ lib/Makefile.am and so should cmake to make comparable build.
 
-  - use of correct soname for the shared library build
-
-  - support for several TLS backends are missing
-
-  - the unit tests cause link failures in regular non-static builds
-
-  - no nghttp2 check
-
-  - unusable tool_hugehelp.c with MinGW, see
-    https://github.com/curl/curl/issues/3125
+ See https://github.com/curl/curl/pull/5935
 
 5.7 Visual Studio project gaps
 
@@ -472,6 +466,18 @@ problems may have been fixed or changed somewhat since this was written!
  ... unless you also pass --with-gssapi-libs
 
  https://github.com/curl/curl/issues/3841
+
+5.12 cmake: support build with GnuTLS
+
+5.13 cmake: unusable tool_hugehelp.c with MinGW
+
+ see https://github.com/curl/curl/issues/3125
+
+5.14 cmake: build docs/curl.1
+
+ The cmake build doesn't create the docs/curl.1 file and therefor must rely on
+ it being there already. This makes the --manual option not work and test
+ cases like 1139 can't function.
 
 6. Authentication
 
