@@ -415,7 +415,7 @@ static curl_version_info_data version_info = {
 #if defined(HAVE_ZSTD)
   | CURL_VERSION_ZSTD
 #endif
-#if defined(USE_ALTSVC)
+#ifndef CURL_DISABLE_ALTSVC
   | CURL_VERSION_ALTSVC
 #endif
   ,

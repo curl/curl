@@ -101,7 +101,7 @@ jobs:
     before_install:
     - eval "$(gimme stable)"; gimme --list  # Install latest Go (for boringssl)
   - env:
-    - T=novalgrind QUICHE="yes" C="--with-ssl=$HOME/quiche/deps/boringssl/src --with-quiche=$HOME/quiche/target/release --enable-alt-svc" LD_LIBRARY_PATH=$HOME/quiche/target/release:/usr/local/lib
+    - T=novalgrind QUICHE="yes" C="--with-ssl=$HOME/quiche/deps/boringssl/src --with-quiche=$HOME/quiche/target/release" LD_LIBRARY_PATH=$HOME/quiche/target/release:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -115,7 +115,7 @@ jobs:
     - T=novalgrind LIBRESSL=yes C="--with-ssl=$HOME/libressl" LD_LIBRARY_PATH=/home/travis/libressl/lib:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
   - env:
-    - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild --enable-alt-svc" NOTESTS=
+    - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild" NOTESTS=
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -126,7 +126,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=novalgrind NGTCP2=yes GNUTLS=yes C="PKG_CONFIG_PATH=$HOME/ngbuild --without-ssl --with-gnutls=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild --enable-alt-svc" NOTESTS=
+    - T=novalgrind NGTCP2=yes GNUTLS=yes C="PKG_CONFIG_PATH=$HOME/ngbuild --without-ssl --with-gnutls=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild" NOTESTS=
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -192,7 +192,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug C="--enable-alt-svc"
+    - T=debug C="--disable-alt-svc"
     - *clang
     compiler: clang
     addons:
@@ -346,7 +346,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug C="--enable-alt-svc"
+    - T=debug C=""
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     arch: arm64
     addons:
@@ -364,7 +364,7 @@ jobs:
         - zlib1g-dev
 
   - env:
-    - T=debug C="--enable-alt-svc"
+    - T=debug C=""
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     arch: ppc64le
     addons:
@@ -382,7 +382,7 @@ jobs:
         - zlib1g-dev
 
   - env:
-    - T=debug C="--enable-alt-svc"
+    - T=debug C=""
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     arch: s390x
     addons:

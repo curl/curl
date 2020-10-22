@@ -2518,7 +2518,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-#ifdef USE_ALTSVC
+#ifndef CURL_DISABLE_ALTSVC
   if(conn->bits.altused && !Curl_checkheaders(conn, "Alt-Used")) {
     altused = aprintf("Alt-Used: %s:%d\r\n",
                       conn->conn_to_host.name, conn->conn_to_port);
@@ -3992,7 +3992,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         }
       }
     }
-#ifdef USE_ALTSVC
+#ifndef CURL_DISABLE_ALTSVC
     /* If enabled, the header is incoming and this is over HTTPS */
     else if(data->asi && checkprefix("Alt-Svc:", headp) &&
             ((conn->handler->flags & PROTOPT_SSL) ||

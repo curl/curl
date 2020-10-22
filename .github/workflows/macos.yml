@@ -52,7 +52,7 @@ jobs:
           macosx-version-min: 10.9
         - name: torture
           install: nghttp2 openssl
-          configure: --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
+          configure: --enable-debug --disable-shared --disable-threaded-resolver
           tflags: -n -t --shallow=25 !FTP
           macosx-version-min: 10.9
         - name: macOS 10.15
