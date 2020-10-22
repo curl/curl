@@ -87,7 +87,7 @@ Dependencies
  - OpenSSL      0.9.7
  - GnuTLS       3.1.10
  - zlib         1.1.4
- - libssh2      0.16
+ - libssh2      1.0
  - c-ares       1.6.0
  - libidn2      2.0.0
  - wolfSSL      2.0.0

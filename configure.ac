@@ -3062,7 +3062,8 @@ if test X"$OPT_LIBSSH2" != Xno; then
   CPPFLAGS="$CPPFLAGS $CPP_SSH2"
   LIBS="$LIB_SSH2 $LIBS"
 
-  AC_CHECK_LIB(ssh2, libssh2_channel_open_ex)
+  dnl check for function added in libssh2 version 1.0
+  AC_CHECK_LIB(ssh2, libssh2_session_block_directions)
 
   AC_CHECK_HEADERS(libssh2.h,
     curl_ssh_msg="enabled (libSSH2)"

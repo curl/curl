@@ -2887,7 +2887,6 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 static int ssh_perform_getsock(const struct connectdata *conn,
                                curl_socket_t *sock)
 {
-#ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTION
   int bitmap = GETSOCK_BLANK;
 
   sock[0] = conn->sock[FIRSTSOCKET];
@@ -2899,11 +2898,6 @@ static int ssh_perform_getsock(const struct connectdata *conn,
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
 
   return bitmap;
-#else
-  /* if we don't know the direction we can use the generic *_getsock()
-     function even for the protocol_connect and doing states */
-  return Curl_single_getsock(conn, sock);
-#endif
 }
 
 /* Generic function called by the multi interface to figure out what socket(s)
@@ -2911,20 +2905,11 @@ static int ssh_perform_getsock(const struct connectdata *conn,
 static int ssh_getsock(struct connectdata *conn,
                        curl_socket_t *sock)
 {
-#ifndef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTION
-  (void)conn;
-  (void)sock;
-  /* if we don't know any direction we can just play along as we used to and
-     not provide any sensible info */
-  return GETSOCK_BLANK;
-#else
   /* if we know the direction we can use the generic *_getsock() function even
      for the protocol_connect and doing states */
   return ssh_perform_getsock(conn, sock);
-#endif
 }
 
-#ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTION
 /*
  * When one of the libssh2 functions has returned LIBSSH2_ERROR_EAGAIN this
  * function is used to figure out in what direction and stores this info so
@@ -2949,10 +2934,6 @@ static void ssh_block2waitfor(struct connectdata *conn, bool block)
        the original set */
     conn->waitfor = sshc->orig_waitfor;
 }
-#else
-  /* no libssh2 directional support so we simply don't know */
-#define ssh_block2waitfor(x,y) Curl_nop_stmt
-#endif
 
 /* called repeatedly until done from multi.c */
 static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done)
@@ -3001,7 +2982,6 @@ static CURLcode ssh_block_statemach(struct connectdata *conn,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-#ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTION
     if(block) {
       int dir = libssh2_session_block_directions(sshc->ssh_session);
       curl_socket_t sock = conn->sock[FIRSTSOCKET];
@@ -3015,8 +2995,6 @@ static CURLcode ssh_block_statemach(struct connectdata *conn,
       (void)Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write,
                               left>1000?1000:left);
     }
-#endif
-
   }
 
   return result;
