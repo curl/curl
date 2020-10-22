@@ -87,7 +87,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "!1139 !1501"
+        DISABLED_TESTS: "~571 !1139 !1501 "
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
@@ -100,7 +100,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "!1139 !1501"
+        DISABLED_TESTS: "~571 !1139 !1501"
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
