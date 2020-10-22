@@ -87,7 +87,7 @@ static const struct category_descriptors categories[] = {
   {"imap", "IMAP protocol options", CURLHELP_IMAP},
   /* important is left out because it is the default help page */
   {"misc", "Options that don't fit into any other category", CURLHELP_MISC},
-  {"output", "The output of curl", CURLHELP_OUTPUT},
+  {"output", "Filesystem output", CURLHELP_OUTPUT},
   {"pop3", "POP3 protocol options", CURLHELP_POP3},
   {"post", "HTTP Post specific options", CURLHELP_POST},
   {"proxy", "All options related to proxies", CURLHELP_PROXY},
