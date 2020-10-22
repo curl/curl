@@ -1382,6 +1382,7 @@ _add_if("HTTP2"         USE_NGHTTP2)
 _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
 _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 _add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS OR USE_NSS))
+_add_if("unicode"       ENABLE_UNICODE)
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
 
