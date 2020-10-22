@@ -59,7 +59,22 @@ jobs:
           install: nghttp2 libmetalink libssh2
           configure: --enable-debug --disable-ldap
           macosx-version-min: 10.15
+
     steps:
+    - name: Get Date
+      id: get-date
+      run: |
+        echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+      shell: bash
+
+    - name: Cache homebrew
+      uses: actions/cache@v2
+      with:
+        path: |
+          /usr/local/Homebrew
+          ~/Library/Caches/Homebrew
+        key: ${{ runner.os }}-homebrew-${{ steps.get-date.outputs.date }}
+
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
 
