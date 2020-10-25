@@ -176,8 +176,11 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_rtmp_msg="no      (--with-librtmp)"
   curl_mtlnk_msg="no      (--with-libmetalink)"
     curl_psl_msg="no      (--with-libpsl)"
-
+ curl_altsvc_msg="enabled";
     ssl_backends=
+
+
+enable_altsvc="yes"
 
 dnl
 dnl Save some initial values the user might have provided
@@ -396,6 +399,10 @@ AC_HELP_STRING([--disable-http],[Disable HTTP support]),
        AC_SUBST(CURL_DISABLE_HTTP, [1])
        AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
        AC_SUBST(CURL_DISABLE_RTSP, [1])
+       dnl toggle off alt-svc too when HTTP is disabled
+       AC_DEFINE(CURL_DISABLE_ALTSVC, 1, [disable alt-svc])
+       curl_altsvc_msg="no";
+       enable_altsvc="no"
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -4864,7 +4871,6 @@ AC_HELP_STRING([--disable-get-easy-options],[Disable curl_easy_options]),
 dnl ************************************************************
 dnl switch on/off alt-svc
 dnl
-curl_altsvc_msg="no      (--enable-alt-svc)";
 AC_MSG_CHECKING([whether to support alt-svc])
 AC_ARG_ENABLE(alt-svc,
 AC_HELP_STRING([--enable-alt-svc],[Enable alt-svc support])
@@ -4872,19 +4878,15 @@ AC_HELP_STRING([--disable-alt-svc],[Disable alt-svc support]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_ALTSVC, 1, [disable alt-svc])
+       curl_altsvc_msg="no";
+       enable_altsvc="no"
        ;;
   *) AC_MSG_RESULT(yes)
-       curl_altsvc_msg="enabled";
-       enable_altsvc="yes"
        ;;
   esac ],
        AC_MSG_RESULT(no)
 )
-
-if test "$enable_altsvc" = "yes"; then
-  AC_DEFINE(USE_ALTSVC, 1, [to enable alt-svc])
-  experimental="$experimental alt-svc"
-fi
 
 dnl *************************************************************
 dnl check whether ECH support, if desired, is actually available

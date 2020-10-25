@@ -25,7 +25,7 @@
  */
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_ALTSVC)
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_ALTSVC)
 #include <curl/curl.h>
 #include "urldata.h"
 #include "altsvc.h"
@@ -457,6 +457,9 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   struct altsvc *as;
   unsigned short dstport = srcport; /* the same by default */
   CURLcode result = getalnum(&p, alpnbuf, sizeof(alpnbuf));
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)data;
+#endif
   if(result) {
     infof(data, "Excessive alt-svc header, ignoring...\n");
     return CURLE_OK;
@@ -642,4 +645,4 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
   return FALSE;
 }
 
-#endif /* CURL_DISABLE_HTTP || USE_ALTSVC */
+#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_ALTSVC */

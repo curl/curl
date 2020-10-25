@@ -1899,7 +1899,7 @@ struct Curl_easy {
                                   NOTE that the 'cookie' field in the
                                   UserDefined struct defines if the "engine"
                                   is to be used or not. */
-#ifdef USE_ALTSVC
+#ifndef CURL_DISABLE_ALTSVC
   struct altsvcinfo *asi;      /* the alt-svc cache */
 #endif
   struct Progress progress;    /* for all the progress meter data */

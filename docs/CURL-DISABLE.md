@@ -1,5 +1,9 @@
 # Code defines to disable features and protocols
 
+## CURL_DISABLE_ALTSVC
+
+Disable support for Alt-Svc: HTTP headers.
+
 ## CURL_DISABLE_COOKIES
 
 Disable support for HTTP cookies.

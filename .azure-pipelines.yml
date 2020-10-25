@@ -73,7 +73,7 @@ stages:
         torture:
           name: torture
           install: libnghttp2-dev
-          configure: --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
+          configure: --enable-debug --disable-shared --disable-threaded-resolver
           tests: -n -t --shallow=40 !FTP
     steps:
     - script: sudo apt-get update && sudo apt-get install -y stunnel4 python-impacket libzstd-dev libbrotli-dev $(install)

@@ -2839,7 +2839,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.trailer_data = va_arg(param, void *);
 #endif
     break;
-#ifdef USE_ALTSVC
+#ifndef CURL_DISABLE_ALTSVC
   case CURLOPT_ALTSVC:
     if(!data->asi) {
       data->asi = Curl_altsvc_init();

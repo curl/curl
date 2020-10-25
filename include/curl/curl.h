@@ -949,8 +949,6 @@ typedef enum {
 #define CURLHEADER_SEPARATE (1<<0)
 
 /* CURLALTSVC_* are bits for the CURLOPT_ALTSVC_CTRL option */
-#define CURLALTSVC_IMMEDIATELY  (1<<0)
-
 #define CURLALTSVC_READONLYFILE (1<<2)
 #define CURLALTSVC_H1           (1<<3)
 #define CURLALTSVC_H2           (1<<4)

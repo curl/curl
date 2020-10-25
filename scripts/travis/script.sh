@@ -25,7 +25,7 @@ set -eo pipefail
 ./buildconf
 
 if [ "$T" = "coverage" ]; then
-  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --enable-alt-svc --with-libssh2
+  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2
   make
   make TFLAGS=-n test-nonflaky
   make "TFLAGS=-n -e" test-nonflaky
@@ -36,7 +36,7 @@ if [ "$T" = "coverage" ]; then
 fi
 
 if [ "$T" = "torture" ]; then
-  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --enable-alt-svc --with-libssh2
+  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2
   make
   make TFLAGS=-n test-nonflaky
   make "TFLAGS=-n -e" test-nonflaky
