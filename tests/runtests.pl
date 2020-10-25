@@ -77,6 +77,9 @@ use warnings;
 use Cwd;
 use Digest::MD5 qw(md5);
 use MIME::Base64;
+use Data::Dumper qw(Dumper);
+
+print Dumper \@ARGV;
 
 # Subs imported from serverhelp module
 use serverhelp qw(
