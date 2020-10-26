@@ -99,6 +99,15 @@ getting many files from the same server will not do multiple connects /
 handshakes. This improves speed. Of course this is only done on files
 specified on a single command line and cannot be used between separate curl
 invokes.
+.SH OUTPUT
+If not told otherwise, curl writes the received data to stdout. It can be
+instructed to instead save that data into a local file, using the --output or
+--remote-name options. If curl is given multiple URLs to transfer on the
+command line, it similarly needs multiple options for where to save them.
+
+curl does not parse or otherwise "understand" the content it gets or writes as
+output. It does no encoding or decoding, unless explictly asked so with
+dedicated command line options.
 .SH PROTOCOLS
 curl supports numerous protocols, or put in URL terms: schemes. Your
 particular build may not support them all.
