@@ -182,6 +182,12 @@ struct ssh_conn {
   LIBSSH2_SFTP *sftp_session;   /* SFTP handle */
   LIBSSH2_SFTP_HANDLE *sftp_handle;
 
+#ifndef CURL_DISABLE_PROXY
+  /* for HTTPS proxy storage */
+  Curl_recv *tls_recv;
+  Curl_send *tls_send;
+#endif
+
 #ifdef HAVE_LIBSSH2_AGENT_API
   LIBSSH2_AGENT *ssh_agent;     /* proxy to ssh-agent/pageant */
   struct libssh2_agent_publickey *sshagent_identity,
