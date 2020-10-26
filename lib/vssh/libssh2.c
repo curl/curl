@@ -3017,6 +3017,7 @@ static CURLcode ssh_setup_connection(struct connectdata *conn)
 static Curl_recv scp_recv, sftp_recv;
 static Curl_send scp_send, sftp_send;
 
+#ifndef CURL_DISABLE_PROXY
 static ssize_t ssh_tls_recv(libssh2_socket_t sock, void *buffer,
                             size_t length, int flags, void **abstract)
 {
@@ -3052,6 +3053,7 @@ static ssize_t ssh_tls_send(libssh2_socket_t sock, const void *buffer,
     Curl_debug(conn->data, CURLINFO_DATA_OUT, (char *)buffer, (size_t)nwrite);
   return nwrite;
 }
+#endif
 
 /*
  * Curl_ssh_connect() gets called from Curl_protocol_connect() to allow us to
@@ -3094,6 +3096,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
     return CURLE_FAILED_INIT;
   }
 
+#ifndef CURL_DISABLE_PROXY
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS) {
     /*
      * This crazy union dance is here to avoid assigning a void pointer a
@@ -3132,7 +3135,9 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
     libssh2_session_callback_set(ssh->ssh_session,
                                  LIBSSH2_CALLBACK_SEND, sshsend.sendp);
   }
-  else if(conn->handler->protocol & CURLPROTO_SCP) {
+  else
+#endif /* CURL_DISABLE_PROXY */
+  if(conn->handler->protocol & CURLPROTO_SCP) {
     conn->recv[FIRSTSOCKET] = scp_recv;
     conn->send[FIRSTSOCKET] = scp_send;
   }
