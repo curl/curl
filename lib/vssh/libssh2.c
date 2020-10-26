@@ -3094,6 +3094,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
     return CURLE_FAILED_INIT;
   }
 
+#ifndef CURL_DISABLE_PROXY
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS) {
     /*
      * This crazy union dance is here to avoid assigning a void pointer a
@@ -3132,7 +3133,9 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
     libssh2_session_callback_set(ssh->ssh_session,
                                  LIBSSH2_CALLBACK_SEND, sshsend.sendp);
   }
-  else if(conn->handler->protocol & CURLPROTO_SCP) {
+  else
+#endif /* CURL_DISABLE_PROXY */
+  if(conn->handler->protocol & CURLPROTO_SCP) {
     conn->recv[FIRSTSOCKET] = scp_recv;
     conn->send[FIRSTSOCKET] = scp_send;
   }
