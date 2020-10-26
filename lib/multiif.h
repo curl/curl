@@ -43,6 +43,8 @@ CURLcode Curl_preconnect(struct Curl_easy *data);
    socket and connection hashes */
 struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize);
 
+CURLMcode Curl_create_wakeup_socket(struct Curl_multi *multi);
+
 /* the write bits start at bit 16 for the *getsock() bitmap */
 #define GETSOCK_WRITEBITSTART 16
 

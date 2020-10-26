@@ -380,17 +380,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
     goto error;
 #else
 #ifdef ENABLE_WAKEUP
-  if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, multi->wakeup_pair) < 0) {
-    multi->wakeup_pair[0] = CURL_SOCKET_BAD;
-    multi->wakeup_pair[1] = CURL_SOCKET_BAD;
-  }
-  else if(curlx_nonblock(multi->wakeup_pair[0], TRUE) < 0 ||
-          curlx_nonblock(multi->wakeup_pair[1], TRUE) < 0) {
-    sclose(multi->wakeup_pair[0]);
-    sclose(multi->wakeup_pair[1]);
-    multi->wakeup_pair[0] = CURL_SOCKET_BAD;
-    multi->wakeup_pair[1] = CURL_SOCKET_BAD;
-  }
+  Curl_create_wakeup_socket(multi);
 #endif
 #endif
 
@@ -406,6 +396,29 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 
   free(multi);
   return NULL;
+}
+
+CURLMcode Curl_create_wakeup_socket(struct Curl_multi *multi)
+{
+#ifdef ENABLE_WAKEUP
+    if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, multi->wakeup_pair) < 0) {
+      multi->wakeup_pair[0] = CURL_SOCKET_BAD;
+      multi->wakeup_pair[1] = CURL_SOCKET_BAD;
+      
+      return CURLM_INTERNAL_ERROR;
+    }
+    else if(curlx_nonblock(multi->wakeup_pair[0], TRUE) < 0 ||
+            curlx_nonblock(multi->wakeup_pair[1], TRUE) < 0) {
+      sclose(multi->wakeup_pair[0]);
+      sclose(multi->wakeup_pair[1]);
+      multi->wakeup_pair[0] = CURL_SOCKET_BAD;
+      multi->wakeup_pair[1] = CURL_SOCKET_BAD;
+      
+      return CURLM_INTERNAL_ERROR;
+    }
+#endif
+    
+    return CURLM_OK;
 }
 
 struct Curl_multi *curl_multi_init(void)
@@ -1373,6 +1386,17 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
             if(nread <= 0) {
               if(nread < 0 && EINTR == SOCKERRNO)
                 continue;
+                
+              if(SOCKERRNO != EAGAIN && SOCKERRNO != EWOULDBLOCK)
+              {
+                /* unexpected error: try (once) to recreate the socket;
+                   set its FDs to CURL_SOCKET_BAD on failure so we don't
+                   end up repeatedly trying to read data from it */
+                sclose(multi->wakeup_pair[0]);
+                sclose(multi->wakeup_pair[1]);
+                Curl_create_wakeup_socket(multi);
+              }
+              
               break;
             }
           }
