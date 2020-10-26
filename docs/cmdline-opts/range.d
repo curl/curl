@@ -29,7 +29,7 @@ specifies two separate 100-byte ranges(*) (HTTP)
 .RE
 .IP
 (*) = NOTE that this will cause the server to reply with a multipart
-response, which will be retruned as-is by curl! Parsing or otherwise
+response, which will be returned as-is by curl! Parsing or otherwise
 transforming this response is the responsibility of the caller.
 
 Only digit characters (0-9) are valid in the 'start' and 'stop' fields of the
