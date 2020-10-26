@@ -3024,9 +3024,15 @@ static ssize_t ssh_tls_recv(libssh2_socket_t sock, void *buffer,
   struct connectdata *conn = (struct connectdata *)*abstract;
   ssize_t nread;
   CURLcode result;
+  Curl_recv *backup = conn->recv[0];
+  struct ssh_conn *ssh = &conn->proto.sshc;
   (void)flags;
 
+  /* swap in the TLS reader function for this call only, and then swap back
+     the SSH one again */
+  conn->recv[0] = ssh->tls_recv;
   result = Curl_read(conn, sock, buffer, length, &nread);
+  conn->recv[0] = backup;
   if(result == CURLE_AGAIN)
     return -EAGAIN; /* magic return code for libssh2 */
   else if(result)
@@ -3042,9 +3048,15 @@ static ssize_t ssh_tls_send(libssh2_socket_t sock, const void *buffer,
   struct connectdata *conn = (struct connectdata *)*abstract;
   ssize_t nwrite;
   CURLcode result;
+  Curl_send *backup = conn->send[0];
+  struct ssh_conn *ssh = &conn->proto.sshc;
   (void)flags;
 
+  /* swap in the TLS writer function for this call only, and then swap back
+     the SSH one again */
+  conn->send[0] = ssh->tls_send;
   result = Curl_write(conn, sock, buffer, length, &nwrite);
+  conn->send[0] = backup;
   if(result == CURLE_AGAIN)
     return -EAGAIN; /* magic return code for libssh2 */
   else if(result)
@@ -3134,8 +3146,13 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
                                  LIBSSH2_CALLBACK_RECV, sshrecv.recvp);
     libssh2_session_callback_set(ssh->ssh_session,
                                  LIBSSH2_CALLBACK_SEND, sshsend.sendp);
+
+    /* Store the underlying TLS recv/send function pointers to be used when
+       reading from the proxy */
+    ssh->tls_recv = conn->recv[FIRSTSOCKET];
+    ssh->tls_send = conn->send[FIRSTSOCKET];
   }
-  else
+
 #endif /* CURL_DISABLE_PROXY */
   if(conn->handler->protocol & CURLPROTO_SCP) {
     conn->recv[FIRSTSOCKET] = scp_recv;
