@@ -44,7 +44,7 @@ jobs:
           macosx-version-min: 10.8
         - name: OpenSSL metalink
           install: nghttp2 openssl@1.1 libmetalink
-          configure: --enable-debug --with-ssl=/usr/local/opt/openssl --with-libmetalink
+          configure: --enable-debug --with-ssl=/usr/local/opt/openssl@1.1 --with-libmetalink
           macosx-version-min: 10.9
         - name: LibreSSL metalink
           install: nghttp2 libressl libmetalink
@@ -105,7 +105,7 @@ jobs:
         build:
         - name: OpenSSL
           install: nghttp2 openssl@1.1
-          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1 -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
         - name: LibreSSL
           install: nghttp2 libressl
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
