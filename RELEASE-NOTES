@@ -12,8 +12,14 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o alt-svc: enable (in the build) by default [20]
  o checksrc: warn on empty line before open brace [13]
+ o CI/appveyor: disable test 571 in two cmake builds [22]
  o CI/azure: improve on flakiness by avoiding libtool wrappers [7]
+ o CI/travis: add brotli and zstd to the libssh2 build [27]
+ o cmake: call the feature unixsockets without dash [26]
+ o cmake: set the unicode feature in curl-config on Windows [23]
+ o cmake: store IDN2 information in curl_config.h [25]
  o connect: repair build without ipv6 availability [19]
  o curl_url_set.3: fix typo in the RETURN VALUE section [3]
  o CURLOPT_NOBODY.3: fix typo [6]
@@ -21,14 +27,18 @@ This release includes the following bugfixes:
  o CURLOPT_URL.3: clarify SCP/SFTP URLs are for uploads as well
  o http3: fix two build errors, silence warnings [10]
  o libcurl.pc: make it relocatable [15]
+ o libssh2: fix build with disabled proxy support [17]
+ o libssh2: require version 1.0 or later [24]
  o Makefile.m32: add support for HTTP/3 via ngtcp2+nghttp3 [11]
  o openssl: acknowledge SRP disabling in configure properly [9]
  o os400: Sync libcurl API options [5]
  o packages/OS400: make the source code-style compliant [4]
  o runtests: return error if no tests ran [16]
+ o runtests: revert the mistaken edit of $CURL
  o src/tool_filetime: disable -Wformat on mingw for this file [2]
  o strerror: use 'const' as the string should never be modified [18]
  o test122[12]: remove these two tests [1]
+ o tool_help: make "output" description less confusing [21]
  o tool_operate: fix compiler warning when --libcurl is disabled [12]
  o urlapi: URL encode a '+' in the query part [14]
 
@@ -39,10 +49,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  b9a1 on github, Basuke Suzuki, Cristian Morales Vega, Daniel Stenberg,
-  Dietmar Hauser, Jon Rumsey, Marc Hörsken, Philipp Klaus Krause, Ray Satiro,
-  Tom G. Christensen, Viktor Szakats,
-  (11 contributors)
+  b9a1 on github, Baruch Siach, Basuke Suzuki, Cristian Morales Vega,
+  Daniel Stenberg, Dietmar Hauser, Emil Engler, Jon Rumsey, Marcel Raad,
+  Marc Hörsken, Philipp Klaus Krause, Ray Satiro, Tom G. Christensen,
+  Viktor Szakats,
+  (14 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -64,5 +75,14 @@ References to bug reports and discussions on issues:
  [14] = https://curl.haxx.se/bug/?i=6086
  [15] = https://curl.haxx.se/bug/?i=6061
  [16] = https://curl.haxx.se/bug/?i=6053
+ [17] = https://curl.haxx.se/bug/?i=6125
  [18] = https://curl.haxx.se/bug/?i=6068
  [19] = https://curl.haxx.se/bug/?i=6069
+ [20] = https://curl.haxx.se/bug/?i=5868
+ [21] = https://curl.haxx.se/bug/?i=6118
+ [22] = https://curl.haxx.se/bug/?i=6119
+ [23] = https://curl.haxx.se/bug/?i=6117
+ [24] = https://curl.haxx.se/bug/?i=6116
+ [25] = https://curl.haxx.se/bug/?i=6108
+ [26] = https://curl.haxx.se/bug/?i=6108
+ [27] = https://curl.haxx.se/bug/?i=6105
