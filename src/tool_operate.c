@@ -2174,7 +2174,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
 
     result = pre_transfer(global, per);
     if(result)
-      break;
+      return result;
 
     /* parallel connect means that we don't set PIPEWAIT since pipewait
        will make libcurl prefer multiplexing */
