@@ -65,7 +65,6 @@ content-length: 6
 content-type: text/html
 funny-head: yesyes
 alt-svc: h2=":%HTTP2PORT", ma=315360000; persist=0
-server: nghttpx
 via: 1.1 nghttpx
 
 -foo-
@@ -75,12 +74,12 @@ content-length: 6
 content-type: text/html
 funny-head: yesyes
 alt-svc: h2=":%HTTP2PORT", ma=315360000; persist=0
-server: nghttpx
 via: 1.1 nghttpx
 
 -foo-
 </stdout>
 <stripfile>
+s/^server: nghttpx.*\r?\n//
 # strip out the (dynamic) expire date from the file so that the rest
 # matches
 s/\"2([^\"]*)\"/TIMESTAMP/
