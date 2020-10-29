@@ -1767,19 +1767,13 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
   case "$OPT_SSL" in
   yes)
     dnl --with-ssl (without path) used
-    if test x$cross_compiling != xyes; then
-      dnl only do pkg-config magic when not cross-compiling
-      PKGTEST="yes"
-    fi
+    PKGTEST="yes"
     PREFIX_OPENSSL=/usr/local/ssl
     LIB_OPENSSL="$PREFIX_OPENSSL/lib$libsuff"
     ;;
   off)
     dnl no --with-ssl option given, just check default places
-    if test x$cross_compiling != xyes; then
-      dnl only do pkg-config magic when not cross-compiling
-      PKGTEST="yes"
-    fi
+    PKGTEST="yes"
     PREFIX_OPENSSL=
     ;;
   *)
