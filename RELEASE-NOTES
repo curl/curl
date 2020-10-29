@@ -4,7 +4,7 @@ curl and libcurl 7.73.1
  Command line options:         234
  curl_easy_setopt() options:   278
  Public functions in libcurl:  85
- Contributors:                 2275
+ Contributors:                 2277
 
 This release includes the following changes:
 
@@ -18,27 +18,36 @@ This release includes the following bugfixes:
  o CI/azure: improve on flakiness by avoiding libtool wrappers [7]
  o CI/travis: add brotli and zstd to the libssh2 build [27]
  o cmake: call the feature unixsockets without dash [26]
+ o cmake: make BUILD_TESTING dependent option [30]
  o cmake: set the unicode feature in curl-config on Windows [23]
  o cmake: store IDN2 information in curl_config.h [25]
+ o configure: use pkgconfig to find openSSL when cross-compiling [28]
  o connect: repair build without ipv6 availability [19]
+ o curl.1: add an "OUTPUT" section at the top of the manpage [32]
  o curl_url_set.3: fix typo in the RETURN VALUE section [3]
+ o CURLOPT_DNS_USE_GLOBAL_CACHE.3: fix typo [34]
  o CURLOPT_NOBODY.3: fix typo [6]
  o CURLOPT_TCP_NODELAY.3: fix comment in example code [8]
  o CURLOPT_URL.3: clarify SCP/SFTP URLs are for uploads as well
  o http3: fix two build errors, silence warnings [10]
  o libcurl.pc: make it relocatable [15]
  o libssh2: fix build with disabled proxy support [17]
+ o libssh2: fix transport over HTTPS proxy [31]
  o libssh2: require version 1.0 or later [24]
  o Makefile.m32: add support for HTTP/3 via ngtcp2+nghttp3 [11]
  o openssl: acknowledge SRP disabling in configure properly [9]
  o os400: Sync libcurl API options [5]
  o packages/OS400: make the source code-style compliant [4]
+ o range.d: clarify that curl will not parse multipart responses [36]
+ o range.d: fix typo
  o runtests: return error if no tests ran [16]
  o runtests: revert the mistaken edit of $CURL
+ o runtests: show keywords when no tests ran [33]
  o src/tool_filetime: disable -Wformat on mingw for this file [2]
  o strerror: use 'const' as the string should never be modified [18]
  o test122[12]: remove these two tests [1]
  o tool_help: make "output" description less confusing [21]
+ o tool_operate: bail out proper on errors during parallel transfers [29]
  o tool_operate: fix compiler warning when --libcurl is disabled [12]
  o urlapi: URL encode a '+' in the query part [14]
 
@@ -49,11 +58,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  b9a1 on github, Baruch Siach, Basuke Suzuki, Cristian Morales Vega,
-  Daniel Stenberg, Dietmar Hauser, Emil Engler, Jon Rumsey, Marcel Raad,
-  Marc Hörsken, Philipp Klaus Krause, Ray Satiro, Tom G. Christensen,
-  Viktor Szakats,
-  (14 contributors)
+  b9a1 on github, Baruch Siach, Basuke Suzuki, BrumBrum on hackerone,
+  Cristian Morales Vega, Daniel Stenberg, Dietmar Hauser, Emil Engler,
+  Jon Rumsey, José Joaquín Atria, Marcel Raad, Marc Hörsken,
+  Philipp Klaus Krause, Ray Satiro, Rui LIU, Sergei Nikulov,
+  Tom G. Christensen, Viktor Szakats,
+  (18 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -86,3 +96,11 @@ References to bug reports and discussions on issues:
  [25] = https://curl.haxx.se/bug/?i=6108
  [26] = https://curl.haxx.se/bug/?i=6108
  [27] = https://curl.haxx.se/bug/?i=6105
+ [28] = https://curl.haxx.se/bug/?i=6145
+ [29] = https://curl.haxx.se/bug/?i=6141
+ [30] = https://curl.haxx.se/bug/?i=6072
+ [31] = https://curl.haxx.se/bug/?i=6113
+ [32] = https://curl.haxx.se/bug/?i=6134
+ [33] = https://curl.haxx.se/bug/?i=6126
+ [34] = https://curl.haxx.se/bug/?i=6131
+ [36] = https://curl.haxx.se/bug/?i=6124
