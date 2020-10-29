@@ -2526,14 +2526,20 @@ AC_DEFUN([CURL_MAC_CFLAGS], [
   AC_MSG_RESULT([$tst_cflags]);
 
   if test "$tst_cflags" = "yes"; then
-    AC_MSG_CHECKING([for *version-min in CFLAGS])
+    AC_MSG_CHECKING([for *version-min set by user])
     min=""
-    if test -z "$(echo $CFLAGS | grep m.*os.*-version-min)"; then
+    if test -n "$IPHONEOS_DEPLOYMENT_TARGET"; then
+      var="IPHONEOS_DEPLOYMENT_TARGET"
+    elif test -n "$MACOSX_DEPLOYMENT_TARGET"; then
+      var="MACOSX_DEPLOYMENT_TARGET"
+    elif test -z "$(echo $CFLAGS $CC | grep m.*os.*-version-min)"; then
       min="-mmacosx-version-min=10.8"
       CFLAGS="$CFLAGS $min"
+    else
+      var="CFLAGS or CC"
     fi
     if test -z "$min"; then
-      AC_MSG_RESULT([set by user])
+      AC_MSG_RESULT([set by user in $var])
     else
       AC_MSG_RESULT([$min set])
     fi
