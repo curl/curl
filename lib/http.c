@@ -2873,20 +2873,24 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         }
         else {
           if(postsize) {
+            char chunk[16];
             /* Append the POST data chunky-style */
-            result = Curl_dyn_addf(&req, "%x\r\n", (int)postsize);
+            msnprintf(chunk, sizeof(chunk), "%x\r\n", (int)postsize);
+            result = Curl_dyn_add(&req, chunk);
             if(!result) {
+              included_body = postsize + strlen(chunk);
               result = Curl_dyn_addn(&req, data->set.postfields,
                                      (size_t)postsize);
               if(!result)
                 result = Curl_dyn_add(&req, "\r\n");
-              included_body = postsize + 2;
+              included_body += 2;
             }
           }
-          if(!result)
+          if(!result) {
             result = Curl_dyn_add(&req, "\x30\x0d\x0a\x0d\x0a");
-          /* 0  CR  LF  CR  LF */
-          included_body += 5;
+            /* 0  CR  LF  CR  LF */
+            included_body += 5;
+          }
         }
         if(result)
           return result;
