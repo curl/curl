@@ -334,7 +334,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan"
+    - T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan" TFLAGS=-n
     - *clang
     compiler: clang
     addons:
@@ -346,7 +346,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug C=""
+    - T=debug C="" TFLAGS=-n
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     arch: arm64
     addons:
@@ -364,7 +364,7 @@ jobs:
         - zlib1g-dev
 
   - env:
-    - T=debug C=""
+    - T=debug C="" TFLAGS=-n
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     arch: ppc64le
     addons:
@@ -382,7 +382,7 @@ jobs:
         - zlib1g-dev
 
   - env:
-    - T=debug C=""
+    - T=debug C="" TFLAGS=-n
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     arch: s390x
     addons:
