@@ -1225,13 +1225,18 @@ gtls_connect_step3(struct connectdata *conn,
 
     certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
     showtime(data, "expire date", certclock);
+
+    gnutls_free(certfields.data);
   }
 
   rc = gnutls_x509_crt_get_issuer_dn2(x509_cert, &certfields);
   if(rc)
     infof(data, "Failed to get certificate issuer\n");
-  else
+  else {
     infof(data, "\t issuer: %s\n", certfields.data);
+
+    gnutls_free(certfields.data);
+  }
 #endif
 
   gnutls_x509_crt_deinit(x509_cert);
