@@ -1531,35 +1531,26 @@ enum dupstring {
   STRING_RTSP_SESSION_ID, /* Session ID to use */
   STRING_RTSP_STREAM_URI, /* Stream URI for this request */
   STRING_RTSP_TRANSPORT,  /* Transport for this session */
-
   STRING_SSH_PRIVATE_KEY, /* path to the private key file for auth */
   STRING_SSH_PUBLIC_KEY,  /* path to the public key file for auth */
   STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ascii hex */
   STRING_SSH_KNOWNHOSTS,  /* file name of knownhosts file */
-
   STRING_PROXY_SERVICE_NAME, /* Proxy service name */
   STRING_SERVICE_NAME,    /* Service name */
   STRING_MAIL_FROM,
   STRING_MAIL_AUTH,
-
   STRING_TLSAUTH_USERNAME_ORIG,  /* TLS auth <username> */
   STRING_TLSAUTH_USERNAME_PROXY, /* TLS auth <username> */
   STRING_TLSAUTH_PASSWORD_ORIG,  /* TLS auth <password> */
   STRING_TLSAUTH_PASSWORD_PROXY, /* TLS auth <password> */
-
   STRING_BEARER,                /* <bearer>, if used */
-
   STRING_UNIX_SOCKET_PATH,      /* path to Unix socket, if used */
-
   STRING_TARGET,                /* CURLOPT_REQUEST_TARGET */
   STRING_DOH,                   /* CURLOPT_DOH_URL */
-
   STRING_ALTSVC,                /* CURLOPT_ALTSVC */
-
+  STRING_HSTS,                  /* CURLOPT_HSTS */
   STRING_SASL_AUTHZID,          /* CURLOPT_SASL_AUTHZID */
-
   STRING_TEMP_URL,              /* temp URL storage for proxy use */
-
   STRING_DNS_SERVERS,
   STRING_DNS_INTERFACE,
   STRING_DNS_LOCAL_IP4,
@@ -1899,6 +1890,9 @@ struct Curl_easy {
                                   NOTE that the 'cookie' field in the
                                   UserDefined struct defines if the "engine"
                                   is to be used or not. */
+#ifdef USE_HSTS
+  struct hsts *hsts;
+#endif
 #ifndef CURL_DISABLE_ALTSVC
   struct altsvcinfo *asi;      /* the alt-svc cache */
 #endif

@@ -180,6 +180,8 @@ man_MANS =                                      \
   CURLOPT_HEADERDATA.3                          \
   CURLOPT_HEADERFUNCTION.3                      \
   CURLOPT_HEADEROPT.3                           \
+  CURLOPT_HSTS.3                                \
+  CURLOPT_HSTS_CTRL.3                           \
   CURLOPT_HTTP09_ALLOWED.3                      \
   CURLOPT_HTTP200ALIASES.3                      \
   CURLOPT_HTTPAUTH.3                            \

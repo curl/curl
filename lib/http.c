@@ -77,6 +77,7 @@
 #include "connect.h"
 #include "strdup.h"
 #include "altsvc.h"
+#include "hsts.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -3990,6 +3991,23 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         }
       }
     }
+
+#ifdef USE_HSTS
+    /* If enabled, the header is incoming and this is over HTTPS */
+    else if(data->hsts && checkprefix("Strict-Transport-Security:", headp) &&
+            (conn->handler->flags & PROTOPT_SSL)) {
+      CURLcode check =
+        Curl_hsts_parse(data->hsts, data->state.up.hostname,
+                        &headp[ sizeof("Strict-Transport-Security:") -1 ]);
+      if(check)
+        infof(data, "Illegal STS header skipped\n");
+#ifdef DEBUGBUILD
+      else
+        infof(data, "Parsed STS header fine (%d entries)\n",
+              data->hsts->list.size);
+#endif
+    }
+#endif
 #ifndef CURL_DISABLE_ALTSVC
     /* If enabled, the header is incoming and this is over HTTPS */
     else if(data->asi && checkprefix("Alt-Svc:", headp) &&
