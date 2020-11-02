@@ -156,8 +156,7 @@ static CURLcode sendf(curl_socket_t sockfd, struct connectdata *conn,
     if(result)
       break;
 
-    if(data->set.verbose)
-      Curl_debug(data, CURLINFO_DATA_OUT, sptr, (size_t)bytes_written);
+    Curl_debug(data, CURLINFO_DATA_OUT, sptr, (size_t)bytes_written);
 
     if((size_t)bytes_written != write_len) {
       /* if not all was written at once, we must advance the pointer, decrease

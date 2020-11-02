@@ -1152,10 +1152,9 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
 
     win_update_buffer_size(conn->writesockfd);
 
-    if(data->set.verbose)
-      /* show the data before we change the pointer upload_fromhere */
-      Curl_debug(data, CURLINFO_DATA_OUT, k->upload_fromhere,
-                 (size_t)bytes_written);
+    /* show the data before we change the pointer upload_fromhere */
+    Curl_debug(data, CURLINFO_DATA_OUT, k->upload_fromhere,
+               (size_t)bytes_written);
 
     k->writebytecount += bytes_written;
     Curl_pgrsSetUploadCounter(data, k->writebytecount);

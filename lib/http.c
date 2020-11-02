@@ -1254,16 +1254,12 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
     size_t headlen = (size_t)amount>headersize ? headersize : (size_t)amount;
     size_t bodylen = amount - headlen;
 
-    if(data->set.verbose) {
-      /* this data _may_ contain binary stuff */
-      Curl_debug(data, CURLINFO_HEADER_OUT, ptr, headlen);
-      if(bodylen) {
-        /* there was body data sent beyond the initial header part, pass that
-           on to the debug callback too */
-        Curl_debug(data, CURLINFO_DATA_OUT,
-                   ptr + headlen, bodylen);
-      }
-    }
+    /* this data _may_ contain binary stuff */
+    Curl_debug(data, CURLINFO_HEADER_OUT, ptr, headlen);
+    if(bodylen)
+      /* there was body data sent beyond the initial header part, pass that on
+         to the debug callback too */
+      Curl_debug(data, CURLINFO_DATA_OUT, ptr + headlen, bodylen);
 
     /* 'amount' can never be a very large value here so typecasting it so a
        signed 31 bit value should not cause problems even if ssize_t is
@@ -3537,10 +3533,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           k->keepon &= ~KEEP_RECV;
         }
 
-        if(data->set.verbose)
-          Curl_debug(data, CURLINFO_HEADER_IN,
-                     str_start, headerlen);
-        break;          /* exit header line loop */
+        Curl_debug(data, CURLINFO_HEADER_IN, str_start, headerlen);
+        break; /* exit header line loop */
       }
 
       /* We continue reading headers, reset the line-based header */
@@ -4031,9 +4025,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     if(data->set.include_header)
       writetype |= CLIENTWRITE_BODY;
 
-    if(data->set.verbose)
-      Curl_debug(data, CURLINFO_HEADER_IN, headp,
-                 Curl_dyn_len(&data->state.headerb));
+    Curl_debug(data, CURLINFO_HEADER_IN, headp,
+               Curl_dyn_len(&data->state.headerb));
 
     result = Curl_client_write(conn, writetype, headp,
                                Curl_dyn_len(&data->state.headerb));

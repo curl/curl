@@ -218,8 +218,7 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
   conn->data_prot = data_sec;
 #endif
 
-  if(data->set.verbose)
-    Curl_debug(data, CURLINFO_HEADER_OUT, s, (size_t)bytes_written);
+  Curl_debug(data, CURLINFO_HEADER_OUT, s, (size_t)bytes_written);
 
   if(bytes_written != (ssize_t)write_len) {
     /* the whole chunk was not sent, keep it around and adjust sizes */
@@ -364,9 +363,8 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
 #ifdef HAVE_GSSAPI
           if(!conn->sec_complete)
 #endif
-            if(data->set.verbose)
-              Curl_debug(data, CURLINFO_HEADER_IN,
-                         pp->linestart_resp, (size_t)perline);
+            Curl_debug(data, CURLINFO_HEADER_IN,
+                       pp->linestart_resp, (size_t)perline);
 
           /*
            * We pass all response-lines to the callback function registered
