@@ -49,7 +49,7 @@ if [ "$T" = "debug" ]; then
   make
   make examples
   if [ -z $NOTESTS ]; then
-    make TFLAGS= test-nonflaky
+    make test-nonflaky
   fi
 fi
 
