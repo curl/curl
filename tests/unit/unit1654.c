@@ -56,6 +56,7 @@ UNITTEST_START
     Curl_altsvc_cleanup(&asi);
     return result;
   }
+  curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(!curl)
     goto fail;
@@ -129,6 +130,7 @@ UNITTEST_START
   Curl_altsvc_save(curl, asi, outname);
 
   curl_easy_cleanup(curl);
+  curl_global_cleanup();
   fail:
   Curl_altsvc_cleanup(&asi);
   return unitfail;
