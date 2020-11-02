@@ -1343,10 +1343,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           sshc->nextstate = SSH_NO_STATE;
           break;
         }
-        if(data->set.verbose) {
-          Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"PWD\n", 4);
-          Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp));
-        }
+        Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"PWD\n", 4);
+        Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp));
+
         /* this sends an FTP-like "header" to the header callback so that the
            current directory can be read very similar to how it is read when
            using ordinary FTP. */
@@ -2167,11 +2166,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           data->req.bytecount += readdir_len + 1;
 
           /* output debug output if that is requested */
-          if(data->set.verbose) {
-            Curl_debug(data, CURLINFO_DATA_IN, sshc->readdir_filename,
-                       readdir_len);
-            Curl_debug(data, CURLINFO_DATA_IN, (char *)"\n", 1);
-          }
+          Curl_debug(data, CURLINFO_DATA_IN, sshc->readdir_filename,
+                     readdir_len);
+          Curl_debug(data, CURLINFO_DATA_IN, (char *)"\n", 1);
         }
         else {
           result = Curl_dyn_add(&sshc->readdir, sshc->readdir_longentry);
@@ -2252,13 +2249,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                                    Curl_dyn_len(&sshc->readdir));
 
       if(!result) {
-
         /* output debug output if that is requested */
-        if(data->set.verbose) {
-          Curl_debug(data, CURLINFO_DATA_IN,
-                     Curl_dyn_ptr(&sshc->readdir),
-                     Curl_dyn_len(&sshc->readdir));
-        }
+        Curl_debug(data, CURLINFO_DATA_IN,
+                   Curl_dyn_ptr(&sshc->readdir),
+                   Curl_dyn_len(&sshc->readdir));
         data->req.bytecount += Curl_dyn_len(&sshc->readdir);
       }
       if(result) {
@@ -3037,8 +3031,7 @@ static ssize_t ssh_tls_recv(libssh2_socket_t sock, void *buffer,
     return -EAGAIN; /* magic return code for libssh2 */
   else if(result)
     return -1; /* generic error */
-  if(conn->data->set.verbose)
-    Curl_debug(conn->data, CURLINFO_DATA_IN, (char *)buffer, (size_t)nread);
+  Curl_debug(conn->data, CURLINFO_DATA_IN, (char *)buffer, (size_t)nread);
   return nread;
 }
 
@@ -3061,8 +3054,7 @@ static ssize_t ssh_tls_send(libssh2_socket_t sock, const void *buffer,
     return -EAGAIN; /* magic return code for libssh2 */
   else if(result)
     return -1; /* error */
-  if(conn->data->set.verbose)
-    Curl_debug(conn->data, CURLINFO_DATA_OUT, (char *)buffer, (size_t)nwrite);
+  Curl_debug(conn->data, CURLINFO_DATA_OUT, (char *)buffer, (size_t)nwrite);
   return nwrite;
 }
 #endif

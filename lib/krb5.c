@@ -99,8 +99,7 @@ static CURLcode ftpsend(struct connectdata *conn, const char *cmd)
     if(result)
       break;
 
-    if(conn->data->set.verbose)
-      Curl_debug(conn->data, CURLINFO_HEADER_OUT, sptr, (size_t)bytes_written);
+    Curl_debug(conn->data, CURLINFO_HEADER_OUT, sptr, (size_t)bytes_written);
 
     if(bytes_written != (ssize_t)write_len) {
       write_len -= bytes_written;
@@ -716,7 +715,7 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
     return -1;
   }
 
-  if(conn->data->set.verbose) {
+  {
     buf[decoded_len] = '\n';
     Curl_debug(conn->data, CURLINFO_HEADER_IN, buf, decoded_len + 1);
   }

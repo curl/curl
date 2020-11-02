@@ -1432,11 +1432,8 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
           data->req.bytecount += sshc->readdir_len + 1;
 
           /* output debug output if that is requested */
-          if(data->set.verbose) {
-            Curl_debug(data, CURLINFO_DATA_OUT,
-                       (char *)sshc->readdir_filename,
-                       sshc->readdir_len);
-          }
+          Curl_debug(data, CURLINFO_DATA_OUT, (char *)sshc->readdir_filename,
+                     sshc->readdir_len);
         }
         else {
           sshc->readdir_currLen = strlen(sshc->readdir_longentry);
@@ -1548,12 +1545,9 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
                                  sshc->readdir_currLen);
 
       if(!result) {
-
         /* output debug output if that is requested */
-        if(data->set.verbose) {
-          Curl_debug(data, CURLINFO_DATA_OUT, sshc->readdir_line,
-                     sshc->readdir_currLen);
-        }
+        Curl_debug(data, CURLINFO_DATA_OUT, sshc->readdir_line,
+                   sshc->readdir_currLen);
         data->req.bytecount += sshc->readdir_currLen;
       }
       Curl_safefree(sshc->readdir_line);
@@ -2638,10 +2632,9 @@ static void sftp_quote(struct connectdata *conn)
       sshc->nextstate = SSH_NO_STATE;
       return;
     }
-    if(data->set.verbose) {
-      Curl_debug(data, CURLINFO_HEADER_OUT, (char *) "PWD\n", 4);
-      Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp));
-    }
+    Curl_debug(data, CURLINFO_HEADER_OUT, (char *) "PWD\n", 4);
+    Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp));
+
     /* this sends an FTP-like "header" to the header callback so that the
        current directory can be read very similar to how it is read when
        using ordinary FTP. */
