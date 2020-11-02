@@ -181,6 +181,10 @@ man_MANS =                                      \
   CURLOPT_HEADERFUNCTION.3                      \
   CURLOPT_HEADEROPT.3                           \
   CURLOPT_HSTS.3                                \
+  CURLOPT_HSTSREADDATA.3                        \
+  CURLOPT_HSTSREADFUNCTION.3                    \
+  CURLOPT_HSTSWRITEDATA.3                       \
+  CURLOPT_HSTSWRITEFUNCTION.3                   \
   CURLOPT_HSTS_CTRL.3                           \
   CURLOPT_HTTP09_ALLOWED.3                      \
   CURLOPT_HTTP200ALIASES.3                      \

@@ -78,6 +78,7 @@
 #include "mime.h"
 #include "strcase.h"
 #include "urlapi-int.h"
+#include "hsts.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1528,6 +1529,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     }
 #endif
     Curl_http2_init_state(&data->state);
+    Curl_hsts_loadcb(data, data->hsts);
   }
 
   return result;

@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC)) || \
+#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
   defined(USE_HSTS)
 
 #include "curl_get_line.h"

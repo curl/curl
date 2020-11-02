@@ -888,7 +888,9 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
     if(!outcurl->hsts)
       goto fail;
     if(outcurl->set.str[STRING_HSTS])
-      (void)Curl_hsts_load(outcurl->hsts, outcurl->set.str[STRING_HSTS]);
+      (void)Curl_hsts_loadfile(outcurl,
+                               outcurl->hsts, outcurl->set.str[STRING_HSTS]);
+    (void)Curl_hsts_loadcb(outcurl, outcurl->hsts);
   }
 #endif
   /* Clone the resolver handle, if present, for the new handle */

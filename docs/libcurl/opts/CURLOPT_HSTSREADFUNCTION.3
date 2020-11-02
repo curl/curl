@@ -1,0 +1,81 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_HSTSREADFUNCTION 3 "14 Sep 2020" "libcurl 7.74.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_HSTSREADFUNCTION \- read callback for HSTS hosts
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *sts, void *userp);
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTSREADFUNCTION, hstsread);
+.SH EXPERIMENTAL
+Warning: this feature is early code and is marked as experimental. It can only
+be enabled by explicitly telling configure with \fB--enable-hsts\fP. You are
+advised to not ship this in production before the experimental label is
+removed.
+.SH DESCRIPTION
+Pass a pointer to your callback function, as the prototype shows above.
+
+This callback function gets called by libcurl repeatedly when it populates the
+in-memory HSTS cache.
+
+Set the \fIuserp\fP argument with the \fICURLOPT_HSTSREADDATA(3)\fP option or
+it will be NULL.
+
+When this callback is invoked, the \fIsts\fP pointer points to a populated
+struct: Copy the host name to 'name' (no longer than 'namelen' bytes). Make it
+null-terminated. Set 'includeSubDomains' to TRUE or FALSE. Set 'expire' to a
+date stamp or a zero length string for *forever* (wrong date stamp format
+might cause the name to not get accepted)
+
+The callback should return \fICURLSTS_OK\fP if it returns a name and is
+prepared to be called again (for another host) or \fICURLSTS_DONE\fP if it has
+no entry to return. It can also return \fICURLSTS_FAIL\fP to signal error.
+
+This option doesn't enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
+do that.
+.SH DEFAULT
+NULL - no callback.
+.SH PROTOCOLS
+This feature is only used for HTTP(S) transfer.
+.SH EXAMPLE
+.nf
+{
+  /* set HSTS read callback */
+  curl_easy_setopt(curl, CURLOPT_HSTSREADFUNCTION, hstsread);
+
+  /* pass in suitable argument to the callback */
+  curl_easy_setopt(curl, CURLOPT_HSTSREADDATA, &hstspreload[0]);
+
+  result = curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.74.0
+.SH RETURN VALUE
+This will return CURLE_OK.
+.SH "SEE ALSO"
+.BR CURLOPT_HSTSREADDATA "(3), " CURLOPT_HSTSWRITEFUNCTION "(3), "
+.BR CURLOPT_HSTS "(3), " CURLOPT_HSTS_CTRL "(3), "
+

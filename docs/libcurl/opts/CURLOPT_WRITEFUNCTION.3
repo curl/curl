@@ -67,6 +67,9 @@ transfer to become paused.  See \fIcurl_easy_pause(3)\fP for further details.
 Set this option to NULL to get the internal default function used instead of
 your callback. The internal default function will write the data to the FILE *
 given with \fICURLOPT_WRITEDATA(3)\fP.
+
+This option doesn't enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
+do that.
 .SH DEFAULT
 libcurl will use 'fwrite' as a callback by default.
 .SH PROTOCOLS

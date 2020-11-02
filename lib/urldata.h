@@ -1639,7 +1639,12 @@ struct UserDefined {
   curl_conv_callback convtonetwork;
   /* function to convert from UTF-8 encoding: */
   curl_conv_callback convfromutf8;
-
+#ifdef USE_HSTS
+  curl_hstsread_callback hsts_read;
+  void *hsts_read_userp;
+  curl_hstswrite_callback hsts_write;
+  void *hsts_write_userp;
+#endif
   void *progress_client; /* pointer to pass to the progress callback */
   void *ioctl_client;   /* pointer to pass to the ioctl callback */
   long timeout;         /* in milliseconds, 0 means no timeout */

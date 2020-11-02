@@ -2841,6 +2841,18 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
     break;
 #ifdef USE_HSTS
+  case CURLOPT_HSTSREADFUNCTION:
+    data->set.hsts_read = va_arg(param, curl_hstsread_callback);
+    break;
+  case CURLOPT_HSTSREADDATA:
+    data->set.hsts_read_userp = va_arg(param, void *);
+    break;
+  case CURLOPT_HSTSWRITEFUNCTION:
+    data->set.hsts_write = va_arg(param, curl_hstswrite_callback);
+    break;
+  case CURLOPT_HSTSWRITEDATA:
+    data->set.hsts_write_userp = va_arg(param, void *);
+    break;
   case CURLOPT_HSTS:
     if(!data->hsts) {
       data->hsts = Curl_hsts_init();
@@ -2852,7 +2864,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     if(result)
       return result;
     if(argptr)
-      (void)Curl_hsts_load(data->hsts, argptr);
+      (void)Curl_hsts_loadfile(data, data->hsts, argptr);
     break;
   case CURLOPT_HSTS_CTRL:
     arg = va_arg(param, long);
