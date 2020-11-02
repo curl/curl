@@ -38,6 +38,7 @@ int test(char *URL)
   int error = 0;
   (void)URL;
 
+  curl_global_init(CURL_GLOBAL_ALL);
   easy = curl_easy_init();
   if(!easy)
     return 1;
@@ -83,5 +84,6 @@ int test(char *URL)
     }
   }
   curl_easy_cleanup(easy);
+  curl_global_cleanup();
   return error;
 }
