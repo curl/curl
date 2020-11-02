@@ -140,7 +140,7 @@ problems may have been fixed or changed somewhat since this was written!
  CURLINFO_PRETRANSFER_TIME is near to zero every time.
 
  https://github.com/curl/curl/issues/218
- https://curl.haxx.se/bug/view.cgi?id=1213
+ https://www.curl.se/bug/view.cgi?id=1213
 
 1.4 multipart formposts file name encoding
 
@@ -155,13 +155,13 @@ problems may have been fixed or changed somewhat since this was written!
  If an upload using Expect: 100-continue receives an HTTP 417 response, it
  ought to be automatically resent without the Expect:.  A workaround is for
  the client application to redo the transfer after disabling Expect:.
- https://curl.haxx.se/mail/archive-2008-02/0043.html
+ https://www.curl.se/mail/archive-2008-02/0043.html
 
 1.6 Unnecessary close when 401 received waiting for 100
 
  libcurl closes the connection if an HTTP 401 reply is received while it is
  waiting for the 100-continue response.
- https://curl.haxx.se/mail/lib-2008-08/0462.html
+ https://www.curl.se/mail/lib-2008-08/0462.html
 
 1.7 Deflate error after all content was received
 
@@ -214,7 +214,7 @@ problems may have been fixed or changed somewhat since this was written!
 2.2 DER in keychain
 
  Curl doesn't recognize certificates in DER format in keychain, but it works
- with PEM.  https://curl.haxx.se/bug/view.cgi?id=1065
+ with PEM.  https://www.curl.se/bug/view.cgi?id=1065
 
 2.3 Unable to use PKCS12 certificate with Secure Transport
 
@@ -301,7 +301,7 @@ problems may have been fixed or changed somewhat since this was written!
  IMAP "SEARCH ALL" truncates output on large boxes. "A quick search of the
  code reveals that pingpong.c contains some truncation code, at line 408, when
  it deems the server response to be too large truncating it to 40 characters"
- https://curl.haxx.se/bug/view.cgi?id=1366
+ https://www.curl.se/bug/view.cgi?id=1366
 
 3.2 No disconnect command
 
@@ -312,7 +312,7 @@ problems may have been fixed or changed somewhat since this was written!
 
  You have to tell libcurl not to expect a body, when dealing with one line
  response commands. Please see the POP3 examples and test cases which show
- this for the NOOP and DELE commands. https://curl.haxx.se/bug/?i=740
+ this for the NOOP and DELE commands. https://www.curl.se/bug/?i=740
 
 3.4 AUTH PLAIN for SMTP is not working on all servers
 
@@ -331,7 +331,7 @@ problems may have been fixed or changed somewhat since this was written!
  decoding also means that we need to check for nastiness that is attempted,
  like "../" sequences and the like. Probably everything to the left of any
  embedded slashes should be cut off.
- https://curl.haxx.se/bug/view.cgi?id=1294
+ https://www.curl.se/bug/view.cgi?id=1294
 
  -O also doesn't decode %-encoded names, and while it has even less
  information about the charset involved the process is similar to the -J case.
@@ -346,7 +346,7 @@ problems may have been fixed or changed somewhat since this was written!
  -" fails. Without -J the same command line works! This happens because the
  resume logic is worked out before the target file name (and thus its
  pre-transfer size) has been figured out!
- https://curl.haxx.se/bug/view.cgi?id=1169
+ https://www.curl.se/bug/view.cgi?id=1169
 
 4.3 --retry and transfer timeouts
 
@@ -354,7 +354,7 @@ problems may have been fixed or changed somewhat since this was written!
  -y/-Y) the next attempt doesn't resume the transfer properly from what was
  downloaded in the previous attempt but will truncate and restart at the
  original position where it was at before the previous failed attempt. See
- https://curl.haxx.se/mail/lib-2008-01/0080.html and Mandriva bug report
+ https://www.curl.se/mail/lib-2008-01/0080.html and Mandriva bug report
  https://qa.mandriva.com/show_bug.cgi?id=22565
 
 4.4 Improve --data-urlencode space encoding
@@ -415,9 +415,9 @@ problems may have been fixed or changed somewhat since this was written!
  _UNICODE and UNICODE defined. And, except for Cygwin, Windows can't use UTF-8
  as a locale.
 
-  https://curl.haxx.se/bug/?i=345
-  https://curl.haxx.se/bug/?i=731
-  https://curl.haxx.se/bug/?i=3747
+  https://www.curl.se/bug/?i=345
+  https://www.curl.se/bug/?i=731
+  https://www.curl.se/bug/?i=3747
 
 5.6 cmake: use correct SONAME for shared library
 
@@ -486,11 +486,11 @@ problems may have been fixed or changed somewhat since this was written!
  NTLM authentication involving unicode user name or password only works
  properly if built with UNICODE defined together with the Schannel
  backend. The original problem was mentioned in:
- https://curl.haxx.se/mail/lib-2009-10/0024.html
- https://curl.haxx.se/bug/view.cgi?id=896
+ https://www.curl.se/mail/lib-2009-10/0024.html
+ https://www.curl.se/bug/view.cgi?id=896
 
  The Schannel version verified to work as mentioned in
- https://curl.haxx.se/mail/lib-2012-07/0073.html
+ https://www.curl.se/mail/lib-2012-07/0073.html
 
 6.2 MIT Kerberos for Windows build
 
@@ -502,7 +502,7 @@ problems may have been fixed or changed somewhat since this was written!
 
  NTLM authentication using SSPI (on Windows) when (lib)curl is running in
  "system context" will make it use wrong(?) user name - at least when compared
- to what winhttp does. See https://curl.haxx.se/bug/view.cgi?id=535
+ to what winhttp does. See https://www.curl.se/bug/view.cgi?id=535
 
 6.4 Negotiate and Kerberos V5 need a fake user name
 
@@ -510,8 +510,8 @@ problems may have been fixed or changed somewhat since this was written!
  V5 in the e-mail protocols, you need to  provide a (fake) user name (this
  concerns both curl and the lib) because the code wrongly only considers
  authentication if there's a user name provided by setting
- conn->bits.user_passwd in url.c  https://curl.haxx.se/bug/view.cgi?id=440 How?
- https://curl.haxx.se/mail/lib-2004-08/0182.html A possible solution is to
+ conn->bits.user_passwd in url.c  https://www.curl.se/bug/view.cgi?id=440 How?
+ https://www.curl.se/mail/lib-2004-08/0182.html A possible solution is to
  either modify this variable to be set or introduce a variable such as
  new conn->bits.want_authentication which is set when any of the authentication
  options are set.
@@ -553,7 +553,7 @@ problems may have been fixed or changed somewhat since this was written!
  connection timeout during that phase but only the "real" timeout - which may
  surprise users as it is probably considered to be the connect phase to most
  people. Brought up (and is being misunderstood) in:
- https://curl.haxx.se/bug/view.cgi?id=856
+ https://www.curl.se/bug/view.cgi?id=856
 
 7.2 FTP with CONNECT and slow server
 
@@ -567,14 +567,14 @@ problems may have been fixed or changed somewhat since this was written!
 
  It seems sensible to be able to use CURLOPT_NOBODY and CURLOPT_FAILONERROR
  with FTP to detect if a file exists or not, but it is not working:
- https://curl.haxx.se/mail/lib-2008-07/0295.html
+ https://www.curl.se/mail/lib-2008-07/0295.html
 
 7.4 FTP with ACCT
 
  When doing an operation over FTP that requires the ACCT command (but not when
  logging in), the operation will fail since libcurl doesn't detect this and
  thus fails to issue the correct command:
- https://curl.haxx.se/bug/view.cgi?id=635
+ https://www.curl.se/bug/view.cgi?id=635
 
 7.5 ASCII FTP
 
@@ -646,12 +646,12 @@ problems may have been fixed or changed somewhat since this was written!
 8.1 TELNET and time limitations don't work
 
  When using telnet, the time limitation options don't work.
- https://curl.haxx.se/bug/view.cgi?id=846
+ https://www.curl.se/bug/view.cgi?id=846
 
 8.2 Microsoft telnet server
 
  There seems to be a problem when connecting to the Microsoft telnet server.
- https://curl.haxx.se/bug/view.cgi?id=649
+ https://www.curl.se/bug/view.cgi?id=649
 
 
 9. SFTP and SCP
@@ -663,7 +663,7 @@ problems may have been fixed or changed somewhat since this was written!
  instead the connection is "cancelled" (the operation is considered done)
  prematurely. There is a half-baked (busy-looping) patch provided in the bug
  report but it cannot be accepted as-is. See
- https://curl.haxx.se/bug/view.cgi?id=748
+ https://www.curl.se/bug/view.cgi?id=748
 
 9.2 wolfssh: publickey auth doesn't work
 
@@ -749,7 +749,7 @@ problems may have been fixed or changed somewhat since this was written!
  signal handler back into the library with a sigsetjmp, which effectively
  causes libcurl to continue running within the signal handler. This is
  non-portable and could cause problems on some platforms. A discussion on the
- problem is available at https://curl.haxx.se/mail/lib-2008-09/0197.html
+ problem is available at https://www.curl.se/mail/lib-2008-09/0197.html
 
  Also, alarm() provides timeout resolution only to the nearest second. alarm
  ought to be replaced by setitimer on systems that support it.
@@ -800,7 +800,7 @@ problems may have been fixed or changed somewhat since this was written!
  Generic LDAP is synchronous: OK.
 
  See https://github.com/curl/curl/issues/622 and
-     https://curl.haxx.se/mail/lib-2016-01/0101.html
+     https://www.curl.se/mail/lib-2016-01/0101.html
 
 12.2 LDAP on Windows does authentication wrong?
 
