@@ -954,6 +954,33 @@ typedef enum {
 #define CURLALTSVC_H2           (1<<4)
 #define CURLALTSVC_H3           (1<<5)
 
+
+struct curl_hstsentry {
+  char *name;
+  size_t namelen;
+  unsigned int includeSubDomains:1;
+  char expire[18]; /* YYYYMMDD HH:MM:SS [null-terminated] */
+};
+
+struct curl_index {
+  size_t index; /* the provided entry's "index" or count */
+  size_t total; /* total number of entries to save */
+};
+
+typedef enum {
+  CURLSTS_OK,
+  CURLSTS_DONE,
+  CURLSTS_FAIL
+} CURLSTScode;
+
+typedef CURLSTScode (*curl_hstsread_callback)(CURL *easy,
+                                              struct curl_hstsentry *e,
+                                              void *userp);
+typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
+                                               struct curl_hstsentry *e,
+                                               struct curl_index *i,
+                                               void *userp);
+
 /* CURLHSTS_* are bits for the CURLOPT_HSTS option */
 #define CURLHSTS_ENABLE       (long)(1<<0)
 #define CURLHSTS_READONLYFILE (long)(1<<1)
@@ -2037,6 +2064,14 @@ typedef enum {
   CURLOPT(CURLOPT_HSTS_CTRL, CURLOPTTYPE_LONG, 299),
   /* HSTS file name */
   CURLOPT(CURLOPT_HSTS, CURLOPTTYPE_STRINGPOINT, 300),
+
+  /* HSTS read callback */
+  CURLOPT(CURLOPT_HSTSREADFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 301),
+  CURLOPT(CURLOPT_HSTSREADDATA, CURLOPTTYPE_CBPOINT, 302),
+
+  /* HSTS write callback */
+  CURLOPT(CURLOPT_HSTSWRITEFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 303),
+  CURLOPT(CURLOPT_HSTSWRITEDATA, CURLOPTTYPE_CBPOINT, 304),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
