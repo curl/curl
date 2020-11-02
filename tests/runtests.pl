@@ -256,6 +256,7 @@ my $has_cares;      # set if built with c-ares
 my $has_threadedres;# set if built with threaded resolver
 my $has_psl;        # set if libcurl is built with PSL support
 my $has_altsvc;     # set if libcurl is built with alt-svc support
+my $has_hsts;       # set if libcurl is built with HSTS support
 my $has_ldpreload;  # set if curl is built for systems supporting LD_PRELOAD
 my $has_multissl;   # set if curl is build with MultiSSL support
 my $has_manual;     # set if curl is built with built-in manual
@@ -2762,6 +2763,7 @@ sub compare {
 
 sub setupfeatures {
     $feature{"alt-svc"} = $has_altsvc;
+    $feature{"HSTS"} = $has_hsts;
     $feature{"brotli"} = $has_brotli;
     $feature{"crypto"} = $has_crypto;
     $feature{"debug"} = $debug_build;
@@ -3034,6 +3036,9 @@ sub checksystem {
             if($feat =~ /alt-svc/i) {
                 # alt-svc enabled
                 $has_altsvc=1;
+            }
+            if($feat =~ /HSTS/i) {
+                $has_hsts=1;
             }
             if($feat =~ /AsynchDNS/i) {
                 if(!$has_cares) {

@@ -85,6 +85,7 @@ DPAGES =					\
   head.d header.d				\
   help.d					\
   hostpubmd5.d					\
+  hsts.d                                        \
   http0.9.d					\
   http1.0.d					\
   http1.1.d http2.d				\

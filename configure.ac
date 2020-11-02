@@ -4882,6 +4882,31 @@ AC_HELP_STRING([--disable-alt-svc],[Disable alt-svc support]),
        AC_MSG_RESULT(no)
 )
 
+dnl ************************************************************
+dnl switch on/off hsts
+dnl
+curl_hsts_msg="no      (--enable-hsts)";
+AC_MSG_CHECKING([whether to support HSTS])
+AC_ARG_ENABLE(hsts,
+AC_HELP_STRING([--enable-hsts],[Enable HSTS support])
+AC_HELP_STRING([--disable-hsts],[Disable HSTS support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       ;;
+  *) AC_MSG_RESULT(yes)
+       curl_hsts_msg="enabled";
+       enable_hsts="yes"
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+)
+
+if test "$enable_hsts" = "yes"; then
+  AC_DEFINE(USE_HSTS, 1, [to enable HSTS])
+  experimental="$experimental HSTS"
+fi
+
 dnl *************************************************************
 dnl check whether ECH support, if desired, is actually available
 dnl
@@ -4997,6 +5022,9 @@ fi
 
 if test "x$enable_altsvc" = "xyes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES alt-svc"
+fi
+if test "x$enable_hsts" = "xyes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES HSTS"
 fi
 
 if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \

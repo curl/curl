@@ -58,6 +58,7 @@ struct OperationConfig {
   char *cookiejar;          /* write to this file */
   char *cookiefile;         /* read from this file */
   char *altsvc;             /* alt-svc cache file name */
+  char *hsts;               /* HSTS cache file name */
   bool cookiesession;       /* new session? */
   bool encoding;            /* Accept-Encoding please */
   bool tr_encoding;         /* Transfer-Encoding please */

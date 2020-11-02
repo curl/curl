@@ -79,6 +79,7 @@
 --header (-H)                        5.0
 --help (-h)                          4.0
 --hostpubmd5                         7.17.1
+--hsts                               7.74.0
 --http0.9                            7.64.0
 --http1.0 (-0)                       7.9.1
 --http1.1                            7.33.0

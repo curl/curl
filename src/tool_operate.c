@@ -2072,6 +2072,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->altsvc)
           my_setopt_str(curl, CURLOPT_ALTSVC, config->altsvc);
 
+        if(config->hsts)
+          my_setopt_bitmask(curl, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
+
 #ifdef USE_METALINK
         if(!metalink && config->use_metalink) {
           outs->metalink_parser = metalink_parser_context_new();

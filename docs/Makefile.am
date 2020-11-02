@@ -63,6 +63,7 @@ EXTRA_DIST =                                    \
  GOVERNANCE.md                                  \
  HELP-US.md                                     \
  HISTORY.md                                     \
+ HSTS.md                                        \
  HTTP-COOKIES.md                                \
  HTTP2.md                                       \
  HTTP3.md                                       \

@@ -79,6 +79,7 @@
 #include "http2.h"
 #include "dynbuf.h"
 #include "altsvc.h"
+#include "hsts.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -881,6 +882,15 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
       (void)Curl_altsvc_load(outcurl->asi, outcurl->set.str[STRING_ALTSVC]);
   }
 #endif
+#ifdef USE_HSTS
+  if(data->hsts) {
+    outcurl->hsts = Curl_hsts_init();
+    if(!outcurl->hsts)
+      goto fail;
+    if(outcurl->set.str[STRING_HSTS])
+      (void)Curl_hsts_load(outcurl->hsts, outcurl->set.str[STRING_HSTS]);
+  }
+#endif
   /* Clone the resolver handle, if present, for the new handle */
   if(Curl_resolver_duphandle(outcurl,
                              &outcurl->state.resolver,
@@ -929,6 +939,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
     Curl_safefree(outcurl->change.url);
     Curl_safefree(outcurl->change.referer);
     Curl_altsvc_cleanup(&outcurl->asi);
+    Curl_hsts_cleanup(&outcurl->hsts);
     Curl_freeset(outcurl);
     free(outcurl);
   }

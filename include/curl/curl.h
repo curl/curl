@@ -954,6 +954,10 @@ typedef enum {
 #define CURLALTSVC_H2           (1<<4)
 #define CURLALTSVC_H3           (1<<5)
 
+/* CURLHSTS_* are bits for the CURLOPT_HSTS option */
+#define CURLHSTS_ENABLE       (long)(1<<0)
+#define CURLHSTS_READONLYFILE (long)(1<<1)
+
 /* CURLPROTO_ defines are for the CURLOPT_*PROTOCOLS options */
 #define CURLPROTO_HTTP   (1<<0)
 #define CURLPROTO_HTTPS  (1<<1)
@@ -2029,6 +2033,11 @@ typedef enum {
    */
   CURLOPT(CURLOPT_SSL_EC_CURVES, CURLOPTTYPE_STRINGPOINT, 298),
 
+  /* HSTS bitmask */
+  CURLOPT(CURLOPT_HSTS_CTRL, CURLOPTTYPE_LONG, 299),
+  /* HSTS file name */
+  CURLOPT(CURLOPT_HSTS, CURLOPTTYPE_STRINGPOINT, 300),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2900,6 +2909,7 @@ typedef struct curl_version_info_data curl_version_info_data;
 #define CURL_VERSION_HTTP3        (1<<25) /* HTTP3 support built-in */
 #define CURL_VERSION_ZSTD         (1<<26) /* zstd features are present */
 #define CURL_VERSION_UNICODE      (1<<27) /* Unicode support on Windows */
+#define CURL_VERSION_HSTS         (1<<28) /* HSTS is supported */
 
  /*
  * NAME curl_version_info()

@@ -62,6 +62,11 @@ const struct NameValue setopt_nv_CURL_SOCKS_PROXY[] = {
   NVEND,
 };
 
+const struct NameValueUnsigned setopt_nv_CURLHSTS[] = {
+  NV(CURLHSTS_ENABLE),
+  NVEND,
+};
+
 const struct NameValueUnsigned setopt_nv_CURLAUTH[] = {
   NV(CURLAUTH_ANY),             /* combination */
   NV(CURLAUTH_ANYSAFE),         /* combination */

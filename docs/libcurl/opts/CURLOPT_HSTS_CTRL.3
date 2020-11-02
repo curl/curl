@@ -1,0 +1,73 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_HSTS_CTRL 3 "4 Sep 2020" "libcurl 7.74.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_HSTS_CTRL \- control HSTS behavior
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+#define CURLHSTS_ENABLE       (1<<0)
+#define CURLHSTS_READONLYFILE (1<<1)
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTS_CTRL, long bitmask);
+.fi
+.SH EXPERIMENTAL
+Warning: this feature is early code and is marked as experimental. It can only
+be enabled by explicitly telling configure with \fB--enable-hsts\fP. You are
+advised to not ship this in production before the experimental label is
+removed.
+.SH DESCRIPTION
+HSTS (HTTP Strict Transport Security) means that an HTTPS server can instruct
+the client to not contact it again over clear-text HTTP for a certain period
+into the future. libcurl will then automatically redirect HTTP attempts to
+such hosts to instead use HTTPS. This is done by libcurl retaining this
+knowledge in an in-memory cache.
+
+Populate the long \fIbitmask\fP with the correct set of features to instruct
+libcurl how to handle HSTS for the transfers using this handle.
+.SH BITS
+.IP "CURLHSTS_ENABLE"
+Enable the in-memory HSTS cache for this handle.
+.IP "CURLHSTS_READONLYFILE"
+Make the HSTS file (if specified) read-only - makes libcurl not save the cache
+to the file when closing the handle.
+.SH DEFAULT
+0. HSTS is disabled by default.
+.SH PROTOCOLS
+HTTPS and HTTP
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.74.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_HSTS "(3), " CURLOPT_CONNECT_TO "(3), " CURLOPT_RESOLVE "(3), "
+.BR CURLOPT_ALTSVC "(3), "

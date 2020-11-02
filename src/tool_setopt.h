@@ -64,8 +64,10 @@ extern const struct NameValueUnsigned setopt_nv_CURLSSLOPT[];
 extern const struct NameValue setopt_nv_CURL_NETRC[];
 extern const struct NameValue setopt_nv_CURLPROTO[];
 extern const struct NameValueUnsigned setopt_nv_CURLAUTH[];
+extern const struct NameValueUnsigned setopt_nv_CURLHSTS[];
 
 /* Map options to NameValue sets */
+#define setopt_nv_CURLOPT_HSTS_CTRL setopt_nv_CURLHSTS
 #define setopt_nv_CURLOPT_HTTP_VERSION setopt_nv_CURL_HTTP_VERSION
 #define setopt_nv_CURLOPT_HTTPAUTH setopt_nv_CURLAUTH
 #define setopt_nv_CURLOPT_SSLVERSION setopt_nv_CURL_SSLVERSION
