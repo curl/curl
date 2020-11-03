@@ -1,21 +1,23 @@
 curl and libcurl 7.74.0
 
  Public curl releases:         196
- Command line options:         234
- curl_easy_setopt() options:   278
+ Command line options:         235
+ curl_easy_setopt() options:   284
  Public functions in libcurl:  85
- Contributors:                 2277
+ Contributors:                 2278
 
 This release includes the following changes:
 
- o
+ o hsts: add support for Strict-Transport-Security [37]
 
 This release includes the following bugfixes:
 
+ o acinclude: detect manually set minimum macos/ipod version [46]
  o alt-svc: enable (in the build) by default [20]
  o checksrc: warn on empty line before open brace [13]
  o CI/appveyor: disable test 571 in two cmake builds [22]
  o CI/azure: improve on flakiness by avoiding libtool wrappers [7]
+ o CI/tests: enable test target on TravisCI for CMake builds [38]
  o CI/travis: add brotli and zstd to the libssh2 build [27]
  o cmake: call the feature unixsockets without dash [26]
  o cmake: make BUILD_TESTING dependent option [30]
@@ -29,7 +31,10 @@ This release includes the following bugfixes:
  o CURLOPT_NOBODY.3: fix typo [6]
  o CURLOPT_TCP_NODELAY.3: fix comment in example code [8]
  o CURLOPT_URL.3: clarify SCP/SFTP URLs are for uploads as well
+ o gnutls: fix memory leaks (certfields memory wasn't released) [41]
+ o header.d: mention the "Transfer-Encoding: chunked" handling [45]
  o http3: fix two build errors, silence warnings [10]
+ o http: pass correct header size to debug callback for chunked post [44]
  o libcurl.pc: make it relocatable [15]
  o libssh2: fix build with disabled proxy support [17]
  o libssh2: fix transport over HTTPS proxy [31]
@@ -46,9 +51,14 @@ This release includes the following bugfixes:
  o src/tool_filetime: disable -Wformat on mingw for this file [2]
  o strerror: use 'const' as the string should never be modified [18]
  o test122[12]: remove these two tests [1]
+ o tests: add missing global_init/cleanup calls [42]
+ o tests: fix some http/2 tests for older versions of nghttpx [47]
+ o tool_debug_cb: do not assume zero-terminated data
  o tool_help: make "output" description less confusing [21]
+ o tool_operate: --retry for HTTP 408 responses too [43]
  o tool_operate: bail out proper on errors during parallel transfers [29]
  o tool_operate: fix compiler warning when --libcurl is disabled [12]
+ o travis: use valgrind when running tests for debug builds [40]
  o urlapi: URL encode a '+' in the query part [14]
 
 This release includes the following known bugs:
@@ -104,3 +114,13 @@ References to bug reports and discussions on issues:
  [33] = https://curl.haxx.se/bug/?i=6126
  [34] = https://curl.haxx.se/bug/?i=6131
  [36] = https://curl.haxx.se/bug/?i=6124
+ [37] = https://curl.haxx.se/bug/?i=5896
+ [38] = https://curl.haxx.se/bug/?i=6074
+ [40] = https://curl.haxx.se/bug/?i=6154
+ [41] = https://curl.haxx.se/bug/?i=6153
+ [42] = https://curl.haxx.se/bug/?i=6156
+ [43] = https://curl.haxx.se/bug/?i=6155
+ [44] = https://curl.haxx.se/bug/?i=6147
+ [45] = https://curl.haxx.se/bug/?i=6148
+ [46] = https://curl.haxx.se/bug/?i=6138
+ [47] = https://curl.haxx.se/bug/?i=6139
