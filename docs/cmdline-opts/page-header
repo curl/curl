@@ -106,7 +106,7 @@ instructed to instead save that data into a local file, using the --output or
 command line, it similarly needs multiple options for where to save them.
 
 curl does not parse or otherwise "understand" the content it gets or writes as
-output. It does no encoding or decoding, unless explictly asked so with
+output. It does no encoding or decoding, unless explicitly asked so with
 dedicated command line options.
 .SH PROTOCOLS
 curl supports numerous protocols, or put in URL terms: schemes. Your

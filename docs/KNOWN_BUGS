@@ -108,7 +108,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.9 DoH doesn't inherit all transfer options
  11.10 Blocking socket operations in non-blocking API
  11.11 A shared connection cache is not thread-safe
- 11.12 'no_proxy' string-matches IPv6 numerical addreses
+ 11.12 'no_proxy' string-matches IPv6 numerical addresses
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
@@ -774,7 +774,7 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/4915 and lib1541.c
 
-11.12 'no_proxy' string-matches IPv6 numerical addreses
+11.12 'no_proxy' string-matches IPv6 numerical addresses
 
  This has the downside that "::1" for example doesn't match "::0:1" even
  though they are in fact the same address.

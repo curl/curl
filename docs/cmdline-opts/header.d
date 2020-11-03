@@ -30,7 +30,7 @@ You need --proxy-header to send custom headers intended for a HTTP
 proxy. Added in 7.37.0.
 
 Passing on a "Transfer-Encoding: chunked" header when doing a HTTP request
-with a requst body, will make curl send the data using chunked encoding.
+with a request body, will make curl send the data using chunked encoding.
 
 Example:
 
