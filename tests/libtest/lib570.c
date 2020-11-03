@@ -101,8 +101,12 @@ int test(char *URL)
   stream_uri = NULL;
 
   res = curl_easy_perform(curl);
-  if(res != CURLE_RTSP_SESSION_ERROR) {
+  if(res == CURLE_RTSP_SESSION_ERROR) {
+    res = 0;
+  }
+  else {
     fprintf(stderr, "Failed to detect a Session ID mismatch");
+    res = 1;
   }
 
 test_cleanup:
