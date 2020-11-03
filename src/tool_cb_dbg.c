@@ -187,7 +187,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
 
   switch(type) {
   case CURLINFO_TEXT:
-    fprintf(output, "%s== Info: %s", timebuf, data);
+    fprintf(output, "%s== Info: %.*s", timebuf, (int)size, data);
     /* FALLTHROUGH */
   default: /* in case a new one is introduced to shock us */
     return 0;
