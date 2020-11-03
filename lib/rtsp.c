@@ -786,9 +786,18 @@ CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
       failf(data, "Got a blank Session ID");
     }
     else if(data->set.str[STRING_RTSP_SESSION_ID]) {
+      char *end;
+      size_t idlen;
+
+      /* Find the end of Session ID */
+      end = start + 1;
+      while(*end && !ISSPACE(*end))
+        end++;
+      idlen = end - start;
+
       /* If the Session ID is set, then compare */
-      if(strncmp(start, data->set.str[STRING_RTSP_SESSION_ID],
-                 strlen(data->set.str[STRING_RTSP_SESSION_ID]))  != 0) {
+      if(strlen(data->set.str[STRING_RTSP_SESSION_ID]) != idlen ||
+         strncmp(start, data->set.str[STRING_RTSP_SESSION_ID], idlen) != 0) {
         failf(data, "Got RTSP Session ID Line [%s], but wanted ID [%s]",
               start, data->set.str[STRING_RTSP_SESSION_ID]);
         return CURLE_RTSP_SESSION_ERROR;
