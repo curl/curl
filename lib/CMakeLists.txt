@@ -88,6 +88,8 @@ add_library(
   ALIAS ${LIB_NAME}
   )
 
+set_target_properties(${LIB_NAME} PROPERTIES VERSION 4.7.0 SOVERSION 4)
+
 if(MSVC AND NOT BUILD_SHARED_LIBS)
   set_target_properties(${LIB_NAME} PROPERTIES STATIC_LIBRARY_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
 endif()
