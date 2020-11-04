@@ -34,6 +34,7 @@ problems may have been fixed or changed somewhat since this was written!
  2.9 TLS session cache doesn't work with TFO
  2.10 Store TLS context per transfer instead of per connection
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
+ 2.12 FTPS with Schannel times out file list operation
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -295,6 +296,12 @@ problems may have been fixed or changed somewhat since this was written!
  fail, resulting in error SEC_E_BUFFER_TOO_SMALL or SEC_E_MESSAGE_ALTERED.
 
  https://github.com/curl/curl/issues/5488
+
+2.12 FTPS with Schannel times out file list operation
+
+ "Instead of the command completing, it just sits there until the timeout
+ expires." - the same command line seems to work with other TLS backends and
+ other operating systems. See https://github.com/curl/curl/issues/5284.
 
 3. Email protocols
 
