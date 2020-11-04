@@ -498,7 +498,6 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
 
   fail:
   Curl_safefree(h->filename);
-  free(line);
   fclose(fp);
   return CURLE_OUT_OF_MEMORY;
 }
