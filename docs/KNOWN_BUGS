@@ -114,6 +114,7 @@ problems may have been fixed or changed somewhat since this was written!
  12.1 OpenLDAP hangs after returning results
  12.2 LDAP on Windows does authentication wrong?
  12.3 LDAP on Windows doesn't work
+ 12.4 LDAPS with NSS is slow
 
  13. TCP/IP
  13.1 --interface for ipv6 binds to unusable IP address
@@ -812,6 +813,10 @@ problems may have been fixed or changed somewhat since this was written!
  error that says "no memory" !
 
  https://github.com/curl/curl/issues/4261
+
+12.4 LDAPS with NSS is slow
+
+ See https://github.com/curl/curl/issues/5874
 
 13. TCP/IP
 
