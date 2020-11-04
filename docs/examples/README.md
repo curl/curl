@@ -21,7 +21,7 @@ want you do reorganize them like:
 
     `curl-config --cc` -o example example.c `curl-config --cflags --libs`
 
-**Please** do not use the `curl.haxx.se` site as a test target for your
+**Please** do not use the `curl.se` site as a test target for your
 libcurl applications/experiments. Even if some of the examples use that site
 as a URL at some places, it doesn't mean that the URLs work or that we expect
 you to actually torture our website with your tests!  Thanks.

@@ -7,13 +7,13 @@ assignees: ''
 
 ---
 
-<!-- Only file bugs here! Ask questions on the mailing lists https://curl.haxx.se/mail/
+<!-- Only file bugs here! Ask questions on the mailing lists https://curl.se/mail/
 
      SECURITY RELATED? Post it here: https://hackerone.com/curl
 
      There are collections of known issues to be aware of:
-     https://curl.haxx.se/docs/knownbugs.html
-     https://curl.haxx.se/docs/todo.html       -->
+     https://curl.se/docs/knownbugs.html
+     https://curl.se/docs/todo.html       -->
 
 ### I did this
 

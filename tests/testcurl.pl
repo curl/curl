@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -32,7 +32,7 @@
 # curl-autocompile@haxx.se to be dealt with automatically (make sure the
 # subject includes the word "autobuild" as the mail gets silently discarded
 # otherwise).  The most current build status (with a reasonable backlog) will
-# be published on the curl site, at https://curl.haxx.se/auto/
+# be published on the curl site, at https://curl.se/auto/
 
 # USAGE:
 # testcurl.pl [options] [curl-daily-name] > output

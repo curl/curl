@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -99,7 +99,7 @@ CURLcode curl_easy_perform_ev(CURL *easy);
 #endif
 
 #define CURL_CA_CERT_ERRORMSG                                               \
-  "More details here: https://curl.haxx.se/docs/sslcerts.html\n\n"          \
+  "More details here: https://curl.se/docs/sslcerts.html\n\n"          \
   "curl failed to verify the legitimacy of the server and therefore "       \
   "could not\nestablish a secure connection to it. To learn more about "    \
   "this situation and\nhow to fix it, please visit the web page mentioned " \

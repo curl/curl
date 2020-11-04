@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -23,7 +23,7 @@
 
 /*
   Based on a bug report recipe by Rene Bernhardt in
-  https://curl.haxx.se/mail/lib-2011-10/0323.html
+  https://curl.se/mail/lib-2011-10/0323.html
 
   It is reproducible by the following steps:
 

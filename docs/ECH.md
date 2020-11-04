@@ -103,7 +103,7 @@ accordingly.
 
 Proposed-by: @niallor (Niall O'Reilly)\
 Encouraged-by: @sftcd (Stephen Farrell)\
-See-also: [this message](https://curl.haxx.se/mail/lib-2019-05/0108.html)
+See-also: [this message](https://curl.se/mail/lib-2019-05/0108.html)
 
 Limitations:
 -   Book-keeping (symbols-in-versions) needs real release number, not 'DUMMY'.

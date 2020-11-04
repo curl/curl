@@ -45,14 +45,14 @@ one that piques your interest.
 
 Some bugs are known and haven't yet received attention and work enough to get
 fixed. We collect such known existing flaws in the
-[KNOWN_BUGS](https://curl.haxx.se/docs/knownbugs.html) page. Many of them link
+[KNOWN_BUGS](https://curl.se/docs/knownbugs.html) page. Many of them link
 to the original bug report with some additional details, but some may also
 have aged a bit and may require some verification that the bug still exists in
 the same way and that what was said about it in the past is still valid.
 
 ## Fix autobuild problems
 
-On the [autobuilds page](https://curl.haxx.se/dev/builds.html) we show a
+On the [autobuilds page](https://curl.se/dev/builds.html) we show a
 collection of test results from the automatic curl build and tests that are
 performed by volunteers. Fixing compiler warnings and errors shown there is
 something we value greatly. Also, if you own or run systems or architectures
@@ -63,7 +63,7 @@ volunteers running builds automatically to help us keep curl portable.
 
 Ideas for features and functions that we have considered worthwhile to
 implement and provide are kept in the
-[TODO](https://curl.haxx.se/docs/todo.html) file. Some of the ideas are
+[TODO](https://curl.se/docs/todo.html) file. Some of the ideas are
 rough. Some are well thought out. Some probably aren't really suitable
 anymore.
 
@@ -81,7 +81,7 @@ the specific implementation. Either way is fine.
 
 ## CONTRIBUTE
 
-We offer [guidelines](https://curl.haxx.se/dev/contribute.html) that are
+We offer [guidelines](https://curl.se/dev/contribute.html) that are
 suitable to be familiar with before you decide to contribute to curl. If
 you're used to open source development, you'll probably not find many
 surprises in there.

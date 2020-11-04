@@ -1085,18 +1085,18 @@ for older and later versions as things don't change drastically that often.
   the share API.
 
 
-[1]: https://curl.haxx.se/libcurl/c/curl_easy_setopt.html
-[2]: https://curl.haxx.se/libcurl/c/curl_easy_init.html
+[1]: https://curl.se/libcurl/c/curl_easy_setopt.html
+[2]: https://curl.se/libcurl/c/curl_easy_init.html
 [3]: https://c-ares.haxx.se/
 [4]: https://tools.ietf.org/html/rfc7230 "RFC 7230"
-[5]: https://curl.haxx.se/libcurl/c/CURLOPT_ACCEPT_ENCODING.html
-[6]: https://curl.haxx.se/docs/manpage.html#--compressed
-[7]: https://curl.haxx.se/libcurl/c/curl_multi_socket_action.html
-[8]: https://curl.haxx.se/libcurl/c/curl_multi_timeout.html
-[9]: https://curl.haxx.se/libcurl/c/curl_multi_setopt.html
-[10]: https://curl.haxx.se/libcurl/c/CURLMOPT_TIMERFUNCTION.html
-[11]: https://curl.haxx.se/libcurl/c/curl_multi_perform.html
-[12]: https://curl.haxx.se/libcurl/c/curl_multi_fdset.html
-[13]: https://curl.haxx.se/libcurl/c/curl_multi_add_handle.html
-[14]: https://curl.haxx.se/libcurl/c/curl_multi_info_read.html
+[5]: https://curl.se/libcurl/c/CURLOPT_ACCEPT_ENCODING.html
+[6]: https://curl.se/docs/manpage.html#--compressed
+[7]: https://curl.se/libcurl/c/curl_multi_socket_action.html
+[8]: https://curl.se/libcurl/c/curl_multi_timeout.html
+[9]: https://curl.se/libcurl/c/curl_multi_setopt.html
+[10]: https://curl.se/libcurl/c/CURLMOPT_TIMERFUNCTION.html
+[11]: https://curl.se/libcurl/c/curl_multi_perform.html
+[12]: https://curl.se/libcurl/c/curl_multi_fdset.html
+[13]: https://curl.se/libcurl/c/curl_multi_add_handle.html
+[14]: https://curl.se/libcurl/c/curl_multi_info_read.html
 [15]: https://tools.ietf.org/html/rfc7231#section-3.1.2.2

@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: Feature request
-    url: https://curl.haxx.se/mail/
+    url: https://curl.se/mail/
     about: To propose new features or enhancements, please bring that discussion to a suitable curl mailing list.
   - name: Question
-    url: https://curl.haxx.se/mail/
+    url: https://curl.se/mail/
     about: Questions should go to the mailing list
   - name: Commercial support
-    url: https://curl.haxx.se/support.html
+    url: https://curl.se/support.html
     about: Several companies are offering paid support for curl/libcurl

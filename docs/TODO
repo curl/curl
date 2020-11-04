@@ -415,7 +415,7 @@
  See https://github.com/curl/curl/issues/3523
 
  Michael Kaufmann suggestion here:
- https://curl.haxx.se/video/curlup-2017/2017-03-19_05_Michael_Kaufmann_Websocket_support_for_curl.mp4
+ https://curl.se/video/curlup-2017/2017-03-19_05_Michael_Kaufmann_Websocket_support_for_curl.mp4
 
 1.30 config file parsing
 
@@ -525,7 +525,7 @@
  When trying to connect passively to a server which only supports active
  connections, libcurl returns CURLE_FTP_WEIRD_PASV_REPLY and closes the
  connection. There could be a way to fallback to an active connection (and
- vice versa). https://curl.haxx.se/bug/feature.cgi?id=1754793
+ vice versa). https://curl.se/bug/feature.cgi?id=1754793
 
 4.3 Earlier bad letter detection
 
@@ -562,7 +562,7 @@
 5.1 Better persistency for HTTP 1.0
 
  "Better" support for persistent connections over HTTP 1.0
- https://curl.haxx.se/bug/feature.cgi?id=1089001
+ https://curl.se/bug/feature.cgi?id=1089001
 
 5.2 Set custom client ip when using haproxy protocol
 
@@ -639,7 +639,7 @@
  hack ;-)
 
  Please see the following thread for more information:
- https://curl.haxx.se/mail/lib-2012-05/0178.html
+ https://curl.se/mail/lib-2012-05/0178.html
 
 
 8. POP3
@@ -766,9 +766,9 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  https://www.rfc-editor.org/rfc/rfc6698.txt
 
  An initial patch was posted by Suresh Krishnaswamy on March 7th 2013
- (https://curl.haxx.se/mail/lib-2013-03/0075.html) but it was a too simple
+ (https://curl.se/mail/lib-2013-03/0075.html) but it was a too simple
  approach. See Daniel's comments:
- https://curl.haxx.se/mail/lib-2013-03/0103.html . libunbound may be the
+ https://curl.se/mail/lib-2013-03/0103.html . libunbound may be the
  correct library to base this development on.
 
  Björn Stenberg wrote a separate initial take on DANE that was never
