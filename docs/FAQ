@@ -261,7 +261,7 @@ FAQ
   If you want to support our project, consider a donation or a banner-program
   or even better: by helping us with coding, documenting or testing etc.
 
-  See also: https://curl.haxx.se/sponsors.html
+  See also: https://curl.se/sponsors.html
 
   1.7 What about CURL from curl.com?
 
@@ -283,7 +283,7 @@ FAQ
   Please do not mail any single individual unless you really need to. Keep
   curl-related questions on a suitable mailing list. All available mailing
   lists are listed in the MANUAL document and online at
-  https://curl.haxx.se/mail/
+  https://curl.se/mail/
 
   Keeping curl-related questions and discussions on mailing lists allows
   others to join in and help, to share their ideas, to contribute their
@@ -304,7 +304,7 @@ FAQ
   your curl-related problems.
 
   We list available alternatives on the curl website:
-  https://curl.haxx.se/support.html
+  https://curl.se/support.html
 
   1.10 How many are using curl?
 
@@ -336,7 +336,7 @@ FAQ
   If you want the most recent collection of ca certs that Mozilla Firefox
   uses, we recommend that you extract the collection yourself from Mozilla
   Firefox (by running 'make ca-bundle), or by using our online service setup
-  for this purpose: https://curl.haxx.se/docs/caextract.html
+  for this purpose: https://curl.se/docs/caextract.html
 
   1.12 I have a problem who can I chat with?
 
@@ -441,7 +441,7 @@ FAQ
   libressl, BoringSSL, GnuTLS, wolfSSL, NSS, mbedTLS, MesaLink, Secure
   Transport (native iOS/OS X), Schannel (native Windows), GSKit (native IBM
   i), or BearSSL. They all have their pros and cons, and we try to maintain a
-  comparison of them here: https://curl.haxx.se/docs/ssl-compared.html
+  comparison of them here: https://curl.se/docs/ssl-compared.html
 
   2.3 Where can I find a copy of LIBEAY32.DLL?
 
@@ -555,7 +555,7 @@ FAQ
 
   Find out more about which languages that support curl directly, and how to
   install and use them, in the libcurl section of the curl website:
-  https://curl.haxx.se/libcurl/
+  https://curl.se/libcurl/
 
   All the various bindings to libcurl are made by other projects and people,
   outside of the cURL project. The cURL project itself only produces libcurl
@@ -689,7 +689,7 @@ FAQ
   certificate. Server certificate verification is enabled by default in curl
   and libcurl and is often the reason for problems as explained in FAQ entry
   4.12 and the SSLCERTS document
-  (https://curl.haxx.se/docs/sslcerts.html). Server certificates that are
+  (https://curl.se/docs/sslcerts.html). Server certificates that are
   "self-signed" or otherwise signed by a CA that you do not have a CA cert
   for, cannot be verified. If the verification during a connect fails, you are
   refused access. You then need to explicitly disable the verification to
@@ -980,7 +980,7 @@ FAQ
   this check.
 
   Details are also in the SSLCERTS file in the release archives, found online
-  here: https://curl.haxx.se/docs/sslcerts.html
+  here: https://curl.se/docs/sslcerts.html
 
   4.13 Why is curl -R on Windows one hour off?
 
@@ -1157,7 +1157,7 @@ FAQ
 
   There may be some exceptions to thread safety depending on how libcurl was
   built. Please review the guidelines for thread safety to learn more:
-  https://curl.haxx.se/libcurl/c/threadsafe.html
+  https://curl.se/libcurl/c/threadsafe.html
 
   5.2 How can I receive all data into a large memory chunk?
 
@@ -1512,7 +1512,7 @@ FAQ
   notice" somewhere. Most probably like in the documentation or in the section
   where other third party dependencies already are mentioned and acknowledged.
 
-  As can be seen here: https://curl.haxx.se/docs/companies.html and elsewhere,
+  As can be seen here: https://curl.se/docs/companies.html and elsewhere,
   more and more companies are discovering the power of libcurl and take
   advantage of it even in commercial environments.
 

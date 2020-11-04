@@ -63,7 +63,7 @@ This release includes the following bugfixes:
 
 This release includes the following known bugs:
 
- o see docs/KNOWN_BUGS (https://curl.haxx.se/docs/knownbugs.html)
+ o see docs/KNOWN_BUGS (https://curl.se/docs/knownbugs.html)
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
@@ -79,48 +79,48 @@ advice from friends like these:
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=6080
- [2] = https://curl.haxx.se/bug/?i=6079
- [3] = https://curl.haxx.se/bug/?i=6102
- [4] = https://curl.haxx.se/bug/?i=6085
- [5] = https://curl.haxx.se/bug/?i=6083
- [6] = https://curl.haxx.se/bug/?i=6097
- [7] = https://curl.haxx.se/bug/?i=6049
- [8] = https://curl.haxx.se/bug/?i=6096
- [9] = https://curl.haxx.se/mail/lib-2020-10/0037.html
- [10] = https://curl.haxx.se/bug/?i=6093
- [11] = https://curl.haxx.se/bug/?i=6092
- [12] = https://curl.haxx.se/bug/?i=6095
- [13] = https://curl.haxx.se/bug/?i=6088
- [14] = https://curl.haxx.se/bug/?i=6086
- [15] = https://curl.haxx.se/bug/?i=6061
- [16] = https://curl.haxx.se/bug/?i=6053
- [17] = https://curl.haxx.se/bug/?i=6125
- [18] = https://curl.haxx.se/bug/?i=6068
- [19] = https://curl.haxx.se/bug/?i=6069
- [20] = https://curl.haxx.se/bug/?i=5868
- [21] = https://curl.haxx.se/bug/?i=6118
- [22] = https://curl.haxx.se/bug/?i=6119
- [23] = https://curl.haxx.se/bug/?i=6117
- [24] = https://curl.haxx.se/bug/?i=6116
- [25] = https://curl.haxx.se/bug/?i=6108
- [26] = https://curl.haxx.se/bug/?i=6108
- [27] = https://curl.haxx.se/bug/?i=6105
- [28] = https://curl.haxx.se/bug/?i=6145
- [29] = https://curl.haxx.se/bug/?i=6141
- [30] = https://curl.haxx.se/bug/?i=6072
- [31] = https://curl.haxx.se/bug/?i=6113
- [32] = https://curl.haxx.se/bug/?i=6134
- [33] = https://curl.haxx.se/bug/?i=6126
- [34] = https://curl.haxx.se/bug/?i=6131
- [36] = https://curl.haxx.se/bug/?i=6124
- [37] = https://curl.haxx.se/bug/?i=5896
- [38] = https://curl.haxx.se/bug/?i=6074
- [40] = https://curl.haxx.se/bug/?i=6154
- [41] = https://curl.haxx.se/bug/?i=6153
- [42] = https://curl.haxx.se/bug/?i=6156
- [43] = https://curl.haxx.se/bug/?i=6155
- [44] = https://curl.haxx.se/bug/?i=6147
- [45] = https://curl.haxx.se/bug/?i=6148
- [46] = https://curl.haxx.se/bug/?i=6138
- [47] = https://curl.haxx.se/bug/?i=6139
+ [1] = https://curl.se/bug/?i=6080
+ [2] = https://curl.se/bug/?i=6079
+ [3] = https://curl.se/bug/?i=6102
+ [4] = https://curl.se/bug/?i=6085
+ [5] = https://curl.se/bug/?i=6083
+ [6] = https://curl.se/bug/?i=6097
+ [7] = https://curl.se/bug/?i=6049
+ [8] = https://curl.se/bug/?i=6096
+ [9] = https://curl.se/mail/lib-2020-10/0037.html
+ [10] = https://curl.se/bug/?i=6093
+ [11] = https://curl.se/bug/?i=6092
+ [12] = https://curl.se/bug/?i=6095
+ [13] = https://curl.se/bug/?i=6088
+ [14] = https://curl.se/bug/?i=6086
+ [15] = https://curl.se/bug/?i=6061
+ [16] = https://curl.se/bug/?i=6053
+ [17] = https://curl.se/bug/?i=6125
+ [18] = https://curl.se/bug/?i=6068
+ [19] = https://curl.se/bug/?i=6069
+ [20] = https://curl.se/bug/?i=5868
+ [21] = https://curl.se/bug/?i=6118
+ [22] = https://curl.se/bug/?i=6119
+ [23] = https://curl.se/bug/?i=6117
+ [24] = https://curl.se/bug/?i=6116
+ [25] = https://curl.se/bug/?i=6108
+ [26] = https://curl.se/bug/?i=6108
+ [27] = https://curl.se/bug/?i=6105
+ [28] = https://curl.se/bug/?i=6145
+ [29] = https://curl.se/bug/?i=6141
+ [30] = https://curl.se/bug/?i=6072
+ [31] = https://curl.se/bug/?i=6113
+ [32] = https://curl.se/bug/?i=6134
+ [33] = https://curl.se/bug/?i=6126
+ [34] = https://curl.se/bug/?i=6131
+ [36] = https://curl.se/bug/?i=6124
+ [37] = https://curl.se/bug/?i=5896
+ [38] = https://curl.se/bug/?i=6074
+ [40] = https://curl.se/bug/?i=6154
+ [41] = https://curl.se/bug/?i=6153
+ [42] = https://curl.se/bug/?i=6156
+ [43] = https://curl.se/bug/?i=6155
+ [44] = https://curl.se/bug/?i=6147
+ [45] = https://curl.se/bug/?i=6148
+ [46] = https://curl.se/bug/?i=6138
+ [47] = https://curl.se/bug/?i=6139

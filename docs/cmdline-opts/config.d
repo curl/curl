@@ -29,7 +29,7 @@ Note that to be able to specify a URL in the config file, you need to specify
 it using the --url option, and not by simply writing the URL on its own
 line. So, it could look similar to this:
 
-url = "https://curl.haxx.se/docs/"
+url = "https://curl.se/docs/"
 
 When curl is invoked, it (unless --disable is used) checks for a default
 config file and uses it if found. The default config file is checked for in

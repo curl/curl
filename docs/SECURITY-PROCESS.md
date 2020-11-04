@@ -8,7 +8,7 @@ Publishing Information
 ----------------------
 
 All known and public curl or libcurl related vulnerabilities are listed on
-[the curl website security page](https://curl.haxx.se/docs/security.html).
+[the curl website security page](https://curl.se/docs/security.html).
 
 Security vulnerabilities **should not** be entered in the project's public bug
 tracker.
@@ -128,5 +128,5 @@ Publishing Security Advisories
 Bug Bounty
 ----------
 
-See [BUG-BOUNTY](https://curl.haxx.se/docs/bugbounty.html) for details on the
+See [BUG-BOUNTY](https://curl.se/docs/bugbounty.html) for details on the
 bug bounty program.

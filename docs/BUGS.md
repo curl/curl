@@ -20,7 +20,7 @@
  Please read the rest of this document below first before doing that!
 
  If you feel you need to ask around first, find a suitable [mailing list](
- https://curl.haxx.se/mail/) and post your questions there.
+ https://curl.se/mail/) and post your questions there.
 
 ## Security bugs
 
@@ -39,7 +39,7 @@
  vulnerable versions.
 
  The curl project's process for handling security related issues is
- [documented separately](https://curl.haxx.se/dev/secprocess.html).
+ [documented separately](https://curl.se/dev/secprocess.html).
 
 ## What to report
 
@@ -144,7 +144,7 @@
 
  The curl project typically releases new versions every other month, and we
  fix several hundred bugs per year. For a huge table of releases, number of
- bug fixes and more, see: https://curl.haxx.se/docs/releases.html
+ bug fixes and more, see: https://curl.se/docs/releases.html
 
  The developers in the curl project do not have bandwidth or energy enough to
  maintain several branches or to spend much time on hunting down problems in
@@ -170,7 +170,7 @@
  Security wise, it is almost always a bad idea to lag behind the current curl
  versions by a lot. We keeping discovering and reporting security problems
  over time see you can see in [this
- table](https://curl.haxx.se/docs/vulnerabilities.html)
+ table](https://curl.se/docs/vulnerabilities.html)
 
 # Bug fixing procedure
 

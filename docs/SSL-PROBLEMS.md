@@ -84,4 +84,4 @@
 
   References:
 
-  https://curl.haxx.se/docs/ssl-compared.html
+  https://curl.se/docs/ssl-compared.html

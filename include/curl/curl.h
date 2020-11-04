@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,7 +24,7 @@
 
 /*
  * If you have libcurl problems, all docs and details are found here:
- *   https://curl.haxx.se/libcurl/
+ *   https://curl.se/libcurl/
  *
  * curl-library mailing list subscription and unsubscription web interface:
  *   https://cool.haxx.se/mailman/listinfo/curl-library/

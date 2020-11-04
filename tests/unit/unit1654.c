@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -111,7 +111,7 @@ UNITTEST_START
   result =
     Curl_altsvc_parse(curl, asi,
                       "h2=\":443\", h3=\":443\"; ma = 120; persist = 1\r\n",
-                      ALPN_h1, "curl.haxx.se", 80);
+                      ALPN_h1, "curl.se", 80);
   if(result) {
     fprintf(stderr, "Curl_altsvc_parse(5) failed!\n");
     unitfail++;
@@ -120,7 +120,7 @@ UNITTEST_START
 
   /* clear that one again and decrease the counter */
   result = Curl_altsvc_parse(curl, asi, "clear;\r\n",
-                             ALPN_h1, "curl.haxx.se", 80);
+                             ALPN_h1, "curl.se", 80);
   if(result) {
     fprintf(stderr, "Curl_altsvc_parse(6) failed!\n");
     unitfail++;

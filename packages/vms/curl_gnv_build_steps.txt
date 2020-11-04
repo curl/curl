@@ -36,7 +36,7 @@ time that this document was written.
 [gnv.common_src]curl_*_original_src.bck is the original source of the curl kit
 as provided by the curl project.  [gnv.vms_src]curl-*_vms_src.bck, if present,
 has the OpenVMS specific files that are used for building that are not yet in
-the curl source kits for that release distributed https://curl.haxx.se
+the curl source kits for that release distributed https://curl.se
 
 These backup savesets should be restored to different directory trees on
 an ODS-5 volume(s) which are referenced by concealed rooted logical names.

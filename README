@@ -24,7 +24,7 @@ README
 CONTACT
 
   If you have problems, questions, ideas or suggestions, please contact us
-  by posting to a suitable mailing list. See https://curl.haxx.se/mail/
+  by posting to a suitable mailing list. See https://curl.se/mail/
 
   All contributors to the project are listed in the THANKS document.
 
@@ -32,7 +32,7 @@ WEBSITE
 
   Visit the curl website for the latest news and downloads:
 
-        https://curl.haxx.se/
+        https://curl.se/
 
 GIT
 

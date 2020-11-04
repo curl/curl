@@ -71,7 +71,7 @@ fail):
 
 Fetch two files and store them with their remote names:
 
-    curl -O www.haxx.se/index.html -O curl.haxx.se/download.html
+    curl -O www.haxx.se/index.html -O curl.se/download.html
 
 ## Using Passwords
 
@@ -273,7 +273,7 @@ will then store the headers in the specified file.
 
 Store the HTTP headers in a separate file (headers.txt in the example):
 
-      curl --dump-header headers.txt curl.haxx.se
+      curl --dump-header headers.txt curl.se
 
 Note that headers stored in a separate file can be very useful at a later time
 if you want curl to use cookies sent by the server. More about that in the
@@ -772,7 +772,7 @@ fallback mechanism in case if LDAPv3 will fail to connect.
 LDAP is a complex thing and writing an LDAP query is not an easy task. I do
 advise you to dig up the syntax description for that elsewhere. One such place
 might be: [RFC 2255, The LDAP URL
-Format](https://curl.haxx.se/rfc/rfc2255.txt)
+Format](https://curl.se/rfc/rfc2255.txt)
 
 To show you an example, this is how I can get all people from my local LDAP
 server that has a certain sub-domain in their email address:
@@ -837,7 +837,7 @@ use it for all protocols where authentication is used.
 
 A very simple `.netrc` file could look something like:
 
-    machine curl.haxx.se login iamdaniel password mysecret
+    machine curl.se login iamdaniel password mysecret
 
 ## Custom Output
 
@@ -977,7 +977,7 @@ fail.
 
 For your convenience, we have several open mailing lists to discuss curl, its
 development and things relevant to this. Get all info at
-https://curl.haxx.se/mail/.
+https://curl.se/mail/.
 
 Please direct curl questions, feature requests and trouble reports to one of
 these mailing lists instead of mailing any individual.
