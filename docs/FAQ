@@ -187,8 +187,8 @@ FAQ
   market. Curl is targeted at single-shot file transfers.
 
   Curl is not a website mirroring program. If you want to use curl to mirror
-  something: fine, go ahead and write a script that wraps around curl to make
-  it reality (like curlmirror.pl does).
+  something: fine, go ahead and write a script that wraps around curl or use
+  libcurl to make it reality.
 
   Curl is not an FTP site mirroring program. Sure, get and send FTP with curl
   but if you want systematic and sequential behavior you should write a
@@ -402,7 +402,7 @@ FAQ
   libraries that are needed (with shared libraries, that dependency "chain" is
   handled automatically). This is a very error-prone process and one that also
   tends to vary over time depending on the release versions of the involved
-  components and may also different between operating systems.
+  components and may also differ between operating systems.
 
   For that reason, configure does very little attempts to actually figure this
   out and you are instead encouraged to set LIBS and LDFLAGS accordingly when
