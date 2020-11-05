@@ -2073,7 +2073,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_ALTSVC, config->altsvc);
 
         if(config->hsts)
-          my_setopt_bitmask(curl, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
+          my_setopt_str(curl, CURLOPT_HSTS, config->hsts);
 
 #ifdef USE_METALINK
         if(!metalink && config->use_metalink) {
