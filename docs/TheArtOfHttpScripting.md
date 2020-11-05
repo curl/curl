@@ -11,7 +11,7 @@
 
  Curl is a command line tool for doing all sorts of URL manipulations and
  transfers, but this particular document will focus on how to use it when
- doing HTTP requests for fun and profit. I willl assume that you know how to
+ doing HTTP requests for fun and profit. I will assume that you know how to
  invoke `curl --help` or `curl --manual` to get basic information about it.
 
  Curl is not written to do everything for you. It makes the requests, it gets
