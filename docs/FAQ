@@ -24,11 +24,8 @@ FAQ
   1.15 How do I port libcurl to my OS?
 
  2. Install Related Problems
-  2.1 configure doesn't find OpenSSL even when it is installed
-   2.1.1 native linker doesn't find OpenSSL
-   2.1.2 only the libssl lib is missing
+  2.1 configure fails when using static libraries
   2.2 Does curl work/build with other SSL libraries?
-  2.3 Where can I find a copy of LIBEAY32.DLL?
   2.4 Does curl support SOCKS (RFC 1928) ?
 
  3. Usage Problems
@@ -394,42 +391,23 @@ FAQ
 
 2. Install Related Problems
 
-  2.1 configure doesn't find OpenSSL even when it is installed
+  2.1 configure fails when using static libraries
 
-  This may be because of several reasons.
+  You may find that configure fails to properly detect the entire dependency
+  chain of libraries when you provide static versions of the libraries that
+  configure checks for.
 
-    2.1.1 native linker doesn't find openssl
+  The reason why static libraries is much harder to deal with is that for them
+  we don't get any help but the script itself must know or check what more
+  libraries that are needed (with shared libraries, that dependency "chain" is
+  handled automatically). This is a very error-prone process and one that also
+  tends to vary over time depending on the release versions of the involved
+  components and may also different between operating systems.
 
-    Affected platforms:
-      Solaris (native cc compiler)
-      HPUX (native cc compiler)
-      SGI IRIX (native cc compiler)
-      SCO UNIX (native cc compiler)
-
-    When configuring curl, I specify --with-ssl. OpenSSL is installed in
-    /usr/local/ssl Configure reports SSL in /usr/local/ssl, but fails to find
-    CRYPTO_lock in -lcrypto
-
-    Cause: The cc for this test places the -L/usr/local/ssl/lib AFTER
-    -lcrypto, so ld can't find the library. This is due to a bug in the GNU
-    autoconf tool.
-
-    Workaround: Specifying "LDFLAGS=-L/usr/local/ssl/lib" in front of
-    ./configure places the -L/usr/local/ssl/lib early enough in the command
-    line to make things work
-
-    2.1.2 only the libssl lib is missing
-
-    If all include files and the libcrypto lib is present, with only the
-    libssl being missing according to configure, this is most likely because
-    a few functions are left out from the libssl.
-
-    If the function names missing include RSA or RSAREF you can be certain
-    that this is because libssl requires the RSA and RSAREF libs to build.
-
-    See the INSTALL file section that explains how to add those libs to
-    configure. Make sure that you remove the config.cache file before you
-    rerun configure with the new flags.
+  For that reason, configure does very little attempts to actually figure this
+  out and you are instead encouraged to set LIBS and LDFLAGS accordingly when
+  you invoke configure, and point out the needed libraries and set the
+  necessary flags yourself.
 
   2.2 Does curl work/build with other SSL libraries?
 
@@ -443,19 +421,9 @@ FAQ
   i), or BearSSL. They all have their pros and cons, and we try to maintain a
   comparison of them here: https://curl.se/docs/ssl-compared.html
 
-  2.3 Where can I find a copy of LIBEAY32.DLL?
-
-  That is an OpenSSL binary built for Windows.
-
-  Curl can be built with OpenSSL to do the SSL stuff. The LIBEAY32.DLL is then
-  what curl needs on a windows machine to do https:// etc. Check out the curl
-  website to find accurate and up-to-date pointers to recent OpenSSL DLLs and
-  other binary packages.
-
   2.4 Does curl support SOCKS (RFC 1928) ?
 
   Yes, SOCKS 4 and 5 are supported.
-
 
 3. Usage problems
 
@@ -485,13 +453,13 @@ FAQ
 
   3.3 Why doesn't my posting using -F work?
 
-  You can't arbitrarily use -F or -d, the choice between -F or -d depends on the
-  HTTP operation you need curl to do and what the web server that will receive
-  your post expects.
+  You can't arbitrarily use -F or -d, the choice between -F or -d depends on
+  the HTTP operation you need curl to do and what the web server that will
+  receive your post expects.
 
-  If the form you're trying to submit uses the type 'multipart/form-data', then
-  and only then you must use the -F type. In all the most common cases, you
-  should use -d which then causes a posting with the type
+  If the form you're trying to submit uses the type 'multipart/form-data',
+  then and only then you must use the -F type. In all the most common cases,
+  you should use -d which then causes a posting with the type
   'application/x-www-form-urlencoded'.
 
   This is described in some detail in the MANUAL and TheArtOfHttpScripting
