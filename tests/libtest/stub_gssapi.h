@@ -68,6 +68,7 @@ typedef uint32_t OM_uint32;
 
 typedef OM_uint32 gss_qop_t;
 
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct gss_buffer_desc_struct {
   size_t length;
   void *value;
@@ -85,11 +86,13 @@ struct gss_name_t_desc_struct;
 typedef struct gss_name_t_desc_struct *gss_name_t;
 typedef const struct gss_name_t_desc_struct *gss_const_name_t;
 
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct gss_OID_desc_struct {
   OM_uint32 length;
   void      *elements;
 } gss_OID_desc, *gss_OID;
 
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct gss_channel_bindings_struct {
   OM_uint32 initiator_addrtype;
   gss_buffer_desc initiator_address;
