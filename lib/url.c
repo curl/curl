@@ -1922,8 +1922,26 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
 #ifdef USE_HSTS
   if(data->hsts && strcasecompare("http", data->state.up.scheme)) {
-    if(Curl_hsts(data->hsts, data->state.up.hostname, TRUE))
-      infof(data, "Switch from HTTP to HTTPS due to HSTS!\n");
+    if(Curl_hsts(data->hsts, data->state.up.hostname, TRUE)) {
+      char *url;
+      Curl_safefree(data->state.up.scheme);
+      uc = curl_url_set(uh, CURLUPART_SCHEME, "https", 0);
+      if(uc)
+        return Curl_uc_to_curlcode(uc);
+      if(data->change.url_alloc)
+        Curl_safefree(data->change.url);
+      /* after update, get the updated version */
+      uc = curl_url_get(uh, CURLUPART_URL, &url, 0);
+      if(uc)
+        return Curl_uc_to_curlcode(uc);
+      uc = curl_url_get(uh, CURLUPART_SCHEME, &data->state.up.scheme, 0);
+      if(uc)
+        return Curl_uc_to_curlcode(uc);
+      data->change.url = url;
+      data->change.url_alloc = TRUE;
+      infof(data, "Switched from HTTP to HTTPS due to HSTS => %s\n",
+            data->change.url);
+    }
   }
 #endif
 
