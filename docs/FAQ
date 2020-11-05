@@ -64,9 +64,9 @@ FAQ
    4.5.5 "405 Method Not Allowed"
    4.5.6 "301 Moved Permanently"
   4.6 Can you tell me what error code 142 means?
-  4.7 How do I keep user names and passwords secret in Curl command lines?
+  4.7 How do I keep user names and passwords secret in curl command lines?
   4.8 I found a bug!
-  4.9 Curl can't authenticate to the server that requires NTLM?
+  4.9 curl can't authenticate to the server that requires NTLM?
   4.10 My HTTP request using HEAD, PUT or DELETE doesn't work!
   4.11 Why do my HTTP range requests return the full document?
   4.12 Why do I get "certificate verify failed" ?
@@ -125,7 +125,7 @@ FAQ
   originally with URL spelled in uppercase to make it obvious it deals with
   URLs. The fact it can also be pronounced 'see URL' also helped, it works as
   an abbreviation for "Client URL Request Library" or why not the recursive
-  version: "Curl URL Request Library".
+  version: "curl URL Request Library".
 
   The cURL project produces two products:
 
@@ -181,22 +181,22 @@ FAQ
 
   1.3 What is curl not?
 
-  Curl is not a wget clone. That is a common misconception.  Never, during
+  curl is not a wget clone. That is a common misconception.  Never, during
   curl's development, have we intended curl to replace wget or compete on its
-  market. Curl is targeted at single-shot file transfers.
+  market. curl is targeted at single-shot file transfers.
 
-  Curl is not a website mirroring program. If you want to use curl to mirror
+  curl is not a website mirroring program. If you want to use curl to mirror
   something: fine, go ahead and write a script that wraps around curl or use
   libcurl to make it reality.
 
-  Curl is not an FTP site mirroring program. Sure, get and send FTP with curl
+  curl is not an FTP site mirroring program. Sure, get and send FTP with curl
   but if you want systematic and sequential behavior you should write a
   script (or write a new program that interfaces libcurl) and do it.
 
-  Curl is not a PHP tool, even though it works perfectly well when used from
+  curl is not a PHP tool, even though it works perfectly well when used from
   or with PHP (when using the PHP/CURL module).
 
-  Curl is not a program for a single operating system. Curl exists, compiles,
+  curl is not a program for a single operating system. curl exists, compiles,
   builds and runs under a wide range of operating systems, including all
   modern Unixes (and a bunch of older ones too), Windows, Amiga, BeOS, OS/2,
   OS X, QNX etc.
@@ -207,12 +207,12 @@ FAQ
   better. We do however believe in a few rules when it comes to the future of
   curl:
 
-  Curl -- the command line tool -- is to remain a non-graphical command line
+  curl -- the command line tool -- is to remain a non-graphical command line
   tool. If you want GUIs or fancy scripting capabilities, you should look for
   another tool that uses libcurl.
 
   We do not add things to curl that other small and available tools already do
-  very well at the side. Curl's output can be piped into another program or
+  very well at the side. curl's output can be piped into another program or
   redirected to another file for the next program to interpret.
 
   We focus on protocol related issues and improvements. If you want to do more
@@ -448,7 +448,7 @@ FAQ
 
   3.2 How do I tell curl to resume a transfer?
 
-  Curl supports resumed transfers both ways on both FTP and HTTP.
+  curl supports resumed transfers both ways on both FTP and HTTP.
   Try the -C option.
 
   3.3 Why doesn't my posting using -F work?
@@ -507,7 +507,7 @@ FAQ
 
   3.8 How do I tell curl to follow HTTP redirects?
 
-  Curl does not follow so-called redirects by default. The Location: header
+  curl does not follow so-called redirects by default. The Location: header
   that informs the client about this is only interpreted if you're using the
   -L/--location option. As in:
 
@@ -542,7 +542,7 @@ FAQ
 
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
-  Curl adheres to the HTTP spec, which basically means you can play with *any*
+  curl adheres to the HTTP spec, which basically means you can play with *any*
   protocol that is built on top of HTTP. Protocols such as SOAP, WEBDAV and
   XML-RPC are all such ones. You can use -X to set custom requests and -H to
   set custom headers (or replace internally generated ones).
@@ -594,7 +594,7 @@ FAQ
 
   3.14 Does curl support Javascript or PAC (automated proxy config)?
 
-  Many web pages do magic stuff using embedded Javascript. Curl and libcurl
+  Many web pages do magic stuff using embedded Javascript. curl and libcurl
   have no built-in support for that, so it will be treated just like any other
   contents.
 
@@ -794,7 +794,7 @@ FAQ
 
   4.4 Why do I get downloaded data even though the web page doesn't exist?
 
-  Curl asks remote servers for the page you specify. If the page doesn't exist
+  curl asks remote servers for the page you specify. If the page doesn't exist
   at the server, the HTTP protocol defines how the server should respond and
   that means that headers and a "page" will be returned. That's simply how
   HTTP works.
@@ -853,7 +853,7 @@ FAQ
   appreciate a detailed bug report from you that describes how we could go
   ahead and repeat this!
 
-  4.7 How do I keep user names and passwords secret in Curl command lines?
+  4.7 How do I keep user names and passwords secret in curl command lines?
 
   This problem has two sides:
 
@@ -887,7 +887,7 @@ FAQ
   If there is a bug, read the BUGS document first. Then report it as described
   in there.
 
-  4.9 Curl can't authenticate to the server that requires NTLM?
+  4.9 curl can't authenticate to the server that requires NTLM?
 
   NTLM support requires OpenSSL, GnuTLS, mbedTLS, NSS, Secure Transport, or
   Microsoft Windows libraries at build-time to provide this functionality.
@@ -920,7 +920,7 @@ FAQ
       SSL3_GET_SERVER_CERTIFICATE:certificate verify failed
 
   Then it means that curl couldn't verify that the server's certificate was
-  good. Curl verifies the certificate using the CA cert bundle that comes with
+  good. curl verifies the certificate using the CA cert bundle that comes with
   the curl installation.
 
   To disable the verification (which makes it act like curl did before 7.10),
@@ -1172,7 +1172,7 @@ FAQ
   5.6 What about Keep-Alive or persistent connections?
 
   curl and libcurl have excellent support for persistent connections when
-  transferring several files from the same server.  Curl will attempt to reuse
+  transferring several files from the same server.  curl will attempt to reuse
   connections for all URLs specified on the same command line/config file, and
   libcurl will reuse connections for all transfers that are made using the
   same libcurl handle.
@@ -1391,7 +1391,7 @@ FAQ
 
 6. License Issues
 
-  Curl and libcurl are released under a MIT/X derivate license. The license is
+  curl and libcurl are released under a MIT/X derivate license. The license is
   very liberal and should not impose a problem for your project. This section
   is just a brief summary for the cases we get the most questions. (Parts of
   this section was much enhanced by Bjorn Reese.)
