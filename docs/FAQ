@@ -53,7 +53,6 @@ FAQ
   3.22 curl -X gives me HTTP problems
 
  4. Running Problems
-  4.1 Problems connecting to SSL servers.
   4.2 Why do I get problems when I use & or % in the URL?
   4.3 How can I use {, }, [ or ] to specify multiple URLs?
   4.4 Why do I get downloaded data even though the web page doesn't exist?
@@ -373,7 +372,8 @@ FAQ
   lots of people who can review patches, comment on them and "receive" them
   properly.
 
-  Lots of more details are found in the CONTRIBUTE and INTERNALS docs.
+  Lots of more details are found in the CONTRIBUTE.md and INTERNALS.md
+  documents.
 
   1.15 How do I port libcurl to my OS?
 
@@ -409,9 +409,9 @@ FAQ
   you invoke configure, and point out the needed libraries and set the
   necessary flags yourself.
 
-  2.2 Does curl work/build with other SSL libraries?
+  2.2 Does curl work with other SSL libraries?
 
-  Curl has been written to use a generic SSL function layer internally, and
+  curl has been written to use a generic SSL function layer internally, and
   that SSL functionality can then be provided by one out of many different SSL
   backends.
 
@@ -757,21 +757,6 @@ FAQ
 
 
 4. Running Problems
-
-  4.1 Problems connecting to SSL servers.
-
-  It took a very long time before we could sort out why curl had problems to
-  connect to certain SSL servers when using SSLeay or OpenSSL v0.9+.  The
-  error sometimes showed up similar to:
-
-  16570:error:1407D071:SSL routines:SSL2_READ:bad mac decode:s2_pkt.c:233:
-
-  It turned out to be because many older SSL servers don't deal with SSLv3
-  requests properly. To correct this problem, tell curl to select SSLv2 from
-  the command line (-2/--sslv2).
-
-  There have also been examples where the remote server didn't like the SSLv2
-  request and instead you had to force curl to use SSLv3 with -3/--sslv3.
 
   4.2 Why do I get problems when I use & or % in the URL?
 
