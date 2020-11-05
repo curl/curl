@@ -121,8 +121,6 @@ static CURLcode hsts_create(struct hsts *h,
     free(sts);
     return CURLE_OUT_OF_MEMORY;
   }
-  fprintf(stderr, "*** Add %s %s %d\n", hostname,
-          subdomains?"SUB":"-", (int)expires);
   Curl_llist_insert_next(&h->list, h->list.tail, sts, &sts->node);
   return CURLE_OK;
 }
