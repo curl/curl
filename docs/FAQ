@@ -913,27 +913,32 @@ FAQ
 
   4.12 Why do I get "certificate verify failed" ?
 
-  You invoke curl 7.10 or later to communicate on a https:// URL and get an
-  error back looking something similar to this:
+  When you invoke curl and get an error 60 error back it means that curl
+  couldn't verify that the server's certificate was good. curl verifies the
+  certificate using the CA cert bundle and verifying for which names the
+  certficiate has been granted.
 
-      curl: (35) SSL: error:14090086:SSL routines:
-      SSL3_GET_SERVER_CERTIFICATE:certificate verify failed
+  To completely disable the certficiate verification, use -k. This does
+  however enable man-in-the-middle attacks and makes the transfer INSECURE.
+  We strongly advice against doing this for more than experiments.
 
-  Then it means that curl couldn't verify that the server's certificate was
-  good. curl verifies the certificate using the CA cert bundle that comes with
-  the curl installation.
+  If you get this failure with a CA cert bundle installed and used, the
+  server's certificate might not be signed by one of the CA's in yout CA
+  store. It might for example be self-signed. You then correct this problem by
+  obtaining a valid CA cert for the server. Or again, decrease the security by
+  disabling this check.
 
-  To disable the verification (which makes it act like curl did before 7.10),
-  use -k. This does however enable man-in-the-middle attacks.
+  At times, you find that the verification works in your favorite browser but
+  fails in curl. When this happens, the reason is usually that the server
+  sends an incomplete cert chain. The server is mandated to send all
+  "intermediate certificates" but doesn't. This typically works with browsers
+  anyway since they A) cache such certs and B) supports AIA which downloads
+  such missing certificates on demand. This is a server misconfiguration. A
+  good way to figure out if this is the case it to use the SSL Labs server
+  test and check the certificate chain: https://www.ssllabs.com/ssltest/
 
-  If you get this failure but are having a CA cert bundle installed and used,
-  the server's certificate is not signed by one of the CA's in the bundle. It
-  might for example be self-signed. You then correct this problem by obtaining
-  a valid CA cert for the server. Or again, decrease the security by disabling
-  this check.
-
-  Details are also in the SSLCERTS file in the release archives, found online
-  here: https://curl.se/docs/sslcerts.html
+  Details are also in the SSLCERTS.md document, found online here:
+  https://curl.se/docs/sslcerts.html
 
   4.13 Why is curl -R on Windows one hour off?
 
