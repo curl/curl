@@ -4515,6 +4515,8 @@ if test "$want_pthreads" != "no"; then
       if test "$USE_THREADS_POSIX" != "1"
       then
         CFLAGS="$CFLAGS -pthread"
+        # assign PTHREAD for pkg-config use
+        PTHREAD=" -pthread"
         AC_CHECK_LIB(pthread, pthread_create,
                      [USE_THREADS_POSIX=1],
                      [ CFLAGS="$save_CFLAGS"])
@@ -4945,7 +4947,7 @@ CURL_CONFIGURE_SYMBOL_HIDING
 dnl
 dnl All the library dependencies put into $LIB apply to libcurl only.
 dnl
-LIBCURL_LIBS=$LIBS
+LIBCURL_LIBS="$LIBS$PTHREAD"
 
 AC_SUBST(LIBCURL_LIBS)
 AC_SUBST(CURL_NETWORK_LIBS)
