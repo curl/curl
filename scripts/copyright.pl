@@ -43,9 +43,6 @@ my @skiplist=(
     '^projects/Windows/.*.tmpl$', # generated MSVC file
     '^projects/Windows/.*.vcxproj.filters$', # generated MSVC file
     '^m4/ax_compile_check_sizeof.m4$', # imported, leave be
-    '^m4/ax_compute_relative_paths.m4$', # imported, leave be
-    '^m4/ax_normalize_path.m4$', # imported, leave be
-    '^m4/ax_recursive_eval.m4$', # imported, leave be
     '^.mailmap', # git control file
     '\/readme',
     '^.github/', # github instruction files
