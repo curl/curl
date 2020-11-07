@@ -451,7 +451,6 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
 {
   const char *p = value;
   size_t len;
-  enum alpnid dstalpnid = srcalpnid; /* the same by default */
   char namebuf[MAX_ALTSVC_HOSTLEN] = "";
   char alpnbuf[MAX_ALTSVC_ALPNLEN] = "";
   struct altsvc *as;
@@ -478,7 +477,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   do {
     if(*p == '=') {
       /* [protocol]="[host][:port]" */
-      dstalpnid = alpn2alpnid(alpnbuf);
+      enum alpnid dstalpnid = alpn2alpnid(alpnbuf); /* the same by default */
       p++;
       if(*p == '\"') {
         const char *dsthost = "";
