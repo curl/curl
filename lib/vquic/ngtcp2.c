@@ -1163,6 +1163,7 @@ static nghttp3_conn_callbacks ngh3_callbacks = {
   cb_h3_send_stop_sending,
   NULL, /* push_stream */
   NULL, /* end_stream */
+  NULL, /* reset_stream */
 };
 
 static int init_ngh3_conn(struct quicsocket *qs)
