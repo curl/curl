@@ -48,7 +48,8 @@ thus the string storage associated to the pointer argument may be overwritten
 after \fIcurl_easy_setopt(3)\fP returns. The only exception to this rule is
 really \fICURLOPT_POSTFIELDS(3)\fP, but the alternative that copies the string
 \fICURLOPT_COPYPOSTFIELDS(3)\fP has some usage characteristics you need to
-read up on.
+read up on. This function does not accept input strings longer than
+\fBCURL_MAX_INPUT_LENGTH\fP (8 MB).
 
 The order in which the options are set does not matter.
 
