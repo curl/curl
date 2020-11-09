@@ -486,6 +486,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
   size_t bytes = 0; /* remaining length field size in bytes */
   char client_id[MAX_CLIENT_ID_LENGTH];
   long testno;
+  FILE *stream = NULL;
 
   static const char protocol[7] = {
     0x00, 0x04,       /* protocol length */
@@ -550,7 +551,6 @@ static curl_socket_t mqttit(curl_socket_t fd)
       }
     }
     else if(byte == MQTT_MSG_SUBSCRIBE) {
-      FILE *stream;
       int error;
       char *data;
       size_t datalen;
@@ -636,7 +636,10 @@ static curl_socket_t mqttit(curl_socket_t fd)
   } while(1);
 
   end:
-  fclose(dump);
+  if(dump)
+    fclose(dump);
+  if(stream)
+    fclose(stream);
   return CURL_SOCKET_BAD;
 }
 
