@@ -636,7 +636,8 @@ static curl_socket_t mqttit(curl_socket_t fd)
   } while(1);
 
   end:
-  fclose(dump);
+  if(dump)
+    fclose(dump);
   if(stream)
     fclose(stream);
   return CURL_SOCKET_BAD;
