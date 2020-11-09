@@ -802,7 +802,11 @@ struct proxy_info {
 /* struct for HTTP CONNECT state data */
 struct http_connect_state {
   struct dynbuf rcvbuf;
-  int keepon;
+  enum keeponval {
+    KEEPON_DONE,
+    KEEPON_CONNECT,
+    KEEPON_IGNORE
+  } keepon;
   curl_off_t cl; /* size of content to read and ignore */
   enum {
     TUNNEL_INIT,    /* init/default/no tunnel state */
