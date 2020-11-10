@@ -89,6 +89,8 @@
 #    include "config-android-arm64.h"
 #  elif defined(__i386__)
 #    include "config-android-x86.h"
+#  elif defined(__x86_64__)
+#    include "config-android-x86_64.h"
 #  else
 #    error Unknown Android CPU architecture.
 #  endif
