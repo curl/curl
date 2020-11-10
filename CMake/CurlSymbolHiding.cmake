@@ -27,7 +27,7 @@ mark_as_advanced(CURL_HIDDEN_SYMBOLS)
 if(CURL_HIDDEN_SYMBOLS)
   set(SUPPORTS_SYMBOL_HIDING FALSE)
 
-  if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+  if(CMAKE_C_COMPILER_ID MATCHES "Clang" AND NOT MSVC)
     set(SUPPORTS_SYMBOL_HIDING TRUE)
     set(_SYMBOL_EXTERN "__attribute__ ((__visibility__ (\"default\")))")
     set(_CFLAG_SYMBOLS_HIDE "-fvisibility=hidden")
