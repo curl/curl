@@ -22,6 +22,7 @@
 
 #include "curl_setup.h"
 
+#if defined(WINAPI_FAMILY_PARTITION)
 #if defined(WIN32)
 
 #include <curl/curl.h>
@@ -259,4 +260,5 @@ HMODULE Curl_load_library(LPCTSTR filename)
 #endif
 }
 
-#endif /* WIN32 */
+#endif
+#endif // WINAPI_FAMILY_PARTITION

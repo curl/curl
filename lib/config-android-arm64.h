@@ -794,7 +794,9 @@
 #define NTLM_WB_FILE "/usr/bin/ntlm_auth"
 
 /* cpu-machine-OS */
-#define OS "arm-unknown-linux-gnu"
+#ifndef OS
+   #define OS "arm-unknown-linux-gnu"
+#endif
 
 /* Name of package */
 #define PACKAGE "curl"
@@ -888,6 +890,9 @@
 
 /* The size of `size_t', as computed by sizeof. */
 #define SIZEOF_SIZE_T 8
+
+/* Define to the size of `curl_off_t', as computed by sizeof. */
+#define SIZEOF_CURL_OFF_T 8
 
 /* The size of `time_t', as computed by sizeof. */
 #define SIZEOF_TIME_T 8
