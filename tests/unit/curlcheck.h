@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -39,9 +39,10 @@
 #define verify_memory(dynamic, check, len)                                  \
   if(dynamic && memcmp(dynamic, check, len)) {                              \
     fprintf(stderr, "%s:%d Memory buffer mismatch size %d. '%s' is not\n",  \
-            __FILE__, __LINE__, len, hexdump((unsigned char *)check, len)); \
-    fprintf(stderr, "%s:%d the same as '%s'\n",                             \
-            __FILE__, __LINE__, hexdump((unsigned char *)dynamic, len));    \
+            __FILE__, __LINE__, len,                                        \
+            hexdump((const unsigned char *)check, len));                    \
+    fprintf(stderr, "%s:%d the same as '%s'\n", __FILE__, __LINE__,         \
+            hexdump((const unsigned char *)dynamic, len));                  \
     unitfail++;                                                             \
   }
 
@@ -51,7 +52,7 @@
     fprintf(stderr, "%s:%d test failed: '%s'\n",                       \
             __FILE__, __LINE__, msg);                                  \
     unitfail++;                                                        \
-  } WHILE_FALSE
+  } while(0)
 
 
 /* The abort macros mark the current test step as failed, and exit the test */
@@ -76,7 +77,7 @@
             __FILE__, __LINE__, msg);                         \
     unitfail++;                                               \
     goto unit_test_abort;                                     \
-  } WHILE_FALSE
+  } while(0)
 
 
 
@@ -98,4 +99,3 @@ unit_test_abort:                                \
   }                                             \
   return unitfail;                              \
   }
-

@@ -40,19 +40,17 @@ HTTP GET with -O -J and Content-Disposition, -D file
 CURL_TESTDIR=%PWD/log
 </setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1340 -J -O -D log/heads1340
+http://%HOSTIP:%HTTPPORT/1340 -J -O -D log/heads1340 -w "curl: Saved to filename %{filename_effective}\n"
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1340 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
@@ -73,7 +71,7 @@ Content-Disposition: filename=name1340; charset=funny; option=strange
 </file2>
 
 <file3 name="log/stdout1340" mode="text">
-curl: Saved to filename '%PWD/log/name1340'
+curl: Saved to filename %PWD/log/name1340
 </file3>
 
 </verify>

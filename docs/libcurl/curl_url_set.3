@@ -1,0 +1,146 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_url_set 3 "6 Aug 2018" "libcurl" "libcurl Manual"
+.SH NAME
+curl_url_set - set a URL part
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+
+CURLUcode curl_url_set(CURLU *url,
+                       CURLUPart part,
+                       const char *content,
+                       unsigned int flags)
+.fi
+.SH DESCRIPTION
+Given the \fIurl\fP handle of an already parsed URL, this function lets the
+user set/update individual pieces of it.
+
+The \fIpart\fP argument should identify the particular URL part (see list
+below) to set or change, with \fIcontent\fP pointing to a null-terminated
+string with the new contents for that URL part. The contents should be in the
+form and encoding they'd use in a URL: URL encoded.
+
+Setting a part to a NULL pointer will effectively remove that part's contents
+from the CURLU handle.
+
+The \fIflags\fP argument is a bitmask with independent features.
+.SH PARTS
+.IP CURLUPART_URL
+Allows the full URL of the handle to be replaced. If the handle already is
+populated with a URL, the new URL can be relative to the previous.
+
+When successfully setting a new URL, relative or absolute, the handle contents
+will be replaced with the information of the newly set URL.
+
+Pass a pointer to a null-terminated string to the \fIurl\fP parameter. The
+string must point to a correctly formatted "RFC 3986+" URL or be a NULL
+pointer.
+.IP CURLUPART_SCHEME
+Scheme cannot be URL decoded on set.
+.IP CURLUPART_USER
+.IP CURLUPART_PASSWORD
+.IP CURLUPART_OPTIONS
+.IP CURLUPART_HOST
+The host name. If it is IDNA the string must then be encoded as your locale
+says or UTF-8 (when WinIDN is used). If it is a bracketed IPv6 numeric address
+it may contain a zone id (or you can use CURLUPART_ZONEID).
+.IP CURLUPART_ZONEID
+If the host name is a numeric IPv6 address, this field can also be set.
+.IP CURLUPART_PORT
+Port cannot be URL encoded on set. The given port number is provided as a
+string and the decimal number must be between 1 and 65535. Anything else will
+return an error.
+.IP CURLUPART_PATH
+If a path is set in the URL without a leading slash, a slash will be inserted
+automatically when this URL is read from the handle.
+.IP CURLUPART_QUERY
+The query part will also get spaces converted to pluses when asked to URL
+encode on set with the CURLU_URLENCODE bit.
+
+If used together with the \fICURLU_APPENDQUERY\fP bit, the provided part will
+be appended on the end of the existing query - and if the previous part didn't
+end with an ampersand (&), an ampersand will be inserted before the new
+appended part.
+
+When \fICURLU_APPENDQUERY\fP is used together with \fICURLU_URLENCODE\fP, the
+first '=' symbol will not be URL encoded.
+
+The question mark in the URL is not part of the actual query contents.
+.IP CURLUPART_FRAGMENT
+The hash sign in the URL is not part of the actual fragment contents.
+.SH FLAGS
+The flags argument is zero, one or more bits set in a bitmask.
+.IP CURLU_NON_SUPPORT_SCHEME
+If set, allows \fIcurl_url_set(3)\fP to set a non-supported scheme.
+.IP CURLU_URLENCODE
+When set, \fIcurl_url_set(3)\fP URL encodes the part on entry, except for
+scheme, port and URL.
+
+When setting the path component with URL encoding enabled, the slash character
+will be skipped.
+
+The query part gets space-to-plus conversion before the URL conversion.
+
+This URL encoding is charset unaware and will convert the input on a
+byte-by-byte manner.
+.IP CURLU_DEFAULT_SCHEME
+If set, will make libcurl allow the URL to be set without a scheme and then
+sets that to the default scheme: HTTPS. Overrides the \fICURLU_GUESS_SCHEME\fP
+option if both are set.
+.IP CURLU_GUESS_SCHEME
+If set, will make libcurl allow the URL to be set without a scheme and it
+instead "guesses" which scheme that was intended based on the host name.  If
+the outermost sub-domain name matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then
+that scheme will be used, otherwise it picks HTTP. Conflicts with the
+\fICURLU_DEFAULT_SCHEME\fP option which takes precedence if both are set.
+.IP CURLU_NO_AUTHORITY
+If set, skips authority checks. The RFC allows individual schemes to omit the
+host part (normally the only mandatory part of the authority), but libcurl
+cannot know whether this is permitted for custom schemes. Specifying the flag
+permits empty authority sections, similar to how file scheme is handled.
+
+.SH RETURN VALUE
+Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
+fine.
+
+A URL string passed on to \fIcurl_url_set(3)\fP for the \fBCURLUPART_URL\fP
+part, must be shorter than 8000000 bytes otherwise it returns
+\fBCURLUE_MALFORMED_INPUT\fP (added in 7.65.0).
+
+If this function returns an error, no URL part is returned.
+.SH EXAMPLE
+.nf
+  CURLUcode rc;
+  CURLU *url = curl_url();
+  rc = curl_url_set(url, CURLUPART_URL, "https://example.com", 0);
+  if(!rc) {
+    char *scheme;
+    /* change it to an FTP URL */
+    rc = curl_url_set(url, CURLUPART_SCHEME, "ftp", 0);
+  }
+  curl_url_cleanup(url);
+.fi
+.SH AVAILABILITY
+Added in curl 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
+.SH "SEE ALSO"
+.BR curl_url_cleanup "(3), " curl_url "(3), " curl_url_get "(3), "
+.BR curl_url_dup "(3), "

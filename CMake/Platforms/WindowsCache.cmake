@@ -1,3 +1,24 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
 if(NOT UNIX)
   if(WIN32)
     set(HAVE_LIBDL 0)
@@ -7,7 +28,6 @@ if(NOT UNIX)
     set(HAVE_LIBNSL 0)
     set(HAVE_GETHOSTNAME 1)
     set(HAVE_LIBZ 0)
-    set(HAVE_LIBCRYPTO 0)
 
     set(HAVE_DLOPEN 0)
 
@@ -118,8 +138,7 @@ if(NOT UNIX)
 
     set(HAVE_SIGACTION 0)
     set(HAVE_MACRO_SIGSETJMP 0)
-  else(WIN32)
+  else()
     message("This file should be included on Windows platform only")
-  endif(WIN32)
-endif(NOT UNIX)
-
+  endif()
+endif()

@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+      - master
+      - '*/ci'
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  fuzzing:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Build Fuzzers
+      uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
+      with:
+        oss-fuzz-project-name: 'curl'
+        dry-run: false
+
+    - name: Run Fuzzers
+      uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
+      with:
+        oss-fuzz-project-name: 'curl'
+        fuzz-seconds: 2400
+        dry-run: false
+
+    - name: Upload Crash
+      uses: actions/upload-artifact@v1
+      if: failure()
+      with:
+        name: artifacts
+        path: ./out/artifacts

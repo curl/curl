@@ -1,6 +1,6 @@
 /* This is from the BIND 4.9.4 release, modified to compile by itself */
 
-/* Copyright (c) 1996 by Internet Software Consortium.
+/* Copyright (c) 1996 - 2020 by Internet Software Consortium.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -57,15 +57,15 @@ static int      inet_pton6(const char *src, unsigned char *dst);
  * notice:
  *      On Windows we store the error in the thread errno, not
  *      in the winsock error code. This is to avoid losing the
- *      actual last winsock error. So use macro ERRNO to fetch the
- *      errno this function sets when returning (-1), not SOCKERRNO.
+ *      actual last winsock error. So when this function returns
+ *      -1, check errno not SOCKERRNO.
  * author:
  *      Paul Vixie, 1996.
  */
 int
 Curl_inet_pton(int af, const char *src, void *dst)
 {
-  switch (af) {
+  switch(af) {
   case AF_INET:
     return (inet_pton4(src, (unsigned char *)dst));
 #ifdef ENABLE_IPV6
@@ -73,7 +73,7 @@ Curl_inet_pton(int af, const char *src, void *dst)
     return (inet_pton6(src, (unsigned char *)dst));
 #endif
   default:
-    SET_ERRNO(EAFNOSUPPORT);
+    errno = EAFNOSUPPORT;
     return (-1);
   }
   /* NOTREACHED */
@@ -103,7 +103,8 @@ inet_pton4(const char *src, unsigned char *dst)
   while((ch = *src++) != '\0') {
     const char *pch;
 
-    if((pch = strchr(digits, ch)) != NULL) {
+    pch = strchr(digits, ch);
+    if(pch) {
       unsigned int val = *tp * 10 + (unsigned int)(pch - digits);
 
       if(saw_digit && *tp == 0)
@@ -111,7 +112,7 @@ inet_pton4(const char *src, unsigned char *dst)
       if(val > 255)
         return (0);
       *tp = (unsigned char)val;
-      if(! saw_digit) {
+      if(!saw_digit) {
         if(++octets > 4)
           return (0);
         saw_digit = 1;
@@ -152,7 +153,7 @@ inet_pton6(const char *src, unsigned char *dst)
   static const char xdigits_l[] = "0123456789abcdef",
     xdigits_u[] = "0123456789ABCDEF";
   unsigned char tmp[IN6ADDRSZ], *tp, *endp, *colonp;
-  const char *xdigits, *curtok;
+  const char *curtok;
   int ch, saw_xdigit;
   size_t val;
 
@@ -167,9 +168,11 @@ inet_pton6(const char *src, unsigned char *dst)
   saw_xdigit = 0;
   val = 0;
   while((ch = *src++) != '\0') {
+    const char *xdigits;
     const char *pch;
 
-    if((pch = strchr((xdigits = xdigits_l), ch)) == NULL)
+    pch = strchr((xdigits = xdigits_l), ch);
+    if(!pch)
       pch = strchr((xdigits = xdigits_u), ch);
     if(pch != NULL) {
       val <<= 4;

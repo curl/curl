@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -68,6 +68,10 @@ int test(char *URL)
   /* Purposely omit to set CURLOPT_POSTFIELDSIZE */
   easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
   easy_setopt(curl, CURLOPT_READDATA, &pooh);
+#ifdef LIB1539
+  /* speak HTTP 1.0 - no chunked! */
+  easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+#endif
 
   result = curl_easy_perform(curl);
 

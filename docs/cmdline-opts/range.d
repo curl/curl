@@ -3,8 +3,9 @@ Short: r
 Help: Retrieve only the bytes within RANGE
 Arg: <range>
 Protocols: HTTP FTP SFTP FILE
+Category: http ftp sftp file
 ---
-Retrieve a byte range (i.e a partial document) from a HTTP/1.1, FTP or SFTP
+Retrieve a byte range (i.e. a partial document) from an HTTP/1.1, FTP or SFTP
 server or a local FILE. Ranges can be specified in a number of ways.
 .RS
 .TP 10

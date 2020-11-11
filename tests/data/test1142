@@ -42,16 +42,17 @@ HTTP redirect to http://// (four slashes!)
  <command>
 %HOSTIP:%HTTPPORT/want/1142 -L -x http://%HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET http://%HOSTIP:%HTTPPORT/want/1142 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

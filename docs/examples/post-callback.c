@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,36 +20,45 @@
  *
  ***************************************************************************/
 /* <DESC>
- * An example source code that issues a HTTP POST and we provide the actual
- * data through a read callback.
+ * Issue an HTTP POST and provide the data through the read callback.
  * </DESC>
  */
 #include <stdio.h>
 #include <string.h>
 #include <curl/curl.h>
 
-const char data[]="this is what we post to the silly web server";
+/* silly test data to POST */
+static const char data[]="Lorem ipsum dolor sit amet, consectetur adipiscing "
+  "elit. Sed vel urna neque. Ut quis leo metus. Quisque eleifend, ex at "
+  "laoreet rhoncus, odio ipsum semper metus, at tempus ante urna in mauris. "
+  "Suspendisse ornare tempor venenatis. Ut dui neque, pellentesque a varius "
+  "eget, mattis vitae ligula. Fusce ut pharetra est. Ut ullamcorper mi ac "
+  "sollicitudin semper. Praesent sit amet tellus varius, posuere nulla non, "
+  "rhoncus ipsum.";
 
 struct WriteThis {
   const char *readptr;
-  long sizeleft;
+  size_t sizeleft;
 };
 
-static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_callback(void *dest, size_t size, size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
+  struct WriteThis *wt = (struct WriteThis *)userp;
+  size_t buffer_size = size*nmemb;
 
-  if(size*nmemb < 1)
-    return 0;
+  if(wt->sizeleft) {
+    /* copy as much as possible from the source to the destination */
+    size_t copy_this_much = wt->sizeleft;
+    if(copy_this_much > buffer_size)
+      copy_this_much = buffer_size;
+    memcpy(dest, wt->readptr, copy_this_much);
 
-  if(pooh->sizeleft) {
-    *(char *)ptr = pooh->readptr[0]; /* copy one single byte */
-    pooh->readptr++;                 /* advance pointer */
-    pooh->sizeleft--;                /* less data left */
-    return 1;                        /* we return 1 byte at a time! */
+    wt->readptr += copy_this_much;
+    wt->sizeleft -= copy_this_much;
+    return copy_this_much; /* we copied this many bytes */
   }
 
-  return 0;                          /* no more data left to deliver */
+  return 0; /* no more data left to deliver */
 }
 
 int main(void)
@@ -57,10 +66,10 @@ int main(void)
   CURL *curl;
   CURLcode res;
 
-  struct WriteThis pooh;
+  struct WriteThis wt;
 
-  pooh.readptr = data;
-  pooh.sizeleft = (long)strlen(data);
+  wt.readptr = data;
+  wt.sizeleft = strlen(data);
 
   /* In windows, this will init the winsock stuff */
   res = curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -75,7 +84,7 @@ int main(void)
   curl = curl_easy_init();
   if(curl) {
     /* First set the URL that is about to receive our POST. */
-    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/index.cgi");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/index.cgi");
 
     /* Now specify we want to POST data */
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
@@ -84,7 +93,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 
     /* pointer to pass to our read function */
-    curl_easy_setopt(curl, CURLOPT_READDATA, &pooh);
+    curl_easy_setopt(curl, CURLOPT_READDATA, &wt);
 
     /* get verbose debug output please */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -108,7 +117,7 @@ int main(void)
 #else
     /* Set the expected POST size. If you want to POST large amounts of data,
        consider CURLOPT_POSTFIELDSIZE_LARGE */
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, pooh.sizeleft);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)wt.sizeleft);
 #endif
 
 #ifdef DISABLE_EXPECT

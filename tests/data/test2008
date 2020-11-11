@@ -4,6 +4,7 @@
 Metalink
 HTTP
 HTTP GET
+FILE
 </keywords>
 </info>
 
@@ -65,19 +66,27 @@ perl %SRCDIR/libtest/notexists.pl log/2008 log/name2008 log/outfile2008
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /2008 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 <file1 name="log/download2008">
 Some stuff delivered from an HTTP resource
 </file1>
+# The Content-Length replace here is to handle with 4/5 digit port number in
+# the content
+<stripfile2>
+s/Last-Modified:.*//
+s/Content-Length: 49[67]/Content-Length: yeps/
+</stripfile2>
 <file2 name="log/heads2008">
+Content-Length: yeps
+Accept-ranges: bytes
+
+
 HTTP/1.1 200 OK
 Date: Thu, 21 Jun 2012 15:23:48 GMT
 Server: test-server/fake
@@ -90,7 +99,7 @@ Funny-head: yesyes
 </file2>
 <file3 name="log/stdout2008">
 </file3>
-<file4 name="log/stderr2008">
+<file4 name="log/stderr2008" mode="text">
 Metalink: parsing (file://%PWD/log/test2008.metalink) metalink/XML...
 Metalink: parsing (file://%PWD/log/test2008.metalink) OK
 Metalink: fetching (log/download2008) from (http://%HOSTIP:%HTTPPORT/2008)...

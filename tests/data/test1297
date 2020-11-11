@@ -1,0 +1,65 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<connect>
+HTTP/1.1 200 Mighty fine indeed
+Server: test tunnel 2000
+
+</connect>
+
+<data nocheck="yes">
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+http-proxy
+</server>
+<name>
+CONNECT to peer that returns nothing
+</name>
+<command>
+--proxytunnel --proxy %HOSTIP:%PROXYPORT http://%HOSTIP.1297:%HTTPPORT/we/want/that/page/1297
+</command>
+<features>
+proxy
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<proxy>
+CONNECT %HOSTIP.1297:%HTTPPORT HTTP/1.1
+Host: %HOSTIP.1297:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</proxy>
+<protocol>
+GET /we/want/that/page/1297 HTTP/1.1
+Host: %HOSTIP.1297:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+# 52 - got nothing
+<errorcode>
+52
+</errorcode>
+</verify>
+</testcase>

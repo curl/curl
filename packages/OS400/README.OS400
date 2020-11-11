@@ -63,6 +63,8 @@ designer. CCSID 0 can be used to select the current job's CCSID.
 _ curl_easy_setopt_ccsid()
   Variable arguments are a string pointer and a CCSID (unsigned int) for
 options:
+        CURLOPT_ABSTRACT_UNIX_SOCKET
+        CURLOPT_ALTSVC
         CURLOPT_CAINFO
         CURLOPT_CAPATH
         CURLOPT_COOKIE
@@ -74,6 +76,7 @@ options:
         CURLOPT_CUSTOMREQUEST
         CURLOPT_DEFAULT_PROTOCOL
         CURLOPT_DNS_SERVERS
+        CURLOPT_DOH_URL
         CURLOPT_EGDSOCKET
         CURLOPT_ENCODING
         CURLOPT_FTPPORT
@@ -90,6 +93,7 @@ options:
         CURLOPT_NOPROXY
         CURLOPT_PASSWORD
         CURLOPT_PINNEDPUBLICKEY
+        CURLOPT_PRE_PROXY
         CURLOPT_PROXY
         CURLOPT_PROXYPASSWORD
         CURLOPT_PROXYUSERNAME
@@ -105,18 +109,20 @@ options:
         CURLOPT_PROXY_SSLKEY
         CURLOPT_PROXY_SSLKEYTYPE
         CURLOPT_PROXY_SSL_CIPHER_LIST
+        CURLOPT_PROXY_TLS13_CIPHERS
         CURLOPT_PROXY_TLSAUTH_PASSWORD
         CURLOPT_PROXY_TLSAUTH_TYPE
         CURLOPT_PROXY_TLSAUTH_USERNAME
         CURLOPT_RANDOM_FILE
         CURLOPT_RANGE
         CURLOPT_REFERER
+        CURLOPT_REQUEST_TARGET
         CURLOPT_RTSP_SESSION_UID
         CURLOPT_RTSP_STREAM_URI
         CURLOPT_RTSP_TRANSPORT
+        CURLOPT_SASL_AUTHZID
         CURLOPT_SERVICE_NAME
         CURLOPT_SOCKS5_GSSAPI_SERVICE
-        CURLOPT_SOCKS_PROXY
         CURLOPT_SSH_HOST_PUBLIC_KEY_MD5
         CURLOPT_SSH_KNOWNHOSTS
         CURLOPT_SSH_PRIVATE_KEYFILE
@@ -127,6 +133,7 @@ options:
         CURLOPT_SSLKEY
         CURLOPT_SSLKEYTYPE
         CURLOPT_SSL_CIPHER_LIST
+        CURLOPT_TLS13_CIPHERS
         CURLOPT_TLSAUTH_PASSWORD
         CURLOPT_TLSAUTH_TYPE
         CURLOPT_TLSAUTH_USERNAME
@@ -181,8 +188,8 @@ CCSID.
         CURLINFO_COOKIELIST
 Lists returned should be released with curl_slist_free_all() after use.
   Option CURLINFO_CERTINFO is followed by a struct curl_certinfo * * and a
-CCSID. Returned structures sould be free'ed using curl_certinfo_free_all() after
-use.
+CCSID. Returned structures should be free'ed using curl_certinfo_free_all()
+after use.
   Other options are processed like in curl_easy_getinfo().
 
 _ curl_pushheader_bynum_cssid() and curl_pushheader_byname_ccsid()
@@ -240,7 +247,8 @@ _ If data compression has to be supported, ZLIB development environment must
   be installed.
 _ Likewise, if SCP and SFTP protocols have to be compiled in, LIBSSH2
   developent environment must be installed.
-_ Install the curl source directory in IFS.
+_ Install the curl source directory in IFS. Do NOT install it in the
+  installation target directory (which defaults to /curl).
 _ Enter shell (QSH)
 _ Change current directory to the curl installation directory
 _ Change current directory to ./packages/OS400
@@ -275,7 +283,7 @@ _ CURL.INC member in file H. This defines everything needed by an ILE/RPG
   program using libcurl.
 _ LIBxxx modules and programs. Although the test environment is not supported
   on OS/400, the libcurl test programs are compiled for manual tests.
-_ IFS directory /curl/include/curl containg the C header files for IFS source
+_ IFS directory /curl/include/curl containing the C header files for IFS source
   C/C++ compilation and curl.inc.rpgle for IFS source ILE/RPG compilation.
 
 
@@ -315,8 +323,10 @@ _ Procedures curl_easy_setopt_long(), curl_easy_setopt_object(),
   curl_easy_setopt_function() and curl_easy_setopt_offset() are all alias
   prototypes to curl_easy_setopt(), but with different parameter lists.
 _ Procedures curl_easy_getinfo_string(), curl_easy_getinfo_long(),
-  curl_easy_getinfo_double() and curl_easy_getinfo_slist() are all alias
-  prototypes to curl_easy_getinfo(), but with different parameter lists.
+  curl_easy_getinfo_double(), curl_easy_getinfo_slist(),
+  curl_easy_getinfo_ptr(), curl_easy_getinfo_socket() and
+  curl_easy_getinfo_off_t() are all alias prototypes to curl_easy_getinfo(),
+  but with different parameter lists.
 _ Procedures curl_multi_setopt_long(), curl_multi_setopt_object(),
   curl_multi_setopt_function() and curl_multi_setopt_offset() are all alias
   prototypes to curl_multi_setopt(), but with different parameter lists.

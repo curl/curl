@@ -1,7 +1,8 @@
-long: retry-delay
-arg: <seconds>
+Long: retry-delay
+Arg: <seconds>
 Help: Wait time between retries
 Added: 7.12.3
+Category: curl
 ---
 Make curl sleep this amount of time before each retry when a transfer has
 failed with a transient error (it changes the default backoff time algorithm

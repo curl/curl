@@ -2,7 +2,7 @@
 #
 # xc-translit.m4
 #
-# Copyright (c) 2011 Daniel Stenberg <daniel@haxx.se>
+# Copyright (c) 2011 - 2020, Daniel Stenberg <daniel@haxx.se>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -161,4 +161,3 @@ dnl Expands to quoted result of 'translit' expansion.
 
 AC_DEFUN([XC_QTRANSLIT],
 [XC_QUOTE(translit([$1], [$2], [$3]))])
-

@@ -1,0 +1,98 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<connect>
+HTTP/1.1 200 Mighty fine indeed
+Server: test tunnel 2000
+
+</connect>
+
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+Connection: keep-alive
+
+contents
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+http-proxy
+</server>
+<name>
+Suppress proxy CONNECT response headers
+</name>
+<command>
+--proxytunnel --suppress-connect-headers --dump-header - --include --write-out "\nCONNECT CODE: %{http_connect}\nRECEIVED HEADER BYTE TOTAL: %{size_header}\n" --proxy %HOSTIP:%PROXYPORT http://%HOSTIP.1288:%HTTPPORT/we/want/that/page/1288
+</command>
+<features>
+proxy
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<proxy>
+CONNECT %HOSTIP.1288:%HTTPPORT HTTP/1.1
+Host: %HOSTIP.1288:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</proxy>
+<protocol>
+GET /we/want/that/page/1288 HTTP/1.1
+Host: %HOSTIP.1288:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+# This test is structured to test all the expectations of
+# --suppress-connect-headers, which are:
+# Must suppress in --include and --dump-header
+# Must not suppress in --verbose and --trace
+# Must not suppress in statistics (eg received header byte total)
+<stdout>
+HTTP/1.1 200 OK
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Server: test-server/fake
+Content-Type: text/html
+Content-Type: text/html
+Funny-head: yesyes
+Funny-head: yesyes
+Content-Length: 9
+Content-Length: 9
+Connection: keep-alive
+Connection: keep-alive
+
+
+contents
+
+CONNECT CODE: 200
+RECEIVED HEADER BYTE TOTAL: 231
+</stdout>
+</verify>
+</testcase>

@@ -1,0 +1,35 @@
+<testcase>
+<info>
+<keywords>
+command-line
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+ <name>
+Try a non-boolean command line option with --no-
+ </name>
+ <command>
+--no-proxy "hey" http://%HOSTIP:%NOLISTENPORT/333
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# detected the bad --no- prefix
+<errorcode>
+2
+</errorcode>
+</verify>
+</testcase>

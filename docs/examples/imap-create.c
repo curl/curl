@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,7 +48,7 @@ int main(void)
     /* This is just the server URL */
     curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com");
 
-    /* Set the CREATE command specifing the new folder name */
+    /* Set the CREATE command specifying the new folder name */
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "CREATE FOLDER");
 
     /* Perform the custom request */

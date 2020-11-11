@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,9 +29,7 @@
 
 #include "test.h"
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #include "testutil.h"
 #include "warnless.h"
@@ -42,6 +40,7 @@
 int test(char *URL)
 {
   CURL *easy = NULL;
+  CURL *dup;
   CURLM *multi = NULL;
   int still_running;
   int res = 0;
@@ -51,8 +50,8 @@ int test(char *URL)
   /* DNS cache injection */
   struct curl_slist *dns_cache_list;
 
-  snprintf(redirect, sizeof(redirect), "google.com:%s:%s", libtest_arg2,
-           libtest_arg3);
+  msnprintf(redirect, sizeof(redirect), "google.com:%s:%s", libtest_arg2,
+            libtest_arg3);
 
   start_test_timing();
 
@@ -73,6 +72,17 @@ int test(char *URL)
   easy_setopt(easy, CURLOPT_URL, URL);
   easy_setopt(easy, CURLOPT_HEADER, 1L);
   easy_setopt(easy, CURLOPT_RESOLVE, dns_cache_list);
+
+  dup = curl_easy_duphandle(easy);
+  if(dup) {
+    curl_easy_cleanup(easy);
+    easy = dup;
+  }
+  else {
+    curl_slist_free_all(dns_cache_list);
+    curl_easy_cleanup(easy);
+    return CURLE_OUT_OF_MEMORY;
+  }
 
   multi_init(multi);
 
@@ -99,7 +109,7 @@ int test(char *URL)
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
-    select_test(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+    select_test(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
     abort_on_test_timeout();
 

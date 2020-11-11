@@ -1,6 +1,8 @@
 Long: quote
+Short: Q
 Help: Send command(s) to server before transfer
 Protocols: FTP SFTP
+Category: ftp sftp
 ---
 
 Send an arbitrary command to the remote FTP or SFTP server. Quote commands are
@@ -15,15 +17,20 @@ If the server returns failure for one of the commands, the entire operation
 will be aborted. You must send syntactically correct FTP commands as RFC 959
 defines to FTP servers, or one of the commands listed below to SFTP servers.
 
-This option can be used multiple times. When speaking to an FTP server, prefix
-the command with an asterisk (*) to make curl continue even if the command
-fails as by default curl will stop at first failure.
+Prefix the command with an asterisk (*) to make curl continue even if the
+command fails as by default curl will stop at first failure.
+
+This option can be used multiple times.
 
 SFTP is a binary protocol. Unlike for FTP, curl interprets SFTP quote commands
 itself before sending them to the server.  File names may be quoted
 shell-style to embed spaces or special characters.  Following is the list of
 all supported SFTP quote commands:
 .RS
+.IP "atime date file"
+The atime command sets the last access time of the file named by the file
+operand. The <date expression> can be all sorts of date strings, see the
+\fIcurl_getdate(3)\fP man page for date expression details. (Added in 7.73.0)
 .IP "chgrp group file"
 The chgrp command sets the group ID of the file named by the file operand to
 the group ID specified by the group operand. The group operand is a decimal
@@ -40,6 +47,10 @@ The ln and symlink commands create a symbolic link at the target_file location
 pointing to the source_file location.
 .IP "mkdir directory_name"
 The mkdir command creates the directory named by the directory_name operand.
+.IP "mtime date file"
+The mtime command sets the last modification time of the file named by the
+file operand. The <date expression> can be all sorts of date strings, see the
+\fIcurl_getdate(3)\fP man page for date expression details. (Added in 7.73.0)
 .IP "pwd"
 The pwd command returns the absolute pathname of the current working directory.
 .IP "rename source target"

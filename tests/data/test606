@@ -16,7 +16,7 @@ sftp
 SFTP invalid user login
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u not-a-valid-user: sftp://%HOSTIP:%SSHPORT%PWD/not-a-valid-file-moooo --insecure
+--key curl_client_key --pubkey curl_client_key.pub -u not-a-valid-user: sftp://%HOSTIP:%SSHPORT%SSH_PWD/not-a-valid-file-moooo --insecure
 </command>
 </client>
 

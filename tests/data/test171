@@ -33,16 +33,17 @@ HTTP, get cookie with dot prefixed full domain
  <command>
 -c log/jar171 -x %HOSTIP:%HTTPPORT http://z.x.com/171
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET http://z.x.com/171 HTTP/1.1
 Host: z.x.com
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

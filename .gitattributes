@@ -3,3 +3,6 @@ buildconf eol=lf
 configure.ac eol=lf
 *.m4 eol=lf
 *.in eol=lf
+*.am eol=lf
+*.sh eol=lf
+*.[ch] whitespace=tab-in-indent

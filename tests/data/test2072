@@ -1,0 +1,44 @@
+<testcase>
+<info>
+<keywords>
+FILE
+</keywords>
+</info>
+
+<reply>
+<data>
+foo
+   bar
+bar
+   foo
+moo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+file
+</server>
+<name>
+file:// with unix path resolution behavior for the case of extra slashes
+</name>
+<command option="no-include">
+file:////%PWD/log/test2072.txt
+</command>
+<precheck>
+perl -e "print 'Test requires a unix system' if ( $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'dos' || $^O eq 'msys');"
+</precheck>
+<file name="log/test2072.txt">
+foo
+   bar
+bar
+   foo
+moo
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+URL
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+unit tests for url.c
+ </name>
+</client>
+</testcase>

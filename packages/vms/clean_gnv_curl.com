@@ -11,11 +11,11 @@ $!
 $! This should be run with no parameters after the gnv_curl_configure.sh
 $! script is run.
 $!
-$! Paramter P1: REALCLEAN
+$! Parameter P1: REALCLEAN
 $!   This removes all build products and brings the environment back to
 $!   the point where the gnv_curl_configure.sh procedure needs to be run again.
 $!
-$! Copyright 2009, John Malmberg
+$! Copyright 2009 - 2020, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -105,9 +105,6 @@ $!
 $ file = "lcl_root:[...]*.lai"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.include.curl]curlbuild.h_old"
-$ if f$search(file) .nes. "" then delete 'file';*
-$!
 $ file = "lcl_root:[.packages.vms]curl-*_original_src.bck"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
@@ -166,9 +163,6 @@ $!
 $ file = "lcl_root:[]config.h"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.include.curl]curlbuild.h"
-$ if f$search(file) .nes. "" then delete 'file';*
-$!
 $ file = "lcl_root:[.src]config.h"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
@@ -224,9 +218,6 @@ $ file = "lcl_root:[...]gnv$*.*"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
 $ file = "lcl_root:[...]gnv*.opt"
-$ if f$search(file) .nes. "" then delete 'file';*
-$!
-$ file = "lcl_root:[.packages.EPM]curl.list"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
 $ file = "lcl_root:[.packages.vms]macro32_exactcase.exe"

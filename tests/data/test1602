@@ -18,9 +18,5 @@ unittest
  <name>
 Internal hash create/add/destroy testing, exercising clean functions
  </name>
-<tool>
-unit1602
-</tool>
 </client>
-
 </testcase>

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -50,7 +50,7 @@ void handle_error(const char *file, int lineno, const char *msg)
 }
 
 /* This array will store all of the mutexes available to OpenSSL. */
-static MUTEX_TYPE *mutex_buf= NULL;
+static MUTEX_TYPE *mutex_buf = NULL;
 
 static void locking_function(int mode, int n, const char *file, int line)
 {

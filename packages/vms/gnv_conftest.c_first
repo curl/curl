@@ -2,7 +2,7 @@
  *
  * $Id$
  *
- * Copyright 2009, John Malmberg
+ * Copyright 2009 - 2020, John Malmberg
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -58,4 +58,3 @@ char ENGINE_load_builtin_engines (void) {return 0;}
  * it turns out that VMS does not have the CRYPTO_LOCK symbol in the
  * transfer vector, even though it is in the header file.
  */
-

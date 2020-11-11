@@ -1,8 +1,9 @@
 Long: proxy-header
-Arg: <header>
-Help: Pass custom header LINE to proxy
+Arg: <header/@file>
+Help: Pass custom header(s) to proxy
 Protocols: HTTP
 Added: 7.37.0
+Category: proxy
 ---
 Extra header to include in the request when sending HTTP to a proxy. You may
 specify any number of extra headers. This is the equivalent option to --header
@@ -16,5 +17,9 @@ up for you.
 
 Headers specified with this option will not be included in requests that curl
 knows will not be sent to a proxy.
+
+Starting in 7.55.0, this option can take an argument in @filename style, which
+then adds a header for each line in the input file. Using @- will make curl
+read the header file from stdin.
 
 This option can be used multiple times to add/replace/remove multiple headers.

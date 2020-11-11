@@ -3,10 +3,11 @@ Arg: <protocols>
 Help: Enable/disable PROTOCOLS
 See-also: proto-redir proto-default
 Added: 7.20.2
+Category: connection curl
 ---
 Tells curl to limit what protocols it may use in the transfer. Protocols are
 evaluated left to right, are comma separated, and are each a protocol name or
-'all', optionally prefixed by zero or more modifiers. Available modifiers are:
+\&'all', optionally prefixed by zero or more modifiers. Available modifiers are:
 .RS
 .TP 3
 .B +

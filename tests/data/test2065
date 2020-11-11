@@ -1,0 +1,82 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Digest auth
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 401 Authorization Required
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Digest realm="testrealm", nonce="2053604145", algorithm="SHA-512-256"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
+
+This is not the real page
+</data>
+
+# This is supposed to be returned when the server gets a
+# Authorization: Digest line passed-in from the client
+<data1000>
+HTTP/1.1 401 Still a bad password you moron
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+
+This is not the real page either
+</data1000>
+
+<datacheck>
+HTTP/1.1 401 Authorization Required
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Digest realm="testrealm", nonce="2053604145", algorithm="SHA-512-256"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
+
+HTTP/1.1 401 Still a bad password you moron
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+
+This is not the real page either
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+!SSPI
+crypto
+</features>
+ <name>
+HTTP with RFC7616 Digest authorization with bad password, SHA-512-256 and userhash=false
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/2065 -u testuser:test2pass --digest
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /2065 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /2065 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="2053604145", uri="/2065", response="5a5f20b0e601aeddc6f96422c2332d49ff431c49ab143b5f836ef76e9ac78f5e", algorithm=SHA-512-256
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

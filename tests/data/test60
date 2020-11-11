@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP PUT
+chunked Transfer-Encoding
 </keywords>
 </info>
 
@@ -36,12 +37,10 @@ more than one byte
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 PUT /bzz/60 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Transfer-Encoding: chunked
 Content-Length: 1

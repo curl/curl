@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -81,7 +81,7 @@ CURLcode Curl_auth_decode_cram_md5_message(const char *chlg64, char **outptr,
  * data    [in]     - The session handle.
  * chlg    [in]     - The challenge.
  * userp   [in]     - The user name.
- * passdwp [in]     - The user's password.
+ * passwdp [in]     - The user's password.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
  * outlen  [out]    - The length of the output message.
@@ -96,7 +96,7 @@ CURLcode Curl_auth_create_cram_md5_message(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   size_t chlglen = 0;
-  HMAC_context *ctxt;
+  struct HMAC_context *ctxt;
   unsigned char digest[MD5_DIGEST_LEN];
   char *response;
 

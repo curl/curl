@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,7 +47,8 @@ print_cookies(CURL *curl)
             curl_easy_strerror(res));
     exit(1);
   }
-  nc = cookies, i = 1;
+  nc = cookies;
+  i = 1;
   while(nc) {
     printf("[%d]: %s\n", i, nc->data);
     nc = nc->next;
@@ -70,7 +71,7 @@ main(void)
   if(curl) {
     char nline[256];
 
-    curl_easy_setopt(curl, CURLOPT_URL, "http://www.example.com/");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, ""); /* start cookie engine */
     res = curl_easy_perform(curl);
@@ -93,9 +94,9 @@ main(void)
 #endif
     /* Netscape format cookie */
     snprintf(nline, sizeof(nline), "%s\t%s\t%s\t%s\t%lu\t%s\t%s",
-             ".google.com", "TRUE", "/", "FALSE",
+             ".example.com", "TRUE", "/", "FALSE",
              (unsigned long)time(NULL) + 31337UL,
-             "PREF", "hello google, i like you very much!");
+             "PREF", "hello example, i like you very much!");
     res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
     if(res != CURLE_OK) {
       fprintf(stderr, "Curl curl_easy_setopt failed: %s\n",
@@ -111,7 +112,7 @@ main(void)
     */
     snprintf(nline, sizeof(nline),
       "Set-Cookie: OLD_PREF=3d141414bf4209321; "
-      "expires=Sun, 17-Jan-2038 19:14:07 GMT; path=/; domain=.google.com");
+      "expires=Sun, 17-Jan-2038 19:14:07 GMT; path=/; domain=.example.com");
     res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
     if(res != CURLE_OK) {
       fprintf(stderr, "Curl curl_easy_setopt failed: %s\n",

@@ -2,6 +2,7 @@ Long: write-out
 Short: w
 Arg: <format>
 Help: Use output FORMAT after completion
+Category: verbose
 ---
 Make curl display information on stdout after a completed transfer. The format
 is a string that may contain plain text mixed with any number of
@@ -15,6 +16,9 @@ text that curl thinks fit, as described below. All variables are specified as
 output a newline by using \\n, a carriage return with \\r and a tab space with
 \\t.
 
+The output will be written to standard output, but this can be switched to
+standard error by using %{stderr}.
+
 .B NOTE:
 The %-symbol is a special symbol in the win32-environment, where all
 occurrences of % must be doubled when using this option.
@@ -27,8 +31,8 @@ The Content-Type of the requested document, if there was any.
 .TP
 .B filename_effective
 The ultimate filename that curl writes out to. This is only meaningful if curl
-is told to write to a file with the \fI--remote-name\fP or \fI--output\fP
-option. It's most useful in combination with the \fI--remote-header-name\fP
+is told to write to a file with the --remote-name or --output
+option. It's most useful in combination with the --remote-header-name
 option. (Added in 7.26.0)
 .TP
 .B ftp_entry_path
@@ -47,6 +51,9 @@ curl CONNECT request. (Added in 7.12.4)
 .B http_version
 The http version that was effectively used. (Added in 7.50.0)
 .TP
+.B json
+A JSON object with all available keys.
+.TP
 .B local_ip
 The IP address of the local end of the most recently done connection - can be
 either IPv4 or IPv6 (Added in 7.29.0)
@@ -54,15 +61,27 @@ either IPv4 or IPv6 (Added in 7.29.0)
 .B local_port
 The local port number of the most recently done connection (Added in 7.29.0)
 .TP
+.B method
+The http method used in the most recent HTTP request (Added in 7.72.0)
+.TP
 .B num_connects
 Number of new connects made in the recent transfer. (Added in 7.12.3)
+.TP
+.B num_headers
+The number of response headers in the most recent request (restarted at each
+ redirect). Note that the status line IS NOT a header. (Added in 7.73.0)
 .TP
 .B num_redirects
 Number of redirects that were followed in the request. (Added in 7.12.3)
 .TP
+.B proxy_ssl_verify_result
+The result of the HTTPS proxy's SSL peer certificate verification that was
+requested. 0 means the verification was successful. (Added in 7.52.0)
+.TP
 .B redirect_url
-When an HTTP request was made without -L to follow redirects, this variable
-will show the actual URL a redirect \fIwould\fP take you to. (Added in 7.18.2)
+When an HTTP request was made without --location to follow redirects (or when
+--max-redir is met), this variable will show the actual URL a redirect
+\fIwould\fP have gone to. (Added in 7.18.2)
 .TP
 .B remote_ip
 The remote IP address of the most recently done connection - can be either
@@ -70,6 +89,10 @@ IPv4 or IPv6 (Added in 7.29.0)
 .TP
 .B remote_port
 The remote port number of the most recently done connection (Added in 7.29.0)
+.TP
+.B response_code
+The numerical response code that was found in the last transfer (formerly
+known as "http_code"). (Added in 7.18.2)
 .TP
 .B scheme
 The URL scheme (sometimes called protocol) that was effectively used (Added in 7.52.0)
@@ -98,6 +121,15 @@ second.
 The result of the SSL peer certificate verification that was requested. 0
 means the verification was successful. (Added in 7.19.0)
 .TP
+.B stderr
+From this point on, the --write-out output will be written to standard
+error. (Added in 7.63.0)
+.TP
+.B stdout
+From this point on, the --write-out output will be written to standard output.
+This is the default, but can be used to switch back after switching to stderr.
+(Added in 7.63.0)
+.TP
 .B time_appconnect
 The time, in seconds, it took from the start until the SSL/SSH/etc
 connect/handshake to the remote host was completed. (Added in 7.19.0)
@@ -116,7 +148,7 @@ about to begin. This includes all pre-transfer commands and negotiations that
 are specific to the particular protocol(s) involved.
 .TP
 .B time_redirect
-The time, in seconds, it took for all redirection steps include name lookup,
+The time, in seconds, it took for all redirection steps including name lookup,
 connect, pretransfer and transfer before the final transaction was
 started. time_redirect shows the complete execution time for multiple
 redirections. (Added in 7.12.3)
@@ -127,8 +159,7 @@ about to be transferred. This includes time_pretransfer and also the time the
 server needed to calculate the result.
 .TP
 .B time_total
-The total time, in seconds, that the full operation lasted. The time will be
-displayed with millisecond resolution.
+The total time, in seconds, that the full operation lasted.
 .TP
 .B url_effective
 The URL that was fetched last. This is most meaningful if you've told curl

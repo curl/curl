@@ -4,7 +4,7 @@ $! $Id$
 $!
 $! File to build images using gnv$libcurl.exe
 $!
-$! Copyright 2009, John Malmberg
+$! Copyright 2009 - 2020, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -262,7 +262,7 @@ version or a compatible later version.
 
 For Alpha and IA64 platforms, see the url below to register to get the
 download URL.  The kit will be HP 1.4-467 or later.
-  http://h71000.www7.hp.com/openvms/products/ssl/ssl.html
+  https://h41379.www4.hpe.com/openvms/products/ssl/ssl.html
 
 For VAX, use the same registration, but remove the kit name from any of the
 download URLs provided and put in CPQ-VAXVMS-SSL-V0101-B-1.PCSI-DCX_VAXEXE
@@ -740,7 +740,7 @@ gnv$libcurl/share
 $endif
 $!
 $!
-$target = "persistant"
+$target = "persistent"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
 $   define/user gnv$libcurl 'gnv_libcurl_share'

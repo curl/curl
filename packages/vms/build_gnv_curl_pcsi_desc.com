@@ -31,7 +31,7 @@ $! A rename action section is needed to make sure that the files are
 $! created in the GNV$GNU: in the correct case, and to create the alias
 $! link [usr.bin]curl. for [usr.bin]curl.exe.
 $!
-$! Copyright 2009, John Malmberg
+$! Copyright 2009 - 2020, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -351,7 +351,7 @@ $           endif
 $       endif
 $   endif
 $!
-$!  Filenames with $ in them are VMS special and do not need to be lowercased.
+$!  Filenames with $ in them are VMS special and do not need to be lowercase.
 $!  --------------------------------------------------------------------------
 $   if f$locate("$", pathname) .lt. f$length(pathname) then goto inst_file_loop
 $!

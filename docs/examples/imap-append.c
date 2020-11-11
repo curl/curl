@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -85,14 +85,15 @@ int main(void)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  const char **p;
-  long infilesize;
-  struct upload_status upload_ctx;
-
-  upload_ctx.lines_read = 0;
 
   curl = curl_easy_init();
   if(curl) {
+    const char **p;
+    long infilesize;
+    struct upload_status upload_ctx;
+
+    upload_ctx.lines_read = 0;
+
     /* Set username and password */
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");

@@ -42,14 +42,11 @@ http://%HOSTIP:%HTTPPORT/33 -Tlog/test33.txt -C 50
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 PUT /33 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Content-Range: bytes 50-99/100
-User-Agent: curl/7.6 (sparc-sun-solaris2.7) libcurl 7.6-pre4 (SSL 0.9.6) (krb4 enabled)
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 50
 Expect: 100-continue

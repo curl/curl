@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+x509
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+x509 parsing
+ </name>
+</client>
+</testcase>

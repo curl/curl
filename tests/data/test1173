@@ -1,0 +1,26 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+documentation
+--manual
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+
+ <name>
+Basic man page syntax check
+ </name>
+
+<command type="perl">
+%SRCDIR/manpage-syntax.pl %SRCDIR/../docs/*.1  %SRCDIR/../docs/libcurl/*.3 %SRCDIR/../docs/libcurl/opts/*.3
+</command>
+</client>
+
+</testcase>

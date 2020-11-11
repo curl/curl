@@ -15,4 +15,3 @@ commonName_value              = Northern Nowhere Trust Anchor
 basicConstraints = critical,CA:true
 keyUsage        = critical,keyCertSign,cRLSign
 subjectKeyIdentifier = hash
-

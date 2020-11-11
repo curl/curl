@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,7 +56,7 @@ static size_t rtp_write(void *ptr, size_t size, size_t nmemb, void *stream)
   int channel = RTP_PKT_CHANNEL(data);
   int message_size;
   int coded_size = RTP_PKT_LENGTH(data);
-  size_t failure = (size * nmemb) ? 0 : 1;
+  size_t failure = (size && nmemb) ? 0 : 1;
   int i;
   (void)stream;
 
@@ -70,7 +70,7 @@ static size_t rtp_write(void *ptr, size_t size, size_t nmemb, void *stream)
   }
 
   data += 4;
-  for(i = 0; i < message_size; i+= RTP_DATA_SIZE) {
+  for(i = 0; i < message_size; i += RTP_DATA_SIZE) {
     if(message_size - i > RTP_DATA_SIZE) {
       if(memcmp(RTP_DATA, data + i, RTP_DATA_SIZE) != 0) {
         printf("RTP PAYLOAD CORRUPTED [%s]\n", data + i);
@@ -103,10 +103,9 @@ int test(char *URL)
   int res;
   CURL *curl;
   char *stream_uri = NULL;
-  int request=1;
-  FILE *protofile = NULL;
+  int request = 1;
 
-  protofile = fopen(libtest_arg2, "wb");
+  FILE *protofile = fopen(libtest_arg2, "wb");
   if(protofile == NULL) {
     fprintf(stderr, "Couldn't open the protocol dump file\n");
     return TEST_ERR_MAJOR_BAD;
@@ -118,7 +117,8 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     fclose(protofile);
     curl_global_cleanup();
@@ -126,7 +126,8 @@ int test(char *URL)
   }
   test_setopt(curl, CURLOPT_URL, URL);
 
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -147,7 +148,8 @@ int test(char *URL)
     goto test_cleanup;
 
   /* This PLAY starts the interleave */
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -161,7 +163,8 @@ int test(char *URL)
     goto test_cleanup;
 
   /* The DESCRIBE request will try to consume data after the Content */
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -174,7 +177,8 @@ int test(char *URL)
   if(res)
     goto test_cleanup;
 
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -207,4 +211,3 @@ test_cleanup:
 
   return res;
 }
-

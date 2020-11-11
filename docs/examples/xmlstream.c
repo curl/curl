@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,7 +25,7 @@
  */
 /* Written by David Strauss
  *
- * Expat => http://www.libexpat.org/
+ * Expat => https://libexpat.github.io/
  *
  * gcc -Wall -I/usr/local/include xmlstream.c -lcurl -lexpat -o xmlstream
  *
@@ -69,14 +69,15 @@ static void characterDataHandler(void *userData, const XML_Char *s, int len)
   struct ParserStruct *state = (struct ParserStruct *) userData;
   struct MemoryStruct *mem = &state->characters;
 
-  mem->memory = realloc(mem->memory, mem->size + len + 1);
-  if(mem->memory == NULL) {
+  char *ptr = realloc(mem->memory, mem->size + len + 1);
+  if(!ptr) {
     /* Out of memory. */
     fprintf(stderr, "Not enough memory (realloc returned NULL).\n");
     state->ok = 0;
     return;
   }
 
+  mem->memory = ptr;
   memcpy(&(mem->memory[mem->size]), s, len);
   mem->size += len;
   mem->memory[mem->size] = 0;
@@ -127,10 +128,10 @@ int main(void)
   XML_SetCharacterDataHandler(parser, characterDataHandler);
 
   /* Initialize a libcurl handle. */
-  curl_global_init(CURL_GLOBAL_ALL ^ CURL_GLOBAL_SSL);
+  curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_handle = curl_easy_init();
   curl_easy_setopt(curl_handle, CURLOPT_URL,
-                   "http://www.w3schools.com/xml/simple.xml");
+                   "https://www.w3schools.com/xml/simple.xml");
   curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, parseStreamCallback);
   curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)parser);
 

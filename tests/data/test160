@@ -56,16 +56,15 @@ Connection: close
 surprise2
 </stdout>
 
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /want/160 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /wantmore/1600001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

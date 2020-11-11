@@ -1,0 +1,74 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Digest auth
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 401 Authorization Required swsclose
+WWW-Authenticate: Digest realm="testrealm", nonce="1"
+Content-Length: 26
+
+This is not the real page
+</data>
+
+# This is supposed to be returned when the server gets a
+# Authorization: Digest line passed-in from the client
+<data1000>
+HTTP/1.1 200 OK swsclose
+Content-Length: 23
+
+This IS the real page!
+</data1000>
+
+<datacheck>
+HTTP/1.1 401 Authorization Required swsclose
+WWW-Authenticate: Digest realm="testrealm", nonce="1"
+Content-Length: 26
+
+HTTP/1.1 200 OK swsclose
+Content-Length: 23
+
+This IS the real page!
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+!SSPI
+crypto
+</features>
+<name>
+HTTP with digest auth and URI contains query
+</name>
+<command>
+"http://%HOSTIP:%HTTPPORT/2076?query" -u testuser:testpass --digest
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /2076?query HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /2076?query HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="1", uri="/2076?query", response="5758bd3bbde7f33236e6ccd278eb59af"
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

@@ -7,7 +7,7 @@ HTTP POST
 </info>
 #
 # Server-side
-<reply name="1">
+<reply>
 <data>
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
@@ -38,7 +38,7 @@ lib578
 HTTP POST lower than MAX_INITIAL_POST_SIZE with progress callback
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/500 log/ip578
+http://%HOSTIP:%HTTPPORT/578 log/ip578
 </command>
 </client>
 

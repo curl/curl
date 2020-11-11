@@ -1,0 +1,66 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+-O
+--remote-time
+</keywords>
+</info>
+
+#
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+Content-Length: 6
+Connection: close
+
+12345
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+# This relies on the debug feature to allow us to set a directory
+# in which to store the -O output
+<features>
+debug
+</features>
+<server>
+http
+</server>
+<name>
+HTTP GET with -O and --remote-time
+</name>
+<setenv>
+CURL_TESTDIR=%PWD/log
+</setenv>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/1443 -O --remote-time
+</command>
+# Verify the mtime of the file. The mtime is specifically chosen to be an even
+# number so that it can be represented exactly on a FAT filesystem.
+<postcheck>
+perl -e 'exit((stat("log/1443"))[9] != 960898200)'
+</postcheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /1443 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<file name="log/1443">
+12345
+</file>
+</verify>
+</testcase>

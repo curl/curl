@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,13 +42,13 @@ int main(void)
   CURL *http_handle2;
   CURLM *multi_handle;
 
-  int still_running; /* keep number of running handles */
+  int still_running = 0; /* keep number of running handles */
 
   http_handle = curl_easy_init();
   http_handle2 = curl_easy_init();
 
   /* set options */
-  curl_easy_setopt(http_handle, CURLOPT_URL, "http://www.example.com/");
+  curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
 
   /* set options */
   curl_easy_setopt(http_handle2, CURLOPT_URL, "http://localhost/");
@@ -63,7 +63,7 @@ int main(void)
   /* we start some action by calling perform right away */
   curl_multi_perform(multi_handle, &still_running);
 
-  do {
+  while(still_running) {
     struct timeval timeout;
     int rc; /* select() return code */
     CURLMcode mc; /* curl_multi_fdset() return code */
@@ -119,7 +119,7 @@ int main(void)
     else {
       /* Note that on some platforms 'timeout' may be modified by select().
          If you need access to the original value save a copy beforehand. */
-      rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+      rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
     }
 
     switch(rc) {
@@ -132,7 +132,7 @@ int main(void)
       curl_multi_perform(multi_handle, &still_running);
       break;
     }
-  } while(still_running);
+  }
 
   curl_multi_cleanup(multi_handle);
 

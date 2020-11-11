@@ -1,0 +1,49 @@
+<testcase>
+<info>
+<keywords>
+GOPHER
+HTTP GET
+followlocation
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data1>
+HTTP/1.1 302 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 7
+Location: gopher://www.example.co.uk
+
+nomnom
+</data1>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Make sure redirects to CURLPROTO_GOPHER are forbidden by default
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/15630001 -L -H "Host: www.example.com"
+</command>
+</client>
+<verify>
+<errorcode>
+1
+</errorcode>
+<protocol>
+GET /15630001 HTTP/1.1
+Host: www.example.com
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+</verify>
+
+</testcase>

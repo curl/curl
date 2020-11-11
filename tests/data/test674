@@ -1,0 +1,54 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+CURLOPT_CURLU
+curl_easy_duphandle
+</keywords>
+</info>
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+<client>
+<server>
+http
+</server>
+<tool>
+lib674
+</tool>
+<name>
+Set CURLOPT_CURLU and dupe the handle
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/674
+</command>
+</client>
+
+<verify>
+<protocol>
+GET /674 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /674 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+
+</testcase>

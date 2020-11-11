@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# (c) CopyRight EdelWeb for EdelKey and OpenEvidence, 2000-2004, 2009
+# (c) CopyRight 2000 - 2020, EdelWeb for EdelKey and OpenEvidence
 # Author: Peter Sylvester
 
 # "libre" for integration with curl
@@ -17,22 +17,24 @@ cd $HOME
 
 KEYSIZE=2048
 DURATION=6000
+# The -sha256 option was introduced in OpenSSL 1.0.1
+DIGESTALGO=-sha256
 
 PREFIX=$1
 if [ ".$PREFIX" = . ] ; then
-	echo No configuration prefix
-	NOTOK=1
+   echo No configuration prefix
+   NOTOK=1
 else
-    if [ ! -f $PREFIX-ca.prm ] ; then
-	echo No configuration file $PREFIX-ca.prm
-	NOTOK=1
-    fi
+   if [ ! -f $PREFIX-ca.prm ] ; then
+      echo No configuration file $PREFIX-ca.prm
+      NOTOK=1
+   fi
 fi
 
 if [ ".$NOTOK" != . ] ; then
-    echo "Sorry, I can't do that for you."
-    $USAGE
-    exit
+   echo "Sorry, I can't do that for you."
+   $USAGE
+   exit
 fi
 
 GETSERIAL="\$t = time ;\$d =  \$t . substr(\$t+$$ ,-4,4)-1;print \$d"
@@ -46,9 +48,9 @@ openssl genrsa -out $PREFIX-ca.key $KEYSIZE -passout pass:secret
 echo "openssl req -config $PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr"
 $OPENSSL req -config $PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr -passin pass:secret
 
-echo "openssl x509 -set_serial $SERIAL -extfile $PREFIX-ca.prm -days $DURATION -req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-$SERIAL.ca-cacert -sha1 "
+echo "openssl x509 -set_serial $SERIAL -extfile $PREFIX-ca.prm -days $DURATION -req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-$SERIAL.ca-cacert $DIGESTALGO "
 
-$OPENSSL x509  -set_serial $SERIAL -extfile $PREFIX-ca.prm -days $DURATION -req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-$SERIAL-ca.cacert -sha1
+$OPENSSL x509  -set_serial $SERIAL -extfile $PREFIX-ca.prm -days $DURATION -req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-$SERIAL-ca.cacert $DIGESTALGO
 
 echo "openssl x509 -text -in $PREFIX-$SERIAL-ca.cacert -nameopt multiline > $PREFIX-ca.cacert "
 $OPENSSL x509 -text -in $PREFIX-$SERIAL-ca.cacert -nameopt multiline > $PREFIX-ca.cacert

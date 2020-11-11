@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP data with single dot-only line
+ </name>
+<stdin>
+.
+</stdin>
+<command>
+smtp://%HOSTIP:%SMTPPORT/952 --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO 952
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+..
+.
+</upload>
+</verify>
+</testcase>

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,7 @@
 #include "curl_sspi.h"
 #include "curl_multibyte.h"
 #include "system_win32.h"
+#include "version_win32.h"
 #include "warnless.h"
 
 /* The last #include files should be: */
@@ -82,7 +83,7 @@ CURLcode Curl_sspi_global_init(void)
      * have both these DLLs (security.dll forwards calls to secur32.dll) */
 
     /* Load SSPI dll into the address space of the calling process */
-    if(Curl_verify_windows_version(4, 0, PLATFORM_WINNT, VERSION_EQUAL))
+    if(curlx_verify_windows_version(4, 0, PLATFORM_WINNT, VERSION_EQUAL))
       s_hSecDll = Curl_load_library(TEXT("security.dll"));
     else
       s_hSecDll = Curl_load_library(TEXT("secur32.dll"));
@@ -90,8 +91,9 @@ CURLcode Curl_sspi_global_init(void)
       return CURLE_FAILED_INIT;
 
     /* Get address of the InitSecurityInterfaceA function from the SSPI dll */
-    pInitSecurityInterface = (INITSECURITYINTERFACE_FN)
-      GetProcAddress(s_hSecDll, SECURITYENTRYPOINT);
+    pInitSecurityInterface =
+      CURLX_FUNCTION_CAST(INITSECURITYINTERFACE_FN,
+                          (GetProcAddress(s_hSecDll, SECURITYENTRYPOINT)));
     if(!pInitSecurityInterface)
       return CURLE_FAILED_INIT;
 
@@ -131,7 +133,7 @@ void Curl_sspi_global_cleanup(void)
  * Parameters:
  *
  * userp    [in]     - The user name in the format User or Domain\User.
- * passdwp  [in]     - The user's password.
+ * passwdp  [in]     - The user's password.
  * identity [in/out] - The identity structure.
  *
  * Returns CURLE_OK on success.
@@ -150,7 +152,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   /* Initialize the identity */
   memset(identity, 0, sizeof(*identity));
 
-  useranddomain.tchar_ptr = Curl_convert_UTF8_to_tchar((char *)userp);
+  useranddomain.tchar_ptr = curlx_convert_UTF8_to_tchar((char *)userp);
   if(!useranddomain.tchar_ptr)
     return CURLE_OUT_OF_MEMORY;
 
@@ -172,7 +174,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   /* Setup the identity's user and length */
   dup_user.tchar_ptr = _tcsdup(user.tchar_ptr);
   if(!dup_user.tchar_ptr) {
-    Curl_unicodefree(useranddomain.tchar_ptr);
+    curlx_unicodefree(useranddomain.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
   }
   identity->User = dup_user.tbyte_ptr;
@@ -182,7 +184,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   /* Setup the identity's domain and length */
   dup_domain.tchar_ptr = malloc(sizeof(TCHAR) * (domlen + 1));
   if(!dup_domain.tchar_ptr) {
-    Curl_unicodefree(useranddomain.tchar_ptr);
+    curlx_unicodefree(useranddomain.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
   }
   _tcsncpy(dup_domain.tchar_ptr, domain.tchar_ptr, domlen);
@@ -191,22 +193,22 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   identity->DomainLength = curlx_uztoul(domlen);
   dup_domain.tchar_ptr = NULL;
 
-  Curl_unicodefree(useranddomain.tchar_ptr);
+  curlx_unicodefree(useranddomain.tchar_ptr);
 
   /* Setup the identity's password and length */
-  passwd.tchar_ptr = Curl_convert_UTF8_to_tchar((char *)passwdp);
+  passwd.tchar_ptr = curlx_convert_UTF8_to_tchar((char *)passwdp);
   if(!passwd.tchar_ptr)
     return CURLE_OUT_OF_MEMORY;
   dup_passwd.tchar_ptr = _tcsdup(passwd.tchar_ptr);
   if(!dup_passwd.tchar_ptr) {
-    Curl_unicodefree(passwd.tchar_ptr);
+    curlx_unicodefree(passwd.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
   }
   identity->Password = dup_passwd.tbyte_ptr;
   identity->PasswordLength = curlx_uztoul(_tcslen(dup_passwd.tchar_ptr));
   dup_passwd.tchar_ptr = NULL;
 
-  Curl_unicodefree(passwd.tchar_ptr);
+  curlx_unicodefree(passwd.tchar_ptr);
 
   /* Setup the identity's flags */
   identity->Flags = SECFLAG_WINNT_AUTH_IDENTITY;

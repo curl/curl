@@ -1,6 +1,7 @@
 Long: ignore-content-length
 Help: Ignore the size of the remote resource
 Protocols: FTP HTTP
+Category: http ftp
 ---
 For HTTP, Ignore the Content-Length header. This is particularly useful for
 servers running Apache 1.x, which will report incorrect Content-Length for

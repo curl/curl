@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * SMTP example showing how to send e-mails
+ * Send e-mail with SMTP
  * </DESC>
  */
 
@@ -29,22 +29,26 @@
 #include <string.h>
 #include <curl/curl.h>
 
-/* This is a simple example showing how to send mail using libcurl's SMTP
- * capabilities. For an example of using the multi interface please see
- * smtp-multi.c.
- *
- * Note that this example requires libcurl 7.20.0 or above.
+/*
+ * For an SMTP example using the multi interface please see smtp-multi.c.
  */
 
-#define FROM    "<sender@example.org>"
-#define TO      "<addressee@example.net>"
-#define CC      "<info@example.org>"
+/* The libcurl options want plain addresses, the viewable headers in the mail
+ * can very well get a full name as well.
+ */
+#define FROM_ADDR    "<sender@example.org>"
+#define TO_ADDR      "<addressee@example.net>"
+#define CC_ADDR      "<info@example.org>"
+
+#define FROM_MAIL "Sender Person " FROM_ADDR
+#define TO_MAIL   "A Receiver " TO_ADDR
+#define CC_MAIL   "John CC Smith " CC_ADDR
 
 static const char *payload_text[] = {
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n",
-  "To: " TO "\r\n",
-  "From: " FROM "(Example User)\r\n",
-  "Cc: " CC "(Another example User)\r\n",
+  "To: " TO_MAIL "\r\n",
+  "From: " FROM_MAIL "\r\n",
+  "Cc: " CC_MAIL "\r\n",
   "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
   "rfcpedant.example.org>\r\n",
   "Subject: SMTP example message\r\n",
@@ -103,13 +107,13 @@ int main(void)
      * they could cause an endless loop. See RFC 5321 Section 4.5.5 for more
      * details.
      */
-    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM);
+    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM_ADDR);
 
     /* Add two recipients, in this particular case they correspond to the
      * To: and Cc: addressees in the header, but they could be any kind of
      * recipient. */
-    recipients = curl_slist_append(recipients, TO);
-    recipients = curl_slist_append(recipients, CC);
+    recipients = curl_slist_append(recipients, TO_ADDR);
+    recipients = curl_slist_append(recipients, CC_ADDR);
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
     /* We're using a callback function to specify the payload (the headers and

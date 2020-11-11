@@ -1,0 +1,40 @@
+<testcase>
+<info>
+<keywords>
+FILE
+</keywords>
+</info>
+
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+file
+</server>
+<name>
+file:// bad host
+</name>
+# This command should not succeed since we only accept
+# file:/// file://localhost/ file://127.0.0.1/
+<command>
+file://bad-host%PWD/log/test1145.txt
+</command>
+<file name="log/test1145.txt">
+foo
+   bar
+bar
+   foo
+moo
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# CURLE_URL_MALFORMAT is error code 3
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

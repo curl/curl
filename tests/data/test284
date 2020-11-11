@@ -51,7 +51,7 @@ tftp
 TFTP retrieve of boundary case 512 byte file
  </name>
  <command>
-tftp://%HOSTIP:%TFTPPORT//284 --trace-ascii log/traceit
+tftp://%HOSTIP:%TFTPPORT//284
 </command>
 </client>
 

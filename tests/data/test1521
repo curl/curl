@@ -1,0 +1,30 @@
+<testcase>
+<info>
+<keywords>
+curl_easy_setopt
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<tool>
+lib1521
+</tool>
+
+ <name>
+Test all curl_easy_setopt and curl_easy_getinfo options
+ </name>
+ <command>
+unused
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,10 +46,10 @@ struct FtpFile {
 static size_t my_fwrite(void *buffer, size_t size, size_t nmemb,
                         void *stream)
 {
-  struct FtpFile *out=(struct FtpFile *)stream;
-  if(out && !out->stream) {
+  struct FtpFile *out = (struct FtpFile *)stream;
+  if(!out->stream) {
     /* open file for writing */
-    out->stream=fopen(out->filename, "wb");
+    out->stream = fopen(out->filename, "wb");
     if(!out->stream)
       return -1; /* failure, can't open file to write */
   }
@@ -61,7 +61,7 @@ int main(void)
 {
   CURL *curl;
   CURLcode res;
-  struct FtpFile ftpfile={
+  struct FtpFile ftpfile = {
     "yourfile.bin", /* name to store the file as if successful */
     NULL
   };

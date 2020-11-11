@@ -71,15 +71,14 @@ bar
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^(User-Agent:|Content-Type: multipart/form-data;|------------).*
+^(Content-Type: multipart/form-data;|------------).*
 </strip>
 <protocol>
 POST /we/want/1053 HTTP/1.1
-User-Agent: curl/7.18.2 (i686-pc-linux-gnu) libcurl/7.18.2 OpenSSL/0.9.7a ipv6 zlib/1.1.4
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 410
-Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763
 
 ------------------------------9ef8d6205763
@@ -100,11 +99,10 @@ bar
 
 ------------------------------9ef8d6205763--
 POST /we/want/data/10530002.txt?coolsite=yes HTTP/1.1
-User-Agent: curl/7.18.2 (i686-pc-linux-gnu) libcurl/7.18.2 OpenSSL/0.9.7a ipv6 zlib/1.1.4
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 410
-Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763
 
 ------------------------------9ef8d6205763

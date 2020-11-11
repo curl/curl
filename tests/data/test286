@@ -16,7 +16,7 @@ tftp
 TFTP send of boundary case 512 byte file
  </name>
  <command>
--T log/test286.txt tftp://%HOSTIP:%TFTPPORT// --trace-ascii log/traceit
+-T log/test286.txt tftp://%HOSTIP:%TFTPPORT//
 </command>
 <file name="log/test286.txt">
 A chunk of data which exactly fits into

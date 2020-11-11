@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,6 +33,9 @@ struct ProgressData {
   int         width;
   FILE       *out;  /* where to write everything to */
   curl_off_t  initial_size;
+  unsigned int tick;
+  int bar;
+  int barmove;
 };
 
 void progressbarinit(struct ProgressData *bar,
@@ -47,4 +50,3 @@ int tool_progress_cb(void *clientp,
                      curl_off_t ultotal, curl_off_t ulnow);
 
 #endif /* HEADER_CURL_TOOL_CB_PRG_H */
-

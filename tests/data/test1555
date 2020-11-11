@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+RECURSIVE_API_CALL
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 204 PARTIAL
+X-Comment: partial response to keep the client waiting
+</data>
+<postcmd>
+wait 10
+</postcmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<tool>
+lib1555
+</tool>
+ <name>
+verify api is protected against calls from callbacks
+ </name>
+
+# this server/host won't be used for real
+ <command>
+http://%HOSTIP:%HTTPPORT/1555
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+</protocol>
+# 42 == CURLE_ABORTED_BY_CALLBACK
+<errorcode>
+42
+</errorcode>
+<stdout>
+curl_easy_recv returned 93
+curl_easy_send returned 93
+</stdout>
+</verify>
+</testcase>

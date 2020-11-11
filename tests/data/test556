@@ -8,7 +8,7 @@ HTTP GET
 
 <reply>
 <data>
-HTTP/1.1 200 OK
+HTTP/1.1 200 OK swsclose
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 Content-Length: 6
@@ -38,9 +38,6 @@ http://%HOSTIP:%HTTPPORT
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /556 HTTP/1.2
 Host: ninja

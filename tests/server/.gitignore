@@ -5,3 +5,6 @@ rtspd
 sockfilt
 sws
 tftpd
+socksd
+disabled
+mqttd

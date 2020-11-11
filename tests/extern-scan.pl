@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2010-2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2010 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -49,7 +49,9 @@ sub scanheader {
     open H, "<$f" || die;
     while(<H>) {
         if (/^(CURL_EXTERN.*)/) {
-            print "$1\n";
+            my $decl = $1;
+            $decl =~ s/\r$//;
+            print "$decl\n";
         }
     }
     close H;

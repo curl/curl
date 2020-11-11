@@ -1,0 +1,70 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+URL API
+CURLOPT_CURLU
+CURLOPT_FOLLOWLOCATION
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 302 OK
+Content-Length: 6
+Location: /15670002
+
+-foo-
+</data>
+<data2>
+HTTP/1.1 200 OK
+Content-Length: 11
+
+redirected
+</data2>
+<datacheck>
+redirected
+redirected
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib1567
+</tool>
+
+ <name>
+re-run redirected transfer without setting CURLU URL again
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1567
+</command>
+</client>
+
+<verify>
+<protocol>
+GET /1567 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /15670002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /1567 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /15670002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

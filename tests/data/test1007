@@ -17,7 +17,7 @@ tftp
 TFTP send with invalid permission on server
  </name>
  <command>
--T log/test1007.txt tftp://%HOSTIP:%TFTPPORT//invalid-file --trace-ascii log/traceit
+-T log/test1007.txt tftp://%HOSTIP:%TFTPPORT//invalid-file
 </command>
 <file name="log/test1007.txt">
 This data will not be sent

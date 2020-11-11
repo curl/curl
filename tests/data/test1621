@@ -1,0 +1,23 @@
+<testcase>
+<info>
+<keywords>
+unittest
+stripcredentials
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+https
+</features>
+ <name>
+unit tests for stripcredentials from URL
+ </name>
+</client>
+</testcase>

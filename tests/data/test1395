@@ -17,10 +17,5 @@ unittest
  <name>
 Curl_dedotdotify
  </name>
-<tool>
-unit1395
-</tool>
-
 </client>
-
 </testcase>

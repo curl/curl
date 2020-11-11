@@ -58,38 +58,22 @@ simple TLS-SRP HTTPS GET, check user in response
 <verify>
 <protocol>
 </protocol>
-<file name="log/curl320.out" mode="text">
+<file name="log/curl320.out">
 HTTP/1.0 200 OK
 Content-type: text/html
 
-
-<HTML><BODY>
-<CENTER><H1>This is <a href="http://www.gnu.org/software/gnutls">GnuTLS</a></H1></CENTER>
-
-
-
-<h5>If your browser supports session resuming, then you should see the same session ID, when you press the <b>reload</b> button.</h5>
-<p>Connected as user 'jsmith'.</p>
-<P>
-<TABLE border=1><TR><TD></TD></TR>
-<TR><TD>Key Exchange:</TD><TD>SRP</TD></TR>
-<TR><TD>Compression</TD><TD>NULL</TD></TR>
-<TR><TD>Cipher</TD><TD>AES-NNN-CBC</TD></TR>
-<TR><TD>MAC</TD><TD>SHA1</TD></TR>
-<TR><TD>Ciphersuite</TD><TD>SRP_SHA_AES_NNN_CBC_SHA1</TD></TR></p></TABLE>
-<hr><P>Your HTTP header was:<PRE>Host: %HOSTIP:%HTTPTLSPORT
+FINE
 User-Agent: curl-test-suite
 Accept: */*
 
-</PRE></P>
-</BODY></HTML>
-
 </file>
 <stripfile>
-s/^<p>Session ID:.*//
+s/^<p>Connected as user 'jsmith'.*/FINE/
 s/Protocol version:.*[0-9]//
 s/GNUTLS/GnuTLS/
 s/(AES[-_])\d\d\d([-_]CBC)/$1NNN$2/
+s/^<.*\n//
+s/^\n//
 </stripfile>
 </verify>
 

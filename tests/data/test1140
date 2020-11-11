@@ -23,4 +23,10 @@ Verify the nroff of man pages
 </command>
 </client>
 
+<verify>
+<stdout>
+OK
+</stdout>
+</verify>
+
 </testcase>
