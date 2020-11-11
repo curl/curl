@@ -1254,6 +1254,8 @@ const struct Curl_ssl *Curl_ssl =
   &Curl_ssl_gskit;
 #elif defined(USE_MBEDTLS)
   &Curl_ssl_mbedtls;
+#elif defined(USE_UNITYTLS)
+  &Curl_ssl_unitytls;
 #elif defined(USE_NSS)
   &Curl_ssl_nss;
 #elif defined(USE_OPENSSL)
@@ -1283,6 +1285,9 @@ static const struct Curl_ssl *available_backends[] = {
 #endif
 #if defined(USE_MBEDTLS)
   &Curl_ssl_mbedtls,
+#endif
+#if defined(USE_UNITYTLS)
+  &Curl_ssl_unitytls,
 #endif
 #if defined(USE_NSS)
   &Curl_ssl_nss,
