@@ -137,7 +137,7 @@ sub onecommit {
         $ref = $closes[0];
     }
 
-    if($ref =~ /^(\d+)/) {
+    if($ref =~ /^#?(\d+)/) {
         $ref = "https://curl.se/bug/?i=$1"
     }
     if($ref) {
