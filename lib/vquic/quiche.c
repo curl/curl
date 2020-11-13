@@ -61,7 +61,7 @@ static CURLcode flush_egress(struct Curl_easy *data, curl_socket_t sockfd,
                              struct quicsocket *qs);
 
 static CURLcode http_request(struct Curl_easy *data, const void *mem,
-                             size_t len);
+                             size_t len, ssize_t *written);
 static Curl_recv h3_stream_recv;
 static Curl_send h3_stream_send;
 
@@ -90,9 +90,14 @@ static CURLcode qs_disconnect(struct Curl_easy *data,
   DEBUGASSERT(qs);
   if(qs->conn) {
     (void)quiche_conn_close(qs->conn, TRUE, 0, NULL, 0);
+
     /* flushing the egress is not a failsafe way to deliver all the
        outstanding packets, but we also don't want to get stuck here... */
-    (void)flush_egress(data, qs->sockfd, qs);
+    if(flush_egress(data, qs->sockfd, qs) == CURLE_AGAIN) {
+      free(qs->egress_buf);
+      qs->egress_buf = NULL;
+      qs->egress_buflen = 0;
+    }
     quiche_conn_free(qs->conn);
     qs->conn = NULL;
   }
@@ -194,6 +199,8 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   (void)addr;
   (void)addrlen;
 
+  qs->egress_buf = NULL;
+  qs->egress_buflen = 0;
   qs->sockfd = sockfd;
   qs->cfg = quiche_config_new(QUICHE_PROTOCOL_VERSION);
   if(!qs->cfg) {
@@ -246,8 +253,14 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
 #endif
 
   result = flush_egress(data, sockfd, qs);
-  if(result)
+  if(result) {
+    if(result == CURLE_AGAIN) {
+      /* It's not possible that the new connection has fulfilled the buffer */
+      result = CURLE_SEND_ERROR;
+    }
+    qs_disconnect(data, qs);
     return result;
+  }
 
   /* extract the used address as a string */
   if(!Curl_addr2string((struct sockaddr*)addr, addrlen, ipbuf, &port)) {
@@ -338,8 +351,16 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
     goto error;
 
   result = flush_egress(data, sockfd, qs);
-  if(result)
-    goto error;
+  if(result) {
+    if(result == CURLE_AGAIN) {
+      /* Looks like the quic connection is still alive,
+         not return CURLE_AGAIN here */
+      result = CURLE_OK;
+    }
+    else {
+      goto error;
+    }
+  }
 
   if(quiche_conn_is_established(qs->conn)) {
     *done = TRUE;
@@ -396,9 +417,30 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
 static CURLcode flush_egress(struct Curl_easy *data, int sockfd,
                              struct quicsocket *qs)
 {
-  ssize_t sent;
+  ssize_t sent, socksent;
   uint8_t out[1200];
   int64_t timeout_ns;
+
+  if(qs->egress_buf != NULL) {
+    while(
+      (socksent = send(sockfd, qs->egress_buf, qs->egress_buflen, 0)) == -1 &&
+      errno == EINTR)
+      ;
+    if(socksent < 0) {
+      if(errno == EAGAIN || errno == EWOULDBLOCK) {
+        return CURLE_AGAIN;
+      }
+      else {
+        failf(data, "send() returned %zd\n", socksent);
+        return CURLE_SEND_ERROR;
+      }
+    }
+    else {
+      free(qs->egress_buf);
+      qs->egress_buf = NULL;
+      qs->egress_buflen = 0;
+    }
+  }
 
   do {
     sent = quiche_conn_send(qs->conn, out, sizeof(out));
@@ -410,10 +452,18 @@ static CURLcode flush_egress(struct Curl_easy *data, int sockfd,
       return CURLE_SEND_ERROR;
     }
 
-    sent = send(sockfd, out, sent, 0);
-    if(sent < 0) {
-      failf(data, "send() returned %zd", sent);
-      return CURLE_SEND_ERROR;
+    while((socksent = send(sockfd, out, sent, 0)) == -1 && errno == EINTR)
+      ;
+    if(socksent < 0) {
+      if(errno == EAGAIN || errno == EWOULDBLOCK) {
+        qs->egress_buf = malloc(sent);
+        memcpy(qs->egress_buf, out, sent);
+        return CURLE_AGAIN;
+      }
+      else {
+        failf(data, "send() returned %zd", socksent);
+        return CURLE_SEND_ERROR;
+      }
     }
   } while(1);
 
@@ -469,6 +519,7 @@ static ssize_t h3_stream_recv(struct Curl_easy *data,
   ssize_t rcode;
   struct connectdata *conn = data->conn;
   struct quicsocket *qs = conn->quic;
+  CURLcode flush_egress_code;
   curl_socket_t sockfd = conn->sock[sockindex];
   quiche_h3_event *ev;
   int rc;
@@ -538,8 +589,14 @@ static ssize_t h3_stream_recv(struct Curl_easy *data,
 
     quiche_h3_event_free(ev);
   }
-  if(flush_egress(data, sockfd, qs)) {
-    *curlcode = CURLE_SEND_ERROR;
+  flush_egress_code = flush_egress(data, sockfd, qs);
+  if(flush_egress_code != CURLE_OK) {
+    if(flush_egress_code == CURLE_AGAIN) {
+      *curlcode = CURLE_AGAIN;
+    }
+    else {
+      *curlcode = CURLE_SEND_ERROR;
+    }
     return -1;
   }
 
@@ -561,29 +618,53 @@ static ssize_t h3_stream_send(struct Curl_easy *data,
   ssize_t sent;
   struct connectdata *conn = data->conn;
   struct quicsocket *qs = conn->quic;
+  CURLcode flush_egress_code;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct HTTP *stream = data->req.p.http;
 
-  if(!stream->h3req) {
-    CURLcode result = http_request(data, mem, len);
-    if(result) {
+  /* flush egress buffer if exists */
+  flush_egress_code = flush_egress(data, sockfd, qs);
+  if(flush_egress_code != CURLE_OK) {
+    if(flush_egress_code == CURLE_AGAIN) {
+      *curlcode = CURLE_AGAIN;
+    }
+    else {
       *curlcode = CURLE_SEND_ERROR;
+    }
+    return -1;
+  }
+
+  if(!stream->h3req) {
+    *curlcode = http_request(data, mem, len, &sent);
+    if(*curlcode) {
       return -1;
     }
-    sent = len;
   }
   else {
     H3BUGF(infof(data, "Pass on %zd body bytes to quiche\n", len));
     sent = quiche_h3_send_body(qs->h3c, qs->conn, stream->stream3_id,
                                (uint8_t *)mem, len, FALSE);
     if(sent < 0) {
-      *curlcode = CURLE_SEND_ERROR;
+      if(sent == QUICHE_H3_ERR_DONE) {
+        /* a partial write happens here,
+           set CURLE_AGAIN then curl would retry later */
+        *curlcode = CURLE_AGAIN;
+      }
+      else {
+        *curlcode = CURLE_SEND_ERROR;
+      }
       return -1;
     }
   }
 
-  if(flush_egress(data, sockfd, qs)) {
-    *curlcode = CURLE_SEND_ERROR;
+  flush_egress_code = flush_egress(data, sockfd, qs);
+  if(flush_egress_code != CURLE_OK) {
+    if(flush_egress_code == CURLE_AGAIN) {
+      *curlcode = CURLE_AGAIN;
+    }
+    else {
+      *curlcode = CURLE_SEND_ERROR;
+    }
     return -1;
   }
 
@@ -605,7 +686,7 @@ int Curl_quic_ver(char *p, size_t len)
 #define AUTHORITY_DST_IDX 3
 
 static CURLcode http_request(struct Curl_easy *data, const void *mem,
-                             size_t len)
+                             size_t len, ssize_t *written)
 {
   /*
    */
@@ -629,11 +710,16 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   for(i = 1; i < len; ++i) {
     if(hdbuf[i] == '\n' && hdbuf[i - 1] == '\r') {
       ++nheader;
+      if(i >= 3 && hdbuf[i - 2] == '\n' && hdbuf[i - 3] == '\r') {
+        break;
+      }
       ++i;
     }
   }
-  if(nheader < 2)
+  if(nheader < 2) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT; /* internal error */
     goto fail;
+  }
 
   /* We counted additional 2 \r\n in the first and last line. We need 3
      new headers: :method, :path and :scheme. Therefore we need one
@@ -655,8 +741,10 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
 
   /* Method does not contain spaces */
   end = memchr(hdbuf, ' ', line_end - hdbuf);
-  if(!end || end == hdbuf)
+  if(!end || end == hdbuf) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT; /* internal error */
     goto fail;
+  }
   nva[0].name = (unsigned char *)":method";
   nva[0].name_len = strlen((char *)nva[0].name);
   nva[0].value = (unsigned char *)hdbuf;
@@ -672,8 +760,10 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
       break;
     }
   }
-  if(!end || end == hdbuf)
+  if(!end || end == hdbuf) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT; /* internal error */
     goto fail;
+  }
   nva[1].name = (unsigned char *)":path";
   nva[1].name_len = strlen((char *)nva[1].name);
   nva[1].value = (unsigned char *)hdbuf;
@@ -687,7 +777,6 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
     nva[2].value = (unsigned char *)"http";
   nva[2].value_len = strlen((char *)nva[2].value);
 
-
   authority_idx = 0;
   i = 3;
   while(i < nheader) {
@@ -698,17 +787,23 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
     /* check for next CR, but only within the piece of data left in the given
        buffer */
     line_end = memchr(hdbuf, '\r', len - (hdbuf - (char *)mem));
-    if(!line_end || (line_end == hdbuf))
+    if(!line_end || (line_end == hdbuf)) {
+      result = CURLE_BAD_FUNCTION_ARGUMENT; /* internal error */
       goto fail;
+    }
 
     /* header continuation lines are not supported */
-    if(*hdbuf == ' ' || *hdbuf == '\t')
+    if(*hdbuf == ' ' || *hdbuf == '\t') {
+      result = CURLE_BAD_FUNCTION_ARGUMENT; /* internal error */
       goto fail;
+    }
 
     for(end = hdbuf; end < line_end && *end != ':'; ++end)
       ;
-    if(end == hdbuf || end == line_end)
+    if(end == hdbuf || end == line_end) {
+      result = CURLE_BAD_FUNCTION_ARGUMENT; /* internal error */
       goto fail;
+    }
     hlen = end - hdbuf;
 
     if(hlen == 4 && strncasecompare("host", hdbuf, 4)) {
@@ -749,6 +844,8 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
     ++i;
   }
 
+  hdbuf += nva[i - 1].value_len + 4;
+
   /* :authority must come before non-pseudo header fields */
   if(authority_idx != 0 && authority_idx != AUTHORITY_DST_IDX) {
     quiche_h3_header authority = nva[authority_idx];
@@ -779,28 +876,44 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
     }
   }
 
+  *written = (ssize_t) len;
+
   switch(data->state.httpreq) {
   case HTTPREQ_POST:
   case HTTPREQ_POST_FORM:
   case HTTPREQ_POST_MIME:
   case HTTPREQ_PUT:
-    if(data->state.infilesize != -1)
-      stream->upload_left = data->state.infilesize;
-    else
+    if(data->state.infilesize != -1) {
+      stream->upload_left = len - ((char *)hdbuf - (char *)mem);
+      if(stream->upload_left == 0 && data->state.infilesize > 0) {
+        stream->upload_left = -1; /* unknown, but not zero */
+      }
+    }
+    else {
       /* data sending without specifying the data amount up front */
       stream->upload_left = -1; /* unknown, but not zero */
+    }
 
     stream3_id = quiche_h3_send_request(qs->h3c, qs->conn, nva, nheader,
                                         stream->upload_left ? FALSE: TRUE);
-    if((stream3_id >= 0) && data->set.postfields) {
+    if(stream3_id >= 0 && data->set.postfields && stream->upload_left > 0) {
+      bool fin = data->state.infilesize > stream->upload_left ? FALSE : TRUE;
       ssize_t sent = quiche_h3_send_body(qs->h3c, qs->conn, stream3_id,
                                          (uint8_t *)data->set.postfields,
-                                         stream->upload_left, TRUE);
+                                         stream->upload_left, fin);
       if(sent <= 0) {
         failf(data, "quiche_h3_send_body failed!");
-        result = CURLE_SEND_ERROR;
+        if(sent == QUICHE_H3_ERR_DONE) {
+          result = CURLE_AGAIN;
+          /* Then curl would try to call this function again */
+          stream->h3req = FALSE;
+        }
+        else {
+          result = CURLE_SEND_ERROR;
+        }
       }
-      stream->upload_left = 0; /* nothing left to send */
+      *written -= (ssize_t)(stream->upload_left - sent);
+      stream->upload_left -= sent;
     }
     break;
   default:
@@ -814,7 +927,14 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   if(stream3_id < 0) {
     H3BUGF(infof(data, "quiche_h3_send_request returned %d\n",
                  stream3_id));
-    result = CURLE_SEND_ERROR;
+    if(stream3_id == QUICHE_H3_ERR_STREAM_BLOCKED) {
+      result = CURLE_AGAIN;
+      /* Then curl would try to call this function again */
+      stream->h3req = FALSE;
+    }
+    else {
+      result = CURLE_SEND_ERROR;
+    }
     goto fail;
   }
 
@@ -839,13 +959,27 @@ CURLcode Curl_quic_done_sending(struct Curl_easy *data)
   if(conn->handler == &Curl_handler_http3) {
     /* only for HTTP/3 transfers */
     ssize_t sent;
+    int i;
+    curl_socket_t sockfd;
     struct HTTP *stream = data->req.p.http;
     struct quicsocket *qs = conn->quic;
     stream->upload_done = TRUE;
     sent = quiche_h3_send_body(qs->h3c, qs->conn, stream->stream3_id,
                                NULL, 0, TRUE);
-    if(sent < 0)
-      return CURLE_SEND_ERROR;
+    if(sent < 0) {
+      if(sent == QUICHE_H3_ERR_DONE) {
+        return CURLE_AGAIN;
+      }
+      else {
+        return CURLE_SEND_ERROR;
+      }
+    }
+    for(i = 0; i < 2; i++) {
+      if(&conn->hequic[0] == qs) {
+        sockfd = conn->sock[i];
+        return flush_egress(data, sockfd, qs);
+      }
+    }
   }
 
   return CURLE_OK;

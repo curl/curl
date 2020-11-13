@@ -43,6 +43,8 @@ struct quicsocket {
   uint8_t scid[QUICHE_MAX_CONN_ID_LEN];
   curl_socket_t sockfd;
   uint32_t version;
+  uint8_t *egress_buf;
+  ssize_t egress_buflen;
 };
 
 #endif
