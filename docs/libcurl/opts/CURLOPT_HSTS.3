@@ -46,6 +46,21 @@ only enable HSTS without reading from or writing to any file.
 
 If this option is set multiple times, libcurl will load cache entries from
 each given file but will only store the last used name for later writing.
+.SH "FILE FORMAT"
+The HSTS cache is saved to and loaded from a text file with one entry per
+physical line. Each line in the file has the following format:
+
+[host] [stamp]
+
+[host] is the domain name for the entry and the name is dot-prefixed if it is
+a includeSubDomain entry (if the entry is valid for all subdmains to the name
+as well or only for the exact name).
+
+[stamp] is the time (in UTC) when the entry expires and it uses the format
+\&"YYYYMMDD HH:MM:SS".
+
+Lines starting with "#" are treated as comments and are ignored. There is
+currently no length or size limit.
 .SH DEFAULT
 NULL, no file name
 .SH PROTOCOLS
