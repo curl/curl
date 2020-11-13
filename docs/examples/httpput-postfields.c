@@ -71,7 +71,11 @@ int main(int argc, char **argv)
        curl does strlen to get the size. */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, olivertwist);
 
-    /* override the POST implied by CURLOPT_POSTFIELDS */
+    /* override the POST implied by CURLOPT_POSTFIELDS
+     *
+     * Warning: CURLOPT_CUSTOMREQUEST is problematic, especially if you want
+     * to follow redirects. Be aware.
+     */
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
 
     /* specify target URL, and note that this URL should include a file
