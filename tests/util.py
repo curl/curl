@@ -19,18 +19,32 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-"""Module for extracting test data from the test data folder"""
+"""Module for extracting test data from the test data folder and other utils"""
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
+
+import logging
 import os
 import re
-import logging
 
 log = logging.getLogger(__name__)
 
 
 REPLY_DATA = re.compile("<reply>[ \t\n\r]*<data[^<]*>(.*?)</data>", re.MULTILINE | re.DOTALL)
+
+
+class ClosingFileHandler(logging.StreamHandler):
+    def __init__(self, filename):
+        super(ClosingFileHandler, self).__init__()
+        self.filename = os.path.abspath(filename)
+        self.setStream(None)
+
+    def emit(self, record):
+        with open(self.filename, "a") as fp:
+            self.setStream(fp)
+            super(ClosingFileHandler, self).emit(record)
+            self.setStream(None)
 
 
 class TestData(object):

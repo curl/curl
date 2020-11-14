@@ -23,10 +23,14 @@
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
+
 import argparse
+import logging
 import os
 import sys
-import logging
+
+from util import ClosingFileHandler
+
 if sys.version_info.major >= 3:
     import socketserver
 else:
@@ -313,7 +317,7 @@ def setup_logging(options):
 
     # Write out to a logfile
     if options.logfile:
-        handler = logging.FileHandler(options.logfile, mode="w")
+        handler = ClosingFileHandler(options.logfile)
         handler.setFormatter(formatter)
         handler.setLevel(logging.DEBUG)
         root_logger.addHandler(handler)
