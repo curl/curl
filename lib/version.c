@@ -274,6 +274,9 @@ static const char * const protocols[] = {
 #ifndef CURL_DISABLE_GOPHER
   "gopher",
 #endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_GOPHER)
+  "gophers",
+#endif
 #ifndef CURL_DISABLE_HTTP
   "http",
 #endif

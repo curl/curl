@@ -33,6 +33,7 @@
 #include "gopher.h"
 #include "select.h"
 #include "strdup.h"
+#include "vtls/vtls.h"
 #include "url.h"
 #include "escape.h"
 #include "warnless.h"
@@ -46,6 +47,10 @@
  */
 
 static CURLcode gopher_do(struct connectdata *conn, bool *done);
+#ifdef USE_SSL
+static CURLcode gopher_connect(struct connectdata *conn, bool *done);
+static CURLcode gopher_connecting(struct connectdata *conn, bool *done);
+#endif
 
 /*
  * Gopher protocol handler.
@@ -74,6 +79,46 @@ const struct Curl_handler Curl_handler_gopher = {
   CURLPROTO_GOPHER,                     /* family */
   PROTOPT_NONE                          /* flags */
 };
+
+#ifdef USE_SSL
+const struct Curl_handler Curl_handler_gophers = {
+  "GOPHERS",                            /* scheme */
+  ZERO_NULL,                            /* setup_connection */
+  gopher_do,                            /* do_it */
+  ZERO_NULL,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  gopher_connect,                       /* connect_it */
+  gopher_connecting,                    /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_getsock */
+  ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
+  ZERO_NULL,                            /* perform_getsock */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
+  PORT_GOPHER,                          /* defport */
+  CURLPROTO_GOPHER,                     /* protocol */
+  CURLPROTO_GOPHER,                     /* family */
+  PROTOPT_SSL                           /* flags */
+};
+
+static CURLcode gopher_connect(struct connectdata *conn, bool *done)
+{
+  (void)conn;
+  (void)done;
+  return CURLE_OK;
+}
+
+static CURLcode gopher_connecting(struct connectdata *conn, bool *done)
+{
+  CURLcode result = Curl_ssl_connect(conn, FIRSTSOCKET);
+  if(result)
+    connclose(conn, "Failed TLS connection");
+  *done = TRUE;
+  return result;
+}
+#endif
 
 static CURLcode gopher_do(struct connectdata *conn, bool *done)
 {
@@ -127,6 +172,11 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   k = curlx_uztosz(len);
 
   for(;;) {
+    /* Break out of the loop if the selector is empty because OpenSSL and/or
+       LibreSSL fail with errno 0 if this is the case. */
+    if(strlen(sel) < 1)
+      break;
+
     result = Curl_write(conn, sockfd, sel, k, &amount);
     if(!result) { /* Which may not have written it all! */
       result = Curl_client_write(conn, CLIENTWRITE_HEADER, sel, amount);
