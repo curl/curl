@@ -251,6 +251,9 @@ static const struct Curl_handler * const protocols[] = {
 
 #ifndef CURL_DISABLE_GOPHER
   &Curl_handler_gopher,
+#ifdef USE_SSL
+  &Curl_handler_gophers,
+#endif
 #endif
 
 #ifdef USE_LIBRTMP
