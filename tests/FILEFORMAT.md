@@ -117,6 +117,7 @@ Available substitute variables include:
 - `%FTPTIME3` - Even longer than %FTPTIME2
 - `%GOPHER6PORT` - IPv6 port number of the Gopher server
 - `%GOPHERPORT` - Port number of the Gopher server
+- `%GOPHERSPORT` - Port number of the Gophers server
 - `%HOST6IP` - IPv6 address of the host running this test
 - `%HOSTIP` - IPv4 address of the host running this test
 - `%HTTP6PORT` - IPv6 port number of the HTTP server
@@ -329,6 +330,8 @@ What server(s) this test case requires/uses. Available servers:
 - `ftp-ipv6`
 - `ftp`
 - `ftps`
+- `gopher`
+- `gophers`
 - `http-ipv6`
 - `http-proxy`
 - `http-unix`

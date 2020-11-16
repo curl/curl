@@ -151,6 +151,7 @@ my $SMTP6PORT=$noport;   # SMTP IPv6 server port
 my $RTSPPORT=$noport;    # RTSP
 my $RTSP6PORT=$noport;   # RTSP IPv6 server port
 my $GOPHERPORT=$noport;  # Gopher
+my $GOPHERSPORT=$noport; # Gophers
 my $GOPHER6PORT=$noport; # Gopher IPv6 server port
 my $HTTPTLSPORT=$noport; # HTTP TLS (non-stunnel) server port
 my $HTTPTLS6PORT=$noport; # HTTP TLS (non-stunnel) IPv6 server port
@@ -417,7 +418,7 @@ delete $ENV{'CURL_CA_BUNDLE'} if($ENV{'CURL_CA_BUNDLE'});
 # possible servers.
 #
 sub init_serverpidfile_hash {
-  for my $proto (('ftp', 'http', 'imap', 'pop3', 'smtp', 'http/2')) {
+  for my $proto (('ftp', 'gopher', 'http', 'imap', 'pop3', 'smtp', 'http/2')) {
     for my $ssl (('', 's')) {
       for my $ipvnum ((4, 6)) {
         for my $idnum ((1, 2, 3)) {
@@ -430,7 +431,7 @@ sub init_serverpidfile_hash {
       }
     }
   }
-  for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'gopher', 'httptls',
+  for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'httptls',
                   'dict', 'smb', 'smbs', 'telnet', 'mqtt')) {
     for my $ipvnum ((4, 6)) {
       for my $idnum ((1, 2)) {
@@ -1601,10 +1602,9 @@ sub runhttpserver {
 # start the https stunnel based server
 #
 sub runhttpsserver {
-    my ($verbose, $ipv6, $proxy, $certfile) = @_;
-    my $proto = 'https';
-    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
-    my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
+    my ($verbose, $proto, $proxy, $certfile) = @_;
+    my $ip = $HOSTIP;
+    my $ipvnum = 4;
     my $idnum = 1;
     my $server;
     my $srvrname;
@@ -1648,7 +1648,10 @@ sub runhttpsserver {
     $flags .= "--ipv$ipvnum --proto $proto ";
     $flags .= "--certfile \"$certfile\" " if($certfile ne 'stunnel.pem');
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
-    if(!$proxy) {
+    if($proto eq "gophers") {
+        $flags .= "--connect $GOPHERPORT";
+    }
+    elsif(!$proxy) {
         $flags .= "--connect $HTTPPORT";
     }
     else {
@@ -3233,6 +3236,7 @@ sub subVariables {
     $$thing =~ s/${prefix}FTPPORT/$FTPPORT/g;
     $$thing =~ s/${prefix}GOPHER6PORT/$GOPHER6PORT/g;
     $$thing =~ s/${prefix}GOPHERPORT/$GOPHERPORT/g;
+    $$thing =~ s/${prefix}GOPHERSPORT/$GOPHERSPORT/g;
     $$thing =~ s/${prefix}HTTPTLS6PORT/$HTTPTLS6PORT/g;
     $$thing =~ s/${prefix}HTTPTLSPORT/$HTTPTLSPORT/g;
     $$thing =~ s/${prefix}HTTP6PORT/$HTTP6PORT/g;
@@ -4640,7 +4644,7 @@ sub startservers {
         $what =~ s/[^a-z0-9\/-]//g;
 
         my $certfile;
-        if($what =~ /^(ftp|http|imap|pop3|smtp)s((\d*)(-ipv6|-unix|))$/) {
+        if($what =~ /^(ftp|gopher|http|imap|pop3|smtp)s((\d*)(-ipv6|-unix|))$/) {
             $certfile = ($whatlist[1]) ? $whatlist[1] : 'stunnel.pem';
         }
 
@@ -4857,13 +4861,48 @@ sub startservers {
             }
             if(!$run{'https'}) {
                 ($pid, $pid2, $HTTPSPORT) =
-                    runhttpsserver($verbose, "", "", $certfile);
+                    runhttpsserver($verbose, "https", "", $certfile);
                 if($pid <= 0) {
                     return "failed starting HTTPS server (stunnel)";
                 }
                 logmsg sprintf("* pid https => %d %d\n", $pid, $pid2)
                     if($verbose);
                 $run{'https'}="$pid $pid2";
+            }
+        }
+        elsif($what eq "gophers") {
+            if(!$stunnel) {
+                # we can't run TLS tests without stunnel
+                return "no stunnel";
+            }
+            if($runcert{'gophers'} && ($runcert{'gophers'} ne $certfile)) {
+                # stop server when running and using a different cert
+                stopserver('gophers');
+            }
+            if($torture && $run{'gopher'} &&
+               !responsive_http_server("gopher", $verbose, 0, $GOPHERPORT)) {
+                stopserver('gopher');
+            }
+            if(!$run{'gopher'}) {
+                ($pid, $pid2, $GOPHERPORT) =
+                    runhttpserver("gopher", $verbose, 0);
+                if($pid <= 0) {
+                    return "failed starting GOPHER server";
+                }
+                printf ("* pid gopher => %d %d\n", $pid, $pid2) if($verbose);
+                print "GOPHERPORT => $GOPHERPORT\n" if($verbose);
+                $run{'gopher'}="$pid $pid2";
+            }
+            if(!$run{'gophers'}) {
+                ($pid, $pid2, $GOPHERSPORT) =
+                    runhttpsserver($verbose, "gophers", "", $certfile);
+                if($pid <= 0) {
+                    return "failed starting GOPHERS server (stunnel)";
+                }
+                logmsg sprintf("* pid gophers => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                print "GOPHERSPORT => $GOPHERSPORT\n" if($verbose);
+                $run{'gophers'}="$pid $pid2";
             }
         }
         elsif($what eq "https-proxy") {
@@ -4886,7 +4925,7 @@ sub startservers {
 
             if(!$run{'https-proxy'}) {
                 ($pid, $pid2, $HTTPSPROXYPORT) =
-                    runhttpsserver($verbose, "", "proxy", $certfile);
+                    runhttpsserver($verbose, "https", "proxy", $certfile);
                 if($pid <= 0) {
                     return "failed starting HTTPS-proxy (stunnel)";
                 }
