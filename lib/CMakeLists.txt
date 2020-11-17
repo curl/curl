@@ -39,7 +39,7 @@ list(APPEND HHEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h
   )
 
-if(MSVC)
+if(WIN32)
   list(APPEND CSOURCES libcurl.rc)
 endif()
 
