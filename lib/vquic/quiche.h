@@ -41,6 +41,7 @@ struct quicsocket {
   quiche_h3_conn *h3c;
   quiche_h3_config *h3config;
   uint8_t scid[QUICHE_MAX_CONN_ID_LEN];
+  curl_socket_t sockfd;
   uint32_t version;
 };
 

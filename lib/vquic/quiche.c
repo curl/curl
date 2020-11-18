@@ -89,8 +89,17 @@ static int quiche_perform_getsock(const struct connectdata *conn,
   return quiche_getsock((struct connectdata *)conn, socks);
 }
 
-static CURLcode qs_disconnect(struct quicsocket *qs)
+static CURLcode qs_disconnect(struct connectdata *conn,
+                              struct quicsocket *qs)
 {
+  if(qs->conn) {
+    (void)quiche_conn_close(qs->conn, TRUE, 0, NULL, 0);
+    /* flushing the egress is not a failsafe way to deliver all the
+       outstanding packets, but we also don't want to get stuck here... */
+    (void)flush_egress(conn, qs->sockfd, qs);
+    quiche_conn_free(qs->conn);
+    qs->conn = NULL;
+  }
   if(qs->h3config)
     quiche_h3_config_free(qs->h3config);
   if(qs->h3c)
@@ -98,10 +107,6 @@ static CURLcode qs_disconnect(struct quicsocket *qs)
   if(qs->cfg) {
     quiche_config_free(qs->cfg);
     qs->cfg = NULL;
-  }
-  if(qs->conn) {
-    quiche_conn_free(qs->conn);
-    qs->conn = NULL;
   }
   return CURLE_OK;
 }
@@ -111,14 +116,14 @@ static CURLcode quiche_disconnect(struct connectdata *conn,
 {
   struct quicsocket *qs = conn->quic;
   (void)dead_connection;
-  return qs_disconnect(qs);
+  return qs_disconnect(conn, qs);
 }
 
 void Curl_quic_disconnect(struct connectdata *conn,
                           int tempindex)
 {
   if(conn->transport == TRNSPRT_QUIC)
-    qs_disconnect(&conn->hequic[tempindex]);
+    qs_disconnect(conn, &conn->hequic[tempindex]);
 }
 
 static unsigned int quiche_conncheck(struct connectdata *conn,
@@ -187,6 +192,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   (void)addr;
   (void)addrlen;
 
+  qs->sockfd = sockfd;
   qs->cfg = quiche_config_new(QUICHE_PROTOCOL_VERSION);
   if(!qs->cfg) {
     failf(data, "can't create quiche config");
@@ -337,7 +343,7 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
 
   return result;
   error:
-  qs_disconnect(qs);
+  qs_disconnect(conn, qs);
   return result;
 }
 
