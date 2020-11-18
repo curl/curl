@@ -129,6 +129,7 @@ problems may have been fixed or changed somewhat since this was written!
  15.6 uses -lpthread instead of Threads::Threads
  15.7 generated .pc file contains strange entries
  15.8 libcurl.pc uses absolute library paths
+ 15.9 doesn't fail if zlib support is requested but not found
 
 ==============================================================================
 
@@ -883,3 +884,7 @@ problems may have been fixed or changed somewhat since this was written!
  autotools equivalent would say Libs.private: -lssl -lcrypto -lz
 
  See https://github.com/curl/curl/issues/6169
+
+15.9 doesn't fail if zlib support is requested but not found
+
+ See https://github.com/curl/curl/issues/6173
