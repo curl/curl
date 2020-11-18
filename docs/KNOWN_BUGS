@@ -126,6 +126,7 @@ problems may have been fixed or changed somewhat since this was written!
  15.3 unusable tool_hugehelp.c with MinGW
  15.4 build docs/curl.1
  15.5 build on Linux links libcurl to libdl
+ 15.6 uses -lpthread instead of Threads::Threads
 
 ==============================================================================
 
@@ -861,3 +862,7 @@ problems may have been fixed or changed somewhat since this was written!
  ... which it shouldn't need to!
 
  See https://github.com/curl/curl/issues/6165
+
+15.6 uses -lpthread instead of Threads::Threads
+
+ See https://github.com/curl/curl/issues/6166
