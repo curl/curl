@@ -22,6 +22,7 @@
 #include "tool_setup.h"
 
 #ifdef HAVE_PWD_H
+#  undef __NO_NET_API /* required for building for AmigaOS */
 #  include <pwd.h>
 #endif
 

@@ -863,14 +863,14 @@ then
   ])
 fi
 
-if test "$HAVE_GETHOSTBYNAME" != "1"
+if test "$HAVE_GETHOSTBYNAME" != "1" -o "${with_amissl+set}" = set
 then
   dnl This is for AmigaOS with bsdsocket.library - needs testing before -lnet
   AC_MSG_CHECKING([for gethostbyname for AmigaOS bsdsocket.library])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-#include <proto/bsdsocket.h>
-struct Library *SocketBase = NULL;
+  #include <proto/bsdsocket.h>
+  struct Library *SocketBase = NULL;
     ]],[[
       gethostbyname("www.dummysite.com");
     ]])

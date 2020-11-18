@@ -277,10 +277,16 @@
 #  include <exec/execbase.h>
 #  include <proto/exec.h>
 #  include <proto/dos.h>
+#  include <unistd.h>
 #  ifdef HAVE_PROTO_BSDSOCKET_H
 #    include <proto/bsdsocket.h> /* ensure bsdsocket.library use */
 #    define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
 #  endif
+/*
+ * In clib2 arpa/inet.h warns that some prototypes may clash
+ * with bsdsocket.library. This avoids the definition of those.
+ */
+#  define __NO_NET_API
 #endif
 
 #include <stdio.h>

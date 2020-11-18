@@ -1880,11 +1880,6 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
 #endif
 #endif
 #ifndef HAVE_WINDOWS_H
-#ifdef HAVE_PROTO_BSDSOCKET_H
-#include <proto/bsdsocket.h>
-struct Library *SocketBase = NULL;
-#define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
-#endif
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #elif defined(HAVE_UNISTD_H)
@@ -1892,6 +1887,11 @@ struct Library *SocketBase = NULL;
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_PROTO_BSDSOCKET_H
+#include <proto/bsdsocket.h>
+struct Library *SocketBase = NULL;
+#define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
 #endif
 #endif
     ]],[[
@@ -1945,11 +1945,6 @@ struct Library *SocketBase = NULL;
 #endif
 #endif
 #ifndef HAVE_WINDOWS_H
-#ifdef HAVE_PROTO_BSDSOCKET_H
-#include <proto/bsdsocket.h>
-struct Library *SocketBase = NULL;
-#define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
-#endif
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #elif defined(HAVE_UNISTD_H)
@@ -1957,6 +1952,11 @@ struct Library *SocketBase = NULL;
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_PROTO_BSDSOCKET_H
+#include <proto/bsdsocket.h>
+struct Library *SocketBase = NULL;
+#define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
 #endif
 #define SELECTCALLCONV
 #endif
