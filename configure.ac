@@ -863,27 +863,24 @@ then
   ])
 fi
 
-if test "$HAVE_GETHOSTBYNAME" != "1"
-then
-  dnl This is for AmigaOS with bsdsocket.library - needs testing before -lnet
-  AC_MSG_CHECKING([for gethostbyname for AmigaOS bsdsocket.library])
-  AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
+dnl This is for AmigaOS with bsdsocket.library - needs testing before -lnet
+AC_MSG_CHECKING([for gethostbyname for AmigaOS bsdsocket.library])
+AC_LINK_IFELSE([
+  AC_LANG_PROGRAM([[
 #include <proto/bsdsocket.h>
 struct Library *SocketBase = NULL;
-    ]],[[
-      gethostbyname("www.dummysite.com");
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    HAVE_GETHOSTBYNAME="1"
-    HAVE_PROTO_BSDSOCKET_H="1"
-    AC_DEFINE(HAVE_PROTO_BSDSOCKET_H, 1, [if Amiga bsdsocket.library is in use])
-    AC_SUBST(HAVE_PROTO_BSDSOCKET_H, [1])
-  ],[
-    AC_MSG_RESULT([no])
-  ])
-fi
+  ]],[[
+    gethostbyname("www.dummysite.com");
+  ]])
+],[
+  AC_MSG_RESULT([yes])
+  HAVE_GETHOSTBYNAME="1"
+  HAVE_PROTO_BSDSOCKET_H="1"
+  AC_DEFINE(HAVE_PROTO_BSDSOCKET_H, 1, [if Amiga bsdsocket.library is in use])
+  AC_SUBST(HAVE_PROTO_BSDSOCKET_H, [1])
+],[
+  AC_MSG_RESULT([no])
+])
 
 if test "$HAVE_GETHOSTBYNAME" != "1"
 then

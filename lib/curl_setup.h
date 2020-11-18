@@ -277,10 +277,23 @@
 #  include <exec/execbase.h>
 #  include <proto/exec.h>
 #  include <proto/dos.h>
+#  include <unistd.h>
+/*
+ * pwd.h required for getpwuid but works only if __NO_NET_API is not
+ * defined so it must be defined here.
+ */
+#  ifdef HAVE_PWD_H
+#    include <pwd.h>
+#  endif
 #  ifdef HAVE_PROTO_BSDSOCKET_H
 #    include <proto/bsdsocket.h> /* ensure bsdsocket.library use */
 #    define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
 #  endif
+/*
+ * In clib2 arpa/inet.h warns that some prototypes may clash
+ * with bsdsocket.library. This avoids the definition of those.
+ */
+#  define __NO_NET_API
 #endif
 
 #include <stdio.h>
