@@ -127,6 +127,7 @@ problems may have been fixed or changed somewhat since this was written!
  15.4 build docs/curl.1
  15.5 build on Linux links libcurl to libdl
  15.6 uses -lpthread instead of Threads::Threads
+ 15.7 generated .pc file contains strange entries
 
 ==============================================================================
 
@@ -866,3 +867,10 @@ problems may have been fixed or changed somewhat since this was written!
 15.6 uses -lpthread instead of Threads::Threads
 
  See https://github.com/curl/curl/issues/6166
+
+15.7 generated .pc file contains strange entries
+
+ The Libs.private field of the generated .pc file contains -lgcc -lgcc_s -lc
+ -lgcc -lgcc_s
+
+ See https://github.com/curl/curl/issues/6167
