@@ -623,28 +623,25 @@ check_library_exists_concat("idn2" idn2_lookup_ul HAVE_LIBIDN2)
 # Check for symbol dlopen (same as HAVE_LIBDL)
 check_library_exists("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
 
-option(CURL_ZLIB "Set to ON to enable building curl with zlib support." ON)
 set(HAVE_LIBZ OFF)
 set(HAVE_ZLIB_H OFF)
 set(USE_ZLIB OFF)
-if(CURL_ZLIB)
-  find_package(ZLIB QUIET)
-  if(ZLIB_FOUND)
-    set(HAVE_ZLIB_H ON)
-    set(HAVE_LIBZ ON)
-    set(USE_ZLIB ON)
+optional_dependency(ZLIB)
+if(ZLIB_FOUND)
+  set(HAVE_ZLIB_H ON)
+  set(HAVE_LIBZ ON)
+  set(USE_ZLIB ON)
 
-    # Depend on ZLIB via imported targets if supported by the running
-    # version of CMake.  This allows our dependents to get our dependencies
-    # transitively.
-    if(NOT CMAKE_VERSION VERSION_LESS 3.4)
-      list(APPEND CURL_LIBS ZLIB::ZLIB)
-    else()
-      list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
-      include_directories(${ZLIB_INCLUDE_DIRS})
-    endif()
-    list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
+  # Depend on ZLIB via imported targets if supported by the running
+  # version of CMake.  This allows our dependents to get our dependencies
+  # transitively.
+  if(NOT CMAKE_VERSION VERSION_LESS 3.4)
+    list(APPEND CURL_LIBS ZLIB::ZLIB)
+  else()
+    list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
+    include_directories(${ZLIB_INCLUDE_DIRS})
   endif()
+  list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
 endif()
 
 option(CURL_BROTLI "Set to ON to enable building curl with brotli support." OFF)

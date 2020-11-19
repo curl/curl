@@ -129,9 +129,8 @@ problems may have been fixed or changed somewhat since this was written!
  15.6 uses -lpthread instead of Threads::Threads
  15.7 generated .pc file contains strange entries
  15.8 libcurl.pc uses absolute library paths
- 15.9 doesn't fail if zlib support is requested but not found
- 15.10 cert paths autodetected when cross-compiling
- 15.11 libspsl is not supported
+ 15.9 cert paths autodetected when cross-compiling
+ 15.10 libspsl is not supported
 
 ==============================================================================
 
@@ -887,17 +886,13 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/6169
 
-15.9 doesn't fail if zlib support is requested but not found
-
- See https://github.com/curl/curl/issues/6173
-
-15.10 cert paths autodetected when cross-compiling
+15.9 cert paths autodetected when cross-compiling
 
  The autotools build disables the ca_path/ca_bundle detection when
  cross-compiling. The cmake build keeps doing the detection.
 
  See https://github.com/curl/curl/issues/6178
 
-15.11 libspsl is not supported
+15.10 libspsl is not supported
 
  See https://github.com/curl/curl/issues/6214
