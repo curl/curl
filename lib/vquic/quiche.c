@@ -384,7 +384,7 @@ static CURLcode flush_egress(struct connectdata *conn, int sockfd,
                              struct quicsocket *qs)
 {
   ssize_t sent;
-  static uint8_t out[1200];
+  uint8_t out[1200];
   int64_t timeout_ns;
 
   do {
