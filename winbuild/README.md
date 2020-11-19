@@ -89,7 +89,12 @@ where `<options>` is one or many of:
  - `ENABLE_IPV6=<yes/no>`        - Enable IPv6, defaults to yes
  - `ENABLE_IDN=<yes or no>`      - Enable use of Windows IDN APIs, defaults to yes
                                    Requires Windows Vista or later
- - `ENABLE_SCHANNEL=<yes/no>`    - Enable native Windows SSL support, defaults to yes
+ - `ENABLE_SCHANNEL=<yes/no>`    - Enable native Windows SSL support, defaults
+                                   to yes if SSPI and no other SSL library
+ - `ENABLE_OPENSSL_AUTO_LOAD_CONFIG=<yes/no>`
+                                 - Enable loading OpenSSL configuration
+                                   automatically, defaults to yes
+ - `ENABLE_UNICODE=<yes/no>`     - Enable UNICODE support, defaults to no
  - `GEN_PDB=<yes/no>`            - Generate Program Database (debug symbols for release build)
  - `DEBUG=<yes/no>`              - Debug builds
  - `MACHINE=<x86/x64>`           - Target architecture (default is x86)
