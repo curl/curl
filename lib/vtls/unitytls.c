@@ -679,7 +679,7 @@ static void *Curl_unitytls_get_internals(struct ssl_connect_data *connssl,
   return backend->ctx;
 }
 
-const struct Curl_ssl Curl_ssl_mbedtls = {
+const struct Curl_ssl Curl_ssl_unitytls = {
   { CURLSSLBACKEND_UNITYTLS, "unitytls" }, /* info */
 
   SSLSUPP_CA_PATH |
