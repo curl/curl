@@ -226,6 +226,9 @@ endif
 ifeq ($(findstring -ngtcp2,$(CFG)),-ngtcp2)
 NGTCP2 = 1
 endif
+ifeq ($(findstring -unicode,$(CFG)),-unicode)
+UNICODE = 1
+endif
 
 INCLUDES = -I. -I../include
 CFLAGS += -DBUILDING_LIBCURL
@@ -233,6 +236,9 @@ ifdef SSL
   ifdef WINSSL
     CFLAGS += -DCURL_WITH_MULTI_SSL
   endif
+endif
+ifdef UNICODE
+  CFLAGS += -DUNICODE -D_UNICODE
 endif
 
 ifdef SYNC
