@@ -89,7 +89,8 @@ where `<options>` is one or many of:
  - `ENABLE_IPV6=<yes/no>`        - Enable IPv6, defaults to yes
  - `ENABLE_IDN=<yes or no>`      - Enable use of Windows IDN APIs, defaults to yes
                                    Requires Windows Vista or later
- - `ENABLE_SCHANNEL=<yes/no>`    - Enable native Windows SSL support, defaults to yes
+ - `ENABLE_SCHANNEL=<yes/no>`    - Enable native Windows SSL support, defaults
+                                   to yes if SSPI and no other SSL library
  - `ENABLE_OPENSSL_AUTO_LOAD_CONFIG=<yes/no>`
                                  - Enable loading OpenSSL configuration
                                    automatically, defaults to yes
