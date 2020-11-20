@@ -55,7 +55,7 @@ Build ngtcp2
      % git clone https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -i
-     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3>
+     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
      % make
      % make install
 
@@ -70,9 +70,9 @@ Build curl
 
 ## Build with GnuTLS
 
-Build (patched) GnuTLS
+Build GnuTLS
 
-     % git clone --depth 1 -b tmp-quic https://gitlab.com/gnutls/gnutls.git
+     % git clone --depth 1 https://gitlab.com/gnutls/gnutls.git
      % cd gnutls
      % ./bootstrap
      % ./configure --disable-doc --prefix=<somewhere1>
@@ -95,7 +95,7 @@ Build ngtcp2
      % git clone https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -i
-     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3>
+     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
      % make
      % make install
 
