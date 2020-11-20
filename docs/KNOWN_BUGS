@@ -381,6 +381,15 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/3229
 
+4.5 Terminal control chars from remote are not escaped
+
+ The terminal output may get garbled or hide important parts when curls output
+ is directly shown on a terminal and not piped through less or something similar
+ to filter terminal escape sequences out. This includes among others HTTP
+ headers shown with --verbose or the file content.
+
+ See https://github.com/curl/curl/issues/6150
+
 5. Build and portability issues
 
 5.1 OS400 port requires deprecated IBM library
