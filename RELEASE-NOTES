@@ -4,7 +4,7 @@ curl and libcurl 7.74.0
  Command line options:         235
  curl_easy_setopt() options:   284
  Public functions in libcurl:  85
- Contributors:                 2282
+ Contributors:                 2283
 
 This release includes the following changes:
 
@@ -20,22 +20,27 @@ This release includes the following bugfixes:
  o CI/azure: improve on flakiness by avoiding libtool wrappers [7]
  o CI/tests: enable test target on TravisCI for CMake builds [38]
  o CI/travis: add brotli and zstd to the libssh2 build [27]
+ o cirrus: build with FreeBSD 12.2 in CirrusCI [80]
  o cmake: call the feature unixsockets without dash [26]
  o cmake: correctly handle linker flags for static libs [52]
  o cmake: don't pass -fvisibility=hidden to clang-cl on Windows [53]
  o cmake: make BUILD_TESTING dependent option [30]
+ o cmake: make CURL_ZLIB a tri-state variable [70]
  o cmake: set the unicode feature in curl-config on Windows [23]
  o cmake: store IDN2 information in curl_config.h [25]
+ o cmake: use libcurl.rc in all Windows builds [69]
  o configure: pass -pthread to Libs.private for pkg-config [50]
  o configure: use pkgconfig to find openSSL when cross-compiling [28]
  o connect: repair build without ipv6 availability [19]
  o curl.1: add an "OUTPUT" section at the top of the manpage [32]
  o curl.se: new home [59]
+ o curl: add compatibility for Amiga and GCC 6.5 [61]
  o curl: only warn not fail, if not finding the home dir [15]
  o curl_easy_escape: limit output string length to 3 * max input [55]
  o Curl_pgrsStartNow: init speed limit time stamps at start [48]
  o curl_url_set.3: fix typo in the RETURN VALUE section [3]
  o CURLOPT_DNS_USE_GLOBAL_CACHE.3: fix typo [34]
+ o CURLOPT_HSTS.3: document the file format [82]
  o CURLOPT_NOBODY.3: fix typo [6]
  o CURLOPT_TCP_NODELAY.3: fix comment in example code [8]
  o CURLOPT_URL.3: clarify SCP/SFTP URLs are for uploads as well
@@ -57,8 +62,10 @@ This release includes the following bugfixes:
  o mqttd: fclose test file when done [60]
  o ngtcp2: adapt to recent nghttp3 updates [49]
  o openssl: acknowledge SRP disabling in configure properly [9]
+ o openssl: guard against OOM on context creation [68]
  o os400: Sync libcurl API options [5]
  o packages/OS400: make the source code-style compliant [4]
+ o quiche: remove 'static' from local buffer [71]
  o range.d: clarify that curl will not parse multipart responses [36]
  o range.d: fix typo
  o rtsp: error out on empty Session ID, unified the code
@@ -70,6 +77,8 @@ This release includes the following bugfixes:
  o src/tool_filetime: disable -Wformat on mingw for this file [2]
  o strerror: use 'const' as the string should never be modified [18]
  o test122[12]: remove these two tests [1]
+ o tests/*server.py: close log file after each log line [81]
+ o tests/server/tftpd.c: close upload file right after transfer [62]
  o tests: add missing global_init/cleanup calls [42]
  o tests: fix some http/2 tests for older versions of nghttpx [47]
  o tool_debug_cb: do not assume zero-terminated data
@@ -94,9 +103,10 @@ advice from friends like these:
   Dirk Wetter, Emil Engler, hamstergene on github, Harry Sintonen,
   Jakub Zakrzewski, Jeroen Ooms, Jon Rumsey, José Joaquín Atria,
   Kael1117 on github, Marcel Raad, Marc Hörsken, Marc Schlatter,
-  Niranjan Hasabnis, nosajsnikta on github, Philipp Klaus Krause, Ray Satiro,
-  Rui LIU, Sergei Nikulov, Tobias Hieta, Tom G. Christensen, Viktor Szakats,
-  (32 contributors)
+  Niranjan Hasabnis, nosajsnikta on github, Oliver Urbann,
+  Philipp Klaus Krause, Ray Satiro, Rui LIU, Sergei Nikulov, Tobias Hieta,
+  Tom G. Christensen, Viktor Szakats, Vincent Torri,
+  (34 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -162,6 +172,15 @@ References to bug reports and discussions on issues:
  [58] = https://curl.se/bug/?i=6171
  [59] = https://curl.se/bug/?i=6172
  [60] = https://curl.se/bug/?i=6058
+ [61] = https://curl.se/bug/?i=6220
+ [62] = https://curl.se/bug/?i=6058
  [63] = https://curl.se/bug/?i=6077
  [64] = https://curl.se/bug/?i=6161
  [65] = https://curl.se/bug/?i=6161
+ [68] = https://curl.se/bug/?i=6224
+ [69] = https://curl.se/bug/?i=6215
+ [70] = https://curl.se/bug/?i=6173
+ [71] = https://curl.se/bug/?i=6223
+ [80] = https://curl.se/bug/?i=6211
+ [81] = https://curl.se/bug/?i=6058
+ [82] = https://curl.se/bug/?i=6205
