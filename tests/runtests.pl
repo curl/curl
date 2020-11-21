@@ -217,7 +217,7 @@ my $start;
 my $ftpchecktime=1; # time it took to verify our test FTP server
 my $scrambleorder;
 my $stunnel = checkcmd("stunnel4") || checkcmd("tstunnel") || checkcmd("stunnel");
-my $valgrind = checktestcmd("valgrind");
+my $valgrind = $^O eq "darwin" || $^O eq "linux" ? checktestcmd("valgrind") : 0;
 my $valgrind_logfile="--logfile";
 my $valgrind_tool;
 my $gdb = checktestcmd("gdb");
