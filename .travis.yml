@@ -127,7 +127,7 @@ jobs:
     - T=novalgrind LIBRESSL=yes C="--with-ssl=$HOME/libressl" LD_LIBRARY_PATH=/home/travis/libressl/lib:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
   - env:
-    - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild" NOTESTS=
+    - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild" NOTESTS= TFLAGS=-v
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -138,7 +138,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=novalgrind NGTCP2=yes GNUTLS=yes C="PKG_CONFIG_PATH=$HOME/ngbuild --without-ssl --with-gnutls=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild" NOTESTS=
+    - T=novalgrind NGTCP2=yes GNUTLS=yes C="PKG_CONFIG_PATH=$HOME/ngbuild --without-ssl --with-gnutls=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild" NOTESTS= TFLAGS=-v
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
