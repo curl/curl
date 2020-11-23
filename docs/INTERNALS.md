@@ -236,11 +236,9 @@ multi_do()
    The functions are named after the protocols they handle.
 
    The protocol-specific functions of course deal with protocol-specific
-   negotiations and setup. They have access to the `Curl_sendf()` (from
-   `lib/sendf.c`) function to send printf-style formatted data to the remote
-   host and when they're ready to make the actual file transfer they call the
-   `Curl_setup_transfer()` function (in `lib/transfer.c`) to setup the
-   transfer and returns.
+   negotiations and setup. When they're ready to start the actual file
+   transfer they call the `Curl_setup_transfer()` function (in
+   `lib/transfer.c`) to setup the transfer and returns.
 
    If this DO function fails and the connection is being re-used, libcurl will
    then close this connection, setup a new connection and re-issue the DO

@@ -124,8 +124,6 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
     sel_org = sel;
   }
 
-  /* We use Curl_write instead of Curl_sendf to make sure the entire buffer is
-     sent, which could be sizeable with long selectors. */
   k = curlx_uztosz(len);
 
   for(;;) {
