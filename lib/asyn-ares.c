@@ -85,7 +85,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-struct ResolverResults {
+struct thread_data {
   int num_pending; /* number of ares_gethostbyname() requests */
   struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
                                     parts */
@@ -229,8 +229,8 @@ static void destroy_async_data(struct Curl_async *async)
 {
   free(async->hostname);
 
-  if(async->os_specific) {
-    struct ResolverResults *res = (struct ResolverResults *)async->os_specific;
+  if(async->tdata) {
+    struct thread_data *res = async->tdata;
     if(res) {
       if(res->temp_ai) {
         Curl_freeaddrinfo(res->temp_ai);
@@ -238,7 +238,7 @@ static void destroy_async_data(struct Curl_async *async)
       }
       free(res);
     }
-    async->os_specific = NULL;
+    async->tdata = NULL;
   }
 
   async->hostname = NULL;
@@ -349,8 +349,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
                                    struct Curl_dns_entry **dns)
 {
   struct Curl_easy *data = conn->data;
-  struct ResolverResults *res = (struct ResolverResults *)
-    conn->async.os_specific;
+  struct thread_data *res = conn->async.tdata;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(dns);
@@ -498,7 +497,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
 }
 
 /* Connects results to the list */
-static void compound_results(struct ResolverResults *res,
+static void compound_results(struct thread_data *res,
                              struct Curl_addrinfo *ai)
 {
   struct Curl_addrinfo *ai_tail;
@@ -527,7 +526,7 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
                                struct hostent *hostent)
 {
   struct connectdata *conn = (struct connectdata *)arg;
-  struct ResolverResults *res;
+  struct thread_data *res;
 
 #ifdef HAVE_CARES_CALLBACK_TIMEOUTS
   (void)timeouts; /* ignored */
@@ -538,7 +537,7 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
        be valid so only defer it when we know the 'status' says its fine! */
     return;
 
-  res = (struct ResolverResults *)conn->async.os_specific;
+  res = conn->async.tdata;
   if(res) {
     res->num_pending--;
 
@@ -653,20 +652,20 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
   bufp = strdup(hostname);
   if(bufp) {
-    struct ResolverResults *res = NULL;
+    struct thread_data *res = NULL;
     free(conn->async.hostname);
     conn->async.hostname = bufp;
     conn->async.port = port;
     conn->async.done = FALSE;   /* not done */
     conn->async.status = 0;     /* clear */
     conn->async.dns = NULL;     /* clear */
-    res = calloc(sizeof(struct ResolverResults), 1);
+    res = calloc(sizeof(struct thread_data), 1);
     if(!res) {
       free(conn->async.hostname);
       conn->async.hostname = NULL;
       return NULL;
     }
-    conn->async.os_specific = res;
+    conn->async.tdata = res;
 
     /* initial status - failed */
     res->last_status = ARES_ENOTFOUND;
