@@ -2070,7 +2070,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
 
     if(acc > MAX_ACC) {
       infof(conn->data, "http2_send: Warning: The cumulative length of all "
-            "headers exceeds %zu bytes and that could cause the "
+            "headers exceeds %d bytes and that could cause the "
             "stream to be rejected.\n", MAX_ACC);
     }
   }
@@ -2269,7 +2269,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
      data into stream->mem, overwriting data already there. */
   if(H2_BUFSIZE < nread) {
     failf(data, "connection buffer size is too small to store data following "
-                "HTTP Upgrade response header: buflen=%zu, datalen=%zu",
+                "HTTP Upgrade response header: buflen=%d, datalen=%zu",
           H2_BUFSIZE, nread);
     return CURLE_HTTP2;
   }

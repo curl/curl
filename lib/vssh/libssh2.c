@@ -1265,7 +1265,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
              a time-out or similar */
           result = CURLE_SSH;
         sshc->actualcode = result;
-        DEBUGF(infof(data, "error = %d makes libcurl = %d\n",
+        DEBUGF(infof(data, "error = %lu makes libcurl = %d\n",
                      sftperr, (int)result));
         state(conn, SSH_STOP);
         break;
@@ -1945,7 +1945,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           sshc->actualcode = CURLE_SSH;
           sftperr = LIBSSH2_FX_OK;
         }
-        failf(data, "Upload failed: %s (%d/%d)",
+        failf(data, "Upload failed: %s (%lu/%d)",
               sftperr != LIBSSH2_FX_OK ?
               sftp_libssh2_strerror(sftperr):"ssh error",
               sftperr, rc);

@@ -63,7 +63,7 @@ static CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *e,
 {
   (void)easy;
   (void)userp;
-  printf("[%u/%u] %s %s\n", i->index, i->total, e->name, e->expire);
+  printf("[%zu/%zu] %s %s\n", i->index, i->total, e->name, e->expire);
   return CURLSTS_OK;
 }
 
