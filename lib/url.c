@@ -2108,7 +2108,7 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
 
 void Curl_free_request_state(struct Curl_easy *data)
 {
-  Curl_safefree(data->req.protop);
+  Curl_safefree(data->req.p.http);
   Curl_safefree(data->req.newurl);
 
 #ifndef CURL_DISABLE_DOH

@@ -96,12 +96,12 @@ static CURLcode mqtt_setup_conn(struct connectdata *conn)
      during this request */
   struct MQTT *mq;
   struct Curl_easy *data = conn->data;
-  DEBUGASSERT(data->req.protop == NULL);
+  DEBUGASSERT(data->req.p.mqtt == NULL);
 
   mq = calloc(1, sizeof(struct MQTT));
   if(!mq)
     return CURLE_OUT_OF_MEMORY;
-  data->req.protop = mq;
+  data->req.p.mqtt = mq;
   return CURLE_OK;
 }
 
@@ -111,7 +111,7 @@ static CURLcode mqtt_send(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   struct Curl_easy *data = conn->data;
-  struct MQTT *mq = data->req.protop;
+  struct MQTT *mq = data->req.p.mqtt;
   ssize_t n;
   result = Curl_write(conn, sockfd, buf, len, &n);
   if(!result)
@@ -425,7 +425,7 @@ static CURLcode mqtt_read_publish(struct connectdata *conn,
   unsigned char *pkt = (unsigned char *)data->state.buffer;
   size_t remlen;
   struct mqtt_conn *mqtt = &conn->proto.mqtt;
-  struct MQTT *mq = data->req.protop;
+  struct MQTT *mq = data->req.p.mqtt;
   unsigned char packet;
 
   switch(mqtt->state) {
@@ -531,7 +531,7 @@ static CURLcode mqtt_doing(struct connectdata *conn, bool *done)
   CURLcode result = CURLE_OK;
   struct mqtt_conn *mqtt = &conn->proto.mqtt;
   struct Curl_easy *data = conn->data;
-  struct MQTT *mq = data->req.protop;
+  struct MQTT *mq = data->req.p.mqtt;
   ssize_t nread;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   unsigned char *pkt = (unsigned char *)data->state.buffer;

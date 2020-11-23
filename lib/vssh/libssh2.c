@@ -798,7 +798,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct SSHPROTO *sftp_scp = data->req.protop;
+  struct SSHPROTO *sftp_scp = data->req.p.ssh;
   struct ssh_conn *sshc = &conn->proto.sshc;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc = LIBSSH2_ERROR_NONE;
@@ -3001,7 +3001,7 @@ static CURLcode ssh_setup_connection(struct connectdata *conn)
 {
   struct SSHPROTO *ssh;
 
-  conn->data->req.protop = ssh = calloc(1, sizeof(struct SSHPROTO));
+  conn->data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
 
@@ -3073,7 +3073,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   struct Curl_easy *data = conn->data;
 
   /* initialize per-handle data if not already */
-  if(!data->req.protop)
+  if(!data->req.p.ssh)
     ssh_setup_connection(conn);
 
   /* We default to persistent connections. We set this already in this connect
@@ -3299,7 +3299,7 @@ static CURLcode scp_disconnect(struct connectdata *conn, bool dead_connection)
 static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
 {
   CURLcode result = CURLE_OK;
-  struct SSHPROTO *sftp_scp = conn->data->req.protop;
+  struct SSHPROTO *sftp_scp = conn->data->req.p.ssh;
 
   if(!status) {
     /* run the state-machine */

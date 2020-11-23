@@ -959,7 +959,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
                               void *stream_user_data)
 {
   struct Curl_easy *data = stream_user_data;
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
   (void)conn;
   (void)stream_id;
   (void)app_error_code;
@@ -1005,7 +1005,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
                            void *user_data, void *stream_user_data)
 {
   struct Curl_easy *data = stream_user_data;
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
   CURLcode result = CURLE_OK;
   (void)conn;
 
@@ -1064,7 +1064,7 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
                              void *user_data, void *stream_user_data)
 {
   struct Curl_easy *data = stream_user_data;
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
   CURLcode result = CURLE_OK;
   (void)conn;
   (void)stream_id;
@@ -1088,7 +1088,7 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
   nghttp3_vec h3name = nghttp3_rcbuf_get_buf(name);
   nghttp3_vec h3val = nghttp3_rcbuf_get_buf(value);
   struct Curl_easy *data = stream_user_data;
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
   CURLcode result = CURLE_OK;
   (void)conn;
   (void)stream_id;
@@ -1253,7 +1253,7 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
                                 CURLcode *curlcode)
 {
   curl_socket_t sockfd = conn->sock[sockindex];
-  struct HTTP *stream = conn->data->req.protop;
+  struct HTTP *stream = conn->data->req.p.http;
   struct quicsocket *qs = conn->quic;
 
   if(!stream->memlen) {
@@ -1311,7 +1311,7 @@ static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
                                    void *stream_user_data)
 {
   struct Curl_easy *data = stream_user_data;
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
   (void)conn;
   (void)stream_id;
   (void)user_data;
@@ -1333,7 +1333,7 @@ static ssize_t cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
 {
   struct Curl_easy *data = stream_user_data;
   size_t nread;
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
   (void)conn;
   (void)stream_id;
   (void)user_data;
@@ -1396,7 +1396,7 @@ static ssize_t cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
 static CURLcode http_request(struct connectdata *conn, const void *mem,
                              size_t len)
 {
-  struct HTTP *stream = conn->data->req.protop;
+  struct HTTP *stream = conn->data->req.p.http;
   size_t nheader;
   size_t i;
   size_t authority_idx;
@@ -1639,7 +1639,7 @@ static ssize_t ngh3_stream_send(struct connectdata *conn,
   ssize_t sent;
   struct quicsocket *qs = conn->quic;
   curl_socket_t sockfd = conn->sock[sockindex];
-  struct HTTP *stream = conn->data->req.protop;
+  struct HTTP *stream = conn->data->req.p.http;
 
   if(!stream->h3req) {
     CURLcode result = http_request(conn, mem, len);
@@ -1910,7 +1910,7 @@ CURLcode Curl_quic_done_sending(struct connectdata *conn)
 {
   if(conn->handler == &Curl_handler_http3) {
     /* only for HTTP/3 transfers */
-    struct HTTP *stream = conn->data->req.protop;
+    struct HTTP *stream = conn->data->req.p.http;
     struct quicsocket *qs = conn->quic;
     stream->upload_done = TRUE;
     (void)nghttp3_conn_resume_stream(qs->h3conn, stream->stream3_id);
@@ -1927,7 +1927,7 @@ void Curl_quic_done(struct Curl_easy *data, bool premature)
   (void)premature;
   if(data->conn->handler == &Curl_handler_http3) {
     /* only for HTTP/3 transfers */
-    struct HTTP *stream = data->req.protop;
+    struct HTTP *stream = data->req.p.http;
     Curl_dyn_free(&stream->overflow);
   }
 }
@@ -1942,7 +1942,7 @@ bool Curl_quic_data_pending(const struct Curl_easy *data)
      buffer and allocated an overflow buffer. Since it's possible that
      there's no more data coming on the socket, we need to keep reading
      until the overflow buffer is empty. */
-  const struct HTTP *stream = data->req.protop;
+  const struct HTTP *stream = data->req.p.http;
   return Curl_dyn_len(&stream->overflow) > 0;
 }
 

@@ -983,8 +983,8 @@ for older and later versions as things don't change drastically that often.
   protocol specific data that then gets associated with that `Curl_easy` for
   the rest of this transfer. It gets freed again at the end of the transfer.
   It will be called before the `connectdata` for the transfer has been
-  selected/created. Most protocols will allocate its private
-  `struct [PROTOCOL]` here and assign `Curl_easy->req.protop` to point to it.
+  selected/created. Most protocols will allocate its private `struct
+  [PROTOCOL]` here and assign `Curl_easy->req.p.[protocol]` to it.
 
   `->connect_it` allows a protocol to do some specific actions after the TCP
   connect is done, that can still be considered part of the connection phase.

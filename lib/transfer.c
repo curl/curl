@@ -168,7 +168,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
   bool sending_http_headers = FALSE;
 
   if(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)) {
-    const struct HTTP *http = data->req.protop;
+    const struct HTTP *http = data->req.p.http;
 
     if(http->sending == HTTPSEND_REQUEST)
       /* We're sending the HTTP request headers, not the data.
@@ -427,7 +427,7 @@ CURLcode Curl_readrewind(struct connectdata *conn)
      CURLOPT_HTTPPOST, call app to rewind
   */
   if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
-    struct HTTP *http = data->req.protop;
+    struct HTTP *http = data->req.p.http;
 
     if(http->sendit)
       mimepart = http->sendit;
@@ -1029,7 +1029,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
         /* HTTP pollution, this should be written nicer to become more
            protocol agnostic. */
         size_t fillcount;
-        struct HTTP *http = k->protop;
+        struct HTTP *http = k->p.http;
 
         if((k->exp100 == EXP100_SENDING_REQUEST) &&
            (http->sending == HTTPSEND_BODY)) {
@@ -1854,7 +1854,7 @@ Curl_setup_transfer(
 {
   struct SingleRequest *k = &data->req;
   struct connectdata *conn = data->conn;
-  struct HTTP *http = data->req.protop;
+  struct HTTP *http = data->req.p.http;
   bool httpsending = ((conn->handler->protocol&PROTO_FAMILY_HTTP) &&
                       (http->sending == HTTPSEND_REQUEST));
   DEBUGASSERT(conn != NULL);

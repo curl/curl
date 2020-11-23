@@ -643,8 +643,23 @@ struct SingleRequest {
      and the 'upload_present' contains the number of bytes available at this
      position */
   char *upload_fromhere;
-  void *protop;       /* Allocated protocol-specific data. Each protocol
-                         handler makes sure this points to data it needs. */
+
+  /* Allocated protocol-specific data. Each protocol handler makes sure this
+     points to data it needs. */
+  union {
+    struct FILEPROTO *file;
+    struct FTP *ftp;
+    struct HTTP *http;
+    struct IMAP *imap;
+    struct ldapreqinfo *ldap;
+    struct MQTT *mqtt;
+    struct POP3 *pop3;
+    struct RTSP *rtsp;
+    struct smb_request *smb;
+    struct SMTP *smtp;
+    struct SSHPROTO *ssh;
+    struct TELNET *telnet;
+  } p;
 #ifndef CURL_DISABLE_DOH
   struct dohdata doh; /* DoH specific data for this request */
 #endif
