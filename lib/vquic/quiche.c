@@ -358,7 +358,7 @@ static CURLcode process_ingress(struct connectdata *conn, int sockfd,
       break;
 
     if(recvd < 0) {
-      failf(conn->data, "quiche: recv() unexpectedly returned %d "
+      failf(conn->data, "quiche: recv() unexpectedly returned %zd "
             "(errno: %d, socket %d)", recvd, SOCKERRNO, sockfd);
       return CURLE_RECV_ERROR;
     }
@@ -368,7 +368,7 @@ static CURLcode process_ingress(struct connectdata *conn, int sockfd,
       break;
 
     if(recvd < 0) {
-      failf(conn->data, "quiche_conn_recv() == %d", recvd);
+      failf(conn->data, "quiche_conn_recv() == %zd", recvd);
       return CURLE_RECV_ERROR;
     }
   } while(1);
@@ -762,7 +762,7 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
 
     if(acc > MAX_ACC) {
       infof(data, "http_request: Warning: The cumulative length of all "
-            "headers exceeds %zu bytes and that could cause the "
+            "headers exceeds %d bytes and that could cause the "
             "stream to be rejected.\n", MAX_ACC);
     }
   }

@@ -227,11 +227,11 @@ bool progress_meter(struct GlobalConfig *global,
     }
     if(dlknown && all_dltotal)
       /* TODO: handle integer overflow */
-      msnprintf(dlpercen, sizeof(dlpercen), "%3d",
+      msnprintf(dlpercen, sizeof(dlpercen), "%3" CURL_FORMAT_CURL_OFF_T,
                 all_dlnow * 100 / all_dltotal);
     if(ulknown && all_ultotal)
       /* TODO: handle integer overflow */
-      msnprintf(ulpercen, sizeof(ulpercen), "%3d",
+      msnprintf(ulpercen, sizeof(ulpercen), "%3" CURL_FORMAT_CURL_OFF_T,
                 all_ulnow * 100 / all_ultotal);
 
     /* get the transfer speed, the higher of the two */

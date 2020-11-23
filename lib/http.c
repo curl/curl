@@ -4003,7 +4003,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         infof(data, "Illegal STS header skipped\n");
 #ifdef DEBUGBUILD
       else
-        infof(data, "Parsed STS header fine (%d entries)\n",
+        infof(data, "Parsed STS header fine (%zu entries)\n",
               data->hsts->list.size);
 #endif
     }

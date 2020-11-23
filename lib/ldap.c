@@ -923,7 +923,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
       char *unescaped;
       CURLcode result;
 
-      LDAP_TRACE(("attr[%d] '%s'\n", i, attributes[i]));
+      LDAP_TRACE(("attr[%zu] '%s'\n", i, attributes[i]));
 
       /* Unescape the attribute */
       result = Curl_urldecode(conn->data, attributes[i], 0, &unescaped, NULL,

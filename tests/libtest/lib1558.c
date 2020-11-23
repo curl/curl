@@ -49,7 +49,7 @@ int test(char *URL)
     goto test_cleanup;
   }
 
-  printf("Protocol: %x\n", protocol);
+  printf("Protocol: %lx\n", protocol);
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
