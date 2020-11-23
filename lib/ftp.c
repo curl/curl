@@ -1336,7 +1336,7 @@ static CURLcode ftp_state_use_pasv(struct connectdata *conn)
 static CURLcode ftp_state_prepare_transfer(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct FTP *ftp = conn->data->req.protop;
+  struct FTP *ftp = conn->data->req.p.ftp;
   struct Curl_easy *data = conn->data;
 
   if(ftp->transfer != FTPTRANSFER_BODY) {
@@ -1379,7 +1379,7 @@ static CURLcode ftp_state_prepare_transfer(struct connectdata *conn)
 static CURLcode ftp_state_rest(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct FTP *ftp = conn->data->req.protop;
+  struct FTP *ftp = conn->data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   if((ftp->transfer != FTPTRANSFER_BODY) && ftpc->file) {
@@ -1400,7 +1400,7 @@ static CURLcode ftp_state_rest(struct connectdata *conn)
 static CURLcode ftp_state_size(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct FTP *ftp = conn->data->req.protop;
+  struct FTP *ftp = conn->data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   if((ftp->transfer == FTPTRANSFER_INFO) && ftpc->file) {
@@ -1421,7 +1421,7 @@ static CURLcode ftp_state_list(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct FTP *ftp = data->req.protop;
+  struct FTP *ftp = data->req.p.ftp;
 
   /* If this output is to be machine-parsed, the NLST command might be better
      to use, since the LIST command output is not specified or standard in any
@@ -1497,7 +1497,7 @@ static CURLcode ftp_state_stor_prequote(struct connectdata *conn)
 static CURLcode ftp_state_type(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct FTP *ftp = conn->data->req.protop;
+  struct FTP *ftp = conn->data->req.p.ftp;
   struct Curl_easy *data = conn->data;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
@@ -1555,7 +1555,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
                                    bool sizechecked)
 {
   CURLcode result = CURLE_OK;
-  struct FTP *ftp = conn->data->req.protop;
+  struct FTP *ftp = conn->data->req.p.ftp;
   struct Curl_easy *data = conn->data;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
@@ -1655,7 +1655,7 @@ static CURLcode ftp_state_quote(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct FTP *ftp = data->req.protop;
+  struct FTP *ftp = data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   bool quote = FALSE;
   struct curl_slist *item;
@@ -2030,7 +2030,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct FTP *ftp = data->req.protop;
+  struct FTP *ftp = data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   switch(ftpcode) {
@@ -2163,7 +2163,7 @@ static CURLcode ftp_state_retr(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct FTP *ftp = data->req.protop;
+  struct FTP *ftp = data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   if(data->set.max_filesize && (filesize > data->set.max_filesize)) {
@@ -2381,7 +2381,7 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct FTP *ftp = data->req.protop;
+  struct FTP *ftp = data->req.p.ftp;
 
   if((ftpcode == 150) || (ftpcode == 125)) {
 
@@ -3132,7 +3132,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
                          bool premature)
 {
   struct Curl_easy *data = conn->data;
-  struct FTP *ftp = data->req.protop;
+  struct FTP *ftp = data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct pingpong *pp = &ftpc->pp;
   ssize_t nread;
@@ -3497,7 +3497,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
   bool complete = FALSE;
 
   /* the ftp struct is inited in ftp_connect() */
-  struct FTP *ftp = data->req.protop;
+  struct FTP *ftp = data->req.p.ftp;
 
   /* if the second connection isn't done yet, wait for it */
   if(!conn->bits.tcpconnect[SECONDARYSOCKET]) {
@@ -3662,7 +3662,7 @@ CURLcode ftp_perform(struct connectdata *conn,
 
   if(conn->data->set.opt_no_body) {
     /* requested no body means no transfer... */
-    struct FTP *ftp = conn->data->req.protop;
+    struct FTP *ftp = conn->data->req.p.ftp;
     ftp->transfer = FTPTRANSFER_INFO;
   }
 
@@ -3697,7 +3697,7 @@ static void wc_data_dtor(void *ptr)
 static CURLcode init_wc_data(struct connectdata *conn)
 {
   char *last_slash;
-  struct FTP *ftp = conn->data->req.protop;
+  struct FTP *ftp = conn->data->req.p.ftp;
   char *path = ftp->path;
   struct WildcardData *wildcard = &(conn->data->wildcard);
   CURLcode result = CURLE_OK;
@@ -3831,7 +3831,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
     /* filelist has at least one file, lets get first one */
     struct ftp_conn *ftpc = &conn->proto.ftpc;
     struct curl_fileinfo *finfo = wildcard->filelist.head->ptr;
-    struct FTP *ftp = conn->data->req.protop;
+    struct FTP *ftp = conn->data->req.p.ftp;
 
     char *tmp_path = aprintf("%s%s", wildcard->path, finfo->filename);
     if(!tmp_path)
@@ -4038,7 +4038,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
   /* the ftp struct is already inited in ftp_connect() */
-  struct FTP *ftp = data->req.protop;
+  struct FTP *ftp = data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   const char *slashPos = NULL;
   const char *fileName = NULL;
@@ -4183,7 +4183,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
 static CURLcode ftp_dophase_done(struct connectdata *conn,
                                  bool connected)
 {
-  struct FTP *ftp = conn->data->req.protop;
+  struct FTP *ftp = conn->data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   if(connected) {
@@ -4280,7 +4280,7 @@ static CURLcode ftp_setup_connection(struct connectdata *conn)
   char *type;
   struct FTP *ftp;
 
-  conn->data->req.protop = ftp = calloc(sizeof(struct FTP), 1);
+  conn->data->req.p.ftp = ftp = calloc(sizeof(struct FTP), 1);
   if(NULL == ftp)
     return CURLE_OUT_OF_MEMORY;
 

@@ -553,7 +553,7 @@ static CURLcode pop3_perform_command(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct POP3 *pop3 = data->req.protop;
+  struct POP3 *pop3 = data->req.p.pop3;
   const char *command = NULL;
 
   /* Calculate the default command */
@@ -886,7 +886,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct POP3 *pop3 = data->req.protop;
+  struct POP3 *pop3 = data->req.p.pop3;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
 
@@ -1048,7 +1048,7 @@ static CURLcode pop3_init(struct connectdata *conn)
   struct Curl_easy *data = conn->data;
   struct POP3 *pop3;
 
-  pop3 = data->req.protop = calloc(sizeof(struct POP3), 1);
+  pop3 = data->req.p.pop3 = calloc(sizeof(struct POP3), 1);
   if(!pop3)
     result = CURLE_OUT_OF_MEMORY;
 
@@ -1123,7 +1123,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct POP3 *pop3 = data->req.protop;
+  struct POP3 *pop3 = data->req.p.pop3;
 
   (void)premature;
 
@@ -1157,7 +1157,7 @@ static CURLcode pop3_perform(struct connectdata *conn, bool *connected,
 {
   /* This is POP3 and no proxy */
   CURLcode result = CURLE_OK;
-  struct POP3 *pop3 = conn->data->req.protop;
+  struct POP3 *pop3 = conn->data->req.p.pop3;
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
 
@@ -1389,7 +1389,7 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
 {
   /* The POP3 struct is already initialised in pop3_connect() */
   struct Curl_easy *data = conn->data;
-  struct POP3 *pop3 = data->req.protop;
+  struct POP3 *pop3 = data->req.p.pop3;
   const char *path = &data->state.up.path[1]; /* skip leading path */
 
   /* URL decode the path for the message ID */
@@ -1406,7 +1406,7 @@ static CURLcode pop3_parse_custom_request(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct POP3 *pop3 = data->req.protop;
+  struct POP3 *pop3 = data->req.p.pop3;
   const char *custom = data->set.str[STRING_CUSTOMREQUEST];
 
   /* URL decode the custom request */

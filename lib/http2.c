@@ -257,7 +257,7 @@ static unsigned int http2_conncheck(struct connectdata *check,
 /* called from http_setup_conn */
 void Curl_http2_setup_req(struct Curl_easy *data)
 {
-  struct HTTP *http = data->req.protop;
+  struct HTTP *http = data->req.p.http;
   http->bodystarted = FALSE;
   http->status_code = -1;
   http->pausedata = NULL;
@@ -393,7 +393,7 @@ char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num)
   if(!h || !GOOD_EASY_HANDLE(h->data))
     return NULL;
   else {
-    struct HTTP *stream = h->data->req.protop;
+    struct HTTP *stream = h->data->req.p.http;
     if(num < stream->push_headers_used)
       return stream->push_headers[num];
   }
@@ -415,7 +415,7 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
      !strcmp(header, ":") || strchr(header + 1, ':'))
     return NULL;
   else {
-    struct HTTP *stream = h->data->req.protop;
+    struct HTTP *stream = h->data->req.p.http;
     size_t len = strlen(header);
     size_t i;
     for(i = 0; i<stream->push_headers_used; i++) {
@@ -462,7 +462,7 @@ static struct Curl_easy *duphandle(struct Curl_easy *data)
       (void)Curl_close(&second);
     }
     else {
-      second->req.protop = http;
+      second->req.p.http = http;
       Curl_dyn_init(&http->header_recvbuf, DYN_H2_HEADERS);
       Curl_http2_setup_req(second);
       second->state.stream_weight = data->state.stream_weight;
@@ -539,7 +539,7 @@ static int push_promise(struct Curl_easy *data,
     /* ask the application */
     H2BUGF(infof(data, "Got PUSH_PROMISE, ask application!\n"));
 
-    stream = data->req.protop;
+    stream = data->req.p.http;
     if(!stream) {
       failf(data, "Internal NULL stream!\n");
       (void)Curl_close(&newhandle);
@@ -569,13 +569,13 @@ static int push_promise(struct Curl_easy *data,
     if(rv) {
       DEBUGASSERT((rv > CURL_PUSH_OK) && (rv <= CURL_PUSH_ERROROUT));
       /* denied, kill off the new handle again */
-      http2_stream_free(newhandle->req.protop);
-      newhandle->req.protop = NULL;
+      http2_stream_free(newhandle->req.p.http);
+      newhandle->req.p.http = NULL;
       (void)Curl_close(&newhandle);
       goto fail;
     }
 
-    newstream = newhandle->req.protop;
+    newstream = newhandle->req.p.http;
     newstream->stream_id = frame->promised_stream_id;
     newhandle->req.maxdownload = -1;
     newhandle->req.size = -1;
@@ -585,8 +585,8 @@ static int push_promise(struct Curl_easy *data,
     rc = Curl_multi_add_perform(data->multi, newhandle, conn);
     if(rc) {
       infof(data, "failed to add handle to multi\n");
-      http2_stream_free(newhandle->req.protop);
-      newhandle->req.protop = NULL;
+      http2_stream_free(newhandle->req.p.http);
+      newhandle->req.p.http = NULL;
       Curl_close(&newhandle);
       rv = CURL_PUSH_DENY;
       goto fail;
@@ -669,7 +669,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     return 0;
   }
 
-  stream = data_s->req.protop;
+  stream = data_s->req.p.http;
   if(!stream) {
     H2BUGF(infof(data_s, "No proto pointer for stream: %x\n",
                  stream_id));
@@ -785,7 +785,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
        internal error more than anything else! */
     return NGHTTP2_ERR_CALLBACK_FAILURE;
 
-  stream = data_s->req.protop;
+  stream = data_s->req.p.http;
   if(!stream)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
 
@@ -851,7 +851,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
     }
     H2BUGF(infof(data_s, "on_stream_close(), %s (err %d), stream %u\n",
                  nghttp2_http2_strerror(error_code), error_code, stream_id));
-    stream = data_s->req.protop;
+    stream = data_s->req.p.http;
     if(!stream)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
 
@@ -896,7 +896,7 @@ static int on_begin_headers(nghttp2_session *session,
     return 0;
   }
 
-  stream = data_s->req.protop;
+  stream = data_s->req.p.http;
   if(!stream || !stream->bodystarted) {
     return 0;
   }
@@ -954,7 +954,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
        internal error more than anything else! */
     return NGHTTP2_ERR_CALLBACK_FAILURE;
 
-  stream = data_s->req.protop;
+  stream = data_s->req.p.http;
   if(!stream) {
     failf(data_s, "Internal NULL stream! 5\n");
     return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -1102,7 +1102,7 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
          internal error more than anything else! */
       return NGHTTP2_ERR_CALLBACK_FAILURE;
 
-    stream = data_s->req.protop;
+    stream = data_s->req.p.http;
     if(!stream)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
@@ -1163,7 +1163,7 @@ static void populate_settings(struct connectdata *conn,
 
 void Curl_http2_done(struct Curl_easy *data, bool premature)
 {
-  struct HTTP *http = data->req.protop;
+  struct HTTP *http = data->req.p.http;
   struct http_conn *httpc = &data->conn->proto.httpc;
 
   /* there might be allocated resources done before this got the 'h2' pointer
@@ -1400,7 +1400,7 @@ CURLcode Curl_http2_done_sending(struct connectdata *conn)
      (conn->handler == &Curl_handler_http2)) {
     /* make sure this is only attempted for HTTP/2 transfers */
 
-    struct HTTP *stream = conn->data->req.protop;
+    struct HTTP *stream = conn->data->req.p.http;
 
     struct http_conn *httpc = &conn->proto.httpc;
     nghttp2_session *h2 = httpc->h2;
@@ -1523,7 +1523,7 @@ static void h2_pri_spec(struct Curl_easy *data,
                         nghttp2_priority_spec *pri_spec)
 {
   struct HTTP *depstream = (data->set.stream_depends_on?
-                            data->set.stream_depends_on->req.protop:NULL);
+                            data->set.stream_depends_on->req.p.http:NULL);
   int32_t depstream_id = depstream? depstream->stream_id:0;
   nghttp2_priority_spec_init(pri_spec, depstream_id, data->set.stream_weight,
                              data->set.stream_depends_e);
@@ -1540,7 +1540,7 @@ static void h2_pri_spec(struct Curl_easy *data,
 static int h2_session_send(struct Curl_easy *data,
                            nghttp2_session *h2)
 {
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
   if((data->set.stream_weight != data->state.stream_weight) ||
      (data->set.stream_depends_e != data->state.stream_depends_e) ||
      (data->set.stream_depends_on != data->state.stream_depends_on) ) {
@@ -1568,7 +1568,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   ssize_t nread;
   struct http_conn *httpc = &conn->proto.httpc;
   struct Curl_easy *data = conn->data;
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
 
@@ -1840,7 +1840,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
    */
   int rv;
   struct http_conn *httpc = &conn->proto.httpc;
-  struct HTTP *stream = conn->data->req.protop;
+  struct HTTP *stream = conn->data->req.p.http;
   nghttp2_nv *nva = NULL;
   size_t nheader;
   size_t i;
@@ -2154,7 +2154,7 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
 {
   CURLcode result;
   struct http_conn *httpc = &conn->proto.httpc;
-  struct HTTP *stream = conn->data->req.protop;
+  struct HTTP *stream = conn->data->req.p.http;
 
   DEBUGASSERT(conn->data->state.buffer);
 
@@ -2208,7 +2208,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   struct http_conn *httpc = &conn->proto.httpc;
   int rv;
   struct Curl_easy *data = conn->data;
-  struct HTTP *stream = conn->data->req.protop;
+  struct HTTP *stream = conn->data->req.p.http;
 
   result = Curl_http2_setup(conn);
   if(result)
@@ -2300,7 +2300,7 @@ CURLcode Curl_http2_stream_pause(struct Curl_easy *data, bool pause)
     return CURLE_OK;
 #ifdef NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE
   else {
-    struct HTTP *stream = data->req.protop;
+    struct HTTP *stream = data->req.p.http;
     struct http_conn *httpc = &data->conn->proto.httpc;
     uint32_t window = !pause * HTTP2_HUGE_WINDOW_SIZE;
     int rv = nghttp2_session_set_local_window_size(httpc->h2,

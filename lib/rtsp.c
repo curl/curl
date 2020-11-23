@@ -115,7 +115,7 @@ static CURLcode rtsp_setup_connection(struct connectdata *conn)
 {
   struct RTSP *rtsp;
 
-  conn->data->req.protop = rtsp = calloc(1, sizeof(struct RTSP));
+  conn->data->req.p.rtsp = rtsp = calloc(1, sizeof(struct RTSP));
   if(!rtsp)
     return CURLE_OUT_OF_MEMORY;
 
@@ -200,7 +200,7 @@ static CURLcode rtsp_done(struct connectdata *conn,
                           CURLcode status, bool premature)
 {
   struct Curl_easy *data = conn->data;
-  struct RTSP *rtsp = data->req.protop;
+  struct RTSP *rtsp = data->req.p.rtsp;
   CURLcode httpStatus;
 
   /* Bypass HTTP empty-reply checks on receive */
@@ -233,7 +233,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
   Curl_RtspReq rtspreq = data->set.rtspreq;
-  struct RTSP *rtsp = data->req.protop;
+  struct RTSP *rtsp = data->req.p.rtsp;
   struct dynbuf req_buffer;
   curl_off_t postsize = 0; /* for ANNOUNCE and SET_PARAMETER */
   curl_off_t putsize = 0; /* for ANNOUNCE and SET_PARAMETER */
@@ -765,7 +765,7 @@ CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
     /* Store the received CSeq. Match is verified in rtsp_done */
     int nc = sscanf(&header[4], ": %ld", &CSeq);
     if(nc == 1) {
-      struct RTSP *rtsp = data->req.protop;
+      struct RTSP *rtsp = data->req.p.rtsp;
       rtsp->CSeq_recv = CSeq; /* mark the request */
       data->state.rtsp_CSeq_recv = CSeq; /* update the handle */
     }

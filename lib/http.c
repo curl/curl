@@ -165,14 +165,14 @@ static CURLcode http_setup_conn(struct connectdata *conn)
      during this request */
   struct HTTP *http;
   struct Curl_easy *data = conn->data;
-  DEBUGASSERT(data->req.protop == NULL);
+  DEBUGASSERT(data->req.p.http == NULL);
 
   http = calloc(1, sizeof(struct HTTP));
   if(!http)
     return CURLE_OUT_OF_MEMORY;
 
   Curl_mime_initpart(&http->form, conn->data);
-  data->req.protop = http;
+  data->req.p.http = http;
 
   if(data->set.httpversion == CURL_HTTP_VERSION_3) {
     if(conn->handler->flags & PROTOPT_SSL)
@@ -428,7 +428,7 @@ static bool pickoneauth(struct auth *pick, unsigned long mask)
 static CURLcode http_perhapsrewind(struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
-  struct HTTP *http = data->req.protop;
+  struct HTTP *http = data->req.p.http;
   curl_off_t bytessent;
   curl_off_t expectsend = -1; /* default is unknown */
 
@@ -1112,7 +1112,7 @@ static size_t readmoredata(char *buffer,
                            void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
-  struct HTTP *http = conn->data->req.protop;
+  struct HTTP *http = conn->data->req.p.http;
   size_t fullsize = size * nitems;
 
   if(!http->postsize)
@@ -1170,7 +1170,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
   char *ptr;
   size_t size;
   struct Curl_easy *data = conn->data;
-  struct HTTP *http = data->req.protop;
+  struct HTTP *http = data->req.p.http;
   size_t sendsize;
   curl_socket_t sockfd;
   size_t headersize;
@@ -1516,7 +1516,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
                         CURLcode status, bool premature)
 {
   struct Curl_easy *data = conn->data;
-  struct HTTP *http = data->req.protop;
+  struct HTTP *http = data->req.p.http;
 
   /* Clear multipass flag. If authentication isn't done yet, then it will get
    * a chance to be set back to true when we output the next auth header */
@@ -1977,7 +1977,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         return result;
     }
   }
-  http = data->req.protop;
+  http = data->req.p.http;
   DEBUGASSERT(http);
 
   if(!data->state.this_is_a_follow) {

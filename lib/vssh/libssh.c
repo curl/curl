@@ -664,7 +664,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct SSHPROTO *protop = data->req.protop;
+  struct SSHPROTO *protop = data->req.p.ssh;
   struct ssh_conn *sshc = &conn->proto.sshc;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc = SSH_NO_ERROR, err;
@@ -2125,7 +2125,7 @@ static CURLcode myssh_setup_connection(struct connectdata *conn)
 {
   struct SSHPROTO *ssh;
 
-  conn->data->req.protop = ssh = calloc(1, sizeof(struct SSHPROTO));
+  conn->data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
 
@@ -2148,7 +2148,7 @@ static CURLcode myssh_connect(struct connectdata *conn, bool *done)
   int rc;
 
   /* initialize per-handle data if not already */
-  if(!data->req.protop)
+  if(!data->req.p.ssh)
     myssh_setup_connection(conn);
 
   /* We default to persistent connections. We set this already in this connect
@@ -2349,7 +2349,7 @@ static CURLcode scp_disconnect(struct connectdata *conn,
 static CURLcode myssh_done(struct connectdata *conn, CURLcode status)
 {
   CURLcode result = CURLE_OK;
-  struct SSHPROTO *protop = conn->data->req.protop;
+  struct SSHPROTO *protop = conn->data->req.p.ssh;
 
   if(!status) {
     /* run the state-machine */
@@ -2602,7 +2602,7 @@ static void sftp_quote(struct connectdata *conn)
 {
   const char *cp;
   struct Curl_easy *data = conn->data;
-  struct SSHPROTO *protop = data->req.protop;
+  struct SSHPROTO *protop = data->req.p.ssh;
   struct ssh_conn *sshc = &conn->proto.sshc;
   CURLcode result;
 
