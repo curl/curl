@@ -1299,6 +1299,7 @@ send_ack:
     }
   } while(size == SEGSIZE);
   write_behind(test, pf->f_convert);
+  /* close the output file as early as possible after upload completion */
   if(test->ofile > 0) {
     close(test->ofile);
     test->ofile = 0;
@@ -1325,6 +1326,11 @@ send_ack:
     (void) swrite(peer, &ackbuf.storage[0], 4);  /* resend final ack */
   }
 abort:
+  /* make sure the output file is closed in case of abort */
+  if(test->ofile > 0) {
+    close(test->ofile);
+    test->ofile = 0;
+  }
   return;
 }
 
