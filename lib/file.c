@@ -227,18 +227,8 @@ static CURLcode file_done(struct connectdata *conn,
 static CURLcode file_disconnect(struct connectdata *conn,
                                 bool dead_connection)
 {
-  struct FILEPROTO *file = conn->data->req.p.file;
   (void)dead_connection; /* not used */
-
-  if(file) {
-    Curl_safefree(file->freepath);
-    file->path = NULL;
-    if(file->fd != -1)
-      close(file->fd);
-    file->fd = -1;
-  }
-
-  return CURLE_OK;
+  return file_done(conn, 0, 0);
 }
 
 #ifdef DOS_FILESYSTEM
