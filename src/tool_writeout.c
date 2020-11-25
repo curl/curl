@@ -112,7 +112,7 @@ void ourWriteOut(CURL *curl, struct per_transfer *per, const char *writeinfo)
   const char *ptr = writeinfo;
   char *stringp = NULL;
   long longinfo;
-  double doubleinfo;
+  curl_off_t offinfo;
 
   while(ptr && *ptr) {
     if('%' == *ptr && ptr[1]) {
@@ -189,65 +189,64 @@ void ourWriteOut(CURL *curl, struct per_transfer *per, const char *writeinfo)
                 break;
               case VAR_REDIRECT_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_REDIRECT_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_REDIRECT_TIME_T, &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_TOTAL_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_NAMELOOKUP_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_TIME_T,
+                                     &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_CONNECT_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME, &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME_T, &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_APPCONNECT_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_APPCONNECT_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_APPCONNECT_TIME_T,
+                                     &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_PRETRANSFER_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME_T,
+                                     &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_STARTTRANSFER_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME_T,
+                                     &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_SIZE_UPLOAD:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD, &doubleinfo))
-                  fprintf(stream, "%.0f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD_T, &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_SIZE_DOWNLOAD:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD,
-                                     &doubleinfo))
-                  fprintf(stream, "%.0f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T,
+                                     &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_SPEED_DOWNLOAD:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD,
-                                     &doubleinfo))
-                  fprintf(stream, "%.3f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD_T,
+                                     &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_SPEED_UPLOAD:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &doubleinfo))
-                  fprintf(stream, "%.3f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD_T, &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_CONTENT_TYPE:
                 if((CURLE_OK ==
