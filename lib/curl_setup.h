@@ -238,7 +238,7 @@
  * interface doesn't support IPv4, but supports IPv6, NAT64, and DNS64,
  * performing this task will result in a synthesized IPv6 address.
  */
-#ifdef  __APPLE__
+#if defined(__APPLE__) && !defined(USE_ARES)
 #define USE_RESOLVE_ON_IPS 1
 #endif
 
