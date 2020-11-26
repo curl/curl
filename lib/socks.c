@@ -771,7 +771,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
 
   case CONNECT_RESOLVING:
     /* check if we have the name resolved by now */
-    dns = Curl_fetch_addr(conn, hostname, (int)conn->port);
+    dns = Curl_fetch_addr(conn, hostname, remote_port);
 
     if(dns) {
 #ifdef CURLRES_ASYNCH
