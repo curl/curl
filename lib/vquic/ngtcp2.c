@@ -349,14 +349,8 @@ static int quic_init_ssl(struct quicsocket *qs)
   SSL_set_app_data(qs->ssl, qs);
   SSL_set_connect_state(qs->ssl);
 
-  switch(qs->version) {
-#ifdef NGTCP2_PROTO_VER
-  case NGTCP2_PROTO_VER:
-    alpn = (const uint8_t *)NGHTTP3_ALPN_H3;
-    alpnlen = sizeof(NGHTTP3_ALPN_H3) - 1;
-    break;
-#endif
-  }
+  alpn = (const uint8_t *)NGHTTP3_ALPN_H3;
+  alpnlen = sizeof(NGHTTP3_ALPN_H3) - 1;
   if(alpn)
     SSL_set_alpn_protos(qs->ssl, alpn, (int)alpnlen);
 
@@ -532,15 +526,9 @@ static int quic_init_ssl(struct quicsocket *qs)
     return 1;
   }
 
-  switch(qs->version) {
-#ifdef NGTCP2_PROTO_VER
-  case NGTCP2_PROTO_VER:
-    /* strip the first byte (the length) from NGHTTP3_ALPN_H3 */
-    alpn.data = (unsigned char *)NGHTTP3_ALPN_H3 + 1;
-    alpn.size = sizeof(NGHTTP3_ALPN_H3) - 2;
-    break;
-#endif
-  }
+  /* strip the first byte (the length) from NGHTTP3_ALPN_H3 */
+  alpn.data = (unsigned char *)NGHTTP3_ALPN_H3 + 1;
+  alpn.size = sizeof(NGHTTP3_ALPN_H3) - 2;
   if(alpn.data)
     gnutls_alpn_set_protocols(qs->ssl, &alpn, 1, 0);
 
