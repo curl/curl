@@ -821,7 +821,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   ngtcp2_addr_init(&path.remote, addr, addrlen, NULL);
 
   rc = ngtcp2_conn_client_new(&qs->qconn, &qs->dcid, &qs->scid, &path,
-                              NGTCP2_PROTO_VER_MAX, &ng_callbacks,
+                              NGTCP2_PROTO_VER_MIN, &ng_callbacks,
                               &qs->settings, NULL, qs);
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
