@@ -49,6 +49,7 @@
 #define PORT_RTMPT PORT_HTTP
 #define PORT_RTMPS PORT_HTTPS
 #define PORT_GOPHER 70
+#define PORT_GEMINI 1965
 #define PORT_MQTT 1883
 
 #define DICT_MATCH "/MATCH:"
@@ -659,6 +660,7 @@ struct SingleRequest {
     struct SMTP *smtp;
     struct SSHPROTO *ssh;
     struct TELNET *telnet;
+    struct GEMINI *gemini;
   } p;
 #ifndef CURL_DISABLE_DOH
   struct dohdata doh; /* DoH specific data for this request */

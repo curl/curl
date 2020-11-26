@@ -646,6 +646,22 @@ AC_HELP_STRING([--disable-gopher],[Disable Gopher support]),
        AC_MSG_RESULT(yes)
 )
 
+AC_MSG_CHECKING([whether to support gemini])
+AC_ARG_ENABLE(gemini,
+AC_HELP_STRING([--enable-gemini],[Enable Gemini support])
+AC_HELP_STRING([--disable-gemini],[Disable Gemini support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_GEMINI, 1, [to disable Gemini])
+       AC_SUBST(CURL_DISABLE_GEMINI, [1])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
 AC_MSG_CHECKING([whether to support mqtt])
 AC_ARG_ENABLE(mqtt,
 AC_HELP_STRING([--enable-mqtt],[Enable MQTT support])

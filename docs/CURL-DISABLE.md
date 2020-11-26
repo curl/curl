@@ -33,6 +33,10 @@ Disable the FTP (and FTPS) protocol
 Disable the `curl_easy_options` API calls that lets users get information
 about existing options to `curl_easy_setopt`.
 
+## CURL_DISABLE_GEMINI
+
+Disable the GEMINI protocol.
+
 ## CURL_DISABLE_GOPHER
 
 Disable the GOPHER protocol.

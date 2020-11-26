@@ -194,6 +194,9 @@
 #  ifndef CURL_DISABLE_SMB
 #    define CURL_DISABLE_SMB
 #  endif
+#  ifndef CURL_DISABLE_GEMINI
+#    define CURL_DISABLE_GEMINI
+#  endif
 #endif
 
 /*

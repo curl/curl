@@ -115,6 +115,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "http_ntlm.h"
 #include "curl_rtmp.h"
 #include "gopher.h"
+#include "gemini.h"
 #include "mqtt.h"
 #include "http_proxy.h"
 #include "conncache.h"
@@ -251,6 +252,10 @@ static const struct Curl_handler * const protocols[] = {
 
 #ifndef CURL_DISABLE_GOPHER
   &Curl_handler_gopher,
+#endif
+
+#if !defined CURL_DISABLE_GEMINI && defined USE_SSL
+  &Curl_handler_gemini,
 #endif
 
 #ifdef USE_LIBRTMP
