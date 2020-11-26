@@ -828,7 +828,8 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   if(rv == -1)
     return CURLE_QUIC_CONNECT_ERROR;
 
-  ngtcp2_addr_init(&path.local, &qs->local_addr, qs->local_addrlen, NULL);
+  ngtcp2_addr_init(&path.local, (struct sockaddr *)&qs->local_addr,
+                   qs->local_addrlen, NULL);
   ngtcp2_addr_init(&path.remote, addr, addrlen, NULL);
 
   rc = ngtcp2_conn_client_new(&qs->qconn, &qs->dcid, &qs->scid, &path,
@@ -1745,7 +1746,7 @@ static CURLcode ng_process_ingress(struct connectdata *conn,
       return CURLE_RECV_ERROR;
     }
 
-    ngtcp2_addr_init(&path.local, &qs->local_addr,
+    ngtcp2_addr_init(&path.local, (struct sockaddr *)&qs->local_addr,
                      qs->local_addrlen, NULL);
     ngtcp2_addr_init(&path.remote, (struct sockaddr *)&remote_addr,
                      remote_addrlen, NULL);
@@ -1779,7 +1780,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
   nghttp3_vec vec[16];
   ssize_t ndatalen;
 
-  switch(qs->local_addr.sa_family) {
+  switch(qs->local_addr.ss_family) {
   case AF_INET:
     pktlen = NGTCP2_MAX_PKTLEN_IPV4;
     break;
