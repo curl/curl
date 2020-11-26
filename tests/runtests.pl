@@ -2762,6 +2762,7 @@ sub compare {
 }
 
 sub setupfeatures {
+    $feature{"c-ares"} = $has_cares;
     $feature{"alt-svc"} = $has_altsvc;
     $feature{"HSTS"} = $has_hsts;
     $feature{"brotli"} = $has_brotli;

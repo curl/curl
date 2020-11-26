@@ -333,6 +333,7 @@ SKIPPED.
 Features testable here are:
 
 - `alt-svc`
+- `c-ares`
 - `cookies`
 - `crypto`
 - `debug`
