@@ -76,6 +76,10 @@
 #endif
 
 #if defined(__MACH__)
+#  include "config-macos.h"
+#endif
+
+#if defined(macintosh) && defined(__MRC__)
 #  include "config-mac.h"
 #endif
 
