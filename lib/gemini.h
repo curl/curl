@@ -50,6 +50,7 @@ struct GEMINI {
     size_t amount_total; /* How many bytes in {data} */
     size_t amount_sent; /* How many bytes of it we already sent */
   } request;
+  bool redirect;
 };
 
 #endif /* HEADER_CURL_GEMINI_H */

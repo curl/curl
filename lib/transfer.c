@@ -66,6 +66,7 @@
 #include "sendf.h"
 #include "speedcheck.h"
 #include "progress.h"
+#include "gemini.h"
 #include "http.h"
 #include "url.h"
 #include "getinfo.h"
@@ -1803,6 +1804,11 @@ CURLcode Curl_retry_request(struct connectdata *conn,
     data->state.refused_stream = FALSE; /* clear again */
     retry = TRUE;
   }
+  /* Here we re-use -L flag from HTTP. Is it good idea? */
+  else if((conn->handler->protocol&CURLPROTO_GEMINI) &&
+          (data->set.http_follow_location) &&
+          (conn->data->req.p.gemini->redirect))
+    retry = TRUE;
   if(retry) {
 #define CONN_MAX_RETRIES 5
     if(data->state.retrycount++ >= CONN_MAX_RETRIES) {

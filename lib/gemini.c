@@ -24,9 +24,9 @@
 
 #if !defined CURL_DISABLE_GEMINI && defined USE_SSL
 
-#include <ctype.h>
 #include <string.h>
 #include "gemini.h"
+#include "curl_ctype.h"
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
@@ -203,7 +203,7 @@ static CURLcode gemini_doing_finish(struct connectdata *conn, bool *done)
     return CURLE_WEIRD_SERVER_REPLY;
   }
 
-  if(block[2] != ' ' || !isdigit(block[0]) || !isdigit(block[1])) {
+  if(block[2] != ' ' || !ISDIGIT(block[0]) || !ISDIGIT(block[1])) {
     failf(data, "First 3 bytes of response violate specification");
     return CURLE_WEIRD_SERVER_REPLY;
   }
@@ -222,7 +222,16 @@ static CURLcode gemini_doing_finish(struct connectdata *conn, bool *done)
     return result;
 
   status = block[0];
-  if(status != '2') { /* TODO: handle redirects */
+  if(status == '3') {
+    gemini->redirect = TRUE;
+    *(lf - 1) = '\0';
+    Curl_safefree(data->change.url);
+    data->change.url = strdup(block + 3);
+    if(!data->change.url)
+      return CURLE_OUT_OF_MEMORY;
+  }
+
+  if(status != '2') {
     *done = TRUE;
     return CURLE_OK;
   }
@@ -249,6 +258,7 @@ static CURLcode gemini_disconnect(struct connectdata *conn, bool _ignored)
 
   /* Curl engine will free GEMINI structure itself */
   gemini = conn->data->req.p.gemini;
+  conn->data->req.p.gemini = NULL;
   free(gemini->request.memory);
 
   return CURLE_OK;
