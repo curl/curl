@@ -74,6 +74,7 @@ EXTRA_DIST =                                    \
  KNOWN_BUGS                                     \
  MAIL-ETIQUETTE                                 \
  MQTT.md                                        \
+ NEW-PROTOCOL.md                                \
  options-in-versions                            \
  PARALLEL-TRANSFERS.md                          \
  README.md                                      \
