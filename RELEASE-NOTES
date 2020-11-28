@@ -15,6 +15,7 @@ This release includes the following bugfixes:
  o acinclude: detect manually set minimum macos/ipod version [46]
  o alt-svc: enable (in the build) by default [20]
  o alt-svc: minimize variable scope and avoid "DEAD_STORE" [51]
+ o asyn: use 'struct thread_data *' instead of 'void *' [84]
  o checksrc: warn on empty line before open brace [13]
  o CI/appveyor: disable test 571 in two cmake builds [22]
  o CI/azure: improve on flakiness by avoiding libtool wrappers [7]
@@ -38,6 +39,7 @@ This release includes the following bugfixes:
  o curl: only warn not fail, if not finding the home dir [15]
  o curl_easy_escape: limit output string length to 3 * max input [55]
  o Curl_pgrsStartNow: init speed limit time stamps at start [48]
+ o curl_setup: USE_RESOLVE_ON_IPS is for Apple native resolver use
  o curl_url_set.3: fix typo in the RETURN VALUE section [3]
  o CURLOPT_DNS_USE_GLOBAL_CACHE.3: fix typo [34]
  o CURLOPT_HSTS.3: document the file format [82]
@@ -48,19 +50,25 @@ This release includes the following bugfixes:
  o docs: Fix various typos in documentation [58]
  o examples/httpput: remove use of CURLOPT_PUT [39]
  o FAQ: refreshed [56]
+ o file: avoid duplicated code sequence [77]
  o gnutls: fix memory leaks (certfields memory wasn't released) [41]
  o header.d: mention the "Transfer-Encoding: chunked" handling [45]
  o HISTORY: the new domain
  o http3: fix two build errors, silence warnings [10]
+ o http3: use the master branch of GnuTLS for testing [88]
  o http: pass correct header size to debug callback for chunked post [44]
  o http_proxy: use enum with state names for 'keepon' [54]
  o httpput-postfields.c: new example doing PUT with POSTFIELDS [35]
+ o infof/failf calls: fix format specifiers [78]
  o libssh2: fix build with disabled proxy support [17]
  o libssh2: fix transport over HTTPS proxy [31]
  o libssh2: require version 1.0 or later [24]
  o Makefile.m32: add support for HTTP/3 via ngtcp2+nghttp3 [11]
+ o Makefile.m32: add support for UNICODE builds [85]
  o mqttd: fclose test file when done [60]
  o ngtcp2: adapt to recent nghttp3 updates [49]
+ o ngtcp2: advertise h3 ALPN unconditionally [72]
+ o ngtcp2: use the minimal version of QUIC supported by ngtcp2 [67]
  o openssl: acknowledge SRP disabling in configure properly [9]
  o openssl: guard against OOM on context creation [68]
  o os400: Sync libcurl API options [5]
@@ -74,9 +82,11 @@ This release includes the following bugfixes:
  o runtests: return error if no tests ran [16]
  o runtests: revert the mistaken edit of $CURL
  o runtests: show keywords when no tests ran [33]
+ o socks: check for DNS entries with the right port number [74]
  o src/tool_filetime: disable -Wformat on mingw for this file [2]
  o strerror: use 'const' as the string should never be modified [18]
  o test122[12]: remove these two tests [1]
+ o test506: make it not run in c-ares builds [75]
  o tests/*server.py: close log file after each log line [81]
  o tests/server/tftpd.c: close upload file right after transfer [62]
  o tests: add missing global_init/cleanup calls [42]
@@ -86,9 +96,12 @@ This release includes the following bugfixes:
  o tool_operate: --retry for HTTP 408 responses too [43]
  o tool_operate: bail out proper on errors during parallel transfers [29]
  o tool_operate: fix compiler warning when --libcurl is disabled [12]
+ o tool_writeout: use off_t getinfo-types instead of doubles [76]
  o travis: use ninja-build for CMake builds [63]
  o travis: use valgrind when running tests for debug builds [40]
  o urlapi: URL encode a '+' in the query part [14]
+ o urldata: remove 'void *protop' and create the union 'p' [86]
+ o vquic/ngtcp2.h: define local_addr as sockaddr_storage [73]
 
 This release includes the following known bugs:
 
@@ -99,14 +112,14 @@ advice from friends like these:
 
   Andreas Fischer, asavah on github, b9a1 on github, Baruch Siach,
   Basuke Suzuki, bobmitchell1956 on github, BrumBrum on hackerone,
-  Cristian Morales Vega, Daniel Gustafsson, Daniel Stenberg, Dietmar Hauser,
-  Dirk Wetter, Emil Engler, hamstergene on github, Harry Sintonen,
-  Jakub Zakrzewski, Jeroen Ooms, Jon Rumsey, José Joaquín Atria,
-  Kael1117 on github, Marcel Raad, Marc Hörsken, Marc Schlatter,
-  Niranjan Hasabnis, nosajsnikta on github, Oliver Urbann,
-  Philipp Klaus Krause, Ray Satiro, Rui LIU, Sergei Nikulov, Tobias Hieta,
-  Tom G. Christensen, Viktor Szakats, Vincent Torri,
-  (34 contributors)
+  Cristian Morales Vega, Daiki Ueno, Daniel Gustafsson, Daniel Stenberg,
+  Dietmar Hauser, Dirk Wetter, Emil Engler, hamstergene on github,
+  Harry Sintonen, Jakub Zakrzewski, Jeroen Ooms, Jon Rumsey,
+  José Joaquín Atria, Kael1117 on github, Marcel Raad, Marc Hörsken,
+  Marc Schlatter, Niranjan Hasabnis, nosajsnikta on github, Oliver Urbann,
+  Philipp Klaus Krause, Ray Satiro, Rikard Falkeborn, Rui LIU, Sergei Nikulov,
+  Tobias Hieta, Tom G. Christensen, Viktor Szakats, Vincent Torri,
+  (36 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -177,10 +190,22 @@ References to bug reports and discussions on issues:
  [63] = https://curl.se/bug/?i=6077
  [64] = https://curl.se/bug/?i=6161
  [65] = https://curl.se/bug/?i=6161
+ [67] = https://curl.se/bug/?i=6250
  [68] = https://curl.se/bug/?i=6224
  [69] = https://curl.se/bug/?i=6215
  [70] = https://curl.se/bug/?i=6173
  [71] = https://curl.se/bug/?i=6223
+ [72] = https://curl.se/bug/?i=6250
+ [73] = https://curl.se/bug/?i=6250
+ [74] = https://curl.se/bug/?i=6247
+ [75] = https://curl.se/bug/?i=6247
+ [76] = https://curl.se/bug/?i=6248
+ [77] = https://curl.se/bug/?i=6249
+ [78] = https://curl.se/bug/?i=6241
  [80] = https://curl.se/bug/?i=6211
  [81] = https://curl.se/bug/?i=6058
  [82] = https://curl.se/bug/?i=6205
+ [84] = https://curl.se/bug/?i=6239
+ [85] = https://curl.se/bug/?i=6228
+ [86] = https://curl.se/bug/?i=6238
+ [88] = https://curl.se/bug/?i=6235
