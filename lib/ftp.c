@@ -1940,6 +1940,17 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
 #endif
   {
     /* normal, direct, ftp connection */
+
+    /* postponed address resolution in case of tcp fastopen */
+    int no_newhost = !ftpc->newhost || ftpc->newhost[0] == '\0';
+    if(conn->bits.tcp_fastopen && !conn->bits.reuse && no_newhost) {
+      Curl_updateconninfo_rem(conn, conn->sock[FIRSTSOCKET]);
+      Curl_safefree(ftpc->newhost);
+      ftpc->newhost = strdup(control_address(conn));
+      if(!ftpc->newhost)
+        return CURLE_OUT_OF_MEMORY;
+    }
+
     rc = Curl_resolv(conn, ftpc->newhost, ftpc->newport, FALSE, &addr);
     if(rc == CURLRESOLV_PENDING)
       /* BLOCKING */
