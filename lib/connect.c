@@ -677,7 +677,7 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
 {
   if(conn->transport == TRNSPRT_TCP) {
 #if defined(HAVE_GETPEERNAME) || defined(HAVE_GETSOCKNAME)
-    if(!conn->bits.reuse && !conn->bits.tcp_fastopen) {
+    if(!conn->bits.reuse) {
       struct Curl_easy *data = conn->data;
       char buffer[STRERROR_LEN];
       struct Curl_sockaddr_storage ssrem;

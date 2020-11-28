@@ -909,6 +909,7 @@ check_include_file_concat("net/if.h"         HAVE_NET_IF_H)
 check_include_file_concat("netdb.h"          HAVE_NETDB_H)
 check_include_file_concat("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file_concat("netinet/tcp.h"    HAVE_NETINET_TCP_H)
+check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
 
 check_include_file_concat("pem.h"            HAVE_PEM_H)
 check_include_file_concat("poll.h"           HAVE_POLL_H)
