@@ -1107,6 +1107,11 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
   return !rc;
 }
 
+#ifdef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
+#define INITFLAGS OPENSSL_INIT_NO_LOAD_CONFIG
+#else
+#define INITFLAGS OPENSSL_INIT_LOAD_CONFIG
+#endif
 /**
  * Global SSL init
  *
@@ -1115,6 +1120,10 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
  */
 static int Curl_ossl_init(void)
 {
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) &&  \
+  !defined(LIBRESSL_VERSION_NUMBER)
+  OPENSSL_init_ssl(OPENSSL_INIT_ENGINE_ALL_BUILTIN | INITFLAGS, NULL);
+#else
   OPENSSL_load_builtin_modules();
 
 #ifdef USE_OPENSSL_ENGINE
@@ -1133,10 +1142,6 @@ static int Curl_ossl_init(void)
                          CONF_MFLAGS_IGNORE_MISSING_FILE);
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
-    !defined(LIBRESSL_VERSION_NUMBER)
-  /* OpenSSL 1.1.0+ takes care of initialization itself */
-#else
   /* Lets get nice error messages */
   SSL_load_error_strings();
 
