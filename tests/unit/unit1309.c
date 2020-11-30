@@ -99,7 +99,7 @@ UNITTEST_START
     splayprint(root, 0, 1);
     printf("remove pointer %d, payload %zu\n", rem,
            *(size_t *)nodes[rem].payload);
-    rc = Curl_splayremovebyaddr(root, &nodes[rem], &root);
+    rc = Curl_splayremove(root, &nodes[rem], &root);
     if(rc) {
       /* failed! */
       printf("remove %d failed!\n", rem);

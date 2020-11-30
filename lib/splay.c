@@ -206,9 +206,9 @@ struct Curl_tree *Curl_splaygetbest(struct curltime i,
  *
  * @unittest: 1309
  */
-int Curl_splayremovebyaddr(struct Curl_tree *t,
-                           struct Curl_tree *removenode,
-                           struct Curl_tree **newroot)
+int Curl_splayremove(struct Curl_tree *t,
+                     struct Curl_tree *removenode,
+                     struct Curl_tree **newroot)
 {
   static const struct curltime KEY_NOTUSED = {
     (time_t)-1, (unsigned int)-1
