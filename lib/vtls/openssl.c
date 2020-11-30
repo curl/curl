@@ -2735,33 +2735,33 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
     BIO *ssl_cert_bio = NULL;
     BIO *ssl_key_bio = NULL;
-    int result_cert_stuff;
     if(ssl_cert_blob) {
       /* the typecast of blob->len is fine since it is guaranteed to never be
          larger than CURL_MAX_INPUT_LENGTH */
       ssl_cert_bio = BIO_new_mem_buf(ssl_cert_blob->data,
                                      (int)ssl_cert_blob->len);
       if(!ssl_cert_bio)
-        return CURLE_SSL_CERTPROBLEM;
+        result = CURLE_OUT_OF_MEMORY;
     }
-    if(SSL_SET_OPTION(key_blob)) {
+    if(!result && SSL_SET_OPTION(key_blob)) {
       ssl_key_bio = BIO_new_mem_buf(SSL_SET_OPTION(key_blob)->data,
                                     (int)SSL_SET_OPTION(key_blob)->len);
       if(!ssl_key_bio)
-        return CURLE_SSL_CERTPROBLEM;
+        result = CURLE_OUT_OF_MEMORY;
     }
-    result_cert_stuff = cert_stuff(conn, backend->ctx,
+    if(!result &&
+       !cert_stuff(conn, backend->ctx,
                    ssl_cert, ssl_cert_bio, ssl_cert_type,
                    SSL_SET_OPTION(key), ssl_key_bio,
-                   SSL_SET_OPTION(key_type), SSL_SET_OPTION(key_passwd));
+                   SSL_SET_OPTION(key_type), SSL_SET_OPTION(key_passwd)))
+      result = CURLE_SSL_CERTPROBLEM;
     if(ssl_cert_bio)
       BIO_free(ssl_cert_bio);
     if(ssl_key_bio)
       BIO_free(ssl_key_bio);
-    if(!result_cert_stuff) {
+    if(result)
       /* failf() is already done in cert_stuff() */
-      return CURLE_SSL_CERTPROBLEM;
-    }
+      return result;
   }
 
   ciphers = SSL_CONN_CONFIG(cipher_list);
