@@ -46,6 +46,21 @@ class ClosingFileHandler(logging.StreamHandler):
             super(ClosingFileHandler, self).emit(record)
             self.setStream(None)
 
+    def setStream(self, stream):
+        setStream = getattr(super(ClosingFileHandler, self), 'setStream', None)
+        if callable(setStream):
+            return setStream(stream)
+        if stream is self.stream:
+            result = None
+        else:
+            result = self.stream
+            self.acquire()
+            try:
+                self.flush()
+                self.stream = stream
+            finally:
+                self.release()
+        return result
 
 class TestData(object):
     def __init__(self, data_folder):
