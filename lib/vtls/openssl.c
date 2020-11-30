@@ -1084,9 +1084,6 @@ int cert_stuff(struct connectdata *conn,
 /* returns non-zero on failure */
 static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
 {
-#if 0
-  return X509_NAME_oneline(a, buf, size);
-#else
   BIO *bio_out = BIO_new(BIO_s_mem());
   BUF_MEM *biomem;
   int rc;
@@ -1108,7 +1105,6 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
   BIO_free(bio_out);
 
   return !rc;
-#endif
 }
 
 /**
