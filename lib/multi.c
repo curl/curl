@@ -3375,9 +3375,8 @@ void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
 
     /* Since this is an updated time, we must remove the previous entry from
        the splay tree first and then re-add the new value */
-    rc = Curl_splayremovebyaddr(multi->timetree,
-                                &data->state.timenode,
-                                &multi->timetree);
+    rc = Curl_splayremove(multi->timetree, &data->state.timenode,
+                          &multi->timetree);
     if(rc)
       infof(data, "Internal error removing splay node = %d\n", rc);
   }
@@ -3423,9 +3422,8 @@ void Curl_expire_clear(struct Curl_easy *data)
     struct Curl_llist *list = &data->state.timeoutlist;
     int rc;
 
-    rc = Curl_splayremovebyaddr(multi->timetree,
-                                &data->state.timenode,
-                                &multi->timetree);
+    rc = Curl_splayremove(multi->timetree, &data->state.timenode,
+                          &multi->timetree);
     if(rc)
       infof(data, "Internal error clearing splay node = %d\n", rc);
 
