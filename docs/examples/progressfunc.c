@@ -62,7 +62,8 @@ static int xferinfo(void *p,
 
   /* under certain circumstances it may be desirable for certain functionality
      to only run every N seconds, in order to do this the transaction time can
-     be used */
+     be used. Internally the curtime obtained is limited to platform dependent
+     min/max values, e.g. 0x7FFFFFFF (2147483647) (35min47s) */
   if((curtime - myp->lastruntime) >= MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL) {
     myp->lastruntime = curtime;
 #ifdef TIME_IN_US
