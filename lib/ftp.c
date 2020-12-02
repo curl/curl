@@ -1942,7 +1942,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     /* normal, direct, ftp connection */
 
     /* postponed address resolution in case of tcp fastopen */
-    int no_newhost = !ftpc->newhost || ftpc->newhost[0] == '\0';
+    int no_newhost = ftpc->newhost[0] == '\0';
     if(conn->bits.tcp_fastopen && !conn->bits.reuse && no_newhost) {
       Curl_updateconninfo_rem(conn, conn->sock[FIRSTSOCKET]);
       Curl_safefree(ftpc->newhost);
