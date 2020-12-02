@@ -1795,6 +1795,11 @@ static CURLcode verifystatus(struct connectdata *conn,
   X509_STORE     *st = NULL;
   STACK_OF(X509) *ch = NULL;
   struct ssl_backend_data *backend = connssl->backend;
+  X509 *cert;
+  OCSP_CERTID *id = NULL;
+  int cert_status, crl_reason;
+  ASN1_GENERALIZEDTIME *rev, *thisupd, *nextupd;
+  int ret;
 
   long len = SSL_get_tlsext_status_ocsp_resp(backend->handle, &status);
 
@@ -1863,43 +1868,63 @@ static CURLcode verifystatus(struct connectdata *conn,
     goto end;
   }
 
-  for(i = 0; i < OCSP_resp_count(br); i++) {
-    int cert_status, crl_reason;
-    OCSP_SINGLERESP *single = NULL;
+  /* Compute the certificate's ID */
+  cert = SSL_get_peer_certificate(backend->handle);
+  if(!cert) {
+    failf(data, "Error getting peer certficate");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto end;
+  }
 
-    ASN1_GENERALIZEDTIME *rev, *thisupd, *nextupd;
-
-    single = OCSP_resp_get0(br, i);
-    if(!single)
-      continue;
-
-    cert_status = OCSP_single_get0_status(single, &crl_reason, &rev,
-                                          &thisupd, &nextupd);
-
-    if(!OCSP_check_validity(thisupd, nextupd, 300L, -1L)) {
-      failf(data, "OCSP response has expired");
-      result = CURLE_SSL_INVALIDCERTSTATUS;
-      goto end;
+  for(i = 0; i < sk_X509_num(ch); i++) {
+    X509 *issuer = sk_X509_value(ch, i);
+    if(X509_check_issued(issuer, cert) == X509_V_OK) {
+      id = OCSP_cert_to_id(EVP_sha1(), cert, issuer);
+      break;
     }
+  }
+  X509_free(cert);
 
-    infof(data, "SSL certificate status: %s (%d)\n",
-          OCSP_cert_status_str(cert_status), cert_status);
+  if(!id) {
+    failf(data, "Error computing OCSP ID");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto end;
+  }
 
-    switch(cert_status) {
-      case V_OCSP_CERTSTATUS_GOOD:
-        break;
+  /* Find the single OCSP response corresponding to the certificate ID */
+  ret = OCSP_resp_find_status(br, id, &cert_status, &crl_reason, &rev,
+                              &thisupd, &nextupd);
+  OCSP_CERTID_free(id);
+  if(ret != 1) {
+    failf(data, "Could not find certificate ID in OCSP response");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto end;
+  }
 
-      case V_OCSP_CERTSTATUS_REVOKED:
-        result = CURLE_SSL_INVALIDCERTSTATUS;
+  /* Validate the corresponding single OCSP response */
+  if(!OCSP_check_validity(thisupd, nextupd, 300L, -1L)) {
+    failf(data, "OCSP response has expired");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto end;
+  }
 
-        failf(data, "SSL certificate revocation reason: %s (%d)",
-              OCSP_crl_reason_str(crl_reason), crl_reason);
-        goto end;
+  infof(data, "SSL certificate status: %s (%d)\n",
+        OCSP_cert_status_str(cert_status), cert_status);
 
-      case V_OCSP_CERTSTATUS_UNKNOWN:
-        result = CURLE_SSL_INVALIDCERTSTATUS;
-        goto end;
-    }
+  switch(cert_status) {
+  case V_OCSP_CERTSTATUS_GOOD:
+    break;
+
+  case V_OCSP_CERTSTATUS_REVOKED:
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    failf(data, "SSL certificate revocation reason: %s (%d)",
+          OCSP_crl_reason_str(crl_reason), crl_reason);
+    goto end;
+
+  case V_OCSP_CERTSTATUS_UNKNOWN:
+  default:
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto end;
   }
 
 end:
