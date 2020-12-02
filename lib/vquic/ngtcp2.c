@@ -126,7 +126,7 @@ quic_from_ossl_level(OSSL_ENCRYPTION_LEVEL ossl_level)
   case ssl_encryption_handshake:
     return NGTCP2_CRYPTO_LEVEL_HANDSHAKE;
   case ssl_encryption_application:
-    return NGTCP2_CRYPTO_LEVEL_APP;
+    return NGTCP2_CRYPTO_LEVEL_APPLICATION;
   default:
     assert(0);
   }
@@ -143,7 +143,7 @@ quic_from_gtls_level(gnutls_record_encryption_level_t gtls_level)
   case GNUTLS_ENCRYPTION_LEVEL_HANDSHAKE:
     return NGTCP2_CRYPTO_LEVEL_HANDSHAKE;
   case GNUTLS_ENCRYPTION_LEVEL_APPLICATION:
-    return NGTCP2_CRYPTO_LEVEL_APP;
+    return NGTCP2_CRYPTO_LEVEL_APPLICATION;
   default:
     assert(0);
   }
@@ -265,7 +265,7 @@ static int quic_set_encryption_secrets(SSL *ssl,
        qs->qconn, NULL, NULL, NULL, level, tx_secret, secretlen) != 0)
     return 0;
 
-  if(level == NGTCP2_CRYPTO_LEVEL_APP) {
+  if(level == NGTCP2_CRYPTO_LEVEL_APPLICATION) {
     if(init_ngh3_conn(qs) != CURLE_OK)
       return 0;
   }
@@ -376,7 +376,7 @@ static int secret_func(gnutls_session_t ssl,
        qs->qconn, NULL, NULL, NULL, level, tx_secret, secretlen) != 0)
     return 0;
 
-  if(level == NGTCP2_CRYPTO_LEVEL_APP) {
+  if(level == NGTCP2_CRYPTO_LEVEL_APPLICATION) {
     if(init_ngh3_conn(qs) != CURLE_OK)
       return -1;
   }
