@@ -1117,13 +1117,17 @@ static int Curl_ossl_init(void)
 {
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) &&  \
   !defined(LIBRESSL_VERSION_NUMBER)
-  const int64_t flags = OPENSSL_INIT_ENGINE_ALL_BUILTIN |
-#ifdef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
-    OPENSSL_INIT_NO_LOAD_CONFIG
-#else
-    OPENSSL_INIT_LOAD_CONFIG
+  const int64_t flags =
+#ifdef OPENSSL_INIT_ENGINE_ALL_BUILTIN
+    /* not present in BoringSSL */
+    OPENSSL_INIT_ENGINE_ALL_BUILTIN |
 #endif
-    ;
+#ifdef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
+    OPENSSL_INIT_NO_LOAD_CONFIG |
+#else
+    OPENSSL_INIT_LOAD_CONFIG |
+#endif
+    0;
   OPENSSL_init_ssl(flags, NULL);
 #else
   OPENSSL_load_builtin_modules();
