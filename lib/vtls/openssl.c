@@ -1107,11 +1107,6 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
   return !rc;
 }
 
-#ifdef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
-#define INITFLAGS OPENSSL_INIT_NO_LOAD_CONFIG
-#else
-#define INITFLAGS OPENSSL_INIT_LOAD_CONFIG
-#endif
 /**
  * Global SSL init
  *
@@ -1122,7 +1117,14 @@ static int Curl_ossl_init(void)
 {
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) &&  \
   !defined(LIBRESSL_VERSION_NUMBER)
-  OPENSSL_init_ssl(OPENSSL_INIT_ENGINE_ALL_BUILTIN | INITFLAGS, NULL);
+  const int64_t flags = OPENSSL_INIT_ENGINE_ALL_BUILTIN |
+#ifdef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
+    OPENSSL_INIT_NO_LOAD_CONFIG
+#else
+    OPENSSL_INIT_LOAD_CONFIG
+#endif
+    ;
+  OPENSSL_init_ssl(flags, NULL);
 #else
   OPENSSL_load_builtin_modules();
 
