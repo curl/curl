@@ -49,6 +49,14 @@ on github
 
 - edit the newly made release tag so that it is listed as the latest release
 
+on hackerone
+------------
+
+- ask for the issue to be disclosed. If there are sensitive details present in
+  the report and discussion, those should be redacted from the disclosure. The
+  default policy is to disclose as much as possible as soon as the
+  vulnerability has been published.
+
 inform
 ------
 
