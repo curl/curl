@@ -497,7 +497,8 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
   return result;
 }
 
-UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname)
+UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname,
+                                   bool has_scheme)
 {
   char *portptr = NULL;
   char endbracket;
@@ -542,10 +543,14 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname)
 
     /* Browser behavior adaptation. If there's a colon with no digits after,
        just cut off the name there which makes us ignore the colon and just
-       use the default port. Firefox, Chrome and Safari all do that. */
+       use the default port. Firefox, Chrome and Safari all do that.
+
+       Don't do it if the URL has no scheme, to make something that looks like
+       a scheme not work!
+    */
     if(!portptr[1]) {
       *portptr = '\0';
-      return CURLUE_OK;
+      return has_scheme ? CURLUE_OK : CURLUE_BAD_PORT_NUMBER;
     }
 
     if(!ISDIGIT(portptr[1]))
@@ -904,7 +909,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
     if(result)
       return result;
 
-    result = Curl_parse_port(u, hostname);
+    result = Curl_parse_port(u, hostname, url_has_scheme);
     if(result)
       return result;
 
