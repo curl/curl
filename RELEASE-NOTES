@@ -4,7 +4,7 @@ curl and libcurl 7.74.0
  Command line options:         235
  curl_easy_setopt() options:   284
  Public functions in libcurl:  85
- Contributors:                 2283
+ Contributors:                 2287
 
 This release includes the following changes:
 
@@ -23,6 +23,7 @@ This release includes the following bugfixes:
  o CI/travis: add brotli and zstd to the libssh2 build [27]
  o cirrus: build with FreeBSD 12.2 in CirrusCI [80]
  o cmake: call the feature unixsockets without dash [26]
+ o cmake: check for linux/tcp.h [91]
  o cmake: correctly handle linker flags for static libs [52]
  o cmake: don't pass -fvisibility=hidden to clang-cl on Windows [53]
  o cmake: make BUILD_TESTING dependent option [30]
@@ -47,6 +48,7 @@ This release includes the following bugfixes:
  o CURLOPT_TCP_NODELAY.3: fix comment in example code [8]
  o CURLOPT_URL.3: clarify SCP/SFTP URLs are for uploads as well
  o docs: document the 8MB input string limit [57]
+ o docs: fix typos and markup in ETag manpage sections [87]
  o docs: Fix various typos in documentation [58]
  o examples/httpput: remove use of CURLOPT_PUT [39]
  o FAQ: refreshed [56]
@@ -66,13 +68,19 @@ This release includes the following bugfixes:
  o Makefile.m32: add support for HTTP/3 via ngtcp2+nghttp3 [11]
  o Makefile.m32: add support for UNICODE builds [85]
  o mqttd: fclose test file when done [60]
+ o NEW-PROTOCOL: document what needs to be done to add one [92]
  o ngtcp2: adapt to recent nghttp3 updates [49]
  o ngtcp2: advertise h3 ALPN unconditionally [72]
+ o ngtcp2: Fix build error due to symbol name change [90]
  o ngtcp2: use the minimal version of QUIC supported by ngtcp2 [67]
+ o ntlm: avoid malloc(0) on zero length user and domain [96]
  o openssl: acknowledge SRP disabling in configure properly [9]
+ o openssl: free mem_buf in error path [94]
  o openssl: guard against OOM on context creation [68]
+ o openssl: use OPENSSL_init_ssl() with >= 1.1.0 [66]
  o os400: Sync libcurl API options [5]
  o packages/OS400: make the source code-style compliant [4]
+ o quiche: close the connection [89]
  o quiche: remove 'static' from local buffer [71]
  o range.d: clarify that curl will not parse multipart responses [36]
  o range.d: fix typo
@@ -89,6 +97,7 @@ This release includes the following bugfixes:
  o test506: make it not run in c-ares builds [75]
  o tests/*server.py: close log file after each log line [81]
  o tests/server/tftpd.c: close upload file right after transfer [62]
+ o tests/util.py: fix compatibility with Python 2 [83]
  o tests: add missing global_init/cleanup calls [42]
  o tests: fix some http/2 tests for older versions of nghttpx [47]
  o tool_debug_cb: do not assume zero-terminated data
@@ -113,13 +122,14 @@ advice from friends like these:
   Andreas Fischer, asavah on github, b9a1 on github, Baruch Siach,
   Basuke Suzuki, bobmitchell1956 on github, BrumBrum on hackerone,
   Cristian Morales Vega, Daiki Ueno, Daniel Gustafsson, Daniel Stenberg,
-  Dietmar Hauser, Dirk Wetter, Emil Engler, hamstergene on github,
-  Harry Sintonen, Jakub Zakrzewski, Jeroen Ooms, Jon Rumsey,
-  José Joaquín Atria, Kael1117 on github, Marcel Raad, Marc Hörsken,
-  Marc Schlatter, Niranjan Hasabnis, nosajsnikta on github, Oliver Urbann,
+  Dietmar Hauser, Dirk Wetter, emanruse on github, Emil Engler,
+  hamstergene on github, Harry Sintonen, Jakub Zakrzewski, Jeroen Ooms,
+  Jon Rumsey, José Joaquín Atria, Junho Choi, Kael1117 on github,
+  Klaus Crusius, Kovalkov Dmitrii, Marcel Raad, Marc Hörsken, Marc Schlatter,
+  Niranjan Hasabnis, nosajsnikta on github, Oliver Urbann, Per Nilsson,
   Philipp Klaus Krause, Ray Satiro, Rikard Falkeborn, Rui LIU, Sergei Nikulov,
   Tobias Hieta, Tom G. Christensen, Viktor Szakats, Vincent Torri,
-  (36 contributors)
+  (41 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -190,6 +200,7 @@ References to bug reports and discussions on issues:
  [63] = https://curl.se/bug/?i=6077
  [64] = https://curl.se/bug/?i=6161
  [65] = https://curl.se/bug/?i=6161
+ [66] = https://curl.se/bug/?i=6254
  [67] = https://curl.se/bug/?i=6250
  [68] = https://curl.se/bug/?i=6224
  [69] = https://curl.se/bug/?i=6215
@@ -205,7 +216,15 @@ References to bug reports and discussions on issues:
  [80] = https://curl.se/bug/?i=6211
  [81] = https://curl.se/bug/?i=6058
  [82] = https://curl.se/bug/?i=6205
+ [83] = https://curl.se/bug/?i=6259
  [84] = https://curl.se/bug/?i=6239
  [85] = https://curl.se/bug/?i=6228
  [86] = https://curl.se/bug/?i=6238
+ [87] = https://curl.se/bug/?i=6273
  [88] = https://curl.se/bug/?i=6235
+ [89] = https://curl.se/bug/?i=6213
+ [90] = https://curl.se/bug/?i=6271
+ [91] = https://curl.se/bug/?i=6252
+ [92] = https://curl.se/bug/?i=6263
+ [94] = https://curl.se/bug/?i=6267
+ [96] = https://curl.se/bug/?i=6264
