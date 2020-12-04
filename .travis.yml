@@ -417,6 +417,7 @@ install:
 # Do not add anything here, instead add to the respective script.
 before_script:
 - ./scripts/travis/before_script.sh || travis_terminate 1
+
 script:
 - ./scripts/travis/script.sh || travis_terminate 1
 
