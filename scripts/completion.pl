@@ -37,7 +37,7 @@ Getopt::Long::GetOptions(
 Pod::Usage::pod2usage() if $help;
 
 my $regex = '\s+(?:(-[^\s]+),\s)?(--[^\s]+)\s*(\<.+?\>)?\s+(.*)';
-my @opts = parse_main_opts('--help', $regex);
+my @opts = parse_main_opts('--help all', $regex);
 
 if ($shell eq 'fish') {
     print "# curl fish completion\n\n";
