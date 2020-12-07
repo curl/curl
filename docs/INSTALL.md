@@ -148,7 +148,9 @@ debug multithreaded dynamic C runtime.
 
 Make sure that MinGW32's bin dir is in the search path, for example:
 
-    set PATH=c:\mingw32\bin;%PATH%
+```cmd
+set PATH=c:\mingw32\bin;%PATH%
+```
 
 then run `mingw32-make mingw32` in the root dir. There are other
 make targets available to build libcurl with more features, use:
@@ -164,20 +166,26 @@ to verify that the provided `Makefile.m32` files use the proper paths, and
 adjust as necessary. It is also possible to override these paths with
 environment variables, for example:
 
-    set ZLIB_PATH=c:\zlib-1.2.8
-    set OPENSSL_PATH=c:\openssl-1.0.2c
-    set LIBSSH2_PATH=c:\libssh2-1.6.0
+```cmd
+set ZLIB_PATH=c:\zlib-1.2.8
+set OPENSSL_PATH=c:\openssl-1.0.2c
+set LIBSSH2_PATH=c:\libssh2-1.6.0
+```
 
 It is also possible to build with other LDAP SDKs than MS LDAP; currently
 it is possible to build with native Win32 OpenLDAP, or with the Novell CLDAP
 SDK. If you want to use these you need to set these vars:
 
-    set LDAP_SDK=c:\openldap
-    set USE_LDAP_OPENLDAP=1
+```cmd
+set LDAP_SDK=c:\openldap
+set USE_LDAP_OPENLDAP=1
+```
 
 or for using the Novell SDK:
 
-    set USE_LDAP_NOVELL=1
+```cmd
+set USE_LDAP_NOVELL=1
+```
 
 If you want to enable LDAPS support then set LDAPS=1.
 
@@ -280,9 +288,11 @@ the same curl binary is executed on older cats. For example, running these
 commands in curl's directory in the shell will build the code such that it
 will run on cats as old as OS X 10.6 ("Snow Leopard") (using bash):
 
-    export MACOSX_DEPLOYMENT_TARGET="10.6"
-    ./configure --with-secure-transport
-    make
+```bash
+export MACOSX_DEPLOYMENT_TARGET="10.6"
+./configure --with-secure-transport
+make
+```
 
 # Android
 
@@ -295,16 +305,18 @@ where it has been installed and then set up some environment variables before
 launching `configure`. On macOS, those variables could look like this to compile
 for `aarch64` and API level 29:
 
-    export NDK=~/Library/Android/sdk/ndk/20.1.5948944
-    export HOST_TAG=darwin-x86_64
-    export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/$HOST_TAG
-    export AR=$TOOLCHAIN/bin/aarch64-linux-android-ar
-    export AS=$TOOLCHAIN/bin/aarch64-linux-android-as
-    export CC=$TOOLCHAIN/bin/aarch64-linux-android29-clang
-    export CXX=$TOOLCHAIN/bin/aarch64-linux-android29-clang++
-    export LD=$TOOLCHAIN/bin/aarch64-linux-android-ld
-    export RANLIB=$TOOLCHAIN/bin/aarch64-linux-android-ranlib
-    export STRIP=$TOOLCHAIN/bin/aarch64-linux-android-strip
+```bash
+export NDK=~/Library/Android/sdk/ndk/20.1.5948944
+export HOST_TAG=darwin-x86_64
+export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/$HOST_TAG
+export AR=$TOOLCHAIN/bin/aarch64-linux-android-ar
+export AS=$TOOLCHAIN/bin/aarch64-linux-android-as
+export CC=$TOOLCHAIN/bin/aarch64-linux-android29-clang
+export CXX=$TOOLCHAIN/bin/aarch64-linux-android29-clang++
+export LD=$TOOLCHAIN/bin/aarch64-linux-android-ld
+export RANLIB=$TOOLCHAIN/bin/aarch64-linux-android-ranlib
+export STRIP=$TOOLCHAIN/bin/aarch64-linux-android-strip
+```
 
 When building on Linux or targeting other API levels or architectures, you need
 to adjust those variables accordingly. After that you can build curl like this:
@@ -337,22 +349,24 @@ configure with any options you need.  Be sure and specify the `--host` and
 example of cross-compiling for the IBM 405GP PowerPC processor using the
 toolchain from MonteVista for Hardhat Linux.
 
-    #! /bin/sh
+```bash
+#! /bin/sh
 
-    export PATH=$PATH:/opt/hardhat/devkit/ppc/405/bin
-    export CPPFLAGS="-I/opt/hardhat/devkit/ppc/405/target/usr/include"
-    export AR=ppc_405-ar
-    export AS=ppc_405-as
-    export LD=ppc_405-ld
-    export RANLIB=ppc_405-ranlib
-    export CC=ppc_405-gcc
-    export NM=ppc_405-nm
+export PATH=$PATH:/opt/hardhat/devkit/ppc/405/bin
+export CPPFLAGS="-I/opt/hardhat/devkit/ppc/405/target/usr/include"
+export AR=ppc_405-ar
+export AS=ppc_405-as
+export LD=ppc_405-ld
+export RANLIB=ppc_405-ranlib
+export CC=ppc_405-gcc
+export NM=ppc_405-nm
 
-    ./configure --target=powerpc-hardhat-linux
-        --host=powerpc-hardhat-linux
-        --build=i586-pc-linux-gnu
-        --prefix=/opt/hardhat/devkit/ppc/405/target/usr/local
-        --exec-prefix=/usr/local
+./configure --target=powerpc-hardhat-linux
+    --host=powerpc-hardhat-linux
+    --build=i586-pc-linux-gnu
+    --prefix=/opt/hardhat/devkit/ppc/405/target/usr/local
+    --exec-prefix=/usr/local
+```
 
 You may also need to provide a parameter like `--with-random=/dev/urandom` to
 configure as it cannot detect the presence of a random number generating
