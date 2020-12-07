@@ -222,10 +222,12 @@
 
  A GET-form uses the method GET, as specified in HTML like:
 
-    <form method="GET" action="junk.cgi">
-      <input type=text name="birthyear">
-      <input type=submit name=press value="OK">
-    </form>
+```html
+<form method="GET" action="junk.cgi">
+  <input type=text name="birthyear">
+  <input type=submit name=press value="OK">
+</form>
+```
 
  In your favorite browser, this form will appear with a text box to fill in
  and a press-button labeled "OK". If you fill in '1905' and press the OK
@@ -258,10 +260,12 @@
 
  The form would look very similar to the previous one:
 
-    <form method="POST" action="junk.cgi">
-      <input type=text name="birthyear">
-      <input type=submit name=press value=" OK ">
-    </form>
+```html
+<form method="POST" action="junk.cgi">
+  <input type=text name="birthyear">
+  <input type=submit name=press value=" OK ">
+</form>
+```
 
  And to use curl to post this form with the same data filled in as before, we
  could do it like:
@@ -293,10 +297,12 @@
  This method is mainly designed to better support file uploads. A form that
  allows a user to upload a file could be written like this in HTML:
 
-    <form method="POST" enctype='multipart/form-data' action="upload.cgi">
-      <input type=file name=upload>
-      <input type=submit name=press value="OK">
-    </form>
+```html
+<form method="POST" enctype='multipart/form-data' action="upload.cgi">
+  <input type=file name=upload>
+  <input type=submit name=press value="OK">
+</form>
+```
 
  This clearly shows that the Content-Type about to be sent is
  `multipart/form-data`.
@@ -315,11 +321,13 @@
  A similar example form with one visible field, one hidden field and one
  submit button could look like:
 
-    <form method="POST" action="foobar.cgi">
-      <input type=text name="birthyear">
-      <input type=hidden name="person" value="daniel">
-      <input type=submit name="press" value="OK">
-    </form>
+```html
+<form method="POST" action="foobar.cgi">
+  <input type=text name="birthyear">
+  <input type=hidden name="person" value="daniel">
+  <input type=submit name="press" value="OK">
+</form>
+```
 
  To POST this with curl, you won't have to think about if the fields are
  hidden or not. To curl they're all the same:
@@ -383,7 +391,7 @@
  may require its own user and password to allow the client to get through to
  the Internet. To specify those with curl, run something like:
 
-        curl --proxy-user proxyuser:proxypassword curl.se
+    curl --proxy-user proxyuser:proxypassword curl.se
 
  If your proxy requires the authentication to be done using the NTLM method,
  use [`--proxy-ntlm`](https://curl.se/docs/manpage.html#--proxy-ntlm), if
