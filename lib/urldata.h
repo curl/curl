@@ -205,14 +205,14 @@ struct ssl_backend_data;
 
 /* struct for data related to each SSL connection */
 struct ssl_connect_data {
-  /* Use ssl encrypted communications TRUE/FALSE, not necessarily using it atm
-     but at least asked to or meaning to use it. See 'state' for the exact
-     current state of the connection. */
   ssl_connection_state state;
   ssl_connect_state connecting_state;
 #if defined(USE_SSL)
   struct ssl_backend_data *backend;
 #endif
+  /* Use ssl encrypted communications TRUE/FALSE. The library is not
+     necessarily using ssl at the moment but at least asked to or means to use
+     it. See 'state' for the exact current state of the connection. */
   BIT(use);
 };
 
