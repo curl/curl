@@ -680,6 +680,7 @@ void Curl_conninfo_remote(struct connectdata *conn, curl_socket_t sockfd)
   struct Curl_sockaddr_storage ssrem;
   curl_socklen_t plen;
   plen = sizeof(struct Curl_sockaddr_storage);
+  memset(&ssrem, 0, sizeof(ssrem));
   if(getpeername(sockfd, (struct sockaddr*) &ssrem, &plen)) {
     int error = SOCKERRNO;
     failf(conn->data, "getpeername() failed with errno %d: %s",
