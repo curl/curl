@@ -717,7 +717,7 @@ static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
   return 0;
 }
 
-static ngtcp2_conn_callbacks ng_callbacks = {
+static ngtcp2_callbacks ng_callbacks = {
   ngtcp2_crypto_client_initial_cb,
   NULL, /* recv_client_initial */
   cb_recv_crypto_data,
@@ -1134,7 +1134,7 @@ static int cb_h3_send_stop_sending(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
-static nghttp3_conn_callbacks ngh3_callbacks = {
+static nghttp3_callbacks ngh3_callbacks = {
   cb_h3_acked_stream_data, /* acked_stream_data */
   cb_h3_stream_close,
   cb_h3_recv_data,
@@ -1166,7 +1166,7 @@ static int init_ngh3_conn(struct quicsocket *qs)
     return CURLE_QUIC_CONNECT_ERROR;
   }
 
-  nghttp3_conn_settings_default(&qs->h3settings);
+  nghttp3_settings_default(&qs->h3settings);
 
   rc = nghttp3_conn_client_new(&qs->h3conn,
                                &ngh3_callbacks,

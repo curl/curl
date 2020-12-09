@@ -62,7 +62,7 @@ struct quicsocket {
   socklen_t local_addrlen;
 
   nghttp3_conn *h3conn;
-  nghttp3_conn_settings h3settings;
+  nghttp3_settings h3settings;
   int qlogfd;
 };
 
