@@ -12,6 +12,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2020-8286: Inferior OCSP verification [93]
+ o CVE-2020-8285: FTP wildcard stack overflow [95]
+ o CVE-2020-8284: trusting FTP PASV responses [97]
  o acinclude: detect manually set minimum macos/ipod version [46]
  o alt-svc: enable (in the build) by default [20]
  o alt-svc: minimize variable scope and avoid "DEAD_STORE" [51]
@@ -26,6 +29,7 @@ This release includes the following bugfixes:
  o cmake: check for linux/tcp.h [91]
  o cmake: correctly handle linker flags for static libs [52]
  o cmake: don't pass -fvisibility=hidden to clang-cl on Windows [53]
+ o cmake: don't use reserved target name 'test' [79]
  o cmake: make BUILD_TESTING dependent option [30]
  o cmake: make CURL_ZLIB a tri-state variable [70]
  o cmake: set the unicode feature in curl-config on Windows [23]
@@ -53,6 +57,7 @@ This release includes the following bugfixes:
  o examples/httpput: remove use of CURLOPT_PUT [39]
  o FAQ: refreshed [56]
  o file: avoid duplicated code sequence [77]
+ o ftp: retry getpeername for FTP with TCP_FASTOPEN [100]
  o gnutls: fix memory leaks (certfields memory wasn't released) [41]
  o header.d: mention the "Transfer-Encoding: chunked" handling [45]
  o HISTORY: the new domain
@@ -84,12 +89,14 @@ This release includes the following bugfixes:
  o quiche: remove 'static' from local buffer [71]
  o range.d: clarify that curl will not parse multipart responses [36]
  o range.d: fix typo
+ o Revert "multi: implement wait using winsock events" [99]
  o rtsp: error out on empty Session ID, unified the code
  o rtsp: fixed Session ID comparison to refuse prefix [65]
  o rtsp: fixed the RTST Session ID mismatch in test 570 [64]
  o runtests: return error if no tests ran [16]
  o runtests: revert the mistaken edit of $CURL
  o runtests: show keywords when no tests ran [33]
+ o scripts/completion.pl: parse all opts [101]
  o socks: check for DNS entries with the right port number [74]
  o src/tool_filetime: disable -Wformat on mingw for this file [2]
  o strerror: use 'const' as the string should never be modified [18]
@@ -108,6 +115,7 @@ This release includes the following bugfixes:
  o tool_writeout: use off_t getinfo-types instead of doubles [76]
  o travis: use ninja-build for CMake builds [63]
  o travis: use valgrind when running tests for debug builds [40]
+ o urlapi: don't accept blank port number field without scheme [98]
  o urlapi: URL encode a '+' in the query part [14]
  o urldata: remove 'void *protop' and create the union 'p' [86]
  o vquic/ngtcp2.h: define local_addr as sockaddr_storage [73]
@@ -121,15 +129,17 @@ advice from friends like these:
 
   Andreas Fischer, asavah on github, b9a1 on github, Baruch Siach,
   Basuke Suzuki, bobmitchell1956 on github, BrumBrum on hackerone,
-  Cristian Morales Vega, Daiki Ueno, Daniel Gustafsson, Daniel Stenberg,
-  Dietmar Hauser, Dirk Wetter, emanruse on github, Emil Engler,
-  hamstergene on github, Harry Sintonen, Jakub Zakrzewski, Jeroen Ooms,
-  Jon Rumsey, José Joaquín Atria, Junho Choi, Kael1117 on github,
-  Klaus Crusius, Kovalkov Dmitrii, Marcel Raad, Marc Hörsken, Marc Schlatter,
-  Niranjan Hasabnis, nosajsnikta on github, Oliver Urbann, Per Nilsson,
-  Philipp Klaus Krause, Ray Satiro, Rikard Falkeborn, Rui LIU, Sergei Nikulov,
-  Tobias Hieta, Tom G. Christensen, Viktor Szakats, Vincent Torri,
-  (41 contributors)
+  Cristian Morales Vega, d4d on hackerone, Daiki Ueno, Daniel Gustafsson,
+  Daniel Stenberg, Dietmar Hauser, Dirk Wetter, emanruse on github,
+  Emil Engler, hamstergene on github, Harry Sintonen, Jacob Hoffman-Andrews,
+  Jakub Zakrzewski, Jeroen Ooms, Jon Rumsey, José Joaquín Atria, Junho Choi,
+  Kael1117 on github, Klaus Crusius, Kovalkov Dmitrii, Marcel Raad,
+  Marc Hörsken, Marc Schlatter, Niranjan Hasabnis, nosajsnikta on github,
+  Oliver Urbann, Per Nilsson, Philipp Klaus Krause, Ray Satiro,
+  Rikard Falkeborn, Rui LIU, Sergei Nikulov, Thomas Danielsson, Tobias Hieta,
+  Tom G. Christensen, Varnavas Papaioannou, Viktor Szakats, Vincent Torri,
+  xnynx on github,
+  (46 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -213,6 +223,7 @@ References to bug reports and discussions on issues:
  [76] = https://curl.se/bug/?i=6248
  [77] = https://curl.se/bug/?i=6249
  [78] = https://curl.se/bug/?i=6241
+ [79] = https://curl.se/bug/?i=6257
  [80] = https://curl.se/bug/?i=6211
  [81] = https://curl.se/bug/?i=6058
  [82] = https://curl.se/bug/?i=6205
@@ -226,5 +237,12 @@ References to bug reports and discussions on issues:
  [90] = https://curl.se/bug/?i=6271
  [91] = https://curl.se/bug/?i=6252
  [92] = https://curl.se/bug/?i=6263
+ [93] = https://curl.se/docs/CVE-2020-8286.html
  [94] = https://curl.se/bug/?i=6267
+ [95] = https://curl.se/docs/CVE-2020-8285.html
  [96] = https://curl.se/bug/?i=6264
+ [97] = https://curl.se/docs/CVE-2020-8284.html
+ [98] = https://curl.se/bug/?i=6283
+ [99] = https://curl.se/bug/?i=6146
+ [100] = https://curl.se/bug/?i=6252
+ [101] = https://curl.se/bug/?i=6280
