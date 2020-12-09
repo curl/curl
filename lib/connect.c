@@ -256,6 +256,9 @@ static CURLcode bindlocal(struct connectdata *conn,
   int portnum = data->set.localportrange;
   const char *dev = data->set.str[STRING_DEVICE];
   int error;
+#ifdef IP_BIND_ADDRESS_NO_PORT
+  int on = 1;
+#endif
 
   /*************************************************************
    * Select device to bind socket to
@@ -441,7 +444,9 @@ static CURLcode bindlocal(struct connectdata *conn,
       sizeof_sa = sizeof(struct sockaddr_in);
     }
   }
-
+#ifdef IP_BIND_ADDRESS_NO_PORT
+  setsockopt(sockfd, SOL_IP, IP_BIND_ADDRESS_NO_PORT, &on, sizeof(on));
+#endif
   for(;;) {
     if(bind(sockfd, sock, sizeof_sa) >= 0) {
       /* we succeeded to bind */
