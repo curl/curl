@@ -1,6 +1,6 @@
-curl and libcurl 7.74.0
+curl and libcurl 7.74.1
 
- Public curl releases:         196
+ Public curl releases:         197
  Command line options:         235
  curl_easy_setopt() options:   284
  Public functions in libcurl:  85
@@ -8,117 +8,11 @@ curl and libcurl 7.74.0
 
 This release includes the following changes:
 
- o hsts: add experimental support for Strict-Transport-Security [37]
+ o
 
 This release includes the following bugfixes:
 
- o CVE-2020-8286: Inferior OCSP verification [93]
- o CVE-2020-8285: FTP wildcard stack overflow [95]
- o CVE-2020-8284: trusting FTP PASV responses [97]
- o acinclude: detect manually set minimum macos/ipod version [46]
- o alt-svc: enable (in the build) by default [20]
- o alt-svc: minimize variable scope and avoid "DEAD_STORE" [51]
- o asyn: use 'struct thread_data *' instead of 'void *' [84]
- o checksrc: warn on empty line before open brace [13]
- o CI/appveyor: disable test 571 in two cmake builds [22]
- o CI/azure: improve on flakiness by avoiding libtool wrappers [7]
- o CI/tests: enable test target on TravisCI for CMake builds [38]
- o CI/travis: add brotli and zstd to the libssh2 build [27]
- o cirrus: build with FreeBSD 12.2 in CirrusCI [80]
- o cmake: call the feature unixsockets without dash [26]
- o cmake: check for linux/tcp.h [91]
- o cmake: correctly handle linker flags for static libs [52]
- o cmake: don't pass -fvisibility=hidden to clang-cl on Windows [53]
- o cmake: don't use reserved target name 'test' [79]
- o cmake: make BUILD_TESTING dependent option [30]
- o cmake: make CURL_ZLIB a tri-state variable [70]
- o cmake: set the unicode feature in curl-config on Windows [23]
- o cmake: store IDN2 information in curl_config.h [25]
- o cmake: use libcurl.rc in all Windows builds [69]
- o configure: pass -pthread to Libs.private for pkg-config [50]
- o configure: use pkgconfig to find openSSL when cross-compiling [28]
- o connect: repair build without ipv6 availability [19]
- o curl.1: add an "OUTPUT" section at the top of the manpage [32]
- o curl.se: new home [59]
- o curl: add compatibility for Amiga and GCC 6.5 [61]
- o curl: only warn not fail, if not finding the home dir [15]
- o curl_easy_escape: limit output string length to 3 * max input [55]
- o Curl_pgrsStartNow: init speed limit time stamps at start [48]
- o curl_setup: USE_RESOLVE_ON_IPS is for Apple native resolver use
- o curl_url_set.3: fix typo in the RETURN VALUE section [3]
- o CURLOPT_DNS_USE_GLOBAL_CACHE.3: fix typo [34]
- o CURLOPT_HSTS.3: document the file format [82]
- o CURLOPT_NOBODY.3: fix typo [6]
- o CURLOPT_TCP_NODELAY.3: fix comment in example code [8]
- o CURLOPT_URL.3: clarify SCP/SFTP URLs are for uploads as well
- o docs: document the 8MB input string limit [57]
- o docs: fix typos and markup in ETag manpage sections [87]
- o docs: Fix various typos in documentation [58]
- o examples/httpput: remove use of CURLOPT_PUT [39]
- o FAQ: refreshed [56]
- o file: avoid duplicated code sequence [77]
- o ftp: retry getpeername for FTP with TCP_FASTOPEN [100]
- o gnutls: fix memory leaks (certfields memory wasn't released) [41]
- o header.d: mention the "Transfer-Encoding: chunked" handling [45]
- o HISTORY: the new domain
- o http3: fix two build errors, silence warnings [10]
- o http3: use the master branch of GnuTLS for testing [88]
- o http: pass correct header size to debug callback for chunked post [44]
- o http_proxy: use enum with state names for 'keepon' [54]
- o httpput-postfields.c: new example doing PUT with POSTFIELDS [35]
- o infof/failf calls: fix format specifiers [78]
- o libssh2: fix build with disabled proxy support [17]
- o libssh2: fix transport over HTTPS proxy [31]
- o libssh2: require version 1.0 or later [24]
- o Makefile.m32: add support for HTTP/3 via ngtcp2+nghttp3 [11]
- o Makefile.m32: add support for UNICODE builds [85]
- o mqttd: fclose test file when done [60]
- o NEW-PROTOCOL: document what needs to be done to add one [92]
- o ngtcp2: adapt to recent nghttp3 updates [49]
- o ngtcp2: advertise h3 ALPN unconditionally [72]
- o ngtcp2: Fix build error due to symbol name change [90]
- o ngtcp2: use the minimal version of QUIC supported by ngtcp2 [67]
- o ntlm: avoid malloc(0) on zero length user and domain [96]
- o openssl: acknowledge SRP disabling in configure properly [9]
- o openssl: free mem_buf in error path [94]
- o openssl: guard against OOM on context creation [68]
- o openssl: use OPENSSL_init_ssl() with >= 1.1.0 [66]
- o os400: Sync libcurl API options [5]
- o packages/OS400: make the source code-style compliant [4]
- o quiche: close the connection [89]
- o quiche: remove 'static' from local buffer [71]
- o range.d: clarify that curl will not parse multipart responses [36]
- o range.d: fix typo
- o Revert "multi: implement wait using winsock events" [99]
- o rtsp: error out on empty Session ID, unified the code
- o rtsp: fixed Session ID comparison to refuse prefix [65]
- o rtsp: fixed the RTST Session ID mismatch in test 570 [64]
- o runtests: return error if no tests ran [16]
- o runtests: revert the mistaken edit of $CURL
- o runtests: show keywords when no tests ran [33]
- o scripts/completion.pl: parse all opts [101]
- o socks: check for DNS entries with the right port number [74]
- o src/tool_filetime: disable -Wformat on mingw for this file [2]
- o strerror: use 'const' as the string should never be modified [18]
- o test122[12]: remove these two tests [1]
- o test506: make it not run in c-ares builds [75]
- o tests/*server.py: close log file after each log line [81]
- o tests/server/tftpd.c: close upload file right after transfer [62]
- o tests/util.py: fix compatibility with Python 2 [83]
- o tests: add missing global_init/cleanup calls [42]
- o tests: fix some http/2 tests for older versions of nghttpx [47]
- o tool_debug_cb: do not assume zero-terminated data
- o tool_help: make "output" description less confusing [21]
- o tool_operate: --retry for HTTP 408 responses too [43]
- o tool_operate: bail out proper on errors during parallel transfers [29]
- o tool_operate: fix compiler warning when --libcurl is disabled [12]
- o tool_writeout: use off_t getinfo-types instead of doubles [76]
- o travis: use ninja-build for CMake builds [63]
- o travis: use valgrind when running tests for debug builds [40]
- o urlapi: don't accept blank port number field without scheme [98]
- o urlapi: URL encode a '+' in the query part [14]
- o urldata: remove 'void *protop' and create the union 'p' [86]
- o vquic/ngtcp2.h: define local_addr as sockaddr_storage [73]
+ o
 
 This release includes the following known bugs:
 
@@ -127,122 +21,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andreas Fischer, asavah on github, b9a1 on github, Baruch Siach,
-  Basuke Suzuki, bobmitchell1956 on github, BrumBrum on hackerone,
-  Cristian Morales Vega, d4d on hackerone, Daiki Ueno, Daniel Gustafsson,
-  Daniel Stenberg, Dietmar Hauser, Dirk Wetter, emanruse on github,
-  Emil Engler, hamstergene on github, Harry Sintonen, Jacob Hoffman-Andrews,
-  Jakub Zakrzewski, Jeroen Ooms, Jon Rumsey, José Joaquín Atria, Junho Choi,
-  Kael1117 on github, Klaus Crusius, Kovalkov Dmitrii, Marcel Raad,
-  Marc Hörsken, Marc Schlatter, Niranjan Hasabnis, nosajsnikta on github,
-  Oliver Urbann, Per Nilsson, Philipp Klaus Krause, Ray Satiro,
-  Rikard Falkeborn, Rui LIU, Sergei Nikulov, Thomas Danielsson, Tobias Hieta,
-  Tom G. Christensen, Varnavas Papaioannou, Viktor Szakats, Vincent Torri,
-  xnynx on github,
-  (46 contributors)
+
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.se/bug/?i=6080
- [2] = https://curl.se/bug/?i=6079
- [3] = https://curl.se/bug/?i=6102
- [4] = https://curl.se/bug/?i=6085
- [5] = https://curl.se/bug/?i=6083
- [6] = https://curl.se/bug/?i=6097
- [7] = https://curl.se/bug/?i=6049
- [8] = https://curl.se/bug/?i=6096
- [9] = https://curl.se/mail/lib-2020-10/0037.html
- [10] = https://curl.se/bug/?i=6093
- [11] = https://curl.se/bug/?i=6092
- [12] = https://curl.se/bug/?i=6095
- [13] = https://curl.se/bug/?i=6088
- [14] = https://curl.se/bug/?i=6086
- [15] = https://curl.se/bug/?i=6200
- [16] = https://curl.se/bug/?i=6053
- [17] = https://curl.se/bug/?i=6125
- [18] = https://curl.se/bug/?i=6068
- [19] = https://curl.se/bug/?i=6069
- [20] = https://curl.se/bug/?i=5868
- [21] = https://curl.se/bug/?i=6118
- [22] = https://curl.se/bug/?i=6119
- [23] = https://curl.se/bug/?i=6117
- [24] = https://curl.se/bug/?i=6116
- [25] = https://curl.se/bug/?i=6108
- [26] = https://curl.se/bug/?i=6108
- [27] = https://curl.se/bug/?i=6105
- [28] = https://curl.se/bug/?i=6145
- [29] = https://curl.se/bug/?i=6141
- [30] = https://curl.se/bug/?i=6072
- [31] = https://curl.se/bug/?i=6113
- [32] = https://curl.se/bug/?i=6134
- [33] = https://curl.se/bug/?i=6126
- [34] = https://curl.se/bug/?i=6131
- [35] = https://curl.se/bug/?i=6188
- [36] = https://curl.se/bug/?i=6124
- [37] = https://curl.se/bug/?i=5896
- [38] = https://curl.se/bug/?i=6074
- [39] = https://curl.se/bug/?i=6186
- [40] = https://curl.se/bug/?i=6154
- [41] = https://curl.se/bug/?i=6153
- [42] = https://curl.se/bug/?i=6156
- [43] = https://curl.se/bug/?i=6155
- [44] = https://curl.se/bug/?i=6147
- [45] = https://curl.se/bug/?i=6148
- [46] = https://curl.se/bug/?i=6138
- [47] = https://curl.se/bug/?i=6139
- [48] = https://curl.se/bug/?i=6162
- [49] = https://curl.se/bug/?i=6185
- [50] = https://curl.se/bug/?i=6168
- [51] = https://curl.se/bug/?i=6182
- [52] = https://curl.se/bug/?i=6195
- [53] = https://curl.se/bug/?i=6194
- [54] = https://curl.se/mail/lib-2020-11/0026.html
- [55] = https://curl.se/bug/?i=6192
- [56] = https://curl.se/bug/?i=6177
- [57] = https://curl.se/bug/?i=6190
- [58] = https://curl.se/bug/?i=6171
- [59] = https://curl.se/bug/?i=6172
- [60] = https://curl.se/bug/?i=6058
- [61] = https://curl.se/bug/?i=6220
- [62] = https://curl.se/bug/?i=6058
- [63] = https://curl.se/bug/?i=6077
- [64] = https://curl.se/bug/?i=6161
- [65] = https://curl.se/bug/?i=6161
- [66] = https://curl.se/bug/?i=6254
- [67] = https://curl.se/bug/?i=6250
- [68] = https://curl.se/bug/?i=6224
- [69] = https://curl.se/bug/?i=6215
- [70] = https://curl.se/bug/?i=6173
- [71] = https://curl.se/bug/?i=6223
- [72] = https://curl.se/bug/?i=6250
- [73] = https://curl.se/bug/?i=6250
- [74] = https://curl.se/bug/?i=6247
- [75] = https://curl.se/bug/?i=6247
- [76] = https://curl.se/bug/?i=6248
- [77] = https://curl.se/bug/?i=6249
- [78] = https://curl.se/bug/?i=6241
- [79] = https://curl.se/bug/?i=6257
- [80] = https://curl.se/bug/?i=6211
- [81] = https://curl.se/bug/?i=6058
- [82] = https://curl.se/bug/?i=6205
- [83] = https://curl.se/bug/?i=6259
- [84] = https://curl.se/bug/?i=6239
- [85] = https://curl.se/bug/?i=6228
- [86] = https://curl.se/bug/?i=6238
- [87] = https://curl.se/bug/?i=6273
- [88] = https://curl.se/bug/?i=6235
- [89] = https://curl.se/bug/?i=6213
- [90] = https://curl.se/bug/?i=6271
- [91] = https://curl.se/bug/?i=6252
- [92] = https://curl.se/bug/?i=6263
- [93] = https://curl.se/docs/CVE-2020-8286.html
- [94] = https://curl.se/bug/?i=6267
- [95] = https://curl.se/docs/CVE-2020-8285.html
- [96] = https://curl.se/bug/?i=6264
- [97] = https://curl.se/docs/CVE-2020-8284.html
- [98] = https://curl.se/bug/?i=6283
- [99] = https://curl.se/bug/?i=6146
- [100] = https://curl.se/bug/?i=6252
- [101] = https://curl.se/bug/?i=6280
+ [1] = https://curl.se/bug/?i=
