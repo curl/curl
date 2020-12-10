@@ -1460,13 +1460,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_RESOLVE:
     /*
-     * List of NAME:[address] names to populate the DNS cache with
-     * Prefix the NAME with dash (-) to _remove_ the name from the cache.
-     *
-     * Names added with this API will remain in the cache until explicitly
+     * List of HOST:PORT:[addresses] strings to populate the DNS cache with
+     * Entries added this way will remain in the cache until explicitly
      * removed or the handle is cleaned up.
      *
-     * This API can remove any name from the DNS cache, but only entries
+     * Prefix the HOST with plus sign (+) to have the entry expire just like
+     * automatically added entries.
+     *
+     * Prefix the HOST with dash (-) to _remove_ the entry from the cache.
+     *
+     * This API can remove any entry from the DNS cache, but only entries
      * that aren't actually in use right now will be pruned immediately.
      */
     data->set.resolve = va_arg(param, struct curl_slist *);

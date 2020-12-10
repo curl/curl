@@ -65,7 +65,7 @@ struct Curl_hash *Curl_global_host_cache_init(void);
 
 struct Curl_dns_entry {
   struct Curl_addrinfo *addr;
-  /* timestamp == 0 -- CURLOPT_RESOLVE entry, doesn't timeout */
+  /* timestamp == 0 -- permanent CURLOPT_RESOLVE entry (doesn't time out) */
   time_t timestamp;
   /* use-counter, use Curl_resolv_unlock to release reference */
   long inuse;
