@@ -61,7 +61,7 @@ int test(char *URL)
 
   /* try a single wakeup */
 
-  multi_wakeup(multi);
+  res_multi_wakeup(multi);
 
   time_before_wait = tutil_tvnow();
   multi_poll(multi, NULL, 0, 1000, &numfds);
@@ -94,7 +94,7 @@ int test(char *URL)
   /* try lots of wakeup */
 
   for(i = 0; i < WAKEUP_NUM; ++i)
-    multi_wakeup(multi);
+    res_multi_wakeup(multi);
 
   time_before_wait = tutil_tvnow();
   multi_poll(multi, NULL, 0, 1000, &numfds);
