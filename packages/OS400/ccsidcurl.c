@@ -1058,7 +1058,7 @@ Curl_formget_callback_ccsid(void *arg, const char *buf, size_t len)
   int l;
   size_t ret;
 
-  p = (cfcdata *) arg;
+  p = (struct cfcdata *) arg;
 
   if((long) len <= 0)
     return (*p->append)(p->arg, buf, len);
@@ -1085,7 +1085,7 @@ int
 curl_formget_ccsid(struct curl_httppost *form, void *arg,
                    curl_formget_callback append, unsigned int ccsid)
 {
-  cfcdata lcfc;
+  struct cfcdata lcfc;
 
   lcfc.append = append;
   lcfc.arg = arg;
