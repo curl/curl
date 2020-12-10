@@ -11,13 +11,11 @@ libcurl from source code.
 
 You can download and install curl and libcurl using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
 
-
     git clone https://github.com/Microsoft/vcpkg.git
     cd vcpkg
     ./bootstrap-vcpkg.sh
     ./vcpkg integrate install
     vcpkg install curl[tool]
-
 
 The curl port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 
@@ -66,9 +64,7 @@ have OpenSSL installed in `/usr/local/ssl`, you can run configure like:
 If you have OpenSSL installed somewhere else (for example, `/opt/OpenSSL`) and
 you have pkg-config installed, set the pkg-config path first, like this:
 
-
     env PKG_CONFIG_PATH=/opt/OpenSSL/lib/pkgconfig ./configure --with-ssl
-
 
 Without pkg-config installed, use this:
 
