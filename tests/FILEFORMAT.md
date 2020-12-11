@@ -68,6 +68,36 @@ For example, to insert the word hello a 100 times:
 
     %repeat[100 x hello]%
 
+## Conditional lines
+
+Lines in the test file can be made to appear conditionally on a specific
+feature (see the "features" section below) being set or not set. If the
+specific feature is present, the following lines will be output, otherwise it
+outputs nothing, until a following else or endif clause. Like this:
+
+    %if brotli
+    Accept-Encoding
+    %endif
+
+It can also check for the inversed condition, so if the feature us *not* set by
+the use of an exclamation mark:
+
+    %if !brotli
+    Accept-Encoding: not-brotli
+    %endif
+
+You can also make an "else" clause to get output for the opposite condition,
+like:
+
+    %if brotli
+    Accept-Encoding: brotli
+    %else
+    Accept-Encoding: nothing
+    %endif
+
+**Note** that there can be no nested conditions. You can only do one
+conditional at a time and you can only check for a single feature in it.
+
 # Variables
 
 When the test is preprocessed, a range of "variables" in the test file will be
@@ -344,6 +374,7 @@ Features testable here are:
 - `HSTS`
 - `HTTP-auth`
 - `http/2`
+- `hyper`
 - `idn`
 - `ipv6`
 - `Kerberos`
