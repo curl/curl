@@ -32,7 +32,7 @@ the correct auth field, and then pass on that same URL to a *second* parser,
 there will always be a risk it treats the same URL differently. There is no
 right and wrong in URL land, only differences of opinions.
 
-libcurl offers a separate API to its URL parser for among others, this reason.
+libcurl offers a separate API to its URL parser for this reason, among others.
 
 Applications may at times find it convenient to allow users to specify URLs
 for various purposes and that string would then end up fed to curl. Getting a
@@ -41,7 +41,7 @@ security concerns:
 
 1. If you have an application that runs as or in a server application, getting
    an unfiltered URL can trick your application to access a local resource
-   instead of a remote. Protecting yourself against localhost accesses is very
+   instead of a remote resource. Protecting yourself against localhost accesses is very
    hard when accepting user provided URLs.
 
 2. Such custom URLs can access other ports than you planned as port numbers
@@ -119,7 +119,7 @@ A URL may consist of the following components - many of them are optional:
 Each component is separated from the following component with a divider
 character or string.
 
-Which in an example could look like
+For example, this could look like:
 
     http://user:password@www.example.com:80/index.hmtl?foo=bar#top
 
@@ -130,7 +130,7 @@ many different schemes. You can limit what schemes curl should acccept.
 
 ## Userinfo
 
-The userinfo field can be used to set user name and password for this
+The userinfo field can be used to set user name and password for
 authentication purposes in this transfer. The use of this field is discouraged
 since it often means passing around the password in plain text and is thus a
 security risk.
@@ -168,7 +168,7 @@ only if the URL starts with a scheme.
 
 ## FTP
 
-The path part of an FTP request specifies the file to retrieve and from what
+The path part of an FTP request specifies the file to retrieve and from which
 directory. If the file part is omitted then libcurl downloads the directory
 listing for the directory specified. If the directory is omitted then the
 directory listing for the root / home directory will be returned.
@@ -261,7 +261,7 @@ Seearch for an empty DN and request information about the
     ldap://ldap.example.com/?rootDomainNamingContext
 
 For more information about the individual components of a LDAP URL please
-see RFC4516.
+see [RFC 4516](https://tools.ietf.org/html/rfc4516).
 
 ## POP3
 
@@ -295,7 +295,7 @@ curl supports SMB version 1 (only)
 ## SMTP
 
 The path part of a SMTP request specifies the host name to present during
-communication with the mail server. If the path is omitted then libcurl will
+communication with the mail server. If the path is omitted, then libcurl will
 attempt to resolve the local computer's host name. However, this may not
 return the fully qualified domain name that is required by some mail servers
 and specifying this path allows you to set an alternative name, such as your
