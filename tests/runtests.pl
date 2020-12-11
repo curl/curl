@@ -3593,7 +3593,7 @@ sub singletest {
                 $cond = $1;
                 $rev = 1;
             }
-            $rev ^= $feature{$cond};
+            $rev ^= $feature{$cond} ? 1 : 0;
             $show = $rev;
             next;
         }
