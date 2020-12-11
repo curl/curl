@@ -405,6 +405,7 @@ Features testable here are:
 - `unittest`
 - `unix-sockets`
 - `verbose-strings`
+- `wakeup`
 - `win32`
 
 as well as each protocol that curl supports.  A protocol only needs to be

@@ -2823,6 +2823,7 @@ sub setupfeatures {
     $feature{"shuffle-dns"} = 1;
     $feature{"typecheck"} = 1;
     $feature{"verbose-strings"} = 1;
+    $feature{"wakeup"} = 1;
 
 }
 
