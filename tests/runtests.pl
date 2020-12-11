@@ -257,11 +257,12 @@ my $has_threadedres;# set if built with threaded resolver
 my $has_psl;        # set if libcurl is built with PSL support
 my $has_altsvc;     # set if libcurl is built with alt-svc support
 my $has_hsts;       # set if libcurl is built with HSTS support
-my $has_ldpreload;  # set if curl is built for systems supporting LD_PRELOAD
-my $has_multissl;   # set if curl is build with MultiSSL support
-my $has_manual;     # set if curl is built with built-in manual
-my $has_win32;      # set if curl is built for Windows
-my $has_mingw;      # set if curl is built with MinGW (as opposed to MinGW-w64)
+my $has_ldpreload;  # set if built for systems supporting LD_PRELOAD
+my $has_multissl;   # set if build with MultiSSL support
+my $has_manual;     # set if built with built-in manual
+my $has_win32;      # set if built for Windows
+my $has_mingw;      # set if built with MinGW (as opposed to MinGW-w64)
+my $has_hyper = 0;  # set if built with Hyper
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
@@ -2762,6 +2763,7 @@ sub compare {
 }
 
 sub setupfeatures {
+    $feature{"hyper"} = $has_hyper;
     $feature{"c-ares"} = $has_cares;
     $feature{"alt-svc"} = $has_altsvc;
     $feature{"HSTS"} = $has_hsts;
@@ -2926,6 +2928,9 @@ sub checksystem {
            }
            if ($libcurl =~ /mesalink/i) {
                $has_mesalink=1;
+           }
+           if ($libcurl =~ /Hyper/i) {
+               $has_hyper=1;
            }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
@@ -3329,6 +3334,35 @@ sub subBase64 {
     }
 }
 
+my $prevupdate;
+sub subNewlines {
+    my ($thing) = @_;
+
+    # When curl is built with Hyper, it gets all response headers delivered as
+    # name/value pairs and curl "invents" the newlines when it saves the
+    # headers. Therefore, curl will always save headers with CRLF newlines
+    # when built to use Hyper. By making sure we deliver all tests using CRLF
+    # as well, all test comparisons will survive without knowing about this
+    # little quirk.
+
+    if(($$thing =~ /^HTTP\/(1.1|1.0|2) [1-5][^\x0d]*\z/) ||
+       (($$thing =~ /^[a-z0-9_-]+: [^\x0d]*\z/i) &&
+        # skip curl error messages
+        ($$thing !~ /^curl: \(\d+\) /))) {
+        # enforce CRLF newline
+        $$thing =~ s/\x0a/\x0d\x0a/;
+        $prevupdate = 1;
+    }
+    else {
+        if(($$thing =~ /^\n\z/) && $prevupdate) {
+            # if there's a blank link after a line we update, we hope it is
+            # the empty line following headers
+            $$thing =~ s/\x0a/\x0d\x0a/;
+        }
+        $prevupdate = 0;
+    }
+}
+
 sub fixarray {
     my @in = @_;
 
@@ -3548,14 +3582,41 @@ sub singletest {
     my $otest = "log/test$testnum";
     open(D, ">$otest");
     my $diff;
+    my $show = 1;
     for my $s (@entiretest) {
         my $f = $s;
-        subVariables(\$s, "%");
-        subBase64(\$s);
-        if($f ne $s) {
+        if($s =~ /^ *%if (.*)/) {
+            my $cond = $1;
+            my $rev = 0;
+
+            if($cond =~ /^!(.*)/) {
+                $cond = $1;
+                $rev = 1;
+            }
+            $rev ^= $feature{$cond};
+            $show = $rev;
+            next;
+        }
+        elsif($s =~ /^ *%else/) {
+            $show ^= 1;
+            next;
+        }
+        elsif($s =~ /^ *%endif/) {
+            $show = 1;
+            next;
+        }
+        if($show) {
+            subVariables(\$s, "%");
+            subBase64(\$s);
+            subNewlines(\$s) if($has_hyper);
+            if($f ne $s) {
+                $diff++;
+            }
+            print D $s;
+        }
+        else {
             $diff++;
         }
-        print D $s;
     }
     close(D);
 
