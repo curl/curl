@@ -22,9 +22,13 @@
  *
  ***************************************************************************/
 
+#include "llist.h"
+#include "hash.h"
 #include "conncache.h"
 #include "psl.h"
 #include "socketpair.h"
+
+struct connectdata;
 
 struct Curl_message {
   struct Curl_llist_element list;
