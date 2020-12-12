@@ -41,7 +41,7 @@ security concerns:
 
 1. If you have an application that runs as or in a server application, getting
    an unfiltered URL can trick your application to access a local resource
-   instead of a remote resources. Protecting yourself against localhost accesses is very
+   instead of a remote resource. Protecting yourself against localhost accesses is very
    hard when accepting user provided URLs.
 
 2. Such custom URLs can access other ports than you planned as port numbers
