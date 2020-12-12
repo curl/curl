@@ -126,10 +126,10 @@ For example, this could look like:
 ## Scheme
 
 The scheme specifies the protocol to use. A curl build can support a few or
-many different schemes. You can limit what schemes curl should acccept.
+many different schemes. You can limit what schemes curl should accept.
 
 curl supports the following schemes on URLs specified to transfer. They are
-matched case insensitvely:
+matched case insensitively:
 
 `dict`, `file`, `ftp`, `ftps`, `gopher`, `http`, `https`, `imap`, `imaps`,
 `ldap`, `ldaps`, `mqtt`, `pop3`, `pop3s`, `rtmp`, `rtmpe`, `rtmps`, `rtmpt`,
@@ -267,7 +267,7 @@ the same search but will only return postalAddress attributes:
 
     ldap://ldap.example.com/o=My%20Organisation?postalAddress
 
-Seearch for an empty DN and request information about the
+Search for an empty DN and request information about the
 `rootDomainNamingContext` attribute for an Active Directory server:
 
     ldap://ldap.example.com/?rootDomainNamingContext

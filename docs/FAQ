@@ -83,7 +83,7 @@ FAQ
   5.1 Is libcurl thread-safe?
   5.2 How can I receive all data into a large memory chunk?
   5.3 How do I fetch multiple files with libcurl?
-  5.4 Does libcurl do Winsock initing on win32 systems?
+  5.4 Does libcurl do Winsock initialization on win32 systems?
   5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on win32 ?
   5.6 What about Keep-Alive or persistent connections?
   5.7 Link errors when building libcurl on Windows!
@@ -915,9 +915,9 @@ FAQ
   When you invoke curl and get an error 60 error back it means that curl
   couldn't verify that the server's certificate was good. curl verifies the
   certificate using the CA cert bundle and verifying for which names the
-  certficiate has been granted.
+  certificate has been granted.
 
-  To completely disable the certficiate verification, use -k. This does
+  To completely disable the certificate verification, use -k. This does
   however enable man-in-the-middle attacks and makes the transfer INSECURE.
   We strongly advice against doing this for more than experiments.
 
