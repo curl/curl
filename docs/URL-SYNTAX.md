@@ -302,6 +302,8 @@ and specifying this path allows you to set an alternative name, such as your
 machine's fully qualified domain name, which you might have obtained from an
 external function such as gethostname or getaddrinfo.
 
+The default smtp port is 25. Some servers use port 587 as an alternative.
+
 ## RTMP
 
 There's no official URL spec for RTMP so libcurl uses the URL syntax supported
