@@ -200,9 +200,16 @@ curl only allows the hostname part of a FILE URL to be one out of these three
 alternatives: `localhost`, `127.0.0.1` or blank ("", zero characters).
 Anything else will make curl fail to parse the URL.
 
-On Windows, curl accepts that the FILE URL's path starts with a "drive
-letter". That's a single letter `a` to `z` followed by a colon or a pipe
-character (`|`).
+### Windows-specific FILE details
+
+curl accepts that the FILE URL's path starts with a "drive letter". That's a
+single letter `a` to `z` followed by a colon or a pipe character (`|`).
+
+The Windows operating system itself will convert some file accesses to perform
+network accesses over SMB/CIFS, through several different file path patterns.
+This way, a `file://` URL passed to curl *might* be converted into a network
+access inadvertently and unknowingly to curl. This is a Windows feature curl
+cannot control or disable.
 
 ## IMAP
 
