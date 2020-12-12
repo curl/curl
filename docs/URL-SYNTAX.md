@@ -128,6 +128,18 @@ For example, this could look like:
 The scheme specifies the protocol to use. A curl build can support a few or
 many different schemes. You can limit what schemes curl should acccept.
 
+curl supports the following schemes on URLs specified to transfer. They are
+matched case insensitvely:
+
+`dict`, `file`, `ftp`, `ftps`, `gopher`, `http`, `https`, `imap`, `imaps`,
+`ldap`, `ldaps`, `mqtt`, `pop3`, `pop3s`, `rtmp`, `rtmpe`, `rtmps`, `rtmpt`,
+`rtmpte`, `rtmpts`, `rtsp`, `smb`, `smbs`, `smtp`, `smtps`, `telnet`, `tftp`
+
+When the URL is specified to identify a proxy, curl recognizes the following
+schemes:
+
+`http`, `https`, `socks4`, `socks4a`, `socks5`, `socks5h`, `socks`
+
 ## Userinfo
 
 The userinfo field can be used to set user name and password for
