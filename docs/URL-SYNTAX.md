@@ -167,8 +167,15 @@ brackets). For example:
 
     http://[2001:1890:1112:1::20]/
 
+### IDNA
+
 If curl was built with International Domain Name (IDN) support, it can also
 handle host names using non-ASCII characters.
+
+curl supports IDN host names using the IDNA 2008 standard. This differs from
+browsers that follow the WHATWG URL spec, which dictates IDNA 2003 to be used.
+The two standards have a huge overlap but differ slightly, perhaps most
+famously in how they deal with the German "double s" (`ß`).
 
 ## Port number
 
