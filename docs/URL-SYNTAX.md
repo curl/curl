@@ -176,6 +176,14 @@ If there's a colon after the hostname, that should be followed by the port
 number to use. 1 - 65535. curl also supports a blank port number field - but
 only if the URL starts with a scheme.
 
+If the port number is not specified in the URL, curl will used a default port
+based on the provide scheme:
+
+DICT 2628, FTP 21, FTPS 990, GOPHER 70, HTTP 80, HTTPS 443, IMAP 132,
+IMAPS 993, LDAP 369, LDAPS 636, MQTT 1883, POP3 110, POP3S 995, RTMP 1935,
+RTMPS 443, RTMPT 80, RTSP 554, SCP 22, SFTP 22, SMB 445, SMBS 445, SMTP 25,
+SMTPS 465, TELNET 23, TFTP 69
+
 # Scheme specific behaviors
 
 ## FTP
