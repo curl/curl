@@ -143,7 +143,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,mbedtls,wolfssl,schannel,secure-transport,mesalink,amissl,bearssl} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,mbedtls,wolfssl,schannel,secure-transport,mesalink,amissl,bearssl,rustls} )"
     curl_ssh_msg="no      (--with-{libssh,libssh2})"
    curl_zlib_msg="no      (--with-zlib)"
  curl_brotli_msg="no      (--with-brotli)"
@@ -2698,6 +2698,98 @@ if test -z "$ssl_backends" -o "x$OPT_BEARSSL" != xno; then
 fi
 
 dnl ----------------------------------------------------
+dnl check for rustls
+dnl ----------------------------------------------------
+
+OPT_RUSTLS=no
+
+_cppflags=$CPPFLAGS
+_ldflags=$LDFLAGS
+AC_ARG_WITH(rustls,dnl
+AC_HELP_STRING([--with-rustls=PATH],[where to look for rustls, PATH points to the installation root])
+AC_HELP_STRING([--without-rustls], [disable rustls detection]),
+  OPT_RUSTLS=$withval)
+
+if test -z "$ssl_backends" -o "x$OPT_RUSTLS" != xno; then
+  ssl_msg=
+
+  if test X"$OPT_RUSTLS" != Xno; then
+
+    if test "$OPT_RUSTLS" = "yes"; then
+      OPT_RUSTLS=""
+    fi
+
+    if test -z "$OPT_RUSTLS" ; then
+      dnl check for lib first without setting any new path
+
+      AC_CHECK_LIB(crustls, rustls_client_session_read,
+      dnl libcrustls found, set the variable
+       [
+         AC_DEFINE(USE_RUSTLS, 1, [if rustls is enabled])
+         AC_SUBST(USE_RUSTLS, [1])
+         RUSTLS_ENABLED=1
+         USE_RUSTLS="yes"
+         ssl_msg="rustls"
+	 test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+        ], [], -lpthread -ldl)
+    fi
+
+    addld=""
+    addlib="-lpthread"
+    addcflags=""
+    bearssllib=""
+
+    if test "x$USE_RUSTLS" != "xyes"; then
+      dnl add the path and test again
+      addld=-L$OPT_RUSTLS/lib$libsuff
+      addcflags=-I$OPT_RUSTLS/include
+      rustlslib=$OPT_RUSTLS/lib$libsuff
+
+      LDFLAGS="$LDFLAGS $addld"
+      if test "$addcflags" != "-I/usr/include"; then
+         CPPFLAGS="$CPPFLAGS $addcflags"
+      fi
+
+      AC_CHECK_LIB(crustls, rustls_client_session_read,
+       [
+       AC_DEFINE(USE_RUSTLS, 1, [if rustls is enabled])
+       AC_SUBST(USE_RUSTLS, [1])
+       RUSTLS_ENABLED=1
+       USE_RUSTLS="yes"
+       ssl_msg="rustls"
+       test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+       ],
+       [
+         CPPFLAGS=$_cppflags
+         LDFLAGS=$_ldflags
+       ], -lpthread -ldl)
+    fi
+
+    if test "x$USE_RUSTLS" = "xyes"; then
+      AC_MSG_NOTICE([detected rustls])
+      check_for_ca_bundle=1
+
+      LIBS="-lcrustls -lpthread -ldl $LIBS"
+
+      if test -n "$rustlslib"; then
+        dnl when shared libs were found in a path that the run-time
+        dnl linker doesn't search through, we need to add it to
+        dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
+        dnl due to this
+        if test "x$cross_compiling" != "xyes"; then
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$rustlslib"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $rustlslib to CURL_LIBRARY_PATH])
+        fi
+      fi
+    fi
+
+  fi dnl rustls not disabled
+
+  test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
+fi
+
+dnl ----------------------------------------------------
 dnl NSS. Only check if GnuTLS and OpenSSL are not enabled
 dnl ----------------------------------------------------
 
@@ -2827,7 +2919,8 @@ if test -z "$ssl_backends" -o "x$OPT_NSS" != xno; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$MESALINK_ENABLED$BEARSSL_ENABLED$AMISSL_ENABLED" in
+case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$MESALINK_ENABLED$BEARSSL_ENABLED$AMISSL_ENABLED$RUSTLS_ENABLED"
+in
 x)
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
   AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss, --with-schannel, --with-secure-transport, --with-mesalink, --with-amissl or --with-bearssl to address this.])

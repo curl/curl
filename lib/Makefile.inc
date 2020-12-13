@@ -49,6 +49,7 @@ LIB_VTLS_CFILES =           \
   vtls/mesalink.c           \
   vtls/nss.c                \
   vtls/openssl.c            \
+  vtls/rustls.c             \
   vtls/schannel.c           \
   vtls/schannel_verify.c    \
   vtls/sectransp.c          \
@@ -65,6 +66,7 @@ LIB_VTLS_HFILES =           \
   vtls/mesalink.h           \
   vtls/nssg.h               \
   vtls/openssl.h            \
+  vtls/rustls.h             \
   vtls/schannel.h           \
   vtls/sectransp.h          \
   vtls/vtls.h               \
