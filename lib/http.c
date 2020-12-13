@@ -1552,7 +1552,7 @@ static int https_getsock(struct Curl_easy *data,
 {
   (void)data;
   if(conn->handler->flags & PROTOPT_SSL)
-    return Curl_ssl_getsock(conn, socks);
+    return Curl_ssl->getsock(conn, socks);
   return GETSOCK_BLANK;
 }
 #endif /* USE_SSL */

@@ -116,6 +116,7 @@ bool Curl_ssl_tls13_ciphersuites(void);
 #include "mbedtls.h"        /* mbedTLS versions */
 #include "mesalink.h"       /* MesaLink versions */
 #include "bearssl.h"        /* BearSSL versions */
+#include "rustls.h"         /* rustls versions */
 
 #ifndef MAX_PINNED_PUBKEY_SIZE
 #define MAX_PINNED_PUBKEY_SIZE 1048576 /* 1MB */

@@ -905,7 +905,7 @@ static int waitconnect_getsock(struct connectdata *conn,
 #ifdef USE_SSL
 #ifndef CURL_DISABLE_PROXY
   if(CONNECT_FIRSTSOCKET_PROXY_SSL())
-    return Curl_ssl_getsock(conn, sock);
+    return Curl_ssl->getsock(conn, sock);
 #endif
 #endif
 
