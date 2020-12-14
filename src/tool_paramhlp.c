@@ -40,6 +40,7 @@
 
 struct getout *new_getout(struct OperationConfig *config)
 {
+  static int outnum = 0;
   struct getout *node = calloc(1, sizeof(struct getout));
   struct getout *last = config->url_last;
   if(node) {
@@ -53,6 +54,7 @@ struct getout *new_getout(struct OperationConfig *config)
     config->url_last = node;
 
     node->flags = config->default_node_flags;
+    node->num = outnum++;
   }
   return node;
 }

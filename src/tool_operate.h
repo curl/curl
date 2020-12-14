@@ -41,6 +41,7 @@ struct per_transfer {
   struct metalinkfile *mlfile;
   struct metalink_resource *mlres;
   char *this_url;
+  unsigned int urlnum; /* the index of the given URL */
   char *outfile;
   bool infdopen; /* TRUE if infd needs closing */
   int infd;

@@ -628,7 +628,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     fputs("\n", per->progressbar.out);
 
   if(config->writeout)
-    ourWriteOut(per->curl, per, config->writeout);
+    ourWriteOut(per->curl, per, config->writeout, result);
 
   /* Close the outs file */
   if(outs->fopened && outs->stream) {
@@ -873,6 +873,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         *added = TRUE;
         per->config = config;
         per->curl = curl;
+        per->urlnum = urlnode->num;
 
         /* default headers output stream is stdout */
         heads = &per->heads;
