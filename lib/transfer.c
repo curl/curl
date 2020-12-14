@@ -708,64 +708,10 @@ static CURLcode readwrite_data(struct Curl_easy *data,
            write a piece of the body */
         if(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)) {
           /* HTTP-only checks */
-
-          if(data->req.newurl) {
-            if(conn->bits.close) {
-              /* Abort after the headers if "follow Location" is set
-                 and we're set to close anyway. */
-              k->keepon &= ~KEEP_RECV;
-              *done = TRUE;
-              return CURLE_OK;
-            }
-            /* We have a new url to load, but since we want to be able
-               to re-use this connection properly, we read the full
-               response in "ignore more" */
-            k->ignorebody = TRUE;
-            infof(data, "Ignoring the response-body\n");
-          }
-          if(data->state.resume_from && !k->content_range &&
-             (data->state.httpreq == HTTPREQ_GET) &&
-             !k->ignorebody) {
-
-            if(k->size == data->state.resume_from) {
-              /* The resume point is at the end of file, consider this fine
-                 even if it doesn't allow resume from here. */
-              infof(data, "The entire document is already downloaded");
-              connclose(conn, "already downloaded");
-              /* Abort download */
-              k->keepon &= ~KEEP_RECV;
-              *done = TRUE;
-              return CURLE_OK;
-            }
-
-            /* we wanted to resume a download, although the server doesn't
-             * seem to support this and we did this with a GET (if it
-             * wasn't a GET we did a POST or PUT resume) */
-            failf(data, "HTTP server doesn't seem to support "
-                  "byte ranges. Cannot resume.");
-            return CURLE_RANGE_ERROR;
-          }
-
-          if(data->set.timecondition && !data->state.range) {
-            /* A time condition has been set AND no ranges have been
-               requested. This seems to be what chapter 13.3.4 of
-               RFC 2616 defines to be the correct action for a
-               HTTP/1.1 client */
-
-            if(!Curl_meets_timecondition(data, k->timeofdoc)) {
-              *done = TRUE;
-              /* We're simulating a http 304 from server so we return
-                 what should have been returned from the server */
-              data->info.httpcode = 304;
-              infof(data, "Simulate a HTTP 304 response!\n");
-              /* we abort the transfer before it is completed == we ruin the
-                 re-use ability. Close the connection */
-              connclose(conn, "Simulated 304 handling");
-              return CURLE_OK;
-            }
-          } /* we have a time condition */
-
-        } /* this is HTTP or RTSP */
+          result = Curl_http_firstwrite(data, conn, done);
+          if(result || *done)
+            return result;
+        }
       } /* this is the first time we write a body part */
 #endif /* CURL_DISABLE_HTTP */
 
@@ -1263,6 +1209,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     return CURLE_SEND_ERROR;
   }
 
+#ifdef USE_HYPER
+  if(conn->datastream)
+    return conn->datastream(data, conn, &didwhat, done, select_res);
+#endif
   /* We go ahead and do a read if we have a readable socket or if
      the stream was rewound (in which case we have data in a
      buffer) */
