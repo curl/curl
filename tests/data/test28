@@ -30,7 +30,11 @@ If this is received, the location following worked
 HTTP/1.1 301 This is a weirdo text message swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
+%if hyper
+Location: /online/1,1795,Welcome,00.html/280002.txt?logout=TRUE
+%else
 Location:  /online/1,1795,Welcome,00.html/280002.txt?logout=TRUE
+%endif
 Connection: close
 
 HTTP/1.1 200 Followed here fine swsclose

@@ -41,7 +41,7 @@ Accept: */*
 22
 </errorcode>
 <file2 name="log/stderr24" mode="text">
-curl: (22) The requested URL returned error: 404 BAD BOY
+curl: (22) The requested URL returned error: 404
 </file2>
 </verify>
 </testcase>
