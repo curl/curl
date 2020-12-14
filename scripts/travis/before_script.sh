@@ -103,6 +103,15 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
   make install
 fi
 
+if [ "$TRAVIS_OS_NAME" = linux -a "$HYPER" ]; then
+  cd $HOME
+  git clone --depth=1 -b hyper-capi https://github.com/hyperium/hyper.git
+  curl https://sh.rustup.rs -sSf | sh -s -- -y
+  source $HOME/.cargo/env
+  cd $HOME/hyper
+  cargo build -v --no-default-features --features ffi
+fi
+
 if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   cd $HOME
   git clone --depth=1 --recursive https://github.com/cloudflare/quiche.git
