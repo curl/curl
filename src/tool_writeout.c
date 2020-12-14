@@ -106,6 +106,14 @@ static const struct writeoutvar variables[] = {
    0, JSON_NONE}
 };
 
+static void us2sec(FILE *stream, curl_off_t us)
+{
+  curl_off_t secs = us / 1000000;
+  us %= 1000000;
+  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU ".%06" CURL_FORMAT_CURL_OFF_TU,
+          secs, us);
+}
+
 void ourWriteOut(CURL *curl, struct per_transfer *per, const char *writeinfo)
 {
   FILE *stream = stdout;
@@ -190,41 +198,41 @@ void ourWriteOut(CURL *curl, struct per_transfer *per, const char *writeinfo)
               case VAR_REDIRECT_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_REDIRECT_TIME_T, &offinfo))
-                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
+                  us2sec(stream, offinfo);
                 break;
               case VAR_TOTAL_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &offinfo))
-                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
+                  us2sec(stream, offinfo);
                 break;
               case VAR_NAMELOOKUP_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_TIME_T,
                                      &offinfo))
-                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
+                  us2sec(stream, offinfo);
                 break;
               case VAR_CONNECT_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME_T, &offinfo))
-                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
+                  us2sec(stream, offinfo);
                 break;
               case VAR_APPCONNECT_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_APPCONNECT_TIME_T,
                                      &offinfo))
-                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
+                  us2sec(stream, offinfo);
                 break;
               case VAR_PRETRANSFER_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME_T,
                                      &offinfo))
-                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
+                  us2sec(stream, offinfo);
                 break;
               case VAR_STARTTRANSFER_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME_T,
                                      &offinfo))
-                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
+                  us2sec(stream, offinfo);
                 break;
               case VAR_SIZE_UPLOAD:
                 if(CURLE_OK ==
