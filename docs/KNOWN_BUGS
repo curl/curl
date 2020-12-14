@@ -70,6 +70,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.6 libcurl can fail to try alternatives with --proxy-any
  6.7 Don't clear digest for single realm
  6.8 RTSP authentication breaks without redirect support
+ 6.9 SHA-256 digest not supported in Windows SSPI builds
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -557,6 +558,17 @@ problems may have been fixed or changed somewhat since this was written!
  to allow redirects to RTSP to work.
 
  See https://github.com/curl/curl/pull/4750
+
+6.9 SHA-256 digest not supported in Windows SSPI builds
+
+ Windows builds of curl that have SSPI enabled use the native Windows API calls
+ to create authentication strings. The call to InitializeSecurityContext fails
+ with SEC_E_QOP_NOT_SUPPORTED which causes curl to fail with CURLE_AUTH_ERROR.
+
+ Microsoft does not document supported digest algorithms and that SEC_E error
+ code is not a documented error for InitializeSecurityContext (digest).
+
+ https://github.com/curl/curl/issues/6302
 
 7. FTP
 
