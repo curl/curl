@@ -166,7 +166,9 @@ curl_verbose_msg="enabled (--disable-verbose)"
     curl_psl_msg="no      (--with-libpsl)"
  curl_altsvc_msg="enabled";
     ssl_backends=
-
+     curl_h1_msg="enabled (--with-hyper)"
+     curl_h2_msg="no      (--with-nghttp2)"
+     curl_h3_msg="no      (--with-ngtcp2, --with-quiche)"
 
 enable_altsvc="yes"
 
@@ -389,6 +391,7 @@ AC_HELP_STRING([--disable-http],[Disable HTTP support]),
        AC_SUBST(CURL_DISABLE_RTSP, [1])
        dnl toggle off alt-svc too when HTTP is disabled
        AC_DEFINE(CURL_DISABLE_ALTSVC, 1, [disable alt-svc])
+       curl_h1_msg="no      (--enable-http, --with-hyper)"
        curl_altsvc_msg="no";
        enable_altsvc="no"
        ;;
@@ -3552,7 +3555,6 @@ case "$OPT_H2" in
     ;;
 esac
 
-curl_h2_msg="no      (--with-nghttp2)"
 if test X"$want_h2" != Xno; then
   dnl backup the pre-nghttp2 variables
   CLEANLDFLAGS="$LDFLAGS"
@@ -3611,7 +3613,6 @@ dnl Check for ngtcp2 (QUIC)
 dnl **********************************************************************
 
 OPT_TCP2="yes"
-curl_h3_msg="no      (--with-ngtcp2, --with-quiche)"
 
 if test "x$disable_http" = "xyes"; then
   # without HTTP, ngtcp2 is no use
@@ -3986,6 +3987,98 @@ if test X"$want_quiche" != Xno; then
     fi
   fi
 fi
+
+dnl **********************************************************************
+dnl Check for Hyper
+dnl **********************************************************************
+
+OPT_HYPER="yes"
+
+if test "x$disable_http" = "xyes"; then
+  # without HTTP, hyper is of no use
+  OPT_HYPER="no"
+fi
+
+AC_ARG_WITH(hyper,
+AC_HELP_STRING([--with-hyper=PATH],[Enable hyper usage])
+AC_HELP_STRING([--without-hyper],[Disable hyper usage]),
+  [OPT_HYPER=$withval])
+case "$OPT_HYPER" in
+  no)
+    dnl --without-hyper option used
+    want_hyper="no"
+    ;;
+  yes)
+    dnl --with-hyper option used without path
+    want_hyper="default"
+    want_hyper_path=""
+    ;;
+  *)
+    dnl --with-hyper option used with path
+    want_hyper="yes"
+    want_hyper_path="$withval"
+    ;;
+esac
+
+if test X"$want_hyper" != Xno; then
+  dnl backup the pre-hyper variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  CURL_CHECK_PKGCONFIG(hyper, $want_hyper_path)
+
+  if test "$PKGCONFIG" != "no" ; then
+    LIB_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path])
+      $PKGCONFIG --libs-only-l hyper`
+    CPP_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path]) dnl
+      $PKGCONFIG --cflags-only-I hyper`
+    LD_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path])
+      $PKGCONFIG --libs-only-L hyper`
+  else
+    dnl no hyper pkg-config found
+    LIB_HYPER="-lhyper"
+    if test X"$want_hyper" != Xdefault; then
+      CPP_HYPER=-I"$want_hyper_path/capi/include"
+      LD_HYPER="-L$want_hyper_path/target/debug"
+    fi
+  fi
+  if test -n "$LIB_HYPER"; then
+    AC_MSG_NOTICE([-l is $LIB_HYPER])
+    AC_MSG_NOTICE([-I is $CPP_HYPER])
+    AC_MSG_NOTICE([-L is $LD_HYPER])
+
+    LDFLAGS="$LDFLAGS $LD_HYPER"
+    CPPFLAGS="$CPPFLAGS $CPP_HYPER"
+    LIBS="$LIB_HYPER $LIBS"
+
+    if test "x$cross_compiling" != "xyes"; then
+      DIR_HYPER=`echo $LD_HYPER | $SED -e 's/^-L//'`
+    fi
+
+    AC_CHECK_LIB(hyper, hyper_io_new,
+      [
+       AC_CHECK_HEADERS(hyper.h,
+          experimental="$experimental Hyper"
+          AC_MSG_NOTICE([Hyper support is experimental])
+          curl_h1_msg="enabled (Hyper)"
+          curl_h2_msg=$curl_h1_msg
+          HYPER_ENABLED=1
+          AC_DEFINE(USE_HYPER, 1, [if hyper is in use])
+          AC_SUBST(USE_HYPER, [1])
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_HYPER"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_HYPER to CURL_LIBRARY_PATH]),
+       )
+      ],
+        dnl not found, revert back to clean variables
+        LDFLAGS=$CLEANLDFLAGS
+        CPPFLAGS=$CLEANCPPFLAGS
+        LIBS=$CLEANLIBS
+    )
+  fi
+fi
+
 
 dnl **********************************************************************
 dnl Check for zsh completion path
@@ -5045,7 +5138,7 @@ if test "x$USE_TLS_SRP" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES TLS-SRP"
 fi
 
-if test "x$USE_NGHTTP2" = "x1"; then
+if test "x$USE_NGHTTP2" = "x1" -o "x$USE_HYPER" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP2"
 fi
 
@@ -5265,6 +5358,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Metalink:         ${curl_mtlnk_msg}
   PSL:              ${curl_psl_msg}
   Alt-svc:          ${curl_altsvc_msg}
+  HTTP1:            ${curl_h1_msg}
   HTTP2:            ${curl_h2_msg}
   HTTP3:            ${curl_h3_msg}
   ECH:              ${curl_ech_msg}
