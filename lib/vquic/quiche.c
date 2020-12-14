@@ -833,7 +833,6 @@ CURLcode Curl_quic_done_sending(struct connectdata *conn)
     ssize_t sent;
     struct HTTP *stream = conn->data->req.p.http;
     struct quicsocket *qs = conn->quic;
-    fprintf(stderr, "!!! Curl_quic_done_sending\n");
     stream->upload_done = TRUE;
     sent = quiche_h3_send_body(qs->h3c, qs->conn, stream->stream3_id,
                                NULL, 0, TRUE);
