@@ -101,6 +101,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     if(!m) {
       if(data->set.opt_no_body)
         m = "HEAD";
+#ifndef CURL_DISABLE_HTTP
       else {
         switch(data->state.httpreq) {
         case HTTPREQ_POST:
@@ -120,6 +121,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
           break;
         }
       }
+#endif
     }
     *param_charp = m;
   }
