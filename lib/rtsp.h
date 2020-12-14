@@ -21,6 +21,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#ifdef USE_HYPER
+#define CURL_DISABLE_RTSP
+#endif
+
 #ifndef CURL_DISABLE_RTSP
 
 extern const struct Curl_handler Curl_handler_rtsp;
