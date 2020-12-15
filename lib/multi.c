@@ -1174,24 +1174,27 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
         long mask = 0;
 #endif
         if(bitmap & GETSOCK_READSOCK(i)) {
+          s = sockbunch[i];
 #ifdef USE_WINSOCK
           mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
 #endif
-          ufds[nfds].fd = sockbunch[i];
+          ufds[nfds].fd = s;
           ufds[nfds].events = POLLIN;
           ++nfds;
-          s = sockbunch[i];
         }
         if(bitmap & GETSOCK_WRITESOCK(i)) {
+          s = sockbunch[i];
 #ifdef USE_WINSOCK
           mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
+          send(s, NULL, 0, 0); /* reset FD_WRITE */
 #endif
-          ufds[nfds].fd = sockbunch[i];
+          ufds[nfds].fd = s;
           ufds[nfds].events = POLLOUT;
           ++nfds;
-          s = sockbunch[i];
         }
+        /* s is only set if either being readable or writable is checked */
         if(s == CURL_SOCKET_BAD) {
+          /* break on entry not checked for being readable or writable */
           break;
         }
 #ifdef USE_WINSOCK
@@ -1215,8 +1218,10 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
       mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
     if(extra_fds[i].events & CURL_WAIT_POLLPRI)
       mask |= FD_OOB;
-    if(extra_fds[i].events & CURL_WAIT_POLLOUT)
+    if(extra_fds[i].events & CURL_WAIT_POLLOUT) {
       mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
+      send(extra_fds[i].fd, NULL, 0, 0); /* reset FD_WRITE */
+    }
     if(WSAEventSelect(extra_fds[i].fd, multi->wsa_event, mask) != 0) {
       if(ufds_malloc)
         free(ufds);
@@ -1317,8 +1322,10 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
               }
               WSAEventSelect(sockbunch[i], multi->wsa_event, 0);
             }
-            else
+            else {
+              /* break on entry not checked for being readable or writable */
               break;
+            }
           }
 
           data = data->next;
