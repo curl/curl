@@ -168,6 +168,7 @@
  19.1 roffit
  19.2 Enable PIE and RELRO by default
  19.3 Don't use GNU libtool on OpenBSD
+ 19.4 Package curl for Windows in a signed installer
 
  20. Test suite
  20.1 SSL tunnel
@@ -1197,6 +1198,10 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  OpenBSD libtool instead.
 
  See https://github.com/curl/curl/issues/5862
+
+19.4 Package curl for Windows in a signed installer
+
+ See https://github.com/curl/curl/issues/5424
 
 20. Test suite
 
