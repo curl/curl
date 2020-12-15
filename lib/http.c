@@ -1294,6 +1294,9 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
         http->postdata = ptr;
         http->postsize = (curl_off_t)size;
 
+        /* this much data is remaining header: */
+        data->req.pendingheader = headersize - headlen;
+
         http->send_buffer = *in; /* copy the whole struct */
         http->sending = HTTPSEND_REQUEST;
 
@@ -1316,6 +1319,8 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
   }
   Curl_dyn_free(in);
 
+  /* no remaining header data */
+  data->req.pendingheader = 0;
   return result;
 }
 

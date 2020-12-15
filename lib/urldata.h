@@ -604,6 +604,8 @@ struct SingleRequest {
                                    following second response code) result in a
                                    CURLE_GOT_NOTHING error code */
 
+  curl_off_t pendingheader;      /* this many bytes left to send is actually
+                                    header and not body */
   struct curltime start;         /* transfer started at this time */
   struct curltime now;           /* current time */
   enum {

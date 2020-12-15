@@ -1016,6 +1016,8 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
   *didwhat |= KEEP_SEND;
 
   do {
+    curl_off_t nbody;
+
     /* only read more data if there's no upload data already
        present in the upload buffer */
     if(0 == k->upload_present) {
@@ -1153,12 +1155,26 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
 
     win_update_buffer_size(conn->writesockfd);
 
-    /* show the data before we change the pointer upload_fromhere */
-    Curl_debug(data, CURLINFO_DATA_OUT, k->upload_fromhere,
-               (size_t)bytes_written);
+    if(k->pendingheader) {
+      /* parts of what was sent was header */
+      curl_off_t n = CURLMIN(k->pendingheader, bytes_written);
+      /* show the data before we change the pointer upload_fromhere */
+      Curl_debug(data, CURLINFO_HEADER_OUT, k->upload_fromhere, (size_t)n);
+      k->pendingheader -= n;
+      nbody = bytes_written - n; /* size of the written body part */
+    }
+    else
+      nbody = bytes_written;
 
-    k->writebytecount += bytes_written;
-    Curl_pgrsSetUploadCounter(data, k->writebytecount);
+    if(nbody) {
+      /* show the data before we change the pointer upload_fromhere */
+      Curl_debug(data, CURLINFO_DATA_OUT,
+                 &k->upload_fromhere[bytes_written - nbody],
+                 (size_t)nbody);
+
+      k->writebytecount += nbody;
+      Curl_pgrsSetUploadCounter(data, k->writebytecount);
+    }
 
     if((!k->upload_chunky || k->forbidchunk) &&
        (k->writebytecount == data->state.infilesize)) {
