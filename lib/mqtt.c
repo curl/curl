@@ -553,7 +553,7 @@ static CURLcode mqtt_doing(struct connectdata *conn, bool *done)
   case MQTT_FIRST:
     /* Read the initial byte only */
     result = Curl_read(conn, sockfd, (char *)&mq->firstbyte, 1, &nread);
-    if(result)
+    if(!nread)
       break;
     Curl_debug(data, CURLINFO_HEADER_IN, (char *)&mq->firstbyte, 1);
     /* remember the first byte */
@@ -563,7 +563,7 @@ static CURLcode mqtt_doing(struct connectdata *conn, bool *done)
   case MQTT_REMAINING_LENGTH:
     do {
       result = Curl_read(conn, sockfd, (char *)&byte, 1, &nread);
-      if(result)
+      if(!nread)
         break;
       Curl_debug(data, CURLINFO_HEADER_IN, (char *)&byte, 1);
       pkt[mq->npacket++] = byte;
