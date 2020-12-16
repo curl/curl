@@ -198,8 +198,8 @@ void SyncTime_CURL_Init(CURL *curl, char *proxy_port,
 #ifdef SYNCTIME_UA
   curl_easy_setopt(curl, CURLOPT_USERAGENT, SYNCTIME_UA);
 #endif
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, *SyncTime_CURL_WriteOutput);
-  curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, *SyncTime_CURL_WriteHeader);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, SyncTime_CURL_WriteOutput);
+  curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, SyncTime_CURL_WriteHeader);
 }
 
 int SyncTime_CURL_Fetch(CURL *curl, char *URL_Str, char *OutFileName,
