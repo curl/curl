@@ -1,18 +1,33 @@
-curl and libcurl 7.74.1
+curl and libcurl 7.75.0
 
  Public curl releases:         197
  Command line options:         235
  curl_easy_setopt() options:   284
  Public functions in libcurl:  85
- Contributors:                 2287
+ Contributors:                 2296
 
 This release includes the following changes:
 
- o
+ o gopher: implement secure gopher protocol. [2]
 
 This release includes the following bugfixes:
 
- o
+ o BUG-BOUNTY: minor language updates [5]
+ o connect: defer port selection until connect() time [22]
+ o connect: zero variable on stack to silence valgrind complaint [23]
+ o CURLOPT_URL.3: remove scheme specific details [12]
+ o digest_sspi: Show InitializeSecurityContext errors in verbose mode [8]
+ o docs/URL-SYNTAX: the URL syntax curl accepts and works with [15]
+ o docs: enable syntax highlighting in several docs files [16]
+ o lib1564/5: verify that curl_multi_wakeup returns OK
+ o mqtt: deal with 0 byte reads correctly [4]
+ o ngtcp2: make it build it current master again [21]
+ o OS400: update ccsidcurl.c [20]
+ o quiche: remove fprintf() leftover
+ o runtests: add 'wakeup' as a feature
+ o runtests: add support for %if [feature] conditions [19]
+ o tests: make --libcurl tests only test FTP options if ftp enabled [18]
+ o tooĺ_writeout: fix the -w time output units [6]
 
 This release includes the following known bugs:
 
@@ -21,10 +36,26 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-
+  0xflotus on github, Cristian Rodríguez, Dan Fandrich, Daniel Stenberg,
+  Douglas R. Reno, Hans-Christian Noren Egtvedt, Jon Rumsey, parazyd on github,
+  Ray Satiro, 不确定
+  (10 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.se/bug/?i=
+ [2] = https://curl.se/bug/?i=6208
+ [4] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=28676
+ [5] = https://curl.se/bug/?i=6318
+ [6] = https://curl.se/bug/?i=6321
+ [8] = https://curl.se/bug/?i=6315
+ [12] = https://curl.se/bug/?i=6307
+ [15] = https://curl.se/bug/?i=6285
+ [16] = https://curl.se/bug/?i=6286
+ [18] = https://curl.se/bug/?i=6303
+ [19] = https://curl.se/bug/?i=6304
+ [20] = https://curl.se/bug/?i=6292
+ [21] = https://curl.se/bug/?i=6296
+ [22] = https://curl.se/bug/?i=6295
+ [23] = https://curl.se/bug/?i=6289
