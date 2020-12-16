@@ -163,6 +163,7 @@
  18.21 retry on the redirected-to URL
  18.23 Set the modification date on an uploaded file
  18.24 Use multiple parallel transfers for a single download
+ 18.25 Prevent terminal injection when writing to terminal
 
  19. Build
  19.1 roffit
@@ -1169,6 +1170,15 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  defaults.
 
  See https://github.com/curl/curl/issues/5774
+
+18.25 Prevent terminal injection when writing to terminal
+
+ curl could offer an option to make escape sequence either non-functional or
+ avoid cursor moves or similar to reduce the risk of a user getting tricked by
+ clever tricks.
+
+ See https://github.com/curl/curl/issues/6150
+
 
 19. Build
 
