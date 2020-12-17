@@ -1574,6 +1574,20 @@ CURLcode Curl_socket(struct connectdata *conn,
   }
 #endif
 
+#if defined(__linux__) && defined(IP_RECVERR)
+  if(addr->socktype == SOCK_DGRAM) {
+    int one = 1;
+    switch(addr->family) {
+      case AF_INET:
+        setsockopt(*sockfd, SOL_IP, IP_RECVERR, &one, sizeof(one));
+        break;
+      case AF_INET6:
+        setsockopt(*sockfd, SOL_IPV6, IPV6_RECVERR, &one, sizeof(one));
+        break;
+    }
+  }
+#endif
+
   return CURLE_OK;
 
 }
