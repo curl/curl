@@ -537,7 +537,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
         logmsg("Too large client id");
         goto end;
       }
-      memcpy(client_id, &buffer[14], payload_len);
+      memcpy(client_id, &buffer[12], payload_len);
       client_id[payload_len] = 0;
 
       logmsg("MQTT client connect accepted: %s", client_id);
