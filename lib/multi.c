@@ -2079,7 +2079,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else
         result = Curl_speedcheck(data, *nowp);
 
-      if(!result) {
+      if(result) {
+        if(!(data->conn->handler->flags & PROTOPT_DUAL) &&
+           result != CURLE_HTTP2_STREAM)
+          streamclose(data->conn, "Transfer returned error");
+
+        Curl_posttransfer(data);
+        multi_done(data, result, TRUE);
+      }
+      else {
         send_timeout_ms = 0;
         if(data->set.max_send_speed > 0)
           send_timeout_ms =
