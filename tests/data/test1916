@@ -2,7 +2,7 @@
 <info>
 <keywords>
 MQTT
-MQTT SUBSCRIBE
+MQTT PUBLISH
 </keywords>
 </info>
 
@@ -27,10 +27,13 @@ mqtt
 mqtt
 </server>
 <name>
-MQTT PUBLISH empty payload, single space topic
+MQTT PUBLISH with no POSTFIELDSIZE set
 </name>
+<tool>
+lib1916
+</tool>
 <command option="binary-trace">
-mqtt://%HOSTIP:%MQTTPORT/%20 -d ""
+"mqtt://%HOSTIP:%MQTTPORT/ "
 </command>
 </client>
 

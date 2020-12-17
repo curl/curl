@@ -319,7 +319,7 @@ static CURLcode mqtt_publish(struct connectdata *conn)
 {
   CURLcode result;
   char *payload = conn->data->set.postfields;
-  size_t payloadlen = (size_t)conn->data->set.postfieldsize;
+  size_t payloadlen;
   char *topic = NULL;
   size_t topiclen;
   unsigned char *pkt = NULL;
@@ -327,6 +327,14 @@ static CURLcode mqtt_publish(struct connectdata *conn)
   size_t remaininglength;
   size_t encodelen;
   char encodedbytes[4];
+  curl_off_t postfieldsize = conn->data->set.postfieldsize;
+
+  if(!payload)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(postfieldsize < 0)
+    payloadlen = strlen(payload);
+  else
+    payloadlen = (size_t)postfieldsize;
 
   result = mqtt_get_topic(conn, &topic, &topiclen);
   if(result)

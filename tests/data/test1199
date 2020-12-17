@@ -30,7 +30,7 @@ mqtt
 MQTT PUBLISH empty payload, no topic
 </name>
 <command option="binary-trace">
-"mqtt:/%HOSTIP:%MQTTPORT/" -d ""
+mqtt://%HOSTIP:%MQTTPORT -d ""
 </command>
 </client>
 
