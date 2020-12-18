@@ -1402,8 +1402,10 @@ struct UrlState {
   int stream_weight;
   CURLU *uh; /* URL handle for the current parsed URL */
   struct urlpieces up;
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
   Curl_HttpReq httpreq; /* what kind of HTTP request (if any) is this */
+#endif
+#ifndef CURL_DISABLE_HTTP
   size_t trailers_bytes_sent;
   struct dynbuf trailers_buf; /* a buffer containing the compiled trailing
                                  headers */
@@ -1706,7 +1708,7 @@ struct UserDefined {
                                     the hostname and port to connect to */
   curl_TimeCond timecondition; /* kind of time/date comparison */
   time_t timevalue;       /* what time to compare with */
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
   Curl_HttpReq method;   /* what kind of HTTP request (if any) is this */
 #endif
   long httpversion; /* when non-zero, a specific HTTP version requested to

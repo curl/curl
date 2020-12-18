@@ -23,6 +23,17 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+typedef enum {
+  HTTPREQ_NONE, /* first in list */
+  HTTPREQ_GET,
+  HTTPREQ_POST,
+  HTTPREQ_POST_FORM, /* we make a difference internally */
+  HTTPREQ_POST_MIME, /* we make a difference internally */
+  HTTPREQ_PUT,
+  HTTPREQ_HEAD,
+  HTTPREQ_LAST /* last in list */
+} Curl_HttpReq;
+
 #ifndef CURL_DISABLE_HTTP
 
 #ifdef USE_NGHTTP2
@@ -34,17 +45,6 @@ extern const struct Curl_handler Curl_handler_http;
 #ifdef USE_SSL
 extern const struct Curl_handler Curl_handler_https;
 #endif
-
-typedef enum {
-  HTTPREQ_NONE, /* first in list */
-  HTTPREQ_GET,
-  HTTPREQ_POST,
-  HTTPREQ_POST_FORM, /* we make a difference internally */
-  HTTPREQ_POST_MIME, /* we make a difference internally */
-  HTTPREQ_PUT,
-  HTTPREQ_HEAD,
-  HTTPREQ_LAST /* last in list */
-} Curl_HttpReq;
 
 /* Header specific functions */
 bool Curl_compareheader(const char *headerline,  /* line to check */
