@@ -170,7 +170,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug OPENSSL3="yes" C="--with-ssl=$HOME/openssl3" LD_LIBRARY_PATH=/home/travis/openssl3/lib:/usr/local/lib
+    - T=debug OPENSSL3="yes" C="--with-ssl=$HOME/openssl3" LD_LIBRARY_PATH=/home/travis/openssl3/lib:/usr/local/lib TFLAGS="https"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
