@@ -73,6 +73,7 @@
  5.3 Rearrange request header order
  5.4 Allow SAN names in HTTP/2 server push
  5.5 auth= in URLs
+ 5.6 alt-svc should fallback if alt-svc doesn't work
 
  6. TELNET
  6.1 ditch stdin
@@ -606,6 +607,13 @@
 
  Additionally this should be implemented for proxy base URLs as well.
 
+5.6 alt-svc should fallback if alt-svc doesn't work
+
+ The alt-svc: header provides a set of alternative services for curl to use
+ instead of the original. If the first attempted one fails, it should try the
+ next etc and if all alterantives fail go back to the original.
+
+ See https://github.com/curl/curl/issues/4908
 
 6. TELNET
 
