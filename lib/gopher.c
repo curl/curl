@@ -150,7 +150,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
 
   /* Create selector. Degenerate cases: / and /1 => convert to "" */
   if(strlen(gopherpath) <= 2) {
-    sel = (char *)"";
+    sel = "";
     len = strlen(sel);
     free(gopherpath);
   }
