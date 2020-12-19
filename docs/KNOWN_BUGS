@@ -36,6 +36,7 @@ problems may have been fixed or changed somewhat since this was written!
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.12 FTPS with Schannel times out file list operation
  2.13 curl with wolfSSL lacks support for renegotiation
+ 2.14 Secure Transport disabling hostname validation also disables SNI
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -321,6 +322,20 @@ problems may have been fixed or changed somewhat since this was written!
  renegotiation and client does not handle renegotiation.
 
  See https://github.com/curl/curl/issues/5839
+
+2.14 Secure Transport disabling hostname validation also disables SNI
+
+ SNI is the hostname that is sent by the TLS library to the server as part of
+ the TLS handshake. Secure Transport does not send SNI when hostname validation
+ is disabled. Servers that host multiple websites may not know which
+ certificate to serve without SNI or which backend server to connect to. The
+ server may serve the certificate of a default server or abort.
+
+ If a server aborts a handshake then curl shows error "SSL peer handshake
+ failed, the server most likely requires a client certificate to connect".
+ In this case the error may also have been caused by lack of SNI.
+
+ https://github.com/curl/curl/issues/6347
 
 3. Email protocols
 
