@@ -92,6 +92,7 @@ problems may have been fixed or changed somewhat since this was written!
  9. SFTP and SCP
  9.1 SFTP doesn't do CURLOPT_POSTQUOTE correct
  9.2 wolfssh: publickey auth doesn't work
+ 9.3 Remote recursive folder creation with SFTP
 
  10. SOCKS
  10.3 FTPS over SOCKS
@@ -713,6 +714,14 @@ problems may have been fixed or changed somewhat since this was written!
  yet, the necessary API for make this work is provided by wolfSSH.
 
  See https://github.com/curl/curl/issues/4820
+
+9.3 Remote recursive folder creation with SFTP
+
+ On this servers, the curl fails to create directories on the remote server
+ even when CURLOPT_FTP_CREATE_MISSING_DIRS option is set.
+
+ See https://github.com/curl/curl/issues/5204
+
 
 10. SOCKS
 
