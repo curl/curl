@@ -229,7 +229,7 @@ jobs:
         - libzstd-dev
         - libmbedtls-dev
   - env:
-    - T=debug C="--with-gnutls --without-ssl"
+    - T=debug C="--with-gnutls --without-ssl" TFLAGS="~2034 ~2037 ~2041"
     - *clang
     compiler: clang
     addons:
