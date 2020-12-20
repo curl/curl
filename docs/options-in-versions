@@ -30,6 +30,7 @@
 --cookie (-b)                        4.9
 --cookie-jar (-c)                    7.9
 --create-dirs                        7.10.3
+--create-file-mode                   7.75.0
 --crlf                               5.7
 --crlfile                            7.19.7
 --curves                             7.73.0
