@@ -525,7 +525,8 @@ static int uploadpostfields(void *userdata, hyper_context *ctx,
     *chunk = NULL; /* nothing more to deliver */
   else {
     /* send everything off in a single go */
-    *chunk = hyper_buf_copy(data->set.postfields, data->req.p.http->postsize);
+    *chunk = hyper_buf_copy(data->set.postfields,
+                            (size_t)data->req.p.http->postsize);
     data->req.upload_done = TRUE;
   }
   return HYPER_POLL_READY;
@@ -561,7 +562,7 @@ static CURLcode bodysend(struct Curl_easy *data,
                          hyper_request *hyperreq,
                          Curl_HttpReq httpreq)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct dynbuf req;
   if((httpreq == HTTPREQ_GET) || (httpreq == HTTPREQ_HEAD))
     Curl_pgrsSetUploadSize(data, 0); /* no request body */
@@ -819,11 +820,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  if((httpreq != HTTPREQ_GET) && (httpreq != HTTPREQ_HEAD)) {
-    result = bodysend(data, conn, headers, req, httpreq);
-    if(result)
-      return result;
-  }
+  result = bodysend(data, conn, headers, req, httpreq);
+  if(result)
+    return result;
 
   Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"\r\n", 2);
 
