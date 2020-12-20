@@ -108,6 +108,7 @@ static const struct LongShort aliases[]= {
 #endif
   {"*q", "ftp-create-dirs",          ARG_BOOL},
   {"*r", "create-dirs",              ARG_BOOL},
+  {"*R", "create-file-mode",         ARG_STRING},
   {"*s", "max-redirs",               ARG_STRING},
   {"*t", "proxy-ntlm",               ARG_BOOL},
   {"*u", "crlf",                     ARG_BOOL},
@@ -772,6 +773,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       case 'r': /* --create-dirs */
         config->create_dirs = toggle;
+        break;
+
+      case 'R': /* --create-file-mode */
+        err = oct2nummax(&config->create_file_mode, nextarg, 0777);
+        if(err)
+          return err;
         break;
 
       case 's': /* --max-redirs */
