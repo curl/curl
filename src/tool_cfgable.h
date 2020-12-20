@@ -193,6 +193,7 @@ struct OperationConfig {
   long ssl_version_max;
   long proxy_ssl_version;
   long ip_version;
+  long create_file_mode; /* CURLOPT_NEW_FILE_PERMS */
   curl_TimeCond timecond;
   curl_off_t condtime;
   struct curl_slist *headers;

@@ -40,6 +40,7 @@ DPAGES =					\
   cookie-jar.d					\
   cookie.d					\
   create-dirs.d					\
+  create-file-mode.d                            \
   crlf.d crlfile.d				\
   curves.d					\
   data-ascii.d					\

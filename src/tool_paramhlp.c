@@ -129,14 +129,13 @@ void cleanarg(char *str)
  * getparameter a lot, we must check it for NULL before accessing the str
  * data.
  */
-
-ParameterError str2num(long *val, const char *str)
+static ParameterError getnum(long *val, const char *str, int base)
 {
   if(str) {
     char *endptr = NULL;
     long num;
     errno = 0;
-    num = strtol(str, &endptr, 10);
+    num = strtol(str, &endptr, base);
     if(errno == ERANGE)
       return PARAM_NUMBER_TOO_LARGE;
     if((endptr != str) && (endptr == str + strlen(str))) {
@@ -145,6 +144,24 @@ ParameterError str2num(long *val, const char *str)
     }
   }
   return PARAM_BAD_NUMERIC; /* badness */
+}
+
+ParameterError str2num(long *val, const char *str)
+{
+  return getnum(val, str, 10);
+}
+
+ParameterError oct2nummax(long *val, const char *str, long max)
+{
+  ParameterError result = getnum(val, str, 8);
+  if(result != PARAM_OK)
+    return result;
+  else if(*val > max)
+    return PARAM_NUMBER_TOO_LARGE;
+  else if(*val < 0)
+    return PARAM_NEGATIVE_NUMERIC;
+
+  return PARAM_OK;
 }
 
 /*
@@ -158,7 +175,7 @@ ParameterError str2num(long *val, const char *str)
 
 ParameterError str2unum(long *val, const char *str)
 {
-  ParameterError result = str2num(val, str);
+  ParameterError result = getnum(val, str, 10);
   if(result != PARAM_OK)
     return result;
   if(*val < 0)

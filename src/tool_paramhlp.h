@@ -33,6 +33,7 @@ void cleanarg(char *str);
 
 ParameterError str2num(long *val, const char *str);
 ParameterError str2unum(long *val, const char *str);
+ParameterError oct2nummax(long *val, const char *str, long max);
 ParameterError str2unummax(long *val, const char *str, long max);
 ParameterError str2udouble(double *val, const char *str, long max);
 
