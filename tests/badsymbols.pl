@@ -90,6 +90,9 @@ sub scanenums {
         if($skipit) {
             next;
         }
+        if (/^#/) {
+            next;
+        }
         if ( /enum\s+(\S+\s+)?{/ .. /}/ ) {
             s/^\s+//;
             chomp;
