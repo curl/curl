@@ -169,10 +169,12 @@ sub single {
         }
         elsif(/^---/) {
             if(!$long) {
-                print STDERR "WARN: no 'Long:' in $f\n";
+                print STDERR "ERROR: no 'Long:' in $f\n";
+                exit 1;
             }
             if(!$category) {
-                print STDERR "WARN: no 'Category:' in $f\n";
+                print STDERR "ERROR: no 'Category:' in $f\n";
+                exit 2;
             }
             last;
         }
