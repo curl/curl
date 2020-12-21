@@ -1,26 +1,34 @@
 curl and libcurl 7.75.0
 
  Public curl releases:         197
- Command line options:         235
- curl_easy_setopt() options:   284
+ Command line options:         237
+ curl_easy_setopt() options:   285
  Public functions in libcurl:  85
- Contributors:                 2297
+ Contributors:                 2301
 
 This release includes the following changes:
 
+ o curl: add --create-file-mode [mode] [28]
+ o curl: add new variables to --write-out [25]
  o gopher: implement secure gopher protocol [2]
  o http: add Hyper as new optional HTTP backend [24]
+ o http: introduce AWS HTTP v4 Signature support [26]
 
 This release includes the following bugfixes:
 
+ o badsymbols.pl: add verbose mode -v [31]
  o BUG-BOUNTY: minor language updates [5]
  o cmake: enable gophers correctly in curl-config [10]
+ o cmdline-opts/gen.pl: return hard on errors [11]
  o connect: defer port selection until connect() time [22]
+ o connect: on linux, enable reporting of all ICMP errors on UDP sockets [27]
  o connect: zero variable on stack to silence valgrind complaint [23]
+ o cookie: avoid the C1001 internal compiler error with MSVC 14 [36]
  o CURLOPT_URL.3: remove scheme specific details [12]
  o digest_sspi: Show InitializeSecurityContext errors in verbose mode [8]
  o docs/URL-SYNTAX: the URL syntax curl accepts and works with [15]
  o docs: enable syntax highlighting in several docs files [16]
+ o examples/libtest: add .checksrc to dist [14]
  o examples: remove superfluous asterisk uses
  o getinfo: build with disabled HTTP support
  o http: show the request as headers even when split-sending [7]
@@ -38,6 +46,7 @@ This release includes the following bugfixes:
  o tests/mqttd: extract the client id from the correct offset [13]
  o tests: make --libcurl tests only test FTP options if ftp enabled [18]
  o tooĺ_writeout: fix the -w time output units [6]
+ o travis: restrict the openssl3 job to only run https and ftps tests [34]
 
 This release includes the following known bugs:
 
@@ -46,10 +55,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  0xflotus on github, Cristian Rodríguez, Dan Fandrich, Daniel Stenberg,
-  Douglas R. Reno, Hans-Christian Noren Egtvedt, Jon Rumsey, parazyd on github,
-  Ray Satiro, Sean McArthur, Tomas Berger, 不确定
-  (12 contributors)
+  0xflotus on github, Cory Benfield, Cristian Rodríguez, Dan Fandrich,
+  Daniel Stenberg, Douglas R. Reno, Earnestly on github, Gisle Vanem,
+  Hans-Christian Noren Egtvedt, Ian Spence, Jeremy Thibault, Jon Rumsey,
+  Jon Wilkes, Matthias Gatto, Nick Zitzmann, parazyd on github, Ray Satiro,
+  Sean McArthur, Tomas Berger, 不确定
+  (20 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -65,8 +76,10 @@ References to bug reports and discussions on issues:
  [8] = https://curl.se/bug/?i=6315
  [9] = https://curl.se/bug/?i=6333
  [10] = https://curl.se/bug/?i=6336
+ [11] = https://curl.se/bug/?i=6354
  [12] = https://curl.se/bug/?i=6307
  [13] = https://curl.se/bug/?i=6334
+ [14] = https://curl.se/bug/?i=6176
  [15] = https://curl.se/bug/?i=6285
  [16] = https://curl.se/bug/?i=6286
  [17] = https://curl.se/bug/?i=6332
@@ -77,3 +90,10 @@ References to bug reports and discussions on issues:
  [22] = https://curl.se/bug/?i=6295
  [23] = https://curl.se/bug/?i=6289
  [24] = https://curl.se/bug/?i=6110
+ [25] = https://curl.se/bug/?i=6199
+ [26] = https://curl.se/bug/?i=5703
+ [27] = https://curl.se/bug/?i=6341
+ [28] = https://curl.se/bug/?i=6244
+ [31] = https://curl.se/bug/?i=6349
+ [34] = https://curl.se/bug/?i=6345
+ [36] = https://curl.se/bug/?i=6112
