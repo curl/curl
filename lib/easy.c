@@ -1080,6 +1080,9 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
      (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) {
     Curl_expire(data, 0, EXPIRE_RUN_NOW); /* get this handle going again */
 
+    /* reset the too-slow time keeper */
+    data->state.keeps_speed.tv_sec = 0;
+
     if(!data->state.tempcount)
       /* if not pausing again, force a recv/send check of this connection as
          the data might've been read off the socket already */
