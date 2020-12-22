@@ -101,9 +101,10 @@ static int http2_perform_getsock(const struct connectdata *conn,
 
   sock[0] = conn->sock[FIRSTSOCKET];
 
-  /* in a HTTP/2 connection we can basically always get a frame so we should
-     always be ready for one */
-  bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
+  if(!(k->keepon & KEEP_RECV_PAUSE))
+    /* Unless paused - in a HTTP/2 connection we can basically always get a
+       frame so we should always be ready for one */
+    bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
 
   /* we're still uploading or the HTTP/2 layer wants to send data */
   if(((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND) ||
