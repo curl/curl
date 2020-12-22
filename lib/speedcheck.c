@@ -39,6 +39,10 @@ void Curl_speedinit(struct Curl_easy *data)
 CURLcode Curl_speedcheck(struct Curl_easy *data,
                          struct curltime now)
 {
+  if(data->req.keepon & KEEP_RECV_PAUSE)
+    /* A paused transfer is not qualified for speed checks */
+    return CURLE_OK;
+
   if((data->progress.current_speed >= 0) && data->set.low_speed_time) {
     if(data->progress.current_speed < data->set.low_speed_limit) {
       if(!data->state.keeps_speed.tv_sec)
