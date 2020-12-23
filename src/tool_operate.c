@@ -2542,7 +2542,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 
   /* Parse .curlrc if necessary */
   if((argc == 1) ||
-     (!curl_strequal(first_arg, "-q") &&
+     (strncmp(first_arg, "-q", 2) &&
       !curl_strequal(first_arg, "--disable"))) {
     parseconfig(NULL, global); /* ignore possible failure */
 
