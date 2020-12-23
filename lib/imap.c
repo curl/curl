@@ -769,7 +769,7 @@ static CURLcode imap_perform_append(struct connectdata *conn)
 
   /* Check we know the size of the upload */
   if(data->state.infilesize < 0) {
-    failf(data, "Cannot APPEND with unknown input file size\n");
+    failf(data, "Cannot APPEND with unknown input file size");
     return CURLE_UPLOAD_FAILED;
   }
 

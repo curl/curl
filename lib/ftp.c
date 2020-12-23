@@ -1768,7 +1768,7 @@ static CURLcode ftp_epsv_disable(struct connectdata *conn)
 #endif
     ) {
     /* We can't disable EPSV when doing IPv6, so this is instead a fail */
-    failf(conn->data, "Failed EPSV attempt, exiting\n");
+    failf(conn->data, "Failed EPSV attempt, exiting");
     return CURLE_WEIRD_SERVER_REPLY;
   }
 

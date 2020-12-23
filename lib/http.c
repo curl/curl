@@ -3743,7 +3743,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           k->badheader = HEADER_ALLBAD;
           streamclose(conn, "bad HTTP: No end-of-message indicator");
           if(!data->set.http09_allowed) {
-            failf(data, "Received HTTP/0.9 when not allowed\n");
+            failf(data, "Received HTTP/0.9 when not allowed");
             return CURLE_UNSUPPORTED_PROTOCOL;
           }
           break;
@@ -3778,7 +3778,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         streamclose(conn, "bad HTTP: No end-of-message indicator");
         /* this is not the beginning of a protocol first header line */
         if(!data->set.http09_allowed) {
-          failf(data, "Received HTTP/0.9 when not allowed\n");
+          failf(data, "Received HTTP/0.9 when not allowed");
           return CURLE_UNSUPPORTED_PROTOCOL;
         }
         k->header = FALSE;

@@ -711,7 +711,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     return NULL;
   }
 
-  failf(conn->data, "getaddrinfo() thread failed\n");
+  failf(conn->data, "getaddrinfo() thread failed");
 
   return NULL;
 }
@@ -766,7 +766,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     return NULL;
   }
 
-  failf(data, "getaddrinfo() thread failed to start\n");
+  failf(data, "getaddrinfo() thread failed to start");
   return NULL;
 
 }

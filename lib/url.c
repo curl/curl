@@ -1550,7 +1550,7 @@ CURLcode Curl_idnconvert_hostname(struct connectdata *conn,
         host->name = host->encalloc;
       }
       else {
-        failf(data, "Failed to convert %s to ACE; %s\n", host->name,
+        failf(data, "Failed to convert %s to ACE; %s", host->name,
               idn2_strerror(rc));
         return CURLE_URL_MALFORMAT;
       }
@@ -1565,7 +1565,7 @@ CURLcode Curl_idnconvert_hostname(struct connectdata *conn,
     }
     else {
       char buffer[STRERROR_LEN];
-      failf(data, "Failed to convert %s to ACE; %s\n", host->name,
+      failf(data, "Failed to convert %s to ACE; %s", host->name,
             Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
       return CURLE_URL_MALFORMAT;
     }

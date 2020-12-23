@@ -92,7 +92,7 @@ static int check_gss_err(struct Curl_easy *data,
       }
       gss_release_buffer(&min_stat, &status_string);
     }
-    failf(data, "GSS-API error: %s failed:\n%s", function, buf);
+    failf(data, "GSS-API error: %s failed: %s", function, buf);
     return 1;
   }
 

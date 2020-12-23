@@ -340,7 +340,7 @@ static CURLcode hyperstream(struct Curl_easy *data,
     h->init = TRUE;
     *didwhat = KEEP_RECV;
     if(!resp) {
-      failf(data, "hyperstream: couldn't get response\n");
+      failf(data, "hyperstream: couldn't get response");
       return CURLE_RECV_ERROR;
     }
 
@@ -356,7 +356,7 @@ static CURLcode hyperstream(struct Curl_easy *data,
 
     headers = hyper_response_headers(resp);
     if(!headers) {
-      failf(data, "hyperstream: couldn't get response headers\n");
+      failf(data, "hyperstream: couldn't get response headers");
       result = CURLE_RECV_ERROR;
       break;
     }
@@ -369,20 +369,20 @@ static CURLcode hyperstream(struct Curl_easy *data,
     }
 
     if(empty_header(data)) {
-      failf(data, "hyperstream: couldn't pass blank header\n");
+      failf(data, "hyperstream: couldn't pass blank header");
       result = CURLE_OUT_OF_MEMORY;
       break;
     }
 
     resp_body = hyper_response_body(resp);
     if(!resp_body) {
-      failf(data, "hyperstream: couldn't get response body\n");
+      failf(data, "hyperstream: couldn't get response body");
       result = CURLE_RECV_ERROR;
       break;
     }
     foreach = hyper_body_foreach(resp_body, hyper_body_chunk, data);
     if(!foreach) {
-      failf(data, "hyperstream: body foreach failed\n");
+      failf(data, "hyperstream: body foreach failed");
       result = CURLE_OUT_OF_MEMORY;
       break;
     }
@@ -467,7 +467,7 @@ CURLcode Curl_hyper_header(struct Curl_easy *data, hyper_headers *headers,
 
     if(HYPERE_OK != hyper_headers_add(headers, (uint8_t *)n, nlen,
                                       (uint8_t *)v, vlen)) {
-      failf(data, "hyper_headers_add host\n");
+      failf(data, "hyper_headers_add host");
       return CURLE_OUT_OF_MEMORY;
     }
     if(data->set.verbose) {
@@ -505,7 +505,7 @@ static CURLcode request_target(struct Curl_easy *data,
 
   if(hyper_request_set_uri(req, (uint8_t *)Curl_dyn_uptr(&r),
                            Curl_dyn_len(&r))) {
-    failf(data, "error setting path\n");
+    failf(data, "error setting path");
     result = CURLE_OUT_OF_MEMORY;
   }
   else
@@ -758,7 +758,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   headers = hyper_request_headers(req);
   if(!headers) {
-    failf(data, "hyper_request_headers\n");
+    failf(data, "hyper_request_headers");
     goto error;
   }
 
@@ -829,7 +829,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   data->req.upload_chunky = FALSE;
   sendtask = hyper_clientconn_send(client, req);
   if(!sendtask) {
-    failf(data, "hyper_clientconn_send\n");
+    failf(data, "hyper_clientconn_send");
     goto error;
   }
 
