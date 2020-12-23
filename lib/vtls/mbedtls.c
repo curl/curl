@@ -280,7 +280,7 @@ mbed_connect_step1(struct connectdata *conn,
 #ifdef MBEDTLS_ERROR_C
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
-    failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s\n",
+    failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
           -ret, errorbuf);
   }
 #else
@@ -293,7 +293,7 @@ mbed_connect_step1(struct connectdata *conn,
 #ifdef MBEDTLS_ERROR_C
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
-    failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s\n",
+    failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
           -ret, errorbuf);
   }
 #endif /* THREADING_SUPPORT */
@@ -868,7 +868,7 @@ static CURLcode Curl_mbedtls_random(struct Curl_easy *data,
 #ifdef MBEDTLS_ERROR_C
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
-    failf(data, "Failed - mbedTLS: ctr_drbg_seed returned (-0x%04X) %s\n",
+    failf(data, "Failed - mbedTLS: ctr_drbg_seed returned (-0x%04X) %s",
           -ret, errorbuf);
   }
   else {
@@ -878,7 +878,7 @@ static CURLcode Curl_mbedtls_random(struct Curl_easy *data,
 #ifdef MBEDTLS_ERROR_C
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
-      failf(data, "mbedTLS: ctr_drbg_init returned (-0x%04X) %s\n",
+      failf(data, "mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
             -ret, errorbuf);
     }
   }

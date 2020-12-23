@@ -135,7 +135,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   if(status != SEC_E_OK) {
     free(input_token);
 
-    failf(data, "SSPI: couldn't get auth info\n");
+    failf(data, "SSPI: couldn't get auth info");
     return CURLE_AUTH_ERROR;
   }
 
@@ -439,7 +439,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
   status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_DIGEST),
                                               &SecurityPackage);
   if(status != SEC_E_OK) {
-    failf(data, "SSPI: couldn't get auth info\n");
+    failf(data, "SSPI: couldn't get auth info");
     return CURLE_AUTH_ERROR;
   }
 

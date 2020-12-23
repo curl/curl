@@ -399,14 +399,14 @@ static CURLcode flush_egress(struct connectdata *conn, int sockfd,
       break;
 
     if(sent < 0) {
-      failf(conn->data, "quiche_conn_send returned %zd\n",
+      failf(conn->data, "quiche_conn_send returned %zd",
             sent);
       return CURLE_SEND_ERROR;
     }
 
     sent = send(sockfd, out, sent, 0);
     if(sent < 0) {
-      failf(conn->data, "send() returned %zd\n", sent);
+      failf(conn->data, "send() returned %zd", sent);
       return CURLE_SEND_ERROR;
     }
   } while(1);

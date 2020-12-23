@@ -542,7 +542,7 @@ static int push_promise(struct Curl_easy *data,
 
     stream = data->req.p.http;
     if(!stream) {
-      failf(data, "Internal NULL stream!\n");
+      failf(data, "Internal NULL stream!");
       (void)Curl_close(&newhandle);
       rv = CURL_PUSH_DENY;
       goto fail;
@@ -957,7 +957,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 
   stream = data_s->req.p.http;
   if(!stream) {
-    failf(data_s, "Internal NULL stream! 5\n");
+    failf(data_s, "Internal NULL stream!");
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -1341,7 +1341,7 @@ static int h2_process_pending_input(struct connectdata *conn,
   if(rv < 0) {
     failf(data,
           "h2_process_pending_input: nghttp2_session_mem_recv() returned "
-          "%zd:%s\n", rv, nghttp2_strerror((int)rv));
+          "%zd:%s", rv, nghttp2_strerror((int)rv));
     *err = CURLE_RECV_ERROR;
     return -1;
   }

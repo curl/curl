@@ -106,7 +106,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
                                               &SecurityPackage);
   if(status != SEC_E_OK) {
-    failf(data, "SSPI: couldn't get auth info\n");
+    failf(data, "SSPI: couldn't get auth info");
     return CURLE_AUTH_ERROR;
   }
 

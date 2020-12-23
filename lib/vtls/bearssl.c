@@ -349,8 +349,8 @@ static CURLcode bearssl_connect_step1(struct connectdata *conn, int sockindex)
     ret = load_cafile(ssl_cafile, &backend->anchors, &backend->anchors_len);
     if(ret != CURLE_OK) {
       if(verifypeer) {
-        failf(data, "error setting certificate verify locations:\n"
-              "  CAfile: %s\n", ssl_cafile);
+        failf(data, "error setting certificate verify locations."
+              " CAfile: %s", ssl_cafile);
         return ret;
       }
       infof(data, "error setting certificate verify locations,"

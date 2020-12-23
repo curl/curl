@@ -1289,7 +1289,7 @@ static CURLcode Curl_ossl_set_engine(struct Curl_easy *data,
     char buf[256];
 
     ENGINE_free(e);
-    failf(data, "Failed to initialise SSL Engine '%s':\n%s",
+    failf(data, "Failed to initialise SSL Engine '%s': %s",
           engine, ossl_strerror(ERR_get_error(), buf, sizeof(buf)));
     return CURLE_SSL_ENGINE_INITFAILED;
   }

@@ -587,7 +587,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   nconsumed =
     nghttp3_conn_read_stream(qs->h3conn, stream_id, buf, buflen, fin);
   if(nconsumed < 0) {
-    failf(qs->conn->data, "nghttp3_conn_read_stream returned error: %s\n",
+    failf(qs->conn->data, "nghttp3_conn_read_stream returned error: %s",
           nghttp3_strerror((int)nconsumed));
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -616,7 +616,7 @@ cb_acked_stream_data_offset(ngtcp2_conn *tconn, int64_t stream_id,
 
   rv = nghttp3_conn_add_ack_offset(qs->h3conn, stream_id, datalen);
   if(rv != 0) {
-    failf(qs->conn->data, "nghttp3_conn_add_ack_offset returned error: %s\n",
+    failf(qs->conn->data, "nghttp3_conn_add_ack_offset returned error: %s",
           nghttp3_strerror(rv));
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -637,7 +637,7 @@ static int cb_stream_close(ngtcp2_conn *tconn, int64_t stream_id,
   rv = nghttp3_conn_close_stream(qs->h3conn, stream_id,
                                  app_error_code);
   if(rv != 0) {
-    failf(qs->conn->data, "nghttp3_conn_close_stream returned error: %s\n",
+    failf(qs->conn->data, "nghttp3_conn_close_stream returned error: %s",
           nghttp3_strerror(rv));
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -658,7 +658,7 @@ static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
 
   rv = nghttp3_conn_reset_stream(qs->h3conn, stream_id);
   if(rv != 0) {
-    failf(qs->conn->data, "nghttp3_conn_reset_stream returned error: %s\n",
+    failf(qs->conn->data, "nghttp3_conn_reset_stream returned error: %s",
           nghttp3_strerror(rv));
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -689,7 +689,7 @@ static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
 
   rv = nghttp3_conn_unblock_stream(qs->h3conn, stream_id);
   if(rv != 0) {
-    failf(qs->conn->data, "nghttp3_conn_unblock_stream returned error: %s\n",
+    failf(qs->conn->data, "nghttp3_conn_unblock_stream returned error: %s",
           nghttp3_strerror(rv));
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -1783,7 +1783,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
 
   rv = ngtcp2_conn_handle_expiry(qs->qconn, ts);
   if(rv != 0) {
-    failf(conn->data, "ngtcp2_conn_handle_expiry returned error: %s\n",
+    failf(conn->data, "ngtcp2_conn_handle_expiry returned error: %s",
           ngtcp2_strerror(rv));
     return CURLE_SEND_ERROR;
   }
@@ -1796,7 +1796,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
       veccnt = nghttp3_conn_writev_stream(qs->h3conn, &stream_id, &fin, vec,
                                           sizeof(vec) / sizeof(vec[0]));
       if(veccnt < 0) {
-        failf(conn->data, "nghttp3_conn_writev_stream returned error: %s\n",
+        failf(conn->data, "nghttp3_conn_writev_stream returned error: %s",
               nghttp3_strerror((int)veccnt));
         return CURLE_SEND_ERROR;
       }
@@ -1838,7 +1838,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
           }
           else {
             assert(ndatalen == -1);
-            failf(conn->data, "ngtcp2_conn_writev_stream returned error: %s\n",
+            failf(conn->data, "ngtcp2_conn_writev_stream returned error: %s",
                   ngtcp2_strerror((int)outlen));
             return CURLE_SEND_ERROR;
           }
@@ -1852,7 +1852,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
       outlen = ngtcp2_conn_write_pkt(qs->qconn, &ps.path, NULL,
                                      out, pktlen, ts);
       if(outlen < 0) {
-        failf(conn->data, "ngtcp2_conn_write_pkt returned error: %s\n",
+        failf(conn->data, "ngtcp2_conn_write_pkt returned error: %s",
               ngtcp2_strerror((int)outlen));
         return CURLE_SEND_ERROR;
       }
@@ -1871,7 +1871,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
         break;
       }
       else {
-        failf(conn->data, "send() returned %zd (errno %d)\n", sent,
+        failf(conn->data, "send() returned %zd (errno %d)", sent,
               SOCKERRNO);
         return CURLE_SEND_ERROR;
       }

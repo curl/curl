@@ -298,7 +298,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
       }
       else {
         hp = NULL; /* fail! */
-        failf(data, "SOCKS4 connection to %s not supported\n", buf);
+        failf(data, "SOCKS4 connection to %s not supported", buf);
       }
 
       Curl_resolv_unlock(data, dns); /* not used anymore from now on */
@@ -319,7 +319,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
     if(proxy_user) {
       size_t plen = strlen(proxy_user);
       if(plen >= sizeof(sx->socksreq) - 8) {
-        failf(data, "Too long SOCKS proxy user name, can't use!\n");
+        failf(data, "Too long SOCKS proxy user name, can't use!");
         return CURLPX_LONG_USER;
       }
       /* copy the proxy name WITH trailing zero */
@@ -839,7 +839,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
 #endif
     else {
       hp = NULL; /* fail! */
-      failf(data, "SOCKS5 connection to %s not supported\n", dest);
+      failf(data, "SOCKS5 connection to %s not supported", dest);
     }
 
     Curl_resolv_unlock(data, dns); /* not used anymore from now on */

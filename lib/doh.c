@@ -225,7 +225,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
   DOHcode d = doh_encode(host, dnstype, p->dohbuffer, sizeof(p->dohbuffer),
                          &p->dohlen);
   if(d) {
-    failf(data, "Failed to encode DOH packet [%d]\n", d);
+    failf(data, "Failed to encode DOH packet [%d]", d);
     return CURLE_OUT_OF_MEMORY;
   }
 

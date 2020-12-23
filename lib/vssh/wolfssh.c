@@ -262,7 +262,7 @@ static ssize_t wsftp_send(struct connectdata *conn, int sockindex,
     return -1;
   }
   if(rc < 0) {
-    failf(conn->data, "wolfSSH_SFTP_SendWritePacket returned %d\n", rc);
+    failf(conn->data, "wolfSSH_SFTP_SendWritePacket returned %d", rc);
     return -1;
   }
   DEBUGASSERT(rc == (int)len);
@@ -307,7 +307,7 @@ static ssize_t wsftp_recv(struct connectdata *conn, int sockindex,
   DEBUGASSERT(rc <= (int)len);
 
   if(rc < 0) {
-    failf(conn->data, "wolfSSH_SFTP_SendReadPacket returned %d\n", rc);
+    failf(conn->data, "wolfSSH_SFTP_SendReadPacket returned %d", rc);
     return -1;
   }
   sshc->offset += len;
