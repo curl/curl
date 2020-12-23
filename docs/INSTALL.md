@@ -455,11 +455,11 @@ and runs on, that isn't listed, please let us know!
 
 AIX, AmigaOS, Android, BeOS, Blackberry 10, Blackberry Tablet OS, Cell OS,
 ChromeOS, Cygwin, Dragonfly BSD, eCOS, FreeBSD, FreeDOS, FreeRTOS, Fuchsia,
-Garmin OS, Genode, Haiku, Hardedened BSD, HP-UX, Hurd, Illumos, Integrity,
+Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd, Illumos, Integrity,
 iOS, ipadOS, IRIX, LineageOS, Linux, Mac OS 9, macOS, Mbed, Micrium, MINIX,
-MorphOS, MPE/iX, MS DOS, NCR MP-RAS, NetBSD, Netware, Nintendo Switch,
+MorphOS, MPE/iX, MS-DOS, NCR MP-RAS, NetBSD, Netware, Nintendo Switch,
 NonStop OS, NuttX, OpenBSD, OpenStep, OS/2, OS/400, OS21, Plan 9,
-PlayStation Portable, QNX, Qubes OS, ReactOS, Redox, RICS OS, Sailfish OS,
+PlayStation Portable, QNX, Qubes OS, ReactOS, Redox, RISC OS, Sailfish OS,
 SCO Unix, Serenity, SINIX-Z, Solaris, SolusOS, SunOS, Syllable OS, Symbian,
 Tizen, TPF, Tru64, tvOS, ucLinux, Ultrix, UNICOS, UnixWare, VMS, vxWorks,
 WebOS, Wii system software, Windows, Windows CE, Xbox System, z/OS
