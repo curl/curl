@@ -447,77 +447,24 @@ line.  Following is a list of appropriate key words:
 
 # PORTS
 
-This is a probably incomplete list of known hardware and operating systems
-that curl has been compiled for. If you know a system curl compiles and
-runs on, that isn't listed, please let us know!
+This is a probably incomplete list of known CPU architectures and operating
+systems that curl has been compiled for. If you know a system curl compiles
+and runs on, that isn't listed, please let us know!
 
-  - Alpha DEC OSF 4
-  - Alpha Digital UNIX v3.2
-  - Alpha FreeBSD 4.1, 4.5
-  - Alpha Linux 2.2, 2.4
-  - Alpha NetBSD 1.5.2
-  - Alpha OpenBSD 3.0
-  - Alpha OpenVMS V7.1-1H2
-  - Alpha Tru64 v5.0 5.1
-  - AVR32 Linux
-  - ARM Android 1.5, 2.1, 2.3, 3.2, 4.x
-  - ARM INTEGRITY
-  - ARM iOS
-  - Cell Linux
-  - Cell Cell OS
-  - HP-PA HP-UX 9.X 10.X 11.X
-  - HP-PA Linux
-  - HP3000 MPE/iX
-  - MicroBlaze uClinux
-  - MIPS IRIX 6.2, 6.5
-  - MIPS Linux
-  - OS/400
-  - Pocket PC/Win CE 3.0
-  - Power AIX 3.2.5, 4.2, 4.3.1, 4.3.2, 5.1, 5.2
-  - PowerPC Darwin 1.0
-  - PowerPC INTEGRITY
-  - PowerPC Linux
-  - PowerPC Mac OS 9
-  - PowerPC Mac OS X
-  - SH4 Linux 2.6.X
-  - SH4 OS21
-  - SINIX-Z v5
-  - Sparc Linux
-  - Sparc Solaris 2.4, 2.5, 2.5.1, 2.6, 7, 8, 9, 10
-  - Sparc SunOS 4.1.X
-  - StrongARM (and other ARM) RISC OS 3.1, 4.02
-  - StrongARM/ARM7/ARM9 Linux 2.4, 2.6
-  - StrongARM NetBSD 1.4.1
-  - Symbian OS (P.I.P.S.) 9.x
-  - TPF
-  - Ultrix 4.3a
-  - UNICOS 9.0
-  - i386 BeOS
-  - i386 DOS
-  - i386 eCos 1.3.1
-  - i386 Esix 4.1
-  - i386 FreeBSD
-  - i386 HURD
-  - i386 Haiku OS
-  - i386 Linux 1.3, 2.0, 2.2, 2.3, 2.4, 2.6
-  - i386 Mac OS X
-  - i386 MINIX 3.1
-  - i386 NetBSD
-  - i386 Novell NetWare
-  - i386 OS/2
-  - i386 OpenBSD
-  - i386 QNX 6
-  - i386 SCO unix
-  - i386 Solaris 2.7
-  - i386 Windows 95, 98, ME, NT, 2000, XP, 2003
-  - i486 ncr-sysv4.3.03 (NCR MP-RAS)
-  - ia64 Linux 2.3.99
-  - m68k AmigaOS 3
-  - m68k Linux
-  - m68k uClinux
-  - m68k OpenBSD
-  - m88k dg-dgux5.4R3.00
-  - s390 Linux
-  - x86_64 Linux
-  - XScale/PXA250 Linux 2.4
-  - Nios II uClinux
+## 81 Operating Systems
+
+AIX, AmigaOS, Android, Aros, BeOS, Blackberry 10, Blackberry Tablet OS, Cell
+OS, ChromeOS, Cisco IOS, Cygwin, Dragonfly BSD, eCOS, FreeBSD, FreeDOS,
+FreeRTOS, Fuchsia, Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd,
+Illumos, Integrity, iOS, ipadOS, IRIX, LineageOS, Linux, Lua RTOS, Mac OS 9,
+macOS, Mbed, Micrium, MINIX, MorphOS, MPE/iX, MS-DOS, NCR MP-RAS, NetBSD,
+Netware, Nintendo Switch, NonStop OS, NuttX, OpenBSD, OpenStep, OS/2, OS/400,
+OS21, Plan 9, PlayStation Portable, QNX, Qubes OS, ReactOS, Redox, RISC OS,
+Sailfish OS, SCO Unix, Serenity, SINIX-Z, Solaris, SunOS, Syllable OS,
+Symbian, Tizen, TPF, Tru64, tvOS, ucLinux, Ultrix, UNICOS, UnixWare, VMS,
+vxWorks, WebOS, Wii system software, Windows, Windows CE, Xbox System, z/OS
+
+## 22 CPU Architectures
+
+Alpha, ARC, ARM, AVR32, Cell, HP-PA, Itanium, m68k, MicroBlaze, MIPS, Nios,
+OpenRISC, POWER, PowerPC, RISC-V, s390, SH4, SPARC, VAX, x86, x86-64, Xtensa
