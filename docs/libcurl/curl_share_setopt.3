@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -74,10 +74,10 @@ by default. Note this symbol was added in 7.10.3 but was not implemented until
 7.23.0.
 .IP CURL_LOCK_DATA_CONNECT
 Put the connection cache in the share object and make all easy handles using
-this share object share the connection cache. Using this, you can for example
-do multi-threaded libcurl use with one handle in each thread, and yet have a
-shared pool of unused connections and this way get way better connection
-re-use than if you use one separate pool in each thread.
+this share object share the connection cache.
+
+Note that due to a known bug, it is not safe to share connections this way
+between multiple concurrent threads.
 
 Connections that are used for HTTP/1.1 Pipelining or HTTP/2 multiplexing only
 get additional transfers added to them if the existing connection is held by

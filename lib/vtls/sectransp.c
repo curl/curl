@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -1397,11 +1397,16 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
   const struct curl_blob *ssl_cablob = NULL;
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
-  char * const ssl_cert = SSL_SET_OPTION(cert);
-  const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(cert_blob);
+  char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
+  const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(primary.cert_blob);
+#ifndef CURL_DISABLE_PROXY
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
+#else
+  const char * const hostname = conn->host.name;
+  const long int port = conn->remote_port;
+#endif
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
@@ -1606,8 +1611,11 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
                                                        &kCFTypeArrayCallBacks);
 
 #ifdef USE_NGHTTP2
-      if(data->set.httpversion >= CURL_HTTP_VERSION_2 &&
-         (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)) {
+      if(data->set.httpversion >= CURL_HTTP_VERSION_2
+#ifndef CURL_DISABLE_PROXY
+         && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
+#endif
+        ) {
         CFArrayAppendValue(alpnArr, CFSTR(NGHTTP2_PROTO_VERSION_ID));
         infof(data, "ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
       }
@@ -1962,7 +1970,7 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
     else {
       CURLcode result;
       ssl_sessionid =
-        aprintf("%s:%d:%d:%s:%hu", ssl_cafile,
+        aprintf("%s:%d:%d:%s:%ld", ssl_cafile,
                 verifypeer, SSL_CONN_CONFIG(verifyhost), hostname, port);
       ssl_sessionid_len = strlen(ssl_sessionid);
 
@@ -2181,7 +2189,7 @@ static CURLcode verify_cert(const char *cafile, struct Curl_easy *data,
     if(res < 0) {
       free(certbuf);
       CFRelease(array);
-      failf(data, "SSL: invalid CA certificate #%d (offset %d) in bundle",
+      failf(data, "SSL: invalid CA certificate #%d (offset %zu) in bundle",
             n, offset);
       return CURLE_SSL_CACERT_BADFILE;
     }
@@ -2379,8 +2387,12 @@ sectransp_connect_step2(struct connectdata *conn, int sockindex)
   OSStatus err;
   SSLCipherSuite cipher;
   SSLProtocol protocol = 0;
+#ifndef CURL_DISABLE_PROXY
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
+#else
+  const char * const hostname = conn->host.name;
+#endif
 
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
               || ssl_connect_2_reading == connssl->connecting_state

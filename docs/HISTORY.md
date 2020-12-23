@@ -7,9 +7,12 @@ currency-exchange calculations available to Internet Relay Chat (IRC)
 users. All the necessary data were published on the Web; he just needed to
 automate their retrieval.
 
-Daniel simply adopted an existing command-line open-source tool, httpget, that
-Brazilian Rafael Sagula had written and recently released version 0.1 of. After
-a few minor adjustments, it did just what he needed.
+1996
+----
+
+Daniel adopted an existing command-line open-source tool, httpget, that
+Brazilian Rafael Sagula had written and recently released version 0.1
+of. After a few minor adjustments, it did just what he needed.
 
 1997
 ----
@@ -58,7 +61,7 @@ OpenSSL took over and SSLeay was abandoned.
 
 May: first Debian package.
 
-August: LDAP:// and FILE:// support added. The curl web site gets 1300 visits
+August: LDAP:// and FILE:// support added. The curl website gets 1300 visits
 weekly. Moved site to curl.haxx.nu.
 
 September: Released curl 6.0. 15000 lines of code.
@@ -77,7 +80,7 @@ other software and programs to be based on and powered by libcurl. Almost
 
 June: the curl site moves to "curl.haxx.se"
 
-August, the curl web site gets 4000 visits weekly.
+August, the curl website gets 4000 visits weekly.
 
 The PHP guys adopted libcurl already the same month, when the first ever third
 party libcurl binding showed up. CURL has been a supported module in PHP since
@@ -106,7 +109,7 @@ The first experimental ftps:// support was added.
 
 August: curl is bundled in Mac OS X, 10.1. It was already becoming more and
 more of a standard utility of Linux distributions and a regular in the BSD
-ports collections. The curl web site gets 8000 visits weekly. Curl Corporation
+ports collections. The curl website gets 8000 visits weekly. Curl Corporation
 contacted Daniel to discuss "the name issue". After Daniel's reply, they have
 never since got back in touch again.
 
@@ -117,7 +120,7 @@ without many whistles.
 2002
 ----
 
-June: the curl web site gets 13000 visits weekly. curl and libcurl is
+June: the curl website gets 13000 visits weekly. curl and libcurl is
 35000 lines of code. Reported successful compiles on more than 40 combinations
 of CPUs and operating systems.
 
@@ -126,8 +129,10 @@ impossible. Around 5000 downloaded packages each week from the main site gives
 a hint, but the packages are mirrored extensively, bundled with numerous OS
 distributions and otherwise retrieved as part of other software.
 
-September: with the release of curl 7.10 it is released under the MIT license
+October 1: with the release of curl 7.10 it is released under the MIT license
 only.
+
+Starting with 7.10, curl verifies SSL server certificates by default.
 
 2003
 ----
@@ -135,13 +140,13 @@ only.
 January: Started working on the distributed curl tests. The autobuilds.
 
 February: the curl site averages at 20000 visits weekly. At any given moment,
-there's an average of 3 people browsing the curl.haxx.se site.
+there's an average of 3 people browsing the website.
 
 Multiple new authentication schemes are supported: Digest (May), NTLM (June)
 and Negotiate (June).
 
 November: curl 7.10.8 is released. 45000 lines of code. ~55000 unique visitors
-to the curl.haxx.se site. Five official web mirrors.
+to the website. Five official web mirrors.
 
 December: full-fledged SSL for FTP is supported.
 
@@ -162,7 +167,7 @@ August: Curl and libcurl 7.12.1
     Available command line options:            96
     Available curl_easy_setopt() options:     120
     Number of public functions in libcurl:     36
-    Amount of public web site mirrors:         12
+    Amount of public website mirrors:         12
     Number of known libcurl bindings:          26
 
 2005
@@ -175,7 +180,7 @@ April: Added the multi_socket() API
 
 September: TFTP support was added.
 
-More than 100,000 unique visitors of the curl web site. 25 mirrors.
+More than 100,000 unique visitors of the curl website. 25 mirrors.
 
 December: security vulnerability: libcurl URL Buffer Overflow
 
@@ -283,7 +288,7 @@ April: added the cyassl backend (later renamed to WolfSSL)
 
  March: first real release supporting HTTP/2
 
- September: Web site had 245,000 unique visitors and served 236GB data
+ September: Website had 245,000 unique visitors and served 236GB data
 
  SMB and SMBS support
 
@@ -312,7 +317,7 @@ April: added the cyassl backend (later renamed to WolfSSL)
 
  September: Added Multi-SSL support
 
- The web site serves 3100 GB/month
+ The website serves 3100 GB/month
 
     Public curl releases:         169
     Command line options:         211
@@ -321,6 +326,8 @@ April: added the cyassl backend (later renamed to WolfSSL)
     Contributors:                 1609
 
  October: SSLKEYLOGFILE support, new MIME API
+
+ October: Daniel received the Polhem Prize for his work on curl
 
  November: brotli
 
@@ -351,9 +358,30 @@ April: added the cyassl backend (later renamed to WolfSSL)
     Public functions in libcurl:  80
     Contributors:                 1808
 
+ December: removed axTLS support
+
 2019
 ----
+
+ March: added experimental alt-svc support
 
  August: the first HTTP/3 requests with curl.
 
  September: 7.66.0 is released and the tool offers parallel downloads
+
+2020
+----
+
+ curl and libcurl are installed in an estimated 10 *billion* instances
+ world-wide.
+
+ January: added BearSSL support
+
+ March: removed support for PolarSSL, added wolfSSH support
+
+ April: experimental MQTT support
+
+ August: zstd support
+
+ November: the website moves to www.curl.se. The website serves 10TB data
+ monthly.

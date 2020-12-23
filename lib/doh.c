@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -57,12 +57,13 @@ static const char * const errors[]={
   "Unexpected TYPE",
   "Unexpected CLASS",
   "No content",
-  "Bad ID"
+  "Bad ID",
+  "Name too long"
 };
 
 static const char *doh_strerror(DOHcode code)
 {
-  if((code >= DOH_OK) && (code <= DOH_DNS_BAD_ID))
+  if((code >= DOH_OK) && (code <= DOH_DNS_NAME_TOO_LONG))
     return errors[code];
   return "bad error code";
 }
@@ -348,6 +349,10 @@ static CURLcode dohprobe(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl.fsslctx);
     if(data->set.ssl.fsslctxp)
       ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_DATA, data->set.ssl.fsslctxp);
+    if(data->set.str[STRING_SSL_EC_CURVES]) {
+      ERROR_CHECK_SETOPT(CURLOPT_SSL_EC_CURVES,
+        data->set.str[STRING_SSL_EC_CURVES]);
+    }
 
     doh->set.fmultidone = Curl_doh_done;
     doh->set.dohfor = data; /* identify for which transfer this is done */
@@ -803,6 +808,7 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
 #endif
   CURLcode result = CURLE_OK;
   int i;
+  size_t hostlen = strlen(hostname) + 1; /* include zero terminator */
 
   if(!de)
     /* no input == no output! */
@@ -825,24 +831,14 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
       addrtype = AF_INET;
     }
 
-    ai = calloc(1, sizeof(struct Curl_addrinfo));
+    ai = calloc(1, sizeof(struct Curl_addrinfo) + ss_size + hostlen);
     if(!ai) {
       result = CURLE_OUT_OF_MEMORY;
       break;
     }
-    ai->ai_canonname = strdup(hostname);
-    if(!ai->ai_canonname) {
-      result = CURLE_OUT_OF_MEMORY;
-      free(ai);
-      break;
-    }
-    ai->ai_addr = calloc(1, ss_size);
-    if(!ai->ai_addr) {
-      result = CURLE_OUT_OF_MEMORY;
-      free(ai->ai_canonname);
-      free(ai);
-      break;
-    }
+    ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
+    ai->ai_canonname = (void *)((char *)ai->ai_addr + ss_size);
+    memcpy(ai->ai_canonname, hostname, hostlen);
 
     if(!firstai)
       /* store the pointer we want to return from this function */
@@ -867,7 +863,7 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
       addr = (void *)ai->ai_addr; /* storage area for this info */
       DEBUGASSERT(sizeof(struct in_addr) == sizeof(de->addr[i].ip.v4));
       memcpy(&addr->sin_addr, &de->addr[i].ip.v4, sizeof(struct in_addr));
-      addr->sin_family = (CURL_SA_FAMILY_T)addrtype;
+      addr->sin_family = addrtype;
       addr->sin_port = htons((unsigned short)port);
       break;
 
@@ -876,7 +872,7 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
       addr6 = (void *)ai->ai_addr; /* storage area for this info */
       DEBUGASSERT(sizeof(struct in6_addr) == sizeof(de->addr[i].ip.v6));
       memcpy(&addr6->sin6_addr, &de->addr[i].ip.v6, sizeof(struct in6_addr));
-      addr6->sin6_family = (CURL_SA_FAMILY_T)addrtype;
+      addr6->sin6_family = addrtype;
       addr6->sin6_port = htons((unsigned short)port);
       break;
 #endif

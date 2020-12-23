@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -41,17 +41,19 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
                            const struct sockaddr *addr,
                            socklen_t addrlen);
 CURLcode Curl_quic_is_connected(struct connectdata *conn,
-                                curl_socket_t sockfd,
+                                int sockindex,
                                 bool *connected);
 int Curl_quic_ver(char *p, size_t len);
 CURLcode Curl_quic_done_sending(struct connectdata *conn);
 void Curl_quic_done(struct Curl_easy *data, bool premature);
 bool Curl_quic_data_pending(const struct Curl_easy *data);
+void Curl_quic_disconnect(struct connectdata *conn, int tempindex);
 
 #else /* ENABLE_QUIC */
 #define Curl_quic_done_sending(x)
 #define Curl_quic_done(x,y)
 #define Curl_quic_data_pending(x)
+#define Curl_quic_disconnect(x,y)
 #endif /* !ENABLE_QUIC */
 
 #endif /* HEADER_CURL_QUIC_H */

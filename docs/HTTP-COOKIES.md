@@ -15,7 +15,7 @@
   servers with the Cookie: header.
 
   For a very long time, the only spec explaining how to use cookies was the
-  original [Netscape spec from 1994](https://curl.haxx.se/rfc/cookie_spec.html).
+  original [Netscape spec from 1994](https://curl.se/rfc/cookie_spec.html).
 
   In 2011, [RFC6265](https://www.ietf.org/rfc/rfc6265.txt) was finally
   published and details how cookies work within HTTP. In 2016, an update which
@@ -129,6 +129,6 @@
   Since curl and libcurl are plain HTTP clients without any knowledge of or
   capability to handle javascript, such cookies will not be detected or used.
 
-  Often, if you want to mimic what a browser does on such web sites, you can
+  Often, if you want to mimic what a browser does on such websites, you can
   record web browser HTTP traffic when using such a site and then repeat the
   cookie operations using curl or libcurl.

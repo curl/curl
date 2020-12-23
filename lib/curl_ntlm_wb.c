@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -376,8 +376,7 @@ CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
  * This is for creating ntlm header output by delegating challenge/response
  * to Samba's winbind daemon helper ntlm_auth.
  */
-CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
-                              bool proxy)
+CURLcode Curl_output_ntlm_wb(struct connectdata *conn, bool proxy)
 {
   /* point to the address of the pointer that holds the string to send to the
      server, which is for a plain host or for a HTTP proxy */
@@ -387,6 +386,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   struct ntlmdata *ntlm;
   curlntlm *state;
   struct auth *authp;
+  struct Curl_easy *data = conn->data;
 
   CURLcode res = CURLE_OK;
 
@@ -395,7 +395,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
 
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-    allocuserpwd = &conn->allocptr.proxyuserpwd;
+    allocuserpwd = &data->state.aptr.proxyuserpwd;
     userp = conn->http_proxy.user;
     ntlm = &conn->proxyntlm;
     state = &conn->proxy_ntlm_state;
@@ -405,7 +405,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
 #endif
   }
   else {
-    allocuserpwd = &conn->allocptr.userpwd;
+    allocuserpwd = &data->state.aptr.userpwd;
     userp = conn->user;
     ntlm = &conn->ntlm;
     state = &conn->http_ntlm_state;

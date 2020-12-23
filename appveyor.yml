@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,8 @@ environment:
         PRJ_GEN: "Visual Studio 9 2008"
         PRJ_CFG: Release
         OPENSSL: OFF
-        WINSSL: ON
+        SCHANNEL: ON
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: OFF
         SHARED: ON
@@ -42,7 +43,8 @@ environment:
         TARGET: "-A x64"
         PRJ_CFG: Release
         OPENSSL: ON
-        WINSSL: OFF
+        SCHANNEL: OFF
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: OFF
         SHARED: ON
@@ -54,7 +56,8 @@ environment:
         TARGET: "-A ARM64"
         PRJ_CFG: Release
         OPENSSL: OFF
-        WINSSL: ON
+        SCHANNEL: ON
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: OFF
         SHARED: OFF
@@ -66,7 +69,8 @@ environment:
         PRJ_GEN: "Visual Studio 10 2010 Win64"
         PRJ_CFG: Debug
         OPENSSL: OFF
-        WINSSL: OFF
+        SCHANNEL: OFF
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
@@ -78,11 +82,12 @@ environment:
         TARGET: "-A x64"
         PRJ_CFG: Debug
         OPENSSL: OFF
-        WINSSL: ON
+        SCHANNEL: ON
+        ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "!1139 !1501"
+        DISABLED_TESTS: "~571 !1139 !1501 "
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
@@ -90,11 +95,12 @@ environment:
         TARGET: "-A x64"
         PRJ_CFG: Debug
         OPENSSL: OFF
-        WINSSL: OFF
+        SCHANNEL: OFF
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "!1139 !1501"
+        DISABLED_TESTS: "~571 !1139 !1501"
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
@@ -102,7 +108,8 @@ environment:
         TARGET: "-A x64"
         PRJ_CFG: Debug
         OPENSSL: OFF
-        WINSSL: OFF
+        SCHANNEL: OFF
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: ON
         TESTING: ON
         SHARED: OFF
@@ -114,7 +121,8 @@ environment:
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
         OPENSSL: OFF
-        WINSSL: ON
+        SCHANNEL: ON
+        ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
@@ -127,7 +135,8 @@ environment:
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
         OPENSSL: OFF
-        WINSSL: ON
+        SCHANNEL: ON
+        ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
@@ -140,7 +149,8 @@ environment:
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
         OPENSSL: OFF
-        WINSSL: ON
+        SCHANNEL: ON
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
@@ -153,7 +163,8 @@ environment:
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
         OPENSSL: OFF
-        WINSSL: OFF
+        SCHANNEL: OFF
+        ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
@@ -221,12 +232,12 @@ environment:
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 ~1056 !1233"
-        CONFIG_ARGS: "--enable-debug --enable-werror --enable-alt-svc --disable-threaded-resolver --disable-proxy"
+        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 !504 !704 !705 ~1056 !1233"
-        CONFIG_ARGS: "--enable-debug --enable-werror --enable-alt-svc --disable-threaded-resolver"
+        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: autotools
         TESTING: ON
@@ -244,12 +255,13 @@ build_script:
         -G"%PRJ_GEN%"
         %TARGET%
         -DCMAKE_USE_OPENSSL=%OPENSSL%
-        -DCMAKE_USE_WINSSL=%WINSSL%
+        -DCMAKE_USE_SCHANNEL=%SCHANNEL%
         -DHTTP_ONLY=%HTTP_ONLY%
         -DBUILD_SHARED_LIBS=%SHARED%
         -DBUILD_TESTING=%TESTING%
         -DCURL_WERROR=ON
         -DENABLE_DEBUG=ON
+        -DENABLE_UNICODE=%ENABLE_UNICODE%
         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=""
         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
         -DCMAKE_INSTALL_PREFIX="C:/CURL"
@@ -279,13 +291,21 @@ build_script:
       if %BUILD_SYSTEM%==autotools (
         bash.exe -e -l -c "cd /c/projects/curl && ./buildconf && ./configure %CONFIG_ARGS% && make && make examples && cd tests && make"
       )))))
+    - if %TESTING%==ON (
+        if %BUILD_SYSTEM%==CMake (
+          cmake --build . --config %PRJ_CFG% --parallel 2 --target testdeps
+      ))
 
 test_script:
     - if %TESTING%==ON (
-        echo APPVEYOR_API_URL=%APPVEYOR_API_URL% &&
-        bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -b$(($(echo '%APPVEYOR_API_URL%' | cut -d'/' -f3 | cut -d':' -f2)+1)) -p !flaky %DISABLED_TESTS%" )
+        if %BUILD_SYSTEM%==CMake (
+          set TFLAGS=%DISABLED_TESTS% &&
+          cmake --build . --config %PRJ_CFG% --target test-nonflaky
+        ) else (
+          echo APPVEYOR_API_URL=%APPVEYOR_API_URL% &&
+          bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -p !flaky %DISABLED_TESTS%" ))
 
-# whitelist branches to avoid testing feature branches twice (as branch and as pull request)
+# select branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
     only:
         - master
@@ -294,5 +314,5 @@ branches:
 artifacts:
   - path: '**/curl.exe'
     name: curl
-  - path: '**/libcurl.dll'
+  - path: '**/*curl*.dll'
     name: libcurl

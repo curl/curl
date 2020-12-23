@@ -32,9 +32,6 @@ HTTP, urlglob retrieval with bad range
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <errorcode>
 3
 </errorcode>

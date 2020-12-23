@@ -59,16 +59,15 @@ http://åäö.se:%HTTPPORT/2046 --resolve xn--4cab6c.se:%HTTPPORT:%HOSTIP -w "%{
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /2046 HTTP/1.1
 Host: xn--4cab6c.se:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /20460001 HTTP/1.1
 Host: xn--4cab6c.se:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

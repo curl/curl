@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -322,7 +322,7 @@ static CURLcode wssh_setup_connection(struct connectdata *conn)
 {
   struct SSHPROTO *ssh;
 
-  conn->data->req.protop = ssh = calloc(1, sizeof(struct SSHPROTO));
+  conn->data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
 
@@ -356,7 +356,7 @@ static CURLcode wssh_connect(struct connectdata *conn, bool *done)
   int rc;
 
   /* initialize per-handle data if not already */
-  if(!data->req.protop)
+  if(!data->req.p.ssh)
     wssh_setup_connection(conn);
 
   /* We default to persistent connections. We set this already in this connect
@@ -429,7 +429,7 @@ static CURLcode wssh_statemach_act(struct connectdata *conn, bool *block)
   CURLcode result = CURLE_OK;
   struct ssh_conn *sshc = &conn->proto.sshc;
   struct Curl_easy *data = conn->data;
-  struct SSHPROTO *sftp_scp = data->req.protop;
+  struct SSHPROTO *sftp_scp = data->req.p.ssh;
   WS_SFTPNAME *name;
   int rc = 0;
   *block = FALSE; /* we're not blocking by default */
@@ -1027,7 +1027,7 @@ static CURLcode wssh_block_statemach(struct connectdata *conn,
 static CURLcode wssh_done(struct connectdata *conn, CURLcode status)
 {
   CURLcode result = CURLE_OK;
-  struct SSHPROTO *sftp_scp = conn->data->req.protop;
+  struct SSHPROTO *sftp_scp = conn->data->req.p.ssh;
 
   if(!status) {
     /* run the state-machine */

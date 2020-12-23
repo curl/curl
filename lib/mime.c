@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -595,7 +595,6 @@ static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
         switch(qp_lookahead_eol(st, ateof, consumed)) {
         case -1:        /* Need more data. */
           return cursize;
-          break;
         case 0:         /* Not followed by a CRLF. */
           softlinebreak = 1;
           break;
@@ -1420,7 +1419,7 @@ CURLcode curl_mime_data(curl_mimepart *part,
 
     if(datasize)
       memcpy(part->data, data, datasize);
-    part->data[datasize] = '\0';    /* Set a nul terminator as sentinel. */
+    part->data[datasize] = '\0';    /* Set a null terminator as sentinel. */
 
     part->readfunc = mime_mem_read;
     part->seekfunc = mime_mem_seek;

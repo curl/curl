@@ -21,31 +21,44 @@ jobs:
         build:
         - name: normal
           install: nghttp2
+          macosx-version-min: 10.9
         - name: debug
           install: nghttp2
-          configure: --enable-debug --enable-werror --without-brotli --enable-mqtt
+          configure: --enable-debug --enable-mqtt
+          macosx-version-min: 10.9
         - name: libssh2
           install: nghttp2 libssh2
           configure: --enable-debug --with-libssh2
+          macosx-version-min: 10.9
         - name: c-ares
           install: nghttp2
           configure: --enable-debug --enable-ares
+          macosx-version-min: 10.9
         - name: HTTP only
           install: nghttp2
-          configure: --enable-debug --enable-werror --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libmetalink --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
+          configure: --enable-debug --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libmetalink --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
+          macosx-version-min: 10.15
         - name: SecureTransport metalink
           install: nghttp2 openssl libmetalink
-          configure: --enable-debug --without-ssl --with-darwinssl --with-libmetalink
+          configure: --enable-debug --without-ssl --with-secure-transport --with-libmetalink
+          macosx-version-min: 10.8
         - name: OpenSSL metalink
           install: nghttp2 openssl libmetalink
           configure: --enable-debug --with-ssl=/usr/local/opt/openssl --with-libmetalink
+          macosx-version-min: 10.9
         - name: LibreSSL metalink
           install: nghttp2 libressl libmetalink
           configure: --enable-debug --with-ssl=/usr/local/opt/libressl --with-libmetalink
+          macosx-version-min: 10.9
         - name: torture
           install: nghttp2 openssl
-          configure: --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
+          configure: --enable-debug --disable-shared --disable-threaded-resolver
           tflags: -n -t --shallow=25 !FTP
+          macosx-version-min: 10.9
+        - name: macOS 10.15
+          install: nghttp2 libmetalink libssh2
+          configure: --enable-debug --disable-ldap
+          macosx-version-min: 10.15
     steps:
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
@@ -55,8 +68,11 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - run: ./buildconf && ./configure ${{ matrix.build.configure }}
+    - run: ./buildconf && ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
       name: 'configure'
+      env:
+        # -Wvla is caused by brotli
+        CFLAGS: "-Wno-vla -mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
 
     - run: make
       name: 'make'
@@ -76,10 +92,13 @@ jobs:
         compiler:
         - CC: clang
           CXX: clang++
+          CFLAGS: "-mmacosx-version-min=10.15"
         - CC: gcc-8
           CXX: g++-8
+          CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
         - CC: gcc-9
           CXX: g++-9
+          CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
         build:
         - name: OpenSSL
           install: nghttp2 openssl
@@ -96,7 +115,7 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - run: cmake -H. -Bbuild ${{ matrix.build.generate }}
+    - run: cmake -H. -Bbuild -DCURL_WERROR=ON -DPICKY_COMPILER=ON ${{ matrix.build.generate }}
       name: 'cmake generate'
 
     - run: cmake --build build

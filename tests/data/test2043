@@ -10,7 +10,7 @@ HTTP GET
 # Client-side
 <client>
 <features>
-WinSSL
+Schannel
 </features>
 <server>
 none

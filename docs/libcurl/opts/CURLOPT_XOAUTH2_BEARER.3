@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_XOAUTH2_BEARER \- specify OAuth 2.0 access token
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_XOAUTH2_BEARER, char *token);
 .SH DESCRIPTION
-Pass a char * as parameter, which should point to the zero terminated OAuth
+Pass a char * as parameter, which should point to the null-terminated OAuth
 2.0 Bearer Access Token for use with HTTP, IMAP, POP3 and SMTP servers
 that support the OAuth 2.0 Authorization Framework.
 

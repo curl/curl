@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -48,24 +48,24 @@ int Curl_SOCKS_getsock(struct connectdata *conn,
  * This function logs in to a SOCKS4(a) proxy and sends the specifics to the
  * final destination server.
  */
-CURLcode Curl_SOCKS4(const char *proxy_name,
-                     const char *hostname,
-                     int remote_port,
-                     int sockindex,
-                     struct connectdata *conn,
-                     bool *done);
+CURLproxycode Curl_SOCKS4(const char *proxy_name,
+                          const char *hostname,
+                          int remote_port,
+                          int sockindex,
+                          struct connectdata *conn,
+                          bool *done);
 
 /*
  * This function logs in to a SOCKS5 proxy and sends the specifics to the
  * final destination server.
  */
-CURLcode Curl_SOCKS5(const char *proxy_name,
-                     const char *proxy_password,
-                     const char *hostname,
-                     int remote_port,
-                     int sockindex,
-                     struct connectdata *conn,
-                     bool *done);
+CURLproxycode Curl_SOCKS5(const char *proxy_name,
+                          const char *proxy_password,
+                          const char *hostname,
+                          int remote_port,
+                          int sockindex,
+                          struct connectdata *conn,
+                          bool *done);
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
 /*

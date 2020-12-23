@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,10 +21,17 @@
  ***************************************************************************/
 #include "tool_filetime.h"
 
+#include "curlx.h"
+
 #ifdef HAVE_UTIME_H
 #  include <utime.h>
 #elif defined(HAVE_SYS_UTIME_H)
 #  include <sys/utime.h>
+#endif
+
+#if defined(__GNUC__) && defined(__MINGW32__)
+/* GCC 10 on mingw has issues with this, disable */
+#pragma GCC diagnostic ignored "-Wformat"
 #endif
 
 curl_off_t getfiletime(const char *filename, FILE *error_stream)
@@ -36,11 +43,13 @@ curl_off_t getfiletime(const char *filename, FILE *error_stream)
    access to a 64-bit type we can bypass stat and get the times directly. */
 #if defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)
   HANDLE hfile;
+  TCHAR *tchar_filename = curlx_convert_UTF8_to_tchar((char *)filename);
 
-  hfile = CreateFileA(filename, FILE_READ_ATTRIBUTES,
+  hfile = CreateFile(tchar_filename, FILE_READ_ATTRIBUTES,
                       (FILE_SHARE_READ | FILE_SHARE_WRITE |
                        FILE_SHARE_DELETE),
                       NULL, OPEN_EXISTING, 0, NULL);
+  curlx_unicodefree(tchar_filename);
   if(hfile != INVALID_HANDLE_VALUE) {
     FILETIME ft;
     if(GetFileTime(hfile, NULL, NULL, &ft)) {
@@ -93,6 +102,7 @@ void setfiletime(curl_off_t filetime, const char *filename,
    access to a 64-bit type we can bypass utime and set the times directly. */
 #if defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)
     HANDLE hfile;
+    TCHAR *tchar_filename = curlx_convert_UTF8_to_tchar((char *)filename);
 
     /* 910670515199 is the maximum unix filetime that can be used as a
        Windows FILETIME without overflow: 30827-12-31T23:59:59. */
@@ -100,13 +110,15 @@ void setfiletime(curl_off_t filetime, const char *filename,
       fprintf(error_stream,
               "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
               " on outfile: overflow\n", filetime);
+      curlx_unicodefree(tchar_filename);
       return;
     }
 
-    hfile = CreateFileA(filename, FILE_WRITE_ATTRIBUTES,
+    hfile = CreateFile(tchar_filename, FILE_WRITE_ATTRIBUTES,
                         (FILE_SHARE_READ | FILE_SHARE_WRITE |
                          FILE_SHARE_DELETE),
                         NULL, OPEN_EXISTING, 0, NULL);
+    curlx_unicodefree(tchar_filename);
     if(hfile != INVALID_HANDLE_VALUE) {
       curl_off_t converted = ((curl_off_t)filetime * 10000000) +
                              CURL_OFF_T_C(116444736000000000);

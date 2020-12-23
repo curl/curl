@@ -33,7 +33,7 @@ in the master branch using pull-requests, just like ordinary changes.
 
 Build (patched) OpenSSL
 
-     % git clone --depth 1 -b OpenSSL_1_1_1d-quic-draft-27 https://github.com/tatsuhiro-t/openssl
+     % git clone --depth 1 -b OpenSSL_1_1_1g-quic-draft-29 https://github.com/tatsuhiro-t/openssl
      % cd openssl
      % ./config enable-tls1_3 --prefix=<somewhere1>
      % make
@@ -55,7 +55,7 @@ Build ngtcp2
      % git clone https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -i
-     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3>
+     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
      % make
      % make install
 
@@ -65,14 +65,14 @@ Build curl
      % git clone https://github.com/curl/curl
      % cd curl
      % ./buildconf
-     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-ssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3> --enable-alt-svc
+     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-ssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
 
 ## Build with GnuTLS
 
-Build (patched) GnuTLS
+Build GnuTLS
 
-     % git clone --depth 1 -b tmp-quic https://gitlab.com/gnutls/gnutls.git
+     % git clone --depth 1 https://gitlab.com/gnutls/gnutls.git
      % cd gnutls
      % ./bootstrap
      % ./configure --disable-doc --prefix=<somewhere1>
@@ -95,7 +95,7 @@ Build ngtcp2
      % git clone https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -i
-     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3>
+     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
      % make
      % make install
 
@@ -105,7 +105,7 @@ Build curl
      % git clone https://github.com/curl/curl
      % cd curl
      % ./buildconf
-     % ./configure --without-ssl --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3> --enable-alt-svc
+     % ./configure --without-ssl --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
 
 # quiche version
@@ -115,9 +115,10 @@ Build curl
 Build quiche and BoringSSL:
 
      % git clone --recursive https://github.com/cloudflare/quiche
+     % cd quiche
      % cargo build --release --features pkg-config-meta,qlog
-     % mkdir deps/boringssl/lib
-     % ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/lib/
+     % mkdir deps/boringssl/src/lib
+     % ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
 
 Build curl:
 
@@ -125,7 +126,7 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % ./buildconf
-     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-ssl=$PWD/../quiche/deps/boringssl --with-quiche=$PWD/../quiche/target/release --enable-alt-svc
+     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-ssl=$PWD/../quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
      % make
 
 ## Run

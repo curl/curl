@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,6 +31,9 @@
 
 #ifdef USE_MBEDTLS
 
+/* Define this to enable lots of debugging for mbedTLS */
+/* #define MBEDTLS_DEBUG */
+
 #include <mbedtls/version.h>
 #if MBEDTLS_VERSION_NUMBER >= 0x02040000
 #include <mbedtls/net_sockets.h>
@@ -45,6 +48,12 @@
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/sha256.h>
+
+#if MBEDTLS_VERSION_MAJOR >= 2
+#  ifdef MBEDTLS_DEBUG
+#    include <mbedtls/debug.h>
+#  endif
+#endif
 
 #include "urldata.h"
 #include "sendf.h"
@@ -112,9 +121,6 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 /* end of entropy_func_mutex() */
 
 #endif /* THREADING_SUPPORT */
-
-/* Define this to enable lots of debugging for mbedTLS */
-#undef MBEDTLS_DEBUG
 
 #ifdef MBEDTLS_DEBUG
 static void mbed_debug(void *context, int level, const char *f_name,
@@ -244,11 +250,16 @@ mbed_connect_step1(struct connectdata *conn,
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
-  char * const ssl_cert = SSL_SET_OPTION(cert);
+  char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
   const char * const ssl_crlfile = SSL_SET_OPTION(CRLfile);
+#ifndef CURL_DISABLE_PROXY
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
+#else
+  const char * const hostname = conn->host.name;
+  const long int port = conn->remote_port;
+#endif
   int ret = -1;
   char errorbuf[128];
   errorbuf[0] = 0;
@@ -538,9 +549,14 @@ mbed_connect_step2(struct connectdata *conn,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   const mbedtls_x509_crt *peercert;
+#ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = SSL_IS_PROXY() ?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+#else
+  const char * const pinnedpubkey =
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+#endif
 
   conn->recv[sockindex] = mbed_recv;
   conn->send[sockindex] = mbed_send;

@@ -69,12 +69,10 @@ Use -K with --next and --config from within
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
 POST /4320001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 a: a
 Content-Length: 1
@@ -82,6 +80,7 @@ Content-Type: application/x-www-form-urlencoded
 
 aPOST /4320002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 b: b
 Content-Length: 1
@@ -89,6 +88,7 @@ Content-Type: application/x-www-form-urlencoded
 
 bPOST /4320003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 c: c
 Content-Length: 1

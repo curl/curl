@@ -65,18 +65,16 @@ http://%HOSTIP:%HTTPPORT/2061 -u testuser:testpass --digest
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /2061 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /2061 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/2061", response="9dc55255f1a2537b838311674b621d45346b862a81631bb20e4ce356ef25062d", algorithm=SHA-256
-User-Agent: curl/7.10.5 (i686-pc-linux-gnu) libcurl/7.10.5 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

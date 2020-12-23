@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -274,7 +274,7 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
   curl_fnmatch_callback compare;
   struct WildcardData *wc = &conn->data->wildcard;
   struct ftp_wc *ftpwc = wc->protdata;
-  struct curl_llist *llist = &wc->filelist;
+  struct Curl_llist *llist = &wc->filelist;
   struct ftp_parselist_data *parser = ftpwc->parser;
   bool add = TRUE;
   struct curl_fileinfo *finfo = &infop->info;
@@ -418,8 +418,8 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
             finfo->b_data[parser->item_length - 1] = 0;
             if(strncmp("total ", finfo->b_data, 6) == 0) {
               char *endptr = finfo->b_data + 6;
-              /* here we can deal with directory size, pass the leading white
-                 spaces and then the digits */
+              /* here we can deal with directory size, pass the leading
+                 whitespace and then the digits */
               while(ISSPACE(*endptr))
                 endptr++;
               while(ISDIGIT(*endptr))

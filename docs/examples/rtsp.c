@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2019, Jim Hollinger
+ * Copyright (c) 2011 - 2020, Jim Hollinger
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -192,7 +192,7 @@ int main(int argc, char * const argv[])
   char *base_name = NULL;
 
   printf("\nRTSP request %s\n", VERSION_STR);
-  printf("    Project web site: "
+  printf("    Project website: "
     "https://github.com/BackupGGCode/rtsprequest\n");
   printf("    Requires curl V7.20 or greater\n\n");
 

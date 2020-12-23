@@ -38,8 +38,8 @@ nothing
 <file name="log/memdump">
 MEM lib558.c: malloc()
 MEM lib558.c: free()
-MEM strdup.c: realloc()
-MEM strdup.c: realloc()
+MEM dynbuf.c: realloc()
+MEM dynbuf.c: realloc()
 MEM escape.c: free()
 </file>
 <stripfile>
@@ -49,6 +49,8 @@ s/\(.*\)/()/
 s/:\d+/:/
 s:^(MEM |FD )(.*/)(.*):$1$3:
 s/\r\n/\n/
+s/^MEM getenv.c: realloc\(\)[\n]$//
+s/^MEM getenv.c: free\(\)[\n]$//
 </stripfile>
 </verify>
 

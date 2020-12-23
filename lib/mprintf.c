@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -99,12 +99,12 @@ static const char lower_digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 /* Upper-case digits.  */
 static const char upper_digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-#define OUTCHAR(x) \
-  do{ \
+#define OUTCHAR(x)                                     \
+  do {                                                 \
     if(stream((unsigned char)(x), (FILE *)data) != -1) \
-      done++; \
-    else \
-     return done; /* return immediately on failure */ \
+      done++;                                          \
+    else                                               \
+      return done; /* return immediately on failure */ \
   } while(0)
 
 /* Data type to read from the arglist */
@@ -169,7 +169,7 @@ struct nsprintf {
 };
 
 struct asprintf {
-  struct dynbuf b;
+  struct dynbuf *b;
   bool fail; /* if an alloc has failed and thus the output is not the complete
                 data */
 };
@@ -178,12 +178,14 @@ static long dprintf_DollarString(char *input, char **end)
 {
   int number = 0;
   while(ISDIGIT(*input)) {
-    number *= 10;
-    number += *input-'0';
+    if(number < MAX_PARAMETERS) {
+      number *= 10;
+      number += *input - '0';
+    }
     input++;
   }
-  if(number && ('$'==*input++)) {
-    *end = input;
+  if(number <= MAX_PARAMETERS && ('$' == *input)) {
+    *end = ++input;
     return number;
   }
   return 0;
@@ -377,6 +379,8 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
           if(width > max_param)
             max_param = width;
           break;
+        case '\0':
+          fmt--;
         default:
           break;
         }
@@ -458,6 +462,9 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
         /* we have the width specified from a parameter, so we make that
            parameter's info setup properly */
         long k = width - 1;
+        if((k < 0) || (k >= MAX_PARAMETERS))
+          /* out of allowed range */
+          return 1;
         vto[i].width = k;
         vto[k].type = FORMAT_WIDTH;
         vto[k].flags = FLAGS_NEW;
@@ -469,6 +476,9 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
         /* we have the precision specified from a parameter, so we make that
            parameter's info setup properly */
         long k = precision - 1;
+        if((k < 0) || (k >= MAX_PARAMETERS))
+          /* out of allowed range */
+          return 1;
         vto[i].precision = k;
         vto[k].type = FORMAT_WIDTH;
         vto[k].flags = FLAGS_NEW;
@@ -476,7 +486,7 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
         vto[k].width = 0;
         vto[k].precision = 0;
       }
-      *endpos++ = fmt + 1; /* end of this sequence */
+      *endpos++ = fmt + ((*fmt == '\0') ? 0 : 1); /* end of this sequence */
     }
   }
 
@@ -754,7 +764,7 @@ static int dprintf_formatf(
 
       if(prec > 0) {
         width -= prec;
-        while(prec-- > 0)
+        while(prec-- > 0 && w >= work)
           *w-- = '0';
       }
 
@@ -868,7 +878,7 @@ static int dprintf_formatf(
               OUTCHAR(' ');
           for(point = strnil; *point != '\0'; ++point)
             OUTCHAR(*point);
-          if(! (p->flags & FLAGS_LEFT))
+          if(!(p->flags & FLAGS_LEFT))
             while(width-- > 0)
               OUTCHAR(' ');
         }
@@ -918,6 +928,8 @@ static int dprintf_formatf(
              precision */
           size_t maxprec = sizeof(work) - 2;
           double val = p->data.dnum;
+          if(width > 0 && prec <= width)
+            maxprec -= width;
           while(val >= 10.0) {
             val /= 10;
             maxprec--;
@@ -925,6 +937,8 @@ static int dprintf_formatf(
 
           if(prec > (long)maxprec)
             prec = (long)maxprec-1;
+          if(prec < 0)
+            prec = 0;
           /* RECURSIVE USAGE */
           len = curl_msnprintf(fptr, left, ".%ld", prec);
           fptr += len;
@@ -1028,48 +1042,59 @@ static int alloc_addbyter(int output, FILE *data)
   struct asprintf *infop = (struct asprintf *)data;
   unsigned char outc = (unsigned char)output;
 
-  if(Curl_dyn_addn(&infop->b, &outc, 1)) {
+  if(Curl_dyn_addn(infop->b, &outc, 1)) {
     infop->fail = 1;
     return -1; /* fail */
   }
   return outc; /* fputc() returns like this on success */
 }
 
-char *curl_maprintf(const char *format, ...)
+extern int Curl_dyn_vprintf(struct dynbuf *dyn,
+                            const char *format, va_list ap_save);
+
+/* appends the formatted string, returns 0 on success, 1 on error */
+int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
 {
-  va_list ap_save; /* argument pointer */
   int retcode;
   struct asprintf info;
-  Curl_dyn_init(&info.b, DYN_APRINTF);
+  info.b = dyn;
   info.fail = 0;
 
-  va_start(ap_save, format);
   retcode = dprintf_formatf(&info, alloc_addbyter, format, ap_save);
-  va_end(ap_save);
   if((-1 == retcode) || info.fail) {
-    Curl_dyn_free(&info.b);
-    return NULL;
+    Curl_dyn_free(info.b);
+    return 1;
   }
-  if(Curl_dyn_len(&info.b))
-    return Curl_dyn_ptr(&info.b);
-  return strdup("");
+  return 0;
 }
 
 char *curl_mvaprintf(const char *format, va_list ap_save)
 {
   int retcode;
   struct asprintf info;
-  Curl_dyn_init(&info.b, DYN_APRINTF);
+  struct dynbuf dyn;
+  info.b = &dyn;
+  Curl_dyn_init(info.b, DYN_APRINTF);
   info.fail = 0;
 
   retcode = dprintf_formatf(&info, alloc_addbyter, format, ap_save);
   if((-1 == retcode) || info.fail) {
-    Curl_dyn_free(&info.b);
+    Curl_dyn_free(info.b);
     return NULL;
   }
-  if(Curl_dyn_len(&info.b))
-    return Curl_dyn_ptr(&info.b);
+  if(Curl_dyn_len(info.b))
+    return Curl_dyn_ptr(info.b);
   return strdup("");
+}
+
+char *curl_maprintf(const char *format, ...)
+{
+  va_list ap_save;
+  char *s;
+  va_start(ap_save, format);
+  s = curl_mvaprintf(format, ap_save);
+  va_end(ap_save);
+  return s;
 }
 
 static int storebuffer(int output, FILE *data)

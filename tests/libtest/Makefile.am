@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -44,8 +44,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/lib
 endif
 
-EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl \
-  test1022.pl Makefile.inc notexists.pl CMakeLists.txt mk-lib1521.pl
+EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl test1022.pl   \
+  Makefile.inc notexists.pl CMakeLists.txt mk-lib1521.pl .checksrc
 
 CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 
@@ -91,8 +91,11 @@ libhostname_la_CPPFLAGS_EXTRA =
 libhostname_la_LDFLAGS_EXTRA = -module -avoid-version -rpath /nowhere
 libhostname_la_CFLAGS_EXTRA =
 
+libstubgss_la_LDFLAGS_EXTRA =
+
 if CURL_LT_SHLIB_USE_NO_UNDEFINED
 libhostname_la_LDFLAGS_EXTRA += -no-undefined
+libstubgss_la_LDFLAGS_EXTRA += -no-undefined
 endif
 
 if CURL_LT_SHLIB_USE_MIMPURE_TEXT
@@ -118,7 +121,7 @@ if BUILD_STUB_GSS
 noinst_LTLIBRARIES += libstubgss.la
 
 libstubgss_la_CPPFLAGS = $(AM_CPPFLAGS)
-libstubgss_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -rpath /nowhere
+libstubgss_la_LDFLAGS = $(AM_LDFLAGS) $(libstubgss_la_LDFLAGS_EXTRA) -avoid-version -rpath /nowhere
 libstubgss_la_CFLAGS = $(AM_CFLAGS) -g
 
 libstubgss_la_SOURCES = stub_gssapi.c stub_gssapi.h
@@ -137,7 +140,7 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.[ch]
+	$(CHECKSRC)@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(srcdir) $(srcdir)/*.[ch]
 
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes

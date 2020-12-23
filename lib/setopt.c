@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,6 +30,8 @@
 
 #ifdef HAVE_LINUX_TCP_H
 #include <linux/tcp.h>
+#elif defined(HAVE_NETINET_TCP_H)
+#include <netinet/tcp.h>
 #endif
 
 #include "urldata.h"
@@ -45,6 +47,7 @@
 #include "setopt.h"
 #include "multiif.h"
 #include "altsvc.h"
+#include "hsts.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -271,9 +274,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Do not include the body part in the output data stream.
      */
     data->set.opt_no_body = (0 != va_arg(param, long)) ? TRUE : FALSE;
+#ifndef CURL_DISABLE_HTTP
     if(data->set.opt_no_body)
       /* in HTTP lingo, no body means using the HEAD request... */
       data->set.method = HTTPREQ_HEAD;
+    else if(data->set.method == HTTPREQ_HEAD)
+      data->set.method = HTTPREQ_GET;
+#endif
     break;
   case CURLOPT_FAILONERROR:
     /*
@@ -428,104 +435,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       primary->version_max = version_max;
     }
 #else
-    result = CURLE_UNKNOWN_OPTION;
+    result = CURLE_NOT_BUILT_IN;
 #endif
     break;
 
-#ifndef CURL_DISABLE_HTTP
-  case CURLOPT_AUTOREFERER:
-    /*
-     * Switch on automatic referer that gets set if curl follows locations.
-     */
-    data->set.http_auto_referer = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    break;
-
-  case CURLOPT_ACCEPT_ENCODING:
-    /*
-     * String to use at the value of Accept-Encoding header.
-     *
-     * If the encoding is set to "" we use an Accept-Encoding header that
-     * encompasses all the encodings we support.
-     * If the encoding is set to NULL we don't send an Accept-Encoding header
-     * and ignore an received Content-Encoding header.
-     *
-     */
-    argptr = va_arg(param, char *);
-    if(argptr && !*argptr) {
-      argptr = Curl_all_content_encodings();
-      if(!argptr)
-        result = CURLE_OUT_OF_MEMORY;
-      else {
-        result = Curl_setstropt(&data->set.str[STRING_ENCODING], argptr);
-        free(argptr);
-      }
-    }
-    else
-      result = Curl_setstropt(&data->set.str[STRING_ENCODING], argptr);
-    break;
-
-  case CURLOPT_TRANSFER_ENCODING:
-    data->set.http_transfer_encoding = (0 != va_arg(param, long)) ?
-      TRUE : FALSE;
-    break;
-
-  case CURLOPT_FOLLOWLOCATION:
-    /*
-     * Follow Location: header hints on a HTTP-server.
-     */
-    data->set.http_follow_location = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    break;
-
-  case CURLOPT_UNRESTRICTED_AUTH:
-    /*
-     * Send authentication (user+password) when following locations, even when
-     * hostname changed.
-     */
-    data->set.allow_auth_to_other_hosts =
-      (0 != va_arg(param, long)) ? TRUE : FALSE;
-    break;
-
-  case CURLOPT_MAXREDIRS:
-    /*
-     * The maximum amount of hops you allow curl to follow Location:
-     * headers. This should mostly be used to detect never-ending loops.
-     */
-    arg = va_arg(param, long);
-    if(arg < -1)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.maxredirs = arg;
-    break;
-
-  case CURLOPT_POSTREDIR:
-    /*
-     * Set the behaviour of POST when redirecting
-     * CURL_REDIR_GET_ALL - POST is changed to GET after 301 and 302
-     * CURL_REDIR_POST_301 - POST is kept as POST after 301
-     * CURL_REDIR_POST_302 - POST is kept as POST after 302
-     * CURL_REDIR_POST_303 - POST is kept as POST after 303
-     * CURL_REDIR_POST_ALL - POST is kept as POST after 301, 302 and 303
-     * other - POST is kept as POST after 301 and 302
-     */
-    arg = va_arg(param, long);
-    if(arg < CURL_REDIR_GET_ALL)
-      /* no return error on too high numbers since the bitmask could be
-         extended in a future */
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.keep_post = arg & CURL_REDIR_POST_ALL;
-    break;
-
-  case CURLOPT_POST:
-    /* Does this option serve a purpose anymore? Yes it does, when
-       CURLOPT_POSTFIELDS isn't used and the POST data is read off the
-       callback! */
-    if(va_arg(param, long)) {
-      data->set.method = HTTPREQ_POST;
-      data->set.opt_no_body = FALSE; /* this is implied */
-    }
-    else
-      data->set.method = HTTPREQ_GET;
-    break;
-
+    /* MQTT "borrows" some of the HTTP options */
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
   case CURLOPT_COPYPOSTFIELDS:
     /*
      * A string with POST data. Makes curl HTTP POST. Even if it is NULL.
@@ -620,6 +535,100 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
     data->set.postfieldsize = bigsize;
     break;
+#endif
+#ifndef CURL_DISABLE_HTTP
+  case CURLOPT_AUTOREFERER:
+    /*
+     * Switch on automatic referer that gets set if curl follows locations.
+     */
+    data->set.http_auto_referer = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+
+  case CURLOPT_ACCEPT_ENCODING:
+    /*
+     * String to use at the value of Accept-Encoding header.
+     *
+     * If the encoding is set to "" we use an Accept-Encoding header that
+     * encompasses all the encodings we support.
+     * If the encoding is set to NULL we don't send an Accept-Encoding header
+     * and ignore an received Content-Encoding header.
+     *
+     */
+    argptr = va_arg(param, char *);
+    if(argptr && !*argptr) {
+      argptr = Curl_all_content_encodings();
+      if(!argptr)
+        result = CURLE_OUT_OF_MEMORY;
+      else {
+        result = Curl_setstropt(&data->set.str[STRING_ENCODING], argptr);
+        free(argptr);
+      }
+    }
+    else
+      result = Curl_setstropt(&data->set.str[STRING_ENCODING], argptr);
+    break;
+
+  case CURLOPT_TRANSFER_ENCODING:
+    data->set.http_transfer_encoding = (0 != va_arg(param, long)) ?
+      TRUE : FALSE;
+    break;
+
+  case CURLOPT_FOLLOWLOCATION:
+    /*
+     * Follow Location: header hints on a HTTP-server.
+     */
+    data->set.http_follow_location = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+
+  case CURLOPT_UNRESTRICTED_AUTH:
+    /*
+     * Send authentication (user+password) when following locations, even when
+     * hostname changed.
+     */
+    data->set.allow_auth_to_other_hosts =
+      (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+
+  case CURLOPT_MAXREDIRS:
+    /*
+     * The maximum amount of hops you allow curl to follow Location:
+     * headers. This should mostly be used to detect never-ending loops.
+     */
+    arg = va_arg(param, long);
+    if(arg < -1)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.maxredirs = arg;
+    break;
+
+  case CURLOPT_POSTREDIR:
+    /*
+     * Set the behaviour of POST when redirecting
+     * CURL_REDIR_GET_ALL - POST is changed to GET after 301 and 302
+     * CURL_REDIR_POST_301 - POST is kept as POST after 301
+     * CURL_REDIR_POST_302 - POST is kept as POST after 302
+     * CURL_REDIR_POST_303 - POST is kept as POST after 303
+     * CURL_REDIR_POST_ALL - POST is kept as POST after 301, 302 and 303
+     * other - POST is kept as POST after 301 and 302
+     */
+    arg = va_arg(param, long);
+    if(arg < CURL_REDIR_GET_ALL)
+      /* no return error on too high numbers since the bitmask could be
+         extended in a future */
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.keep_post = arg & CURL_REDIR_POST_ALL;
+    break;
+
+  case CURLOPT_POST:
+    /* Does this option serve a purpose anymore? Yes it does, when
+       CURLOPT_POSTFIELDS isn't used and the POST data is read off the
+       callback! */
+    if(va_arg(param, long)) {
+      data->set.method = HTTPREQ_POST;
+      data->set.opt_no_body = FALSE; /* this is implied */
+    }
+    else
+      data->set.method = HTTPREQ_GET;
+    break;
 
   case CURLOPT_HTTPPOST:
     /*
@@ -629,6 +638,20 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.method = HTTPREQ_POST_FORM;
     data->set.opt_no_body = FALSE; /* this is implied */
     break;
+
+  case CURLOPT_AWS_SIGV4:
+    /*
+     * String that holds file type of the SSL certificate to use
+     */
+    result = Curl_setstropt(&data->set.str[STRING_AWS_SIGV4],
+                            va_arg(param, char *));
+    /*
+     * Basic been set by default it need to be unset here
+     */
+    if(data->set.str[STRING_AWS_SIGV4])
+      data->set.httpauth = CURLAUTH_AWS_SIGV4;
+    break;
+
 #endif   /* CURL_DISABLE_HTTP */
 
   case CURLOPT_MIMEPOST:
@@ -718,6 +741,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     argptr = (char *)va_arg(param, void *);
     if(argptr) {
       struct curl_slist *cl;
+      /* general protection against mistakes and abuse */
+      if(strlen(argptr) > CURL_MAX_INPUT_LENGTH)
+        return CURLE_BAD_FUNCTION_ARGUMENT;
       /* append the cookie file name to the list of file names, and deal with
          them later */
       cl = curl_slist_append(data->change.cookielist, argptr);
@@ -802,6 +828,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         /* if cookie engine was not running, activate it */
         data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
 
+      /* general protection against mistakes and abuse */
+      if(strlen(argptr) > CURL_MAX_INPUT_LENGTH)
+        return CURLE_BAD_FUNCTION_ARGUMENT;
       argptr = strdup(argptr);
       if(!argptr || !data->cookies) {
         result = CURLE_OUT_OF_MEMORY;
@@ -852,7 +881,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       ;
     else
 #endif
-#ifndef USE_NGHTTP2
+#if !defined(USE_NGHTTP2) && !defined(USE_HYPER)
     if(arg >= CURL_HTTP_VERSION_2)
       return CURLE_UNSUPPORTED_PROTOCOL;
 #else
@@ -1067,7 +1096,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       break;
     default:
       /* reserve other values for future use */
-      result = CURLE_UNKNOWN_OPTION;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
       break;
     }
     break;
@@ -1220,21 +1249,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * An FTP/SFTP option that modifies an upload to create missing
      * directories on the server.
      */
-    switch(va_arg(param, long)) {
-    case 0:
-      data->set.ftp_create_missing_dirs = 0;
-      break;
-    case 1:
-      data->set.ftp_create_missing_dirs = 1;
-      break;
-    case 2:
-      data->set.ftp_create_missing_dirs = 2;
-      break;
-    default:
-      /* reserve other values for future use */
-      result = CURLE_UNKNOWN_OPTION;
-      break;
-    }
+    arg = va_arg(param, long);
+    /* reserve other values for future use */
+    if((arg < CURLFTP_CREATE_DIR_NONE) ||
+       (arg > CURLFTP_CREATE_DIR_RETRY))
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+    else
+      data->set.ftp_create_missing_dirs = (int)arg;
     break;
   case CURLOPT_READDATA:
     /*
@@ -2073,6 +2094,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * The application kindly asks for a differently sized receive buffer.
      * If it seems reasonable, we'll use it.
      */
+    if(data->state.buffer)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+
     arg = va_arg(param, long);
 
     if(arg > READBUFFER_MAX)
@@ -2082,18 +2106,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     else if(arg < READBUFFER_MIN)
       arg = READBUFFER_MIN;
 
-    /* Resize if new size */
-    if((arg != data->set.buffer_size) && data->state.buffer) {
-      char *newbuff = realloc(data->state.buffer, arg + 1);
-      if(!newbuff) {
-        DEBUGF(fprintf(stderr, "Error: realloc of buffer failed\n"));
-        result = CURLE_OUT_OF_MEMORY;
-      }
-      else
-        data->state.buffer = newbuff;
-    }
     data->set.buffer_size = arg;
-
     break;
 
   case CURLOPT_UPLOAD_BUFFERSIZE:
@@ -2241,6 +2254,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 #endif
 
+  case CURLOPT_SSL_EC_CURVES:
+    /*
+     * Set accepted curves in SSL connection setup.
+     * Specify colon-delimited list of curve algorithm names.
+     */
+    result = Curl_setstropt(&data->set.str[STRING_SSL_EC_CURVES],
+                            va_arg(param, char *));
+    break;
 #endif
   case CURLOPT_IPRESOLVE:
     arg = va_arg(param, long);
@@ -2511,9 +2532,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set the RTSP request method (OPTIONS, SETUP, PLAY, etc...)
      * Would this be better if the RTSPREQ_* were just moved into here?
      */
-    long curl_rtspreq = va_arg(param, long);
+    long in_rtspreq = va_arg(param, long);
     Curl_RtspReq rtspreq = RTSPREQ_NONE;
-    switch(curl_rtspreq) {
+    switch(in_rtspreq) {
     case CURL_RTSPREQ_OPTIONS:
       rtspreq = RTSPREQ_OPTIONS;
       break;
@@ -2837,7 +2858,46 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.trailer_data = va_arg(param, void *);
 #endif
     break;
-#ifdef USE_ALTSVC
+#ifdef USE_HSTS
+  case CURLOPT_HSTSREADFUNCTION:
+    data->set.hsts_read = va_arg(param, curl_hstsread_callback);
+    break;
+  case CURLOPT_HSTSREADDATA:
+    data->set.hsts_read_userp = va_arg(param, void *);
+    break;
+  case CURLOPT_HSTSWRITEFUNCTION:
+    data->set.hsts_write = va_arg(param, curl_hstswrite_callback);
+    break;
+  case CURLOPT_HSTSWRITEDATA:
+    data->set.hsts_write_userp = va_arg(param, void *);
+    break;
+  case CURLOPT_HSTS:
+    if(!data->hsts) {
+      data->hsts = Curl_hsts_init();
+      if(!data->hsts)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    argptr = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_HSTS], argptr);
+    if(result)
+      return result;
+    if(argptr)
+      (void)Curl_hsts_loadfile(data, data->hsts, argptr);
+    break;
+  case CURLOPT_HSTS_CTRL:
+    arg = va_arg(param, long);
+    if(arg & CURLHSTS_ENABLE) {
+      if(!data->hsts) {
+        data->hsts = Curl_hsts_init();
+        if(!data->hsts)
+          return CURLE_OUT_OF_MEMORY;
+      }
+    }
+    else
+      Curl_hsts_cleanup(&data->hsts);
+    break;
+#endif
+#ifndef CURL_DISABLE_ALTSVC
   case CURLOPT_ALTSVC:
     if(!data->asi) {
       data->asi = Curl_altsvc_init();

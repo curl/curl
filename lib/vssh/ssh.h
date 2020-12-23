@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -181,6 +181,12 @@ struct ssh_conn {
   LIBSSH2_CHANNEL *ssh_channel; /* Secure Shell channel handle */
   LIBSSH2_SFTP *sftp_session;   /* SFTP handle */
   LIBSSH2_SFTP_HANDLE *sftp_handle;
+
+#ifndef CURL_DISABLE_PROXY
+  /* for HTTPS proxy storage */
+  Curl_recv *tls_recv;
+  Curl_send *tls_send;
+#endif
 
 #ifdef HAVE_LIBSSH2_AGENT_API
   LIBSSH2_AGENT *ssh_agent;     /* proxy to ssh-agent/pageant */

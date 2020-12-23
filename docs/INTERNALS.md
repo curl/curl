@@ -87,7 +87,7 @@ Dependencies
  - OpenSSL      0.9.7
  - GnuTLS       3.1.10
  - zlib         1.1.4
- - libssh2      0.16
+ - libssh2      1.0
  - c-ares       1.6.0
  - libidn2      2.0.0
  - wolfSSL      2.0.0
@@ -97,6 +97,7 @@ Dependencies
  - NSS          3.14.x
  - Heimdal      ?
  - nghttp2      1.12.0
+ - WinSock      2.2 (on Windows 95+ and Windows CE .NET 4.1+)
 
 Operating Systems
 -----------------
@@ -146,6 +147,8 @@ Windows vs Unix
    also do it etc there might be reasons for applications to alter that
    behaviour.
 
+   We require WinSock version 2.2 and load this version during global init.
+
  3. The file descriptors for network communication and file operations are
     not as easily interchangeable as in Unix.
 
@@ -181,8 +184,9 @@ Library
 
  `curl_global_init()` and `curl_global_cleanup()` should be called by the
  application to initialize and clean up global stuff in the library. As of
- today, it can handle the global SSL initing if SSL is enabled and it can init
- the socket layer on windows machines. libcurl itself has no "global" scope.
+ today, it can handle the global SSL initialization if SSL is enabled and it
+ can initialize the socket layer on Windows machines. libcurl itself has no
+ "global" scope.
 
  All printf()-style functions use the supplied clones in `lib/mprintf.c`. This
  makes sure we stay absolutely platform independent.
@@ -223,7 +227,7 @@ Curl_connect()
    This function makes sure there's an allocated and initiated `connectdata`
    struct that is used for this particular connection only (although there may
    be several requests performed on the same connect). A bunch of things are
-   inited/inherited from the `Curl_easy` struct.
+   initialized/inherited from the `Curl_easy` struct.
 
 <a name="multi_do"></a>
 multi_do()
@@ -233,11 +237,9 @@ multi_do()
    The functions are named after the protocols they handle.
 
    The protocol-specific functions of course deal with protocol-specific
-   negotiations and setup. They have access to the `Curl_sendf()` (from
-   `lib/sendf.c`) function to send printf-style formatted data to the remote
-   host and when they're ready to make the actual file transfer they call the
-   `Curl_setup_transfer()` function (in `lib/transfer.c`) to setup the
-   transfer and returns.
+   negotiations and setup. When they're ready to start the actual file
+   transfer they call the `Curl_setup_transfer()` function (in
+   `lib/transfer.c`) to setup the transfer and returns.
 
    If this DO function fails and the connection is being re-used, libcurl will
    then close this connection, setup a new connection and re-issue the DO
@@ -323,9 +325,9 @@ FTP
 Kerberos
 ========
 
- Kerberos support is mainly in `lib/krb5.c` and `lib/security.c` but also
- `curl_sasl_sspi.c` and `curl_sasl_gssapi.c` for the email protocols and
- `socks_gssapi.c` and `socks_sspi.c` for SOCKS5 proxy specifics.
+ Kerberos support is mainly in `lib/krb5.c` but also `curl_sasl_sspi.c` and
+ `curl_sasl_gssapi.c` for the email protocols and `socks_gssapi.c` and
+ `socks_sspi.c` for SOCKS5 proxy specifics.
 
 <a name="telnet"></a>
 TELNET
@@ -500,7 +502,7 @@ Client
  status and exits.
 
  When the operation is done, the `ourWriteOut()` function in `src/writeout.c`
- may be called to report about the operation. That function is using the
+ may be called to report about the operation. That function is mostly using the
  `curl_easy_getinfo()` function to extract useful information from the curl
  session.
 
@@ -772,7 +774,9 @@ Track Down Memory Leaks
 
   Add a line in your application code:
 
-       `curl_dbg_memdebug("dump");`
+```c
+  curl_dbg_memdebug("dump");
+```
 
   This will make the malloc debug system output a full trace of all resource
   using functions to the given file name. Make sure you rebuild your program
@@ -980,8 +984,8 @@ for older and later versions as things don't change drastically that often.
   protocol specific data that then gets associated with that `Curl_easy` for
   the rest of this transfer. It gets freed again at the end of the transfer.
   It will be called before the `connectdata` for the transfer has been
-  selected/created. Most protocols will allocate its private
-  `struct [PROTOCOL]` here and assign `Curl_easy->req.protop` to point to it.
+  selected/created. Most protocols will allocate its private `struct
+  [PROTOCOL]` here and assign `Curl_easy->req.p.[protocol]` to it.
 
   `->connect_it` allows a protocol to do some specific actions after the TCP
   connect is done, that can still be considered part of the connection phase.
@@ -1082,18 +1086,18 @@ for older and later versions as things don't change drastically that often.
   the share API.
 
 
-[1]: https://curl.haxx.se/libcurl/c/curl_easy_setopt.html
-[2]: https://curl.haxx.se/libcurl/c/curl_easy_init.html
+[1]: https://curl.se/libcurl/c/curl_easy_setopt.html
+[2]: https://curl.se/libcurl/c/curl_easy_init.html
 [3]: https://c-ares.haxx.se/
 [4]: https://tools.ietf.org/html/rfc7230 "RFC 7230"
-[5]: https://curl.haxx.se/libcurl/c/CURLOPT_ACCEPT_ENCODING.html
-[6]: https://curl.haxx.se/docs/manpage.html#--compressed
-[7]: https://curl.haxx.se/libcurl/c/curl_multi_socket_action.html
-[8]: https://curl.haxx.se/libcurl/c/curl_multi_timeout.html
-[9]: https://curl.haxx.se/libcurl/c/curl_multi_setopt.html
-[10]: https://curl.haxx.se/libcurl/c/CURLMOPT_TIMERFUNCTION.html
-[11]: https://curl.haxx.se/libcurl/c/curl_multi_perform.html
-[12]: https://curl.haxx.se/libcurl/c/curl_multi_fdset.html
-[13]: https://curl.haxx.se/libcurl/c/curl_multi_add_handle.html
-[14]: https://curl.haxx.se/libcurl/c/curl_multi_info_read.html
+[5]: https://curl.se/libcurl/c/CURLOPT_ACCEPT_ENCODING.html
+[6]: https://curl.se/docs/manpage.html#--compressed
+[7]: https://curl.se/libcurl/c/curl_multi_socket_action.html
+[8]: https://curl.se/libcurl/c/curl_multi_timeout.html
+[9]: https://curl.se/libcurl/c/curl_multi_setopt.html
+[10]: https://curl.se/libcurl/c/CURLMOPT_TIMERFUNCTION.html
+[11]: https://curl.se/libcurl/c/curl_multi_perform.html
+[12]: https://curl.se/libcurl/c/curl_multi_fdset.html
+[13]: https://curl.se/libcurl/c/curl_multi_add_handle.html
+[14]: https://curl.se/libcurl/c/curl_multi_info_read.html
 [15]: https://tools.ietf.org/html/rfc7231#section-3.1.2.2

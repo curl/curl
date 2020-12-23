@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -31,6 +31,7 @@ CMAKE_DIST =                                    \
  CMake/CurlSymbolHiding.cmake                   \
  CMake/CurlTests.c                              \
  CMake/FindBearSSL.cmake                        \
+ CMake/FindBrotli.cmake                         \
  CMake/FindCARES.cmake                          \
  CMake/FindGSS.cmake                            \
  CMake/FindLibSSH2.cmake                        \
@@ -38,8 +39,10 @@ CMAKE_DIST =                                    \
  CMake/FindNGHTTP2.cmake                        \
  CMake/FindNGHTTP3.cmake                        \
  CMake/FindNGTCP2.cmake                         \
+ CMake/FindNSS.cmake                            \
  CMake/FindQUICHE.cmake                         \
  CMake/FindWolfSSL.cmake                        \
+ CMake/FindZstd.cmake                           \
  CMake/Macros.cmake                             \
  CMake/OtherTests.cmake                         \
  CMake/Platforms/WindowsCache.cmake             \
@@ -164,7 +167,7 @@ VC_DIST = projects/README                           \
  projects/wolfssl_options.h                         \
  projects/wolfssl_override.props
 
-WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat \
+WINBUILD_DIST = winbuild/README.md winbuild/gen_resp_file.bat \
  winbuild/MakefileBuild.vc winbuild/Makefile.vc
 
 PLAN9_DIST = plan9/include/mkfile \
@@ -326,6 +329,7 @@ checksrc:
 	(cd tests && $(MAKE) checksrc)
 	(cd include/curl && $(MAKE) checksrc)
 	(cd docs/examples && $(MAKE) checksrc)
+	(cd packages && $(MAKE) checksrc)
 
 .PHONY: vc-ide
 

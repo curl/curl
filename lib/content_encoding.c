@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,14 +28,14 @@
 
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>
-#ifdef __SYMBIAN32__
-/* zlib pollutes the namespace with this definition */
-#undef WIN32
-#endif
 #endif
 
 #ifdef HAVE_BROTLI
 #include <brotli/decode.h>
+#endif
+
+#ifdef HAVE_ZSTD
+#include <zstd.h>
 #endif
 
 #include "sendf.h"
@@ -710,6 +710,95 @@ static const struct content_encoding brotli_encoding = {
 #endif
 
 
+#ifdef HAVE_ZSTD
+/* Writer parameters. */
+struct zstd_params {
+  ZSTD_DStream *zds;    /* State structure for zstd. */
+  void *decomp;
+};
+
+static CURLcode zstd_init_writer(struct connectdata *conn,
+                                 struct contenc_writer *writer)
+{
+  struct zstd_params *zp = (struct zstd_params *)&writer->params;
+  (void)conn;
+
+  if(!writer->downstream)
+    return CURLE_WRITE_ERROR;
+
+  zp->zds = ZSTD_createDStream();
+  zp->decomp = NULL;
+  return zp->zds ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+}
+
+static CURLcode zstd_unencode_write(struct connectdata *conn,
+    struct contenc_writer *writer,
+    const char *buf, size_t nbytes)
+{
+  CURLcode result = CURLE_OK;
+  struct zstd_params *zp = (struct zstd_params *)&writer->params;
+  ZSTD_inBuffer in;
+  ZSTD_outBuffer out;
+  size_t errorCode;
+
+  if(!zp->decomp) {
+    zp->decomp = malloc(DSIZ);
+    if(!zp->decomp)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  in.pos = 0;
+  in.src = buf;
+  in.size = nbytes;
+
+  for(;;) {
+    out.pos = 0;
+    out.dst = zp->decomp;
+    out.size = DSIZ;
+
+    errorCode = ZSTD_decompressStream(zp->zds, &out, &in);
+    if(ZSTD_isError(errorCode)) {
+      return CURLE_BAD_CONTENT_ENCODING;
+    }
+    if(out.pos > 0) {
+      result = Curl_unencode_write(conn, writer->downstream,
+                                   zp->decomp, out.pos);
+      if(result)
+        break;
+    }
+    if((in.pos == nbytes) && (out.pos < out.size))
+      break;
+  }
+
+  return result;
+}
+
+static void zstd_close_writer(struct connectdata *conn,
+    struct contenc_writer *writer)
+{
+  struct zstd_params *zp = (struct zstd_params *)&writer->params;
+  (void)conn;
+
+  if(zp->decomp) {
+    free(zp->decomp);
+    zp->decomp = NULL;
+  }
+  if(zp->zds) {
+    ZSTD_freeDStream(zp->zds);
+    zp->zds = NULL;
+  }
+}
+
+static const struct content_encoding zstd_encoding = {
+  "zstd",
+  NULL,
+  zstd_init_writer,
+  zstd_unencode_write,
+  zstd_close_writer,
+  sizeof(struct zstd_params)
+};
+#endif
+
+
 /* Identity handler. */
 static CURLcode identity_init_writer(struct connectdata *conn,
                                      struct contenc_writer *writer)
@@ -751,6 +840,9 @@ static const struct content_encoding * const encodings[] = {
 #endif
 #ifdef HAVE_BROTLI
   &brotli_encoding,
+#endif
+#ifdef HAVE_ZSTD
+  &zstd_encoding,
 #endif
   NULL
 };

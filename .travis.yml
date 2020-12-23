@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -46,6 +46,7 @@ addons:
     - libidn2-dev
     - gnutls-bin
     - python-impacket
+    - ninja-build
 
 jobs:
   include:
@@ -59,6 +60,8 @@ jobs:
         - *common_packages
         - krb5-user
         - libssh2-1-dev
+        - libbrotli-dev
+        - libzstd-dev
   - env:
     - T=normal C=--with-libssh
     # Avoid bionic, its pre-release libssh version triggers deprecation warnings.
@@ -77,11 +80,10 @@ jobs:
         - gnutls-bin
         # The above list is common_packages minus impacket.
         - libssh-dev
+        - ninja-build
   - env:
     - T=normal C="--enable-ares"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-  - env:
-    - T=normal C="--enable-mqtt"
   - env:
     - T=normal C="--disable-proxy"
   - env:
@@ -94,16 +96,15 @@ jobs:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
     - T=novalgrind BORINGSSL=yes C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     before_install:
     - eval "$(gimme stable)"; gimme --list  # Install latest Go (for boringssl)
   - env:
-    - T=novalgrind QUICHE="yes" C="--with-ssl=$HOME/quiche/deps/boringssl --with-quiche=$HOME/quiche/target/release --enable-alt-svc" LD_LIBRARY_PATH=$HOME/quiche/target/release:/usr/local/lib
+    - T=novalgrind QUICHE="yes" C="--with-ssl=$HOME/quiche/deps/boringssl/src --with-quiche=$HOME/quiche/target/release" LD_LIBRARY_PATH=$HOME/quiche/target/release:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-    before_install:
-    - eval "$(gimme stable)"; gimme --list  # Install latest Go (for boringssl)
     addons:
       apt:
         <<: *common_apt
@@ -111,9 +112,9 @@ jobs:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
-    - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild --enable-alt-svc" NOTESTS=
-    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    - T=debug HYPER="yes" C="--with-hyper=$HOME/hyper" LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib TFLAGS="1 to 29"
     addons:
       apt:
         <<: *common_apt
@@ -121,8 +122,12 @@ jobs:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
-    - T=novalgrind NGTCP2=yes GNUTLS=yes C="PKG_CONFIG_PATH=$HOME/ngbuild --without-ssl --with-gnutls=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild --enable-alt-svc" NOTESTS=
+    - T=novalgrind LIBRESSL=yes C="--with-ssl=$HOME/libressl" LD_LIBRARY_PATH=/home/travis/libressl/lib:/usr/local/lib
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+  - env:
+    - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild" NOTESTS=
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -131,6 +136,18 @@ jobs:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=novalgrind NGTCP2=yes GNUTLS=yes C="PKG_CONFIG_PATH=$HOME/ngbuild --without-ssl --with-gnutls=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild" NOTESTS=
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
         - autogen
         - automake
         - autopoint
@@ -151,8 +168,9 @@ jobs:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
-    - T=debug-mesalink C="--with-mesalink --without-ssl"
+    - T=debug OPENSSL3="yes" C="--with-ssl=$HOME/openssl3" LD_LIBRARY_PATH=/home/travis/openssl3/lib:/usr/local/lib TFLAGS="https ftps"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -161,6 +179,18 @@ jobs:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=debug-mesalink C="--with-mesalink --without-ssl" MESALINK=yes
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
   - env:
     - T=debug
     - &clang OVERRIDE_CC="CC=clang-9" OVERRIDE_CXX="CXX=clang++-9"
@@ -172,8 +202,9 @@ jobs:
         - &clang_packages [*common_packages, clang-9]
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
-    - T=debug C="--enable-alt-svc"
+    - T=debug C="--enable-hsts --disable-alt-svc"
     - *clang
     compiler: clang
     addons:
@@ -183,6 +214,7 @@ jobs:
         - *clang_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
     - T=debug C="--with-mbedtls --without-ssl"
     - *clang
@@ -194,6 +226,7 @@ jobs:
         - *clang_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
         - libmbedtls-dev
   - env:
     - T=debug C="--with-gnutls --without-ssl"
@@ -207,6 +240,7 @@ jobs:
         - libgnutls28-dev
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
     - T=debug C="--with-nss --without-ssl" NOTESTS=1 CPPFLAGS="-isystem /usr/include/nss"
     - *clang
@@ -219,11 +253,12 @@ jobs:
         - libnss3-dev
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
     - T=iconv
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
   - env:
-    - T=cmake BORINGSSL=yes QUICHE=yes C="-DUSE_QUICHE=1 -DOPENSSL_ROOT_DIR=$HOME/boringssl"
+    - T=cmake BORINGSSL=yes QUICHE=yes C="-GNinja -DUSE_QUICHE=1 -DOPENSSL_ROOT_DIR=$HOME/boringssl -DCURL_BROTLI=1 -DCURL_ZSTD=1"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     - PKG_CONFIG_PATH="$HOME/quiche/target/release"
     before_install:
@@ -235,8 +270,9 @@ jobs:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
-    - T=cmake NGTCP2=yes C="-DUSE_NGTCP2=ON"
+    - T=cmake NGTCP2=yes C="-GNinja -DUSE_NGTCP2=ON -DCURL_BROTLI=1 -DCURL_ZSTD=1"
     - *clang
     - PKG_CONFIG_PATH="$HOME/ngbuild/lib/pkgconfig"
     compiler: clang
@@ -247,6 +283,7 @@ jobs:
         - *clang_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
     - T=torture
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
@@ -258,6 +295,7 @@ jobs:
         - lcov
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
         - libssh2-1-dev
   - env:
     - T=distcheck
@@ -269,6 +307,7 @@ jobs:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
     - T=fuzzer
     - *clang
@@ -280,6 +319,7 @@ jobs:
         - *clang_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
     - T=tidy
     - *clang
@@ -292,6 +332,7 @@ jobs:
         - clang-tidy-9
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
     - T=scan-build
     - *clang
@@ -303,8 +344,9 @@ jobs:
         - *clang_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
-    - T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan"
+    - T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan" TFLAGS=-n
     - *clang
     compiler: clang
     addons:
@@ -314,8 +356,9 @@ jobs:
         - *clang_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
   - env:
-    - T=debug C="--enable-alt-svc"
+    - T=debug C="" TFLAGS=-n
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     arch: arm64
     addons:
@@ -325,6 +368,43 @@ jobs:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
+        - libzstd-dev
+        - libev-dev
+        - libssl-dev
+        - libtool
+        - pkg-config
+        - zlib1g-dev
+
+  - env:
+    - T=debug C="" TFLAGS=-n
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    arch: ppc64le
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libev-dev
+        - libssl-dev
+        - libtool
+        - pkg-config
+        - zlib1g-dev
+
+  - env:
+    - T=debug C="" TFLAGS=-n
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    arch: s390x
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
         - libev-dev
         - libssl-dev
         - libtool
@@ -346,7 +426,7 @@ before_script:
 script:
 - ./scripts/travis/script.sh || travis_terminate 1
 
-# whitelist branches to avoid testing feature branches twice (as branch and as pull request)
+# select branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
   only:
   - master

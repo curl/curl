@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -54,7 +54,7 @@ shown above.
 \fICURLOPT_VERBOSE(3)\fP is in effect. This callback receives debug
 information, as specified in the \fItype\fP argument. This function must
 return 0. The \fIdata\fP pointed to by the char * passed to this function WILL
-NOT be zero terminated, but will be exactly of the \fIsize\fP as told by the
+NOT be null-terminated, but will be exactly of the \fIsize\fP as told by the
 \fIsize\fP argument.
 
 The \fIuserptr\fP argument is the pointer set with \fICURLOPT_DEBUGDATA(3)\fP.
@@ -166,7 +166,7 @@ int main(void)
     /* example.com is redirected, so we tell libcurl to follow redirection */
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)

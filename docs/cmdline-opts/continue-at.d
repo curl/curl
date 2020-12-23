@@ -3,6 +3,7 @@ Long: continue-at
 Arg: <offset>
 Help: Resumed transfer offset
 See-also: range
+Category: connection
 ---
 Continue/Resume a previous file transfer at the given offset. The given offset
 is the exact number of bytes that will be skipped, counting from the beginning

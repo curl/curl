@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_COOKIEFILE \- file name to read cookies from
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIEFILE, char *filename);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. It should point to
+Pass a pointer to a null-terminated string as parameter. It should point to
 the file name of your file holding cookie data to read. The cookie data can be
 in either the old Netscape / Mozilla cookie data format or just regular HTTP
 headers (Set-Cookie style) dumped to a file.
@@ -65,7 +65,7 @@ HTTP
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/foo.bin");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
 
   /* get cookies from an existing file */
   curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "/tmp/cookies.txt");
@@ -78,7 +78,7 @@ if(curl) {
 .SH "Cookie file format"
 The cookie file format and general cookie concepts in curl are described in
 the HTTP-COOKIES.md file, also hosted online here:
-https://curl.haxx.se/docs/http-cookies.html
+https://curl.se/docs/http-cookies.html
 .SH AVAILABILITY
 As long as HTTP is supported
 .SH RETURN VALUE

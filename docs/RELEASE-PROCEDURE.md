@@ -42,7 +42,7 @@ in the curl-www repo
 
 - make sure all relevant changes are committed and pushed on the master branch
 
-  (the web site then updates its contents automatically)
+  (the website then updates its contents automatically)
 
 on github
 ---------
@@ -95,13 +95,15 @@ Coming dates
 Based on the description above, here are some planned release dates (at the
 time of this writing):
 
-- March 4, 2020 (7.69.0)
-- April 29, 2020
-- June 24, 2020
-- August 19, 2020
+- August 19, 2020 (7.72.0)
 - October 14, 2020
 - December 9, 2020
 - February 3, 2021
+- March 31, 2021
+- May 26, 2021
+- July 21, 2021
+- September 15, 2021
+- November 10, 2021
 
 The above (and more) curl-related dates are published in
 [iCalendar format](https://calendar.google.com/calendar/ical/c9u5d64odop9js55oltfarjk6g%40group.calendar.google.com/public/basic.ics)

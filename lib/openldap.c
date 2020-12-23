@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -107,6 +107,7 @@ const struct Curl_handler Curl_handler_ldap = {
   ZERO_NULL,                            /* connection_check */
   PORT_LDAP,                            /* defport */
   CURLPROTO_LDAP,                       /* protocol */
+  CURLPROTO_LDAP,                       /* family */
   PROTOPT_NONE                          /* flags */
 };
 
@@ -132,7 +133,8 @@ const struct Curl_handler Curl_handler_ldaps = {
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
   PORT_LDAPS,                           /* defport */
-  CURLPROTO_LDAP,                       /* protocol */
+  CURLPROTO_LDAPS,                      /* protocol */
+  CURLPROTO_LDAP,                       /* family */
   PROTOPT_SSL                           /* flags */
 };
 #endif
@@ -410,7 +412,7 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done)
   if(!lr)
     return CURLE_OUT_OF_MEMORY;
   lr->msgid = msgid;
-  data->req.protop = lr;
+  data->req.p.ldap = lr;
   Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
   *done = TRUE;
   return CURLE_OK;
@@ -419,7 +421,7 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done)
 static CURLcode ldap_done(struct connectdata *conn, CURLcode res,
                           bool premature)
 {
-  struct ldapreqinfo *lr = conn->data->req.protop;
+  struct ldapreqinfo *lr = conn->data->req.p.ldap;
 
   (void)res;
   (void)premature;
@@ -431,7 +433,7 @@ static CURLcode ldap_done(struct connectdata *conn, CURLcode res,
       ldap_abandon_ext(li->ld, lr->msgid, NULL, NULL);
       lr->msgid = 0;
     }
-    conn->data->req.protop = NULL;
+    conn->data->req.p.ldap = NULL;
     free(lr);
   }
 
@@ -443,7 +445,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
 {
   struct ldapconninfo *li = conn->proto.ldapc;
   struct Curl_easy *data = conn->data;
-  struct ldapreqinfo *lr = data->req.protop;
+  struct ldapreqinfo *lr = data->req.p.ldap;
   int rc, ret;
   LDAPMessage *msg = NULL;
   LDAPMessage *ent;

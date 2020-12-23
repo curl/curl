@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -649,37 +649,37 @@ AC_DEFUN([CURL_CHECK_NTLM_WB], [
   fi
 ])
 
-dnl CURL_CHECK_OPTION_ESNI
+dnl CURL_CHECK_OPTION_ECH
 dnl -----------------------------------------------------
 dnl Verify whether configure has been invoked with option
-dnl --enable-esni or --disable-esni, and set
-dnl shell variable want_esni as appropriate.
+dnl --enable-ech or --disable-ech, and set
+dnl shell variable want_ech as appropriate.
 
-AC_DEFUN([CURL_CHECK_OPTION_ESNI], [
-  AC_MSG_CHECKING([whether to enable ESNI support])
-  OPT_ESNI="default"
-  AC_ARG_ENABLE(esni,
-AC_HELP_STRING([--enable-esni],[Enable ESNI support])
-AC_HELP_STRING([--disable-esni],[Disable ESNI support]),
-  OPT_ESNI=$enableval)
-  case "$OPT_ESNI" in
+AC_DEFUN([CURL_CHECK_OPTION_ECH], [
+  AC_MSG_CHECKING([whether to enable ECH support])
+  OPT_ECH="default"
+  AC_ARG_ENABLE(ech,
+AC_HELP_STRING([--enable-ech],[Enable ECH support])
+AC_HELP_STRING([--disable-ech],[Disable ECH support]),
+  OPT_ECH=$enableval)
+  case "$OPT_ECH" in
     no)
-      dnl --disable-esni option used
-      want_esni="no"
-      curl_esni_msg="no      (--enable-esni)"
+      dnl --disable-ech option used
+      want_ech="no"
+      curl_ech_msg="no      (--enable-ech)"
       AC_MSG_RESULT([no])
       ;;
     default)
       dnl configure option not specified
-      want_esni="no"
-      curl_esni_msg="no      (--enable-esni)"
+      want_ech="no"
+      curl_ech_msg="no      (--enable-ech)"
       AC_MSG_RESULT([no])
       ;;
     *)
-      dnl --enable-esni option used
-      want_esni="yes"
-      curl_esni_msg="enabled (--disable-esni)"
-      experimental="esni"
+      dnl --enable-ech option used
+      want_ech="yes"
+      curl_ech_msg="enabled (--disable-ech)"
+      experimental="ech"
       AC_MSG_RESULT([yes])
       ;;
   esac

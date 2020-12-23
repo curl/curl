@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -131,13 +131,15 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   struct ntlmdata *ntlm;
   curlntlm *state;
   struct auth *authp;
+  struct Curl_easy *data = conn->data;
+
 
   DEBUGASSERT(conn);
-  DEBUGASSERT(conn->data);
+  DEBUGASSERT(data);
 
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-    allocuserpwd = &conn->allocptr.proxyuserpwd;
+    allocuserpwd = &data->state.aptr.proxyuserpwd;
     userp = conn->http_proxy.user;
     passwdp = conn->http_proxy.passwd;
     service = conn->data->set.str[STRING_PROXY_SERVICE_NAME] ?
@@ -151,7 +153,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
 #endif
   }
   else {
-    allocuserpwd = &conn->allocptr.userpwd;
+    allocuserpwd = &data->state.aptr.userpwd;
     userp = conn->user;
     passwdp = conn->passwd;
     service = conn->data->set.str[STRING_SERVICE_NAME] ?

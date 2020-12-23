@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -58,6 +58,7 @@ struct OperationConfig {
   char *cookiejar;          /* write to this file */
   char *cookiefile;         /* read from this file */
   char *altsvc;             /* alt-svc cache file name */
+  char *hsts;               /* HSTS cache file name */
   bool cookiesession;       /* new session? */
   bool encoding;            /* Accept-Encoding please */
   bool tr_encoding;         /* Transfer-Encoding please */
@@ -80,6 +81,7 @@ struct OperationConfig {
   double connecttimeout;
   long maxredirs;
   curl_off_t max_filesize;
+  char *output_dir;
   char *headerfile;
   char *ftpport;
   char *iface;
@@ -161,6 +163,7 @@ struct OperationConfig {
   char *etag_compare_file;
   bool crlf;
   char *customrequest;
+  char *ssl_ec_curves;
   char *krblevel;
   char *request_target;
   long httpversion;
@@ -190,6 +193,7 @@ struct OperationConfig {
   long ssl_version_max;
   long proxy_ssl_version;
   long ip_version;
+  long create_file_mode; /* CURLOPT_NEW_FILE_PERMS */
   curl_TimeCond timecond;
   curl_off_t condtime;
   struct curl_slist *headers;
@@ -280,6 +284,7 @@ struct OperationConfig {
                                      0 is valid. default: CURL_HET_DEFAULT. */
   bool haproxy_protocol;          /* whether to send HAProxy protocol v1 */
   bool disallow_username_in_url;  /* disallow usernames in URLs */
+  char *aws_sigv4_provider;
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */
@@ -310,6 +315,7 @@ struct GlobalConfig {
   bool parallel;
   long parallel_max;
   bool parallel_connect;
+  char *help_category;            /* The help category, if set */
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;   /* Always last in the struct */

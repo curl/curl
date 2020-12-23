@@ -2,6 +2,7 @@ Long: write-out
 Short: w
 Arg: <format>
 Help: Use output FORMAT after completion
+Category: verbose
 ---
 Make curl display information on stdout after a completed transfer. The format
 is a string that may contain plain text mixed with any number of
@@ -27,6 +28,12 @@ The variables available are:
 .TP 15
 .B content_type
 The Content-Type of the requested document, if there was any.
+.TP
+.B errormsg
+The error message. (Added in 7.75.0)
+.TP
+.B exitcode
+The numerical exitcode. (Added in 7.75.0)
 .TP
 .B filename_effective
 The ultimate filename that curl writes out to. This is only meaningful if curl
@@ -60,11 +67,22 @@ either IPv4 or IPv6 (Added in 7.29.0)
 .B local_port
 The local port number of the most recently done connection (Added in 7.29.0)
 .TP
+.B method
+The http method used in the most recent HTTP request (Added in 7.72.0)
+.TP
 .B num_connects
 Number of new connects made in the recent transfer. (Added in 7.12.3)
 .TP
+.B num_headers
+The number of response headers in the most recent request (restarted at each
+ redirect). Note that the status line IS NOT a header. (Added in 7.73.0)
+.TP
 .B num_redirects
 Number of redirects that were followed in the request. (Added in 7.12.3)
+.TP
+.B onerror
+The rest of the output is only shown if the transfer returned a non-zero error
+(Added in 7.75.0)
 .TP
 .B proxy_ssl_verify_result
 The result of the HTTPS proxy's SSL peer certificate verification that was
@@ -152,6 +170,12 @@ server needed to calculate the result.
 .TP
 .B time_total
 The total time, in seconds, that the full operation lasted.
+.TP
+.B url
+The URL that was fetched. (Added in 7.75.0)
+.TP
+.B urlnum
+The URL index number of this transfer, 0-indexed. (Added in 7.75.0)
 .TP
 .B url_effective
 The URL that was fetched last. This is most meaningful if you've told curl

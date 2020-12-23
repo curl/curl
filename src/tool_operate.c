@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -99,7 +99,7 @@ CURLcode curl_easy_perform_ev(CURL *easy);
 #endif
 
 #define CURL_CA_CERT_ERRORMSG                                               \
-  "More details here: https://curl.haxx.se/docs/sslcerts.html\n\n"          \
+  "More details here: https://curl.se/docs/sslcerts.html\n\n"          \
   "curl failed to verify the legitimacy of the server and therefore "       \
   "could not\nestablish a secure connection to it. To learn more about "    \
   "this situation and\nhow to fix it, please visit the web page mentioned " \
@@ -320,8 +320,13 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
     if(S_ISREG(fileinfo.st_mode))
       uploadfilesize = fileinfo.st_size;
 
-    if(uploadfilesize != -1)
+    if(uploadfilesize != -1) {
+      struct OperationConfig *config = per->config; /* for the macro below */
+#ifdef CURL_DISABLE_LIBCURL_OPTION
+      (void)config;
+#endif
       my_setopt(per->curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
+    }
     per->input.fd = per->infd;
   }
   return result;
@@ -333,7 +338,8 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
 static CURLcode post_per_transfer(struct GlobalConfig *global,
                                   struct per_transfer *per,
                                   CURLcode result,
-                                  bool *retryp)
+                                  bool *retryp,
+                                  long *delay) /* milliseconds! */
 {
   struct OutStruct *outs = &per->outs;
   CURL *curl = per->curl;
@@ -343,6 +349,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     return result;
 
   *retryp = FALSE;
+  *delay = 0; /* for no retry, keep it zero */
 
   if(per->infdopen)
     close(per->infd);
@@ -467,6 +474,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 
         switch(response) {
+        case 408: /* Request Timeout */
         case 429: /* Too Many Requests (RFC6585) */
         case 500: /* Internal Server Error */
         case 502: /* Bad Gateway */
@@ -512,10 +520,10 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       static const char * const m[]={
         NULL,
         "(retrying all errors)",
-        "timeout",
-        "connection refused",
-        "HTTP error",
-        "FTP error"
+        ": timeout",
+        ": connection refused",
+        ": HTTP error",
+        ": FTP error"
       };
 
       sleeptime = per->retry_sleep;
@@ -529,13 +537,12 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
             sleeptime = (long)retry_after * 1000; /* milliseconds */
         }
       }
-      warnf(config->global, "Transient problem: %s "
+      warnf(config->global, "Problem %s. "
             "Will retry in %ld seconds. "
             "%ld retries left.\n",
             m[retry], sleeptime/1000L, per->retry_numretries);
 
       per->retry_numretries--;
-      tool_go_sleep(sleeptime);
       if(!config->retry_delay) {
         per->retry_sleep *= 2;
         if(per->retry_sleep > RETRY_SLEEP_MAX)
@@ -578,7 +585,8 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         }
         outs->bytes = 0; /* clear for next round */
       }
-      *retryp = TRUE; /* curl_easy_perform loop */
+      *retryp = TRUE;
+      *delay = sleeptime;
       return CURLE_OK;
     }
   } /* if retry_numretries */
@@ -620,7 +628,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     fputs("\n", per->progressbar.out);
 
   if(config->writeout)
-    ourWriteOut(per->curl, &per->outs, config->writeout);
+    ourWriteOut(per->curl, per, config->writeout, result);
 
   /* Close the outs file */
   if(outs->fopened && outs->stream) {
@@ -865,6 +873,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         *added = TRUE;
         per->config = config;
         per->curl = curl;
+        per->urlnum = urlnode->num;
 
         /* default headers output stream is stdout */
         heads = &per->heads;
@@ -922,7 +931,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
           if((PARAM_OK == file2string(&etag_from_file, file)) &&
              etag_from_file) {
-            header = aprintf("If-None-Match: \"%s\"", etag_from_file);
+            header = aprintf("If-None-Match: %s", etag_from_file);
             Curl_safefree(etag_from_file);
           }
           else
@@ -1050,6 +1059,15 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             }
           }
 
+          if(config->output_dir) {
+            char *d = aprintf("%s/%s", config->output_dir, per->outfile);
+            if(!d) {
+              result = CURLE_WRITE_ERROR;
+              break;
+            }
+            free(per->outfile);
+            per->outfile = d;
+          }
           /* Create the directory hierarchy, if not pre-existent to a multiple
              file output call */
 
@@ -1511,6 +1529,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->pinnedpubkey)
           my_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY, config->pinnedpubkey);
 
+        if(config->ssl_ec_curves)
+          my_setopt_str(curl, CURLOPT_SSL_EC_CURVES, config->ssl_ec_curves);
+
         if(curlinfo->features & CURL_VERSION_SSL) {
           /* Check if config->cert is a PKCS#11 URI and set the
            * config->cert_type if necessary */
@@ -1641,6 +1662,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_SSLKEYTYPE, config->key_type);
           my_setopt_str(curl, CURLOPT_PROXY_SSLKEYTYPE,
                         config->proxy_key_type);
+          my_setopt_str(curl, CURLOPT_AWS_SIGV4,
+                        config->aws_sigv4_provider);
 
           if(config->insecure_ok) {
             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -1691,30 +1714,25 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->path_as_is)
           my_setopt(curl, CURLOPT_PATH_AS_IS, 1L);
 
-        if(built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP)) {
-          if(!config->insecure_ok) {
-            char *home;
-            char *file;
-            result = CURLE_FAILED_INIT;
-            home = homedir();
-            if(home) {
-              file = aprintf("%s/.ssh/known_hosts", home);
-              if(file) {
-                /* new in curl 7.19.6 */
-                result = res_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, file);
-                curl_free(file);
-                if(result == CURLE_UNKNOWN_OPTION)
-                  /* libssh2 version older than 1.1.1 */
-                  result = CURLE_OK;
-              }
-              Curl_safefree(home);
+        if((built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP)) &&
+           !config->insecure_ok) {
+          char *home = homedir(NULL);
+          if(home) {
+            char *file = aprintf("%s/.ssh/known_hosts", home);
+            if(file) {
+              /* new in curl 7.19.6 */
+              result = res_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, file);
+              curl_free(file);
+              if(result == CURLE_UNKNOWN_OPTION)
+                /* libssh2 version older than 1.1.1 */
+                result = CURLE_OK;
             }
-            else {
-              errorf(global, "Failed to figure out user's home dir!");
-            }
+            Curl_safefree(home);
             if(result)
               break;
           }
+          else
+            warnf(global, "No home dir, couldn't find known_hosts file!");
         }
 
         if(config->no_body || config->remote_time) {
@@ -1839,12 +1857,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_MAXFILESIZE_LARGE,
                     config->max_filesize);
 
-        if(4 == config->ip_version)
-          my_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-        else if(6 == config->ip_version)
-          my_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6);
-        else
-          my_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_WHATEVER);
+        my_setopt(curl, CURLOPT_IPRESOLVE, config->ip_version);
 
         /* new in curl 7.15.5 */
         if(config->ftp_ssl_reqd)
@@ -2057,6 +2070,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->altsvc)
           my_setopt_str(curl, CURLOPT_ALTSVC, config->altsvc);
 
+        if(config->hsts)
+          my_setopt_str(curl, CURLOPT_HSTS, config->hsts);
+
 #ifdef USE_METALINK
         if(!metalink && config->use_metalink) {
           outs->metalink_parser = metalink_parser_context_new();
@@ -2140,6 +2156,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
   struct per_transfer *per;
   CURLcode result = CURLE_OK;
   CURLMcode mcode;
+  bool sleeping = FALSE;
   *addedp = FALSE;
   *morep = FALSE;
   result = create_transfer(global, share, addedp);
@@ -2151,10 +2168,15 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     if(per->added)
       /* already added */
       continue;
+    if(per->startat && (time(NULL) < per->startat)) {
+      /* this is still delaying */
+      sleeping = TRUE;
+      continue;
+    }
 
     result = pre_transfer(global, per);
     if(result)
-      break;
+      return result;
 
     /* parallel connect means that we don't set PIPEWAIT since pipewait
        will make libcurl prefer multiplexing */
@@ -2175,7 +2197,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     all_added++;
     *addedp = TRUE;
   }
-  *morep = per ? TRUE : FALSE;
+  *morep = (per || sleeping) ? TRUE : FALSE;
   return CURLE_OK;
 }
 
@@ -2189,6 +2211,7 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
   struct timeval start = tvnow();
   bool more_transfers;
   bool added_transfers;
+  time_t tick = time(NULL);
 
   multi = curl_multi_init();
   if(!multi)
@@ -2211,27 +2234,39 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
     if(!mcode) {
       int rc;
       CURLMsg *msg;
-      bool removed = FALSE;
+      bool checkmore = FALSE;
       do {
         msg = curl_multi_info_read(multi, &rc);
         if(msg) {
           bool retry;
+          long delay;
           struct per_transfer *ended;
           CURL *easy = msg->easy_handle;
           result = msg->data.result;
           curl_easy_getinfo(easy, CURLINFO_PRIVATE, (void *)&ended);
           curl_multi_remove_handle(multi, easy);
 
-          result = post_per_transfer(global, ended, result, &retry);
-          if(retry)
-            continue;
+          result = post_per_transfer(global, ended, result, &retry, &delay);
           progress_finalize(ended); /* before it goes away */
           all_added--; /* one fewer added */
-          removed = TRUE;
-          (void)del_per_transfer(ended);
+          checkmore = TRUE;
+          if(retry) {
+            ended->added = FALSE; /* add it again */
+            /* we delay retries in full integer seconds only */
+            ended->startat = delay ? time(NULL) + delay/1000 : 0;
+          }
+          else
+            (void)del_per_transfer(ended);
         }
       } while(msg);
-      if(removed) {
+      if(!checkmore) {
+        time_t tock = time(NULL);
+        if(tick != tock) {
+          checkmore = TRUE;
+          tick = tock;
+        }
+      }
+      if(checkmore) {
         /* one or more transfers completed, add more! */
         (void)add_parallel_transfers(global, multi, share,
                                      &more_transfers,
@@ -2271,6 +2306,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     return result;
   for(per = transfers; per;) {
     bool retry;
+    long delay;
     bool bailout = FALSE;
     result = pre_transfer(global, per);
     if(result)
@@ -2293,9 +2329,11 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     /* store the result of the actual transfer */
     returncode = result;
 
-    result = post_per_transfer(global, per, result, &retry);
-    if(retry)
+    result = post_per_transfer(global, per, result, &retry, &delay);
+    if(retry) {
+      tool_go_sleep(delay);
       continue;
+    }
 
     /* Bail out upon critical errors or --fail-early */
     if(result || is_fatal_error(returncode) ||
@@ -2415,15 +2453,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
 #ifdef WIN32
       else {
         result = FindWin32CACert(config, tls_backend_info->backend,
-                                 "curl-ca-bundle.crt");
-#if defined(USE_WIN32_CRYPTO)
-        if(!config->cacert && !config->capath) {
-          /* user, and environment did not specify any ca file or path
-             and there is no "curl-ca-bundle.crt" file in standard path
-             so the only possible solution is using the windows ca store */
-          config->native_ca_store = TRUE;
-        }
-#endif
+                                 TEXT("curl-ca-bundle.crt"));
       }
 #endif
     }
@@ -2478,7 +2508,8 @@ static CURLcode run_all_transfers(struct GlobalConfig *global,
   /* cleanup if there are any left */
   for(per = transfers; per;) {
     bool retry;
-    CURLcode result2 = post_per_transfer(global, per, result, &retry);
+    long delay;
+    CURLcode result2 = post_per_transfer(global, per, result, &retry, &delay);
     if(!result)
       /* don't overwrite the original error */
       result = result2;
@@ -2532,7 +2563,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 
       /* Check if we were asked for the help */
       if(res == PARAM_HELP_REQUESTED)
-        tool_help();
+        tool_help(global->help_category);
       /* Check if we were asked for the manual */
       else if(res == PARAM_MANUAL_REQUESTED)
         hugehelp();

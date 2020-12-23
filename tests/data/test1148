@@ -45,12 +45,10 @@ LC_NUMERIC=en_US.UTF-8
 
 #
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1148 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

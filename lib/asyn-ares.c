@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -67,8 +67,8 @@
 #include "select.h"
 #include "progress.h"
 
-#  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) && \
-     (defined(WIN32) || defined(__SYMBIAN32__))
+#  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
+  defined(WIN32)
 #    define CARES_STATICLIB
 #  endif
 #  include <ares.h>
@@ -85,7 +85,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-struct ResolverResults {
+struct thread_data {
   int num_pending; /* number of ares_gethostbyname() requests */
   struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
                                     parts */
@@ -229,8 +229,8 @@ static void destroy_async_data(struct Curl_async *async)
 {
   free(async->hostname);
 
-  if(async->os_specific) {
-    struct ResolverResults *res = (struct ResolverResults *)async->os_specific;
+  if(async->tdata) {
+    struct thread_data *res = async->tdata;
     if(res) {
       if(res->temp_ai) {
         Curl_freeaddrinfo(res->temp_ai);
@@ -238,7 +238,7 @@ static void destroy_async_data(struct Curl_async *async)
       }
       free(res);
     }
-    async->os_specific = NULL;
+    async->tdata = NULL;
   }
 
   async->hostname = NULL;
@@ -286,7 +286,7 @@ int Curl_resolver_getsock(struct connectdata *conn,
  * return number of sockets it worked on
  */
 
-static int waitperform(struct connectdata *conn, int timeout_ms)
+static int waitperform(struct connectdata *conn, timediff_t timeout_ms)
 {
   struct Curl_easy *data = conn->data;
   int nfds;
@@ -349,8 +349,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
                                    struct Curl_dns_entry **dns)
 {
   struct Curl_easy *data = conn->data;
-  struct ResolverResults *res = (struct ResolverResults *)
-    conn->async.os_specific;
+  struct thread_data *res = conn->async.tdata;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(dns);
@@ -437,9 +436,13 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   while(!result) {
     struct timeval *tvp, tv, store;
     int itimeout;
-    int timeout_ms;
+    timediff_t timeout_ms;
 
-    itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
+#if TIMEDIFF_T_MAX > INT_MAX
+    itimeout = (timeout > INT_MAX) ? INT_MAX : (int)timeout;
+#else
+    itimeout = (int)timeout;
+#endif
 
     store.tv_sec = itimeout/1000;
     store.tv_usec = (itimeout%1000)*1000;
@@ -450,7 +453,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
        second is left, otherwise just use 1000ms to make sure the progress
        callback gets called frequent enough */
     if(!tvp->tv_sec)
-      timeout_ms = (int)(tvp->tv_usec/1000);
+      timeout_ms = (timediff_t)(tvp->tv_usec/1000);
     else
       timeout_ms = 1000;
 
@@ -470,7 +473,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
       else if(timediff > timeout)
         timeout = -1;
       else
-        timeout -= (long)timediff;
+        timeout -= timediff;
       now = now2; /* for next loop */
     }
     if(timeout < 0)
@@ -494,7 +497,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
 }
 
 /* Connects results to the list */
-static void compound_results(struct ResolverResults *res,
+static void compound_results(struct thread_data *res,
                              struct Curl_addrinfo *ai)
 {
   struct Curl_addrinfo *ai_tail;
@@ -523,7 +526,7 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
                                struct hostent *hostent)
 {
   struct connectdata *conn = (struct connectdata *)arg;
-  struct ResolverResults *res;
+  struct thread_data *res;
 
 #ifdef HAVE_CARES_CALLBACK_TIMEOUTS
   (void)timeouts; /* ignored */
@@ -534,7 +537,7 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
        be valid so only defer it when we know the 'status' says its fine! */
     return;
 
-  res = (struct ResolverResults *)conn->async.os_specific;
+  res = conn->async.tdata;
   if(res) {
     res->num_pending--;
 
@@ -629,7 +632,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
   *waitp = 0; /* default to synchronous response */
 
-#ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
+#ifdef ENABLE_IPV6
   switch(conn->ip_version) {
   default:
 #if ARES_VERSION >= 0x010601
@@ -645,28 +648,28 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     family = PF_INET6;
     break;
   }
-#endif /* CURLRES_IPV6 */
+#endif /* ENABLE_IPV6 */
 
   bufp = strdup(hostname);
   if(bufp) {
-    struct ResolverResults *res = NULL;
+    struct thread_data *res = NULL;
     free(conn->async.hostname);
     conn->async.hostname = bufp;
     conn->async.port = port;
     conn->async.done = FALSE;   /* not done */
     conn->async.status = 0;     /* clear */
     conn->async.dns = NULL;     /* clear */
-    res = calloc(sizeof(struct ResolverResults), 1);
+    res = calloc(sizeof(struct thread_data), 1);
     if(!res) {
       free(conn->async.hostname);
       conn->async.hostname = NULL;
       return NULL;
     }
-    conn->async.os_specific = res;
+    conn->async.tdata = res;
 
     /* initial status - failed */
     res->last_status = ARES_ENOTFOUND;
-#ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
+#ifdef ENABLE_IPV6
     if(family == PF_UNSPEC) {
       if(Curl_ipv6works(conn)) {
         res->num_pending = 2;
@@ -686,7 +689,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
       }
     }
     else
-#endif /* CURLRES_IPV6 */
+#endif /* ENABLE_IPV6 */
     {
       res->num_pending = 1;
 

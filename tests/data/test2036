@@ -29,9 +29,6 @@ HTTP, -O with no slash at all in the URL
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <errorcode>
 23
 </errorcode>

@@ -3,6 +3,7 @@ Short: m
 Arg: <seconds>
 Help: Maximum time allowed for the transfer
 See-also: connect-timeout
+Category: connection
 ---
 Maximum time in seconds that you allow the whole operation to take.  This is
 useful for preventing your batch jobs from hanging for hours due to slow

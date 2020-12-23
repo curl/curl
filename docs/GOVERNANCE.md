@@ -50,7 +50,7 @@ services and paying for people to work on curl related code etc. Usually, such
 donations are services paid for directly by the sponsors.
 
 We grade sponsors in a few different levels and if they meet the criteria,
-they can be mentioned on the Sponsors page on the curl web site.
+they can be mentioned on the Sponsors page on the curl website.
 
 ## Commercial Support
 
@@ -103,7 +103,7 @@ Feltzing serve as backup admins for when Daniel is gone or unable.
 The primary server is paid for by Haxx. The machine is physically located in a
 server bunker in Stockholm Sweden, operated by the company Portlane.
 
-The web site contents are served to the web via Fastly and Daniel is the
+The website contents are served to the web via Fastly and Daniel is the
 primary curl contact with Fastly.
 
 ### BDFL

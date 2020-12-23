@@ -2,6 +2,7 @@ Long: retry-max-time
 Arg: <seconds>
 Help: Retry only within this period
 Added: 7.12.3
+Category: curl
 ---
 The retry timer is reset before the first transfer attempt. Retries will be
 done as usual (see --retry) as long as the timer hasn't reached this given

@@ -44,13 +44,13 @@ http://%HOSTIP:%HTTP2PORT/1702 --http2 --head
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^X-Forwarded-Proto:.*
 ^Via:.*
 </strip>
 <protocol>
 HEAD /1702 HTTP/1.1
 Host: %HOSTIP:%HTTP2PORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
@@ -67,12 +67,11 @@ accept-ranges: bytes
 content-length: 6
 content-type: text/html
 funny-head: yesyes
-server: cut-out
 via: 1.1 nghttpx
 
 </stdout>
 <stripfile>
-s/^server:.*/server: cut-out/
+s/^server: nghttpx.*\r?\n//
 </stripfile>
 </verify>
 </testcase>

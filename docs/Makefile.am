@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -45,46 +45,49 @@ EXTRA_DIST =                                    \
  ALTSVC.md                                      \
  BINDINGS.md                                    \
  BUG-BOUNTY.md                                  \
- BUGS                                           \
+ BUGS.md                                        \
  CHECKSRC.md                                    \
  CIPHERS.md                                     \
  CMakeLists.txt                                 \
  CODE_OF_CONDUCT.md                             \
+ CODE_REVIEW.md                                 \
  CODE_STYLE.md                                  \
  CONTRIBUTE.md                                  \
  CURL-DISABLE.md                                \
  DEPRECATE.md                                   \
  DYNBUF.md                                      \
- ESNI.md                                        \
+ ECH.md                                         \
  EXPERIMENTAL.md                                \
  FAQ                                            \
- FEATURES                                       \
+ FEATURES.md                                    \
  GOVERNANCE.md                                  \
  HELP-US.md                                     \
  HISTORY.md                                     \
+ HSTS.md                                        \
  HTTP-COOKIES.md                                \
  HTTP2.md                                       \
  HTTP3.md                                       \
+ HYPER.md                                       \
  INSTALL                                        \
  INSTALL.cmake                                  \
  INSTALL.md                                     \
  INTERNALS.md                                   \
  KNOWN_BUGS                                     \
- LICENSE-MIXING.md                              \
  MAIL-ETIQUETTE                                 \
  MQTT.md                                        \
+ NEW-PROTOCOL.md                                \
  options-in-versions                            \
  PARALLEL-TRANSFERS.md                          \
  README.md                                      \
  RELEASE-PROCEDURE.md                           \
- RESOURCES                                      \
  ROADMAP.md                                     \
  SECURITY-PROCESS.md                            \
  SSL-PROBLEMS.md                                \
  SSLCERTS.md                                    \
  THANKS                                         \
  TODO                                           \
- TheArtOfHttpScripting                          \
+ TheArtOfHttpScripting.md                       \
+ URL-SYNTAX.md                                  \
  VERSIONS.md
 
 MAN2HTML= roffit $< >$@

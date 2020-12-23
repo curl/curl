@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -78,6 +78,7 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   info->conn_local_ip[0] = '\0';
   info->conn_primary_port = 0;
   info->conn_local_port = 0;
+  info->retry_after = 0;
 
   info->conn_scheme = 0;
   info->conn_protocol = 0;
@@ -94,6 +95,36 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
   switch(info) {
   case CURLINFO_EFFECTIVE_URL:
     *param_charp = data->change.url?data->change.url:(char *)"";
+    break;
+  case CURLINFO_EFFECTIVE_METHOD: {
+    const char *m = data->set.str[STRING_CUSTOMREQUEST];
+    if(!m) {
+      if(data->set.opt_no_body)
+        m = "HEAD";
+#ifndef CURL_DISABLE_HTTP
+      else {
+        switch(data->state.httpreq) {
+        case HTTPREQ_POST:
+        case HTTPREQ_POST_FORM:
+        case HTTPREQ_POST_MIME:
+          m = "POST";
+          break;
+        case HTTPREQ_PUT:
+          m = "PUT";
+          break;
+        default: /* this should never happen */
+        case HTTPREQ_GET:
+          m = "GET";
+          break;
+        case HTTPREQ_HEAD:
+          m = "HEAD";
+          break;
+        }
+      }
+#endif
+    }
+    *param_charp = m;
+  }
     break;
   case CURLINFO_CONTENT_TYPE:
     *param_charp = data->info.contenttype;
@@ -239,6 +270,9 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_LOCAL_PORT:
     /* Return the local port of the most recent (primary) connection */
     *param_longp = data->info.conn_local_port;
+    break;
+  case CURLINFO_PROXY_ERROR:
+    *param_longp = (long)data->info.pxcode;
     break;
   case CURLINFO_CONDITION_UNMET:
     if(data->info.httpcode == 304)

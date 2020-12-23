@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,6 +31,7 @@
 #include "tool_homedir.h"
 #include "tool_msgs.h"
 #include "tool_parsecfg.h"
+#include "dynbuf.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -39,7 +40,9 @@
 #define ISSEP(x,dash) (!dash && (((x) == '=') || ((x) == ':')))
 
 static const char *unslashquote(const char *line, char *param);
-static char *my_get_line(FILE *fp);
+
+#define MAX_CONFIG_LINE_LENGTH (100*1024)
+static bool my_get_line(FILE *fp, struct curlx_dynbuf *, bool *error);
 
 #ifdef WIN32
 static FILE *execpath(const char *filename)
@@ -82,7 +85,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   if(!filename || !*filename) {
     /* NULL or no file name attempts to load .curlrc from the homedir! */
 
-    char *home = homedir();    /* portable homedir finder */
+    char *home = homedir(".curlrc");
 #ifndef WIN32
     if(home) {
       pathalloc = curl_maprintf("%s%s.curlrc", home, DIR_CHAR);
@@ -135,17 +138,23 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 
   if(file) {
     char *line;
-    char *aline;
     char *option;
     char *param;
     int lineno = 0;
     bool dashed_option;
+    struct curlx_dynbuf buf;
+    bool fileerror;
+    curlx_dyn_init(&buf, MAX_CONFIG_LINE_LENGTH);
 
-    while(NULL != (aline = my_get_line(file))) {
+    while(my_get_line(file, &buf, &fileerror)) {
       int res;
       bool alloced_param = FALSE;
       lineno++;
-      line = aline;
+      line = curlx_dyn_ptr(&buf);
+      if(!line) {
+        rc = 1; /* out of memory */
+        break;
+      }
 
       /* line with # in the first non-blank column is a comment! */
       while(*line && ISSPACE(*line))
@@ -158,7 +167,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       case '\n':
       case '*':
       case '\0':
-        Curl_safefree(aline);
+        curlx_dyn_reset(&buf);
         continue;
       }
 
@@ -173,7 +182,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       /* ... and has ended here */
 
       if(*line)
-        *line++ = '\0'; /* zero terminate, we have a local copy of the data */
+        *line++ = '\0'; /* null-terminate, we have a local copy of the data */
 
 #ifdef DEBUG_CONFIG
       fprintf(stderr, "GOT: %s\n", option);
@@ -190,7 +199,6 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
         param = malloc(strlen(line) + 1); /* parameter */
         if(!param) {
           /* out of memory */
-          Curl_safefree(aline);
           rc = 1;
           break;
         }
@@ -203,7 +211,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
           line++;
 
         if(*line) {
-          *line = '\0'; /* zero terminate */
+          *line = '\0'; /* null-terminate */
 
           /* to detect mistakes better, see if there's data following */
           line++;
@@ -219,7 +227,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
             break;
           default:
             warnf(operation->global, "%s:%d: warning: '%s' uses unquoted "
-                  "white space in the line that may cause side-effects!\n",
+                  "whitespace in the line that may cause side-effects!\n",
                   filename, lineno, option);
           }
         }
@@ -280,10 +288,13 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       if(alloced_param)
         Curl_safefree(param);
 
-      Curl_safefree(aline);
+      curlx_dyn_reset(&buf);
     }
+    curlx_dyn_free(&buf);
     if(file != stdin)
       fclose(file);
+    if(fileerror)
+      rc = 1;
   }
   else
     rc = 1; /* couldn't open the file */
@@ -329,45 +340,29 @@ static const char *unslashquote(const char *line, char *param)
     else
       *param++ = *line++;
   }
-  *param = '\0'; /* always zero terminate */
+  *param = '\0'; /* always null-terminate */
   return line;
 }
 
 /*
  * Reads a line from the given file, ensuring is NUL terminated.
- * The pointer must be freed by the caller.
- * NULL is returned on an out of memory condition.
  */
-static char *my_get_line(FILE *fp)
+static bool my_get_line(FILE *fp, struct curlx_dynbuf *db,
+                        bool *error)
 {
   char buf[4096];
-  char *nl = NULL;
-  char *line = NULL;
-
+  *error = FALSE;
   do {
-    if(NULL == fgets(buf, sizeof(buf), fp))
-      break;
-    if(!line) {
-      line = strdup(buf);
-      if(!line)
-        return NULL;
+    /* fgets() returns s on success, and NULL on error or when end of file
+       occurs while no characters have been read. */
+    if(!fgets(buf, sizeof(buf), fp))
+      /* only if there's data in the line, return TRUE */
+      return curlx_dyn_len(db) ? TRUE : FALSE;
+    if(curlx_dyn_add(db, buf)) {
+      *error = TRUE; /* error */
+      return FALSE; /* stop reading */
     }
-    else {
-      char *ptr;
-      size_t linelen = strlen(line);
-      ptr = realloc(line, linelen + strlen(buf) + 1);
-      if(!ptr) {
-        Curl_safefree(line);
-        return NULL;
-      }
-      line = ptr;
-      strcpy(&line[linelen], buf);
-    }
-    nl = strchr(line, '\n');
-  } while(!nl);
+  } while(!strchr(buf, '\n'));
 
-  if(nl)
-    *nl = '\0';
-
-  return line;
+  return TRUE; /* continue */
 }

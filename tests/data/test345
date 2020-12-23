@@ -34,7 +34,7 @@ http
 Both --etag-compare and -save store new Etag using one pre-existing file
 </name>
 <file name="log/etag345">
-21025-dc7-39462498
+"21025-dc7-39462498"
 </file>
 <command>
 http://%HOSTIP:%HTTPPORT/345 --etag-compare log/etag345 --etag-save log/etag345
@@ -44,18 +44,16 @@ http://%HOSTIP:%HTTPPORT/345 --etag-compare log/etag345 --etag-save log/etag345
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /345 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 If-None-Match: "21025-dc7-39462498"
 
 </protocol>
 <file name="log/etag345">
-21025-dc7-11111
+"21025-dc7-11111"
 </file>
 </verify>
 </testcase>

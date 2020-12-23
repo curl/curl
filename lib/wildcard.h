@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,18 +39,18 @@ typedef enum {
   CURLWC_ERROR, /* error cases */
   CURLWC_DONE   /* if is wildcard->state == CURLWC_DONE wildcard loop
                    will end */
-} curl_wildcard_states;
+} wildcard_states;
 
-typedef void (*curl_wildcard_dtor)(void *ptr);
+typedef void (*wildcard_dtor)(void *ptr);
 
 /* struct keeping information about wildcard download process */
 struct WildcardData {
-  curl_wildcard_states state;
+  wildcard_states state;
   char *path; /* path to the directory, where we trying wildcard-match */
   char *pattern; /* wildcard pattern */
-  struct curl_llist filelist; /* llist with struct Curl_fileinfo */
+  struct Curl_llist filelist; /* llist with struct Curl_fileinfo */
   void *protdata; /* pointer to protocol specific temporary data */
-  curl_wildcard_dtor dtor;
+  wildcard_dtor dtor;
   void *customptr;  /* for CURLOPT_CHUNK_DATA pointer */
 };
 

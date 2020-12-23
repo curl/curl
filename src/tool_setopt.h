@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -64,8 +64,10 @@ extern const struct NameValueUnsigned setopt_nv_CURLSSLOPT[];
 extern const struct NameValue setopt_nv_CURL_NETRC[];
 extern const struct NameValue setopt_nv_CURLPROTO[];
 extern const struct NameValueUnsigned setopt_nv_CURLAUTH[];
+extern const struct NameValueUnsigned setopt_nv_CURLHSTS[];
 
 /* Map options to NameValue sets */
+#define setopt_nv_CURLOPT_HSTS_CTRL setopt_nv_CURLHSTS
 #define setopt_nv_CURLOPT_HTTP_VERSION setopt_nv_CURL_HTTP_VERSION
 #define setopt_nv_CURLOPT_HTTPAUTH setopt_nv_CURLAUTH
 #define setopt_nv_CURLOPT_SSLVERSION setopt_nv_CURL_SSLVERSION
@@ -98,14 +100,15 @@ CURLcode tool_setopt_mimepost(CURL *curl, struct GlobalConfig *config,
 CURLcode tool_setopt_slist(CURL *curl, struct GlobalConfig *config,
                            const char *name, CURLoption tag,
                            struct curl_slist *list);
-CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
+CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
+                     struct OperationConfig *config,
                      const char *name, CURLoption tag, ...);
 
 #define my_setopt(x,y,z) \
-  SETOPT_CHECK(tool_setopt(x, FALSE, global, #y, y, z), y)
+  SETOPT_CHECK(tool_setopt(x, FALSE, global, config, #y, y, z), y)
 
 #define my_setopt_str(x,y,z) \
-  SETOPT_CHECK(tool_setopt(x, TRUE, global, #y, y, z), y)
+  SETOPT_CHECK(tool_setopt(x, TRUE, global, config, #y, y, z), y)
 
 #define my_setopt_enum(x,y,z) \
   SETOPT_CHECK(tool_setopt_enum(x, global, #y, y, setopt_nv_ ## y, z), y)
@@ -122,9 +125,9 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
 #define my_setopt_slist(x,y,z) \
   SETOPT_CHECK(tool_setopt_slist(x, global, #y, y, z), y)
 
-#define res_setopt(x,y,z) tool_setopt(x, FALSE, global, #y, y, z)
+#define res_setopt(x,y,z) tool_setopt(x, FALSE, global, config, #y, y, z)
 
-#define res_setopt_str(x,y,z) tool_setopt(x, TRUE, global, #y, y, z)
+#define res_setopt_str(x,y,z) tool_setopt(x, TRUE, global, config, #y, y, z)
 
 #else /* CURL_DISABLE_LIBCURL_OPTION */
 

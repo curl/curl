@@ -38,9 +38,6 @@ http://%HOSTIP:%HTTPPORT
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /556 HTTP/1.2
 Host: ninja

@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,7 @@ CURLINFO_RETRY_AFTER \- returns the Retry-After retry delay
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_RETRY_AFTER, curl_off_t *retry);
 .SH DESCRIPTION
 Pass a pointer to a curl_off_t variable to receive the number of seconds the
-HTTP server suggesets the client should wait until the next request is
+HTTP server suggests the client should wait until the next request is
 issued. The information from the "Retry-After:" header.
 
 While the HTTP header might contain a fixed date string, the
@@ -44,7 +44,7 @@ HTTP(S)
 CURL *curl = curl_easy_init();
 if(curl) {
   CURLcode res;
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
   res = curl_easy_perform(curl);
   if(res == CURLE_OK) {
     curl_off_t wait = 0;

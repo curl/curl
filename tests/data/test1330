@@ -41,6 +41,8 @@ s/\(.*\)/()/
 s/:\d+/:/
 s:^(MEM )(.*/)(.*):$1$3:
 s/\r\n/\n/
+s/^MEM getenv.c: realloc\(\)[\n]$//
+s/^MEM getenv.c: free\(\)[\n]$//
 </stripfile>
 </verify>
 </testcase>

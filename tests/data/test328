@@ -42,12 +42,12 @@ http://%HOSTIP:%HTTPPORT/hello/328 --compressed
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^Accept-Encoding:.*
 </strip>
 <protocol>
 GET /hello/328 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

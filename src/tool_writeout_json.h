@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,7 +24,7 @@
 #include "tool_setup.h"
 #include "tool_writeout.h"
 
-void ourWriteOutJSON(const struct writeoutvar mappings[],
-        CURL *curl, struct OutStruct *outs, FILE *stream);
+void ourWriteOutJSON(const struct writeoutvar mappings[], CURL *curl,
+                     struct per_transfer *per, FILE *stream);
 
 #endif /* HEADER_CURL_TOOL_WRITEOUT_H */

@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -26,7 +26,7 @@ add_subdirectory(server)
 add_subdirectory(unit)
 
 function(add_runtests targetname test_flags)
-  # Use a special '${TFLAGS}' placeholder as last argument which will be
+  # Use a special '$TFLAGS' placeholder as last argument which will be
   # replaced by the contents of the environment variable in runtests.pl.
   # This is a workaround for CMake's limitation where commands executed by
   # 'make' or 'ninja' cannot portably reference environment variables.
@@ -35,13 +35,12 @@ function(add_runtests targetname test_flags)
     COMMAND
       "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runtests.pl"
       ${test_flags_list}
-      "\${TFLAGS}"
+      "\$TFLAGS"
     DEPENDS testdeps
     VERBATIM USES_TERMINAL
   )
 endfunction()
 
-add_runtests(test           "")
 add_runtests(test-quiet     "-a -s")
 add_runtests(test-am        "-a -am")
 add_runtests(test-full      "-a -p -r")

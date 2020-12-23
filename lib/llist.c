@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,7 +34,7 @@
  * @unittest: 1300
  */
 void
-Curl_llist_init(struct curl_llist *l, curl_llist_dtor dtor)
+Curl_llist_init(struct Curl_llist *l, Curl_llist_dtor dtor)
 {
   l->size = 0;
   l->dtor = dtor;
@@ -54,9 +54,9 @@ Curl_llist_init(struct curl_llist *l, curl_llist_dtor dtor)
  * @unittest: 1300
  */
 void
-Curl_llist_insert_next(struct curl_llist *list, struct curl_llist_element *e,
+Curl_llist_insert_next(struct Curl_llist *list, struct Curl_llist_element *e,
                        const void *p,
-                       struct curl_llist_element *ne)
+                       struct Curl_llist_element *ne)
 {
   ne->ptr = (void *) p;
   if(list->size == 0) {
@@ -90,7 +90,7 @@ Curl_llist_insert_next(struct curl_llist *list, struct curl_llist_element *e,
  * @unittest: 1300
  */
 void
-Curl_llist_remove(struct curl_llist *list, struct curl_llist_element *e,
+Curl_llist_remove(struct Curl_llist *list, struct Curl_llist_element *e,
                   void *user)
 {
   void *ptr;
@@ -131,7 +131,7 @@ Curl_llist_remove(struct curl_llist *list, struct curl_llist_element *e,
 }
 
 void
-Curl_llist_destroy(struct curl_llist *list, void *user)
+Curl_llist_destroy(struct Curl_llist *list, void *user)
 {
   if(list) {
     while(list->size > 0)
@@ -140,7 +140,7 @@ Curl_llist_destroy(struct curl_llist *list, void *user)
 }
 
 size_t
-Curl_llist_count(struct curl_llist *list)
+Curl_llist_count(struct Curl_llist *list)
 {
   return list->size;
 }

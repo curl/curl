@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,8 +29,12 @@
  * be shared.
  */
 
+#include "timeval.h"
+
+struct connectdata;
+
 struct conncache {
-  struct curl_hash hash;
+  struct Curl_hash hash;
   size_t num_conn;
   long next_connection_id;
   struct curltime last_cleanup;
@@ -66,7 +70,7 @@ struct conncache {
 struct connectbundle {
   int multiuse;                 /* supports multi-use */
   size_t num_connections;       /* Number of connections in the bundle */
-  struct curl_llist conn_list;  /* The connectdata members of the bundle */
+  struct Curl_llist conn_list;  /* The connectdata members of the bundle */
 };
 
 /* returns 1 on error, 0 is fine */

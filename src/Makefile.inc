@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,9 @@ CURLX_CFILES = \
   ../lib/nonblock.c \
   ../lib/warnless.c \
   ../lib/curl_ctype.c \
-  ../lib/curl_multibyte.c
+  ../lib/curl_multibyte.c \
+  ../lib/version_win32.c \
+  ../lib/dynbuf.c
 
 CURLX_HFILES = \
   ../lib/curl_setup.h \
@@ -43,7 +45,9 @@ CURLX_HFILES = \
   ../lib/nonblock.h \
   ../lib/warnless.h \
   ../lib/curl_ctype.h \
-  ../lib/curl_multibyte.h
+  ../lib/curl_multibyte.h \
+  ../lib/version_win32.h \
+  ../lib/dynbuf.h
 
 CURL_CFILES = \
   slist_wc.c \

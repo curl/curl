@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_CUSTOMREQUEST \- custom string for request
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CUSTOMREQUEST, char *request);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter.
+Pass a pointer to a null-terminated string as parameter.
 
 When you change the request method by setting \fICURLOPT_CUSTOMREQUEST(3)\fP
 to something, you don't actually change how libcurl behaves or acts in regards
@@ -91,7 +91,7 @@ HTTP, FTP, IMAP, POP3 and SMTP
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/foo.bin");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
 
   /* DELETE the given path */
   curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");

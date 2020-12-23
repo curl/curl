@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_RTSP
+#if !defined(CURL_DISABLE_RTSP) && !defined(USE_HYPER)
 
 #include "urldata.h"
 #include <curl/curl.h>
@@ -106,6 +106,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   rtsp_conncheck,                       /* connection_check */
   PORT_RTSP,                            /* defport */
   CURLPROTO_RTSP,                       /* protocol */
+  CURLPROTO_RTSP,                       /* family */
   PROTOPT_NONE                          /* flags */
 };
 
@@ -114,7 +115,7 @@ static CURLcode rtsp_setup_connection(struct connectdata *conn)
 {
   struct RTSP *rtsp;
 
-  conn->data->req.protop = rtsp = calloc(1, sizeof(struct RTSP));
+  conn->data->req.p.rtsp = rtsp = calloc(1, sizeof(struct RTSP));
   if(!rtsp)
     return CURLE_OUT_OF_MEMORY;
 
@@ -199,7 +200,7 @@ static CURLcode rtsp_done(struct connectdata *conn,
                           CURLcode status, bool premature)
 {
   struct Curl_easy *data = conn->data;
-  struct RTSP *rtsp = data->req.protop;
+  struct RTSP *rtsp = data->req.p.rtsp;
   CURLcode httpStatus;
 
   /* Bypass HTTP empty-reply checks on receive */
@@ -232,7 +233,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
   Curl_RtspReq rtspreq = data->set.rtspreq;
-  struct RTSP *rtsp = data->req.protop;
+  struct RTSP *rtsp = data->req.p.rtsp;
   struct dynbuf req_buffer;
   curl_off_t postsize = 0; /* for ANNOUNCE and SET_PARAMETER */
   curl_off_t putsize = 0; /* for ANNOUNCE and SET_PARAMETER */
@@ -333,12 +334,12 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   if(rtspreq == RTSPREQ_SETUP && !p_transport) {
     /* New Transport: setting? */
     if(data->set.str[STRING_RTSP_TRANSPORT]) {
-      Curl_safefree(conn->allocptr.rtsp_transport);
+      Curl_safefree(data->state.aptr.rtsp_transport);
 
-      conn->allocptr.rtsp_transport =
+      data->state.aptr.rtsp_transport =
         aprintf("Transport: %s\r\n",
                 data->set.str[STRING_RTSP_TRANSPORT]);
-      if(!conn->allocptr.rtsp_transport)
+      if(!data->state.aptr.rtsp_transport)
         return CURLE_OUT_OF_MEMORY;
     }
     else {
@@ -347,7 +348,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
 
-    p_transport = conn->allocptr.rtsp_transport;
+    p_transport = data->state.aptr.rtsp_transport;
   }
 
   /* Accept Headers for DESCRIBE requests */
@@ -359,14 +360,14 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
     /* Accept-Encoding header */
     if(!Curl_checkheaders(conn, "Accept-Encoding") &&
        data->set.str[STRING_ENCODING]) {
-      Curl_safefree(conn->allocptr.accept_encoding);
-      conn->allocptr.accept_encoding =
+      Curl_safefree(data->state.aptr.accept_encoding);
+      data->state.aptr.accept_encoding =
         aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
 
-      if(!conn->allocptr.accept_encoding)
+      if(!data->state.aptr.accept_encoding)
         return CURLE_OUT_OF_MEMORY;
 
-      p_accept_encoding = conn->allocptr.accept_encoding;
+      p_accept_encoding = data->state.aptr.accept_encoding;
     }
   }
 
@@ -374,13 +375,13 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
      it might have been used in the proxy connect, but if we have got a header
      with the user-agent string specified, we erase the previously made string
      here. */
-  if(Curl_checkheaders(conn, "User-Agent") && conn->allocptr.uagent) {
-    Curl_safefree(conn->allocptr.uagent);
-    conn->allocptr.uagent = NULL;
+  if(Curl_checkheaders(conn, "User-Agent") && data->state.aptr.uagent) {
+    Curl_safefree(data->state.aptr.uagent);
+    data->state.aptr.uagent = NULL;
   }
   else if(!Curl_checkheaders(conn, "User-Agent") &&
           data->set.str[STRING_USERAGENT]) {
-    p_uagent = conn->allocptr.uagent;
+    p_uagent = data->state.aptr.uagent;
   }
 
   /* setup the authentication headers */
@@ -388,17 +389,17 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  p_proxyuserpwd = conn->allocptr.proxyuserpwd;
-  p_userpwd = conn->allocptr.userpwd;
+  p_proxyuserpwd = data->state.aptr.proxyuserpwd;
+  p_userpwd = data->state.aptr.userpwd;
 
   /* Referrer */
-  Curl_safefree(conn->allocptr.ref);
+  Curl_safefree(data->state.aptr.ref);
   if(data->change.referer && !Curl_checkheaders(conn, "Referer"))
-    conn->allocptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
+    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
   else
-    conn->allocptr.ref = NULL;
+    data->state.aptr.ref = NULL;
 
-  p_referrer = conn->allocptr.ref;
+  p_referrer = data->state.aptr.ref;
 
   /*
    * Range Header
@@ -411,9 +412,9 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
 
     /* Check to see if there is a range set in the custom headers */
     if(!Curl_checkheaders(conn, "Range") && data->state.range) {
-      Curl_safefree(conn->allocptr.rangeline);
-      conn->allocptr.rangeline = aprintf("Range: %s\r\n", data->state.range);
-      p_range = conn->allocptr.rangeline;
+      Curl_safefree(data->state.aptr.rangeline);
+      data->state.aptr.rangeline = aprintf("Range: %s\r\n", data->state.range);
+      p_range = data->state.aptr.rangeline;
     }
   }
 
@@ -476,8 +477,8 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
    * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
    * with basic and digest, it will be freed anyway by the next request
    */
-  Curl_safefree(conn->allocptr.userpwd);
-  conn->allocptr.userpwd = NULL;
+  Curl_safefree(data->state.aptr.userpwd);
+  data->state.aptr.userpwd = NULL;
 
   if(result)
     return result;
@@ -764,7 +765,7 @@ CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
     /* Store the received CSeq. Match is verified in rtsp_done */
     int nc = sscanf(&header[4], ": %ld", &CSeq);
     if(nc == 1) {
-      struct RTSP *rtsp = data->req.protop;
+      struct RTSP *rtsp = data->req.p.rtsp;
       rtsp->CSeq_recv = CSeq; /* mark the request */
       data->state.rtsp_CSeq_recv = CSeq; /* update the handle */
     }
@@ -775,6 +776,8 @@ CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
   }
   else if(checkprefix("Session:", header)) {
     char *start;
+    char *end;
+    size_t idlen;
 
     /* Find the first non-space letter */
     start = header + 8;
@@ -783,11 +786,25 @@ CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
 
     if(!*start) {
       failf(data, "Got a blank Session ID");
+      return CURLE_RTSP_SESSION_ERROR;
     }
-    else if(data->set.str[STRING_RTSP_SESSION_ID]) {
+
+    /* Find the end of Session ID
+     *
+     * Allow any non whitespace content, up to the field separator or end of
+     * line. RFC 2326 isn't 100% clear on the session ID and for example
+     * gstreamer does url-encoded session ID's not covered by the standard.
+     */
+    end = start;
+    while(*end && *end != ';' && !ISSPACE(*end))
+      end++;
+    idlen = end - start;
+
+    if(data->set.str[STRING_RTSP_SESSION_ID]) {
+
       /* If the Session ID is set, then compare */
-      if(strncmp(start, data->set.str[STRING_RTSP_SESSION_ID],
-                 strlen(data->set.str[STRING_RTSP_SESSION_ID]))  != 0) {
+      if(strlen(data->set.str[STRING_RTSP_SESSION_ID]) != idlen ||
+         strncmp(start, data->set.str[STRING_RTSP_SESSION_ID], idlen) != 0) {
         failf(data, "Got RTSP Session ID Line [%s], but wanted ID [%s]",
               start, data->set.str[STRING_RTSP_SESSION_ID]);
         return CURLE_RTSP_SESSION_ERROR;
@@ -796,24 +813,17 @@ CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
     else {
       /* If the Session ID is not set, and we find it in a response, then set
        * it.
-       *
-       * Allow any non whitespace content, up to the field separator or end of
-       * line. RFC 2326 isn't 100% clear on the session ID and for example
-       * gstreamer does url-encoded session ID's not covered by the standard.
        */
-      char *end = start;
-      while(*end && *end != ';' && !ISSPACE(*end))
-        end++;
 
       /* Copy the id substring into a new buffer */
-      data->set.str[STRING_RTSP_SESSION_ID] = malloc(end - start + 1);
+      data->set.str[STRING_RTSP_SESSION_ID] = malloc(idlen + 1);
       if(data->set.str[STRING_RTSP_SESSION_ID] == NULL)
         return CURLE_OUT_OF_MEMORY;
-      memcpy(data->set.str[STRING_RTSP_SESSION_ID], start, end - start);
-      (data->set.str[STRING_RTSP_SESSION_ID])[end - start] = '\0';
+      memcpy(data->set.str[STRING_RTSP_SESSION_ID], start, idlen);
+      (data->set.str[STRING_RTSP_SESSION_ID])[idlen] = '\0';
     }
   }
   return CURLE_OK;
 }
 
-#endif /* CURL_DISABLE_RTSP */
+#endif /* CURL_DISABLE_RTSP or using Hyper */

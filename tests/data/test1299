@@ -41,12 +41,10 @@ Send "OPTIONS *" with --request-target
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 OPTIONS * HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Testno: 1299
 

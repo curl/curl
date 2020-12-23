@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -1536,6 +1536,17 @@ static int test_weird_arguments(void)
   }
 
   errors += string_check(buf, "");
+
+  /* Do not skip sanity checks with parameters! */
+  buf[0] = 0;
+  rc = curl_msnprintf(buf, sizeof(buf), "%d, %.*1$d", 500, 1);
+
+  if(rc != 256) {
+    printf("curl_mprintf() returned %d and not 256!\n", rc);
+    errors++;
+  }
+
+  errors += strlen_check(buf, 255);
 
   if(errors)
     printf("Some curl_mprintf() weird arguments tests failed!\n");

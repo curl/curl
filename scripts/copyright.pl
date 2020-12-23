@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@
 #
 
 # regexes of files to not scan
-my @whitelist=(
+my @skiplist=(
     '^tests\/data\/test(\d+)$', # test case data
     '^docs\/cmdline-opts\/[a-z]+(.*)\.d$', # curl.1 pieces
     '(\/|^)[A-Z0-9_.-]+$', # all uppercase file name, possibly with dot and dash
@@ -44,9 +44,11 @@ my @whitelist=(
     '^projects/Windows/.*.vcxproj.filters$', # generated MSVC file
     '^m4/ax_compile_check_sizeof.m4$', # imported, leave be
     '^.mailmap', # git control file
-    '^winbuild/BUILD.WINDOWS.txt$', # instructions
     '\/readme',
     '^.github/', # github instruction files
+    '^.dcignore', # deepcode.ai instruction file
+    '^.muse/', # muse-CI control files
+    "buildconf", # its nothing to copyright
 
     # docs/ files we're okay with without copyright
     'INSTALL.cmake',
@@ -60,17 +62,6 @@ my @whitelist=(
     # macos-framework files
     '^lib\/libcurl.plist',
     '^lib\/libcurl.vers.in',
-
-    # symbian build files we know little about
-    '^packages\/Symbian\/bwins\/libcurlu.def',
-    '^packages\/Symbian\/eabi\/libcurlu.def',
-    '^packages\/Symbian\/group\/bld.inf',
-    '^packages\/Symbian\/group\/curl.iby',
-    '^packages\/Symbian\/group\/curl.mmp',
-    '^packages\/Symbian\/group\/curl.pkg',
-    '^packages\/Symbian\/group\/libcurl.iby',
-    '^packages\/Symbian\/group\/libcurl.mmp',
-    '^packages\/Symbian\/group\/libcurl.pkg',
 
     # vms files
     '^packages\/vms\/build_vms.com',
@@ -168,10 +159,10 @@ else {
 for my $f (@all) {
     chomp $f;
     my $skipped = 0;
-    for my $skip (@whitelist) {
+    for my $skip (@skiplist) {
         #print "$f matches $skip ?\n";
         if($f =~ /$skip/) {
-            $whitelisted++;
+            $skiplisted++;
             $skipped = 1;
             #print "$f: SKIPPED ($skip)\n";
             last;
@@ -186,6 +177,6 @@ for my $f (@all) {
 
 print STDERR "$missing files have no copyright\n" if($missing);
 print STDERR "$wrong files have wrong copyright year\n" if ($wrong);
-print STDERR "$whitelisted files are whitelisted\n" if ($whitelisted);
+print STDERR "$skiplisted files are skipped\n" if ($skiplisted);
 
 exit 1 if($missing || $wrong);

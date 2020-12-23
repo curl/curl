@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -37,8 +37,9 @@ sub azure_check_environment {
 }
 
 sub azure_create_test_run {
+    my ($curl)=@_;
     my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
-    my $azure_run=`curl --silent --noproxy "*" \\
+    my $azure_run=`$curl --silent --noproxy "*" \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header "Content-Type: application/json" \\
     --data "
@@ -48,7 +49,7 @@ sub azure_create_test_run {
             'build': {'id': '$ENV{'BUILD_BUILDID'}'}
         }
     " \\
-    "$azure_baseurl/_apis/test/runs?api-version=5.0"`;
+    "$azure_baseurl/_apis/test/runs?api-version=5.1"`;
     if($azure_run =~ /"id":(\d+)/) {
         return $1;
     }
@@ -56,12 +57,13 @@ sub azure_create_test_run {
 }
 
 sub azure_create_test_result {
-    my ($azure_run_id, $testnum, $testname)=@_;
+    my ($curl, $azure_run_id, $testnum, $testname)=@_;
     $testname =~ s/\\/\\\\/g;
     $testname =~ s/\'/\\\'/g;
     $testname =~ s/\"/\\\"/g;
+    my $title_testnum=sprintf("%04d", $testnum);
     my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
-    my $azure_result=`curl --silent --noproxy "*" \\
+    my $azure_result=`$curl --silent --noproxy "*" \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header "Content-Type: application/json" \\
     --data "
@@ -69,13 +71,14 @@ sub azure_create_test_result {
             {
                 'build': {'id': '$ENV{'BUILD_BUILDID'}'},
                 'testCase': {'id': $testnum},
-                'testCaseTitle': '$testname',
+                'testCaseTitle': '$title_testnum: $testname',
+                'testCaseRevision': 2,
                 'automatedTestName': 'curl.tests.$testnum',
                 'outcome': 'InProgress'
             }
         ]
     " \\
-    "$azure_baseurl/_apis/test/runs/$azure_run_id/results?api-version=5.0"`;
+    "$azure_baseurl/_apis/test/runs/$azure_run_id/results?api-version=5.1"`;
     if($azure_result =~ /\[\{"id":(\d+)/) {
         return $1;
     }
@@ -83,7 +86,7 @@ sub azure_create_test_result {
 }
 
 sub azure_update_test_result {
-    my ($azure_run_id, $azure_result_id, $testnum, $error, $start, $stop)=@_;
+    my ($curl, $azure_run_id, $azure_result_id, $testnum, $error, $start, $stop)=@_;
     if(!defined $stop) {
         $stop = $start;
     }
@@ -92,10 +95,10 @@ sub azure_update_test_result {
     my $azure_duration = sprintf("%.0f", ($stop-$start)*1000);
     my $azure_outcome;
     if($error == 2) {
-        $azure_outcome = 'Not applicable';
+        $azure_outcome = 'NotApplicable';
     }
     elsif($error < 0) {
-        $azure_outcome = 'Not executed';
+        $azure_outcome = 'NotExecuted';
     }
     elsif(!$error) {
         $azure_outcome = 'Passed';
@@ -104,7 +107,7 @@ sub azure_update_test_result {
         $azure_outcome = 'Failed';
     }
     my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
-    my $azure_result=`curl --silent --noproxy "*" --request PATCH \\
+    my $azure_result=`$curl --silent --noproxy "*" --request PATCH \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header "Content-Type: application/json" \\
     --data "
@@ -118,7 +121,7 @@ sub azure_update_test_result {
             }
         ]
     " \\
-    "$azure_baseurl/_apis/test/runs/$azure_run_id/results?api-version=5.0"`;
+    "$azure_baseurl/_apis/test/runs/$azure_run_id/results?api-version=5.1"`;
     if($azure_result =~ /\[\{"id":(\d+)/) {
         return $1;
     }
@@ -126,9 +129,9 @@ sub azure_update_test_result {
 }
 
 sub azure_update_test_run {
-    my ($azure_run_id)=@_;
+    my ($curl, $azure_run_id)=@_;
     my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
-    my $azure_run=`curl --silent --noproxy "*" --request PATCH \\
+    my $azure_run=`$curl --silent --noproxy "*" --request PATCH \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header "Content-Type: application/json" \\
     --data "
@@ -136,7 +139,7 @@ sub azure_update_test_run {
             'state': 'Completed'
         }
     " \\
-    "$azure_baseurl/_apis/test/runs/$azure_run_id?api-version=5.0"`;
+    "$azure_baseurl/_apis/test/runs/$azure_run_id?api-version=5.1"`;
     if($azure_run =~ /"id":(\d+)/) {
         return $1;
     }

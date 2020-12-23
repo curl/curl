@@ -38,12 +38,10 @@ http://%HOSTIP:%HTTPPORT/2078 -u : --negotiate --data name=value
 <errorcode>
 0
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
 POST /2078 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 10
 Content-Type: application/x-www-form-urlencoded

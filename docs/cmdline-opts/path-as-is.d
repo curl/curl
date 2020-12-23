@@ -1,6 +1,7 @@
 Long: path-as-is
 Help: Do not squash .. sequences in URL path
 Added: 7.42.0
+Category: curl
 ---
 Tell curl to not handle sequences of /../ or /./ in the given URL
 path. Normally curl will squash or merge them according to standards but with

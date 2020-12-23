@@ -14,6 +14,7 @@
 --alt-svc                            7.64.1
 --anyauth                            7.10.6
 --append (-a)                        4.8
+--aws-sigv4                          7.75.0
 --basic                              7.10.6
 --cacert                             7.5
 --capath                             7.9.8
@@ -30,8 +31,10 @@
 --cookie (-b)                        4.9
 --cookie-jar (-c)                    7.9
 --create-dirs                        7.10.3
+--create-file-mode                   7.75.0
 --crlf                               5.7
 --crlfile                            7.19.7
+--curves                             7.73.0
 --data (-d)                          4.0
 --data-ascii                         7.2
 --data-binary                        7.2
@@ -78,6 +81,7 @@
 --header (-H)                        5.0
 --help (-h)                          4.0
 --hostpubmd5                         7.17.1
+--hsts                               7.74.0
 --http0.9                            7.64.0
 --http1.0 (-0)                       7.9.1
 --http1.1                            7.33.0
@@ -127,6 +131,7 @@
 --ntlm-wb                            7.22.0
 --oauth2-bearer                      7.33.0
 --output (-o)                        4.0
+--output-dir                         7.73.0
 --parallel (-Z)                      7.66.0
 --parallel-immediate                 7.68.0
 --parallel-max                       7.66.0

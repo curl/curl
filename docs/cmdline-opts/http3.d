@@ -6,6 +6,7 @@ Mutexed: http1.1 http1.0 http2 http2-prior-knowledge
 Requires: HTTP/3
 Help: Use HTTP v3
 See-also: http1.1 http2
+Category: http
 ---
 
 WARNING: this option is experimental. Do not use in production.

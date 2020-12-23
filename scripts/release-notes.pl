@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -137,8 +137,8 @@ sub onecommit {
         $ref = $closes[0];
     }
 
-    if($ref =~ /^(\d+)/) {
-        $ref = "https://curl.haxx.se/bug/?i=$1"
+    if($ref =~ /^#?(\d+)/) {
+        $ref = "https://curl.se/bug/?i=$1"
     }
     if($ref) {
         my $r = getref();
@@ -156,7 +156,8 @@ for my $l (@releasenotes) {
         push @o, $l;
         push @o, "\n";
         for my $f (@line) {
-            push @o, sprintf " o $f%s\n", $moreinfo{$f}? sprintf(" [%d]", $moreinfo{$f}): "";
+            push @o, sprintf " o %s%s\n", $f,
+                $moreinfo{$f}? sprintf(" [%d]", $moreinfo{$f}): "";
             $refused[$moreinfo{$f}]=3;
         }
         push @o, " --- new entries are listed above this ---";
@@ -208,6 +209,6 @@ exit;
 # Debug: show unused references
 for my $r (1 .. $#refs) {
     if($refused[$r] != 3) {
-        printf "$r is %d!\n", $refused[$r];
+        printf "%s is %d!\n", $r, $refused[$r];
     }
 }

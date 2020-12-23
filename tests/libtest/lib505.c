@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -71,7 +71,7 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if(! file_info.st_size) {
+  if(!file_info.st_size) {
     fprintf(stderr, "ERROR: file %s has zero size!\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;

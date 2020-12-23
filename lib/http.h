@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -22,6 +22,17 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+
+typedef enum {
+  HTTPREQ_NONE, /* first in list */
+  HTTPREQ_GET,
+  HTTPREQ_POST,
+  HTTPREQ_POST_FORM, /* we make a difference internally */
+  HTTPREQ_POST_MIME, /* we make a difference internally */
+  HTTPREQ_PUT,
+  HTTPREQ_HEAD,
+  HTTPREQ_LAST /* last in list */
+} Curl_HttpReq;
 
 #ifndef CURL_DISABLE_HTTP
 
@@ -44,20 +55,61 @@ char *Curl_copy_header_value(const char *header);
 
 char *Curl_checkProxyheaders(const struct connectdata *conn,
                              const char *thisheader);
+#ifndef USE_HYPER
 CURLcode Curl_buffer_send(struct dynbuf *in,
                           struct connectdata *conn,
                           curl_off_t *bytes_written,
                           size_t included_body_bytes,
                           int socketindex);
+#else
+#define Curl_buffer_send(a,b,c,d,e) CURLE_OK
+#endif
 
 CURLcode Curl_add_timecondition(const struct connectdata *conn,
                                 struct dynbuf *buf);
 CURLcode Curl_add_custom_headers(struct connectdata *conn,
                                  bool is_connect,
-                                 struct dynbuf *req_buffer);
+#ifndef USE_HYPER
+                                 struct dynbuf *req
+#else
+                                 void *headers
+#endif
+  );
 CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
                                     struct dynbuf *buf,
                                     struct Curl_easy *handle);
+
+void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
+                      const char **method, Curl_HttpReq *);
+CURLcode Curl_http_useragent(struct Curl_easy *data, struct connectdata *conn);
+CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn);
+CURLcode Curl_http_target(struct Curl_easy *data, struct connectdata *conn,
+                          struct dynbuf *req);
+CURLcode Curl_http_statusline(struct Curl_easy *data,
+                              struct connectdata *conn);
+CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
+                          char *headp);
+CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
+                        Curl_HttpReq httpreq,
+                        const char **teep);
+CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
+                            struct dynbuf *r, Curl_HttpReq httpreq);
+#ifndef CURL_DISABLE_COOKIES
+CURLcode Curl_http_cookies(struct Curl_easy *data,
+                           struct connectdata *conn,
+                           struct dynbuf *r);
+#else
+#define Curl_http_cookies(a,b,c) CURLE_OK
+#endif
+CURLcode Curl_http_resume(struct Curl_easy *data,
+                          struct connectdata *conn,
+                          Curl_HttpReq httpreq);
+CURLcode Curl_http_range(struct Curl_easy *data,
+                         struct connectdata *conn,
+                         Curl_HttpReq httpreq);
+CURLcode Curl_http_firstwrite(struct Curl_easy *data,
+                              struct connectdata *conn,
+                              bool *done);
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http(struct connectdata *conn, bool *done);
@@ -115,7 +167,6 @@ struct HTTP {
   const char *postdata;
 
   const char *p_pragma;      /* Pragma: string */
-  const char *p_accept;      /* Accept: string */
 
   /* For FORM posting */
   curl_mimepart form;
@@ -148,6 +199,7 @@ struct HTTP {
   struct dynbuf header_recvbuf;
   size_t nread_header_recvbuf; /* number of bytes in header_recvbuf fed into
                                   upper layer */
+  struct dynbuf trailer_recvbuf;
   int status_code; /* HTTP status code */
   const uint8_t *pausedata; /* pointer to data received in on_data_chunk */
   size_t pauselen; /* the number of bytes left in data */

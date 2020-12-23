@@ -98,27 +98,22 @@ chkhostname curlhost
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
+
 <protocol>
 GET http://test.remote.example.com/path/590 HTTP/1.1
 Host: test.remote.example.com
-User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://test.remote.example.com/path/590 HTTP/1.1
 Host: test.remote.example.com
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://test.remote.example.com/path/590 HTTP/1.1
 Host: test.remote.example.com
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAAAgACAHAAAAAIAAgAcgAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAAIWYOdZV0iKA8ytf+dU+Bz9TpMJ4mBKu221lY3VybGhvc3Q=
-User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Accept: */*
 Proxy-Connection: Keep-Alive
 

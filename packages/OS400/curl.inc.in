@@ -9,7 +9,7 @@
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
-      * are also available at https://curl.haxx.se/docs/copyright.html.
+      * are also available at https://curl.se/docs/copyright.html.
       *
       * You may opt to use, copy, modify, merge, publish, distribute and/or sell
       * copies of the Software, and permit persons to whom the Software is
@@ -140,6 +140,8 @@
      d                 c                   X'01000000'
      d CURL_VERSION_HTTP3...
      d                 c                   X'02000000'
+     d CURL_VERSION_UNICODE...
+     d                 c                   X'04000000'
       *
      d CURL_HTTPPOST_FILENAME...
      d                 c                   X'00000001'
@@ -234,6 +236,8 @@
      d                 c                   20000
      d CURLOPTTYPE_OFF_T...
      d                 c                   30000
+     d CURLOPTTYPE_BLOB...
+     d                 c                   40000
       *
      d CURL_IPRESOLVE_WHATEVER...
      d                 c                   0
@@ -1434,6 +1438,24 @@
      d                 c                   00288
      d  CURLOPT_SASL_AUTHZID...
      d                 c                   10289
+     d  CURLOPT_MAIL_RCPT_ALLLOWFAILS...
+     d                 c                   00290
+     d  CURLOPT_SSLCERT_BLOB...
+     d                 c                   40291
+     d  CURLOPT_SSLKEY_BLOB...
+     d                 c                   40292
+     d  CURLOPT_PROXY_SSLCERT_BLOB...
+     d                 c                   40293
+     d  CURLOPT_PROXY_SSLKEY_BLOB...
+     d                 c                   40294
+     d  CURLOPT_ISSUERCERT_BLOB...
+     d                 c                   40295
+     d  CURLOPT_PROXY_ISSUERCERT...
+     d                 c                   10296
+     d  CURLOPT_PROXY_ISSUERCERT_BLOB...
+     d                 c                   40297
+     d  CURLOPT_SSL_EC_CURVES...
+     d                 c                   10298
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -1653,7 +1675,13 @@
      d  CURLINFO_REDIRECT_TIME_T...                                             CURLINFO_OFF_T  + 55
      d                 c                   X'00600037'
      d  CURLINFO_APPCONNECT_TIME_T...                                           CURLINFO_OFF_T  + 56
-     d                 c                   X'00600036'
+     d                 c                   X'00600038'
+     d  CURLINFO_RETRY_AFTER...                                                 CURLINFO_OFF_T  + 57
+     d                 c                   X'00600039'
+     d  CURLINFO_EFFECTIVE_METHOD...                                            CURLINFO_STRING + 58
+     d                 c                   X'0010003A'
+     d  CURLINFO_PROXY_ERROR...                                                 CURLINFO_LONG + 59
+     d                 c                   X'0020003B'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'

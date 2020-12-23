@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -63,6 +63,7 @@
 #include "warnless.h"
 #include "curl_base64.h"
 #include "curl_printf.h"
+#include "strdup.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -82,6 +83,44 @@
   else                                       \
     dest->var = NULL;
 
+#define CLONE_BLOB(var)                         \
+  if(blobdup(&dest->var, source->var))         \
+    return FALSE;
+
+static CURLcode blobdup(struct curl_blob **dest,
+                        struct curl_blob *src)
+{
+  DEBUGASSERT(dest);
+  DEBUGASSERT(!*dest);
+  if(src) {
+    /* only if there's data to dupe! */
+    struct curl_blob *d;
+    d = malloc(sizeof(struct curl_blob) + src->len);
+    if(!d)
+      return CURLE_OUT_OF_MEMORY;
+    d->len = src->len;
+    /* Always duplicate because the connection may survive longer than the
+       handle that passed in the blob. */
+    d->flags = CURL_BLOB_COPY;
+    d->data = (void *)((char *)d + sizeof(struct curl_blob));
+    memcpy(d->data, src->data, src->len);
+    *dest = d;
+  }
+  return CURLE_OK;
+}
+
+/* returns TRUE if the blobs are identical */
+static bool blobcmp(struct curl_blob *first, struct curl_blob *second)
+{
+  if(!first && !second) /* both are NULL */
+    return TRUE;
+  if(!first || !second) /* one is NULL */
+    return FALSE;
+  if(first->len != second->len) /* different sizes */
+    return FALSE;
+  return !memcmp(first->data, second->data, first->len); /* same data */
+}
+
 bool
 Curl_ssl_config_matches(struct ssl_primary_config *data,
                         struct ssl_primary_config *needle)
@@ -91,6 +130,7 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      (data->verifypeer == needle->verifypeer) &&
      (data->verifyhost == needle->verifyhost) &&
      (data->verifystatus == needle->verifystatus) &&
+     blobcmp(data->cert_blob, needle->cert_blob) &&
      Curl_safe_strcasecompare(data->CApath, needle->CApath) &&
      Curl_safe_strcasecompare(data->CAfile, needle->CAfile) &&
      Curl_safe_strcasecompare(data->clientcert, needle->clientcert) &&
@@ -98,6 +138,7 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      Curl_safe_strcasecompare(data->egdsocket, needle->egdsocket) &&
      Curl_safe_strcasecompare(data->cipher_list, needle->cipher_list) &&
      Curl_safe_strcasecompare(data->cipher_list13, needle->cipher_list13) &&
+     Curl_safe_strcasecompare(data->curves, needle->curves) &&
      Curl_safe_strcasecompare(data->pinned_key, needle->pinned_key))
     return TRUE;
 
@@ -115,6 +156,7 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   dest->verifystatus = source->verifystatus;
   dest->sessionid = source->sessionid;
 
+  CLONE_BLOB(cert_blob);
   CLONE_STRING(CApath);
   CLONE_STRING(CAfile);
   CLONE_STRING(clientcert);
@@ -123,6 +165,7 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   CLONE_STRING(cipher_list);
   CLONE_STRING(cipher_list13);
   CLONE_STRING(pinned_key);
+  CLONE_STRING(curves);
 
   return TRUE;
 }
@@ -137,6 +180,8 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
   Curl_safefree(sslc->cipher_list);
   Curl_safefree(sslc->cipher_list13);
   Curl_safefree(sslc->pinned_key);
+  Curl_safefree(sslc->cert_blob);
+  Curl_safefree(sslc->curves);
 }
 
 #ifdef USE_SSL
@@ -320,7 +365,7 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
                            size_t *idsize, /* set 0 if unknown */
                            int sockindex)
 {
-  struct curl_ssl_session *check;
+  struct Curl_ssl_session *check;
   struct Curl_easy *data = conn->data;
   size_t i;
   long *general_age;
@@ -387,7 +432,7 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
 /*
  * Kill a single session ID entry in the cache.
  */
-void Curl_ssl_kill_session(struct curl_ssl_session *session)
+void Curl_ssl_kill_session(struct Curl_ssl_session *session)
 {
   if(session->sessionid) {
     /* defensive check */
@@ -414,7 +459,7 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
   struct Curl_easy *data = conn->data;
 
   for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
-    struct curl_ssl_session *check = &data->state.session[i];
+    struct Curl_ssl_session *check = &data->state.session[i];
 
     if(check->sessionid == ssl_sessionid) {
       Curl_ssl_kill_session(check);
@@ -436,7 +481,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
 {
   size_t i;
   struct Curl_easy *data = conn->data; /* the mother of all structs */
-  struct curl_ssl_session *store = &data->state.session[0];
+  struct Curl_ssl_session *store = &data->state.session[0];
   long oldest_age = data->state.session[0].age; /* zero if unused */
   char *clone_host;
   char *clone_conn_to_host;
@@ -579,6 +624,7 @@ void Curl_ssl_close(struct connectdata *conn, int sockindex)
 {
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
   Curl_ssl->close_one(conn, sockindex);
+  conn->ssl[sockindex].state = ssl_connection_none;
 }
 
 CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
@@ -621,13 +667,13 @@ struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data)
  */
 CURLcode Curl_ssl_initsessions(struct Curl_easy *data, size_t amount)
 {
-  struct curl_ssl_session *session;
+  struct Curl_ssl_session *session;
 
   if(data->state.session)
     /* this is just a precaution to prevent multiple inits */
     return CURLE_OK;
 
-  session = calloc(amount, sizeof(struct curl_ssl_session));
+  session = calloc(amount, sizeof(struct Curl_ssl_session));
   if(!session)
     return CURLE_OUT_OF_MEMORY;
 
@@ -706,7 +752,7 @@ CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num)
 }
 
 /*
- * 'value' is NOT a zero terminated string
+ * 'value' is NOT a null-terminated string
  */
 CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
                                     int certnum,
@@ -728,10 +774,10 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
   /* sprintf the label and colon */
   msnprintf(output, outlen, "%s:", label);
 
-  /* memcpy the value (it might not be zero terminated) */
+  /* memcpy the value (it might not be null-terminated) */
   memcpy(&output[labellen + 1], value, valuelen);
 
-  /* zero terminate the output */
+  /* null-terminate the output */
   output[labellen + 1 + valuelen] = 0;
 
   nl = Curl_slist_append_nodup(ci->certinfo[certnum], output);

@@ -8,14 +8,14 @@ flaws or bugs.
 
 ### Join the Community
 
-Skip over to [https://curl.haxx.se/mail/](https://curl.haxx.se/mail/) and join
+Skip over to [https://curl.se/mail/](https://curl.se/mail/) and join
 the appropriate mailing list(s).  Read up on details before you post
 questions. Read this file before you start sending patches! We prefer
 questions sent to and discussions being held on the mailing list(s), not sent
 to individuals.
 
 Before posting to one of the curl mailing lists, please read up on the
-[mailing list etiquette](https://curl.haxx.se/mail/etiquette.html).
+[mailing list etiquette](https://curl.se/mail/etiquette.html).
 
 We also hang out on IRC in #curl on irc.freenode.net
 
@@ -49,12 +49,12 @@ always provide us with your full real name when contributing!
 ### What To Read
 
 Source code, the man pages, the [INTERNALS
-document](https://curl.haxx.se/dev/internals.html),
-[TODO](https://curl.haxx.se/docs/todo.html),
-[KNOWN_BUGS](https://curl.haxx.se/docs/knownbugs.html) and the [most recent
-changes](https://curl.haxx.se/dev/sourceactivity.html) in git. Just lurking on
+document](https://curl.se/dev/internals.html),
+[TODO](https://curl.se/docs/todo.html),
+[KNOWN_BUGS](https://curl.se/docs/knownbugs.html) and the [most recent
+changes](https://curl.se/dev/sourceactivity.html) in git. Just lurking on
 the [curl-library mailing
-list](https://curl.haxx.se/mail/list.cgi?list=curl-library) will give you a
+list](https://curl.se/mail/list.cgi?list=curl-library) will give you a
 lot of insights on what's going on right now. Asking there is a good idea too.
 
 ## Write a good patch
@@ -62,7 +62,7 @@ lot of insights on what's going on right now. Asking there is a good idea too.
 ### Follow code style
 
 When writing C code, follow the
-[CODE_STYLE](https://curl.haxx.se/dev/code-style.html) already established in
+[CODE_STYLE](https://curl.se/dev/code-style.html) already established in
 the project. Consistent style makes code easier to read and mistakes less
 likely to happen. Run `make checksrc` before you submit anything, to make sure
 you follow the basic style. That script doesn't verify everything, but if it
@@ -108,7 +108,7 @@ submit a small description of your fix or your new features with every
 contribution so that it can be swiftly added to the package documentation.
 
 The documentation is always made in man pages (nroff formatted) or plain
-ASCII files. All HTML files on the web site and in the release archives are
+ASCII files. All HTML files on the website and in the release archives are
 generated from the nroff/ASCII versions.
 
 ### Test Cases
@@ -131,7 +131,7 @@ verified your changes.
 Ideally you file a [pull request on
 github](https://github.com/curl/curl/pulls), but you can also send your plain
 patch to [the curl-library mailing
-list](https://curl.haxx.se/mail/list.cgi?list=curl-library).
+list](https://curl.se/mail/list.cgi?list=curl-library).
 
 Either way, your change will be reviewed and discussed there and you will be
 expected to correct flaws pointed out and update accordingly, or the change
@@ -172,6 +172,33 @@ you are expected to fix the problem. If you don't understand when the issue is
 or have other problems to fix the complaint, just ask and other project
 members will likely be able to help out.
 
+Consider the following table while looking at pull request failures:
+
+ | CI platform as shown in PR          | State  | What to look at next       |
+ | ----------------------------------- | ------ | -------------------------- |
+ | CI / codeql                         | stable | quality check results      |
+ | CI / fuzzing                        | stable | fuzzing results            |
+ | CI / macos ...                      | stable | all errors and failures    |
+ | Code scanning results / CodeQL      | stable | quality check results      |
+ | FreeBSD FreeBSD: ...                | stable | all errors and failures    |
+ | LGTM analysis: Python               | stable | new findings               |
+ | LGTM analysis:  C/C++               | stable | new findings               |
+ | buildbot/curl_winssl_ ...           | stable | all errors and failures    |
+ | continuous-integration/appveyor/pr  | stable | all errors and failures    |
+ | continuous-integration/travis-ci/pr | stable | all errors and failures    |
+ | curl.curl (linux ...)               | stable | all errors and failures    |
+ | curl.curl (windows ...)             | flaky  | repetitive errors/failures |
+ | deepcode-ci-bot                     | stable | new findings               |
+ | musedev                             | stable | new findings               |
+
+Sometimes the tests fail due to a dependency service temporarily being offline
+or otherwise unavailable, eg. package downloads. In this case you can just
+try to update your pull requests to rerun the tests later as described below.
+
+You can update your pull requests by pushing new commits or force-pushing
+changes to existing commits. Force-pushing an amended commit without any
+actual content changed also allows you to retrigger the tests for that commit.
+
 When you adjust your pull requests after review, consider squashing the
 commits so that we can review the full updated version more easily.
 
@@ -199,6 +226,16 @@ A short guide to how to write commit messages in the curl project.
     [Reported-by: John Doe - credit the reporter]
     [whatever-else-by: credit all helpers, finders, doers]
     ---- stop ----
+
+The first line is a succinct description of the change:
+
+ - use the imperative, present tense: "change" not "changed" nor "changes"
+ - don't capitalize first letter
+ - no dot (.) at the end
+
+The `[area]` in the first line can be `http2`, `cookies`, `openssl` or
+similar. There's no fixed list to select from but using the same "area" as
+other related changes could make sense.
 
 Don't forget to use commit --author="" if you commit someone else's work, and
 make sure that you have your own user and email setup correctly in git before
@@ -265,3 +302,6 @@ For Windows:
 
  - [https://gnuwin32.sourceforge.io/packages/patch.htm](https://gnuwin32.sourceforge.io/packages/patch.htm)
  - [https://gnuwin32.sourceforge.io/packages/diffutils.htm](https://gnuwin32.sourceforge.io/packages/diffutils.htm)
+
+### Useful resources
+* [Webinar on getting code into cURL](https://www.youtube.com/watch?v=QmZ3W1d6LQI)

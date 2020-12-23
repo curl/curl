@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_CAINFO, char *path);
 .SH DESCRIPTION
 This option is for connecting to an HTTPS proxy, not an HTTPS server.
 
-Pass a char * to a zero terminated string naming a file holding one or more
+Pass a char * to a null-terminated string naming a file holding one or more
 certificates to verify the HTTPS proxy with.
 
 If \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP is zero and you avoid verifying the
@@ -72,7 +72,7 @@ Added in 7.52.0
 
 For TLS backends that don't support certificate files, the
 \fICURLOPT_PROXY_CAINFO(3)\fP option is ignored. Refer to
-https://curl.haxx.se/docs/ssl-compared.html
+https://curl.se/docs/ssl-compared.html
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.

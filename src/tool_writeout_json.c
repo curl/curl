@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -103,12 +103,19 @@ static int writeString(FILE *str, CURL *curl, const char *key, CURLINFO ci)
   return 0;
 }
 
-static int writeLong(FILE *str, CURL *curl, const char *key, CURLINFO ci)
+static int writeLong(FILE *str, CURL *curl, const char *key, CURLINFO ci,
+                     struct per_transfer *per, const struct writeoutvar *wovar)
 {
-  long val = 0;
-  if(CURLE_OK == curl_easy_getinfo(curl, ci, &val)) {
-    fprintf(str, "\"%s\":%ld", key, val);
+  if(wovar->id == VAR_NUM_HEADERS) {
+    fprintf(str, "\"%s\":%ld", key, per->num_headers);
     return 1;
+  }
+  else {
+    long val = 0;
+    if(CURLE_OK == curl_easy_getinfo(curl, ci, &val)) {
+      fprintf(str, "\"%s\":%ld", key, val);
+      return 1;
+    }
   }
   return 0;
 }
@@ -149,12 +156,13 @@ static int writeVersion(FILE *str, CURL *curl, const char *key, CURLINFO ci)
 }
 
 void ourWriteOutJSON(const struct writeoutvar mappings[], CURL *curl,
-        struct OutStruct *outs, FILE *stream)
+                     struct per_transfer *per, FILE *stream)
 {
   int i;
 
   fputs("{", stream);
   for(i = 0; mappings[i].name != NULL; i++) {
+    const struct writeoutvar *wovar = &mappings[i];
     const char *name = mappings[i].name;
     CURLINFO cinfo = mappings[i].cinfo;
     int ok = 0;
@@ -168,7 +176,7 @@ void ourWriteOutJSON(const struct writeoutvar mappings[], CURL *curl,
       ok = writeString(stream, curl, name, cinfo);
       break;
     case JSON_LONG:
-      ok = writeLong(stream, curl, name, cinfo);
+      ok = writeLong(stream, curl, name, cinfo, per, wovar);
       break;
     case JSON_OFFSET:
       ok = writeOffset(stream, curl, name, cinfo);
@@ -177,7 +185,7 @@ void ourWriteOutJSON(const struct writeoutvar mappings[], CURL *curl,
       ok = writeTime(stream, curl, name, cinfo);
       break;
     case JSON_FILENAME:
-      ok = writeFilename(stream, name, outs->filename);
+      ok = writeFilename(stream, name, per->outs.filename);
       break;
     case JSON_VERSION:
       ok = writeVersion(stream, curl, name, cinfo);

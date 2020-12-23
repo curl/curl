@@ -47,9 +47,6 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <strippart>
 s/^PROXY TCP4 %CLIENTIP %HOSTIP (\d*) %HTTPPORT/proxy-line/
 </strippart>
@@ -57,6 +54,7 @@ s/^PROXY TCP4 %CLIENTIP %HOSTIP (\d*) %HTTPPORT/proxy-line/
 proxy-line
 GET /1455 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Testno: 1455
 

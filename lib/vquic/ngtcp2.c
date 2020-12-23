@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -126,7 +126,7 @@ quic_from_ossl_level(OSSL_ENCRYPTION_LEVEL ossl_level)
   case ssl_encryption_handshake:
     return NGTCP2_CRYPTO_LEVEL_HANDSHAKE;
   case ssl_encryption_application:
-    return NGTCP2_CRYPTO_LEVEL_APP;
+    return NGTCP2_CRYPTO_LEVEL_APPLICATION;
   default:
     assert(0);
   }
@@ -143,16 +143,18 @@ quic_from_gtls_level(gnutls_record_encryption_level_t gtls_level)
   case GNUTLS_ENCRYPTION_LEVEL_HANDSHAKE:
     return NGTCP2_CRYPTO_LEVEL_HANDSHAKE;
   case GNUTLS_ENCRYPTION_LEVEL_APPLICATION:
-    return NGTCP2_CRYPTO_LEVEL_APP;
+    return NGTCP2_CRYPTO_LEVEL_APPLICATION;
   default:
     assert(0);
   }
 }
 #endif
 
-static void qlog_callback(void *user_data, const void *data, size_t datalen)
+static void qlog_callback(void *user_data, uint32_t flags,
+                          const void *data, size_t datalen)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
+  (void)flags;
   if(qs->qlogfd != -1) {
     ssize_t rc = write(qs->qlogfd, data, datalen);
     if(rc == -1) {
@@ -256,14 +258,14 @@ static int quic_set_encryption_secrets(SSL *ssl,
   int level = quic_from_ossl_level(ossl_level);
 
   if(ngtcp2_crypto_derive_and_install_rx_key(
-         qs->qconn, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
+       qs->qconn, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
     return 0;
 
   if(ngtcp2_crypto_derive_and_install_tx_key(
-         qs->qconn, NULL, NULL, NULL, level, tx_secret, secretlen) != 0)
+       qs->qconn, NULL, NULL, NULL, level, tx_secret, secretlen) != 0)
     return 0;
 
-  if(level == NGTCP2_CRYPTO_LEVEL_APP) {
+  if(level == NGTCP2_CRYPTO_LEVEL_APPLICATION) {
     if(init_ngh3_conn(qs) != CURLE_OK)
       return 0;
   }
@@ -341,22 +343,14 @@ static int quic_init_ssl(struct quicsocket *qs)
   /* this will need some attention when HTTPS proxy over QUIC get fixed */
   const char * const hostname = qs->conn->host.name;
 
-  if(qs->ssl)
-    SSL_free(qs->ssl);
-
+  DEBUGASSERT(!qs->ssl);
   qs->ssl = SSL_new(qs->sslctx);
 
   SSL_set_app_data(qs->ssl, qs);
   SSL_set_connect_state(qs->ssl);
 
-  switch(qs->version) {
-#ifdef NGTCP2_PROTO_VER
-  case NGTCP2_PROTO_VER:
-    alpn = (const uint8_t *)NGHTTP3_ALPN_H3;
-    alpnlen = sizeof(NGHTTP3_ALPN_H3) - 1;
-    break;
-#endif
-  }
+  alpn = (const uint8_t *)NGHTTP3_ALPN_H3;
+  alpnlen = sizeof(NGHTTP3_ALPN_H3) - 1;
   if(alpn)
     SSL_set_alpn_protos(qs->ssl, alpn, (int)alpnlen);
 
@@ -375,14 +369,14 @@ static int secret_func(gnutls_session_t ssl,
 
   if(level != NGTCP2_CRYPTO_LEVEL_EARLY &&
      ngtcp2_crypto_derive_and_install_rx_key(
-         qs->qconn, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
+       qs->qconn, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
     return 0;
 
   if(ngtcp2_crypto_derive_and_install_tx_key(
-         qs->qconn, NULL, NULL, NULL, level, tx_secret, secretlen) != 0)
+       qs->qconn, NULL, NULL, NULL, level, tx_secret, secretlen) != 0)
     return 0;
 
-  if(level == NGTCP2_CRYPTO_LEVEL_APP) {
+  if(level == NGTCP2_CRYPTO_LEVEL_APPLICATION) {
     if(init_ngh3_conn(qs) != CURLE_OK)
       return -1;
   }
@@ -429,8 +423,8 @@ static int tp_recv_func(gnutls_session_t ssl, const uint8_t *data,
   ngtcp2_transport_params params;
 
   if(ngtcp2_decode_transport_params(
-         &params, NGTCP2_TRANSPORT_PARAMS_TYPE_ENCRYPTED_EXTENSIONS,
-         data, data_size) != 0)
+       &params, NGTCP2_TRANSPORT_PARAMS_TYPE_ENCRYPTED_EXTENSIONS,
+       data, data_size) != 0)
     return -1;
 
   if(ngtcp2_conn_set_remote_transport_params(qs->qconn, &params) != 0)
@@ -452,8 +446,8 @@ static int tp_send_func(gnutls_session_t ssl, gnutls_buffer_t extdata)
     paramsbuf, sizeof(paramsbuf), NGTCP2_TRANSPORT_PARAMS_TYPE_CLIENT_HELLO,
     &params);
   if(nwrite < 0) {
-    fprintf(stderr, "ngtcp2_encode_transport_params: %s\n",
-          ngtcp2_strerror((int)nwrite));
+    H3BUGF(fprintf(stderr, "ngtcp2_encode_transport_params: %s\n",
+                   ngtcp2_strerror((int)nwrite)));
     return -1;
   }
 
@@ -471,16 +465,15 @@ static int quic_init_ssl(struct quicsocket *qs)
   const char * const hostname = qs->conn->host.name;
   int rc;
 
-  if(qs->ssl)
-    gnutls_deinit(qs->ssl);
+  DEBUGASSERT(!qs->ssl);
 
   gnutls_init(&qs->ssl, GNUTLS_CLIENT);
   gnutls_session_set_ptr(qs->ssl, qs);
 
   rc = gnutls_priority_set_direct(qs->ssl, QUIC_PRIORITY, NULL);
   if(rc < 0) {
-    fprintf(stderr, "gnutls_priority_set_direct failed: %s\n",
-            gnutls_strerror(rc));
+    H3BUGF(fprintf(stderr, "gnutls_priority_set_direct failed: %s\n",
+                   gnutls_strerror(rc)));
     return 1;
   }
 
@@ -496,8 +489,8 @@ static int quic_init_ssl(struct quicsocket *qs)
                                    GNUTLS_EXT_FLAG_CLIENT_HELLO |
                                    GNUTLS_EXT_FLAG_EE);
   if(rc < 0) {
-    fprintf(stderr, "gnutls_session_ext_register failed: %s\n",
-            gnutls_strerror(rc));
+    H3BUGF(fprintf(stderr, "gnutls_session_ext_register failed: %s\n",
+                   gnutls_strerror(rc)));
     return 1;
   }
 
@@ -512,34 +505,30 @@ static int quic_init_ssl(struct quicsocket *qs)
 
   rc = gnutls_certificate_allocate_credentials(&qs->cred);
   if(rc < 0) {
-    fprintf(stderr, "gnutls_certificate_allocate_credentials failed: %s\n",
-            gnutls_strerror(rc));
+    H3BUGF(fprintf(stderr,
+                   "gnutls_certificate_allocate_credentials failed: %s\n",
+                   gnutls_strerror(rc)));
     return 1;
   }
 
   rc = gnutls_certificate_set_x509_system_trust(qs->cred);
   if(rc < 0) {
-    fprintf(stderr, "gnutls_certificate_set_x509_system_trust failed: %s\n",
-            gnutls_strerror(rc));
+    H3BUGF(fprintf(stderr,
+                   "gnutls_certificate_set_x509_system_trust failed: %s\n",
+                   gnutls_strerror(rc)));
     return 1;
   }
 
   rc = gnutls_credentials_set(qs->ssl, GNUTLS_CRD_CERTIFICATE, qs->cred);
   if(rc < 0) {
-    fprintf(stderr, "gnutls_credentials_set failed: %s\n",
-            gnutls_strerror(rc));
+    H3BUGF(fprintf(stderr, "gnutls_credentials_set failed: %s\n",
+                   gnutls_strerror(rc)));
     return 1;
   }
 
-  switch(qs->version) {
-#ifdef NGTCP2_PROTO_VER
-  case NGTCP2_PROTO_VER:
-    /* strip the first byte (the length) from NGHTTP3_ALPN_H3 */
-    alpn.data = (unsigned char *)NGHTTP3_ALPN_H3 + 1;
-    alpn.size = sizeof(NGHTTP3_ALPN_H3) - 2;
-    break;
-#endif
-  }
+  /* strip the first byte (the length) from NGHTTP3_ALPN_H3 */
+  alpn.data = (unsigned char *)NGHTTP3_ALPN_H3 + 1;
+  alpn.size = sizeof(NGHTTP3_ALPN_H3) - 2;
   if(alpn.data)
     gnutls_alpn_set_protocols(qs->ssl, &alpn, 1, 0);
 
@@ -584,13 +573,14 @@ static void extend_stream_window(ngtcp2_conn *tconn,
 }
 
 
-static int cb_recv_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
-                               int fin, uint64_t offset,
+static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
+                               int64_t stream_id, uint64_t offset,
                                const uint8_t *buf, size_t buflen,
                                void *user_data, void *stream_user_data)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
   ssize_t nconsumed;
+  int fin = flags & NGTCP2_STREAM_DATA_FLAG_FIN ? 1 : 0;
   (void)offset;
   (void)stream_user_data;
 
@@ -727,7 +717,7 @@ static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
   return 0;
 }
 
-static ngtcp2_conn_callbacks ng_callbacks = {
+static ngtcp2_callbacks ng_callbacks = {
   ngtcp2_crypto_client_initial_cb,
   NULL, /* recv_client_initial */
   cb_recv_crypto_data,
@@ -756,7 +746,10 @@ static ngtcp2_conn_callbacks ng_callbacks = {
   NULL, /* extend_max_remote_streams_uni */
   cb_extend_max_stream_data,
   NULL, /* dcid_status */
-  NULL  /* handshake_confirmed */
+  NULL, /* handshake_confirmed */
+  NULL, /* recv_new_token */
+  ngtcp2_crypto_delete_crypto_aead_ctx_cb,
+  ngtcp2_crypto_delete_crypto_cipher_ctx_cb
 };
 
 /*
@@ -778,6 +771,8 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   long port;
   int qfd;
 
+  if(qs->conn)
+    Curl_quic_disconnect(conn, sockindex);
   qs->conn = conn;
 
   /* extract the used address as a string */
@@ -791,7 +786,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   infof(data, "Connect socket %d over QUIC to %s:%ld\n",
         sockfd, ipbuf, port);
 
-  qs->version = NGTCP2_PROTO_VER;
+  qs->version = NGTCP2_PROTO_VER_MAX;
 #ifdef USE_OPENSSL
   qs->sslctx = quic_ssl_ctx(data);
   if(!qs->sslctx)
@@ -821,17 +816,13 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   if(rv == -1)
     return CURLE_QUIC_CONNECT_ERROR;
 
-  ngtcp2_addr_init(&path.local, (uint8_t *)&qs->local_addr, qs->local_addrlen,
-                   NULL);
-  ngtcp2_addr_init(&path.remote, (uint8_t*)addr, addrlen, NULL);
+  ngtcp2_addr_init(&path.local, (struct sockaddr *)&qs->local_addr,
+                   qs->local_addrlen, NULL);
+  ngtcp2_addr_init(&path.remote, addr, addrlen, NULL);
 
-#ifdef NGTCP2_PROTO_VER
-#define QUICVER NGTCP2_PROTO_VER
-#else
-#error "unsupported ngtcp2 version"
-#endif
-  rc = ngtcp2_conn_client_new(&qs->qconn, &qs->dcid, &qs->scid, &path, QUICVER,
-                              &ng_callbacks, &qs->settings, NULL, qs);
+  rc = ngtcp2_conn_client_new(&qs->qconn, &qs->dcid, &qs->scid, &path,
+                              NGTCP2_PROTO_VER_MIN, &ng_callbacks,
+                              &qs->settings, NULL, qs);
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
 
@@ -876,36 +867,50 @@ static int ng_perform_getsock(const struct connectdata *conn,
   return ng_getsock((struct connectdata *)conn, socks);
 }
 
-static CURLcode qs_disconnect(struct quicsocket *qs)
+static void qs_disconnect(struct quicsocket *qs)
 {
   int i;
-  if(qs->qlogfd != -1)
+  if(!qs->conn) /* already closed */
+    return;
+  qs->conn = NULL;
+  if(qs->qlogfd != -1) {
     close(qs->qlogfd);
+    qs->qlogfd = -1;
+  }
   if(qs->ssl)
 #ifdef USE_OPENSSL
     SSL_free(qs->ssl);
 #elif defined(USE_GNUTLS)
     gnutls_deinit(qs->ssl);
 #endif
+  qs->ssl = NULL;
 #ifdef USE_GNUTLS
   if(qs->cred)
     gnutls_certificate_free_credentials(qs->cred);
 #endif
   for(i = 0; i < 3; i++)
-    free(qs->crypto_data[i].buf);
+    Curl_safefree(qs->crypto_data[i].buf);
   nghttp3_conn_del(qs->h3conn);
   ngtcp2_conn_del(qs->qconn);
 #ifdef USE_OPENSSL
   SSL_CTX_free(qs->sslctx);
 #endif
-  return CURLE_OK;
+}
+
+void Curl_quic_disconnect(struct connectdata *conn,
+                          int tempindex)
+{
+  if(conn->transport == TRNSPRT_QUIC)
+    qs_disconnect(&conn->hequic[tempindex]);
 }
 
 static CURLcode ng_disconnect(struct connectdata *conn,
                               bool dead_connection)
 {
   (void)dead_connection;
-  return qs_disconnect(&conn->hequic[0]);
+  Curl_quic_disconnect(conn, 0);
+  Curl_quic_disconnect(conn, 1);
+  return CURLE_OK;
 }
 
 static unsigned int ng_conncheck(struct connectdata *conn,
@@ -934,6 +939,7 @@ static const struct Curl_handler Curl_handler_http3 = {
   ng_conncheck,                         /* connection_check */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
+  CURLPROTO_HTTP,                       /* family */
   PROTOPT_SSL | PROTOPT_STREAM          /* flags */
 };
 
@@ -942,7 +948,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
                               void *stream_user_data)
 {
   struct Curl_easy *data = stream_user_data;
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
   (void)conn;
   (void)stream_id;
   (void)app_error_code;
@@ -988,7 +994,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
                            void *user_data, void *stream_user_data)
 {
   struct Curl_easy *data = stream_user_data;
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
   CURLcode result = CURLE_OK;
   (void)conn;
 
@@ -1047,7 +1053,7 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
                              void *user_data, void *stream_user_data)
 {
   struct Curl_easy *data = stream_user_data;
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
   CURLcode result = CURLE_OK;
   (void)conn;
   (void)stream_id;
@@ -1071,7 +1077,7 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
   nghttp3_vec h3name = nghttp3_rcbuf_get_buf(name);
   nghttp3_vec h3val = nghttp3_rcbuf_get_buf(value);
   struct Curl_easy *data = stream_user_data;
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
   CURLcode result = CURLE_OK;
   (void)conn;
   (void)stream_id;
@@ -1128,7 +1134,7 @@ static int cb_h3_send_stop_sending(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
-static nghttp3_conn_callbacks ngh3_callbacks = {
+static nghttp3_callbacks ngh3_callbacks = {
   cb_h3_acked_stream_data, /* acked_stream_data */
   cb_h3_stream_close,
   cb_h3_recv_data,
@@ -1146,6 +1152,7 @@ static nghttp3_conn_callbacks ngh3_callbacks = {
   cb_h3_send_stop_sending,
   NULL, /* push_stream */
   NULL, /* end_stream */
+  NULL, /* reset_stream */
 };
 
 static int init_ngh3_conn(struct quicsocket *qs)
@@ -1159,7 +1166,7 @@ static int init_ngh3_conn(struct quicsocket *qs)
     return CURLE_QUIC_CONNECT_ERROR;
   }
 
-  nghttp3_conn_settings_default(&qs->h3settings);
+  nghttp3_settings_default(&qs->h3settings);
 
   rc = nghttp3_conn_client_new(&qs->h3conn,
                                &ngh3_callbacks,
@@ -1235,7 +1242,7 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
                                 CURLcode *curlcode)
 {
   curl_socket_t sockfd = conn->sock[sockindex];
-  struct HTTP *stream = conn->data->req.protop;
+  struct HTTP *stream = conn->data->req.p.http;
   struct quicsocket *qs = conn->quic;
 
   if(!stream->memlen) {
@@ -1293,7 +1300,7 @@ static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
                                    void *stream_user_data)
 {
   struct Curl_easy *data = stream_user_data;
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
   (void)conn;
   (void)stream_id;
   (void)user_data;
@@ -1315,7 +1322,7 @@ static ssize_t cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
 {
   struct Curl_easy *data = stream_user_data;
   size_t nread;
-  struct HTTP *stream = data->req.protop;
+  struct HTTP *stream = data->req.p.http;
   (void)conn;
   (void)stream_id;
   (void)user_data;
@@ -1378,7 +1385,7 @@ static ssize_t cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
 static CURLcode http_request(struct connectdata *conn, const void *mem,
                              size_t len)
 {
-  struct HTTP *stream = conn->data->req.protop;
+  struct HTTP *stream = conn->data->req.p.http;
   size_t nheader;
   size_t i;
   size_t authority_idx;
@@ -1553,7 +1560,7 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
 
     if(acc > MAX_ACC) {
       infof(data, "http_request: Warning: The cumulative length of all "
-            "headers exceeds %zu bytes and that could cause the "
+            "headers exceeds %d bytes and that could cause the "
             "stream to be rejected.\n", MAX_ACC);
     }
   }
@@ -1621,7 +1628,7 @@ static ssize_t ngh3_stream_send(struct connectdata *conn,
   ssize_t sent;
   struct quicsocket *qs = conn->quic;
   curl_socket_t sockfd = conn->sock[sockindex];
-  struct HTTP *stream = conn->data->req.protop;
+  struct HTTP *stream = conn->data->req.p.http;
 
   if(!stream->h3req) {
     CURLcode result = http_request(conn, mem, len);
@@ -1698,7 +1705,8 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn,
 
 }
 
-static CURLcode ng_process_ingress(struct connectdata *conn, int sockfd,
+static CURLcode ng_process_ingress(struct connectdata *conn,
+                                   curl_socket_t sockfd,
                                    struct quicsocket *qs)
 {
   ssize_t recvd;
@@ -1709,10 +1717,11 @@ static CURLcode ng_process_ingress(struct connectdata *conn, int sockfd,
   socklen_t remote_addrlen;
   ngtcp2_path path;
   ngtcp2_tstamp ts = timestamp();
+  ngtcp2_pkt_info pi = { 0 };
 
   for(;;) {
     remote_addrlen = sizeof(remote_addr);
-    while((recvd = recvfrom(sockfd, buf, bufsize, 0,
+    while((recvd = recvfrom(sockfd, (char *)buf, bufsize, 0,
                             (struct sockaddr *)&remote_addr,
                             &remote_addrlen)) == -1 &&
           SOCKERRNO == EINTR)
@@ -1721,16 +1730,16 @@ static CURLcode ng_process_ingress(struct connectdata *conn, int sockfd,
       if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK)
         break;
 
-      failf(conn->data, "ngtcp2: recvfrom() unexpectedly returned %d", recvd);
+      failf(conn->data, "ngtcp2: recvfrom() unexpectedly returned %zd", recvd);
       return CURLE_RECV_ERROR;
     }
 
-    ngtcp2_addr_init(&path.local, (uint8_t *)&qs->local_addr,
+    ngtcp2_addr_init(&path.local, (struct sockaddr *)&qs->local_addr,
                      qs->local_addrlen, NULL);
-    ngtcp2_addr_init(&path.remote, (uint8_t *)&remote_addr, remote_addrlen,
-                     NULL);
+    ngtcp2_addr_init(&path.remote, (struct sockaddr *)&remote_addr,
+                     remote_addrlen, NULL);
 
-    rv = ngtcp2_conn_read_pkt(qs->qconn, &path, buf, recvd, ts);
+    rv = ngtcp2_conn_read_pkt(qs->qconn, &path, &pi, buf, recvd, ts);
     if(rv != 0) {
       /* TODO Send CONNECTION_CLOSE if possible */
       return CURLE_RECV_ERROR;
@@ -1792,11 +1801,12 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
         return CURLE_SEND_ERROR;
       }
       else if(veccnt > 0) {
+        uint32_t flags = NGTCP2_WRITE_STREAM_FLAG_MORE |
+          (fin ? NGTCP2_WRITE_STREAM_FLAG_FIN : 0);
         outlen =
-          ngtcp2_conn_writev_stream(qs->qconn, &ps.path,
+          ngtcp2_conn_writev_stream(qs->qconn, &ps.path, NULL,
                                     out, pktlen, &ndatalen,
-                                    NGTCP2_WRITE_STREAM_FLAG_MORE,
-                                    stream_id, fin,
+                                    flags, stream_id,
                                     (const ngtcp2_vec *)vec, veccnt, ts);
         if(outlen == 0) {
           break;
@@ -1814,7 +1824,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
             }
             continue;
           }
-          else if(outlen == NGTCP2_ERR_WRITE_STREAM_MORE) {
+          else if(outlen == NGTCP2_ERR_WRITE_MORE) {
             assert(ndatalen > 0);
             rv = nghttp3_conn_add_write_offset(qs->h3conn, stream_id,
                                                ndatalen);
@@ -1839,7 +1849,8 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
       }
     }
     if(outlen < 0) {
-      outlen = ngtcp2_conn_write_pkt(qs->qconn, &ps.path, out, pktlen, ts);
+      outlen = ngtcp2_conn_write_pkt(qs->qconn, &ps.path, NULL,
+                                     out, pktlen, ts);
       if(outlen < 0) {
         failf(conn->data, "ngtcp2_conn_write_pkt returned error: %s\n",
               ngtcp2_strerror((int)outlen));
@@ -1850,7 +1861,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
     }
 
     memcpy(&remote_addr, ps.path.remote.addr, ps.path.remote.addrlen);
-    while((sent = send(sockfd, out, outlen, 0)) == -1 &&
+    while((sent = send(sockfd, (const char *)out, outlen, 0)) == -1 &&
           SOCKERRNO == EINTR)
       ;
 
@@ -1888,7 +1899,7 @@ CURLcode Curl_quic_done_sending(struct connectdata *conn)
 {
   if(conn->handler == &Curl_handler_http3) {
     /* only for HTTP/3 transfers */
-    struct HTTP *stream = conn->data->req.protop;
+    struct HTTP *stream = conn->data->req.p.http;
     struct quicsocket *qs = conn->quic;
     stream->upload_done = TRUE;
     (void)nghttp3_conn_resume_stream(qs->h3conn, stream->stream3_id);
@@ -1905,7 +1916,7 @@ void Curl_quic_done(struct Curl_easy *data, bool premature)
   (void)premature;
   if(data->conn->handler == &Curl_handler_http3) {
     /* only for HTTP/3 transfers */
-    struct HTTP *stream = data->req.protop;
+    struct HTTP *stream = data->req.p.http;
     Curl_dyn_free(&stream->overflow);
   }
 }
@@ -1920,7 +1931,7 @@ bool Curl_quic_data_pending(const struct Curl_easy *data)
      buffer and allocated an overflow buffer. Since it's possible that
      there's no more data coming on the socket, we need to keep reading
      until the overflow buffer is empty. */
-  const struct HTTP *stream = data->req.protop;
+  const struct HTTP *stream = data->req.p.http;
   return Curl_dyn_len(&stream->overflow) > 0;
 }
 

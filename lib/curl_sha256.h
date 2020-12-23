@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,6 +24,9 @@
  ***************************************************************************/
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
+#include "curl_hmac.h"
+
+extern const struct HMAC_params Curl_HMAC_SHA256[1];
 
 #define SHA256_DIGEST_LENGTH 32
 

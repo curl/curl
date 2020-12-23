@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,6 +36,7 @@
 #include "tool_bname.h"
 #include "tool_doswin.h"
 
+#include "curlx.h"
 #include "memdebug.h" /* keep this as LAST include */
 
 #ifdef WIN32
@@ -612,7 +613,7 @@ char **__crt0_glob_function(char *arg)
 
 CURLcode FindWin32CACert(struct OperationConfig *config,
                          curl_sslbackend backend,
-                         const char *bundle_file)
+                         const TCHAR *bundle_file)
 {
   CURLcode result = CURLE_OK;
 
@@ -626,15 +627,19 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
      backend != CURLSSLBACKEND_SCHANNEL) {
 
     DWORD res_len;
-    char buf[PATH_MAX];
-    char *ptr = NULL;
+    TCHAR buf[PATH_MAX];
+    TCHAR *ptr = NULL;
 
-    buf[0] = '\0';
+    buf[0] = TEXT('\0');
 
-    res_len = SearchPathA(NULL, bundle_file, NULL, PATH_MAX, buf, &ptr);
+    res_len = SearchPath(NULL, bundle_file, NULL, PATH_MAX, buf, &ptr);
     if(res_len > 0) {
       Curl_safefree(config->cacert);
+#ifdef UNICODE
+      config->cacert = curlx_convert_wchar_to_UTF8(buf);
+#else
       config->cacert = strdup(buf);
+#endif
       if(!config->cacert)
         result = CURLE_OUT_OF_MEMORY;
     }
@@ -702,22 +707,11 @@ bool tool_isVistaOrGreater;
 
 CURLcode win32_init(void)
 {
-  OSVERSIONINFOEXA osvi;
-  unsigned __int64 mask = 0;
-  unsigned char op = VER_GREATER_EQUAL;
-
-  memset(&osvi, 0, sizeof(osvi));
-  osvi.dwOSVersionInfoSize = sizeof(osvi);
-  osvi.dwMajorVersion = 6;
-  VER_SET_CONDITION(mask, VER_MAJORVERSION, op);
-  VER_SET_CONDITION(mask, VER_MINORVERSION, op);
-
-  if(VerifyVersionInfoA(&osvi, (VER_MAJORVERSION | VER_MINORVERSION), mask))
+  if(curlx_verify_windows_version(6, 0, PLATFORM_WINNT,
+                                  VERSION_GREATER_THAN_EQUAL))
     tool_isVistaOrGreater = true;
-  else if(GetLastError() == ERROR_OLD_WIN_VERSION)
-    tool_isVistaOrGreater = false;
   else
-    return CURLE_FAILED_INIT;
+    tool_isVistaOrGreater = false;
 
   QueryPerformanceFrequency(&tool_freq);
   return CURLE_OK;

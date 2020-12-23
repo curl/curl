@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,6 +38,7 @@
 #include "sendf.h"
 #include "strdup.h"
 #include "strcase.h"
+#include "strerror.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -220,6 +221,8 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
      status == SEC_I_COMPLETE_AND_CONTINUE)
     s_pSecFn->CompleteAuthToken(&credentials, &resp_desc);
   else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
+    char buffer[STRERROR_LEN];
+
     s_pSecFn->FreeCredentialsHandle(&credentials);
     Curl_sspi_free_identity(p_identity);
     free(spn);
@@ -228,6 +231,9 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 
     if(status == SEC_E_INSUFFICIENT_MEMORY)
       return CURLE_OUT_OF_MEMORY;
+
+    infof(data, "schannel: InitializeSecurityContext failed: %s\n",
+          Curl_sspi_strerror(status, buffer, sizeof(buffer)));
 
     return CURLE_AUTH_ERROR;
   }
@@ -611,6 +617,8 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
        status == SEC_I_COMPLETE_AND_CONTINUE)
       s_pSecFn->CompleteAuthToken(&credentials, &resp_desc);
     else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
+      char buffer[STRERROR_LEN];
+
       s_pSecFn->FreeCredentialsHandle(&credentials);
 
       Curl_sspi_free_identity(p_identity);
@@ -620,6 +628,9 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
       if(status == SEC_E_INSUFFICIENT_MEMORY)
         return CURLE_OUT_OF_MEMORY;
+
+      infof(data, "schannel: InitializeSecurityContext failed: %s\n",
+            Curl_sspi_strerror(status, buffer, sizeof(buffer)));
 
       return CURLE_AUTH_ERROR;
     }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,11 +34,13 @@
 #include "tool_msgs.h"
 #include "tool_paramhlp.h"
 #include "tool_version.h"
+#include "dynbuf.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
 struct getout *new_getout(struct OperationConfig *config)
 {
+  static int outnum = 0;
   struct getout *node = calloc(1, sizeof(struct getout));
   struct getout *last = config->url_last;
   if(node) {
@@ -52,104 +54,57 @@ struct getout *new_getout(struct OperationConfig *config)
     config->url_last = node;
 
     node->flags = config->default_node_flags;
+    node->num = outnum++;
   }
   return node;
 }
 
+#define MAX_FILE2STRING (256*1024*1024) /* big enough ? */
+
 ParameterError file2string(char **bufp, FILE *file)
 {
-  char *string = NULL;
+  struct curlx_dynbuf dyn;
+  curlx_dyn_init(&dyn, MAX_FILE2STRING);
   if(file) {
-    char *ptr;
-    size_t alloc = 512;
-    size_t alloc_needed;
     char buffer[256];
-    size_t stringlen = 0;
-    string = calloc(1, alloc);
-    if(!string)
-      return PARAM_NO_MEM;
 
     while(fgets(buffer, sizeof(buffer), file)) {
-      size_t buflen;
-      ptr = strchr(buffer, '\r');
+      char *ptr = strchr(buffer, '\r');
       if(ptr)
         *ptr = '\0';
       ptr = strchr(buffer, '\n');
       if(ptr)
         *ptr = '\0';
-      buflen = strlen(buffer);
-      alloc_needed = stringlen + buflen + 1;
-      if(alloc < alloc_needed) {
-#if SIZEOF_SIZE_T < 8
-        if(alloc >= (size_t)SIZE_T_MAX/2) {
-          Curl_safefree(string);
-          return PARAM_NO_MEM;
-        }
-#endif
-        /* doubling is enough since the string to add is always max 256 bytes
-           and the alloc size start at 512 */
-        alloc *= 2;
-        ptr = realloc(string, alloc);
-        if(!ptr) {
-          Curl_safefree(string);
-          return PARAM_NO_MEM;
-        }
-        string = ptr;
-      }
-      strcpy(string + stringlen, buffer);
-      stringlen += buflen;
+      if(curlx_dyn_add(&dyn, buffer))
+        return PARAM_NO_MEM;
     }
   }
-  *bufp = string;
+  *bufp = curlx_dyn_ptr(&dyn);
   return PARAM_OK;
 }
 
+#define MAX_FILE2MEMORY (1024*1024*1024) /* big enough ? */
+
 ParameterError file2memory(char **bufp, size_t *size, FILE *file)
 {
-  char *newbuf;
-  char *buffer = NULL;
-  size_t nused = 0;
-
   if(file) {
     size_t nread;
-    size_t alloc = 512;
+    struct curlx_dynbuf dyn;
+    curlx_dyn_init(&dyn, MAX_FILE2MEMORY);
     do {
-      if(!buffer || (alloc == nused)) {
-        /* size_t overflow detection for huge files */
-        if(alloc + 1 > ((size_t)-1)/2) {
-          Curl_safefree(buffer);
+      char buffer[4096];
+      nread = fread(buffer, 1, sizeof(buffer), file);
+      if(nread)
+        if(curlx_dyn_addn(&dyn, buffer, nread))
           return PARAM_NO_MEM;
-        }
-        alloc *= 2;
-        /* allocate an extra char, reserved space, for null termination */
-        newbuf = realloc(buffer, alloc + 1);
-        if(!newbuf) {
-          Curl_safefree(buffer);
-          return PARAM_NO_MEM;
-        }
-        buffer = newbuf;
-      }
-      nread = fread(buffer + nused, 1, alloc-nused, file);
-      nused += nread;
     } while(nread);
-    /* null terminate the buffer in case it's used as a string later */
-    buffer[nused] = '\0';
-    /* free trailing slack space, if possible */
-    if(alloc != nused) {
-      newbuf = realloc(buffer, nused + 1);
-      if(!newbuf) {
-        Curl_safefree(buffer);
-        return PARAM_NO_MEM;
-      }
-      buffer = newbuf;
-    }
-    /* discard buffer if nothing was read */
-    if(!nused) {
-      Curl_safefree(buffer); /* no string */
-    }
+    *size = curlx_dyn_len(&dyn);
+    *bufp = curlx_dyn_ptr(&dyn);
   }
-  *size = nused;
-  *bufp = buffer;
+  else {
+    *size = 0;
+    *bufp = NULL;
+  }
   return PARAM_OK;
 }
 
@@ -176,14 +131,13 @@ void cleanarg(char *str)
  * getparameter a lot, we must check it for NULL before accessing the str
  * data.
  */
-
-ParameterError str2num(long *val, const char *str)
+static ParameterError getnum(long *val, const char *str, int base)
 {
   if(str) {
     char *endptr = NULL;
     long num;
     errno = 0;
-    num = strtol(str, &endptr, 10);
+    num = strtol(str, &endptr, base);
     if(errno == ERANGE)
       return PARAM_NUMBER_TOO_LARGE;
     if((endptr != str) && (endptr == str + strlen(str))) {
@@ -192,6 +146,24 @@ ParameterError str2num(long *val, const char *str)
     }
   }
   return PARAM_BAD_NUMERIC; /* badness */
+}
+
+ParameterError str2num(long *val, const char *str)
+{
+  return getnum(val, str, 10);
+}
+
+ParameterError oct2nummax(long *val, const char *str, long max)
+{
+  ParameterError result = getnum(val, str, 8);
+  if(result != PARAM_OK)
+    return result;
+  else if(*val > max)
+    return PARAM_NUMBER_TOO_LARGE;
+  else if(*val < 0)
+    return PARAM_NEGATIVE_NUMERIC;
+
+  return PARAM_OK;
 }
 
 /*
@@ -205,7 +177,7 @@ ParameterError str2num(long *val, const char *str)
 
 ParameterError str2unum(long *val, const char *str)
 {
-  ParameterError result = str2num(val, str);
+  ParameterError result = getnum(val, str, 10);
   if(result != PARAM_OK)
     return result;
   if(*val < 0)
@@ -460,6 +432,7 @@ ParameterError str2offset(curl_off_t *val, const char *str)
   return PARAM_BAD_NUMERIC;
 }
 
+#define MAX_USERPWDLENGTH (100*1024)
 static CURLcode checkpasswd(const char *kind, /* for what purpose */
                             const size_t i,   /* operation index */
                             const bool last,  /* TRUE if last operation */
@@ -479,12 +452,11 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
 
   if(!psep && **userpwd != ';') {
     /* no password present, prompt for one */
-    char passwd[256] = "";
+    char passwd[2048] = "";
     char prompt[256];
-    size_t passwdlen;
-    size_t userlen = strlen(*userpwd);
-    char *passptr;
+    struct curlx_dynbuf dyn;
 
+    curlx_dyn_init(&dyn, MAX_USERPWDLENGTH);
     if(osep)
       *osep = '\0';
 
@@ -500,22 +472,15 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
 
     /* get password */
     getpass_r(prompt, passwd, sizeof(passwd));
-    passwdlen = strlen(passwd);
-
     if(osep)
       *osep = ';';
 
-    /* extend the allocated memory area to fit the password too */
-    passptr = realloc(*userpwd,
-                      passwdlen + 1 + /* an extra for the colon */
-                      userlen + 1);   /* an extra for the zero */
-    if(!passptr)
+    if(curlx_dyn_addf(&dyn, "%s:%s", *userpwd, passwd))
       return CURLE_OUT_OF_MEMORY;
 
-    /* append the password separated with a colon */
-    passptr[userlen] = ':';
-    memcpy(&passptr[userlen + 1], passwd, passwdlen + 1);
-    *userpwd = passptr;
+    /* return the new string */
+    free(*userpwd);
+    *userpwd = curlx_dyn_ptr(&dyn);
   }
 
   return CURLE_OK;

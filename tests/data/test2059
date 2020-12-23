@@ -81,14 +81,11 @@ test
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET http://%HOSTIP:%HTTPPORT/2059 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Content-Range: bytes 2-4/5
-User-Agent: curl/7.12.1-CVS (i686-pc-linux-gnu) libcurl/7.12.1-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.6
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
@@ -97,6 +94,7 @@ GET http://%HOSTIP:%HTTPPORT/2059 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="fddc3bc7b753b73ab0848fd83cb20cbbca971258eb8d20c941dd5e0b010d66be", realm="testrealm", nonce="1053604144", uri="/2059", response="fc09be8192851e284e73e8b719b32a2f6f91cca0594e68713da8c49dc2c1656e", algorithm=SHA-512-256, userhash=true
 Content-Range: bytes 2-4/5
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 3

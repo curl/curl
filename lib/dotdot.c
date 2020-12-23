@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,7 +39,7 @@
  * Curl_dedotdotify()
  * @unittest: 1395
  *
- * This function gets a zero-terminated path with dot and dotdot sequences
+ * This function gets a null-terminated path with dot and dotdot sequences
  * passed in and strips them off according to the rules in RFC 3986 section
  * 5.2.4.
  *
@@ -62,7 +62,7 @@ char *Curl_dedotdotify(const char *input)
   if(!out)
     return NULL; /* out of memory */
 
-  *out = 0; /* zero terminates, for inputs like "./" */
+  *out = 0; /* null-terminates, for inputs like "./" */
 
   /* get a cloned copy of the input */
   clone = strdup(input);
@@ -129,7 +129,7 @@ char *Curl_dedotdotify(const char *input)
         if(*outptr == '/')
           break;
       }
-      *outptr = 0; /* zero-terminate where it stops */
+      *outptr = 0; /* null-terminate where it stops */
     }
     else if(!strcmp("/..", clone)) {
       clone[2]='/';
@@ -141,7 +141,7 @@ char *Curl_dedotdotify(const char *input)
         if(*outptr == '/')
           break;
       }
-      *outptr = 0; /* zero-terminate where it stops */
+      *outptr = 0; /* null-terminate where it stops */
     }
 
     /*  D.  if the input buffer consists only of "." or "..", then remove

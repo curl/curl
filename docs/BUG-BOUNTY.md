@@ -22,7 +22,7 @@ details.
 
 # What are the reward amounts?
 
-The curl projects offer monetary compensation for reported and published
+The curl project offers monetary compensation for reported and published
 security vulnerabilities. The amount of money that is rewarded depends on how
 serious the flaw is determined to be.
 
@@ -46,18 +46,14 @@ before a bug bounty will be considered.
 Bounties need to be requested within twelve months from the publication of the
 vulnerability.
 
-The vulnerabilities must not have been made public before February 1st, 2019.
-We do not retroactively pay for old, already known, or published security
-problems.
-
 # Product vulnerabilities only
 
 This bug bounty only concerns the curl and libcurl products and thus their
 respective source codes - when running on existing hardware. It does not
 include documentation, websites, or other infrastructure.
 
-The curl security team will be the sole arbiter if a reported flaw can be
-subject to a bounty or not.
+The curl security team is the sole arbiter if a reported flaw is subject to a
+bounty or not.
 
 # How are vulnerabilities graded?
 

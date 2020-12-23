@@ -8,7 +8,7 @@ Publishing Information
 ----------------------
 
 All known and public curl or libcurl related vulnerabilities are listed on
-[the curl web site security page](https://curl.haxx.se/docs/security.html).
+[the curl website security page](https://curl.se/docs/security.html).
 
 Security vulnerabilities **should not** be entered in the project's public bug
 tracker.
@@ -88,7 +88,7 @@ announcement.
   the same manner we always announce releases. It gets sent to the
   curl-announce, curl-library and curl-users mailing lists.
 
-- The security web page on the web site should get the new vulnerability
+- The security web page on the website should get the new vulnerability
   mentioned.
 
 curl-security (at haxx dot se)
@@ -125,8 +125,16 @@ Publishing Security Advisories
 6. On security advisory release day, push the changes on the curl-www
    repository's remote master branch.
 
+Hackerone
+---------
+
+Request the issue to be disclosed. If there are sensitive details present in
+the report and discussion, those should be redacted from the disclosure. The
+default policy is to disclose as much as possible as soon as the vulnerability
+has been published.
+
 Bug Bounty
 ----------
 
-See [BUG-BOUNTY](https://curl.haxx.se/docs/bugbounty.html) for details on the
+See [BUG-BOUNTY](https://curl.se/docs/bugbounty.html) for details on the
 bug bounty program.

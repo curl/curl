@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -75,6 +75,8 @@ void Curl_sndbufset(curl_socket_t sockfd);
 #endif
 
 void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd);
+void Curl_conninfo_remote(struct connectdata *conn, curl_socket_t sockfd);
+void Curl_conninfo_local(struct connectdata *conn, curl_socket_t sockfd);
 void Curl_persistconninfo(struct connectdata *conn);
 int Curl_closesocket(struct connectdata *conn, curl_socket_t sock);
 

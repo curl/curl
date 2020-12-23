@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -185,7 +185,7 @@ struct thread_data {
 
 static struct thread_sync_data *conn_thread_sync_data(struct connectdata *conn)
 {
-  return &(((struct thread_data *)conn->async.os_specific)->tsd);
+  return &(conn->async.tdata->tsd);
 }
 
 /* Destroy resolver thread synchronization data */
@@ -294,7 +294,7 @@ static int getaddrinfo_complete(struct connectdata *conn)
  */
 static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
 {
-  struct thread_sync_data *tsd = (struct thread_sync_data*)arg;
+  struct thread_sync_data *tsd = (struct thread_sync_data *)arg;
   struct thread_data *td = tsd->td;
   char service[12];
   int rc;
@@ -380,8 +380,8 @@ static unsigned int CURL_STDCALL gethostbyname_thread(void *arg)
  */
 static void destroy_async_data(struct Curl_async *async)
 {
-  if(async->os_specific) {
-    struct thread_data *td = (struct thread_data*) async->os_specific;
+  if(async->tdata) {
+    struct thread_data *td = async->tdata;
     int done;
 #ifdef USE_SOCKETPAIR
     curl_socket_t sock_rd = td->tsd.sock_pair[0];
@@ -406,7 +406,7 @@ static void destroy_async_data(struct Curl_async *async)
 
       destroy_thread_sync_data(&td->tsd);
 
-      free(async->os_specific);
+      free(async->tdata);
     }
 #ifdef USE_SOCKETPAIR
     /*
@@ -418,7 +418,7 @@ static void destroy_async_data(struct Curl_async *async)
     sclose(sock_rd);
 #endif
   }
-  async->os_specific = NULL;
+  async->tdata = NULL;
 
   free(async->hostname);
   async->hostname = NULL;
@@ -437,7 +437,7 @@ static bool init_resolve_thread(struct connectdata *conn,
   struct thread_data *td = calloc(1, sizeof(struct thread_data));
   int err = ENOMEM;
 
-  conn->async.os_specific = (void *)td;
+  conn->async.tdata = td;
   if(!td)
     goto errno_exit;
 
@@ -448,7 +448,7 @@ static bool init_resolve_thread(struct connectdata *conn,
   td->thread_hnd = curl_thread_t_null;
 
   if(!init_thread_sync_data(td, hostname, port, hints)) {
-    conn->async.os_specific = NULL;
+    conn->async.tdata = NULL;
     free(td);
     goto errno_exit;
   }
@@ -519,7 +519,7 @@ static CURLcode thread_wait_resolv(struct connectdata *conn,
                                    struct Curl_dns_entry **entry,
                                    bool report)
 {
-  struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
+  struct thread_data *td = conn->async.tdata;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(conn && td);
@@ -557,7 +557,7 @@ static CURLcode thread_wait_resolv(struct connectdata *conn,
  */
 void Curl_resolver_kill(struct connectdata *conn)
 {
-  struct thread_data *td = (struct thread_data*) conn->async.os_specific;
+  struct thread_data *td = conn->async.tdata;
 
   /* If we're still resolving, we must wait for the threads to fully clean up,
      unfortunately.  Otherwise, we can simply cancel to clean up any resolver
@@ -596,7 +596,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
                                    struct Curl_dns_entry **entry)
 {
   struct Curl_easy *data = conn->data;
-  struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
+  struct thread_data *td = conn->async.tdata;
   int done = 0;
 
   DEBUGASSERT(entry);
@@ -656,7 +656,7 @@ int Curl_resolver_getsock(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   struct resdata *reslv = (struct resdata *)data->state.resolver;
 #ifdef USE_SOCKETPAIR
-  struct thread_data *td = (struct thread_data*)conn->async.os_specific;
+  struct thread_data *td = conn->async.tdata;
 #else
   (void)socks;
 #endif

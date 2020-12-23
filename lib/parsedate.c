@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -275,48 +275,21 @@ enum assume {
   DATE_TIME
 };
 
-/* this is a clone of 'struct tm' but with all fields we don't need or use
-   cut out */
-struct my_tm {
-  int tm_sec;
-  int tm_min;
-  int tm_hour;
-  int tm_mday;
-  int tm_mon;
-  int tm_year; /* full year */
-};
-
-/* struct tm to time since epoch in GMT time zone.
- * This is similar to the standard mktime function but for GMT only, and
- * doesn't suffer from the various bugs and portability problems that
- * some systems' implementations have.
- *
- * Returns 0 on success, otherwise non-zero.
+/*
+ * time2epoch: time stamp to seconds since epoch in GMT time zone.  Similar to
+ * mktime but for GMT only.
  */
-static void my_timegm(struct my_tm *tm, time_t *t)
+static time_t time2epoch(int sec, int min, int hour,
+                         int mday, int mon, int year)
 {
   static const int month_days_cumulative [12] =
     { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
-  int month, year, leap_days;
-
-  year = tm->tm_year;
-  month = tm->tm_mon;
-  if(month < 0) {
-    year += (11 - month) / 12;
-    month = 11 - (11 - month) % 12;
-  }
-  else if(month >= 12) {
-    year -= month / 12;
-    month = month % 12;
-  }
-
-  leap_days = year - (tm->tm_mon <= 1);
+  int leap_days = year - (mon <= 1);
   leap_days = ((leap_days / 4) - (leap_days / 100) + (leap_days / 400)
                - (1969 / 4) + (1969 / 100) - (1969 / 400));
-
-  *t = ((((time_t) (year - 1970) * 365
-          + leap_days + month_days_cumulative[month] + tm->tm_mday - 1) * 24
-         + tm->tm_hour) * 60 + tm->tm_min) * 60 + tm->tm_sec;
+  return ((((time_t) (year - 1970) * 365
+            + leap_days + month_days_cumulative[mon] + mday - 1) * 24
+           + hour) * 60 + min) * 60 + sec;
 }
 
 /*
@@ -341,7 +314,6 @@ static int parsedate(const char *date, time_t *output)
   int secnum = -1;
   int yearnum = -1;
   int tzoff = -1;
-  struct my_tm tm;
   enum assume dignext = DATE_MDAY;
   const char *indate = date; /* save the original pointer */
   int part = 0; /* max 6 parts */
@@ -533,18 +505,11 @@ static int parsedate(const char *date, time_t *output)
      (hournum > 23) || (minnum > 59) || (secnum > 60))
     return PARSEDATE_FAIL; /* clearly an illegal date */
 
-  tm.tm_sec = secnum;
-  tm.tm_min = minnum;
-  tm.tm_hour = hournum;
-  tm.tm_mday = mdaynum;
-  tm.tm_mon = monnum;
-  tm.tm_year = yearnum;
-
-  /* my_timegm() returns a time_t. time_t is often 32 bits, sometimes even on
+  /* time2epoch() returns a time_t. time_t is often 32 bits, sometimes even on
      architectures that feature 64 bit 'long' but ultimately time_t is the
      correct data type to use.
   */
-  my_timegm(&tm, &t);
+  t = time2epoch(secnum, minnum, hournum, mdaynum, monnum, yearnum);
 
   /* Add the time zone diff between local time zone and GMT. */
   if(tzoff == -1)
@@ -624,6 +589,7 @@ CURLcode Curl_gmtime(time_t intime, struct tm *store)
   /* thread-safe version */
   tm = (struct tm *)gmtime_r(&intime, store);
 #else
+  /* !checksrc! disable BANNEDFUNC 1 */
   tm = gmtime(&intime);
   if(tm)
     *store = *tm; /* copy the pointed struct to the local copy */

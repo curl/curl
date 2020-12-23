@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,6 +33,7 @@
 #include "gopher.h"
 #include "select.h"
 #include "strdup.h"
+#include "vtls/vtls.h"
 #include "url.h"
 #include "escape.h"
 #include "warnless.h"
@@ -46,6 +47,10 @@
  */
 
 static CURLcode gopher_do(struct connectdata *conn, bool *done);
+#ifdef USE_SSL
+static CURLcode gopher_connect(struct connectdata *conn, bool *done);
+static CURLcode gopher_connecting(struct connectdata *conn, bool *done);
+#endif
 
 /*
  * Gopher protocol handler.
@@ -71,8 +76,49 @@ const struct Curl_handler Curl_handler_gopher = {
   ZERO_NULL,                            /* connection_check */
   PORT_GOPHER,                          /* defport */
   CURLPROTO_GOPHER,                     /* protocol */
+  CURLPROTO_GOPHER,                     /* family */
   PROTOPT_NONE                          /* flags */
 };
+
+#ifdef USE_SSL
+const struct Curl_handler Curl_handler_gophers = {
+  "GOPHERS",                            /* scheme */
+  ZERO_NULL,                            /* setup_connection */
+  gopher_do,                            /* do_it */
+  ZERO_NULL,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  gopher_connect,                       /* connect_it */
+  gopher_connecting,                    /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_getsock */
+  ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
+  ZERO_NULL,                            /* perform_getsock */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
+  PORT_GOPHER,                          /* defport */
+  CURLPROTO_GOPHER,                     /* protocol */
+  CURLPROTO_GOPHER,                     /* family */
+  PROTOPT_SSL                           /* flags */
+};
+
+static CURLcode gopher_connect(struct connectdata *conn, bool *done)
+{
+  (void)conn;
+  (void)done;
+  return CURLE_OK;
+}
+
+static CURLcode gopher_connecting(struct connectdata *conn, bool *done)
+{
+  CURLcode result = Curl_ssl_connect(conn, FIRSTSOCKET);
+  if(result)
+    connclose(conn, "Failed TLS connection");
+  *done = TRUE;
+  return result;
+}
+#endif
 
 static CURLcode gopher_do(struct connectdata *conn, bool *done)
 {
@@ -116,18 +162,21 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
     newp += 2;
 
     /* ... and finally unescape */
-    result = Curl_urldecode(data, newp, 0, &sel, &len, FALSE);
+    result = Curl_urldecode(data, newp, 0, &sel, &len, REJECT_ZERO);
     free(gopherpath);
     if(result)
       return result;
     sel_org = sel;
   }
 
-  /* We use Curl_write instead of Curl_sendf to make sure the entire buffer is
-     sent, which could be sizeable with long selectors. */
   k = curlx_uztosz(len);
 
   for(;;) {
+    /* Break out of the loop if the selector is empty because OpenSSL and/or
+       LibreSSL fail with errno 0 if this is the case. */
+    if(strlen(sel) < 1)
+      break;
+
     result = Curl_write(conn, sockfd, sel, k, &amount);
     if(!result) { /* Which may not have written it all! */
       result = Curl_client_write(conn, CLIENTWRITE_HEADER, sel, amount);
@@ -170,9 +219,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   free(sel_org);
 
   if(!result)
-    /* We can use Curl_sendf to send the terminal \r\n relatively safely and
-       save allocing another string/doing another _write loop. */
-    result = Curl_sendf(sockfd, conn, "\r\n");
+    result = Curl_write(conn, sockfd, "\r\n", 2, &amount);
   if(result) {
     failf(data, "Failed sending Gopher request");
     return result;

@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HSTS
+CURLOPT_HSTSREADFUNCTION
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<features>
+HSTS
+http
+</features>
+<server>
+none
+</server>
+
+# require debug so that alt-svc can work over plain old HTTP
+<name>
+HSTS read/write callbacks
+</name>
+<tool>
+lib1915
+</tool>
+
+<command>
+http://%HOSTIP:%NOLISTENPORT/not-there/1915
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# it fails because there's nothing on that port
+<errorcode>
+7
+</errorcode>
+<stdout>
+[0/4] 1.example.com 20300320 01:02:03
+[1/4] 2.example.com 20300320 01:02:03
+[2/4] 3.example.com 20300320 01:02:03
+[3/4] 4.example.com 20300320 01:02:03
+</stdout>
+</verify>
+</testcase>

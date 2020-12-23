@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_USERAGENT \- set HTTP user-agent header
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USERAGENT, char *ua);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. It will be used to
+Pass a pointer to a null-terminated string as parameter. It will be used to
 set the User-Agent: header in the HTTP request sent to the remote server. This
 can be used to fool servers or scripts. You can also set any custom header
 with \fICURLOPT_HTTPHEADER(3)\fP.
@@ -43,7 +43,7 @@ HTTP, HTTPS
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "Dark Secret Ninja/1.0");
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -183,6 +183,7 @@ const struct Curl_handler Curl_handler_tftp = {
   ZERO_NULL,                            /* connection_check */
   PORT_TFTP,                            /* defport */
   CURLPROTO_TFTP,                       /* protocol */
+  CURLPROTO_TFTP,                       /* family */
   PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
 };
 
@@ -487,7 +488,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
        file name so we skip the always-present first letter of the path
        string. */
     result = Curl_urldecode(data, &state->conn->data->state.up.path[1], 0,
-                            &filename, NULL, FALSE);
+                            &filename, NULL, REJECT_ZERO);
     if(result)
       return result;
 

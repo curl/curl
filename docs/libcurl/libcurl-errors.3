@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -271,7 +271,7 @@ interface. Also consider \fIcurl_multi_strerror(3)\fP.
 .IP "CURLM_CALL_MULTI_PERFORM (-1)"
 This is not really an error. It means you should call
 \fIcurl_multi_perform(3)\fP again without doing select() or similar in
-between. Before version 7.20.0 this could be returned by
+between. Before version 7.20.0 (released on February 9 2010) this could be returned by
 \fIcurl_multi_perform(3)\fP, but in later versions this return code is never
 used.
 .IP "CURLM_CALL_MULTI_SOCKET (-1)"

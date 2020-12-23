@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,7 @@ CURLOPT_PROXY \- set proxy to use
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY, char *proxy);
 .SH DESCRIPTION
 Set the \fIproxy\fP to use for the upcoming request. The parameter should be a
-char * to a zero terminated string holding the host name or dotted numerical
+char * to a null-terminated string holding the host name or dotted numerical
 IP address. A numerical IPv6 address must be written within [brackets].
 
 To specify port number in this string, append :[port] to the end of the host
@@ -95,7 +95,7 @@ All except file://. Note that some protocols don't do very well over proxy.
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/file.txt");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/file.txt");
   curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy:80");
   curl_easy_perform(curl);
 }

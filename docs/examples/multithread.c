@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,11 +36,11 @@
   If you intend to use a SSL-based protocol here you might need to setup TLS
   library mutex callbacks as described here:
 
-  https://curl.haxx.se/libcurl/c/threadsafe.html
+  https://curl.se/libcurl/c/threadsafe.html
 
 */
 const char * const urls[NUMT]= {
-  "https://curl.haxx.se/",
+  "https://curl.se/",
   "ftp://cool.haxx.se/",
   "https://www.cag.se/",
   "www.haxx.se"
@@ -89,6 +89,6 @@ int main(int argc, char **argv)
     pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }
-
+  curl_global_cleanup();
   return 0;
 }

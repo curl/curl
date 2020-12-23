@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -60,7 +60,6 @@
 
 /*
  * Define USE_WINSOCK to 2 if we have and use WINSOCK2 API, else
- * define USE_WINSOCK to 1 if we have and use WINSOCK  API, else
  * undefine USE_WINSOCK.
  */
 
@@ -70,7 +69,7 @@
 #  define USE_WINSOCK 2
 #else
 #  ifdef HAVE_WINSOCK_H
-#    define USE_WINSOCK 1
+#    error "WinSock version 1 is no longer supported, version 2 is required!"
 #  endif
 #endif
 

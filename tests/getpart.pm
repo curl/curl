@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -28,12 +28,7 @@ my $xmlfile;
 my $warning=0;
 my $trace=0;
 
-sub decode_base64 {
-  tr:A-Za-z0-9+/::cd;                   # remove non-base64 chars
-  tr:A-Za-z0-9+/: -_:;                  # convert to uuencoded format
-  my $len = pack("c", 32 + 0.75*length);   # compute length byte
-  return unpack("u", $len . $_);         # uudecode and print
-}
+use MIME::Base64;
 
 sub decode_hex {
     my $s = $_;

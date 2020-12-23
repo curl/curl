@@ -55,17 +55,16 @@ Content-Length: 6
 
 -foo-
 </stdout>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET http://test.remote.haxx.se.1421:8990/ HTTP/1.1
 Host: test.remote.haxx.se.1421:8990
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://different.remote.haxx.se.1421:8990/ HTTP/1.1
 Host: different.remote.haxx.se.1421:8990
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

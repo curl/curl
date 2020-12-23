@@ -36,13 +36,11 @@ HTTP GET with user and password
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /2 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic ZmFrZTp1c2Vy
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

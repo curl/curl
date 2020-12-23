@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -26,15 +26,18 @@
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
+
 import argparse
+import logging
 import os
 import sys
-import logging
+
+from util import ClosingFileHandler
+
 try:  # Python 2
     import SocketServer as socketserver
 except ImportError:  # Python 3
     import socketserver
-
 
 log = logging.getLogger(__name__)
 HOST = "localhost"
@@ -138,7 +141,7 @@ def setup_logging(options):
 
     # Write out to a logfile
     if options.logfile:
-        handler = logging.FileHandler(options.logfile, mode="w")
+        handler = ClosingFileHandler(options.logfile)
         handler.setFormatter(formatter)
         handler.setLevel(logging.DEBUG)
         root_logger.addHandler(handler)

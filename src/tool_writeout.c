@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,87 +30,79 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 static const struct writeoutvar variables[] = {
-  {"url_effective", VAR_EFFECTIVE_URL, 0,
-   CURLINFO_EFFECTIVE_URL, JSON_STRING},
-  {"http_code", VAR_HTTP_CODE, 0,
-   CURLINFO_RESPONSE_CODE, JSON_LONG},
-  {"response_code", VAR_HTTP_CODE, 0,
-   CURLINFO_RESPONSE_CODE, JSON_LONG},
-  {"http_connect", VAR_HTTP_CODE_PROXY, 0,
-   CURLINFO_HTTP_CONNECTCODE, JSON_LONG},
-  {"time_total", VAR_TOTAL_TIME, 0,
-   CURLINFO_TOTAL_TIME_T, JSON_TIME},
-  {"time_namelookup", VAR_NAMELOOKUP_TIME, 0,
-   CURLINFO_NAMELOOKUP_TIME_T, JSON_TIME},
-  {"time_connect", VAR_CONNECT_TIME, 0,
-   CURLINFO_CONNECT_TIME_T, JSON_TIME},
-  {"time_appconnect", VAR_APPCONNECT_TIME, 0,
-   CURLINFO_APPCONNECT_TIME_T, JSON_TIME},
-  {"time_pretransfer", VAR_PRETRANSFER_TIME, 0,
-   CURLINFO_PRETRANSFER_TIME_T, JSON_TIME},
-  {"time_starttransfer", VAR_STARTTRANSFER_TIME, 0,
-   CURLINFO_STARTTRANSFER_TIME_T, JSON_TIME},
-  {"size_header", VAR_HEADER_SIZE, 0,
-   CURLINFO_HEADER_SIZE, JSON_LONG},
-  {"size_request", VAR_REQUEST_SIZE, 0,
-   CURLINFO_REQUEST_SIZE, JSON_LONG},
-  {"size_download", VAR_SIZE_DOWNLOAD, 0,
-   CURLINFO_SIZE_DOWNLOAD_T, JSON_OFFSET},
-  {"size_upload", VAR_SIZE_UPLOAD, 0,
-   CURLINFO_SIZE_UPLOAD_T, JSON_OFFSET},
-  {"speed_download", VAR_SPEED_DOWNLOAD, 0,
-   CURLINFO_SPEED_DOWNLOAD_T, JSON_OFFSET},
-  {"speed_upload", VAR_SPEED_UPLOAD, 0,
-   CURLINFO_SPEED_UPLOAD_T, JSON_OFFSET},
-  {"content_type", VAR_CONTENT_TYPE, 0,
-   CURLINFO_CONTENT_TYPE, JSON_STRING},
-  {"num_connects", VAR_NUM_CONNECTS, 0,
-   CURLINFO_NUM_CONNECTS, JSON_LONG},
-  {"time_redirect", VAR_REDIRECT_TIME, 0,
-   CURLINFO_REDIRECT_TIME_T, JSON_TIME},
-  {"num_redirects", VAR_REDIRECT_COUNT, 0,
-   CURLINFO_REDIRECT_COUNT, JSON_LONG},
-  {"ftp_entry_path", VAR_FTP_ENTRY_PATH, 0,
-   CURLINFO_FTP_ENTRY_PATH, JSON_STRING},
-  {"redirect_url", VAR_REDIRECT_URL, 0,
-   CURLINFO_REDIRECT_URL, JSON_STRING},
-  {"ssl_verify_result", VAR_SSL_VERIFY_RESULT, 0,
-   CURLINFO_SSL_VERIFYRESULT, JSON_LONG},
+  {"content_type", VAR_CONTENT_TYPE, 0, CURLINFO_CONTENT_TYPE, JSON_STRING},
+  {"filename_effective", VAR_EFFECTIVE_FILENAME, 0, 0, JSON_FILENAME},
+  {"exitcode", VAR_EXITCODE, 0, 0, JSON_LONG},
+  {"errormsg", VAR_ERRORMSG, 0, 0, JSON_STRING},
+  {"ftp_entry_path", VAR_FTP_ENTRY_PATH, 0, CURLINFO_FTP_ENTRY_PATH,
+   JSON_STRING},
+  {"http_code", VAR_HTTP_CODE, 0, CURLINFO_RESPONSE_CODE, JSON_LONG},
+  {"http_connect", VAR_HTTP_CODE_PROXY, 0, CURLINFO_HTTP_CONNECTCODE,
+   JSON_LONG},
+  {"http_version", VAR_HTTP_VERSION, 0, CURLINFO_HTTP_VERSION, JSON_VERSION},
+  {"json", VAR_JSON, 1, 0, JSON_NONE},
+  {"local_ip", VAR_LOCAL_IP, 0, CURLINFO_LOCAL_IP, JSON_STRING},
+  {"local_port", VAR_LOCAL_PORT, 0, CURLINFO_LOCAL_PORT, JSON_LONG},
+  {"method", VAR_EFFECTIVE_METHOD, 0, CURLINFO_EFFECTIVE_METHOD, JSON_STRING},
+  {"num_connects", VAR_NUM_CONNECTS, 0, CURLINFO_NUM_CONNECTS, JSON_LONG},
+  {"num_headers", VAR_NUM_HEADERS, 0, 0, JSON_LONG},
+  {"num_redirects", VAR_REDIRECT_COUNT, 0, CURLINFO_REDIRECT_COUNT, JSON_LONG},
+  {"onerror", VAR_ONERROR, 1, 0, JSON_NONE},
   {"proxy_ssl_verify_result", VAR_PROXY_SSL_VERIFY_RESULT, 0,
    CURLINFO_PROXY_SSL_VERIFYRESULT, JSON_LONG},
-  {"filename_effective", VAR_EFFECTIVE_FILENAME, 0,
-   0, JSON_FILENAME},
-  {"remote_ip", VAR_PRIMARY_IP, 0,
-   CURLINFO_PRIMARY_IP, JSON_STRING},
-  {"remote_port", VAR_PRIMARY_PORT, 0,
-   CURLINFO_PRIMARY_PORT, JSON_LONG},
-  {"local_ip", VAR_LOCAL_IP, 0,
-   CURLINFO_LOCAL_IP, JSON_STRING},
-  {"local_port", VAR_LOCAL_PORT, 0,
-   CURLINFO_LOCAL_PORT, JSON_LONG},
-  {"http_version", VAR_HTTP_VERSION, 0,
-   CURLINFO_HTTP_VERSION, JSON_VERSION},
-  {"scheme", VAR_SCHEME, 0,
-   CURLINFO_SCHEME, JSON_STRING},
-  {"stdout", VAR_STDOUT, 1,
-   0, JSON_NONE},
-  {"stderr", VAR_STDERR, 1,
-   0, JSON_NONE},
-  {"json", VAR_JSON, 1,
-   0, JSON_NONE},
-  {NULL, VAR_NONE, 1,
-   0, JSON_NONE}
+  {"redirect_url", VAR_REDIRECT_URL, 0, CURLINFO_REDIRECT_URL, JSON_STRING},
+  {"remote_ip", VAR_PRIMARY_IP, 0, CURLINFO_PRIMARY_IP, JSON_STRING},
+  {"remote_port", VAR_PRIMARY_PORT, 0, CURLINFO_PRIMARY_PORT, JSON_LONG},
+  {"response_code", VAR_HTTP_CODE, 0, CURLINFO_RESPONSE_CODE, JSON_LONG},
+  {"scheme", VAR_SCHEME, 0, CURLINFO_SCHEME, JSON_STRING},
+  {"size_download", VAR_SIZE_DOWNLOAD, 0, CURLINFO_SIZE_DOWNLOAD_T,
+   JSON_OFFSET},
+  {"size_header", VAR_HEADER_SIZE, 0, CURLINFO_HEADER_SIZE, JSON_LONG},
+  {"size_request", VAR_REQUEST_SIZE, 0, CURLINFO_REQUEST_SIZE, JSON_LONG},
+  {"size_upload", VAR_SIZE_UPLOAD, 0, CURLINFO_SIZE_UPLOAD_T, JSON_OFFSET},
+  {"speed_download", VAR_SPEED_DOWNLOAD, 0, CURLINFO_SPEED_DOWNLOAD_T,
+   JSON_OFFSET},
+  {"speed_upload", VAR_SPEED_UPLOAD, 0, CURLINFO_SPEED_UPLOAD_T, JSON_OFFSET},
+  {"ssl_verify_result", VAR_SSL_VERIFY_RESULT, 0, CURLINFO_SSL_VERIFYRESULT,
+   JSON_LONG},
+  {"stderr", VAR_STDERR, 1, 0, JSON_NONE},
+  {"stdout", VAR_STDOUT, 1, 0, JSON_NONE},
+  {"time_appconnect", VAR_APPCONNECT_TIME, 0, CURLINFO_APPCONNECT_TIME_T,
+   JSON_TIME},
+  {"time_connect", VAR_CONNECT_TIME, 0, CURLINFO_CONNECT_TIME_T, JSON_TIME},
+  {"time_namelookup", VAR_NAMELOOKUP_TIME, 0, CURLINFO_NAMELOOKUP_TIME_T,
+   JSON_TIME},
+  {"time_pretransfer", VAR_PRETRANSFER_TIME, 0, CURLINFO_PRETRANSFER_TIME_T,
+   JSON_TIME},
+  {"time_redirect", VAR_REDIRECT_TIME, 0, CURLINFO_REDIRECT_TIME_T, JSON_TIME},
+  {"time_starttransfer", VAR_STARTTRANSFER_TIME, 0,
+   CURLINFO_STARTTRANSFER_TIME_T, JSON_TIME},
+  {"time_total", VAR_TOTAL_TIME, 0, CURLINFO_TOTAL_TIME_T, JSON_TIME},
+  {"url", VAR_INPUT_URL, 0, 0, JSON_STRING},
+  {"url_effective", VAR_EFFECTIVE_URL, 0, CURLINFO_EFFECTIVE_URL, JSON_STRING},
+  {"urlnum", VAR_URLNUM, 0, 0, JSON_LONG},
+  {NULL, VAR_NONE, 1, 0, JSON_NONE}
 };
 
-void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
+static void us2sec(FILE *stream, curl_off_t us)
+{
+  curl_off_t secs = us / 1000000;
+  us %= 1000000;
+  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU ".%06" CURL_FORMAT_CURL_OFF_TU,
+          secs, us);
+}
+
+void ourWriteOut(CURL *curl, struct per_transfer *per, const char *writeinfo,
+                 CURLcode result)
 {
   FILE *stream = stdout;
   const char *ptr = writeinfo;
   char *stringp = NULL;
   long longinfo;
-  double doubleinfo;
+  curl_off_t offinfo;
+  bool done = FALSE;
 
-  while(ptr && *ptr) {
+  while(ptr && *ptr && !done) {
     if('%' == *ptr && ptr[1]) {
       if('%' == ptr[1]) {
         /* an escaped %-letter */
@@ -131,14 +123,39 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
             continue;
           }
           keepit = *end;
-          *end = 0; /* zero terminate */
+          *end = 0; /* null-terminate */
           for(i = 0; variables[i].name; i++) {
             if(curl_strequal(ptr, variables[i].name)) {
               match = TRUE;
               switch(variables[i].id) {
+              case VAR_ONERROR:
+                if(result == CURLE_OK)
+                  /* this isn't error so skip the rest */
+                  done = TRUE;
+                break;
+              case VAR_EXITCODE:
+                fprintf(stream, "%d", (int)result);
+                break;
+              case VAR_ERRORMSG:
+                fputs(per->errorbuffer[0] ? per->errorbuffer :
+                      curl_easy_strerror(result), stream);
+                break;
+              case VAR_INPUT_URL:
+                fputs(per->this_url, stream);
+                break;
+              case VAR_URLNUM:
+                fprintf(stream, "%u", per->urlnum);
+                break;
               case VAR_EFFECTIVE_URL:
                 if((CURLE_OK ==
                     curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &stringp))
+                   && stringp)
+                  fputs(stringp, stream);
+                break;
+              case VAR_EFFECTIVE_METHOD:
+                if((CURLE_OK == curl_easy_getinfo(curl,
+                                                  CURLINFO_EFFECTIVE_METHOD,
+                                                  &stringp))
                    && stringp)
                   fputs(stringp, stream);
                 break;
@@ -146,6 +163,9 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &longinfo))
                   fprintf(stream, "%03ld", longinfo);
+                break;
+              case VAR_NUM_HEADERS:
+                fprintf(stream, "%ld", per->num_headers);
                 break;
               case VAR_HTTP_CODE_PROXY:
                 if(CURLE_OK ==
@@ -175,65 +195,64 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                 break;
               case VAR_REDIRECT_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_REDIRECT_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_REDIRECT_TIME_T, &offinfo))
+                  us2sec(stream, offinfo);
                 break;
               case VAR_TOTAL_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &offinfo))
+                  us2sec(stream, offinfo);
                 break;
               case VAR_NAMELOOKUP_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_TIME_T,
+                                     &offinfo))
+                  us2sec(stream, offinfo);
                 break;
               case VAR_CONNECT_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME, &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME_T, &offinfo))
+                  us2sec(stream, offinfo);
                 break;
               case VAR_APPCONNECT_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_APPCONNECT_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_APPCONNECT_TIME_T,
+                                     &offinfo))
+                  us2sec(stream, offinfo);
                 break;
               case VAR_PRETRANSFER_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME_T,
+                                     &offinfo))
+                  us2sec(stream, offinfo);
                 break;
               case VAR_STARTTRANSFER_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME_T,
+                                     &offinfo))
+                  us2sec(stream, offinfo);
                 break;
               case VAR_SIZE_UPLOAD:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD, &doubleinfo))
-                  fprintf(stream, "%.0f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD_T, &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_SIZE_DOWNLOAD:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD,
-                                     &doubleinfo))
-                  fprintf(stream, "%.0f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T,
+                                     &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_SPEED_DOWNLOAD:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD,
-                                     &doubleinfo))
-                  fprintf(stream, "%.3f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD_T,
+                                     &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_SPEED_UPLOAD:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &doubleinfo))
-                  fprintf(stream, "%.3f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD_T, &offinfo))
+                  fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU, offinfo);
                 break;
               case VAR_CONTENT_TYPE:
                 if((CURLE_OK ==
@@ -266,14 +285,13 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                   fprintf(stream, "%ld", longinfo);
                 break;
               case VAR_EFFECTIVE_FILENAME:
-                if(outs->filename)
-                  fprintf(stream, "%s", outs->filename);
+                if(per->outs.filename)
+                  fputs(per->outs.filename, stream);
                 break;
               case VAR_PRIMARY_IP:
-                if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP,
-                                     &stringp))
-                  fprintf(stream, "%s", stringp);
+                if((CURLE_OK == curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP,
+                                                  &stringp)) && stringp)
+                  fputs(stringp, stream);
                 break;
               case VAR_PRIMARY_PORT:
                 if(CURLE_OK ==
@@ -282,10 +300,9 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                   fprintf(stream, "%ld", longinfo);
                 break;
               case VAR_LOCAL_IP:
-                if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_LOCAL_IP,
-                                     &stringp))
-                  fprintf(stream, "%s", stringp);
+                if((CURLE_OK == curl_easy_getinfo(curl, CURLINFO_LOCAL_IP,
+                                                  &stringp)) && stringp)
+                  fputs(stringp, stream);
                 break;
               case VAR_LOCAL_PORT:
                 if(CURLE_OK ==
@@ -317,10 +334,9 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                 }
                 break;
               case VAR_SCHEME:
-                if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SCHEME,
-                                     &stringp))
-                  fprintf(stream, "%s", stringp);
+                if((CURLE_OK == curl_easy_getinfo(curl, CURLINFO_SCHEME,
+                                                  &stringp)) && stringp)
+                  fputs(stringp, stream);
                 break;
               case VAR_STDOUT:
                 stream = stdout;
@@ -329,7 +345,7 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                 stream = stderr;
                 break;
               case VAR_JSON:
-                ourWriteOutJSON(variables, curl, outs, stream);
+                ourWriteOutJSON(variables, curl, per, stream);
               default:
                 break;
               }
@@ -374,5 +390,4 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
       ptr++;
     }
   }
-
 }

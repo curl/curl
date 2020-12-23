@@ -21,6 +21,83 @@ variables are substituted by the their respective contents and the output
 version of the test file is stored as `log/testNUM`. That version is what will
 be read and used by the test servers.
 
+## Base64 Encoding
+
+In the preprocess stage, a special instruction can be used to have runtests.pl
+base64 encode a certain section and insert in the generated output file. This
+is in particular good for test cases where the test tool is expected to pass
+in base64 encoded content that might use dynamic information that is unique
+for this particular test invocation, like the server port number.
+
+To insert a base64 encoded string into the output, use this syntax:
+
+    %b64[ data to encode ]b64%
+
+The data to encode can then use any of the existing variables mentioned below,
+or even percent-encoded individual bytes. As an example, insert the HTTP
+server's port number (in ASCII) followed by a space and the hexadecimal byte
+9a:
+
+    %b64[%HTTPPORT %9a]b64%
+
+## Hexadecimal decoding
+
+In the preprocess stage, a special instruction can be used to have runtests.pl
+generate a sequence of binary bytes.
+
+To insert a sequence of bytes from a hex encoded string, use this syntax:
+
+    %hex[ %XX-encoded data to decode ]hex%
+
+For example, to insert the binary octets 0, 1 and 255 into the test file:
+
+    %hex[ %00%01%FF ]hex%
+
+## Repeat content
+
+In the preprocess stage, a special instruction can be used to have runtests.pl
+generate a repetetive sequence of bytes.
+
+To insert a sequence of repeat bytes, use this syntax to make the `<string>`
+get repeated `<number>` of times. The number has to be 1 or large and the
+string may contain `%HH` hexadecimal codes:
+
+    %repeat[<number> x <string>]%
+
+For example, to insert the word hello a 100 times:
+
+    %repeat[100 x hello]%
+
+## Conditional lines
+
+Lines in the test file can be made to appear conditionally on a specific
+feature (see the "features" section below) being set or not set. If the
+specific feature is present, the following lines will be output, otherwise it
+outputs nothing, until a following else or endif clause. Like this:
+
+    %if brotli
+    Accept-Encoding
+    %endif
+
+It can also check for the inversed condition, so if the feature us *not* set by
+the use of an exclamation mark:
+
+    %if !brotli
+    Accept-Encoding: not-brotli
+    %endif
+
+You can also make an "else" clause to get output for the opposite condition,
+like:
+
+    %if brotli
+    Accept-Encoding: brotli
+    %else
+    Accept-Encoding: nothing
+    %endif
+
+**Note** that there can be no nested conditions. You can only do one
+conditional at a time and you can only check for a single feature in it.
+
 # Variables
 
 When the test is preprocessed, a range of "variables" in the test file will be
@@ -40,10 +117,12 @@ Available substitute variables include:
 - `%FTPTIME3` - Even longer than %FTPTIME2
 - `%GOPHER6PORT` - IPv6 port number of the Gopher server
 - `%GOPHERPORT` - Port number of the Gopher server
+- `%GOPHERSPORT` - Port number of the Gophers server
 - `%HOST6IP` - IPv6 address of the host running this test
 - `%HOSTIP` - IPv4 address of the host running this test
 - `%HTTP6PORT` - IPv6 port number of the HTTP server
 - `%HTTPPORT` - Port number of the HTTP server
+- `%HTTP2PORT` - Port number of the HTTP/2 server
 - `%HTTPSPORT` - Port number of the HTTPS server
 - `%HTTPSPROXYPORT` - Port number of the HTTPS-proxy
 - `%HTTPTLS6PORT` - IPv6 port number of the HTTP TLS server
@@ -52,7 +131,7 @@ Available substitute variables include:
 - `%IMAP6PORT` - IPv6 port number of the IMAP server
 - `%IMAPPORT` - Port number of the IMAP server
 - `%MQTTPORT` - Port number of the MQTT server
-- `%NEGTELNETPORT` - Port number of the telnet server
+- `%TELNETPORT` - Port number of the telnet server
 - `%NOLISTENPORT` - Port number where no service is listening
 - `%POP36PORT` - IPv6 port number of the POP3 server
 - `%POP3PORT` - Port number of the POP3 server
@@ -73,6 +152,7 @@ Available substitute variables include:
 - `%TFTP6PORT` - IPv6 port number of the TFTP server
 - `%TFTPPORT` - Port number of the TFTP server
 - `%USER` - Login ID of the user running the test
+- `%VERSION` - the full version number of the tested curl
 
 # `<testcase>`
 
@@ -217,6 +297,7 @@ about to issue.
    POP3 `CAPA` and SMTP `EHLO` commands
 - `AUTH [mechanisms]` - Enables support for SASL authentication and specifies
    a list of space separated mechanisms for IMAP, POP3 and SMTP
+- `STOR [msg]` respond with this instead of default after `STOR`
 
 #### For HTTP/HTTPS
 
@@ -249,6 +330,8 @@ What server(s) this test case requires/uses. Available servers:
 - `ftp-ipv6`
 - `ftp`
 - `ftps`
+- `gopher`
+- `gophers`
 - `http-ipv6`
 - `http-proxy`
 - `http-unix`
@@ -283,6 +366,7 @@ SKIPPED.
 Features testable here are:
 
 - `alt-svc`
+- `c-ares`
 - `cookies`
 - `crypto`
 - `debug`
@@ -290,8 +374,10 @@ Features testable here are:
 - `getrlimit`
 - `GnuTLS`
 - `GSS-API`
+- `HSTS`
 - `HTTP-auth`
 - `http/2`
+- `hyper`
 - `idn`
 - `ipv6`
 - `Kerberos`
@@ -308,6 +394,7 @@ Features testable here are:
 - `parsedate`
 - `proxy`
 - `PSL`
+- `Schannel`
 - `shuffle-dns`
 - `socks`
 - `SPNEGO`
@@ -321,8 +408,8 @@ Features testable here are:
 - `unittest`
 - `unix-sockets`
 - `verbose-strings`
+- `wakeup`
 - `win32`
-- `WinSSL`
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server
@@ -360,7 +447,7 @@ Brief test case description, shown when the test runs.
 Set the given environment variables to the specified value before the actual
 command is run. They are cleared again after the command has been run.
 
-### `<command [option="no-output/no-include/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl"]>`
+### `<command [option="no-output/no-include/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl/shell"]>`
 Command line to run.
 
 Note that the URL that gets passed to the server actually controls what data
@@ -376,6 +463,9 @@ hexadecimal group in the address will be used as the test number! For example
 the address "[1234::ff]" would be treated as test case 255.
 
 Set `type="perl"` to write the test case as a perl script. It implies that
+there's no memory debugging and valgrind gets shut off for this test.
+
+Set `type="shell"` to write the test case as a shell script. It implies that
 there's no memory debugging and valgrind gets shut off for this test.
 
 Set `option="no-output"` to prevent the test script to slap on the `--output`
@@ -405,9 +495,12 @@ parameter is the not negative integer number of seconds for the delay. This
 'delay' attribute is intended for very specific test cases, and normally not
 needed.
 
-### `<file name="log/filename">`
+### `<file name="log/filename" [nonewline="yes"]>`
 This creates the named file with this content before the test case is run,
 which is useful if the test case needs a file to act on.
+
+If 'nonewline="yes"` is used, the created file will have the final newline
+stripped off.
 
 ### `<stdin [nonewline="yes"]>`
 Pass this given data on stdin to the tool.
@@ -443,6 +536,15 @@ The protocol dump curl should transmit to a HTTP proxy (when the http-proxy
 server is used), if 'nonewline' is set, we will cut off the trailing newline
 of this given data before comparing with the one actually sent by the client
 The `<strip>` and `<strippart>` rules are applied before comparisons are made.
+
+### `<stderr [mode="text"] [nonewline="yes"]>`
+This verifies that this data was passed to stderr.
+
+Use the mode="text" attribute if the output is in text mode on platforms that
+have a text/binary difference.
+
+If 'nonewline' is set, we will cut off the trailing newline of this given data
+before comparing with the one actually received by the client
 
 ### `<stdout [mode="text"] [nonewline="yes"]>`
 This verifies that this data was passed to stdout.

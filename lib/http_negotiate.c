@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -123,7 +123,8 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   struct auth *authp = proxy ? &conn->data->state.authproxy :
     &conn->data->state.authhost;
   curlnegotiate *state = proxy ? &conn->proxy_negotiate_state :
-                                 &conn->http_negotiate_state;
+    &conn->http_negotiate_state;
+  struct Curl_easy *data = conn->data;
   char *base64 = NULL;
   size_t len = 0;
   char *userp;
@@ -168,15 +169,15 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
       return result;
 
     userp = aprintf("%sAuthorization: Negotiate %s\r\n", proxy ? "Proxy-" : "",
-      base64);
+                    base64);
 
     if(proxy) {
-      Curl_safefree(conn->allocptr.proxyuserpwd);
-      conn->allocptr.proxyuserpwd = userp;
+      Curl_safefree(data->state.aptr.proxyuserpwd);
+      data->state.aptr.proxyuserpwd = userp;
     }
     else {
-      Curl_safefree(conn->allocptr.userpwd);
-      conn->allocptr.userpwd = userp;
+      Curl_safefree(data->state.aptr.userpwd);
+      data->state.aptr.userpwd = userp;
     }
 
     free(base64);

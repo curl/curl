@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -64,6 +64,7 @@ struct pingpong {
                                milliseconds we await for a server response. */
   struct connectdata *conn; /* points to the connectdata struct that this
                                belongs to */
+  struct dynbuf sendbuf;
 
   /* Function pointers the protocols MUST implement and provide for the
      pingpong layer to function */
@@ -85,6 +86,9 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block,
 
 /* initialize stuff to prepare for reading a fresh new response */
 void Curl_pp_init(struct pingpong *pp);
+
+/* setup for the transfer */
+void Curl_pp_setup(struct pingpong *pp);
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */

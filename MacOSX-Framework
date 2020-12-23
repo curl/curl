@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -103,7 +103,7 @@ MINVER64='-mmacosx-version-min='$MACVER64
 if test ! -z $SDK32; then
   echo "----Configuring libcurl for 32 bit universal framework..."
   make clean
-  ./configure --disable-dependency-tracking --disable-static --with-gssapi --with-darwinssl \
+  ./configure --disable-dependency-tracking --disable-static --with-gssapi --with-secure-transport \
     CFLAGS="-Os -isysroot $SDK32_DIR $ARCHES32" \
     LDFLAGS="-Wl,-syslibroot,$SDK32_DIR $ARCHES32 -Wl,-headerpad_max_install_names" \
     CC=$CC
@@ -132,7 +132,7 @@ if test ! -z $SDK32; then
     popd
     make clean
     echo "----Configuring libcurl for 64 bit universal framework..."
-    ./configure --disable-dependency-tracking --disable-static --with-gssapi --with-darwinssl \
+    ./configure --disable-dependency-tracking --disable-static --with-gssapi --with-secure-transport \
       CFLAGS="-Os -isysroot $SDK64_DIR $ARCHES64" \
       LDFLAGS="-Wl,-syslibroot,$SDK64_DIR $ARCHES64 -Wl,-headerpad_max_install_names" \
       CC=$CC

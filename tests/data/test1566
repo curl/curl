@@ -35,7 +35,7 @@ http
 http://%HOSTIP:%HTTPPORT/1566 -o log/output1566 --etag-compare log/etag1566
 </command>
 <file name="log/etag1566">
-123456
+"123456"
 </file>
 <file1 name="log/output1566">
 downloaded already
@@ -46,12 +46,10 @@ downloaded already
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1566 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 If-None-Match: "123456"
 

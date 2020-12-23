@@ -17,24 +17,22 @@ README
 
   You find answers to the most frequent questions we get in the FAQ document.
 
-  Study the COPYING file for distribution terms and similar. If you distribute
-  curl binaries or other binaries that involve libcurl, you might enjoy the
-  LICENSE-MIXING document.
+  Study the COPYING file for distribution terms.
 
-  All of those documents and more can be found in the docs/ directory.
+  Those documents and more can be found in the docs/ directory.
 
 CONTACT
 
   If you have problems, questions, ideas or suggestions, please contact us
-  by posting to a suitable mailing list. See https://curl.haxx.se/mail/
+  by posting to a suitable mailing list. See https://curl.se/mail/
 
   All contributors to the project are listed in the THANKS document.
 
-WEB SITE
+WEBSITE
 
-  Visit the curl web site for the latest news and downloads:
+  Visit the curl website for the latest news and downloads:
 
-        https://curl.haxx.se/
+        https://curl.se/
 
 GIT
 

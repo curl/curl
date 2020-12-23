@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -43,6 +43,7 @@ my %helplong;
 my %arglong;
 my %redirlong;
 my %protolong;
+my %catlong;
 
 # get the long name version, return the man page string
 sub manpageify {
@@ -126,6 +127,7 @@ sub single {
     my $arg;
     my $mutexed;
     my $requires;
+    my $category;
     my $seealso;
     my $magic; # cmdline special option
     while(<F>) {
@@ -159,12 +161,20 @@ sub single {
         elsif(/^Requires: *(.*)/i) {
             $requires=$1;
         }
+        elsif(/^Category: *(.*)/i) {
+            $category=$1;
+        }
         elsif(/^Help: *(.*)/i) {
             ;
         }
         elsif(/^---/) {
             if(!$long) {
-                print STDERR "WARN: no 'Long:' in $f\n";
+                print STDERR "ERROR: no 'Long:' in $f\n";
+                exit 1;
+            }
+            if(!$category) {
+                print STDERR "ERROR: no 'Category:' in $f\n";
+                exit 2;
             }
             last;
         }
@@ -216,12 +226,24 @@ sub single {
     if($seealso) {
         my @m=split(/ /, $seealso);
         my $mstr;
+        my $and = 0;
+        my $num = scalar(@m);
+        if($num > 2) {
+            # use commas up to this point
+            $and = $num - 1;
+        }
+        my $i = 0;
         for my $k (@m) {
             if(!$helplong{$k}) {
                 print STDERR "WARN: $f see-alsos a non-existing option: $k\n";
             }
             my $l = manpageify($k);
-            $mstr .= sprintf "%s$l", $mstr?" and ":"";
+            my $sep = " and";
+            if($and && ($i < $and)) {
+                $sep = ",";
+            }
+            $mstr .= sprintf "%s$l", $mstr?"$sep ":"";
+            $i++;
         }
         push @foot, seealso($standalone, $mstr);
     }
@@ -262,6 +284,7 @@ sub getshortlong {
     my $help;
     my $arg;
     my $protocols;
+    my $category;
     while(<F>) {
         if(/^Short: (.)/i) {
             $short=$1;
@@ -278,6 +301,9 @@ sub getshortlong {
         elsif(/^Protocols: (.*)/i) {
             $protocols=$1;
         }
+        elsif(/^Category: (.*)/i) {
+            $category=$1;
+        }
         elsif(/^---/) {
             last;
         }
@@ -291,6 +317,7 @@ sub getshortlong {
         $helplong{$long}=$help;
         $arglong{$long}=$arg;
         $protolong{$long}=$protocols;
+        $catlong{$long}=$category;
     }
 }
 
@@ -316,6 +343,8 @@ sub listhelp {
     foreach my $f (sort keys %helplong) {
         my $long = $f;
         my $short = $optlong{$long};
+        my @categories = split ' ', $catlong{$long};
+        my $bitmask;
         my $opt;
 
         if(defined($short) && $long) {
@@ -324,7 +353,13 @@ sub listhelp {
         elsif($long && !$short) {
             $opt = "    --$long";
         }
-
+        for my $i (0 .. $#categories) {
+            $bitmask .= 'CURLHELP_' . uc $categories[$i];
+            # If not last element, append |
+            if($i < $#categories) {
+                $bitmask .= ' | ';
+            }
+        }
         my $arg = $arglong{$long};
         if($arg) {
             $opt .= " $arg";
@@ -332,12 +367,31 @@ sub listhelp {
         my $desc = $helplong{$f};
         $desc =~ s/\"/\\\"/g; # escape double quotes
 
-        my $line = sprintf "  {\"%s\",\n   \"%s\"},\n", $opt, $desc;
+        my $line = sprintf "  {\"%s\",\n   \"%s\",\n   %s},\n", $opt, $desc, $bitmask;
 
         if(length($opt) + length($desc) > 78) {
             print STDERR "WARN: the --$long line is too long\n";
         }
         print $line;
+    }
+}
+
+sub listcats {
+    my %allcats;
+    foreach my $f (sort keys %helplong) {
+        my @categories = split ' ', $catlong{$f};
+        foreach (@categories) {
+            $allcats{$_} = undef;
+        }
+    }
+    my @categories;
+    foreach my $key (keys %allcats) {
+        push @categories, $key;
+    }
+    @categories = sort @categories;
+    unshift @categories, 'hidden';
+    for my $i (0..$#categories) {
+        print '#define ' . 'CURLHELP_' . uc($categories[$i]) . ' ' . "1u << " . $i . "u\n";
     }
 }
 
@@ -394,8 +448,12 @@ sub getargs {
         showprotocols();
         return;
     }
+    elsif($f eq "listcats") {
+        listcats();
+        return;
+    }
 
-    print "Usage: gen.pl <mainpage/listhelp/single FILE/protos> [files]\n";
+    print "Usage: gen.pl <mainpage/listhelp/single FILE/protos/listcats> [files]\n";
 }
 
 #------------------------------------------------------------------------

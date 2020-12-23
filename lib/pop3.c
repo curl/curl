@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -128,6 +128,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   ZERO_NULL,                        /* connection_check */
   PORT_POP3,                        /* defport */
   CURLPROTO_POP3,                   /* protocol */
+  CURLPROTO_POP3,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
   PROTOPT_URLOPTIONS
 };
@@ -155,6 +156,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   ZERO_NULL,                        /* connection_check */
   PORT_POP3S,                       /* defport */
   CURLPROTO_POP3S,                  /* protocol */
+  CURLPROTO_POP3,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_SSL
   | PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS /* flags */
 };
@@ -551,7 +553,7 @@ static CURLcode pop3_perform_command(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct POP3 *pop3 = data->req.protop;
+  struct POP3 *pop3 = data->req.p.pop3;
   const char *command = NULL;
 
   /* Calculate the default command */
@@ -884,7 +886,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct POP3 *pop3 = data->req.protop;
+  struct POP3 *pop3 = data->req.p.pop3;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
 
@@ -1046,7 +1048,7 @@ static CURLcode pop3_init(struct connectdata *conn)
   struct Curl_easy *data = conn->data;
   struct POP3 *pop3;
 
-  pop3 = data->req.protop = calloc(sizeof(struct POP3), 1);
+  pop3 = data->req.p.pop3 = calloc(sizeof(struct POP3), 1);
   if(!pop3)
     result = CURLE_OUT_OF_MEMORY;
 
@@ -1091,6 +1093,7 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
   Curl_sasl_init(&pop3c->sasl, &saslpop3);
 
   /* Initialise the pingpong layer */
+  Curl_pp_setup(pp);
   Curl_pp_init(pp);
 
   /* Parse the URL options */
@@ -1120,7 +1123,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct POP3 *pop3 = data->req.protop;
+  struct POP3 *pop3 = data->req.p.pop3;
 
   (void)premature;
 
@@ -1154,7 +1157,7 @@ static CURLcode pop3_perform(struct connectdata *conn, bool *connected,
 {
   /* This is POP3 and no proxy */
   CURLcode result = CURLE_OK;
-  struct POP3 *pop3 = conn->data->req.protop;
+  struct POP3 *pop3 = conn->data->req.p.pop3;
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
 
@@ -1386,11 +1389,11 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
 {
   /* The POP3 struct is already initialised in pop3_connect() */
   struct Curl_easy *data = conn->data;
-  struct POP3 *pop3 = data->req.protop;
+  struct POP3 *pop3 = data->req.p.pop3;
   const char *path = &data->state.up.path[1]; /* skip leading path */
 
   /* URL decode the path for the message ID */
-  return Curl_urldecode(data, path, 0, &pop3->id, NULL, TRUE);
+  return Curl_urldecode(data, path, 0, &pop3->id, NULL, REJECT_CTRL);
 }
 
 /***********************************************************************
@@ -1403,12 +1406,12 @@ static CURLcode pop3_parse_custom_request(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct POP3 *pop3 = data->req.protop;
+  struct POP3 *pop3 = data->req.p.pop3;
   const char *custom = data->set.str[STRING_CUSTOMREQUEST];
 
   /* URL decode the custom request */
   if(custom)
-    result = Curl_urldecode(data, custom, 0, &pop3->custom, NULL, TRUE);
+    result = Curl_urldecode(data, custom, 0, &pop3->custom, NULL, REJECT_CTRL);
 
   return result;
 }

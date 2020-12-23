@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -24,7 +24,7 @@
 #
 ## Makefile for building curl examples with MingW (GCC-3.2 or later)
 ## and optionally OpenSSL (1.0.2a), libssh2 (1.5), zlib (1.2.8), librtmp (2.4),
-## brotli (1.0.1)
+## brotli (1.0.1), zstd (1.4.5)
 ##
 ## Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
 ## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
@@ -38,6 +38,10 @@
 # Edit the path below to point to the base of your Zlib sources.
 ifndef ZLIB_PATH
 ZLIB_PATH = ../../../zlib-1.2.8
+endif
+# Edit the path below to point to the base of your Zstandard sources.
+ifndef ZSTD_PATH
+ZSTD_PATH = ../../../zstd-1.4.5
 endif
 # Edit the path below to point to the base of your Brotli sources.
 ifndef BROTLI_PATH
@@ -84,6 +88,14 @@ endif
 # Edit the path below to point to the base of your nghttp2 package.
 ifndef NGHTTP2_PATH
 NGHTTP2_PATH = ../../../nghttp2-1.0.0
+endif
+# Edit the path below to point to the base of your nghttp3 package.
+ifndef NGHTTP3_PATH
+NGHTTP3_PATH = ../../../nghttp3-1.0.0
+endif
+# Edit the path below to point to the base of your ngtcp2 package.
+ifndef NGTCP2_PATH
+NGTCP2_PATH = ../../../ngtcp2-1.0.0
 endif
 
 PROOT = ../..
@@ -180,6 +192,9 @@ endif
 ifeq ($(findstring -zlib,$(CFG)),-zlib)
 ZLIB = 1
 endif
+ifeq ($(findstring -zstd,$(CFG)),-zstd)
+ZSTD = 1
+endif
 ifeq ($(findstring -brotli,$(CFG)),-brotli)
 BROTLI = 1
 endif
@@ -207,6 +222,12 @@ SSPI = 1
 endif
 ifeq ($(findstring -nghttp2,$(CFG)),-nghttp2)
 NGHTTP2 = 1
+endif
+ifeq ($(findstring -nghttp3,$(CFG)),-nghttp3)
+NGHTTP3 = 1
+endif
+ifeq ($(findstring -ngtcp2,$(CFG)),-ngtcp2)
+NGTCP2 = 1
 endif
 
 INCLUDES = -I. -I$(PROOT) -I$(PROOT)/include -I$(PROOT)/lib
@@ -245,6 +266,15 @@ ifdef SSH2
   endif
 endif
 ifdef SSL
+  ifdef NGHTTP3
+    CFLAGS += -DUSE_NGHTTP3
+    curl_LDADD += -L"$(NGHTTP3_PATH)/lib" -lnghttp3
+    ifdef NGTCP2
+      CFLAGS += -DUSE_NGTCP2
+      curl_LDADD += -L"$(NGTCP2_PATH)/lib" -lngtcp2 -lngtcp2_crypto_openssl
+    endif
+  endif
+
   ifndef OPENSSL_INCLUDE
     ifeq "$(wildcard $(OPENSSL_PATH)/outinc)" "$(OPENSSL_PATH)/outinc"
       OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc
@@ -283,6 +313,16 @@ ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
   CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   curl_LDADD += -L"$(ZLIB_PATH)" -lz
+endif
+ifdef ZSTD
+  INCLUDES += -I"$(ZSTD_PATH)/include"
+  CFLAGS += -DHAVE_ZSTD
+  curl_LDADD += -L"$(ZSTD_PATH)/lib"
+  ifdef ZSTD_LIBS
+    curl_LDADD += $(ZSTD_LIBS)
+  else
+    curl_LDADD += -lzstd
+  endif
 endif
 ifdef BROTLI
   INCLUDES += -I"$(BROTLI_PATH)/include"

@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -42,7 +42,7 @@ print <<HEADER
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -133,6 +133,8 @@ static curl_chunk_end_callback chunk_end_cb;
 static curl_fnmatch_callback fnmatch_cb;
 static curl_closesocket_callback closesocketcb;
 static curl_xferinfo_callback xferinfocb;
+static curl_hstsread_callback hstsreadcb;
+static curl_hstswrite_callback hstswritecb;
 static curl_resolver_start_callback resolver_start_cb;
 
 int test(char *URL)
@@ -184,13 +186,15 @@ while(<STDIN>) {
             print "${pref} \"string\");\n$check";
             print "${pref} NULL);\n$check";
         }
-        elsif($type eq "CURLOPTTYPE_LONG") {
+        elsif(($type eq "CURLOPTTYPE_LONG") ||
+              ($type eq "CURLOPTTYPE_VALUES")) {
             print "${pref} 0L);\n$check";
             print "${pref} 22L);\n$check";
             print "${pref} LO);\n$check";
             print "${pref} HI);\n$check";
         }
-        elsif($type eq "CURLOPTTYPE_OBJECTPOINT") {
+        elsif(($type eq "CURLOPTTYPE_OBJECTPOINT") ||
+              ($type eq "CURLOPTTYPE_CBPOINT")) {
             if($name =~ /DEPENDS/) {
               print "${pref} dep);\n$check";
             }
@@ -244,8 +248,8 @@ while(<STDIN>) {
             print "${pref} &blob);\n$check";
         }
         else {
-            print STDERR "\n---- $type\n";
-            exit; # exit to make this noticed!
+            print STDERR "\nUnknown type: $type\n";
+            exit 22; # exit to make this noticed!
         }
     }
     elsif($_ =~ /^  CURLINFO_NONE/) {
@@ -295,7 +299,7 @@ while(<STDIN>) {
 
 
 print <<FOOTER
-  curl_easy_setopt(curl, 1, 0);
+  curl_easy_setopt(curl, (CURLoption)1, 0);
   res = CURLE_OK;
 test_cleanup:
   curl_easy_cleanup(curl);

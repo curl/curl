@@ -29,7 +29,7 @@ Basic TELNET negotiation
 test1452
 </stdin>
  <command>
-telnet://%HOSTIP:%NEGTELNETPORT --upload-file -
+telnet://%HOSTIP:%TELNETPORT --upload-file -
 </command>
 </client>
 

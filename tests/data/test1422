@@ -47,12 +47,10 @@ http://%HOSTIP:%HTTPPORT/1422 -J -O file://%PWD/log/name1422
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1422 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

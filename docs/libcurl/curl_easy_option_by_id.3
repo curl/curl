@@ -1,0 +1,46 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_easy_option_by_id 3 "27 Aug 2020" "libcurl 7.73.0" "libcurl Manual"
+.SH NAME
+curl_easy_option_by_id - find an easy setopt option by id
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+const struct curl_easyoption *curl_easy_option_by_id(CURLoption id);
+.fi
+.SH DESCRIPTION
+Given a CURLoption \fBid\fP, this function returns a pointer to the
+curl_easyoption struct, holding information about the
+\fIcurl_easy_setopt(3)\fP option using that id. The option id is the CURLOPT_
+prefix ones provided in the standard curl/curl.h header file. This function
+will return the non-aliases version for the cases where there is an alias
+function as well.
+
+If libcurl has no option with the given id, this function returns NULL.
+.SH AVAILABILITY
+This function was added in libcurl 7.73.0
+.SH RETURN VALUE
+A pointer to the curl_easyoption struct for the option or NULL.
+.SH "SEE ALSO"
+.BR curl_easy_option_by_name "(3)," curl_easy_option_next "(3),"
+.BR curl_easy_setopt "(3),"

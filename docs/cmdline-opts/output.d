@@ -3,6 +3,7 @@ Arg: <file>
 Short: o
 Help: Write to file instead of stdout
 See-also: remote-name remote-name-all remote-header-name
+Category: important curl
 ---
 Write output to <file> instead of stdout. If you are using {} or [] to fetch
 multiple documents, you should quote the URL and you can use '#' followed by a

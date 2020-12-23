@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -34,12 +34,12 @@ sub appveyor_check_environment {
 }
 
 sub appveyor_create_test_result {
-    my ($testnum, $testname)=@_;
+    my ($curl, $testnum, $testname)=@_;
     $testname =~ s/\\/\\\\/g;
     $testname =~ s/\'/\\\'/g;
     $testname =~ s/\"/\\\"/g;
     my $appveyor_baseurl="$ENV{'APPVEYOR_API_URL'}";
-    my $appveyor_result=`curl --silent --noproxy "*" \\
+    my $appveyor_result=`$curl --silent --noproxy "*" \\
     --header "Content-Type: application/json" \\
     --data "
         {
@@ -55,7 +55,7 @@ sub appveyor_create_test_result {
 }
 
 sub appveyor_update_test_result {
-    my ($testnum, $error, $start, $stop)=@_;
+    my ($curl, $testnum, $error, $start, $stop)=@_;
     my $testname=$APPVEYOR_TEST_NAMES{$testnum};
     if(!defined $testname) {
         return;
@@ -83,7 +83,7 @@ sub appveyor_update_test_result {
         $appveyor_category = 'Error';
     }
     my $appveyor_baseurl="$ENV{'APPVEYOR_API_URL'}";
-    my $appveyor_result=`curl --silent --noproxy "*" --request PUT \\
+    my $appveyor_result=`$curl --silent --noproxy "*" --request PUT \\
     --header "Content-Type: application/json" \\
     --data "
         {
@@ -98,7 +98,7 @@ sub appveyor_update_test_result {
     "$appveyor_baseurl/api/tests"`;
     print "AppVeyor API result: $appveyor_result\n" if ($appveyor_result);
     if($appveyor_category eq 'Error') {
-        $appveyor_result=`curl --silent --noproxy "*" \\
+        $appveyor_result=`$curl --silent --noproxy "*" \\
         --header "Content-Type: application/json" \\
         --data "
             {

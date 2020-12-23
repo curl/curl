@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,7 +40,7 @@
 #include "memdebug.h" /* LAST include file */
 
 static struct Curl_easy *data;
-static struct curl_hash hp;
+static struct Curl_hash hp;
 static char *data_key;
 static struct Curl_dns_entry *data_node;
 
@@ -76,23 +76,18 @@ static void unit_stop(void)
 static struct Curl_addrinfo *fake_ai(void)
 {
   static struct Curl_addrinfo *ai;
+  static const char dummy[]="dummy";
+  size_t namelen = sizeof(dummy); /* including the zero terminator */
 
-  ai = calloc(1, sizeof(struct Curl_addrinfo));
+  ai = calloc(1, sizeof(struct Curl_addrinfo) + sizeof(struct sockaddr_in) +
+              namelen);
   if(!ai)
     return NULL;
 
-  ai->ai_canonname = strdup("dummy");
-  if(!ai->ai_canonname) {
-    free(ai);
-    return NULL;
-  }
-
-  ai->ai_addr = calloc(1, sizeof(struct sockaddr_in));
-  if(!ai->ai_addr) {
-    free(ai->ai_canonname);
-    free(ai);
-    return NULL;
-  }
+  ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
+  ai->ai_canonname = (void *)((char *)ai->ai_addr +
+                              sizeof(struct sockaddr_in));
+  memcpy(ai->ai_canonname, dummy, namelen);
 
   ai->ai_family = AF_INET;
   ai->ai_addrlen = sizeof(struct sockaddr_in);

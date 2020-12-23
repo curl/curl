@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -36,7 +36,7 @@ to overwrite the original data after setting this option.
 Because data are copied, care must be taken when using this option in
 conjunction with \fICURLOPT_POSTFIELDSIZE(3)\fP or
 \fICURLOPT_POSTFIELDSIZE_LARGE(3)\fP: If the size has not been set prior to
-\fICURLOPT_COPYPOSTFIELDS(3)\fP, the data is assumed to be a zero terminated
+\fICURLOPT_COPYPOSTFIELDS(3)\fP, the data is assumed to be a null-terminated
 string; else the stored size informs the library about the byte count to
 copy. In any case, the size must not be changed after
 \fICURLOPT_COPYPOSTFIELDS(3)\fP, unless another \fICURLOPT_POSTFIELDS(3)\fP or
@@ -50,7 +50,7 @@ HTTP(S)
 CURL *curl = curl_easy_init();
 if(curl) {
   char local_buffer[1024]="data to send";
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* size of the data to copy from the buffer and send in the request */
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 12L);

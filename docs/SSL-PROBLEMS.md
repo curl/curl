@@ -78,10 +78,10 @@
   depending on the OS or build configuration. The --ssl-no-revoke option was
   introduced in 7.44.0 to disable revocation checking but currently is only
   supported for Schannel (the native Windows SSL library), with an exception
-  in the case of Windows' Untrusted Publishers blacklist which it seems can't
+  in the case of Windows' Untrusted Publishers block list which it seems can't
   be bypassed. This option may have broader support to accommodate other SSL
   backends in the future.
 
   References:
 
-  https://curl.haxx.se/docs/ssl-compared.html
+  https://curl.se/docs/ssl-compared.html

@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -35,9 +35,9 @@ data to a mime part.
 
 \fIpart\fP is the part's to assign contents to.
 
-\fIfilename\fP points to the nul-terminated file's path name. The pointer can
-be NULL to detach the previous part contents settings.  Filename storage can be
-safely be reused after this call.
+\fIfilename\fP points to the null-terminated file's path name. The pointer can
+be NULL to detach the previous part contents settings.  Filename storage can
+be safely be reused after this call.
 
 As a side effect, the part's remote file name is set to the base name of the
 given \fIfilename\fP if it is a valid named file. This can be undone or

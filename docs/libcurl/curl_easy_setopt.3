@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -48,7 +48,8 @@ thus the string storage associated to the pointer argument may be overwritten
 after \fIcurl_easy_setopt(3)\fP returns. The only exception to this rule is
 really \fICURLOPT_POSTFIELDS(3)\fP, but the alternative that copies the string
 \fICURLOPT_COPYPOSTFIELDS(3)\fP has some usage characteristics you need to
-read up on.
+read up on. This function does not accept input strings longer than
+\fBCURL_MAX_INPUT_LENGTH\fP (8 MB).
 
 The order in which the options are set does not matter.
 
@@ -319,6 +320,18 @@ Add or control cookies. See \fICURLOPT_COOKIELIST(3)\fP
 Specify the Alt-Svc: cache file name. See \fICURLOPT_ALTSVC(3)\fP
 .IP CURLOPT_ALTSVC_CTRL
 Enable and configure Alt-Svc: treatment. See \fICURLOPT_ALTSVC_CTRL(3)\fP
+.IP CURLOPT_HSTS
+Set HSTS cache file. See \fICURLOPT_HSTS(3)\fP
+.IP CURLOPT_HSTS_CTRL
+Enable HSTS. See \fICURLOPT_HSTS_CTRL(3)\fP
+.IP CURLOPT_HSTSREADFUNCTION
+Set HSTS read callback. See \fICURLOPT_HSTSREADFUNCTION(3)\fP
+.IP CURLOPT_HSTSREADDATA
+Pass pointer to the HSTS read callback. See \fICURLOPT_HSTSREADDATA(3)\fP
+.IP CURLOPT_HSTSWRITEFUNCTION
+Set HSTS write callback. See \fICURLOPT_HSTSWRITEFUNCTION(3)\fP
+.IP CURLOPT_HSTSWRITEDATA
+Pass pointer to the HSTS write callback. See \fICURLOPT_HSTSWRITEDATA(3)\fP
 .IP CURLOPT_HTTPGET
 Do an HTTP GET request. See \fICURLOPT_HTTPGET(3)\fP
 .IP CURLOPT_REQUEST_TARGET
@@ -410,6 +423,8 @@ RTSP Transport: header. See \fICURLOPT_RTSP_TRANSPORT(3)\fP
 Client CSEQ number. See \fICURLOPT_RTSP_CLIENT_CSEQ(3)\fP
 .IP CURLOPT_RTSP_SERVER_CSEQ
 CSEQ number for RTSP Server->Client request. See \fICURLOPT_RTSP_SERVER_CSEQ(3)\fP
+.IP CURLOPT_AWS_SIGV4
+AWS HTTP V4 Signature. See \fICURLOPT_AWS_SIGV4(3)\fP
 .SH PROTOCOL OPTIONS
 .IP CURLOPT_TRANSFERTEXT
 Use text transfer. See \fICURLOPT_TRANSFERTEXT(3)\fP
@@ -532,6 +547,8 @@ Proxy client key type. See \fICURLOPT_PROXY_SSLKEYTYPE(3)\fP
 Client key password. See \fICURLOPT_KEYPASSWD(3)\fP
 .IP CURLOPT_PROXY_KEYPASSWD
 Proxy client key password. See \fICURLOPT_PROXY_KEYPASSWD(3)\fP
+.IP CURLOPT_SSL_EC_CURVES
+Set key exchange curves. See \fICURLOPT_SSL_EC_CURVES(3)\fP
 .IP CURLOPT_SSL_ENABLE_ALPN
 Enable use of ALPN. See \fICURLOPT_SSL_ENABLE_ALPN(3)\fP
 .IP CURLOPT_SSL_ENABLE_NPN
@@ -643,6 +660,9 @@ Strings passed on to libcurl must be shorter than 8000000 bytes, otherwise
 \fIcurl_easy_setopt(3)\fP returns \fBCURLE_BAD_FUNCTION_ARGUMENT\fP (added in
 7.65.0).
 
+\fBCURLE_BAD_FUNCTION_ARGUMENT\fP is returned when the argument to an option
+is invalid, like perhaps out of range.a
+
 If you try to set an option that libcurl doesn't know about, perhaps because
 the library is too old to support it or the option was removed in a recent
 version, this function will return \fICURLE_UNKNOWN_OPTION\fP. If support for
@@ -653,7 +673,7 @@ the option was disabled at compile-time, it will return
 CURL *curl = curl_easy_init();
 if(curl) {
   CURLcode res;
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
   res = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 }

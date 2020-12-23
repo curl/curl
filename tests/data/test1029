@@ -30,18 +30,16 @@ http
 HTTP Location: and 'redirect_url' check
  </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/our/1029 -w '%{redirect_url}\n'
+http://%HOSTIP:%HTTPPORT/we/want/our/1029 -w '%{redirect_url} %{url} %{exitcode} %{errormsg}\n'
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /we/want/our/1029 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
@@ -52,7 +50,7 @@ Content-Length: 62
 Connection: close
 
 This server reply is for testing a simple Location: following
-http://%HOSTIP:%HTTPPORT/we/want/our/data/10290002.txt?coolsite=yes
+http://%HOSTIP:%HTTPPORT/we/want/our/data/10290002.txt?coolsite=yes http://%HOSTIP:%HTTPPORT/we/want/our/1029 0 No error
 </stdout>
 </verify>
 </testcase>

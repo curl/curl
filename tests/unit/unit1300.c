@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -23,11 +23,11 @@
 
 #include "llist.h"
 
-static struct curl_llist llist;
+static struct Curl_llist llist;
 
-static struct curl_llist llist_destination;
+static struct Curl_llist llist_destination;
 
-static void test_curl_llist_dtor(void *key, void *value)
+static void test_Curl_llist_dtor(void *key, void *value)
 {
   /* used by the llist API, does nothing here */
   (void)key;
@@ -36,8 +36,8 @@ static void test_curl_llist_dtor(void *key, void *value)
 
 static CURLcode unit_setup(void)
 {
-  Curl_llist_init(&llist, test_curl_llist_dtor);
-  Curl_llist_init(&llist_destination, test_curl_llist_dtor);
+  Curl_llist_init(&llist, test_Curl_llist_dtor);
+  Curl_llist_init(&llist_destination, test_Curl_llist_dtor);
   return CURLE_OK;
 }
 
@@ -50,14 +50,14 @@ UNITTEST_START
   int unusedData_case1 = 1;
   int unusedData_case2 = 2;
   int unusedData_case3 = 3;
-  struct curl_llist_element case1_list;
-  struct curl_llist_element case2_list;
-  struct curl_llist_element case3_list;
-  struct curl_llist_element case4_list;
-  struct curl_llist_element *head;
-  struct curl_llist_element *element_next;
-  struct curl_llist_element *element_prev;
-  struct curl_llist_element *to_remove;
+  struct Curl_llist_element case1_list;
+  struct Curl_llist_element case2_list;
+  struct Curl_llist_element case3_list;
+  struct Curl_llist_element case4_list;
+  struct Curl_llist_element *head;
+  struct Curl_llist_element *element_next;
+  struct Curl_llist_element *element_prev;
+  struct Curl_llist_element *to_remove;
   size_t llist_size = Curl_llist_count(&llist);
 
   /**
@@ -74,8 +74,8 @@ UNITTEST_START
   fail_unless(llist.size == 0, "list initial size should be zero");
   fail_unless(llist.head == NULL, "list head should initiate to NULL");
   fail_unless(llist.tail == NULL, "list tail should intiate to NULL");
-  fail_unless(llist.dtor == test_curl_llist_dtor,
-               "list dtor should initiate to test_curl_llist_dtor");
+  fail_unless(llist.dtor == test_Curl_llist_dtor,
+               "list dtor should initiate to test_Curl_llist_dtor");
 
   /**
    * testing Curl_llist_insert_next

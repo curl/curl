@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -41,6 +41,9 @@ You should not free the memory returned by this function unless it is
 explicitly mentioned below.
 .SH AVAILABLE INFORMATION
 The following information can be extracted:
+.IP CURLINFO_EFFECTIVE_METHOD
+Last used HTTP method.
+See \fICURLINFO_EFFECTIVE_METHOD(3)\fP
 .IP CURLINFO_EFFECTIVE_URL
 Last used URL.
 See \fICURLINFO_EFFECTIVE_URL(3)\fP
@@ -138,6 +141,9 @@ See \fICURLINFO_REQUEST_SIZE(3)\fP
 .IP CURLINFO_SSL_VERIFYRESULT
 Certificate verification result.
 See \fICURLINFO_SSL_VERIFYRESULT(3)\fP
+.IP CURLINFO_PROXY_ERROR
+Detailed proxy error.
+See \fICURLINFO_PROXY_ERROR(3)\fP
 .IP CURLINFO_PROXY_SSL_VERIFYRESULT
 Proxy certificate verification result.
 See \fICURLINFO_PROXY_SSL_VERIFYRESULT(3)\fP

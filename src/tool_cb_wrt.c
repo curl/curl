@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,6 +20,13 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+
+#ifdef HAVE_FCNTL_H
+/* for open() */
+#include <fcntl.h>
+#endif
+
+#include <sys/stat.h>
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -32,12 +39,21 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+#ifdef WIN32
+#define OPENMODE S_IREAD | S_IWRITE
+#else
+#define OPENMODE S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
+#endif
+
 /* create a local file for writing, return TRUE on success */
 bool tool_create_output_file(struct OutStruct *outs,
                              struct OperationConfig *config)
 {
   struct GlobalConfig *global;
-  FILE *file;
+  FILE *file = NULL;
   DEBUGASSERT(outs);
   DEBUGASSERT(config);
   global = config->global;
@@ -48,17 +64,29 @@ bool tool_create_output_file(struct OutStruct *outs,
 
   if(outs->is_cd_filename) {
     /* don't overwrite existing files */
-    file = fopen(outs->filename, "rb");
-    if(file) {
-      fclose(file);
-      warnf(global, "Refusing to overwrite %s: %s\n", outs->filename,
-            strerror(EEXIST));
-      return FALSE;
+    int fd;
+    char *name = outs->filename;
+    char *aname = NULL;
+    if(config->output_dir) {
+      aname = aprintf("%s/%s", config->output_dir, name);
+      if(!aname) {
+        errorf(global, "out of memory\n");
+        return FALSE;
+      }
+      name = aname;
     }
+    fd = open(name, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
+    if(fd != -1) {
+      file = fdopen(fd, "wb");
+      if(!file)
+        close(fd);
+    }
+    free(aname);
   }
+  else
+    /* open file for writing */
+    file = fopen(outs->filename, "wb");
 
-  /* open file for writing */
-  file = fopen(outs->filename, "wb");
   if(!file) {
     warnf(global, "Failed to create the file %s: %s\n", outs->filename,
           strerror(errno));

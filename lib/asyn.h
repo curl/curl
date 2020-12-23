@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -164,7 +164,6 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 #define Curl_resolver_kill(x) Curl_nop_stmt
 #define Curl_resolver_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_resolver_wait_resolv(x,y) CURLE_COULDNT_RESOLVE_HOST
-#define Curl_resolver_getsock(x,y,z) 0
 #define Curl_resolver_duphandle(x,y,z) CURLE_OK
 #define Curl_resolver_init(x,y) CURLE_OK
 #define Curl_resolver_global_init() CURLE_OK

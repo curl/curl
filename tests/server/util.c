@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -119,6 +119,7 @@ void logmsg(const char *msg, ...)
     known_offset = 1;
   }
   sec = epoch_offset + tv.tv_sec;
+  /* !checksrc! disable BANNEDFUNC 1 */
   now = localtime(&sec); /* not thread safe but we don't care */
 
   msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
@@ -166,8 +167,8 @@ void win32_init(void)
   WORD wVersionRequested;
   WSADATA wsaData;
   int err;
-  wVersionRequested = MAKEWORD(USE_WINSOCK, USE_WINSOCK);
 
+  wVersionRequested = MAKEWORD(2, 2);
   err = WSAStartup(wVersionRequested, &wsaData);
 
   if(err != 0) {
@@ -176,8 +177,8 @@ void win32_init(void)
     exit(1);
   }
 
-  if(LOBYTE(wsaData.wVersion) != USE_WINSOCK ||
-     HIBYTE(wsaData.wVersion) != USE_WINSOCK) {
+  if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
+     HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
     WSACleanup();
     perror("Winsock init failed");
     logmsg("No suitable winsock.dll found -- aborting");
@@ -290,7 +291,7 @@ int write_pidfile(const char *filename)
 #endif
   fprintf(pidfile, "%" CURL_FORMAT_CURL_OFF_T "\n", pid);
   fclose(pidfile);
-  logmsg("Wrote pid %ld to %s", pid, filename);
+  logmsg("Wrote pid %" CURL_FORMAT_CURL_OFF_T " to %s", pid, filename);
   return 1; /* success */
 }
 
@@ -475,7 +476,7 @@ static struct timeval tvnow(void)
   struct timespec tsnow;
   if(0 == clock_gettime(CLOCK_MONOTONIC, &tsnow)) {
     now.tv_sec = tsnow.tv_sec;
-    now.tv_usec = tsnow.tv_nsec / 1000;
+    now.tv_usec = (int)(tsnow.tv_nsec / 1000);
   }
   /*
   ** Even when the configure process has truly detected monotonic clock
@@ -681,13 +682,14 @@ static DWORD WINAPI main_window_loop(LPVOID lpParameter)
   ZeroMemory(&wc, sizeof(wc));
   wc.lpfnWndProc = (WNDPROC)main_window_proc;
   wc.hInstance = (HINSTANCE)lpParameter;
-  wc.lpszClassName = "MainWClass";
+  wc.lpszClassName = TEXT("MainWClass");
   if(!RegisterClass(&wc)) {
     perror("RegisterClass failed");
     return (DWORD)-1;
   }
 
-  hidden_main_window = CreateWindowEx(0, "MainWClass", "Recv WM_CLOSE msg",
+  hidden_main_window = CreateWindowEx(0, TEXT("MainWClass"),
+                                      TEXT("Recv WM_CLOSE msg"),
                                       WS_OVERLAPPEDWINDOW,
                                       CW_USEDEFAULT, CW_USEDEFAULT,
                                       CW_USEDEFAULT, CW_USEDEFAULT,

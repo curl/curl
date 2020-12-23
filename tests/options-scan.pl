@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -101,7 +101,7 @@ for my $c (sort @cmdopts) {
         versioncheck($c, $oiv{$c});
     }
     else {
-        print STDERR "$c is in the directory but not in file!\n";
+        print STDERR "--$c is in the option directory but not in $opts!\n";
         $error++;
     }
 }
@@ -116,5 +116,7 @@ for my $v (sort @veropts) {
         $error++;
     }
 }
+
+print STDERR "ok\n" if(!$error);
 
 exit $error;

@@ -73,20 +73,17 @@ http://digest:alot@data.from.server.requiring.digest.hohoho.com/335 --proxy http
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
 GET http://data.from.server.requiring.digest.hohoho.com/335 HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://data.from.server.requiring.digest.hohoho.com/335 HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
 Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/335", response="f61609cd8f5bb205ef4e169b2c5626cb"
-User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
@@ -94,7 +91,7 @@ GET http://data.from.server.requiring.digest.hohoho.com/335 HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
 Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/335", response="f61609cd8f5bb205ef4e169b2c5626cb"
 Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/335", response="08a2e2e684047f4219a38ddc189ac00c"
-User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.3
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

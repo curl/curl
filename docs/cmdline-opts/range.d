@@ -3,6 +3,7 @@ Short: r
 Help: Retrieve only the bytes within RANGE
 Arg: <range>
 Protocols: HTTP FTP SFTP FILE
+Category: http ftp sftp file
 ---
 Retrieve a byte range (i.e. a partial document) from an HTTP/1.1, FTP or SFTP
 server or a local FILE. Ranges can be specified in a number of ways.
@@ -28,7 +29,8 @@ specifies two separate 100-byte ranges(*) (HTTP)
 .RE
 .IP
 (*) = NOTE that this will cause the server to reply with a multipart
-response!
+response, which will be returned as-is by curl! Parsing or otherwise
+transforming this response is the responsibility of the caller.
 
 Only digit characters (0-9) are valid in the 'start' and 'stop' fields of the
 \&'start-stop' range syntax. If a non-digit character is given in the range,

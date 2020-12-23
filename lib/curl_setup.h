@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,8 +38,7 @@
  * Define WIN32 when build target is Win32 API
  */
 
-#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32) && \
-    !defined(__SYMBIAN32__)
+#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32)
 #define WIN32
 #endif
 
@@ -86,10 +85,6 @@
 
 #ifdef __AMIGA__
 #  include "config-amigaos.h"
-#endif
-
-#ifdef __SYMBIAN32__
-#  include "config-symbian.h"
 #endif
 
 #ifdef __OS400__
@@ -243,7 +238,7 @@
  * interface doesn't support IPv4, but supports IPv6, NAT64, and DNS64,
  * performing this task will result in a synthesized IPv6 address.
  */
-#ifdef  __APPLE__
+#if defined(__APPLE__) && !defined(USE_ARES)
 #define USE_RESOLVE_ON_IPS 1
 #endif
 
@@ -282,10 +277,16 @@
 #  include <exec/execbase.h>
 #  include <proto/exec.h>
 #  include <proto/dos.h>
+#  include <unistd.h>
 #  ifdef HAVE_PROTO_BSDSOCKET_H
 #    include <proto/bsdsocket.h> /* ensure bsdsocket.library use */
 #    define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
 #  endif
+/*
+ * In clib2 arpa/inet.h warns that some prototypes may clash
+ * with bsdsocket.library. This avoids the definition of those.
+ */
+#  define __NO_NET_API
 #endif
 
 #include <stdio.h>
@@ -335,8 +336,10 @@
 #  define struct_stat                struct _stati64
 #  define LSEEK_ERROR                (__int64)-1
 #  define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
+#  define access(fname,mode)         curlx_win32_access(fname, mode)
    int curlx_win32_stat(const char *path, struct_stat *buffer);
    FILE *curlx_win32_fopen(const char *filename, const char *mode);
+   int curlx_win32_access(const char *path, int mode);
 #endif
 
 /*
@@ -354,8 +357,10 @@
 #    define stat(fname,stp)            curlx_win32_stat(fname, stp)
 #    define struct_stat                struct _stat
 #    define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
+#    define access(fname,mode)         curlx_win32_access(fname, mode)
      int curlx_win32_stat(const char *path, struct_stat *buffer);
      FILE *curlx_win32_fopen(const char *filename, const char *mode);
+     int curlx_win32_access(const char *path, int mode);
 #  endif
 #  define LSEEK_ERROR                (long)-1
 #endif
@@ -556,14 +561,6 @@
 /* ---------------------------------------------------------------- */
 
 /*
- * When using WINSOCK, TELNET protocol requires WINSOCK2 API.
- */
-
-#if defined(USE_WINSOCK) && (USE_WINSOCK != 2)
-#  define CURL_DISABLE_TELNET 1
-#endif
-
-/*
  * msvc 6.0 does not have struct sockaddr_storage and
  * does not define IPPROTO_ESP in winsock2.h. But both
  * are available if PSDK is properly installed.
@@ -633,18 +630,22 @@ int netware_init(void);
 
 /* Single point where USE_NTLM definition might be defined */
 #if !defined(CURL_DISABLE_NTLM) && !defined(CURL_DISABLE_CRYPTO_AUTH)
-#if defined(USE_OPENSSL) || defined(USE_WINDOWS_SSPI) || \
-    defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) || \
-    defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) || \
-    defined(USE_MBEDTLS)
+#if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                     \
+  defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) ||  \
+  defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
+  (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
 
-#define USE_NTLM
+#define USE_CURL_NTLM_CORE
 
 #  if defined(USE_MBEDTLS)
 /* Get definition of MBEDTLS_MD4_C */
 #  include <mbedtls/md4.h>
 #  endif
 
+#endif
+
+#if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
+#define USE_NTLM
 #endif
 #endif
 
@@ -697,7 +698,7 @@ int netware_init(void);
      defined(HAVE_WINSOCK_H) || \
      defined(HAVE_WINSOCK2_H) || \
      defined(HAVE_WS2TCPIP_H)
-#    error "Winsock and lwIP TCP/IP stack definitions shall not coexist!"
+#    error "WinSock and lwIP TCP/IP stack definitions shall not coexist!"
 #  endif
 #endif
 

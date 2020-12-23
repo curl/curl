@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -92,6 +92,11 @@ typedef struct {
                                   be NULL */
   const char *capath;          /* the built-in default CURLOPT_CAPATH, might
                                   be NULL */
+  /* when 'age' is CURLVERSION_EIGHTH or higher (>= 7.71.0), the members
+     below exist */
+  unsigned int zstd_ver_num; /* Numeric Zstd version
+                                  (MAJOR << 24) | (MINOR << 12) | PATCH */
+  const char *zstd_version; /* human readable string. */
 } curl_version_info_data;
 .fi
 
@@ -121,6 +126,8 @@ more exact timeouts (even on Windows) and less blocking when using the multi
 interface. (added in 7.10.7)
 .IP CURL_VERSION_BROTLI
 supports HTTP Brotli content encoding using libbrotlidec (Added in 7.57.0)
+.IP CURL_VERSION_ZSTD
+supports HTTP zstd content encoding using zstd library (Added in 7.72.0)
 .IP CURL_VERSION_CONV
 libcurl was built with support for character conversions, as provided by the
 CURLOPT_CONV_* callbacks. (Added in 7.15.4)
@@ -136,6 +143,9 @@ to use the current user credentials without the app having to pass them on.
 (Added in 7.38.0)
 .IP CURL_VERSION_GSSNEGOTIATE
 supports HTTP GSS-Negotiate (added in 7.10.6)
+.IP CURL_VERSION_HSTS
+libcurl was built with support for HSTS (HTTP Strict Transport Security)
+(Added in 7.74.0)
 .IP CURL_VERSION_HTTPS_PROXY
 libcurl was built with support for HTTPS-proxy.
 (Added in 7.52.0)
@@ -150,12 +160,15 @@ letters. (Added in 7.12.0)
 .IP CURL_VERSION_IPV6
 supports IPv6
 .IP CURL_VERSION_KERBEROS4
-supports Kerberos V4 (when using FTP)
+supports Kerberos V4 (when using FTP). Legacy bit. Deprecated since 7.33.0.
 .IP CURL_VERSION_KERBEROS5
 supports Kerberos V5 authentication for FTP, IMAP, POP3, SMTP and SOCKSv5 proxy
 (Added in 7.40.0)
 .IP CURL_VERSION_LARGEFILE
 libcurl was built with support for large files. (Added in 7.11.1)
+.IP CURL_VERSION_UNICODE
+libcurl was built with Unicode support on Windows. This makes non-ASCII
+characters work in filenames and options passed to libcurl. (Added in 7.72.0)
 .IP CURL_VERSION_LIBZ
 supports HTTP deflate using libz (Added in 7.10)
 .IP CURL_VERSION_MULTI_SSL
@@ -182,7 +195,8 @@ makes libcurl use Windows-provided functions for Kerberos, NTLM, SPNEGO and
 Digest authentication. It also allows libcurl to use the current user
 credentials without the app having to pass them on. (Added in 7.13.2)
 .IP CURL_VERSION_TLSAUTH_SRP
-libcurl was built with support for TLS-SRP. (Added in 7.21.4)
+libcurl was built with support for TLS-SRP (in one or more of the built-in TLS
+backends). (Added in 7.21.4)
 .IP CURL_VERSION_UNIX_SOCKETS
 libcurl was built with support for Unix domain sockets.
 (Added in 7.40.0)

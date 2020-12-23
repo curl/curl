@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -59,9 +59,9 @@ struct connectdata;
  * Global DNS cache is general badness. Do not use. This will be removed in
  * a future version. Use the share interface instead!
  *
- * Returns a struct curl_hash pointer on success, NULL on failure.
+ * Returns a struct Curl_hash pointer on success, NULL on failure.
  */
-struct curl_hash *Curl_global_host_cache_init(void);
+struct Curl_hash *Curl_global_host_cache_init(void);
 
 struct Curl_dns_entry {
   struct Curl_addrinfo *addr;
@@ -128,7 +128,7 @@ void Curl_resolv_unlock(struct Curl_easy *data,
                         struct Curl_dns_entry *dns);
 
 /* init a new dns cache and return success */
-int Curl_mk_dnscache(struct curl_hash *hash);
+int Curl_mk_dnscache(struct Curl_hash *hash);
 
 /* prune old entries from the DNS cache */
 void Curl_hostcache_prune(struct Curl_easy *data);
@@ -234,7 +234,7 @@ CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
 /*
  * Clean off entries from the cache
  */
-void Curl_hostcache_clean(struct Curl_easy *data, struct curl_hash *hash);
+void Curl_hostcache_clean(struct Curl_easy *data, struct Curl_hash *hash);
 
 /*
  * Populate the cache with specified entries from CURLOPT_RESOLVE.

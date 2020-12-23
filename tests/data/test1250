@@ -39,13 +39,11 @@ http://user:secret@%HOSTIP:%HTTPPORT/1250 --noproxy %HOSTIP --max-time 5
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /1250 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dXNlcjpzZWNyZXQ=
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

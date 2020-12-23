@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -37,7 +37,7 @@ Getopt::Long::GetOptions(
 Pod::Usage::pod2usage() if $help;
 
 my $regex = '\s+(?:(-[^\s]+),\s)?(--[^\s]+)\s*(\<.+?\>)?\s+(.*)';
-my @opts = parse_main_opts('--help', $regex);
+my @opts = parse_main_opts('--help all', $regex);
 
 if ($shell eq 'fish') {
     print "# curl fish completion\n\n";

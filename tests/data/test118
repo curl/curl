@@ -12,6 +12,7 @@ FAILURE
 <servercmd>
 REPLY RETR 314 bluah you f00l!
 REPLY EPSV 314 bluah you f00l!
+REPLY SIZE 500 command not understood
 </servercmd>
 </reply>
 

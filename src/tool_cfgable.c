@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -44,6 +44,7 @@ void config_init(struct OperationConfig *config)
   config->tcp_nodelay = TRUE; /* enabled by default */
   config->happy_eyeballs_timeout_ms = CURL_HET_DEFAULT;
   config->http09_allowed = FALSE;
+  config->ftp_skip_ip = TRUE;
 }
 
 static void free_config_fields(struct OperationConfig *config)
@@ -54,6 +55,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->egd_file);
   Curl_safefree(config->useragent);
   Curl_safefree(config->altsvc);
+  Curl_safefree(config->hsts);
   Curl_safefree(config->cookie);
   Curl_safefree(config->cookiejar);
   Curl_safefree(config->cookiefile);
@@ -89,6 +91,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->mail_auth);
 
   Curl_safefree(config->netrc_file);
+  Curl_safefree(config->output_dir);
 
   urlnode = config->url_list;
   while(urlnode) {
@@ -112,6 +115,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->cert_type);
   Curl_safefree(config->proxy_cert_type);
   Curl_safefree(config->cacert);
+  Curl_safefree(config->login_options);
   Curl_safefree(config->proxy_cacert);
   Curl_safefree(config->capath);
   Curl_safefree(config->proxy_capath);
@@ -164,6 +168,8 @@ static void free_config_fields(struct OperationConfig *config)
 
   Curl_safefree(config->ftp_account);
   Curl_safefree(config->ftp_alternative_to_user);
+
+  Curl_safefree(config->aws_sigv4_provider);
 }
 
 void config_free(struct OperationConfig *config)

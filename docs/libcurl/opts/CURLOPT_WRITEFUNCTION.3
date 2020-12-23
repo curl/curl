@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -52,7 +52,7 @@ means 100K.
 This function may be called with zero bytes data if the transferred file is
 empty.
 
-The data passed to this function will not be zero terminated!
+The data passed to this function will not be null-terminated!
 
 Set the \fIuserdata\fP argument with the \fICURLOPT_WRITEDATA(3)\fP option.
 
@@ -67,6 +67,9 @@ transfer to become paused.  See \fIcurl_easy_pause(3)\fP for further details.
 Set this option to NULL to get the internal default function used instead of
 your callback. The internal default function will write the data to the FILE *
 given with \fICURLOPT_WRITEDATA(3)\fP.
+
+This option doesn't enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
+do that.
 .SH DEFAULT
 libcurl will use 'fwrite' as a callback by default.
 .SH PROTOCOLS
@@ -76,7 +79,7 @@ Support for the CURL_WRITEFUNC_PAUSE return code was added in version 7.18.0.
 .SH RETURN VALUE
 This will return CURLE_OK.
 .SH EXAMPLE
-.NF
+.nf
  struct memory {
    char *response;
    size_t size;
@@ -106,7 +109,7 @@ This will return CURLE_OK.
 
  /* we pass our 'chunk' struct to the callback function */
  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
-.FI
+.fi
 .SH "SEE ALSO"
 .BR CURLOPT_WRITEDATA "(3), " CURLOPT_READFUNCTION "(3), "
 .BR CURLOPT_HEADERFUNCTION "(3), "

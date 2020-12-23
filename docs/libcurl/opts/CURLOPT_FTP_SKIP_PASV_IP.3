@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -35,11 +35,13 @@ address it already uses for the control connection. But it will use the port
 number from the 227-response.
 
 This option thus allows libcurl to work around broken server installations
-that due to NATs, firewalls or incompetence report the wrong IP address back.
+that due to NATs, firewalls or incompetence report the wrong IP address
+back. Setting the option also reduces the risk for various sorts of client
+abuse by malicious servers.
 
 This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
 .SH DEFAULT
-0
+1 since 7.74.0, was 0 before then.
 .SH PROTOCOLS
 FTP
 .SH EXAMPLE

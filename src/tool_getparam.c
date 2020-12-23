@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -108,10 +108,12 @@ static const struct LongShort aliases[]= {
 #endif
   {"*q", "ftp-create-dirs",          ARG_BOOL},
   {"*r", "create-dirs",              ARG_BOOL},
+  {"*R", "create-file-mode",         ARG_STRING},
   {"*s", "max-redirs",               ARG_STRING},
   {"*t", "proxy-ntlm",               ARG_BOOL},
   {"*u", "crlf",                     ARG_BOOL},
   {"*v", "stderr",                   ARG_FILENAME},
+  {"*V", "aws-sigv4",             ARG_STRING},
   {"*w", "interface",                ARG_STRING},
   {"*x", "krb",                      ARG_STRING},
   {"*x", "krb4",                     ARG_STRING},
@@ -219,6 +221,7 @@ static const struct LongShort aliases[]= {
   {"A",  "user-agent",               ARG_STRING},
   {"b",  "cookie",                   ARG_STRING},
   {"ba", "alt-svc",                  ARG_STRING},
+  {"bb", "hsts",                     ARG_STRING},
   {"B",  "use-ascii",                ARG_BOOL},
   {"c",  "cookie-jar",               ARG_STRING},
   {"C",  "continue-at",              ARG_STRING},
@@ -272,6 +275,7 @@ static const struct LongShort aliases[]= {
   {"EB", "socks5-gssapi",            ARG_BOOL},
   {"EC", "etag-save",                ARG_FILENAME},
   {"ED", "etag-compare",             ARG_FILENAME},
+  {"EE", "curves",                   ARG_STRING},
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
   {"fb", "styled-output",            ARG_BOOL},
@@ -303,6 +307,7 @@ static const struct LongShort aliases[]= {
   {"o",  "output",                   ARG_FILENAME},
   {"O",  "remote-name",              ARG_NONE},
   {"Oa", "remote-name-all",          ARG_BOOL},
+  {"Ob", "output-dir",               ARG_STRING},
   {"p",  "proxytunnel",              ARG_BOOL},
   {"P",  "ftp-port",                 ARG_STRING},
   {"q",  "disable",                  ARG_BOOL},
@@ -695,7 +700,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       case 'j': /* --compressed */
         if(toggle &&
-           !(curlinfo->features & (CURL_VERSION_LIBZ | CURL_VERSION_BROTLI)))
+           !(curlinfo->features & (CURL_VERSION_LIBZ |
+                                   CURL_VERSION_BROTLI | CURL_VERSION_ZSTD)))
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         config->encoding = toggle;
         break;
@@ -770,6 +776,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->create_dirs = toggle;
         break;
 
+      case 'R': /* --create-file-mode */
+        err = oct2nummax(&config->create_file_mode, nextarg, 0777);
+        if(err)
+          return err;
+        break;
+
       case 's': /* --max-redirs */
         /* specified max no of redirects (http(s)), this accepts -1 as a
            special condition */
@@ -792,6 +804,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->crlf = toggle;
         break;
 
+      case 'V': /* --aws-sigv4 */
+        config->authtype |= CURLAUTH_AWS_SIGV4;
+        GetStr(&config->aws_sigv4_provider, nextarg);
+        break;
       case 'v': /* --stderr */
         if(strcmp(nextarg, "-")) {
           FILE *newfile = fopen(nextarg, FOPEN_WRITETEXT);
@@ -813,7 +829,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'x': /* --krb */
         /* kerberos level string */
-        if(curlinfo->features & CURL_VERSION_KERBEROS4)
+        if(curlinfo->features & CURL_VERSION_SPNEGO)
           GetStr(&config->krblevel, nextarg);
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
@@ -966,7 +982,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         if(*p) {
           /* if there's anything more than a plain decimal number */
           rc = sscanf(p, " - %6s", lrange);
-          *p = 0; /* zero terminate to make str2unum() work below */
+          *p = 0; /* null-terminate to make str2unum() work below */
         }
         else
           rc = 0;
@@ -1266,11 +1282,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case '4':
       /* IPv4 */
-      config->ip_version = 4;
+      config->ip_version = CURL_IPRESOLVE_V4;
       break;
     case '6':
       /* IPv6 */
-      config->ip_version = 6;
+      config->ip_version = CURL_IPRESOLVE_V6;
       break;
     case 'a':
       /* This makes the FTP sessions use APPE instead of STOR */
@@ -1285,6 +1301,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 'a': /* --alt-svc */
         if(curlinfo->features & CURL_VERSION_ALTSVC)
           GetStr(&config->altsvc, nextarg);
+        else
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
+        break;
+      case 'b': /* --hsts */
+        if(curlinfo->features & CURL_VERSION_HSTS)
+          GetStr(&config->hsts, nextarg);
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
@@ -1517,7 +1539,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         /* Automatic referer requested, this may be combined with a
            set initial one */
         config->autoreferer = TRUE;
-        *ptr = 0; /* zero terminate here */
+        *ptr = 0; /* null-terminate here */
       }
       else
         config->autoreferer = FALSE;
@@ -1724,6 +1746,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         GetStr(&config->etag_compare_file, nextarg);
         break;
 
+      case 'E':
+        GetStr(&config->ssl_ec_curves, nextarg);
+        break;
+
       default: /* unknown flag */
         return PARAM_OPTION_UNKNOWN;
       }
@@ -1770,6 +1796,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
     case 'h': /* h for help */
       if(toggle) {
+        if(nextarg) {
+          global->help_category = strdup(nextarg);
+          if(!global->help_category)
+            return PARAM_NO_MEM;
+        }
         return PARAM_HELP_REQUESTED;
       }
       /* we now actually support --no-help too! */
@@ -1817,6 +1848,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case 'i':
+      if(config->content_disposition) {
+        warnf(global,
+              "--include and --remote-header-name cannot be combined.\n");
+        return PARAM_BAD_USE;
+      }
       config->show_headers = toggle; /* show the headers as well in the
                                         general output stream */
       break;
@@ -1903,6 +1939,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case 'O': /* --remote-name */
       if(subletter == 'a') { /* --remote-name-all */
         config->default_node_flags = toggle?GETOUT_USEREMOTE:0;
+        break;
+      }
+      else if(subletter == 'b') { /* --output-dir */
+        GetStr(&config->output_dir, nextarg);
         break;
       }
       /* FALLTHROUGH */
@@ -2302,6 +2342,9 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       result = getparameter("--url", orig_opt, &used, global,
                             config);
     }
+
+    if(!result)
+      curlx_unicodefree(orig_opt);
   }
 
   if(result && result != PARAM_HELP_REQUESTED &&

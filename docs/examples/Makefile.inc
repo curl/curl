@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -36,7 +36,7 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   ftpuploadresume sslbackend postit2-formadd multi-formadd                 \
   shared-connection-cache sftpuploadresume http2-pushinmemory parseurl     \
   urlapi imap-authzid pop3-authzid smtp-authzid http3 altsvc               \
-  http3-present multi-poll
+  http3-present multi-poll httpput-postfields
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.

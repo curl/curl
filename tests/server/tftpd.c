@@ -821,11 +821,6 @@ int main(int argc, char **argv)
     sclose(peer);
     peer = CURL_SOCKET_BAD;
 
-    if(test.ofile > 0) {
-      close(test.ofile);
-      test.ofile = 0;
-    }
-
     if(got_exit_signal)
       break;
 
@@ -1304,6 +1299,11 @@ send_ack:
     }
   } while(size == SEGSIZE);
   write_behind(test, pf->f_convert);
+  /* close the output file as early as possible after upload completion */
+  if(test->ofile > 0) {
+    close(test->ofile);
+    test->ofile = 0;
+  }
 
   rap->th_opcode = htons((unsigned short)opcode_ACK);  /* send the "final"
                                                           ack */
@@ -1326,6 +1326,11 @@ send_ack:
     (void) swrite(peer, &ackbuf.storage[0], 4);  /* resend final ack */
   }
 abort:
+  /* make sure the output file is closed in case of abort */
+  if(test->ofile > 0) {
+    close(test->ofile);
+    test->ofile = 0;
+  }
   return;
 }
 

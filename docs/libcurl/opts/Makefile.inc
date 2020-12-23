@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -35,6 +35,7 @@ man_MANS =                                      \
   CURLINFO_CONTENT_LENGTH_UPLOAD_T.3            \
   CURLINFO_CONTENT_TYPE.3                       \
   CURLINFO_COOKIELIST.3                         \
+  CURLINFO_EFFECTIVE_METHOD.3                   \
   CURLINFO_EFFECTIVE_URL.3                      \
   CURLINFO_FILETIME.3                           \
   CURLINFO_FILETIME_T.3                         \
@@ -56,8 +57,9 @@ man_MANS =                                      \
   CURLINFO_PRIMARY_PORT.3                       \
   CURLINFO_PRIVATE.3                            \
   CURLINFO_PROTOCOL.3                           \
-  CURLINFO_PROXYAUTH_AVAIL.3                    \
+  CURLINFO_PROXY_ERROR.3                        \
   CURLINFO_PROXY_SSL_VERIFYRESULT.3             \
+  CURLINFO_PROXYAUTH_AVAIL.3                    \
   CURLINFO_REDIRECT_COUNT.3                     \
   CURLINFO_REDIRECT_TIME.3                      \
   CURLINFO_REDIRECT_TIME_T.3                    \
@@ -178,6 +180,12 @@ man_MANS =                                      \
   CURLOPT_HEADERDATA.3                          \
   CURLOPT_HEADERFUNCTION.3                      \
   CURLOPT_HEADEROPT.3                           \
+  CURLOPT_HSTS.3                                \
+  CURLOPT_HSTSREADDATA.3                        \
+  CURLOPT_HSTSREADFUNCTION.3                    \
+  CURLOPT_HSTSWRITEDATA.3                       \
+  CURLOPT_HSTSWRITEFUNCTION.3                   \
+  CURLOPT_HSTS_CTRL.3                           \
   CURLOPT_HTTP09_ALLOWED.3                      \
   CURLOPT_HTTP200ALIASES.3                      \
   CURLOPT_HTTPAUTH.3                            \
@@ -329,6 +337,7 @@ man_MANS =                                      \
   CURLOPT_SSL_CIPHER_LIST.3                     \
   CURLOPT_SSL_CTX_DATA.3                        \
   CURLOPT_SSL_CTX_FUNCTION.3                    \
+  CURLOPT_SSL_EC_CURVES.3			\
   CURLOPT_SSL_ENABLE_ALPN.3                     \
   CURLOPT_SSL_ENABLE_NPN.3                      \
   CURLOPT_SSL_FALSESTART.3                      \
@@ -373,6 +382,7 @@ man_MANS =                                      \
   CURLOPT_USERNAME.3                            \
   CURLOPT_USERPWD.3                             \
   CURLOPT_USE_SSL.3                             \
+  CURLOPT_AWS_SIGV4.3                           \
   CURLOPT_VERBOSE.3                             \
   CURLOPT_WILDCARDMATCH.3                       \
   CURLOPT_WRITEDATA.3                           \

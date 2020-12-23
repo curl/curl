@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -319,6 +319,9 @@ curl_easy_strerror(CURLcode error)
 
   case CURLE_QUIC_CONNECT_ERROR:
     return "QUIC connection error";
+
+ case CURLE_PROXY:
+    return "proxy handshake error";
 
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
@@ -652,34 +655,27 @@ static const char *
 get_winapi_error(int err, char *buf, size_t buflen)
 {
   char *p;
+  wchar_t wbuf[256];
 
   if(!buflen)
     return NULL;
 
   *buf = '\0';
+  *wbuf = L'\0';
 
-#ifdef _WIN32_WCE
-  {
-    wchar_t wbuf[256];
-    wbuf[0] = L'\0';
-
-    if(FormatMessage((FORMAT_MESSAGE_FROM_SYSTEM |
-                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
-                     LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(wchar_t), NULL)) {
-      size_t written = wcstombs(buf, wbuf, buflen - 1);
-      if(written != (size_t)-1)
-        buf[written] = '\0';
-      else
-        *buf = '\0';
-    }
+  /* We return the local codepage version of the error string because if it is
+     output to the user's terminal it will likely be with functions which
+     expect the local codepage (eg fprintf, failf, infof).
+     FormatMessageW -> wcstombs is used for Windows CE compatibility. */
+  if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
+                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
+                    LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(wchar_t), NULL)) {
+    size_t written = wcstombs(buf, wbuf, buflen - 1);
+    if(written != (size_t)-1)
+      buf[written] = '\0';
+    else
+      *buf = '\0';
   }
-#else
-  if(!FormatMessageA((FORMAT_MESSAGE_FROM_SYSTEM |
-                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
-                     LANG_NEUTRAL, buf, (DWORD)buflen, NULL)) {
-    *buf = '\0';
-  }
-#endif
 
   /* Truncate multiple lines */
   p = strchr(buf, '\n');
@@ -785,7 +781,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   }
 #else
   {
-    char *msg = strerror(err);
+    const char *msg = strerror(err);
     if(msg)
       strncpy(buf, msg, max);
     else
@@ -795,7 +791,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
 
 #endif /* end of not Windows */
 
-  buf[max] = '\0'; /* make sure the string is zero terminated */
+  buf[max] = '\0'; /* make sure the string is null-terminated */
 
   /* strip trailing '\r\n' or '\n'. */
   p = strrchr(buf, '\n');

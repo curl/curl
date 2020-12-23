@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -27,7 +27,7 @@ EXTRA_DIST = Makefile.m32 config-win32.h config-win32ce.h           \
  config-plan9.h config-riscos.h config-mac.h curl_config.h.in       \
  makefile.dj config-dos.h libcurl.plist libcurl.rc config-amigaos.h \
  makefile.amiga Makefile.netware nwlib.c nwos.c config-win32ce.h    \
- config-os400.h setup-os400.h config-symbian.h Makefile.Watcom      \
+ config-os400.h setup-os400.h                                       \
  config-tpf.h mk-ca-bundle.pl mk-ca-bundle.vbs $(CMAKE_DIST)        \
  firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl    \
  setup-win32.h
@@ -66,7 +66,7 @@ endif
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-VERSIONINFO=-version-info 10:0:6
+VERSIONINFO=-version-info 11:0:7
 # This flag accepts an argument of the form current[:revision[:age]]. So,
 # passing -version-info 3:12:1 sets current to 3, revision to 12, and age to
 # 1.
@@ -153,3 +153,6 @@ TIDY:=clang-tidy
 
 tidy:
 	$(TIDY) $(CSOURCES) $(TIDYFLAGS) -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H
+
+optiontable:
+	perl optiontable.pl < $(top_srcdir)/include/curl/curl.h > easyoptions.c

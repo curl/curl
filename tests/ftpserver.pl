@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -83,6 +83,7 @@ my $proto = 'ftp';  # default server protocol
 my $srcdir;         # directory where ftpserver.pl is located
 my $srvrname;       # server name for presentation purposes
 my $cwd_testno;     # test case numbers extracted from CWD command
+my $testno = 0;     # test case number (read from ftpserver.cmd)
 my $path   = '.';
 my $logdir = $path .'/log';
 
@@ -144,6 +145,7 @@ my $nodataconn;    # set if ftp srvr doesn't establish or accepts data channel
 my $nodataconn425; # set if ftp srvr doesn't establish data ch and replies 425
 my $nodataconn421; # set if ftp srvr doesn't establish data ch and replies 421
 my $nodataconn150; # set if ftp srvr doesn't establish data ch and replies 150
+my $storeresp;
 my @capabilities;  # set if server supports capability commands
 my @auth_mechs;    # set if server supports authentication commands
 my %fulltextreply; #
@@ -449,16 +451,13 @@ sub startsf {
 # Returns the given test's reply data
 #
 sub getreplydata {
-    my ($testno) = @_;
+    my ($num) = @_;
     my $testpart = "";
 
-    $testno =~ s/^([^0-9]*)//;
-    if($testno > 10000) {
-       $testpart = $testno % 10000;
-       $testno = int($testno / 10000);
+    $num =~ s/^([^0-9]*)//;
+    if($num > 10000) {
+       $testpart = $num % 10000;
     }
-
-    loadtest("$srcdir/data/test$testno");
 
     my @data = getpart("reply", "data$testpart");
     if((!@data) && ($testpart ne "")) {
@@ -835,13 +834,8 @@ sub MAIL_smtp {
             }
         }
 
-        # Validate the from address (only <> and a valid email address inside
-        # <> are allowed, such as <user@example.com>)
-        if (($from eq "<>") ||
-            (!$smtputf8 && $from =~
-              /^<([a-zA-Z0-9._%+-]+)\@(([a-zA-Z0-9-]+)\.)+([a-zA-Z]{2,4})>$/) ||
-            ($smtputf8 && $from =~
-              /^<([a-zA-Z0-9\x{80}-\x{ff}._%+-]+)\@(([a-zA-Z0-9\x{80}-\x{ff}-]+)\.)+([a-zA-Z]{2,4})>$/)) {
+        # this server doesn't "validate" MAIL FROM addresses
+        if (length($from)) {
             my @found;
             my $valid = 1;
 
@@ -2098,7 +2092,8 @@ my @ftpdir=("total 20\r\n",
     logmsg "pass LIST data on data connection\n";
 
     if($cwd_testno) {
-        loadtest("$srcdir/data/test$cwd_testno");
+        loadtest("$logdir/test$cwd_testno") ||
+            loadtest("$srcdir/data/test$cwd_testno");
 
         my @data = getpart("reply", "data");
         for(@data) {
@@ -2161,7 +2156,8 @@ sub MDTM_ftp {
         $testno = int($testno / 10000);
     }
 
-    loadtest("$srcdir/data/test$testno");
+    loadtest("$logdir/test$testno") ||
+        loadtest("$srcdir/data/test$testno");
 
     my @data = getpart("reply", "mdtm");
 
@@ -2214,7 +2210,8 @@ sub SIZE_ftp {
         $testno = int($testno / 10000);
     }
 
-    loadtest("$srcdir/data/test$testno");
+    loadtest("$logdir/test$testno") ||
+        loadtest("$srcdir/data/test$testno");
 
     my @data = getpart("reply", "size");
 
@@ -2303,7 +2300,8 @@ sub RETR_ftp {
         $testno = int($testno / 10000);
     }
 
-    loadtest("$srcdir/data/test$testno");
+    loadtest("$logdir/test$testno") ||
+        loadtest("$srcdir/data/test$testno");
 
     my @data = getpart("reply", "data$testpart");
 
@@ -2416,6 +2414,10 @@ sub STOR_ftp {
             logmsg "No support for: $line";
             last;
         }
+        if($storeresp) {
+            # abort early
+            last;
+        }
     }
     if($nosave) {
         print FILE "$ulsize bytes would've been stored here\n";
@@ -2423,7 +2425,12 @@ sub STOR_ftp {
     close(FILE);
     close_dataconn($disc);
     logmsg "received $ulsize bytes upload\n";
-    sendcontrol "226 File transfer complete\r\n";
+    if($storeresp) {
+        sendcontrol "$storeresp\r\n";
+    }
+    else {
+        sendcontrol "226 File transfer complete\r\n";
+    }
     return 0;
 }
 
@@ -2787,6 +2794,7 @@ sub customize {
     $nodataconn425 = 0; # default is to not send 425 without data channel
     $nodataconn421 = 0; # default is to not send 421 without data channel
     $nodataconn150 = 0; # default is to not send 150 without data channel
+    $storeresp = "";    # send as ultimate STOR response
     @capabilities = (); # default is to not support capability commands
     @auth_mechs = ();   # default is to not support authentication commands
     %fulltextreply = ();#
@@ -2869,6 +2877,10 @@ sub customize {
             logmsg "FTPD: instructed to use NODATACONN\n";
             $nodataconn=1;
         }
+        elsif($_ =~ /^STOR (.*)/) {
+            $storeresp=$1;
+            logmsg "FTPD: instructed to use respond to STOR with '$storeresp'\n";
+        }
         elsif($_ =~ /CAPA (.*)/) {
             logmsg "FTPD: instructed to support CAPABILITY command\n";
             @capabilities = split(/ (?!(?:[^" ]|[^"] [^"])+")/, $1);
@@ -2885,6 +2897,10 @@ sub customize {
             # uploading insanely huge amounts
             $nosave = 1;
             logmsg "FTPD: NOSAVE prevents saving of uploaded data\n";
+        }
+        elsif($_ =~ /^Testnum (\d+)/){
+            $testno = $1;
+            logmsg "FTPD: run test case number: $testno\n";
         }
     }
     close(CUSTOM);
@@ -3074,6 +3090,8 @@ while(1) {
     $| = 1;
 
     &customize(); # read test control instructions
+    loadtest("$logdir/test$testno") ||
+        loadtest("$srcdir/data/test$testno");
 
     my $welcome = $commandreply{"welcome"};
     if(!$welcome) {

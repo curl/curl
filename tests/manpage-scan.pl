@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2016 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2016 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -130,7 +130,7 @@ scanmanpage("$root/docs/libcurl/curl_easy_setopt.3", @curlopt);
 scanmanpage("$root/docs/libcurl/curl_easy_getinfo.3", @curlinfo);
 scanmanpage("$root/docs/libcurl/curl_multi_setopt.3", @curlmopt);
 
-# using this hash array, we can whitelist specific options
+# using this hash array, we can skip specific options
 my %opts = (
     # pretend these --no options exists in tool_getparam.c
     '--no-alpn' => 1,
@@ -288,4 +288,4 @@ foreach my $o (keys %opts) {
     }
 }
 
-exit $errors;
+print STDERR "$errors\n";

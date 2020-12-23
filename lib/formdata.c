@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -602,7 +602,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         /* Note that there's small risk that form->name is NULL here if the
            app passed in a bad combo, so we better check for that first. */
         if(form->name) {
-          /* copy name (without strdup; possibly not nul-terminated) */
+          /* copy name (without strdup; possibly not null-terminated) */
           form->name = Curl_memdup(form->name, form->namelength?
                                    form->namelength:
                                    strlen(form->name) + 1);
@@ -771,7 +771,7 @@ void curl_formfree(struct curl_httppost *form)
 }
 
 
-/* Set mime part name, taking care of non nul-terminated name string. */
+/* Set mime part name, taking care of non null-terminated name string. */
 static CURLcode setname(curl_mimepart *part, const char *name, size_t len)
 {
   char *zname;

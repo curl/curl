@@ -2,6 +2,7 @@ Long: oauth2-bearer
 Help: OAuth 2 Bearer Token
 Arg: <token>
 Protocols: IMAP POP3 SMTP HTTP
+Category: auth
 ---
 Specify the Bearer Token for OAUTH 2.0 server authentication. The Bearer Token
 is used in conjunction with the user name which can be specified as part of

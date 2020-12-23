@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -227,11 +227,11 @@ bool progress_meter(struct GlobalConfig *global,
     }
     if(dlknown && all_dltotal)
       /* TODO: handle integer overflow */
-      msnprintf(dlpercen, sizeof(dlpercen), "%3d",
+      msnprintf(dlpercen, sizeof(dlpercen), "%3" CURL_FORMAT_CURL_OFF_T,
                 all_dlnow * 100 / all_dltotal);
     if(ulknown && all_ultotal)
       /* TODO: handle integer overflow */
-      msnprintf(ulpercen, sizeof(ulpercen), "%3d",
+      msnprintf(ulpercen, sizeof(ulpercen), "%3" CURL_FORMAT_CURL_OFF_T,
                 all_ulnow * 100 / all_ultotal);
 
     /* get the transfer speed, the higher of the two */

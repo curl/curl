@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -493,7 +493,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     gss_release_buffer(&gss_status, &gss_recv_token);
 
     if(gss_w_token.length != 1) {
-      failf(data, "Invalid GSS-API encryption response length (%d).",
+      failf(data, "Invalid GSS-API encryption response length (%zu).",
             gss_w_token.length);
       gss_release_buffer(&gss_status, &gss_w_token);
       gss_delete_sec_context(&gss_status, &gss_context, NULL);
@@ -505,7 +505,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   }
   else {
     if(gss_recv_token.length != 1) {
-      failf(data, "Invalid GSS-API encryption response length (%d).",
+      failf(data, "Invalid GSS-API encryption response length (%zu).",
             gss_recv_token.length);
       gss_release_buffer(&gss_status, &gss_recv_token);
       gss_delete_sec_context(&gss_status, &gss_context, NULL);
