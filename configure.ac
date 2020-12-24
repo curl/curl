@@ -149,6 +149,7 @@ dnl initialize all the info variables
  curl_brotli_msg="no      (--with-brotli)"
    curl_zstd_msg="no      (--with-zstd)"
     curl_gss_msg="no      (--with-gssapi)"
+  curl_gsasl_msg="no      (--with-gsasl)"
 curl_tls_srp_msg="no      (--enable-tls-srp)"
     curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
    curl_ipv6_msg="no      (--enable-ipv6)"
@@ -2895,6 +2896,28 @@ if test $with_libpsl != "no"; then
 fi
 AM_CONDITIONAL([USE_LIBPSL], [test "$curl_psl_msg" = "enabled"])
 
+
+dnl **********************************************************************
+dnl Check for libgsasl
+dnl **********************************************************************
+
+AC_ARG_WITH(libgsasl,
+           AS_HELP_STRING([--without-libgsasl],
+           [disable libgsasl support for SCRAM]),
+           with_libgsasl=$withval,
+           with_libgsasl=yes)
+if test $with_libgsasl != "no"; then
+  AC_SEARCH_LIBS(gsasl_init, gsasl,
+    [curl_gsasl_msg="enabled";
+     AC_DEFINE([USE_GSASL], [1], [GSASL support enabled])
+     ],
+    [curl_gsasl_msg="no      (libgsasl not found)";
+     AC_MSG_WARN([libgsasl was not found])
+     ]
+  )
+fi
+AM_CONDITIONAL([USE_GSASL], [test "$curl_gsasl_msg" = "enabled"])
+
 dnl **********************************************************************
 dnl Check for libmetalink
 dnl **********************************************************************
@@ -5103,6 +5126,10 @@ if test "x$curl_psl_msg" = "xenabled"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES PSL"
 fi
 
+if test "x$curl_gsasl_msg" = "xenabled"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES GSASL"
+fi
+
 if test "x$enable_altsvc" = "xyes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES alt-svc"
 fi
@@ -5337,6 +5364,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   brotli:           ${curl_brotli_msg}
   zstd:             ${curl_zstd_msg}
   GSS-API:          ${curl_gss_msg}
+  GSASL:            ${curl_gsasl_msg}
   TLS-SRP:          ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}
   IPv6:             ${curl_ipv6_msg}
