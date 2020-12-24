@@ -608,7 +608,7 @@ wolfssl_connect_step2(struct connectdata *conn,
      * as also mismatching CN fields */
     else if(DOMAIN_NAME_MISMATCH == detail) {
 #if 1
-      failf(data, "\tsubject alt name(s) or common name do not match \"%s\"\n",
+      failf(data, "\tsubject alt name(s) or common name do not match \"%s\"",
             dispname);
       return CURLE_PEER_FAILED_VERIFICATION;
 #else
@@ -635,7 +635,7 @@ wolfssl_connect_step2(struct connectdata *conn,
 #if LIBWOLFSSL_VERSION_HEX >= 0x02007000 /* 2.7.0 */
     else if(ASN_NO_SIGNER_E == detail) {
       if(SSL_CONN_CONFIG(verifypeer)) {
-        failf(data, "\tCA signer not available for verification\n");
+        failf(data, "\tCA signer not available for verification");
         return CURLE_SSL_CACERT_BADFILE;
       }
       else {
