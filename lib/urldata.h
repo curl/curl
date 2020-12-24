@@ -371,6 +371,15 @@ struct kerberos5data {
 };
 #endif
 
+/* Struct used for SCRAM-SHA-1 authentication */
+#ifdef USE_GSASL
+#include <gsasl.h>
+struct gsasldata {
+  Gsasl *ctx;
+  Gsasl_session *client;
+};
+#endif
+
 /* Struct used for NTLM challenge-response authentication */
 #if defined(USE_NTLM)
 struct ntlmdata {
@@ -1059,6 +1068,10 @@ struct connectdata {
   /*************** Request - specific items ************/
 #if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
   CtxtHandle *sslContext;
+#endif
+
+#ifdef USE_GSASL
+  struct gsasldata gsasl;
 #endif
 
 #if defined(USE_NTLM)

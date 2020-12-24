@@ -23,6 +23,8 @@
  * RFC2831 DIGEST-MD5 authentication
  * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
+ * RFC5802 SCRAM-SHA-1 authentication
+ * RFC7677 SCRAM-SHA-256 authentication
  * RFC6749 OAuth 2.0 Authorization Framework
  * RFC7628 A Set of SASL Mechanisms for OAuth
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
@@ -67,6 +69,8 @@ static const struct {
   { "NTLM",         4,  SASL_MECH_NTLM },
   { "XOAUTH2",      7,  SASL_MECH_XOAUTH2 },
   { "OAUTHBEARER",  11, SASL_MECH_OAUTHBEARER },
+  { "SCRAM-SHA-1",  11, SASL_MECH_SCRAM_SHA_1 },
+  { "SCRAM-SHA-256",13, SASL_MECH_SCRAM_SHA_256 },
   { ZERO_NULL,      0,  0 }
 };
 
@@ -87,6 +91,13 @@ void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
   /* Cleanup the gssapi structure */
   if(authused == SASL_MECH_GSSAPI) {
     Curl_auth_cleanup_gssapi(&conn->krb5);
+  }
+#endif
+
+#if defined(USE_GSASL)
+  /* Cleanup the GSASL structure */
+  if(authused & (SASL_MECH_SCRAM_SHA_1 | SASL_MECH_SCRAM_SHA_256)) {
+    Curl_auth_gsasl_cleanup(&conn->gsasl);
   }
 #endif
 
@@ -215,6 +226,7 @@ static void state(struct SASL *sasl, struct Curl_easy *data,
     "GSSAPI_NO_DATA",
     "OAUTH2",
     "OAUTH2_RESP",
+    "GSASL",
     "CANCEL",
     "FINAL",
     /* LAST */
@@ -313,6 +325,37 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
                                                       sasl->mutual_auth,
                                                       NULL, &conn->krb5,
                                                       &resp, &len);
+    }
+    else
+#endif
+#ifdef USE_GSASL
+    if((enabledmechs & SASL_MECH_SCRAM_SHA_256) &&
+       Curl_auth_gsasl_is_supported(data, SASL_MECH_STRING_SCRAM_SHA_256,
+                                    &conn->gsasl)) {
+      mech = SASL_MECH_STRING_SCRAM_SHA_256;
+      sasl->authused = SASL_MECH_SCRAM_SHA_256;
+      state1 = SASL_GSASL;
+      state2 = SASL_GSASL;
+
+      result = Curl_auth_gsasl_start(data, conn->user,
+                                     conn->passwd, &conn->gsasl);
+      if(result == CURLE_OK && (force_ir || data->set.sasl_ir))
+        result = Curl_auth_gsasl_token(data, NULL, &conn->gsasl,
+                                       &resp, &len);
+    }
+    else if((enabledmechs & SASL_MECH_SCRAM_SHA_1) &&
+            Curl_auth_gsasl_is_supported(data, SASL_MECH_STRING_SCRAM_SHA_1,
+                                         &conn->gsasl)) {
+      mech = SASL_MECH_STRING_SCRAM_SHA_1;
+      sasl->authused = SASL_MECH_SCRAM_SHA_1;
+      state1 = SASL_GSASL;
+      state2 = SASL_GSASL;
+
+      result = Curl_auth_gsasl_start(data, conn->user,
+                                     conn->passwd, &conn->gsasl);
+      if(result == CURLE_OK && (force_ir || data->set.sasl_ir))
+        result = Curl_auth_gsasl_token(data, NULL, &conn->gsasl,
+                                       &resp, &len);
     }
     else
 #endif
@@ -481,6 +524,15 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     result = Curl_auth_create_external_message(data, conn->user, &resp, &len);
     break;
 
+#ifdef USE_GSASL
+  case SASL_GSASL:
+    sasl->params->getmessage(data->state.buffer, &serverdata);
+    result = Curl_auth_gsasl_token(data, serverdata, &conn->gsasl,
+                                   &resp, &len);
+    if(len > 0)
+      newstate = SASL_GSASL;
+    break;
+#endif
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   case SASL_CRAMMD5:
     sasl->params->getmessage(data->state.buffer, &serverdata);

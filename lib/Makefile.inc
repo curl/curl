@@ -25,6 +25,7 @@ LIB_VAUTH_CFILES =      \
   vauth/cram.c          \
   vauth/digest.c        \
   vauth/digest_sspi.c   \
+  vauth/gsasl.c         \
   vauth/krb5_gssapi.c   \
   vauth/krb5_sspi.c     \
   vauth/ntlm.c          \
