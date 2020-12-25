@@ -1,0 +1,52 @@
+name: CI_cmake
+
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+    - master
+    - '*/ci'
+  pull_request:
+    branches:
+    - master
+
+jobs:
+
+  windows_msys:
+    name:  windows_msys cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
+    runs-on: windows-latest
+    env: ${{ matrix.compiler }}
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler:
+        - CC: clang
+        - CC: gcc
+          CFLAGS: "-Wno-error=undef -Wno-error=conversion"
+        build:
+        - name: OpenSSL
+          generate: -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_USE_OPENSSL=on
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          git
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-ninja
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-clang
+          mingw-w64-x86_64-perl
+          mingw-w64-x86_64-openssl
+          mingw-w64-x86_64-nghttp2
+
+    - run: echo "D:/a/_temp/msys/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    - uses: actions/checkout@v2
+
+    - run: cmake -S. -Bbuild -GNinja -DBUILD_TESTING=off -DCURL_WERROR=ON -DPICKY_COMPILER=ON ${{ matrix.build.generate }}
+      name: CMake generate
+
+    - run: cmake --build build --parallel
+      name: CMake build
