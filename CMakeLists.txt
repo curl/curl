@@ -39,13 +39,13 @@
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
 cmake_minimum_required(VERSION 3.2...3.16 FATAL_ERROR)
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 include(Utilities)
 include(Macros)
 include(CMakeDependentOption)
 include(CheckCCompilerFlag)
 
-project(CURL C)
+project(CURL LANGUAGES C)
 
 file(STRINGS ${CURL_SOURCE_DIR}/include/curl/curlver.h CURL_VERSION_H_CONTENTS REGEX "#define LIBCURL_VERSION( |_NUM )")
 string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*"
