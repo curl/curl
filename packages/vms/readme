@@ -168,8 +168,8 @@ in other ways.  Product files (.EXE, .H, .LIS, .MAP, .OBJ, .OLB, ...)
 should be produced in an architecture-specific subdirectory under this
 directory ([.ALPHA], [.IA64], [.VAX]).
 
-The file curl_gnv_build_steps.txt contains information on buildling using
-the GNV tool kit, building a shared libcurl, and producting a PCSI kit for
+The file curl_gnv_build_steps.txt contains information on building using
+the GNV tool kit, building a shared libcurl, and producing a PCSI kit for
 distribution.  The curl_gnv_build_steps.text is included in the release
 notes file of the PCSI kit.
 

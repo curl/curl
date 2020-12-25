@@ -611,7 +611,7 @@
 
  The alt-svc: header provides a set of alternative services for curl to use
  instead of the original. If the first attempted one fails, it should try the
- next etc and if all alterantives fail go back to the original.
+ next etc and if all alternatives fail go back to the original.
 
  See https://github.com/curl/curl/issues/4908
 
