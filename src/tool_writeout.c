@@ -141,7 +141,8 @@ void ourWriteOut(CURL *curl, struct per_transfer *per, const char *writeinfo,
                       curl_easy_strerror(result), stream);
                 break;
               case VAR_INPUT_URL:
-                fputs(per->this_url, stream);
+                if(per->this_url)
+                  fputs(per->this_url, stream);
                 break;
               case VAR_URLNUM:
                 fprintf(stream, "%u", per->urlnum);
