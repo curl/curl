@@ -1384,7 +1384,7 @@ FAQ
 
 6. License Issues
 
-  curl and libcurl are released under a MIT/X derivate license. The license is
+  curl and libcurl are released under a MIT/X derivative license. The license is
   very liberal and should not impose a problem for your project. This section
   is just a brief summary for the cases we get the most questions. (Parts of
   this section was much enhanced by Bjorn Reese.)
@@ -1399,7 +1399,7 @@ FAQ
 
   Yes!
 
-  Since libcurl may be distributed under the MIT/X derivate license, it can be
+  Since libcurl may be distributed under the MIT/X derivative license, it can be
   used together with GPL in any software.
 
   6.2 I have a closed-source program, can I use the libcurl library?
@@ -1424,7 +1424,7 @@ FAQ
 
   Yes!
 
-  The MIT/X derivate license practically allows you to do almost anything with
+  The MIT/X derivative license practically allows you to do almost anything with
   the sources, on the condition that the copyright texts in the sources are
   left intact.
 
