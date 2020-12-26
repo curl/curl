@@ -75,17 +75,21 @@
                                   (1<<CURL_LOCK_DATA_SSL_SESSION)))
 
 #define CLONE_STRING(var)                    \
-  if(source->var) {                          \
-    dest->var = strdup(source->var);         \
-    if(!dest->var)                           \
-      return FALSE;                          \
-  }                                          \
-  else                                       \
-    dest->var = NULL;
+  do {                                       \
+    if(source->var) {                        \
+      dest->var = strdup(source->var);       \
+      if(!dest->var)                         \
+        return FALSE;                        \
+    }                                        \
+    else                                     \
+      dest->var = NULL;                      \
+  } while(0)
 
-#define CLONE_BLOB(var)                         \
-  if(blobdup(&dest->var, source->var))         \
-    return FALSE;
+#define CLONE_BLOB(var)                        \
+  do {                                         \
+    if(blobdup(&dest->var, source->var))       \
+      return FALSE;                            \
+  } while(0)
 
 static CURLcode blobdup(struct curl_blob **dest,
                         struct curl_blob *src)

@@ -362,10 +362,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   }
   else
 #endif
-    if(config->synthetic_error) {
-      ;
-    }
-    else if(result && global->showerror) {
+    if(!config->synthetic_error && result && global->showerror) {
       fprintf(global->errors, "curl: (%d) %s\n", result,
               (per->errorbuffer[0]) ? per->errorbuffer :
               curl_easy_strerror(result));

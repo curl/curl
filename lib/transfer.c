@@ -1232,10 +1232,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   }
 
   k->now = Curl_now();
-  if(didwhat) {
-    ;
-  }
-  else {
+  if(!didwhat) {
     /* no read no write, this is a timeout? */
     if(k->exp100 == EXP100_AWAITING_CONTINUE) {
       /* This should allow some time for the header to arrive, but only a

@@ -1151,10 +1151,7 @@ ConnectionExists(struct Curl_easy *data,
       if(bundle->multiuse == BUNDLE_MULTIPLEX)
         multiplexed = CONN_INUSE(check);
 
-      if(canmultiplex) {
-        ;
-      }
-      else {
+      if(!canmultiplex) {
         if(multiplexed) {
           /* can only happen within multi handles, and means that another easy
              handle is using this connection */

@@ -49,17 +49,24 @@ struct conncache {
 #ifdef CURLDEBUG
 /* the debug versions of these macros make extra certain that the lock is
    never doubly locked or unlocked */
-#define CONNCACHE_LOCK(x) if((x)->share) {                              \
-    Curl_share_lock((x), CURL_LOCK_DATA_CONNECT, CURL_LOCK_ACCESS_SINGLE); \
-    DEBUGASSERT(!(x)->state.conncache_lock);                            \
-    (x)->state.conncache_lock = TRUE;                                   \
-  }
+#define CONNCACHE_LOCK(x)                                               \
+  do {                                                                  \
+    if((x)->share) {                                                    \
+      Curl_share_lock((x), CURL_LOCK_DATA_CONNECT,                      \
+                      CURL_LOCK_ACCESS_SINGLE);                         \
+      DEBUGASSERT(!(x)->state.conncache_lock);                          \
+      (x)->state.conncache_lock = TRUE;                                 \
+    }                                                                   \
+  } while(0)
 
-#define CONNCACHE_UNLOCK(x) if((x)->share) {                            \
-    DEBUGASSERT((x)->state.conncache_lock);                             \
-    (x)->state.conncache_lock = FALSE;                                  \
-    Curl_share_unlock((x), CURL_LOCK_DATA_CONNECT);                     \
-  }
+#define CONNCACHE_UNLOCK(x)                                             \
+  do {                                                                  \
+    if((x)->share) {                                                    \
+      DEBUGASSERT((x)->state.conncache_lock);                           \
+      (x)->state.conncache_lock = FALSE;                                \
+      Curl_share_unlock((x), CURL_LOCK_DATA_CONNECT);                   \
+    }                                                                   \
+  } while(0)
 #else
 #define CONNCACHE_LOCK(x) if((x)->share)                                \
     Curl_share_lock((x), CURL_LOCK_DATA_CONNECT, CURL_LOCK_ACCESS_SINGLE)

@@ -124,13 +124,17 @@ const struct Curl_handler Curl_handler_smbs = {
 
 /* Append a string to an SMB message */
 #define MSGCAT(str)                             \
-  strcpy(p, (str));                             \
-  p += strlen(str);
+  do {                                          \
+    strcpy(p, (str));                           \
+    p += strlen(str);                           \
+  } while(0)
 
 /* Append a null-terminated string to an SMB message */
 #define MSGCATNULL(str)                         \
-  strcpy(p, (str));                             \
-  p += strlen(str) + 1;
+  do {                                          \
+    strcpy(p, (str));                           \
+    p += strlen(str) + 1;                       \
+  } while(0)
 
 /* SMB is mostly little endian */
 #if (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || \
