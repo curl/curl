@@ -44,13 +44,15 @@
 #include "memdebug.h"
 
 #define HMAC_SHA256(k, kl, d, dl, o)                                    \
-  if(Curl_hmacit(Curl_HMAC_SHA256, (unsigned char *)k,                  \
-                 (unsigned int)kl,                                      \
-                 (unsigned char *)d,                                    \
-                 (unsigned int)dl, o) != CURLE_OK) {                    \
-    ret = CURLE_OUT_OF_MEMORY;                                          \
-    goto free_all;                                                      \
-  }
+  do {                                                                  \
+    if(Curl_hmacit(Curl_HMAC_SHA256, (unsigned char *)k,                \
+                   (unsigned int)kl,                                    \
+                   (unsigned char *)d,                                  \
+                   (unsigned int)dl, o) != CURLE_OK) {                  \
+      ret = CURLE_OUT_OF_MEMORY;                                        \
+      goto free_all;                                                    \
+    }                                                                   \
+  } while(0)
 
 #define PROVIDER_MAX_L 16
 #define REQUEST_TYPE_L (PROVIDER_MAX_L + sizeof("4_request"))
