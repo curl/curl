@@ -4,7 +4,7 @@ curl and libcurl 7.75.0
  Command line options:         237
  curl_easy_setopt() options:   285
  Public functions in libcurl:  85
- Contributors:                 2301
+ Contributors:                 2302
 
 This release includes the following changes:
 
@@ -17,6 +17,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o badsymbols.pl: add verbose mode -v [31]
+ o badsymbols.pl: ignore stand-alone single hash lines [40]
  o BUG-BOUNTY: minor language updates [5]
  o cmake: enable gophers correctly in curl-config [10]
  o cmdline-opts/gen.pl: return hard on errors [11]
@@ -24,15 +25,21 @@ This release includes the following bugfixes:
  o connect: on linux, enable reporting of all ICMP errors on UDP sockets [27]
  o connect: zero variable on stack to silence valgrind complaint [23]
  o cookie: avoid the C1001 internal compiler error with MSVC 14 [36]
+ o curl: fix handling of -q option [39]
+ o curl_easy_pause.3: add multiplexed pause effects [41]
  o CURLOPT_URL.3: remove scheme specific details [12]
  o digest_sspi: Show InitializeSecurityContext errors in verbose mode [8]
  o docs/URL-SYNTAX: the URL syntax curl accepts and works with [15]
  o docs: enable syntax highlighting in several docs files [16]
  o examples/libtest: add .checksrc to dist [14]
  o examples: remove superfluous asterisk uses
+ o failf: remove newline from formatting strings [35]
  o getinfo: build with disabled HTTP support
+ o h2: do not wait for RECV on paused transfers [43]
  o http: show the request as headers even when split-sending [7]
+ o INSTALL: update the list known OSes and CPU archs curl has run on [38]
  o lib1564/5: verify that curl_multi_wakeup returns OK
+ o misc: fix "warning: empty expression statement has no effect" [30]
  o mqtt: deal with 0 byte reads correctly [4]
  o mqtt: handle POST/PUBLISH without a set POSTFIELDSIZE [1]
  o multi: when erroring in TOOFAST state, act as for PERFORM [9]
@@ -42,6 +49,7 @@ This release includes the following bugfixes:
  o Revert "CI/github: work-around for brew breakage on macOS" [17]
  o runtests: add 'wakeup' as a feature
  o runtests: add support for %if [feature] conditions [19]
+ o speedcheck: exclude paused transfers [42]
  o test1522: add debug tracing [3]
  o tests/mqttd: extract the client id from the correct offset [13]
  o tests: make --libcurl tests only test FTP options if ftp enabled [18]
@@ -55,12 +63,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  0xflotus on github, Cory Benfield, Cristian Rodríguez, Dan Fandrich,
-  Daniel Stenberg, Douglas R. Reno, Earnestly on github, Gisle Vanem,
-  Hans-Christian Noren Egtvedt, Ian Spence, Jeremy Thibault, Jon Rumsey,
-  Jon Wilkes, Matthias Gatto, Nick Zitzmann, parazyd on github, Ray Satiro,
-  Sean McArthur, Tomas Berger, 不确定
-  (20 contributors)
+  0xflotus on github, Cherish98 on github, Cory Benfield, Cristian Rodríguez,
+  Dan Fandrich, Daniel Stenberg, Dennis Clarke, Douglas R. Reno,
+  Earnestly on github, Gisle Vanem, Hans-Christian Noren Egtvedt,
+  Harry Sintonen, Ian Spence, Jeremy Thibault, Jon Rumsey, Jon Wilkes,
+  Matthias Gatto, Nick Zitzmann, parazyd on github, Ray Satiro, Sean McArthur,
+  Tomas Berger, XhmikosR on github, 不确定
+  (24 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -94,6 +103,14 @@ References to bug reports and discussions on issues:
  [26] = https://curl.se/bug/?i=5703
  [27] = https://curl.se/bug/?i=6341
  [28] = https://curl.se/bug/?i=6244
+ [30] = https://github.com/curl/curl/commit/08e8455dddc5e48e58a12ade3815c01ae3da3b64#commitcomment-45433279
  [31] = https://curl.se/bug/?i=6349
  [34] = https://curl.se/bug/?i=6345
+ [35] = https://curl.se/bug/?i=6365
  [36] = https://curl.se/bug/?i=6112
+ [38] = https://curl.se/bug/?i=6366
+ [39] = https://curl.se/bug/?i=6364
+ [40] = https://curl.se/mail/lib-2020-12/0084.html
+ [41] = https://curl.se/bug/?i=6360
+ [42] = https://curl.se/bug/?i=6358
+ [43] = https://curl.se/bug/?i=6356
