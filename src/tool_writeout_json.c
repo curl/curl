@@ -74,7 +74,7 @@ static void jsonEscape(FILE *stream, const char *in)
         fputc(*i, stream);
       }
       break;
-    };
+    }
   }
 }
 
