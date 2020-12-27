@@ -1783,14 +1783,12 @@ schannel_recv(struct connectdata *conn, int sockindex,
     infof(data, "schannel: server indicated shutdown in a prior call\n");
     goto cleanup;
   }
-  else if(!len) {
-    /* It's debatable what to return when !len. Regardless we can't return
-       immediately because there may be data to decrypt (in the case we want to
-       decrypt all encrypted cached data) so handle !len later in cleanup.
-    */
-    ; /* do nothing */
-  }
-  else if(!BACKEND->recv_connection_closed) {
+
+  /* It's debatable what to return when !len. Regardless we can't return
+     immediately because there may be data to decrypt (in the case we want to
+     decrypt all encrypted cached data) so handle !len later in cleanup.
+  */
+  else if(len && !BACKEND->recv_connection_closed) {
     /* increase enc buffer in order to fit the requested amount of data */
     size = BACKEND->encdata_length - BACKEND->encdata_offset;
     if(size < CURL_SCHANNEL_BUFFER_FREE_SIZE ||
