@@ -61,6 +61,10 @@ djgpp:
 	$(MAKE) -C lib -f Makefile.dj
 	$(MAKE) -C src -f Makefile.dj
 
+djgpp-clean:
+	$(MAKE) -C lib -f Makefile.dj clean
+	$(MAKE) -C src -f Makefile.dj clean
+
 cygwin:
 	./configure
 	make
