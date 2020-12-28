@@ -1,10 +1,9 @@
 Gisle Vanem made curl build fine on DOS (and MingW) with djgpp, OpenSSL and his
 Watt-32 stack.
 
-'make -f Makefile.dist djgpp-clean djgpp' in the root curl dir should build it fine.
-
-(the 'djgpp-clean' target will first delete 'lib/curl_config.h' which is possibly
- from a previous incompatible Windows-build).
+'make -f Makefile.dist djgpp' in the root curl dir should build it fine.
+Or enter 'lib' and do a 'make -f Makefile.dj clean all' to first delete
+'lib/curl_config.h' which is possibly from a previous incompatible Windows-build.
 
 Note 1: djgpp 2.04 beta has a sscanf() bug so the URL parsing isn't
         done properly. Use djgpp 2.03 until they fix it.
