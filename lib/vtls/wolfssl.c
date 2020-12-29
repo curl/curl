@@ -256,7 +256,7 @@ wolfssl_connect_step1(struct connectdata *conn,
     use_sni(TRUE);
     break;
   case CURL_SSLVERSION_TLSv1_0:
-#ifdef WOLFSSL_ALLOW_TLSV10
+#if defined(WOLFSSL_ALLOW_TLSV10) && !defined(NO_OLD_TLS)
     req_method = TLSv1_client_method();
     use_sni(TRUE);
 #else
@@ -265,8 +265,13 @@ wolfssl_connect_step1(struct connectdata *conn,
 #endif
     break;
   case CURL_SSLVERSION_TLSv1_1:
+#ifndef NO_OLD_TLS
     req_method = TLSv1_1_client_method();
     use_sni(TRUE);
+#else
+    failf(data, "wolfSSL does not support TLS 1.1");
+    return CURLE_NOT_BUILT_IN;
+#endif
     break;
   case CURL_SSLVERSION_TLSv1_2:
     req_method = TLSv1_2_client_method();
