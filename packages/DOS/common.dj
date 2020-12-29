@@ -104,7 +104,7 @@ USE_ARES = 0
 #
 # Enable debug code in libcurl/curl
 #
-USE_DEBUG = 1
+USE_DEBUG = 0
 
 #
 # Enable memory tracking code in libcurl/curl
