@@ -46,9 +46,9 @@ sure that the callback uses a different lock for each kind of data.
 
 .IP CURL_LOCK_DATA_KNOWNHOSTS
 Share the known_hosts handle for SFTP and SCP transfers. 
-This will share the content of the known_hosts file among multiple connection. 
+This will share the content of the known_hosts file between multiple transfert. 
 It's usefull if you are usings thread to transfer data simultaneously. 
-Otherwise there is risk that two connection write at the same time to the file.
+Otherwise there is risk that two transfert write at the same time to the file.
 Only works with the libssh2 backend. Added in 7.75.0
 
 .IP CURLSHOPT_UNLOCKFUNC
