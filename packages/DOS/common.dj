@@ -135,10 +135,9 @@ ifeq ($(USE_OPENSSL),1)
   CFLAGS += -DUSE_OPENSSL -I$(OPENSSL_ROOT)/include
 
   #
-  # Squelch the warnings from '$(OPENSSL_ROOT)/include/openssl/opensslconf.h'
-  # and use of deprecated functions.
+  # Squelch the warnings on deprecated functions.
   #
-  CFLAGS += -D__AFL_LOOP -DOPENSSL_SUPPRESS_DEPRECATED
+  CFLAGS += -DOPENSSL_SUPPRESS_DEPRECATED
 
   #
   # Use some of these too?
