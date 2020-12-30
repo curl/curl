@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# (c) CopyRight 2000 - 2020, EdelWeb for EdelKey and OpenEvidence
+# (c) CopyRight 2000 - 2021, EdelWeb for EdelKey and OpenEvidence
 # Author: Peter Sylvester
 
 # "libre" for integration with curl
