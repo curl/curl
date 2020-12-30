@@ -181,6 +181,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
       return CURLE_URL_MALFORMAT;
     }
 
+  /* Windows open fails on directories */
   fd = open_readonly(actual_path, O_RDONLY|O_BINARY);
   file->path = actual_path;
 #else
@@ -190,7 +191,17 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
     return CURLE_URL_MALFORMAT;
   }
 
+  /* non-Windows allow a plain open() of a directory ... */
   fd = open_readonly(real_path, O_RDONLY);
+  if(fd != -1) {
+    struct stat st;
+    fstat(fd, &st);
+    /* ... but since we can "transfer" a directory, we fail */
+    if(st.st_mode & S_IFDIR) {
+      close(fd);
+      fd = -1;
+    }
+  }
   file->path = real_path;
 #endif
   file->freepath = real_path; /* free this when done */
