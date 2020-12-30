@@ -75,7 +75,7 @@ The default internal read callback is fread().
 This is used for all protocols when doing uploads.
 .SH EXAMPLE
 .nf
-size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
+size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   FILE *readhere = (FILE *)userdata;
   curl_off_t nread;

@@ -51,7 +51,7 @@ static size_t discardfunc(void *ptr, size_t size, size_t nmemb, void *stream)
 }
 
 /* read data to upload */
-static size_t readfunc(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t readfunc(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   FILE *f = stream;
   size_t n;
