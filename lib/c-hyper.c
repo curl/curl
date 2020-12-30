@@ -374,6 +374,13 @@ static CURLcode hyperstream(struct Curl_easy *data,
       break;
     }
 
+    /* Curl_http_auth_act() checks what authentication methods that are
+     * available and decides which one (if any) to use. It will set 'newurl'
+     * if an auth method was picked. */
+    result = Curl_http_auth_act(conn);
+    if(result)
+      break;
+
     resp_body = hyper_response_body(resp);
     if(!resp_body) {
       failf(data, "hyperstream: couldn't get response body");
