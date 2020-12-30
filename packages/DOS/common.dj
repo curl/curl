@@ -167,7 +167,7 @@ ifeq ($(USE_IPV6),1)
 endif
 
 ifeq ($(USE_ARES),1)
-  CFLAGS += -DUSE_ARES -I$(ARES_ROOT)
+  CFLAGS += -DUSE_ARES -I$(ARES_ROOT)/include
 endif
 
 ifeq ($(USE_IDNA),1)
