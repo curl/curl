@@ -816,7 +816,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  result = Curl_add_timecondition(conn, req);
+  result = Curl_add_timecondition(conn, headers);
   if(result)
     return result;
 
