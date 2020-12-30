@@ -48,7 +48,7 @@ static void reset_data(struct cb_data *data, CURL *curl)
 }
 
 
-static size_t read_callback(void *ptr, size_t size, size_t nitems,
+static size_t read_callback(char *ptr, size_t size, size_t nitems,
                             void *userdata)
 {
   struct cb_data *data = (struct cb_data *)userdata;

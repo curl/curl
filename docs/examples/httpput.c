@@ -38,7 +38,7 @@
  * http://www.apacheweek.com/features/put
  */
 
-static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t retcode;
   curl_off_t nread;
