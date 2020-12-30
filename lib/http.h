@@ -66,7 +66,12 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
 #endif
 
 CURLcode Curl_add_timecondition(const struct connectdata *conn,
-                                struct dynbuf *buf);
+#ifndef USE_HYPER
+                                 struct dynbuf *req
+#else
+                                 void *headers
+#endif
+  );
 CURLcode Curl_add_custom_headers(struct connectdata *conn,
                                  bool is_connect,
 #ifndef USE_HYPER

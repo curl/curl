@@ -1863,7 +1863,12 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
 
 #ifndef CURL_DISABLE_PARSEDATE
 CURLcode Curl_add_timecondition(const struct connectdata *conn,
-                                struct dynbuf *req)
+#ifndef USE_HYPER
+                                 struct dynbuf *req
+#else
+                                 void *req
+#endif
+  )
 {
   struct Curl_easy *data = conn->data;
   const struct tm *tm;
@@ -1922,7 +1927,11 @@ CURLcode Curl_add_timecondition(const struct connectdata *conn,
             tm->tm_min,
             tm->tm_sec);
 
+#ifndef USE_HYPER
   result = Curl_dyn_add(req, datestr);
+#else
+  result = Curl_hyper_header(data, req, datestr);
+#endif
 
   return result;
 }
