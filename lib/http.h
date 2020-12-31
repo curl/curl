@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -66,7 +66,12 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
 #endif
 
 CURLcode Curl_add_timecondition(const struct connectdata *conn,
-                                struct dynbuf *buf);
+#ifndef USE_HYPER
+                                 struct dynbuf *req
+#else
+                                 void *headers
+#endif
+  );
 CURLcode Curl_add_custom_headers(struct connectdata *conn,
                                  bool is_connect,
 #ifndef USE_HYPER
