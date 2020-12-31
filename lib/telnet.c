@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -214,7 +214,7 @@ CURLcode init_telnet(struct connectdata *conn)
   tn->him_preferred[CURL_TELOPT_SGA] = CURL_YES;
 
   /* To be compliant with previous releases of libcurl
-     we enable this option by default. This behaviour
+     we enable this option by default. This behavior
          can be changed thanks to the "BINARY" option in
          CURLOPT_TELNETOPTIONS
   */

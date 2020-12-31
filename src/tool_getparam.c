@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1990,7 +1990,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* This makes the FTP sessions use PORT instead of PASV */
       /* use <eth0> or <192.168.10.10> style addresses. Anything except
          this will make us try to get the "default" address.
-         NOTE: this is a changed behaviour since the released 4.1!
+         NOTE: this is a changed behavior since the released 4.1!
       */
       GetStr(&config->ftpport, nextarg);
       break;

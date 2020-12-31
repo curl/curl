@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -602,7 +602,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_POSTREDIR:
     /*
-     * Set the behaviour of POST when redirecting
+     * Set the behavior of POST when redirecting
      * CURL_REDIR_GET_ALL - POST is changed to GET after 301 and 302
      * CURL_REDIR_POST_301 - POST is kept as POST after 301
      * CURL_REDIR_POST_302 - POST is kept as POST after 302

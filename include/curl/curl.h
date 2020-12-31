@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1615,7 +1615,7 @@ typedef enum {
   CURLOPT(CURLOPT_NEW_FILE_PERMS, CURLOPTTYPE_LONG, 159),
   CURLOPT(CURLOPT_NEW_DIRECTORY_PERMS, CURLOPTTYPE_LONG, 160),
 
-  /* Set the behaviour of POST when redirecting. Values must be set to one
+  /* Set the behavior of POST when redirecting. Values must be set to one
      of CURL_REDIR* defines below. This used to be called CURLOPT_POST301 */
   CURLOPT(CURLOPT_POSTREDIR, CURLOPTTYPE_VALUES, 161),
 

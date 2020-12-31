@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -118,7 +118,7 @@ sub checkfile {
     my $found = scanfile($file);
 
     if(!$found) {
-        print "$file: missing copyright range\n";
+        print "$file:1: missing copyright range\n";
         return 2;
     }
 
@@ -140,8 +140,9 @@ sub checkfile {
 
     if(defined($commityear) && scalar(@copyright) &&
        $copyright[0]{year} != $commityear) {
-        print "$file: copyright year out of date, should be $commityear, " .
-            "is $copyright[0]{year}\n";
+        printf "$file:%d: copyright year out of date, should be $commityear, " .
+            "is $copyright[0]{year}\n",
+            $copyright[0]{line};
     }
     else {
         $fine = 1;

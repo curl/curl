@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1650,7 +1650,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
      * request with an error page. To be sure that libcurl gets the page that
      * most user agents would get, libcurl has to force GET.
      *
-     * This behaviour is forbidden by RFC1945 and the obsolete RFC2616, and
+     * This behavior is forbidden by RFC1945 and the obsolete RFC2616, and
      * can be overridden with CURLOPT_POSTREDIR.
      */
     if((data->state.httpreq == HTTPREQ_POST
@@ -1675,7 +1675,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
      * request with an error page. To be sure that libcurl gets the page that
      * most user agents would get, libcurl has to force GET.
      *
-     * This behaviour is forbidden by RFC1945 and the obsolete RFC2616, and
+     * This behavior is forbidden by RFC1945 and the obsolete RFC2616, and
      * can be overridden with CURLOPT_POSTREDIR.
      */
     if((data->state.httpreq == HTTPREQ_POST

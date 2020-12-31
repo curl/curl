@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2171,7 +2171,7 @@ static bool check_noproxy(const char *name, const char *no_proxy)
         /* Look for the end of the token. */
         ;
 
-      /* To match previous behaviour, where it was necessary to specify
+      /* To match previous behavior, where it was necessary to specify
        * ".local.com" to prevent matching "notlocal.com", we will leave
        * the '.' off.
        */

@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -407,7 +407,7 @@ foreach $protocol (('ftp', 'http', 'ftps', 'https', 'no', 'all')) {
 }
 
 # make sure we don't get affected by other variables that control our
-# behaviour
+# behavior
 
 delete $ENV{'SSL_CERT_DIR'} if($ENV{'SSL_CERT_DIR'});
 delete $ENV{'SSL_CERT_PATH'} if($ENV{'SSL_CERT_PATH'});

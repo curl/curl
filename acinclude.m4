@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -143,7 +143,7 @@ int main (void)
 dnl CURL_CHECK_AIX_ALL_SOURCE
 dnl -------------------------------------------------
 dnl Provides a replacement of traditional AC_AIX with
-dnl an uniform behaviour across all autoconf versions,
+dnl an uniform behavior across all autoconf versions,
 dnl and with our own placement rules.
 
 AC_DEFUN([CURL_CHECK_AIX_ALL_SOURCE], [

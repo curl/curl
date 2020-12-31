@@ -109,7 +109,7 @@
   output text messages or escape sequences on user login.  When these shell
   startup messages or escape sequences are output they might corrupt the
   expected stream of data which flows to the sftp-server or from the ssh
-  client which can result in bad test behaviour or even prevent the test
+  client which can result in bad test behavior or even prevent the test
   server from running.
 
   If the test suite ssh or sftp server fails to start up and logs the message

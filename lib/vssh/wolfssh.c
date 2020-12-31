@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2019 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -583,7 +583,7 @@ static CURLcode wssh_statemach_act(struct connectdata *conn, bool *block)
         /* If we have restart position then open for append */
         flags = WOLFSSH_FXF_WRITE|WOLFSSH_FXF_APPEND;
       else
-        /* Clear file before writing (normal behaviour) */
+        /* Clear file before writing (normal behavior) */
         flags = WOLFSSH_FXF_WRITE|WOLFSSH_FXF_CREAT|WOLFSSH_FXF_TRUNC;
 
       memset(&createattrs, 0, sizeof(createattrs));
