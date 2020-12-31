@@ -1276,7 +1276,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
          * lib/telnet.c will Curl_poll() on the input file descriptor
          * rather then calling the READFUNCTION at regular intervals.
          * The circumstances in which it is preferable to enable this
-         * behaviour, by omitting to set the READFUNCTION & READDATA options,
+         * behavior, by omitting to set the READFUNCTION & READDATA options,
          * have not been determined.
          */
         my_setopt(curl, CURLOPT_READDATA, input);

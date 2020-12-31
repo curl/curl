@@ -143,7 +143,7 @@ int main (void)
 dnl CURL_CHECK_AIX_ALL_SOURCE
 dnl -------------------------------------------------
 dnl Provides a replacement of traditional AC_AIX with
-dnl an uniform behaviour across all autoconf versions,
+dnl an uniform behavior across all autoconf versions,
 dnl and with our own placement rules.
 
 AC_DEFUN([CURL_CHECK_AIX_ALL_SOURCE], [

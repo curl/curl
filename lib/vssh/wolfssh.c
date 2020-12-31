@@ -583,7 +583,7 @@ static CURLcode wssh_statemach_act(struct connectdata *conn, bool *block)
         /* If we have restart position then open for append */
         flags = WOLFSSH_FXF_WRITE|WOLFSSH_FXF_APPEND;
       else
-        /* Clear file before writing (normal behaviour) */
+        /* Clear file before writing (normal behavior) */
         flags = WOLFSSH_FXF_WRITE|WOLFSSH_FXF_CREAT|WOLFSSH_FXF_TRUNC;
 
       memset(&createattrs, 0, sizeof(createattrs));

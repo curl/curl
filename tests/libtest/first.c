@@ -146,7 +146,7 @@ int main(int argc, char **argv)
 
   /*
    * Setup proper locale from environment. This is needed to enable locale-
-   * specific behaviour by the C library in order to test for undesired side
+   * specific behavior by the C library in order to test for undesired side
    * effects that could cause in libcurl.
    */
 #ifdef HAVE_SETLOCALE

@@ -1228,7 +1228,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         /* If we have restart position then open for append */
         flags = O_WRONLY|O_APPEND;
       else
-        /* Clear file before writing (normal behaviour) */
+        /* Clear file before writing (normal behavior) */
         flags = O_WRONLY|O_CREAT|O_TRUNC;
 
       if(sshc->sftp_file)

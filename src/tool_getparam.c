@@ -1990,7 +1990,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* This makes the FTP sessions use PORT instead of PASV */
       /* use <eth0> or <192.168.10.10> style addresses. Anything except
          this will make us try to get the "default" address.
-         NOTE: this is a changed behaviour since the released 4.1!
+         NOTE: this is a changed behavior since the released 4.1!
       */
       GetStr(&config->ftpport, nextarg);
       break;

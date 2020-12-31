@@ -468,7 +468,7 @@ static unsigned int get32bit(const unsigned char *doh, int index)
       the pointer first. */
    doh += index;
 
-   /* avoid undefined behaviour by casting to unsigned before shifting
+   /* avoid undefined behavior by casting to unsigned before shifting
       24 bits, possibly into the sign bit. codegen is same, but
       ub sanitizer won't be upset */
   return ( (unsigned)doh[0] << 24) | (doh[1] << 16) |(doh[2] << 8) | doh[3];

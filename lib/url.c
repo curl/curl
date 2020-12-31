@@ -2171,7 +2171,7 @@ static bool check_noproxy(const char *name, const char *no_proxy)
         /* Look for the end of the token. */
         ;
 
-      /* To match previous behaviour, where it was necessary to specify
+      /* To match previous behavior, where it was necessary to specify
        * ".local.com" to prevent matching "notlocal.com", we will leave
        * the '.' off.
        */

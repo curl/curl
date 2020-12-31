@@ -200,7 +200,7 @@ part number and will then increase the part number with one. This is useful
 for auth tests and similar.
 
 `sendzero=yes` means that the (FTP) server will "send" the data even if the
-size is zero bytes. Used to verify curl's behaviour on zero bytes transfers.
+size is zero bytes. Used to verify curl's behavior on zero bytes transfers.
 
 `base64=yes` means that the data provided in the test-file is a chunk of data
 encoded with base64. It is the only way a test case can contain binary

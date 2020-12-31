@@ -214,7 +214,7 @@ CURLcode init_telnet(struct connectdata *conn)
   tn->him_preferred[CURL_TELOPT_SGA] = CURL_YES;
 
   /* To be compliant with previous releases of libcurl
-     we enable this option by default. This behaviour
+     we enable this option by default. This behavior
          can be changed thanks to the "BINARY" option in
          CURLOPT_TELNETOPTIONS
   */
