@@ -79,42 +79,42 @@ endif
 # with djgpp/Watt-32. Set to 0 if you don't need https URLs
 # (reduces curl.exe with approx 700 kB)
 #
-USE_OPENSSL = 0
+USE_OPENSSL ?= 0
 
 #
 # Use zlib for contents encoding. Needed for 'USE_OPENSSL=1' too.
 #
-USE_ZLIB = 0
+USE_ZLIB ?= 0
 
 #
 # Use libidn for international domain names
 #
-USE_IDNA = 0
+USE_IDNA ?= 0
 
 #
 # Use Watt-32 IPv6 stack (only IPv6 name resolution working at the moment)
 #
-USE_IPV6 = 0
+USE_IPV6 ?= 0
 
 #
 # Use C-Ares resolver library
 #
-USE_ARES = 0
+USE_ARES ?= 0
 
 #
 # Enable debug code in libcurl/curl
 #
-USE_DEBUG = 0
+USE_DEBUG ?= 0
 
 #
 # Enable memory tracking code in libcurl/curl
 #
-USE_CURLDEBUG = 0
+USE_CURLDEBUG ?= 0
 
 #
 # Generate a .map file in 'link_EXE' macro
 #
-MAKE_MAP_FILE ?= 1
+MAKE_MAP_FILE ?= 0
 
 default: all
 
