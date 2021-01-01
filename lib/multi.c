@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2211,7 +2211,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multi_done(data, result, TRUE);
       }
       else if(done) {
-        followtype follow = FOLLOW_NONE;
 
         /* call this even if the readwrite function returned error */
         Curl_posttransfer(data);
@@ -2219,6 +2218,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* When we follow redirects or is set to retry the connection, we must
            to go back to the CONNECT state */
         if(data->req.newurl || retry) {
+          followtype follow = FOLLOW_NONE;
           if(!retry) {
             /* if the URL is a follow-location and not just a retried request
                then figure out the URL here */

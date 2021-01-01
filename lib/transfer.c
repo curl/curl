@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1537,6 +1537,8 @@ CURLcode Curl_follow(struct Curl_easy *data,
   bool reachedmax = FALSE;
   CURLUcode uc;
 
+  DEBUGASSERT(type != FOLLOW_NONE);
+
   if(type == FOLLOW_REDIR) {
     if((data->set.maxredirs != -1) &&
        (data->set.followlocation >= data->set.maxredirs)) {
@@ -1568,8 +1570,11 @@ CURLcode Curl_follow(struct Curl_easy *data,
     }
   }
 
-  if(Curl_is_absolute_url(newurl, NULL, MAX_SCHEME_LEN))
-    /* This is an absolute URL, don't allow the custom port number */
+  if((type != FOLLOW_RETRY) &&
+     (data->req.httpcode != 401) && (data->req.httpcode != 407) &&
+     Curl_is_absolute_url(newurl, NULL, MAX_SCHEME_LEN))
+    /* If this is not redirect due to a 401 or 407 response and an absolute
+       URL: don't allow a custom port number */
     disallowport = TRUE;
 
   DEBUGASSERT(data->state.uh);
