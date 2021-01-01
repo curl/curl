@@ -2003,7 +2003,9 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   }
   else {
     unsigned long port = strtoul(data->state.up.port, NULL, 10);
-    conn->port = conn->remote_port = curlx_ultous(port);
+    conn->port = conn->remote_port =
+      (data->set.use_port && data->state.allow_port) ?
+      (int)data->set.use_port : curlx_ultous(port);
   }
 
   (void)curl_url_get(uh, CURLUPART_QUERY, &data->state.up.query, 0);
