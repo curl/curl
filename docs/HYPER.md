@@ -45,3 +45,21 @@ on specific input and output headers are done the same way in curl code.
 The API in Hyper delivers received HTTP headers as (cleaned up) name=value
 pairs, making it impossible for curl to know the exact byte representation
 over the wire with Hyper.
+
+## Remaining issues
+
+This backend is still not feature complete with the native backend. Areas that
+still need attention and verification include:
+
+- multiplexed HTTP/2
+- h2 Upgrade:
+- pausing transfers
+- co-exist with a HTTP/3 build
+- receiving HTTP/1 trailers
+- sending HTTP/1 trailers
+- accept-encoding
+- transfer encoding
+- alt-svc
+- hsts
+- CONNECT
+- DoH ([#6389](https://github.com/curl/curl/issues/6389))
