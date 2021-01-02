@@ -396,7 +396,8 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
-      fprintf(global->errors, "(%d) Failed writing body\n", result);
+      if(global->showerror)
+        fprintf(global->errors, "curl: (%d) Failed writing body\n", result);
     }
   }
 
@@ -559,9 +560,9 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         if(ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we can't just append as then we'll
              create something strange, bail out */
-          if(!global->mute)
+          if(global->showerror)
             fprintf(global->errors,
-                    "failed to truncate, exiting\n");
+                    "curl: (23) Failed to truncate file\n");
           return CURLE_WRITE_ERROR;
         }
         /* now seek to the end of the file, the position where we
@@ -575,9 +576,9 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         rc = fseek(outs->stream, (long)outs->init, SEEK_SET);
 #endif
         if(rc) {
-          if(!global->mute)
+          if(global->showerror)
             fprintf(global->errors,
-                    "failed seeking to end of file, exiting\n");
+                    "curl: (23) Failed seeking to end of file\n");
           return CURLE_WRITE_ERROR;
         }
         outs->bytes = 0; /* clear for next round */
@@ -633,7 +634,8 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
-      fprintf(global->errors, "(%d) Failed writing body\n", result);
+      if(global->showerror)
+        fprintf(global->errors, "curl: (%d) Failed writing body\n", result);
     }
   }
 
