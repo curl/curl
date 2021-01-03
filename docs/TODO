@@ -171,6 +171,7 @@
  19.2 Enable PIE and RELRO by default
  19.3 Don't use GNU libtool on OpenBSD
  19.4 Package curl for Windows in a signed installer
+ 19.5 clang-format
 
  20. Test suite
  20.1 SSL tunnel
@@ -1220,6 +1221,11 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 19.4 Package curl for Windows in a signed installer
 
  See https://github.com/curl/curl/issues/5424
+
+19.5 clang-format
+ clang-format looks like a nice tool we could use in order to replace or help
+ checksrc someday. Maybe someone with some experience with this tool can help
+ us to write a .clang-format file according to the curl coding convention.
 
 20. Test suite
 
