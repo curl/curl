@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -124,6 +124,10 @@ curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 #  pragma warning(default:4232) /* MSVC extension, dllimport identity */
 #endif
 
+#ifdef DEBUGBUILD
+static char *leakpointer;
+#endif
+
 /**
  * curl_global_init() globally initializes curl given a bitwise set of the
  * different features of what to initialize.
@@ -189,6 +193,12 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #endif
 
   init_flags = flags;
+
+#ifdef DEBUGBUILD
+  if(getenv("CURL_GLOBAL_INIT"))
+    /* alloc data that will leak if *cleanup() is not called! */
+    leakpointer = malloc(1);
+#endif
 
   return CURLE_OK;
 
@@ -264,6 +274,9 @@ void curl_global_cleanup(void)
 
 #ifdef USE_WOLFSSH
   (void)wolfSSH_Cleanup();
+#endif
+#ifdef DEBUGBUILD
+  free(leakpointer);
 #endif
 
   init_flags  = 0;

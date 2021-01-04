@@ -381,6 +381,7 @@ if (!$USER) {
 $ENV{'CURL_MEMDEBUG'} = $memdump;
 $ENV{'CURL_ENTROPY'}="12345678";
 $ENV{'CURL_FORCETIME'}=1; # for debug NTLM magic
+$ENV{'CURL_GLOBAL_INIT'}=1; # debug curl_global_init/cleanup use
 $ENV{'HOME'}=$pwd;
 $ENV{'COLUMNS'}=79; # screen width!
 
