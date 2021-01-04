@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,6 +27,9 @@
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 
 #include <curl/curl.h>
+#ifdef USE_HYPER
+#include <hyper.h>
+#endif
 #include "sendf.h"
 #include "http.h"
 #include "url.h"
@@ -181,10 +184,42 @@ static void connect_done(struct connectdata *conn)
   infof(conn->data, "CONNECT phase completed!\n");
 }
 
+static CURLcode CONNECT_host(struct connectdata *conn,
+                             const char *hostname,
+                             int remote_port,
+                             char **connecthostp,
+                             char **hostp)
+{
+  char *hostheader; /* for CONNECT */
+  char *host = NULL; /* Host: */
+  bool ipv6_ip = conn->bits.ipv6_ip;
+
+  /* the hostname may be different */
+  if(hostname != conn->host.name)
+    ipv6_ip = (strchr(hostname, ':') != NULL);
+  hostheader = /* host:port with IPv6 support */
+    aprintf("%s%s%s:%d", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"",
+            remote_port);
+  if(!hostheader)
+    return CURLE_OUT_OF_MEMORY;
+
+  if(!Curl_checkProxyheaders(conn, "Host")) {
+    host = aprintf("Host: %s\r\n", hostheader);
+    if(!host) {
+      free(hostheader);
+      return CURLE_OUT_OF_MEMORY;
+    }
+  }
+  *connecthostp = hostheader;
+  *hostp = host;
+  return CURLE_OK;
+}
+
 static CURLcode CONNECT(struct connectdata *conn,
                         int sockindex,
                         const char *hostname,
                         int remote_port)
+#ifndef USE_HYPER
 {
   int subversion = 0;
   struct Curl_easy *data = conn->data;
@@ -207,8 +242,9 @@ static CURLcode CONNECT(struct connectdata *conn,
     timediff_t check;
     if(TUNNEL_INIT == s->tunnel_state) {
       /* BEGIN CONNECT PHASE */
-      char *host_port;
       struct dynbuf req;
+      char *hostheader = NULL;
+      char *host = NULL;
 
       infof(data, "Establish HTTP proxy tunnel to %s:%d\n",
             hostname, remote_port);
@@ -219,46 +255,22 @@ static CURLcode CONNECT(struct connectdata *conn,
       free(data->req.newurl);
       data->req.newurl = NULL;
 
-      host_port = aprintf("%s:%d", hostname, remote_port);
-      if(!host_port)
-        return CURLE_OUT_OF_MEMORY;
-
       /* initialize a dynamic send-buffer */
       Curl_dyn_init(&req, DYN_HTTP_REQUEST);
 
-      /* Setup the proxy-authorization header, if any */
-      result = Curl_http_output_auth(conn, "CONNECT", host_port, TRUE);
+      result = CONNECT_host(conn, hostname, remote_port, &hostheader, &host);
+      if(result)
+        return result;
 
-      free(host_port);
+      /* Setup the proxy-authorization header, if any */
+      result = Curl_http_output_auth(conn, "CONNECT", hostheader, TRUE);
 
       if(!result) {
-        char *host = NULL;
         const char *proxyconn = "";
         const char *useragent = "";
         const char *httpv =
           (conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ? "1.0" : "1.1";
-        bool ipv6_ip = conn->bits.ipv6_ip;
-        char *hostheader;
 
-        /* the hostname may be different */
-        if(hostname != conn->host.name)
-          ipv6_ip = (strchr(hostname, ':') != NULL);
-        hostheader = /* host:port with IPv6 support */
-          aprintf("%s%s%s:%d", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"",
-                  remote_port);
-        if(!hostheader) {
-          Curl_dyn_free(&req);
-          return CURLE_OUT_OF_MEMORY;
-        }
-
-        if(!Curl_checkProxyheaders(conn, "Host")) {
-          host = aprintf("Host: %s\r\n", hostheader);
-          if(!host) {
-            free(hostheader);
-            Curl_dyn_free(&req);
-            return CURLE_OUT_OF_MEMORY;
-          }
-        }
         if(!Curl_checkProxyheaders(conn, "Proxy-Connection"))
           proxyconn = "Proxy-Connection: Keep-Alive\r\n";
 
@@ -281,10 +293,6 @@ static CURLcode CONNECT(struct connectdata *conn,
                         useragent,
                         proxyconn);
 
-        if(host)
-          free(host);
-        free(hostheader);
-
         if(!result)
           result = Curl_add_custom_headers(conn, TRUE, &req);
 
@@ -301,7 +309,8 @@ static CURLcode CONNECT(struct connectdata *conn,
         if(result)
           failf(data, "Failed sending CONNECT to proxy");
       }
-
+      free(host);
+      free(hostheader);
       Curl_dyn_free(&req);
       if(result)
         return result;
@@ -628,6 +637,223 @@ static CURLcode CONNECT(struct connectdata *conn,
   Curl_dyn_free(&s->rcvbuf);
   return CURLE_OK;
 }
+#else
+/* The Hyper version of CONNECT */
+{
+  struct Curl_easy *data = conn->data;
+  struct hyptransfer *h = &data->hyp;
+  curl_socket_t tunnelsocket = conn->sock[sockindex];
+  struct http_connect_state *s = conn->connect_state;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+  hyper_io *io = NULL;
+  hyper_request *req = NULL;
+  hyper_headers *headers = NULL;
+  hyper_clientconn_options *options = NULL;
+  hyper_task *handshake = NULL;
+  hyper_task *task = NULL; /* for the handshake */
+  hyper_task *sendtask = NULL; /* for the send */
+  hyper_clientconn *client = NULL;
+  hyper_error *hypererr = NULL;
+  char *hostheader = NULL; /* for CONNECT */
+  char *host = NULL; /* Host: */
+
+  if(Curl_connect_complete(conn))
+    return CURLE_OK; /* CONNECT is already completed */
+
+  conn->bits.proxy_connect_closed = FALSE;
+
+  do {
+    switch(s->tunnel_state) {
+    case TUNNEL_INIT:
+      /* BEGIN CONNECT PHASE */
+      io = hyper_io_new();
+      if(!io) {
+        failf(data, "Couldn't create hyper IO");
+        goto error;
+      }
+      /* tell Hyper how to read/write network data */
+      hyper_io_set_userdata(io, conn);
+      hyper_io_set_read(io, Curl_hyper_recv);
+      hyper_io_set_write(io, Curl_hyper_send);
+      conn->sockfd = tunnelsocket;
+
+      /* create an executor to poll futures */
+      if(!h->exec) {
+        h->exec = hyper_executor_new();
+        if(!h->exec) {
+          failf(data, "Couldn't create hyper executor");
+          goto error;
+        }
+      }
+
+      options = hyper_clientconn_options_new();
+      if(!options) {
+        failf(data, "Couldn't create hyper client options");
+        goto error;
+      }
+
+      hyper_clientconn_options_exec(options, h->exec);
+
+      /* "Both the `io` and the `options` are consumed in this function
+         call" */
+      handshake = hyper_clientconn_handshake(io, options);
+      if(!handshake) {
+        failf(data, "Couldn't create hyper client handshake");
+        goto error;
+      }
+      io = NULL;
+      options = NULL;
+
+      if(HYPERE_OK != hyper_executor_push(h->exec, handshake)) {
+        failf(data, "Couldn't hyper_executor_push the handshake");
+        goto error;
+      }
+      handshake = NULL; /* ownership passed on */
+
+      task = hyper_executor_poll(h->exec);
+      if(!task) {
+        failf(data, "Couldn't hyper_executor_poll the handshake");
+        goto error;
+      }
+
+      client = hyper_task_value(task);
+      hyper_task_free(task);
+      req = hyper_request_new();
+      if(!req) {
+        failf(data, "Couldn't hyper_request_new");
+        goto error;
+      }
+      if(hyper_request_set_method(req, (uint8_t *)"CONNECT",
+                                  strlen("CONNECT"))) {
+        failf(data, "error setting method");
+        goto error;
+      }
+
+      result = CONNECT_host(conn, hostname, remote_port, &hostheader, &host);
+      if(result)
+        goto error;
+
+      if(hyper_request_set_uri(req, (uint8_t *)hostheader,
+                               strlen(hostheader))) {
+        failf(data, "error setting path");
+        result = CURLE_OUT_OF_MEMORY;
+      }
+      /* Setup the proxy-authorization header, if any */
+      result = Curl_http_output_auth(conn, "CONNECT", hostheader, TRUE);
+      if(result)
+        goto error;
+      Curl_safefree(hostheader);
+
+      /* default is 1.1 */
+      if((conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) &&
+         (HYPERE_OK != hyper_request_set_version(req,
+                                                 HYPER_HTTP_VERSION_1_0))) {
+        failf(data, "error settting HTTP version");
+        goto error;
+      }
+
+      headers = hyper_request_headers(req);
+      if(!headers) {
+        failf(data, "hyper_request_headers");
+        goto error;
+      }
+      if(host && Curl_hyper_header(data, headers, host))
+        goto error;
+      Curl_safefree(host);
+
+      if(data->state.aptr.proxyuserpwd &&
+         Curl_hyper_header(data, headers, data->state.aptr.proxyuserpwd))
+        goto error;
+
+      if(data->set.str[STRING_USERAGENT] &&
+         *data->set.str[STRING_USERAGENT] &&
+         data->state.aptr.uagent &&
+         Curl_hyper_header(data, headers, data->state.aptr.uagent))
+        goto error;
+
+      if(!Curl_checkProxyheaders(conn, "Proxy-Connection") &&
+         Curl_hyper_header(data, headers, "Proxy-Connection: Keep-Alive"))
+        goto error;
+
+      sendtask = hyper_clientconn_send(client, req);
+      if(!sendtask) {
+        failf(data, "hyper_clientconn_send");
+        goto error;
+      }
+
+      if(HYPERE_OK != hyper_executor_push(h->exec, sendtask)) {
+        failf(data, "Couldn't hyper_executor_push the send");
+        goto error;
+      }
+
+      hyper_clientconn_free(client);
+
+      do {
+        task = hyper_executor_poll(h->exec);
+        if(task) {
+          bool error = hyper_task_type(task) == HYPER_TASK_ERROR;
+          if(error)
+            hypererr = hyper_task_value(task);
+          hyper_task_free(task);
+          if(error)
+            goto error;
+        }
+      } while(task);
+      s->tunnel_state = TUNNEL_CONNECT;
+      /* FALLTHROUGH */
+    case TUNNEL_CONNECT: {
+      int didwhat;
+      bool done = FALSE;
+      result = Curl_hyper_stream(data, conn, &didwhat, &done,
+                                 CURL_CSELECT_IN | CURL_CSELECT_OUT);
+      if(result)
+        goto error;
+      if(!done)
+        break;
+      fprintf(stderr, "done\n");
+      s->tunnel_state = TUNNEL_COMPLETE;
+      if(h->exec) {
+        hyper_executor_free(h->exec);
+        h->exec = NULL;
+      }
+      if(h->read_waker) {
+        hyper_waker_free(h->read_waker);
+        h->read_waker = NULL;
+      }
+      if(h->write_waker) {
+        hyper_waker_free(h->write_waker);
+        h->write_waker = NULL;
+      }
+    }
+      /* FALLTHROUGH */
+    default:
+      break;
+    }
+  } while(data->req.newurl);
+
+  result = CURLE_OK;
+  error:
+  free(host);
+  free(hostheader);
+  if(io)
+    hyper_io_free(io);
+
+  if(options)
+    hyper_clientconn_options_free(options);
+
+  if(handshake)
+    hyper_task_free(handshake);
+
+  if(hypererr) {
+    uint8_t errbuf[256];
+    size_t errlen = hyper_error_print(hypererr, errbuf, sizeof(errbuf));
+    failf(data, "Hyper: %.*s", (int)errlen, errbuf);
+    hyper_error_free(hypererr);
+  }
+  return result;
+}
+
+#endif
 
 void Curl_connect_free(struct Curl_easy *data)
 {
