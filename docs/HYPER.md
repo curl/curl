@@ -61,5 +61,4 @@ still need attention and verification include:
 - transfer encoding
 - alt-svc
 - hsts
-- CONNECT
 - DoH ([#6389](https://github.com/curl/curl/issues/6389))
