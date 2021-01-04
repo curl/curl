@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,8 +40,10 @@ int test(char *URL)
 
   curl_global_init(CURL_GLOBAL_ALL);
   easy = curl_easy_init();
-  if(!easy)
+  if(!easy) {
+    curl_global_cleanup();
     return 1;
+  }
 
   /* make it a zero terminated C string with just As */
   memset(buffer, 'A', MAX_INPUT_LENGTH + 1);
