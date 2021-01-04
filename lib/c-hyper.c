@@ -318,8 +318,12 @@ static CURLcode hyperstream(struct Curl_easy *data,
       else {
         uint8_t errbuf[256];
         size_t errlen = hyper_error_print(hypererr, errbuf, sizeof(errbuf));
-        failf(data, "Hyper: %.*s", (int)errlen, errbuf);
-        result = CURLE_RECV_ERROR; /* not a very good return code */
+        hyper_code code = hyper_error_code(hypererr);
+        failf(data, "Hyper: [%d] %.*s", (int)code, (int)errlen, errbuf);
+        if((code == HYPERE_UNEXPECTED_EOF) && !data->req.bytecount)
+          result = CURLE_GOT_NOTHING;
+        else
+          result = CURLE_RECV_ERROR;
       }
       *done = TRUE;
       hyper_error_free(hypererr);
@@ -885,7 +889,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(hypererr) {
     uint8_t errbuf[256];
     size_t errlen = hyper_error_print(hypererr, errbuf, sizeof(errbuf));
-    failf(data, "Hyper: %.*s", (int)errlen, errbuf);
+    hyper_code code = hyper_error_code(hypererr);
+    failf(data, "Hyper: [%d] %.*s", (int)code, (int)errlen, errbuf);
     hyper_error_free(hypererr);
   }
   return CURLE_OUT_OF_MEMORY;
