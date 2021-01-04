@@ -96,7 +96,7 @@
 
 static int http_getsock_do(struct connectdata *conn,
                            curl_socket_t *socks);
-static int http_should_fail(struct connectdata *conn);
+static bool http_should_fail(struct connectdata *conn);
 
 #ifndef CURL_DISABLE_PROXY
 static CURLcode add_haproxy_protocol_header(struct connectdata *conn);
@@ -1046,11 +1046,11 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
  *
  * @param conn all information about the current connection
  *
- * @retval 0 communications should continue
+ * @retval FALSE communications should continue
  *
- * @retval 1 communications should not continue
+ * @retval TRUE communications should not continue
  */
-static int http_should_fail(struct connectdata *conn)
+static bool http_should_fail(struct connectdata *conn)
 {
   struct Curl_easy *data;
   int httpcode;
@@ -1066,20 +1066,20 @@ static int http_should_fail(struct connectdata *conn)
   ** don't fail.
   */
   if(!data->set.http_fail_on_error)
-    return 0;
+    return FALSE;
 
   /*
   ** Any code < 400 is never terminal.
   */
   if(httpcode < 400)
-    return 0;
+    return FALSE;
 
   /*
   ** Any code >= 400 that's not 401 or 407 is always
   ** a terminal error
   */
   if((httpcode != 401) && (httpcode != 407))
-    return 1;
+    return TRUE;
 
   /*
   ** All we have left to deal with is 401 and 407
@@ -3309,12 +3309,6 @@ checkprotoprefix(struct Curl_easy *data, struct connectdata *conn,
   return checkhttpprefix(data, s, len);
 }
 
-static void print_http_error(struct Curl_easy *data)
-{
-  struct SingleRequest *k = &data->req;
-  failf(data, "The requested URL returned error: %d", k->httpcode);
-}
-
 /*
  * Curl_http_header() parses a single response header.
  */
@@ -3646,16 +3640,6 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
        pretend this is no error */
     k->ignorebody = TRUE; /* Avoid appending error msg to good data. */
   }
-  else if(data->set.http_fail_on_error && (k->httpcode >= 400) &&
-          ((k->httpcode != 401) || !conn->bits.user_passwd)
-#ifndef CURL_DISABLE_PROXY
-          && ((k->httpcode != 407) || !conn->bits.proxy_user_passwd)
-#endif
-    ) {
-    /* serious error, go home! */
-    print_http_error(data);
-    return CURLE_HTTP_RETURNED_ERROR;
-  }
 
   if(conn->httpversion == 10) {
     /* Default action for HTTP/1.0 must be to close, unless
@@ -3928,15 +3912,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         conn->proxy_negotiate_state = GSS_AUTHSUCC;
       }
 #endif
-      /*
-       * When all the headers have been parsed, see if we should give
-       * up and return an error.
-       */
-      if(http_should_fail(conn)) {
-        failf(data, "The requested URL returned error: %d",
-              k->httpcode);
-        return CURLE_HTTP_RETURNED_ERROR;
-      }
 
       /* now, only output this if the header AND body are requested:
        */
@@ -3953,6 +3928,16 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
       data->info.header_size += (long)headerlen;
       data->req.headerbytecount += (long)headerlen;
+
+      /*
+       * When all the headers have been parsed, see if we should give
+       * up and return an error.
+       */
+      if(http_should_fail(conn)) {
+        failf(data, "The requested URL returned error: %d",
+              k->httpcode);
+        return CURLE_HTTP_RETURNED_ERROR;
+      }
 
       data->req.deductheadercount =
         (100 <= k->httpcode && 199 >= k->httpcode)?data->req.headerbytecount:0;
