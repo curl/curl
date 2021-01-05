@@ -545,7 +545,7 @@ while (<TXT>) {
       print CRT @precert if($opt_m);
       my $maxStringLength = length(decode('UTF-8', $caname, Encode::FB_CROAK | Encode::LEAVE_SRC));
       if ($opt_t) {
-        foreach my $key (keys %trust_purposes_by_level) {
+        foreach my $key (sort keys %trust_purposes_by_level) {
            my $string = $key . ": " . join(", ", @{$trust_purposes_by_level{$key}});
            $maxStringLength = List::Util::max( length($string), $maxStringLength );
            print CRT $string . "\n";
