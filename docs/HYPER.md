@@ -24,7 +24,7 @@ Build hyper and enable the C API:
 
      % git clone -b hyper-capi https://github.com/hyperium/hyper
      % cd hyper
-     % cargo build --no-default-features --features ffi
+     % RUSTFLAGS="--cfg hyper_unstable_ffi" cargo build --features client,http1,http2,ffi
 
 Build curl to use hyper's C API:
 
