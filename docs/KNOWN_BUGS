@@ -35,7 +35,6 @@ problems may have been fixed or changed somewhat since this was written!
  2.10 Store TLS context per transfer instead of per connection
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.12 FTPS with Schannel times out file list operation
- 2.13 curl with wolfSSL lacks support for renegotiation
  2.14 Secure Transport disabling hostname validation also disables SNI
 
  3. Email protocols
@@ -316,14 +315,6 @@ problems may have been fixed or changed somewhat since this was written!
  "Instead of the command completing, it just sits there until the timeout
  expires." - the same command line seems to work with other TLS backends and
  other operating systems. See https://github.com/curl/curl/issues/5284.
-
-2.13 curl with wolfSSL lacks support for renegotiation
-
- I am using curl (with wolfSSL) to connect https endpoint, but connection with
- this https endpoint gets terminated because server initiates the
- renegotiation and client does not handle renegotiation.
-
- See https://github.com/curl/curl/issues/5839
 
 2.14 Secure Transport disabling hostname validation also disables SNI
 
