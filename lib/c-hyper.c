@@ -329,7 +329,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       hyper_error_free(hypererr);
       break;
     }
-    else if(h->init) {
+    else if(h->endtask == task) {
       /* end of transfer */
       *done = TRUE;
       infof(data, "hyperstream is done!\n");
@@ -341,7 +341,6 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     }
     /* HYPER_TASK_RESPONSE */
 
-    h->init = TRUE;
     *didwhat = KEEP_RECV;
     if(!resp) {
       failf(data, "hyperstream: couldn't get response");
@@ -403,6 +402,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       result = CURLE_OUT_OF_MEMORY;
       break;
     }
+    h->endtask = foreach;
 
     hyper_response_free(resp);
     resp = NULL;
