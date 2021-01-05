@@ -4,12 +4,13 @@ curl and libcurl 7.75.0
  Command line options:         237
  curl_easy_setopt() options:   285
  Public functions in libcurl:  85
- Contributors:                 2302
+ Contributors:                 2308
 
 This release includes the following changes:
 
  o curl: add --create-file-mode [mode] [28]
  o curl: add new variables to --write-out [25]
+ o dns: extend CURLOPT_RESOLVE syntax for adding non-permanent entries [53]
  o gopher: implement secure gopher protocol [2]
  o http: add Hyper as new optional HTTP backend [24]
  o http: introduce AWS HTTP v4 Signature support [26]
@@ -19,26 +20,35 @@ This release includes the following bugfixes:
  o badsymbols.pl: add verbose mode -v [31]
  o badsymbols.pl: ignore stand-alone single hash lines [40]
  o BUG-BOUNTY: minor language updates [5]
+ o cleanup: fix empty expression statement has no effect
  o cmake: enable gophers correctly in curl-config [10]
  o cmdline-opts/gen.pl: return hard on errors [11]
+ o cmdline-opts/retry.d: mention response code 429 as well [47]
+ o configure: set -Wextra-semi-stmt for clang with --enable-debug [52]
  o connect: defer port selection until connect() time [22]
  o connect: on linux, enable reporting of all ICMP errors on UDP sockets [27]
  o connect: zero variable on stack to silence valgrind complaint [23]
  o cookie: avoid the C1001 internal compiler error with MSVC 14 [36]
+ o curl.1: fix typo microsft -> microsoft [56]
  o curl: fix handling of -q option [39]
  o curl_easy_pause.3: add multiplexed pause effects [41]
  o CURLOPT_URL.3: remove scheme specific details [12]
  o digest_sspi: Show InitializeSecurityContext errors in verbose mode [8]
+ o docs/examples: adjust prototypes for CURLOPT_READFUNCTION [51]
  o docs/URL-SYNTAX: the URL syntax curl accepts and works with [15]
  o docs: enable syntax highlighting in several docs files [16]
+ o docs: remove redundant "better" in --fail help [55]
  o examples/libtest: add .checksrc to dist [14]
  o examples: remove superfluous asterisk uses
  o failf: remove newline from formatting strings [35]
  o getinfo: build with disabled HTTP support
  o h2: do not wait for RECV on paused transfers [43]
+ o HISTORY: added dates to early history
  o http: show the request as headers even when split-sending [7]
+ o httpauth: make multi-request auth work with custom port [45]
  o INSTALL: update the list known OSes and CPU archs curl has run on [38]
  o lib1564/5: verify that curl_multi_wakeup returns OK
+ o misc: assorted typo fixes [57]
  o misc: fix "warning: empty expression statement has no effect" [30]
  o mqtt: deal with 0 byte reads correctly [4]
  o mqtt: handle POST/PUBLISH without a set POSTFIELDSIZE [1]
@@ -51,10 +61,14 @@ This release includes the following bugfixes:
  o runtests: add support for %if [feature] conditions [19]
  o speedcheck: exclude paused transfers [42]
  o test1522: add debug tracing [3]
+ o test1633: set appropriate name
  o tests/mqttd: extract the client id from the correct offset [13]
  o tests: make --libcurl tests only test FTP options if ftp enabled [18]
+ o tool_operate: fix the suppression logic of some error messages [33]
  o tooĺ_writeout: fix the -w time output units [6]
+ o travis: limit the tests with quiche builds to HTTPS and FTPS only [44]
  o travis: restrict the openssl3 job to only run https and ftps tests [34]
+ o wolfssl: Support wolfSSL builds missing TLS 1.1 [37]
 
 This release includes the following known bugs:
 
@@ -64,12 +78,13 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   0xflotus on github, Cherish98 on github, Cory Benfield, Cristian Rodríguez,
-  Dan Fandrich, Daniel Stenberg, Dennis Clarke, Douglas R. Reno,
-  Earnestly on github, Gisle Vanem, Hans-Christian Noren Egtvedt,
-  Harry Sintonen, Ian Spence, Jeremy Thibault, Jon Rumsey, Jon Wilkes,
-  Matthias Gatto, Nick Zitzmann, parazyd on github, Ray Satiro, Sean McArthur,
-  Tomas Berger, XhmikosR on github, 不确定
-  (24 contributors)
+  Dan Fandrich, Daniel Stenberg, Denis Laxalde, Dennis Clarke, Douglas R. Reno,
+  Earnestly on github, Emil Engler, Gisle Vanem, Hans-Christian Noren Egtvedt,
+  Harry Sintonen, Hongyi Zhao, Ian Spence, Jeremy Thibault, Jon Rumsey,
+  Jon Wilkes, Julian Montes, Kevin Ushey, Matthias Gatto, Nick Zitzmann,
+  Olaf Hering, parazyd on github, Paul Groke, Ray Satiro, Sean McArthur,
+  Tomas Berger, UrsusArctos on github, XhmikosR on github, 不确定
+  (32 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -105,12 +120,23 @@ References to bug reports and discussions on issues:
  [28] = https://curl.se/bug/?i=6244
  [30] = https://github.com/curl/curl/commit/08e8455dddc5e48e58a12ade3815c01ae3da3b64#commitcomment-45433279
  [31] = https://curl.se/bug/?i=6349
+ [33] = https://curl.se/mail/archive-2020-12/0017.html
  [34] = https://curl.se/bug/?i=6345
  [35] = https://curl.se/bug/?i=6365
  [36] = https://curl.se/bug/?i=6112
+ [37] = https://curl.se/mail/lib-2020-12/0121.html
  [38] = https://curl.se/bug/?i=6366
  [39] = https://curl.se/bug/?i=6364
  [40] = https://curl.se/mail/lib-2020-12/0084.html
  [41] = https://curl.se/bug/?i=6360
  [42] = https://curl.se/bug/?i=6358
  [43] = https://curl.se/bug/?i=6356
+ [44] = https://curl.se/bug/?i=6403
+ [45] = https://curl.se/bug/?i=6397
+ [47] = https://curl.se/mail/archive-2020-12/0018.html
+ [51] = https://curl.se/bug/?i=6392
+ [52] = https://curl.se/bug/?i=6378
+ [53] = https://curl.se/bug/?i=6294
+ [55] = https://curl.se/bug/?i=6385
+ [56] = https://curl.se/bug/?i=6380
+ [57] = https://curl.se/bug/?i=6375
