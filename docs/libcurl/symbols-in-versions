@@ -703,6 +703,7 @@ CURLPROTO_FILE                  7.19.4
 CURLPROTO_FTP                   7.19.4
 CURLPROTO_FTPS                  7.19.4
 CURLPROTO_GOPHER                7.21.2
+CURLPROTO_GOPHERS               7.75.0
 CURLPROTO_HTTP                  7.19.4
 CURLPROTO_HTTPS                 7.19.4
 CURLPROTO_IMAP                  7.20.0
