@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -365,7 +365,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   struct_stat statbuf; /* struct_stat instead of struct stat just to allow the
                           Windows version to have a different struct without
                           having to redefine the simple word 'stat' */
-  curl_off_t expected_size = 0;
+  curl_off_t expected_size = -1;
   bool size_known;
   bool fstated = FALSE;
   struct Curl_easy *data = conn->data;
@@ -388,8 +388,8 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
 
   /* VMS: This only works reliable for STREAMLF files */
   if(-1 != fstat(fd, &statbuf)) {
-    /* we could stat it, then read out the size */
-    expected_size = statbuf.st_size;
+    if(!S_ISDIR(statbuf.st_mode))
+      expected_size = statbuf.st_size;
     /* and store the modification time */
     data->info.filetime = statbuf.st_mtime;
     fstated = TRUE;
@@ -407,12 +407,14 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     struct tm buffer;
     const struct tm *tm = &buffer;
     char header[80];
-    msnprintf(header, sizeof(header),
-              "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
-              expected_size);
-    result = Curl_client_write(conn, CLIENTWRITE_HEADER, header, 0);
-    if(result)
-      return result;
+    if(expected_size >= 0) {
+      msnprintf(header, sizeof(header),
+                "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
+                expected_size);
+      result = Curl_client_write(conn, CLIENTWRITE_HEADER, header, 0);
+      if(result)
+        return result;
+    }
 
     result = Curl_client_write(conn, CLIENTWRITE_HEADER,
                                (char *)"Accept-ranges: bytes\r\n", 0);
