@@ -2916,7 +2916,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   const char *p_accept;      /* Accept: string */
 
   /* Always consider the DO phase done after this function call, even if there
-     may be parts of the request that is not yet sent, since we can deal with
+     may be parts of the request that are not yet sent, since we can deal with
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
 
