@@ -1258,7 +1258,9 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
   }
   else {
 #ifdef CURLDEBUG
-    /* Allow debug builds override this logic to force short initial sends */
+    /* Allow debug builds to override this logic to force short initial
+       sends
+     */
     char *p = getenv("CURL_SMALLREQSEND");
     if(p) {
       size_t altsize = (size_t)strtoul(p, NULL, 10);
