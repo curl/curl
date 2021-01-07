@@ -285,7 +285,7 @@ Curl_he2ai(const struct hostent *he, int port)
 #endif
       ss_size = sizeof(struct sockaddr_in);
 
-    /* allocate memory to told the struct, the address and the name */
+    /* allocate memory to hold the struct, the address and the name */
     ai = calloc(1, sizeof(struct Curl_addrinfo) + ss_size + namelen);
     if(!ai) {
       result = CURLE_OUT_OF_MEMORY;

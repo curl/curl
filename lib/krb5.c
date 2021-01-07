@@ -776,7 +776,7 @@ static int sec_set_protection_level(struct connectdata *conn)
     }
   }
 
-  /* Now try to negiociate the protection level. */
+  /* Now try to negotiate the protection level. */
   code = ftp_send_command(conn, "PROT %c", level_to_char(level));
 
   if(code < 0)

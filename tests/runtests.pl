@@ -2252,7 +2252,7 @@ sub runsshserver {
 }
 
 #######################################################################
-# Start the socks server
+# Start the MQTT server
 #
 sub runmqttserver {
     my ($id, $verbose, $ipv6) = @_;

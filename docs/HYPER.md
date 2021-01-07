@@ -39,7 +39,7 @@ Build curl to use hyper's C API:
 Hyper is a low level HTTP transport library. curl itself provides all HTTP
 headers and Hyper provides all received headers back to curl.
 
-Therefore, msost of the "header logic" in curl as in responding to and acting
+Therefore, most of the "header logic" in curl as in responding to and acting
 on specific input and output headers are done the same way in curl code.
 
 The API in Hyper delivers received HTTP headers as (cleaned up) name=value
