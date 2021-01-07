@@ -3021,7 +3021,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     /* When we are to insert a TE: header in the request, we must also insert
        TE in a Connection: header, so we need to merge the custom provided
        Connection: header and prevent the original to get sent. Note that if
-       the user has inserted his/hers own TE: header we don't do this magic
+       the user has inserted his/her own TE: header we don't do this magic
        but then assume that the user will handle it all! */
     char *cptr = Curl_checkheaders(conn, "Connection");
 #define TE_HEADER "TE: gzip\r\n"
