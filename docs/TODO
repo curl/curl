@@ -101,7 +101,8 @@
  11.3 Use NTLMv2
  11.4 Create remote directories
 
- 12. New protocols
+ 12. FILE
+ 12.1 Directory listing for FILE:
 
  13. SSL
  13.1 TLS-PSK with OpenSSL
@@ -692,23 +693,31 @@
 
 11.1 File listing support
 
-Add support for listing the contents of a SMB share. The output should probably
-be the same as/similar to FTP.
+ Add support for listing the contents of a SMB share. The output should
+ probably be the same as/similar to FTP.
 
 11.2 Honor file timestamps
 
-The timestamp of the transferred file should reflect that of the original file.
+ The timestamp of the transferred file should reflect that of the original
+ file.
 
 11.3 Use NTLMv2
 
-Currently the SMB authentication uses NTLMv1.
+ Currently the SMB authentication uses NTLMv1.
 
 11.4 Create remote directories
 
-Support for creating remote directories when uploading a file to a directory
-that doesn't exist on the server, just like --ftp-create-dirs.
+ Support for creating remote directories when uploading a file to a directory
+ that doesn't exist on the server, just like --ftp-create-dirs.
 
-12. New protocols
+
+12. FILE
+
+12.1 Directory listing for FILE:
+
+ Add support for listing the contents of a directory accessed with FILE. The
+ output should probably be the same as/similar to FTP.
+
 
 13. SSL
 
