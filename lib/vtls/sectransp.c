@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2012 - 2017, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2693,7 +2693,7 @@ sectransp_connect_step2(struct connectdata *conn, int sockindex)
         else
           infof(data, "ALPN, server did not agree to a protocol\n");
 
-        Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+        Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                             BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
 
         /* chosenProtocol is a reference to the string within alpnArr
@@ -3157,13 +3157,13 @@ static bool Curl_sectransp_false_start(void)
   return FALSE;
 }
 
-static ssize_t sectransp_send(struct connectdata *conn,
+static ssize_t sectransp_send(struct Curl_easy *data,
                               int sockindex,
                               const void *mem,
                               size_t len,
                               CURLcode *curlcode)
 {
-  /*struct Curl_easy *data = conn->data;*/
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   size_t processed = 0UL;
@@ -3215,7 +3215,7 @@ static ssize_t sectransp_send(struct connectdata *conn,
           *curlcode = CURLE_AGAIN;
           return -1L;
         default:
-          failf(conn->data, "SSLWrite() returned error %d", err);
+          failf(data, "SSLWrite() returned error %d", err);
           *curlcode = CURLE_SEND_ERROR;
           return -1L;
       }
@@ -3224,13 +3224,13 @@ static ssize_t sectransp_send(struct connectdata *conn,
   return (ssize_t)processed;
 }
 
-static ssize_t sectransp_recv(struct connectdata *conn,
+static ssize_t sectransp_recv(struct Curl_easy *data,
                               int num,
                               char *buf,
                               size_t buffersize,
                               CURLcode *curlcode)
 {
-  /*struct Curl_easy *data = conn->data;*/
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[num];
   struct ssl_backend_data *backend = connssl->backend;
   size_t processed = 0UL;
@@ -3269,7 +3269,7 @@ static ssize_t sectransp_recv(struct connectdata *conn,
         }
         goto again;
       default:
-        failf(conn->data, "SSLRead() return error %d", err);
+        failf(data, "SSLRead() return error %d", err);
         *curlcode = CURLE_RECV_ERROR;
         return -1L;
         break;

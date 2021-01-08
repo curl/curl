@@ -565,7 +565,7 @@ enum resolve_t Curl_resolv(struct connectdata *conn,
     if(!addr) {
       /* Check what IP specifics the app has requested and if we can provide
        * it. If not, bail out. */
-      if(!Curl_ipvalid(conn))
+      if(!Curl_ipvalid(data, conn))
         return CURLRESOLV_ERROR;
 
       if(allowDOH && data->set.doh && !ipnum) {

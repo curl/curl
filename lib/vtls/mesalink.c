@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2017 - 2018, Yiming Jing, <jingyiming@baidu.com>
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -378,9 +378,10 @@ mesalink_connect_step3(struct connectdata *conn, int sockindex)
 }
 
 static ssize_t
-mesalink_send(struct connectdata *conn, int sockindex, const void *mem,
+mesalink_send(struct Curl_easy *data, int sockindex, const void *mem,
               size_t len, CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   char error_buffer[MESALINK_MAX_ERROR_SZ];
   int memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
@@ -395,7 +396,7 @@ mesalink_send(struct connectdata *conn, int sockindex, const void *mem,
       *curlcode = CURLE_AGAIN;
       return -1;
     default:
-      failf(conn->data,
+      failf(data,
             "SSL write: %s, errno %d",
             ERR_error_string_n(err, error_buffer, sizeof(error_buffer)),
             SOCKERRNO);
@@ -423,9 +424,10 @@ Curl_mesalink_close(struct connectdata *conn, int sockindex)
 }
 
 static ssize_t
-mesalink_recv(struct connectdata *conn, int num, char *buf, size_t buffersize,
+mesalink_recv(struct Curl_easy *data, int num, char *buf, size_t buffersize,
               CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[num];
   char error_buffer[MESALINK_MAX_ERROR_SZ];
   int buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
@@ -444,7 +446,7 @@ mesalink_recv(struct connectdata *conn, int num, char *buf, size_t buffersize,
       *curlcode = CURLE_AGAIN;
       return -1;
     default:
-      failf(conn->data,
+      failf(data,
             "SSL read: %s, errno %d",
             ERR_error_string_n(err, error_buffer, sizeof(error_buffer)),
             SOCKERRNO);

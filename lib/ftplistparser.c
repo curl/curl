@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -268,10 +268,11 @@ static int ftp_pl_get_permission(const char *str)
   return permissions;
 }
 
-static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
+static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
                                     struct fileinfo *infop)
 {
   curl_fnmatch_callback compare;
+  struct connectdata *conn = data->conn;
   struct WildcardData *wc = &conn->data->wildcard;
   struct ftp_wc *ftpwc = wc->protdata;
   struct Curl_llist *llist = &wc->filelist;
@@ -327,8 +328,8 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
                           void *connptr)
 {
   size_t bufflen = size*nmemb;
-  struct connectdata *conn = (struct connectdata *)connptr;
-  struct ftp_wc *ftpwc = conn->data->wildcard.protdata;
+  struct Curl_easy *data = (struct Curl_easy *)connptr;
+  struct ftp_wc *ftpwc = data->wildcard.protdata;
   struct ftp_parselist_data *parser = ftpwc->parser;
   struct fileinfo *infop;
   struct curl_fileinfo *finfo;
@@ -728,7 +729,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
             finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
             parser->offsets.filename = parser->item_offset;
             parser->state.UNIX.main = PL_UNIX_FILETYPE;
-            result = ftp_pl_insert_finfo(conn, infop);
+            result = ftp_pl_insert_finfo(data, infop);
             if(result) {
               parser->error = result;
               goto fail;
@@ -740,7 +741,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
             finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
             parser->offsets.filename = parser->item_offset;
             parser->state.UNIX.main = PL_UNIX_FILETYPE;
-            result = ftp_pl_insert_finfo(conn, infop);
+            result = ftp_pl_insert_finfo(data, infop);
             if(result) {
               parser->error = result;
               goto fail;
@@ -835,7 +836,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           else if(c == '\n') {
             finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
             parser->offsets.symlink_target = parser->item_offset;
-            result = ftp_pl_insert_finfo(conn, infop);
+            result = ftp_pl_insert_finfo(data, infop);
             if(result) {
               parser->error = result;
               goto fail;
@@ -847,7 +848,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           if(c == '\n') {
             finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
             parser->offsets.symlink_target = parser->item_offset;
-            result = ftp_pl_insert_finfo(conn, infop);
+            result = ftp_pl_insert_finfo(data, infop);
             if(result) {
               parser->error = result;
               goto fail;
@@ -967,7 +968,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
             parser->offsets.filename = parser->item_offset;
             finfo->b_data[finfo->b_used - 1] = 0;
             parser->offsets.filename = parser->item_offset;
-            result = ftp_pl_insert_finfo(conn, infop);
+            result = ftp_pl_insert_finfo(data, infop);
             if(result) {
               parser->error = result;
               goto fail;
@@ -979,7 +980,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         case PL_WINNT_FILENAME_WINEOL:
           if(c == '\n') {
             parser->offsets.filename = parser->item_offset;
-            result = ftp_pl_insert_finfo(conn, infop);
+            result = ftp_pl_insert_finfo(data, infop);
             if(result) {
               parser->error = result;
               goto fail;

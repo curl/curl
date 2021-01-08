@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -701,7 +701,7 @@ mbed_connect_step2(struct connectdata *conn,
     else {
       infof(data, "ALPN, server did not agree to a protocol\n");
     }
-    Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+    Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                         BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 #endif
@@ -763,16 +763,16 @@ mbed_connect_step3(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static ssize_t mbed_send(struct connectdata *conn, int sockindex,
+static ssize_t mbed_send(struct Curl_easy *data, int sockindex,
                          const void *mem, size_t len,
                          CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   int ret = -1;
 
-  ret = mbedtls_ssl_write(&backend->ssl,
-                          (unsigned char *)mem, len);
+  ret = mbedtls_ssl_write(&backend->ssl, (unsigned char *)mem, len);
 
   if(ret < 0) {
     *curlcode = (ret == MBEDTLS_ERR_SSL_WANT_WRITE) ?
@@ -804,16 +804,16 @@ static void mbedtls_close(struct connectdata *conn, int sockindex)
 #endif /* THREADING_SUPPORT */
 }
 
-static ssize_t mbed_recv(struct connectdata *conn, int num,
+static ssize_t mbed_recv(struct Curl_easy *data, int num,
                          char *buf, size_t buffersize,
                          CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[num];
   struct ssl_backend_data *backend = connssl->backend;
   int ret = -1;
   ssize_t len = -1;
 
-  memset(buf, 0, buffersize);
   ret = mbedtls_ssl_read(&backend->ssl, (unsigned char *)buf,
                          buffersize);
 

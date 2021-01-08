@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -65,9 +65,10 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
 static Curl_recv h3_stream_recv;
 static Curl_send h3_stream_send;
 
-static int quiche_getsock(struct connectdata *conn, curl_socket_t *socks)
+static int quiche_getsock(struct Curl_easy *data,
+                          struct connectdata *conn, curl_socket_t *socks)
 {
-  struct SingleRequest *k = &conn->data->req;
+  struct SingleRequest *k = &data->req;
   int bitmap = GETSOCK_BLANK;
 
   socks[0] = conn->sock[FIRSTSOCKET];
@@ -81,12 +82,6 @@ static int quiche_getsock(struct connectdata *conn, curl_socket_t *socks)
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
 
   return bitmap;
-}
-
-static int quiche_perform_getsock(const struct connectdata *conn,
-                                  curl_socket_t *socks)
-{
-  return quiche_getsock((struct connectdata *)conn, socks);
 }
 
 static CURLcode qs_disconnect(struct connectdata *conn,
@@ -111,10 +106,12 @@ static CURLcode qs_disconnect(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static CURLcode quiche_disconnect(struct connectdata *conn,
+static CURLcode quiche_disconnect(struct Curl_easy *data,
+                                  struct connectdata *conn,
                                   bool dead_connection)
 {
   struct quicsocket *qs = conn->quic;
+  (void)data;
   (void)dead_connection;
   return qs_disconnect(conn, qs);
 }
@@ -126,19 +123,21 @@ void Curl_quic_disconnect(struct connectdata *conn,
     qs_disconnect(conn, &conn->hequic[tempindex]);
 }
 
-static unsigned int quiche_conncheck(struct connectdata *conn,
+static unsigned int quiche_conncheck(struct Curl_easy *data,
+                                     struct connectdata *conn,
                                      unsigned int checks_to_perform)
 {
+  (void)data;
   (void)conn;
   (void)checks_to_perform;
   return CONNRESULT_NONE;
 }
 
-static CURLcode quiche_do(struct connectdata *conn, bool *done)
+static CURLcode quiche_do(struct Curl_easy *data, bool *done)
 {
-  struct HTTP *stream = conn->data->req.p.http;
+  struct HTTP *stream = data->req.p.http;
   stream->h3req = FALSE; /* not sent */
-  return Curl_http(conn, done);
+  return Curl_http(data, done);
 }
 
 static const struct Curl_handler Curl_handler_http3 = {
@@ -153,7 +152,7 @@ static const struct Curl_handler Curl_handler_http3 = {
   quiche_getsock,                       /* proto_getsock */
   quiche_getsock,                       /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
-  quiche_perform_getsock,               /* perform_getsock */
+  quiche_getsock,                       /* perform_getsock */
   quiche_disconnect,                    /* disconnect */
   ZERO_NULL,                            /* readwrite */
   quiche_conncheck,                     /* connection_check */
@@ -256,7 +255,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
   memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
-  Curl_persistconninfo(conn);
+  Curl_persistconninfo(data, conn);
 
   /* for connection reuse purposes: */
   conn->ssl[FIRSTSOCKET].state = ssl_connection_complete;
@@ -453,7 +452,7 @@ static int cb_each_header(uint8_t *name, size_t name_len,
   return 0;
 }
 
-static ssize_t h3_stream_recv(struct connectdata *conn,
+static ssize_t h3_stream_recv(struct Curl_easy *data,
                               int sockindex,
                               char *buf,
                               size_t buffersize,
@@ -461,12 +460,12 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
 {
   ssize_t recvd = -1;
   ssize_t rcode;
+  struct connectdata *conn = data->conn;
   struct quicsocket *qs = conn->quic;
   curl_socket_t sockfd = conn->sock[sockindex];
   quiche_h3_event *ev;
   int rc;
   struct h3h1header headers;
-  struct Curl_easy *data = conn->data;
   struct HTTP *stream = data->req.p.http;
   headers.dest = buf;
   headers.destlen = buffersize;
@@ -546,16 +545,17 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
   return recvd;
 }
 
-static ssize_t h3_stream_send(struct connectdata *conn,
+static ssize_t h3_stream_send(struct Curl_easy *data,
                               int sockindex,
                               const void *mem,
                               size_t len,
                               CURLcode *curlcode)
 {
   ssize_t sent;
+  struct connectdata *conn = data->conn;
   struct quicsocket *qs = conn->quic;
   curl_socket_t sockfd = conn->sock[sockindex];
-  struct HTTP *stream = conn->data->req.p.http;
+  struct HTTP *stream = data->req.p.http;
 
   if(!stream->h3req) {
     CURLcode result = http_request(conn, mem, len);

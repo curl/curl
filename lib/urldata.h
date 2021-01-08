@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -105,14 +105,14 @@
 #include "dynbuf.h"
 
 /* return the count of bytes sent, or -1 on error */
-typedef ssize_t (Curl_send)(struct connectdata *conn, /* connection data */
+typedef ssize_t (Curl_send)(struct Curl_easy *data,   /* transfer */
                             int sockindex,            /* socketindex */
                             const void *buf,          /* data to write */
                             size_t len,               /* max amount to write */
                             CURLcode *err);           /* error to return */
 
 /* return the count of bytes read, or -1 on error */
-typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
+typedef ssize_t (Curl_recv)(struct Curl_easy *data,   /* transfer */
                             int sockindex,            /* socketindex */
                             char *buf,                /* store data here */
                             size_t len,               /* max amount to read */
@@ -535,12 +535,6 @@ struct Curl_async {
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
 
-/* These function pointer types are here only to allow easier typecasting
-   within the source when we need to cast between data pointers (such as NULL)
-   and function pointers. */
-typedef CURLcode (*Curl_do_more_func)(struct connectdata *, int *);
-typedef CURLcode (*Curl_done_func)(struct connectdata *, CURLcode, bool);
-
 enum expect100 {
   EXP100_SEND_DATA,           /* enough waiting, just send the body now */
   EXP100_AWAITING_CONTINUE,   /* waiting for the 100 Continue header */
@@ -697,18 +691,20 @@ struct SingleRequest {
 struct Curl_handler {
   const char *scheme;        /* URL scheme name. */
 
-  /* Complement to setup_connection_internals(). */
-  CURLcode (*setup_connection)(struct connectdata *);
+  /* Complement to setup_connection_internals(). This is done before the
+     transfer "owns" the connection. */
+  CURLcode (*setup_connection)(struct Curl_easy *data,
+                               struct connectdata *conn);
 
   /* These two functions MUST be set to be protocol dependent */
-  CURLcode (*do_it)(struct connectdata *, bool *done);
-  Curl_done_func done;
+  CURLcode (*do_it)(struct Curl_easy *data, bool *done);
+  CURLcode (*done)(struct Curl_easy *, CURLcode, bool);
 
   /* If the curl_do() function is better made in two halves, this
    * curl_do_more() function will be called afterwards, if set. For example
    * for doing the FTP stuff after the PASV/PORT command.
    */
-  Curl_do_more_func do_more;
+  CURLcode (*do_more)(struct Curl_easy *, int *);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * after the connect() and everything is done, as a step in the connection.
@@ -716,39 +712,41 @@ struct Curl_handler {
    * function completes before return. If it doesn't complete, the caller
    * should call the curl_connecting() function until it is.
    */
-  CURLcode (*connect_it)(struct connectdata *, bool *done);
+  CURLcode (*connect_it)(struct Curl_easy *data, bool *done);
 
   /* See above. */
-  CURLcode (*connecting)(struct connectdata *, bool *done);
-  CURLcode (*doing)(struct connectdata *, bool *done);
+  CURLcode (*connecting)(struct Curl_easy *data, bool *done);
+  CURLcode (*doing)(struct Curl_easy *data, bool *done);
 
   /* Called from the multi interface during the PROTOCONNECT phase, and it
      should then return a proper fd set */
-  int (*proto_getsock)(struct connectdata *conn,
-                       curl_socket_t *socks);
+  int (*proto_getsock)(struct Curl_easy *data,
+                       struct connectdata *conn, curl_socket_t *socks);
 
   /* Called from the multi interface during the DOING phase, and it should
      then return a proper fd set */
-  int (*doing_getsock)(struct connectdata *conn,
-                       curl_socket_t *socks);
+  int (*doing_getsock)(struct Curl_easy *data,
+                       struct connectdata *conn, curl_socket_t *socks);
 
   /* Called from the multi interface during the DO_MORE phase, and it should
      then return a proper fd set */
-  int (*domore_getsock)(struct connectdata *conn,
-                        curl_socket_t *socks);
+  int (*domore_getsock)(struct Curl_easy *data,
+                        struct connectdata *conn, curl_socket_t *socks);
 
   /* Called from the multi interface during the DO_DONE, PERFORM and
      WAITPERFORM phases, and it should then return a proper fd set. Not setting
      this will make libcurl use the generic default one. */
-  int (*perform_getsock)(const struct connectdata *conn,
-                         curl_socket_t *socks);
+  int (*perform_getsock)(struct Curl_easy *data,
+                         struct connectdata *conn, curl_socket_t *socks);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * by the curl_disconnect(), as a step in the disconnection.  If the handler
-   * is called because the connection has been considered dead, dead_connection
-   * is set to TRUE.
+   * is called because the connection has been considered dead,
+   * dead_connection is set to TRUE. The connection is already disassociated
+   * from the transfer here.
    */
-  CURLcode (*disconnect)(struct connectdata *, bool dead_connection);
+  CURLcode (*disconnect)(struct Curl_easy *, struct connectdata *,
+                         bool dead_connection);
 
   /* If used, this function gets called from transfer.c:readwrite_data() to
      allow the protocol to do extra reads/writes */
@@ -758,7 +756,8 @@ struct Curl_handler {
   /* This function can perform various checks on the connection. See
      CONNCHECK_* for more information about the checks that can be performed,
      and CONNRESULT_* for the results that can be returned. */
-  unsigned int (*connection_check)(struct connectdata *conn,
+  unsigned int (*connection_check)(struct Curl_easy *data,
+                                   struct connectdata *conn,
                                    unsigned int checks_to_perform);
 
   long defport;           /* Default port. */

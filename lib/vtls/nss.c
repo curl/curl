@@ -814,6 +814,7 @@ static SECStatus nss_auth_cert_hook(void *arg, PRFileDesc *fd, PRBool checksig,
 static void HandshakeCallback(PRFileDesc *sock, void *arg)
 {
   struct connectdata *conn = (struct connectdata*) arg;
+  struct Curl_easy *data = conn->data;
   unsigned int buflenmax = 50;
   unsigned char buf[50];
   unsigned int buflen;
@@ -833,15 +834,15 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
 #endif
     case SSL_NEXT_PROTO_NO_SUPPORT:
     case SSL_NEXT_PROTO_NO_OVERLAP:
-      infof(conn->data, "ALPN/NPN, server did not agree to a protocol\n");
+      infof(data, "ALPN/NPN, server did not agree to a protocol\n");
       return;
 #ifdef SSL_ENABLE_ALPN
     case SSL_NEXT_PROTO_SELECTED:
-      infof(conn->data, "ALPN, server accepted to use %.*s\n", buflen, buf);
+      infof(data, "ALPN, server accepted to use %.*s\n", buflen, buf);
       break;
 #endif
     case SSL_NEXT_PROTO_NEGOTIATED:
-      infof(conn->data, "NPN, server accepted to use %.*s\n", buflen, buf);
+      infof(data, "NPN, server accepted to use %.*s\n", buflen, buf);
       break;
     }
 
@@ -856,7 +857,7 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
        !memcmp(ALPN_HTTP_1_1, buf, ALPN_HTTP_1_1_LENGTH)) {
       conn->negnpn = CURL_HTTP_VERSION_1_1;
     }
-    Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+    Curl_multiuse_state(conn->data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                         BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 }
@@ -952,6 +953,7 @@ static void display_cert_info(struct Curl_easy *data,
 static CURLcode display_conn_info(struct connectdata *conn, PRFileDesc *sock)
 {
   CURLcode result = CURLE_OK;
+  struct Curl_easy *data = conn->data;
   SSLChannelInfo channel;
   SSLCipherSuiteInfo suite;
   CERTCertificate *cert;
@@ -965,16 +967,16 @@ static CURLcode display_conn_info(struct connectdata *conn, PRFileDesc *sock)
      channel.cipherSuite) {
     if(SSL_GetCipherSuiteInfo(channel.cipherSuite,
                               &suite, sizeof(suite)) == SECSuccess) {
-      infof(conn->data, "SSL connection using %s\n", suite.cipherSuiteName);
+      infof(data, "SSL connection using %s\n", suite.cipherSuiteName);
     }
   }
 
   cert = SSL_PeerCertificate(sock);
   if(cert) {
-    infof(conn->data, "Server certificate:\n");
+    infof(data, "Server certificate:\n");
 
-    if(!conn->data->set.ssl.certinfo) {
-      display_cert_info(conn->data, cert);
+    if(!data->set.ssl.certinfo) {
+      display_cert_info(data, cert);
       CERT_DestroyCertificate(cert);
     }
     else {
@@ -995,10 +997,10 @@ static CURLcode display_conn_info(struct connectdata *conn, PRFileDesc *sock)
         }
       }
 
-      result = Curl_ssl_init_certinfo(conn->data, i);
+      result = Curl_ssl_init_certinfo(data, i);
       if(!result) {
         for(i = 0; cert; cert = cert2) {
-          result = Curl_extract_certinfo(conn, i++, (char *)cert->derCert.data,
+          result = Curl_extract_certinfo(data, i++, (char *)cert->derCert.data,
                                          (char *)cert->derCert.data +
                                                  cert->derCert.len);
           if(result)
@@ -2260,19 +2262,20 @@ static CURLcode nss_connect_nonblocking(struct connectdata *conn,
   return nss_connect_common(conn, sockindex, done);
 }
 
-static ssize_t nss_send(struct connectdata *conn,  /* connection data */
+static ssize_t nss_send(struct Curl_easy *data,    /* transfer */
                         int sockindex,             /* socketindex */
                         const void *mem,           /* send this data */
                         size_t len,                /* amount to write */
                         CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   ssize_t rc;
 
   /* The SelectClientCert() hook uses this for infof() and failf() but the
      handle stored in nss_setup_connect() could have already been freed. */
-  backend->data = conn->data;
+  backend->data = data;
 
   rc = PR_Send(backend->handle, mem, (int)len, 0, PR_INTERVAL_NO_WAIT);
   if(rc < 0) {
@@ -2282,7 +2285,7 @@ static ssize_t nss_send(struct connectdata *conn,  /* connection data */
     else {
       /* print the error number and error string */
       const char *err_name = nss_error_to_name(err);
-      infof(conn->data, "SSL write: error %d (%s)\n", err, err_name);
+      infof(data, "SSL write: error %d (%s)\n", err, err_name);
 
       /* print a human-readable message describing the error if available */
       nss_print_error_message(conn->data, err);
@@ -2298,19 +2301,20 @@ static ssize_t nss_send(struct connectdata *conn,  /* connection data */
   return rc; /* number of bytes */
 }
 
-static ssize_t nss_recv(struct connectdata *conn,  /* connection data */
+static ssize_t nss_recv(struct Curl_easy *data,    /* transfer */
                         int sockindex,             /* socketindex */
                         char *buf,                 /* store read data here */
                         size_t buffersize,         /* max amount to read */
                         CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   ssize_t nread;
 
   /* The SelectClientCert() hook uses this for infof() and failf() but the
      handle stored in nss_setup_connect() could have already been freed. */
-  backend->data = conn->data;
+  backend->data = data;
 
   nread = PR_Recv(backend->handle, buf, (int)buffersize, 0,
                   PR_INTERVAL_NO_WAIT);
@@ -2323,7 +2327,7 @@ static ssize_t nss_recv(struct connectdata *conn,  /* connection data */
     else {
       /* print the error number and error string */
       const char *err_name = nss_error_to_name(err);
-      infof(conn->data, "SSL read: errno %d (%s)\n", err, err_name);
+      infof(data, "SSL read: errno %d (%s)\n", err, err_name);
 
       /* print a human-readable message describing the error if available */
       nss_print_error_message(conn->data, err);

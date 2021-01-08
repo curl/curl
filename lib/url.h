@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -72,9 +72,9 @@ void Curl_free_idnconverted_hostname(struct hostname *host);
                                              specified */
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
-#define Curl_verboseconnect(x)  Curl_nop_stmt
+#define Curl_verboseconnect(x,y)  Curl_nop_stmt
 #else
-void Curl_verboseconnect(struct connectdata *conn);
+void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn);
 #endif
 
 #ifdef CURL_DISABLE_PROXY

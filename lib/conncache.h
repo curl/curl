@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2015 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2015 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2012 - 2014, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
@@ -101,7 +101,8 @@ void Curl_conncache_remove_conn(struct Curl_easy *data,
 bool Curl_conncache_foreach(struct Curl_easy *data,
                             struct conncache *connc,
                             void *param,
-                            int (*func)(struct connectdata *conn,
+                            int (*func)(struct Curl_easy *data,
+                                        struct connectdata *conn,
                                         void *param));
 
 struct connectdata *

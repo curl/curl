@@ -45,27 +45,28 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-static CURLcode wssh_connect(struct connectdata *conn, bool *done);
-static CURLcode wssh_multi_statemach(struct connectdata *conn, bool *done);
-static CURLcode wssh_do(struct connectdata *conn, bool *done);
+static CURLcode wssh_connect(struct Curl_easy *data, bool *done);
+static CURLcode wssh_multi_statemach(struct Curl_easy *data, bool *done);
+static CURLcode wssh_do(struct Curl_easy *data, bool *done);
 #if 0
-static CURLcode wscp_done(struct connectdata *conn,
+static CURLcode wscp_done(struct Curl_easy *data,
                           CURLcode, bool premature);
-static CURLcode wscp_doing(struct connectdata *conn,
+static CURLcode wscp_doing(struct Curl_easy *data,
                            bool *dophase_done);
-static CURLcode wscp_disconnect(struct connectdata *conn,
+static CURLcode wscp_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn,
                                 bool dead_connection);
 #endif
-static CURLcode wsftp_done(struct connectdata *conn,
+static CURLcode wsftp_done(struct Curl_easy *data,
                            CURLcode, bool premature);
-static CURLcode wsftp_doing(struct connectdata *conn,
+static CURLcode wsftp_doing(struct Curl_easy *data,
                             bool *dophase_done);
-static CURLcode wsftp_disconnect(struct connectdata *conn, bool dead);
+static CURLcode wsftp_disconnect(struct Curl_easy *data, bool dead);
 static int wssh_getsock(struct connectdata *conn,
                         curl_socket_t *sock);
-static int wssh_perform_getsock(const struct connectdata *conn,
+static int wssh_perform_getsock(struct connectdata *conn,
                                 curl_socket_t *sock);
-static CURLcode wssh_setup_connection(struct connectdata *conn);
+static CURLcode wssh_setup_connection(struct Curl_easy *data);
 
 #if 0
 /*
@@ -118,6 +119,7 @@ const struct Curl_handler Curl_handler_sftp = {
   ZERO_NULL,                            /* connection_check */
   PORT_SSH,                             /* defport */
   CURLPROTO_SFTP,                       /* protocol */
+  CURLPROTO_SFTP,                       /* family */
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION
   | PROTOPT_NOURLQUERY                  /* flags */
 };
@@ -318,11 +320,11 @@ static ssize_t wsftp_recv(struct connectdata *conn, int sockindex,
 /*
  * SSH setup and connection
  */
-static CURLcode wssh_setup_connection(struct connectdata *conn)
+static CURLcode wssh_setup_connection(struct Curl_easy *data)
 {
   struct SSHPROTO *ssh;
 
-  conn->data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
+  data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
 
@@ -348,16 +350,16 @@ static int userauth(byte authtype,
   return 0;
 }
 
-static CURLcode wssh_connect(struct connectdata *conn, bool *done)
+static CURLcode wssh_connect(struct Curl_easy *data, bool *done)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   struct ssh_conn *sshc;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc;
 
   /* initialize per-handle data if not already */
   if(!data->req.p.ssh)
-    wssh_setup_connection(conn);
+    wssh_setup_connection(data);
 
   /* We default to persistent connections. We set this already in this connect
      function to make the re-use checks properly be able to check this bit. */
@@ -410,7 +412,7 @@ static CURLcode wssh_connect(struct connectdata *conn, bool *done)
   else
     state(conn, SSH_SFTP_INIT);
 
-  return wssh_multi_statemach(conn, done);
+  return wssh_multi_statemach(data, done);
   error:
   wolfSSH_free(sshc->ssh_session);
   wolfSSH_CTX_free(sshc->ctx);
@@ -424,11 +426,11 @@ static CURLcode wssh_connect(struct connectdata *conn, bool *done)
  * wants to be called again when the socket is ready
  */
 
-static CURLcode wssh_statemach_act(struct connectdata *conn, bool *block)
+static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = &conn->proto.sshc;
-  struct Curl_easy *data = conn->data;
   struct SSHPROTO *sftp_scp = data->req.p.ssh;
   WS_SFTPNAME *name;
   int rc = 0;
@@ -762,7 +764,7 @@ static CURLcode wssh_statemach_act(struct connectdata *conn, bool *block)
 
       /* We cannot seek with wolfSSH so resuming and range requests are not
          possible */
-      if(conn->data->state.use_range || data->state.resume_from) {
+      if(data->state.use_range || data->state.resume_from) {
         infof(data, "wolfSSH cannot do range/seek on SFTP\n");
         return CURLE_BAD_DOWNLOAD_RESUME;
       }
@@ -887,19 +889,20 @@ static CURLcode wssh_statemach_act(struct connectdata *conn, bool *block)
 }
 
 /* called repeatedly until done from multi.c */
-static CURLcode wssh_multi_statemach(struct connectdata *conn, bool *done)
+static CURLcode wssh_multi_statemach(struct Curl_easy *data, bool *done)
 {
+  struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = &conn->proto.sshc;
   CURLcode result = CURLE_OK;
   bool block; /* we store the status and use that to provide a ssh_getsock()
                  implementation */
   do {
-    result = wssh_statemach_act(conn, &block);
+    result = wssh_statemach_act(data, &block);
     *done = (sshc->state == SSH_STOP) ? TRUE : FALSE;
     /* if there's no error, it isn't done and it didn't EWOULDBLOCK, then
        try again */
     if(*done) {
-      DEBUGF(infof(conn->data, "wssh_statemach_act says DONE\n"));
+      DEBUGF(infof(data, "wssh_statemach_act says DONE\n"));
     }
   } while(!result && !*done && !block);
 
@@ -907,24 +910,25 @@ static CURLcode wssh_multi_statemach(struct connectdata *conn, bool *done)
 }
 
 static
-CURLcode wscp_perform(struct connectdata *conn,
+CURLcode wscp_perform(struct Curl_easy *data,
                       bool *connected,
                       bool *dophase_done)
 {
-  (void)conn;
+  (void)data;
   (void)connected;
   (void)dophase_done;
   return CURLE_OK;
 }
 
 static
-CURLcode wsftp_perform(struct connectdata *conn,
+CURLcode wsftp_perform(struct Curl_easy *data,
                        bool *connected,
                        bool *dophase_done)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
 
-  DEBUGF(infof(conn->data, "DO phase starts\n"));
+  DEBUGF(infof(data, "DO phase starts\n"));
 
   *dophase_done = FALSE; /* not done yet */
 
@@ -932,12 +936,12 @@ CURLcode wsftp_perform(struct connectdata *conn,
   state(conn, SSH_SFTP_QUOTE_INIT);
 
   /* run the state-machine */
-  result = wssh_multi_statemach(conn, dophase_done);
+  result = wssh_multi_statemach(data, dophase_done);
 
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done) {
-    DEBUGF(infof(conn->data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete\n"));
   }
 
   return result;
@@ -946,11 +950,11 @@ CURLcode wsftp_perform(struct connectdata *conn,
 /*
  * The DO function is generic for both protocols.
  */
-static CURLcode wssh_do(struct connectdata *conn, bool *done)
+static CURLcode wssh_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result;
   bool connected = 0;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = &conn->proto.sshc;
 
   *done = FALSE; /* default to false */
@@ -965,26 +969,26 @@ static CURLcode wssh_do(struct connectdata *conn, bool *done)
   Curl_pgrsSetDownloadSize(data, -1);
 
   if(conn->handler->protocol & CURLPROTO_SCP)
-    result = wscp_perform(conn, &connected,  done);
+    result = wscp_perform(data, &connected,  done);
   else
-    result = wsftp_perform(conn, &connected,  done);
+    result = wsftp_perform(data, &connected,  done);
 
   return result;
 }
 
-static CURLcode wssh_block_statemach(struct connectdata *conn,
+static CURLcode wssh_block_statemach(struct Curl_easy *data,
                                     bool disconnect)
 {
+  struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = &conn->proto.sshc;
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
 
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
     timediff_t left = 1000;
     struct curltime now = Curl_now();
 
-    result = wssh_statemach_act(conn, &block);
+    result = wssh_statemach_act(data, &block);
     if(result)
       break;
 
@@ -1024,14 +1028,15 @@ static CURLcode wssh_block_statemach(struct connectdata *conn,
 
 /* generic done function for both SCP and SFTP called from their specific
    done functions */
-static CURLcode wssh_done(struct connectdata *conn, CURLcode status)
+static CURLcode wssh_done(struct Curl_easy *data, CURLcode status)
 {
   CURLcode result = CURLE_OK;
-  struct SSHPROTO *sftp_scp = conn->data->req.p.ssh;
+  struct connectdata *conn = data->conn;
+  struct SSHPROTO *sftp_scp = data->req.p.ssh;
 
   if(!status) {
     /* run the state-machine */
-    result = wssh_block_statemach(conn, FALSE);
+    result = wssh_block_statemach(data, FALSE);
   }
   else
     result = status;
@@ -1041,12 +1046,12 @@ static CURLcode wssh_done(struct connectdata *conn, CURLcode status)
   if(Curl_pgrsDone(conn))
     return CURLE_ABORTED_BY_CALLBACK;
 
-  conn->data->req.keepon = 0; /* clear all bits */
+  data->req.keepon = 0; /* clear all bits */
   return result;
 }
 
 #if 0
-static CURLcode wscp_done(struct connectdata *conn,
+static CURLcode wscp_done(struct Curl_easy *data,
                          CURLcode code, bool premature)
 {
   CURLcode result = CURLE_OK;
@@ -1057,7 +1062,7 @@ static CURLcode wscp_done(struct connectdata *conn,
   return result;
 }
 
-static CURLcode wscp_doing(struct connectdata *conn,
+static CURLcode wscp_doing(struct Curl_easy *data,
                           bool *dophase_done)
 {
   CURLcode result = CURLE_OK;
@@ -1067,9 +1072,11 @@ static CURLcode wscp_doing(struct connectdata *conn,
   return result;
 }
 
-static CURLcode wscp_disconnect(struct connectdata *conn, bool dead_connection)
+static CURLcode wscp_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn, bool dead_connection)
 {
   CURLcode result = CURLE_OK;
+  (void)data;
   (void)conn;
   (void)dead_connection;
 
@@ -1077,40 +1084,41 @@ static CURLcode wscp_disconnect(struct connectdata *conn, bool dead_connection)
 }
 #endif
 
-static CURLcode wsftp_done(struct connectdata *conn,
+static CURLcode wsftp_done(struct Curl_easy *data,
                           CURLcode code, bool premature)
 {
   (void)premature;
-  state(conn, SSH_SFTP_CLOSE);
+  state(data->conn, SSH_SFTP_CLOSE);
 
-  return wssh_done(conn, code);
+  return wssh_done(data, code);
 }
 
-static CURLcode wsftp_doing(struct connectdata *conn,
+static CURLcode wsftp_doing(struct Curl_easy *data,
                            bool *dophase_done)
 {
-  CURLcode result = wssh_multi_statemach(conn, dophase_done);
+  CURLcode result = wssh_multi_statemach(data, dophase_done);
 
   if(*dophase_done) {
-    DEBUGF(infof(conn->data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete\n"));
   }
   return result;
 }
 
-static CURLcode wsftp_disconnect(struct connectdata *conn, bool dead)
+static CURLcode wsftp_disconnect(struct Curl_easy *data, bool dead)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   (void)dead;
 
-  DEBUGF(infof(conn->data, "SSH DISCONNECT starts now\n"));
+  DEBUGF(infof(data, "SSH DISCONNECT starts now\n"));
 
   if(conn->proto.sshc.ssh_session) {
     /* only if there's a session still around to use! */
     state(conn, SSH_SFTP_SHUTDOWN);
-    result = wssh_block_statemach(conn, TRUE);
+    result = wssh_block_statemach(data, TRUE);
   }
 
-  DEBUGF(infof(conn->data, "SSH DISCONNECT is done\n"));
+  DEBUGF(infof(data, "SSH DISCONNECT is done\n"));
   return result;
 }
 
@@ -1120,7 +1128,7 @@ static int wssh_getsock(struct connectdata *conn,
   return wssh_perform_getsock(conn, sock);
 }
 
-static int wssh_perform_getsock(const struct connectdata *conn,
+static int wssh_perform_getsock(struct connectdata *conn,
                                 curl_socket_t *sock)
 {
   int bitmap = GETSOCK_BLANK;

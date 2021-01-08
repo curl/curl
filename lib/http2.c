@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -65,12 +65,13 @@
 #endif
 
 
-static ssize_t http2_recv(struct connectdata *conn, int sockindex,
+static ssize_t http2_recv(struct Curl_easy *data, int sockindex,
                           char *mem, size_t len, CURLcode *err);
-static bool http2_connisdead(struct connectdata *conn);
+static bool http2_connisdead(struct Curl_easy *data,
+                             struct connectdata *conn);
 static int h2_session_send(struct Curl_easy *data,
                            nghttp2_session *h2);
-static int h2_process_pending_input(struct connectdata *conn,
+static int h2_process_pending_input(struct Curl_easy *data,
                                     struct http_conn *httpc,
                                     CURLcode *err);
 
@@ -92,11 +93,12 @@ void Curl_http2_init_userset(struct UserDefined *set)
   set->stream_weight = NGHTTP2_DEFAULT_WEIGHT;
 }
 
-static int http2_perform_getsock(const struct connectdata *conn,
-                                 curl_socket_t *sock)
+static int http2_getsock(struct Curl_easy *data,
+                         struct connectdata *conn,
+                         curl_socket_t *sock)
 {
   const struct http_conn *c = &conn->proto.httpc;
-  struct SingleRequest *k = &conn->data->req;
+  struct SingleRequest *k = &data->req;
   int bitmap = GETSOCK_BLANK;
 
   sock[0] = conn->sock[FIRSTSOCKET];
@@ -112,12 +114,6 @@ static int http2_perform_getsock(const struct connectdata *conn,
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
 
   return bitmap;
-}
-
-static int http2_getsock(struct connectdata *conn,
-                         curl_socket_t *socks)
-{
-  return http2_perform_getsock(conn, socks);
 }
 
 /*
@@ -140,18 +136,22 @@ static void http2_stream_free(struct HTTP *http)
  * connection cache and not the "main" one. Don't touch the easy handle!
  */
 
-static CURLcode http2_disconnect(struct connectdata *conn,
+static CURLcode http2_disconnect(struct Curl_easy *data,
+                                 struct connectdata *conn,
                                  bool dead_connection)
 {
   struct http_conn *c = &conn->proto.httpc;
   (void)dead_connection;
+#ifndef DEBUG_HTTP2
+  (void)data;
+#endif
 
-  H2BUGF(infof(conn->data, "HTTP/2 DISCONNECT starts now\n"));
+  H2BUGF(infof(data, "HTTP/2 DISCONNECT starts now\n"));
 
   nghttp2_session_del(c->h2);
   Curl_safefree(c->inbuf);
 
-  H2BUGF(infof(conn->data, "HTTP/2 DISCONNECT done\n"));
+  H2BUGF(infof(data, "HTTP/2 DISCONNECT done\n"));
 
   return CURLE_OK;
 }
@@ -163,7 +163,7 @@ static CURLcode http2_disconnect(struct connectdata *conn,
  * Instead, if it is readable, run Curl_connalive() to peek at the socket
  * and distinguish between closed and data.
  */
-static bool http2_connisdead(struct connectdata *conn)
+static bool http2_connisdead(struct Curl_easy *data, struct connectdata *conn)
 {
   int sval;
   bool dead = TRUE;
@@ -193,14 +193,14 @@ static bool http2_connisdead(struct connectdata *conn)
       if(httpc->recv_underlying)
         /* if called "too early", this pointer isn't setup yet! */
         nread = ((Curl_recv *)httpc->recv_underlying)(
-          conn, FIRSTSOCKET, httpc->inbuf, H2_BUFSIZE, &result);
+          data, FIRSTSOCKET, httpc->inbuf, H2_BUFSIZE, &result);
       if(nread != -1) {
-        infof(conn->data,
+        infof(data,
               "%d bytes stray data read before trying h2 connection\n",
               (int)nread);
         httpc->nread_inbuf = 0;
         httpc->inbuflen = nread;
-        (void)h2_process_pending_input(conn, httpc, &result);
+        (void)h2_process_pending_input(data, httpc, &result);
       }
       else
         /* the read failed so let's say this is dead anyway */
@@ -211,24 +211,25 @@ static bool http2_connisdead(struct connectdata *conn)
   return dead;
 }
 
-static unsigned int http2_conncheck(struct connectdata *check,
+static unsigned int http2_conncheck(struct Curl_easy *data,
+                                    struct connectdata *conn,
                                     unsigned int checks_to_perform)
 {
   unsigned int ret_val = CONNRESULT_NONE;
-  struct http_conn *c = &check->proto.httpc;
+  struct http_conn *c = &conn->proto.httpc;
   int rc;
   bool send_frames = false;
 
   if(checks_to_perform & CONNCHECK_ISDEAD) {
-    if(http2_connisdead(check))
+    if(http2_connisdead(data, conn))
       ret_val |= CONNRESULT_DEAD;
   }
 
   if(checks_to_perform & CONNCHECK_KEEPALIVE) {
     struct curltime now = Curl_now();
-    timediff_t elapsed = Curl_timediff(now, check->keepalive);
+    timediff_t elapsed = Curl_timediff(now, conn->keepalive);
 
-    if(elapsed > check->upkeep_interval_ms) {
+    if(elapsed > conn->upkeep_interval_ms) {
       /* Perform an HTTP/2 PING */
       rc = nghttp2_submit_ping(c->h2, 0, ZERO_NULL);
       if(!rc) {
@@ -237,18 +238,18 @@ static unsigned int http2_conncheck(struct connectdata *check,
         send_frames = true;
       }
       else {
-       failf(check->data, "nghttp2_submit_ping() failed: %s(%d)",
+       failf(data, "nghttp2_submit_ping() failed: %s(%d)",
              nghttp2_strerror(rc), rc);
       }
 
-      check->keepalive = now;
+      conn->keepalive = now;
     }
   }
 
   if(send_frames) {
     rc = nghttp2_session_send(c->h2);
     if(rc)
-      failf(check->data, "nghttp2_session_send() failed: %s(%d)",
+      failf(data, "nghttp2_session_send() failed: %s(%d)",
             nghttp2_strerror(rc), rc);
   }
 
@@ -295,7 +296,7 @@ static const struct Curl_handler Curl_handler_http2 = {
   http2_getsock,                        /* proto_getsock */
   http2_getsock,                        /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
-  http2_perform_getsock,                /* perform_getsock */
+  http2_getsock,                        /* perform_getsock */
   http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
   http2_conncheck,                      /* connection_check */
@@ -317,7 +318,7 @@ static const struct Curl_handler Curl_handler_http2_ssl = {
   http2_getsock,                        /* proto_getsock */
   http2_getsock,                        /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
-  http2_perform_getsock,                /* perform_getsock */
+  http2_getsock,                        /* perform_getsock */
   http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
   http2_conncheck,                      /* connection_check */
@@ -343,7 +344,7 @@ int Curl_http2_ver(char *p, size_t len)
  * written. See the documentation of nghttp2_send_callback for the details.
  */
 static ssize_t send_callback(nghttp2_session *h2,
-                             const uint8_t *data, size_t length, int flags,
+                             const uint8_t *mem, size_t length, int flags,
                              void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
@@ -358,8 +359,8 @@ static ssize_t send_callback(nghttp2_session *h2,
     /* called before setup properly! */
     return NGHTTP2_ERR_CALLBACK_FAILURE;
 
-  written = ((Curl_send*)c->send_underlying)(conn, FIRSTSOCKET,
-                                             data, length, &result);
+  written = ((Curl_send*)c->send_underlying)(conn->data, FIRSTSOCKET,
+                                             mem, length, &result);
 
   if(result == CURLE_AGAIN) {
     return NGHTTP2_ERR_WOULDBLOCK;
@@ -1215,7 +1216,7 @@ void Curl_http2_done(struct Curl_easy *data, bool premature)
 /*
  * Initialize nghttp2 for a Curl connection
  */
-static CURLcode http2_init(struct connectdata *conn)
+static CURLcode http2_init(struct Curl_easy *data, struct connectdata *conn)
 {
   if(!conn->proto.httpc.h2) {
     int rc;
@@ -1228,7 +1229,7 @@ static CURLcode http2_init(struct connectdata *conn)
     rc = nghttp2_session_callbacks_new(&callbacks);
 
     if(rc) {
-      failf(conn->data, "Couldn't initialize nghttp2 callbacks!");
+      failf(data, "Couldn't initialize nghttp2 callbacks!");
       return CURLE_OUT_OF_MEMORY; /* most likely at least */
     }
 
@@ -1257,7 +1258,7 @@ static CURLcode http2_init(struct connectdata *conn)
     nghttp2_session_callbacks_del(callbacks);
 
     if(rc) {
-      failf(conn->data, "Couldn't initialize nghttp2!");
+      failf(data, "Couldn't initialize nghttp2!");
       return CURLE_OUT_OF_MEMORY; /* most likely at least */
     }
   }
@@ -1274,7 +1275,8 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
   ssize_t binlen;
   char *base64;
   size_t blen;
-  struct SingleRequest *k = &conn->data->req;
+  struct Curl_easy *data = conn->data;
+  struct SingleRequest *k = &data->req;
   uint8_t *binsettings = conn->proto.httpc.binsettings;
   struct http_conn *httpc = &conn->proto.httpc;
 
@@ -1285,13 +1287,13 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
                                          httpc->local_settings,
                                          httpc->local_settings_num);
   if(binlen <= 0) {
-    failf(conn->data, "nghttp2 unexpectedly failed on pack_settings_payload");
+    failf(data, "nghttp2 unexpectedly failed on pack_settings_payload");
     Curl_dyn_free(req);
     return CURLE_FAILED_INIT;
   }
   conn->proto.httpc.binlen = binlen;
 
-  result = Curl_base64url_encode(conn->data, (const char *)binsettings, binlen,
+  result = Curl_base64url_encode(data, (const char *)binsettings, binlen,
                                  &base64, &blen);
   if(result) {
     Curl_dyn_free(req);
@@ -1325,14 +1327,13 @@ static int should_close_session(struct http_conn *httpc)
  * This function returns 0 if it succeeds, or -1 and error code will
  * be assigned to *err.
  */
-static int h2_process_pending_input(struct connectdata *conn,
+static int h2_process_pending_input(struct Curl_easy *data,
                                     struct http_conn *httpc,
                                     CURLcode *err)
 {
   ssize_t nread;
   char *inbuf;
   ssize_t rv;
-  struct Curl_easy *data = conn->data;
 
   nread = httpc->inbuflen - httpc->nread_inbuf;
   inbuf = httpc->inbuf + httpc->nread_inbuf;
@@ -1372,7 +1373,7 @@ static int h2_process_pending_input(struct connectdata *conn,
        the connection may not be reused. This is set when a
        GOAWAY frame has been received or when the limit of stream
        identifiers has been reached. */
-    connclose(conn, "http/2: No new requests allowed");
+    connclose(data->conn, "http/2: No new requests allowed");
   }
 
   if(should_close_session(httpc)) {
@@ -1382,7 +1383,7 @@ static int h2_process_pending_input(struct connectdata *conn,
       *err = CURLE_HTTP2;
     else {
       /* not an error per se, but should still close the connection */
-      connclose(conn, "GOAWAY received");
+      connclose(data->conn, "GOAWAY received");
       *err = CURLE_OK;
     }
     return -1;
@@ -1393,7 +1394,8 @@ static int h2_process_pending_input(struct connectdata *conn,
 /*
  * Called from transfer.c:done_sending when we stop uploading.
  */
-CURLcode Curl_http2_done_sending(struct connectdata *conn)
+CURLcode Curl_http2_done_sending(struct Curl_easy *data,
+                                 struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
@@ -1401,7 +1403,7 @@ CURLcode Curl_http2_done_sending(struct connectdata *conn)
      (conn->handler == &Curl_handler_http2)) {
     /* make sure this is only attempted for HTTP/2 transfers */
 
-    struct HTTP *stream = conn->data->req.p.http;
+    struct HTTP *stream = data->req.p.http;
 
     struct http_conn *httpc = &conn->proto.httpc;
     nghttp2_session *h2 = httpc->h2;
@@ -1414,13 +1416,11 @@ CURLcode Curl_http2_done_sending(struct connectdata *conn)
       /* resume sending here to trigger the callback to get called again so
          that it can signal EOF to nghttp2 */
       (void)nghttp2_session_resume_data(h2, stream->stream_id);
-
-      (void)h2_process_pending_input(conn, httpc, &result);
+      (void)h2_process_pending_input(data, httpc, &result);
     }
 
     /* If nghttp2 still has pending frames unsent */
     if(nghttp2_session_want_write(h2)) {
-      struct Curl_easy *data = conn->data;
       struct SingleRequest *k = &data->req;
       int rv;
 
@@ -1451,7 +1451,7 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
   drained_transfer(data, httpc);
 
   if(httpc->pause_stream_id == 0) {
-    if(h2_process_pending_input(conn, httpc, err) != 0) {
+    if(h2_process_pending_input(data, httpc, err) != 0) {
       return -1;
     }
   }
@@ -1499,7 +1499,7 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
 
       Curl_debug(data, CURLINFO_HEADER_IN, trailp, len);
       /* pass the trailers one by one to the callback */
-      result = Curl_client_write(conn, CLIENTWRITE_HEADER, trailp, len);
+      result = Curl_client_write(data, CLIENTWRITE_HEADER, trailp, len);
       if(result) {
         *err = result;
         return -1;
@@ -1563,12 +1563,12 @@ static int h2_session_send(struct Curl_easy *data,
   return nghttp2_session_send(h2);
 }
 
-static ssize_t http2_recv(struct connectdata *conn, int sockindex,
+static ssize_t http2_recv(struct Curl_easy *data, int sockindex,
                           char *mem, size_t len, CURLcode *err)
 {
   ssize_t nread;
+  struct connectdata *conn = data->conn;
   struct http_conn *httpc = &conn->proto.httpc;
-  struct Curl_easy *data = conn->data;
   struct HTTP *stream = data->req.p.http;
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
@@ -1632,7 +1632,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       /* We have paused nghttp2, but we have no pause data (see
          on_data_chunk_recv). */
       httpc->pause_stream_id = 0;
-      if(h2_process_pending_input(conn, httpc, err) != 0) {
+      if(h2_process_pending_input(data, httpc, err) != 0) {
         return -1;
       }
     }
@@ -1660,7 +1660,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
          frames, then we have to call it again with 0-length data.
          Without this, on_stream_close callback will not be called,
          and stream could be hanged. */
-      if(h2_process_pending_input(conn, httpc, err) != 0) {
+      if(h2_process_pending_input(data, httpc, err) != 0) {
         return -1;
       }
     }
@@ -1694,7 +1694,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
     if(httpc->inbuflen == 0) {
       nread = ((Curl_recv *)httpc->recv_underlying)(
-          conn, FIRSTSOCKET, httpc->inbuf, H2_BUFSIZE, err);
+        data, FIRSTSOCKET, httpc->inbuf, H2_BUFSIZE, err);
 
       if(nread == -1) {
         if(*err != CURLE_AGAIN)
@@ -1725,7 +1725,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
                    nread));
     }
 
-    if(h2_process_pending_input(conn, httpc, err) != 0)
+    if(h2_process_pending_input(data, httpc, err) != 0)
       return -1;
   }
   if(stream->memlen) {
@@ -1831,7 +1831,7 @@ static header_instruction inspect_header(const char *name, size_t namelen,
   }
 }
 
-static ssize_t http2_send(struct connectdata *conn, int sockindex,
+static ssize_t http2_send(struct Curl_easy *data, int sockindex,
                           const void *mem, size_t len, CURLcode *err)
 {
   /*
@@ -1840,8 +1840,9 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
    * request.
    */
   int rv;
+  struct connectdata *conn = data->conn;
   struct http_conn *httpc = &conn->proto.httpc;
-  struct HTTP *stream = conn->data->req.p.http;
+  struct HTTP *stream = data->req.p.http;
   nghttp2_nv *nva = NULL;
   size_t nheader;
   size_t i;
@@ -1855,16 +1856,16 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
 
   (void)sockindex;
 
-  H2BUGF(infof(conn->data, "http2_send len=%zu\n", len));
+  H2BUGF(infof(data, "http2_send len=%zu\n", len));
 
   if(stream->stream_id != -1) {
     if(stream->close_handled) {
-      infof(conn->data, "stream %d closed\n", stream->stream_id);
+      infof(data, "stream %d closed\n", stream->stream_id);
       *err = CURLE_HTTP2_STREAM;
       return -1;
     }
     else if(stream->closed) {
-      return http2_handle_stream_close(conn, conn->data, stream, err);
+      return http2_handle_stream_close(conn, data, stream, err);
     }
     /* If stream_id != -1, we have dispatched request HEADERS, and now
        are going to send or sending request body in DATA frame */
@@ -1875,7 +1876,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
       *err = CURLE_SEND_ERROR;
       return -1;
     }
-    rv = h2_session_send(conn->data, h2);
+    rv = h2_session_send(data, h2);
     if(nghttp2_is_fatal(rv)) {
       *err = CURLE_SEND_ERROR;
       return -1;
@@ -1888,7 +1889,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     stream->upload_len = 0;
 
     if(should_close_session(httpc)) {
-      H2BUGF(infof(conn->data, "http2_send: nothing to do in this session\n"));
+      H2BUGF(infof(data, "http2_send: nothing to do in this session\n"));
       *err = CURLE_HTTP2;
       return -1;
     }
@@ -1901,7 +1902,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
       nghttp2_session_resume_data(h2, stream->stream_id);
     }
 
-    H2BUGF(infof(conn->data, "http2_send returns %zu for stream %u\n", len,
+    H2BUGF(infof(data, "http2_send returns %zu for stream %u\n", len,
                  stream->stream_id));
     return len;
   }
@@ -1945,7 +1946,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   nva[0].valuelen = (size_t)(end - hdbuf);
   nva[0].flags = NGHTTP2_NV_FLAG_NONE;
   if(HEADER_OVERFLOW(nva[0])) {
-    failf(conn->data, "Failed sending HTTP request: Header overflow");
+    failf(data, "Failed sending HTTP request: Header overflow");
     goto fail;
   }
 
@@ -1967,7 +1968,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   nva[1].valuelen = (size_t)(end - hdbuf);
   nva[1].flags = NGHTTP2_NV_FLAG_NONE;
   if(HEADER_OVERFLOW(nva[1])) {
-    failf(conn->data, "Failed sending HTTP request: Header overflow");
+    failf(data, "Failed sending HTTP request: Header overflow");
     goto fail;
   }
 
@@ -1980,7 +1981,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   nva[2].valuelen = strlen((char *)nva[2].value);
   nva[2].flags = NGHTTP2_NV_FLAG_NONE;
   if(HEADER_OVERFLOW(nva[2])) {
-    failf(conn->data, "Failed sending HTTP request: Header overflow");
+    failf(data, "Failed sending HTTP request: Header overflow");
     goto fail;
   }
 
@@ -2040,7 +2041,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
 
     nva[i].flags = NGHTTP2_NV_FLAG_NONE;
     if(HEADER_OVERFLOW(nva[i])) {
-      failf(conn->data, "Failed sending HTTP request: Header overflow");
+      failf(data, "Failed sending HTTP request: Header overflow");
       goto fail;
     }
     ++i;
@@ -2064,30 +2065,30 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     for(i = 0; i < nheader; ++i) {
       acc += nva[i].namelen + nva[i].valuelen;
 
-      H2BUGF(infof(conn->data, "h2 header: %.*s:%.*s\n",
+      H2BUGF(infof(data, "h2 header: %.*s:%.*s\n",
                    nva[i].namelen, nva[i].name,
                    nva[i].valuelen, nva[i].value));
     }
 
     if(acc > MAX_ACC) {
-      infof(conn->data, "http2_send: Warning: The cumulative length of all "
+      infof(data, "http2_send: Warning: The cumulative length of all "
             "headers exceeds %d bytes and that could cause the "
             "stream to be rejected.\n", MAX_ACC);
     }
   }
 
-  h2_pri_spec(conn->data, &pri_spec);
+  h2_pri_spec(data, &pri_spec);
 
-  H2BUGF(infof(conn->data, "http2_send request allowed %d (easy handle %p)\n",
-         nghttp2_session_check_request_allowed(h2), (void *)conn->data));
+  H2BUGF(infof(data, "http2_send request allowed %d (easy handle %p)\n",
+               nghttp2_session_check_request_allowed(h2), (void *)data));
 
-  switch(conn->data->state.httpreq) {
+  switch(data->state.httpreq) {
   case HTTPREQ_POST:
   case HTTPREQ_POST_FORM:
   case HTTPREQ_POST_MIME:
   case HTTPREQ_PUT:
-    if(conn->data->state.infilesize != -1)
-      stream->upload_left = conn->data->state.infilesize;
+    if(data->state.infilesize != -1)
+      stream->upload_left = data->state.infilesize;
     else
       /* data sending without specifying the data amount up front */
       stream->upload_left = -1; /* unknown, but not zero */
@@ -2095,32 +2096,32 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     data_prd.read_callback = data_source_read_callback;
     data_prd.source.ptr = NULL;
     stream_id = nghttp2_submit_request(h2, &pri_spec, nva, nheader,
-                                       &data_prd, conn->data);
+                                       &data_prd, data);
     break;
   default:
     stream_id = nghttp2_submit_request(h2, &pri_spec, nva, nheader,
-                                       NULL, conn->data);
+                                       NULL, data);
   }
 
   Curl_safefree(nva);
 
   if(stream_id < 0) {
-    H2BUGF(infof(conn->data,
+    H2BUGF(infof(data,
                  "http2_send() nghttp2_submit_request error (%s)%d\n",
                  nghttp2_strerror(stream_id), stream_id));
     *err = CURLE_SEND_ERROR;
     return -1;
   }
 
-  infof(conn->data, "Using Stream ID: %x (easy handle %p)\n",
-        stream_id, (void *)conn->data);
+  infof(data, "Using Stream ID: %x (easy handle %p)\n",
+        stream_id, (void *)data);
   stream->stream_id = stream_id;
 
   /* this does not call h2_session_send() since there can not have been any
    * priority update since the nghttp2_submit_request() call above */
   rv = nghttp2_session_send(h2);
   if(rv != 0) {
-    H2BUGF(infof(conn->data,
+    H2BUGF(infof(data,
                  "http2_send() nghttp2_session_send error (%s)%d\n",
                  nghttp2_strerror(rv), rv));
 
@@ -2129,7 +2130,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   }
 
   if(should_close_session(httpc)) {
-    H2BUGF(infof(conn->data, "http2_send: nothing to do in this session\n"));
+    H2BUGF(infof(data, "http2_send: nothing to do in this session\n"));
     *err = CURLE_HTTP2;
     return -1;
   }
@@ -2151,13 +2152,14 @@ fail:
   return -1;
 }
 
-CURLcode Curl_http2_setup(struct connectdata *conn)
+CURLcode Curl_http2_setup(struct Curl_easy *data,
+                          struct connectdata *conn)
 {
   CURLcode result;
   struct http_conn *httpc = &conn->proto.httpc;
-  struct HTTP *stream = conn->data->req.p.http;
+  struct HTTP *stream = data->req.p.http;
 
-  DEBUGASSERT(conn->data->state.buffer);
+  DEBUGASSERT(data->state.buffer);
 
   stream->stream_id = -1;
 
@@ -2173,18 +2175,18 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   else
     conn->handler = &Curl_handler_http2;
 
-  result = http2_init(conn);
+  result = http2_init(data, conn);
   if(result) {
     Curl_dyn_free(&stream->header_recvbuf);
     return result;
   }
 
-  infof(conn->data, "Using HTTP2, server supports multi-use\n");
+  infof(data, "Using HTTP2, server supports multi-use\n");
   stream->upload_left = 0;
   stream->upload_mem = NULL;
   stream->upload_len = 0;
-  stream->mem = conn->data->state.buffer;
-  stream->len = conn->data->set.buffer_size;
+  stream->mem = data->state.buffer;
+  stream->len = data->set.buffer_size;
 
   httpc->inbuflen = 0;
   httpc->nread_inbuf = 0;
@@ -2196,22 +2198,22 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   conn->httpversion = 20;
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
 
-  infof(conn->data, "Connection state changed (HTTP/2 confirmed)\n");
-  multi_connchanged(conn->data->multi);
+  infof(data, "Connection state changed (HTTP/2 confirmed)\n");
+  multi_connchanged(data->multi);
 
   return CURLE_OK;
 }
 
-CURLcode Curl_http2_switched(struct connectdata *conn,
+CURLcode Curl_http2_switched(struct Curl_easy *data,
                              const char *mem, size_t nread)
 {
   CURLcode result;
+  struct connectdata *conn = data->conn;
   struct http_conn *httpc = &conn->proto.httpc;
   int rv;
-  struct Curl_easy *data = conn->data;
-  struct HTTP *stream = conn->data->req.p.http;
+  struct HTTP *stream = data->req.p.http;
 
-  result = Curl_http2_setup(conn);
+  result = Curl_http2_setup(data, conn);
   if(result)
     return result;
 
@@ -2220,7 +2222,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   conn->recv[FIRSTSOCKET] = http2_recv;
   conn->send[FIRSTSOCKET] = http2_send;
 
-  if(conn->data->req.upgr101 == UPGR101_RECEIVED) {
+  if(data->req.upgr101 == UPGR101_RECEIVED) {
     /* stream 1 is opened implicitly on upgrade */
     stream->stream_id = 1;
     /* queue SETTINGS frame (again) */
@@ -2270,13 +2272,13 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
      data into stream->mem, overwriting data already there. */
   if(H2_BUFSIZE < nread) {
     failf(data, "connection buffer size is too small to store data following "
-                "HTTP Upgrade response header: buflen=%d, datalen=%zu",
+          "HTTP Upgrade response header: buflen=%d, datalen=%zu",
           H2_BUFSIZE, nread);
     return CURLE_HTTP2;
   }
 
-  infof(conn->data, "Copying HTTP/2 data in stream buffer to connection buffer"
-                    " after upgrade: len=%zu\n",
+  infof(data, "Copying HTTP/2 data in stream buffer to connection buffer"
+        " after upgrade: len=%zu\n",
         nread);
 
   if(nread)
@@ -2286,7 +2288,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
 
   DEBUGASSERT(httpc->nread_inbuf == 0);
 
-  if(-1 == h2_process_pending_input(conn, httpc, &result))
+  if(-1 == h2_process_pending_input(data, httpc, &result))
     return CURLE_HTTP2;
 
   return CURLE_OK;

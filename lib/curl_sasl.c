@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -398,7 +398,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       resp = NULL;
     }
 
-    result = sasl->params->sendauth(conn, mech, resp);
+    result = sasl->params->sendauth(data, conn, mech, resp);
     if(!result) {
       *progress = SASL_INPROGRESS;
       state(sasl, conn, resp ? state2 : state1);
@@ -621,12 +621,12 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   switch(result) {
   case CURLE_BAD_CONTENT_ENCODING:
     /* Cancel dialog */
-    result = sasl->params->sendcont(conn, "*");
+    result = sasl->params->sendcont(data, conn, "*");
     newstate = SASL_CANCEL;
     break;
   case CURLE_OK:
     if(resp)
-      result = sasl->params->sendcont(conn, resp);
+      result = sasl->params->sendcont(data, conn, resp);
     break;
   default:
     newstate = SASL_STOP;    /* Stop on error */
