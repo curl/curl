@@ -111,10 +111,10 @@ static void printsub(struct Curl_easy *data,
 static void suboption(struct connectdata *);
 static void sendsuboption(struct connectdata *conn, int option);
 
-static CURLcode telnet_do(struct connectdata *conn, bool *done);
-static CURLcode telnet_done(struct connectdata *conn,
+static CURLcode telnet_do(struct Curl_easy *data, bool *done);
+static CURLcode telnet_done(struct Curl_easy *data,
                                  CURLcode, bool premature);
-static CURLcode send_telnet_data(struct connectdata *conn,
+static CURLcode send_telnet_data(struct Curl_easy *data,
                                  char *buffer, ssize_t nread);
 
 /* For negotiation compliant to RFC 1143 */
@@ -995,7 +995,7 @@ static void sendsuboption(struct connectdata *conn, int option)
     }
     /* ... then the window size with the send_telnet_data() function
        to deal with 0xFF cases ... */
-    send_telnet_data(conn, (char *)tn->subbuffer + 3, 4);
+    send_telnet_data(data, (char *)tn->subbuffer + 3, 4);
     /* ... and the footer */
     bytes_written = swrite(conn->sock[FIRSTSOCKET], tn->subbuffer + 7, 2);
     if(bytes_written < 0) {
@@ -1021,7 +1021,7 @@ CURLcode telrcv(struct connectdata *conn,
 
 #define startskipping()                                       \
   if(startwrite >= 0) {                                       \
-    result = Curl_client_write(conn,                          \
+    result = Curl_client_write(data,                          \
                                CLIENTWRITE_BODY,              \
                                (char *)&inbuf[startwrite],    \
                                in-startwrite);                \
@@ -1171,13 +1171,14 @@ CURLcode telrcv(struct connectdata *conn,
 }
 
 /* Escape and send a telnet data block */
-static CURLcode send_telnet_data(struct connectdata *conn,
+static CURLcode send_telnet_data(struct Curl_easy *data,
                                  char *buffer, ssize_t nread)
 {
   ssize_t escapes, i, outlen;
   unsigned char *outbuf = NULL;
   CURLcode result = CURLE_OK;
   ssize_t bytes_written, total_written;
+  struct connectdata *conn = data->conn;
 
   /* Determine size of new buffer after escaping */
   escapes = 0;
@@ -1216,7 +1217,7 @@ static CURLcode send_telnet_data(struct connectdata *conn,
         break;
       default:                    /* write! */
         bytes_written = 0;
-        result = Curl_write(conn, conn->sock[FIRSTSOCKET],
+        result = Curl_write(data, conn->sock[FIRSTSOCKET],
                             outbuf + total_written,
                             outlen - total_written,
                             &bytes_written);
@@ -1232,9 +1233,10 @@ static CURLcode send_telnet_data(struct connectdata *conn,
   return result;
 }
 
-static CURLcode telnet_done(struct connectdata *conn,
-                                 CURLcode status, bool premature)
+static CURLcode telnet_done(struct Curl_easy *data,
+                            CURLcode status, bool premature)
 {
+  struct connectdata *conn = data->conn;
   struct TELNET *tn = (struct TELNET *)conn->data->req.p.telnet;
   (void)status; /* unused */
   (void)premature; /* not used */
@@ -1250,10 +1252,10 @@ static CURLcode telnet_done(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static CURLcode telnet_do(struct connectdata *conn, bool *done)
+static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 #ifdef USE_WINSOCK
   WSAEVENT event_handle;
@@ -1378,7 +1380,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
           }
         }
 
-        result = send_telnet_data(conn, buf, readfile_read);
+        result = send_telnet_data(data, buf, readfile_read);
         if(result) {
           keepon = FALSE;
           break;
@@ -1396,7 +1398,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
         break;
       }
 
-      result = send_telnet_data(conn, buf, readfile_read);
+      result = send_telnet_data(data, buf, readfile_read);
       if(result) {
         keepon = FALSE;
         break;
@@ -1418,7 +1420,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       }
       if(events.lNetworkEvents & FD_READ) {
         /* read data from network */
-        result = Curl_read(conn, sockfd, buf, data->set.buffer_size, &nread);
+        result = Curl_read(data, sockfd, buf, data->set.buffer_size, &nread);
         /* read would've blocked. Loop again */
         if(result == CURLE_AGAIN)
           break;
@@ -1498,7 +1500,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     default:                    /* read! */
       if(pfd[0].revents & POLLIN) {
         /* read data from network */
-        result = Curl_read(conn, sockfd, buf, data->set.buffer_size, &nread);
+        result = Curl_read(data, sockfd, buf, data->set.buffer_size, &nread);
         /* read would've blocked. Loop again */
         if(result == CURLE_AGAIN)
           break;
@@ -1550,7 +1552,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       }
 
       if(nread > 0) {
-        result = send_telnet_data(conn, buf, nread);
+        result = send_telnet_data(data, buf, nread);
         if(result) {
           keepon = FALSE;
           break;

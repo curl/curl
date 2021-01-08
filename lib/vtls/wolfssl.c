@@ -735,7 +735,7 @@ wolfssl_connect_step2(struct connectdata *conn,
       else
         infof(data, "ALPN, unrecognized protocol %.*s\n", protocol_len,
               protocol);
-      Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+      Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                           BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
     }
     else if(rc == SSL_ALPN_NOT_FOUND)
@@ -807,12 +807,13 @@ wolfssl_connect_step3(struct connectdata *conn,
 }
 
 
-static ssize_t wolfssl_send(struct connectdata *conn,
-                           int sockindex,
-                           const void *mem,
-                           size_t len,
-                           CURLcode *curlcode)
+static ssize_t wolfssl_send(struct Curl_easy *data,
+                            int sockindex,
+                            const void *mem,
+                            size_t len,
+                            CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   char error_buffer[WOLFSSL_MAX_ERROR_SZ];
@@ -829,7 +830,7 @@ static ssize_t wolfssl_send(struct connectdata *conn,
       *curlcode = CURLE_AGAIN;
       return -1;
     default:
-      failf(conn->data, "SSL write: %s, errno %d",
+      failf(data, "SSL write: %s, errno %d",
             ERR_error_string(err, error_buffer),
             SOCKERRNO);
       *curlcode = CURLE_SEND_ERROR;
@@ -855,12 +856,13 @@ static void wolfssl_close(struct connectdata *conn, int sockindex)
   }
 }
 
-static ssize_t wolfssl_recv(struct connectdata *conn,
+static ssize_t wolfssl_recv(struct Curl_easy *data,
                             int num,
                             char *buf,
                             size_t buffersize,
                             CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[num];
   struct ssl_backend_data *backend = connssl->backend;
   char error_buffer[WOLFSSL_MAX_ERROR_SZ];
@@ -879,9 +881,8 @@ static ssize_t wolfssl_recv(struct connectdata *conn,
       *curlcode = CURLE_AGAIN;
       return -1;
     default:
-      failf(conn->data, "SSL read: %s, errno %d",
-            ERR_error_string(err, error_buffer),
-            SOCKERRNO);
+      failf(data, "SSL read: %s, errno %d",
+            ERR_error_string(err, error_buffer), SOCKERRNO);
       *curlcode = CURLE_RECV_ERROR;
       return -1;
     }

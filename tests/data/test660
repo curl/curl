@@ -29,6 +29,7 @@ imap://%HOSTIP:%IMAPPORT/660
 <verify>
 <protocol>
 A001 CAPABILITY
+A002 LOGOUT
 </protocol>
 </verify>
 </testcase>

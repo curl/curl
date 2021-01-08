@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2009, 2011, Markus Moeller, <markus_moeller@compuserve.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -204,7 +204,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       us_length = htons((short)sspi_send_token.cbBuffer);
       memcpy(socksreq + 2, &us_length, sizeof(short));
 
-      code = Curl_write_plain(conn, sock, (char *)socksreq, 4, &written);
+      code = Curl_write_plain(data, sock, (char *)socksreq, 4, &written);
       if(code || (4 != written)) {
         failf(data, "Failed to send SSPI authentication request.");
         free(service_name);
@@ -217,7 +217,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
         return CURLE_COULDNT_CONNECT;
       }
 
-      code = Curl_write_plain(conn, sock, (char *)sspi_send_token.pvBuffer,
+      code = Curl_write_plain(data, sock, (char *)sspi_send_token.pvBuffer,
                               sspi_send_token.cbBuffer, &written);
       if(code || (sspi_send_token.cbBuffer != (size_t)written)) {
         failf(data, "Failed to send SSPI authentication token.");
@@ -466,7 +466,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     memcpy(socksreq + 2, &us_length, sizeof(short));
   }
 
-  code = Curl_write_plain(conn, sock, (char *)socksreq, 4, &written);
+  code = Curl_write_plain(data, sock, (char *)socksreq, 4, &written);
   if(code || (4 != written)) {
     failf(data, "Failed to send SSPI encryption request.");
     if(sspi_send_token.pvBuffer)
@@ -477,7 +477,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
   if(data->set.socks5_gssapi_nec) {
     memcpy(socksreq, &gss_enc, 1);
-    code = Curl_write_plain(conn, sock, (char *)socksreq, 1, &written);
+    code = Curl_write_plain(data, sock, (char *)socksreq, 1, &written);
     if(code || (1 != written)) {
       failf(data, "Failed to send SSPI encryption type.");
       s_pSecFn->DeleteSecurityContext(&sspi_context);
@@ -485,7 +485,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     }
   }
   else {
-    code = Curl_write_plain(conn, sock, (char *)sspi_send_token.pvBuffer,
+    code = Curl_write_plain(data, sock, (char *)sspi_send_token.pvBuffer,
                             sspi_send_token.cbBuffer, &written);
     if(code || (sspi_send_token.cbBuffer != (size_t)written)) {
       failf(data, "Failed to send SSPI encryption type.");

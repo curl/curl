@@ -46,10 +46,10 @@
  * Forward declarations.
  */
 
-static CURLcode gopher_do(struct connectdata *conn, bool *done);
+static CURLcode gopher_do(struct Curl_easy *data, bool *done);
 #ifdef USE_SSL
-static CURLcode gopher_connect(struct connectdata *conn, bool *done);
-static CURLcode gopher_connecting(struct connectdata *conn, bool *done);
+static CURLcode gopher_connect(struct Curl_easy *data, bool *done);
+static CURLcode gopher_connecting(struct Curl_easy *data, bool *done);
 #endif
 
 /*
@@ -103,15 +103,16 @@ const struct Curl_handler Curl_handler_gophers = {
   PROTOPT_SSL                           /* flags */
 };
 
-static CURLcode gopher_connect(struct connectdata *conn, bool *done)
+static CURLcode gopher_connect(struct Curl_easy *data, bool *done)
 {
-  (void)conn;
+  (void)data;
   (void)done;
   return CURLE_OK;
 }
 
-static CURLcode gopher_connecting(struct connectdata *conn, bool *done)
+static CURLcode gopher_connecting(struct Curl_easy *data, bool *done)
 {
+  struct connectdata *conn = data->conn;
   CURLcode result = Curl_ssl_connect(conn, FIRSTSOCKET);
   if(result)
     connclose(conn, "Failed TLS connection");
@@ -120,10 +121,10 @@ static CURLcode gopher_connecting(struct connectdata *conn, bool *done)
 }
 #endif
 
-static CURLcode gopher_do(struct connectdata *conn, bool *done)
+static CURLcode gopher_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   char *gopherpath;
   char *path = data->state.up.path;
@@ -177,9 +178,9 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
     if(strlen(sel) < 1)
       break;
 
-    result = Curl_write(conn, sockfd, sel, k, &amount);
+    result = Curl_write(data, sockfd, sel, k, &amount);
     if(!result) { /* Which may not have written it all! */
-      result = Curl_client_write(conn, CLIENTWRITE_HEADER, sel, amount);
+      result = Curl_client_write(data, CLIENTWRITE_HEADER, sel, amount);
       if(result)
         break;
 
@@ -219,12 +220,12 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   free(sel_org);
 
   if(!result)
-    result = Curl_write(conn, sockfd, "\r\n", 2, &amount);
+    result = Curl_write(data, sockfd, "\r\n", 2, &amount);
   if(result) {
     failf(data, "Failed sending Gopher request");
     return result;
   }
-  result = Curl_client_write(conn, CLIENTWRITE_HEADER, (char *)"\r\n", 2);
+  result = Curl_client_write(data, CLIENTWRITE_HEADER, (char *)"\r\n", 2);
   if(result)
     return result;
 

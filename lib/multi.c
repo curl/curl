@@ -586,7 +586,7 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   /* this calls the protocol-specific function pointer previously set */
   if(conn->handler->done)
-    result = conn->handler->done(conn, status, premature);
+    result = conn->handler->done(data, status, premature);
   else
     result = status;
 
@@ -697,16 +697,12 @@ static CURLcode multi_done(struct Curl_easy *data,
   return result;
 }
 
-static int close_connect_only(struct connectdata *conn, void *param)
+static int close_connect_only(struct Curl_easy *data,
+                              struct connectdata *conn, void *param)
 {
-  struct Curl_easy *data = param;
-
+  (void)param;
   if(data->state.lastconnect_id != conn->connection_id)
     return 0;
-
-  if(conn->data != data)
-    return 1;
-  conn->data = NULL;
 
   if(!conn->bits.connect_only)
     return 1;
@@ -816,7 +812,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   if(data->state.lastconnect_id != -1) {
     /* Mark any connect-only connection for closure */
     Curl_conncache_foreach(data, data->state.conn_cache,
-                           data, &close_connect_only);
+                           NULL, close_connect_only);
   }
 
 #ifdef USE_LIBPSL
@@ -945,27 +941,30 @@ static int waitproxyconnect_getsock(struct connectdata *conn,
   return GETSOCK_WRITESOCK(0);
 }
 
-static int domore_getsock(struct connectdata *conn,
+static int domore_getsock(struct Curl_easy *data,
+                          struct connectdata *conn,
                           curl_socket_t *socks)
 {
   if(conn && conn->handler->domore_getsock)
-    return conn->handler->domore_getsock(conn, socks);
+    return conn->handler->domore_getsock(data, conn, socks);
   return GETSOCK_BLANK;
 }
 
-static int doing_getsock(struct connectdata *conn,
+static int doing_getsock(struct Curl_easy *data,
+                         struct connectdata *conn,
                          curl_socket_t *socks)
 {
   if(conn && conn->handler->doing_getsock)
-    return conn->handler->doing_getsock(conn, socks);
+    return conn->handler->doing_getsock(data, conn, socks);
   return GETSOCK_BLANK;
 }
 
-static int protocol_getsock(struct connectdata *conn,
+static int protocol_getsock(struct Curl_easy *data,
+                            struct connectdata *conn,
                             curl_socket_t *socks)
 {
   if(conn->handler->proto_getsock)
-    return conn->handler->proto_getsock(conn, socks);
+    return conn->handler->proto_getsock(data, conn, socks);
   /* Backup getsock logic. Since there is a live socket in use, we must wait
      for it or it will be removed from watching when the multi_socket API is
      used. */
@@ -978,10 +977,11 @@ static int protocol_getsock(struct connectdata *conn,
 static int multi_getsock(struct Curl_easy *data,
                          curl_socket_t *socks)
 {
+  struct connectdata *conn = data->conn;
   /* The no connection case can happen when this is called from
      curl_multi_remove_handle() => singlesocket() => multi_getsock().
   */
-  if(!data->conn)
+  if(!conn)
     return 0;
 
   if(data->mstate > CURLM_STATE_CONNECT &&
@@ -995,30 +995,30 @@ static int multi_getsock(struct Curl_easy *data,
     return 0;
 
   case CURLM_STATE_WAITRESOLVE:
-    return Curl_resolv_getsock(data->conn, socks);
+    return Curl_resolv_getsock(conn, socks);
 
   case CURLM_STATE_PROTOCONNECT:
   case CURLM_STATE_SENDPROTOCONNECT:
-    return protocol_getsock(data->conn, socks);
+    return protocol_getsock(data, conn, socks);
 
   case CURLM_STATE_DO:
   case CURLM_STATE_DOING:
-    return doing_getsock(data->conn, socks);
+    return doing_getsock(data, conn, socks);
 
   case CURLM_STATE_WAITPROXYCONNECT:
-    return waitproxyconnect_getsock(data->conn, socks);
+    return waitproxyconnect_getsock(conn, socks);
 
   case CURLM_STATE_WAITCONNECT:
-    return waitconnect_getsock(data->conn, socks);
+    return waitconnect_getsock(conn, socks);
 
   case CURLM_STATE_DO_MORE:
-    return domore_getsock(data->conn, socks);
+    return domore_getsock(data, conn, socks);
 
   case CURLM_STATE_DO_DONE: /* since is set after DO is completed, we switch
                                to waiting for the same as the *PERFORM
                                states */
   case CURLM_STATE_PERFORM:
-    return Curl_single_getsock(data->conn, socks);
+    return Curl_single_getsock(data, conn, socks);
   }
 
 }
@@ -1401,7 +1401,8 @@ static CURLcode multi_do(struct Curl_easy *data, bool *done)
 
   if(conn->handler->do_it)
     /* generic protocol-specific function pointer set in curl_connect() */
-    result = conn->handler->do_it(conn, done);
+    result = conn->handler->do_it(data, done);
+
   return result;
 }
 
@@ -1414,14 +1415,15 @@ static CURLcode multi_do(struct Curl_easy *data, bool *done)
  * DOING state there's more work to do!
  */
 
-static CURLcode multi_do_more(struct connectdata *conn, int *complete)
+static CURLcode multi_do_more(struct Curl_easy *data, int *complete)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
 
   *complete = 0;
 
   if(conn->handler->do_more)
-    result = conn->handler->do_more(conn, complete);
+    result = conn->handler->do_more(data, complete);
 
   return result;
 }
@@ -1432,14 +1434,14 @@ static CURLcode multi_do_more(struct connectdata *conn, int *complete)
  * protocol layer.
  */
 
-static CURLcode protocol_connecting(struct connectdata *conn,
-                                    bool *done)
+static CURLcode protocol_connecting(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
 
   if(conn && conn->handler->connecting) {
     *done = FALSE;
-    result = conn->handler->connecting(conn, done);
+    result = conn->handler->connecting(data, done);
   }
   else
     *done = TRUE;
@@ -1452,13 +1454,14 @@ static CURLcode protocol_connecting(struct connectdata *conn,
  * until the DOING phase is done on protocol layer.
  */
 
-static CURLcode protocol_doing(struct connectdata *conn, bool *done)
+static CURLcode protocol_doing(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
 
   if(conn && conn->handler->doing) {
     *done = FALSE;
-    result = conn->handler->doing(conn, done);
+    result = conn->handler->doing(data, done);
   }
   else
     *done = TRUE;
@@ -1471,11 +1474,11 @@ static CURLcode protocol_doing(struct connectdata *conn, bool *done)
  * proceed with some action.
  *
  */
-static CURLcode protocol_connect(struct connectdata *conn,
+static CURLcode protocol_connect(struct Curl_easy *data,
                                  bool *protocol_done)
 {
   CURLcode result = CURLE_OK;
-
+  struct connectdata *conn = data->conn;
   DEBUGASSERT(conn);
   DEBUGASSERT(protocol_done);
 
@@ -1514,7 +1517,7 @@ static CURLcode protocol_connect(struct connectdata *conn,
       /* is there a protocol-specific connect() procedure? */
 
       /* Call the protocol-specific connect function */
-      result = conn->handler->connect_it(conn, protocol_done);
+      result = conn->handler->connect_it(data, protocol_done);
     }
     else
       *protocol_done = TRUE;
@@ -1785,7 +1788,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case CURLM_STATE_WAITPROXYCONNECT:
       /* this is HTTP-specific, but sending CONNECT to a proxy is HTTP... */
       DEBUGASSERT(data->conn);
-      result = Curl_http_connect(data->conn, &protocol_connected);
+      result = Curl_http_connect(data, &protocol_connected);
 #ifndef CURL_DISABLE_PROXY
       if(data->conn->bits.proxy_connect_closed) {
         rc = CURLM_CALL_MULTI_PERFORM;
@@ -1816,7 +1819,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case CURLM_STATE_WAITCONNECT:
       /* awaiting a completion of an asynch TCP connect */
       DEBUGASSERT(data->conn);
-      result = Curl_is_connected(data->conn, FIRSTSOCKET, &connected);
+      result = Curl_is_connected(data, data->conn, FIRSTSOCKET, &connected);
       if(connected && !result) {
 #ifndef CURL_DISABLE_HTTP
         if(
@@ -1849,7 +1852,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     case CURLM_STATE_SENDPROTOCONNECT:
-      result = protocol_connect(data->conn, &protocol_connected);
+      result = protocol_connect(data, &protocol_connected);
       if(!result && !protocol_connected)
         /* switch to waiting state */
         multistate(data, CURLM_STATE_PROTOCONNECT);
@@ -1868,7 +1871,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_PROTOCONNECT:
       /* protocol-specific connect phase */
-      result = protocol_connecting(data->conn, &protocol_connected);
+      result = protocol_connecting(data, &protocol_connected);
       if(!result && protocol_connected) {
         /* after the connect has completed, go WAITDO or DO */
         multistate(data, CURLM_STATE_DO);
@@ -1994,7 +1997,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case CURLM_STATE_DOING:
       /* we continue DOING until the DO phase is complete */
       DEBUGASSERT(data->conn);
-      result = protocol_doing(data->conn, &dophase_done);
+      result = protocol_doing(data, &dophase_done);
       if(!result) {
         if(dophase_done) {
           /* after DO, go DO_DONE or DO_MORE */
@@ -2017,7 +2020,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        * When we are connected, DO MORE and then go DO_DONE
        */
       DEBUGASSERT(data->conn);
-      result = multi_do_more(data->conn, &control);
+      result = multi_do_more(data, &control);
 
       if(!result) {
         if(control) {
@@ -2280,14 +2283,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* allow a previously set error code take precedence */
         if(!result)
           result = res;
-
-        /*
-         * If there are other handles on the connection, multi_done won't set
-         * conn to NULL.  In such a case, curl_multi_remove_handle() can
-         * access free'd data, if the connection is free'd and the handle
-         * removed before we perform the processing in CURLM_STATE_COMPLETED
-         */
-        Curl_detach_connnection(data);
       }
 
 #ifndef CURL_DISABLE_FTP
@@ -3329,16 +3324,18 @@ size_t Curl_multi_max_total_connections(struct Curl_multi *multi)
  * When information about a connection has appeared, call this!
  */
 
-void Curl_multiuse_state(struct connectdata *conn,
+void Curl_multiuse_state(struct Curl_easy *data,
                          int bundlestate) /* use BUNDLE_* defines */
 {
+  struct connectdata *conn;
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->multi);
+  conn = data->conn;
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->bundle);
-  DEBUGASSERT(conn->data);
-  DEBUGASSERT(conn->data->multi);
 
   conn->bundle->multiuse = bundlestate;
-  process_pending_handles(conn->data->multi);
+  process_pending_handles(data->multi);
 }
 
 static void process_pending_handles(struct Curl_multi *multi)

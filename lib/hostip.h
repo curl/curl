@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -99,7 +99,7 @@ enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */
-bool Curl_ipv6works(struct connectdata *conn);
+bool Curl_ipv6works(struct Curl_easy *data);
 #else
 #define Curl_ipv6works(x) FALSE
 #endif
@@ -108,7 +108,7 @@ bool Curl_ipv6works(struct connectdata *conn);
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.
  */
-bool Curl_ipvalid(struct connectdata *conn);
+bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn);
 
 
 /*

@@ -67,7 +67,7 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
 
   (void)ctx;
 
-  result = Curl_read(conn, conn->sockfd, (char *)buf, buflen, &nread);
+  result = Curl_read(data, conn->sockfd, (char *)buf, buflen, &nread);
   if(result == CURLE_AGAIN) {
     /* would block, register interest */
     if(data->hyp.read_waker)
@@ -94,7 +94,7 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
   CURLcode result;
   ssize_t nwrote;
 
-  result = Curl_write(conn, conn->sockfd, (void *)buf, buflen, &nwrote);
+  result = Curl_write(data, conn->sockfd, (void *)buf, buflen, &nwrote);
   if(result == CURLE_AGAIN) {
     /* would block, register interest */
     if(data->hyp.write_waker)
@@ -380,7 +380,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     /* Curl_http_auth_act() checks what authentication methods that are
      * available and decides which one (if any) to use. It will set 'newurl'
      * if an auth method was picked. */
-    result = Curl_http_auth_act(conn);
+    result = Curl_http_auth_act(data);
     if(result)
       break;
 
@@ -628,9 +628,9 @@ static CURLcode cookies(struct Curl_easy *data,
  * request is to be performed. This creates and sends a properly constructed
  * HTTP request.
  */
-CURLcode Curl_http(struct connectdata *conn, bool *done)
+CURLcode Curl_http(struct Curl_easy *data, bool *done)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   struct hyptransfer *h = &data->hyp;
   hyper_io *io = NULL;
   hyper_clientconn_options *options = NULL;
@@ -670,7 +670,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       if(!pq)
         return CURLE_OUT_OF_MEMORY;
     }
-    result = Curl_http_output_auth(conn, method, httpreq,
+    result = Curl_http_output_auth(data, conn, method, httpreq,
                                    (pq ? pq : data->state.up.path), FALSE);
     free(pq);
     if(result)
@@ -681,11 +681,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  result = Curl_http_range(data, conn, httpreq);
+  result = Curl_http_range(data, httpreq);
   if(result)
     return result;
 
-  result = Curl_http_useragent(data, conn);
+  result = Curl_http_useragent(data);
   if(result)
     return result;
 
@@ -799,7 +799,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      Curl_hyper_header(data, headers, data->state.aptr.uagent))
     goto error;
 
-  p_accept = Curl_checkheaders(conn, "Accept")?NULL:"Accept: */*\r\n";
+  p_accept = Curl_checkheaders(data, "Accept")?NULL:"Accept: */*\r\n";
   if(p_accept && Curl_hyper_header(data, headers, p_accept))
     goto error;
 
@@ -808,14 +808,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.httpproxy && !conn->bits.tunnel_proxy &&
-     !Curl_checkProxyheaders(conn, "Proxy-Connection")) {
+     !Curl_checkProxyheaders(data, conn, "Proxy-Connection")) {
     if(Curl_hyper_header(data, headers, "Proxy-Connection: Keep-Alive"))
       goto error;
   }
 #endif
 
   Curl_safefree(data->state.aptr.ref);
-  if(data->change.referer && !Curl_checkheaders(conn, "Referer")) {
+  if(data->change.referer && !Curl_checkheaders(data, "Referer")) {
     data->state.aptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
     if(!data->state.aptr.ref)
       return CURLE_OUT_OF_MEMORY;
@@ -827,11 +827,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  result = Curl_add_timecondition(conn, headers);
+  result = Curl_add_timecondition(data, headers);
   if(result)
     return result;
 
-  result = Curl_add_custom_headers(conn, FALSE, headers);
+  result = Curl_add_custom_headers(data, FALSE, headers);
   if(result)
     return result;
 

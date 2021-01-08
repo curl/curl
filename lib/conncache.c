@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2016, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -318,7 +318,8 @@ void Curl_conncache_remove_conn(struct Curl_easy *data,
 bool Curl_conncache_foreach(struct Curl_easy *data,
                             struct conncache *connc,
                             void *param,
-                            int (*func)(struct connectdata *conn, void *param))
+                            int (*func)(struct Curl_easy *data,
+                                        struct connectdata *conn, void *param))
 {
   struct Curl_hash_iterator iter;
   struct Curl_llist_element *curr;
@@ -344,7 +345,7 @@ bool Curl_conncache_foreach(struct Curl_easy *data,
       struct connectdata *conn = curr->ptr;
       curr = curr->next;
 
-      if(1 == func(conn, param)) {
+      if(1 == func(data, conn, param)) {
         CONNCACHE_UNLOCK(data);
         return TRUE;
       }

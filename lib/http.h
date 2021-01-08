@@ -51,11 +51,12 @@ bool Curl_compareheader(const char *headerline,  /* line to check */
 
 char *Curl_copy_header_value(const char *header);
 
-char *Curl_checkProxyheaders(const struct connectdata *conn,
+char *Curl_checkProxyheaders(struct Curl_easy *data,
+                             const struct connectdata *conn,
                              const char *thisheader);
 #ifndef USE_HYPER
 CURLcode Curl_buffer_send(struct dynbuf *in,
-                          struct connectdata *conn,
+                          struct Curl_easy *data,
                           curl_off_t *bytes_written,
                           size_t included_body_bytes,
                           int socketindex);
@@ -63,14 +64,14 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
 #define Curl_buffer_send(a,b,c,d,e) CURLE_OK
 #endif
 
-CURLcode Curl_add_timecondition(const struct connectdata *conn,
+CURLcode Curl_add_timecondition(struct Curl_easy *data,
 #ifndef USE_HYPER
-                                 struct dynbuf *req
+                                struct dynbuf *req
 #else
-                                 void *headers
+                                void *headers
 #endif
   );
-CURLcode Curl_add_custom_headers(struct connectdata *conn,
+CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                                  bool is_connect,
 #ifndef USE_HYPER
                                  struct dynbuf *req
@@ -84,7 +85,7 @@ CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
 
 void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
                       const char **method, Curl_HttpReq *);
-CURLcode Curl_http_useragent(struct Curl_easy *data, struct connectdata *conn);
+CURLcode Curl_http_useragent(struct Curl_easy *data);
 CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_http_target(struct Curl_easy *data, struct connectdata *conn,
                           struct dynbuf *req);
@@ -108,21 +109,20 @@ CURLcode Curl_http_resume(struct Curl_easy *data,
                           struct connectdata *conn,
                           Curl_HttpReq httpreq);
 CURLcode Curl_http_range(struct Curl_easy *data,
-                         struct connectdata *conn,
                          Curl_HttpReq httpreq);
 CURLcode Curl_http_firstwrite(struct Curl_easy *data,
                               struct connectdata *conn,
                               bool *done);
 
 /* protocol-specific functions set up to be called by the main engine */
-CURLcode Curl_http(struct connectdata *conn, bool *done);
-CURLcode Curl_http_done(struct connectdata *, CURLcode, bool premature);
-CURLcode Curl_http_connect(struct connectdata *conn, bool *done);
+CURLcode Curl_http(struct Curl_easy *data, bool *done);
+CURLcode Curl_http_done(struct Curl_easy *data, CURLcode, bool premature);
+CURLcode Curl_http_connect(struct Curl_easy *data, bool *done);
 
 /* These functions are in http.c */
-CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
+CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                               const char *auth);
-CURLcode Curl_http_auth_act(struct connectdata *conn);
+CURLcode Curl_http_auth_act(struct Curl_easy *data);
 
 /* If only the PICKNONE bit is set, there has been a round-trip and we
    selected to use no auth at all. Ie, we actively select no auth, as opposed
@@ -301,7 +301,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
  * @returns CURLcode
  */
 CURLcode
-Curl_http_output_auth(struct connectdata *conn,
+Curl_http_output_auth(struct Curl_easy *data,
+                      struct connectdata *conn,
                       const char *request,
                       Curl_HttpReq httpreq,
                       const char *path,

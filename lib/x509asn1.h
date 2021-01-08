@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -125,9 +125,9 @@ const char *Curl_ASN1tostr(struct Curl_asn1Element *elem, int type);
 const char *Curl_DNtostr(struct Curl_asn1Element *dn);
 int Curl_parseX509(struct Curl_X509certificate *cert,
                    const char *beg, const char *end);
-CURLcode Curl_extract_certinfo(struct connectdata *conn, int certnum,
+CURLcode Curl_extract_certinfo(struct Curl_easy *data, int certnum,
                                const char *beg, const char *end);
-CURLcode Curl_verifyhost(struct connectdata *conn,
+CURLcode Curl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
                          const char *beg, const char *end);
 #endif /* USE_GSKIT or USE_NSS or USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL */
 #endif /* HEADER_CURL_X509ASN1_H */

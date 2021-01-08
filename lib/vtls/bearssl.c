@@ -552,7 +552,7 @@ static CURLcode bearssl_connect_step3(struct connectdata *conn, int sockindex)
         conn->negnpn = CURL_HTTP_VERSION_1_1;
       else
         infof(data, "ALPN, unrecognized protocol %s\n", protocol);
-      Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+      Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                           BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
     }
     else
@@ -585,10 +585,10 @@ static CURLcode bearssl_connect_step3(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-static ssize_t bearssl_send(struct connectdata *conn, int sockindex,
+static ssize_t bearssl_send(struct Curl_easy *data, int sockindex,
                             const void *buf, size_t len, CURLcode *err)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   unsigned char *app;
@@ -618,9 +618,10 @@ static ssize_t bearssl_send(struct connectdata *conn, int sockindex,
   }
 }
 
-static ssize_t bearssl_recv(struct connectdata *conn, int sockindex,
+static ssize_t bearssl_recv(struct Curl_easy *data, int sockindex,
                             char *buf, size_t len, CURLcode *err)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   unsigned char *app;

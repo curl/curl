@@ -1433,7 +1433,7 @@ static int ossl_shutdown(struct connectdata *conn, int sockindex)
         default:
           /* openssl/ssl.h says "look at error stack/return value/errno" */
           sslerror = ERR_get_error();
-          failf(conn->data, OSSL_PACKAGE " SSL_read on shutdown: %s, errno %d",
+          failf(data, OSSL_PACKAGE " SSL_read on shutdown: %s, errno %d",
                 (sslerror ?
                  ossl_strerror(sslerror, buf, sizeof(buf)) :
                  SSL_ERROR_to_str(err)),
@@ -2206,15 +2206,15 @@ select_next_proto_cb(SSL *ssl,
                      const unsigned char *in, unsigned int inlen,
                      void *arg)
 {
-  struct connectdata *conn = (struct connectdata*) arg;
-
+  struct Curl_easy *data = (struct Curl_easy *)arg;
+  struct connectdata *conn = data->conn;
   (void)ssl;
 
 #ifdef USE_NGHTTP2
-  if(conn->data->set.httpversion >= CURL_HTTP_VERSION_2 &&
+  if(data->set.httpversion >= CURL_HTTP_VERSION_2 &&
      !select_next_protocol(out, outlen, in, inlen, NGHTTP2_PROTO_VERSION_ID,
                            NGHTTP2_PROTO_VERSION_ID_LEN)) {
-    infof(conn->data, "NPN, negotiated HTTP2 (%s)\n",
+    infof(data, "NPN, negotiated HTTP2 (%s)\n",
           NGHTTP2_PROTO_VERSION_ID);
     conn->negnpn = CURL_HTTP_VERSION_2;
     return SSL_TLSEXT_ERR_OK;
@@ -2223,12 +2223,12 @@ select_next_proto_cb(SSL *ssl,
 
   if(!select_next_protocol(out, outlen, in, inlen, ALPN_HTTP_1_1,
                            ALPN_HTTP_1_1_LENGTH)) {
-    infof(conn->data, "NPN, negotiated HTTP1.1\n");
+    infof(data, "NPN, negotiated HTTP1.1\n");
     conn->negnpn = CURL_HTTP_VERSION_1_1;
     return SSL_TLSEXT_ERR_OK;
   }
 
-  infof(conn->data, "NPN, no overlap, use HTTP1.1\n");
+  infof(data, "NPN, no overlap, use HTTP1.1\n");
   *out = (unsigned char *)ALPN_HTTP_1_1;
   *outlen = ALPN_HTTP_1_1_LENGTH;
   conn->negnpn = CURL_HTTP_VERSION_1_1;
@@ -2729,7 +2729,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
 #ifdef HAS_NPN
   if(conn->bits.tls_enable_npn)
-    SSL_CTX_set_next_proto_select_cb(backend->ctx, select_next_proto_cb, conn);
+    SSL_CTX_set_next_proto_select_cb(backend->ctx, select_next_proto_cb, data);
 #endif
 
 #ifdef HAS_ALPN
@@ -3385,7 +3385,7 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
       else
         infof(data, "ALPN, server did not agree to a protocol\n");
 
-      Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+      Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                           BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
     }
 #endif
@@ -4130,7 +4130,7 @@ static bool ossl_data_pending(const struct connectdata *conn,
 
 static size_t ossl_version(char *buffer, size_t size);
 
-static ssize_t ossl_send(struct connectdata *conn,
+static ssize_t ossl_send(struct Curl_easy *data,
                          int sockindex,
                          const void *mem,
                          size_t len,
@@ -4143,6 +4143,7 @@ static ssize_t ossl_send(struct connectdata *conn,
   unsigned long sslerror;
   int memlen;
   int rc;
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
 
@@ -4174,7 +4175,7 @@ static ssize_t ossl_send(struct connectdata *conn,
           strncpy(error_buffer, SSL_ERROR_to_str(err), sizeof(error_buffer));
           error_buffer[sizeof(error_buffer) - 1] = '\0';
         }
-        failf(conn->data, OSSL_PACKAGE " SSL_write: %s, errno %d",
+        failf(data, OSSL_PACKAGE " SSL_write: %s, errno %d",
               error_buffer, sockerr);
         *curlcode = CURLE_SEND_ERROR;
         return -1;
@@ -4192,17 +4193,16 @@ static ssize_t ossl_send(struct connectdata *conn,
         ) {
         char ver[120];
         ossl_version(ver, 120);
-        failf(conn->data, "Error: %s does not support double SSL tunneling.",
-              ver);
+        failf(data, "Error: %s does not support double SSL tunneling.", ver);
       }
       else
-        failf(conn->data, "SSL_write() error: %s",
+        failf(data, "SSL_write() error: %s",
               ossl_strerror(sslerror, error_buffer, sizeof(error_buffer)));
       *curlcode = CURLE_SEND_ERROR;
       return -1;
     }
     /* a true error */
-    failf(conn->data, OSSL_PACKAGE " SSL_write: %s, errno %d",
+    failf(data, OSSL_PACKAGE " SSL_write: %s, errno %d",
           SSL_ERROR_to_str(err), SOCKERRNO);
     *curlcode = CURLE_SEND_ERROR;
     return -1;
@@ -4211,7 +4211,7 @@ static ssize_t ossl_send(struct connectdata *conn,
   return (ssize_t)rc; /* number of bytes */
 }
 
-static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
+static ssize_t ossl_recv(struct Curl_easy *data,   /* transfer */
                          int num,                  /* socketindex */
                          char *buf,                /* store read data here */
                          size_t buffersize,        /* max amount to read */
@@ -4221,6 +4221,7 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
   unsigned long sslerror;
   ssize_t nread;
   int buffsize;
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[num];
   struct ssl_backend_data *backend = connssl->backend;
 

@@ -93,12 +93,11 @@
  *
  * Returns a pointer to the first matching header or NULL if none matched.
  */
-char *Curl_checkheaders(const struct connectdata *conn,
+char *Curl_checkheaders(const struct Curl_easy *data,
                         const char *thisheader)
 {
   struct curl_slist *head;
   size_t thislen = strlen(thisheader);
-  struct Curl_easy *data = conn->data;
 
   for(head = data->set.headers; head; head = head->next) {
     if(strncasecompare(head->data, thisheader, thislen) &&
@@ -599,7 +598,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
     if(bytestoread) {
       /* receive data from the network! */
-      result = Curl_read(conn, conn->sockfd, buf, bytestoread, &nread);
+      result = Curl_read(data, conn->sockfd, buf, bytestoread, &nread);
 
       /* read would've blocked */
       if(CURLE_AGAIN == result)
@@ -814,11 +813,11 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
           /* Don't let excess data pollute body writes */
           if(k->maxdownload == -1 || (curl_off_t)headlen <= k->maxdownload)
-            result = Curl_client_write(conn, CLIENTWRITE_BODY,
+            result = Curl_client_write(data, CLIENTWRITE_BODY,
                                        Curl_dyn_ptr(&data->state.headerb),
                                        headlen);
           else
-            result = Curl_client_write(conn, CLIENTWRITE_BODY,
+            result = Curl_client_write(data, CLIENTWRITE_BODY,
                                        Curl_dyn_ptr(&data->state.headerb),
                                        (size_t)k->maxdownload);
 
@@ -835,10 +834,10 @@ static CURLcode readwrite_data(struct Curl_easy *data,
             if(!k->ignorebody) {
 #ifndef CURL_DISABLE_POP3
               if(conn->handler->protocol & PROTO_FAMILY_POP3)
-                result = Curl_pop3_write(conn, k->str, nread);
+                result = Curl_pop3_write(data, k->str, nread);
               else
 #endif /* CURL_DISABLE_POP3 */
-                result = Curl_client_write(conn, CLIENTWRITE_BODY, k->str,
+                result = Curl_client_write(data, CLIENTWRITE_BODY, k->str,
                                            nread);
             }
           }
@@ -904,13 +903,14 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-CURLcode Curl_done_sending(struct connectdata *conn,
+CURLcode Curl_done_sending(struct Curl_easy *data,
                            struct SingleRequest *k)
 {
+  struct connectdata *conn = data->conn;
   k->keepon &= ~KEEP_SEND; /* we're done writing */
 
   /* These functions should be moved into the handler struct! */
-  Curl_http2_done_sending(conn);
+  Curl_http2_done_sending(data, conn);
   Curl_quic_done_sending(conn);
 
   if(conn->bits.rewindaftersend) {
@@ -1017,7 +1017,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
         break;
       }
       if(nread <= 0) {
-        result = Curl_done_sending(conn, k);
+        result = Curl_done_sending(data, k);
         if(result)
           return result;
         break;
@@ -1079,7 +1079,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_SMTP
       if(conn->handler->protocol & PROTO_FAMILY_SMTP) {
-        result = Curl_smtp_escape_eob(conn, nread);
+        result = Curl_smtp_escape_eob(data, nread);
         if(result)
           return result;
       }
@@ -1091,7 +1091,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
     }
 
     /* write to socket (send away data) */
-    result = Curl_write(conn,
+    result = Curl_write(data,
                         conn->writesockfd,  /* socket to send to */
                         k->upload_fromhere, /* buffer pointer */
                         k->upload_present,  /* buffer size */
@@ -1148,7 +1148,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
       k->upload_present = 0; /* no more bytes left */
 
       if(k->upload_done) {
-        result = Curl_done_sending(conn, k);
+        result = Curl_done_sending(data, k);
         if(result)
           return result;
       }
@@ -1336,15 +1336,15 @@ CURLcode Curl_readwrite(struct connectdata *conn,
  * keeps track of. This function will only be called for connections that are
  * in the proper state to have this information available.
  */
-int Curl_single_getsock(const struct connectdata *conn,
+int Curl_single_getsock(struct Curl_easy *data,
+                        struct connectdata *conn,
                         curl_socket_t *sock)
 {
-  const struct Curl_easy *data = conn->data;
   int bitmap = GETSOCK_BLANK;
   unsigned sockindex = 0;
 
   if(conn->handler->perform_getsock)
-    return conn->handler->perform_getsock(conn, sock);
+    return conn->handler->perform_getsock(data, conn, sock);
 
   /* don't include HOLD and PAUSE connections */
   if((data->req.keepon & KEEP_RECVBITS) == KEEP_RECV) {

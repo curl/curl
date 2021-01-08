@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -357,7 +357,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
     /* FALLTHROUGH */
   case CONNECT_REQ_SENDING:
     /* Send request */
-    result = Curl_write_plain(conn, sockfd, (char *)sx->outp,
+    result = Curl_write_plain(data, sockfd, (char *)sx->outp,
                               sx->outstanding, &written);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Failed to send SOCKS4 connect request.");
@@ -561,7 +561,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
     /* write the number of authentication methods */
     socksreq[1] = (unsigned char) (idx - 2);
 
-    result = Curl_write_plain(conn, sockfd, (char *)socksreq, idx, &written);
+    result = Curl_write_plain(data, sockfd, (char *)socksreq, idx, &written);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Unable to send initial SOCKS5 request.");
       return CURLPX_SEND_CONNECT;
@@ -575,7 +575,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
     sxstate(conn, CONNECT_SOCKS_READ);
     goto CONNECT_SOCKS_READ_INIT;
   case CONNECT_SOCKS_SEND:
-    result = Curl_write_plain(conn, sockfd, (char *)sx->outp,
+    result = Curl_write_plain(data, sockfd, (char *)sx->outp,
                               sx->outstanding, &written);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Unable to send initial SOCKS5 request.");
@@ -707,7 +707,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
   }
     /* FALLTHROUGH */
   case CONNECT_AUTH_SEND:
-    result = Curl_write_plain(conn, sockfd, (char *)sx->outp,
+    result = Curl_write_plain(data, sockfd, (char *)sx->outp,
                               sx->outstanding, &written);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Failed to send SOCKS5 sub-negotiation request.");
@@ -881,7 +881,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
     sxstate(conn, CONNECT_REQ_SENDING);
     /* FALLTHROUGH */
   case CONNECT_REQ_SENDING:
-    result = Curl_write_plain(conn, sockfd, (char *)sx->outp,
+    result = Curl_write_plain(data, sockfd, (char *)sx->outp,
                               sx->outstanding, &written);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Failed to send SOCKS5 connect request.");

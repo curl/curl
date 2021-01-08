@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,16 +62,15 @@
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */
-bool Curl_ipv6works(struct connectdata *conn)
+bool Curl_ipv6works(struct Curl_easy *data)
 {
-  if(conn) {
+  if(data) {
     /* the nature of most system is that IPv6 status doesn't come and go
        during a program's lifetime so we only probe the first time and then we
        have the info kept for fast re-use */
-    DEBUGASSERT(conn);
-    DEBUGASSERT(conn->data);
-    DEBUGASSERT(conn->data->multi);
-    return conn->data->multi->ipv6_works;
+    DEBUGASSERT(data);
+    DEBUGASSERT(data->multi);
+    return data->multi->ipv6_works;
   }
   else {
     int ipv6_works = -1;
@@ -82,7 +81,7 @@ bool Curl_ipv6works(struct connectdata *conn)
       ipv6_works = 0;
     else {
       ipv6_works = 1;
-      Curl_closesocket(NULL, s);
+      sclose(s);
     }
     return (ipv6_works>0)?TRUE:FALSE;
   }
@@ -92,10 +91,10 @@ bool Curl_ipv6works(struct connectdata *conn)
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.
  */
-bool Curl_ipvalid(struct connectdata *conn)
+bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
 {
   if(conn->ip_version == CURL_IPRESOLVE_V6)
-    return Curl_ipv6works(conn);
+    return Curl_ipv6works(data);
 
   return TRUE;
 }
@@ -161,7 +160,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     break;
   }
 
-  if((pf != PF_INET) && !Curl_ipv6works(conn))
+  if((pf != PF_INET) && !Curl_ipv6works(data))
     /* The stack seems to be a non-IPv6 one */
     pf = PF_INET;
 

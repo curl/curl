@@ -885,7 +885,7 @@ gtls_connect_step3(struct connectdata *conn,
       const char *beg = (const char *) chainp[i].data;
       const char *end = beg + chainp[i].size;
 
-      result = Curl_extract_certinfo(conn, i, beg, end);
+      result = Curl_extract_certinfo(data, i, beg, end);
       if(result)
         return result;
     }
@@ -1263,7 +1263,7 @@ gtls_connect_step3(struct connectdata *conn,
     else
       infof(data, "ALPN, server did not agree to a protocol\n");
 
-    Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+    Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                         BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 
@@ -1399,12 +1399,13 @@ static bool gtls_data_pending(const struct connectdata *conn,
   return res;
 }
 
-static ssize_t gtls_send(struct connectdata *conn,
+static ssize_t gtls_send(struct Curl_easy *data,
                          int sockindex,
                          const void *mem,
                          size_t len,
                          CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   ssize_t rc = gnutls_record_send(backend->session, mem, len);
@@ -1526,12 +1527,13 @@ static int gtls_shutdown(struct connectdata *conn, int sockindex)
   return retval;
 }
 
-static ssize_t gtls_recv(struct connectdata *conn, /* connection data */
+static ssize_t gtls_recv(struct Curl_easy *data, /* connection data */
                          int num,                  /* socketindex */
                          char *buf,                /* store read data here */
                          size_t buffersize,        /* max amount to read */
                          CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[num];
   struct ssl_backend_data *backend = connssl->backend;
   ssize_t ret;

@@ -5,9 +5,9 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -956,7 +956,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
                "sending %lu bytes...\n", outbuf.cbBuffer));
 
   /* send initial handshake data which is now stored in output buffer */
-  result = Curl_write_plain(conn, conn->sock[sockindex], outbuf.pvBuffer,
+  result = Curl_write_plain(data, conn->sock[sockindex], outbuf.pvBuffer,
                             outbuf.cbBuffer, &written);
   s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
   if((result != CURLE_OK) || (outbuf.cbBuffer != (size_t) written)) {
@@ -1153,7 +1153,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
                        "sending %lu bytes...\n", outbuf[i].cbBuffer));
 
           /* send handshake token to server */
-          result = Curl_write_plain(conn, conn->sock[sockindex],
+          result = Curl_write_plain(data, conn->sock[sockindex],
                                     outbuf[i].pvBuffer, outbuf[i].cbBuffer,
                                     &written);
           if((result != CURLE_OK) ||
@@ -1305,7 +1305,7 @@ cert_counter_callback(const CERT_CONTEXT *ccert_context, void *certs_count)
 
 struct Adder_args
 {
-  struct connectdata *conn;
+  struct Curl_easy *data;
   CURLcode result;
   int idx;
   int certs_count;
@@ -1320,7 +1320,8 @@ add_cert_to_certinfo(const CERT_CONTEXT *ccert_context, void *raw_arg)
     const char *beg = (const char *) ccert_context->pbCertEncoded;
     const char *end = beg + ccert_context->cbCertEncoded;
     int insert_index = (args->certs_count - 1) - args->idx;
-    args->result = Curl_extract_certinfo(args->conn, insert_index, beg, end);
+    args->result = Curl_extract_certinfo(args->data, insert_index,
+                                         beg, end);
     args->idx++;
   }
   return args->result == CURLE_OK;
@@ -1400,7 +1401,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
     }
     else
       infof(data, "ALPN, server did not agree to a protocol\n");
-    Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+    Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                         BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 #endif
@@ -1458,7 +1459,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
     result = Curl_ssl_init_certinfo(data, certs_count);
     if(!result) {
       struct Adder_args args;
-      args.conn = conn;
+      args.data = data;
       args.idx = 0;
       args.certs_count = certs_count;
       traverse_cert_store(ccert_context, add_cert_to_certinfo, &args);
@@ -1597,12 +1598,13 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
 }
 
 static ssize_t
-schannel_send(struct connectdata *conn, int sockindex,
+schannel_send(struct Curl_easy *data, int sockindex,
               const void *buf, size_t len, CURLcode *err)
 {
   ssize_t written = -1;
   size_t data_len = 0;
-  unsigned char *data = NULL;
+  unsigned char *ptr = NULL;
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   SecBuffer outbuf[4];
   SecBufferDesc outbuf_desc;
@@ -1629,19 +1631,19 @@ schannel_send(struct connectdata *conn, int sockindex,
   /* calculate the complete message length and allocate a buffer for it */
   data_len = BACKEND->stream_sizes.cbHeader + len +
     BACKEND->stream_sizes.cbTrailer;
-  data = (unsigned char *) malloc(data_len);
-  if(data == NULL) {
+  ptr = (unsigned char *) malloc(data_len);
+  if(!ptr) {
     *err = CURLE_OUT_OF_MEMORY;
     return -1;
   }
 
   /* setup output buffers (header, data, trailer, empty) */
   InitSecBuffer(&outbuf[0], SECBUFFER_STREAM_HEADER,
-                data, BACKEND->stream_sizes.cbHeader);
+                ptr, BACKEND->stream_sizes.cbHeader);
   InitSecBuffer(&outbuf[1], SECBUFFER_DATA,
-                data + BACKEND->stream_sizes.cbHeader, curlx_uztoul(len));
+                ptr + BACKEND->stream_sizes.cbHeader, curlx_uztoul(len));
   InitSecBuffer(&outbuf[2], SECBUFFER_STREAM_TRAILER,
-                data + BACKEND->stream_sizes.cbHeader + len,
+                ptr + BACKEND->stream_sizes.cbHeader + len,
                 BACKEND->stream_sizes.cbTrailer);
   InitSecBuffer(&outbuf[3], SECBUFFER_EMPTY, NULL, 0);
   InitSecBufferDesc(&outbuf_desc, outbuf, 4);
@@ -1680,10 +1682,10 @@ schannel_send(struct connectdata *conn, int sockindex,
     while(len > (size_t)written) {
       ssize_t this_write = 0;
       int what;
-      timediff_t timeout_ms = Curl_timeleft(conn->data, NULL, FALSE);
+      timediff_t timeout_ms = Curl_timeleft(data, NULL, FALSE);
       if(timeout_ms < 0) {
         /* we already got the timeout */
-        failf(conn->data, "schannel: timed out sending data "
+        failf(data, "schannel: timed out sending data "
               "(bytes sent: %zd)", written);
         *err = CURLE_OPERATION_TIMEDOUT;
         written = -1;
@@ -1694,13 +1696,13 @@ schannel_send(struct connectdata *conn, int sockindex,
       what = SOCKET_WRITABLE(conn->sock[sockindex], timeout_ms);
       if(what < 0) {
         /* fatal error */
-        failf(conn->data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
+        failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
         *err = CURLE_SEND_ERROR;
         written = -1;
         break;
       }
       else if(0 == what) {
-        failf(conn->data, "schannel: timed out sending data "
+        failf(data, "schannel: timed out sending data "
               "(bytes sent: %zd)", written);
         *err = CURLE_OPERATION_TIMEDOUT;
         written = -1;
@@ -1708,7 +1710,7 @@ schannel_send(struct connectdata *conn, int sockindex,
       }
       /* socket is writable */
 
-      result = Curl_write_plain(conn, conn->sock[sockindex], data + written,
+      result = Curl_write_plain(data, conn->sock[sockindex], ptr + written,
                                 len - written, &this_write);
       if(result == CURLE_AGAIN)
         continue;
@@ -1728,7 +1730,7 @@ schannel_send(struct connectdata *conn, int sockindex,
     *err = CURLE_SEND_ERROR;
   }
 
-  Curl_safefree(data);
+  Curl_safefree(ptr);
 
   if(len == (size_t)written)
     /* Encrypted message including header, data and trailer entirely sent.
@@ -1739,12 +1741,12 @@ schannel_send(struct connectdata *conn, int sockindex,
 }
 
 static ssize_t
-schannel_recv(struct connectdata *conn, int sockindex,
+schannel_recv(struct Curl_easy *data, int sockindex,
               char *buf, size_t len, CURLcode *err)
 {
   size_t size = 0;
   ssize_t nread = -1;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   unsigned char *reallocated_buffer;
   size_t reallocated_length;
@@ -2181,7 +2183,7 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
       /* send close message which is in output buffer */
       ssize_t written;
-      result = Curl_write_plain(conn, conn->sock[sockindex], outbuf.pvBuffer,
+      result = Curl_write_plain(data, conn->sock[sockindex], outbuf.pvBuffer,
                                 outbuf.cbBuffer, &written);
 
       s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
