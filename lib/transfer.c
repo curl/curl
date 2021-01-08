@@ -1336,7 +1336,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
  * keeps track of. This function will only be called for connections that are
  * in the proper state to have this information available.
  */
-int Curl_single_getsock(const struct connectdata *conn,
+int Curl_single_getsock(struct connectdata *conn,
                         curl_socket_t *sock)
 {
   const struct Curl_easy *data = conn->data;

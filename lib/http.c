@@ -103,13 +103,14 @@ static CURLcode add_haproxy_protocol_header(struct connectdata *conn);
 #endif
 
 #ifdef USE_SSL
-static CURLcode https_connecting(struct connectdata *conn, bool *done);
+static CURLcode https_connecting(struct Curl_easy *data, bool *done);
 static int https_getsock(struct connectdata *conn,
                          curl_socket_t *socks);
 #else
 #define https_connecting(x,y) CURLE_COULDNT_CONNECT
 #endif
-static CURLcode http_setup_conn(struct connectdata *conn);
+static CURLcode http_setup_conn(struct Curl_easy *data,
+                                struct connectdata *conn);
 
 /*
  * HTTP handler interface.
@@ -165,19 +166,19 @@ const struct Curl_handler Curl_handler_https = {
 };
 #endif
 
-static CURLcode http_setup_conn(struct connectdata *conn)
+static CURLcode http_setup_conn(struct Curl_easy *data,
+                                struct connectdata *conn)
 {
   /* allocate the HTTP-specific struct for the Curl_easy, only to survive
      during this request */
   struct HTTP *http;
-  struct Curl_easy *data = conn->data;
   DEBUGASSERT(data->req.p.http == NULL);
 
   http = calloc(1, sizeof(struct HTTP));
   if(!http)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_mime_initpart(&http->form, conn->data);
+  Curl_mime_initpart(&http->form, data);
   data->req.p.http = http;
 
   if(data->set.httpversion == CURL_HTTP_VERSION_3) {
@@ -1407,9 +1408,10 @@ Curl_compareheader(const char *headerline, /* line to check */
  * Curl_http_connect() performs HTTP stuff to do at connect-time, called from
  * the generic Curl_connect().
  */
-CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
+CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
 {
   CURLcode result;
+  struct connectdata *conn = data->conn;
 
   /* We default to persistent connections. We set this already in this connect
      function to make the re-use checks properly be able to check this bit. */
@@ -1432,7 +1434,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
     /* nothing else to do except wait right now - we're not done here. */
     return CURLE_OK;
 
-  if(conn->data->set.haproxyprotocol) {
+  if(data->set.haproxyprotocol) {
     /* add HAProxy PROXY protocol header */
     result = add_haproxy_protocol_header(conn);
     if(result)
@@ -1442,7 +1444,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
 
   if(conn->given->protocol & CURLPROTO_HTTPS) {
     /* perform SSL initialization */
-    result = https_connecting(conn, done);
+    result = https_connecting(data, done);
     if(result)
       return result;
   }
@@ -1502,10 +1504,11 @@ static CURLcode add_haproxy_protocol_header(struct connectdata *conn)
 #endif
 
 #ifdef USE_SSL
-static CURLcode https_connecting(struct connectdata *conn, bool *done)
+static CURLcode https_connecting(struct Curl_easy *data, bool *done)
 {
   CURLcode result;
-  DEBUGASSERT((conn) && (conn->handler->flags & PROTOPT_SSL));
+  struct connectdata *conn = data->conn;
+  DEBUGASSERT((data) && (data->conn->handler->flags & PROTOPT_SSL));
 
 #ifdef ENABLE_QUIC
   if(conn->transport == TRNSPRT_QUIC) {
@@ -1536,10 +1539,10 @@ static int https_getsock(struct connectdata *conn,
  * performed.
  */
 
-CURLcode Curl_http_done(struct connectdata *conn,
+CURLcode Curl_http_done(struct Curl_easy *data,
                         CURLcode status, bool premature)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   struct HTTP *http = data->req.p.http;
 
   /* Clear multipass flag. If authentication isn't done yet, then it will get
@@ -2888,9 +2891,9 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
  * request is to be performed. This creates and sends a properly constructed
  * HTTP request.
  */
-CURLcode Curl_http(struct connectdata *conn, bool *done)
+CURLcode Curl_http(struct Curl_easy *data, bool *done)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
   struct HTTP *http;
   Curl_HttpReq httpreq;
@@ -2923,8 +2926,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       default:
         /* Check if user wants to use HTTP/2 with clear TCP*/
 #ifdef USE_NGHTTP2
-        if(conn->data->set.httpversion ==
-           CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
+        if(data->set.httpversion == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
 #ifndef CURL_DISABLE_PROXY
           if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
             /* We don't support HTTP/2 proxies yet. Also it's debatable
@@ -3983,7 +3985,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                 infof(data, "Got 417 while waiting for a 100\n");
                 data->state.disableexpect = TRUE;
                 DEBUGASSERT(!data->req.newurl);
-                data->req.newurl = strdup(conn->data->change.url);
+                data->req.newurl = strdup(data->change.url);
                 Curl_done_sending(conn, k);
               }
               else if(data->set.http_keep_sending_on_error) {

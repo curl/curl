@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -125,18 +125,20 @@ static CURLcode ftp_nb_type(struct connectdata *conn,
                             bool ascii, ftpstate newstate);
 static int ftp_need_type(struct connectdata *conn,
                          bool ascii);
-static CURLcode ftp_do(struct connectdata *conn, bool *done);
-static CURLcode ftp_done(struct connectdata *conn,
+static CURLcode ftp_do(struct Curl_easy *data, bool *done);
+static CURLcode ftp_done(struct Curl_easy *data,
                          CURLcode, bool premature);
-static CURLcode ftp_connect(struct connectdata *conn, bool *done);
-static CURLcode ftp_disconnect(struct connectdata *conn, bool dead_connection);
-static CURLcode ftp_do_more(struct connectdata *conn, int *completed);
-static CURLcode ftp_multi_statemach(struct connectdata *conn, bool *done);
+static CURLcode ftp_connect(struct Curl_easy *data, bool *done);
+static CURLcode ftp_disconnect(struct Curl_easy *data,
+                               struct connectdata *conn, bool dead_connection);
+static CURLcode ftp_do_more(struct Curl_easy *data, int *completed);
+static CURLcode ftp_multi_statemach(struct Curl_easy *data, bool *done);
 static int ftp_getsock(struct connectdata *conn, curl_socket_t *socks);
 static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks);
-static CURLcode ftp_doing(struct connectdata *conn,
+static CURLcode ftp_doing(struct Curl_easy *data,
                           bool *dophase_done);
-static CURLcode ftp_setup_connection(struct connectdata *conn);
+static CURLcode ftp_setup_connection(struct Curl_easy *data,
+                                     struct connectdata *conn);
 static CURLcode init_wc_data(struct connectdata *conn);
 static CURLcode wc_statemach(struct connectdata *conn);
 static void wc_data_dtor(void *ptr);
@@ -145,7 +147,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
                              struct pingpong *pp,
                              int *ftpcode,
                              size_t *size);
-static CURLcode ftp_dophase_done(struct connectdata *conn,
+static CURLcode ftp_dophase_done(struct Curl_easy *data,
                                  bool connected);
 
 /*
@@ -2030,7 +2032,7 @@ static CURLcode ftp_state_port_resp(struct connectdata *conn,
   else {
     infof(data, "Connect data stream actively\n");
     state(conn, FTP_STOP); /* end of DO phase */
-    result = ftp_dophase_done(conn, FALSE);
+    result = ftp_dophase_done(data, FALSE);
   }
 
   return result;
@@ -3056,9 +3058,10 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
 
 
 /* called repeatedly until done from multi.c */
-static CURLcode ftp_multi_statemach(struct connectdata *conn,
+static CURLcode ftp_multi_statemach(struct Curl_easy *data,
                                     bool *done)
 {
+  struct connectdata *conn = data->conn;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   CURLcode result = Curl_pp_statemach(&ftpc->pp, FALSE, FALSE);
 
@@ -3093,10 +3096,11 @@ static CURLcode ftp_block_statemach(struct connectdata *conn)
  * phase is done when this function returns, or FALSE if not.
  *
  */
-static CURLcode ftp_connect(struct connectdata *conn,
+static CURLcode ftp_connect(struct Curl_easy *data,
                             bool *done) /* see description above */
 {
   CURLcode result;
+  struct connectdata *conn = data->conn;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct pingpong *pp = &ftpc->pp;
 
@@ -3125,7 +3129,7 @@ static CURLcode ftp_connect(struct connectdata *conn,
      response */
   state(conn, FTP_WAIT220);
 
-  result = ftp_multi_statemach(conn, done);
+  result = ftp_multi_statemach(data, done);
 
   return result;
 }
@@ -3139,10 +3143,10 @@ static CURLcode ftp_connect(struct connectdata *conn,
  *
  * Input argument is already checked for validity.
  */
-static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
+static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
                          bool premature)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   struct FTP *ftp = data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct pingpong *pp = &ftpc->pp;
@@ -3499,9 +3503,9 @@ ftp_pasv_verbose(struct connectdata *conn,
  * EPSV).
  */
 
-static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
+static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   CURLcode result = CURLE_OK;
   bool connected = FALSE;
@@ -3552,7 +3556,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
   if(ftpc->state) {
     /* already in a state so skip the initial commands.
        They are only done to kickstart the do_more state */
-    result = ftp_multi_statemach(conn, &complete);
+    result = ftp_multi_statemach(data, &complete);
 
     *completep = (int)complete;
 
@@ -3597,7 +3601,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
       if(result)
         return result;
 
-      result = ftp_multi_statemach(conn, &complete);
+      result = ftp_multi_statemach(data, &complete);
       /* ftpc->wait_data_conn is always false here */
       *completep = (int)complete;
     }
@@ -3633,7 +3637,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
           return result;
       }
 
-      result = ftp_multi_statemach(conn, &complete);
+      result = ftp_multi_statemach(data, &complete);
       *completep = (int)complete;
     }
     return result;
@@ -3662,16 +3666,17 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
  */
 
 static
-CURLcode ftp_perform(struct connectdata *conn,
+CURLcode ftp_perform(struct Curl_easy *data,
                      bool *connected,  /* connect status after PASV / PORT */
                      bool *dophase_done)
 {
   /* this is FTP and no proxy */
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
 
-  DEBUGF(infof(conn->data, "DO phase starts\n"));
+  DEBUGF(infof(data, "DO phase starts\n"));
 
-  if(conn->data->set.opt_no_body) {
+  if(data->set.opt_no_body) {
     /* requested no body means no transfer... */
     struct FTP *ftp = conn->data->req.p.ftp;
     ftp->transfer = FTPTRANSFER_INFO;
@@ -3685,7 +3690,7 @@ CURLcode ftp_perform(struct connectdata *conn,
     return result;
 
   /* run the state-machine */
-  result = ftp_multi_statemach(conn, dophase_done);
+  result = ftp_multi_statemach(data, dophase_done);
 
   *connected = conn->bits.tcpconnect[SECONDARYSOCKET];
 
@@ -3936,18 +3941,19 @@ static CURLcode wc_statemach(struct connectdata *conn)
  *
  * The input argument is already checked for validity.
  */
-static CURLcode ftp_do(struct connectdata *conn, bool *done)
+static CURLcode ftp_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   *done = FALSE; /* default to false */
   ftpc->wait_data_conn = FALSE; /* default to no such wait */
 
-  if(conn->data->state.wildcardmatch) {
+  if(data->state.wildcardmatch) {
     result = wc_statemach(conn);
-    if(conn->data->wildcard.state == CURLWC_SKIP ||
-      conn->data->wildcard.state == CURLWC_DONE) {
+    if(data->wildcard.state == CURLWC_SKIP ||
+      data->wildcard.state == CURLWC_DONE) {
       /* do not call ftp_regular_transfer */
       return CURLE_OK;
     }
@@ -4005,7 +4011,9 @@ static CURLcode ftp_quit(struct connectdata *conn)
  * Disconnect from an FTP server. Cleanup protocol-specific per-connection
  * resources. BLOCKING.
  */
-static CURLcode ftp_disconnect(struct connectdata *conn, bool dead_connection)
+static CURLcode ftp_disconnect(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               bool dead_connection)
 {
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct pingpong *pp = &ftpc->pp;
@@ -4024,7 +4032,6 @@ static CURLcode ftp_disconnect(struct connectdata *conn, bool dead_connection)
   (void)ftp_quit(conn); /* ignore errors on the QUIT */
 
   if(ftpc->entrypath) {
-    struct Curl_easy *data = conn->data;
     if(data->state.most_recent_ftp_entrypath == ftpc->entrypath) {
       data->state.most_recent_ftp_entrypath = NULL;
     }
@@ -4193,15 +4200,15 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
 }
 
 /* call this when the DO phase has completed */
-static CURLcode ftp_dophase_done(struct connectdata *conn,
-                                 bool connected)
+static CURLcode ftp_dophase_done(struct Curl_easy *data, bool connected)
 {
-  struct FTP *ftp = conn->data->req.p.ftp;
+  struct connectdata *conn = data->conn;
+  struct FTP *ftp = data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   if(connected) {
     int completed;
-    CURLcode result = ftp_do_more(conn, &completed);
+    CURLcode result = ftp_do_more(data, &completed);
 
     if(result) {
       close_secondarysocket(conn);
@@ -4222,17 +4229,17 @@ static CURLcode ftp_dophase_done(struct connectdata *conn,
 }
 
 /* called from multi.c while DOing */
-static CURLcode ftp_doing(struct connectdata *conn,
+static CURLcode ftp_doing(struct Curl_easy *data,
                           bool *dophase_done)
 {
-  CURLcode result = ftp_multi_statemach(conn, dophase_done);
+  CURLcode result = ftp_multi_statemach(data, dophase_done);
 
   if(result)
-    DEBUGF(infof(conn->data, "DO phase failed\n"));
+    DEBUGF(infof(data, "DO phase failed\n"));
   else if(*dophase_done) {
-    result = ftp_dophase_done(conn, FALSE /* not connected */);
+    result = ftp_dophase_done(data, FALSE /* not connected */);
 
-    DEBUGF(infof(conn->data, "DO phase is complete2\n"));
+    DEBUGF(infof(data, "DO phase is complete2\n"));
   }
   return result;
 }
@@ -4266,7 +4273,7 @@ CURLcode ftp_regular_transfer(struct connectdata *conn,
 
   ftpc->ctl_valid = TRUE; /* starts good */
 
-  result = ftp_perform(conn,
+  result = ftp_perform(data,
                        &connected, /* have we connected after PASV/PORT */
                        dophase_done); /* all commands in the DO-phase done? */
 
@@ -4276,7 +4283,7 @@ CURLcode ftp_regular_transfer(struct connectdata *conn,
       /* the DO phase has not completed yet */
       return CURLE_OK;
 
-    result = ftp_dophase_done(conn, connected);
+    result = ftp_dophase_done(data, connected);
 
     if(result)
       return result;
@@ -4287,13 +4294,13 @@ CURLcode ftp_regular_transfer(struct connectdata *conn,
   return result;
 }
 
-static CURLcode ftp_setup_connection(struct connectdata *conn)
+static CURLcode ftp_setup_connection(struct Curl_easy *data,
+                                     struct connectdata *conn)
 {
-  struct Curl_easy *data = conn->data;
   char *type;
   struct FTP *ftp;
 
-  conn->data->req.p.ftp = ftp = calloc(sizeof(struct FTP), 1);
+  data->req.p.ftp = ftp = calloc(sizeof(struct FTP), 1);
   if(NULL == ftp)
     return CURLE_OUT_OF_MEMORY;
 

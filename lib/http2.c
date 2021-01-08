@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -92,7 +92,7 @@ void Curl_http2_init_userset(struct UserDefined *set)
   set->stream_weight = NGHTTP2_DEFAULT_WEIGHT;
 }
 
-static int http2_perform_getsock(const struct connectdata *conn,
+static int http2_perform_getsock(struct connectdata *conn,
                                  curl_socket_t *sock)
 {
   const struct http_conn *c = &conn->proto.httpc;
@@ -114,8 +114,7 @@ static int http2_perform_getsock(const struct connectdata *conn,
   return bitmap;
 }
 
-static int http2_getsock(struct connectdata *conn,
-                         curl_socket_t *socks)
+static int http2_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
   return http2_perform_getsock(conn, socks);
 }
@@ -140,18 +139,22 @@ static void http2_stream_free(struct HTTP *http)
  * connection cache and not the "main" one. Don't touch the easy handle!
  */
 
-static CURLcode http2_disconnect(struct connectdata *conn,
+static CURLcode http2_disconnect(struct Curl_easy *data,
+                                 struct connectdata *conn,
                                  bool dead_connection)
 {
   struct http_conn *c = &conn->proto.httpc;
   (void)dead_connection;
+#ifndef DEBUG_HTTP2
+  (void)data;
+#endif
 
-  H2BUGF(infof(conn->data, "HTTP/2 DISCONNECT starts now\n"));
+  H2BUGF(infof(data, "HTTP/2 DISCONNECT starts now\n"));
 
   nghttp2_session_del(c->h2);
   Curl_safefree(c->inbuf);
 
-  H2BUGF(infof(conn->data, "HTTP/2 DISCONNECT done\n"));
+  H2BUGF(infof(data, "HTTP/2 DISCONNECT done\n"));
 
   return CURLE_OK;
 }

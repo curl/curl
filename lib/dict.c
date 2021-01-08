@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -67,7 +67,7 @@
  * Forward declarations.
  */
 
-static CURLcode dict_do(struct connectdata *conn, bool *done);
+static CURLcode dict_do(struct Curl_easy *data, bool *done);
 
 /*
  * DICT protocol handler.
@@ -173,7 +173,7 @@ static CURLcode sendf(curl_socket_t sockfd, struct connectdata *conn,
   return result;
 }
 
-static CURLcode dict_do(struct connectdata *conn, bool *done)
+static CURLcode dict_do(struct Curl_easy *data, bool *done)
 {
   char *word;
   char *eword;
@@ -183,7 +183,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
   char *nthdef = NULL; /* This is not part of the protocol, but required
                           by RFC 2229 */
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
   char *path = data->state.up.path;

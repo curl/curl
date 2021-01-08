@@ -628,9 +628,9 @@ static CURLcode cookies(struct Curl_easy *data,
  * request is to be performed. This creates and sends a properly constructed
  * HTTP request.
  */
-CURLcode Curl_http(struct connectdata *conn, bool *done)
+CURLcode Curl_http(struct Curl_easy *data, bool *done)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   struct hyptransfer *h = &data->hyp;
   hyper_io *io = NULL;
   hyper_clientconn_options *options = NULL;

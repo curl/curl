@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2020 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2019, Björn Stenberg, <bjorn@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
@@ -59,10 +59,11 @@
  * Forward declarations.
  */
 
-static CURLcode mqtt_do(struct connectdata *conn, bool *done);
-static CURLcode mqtt_doing(struct connectdata *conn, bool *done);
+static CURLcode mqtt_do(struct Curl_easy *data, bool *done);
+static CURLcode mqtt_doing(struct Curl_easy *data, bool *done);
 static int mqtt_getsock(struct connectdata *conn, curl_socket_t *sock);
-static CURLcode mqtt_setup_conn(struct connectdata *conn);
+static CURLcode mqtt_setup_conn(struct Curl_easy *data,
+                                struct connectdata *conn);
 
 /*
  * MQTT protocol handler.
@@ -90,12 +91,13 @@ const struct Curl_handler Curl_handler_mqtt = {
   PROTOPT_NONE                        /* flags */
 };
 
-static CURLcode mqtt_setup_conn(struct connectdata *conn)
+static CURLcode mqtt_setup_conn(struct Curl_easy *data,
+                                struct connectdata *conn)
 {
   /* allocate the HTTP-specific struct for the Curl_easy, only to survive
      during this request */
   struct MQTT *mq;
-  struct Curl_easy *data = conn->data;
+  (void)conn;
   DEBUGASSERT(data->req.p.mqtt == NULL);
 
   mq = calloc(1, sizeof(struct MQTT));
@@ -137,7 +139,7 @@ static int mqtt_getsock(struct connectdata *conn,
   return GETSOCK_READSOCK(FIRSTSOCKET);
 }
 
-static CURLcode mqtt_connect(struct connectdata *conn)
+static CURLcode mqtt_connect(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
   const size_t client_id_offset = 14;
@@ -157,19 +159,19 @@ static CURLcode mqtt_connect(struct connectdata *conn)
   packet[1] = (packetlen - 2) & 0x7f;
   packet[client_id_offset - 1] = MQTT_CLIENTID_LEN;
 
-  result = Curl_rand_hex(conn->data, (unsigned char *)&client_id[clen],
+  result = Curl_rand_hex(data, (unsigned char *)&client_id[clen],
                          MQTT_CLIENTID_LEN - clen + 1);
   memcpy(&packet[client_id_offset], client_id, MQTT_CLIENTID_LEN);
-  infof(conn->data, "Using client id '%s'\n", client_id);
+  infof(data, "Using client id '%s'\n", client_id);
   if(!result)
-    result = mqtt_send(conn, packet, packetlen);
+    result = mqtt_send(data->conn, packet, packetlen);
   return result;
 }
 
-static CURLcode mqtt_disconnect(struct connectdata *conn)
+static CURLcode mqtt_disconnect(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
-  result = mqtt_send(conn, (char *)"\xe0\x00", 2);
+  result = mqtt_send(data->conn, (char *)"\xe0\x00", 2);
   return result;
 }
 
@@ -518,14 +520,14 @@ static CURLcode mqtt_read_publish(struct connectdata *conn,
   return result;
 }
 
-static CURLcode mqtt_do(struct connectdata *conn, bool *done)
+static CURLcode mqtt_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
 
   *done = FALSE; /* unconditionally */
 
-  result = mqtt_connect(conn);
+  result = mqtt_connect(data);
   if(result) {
     failf(data, "Error %d sending MQTT CONN request", result);
     return result;
@@ -534,11 +536,11 @@ static CURLcode mqtt_do(struct connectdata *conn, bool *done)
   return CURLE_OK;
 }
 
-static CURLcode mqtt_doing(struct connectdata *conn, bool *done)
+static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   struct mqtt_conn *mqtt = &conn->proto.mqtt;
-  struct Curl_easy *data = conn->data;
   struct MQTT *mq = data->req.p.mqtt;
   ssize_t nread;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
@@ -599,7 +601,7 @@ static CURLcode mqtt_doing(struct connectdata *conn, bool *done)
     if(conn->data->state.httpreq == HTTPREQ_POST) {
       result = mqtt_publish(conn);
       if(!result) {
-        result = mqtt_disconnect(conn);
+        result = mqtt_disconnect(data);
         *done = TRUE;
       }
       mqtt->nextstate = MQTT_FIRST;

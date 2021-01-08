@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -148,15 +148,17 @@ struct tftp_state_data {
 /* Forward declarations */
 static CURLcode tftp_rx(struct tftp_state_data *state, tftp_event_t event);
 static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event);
-static CURLcode tftp_connect(struct connectdata *conn, bool *done);
-static CURLcode tftp_disconnect(struct connectdata *conn,
+static CURLcode tftp_connect(struct Curl_easy *data, bool *done);
+static CURLcode tftp_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn,
                                 bool dead_connection);
-static CURLcode tftp_do(struct connectdata *conn, bool *done);
-static CURLcode tftp_done(struct connectdata *conn,
+static CURLcode tftp_do(struct Curl_easy *data, bool *done);
+static CURLcode tftp_done(struct Curl_easy *data,
                           CURLcode, bool premature);
-static CURLcode tftp_setup_connection(struct connectdata *conn);
-static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done);
-static CURLcode tftp_doing(struct connectdata *conn, bool *dophase_done);
+static CURLcode tftp_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn);
+static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done);
+static CURLcode tftp_doing(struct Curl_easy *data, bool *dophase_done);
 static int tftp_getsock(struct connectdata *conn, curl_socket_t *socks);
 static CURLcode tftp_translate_code(tftp_error_t error);
 
@@ -962,9 +964,11 @@ static CURLcode tftp_state_machine(struct tftp_state_data *state,
  * The disconnect callback
  *
  **********************************************************/
-static CURLcode tftp_disconnect(struct connectdata *conn, bool dead_connection)
+static CURLcode tftp_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn, bool dead_connection)
 {
   struct tftp_state_data *state = conn->proto.tftpc;
+  (void) data;
   (void) dead_connection;
 
   /* done, free dynamically allocated pkt buffers */
@@ -984,11 +988,12 @@ static CURLcode tftp_disconnect(struct connectdata *conn, bool dead_connection)
  * The connect callback
  *
  **********************************************************/
-static CURLcode tftp_connect(struct connectdata *conn, bool *done)
+static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
 {
   struct tftp_state_data *state;
   int blksize;
   int need_blksize;
+  struct connectdata *conn = data->conn;
 
   blksize = TFTP_BLKSIZE_DEFAULT;
 
@@ -1077,10 +1082,11 @@ static CURLcode tftp_connect(struct connectdata *conn, bool *done)
  * The done callback
  *
  **********************************************************/
-static CURLcode tftp_done(struct connectdata *conn, CURLcode status,
+static CURLcode tftp_done(struct Curl_easy *data, CURLcode status,
                           bool premature)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   struct tftp_state_data *state = conn->proto.tftpc;
 
   (void)status; /* unused */
@@ -1242,13 +1248,13 @@ static long tftp_state_timeout(struct connectdata *conn, tftp_event_t *event)
  * Handle single RX socket event and return
  *
  **********************************************************/
-static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done)
+static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done)
 {
-  tftp_event_t          event;
-  CURLcode              result = CURLE_OK;
-  struct Curl_easy  *data = conn->data;
+  tftp_event_t event;
+  CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   struct tftp_state_data *state = conn->proto.tftpc;
-  long                  timeout_ms = tftp_state_timeout(conn, &event);
+  long timeout_ms = tftp_state_timeout(conn, &event);
 
   *done = FALSE;
 
@@ -1301,22 +1307,22 @@ static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done)
  * Called from multi.c while DOing
  *
  **********************************************************/
-static CURLcode tftp_doing(struct connectdata *conn, bool *dophase_done)
+static CURLcode tftp_doing(struct Curl_easy *data, bool *dophase_done)
 {
   CURLcode result;
-  result = tftp_multi_statemach(conn, dophase_done);
+  result = tftp_multi_statemach(data, dophase_done);
 
   if(*dophase_done) {
-    DEBUGF(infof(conn->data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete\n"));
   }
   else if(!result) {
     /* The multi code doesn't have this logic for the DOING state so we
        provide it for TFTP since it may do the entire transfer in this
        state. */
-    if(Curl_pgrsUpdate(conn))
+    if(Curl_pgrsUpdate(data->conn))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(conn->data, Curl_now());
+      result = Curl_speedcheck(data, Curl_now());
   }
   return result;
 }
@@ -1328,9 +1334,10 @@ static CURLcode tftp_doing(struct connectdata *conn, bool *dophase_done)
  * Entry point for transfer from tftp_do, sarts state mach
  *
  **********************************************************/
-static CURLcode tftp_perform(struct connectdata *conn, bool *dophase_done)
+static CURLcode tftp_perform(struct Curl_easy *data, bool *dophase_done)
 {
-  CURLcode              result = CURLE_OK;
+  CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   struct tftp_state_data *state = conn->proto.tftpc;
 
   *dophase_done = FALSE;
@@ -1340,10 +1347,10 @@ static CURLcode tftp_perform(struct connectdata *conn, bool *dophase_done)
   if((state->state == TFTP_STATE_FIN) || result)
     return result;
 
-  tftp_multi_statemach(conn, dophase_done);
+  tftp_multi_statemach(data, dophase_done);
 
   if(*dophase_done)
-    DEBUGF(infof(conn->data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete\n"));
 
   return result;
 }
@@ -1359,15 +1366,16 @@ static CURLcode tftp_perform(struct connectdata *conn, bool *dophase_done)
  *
  **********************************************************/
 
-static CURLcode tftp_do(struct connectdata *conn, bool *done)
+static CURLcode tftp_do(struct Curl_easy *data, bool *done)
 {
   struct tftp_state_data *state;
   CURLcode result;
+  struct connectdata *conn = data->conn;
 
   *done = FALSE;
 
   if(!conn->proto.tftpc) {
-    result = tftp_connect(conn, done);
+    result = tftp_connect(data, done);
     if(result)
       return result;
   }
@@ -1376,7 +1384,7 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
   if(!state)
     return CURLE_TFTP_ILLEGAL;
 
-  result = tftp_perform(conn, done);
+  result = tftp_perform(data, done);
 
   /* If tftp_perform() returned an error, use that for return code. If it
      was OK, see if tftp_translate_code() has an error. */
@@ -1387,9 +1395,9 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
   return result;
 }
 
-static CURLcode tftp_setup_connection(struct connectdata *conn)
+static CURLcode tftp_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn)
 {
-  struct Curl_easy *data = conn->data;
   char *type;
 
   conn->transport = TRNSPRT_UDP;

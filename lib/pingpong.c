@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -140,6 +140,7 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block,
 void Curl_pp_init(struct pingpong *pp)
 {
   struct connectdata *conn = pp->conn;
+  DEBUGASSERT(conn->data);
   pp->nread_resp = 0;
   pp->linestart_resp = conn->data->state.buffer;
   pp->pending_resp = TRUE;
@@ -185,6 +186,7 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
     /* can't send without a connection! */
     return CURLE_SEND_ERROR;
   data = conn->data;
+  DEBUGASSERT(data);
 
   Curl_dyn_reset(&pp->sendbuf);
   result = Curl_dyn_vaddf(&pp->sendbuf, fmt, args);

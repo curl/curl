@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -89,15 +89,17 @@
 
 /* Local API functions */
 static CURLcode pop3_regular_transfer(struct connectdata *conn, bool *done);
-static CURLcode pop3_do(struct connectdata *conn, bool *done);
-static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
+static CURLcode pop3_do(struct Curl_easy *data, bool *done);
+static CURLcode pop3_done(struct Curl_easy *data, CURLcode status,
                           bool premature);
-static CURLcode pop3_connect(struct connectdata *conn, bool *done);
-static CURLcode pop3_disconnect(struct connectdata *conn, bool dead);
-static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done);
+static CURLcode pop3_connect(struct Curl_easy *data, bool *done);
+static CURLcode pop3_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn, bool dead);
+static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done);
 static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks);
-static CURLcode pop3_doing(struct connectdata *conn, bool *dophase_done);
-static CURLcode pop3_setup_connection(struct connectdata *conn);
+static CURLcode pop3_doing(struct Curl_easy *data, bool *dophase_done);
+static CURLcode pop3_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn);
 static CURLcode pop3_parse_url_options(struct connectdata *conn);
 static CURLcode pop3_parse_url_path(struct connectdata *conn);
 static CURLcode pop3_parse_custom_request(struct connectdata *conn);
@@ -1011,9 +1013,10 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 }
 
 /* Called repeatedly until done from multi.c */
-static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done)
+static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   if((conn->handler->flags & PROTOPT_SSL) && !pop3c->ssldone) {
@@ -1028,10 +1031,11 @@ static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done)
   return result;
 }
 
-static CURLcode pop3_block_statemach(struct connectdata *conn,
+static CURLcode pop3_block_statemach(struct Curl_easy *data,
                                      bool disconnecting)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   while(pop3c->state != POP3_STOP && !result)
@@ -1042,10 +1046,9 @@ static CURLcode pop3_block_statemach(struct connectdata *conn,
 
 /* Allocate and initialize the POP3 struct for the current Curl_easy if
    required */
-static CURLcode pop3_init(struct connectdata *conn)
+static CURLcode pop3_init(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
   struct POP3 *pop3;
 
   pop3 = data->req.p.pop3 = calloc(sizeof(struct POP3), 1);
@@ -1071,9 +1074,10 @@ static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks)
  * The variable 'done' points to will be TRUE if the protocol-layer connect
  * phase is done when this function returns, or FALSE if not.
  */
-static CURLcode pop3_connect(struct connectdata *conn, bool *done)
+static CURLcode pop3_connect(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
 
@@ -1104,7 +1108,7 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
   /* Start off waiting for the server greeting response */
   state(conn, POP3_SERVERGREET);
 
-  result = pop3_multi_statemach(conn, done);
+  result = pop3_multi_statemach(data, done);
 
   return result;
 }
@@ -1118,11 +1122,10 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
  *
  * Input argument is already checked for validity.
  */
-static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
+static CURLcode pop3_done(struct Curl_easy *data, CURLcode status,
                           bool premature)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
   struct POP3 *pop3 = data->req.p.pop3;
 
   (void)premature;
@@ -1131,7 +1134,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
     return CURLE_OK;
 
   if(status) {
-    connclose(conn, "POP3 done with bad status");
+    connclose(data->conn, "POP3 done with bad status");
     result = status;         /* use the already set error code */
   }
 
@@ -1152,11 +1155,12 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
  * This is the actual DO function for POP3. Get a message/listing according to
  * the options previously setup.
  */
-static CURLcode pop3_perform(struct connectdata *conn, bool *connected,
+static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
                              bool *dophase_done)
 {
   /* This is POP3 and no proxy */
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   struct POP3 *pop3 = conn->data->req.p.pop3;
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
@@ -1174,8 +1178,7 @@ static CURLcode pop3_perform(struct connectdata *conn, bool *connected,
     return result;
 
   /* Run the state-machine */
-  result = pop3_multi_statemach(conn, dophase_done);
-
+  result = pop3_multi_statemach(data, dophase_done);
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done)
@@ -1193,9 +1196,10 @@ static CURLcode pop3_perform(struct connectdata *conn, bool *connected,
  *
  * The input argument is already checked for validity.
  */
-static CURLcode pop3_do(struct connectdata *conn, bool *done)
+static CURLcode pop3_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
 
   *done = FALSE; /* default to false */
 
@@ -1221,9 +1225,11 @@ static CURLcode pop3_do(struct connectdata *conn, bool *done)
  * Disconnect from an POP3 server. Cleanup protocol-specific per-connection
  * resources. BLOCKING.
  */
-static CURLcode pop3_disconnect(struct connectdata *conn, bool dead_connection)
+static CURLcode pop3_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn, bool dead_connection)
 {
   struct pop3_conn *pop3c = &conn->proto.pop3c;
+  (void)data;
 
   /* We cannot send quit unconditionally. If this connection is stale or
      bad in any way, sending quit and waiting around here will make the
@@ -1233,7 +1239,7 @@ static CURLcode pop3_disconnect(struct connectdata *conn, bool dead_connection)
      point! */
   if(!dead_connection && pop3c->pp.conn && pop3c->pp.conn->bits.protoconnstart)
     if(!pop3_perform_quit(conn))
-      (void)pop3_block_statemach(conn, TRUE); /* ignore errors on QUIT */
+      (void)pop3_block_statemach(data, TRUE); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);
@@ -1248,25 +1254,25 @@ static CURLcode pop3_disconnect(struct connectdata *conn, bool dead_connection)
 }
 
 /* Call this when the DO phase has completed */
-static CURLcode pop3_dophase_done(struct connectdata *conn, bool connected)
+static CURLcode pop3_dophase_done(struct Curl_easy *data, bool connected)
 {
-  (void)conn;
+  (void)data;
   (void)connected;
 
   return CURLE_OK;
 }
 
 /* Called from multi.c while DOing */
-static CURLcode pop3_doing(struct connectdata *conn, bool *dophase_done)
+static CURLcode pop3_doing(struct Curl_easy *data, bool *dophase_done)
 {
-  CURLcode result = pop3_multi_statemach(conn, dophase_done);
+  CURLcode result = pop3_multi_statemach(data, dophase_done);
 
   if(result)
-    DEBUGF(infof(conn->data, "DO phase failed\n"));
+    DEBUGF(infof(data, "DO phase failed\n"));
   else if(*dophase_done) {
-    result = pop3_dophase_done(conn, FALSE /* not connected */);
+    result = pop3_dophase_done(data, FALSE /* not connected */);
 
-    DEBUGF(infof(conn->data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete\n"));
   }
 
   return result;
@@ -1298,19 +1304,20 @@ static CURLcode pop3_regular_transfer(struct connectdata *conn,
   Curl_pgrsSetDownloadSize(data, -1);
 
   /* Carry out the perform */
-  result = pop3_perform(conn, &connected, dophase_done);
+  result = pop3_perform(data, &connected, dophase_done);
 
   /* Perform post DO phase operations if necessary */
   if(!result && *dophase_done)
-    result = pop3_dophase_done(conn, connected);
+    result = pop3_dophase_done(data, connected);
 
   return result;
 }
 
-static CURLcode pop3_setup_connection(struct connectdata *conn)
+static CURLcode pop3_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn)
 {
   /* Initialise the POP3 layer */
-  CURLcode result = pop3_init(conn);
+  CURLcode result = pop3_init(data);
   if(result)
     return result;
 

@@ -117,9 +117,9 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
                               bool *done);
 
 /* protocol-specific functions set up to be called by the main engine */
-CURLcode Curl_http(struct connectdata *conn, bool *done);
-CURLcode Curl_http_done(struct connectdata *, CURLcode, bool premature);
-CURLcode Curl_http_connect(struct connectdata *conn, bool *done);
+CURLcode Curl_http(struct Curl_easy *data, bool *done);
+CURLcode Curl_http_done(struct Curl_easy *data, CURLcode, bool premature);
+CURLcode Curl_http_connect(struct Curl_easy *data, bool *done);
 
 /* These functions are in http.c */
 CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,

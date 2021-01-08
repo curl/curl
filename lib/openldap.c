@@ -5,8 +5,8 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
+ * Copyright (C) 2011 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010, Howard Chu, <hyc@openldap.org>
- * Copyright (C) 2011 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -76,12 +76,14 @@ extern int ldap_init_fd(ber_socket_t fd, int proto, const char *url,
                         LDAP **ld);
 #endif
 
-static CURLcode ldap_setup_connection(struct connectdata *conn);
-static CURLcode ldap_do(struct connectdata *conn, bool *done);
-static CURLcode ldap_done(struct connectdata *conn, CURLcode, bool);
-static CURLcode ldap_connect(struct connectdata *conn, bool *done);
-static CURLcode ldap_connecting(struct connectdata *conn, bool *done);
-static CURLcode ldap_disconnect(struct connectdata *conn, bool dead);
+static CURLcode ldap_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn);
+static CURLcode ldap_do(struct Curl_easy *data, bool *done);
+static CURLcode ldap_done(struct Curl_easy *data, CURLcode, bool);
+static CURLcode ldap_connect(struct Curl_easy *data, bool *done);
+static CURLcode ldap_connecting(struct Curl_easy *data, bool *done);
+static CURLcode ldap_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn, bool dead);
 
 static Curl_recv ldap_recv;
 
@@ -169,11 +171,11 @@ struct ldapreqinfo {
   int nument;
 };
 
-static CURLcode ldap_setup_connection(struct connectdata *conn)
+static CURLcode ldap_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn)
 {
   struct ldapconninfo *li;
   LDAPURLDesc *lud;
-  struct Curl_easy *data = conn->data;
   int rc, proto;
   CURLcode status;
 
@@ -205,10 +207,10 @@ static CURLcode ldap_setup_connection(struct connectdata *conn)
 static Sockbuf_IO ldapsb_tls;
 #endif
 
-static CURLcode ldap_connect(struct connectdata *conn, bool *done)
+static CURLcode ldap_connect(struct Curl_easy *data, bool *done)
 {
+  struct connectdata *conn = data->conn;
   struct ldapconninfo *li = conn->proto.ldapc;
-  struct Curl_easy *data = conn->data;
   int rc, proto = LDAP_VERSION3;
   char hosturl[1024];
   char *ptr;
@@ -252,10 +254,10 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
   return CURLE_OK;
 }
 
-static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
+static CURLcode ldap_connecting(struct Curl_easy *data, bool *done)
 {
+  struct connectdata *conn = data->conn;
   struct ldapconninfo *li = conn->proto.ldapc;
-  struct Curl_easy *data = conn->data;
   LDAPMessage *msg = NULL;
   struct timeval tv = {0, 1}, *tvp;
   int rc, err;
@@ -357,10 +359,12 @@ static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
   return CURLE_OK;
 }
 
-static CURLcode ldap_disconnect(struct connectdata *conn, bool dead_connection)
+static CURLcode ldap_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn, bool dead_connection)
 {
   struct ldapconninfo *li = conn->proto.ldapc;
   (void) dead_connection;
+  (void) data;
 
   if(li) {
     if(li->ld) {
@@ -373,15 +377,15 @@ static CURLcode ldap_disconnect(struct connectdata *conn, bool dead_connection)
   return CURLE_OK;
 }
 
-static CURLcode ldap_do(struct connectdata *conn, bool *done)
+static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 {
+  struct connectdata *conn = data->conn;
   struct ldapconninfo *li = conn->proto.ldapc;
   struct ldapreqinfo *lr;
   CURLcode status = CURLE_OK;
   int rc = 0;
   LDAPURLDesc *ludp = NULL;
   int msgid;
-  struct Curl_easy *data = conn->data;
 
   connkeep(conn, "OpenLDAP do");
 
@@ -418,10 +422,11 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done)
   return CURLE_OK;
 }
 
-static CURLcode ldap_done(struct connectdata *conn, CURLcode res,
+static CURLcode ldap_done(struct Curl_easy *data, CURLcode res,
                           bool premature)
 {
-  struct ldapreqinfo *lr = conn->data->req.p.ldap;
+  struct connectdata *conn = data->conn;
+  struct ldapreqinfo *lr = data->req.p.ldap;
 
   (void)res;
   (void)premature;

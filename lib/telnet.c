@@ -111,8 +111,8 @@ static void printsub(struct Curl_easy *data,
 static void suboption(struct connectdata *);
 static void sendsuboption(struct connectdata *conn, int option);
 
-static CURLcode telnet_do(struct connectdata *conn, bool *done);
-static CURLcode telnet_done(struct connectdata *conn,
+static CURLcode telnet_do(struct Curl_easy *data, bool *done);
+static CURLcode telnet_done(struct Curl_easy *data,
                                  CURLcode, bool premature);
 static CURLcode send_telnet_data(struct connectdata *conn,
                                  char *buffer, ssize_t nread);
@@ -1232,9 +1232,10 @@ static CURLcode send_telnet_data(struct connectdata *conn,
   return result;
 }
 
-static CURLcode telnet_done(struct connectdata *conn,
-                                 CURLcode status, bool premature)
+static CURLcode telnet_done(struct Curl_easy *data,
+                            CURLcode status, bool premature)
 {
+  struct connectdata *conn = data->conn;
   struct TELNET *tn = (struct TELNET *)conn->data->req.p.telnet;
   (void)status; /* unused */
   (void)premature; /* not used */
@@ -1250,10 +1251,10 @@ static CURLcode telnet_done(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static CURLcode telnet_do(struct connectdata *conn, bool *done)
+static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 #ifdef USE_WINSOCK
   WSAEVENT event_handle;

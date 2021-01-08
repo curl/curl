@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -92,15 +92,17 @@
 
 /* Local API functions */
 static CURLcode smtp_regular_transfer(struct connectdata *conn, bool *done);
-static CURLcode smtp_do(struct connectdata *conn, bool *done);
-static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
+static CURLcode smtp_do(struct Curl_easy *data, bool *done);
+static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
                           bool premature);
-static CURLcode smtp_connect(struct connectdata *conn, bool *done);
-static CURLcode smtp_disconnect(struct connectdata *conn, bool dead);
-static CURLcode smtp_multi_statemach(struct connectdata *conn, bool *done);
+static CURLcode smtp_connect(struct Curl_easy *data, bool *done);
+static CURLcode smtp_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn, bool dead);
+static CURLcode smtp_multi_statemach(struct Curl_easy *data, bool *done);
 static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks);
-static CURLcode smtp_doing(struct connectdata *conn, bool *dophase_done);
-static CURLcode smtp_setup_connection(struct connectdata *conn);
+static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done);
+static CURLcode smtp_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn);
 static CURLcode smtp_parse_url_options(struct connectdata *conn);
 static CURLcode smtp_parse_url_path(struct connectdata *conn);
 static CURLcode smtp_parse_custom_request(struct connectdata *conn);
@@ -1243,9 +1245,10 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
 }
 
 /* Called repeatedly until done from multi.c */
-static CURLcode smtp_multi_statemach(struct connectdata *conn, bool *done)
+static CURLcode smtp_multi_statemach(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
   if((conn->handler->flags & PROTOPT_SSL) && !smtpc->ssldone) {
@@ -1260,10 +1263,11 @@ static CURLcode smtp_multi_statemach(struct connectdata *conn, bool *done)
   return result;
 }
 
-static CURLcode smtp_block_statemach(struct connectdata *conn,
+static CURLcode smtp_block_statemach(struct Curl_easy *data,
                                      bool disconnecting)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
   while(smtpc->state != SMTP_STOP && !result)
@@ -1274,10 +1278,9 @@ static CURLcode smtp_block_statemach(struct connectdata *conn,
 
 /* Allocate and initialize the SMTP struct for the current Curl_easy if
    required */
-static CURLcode smtp_init(struct connectdata *conn)
+static CURLcode smtp_init(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
   struct SMTP *smtp;
 
   smtp = data->req.p.smtp = calloc(sizeof(struct SMTP), 1);
@@ -1303,9 +1306,10 @@ static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks)
  * The variable pointed to by 'done' will be TRUE if the protocol-layer
  * connect phase is done when this function returns, or FALSE if not.
  */
-static CURLcode smtp_connect(struct connectdata *conn, bool *done)
+static CURLcode smtp_connect(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   struct pingpong *pp = &smtpc->pp;
 
@@ -1340,7 +1344,7 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   /* Start off waiting for the server greeting response */
   state(conn, SMTP_SERVERGREET);
 
-  result = smtp_multi_statemach(conn, done);
+  result = smtp_multi_statemach(data, done);
 
   return result;
 }
@@ -1354,11 +1358,11 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
  *
  * Input argument is already checked for validity.
  */
-static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
+static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
                           bool premature)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   struct SMTP *smtp = data->req.p.smtp;
   struct pingpong *pp = &conn->proto.smtpc.pp;
   char *eob;
@@ -1423,7 +1427,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     state(conn, SMTP_POSTDATA);
 
     /* Run the state-machine */
-    result = smtp_block_statemach(conn, FALSE);
+    result = smtp_block_statemach(data, FALSE);
   }
 
   /* Clear the transfer mode for the next request */
@@ -1439,12 +1443,12 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
  * This is the actual DO function for SMTP. Transfer a mail, send a command
  * or get some data according to the options previously setup.
  */
-static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
+static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
                              bool *dophase_done)
 {
   /* This is SMTP and no proxy */
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   struct SMTP *smtp = data->req.p.smtp;
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
@@ -1482,7 +1486,7 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
     return result;
 
   /* Run the state-machine */
-  result = smtp_multi_statemach(conn, dophase_done);
+  result = smtp_multi_statemach(data, dophase_done);
 
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
@@ -1501,9 +1505,10 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
  *
  * The input argument is already checked for validity.
  */
-static CURLcode smtp_do(struct connectdata *conn, bool *done)
+static CURLcode smtp_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
 
   *done = FALSE; /* default to false */
 
@@ -1524,9 +1529,12 @@ static CURLcode smtp_do(struct connectdata *conn, bool *done)
  * Disconnect from an SMTP server. Cleanup protocol-specific per-connection
  * resources. BLOCKING.
  */
-static CURLcode smtp_disconnect(struct connectdata *conn, bool dead_connection)
+static CURLcode smtp_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                bool dead_connection)
 {
   struct smtp_conn *smtpc = &conn->proto.smtpc;
+  (void)data;
 
   /* We cannot send quit unconditionally. If this connection is stale or
      bad in any way, sending quit and waiting around here will make the
@@ -1536,7 +1544,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn, bool dead_connection)
      point! */
   if(!dead_connection && smtpc->pp.conn && smtpc->pp.conn->bits.protoconnstart)
     if(!smtp_perform_quit(conn))
-      (void)smtp_block_statemach(conn, TRUE); /* ignore errors on QUIT */
+      (void)smtp_block_statemach(data, TRUE); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&smtpc->pp);
@@ -1551,30 +1559,30 @@ static CURLcode smtp_disconnect(struct connectdata *conn, bool dead_connection)
 }
 
 /* Call this when the DO phase has completed */
-static CURLcode smtp_dophase_done(struct connectdata *conn, bool connected)
+static CURLcode smtp_dophase_done(struct Curl_easy *data, bool connected)
 {
-  struct SMTP *smtp = conn->data->req.p.smtp;
+  struct SMTP *smtp = data->req.p.smtp;
 
   (void)connected;
 
   if(smtp->transfer != FTPTRANSFER_BODY)
     /* no data to transfer */
-    Curl_setup_transfer(conn->data, -1, -1, FALSE, -1);
+    Curl_setup_transfer(data, -1, -1, FALSE, -1);
 
   return CURLE_OK;
 }
 
 /* Called from multi.c while DOing */
-static CURLcode smtp_doing(struct connectdata *conn, bool *dophase_done)
+static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done)
 {
-  CURLcode result = smtp_multi_statemach(conn, dophase_done);
+  CURLcode result = smtp_multi_statemach(data, dophase_done);
 
   if(result)
-    DEBUGF(infof(conn->data, "DO phase failed\n"));
+    DEBUGF(infof(data, "DO phase failed\n"));
   else if(*dophase_done) {
-    result = smtp_dophase_done(conn, FALSE /* not connected */);
+    result = smtp_dophase_done(data, FALSE /* not connected */);
 
-    DEBUGF(infof(conn->data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete\n"));
   }
 
   return result;
@@ -1606,16 +1614,17 @@ static CURLcode smtp_regular_transfer(struct connectdata *conn,
   Curl_pgrsSetDownloadSize(data, -1);
 
   /* Carry out the perform */
-  result = smtp_perform(conn, &connected, dophase_done);
+  result = smtp_perform(data, &connected, dophase_done);
 
   /* Perform post DO phase operations if necessary */
   if(!result && *dophase_done)
-    result = smtp_dophase_done(conn, connected);
+    result = smtp_dophase_done(data, connected);
 
   return result;
 }
 
-static CURLcode smtp_setup_connection(struct connectdata *conn)
+static CURLcode smtp_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn)
 {
   CURLcode result;
 
@@ -1623,7 +1632,7 @@ static CURLcode smtp_setup_connection(struct connectdata *conn)
   conn->bits.tls_upgraded = FALSE;
 
   /* Initialise the SMTP layer */
-  result = smtp_init(conn);
+  result = smtp_init(data);
   if(result)
     return result;
 

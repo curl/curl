@@ -579,7 +579,7 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   /* this calls the protocol-specific function pointer previously set */
   if(conn->handler->done)
-    result = conn->handler->done(conn, status, premature);
+    result = conn->handler->done(data, status, premature);
   else
     result = status;
 
@@ -1406,7 +1406,7 @@ static CURLcode multi_do(struct Curl_easy *data, bool *done)
 
   if(conn->handler->do_it) {
     /* generic protocol-specific function pointer set in curl_connect() */
-    result = conn->handler->do_it(conn, done);
+    result = conn->handler->do_it(data, done);
 
     if(!result && *done)
       /* do_complete must be called after the protocol-specific DO function */
@@ -1424,14 +1424,15 @@ static CURLcode multi_do(struct Curl_easy *data, bool *done)
  * DOING state there's more work to do!
  */
 
-static CURLcode multi_do_more(struct connectdata *conn, int *complete)
+static CURLcode multi_do_more(struct Curl_easy *data, int *complete)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
 
   *complete = 0;
 
   if(conn->handler->do_more)
-    result = conn->handler->do_more(conn, complete);
+    result = conn->handler->do_more(data, complete);
 
   if(!result && (*complete == 1))
     /* do_complete must be called after the protocol-specific DO function */
@@ -1446,14 +1447,14 @@ static CURLcode multi_do_more(struct connectdata *conn, int *complete)
  * protocol layer.
  */
 
-static CURLcode protocol_connecting(struct connectdata *conn,
-                                    bool *done)
+static CURLcode protocol_connecting(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
 
   if(conn && conn->handler->connecting) {
     *done = FALSE;
-    result = conn->handler->connecting(conn, done);
+    result = conn->handler->connecting(data, done);
   }
   else
     *done = TRUE;
@@ -1466,13 +1467,14 @@ static CURLcode protocol_connecting(struct connectdata *conn,
  * until the DOING phase is done on protocol layer.
  */
 
-static CURLcode protocol_doing(struct connectdata *conn, bool *done)
+static CURLcode protocol_doing(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
 
   if(conn && conn->handler->doing) {
     *done = FALSE;
-    result = conn->handler->doing(conn, done);
+    result = conn->handler->doing(data, done);
   }
   else
     *done = TRUE;
@@ -1485,11 +1487,11 @@ static CURLcode protocol_doing(struct connectdata *conn, bool *done)
  * proceed with some action.
  *
  */
-static CURLcode protocol_connect(struct connectdata *conn,
+static CURLcode protocol_connect(struct Curl_easy *data,
                                  bool *protocol_done)
 {
   CURLcode result = CURLE_OK;
-
+  struct connectdata *conn = data->conn;
   DEBUGASSERT(conn);
   DEBUGASSERT(protocol_done);
 
@@ -1528,7 +1530,7 @@ static CURLcode protocol_connect(struct connectdata *conn,
       /* is there a protocol-specific connect() procedure? */
 
       /* Call the protocol-specific connect function */
-      result = conn->handler->connect_it(conn, protocol_done);
+      result = conn->handler->connect_it(data, protocol_done);
     }
     else
       *protocol_done = TRUE;
@@ -1796,7 +1798,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case CURLM_STATE_WAITPROXYCONNECT:
       /* this is HTTP-specific, but sending CONNECT to a proxy is HTTP... */
       DEBUGASSERT(data->conn);
-      result = Curl_http_connect(data->conn, &protocol_connected);
+      result = Curl_http_connect(data, &protocol_connected);
 #ifndef CURL_DISABLE_PROXY
       if(data->conn->bits.proxy_connect_closed) {
         rc = CURLM_CALL_MULTI_PERFORM;
@@ -1860,7 +1862,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     case CURLM_STATE_SENDPROTOCONNECT:
-      result = protocol_connect(data->conn, &protocol_connected);
+      result = protocol_connect(data, &protocol_connected);
       if(!result && !protocol_connected)
         /* switch to waiting state */
         multistate(data, CURLM_STATE_PROTOCONNECT);
@@ -1879,7 +1881,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_PROTOCONNECT:
       /* protocol-specific connect phase */
-      result = protocol_connecting(data->conn, &protocol_connected);
+      result = protocol_connecting(data, &protocol_connected);
       if(!result && protocol_connected) {
         /* after the connect has completed, go WAITDO or DO */
         multistate(data, CURLM_STATE_DO);
@@ -2002,7 +2004,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case CURLM_STATE_DOING:
       /* we continue DOING until the DO phase is complete */
       DEBUGASSERT(data->conn);
-      result = protocol_doing(data->conn, &dophase_done);
+      result = protocol_doing(data, &dophase_done);
       if(!result) {
         if(dophase_done) {
           /* after DO, go DO_DONE or DO_MORE */
@@ -2025,7 +2027,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        * When we are connected, DO MORE and then go DO_DONE
        */
       DEBUGASSERT(data->conn);
-      result = multi_do_more(data->conn, &control);
+      result = multi_do_more(data, &control);
 
       if(!result) {
         if(control) {

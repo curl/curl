@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
+ * Copyright (C) 2016 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2014, Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
- * Copyright (C) 2016-2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,16 +54,19 @@
 #include "memdebug.h"
 
 /* Local API functions */
-static CURLcode smb_setup_connection(struct connectdata *conn);
-static CURLcode smb_connect(struct connectdata *conn, bool *done);
-static CURLcode smb_connection_state(struct connectdata *conn, bool *done);
-static CURLcode smb_do(struct connectdata *conn, bool *done);
-static CURLcode smb_request_state(struct connectdata *conn, bool *done);
-static CURLcode smb_done(struct connectdata *conn, CURLcode status,
+static CURLcode smb_setup_connection(struct Curl_easy *data,
+                                     struct connectdata *conn);
+static CURLcode smb_connect(struct Curl_easy *data, bool *done);
+static CURLcode smb_connection_state(struct Curl_easy *data, bool *done);
+static CURLcode smb_do(struct Curl_easy *data, bool *done);
+static CURLcode smb_request_state(struct Curl_easy *data, bool *done);
+static CURLcode smb_done(struct Curl_easy *data, CURLcode status,
                          bool premature);
-static CURLcode smb_disconnect(struct connectdata *conn, bool dead);
+static CURLcode smb_disconnect(struct Curl_easy *data,
+                               struct connectdata *conn, bool dead);
 static int smb_getsock(struct connectdata *conn, curl_socket_t *socks);
-static CURLcode smb_parse_url_path(struct connectdata *conn);
+static CURLcode smb_parse_url_path(struct Curl_easy *data,
+                                   struct connectdata *conn);
 
 /*
  * SMB handler interface
@@ -233,21 +236,23 @@ static void request_state(struct connectdata *conn,
 
 /* this should setup things in the connection, not in the easy
    handle */
-static CURLcode smb_setup_connection(struct connectdata *conn)
+static CURLcode smb_setup_connection(struct Curl_easy *data,
+                                     struct connectdata *conn)
 {
   struct smb_request *req;
 
   /* Initialize the request state */
-  conn->data->req.p.smb = req = calloc(1, sizeof(struct smb_request));
+  data->req.p.smb = req = calloc(1, sizeof(struct smb_request));
   if(!req)
     return CURLE_OUT_OF_MEMORY;
 
   /* Parse the URL path */
-  return smb_parse_url_path(conn);
+  return smb_parse_url_path(data, conn);
 }
 
-static CURLcode smb_connect(struct connectdata *conn, bool *done)
+static CURLcode smb_connect(struct Curl_easy *data, bool *done)
 {
+  struct connectdata *conn = data->conn;
   struct smb_conn *smbc = &conn->proto.smbc;
   char *slash;
 
@@ -643,8 +648,9 @@ static CURLcode smb_send_and_recv(struct connectdata *conn, void **msg)
   return smb_recv_message(conn, msg);
 }
 
-static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
+static CURLcode smb_connection_state(struct Curl_easy *data, bool *done)
 {
+  struct connectdata *conn = data->conn;
   struct smb_conn *smbc = &conn->proto.smbc;
   struct smb_negotiate_response *nrsp;
   struct smb_header *h;
@@ -740,9 +746,10 @@ static void get_posix_time(time_t *out, curl_off_t timestamp)
     *out = (time_t) timestamp;
 }
 
-static CURLcode smb_request_state(struct connectdata *conn, bool *done)
+static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
 {
-  struct smb_request *req = conn->data->req.p.smb;
+  struct connectdata *conn = data->conn;
+  struct smb_request *req = data->req.p.smb;
   struct smb_header *h;
   struct smb_conn *smbc = &conn->proto.smbc;
   enum smb_req_state next_state = SMB_DONE;
@@ -923,18 +930,20 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
   return CURLE_OK;
 }
 
-static CURLcode smb_done(struct connectdata *conn, CURLcode status,
+static CURLcode smb_done(struct Curl_easy *data, CURLcode status,
                          bool premature)
 {
   (void) premature;
-  Curl_safefree(conn->data->req.p.smb);
+  Curl_safefree(data->req.p.smb);
   return status;
 }
 
-static CURLcode smb_disconnect(struct connectdata *conn, bool dead)
+static CURLcode smb_disconnect(struct Curl_easy *data,
+                               struct connectdata *conn, bool dead)
 {
   struct smb_conn *smbc = &conn->proto.smbc;
   (void) dead;
+  (void) data;
   Curl_safefree(smbc->share);
   Curl_safefree(smbc->domain);
   Curl_safefree(smbc->recv_buf);
@@ -947,8 +956,9 @@ static int smb_getsock(struct connectdata *conn, curl_socket_t *socks)
   return GETSOCK_READSOCK(0) | GETSOCK_WRITESOCK(0);
 }
 
-static CURLcode smb_do(struct connectdata *conn, bool *done)
+static CURLcode smb_do(struct Curl_easy *data, bool *done)
 {
+  struct connectdata *conn = data->conn;
   struct smb_conn *smbc = &conn->proto.smbc;
 
   *done = FALSE;
@@ -958,9 +968,9 @@ static CURLcode smb_do(struct connectdata *conn, bool *done)
   return CURLE_URL_MALFORMAT;
 }
 
-static CURLcode smb_parse_url_path(struct connectdata *conn)
+static CURLcode smb_parse_url_path(struct Curl_easy *data,
+                                   struct connectdata *conn)
 {
-  struct Curl_easy *data = conn->data;
   struct smb_request *req = data->req.p.smb;
   struct smb_conn *smbc = &conn->proto.smbc;
   char *path;

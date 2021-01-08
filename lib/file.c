@@ -81,13 +81,15 @@
  * Forward declarations.
  */
 
-static CURLcode file_do(struct connectdata *, bool *done);
-static CURLcode file_done(struct connectdata *conn,
+static CURLcode file_do(struct Curl_easy *data, bool *done);
+static CURLcode file_done(struct Curl_easy *data,
                           CURLcode status, bool premature);
-static CURLcode file_connect(struct connectdata *conn, bool *done);
-static CURLcode file_disconnect(struct connectdata *conn,
+static CURLcode file_connect(struct Curl_easy *data, bool *done);
+static CURLcode file_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn,
                                 bool dead_connection);
-static CURLcode file_setup_connection(struct connectdata *conn);
+static CURLcode file_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn);
 
 /*
  * FILE scheme handler.
@@ -116,11 +118,13 @@ const struct Curl_handler Curl_handler_file = {
 };
 
 
-static CURLcode file_setup_connection(struct connectdata *conn)
+static CURLcode file_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn)
 {
+  (void)conn;
   /* allocate the FILE specific struct */
-  conn->data->req.p.file = calloc(1, sizeof(struct FILEPROTO));
-  if(!conn->data->req.p.file)
+  data->req.p.file = calloc(1, sizeof(struct FILEPROTO));
+  if(!data->req.p.file)
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;
@@ -131,9 +135,8 @@ static CURLcode file_setup_connection(struct connectdata *conn)
  * do protocol-specific actions at connect-time.  We emulate a
  * connect-then-transfer protocol and "connect" to the file here
  */
-static CURLcode file_connect(struct connectdata *conn, bool *done)
+static CURLcode file_connect(struct Curl_easy *data, bool *done)
 {
-  struct Curl_easy *data = conn->data;
   char *real_path;
   struct FILEPROTO *file = data->req.p.file;
   int fd;
@@ -198,7 +201,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   file->fd = fd;
   if(!data->set.upload && (fd == -1)) {
     failf(data, "Couldn't open file %s", data->state.up.path);
-    file_done(conn, CURLE_FILE_COULDNT_READ_FILE, FALSE);
+    file_done(data, CURLE_FILE_COULDNT_READ_FILE, FALSE);
     return CURLE_FILE_COULDNT_READ_FILE;
   }
   *done = TRUE;
@@ -206,10 +209,10 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   return CURLE_OK;
 }
 
-static CURLcode file_done(struct connectdata *conn,
-                               CURLcode status, bool premature)
+static CURLcode file_done(struct Curl_easy *data,
+                          CURLcode status, bool premature)
 {
-  struct FILEPROTO *file = conn->data->req.p.file;
+  struct FILEPROTO *file = data->req.p.file;
   (void)status; /* not used */
   (void)premature; /* not used */
 
@@ -224,11 +227,13 @@ static CURLcode file_done(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static CURLcode file_disconnect(struct connectdata *conn,
+static CURLcode file_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn,
                                 bool dead_connection)
 {
   (void)dead_connection; /* not used */
-  return file_done(conn, 0, 0);
+  (void)conn;
+  return file_done(data, 0, 0);
 }
 
 #ifdef DOS_FILESYSTEM
@@ -237,14 +242,13 @@ static CURLcode file_disconnect(struct connectdata *conn,
 #define DIRSEP '/'
 #endif
 
-static CURLcode file_upload(struct connectdata *conn)
+static CURLcode file_upload(struct Curl_easy *data)
 {
-  struct FILEPROTO *file = conn->data->req.p.file;
+  struct FILEPROTO *file = data->req.p.file;
   const char *dir = strchr(file->path, DIRSEP);
   int fd;
   int mode;
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
   char *buf = data->state.buffer;
   curl_off_t bytecount = 0;
   struct_stat file_stat;
@@ -254,7 +258,7 @@ static CURLcode file_upload(struct connectdata *conn)
    * Since FILE: doesn't do the full init, we need to provide some extra
    * assignments here.
    */
-  conn->data->req.upload_fromhere = buf;
+  data->req.upload_fromhere = buf;
 
   if(!dir)
     return CURLE_FILE_COULDNT_READ_FILE; /* fix: better error code */
@@ -273,7 +277,7 @@ static CURLcode file_upload(struct connectdata *conn)
   else
     mode = MODE_DEFAULT|O_TRUNC;
 
-  fd = open(file->path, mode, conn->data->set.new_file_perms);
+  fd = open(file->path, mode, data->set.new_file_perms);
   if(fd < 0) {
     failf(data, "Can't open %s for writing", file->path);
     return CURLE_WRITE_ERROR;
@@ -297,7 +301,8 @@ static CURLcode file_upload(struct connectdata *conn)
     size_t nread;
     size_t nwrite;
     size_t readcount;
-    result = Curl_fillreadbuffer(conn, data->set.buffer_size, &readcount);
+    result = Curl_fillreadbuffer(data->conn, data->set.buffer_size,
+                                 &readcount);
     if(result)
       break;
 
@@ -333,12 +338,12 @@ static CURLcode file_upload(struct connectdata *conn)
 
     Curl_pgrsSetUploadCounter(data, bytecount);
 
-    if(Curl_pgrsUpdate(conn))
+    if(Curl_pgrsUpdate(data->conn))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
       result = Curl_speedcheck(data, Curl_now());
   }
-  if(!result && Curl_pgrsUpdate(conn))
+  if(!result && Curl_pgrsUpdate(data->conn))
     result = CURLE_ABORTED_BY_CALLBACK;
 
   close(fd);
@@ -354,7 +359,7 @@ static CURLcode file_upload(struct connectdata *conn)
  * opposed to sockets) we instead perform the whole do-operation in this
  * function.
  */
-static CURLcode file_do(struct connectdata *conn, bool *done)
+static CURLcode file_do(struct Curl_easy *data, bool *done)
 {
   /* This implementation ignores the host name in conformance with
      RFC 1738. Only local files (reachable via the standard file system)
@@ -368,7 +373,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   curl_off_t expected_size = -1;
   bool size_known;
   bool fstated = FALSE;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   char *buf = data->state.buffer;
   curl_off_t bytecount = 0;
   int fd;
@@ -379,9 +384,9 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   Curl_pgrsStartNow(data);
 
   if(data->set.upload)
-    return file_upload(conn);
+    return file_upload(data);
 
-  file = conn->data->req.p.file;
+  file = data->req.p.file;
 
   /* get the fd from the connection phase */
   fd = file->fd;

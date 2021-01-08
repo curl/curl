@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,10 +48,11 @@
                              ((int)((unsigned char)((p)[3]))))
 
 /* protocol-specific functions set up to be called by the main engine */
-static CURLcode rtsp_do(struct connectdata *conn, bool *done);
-static CURLcode rtsp_done(struct connectdata *conn, CURLcode, bool premature);
-static CURLcode rtsp_connect(struct connectdata *conn, bool *done);
-static CURLcode rtsp_disconnect(struct connectdata *conn, bool dead);
+static CURLcode rtsp_do(struct Curl_easy *data, bool *done);
+static CURLcode rtsp_done(struct Curl_easy *data, CURLcode, bool premature);
+static CURLcode rtsp_connect(struct Curl_easy *data, bool *done);
+static CURLcode rtsp_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn, bool dead);
 static int rtsp_getsock_do(struct connectdata *conn, curl_socket_t *socks);
 
 /*
@@ -66,15 +67,15 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
                                    ssize_t *nread,
                                    bool *readmore);
 
-static CURLcode rtsp_setup_connection(struct connectdata *conn);
+static CURLcode rtsp_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn);
 static unsigned int rtsp_conncheck(struct connectdata *check,
                                    unsigned int checks_to_perform);
 
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we're always _sending_ a request and thus we wait for
    the single socket to become writable only */
-static int rtsp_getsock_do(struct connectdata *conn,
-                           curl_socket_t *socks)
+static int rtsp_getsock_do(struct connectdata *conn, curl_socket_t *socks)
 {
   /* write mode */
   socks[0] = conn->sock[FIRSTSOCKET];
@@ -111,11 +112,13 @@ const struct Curl_handler Curl_handler_rtsp = {
 };
 
 
-static CURLcode rtsp_setup_connection(struct connectdata *conn)
+static CURLcode rtsp_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn)
 {
   struct RTSP *rtsp;
+  (void)conn;
 
-  conn->data->req.p.rtsp = rtsp = calloc(1, sizeof(struct RTSP));
+  data->req.p.rtsp = rtsp = calloc(1, sizeof(struct RTSP));
   if(!rtsp)
     return CURLE_OUT_OF_MEMORY;
 
@@ -170,12 +173,11 @@ static unsigned int rtsp_conncheck(struct connectdata *check,
 }
 
 
-static CURLcode rtsp_connect(struct connectdata *conn, bool *done)
+static CURLcode rtsp_connect(struct Curl_easy *data, bool *done)
 {
   CURLcode httpStatus;
-  struct Curl_easy *data = conn->data;
 
-  httpStatus = Curl_http_connect(conn, done);
+  httpStatus = Curl_http_connect(data, done);
 
   /* Initialize the CSeq if not already done */
   if(data->state.rtsp_next_client_CSeq == 0)
@@ -183,23 +185,24 @@ static CURLcode rtsp_connect(struct connectdata *conn, bool *done)
   if(data->state.rtsp_next_server_CSeq == 0)
     data->state.rtsp_next_server_CSeq = 1;
 
-  conn->proto.rtspc.rtp_channel = -1;
+  data->conn->proto.rtspc.rtp_channel = -1;
 
   return httpStatus;
 }
 
-static CURLcode rtsp_disconnect(struct connectdata *conn, bool dead)
+static CURLcode rtsp_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn, bool dead)
 {
   (void) dead;
+  (void) data;
   Curl_safefree(conn->proto.rtspc.rtp_buf);
   return CURLE_OK;
 }
 
 
-static CURLcode rtsp_done(struct connectdata *conn,
+static CURLcode rtsp_done(struct Curl_easy *data,
                           CURLcode status, bool premature)
 {
-  struct Curl_easy *data = conn->data;
   struct RTSP *rtsp = data->req.p.rtsp;
   CURLcode httpStatus;
 
@@ -207,7 +210,7 @@ static CURLcode rtsp_done(struct connectdata *conn,
   if(data->set.rtspreq == RTSPREQ_RECEIVE)
     premature = TRUE;
 
-  httpStatus = Curl_http_done(conn, status, premature);
+  httpStatus = Curl_http_done(data, status, premature);
 
   if(rtsp) {
     /* Check the sequence numbers */
@@ -220,7 +223,7 @@ static CURLcode rtsp_done(struct connectdata *conn,
       return CURLE_RTSP_CSEQ_ERROR;
     }
     if(data->set.rtspreq == RTSPREQ_RECEIVE &&
-            (conn->proto.rtspc.rtp_channel == -1)) {
+            (data->conn->proto.rtspc.rtp_channel == -1)) {
       infof(data, "Got an RTP Receive with a CSeq of %ld\n", CSeq_recv);
     }
   }
@@ -228,9 +231,9 @@ static CURLcode rtsp_done(struct connectdata *conn,
   return httpStatus;
 }
 
-static CURLcode rtsp_do(struct connectdata *conn, bool *done)
+static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
   Curl_RtspReq rtspreq = data->set.rtspreq;
   struct RTSP *rtsp = data->req.p.rtsp;

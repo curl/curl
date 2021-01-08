@@ -709,11 +709,11 @@ static void conn_reset_all_postponed_data(struct connectdata *conn)
 #endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
 
 
-static void conn_shutdown(struct connectdata *conn)
+static void conn_shutdown(struct Curl_easy *data, struct connectdata *conn)
 {
   DEBUGASSERT(conn);
-  infof(conn->data, "Closing connection %ld\n", conn->connection_id);
-  DEBUGASSERT(conn->data);
+  DEBUGASSERT(data);
+  infof(data, "Closing connection %ld\n", conn->connection_id);
 
   /* possible left-overs from the async name resolvers */
   Curl_resolver_cancel(conn);
@@ -834,11 +834,18 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
     /* treat the connection as dead in CONNECT_ONLY situations */
     dead_connection = TRUE;
 
-  if(conn->handler->disconnect)
-    /* This is set if protocol-specific cleanups should be made */
-    conn->handler->disconnect(conn, dead_connection);
+  if(conn->handler->disconnect) {
+    /* During disconnect, the connection and the transfer is already
+       disassociated, but the SSH backends (and more?) still need the
+       transfer's connection pointer to identify the used connection */
+    data->conn = conn;
 
-  conn_shutdown(conn);
+    /* This is set if protocol-specific cleanups should be made */
+    conn->handler->disconnect(data, conn, dead_connection);
+    data->conn = NULL; /* forget it again */
+  }
+
+  conn_shutdown(data, conn);
   conn_free(conn);
   return CURLE_OK;
 }
@@ -2079,7 +2086,8 @@ static CURLcode setup_range(struct Curl_easy *data)
  *
  * This MUST get called after proxy magic has been figured out.
  */
-static CURLcode setup_connection_internals(struct connectdata *conn)
+static CURLcode setup_connection_internals(struct Curl_easy *data,
+                                           struct connectdata *conn)
 {
   const struct Curl_handler *p;
   CURLcode result;
@@ -2088,7 +2096,7 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
   p = conn->handler;
 
   if(p->setup_connection) {
-    result = (*p->setup_connection)(conn);
+    result = (*p->setup_connection)(data, conn);
 
     if(result)
       return result;
@@ -3595,7 +3603,7 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Setup internals depending on protocol. Needs to be done after
    * we figured out what/if proxy to use.
    *************************************************************/
-  result = setup_connection_internals(conn);
+  result = setup_connection_internals(data, conn);
   if(result)
     goto out;
 
@@ -3616,7 +3624,7 @@ static CURLcode create_conn(struct Curl_easy *data,
        that the file is present here! */
     DEBUGASSERT(conn->handler->connect_it);
     Curl_persistconninfo(conn);
-    result = conn->handler->connect_it(conn, &done);
+    result = conn->handler->connect_it(data, &done);
 
     /* Setup a "faked" transfer that'll do nothing */
     if(!result) {
@@ -3634,7 +3642,7 @@ static CURLcode create_conn(struct Curl_easy *data,
       if(result) {
         DEBUGASSERT(conn->handler->done);
         /* we ignore the return code for the protocol-specific DONE */
-        (void)conn->handler->done(conn, result, FALSE);
+        (void)conn->handler->done(data, result, FALSE);
         goto out;
       }
       Curl_setup_transfer(data, -1, -1, FALSE, -1);

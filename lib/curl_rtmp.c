@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010, Howard Chu, <hyc@highlandsun.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -48,11 +48,13 @@
 
 #define DEF_BUFTIME    (2*60*60*1000)    /* 2 hours */
 
-static CURLcode rtmp_setup_connection(struct connectdata *conn);
-static CURLcode rtmp_do(struct connectdata *conn, bool *done);
-static CURLcode rtmp_done(struct connectdata *conn, CURLcode, bool premature);
-static CURLcode rtmp_connect(struct connectdata *conn, bool *done);
-static CURLcode rtmp_disconnect(struct connectdata *conn, bool dead);
+static CURLcode rtmp_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn);
+static CURLcode rtmp_do(struct Curl_easy *data, bool *done);
+static CURLcode rtmp_done(struct Curl_easy *data, CURLcode, bool premature);
+static CURLcode rtmp_connect(struct Curl_easy *data, bool *done);
+static CURLcode rtmp_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn, bool dead);
 
 static Curl_recv rtmp_recv;
 static Curl_send rtmp_send;
@@ -193,7 +195,8 @@ const struct Curl_handler Curl_handler_rtmpts = {
   PROTOPT_NONE                          /* flags*/
 };
 
-static CURLcode rtmp_setup_connection(struct connectdata *conn)
+static CURLcode rtmp_setup_connection(struct Curl_easy *data,
+                                      struct connectdata *conn)
 {
   RTMP *r = RTMP_Alloc();
   if(!r)
@@ -201,7 +204,7 @@ static CURLcode rtmp_setup_connection(struct connectdata *conn)
 
   RTMP_Init(r);
   RTMP_SetBufferMS(r, DEF_BUFTIME);
-  if(!RTMP_SetupURL(r, conn->data->change.url)) {
+  if(!RTMP_SetupURL(r, data->change.url)) {
     RTMP_Free(r);
     return CURLE_URL_MALFORMAT;
   }
@@ -209,8 +212,9 @@ static CURLcode rtmp_setup_connection(struct connectdata *conn)
   return CURLE_OK;
 }
 
-static CURLcode rtmp_connect(struct connectdata *conn, bool *done)
+static CURLcode rtmp_connect(struct Curl_easy *data, bool *done)
 {
+  struct connectdata *conn = data->conn;
   RTMP *r = conn->proto.rtmp;
   SET_RCVTIMEO(tv, 10);
 
@@ -243,9 +247,9 @@ static CURLcode rtmp_connect(struct connectdata *conn, bool *done)
   return CURLE_OK;
 }
 
-static CURLcode rtmp_do(struct connectdata *conn, bool *done)
+static CURLcode rtmp_do(struct Curl_easy *data, bool *done)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   RTMP *r = conn->proto.rtmp;
 
   if(!RTMP_ConnectStream(r, 0))
@@ -261,20 +265,22 @@ static CURLcode rtmp_do(struct connectdata *conn, bool *done)
   return CURLE_OK;
 }
 
-static CURLcode rtmp_done(struct connectdata *conn, CURLcode status,
+static CURLcode rtmp_done(struct Curl_easy *data, CURLcode status,
                           bool premature)
 {
-  (void)conn; /* unused */
+  (void)data; /* unused */
   (void)status; /* unused */
   (void)premature; /* unused */
 
   return CURLE_OK;
 }
 
-static CURLcode rtmp_disconnect(struct connectdata *conn,
+static CURLcode rtmp_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn,
                                 bool dead_connection)
 {
   RTMP *r = conn->proto.rtmp;
+  (void)data;
   (void)dead_connection;
   if(r) {
     conn->proto.rtmp = NULL;
