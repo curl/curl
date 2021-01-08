@@ -263,7 +263,8 @@ static CURLcode CONNECT(struct connectdata *conn,
         return result;
 
       /* Setup the proxy-authorization header, if any */
-      result = Curl_http_output_auth(conn, "CONNECT", hostheader, TRUE);
+      result = Curl_http_output_auth(conn, "CONNECT", HTTPREQ_GET,
+                                     hostheader, TRUE);
 
       if(!result) {
         const char *proxyconn = "";
@@ -739,7 +740,8 @@ static CURLcode CONNECT(struct connectdata *conn,
         result = CURLE_OUT_OF_MEMORY;
       }
       /* Setup the proxy-authorization header, if any */
-      result = Curl_http_output_auth(conn, "CONNECT", hostheader, TRUE);
+      result = Curl_http_output_auth(conn, "CONNECT", HTTPREQ_GET,
+                                     hostheader, TRUE);
       if(result)
         goto error;
       Curl_safefree(hostheader);

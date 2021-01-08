@@ -24,14 +24,12 @@
 #include "curl_setup.h"
 
 typedef enum {
-  HTTPREQ_NONE, /* first in list */
   HTTPREQ_GET,
   HTTPREQ_POST,
   HTTPREQ_POST_FORM, /* we make a difference internally */
   HTTPREQ_POST_MIME, /* we make a difference internally */
   HTTPREQ_PUT,
-  HTTPREQ_HEAD,
-  HTTPREQ_LAST /* last in list */
+  HTTPREQ_HEAD
 } Curl_HttpReq;
 
 #ifndef CURL_DISABLE_HTTP
@@ -295,6 +293,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
  *
  * @param conn all information about the current connection
  * @param request pointer to the request keyword
+ * @param httpreq is the request type
  * @param path pointer to the requested path
  * @param proxytunnel boolean if this is the request setting up a "proxy
  * tunnel"
@@ -304,6 +303,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 CURLcode
 Curl_http_output_auth(struct connectdata *conn,
                       const char *request,
+                      Curl_HttpReq httpreq,
                       const char *path,
                       bool proxytunnel); /* TRUE if this is the request setting
                                             up the proxy tunnel */

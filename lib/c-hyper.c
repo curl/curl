@@ -670,7 +670,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       if(!pq)
         return CURLE_OUT_OF_MEMORY;
     }
-    result = Curl_http_output_auth(conn, method,
+    result = Curl_http_output_auth(conn, method, httpreq,
                                    (pq ? pq : data->state.up.path), FALSE);
     free(pq);
     if(result)
