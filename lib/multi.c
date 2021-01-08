@@ -1389,10 +1389,10 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
  * We init chunking and trailer bits to their default values here immediately
  * before receiving any header data for the current request.
  */
-static void do_complete(struct connectdata *conn)
+static void do_complete(struct Curl_easy *data)
 {
-  conn->data->req.chunk = FALSE;
-  Curl_pgrsTime(conn->data, TIMER_PRETRANSFER);
+  data->req.chunk = FALSE;
+  Curl_pgrsTime(data, TIMER_PRETRANSFER);
 }
 
 static CURLcode multi_do(struct Curl_easy *data, bool *done)
@@ -1410,7 +1410,7 @@ static CURLcode multi_do(struct Curl_easy *data, bool *done)
 
     if(!result && *done)
       /* do_complete must be called after the protocol-specific DO function */
-      do_complete(conn);
+      do_complete(data);
   }
   return result;
 }
@@ -1436,7 +1436,7 @@ static CURLcode multi_do_more(struct Curl_easy *data, int *complete)
 
   if(!result && (*complete == 1))
     /* do_complete must be called after the protocol-specific DO function */
-    do_complete(conn);
+    do_complete(data);
 
   return result;
 }
