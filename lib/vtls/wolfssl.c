@@ -735,7 +735,7 @@ wolfssl_connect_step2(struct connectdata *conn,
       else
         infof(data, "ALPN, unrecognized protocol %.*s\n", protocol_len,
               protocol);
-      Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+      Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                           BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
     }
     else if(rc == SSL_ALPN_NOT_FOUND)

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2020, Michael Forney, <mforney@mforney.org>
+ * Copyright (C) 2019 - 2021, Michael Forney, <mforney@mforney.org>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -552,7 +552,7 @@ static CURLcode bearssl_connect_step3(struct connectdata *conn, int sockindex)
         conn->negnpn = CURL_HTTP_VERSION_1_1;
       else
         infof(data, "ALPN, unrecognized protocol %s\n", protocol);
-      Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+      Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                           BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
     }
     else

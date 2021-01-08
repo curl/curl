@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2017, Nick Zitzmann, <nickzman@gmail.com>.
  * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2017, Nick Zitzmann, <nickzman@gmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2693,7 +2693,7 @@ sectransp_connect_step2(struct connectdata *conn, int sockindex)
         else
           infof(data, "ALPN, server did not agree to a protocol\n");
 
-        Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+        Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                             BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
 
         /* chosenProtocol is a reference to the string within alpnArr

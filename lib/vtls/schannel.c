@@ -5,9 +5,9 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1400,7 +1400,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
     }
     else
       infof(data, "ALPN, server did not agree to a protocol\n");
-    Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+    Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                         BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 #endif
