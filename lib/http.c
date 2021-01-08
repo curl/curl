@@ -784,6 +784,7 @@ output_auth_headers(struct connectdata *conn,
 CURLcode
 Curl_http_output_auth(struct connectdata *conn,
                       const char *request,
+                      Curl_HttpReq httpreq,
                       const char *path,
                       bool proxytunnel) /* TRUE if this is the request setting
                                            up the proxy tunnel */
@@ -849,6 +850,17 @@ Curl_http_output_auth(struct connectdata *conn,
   }
   else
     authhost->done = TRUE;
+
+  if(((authhost->multipass && !authhost->done) ||
+      (authproxy->multipass && !authproxy->done)) &&
+     (httpreq != HTTPREQ_GET) &&
+     (httpreq != HTTPREQ_HEAD)) {
+    /* Auth is required and we are not authenticated yet. Make a PUT or POST
+       with content-length zero as a "probe". */
+    conn->bits.authneg = TRUE;
+  }
+  else
+    conn->bits.authneg = FALSE;
 
   return result;
 }
@@ -1962,7 +1974,7 @@ void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
     if(data->set.opt_no_body)
       request = "HEAD";
     else {
-      DEBUGASSERT((httpreq > HTTPREQ_NONE) && (httpreq < HTTPREQ_LAST));
+      DEBUGASSERT((httpreq >= HTTPREQ_GET) && (httpreq <= HTTPREQ_HEAD));
       switch(httpreq) {
       case HTTPREQ_POST:
       case HTTPREQ_POST_FORM:
@@ -2972,23 +2984,12 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       if(!pq)
         return CURLE_OUT_OF_MEMORY;
     }
-    result = Curl_http_output_auth(conn, request,
+    result = Curl_http_output_auth(conn, request, httpreq,
                                    (pq ? pq : data->state.up.path), FALSE);
     free(pq);
     if(result)
       return result;
   }
-
-  if(((data->state.authhost.multipass && !data->state.authhost.done)
-      || (data->state.authproxy.multipass && !data->state.authproxy.done)) &&
-     (httpreq != HTTPREQ_GET) &&
-     (httpreq != HTTPREQ_HEAD)) {
-    /* Auth is required and we are not authenticated yet. Make a PUT or POST
-       with content-length zero as a "probe". */
-    conn->bits.authneg = TRUE;
-  }
-  else
-    conn->bits.authneg = FALSE;
 
   Curl_safefree(data->state.aptr.ref);
   if(data->change.referer && !Curl_checkheaders(conn, "Referer")) {
