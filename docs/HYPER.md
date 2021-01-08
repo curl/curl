@@ -22,7 +22,7 @@ repository](https://github.com/hyperium/hyper/tree/hyper-capi).
 
 Build hyper and enable the C API:
 
-     % git clone -b hyper-capi https://github.com/hyperium/hyper
+     % git clone https://github.com/hyperium/hyper
      % cd hyper
      % RUSTFLAGS="--cfg hyper_unstable_ffi" cargo build --features client,http1,http2,ffi
 
