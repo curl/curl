@@ -1871,7 +1871,7 @@ static CURLcode verifystatus(struct connectdata *conn,
   /* Compute the certificate's ID */
   cert = SSL_get_peer_certificate(backend->handle);
   if(!cert) {
-    failf(data, "Error getting peer certficate");
+    failf(data, "Error getting peer certificate");
     result = CURLE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
