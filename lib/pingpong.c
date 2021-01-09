@@ -44,10 +44,10 @@
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */
-timediff_t Curl_pp_state_timeout(struct pingpong *pp, bool disconnecting)
+timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
+                                 struct pingpong *pp, bool disconnecting)
 {
   struct connectdata *conn = pp->conn;
-  struct Curl_easy *data = conn->data;
   timediff_t timeout_ms; /* in milliseconds */
   timediff_t response_time = (data->set.server_response_timeout)?
     data->set.server_response_timeout: pp->response_time;
@@ -77,15 +77,15 @@ timediff_t Curl_pp_state_timeout(struct pingpong *pp, bool disconnecting)
 /*
  * Curl_pp_statemach()
  */
-CURLcode Curl_pp_statemach(struct pingpong *pp, bool block,
+CURLcode Curl_pp_statemach(struct Curl_easy *data,
+                           struct pingpong *pp, bool block,
                            bool disconnecting)
 {
   struct connectdata *conn = pp->conn;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc;
   timediff_t interval_ms;
-  timediff_t timeout_ms = Curl_pp_state_timeout(pp, disconnecting);
-  struct Curl_easy *data = conn->data;
+  timediff_t timeout_ms = Curl_pp_state_timeout(data, pp, disconnecting);
   CURLcode result = CURLE_OK;
 
   if(timeout_ms <= 0) {
@@ -131,18 +131,17 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block,
     result = CURLE_OUT_OF_MEMORY;
   }
   else if(rc)
-    result = pp->statemach_act(conn);
+    result = pp->statemachine(data, pp->conn);
 
   return result;
 }
 
 /* initialize stuff to prepare for reading a fresh new response */
-void Curl_pp_init(struct pingpong *pp)
+void Curl_pp_init(struct Curl_easy *data, struct pingpong *pp)
 {
-  struct connectdata *conn = pp->conn;
-  DEBUGASSERT(conn->data);
+  DEBUGASSERT(data);
   pp->nread_resp = 0;
-  pp->linestart_resp = conn->data->state.buffer;
+  pp->linestart_resp = data->state.buffer;
   pp->pending_resp = TRUE;
   pp->response = Curl_now(); /* start response time-out now! */
 }
@@ -163,7 +162,8 @@ void Curl_pp_setup(struct pingpong *pp)
  *
  * made to never block
  */
-CURLcode Curl_pp_vsendf(struct pingpong *pp,
+CURLcode Curl_pp_vsendf(struct Curl_easy *data,
+                        struct pingpong *pp,
                         const char *fmt,
                         va_list args)
 {
@@ -172,7 +172,6 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
   char *s;
   CURLcode result;
   struct connectdata *conn = pp->conn;
-  struct Curl_easy *data;
 
 #ifdef HAVE_GSSAPI
   enum protection_level data_sec;
@@ -185,8 +184,6 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
   if(!conn)
     /* can't send without a connection! */
     return CURLE_SEND_ERROR;
-  data = conn->data;
-  DEBUGASSERT(data);
 
   Curl_dyn_reset(&pp->sendbuf);
   result = Curl_dyn_vaddf(&pp->sendbuf, fmt, args);
@@ -200,7 +197,7 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
 
   write_len = Curl_dyn_len(&pp->sendbuf);
   s = Curl_dyn_ptr(&pp->sendbuf);
-  Curl_pp_init(pp);
+  Curl_pp_init(data, pp);
 
   result = Curl_convert_to_network(data, s, write_len);
   /* Curl_convert_to_network calls failf if unsuccessful */
@@ -248,14 +245,14 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
  *
  * made to never block
  */
-CURLcode Curl_pp_sendf(struct pingpong *pp,
+CURLcode Curl_pp_sendf(struct Curl_easy *data, struct pingpong *pp,
                        const char *fmt, ...)
 {
   CURLcode result;
   va_list ap;
   va_start(ap, fmt);
 
-  result = Curl_pp_vsendf(pp, fmt, ap);
+  result = Curl_pp_vsendf(data, pp, fmt, ap);
 
   va_end(ap);
 
@@ -267,7 +264,8 @@ CURLcode Curl_pp_sendf(struct pingpong *pp,
  *
  * Reads a piece of a server response.
  */
-CURLcode Curl_pp_readresp(curl_socket_t sockfd,
+CURLcode Curl_pp_readresp(struct Curl_easy *data,
+                          curl_socket_t sockfd,
                           struct pingpong *pp,
                           int *code, /* return the server code if done */
                           size_t *size) /* size of the response */
@@ -277,7 +275,6 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
   ssize_t gotbytes;
   char *ptr;
   struct connectdata *conn = pp->conn;
-  struct Curl_easy *data = conn->data;
   char * const buf = data->state.buffer;
   CURLcode result = CURLE_OK;
 
@@ -378,7 +375,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
           if(result)
             return result;
 
-          if(pp->endofresp(conn, pp->linestart_resp, perline, code)) {
+          if(pp->endofresp(data, conn, pp->linestart_resp, perline, code)) {
             /* This is the end of the last line, copy the last line to the
                start of the buffer and null-terminate, for old times sake */
             size_t n = ptr - pp->linestart_resp;
@@ -458,8 +455,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
   return result;
 }
 
-int Curl_pp_getsock(struct pingpong *pp,
-                    curl_socket_t *socks)
+int Curl_pp_getsock(struct pingpong *pp, curl_socket_t *socks)
 {
   struct connectdata *conn = pp->conn;
   socks[0] = conn->sock[FIRSTSOCKET];

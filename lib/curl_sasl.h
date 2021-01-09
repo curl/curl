@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -88,10 +88,12 @@ struct SASLproto {
   int contcode;            /* Code to receive when continuation is expected */
   int finalcode;           /* Code to receive upon authentication success */
   size_t maxirlen;         /* Maximum initial response length */
-  CURLcode (*sendauth)(struct connectdata *conn,
+  CURLcode (*sendauth)(struct Curl_easy *data,
+                       struct connectdata *conn,
                        const char *mech, const char *ir);
                            /* Send authentication command */
-  CURLcode (*sendcont)(struct connectdata *conn, const char *contauth);
+  CURLcode (*sendcont)(struct Curl_easy *data,
+                       struct connectdata *conn, const char *contauth);
                            /* Send authentication continuation */
   void (*getmessage)(char *buffer, char **outptr);
                            /* Get SASL response message */

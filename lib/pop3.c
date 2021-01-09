@@ -103,9 +103,11 @@ static CURLcode pop3_setup_connection(struct Curl_easy *data,
 static CURLcode pop3_parse_url_options(struct connectdata *conn);
 static CURLcode pop3_parse_url_path(struct connectdata *conn);
 static CURLcode pop3_parse_custom_request(struct connectdata *conn);
-static CURLcode pop3_perform_auth(struct connectdata *conn, const char *mech,
+static CURLcode pop3_perform_auth(struct Curl_easy *data,
+                                  struct connectdata *conn, const char *mech,
                                   const char *initresp);
-static CURLcode pop3_continue_auth(struct connectdata *conn, const char *resp);
+static CURLcode pop3_continue_auth(struct Curl_easy *data,
+                                   struct connectdata *conn, const char *resp);
 static void pop3_get_message(char *buffer, char **outptr);
 
 /*
@@ -197,10 +199,11 @@ static void pop3_to_pop3s(struct connectdata *conn)
  * capabilities from the CAPA response including the supported authentication
  * types and allowed SASL mechanisms.
  */
-static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
-                           int *resp)
+static bool pop3_endofresp(struct Curl_easy *data, struct connectdata *conn,
+                           char *line, size_t len, int *resp)
 {
   struct pop3_conn *pop3c = &conn->proto.pop3c;
+  (void)data;
 
   /* Do we have an error response? */
   if(len >= 4 && !memcmp("-ERR", line, 4)) {
@@ -316,7 +319,8 @@ static void state(struct connectdata *conn, pop3state newstate)
  * Sends the CAPA command in order to obtain a list of server side supported
  * capabilities.
  */
-static CURLcode pop3_perform_capa(struct connectdata *conn)
+static CURLcode pop3_perform_capa(struct Curl_easy *data,
+                                  struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -326,7 +330,7 @@ static CURLcode pop3_perform_capa(struct connectdata *conn)
   pop3c->tls_supported = FALSE;           /* Clear the TLS capability */
 
   /* Send the CAPA command */
-  result = Curl_pp_sendf(&pop3c->pp, "%s", "CAPA");
+  result = Curl_pp_sendf(data, &pop3c->pp, "%s", "CAPA");
 
   if(!result)
     state(conn, POP3_CAPA);
@@ -340,10 +344,11 @@ static CURLcode pop3_perform_capa(struct connectdata *conn)
  *
  * Sends the STLS command to start the upgrade to TLS.
  */
-static CURLcode pop3_perform_starttls(struct connectdata *conn)
+static CURLcode pop3_perform_starttls(struct Curl_easy *data,
+                                      struct connectdata *conn)
 {
   /* Send the STLS command */
-  CURLcode result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "STLS");
+  CURLcode result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "%s", "STLS");
 
   if(!result)
     state(conn, POP3_STARTTLS);
@@ -357,7 +362,8 @@ static CURLcode pop3_perform_starttls(struct connectdata *conn)
  *
  * Performs the upgrade to TLS.
  */
-static CURLcode pop3_perform_upgrade_tls(struct connectdata *conn)
+static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
+                                         struct connectdata *conn)
 {
   /* Start the SSL connection */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -370,7 +376,7 @@ static CURLcode pop3_perform_upgrade_tls(struct connectdata *conn)
 
     if(pop3c->ssldone) {
       pop3_to_pop3s(conn);
-      result = pop3_perform_capa(conn);
+      result = pop3_perform_capa(data, conn);
     }
   }
 
@@ -383,7 +389,8 @@ static CURLcode pop3_perform_upgrade_tls(struct connectdata *conn)
  *
  * Sends a clear text USER command to authenticate with.
  */
-static CURLcode pop3_perform_user(struct connectdata *conn)
+static CURLcode pop3_perform_user(struct Curl_easy *data,
+                                  struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
@@ -396,7 +403,7 @@ static CURLcode pop3_perform_user(struct connectdata *conn)
   }
 
   /* Send the USER command */
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "USER %s",
+  result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "USER %s",
                          conn->user ? conn->user : "");
   if(!result)
     state(conn, POP3_USER);
@@ -411,7 +418,8 @@ static CURLcode pop3_perform_user(struct connectdata *conn)
  *
  * Sends an APOP command to authenticate with.
  */
-static CURLcode pop3_perform_apop(struct connectdata *conn)
+static CURLcode pop3_perform_apop(struct Curl_easy *data,
+                                  struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -446,7 +454,7 @@ static CURLcode pop3_perform_apop(struct connectdata *conn)
   for(i = 0; i < MD5_DIGEST_LEN; i++)
     msnprintf(&secret[2 * i], 3, "%02x", digest[i]);
 
-  result = Curl_pp_sendf(&pop3c->pp, "APOP %s %s", conn->user, secret);
+  result = Curl_pp_sendf(data, &pop3c->pp, "APOP %s %s", conn->user, secret);
 
   if(!result)
     state(conn, POP3_APOP);
@@ -462,7 +470,8 @@ static CURLcode pop3_perform_apop(struct connectdata *conn)
  * Sends an AUTH command allowing the client to login with the given SASL
  * authentication mechanism.
  */
-static CURLcode pop3_perform_auth(struct connectdata *conn,
+static CURLcode pop3_perform_auth(struct Curl_easy *data,
+                                  struct connectdata *conn,
                                   const char *mech,
                                   const char *initresp)
 {
@@ -471,11 +480,11 @@ static CURLcode pop3_perform_auth(struct connectdata *conn,
 
   if(initresp) {                                  /* AUTH <mech> ...<crlf> */
     /* Send the AUTH command with the initial response */
-    result = Curl_pp_sendf(&pop3c->pp, "AUTH %s %s", mech, initresp);
+    result = Curl_pp_sendf(data, &pop3c->pp, "AUTH %s %s", mech, initresp);
   }
   else {
     /* Send the AUTH command */
-    result = Curl_pp_sendf(&pop3c->pp, "AUTH %s", mech);
+    result = Curl_pp_sendf(data, &pop3c->pp, "AUTH %s", mech);
   }
 
   return result;
@@ -487,12 +496,13 @@ static CURLcode pop3_perform_auth(struct connectdata *conn,
  *
  * Sends SASL continuation data or cancellation.
  */
-static CURLcode pop3_continue_auth(struct connectdata *conn,
+static CURLcode pop3_continue_auth(struct Curl_easy *data,
+                                   struct connectdata *conn,
                                    const char *resp)
 {
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
-  return Curl_pp_sendf(&pop3c->pp, "%s", resp);
+  return Curl_pp_sendf(data, &pop3c->pp, "%s", resp);
 }
 
 /***********************************************************************
@@ -503,7 +513,8 @@ static CURLcode pop3_continue_auth(struct connectdata *conn,
  * authentication mechanism, falling back to APOP and clear text should a
  * common mechanism not be available between the client and server.
  */
-static CURLcode pop3_perform_authentication(struct connectdata *conn)
+static CURLcode pop3_perform_authentication(struct Curl_easy *data,
+                                            struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -529,12 +540,12 @@ static CURLcode pop3_perform_authentication(struct connectdata *conn)
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     if(pop3c->authtypes & pop3c->preftype & POP3_TYPE_APOP)
       /* Perform APOP authentication */
-      result = pop3_perform_apop(conn);
+      result = pop3_perform_apop(data, conn);
     else
 #endif
     if(pop3c->authtypes & pop3c->preftype & POP3_TYPE_CLEARTEXT)
       /* Perform clear text authentication */
-      result = pop3_perform_user(conn);
+      result = pop3_perform_user(data, conn);
     else {
       /* Other mechanisms not supported */
       infof(conn->data, "No known authentication mechanisms supported!\n");
@@ -571,11 +582,11 @@ static CURLcode pop3_perform_command(struct connectdata *conn)
 
   /* Send the command */
   if(pop3->id[0] != '\0')
-    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s %s",
+    result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "%s %s",
                            (pop3->custom && pop3->custom[0] != '\0' ?
                             pop3->custom : command), pop3->id);
   else
-    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s",
+    result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "%s",
                            (pop3->custom && pop3->custom[0] != '\0' ?
                             pop3->custom : command));
 
@@ -591,10 +602,11 @@ static CURLcode pop3_perform_command(struct connectdata *conn)
  *
  * Performs the quit action prior to sclose() be called.
  */
-static CURLcode pop3_perform_quit(struct connectdata *conn)
+static CURLcode pop3_perform_quit(struct Curl_easy *data,
+                                  struct connectdata *conn)
 {
   /* Send the QUIT command */
-  CURLcode result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "QUIT");
+  CURLcode result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "%s", "QUIT");
 
   if(!result)
     state(conn, POP3_QUIT);
@@ -656,7 +668,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
       }
     }
 
-    result = pop3_perform_capa(conn);
+    result = pop3_perform_capa(data, conn);
   }
 
   return result;
@@ -730,36 +742,35 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
       /* We don't have a SSL/TLS connection yet, but SSL is requested */
       if(pop3c->tls_supported)
         /* Switch to TLS connection now */
-        result = pop3_perform_starttls(conn);
+        result = pop3_perform_starttls(data, conn);
       else if(data->set.use_ssl == CURLUSESSL_TRY)
         /* Fallback and carry on with authentication */
-        result = pop3_perform_authentication(conn);
+        result = pop3_perform_authentication(data, conn);
       else {
         failf(data, "STLS not supported.");
         result = CURLE_USE_SSL_FAILED;
       }
     }
     else
-      result = pop3_perform_authentication(conn);
+      result = pop3_perform_authentication(data, conn);
   }
   else {
     /* Clear text is supported when CAPA isn't recognised */
     pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
 
-    result = pop3_perform_authentication(conn);
+    result = pop3_perform_authentication(data, conn);
   }
 
   return result;
 }
 
 /* For STARTTLS responses */
-static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
+static CURLcode pop3_state_starttls_resp(struct Curl_easy *data,
+                                         struct connectdata *conn,
                                          int pop3code,
                                          pop3state instate)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
-
   (void)instate; /* no use for this yet */
 
   if(pop3code != '+') {
@@ -768,10 +779,10 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
       result = CURLE_USE_SSL_FAILED;
     }
     else
-      result = pop3_perform_authentication(conn);
+      result = pop3_perform_authentication(data, conn);
   }
   else
-    result = pop3_perform_upgrade_tls(conn);
+    result = pop3_perform_upgrade_tls(data, conn);
 
   return result;
 }
@@ -798,12 +809,12 @@ static CURLcode pop3_state_auth_resp(struct connectdata *conn,
 #ifndef CURL_DISABLE_CRYPTO_AUTH
       if(pop3c->authtypes & pop3c->preftype & POP3_TYPE_APOP)
         /* Perform APOP authentication */
-        result = pop3_perform_apop(conn);
+        result = pop3_perform_apop(data, conn);
       else
 #endif
       if(pop3c->authtypes & pop3c->preftype & POP3_TYPE_CLEARTEXT)
         /* Perform clear text authentication */
-        result = pop3_perform_user(conn);
+        result = pop3_perform_user(data, conn);
       else {
         failf(data, "Authentication cancelled");
         result = CURLE_LOGIN_DENIED;
@@ -853,7 +864,7 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn, int pop3code,
   }
   else
     /* Send the PASS command */
-    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "PASS %s",
+    result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "PASS %s",
                            conn->passwd ? conn->passwd : "");
   if(!result)
     state(conn, POP3_PASS);
@@ -938,7 +949,8 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
   return result;
 }
 
-static CURLcode pop3_statemach_act(struct connectdata *conn)
+static CURLcode pop3_statemachine(struct Curl_easy *data,
+                                  struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
@@ -946,10 +958,11 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
   size_t nread = 0;
+  (void)data;
 
   /* Busy upgrading the connection; right now all I/O is SSL/TLS, not POP3 */
   if(pop3c->state == POP3_UPGRADETLS)
-    return pop3_perform_upgrade_tls(conn);
+    return pop3_perform_upgrade_tls(data, conn);
 
   /* Flush any data that needs to be sent */
   if(pp->sendleft)
@@ -957,9 +970,9 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 
  do {
     /* Read the response from the server */
-    result = Curl_pp_readresp(sock, pp, &pop3code, &nread);
-    if(result)
-      return result;
+   result = Curl_pp_readresp(data, sock, pp, &pop3code, &nread);
+   if(result)
+     return result;
 
     if(!pop3code)
       break;
@@ -975,7 +988,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       break;
 
     case POP3_STARTTLS:
-      result = pop3_state_starttls_resp(conn, pop3code, pop3c->state);
+      result = pop3_state_starttls_resp(data, conn, pop3code, pop3c->state);
       break;
 
     case POP3_AUTH:
@@ -1025,21 +1038,21 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
       return result;
   }
 
-  result = Curl_pp_statemach(&pop3c->pp, FALSE, FALSE);
+  result = Curl_pp_statemach(data, &pop3c->pp, FALSE, FALSE);
   *done = (pop3c->state == POP3_STOP) ? TRUE : FALSE;
 
   return result;
 }
 
 static CURLcode pop3_block_statemach(struct Curl_easy *data,
+                                     struct connectdata *conn,
                                      bool disconnecting)
 {
   CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   while(pop3c->state != POP3_STOP && !result)
-    result = Curl_pp_statemach(&pop3c->pp, TRUE, disconnecting);
+    result = Curl_pp_statemach(data, &pop3c->pp, TRUE, disconnecting);
 
   return result;
 }
@@ -1086,11 +1099,7 @@ static CURLcode pop3_connect(struct Curl_easy *data, bool *done)
   /* We always support persistent connections in POP3 */
   connkeep(conn, "POP3 default");
 
-  /* Set the default response time-out */
-  pp->response_time = RESP_TIMEOUT;
-  pp->statemach_act = pop3_statemach_act;
-  pp->endofresp = pop3_endofresp;
-  pp->conn = conn;
+  PINGPONG_SETUP(pp, pop3_statemachine, pop3_endofresp);
 
   /* Set the default preferred authentication type and mechanism */
   pop3c->preftype = POP3_TYPE_ANY;
@@ -1098,7 +1107,7 @@ static CURLcode pop3_connect(struct Curl_easy *data, bool *done)
 
   /* Initialise the pingpong layer */
   Curl_pp_setup(pp);
-  Curl_pp_init(pp);
+  Curl_pp_init(data, pp);
 
   /* Parse the URL options */
   result = pop3_parse_url_options(conn);
@@ -1237,9 +1246,10 @@ static CURLcode pop3_disconnect(struct Curl_easy *data,
 
   /* The POP3 session may or may not have been allocated/setup at this
      point! */
-  if(!dead_connection && pop3c->pp.conn && pop3c->pp.conn->bits.protoconnstart)
-    if(!pop3_perform_quit(conn))
-      (void)pop3_block_statemach(data, TRUE); /* ignore errors on QUIT */
+  if(!dead_connection && conn && conn->bits.protoconnstart) {
+    if(!pop3_perform_quit(data, conn))
+      (void)pop3_block_statemach(data, conn, TRUE); /* ignore errors on QUIT */
+  }
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);
