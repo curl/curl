@@ -105,7 +105,7 @@ fi
 
 if [ "$TRAVIS_OS_NAME" = linux -a "$HYPER" ]; then
   cd $HOME
-  git clone --depth=1 -b hyper-capi https://github.com/hyperium/hyper.git
+  git clone --depth=1 https://github.com/hyperium/hyper.git
   curl https://sh.rustup.rs -sSf | sh -s -- -y
   source $HOME/.cargo/env
   cd $HOME/hyper
