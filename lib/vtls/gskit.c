@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1016,7 +1016,7 @@ static CURLcode gskit_connect_step3(struct connectdata *conn, int sockindex)
   }
 
   /* Verify host. */
-  result = Curl_verifyhost(conn, cert, certend);
+  result = Curl_verifyhost(data, conn, cert, certend);
   if(result)
     return result;
 
@@ -1031,7 +1031,7 @@ static CURLcode gskit_connect_step3(struct connectdata *conn, int sockindex)
       return result;
 
     if(cert) {
-      result = Curl_extract_certinfo(conn, 0, cert, certend);
+      result = Curl_extract_certinfo(data, 0, cert, certend);
       if(result)
         return result;
     }

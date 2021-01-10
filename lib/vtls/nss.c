@@ -814,6 +814,7 @@ static SECStatus nss_auth_cert_hook(void *arg, PRFileDesc *fd, PRBool checksig,
 static void HandshakeCallback(PRFileDesc *sock, void *arg)
 {
   struct connectdata *conn = (struct connectdata*) arg;
+  struct Curl_easy *data = conn->data;
   unsigned int buflenmax = 50;
   unsigned char buf[50];
   unsigned int buflen;
@@ -833,15 +834,15 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
 #endif
     case SSL_NEXT_PROTO_NO_SUPPORT:
     case SSL_NEXT_PROTO_NO_OVERLAP:
-      infof(conn->data, "ALPN/NPN, server did not agree to a protocol\n");
+      infof(data, "ALPN/NPN, server did not agree to a protocol\n");
       return;
 #ifdef SSL_ENABLE_ALPN
     case SSL_NEXT_PROTO_SELECTED:
-      infof(conn->data, "ALPN, server accepted to use %.*s\n", buflen, buf);
+      infof(data, "ALPN, server accepted to use %.*s\n", buflen, buf);
       break;
 #endif
     case SSL_NEXT_PROTO_NEGOTIATED:
-      infof(conn->data, "NPN, server accepted to use %.*s\n", buflen, buf);
+      infof(data, "NPN, server accepted to use %.*s\n", buflen, buf);
       break;
     }
 
@@ -952,6 +953,7 @@ static void display_cert_info(struct Curl_easy *data,
 static CURLcode display_conn_info(struct connectdata *conn, PRFileDesc *sock)
 {
   CURLcode result = CURLE_OK;
+  struct Curl_easy *data = conn->data;
   SSLChannelInfo channel;
   SSLCipherSuiteInfo suite;
   CERTCertificate *cert;
@@ -965,16 +967,16 @@ static CURLcode display_conn_info(struct connectdata *conn, PRFileDesc *sock)
      channel.cipherSuite) {
     if(SSL_GetCipherSuiteInfo(channel.cipherSuite,
                               &suite, sizeof(suite)) == SECSuccess) {
-      infof(conn->data, "SSL connection using %s\n", suite.cipherSuiteName);
+      infof(data, "SSL connection using %s\n", suite.cipherSuiteName);
     }
   }
 
   cert = SSL_PeerCertificate(sock);
   if(cert) {
-    infof(conn->data, "Server certificate:\n");
+    infof(data, "Server certificate:\n");
 
-    if(!conn->data->set.ssl.certinfo) {
-      display_cert_info(conn->data, cert);
+    if(!data->set.ssl.certinfo) {
+      display_cert_info(data, cert);
       CERT_DestroyCertificate(cert);
     }
     else {
@@ -995,10 +997,10 @@ static CURLcode display_conn_info(struct connectdata *conn, PRFileDesc *sock)
         }
       }
 
-      result = Curl_ssl_init_certinfo(conn->data, i);
+      result = Curl_ssl_init_certinfo(data, i);
       if(!result) {
         for(i = 0; cert; cert = cert2) {
-          result = Curl_extract_certinfo(conn, i++, (char *)cert->derCert.data,
+          result = Curl_extract_certinfo(data, i++, (char *)cert->derCert.data,
                                          (char *)cert->derCert.data +
                                                  cert->derCert.len);
           if(result)

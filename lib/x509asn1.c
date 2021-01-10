@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -945,13 +945,12 @@ static void do_pubkey(struct Curl_easy *data, int certnum,
   }
 }
 
-CURLcode Curl_extract_certinfo(struct connectdata *conn,
+CURLcode Curl_extract_certinfo(struct Curl_easy *data,
                                int certnum,
                                const char *beg,
                                const char *end)
 {
   struct Curl_X509certificate cert;
-  struct Curl_easy *data = conn->data;
   struct Curl_asn1Element param;
   const char *ccp;
   char *cp1;
@@ -1132,10 +1131,9 @@ static const char *checkOID(const char *beg, const char *end,
   return matched? ccp: NULL;
 }
 
-CURLcode Curl_verifyhost(struct connectdata *conn,
+CURLcode Curl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
                          const char *beg, const char *end)
 {
-  struct Curl_easy *data = conn->data;
   struct Curl_X509certificate cert;
   struct Curl_asn1Element dn;
   struct Curl_asn1Element elem;

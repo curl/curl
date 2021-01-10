@@ -1305,7 +1305,7 @@ cert_counter_callback(const CERT_CONTEXT *ccert_context, void *certs_count)
 
 struct Adder_args
 {
-  struct connectdata *conn;
+  struct Curl_easy *data;
   CURLcode result;
   int idx;
   int certs_count;
@@ -1320,7 +1320,8 @@ add_cert_to_certinfo(const CERT_CONTEXT *ccert_context, void *raw_arg)
     const char *beg = (const char *) ccert_context->pbCertEncoded;
     const char *end = beg + ccert_context->cbCertEncoded;
     int insert_index = (args->certs_count - 1) - args->idx;
-    args->result = Curl_extract_certinfo(args->conn, insert_index, beg, end);
+    args->result = Curl_extract_certinfo(args->data, insert_index,
+                                         beg, end);
     args->idx++;
   }
   return args->result == CURLE_OK;
@@ -1458,7 +1459,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
     result = Curl_ssl_init_certinfo(data, certs_count);
     if(!result) {
       struct Adder_args args;
-      args.conn = conn;
+      args.data = data;
       args.idx = 0;
       args.certs_count = certs_count;
       traverse_cert_store(ccert_context, add_cert_to_certinfo, &args);
