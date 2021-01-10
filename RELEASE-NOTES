@@ -4,7 +4,7 @@ curl and libcurl 7.75.0
  Command line options:         237
  curl_easy_setopt() options:   285
  Public functions in libcurl:  85
- Contributors:                 2308
+ Contributors:                 2314
 
 This release includes the following changes:
 
@@ -21,6 +21,7 @@ This release includes the following bugfixes:
  o badsymbols.pl: ignore stand-alone single hash lines [40]
  o BUG-BOUNTY: minor language updates [5]
  o cleanup: fix empty expression statement has no effect
+ o cmake: Add an option to disable libidn2 [48]
  o cmake: enable gophers correctly in curl-config [10]
  o cmdline-opts/gen.pl: return hard on errors [11]
  o cmdline-opts/retry.d: mention response code 429 as well [47]
@@ -41,20 +42,25 @@ This release includes the following bugfixes:
  o examples/libtest: add .checksrc to dist [14]
  o examples: remove superfluous asterisk uses
  o failf: remove newline from formatting strings [35]
+ o file: don't provide content-length for directories [49]
  o getinfo: build with disabled HTTP support
  o h2: do not wait for RECV on paused transfers [43]
  o HISTORY: added dates to early history
+ o http: have CURLOPT_FAILONERROR fail after all headers [54]
  o http: show the request as headers even when split-sending [7]
  o httpauth: make multi-request auth work with custom port [45]
  o INSTALL: update the list known OSes and CPU archs curl has run on [38]
+ o lib/unit tests: add missing curl_global_cleanup() calls
  o lib1564/5: verify that curl_multi_wakeup returns OK
  o misc: assorted typo fixes [57]
  o misc: fix "warning: empty expression statement has no effect" [30]
+ o mk-ca-bundle.pl: deterministic output when using -t [62]
  o mqtt: deal with 0 byte reads correctly [4]
  o mqtt: handle POST/PUBLISH without a set POSTFIELDSIZE [1]
  o multi: when erroring in TOOFAST state, act as for PERFORM [9]
  o ngtcp2: make it build it current master again [21]
  o OS400: update ccsidcurl.c [20]
+ o pretransfer: setup the User-Agent header here [60]
  o quiche: remove fprintf() leftover
  o Revert "CI/github: work-around for brew breakage on macOS" [17]
  o runtests: add 'wakeup' as a feature
@@ -62,12 +68,15 @@ This release includes the following bugfixes:
  o speedcheck: exclude paused transfers [42]
  o test1522: add debug tracing [3]
  o test1633: set appropriate name
+ o test179: use consistent header line endings
  o tests/mqttd: extract the client id from the correct offset [13]
  o tests: make --libcurl tests only test FTP options if ftp enabled [18]
  o tool_operate: fix the suppression logic of some error messages [33]
  o tooĺ_writeout: fix the -w time output units [6]
  o travis: limit the tests with quiche builds to HTTPS and FTPS only [44]
  o travis: restrict the openssl3 job to only run https and ftps tests [34]
+ o url: if IDNA conversion fails, fallback to Transitional [29]
+ o wolfssl: add SECURE_RENEGOTIATION support [63]
  o wolfssl: Support wolfSSL builds missing TLS 1.1 [37]
 
 This release includes the following known bugs:
@@ -77,14 +86,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  0xflotus on github, Cherish98 on github, Cory Benfield, Cristian Rodríguez,
-  Dan Fandrich, Daniel Stenberg, Denis Laxalde, Dennis Clarke, Douglas R. Reno,
-  Earnestly on github, Emil Engler, Gisle Vanem, Hans-Christian Noren Egtvedt,
-  Harry Sintonen, Hongyi Zhao, Ian Spence, Jeremy Thibault, Jon Rumsey,
-  Jon Wilkes, Julian Montes, Kevin Ushey, Matthias Gatto, Nick Zitzmann,
-  Olaf Hering, parazyd on github, Paul Groke, Ray Satiro, Sean McArthur,
-  Tomas Berger, UrsusArctos on github, XhmikosR on github, 不确定
-  (32 contributors)
+  0xflotus on github, Andrey Gursky, Bubu on github, Cherish98 on github,
+  Cory Benfield, Cristian Rodríguez, Dan Fandrich, Daniel Stenberg,
+  Denis Laxalde, Dennis Clarke, Douglas R. Reno, Earnestly on github,
+  Emil Engler, Flameborn on github, Gergely Nagy, Gisle Vanem,
+  Hans-Christian Noren Egtvedt, Harry Sintonen, Himanshu Gupta, Hongyi Zhao,
+  Ian Spence, Jeremy Thibault, Jon Rumsey, Jon Wilkes, Julian Montes,
+  Kevin Ushey, Matthias Gatto, Mike Gelfand, Nick Zitzmann, Olaf Hering,
+  parazyd on github, Paul Groke, Ray Satiro, Sean McArthur, Tomas Berger,
+  UrsusArctos on github, William A Rowe Jr, XhmikosR on github, 不确定
+  (39 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -118,6 +129,7 @@ References to bug reports and discussions on issues:
  [26] = https://curl.se/bug/?i=5703
  [27] = https://curl.se/bug/?i=6341
  [28] = https://curl.se/bug/?i=6244
+ [29] = https://curl.se/bug/?i=6423
  [30] = https://github.com/curl/curl/commit/08e8455dddc5e48e58a12ade3815c01ae3da3b64#commitcomment-45433279
  [31] = https://curl.se/bug/?i=6349
  [33] = https://curl.se/mail/archive-2020-12/0017.html
@@ -134,9 +146,15 @@ References to bug reports and discussions on issues:
  [44] = https://curl.se/bug/?i=6403
  [45] = https://curl.se/bug/?i=6397
  [47] = https://curl.se/mail/archive-2020-12/0018.html
+ [48] = https://curl.se/bug/?i=6361
+ [49] = https://curl.se/bug/?i=6421
  [51] = https://curl.se/bug/?i=6392
  [52] = https://curl.se/bug/?i=6378
  [53] = https://curl.se/bug/?i=6294
+ [54] = https://curl.se/bug/?i=6408
  [55] = https://curl.se/bug/?i=6385
  [56] = https://curl.se/bug/?i=6380
  [57] = https://curl.se/bug/?i=6375
+ [60] = https://curl.se/bug/?i=6312
+ [62] = https://curl.se/bug/?i=6413
+ [63] = https://curl.se/bug/?i=6411
