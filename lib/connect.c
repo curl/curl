@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -445,7 +445,7 @@ static CURLcode bindlocal(struct connectdata *conn,
     }
   }
 #ifdef IP_BIND_ADDRESS_NO_PORT
-  setsockopt(sockfd, SOL_IP, IP_BIND_ADDRESS_NO_PORT, &on, sizeof(on));
+  (void)setsockopt(sockfd, SOL_IP, IP_BIND_ADDRESS_NO_PORT, &on, sizeof(on));
 #endif
   for(;;) {
     if(bind(sockfd, sock, sizeof_sa) >= 0) {
@@ -1578,18 +1578,17 @@ CURLcode Curl_socket(struct connectdata *conn,
   if(addr->socktype == SOCK_DGRAM) {
     int one = 1;
     switch(addr->family) {
-      case AF_INET:
-        setsockopt(*sockfd, SOL_IP, IP_RECVERR, &one, sizeof(one));
-        break;
-      case AF_INET6:
-        setsockopt(*sockfd, SOL_IPV6, IPV6_RECVERR, &one, sizeof(one));
-        break;
+    case AF_INET:
+      (void)setsockopt(*sockfd, SOL_IP, IP_RECVERR, &one, sizeof(one));
+      break;
+    case AF_INET6:
+      (void)setsockopt(*sockfd, SOL_IPV6, IPV6_RECVERR, &one, sizeof(one));
+      break;
     }
   }
 #endif
 
   return CURLE_OK;
-
 }
 
 /*
