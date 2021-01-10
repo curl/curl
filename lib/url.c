@@ -1541,6 +1541,11 @@ CURLcode Curl_idnconvert_hostname(struct connectdata *conn,
       int flags = IDN2_NFC_INPUT;
 #endif
       int rc = idn2_lookup_ul((const char *)host->name, &ace_hostname, flags);
+      if(rc != IDN2_OK)
+        /* fallback to TR46 Transitional mode for better IDNA2003
+           compatibility */
+        rc = idn2_lookup_ul((const char *)host->name, &ace_hostname,
+                            IDN2_TRANSITIONAL);
       if(rc == IDN2_OK) {
         host->encalloc = (char *)ace_hostname;
         /* change the name pointer to point to the encoded hostname */
