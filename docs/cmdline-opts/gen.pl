@@ -369,8 +369,11 @@ sub listhelp {
 
         my $line = sprintf "  {\"%s\",\n   \"%s\",\n   %s},\n", $opt, $desc, $bitmask;
 
-        if(length($opt) + length($desc) > 78) {
-            print STDERR "WARN: the --$long line is too long\n";
+        if(length($opt) > 78) {
+            print STDERR "WARN: the --$long name is too long\n";
+        }
+        else if(length($desc) > 78) {
+            print STDERR "WARN: the --$long description is too long\n";
         }
         print $line;
     }
