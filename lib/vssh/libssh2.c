@@ -2223,7 +2223,6 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
-      readdir_len = (size_t) rc;
       Curl_dyn_free(&sshc->readdir_link);
 
       /* append filename and extra output */
