@@ -337,6 +337,7 @@ if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_SCHANNEL OR CMAKE_USE_MBEDTLS OR CM
   set(openssl_default OFF)
 endif()
 option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default})
+option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
 
 count_true(enabled_ssl_options_count
   CMAKE_USE_SCHANNEL
