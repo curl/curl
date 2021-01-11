@@ -1589,9 +1589,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       process_pending_handles(multi); /* multiplexed */
     }
 
-    if(data->conn && data->mstate > CURLM_STATE_CONNECT &&
+    if(data->mstate > CURLM_STATE_CONNECT &&
        data->mstate < CURLM_STATE_COMPLETED) {
       /* Make sure we set the connection's current owner */
+      DEBUGASSERT(data->conn);
+      if(!data->conn)
+        return CURLM_INTERNAL_ERROR;
       data->conn->data = data;
     }
 
