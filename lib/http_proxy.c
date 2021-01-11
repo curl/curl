@@ -489,9 +489,12 @@ static CURLcode CONNECT(struct connectdata *conn,
           }
           else
             s->keepon = KEEPON_DONE;
-          if(!s->cl)
+
+          if(s->keepon == KEEPON_DONE && !s->cl)
             /* we did the full CONNECT treatment, go to COMPLETE */
             s->tunnel_state = TUNNEL_COMPLETE;
+
+          DEBUGASSERT(s->keepon == KEEPON_IGNORE || s->keepon == KEEPON_DONE);
           continue;
         }
 
