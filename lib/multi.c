@@ -1916,7 +1916,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
               if(wc->state == CURLWC_DONE || wc->state == CURLWC_SKIP) {
                 /* skip some states if it is important */
                 multi_done(data, CURLE_OK, FALSE);
-                multistate(data, CURLM_STATE_DONE);
+
+                /* if there's no connection left, skip the DONE state */
+                multistate(data, data->conn ?
+                           CURLM_STATE_DONE : CURLM_STATE_COMPLETED);
                 rc = CURLM_CALL_MULTI_PERFORM;
                 break;
               }
