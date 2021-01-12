@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -133,6 +133,9 @@ static const struct helptxt helptext[] = {
   {"-a, --append",
    "Append to target file when uploading",
    CURLHELP_FTP | CURLHELP_SFTP},
+  {"    --aws-sigv4 <provider1[:provider2]>",
+   "Use AWS V4 signature authentication",
+   CURLHELP_AUTH | CURLHELP_HTTP},
   {"    --basic",
    "Use HTTP Basic Authentication",
    CURLHELP_AUTH},
@@ -183,7 +186,7 @@ static const struct helptxt helptext[] = {
    CURLHELP_CURL},
   {"    --create-file-mode",
    "File mode for created files",
-   CURLHELP_SFTP | CURLHELP_SCP | CURLHELP_FILE},
+   CURLHELP_SFTP | CURLHELP_SCP | CURLHELP_FILE | CURLHELP_UPLOAD},
   {"    --crlf",
    "Convert LF to CRLF in upload",
    CURLHELP_FTP | CURLHELP_SMTP},
@@ -646,7 +649,7 @@ static const struct helptxt helptext[] = {
   {"    --request-target",
    "Specify the target for this request",
    CURLHELP_HTTP},
-  {"    --resolve <host:port:addr[,addr]...>",
+  {"    --resolve <[+]host:port:addr[,addr]...>",
    "Resolve the host+port to this address",
    CURLHELP_CONNECTION},
   {"    --retry <num>",
@@ -817,8 +820,6 @@ static const struct helptxt helptext[] = {
   {"-A, --user-agent <name>",
    "Send User-Agent <name> to server",
    CURLHELP_IMPORTANT | CURLHELP_HTTP},
-  {"    --aws-sigv4 <provider1[:provider2]>",
-   "Use HTTP AWS V4 Signature", CURLHELP_HTTP},
   {"-v, --verbose",
    "Make the operation more talkative",
    CURLHELP_IMPORTANT | CURLHELP_VERBOSE},
