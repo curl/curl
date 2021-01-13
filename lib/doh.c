@@ -187,7 +187,7 @@ doh_write_cb(const void *contents, size_t size, size_t nmemb, void *userp)
 }
 
 /* called from multi.c when this DOH transfer is complete */
-static int Curl_doh_done(struct Curl_easy *doh, CURLcode result)
+static int doh_done(struct Curl_easy *doh, CURLcode result)
 {
   struct Curl_easy *data = doh->set.dohfor;
   /* so one of the DOH request done for the 'data' transfer is now complete! */
@@ -354,7 +354,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
         data->set.str[STRING_SSL_EC_CURVES]);
     }
 
-    doh->set.fmultidone = Curl_doh_done;
+    doh->set.fmultidone = doh_done;
     doh->set.dohfor = data; /* identify for which transfer this is done */
     p->easy = doh;
 
