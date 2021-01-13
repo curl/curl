@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -783,12 +783,12 @@ static ssize_t mbed_send(struct connectdata *conn, int sockindex,
   return ret;
 }
 
-static void Curl_mbedtls_close_all(struct Curl_easy *data)
+static void mbedtls_close_all(struct Curl_easy *data)
 {
   (void)data;
 }
 
-static void Curl_mbedtls_close(struct connectdata *conn, int sockindex)
+static void mbedtls_close(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -831,13 +831,13 @@ static ssize_t mbed_recv(struct connectdata *conn, int num,
   return len;
 }
 
-static void Curl_mbedtls_session_free(void *ptr)
+static void mbedtls_session_free(void *ptr)
 {
   mbedtls_ssl_session_free(ptr);
   free(ptr);
 }
 
-static size_t Curl_mbedtls_version(char *buffer, size_t size)
+static size_t mbedtls_version(char *buffer, size_t size)
 {
 #ifdef MBEDTLS_VERSION_C
   /* if mbedtls_version_get_number() is available it is better */
@@ -849,8 +849,8 @@ static size_t Curl_mbedtls_version(char *buffer, size_t size)
 #endif
 }
 
-static CURLcode Curl_mbedtls_random(struct Curl_easy *data,
-                                    unsigned char *entropy, size_t length)
+static CURLcode mbedtls_random(struct Curl_easy *data,
+                               unsigned char *entropy, size_t length)
 {
 #if defined(MBEDTLS_CTR_DRBG_C)
   int ret = -1;
@@ -1011,14 +1011,14 @@ mbed_connect_common(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static CURLcode Curl_mbedtls_connect_nonblocking(struct connectdata *conn,
-                                                 int sockindex, bool *done)
+static CURLcode mbedtls_connect_nonblocking(struct connectdata *conn,
+                                            int sockindex, bool *done)
 {
   return mbed_connect_common(conn, sockindex, TRUE, done);
 }
 
 
-static CURLcode Curl_mbedtls_connect(struct connectdata *conn, int sockindex)
+static CURLcode mbedtls_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode retcode;
   bool done = FALSE;
@@ -1036,28 +1036,28 @@ static CURLcode Curl_mbedtls_connect(struct connectdata *conn, int sockindex)
  * return 0 error initializing SSL
  * return 1 SSL initialized successfully
  */
-static int Curl_mbedtls_init(void)
+static int mbedtls_init(void)
 {
   return Curl_mbedtlsthreadlock_thread_setup();
 }
 
-static void Curl_mbedtls_cleanup(void)
+static void mbedtls_cleanup(void)
 {
   (void)Curl_mbedtlsthreadlock_thread_cleanup();
 }
 
-static bool Curl_mbedtls_data_pending(const struct connectdata *conn,
-                                      int sockindex)
+static bool mbedtls_data_pending(const struct connectdata *conn,
+                                 int sockindex)
 {
   const struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   return mbedtls_ssl_get_bytes_avail(&backend->ssl) != 0;
 }
 
-static CURLcode Curl_mbedtls_sha256sum(const unsigned char *input,
-                                    size_t inputlen,
-                                    unsigned char *sha256sum,
-                                    size_t sha256len UNUSED_PARAM)
+static CURLcode mbedtls_sha256sum(const unsigned char *input,
+                                  size_t inputlen,
+                                  unsigned char *sha256sum,
+                                  size_t sha256len UNUSED_PARAM)
 {
   (void)sha256len;
 #if MBEDTLS_VERSION_NUMBER < 0x02070000
@@ -1070,8 +1070,8 @@ static CURLcode Curl_mbedtls_sha256sum(const unsigned char *input,
   return CURLE_OK;
 }
 
-static void *Curl_mbedtls_get_internals(struct ssl_connect_data *connssl,
-                                        CURLINFO info UNUSED_PARAM)
+static void *mbedtls_get_internals(struct ssl_connect_data *connssl,
+                                   CURLINFO info UNUSED_PARAM)
 {
   struct ssl_backend_data *backend = connssl->backend;
   (void)info;
@@ -1087,26 +1087,26 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
 
   sizeof(struct ssl_backend_data),
 
-  Curl_mbedtls_init,                /* init */
-  Curl_mbedtls_cleanup,             /* cleanup */
-  Curl_mbedtls_version,             /* version */
+  mbedtls_init,                     /* init */
+  mbedtls_cleanup,                  /* cleanup */
+  mbedtls_version,                  /* version */
   Curl_none_check_cxn,              /* check_cxn */
   Curl_none_shutdown,               /* shutdown */
-  Curl_mbedtls_data_pending,        /* data_pending */
-  Curl_mbedtls_random,              /* random */
+  mbedtls_data_pending,             /* data_pending */
+  mbedtls_random,                   /* random */
   Curl_none_cert_status_request,    /* cert_status_request */
-  Curl_mbedtls_connect,             /* connect */
-  Curl_mbedtls_connect_nonblocking, /* connect_nonblocking */
-  Curl_mbedtls_get_internals,       /* get_internals */
-  Curl_mbedtls_close,               /* close_one */
-  Curl_mbedtls_close_all,           /* close_all */
-  Curl_mbedtls_session_free,        /* session_free */
+  mbedtls_connect,                  /* connect */
+  mbedtls_connect_nonblocking,      /* connect_nonblocking */
+  mbedtls_get_internals,            /* get_internals */
+  mbedtls_close,                    /* close_one */
+  mbedtls_close_all,                /* close_all */
+  mbedtls_session_free,             /* session_free */
   Curl_none_set_engine,             /* set_engine */
   Curl_none_set_engine_default,     /* set_engine_default */
   Curl_none_engines_list,           /* engines_list */
   Curl_none_false_start,            /* false_start */
   Curl_none_md5sum,                 /* md5sum */
-  Curl_mbedtls_sha256sum            /* sha256sum */
+  mbedtls_sha256sum                 /* sha256sum */
 };
 
 #endif /* USE_MBEDTLS */
