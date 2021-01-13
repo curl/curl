@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -410,7 +410,7 @@ static bool rand_enough(void)
   return (0 != RAND_status()) ? TRUE : FALSE;
 }
 
-static CURLcode Curl_ossl_seed(struct Curl_easy *data)
+static CURLcode ossl_seed(struct Curl_easy *data)
 {
   /* we have the "SSL is seeded" boolean static to prevent multiple
      time-consuming seedings in vain */
@@ -572,8 +572,8 @@ static bool is_pkcs11_uri(const char *string)
 
 #endif
 
-static CURLcode Curl_ossl_set_engine(struct Curl_easy *data,
-                                     const char *engine);
+static CURLcode ossl_set_engine(struct Curl_easy *data,
+                                const char *engine);
 
 static int
 SSL_CTX_use_certificate_bio(SSL_CTX *ctx, BIO *in, int type,
@@ -773,7 +773,7 @@ int cert_stuff(struct connectdata *conn,
          * cert_file is a PKCS#11 URI */
         if(!data->state.engine) {
           if(is_pkcs11_uri(cert_file)) {
-            if(Curl_ossl_set_engine(data, "pkcs11") != CURLE_OK) {
+            if(ossl_set_engine(data, "pkcs11") != CURLE_OK) {
               return 0;
             }
           }
@@ -972,7 +972,7 @@ int cert_stuff(struct connectdata *conn,
          * key_file is a PKCS#11 URI */
         if(!data->state.engine) {
           if(is_pkcs11_uri(key_file)) {
-            if(Curl_ossl_set_engine(data, "pkcs11") != CURLE_OK) {
+            if(ossl_set_engine(data, "pkcs11") != CURLE_OK) {
               return 0;
             }
           }
@@ -1113,7 +1113,7 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
  * @retval 0 error initializing SSL
  * @retval 1 SSL initialized successfully
  */
-static int Curl_ossl_init(void)
+static int ossl_init(void)
 {
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) &&  \
   !defined(LIBRESSL_VERSION_NUMBER)
@@ -1168,7 +1168,7 @@ static int Curl_ossl_init(void)
 }
 
 /* Global cleanup */
-static void Curl_ossl_cleanup(void)
+static void ossl_cleanup(void)
 {
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
     !defined(LIBRESSL_VERSION_NUMBER)
@@ -1212,7 +1212,7 @@ static void Curl_ossl_cleanup(void)
  *     0 means the connection has been closed
  *    -1 means the connection status is unknown
  */
-static int Curl_ossl_check_cxn(struct connectdata *conn)
+static int ossl_check_cxn(struct connectdata *conn)
 {
   /* SSL_peek takes data out of the raw recv buffer without peeking so we use
      recv MSG_PEEK instead. Bug #795 */
@@ -1258,8 +1258,8 @@ static int Curl_ossl_check_cxn(struct connectdata *conn)
 
 /* Selects an OpenSSL crypto engine
  */
-static CURLcode Curl_ossl_set_engine(struct Curl_easy *data,
-                                     const char *engine)
+static CURLcode ossl_set_engine(struct Curl_easy *data,
+                                const char *engine)
 {
 #ifdef USE_OPENSSL_ENGINE
   ENGINE *e;
@@ -1304,7 +1304,7 @@ static CURLcode Curl_ossl_set_engine(struct Curl_easy *data,
 
 /* Sets engine as default for all SSL operations
  */
-static CURLcode Curl_ossl_set_engine_default(struct Curl_easy *data)
+static CURLcode ossl_set_engine_default(struct Curl_easy *data)
 {
 #ifdef USE_OPENSSL_ENGINE
   if(data->state.engine) {
@@ -1326,7 +1326,7 @@ static CURLcode Curl_ossl_set_engine_default(struct Curl_easy *data)
 
 /* Return list of OpenSSL crypto engine names.
  */
-static struct curl_slist *Curl_ossl_engines_list(struct Curl_easy *data)
+static struct curl_slist *ossl_engines_list(struct Curl_easy *data)
 {
   struct curl_slist *list = NULL;
 #ifdef USE_OPENSSL_ENGINE
@@ -1346,7 +1346,7 @@ static struct curl_slist *Curl_ossl_engines_list(struct Curl_easy *data)
   return list;
 }
 
-static void ossl_close(struct ssl_connect_data *connssl)
+static void ossl_closeone(struct ssl_connect_data *connssl)
 {
   struct ssl_backend_data *backend = connssl->backend;
   if(backend->handle) {
@@ -1365,11 +1365,11 @@ static void ossl_close(struct ssl_connect_data *connssl)
 /*
  * This function is called when an SSL connection is closed.
  */
-static void Curl_ossl_close(struct connectdata *conn, int sockindex)
+static void ossl_close(struct connectdata *conn, int sockindex)
 {
-  ossl_close(&conn->ssl[sockindex]);
+  ossl_closeone(&conn->ssl[sockindex]);
 #ifndef CURL_DISABLE_PROXY
-  ossl_close(&conn->proxy_ssl[sockindex]);
+  ossl_closeone(&conn->proxy_ssl[sockindex]);
 #endif
 }
 
@@ -1377,7 +1377,7 @@ static void Curl_ossl_close(struct connectdata *conn, int sockindex)
  * This function is called to shut down the SSL layer but keep the
  * socket open (CCC - Clear Command Channel)
  */
-static int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
+static int ossl_shutdown(struct connectdata *conn, int sockindex)
 {
   int retval = 0;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -1478,7 +1478,7 @@ static int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
   return retval;
 }
 
-static void Curl_ossl_session_free(void *ptr)
+static void ossl_session_free(void *ptr)
 {
   /* free the ID */
   SSL_SESSION_free(ptr);
@@ -1488,7 +1488,7 @@ static void Curl_ossl_session_free(void *ptr)
  * This function is called when the 'data' struct is going away. Close
  * down everything and free all resources!
  */
-static void Curl_ossl_close_all(struct Curl_easy *data)
+static void ossl_close_all(struct Curl_easy *data)
 {
 #ifdef USE_OPENSSL_ENGINE
   if(data->state.engine) {
@@ -2528,7 +2528,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
 
   /* Make funny stuff to get random input */
-  result = Curl_ossl_seed(data);
+  result = ossl_seed(data);
   if(result)
     return result;
 
@@ -4091,14 +4091,14 @@ static CURLcode ossl_connect_common(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static CURLcode Curl_ossl_connect_nonblocking(struct connectdata *conn,
-                                              int sockindex,
-                                              bool *done)
+static CURLcode ossl_connect_nonblocking(struct connectdata *conn,
+                                         int sockindex,
+                                         bool *done)
 {
   return ossl_connect_common(conn, sockindex, TRUE, done);
 }
 
-static CURLcode Curl_ossl_connect(struct connectdata *conn, int sockindex)
+static CURLcode ossl_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
@@ -4112,8 +4112,8 @@ static CURLcode Curl_ossl_connect(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-static bool Curl_ossl_data_pending(const struct connectdata *conn,
-                                   int connindex)
+static bool ossl_data_pending(const struct connectdata *conn,
+                              int connindex)
 {
   const struct ssl_connect_data *connssl = &conn->ssl[connindex];
   if(connssl->backend->handle && SSL_pending(connssl->backend->handle))
@@ -4128,7 +4128,7 @@ static bool Curl_ossl_data_pending(const struct connectdata *conn,
   return FALSE;
 }
 
-static size_t Curl_ossl_version(char *buffer, size_t size);
+static size_t ossl_version(char *buffer, size_t size);
 
 static ssize_t ossl_send(struct connectdata *conn,
                          int sockindex,
@@ -4191,7 +4191,7 @@ static ssize_t ossl_send(struct connectdata *conn,
 #endif
         ) {
         char ver[120];
-        Curl_ossl_version(ver, 120);
+        ossl_version(ver, 120);
         failf(conn->data, "Error: %s does not support double SSL tunneling.",
               ver);
       }
@@ -4298,7 +4298,7 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
   return nread;
 }
 
-static size_t Curl_ossl_version(char *buffer, size_t size)
+static size_t ossl_version(char *buffer, size_t size)
 {
 #ifdef LIBRESSL_VERSION_NUMBER
 #if LIBRESSL_VERSION_NUMBER < 0x2070100fL
@@ -4369,12 +4369,12 @@ static size_t Curl_ossl_version(char *buffer, size_t size)
 }
 
 /* can be called with data == NULL */
-static CURLcode Curl_ossl_random(struct Curl_easy *data,
-                                 unsigned char *entropy, size_t length)
+static CURLcode ossl_random(struct Curl_easy *data,
+                            unsigned char *entropy, size_t length)
 {
   int rc;
   if(data) {
-    if(Curl_ossl_seed(data)) /* Initiate the seed if not already done */
+    if(ossl_seed(data)) /* Initiate the seed if not already done */
       return CURLE_FAILED_INIT; /* couldn't seed for some reason */
   }
   else {
@@ -4386,10 +4386,10 @@ static CURLcode Curl_ossl_random(struct Curl_easy *data,
   return (rc == 1 ? CURLE_OK : CURLE_FAILED_INIT);
 }
 
-static CURLcode Curl_ossl_md5sum(unsigned char *tmp, /* input */
-                                 size_t tmplen,
-                                 unsigned char *md5sum /* output */,
-                                 size_t unused)
+static CURLcode ossl_md5sum(unsigned char *tmp, /* input */
+                            size_t tmplen,
+                            unsigned char *md5sum /* output */,
+                            size_t unused)
 {
   EVP_MD_CTX *mdctx;
   unsigned int len = 0;
@@ -4406,10 +4406,10 @@ static CURLcode Curl_ossl_md5sum(unsigned char *tmp, /* input */
 }
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
-static CURLcode Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
-                                size_t tmplen,
-                                unsigned char *sha256sum /* output */,
-                                size_t unused)
+static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
+                               size_t tmplen,
+                               unsigned char *sha256sum /* output */,
+                               size_t unused)
 {
   EVP_MD_CTX *mdctx;
   unsigned int len = 0;
@@ -4426,7 +4426,7 @@ static CURLcode Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
 }
 #endif
 
-static bool Curl_ossl_cert_status_request(void)
+static bool ossl_cert_status_request(void)
 {
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
     !defined(OPENSSL_NO_OCSP)
@@ -4436,8 +4436,8 @@ static bool Curl_ossl_cert_status_request(void)
 #endif
 }
 
-static void *Curl_ossl_get_internals(struct ssl_connect_data *connssl,
-                                     CURLINFO info)
+static void *ossl_get_internals(struct ssl_connect_data *connssl,
+                                CURLINFO info)
 {
   /* Legacy: CURLINFO_TLS_SESSION must return an SSL_CTX pointer. */
   struct ssl_backend_data *backend = connssl->backend;
@@ -4459,29 +4459,29 @@ const struct Curl_ssl Curl_ssl_openssl = {
 
   sizeof(struct ssl_backend_data),
 
-  Curl_ossl_init,                /* init */
-  Curl_ossl_cleanup,             /* cleanup */
-  Curl_ossl_version,             /* version */
-  Curl_ossl_check_cxn,           /* check_cxn */
-  Curl_ossl_shutdown,            /* shutdown */
-  Curl_ossl_data_pending,        /* data_pending */
-  Curl_ossl_random,              /* random */
-  Curl_ossl_cert_status_request, /* cert_status_request */
-  Curl_ossl_connect,             /* connect */
-  Curl_ossl_connect_nonblocking, /* connect_nonblocking */
-  Curl_ossl_get_internals,       /* get_internals */
-  Curl_ossl_close,               /* close_one */
-  Curl_ossl_close_all,           /* close_all */
-  Curl_ossl_session_free,        /* session_free */
-  Curl_ossl_set_engine,          /* set_engine */
-  Curl_ossl_set_engine_default,  /* set_engine_default */
-  Curl_ossl_engines_list,        /* engines_list */
-  Curl_none_false_start,         /* false_start */
-  Curl_ossl_md5sum,              /* md5sum */
+  ossl_init,                /* init */
+  ossl_cleanup,             /* cleanup */
+  ossl_version,             /* version */
+  ossl_check_cxn,           /* check_cxn */
+  ossl_shutdown,            /* shutdown */
+  ossl_data_pending,        /* data_pending */
+  ossl_random,              /* random */
+  ossl_cert_status_request, /* cert_status_request */
+  ossl_connect,             /* connect */
+  ossl_connect_nonblocking, /* connect_nonblocking */
+  ossl_get_internals,       /* get_internals */
+  ossl_close,               /* close_one */
+  ossl_close_all,           /* close_all */
+  ossl_session_free,        /* session_free */
+  ossl_set_engine,          /* set_engine */
+  ossl_set_engine_default,  /* set_engine_default */
+  ossl_engines_list,        /* engines_list */
+  Curl_none_false_start,    /* false_start */
+  ossl_md5sum,              /* md5sum */
 #if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
-  Curl_ossl_sha256sum            /* sha256sum */
+  ossl_sha256sum            /* sha256sum */
 #else
-  NULL                           /* sha256sum */
+  NULL                      /* sha256sum */
 #endif
 };
 
