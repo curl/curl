@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -77,14 +77,14 @@
 #ifdef CURL_DOES_CONVERSIONS
 /* Check for an ASCII hex digit.
    We avoid the use of ISXDIGIT to accommodate non-ASCII hosts. */
-static bool Curl_isxdigit_ascii(char digit)
+static bool isxdigit_ascii(char digit)
 {
   return (digit >= 0x30 && digit <= 0x39) /* 0-9 */
-        || (digit >= 0x41 && digit <= 0x46) /* A-F */
-        || (digit >= 0x61 && digit <= 0x66); /* a-f */
+    || (digit >= 0x41 && digit <= 0x46) /* A-F */
+    || (digit >= 0x61 && digit <= 0x66); /* a-f */
 }
 #else
-#define Curl_isxdigit_ascii(x) Curl_isxdigit(x)
+#define isxdigit_ascii(x) Curl_isxdigit(x)
 #endif
 
 void Curl_httpchunk_init(struct connectdata *conn)
@@ -136,7 +136,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
   while(length) {
     switch(ch->state) {
     case CHUNK_HEX:
-      if(Curl_isxdigit_ascii(*datap)) {
+      if(isxdigit_ascii(*datap)) {
         if(ch->hexindex < MAXNUM_SIZE) {
           ch->hexbuffer[ch->hexindex] = *datap;
           datap++;
