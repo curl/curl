@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -133,8 +133,8 @@ void Curl_resolver_global_cleanup(void)
 }
 
 
-static void Curl_ares_sock_state_cb(void *data, ares_socket_t socket_fd,
-                                    int readable, int writable)
+static void sock_state_cb(void *data, ares_socket_t socket_fd,
+                          int readable, int writable)
 {
   struct Curl_easy *easy = data;
   if(!readable && !writable) {
@@ -155,7 +155,7 @@ CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
   int status;
   struct ares_options options;
   int optmask = ARES_OPT_SOCK_STATE_CB;
-  options.sock_state_cb = Curl_ares_sock_state_cb;
+  options.sock_state_cb = sock_state_cb;
   options.sock_state_cb_data = easy;
   status = ares_init_options((ares_channel*)resolver, &options, optmask);
   if(status != ARES_SUCCESS) {
