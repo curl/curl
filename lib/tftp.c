@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -303,7 +303,7 @@ static unsigned short getrpacketblock(const struct tftp_packet *packet)
   return (unsigned short)((packet->data[2] << 8) | packet->data[3]);
 }
 
-static size_t Curl_strnlen(const char *string, size_t maxlen)
+static size_t tftp_strnlen(const char *string, size_t maxlen)
 {
   const char *end = memchr(string, '\0', maxlen);
   return end ? (size_t) (end - string) : maxlen;
@@ -314,14 +314,14 @@ static const char *tftp_option_get(const char *buf, size_t len,
 {
   size_t loc;
 
-  loc = Curl_strnlen(buf, len);
+  loc = tftp_strnlen(buf, len);
   loc++; /* NULL term */
 
   if(loc >= len)
     return NULL;
   *option = buf;
 
-  loc += Curl_strnlen(buf + loc, len-loc);
+  loc += tftp_strnlen(buf + loc, len-loc);
   loc++; /* NULL term */
 
   if(loc > len)
@@ -1171,7 +1171,7 @@ static CURLcode tftp_receive_packet(struct connectdata *conn)
       char *str = (char *)state->rpacket.data + 4;
       size_t strn = state->rbytes - 4;
       state->error = (tftp_error_t)error;
-      if(Curl_strnlen(str, strn) < strn)
+      if(tftp_strnlen(str, strn) < strn)
         infof(data, "TFTP error: %s\n", str);
       break;
     }
