@@ -125,8 +125,8 @@ CURLcode Curl_get_upload_buffer(struct Curl_easy *data)
  * This function will be called to loop through the trailers buffer
  * until no more data is available for sending.
  */
-static size_t Curl_trailers_read(char *buffer, size_t size, size_t nitems,
-                                 void *raw)
+static size_t trailers_read(char *buffer, size_t size, size_t nitems,
+                            void *raw)
 {
   struct Curl_easy *data = (struct Curl_easy *)raw;
   struct dynbuf *trailers_buf = &data->state.trailers_buf;
@@ -142,7 +142,7 @@ static size_t Curl_trailers_read(char *buffer, size_t size, size_t nitems,
   return to_copy;
 }
 
-static size_t Curl_trailers_left(void *raw)
+static size_t trailers_left(void *raw)
 {
   struct Curl_easy *data = (struct Curl_easy *)raw;
   struct dynbuf *trailers_buf = &data->state.trailers_buf;
@@ -231,7 +231,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
        simply return to the previous point in the state machine as if
        nothing happened.
        */
-    readfunc = Curl_trailers_read;
+    readfunc = trailers_read;
     extra_data = (void *)data;
   }
   else
@@ -367,7 +367,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
 
 #ifndef CURL_DISABLE_HTTP
     if(data->state.trailers_state == TRAILERS_SENDING &&
-       !Curl_trailers_left(data)) {
+       !trailers_left(data)) {
       Curl_dyn_free(&data->state.trailers_buf);
       data->state.trailers_state = TRAILERS_DONE;
       data->set.trailer_data = NULL;
