@@ -610,10 +610,10 @@ static void close_one(struct ssl_connect_data *connssl, struct Curl_easy *data,
 }
 
 
-static ssize_t real_gskit_send(struct Curl_easy *data,
-                               struct connectdata *conn, int sockindex,
-                               const void *mem, size_t len, CURLcode *curlcode)
+static ssize_t gskit_send(struct connectdata *conn, int sockindex,
+                          const void *mem, size_t len, CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CURLcode cc = CURLE_SEND_ERROR;
   int written;
@@ -634,17 +634,11 @@ static ssize_t real_gskit_send(struct Curl_easy *data,
   return (ssize_t) written; /* number of bytes */
 }
 
-static ssize_t gskit_send(struct connectdata *conn, int sockindex,
-                          const void *mem, size_t len, CURLcode *curlcode)
-{
-  return real_gskit_send(conn->data, conn, sockindex, mem, len, curlcode);
-}
 
-
-static ssize_t real_gskit_recv(struct Curl_easy *data,
-                               struct connectdata *conn, int num, char *buf,
+static ssize_t gskit_recv(struct Curl_easy *data, int num, char *buf,
                                size_t buffersize, CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[num];
   int nread;
   CURLcode cc = CURLE_RECV_ERROR;
@@ -666,12 +660,6 @@ static ssize_t real_gskit_recv(struct Curl_easy *data,
     break;
   }
   return (ssize_t) nread;
-}
-
-static ssize_t gskit_recv(struct connectdata *conn, int num, char *buf,
-                          size_t buffersize, CURLcode *curlcode)
-{
-  return real_gskit_recv(conn->data, conn, num, buf, buffersize, curlcode);
 }
 
 static CURLcode
