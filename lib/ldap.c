@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -126,7 +126,7 @@ static void _ldap_free_urldesc(LDAPURLDesc *ludp);
 #endif
 
 
-static CURLcode Curl_ldap(struct connectdata *conn, bool *done);
+static CURLcode ldap_do(struct connectdata *conn, bool *done);
 
 /*
  * LDAP protocol handler.
@@ -135,7 +135,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done);
 const struct Curl_handler Curl_handler_ldap = {
   "LDAP",                               /* scheme */
   ZERO_NULL,                            /* setup_connection */
-  Curl_ldap,                            /* do_it */
+  ldap_do,                              /* do_it */
   ZERO_NULL,                            /* done */
   ZERO_NULL,                            /* do_more */
   ZERO_NULL,                            /* connect_it */
@@ -162,7 +162,7 @@ const struct Curl_handler Curl_handler_ldap = {
 const struct Curl_handler Curl_handler_ldaps = {
   "LDAPS",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
-  Curl_ldap,                            /* do_it */
+  ldap_do,                              /* do_it */
   ZERO_NULL,                            /* done */
   ZERO_NULL,                            /* do_more */
   ZERO_NULL,                            /* connect_it */
@@ -266,7 +266,7 @@ static int ldap_win_bind(struct connectdata *conn, LDAP *server,
 #endif
 
 
-static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
+static CURLcode ldap_do(struct connectdata *conn, bool *done)
 {
   CURLcode result = CURLE_OK;
   int rc = 0;
