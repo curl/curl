@@ -58,7 +58,7 @@ static CURLcode https_proxy_connect(struct connectdata *conn, int sockindex)
   if(!conn->bits.proxy_ssl_connected[sockindex]) {
     /* perform SSL initialization for this socket */
     result =
-      Curl_ssl_connect_nonblocking(conn, sockindex,
+      Curl_ssl_connect_nonblocking(conn->data, conn, sockindex,
                                    &conn->bits.proxy_ssl_connected[sockindex]);
     if(result)
       /* a failed connection is marked for closure to prevent (bad) re-use or

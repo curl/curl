@@ -610,10 +610,10 @@ static void close_one(struct ssl_connect_data *connssl, struct Curl_easy *data,
 }
 
 
-static ssize_t real_gskit_send(struct Curl_easy *data,
-                               struct connectdata *conn, int sockindex,
-                               const void *mem, size_t len, CURLcode *curlcode)
+static ssize_t gskit_send(struct connectdata *conn, int sockindex,
+                          const void *mem, size_t len, CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CURLcode cc = CURLE_SEND_ERROR;
   int written;
@@ -634,17 +634,11 @@ static ssize_t real_gskit_send(struct Curl_easy *data,
   return (ssize_t) written; /* number of bytes */
 }
 
-static ssize_t gskit_send(struct connectdata *conn, int sockindex,
-                          const void *mem, size_t len, CURLcode *curlcode)
-{
-  return real_gskit_send(conn->data, conn, sockindex, mem, len, curlcode);
-}
 
-
-static ssize_t real_gskit_recv(struct Curl_easy *data,
-                               struct connectdata *conn, int num, char *buf,
+static ssize_t gskit_recv(struct Curl_easy *data, int num, char *buf,
                                size_t buffersize, CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[num];
   int nread;
   CURLcode cc = CURLE_RECV_ERROR;
@@ -666,12 +660,6 @@ static ssize_t real_gskit_recv(struct Curl_easy *data,
     break;
   }
   return (ssize_t) nread;
-}
-
-static ssize_t gskit_recv(struct connectdata *conn, int num, char *buf,
-                          size_t buffersize, CURLcode *curlcode)
-{
-  return real_gskit_recv(conn->data, conn, num, buf, buffersize, curlcode);
 }
 
 static CURLcode
@@ -1137,9 +1125,9 @@ static CURLcode gskit_connect_common(struct Curl_easy *data,
 }
 
 
-static CURLcode real_gskit_connect_nonblocking(struct Curl_easy *data,
-                                               struct connectdata *conn,
-                                               int sockindex, bool *done)
+static CURLcode gskit_connect_nonblocking(struct Curl_easy *data,
+                                          struct connectdata *conn,
+                                          int sockindex, bool *done)
 {
   CURLcode result;
 
@@ -1149,15 +1137,9 @@ static CURLcode real_gskit_connect_nonblocking(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode gskit_connect_nonblocking(struct connectdata *conn,
-                                          int sockindex, bool *done)
-{
-  return real_gskit_connect_nonblocking(conn->data, conn, sockindex, done);
-}
 
-
-static CURLcode real_gskit_connect(struct Curl_easy *data,
-                                   struct connectdata *conn, int sockindex)
+static CURLcode gskit_connect(struct Curl_easy *data,
+                              struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done;
@@ -1172,27 +1154,17 @@ static CURLcode real_gskit_connect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode gskit_connect(struct connectdata *conn, int sockindex)
-{
-  return real_gskit_connect(conn->data, conn, sockindex);
-}
 
-
-static void real_gskit_close(struct Curl_easy *data, struct connectdata *conn,
-                             int sockindex)
+static void gskit_close(struct Curl_easy *data, struct connectdata *conn,
+                        int sockindex)
 {
   close_one(&conn->ssl[sockindex], data, conn, sockindex);
   close_one(&conn->proxy_ssl[sockindex], data, conn, sockindex);
 }
 
-static void gskit_close(struct connectdata *conn, int sockindex)
-{
-  real_gskit_close(conn->data, conn, sockindex);
-}
 
-
-static int real_gskit_shutdown(struct Curl_easy *data,
-                               struct connectdata *conn, int sockindex)
+static int gskit_shutdown(struct Curl_easy *data,
+                          struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   int what;
@@ -1245,11 +1217,6 @@ static int real_gskit_shutdown(struct Curl_easy *data,
   }
 
   return rc;
-}
-
-static int gskit_shutdown(struct connectdata *conn, int sockindex)
-{
-  return real_gskit_shutdown(conn->data, conn, sockindex);
 }
 
 

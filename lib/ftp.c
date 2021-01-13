@@ -443,7 +443,7 @@ static CURLcode InitiateTransfer(struct Curl_easy *data)
     /* since we only have a plaintext TCP connection here, we must now
      * do the TLS stuff */
     infof(data, "Doing the SSL/TLS handshake on the data stream\n");
-    result = Curl_ssl_connect(conn, SECONDARYSOCKET);
+    result = Curl_ssl_connect(data, conn, SECONDARYSOCKET);
     if(result)
       return result;
   }
@@ -2734,7 +2734,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
 
       if((ftpcode == 234) || (ftpcode == 334)) {
         /* Curl_ssl_connect is BLOCKING */
-        result = Curl_ssl_connect(conn, FIRSTSOCKET);
+        result = Curl_ssl_connect(data, conn, FIRSTSOCKET);
         if(!result) {
           conn->bits.ftp_use_data_ssl = FALSE; /* clear-text data */
           conn->bits.ftp_use_control_ssl = TRUE; /* SSL on control */
@@ -2800,7 +2800,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
     case FTP_CCC:
       if(ftpcode < 500) {
         /* First shut down the SSL layer (note: this call will block) */
-        result = Curl_ssl_shutdown(conn, FIRSTSOCKET);
+        result = Curl_ssl_shutdown(data, conn, FIRSTSOCKET);
 
         if(result)
           failf(data, "Failed to clear the command channel (CCC)");
@@ -3138,7 +3138,7 @@ static CURLcode ftp_connect(struct Curl_easy *data,
 
   if(conn->handler->flags & PROTOPT_SSL) {
     /* BLOCKING */
-    result = Curl_ssl_connect(conn, FIRSTSOCKET);
+    result = Curl_ssl_connect(data, conn, FIRSTSOCKET);
     if(result)
       return result;
     conn->bits.ftp_use_control_ssl = TRUE;
@@ -3284,7 +3284,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     if(conn->ssl[SECONDARYSOCKET].use) {
       /* The secondary socket is using SSL so we must close down that part
          first before we close the socket for real */
-      Curl_ssl_close(conn, SECONDARYSOCKET);
+      Curl_ssl_close(data, conn, SECONDARYSOCKET);
 
       /* Note that we keep "use" set to TRUE since that (next) connection is
          still requested to use SSL */

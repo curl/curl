@@ -79,10 +79,9 @@ static int is_cr_or_lf(char c)
 
 static CURLcode add_certs_to_store(HCERTSTORE trust_store,
                                    const char *ca_file,
-                                   struct connectdata *conn)
+                                   struct Curl_easy *data)
 {
   CURLcode result;
-  struct Curl_easy *data = conn->data;
   HANDLE ca_file_handle = INVALID_HANDLE_VALUE;
   LARGE_INTEGER file_size;
   char *ca_file_buffer = NULL;
@@ -527,10 +526,10 @@ cleanup:
   return result;
 }
 
-CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
+CURLcode Curl_verify_certificate(struct Curl_easy *data,
+                                 struct connectdata *conn, int sockindex)
 {
   SECURITY_STATUS sspi_status;
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CURLcode result = CURLE_OK;
   CERT_CONTEXT *pCertContextServer = NULL;
@@ -584,7 +583,7 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
       }
       else {
         result = add_certs_to_store(trust_store, SSL_CONN_CONFIG(CAfile),
-                                    conn);
+                                    data);
       }
     }
 
@@ -675,7 +674,7 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
 
   if(result == CURLE_OK) {
     if(SSL_CONN_CONFIG(verifyhost)) {
-      result = verify_host(conn->data, pCertContextServer, conn_hostname);
+      result = verify_host(data, pCertContextServer, conn_hostname);
     }
   }
 
