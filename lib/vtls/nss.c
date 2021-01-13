@@ -587,7 +587,7 @@ static CURLcode nss_cache_crl(SECItem *crl_der)
     return CURLE_SSL_CRL_BADFILE;
   }
 
-  /* store the CRL item so that we can free it in Curl_nss_cleanup() */
+  /* store the CRL item so that we can free it in nss_cleanup() */
   if(insert_wrapped_ptr(&nss_crl_list, crl_der) != CURLE_OK) {
     if(SECSuccess == CERT_UncacheCRL(db, crl_der))
       SECITEM_FreeItem(crl_der, PR_TRUE);
@@ -1335,7 +1335,7 @@ static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
 
     infof(data, "Initializing NSS with certpath: %s\n", certpath);
     nss_context = NSS_InitContext(certpath, "", "", "", &initparams,
-            NSS_INIT_READONLY | NSS_INIT_PK11RELOAD);
+                                  NSS_INIT_READONLY | NSS_INIT_PK11RELOAD);
     free(certpath);
 
     if(nss_context != NULL)
@@ -1360,7 +1360,7 @@ static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
 }
 
 /* data might be NULL */
-static CURLcode nss_init(struct Curl_easy *data)
+static CURLcode nss_setup(struct Curl_easy *data)
 {
   char *cert_dir;
   struct_stat st;
@@ -1369,7 +1369,7 @@ static CURLcode nss_init(struct Curl_easy *data)
   if(initialized)
     return CURLE_OK;
 
-  /* list of all CRL items we need to destroy in Curl_nss_cleanup() */
+  /* list of all CRL items we need to destroy in nss_cleanup() */
   Curl_llist_init(&nss_crl_list, nss_destroy_crl_item);
 
   /* First we check if $SSL_DIR points to a valid dir */
@@ -1423,7 +1423,7 @@ static CURLcode nss_init(struct Curl_easy *data)
  * @retval 0 error initializing SSL
  * @retval 1 SSL initialized successfully
  */
-static int Curl_nss_init(void)
+static int nss_init(void)
 {
   /* curl_global_init() is not thread-safe so this test is ok */
   if(nss_initlock == NULL) {
@@ -1451,14 +1451,14 @@ CURLcode Curl_nss_force_init(struct Curl_easy *data)
   }
 
   PR_Lock(nss_initlock);
-  result = nss_init(data);
+  result = nss_setup(data);
   PR_Unlock(nss_initlock);
 
   return result;
 }
 
 /* Global cleanup */
-static void Curl_nss_cleanup(void)
+static void nss_cleanup(void)
 {
   /* This function isn't required to be threadsafe and this is only done
    * as a safety feature.
@@ -1498,7 +1498,7 @@ static void Curl_nss_cleanup(void)
  *     0 means the connection has been closed
  *    -1 means the connection status is unknown
  */
-static int Curl_nss_check_cxn(struct connectdata *conn)
+static int nss_check_cxn(struct connectdata *conn)
 {
   struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
   struct ssl_backend_data *backend = connssl->backend;
@@ -1517,7 +1517,7 @@ static int Curl_nss_check_cxn(struct connectdata *conn)
   return -1;  /* connection status unknown */
 }
 
-static void nss_close(struct ssl_connect_data *connssl)
+static void close_one(struct ssl_connect_data *connssl)
 {
   /* before the cleanup, check whether we are using a client certificate */
   struct ssl_backend_data *backend = connssl->backend;
@@ -1547,7 +1547,7 @@ static void nss_close(struct ssl_connect_data *connssl)
 /*
  * This function is called when an SSL connection is closed.
  */
-static void Curl_nss_close(struct connectdata *conn, int sockindex)
+static void nss_close(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 #ifndef CURL_DISABLE_PROXY
@@ -1573,9 +1573,9 @@ static void Curl_nss_close(struct connectdata *conn, int sockindex)
        a double close leading to crash. */
     connssl_proxy->backend->handle = NULL;
 
-  nss_close(connssl_proxy);
+  close_one(connssl_proxy);
 #endif
-  nss_close(connssl);
+  close_one(connssl);
 }
 
 /* return true if NSS can provide error code (and possibly msg) for the
@@ -1853,7 +1853,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   Curl_llist_init(&backend->obj_list, nss_destroy_object);
 
   PR_Lock(nss_initlock);
-  result = nss_init(conn->data);
+  result = nss_setup(conn->data);
   if(result) {
     PR_Unlock(nss_initlock);
     goto error;
@@ -2249,13 +2249,13 @@ static CURLcode nss_connect_common(struct connectdata *conn, int sockindex,
   return CURLE_OK;
 }
 
-static CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
+static CURLcode nss_connect(struct connectdata *conn, int sockindex)
 {
   return nss_connect_common(conn, sockindex, /* blocking */ NULL);
 }
 
-static CURLcode Curl_nss_connect_nonblocking(struct connectdata *conn,
-                                             int sockindex, bool *done)
+static CURLcode nss_connect_nonblocking(struct connectdata *conn,
+                                        int sockindex, bool *done)
 {
   return nss_connect_common(conn, sockindex, done);
 }
@@ -2339,7 +2339,7 @@ static ssize_t nss_recv(struct connectdata *conn,  /* connection data */
   return nread;
 }
 
-static size_t Curl_nss_version(char *buffer, size_t size)
+static size_t nss_version(char *buffer, size_t size)
 {
   return msnprintf(buffer, size, "NSS/%s", NSS_GetVersion());
 }
@@ -2352,9 +2352,9 @@ static int Curl_nss_seed(struct Curl_easy *data)
 }
 
 /* data might be NULL */
-static CURLcode Curl_nss_random(struct Curl_easy *data,
-                                unsigned char *entropy,
-                                size_t length)
+static CURLcode nss_random(struct Curl_easy *data,
+                           unsigned char *entropy,
+                           size_t length)
 {
   Curl_nss_seed(data);  /* Initiate the seed if not already done */
 
@@ -2365,10 +2365,10 @@ static CURLcode Curl_nss_random(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode Curl_nss_md5sum(unsigned char *tmp, /* input */
-                                size_t tmplen,
-                                unsigned char *md5sum, /* output */
-                                size_t md5len)
+static CURLcode nss_md5sum(unsigned char *tmp, /* input */
+                           size_t tmplen,
+                           unsigned char *md5sum, /* output */
+                           size_t md5len)
 {
   PK11Context *MD5pw = PK11_CreateDigestContext(SEC_OID_MD5);
   unsigned int MD5out;
@@ -2383,10 +2383,10 @@ static CURLcode Curl_nss_md5sum(unsigned char *tmp, /* input */
   return CURLE_OK;
 }
 
-static CURLcode Curl_nss_sha256sum(const unsigned char *tmp, /* input */
-                               size_t tmplen,
-                               unsigned char *sha256sum, /* output */
-                               size_t sha256len)
+static CURLcode nss_sha256sum(const unsigned char *tmp, /* input */
+                              size_t tmplen,
+                              unsigned char *sha256sum, /* output */
+                              size_t sha256len)
 {
   PK11Context *SHA256pw = PK11_CreateDigestContext(SEC_OID_SHA256);
   unsigned int SHA256out;
@@ -2401,7 +2401,7 @@ static CURLcode Curl_nss_sha256sum(const unsigned char *tmp, /* input */
   return CURLE_OK;
 }
 
-static bool Curl_nss_cert_status_request(void)
+static bool nss_cert_status_request(void)
 {
 #ifdef SSL_ENABLE_OCSP_STAPLING
   return TRUE;
@@ -2410,7 +2410,7 @@ static bool Curl_nss_cert_status_request(void)
 #endif
 }
 
-static bool Curl_nss_false_start(void)
+static bool nss_false_start(void)
 {
 #if NSSVERNUM >= 0x030f04 /* 3.15.4 */
   return TRUE;
@@ -2419,7 +2419,7 @@ static bool Curl_nss_false_start(void)
 #endif
 }
 
-static void *Curl_nss_get_internals(struct ssl_connect_data *connssl,
+static void *nss_get_internals(struct ssl_connect_data *connssl,
                                     CURLINFO info UNUSED_PARAM)
 {
   struct ssl_backend_data *backend = connssl->backend;
@@ -2437,28 +2437,28 @@ const struct Curl_ssl Curl_ssl_nss = {
 
   sizeof(struct ssl_backend_data),
 
-  Curl_nss_init,                /* init */
-  Curl_nss_cleanup,             /* cleanup */
-  Curl_nss_version,             /* version */
-  Curl_nss_check_cxn,           /* check_cxn */
+  nss_init,                     /* init */
+  nss_cleanup,                  /* cleanup */
+  nss_version,                  /* version */
+  nss_check_cxn,                /* check_cxn */
   /* NSS has no shutdown function provided and thus always fail */
   Curl_none_shutdown,           /* shutdown */
   Curl_none_data_pending,       /* data_pending */
-  Curl_nss_random,              /* random */
-  Curl_nss_cert_status_request, /* cert_status_request */
-  Curl_nss_connect,             /* connect */
-  Curl_nss_connect_nonblocking, /* connect_nonblocking */
-  Curl_nss_get_internals,       /* get_internals */
-  Curl_nss_close,               /* close_one */
+  nss_random,                   /* random */
+  nss_cert_status_request,      /* cert_status_request */
+  nss_connect,                  /* connect */
+  nss_connect_nonblocking,      /* connect_nonblocking */
+  nss_get_internals,            /* get_internals */
+  nss_close,                    /* close_one */
   Curl_none_close_all,          /* close_all */
   /* NSS has its own session ID cache */
   Curl_none_session_free,       /* session_free */
   Curl_none_set_engine,         /* set_engine */
   Curl_none_set_engine_default, /* set_engine_default */
   Curl_none_engines_list,       /* engines_list */
-  Curl_nss_false_start,         /* false_start */
-  Curl_nss_md5sum,              /* md5sum */
-  Curl_nss_sha256sum            /* sha256sum */
+  nss_false_start,              /* false_start */
+  nss_md5sum,                   /* md5sum */
+  nss_sha256sum                 /* sha256sum */
 };
 
 #endif /* USE_NSS */
