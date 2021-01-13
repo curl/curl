@@ -839,7 +839,7 @@ static ssize_t wolfssl_send(struct connectdata *conn,
   return rc;
 }
 
-static void Curl_wolfssl_close(struct connectdata *conn, int sockindex)
+static void wolfssl_close(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -890,14 +890,14 @@ static ssize_t wolfssl_recv(struct connectdata *conn,
 }
 
 
-static void Curl_wolfssl_session_free(void *ptr)
+static void wolfssl_session_free(void *ptr)
 {
   (void)ptr;
   /* wolfSSL reuses sessions on own, no free */
 }
 
 
-static size_t Curl_wolfssl_version(char *buffer, size_t size)
+static size_t wolfssl_version(char *buffer, size_t size)
 {
 #if LIBWOLFSSL_VERSION_HEX >= 0x03006000
   return msnprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
@@ -907,7 +907,7 @@ static size_t Curl_wolfssl_version(char *buffer, size_t size)
 }
 
 
-static int Curl_wolfssl_init(void)
+static int wolfssl_init(void)
 {
 #ifdef OPENSSL_EXTRA
   Curl_tls_keylog_open();
@@ -916,7 +916,7 @@ static int Curl_wolfssl_init(void)
 }
 
 
-static void Curl_wolfssl_cleanup(void)
+static void wolfssl_cleanup(void)
 {
   wolfSSL_Cleanup();
 #ifdef OPENSSL_EXTRA
@@ -925,8 +925,8 @@ static void Curl_wolfssl_cleanup(void)
 }
 
 
-static bool Curl_wolfssl_data_pending(const struct connectdata *conn,
-                                      int connindex)
+static bool wolfssl_data_pending(const struct connectdata *conn,
+                                 int connindex)
 {
   const struct ssl_connect_data *connssl = &conn->ssl[connindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -941,7 +941,7 @@ static bool Curl_wolfssl_data_pending(const struct connectdata *conn,
  * This function is called to shut down the SSL layer but keep the
  * socket open (CCC - Clear Command Channel)
  */
-static int Curl_wolfssl_shutdown(struct connectdata *conn, int sockindex)
+static int wolfssl_shutdown(struct connectdata *conn, int sockindex)
 {
   int retval = 0;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -1068,14 +1068,14 @@ wolfssl_connect_common(struct connectdata *conn,
 }
 
 
-static CURLcode Curl_wolfssl_connect_nonblocking(struct connectdata *conn,
-                                                int sockindex, bool *done)
+static CURLcode wolfssl_connect_nonblocking(struct connectdata *conn,
+                                            int sockindex, bool *done)
 {
   return wolfssl_connect_common(conn, sockindex, TRUE, done);
 }
 
 
-static CURLcode Curl_wolfssl_connect(struct connectdata *conn, int sockindex)
+static CURLcode wolfssl_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
@@ -1089,8 +1089,8 @@ static CURLcode Curl_wolfssl_connect(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-static CURLcode Curl_wolfssl_random(struct Curl_easy *data,
-                                   unsigned char *entropy, size_t length)
+static CURLcode wolfssl_random(struct Curl_easy *data,
+                               unsigned char *entropy, size_t length)
 {
   WC_RNG rng;
   (void)data;
@@ -1105,10 +1105,10 @@ static CURLcode Curl_wolfssl_random(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode Curl_wolfssl_sha256sum(const unsigned char *tmp, /* input */
-                                       size_t tmplen,
-                                       unsigned char *sha256sum /* output */,
-                                       size_t unused)
+static CURLcode wolfssl_sha256sum(const unsigned char *tmp, /* input */
+                                  size_t tmplen,
+                                  unsigned char *sha256sum /* output */,
+                                  size_t unused)
 {
   wc_Sha256 SHA256pw;
   (void)unused;
@@ -1118,7 +1118,7 @@ static CURLcode Curl_wolfssl_sha256sum(const unsigned char *tmp, /* input */
   return CURLE_OK;
 }
 
-static void *Curl_wolfssl_get_internals(struct ssl_connect_data *connssl,
+static void *wolfssl_get_internals(struct ssl_connect_data *connssl,
                                         CURLINFO info UNUSED_PARAM)
 {
   struct ssl_backend_data *backend = connssl->backend;
@@ -1136,26 +1136,26 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
 
   sizeof(struct ssl_backend_data),
 
-  Curl_wolfssl_init,                /* init */
-  Curl_wolfssl_cleanup,             /* cleanup */
-  Curl_wolfssl_version,             /* version */
+  wolfssl_init,                    /* init */
+  wolfssl_cleanup,                 /* cleanup */
+  wolfssl_version,                 /* version */
   Curl_none_check_cxn,             /* check_cxn */
-  Curl_wolfssl_shutdown,            /* shutdown */
-  Curl_wolfssl_data_pending,        /* data_pending */
-  Curl_wolfssl_random,              /* random */
+  wolfssl_shutdown,                /* shutdown */
+  wolfssl_data_pending,            /* data_pending */
+  wolfssl_random,                  /* random */
   Curl_none_cert_status_request,   /* cert_status_request */
-  Curl_wolfssl_connect,             /* connect */
-  Curl_wolfssl_connect_nonblocking, /* connect_nonblocking */
-  Curl_wolfssl_get_internals,       /* get_internals */
-  Curl_wolfssl_close,               /* close_one */
+  wolfssl_connect,                 /* connect */
+  wolfssl_connect_nonblocking,     /* connect_nonblocking */
+  wolfssl_get_internals,           /* get_internals */
+  wolfssl_close,                   /* close_one */
   Curl_none_close_all,             /* close_all */
-  Curl_wolfssl_session_free,        /* session_free */
+  wolfssl_session_free,            /* session_free */
   Curl_none_set_engine,            /* set_engine */
   Curl_none_set_engine_default,    /* set_engine_default */
   Curl_none_engines_list,          /* engines_list */
   Curl_none_false_start,           /* false_start */
   Curl_none_md5sum,                /* md5sum */
-  Curl_wolfssl_sha256sum            /* sha256sum */
+  wolfssl_sha256sum                /* sha256sum */
 };
 
 #endif
