@@ -105,7 +105,7 @@ static const char * const statename[]={
 /* function pointer called once when switching TO a state */
 typedef void (*init_multistate_func)(struct Curl_easy *data);
 
-static void Curl_init_completed(struct Curl_easy *data)
+static void init_completed(struct Curl_easy *data)
 {
   /* this is a completed transfer */
 
@@ -139,7 +139,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     NULL,              /* PERFORM */
     NULL,              /* TOOFAST */
     NULL,              /* DONE */
-    Curl_init_completed, /* COMPLETED */
+    init_completed,    /* COMPLETED */
     NULL               /* MSGSENT */
   };
 
@@ -1067,13 +1067,13 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
 
 #define NUM_POLLS_ON_STACK 10
 
-static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
-                                 struct curl_waitfd extra_fds[],
-                                 unsigned int extra_nfds,
-                                 int timeout_ms,
-                                 int *ret,
-                                 bool extrawait, /* when no socket, wait */
-                                 bool use_wakeup)
+static CURLMcode multi_wait(struct Curl_multi *multi,
+                            struct curl_waitfd extra_fds[],
+                            unsigned int extra_nfds,
+                            int timeout_ms,
+                            int *ret,
+                            bool extrawait, /* when no socket, wait */
+                            bool use_wakeup)
 {
   struct Curl_easy *data;
   curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
@@ -1281,8 +1281,8 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
                           int timeout_ms,
                           int *ret)
 {
-  return Curl_multi_wait(multi, extra_fds, extra_nfds, timeout_ms, ret, FALSE,
-                         FALSE);
+  return multi_wait(multi, extra_fds, extra_nfds, timeout_ms, ret, FALSE,
+                    FALSE);
 }
 
 CURLMcode curl_multi_poll(struct Curl_multi *multi,
@@ -1291,8 +1291,8 @@ CURLMcode curl_multi_poll(struct Curl_multi *multi,
                           int timeout_ms,
                           int *ret)
 {
-  return Curl_multi_wait(multi, extra_fds, extra_nfds, timeout_ms, ret, TRUE,
-                         TRUE);
+  return multi_wait(multi, extra_fds, extra_nfds, timeout_ms, ret, TRUE,
+                    TRUE);
 }
 
 CURLMcode curl_multi_wakeup(struct Curl_multi *multi)
@@ -1319,7 +1319,7 @@ CURLMcode curl_multi_wakeup(struct Curl_multi *multi)
 
          The write socket is set to non-blocking, this way this function
          cannot block, making it safe to call even from the same thread
-         that will call Curl_multi_wait(). If swrite() returns that it
+         that will call curl_multi_wait(). If swrite() returns that it
          would block, it's considered successful because it means that
          previous calls to this function will wake up the poll(). */
       if(swrite(multi->wakeup_pair[1], buf, sizeof(buf)) < 0) {
