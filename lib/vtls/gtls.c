@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -86,38 +86,38 @@ struct ssl_backend_data {
 #endif
 };
 
-static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
+static ssize_t gtls_push(void *s, const void *buf, size_t len)
 {
   curl_socket_t sock = *(curl_socket_t *)s;
   ssize_t ret = swrite(sock, buf, len);
   return ret;
 }
 
-static ssize_t Curl_gtls_pull(void *s, void *buf, size_t len)
+static ssize_t gtls_pull(void *s, void *buf, size_t len)
 {
   curl_socket_t sock = *(curl_socket_t *)s;
   ssize_t ret = sread(sock, buf, len);
   return ret;
 }
 
-static ssize_t Curl_gtls_push_ssl(void *s, const void *buf, size_t len)
+static ssize_t gtls_push_ssl(void *s, const void *buf, size_t len)
 {
   return gnutls_record_send((gnutls_session_t) s, buf, len);
 }
 
-static ssize_t Curl_gtls_pull_ssl(void *s, void *buf, size_t len)
+static ssize_t gtls_pull_ssl(void *s, void *buf, size_t len)
 {
   return gnutls_record_recv((gnutls_session_t) s, buf, len);
 }
 
-/* Curl_gtls_init()
+/* gtls_init()
  *
  * Global GnuTLS init, called from Curl_ssl_init(). This calls functions that
  * are not thread-safe and thus this function itself is not thread-safe and
  * must only be called from within curl_global_init() to keep the thread
  * situation under control!
  */
-static int Curl_gtls_init(void)
+static int gtls_init(void)
 {
   int ret = 1;
   if(!gtls_inited) {
@@ -131,7 +131,7 @@ static int Curl_gtls_init(void)
   return ret;
 }
 
-static void Curl_gtls_cleanup(void)
+static void gtls_cleanup(void)
 {
   if(gtls_inited) {
     gnutls_global_deinit();
@@ -408,7 +408,7 @@ gtls_connect_step1(struct connectdata *conn,
     return CURLE_OK;
 
   if(!gtls_inited)
-    Curl_gtls_init();
+    gtls_init();
 
   /* Initialize certverifyresult to OK */
   *certverifyresult = 0;
@@ -698,16 +698,16 @@ gtls_connect_step1(struct connectdata *conn,
 #ifndef CURL_DISABLE_PROXY
   if(conn->proxy_ssl[sockindex].use) {
     transport_ptr = conn->proxy_ssl[sockindex].backend->session;
-    gnutls_transport_push = Curl_gtls_push_ssl;
-    gnutls_transport_pull = Curl_gtls_pull_ssl;
+    gnutls_transport_push = gtls_push_ssl;
+    gnutls_transport_pull = gtls_pull_ssl;
   }
   else
 #endif
   {
     /* file descriptor for the socket */
     transport_ptr = &conn->sock[sockindex];
-    gnutls_transport_push = Curl_gtls_push;
-    gnutls_transport_pull = Curl_gtls_pull;
+    gnutls_transport_push = gtls_push;
+    gnutls_transport_pull = gtls_pull;
   }
 
   /* set the connection handle */
@@ -1358,13 +1358,13 @@ gtls_connect_common(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static CURLcode Curl_gtls_connect_nonblocking(struct connectdata *conn,
-                                              int sockindex, bool *done)
+static CURLcode gtls_connect_nonblocking(struct connectdata *conn,
+                                         int sockindex, bool *done)
 {
   return gtls_connect_common(conn, sockindex, TRUE, done);
 }
 
-static CURLcode Curl_gtls_connect(struct connectdata *conn, int sockindex)
+static CURLcode gtls_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
@@ -1378,8 +1378,8 @@ static CURLcode Curl_gtls_connect(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-static bool Curl_gtls_data_pending(const struct connectdata *conn,
-                                   int connindex)
+static bool gtls_data_pending(const struct connectdata *conn,
+                              int connindex)
 {
   const struct ssl_connect_data *connssl = &conn->ssl[connindex];
   bool res = FALSE;
@@ -1440,7 +1440,7 @@ static void close_one(struct ssl_connect_data *connssl)
 #endif
 }
 
-static void Curl_gtls_close(struct connectdata *conn, int sockindex)
+static void gtls_close(struct connectdata *conn, int sockindex)
 {
   close_one(&conn->ssl[sockindex]);
 #ifndef CURL_DISABLE_PROXY
@@ -1452,7 +1452,7 @@ static void Curl_gtls_close(struct connectdata *conn, int sockindex)
  * This function is called to shut down the SSL layer but keep the
  * socket open (CCC - Clear Command Channel)
  */
-static int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
+static int gtls_shutdown(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -1565,18 +1565,18 @@ static ssize_t gtls_recv(struct connectdata *conn, /* connection data */
   return ret;
 }
 
-static void Curl_gtls_session_free(void *ptr)
+static void gtls_session_free(void *ptr)
 {
   free(ptr);
 }
 
-static size_t Curl_gtls_version(char *buffer, size_t size)
+static size_t gtls_version(char *buffer, size_t size)
 {
   return msnprintf(buffer, size, "GnuTLS/%s", gnutls_check_version(NULL));
 }
 
 #ifndef USE_GNUTLS_NETTLE
-static int Curl_gtls_seed(struct Curl_easy *data)
+static int gtls_seed(struct Curl_easy *data)
 {
   /* we have the "SSL is seeded" boolean static to prevent multiple
      time-consuming seedings in vain */
@@ -1594,8 +1594,8 @@ static int Curl_gtls_seed(struct Curl_easy *data)
 #endif
 
 /* data might be NULL! */
-static CURLcode Curl_gtls_random(struct Curl_easy *data,
-                                 unsigned char *entropy, size_t length)
+static CURLcode gtls_random(struct Curl_easy *data,
+                            unsigned char *entropy, size_t length)
 {
 #if defined(USE_GNUTLS_NETTLE)
   int rc;
@@ -1610,10 +1610,10 @@ static CURLcode Curl_gtls_random(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode Curl_gtls_md5sum(unsigned char *tmp, /* input */
-                                 size_t tmplen,
-                                 unsigned char *md5sum, /* output */
-                                 size_t md5len)
+static CURLcode gtls_md5sum(unsigned char *tmp, /* input */
+                            size_t tmplen,
+                            unsigned char *md5sum, /* output */
+                            size_t md5len)
 {
 #if defined(USE_GNUTLS_NETTLE)
   struct md5_ctx MD5pw;
@@ -1630,10 +1630,10 @@ static CURLcode Curl_gtls_md5sum(unsigned char *tmp, /* input */
   return CURLE_OK;
 }
 
-static CURLcode Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
-                                size_t tmplen,
-                                unsigned char *sha256sum, /* output */
-                                size_t sha256len)
+static CURLcode gtls_sha256sum(const unsigned char *tmp, /* input */
+                               size_t tmplen,
+                               unsigned char *sha256sum, /* output */
+                               size_t sha256len)
 {
 #if defined(USE_GNUTLS_NETTLE)
   struct sha256_ctx SHA256pw;
@@ -1650,12 +1650,12 @@ static CURLcode Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
   return CURLE_OK;
 }
 
-static bool Curl_gtls_cert_status_request(void)
+static bool gtls_cert_status_request(void)
 {
   return TRUE;
 }
 
-static void *Curl_gtls_get_internals(struct ssl_connect_data *connssl,
+static void *gtls_get_internals(struct ssl_connect_data *connssl,
                                      CURLINFO info UNUSED_PARAM)
 {
   struct ssl_backend_data *backend = connssl->backend;
@@ -1673,26 +1673,26 @@ const struct Curl_ssl Curl_ssl_gnutls = {
 
   sizeof(struct ssl_backend_data),
 
-  Curl_gtls_init,                /* init */
-  Curl_gtls_cleanup,             /* cleanup */
-  Curl_gtls_version,             /* version */
+  gtls_init,                     /* init */
+  gtls_cleanup,                  /* cleanup */
+  gtls_version,                  /* version */
   Curl_none_check_cxn,           /* check_cxn */
-  Curl_gtls_shutdown,            /* shutdown */
-  Curl_gtls_data_pending,        /* data_pending */
-  Curl_gtls_random,              /* random */
-  Curl_gtls_cert_status_request, /* cert_status_request */
-  Curl_gtls_connect,             /* connect */
-  Curl_gtls_connect_nonblocking, /* connect_nonblocking */
-  Curl_gtls_get_internals,       /* get_internals */
-  Curl_gtls_close,               /* close_one */
+  gtls_shutdown,                 /* shutdown */
+  gtls_data_pending,             /* data_pending */
+  gtls_random,                   /* random */
+  gtls_cert_status_request,      /* cert_status_request */
+  gtls_connect,                  /* connect */
+  gtls_connect_nonblocking,      /* connect_nonblocking */
+  gtls_get_internals,            /* get_internals */
+  gtls_close,                    /* close_one */
   Curl_none_close_all,           /* close_all */
-  Curl_gtls_session_free,        /* session_free */
+  gtls_session_free,             /* session_free */
   Curl_none_set_engine,          /* set_engine */
   Curl_none_set_engine_default,  /* set_engine_default */
   Curl_none_engines_list,        /* engines_list */
   Curl_none_false_start,         /* false_start */
-  Curl_gtls_md5sum,              /* md5sum */
-  Curl_gtls_sha256sum            /* sha256sum */
+  gtls_md5sum,                   /* md5sum */
+  gtls_sha256sum                 /* sha256sum */
 };
 
 #endif /* USE_GNUTLS */
