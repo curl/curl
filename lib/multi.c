@@ -105,6 +105,13 @@ static const char * const statename[]={
 /* function pointer called once when switching TO a state */
 typedef void (*init_multistate_func)(struct Curl_easy *data);
 
+/* called when the PERFORM state starts  */
+static void init_perform(struct Curl_easy *data)
+{
+  data->req.chunk = FALSE;
+  Curl_pgrsTime(data, TIMER_PRETRANSFER);
+}
+
 static void init_completed(struct Curl_easy *data)
 {
   /* this is a completed transfer */
@@ -136,7 +143,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     NULL,              /* DOING */
     NULL,              /* DO_MORE */
     NULL,              /* DO_DONE */
-    NULL,              /* PERFORM */
+    init_perform,      /* PERFORM */
     NULL,              /* TOOFAST */
     NULL,              /* DONE */
     init_completed,    /* COMPLETED */
@@ -1383,18 +1390,6 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
   return rc;
 }
 
-/*
- * do_complete is called when the DO actions are complete.
- *
- * We init chunking and trailer bits to their default values here immediately
- * before receiving any header data for the current request.
- */
-static void do_complete(struct connectdata *conn)
-{
-  conn->data->req.chunk = FALSE;
-  Curl_pgrsTime(conn->data, TIMER_PRETRANSFER);
-}
-
 static CURLcode multi_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
@@ -1404,14 +1399,9 @@ static CURLcode multi_do(struct Curl_easy *data, bool *done)
   DEBUGASSERT(conn->handler);
   DEBUGASSERT(conn->data == data);
 
-  if(conn->handler->do_it) {
+  if(conn->handler->do_it)
     /* generic protocol-specific function pointer set in curl_connect() */
     result = conn->handler->do_it(conn, done);
-
-    if(!result && *done)
-      /* do_complete must be called after the protocol-specific DO function */
-      do_complete(conn);
-  }
   return result;
 }
 
@@ -1432,10 +1422,6 @@ static CURLcode multi_do_more(struct connectdata *conn, int *complete)
 
   if(conn->handler->do_more)
     result = conn->handler->do_more(conn, complete);
-
-  if(!result && (*complete == 1))
-    /* do_complete must be called after the protocol-specific DO function */
-    do_complete(conn);
 
   return result;
 }
