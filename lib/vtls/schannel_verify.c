@@ -522,7 +522,7 @@ static CURLcode verify_host(struct Curl_easy *data,
     failf(data, "schannel: server certificate name verification failed");
 
 cleanup:
-  curlx_unicodefree(cert_hostname_buff);
+  curl_safefree(cert_hostname_buff);
 
   return result;
 }
