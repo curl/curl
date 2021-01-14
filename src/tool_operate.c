@@ -380,7 +380,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
 
   if(!result && !outs->stream && !outs->bytes) {
     /* we have received no data despite the transfer was successful
-       ==> force cration of an empty output file (if an output file
+       ==> force creation of an empty output file (if an output file
        was specified) */
     long cond_unmet = 0L;
     /* do not create (or even overwrite) the file in case we get no
