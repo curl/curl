@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,7 +36,7 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
 
 /*
  * Macros curlx_convert_UTF8_to_tchar(), curlx_convert_tchar_to_UTF8()
- * and curlx_unicodefree() main purpose is to minimize the number of
+ * and CURLX_UNICODEFREE() main purpose is to minimize the number of
  * preprocessor conditional directives needed by code using these
  * to differentiate UNICODE from non-UNICODE builds.
  *
@@ -44,22 +44,24 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
  * curlx_convert_UTF8_to_tchar() and curlx_convert_tchar_to_UTF8()
  * return a pointer to a newly allocated memory area holding result.
  * When the result is no longer needed, allocated memory is intended
- * to be free'ed with curlx_unicodefree().
+ * to be free'ed with CURLX_UNICODEFREE().
  *
  * When building without UNICODE defined, this macros
  * curlx_convert_UTF8_to_tchar() and curlx_convert_tchar_to_UTF8()
- * return the pointer received as argument. curlx_unicodefree() does
- * no actual free'ing of this pointer it is simply set to NULL.
+ * return the pointer received as argument.
+ *
+ * CURLX_UNICODEFREE() does no actual free'ing of this pointer it is simply
+ * set to NULL.
  */
 
 #if defined(UNICODE) && defined(WIN32)
 
 #define curlx_convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar((ptr))
 #define curlx_convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8((ptr))
-#define curlx_unicodefree(ptr)                          \
+#define CURLX_UNICODEFREE(ptr)                          \
   do {                                                  \
     if(ptr) {                                           \
-      (free)(ptr);                                        \
+      (free)(ptr);                                      \
       (ptr) = NULL;                                     \
     }                                                   \
   } while(0)
@@ -75,7 +77,7 @@ typedef union {
 
 #define curlx_convert_UTF8_to_tchar(ptr) (ptr)
 #define curlx_convert_tchar_to_UTF8(ptr) (ptr)
-#define curlx_unicodefree(ptr) \
+#define CURLX_UNICODEFREE(ptr) \
   do {(ptr) = NULL;} while(0)
 
 typedef union {

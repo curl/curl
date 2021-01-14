@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -288,7 +288,7 @@ cleanup:
     CloseHandle(ca_file_handle);
   }
   Curl_safefree(ca_file_buffer);
-  curlx_unicodefree(ca_file_tstr);
+  CURLX_UNICODEFREE(ca_file_tstr);
 
   return result;
 }
@@ -508,7 +508,7 @@ static CURLcode verify_host(struct Curl_easy *data,
 
         result = CURLE_PEER_FAILED_VERIFICATION;
       }
-      curlx_unicodefree(cert_hostname);
+      CURLX_UNICODEFREE(cert_hostname);
     }
   }
 
@@ -522,7 +522,7 @@ static CURLcode verify_host(struct Curl_easy *data,
     failf(data, "schannel: server certificate name verification failed");
 
 cleanup:
-  curlx_unicodefree(cert_hostname_buff);
+  CURLX_UNICODEFREE(cert_hostname_buff);
 
   return result;
 }

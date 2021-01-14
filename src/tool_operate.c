@@ -2552,7 +2552,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
     }
   }
 
-  curlx_unicodefree(first_arg);
+  CURLX_UNICODEFREE(first_arg);
 
   if(!result) {
     /* Parse the command line arguments */

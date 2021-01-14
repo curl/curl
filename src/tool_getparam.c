@@ -2303,7 +2303,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
           : NULL;
 
         result = getparameter(orig_opt, nextarg, &passarg, global, config);
-        curlx_unicodefree(nextarg);
+        CURLX_UNICODEFREE(nextarg);
         config = global->last;
         if(result == PARAM_NEXT_OPERATION) {
           /* Reset result as PARAM_NEXT_OPERATION is only used here and not
@@ -2344,7 +2344,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
     }
 
     if(!result)
-      curlx_unicodefree(orig_opt);
+      CURLX_UNICODEFREE(orig_opt);
   }
 
   if(result && result != PARAM_HELP_REQUESTED &&
@@ -2359,6 +2359,6 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       helpf(global->errors, "%s\n", reason);
   }
 
-  curlx_unicodefree(orig_opt);
+  CURLX_UNICODEFREE(orig_opt);
   return result;
 }

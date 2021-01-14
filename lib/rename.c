@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2020 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,14 +49,14 @@ int Curl_rename(const char *oldpath, const char *newpath)
   for(;;) {
     timediff_t diff;
     if(MoveFileEx(tchar_oldpath, tchar_newpath, MOVEFILE_REPLACE_EXISTING)) {
-      curlx_unicodefree(tchar_oldpath);
-      curlx_unicodefree(tchar_newpath);
+      CURLX_UNICODEFREE(tchar_oldpath);
+      CURLX_UNICODEFREE(tchar_newpath);
       break;
     }
     diff = Curl_timediff(Curl_now(), start);
     if(diff < 0 || diff > max_wait_ms) {
-      curlx_unicodefree(tchar_oldpath);
-      curlx_unicodefree(tchar_newpath);
+      CURLX_UNICODEFREE(tchar_oldpath);
+      CURLX_UNICODEFREE(tchar_newpath);
       return 1;
     }
     Sleep(1);

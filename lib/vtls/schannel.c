@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -622,7 +622,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
           failf(data, "schannel: Failed to get certificate location"
                 " or file for %s",
                 data->set.ssl.primary.clientcert);
-          curlx_unicodefree(cert_path);
+          CURLX_UNICODEFREE(cert_path);
           return result;
         }
       }
@@ -632,7 +632,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         failf(data, "schannel: certificate format compatibility error "
                 " for %s",
                 blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
-        curlx_unicodefree(cert_path);
+        CURLX_UNICODEFREE(cert_path);
         return CURLE_SSL_CERTPROBLEM;
       }
 
@@ -647,7 +647,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         int str_w_len = 0;
         const char *cert_showfilename_error = blob ?
           "(memory blob)" : data->set.ssl.primary.clientcert;
-        curlx_unicodefree(cert_path);
+        CURLX_UNICODEFREE(cert_path);
         if(fInCert) {
           long cert_tell = 0;
           bool continue_reading = fseek(fInCert, 0, SEEK_END) == 0;
@@ -736,7 +736,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
                 "last error is 0x%x",
                 cert_store_name, cert_store_path, GetLastError());
           free(cert_store_path);
-          curlx_unicodefree(cert_path);
+          CURLX_UNICODEFREE(cert_path);
           return CURLE_SSL_CERTPROBLEM;
         }
         free(cert_store_path);
@@ -750,7 +750,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
                                 cert_thumbprint_data,
                                 &cert_thumbprint.cbData,
                                 NULL, NULL)) {
-          curlx_unicodefree(cert_path);
+          CURLX_UNICODEFREE(cert_path);
           CertCloseStore(cert_store, 0);
           return CURLE_SSL_CERTPROBLEM;
         }
@@ -759,7 +759,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
           cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
           CERT_FIND_HASH, &cert_thumbprint, NULL);
 
-        curlx_unicodefree(cert_path);
+        CURLX_UNICODEFREE(cert_path);
 
         if(client_certs[0]) {
           schannel_cred.cCreds = 1;
@@ -920,7 +920,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     0, &BACKEND->ctxt->ctxt_handle,
     &outbuf_desc, &BACKEND->ret_flags, &BACKEND->ctxt->time_stamp);
 
-  curlx_unicodefree(host_name);
+  CURLX_UNICODEFREE(host_name);
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
     char buffer[STRERROR_LEN];
@@ -1118,7 +1118,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
       host_name, BACKEND->req_flags, 0, 0, &inbuf_desc, 0, NULL,
       &outbuf_desc, &BACKEND->ret_flags, &BACKEND->ctxt->time_stamp);
 
-    curlx_unicodefree(host_name);
+    CURLX_UNICODEFREE(host_name);
 
     /* free buffer for received handshake data */
     Curl_safefree(inbuf[0].pvBuffer);
@@ -2176,7 +2176,7 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
       &BACKEND->ret_flags,
       &BACKEND->ctxt->time_stamp);
 
-    curlx_unicodefree(host_name);
+    CURLX_UNICODEFREE(host_name);
 
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
       /* send close message which is in output buffer */

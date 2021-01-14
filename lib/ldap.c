@@ -246,8 +246,8 @@ static int ldap_win_bind(struct connectdata *conn, LDAP *server,
 
     rc = ldap_simple_bind_s(server, inuser, inpass);
 
-    curlx_unicodefree(inuser);
-    curlx_unicodefree(inpass);
+    CURLX_UNICODEFREE(inuser);
+    CURLX_UNICODEFREE(inpass);
   }
 #if defined(USE_WINDOWS_SSPI)
   else {
@@ -260,7 +260,7 @@ static int ldap_win_bind(struct connectdata *conn, LDAP *server,
 #endif /* #if defined(USE_WIN32_LDAP) */
 
 #if defined(USE_WIN32_LDAP)
-#define FREE_ON_WINLDAP(x) curlx_unicodefree(x)
+#define FREE_ON_WINLDAP(x) CURLX_UNICODEFREE(x)
 #else
 #define FREE_ON_WINLDAP(x)
 #endif
@@ -873,7 +873,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
     ludp->lud_dn = curlx_convert_UTF8_to_tchar(unescaped);
 
     /* Free the unescaped string as we are done with it */
-    curlx_unicodefree(unescaped);
+    CURLX_UNICODEFREE(unescaped);
 
     if(!ludp->lud_dn) {
       rc = LDAP_NO_MEMORY;
@@ -941,7 +941,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
       ludp->lud_attrs[i] = curlx_convert_UTF8_to_tchar(unescaped);
 
       /* Free the unescaped string as we are done with it */
-      curlx_unicodefree(unescaped);
+      CURLX_UNICODEFREE(unescaped);
 
       if(!ludp->lud_attrs[i]) {
         free(attributes);
@@ -1009,7 +1009,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
     ludp->lud_filter = curlx_convert_UTF8_to_tchar(unescaped);
 
     /* Free the unescaped string as we are done with it */
-    curlx_unicodefree(unescaped);
+    CURLX_UNICODEFREE(unescaped);
 
     if(!ludp->lud_filter) {
       rc = LDAP_NO_MEMORY;
