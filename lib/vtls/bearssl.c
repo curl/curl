@@ -294,9 +294,9 @@ static const br_x509_class x509_vtable = {
   x509_get_pkey
 };
 
-static CURLcode bearssl_connect_step1(struct connectdata *conn, int sockindex)
+static CURLcode bearssl_connect_step1(struct Curl_easy *data,
+                                      struct connectdata *conn, int sockindex)
 {
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
@@ -429,10 +429,10 @@ static CURLcode bearssl_connect_step1(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-static CURLcode bearssl_run_until(struct connectdata *conn, int sockindex,
+static CURLcode bearssl_run_until(struct Curl_easy *data,
+                                  struct connectdata *conn, int sockindex,
                                   unsigned target)
 {
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   curl_socket_t sockfd = conn->sock[sockindex];
@@ -507,14 +507,15 @@ static CURLcode bearssl_run_until(struct connectdata *conn, int sockindex,
   }
 }
 
-static CURLcode bearssl_connect_step2(struct connectdata *conn, int sockindex)
+static CURLcode bearssl_connect_step2(struct Curl_easy *data,
+                                      struct connectdata *conn, int sockindex)
 {
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   CURLcode ret;
 
-  ret = bearssl_run_until(conn, sockindex, BR_SSL_SENDAPP | BR_SSL_RECVAPP);
+  ret = bearssl_run_until(data, conn, sockindex,
+                          BR_SSL_SENDAPP | BR_SSL_RECVAPP);
   if(ret == CURLE_AGAIN)
     return CURLE_OK;
   if(ret == CURLE_OK) {
@@ -527,9 +528,9 @@ static CURLcode bearssl_connect_step2(struct connectdata *conn, int sockindex)
   return ret;
 }
 
-static CURLcode bearssl_connect_step3(struct connectdata *conn, int sockindex)
+static CURLcode bearssl_connect_step3(struct Curl_easy *data,
+                                      struct connectdata *conn, int sockindex)
 {
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   CURLcode ret;
@@ -595,7 +596,7 @@ static ssize_t bearssl_send(struct Curl_easy *data, int sockindex,
   size_t applen;
 
   for(;;) {
-    *err = bearssl_run_until(conn, sockindex, BR_SSL_SENDAPP);
+    *err = bearssl_run_until(data, conn, sockindex, BR_SSL_SENDAPP);
     if (*err != CURLE_OK)
       return -1;
     app = br_ssl_engine_sendapp_buf(&backend->ctx.eng, &applen);
@@ -627,7 +628,7 @@ static ssize_t bearssl_recv(struct Curl_easy *data, int sockindex,
   unsigned char *app;
   size_t applen;
 
-  *err = bearssl_run_until(conn, sockindex, BR_SSL_RECVAPP);
+  *err = bearssl_run_until(data, conn, sockindex, BR_SSL_RECVAPP);
   if(*err != CURLE_OK)
     return -1;
   app = br_ssl_engine_recvapp_buf(&backend->ctx.eng, &applen);
@@ -641,13 +642,13 @@ static ssize_t bearssl_recv(struct Curl_easy *data, int sockindex,
   return applen;
 }
 
-static CURLcode bearssl_connect_common(struct connectdata *conn,
+static CURLcode bearssl_connect_common(struct Curl_easy *data,
+                                       struct connectdata *conn,
                                        int sockindex,
                                        bool nonblocking,
                                        bool *done)
 {
   CURLcode ret;
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
   timediff_t timeout_ms;
@@ -660,7 +661,7 @@ static CURLcode bearssl_connect_common(struct connectdata *conn,
   }
 
   if(ssl_connect_1 == connssl->connecting_state) {
-    ret = bearssl_connect_step1(conn, sockindex);
+    ret = bearssl_connect_step1(data, conn, sockindex);
     if(ret)
       return ret;
   }
@@ -713,7 +714,7 @@ static CURLcode bearssl_connect_common(struct connectdata *conn,
      * before step2 has completed while ensuring that a client using select()
      * or epoll() will always have a valid fdset to wait on.
      */
-    ret = bearssl_connect_step2(conn, sockindex);
+    ret = bearssl_connect_step2(data, conn, sockindex);
     if(ret || (nonblocking &&
                (ssl_connect_2 == connssl->connecting_state ||
                 ssl_connect_2_reading == connssl->connecting_state ||
@@ -722,7 +723,7 @@ static CURLcode bearssl_connect_common(struct connectdata *conn,
   }
 
   if(ssl_connect_3 == connssl->connecting_state) {
-    ret = bearssl_connect_step3(conn, sockindex);
+    ret = bearssl_connect_step3(data, conn, sockindex);
     if(ret)
       return ret;
   }
@@ -780,7 +781,7 @@ static CURLcode bearssl_connect(struct connectdata *conn, int sockindex)
   CURLcode ret;
   bool done = FALSE;
 
-  ret = bearssl_connect_common(conn, sockindex, FALSE, &done);
+  ret = bearssl_connect_common(conn->data, conn, sockindex, FALSE, &done);
   if(ret)
     return ret;
 
@@ -792,7 +793,7 @@ static CURLcode bearssl_connect(struct connectdata *conn, int sockindex)
 static CURLcode bearssl_connect_nonblocking(struct connectdata *conn,
                                             int sockindex, bool *done)
 {
-  return bearssl_connect_common(conn, sockindex, TRUE, done);
+  return bearssl_connect_common(conn->data, conn, sockindex, TRUE, done);
 }
 
 static void *bearssl_get_internals(struct ssl_connect_data *connssl,
@@ -802,7 +803,8 @@ static void *bearssl_get_internals(struct ssl_connect_data *connssl,
   return &backend->ctx;
 }
 
-static void bearssl_close(struct connectdata *conn, int sockindex)
+static void real_bearssl_close(struct Curl_easy *data,
+                               struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -810,11 +812,16 @@ static void bearssl_close(struct connectdata *conn, int sockindex)
 
   if(backend->active) {
     br_ssl_engine_close(&backend->ctx.eng);
-    (void)bearssl_run_until(conn, sockindex, BR_SSL_CLOSED);
+    (void)bearssl_run_until(data, conn, sockindex, BR_SSL_CLOSED);
   }
   for(i = 0; i < backend->anchors_len; ++i)
     free(backend->anchors[i].dn.data);
   free(backend->anchors);
+}
+
+static void bearssl_close(struct connectdata *conn, int sockindex)
+{
+  real_bearssl_close(conn->data, conn, sockindex);
 }
 
 static void bearssl_session_free(void *ptr)
