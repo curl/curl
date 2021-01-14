@@ -55,18 +55,22 @@ http://%HOSTIP:%HTTPPORT/584
 #
 # Verify data after the test has been "shot"
 <verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/--------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=------------------------/
+</strippart>
 <protocol>
 POST /584 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 144
-Content-Type: multipart/form-data; boundary=------------------------3433323135333231
+Content-Type: multipart/form-data; boundary=------------------------
 
---------------------------3433323135333231
+--------------------------
 Content-Disposition: form-data; name="fake"
 
 party
---------------------------3433323135333231--
+----------------------------
 POST /584 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
