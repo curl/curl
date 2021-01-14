@@ -196,9 +196,9 @@ static CURLcode mbedtls_version_from_curl(int *mbedver, long version)
 }
 
 static CURLcode
-set_ssl_version_min_max(struct connectdata *conn, int sockindex)
+set_ssl_version_min_max(struct Curl_easy *data, struct connectdata *conn,
+                        int sockindex)
 {
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   int mbedtls_ver_min = MBEDTLS_SSL_MINOR_VERSION_1;
@@ -241,10 +241,9 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
 }
 
 static CURLcode
-mbed_connect_step1(struct connectdata *conn,
+mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                    int sockindex)
 {
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
@@ -427,7 +426,7 @@ mbed_connect_step1(struct connectdata *conn,
   case CURL_SSLVERSION_TLSv1_2:
   case CURL_SSLVERSION_TLSv1_3:
     {
-      CURLcode result = set_ssl_version_min_max(conn, sockindex);
+      CURLcode result = set_ssl_version_min_max(data, conn, sockindex);
       if(result != CURLE_OK)
         return result;
       break;
@@ -541,11 +540,10 @@ mbed_connect_step1(struct connectdata *conn,
 }
 
 static CURLcode
-mbed_connect_step2(struct connectdata *conn,
+mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
                    int sockindex)
 {
   int ret;
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   const mbedtls_x509_crt *peercert;
@@ -713,13 +711,12 @@ mbed_connect_step2(struct connectdata *conn,
 }
 
 static CURLcode
-mbed_connect_step3(struct connectdata *conn,
+mbed_connect_step3(struct Curl_easy *data, struct connectdata *conn,
                    int sockindex)
 {
   CURLcode retcode = CURLE_OK;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
-  struct Curl_easy *data = conn->data;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
@@ -788,10 +785,13 @@ static void mbedtls_close_all(struct Curl_easy *data)
   (void)data;
 }
 
-static void mbedtls_close(struct connectdata *conn, int sockindex)
+static void real_mbedtls_close(struct Curl_easy *data,
+                               struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
+
+  (void) data;
   mbedtls_pk_free(&backend->pk);
   mbedtls_x509_crt_free(&backend->clicert);
   mbedtls_x509_crt_free(&backend->cacert);
@@ -802,6 +802,11 @@ static void mbedtls_close(struct connectdata *conn, int sockindex)
 #ifndef THREADING_SUPPORT
   mbedtls_entropy_free(&backend->entropy);
 #endif /* THREADING_SUPPORT */
+}
+
+static void mbedtls_close(struct connectdata *conn, int sockindex)
+{
+  real_mbedtls_close(conn->data, conn, sockindex);
 }
 
 static ssize_t mbed_recv(struct Curl_easy *data, int num,
@@ -899,13 +904,13 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
 }
 
 static CURLcode
-mbed_connect_common(struct connectdata *conn,
+mbed_connect_common(struct Curl_easy *data,
+                    struct connectdata *conn,
                     int sockindex,
                     bool nonblocking,
                     bool *done)
 {
   CURLcode retcode;
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
   timediff_t timeout_ms;
@@ -926,7 +931,7 @@ mbed_connect_common(struct connectdata *conn,
       failf(data, "SSL connection timeout");
       return CURLE_OPERATION_TIMEDOUT;
     }
-    retcode = mbed_connect_step1(conn, sockindex);
+    retcode = mbed_connect_step1(data, conn, sockindex);
     if(retcode)
       return retcode;
   }
@@ -981,7 +986,7 @@ mbed_connect_common(struct connectdata *conn,
      * ensuring that a client using select() or epoll() will always
      * have a valid fdset to wait on.
      */
-    retcode = mbed_connect_step2(conn, sockindex);
+    retcode = mbed_connect_step2(data, conn, sockindex);
     if(retcode || (nonblocking &&
                    (ssl_connect_2 == connssl->connecting_state ||
                     ssl_connect_2_reading == connssl->connecting_state ||
@@ -991,7 +996,7 @@ mbed_connect_common(struct connectdata *conn,
   } /* repeat step2 until all transactions are done. */
 
   if(ssl_connect_3 == connssl->connecting_state) {
-    retcode = mbed_connect_step3(conn, sockindex);
+    retcode = mbed_connect_step3(data, conn, sockindex);
     if(retcode)
       return retcode;
   }
@@ -1014,7 +1019,7 @@ mbed_connect_common(struct connectdata *conn,
 static CURLcode mbedtls_connect_nonblocking(struct connectdata *conn,
                                             int sockindex, bool *done)
 {
-  return mbed_connect_common(conn, sockindex, TRUE, done);
+  return mbed_connect_common(conn->data, conn, sockindex, TRUE, done);
 }
 
 
@@ -1023,7 +1028,7 @@ static CURLcode mbedtls_connect(struct connectdata *conn, int sockindex)
   CURLcode retcode;
   bool done = FALSE;
 
-  retcode = mbed_connect_common(conn, sockindex, FALSE, &done);
+  retcode = mbed_connect_common(conn->data, conn, sockindex, FALSE, &done);
   if(retcode)
     return retcode;
 
