@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1168,6 +1168,7 @@ static void cleanup_part_content(curl_mimepart *part)
   part->kind = MIMEKIND_NONE;
   part->flags &= ~MIME_FAST_READ;
   part->lastreadstatus = 1; /* Successful read status. */
+  part->state.state = MIMESTATE_BEGIN;
 }
 
 static void mime_subparts_free(void *ptr)

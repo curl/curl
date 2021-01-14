@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,9 +42,22 @@ int test(char *URL)
 
   /* First set the URL that is about to receive our POST. */
   test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_MIMEPOST, NULL);
   test_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
   test_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
+
+#ifdef LIB584
+  {
+    curl_mime *mime = curl_mime_init(curl);
+    curl_mimepart *part = curl_mime_addpart(mime);
+    curl_mime_name(part, "fake");
+    curl_mime_data(part, "party", 5);
+    test_setopt(curl, CURLOPT_MIMEPOST, mime);
+    res = curl_easy_perform(curl);
+    curl_mime_free(mime);
+  }
+#endif
+
+  test_setopt(curl, CURLOPT_MIMEPOST, NULL);
 
   /* Now, we should be making a zero byte POST request */
   res = curl_easy_perform(curl);
