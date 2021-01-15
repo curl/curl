@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             ___|___/|_| ______|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,6 +35,7 @@ struct curl_easyoption Curl_easyopts[] = {
   {"ALTSVC_CTRL", CURLOPT_ALTSVC_CTRL, CURLOT_LONG, 0},
   {"APPEND", CURLOPT_APPEND, CURLOT_LONG, 0},
   {"AUTOREFERER", CURLOPT_AUTOREFERER, CURLOT_LONG, 0},
+  {"AWS_SIGV4", CURLOPT_AWS_SIGV4, CURLOT_STRING, 0},
   {"BUFFERSIZE", CURLOPT_BUFFERSIZE, CURLOT_LONG, 0},
   {"CAINFO", CURLOPT_CAINFO, CURLOT_STRING, 0},
   {"CAPATH", CURLOPT_CAPATH, CURLOT_STRING, 0},
@@ -348,6 +349,6 @@ struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return (CURLOPT_LASTENTRY != (304 + 1));
+  return ((CURLOPT_LASTENTRY%10000) != (305 + 1));
 }
 #endif
