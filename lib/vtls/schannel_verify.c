@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -79,10 +79,10 @@ static int is_cr_or_lf(char c)
 
 static CURLcode add_certs_to_store(HCERTSTORE trust_store,
                                    const char *ca_file,
+                                   struct Curl_easy *data,
                                    struct connectdata *conn)
 {
   CURLcode result;
-  struct Curl_easy *data = conn->data;
   HANDLE ca_file_handle = INVALID_HANDLE_VALUE;
   LARGE_INTEGER file_size;
   char *ca_file_buffer = NULL;
@@ -527,10 +527,10 @@ cleanup:
   return result;
 }
 
-CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
+CURLcode Curl_verify_certificate(struct Curl_easy *data,
+                                 struct connectdata *conn, int sockindex)
 {
   SECURITY_STATUS sspi_status;
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CURLcode result = CURLE_OK;
   CERT_CONTEXT *pCertContextServer = NULL;
@@ -584,7 +584,7 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
       }
       else {
         result = add_certs_to_store(trust_store, SSL_CONN_CONFIG(CAfile),
-                                    conn);
+                                    data, conn);
       }
     }
 
@@ -675,7 +675,7 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
 
   if(result == CURLE_OK) {
     if(SSL_CONN_CONFIG(verifyhost)) {
-      result = verify_host(conn->data, pCertContextServer, conn_hostname);
+      result = verify_host(data, pCertContextServer, conn_hostname);
     }
   }
 
