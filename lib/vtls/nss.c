@@ -1546,9 +1546,8 @@ static void close_one(struct ssl_connect_data *connssl)
 /*
  * This function is called when an SSL connection is closed.
  */
-static void real_nss_close(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           int sockindex)
+static void nss_close(struct Curl_easy *data, struct connectdata *conn,
+                      int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 #ifndef CURL_DISABLE_PROXY
@@ -1578,11 +1577,6 @@ static void real_nss_close(struct Curl_easy *data,
   close_one(connssl_proxy);
 #endif
   close_one(connssl);
-}
-
-static void nss_close(struct connectdata *conn, int sockindex)
-{
-  real_nss_close(conn->data, conn, sockindex);
 }
 
 /* return true if NSS can provide error code (and possibly msg) for the
@@ -2256,15 +2250,17 @@ static CURLcode nss_connect_common(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode nss_connect(struct connectdata *conn, int sockindex)
+static CURLcode nss_connect(struct Curl_easy *data, struct connectdata *conn,
+                            int sockindex)
 {
-  return nss_connect_common(conn->data, conn, sockindex, /* blocking */ NULL);
+  return nss_connect_common(data, conn, sockindex, /* blocking */ NULL);
 }
 
-static CURLcode nss_connect_nonblocking(struct connectdata *conn,
+static CURLcode nss_connect_nonblocking(struct Curl_easy *data,
+                                        struct connectdata *conn,
                                         int sockindex, bool *done)
 {
-  return nss_connect_common(conn->data, conn, sockindex, done);
+  return nss_connect_common(data, conn, sockindex, done);
 }
 
 static ssize_t nss_send(struct Curl_easy *data,    /* transfer */

@@ -408,8 +408,7 @@ mesalink_send(struct Curl_easy *data, int sockindex, const void *mem,
 }
 
 static void
-real_mesalink_close(struct Curl_easy *data,
-                    struct connectdata *conn, int sockindex)
+mesalink_close(struct Curl_easy *data, struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
@@ -424,12 +423,6 @@ real_mesalink_close(struct Curl_easy *data,
     SSL_CTX_free(BACKEND->ctx);
     BACKEND->ctx = NULL;
   }
-}
-
-static void
-mesalink_close(struct connectdata *conn, int sockindex)
-{
-  real_mesalink_close(conn->data, conn, sockindex);
 }
 
 static ssize_t
@@ -483,8 +476,8 @@ mesalink_init(void)
  * socket open (CCC - Clear Command Channel)
  */
 static int
-real_mesalink_shutdown(struct Curl_easy *data,
-                       struct connectdata *conn, int sockindex)
+mesalink_shutdown(struct Curl_easy *data,
+                  struct connectdata *conn, int sockindex)
 {
   int retval = 0;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -496,12 +489,6 @@ real_mesalink_shutdown(struct Curl_easy *data,
     BACKEND->handle = NULL;
   }
   return retval;
-}
-
-static int
-mesalink_shutdown(struct connectdata *conn, int sockindex)
-{
-  return real_mesalink_shutdown(conn->data, conn, sockindex);
 }
 
 static CURLcode
@@ -619,19 +606,20 @@ mesalink_connect_common(struct Curl_easy *data, struct connectdata *conn,
 }
 
 static CURLcode
-mesalink_connect_nonblocking(struct connectdata *conn, int sockindex,
-                             bool *done)
+mesalink_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
+                             int sockindex, bool *done)
 {
-  return mesalink_connect_common(conn->data, conn, sockindex, TRUE, done);
+  return mesalink_connect_common(data, conn, sockindex, TRUE, done);
 }
 
 static CURLcode
-mesalink_connect(struct connectdata *conn, int sockindex)
+mesalink_connect(struct Curl_easy *data, struct connectdata *conn,
+                 int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
 
-  result = mesalink_connect_common(conn->data, conn, sockindex, FALSE, &done);
+  result = mesalink_connect_common(data, conn, sockindex, FALSE, &done);
   if(result)
     return result;
 

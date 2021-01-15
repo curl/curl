@@ -1125,9 +1125,9 @@ static CURLcode gskit_connect_common(struct Curl_easy *data,
 }
 
 
-static CURLcode real_gskit_connect_nonblocking(struct Curl_easy *data,
-                                               struct connectdata *conn,
-                                               int sockindex, bool *done)
+static CURLcode gskit_connect_nonblocking(struct Curl_easy *data,
+                                          struct connectdata *conn,
+                                          int sockindex, bool *done)
 {
   CURLcode result;
 
@@ -1137,15 +1137,9 @@ static CURLcode real_gskit_connect_nonblocking(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode gskit_connect_nonblocking(struct connectdata *conn,
-                                          int sockindex, bool *done)
-{
-  return real_gskit_connect_nonblocking(conn->data, conn, sockindex, done);
-}
 
-
-static CURLcode real_gskit_connect(struct Curl_easy *data,
-                                   struct connectdata *conn, int sockindex)
+static CURLcode gskit_connect(struct Curl_easy *data,
+                              struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done;
@@ -1160,27 +1154,17 @@ static CURLcode real_gskit_connect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode gskit_connect(struct connectdata *conn, int sockindex)
-{
-  return real_gskit_connect(conn->data, conn, sockindex);
-}
 
-
-static void real_gskit_close(struct Curl_easy *data, struct connectdata *conn,
-                             int sockindex)
+static void gskit_close(struct Curl_easy *data, struct connectdata *conn,
+                        int sockindex)
 {
   close_one(&conn->ssl[sockindex], data, conn, sockindex);
   close_one(&conn->proxy_ssl[sockindex], data, conn, sockindex);
 }
 
-static void gskit_close(struct connectdata *conn, int sockindex)
-{
-  real_gskit_close(conn->data, conn, sockindex);
-}
 
-
-static int real_gskit_shutdown(struct Curl_easy *data,
-                               struct connectdata *conn, int sockindex)
+static int gskit_shutdown(struct Curl_easy *data,
+                          struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   int what;
@@ -1233,11 +1217,6 @@ static int real_gskit_shutdown(struct Curl_easy *data,
   }
 
   return rc;
-}
-
-static int gskit_shutdown(struct connectdata *conn, int sockindex)
-{
-  return real_gskit_shutdown(conn->data, conn, sockindex);
 }
 
 

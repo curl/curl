@@ -2064,18 +2064,20 @@ schannel_recv(struct Curl_easy *data, int sockindex,
   return *err ? -1 : 0;
 }
 
-static CURLcode schannel_connect_nonblocking(struct connectdata *conn,
+static CURLcode schannel_connect_nonblocking(struct Curl_easy *data,
+                                             struct connectdata *conn,
                                              int sockindex, bool *done)
 {
-  return schannel_connect_common(conn->data, conn, sockindex, TRUE, done);
+  return schannel_connect_common(data, conn, sockindex, TRUE, done);
 }
 
-static CURLcode schannel_connect(struct connectdata *conn, int sockindex)
+static CURLcode schannel_connect(struct Curl_easy *data,
+                                 struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
 
-  result = schannel_connect_common(conn->data, conn, sockindex, FALSE, &done);
+  result = schannel_connect_common(data, conn, sockindex, FALSE, &done);
   if(result)
     return result;
 
@@ -2096,19 +2098,14 @@ static bool schannel_data_pending(const struct connectdata *conn,
     return FALSE;
 }
 
-static void real_schannel_close(struct Curl_easy *data,
-                                struct connectdata *conn, int sockindex)
+static void schannel_close(struct Curl_easy *data, struct connectdata *conn,
+                           int sockindex)
 {
   (void) data;
 
   if(conn->ssl[sockindex].use)
     /* if the SSL/TLS channel hasn't been shut down yet, do that now. */
     Curl_ssl_shutdown(conn, sockindex);
-}
-
-static void schannel_close(struct connectdata *conn, int sockindex)
-{
-  real_schannel_close(conn->data, conn, sockindex);
 }
 
 static void schannel_session_free(void *ptr)
@@ -2123,8 +2120,8 @@ static void schannel_session_free(void *ptr)
   }
 }
 
-static int real_schannel_shutdown(struct Curl_easy *data,
-                                  struct connectdata *conn, int sockindex)
+static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
+                             int sockindex)
 {
   /* See https://msdn.microsoft.com/en-us/library/windows/desktop/aa380138.aspx
    * Shutting Down an Schannel Connection
@@ -2211,11 +2208,6 @@ static int real_schannel_shutdown(struct Curl_easy *data,
 
   /* free SSPI Schannel API credential handle */
   if(BACKEND->cred) {
-    /*
-     * When this function is called from schannel_close() the connection
-     * might not have an associated transfer so the check for conn->data is
-     * necessary.
-     */
     Curl_ssl_sessionid_lock(conn);
     schannel_session_free(BACKEND->cred);
     Curl_ssl_sessionid_unlock(conn);
@@ -2238,11 +2230,6 @@ static int real_schannel_shutdown(struct Curl_easy *data,
   }
 
   return CURLE_OK;
-}
-
-static int schannel_shutdown(struct connectdata *conn, int sockindex)
-{
-  return real_schannel_shutdown(conn->data, conn, sockindex);
 }
 
 static int schannel_init(void)

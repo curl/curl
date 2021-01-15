@@ -1375,8 +1375,8 @@ static void ossl_closeone(struct ssl_connect_data *connssl)
 /*
  * This function is called when an SSL connection is closed.
  */
-static void real_ossl_close(struct Curl_easy *data,
-                            struct connectdata *conn, int sockindex)
+static void ossl_close(struct Curl_easy *data, struct connectdata *conn,
+                       int sockindex)
 {
   (void) data;
   ossl_closeone(&conn->ssl[sockindex]);
@@ -1385,17 +1385,12 @@ static void real_ossl_close(struct Curl_easy *data,
 #endif
 }
 
-static void ossl_close(struct connectdata *conn, int sockindex)
-{
-  real_ossl_close(conn->data, conn, sockindex);
-}
-
 /*
  * This function is called to shut down the SSL layer but keep the
  * socket open (CCC - Clear Command Channel)
  */
-static int real_ossl_shutdown(struct Curl_easy *data,
-                              struct connectdata *conn, int sockindex)
+static int ossl_shutdown(struct Curl_easy *data,
+                         struct connectdata *conn, int sockindex)
 {
   int retval = 0;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -1493,11 +1488,6 @@ static int real_ossl_shutdown(struct Curl_easy *data,
     backend->handle = NULL;
   }
   return retval;
-}
-
-static int ossl_shutdown(struct connectdata *conn, int sockindex)
-{
-  return real_ossl_shutdown(conn->data, conn, sockindex);
 }
 
 static void ossl_session_free(void *ptr)
@@ -4114,19 +4104,21 @@ static CURLcode ossl_connect_common(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode ossl_connect_nonblocking(struct connectdata *conn,
+static CURLcode ossl_connect_nonblocking(struct Curl_easy *data,
+                                         struct connectdata *conn,
                                          int sockindex,
                                          bool *done)
 {
-  return ossl_connect_common(conn->data, conn, sockindex, TRUE, done);
+  return ossl_connect_common(data, conn, sockindex, TRUE, done);
 }
 
-static CURLcode ossl_connect(struct connectdata *conn, int sockindex)
+static CURLcode ossl_connect(struct Curl_easy *data, struct connectdata *conn,
+                             int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
 
-  result = ossl_connect_common(conn->data, conn, sockindex, FALSE, &done);
+  result = ossl_connect_common(data, conn, sockindex, FALSE, &done);
   if(result)
     return result;
 

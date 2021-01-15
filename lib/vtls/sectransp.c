@@ -2950,18 +2950,20 @@ sectransp_connect_common(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode sectransp_connect_nonblocking(struct connectdata *conn,
+static CURLcode sectransp_connect_nonblocking(struct Curl_easy *data,
+                                              struct connectdata *conn,
                                               int sockindex, bool *done)
 {
-  return sectransp_connect_common(conn->data, conn, sockindex, TRUE, done);
+  return sectransp_connect_common(data, conn, sockindex, TRUE, done);
 }
 
-static CURLcode sectransp_connect(struct connectdata *conn, int sockindex)
+static CURLcode sectransp_connect(struct Curl_easy *data,
+                                  struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
 
-  result = sectransp_connect_common(conn->data, conn, sockindex, FALSE, &done);
+  result = sectransp_connect_common(data, conn, sockindex, FALSE, &done);
 
   if(result)
     return result;
@@ -2971,8 +2973,8 @@ static CURLcode sectransp_connect(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-static void real_sectransp_close(struct Curl_easy *data,
-                                 struct connectdata *conn, int sockindex)
+static void sectransp_close(struct Curl_easy *data, struct connectdata *conn,
+                            int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -2996,13 +2998,8 @@ static void real_sectransp_close(struct Curl_easy *data,
   backend->ssl_sockfd = 0;
 }
 
-static void sectransp_close(struct connectdata *conn, int sockindex)
-{
-  real_sectransp_close(conn->data, conn, sockindex);
-}
-
-static int real_sectransp_shutdown(struct Curl_easy *data,
-                                   struct connectdata *conn, int sockindex)
+static int sectransp_shutdown(struct Curl_easy *data,
+                              struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -3019,7 +3016,7 @@ static int real_sectransp_shutdown(struct Curl_easy *data,
     return 0;
 #endif
 
-  sectransp_close(conn, sockindex);
+  sectransp_close(data, conn, sockindex);
 
   rc = 0;
 
@@ -3055,11 +3052,6 @@ static int real_sectransp_shutdown(struct Curl_easy *data,
   }
 
   return rc;
-}
-
-static int sectransp_shutdown(struct connectdata *conn, int sockindex)
-{
-  return real_sectransp_shutdown(conn->data, conn, sockindex);
 }
 
 static void sectransp_session_free(void *ptr)
