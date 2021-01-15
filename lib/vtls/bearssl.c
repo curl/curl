@@ -374,12 +374,12 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
   if(SSL_SET_OPTION(primary.sessionid)) {
     void *session;
 
-    Curl_ssl_sessionid_lock(conn);
-    if(!Curl_ssl_getsessionid(conn, &session, NULL, sockindex)) {
+    Curl_ssl_sessionid_lock(data);
+    if(!Curl_ssl_getsessionid(data, conn, &session, NULL, sockindex)) {
       br_ssl_engine_set_session_parameters(&backend->ctx.eng, session);
       infof(data, "BearSSL: re-using session ID\n");
     }
-    Curl_ssl_sessionid_unlock(conn);
+    Curl_ssl_sessionid_unlock(data);
   }
 
   if(conn->bits.tls_enable_alpn) {
@@ -569,12 +569,13 @@ static CURLcode bearssl_connect_step3(struct Curl_easy *data,
     if(!session)
       return CURLE_OUT_OF_MEMORY;
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, session);
-    Curl_ssl_sessionid_lock(conn);
-    incache = !(Curl_ssl_getsessionid(conn, &oldsession, NULL, sockindex));
+    Curl_ssl_sessionid_lock(data);
+    incache = !(Curl_ssl_getsessionid(data, conn,
+                                      &oldsession, NULL, sockindex));
     if(incache)
-      Curl_ssl_delsessionid(conn, oldsession);
-    ret = Curl_ssl_addsessionid(conn, session, 0, sockindex);
-    Curl_ssl_sessionid_unlock(conn);
+      Curl_ssl_delsessionid(data, oldsession);
+    ret = Curl_ssl_addsessionid(data, conn, session, 0, sockindex);
+    Curl_ssl_sessionid_unlock(data);
     if(ret) {
       free(session);
       return CURLE_OUT_OF_MEMORY;

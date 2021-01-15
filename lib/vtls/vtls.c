@@ -291,10 +291,10 @@ ssl_connect_init_proxy(struct connectdata *conn, int sockindex)
 #endif
 
 CURLcode
-Curl_ssl_connect(struct connectdata *conn, int sockindex)
+Curl_ssl_connect(struct Curl_easy *data, struct connectdata *conn,
+                 int sockindex)
 {
   CURLcode result;
-  struct Curl_easy *data = conn->data;
 
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy_ssl_connected[sockindex]) {
@@ -320,11 +320,10 @@ Curl_ssl_connect(struct connectdata *conn, int sockindex)
 }
 
 CURLcode
-Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
-                             bool *done)
+Curl_ssl_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
+                             int sockindex, bool *done)
 {
   CURLcode result;
-  struct Curl_easy *data = conn->data;
 
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy_ssl_connected[sockindex]) {
@@ -347,10 +346,8 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
 /*
  * Lock shared SSL session data
  */
-void Curl_ssl_sessionid_lock(struct connectdata *conn)
+void Curl_ssl_sessionid_lock(struct Curl_easy *data)
 {
-  struct Curl_easy *data = conn->data;
-
   if(SSLSESSION_SHARED(data))
     Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
 }
@@ -358,10 +355,8 @@ void Curl_ssl_sessionid_lock(struct connectdata *conn)
 /*
  * Unlock shared SSL session data
  */
-void Curl_ssl_sessionid_unlock(struct connectdata *conn)
+void Curl_ssl_sessionid_unlock(struct Curl_easy *data)
 {
-  struct Curl_easy *data = conn->data;
-
   if(SSLSESSION_SHARED(data))
     Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 }
@@ -370,13 +365,13 @@ void Curl_ssl_sessionid_unlock(struct connectdata *conn)
  * Check if there's a session ID for the given connection in the cache, and if
  * there's one suitable, it is provided. Returns TRUE when no entry matched.
  */
-bool Curl_ssl_getsessionid(struct connectdata *conn,
+bool Curl_ssl_getsessionid(struct Curl_easy *data,
+                           struct connectdata *conn,
                            void **ssl_sessionid,
                            size_t *idsize, /* set 0 if unknown */
                            int sockindex)
 {
   struct Curl_ssl_session *check;
-  struct Curl_easy *data = conn->data;
   size_t i;
   long *general_age;
   bool no_match = TRUE;
@@ -463,10 +458,9 @@ void Curl_ssl_kill_session(struct Curl_ssl_session *session)
 /*
  * Delete the given session ID from the cache.
  */
-void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
+void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid)
 {
   size_t i;
-  struct Curl_easy *data = conn->data;
 
   for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
     struct Curl_ssl_session *check = &data->state.session[i];
@@ -484,13 +478,13 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
  * layer. Curl_XXXX_session_free() will be called to free/kill the session ID
  * later on.
  */
-CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
+CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
+                               struct connectdata *conn,
                                void *ssl_sessionid,
                                size_t idsize,
                                int sockindex)
 {
   size_t i;
-  struct Curl_easy *data = conn->data; /* the mother of all structs */
   struct Curl_ssl_session *store = &data->state.session[0];
   long oldest_age = data->state.session[0].age; /* zero if unused */
   char *clone_host;
@@ -630,16 +624,18 @@ int Curl_ssl_getsock(struct connectdata *conn,
 /* USE_OPENSSL || USE_GNUTLS || USE_SCHANNEL || USE_SECTRANSP || USE_NSS */
 #endif
 
-void Curl_ssl_close(struct connectdata *conn, int sockindex)
+void Curl_ssl_close(struct Curl_easy *data, struct connectdata *conn,
+                    int sockindex)
 {
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
-  Curl_ssl->close_one(conn->data, conn, sockindex);
+  Curl_ssl->close_one(data, conn, sockindex);
   conn->ssl[sockindex].state = ssl_connection_none;
 }
 
-CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
+CURLcode Curl_ssl_shutdown(struct Curl_easy *data, struct connectdata *conn,
+                           int sockindex)
 {
-  if(Curl_ssl->shut_down(conn->data, conn, sockindex))
+  if(Curl_ssl->shut_down(data, conn, sockindex))
     return CURLE_SSL_SHUTDOWN_FAILED;
 
   conn->ssl[sockindex].use = FALSE; /* get back to ordinary socket usage */

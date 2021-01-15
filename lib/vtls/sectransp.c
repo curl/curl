@@ -1952,12 +1952,12 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
     char *ssl_sessionid;
     size_t ssl_sessionid_len;
 
-    Curl_ssl_sessionid_lock(conn);
-    if(!Curl_ssl_getsessionid(conn, (void **)&ssl_sessionid,
+    Curl_ssl_sessionid_lock(data);
+    if(!Curl_ssl_getsessionid(data, conn, (void **)&ssl_sessionid,
                               &ssl_sessionid_len, sockindex)) {
       /* we got a session id, use it! */
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
-      Curl_ssl_sessionid_unlock(conn);
+      Curl_ssl_sessionid_unlock(data);
       if(err != noErr) {
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
         return CURLE_SSL_CONNECT_ERROR;
@@ -1976,14 +1976,14 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
 
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
       if(err != noErr) {
-        Curl_ssl_sessionid_unlock(conn);
+        Curl_ssl_sessionid_unlock(data);
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
         return CURLE_SSL_CONNECT_ERROR;
       }
 
-      result = Curl_ssl_addsessionid(conn, ssl_sessionid, ssl_sessionid_len,
-                                     sockindex);
-      Curl_ssl_sessionid_unlock(conn);
+      result = Curl_ssl_addsessionid(data, conn, ssl_sessionid,
+                                     ssl_sessionid_len, sockindex);
+      Curl_ssl_sessionid_unlock(data);
       if(result) {
         failf(data, "failed to store ssl session");
         return result;
