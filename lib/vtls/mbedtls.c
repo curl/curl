@@ -785,8 +785,8 @@ static void mbedtls_close_all(struct Curl_easy *data)
   (void)data;
 }
 
-static void real_mbedtls_close(struct Curl_easy *data,
-                               struct connectdata *conn, int sockindex)
+static void mbedtls_close(struct Curl_easy *data,
+                          struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -802,11 +802,6 @@ static void real_mbedtls_close(struct Curl_easy *data,
 #ifndef THREADING_SUPPORT
   mbedtls_entropy_free(&backend->entropy);
 #endif /* THREADING_SUPPORT */
-}
-
-static void mbedtls_close(struct connectdata *conn, int sockindex)
-{
-  real_mbedtls_close(conn->data, conn, sockindex);
 }
 
 static ssize_t mbed_recv(struct Curl_easy *data, int num,
@@ -1016,19 +1011,21 @@ mbed_connect_common(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode mbedtls_connect_nonblocking(struct connectdata *conn,
+static CURLcode mbedtls_connect_nonblocking(struct Curl_easy *data,
+                                            struct connectdata *conn,
                                             int sockindex, bool *done)
 {
-  return mbed_connect_common(conn->data, conn, sockindex, TRUE, done);
+  return mbed_connect_common(data, conn, sockindex, TRUE, done);
 }
 
 
-static CURLcode mbedtls_connect(struct connectdata *conn, int sockindex)
+static CURLcode mbedtls_connect(struct Curl_easy *data,
+                                struct connectdata *conn, int sockindex)
 {
   CURLcode retcode;
   bool done = FALSE;
 
-  retcode = mbed_connect_common(conn->data, conn, sockindex, FALSE, &done);
+  retcode = mbed_connect_common(data, conn, sockindex, FALSE, &done);
   if(retcode)
     return retcode;
 

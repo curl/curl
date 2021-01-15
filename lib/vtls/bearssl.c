@@ -776,12 +776,13 @@ static CURLcode bearssl_random(struct Curl_easy *data UNUSED_PARAM,
   return CURLE_OK;
 }
 
-static CURLcode bearssl_connect(struct connectdata *conn, int sockindex)
+static CURLcode bearssl_connect(struct Curl_easy *data,
+                                struct connectdata *conn, int sockindex)
 {
   CURLcode ret;
   bool done = FALSE;
 
-  ret = bearssl_connect_common(conn->data, conn, sockindex, FALSE, &done);
+  ret = bearssl_connect_common(data, conn, sockindex, FALSE, &done);
   if(ret)
     return ret;
 
@@ -790,10 +791,11 @@ static CURLcode bearssl_connect(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-static CURLcode bearssl_connect_nonblocking(struct connectdata *conn,
+static CURLcode bearssl_connect_nonblocking(struct Curl_easy *data,
+                                            struct connectdata *conn,
                                             int sockindex, bool *done)
 {
-  return bearssl_connect_common(conn->data, conn, sockindex, TRUE, done);
+  return bearssl_connect_common(data, conn, sockindex, TRUE, done);
 }
 
 static void *bearssl_get_internals(struct ssl_connect_data *connssl,
@@ -803,8 +805,8 @@ static void *bearssl_get_internals(struct ssl_connect_data *connssl,
   return &backend->ctx;
 }
 
-static void real_bearssl_close(struct Curl_easy *data,
-                               struct connectdata *conn, int sockindex)
+static void bearssl_close(struct Curl_easy *data,
+                          struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -817,11 +819,6 @@ static void real_bearssl_close(struct Curl_easy *data,
   for(i = 0; i < backend->anchors_len; ++i)
     free(backend->anchors[i].dn.data);
   free(backend->anchors);
-}
-
-static void bearssl_close(struct connectdata *conn, int sockindex)
-{
-  real_bearssl_close(conn->data, conn, sockindex);
 }
 
 static void bearssl_session_free(void *ptr)

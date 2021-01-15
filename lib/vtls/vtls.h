@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,7 +47,8 @@ struct Curl_ssl {
 
   size_t (*version)(char *buffer, size_t size);
   int (*check_cxn)(struct connectdata *cxn);
-  int (*shut_down)(struct connectdata *conn, int sockindex);
+  int (*shut_down)(struct Curl_easy *data, struct connectdata *conn,
+                   int sockindex);
   bool (*data_pending)(const struct connectdata *conn,
                        int connindex);
 
@@ -56,11 +57,14 @@ struct Curl_ssl {
                      size_t length);
   bool (*cert_status_request)(void);
 
-  CURLcode (*connect_blocking)(struct connectdata *conn, int sockindex);
-  CURLcode (*connect_nonblocking)(struct connectdata *conn, int sockindex,
+  CURLcode (*connect_blocking)(struct Curl_easy *data,
+                               struct connectdata *conn, int sockindex);
+  CURLcode (*connect_nonblocking)(struct Curl_easy *data,
+                                  struct connectdata *conn, int sockindex,
                                   bool *done);
   void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
-  void (*close_one)(struct connectdata *conn, int sockindex);
+  void (*close_one)(struct Curl_easy *data, struct connectdata *conn,
+                    int sockindex);
   void (*close_all)(struct Curl_easy *data);
   void (*session_free)(void *ptr);
 
@@ -82,7 +86,8 @@ extern const struct Curl_ssl *Curl_ssl;
 
 int Curl_none_init(void);
 void Curl_none_cleanup(void);
-int Curl_none_shutdown(struct connectdata *conn, int sockindex);
+int Curl_none_shutdown(struct Curl_easy *data, struct connectdata *conn,
+                       int sockindex);
 int Curl_none_check_cxn(struct connectdata *conn);
 CURLcode Curl_none_random(struct Curl_easy *data, unsigned char *entropy,
                           size_t length);

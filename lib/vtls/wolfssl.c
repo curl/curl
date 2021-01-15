@@ -837,8 +837,8 @@ static ssize_t wolfssl_send(struct Curl_easy *data,
   return rc;
 }
 
-static void real_wolfssl_close(struct Curl_easy *data,
-                               struct connectdata *conn, int sockindex)
+static void wolfssl_close(struct Curl_easy *data, struct connectdata *conn,
+                          int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -854,11 +854,6 @@ static void real_wolfssl_close(struct Curl_easy *data,
     SSL_CTX_free(backend->ctx);
     backend->ctx = NULL;
   }
-}
-
-static void wolfssl_close(struct connectdata *conn, int sockindex)
-{
-  real_wolfssl_close(conn->data, conn, sockindex);
 }
 
 static ssize_t wolfssl_recv(struct Curl_easy *data,
@@ -947,8 +942,8 @@ static bool wolfssl_data_pending(const struct connectdata *conn,
  * This function is called to shut down the SSL layer but keep the
  * socket open (CCC - Clear Command Channel)
  */
-static int real_wolfssl_shutdown(struct Curl_easy *data,
-                                 struct connectdata *conn, int sockindex)
+static int wolfssl_shutdown(struct Curl_easy *data, struct connectdata *conn,
+                            int sockindex)
 {
   int retval = 0;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -961,11 +956,6 @@ static int real_wolfssl_shutdown(struct Curl_easy *data,
     backend->handle = NULL;
   }
   return retval;
-}
-
-static int wolfssl_shutdown(struct connectdata *conn, int sockindex)
-{
-  return real_wolfssl_shutdown(conn->data, conn, sockindex);
 }
 
 
@@ -1082,19 +1072,21 @@ wolfssl_connect_common(struct Curl_easy *data,
 }
 
 
-static CURLcode wolfssl_connect_nonblocking(struct connectdata *conn,
+static CURLcode wolfssl_connect_nonblocking(struct Curl_easy *data,
+                                            struct connectdata *conn,
                                             int sockindex, bool *done)
 {
-  return wolfssl_connect_common(conn->data, conn, sockindex, TRUE, done);
+  return wolfssl_connect_common(data, conn, sockindex, TRUE, done);
 }
 
 
-static CURLcode wolfssl_connect(struct connectdata *conn, int sockindex)
+static CURLcode wolfssl_connect(struct Curl_easy *data,
+                                struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
 
-  result = wolfssl_connect_common(conn->data, conn, sockindex, FALSE, &done);
+  result = wolfssl_connect_common(data, conn, sockindex, FALSE, &done);
   if(result)
     return result;
 

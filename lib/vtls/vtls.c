@@ -294,6 +294,7 @@ CURLcode
 Curl_ssl_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
+  struct Curl_easy *data = conn->data;
 
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy_ssl_connected[sockindex]) {
@@ -303,17 +304,17 @@ Curl_ssl_connect(struct connectdata *conn, int sockindex)
   }
 #endif
 
-  if(!ssl_prefs_check(conn->data))
+  if(!ssl_prefs_check(data))
     return CURLE_SSL_CONNECT_ERROR;
 
   /* mark this is being ssl-enabled from here on. */
   conn->ssl[sockindex].use = TRUE;
   conn->ssl[sockindex].state = ssl_connection_negotiating;
 
-  result = Curl_ssl->connect_blocking(conn, sockindex);
+  result = Curl_ssl->connect_blocking(data, conn, sockindex);
 
   if(!result)
-    Curl_pgrsTime(conn->data, TIMER_APPCONNECT); /* SSL is connected */
+    Curl_pgrsTime(data, TIMER_APPCONNECT); /* SSL is connected */
 
   return result;
 }
@@ -323,6 +324,8 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
                              bool *done)
 {
   CURLcode result;
+  struct Curl_easy *data = conn->data;
+
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy_ssl_connected[sockindex]) {
     result = ssl_connect_init_proxy(conn, sockindex);
@@ -330,14 +333,14 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
       return result;
   }
 #endif
-  if(!ssl_prefs_check(conn->data))
+  if(!ssl_prefs_check(data))
     return CURLE_SSL_CONNECT_ERROR;
 
   /* mark this is being ssl requested from here on. */
   conn->ssl[sockindex].use = TRUE;
-  result = Curl_ssl->connect_nonblocking(conn, sockindex, done);
+  result = Curl_ssl->connect_nonblocking(data, conn, sockindex, done);
   if(!result && *done)
-    Curl_pgrsTime(conn->data, TIMER_APPCONNECT); /* SSL is connected */
+    Curl_pgrsTime(data, TIMER_APPCONNECT); /* SSL is connected */
   return result;
 }
 
@@ -346,9 +349,10 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
  */
 void Curl_ssl_sessionid_lock(struct connectdata *conn)
 {
-  if(SSLSESSION_SHARED(conn->data))
-    Curl_share_lock(conn->data,
-                    CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
+  struct Curl_easy *data = conn->data;
+
+  if(SSLSESSION_SHARED(data))
+    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
 }
 
 /*
@@ -356,8 +360,10 @@ void Curl_ssl_sessionid_lock(struct connectdata *conn)
  */
 void Curl_ssl_sessionid_unlock(struct connectdata *conn)
 {
-  if(SSLSESSION_SHARED(conn->data))
-    Curl_share_unlock(conn->data, CURL_LOCK_DATA_SSL_SESSION);
+  struct Curl_easy *data = conn->data;
+
+  if(SSLSESSION_SHARED(data))
+    Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 }
 
 /*
@@ -627,13 +633,13 @@ int Curl_ssl_getsock(struct connectdata *conn,
 void Curl_ssl_close(struct connectdata *conn, int sockindex)
 {
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
-  Curl_ssl->close_one(conn, sockindex);
+  Curl_ssl->close_one(conn->data, conn, sockindex);
   conn->ssl[sockindex].state = ssl_connection_none;
 }
 
 CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
 {
-  if(Curl_ssl->shut_down(conn, sockindex))
+  if(Curl_ssl->shut_down(conn->data, conn, sockindex))
     return CURLE_SSL_SHUTDOWN_FAILED;
 
   conn->ssl[sockindex].use = FALSE; /* get back to ordinary socket usage */
@@ -1080,9 +1086,11 @@ int Curl_none_init(void)
 void Curl_none_cleanup(void)
 { }
 
-int Curl_none_shutdown(struct connectdata *conn UNUSED_PARAM,
+int Curl_none_shutdown(struct Curl_easy *data UNUSED_PARAM,
+                       struct connectdata *conn UNUSED_PARAM,
                        int sockindex UNUSED_PARAM)
 {
+  (void)data;
   (void)conn;
   (void)sockindex;
   return 0;
@@ -1188,19 +1196,21 @@ static int multissl_init(void)
   return Curl_ssl->init();
 }
 
-static CURLcode multissl_connect(struct connectdata *conn, int sockindex)
+static CURLcode multissl_connect(struct Curl_easy *data,
+                                 struct connectdata *conn, int sockindex)
 {
   if(multissl_setup(NULL))
     return CURLE_FAILED_INIT;
-  return Curl_ssl->connect_blocking(conn, sockindex);
+  return Curl_ssl->connect_blocking(data, conn, sockindex);
 }
 
-static CURLcode multissl_connect_nonblocking(struct connectdata *conn,
+static CURLcode multissl_connect_nonblocking(struct Curl_easy *data,
+                                             struct connectdata *conn,
                                              int sockindex, bool *done)
 {
   if(multissl_setup(NULL))
     return CURLE_FAILED_INIT;
-  return Curl_ssl->connect_nonblocking(conn, sockindex, done);
+  return Curl_ssl->connect_nonblocking(data, conn, sockindex, done);
 }
 
 static void *multissl_get_internals(struct ssl_connect_data *connssl,
@@ -1211,11 +1221,12 @@ static void *multissl_get_internals(struct ssl_connect_data *connssl,
   return Curl_ssl->get_internals(connssl, info);
 }
 
-static void multissl_close(struct connectdata *conn, int sockindex)
+static void multissl_close(struct Curl_easy *data, struct connectdata *conn,
+                           int sockindex)
 {
   if(multissl_setup(NULL))
     return;
-  Curl_ssl->close_one(conn, sockindex);
+  Curl_ssl->close_one(data, conn, sockindex);
 }
 
 static const struct Curl_ssl Curl_ssl_multi = {

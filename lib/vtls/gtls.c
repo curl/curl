@@ -1359,18 +1359,20 @@ gtls_connect_common(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode gtls_connect_nonblocking(struct connectdata *conn,
+static CURLcode gtls_connect_nonblocking(struct Curl_easy *data,
+                                         struct connectdata *conn,
                                          int sockindex, bool *done)
 {
-  return gtls_connect_common(conn->data, conn, sockindex, TRUE, done);
+  return gtls_connect_common(data, conn, sockindex, TRUE, done);
 }
 
-static CURLcode gtls_connect(struct connectdata *conn, int sockindex)
+static CURLcode gtls_connect(struct Curl_easy *data, struct connectdata *conn,
+                             int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
 
-  result = gtls_connect_common(conn->data, conn, sockindex, FALSE, &done);
+  result = gtls_connect_common(data, conn, sockindex, FALSE, &done);
   if(result)
     return result;
 
@@ -1442,8 +1444,8 @@ static void close_one(struct ssl_connect_data *connssl)
 #endif
 }
 
-static void real_gtls_close(struct Curl_easy *data, struct connectdata *conn,
-                            int sockindex)
+static void gtls_close(struct Curl_easy *data, struct connectdata *conn,
+                       int sockindex)
 {
   (void) data;
   close_one(&conn->ssl[sockindex]);
@@ -1452,17 +1454,12 @@ static void real_gtls_close(struct Curl_easy *data, struct connectdata *conn,
 #endif
 }
 
-static void gtls_close(struct connectdata *conn, int sockindex)
-{
-  real_gtls_close(conn->data, conn, sockindex);
-}
-
 /*
  * This function is called to shut down the SSL layer but keep the
  * socket open (CCC - Clear Command Channel)
  */
-static int real_gtls_shutdown(struct Curl_easy *data, struct connectdata *conn,
-                              int sockindex)
+static int gtls_shutdown(struct Curl_easy *data, struct connectdata *conn,
+                         int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -1533,11 +1530,6 @@ static int real_gtls_shutdown(struct Curl_easy *data, struct connectdata *conn,
   backend->session = NULL;
 
   return retval;
-}
-
-static int gtls_shutdown(struct connectdata *conn, int sockindex)
-{
-  return real_gtls_shutdown(conn->data, conn, sockindex);
 }
 
 static ssize_t gtls_recv(struct Curl_easy *data, /* connection data */
