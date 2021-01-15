@@ -89,10 +89,10 @@ static int do_file_type(const char *type)
  * layer and do all necessary magic.
  */
 static CURLcode
-mesalink_connect_step1(struct connectdata *conn, int sockindex)
+mesalink_connect_step1(struct Curl_easy *data,
+                       struct connectdata *conn, int sockindex)
 {
   char *ciphers;
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct in_addr addr4;
 #ifdef ENABLE_IPV6
@@ -288,10 +288,10 @@ mesalink_connect_step1(struct connectdata *conn, int sockindex)
 }
 
 static CURLcode
-mesalink_connect_step2(struct connectdata *conn, int sockindex)
+mesalink_connect_step2(struct Curl_easy *data,
+                       struct connectdata *conn, int sockindex)
 {
   int ret = -1;
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   conn->recv[sockindex] = mesalink_recv;
@@ -408,9 +408,12 @@ mesalink_send(struct Curl_easy *data, int sockindex, const void *mem,
 }
 
 static void
-Curl_mesalink_close(struct connectdata *conn, int sockindex)
+real_mesalink_close(struct Curl_easy *data,
+                    struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+
+  (void) data;
 
   if(BACKEND->handle) {
     (void)SSL_shutdown(BACKEND->handle);
@@ -421,6 +424,12 @@ Curl_mesalink_close(struct connectdata *conn, int sockindex)
     SSL_CTX_free(BACKEND->ctx);
     BACKEND->ctx = NULL;
   }
+}
+
+static void
+mesalink_close(struct connectdata *conn, int sockindex)
+{
+  real_mesalink_close(conn->data, conn, sockindex);
 }
 
 static ssize_t
@@ -458,13 +467,13 @@ mesalink_recv(struct Curl_easy *data, int num, char *buf, size_t buffersize,
 }
 
 static size_t
-Curl_mesalink_version(char *buffer, size_t size)
+mesalink_version(char *buffer, size_t size)
 {
   return msnprintf(buffer, size, "MesaLink/%s", MESALINK_VERSION_STRING);
 }
 
 static int
-Curl_mesalink_init(void)
+mesalink_init(void)
 {
   return (SSL_library_init() == SSL_SUCCESS);
 }
@@ -474,10 +483,13 @@ Curl_mesalink_init(void)
  * socket open (CCC - Clear Command Channel)
  */
 static int
-Curl_mesalink_shutdown(struct connectdata *conn, int sockindex)
+real_mesalink_shutdown(struct Curl_easy *data,
+                       struct connectdata *conn, int sockindex)
 {
   int retval = 0;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+
+  (void) data;
 
   if(BACKEND->handle) {
     SSL_free(BACKEND->handle);
@@ -486,12 +498,17 @@ Curl_mesalink_shutdown(struct connectdata *conn, int sockindex)
   return retval;
 }
 
+static int
+mesalink_shutdown(struct connectdata *conn, int sockindex)
+{
+  return real_mesalink_shutdown(conn->data, conn, sockindex);
+}
+
 static CURLcode
-mesalink_connect_common(struct connectdata *conn, int sockindex,
-                        bool nonblocking, bool *done)
+mesalink_connect_common(struct Curl_easy *data, struct connectdata *conn,
+                        int sockindex, bool nonblocking, bool *done)
 {
   CURLcode result;
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
   timediff_t timeout_ms;
@@ -513,7 +530,7 @@ mesalink_connect_common(struct connectdata *conn, int sockindex,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    result = mesalink_connect_step1(conn, sockindex);
+    result = mesalink_connect_step1(data, conn, sockindex);
     if(result)
       return result;
   }
@@ -570,7 +587,7 @@ mesalink_connect_common(struct connectdata *conn, int sockindex,
      * ensuring that a client using select() or epoll() will always
      * have a valid fdset to wait on.
      */
-    result = mesalink_connect_step2(conn, sockindex);
+    result = mesalink_connect_step2(data, conn, sockindex);
 
     if(result ||
        (nonblocking && (ssl_connect_2 == connssl->connecting_state ||
@@ -602,19 +619,19 @@ mesalink_connect_common(struct connectdata *conn, int sockindex,
 }
 
 static CURLcode
-Curl_mesalink_connect_nonblocking(struct connectdata *conn, int sockindex,
-                                  bool *done)
+mesalink_connect_nonblocking(struct connectdata *conn, int sockindex,
+                             bool *done)
 {
-  return mesalink_connect_common(conn, sockindex, TRUE, done);
+  return mesalink_connect_common(conn->data, conn, sockindex, TRUE, done);
 }
 
 static CURLcode
-Curl_mesalink_connect(struct connectdata *conn, int sockindex)
+mesalink_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
 
-  result = mesalink_connect_common(conn, sockindex, FALSE, &done);
+  result = mesalink_connect_common(conn->data, conn, sockindex, FALSE, &done);
   if(result)
     return result;
 
@@ -624,8 +641,8 @@ Curl_mesalink_connect(struct connectdata *conn, int sockindex)
 }
 
 static void *
-Curl_mesalink_get_internals(struct ssl_connect_data *connssl,
-                            CURLINFO info UNUSED_PARAM)
+mesalink_get_internals(struct ssl_connect_data *connssl,
+                       CURLINFO info UNUSED_PARAM)
 {
   (void)info;
   return BACKEND->handle;
@@ -638,26 +655,26 @@ const struct Curl_ssl Curl_ssl_mesalink = {
 
   sizeof(struct ssl_backend_data),
 
-  Curl_mesalink_init, /* init */
-  Curl_none_cleanup, /* cleanup */
-  Curl_mesalink_version, /* version */
-  Curl_none_check_cxn, /* check_cxn */
-  Curl_mesalink_shutdown, /* shutdown */
-  Curl_none_data_pending, /* data_pending */
-  Curl_none_random, /* random */
+  mesalink_init,                 /* init */
+  Curl_none_cleanup,             /* cleanup */
+  mesalink_version,              /* version */
+  Curl_none_check_cxn,           /* check_cxn */
+  mesalink_shutdown,             /* shutdown */
+  Curl_none_data_pending,        /* data_pending */
+  Curl_none_random,              /* random */
   Curl_none_cert_status_request, /* cert_status_request */
-  Curl_mesalink_connect, /* connect */
-  Curl_mesalink_connect_nonblocking, /* connect_nonblocking */
-  Curl_mesalink_get_internals, /* get_internals */
-  Curl_mesalink_close, /* close_one */
-  Curl_none_close_all, /* close_all */
-  Curl_none_session_free, /* session_free */
-  Curl_none_set_engine, /* set_engine */
-  Curl_none_set_engine_default, /* set_engine_default */
-  Curl_none_engines_list, /* engines_list */
-  Curl_none_false_start, /* false_start */
-  Curl_none_md5sum, /* md5sum */
-  NULL /* sha256sum */
+  mesalink_connect,              /* connect */
+  mesalink_connect_nonblocking,  /* connect_nonblocking */
+  mesalink_get_internals,        /* get_internals */
+  mesalink_close,                /* close_one */
+  Curl_none_close_all,           /* close_all */
+  Curl_none_session_free,        /* session_free */
+  Curl_none_set_engine,          /* set_engine */
+  Curl_none_set_engine_default,  /* set_engine_default */
+  Curl_none_engines_list,        /* engines_list */
+  Curl_none_false_start,         /* false_start */
+  Curl_none_md5sum,              /* md5sum */
+  NULL                           /* sha256sum */
 };
 
 #endif
