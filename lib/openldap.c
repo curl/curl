@@ -245,7 +245,8 @@ static CURLcode ldap_connect(struct Curl_easy *data, bool *done)
 #ifdef USE_SSL
   if(conn->handler->flags & PROTOPT_SSL) {
     CURLcode result;
-    result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &li->ssldone);
+    result = Curl_ssl_connect_nonblocking(data, conn,
+                                          FIRSTSOCKET, &li->ssldone);
     if(result)
       return result;
   }
@@ -267,7 +268,7 @@ static CURLcode ldap_connecting(struct Curl_easy *data, bool *done)
   if(conn->handler->flags & PROTOPT_SSL) {
     /* Is the SSL handshake complete yet? */
     if(!li->ssldone) {
-      CURLcode result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET,
+      CURLcode result = Curl_ssl_connect_nonblocking(data, conn, FIRSTSOCKET,
                                                      &li->ssldone);
       if(result || !li->ssldone)
         return result;

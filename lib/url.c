@@ -723,8 +723,8 @@ static void conn_shutdown(struct Curl_easy *data, struct connectdata *conn)
 
   /* close the SSL stuff before we close any sockets since they will/may
      write to the sockets */
-  Curl_ssl_close(conn, FIRSTSOCKET);
-  Curl_ssl_close(conn, SECONDARYSOCKET);
+  Curl_ssl_close(data, conn, FIRSTSOCKET);
+  Curl_ssl_close(data, conn, SECONDARYSOCKET);
 
   /* close possibly still open sockets */
   if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET])

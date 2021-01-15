@@ -494,8 +494,9 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
   /* check for an existing re-usable credential handle */
   if(SSL_SET_OPTION(primary.sessionid)) {
-    Curl_ssl_sessionid_lock(conn);
-    if(!Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL, sockindex)) {
+    Curl_ssl_sessionid_lock(data);
+    if(!Curl_ssl_getsessionid(data, conn,
+                              (void **)&old_cred, NULL, sockindex)) {
       BACKEND->cred = old_cred;
       DEBUGF(infof(data, "schannel: re-using existing credential handle\n"));
 
@@ -505,7 +506,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                    "schannel: incremented credential handle refcount = %d\n",
                    BACKEND->cred->refcount));
     }
-    Curl_ssl_sessionid_unlock(conn);
+    Curl_ssl_sessionid_unlock(data);
   }
 
   if(!BACKEND->cred) {
@@ -1412,24 +1413,24 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
     bool incache;
     struct Curl_schannel_cred *old_cred = NULL;
 
-    Curl_ssl_sessionid_lock(conn);
-    incache = !(Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL,
+    Curl_ssl_sessionid_lock(data);
+    incache = !(Curl_ssl_getsessionid(data, conn, (void **)&old_cred, NULL,
                                       sockindex));
     if(incache) {
       if(old_cred != BACKEND->cred) {
         DEBUGF(infof(data,
                      "schannel: old credential handle is stale, removing\n"));
         /* we're not taking old_cred ownership here, no refcount++ is needed */
-        Curl_ssl_delsessionid(conn, (void *)old_cred);
+        Curl_ssl_delsessionid(data, (void *)old_cred);
         incache = FALSE;
       }
     }
     if(!incache) {
-      result = Curl_ssl_addsessionid(conn, (void *)BACKEND->cred,
+      result = Curl_ssl_addsessionid(data, conn, (void *)BACKEND->cred,
                                      sizeof(struct Curl_schannel_cred),
                                      sockindex);
       if(result) {
-        Curl_ssl_sessionid_unlock(conn);
+        Curl_ssl_sessionid_unlock(data);
         failf(data, "schannel: failed to store credential handle");
         return result;
       }
@@ -1440,7 +1441,7 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
                      "schannel: stored credential handle in session cache\n"));
       }
     }
-    Curl_ssl_sessionid_unlock(conn);
+    Curl_ssl_sessionid_unlock(data);
   }
 
   if(data->set.ssl.certinfo) {
@@ -2101,11 +2102,9 @@ static bool schannel_data_pending(const struct connectdata *conn,
 static void schannel_close(struct Curl_easy *data, struct connectdata *conn,
                            int sockindex)
 {
-  (void) data;
-
   if(conn->ssl[sockindex].use)
     /* if the SSL/TLS channel hasn't been shut down yet, do that now. */
-    Curl_ssl_shutdown(conn, sockindex);
+    Curl_ssl_shutdown(data, conn, sockindex);
 }
 
 static void schannel_session_free(void *ptr)
@@ -2208,9 +2207,9 @@ static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
 
   /* free SSPI Schannel API credential handle */
   if(BACKEND->cred) {
-    Curl_ssl_sessionid_lock(conn);
+    Curl_ssl_sessionid_lock(data);
     schannel_session_free(BACKEND->cred);
-    Curl_ssl_sessionid_unlock(conn);
+    Curl_ssl_sessionid_unlock(data);
     BACKEND->cred = NULL;
   }
 

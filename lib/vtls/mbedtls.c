@@ -462,17 +462,17 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   if(SSL_SET_OPTION(primary.sessionid)) {
     void *old_session = NULL;
 
-    Curl_ssl_sessionid_lock(conn);
-    if(!Curl_ssl_getsessionid(conn, &old_session, NULL, sockindex)) {
+    Curl_ssl_sessionid_lock(data);
+    if(!Curl_ssl_getsessionid(data, conn, &old_session, NULL, sockindex)) {
       ret = mbedtls_ssl_set_session(&backend->ssl, old_session);
       if(ret) {
-        Curl_ssl_sessionid_unlock(conn);
+        Curl_ssl_sessionid_unlock(data);
         failf(data, "mbedtls_ssl_set_session returned -0x%x", -ret);
         return CURLE_SSL_CONNECT_ERROR;
       }
       infof(data, "mbedTLS re-using session\n");
     }
-    Curl_ssl_sessionid_unlock(conn);
+    Curl_ssl_sessionid_unlock(data);
   }
 
   mbedtls_ssl_conf_ca_chain(&backend->config,
@@ -741,12 +741,13 @@ mbed_connect_step3(struct Curl_easy *data, struct connectdata *conn,
     }
 
     /* If there's already a matching session in the cache, delete it */
-    Curl_ssl_sessionid_lock(conn);
-    if(!Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL, sockindex))
-      Curl_ssl_delsessionid(conn, old_ssl_sessionid);
+    Curl_ssl_sessionid_lock(data);
+    if(!Curl_ssl_getsessionid(data, conn, &old_ssl_sessionid, NULL, sockindex))
+      Curl_ssl_delsessionid(data, old_ssl_sessionid);
 
-    retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0, sockindex);
-    Curl_ssl_sessionid_unlock(conn);
+    retcode = Curl_ssl_addsessionid(data, conn,
+                                    our_ssl_sessionid, 0, sockindex);
+    Curl_ssl_sessionid_unlock(data);
     if(retcode) {
       mbedtls_ssl_session_free(our_ssl_sessionid);
       free(our_ssl_sessionid);

@@ -731,15 +731,16 @@ gtls_connect_step1(struct Curl_easy *data,
     void *ssl_sessionid;
     size_t ssl_idsize;
 
-    Curl_ssl_sessionid_lock(conn);
-    if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, &ssl_idsize, sockindex)) {
+    Curl_ssl_sessionid_lock(data);
+    if(!Curl_ssl_getsessionid(data, conn,
+                              &ssl_sessionid, &ssl_idsize, sockindex)) {
       /* we got a session id, use it! */
       gnutls_session_set_data(session, ssl_sessionid, ssl_idsize);
 
       /* Informational message */
       infof(data, "SSL re-using session ID\n");
     }
-    Curl_ssl_sessionid_unlock(conn);
+    Curl_ssl_sessionid_unlock(data);
   }
 
   return CURLE_OK;
@@ -1290,19 +1291,19 @@ gtls_connect_step3(struct Curl_easy *data,
       /* extract session ID to the allocated buffer */
       gnutls_session_get_data(session, connect_sessionid, &connect_idsize);
 
-      Curl_ssl_sessionid_lock(conn);
-      incache = !(Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL,
+      Curl_ssl_sessionid_lock(data);
+      incache = !(Curl_ssl_getsessionid(data, conn, &ssl_sessionid, NULL,
                                         sockindex));
       if(incache) {
         /* there was one before in the cache, so instead of risking that the
            previous one was rejected, we just kill that and store the new */
-        Curl_ssl_delsessionid(conn, ssl_sessionid);
+        Curl_ssl_delsessionid(data, ssl_sessionid);
       }
 
       /* store this session id */
-      result = Curl_ssl_addsessionid(conn, connect_sessionid, connect_idsize,
-                                     sockindex);
-      Curl_ssl_sessionid_unlock(conn);
+      result = Curl_ssl_addsessionid(data, conn, connect_sessionid,
+                                     connect_idsize, sockindex);
+      Curl_ssl_sessionid_unlock(data);
       if(result) {
         free(connect_sessionid);
         result = CURLE_OUT_OF_MEMORY;

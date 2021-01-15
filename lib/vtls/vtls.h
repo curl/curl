@@ -170,15 +170,19 @@ int Curl_ssl_backend(void);
 #ifdef USE_SSL
 int Curl_ssl_init(void);
 void Curl_ssl_cleanup(void);
-CURLcode Curl_ssl_connect(struct connectdata *conn, int sockindex);
-CURLcode Curl_ssl_connect_nonblocking(struct connectdata *conn,
+CURLcode Curl_ssl_connect(struct Curl_easy *data, struct connectdata *conn,
+                          int sockindex);
+CURLcode Curl_ssl_connect_nonblocking(struct Curl_easy *data,
+                                      struct connectdata *conn,
                                       int sockindex,
                                       bool *done);
 /* tell the SSL stuff to close down all open information regarding
    connections (and thus session ID caching etc) */
 void Curl_ssl_close_all(struct Curl_easy *data);
-void Curl_ssl_close(struct connectdata *conn, int sockindex);
-CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex);
+void Curl_ssl_close(struct Curl_easy *data, struct connectdata *conn,
+                    int sockindex);
+CURLcode Curl_ssl_shutdown(struct Curl_easy *data, struct connectdata *conn,
+                           int sockindex);
 CURLcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine);
 /* Sets engine as default for all SSL operations */
 CURLcode Curl_ssl_set_engine_default(struct Curl_easy *data);
@@ -210,10 +214,10 @@ CURLcode Curl_ssl_push_certinfo(struct Curl_easy *data, int certnum,
  * The purpose of explicitly locking SSL session cache data is to allow
  * individual SSL engines to manage session lifetime in their specific way.
  */
-void Curl_ssl_sessionid_lock(struct connectdata *conn);
+void Curl_ssl_sessionid_lock(struct Curl_easy *data);
 
 /* Unlock session cache mutex */
-void Curl_ssl_sessionid_unlock(struct connectdata *conn);
+void Curl_ssl_sessionid_unlock(struct Curl_easy *data);
 
 /* extract a session ID
  * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
@@ -221,7 +225,8 @@ void Curl_ssl_sessionid_unlock(struct connectdata *conn);
  * is properly taken (e.g. its refcount is incremented
  * under sessionid mutex).
  */
-bool Curl_ssl_getsessionid(struct connectdata *conn,
+bool Curl_ssl_getsessionid(struct Curl_easy *data,
+                           struct connectdata *conn,
                            void **ssl_sessionid,
                            size_t *idsize, /* set 0 if unknown */
                            int sockindex);
@@ -230,7 +235,8 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
  * Caller must ensure that it has properly shared ownership of this sessionid
  * object with cache (e.g. incrementing refcount on success)
  */
-CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
+CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
+                               struct connectdata *conn,
                                void *ssl_sessionid,
                                size_t idsize,
                                int sockindex);
@@ -247,7 +253,7 @@ void Curl_ssl_kill_session(struct Curl_ssl_session *session);
  * take sessionid object ownership from sessionid cache
  * (e.g. decrement refcount).
  */
-void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid);
+void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid);
 
 /* get N random bytes into the buffer */
 CURLcode Curl_ssl_random(struct Curl_easy *data, unsigned char *buffer,
@@ -272,10 +278,10 @@ bool Curl_ssl_false_start(void);
 /* When SSL support is not present, just define away these function calls */
 #define Curl_ssl_init() 1
 #define Curl_ssl_cleanup() Curl_nop_stmt
-#define Curl_ssl_connect(x,y) CURLE_NOT_BUILT_IN
+#define Curl_ssl_connect(x,y,z) CURLE_NOT_BUILT_IN
 #define Curl_ssl_close_all(x) Curl_nop_stmt
-#define Curl_ssl_close(x,y) Curl_nop_stmt
-#define Curl_ssl_shutdown(x,y) CURLE_NOT_BUILT_IN
+#define Curl_ssl_close(x,y,z) Curl_nop_stmt
+#define Curl_ssl_shutdown(x,y,z) CURLE_NOT_BUILT_IN
 #define Curl_ssl_set_engine(x,y) CURLE_NOT_BUILT_IN
 #define Curl_ssl_set_engine_default(x) CURLE_NOT_BUILT_IN
 #define Curl_ssl_engines_list(x) NULL
@@ -285,7 +291,7 @@ bool Curl_ssl_false_start(void);
 #define Curl_ssl_data_pending(x,y) 0
 #define Curl_ssl_check_cxn(x) 0
 #define Curl_ssl_free_certinfo(x) Curl_nop_stmt
-#define Curl_ssl_connect_nonblocking(x,y,z) CURLE_NOT_BUILT_IN
+#define Curl_ssl_connect_nonblocking(x,y,z,w) CURLE_NOT_BUILT_IN
 #define Curl_ssl_kill_session(x) Curl_nop_stmt
 #define Curl_ssl_random(x,y,z) ((void)x, CURLE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE
