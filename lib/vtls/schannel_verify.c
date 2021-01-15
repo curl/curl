@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -477,7 +477,7 @@ static CURLcode verify_host(struct Curl_easy *data,
      * (or some equivalent) encoding
      */
     cert_hostname = curlx_convert_tchar_to_UTF8(
-        &cert_hostname_buff[cert_hostname_buff_index]);
+      &cert_hostname_buff[cert_hostname_buff_index]);
     if(!cert_hostname) {
       result = CURLE_OUT_OF_MEMORY;
     }
@@ -500,8 +500,8 @@ static CURLcode verify_host(struct Curl_easy *data,
               "against certificate name (%s)\n",
               conn_hostname, cert_hostname);
 
-        cert_hostname_len = _tcslen(
-            &cert_hostname_buff[cert_hostname_buff_index]);
+        cert_hostname_len =
+          _tcslen(&cert_hostname_buff[cert_hostname_buff_index]);
 
         /* Move on to next cert name */
         cert_hostname_buff_index += cert_hostname_len + 1;
@@ -522,7 +522,7 @@ static CURLcode verify_host(struct Curl_easy *data,
     failf(data, "schannel: server certificate name verification failed");
 
 cleanup:
-  curl_safefree(cert_hostname_buff);
+  Curl_safefree(cert_hostname_buff);
 
   return result;
 }
