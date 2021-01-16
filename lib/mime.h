@@ -110,6 +110,7 @@ struct curl_mimepart {
   curl_mime *parent;               /* Parent mime structure. */
   curl_mimepart *nextpart;         /* Forward linked list. */
   enum mimekind kind;              /* The part kind. */
+  unsigned int flags;              /* Flags. */
   char *data;                      /* Memory data or file name. */
   curl_read_callback readfunc;     /* Read function. */
   curl_seek_callback seekfunc;     /* Seek function. */
@@ -122,7 +123,6 @@ struct curl_mimepart {
   char *filename;                  /* Remote file name. */
   char *name;                      /* Data name. */
   curl_off_t datasize;             /* Expected data size. */
-  unsigned int flags;              /* Flags. */
   struct mime_state state;         /* Current readback state. */
   const struct mime_encoder *encoder; /* Content data encoder. */
   struct mime_encoder_state encstate; /* Data encoder state. */

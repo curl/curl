@@ -160,10 +160,9 @@ static bool init_resolve_thread(struct connectdata *conn,
 struct thread_sync_data {
   curl_mutex_t *mtx;
   int done;
-
+  int port;
   char *hostname;        /* hostname to resolve, Curl_async.hostname
                             duplicate */
-  int port;
 #ifdef USE_SOCKETPAIR
   struct connectdata *conn;
   curl_socket_t sock_pair[2]; /* socket pair */

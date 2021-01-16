@@ -61,6 +61,7 @@ struct pop3_conn {
   struct pingpong pp;
   pop3state state;        /* Always use pop3.c:state() to change state! */
   bool ssldone;           /* Is connect() over SSL done? */
+  bool tls_supported;     /* StartTLS capability supported by server */
   size_t eob;             /* Number of bytes of the EOB (End Of Body) that
                              have been received so far */
   size_t strip;           /* Number of bytes from the start to ignore as
@@ -69,7 +70,6 @@ struct pop3_conn {
   unsigned int authtypes; /* Accepted authentication types */
   unsigned int preftype;  /* Preferred authentication type */
   char *apoptimestamp;    /* APOP timestamp from the server greeting */
-  bool tls_supported;     /* StartTLS capability supported by server */
 };
 
 extern const struct Curl_handler Curl_handler_pop3;

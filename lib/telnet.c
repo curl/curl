@@ -156,13 +156,12 @@ struct TELNET {
   char subopt_xdisploc[128];         /* Set with suboption XDISPLOC */
   unsigned short subopt_wsx;         /* Set with suboption NAWS */
   unsigned short subopt_wsy;         /* Set with suboption NAWS */
+  TelnetReceive telrcv_state;
   struct curl_slist *telnet_vars;    /* Environment variables */
 
   /* suboptions */
   unsigned char subbuffer[SUBBUFSIZE];
   unsigned char *subpointer, *subend;      /* buffer for sub-options */
-
-  TelnetReceive telrcv_state;
 };
 
 
