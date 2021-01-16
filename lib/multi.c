@@ -200,8 +200,8 @@ struct Curl_sh_entry {
   struct Curl_hash transfers; /* hash of transfers using this socket */
   unsigned int action;  /* what combined action READ/WRITE this socket waits
                            for */
-  void *socketp; /* settable by users with curl_multi_assign() */
   unsigned int users; /* number of transfers using this */
+  void *socketp; /* settable by users with curl_multi_assign() */
   unsigned int readers; /* this many transfers want to read */
   unsigned int writers; /* this many transfers want to write */
 };

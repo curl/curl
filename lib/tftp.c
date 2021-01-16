@@ -132,7 +132,6 @@ struct tftp_state_data {
   time_t          start_time;
   time_t          max_time;
   time_t          rx_time;
-  unsigned short  block;
   struct Curl_sockaddr_storage   local_addr;
   struct Curl_sockaddr_storage   remote_addr;
   curl_socklen_t  remote_addrlen;
@@ -140,6 +139,7 @@ struct tftp_state_data {
   int             sbytes;
   int             blksize;
   int             requested_blksize;
+  unsigned short  block;
   struct tftp_packet rpacket;
   struct tftp_packet spacket;
 };

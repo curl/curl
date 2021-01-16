@@ -393,8 +393,8 @@ struct ntlmdata {
 #else
   unsigned int flags;
   unsigned char nonce[8];
-  void *target_info; /* TargetInfo received in the ntlm type-2 message */
   unsigned int target_info_len;
+  void *target_info; /* TargetInfo received in the ntlm type-2 message */
 
 #if defined(NTLM_WB_ENABLED)
   /* used for communication with Samba's winbind daemon helper ntlm_auth */
@@ -542,8 +542,8 @@ struct hostname {
 struct Curl_async {
   char *hostname;
   int port;
-  struct Curl_dns_entry *dns;
   int status; /* if done is TRUE, this is the status from the callback */
+  struct Curl_dns_entry *dns;
   struct thread_data *tdata;
   BIT(done);  /* set TRUE when the lookup is complete */
 };
@@ -597,8 +597,8 @@ struct dohdata {
   struct curl_slist *headers;
   struct dnsprobe probe[DOH_PROBE_SLOTS];
   unsigned int pending; /* still outstanding requests */
-  const char *host;
   int port;
+  const char *host;
 };
 
 /*
@@ -641,6 +641,7 @@ struct SingleRequest {
                                    Content-Range: header */
   int httpcode;                 /* error code from the 'HTTP/1.? XXX' or
                                    'RTSP/1.? XXX' line */
+  int keepon;
   struct curltime start100;      /* time stamp to wait for the 100 code from */
   enum expect100 exp100;        /* expect 100 continue state */
   enum upgrade101 upgr101;      /* 101 upgrade state */
@@ -649,7 +650,6 @@ struct SingleRequest {
   struct contenc_writer *writer_stack;
   time_t timeofdoc;
   long bodywrites;
-  int keepon;
   char *location;   /* This points to an allocated version of the Location:
                        header data */
   char *newurl;     /* Set to the new URL to use when a redirect or a retry is
@@ -1019,13 +1019,14 @@ struct connectdata {
 #endif
   struct ConnectBits bits;    /* various state-flags for this connection */
 
+  /* The field below gets set in Curl_connecthost */
+  int num_addr; /* number of addresses to try to connect to */
  /* connecttime: when connect() is called on the current IP address. Used to
     be able to track when to move on to try next IP - but only when the multi
     interface is used. */
   struct curltime connecttime;
-  /* The two fields below get set in Curl_connecthost */
-  int num_addr; /* number of addresses to try to connect to */
 
+  /* The field below gets set in Curl_connecthost */
   /* how long time in milliseconds to spend on trying to connect to each IP
      address, per family */
   timediff_t timeoutms_per_addr[2];
@@ -1351,10 +1352,10 @@ struct UrlState {
   int first_remote_port; /* remote port of the first (not followed) request */
   struct Curl_ssl_session *session; /* array of 'max_ssl_sessions' size */
   long sessionage;                  /* number of the most recent session */
-  unsigned int tempcount; /* number of entries in use in tempwrite, 0 - 3 */
   struct tempbuf tempwrite[3]; /* BOTH, HEADER, BODY */
-  char *scratch; /* huge buffer[set.buffer_size*2] for upload CRLF replacing */
+  unsigned int tempcount; /* number of entries in use in tempwrite, 0 - 3 */
   int os_errno;  /* filled in with errno whenever an error occurs */
+  char *scratch; /* huge buffer[set.buffer_size*2] for upload CRLF replacing */
 #ifdef HAVE_SIGNAL
   /* storage for the previous bag^H^H^HSIGPIPE signal handler :-) */
   void (*prev_signal)(int sig);
@@ -1719,6 +1720,7 @@ struct UserDefined {
   struct curl_slist *connect_to; /* list of host:port mappings to override
                                     the hostname and port to connect to */
   curl_TimeCond timecondition; /* kind of time/date comparison */
+  curl_proxytype proxytype; /* what kind of proxy that is in use */
   time_t timevalue;       /* what time to compare with */
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
   Curl_HttpReq method;   /* what kind of HTTP request (if any) is this */
@@ -1730,7 +1732,6 @@ struct UserDefined {
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
 #endif
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
-  curl_proxytype proxytype; /* what kind of proxy that is in use */
   long dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
   size_t upload_buffer_size; /* size of upload buffer to use,

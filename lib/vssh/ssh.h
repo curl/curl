@@ -123,6 +123,8 @@ struct ssh_conn {
   char *rsa_pub;              /* path name */
   char *rsa;                  /* path name */
   bool authed;                /* the connection has been authenticated fine */
+  bool acceptfail;            /* used by the SFTP_QUOTE (continue if
+                                 quote command fails) */
   sshstate state;             /* always use ssh.c:state() to change state! */
   sshstate nextstate;         /* the state to goto after stopping */
   CURLcode actualcode;        /* the actual error code */
@@ -130,8 +132,6 @@ struct ssh_conn {
   char *quote_path1;          /* two generic pointers for the QUOTE stuff */
   char *quote_path2;
 
-  bool acceptfail;            /* used by the SFTP_QUOTE (continue if
-                                 quote command fails) */
   char *homedir;              /* when doing SFTP we figure out home dir in the
                                  connect phase */
   char *readdir_line;
@@ -140,9 +140,8 @@ struct ssh_conn {
   int secondCreateDirs;         /* counter use by the code to see if the
                                    second attempt has been made to change
                                    to/create a directory */
-  char *slash_pos;              /* used by the SFTP_CREATE_DIRS state */
-
   int orig_waitfor;             /* default READ/WRITE bits wait for */
+  char *slash_pos;              /* used by the SFTP_CREATE_DIRS state */
 
 #if defined(USE_LIBSSH)
   char *readdir_linkPath;
