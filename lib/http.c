@@ -3123,6 +3123,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 #ifndef CURL_DISABLE_PROXY
                   (conn->bits.httpproxy &&
                    !conn->bits.tunnel_proxy &&
+                   !Curl_checkheaders(data, "Proxy-Connection") &&
                    !Curl_checkProxyheaders(data, conn, "Proxy-Connection"))?
                   "Proxy-Connection: Keep-Alive\r\n":"",
 #else
