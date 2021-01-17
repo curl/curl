@@ -120,12 +120,9 @@ static int hyper_each_header(void *userdata,
                              size_t value_len)
 {
   struct Curl_easy *data = (struct Curl_easy *)userdata;
-  size_t wrote;
   size_t len;
   char *headp;
   CURLcode result;
-  curl_write_callback writeheader =
-    data->set.fwrite_header? data->set.fwrite_header: data->set.fwrite_func;
   Curl_dyn_reset(&data->state.headerb);
   if(name_len) {
     if(Curl_dyn_addf(&data->state.headerb, "%.*s: %.*s\r\n",
@@ -147,10 +144,8 @@ static int hyper_each_header(void *userdata,
 
   Curl_debug(data, CURLINFO_HEADER_IN, headp, len);
 
-  Curl_set_in_callback(data, true);
-  wrote = writeheader(headp, 1, len, data->set.writeheader);
-  Curl_set_in_callback(data, false);
-  if(wrote != len) {
+  result = Curl_client_write(data->conn, CLIENTWRITE_HEADER, headp, len);
+  if(result) {
     data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
     return HYPER_ITER_BREAK;
   }
@@ -165,13 +160,12 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
   char *buf = (char *)hyper_buf_bytes(chunk);
   size_t len = hyper_buf_len(chunk);
   struct Curl_easy *data = (struct Curl_easy *)userdata;
-  curl_write_callback writebody = data->set.fwrite_func;
   struct SingleRequest *k = &data->req;
-  size_t wrote;
+  CURLcode result;
 
   if(0 == k->bodywrites++) {
     bool done = FALSE;
-    CURLcode result = Curl_http_firstwrite(data, data->conn, &done);
+    result = Curl_http_firstwrite(data, data->conn, &done);
     if(result || done) {
       infof(data, "Return early from hyper_body_chunk\n");
       data->state.hresult = result;
@@ -181,12 +175,10 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
   if(k->ignorebody)
     return HYPER_ITER_CONTINUE;
   Curl_debug(data, CURLINFO_DATA_IN, buf, len);
-  Curl_set_in_callback(data, true);
-  wrote = writebody(buf, 1, len, data->set.out);
-  Curl_set_in_callback(data, false);
+  result = Curl_client_write(data->conn, CLIENTWRITE_BODY, buf, len);
 
-  if(wrote != len) {
-    data->state.hresult = CURLE_WRITE_ERROR;
+  if(result) {
+    data->state.hresult = result;
     return HYPER_ITER_BREAK;
   }
 
