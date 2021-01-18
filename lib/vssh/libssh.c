@@ -532,10 +532,10 @@ static int myssh_is_known(struct connectdata *conn)
 
 cleanup:
   if(found_base64) {
-    free(found_base64);
+    (free)(found_base64);
   }
   if(known_base64) {
-    free(known_base64);
+    (free)(known_base64);
   }
   if(hash)
     ssh_clean_pubkey_hash(&hash);
