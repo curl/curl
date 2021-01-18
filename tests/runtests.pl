@@ -3369,15 +3369,6 @@ sub subNewlines {
     }
 }
 
-sub fixarray {
-    my @in = @_;
-
-    for(@in) {
-        subVariables(\$_);
-    }
-    return @in;
-}
-
 #######################################################################
 # Provide time stamps for single test skipped events
 #
@@ -3426,6 +3417,46 @@ sub timestampskippedevents {
             $timesrvrini{$testnum} = $timeprepini{$testnum};
         }
     }
+}
+
+#
+# 'prepro' processes the input array and replaces %-variables in the array
+# etc. Returns the processed version of the array
+
+sub prepro {
+    my (@entiretest) = @_;
+    my $show = 1;
+    my @out;
+    for my $s (@entiretest) {
+        my $f = $s;
+        if($s =~ /^ *%if (.*)/) {
+            my $cond = $1;
+            my $rev = 0;
+
+            if($cond =~ /^!(.*)/) {
+                $cond = $1;
+                $rev = 1;
+            }
+            $rev ^= $feature{$cond} ? 1 : 0;
+            $show = $rev;
+            next;
+        }
+        elsif($s =~ /^ *%else/) {
+            $show ^= 1;
+            next;
+        }
+        elsif($s =~ /^ *%endif/) {
+            $show = 1;
+            next;
+        }
+        if($show) {
+            subVariables(\$s, "%");
+            subBase64(\$s);
+            subNewlines(\$s) if($has_hyper);
+            push @out, $s;
+        }
+    }
+    return @out;
 }
 
 #######################################################################
@@ -3586,52 +3617,16 @@ sub singletest {
     # "basic" test case readers to enjoy variable replacements.
     my @entiretest = fulltest();
     my $otest = "log/test$testnum";
-    open(D, ">$otest");
-    my $diff;
-    my $show = 1;
-    for my $s (@entiretest) {
-        my $f = $s;
-        if($s =~ /^ *%if (.*)/) {
-            my $cond = $1;
-            my $rev = 0;
 
-            if($cond =~ /^!(.*)/) {
-                $cond = $1;
-                $rev = 1;
-            }
-            $rev ^= $feature{$cond} ? 1 : 0;
-            $show = $rev;
-            next;
-        }
-        elsif($s =~ /^ *%else/) {
-            $show ^= 1;
-            next;
-        }
-        elsif($s =~ /^ *%endif/) {
-            $show = 1;
-            next;
-        }
-        if($show) {
-            subVariables(\$s, "%");
-            subBase64(\$s);
-            subNewlines(\$s) if($has_hyper);
-            if($f ne $s) {
-                $diff++;
-            }
-            print D $s;
-        }
-        else {
-            $diff++;
-        }
-    }
+    @entiretest = prepro(@entiretest);
+
+    # save the new version
+    open(D, ">$otest");
+    print D @entiretest;
     close(D);
 
-    # remove the separate test file again if nothing was updated to keep
-    # things simpler
-    unlink($otest) if(!$diff);
-
     # in case the process changed the file, reload it
-    loadtest("log/test${testnum}") if($diff);
+    loadtest("log/test${testnum}");
 
     # timestamp required servers verification end
     $timesrvrend{$testnum} = Time::HiRes::time();
@@ -3640,7 +3635,6 @@ sub singletest {
     if(@setenv) {
         foreach my $s (@setenv) {
             chomp $s;
-            subVariables(\$s);
             if($s =~ /([^=]*)=(.*)/) {
                 my ($var, $content) = ($1, $2);
                 # remember current setting, to restore it once test runs
@@ -3672,7 +3666,6 @@ sub singletest {
         if(@precheck) {
             $cmd = $precheck[0];
             chomp $cmd;
-            subVariables(\$cmd);
             if($cmd) {
                 my @p = split(/ /, $cmd);
                 if($p[0] !~ /\//) {
@@ -3751,23 +3744,20 @@ sub singletest {
             map s/\n/\r\n/g, @reply;
         }
     }
-    for my $r (@reply) {
-        subVariables(\$r);
-    }
 
     # this is the valid protocol blurb curl should generate
-    my @protocol= fixarray ( getpart("verify", "protocol") );
+    my @protocol= getpart("verify", "protocol");
 
     # this is the valid protocol blurb curl should generate to a proxy
-    my @proxyprot = fixarray ( getpart("verify", "proxy") );
+    my @proxyprot = getpart("verify", "proxy");
 
     # redirected stdout/stderr to these files
     $STDOUT="$LOGDIR/stdout$testnum";
     $STDERR="$LOGDIR/stderr$testnum";
 
     # if this section exists, we verify that the stdout contained this:
-    my @validstdout = fixarray ( getpart("verify", "stdout") );
-    my @validstderr = fixarray ( getpart("verify", "stderr") );
+    my @validstdout = getpart("verify", "stdout");
+    my @validstderr = getpart("verify", "stderr");
 
     # if this section exists, we verify upload
     my @upload = getpart("verify", "upload");
@@ -3780,7 +3770,7 @@ sub singletest {
     }
 
     # if this section exists, it might be FTP server instructions:
-    my @ftpservercmd = fixarray ( getpart("reply", "servercmd") );
+    my @ftpservercmd = getpart("reply", "servercmd");
 
     my $CURLOUT="$LOGDIR/curl$testnum.out"; # curl output if not stdout
 
@@ -3818,7 +3808,6 @@ sub singletest {
         # make some nice replace operations
         $cmd =~ s/\n//g; # no newlines please
         # substitute variables in the command line
-        subVariables(\$cmd);
     }
     else {
         # there was no command given, use something silly
@@ -3840,7 +3829,6 @@ sub singletest {
                 return -1;
             }
             my $fileContent = join('', @inputfile);
-            subVariables(\$fileContent);
             open(OUTFILE, ">$filename");
             binmode OUTFILE; # for crapage systems, use binary
             if($fileattr{'nonewline'}) {
@@ -4112,7 +4100,6 @@ sub singletest {
     if(@postcheck) {
         $cmd = join("", @postcheck);
         chomp $cmd;
-        subVariables(\$cmd);
         if($cmd) {
             logmsg "postcheck $cmd\n" if($verbose);
             my $rc = runclient("$cmd");
@@ -4172,9 +4159,6 @@ sub singletest {
             @actual = @newgen;
         }
 
-        # variable-replace in the stdout we have from the test case file
-        @validstdout = fixarray(@validstdout);
-
         # get all attributes
         my %hash = getpartattr("verify", "stdout");
 
@@ -4222,9 +4206,6 @@ sub singletest {
             # length) because of replacements
             @actual = @newgen;
         }
-
-        # variable-replace in the stderr we have from the test case file
-        @validstderr = fixarray(@validstderr);
 
         # get all attributes
         my %hash = getpartattr("verify", "stderr");
@@ -4281,7 +4262,7 @@ sub singletest {
         # what parts to cut off from the protocol
         my @strippart = getpart("verify", "strippart");
         my $strip;
-        @strippart = fixarray(@strippart);
+
         for $strip (@strippart) {
             chomp $strip;
             for(@out) {
@@ -4435,8 +4416,6 @@ sub singletest {
                 # length) because of replacements
                 @generated = @newgen;
             }
-
-            @outfile = fixarray(@outfile);
 
             $res = compare($testnum, $testname, "output ($filename)",
                            \@generated, \@outfile);
