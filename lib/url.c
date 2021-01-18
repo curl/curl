@@ -829,26 +829,23 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
   /* Cleanup NEGOTIATE connection-related data */
   Curl_http_auth_cleanup_negotiate(conn);
 
-  /* the protocol specific disconnect handler and conn_shutdown need a transfer
-     for the connection! */
-  conn->data = data;
-
   if(conn->bits.connect_only)
     /* treat the connection as dead in CONNECT_ONLY situations */
     dead_connection = TRUE;
 
-  if(conn->handler->disconnect) {
-    /* During disconnect, the connection and the transfer is already
-       disassociated, but the SSH backends (and more?) still need the
-       transfer's connection pointer to identify the used connection */
-    data->conn = conn;
+  /* temporarily attach the connection to this transfer handle for the
+     disonnect and shutdown */
+  Curl_attach_connnection(data, conn);
 
+  if(conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
     conn->handler->disconnect(data, conn, dead_connection);
-    data->conn = NULL; /* forget it again */
-  }
 
   conn_shutdown(data, conn);
+
+  /* detach it again */
+  Curl_detach_connnection(data);
+
   conn_free(conn);
   return CURLE_OK;
 }
@@ -1111,7 +1108,7 @@ ConnectionExists(struct Curl_easy *data,
 
   /* Look up the bundle with all the connections to this particular host.
      Locks the connection cache, beware of early returns! */
-  bundle = Curl_conncache_find_bundle(needle, data->state.conn_cache,
+  bundle = Curl_conncache_find_bundle(data, needle, data->state.conn_cache,
                                       &hostbundle);
   if(bundle) {
     /* Max pipe length is zero (unlimited) for multiplexed connections */
@@ -3650,7 +3647,7 @@ static CURLcode create_conn(struct Curl_easy *data,
       conn->bits.tcpconnect[FIRSTSOCKET] = TRUE; /* we are "connected */
 
       Curl_attach_connnection(data, conn);
-      result = Curl_conncache_add_conn(data->state.conn_cache, conn);
+      result = Curl_conncache_add_conn(data);
       if(result)
         goto out;
 
@@ -3820,7 +3817,8 @@ static CURLcode create_conn(struct Curl_easy *data,
       /* this gets a lock on the conncache */
       const char *bundlehost;
       struct connectbundle *bundle =
-        Curl_conncache_find_bundle(conn, data->state.conn_cache, &bundlehost);
+        Curl_conncache_find_bundle(data, conn, data->state.conn_cache,
+                                   &bundlehost);
 
       if(max_host_connections > 0 && bundle &&
          (bundle->num_connections >= max_host_connections)) {
@@ -3873,8 +3871,7 @@ static CURLcode create_conn(struct Curl_easy *data,
        * cache of ours!
        */
       Curl_attach_connnection(data, conn);
-
-      result = Curl_conncache_add_conn(data->state.conn_cache, conn);
+      result = Curl_conncache_add_conn(data);
       if(result)
         goto out;
     }

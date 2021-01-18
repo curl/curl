@@ -117,7 +117,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
 
   if(block) {
     /* if we didn't wait, we don't have to spend time on this now */
-    if(Curl_pgrsUpdate(conn))
+    if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
       result = Curl_speedcheck(data, Curl_now());
@@ -469,13 +469,14 @@ int Curl_pp_getsock(struct pingpong *pp, curl_socket_t *socks)
   return GETSOCK_READSOCK(0);
 }
 
-CURLcode Curl_pp_flushsend(struct pingpong *pp)
+CURLcode Curl_pp_flushsend(struct Curl_easy *data,
+                           struct pingpong *pp)
 {
   /* we have a piece of a command still left to send */
   struct connectdata *conn = pp->conn;
   ssize_t written;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
-  CURLcode result = Curl_write(conn->data, sock, pp->sendthis + pp->sendsize -
+  CURLcode result = Curl_write(data, sock, pp->sendthis + pp->sendsize -
                                pp->sendleft, pp->sendleft, &written);
   if(result)
     return result;

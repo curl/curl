@@ -143,7 +143,8 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
                           size_t *size); /* size of the response */
 
 
-CURLcode Curl_pp_flushsend(struct pingpong *pp);
+CURLcode Curl_pp_flushsend(struct Curl_easy *data,
+                           struct pingpong *pp);
 
 /* call this when a pingpong connection is disconnected */
 CURLcode Curl_pp_disconnect(struct pingpong *pp);

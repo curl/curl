@@ -1179,7 +1179,7 @@ static CURLcode smtp_statemachine(struct Curl_easy *data,
 
   /* Flush any data that needs to be sent */
   if(pp->sendleft)
-    return Curl_pp_flushsend(pp);
+    return Curl_pp_flushsend(data, pp);
 
   do {
     /* Read the response from the server */
