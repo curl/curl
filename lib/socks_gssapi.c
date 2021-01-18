@@ -100,9 +100,9 @@ static int check_gss_err(struct Curl_easy *data,
 }
 
 CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
-                                      struct connectdata *conn)
+                                      struct Curl_easy *data)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   curl_socket_t sock = conn->sock[sockindex];
   CURLcode code;
   ssize_t actualread;
@@ -240,7 +240,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
      * +----+------+-----+----------------+
      */
 
-    result = Curl_blockread_all(conn, sock, (char *)socksreq, 4, &actualread);
+    result = Curl_blockread_all(data, sock, (char *)socksreq, 4, &actualread);
     if(result || (actualread != 4)) {
       failf(data, "Failed to receive GSS-API authentication response.");
       gss_release_name(&gss_status, &server);
@@ -279,7 +279,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       return CURLE_OUT_OF_MEMORY;
     }
 
-    result = Curl_blockread_all(conn, sock, (char *)gss_recv_token.value,
+    result = Curl_blockread_all(data, sock, (char *)gss_recv_token.value,
                                 gss_recv_token.length, &actualread);
 
     if(result || (actualread != us_length)) {
@@ -437,7 +437,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     gss_release_buffer(&gss_status, &gss_w_token);
   }
 
-  result = Curl_blockread_all(conn, sock, (char *)socksreq, 4, &actualread);
+  result = Curl_blockread_all(data, sock, (char *)socksreq, 4, &actualread);
   if(result || (actualread != 4)) {
     failf(data, "Failed to receive GSS-API encryption response.");
     gss_delete_sec_context(&gss_status, &gss_context, NULL);
@@ -468,7 +468,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     gss_delete_sec_context(&gss_status, &gss_context, NULL);
     return CURLE_OUT_OF_MEMORY;
   }
-  result = Curl_blockread_all(conn, sock, (char *)gss_recv_token.value,
+  result = Curl_blockread_all(data, sock, (char *)gss_recv_token.value,
                               gss_recv_token.length, &actualread);
 
   if(result || (actualread != us_length)) {

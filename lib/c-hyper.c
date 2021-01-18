@@ -144,7 +144,7 @@ static int hyper_each_header(void *userdata,
 
   Curl_debug(data, CURLINFO_HEADER_IN, headp, len);
 
-  result = Curl_client_write(data->conn, CLIENTWRITE_HEADER, headp, len);
+  result = Curl_client_write(data, CLIENTWRITE_HEADER, headp, len);
   if(result) {
     data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
     return HYPER_ITER_BREAK;
@@ -175,7 +175,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
   if(k->ignorebody)
     return HYPER_ITER_CONTINUE;
   Curl_debug(data, CURLINFO_DATA_IN, buf, len);
-  result = Curl_client_write(data->conn, CLIENTWRITE_BODY, buf, len);
+  result = Curl_client_write(data, CLIENTWRITE_BODY, buf, len);
 
   if(result) {
     data->state.hresult = result;

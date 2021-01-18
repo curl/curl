@@ -690,7 +690,7 @@ output_auth_headers(struct Curl_easy *data,
 #ifdef USE_NTLM
   if(authstatus->picked == CURLAUTH_NTLM) {
     auth = "NTLM";
-    result = Curl_output_ntlm(conn, proxy);
+    result = Curl_output_ntlm(data, proxy);
     if(result)
       return result;
   }
@@ -966,7 +966,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
           if(authp->picked == CURLAUTH_NTLM ||
              authp->picked == CURLAUTH_NTLM_WB) {
             /* NTLM authentication is picked and activated */
-            CURLcode result = Curl_input_ntlm(conn, proxy, auth);
+            CURLcode result = Curl_input_ntlm(data, proxy, auth);
             if(!result) {
               data->state.authproblem = FALSE;
 #ifdef NTLM_WB_ENABLED
@@ -3184,7 +3184,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     /* if a request-body has been sent off, we make sure this progress is noted
        properly */
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
-    if(Curl_pgrsUpdate(conn))
+    if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
 
     if(!http->postsize) {

@@ -678,7 +678,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
         return CURLE_RECV_ERROR;
 
       case 0: /* timeout */
-        if(Curl_pgrsUpdate(conn))
+        if(Curl_pgrsUpdate(data))
           return CURLE_ABORTED_BY_CALLBACK;
         continue; /* just continue in our loop for the timeout duration */
 
@@ -2656,7 +2656,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
   size_t nread = 0;
 
   if(pp->sendleft)
-    return Curl_pp_flushsend(pp);
+    return Curl_pp_flushsend(data, pp);
 
   result = ftp_readresp(data, sock, pp, &ftpcode, &nread);
   if(result)
