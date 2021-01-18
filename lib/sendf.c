@@ -406,7 +406,9 @@ CURLcode Curl_write_plain(struct Curl_easy *data,
 {
   CURLcode result;
   struct connectdata *conn = data->conn;
-  int num = (sockfd == conn->sock[SECONDARYSOCKET]);
+  int num;
+  DEBUGASSERT(conn);
+  num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
   *written = Curl_send_plain(data, num, mem, len, &result);
 
