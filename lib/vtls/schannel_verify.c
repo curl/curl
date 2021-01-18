@@ -79,8 +79,7 @@ static int is_cr_or_lf(char c)
 
 static CURLcode add_certs_to_store(HCERTSTORE trust_store,
                                    const char *ca_file,
-                                   struct Curl_easy *data,
-                                   struct connectdata *conn)
+                                   struct Curl_easy *data)
 {
   CURLcode result;
   HANDLE ca_file_handle = INVALID_HANDLE_VALUE;
@@ -584,7 +583,7 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
       }
       else {
         result = add_certs_to_store(trust_store, SSL_CONN_CONFIG(CAfile),
-                                    data, conn);
+                                    data);
       }
     }
 
