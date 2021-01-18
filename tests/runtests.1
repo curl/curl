@@ -78,6 +78,10 @@ detected. Useful for debugging.
 Lists all test case names.
 .IP "-n"
 Disable the check for and use of valgrind.
+.IP "-o <variablename=value>"
+Overwrite the specified internal \fBvariable\fP with \fBvalue\fP.
+Useful to change variables that didn't get a dedicated flag to change them.
+Check the source to see which variables are available.
 .IP "-p"
 Prints out all files in "log/" to stdout when a test case fails. Very
 practical when used in the automated and distributed tests since then the
