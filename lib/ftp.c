@@ -678,7 +678,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
         return CURLE_RECV_ERROR;
 
       case 0: /* timeout */
-        if(Curl_pgrsUpdate(conn))
+        if(Curl_pgrsUpdate(data))
           return CURLE_ABORTED_BY_CALLBACK;
         continue; /* just continue in our loop for the timeout duration */
 

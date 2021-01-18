@@ -463,7 +463,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
     if(result || conn->async.done)
       break;
 
-    if(Curl_pgrsUpdate(conn))
+    if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else {
       struct curltime now2 = Curl_now();

@@ -3184,7 +3184,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     /* if a request-body has been sent off, we make sure this progress is noted
        properly */
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
-    if(Curl_pgrsUpdate(conn))
+    if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
 
     if(!http->postsize) {

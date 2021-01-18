@@ -2949,7 +2949,7 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
     if(result)
       break;
 
-    if(Curl_pgrsUpdate(conn))
+    if(Curl_pgrsUpdate(data))
       return CURLE_ABORTED_BY_CALLBACK;
 
     result = Curl_speedcheck(data, now);

@@ -1201,7 +1201,7 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data)
     }
 
     /* Update the progress meter */
-    if(Curl_pgrsUpdate(conn)) {
+    if(Curl_pgrsUpdate(data)) {
       tftp_state_machine(state, TFTP_EVENT_ERROR);
       return CURLE_ABORTED_BY_CALLBACK;
     }
@@ -1323,7 +1323,7 @@ static CURLcode tftp_doing(struct Curl_easy *data, bool *dophase_done)
     /* The multi code doesn't have this logic for the DOING state so we
        provide it for TFTP since it may do the entire transfer in this
        state. */
-    if(Curl_pgrsUpdate(data->conn))
+    if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
       result = Curl_speedcheck(data, Curl_now());

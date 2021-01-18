@@ -338,12 +338,12 @@ static CURLcode file_upload(struct Curl_easy *data)
 
     Curl_pgrsSetUploadCounter(data, bytecount);
 
-    if(Curl_pgrsUpdate(data->conn))
+    if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
       result = Curl_speedcheck(data, Curl_now());
   }
-  if(!result && Curl_pgrsUpdate(data->conn))
+  if(!result && Curl_pgrsUpdate(data))
     result = CURLE_ABORTED_BY_CALLBACK;
 
   close(fd);
@@ -527,12 +527,12 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
     Curl_pgrsSetDownloadCounter(data, bytecount);
 
-    if(Curl_pgrsUpdate(conn))
+    if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
       result = Curl_speedcheck(data, Curl_now());
   }
-  if(Curl_pgrsUpdate(conn))
+  if(Curl_pgrsUpdate(data))
     result = CURLE_ABORTED_BY_CALLBACK;
 
   return result;

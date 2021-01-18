@@ -1575,7 +1575,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       }
     }
 
-    if(Curl_pgrsUpdate(conn)) {
+    if(Curl_pgrsUpdate(data)) {
       result = CURLE_ABORTED_BY_CALLBACK;
       break;
     }

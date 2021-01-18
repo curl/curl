@@ -2069,7 +2069,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case CURLM_STATE_TOOFAST: /* limit-rate exceeded in either direction */
       DEBUGASSERT(data->conn);
       /* if both rates are within spec, resume transfer */
-      if(Curl_pgrsUpdate(data->conn))
+      if(Curl_pgrsUpdate(data))
         result = CURLE_ABORTED_BY_CALLBACK;
       else
         result = Curl_speedcheck(data, *nowp);
@@ -2352,7 +2352,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         rc = CURLM_CALL_MULTI_PERFORM;
       }
       /* if there's still a connection to use, call the progress function */
-      else if(data->conn && Curl_pgrsUpdate(data->conn)) {
+      else if(data->conn && Curl_pgrsUpdate(data)) {
         /* aborted due to progress callback return code must close the
            connection */
         result = CURLE_ABORTED_BY_CALLBACK;
