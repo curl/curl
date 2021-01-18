@@ -829,26 +829,23 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
   /* Cleanup NEGOTIATE connection-related data */
   Curl_http_auth_cleanup_negotiate(conn);
 
-  /* the protocol specific disconnect handler and conn_shutdown need a transfer
-     for the connection! */
-  conn->data = data;
-
   if(conn->bits.connect_only)
     /* treat the connection as dead in CONNECT_ONLY situations */
     dead_connection = TRUE;
 
-  if(conn->handler->disconnect) {
-    /* During disconnect, the connection and the transfer is already
-       disassociated, but the SSH backends (and more?) still need the
-       transfer's connection pointer to identify the used connection */
-    data->conn = conn;
+  /* temporarily attach the connection to this transfer handle for the
+     disonnect and shutdown */
+  Curl_attach_connnection(data, conn);
 
+  if(conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
     conn->handler->disconnect(data, conn, dead_connection);
-    data->conn = NULL; /* forget it again */
-  }
 
   conn_shutdown(data, conn);
+
+  /* detach it again */
+  Curl_detach_connnection(data);
+
   conn_free(conn);
   return CURLE_OK;
 }
