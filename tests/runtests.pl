@@ -5257,12 +5257,6 @@ sub runtimestats {
     logmsg "\n";
 }
 
-# globally disabled tests
-disabledtests("$TESTDIR/DISABLED");
-
-# locally disabled tests, ignored by git etc
-disabledtests("$TESTDIR/DISABLED.local");
-
 #######################################################################
 # Check options to this test program
 #
@@ -5574,12 +5568,16 @@ if(!$listonly) {
     checksystem();
 }
 
+# globally disabled tests
+disabledtests("$TESTDIR/DISABLED");
+
 #######################################################################
 # Fetch all disabled tests, if there are any
 #
 
 sub disabledtests {
     my ($file) = @_;
+    my @input;
 
     if(open(D, "<$file")) {
         while(<D>) {
@@ -5587,17 +5585,29 @@ sub disabledtests {
                 # allow comments
                 next;
             }
-            if($_ =~ /(\d+)/) {
+            push @input, $_;
+        }
+        close(D);
+
+        # preprocess the input to make conditionally disabled tests depending
+        # on variables
+        my @pp = prepro(@input);
+        for my $t (@pp) {
+            if($t =~ /(\d+)/) {
                 my ($n) = $1;
                 $disabled{$n}=$n; # disable this test number
                 if(! -f "$srcdir/data/test$n") {
-                    print STDERR "WARNING! Non-existing test $n in DISABLED!\n";
+                    print STDERR "WARNING! Non-existing test $n in $file!\n";
                     # fail hard to make user notice
                     exit 1;
                 }
+                logmsg "DISABLED: test $n\n" if ($verbose);
+            }
+            else {
+                print STDERR "$file: rubbish content: $t\n";
+                exit 2;
             }
         }
-        close(D);
     }
 }
 
