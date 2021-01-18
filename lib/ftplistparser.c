@@ -272,8 +272,7 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
                                     struct fileinfo *infop)
 {
   curl_fnmatch_callback compare;
-  struct connectdata *conn = data->conn;
-  struct WildcardData *wc = &conn->data->wildcard;
+  struct WildcardData *wc = &data->wildcard;
   struct ftp_wc *ftpwc = wc->protdata;
   struct Curl_llist *llist = &wc->filelist;
   struct ftp_parselist_data *parser = ftpwc->parser;
@@ -294,13 +293,13 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
                           str + parser->offsets.user : NULL;
 
   /* get correct fnmatch callback */
-  compare = conn->data->set.fnmatch;
+  compare = data->set.fnmatch;
   if(!compare)
     compare = Curl_fnmatch;
 
   /* filter pattern-corresponding filenames */
-  Curl_set_in_callback(conn->data, true);
-  if(compare(conn->data->set.fnmatch_data, wc->pattern,
+  Curl_set_in_callback(data, true);
+  if(compare(data->set.fnmatch_data, wc->pattern,
              finfo->filename) == 0) {
     /* discard symlink which is containing multiple " -> " */
     if((finfo->filetype == CURLFILETYPE_SYMLINK) && finfo->strings.target &&
@@ -311,7 +310,7 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
   else {
     add = FALSE;
   }
-  Curl_set_in_callback(conn->data, false);
+  Curl_set_in_callback(data, false);
 
   if(add) {
     Curl_llist_insert_next(llist, llist->tail, finfo, &infop->list);
