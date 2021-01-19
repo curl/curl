@@ -203,6 +203,9 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
   ssize_t actualread;
   ssize_t written;
 
+  /* make sure that the buffer is at least 600 bytes */
+  DEBUGASSERT(READBUFFER_MIN >= 600);
+
   if(!SOCKS_STATE(sx->state) && !*done)
     sxstate(data, CONNECT_SOCKS_INIT);
 
