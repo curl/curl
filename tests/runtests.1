@@ -82,6 +82,10 @@ Disable the check for and use of valgrind.
 Overwrite the specified internal \fBvariable\fP with \fBvalue\fP.
 Useful to change variables that didn't get a dedicated flag to change them.
 Check the source to see which variables are available.
+.IP "-P <proxy>"
+Use the specified HTTP proxy when executing tests, even if the tests
+themselves don't specify a proxy. This option allows to test external
+proxies using curl's regression test suite.
 .IP "-p"
 Prints out all files in "log/" to stdout when a test case fails. Very
 practical when used in the automated and distributed tests since then the
