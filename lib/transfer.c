@@ -911,7 +911,7 @@ CURLcode Curl_done_sending(struct Curl_easy *data,
 
   /* These functions should be moved into the handler struct! */
   Curl_http2_done_sending(data, conn);
-  Curl_quic_done_sending(conn);
+  Curl_quic_done_sending(data);
 
   if(conn->bits.rewindaftersend) {
     CURLcode result = Curl_readrewind(conn);

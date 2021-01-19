@@ -319,7 +319,9 @@ static CURLcode quiche_has_connected(struct connectdata *conn,
 /*
  * This function gets polled to check if this QUIC connection has connected.
  */
-CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
+CURLcode Curl_quic_is_connected(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                int sockindex,
                                 bool *done)
 {
   CURLcode result;
