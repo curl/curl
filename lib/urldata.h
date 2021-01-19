@@ -682,7 +682,7 @@ struct SingleRequest {
     struct TELNET *telnet;
   } p;
 #ifndef CURL_DISABLE_DOH
-  struct dohdata doh; /* DoH specific data for this request */
+  struct dohdata *doh; /* DoH specific data for this request */
 #endif
   BIT(header);       /* incoming data has HTTP header */
   BIT(content_range); /* set TRUE if Content-Range: was found */
