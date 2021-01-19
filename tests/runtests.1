@@ -74,6 +74,11 @@ Displays a help text about this program's command line options.
 .IP "-k"
 Keep output and log files in log/ after a test run, even if no error was
 detected. Useful for debugging.
+.IP "-L <file>"
+Load and execute the specified file which should contain perl code.
+This option allows to change \fIruntests.pl\fP behaviour by overwriting
+functions and variables and is useful when testing external proxies
+using curl's regression test suite.
 .IP "-l"
 Lists all test case names.
 .IP "-n"
