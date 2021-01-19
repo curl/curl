@@ -56,7 +56,7 @@ void Curl_quic_disconnect(struct Curl_easy *data,
 #define Curl_quic_done_sending(x)
 #define Curl_quic_done(x,y)
 #define Curl_quic_data_pending(x)
-#define Curl_quic_disconnect(x,y)
+#define Curl_quic_disconnect(x,y,z)
 #endif /* !ENABLE_QUIC */
 
 #endif /* HEADER_CURL_QUIC_H */
