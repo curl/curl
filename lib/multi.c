@@ -69,7 +69,7 @@
 #define CURL_MULTI_HANDLE 0x000bab1e
 
 #define GOOD_MULTI_HANDLE(x) \
-  ((x) && (x)->type == CURL_MULTI_HANDLE)
+  ((x) && (x)->magic == CURL_MULTI_HANDLE)
 
 static CURLMcode singlesocket(struct Curl_multi *multi,
                               struct Curl_easy *data);
@@ -360,7 +360,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   if(!multi)
     return NULL;
 
-  multi->type = CURL_MULTI_HANDLE;
+  multi->magic = CURL_MULTI_HANDLE;
 
   if(Curl_mk_dnscache(&multi->hostcache))
     goto error;
@@ -2453,7 +2453,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     if(multi->in_callback)
       return CURLM_RECURSIVE_API_CALL;
 
-    multi->type = 0; /* not good anymore */
+    multi->magic = 0; /* not good anymore */
 
     /* Firsrt remove all remaining easy handles */
     data = multi->easyp;
