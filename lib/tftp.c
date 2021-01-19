@@ -799,8 +799,7 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
     state->sbytes = 0;
     state->data->req.upload_fromhere = (char *)state->spacket.data + 4;
     do {
-      result = Curl_fillreadbuffer(data->conn, state->blksize - state->sbytes,
-                                   &cb);
+      result = Curl_fillreadbuffer(data, state->blksize - state->sbytes, &cb);
       if(result)
         return result;
       state->sbytes += (int)cb;

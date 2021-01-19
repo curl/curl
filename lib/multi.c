@@ -1947,7 +1947,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           followtype follow = FOLLOW_NONE;
           CURLcode drc;
 
-          drc = Curl_retry_request(data->conn, &newurl);
+          drc = Curl_retry_request(data, &newurl);
           if(drc) {
             /* a failure here pretty much implies an out of memory */
             result = drc;
@@ -2154,7 +2154,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          * condition and the server closed the re-used connection exactly when
          * we wanted to use it, so figure out if that is indeed the case.
          */
-        CURLcode ret = Curl_retry_request(data->conn, &newurl);
+        CURLcode ret = Curl_retry_request(data, &newurl);
         if(!ret)
           retry = (newurl)?TRUE:FALSE;
         else if(!result)
@@ -2169,7 +2169,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else if((CURLE_HTTP2_STREAM == result) &&
               Curl_h2_http_1_1_error(data->conn)) {
-        CURLcode ret = Curl_retry_request(data->conn, &newurl);
+        CURLcode ret = Curl_retry_request(data, &newurl);
 
         if(!ret) {
           infof(data, "Downgrades to HTTP/1.1!\n");

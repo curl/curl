@@ -555,7 +555,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 
   if(bytessent)
     /* we rewind now at once since if we already sent something */
-    return Curl_readrewind(conn);
+    return Curl_readrewind(data);
 
   return CURLE_OK;
 }

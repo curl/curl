@@ -541,8 +541,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
   size_t fillcount;
   struct Curl_easy *data = (struct Curl_easy *)userdata;
   CURLcode result =
-    Curl_fillreadbuffer(data->conn, data->set.upload_buffer_size,
-                        &fillcount);
+    Curl_fillreadbuffer(data, data->set.upload_buffer_size, &fillcount);
   (void)ctx;
   if(result)
     return HYPER_POLL_ERROR;
