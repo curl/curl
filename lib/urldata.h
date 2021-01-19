@@ -868,13 +868,9 @@ enum connect_t {
 
 #define SOCKS_STATE(x) (((x) >= CONNECT_SOCKS_INIT) &&  \
                         ((x) < CONNECT_DONE))
-#define SOCKS_REQUEST_BUFSIZE 600  /* room for large user/pw (255 max each) */
 
 struct connstate {
   enum connect_t state;
-  unsigned char socksreq[SOCKS_REQUEST_BUFSIZE];
-
-  /* CONNECT_SOCKS_SEND */
   ssize_t outstanding;  /* send this many bytes more */
   unsigned char *outp; /* send from this pointer */
 };
