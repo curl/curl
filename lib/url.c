@@ -451,9 +451,12 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->state.aptr.rtsp_transport);
 
 #ifndef CURL_DISABLE_DOH
-  Curl_dyn_free(&data->req.doh.probe[0].serverdoh);
-  Curl_dyn_free(&data->req.doh.probe[1].serverdoh);
-  curl_slist_free_all(data->req.doh.headers);
+  if(data->req.doh) {
+    Curl_dyn_free(&data->req.doh->probe[0].serverdoh);
+    Curl_dyn_free(&data->req.doh->probe[1].serverdoh);
+    curl_slist_free_all(data->req.doh->headers);
+    Curl_safefree(data->req.doh);
+  }
 #endif
 
   /* destruct wildcard structures if it is needed */
@@ -2138,8 +2141,10 @@ void Curl_free_request_state(struct Curl_easy *data)
   Curl_safefree(data->req.newurl);
 
 #ifndef CURL_DISABLE_DOH
-  Curl_close(&data->req.doh.probe[0].easy);
-  Curl_close(&data->req.doh.probe[1].easy);
+  if(data->req.doh) {
+    Curl_close(&data->req.doh->probe[0].easy);
+    Curl_close(&data->req.doh->probe[1].easy);
+  }
 #endif
 }
 
