@@ -2169,8 +2169,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       data->share = NULL;
     }
 
-    /* use new share if it set */
-    data->share = set;
+    if(GOOD_SHARE_HANDLE(set))
+      /* use new share if it set */
+      data->share = set;
     if(data->share) {
 
       Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);

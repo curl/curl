@@ -1884,6 +1884,10 @@ struct Names {
  */
 
 struct Curl_easy {
+  /* First a simple identifier to easier detect if a user mix up this easy
+     handle with a multi handle. Set this to CURLEASY_MAGIC_NUMBER */
+  unsigned int magic;
+
   /* first, two fields for the linked list of these */
   struct Curl_easy *next;
   struct Curl_easy *prev;
@@ -1947,7 +1951,6 @@ struct Curl_easy {
 #ifdef USE_HYPER
   struct hyptransfer hyp;
 #endif
-  unsigned int magic;          /* set to a CURLEASY_MAGIC_NUMBER */
 };
 
 #define LIBCURL_NAME "libcurl"
