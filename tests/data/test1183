@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Server: Blafasel/5.0
+Date: Sat, 16 Jan 2021 14:48:30 GMT
+Content-Length: 12
+
+Bla bla bla
+</data>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+proxy
+</features>
+ <name>
+%TESTNUMBER used instead of actual test number
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify that the %TESTNUMBER has been resolved to 1183
+<verify>
+<protocol>
+GET /1183 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
