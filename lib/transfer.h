@@ -47,10 +47,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                         bool *comeback);
 int Curl_single_getsock(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks);
-CURLcode Curl_readrewind(struct connectdata *conn);
-CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
+CURLcode Curl_readrewind(struct Curl_easy *data);
+CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
                              size_t *nreadp);
-CURLcode Curl_retry_request(struct connectdata *conn, char **url);
+CURLcode Curl_retry_request(struct Curl_easy *data, char **url);
 bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
 CURLcode Curl_get_upload_buffer(struct Curl_easy *data);
 

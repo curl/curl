@@ -153,10 +153,9 @@ static size_t trailers_left(void *raw)
  * This function will call the read callback to fill our buffer with data
  * to upload.
  */
-CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
+CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
                              size_t *nreadp)
 {
-  struct Curl_easy *data = conn->data;
   size_t buffersize = bytes;
   size_t nread;
 
@@ -253,7 +252,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
   if(nread == CURL_READFUNC_PAUSE) {
     struct SingleRequest *k = &data->req;
 
-    if(conn->handler->flags & PROTOPT_NONETWORK) {
+    if(data->conn->handler->flags & PROTOPT_NONETWORK) {
       /* protocols that work without network cannot be paused. This is
          actually only FILE:// just now, and it can't pause since the transfer
          isn't done using the "normal" procedure. */
@@ -409,9 +408,9 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
  * POST/PUT with multi-pass authentication when a sending was denied and a
  * resend is necessary.
  */
-CURLcode Curl_readrewind(struct connectdata *conn)
+CURLcode Curl_readrewind(struct Curl_easy *data)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   curl_mimepart *mimepart = &data->set.mimepost;
 
   conn->bits.rewindaftersend = FALSE; /* we rewind now */
@@ -762,8 +761,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
           dataleft = conn->chunk.dataleft;
           if(dataleft != 0) {
-            infof(conn->data, "Leftovers after chunking: %zu bytes\n",
-                  dataleft);
+            infof(data, "Leftovers after chunking: %zu bytes\n", dataleft);
           }
         }
         /* If it returned OK, we just keep going */
@@ -830,7 +828,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
              in http_chunks.c.
              Make sure that ALL_CONTENT_ENCODINGS contains all the
              encodings handled here. */
-          if(conn->data->set.http_ce_skip || !k->writer_stack) {
+          if(data->set.http_ce_skip || !k->writer_stack) {
             if(!k->ignorebody) {
 #ifndef CURL_DISABLE_POP3
               if(conn->handler->protocol & PROTO_FAMILY_POP3)
@@ -914,7 +912,7 @@ CURLcode Curl_done_sending(struct Curl_easy *data,
   Curl_quic_done_sending(conn);
 
   if(conn->bits.rewindaftersend) {
-    CURLcode result = Curl_readrewind(conn);
+    CURLcode result = Curl_readrewind(data);
     if(result)
       return result;
   }
@@ -1002,7 +1000,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
             sending_http_headers = FALSE;
         }
 
-        result = Curl_fillreadbuffer(conn, data->set.upload_buffer_size,
+        result = Curl_fillreadbuffer(data, data->set.upload_buffer_size,
                                      &fillcount);
         if(result)
           return result;
@@ -1195,7 +1193,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   else
     fd_write = CURL_SOCKET_BAD;
 
-  if(conn->data->state.drain) {
+  if(data->state.drain) {
     select_res |= CURL_CSELECT_IN;
     DEBUGF(infof(data, "Curl_readwrite: forcibly told to drain data\n"));
   }
@@ -1748,10 +1746,9 @@ CURLcode Curl_follow(struct Curl_easy *data,
 /* Returns CURLE_OK *and* sets '*url' if a request retry is wanted.
 
    NOTE: that the *url is malloc()ed. */
-CURLcode Curl_retry_request(struct connectdata *conn,
-                            char **url)
+CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   bool retry = FALSE;
   *url = NULL;
 
@@ -1781,7 +1778,7 @@ CURLcode Curl_retry_request(struct connectdata *conn,
        to issue again, but the nghttp2 API can deliver the message to other
        streams as well, which is why this adds the check the data counters
        too. */
-    infof(conn->data, "REFUSED_STREAM, retrying a fresh connect\n");
+    infof(data, "REFUSED_STREAM, retrying a fresh connect\n");
     data->state.refused_stream = FALSE; /* clear again */
     retry = TRUE;
   }
@@ -1793,9 +1790,9 @@ CURLcode Curl_retry_request(struct connectdata *conn,
       data->state.retrycount = 0;
       return CURLE_SEND_ERROR;
     }
-    infof(conn->data, "Connection died, retrying a fresh connect\
+    infof(data, "Connection died, retrying a fresh connect\
 (retry count: %d)\n", data->state.retrycount);
-    *url = strdup(conn->data->change.url);
+    *url = strdup(data->change.url);
     if(!*url)
       return CURLE_OUT_OF_MEMORY;
 
@@ -1809,7 +1806,7 @@ CURLcode Curl_retry_request(struct connectdata *conn,
 
     if(conn->handler->protocol&PROTO_FAMILY_HTTP) {
       if(data->req.writebytecount) {
-        CURLcode result = Curl_readrewind(conn);
+        CURLcode result = Curl_readrewind(data);
         if(result) {
           Curl_safefree(*url);
           return result;
