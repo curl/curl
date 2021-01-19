@@ -2177,8 +2177,9 @@ CURLcode Curl_http_target(struct Curl_easy *data,
 
     curl_url_cleanup(h);
 
-    /* url */
-    result = Curl_dyn_add(r, url);
+    /* target or url */
+    result = Curl_dyn_add(r, data->set.str[STRING_TARGET]?
+      data->set.str[STRING_TARGET]:url);
     free(url);
     if(result)
       return (result);
