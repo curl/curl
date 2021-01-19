@@ -160,6 +160,22 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 #include <libssh2_sftp.h>
 #endif /* HAVE_LIBSSH2_H */
 
+#define READBUFFER_SIZE CURL_MAX_WRITE_SIZE
+#define READBUFFER_MAX  CURL_MAX_READ_SIZE
+#define READBUFFER_MIN  1024
+
+/* The default upload buffer size, should not be smaller than
+   CURL_MAX_WRITE_SIZE, as it needs to hold a full buffer as could be sent in
+   a write callback.
+
+   The size was 16KB for many years but was bumped to 64KB because it makes
+   libcurl able to do significantly faster uploads in some circumstances. Even
+   larger buffers can help further, but this is deemed a fair memory/speed
+   compromise. */
+#define UPLOADBUFFER_DEFAULT 65536
+#define UPLOADBUFFER_MAX (2*1024*1024)
+#define UPLOADBUFFER_MIN CURL_MAX_WRITE_SIZE
+
 #define CURLEASY_MAGIC_NUMBER 0xc0dedbadU
 #define GOOD_EASY_HANDLE(x) \
   ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
@@ -868,13 +884,9 @@ enum connect_t {
 
 #define SOCKS_STATE(x) (((x) >= CONNECT_SOCKS_INIT) &&  \
                         ((x) < CONNECT_DONE))
-#define SOCKS_REQUEST_BUFSIZE 600  /* room for large user/pw (255 max each) */
 
 struct connstate {
   enum connect_t state;
-  unsigned char socksreq[SOCKS_REQUEST_BUFSIZE];
-
-  /* CONNECT_SOCKS_SEND */
   ssize_t outstanding;  /* send this many bytes more */
   unsigned char *outp; /* send from this pointer */
 };

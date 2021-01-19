@@ -195,13 +195,16 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
   struct connectdata *conn = data->conn;
   const bool protocol4a =
     (conn->socks_proxy.proxytype == CURLPROXY_SOCKS4A) ? TRUE : FALSE;
-  unsigned char *socksreq = &conn->cnnct.socksreq[0];
+  unsigned char *socksreq = (unsigned char *)data->state.buffer;
   CURLcode result;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct connstate *sx = &conn->cnnct;
   struct Curl_dns_entry *dns = NULL;
   ssize_t actualread;
   ssize_t written;
+
+  /* make sure that the buffer is at least 600 bytes */
+  DEBUGASSERT(READBUFFER_MIN >= 600);
 
   if(!SOCKS_STATE(sx->state) && !*done)
     sxstate(data, CONNECT_SOCKS_INIT);
@@ -319,7 +322,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
     socksreq[8] = 0; /* ensure empty userid is NUL-terminated */
     if(proxy_user) {
       size_t plen = strlen(proxy_user);
-      if(plen >= sizeof(sx->socksreq) - 8) {
+      if(plen >= (size_t)data->set.buffer_size - 8) {
         failf(data, "Too long SOCKS proxy user name, can't use!");
         return CURLPX_LONG_USER;
       }
@@ -438,8 +441,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
     failf(data,
           "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
           ", request rejected or failed.",
-          (unsigned char)socksreq[4], (unsigned char)socksreq[5],
-          (unsigned char)socksreq[6], (unsigned char)socksreq[7],
+          socksreq[4], socksreq[5], socksreq[6], socksreq[7],
           (((unsigned char)socksreq[2] << 8) | (unsigned char)socksreq[3]),
           (unsigned char)socksreq[1]);
     return CURLPX_REQUEST_FAILED;
@@ -448,8 +450,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
           "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
           ", request rejected because SOCKS server cannot connect to "
           "identd on the client.",
-          (unsigned char)socksreq[4], (unsigned char)socksreq[5],
-          (unsigned char)socksreq[6], (unsigned char)socksreq[7],
+          socksreq[4], socksreq[5], socksreq[6], socksreq[7],
           (((unsigned char)socksreq[2] << 8) | (unsigned char)socksreq[3]),
           (unsigned char)socksreq[1]);
     return CURLPX_IDENTD;
@@ -458,8 +459,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
           "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
           ", request rejected because the client program and identd "
           "report different user-ids.",
-          (unsigned char)socksreq[4], (unsigned char)socksreq[5],
-          (unsigned char)socksreq[6], (unsigned char)socksreq[7],
+          socksreq[4], socksreq[5], socksreq[6], socksreq[7],
           (((unsigned char)socksreq[2] << 8) | (unsigned char)socksreq[3]),
           (unsigned char)socksreq[1]);
     return CURLPX_IDENTD_DIFFER;
@@ -467,8 +467,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
     failf(data,
           "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
           ", Unknown.",
-          (unsigned char)socksreq[4], (unsigned char)socksreq[5],
-          (unsigned char)socksreq[6], (unsigned char)socksreq[7],
+          socksreq[4], socksreq[5], socksreq[6], socksreq[7],
           (((unsigned char)socksreq[2] << 8) | (unsigned char)socksreq[3]),
           (unsigned char)socksreq[1]);
     return CURLPX_UNKNOWN_FAIL;
@@ -507,7 +506,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
     o  X'00' succeeded
   */
   struct connectdata *conn = data->conn;
-  unsigned char *socksreq = &conn->cnnct.socksreq[0];
+  unsigned char *socksreq = (unsigned char *)data->state.buffer;
   char dest[256] = "unknown";  /* printable hostname:port */
   int idx;
   ssize_t actualread;
