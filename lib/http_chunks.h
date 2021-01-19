@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,10 +26,10 @@ struct connectdata;
 
 /*
  * The longest possible hexadecimal number we support in a chunked transfer.
- * Weird enough, RFC2616 doesn't set a maximum size! Since we use strtoul()
- * to convert it, we "only" support 2^32 bytes chunk data.
+ * Neither RFC2616 nor the later HTTP specs define a maximum chunk size.
+ * For 64 bit curl_off_t we support 16 digits. For 32 bit, 8 digits.
  */
-#define MAXNUM_SIZE 16
+#define CHUNK_MAXNUM_LEN (SIZEOF_CURL_OFF_T * 2)
 
 typedef enum {
   /* await and buffer all hexadecimal digits until we get one that isn't a
@@ -83,7 +83,7 @@ typedef enum {
 const char *Curl_chunked_strerror(CHUNKcode code);
 
 struct Curl_chunker {
-  char hexbuffer[ MAXNUM_SIZE + 1];
+  char hexbuffer[ CHUNK_MAXNUM_LEN + 1]; /* +1 for null-terminator */
   int hexindex;
   ChunkyState state;
   curl_off_t datasize;

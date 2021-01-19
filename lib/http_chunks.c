@@ -137,7 +137,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
     switch(ch->state) {
     case CHUNK_HEX:
       if(isxdigit_ascii(*datap)) {
-        if(ch->hexindex < MAXNUM_SIZE) {
+        if(ch->hexindex < CHUNK_MAXNUM_LEN) {
           ch->hexbuffer[ch->hexindex] = *datap;
           datap++;
           length--;
