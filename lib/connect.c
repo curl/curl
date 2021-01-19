@@ -887,7 +887,7 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
     error = 0;
 #ifdef ENABLE_QUIC
     if(conn->transport == TRNSPRT_QUIC) {
-      result = Curl_quic_is_connected(conn, i, connected);
+      result = Curl_quic_is_connected(data, conn, i, connected);
       if(!result && *connected) {
         /* use this socket from now on */
         conn->sock[sockindex] = conn->tempsock[i];
@@ -1024,8 +1024,8 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
           hostname, conn->port,
           Curl_strerror(error, buffer, sizeof(buffer)));
 
-    Curl_quic_disconnect(conn, 0);
-    Curl_quic_disconnect(conn, 1);
+    Curl_quic_disconnect(data, conn, 0);
+    Curl_quic_disconnect(data, conn, 1);
 
 #ifdef WSAETIMEDOUT
     if(WSAETIMEDOUT == data->state.os_errno)
@@ -1280,7 +1280,7 @@ static CURLcode singleipconnect(struct Curl_easy *data,
     else if(conn->transport == TRNSPRT_QUIC) {
       /* pass in 'sockfd' separately since it hasn't been put into the
          tempsock array at this point */
-      result = Curl_quic_connect(conn, sockfd, tempindex,
+      result = Curl_quic_connect(data, conn, sockfd, tempindex,
                                  &addr.sa_addr, addr.addrlen);
       if(result)
         error = SOCKERRNO;

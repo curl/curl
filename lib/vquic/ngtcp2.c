@@ -87,7 +87,7 @@ struct h3out {
   "+GROUP-X25519:+GROUP-SECP384R1:+GROUP-SECP521R1"
 #endif
 
-static CURLcode ng_process_ingress(struct connectdata *conn,
+static CURLcode ng_process_ingress(struct Curl_easy *data,
                                    curl_socket_t sockfd,
                                    struct quicsocket *qs);
 static CURLcode ng_flush_egress(struct Curl_easy *data, int sockfd,
@@ -556,10 +556,8 @@ cb_recv_crypto_data(ngtcp2_conn *tconn, ngtcp2_crypto_level crypto_level,
 
 static int cb_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 {
-  struct quicsocket *qs = (struct quicsocket *)user_data;
+  (void)user_data;
   (void)tconn;
-  infof(qs->conn->data, "QUIC handshake is completed\n");
-
   return 0;
 }
 
@@ -587,8 +585,6 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   nconsumed =
     nghttp3_conn_read_stream(qs->h3conn, stream_id, buf, buflen, fin);
   if(nconsumed < 0) {
-    failf(qs->conn->data, "nghttp3_conn_read_stream returned error: %s",
-          nghttp3_strerror((int)nconsumed));
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -616,8 +612,6 @@ cb_acked_stream_data_offset(ngtcp2_conn *tconn, int64_t stream_id,
 
   rv = nghttp3_conn_add_ack_offset(qs->h3conn, stream_id, datalen);
   if(rv != 0) {
-    failf(qs->conn->data, "nghttp3_conn_add_ack_offset returned error: %s",
-          nghttp3_strerror(rv));
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -637,8 +631,6 @@ static int cb_stream_close(ngtcp2_conn *tconn, int64_t stream_id,
   rv = nghttp3_conn_close_stream(qs->h3conn, stream_id,
                                  app_error_code);
   if(rv != 0) {
-    failf(qs->conn->data, "nghttp3_conn_close_stream returned error: %s",
-          nghttp3_strerror(rv));
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -658,8 +650,6 @@ static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
 
   rv = nghttp3_conn_reset_stream(qs->h3conn, stream_id);
   if(rv != 0) {
-    failf(qs->conn->data, "nghttp3_conn_reset_stream returned error: %s",
-          nghttp3_strerror(rv));
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -689,8 +679,6 @@ static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
 
   rv = nghttp3_conn_unblock_stream(qs->h3conn, stream_id);
   if(rv != 0) {
-    failf(qs->conn->data, "nghttp3_conn_unblock_stream returned error: %s",
-          nghttp3_strerror(rv));
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -701,16 +689,16 @@ static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
                                     uint8_t *token, size_t cidlen,
                                     void *user_data)
 {
-  struct quicsocket *qs = (struct quicsocket *)user_data;
   CURLcode result;
   (void)tconn;
+  (void)user_data;
 
-  result = Curl_rand(qs->conn->data, cid->data, cidlen);
+  result = Curl_rand(NULL, cid->data, cidlen);
   if(result)
     return NGTCP2_ERR_CALLBACK_FAILURE;
   cid->datalen = cidlen;
 
-  result = Curl_rand(qs->conn->data, token, NGTCP2_STATELESS_RESET_TOKENLEN);
+  result = Curl_rand(NULL, token, NGTCP2_STATELESS_RESET_TOKENLEN);
   if(result)
     return NGTCP2_ERR_CALLBACK_FAILURE;
 
@@ -755,7 +743,8 @@ static ngtcp2_callbacks ng_callbacks = {
 /*
  * Might be called twice for happy eyeballs.
  */
-CURLcode Curl_quic_connect(struct connectdata *conn,
+CURLcode Curl_quic_connect(struct Curl_easy *data,
+                           struct connectdata *conn,
                            curl_socket_t sockfd,
                            int sockindex,
                            const struct sockaddr *addr,
@@ -765,14 +754,13 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   int rv;
   CURLcode result;
   ngtcp2_path path; /* TODO: this must be initialized properly */
-  struct Curl_easy *data = conn->data;
   struct quicsocket *qs = &conn->hequic[sockindex];
   char ipbuf[40];
   long port;
   int qfd;
 
   if(qs->conn)
-    Curl_quic_disconnect(conn, sockindex);
+    Curl_quic_disconnect(data, conn, sockindex);
   qs->conn = conn;
 
   /* extract the used address as a string */
@@ -892,9 +880,11 @@ static void qs_disconnect(struct quicsocket *qs)
 #endif
 }
 
-void Curl_quic_disconnect(struct connectdata *conn,
+void Curl_quic_disconnect(struct Curl_easy *data,
+                          struct connectdata *conn,
                           int tempindex)
 {
+  (void)data;
   if(conn->transport == TRNSPRT_QUIC)
     qs_disconnect(&conn->hequic[tempindex]);
 }
@@ -904,9 +894,8 @@ static CURLcode ng_disconnect(struct Curl_easy *data,
                               bool dead_connection)
 {
   (void)dead_connection;
-  (void)data;
-  Curl_quic_disconnect(conn, 0);
-  Curl_quic_disconnect(conn, 1);
+  Curl_quic_disconnect(data, conn, 0);
+  Curl_quic_disconnect(data, conn, 1);
   return CURLE_OK;
 }
 
@@ -1161,7 +1150,6 @@ static int init_ngh3_conn(struct quicsocket *qs)
   int64_t ctrl_stream_id, qpack_enc_stream_id, qpack_dec_stream_id;
 
   if(ngtcp2_conn_get_max_local_streams_uni(qs->qconn) < 3) {
-    failf(qs->conn->data, "too few available QUIC streams");
     return CURLE_QUIC_CONNECT_ERROR;
   }
 
@@ -1257,7 +1245,7 @@ static ssize_t ngh3_stream_recv(struct Curl_easy *data,
      as possible to the receive buffer before receiving more */
   drain_overflow_buffer(stream);
 
-  if(ng_process_ingress(conn, sockfd, qs)) {
+  if(ng_process_ingress(data, sockfd, qs)) {
     *curlcode = CURLE_RECV_ERROR;
     return -1;
   }
@@ -1669,13 +1657,13 @@ static void ng_has_connected(struct connectdata *conn, int tempindex)
   conn->httpversion = 30;
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
   conn->quic = &conn->hequic[tempindex];
-  DEBUGF(infof(conn->data, "ngtcp2 established connection!\n"));
 }
 
 /*
  * There can be multiple connection attempts going on in parallel.
  */
-CURLcode Curl_quic_is_connected(struct connectdata *conn,
+CURLcode Curl_quic_is_connected(struct Curl_easy *data,
+                                struct connectdata *conn,
                                 int sockindex,
                                 bool *done)
 {
@@ -1683,11 +1671,11 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn,
   struct quicsocket *qs = &conn->hequic[sockindex];
   curl_socket_t sockfd = conn->tempsock[sockindex];
 
-  result = ng_process_ingress(conn, sockfd, qs);
+  result = ng_process_ingress(data, sockfd, qs);
   if(result)
     goto error;
 
-  result = ng_flush_egress(conn->data, sockfd, qs);
+  result = ng_flush_egress(data, sockfd, qs);
   if(result)
     goto error;
 
@@ -1703,7 +1691,7 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn,
 
 }
 
-static CURLcode ng_process_ingress(struct connectdata *conn,
+static CURLcode ng_process_ingress(struct Curl_easy *data,
                                    curl_socket_t sockfd,
                                    struct quicsocket *qs)
 {
@@ -1728,7 +1716,7 @@ static CURLcode ng_process_ingress(struct connectdata *conn,
       if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK)
         break;
 
-      failf(conn->data, "ngtcp2: recvfrom() unexpectedly returned %zd", recvd);
+      failf(data, "ngtcp2: recvfrom() unexpectedly returned %zd", recvd);
       return CURLE_RECV_ERROR;
     }
 
@@ -1894,11 +1882,13 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
 /*
  * Called from transfer.c:done_sending when we stop HTTP/3 uploading.
  */
-CURLcode Curl_quic_done_sending(struct connectdata *conn)
+CURLcode Curl_quic_done_sending(struct Curl_easy *data)
 {
+  struct connectdata *conn = data->conn;
+  DEBUGASSERT(conn);
   if(conn->handler == &Curl_handler_http3) {
     /* only for HTTP/3 transfers */
-    struct HTTP *stream = conn->data->req.p.http;
+    struct HTTP *stream = data->req.p.http;
     struct quicsocket *qs = conn->quic;
     stream->upload_done = TRUE;
     (void)nghttp3_conn_resume_stream(qs->h3conn, stream->stream3_id);
