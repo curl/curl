@@ -965,8 +965,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       break;
 
     case SSH_SFTP_QUOTE_INIT:
-
-      result = Curl_getworkingpath(conn, sshc->homedir, &protop->path);
+      result = Curl_getworkingpath(data, sshc->homedir, &protop->path);
       if(result) {
         sshc->actualcode = result;
         state(data, SSH_STOP);
@@ -1781,9 +1780,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       state(data, SSH_SESSION_DISCONNECT);
       break;
 
-
     case SSH_SCP_TRANS_INIT:
-      result = Curl_getworkingpath(conn, sshc->homedir, &protop->path);
+      result = Curl_getworkingpath(data, sshc->homedir, &protop->path);
       if(result) {
         sshc->actualcode = result;
         state(data, SSH_STOP);

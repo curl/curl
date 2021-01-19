@@ -1275,7 +1275,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
 
     case SSH_SFTP_QUOTE_INIT:
 
-      result = Curl_getworkingpath(conn, sshc->homedir, &sftp_scp->path);
+      result = Curl_getworkingpath(data, sshc->homedir, &sftp_scp->path);
       if(result) {
         sshc->actualcode = result;
         state(data, SSH_STOP);
@@ -2503,7 +2503,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       break;
 
     case SSH_SCP_TRANS_INIT:
-      result = Curl_getworkingpath(conn, sshc->homedir, &sftp_scp->path);
+      result = Curl_getworkingpath(data, sshc->homedir, &sftp_scp->path);
       if(result) {
         sshc->actualcode = result;
         state(data, SSH_STOP);
