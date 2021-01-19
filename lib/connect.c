@@ -1024,8 +1024,8 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
           hostname, conn->port,
           Curl_strerror(error, buffer, sizeof(buffer)));
 
-    Curl_quic_disconnect(conn, 0);
-    Curl_quic_disconnect(conn, 1);
+    Curl_quic_disconnect(data, conn, 0);
+    Curl_quic_disconnect(data, conn, 1);
 
 #ifdef WSAETIMEDOUT
     if(WSAETIMEDOUT == data->state.os_errno)
