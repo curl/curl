@@ -372,7 +372,6 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   curl_off_t expected_size = -1;
   bool size_known;
   bool fstated = FALSE;
-  struct connectdata *conn = data->conn;
   char *buf = data->state.buffer;
   curl_off_t bytecount = 0;
   int fd;
@@ -451,7 +450,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   }
 
   /* Check whether file range has been specified */
-  result = Curl_range(conn);
+  result = Curl_range(data);
   if(result)
     return result;
 

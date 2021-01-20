@@ -830,7 +830,7 @@ static int ftp_domore_getsock(struct Curl_easy *data,
        connect on the secondary connection */
     socks[0] = conn->sock[FIRSTSOCKET];
 
-    if(!conn->data->set.ftp_use_port) {
+    if(!data->set.ftp_use_port) {
       int s;
       int i;
       /* PORT is used to tell the server to connect to us, and during that we
@@ -3633,7 +3633,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
       /* download */
       ftp->downloadsize = -1; /* unknown as of yet */
 
-      result = Curl_range(conn);
+      result = Curl_range(data);
 
       if(result == CURLE_OK && data->req.maxdownload >= 0) {
         /* Don't check for successful transfer */
