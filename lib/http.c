@@ -672,7 +672,7 @@ output_auth_headers(struct Curl_easy *data,
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if(authstatus->picked == CURLAUTH_AWS_SIGV4) {
     auth = "AWS_SIGV4";
-    result = Curl_output_aws_sigv4(conn, proxy);
+    result = Curl_output_aws_sigv4(data, proxy);
     if(result)
       return result;
   }
@@ -681,7 +681,7 @@ output_auth_headers(struct Curl_easy *data,
 #ifdef USE_SPNEGO
   if(authstatus->picked == CURLAUTH_NEGOTIATE) {
     auth = "Negotiate";
-    result = Curl_output_negotiate(conn, proxy);
+    result = Curl_output_negotiate(data, conn, proxy);
     if(result)
       return result;
   }
@@ -699,7 +699,7 @@ output_auth_headers(struct Curl_easy *data,
 #if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
   if(authstatus->picked == CURLAUTH_NTLM_WB) {
     auth = "NTLM_WB";
-    result = Curl_output_ntlm_wb(conn, proxy);
+    result = Curl_output_ntlm_wb(data, conn, proxy);
     if(result)
       return result;
   }
@@ -708,7 +708,8 @@ output_auth_headers(struct Curl_easy *data,
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if(authstatus->picked == CURLAUTH_DIGEST) {
     auth = "Digest";
-    result = Curl_output_digest(conn,
+    result = Curl_output_digest(data,
+                                conn,
                                 proxy,
                                 (const unsigned char *)request,
                                 (const unsigned char *)path);
@@ -903,6 +904,8 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
   unsigned long *availp;
   struct auth *authp;
 
+  (void) conn; /* In case conditionals make it unused. */
+
   if(proxy) {
     availp = &data->info.proxyauthavail;
     authp = &data->state.authproxy;
@@ -937,7 +940,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
         authp->avail |= CURLAUTH_NEGOTIATE;
 
         if(authp->picked == CURLAUTH_NEGOTIATE) {
-          CURLcode result = Curl_input_negotiate(conn, proxy, auth);
+          CURLcode result = Curl_input_negotiate(data, conn, proxy, auth);
           if(!result) {
             DEBUGASSERT(!data->req.newurl);
             data->req.newurl = strdup(data->change.url);
@@ -976,7 +979,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                 *availp |= CURLAUTH_NTLM_WB;
                 authp->avail |= CURLAUTH_NTLM_WB;
 
-                result = Curl_input_ntlm_wb(conn, proxy, auth);
+                result = Curl_input_ntlm_wb(data, conn, proxy, auth);
                 if(result) {
                   infof(data, "Authentication problem. Ignoring this.\n");
                   data->state.authproblem = TRUE;
@@ -1007,7 +1010,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
              * authentication isn't activated yet, as we need to store the
              * incoming data from this header in case we are going to use
              * Digest */
-            result = Curl_input_digest(conn, proxy, auth);
+            result = Curl_input_digest(data, proxy, auth);
             if(result) {
               infof(data, "Authentication problem. Ignoring this.\n");
               data->state.authproblem = TRUE;
@@ -3611,7 +3614,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
   }
 #endif
   else if(conn->handler->protocol & CURLPROTO_RTSP) {
-    result = Curl_rtsp_parseheader(conn, headp);
+    result = Curl_rtsp_parseheader(data, headp);
     if(result)
       return result;
   }

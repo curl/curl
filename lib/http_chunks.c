@@ -159,8 +159,7 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
         ch->hexbuffer[ch->hexindex] = 0;
 
         /* convert to host encoding before calling strtoul */
-        result = Curl_convert_from_network(conn->data, ch->hexbuffer,
-                                           ch->hexindex);
+        result = Curl_convert_from_network(data, ch->hexbuffer, ch->hexindex);
         if(result) {
           /* Curl_convert_from_network calls failf if unsuccessful */
           /* Treat it as a bad hex character */
@@ -195,8 +194,8 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
       piece = curlx_sotouz((ch->datasize >= length)?length:ch->datasize);
 
       /* Write the data portion available */
-      if(!conn->data->set.http_te_skip && !k->ignorebody) {
-        if(!conn->data->set.http_ce_skip && k->writer_stack)
+      if(!data->set.http_te_skip && !k->ignorebody) {
+        if(!data->set.http_ce_skip && k->writer_stack)
           result = Curl_unencode_write(data, k->writer_stack, datap, piece);
         else
           result = Curl_client_write(data, CLIENTWRITE_BODY, datap, piece);
@@ -243,7 +242,7 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
           tr = Curl_dyn_ptr(&conn->trailer);
           trlen = Curl_dyn_len(&conn->trailer);
           /* Convert to host encoding before calling Curl_client_write */
-          result = Curl_convert_from_network(conn->data, tr, trlen);
+          result = Curl_convert_from_network(data, tr, trlen);
           if(result)
             /* Curl_convert_from_network calls failf if unsuccessful */
             /* Treat it as a bad chunk */

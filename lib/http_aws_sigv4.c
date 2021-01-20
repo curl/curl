@@ -69,11 +69,10 @@ static void sha256_to_hex(char *dst, unsigned char *sha, size_t dst_l)
   }
 }
 
-CURLcode Curl_output_aws_sigv4(struct connectdata *conn, bool proxy)
+CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 {
   CURLcode ret = CURLE_OK;
   char sk[FULL_SK_L] = {0};
-  struct Curl_easy *data = conn->data;
   const char *customrequest = data->set.str[STRING_CUSTOMREQUEST];
   const char *hostname = data->state.up.hostname;
   struct tm info;

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,7 +29,7 @@
 
 extern const struct Curl_handler Curl_handler_rtsp;
 
-CURLcode Curl_rtsp_parseheader(struct connectdata *conn, char *header);
+CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header);
 
 #else
 /* disabled */

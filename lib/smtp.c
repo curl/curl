@@ -475,7 +475,7 @@ static CURLcode smtp_perform_authentication(struct Curl_easy *data)
   }
 
   /* Calculate the SASL login details */
-  result = Curl_sasl_start(&smtpc->sasl, conn, FALSE, &progress);
+  result = Curl_sasl_start(&smtpc->sasl, data, conn, FALSE, &progress);
 
   if(!result) {
     if(progress == SASL_INPROGRESS)
@@ -979,7 +979,7 @@ static CURLcode smtp_state_auth_resp(struct Curl_easy *data,
 
   (void)instate; /* no use for this yet */
 
-  result = Curl_sasl_continue(&smtpc->sasl, conn, smtpcode, &progress);
+  result = Curl_sasl_continue(&smtpc->sasl, data, conn, smtpcode, &progress);
   if(!result)
     switch(progress) {
     case SASL_DONE:

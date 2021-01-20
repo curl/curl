@@ -87,7 +87,7 @@ static int rtsp_getsock_do(struct Curl_easy *data, struct connectdata *conn,
 }
 
 static
-CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len);
+CURLcode rtp_client_write(struct Curl_easy *data, char *ptr, size_t len);
 
 
 /*
@@ -652,7 +652,7 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
        * Write out the header including the leading '$' */
       DEBUGF(infof(data, "RTP write channel %d rtp_length %d\n",
              rtspc->rtp_channel, rtp_length));
-      result = rtp_client_write(conn, &rtp[0], rtp_length + 4);
+      result = rtp_client_write(data, &rtp[0], rtp_length + 4);
       if(result) {
         failf(data, "Got an error writing an RTP packet");
         *readmore = FALSE;
@@ -723,9 +723,8 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
 }
 
 static
-CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len)
+CURLcode rtp_client_write(struct Curl_easy *data, char *ptr, size_t len)
 {
-  struct Curl_easy *data = conn->data;
   size_t wrote;
   curl_write_callback writeit;
   void *user_ptr;
@@ -765,10 +764,8 @@ CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len)
   return CURLE_OK;
 }
 
-CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
-                               char *header)
+CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
 {
-  struct Curl_easy *data = conn->data;
   long CSeq = 0;
 
   if(checkprefix("CSeq:", header)) {
