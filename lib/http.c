@@ -672,7 +672,7 @@ output_auth_headers(struct Curl_easy *data,
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if(authstatus->picked == CURLAUTH_AWS_SIGV4) {
     auth = "AWS_SIGV4";
-    result = Curl_output_aws_sigv4(conn, proxy);
+    result = Curl_output_aws_sigv4(data, proxy);
     if(result)
       return result;
   }
