@@ -530,7 +530,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
 
   if(pop3c->authtypes & pop3c->preftype & POP3_TYPE_SASL) {
     /* Calculate the SASL login details */
-    result = Curl_sasl_start(&pop3c->sasl, conn, FALSE, &progress);
+    result = Curl_sasl_start(&pop3c->sasl, data, conn, FALSE, &progress);
 
     if(!result)
       if(progress == SASL_INPROGRESS)
@@ -800,7 +800,7 @@ static CURLcode pop3_state_auth_resp(struct Curl_easy *data,
 
   (void)instate; /* no use for this yet */
 
-  result = Curl_sasl_continue(&pop3c->sasl, conn, pop3code, &progress);
+  result = Curl_sasl_continue(&pop3c->sasl, data, conn, pop3code, &progress);
   if(!result)
     switch(progress) {
     case SASL_DONE:

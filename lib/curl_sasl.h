@@ -135,11 +135,13 @@ void Curl_sasl_init(struct SASL *sasl, const struct SASLproto *params);
 bool Curl_sasl_can_authenticate(struct SASL *sasl, struct connectdata *conn);
 
 /* Calculate the required login details for SASL authentication  */
-CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
+CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
+                         struct connectdata *conn,
                          bool force_ir, saslprogress *progress);
 
 /* Continue an SASL authentication  */
-CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
+CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
+                            struct connectdata *conn,
                             int code, saslprogress *progress);
 
 #endif /* HEADER_CURL_SASL_H */
