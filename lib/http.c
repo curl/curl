@@ -3611,7 +3611,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
   }
 #endif
   else if(conn->handler->protocol & CURLPROTO_RTSP) {
-    result = Curl_rtsp_parseheader(conn, headp);
+    result = Curl_rtsp_parseheader(data, headp);
     if(result)
       return result;
   }
