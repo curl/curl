@@ -164,6 +164,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
 
 #ifdef CURL_DOES_CONVERSIONS
   bool sending_http_headers = FALSE;
+  struct connectdata *conn = data->conn;
 
   if(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)) {
     const struct HTTP *http = data->req.p.http;
