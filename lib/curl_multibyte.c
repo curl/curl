@@ -82,6 +82,32 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w)
 
 #if defined(USE_WIN32_LARGE_FILES) || defined(USE_WIN32_SMALL_FILES)
 
+int curlx_win32_open(const char *filename, int oflag, ...)
+{
+  int pmode = 0;
+
+#ifdef _UNICODE
+  int result = -1;
+  wchar_t *filename_w = curlx_convert_UTF8_to_wchar(filename);
+#endif
+
+  va_list param;
+  va_start(param, oflag);
+  if(oflag & O_CREAT)
+    pmode = va_arg(param, int);
+  va_end(param);
+
+#ifdef _UNICODE
+  if(filename_w)
+    result = _wopen(filename_w, oflag, pmode);
+  free(filename_w);
+  if(result != -1)
+    return result;
+#endif
+
+  return (_open)(filename, oflag, pmode);
+}
+
 FILE *curlx_win32_fopen(const char *filename, const char *mode)
 {
 #ifdef _UNICODE

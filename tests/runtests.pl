@@ -268,6 +268,7 @@ my $has_manual;     # set if built with built-in manual
 my $has_win32;      # set if built for Windows
 my $has_mingw;      # set if built with MinGW (as opposed to MinGW-w64)
 my $has_hyper = 0;  # set if built with Hyper
+my $has_unicode;    # set if libcurl is built with Unicode support
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
@@ -2826,6 +2827,7 @@ sub setupfeatures {
     $feature{"threaded-resolver"} = $has_threadedres;
     $feature{"TLS-SRP"} = $has_tls_srp;
     $feature{"TrackMemory"} = $has_memory_tracking;
+    $feature{"Unicode"} = $has_unicode;
     $feature{"unittest"} = $debug_build;
     $feature{"unix-sockets"} = $has_unix;
     $feature{"win32"} = $has_win32;
@@ -3092,6 +3094,9 @@ sub checksystem {
 
                 # 'https-proxy' is used as "server" so consider it a protocol
                 push @protocols, 'https-proxy';
+            }
+            if($feat =~ /Unicode/i) {
+                $has_unicode = 1;
             }
         }
         #
