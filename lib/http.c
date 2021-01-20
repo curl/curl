@@ -681,7 +681,7 @@ output_auth_headers(struct Curl_easy *data,
 #ifdef USE_SPNEGO
   if(authstatus->picked == CURLAUTH_NEGOTIATE) {
     auth = "Negotiate";
-    result = Curl_output_negotiate(conn, proxy);
+    result = Curl_output_negotiate(data, conn, proxy);
     if(result)
       return result;
   }
@@ -938,7 +938,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
         authp->avail |= CURLAUTH_NEGOTIATE;
 
         if(authp->picked == CURLAUTH_NEGOTIATE) {
-          CURLcode result = Curl_input_negotiate(conn, proxy, auth);
+          CURLcode result = Curl_input_negotiate(data, conn, proxy, auth);
           if(!result) {
             DEBUGASSERT(!data->req.newurl);
             data->req.newurl = strdup(data->change.url);
