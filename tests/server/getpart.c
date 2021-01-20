@@ -278,7 +278,7 @@ static int decodedata(char  **buf,   /* dest buffer */
 int getpart(char **outbuf, size_t *outlen,
             const char *main, const char *sub, FILE *stream)
 {
-# define MAX_TAG_LEN 79
+# define MAX_TAG_LEN 200
   char couter[MAX_TAG_LEN + 1]; /* current outermost section */
   char cmain[MAX_TAG_LEN + 1];  /* current main section */
   char csub[MAX_TAG_LEN + 1];   /* current sub section */
