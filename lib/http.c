@@ -708,7 +708,8 @@ output_auth_headers(struct Curl_easy *data,
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if(authstatus->picked == CURLAUTH_DIGEST) {
     auth = "Digest";
-    result = Curl_output_digest(conn,
+    result = Curl_output_digest(data,
+                                conn,
                                 proxy,
                                 (const unsigned char *)request,
                                 (const unsigned char *)path);
@@ -1007,7 +1008,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
              * authentication isn't activated yet, as we need to store the
              * incoming data from this header in case we are going to use
              * Digest */
-            result = Curl_input_digest(conn, proxy, auth);
+            result = Curl_input_digest(data, proxy, auth);
             if(result) {
               infof(data, "Authentication problem. Ignoring this.\n");
               data->state.authproblem = TRUE;
