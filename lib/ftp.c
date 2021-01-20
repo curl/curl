@@ -3633,7 +3633,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
       /* download */
       ftp->downloadsize = -1; /* unknown as of yet */
 
-      result = Curl_range(conn);
+      result = Curl_range(data);
 
       if(result == CURLE_OK && data->req.maxdownload >= 0) {
         /* Don't check for successful transfer */
