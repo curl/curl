@@ -741,7 +741,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
          */
         CURLcode extra;
         CHUNKcode res =
-          Curl_httpchunk_read(conn, k->str, nread, &nread, &extra);
+          Curl_httpchunk_read(data, k->str, nread, &nread, &extra);
 
         if(CHUNKE_OK < res) {
           if(CHUNKE_PASSTHRU_ERROR == res) {
@@ -841,7 +841,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
             }
           }
           else if(!k->ignorebody)
-            result = Curl_unencode_write(conn, k->writer_stack, k->str, nread);
+            result = Curl_unencode_write(data, k->writer_stack, k->str, nread);
         }
         k->badheader = HEADER_NORMAL; /* taken care of now */
 

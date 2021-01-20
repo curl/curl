@@ -391,7 +391,7 @@ static CURLcode CONNECT(struct connectdata *conn,
 
             /* now parse the chunked piece of data so that we can
                properly tell when the stream ends */
-            r = Curl_httpchunk_read(conn, &byte, 1, &tookcareof, &extra);
+            r = Curl_httpchunk_read(data, &byte, 1, &tookcareof, &extra);
             if(r == CHUNKE_STOP) {
               /* we're done reading chunks! */
               infof(data, "chunk reading DONE\n");
@@ -472,7 +472,7 @@ static CURLcode CONNECT(struct connectdata *conn,
 
               /* now parse the chunked piece of data so that we can properly
                  tell when the stream ends */
-              r = Curl_httpchunk_read(conn, linep + 1, 1, &gotbytes,
+              r = Curl_httpchunk_read(data, linep + 1, 1, &gotbytes,
                                       &extra);
               if(r == CHUNKE_STOP) {
                 /* we're done reading chunks! */
@@ -545,7 +545,7 @@ static CURLcode CONNECT(struct connectdata *conn,
             infof(data, "CONNECT responded chunked\n");
             s->chunked_encoding = TRUE;
             /* init our chunky engine */
-            Curl_httpchunk_init(conn);
+            Curl_httpchunk_init(data);
           }
         }
         else if(Curl_compareheader(linep, "Proxy-Connection:", "close"))
