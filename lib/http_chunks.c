@@ -87,8 +87,9 @@ static bool isxdigit_ascii(char digit)
 #define isxdigit_ascii(x) Curl_isxdigit(x)
 #endif
 
-void Curl_httpchunk_init(struct connectdata *conn)
+void Curl_httpchunk_init(struct Curl_easy *data)
 {
+  struct connectdata *conn = data->conn;
   struct Curl_chunker *chunk = &conn->chunk;
   chunk->hexindex = 0;      /* start at 0 */
   chunk->dataleft = 0;      /* no data left yet! */
@@ -107,14 +108,14 @@ void Curl_httpchunk_init(struct connectdata *conn)
  * This function always uses ASCII hex values to accommodate non-ASCII hosts.
  * For example, 0x0d and 0x0a are used instead of '\r' and '\n'.
  */
-CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
+CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
                               char *datap,
                               ssize_t datalen,
                               ssize_t *wrotep,
                               CURLcode *extrap)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   struct Curl_chunker *ch = &conn->chunk;
   struct SingleRequest *k = &data->req;
   size_t piece;
@@ -196,7 +197,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       /* Write the data portion available */
       if(!conn->data->set.http_te_skip && !k->ignorebody) {
         if(!conn->data->set.http_ce_skip && k->writer_stack)
-          result = Curl_unencode_write(conn, k->writer_stack, datap, piece);
+          result = Curl_unencode_write(data, k->writer_stack, datap, piece);
         else
           result = Curl_client_write(data, CLIENTWRITE_BODY, datap, piece);
 
@@ -219,7 +220,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
     case CHUNK_POSTLF:
       if(*datap == 0x0a) {
         /* The last one before we go back to hex state and start all over. */
-        Curl_httpchunk_init(conn); /* sets state back to CHUNK_HEX */
+        Curl_httpchunk_init(data); /* sets state back to CHUNK_HEX */
       }
       else if(*datap != 0x0d)
         return CHUNKE_BAD_CHUNK;

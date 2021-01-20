@@ -1566,7 +1566,7 @@ CURLcode Curl_http_done(struct Curl_easy *data,
   data->state.authhost.multipass = FALSE;
   data->state.authproxy.multipass = FALSE;
 
-  Curl_unencode_cleanup(conn);
+  Curl_unencode_cleanup(data);
 
   /* set the proper values (possibly modified on POST) */
   conn->seek_func = data->set.seek_func; /* restore */
@@ -3427,7 +3427,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
      * of chunks, and a chunk-data set to zero signals the
      * end-of-chunks. */
 
-    result = Curl_build_unencoding_stack(conn, headp + 18, TRUE);
+    result = Curl_build_unencoding_stack(data, headp + 18, TRUE);
     if(result)
       return result;
   }
@@ -3440,7 +3440,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
      * 2616). zlib cannot handle compress.  However, errors are
      * handled further down when the response body is processed
      */
-    result = Curl_build_unencoding_stack(conn, headp + 17, FALSE);
+    result = Curl_build_unencoding_stack(data, headp + 17, FALSE);
     if(result)
       return result;
   }
