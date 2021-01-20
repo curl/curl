@@ -565,7 +565,7 @@ static CURLcode multi_done(struct Curl_easy *data,
   conn->data = data; /* ensure the connection uses this transfer now */
 
   /* Stop the resolver and free its own resources (but not dns_entry yet). */
-  Curl_resolver_kill(conn);
+  Curl_resolver_kill(data);
 
   /* Cleanup possible redirect junk */
   Curl_safefree(data->req.newurl);
@@ -995,7 +995,7 @@ static int multi_getsock(struct Curl_easy *data,
     return 0;
 
   case CURLM_STATE_WAITRESOLVE:
-    return Curl_resolv_getsock(conn, socks);
+    return Curl_resolv_getsock(data, socks);
 
   case CURLM_STATE_PROTOCONNECT:
   case CURLM_STATE_SENDPROTOCONNECT:
@@ -1733,15 +1733,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if(dns) {
 #ifdef CURLRES_ASYNCH
-        conn->async.dns = dns;
-        conn->async.done = TRUE;
+        data->state.async.dns = dns;
+        data->state.async.done = TRUE;
 #endif
         result = CURLE_OK;
         infof(data, "Hostname '%s' was found in DNS cache\n", hostname);
       }
 
       if(!dns)
-        result = Curl_resolv_check(data->conn, &dns);
+        result = Curl_resolv_check(data, &dns);
 
       /* Update sockets here, because the socket(s) may have been
          closed and the application thus needs to be told, even if it
@@ -1754,7 +1754,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(dns) {
         /* Perform the next step in the connection phase, and then move on
            to the WAITCONNECT state */
-        result = Curl_once_resolved(data->conn, &protocol_connected);
+        result = Curl_once_resolved(data, &protocol_connected);
 
         if(result)
           /* if Curl_once_resolved() returns failure, the connection struct

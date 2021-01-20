@@ -539,14 +539,20 @@ struct hostname {
 #define KEEP_RECVBITS (KEEP_RECV | KEEP_RECV_HOLD | KEEP_RECV_PAUSE)
 #define KEEP_SENDBITS (KEEP_SEND | KEEP_SEND_HOLD | KEEP_SEND_PAUSE)
 
+#if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
+#define USE_CURL_ASYNC
 struct Curl_async {
   char *hostname;
-  int port;
-  int status; /* if done is TRUE, this is the status from the callback */
   struct Curl_dns_entry *dns;
   struct thread_data *tdata;
+  void *resolver; /* resolver state, if it is used in the URL state -
+                     ares_channel f.e. */
+  int port;
+  int status; /* if done is TRUE, this is the status from the callback */
   BIT(done);  /* set TRUE when the lookup is complete */
 };
+
+#endif
 
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
@@ -1093,9 +1099,6 @@ struct connectdata {
   struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
 #endif
 
-  /* data used for the asynch name resolve callback */
-  struct Curl_async async;
-
   /* for chunked-encoded trailer */
   struct dynbuf trailer;
 
@@ -1330,7 +1333,6 @@ struct urlpieces {
 struct UrlState {
   /* Points to the connection cache */
   struct conncache *conn_cache;
-
   int retrycount; /* number of retries on a new connection */
 
   /* buffers to store authentication data in, as parsed from input options */
@@ -1365,8 +1367,9 @@ struct UrlState {
 
   struct auth authhost;  /* auth details for host */
   struct auth authproxy; /* auth details for proxy */
-  void *resolver; /* resolver state, if it is used in the URL state -
-                     ares_channel f.e. */
+#ifdef USE_CURL_ASYNC
+  struct Curl_async async;  /* asynchronous name resolver data */
+#endif
 
 #if defined(USE_OPENSSL)
   /* void instead of ENGINE to avoid bleeding OpenSSL into this header */

@@ -89,7 +89,7 @@ bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
  * flavours have thread-safe versions of the plain gethostbyname() etc.
  *
  */
-struct Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
+struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
                                        const char *hostname,
                                        int port,
                                        int *waitp)
@@ -97,14 +97,14 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   struct Curl_addrinfo *ai = NULL;
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)conn;
+  (void)data;
 #endif
 
   *waitp = 0; /* synchronous response only */
 
   ai = Curl_ipv4_resolve_r(hostname, port);
   if(!ai)
-    infof(conn->data, "Curl_ipv4_resolve_r failed for %s\n", hostname);
+    infof(data, "Curl_ipv4_resolve_r failed for %s\n", hostname);
 
   return ai;
 }

@@ -427,7 +427,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->info.wouldredirect);
 
   /* this destroys the channel and we cannot use it anymore after this */
-  Curl_resolver_cleanup(data->state.resolver);
+  Curl_resolver_cleanup(data->state.async.resolver);
 
   Curl_http2_cleanup_dependencies(data);
   Curl_convert_close(data);
@@ -643,7 +643,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
-  result = Curl_resolver_init(data, &data->state.resolver);
+  result = Curl_resolver_init(data, &data->state.async.resolver);
   if(result) {
     DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
     free(data);
@@ -664,7 +664,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
   }
 
   if(result) {
-    Curl_resolver_cleanup(data->state.resolver);
+    Curl_resolver_cleanup(data->state.async.resolver);
     Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
     free(data);
@@ -722,7 +722,7 @@ static void conn_shutdown(struct Curl_easy *data, struct connectdata *conn)
   infof(data, "Closing connection %ld\n", conn->connection_id);
 
   /* possible left-overs from the async name resolvers */
-  Curl_resolver_cancel(conn);
+  Curl_resolver_cancel(data);
 
   /* close the SSL stuff before we close any sockets since they will/may
      write to the sockets */
@@ -3307,7 +3307,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
       conn->hostname_resolve = strdup(connhost->name);
       if(!conn->hostname_resolve)
         return CURLE_OUT_OF_MEMORY;
-      rc = Curl_resolv_timeout(conn, conn->hostname_resolve, (int)conn->port,
+      rc = Curl_resolv_timeout(data, conn->hostname_resolve, (int)conn->port,
                                &hostaddr, timeout_ms);
       if(rc == CURLRESOLV_PENDING)
         *async = TRUE;
@@ -3332,7 +3332,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
       conn->hostname_resolve = strdup(host->name);
       if(!conn->hostname_resolve)
         return CURLE_OUT_OF_MEMORY;
-      rc = Curl_resolv_timeout(conn, conn->hostname_resolve, (int)conn->port,
+      rc = Curl_resolv_timeout(data, conn->hostname_resolve, (int)conn->port,
                                &hostaddr, timeout_ms);
 
       if(rc == CURLRESOLV_PENDING)
