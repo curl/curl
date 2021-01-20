@@ -455,7 +455,7 @@ and runs on, that isn't listed, please let us know!
 
 AIX, AmigaOS, Android, Aros, BeOS, Blackberry 10, Blackberry Tablet OS, Cell
 OS, ChromeOS, Cisco IOS, Cygwin, Dragonfly BSD, eCOS, FreeBSD, FreeDOS,
-FreeRTOS, Fuchsia, Garmin OS, Genode, Haiku, HardedenedBSD, HP-UX, Hurd,
+FreeRTOS, Fuchsia, Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd,
 Illumos, Integrity, iOS, ipadOS, IRIX, LineageOS, Linux, Lua RTOS, Mac OS 9,
 macOS, Mbed, Micrium, MINIX, MorphOS, MPE/iX, MS-DOS, NCR MP-RAS, NetBSD,
 Netware, Nintendo Switch, NonStop OS, NuttX, OpenBSD, OpenStep, Orbis OS,
