@@ -405,6 +405,7 @@ Features testable here are:
 - `TLS-SRP`
 - `TrackMemory`
 - `typecheck`
+- `Unicode`
 - `unittest`
 - `unix-sockets`
 - `verbose-strings`
