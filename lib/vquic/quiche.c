@@ -85,10 +85,8 @@ static int quiche_getsock(struct Curl_easy *data,
 }
 
 static CURLcode qs_disconnect(struct Curl_easy *data,
-                              struct connectdata *conn,
                               struct quicsocket *qs)
 {
-  DEBUGASSERT(conn);
   DEBUGASSERT(qs);
   if(qs->conn) {
     (void)quiche_conn_close(qs->conn, TRUE, 0, NULL, 0);
@@ -115,7 +113,7 @@ static CURLcode quiche_disconnect(struct Curl_easy *data,
 {
   struct quicsocket *qs = conn->quic;
   (void)dead_connection;
-  return qs_disconnect(data, conn, qs);
+  return qs_disconnect(data, qs);
 }
 
 void Curl_quic_disconnect(struct Curl_easy *data,
@@ -123,7 +121,7 @@ void Curl_quic_disconnect(struct Curl_easy *data,
                           int tempindex)
 {
   if(conn->transport == TRNSPRT_QUIC)
-    qs_disconnect(data, conn, &conn->hequic[tempindex]);
+    qs_disconnect(data, &conn->hequic[tempindex]);
 }
 
 static unsigned int quiche_conncheck(struct Curl_easy *data,
@@ -347,7 +345,7 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
 
   return result;
   error:
-  qs_disconnect(data, conn, qs);
+  qs_disconnect(data, qs);
   return result;
 }
 
