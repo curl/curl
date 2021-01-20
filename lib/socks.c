@@ -238,7 +238,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
     /* DNS resolve only for SOCKS4, not SOCKS4a */
     if(!protocol4a) {
       enum resolve_t rc =
-        Curl_resolv(conn, hostname, remote_port, FALSE, &dns);
+        Curl_resolv(data, hostname, remote_port, FALSE, &dns);
 
       if(rc == CURLRESOLV_ERROR)
         return CURLPX_RESOLVE_HOST;
@@ -261,14 +261,14 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
 
     if(dns) {
 #ifdef CURLRES_ASYNCH
-      conn->async.dns = dns;
-      conn->async.done = TRUE;
+      data->state.async.dns = dns;
+      data->state.async.done = TRUE;
 #endif
       infof(data, "Hostname '%s' was found\n", hostname);
       sxstate(data, CONNECT_RESOLVED);
     }
     else {
-      result = Curl_resolv_check(data->conn, &dns);
+      result = Curl_resolv_check(data, &dns);
       if(!dns) {
         if(result)
           return CURLPX_RESOLVE_HOST;
@@ -754,7 +754,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
   CONNECT_REQ_INIT:
   case CONNECT_REQ_INIT:
     if(socks5_resolve_local) {
-      enum resolve_t rc = Curl_resolv(conn, hostname, remote_port,
+      enum resolve_t rc = Curl_resolv(data, hostname, remote_port,
                                       FALSE, &dns);
 
       if(rc == CURLRESOLV_ERROR)
@@ -775,14 +775,14 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
 
     if(dns) {
 #ifdef CURLRES_ASYNCH
-      conn->async.dns = dns;
-      conn->async.done = TRUE;
+      data->state.async.dns = dns;
+      data->state.async.done = TRUE;
 #endif
       infof(data, "SOCKS5: hostname '%s' found\n", hostname);
     }
 
     if(!dns) {
-      result = Curl_resolv_check(data->conn, &dns);
+      result = Curl_resolv_check(data, &dns);
       if(!dns) {
         if(result)
           return CURLPX_RESOLVE_HOST;

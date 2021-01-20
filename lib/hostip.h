@@ -85,12 +85,12 @@ enum resolve_t {
   CURLRESOLV_RESOLVED =  0,
   CURLRESOLV_PENDING  =  1
 };
-enum resolve_t Curl_resolv(struct connectdata *conn,
+enum resolve_t Curl_resolv(struct Curl_easy *data,
                            const char *hostname,
                            int port,
                            bool allowDOH,
                            struct Curl_dns_entry **dnsentry);
-enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
+enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
                                    const char *hostname, int port,
                                    struct Curl_dns_entry **dnsentry,
                                    timediff_t timeoutms);
@@ -117,7 +117,7 @@ bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn);
  * name resolve layers (selected at build-time). They all take this same set
  * of arguments
  */
-struct Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
+struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
                                        const char *hostname,
                                        int port,
                                        int *waitp);
@@ -148,7 +148,7 @@ int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
 /* IPv4 threadsafe resolve function used for synch and asynch builds */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
-CURLcode Curl_once_resolved(struct connectdata *conn, bool *protocol_connect);
+CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_connect);
 
 /*
  * Curl_addrinfo_callback() is used when we build with any asynch specialty.
@@ -156,7 +156,7 @@ CURLcode Curl_once_resolved(struct connectdata *conn, bool *protocol_connect);
  * status is CURL_ASYNC_SUCCESS. Twiddles fields in conn to indicate async
  * request completed whether successful or failed.
  */
-CURLcode Curl_addrinfo_callback(struct connectdata *conn,
+CURLcode Curl_addrinfo_callback(struct Curl_easy *data,
                                 int status,
                                 struct Curl_addrinfo *ai);
 
@@ -240,10 +240,9 @@ void Curl_hostcache_clean(struct Curl_easy *data, struct Curl_hash *hash);
  * Populate the cache with specified entries from CURLOPT_RESOLVE.
  */
 CURLcode Curl_loadhostpairs(struct Curl_easy *data);
-
-CURLcode Curl_resolv_check(struct connectdata *conn,
+CURLcode Curl_resolv_check(struct Curl_easy *data,
                            struct Curl_dns_entry **dns);
-int Curl_resolv_getsock(struct connectdata *conn,
+int Curl_resolv_getsock(struct Curl_easy *data,
                         curl_socket_t *socks);
 
 #endif /* HEADER_CURL_HOSTIP_H */

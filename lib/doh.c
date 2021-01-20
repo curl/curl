@@ -379,21 +379,21 @@ static CURLcode dohprobe(struct Curl_easy *data,
  * 'Curl_addrinfo *' with the address information.
  */
 
-struct Curl_addrinfo *Curl_doh(struct connectdata *conn,
+struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
                                const char *hostname,
                                int port,
                                int *waitp)
 {
-  struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
   int slot;
   struct dohdata *dohp;
+  struct connectdata *conn = data->conn;
   *waitp = TRUE; /* this never returns synchronously */
-  (void)conn;
   (void)hostname;
   (void)port;
 
   DEBUGASSERT(!data->req.doh);
+  DEBUGASSERT(conn);
 
   /* start clean, consider allocating this struct on demand */
   dohp = data->req.doh = calloc(sizeof(struct dohdata), 1);
@@ -911,18 +911,17 @@ UNITTEST void de_cleanup(struct dohentry *d)
   }
 }
 
-CURLcode Curl_doh_is_resolved(struct connectdata *conn,
+CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                               struct Curl_dns_entry **dnsp)
 {
   CURLcode result;
-  struct Curl_easy *data = conn->data;
   struct dohdata *dohp = data->req.doh;
   *dnsp = NULL; /* defaults to no response */
 
   if(!dohp->probe[DOH_PROBE_SLOT_IPADDR_V4].easy &&
      !dohp->probe[DOH_PROBE_SLOT_IPADDR_V6].easy) {
-    failf(data, "Could not DOH-resolve: %s", conn->async.hostname);
-    return conn->bits.proxy?CURLE_COULDNT_RESOLVE_PROXY:
+    failf(data, "Could not DOH-resolve: %s", data->state.async.hostname);
+    return data->conn->bits.proxy?CURLE_COULDNT_RESOLVE_PROXY:
       CURLE_COULDNT_RESOLVE_HOST;
   }
   else if(!dohp->pending) {
@@ -982,7 +981,7 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
         Curl_freeaddrinfo(ai);
       }
       else {
-        conn->async.dns = dns;
+        data->state.async.dns = dns;
         *dnsp = dns;
         result = CURLE_OK;      /* address resolution OK */
       }

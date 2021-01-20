@@ -1079,9 +1079,9 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   }
 
   /* resolv ip/host to ip */
-  rc = Curl_resolv(conn, host, 0, FALSE, &h);
+  rc = Curl_resolv(data, host, 0, FALSE, &h);
   if(rc == CURLRESOLV_PENDING)
-    (void)Curl_resolver_wait_resolv(conn, &h);
+    (void)Curl_resolver_wait_resolv(data, &h);
   if(h) {
     res = h->addr;
     /* when we return from this function, we can forget about this entry
@@ -1945,11 +1945,11 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
      */
     const char * const host_name = conn->bits.socksproxy ?
       conn->socks_proxy.host.name : conn->http_proxy.host.name;
-    rc = Curl_resolv(conn, host_name, (int)conn->port, FALSE, &addr);
+    rc = Curl_resolv(data, host_name, (int)conn->port, FALSE, &addr);
     if(rc == CURLRESOLV_PENDING)
       /* BLOCKING, ignores the return code but 'addr' will be NULL in
          case of failure */
-      (void)Curl_resolver_wait_resolv(conn, &addr);
+      (void)Curl_resolver_wait_resolv(data, &addr);
 
     connectport =
       (unsigned short)conn->port; /* we connect to the proxy's port */
@@ -1974,10 +1974,10 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
         return CURLE_OUT_OF_MEMORY;
     }
 
-    rc = Curl_resolv(conn, ftpc->newhost, ftpc->newport, FALSE, &addr);
+    rc = Curl_resolv(data, ftpc->newhost, ftpc->newport, FALSE, &addr);
     if(rc == CURLRESOLV_PENDING)
       /* BLOCKING */
-      (void)Curl_resolver_wait_resolv(conn, &addr);
+      (void)Curl_resolver_wait_resolv(data, &addr);
 
     connectport = ftpc->newport; /* we connect to the remote port */
 

@@ -127,7 +127,7 @@ static void dump_addrinfo(struct connectdata *conn,
  * memory we need to free after use. That memory *MUST* be freed with
  * Curl_freeaddrinfo(), nothing else.
  */
-struct Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
+struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
                                        const char *hostname,
                                        int port,
                                        int *waitp)
@@ -141,14 +141,11 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   char addrbuf[128];
 #endif
   int pf;
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  struct Curl_easy *data = conn->data;
-#endif
 
   *waitp = 0; /* synchronous response only */
 
   /* Check if a limited name resolve has been requested */
-  switch(conn->ip_version) {
+  switch(data->set.ipver) {
   case CURL_IPRESOLVE_V4:
     pf = PF_INET;
     break;

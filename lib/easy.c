@@ -908,8 +908,8 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
 #endif
   /* Clone the resolver handle, if present, for the new handle */
   if(Curl_resolver_duphandle(outcurl,
-                             &outcurl->state.resolver,
-                             data->state.resolver))
+                             &outcurl->state.async.resolver,
+                             data->state.async.resolver))
     goto fail;
 
 #ifdef USE_ARES

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -91,7 +91,7 @@ CURLcode Curl_resolver_duphandle(struct Curl_easy *easy, void **to,
  *
  * It is safe to call this when conn is in any state.
  */
-void Curl_resolver_cancel(struct connectdata *conn);
+void Curl_resolver_cancel(struct Curl_easy *data);
 
 /*
  * Curl_resolver_kill().
@@ -104,7 +104,7 @@ void Curl_resolver_cancel(struct connectdata *conn);
  *
  * It is safe to call this when conn is in any state.
  */
-void Curl_resolver_kill(struct connectdata *conn);
+void Curl_resolver_kill(struct Curl_easy *data);
 
 /* Curl_resolver_getsock()
  *
@@ -114,7 +114,7 @@ void Curl_resolver_kill(struct connectdata *conn);
  * return bitmask indicating what file descriptors (referring to array indexes
  * in the 'sock' array) to wait for, read/write.
  */
-int Curl_resolver_getsock(struct connectdata *conn, curl_socket_t *sock);
+int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *sock);
 
 /*
  * Curl_resolver_is_resolved()
@@ -125,7 +125,7 @@ int Curl_resolver_getsock(struct connectdata *conn, curl_socket_t *sock);
  *
  * Returns normal CURLcode errors.
  */
-CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
+CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
                                    struct Curl_dns_entry **dns);
 
 /*
@@ -139,7 +139,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
  * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
  */
-CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
+CURLcode Curl_resolver_wait_resolv(struct Curl_easy *data,
                                    struct Curl_dns_entry **dnsentry);
 
 /*
@@ -153,7 +153,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
  * Each resolver backend must of course make sure to return data in the
  * correct format to comply with this.
  */
-struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
+struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
                                                 const char *hostname,
                                                 int port,
                                                 int *waitp);

@@ -253,14 +253,12 @@ sigjmp_buf curl_jmpenv;
 #endif
 
 /* lookup address, returns entry if found and not stale */
-static struct Curl_dns_entry *
-fetch_addr(struct connectdata *conn,
-                const char *hostname,
-                int port)
+static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
+                                         const char *hostname,
+                                         int port)
 {
   struct Curl_dns_entry *dns = NULL;
   size_t entry_len;
-  struct Curl_easy *data = conn->data;
   char entry_id[MAX_HOSTCACHE_LEN];
 
   /* Create an entry id, based upon the hostname and port */
@@ -321,7 +319,7 @@ Curl_fetch_addr(struct connectdata *conn,
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-  dns = fetch_addr(conn, hostname, port);
+  dns = fetch_addr(data, hostname, port);
 
   if(dns)
     dns->inuse++; /* we use it! */
@@ -480,16 +478,16 @@ Curl_cache_addr(struct Curl_easy *data,
  * CURLRESOLV_PENDING  (1) = waiting for response, no pointer
  */
 
-enum resolve_t Curl_resolv(struct connectdata *conn,
+enum resolve_t Curl_resolv(struct Curl_easy *data,
                            const char *hostname,
                            int port,
                            bool allowDOH,
                            struct Curl_dns_entry **entry)
 {
   struct Curl_dns_entry *dns = NULL;
-  struct Curl_easy *data = conn->data;
   CURLcode result;
   enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
+  struct connectdata *conn = data->conn;
 
   *entry = NULL;
   conn->bits.doh = FALSE; /* default is not */
@@ -497,7 +495,7 @@ enum resolve_t Curl_resolv(struct connectdata *conn,
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-  dns = fetch_addr(conn, hostname, port);
+  dns = fetch_addr(data, hostname, port);
 
   if(dns) {
     infof(data, "Hostname %s was found in DNS cache\n", hostname);
@@ -523,7 +521,7 @@ enum resolve_t Curl_resolv(struct connectdata *conn,
     if(data->set.resolver_start) {
       int st;
       Curl_set_in_callback(data, true);
-      st = data->set.resolver_start(data->state.resolver, NULL,
+      st = data->set.resolver_start(data->state.async.resolver, NULL,
                                     data->set.resolver_start_client);
       Curl_set_in_callback(data, false);
       if(st)
@@ -569,13 +567,13 @@ enum resolve_t Curl_resolv(struct connectdata *conn,
         return CURLRESOLV_ERROR;
 
       if(allowDOH && data->set.doh && !ipnum) {
-        addr = Curl_doh(conn, hostname, port, &respwait);
+        addr = Curl_doh(data, hostname, port, &respwait);
       }
       else {
         /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
            non-zero value indicating that we need to wait for the response to
            the resolve call */
-        addr = Curl_getaddrinfo(conn,
+        addr = Curl_getaddrinfo(data,
 #ifdef DEBUGBUILD
                                 (data->set.str[STRING_DEVICE]
                                  && !strcmp(data->set.str[STRING_DEVICE],
@@ -589,7 +587,7 @@ enum resolve_t Curl_resolv(struct connectdata *conn,
         /* the response to our resolve call will come asynchronously at
            a later time, good or bad */
         /* First, check that we haven't received the info by now */
-        result = Curl_resolv_check(conn, &dns);
+        result = Curl_resolv_check(data, &dns);
         if(result) /* error detected */
           return CURLRESOLV_ERROR;
         if(dns)
@@ -658,7 +656,7 @@ RETSIGTYPE alarmfunc(int sig)
  * CURLRESOLV_PENDING  (1) = waiting for response, no pointer
  */
 
-enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
+enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
                                    const char *hostname,
                                    int port,
                                    struct Curl_dns_entry **entry,
@@ -676,7 +674,6 @@ enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
 #endif /* HAVE_SIGACTION */
   volatile long timeout;
   volatile unsigned int prev_alarm = 0;
-  struct Curl_easy *data = conn->data;
 #endif /* USE_ALARM_TIMEOUT */
   enum resolve_t rc;
 
@@ -757,7 +754,7 @@ enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
   /* Perform the actual name resolution. This might be interrupted by an
    * alarm if it takes too long.
    */
-  rc = Curl_resolv(conn, hostname, port, TRUE, entry);
+  rc = Curl_resolv(data, hostname, port, TRUE, entry);
 
 #ifdef USE_ALARM_TIMEOUT
 clean_up:
@@ -1068,27 +1065,27 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-CURLcode Curl_resolv_check(struct connectdata *conn,
+CURLcode Curl_resolv_check(struct Curl_easy *data,
                            struct Curl_dns_entry **dns)
 {
 #if defined(CURL_DISABLE_DOH) && !defined(CURLRES_ASYNCH)
   (void)dns;
 #endif
 
-  if(conn->bits.doh)
-    return Curl_doh_is_resolved(conn, dns);
-  return Curl_resolver_is_resolved(conn, dns);
+  if(data->conn->bits.doh)
+    return Curl_doh_is_resolved(data, dns);
+  return Curl_resolver_is_resolved(data, dns);
 }
 
-int Curl_resolv_getsock(struct connectdata *conn,
+int Curl_resolv_getsock(struct Curl_easy *data,
                         curl_socket_t *socks)
 {
 #ifdef CURLRES_ASYNCH
-  if(conn->bits.doh)
+  if(data->conn->bits.doh)
     /* nothing to wait for during DOH resolve, those handles have their own
        sockets */
     return GETSOCK_BLANK;
-  return Curl_resolver_getsock(conn, socks);
+  return Curl_resolver_getsock(data, socks);
 #else
   (void)conn;
   (void)socks;
@@ -1101,21 +1098,19 @@ int Curl_resolv_getsock(struct connectdata *conn,
 
    Note: this function disconnects and frees the conn data in case of
    resolve failure */
-CURLcode Curl_once_resolved(struct connectdata *conn,
-                            bool *protocol_done)
+CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
 {
   CURLcode result;
+  struct connectdata *conn = data->conn;
 
-  if(conn->async.dns) {
-    conn->dns_entry = conn->async.dns;
-    conn->async.dns = NULL;
+  if(data->state.async.dns) {
+    conn->dns_entry = data->state.async.dns;
+    data->state.async.dns = NULL;
   }
 
   result = Curl_setup_conn(conn, protocol_done);
 
   if(result) {
-    struct Curl_easy *data = conn->data;
-    DEBUGASSERT(data);
     Curl_detach_connnection(data);
     Curl_conncache_remove_conn(data, conn, TRUE);
     Curl_disconnect(data, conn, TRUE);
