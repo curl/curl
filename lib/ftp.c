@@ -830,7 +830,7 @@ static int ftp_domore_getsock(struct Curl_easy *data,
        connect on the secondary connection */
     socks[0] = conn->sock[FIRSTSOCKET];
 
-    if(!conn->data->set.ftp_use_port) {
+    if(!data->set.ftp_use_port) {
       int s;
       int i;
       /* PORT is used to tell the server to connect to us, and during that we
