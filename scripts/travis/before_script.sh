@@ -62,7 +62,7 @@ if [ "$NGTCP2" = yes ]; then
   git clone --depth 1 https://github.com/ngtcp2/ngtcp2
   cd ngtcp2
   autoreconf -i
-  ./configure PKG_CONFIG_PATH=$HOME/ngbuild/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --prefix=$HOME/ngbuild --enable-lib-only
+  ./configure PKG_CONFIG_PATH=$HOME/ngbuild/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --prefix=$HOME/ngbuild --enable-lib-only --with-gnutls
   make
   make install
 fi
