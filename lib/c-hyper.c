@@ -60,8 +60,8 @@
 size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
                        uint8_t *buf, size_t buflen)
 {
-  struct connectdata *conn = (struct connectdata *)userp;
-  struct Curl_easy *data = conn->data;
+  struct Curl_easy *data = userp;
+  struct connectdata *conn = data->conn;
   CURLcode result;
   ssize_t nread;
 
@@ -89,8 +89,8 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
 size_t Curl_hyper_send(void *userp, hyper_context *ctx,
                        const uint8_t *buf, size_t buflen)
 {
-  struct connectdata *conn = (struct connectdata *)userp;
-  struct Curl_easy *data = conn->data;
+  struct Curl_easy *data = userp;
+  struct connectdata *conn = data->conn;
   CURLcode result;
   ssize_t nwrote;
 
@@ -686,7 +686,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     goto error;
   }
   /* tell Hyper how to read/write network data */
-  hyper_io_set_userdata(io, conn);
+  hyper_io_set_userdata(io, data);
   hyper_io_set_read(io, Curl_hyper_recv);
   hyper_io_set_write(io, Curl_hyper_send);
 
