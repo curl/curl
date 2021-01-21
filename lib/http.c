@@ -1597,7 +1597,7 @@ CURLcode Curl_http_done(struct Curl_easy *data,
        return an error here */
     failf(data, "Empty reply from server");
     /* Mark it as closed to avoid the "left intact" message */
-    connclose(conn, "Empty reply from server");
+    streamclose(conn, "Empty reply from server");
     return CURLE_GOT_NOTHING;
   }
 
