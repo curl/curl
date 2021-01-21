@@ -918,6 +918,8 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   struct dohdata *dohp = data->req.doh;
   *dnsp = NULL; /* defaults to no response */
+  if(!dohp)
+    return CURLE_OUT_OF_MEMORY;
 
   if(!dohp->probe[DOH_PROBE_SLOT_IPADDR_V4].easy &&
      !dohp->probe[DOH_PROBE_SLOT_IPADDR_V6].easy) {
