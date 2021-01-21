@@ -721,7 +721,9 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   if(!buflen)
     return NULL;
 
+#ifndef WIN32
   DEBUGASSERT(err >= 0);
+#endif
 
   max = buflen - 1;
   *buf = '\0';
