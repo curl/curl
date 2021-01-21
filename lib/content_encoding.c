@@ -1077,10 +1077,10 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
 
 #else
 /* Stubs for builds without HTTP. */
-CURLcode Curl_build_unencoding_stack(struct connectdata *conn,
+CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
                                      const char *enclist, int maybechunked)
 {
-  (void) conn;
+  (void) data;
   (void) enclist;
   (void) maybechunked;
   return CURLE_NOT_BUILT_IN;
@@ -1097,9 +1097,9 @@ CURLcode Curl_unencode_write(struct Curl_easy *data,
   return CURLE_NOT_BUILT_IN;
 }
 
-void Curl_unencode_cleanup(struct connectdata *conn)
+void Curl_unencode_cleanup(struct Curl_easy *data)
 {
-  (void) conn;
+  (void) data;
 }
 
 char *Curl_all_content_encodings(void)
