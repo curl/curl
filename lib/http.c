@@ -699,7 +699,7 @@ output_auth_headers(struct Curl_easy *data,
 #if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
   if(authstatus->picked == CURLAUTH_NTLM_WB) {
     auth = "NTLM_WB";
-    result = Curl_output_ntlm_wb(conn, proxy);
+    result = Curl_output_ntlm_wb(data, conn, proxy);
     if(result)
       return result;
   }
@@ -976,7 +976,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                 *availp |= CURLAUTH_NTLM_WB;
                 authp->avail |= CURLAUTH_NTLM_WB;
 
-                result = Curl_input_ntlm_wb(conn, proxy, auth);
+                result = Curl_input_ntlm_wb(data, conn, proxy, auth);
                 if(result) {
                   infof(data, "Authentication problem. Ignoring this.\n");
                   data->state.authproblem = TRUE;
