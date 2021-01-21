@@ -692,7 +692,7 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
 
   if(!timeout)
     /* USE_ALARM_TIMEOUT defined, but no timeout actually requested */
-    return Curl_resolv(conn, hostname, port, TRUE, entry);
+    return Curl_resolv(data, hostname, port, TRUE, entry);
 
   if(timeout < 1000) {
     /* The alarm() function only provides integer second resolution, so if
@@ -745,7 +745,7 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
 #else
 #ifndef CURLRES_ASYNCH
   if(timeoutms)
-    infof(conn->data, "timeout on name lookup is not supported\n");
+    infof(data, "timeout on name lookup is not supported\n");
 #else
   (void)timeoutms; /* timeoutms not used with an async resolver */
 #endif
@@ -781,7 +781,7 @@ clean_up:
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
     timediff_t elapsed_secs = Curl_timediff(Curl_now(),
-                                            conn->created) / 1000;
+                                            data->conn->created) / 1000;
 
     /* the alarm period is counted in even number of seconds */
     unsigned long alarm_set = (unsigned long)(prev_alarm - elapsed_secs);
@@ -1087,7 +1087,7 @@ int Curl_resolv_getsock(struct Curl_easy *data,
     return GETSOCK_BLANK;
   return Curl_resolver_getsock(data, socks);
 #else
-  (void)conn;
+  (void)data;
   (void)socks;
   return GETSOCK_BLANK;
 #endif
