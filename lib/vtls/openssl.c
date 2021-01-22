@@ -2890,16 +2890,16 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 
       if(hStore) {
         PCCERT_CONTEXT pContext = NULL;
-        /* The array of enhanced key usage OIDs will vary per certificate and is
-           declared outside of the loop so that rather than malloc/free each
-           iteration we can grow it with realloc, when necessary. */
+        /* The array of enhanced key usage OIDs will vary per certificate and
+           is declared outside of the loop so that rather than malloc/free
+           each iteration we can grow it with realloc, when necessary. */
         CERT_ENHKEY_USAGE *enhkey_usage = NULL;
         DWORD enhkey_usage_size = 0;
 
         /* This loop makes a best effort to import all valid certificates from
-           the MS root store. If a certificate cannot be imported it is skipped.
-           'result' is used to store only hard-fail conditions (such as out of
-           memory) that cause an early break. */
+           the MS root store. If a certificate cannot be imported it is
+           skipped. 'result' is used to store only hard-fail conditions (such
+           as out of memory) that cause an early break. */
         result = CURLE_OK;
         for(;;) {
           X509 *x509;
@@ -2944,10 +2944,11 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 
           /* If enhanced key usage exists check for server auth attribute.
            *
-           * Note "In a Microsoft environment, a certificate might also have EKU
-           * extended properties that specify valid uses for the certificate."
-           * The call below checks both, and behavior varies depending on what is
-           * found. For more details see CertGetEnhancedKeyUsage doc.
+           * Note "In a Microsoft environment, a certificate might also have
+           * EKU extended properties that specify valid uses for the
+           * certificate."
+           * The call below checks both, and behavior varies depending on what
+           * is found. For more details see CertGetEnhancedKeyUsage doc.
            */
           if(CertGetEnhancedKeyUsage(pContext, 0, NULL, &req_size)) {
             if(req_size && req_size > enhkey_usage_size) {
@@ -2965,9 +2966,9 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 
             if(CertGetEnhancedKeyUsage(pContext, 0, enhkey_usage, &req_size)) {
               if(!enhkey_usage->cUsageIdentifier) {
-                /* "If GetLastError returns CRYPT_E_NOT_FOUND, the certificate is
-                   good for all uses. If it returns zero, the certificate has no
-                   valid uses." */
+                /* "If GetLastError returns CRYPT_E_NOT_FOUND, the certificate
+                   is good for all uses. If it returns zero, the certificate
+                   has no valid uses." */
                 if((HRESULT)GetLastError() != CRYPT_E_NOT_FOUND)
                   continue;
               }
@@ -2997,9 +2998,9 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
           if(!x509)
             continue;
 
-          /* Try to import the certificate. This may fail for legitimate reasons
-             such as duplicate certificate, which is allowed by MS but not
-             OpenSSL. */
+          /* Try to import the certificate. This may fail for legitimate
+             reasons such as duplicate certificate, which is allowed by MS but
+             not OpenSSL. */
           if(X509_STORE_add_cert(store, x509) == 1) {
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
             infof(data, "SSL: Imported cert \"%s\"\n", cert_name);
