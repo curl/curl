@@ -895,7 +895,9 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
   /*
    * This resource requires authentication
    */
+#ifndef CURL_DISABLE_CRYPTO_AUTH
   struct connectdata *conn = data->conn;
+#endif
 #ifdef USE_SPNEGO
   curlnegotiate *negstate = proxy ? &conn->proxy_negotiate_state :
                                     &conn->http_negotiate_state;
