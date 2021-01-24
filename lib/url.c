@@ -946,15 +946,13 @@ static bool conn_maxage(struct Curl_easy *data,
                         struct connectdata *conn,
                         struct curltime now)
 {
-  if(!conn->data) {
-    timediff_t idletime = Curl_timediff(now, conn->lastused);
-    idletime /= 1000; /* integer seconds is fine */
+  timediff_t idletime = Curl_timediff(now, conn->lastused);
+  idletime /= 1000; /* integer seconds is fine */
 
-    if(idletime > data->set.maxage_conn) {
-      infof(data, "Too old connection (%ld seconds), disconnect it\n",
-            idletime);
-      return TRUE;
-    }
+  if(idletime > data->set.maxage_conn) {
+    infof(data, "Too old connection (%ld seconds), disconnect it\n",
+          idletime);
+    return TRUE;
   }
   return FALSE;
 }
@@ -1486,7 +1484,7 @@ void Curl_verboseconnect(struct Curl_easy *data,
                          struct connectdata *conn)
 {
   if(data->set.verbose)
-    infof(conn->data, "Connected to %s (%s) port %ld (#%ld)\n",
+    infof(data, "Connected to %s (%s) port %ld (#%ld)\n",
 #ifndef CURL_DISABLE_PROXY
           conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
           conn->bits.httpproxy ? conn->http_proxy.host.dispname :
@@ -1532,16 +1530,14 @@ static void strip_trailing_dot(struct hostname *host)
 /*
  * Perform any necessary IDN conversion of hostname
  */
-CURLcode Curl_idnconvert_hostname(struct connectdata *conn,
+CURLcode Curl_idnconvert_hostname(struct Curl_easy *data,
                                   struct hostname *host)
 {
-  struct Curl_easy *data = conn->data;
-
 #ifndef USE_LIBIDN2
   (void)data;
-  (void)conn;
+  (void)data;
 #elif defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void)conn;
+  (void)data;
 #endif
 
   /* set the name we use to display the host name */
@@ -1836,12 +1832,14 @@ CURLcode Curl_uc_to_curlcode(CURLUcode uc)
  * the scope_id based on that!
  */
 
-static void zonefrom_url(CURLU *uh, struct connectdata *conn)
+static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
+                         struct connectdata *conn)
 {
   char *zoneid;
-  CURLUcode uc;
-
-  uc = curl_url_get(uh, CURLUPART_ZONEID, &zoneid, 0);
+  CURLUcode uc = curl_url_get(uh, CURLUPART_ZONEID, &zoneid, 0);
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)data;
+#endif
 
   if(!uc && zoneid) {
     char *endp;
@@ -1864,7 +1862,7 @@ static void zonefrom_url(CURLU *uh, struct connectdata *conn)
       scopeidx = if_nametoindex(zoneid);
 #endif
       if(!scopeidx)
-        infof(conn->data, "Invalid zoneid: %s; %s\n", zoneid,
+        infof(data, "Invalid zoneid: %s; %s\n", zoneid,
               strerror(errno));
       else
         conn->scope_id = scopeidx;
@@ -2046,7 +2044,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     hlen = strlen(hostname);
     hostname[hlen - 1] = 0;
 
-    zonefrom_url(uh, conn);
+    zonefrom_url(uh, data, conn);
   }
 
   /* make sure the connect struct gets its own copy of the host name */
@@ -2234,7 +2232,8 @@ static bool check_noproxy(const char *name, const char *no_proxy)
 * name and is not limited to HTTP proxies only.
 * The returned pointer must be freed by the caller (unless NULL)
 ****************************************************************/
-static char *detect_proxy(struct connectdata *conn)
+static char *detect_proxy(struct Curl_easy *data,
+                          struct connectdata *conn)
 {
   char *proxy = NULL;
 
@@ -2259,6 +2258,9 @@ static char *detect_proxy(struct connectdata *conn)
   const char *protop = conn->handler->scheme;
   char *envp = proxy_env;
   char *prox;
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)data;
+#endif
 
   /* Now, build <protocol>_proxy and check for such a one to use */
   while(*protop)
@@ -2301,7 +2303,7 @@ static char *detect_proxy(struct connectdata *conn)
     }
   }
   if(proxy)
-    infof(conn->data, "Uses proxy env variable %s == '%s'\n", envp, proxy);
+    infof(data, "Uses proxy env variable %s == '%s'\n", envp, proxy);
 
   return proxy;
 }
@@ -2440,7 +2442,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     size_t len = strlen(host);
     host[len-1] = 0; /* clear the trailing bracket */
     host++;
-    zonefrom_url(uhp, conn);
+    zonefrom_url(uhp, data, conn);
   }
   proxyinfo->host.name = host;
 
@@ -2473,13 +2475,13 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
 
 /* create_conn helper to parse and init proxy values. to be called after unix
    socket init but before any proxy vars are evaluated. */
-static CURLcode create_conn_helper_init_proxy(struct connectdata *conn)
+static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
+                                              struct connectdata *conn)
 {
   char *proxy = NULL;
   char *socksproxy = NULL;
   char *no_proxy = NULL;
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
 
   /*************************************************************
    * Extract the user and password from the authentication string
@@ -2521,7 +2523,7 @@ static CURLcode create_conn_helper_init_proxy(struct connectdata *conn)
       no_proxy = curl_getenv(p);
     }
     if(no_proxy) {
-      infof(conn->data, "Uses proxy env variable %s == '%s'\n", p, no_proxy);
+      infof(data, "Uses proxy env variable %s == '%s'\n", p, no_proxy);
     }
   }
 
@@ -2533,7 +2535,7 @@ static CURLcode create_conn_helper_init_proxy(struct connectdata *conn)
 #ifndef CURL_DISABLE_HTTP
   else if(!proxy && !socksproxy)
     /* if the host is not in the noproxy list, detect proxy. */
-    proxy = detect_proxy(conn);
+    proxy = detect_proxy(data, conn);
 #endif /* CURL_DISABLE_HTTP */
 
   Curl_safefree(no_proxy);
@@ -3531,7 +3533,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   /* After the unix socket init but before the proxy vars are used, parse and
      initialize the proxy vars */
 #ifndef CURL_DISABLE_PROXY
-  result = create_conn_helper_init_proxy(conn);
+  result = create_conn_helper_init_proxy(data, conn);
   if(result)
     goto out;
 
@@ -3572,22 +3574,22 @@ static CURLcode create_conn(struct Curl_easy *data,
   /*************************************************************
    * IDN-convert the hostnames
    *************************************************************/
-  result = Curl_idnconvert_hostname(conn, &conn->host);
+  result = Curl_idnconvert_hostname(data, &conn->host);
   if(result)
     goto out;
   if(conn->bits.conn_to_host) {
-    result = Curl_idnconvert_hostname(conn, &conn->conn_to_host);
+    result = Curl_idnconvert_hostname(data, &conn->conn_to_host);
     if(result)
       goto out;
   }
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.httpproxy) {
-    result = Curl_idnconvert_hostname(conn, &conn->http_proxy.host);
+    result = Curl_idnconvert_hostname(data, &conn->http_proxy.host);
     if(result)
       goto out;
   }
   if(conn->bits.socksproxy) {
-    result = Curl_idnconvert_hostname(conn, &conn->socks_proxy.host);
+    result = Curl_idnconvert_hostname(data, &conn->socks_proxy.host);
     if(result)
       goto out;
   }
@@ -3948,11 +3950,11 @@ out:
  * conn->data MUST already have been setup fine (in create_conn)
  */
 
-CURLcode Curl_setup_conn(struct connectdata *conn,
+CURLcode Curl_setup_conn(struct Curl_easy *data,
                          bool *protocol_done)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
 
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
@@ -4026,7 +4028,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
       /* DNS resolution is done: that's either because this is a reused
          connection, in which case DNS was unnecessary, or because DNS
          really did finish already (synch resolver/fast async resolve) */
-      result = Curl_setup_conn(conn, protocol_done);
+      result = Curl_setup_conn(data, protocol_done);
     }
   }
 

@@ -107,7 +107,7 @@ static CURLcode smtp_setup_connection(struct Curl_easy *data,
 static CURLcode smtp_parse_url_options(struct connectdata *conn);
 static CURLcode smtp_parse_url_path(struct Curl_easy *data);
 static CURLcode smtp_parse_custom_request(struct Curl_easy *data);
-static CURLcode smtp_parse_address(struct connectdata *conn, const char *fqma,
+static CURLcode smtp_parse_address(struct Curl_easy *data, const char *fqma,
                                    char **address, struct hostname *host);
 static CURLcode smtp_perform_auth(struct Curl_easy *data,
                                   struct connectdata *conn, const char *mech,
@@ -515,7 +515,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data)
 
       /* Parse the mailbox to verify into the local address and host name
          parts, converting the host name to an IDN A-label if necessary */
-      result = smtp_parse_address(conn, smtp->rcpt->data,
+      result = smtp_parse_address(data, smtp->rcpt->data,
                                   &address, &host);
       if(result)
         return result;
@@ -589,7 +589,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
 
     /* Parse the FROM mailbox into the local address and host name parts,
        converting the host name to an IDN A-label if necessary */
-    result = smtp_parse_address(conn, data->set.str[STRING_MAIL_FROM],
+    result = smtp_parse_address(data, data->set.str[STRING_MAIL_FROM],
                                 &address, &host);
     if(result)
       return result;
@@ -627,7 +627,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
 
       /* Parse the AUTH mailbox into the local address and host name parts,
          converting the host name to an IDN A-label if necessary */
-      result = smtp_parse_address(conn, data->set.str[STRING_MAIL_AUTH],
+      result = smtp_parse_address(data, data->set.str[STRING_MAIL_AUTH],
                                   &address, &host);
       if(result) {
         free(from);
@@ -764,7 +764,7 @@ static CURLcode smtp_perform_rcpt_to(struct Curl_easy *data)
 
   /* Parse the recipient mailbox into the local address and host name parts,
      converting the host name to an IDN A-label if necessary */
-  result = smtp_parse_address(conn, smtp->rcpt->data,
+  result = smtp_parse_address(data, smtp->rcpt->data,
                               &address, &host);
   if(result)
     return result;
@@ -1757,7 +1757,7 @@ static CURLcode smtp_parse_custom_request(struct Curl_easy *data)
  * calling function deems it to be) then the input will simply be returned in
  * the address part with the host name being NULL.
  */
-static CURLcode smtp_parse_address(struct connectdata *conn, const char *fqma,
+static CURLcode smtp_parse_address(struct Curl_easy *data, const char *fqma,
                                    char **address, struct hostname *host)
 {
   CURLcode result = CURLE_OK;
@@ -1782,7 +1782,7 @@ static CURLcode smtp_parse_address(struct connectdata *conn, const char *fqma,
     host->name = host->name + 1;
 
     /* Attempt to convert the host name to IDN ACE */
-    (void) Curl_idnconvert_hostname(conn, host);
+    (void) Curl_idnconvert_hostname(data, host);
 
     /* If Curl_idnconvert_hostname() fails then we shall attempt to continue
        and send the host name using UTF-8 rather than as 7-bit ACE (which is
