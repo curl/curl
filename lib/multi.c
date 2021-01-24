@@ -1499,7 +1499,7 @@ static CURLcode protocol_connect(struct Curl_easy *data,
 
   if(!conn->bits.protoconnstart) {
 #ifndef CURL_DISABLE_PROXY
-    result = Curl_proxy_connect(conn, FIRSTSOCKET);
+    result = Curl_proxy_connect(data, FIRSTSOCKET);
     if(result)
       return result;
 
@@ -1729,7 +1729,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         hostname = conn->host.name;
 
       /* check if we have the name resolved by now */
-      dns = Curl_fetch_addr(conn, hostname, (int)conn->port);
+      dns = Curl_fetch_addr(data, hostname, (int)conn->port);
 
       if(dns) {
 #ifdef CURLRES_ASYNCH

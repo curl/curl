@@ -309,11 +309,10 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
  * use, or we'll leak memory!
  */
 struct Curl_dns_entry *
-Curl_fetch_addr(struct connectdata *conn,
+Curl_fetch_addr(struct Curl_easy *data,
                 const char *hostname,
                 int port)
 {
-  struct Curl_easy *data = conn->data;
   struct Curl_dns_entry *dns = NULL;
 
   if(data->share)

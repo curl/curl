@@ -50,15 +50,16 @@
  * proxy_ssl_connected connection bit when complete.  Can be
  * called multiple times.
  */
-static CURLcode https_proxy_connect(struct connectdata *conn, int sockindex)
+static CURLcode https_proxy_connect(struct Curl_easy *data, int sockindex)
 {
 #ifdef USE_SSL
+  struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
   DEBUGASSERT(conn->http_proxy.proxytype == CURLPROXY_HTTPS);
   if(!conn->bits.proxy_ssl_connected[sockindex]) {
     /* perform SSL initialization for this socket */
     result =
-      Curl_ssl_connect_nonblocking(conn->data, conn, sockindex,
+      Curl_ssl_connect_nonblocking(data, conn, sockindex,
                                    &conn->bits.proxy_ssl_connected[sockindex]);
     if(result)
       /* a failed connection is marked for closure to prevent (bad) re-use or
@@ -67,17 +68,17 @@ static CURLcode https_proxy_connect(struct connectdata *conn, int sockindex)
   }
   return result;
 #else
-  (void) conn;
+  (void) data;
   (void) sockindex;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
 
-CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex)
+CURLcode Curl_proxy_connect(struct Curl_easy *data, int sockindex)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS) {
-    const CURLcode result = https_proxy_connect(conn, sockindex);
+    const CURLcode result = https_proxy_connect(data, sockindex);
     if(result)
       return result;
     if(!conn->bits.proxy_ssl_connected[sockindex])
@@ -105,9 +106,9 @@ CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex)
      * This function might be called several times in the multi interface case
      * if the proxy's CONNECT response is not instant.
      */
-    prot_save = conn->data->req.p.http;
+    prot_save = data->req.p.http;
     memset(&http_proxy, 0, sizeof(http_proxy));
-    conn->data->req.p.http = &http_proxy;
+    data->req.p.http = &http_proxy;
     connkeep(conn, "HTTP proxy CONNECT");
 
     /* for the secondary socket (FTP), use the "connect to host"
@@ -127,8 +128,8 @@ CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex)
       remote_port = conn->conn_to_port;
     else
       remote_port = conn->remote_port;
-    result = Curl_proxyCONNECT(conn, sockindex, hostname, remote_port);
-    conn->data->req.p.http = prot_save;
+    result = Curl_proxyCONNECT(data, sockindex, hostname, remote_port);
+    data->req.p.http = prot_save;
     if(CURLE_OK != result)
       return result;
     Curl_safefree(data->state.aptr.proxyuserpwd);
@@ -152,15 +153,16 @@ bool Curl_connect_ongoing(struct connectdata *conn)
     (conn->connect_state->tunnel_state != TUNNEL_COMPLETE);
 }
 
-static CURLcode connect_init(struct connectdata *conn, bool reinit)
+static CURLcode connect_init(struct Curl_easy *data, bool reinit)
 {
   struct http_connect_state *s;
+  struct connectdata *conn = data->conn;
   if(!reinit) {
     DEBUGASSERT(!conn->connect_state);
     s = calloc(1, sizeof(struct http_connect_state));
     if(!s)
       return CURLE_OUT_OF_MEMORY;
-    infof(conn->data, "allocate connect buffer!\n");
+    infof(data, "allocate connect buffer!\n");
     conn->connect_state = s;
     Curl_dyn_init(&s->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
   }
@@ -176,12 +178,13 @@ static CURLcode connect_init(struct connectdata *conn, bool reinit)
   return CURLE_OK;
 }
 
-static void connect_done(struct connectdata *conn)
+static void connect_done(struct Curl_easy *data)
 {
+  struct connectdata *conn = data->conn;
   struct http_connect_state *s = conn->connect_state;
   s->tunnel_state = TUNNEL_COMPLETE;
   Curl_dyn_free(&s->rcvbuf);
-  infof(conn->data, "CONNECT phase completed!\n");
+  infof(data, "CONNECT phase completed!\n");
 }
 
 static CURLcode CONNECT_host(struct Curl_easy *data,
@@ -216,16 +219,16 @@ static CURLcode CONNECT_host(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode CONNECT(struct connectdata *conn,
+static CURLcode CONNECT(struct Curl_easy *data,
                         int sockindex,
                         const char *hostname,
                         int remote_port)
 #ifndef USE_HYPER
 {
   int subversion = 0;
-  struct Curl_easy *data = conn->data;
   struct SingleRequest *k = &data->req;
   CURLcode result;
+  struct connectdata *conn = data->conn;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
   struct http_connect_state *s = conn->connect_state;
   char *linep;
@@ -592,7 +595,7 @@ static CURLcode CONNECT(struct connectdata *conn,
      * means the HTTP authentication is still going on so if the tunnel
      * is complete we start over in INIT state */
     if(data->req.newurl && (TUNNEL_COMPLETE == s->tunnel_state)) {
-      connect_init(conn, TRUE); /* reinit */
+      connect_init(data, TRUE); /* reinit */
     }
 
   } while(data->req.newurl);
@@ -601,7 +604,7 @@ static CURLcode CONNECT(struct connectdata *conn,
     if(s->close_connection && data->req.newurl) {
       conn->bits.proxy_connect_closed = TRUE;
       infof(data, "Connect me again please\n");
-      connect_done(conn);
+      connect_done(data);
     }
     else {
       free(data->req.newurl);
@@ -646,7 +649,7 @@ static CURLcode CONNECT(struct connectdata *conn,
 #else
 /* The Hyper version of CONNECT */
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   struct hyptransfer *h = &data->hyp;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
   struct http_connect_state *s = conn->connect_state;
@@ -879,21 +882,22 @@ void Curl_connect_free(struct Curl_easy *data)
  * this proxy. After that, the socket can be used just as a normal socket.
  */
 
-CURLcode Curl_proxyCONNECT(struct connectdata *conn,
+CURLcode Curl_proxyCONNECT(struct Curl_easy *data,
                            int sockindex,
                            const char *hostname,
                            int remote_port)
 {
   CURLcode result;
+  struct connectdata *conn = data->conn;
   if(!conn->connect_state) {
-    result = connect_init(conn, FALSE);
+    result = connect_init(data, FALSE);
     if(result)
       return result;
   }
-  result = CONNECT(conn, sockindex, hostname, remote_port);
+  result = CONNECT(data, sockindex, hostname, remote_port);
 
   if(result || Curl_connect_complete(conn))
-    connect_done(conn);
+    connect_done(data);
 
   return result;
 }

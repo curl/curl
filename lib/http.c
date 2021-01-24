@@ -1433,7 +1433,7 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
 
 #ifndef CURL_DISABLE_PROXY
   /* the CONNECT procedure might not have been completed */
-  result = Curl_proxy_connect(conn, FIRSTSOCKET);
+  result = Curl_proxy_connect(data, FIRSTSOCKET);
   if(result)
     return result;
 
