@@ -37,7 +37,7 @@ CURLcode Curl_close(struct Curl_easy **datap); /* opposite of curl_open() */
 CURLcode Curl_connect(struct Curl_easy *, bool *async, bool *protocol_connect);
 CURLcode Curl_disconnect(struct Curl_easy *data,
                          struct connectdata *, bool dead_connection);
-CURLcode Curl_setup_conn(struct connectdata *conn,
+CURLcode Curl_setup_conn(struct Curl_easy *data,
                          bool *protocol_done);
 void Curl_free_request_state(struct Curl_easy *data);
 CURLcode Curl_parse_login_details(const char *login, const size_t len,
@@ -47,7 +47,7 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
 const struct Curl_handler *Curl_builtin_scheme(const char *scheme);
 
 bool Curl_is_ASCII_name(const char *hostname);
-CURLcode Curl_idnconvert_hostname(struct connectdata *conn,
+CURLcode Curl_idnconvert_hostname(struct Curl_easy *data,
                                   struct hostname *host);
 void Curl_free_idnconverted_hostname(struct hostname *host);
 
