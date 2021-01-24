@@ -188,7 +188,7 @@ static CURLcode ldap_setup_connection(struct Curl_easy *data,
         status = CURLE_OUT_OF_MEMORY;
       msg = url_errs[rc];
     }
-    failf(conn->data, "LDAP local: %s", msg);
+    failf(data, "LDAP local: %s", msg);
     return status;
   }
   proto = ldap_pvt_url_scheme2proto(lud->lud_scheme);
@@ -401,7 +401,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         status = CURLE_OUT_OF_MEMORY;
       msg = url_errs[rc];
     }
-    failf(conn->data, "LDAP local: %s", msg);
+    failf(data, "LDAP local: %s", msg);
     return status;
   }
 
@@ -439,7 +439,7 @@ static CURLcode ldap_done(struct Curl_easy *data, CURLcode res,
       ldap_abandon_ext(li->ld, lr->msgid, NULL, NULL);
       lr->msgid = 0;
     }
-    conn->data->req.p.ldap = NULL;
+    data->req.p.ldap = NULL;
     free(lr);
   }
 

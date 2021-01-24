@@ -3543,7 +3543,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
     if(Curl_connect_ongoing(conn)) {
       /* As we're in TUNNEL_CONNECT state now, we know the proxy name and port
          aren't used so we blank their arguments. */
-      result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, NULL, 0);
+      result = Curl_proxyCONNECT(data, SECONDARYSOCKET, NULL, 0);
 
       return result;
     }
@@ -3565,7 +3565,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
   }
 
 #ifndef CURL_DISABLE_PROXY
-  result = Curl_proxy_connect(conn, SECONDARYSOCKET);
+  result = Curl_proxy_connect(data, SECONDARYSOCKET);
   if(result)
     return result;
 
