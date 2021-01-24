@@ -3763,7 +3763,9 @@ sub singletest {
 
     # save the new version
     open(D, ">$otest");
-    print D @entiretest;
+    foreach my $bytes (@entiretest) {
+        print D pack('a*', $bytes) or die "Failed to print '$bytes': $!";
+    }
     close(D);
 
     # in case the process changed the file, reload it
