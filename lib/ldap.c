@@ -100,7 +100,8 @@ struct ldap_urldesc {
 #undef LDAPURLDesc
 #define LDAPURLDesc struct ldap_urldesc
 
-static int  _ldap_url_parse(const struct connectdata *conn,
+static int  _ldap_url_parse(struct Curl_easy *data,
+                            const struct connectdata *conn,
                             LDAPURLDesc **ludp);
 static void _ldap_free_urldesc(LDAPURLDesc *ludp);
 
@@ -232,7 +233,7 @@ static int ldap_win_bind_auth(LDAP *server, const char *user,
 }
 #endif /* #if defined(USE_WINDOWS_SSPI) */
 
-static int ldap_win_bind(struct connectdata *conn, LDAP *server,
+static int ldap_win_bind(struct Curl_easy *data, LDAP *server,
                          const char *user, const char *passwd)
 {
   int rc = LDAP_INVALID_CREDENTIALS;
@@ -240,7 +241,7 @@ static int ldap_win_bind(struct connectdata *conn, LDAP *server,
   PTCHAR inuser = NULL;
   PTCHAR inpass = NULL;
 
-  if(user && passwd && (conn->data->set.httpauth & CURLAUTH_BASIC)) {
+  if(user && passwd && (data->set.httpauth & CURLAUTH_BASIC)) {
     inuser = curlx_convert_UTF8_to_tchar((char *) user);
     inpass = curlx_convert_UTF8_to_tchar((char *) passwd);
 
@@ -251,7 +252,7 @@ static int ldap_win_bind(struct connectdata *conn, LDAP *server,
   }
 #if defined(USE_WINDOWS_SSPI)
   else {
-    rc = ldap_win_bind_auth(server, user, passwd, conn->data->set.httpauth);
+    rc = ldap_win_bind_auth(server, user, passwd, data->set.httpauth);
   }
 #endif
 
@@ -300,7 +301,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #ifdef HAVE_LDAP_URL_PARSE
   rc = ldap_url_parse(data->change.url, &ludp);
 #else
-  rc = _ldap_url_parse(conn, &ludp);
+  rc = _ldap_url_parse(data, conn, &ludp);
 #endif
   if(rc != 0) {
     failf(data, "LDAP local: %s", ldap_err2string(rc));
@@ -472,7 +473,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   }
 #ifdef USE_WIN32_LDAP
   ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
-  rc = ldap_win_bind(conn, server, user, passwd);
+  rc = ldap_win_bind(data, server, user, passwd);
 #else
   rc = ldap_simple_bind_s(server, user, passwd);
 #endif
@@ -480,7 +481,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     ldap_proto = LDAP_VERSION2;
     ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
 #ifdef USE_WIN32_LDAP
-    rc = ldap_win_bind(conn, server, user, passwd);
+    rc = ldap_win_bind(data, server, user, passwd);
 #else
     rc = ldap_simple_bind_s(server, user, passwd);
 #endif
@@ -812,14 +813,15 @@ static bool split_str(char *str, char ***out, size_t *count)
  *
  * <hostname> already known from 'conn->host.name'.
  * <port>     already known from 'conn->remote_port'.
- * extract the rest from 'conn->data->state.path+1'. All fields are optional.
+ * extract the rest from 'data->state.path+1'. All fields are optional.
  * e.g.
  *   ldap://<hostname>:<port>/?<attributes>?<scope>?<filter>
  * yields ludp->lud_dn = "".
  *
  * Defined in RFC4516 section 2.
  */
-static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
+static int _ldap_url_parse2(struct Curl_easy *data,
+                            const struct connectdata *conn, LDAPURLDesc *ludp)
 {
   int rc = LDAP_SUCCESS;
   char *p;
@@ -828,10 +830,10 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
   char *query = NULL;
   size_t i;
 
-  if(!conn->data ||
-     !conn->data->state.up.path ||
-     conn->data->state.up.path[0] != '/' ||
-     !strncasecompare("LDAP", conn->data->state.up.scheme, 4))
+  if(!data ||
+     !data->state.up.path ||
+     data->state.up.path[0] != '/' ||
+     !strncasecompare("LDAP", data->state.up.scheme, 4))
     return LDAP_INVALID_SYNTAX;
 
   ludp->lud_scope = LDAP_SCOPE_BASE;
@@ -839,13 +841,13 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
   ludp->lud_host  = conn->host.name;
 
   /* Duplicate the path */
-  p = path = strdup(conn->data->state.up.path + 1);
+  p = path = strdup(data->state.up.path + 1);
   if(!path)
     return LDAP_NO_MEMORY;
 
   /* Duplicate the query if present */
-  if(conn->data->state.up.query) {
-    q = query = strdup(conn->data->state.up.query);
+  if(data->state.up.query) {
+    q = query = strdup(data->state.up.query);
     if(!query) {
       free(path);
       return LDAP_NO_MEMORY;
@@ -861,7 +863,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
     LDAP_TRACE(("DN '%s'\n", dn));
 
     /* Unescape the DN */
-    result = Curl_urldecode(conn->data, dn, 0, &unescaped, NULL, REJECT_ZERO);
+    result = Curl_urldecode(data, dn, 0, &unescaped, NULL, REJECT_ZERO);
     if(result) {
       rc = LDAP_NO_MEMORY;
 
@@ -926,7 +928,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
       LDAP_TRACE(("attr[%zu] '%s'\n", i, attributes[i]));
 
       /* Unescape the attribute */
-      result = Curl_urldecode(conn->data, attributes[i], 0, &unescaped, NULL,
+      result = Curl_urldecode(data, attributes[i], 0, &unescaped, NULL,
                               REJECT_ZERO);
       if(result) {
         free(attributes);
@@ -996,8 +998,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
     LDAP_TRACE(("filter '%s'\n", filter));
 
     /* Unescape the filter */
-    result = Curl_urldecode(conn->data, filter, 0, &unescaped, NULL,
-                            REJECT_ZERO);
+    result = Curl_urldecode(data, filter, 0, &unescaped, NULL, REJECT_ZERO);
     if(result) {
       rc = LDAP_NO_MEMORY;
 
@@ -1035,7 +1036,8 @@ quit:
   return rc;
 }
 
-static int _ldap_url_parse(const struct connectdata *conn,
+static int _ldap_url_parse(struct Curl_easy *data,
+                           const struct connectdata *conn,
                            LDAPURLDesc **ludpp)
 {
   LDAPURLDesc *ludp = calloc(1, sizeof(*ludp));
@@ -1045,7 +1047,7 @@ static int _ldap_url_parse(const struct connectdata *conn,
   if(!ludp)
      return LDAP_NO_MEMORY;
 
-  rc = _ldap_url_parse2(conn, ludp);
+  rc = _ldap_url_parse2(data, conn, ludp);
   if(rc != LDAP_SUCCESS) {
     _ldap_free_urldesc(ludp);
     ludp = NULL;

@@ -561,13 +561,13 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
     /* handle the security-oriented responses 6xx ***/
     switch(code) {
     case 631:
-      code = Curl_sec_read_msg(conn, buf, PROT_SAFE);
+      code = Curl_sec_read_msg(data, conn, buf, PROT_SAFE);
       break;
     case 632:
-      code = Curl_sec_read_msg(conn, buf, PROT_PRIVATE);
+      code = Curl_sec_read_msg(data, conn, buf, PROT_PRIVATE);
       break;
     case 633:
-      code = Curl_sec_read_msg(conn, buf, PROT_CONFIDENTIAL);
+      code = Curl_sec_read_msg(data, conn, buf, PROT_CONFIDENTIAL);
       break;
     default:
       /* normal ftp stuff we pass through! */
@@ -2685,7 +2685,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
            set a valid level */
         Curl_sec_request_prot(conn, data->set.str[STRING_KRB_LEVEL]);
 
-        if(Curl_sec_login(conn))
+        if(Curl_sec_login(data, conn))
           infof(data, "Logging in with password in cleartext!\n");
         else
           infof(data, "Authentication successful\n");
