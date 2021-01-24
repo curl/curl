@@ -130,50 +130,38 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   int result = -1;
 #ifdef _UNICODE
   wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
+  if(path_w) {
+#if defined(USE_WIN32_SMALL_FILES)
+    result = _wstat(path_w, buffer);
+#else
+    result = _wstati64(path_w, buffer);
+#endif
+    free(path_w);
+    if(result != -1)
+      return result;
+  }
 #endif /* _UNICODE */
 
 #if defined(USE_WIN32_SMALL_FILES)
-#if defined(_UNICODE)
-  if(path_w)
-    result = _wstat(path_w, buffer);
-  else
-#endif /* _UNICODE */
-    result = _stat(path, buffer);
-#else /* USE_WIN32_SMALL_FILES */
-#if defined(_UNICODE)
-  if(path_w)
-    result = _wstati64(path_w, buffer);
-  else
-#endif /* _UNICODE */
-    result = _stati64(path, buffer);
-#endif /* USE_WIN32_SMALL_FILES */
-
-#ifdef _UNICODE
-  free(path_w);
+  result = _stat(path, buffer);
+#else
+  result = _stati64(path, buffer);
 #endif
-
   return result;
 }
 
 int curlx_win32_access(const char *path, int mode)
 {
-    int result = -1;
-#ifdef _UNICODE
-    wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
-#endif /* _UNICODE */
-
 #if defined(_UNICODE)
-    if(path_w)
-        result = _waccess(path_w, mode);
-    else
-#endif /* _UNICODE */
-        result = _access(path, mode);
-
-#ifdef _UNICODE
+  wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
+  if(path_w) {
+    int result = _waccess(path_w, mode);
     free(path_w);
-#endif
-
-    return result;
+    if(result != -1)
+      return result;
+  }
+#endif /* _UNICODE */
+  return _access(path, mode);
 }
 
 #endif /* USE_WIN32_LARGE_FILES || USE_WIN32_SMALL_FILES */
