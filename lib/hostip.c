@@ -1108,7 +1108,7 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
     data->state.async.dns = NULL;
   }
 
-  result = Curl_setup_conn(conn, protocol_done);
+  result = Curl_setup_conn(data, protocol_done);
 
   if(result) {
     Curl_detach_connnection(data);
