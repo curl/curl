@@ -142,7 +142,8 @@ bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
          psnd->recv_size > psnd->recv_processed;
 }
 
-static CURLcode pre_receive_plain(struct connectdata *conn, int num)
+static CURLcode pre_receive_plain(struct Curl_easy *data,
+                                  struct connectdata *conn, int num)
 {
   const curl_socket_t sockfd = conn->sock[num];
   struct postponed_data * const psnd = &(conn->postponed[num]);
@@ -161,7 +162,7 @@ static CURLcode pre_receive_plain(struct connectdata *conn, int num)
       /* Have some incoming data */
       if(!psnd->buffer) {
         /* Use buffer double default size for intermediate buffer */
-        psnd->allocated_size = 2 * conn->data->set.buffer_size;
+        psnd->allocated_size = 2 * data->set.buffer_size;
         psnd->buffer = malloc(psnd->allocated_size);
         if(!psnd->buffer)
           return CURLE_OUT_OF_MEMORY;
@@ -230,7 +231,7 @@ bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
   (void)sockindex;
   return false;
 }
-#define pre_receive_plain(c,n) CURLE_OK
+#define pre_receive_plain(d,c,n) CURLE_OK
 #define get_pre_recved(c,n,b,l) 0
 #endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
 
@@ -347,7 +348,7 @@ ssize_t Curl_send_plain(struct Curl_easy *data, int num,
      To avoid lossage of received data, recv() must be
      performed before every send() if any incoming data is
      available. */
-  if(pre_receive_plain(conn, num)) {
+  if(pre_receive_plain(data, conn, num)) {
     *code = CURLE_OUT_OF_MEMORY;
     return -1;
   }
