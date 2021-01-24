@@ -288,9 +288,10 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 /**
  * Curl_http_output_auth() setups the authentication headers for the
  * host/proxy and the correct authentication
- * method. conn->data->state.authdone is set to TRUE when authentication is
+ * method. data->state.authdone is set to TRUE when authentication is
  * done.
  *
+ * @param data all information about the current transfer
  * @param conn all information about the current connection
  * @param request pointer to the request keyword
  * @param httpreq is the request type
