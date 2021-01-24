@@ -56,7 +56,8 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-static CURLcode ftpsend(struct connectdata *conn, const char *cmd)
+static CURLcode ftpsend(struct Curl_easy *data, struct connectdata *conn,
+                        const char *cmd)
 {
   ssize_t bytes_written;
 #define SBUF_SIZE 1024
@@ -80,7 +81,7 @@ static CURLcode ftpsend(struct connectdata *conn, const char *cmd)
   write_len += 2;
   bytes_written = 0;
 
-  result = Curl_convert_to_network(conn->data, s, write_len);
+  result = Curl_convert_to_network(data, s, write_len);
   /* Curl_convert_to_network calls failf if unsuccessful */
   if(result)
     return result;
@@ -89,7 +90,7 @@ static CURLcode ftpsend(struct connectdata *conn, const char *cmd)
 #ifdef HAVE_GSSAPI
     conn->data_prot = PROT_CMD;
 #endif
-    result = Curl_write(conn->data, conn->sock[FIRSTSOCKET], sptr, write_len,
+    result = Curl_write(data, conn->sock[FIRSTSOCKET], sptr, write_len,
                         &bytes_written);
 #ifdef HAVE_GSSAPI
     DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
@@ -99,7 +100,7 @@ static CURLcode ftpsend(struct connectdata *conn, const char *cmd)
     if(result)
       break;
 
-    Curl_debug(conn->data, CURLINFO_HEADER_OUT, sptr, (size_t)bytes_written);
+    Curl_debug(data, CURLINFO_HEADER_OUT, sptr, (size_t)bytes_written);
 
     if(bytes_written != (ssize_t)write_len) {
       write_len -= bytes_written;
@@ -202,14 +203,13 @@ krb5_encode(void *app_data, const void *from, int length, int level, void **to)
 }
 
 static int
-krb5_auth(void *app_data, struct connectdata *conn)
+krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
 {
   int ret = AUTH_OK;
   char *p;
   const char *host = conn->host.name;
   ssize_t nread;
   curl_socklen_t l = sizeof(conn->local_addr);
-  struct Curl_easy *data = conn->data;
   CURLcode result;
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
                         data->set.str[STRING_SERVICE_NAME] :
@@ -242,7 +242,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
   for(;;) {
     /* this really shouldn't be repeated here, but can't help it */
     if(service == srv_host) {
-      result = ftpsend(conn, "AUTH GSSAPI");
+      result = ftpsend(data, conn, "AUTH GSSAPI");
       if(result)
         return -2;
 
@@ -319,7 +319,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
 
         cmd = aprintf("ADAT %s", p);
         if(cmd)
-          result = ftpsend(conn, cmd);
+          result = ftpsend(data, conn, cmd);
         else
           result = CURLE_OUT_OF_MEMORY;
 
@@ -454,7 +454,7 @@ static int ftp_send_command(struct Curl_easy *data, const char *message, ...)
   mvsnprintf(print_buffer, sizeof(print_buffer), message, args);
   va_end(args);
 
-  if(ftpsend(data->conn, print_buffer)) {
+  if(ftpsend(data, data->conn, print_buffer)) {
     ftp_code = -1;
   }
   else {
@@ -495,7 +495,7 @@ socket_read(curl_socket_t fd, void *to, size_t len)
    CURLcode saying whether an error occurred or CURLE_OK if |len| was
    written. */
 static CURLcode
-socket_write(struct connectdata *conn, curl_socket_t fd, const void *to,
+socket_write(struct Curl_easy *data, curl_socket_t fd, const void *to,
              size_t len)
 {
   const char *to_p = to;
@@ -503,7 +503,7 @@ socket_write(struct connectdata *conn, curl_socket_t fd, const void *to,
   ssize_t written;
 
   while(len > 0) {
-    result = Curl_write_plain(conn->data, fd, to_p, len, &written);
+    result = Curl_write_plain(data, fd, to_p, len, &written);
     if(!result) {
       len -= written;
       to_p += written;
@@ -598,8 +598,8 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
 
 /* Send |length| bytes from |from| to the |fd| socket taking care of encoding
    and negotiating with the server. |from| can be NULL. */
-static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
-                        const char *from, int length)
+static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
+                        curl_socket_t fd, const char *from, int length)
 {
   int bytes, htonl_bytes; /* 32-bit integers for htonl */
   char *buffer = NULL;
@@ -623,7 +623,7 @@ static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
     return; /* error */
 
   if(iscmd) {
-    error = Curl_base64_encode(conn->data, buffer, curlx_sitouz(bytes),
+    error = Curl_base64_encode(data, buffer, curlx_sitouz(bytes),
                                &cmd_buffer, &cmd_size);
     if(error) {
       free(buffer);
@@ -633,27 +633,27 @@ static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
       static const char *enc = "ENC ";
       static const char *mic = "MIC ";
       if(prot_level == PROT_PRIVATE)
-        socket_write(conn, fd, enc, 4);
+        socket_write(data, fd, enc, 4);
       else
-        socket_write(conn, fd, mic, 4);
+        socket_write(data, fd, mic, 4);
 
-      socket_write(conn, fd, cmd_buffer, cmd_size);
-      socket_write(conn, fd, "\r\n", 2);
-      infof(conn->data, "Send: %s%s\n", prot_level == PROT_PRIVATE?enc:mic,
+      socket_write(data, fd, cmd_buffer, cmd_size);
+      socket_write(data, fd, "\r\n", 2);
+      infof(data, "Send: %s%s\n", prot_level == PROT_PRIVATE?enc:mic,
             cmd_buffer);
       free(cmd_buffer);
     }
   }
   else {
     htonl_bytes = htonl(bytes);
-    socket_write(conn, fd, &htonl_bytes, sizeof(htonl_bytes));
-    socket_write(conn, fd, buffer, curlx_sitouz(bytes));
+    socket_write(data, fd, &htonl_bytes, sizeof(htonl_bytes));
+    socket_write(data, fd, buffer, curlx_sitouz(bytes));
   }
   free(buffer);
 }
 
-static ssize_t sec_write(struct connectdata *conn, curl_socket_t fd,
-                         const char *buffer, size_t length)
+static ssize_t sec_write(struct Curl_easy *data, struct connectdata *conn,
+                         curl_socket_t fd, const char *buffer, size_t length)
 {
   ssize_t tx = 0, len = conn->buffer_size;
 
@@ -665,7 +665,7 @@ static ssize_t sec_write(struct connectdata *conn, curl_socket_t fd,
     if(length < (size_t)len)
       len = length;
 
-    do_sec_send(conn, fd, buffer, curlx_sztosi(len));
+    do_sec_send(data, conn, fd, buffer, curlx_sztosi(len));
     length -= len;
     buffer += len;
     tx += len;
@@ -680,11 +680,11 @@ static ssize_t sec_send(struct Curl_easy *data, int sockindex,
   struct connectdata *conn = data->conn;
   curl_socket_t fd = conn->sock[sockindex];
   *err = CURLE_OK;
-  return sec_write(conn, fd, buffer, len);
+  return sec_write(data, conn, fd, buffer, len);
 }
 
-int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
-                      enum protection_level level)
+int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
+                      char *buffer, enum protection_level level)
 {
   /* decoded_len should be size_t or ssize_t but conn->mech->decode returns an
      int */
@@ -693,6 +693,8 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
   int ret_code = 0;
   size_t decoded_sz = 0;
   CURLcode error;
+
+  (void) data;
 
   if(!conn->mech)
     /* not inititalized, return error */
@@ -719,7 +721,7 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
 
   {
     buf[decoded_len] = '\n';
-    Curl_debug(conn->data, CURLINFO_HEADER_IN, buf, decoded_len + 1);
+    Curl_debug(data, CURLINFO_HEADER_IN, buf, decoded_len + 1);
   }
 
   buf[decoded_len] = '\0';
@@ -747,8 +749,8 @@ static int sec_set_protection_level(struct Curl_easy *data)
   DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
 
   if(!conn->sec_complete) {
-    infof(conn->data, "Trying to change the protection level after the"
-                      " completion of the data exchange.\n");
+    infof(data, "Trying to change the protection level after the"
+                " completion of the data exchange.\n");
     return -1;
   }
 
@@ -765,7 +767,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
       return -1;
 
     if(code/100 != 2) {
-      failf(conn->data, "Failed to set the protection's buffer size.");
+      failf(data, "Failed to set the protection's buffer size.");
       return -1;
     }
     conn->buffer_size = buffer_size;
@@ -786,7 +788,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
     return -1;
 
   if(code/100 != 2) {
-    failf(conn->data, "Failed to set the protection level.");
+    failf(data, "Failed to set the protection level.");
     return -1;
   }
 
@@ -808,10 +810,9 @@ Curl_sec_request_prot(struct connectdata *conn, const char *level)
   return 0;
 }
 
-static CURLcode choose_mech(struct connectdata *conn)
+static CURLcode choose_mech(struct Curl_easy *data, struct connectdata *conn)
 {
   int ret;
-  struct Curl_easy *data = conn->data;
   void *tmp_allocation;
   const struct Curl_sec_client_mech *mech = &Curl_krb5_client_mech;
 
@@ -858,7 +859,7 @@ static CURLcode choose_mech(struct connectdata *conn)
   }
 
   /* Authenticate */
-  ret = mech->auth(conn->app_data, conn);
+  ret = mech->auth(conn->app_data, data, conn);
 
   if(ret != AUTH_CONTINUE) {
     if(ret != AUTH_OK) {
@@ -883,9 +884,9 @@ static CURLcode choose_mech(struct connectdata *conn)
 }
 
 CURLcode
-Curl_sec_login(struct connectdata *conn)
+Curl_sec_login(struct Curl_easy *data, struct connectdata *conn)
 {
-  return choose_mech(conn);
+  return choose_mech(data, conn);
 }
 
 
