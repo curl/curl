@@ -1838,7 +1838,7 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
         return CURLE_SEND_ERROR;
       }
     }
-    else if(ndatalen > 0) {
+    else if(ndatalen >= 0) {
       rv = nghttp3_conn_add_write_offset(qs->h3conn, stream_id, ndatalen);
       if(rv != 0) {
         failf(data, "nghttp3_conn_add_write_offset returned error: %s\n",
