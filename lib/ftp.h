@@ -119,36 +119,32 @@ struct ftp_conn {
   char *file;    /* url-decoded file name (or path) */
   char **dirs;   /* realloc()ed array for path components */
   int dirdepth;  /* number of entries used in the 'dirs' array */
+  int cwdcount;     /* number of CWD commands issued */
+  /* newhost is the (allocated) IP addr or host name to connect the data
+     connection to */
+  char *newhost;
+  char *prevpath;   /* url-decoded conn->path from the previous transfer */
+  char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
+                        and others (A/I or zero) */
+  signed char count1; /* general purpose counter for the state machine */
+  signed char count2; /* general purpose counter for the state machine */
+  signed char count3; /* general purpose counter for the state machine */
+  ftpstate state; /* always use ftp.c:state() to change state! */
+  ftpstate state_saved; /* transfer type saved to be reloaded after
+                           data connection is established */
+  unsigned short newport;
+  bool cwdfail;     /* set TRUE if a CWD command fails, as then we must prevent
+                       caching the current directory */
   bool dont_check;  /* Set to TRUE to prevent the final (post-transfer)
                        file size and 226/250 status check. It should still
                        read the line, just ignore the result. */
+  char *server_os;     /* The target server operating system. */
   bool ctl_valid;   /* Tells Curl_ftp_quit() whether or not to do anything. If
                        the connection has timed out or been closed, this
                        should be FALSE when it gets to Curl_ftp_quit() */
   bool cwddone;     /* if it has been determined that the proper CWD combo
                        already has been done */
-  int cwdcount;     /* number of CWD commands issued */
-  bool cwdfail;     /* set TRUE if a CWD command fails, as then we must prevent
-                       caching the current directory */
   bool wait_data_conn; /* this is set TRUE if data connection is waited */
-  /* newhost is the (allocated) IP addr or host name to connect the data
-     connection to */
-  unsigned short newport;
-  char *newhost;
-  char *prevpath;   /* url-decoded conn->path from the previous transfer */
-  char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
-                        and others (A/I or zero) */
-  int count1; /* general purpose counter for the state machine */
-  int count2; /* general purpose counter for the state machine */
-  int count3; /* general purpose counter for the state machine */
-  ftpstate state; /* always use ftp.c:state() to change state! */
-  ftpstate state_saved; /* transfer type saved to be reloaded after
-                           data connection is established */
-  curl_off_t retr_size_saved; /* Size of retrieved file saved */
-  char *server_os;     /* The target server operating system. */
-  curl_off_t known_filesize; /* file size is different from -1, if wildcard
-                                LIST parsing was done and wc_statemach set
-                                it */
 };
 
 #define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */

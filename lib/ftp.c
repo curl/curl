@@ -460,8 +460,7 @@ static CURLcode InitiateTransfer(struct Curl_easy *data)
   }
   else {
     /* FTP download: */
-    Curl_setup_transfer(data, SECONDARYSOCKET,
-                        conn->proto.ftpc.retr_size_saved, FALSE, -1);
+    Curl_setup_transfer(data, SECONDARYSOCKET, data->req.size, FALSE, -1);
   }
 
   conn->proto.ftpc.pp.pending_resp = TRUE; /* expect server response */
@@ -1324,7 +1323,7 @@ static CURLcode ftp_state_use_pasv(struct Curl_easy *data,
   */
 
   static const char mode[][5] = { "EPSV", "PASV" };
-  int modeoff;
+  signed char modeoff;
 
 #ifdef PF_INET6
   if(!conn->bits.ftp_use_epsv && conn->bits.ipv6)
@@ -1742,9 +1741,9 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
       if(ftp->transfer != FTPTRANSFER_BODY)
         state(data, FTP_STOP);
       else {
-        if(ftpc->known_filesize != -1) {
-          Curl_pgrsSetDownloadSize(data, ftpc->known_filesize);
-          result = ftp_state_retr(data, ftpc->known_filesize);
+        if(data->req.size != -1) {
+          Curl_pgrsSetDownloadSize(data, data->req.size);
+          result = ftp_state_retr(data, data->req.size);
         }
         else {
           if(data->set.ignorecl) {
@@ -2499,7 +2498,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
 
     /* FTP download: */
     conn->proto.ftpc.state_saved = instate;
-    conn->proto.ftpc.retr_size_saved = size;
+    data->req.size = size;
 
     if(data->set.ftp_use_port) {
       bool connected;
@@ -3219,7 +3218,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
       data->set.chunk_end(data->wildcard.customptr);
       Curl_set_in_callback(data, false);
     }
-    ftpc->known_filesize = -1;
+    data->req.size = -1;
   }
 
   if(!result)
@@ -3832,7 +3831,6 @@ static CURLcode init_wc_data(struct Curl_easy *data)
 static CURLcode wc_statemach(struct Curl_easy *data)
 {
   struct WildcardData * const wildcard = &(data->wildcard);
-  struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
 
   for(;;) {
@@ -3870,7 +3868,6 @@ static CURLcode wc_statemach(struct Curl_easy *data)
 
     case CURLWC_DOWNLOADING: {
       /* filelist has at least one file, lets get first one */
-      struct ftp_conn *ftpc = &conn->proto.ftpc;
       struct curl_fileinfo *finfo = wildcard->filelist.head->ptr;
       struct FTP *ftp = data->req.p.ftp;
 
@@ -3906,7 +3903,7 @@ static CURLcode wc_statemach(struct Curl_easy *data)
       }
 
       if(finfo->flags & CURLFINFOFLAG_KNOWN_SIZE)
-        ftpc->known_filesize = finfo->size;
+        data->req.size = finfo->size;
 
       result = ftp_parse_url_path(data);
       if(result)
@@ -3971,6 +3968,7 @@ static CURLcode ftp_do(struct Curl_easy *data, bool *done)
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
+  data->req.size = -1; /* make sure this is unknown at this point */
 
   *done = FALSE; /* default to false */
   ftpc->wait_data_conn = FALSE; /* default to no such wait */
@@ -4289,7 +4287,6 @@ CURLcode ftp_regular_transfer(struct Curl_easy *data,
   bool connected = FALSE;
   struct connectdata *conn = data->conn;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
-  data->req.size = -1; /* make sure this is unknown at this point */
 
   Curl_pgrsSetUploadCounter(data, 0);
   Curl_pgrsSetDownloadCounter(data, 0);
@@ -4363,7 +4360,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   /* get some initial data into the ftp struct */
   ftp->transfer = FTPTRANSFER_BODY;
   ftp->downloadsize = 0;
-  conn->proto.ftpc.known_filesize = -1; /* unknown size for now */
+  data->req.size = -1; /* unknown size for now */
 
   return CURLE_OK;
 }
