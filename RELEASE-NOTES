@@ -4,7 +4,7 @@ curl and libcurl 7.75.0
  Command line options:         237
  curl_easy_setopt() options:   285
  Public functions in libcurl:  85
- Contributors:                 2316
+ Contributors:                 2319
 
 This release includes the following changes:
 
@@ -42,8 +42,10 @@ This release includes the following bugfixes:
  o docs/URL-SYNTAX: the URL syntax curl accepts and works with [15]
  o docs: enable syntax highlighting in several docs files [16]
  o docs: fix line length bug in gen.pl [70]
+ o docs: fix typos in NEW-PROTOCOL.md [102]
  o docs: fix wrong documentation in help.d [71]
  o docs: remove redundant "better" in --fail help [55]
+ o doh: allocate state struct on demand [85]
  o examples/libtest: add .checksrc to dist [14]
  o examples: remove superfluous asterisk uses
  o failf: remove newline from formatting strings [35]
@@ -52,15 +54,23 @@ This release includes the following bugfixes:
  o gitattributes: Set batch files to CRLF line endings on checkout [65]
  o h2: do not wait for RECV on paused transfers [43]
  o HISTORY: added dates to early history
+ o http: empty reply connection are not left intact [80]
+ o http: get CURLOPT_REQUEST_TARGET working with a HTTP proxy [83]
  o http: have CURLOPT_FAILONERROR fail after all headers [54]
+ o http: make providing Proxy-Connection header not cause duplicated headers [92]
  o http: show the request as headers even when split-sending [7]
+ o http_chunks: correct and clarify a comment on hexnumber length [88]
  o http_proxy: Fix CONNECT chunked encoding race condition [76]
  o httpauth: make multi-request auth work with custom port [45]
+ o INSTALL: now at 85 operating systems
  o INSTALL: update the list known OSes and CPU archs curl has run on [38]
  o lib/unit tests: add missing curl_global_cleanup() calls
  o lib1564/5: verify that curl_multi_wakeup returns OK
+ o lib: pass in 'struct Curl_easy *' to most functions [101]
  o lib: remove Curl_ prefix from many static functions [66]
+ o lib: save a bit of space with some structure packing [82]
  o libssh2: fix "Value stored to 'readdir_len' is never read"
+ o libssh: avoid plain free() of libssh-memory [99]
  o mime: make sure setting MIMEPOST to NULL resets properly [58]
  o misc: assorted typo fixes [57]
  o misc: fix "warning: empty expression statement has no effect" [30]
@@ -80,21 +90,27 @@ This release includes the following bugfixes:
  o Revert "CI/github: work-around for brew breakage on macOS" [17]
  o runtests: add 'wakeup' as a feature
  o runtests: add support for %if [feature] conditions [19]
+ o runtests: preprocess DISABLED to allow conditionals [93]
  o schannel: plug a memory-leak [64]
  o schannel_verify: fix safefree call typo [50]
+ o socks: use the download buffer instead [86]
  o speedcheck: exclude paused transfers [42]
+ o strerror: skip errnum >= 0 assertion on windows [78]
  o test1522: add debug tracing [3]
  o test1633: set appropriate name
  o test179: use consistent header line endings
+ o test410: verify HTTPS GET with a 49K request header
  o tests/mqttd: extract the client id from the correct offset [13]
  o tests: make --libcurl tests only test FTP options if ftp enabled [18]
  o tool_doswin: Restore original console settings on CTRL signal [68]
  o tool_operate: fix the suppression logic of some error messages [33]
  o tool_operate: spellfix a comment
  o tooĺ_writeout: fix the -w time output units [6]
+ o travis: build ngtcp2 --with-gnutls [72]
  o travis: limit the tests with quiche builds to HTTPS and FTPS only [44]
  o travis: restrict the openssl3 job to only run https and ftps tests [34]
  o url: if IDNA conversion fails, fallback to Transitional [29]
+ o urldata: make magic be the first struct field [87]
  o wolfssl: add SECURE_RENEGOTIATION support [63]
  o wolfssl: Support wolfSSL builds missing TLS 1.1 [37]
 
@@ -108,15 +124,16 @@ advice from friends like these:
   0xflotus on github, Andrey Gursky, Bubu on github, Cherish98 on github,
   Christoph M. Becker, Cory Benfield, Cristian Rodríguez, Dan Fandrich,
   Daniel Stenberg, Denis Laxalde, Dennis Clarke, Douglas R. Reno,
-  Earnestly on github, Emil Engler, Fabian Keil, Flameborn on github,
-  Ganesh Kamath, Gergely Nagy, Gisle Vanem, Hans-Christian Noren Egtvedt,
-  Harry Sintonen, Himanshu Gupta, Hongyi Zhao, Ian Spence, Jeremy Thibault,
-  Jon Rumsey, Jon Wilkes, Julian Montes, Kevin Ushey, Matthias Gatto,
-  Mike Gelfand, Mike Tzou, Nick Zitzmann, Olaf Hering, parazyd on github,
-  Paul Groke, Ray Satiro, Razvan Cojocaru, Rich Turner, Sean McArthur,
+  Earnestly on github, Emil Engler, Erik Olsson, Fabian Keil,
+  Flameborn on github, Ganesh Kamath, Gergely Nagy, Gisle Vanem,
+  Hans-Christian Noren Egtvedt, Harry Sintonen, Himanshu Gupta, Hongyi Zhao,
+  Ian Spence, Jeremy Thibault, Jon Rumsey, Jon Wilkes, Julian Montes,
+  Kevin Ushey, Marcel Raad, Matthias Gatto, Matt Holt, Mike Gelfand, Mike Tzou,
+  Nick Zitzmann, Olaf Hering, parazyd on github, Patrick Monnerat, Paul Groke,
+  Ray Satiro, Razvan Cojocaru, Rich Turner, Sai Ram Kunala, Sean McArthur,
   Tomas Berger, UrsusArctos on github, William A Rowe Jr, XhmikosR on github,
   不确定
-  (45 contributors)
+  (50 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -191,7 +208,21 @@ References to bug reports and discussions on issues:
  [68] = https://curl.se/bug/?i=6226
  [70] = https://curl.se/bug/?i=6438
  [71] = https://curl.se/bug/?i=6436
+ [72] = https://curl.se/bug/?i=6493
  [73] = https://curl.se/mail/lib-2021-01/0063.html
  [74] = https://curl.se/bug/?i=6433
  [75] = https://curl.se/bug/?i=6431
  [76] = https://curl.se/mail/lib-2021-01/0033.html
+ [78] = https://curl.se/bug/?i=6504
+ [80] = https://twitter.com/mholt6/status/1352130240265375744
+ [82] = https://curl.se/bug/?i=6483
+ [83] = https://curl.se/bug/?i=6490
+ [85] = https://curl.se/bug/?i=6492
+ [86] = https://curl.se/bug/?i=6491
+ [87] = https://curl.se/bug/?i=6484
+ [88] = https://curl.se/bug/?i=6489
+ [92] = https://curl.se/mail/lib-2021-01/0095.html
+ [93] = https://curl.se/bug/?i=6477
+ [99] = https://curl.se/bug/?i=6481
+ [101] = https://curl.se/bug/?i=6425
+ [102] = https://curl.se/bug/?i=6471
