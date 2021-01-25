@@ -42,7 +42,8 @@ int test(char *URL)
   }
 
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_AWS_SIGV4, "xxx");
+  test_setopt(curl, CURLOPT_AWS_SIGV4, "xxx:yyy");
+  test_setopt(curl, CURLOPT_USERPWD, "xxx:yyy");
   test_setopt(curl, CURLOPT_HEADER, 0L);
   test_setopt(curl, CURLOPT_URL, URL);
   list = curl_slist_append(list, "Content-Type: application/json");

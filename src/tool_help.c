@@ -133,7 +133,7 @@ static const struct helptxt helptext[] = {
   {"-a, --append",
    "Append to target file when uploading",
    CURLHELP_FTP | CURLHELP_SFTP},
-  {"    --aws-sigv4 <provider1[:provider2]>",
+  {"    --aws-sigv4 <provider1[:provider2[:region[:service]]]>",
    "Use AWS V4 signature authentication",
    CURLHELP_AUTH | CURLHELP_HTTP},
   {"    --basic",

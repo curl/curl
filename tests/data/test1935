@@ -14,7 +14,7 @@ Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Content-Length: 0
-Location: /19330002
+Location: /19350002
 
 </data>
 <data2>
@@ -40,14 +40,14 @@ crypto
 </features>
 
 <name>
-HTTP AWS_SIGV4 with one provider and auth cred via URL
+HTTP AWS_SIGV4 with two providers and region
 </name>
 <tool>
-lib1933
+lib1935
 </tool>
 
 <command>
-http://xxx:yyy@%HOSTIP:%HTTPPORT/1933/testapi/test
+http://%HOSTIP:%HTTPPORT/1935/testapi/test
 </command>
 </client>
 
@@ -59,10 +59,10 @@ http://xxx:yyy@%HOSTIP:%HTTPPORT/1933/testapi/test
 ^Accept:.*
 </strip>
 <protocol>
-GET /1933/testapi/test HTTP/1.1
+GET /1935/testapi/test HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/0/127/xxx4_request, SignedHeaders=content-type;host;x-xxx-date, Signature=d2c2dff48c59ec49dc31ef94f18c5dc1ac3eae2a70d51633a4342dadc0683664
-X-Xxx-Date: 19700101T000000Z
+Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/rrr/127/xxx4_request, SignedHeaders=content-type;host;x-yyy-date, Signature=240750deb9263d4c8ece71c016f3919b56e518249390ef075740f94ef8df846f
+X-Yyy-Date: 19700101T000000Z
 
 </protocol>
 </verify>

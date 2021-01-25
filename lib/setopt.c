@@ -641,7 +641,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_AWS_SIGV4:
     /*
-     * String that holds file type of the SSL certificate to use
+     * String that is merged to some authentication
+     * parameters are used by the algorithm.
      */
     result = Curl_setstropt(&data->set.str[STRING_AWS_SIGV4],
                             va_arg(param, char *));
