@@ -62,7 +62,6 @@ struct pingpong {
                                off, used to time-out response reading */
   timediff_t response_time; /* When no timeout is given, this is the amount of
                                milliseconds we await for a server response. */
-  struct connectdata *conn; /* the connection */
   struct dynbuf sendbuf;
 
   /* Function pointers the protocols MUST implement and provide for the
@@ -78,7 +77,6 @@ struct pingpong {
     pp->response_time = RESP_TIMEOUT;            \
     pp->statemachine = s;                        \
     pp->endofresp = e;                           \
-    pp->conn = conn;                             \
   } while(0)
 
 /*
@@ -149,7 +147,8 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
 /* call this when a pingpong connection is disconnected */
 CURLcode Curl_pp_disconnect(struct pingpong *pp);
 
-int Curl_pp_getsock(struct pingpong *pp, curl_socket_t *socks);
+int Curl_pp_getsock(struct Curl_easy *data, struct pingpong *pp,
+                    curl_socket_t *socks);
 
 
 /***********************************************************************

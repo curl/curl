@@ -1411,8 +1411,7 @@ static int imap_getsock(struct Curl_easy *data,
                         struct connectdata *conn,
                         curl_socket_t *socks)
 {
-  (void)data;
-  return Curl_pp_getsock(&conn->proto.imapc.pp, socks);
+  return Curl_pp_getsock(data, &conn->proto.imapc.pp, socks);
 }
 
 /***********************************************************************

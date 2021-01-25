@@ -1299,8 +1299,7 @@ static CURLcode smtp_init(struct Curl_easy *data)
 static int smtp_getsock(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks)
 {
-  (void)data;
-  return Curl_pp_getsock(&conn->proto.smtpc.pp, socks);
+  return Curl_pp_getsock(data, &conn->proto.smtpc.pp, socks);
 }
 
 /***********************************************************************

@@ -1072,8 +1072,7 @@ static CURLcode pop3_init(struct Curl_easy *data)
 static int pop3_getsock(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks)
 {
-  (void)data;
-  return Curl_pp_getsock(&conn->proto.pop3c.pp, socks);
+  return Curl_pp_getsock(data, &conn->proto.pop3c.pp, socks);
 }
 
 /***********************************************************************
