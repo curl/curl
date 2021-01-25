@@ -902,10 +902,6 @@ struct connstate {
  * unique for an entire connection.
  */
 struct connectdata {
-  /* 'data' is the CURRENT Curl_easy using this connection -- take great
-     caution that this might very well vary between different times this
-     connection is used! */
-  struct Curl_easy *data;
   struct connstate cnnct;
   struct Curl_llist_element bundle_node; /* conncache */
 

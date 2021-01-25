@@ -2063,16 +2063,13 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
                           const void *buf, size_t len, SSL *ssl,
                           void *userp)
 {
-  struct Curl_easy *data;
+  struct Curl_easy *data = userp;
   char unknown[32];
   const char *verstr = NULL;
-  struct connectdata *conn = userp;
 
-  if(!conn || !conn->data || !conn->data->set.fdebug ||
+  if(!data || !data->set.fdebug ||
      (direction != 0 && direction != 1))
     return;
-
-  data = conn->data;
 
   switch(ssl_ver) {
 #ifdef SSL2_VERSION /* removed in recent versions */
@@ -2610,7 +2607,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
   if(data->set.fdebug && data->set.verbose) {
     /* the SSL trace callback is only used for verbose logging */
     SSL_CTX_set_msg_callback(backend->ctx, ssl_tls_trace);
-    SSL_CTX_set_msg_callback_arg(backend->ctx, conn);
+    SSL_CTX_set_msg_callback_arg(backend->ctx, data);
   }
 #endif
 

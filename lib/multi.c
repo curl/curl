@@ -562,8 +562,6 @@ static CURLcode multi_done(struct Curl_easy *data,
     /* Stop if multi_done() has already been called */
     return CURLE_OK;
 
-  conn->data = data; /* ensure the connection uses this transfer now */
-
   /* Stop the resolver and free its own resources (but not dns_entry yet). */
   Curl_resolver_kill(data);
 
@@ -604,16 +602,12 @@ static CURLcode multi_done(struct Curl_easy *data,
   Curl_detach_connnection(data);
   if(CONN_INUSE(conn)) {
     /* Stop if still used. */
-    /* conn->data must not remain pointing to this transfer since it is going
-       away! Find another to own it! */
-    conn->data = conn->easyq.head->ptr;
     CONNCACHE_UNLOCK(data);
     DEBUGF(infof(data, "Connection still in use %zu, "
                  "no more multi_done now!\n",
                  conn->easyq.size));
     return CURLE_OK;
   }
-  conn->data = NULL; /* the connection now has no owner */
   data->state.done = TRUE; /* called just now! */
 
   if(conn->dns_entry) {
@@ -718,7 +712,6 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
 {
   struct Curl_easy *easy = data;
   bool premature;
-  bool easy_owns_conn;
   struct Curl_llist_element *e;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
@@ -741,8 +734,6 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     return CURLM_RECURSIVE_API_CALL;
 
   premature = (data->mstate < CURLM_STATE_COMPLETED) ? TRUE : FALSE;
-  easy_owns_conn = (data->conn && (data->conn->data == easy)) ?
-    TRUE : FALSE;
 
   /* If the 'state' is not INIT or COMPLETED, we might need to do something
      nice to put the easy_handle in a good known state when this returns. */
@@ -752,30 +743,13 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     multi->num_alive--;
   }
 
-  if(data->conn &&
-     data->mstate > CURLM_STATE_DO &&
-     data->mstate < CURLM_STATE_COMPLETED) {
-    /* Set connection owner so that the DONE function closes it.  We can
-       safely do this here since connection is killed. */
-    data->conn->data = easy;
-    streamclose(data->conn, "Removed with partial response");
-    easy_owns_conn = TRUE;
-  }
+  if(data->conn)
+    /* multi_done() clears the association between the easy handle and the
+       connection.
 
-  if(data->conn) {
-
-    /* we must call multi_done() here (if we still own the connection) so that
-       we don't leave a half-baked one around */
-    if(easy_owns_conn) {
-
-      /* multi_done() clears the association between the easy handle and the
-         connection.
-
-         Note that this ignores the return code simply because there's
-         nothing really useful to do with it anyway! */
-      (void)multi_done(data, data->result, premature);
-    }
-  }
+       Note that this ignores the return code simply because there's
+       nothing really useful to do with it anyway! */
+    (void)multi_done(data, data->result, premature);
 
   /* The timer must be shut down before data->multi is set to NULL, else the
      timenode will remain in the splay tree after curl_easy_cleanup is
@@ -983,12 +957,6 @@ static int multi_getsock(struct Curl_easy *data,
   */
   if(!conn)
     return 0;
-
-  if(data->mstate > CURLM_STATE_CONNECT &&
-     data->mstate < CURLM_STATE_COMPLETED) {
-    /* Set up ownership correctly */
-    data->conn->data = data;
-  }
 
   switch(data->mstate) {
   default:
@@ -1397,7 +1365,6 @@ static CURLcode multi_do(struct Curl_easy *data, bool *done)
 
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->handler);
-  DEBUGASSERT(conn->data == data);
 
   if(conn->handler->do_it)
     /* generic protocol-specific function pointer set in curl_connect() */
@@ -1576,15 +1543,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     if(multi_ischanged(multi, TRUE)) {
       DEBUGF(infof(data, "multi changed, check CONNECT_PEND queue!\n"));
       process_pending_handles(multi); /* multiplexed */
-    }
-
-    if(data->mstate > CURLM_STATE_CONNECT &&
-       data->mstate < CURLM_STATE_COMPLETED) {
-      /* Make sure we set the connection's current owner */
-      DEBUGASSERT(data->conn);
-      if(!data->conn)
-        return CURLM_INTERNAL_ERROR;
-      data->conn->data = data;
     }
 
     if(data->conn &&

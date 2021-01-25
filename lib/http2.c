@@ -736,14 +736,10 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     stream->memlen += ncopy;
 
     drain_this(data_s, httpc);
-    {
-      /* get the pointer from userp again since it was re-assigned above */
-      struct connectdata *conn_s = (struct connectdata *)userp;
 
-      /* if we receive data for another handle, wake that up */
-      if(conn_s->data != data_s)
-        Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
-    }
+    /* if we receive data for another handle, wake that up */
+    if(data != data_s)
+      Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
     break;
   case NGHTTP2_PUSH_PROMISE:
     rv = push_promise(data_s, conn, &frame->push_promise);
