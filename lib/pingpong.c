@@ -47,7 +47,7 @@
 timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
                                  struct pingpong *pp, bool disconnecting)
 {
-  struct connectdata *conn = pp->conn;
+  struct connectdata *conn = data->conn;
   timediff_t timeout_ms; /* in milliseconds */
   timediff_t response_time = (data->set.server_response_timeout)?
     data->set.server_response_timeout: pp->response_time;
@@ -81,7 +81,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
                            struct pingpong *pp, bool block,
                            bool disconnecting)
 {
-  struct connectdata *conn = pp->conn;
+  struct connectdata *conn = data->conn;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc;
   timediff_t interval_ms;
@@ -131,7 +131,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
     result = CURLE_OUT_OF_MEMORY;
   }
   else if(rc)
-    result = pp->statemachine(data, pp->conn);
+    result = pp->statemachine(data, data->conn);
 
   return result;
 }
@@ -171,7 +171,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   size_t write_len;
   char *s;
   CURLcode result;
-  struct connectdata *conn = pp->conn;
+  struct connectdata *conn = data->conn;
 
 #ifdef HAVE_GSSAPI
   enum protection_level data_sec;
@@ -274,7 +274,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
   bool keepon = TRUE;
   ssize_t gotbytes;
   char *ptr;
-  struct connectdata *conn = pp->conn;
+  struct connectdata *conn = data->conn;
   char * const buf = data->state.buffer;
   CURLcode result = CURLE_OK;
 
@@ -455,9 +455,10 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
   return result;
 }
 
-int Curl_pp_getsock(struct pingpong *pp, curl_socket_t *socks)
+int Curl_pp_getsock(struct Curl_easy *data,
+                    struct pingpong *pp, curl_socket_t *socks)
 {
-  struct connectdata *conn = pp->conn;
+  struct connectdata *conn = data->conn;
   socks[0] = conn->sock[FIRSTSOCKET];
 
   if(pp->sendleft) {
@@ -473,7 +474,7 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
                            struct pingpong *pp)
 {
   /* we have a piece of a command still left to send */
-  struct connectdata *conn = pp->conn;
+  struct connectdata *conn = data->conn;
   ssize_t written;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   CURLcode result = Curl_write(data, sock, pp->sendthis + pp->sendsize -

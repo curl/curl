@@ -803,8 +803,7 @@ static int ftp_getsock(struct Curl_easy *data,
                        struct connectdata *conn,
                        curl_socket_t *socks)
 {
-  (void)data;
-  return Curl_pp_getsock(&conn->proto.ftpc.pp, socks);
+  return Curl_pp_getsock(data, &conn->proto.ftpc.pp, socks);
 }
 
 /* For the FTP "DO_MORE" phase only */
@@ -850,7 +849,7 @@ static int ftp_domore_getsock(struct Curl_easy *data,
 
     return bits;
   }
-  return Curl_pp_getsock(&conn->proto.ftpc.pp, socks);
+  return Curl_pp_getsock(data, &conn->proto.ftpc.pp, socks);
 }
 
 /* This is called after the FTP_QUOTE state is passed.
