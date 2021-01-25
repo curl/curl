@@ -191,7 +191,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     tmp0 = hostname;
     tmp1 = strchr(tmp0, '.');
     if(!tmp1) {
-      infof(data, "wrong provider2 argument\n");
+      infof(data, "there's no service in params or URL\n");
       ret = CURLE_URL_MALFORMAT;
       goto fail;
     }
@@ -204,7 +204,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       tmp0 = tmp1 + 1;
       tmp1 = strchr(tmp0, '.');
       if(!tmp1) {
-        infof(data, "wrong provider2 argument\n");
+        infof(data, "there's no region in params or URL\n");
         ret = CURLE_URL_MALFORMAT;
         goto fail;
       }
