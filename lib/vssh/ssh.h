@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -111,6 +111,17 @@ typedef enum {
    struct. */
 struct SSHPROTO {
   char *path;                  /* the path we operate on */
+#ifdef USE_LIBSSH2
+  struct dynbuf readdir_link;
+  struct dynbuf readdir;
+  char *readdir_filename;
+  char *readdir_longentry;
+
+  LIBSSH2_SFTP_ATTRIBUTES quote_attrs; /* used by the SFTP_QUOTE state */
+
+  /* Here's a set of struct members used by the SFTP_READDIR state */
+  LIBSSH2_SFTP_ATTRIBUTES readdir_attrs;
+#endif
 };
 
 /* ssh_conn is used for struct connection-oriented data in the connectdata
@@ -167,15 +178,6 @@ struct ssh_conn {
   const char *readdir_longentry;
   char *readdir_tmp;
 #elif defined(USE_LIBSSH2)
-  struct dynbuf readdir_link;
-  struct dynbuf readdir;
-  char *readdir_filename;
-  char *readdir_longentry;
-
-  LIBSSH2_SFTP_ATTRIBUTES quote_attrs; /* used by the SFTP_QUOTE state */
-
-  /* Here's a set of struct members used by the SFTP_READDIR state */
-  LIBSSH2_SFTP_ATTRIBUTES readdir_attrs;
   LIBSSH2_SESSION *ssh_session; /* Secure Shell session */
   LIBSSH2_CHANNEL *ssh_channel; /* Secure Shell channel handle */
   LIBSSH2_SFTP *sftp_session;   /* SFTP handle */
