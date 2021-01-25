@@ -752,17 +752,15 @@ static CURLcode readwrite_data(struct Curl_easy *data,
           return CURLE_RECV_ERROR;
         }
         if(CHUNKE_STOP == res) {
-          size_t dataleft;
           /* we're done reading chunks! */
           k->keepon &= ~KEEP_RECV; /* read no more */
 
-          /* There are now possibly N number of bytes at the end of the
-             str buffer that weren't written to the client.
-             Push it back to be read on the next pass. */
-
-          dataleft = conn->chunk.dataleft;
-          if(dataleft != 0) {
-            infof(data, "Leftovers after chunking: %zu bytes\n", dataleft);
+          /* N number of bytes at the end of the str buffer that weren't
+             written to the client. */
+          if(conn->chunk.datasize) {
+            infof(data, "Leftovers after chunking: % "
+                  CURL_FORMAT_CURL_OFF_T "u bytes\n",
+                  conn->chunk.datasize);
           }
         }
         /* If it returned OK, we just keep going */

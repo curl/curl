@@ -48,7 +48,7 @@ typedef enum {
      big deal. */
   CHUNK_POSTLF,
 
-  /* Used to mark that we're out of the game.  NOTE: that there's a 'dataleft'
+  /* Used to mark that we're out of the game.  NOTE: that there's a 'datasize'
      field in the struct that will tell how many bytes that were not passed to
      the client in the end of the last buffer! */
   CHUNK_STOP,
@@ -83,11 +83,10 @@ typedef enum {
 const char *Curl_chunked_strerror(CHUNKcode code);
 
 struct Curl_chunker {
-  char hexbuffer[ CHUNK_MAXNUM_LEN + 1]; /* +1 for null-terminator */
-  int hexindex;
-  ChunkyState state;
   curl_off_t datasize;
-  size_t dataleft; /* untouched data amount at the end of the last buffer */
+  ChunkyState state;
+  unsigned char hexindex;
+  char hexbuffer[ CHUNK_MAXNUM_LEN + 1]; /* +1 for null-terminator */
 };
 
 /* The following functions are defined in http_chunks.c */
