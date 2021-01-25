@@ -234,6 +234,8 @@
 #endif
 
 struct ssl_backend_data {
+  struct Curl_easy *logger; /* transfer handle to pass trace logs to, only
+                               using sockindex 0 */
   /* these ones requires specific SSL-types */
   SSL_CTX* ctx;
   SSL*     handle;
@@ -1356,10 +1358,16 @@ static struct curl_slist *ossl_engines_list(struct Curl_easy *data)
   return list;
 }
 
-static void ossl_closeone(struct ssl_connect_data *connssl)
+#define set_logger(conn, data)                  \
+  conn->ssl[0].backend->logger = data
+
+static void ossl_closeone(struct Curl_easy *data,
+                          struct connectdata *conn,
+                          struct ssl_connect_data *connssl)
 {
   struct ssl_backend_data *backend = connssl->backend;
   if(backend->handle) {
+    set_logger(conn, data);
     (void)SSL_shutdown(backend->handle);
     SSL_set_connect_state(backend->handle);
 
@@ -1378,10 +1386,9 @@ static void ossl_closeone(struct ssl_connect_data *connssl)
 static void ossl_close(struct Curl_easy *data, struct connectdata *conn,
                        int sockindex)
 {
-  (void) data;
-  ossl_closeone(&conn->ssl[sockindex]);
+  ossl_closeone(data, conn, &conn->ssl[sockindex]);
 #ifndef CURL_DISABLE_PROXY
-  ossl_closeone(&conn->proxy_ssl[sockindex]);
+  ossl_closeone(data, conn, &conn->proxy_ssl[sockindex]);
 #endif
 }
 
@@ -2055,24 +2062,23 @@ static const char *tls_rt_type(int type)
   }
 }
 
-
 /*
  * Our callback from the SSL/TLS layers.
  */
-static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
-                          const void *buf, size_t len, SSL *ssl,
-                          void *userp)
+static void ossl_trace(int direction, int ssl_ver, int content_type,
+                       const void *buf, size_t len, SSL *ssl,
+                       void *userp)
 {
-  struct Curl_easy *data;
   char unknown[32];
   const char *verstr = NULL;
   struct connectdata *conn = userp;
+  struct ssl_connect_data *connssl = &conn->ssl[0];
+  struct ssl_backend_data *backend = connssl->backend;
+  struct Curl_easy *data = backend->logger;
 
-  if(!conn || !conn->data || !conn->data->set.fdebug ||
+  if(!conn || !data || !data->set.fdebug ||
      (direction != 0 && direction != 1))
     return;
-
-  data = conn->data;
 
   switch(ssl_ver) {
 #ifdef SSL2_VERSION /* removed in recent versions */
@@ -2609,7 +2615,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 #ifdef SSL_CTRL_SET_MSG_CALLBACK
   if(data->set.fdebug && data->set.verbose) {
     /* the SSL trace callback is only used for verbose logging */
-    SSL_CTX_set_msg_callback(backend->ctx, ssl_tls_trace);
+    SSL_CTX_set_msg_callback(backend->ctx, ossl_trace);
     SSL_CTX_set_msg_callback_arg(backend->ctx, conn);
   }
 #endif
@@ -4176,6 +4182,7 @@ static ssize_t ossl_send(struct Curl_easy *data,
   ERR_clear_error();
 
   memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
+  set_logger(conn, data);
   rc = SSL_write(backend->handle, mem, memlen);
 
   if(rc <= 0) {
@@ -4254,6 +4261,7 @@ static ssize_t ossl_recv(struct Curl_easy *data,   /* transfer */
   ERR_clear_error();
 
   buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
+  set_logger(conn, data);
   nread = (ssize_t)SSL_read(backend->handle, buf, buffsize);
   if(nread <= 0) {
     /* failed SSL_read */
