@@ -92,7 +92,6 @@ void Curl_httpchunk_init(struct Curl_easy *data)
   struct connectdata *conn = data->conn;
   struct Curl_chunker *chunk = &conn->chunk;
   chunk->hexindex = 0;      /* start at 0 */
-  chunk->dataleft = 0;      /* no data left yet! */
   chunk->state = CHUNK_HEX; /* we get hex first! */
   Curl_dyn_init(&conn->trailer, DYN_H1_TRAILER);
 }
@@ -309,7 +308,7 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
 
         /* Record the length of any data left in the end of the buffer
            even if there's no more chunks to read */
-        ch->dataleft = curlx_sotouz(length);
+        ch->datasize = curlx_sotouz(length);
 
         return CHUNKE_STOP; /* return stop */
       }
