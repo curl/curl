@@ -113,7 +113,7 @@ static const struct LongShort aliases[]= {
   {"*t", "proxy-ntlm",               ARG_BOOL},
   {"*u", "crlf",                     ARG_BOOL},
   {"*v", "stderr",                   ARG_FILENAME},
-  {"*V", "aws-sigv4",             ARG_STRING},
+  {"*V", "aws-sigv4",                ARG_STRING},
   {"*w", "interface",                ARG_STRING},
   {"*x", "krb",                      ARG_STRING},
   {"*x", "krb4",                     ARG_STRING},
@@ -806,8 +806,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       case 'V': /* --aws-sigv4 */
         config->authtype |= CURLAUTH_AWS_SIGV4;
-        GetStr(&config->aws_sigv4_provider, nextarg);
+        GetStr(&config->aws_sigv4, nextarg);
         break;
+
       case 'v': /* --stderr */
         if(strcmp(nextarg, "-")) {
           FILE *newfile = fopen(nextarg, FOPEN_WRITETEXT);

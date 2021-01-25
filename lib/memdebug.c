@@ -189,6 +189,33 @@ char *curl_dbg_strdup(const char *str, int line, const char *source)
   return mem;
 }
 
+char *curl_dbg_strndup(const char *str, size_t maxlen, int line,
+                       const char *source)
+{
+  char *mem;
+  size_t len;
+
+  DEBUGASSERT(str != NULL);
+
+  if(countcheck("strndup", line, source))
+    return NULL;
+
+  len = strnlen(str, maxlen);
+
+  mem = curl_dbg_malloc(len + 1, 0, NULL); /* NULL prevents logging */
+  if(mem) {
+    memcpy(mem, str, len);
+    mem[len] = '\0';
+  }
+
+  if(source)
+    curl_dbg_log("MEM %s:%d strndup(%p, %zu) (%zu) = %p\n",
+                 source, line, (const void *)str, maxlen, len + 1,
+                 (const void *)mem);
+
+  return mem;
+}
+
 #if defined(WIN32) && defined(UNICODE)
 wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line, const char *source)
 {

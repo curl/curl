@@ -40,6 +40,8 @@ CURL_EXTERN void *curl_dbg_realloc(void *ptr, size_t size, int line,
                                    const char *source);
 CURL_EXTERN void curl_dbg_free(void *ptr, int line, const char *source);
 CURL_EXTERN char *curl_dbg_strdup(const char *str, int line, const char *src);
+CURL_EXTERN char *curl_dbg_strndup(const char *str, size_t maxlen, int line,
+                                   const char *src);
 #if defined(WIN32) && defined(UNICODE)
 CURL_EXTERN wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line,
                                      const char *source);
@@ -89,6 +91,8 @@ CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
 /* Set this symbol on the command-line, recompile all lib-sources */
 #undef strdup
 #define strdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
+#undef strndup
+#define strndup(ptr, maxlen) curl_dbg_strndup(ptr, maxlen, __LINE__, __FILE__)
 #define malloc(size) curl_dbg_malloc(size, __LINE__, __FILE__)
 #define calloc(nbelem,size) curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
 #define realloc(ptr,size) curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
