@@ -1334,12 +1334,13 @@ static ssize_t cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
       nread = H3_SEND_SIZE - out->windex;
 
     memcpy(&out->buf[out->windex], stream->upload_mem, nread);
-    out->windex += nread;
-    out->used += nread;
 
     /* that's the chunk we return to nghttp3 */
     vec[0].base = &out->buf[out->windex];
     vec[0].len = nread;
+
+    out->windex += nread;
+    out->used += nread;
 
     if(out->windex == H3_SEND_SIZE)
       out->windex = 0; /* wrap */
