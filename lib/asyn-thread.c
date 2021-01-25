@@ -708,7 +708,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
     return NULL;
   }
 
-  failf(conn->data, "getaddrinfo() thread failed");
+  failf(data, "getaddrinfo() thread failed");
 
   return NULL;
 }
