@@ -1101,24 +1101,8 @@ struct connectdata {
     struct mqtt_conn mqtt;
   } proto;
 
-  int cselect_bits; /* bitmask of socket events */
-  int waitfor;      /* current READ/WRITE bits to wait for */
-
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-  int socks5_gssapi_enctype;
-#endif
-
-  /* When this connection is created, store the conditions for the local end
-     bind. This is stored before the actual bind and before any connection is
-     made and will serve the purpose of being used for comparison reasons so
-     that subsequent bound-requested connections aren't accidentally re-using
-     wrong connections. */
-  char *localdev;
-  unsigned short localport;
-  int localportrange;
   struct http_connect_state *connect_state; /* for HTTP CONNECT */
   struct connectbundle *bundle; /* The bundle we are member of */
-  int negnpn; /* APLN or NPN TLS negotiated protocol, CURL_HTTP_VERSION* */
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;
 #endif
@@ -1126,6 +1110,21 @@ struct connectdata {
   /* if set, an alternative data transfer function */
   Curl_datastream datastream;
 #endif
+  /* When this connection is created, store the conditions for the local end
+     bind. This is stored before the actual bind and before any connection is
+     made and will serve the purpose of being used for comparison reasons so
+     that subsequent bound-requested connections aren't accidentally re-using
+     wrong connections. */
+  char *localdev;
+  int localportrange;
+  int cselect_bits; /* bitmask of socket events */
+  int waitfor;      /* current READ/WRITE bits to wait for */
+  int negnpn; /* APLN or NPN TLS negotiated protocol, CURL_HTTP_VERSION* */
+
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+  int socks5_gssapi_enctype;
+#endif
+  unsigned short localport;
 };
 
 /* The end of connectdata. */
