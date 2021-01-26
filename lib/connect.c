@@ -348,7 +348,7 @@ static CURLcode bindlocal(struct Curl_easy *data,
        * of the connection. The resolve functions should really be changed
        * to take a type parameter instead.
        */
-      long ipver = conn->ip_version;
+      unsigned char ipver = conn->ip_version;
       int rc;
 
       if(af == AF_INET)
