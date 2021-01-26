@@ -885,7 +885,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             FILE *newfile;
             newfile = fopen(config->headerfile, per->prev == NULL?"wb":"ab");
             if(!newfile) {
-              warnf(config->global, "Failed to open %s\n", config->headerfile);
+              warnf(global, "Failed to open %s\n", config->headerfile);
               result = CURLE_WRITE_ERROR;
               break;
             }
@@ -922,7 +922,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           /* open file for reading: */
           FILE *file = fopen(config->etag_compare_file, FOPEN_READTEXT);
           if(!file && !config->etag_save_file) {
-            errorf(config->global,
+            errorf(global,
                    "Failed to open %s\n", config->etag_compare_file);
             result = CURLE_READ_ERROR;
             break;
@@ -939,7 +939,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           if(!header) {
             if(file)
               fclose(file);
-            errorf(config->global,
+            errorf(global,
                    "Failed to allocate memory for custom etag header\n");
             result = CURLE_OUT_OF_MEMORY;
             break;
@@ -965,7 +965,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             FILE *newfile = fopen(config->etag_save_file, "wb");
             if(!newfile) {
               warnf(
-                config->global,
+                global,
                 "Failed to open %s\n", config->etag_save_file);
 
               result = CURLE_WRITE_ERROR;
@@ -1053,7 +1053,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             Curl_safefree(storefile);
             if(result) {
               /* bad globbing */
-              warnf(config->global, "bad output glob!\n");
+              warnf(global, "bad output glob!\n");
               break;
             }
           }
@@ -1153,7 +1153,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
            * we should warn him/her.
            */
           if(config->proxyanyauth || (authbits>1)) {
-            warnf(config->global,
+            warnf(global,
                   "Using --anyauth or --proxy-anyauth with upload from stdin"
                   " involves a big risk of it not working. Use a temporary"
                   " file or a fixed auth type instead!\n");
@@ -1165,7 +1165,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           set_binmode(stdin);
           if(!strcmp(per->uploadfile, ".")) {
             if(curlx_nonblock((curl_socket_t)per->infd, TRUE) < 0)
-              warnf(config->global,
+              warnf(global,
                     "fcntl failed on fd=%d: %s\n", per->infd, strerror(errno));
           }
         }
@@ -1493,7 +1493,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->capath) {
           result = res_setopt_str(curl, CURLOPT_CAPATH, config->capath);
           if(result == CURLE_NOT_BUILT_IN) {
-            warnf(config->global, "ignoring %s, not supported by libcurl\n",
+            warnf(global, "ignoring %s, not supported by libcurl\n",
                   capath_from_env?
                   "SSL_CERT_DIR environment variable":"--capath");
           }
@@ -1510,7 +1510,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                                    config->capath));
           if(result == CURLE_NOT_BUILT_IN) {
             if(config->proxy_capath) {
-              warnf(config->global,
+              warnf(global,
                     "ignoring --proxy-capath, not supported by libcurl\n");
             }
           }
@@ -2079,11 +2079,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             result = CURLE_OUT_OF_MEMORY;
             break;
           }
-          fprintf(config->global->errors,
+          fprintf(global->errors,
                   "Metalink: parsing (%s) metalink/XML...\n", per->this_url);
         }
         else if(metalink)
-          fprintf(config->global->errors,
+          fprintf(global->errors,
                   "Metalink: fetching (%s) from (%s)...\n",
                   mlfile->filename, per->this_url);
 #endif /* USE_METALINK */
