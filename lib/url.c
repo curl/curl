@@ -1674,9 +1674,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   /* Store current time to give a baseline to keepalive connection times. */
   conn->keepalive = Curl_now();
 
-  /* Store off the configured connection upkeep time. */
-  conn->upkeep_interval_ms = data->set.upkeep_interval_ms;
-
   conn->data = data; /* Setup the association between this connection
                         and the Curl_easy */
 

@@ -229,7 +229,7 @@ static unsigned int http2_conncheck(struct Curl_easy *data,
     struct curltime now = Curl_now();
     timediff_t elapsed = Curl_timediff(now, conn->keepalive);
 
-    if(elapsed > conn->upkeep_interval_ms) {
+    if(elapsed > data->set.upkeep_interval_ms) {
       /* Perform an HTTP/2 PING */
       rc = nghttp2_submit_ping(c->h2, 0, ZERO_NULL);
       if(!rc) {
