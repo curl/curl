@@ -1034,8 +1034,6 @@ struct connectdata {
      was used on this connection. */
   struct curltime keepalive;
 
-  long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
-
   /**** curl_get() phase fields */
 
   curl_socket_t sockfd;   /* socket to read from or CURL_SOCKET_BAD */
