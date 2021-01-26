@@ -976,6 +976,7 @@ struct connectdata {
      these are updated with data which comes directly from the socket. */
 
   char primary_ip[MAX_IPADR_LEN];
+  unsigned char ip_version; /* copied from the Curl_easy at creation time */
 
   char *user;    /* user name string, allocated */
   char *passwd;  /* password string, allocated */
@@ -1026,8 +1027,6 @@ struct connectdata {
 
   const struct Curl_handler *handler; /* Connection's protocol handler */
   const struct Curl_handler *given;   /* The protocol first given */
-
-  long ip_version; /* copied from the Curl_easy at creation time */
 
   /* Protocols can use a custom keepalive mechanism to keep connections alive.
      This allows those protocols to track the last time the keepalive mechanism
@@ -1726,8 +1725,8 @@ struct UserDefined {
                                 keep it >= CURL_MAX_WRITE_SIZE */
   void *private_data; /* application-private data */
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
-  long ipver; /* the CURL_IPRESOLVE_* defines in the public header file
-                 0 - whatever, 1 - v2, 2 - v6 */
+  unsigned char ipver; /* the CURL_IPRESOLVE_* defines in the public header
+                          file 0 - whatever, 1 - v2, 2 - v6 */
   curl_off_t max_filesize; /* Maximum file size to download */
 #ifndef CURL_DISABLE_FTP
   curl_ftpfile ftp_filemethod; /* how to get to a file when FTP is used  */
