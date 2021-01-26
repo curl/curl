@@ -696,7 +696,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
                                                 int port,
                                                 int *waitp)
 {
-  struct resdata *reslv = (struct resdata *)data->state.resolver;
+  struct resdata *reslv = (struct resdata *)data->state.async.resolver;
 
   *waitp = 0; /* default to synchronous response */
 
