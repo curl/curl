@@ -644,7 +644,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     /* Ask libcurl if we got a remote file time */
     curl_off_t filetime = -1;
     curl_easy_getinfo(curl, CURLINFO_FILETIME_T, &filetime);
-    setfiletime(filetime, outs->filename, config->global->errors);
+    setfiletime(filetime, outs->filename, global);
   }
 
   /* Close function-local opened file descriptors */
