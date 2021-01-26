@@ -977,13 +977,6 @@ struct connectdata {
 
   char primary_ip[MAX_IPADR_LEN];
 
-  /* 'local_ip' and 'local_port' get filled with local's numerical
-     ip address and port number whenever an outgoing connection is
-     **established** from the primary socket to a remote address. */
-
-  char local_ip[MAX_IPADR_LEN];
-  long local_port;
-
   char *user;    /* user name string, allocated */
   char *passwd;  /* password string, allocated */
   char *options; /* options string, allocated */

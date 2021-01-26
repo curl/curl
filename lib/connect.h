@@ -80,9 +80,10 @@ void Curl_updateconninfo(struct Curl_easy *data, struct connectdata *conn,
                          curl_socket_t sockfd);
 void Curl_conninfo_remote(struct Curl_easy *data, struct connectdata *conn,
                           curl_socket_t sockfd);
-void Curl_conninfo_local(struct Curl_easy *data, struct connectdata *conn,
-                         curl_socket_t sockfd);
-void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn);
+void Curl_conninfo_local(struct Curl_easy *data, curl_socket_t sockfd,
+                         char *local_ip, long *local_port);
+void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
+                          char *local_ip, long local_port);
 int Curl_closesocket(struct Curl_easy *data, struct connectdata *conn,
                      curl_socket_t sock);
 

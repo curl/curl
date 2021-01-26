@@ -3366,6 +3366,11 @@ static void reuse_conn(struct Curl_easy *data,
                        struct connectdata *old_conn,
                        struct connectdata *conn)
 {
+  /* 'local_ip' and 'local_port' get filled with local's numerical
+     ip address and port number whenever an outgoing connection is
+     **established** from the primary socket to a remote address. */
+  char local_ip[MAX_IPADR_LEN] = "";
+  long local_port = -1;
 #ifndef CURL_DISABLE_PROXY
   Curl_free_idnconverted_hostname(&old_conn->http_proxy.host);
   Curl_free_idnconverted_hostname(&old_conn->socks_proxy.host);
@@ -3432,7 +3437,11 @@ static void reuse_conn(struct Curl_easy *data,
   old_conn->hostname_resolve = NULL;
 
   /* persist connection info in session handle */
-  Curl_persistconninfo(data, conn);
+  if(conn->transport == TRNSPRT_TCP) {
+    Curl_conninfo_local(data, conn->sock[FIRSTSOCKET],
+                        local_ip, &local_port);
+  }
+  Curl_persistconninfo(data, conn, local_ip, local_port);
 
   conn_reset_all_postponed_data(old_conn); /* free buffers */
 
@@ -3646,7 +3655,7 @@ static CURLcode create_conn(struct Curl_easy *data,
     /* this is supposed to be the connect function so we better at least check
        that the file is present here! */
     DEBUGASSERT(conn->handler->connect_it);
-    Curl_persistconninfo(data, conn);
+    Curl_persistconninfo(data, conn, NULL, -1);
     result = conn->handler->connect_it(data, &done);
 
     /* Setup a "faked" transfer that'll do nothing */
