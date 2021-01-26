@@ -70,7 +70,7 @@ CURL *curl = curl_easy_init();
 struct curl_slist *list = NULL;
 
 if(curl) {
-  url_easy_setopt(curl, CURLOPT_URL,
+  curl_easy_setopt(curl, CURLOPT_URL,
                   "https://service.region.example.com/uri");
   curl_easy_setopt(c, CURLOPT_AWS_SIGV4, "provider1:provider2");
 
