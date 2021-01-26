@@ -616,7 +616,7 @@ void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn)
   memcpy(data->info.conn_local_ip, conn->local_ip, MAX_IPADR_LEN);
   data->info.conn_scheme = conn->handler->scheme;
   data->info.conn_protocol = conn->handler->protocol;
-  data->info.conn_primary_port = conn->primary_port;
+  data->info.conn_primary_port = conn->port;
   data->info.conn_local_port = conn->local_port;
 }
 
@@ -686,6 +686,7 @@ void Curl_conninfo_remote(struct Curl_easy *data,
   char buffer[STRERROR_LEN];
   struct Curl_sockaddr_storage ssrem;
   curl_socklen_t plen;
+  long port;
   plen = sizeof(struct Curl_sockaddr_storage);
   memset(&ssrem, 0, sizeof(ssrem));
   if(getpeername(sockfd, (struct sockaddr*) &ssrem, &plen)) {
@@ -695,7 +696,7 @@ void Curl_conninfo_remote(struct Curl_easy *data,
     return;
   }
   if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
-                       conn->primary_ip, &conn->primary_port)) {
+                       conn->primary_ip, &port)) {
     failf(data, "ssrem inet_ntop() failed with errno %d: %s",
           errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     return;

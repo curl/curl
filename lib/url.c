@@ -2319,7 +2319,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
                             curl_proxytype proxytype)
 {
   char *portptr = NULL;
-  long port = -1;
+  int port = -1;
   char *proxyuser = NULL;
   char *proxypasswd = NULL;
   char *host;
@@ -2408,14 +2408,14 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   curl_url_get(uhp, CURLUPART_PORT, &portptr, 0);
 
   if(portptr) {
-    port = strtol(portptr, NULL, 10);
+    port = (int)strtol(portptr, NULL, 10);
     free(portptr);
   }
   else {
     if(data->set.proxyport)
       /* None given in the proxy string, then get the default one if it is
          given */
-      port = data->set.proxyport;
+      port = (int)data->set.proxyport;
     else {
       if(proxytype == CURLPROXY_HTTPS)
         port = CURL_DEFAULT_HTTPS_PROXY_PORT;
