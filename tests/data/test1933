@@ -47,7 +47,7 @@ lib1933
 </tool>
 
 <command>
-http://%HOSTIP:%HTTPPORT/1933/testapi/test
+http://xxx:yyy@%HOSTIP:%HTTPPORT/1933/testapi/test
 </command>
 </client>
 

@@ -80,7 +80,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char *provider1_mid = NULL;
   char *region = NULL;
   char *service = NULL;
-  const char *hostname = data->state.up.hostname;
+  const char *hostname = conn->host.name;
 #ifdef DEBUGBUILD
   char *force_timestamp;
 #endif
@@ -100,11 +100,12 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char *request_type = NULL;
   char *credential_scope = NULL;
   char *str_to_sign = NULL;
+  const char *user = conn->user ? conn->user : "";
+  const char *passwd = conn->passwd ? conn->passwd : "";
   char *secret = NULL;
   unsigned char tmp_sign0[32] = {0};
   unsigned char tmp_sign1[32] = {0};
-  char *auth_header = NULL;
-  char *date_header = NULL;
+  char *auth_headers = NULL;
 
   DEBUGASSERT(!proxy);
   (void)proxy;
@@ -319,8 +320,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     goto fail;
   }
 
-  secret = curl_maprintf("%s4%s",
-                         provider0_up, data->set.str[STRING_PASSWORD]);
+  secret = curl_maprintf("%s4%s", provider0_up, passwd);
   if(!secret) {
     goto fail;
   }
@@ -338,37 +338,25 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   sha256_to_hex(sha_hex, tmp_sign0, sizeof(sha_hex));
 
-  auth_header = curl_maprintf("Authorization: %s4-HMAC-SHA256 "
+  auth_headers = curl_maprintf("Authorization: %s4-HMAC-SHA256 "
                               "Credential=%s/%s, "
                               "SignedHeaders=%s, "
-                              "Signature=%s",
+                              "Signature=%s\r\n"
+                              "X-%s-Date: %s\r\n",
                               provider0_up,
-                              data->set.str[STRING_USERNAME],
+                              user,
                               credential_scope,
                               signed_headers,
-                              sha_hex);
-  if(!auth_header) {
+                              sha_hex,
+                              provider1_mid,
+                              timestamp);
+  if(!auth_headers) {
     goto fail;
   }
 
-  data->set.headers = curl_slist_append(data->set.headers, auth_header);
-  if(!data->set.headers) {
-    ret = CURLE_FAILED_INIT;
-    goto fail;
-  }
-
-  date_header = curl_maprintf("X-%s-Date: %s", provider1_mid, timestamp);
-  if(!date_header) {
-    goto fail;
-  }
-
-  data->set.headers = curl_slist_append(data->set.headers, date_header);
-  if(!data->set.headers) {
-    ret = CURLE_FAILED_INIT;
-    goto fail;
-  }
-
-  data->state.authhost.done = 1;
+  Curl_safefree(data->state.aptr.userpwd);
+  data->state.aptr.userpwd = auth_headers;
+  data->state.authhost.done = TRUE;
   ret = CURLE_OK;
 
 fail:
@@ -385,8 +373,6 @@ fail:
   free(credential_scope);
   free(str_to_sign);
   free(secret);
-  free(auth_header);
-  free(date_header);
   return ret;
 }
 
