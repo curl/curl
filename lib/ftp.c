@@ -1819,7 +1819,7 @@ static char *control_address(struct connectdata *conn)
   if(conn->bits.tunnel_proxy || conn->bits.socksproxy)
     return conn->host.name;
 #endif
-  return conn->ip_addr_str;
+  return conn->primary_ip;
 }
 
 static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
