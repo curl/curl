@@ -140,7 +140,7 @@ void setfiletime(curl_off_t filetime, const char *filename,
     times[0].tv_usec = times[1].tv_usec = 0;
     if(utimes(filename, times)) {
       warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-            " on outfile: %s\n", filetime, strerror(errno));
+            " on '%s': %s\n", filetime, filename, strerror(errno));
     }
 
 #elif defined(HAVE_UTIME)
@@ -149,7 +149,7 @@ void setfiletime(curl_off_t filetime, const char *filename,
     times.modtime = (time_t)filetime;
     if(utime(filename, &times)) {
       warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-            " on outfile: %s\n", filetime, strerror(errno));
+            " on '%s': %s\n", filetime, filename, strerror(errno));
     }
 #endif
   }

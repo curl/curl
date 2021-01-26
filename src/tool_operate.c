@@ -374,8 +374,8 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   if(!result && config->xattr && outs->fopened && outs->stream) {
     int rc = fwrite_xattr(curl, fileno(outs->stream));
     if(rc)
-      warnf(config->global, "Error setting extended attributes: %s\n",
-            strerror(errno));
+      warnf(config->global, "Error setting extended attributes on '%s': %s\n",
+            outs->filename, strerror(errno));
   }
 
   if(!result && !outs->stream && !outs->bytes) {
