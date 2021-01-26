@@ -700,7 +700,6 @@ void Curl_conninfo_remote(struct Curl_easy *data,
           errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     return;
   }
-  memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
 #else
   (void)data;
   (void)conn;

@@ -939,11 +939,6 @@ struct connectdata {
   struct Curl_addrinfo *ip_addr;
   struct Curl_addrinfo *tempaddr[2]; /* for happy eyeballs */
 
-  /* 'ip_addr_str' is the ip_addr data as a human readable string.
-     It remains available as long as the connection does, which is longer than
-     the ip_addr itself. */
-  char ip_addr_str[MAX_IPADR_LEN];
-
   unsigned int scope_id;  /* Scope id for IPv6 */
 
   enum {
