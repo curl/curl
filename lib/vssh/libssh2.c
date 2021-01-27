@@ -3173,7 +3173,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
 #endif /* HAVE_LIBSSH2_KNOWNHOST_API */
 
 #ifdef CURL_LIBSSH2_DEBUG
-  libssh2_trace(ssh->ssh_session, ~0);
+  libssh2_trace(sshc->ssh_session, ~0);
   infof(data, "SSH socket: %d\n", (int)sock);
 #endif /* CURL_LIBSSH2_DEBUG */
 
