@@ -2741,7 +2741,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       }
       else if(ftpc->count3 < 1) {
         ftpc->count3++;
-        ftpc->count1 += ftpc->count2; /* get next attempt */
+        ftpc->count1 += (signed char)ftpc->count2; /* get next attempt */
         result = Curl_pp_sendf(data, &ftpc->pp, "AUTH %s",
                                ftpauth[ftpc->count1]);
         /* remain in this same state */
