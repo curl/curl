@@ -744,7 +744,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if(data->set.httpversion == CURL_HTTP_VERSION_1_0) {
     if(HYPERE_OK != hyper_request_set_version(req,
                                               HYPER_HTTP_VERSION_1_0)) {
-      failf(data, "error settting HTTP version");
+      failf(data, "error setting HTTP version");
       goto error;
     }
   }
