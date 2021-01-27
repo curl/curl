@@ -73,7 +73,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   struct connectdata *conn = data->conn;
   size_t len;
   const char *tmp0;
-  char *tmp1;
+  const char *tmp1;
   char *provider0_low = NULL;
   char *provider0_up = NULL;
   char *provider1_low = NULL;
