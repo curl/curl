@@ -43,7 +43,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define PROVIDER_MAX_L 16
+#define PROVIDER_MAX_L 32
 
 #define HMAC_SHA256(k, kl, d, dl, o)        \
   do {                                      \
