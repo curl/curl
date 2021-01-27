@@ -305,9 +305,10 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                 strlen(canonical_request));
   sha256_to_hex(sha_hex, sha_hash, sizeof(sha_hex));
 
-/* Google allow to use rsa key instead of HMAC, so this code might change
- * In the furure, but for now we support only HMAC version
- */
+  /*
+   * Google allow to use rsa key instead of HMAC, so this code might change
+   * In the furure, but for now we support only HMAC version
+   */
   str_to_sign = curl_maprintf("%s4-HMAC-SHA256\n" /* Algorithm */
                               "%s\n" /* RequestDateTime */
                               "%s\n" /* CredentialScope */
