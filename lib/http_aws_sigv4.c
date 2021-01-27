@@ -339,17 +339,17 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   sha256_to_hex(sha_hex, tmp_sign0, sizeof(sha_hex));
 
   auth_headers = curl_maprintf("Authorization: %s4-HMAC-SHA256 "
-                              "Credential=%s/%s, "
-                              "SignedHeaders=%s, "
-                              "Signature=%s\r\n"
-                              "X-%s-Date: %s\r\n",
-                              provider0_up,
-                              user,
-                              credential_scope,
-                              signed_headers,
-                              sha_hex,
-                              provider1_mid,
-                              timestamp);
+                               "Credential=%s/%s, "
+                               "SignedHeaders=%s, "
+                               "Signature=%s\r\n"
+                               "X-%s-Date: %s\r\n",
+                               provider0_up,
+                               user,
+                               credential_scope,
+                               signed_headers,
+                               sha_hex,
+                               provider1_mid,
+                               timestamp);
   if(!auth_headers) {
     goto fail;
   }
