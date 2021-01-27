@@ -125,7 +125,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   tmp0 = data->set.str[STRING_AWS_SIGV4] ?
     data->set.str[STRING_AWS_SIGV4] : "aws:amz";
   tmp1 = strchr(tmp0, ':');
-  len = tmp1 ? tmp1 - tmp0 : strlen(tmp0);
+  len = tmp1 ? (size_t)(tmp1 - tmp0) : strlen(tmp0);
   if(len > PROVIDER_MAX_L || len < 1) {
     infof(data, "wrong provider1 argument\n");
     ret = CURLE_BAD_FUNCTION_ARGUMENT;
@@ -144,7 +144,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   if(tmp1) {
     tmp0 = tmp1 + 1;
     tmp1 = strchr(tmp0, ':');
-    len = tmp1 ? tmp1 - tmp0 : strlen(tmp0);
+    len = tmp1 ? (size_t)(tmp1 - tmp0) : strlen(tmp0);
     if(len > PROVIDER_MAX_L || len < 1) {
       infof(data, "wrong provider2 argument\n");
       ret = CURLE_BAD_FUNCTION_ARGUMENT;
@@ -164,7 +164,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     if(tmp1) {
       tmp0 = tmp1 + 1;
       tmp1 = strchr(tmp0, ':');
-      len = tmp1 ? tmp1 - tmp0 : strlen(tmp0);
+      len = tmp1 ? (size_t)(tmp1 - tmp0) : strlen(tmp0);
       region = strndup(tmp0, len);
       if(!region) {
         goto fail;
