@@ -40,3 +40,24 @@ char *strdup(const char *str)
   return newstr;
 }
 #endif
+
+#ifndef HAVE_STRNDUP
+char *strndup(const char *str, size_t maxlen)
+{
+  size_t len;
+  char *newstr;
+
+  if(!str)
+    return (char *)NULL;
+
+  len = strnlen(maxlen);
+
+  newstr = malloc(len + 1);
+  if(!newstr)
+    return (char *)NULL;
+
+  memcpy(newstr, str, len);
+  newstr[len] = '\0';
+  return newstr;
+}
+#endif

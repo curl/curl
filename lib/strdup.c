@@ -50,6 +50,27 @@ char *curlx_strdup(const char *str)
 }
 #endif
 
+#ifndef HAVE_STRNDUP
+char *curlx_strndup(const char *str, size_t maxlen)
+{
+  size_t len;
+  char *newstr;
+
+  if(!str)
+    return (char *)NULL;
+
+  len = strnlen(maxlen);
+
+  newstr = malloc(len + 1);
+  if(!newstr)
+    return (char *)NULL;
+
+  memcpy(newstr, str, len);
+  newstr[len] = '\0';
+  return newstr;
+}
+#endif
+
 /***************************************************************************
  *
  * Curl_memdup(source, length)
