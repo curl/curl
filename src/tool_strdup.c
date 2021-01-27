@@ -50,7 +50,7 @@ char *strndup(const char *str, size_t maxlen)
   if(!str)
     return (char *)NULL;
 
-  len = strnlen(maxlen);
+  len = strnlen(str, maxlen);
 
   newstr = malloc(len + 1);
   if(!newstr)
