@@ -103,14 +103,6 @@ static long          init_flags;
 #define system_strdup strdup
 #endif
 
-#if defined(_WIN32_WCE)
-#define system_strndup curlx_strndup
-#elif !defined(HAVE_STRNDUP)
-#define system_strndup curlx_strndup
-#else
-#define system_strndup strndup
-#endif
-
 #if defined(_MSC_VER) && defined(_DLL) && !defined(__POCC__)
 #  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
 #endif

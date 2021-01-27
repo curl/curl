@@ -165,10 +165,12 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       tmp0 = tmp1 + 1;
       tmp1 = strchr(tmp0, ':');
       len = tmp1 ? (size_t)(tmp1 - tmp0) : strlen(tmp0);
-      region = strndup(tmp0, len);
+      region = malloc(len + 1);
       if(!region) {
         goto fail;
       }
+      (void)memcpy(region, tmp0, len);
+      region[len] = '\0';
 
       if(tmp1) {
         tmp0 = tmp1 + 1;
@@ -180,11 +182,15 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     }
   }
   else {
-    provider1_low = strndup(provider0_low, len);
-    provider1_mid = strndup(provider0_low, len);
+    provider1_low = malloc(len + 1);
+    provider1_mid = malloc(len + 1);
     if(!provider1_low || !provider1_mid) {
       goto fail;
     }
+    (void)memcpy(provider1_low, provider0_low, len);
+    provider1_low[len] = '\0';
+    (void)memcpy(provider1_mid, provider0_low, len);
+    provider1_mid[len] = '\0';
     provider1_mid[0] = Curl_raw_toupper(provider1_mid[0]);
   }
 
@@ -196,10 +202,13 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       ret = CURLE_URL_MALFORMAT;
       goto fail;
     }
-    service = strndup(tmp0, tmp1 - tmp0);
+    len = tmp1 - tmp0;
+    service = malloc(len + 1);
     if(!service) {
       goto fail;
     }
+    (void)memcpy(service, tmp0, len);
+    service[len] = '\0';
 
     if(!region) {
       tmp0 = tmp1 + 1;
@@ -209,10 +218,13 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
         ret = CURLE_URL_MALFORMAT;
         goto fail;
       }
-      region = strndup(tmp0, tmp1 - tmp0);
+      len = tmp1 - tmp0;
+      region = malloc(len + 1);
       if(!region) {
         goto fail;
       }
+      (void)memcpy(region, tmp0, len);
+      region[len] = '\0';
     }
   }
 
@@ -232,7 +244,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   if(!strftime(timestamp, sizeof(timestamp), "%Y%m%dT%H%M%SZ", &tm)) {
     goto fail;
   }
-  memcpy(date, timestamp, sizeof(date));
+  (void)memcpy(date, timestamp, sizeof(date));
   date[sizeof(date) - 1] = 0;
 
   if(content_type) {
