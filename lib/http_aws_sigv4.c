@@ -126,7 +126,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   tmp1 = strchr(tmp0, ':');
   len = tmp1 ? (size_t)(tmp1 - tmp0) : strlen(tmp0);
   if(len < 1) {
-    infof(data, "wrong provider1 argument\n");
+    infof(data, "first provider can't be empty\n");
     ret = CURLE_BAD_FUNCTION_ARGUMENT;
     goto fail;
   }
@@ -145,7 +145,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     tmp1 = strchr(tmp0, ':');
     len = tmp1 ? (size_t)(tmp1 - tmp0) : strlen(tmp0);
     if(len < 1) {
-      infof(data, "wrong provider2 argument\n");
+      infof(data, "second provider can't be empty\n");
       ret = CURLE_BAD_FUNCTION_ARGUMENT;
       goto fail;
     }
@@ -165,7 +165,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       tmp1 = strchr(tmp0, ':');
       len = tmp1 ? (size_t)(tmp1 - tmp0) : strlen(tmp0);
       if(len < 1) {
-        infof(data, "wrong region argument\n");
+        infof(data, "region can't be empty\n");
         ret = CURLE_BAD_FUNCTION_ARGUMENT;
         goto fail;
       }
@@ -182,7 +182,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
           goto fail;
         }
         if(strlen(service) < 1) {
-          infof(data, "wrong service argument\n");
+          infof(data, "service can't be empty\n");
           ret = CURLE_BAD_FUNCTION_ARGUMENT;
           goto fail;
         }
@@ -203,7 +203,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     tmp1 = strchr(tmp0, '.');
     len = tmp1 - tmp0;
     if(!tmp1 || len < 1) {
-      infof(data, "there's no service in params or URL\n");
+      infof(data, "service missing in parameters or hostname\n");
       ret = CURLE_URL_MALFORMAT;
       goto fail;
     }
@@ -218,7 +218,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       tmp1 = strchr(tmp0, '.');
       len = tmp1 - tmp0;
       if(!tmp1 || len < 1) {
-        infof(data, "there's no region in params or URL\n");
+        infof(data, "region missing in parameters or hostname\n");
         ret = CURLE_URL_MALFORMAT;
         goto fail;
       }
