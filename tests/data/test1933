@@ -40,7 +40,7 @@ crypto
 </features>
 
 <name>
-HTTP AWS_SIGV4
+HTTP AWS_SIGV4 with one provider and auth cred via URL
 </name>
 <tool>
 lib1933

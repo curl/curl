@@ -40,7 +40,7 @@ crypto
 </features>
 
 <name>
-HTTP AWS_SIGV4
+HTTP AWS_SIGV4 with two providers,region and service
 </name>
 <tool>
 lib1936
