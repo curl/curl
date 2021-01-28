@@ -164,6 +164,11 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       tmp0 = tmp1 + 1;
       tmp1 = strchr(tmp0, ':');
       len = tmp1 ? (size_t)(tmp1 - tmp0) : strlen(tmp0);
+      if(len < 1) {
+        infof(data, "wrong region argument\n");
+        ret = CURLE_BAD_FUNCTION_ARGUMENT;
+        goto fail;
+      }
       region = Curl_memdup(tmp0, len + 1);
       if(!region) {
         goto fail;
@@ -174,6 +179,11 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
         tmp0 = tmp1 + 1;
         service = strdup(tmp0);
         if(!service) {
+          goto fail;
+        }
+        if(strlen(service) < 1) {
+          infof(data, "wrong service argument\n");
+          ret = CURLE_BAD_FUNCTION_ARGUMENT;
           goto fail;
         }
       }
@@ -191,12 +201,12 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   if(!service) {
     tmp0 = hostname;
     tmp1 = strchr(tmp0, '.');
-    if(!tmp1) {
+    len = tmp1 - tmp0;
+    if(!tmp1 || len < 1) {
       infof(data, "there's no service in params or URL\n");
       ret = CURLE_URL_MALFORMAT;
       goto fail;
     }
-    len = tmp1 - tmp0;
     service = Curl_memdup(tmp0, len + 1);
     if(!service) {
       goto fail;
@@ -206,12 +216,12 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     if(!region) {
       tmp0 = tmp1 + 1;
       tmp1 = strchr(tmp0, '.');
-      if(!tmp1) {
+      len = tmp1 - tmp0;
+      if(!tmp1 || len < 1) {
         infof(data, "there's no region in params or URL\n");
         ret = CURLE_URL_MALFORMAT;
         goto fail;
       }
-      len = tmp1 - tmp0;
       region = Curl_memdup(tmp0, len + 1);
       if(!region) {
         goto fail;
