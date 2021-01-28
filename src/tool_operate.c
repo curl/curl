@@ -625,9 +625,6 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
        newline here */
     fputs("\n", per->progressbar.out);
 
-  if(config->writeout)
-    ourWriteOut(per->curl, per, config->writeout, result);
-
   /* Close the outs file */
   if(outs->fopened && outs->stream) {
     int rc = fclose(outs->stream);
@@ -646,6 +643,10 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     curl_easy_getinfo(curl, CURLINFO_FILETIME_T, &filetime);
     setfiletime(filetime, outs->filename, global);
   }
+
+  /* Write the --write-out data before cleanup but after result is final */
+  if(config->writeout)
+    ourWriteOut(config->writeout, per, result);
 
   /* Close function-local opened file descriptors */
   if(per->heads.fopened && per->heads.stream)
