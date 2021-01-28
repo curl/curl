@@ -137,6 +137,9 @@ problems may have been fixed or changed somewhat since this was written!
  15.9 cert paths autodetected when cross-compiling
  15.10 libspsl is not supported
 
+ 16. Applications
+ 16.1 pulseUI VPN client
+
 ==============================================================================
 
 1. HTTP
@@ -952,3 +955,18 @@ problems may have been fixed or changed somewhat since this was written!
 15.10 libspsl is not supported
 
  See https://github.com/curl/curl/issues/6214
+
+16. Applications
+
+16.1 pulseUI VPN client
+
+ This application crashes at startup with libcurl 7.74.0 (and presumably later
+ versions too) after we cleaned up OpenSSL initialization. Since this is the
+ only known application to do this, we suspect it is related to something they
+ are doing in their setup that isn't kosher. We have not been able to get in
+ contact with them nor got any technical details to help us debug this
+ further.
+
+ See
+ https://community.pulsesecure.net/t5/Pulse-Desktop-Clients/Linux-Pulse-Client-does-not-work-with-curl-7-74/m-p/44378
+ and https://github.com/curl/curl/issues/6306
