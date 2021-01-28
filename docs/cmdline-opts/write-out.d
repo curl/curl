@@ -33,7 +33,7 @@ The Content-Type of the requested document, if there was any.
 The error message. (Added in 7.75.0)
 .TP
 .B exitcode
-The numerical exitcode. (Added in 7.75.0)
+The numerical exitcode of the transfer. (Added in 7.75.0)
 .TP
 .B filename_effective
 The ultimate filename that curl writes out to. This is only meaningful if curl
