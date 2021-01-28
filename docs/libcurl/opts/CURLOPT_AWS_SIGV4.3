@@ -30,7 +30,7 @@ CURLOPT_AWS_SIGV4 \- V4 signature
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_AWS_SIGV4, char *param);
 .fi
 .SH DESCRIPTION
-Provides AWS V4 signature authentication on HTTPS header.
+Provides AWS V4 signature authentication on HTTP(S) header.
 .PP
 Pass a char * that is the collection of specific arguments are used for
 creating outgoing authentication headers.
@@ -41,10 +41,10 @@ The providers arguments are used for generating some authentication parameters
 such as "Algorithm", "date", "request type" and "signed headers".
 .IP region
 The argument is a geographic area of a resources collection.
-It uses from URL endpoint if omitted.
+It is extracted from the host name specified in the URL if omitted.
 .IP service
 The argument is a function provided by a cloud.
-It uses from URL endpoint if omitted.
+It is extracted from the host name specified in the URL if omitted.
 .PP
 NOTE: This call set \fICURLOPT_HTTPAUTH(3)\fP to CURLAUTH_AWS_SIGV4.
 Calling \fICURLOPT_HTTPAUTH(3)\fP with CURLAUTH_AWS_SIGV4 is the same
