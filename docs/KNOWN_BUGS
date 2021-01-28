@@ -112,6 +112,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.11 A shared connection cache is not thread-safe
  11.12 'no_proxy' string-matches IPv6 numerical addresses
  11.13 wakeup socket disconnect causes havoc
+ 11.14 Multi perform hangs waiting for threaded resolver
 
  12. LDAP
  12.1 OpenLDAP hangs after returning results
@@ -843,6 +844,15 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/6132 and
  https://github.com/curl/curl/pull/6133
+
+11.14 Multi perform hangs waiting for threaded resolver
+
+ If a threaded resolver takes a long time to complete, libcurl can be blocked
+ waiting for it for a longer time than expected - and longer than the set
+ timeouts.
+
+ See https://github.com/curl/curl/issues/2975 and
+ https://github.com/curl/curl/issues/4852
 
 12. LDAP
 
