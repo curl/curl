@@ -246,7 +246,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   if(!strftime(timestamp, sizeof(timestamp), "%Y%m%dT%H%M%SZ", &tm)) {
     goto fail;
   }
-  (void)memcpy(date, timestamp, sizeof(date));
+  memcpy(date, timestamp, sizeof(date));
   date[sizeof(date) - 1] = 0;
 
   if(content_type) {
