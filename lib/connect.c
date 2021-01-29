@@ -737,8 +737,9 @@ void Curl_conninfo_local(struct Curl_easy *data, curl_socket_t sockfd,
   }
 #else
   (void)data;
-  (void)conn;
   (void)sockfd;
+  (void)local_ip;
+  (void)local_port;
 #endif
 }
 
