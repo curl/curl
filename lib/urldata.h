@@ -1335,7 +1335,8 @@ struct UrlState {
                        strdup() data.
                     */
   int first_remote_port; /* remote port of the first (not followed) request */
-  struct Curl_ssl_session *session; /* array of 'max_ssl_sessions' size */
+  struct Curl_ssl_session *session; /* array of 'session_size' size */
+  size_t session_size;              /* size of the array 'session' */
   long sessionage;                  /* number of the most recent session */
   struct tempbuf tempwrite[3]; /* BOTH, HEADER, BODY */
   unsigned int tempcount; /* number of entries in use in tempwrite, 0 - 3 */

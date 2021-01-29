@@ -2155,8 +2155,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         data->cookies = NULL;
 #endif
 
-      if(data->share->sslsession == data->state.session)
+      if(data->share->sslsession == data->state.session) {
+        data->state.session_size = 0;
         data->state.session = NULL;
+      }
 
 #ifdef USE_LIBPSL
       if(data->psl == &data->share->psl)
@@ -2192,7 +2194,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       }
 #endif   /* CURL_DISABLE_HTTP */
       if(data->share->sslsession) {
-        data->set.general_ssl.max_ssl_sessions = data->share->max_ssl_sessions;
+        data->state.session_size = data->share->max_ssl_sessions;
         data->state.session = data->share->sslsession;
       }
 #ifdef USE_LIBPSL
