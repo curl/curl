@@ -435,9 +435,10 @@ CURLcode Curl_readrewind(struct Curl_easy *data)
     ; /* do nothing */
   else if(data->state.httpreq == HTTPREQ_POST_MIME ||
           data->state.httpreq == HTTPREQ_POST_FORM) {
-    if(Curl_mime_rewind(mimepart) != CURLE_OK) {
+    CURLcode result = Curl_mime_rewind(mimepart);
+    if(result) {
       failf(data, "Cannot rewind mime/post data");
-      return CURLE_SEND_FAIL_REWIND;
+      return result;
     }
   }
   else {
