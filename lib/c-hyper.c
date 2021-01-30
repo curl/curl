@@ -64,7 +64,7 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
   struct connectdata *conn = data->conn;
   CURLcode result;
   ssize_t nread;
-
+  DEBUGASSERT(conn);
   (void)ctx;
 
   result = Curl_read(data, conn->sockfd, (char *)buf, buflen, &nread);
