@@ -1036,16 +1036,6 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
   return result;
 }
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
-CURLcode Curl_ssl_md5sum(unsigned char *tmp, /* input */
-                         size_t tmplen,
-                         unsigned char *md5sum, /* output */
-                         size_t md5len)
-{
-  return Curl_ssl->md5sum(tmp, tmplen, md5sum, md5len);
-}
-#endif
-
 /*
  * Check whether the SSL backend supports the status_request extension.
  */
@@ -1156,35 +1146,6 @@ bool Curl_none_false_start(void)
   return FALSE;
 }
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
-CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
-                          unsigned char *md5sum, size_t md5len UNUSED_PARAM)
-{
-  struct MD5_context *MD5pw;
-
-  (void)md5len;
-
-  MD5pw = Curl_MD5_init(Curl_DIGEST_MD5);
-  if(!MD5pw)
-    return CURLE_OUT_OF_MEMORY;
-  Curl_MD5_update(MD5pw, input, curlx_uztoui(inputlen));
-  Curl_MD5_final(MD5pw, md5sum);
-  return CURLE_OK;
-}
-#else
-CURLcode Curl_none_md5sum(unsigned char *input UNUSED_PARAM,
-                          size_t inputlen UNUSED_PARAM,
-                          unsigned char *md5sum UNUSED_PARAM,
-                          size_t md5len UNUSED_PARAM)
-{
-  (void)input;
-  (void)inputlen;
-  (void)md5sum;
-  (void)md5len;
-  return CURLE_NOT_BUILT_IN;
-}
-#endif
-
 static int multissl_init(void)
 {
   if(multissl_setup(NULL))
@@ -1248,7 +1209,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_none_set_engine_default,      /* set_engine_default */
   Curl_none_engines_list,            /* engines_list */
   Curl_none_false_start,             /* false_start */
-  Curl_none_md5sum,                  /* md5sum */
   NULL                               /* sha256sum */
 };
 

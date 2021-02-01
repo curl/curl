@@ -1108,7 +1108,6 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   Curl_none_set_engine_default,     /* set_engine_default */
   Curl_none_engines_list,           /* engines_list */
   Curl_none_false_start,            /* false_start */
-  Curl_none_md5sum,                 /* md5sum */
   mbedtls_sha256sum                 /* sha256sum */
 };
 
