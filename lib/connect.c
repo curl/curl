@@ -611,7 +611,7 @@ static CURLcode trynextip(struct Curl_easy *data,
 /* Copies connection info into the transfer handle to make it available when
    the transfer handle is no longer associated with the connection. */
 void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
-                          char *local_ip, long local_port)
+                          char *local_ip, int local_port)
 {
   memcpy(data->info.conn_primary_ip, conn->primary_ip, MAX_IPADR_LEN);
   if(local_ip && local_ip[0])
@@ -627,7 +627,7 @@ void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
 /* retrieves ip address and port from a sockaddr structure.
    note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
 bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
-                      char *addr, long *port)
+                      char *addr, int *port)
 {
   struct sockaddr_in *si = NULL;
 #ifdef ENABLE_IPV6
@@ -690,7 +690,7 @@ void Curl_conninfo_remote(struct Curl_easy *data,
   char buffer[STRERROR_LEN];
   struct Curl_sockaddr_storage ssrem;
   curl_socklen_t plen;
-  long port;
+  int port;
   plen = sizeof(struct Curl_sockaddr_storage);
   memset(&ssrem, 0, sizeof(ssrem));
   if(getpeername(sockfd, (struct sockaddr*) &ssrem, &plen)) {
@@ -715,7 +715,7 @@ void Curl_conninfo_remote(struct Curl_easy *data,
 /* retrieves the start/end point information of a socket of an established
    connection */
 void Curl_conninfo_local(struct Curl_easy *data, curl_socket_t sockfd,
-                         char *local_ip, long *local_port)
+                         char *local_ip, int *local_port)
 {
 #ifdef HAVE_GETSOCKNAME
   char buffer[STRERROR_LEN];
@@ -752,7 +752,7 @@ void Curl_updateconninfo(struct Curl_easy *data, struct connectdata *conn,
      ip address and port number whenever an outgoing connection is
      **established** from the primary socket to a remote address. */
   char local_ip[MAX_IPADR_LEN] = "";
-  long local_port = -1;
+  int local_port = -1;
 
   if(conn->transport == TRNSPRT_TCP) {
     if(!conn->bits.reuse && !conn->bits.tcp_fastopen) {
@@ -1158,7 +1158,7 @@ static CURLcode singleipconnect(struct Curl_easy *data,
   curl_socket_t sockfd;
   CURLcode result;
   char ipaddress[MAX_IPADR_LEN];
-  long port;
+  int port;
   bool is_tcp;
 #ifdef TCP_FASTOPEN_CONNECT
   int optval = 1;
@@ -1180,7 +1180,7 @@ static CURLcode singleipconnect(struct Curl_easy *data,
     Curl_closesocket(data, conn, sockfd);
     return CURLE_OK;
   }
-  infof(data, "  Trying %s:%ld...\n", ipaddress, port);
+  infof(data, "  Trying %s:%d...\n", ipaddress, port);
 
 #ifdef ENABLE_IPV6
   is_tcp = (addr.family == AF_INET || addr.family == AF_INET6) &&
