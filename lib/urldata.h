@@ -1157,9 +1157,9 @@ struct PureInfo {
      reused, in the connection cache. */
 
   char conn_primary_ip[MAX_IPADR_LEN];
-  long conn_primary_port;
+  int conn_primary_port;
   char conn_local_ip[MAX_IPADR_LEN];
-  long conn_local_port;
+  int conn_local_port;
   const char *conn_scheme;
   unsigned int conn_protocol;
   struct curl_certinfo certs; /* info about the certs, only populated in

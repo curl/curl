@@ -758,7 +758,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   ngtcp2_path path; /* TODO: this must be initialized properly */
   struct quicsocket *qs = &conn->hequic[sockindex];
   char ipbuf[40];
-  long port;
+  int port;
   int qfd;
 
   if(qs->conn)
@@ -773,7 +773,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
-  infof(data, "Connect socket %d over QUIC to %s:%ld\n",
+  infof(data, "Connect socket %d over QUIC to %s:%d\n",
         sockfd, ipbuf, port);
 
   qs->version = NGTCP2_PROTO_VER_MAX;

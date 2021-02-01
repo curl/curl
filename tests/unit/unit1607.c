@@ -145,7 +145,7 @@ UNITTEST_START
     addr = dns ? dns->addr : NULL;
 
     for(j = 0; j < addressnum; ++j) {
-      long port = 0;
+      int port = 0;
       char ipaddress[MAX_IPADR_LEN] = {0};
 
       if(!addr && !tests[i].address[j])

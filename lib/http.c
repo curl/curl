@@ -1500,7 +1500,7 @@ static CURLcode add_haproxy_protocol_header(struct Curl_easy *data)
 
   msnprintf(proxy_header,
             sizeof(proxy_header),
-            "PROXY %s %s %s %li %li\r\n",
+            "PROXY %s %s %s %i %i\r\n",
             tcp_version,
             data->info.conn_local_ip,
             data->info.conn_primary_ip,

@@ -3367,7 +3367,7 @@ static void reuse_conn(struct Curl_easy *data,
      ip address and port number whenever an outgoing connection is
      **established** from the primary socket to a remote address. */
   char local_ip[MAX_IPADR_LEN] = "";
-  long local_port = -1;
+  int local_port = -1;
 #ifndef CURL_DISABLE_PROXY
   Curl_free_idnconverted_hostname(&old_conn->http_proxy.host);
   Curl_free_idnconverted_hostname(&old_conn->socks_proxy.host);
