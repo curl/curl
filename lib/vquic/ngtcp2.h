@@ -48,6 +48,7 @@ struct quicsocket {
   ngtcp2_cid scid;
   uint32_t version;
   ngtcp2_settings settings;
+  ngtcp2_transport_params transport_params;
 #ifdef USE_OPENSSL
   SSL_CTX *sslctx;
   SSL *ssl;
