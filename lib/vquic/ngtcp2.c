@@ -170,20 +170,22 @@ static void quic_settings(struct quicsocket *qs,
                           uint64_t stream_buffer_size)
 {
   ngtcp2_settings *s = &qs->settings;
+  ngtcp2_transport_params *t = &qs->transport_params;
   ngtcp2_settings_default(s);
+  ngtcp2_transport_params_default(t);
 #ifdef DEBUG_NGTCP2
   s->log_printf = quic_printf;
 #else
   s->log_printf = NULL;
 #endif
   s->initial_ts = timestamp();
-  s->transport_params.initial_max_stream_data_bidi_local = stream_buffer_size;
-  s->transport_params.initial_max_stream_data_bidi_remote = QUIC_MAX_STREAMS;
-  s->transport_params.initial_max_stream_data_uni = QUIC_MAX_STREAMS;
-  s->transport_params.initial_max_data = QUIC_MAX_DATA;
-  s->transport_params.initial_max_streams_bidi = 1;
-  s->transport_params.initial_max_streams_uni = 3;
-  s->transport_params.max_idle_timeout = QUIC_IDLE_TIMEOUT;
+  t->initial_max_stream_data_bidi_local = stream_buffer_size;
+  t->initial_max_stream_data_bidi_remote = QUIC_MAX_STREAMS;
+  t->initial_max_stream_data_uni = QUIC_MAX_STREAMS;
+  t->initial_max_data = QUIC_MAX_DATA;
+  t->initial_max_streams_bidi = 1;
+  t->initial_max_streams_uni = 3;
+  t->max_idle_timeout = QUIC_IDLE_TIMEOUT;
   if(qs->qlogfd != -1) {
     s->qlog.write = qlog_callback;
   }
@@ -810,7 +812,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
 
   rc = ngtcp2_conn_client_new(&qs->qconn, &qs->dcid, &qs->scid, &path,
                               NGTCP2_PROTO_VER_MIN, &ng_callbacks,
-                              &qs->settings, NULL, qs);
+                              &qs->settings, &qs->transport_params, NULL, qs);
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
 
