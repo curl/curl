@@ -249,7 +249,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
 
   /* store the used address as a string */
   if(!Curl_addr2string((struct sockaddr*)addr, addrlen,
-                       conn->primary_ip, &conn->primary_port)) {
+                       conn->primary_ip, &conn->port)) {
     char buffer[STRERROR_LEN];
     failf(data, "ssrem inet_ntop() failed with errno %d: %s",
           SOCKERRNO, Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
