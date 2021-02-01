@@ -4413,25 +4413,6 @@ static CURLcode ossl_random(struct Curl_easy *data,
   return (rc == 1 ? CURLE_OK : CURLE_FAILED_INIT);
 }
 
-static CURLcode ossl_md5sum(unsigned char *tmp, /* input */
-                            size_t tmplen,
-                            unsigned char *md5sum /* output */,
-                            size_t unused)
-{
-  EVP_MD_CTX *mdctx;
-  unsigned int len = 0;
-  (void) unused;
-
-  mdctx = EVP_MD_CTX_create();
-  if(!mdctx)
-    return CURLE_OUT_OF_MEMORY;
-  EVP_DigestInit(mdctx, EVP_md5());
-  EVP_DigestUpdate(mdctx, tmp, tmplen);
-  EVP_DigestFinal_ex(mdctx, md5sum, &len);
-  EVP_MD_CTX_destroy(mdctx);
-  return CURLE_OK;
-}
-
 #if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
 static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
                                size_t tmplen,
@@ -4504,7 +4485,6 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_set_engine_default,  /* set_engine_default */
   ossl_engines_list,        /* engines_list */
   Curl_none_false_start,    /* false_start */
-  ossl_md5sum,              /* md5sum */
 #if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
   ossl_sha256sum            /* sha256sum */
 #else

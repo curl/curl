@@ -827,19 +827,6 @@ static void bearssl_session_free(void *ptr)
   free(ptr);
 }
 
-static CURLcode bearssl_md5sum(unsigned char *input,
-                               size_t inputlen,
-                               unsigned char *md5sum,
-                               size_t md5len UNUSED_PARAM)
-{
-  br_md5_context ctx;
-
-  br_md5_init(&ctx);
-  br_md5_update(&ctx, input, inputlen);
-  br_md5_out(&ctx, md5sum);
-  return CURLE_OK;
-}
-
 static CURLcode bearssl_sha256sum(const unsigned char *input,
                                   size_t inputlen,
                                   unsigned char *sha256sum,
@@ -876,7 +863,6 @@ const struct Curl_ssl Curl_ssl_bearssl = {
   Curl_none_set_engine_default,
   Curl_none_engines_list,
   Curl_none_false_start,
-  bearssl_md5sum,
   bearssl_sha256sum
 };
 

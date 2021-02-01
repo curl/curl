@@ -3132,16 +3132,6 @@ static CURLcode sectransp_random(struct Curl_easy *data UNUSED_PARAM,
   return CURLE_OK;
 }
 
-static CURLcode sectransp_md5sum(unsigned char *tmp, /* input */
-                                 size_t tmplen,
-                                 unsigned char *md5sum, /* output */
-                                 size_t md5len)
-{
-  (void)md5len;
-  (void)CC_MD5(tmp, (CC_LONG)tmplen, md5sum);
-  return CURLE_OK;
-}
-
 static CURLcode sectransp_sha256sum(const unsigned char *tmp, /* input */
                                     size_t tmplen,
                                     unsigned char *sha256sum, /* output */
@@ -3319,7 +3309,6 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   Curl_none_set_engine_default,       /* set_engine_default */
   Curl_none_engines_list,             /* engines_list */
   sectransp_false_start,              /* false_start */
-  sectransp_md5sum,                   /* md5sum */
   sectransp_sha256sum                 /* sha256sum */
 };
 

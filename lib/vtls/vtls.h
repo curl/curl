@@ -73,9 +73,6 @@ struct Curl_ssl {
   struct curl_slist *(*engines_list)(struct Curl_easy *data);
 
   bool (*false_start)(void);
-
-  CURLcode (*md5sum)(unsigned char *input, size_t inputlen,
-                     unsigned char *md5sum, size_t md5sumlen);
   CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
 };
@@ -100,8 +97,6 @@ CURLcode Curl_none_set_engine_default(struct Curl_easy *data);
 struct curl_slist *Curl_none_engines_list(struct Curl_easy *data);
 bool Curl_none_false_start(void);
 bool Curl_ssl_tls13_ciphersuites(void);
-CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
-                          unsigned char *md5sum, size_t md5len);
 
 #include "openssl.h"        /* OpenSSL versions */
 #include "gtls.h"           /* GnuTLS versions */
@@ -258,10 +253,6 @@ void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid);
 /* get N random bytes into the buffer */
 CURLcode Curl_ssl_random(struct Curl_easy *data, unsigned char *buffer,
                          size_t length);
-CURLcode Curl_ssl_md5sum(unsigned char *tmp, /* input */
-                         size_t tmplen,
-                         unsigned char *md5sum, /* output */
-                         size_t md5len);
 /* Check pinned public key. */
 CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
                               const char *pinnedpubkey,

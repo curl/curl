@@ -2383,15 +2383,6 @@ static void schannel_checksum(const unsigned char *input,
     CryptReleaseContext(hProv, 0);
 }
 
-static CURLcode schannel_md5sum(unsigned char *input,
-                                size_t inputlen,
-                                unsigned char *md5sum,
-                                size_t md5len)
-{
-  schannel_checksum(input, inputlen, md5sum, md5len, PROV_RSA_FULL, CALG_MD5);
-  return CURLE_OK;
-}
-
 static CURLcode schannel_sha256sum(const unsigned char *input,
                                    size_t inputlen,
                                    unsigned char *sha256sum,
@@ -2435,7 +2426,6 @@ const struct Curl_ssl Curl_ssl_schannel = {
   Curl_none_set_engine_default,      /* set_engine_default */
   Curl_none_engines_list,            /* engines_list */
   Curl_none_false_start,             /* false_start */
-  schannel_md5sum,                   /* md5sum */
   schannel_sha256sum                 /* sha256sum */
 };
 

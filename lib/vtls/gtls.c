@@ -1618,26 +1618,6 @@ static CURLcode gtls_random(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode gtls_md5sum(unsigned char *tmp, /* input */
-                            size_t tmplen,
-                            unsigned char *md5sum, /* output */
-                            size_t md5len)
-{
-#if defined(USE_GNUTLS_NETTLE)
-  struct md5_ctx MD5pw;
-  md5_init(&MD5pw);
-  md5_update(&MD5pw, (unsigned int)tmplen, tmp);
-  md5_digest(&MD5pw, (unsigned int)md5len, md5sum);
-#elif defined(USE_GNUTLS)
-  gcry_md_hd_t MD5pw;
-  gcry_md_open(&MD5pw, GCRY_MD_MD5, 0);
-  gcry_md_write(MD5pw, tmp, tmplen);
-  memcpy(md5sum, gcry_md_read(MD5pw, 0), md5len);
-  gcry_md_close(MD5pw);
-#endif
-  return CURLE_OK;
-}
-
 static CURLcode gtls_sha256sum(const unsigned char *tmp, /* input */
                                size_t tmplen,
                                unsigned char *sha256sum, /* output */
@@ -1699,7 +1679,6 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   Curl_none_set_engine_default,  /* set_engine_default */
   Curl_none_engines_list,        /* engines_list */
   Curl_none_false_start,         /* false_start */
-  gtls_md5sum,                   /* md5sum */
   gtls_sha256sum                 /* sha256sum */
 };
 
