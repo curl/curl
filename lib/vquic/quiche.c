@@ -179,6 +179,8 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   CURLcode result;
   struct quicsocket *qs = &conn->hequic[sockindex];
   char *keylog_file = NULL;
+  char ipbuf[40];
+  long port;
 
 #ifdef DEBUG_QUICHE
   /* initialize debug log callback only once */
@@ -247,14 +249,17 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   if(result)
     return result;
 
-  /* store the used address as a string */
-  if(!Curl_addr2string((struct sockaddr*)addr, addrlen,
-                       conn->primary_ip, &conn->primary_port)) {
+  /* extract the used address as a string */
+  if(!Curl_addr2string((struct sockaddr*)addr, addrlen, ipbuf, &port)) {
     char buffer[STRERROR_LEN];
     failf(data, "ssrem inet_ntop() failed with errno %d: %s",
           SOCKERRNO, Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
+
+  infof(data, "Connect socket %d over QUIC to %s:%ld\n",
+        sockfd, ipbuf, port);
+
   Curl_persistconninfo(data, conn, NULL, -1);
 
   /* for connection reuse purposes: */
