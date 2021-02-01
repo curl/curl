@@ -253,10 +253,6 @@ void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid);
 /* get N random bytes into the buffer */
 CURLcode Curl_ssl_random(struct Curl_easy *data, unsigned char *buffer,
                          size_t length);
-CURLcode Curl_ssl_md5sum(unsigned char *tmp, /* input */
-                         size_t tmplen,
-                         unsigned char *md5sum, /* output */
-                         size_t md5len);
 /* Check pinned public key. */
 CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
                               const char *pinnedpubkey,
