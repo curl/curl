@@ -654,6 +654,7 @@ const struct Curl_ssl Curl_ssl_mesalink = {
   Curl_none_cert_status_request, /* cert_status_request */
   mesalink_connect,              /* connect */
   mesalink_connect_nonblocking,  /* connect_nonblocking */
+  Curl_ssl_getsock,              /* getsock */
   mesalink_get_internals,        /* get_internals */
   mesalink_close,                /* close_one */
   Curl_none_close_all,           /* close_all */

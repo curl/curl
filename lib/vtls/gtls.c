@@ -1671,6 +1671,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   gtls_cert_status_request,      /* cert_status_request */
   gtls_connect,                  /* connect */
   gtls_connect_nonblocking,      /* connect_nonblocking */
+  Curl_ssl_getsock,              /* getsock */
   gtls_get_internals,            /* get_internals */
   gtls_close,                    /* close_one */
   Curl_none_close_all,           /* close_all */

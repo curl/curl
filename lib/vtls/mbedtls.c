@@ -1100,6 +1100,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   Curl_none_cert_status_request,    /* cert_status_request */
   mbedtls_connect,                  /* connect */
   mbedtls_connect_nonblocking,      /* connect_nonblocking */
+  Curl_ssl_getsock,                 /* getsock */
   mbedtls_get_internals,            /* get_internals */
   mbedtls_close,                    /* close_one */
   mbedtls_close_all,                /* close_all */
