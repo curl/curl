@@ -66,6 +66,7 @@ CURL_EXTERN curl_version_info_data *curl_version_info(CURLversion);
 CURL_EXTERN const char *curl_easy_strerror(CURLcode);
 CURL_EXTERN const char *curl_share_strerror(CURLSHcode);
 CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
+CURL_EXTERN void curl_set_ossl_config(char *conf_file, char *appname);
 CURL_EXTERN CURL *curl_easy_init(void);
 CURL_EXTERN CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);
 CURL_EXTERN CURLcode curl_easy_perform(CURL *curl);
