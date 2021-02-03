@@ -62,6 +62,13 @@ struct Curl_ssl {
   CURLcode (*connect_nonblocking)(struct Curl_easy *data,
                                   struct connectdata *conn, int sockindex,
                                   bool *done);
+
+  /* If the SSL backend wants to read or write on this connection during a
+     handshake, set socks[0] to the connection's FIRSTSOCKET, and return
+     a bitmap indicating read or write with GETSOCK_WRITESOCK(0) or
+     GETSOCK_READSOCK(0). Otherwise return GETSOCK_BLANK. */
+  int (*getsock)(struct connectdata *conn, curl_socket_t *socks);
+
   void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
   void (*close_one)(struct Curl_easy *data, struct connectdata *conn,
                     int sockindex);
@@ -88,6 +95,8 @@ int Curl_none_shutdown(struct Curl_easy *data, struct connectdata *conn,
 int Curl_none_check_cxn(struct connectdata *conn);
 CURLcode Curl_none_random(struct Curl_easy *data, unsigned char *entropy,
                           size_t length);
+int Curl_none_getsock(struct connectdata *conn, curl_socket_t *socks);
+int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks);
 void Curl_none_close_all(struct Curl_easy *data);
 void Curl_none_session_free(void *ptr);
 bool Curl_none_data_pending(const struct connectdata *conn, int connindex);

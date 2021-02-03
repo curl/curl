@@ -855,6 +855,7 @@ const struct Curl_ssl Curl_ssl_bearssl = {
   Curl_none_cert_status_request,
   bearssl_connect,
   bearssl_connect_nonblocking,
+  Curl_ssl_getsock,
   bearssl_get_internals,
   bearssl_close,
   Curl_none_close_all,

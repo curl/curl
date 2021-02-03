@@ -2435,6 +2435,7 @@ const struct Curl_ssl Curl_ssl_nss = {
   nss_cert_status_request,      /* cert_status_request */
   nss_connect,                  /* connect */
   nss_connect_nonblocking,      /* connect_nonblocking */
+  Curl_ssl_getsock,             /* getsock */
   nss_get_internals,            /* get_internals */
   nss_close,                    /* close_one */
   Curl_none_close_all,          /* close_all */
