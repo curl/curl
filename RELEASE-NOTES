@@ -4,7 +4,7 @@ curl and libcurl 7.75.0
  Command line options:         237
  curl_easy_setopt() options:   285
  Public functions in libcurl:  85
- Contributors:                 2321
+ Contributors:                 2322
 
 This release includes the following changes:
 
@@ -115,6 +115,7 @@ This release includes the following bugfixes:
  o tool_operate: fix the suppression logic of some error messages [33]
  o tool_operate: spellfix a comment
  o tooĺ_writeout: fix the -w time output units [6]
+ o transfer: fix GCC 10 warning with flag '-Wint-in-bool-context' [79]
  o travis: build ngtcp2 --with-gnutls [72]
  o travis: limit the tests with quiche builds to HTTPS and FTPS only [44]
  o travis: restrict the openssl3 job to only run https and ftps tests [34]
@@ -125,6 +126,7 @@ This release includes the following bugfixes:
  o urldata: remove duplicate port number storage [98]
  o urldata: remove the duplicate 'ip_addr_str' field [100]
  o urldata: store ip version in a single byte [95]
+ o vtls: remove md5sum [69]
  o warnless: remove curlx_ultosi [108]
  o wolfssl: add SECURE_RENEGOTIATION support [63]
  o wolfssl: Support wolfSSL builds missing TLS 1.1 [37]
@@ -136,20 +138,20 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  0xflotus on github, Andrey Gursky, Bubu on github, Cherish98 on github,
-  Christoph M. Becker, Cory Benfield, Cristian Rodríguez, Dan Fandrich,
-  Daniel Stenberg, David Earl, Denis Laxalde, Dennis Clarke, Douglas R. Reno,
-  Earnestly on github, Emil Engler, Erik Olsson, Fabian Keil,
-  Flameborn on github, Ganesh Kamath, Gergely Nagy, Gisle Vanem,
+  0xflotus on github, Alessandro Ghedini, Andrey Gursky, Bubu on github,
+  Cherish98 on github, Christoph M. Becker, Cory Benfield, Cristian Rodríguez,
+  Dan Fandrich, Daniel Stenberg, David Earl, Denis Laxalde, Dennis Clarke,
+  Dmitry Wagin, Douglas R. Reno, Earnestly on github, Emil Engler, Erik Olsson,
+  Fabian Keil, Flameborn on github, Ganesh Kamath, Gergely Nagy, Gisle Vanem,
   Hans-Christian Noren Egtvedt, Harry Sintonen, Himanshu Gupta, Hongyi Zhao,
-  Ian Spence, Ikko Ashimine, Jeremy Thibault, Jon Rumsey, Jon Wilkes,
-  Julian Montes, Kevin Ushey, Marcel Raad, Matthias Gatto, Matt Holt,
-  Mike Gelfand, Mike Tzou, Nick Zitzmann, Olaf Hering, parazyd on github,
-  Patrick Monnerat, Paul Groke, Ray Satiro, Razvan Cojocaru, Rich Turner,
-  Sai Ram Kunala, Sean McArthur, Tatsuhiro Tsujikawa, Tomas Berger,
-  UrsusArctos on github, Viktor Szakats, William A Rowe Jr, XhmikosR on github,
-  不确定
-  (54 contributors)
+  Ian Spence, Ikko Ashimine, Jacob Hoffman-Andrews, Jeremy Thibault,
+  Jon Rumsey, Jon Wilkes, Julian Montes, Kevin Ushey, Marcel Raad,
+  Matthias Gatto, Matt Holt, Michał Antoniak, Mike Gelfand, Mike Tzou,
+  Nick Zitzmann, Olaf Hering, parazyd on github, Patrick Monnerat, Paul Groke,
+  Ray Satiro, Razvan Cojocaru, Rich Turner, Sai Ram Kunala, Sean McArthur,
+  Tatsuhiro Tsujikawa, Tomas Berger, UrsusArctos on github, Viktor Szakats,
+  William A. Rowe Jr, XhmikosR on github, 不确定
+  (58 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -223,6 +225,7 @@ References to bug reports and discussions on issues:
  [66] = https://curl.se/bug/?i=6443
  [67] = https://curl.se/bug/?i=6445
  [68] = https://curl.se/bug/?i=6226
+ [69] = https://curl.se/bug/?i=6557
  [70] = https://curl.se/bug/?i=6438
  [71] = https://curl.se/bug/?i=6436
  [72] = https://curl.se/bug/?i=6493
@@ -231,6 +234,7 @@ References to bug reports and discussions on issues:
  [75] = https://curl.se/bug/?i=6431
  [76] = https://curl.se/mail/lib-2021-01/0033.html
  [78] = https://curl.se/bug/?i=6504
+ [79] = https://curl.se/bug/?i=6537
  [80] = https://twitter.com/mholt6/status/1352130240265375744
  [82] = https://curl.se/bug/?i=6483
  [83] = https://curl.se/bug/?i=6490
