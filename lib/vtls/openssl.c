@@ -1148,7 +1148,14 @@ static int ossl_init(void)
     OPENSSL_INIT_LOAD_CONFIG |
 #endif
     0;
-  OPENSSL_init_ssl(flags, NULL);
+  OPENSSL_INIT_SETTINGS *settings = OPENSSL_INIT_new();
+  OPENSSL_INIT_set_config_filename(settings,
+                                ossl_conf_file);
+  OPENSSL_INIT_set_config_file_flags(settings,
+  CONF_MFLAGS_IGNORE_MISSING_FILE | CONF_MFLAGS_IGNORE_ERRORS);
+  OPENSSL_INIT_set_config_appname(settings, ossl_appname);
+  OPENSSL_init_ssl(flags, settings);
+  OPENSSL_INIT_free(settings);
 #else
   OPENSSL_load_builtin_modules();
 
@@ -1163,7 +1170,7 @@ static int ossl_init(void)
 #endif
 
 #ifndef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
-  CONF_modules_load_file(NULL, NULL,
+  CONF_modules_load_file(ossl_conf_file, ossl_appname,
                          CONF_MFLAGS_DEFAULT_SECTION|
                          CONF_MFLAGS_IGNORE_MISSING_FILE);
 #endif
