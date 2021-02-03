@@ -1167,7 +1167,7 @@ static CURLcode multissl_connect_nonblocking(struct Curl_easy *data,
 static int multissl_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
   if(multissl_setup(NULL))
-    return NULL;
+    return 0;
   return Curl_ssl->getsock(conn, socks);
 }
 
