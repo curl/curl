@@ -1164,7 +1164,7 @@ static CURLcode multissl_connect_nonblocking(struct Curl_easy *data,
   return Curl_ssl->connect_nonblocking(data, conn, sockindex, done);
 }
 
-static void *multissl_getsock(struct connectdata *conn, curl_socket_t *socks)
+static int multissl_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
   if(multissl_setup(NULL))
     return NULL;
@@ -1202,7 +1202,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_none_cert_status_request,     /* cert_status_request */
   multissl_connect,                  /* connect */
   multissl_connect_nonblocking,      /* connect_nonblocking */
-  multissl_getsock,                  /* connect_nonblocking */
+  multissl_getsock,                  /* getsock */
   multissl_get_internals,            /* get_internals */
   multissl_close,                    /* close_one */
   Curl_none_close_all,               /* close_all */
