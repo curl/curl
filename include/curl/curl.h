@@ -3006,6 +3006,19 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #define CURLPAUSE_ALL       (CURLPAUSE_RECV|CURLPAUSE_SEND)
 #define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT|CURLPAUSE_SEND_CONT)
 
+#ifdef USE_OPENSSL
+/*
+ * NAME curl_set_ossl_config()
+ *
+ * DESCRIPTION
+ *
+ * The curl_set_ossl_config function allows to set up
+ * OpenSSL configuration file path and OpenSSL appname (config file section)
+ * to use in OpenSSL initialization functions.
+ */
+CURL_EXTERN void curl_set_ossl_config(char *conf_file, char *appname);
+#endif
+
 #ifdef  __cplusplus
 }
 #endif

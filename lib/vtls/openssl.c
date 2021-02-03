@@ -1117,6 +1117,16 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
   return !rc;
 }
 
+char *ossl_conf_file = NULL;
+char *ossl_appname = NULL;
+
+/* Set up OpenSSL config file path and appname (config section).*/
+void curl_set_ossl_config(char *conf_file, char *appname)
+{
+    ossl_conf_file = conf_file;
+    ossl_appname = appname;
+}
+
 /**
  * Global SSL init
  *
