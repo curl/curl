@@ -81,22 +81,3 @@ In the event that the individual receiving a curl bug bounty needs to pay
 taxes on the reward money, the responsibility lies with the receiver. The
 curl project or its security team never actually receive any of this money,
 hold the money, or pay out the money.
-
-## Bonus levels
-
-In cooperation with [Dropbox](https://www.dropbox.com) the curl bug bounty can
-offer the highest levels of rewards if the issue covers one of the interest
-areas of theirs - and only if the bug is graded *high* or *critical*. A
-non-exhaustive list of vulnerabilities Dropbox is interested in are:
-
- - RCE
- - URL parsing vulnerabilities with demonstrable security impact
-
-Dropbox would generally hand out rewards for critical vulnerabilities ranging
-from 12k-32k USD where RCE is on the upper end of the spectrum.
-
-URL parsing vulnerabilities with demonstrable security impact might include
-incorrectly determining the authority of a URL when a special character is
-inserted into the path of the URL (as a hypothetical). This type of
-vulnerability would likely yield 6k-12k unless further impact could be
-demonstrated.
