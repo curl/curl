@@ -45,7 +45,6 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE A
-SIZE 562
 RETR 562
 QUIT
 </protocol>
