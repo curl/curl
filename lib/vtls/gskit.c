@@ -610,7 +610,7 @@ static void close_one(struct ssl_connect_data *connssl, struct Curl_easy *data,
 }
 
 
-static ssize_t gskit_send(struct connectdata *conn, int sockindex,
+static ssize_t gskit_send(struct Curl_easy *data, int sockindex,
                           const void *mem, size_t len, CURLcode *curlcode)
 {
   struct connectdata *conn = data->conn;
