@@ -1433,7 +1433,7 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
   }
 
   /* Clear the transfer mode for the next request */
-  smtp->transfer = FTPTRANSFER_BODY;
+  smtp->transfer = PPTRANSFER_BODY;
 
   return result;
 }
@@ -1457,7 +1457,7 @@ static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
 
   if(data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    smtp->transfer = FTPTRANSFER_INFO;
+    smtp->transfer = PPTRANSFER_INFO;
   }
 
   *dophase_done = FALSE; /* not done yet */
@@ -1564,7 +1564,7 @@ static CURLcode smtp_dophase_done(struct Curl_easy *data, bool connected)
 
   (void)connected;
 
-  if(smtp->transfer != FTPTRANSFER_BODY)
+  if(smtp->transfer != PPTRANSFER_BODY)
     /* no data to transfer */
     Curl_setup_transfer(data, -1, -1, FALSE, -1);
 

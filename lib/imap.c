@@ -1519,7 +1519,7 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
   Curl_safefree(imap->custom_params);
 
   /* Clear the transfer mode for the next request */
-  imap->transfer = FTPTRANSFER_BODY;
+  imap->transfer = PPTRANSFER_BODY;
 
   return result;
 }
@@ -1545,7 +1545,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
 
   if(data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    imap->transfer = FTPTRANSFER_INFO;
+    imap->transfer = PPTRANSFER_INFO;
   }
 
   *dophase_done = FALSE; /* not done yet */
@@ -1667,7 +1667,7 @@ static CURLcode imap_dophase_done(struct Curl_easy *data, bool connected)
 
   (void)connected;
 
-  if(imap->transfer != FTPTRANSFER_BODY)
+  if(imap->transfer != PPTRANSFER_BODY)
     /* no data to transfer */
     Curl_setup_transfer(data, -1, -1, FALSE, -1);
 

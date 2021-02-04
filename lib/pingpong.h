@@ -33,10 +33,9 @@
 struct connectdata;
 
 typedef enum {
-  FTPTRANSFER_BODY, /* yes do transfer a body */
-  FTPTRANSFER_INFO, /* do still go through to get info/headers */
-  FTPTRANSFER_NONE, /* don't get anything and don't get info */
-  FTPTRANSFER_LAST  /* end of list marker, never used */
+  PPTRANSFER_BODY, /* yes do transfer a body */
+  PPTRANSFER_INFO, /* do still go through to get info/headers */
+  PPTRANSFER_NONE  /* don't get anything and don't get info */
 } curl_pp_transfer;
 
 /*
