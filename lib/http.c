@@ -1960,10 +1960,10 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
 }
 #else
 /* disabled */
-CURLcode Curl_add_timecondition(const struct connectdata *conn,
+CURLcode Curl_add_timecondition(struct Curl_easy *data,
                                 struct dynbuf *req)
 {
-  (void)conn;
+  (void)data;
   (void)req;
   return CURLE_OK;
 }
