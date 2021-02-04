@@ -1747,13 +1747,19 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
           result = ftp_state_retr(data, ftpc->known_filesize);
         }
         else {
-          if(data->set.ignorecl) {
-            /* This code is to support download of growing files.  It prevents
-               the state machine from requesting the file size from the
-               server.  With an unknown file size the download continues until
-               the server terminates it, otherwise the client stops if the
-               received byte count exceeds the reported file size.  Set option
-               CURLOPT_IGNORE_CONTENT_LENGTH to 1 to enable this behavior.*/
+          if(data->set.ignorecl || data->set.prefer_ascii) {
+            /* 'ignorecl' is used to support download of growing files.  It
+               prevents the state machine from requesting the file size from
+               the server.  With an unknown file size the download continues
+               until the server terminates it, otherwise the client stops if
+               the received byte count exceeds the reported file size.  Set
+               option CURLOPT_IGNORE_CONTENT_LENGTH to 1 to enable this
+               behavior.
+
+               In addition: asking for the size for 'TYPE A' transfers is not
+               constructive since servers don't report the converted size. So
+               skip it.
+            */
             result = Curl_pp_sendf(data, &ftpc->pp, "RETR %s", ftpc->file);
             if(!result)
               state(data, FTP_RETR);

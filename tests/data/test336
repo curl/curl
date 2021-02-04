@@ -35,7 +35,7 @@ ftp
 FTP range download when SIZE doesn't work
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/336 --use-ascii --range 3-6
+ftp://%HOSTIP:%FTPPORT/336 --range 3-6
 </command>
 </client>
 
@@ -47,7 +47,7 @@ PASS ftp@example.com
 PWD
 EPSV
 PASV
-TYPE A
+TYPE I
 SIZE 336
 REST 3
 RETR 336
