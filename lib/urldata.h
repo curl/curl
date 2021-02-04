@@ -1400,9 +1400,7 @@ struct UrlState {
   int stream_weight;
   CURLU *uh; /* URL handle for the current parsed URL */
   struct urlpieces up;
-#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
   Curl_HttpReq httpreq; /* what kind of HTTP request (if any) is this */
-#endif
 #ifndef CURL_DISABLE_HTTP
   size_t trailers_bytes_sent;
   struct dynbuf trailers_buf; /* a buffer containing the compiled trailing
@@ -1708,9 +1706,7 @@ struct UserDefined {
   curl_TimeCond timecondition; /* kind of time/date comparison */
   curl_proxytype proxytype; /* what kind of proxy that is in use */
   time_t timevalue;       /* what time to compare with */
-#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
   Curl_HttpReq method;   /* what kind of HTTP request (if any) is this */
-#endif
   long httpversion; /* when non-zero, a specific HTTP version requested to
                        be used in the library's request(s) */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
