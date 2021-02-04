@@ -653,8 +653,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       data->set.httpauth = CURLAUTH_AWS_SIGV4;
     break;
 
-#endif   /* CURL_DISABLE_HTTP */
-
   case CURLOPT_MIMEPOST:
     /*
      * Set to make us do MIME/form POST
@@ -695,7 +693,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.headers = va_arg(param, struct curl_slist *);
     break;
 
-#ifndef CURL_DISABLE_HTTP
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXYHEADER:
     /*
