@@ -520,8 +520,14 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
     if(data->set.resolver_start) {
       int st;
       Curl_set_in_callback(data, true);
-      st = data->set.resolver_start(data->state.async.resolver, NULL,
-                                    data->set.resolver_start_client);
+      st = data->set.resolver_start(
+#ifdef CURLRES_SYNCH
+        NULL,
+#else
+        data->state.async.resolver,
+#endif
+        NULL,
+        data->set.resolver_start_client);
       Curl_set_in_callback(data, false);
       if(st)
         return CURLRESOLV_ERROR;
@@ -1102,10 +1108,12 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
   CURLcode result;
   struct connectdata *conn = data->conn;
 
+#ifndef CURLRES_SYNCH
   if(data->state.async.dns) {
     conn->dns_entry = data->state.async.dns;
     data->state.async.dns = NULL;
   }
+#endif
 
   result = Curl_setup_conn(data, protocol_done);
 
