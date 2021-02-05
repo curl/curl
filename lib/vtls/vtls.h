@@ -66,7 +66,8 @@ struct Curl_ssl {
   /* If the SSL backend wants to read or write on this connection during a
      handshake, set socks[0] to the connection's FIRSTSOCKET, and return
      a bitmap indicating read or write with GETSOCK_WRITESOCK(0) or
-     GETSOCK_READSOCK(0). Otherwise return GETSOCK_BLANK. */
+     GETSOCK_READSOCK(0). Otherwise return GETSOCK_BLANK.
+     Mandatory. */
   int (*getsock)(struct connectdata *conn, curl_socket_t *socks);
 
   void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
@@ -95,8 +96,6 @@ int Curl_none_shutdown(struct Curl_easy *data, struct connectdata *conn,
 int Curl_none_check_cxn(struct connectdata *conn);
 CURLcode Curl_none_random(struct Curl_easy *data, unsigned char *entropy,
                           size_t length);
-int Curl_none_getsock(struct connectdata *conn, curl_socket_t *socks);
-int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks);
 void Curl_none_close_all(struct Curl_easy *data);
 void Curl_none_session_free(void *ptr);
 bool Curl_none_data_pending(const struct connectdata *conn, int connindex);
@@ -167,6 +166,10 @@ bool Curl_ssl_config_matches(struct ssl_primary_config *data,
 bool Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
                                    struct ssl_primary_config *dest);
 void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc);
+/* An implementation of the getsock field of Curl_ssl that relies
+   on the ssl_connect_state enum. Asks for read or write depending
+   on whether conn->state is ssl_connect_2_reading or
+   ssl_connect_2_writing. */
 int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks);
 
 int Curl_ssl_backend(void);

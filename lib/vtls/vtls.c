@@ -611,13 +611,6 @@ int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks)
   return GETSOCK_BLANK;
 }
 
-int Curl_none_getsock(struct connectdata *conn, curl_socket_t *socks)
-{
-  (void)conn;
-  (void)socks;
-  return GETSOCK_BLANK;
-}
-
 void Curl_ssl_close(struct Curl_easy *data, struct connectdata *conn,
                     int sockindex)
 {
