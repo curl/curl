@@ -3518,6 +3518,12 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
     if(data->set.get_filetime)
       data->info.filetime = k->timeofdoc;
   }
+  else if(!k->http_bodyless && checkprefix("x-archive-orig-last-modified:", headp) &&
+          (data->set.timecondition || data->set.get_filetime) ) {
+    k->timeofdoc = Curl_getdate_capped(headp + strlen("x-archive-orig-last-modified:"));
+    if(data->set.get_filetime)
+      data->info.filetime = k->timeofdoc;
+  }
   else if((checkprefix("WWW-Authenticate:", headp) &&
            (401 == k->httpcode)) ||
           (checkprefix("Proxy-authenticate:", headp) &&
