@@ -2482,9 +2482,9 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
           bytes--;
         }
         /* if we have nothing but digits: */
-        if(bytes++) {
+        if(bytes) {
           /* get the number! */
-          (void)curlx_strtoofft(bytes, NULL, 0, &size);
+          (void)curlx_strtoofft(++bytes, NULL, 0, &size);
         }
       }
     }
