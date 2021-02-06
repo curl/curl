@@ -40,10 +40,11 @@
 
 struct getout *new_getout(struct OperationConfig *config)
 {
-  static int outnum = 0;
   struct getout *node = calloc(1, sizeof(struct getout));
   struct getout *last = config->url_last;
   if(node) {
+    static int outnum = 0;
+
     /* append this new node last in the list */
     if(last)
       last->next = node;
