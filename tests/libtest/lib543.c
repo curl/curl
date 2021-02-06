@@ -33,8 +33,6 @@ int test(char *URL)
       0x1d, 0x57, 0xe1};
 
   CURL *easy;
-  int asize;
-  char *s;
   CURLcode res = CURLE_OK;
   (void)URL;
 
@@ -45,9 +43,8 @@ int test(char *URL)
     res = TEST_ERR_MAJOR_BAD;
   }
   else {
-    asize = (int)sizeof(a);
-
-    s = curl_easy_escape(easy, (const char *)a, asize);
+    int asize = (int)sizeof(a);
+    char *s = curl_easy_escape(easy, (const char *)a, asize);
 
     if(s) {
       printf("%s\n", s);
