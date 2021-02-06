@@ -542,7 +542,6 @@ static CURLcode nss_load_cert(struct ssl_connect_data *ssl,
 
   if(!result && !cacert) {
     /* we have successfully loaded a client certificate */
-    CERTCertificate *cert;
     char *nickname = NULL;
     char *n = strrchr(filename, '/');
     if(n)
@@ -554,7 +553,7 @@ static CURLcode nss_load_cert(struct ssl_connect_data *ssl,
      * <https://bugzilla.redhat.com/733685>. */
     nickname = aprintf("PEM Token #1:%s", n);
     if(nickname) {
-      cert = PK11_FindCertFromNickname(nickname, NULL);
+      CERTCertificate *cert = PK11_FindCertFromNickname(nickname, NULL);
       if(cert)
         CERT_DestroyCertificate(cert);
 
@@ -957,7 +956,6 @@ static CURLcode display_conn_info(struct Curl_easy *data, PRFileDesc *sock)
   CERTCertificate *cert2;
   CERTCertificate *cert3;
   PRTime now;
-  int i;
 
   if(SSL_GetChannelInfo(sock, &channel, sizeof(channel)) ==
      SECSuccess && channel.length == sizeof(channel) &&
@@ -978,8 +976,8 @@ static CURLcode display_conn_info(struct Curl_easy *data, PRFileDesc *sock)
     }
     else {
       /* Count certificates in chain. */
+      int i = 1;
       now = PR_Now();
-      i = 1;
       if(!cert->isRoot) {
         cert2 = CERT_FindCertIssuer(cert, now, certUsageSSLCA);
         while(cert2) {
@@ -1782,12 +1780,11 @@ static CURLcode nss_fail_connect(struct ssl_connect_data *connssl,
                                  struct Curl_easy *data,
                                  CURLcode curlerr)
 {
-  PRErrorCode err = 0;
   struct ssl_backend_data *backend = connssl->backend;
 
   if(is_nss_error(curlerr)) {
     /* read NSPR error code */
-    err = PR_GetError();
+    PRErrorCode err = PR_GetError();
     if(is_cc_error(err))
       curlerr = CURLE_SSL_CERTPROBLEM;
 
