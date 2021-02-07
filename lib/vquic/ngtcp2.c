@@ -580,7 +580,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
   ssize_t nconsumed;
-  int fin = flags & NGTCP2_STREAM_DATA_FLAG_FIN ? 1 : 0;
+  int fin = (flags & NGTCP2_STREAM_DATA_FLAG_FIN) ? 1 : 0;
   (void)offset;
   (void)stream_user_data;
 
