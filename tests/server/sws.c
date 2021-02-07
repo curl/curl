@@ -748,7 +748,6 @@ static int ProcessRequest(struct httprequest *req)
 
   if(req->open &&
      req->prot_version >= 11 &&
-     end &&
      req->reqbuf + req->offset > end + strlen(end_of_headers) &&
      !req->cl &&
      (!strncmp(req->reqbuf, "GET", strlen("GET")) ||
