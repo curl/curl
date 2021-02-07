@@ -231,12 +231,6 @@ static CURLcode tftp_set_timeouts(struct tftp_state_data *state)
     if(state->retry_max < 1)
       /* avoid division by zero below */
       state->retry_max = 1;
-
-    /* Compute the re-start interval to suit the timeout */
-    state->retry_time = (int)timeout/state->retry_max;
-    if(state->retry_time<1)
-      state->retry_time = 1;
-
   }
   else {
     if(timeout_ms > 0)

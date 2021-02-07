@@ -498,9 +498,7 @@ static CURLcode pausewrite(struct Curl_easy *data,
     /* store this information in the state struct for later use */
     Curl_dyn_init(&s->tempwrite[i].b, DYN_PAUSE_BUFFER);
     s->tempwrite[i].type = type;
-
-    if(newtype)
-      s->tempcount++;
+    s->tempcount++;
   }
 
   if(Curl_dyn_addn(&s->tempwrite[i].b, (unsigned char *)ptr, len))

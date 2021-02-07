@@ -700,7 +700,6 @@ static CURLcode gskit_connect_step1(struct Curl_easy *data,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   gsk_handle envir;
   CURLcode result;
-  int rc;
   const char * const keyringfile = SSL_CONN_CONFIG(CAfile);
   const char * const keyringpwd = SSL_SET_OPTION(key_passwd);
   const char * const keyringlabel = SSL_SET_OPTION(primary.clientcert);
