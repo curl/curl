@@ -966,7 +966,6 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           else if(c == '\n') {
             parser->offsets.filename = parser->item_offset;
             finfo->b_data[finfo->b_used - 1] = 0;
-            parser->offsets.filename = parser->item_offset;
             result = ftp_pl_insert_finfo(data, infop);
             if(result) {
               parser->error = result;

@@ -1788,7 +1788,6 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
   ngtcp2_path_storage_zero(&ps);
 
   for(;;) {
-    outlen = -1;
     veccnt = 0;
     stream_id = -1;
     fin = 0;
