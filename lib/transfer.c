@@ -1426,7 +1426,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     return result;
 
   data->state.wildcardmatch = data->set.wildcard_enabled;
-  data->set.followlocation = 0; /* reset the location-follow counter */
+  data->state.followlocation = 0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */
   data->state.errorbuf = FALSE; /* no error has occurred */
   data->state.httpversion = 0; /* don't assume any particular server version */
@@ -1553,7 +1553,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
 
   if(type == FOLLOW_REDIR) {
     if((data->set.maxredirs != -1) &&
-       (data->set.followlocation >= data->set.maxredirs)) {
+       (data->state.followlocation >= data->set.maxredirs)) {
       reachedmax = TRUE;
       type = FOLLOW_FAKE; /* switch to fake to store the would-be-redirected
                              to URL */
@@ -1562,7 +1562,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
       /* mark the next request as a followed location: */
       data->state.this_is_a_follow = TRUE;
 
-      data->set.followlocation++; /* count location-followers */
+      data->state.followlocation++; /* count location-followers */
 
       if(data->set.http_auto_referer) {
         /* We are asked to automatically set the previous URL as the referer
