@@ -1224,7 +1224,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         }
       }
 
-      if(data->set.ftp_append)
+      if(data->set.remote_append)
         /* Try to open for append, but create if nonexisting */
         flags = O_WRONLY|O_CREAT|O_APPEND;
       else if(data->state.resume_from > 0)

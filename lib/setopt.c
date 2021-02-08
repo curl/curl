@@ -1165,7 +1165,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * We want to upload and append to an existing file. Used for FTP and
      * SFTP.
      */
-    data->set.ftp_append = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    data->set.remote_append = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
 
 #ifndef CURL_DISABLE_FTP
