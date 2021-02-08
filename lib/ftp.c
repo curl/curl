@@ -1578,6 +1578,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   struct FTP *ftp = data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
+  bool append = data->set.remote_append;
 
   if((data->state.resume_from && !sizechecked) ||
      ((data->state.resume_from > 0) && sizechecked)) {
@@ -1604,7 +1605,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
     }
 
     /* enable append */
-    data->set.ftp_append = TRUE;
+    append = TRUE;
 
     /* Let's read off the proper amount of bytes from the input. */
     if(conn->seek_func) {
@@ -1661,8 +1662,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
     /* we've passed, proceed as normal */
   } /* resume_from */
 
-  result = Curl_pp_sendf(data, &ftpc->pp,
-                         data->set.ftp_append?"APPE %s":"STOR %s",
+  result = Curl_pp_sendf(data, &ftpc->pp, append?"APPE %s":"STOR %s",
                          ftpc->file);
   if(!result)
     state(data, FTP_STOR);

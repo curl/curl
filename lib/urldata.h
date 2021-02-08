@@ -1792,7 +1792,7 @@ struct UserDefined {
   BIT(get_filetime);     /* get the time and get of the remote file */
   BIT(tunnel_thru_httpproxy); /* use CONNECT through a HTTP proxy */
   BIT(prefer_ascii);     /* ASCII rather than binary */
-  BIT(ftp_append);       /* append, not overwrite, on upload */
+  BIT(remote_append);    /* append, not overwrite, on upload */
   BIT(ftp_list_only);    /* switch FTP command for listing directories */
 #ifndef CURL_DISABLE_FTP
   BIT(ftp_use_port);     /* use the FTP PORT command */
