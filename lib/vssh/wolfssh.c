@@ -859,7 +859,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
         result = CURLE_OK;
         while(name) {
           char *line = aprintf("%s\n",
-                               data->set.ftp_list_only ?
+                               data->set.list_only ?
                                name->fName : name->lName);
           if(line == NULL) {
             state(data, SSH_SFTP_CLOSE);

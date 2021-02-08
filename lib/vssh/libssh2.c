@@ -2143,7 +2143,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         readdir_len = (size_t) rc;
         sshp->readdir_filename[readdir_len] = '\0';
 
-        if(data->set.ftp_list_only) {
+        if(data->set.list_only) {
           result = Curl_client_write(data, CLIENTWRITE_BODY,
                                      sshp->readdir_filename,
                                      readdir_len);
