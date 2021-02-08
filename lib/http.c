@@ -4204,14 +4204,14 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       }
       else if(conn->handler->protocol & CURLPROTO_RTSP) {
         char separator;
+        int rtspversion;
         nc = sscanf(HEADER1,
                     " RTSP/%1d.%1d%c%3d",
                     &rtspversion_major,
-                    &conn->rtspversion,
+                    &rtspversion,
                     &separator,
                     &k->httpcode);
         if((nc == 4) && (' ' == separator)) {
-          conn->rtspversion += 10 * rtspversion_major;
           conn->httpversion = 11; /* For us, RTSP acts like HTTP 1.1 */
         }
         else {

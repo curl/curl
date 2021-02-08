@@ -981,12 +981,8 @@ struct connectdata {
   char *user;    /* user name string, allocated */
   char *passwd;  /* password string, allocated */
   char *options; /* options string, allocated */
-
   char *sasl_authzid;     /* authorisation identity string, allocated */
-
   int httpversion;        /* the HTTP version*10 reported by the server */
-  int rtspversion;        /* the RTSP version*10 reported by the server */
-
   struct curltime now;     /* "current" time */
   struct curltime created; /* creation time */
   struct curltime lastused; /* when returned to the connection cache */
