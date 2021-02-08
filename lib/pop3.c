@@ -571,7 +571,7 @@ static CURLcode pop3_perform_command(struct Curl_easy *data)
   const char *command = NULL;
 
   /* Calculate the default command */
-  if(pop3->id[0] == '\0' || data->set.ftp_list_only) {
+  if(pop3->id[0] == '\0' || data->set.list_only) {
     command = "LIST";
 
     if(pop3->id[0] != '\0')

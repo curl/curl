@@ -1378,7 +1378,7 @@ static CURLcode ftp_state_prepare_transfer(struct Curl_easy *data)
         result = Curl_pp_sendf(data, &ftpc->pp, "PRET %s",
                                data->set.str[STRING_CUSTOMREQUEST]?
                                data->set.str[STRING_CUSTOMREQUEST]:
-                               (data->set.ftp_list_only?"NLST":"LIST"));
+                               (data->state.list_only?"NLST":"LIST"));
       else if(data->set.upload)
         result = Curl_pp_sendf(data, &ftpc->pp, "PRET STOR %s",
                                conn->proto.ftpc.file);
@@ -1485,7 +1485,7 @@ static CURLcode ftp_state_list(struct Curl_easy *data)
   cmd = aprintf("%s%s%s",
                 data->set.str[STRING_CUSTOMREQUEST]?
                 data->set.str[STRING_CUSTOMREQUEST]:
-                (data->set.ftp_list_only?"NLST":"LIST"),
+                (data->state.list_only?"NLST":"LIST"),
                 lstArg? " ": "",
                 lstArg? lstArg: "");
   free(lstArg);
@@ -3648,7 +3648,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
 
       if(result)
         ;
-      else if(data->set.ftp_list_only || !ftpc->file) {
+      else if(data->state.list_only || !ftpc->file) {
         /* The specified path ends with a slash, and therefore we think this
            is a directory that is requested, use LIST. But before that we
            need to set ASCII transfer mode. */
@@ -4356,7 +4356,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
       break;
 
     case 'D': /* directory mode */
-      data->set.ftp_list_only = TRUE;
+      data->state.list_only = TRUE;
       break;
 
     case 'I': /* binary mode */
