@@ -460,7 +460,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
   CURLcode result = CURLE_OK;
 
   /* Set ascii mode if -B flag was used */
-  if(data->set.prefer_ascii)
+  if(data->state.prefer_ascii)
     mode = "netascii";
 
   switch(event) {
@@ -1420,14 +1420,14 @@ static CURLcode tftp_setup_connection(struct Curl_easy *data,
     switch(command) {
     case 'A': /* ASCII mode */
     case 'N': /* NETASCII mode */
-      data->set.prefer_ascii = TRUE;
+      data->state.prefer_ascii = TRUE;
       break;
 
     case 'O': /* octet mode */
     case 'I': /* binary mode */
     default:
       /* switch off ASCII */
-      data->set.prefer_ascii = FALSE;
+      data->state.prefer_ascii = FALSE;
       break;
     }
   }
