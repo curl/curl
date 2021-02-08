@@ -1702,7 +1702,7 @@ CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
 
   if(
 #ifdef CURL_DO_LINEEND_CONV
-     (handle->set.prefer_ascii) ||
+     (handle->state.prefer_ascii) ||
 #endif
      (handle->set.crlf)) {
     /* \n will become \r\n later on */
@@ -2209,7 +2209,7 @@ CURLcode Curl_http_target(struct Curl_easy *data,
         }
         if(!type) {
           result = Curl_dyn_addf(r, ";type=%c",
-                                 data->set.prefer_ascii ? 'a' : 'i');
+                                 data->state.prefer_ascii ? 'a' : 'i');
           if(result)
             return result;
         }

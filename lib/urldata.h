@@ -1467,6 +1467,7 @@ struct UrlState {
   BIT(stream_depends_e); /* set or don't set the Exclusive bit */
   BIT(previouslypending); /* this transfer WAS in the multi->pending queue */
   BIT(cookie_engine);
+  BIT(prefer_ascii);     /* ASCII rather than binary */
 };
 
 

@@ -1525,7 +1525,7 @@ static CURLcode ftp_state_type(struct Curl_easy *data)
      information. Which in FTP can't be much more than the file size and
      date. */
   if(data->set.opt_no_body && ftpc->file &&
-     ftp_need_type(conn, data->set.prefer_ascii)) {
+     ftp_need_type(conn, data->state.prefer_ascii)) {
     /* The SIZE command is _not_ RFC 959 specified, and therefore many servers
        may not support it! It is however the only way we have to get a file's
        size! */
@@ -1535,7 +1535,7 @@ static CURLcode ftp_state_type(struct Curl_easy *data)
 
     /* Some servers return different sizes for different modes, and thus we
        must set the proper type before we check the size */
-    result = ftp_nb_type(data, conn, data->set.prefer_ascii, FTP_TYPE);
+    result = ftp_nb_type(data, conn, data->state.prefer_ascii, FTP_TYPE);
     if(result)
       return result;
   }
@@ -1747,7 +1747,7 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
           result = ftp_state_retr(data, ftpc->known_filesize);
         }
         else {
-          if(data->set.ignorecl || data->set.prefer_ascii) {
+          if(data->set.ignorecl || data->state.prefer_ascii) {
             /* 'ignorecl' is used to support download of growing files.  It
                prevents the state machine from requesting the file size from
                the server.  With an unknown file size the download continues
@@ -2454,7 +2454,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
      */
 
     if((instate != FTP_LIST) &&
-       !data->set.prefer_ascii &&
+       !data->state.prefer_ascii &&
        (ftp->downloadsize < 1)) {
       /*
        * It seems directory listings either don't show the size or very
@@ -2493,7 +2493,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
 
     if(size > data->req.maxdownload && data->req.maxdownload > 0)
       size = data->req.size = data->req.maxdownload;
-    else if((instate != FTP_LIST) && (data->set.prefer_ascii))
+    else if((instate != FTP_LIST) && (data->state.prefer_ascii))
       size = -1; /* kludge for servers that understate ASCII mode file size */
 
     infof(data, "Maxdownload = %" CURL_FORMAT_CURL_OFF_T "\n",
@@ -3626,7 +3626,8 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
       }
     }
     else if(data->set.upload) {
-      result = ftp_nb_type(data, conn, data->set.prefer_ascii, FTP_STOR_TYPE);
+      result = ftp_nb_type(data, conn, data->state.prefer_ascii,
+                           FTP_STOR_TYPE);
       if(result)
         return result;
 
@@ -3661,7 +3662,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
         /* otherwise just fall through */
       }
       else {
-        result = ftp_nb_type(data, conn, data->set.prefer_ascii,
+        result = ftp_nb_type(data, conn, data->state.prefer_ascii,
                              FTP_RETR_TYPE);
         if(result)
           return result;
@@ -4351,7 +4352,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
 
     switch(command) {
     case 'A': /* ASCII mode */
-      data->set.prefer_ascii = TRUE;
+      data->state.prefer_ascii = TRUE;
       break;
 
     case 'D': /* directory mode */
@@ -4361,7 +4362,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
     case 'I': /* binary mode */
     default:
       /* switch off ASCII */
-      data->set.prefer_ascii = FALSE;
+      data->state.prefer_ascii = FALSE;
       break;
     }
   }
