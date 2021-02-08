@@ -59,6 +59,7 @@
 --expect100-timeout                  7.47.0
 --fail (-f)                          4.0
 --fail-early                         7.52.0
+--fail-with-body                     7.76.0
 --false-start                        7.42.0
 --form (-F)                          5.0
 --form-string                        7.13.2

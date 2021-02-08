@@ -369,7 +369,18 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       if(result == CURLE_PEER_FAILED_VERIFICATION)
         fputs(CURL_CA_CERT_ERRORMSG, global->errors);
     }
-
+    else if(config->failwithbody) {
+      /* if HTTP response >= 400, return error */
+      long code = 0;
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+      if(code >= 400) {
+        if(global->showerror)
+          fprintf(global->errors,
+                  "curl: (%d) The requested URL returned error: %ld\n",
+                  CURLE_HTTP_RETURNED_ERROR, code);
+        result = CURLE_HTTP_RETURNED_ERROR;
+      }
+    }
   /* Set file extended attributes */
   if(!result && config->xattr && outs->fopened && outs->stream) {
     int rc = fwrite_xattr(curl, fileno(outs->stream));
@@ -669,7 +680,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   free(per->outfile);
   free(per->uploadfile);
 
-  return CURLE_OK;
+  return result;
 }
 
 static void single_transfer_cleanup(struct OperationConfig *config)
@@ -2325,18 +2336,14 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
 #endif
       result = curl_easy_perform(per->curl);
 
-    /* store the result of the actual transfer */
-    returncode = result;
-
-    result = post_per_transfer(global, per, result, &retry, &delay);
+    returncode = post_per_transfer(global, per, result, &retry, &delay);
     if(retry) {
       tool_go_sleep(delay);
       continue;
     }
 
     /* Bail out upon critical errors or --fail-early */
-    if(result || is_fatal_error(returncode) ||
-       (returncode && global->fail_early))
+    if(is_fatal_error(returncode) || (returncode && global->fail_early))
       bailout = TRUE;
     else {
       /* setup the next one just before we delete this */

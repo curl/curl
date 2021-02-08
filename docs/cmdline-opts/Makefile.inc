@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -61,10 +61,11 @@ DPAGES =					\
   dump-header.d					\
   egd-file.d					\
   engine.d					\
-  etag-compare.d                \
-  etag-save.d                   \
+  etag-compare.d                                \
+  etag-save.d                                   \
   expect100-timeout.d				\
   fail-early.d					\
+  fail-with-body.d				\
   fail.d					\
   false-start.d					\
   form-string.d					\
