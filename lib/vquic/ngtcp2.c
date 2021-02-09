@@ -739,7 +739,8 @@ static ngtcp2_callbacks ng_callbacks = {
   NULL, /* handshake_confirmed */
   NULL, /* recv_new_token */
   ngtcp2_crypto_delete_crypto_aead_ctx_cb,
-  ngtcp2_crypto_delete_crypto_cipher_ctx_cb
+  ngtcp2_crypto_delete_crypto_cipher_ctx_cb,
+  NULL /* recv_datagram */
 };
 
 /*
