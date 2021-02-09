@@ -47,6 +47,7 @@ addons:
     - gnutls-bin
     - python-impacket
     - ninja-build
+    - libgsasl7-dev
 
 jobs:
   include:
