@@ -180,7 +180,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   struct quicsocket *qs = &conn->hequic[sockindex];
   char *keylog_file = NULL;
   char ipbuf[40];
-  long port;
+  int port;
 
 #ifdef DEBUG_QUICHE
   /* initialize debug log callback only once */
