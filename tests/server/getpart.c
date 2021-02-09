@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -323,6 +323,7 @@ int getpart(char **outbuf, size_t *outlen,
   size_t datalen;
   int in_wanted_part = 0;
   int base64 = 0;
+  int nonewline = 0;
   int error;
 
   enum {
@@ -389,6 +390,8 @@ int getpart(char **outbuf, size_t *outlen,
             if(error)
               return error;
           }
+          if(nonewline)
+            (*outlen)--;
           break;
         }
       }
@@ -406,6 +409,8 @@ int getpart(char **outbuf, size_t *outlen,
             if(error)
               return error;
           }
+          if(nonewline)
+            (*outlen)--;
           break;
         }
       }
@@ -480,6 +485,10 @@ int getpart(char **outbuf, size_t *outlen,
               /* bit rough test, but "mostly" functional, */
               /* treat wanted part data as base64 encoded */
               base64 = 1;
+          if(strstr(patt, "nonewline=")) {
+            show(("* setting nonewline\n"));
+            nonewline = 1;
+          }
         }
         continue;
       }

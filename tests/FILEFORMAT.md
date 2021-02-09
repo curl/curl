@@ -188,7 +188,7 @@ When using curl built with Hyper, the keywords must include HTTP or HTTPS for
 'hyper mode' to kick in and make line ending checks work for tests.
 ## `<reply>`
 
-### `<data [nocheck="yes"] [sendzero="yes"] [base64="yes"] [hex="yes"]>`
+### `<data [nocheck="yes"] [sendzero="yes"] [base64="yes"] [hex="yes"] [nonewline="yes"]>`
 
 data to be sent to the client on its request and later verified that it
 arrived safely. Set `nocheck="yes"` to prevent the test script from verifying
@@ -213,6 +213,9 @@ much sense for other sections than "data").
 
 `hex=yes` means that the data is a sequence of hex pairs. It will get decoded
 and used as "raw" data.
+
+`nonewline=yes` means that the last byte (the trailing newline character)
+should be cut off from the data before sending or comparing it.
 
 For FTP file listings, the `<data>` section will be used *only* if you make
 sure that there has been a CWD done first to a directory named `test-[num]`
