@@ -4,18 +4,32 @@ curl and libcurl 7.75.1
  Command line options:         237
  curl_easy_setopt() options:   285
  Public functions in libcurl:  85
- Contributors:                 2322
+ Contributors:                 2326
 
 This release includes the following changes:
 
- o
+ o vtls: initial implementation of rustls backend [3]
 
 This release includes the following bugfixes:
 
- o build: fix --disable-http-auth
- o build: fix --disable-dateparse [1]
- o OS400: update for CURLOPT_AWS_SIGV4 [2]
  o BUG-BOUNTY: removed the cooperation mention
+ o build: fix --disable-dateparse [1]
+ o build: fix --disable-http-auth
+ o cmake: fix import library name for non-MS compiler on Windows [10]
+ o curl_multibyte: fall back to local code page stat/access on Windows [8]
+ o CURLOPT_QUOTE.3: clarify that libcurl doesn't parse what's sent [16]
+ o docs: fix FILE example url in --metalink documentation [19]
+ o file: Support unicode urls on windows [9]
+ o ftp: avoid SIZE when asking for a TYPE A file [23]
+ o ftp: never set data->set.ftp_append outside setopt [14]
+ o gskit: correct the gskit_send() prototype [21]
+ o hostip: fix build with sync resolver [20]
+ o OS400: update for CURLOPT_AWS_SIGV4 [2]
+ o runtests.pl: add %TESTNUMBER variable to make copying tests more convenient
+ o runtests.pl: add a -P option to specify an external proxy
+ o sasl: support SCRAM-SHA-1 and SCRAM-SHA-256 via libgsasl [4]
+ o urldata: fix build without HTTP and MQTT [22]
+ o urldata: remove the 'rtspversion' field [15]
 
 This release includes the following known bugs:
 
@@ -24,10 +38,26 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Benbuck Nason, Daniel Stenberg, Firefox OS, Ray Satiro,
-  (4 contributors)
+  awesomenode on github, Benbuck Nason, Bodo Bergmann, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, David Goerger, Fabian Keil, Firefox OS,
+  Ikko Ashimine, Jacob Hoffman-Andrews, Jon Rumsey, Joseph Chen, Ray Satiro,
+  Simon Josefsson, Stephan Szabo, Vincent Torri,
+  (17 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/mail/lib-2021-02/0008.html
  [2] = https://curl.se/bug/?i=6560
+ [3] = https://curl.se/bug/?i=6350
+ [4] = https://curl.se/bug/?i=6372
+ [8] = https://curl.se/bug/?i=6514
+ [9] = https://curl.se/bug/?i=6501
+ [10] = https://curl.se/bug/?i=6225
+ [14] = https://curl.se/bug/?i=6579
+ [15] = https://curl.se/bug/?i=6581
+ [16] = https://curl.se/bug/?i=6577
+ [19] = https://curl.se/bug/?i=6573
+ [20] = https://curl.se/bug/?i=6566
+ [21] = https://curl.se/bug/?i=6569
+ [22] = https://curl.se/bug/?i=6562
+ [23] = https://curl.se/bug/?i=6564
