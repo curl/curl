@@ -71,6 +71,10 @@ endif
 ifndef LIBXML2_PATH
 LIBXML2_PATH = ../../../libxml2-2.9.2
 endif
+# Edit the path below to point to the base of your libgsasl package.
+ifndef LIBGSASL_PATH
+LIBGSASL_PATH = ../../../libgsasl-1.10.0
+endif
 # Edit the path below to point to the base of your libidn2 package.
 ifndef LIBIDN2_PATH
 LIBIDN2_PATH = ../../../libidn2-2.0.3
@@ -197,6 +201,9 @@ ZSTD = 1
 endif
 ifeq ($(findstring -brotli,$(CFG)),-brotli)
 BROTLI = 1
+endif
+ifeq ($(findstring -gsasl,$(CFG)),-gsasl)
+GSASL = 1
 endif
 ifeq ($(findstring -idn2,$(CFG)),-idn2)
 IDN2 = 1
@@ -333,6 +340,10 @@ ifdef BROTLI
   else
     curl_LDADD += -lbrotlidec
   endif
+endif
+ifdef GSASL
+  CFLAGS += -DUSE_GSASL
+  curl_LDADD += -L"$(LIBGSASL_PATH)/lib" -lgsasl
 endif
 ifdef IDN2
   CFLAGS += -DUSE_LIBIDN2
