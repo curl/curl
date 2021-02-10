@@ -69,7 +69,7 @@ CURLcode Curl_auth_gsasl_start(struct Curl_easy *data,
   int res;
   res =
 #endif
-  gsasl_property_set(gsasl->client, GSASL_AUTHID, userp);
+    gsasl_property_set(gsasl->client, GSASL_AUTHID, userp);
 #if GSASL_VERSION_NUMBER >= 0x010a01
   if(res != GSASL_OK) {
     failf(data, "setting AUTHID failed: %s\n", gsasl_strerror(res));
@@ -87,6 +87,8 @@ CURLcode Curl_auth_gsasl_start(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
 #endif
+
+  (void)data;
 
   return CURLE_OK;
 }
