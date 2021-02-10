@@ -100,7 +100,6 @@ CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
 {
   unsigned char *chlg = NULL;
   size_t chlglen = 0;
-  size_t chlg64len = chlg64 ? strlen(chlg64) : 0;
   int result;
   char *response;
 
