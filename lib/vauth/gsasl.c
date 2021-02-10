@@ -65,23 +65,23 @@ CURLcode Curl_auth_gsasl_start(struct Curl_easy *data,
                                const char *passwdp,
                                struct gsasldata *gsasl)
 {
-#if GSASL_VERSION_NUMBER >= 0x010a01
+#if GSASL_VERSION_NUMBER >= 0x010b00
   int res;
   res =
 #endif
     gsasl_property_set(gsasl->client, GSASL_AUTHID, userp);
-#if GSASL_VERSION_NUMBER >= 0x010a01
+#if GSASL_VERSION_NUMBER >= 0x010b00
   if(res != GSASL_OK) {
     failf(data, "setting AUTHID failed: %s\n", gsasl_strerror(res));
     return CURLE_OUT_OF_MEMORY;
   }
 #endif
 
-#if GSASL_VERSION_NUMBER >= 0x010a01
+#if GSASL_VERSION_NUMBER >= 0x010b00
   res =
 #endif
     gsasl_property_set(gsasl->client, GSASL_PASSWORD, passwdp);
-#if GSASL_VERSION_NUMBER >= 0x010a01
+#if GSASL_VERSION_NUMBER >= 0x010b00
   if(res != GSASL_OK) {
     failf(data, "setting PASSWORD failed: %s\n", gsasl_strerror(res));
     return CURLE_OUT_OF_MEMORY;
