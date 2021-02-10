@@ -65,28 +65,30 @@ CURLcode Curl_auth_gsasl_start(struct Curl_easy *data,
                                const char *passwdp,
                                struct gsasldata *gsasl)
 {
-#if GSASL_VERSION_NUMBER >= 0x010a00
+#if GSASL_VERSION_NUMBER >= 0x010b00
   int res;
   res =
 #endif
-  gsasl_property_set(gsasl->client, GSASL_AUTHID, userp);
-#if GSASL_VERSION_NUMBER >= 0x010a00
+    gsasl_property_set(gsasl->client, GSASL_AUTHID, userp);
+#if GSASL_VERSION_NUMBER >= 0x010b00
   if(res != GSASL_OK) {
-    failf(data, "setting AUTHID failed: %s\n", gsasl_strerror(result));
+    failf(data, "setting AUTHID failed: %s\n", gsasl_strerror(res));
     return CURLE_OUT_OF_MEMORY;
   }
 #endif
 
-#if GSASL_VERSION_NUMBER >= 0x010a00
+#if GSASL_VERSION_NUMBER >= 0x010b00
   res =
 #endif
     gsasl_property_set(gsasl->client, GSASL_PASSWORD, passwdp);
-#if GSASL_VERSION_NUMBER >= 0x010a00
+#if GSASL_VERSION_NUMBER >= 0x010b00
   if(res != GSASL_OK) {
-    failf(data, "setting PASSWORD failed: %s\n", gsasl_strerror(result));
+    failf(data, "setting PASSWORD failed: %s\n", gsasl_strerror(res));
     return CURLE_OUT_OF_MEMORY;
   }
 #endif
+
+  (void)data;
 
   return CURLE_OK;
 }
@@ -98,8 +100,8 @@ CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
 {
   unsigned char *chlg = NULL;
   size_t chlglen = 0;
-  size_t chlg64len = chlg64 ? strlen(chlg64) : 0;
-  int result;
+  CURLcode result = CURLE_OK;
+  int res;
   char *response;
 
   if(chlg64) {
@@ -108,11 +110,12 @@ CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
       return result;
   }
 
-  result = gsasl_step(gsasl->client, chlg, chlglen, &response, outlen);
-  if(result != GSASL_OK && result != GSASL_NEEDS_MORE) {
+  res = gsasl_step(gsasl->client,
+                   (const char *)chlg, chlglen, &response, outlen);
+  if(res != GSASL_OK && res != GSASL_NEEDS_MORE) {
     if(chlg64)
       free(chlg);
-    failf(data, "GSASL step: %s\n", gsasl_strerror(result));
+    failf(data, "GSASL step: %s\n", gsasl_strerror(res));
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
@@ -120,10 +123,13 @@ CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
     result = Curl_base64_encode(data, response, 0, outptr, outlen);
     gsasl_free(response);
   }
-  else
+  else {
     *outptr = strdup("");
+    if(!*outptr)
+      result = CURLE_OUT_OF_MEMORY;
+  }
 
-  return CURLE_OK;
+  return result;
 }
 
 void Curl_auth_gsasl_cleanup(struct gsasldata *gsasl)
