@@ -62,6 +62,8 @@ DPAGES = \
   dns-ipv4-addr.d \
   dns-ipv6-addr.d \
   dns-servers.d \
+  doh-cert-status.d \
+  doh-insecure.d \
   doh-url.d \
   dump-header.d \
   egd-file.d \

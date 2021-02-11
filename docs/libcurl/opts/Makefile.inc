@@ -150,6 +150,9 @@ man_MANS =                                      \
   CURLOPT_DNS_SERVERS.3                         \
   CURLOPT_DNS_SHUFFLE_ADDRESSES.3               \
   CURLOPT_DNS_USE_GLOBAL_CACHE.3                \
+  CURLOPT_DOH_SSL_VERIFYHOST.3                  \
+  CURLOPT_DOH_SSL_VERIFYPEER.3                  \
+  CURLOPT_DOH_SSL_VERIFYSTATUS.3                \
   CURLOPT_DOH_URL.3                             \
   CURLOPT_EGDSOCKET.3                           \
   CURLOPT_ERRORBUFFER.3                         \
