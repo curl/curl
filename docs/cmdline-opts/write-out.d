@@ -93,6 +93,9 @@ When an HTTP request was made without --location to follow redirects (or when
 --max-redir is met), this variable will show the actual URL a redirect
 \fIwould\fP have gone to. (Added in 7.18.2)
 .TP
+.B referer
+The Referer: header, if there was any. (Added in 7.76.0)
+.TP
 .B remote_ip
 The remote IP address of the most recently done connection - can be either
 IPv4 or IPv6 (Added in 7.29.0)
