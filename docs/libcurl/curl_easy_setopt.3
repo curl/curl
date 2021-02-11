@@ -565,14 +565,23 @@ SSL version to use. See \fICURLOPT_SSLVERSION(3)\fP
 Proxy SSL version to use. See \fICURLOPT_PROXY_SSLVERSION(3)\fP
 .IP CURLOPT_SSL_VERIFYHOST
 Verify the host name in the SSL certificate. See \fICURLOPT_SSL_VERIFYHOST(3)\fP
+.IP CURLOPT_DOH_SSL_VERIFYHOST
+Verify the host name in the DOH (DNS-over-HTTPS) SSL certificate. See
+\fICURLOPT_DOH_SSL_VERIFYHOST(3)\fP
 .IP CURLOPT_PROXY_SSL_VERIFYHOST
 Verify the host name in the proxy SSL certificate. See \fICURLOPT_PROXY_SSL_VERIFYHOST(3)\fP
 .IP CURLOPT_SSL_VERIFYPEER
 Verify the SSL certificate. See \fICURLOPT_SSL_VERIFYPEER(3)\fP
+.IP CURLOPT_DOH_SSL_VERIFYPEER
+Verify the DOH (DNS-over-HTTPS) SSL certificate. See
+\fICURLOPT_DOH_SSL_VERIFYPEER(3)\fP
 .IP CURLOPT_PROXY_SSL_VERIFYPEER
 Verify the proxy SSL certificate. See \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP
 .IP CURLOPT_SSL_VERIFYSTATUS
 Verify the SSL certificate's status. See \fICURLOPT_SSL_VERIFYSTATUS(3)\fP
+.IP CURLOPT_DOH_SSL_VERIFYSTATUS
+Verify the DOH (DNS-over-HTTPS) SSL certificate's status. See
+\fICURLOPT_DOH_SSL_VERIFYSTATUS(3)\fP
 .IP CURLOPT_CAINFO
 CA cert bundle. See \fICURLOPT_CAINFO(3)\fP
 .IP CURLOPT_PROXY_CAINFO
@@ -661,7 +670,7 @@ Strings passed on to libcurl must be shorter than 8000000 bytes, otherwise
 7.65.0).
 
 \fBCURLE_BAD_FUNCTION_ARGUMENT\fP is returned when the argument to an option
-is invalid, like perhaps out of range.a
+is invalid, like perhaps out of range.
 
 If you try to set an option that libcurl doesn't know about, perhaps because
 the library is too old to support it or the option was removed in a recent

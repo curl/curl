@@ -534,6 +534,8 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
    * libcurl 7.10 introduced SSL verification *by default*! This needs to be
    * switched off unless wanted.
    */
+  set->doh_verifyhost = TRUE;
+  set->doh_verifypeer = TRUE;
   set->ssl.primary.verifypeer = TRUE;
   set->ssl.primary.verifyhost = TRUE;
 #ifdef USE_TLS_SRP

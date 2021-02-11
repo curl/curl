@@ -1848,6 +1848,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         data->set.ssl.primary.verifypeer;
     }
     break;
+  case CURLOPT_DOH_SSL_VERIFYPEER:
+    /*
+     * Enable peer SSL verifying for DOH.
+     */
+    data->set.doh_verifypeer = (0 != va_arg(param, long)) ?
+      TRUE : FALSE;
+    break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSL_VERIFYPEER:
     /*
@@ -1879,6 +1886,15 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       data->conn->ssl_config.verifyhost =
         data->set.ssl.primary.verifyhost;
     }
+    break;
+  case CURLOPT_DOH_SSL_VERIFYHOST:
+    /*
+     * Enable verification of the host name in the peer certificate for DOH
+     */
+    arg = va_arg(param, long);
+
+    /* Treat both 1 and 2 as TRUE */
+    data->set.doh_verifyhost = (bool)((arg & 3) ? TRUE : FALSE);
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSL_VERIFYHOST:
@@ -1914,6 +1930,18 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       data->conn->ssl_config.verifystatus =
         data->set.ssl.primary.verifystatus;
     }
+    break;
+  case CURLOPT_DOH_SSL_VERIFYSTATUS:
+    /*
+     * Enable certificate status verifying for DOH.
+     */
+    if(!Curl_ssl_cert_status_request()) {
+      result = CURLE_NOT_BUILT_IN;
+      break;
+    }
+
+    data->set.doh_verifystatus = (0 != va_arg(param, long)) ?
+      TRUE : FALSE;
     break;
   case CURLOPT_SSL_CTX_FUNCTION:
     /*
@@ -2240,6 +2268,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.ssl.no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
     data->set.ssl.revoke_best_effort = !!(arg & CURLSSLOPT_REVOKE_BEST_EFFORT);
     data->set.ssl.native_ca_store = !!(arg & CURLSSLOPT_NATIVE_CA);
+    /* If a setting is added here it should also be added in dohprobe()
+       which sets its own CURLOPT_SSL_OPTIONS based on these settings. */
     break;
 
 #ifndef CURL_DISABLE_PROXY

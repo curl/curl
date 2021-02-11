@@ -1685,6 +1685,12 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             /* libcurl default is strict verifyhost -> 2L   */
             /* my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L); */
           }
+
+          if(config->doh_insecure_ok) {
+            my_setopt(curl, CURLOPT_DOH_SSL_VERIFYPEER, 0L);
+            my_setopt(curl, CURLOPT_DOH_SSL_VERIFYHOST, 0L);
+          }
+
           if(config->proxy_insecure_ok) {
             my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYPEER, 0L);
             my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYHOST, 0L);
@@ -1695,6 +1701,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
           if(config->verifystatus)
             my_setopt(curl, CURLOPT_SSL_VERIFYSTATUS, 1L);
+
+          if(config->doh_verifystatus)
+            my_setopt(curl, CURLOPT_DOH_SSL_VERIFYSTATUS, 1L);
 
           if(config->falsestart)
             my_setopt(curl, CURLOPT_SSL_FALSESTART, 1L);
@@ -2399,7 +2408,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
   capath_from_env = false;
   if(!config->cacert &&
      !config->capath &&
-     !config->insecure_ok) {
+     (!config->insecure_ok || (config->doh_url && !config->doh_insecure_ok))) {
     CURL *curltls = curl_easy_init();
     struct curl_tlssessioninfo *tls_backend_info = NULL;
 

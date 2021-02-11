@@ -207,10 +207,12 @@ static int doh_done(struct Curl_easy *doh, CURLcode result)
 }
 
 #define ERROR_CHECK_SETOPT(x,y) \
-do {                                      \
-  result = curl_easy_setopt(doh, x, y);   \
-  if(result)                              \
-    goto error;                           \
+do {                                          \
+  result = curl_easy_setopt(doh, x, y);       \
+  if(result &&                                \
+     result != CURLE_NOT_BUILT_IN &&          \
+     result != CURLE_UNKNOWN_OPTION)          \
+    goto error;                               \
 } while(0)
 
 static CURLcode dohprobe(struct Curl_easy *data,
@@ -287,39 +289,23 @@ static CURLcode dohprobe(struct Curl_easy *data,
     if(data->set.no_signal)
       ERROR_CHECK_SETOPT(CURLOPT_NOSIGNAL, 1L);
 
+    ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYHOST,
+      data->set.doh_verifyhost ? 2L : 0L);
+    ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYPEER,
+      data->set.doh_verifypeer ? 1L : 0L);
+    ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYSTATUS,
+      data->set.doh_verifystatus ? 1L : 0L);
+
     /* Inherit *some* SSL options from the user's transfer. This is a
-       best-guess as to which options are needed for compatibility. #3661 */
+       best-guess as to which options are needed for compatibility. #3661
+
+       Note DOH does not inherit the user's proxy server so proxy SSL settings
+       have no effect and are not inherited. If that changes then two new
+       options should be added to check doh proxy insecure separately,
+       CURLOPT_DOH_PROXY_SSL_VERIFYHOST and CURLOPT_DOH_PROXY_SSL_VERIFYPEER.
+       */
     if(data->set.ssl.falsestart)
       ERROR_CHECK_SETOPT(CURLOPT_SSL_FALSESTART, 1L);
-    if(data->set.ssl.primary.verifyhost)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYHOST, 2L);
-#ifndef CURL_DISABLE_PROXY
-    if(data->set.proxy_ssl.primary.verifyhost)
-      ERROR_CHECK_SETOPT(CURLOPT_PROXY_SSL_VERIFYHOST, 2L);
-    if(data->set.proxy_ssl.primary.verifypeer)
-      ERROR_CHECK_SETOPT(CURLOPT_PROXY_SSL_VERIFYPEER, 1L);
-    if(data->set.str[STRING_SSL_CAFILE_PROXY]) {
-      ERROR_CHECK_SETOPT(CURLOPT_PROXY_CAINFO,
-        data->set.str[STRING_SSL_CAFILE_PROXY]);
-    }
-    if(data->set.str[STRING_SSL_CRLFILE_PROXY]) {
-      ERROR_CHECK_SETOPT(CURLOPT_PROXY_CRLFILE,
-        data->set.str[STRING_SSL_CRLFILE_PROXY]);
-    }
-    if(data->set.proxy_ssl.no_revoke)
-      ERROR_CHECK_SETOPT(CURLOPT_PROXY_SSL_OPTIONS, CURLSSLOPT_NO_REVOKE);
-    else if(data->set.proxy_ssl.revoke_best_effort)
-      ERROR_CHECK_SETOPT(CURLOPT_PROXY_SSL_OPTIONS,
-                         CURLSSLOPT_REVOKE_BEST_EFFORT);
-    if(data->set.str[STRING_SSL_CAPATH_PROXY]) {
-      ERROR_CHECK_SETOPT(CURLOPT_PROXY_CAPATH,
-        data->set.str[STRING_SSL_CAPATH_PROXY]);
-    }
-#endif
-    if(data->set.ssl.primary.verifypeer)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYPEER, 1L);
-    if(data->set.ssl.primary.verifystatus)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYSTATUS, 1L);
     if(data->set.str[STRING_SSL_CAFILE_ORIG]) {
       ERROR_CHECK_SETOPT(CURLOPT_CAINFO,
         data->set.str[STRING_SSL_CAFILE_ORIG]);
@@ -342,10 +328,6 @@ static CURLcode dohprobe(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_EGDSOCKET,
         data->set.str[STRING_SSL_EGDSOCKET]);
     }
-    if(data->set.ssl.no_revoke)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_OPTIONS, CURLSSLOPT_NO_REVOKE);
-    else if(data->set.ssl.revoke_best_effort)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_OPTIONS, CURLSSLOPT_REVOKE_BEST_EFFORT);
     if(data->set.ssl.fsslctx)
       ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl.fsslctx);
     if(data->set.ssl.fsslctxp)
@@ -353,6 +335,21 @@ static CURLcode dohprobe(struct Curl_easy *data,
     if(data->set.str[STRING_SSL_EC_CURVES]) {
       ERROR_CHECK_SETOPT(CURLOPT_SSL_EC_CURVES,
         data->set.str[STRING_SSL_EC_CURVES]);
+    }
+
+    {
+      long mask =
+        (data->set.ssl.enable_beast ?
+          CURLSSLOPT_ALLOW_BEAST : 0) |
+        (data->set.ssl.no_revoke ?
+          CURLSSLOPT_NO_REVOKE : 0) |
+        (data->set.ssl.no_partialchain ?
+          CURLSSLOPT_NO_PARTIALCHAIN : 0) |
+        (data->set.ssl.revoke_best_effort ?
+          CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
+        (data->set.ssl.native_ca_store ?
+          CURLSSLOPT_NATIVE_CA : 0);
+      curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS, mask);
     }
 
     doh->set.fmultidone = doh_done;

@@ -50,6 +50,8 @@
 --dns-ipv4-addr                      7.33.0
 --dns-ipv6-addr                      7.33.0
 --dns-servers                        7.33.0
+--doh-cert-status                    7.76.0
+--doh-insecure                       7.76.0
 --doh-url                            7.62.0
 --dump-header (-D)                   5.7
 --egd-file                           7.7

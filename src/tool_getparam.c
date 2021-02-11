@@ -251,6 +251,7 @@ static const struct LongShort aliases[]= {
   {"Ep", "pinnedpubkey",             ARG_STRING},
   {"EP", "proxy-pinnedpubkey",       ARG_STRING},
   {"Eq", "cert-status",              ARG_BOOL},
+  {"EQ", "doh-cert-status",          ARG_BOOL},
   {"Er", "false-start",              ARG_BOOL},
   {"Es", "ssl-no-revoke",            ARG_BOOL},
   {"ES", "ssl-revoke-best-effort",   ARG_BOOL},
@@ -294,6 +295,7 @@ static const struct LongShort aliases[]= {
   {"j",  "junk-session-cookies",     ARG_BOOL},
   {"J",  "remote-header-name",       ARG_BOOL},
   {"k",  "insecure",                 ARG_BOOL},
+  {"kd", "doh-insecure",             ARG_BOOL},
   {"K",  "config",                   ARG_FILENAME},
   {"l",  "list-only",                ARG_BOOL},
   {"L",  "location",                 ARG_BOOL},
@@ -1626,6 +1628,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->verifystatus = TRUE;
         break;
 
+      case 'Q': /* --doh-cert-status */
+        config->doh_verifystatus = TRUE;
+        break;
+
       case 'r': /* --false-start */
         config->falsestart = TRUE;
         break;
@@ -1887,7 +1893,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->content_disposition = toggle;
       break;
     case 'k': /* allow insecure SSL connects */
-      config->insecure_ok = toggle;
+      if(subletter == 'd') /* --doh-insecure */
+        config->doh_insecure_ok = toggle;
+      else
+        config->insecure_ok = toggle;
       break;
     case 'K': /* parse config file */
       if(parseconfig(nextarg, global))
