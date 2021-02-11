@@ -609,7 +609,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
   set->maxage_conn = 118;
   set->http09_allowed = FALSE;
-  set->httpversion =
+  set->httpwant =
 #ifdef USE_NGHTTP2
     CURL_HTTP_VERSION_2TLS
 #else
@@ -887,7 +887,7 @@ static int IsMultiplexingPossible(const struct Curl_easy *handle,
      (!conn->bits.protoconnstart || !conn->bits.close)) {
 
     if(Curl_multiplex_wanted(handle->multi) &&
-       (handle->set.httpversion >= CURL_HTTP_VERSION_2))
+       (handle->state.httpwant >= CURL_HTTP_VERSION_2))
       /* allows HTTP/2 */
       avail |= CURLPIPE_MULTIPLEX;
   }
