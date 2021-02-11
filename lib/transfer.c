@@ -1431,8 +1431,8 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.followlocation = 0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */
   data->state.errorbuf = FALSE; /* no error has occurred */
-  data->state.httpversion = 0; /* don't assume any particular server version */
-
+  data->state.httpwant = data->set.httpwant;
+  data->state.httpversion = 0;
   data->state.authproblem = FALSE;
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;

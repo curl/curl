@@ -475,7 +475,7 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
        protocols in descending order of preference, eg: "h2,http/1.1" */
 
 #ifdef USE_NGHTTP2
-    if(data->set.httpversion >= CURL_HTTP_VERSION_2) {
+    if(data->state.httpversion >= CURL_HTTP_VERSION_2) {
       strcpy(protocols + strlen(protocols), NGHTTP2_PROTO_VERSION_ID ",");
       infof(data, "ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
     }
@@ -724,7 +724,7 @@ wolfssl_connect_step2(struct Curl_easy *data, struct connectdata *conn,
          !memcmp(protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH))
         conn->negnpn = CURL_HTTP_VERSION_1_1;
 #ifdef USE_NGHTTP2
-      else if(data->set.httpversion >= CURL_HTTP_VERSION_2 &&
+      else if(data->state.httpversion >= CURL_HTTP_VERSION_2 &&
               protocol_len == NGHTTP2_PROTO_VERSION_ID_LEN &&
               !memcmp(protocol, NGHTTP2_PROTO_VERSION_ID,
                       NGHTTP2_PROTO_VERSION_ID_LEN))

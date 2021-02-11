@@ -991,7 +991,7 @@ struct connectdata {
   char *passwd;  /* password string, allocated */
   char *options; /* options string, allocated */
   char *sasl_authzid;     /* authorisation identity string, allocated */
-  int httpversion;        /* the HTTP version*10 reported by the server */
+  unsigned char httpversion; /* the HTTP version*10 reported by the server */
   struct curltime now;     /* "current" time */
   struct curltime created; /* creation time */
   struct curltime lastused; /* when returned to the connection cache */
@@ -1375,9 +1375,10 @@ struct UrlState {
 
   /* a place to store the most recently set FTP entrypath */
   char *most_recent_ftp_entrypath;
-
-  int httpversion;       /* the lowest HTTP version*10 reported by any server
-                            involved in this request */
+  unsigned char httpwant; /* when non-zero, a specific HTTP version requested
+                             to be used in the library's request(s) */
+  unsigned char httpversion; /* the lowest HTTP version*10 reported by any
+                                server involved in this request */
 
 #if !defined(WIN32) && !defined(MSDOS) && !defined(__EMX__)
 /* do FTP line-end conversions on most platforms */
@@ -1718,8 +1719,8 @@ struct UserDefined {
   curl_proxytype proxytype; /* what kind of proxy that is in use */
   time_t timevalue;       /* what time to compare with */
   Curl_HttpReq method;   /* what kind of HTTP request (if any) is this */
-  long httpversion; /* when non-zero, a specific HTTP version requested to
-                       be used in the library's request(s) */
+  unsigned char httpwant; /* when non-zero, a specific HTTP version requested
+                             to be used in the library's request(s) */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
 #ifndef CURL_DISABLE_PROXY
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */

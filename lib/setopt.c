@@ -888,7 +888,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     if(arg == CURL_HTTP_VERSION_NONE)
       arg = CURL_HTTP_VERSION_2TLS;
 #endif
-    data->set.httpversion = arg;
+    data->set.httpwant = (unsigned char)arg;
     break;
 
   case CURLOPT_EXPECT_100_TIMEOUT_MS:
