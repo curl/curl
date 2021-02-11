@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -136,6 +136,9 @@ libcurl was built with memory tracking debug capabilities. This is mainly of
 interest for libcurl hackers. (added in 7.19.6)
 .IP CURL_VERSION_DEBUG
 libcurl was built with debug capabilities (added in 7.10.6)
+.IP CURL_VERSION_GSASL
+libcurl was built with libgsasl and thus with some extra SCRAM-SHA
+authentication methods. (added in 7.76.0)
 .IP CURL_VERSION_GSSAPI
 libcurl was built with support for GSS-API. This makes libcurl use provided
 functions for Kerberos and SPNEGO authentication. It also allows libcurl
