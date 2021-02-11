@@ -875,6 +875,7 @@ static const struct feat feats[] = {
   {"PSL",            CURL_VERSION_PSL},
   {"alt-svc",        CURL_VERSION_ALTSVC},
   {"HSTS",           CURL_VERSION_HSTS},
+  {"gsasl",          CURL_VERSION_GSASL},
 };
 
 static void print_category(curlhelp_t category)

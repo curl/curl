@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -100,7 +100,7 @@ static size_t zstd_version(char *buf, size_t bufsz)
  * zeros in the data.
  */
 
-#define VERSION_PARTS 15 /* number of substrings we can concatenate */
+#define VERSION_PARTS 16 /* number of substrings we can concatenate */
 
 char *curl_version(void)
 {
@@ -146,6 +146,9 @@ char *curl_version(void)
 #endif
 #ifdef USE_HYPER
   char hyper_buf[30];
+#endif
+#ifdef USE_GSASL
+  char gsasl_buf[30];
 #endif
   int i = 0;
   int j;
@@ -234,6 +237,11 @@ char *curl_version(void)
 #ifdef USE_HYPER
   msnprintf(hyper_buf, sizeof(hyper_buf), "Hyper/%s", hyper_version());
   src[i++] = hyper_buf;
+#endif
+#ifdef USE_GSASL
+  msnprintf(gsasl_buf, sizeof(gsasl_buf), "libgsasl/%s",
+            gsasl_check_version(NULL));
+  src[i++] = gsasl_buf;
 #endif
 
   DEBUGASSERT(i <= VERSION_PARTS);
@@ -430,6 +438,9 @@ static curl_version_info_data version_info = {
 #endif
 #if defined(USE_HSTS)
   | CURL_VERSION_HSTS
+#endif
+#if defined(USE_GSASL)
+  | CURL_VERSION_GSASL
 #endif
   ,
   NULL, /* ssl_version */
