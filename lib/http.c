@@ -298,26 +298,27 @@ static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
 {
   size_t size = 0;
   char *authorization = NULL;
-  struct connectdata *conn = data->conn;
   char **userp;
   const char *user;
   const char *pwd;
   CURLcode result;
   char *out;
 
+  /* credentials are unique per transfer for HTTP, do not use the ones for the
+     connection */
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
     userp = &data->state.aptr.proxyuserpwd;
-    user = conn->http_proxy.user;
-    pwd = conn->http_proxy.passwd;
+    user = data->state.aptr.proxyuser;
+    pwd = data->state.aptr.proxypasswd;
 #else
     return CURLE_NOT_BUILT_IN;
 #endif
   }
   else {
     userp = &data->state.aptr.userpwd;
-    user = conn->user;
-    pwd = conn->passwd;
+    user = data->state.aptr.user;
+    pwd = data->state.aptr.passwd;
   }
 
   out = aprintf("%s:%s", user, pwd ? pwd : "");
@@ -709,7 +710,6 @@ output_auth_headers(struct Curl_easy *data,
   if(authstatus->picked == CURLAUTH_DIGEST) {
     auth = "Digest";
     result = Curl_output_digest(data,
-                                conn,
                                 proxy,
                                 (const unsigned char *)request,
                                 (const unsigned char *)path);
@@ -756,11 +756,14 @@ output_auth_headers(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
     infof(data, "%s auth using %s with user '%s'\n",
           proxy ? "Proxy" : "Server", auth,
-          proxy ? (conn->http_proxy.user ? conn->http_proxy.user : "") :
-          (conn->user ? conn->user : ""));
+          proxy ? (data->state.aptr.proxyuser ?
+                   data->state.aptr.proxyuser : "") :
+          (data->state.aptr.user ?
+           data->state.aptr.user : ""));
 #else
     infof(data, "Server auth using %s with user '%s'\n",
-          auth, conn->user ? conn->user : "");
+          auth, data->state.aptr.user ?
+          data->state.aptr.user : "");
 #endif
     authstatus->multipass = (!authstatus->done) ? TRUE : FALSE;
   }

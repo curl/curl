@@ -33,10 +33,12 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP (optional .netrc; programmatic user/passwd) dir list PASV
- </name>
- <command>
+</name>
+
+# -u overrides netrc which overrides the URL
+<command>
 --netrc-optional --netrc-file log/netrc134 -u romulus:rhemus ftp://mary:mark@%HOSTIP:%FTPPORT/
 </command>
 <file name="log/netrc134" >

@@ -99,8 +99,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char *request_type = NULL;
   char *credential_scope = NULL;
   char *str_to_sign = NULL;
-  const char *user = conn->user ? conn->user : "";
-  const char *passwd = conn->passwd ? conn->passwd : "";
+  const char *user = data->state.aptr.user ? data->state.aptr.user : "";
+  const char *passwd = data->state.aptr.passwd ? data->state.aptr.passwd : "";
   char *secret = NULL;
   unsigned char tmp_sign0[32] = {0};
   unsigned char tmp_sign1[32] = {0};

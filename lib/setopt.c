@@ -1413,7 +1413,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setstropt(&data->set.str[STRING_USERNAME],
                             va_arg(param, char *));
     break;
-
   case CURLOPT_PASSWORD:
     /*
      * authentication password to use in the operation
