@@ -1436,6 +1436,12 @@ struct UrlState {
     char *cookiehost;
     char *rtsp_transport;
     char *te; /* TE: request header */
+
+    /* transfer credentials */
+    char *user;
+    char *passwd;
+    char *proxyuser;
+    char *proxypasswd;
   } aptr;
 
 #ifdef CURLDEBUG

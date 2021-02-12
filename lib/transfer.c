@@ -79,6 +79,7 @@
 #include "strcase.h"
 #include "urlapi-int.h"
 #include "hsts.h"
+#include "setopt.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1507,6 +1508,19 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     if(!data->state.aptr.uagent)
       return CURLE_OUT_OF_MEMORY;
   }
+
+  if(!result)
+    result = Curl_setstropt(&data->state.aptr.user,
+                            data->set.str[STRING_USERNAME]);
+  if(!result)
+    result = Curl_setstropt(&data->state.aptr.passwd,
+                            data->set.str[STRING_PASSWORD]);
+  if(!result)
+    result = Curl_setstropt(&data->state.aptr.proxyuser,
+                            data->set.str[STRING_PROXYUSERNAME]);
+  if(!result)
+    result = Curl_setstropt(&data->state.aptr.proxypasswd,
+                            data->set.str[STRING_PROXYPASSWORD]);
 
   data->req.headerbytecount = 0;
   return result;

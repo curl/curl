@@ -140,10 +140,10 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
     allocuserpwd = &data->state.aptr.proxyuserpwd;
-    userp = conn->http_proxy.user;
-    passwdp = conn->http_proxy.passwd;
+    userp = data->state.aptr.proxyuser;
+    passwdp = data->state.aptr.proxypasswd;
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
-              data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
+      data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
     hostname = conn->http_proxy.host.name;
     ntlm = &conn->proxyntlm;
     state = &conn->proxy_ntlm_state;
@@ -154,10 +154,10 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   }
   else {
     allocuserpwd = &data->state.aptr.userpwd;
-    userp = conn->user;
-    passwdp = conn->passwd;
+    userp = data->state.aptr.user;
+    passwdp = data->state.aptr.passwd;
     service = data->set.str[STRING_SERVICE_NAME] ?
-              data->set.str[STRING_SERVICE_NAME] : "HTTP";
+      data->set.str[STRING_SERVICE_NAME] : "HTTP";
     hostname = conn->host.name;
     ntlm = &conn->ntlm;
     state = &conn->http_ntlm_state;
