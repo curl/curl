@@ -167,8 +167,8 @@ curl_verbose_msg="enabled (--disable-verbose)"
     curl_psl_msg="no      (--with-libpsl)"
  curl_altsvc_msg="enabled";
     ssl_backends=
-     curl_h1_msg="enabled (--with-hyper)"
-     curl_h2_msg="no      (--with-nghttp2)"
+     curl_h1_msg="enabled (internal)"
+     curl_h2_msg="no      (--with-nghttp2, --with-hyper)"
      curl_h3_msg="no      (--with-ngtcp2, --with-quiche)"
 
 enable_altsvc="yes"
@@ -2749,10 +2749,8 @@ if test -z "$ssl_backends" -o "x$OPT_RUSTLS" != xno; then
        ssl_msg="rustls"
        test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
-       [
-         CPPFLAGS=$_cppflags
-         LDFLAGS=$_ldflags
-       ], -lpthread -ldl)
+       AC_MSG_ERROR([--with-rustls was specified but could not find rustls.]),
+       -lpthread -ldl)
     fi
 
     if test "x$USE_RUSTLS" = "xyes"; then
@@ -4097,12 +4095,7 @@ dnl **********************************************************************
 dnl Check for Hyper
 dnl **********************************************************************
 
-OPT_HYPER="yes"
-
-if test "x$disable_http" = "xyes"; then
-  # without HTTP, hyper is of no use
-  OPT_HYPER="no"
-fi
+OPT_HYPER="no"
 
 AC_ARG_WITH(hyper,
 AC_HELP_STRING([--with-hyper=PATH],[Enable hyper usage])
@@ -4126,6 +4119,10 @@ case "$OPT_HYPER" in
 esac
 
 if test X"$want_hyper" != Xno; then
+  if test "x$disable_http" = "xyes"; then
+    AC_MSG_ERROR([--with-hyper is not compatible with --disable-http])
+  fi
+
   dnl backup the pre-hyper variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
@@ -4142,7 +4139,7 @@ if test X"$want_hyper" != Xno; then
       $PKGCONFIG --libs-only-L hyper`
   else
     dnl no hyper pkg-config found
-    LIB_HYPER="-lhyper"
+    LIB_HYPER="-lhyper -ldl -lpthread -lm"
     if test X"$want_hyper" != Xdefault; then
       CPP_HYPER=-I"$want_hyper_path/capi/include"
       LD_HYPER="-L$want_hyper_path/target/debug"
@@ -4176,10 +4173,7 @@ if test X"$want_hyper" != Xno; then
           AC_MSG_NOTICE([Added $DIR_HYPER to CURL_LIBRARY_PATH]),
        )
       ],
-        dnl not found, revert back to clean variables
-        LDFLAGS=$CLEANLDFLAGS
-        CPPFLAGS=$CLEANCPPFLAGS
-        LIBS=$CLEANLIBS
+      AC_MSG_ERROR([--with-hyper but hyper was not found. See docs/HYPER.md.])
     )
   fi
 fi
