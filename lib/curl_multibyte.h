@@ -31,7 +31,6 @@
 
 wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8);
 char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
-
 #endif /* WIN32 */
 
 /*
@@ -40,29 +39,23 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
  * preprocessor conditional directives needed by code using these
  * to differentiate UNICODE from non-UNICODE builds.
  *
- * When building with UNICODE defined, these two macros
- * curlx_convert_UTF8_to_tchar() and curlx_convert_tchar_to_UTF8()
- * return a pointer to a newly allocated memory area holding result.
- * When the result is no longer needed, allocated memory is intended
- * to be free'ed with curlx_unicodefree().
+ * In the case of a non-UNICODE build the tchar strings are char strings that
+ * are duplicated via strdup and remain in whatever the passed in encoding is,
+ * which is assumed to be UTF-8 but may be other encoding. Therefore the
+ * significance of the conversion functions is primarily for UNICODE builds.
  *
- * When building without UNICODE defined, this macros
- * curlx_convert_UTF8_to_tchar() and curlx_convert_tchar_to_UTF8()
- * return the pointer received as argument. curlx_unicodefree() does
- * no actual free'ing of this pointer it is simply set to NULL.
+ * Allocated memory should be free'd with curlx_unicodefree().
+ *
+ * Note: Because these are curlx functions their memory usage is not tracked
+ * by the curl memory tracker memdebug. You'll notice that curlx function-like
+ * macros call free and strdup in parentheses, eg (strdup)(ptr), and that's to
+ * ensure that the curl memdebug override macros do not replace them.
  */
 
 #if defined(UNICODE) && defined(WIN32)
 
 #define curlx_convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar((ptr))
 #define curlx_convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8((ptr))
-#define curlx_unicodefree(ptr)                          \
-  do {                                                  \
-    if(ptr) {                                           \
-      (free)(ptr);                                        \
-      (ptr) = NULL;                                     \
-    }                                                   \
-  } while(0)
 
 typedef union {
   unsigned short       *tchar_ptr;
@@ -73,10 +66,8 @@ typedef union {
 
 #else
 
-#define curlx_convert_UTF8_to_tchar(ptr) (ptr)
-#define curlx_convert_tchar_to_UTF8(ptr) (ptr)
-#define curlx_unicodefree(ptr) \
-  do {(ptr) = NULL;} while(0)
+#define curlx_convert_UTF8_to_tchar(ptr) (strdup)(ptr)
+#define curlx_convert_tchar_to_UTF8(ptr) (strdup)(ptr)
 
 typedef union {
   char                *tchar_ptr;
@@ -86,5 +77,13 @@ typedef union {
 } xcharp_u;
 
 #endif /* UNICODE && WIN32 */
+
+#define curlx_unicodefree(ptr)                          \
+  do {                                                  \
+    if(ptr) {                                           \
+      (free)(ptr);                                      \
+      (ptr) = NULL;                                     \
+    }                                                   \
+  } while(0)
 
 #endif /* HEADER_CURL_MULTIBYTE_H */
