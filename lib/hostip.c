@@ -521,10 +521,10 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       int st;
       Curl_set_in_callback(data, true);
       st = data->set.resolver_start(
-#ifdef CURLRES_SYNCH
-        NULL,
-#else
+#ifdef USE_CURL_ASYNC
         data->state.async.resolver,
+#else
+        NULL,
 #endif
         NULL,
         data->set.resolver_start_client);
@@ -1108,7 +1108,7 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
   CURLcode result;
   struct connectdata *conn = data->conn;
 
-#ifndef CURLRES_SYNCH
+#ifdef USE_CURL_ASYNC
   if(data->state.async.dns) {
     conn->dns_entry = data->state.async.dns;
     data->state.async.dns = NULL;
