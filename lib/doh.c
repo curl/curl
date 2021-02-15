@@ -284,6 +284,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
     ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, CURLPROTO_HTTP|CURLPROTO_HTTPS);
 #endif
     ERROR_CHECK_SETOPT(CURLOPT_TIMEOUT_MS, (long)timeout_ms);
+    ERROR_CHECK_SETOPT(CURLOPT_SHARE, data->share);
     if(data->set.verbose)
       ERROR_CHECK_SETOPT(CURLOPT_VERBOSE, 1L);
     if(data->set.no_signal)
