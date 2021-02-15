@@ -1204,6 +1204,7 @@ void Curl_http2_done(struct Curl_easy *data, bool premature)
 
   if(premature) {
     /* RST_STREAM */
+    set_transfer(httpc, data); /* set the transfer */
     if(!nghttp2_submit_rst_stream(httpc->h2, NGHTTP2_FLAG_NONE,
                                   http->stream_id, NGHTTP2_STREAM_CLOSED))
       (void)nghttp2_session_send(httpc->h2);
