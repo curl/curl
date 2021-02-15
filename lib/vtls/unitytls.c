@@ -226,7 +226,7 @@ static size_t on_write(void* userData, const UInt8* data, size_t bufferLen, unit
   CURLcode result;
   ssize_t written = 0;
 
-  result = Curl_write_plain(backend->conn, backend->sockfd, data, bufferLen, &written);
+  result = Curl_write_plain(backend->conn->data, backend->sockfd, data, bufferLen, &written);
   if(result == CURLE_AGAIN) {
     unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WOULD_BLOCK);
     return 0;
@@ -290,10 +290,11 @@ static unitytls_x509verify_result on_verify(void* userData, unitytls_x509list_re
   return verify_result;
 }
 
-static ssize_t unitytls_send(struct connectdata *conn, int sockindex,
+static ssize_t unitytls_send(struct Curl_easy *data, int sockindex,
                              const void *mem, size_t len,
                              CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
 
@@ -306,7 +307,7 @@ static ssize_t unitytls_send(struct connectdata *conn, int sockindex,
       *curlcode = CURLE_AGAIN;
     else {
       *curlcode = CURLE_SEND_ERROR;
-      failf(conn->data, "Sending data failed with unitytls error code %i", err.code);
+      failf(data, "Sending data failed with unitytls error code %i", err.code);
     }
     return -1;
   }
@@ -314,10 +315,11 @@ static ssize_t unitytls_send(struct connectdata *conn, int sockindex,
   return written;
 }
 
-static ssize_t unitytls_recv(struct connectdata *conn, int sockindex,
+static ssize_t unitytls_recv(struct Curl_easy *data, int sockindex,
                              char *buf, size_t buffersize,
                              CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
 
@@ -335,7 +337,7 @@ static ssize_t unitytls_recv(struct connectdata *conn, int sockindex,
       *curlcode = CURLE_AGAIN;
     else {
       *curlcode = CURLE_RECV_ERROR;
-      failf(conn->data, "Receiving data failed with unitytls error code %i", err.code);
+      failf(data, "Receiving data failed with unitytls error code %i", err.code);
     }
     return -1;
   }
@@ -539,13 +541,13 @@ static CURLcode unitytls_connect_step3(struct ssl_connect_data* connssl)
   return CURLE_OK;
 }
 
-static CURLcode unitytls_connect_common(struct connectdata *conn,
+static CURLcode unitytls_connect_common(struct Curl_easy *data,
+                                        struct connectdata *conn,
                                         int sockindex,
                                         bool nonblocking,
                                         bool *done)
 {
   CURLcode retcode;
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
 
@@ -607,12 +609,12 @@ static CURLcode unitytls_connect_common(struct connectdata *conn,
   return CURLE_OK;
 }
 
-CURLcode Curl_unitytls_connect(struct connectdata *conn, int sockindex)
+static CURLcode Curl_unitytls_connect(struct Curl_easy *data, struct connectdata *conn, int sockindex)
 {
   CURLcode retcode;
   bool done = false;
 
-  retcode = unitytls_connect_common(conn, sockindex, false, &done);
+  retcode = unitytls_connect_common(data, conn, sockindex, false, &done);
   if(retcode)
     return retcode;
 
@@ -621,12 +623,12 @@ CURLcode Curl_unitytls_connect(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-CURLcode Curl_unitytls_connect_nonblocking(struct connectdata *conn, int sockindex, bool *done)
+static CURLcode Curl_unitytls_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn, int sockindex, bool *done)
 {
-  return unitytls_connect_common(conn, sockindex, true, done);
+  return unitytls_connect_common(data, conn, sockindex, true, done);
 }
 
-void Curl_unitytls_close(struct connectdata *conn, int sockindex)
+static void Curl_unitytls_close(struct Curl_easy *data, struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   struct ssl_backend_data* backend = connssl->backend;
@@ -650,25 +652,25 @@ void Curl_unitytls_close(struct connectdata *conn, int sockindex)
   backend->pk = NULL;
 }
 
-size_t Curl_unitytls_version(char *buffer, size_t size)
+static size_t Curl_unitytls_version(char *buffer, size_t size)
 {
   return snprintf(buffer, size, "UnityTls");
 }
 
-int Curl_unitytls_random(struct Curl_easy *data, unsigned char *entropy, size_t length)
+static CURLcode Curl_unitytls_random(struct Curl_easy *data, unsigned char *entropy, size_t length)
 {
   unitytls_errorstate err;
 
   if(!unitytls_check_interface_available(data))
-    return 1;
+    return CURLE_FAILED_INIT;
 
   err = unitytls->unitytls_errorstate_create();
   unitytls->unitytls_random_generate_bytes(entropy, length, &err);
 
   if(err.code != UNITYTLS_SUCCESS)
-    return 1;
+    return CURLE_FAILED_INIT;
 
-  return 0;
+  return CURLE_OK;
 }
 
 static void *Curl_unitytls_get_internals(struct ssl_connect_data *connssl,
@@ -705,7 +707,6 @@ const struct Curl_ssl Curl_ssl_unitytls = {
   Curl_none_set_engine_default,     /* set_engine_default */
   Curl_none_engines_list,           /* engines_list */
   Curl_none_false_start,            /* false_start */
-  Curl_none_md5sum,                 /* md5sum */
   NULL                              /* sha256sum */
 };
 
