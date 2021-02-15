@@ -278,7 +278,7 @@ static CURLcode ldap_connecting(struct Curl_easy *data, bool *done)
     if(!li->sslinst) {
       Sockbuf *sb;
       ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
-      ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, conn);
+      ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
       li->sslinst = TRUE;
       li->recv = conn->recv[FIRSTSOCKET];
       li->send = conn->send[FIRSTSOCKET];
@@ -716,8 +716,8 @@ ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
 {
   (void)arg;
   if(opt == LBER_SB_OPT_DATA_READY) {
-    struct connectdata *conn = sbiod->sbiod_pvt;
-    return Curl_ssl_data_pending(conn, FIRSTSOCKET);
+    struct Curl_easy *data = sbiod->sbiod_pvt;
+    return Curl_ssl_data_pending(data->conn, FIRSTSOCKET);
   }
   return 0;
 }
@@ -725,12 +725,13 @@ ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
 static ber_slen_t
 ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
 {
-  struct connectdata *conn = sbiod->sbiod_pvt;
+  struct Curl_easy *data = sbiod->sbiod_pvt;
+  struct connectdata *conn = data->conn;
   struct ldapconninfo *li = conn->proto.ldapc;
   ber_slen_t ret;
   CURLcode err = CURLE_RECV_ERROR;
 
-  ret = (li->recv)(conn->data, FIRSTSOCKET, buf, len, &err);
+  ret = (li->recv)(data, FIRSTSOCKET, buf, len, &err);
   if(ret < 0 && err == CURLE_AGAIN) {
     SET_SOCKERRNO(EWOULDBLOCK);
   }
@@ -740,12 +741,13 @@ ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
 static ber_slen_t
 ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
 {
-  struct connectdata *conn = sbiod->sbiod_pvt;
+  struct Curl_easy *data = sbiod->sbiod_pvt;
+  struct connectdata *conn = data->conn;
   struct ldapconninfo *li = conn->proto.ldapc;
   ber_slen_t ret;
   CURLcode err = CURLE_SEND_ERROR;
 
-  ret = (li->send)(conn->data, FIRSTSOCKET, buf, len, &err);
+  ret = (li->send)(data, FIRSTSOCKET, buf, len, &err);
   if(ret < 0 && err == CURLE_AGAIN) {
     SET_SOCKERRNO(EWOULDBLOCK);
   }
