@@ -1,14 +1,15 @@
 curl and libcurl 7.76.0
 
  Public curl releases:         197
- Command line options:         238
- curl_easy_setopt() options:   285
+ Command line options:         240
+ curl_easy_setopt() options:   288
  Public functions in libcurl:  85
- Contributors:                 2327
+ Contributors:                 2329
 
 This release includes the following changes:
 
  o curl: add --fail-with-body [17]
+ o doh: add options to disable ssl verification [5]
  o sasl: support SCRAM-SHA-1 and SCRAM-SHA-256 via libgsasl [4]
  o vtls: initial implementation of rustls backend [3]
 
@@ -30,6 +31,8 @@ This release includes the following bugfixes:
  o ftp: never set data->set.ftp_append outside setopt [14]
  o gskit: correct the gskit_send() prototype [21]
  o hostip: fix build with sync resolver [20]
+ o hostip: fix crash in sync resolver builds that use DOH [12]
+ o http: use credentials from transfer, not connection [25]
  o ngtcp2: adapt to the new recv_datagram callback
  o ngtcp2: clarify calculation precedence [27]
  o OS400: update for CURLOPT_AWS_SIGV4 [2]
@@ -49,12 +52,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  awesomenode on github, Benbuck Nason, Bodo Bergmann, Dan Fandrich,
+  Alex Xu, awesomenode on github, Benbuck Nason, Bodo Bergmann, Dan Fandrich,
   Daniel Gustafsson, Daniel Stenberg, David Goerger, Fabian Keil, Firefox OS,
-  Ikko Ashimine, Jacob Hoffman-Andrews, Jon Rumsey, Joseph Chen, Marcel Raad,
-  Ray Satiro, Simon Josefsson, Stephan Szabo, Viktor Szakats, Vincent Torri,
-  ZimCodes on github,
-  (20 contributors)
+  Ikko Ashimine, Jack Boos Yu, Jacob Hoffman-Andrews, Jon Rumsey, Joseph Chen,
+  Marcel Raad, Ray Satiro, Simon Josefsson, Stephan Szabo, Viktor Szakats,
+  Vincent Torri, ZimCodes on github,
+  (22 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -62,12 +65,14 @@ References to bug reports and discussions on issues:
  [2] = https://curl.se/bug/?i=6560
  [3] = https://curl.se/bug/?i=6350
  [4] = https://curl.se/bug/?i=6372
+ [5] = https://curl.se/bug/?i=4578
  [6] = https://curl.se/bug/?i=6585
  [7] = https://curl.se/bug/?i=6595
  [8] = https://curl.se/bug/?i=6514
  [9] = https://curl.se/bug/?i=6501
  [10] = https://curl.se/bug/?i=6225
  [11] = https://curl.se/bug/?i=6593
+ [12] = https://curl.se/bug/?i=6603
  [14] = https://curl.se/bug/?i=6579
  [15] = https://curl.se/bug/?i=6581
  [16] = https://curl.se/bug/?i=6577
@@ -78,6 +83,7 @@ References to bug reports and discussions on issues:
  [21] = https://curl.se/bug/?i=6569
  [22] = https://curl.se/bug/?i=6562
  [23] = https://curl.se/bug/?i=6564
+ [25] = https://curl.se/bug/?i=6542
  [27] = https://curl.se/bug/?i=6576
  [34] = https://curl.se/bug/?i=6576
  [35] = https://curl.se/bug/?i=6578
