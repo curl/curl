@@ -43,7 +43,7 @@ CURLcode Curl_http2_init(struct connectdata *conn);
 void Curl_http2_init_state(struct UrlState *state);
 void Curl_http2_init_userset(struct UserDefined *set);
 CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
-                                    struct connectdata *conn);
+                                    struct Curl_easy *data);
 CURLcode Curl_http2_setup(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_http2_switched(struct Curl_easy *data,
                              const char *ptr, size_t nread);
