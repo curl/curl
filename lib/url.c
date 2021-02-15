@@ -992,12 +992,12 @@ static bool extract_if_dead(struct connectdata *conn,
       /* briefly attach the connection to this transfer for the purpose of
          checking it */
       Curl_attach_connnection(data, conn);
-      conn->data = data; /* find the way back if necessary */
+
       state = conn->handler->connection_check(data, conn, CONNCHECK_ISDEAD);
       dead = (state & CONNRESULT_DEAD);
       /* detach the connection again */
       Curl_detach_connnection(data);
-      conn->data = NULL; /* clear it again */
+
     }
     else {
       /* Use the general method for determining the death of a connection */
@@ -1098,13 +1098,13 @@ ConnectionExists(struct Curl_easy *data,
 
 #ifdef USE_NTLM
   bool wantNTLMhttp = ((data->state.authhost.want &
-                      (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
-                      (needle->handler->protocol & PROTO_FAMILY_HTTP));
+                        (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+                       (needle->handler->protocol & PROTO_FAMILY_HTTP));
 #ifndef CURL_DISABLE_PROXY
   bool wantProxyNTLMhttp = (needle->bits.proxy_user_passwd &&
-                           ((data->state.authproxy.want &
-                           (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
-                           (needle->handler->protocol & PROTO_FAMILY_HTTP)));
+                            ((data->state.authproxy.want &
+                              (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+                             (needle->handler->protocol & PROTO_FAMILY_HTTP)));
 #else
   bool wantProxyNTLMhttp = FALSE;
 #endif
@@ -1272,17 +1272,19 @@ ConnectionExists(struct Curl_easy *data,
       }
 #endif
 
-      DEBUGASSERT(!check->data || GOOD_EASY_HANDLE(check->data));
-
-      if(!canmultiplex && check->data)
+      if(!canmultiplex && CONN_INUSE(check))
         /* this request can't be multiplexed but the checked connection is
            already in use so we skip it */
         continue;
 
-      if(check->data && (check->data->multi != needle->data->multi))
-        /* this could be subject for multiplex use, but only if they belong to
-         * the same multi handle */
-        continue;
+      if(CONN_INUSE(check)) {
+        /* Subject for multiplex use if 'checks' belongs to the same multi
+           handle as 'data' is. */
+        struct Curl_llist_element *e = check->easyq.head;
+        struct Curl_easy *entry = e->ptr;
+        if(entry->multi != data->multi)
+          continue;
+      }
 
       if(needle->localdev || needle->localport) {
         /* If we are bound to a specific local end (IP+port), we must not
@@ -1441,7 +1443,7 @@ ConnectionExists(struct Curl_easy *data,
               continue;
             }
             else if(multiplexed >=
-                    Curl_multi_max_concurrent_streams(needle->data->multi)) {
+                    Curl_multi_max_concurrent_streams(data->multi)) {
               infof(data, "client side MAX_CONCURRENT_STREAMS reached"
                     ", skip (%zu)\n",
                     multiplexed);
@@ -1465,7 +1467,6 @@ ConnectionExists(struct Curl_easy *data,
 
   if(chosen) {
     /* mark it as used before releasing the lock */
-    chosen->data = data; /* own it! */
     Curl_attach_connnection(data, chosen);
     CONNCACHE_UNLOCK(data);
     *usethis = chosen;
@@ -1679,9 +1680,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
   /* Store current time to give a baseline to keepalive connection times. */
   conn->keepalive = Curl_now();
-
-  conn->data = data; /* Setup the association between this connection
-                        and the Curl_easy */
 
 #ifndef CURL_DISABLE_PROXY
   conn->http_proxy.proxytype = data->set.proxytype;
@@ -3405,8 +3403,6 @@ static void reuse_conn(struct Curl_easy *data,
      allocated in vain and is targeted for destruction */
   Curl_free_primary_ssl_config(&old_conn->ssl_config);
 
-  conn->data = data;
-
   /* get the user+password information from the old_conn struct since it may
    * be new for this request even when we re-use an existing connection */
   conn->bits.user_passwd = old_conn->bits.user_passwd;
@@ -3494,7 +3490,6 @@ static void reuse_conn(struct Curl_easy *data,
  * @param async is set TRUE when an async DNS resolution is pending
  * @see Curl_setup_conn()
  *
- * *NOTE* this function assigns the conn->data pointer!
  */
 
 static CURLcode create_conn(struct Curl_easy *data,
@@ -3976,10 +3971,7 @@ out:
  * create_conn() is all done.
  *
  * Curl_setup_conn() also handles reused connections
- *
- * conn->data MUST already have been setup fine (in create_conn)
  */
-
 CURLcode Curl_setup_conn(struct Curl_easy *data,
                          bool *protocol_done)
 {

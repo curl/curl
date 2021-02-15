@@ -1448,11 +1448,9 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
     }
 
     c = find.found;
-    if(connp) {
+    if(connp)
       /* only store this if the caller cares for it */
       *connp = c;
-      c->data = data;
-    }
     return c->sock[FIRSTSOCKET];
   }
   return CURL_SOCKET_BAD;
