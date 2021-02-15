@@ -3162,7 +3162,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      (data->state.httpwant == CURL_HTTP_VERSION_2)) {
     /* append HTTP2 upgrade magic stuff to the HTTP request if it isn't done
        over SSL */
-    result = Curl_http2_request_upgrade(&req, conn);
+    result = Curl_http2_request_upgrade(&req, data);
     if(result) {
       Curl_dyn_free(&req);
       return result;
