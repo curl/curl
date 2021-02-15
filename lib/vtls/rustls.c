@@ -5,7 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020, Jacob Hoffman-Andrews, <github@hoffman-andrews.com>
+ * Copyright (C) 2020 - 2021, Jacob Hoffman-Andrews,
+ * <github@hoffman-andrews.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -61,10 +62,8 @@ static CURLcode map_error(rustls_result r)
 static bool
 cr_data_pending(const struct connectdata *conn, int sockindex)
 {
-  struct Curl_easy *data = conn->data;
   const struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
-  infof(data, "rustls_data_pending %d\n", backend->data_pending);
   return backend->data_pending;
 }
 
