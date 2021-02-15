@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,6 +27,7 @@
 
 #include "warnless.h"
 #include "curl_sha256.h"
+#include "curl_hmac.h"
 
 #if defined(USE_OPENSSL)
 
@@ -343,11 +344,14 @@ static int sha256_compress(struct sha256_state *md,
   }
 
   /* Compress */
-#define RND(a,b,c,d,e,f,g,h,i)                                  \
-  unsigned long t0 = h + Sigma1(e) + Ch(e, f, g) + K[i] + W[i]; \
-  unsigned long t1 = Sigma0(a) + Maj(a, b, c);                  \
-  d += t0;                                                      \
-  h = t0 + t1;
+#define RND(a,b,c,d,e,f,g,h,i)                                          \
+  do {                                                                  \
+    unsigned long t0 = h + Sigma1(e) + Ch(e, f, g) + K[i] + W[i];       \
+    unsigned long t1 = Sigma0(a) + Maj(a, b, c);                        \
+    d += t0;                                                            \
+    h = t0 + t1;                                                        \
+  } while(0)
+
   for(i = 0; i < 64; ++i) {
     unsigned long t;
     RND(S[0], S[1], S[2], S[3], S[4], S[5], S[6], S[7], i);
@@ -490,5 +494,24 @@ void Curl_sha256it(unsigned char *output, const unsigned char *input,
   SHA256_Update(&ctx, input, curlx_uztoui(length));
   SHA256_Final(output, &ctx);
 }
+
+
+const struct HMAC_params Curl_HMAC_SHA256[] = {
+  {
+    /* Hash initialization function. */
+    CURLX_FUNCTION_CAST(HMAC_hinit_func, SHA256_Init),
+    /* Hash update function. */
+    CURLX_FUNCTION_CAST(HMAC_hupdate_func, SHA256_Update),
+    /* Hash computation end function. */
+    CURLX_FUNCTION_CAST(HMAC_hfinal_func, SHA256_Final),
+    /* Size of hash context structure. */
+    sizeof(SHA256_CTX),
+    /* Maximum key length. */
+    64,
+    /* Result size. */
+    32
+  }
+};
+
 
 #endif /* CURL_DISABLE_CRYPTO_AUTH */

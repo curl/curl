@@ -148,7 +148,9 @@ debug multithreaded dynamic C runtime.
 
 Make sure that MinGW32's bin dir is in the search path, for example:
 
-    set PATH=c:\mingw32\bin;%PATH%
+```cmd
+set PATH=c:\mingw32\bin;%PATH%
+```
 
 then run `mingw32-make mingw32` in the root dir. There are other
 make targets available to build libcurl with more features, use:
@@ -164,20 +166,26 @@ to verify that the provided `Makefile.m32` files use the proper paths, and
 adjust as necessary. It is also possible to override these paths with
 environment variables, for example:
 
-    set ZLIB_PATH=c:\zlib-1.2.8
-    set OPENSSL_PATH=c:\openssl-1.0.2c
-    set LIBSSH2_PATH=c:\libssh2-1.6.0
+```cmd
+set ZLIB_PATH=c:\zlib-1.2.8
+set OPENSSL_PATH=c:\openssl-1.0.2c
+set LIBSSH2_PATH=c:\libssh2-1.6.0
+```
 
 It is also possible to build with other LDAP SDKs than MS LDAP; currently
 it is possible to build with native Win32 OpenLDAP, or with the Novell CLDAP
 SDK. If you want to use these you need to set these vars:
 
-    set LDAP_SDK=c:\openldap
-    set USE_LDAP_OPENLDAP=1
+```cmd
+set LDAP_SDK=c:\openldap
+set USE_LDAP_OPENLDAP=1
+```
 
 or for using the Novell SDK:
 
-    set USE_LDAP_NOVELL=1
+```cmd
+set USE_LDAP_NOVELL=1
+```
 
 If you want to enable LDAPS support then set LDAPS=1.
 
@@ -280,9 +288,11 @@ the same curl binary is executed on older cats. For example, running these
 commands in curl's directory in the shell will build the code such that it
 will run on cats as old as OS X 10.6 ("Snow Leopard") (using bash):
 
-    export MACOSX_DEPLOYMENT_TARGET="10.6"
-    ./configure --with-secure-transport
-    make
+```bash
+export MACOSX_DEPLOYMENT_TARGET="10.6"
+./configure --with-secure-transport
+make
+```
 
 # Android
 
@@ -295,16 +305,18 @@ where it has been installed and then set up some environment variables before
 launching `configure`. On macOS, those variables could look like this to compile
 for `aarch64` and API level 29:
 
-    export NDK=~/Library/Android/sdk/ndk/20.1.5948944
-    export HOST_TAG=darwin-x86_64
-    export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/$HOST_TAG
-    export AR=$TOOLCHAIN/bin/aarch64-linux-android-ar
-    export AS=$TOOLCHAIN/bin/aarch64-linux-android-as
-    export CC=$TOOLCHAIN/bin/aarch64-linux-android29-clang
-    export CXX=$TOOLCHAIN/bin/aarch64-linux-android29-clang++
-    export LD=$TOOLCHAIN/bin/aarch64-linux-android-ld
-    export RANLIB=$TOOLCHAIN/bin/aarch64-linux-android-ranlib
-    export STRIP=$TOOLCHAIN/bin/aarch64-linux-android-strip
+```bash
+export NDK=~/Library/Android/sdk/ndk/20.1.5948944
+export HOST_TAG=darwin-x86_64
+export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/$HOST_TAG
+export AR=$TOOLCHAIN/bin/aarch64-linux-android-ar
+export AS=$TOOLCHAIN/bin/aarch64-linux-android-as
+export CC=$TOOLCHAIN/bin/aarch64-linux-android29-clang
+export CXX=$TOOLCHAIN/bin/aarch64-linux-android29-clang++
+export LD=$TOOLCHAIN/bin/aarch64-linux-android-ld
+export RANLIB=$TOOLCHAIN/bin/aarch64-linux-android-ranlib
+export STRIP=$TOOLCHAIN/bin/aarch64-linux-android-strip
+```
 
 When building on Linux or targeting other API levels or architectures, you need
 to adjust those variables accordingly. After that you can build curl like this:
@@ -337,22 +349,24 @@ configure with any options you need.  Be sure and specify the `--host` and
 example of cross-compiling for the IBM 405GP PowerPC processor using the
 toolchain from MonteVista for Hardhat Linux.
 
-    #! /bin/sh
+```bash
+#! /bin/sh
 
-    export PATH=$PATH:/opt/hardhat/devkit/ppc/405/bin
-    export CPPFLAGS="-I/opt/hardhat/devkit/ppc/405/target/usr/include"
-    export AR=ppc_405-ar
-    export AS=ppc_405-as
-    export LD=ppc_405-ld
-    export RANLIB=ppc_405-ranlib
-    export CC=ppc_405-gcc
-    export NM=ppc_405-nm
+export PATH=$PATH:/opt/hardhat/devkit/ppc/405/bin
+export CPPFLAGS="-I/opt/hardhat/devkit/ppc/405/target/usr/include"
+export AR=ppc_405-ar
+export AS=ppc_405-as
+export LD=ppc_405-ld
+export RANLIB=ppc_405-ranlib
+export CC=ppc_405-gcc
+export NM=ppc_405-nm
 
-    ./configure --target=powerpc-hardhat-linux
-        --host=powerpc-hardhat-linux
-        --build=i586-pc-linux-gnu
-        --prefix=/opt/hardhat/devkit/ppc/405/target/usr/local
-        --exec-prefix=/usr/local
+./configure --target=powerpc-hardhat-linux
+    --host=powerpc-hardhat-linux
+    --build=i586-pc-linux-gnu
+    --prefix=/opt/hardhat/devkit/ppc/405/target/usr/local
+    --exec-prefix=/usr/local
+```
 
 You may also need to provide a parameter like `--with-random=/dev/urandom` to
 configure as it cannot detect the presence of a random number generating
@@ -433,77 +447,25 @@ line.  Following is a list of appropriate key words:
 
 # PORTS
 
-This is a probably incomplete list of known hardware and operating systems
-that curl has been compiled for. If you know a system curl compiles and
-runs on, that isn't listed, please let us know!
+This is a probably incomplete list of known CPU architectures and operating
+systems that curl has been compiled for. If you know a system curl compiles
+and runs on, that isn't listed, please let us know!
 
-  - Alpha DEC OSF 4
-  - Alpha Digital UNIX v3.2
-  - Alpha FreeBSD 4.1, 4.5
-  - Alpha Linux 2.2, 2.4
-  - Alpha NetBSD 1.5.2
-  - Alpha OpenBSD 3.0
-  - Alpha OpenVMS V7.1-1H2
-  - Alpha Tru64 v5.0 5.1
-  - AVR32 Linux
-  - ARM Android 1.5, 2.1, 2.3, 3.2, 4.x
-  - ARM INTEGRITY
-  - ARM iOS
-  - Cell Linux
-  - Cell Cell OS
-  - HP-PA HP-UX 9.X 10.X 11.X
-  - HP-PA Linux
-  - HP3000 MPE/iX
-  - MicroBlaze uClinux
-  - MIPS IRIX 6.2, 6.5
-  - MIPS Linux
-  - OS/400
-  - Pocket PC/Win CE 3.0
-  - Power AIX 3.2.5, 4.2, 4.3.1, 4.3.2, 5.1, 5.2
-  - PowerPC Darwin 1.0
-  - PowerPC INTEGRITY
-  - PowerPC Linux
-  - PowerPC Mac OS 9
-  - PowerPC Mac OS X
-  - SH4 Linux 2.6.X
-  - SH4 OS21
-  - SINIX-Z v5
-  - Sparc Linux
-  - Sparc Solaris 2.4, 2.5, 2.5.1, 2.6, 7, 8, 9, 10
-  - Sparc SunOS 4.1.X
-  - StrongARM (and other ARM) RISC OS 3.1, 4.02
-  - StrongARM/ARM7/ARM9 Linux 2.4, 2.6
-  - StrongARM NetBSD 1.4.1
-  - Symbian OS (P.I.P.S.) 9.x
-  - TPF
-  - Ultrix 4.3a
-  - UNICOS 9.0
-  - i386 BeOS
-  - i386 DOS
-  - i386 eCos 1.3.1
-  - i386 Esix 4.1
-  - i386 FreeBSD
-  - i386 HURD
-  - i386 Haiku OS
-  - i386 Linux 1.3, 2.0, 2.2, 2.3, 2.4, 2.6
-  - i386 Mac OS X
-  - i386 MINIX 3.1
-  - i386 NetBSD
-  - i386 Novell NetWare
-  - i386 OS/2
-  - i386 OpenBSD
-  - i386 QNX 6
-  - i386 SCO unix
-  - i386 Solaris 2.7
-  - i386 Windows 95, 98, ME, NT, 2000, XP, 2003
-  - i486 ncr-sysv4.3.03 (NCR MP-RAS)
-  - ia64 Linux 2.3.99
-  - m68k AmigaOS 3
-  - m68k Linux
-  - m68k uClinux
-  - m68k OpenBSD
-  - m88k dg-dgux5.4R3.00
-  - s390 Linux
-  - x86_64 Linux
-  - XScale/PXA250 Linux 2.4
-  - Nios II uClinux
+## 85 Operating Systems
+
+AIX, AmigaOS, Android, Aros, BeOS, Blackberry 10, Blackberry Tablet OS, Cell
+OS, ChromeOS, Cisco IOS, Cygwin, Dragonfly BSD, eCOS, FreeBSD, FreeDOS,
+FreeRTOS, Fuchsia, Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd,
+Illumos, Integrity, iOS, ipadOS, IRIX, LineageOS, Linux, Lua RTOS, Mac OS 9,
+macOS, Mbed, Micrium, MINIX, MorphOS, MPE/iX, MS-DOS, NCR MP-RAS, NetBSD,
+Netware, Nintendo Switch, NonStop OS, NuttX, OpenBSD, OpenStep, Orbis OS,
+OS/2, OS/400, OS21, Plan 9, PlayStation Portable, QNX, Qubes OS, ReactOS,
+Redox, RICS OS, Sailfish OS, SCO Unix, Serenity, SINIX-Z, Solaris, SunOS,
+Syllable OS, Symbian, Tizen, TPF, Tru64, tvOS, ucLinux, Ultrix, UNICOS,
+UnixWare, VMS, vxWorks, WebOS, Wii system software, Windows, Windows CE, Xbox
+System, z/OS, z/TPF, z/VM, z/VSE
+
+## 22 CPU Architectures
+
+Alpha, ARC, ARM, AVR32, Cell, HP-PA, Itanium, m68k, MicroBlaze, MIPS, Nios,
+OpenRISC, POWER, PowerPC, RISC-V, s390, SH4, SPARC, VAX, x86, x86-64, Xtensa

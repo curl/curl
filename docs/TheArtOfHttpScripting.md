@@ -11,7 +11,7 @@
 
  Curl is a command line tool for doing all sorts of URL manipulations and
  transfers, but this particular document will focus on how to use it when
- doing HTTP requests for fun and profit. I willl assume that you know how to
+ doing HTTP requests for fun and profit. I will assume that you know how to
  invoke `curl --help` or `curl --manual` to get basic information about it.
 
  Curl is not written to do everything for you. It makes the requests, it gets
@@ -38,7 +38,7 @@
 
 ## See the Protocol
 
- Using curl's option [`--verbose`](https://curl.haxx.se/docs/manpage.html#-v)
+ Using curl's option [`--verbose`](https://curl.se/docs/manpage.html#-v)
  (`-v` as a short option) will display what kind of commands curl sends to the
  server, as well as a few other informational texts.
 
@@ -46,8 +46,8 @@
  understand the curl<->server interaction.
 
  Sometimes even `--verbose` is not enough. Then
- [`--trace`](https://curl.haxx.se/docs/manpage.html#-trace) and
- [`--trace-ascii`]((https://curl.haxx.se/docs/manpage.html#--trace-ascii)
+ [`--trace`](https://curl.se/docs/manpage.html#-trace) and
+ [`--trace-ascii`]((https://curl.se/docs/manpage.html#--trace-ascii)
  offer even more details as they show **everything** curl sends and
  receives. Use it like this:
 
@@ -58,7 +58,7 @@
  Many times you may wonder what exactly is taking all the time, or you just
  want to know the amount of milliseconds between two points in a transfer. For
  those, and other similar situations, the
- [`--trace-time`]((https://curl.haxx.se/docs/manpage.html#--trace-time) option
+ [`--trace-time`]((https://curl.se/docs/manpage.html#--trace-time) option
  is what you need. It'll prepend the time to each trace output line:
 
     curl --trace-ascii d.txt --trace-time http://example.com/
@@ -74,7 +74,7 @@
 
  The Uniform Resource Locator format is how you specify the address of a
  particular resource on the Internet. You know these, you've seen URLs like
- https://curl.haxx.se or https://yourbank.com a million times. RFC 3986 is the
+ https://curl.se or https://yourbank.com a million times. RFC 3986 is the
  canonical spec. And yeah, the formal name is not URL, it is URI.
 
 ## Host
@@ -85,7 +85,7 @@
 
  For development and other trying out situations, you can point to a different
  IP address for a host name than what would otherwise be used, by using curl's
- [`--resolve`](https://curl.haxx.se/docs/manpage.html#--resolve) option:
+ [`--resolve`](https://curl.se/docs/manpage.html#--resolve) option:
 
     curl --resolve www.example.org:80:127.0.0.1 http://www.example.org/
 
@@ -141,19 +141,19 @@
  issues a GET request to the server and receives the document it asked for.
  If you issue the command line
 
-    curl https://curl.haxx.se
+    curl https://curl.se
 
  you get a web page returned in your terminal window. The entire HTML document
  that that URL holds.
 
  All HTTP replies contain a set of response headers that are normally hidden,
- use curl's [`--include`](https://curl.haxx.se/docs/manpage.html#-i) (`-i`)
+ use curl's [`--include`](https://curl.se/docs/manpage.html#-i) (`-i`)
  option to display them as well as the rest of the document.
 
 ## HEAD
 
  You can ask the remote server for ONLY the headers by using the
- [`--head`](https://curl.haxx.se/docs/manpage.html#-I) (`-I`) option which
+ [`--head`](https://curl.se/docs/manpage.html#-I) (`-I`) option which
  will make curl issue a HEAD request. In some special cases servers deny the
  HEAD method while others still work, which is a particular kind of annoyance.
 
@@ -173,7 +173,7 @@
 
     curl http://url1.example.com http://url2.example.com
 
- If you use [`--data`](https://curl.haxx.se/docs/manpage.html#-d) to POST to
+ If you use [`--data`](https://curl.se/docs/manpage.html#-d) to POST to
  the URL, using multiple URLs means that you send that same POST to all the
  given URLs.
 
@@ -186,7 +186,7 @@
 
  Sometimes you need to operate on several URLs in a single command line and do
  different HTTP methods on each. For this, you'll enjoy the
- [`--next`](https://curl.haxx.se/docs/manpage.html#-:) option. It is basically
+ [`--next`](https://curl.se/docs/manpage.html#-:) option. It is basically
  a separator that separates a bunch of options from the next. All the URLs
  before `--next` will get the same method and will get all the POST data
  merged into one.
@@ -222,10 +222,12 @@
 
  A GET-form uses the method GET, as specified in HTML like:
 
-    <form method="GET" action="junk.cgi">
-      <input type=text name="birthyear">
-      <input type=submit name=press value="OK">
-    </form>
+```html
+<form method="GET" action="junk.cgi">
+  <input type=text name="birthyear">
+  <input type=submit name=press value="OK">
+</form>
+```
 
  In your favorite browser, this form will appear with a text box to fill in
  and a press-button labeled "OK". If you fill in '1905' and press the OK
@@ -258,10 +260,12 @@
 
  The form would look very similar to the previous one:
 
-    <form method="POST" action="junk.cgi">
-      <input type=text name="birthyear">
-      <input type=submit name=press value=" OK ">
-    </form>
+```html
+<form method="POST" action="junk.cgi">
+  <input type=text name="birthyear">
+  <input type=submit name=press value=" OK ">
+</form>
+```
 
  And to use curl to post this form with the same data filled in as before, we
  could do it like:
@@ -293,10 +297,12 @@
  This method is mainly designed to better support file uploads. A form that
  allows a user to upload a file could be written like this in HTML:
 
-    <form method="POST" enctype='multipart/form-data' action="upload.cgi">
-      <input type=file name=upload>
-      <input type=submit name=press value="OK">
-    </form>
+```html
+<form method="POST" enctype='multipart/form-data' action="upload.cgi">
+  <input type=file name=upload>
+  <input type=submit name=press value="OK">
+</form>
+```
 
  This clearly shows that the Content-Type about to be sent is
  `multipart/form-data`.
@@ -315,11 +321,13 @@
  A similar example form with one visible field, one hidden field and one
  submit button could look like:
 
-    <form method="POST" action="foobar.cgi">
-      <input type=text name="birthyear">
-      <input type=hidden name="person" value="daniel">
-      <input type=submit name="press" value="OK">
-    </form>
+```html
+<form method="POST" action="foobar.cgi">
+  <input type=text name="birthyear">
+  <input type=hidden name="person" value="daniel">
+  <input type=submit name="press" value="OK">
+</form>
+```
 
  To POST this with curl, you won't have to think about if the fields are
  hidden or not. To curl they're all the same:
@@ -370,10 +378,10 @@
 
  The site might require a different authentication method (check the headers
  returned by the server), and then
- [`--ntlm`](https://curl.haxx.se/docs/manpage.html#--ntlm),
- [`--digest`](https://curl.haxx.se/docs/manpage.html#--digest),
- [`--negotiate`](https://curl.haxx.se/docs/manpage.html#--negotiate) or even
- [`--anyauth`](https://curl.haxx.se/docs/manpage.html#--anyauth) might be
+ [`--ntlm`](https://curl.se/docs/manpage.html#--ntlm),
+ [`--digest`](https://curl.se/docs/manpage.html#--digest),
+ [`--negotiate`](https://curl.se/docs/manpage.html#--negotiate) or even
+ [`--anyauth`](https://curl.se/docs/manpage.html#--anyauth) might be
  options that suit you.
 
 ## Proxy Authentication
@@ -383,12 +391,12 @@
  may require its own user and password to allow the client to get through to
  the Internet. To specify those with curl, run something like:
 
-        curl --proxy-user proxyuser:proxypassword curl.haxx.se
+    curl --proxy-user proxyuser:proxypassword curl.se
 
  If your proxy requires the authentication to be done using the NTLM method,
- use [`--proxy-ntlm`](https://curl.haxx.se/docs/manpage.html#--proxy-ntlm), if
+ use [`--proxy-ntlm`](https://curl.se/docs/manpage.html#--proxy-ntlm), if
  it requires Digest use
- [`--proxy-digest`](https://curl.haxx.se/docs/manpage.html#--proxy-digest).
+ [`--proxy-digest`](https://curl.se/docs/manpage.html#--proxy-digest).
 
  If you use any one of these user+password options but leave out the password
  part, curl will prompt for the password interactively.
@@ -462,7 +470,7 @@
 
  If you use curl to POST to a site that immediately redirects you to another
  page, you can safely use
- [`--location`](https://curl.haxx.se/docs/manpage.html#-L) (`-L`) and
+ [`--location`](https://curl.se/docs/manpage.html#-L) (`-L`) and
  `--data`/`--form` together. curl will only use POST in the first request, and
  then revert to GET in the following operations.
 
@@ -501,13 +509,13 @@
 
  Cookies are sent as common HTTP headers. This is practical as it allows curl
  to record cookies simply by recording headers. Record cookies with curl by
- using the [`--dump-header`](https://curl.haxx.se/docs/manpage.html#-D) (`-D`)
+ using the [`--dump-header`](https://curl.se/docs/manpage.html#-D) (`-D`)
  option like:
 
     curl --dump-header headers_and_cookies http://www.example.com
 
  (Take note that the
- [`--cookie-jar`](https://curl.haxx.se/docs/manpage.html#-c) option described
+ [`--cookie-jar`](https://curl.se/docs/manpage.html#-c) option described
  below is a better way to store cookies.)
 
  Curl has a full blown cookie parsing engine built-in that comes in use if you
@@ -519,7 +527,7 @@
     curl --cookie stored_cookies_in_file http://www.example.com
 
  Curl's "cookie engine" gets enabled when you use the
- [`--cookie`](https://curl.haxx.se/docs/manpage.html#-b) option. If you only
+ [`--cookie`](https://curl.se/docs/manpage.html#-b) option. If you only
  want curl to understand received cookies, use `--cookie` with a file that
  doesn't exist. Example, if you want to let curl understand cookies from a
  page and follow a location (and thus possibly send back cookies it received),
@@ -571,12 +579,12 @@
  curl also tries to verify that the server is who it claims to be, by
  verifying the server's certificate against a locally stored CA cert
  bundle. Failing the verification will cause curl to deny the connection. You
- must then use [`--insecure`](https://curl.haxx.se/docs/manpage.html#-k)
+ must then use [`--insecure`](https://curl.se/docs/manpage.html#-k)
  (`-k`) in case you want to tell curl to ignore that the server can't be
  verified.
 
  More about server certificate verification and ca cert bundles can be read in
- the [SSLCERTS document](https://curl.haxx.se/docs/sslcerts.html).
+ the [SSLCERTS document](https://curl.se/docs/sslcerts.html).
 
  At times you may end up with your own CA cert store and then you can tell
  curl to use that to verify the server's certificate:
@@ -611,7 +619,7 @@
  It should be noted that curl selects which methods to use on its own
  depending on what action to ask for. `-d` will do POST, `-I` will do HEAD and
  so on. If you use the
- [`--request`](https://curl.haxx.se/docs/manpage.html#-X) / `-X` option you
+ [`--request`](https://curl.se/docs/manpage.html#-X) / `-X` option you
  can change the method keyword curl selects, but you will not modify curl's
  behavior. This means that if you for example use -d "data" to do a POST, you
  can modify the method to a `PROPFIND` with `-X` and curl will still think it
@@ -671,10 +679,10 @@
  - Make sure you check for and use cookies when needed (both reading with
    `--cookie` and writing with `--cookie-jar`)
 
- - Set user-agent (with [`-A`](https://curl.haxx.se/docs/manpage.html#-A)) to
+ - Set user-agent (with [`-A`](https://curl.se/docs/manpage.html#-A)) to
    one like a recent popular browser does
 
- - Set referer (with [`-E`](https://curl.haxx.se/docs/manpage.html#-E)) like
+ - Set referer (with [`-E`](https://curl.se/docs/manpage.html#-E)) like
    it is set by the browser
 
  - If you use POST, make sure you send all the fields and in the same order as

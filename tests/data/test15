@@ -9,7 +9,7 @@ HTTP GET
 # Server-side
 <reply>
 <data nocheck="yes">
-HTTP/1.4 200 OK
+HTTP/1.1 200 OK
 Fake: yes
 Fake: yes
 Fake: yes
@@ -35,7 +35,7 @@ http://%HOSTIP:%HTTPPORT/want/15 --write-out "%{url_effective} %{http_code} %{si
 # Verify data after the test has been "shot"
 <verify>
 <stdout>
-HTTP/1.4 200 OK
+HTTP/1.1 200 OK
 Fake: yes
 Fake: yes
 Fake: yes

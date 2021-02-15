@@ -26,7 +26,11 @@ body
 </data2>
 <datacheck>
 HTTP/1.1 302 OK swsclose
+%if !hyper
 Location: ../m o o.html/420002    
+%else
+Location: ../m o o.html/420002
+%endif
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Connection: close
 

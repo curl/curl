@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -137,12 +137,11 @@ static char *max5data(curl_off_t bytes, char *max5)
 
 */
 
-int Curl_pgrsDone(struct connectdata *conn)
+int Curl_pgrsDone(struct Curl_easy *data)
 {
   int rc;
-  struct Curl_easy *data = conn->data;
   data->progress.lastshow = 0;
-  rc = Curl_pgrsUpdate(conn); /* the final (forced) update */
+  rc = Curl_pgrsUpdate(data); /* the final (forced) update */
   if(rc)
     return rc;
 
@@ -240,10 +239,8 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
   data->progress.speeder_c = 0; /* reset the progress meter display */
   data->progress.start = Curl_now();
   data->progress.is_t_startransfer_set = false;
-  data->progress.ul_limit_start.tv_sec = 0;
-  data->progress.ul_limit_start.tv_usec = 0;
-  data->progress.dl_limit_start.tv_sec = 0;
-  data->progress.dl_limit_start.tv_usec = 0;
+  data->progress.ul_limit_start = data->progress.start;
+  data->progress.dl_limit_start = data->progress.start;
   data->progress.downloaded = 0;
   data->progress.uploaded = 0;
   /* clear all bits except HIDE and HEADERS_OUT */
@@ -373,11 +370,10 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
 }
 
 /* returns TRUE if it's time to show the progress meter */
-static bool progress_calc(struct connectdata *conn, struct curltime now)
+static bool progress_calc(struct Curl_easy *data, struct curltime now)
 {
   curl_off_t timespent;
   curl_off_t timespent_ms; /* milliseconds */
-  struct Curl_easy *data = conn->data;
   curl_off_t dl = data->progress.downloaded;
   curl_off_t ul = data->progress.uploaded;
   bool timetoshow = FALSE;
@@ -467,9 +463,8 @@ static bool progress_calc(struct connectdata *conn, struct curltime now)
 }
 
 #ifndef CURL_DISABLE_PROGRESS_METER
-static void progress_meter(struct connectdata *conn)
+static void progress_meter(struct Curl_easy *data)
 {
-  struct Curl_easy *data = conn->data;
   char max5[6][10];
   curl_off_t dlpercen = 0;
   curl_off_t ulpercen = 0;
@@ -583,11 +578,10 @@ static void progress_meter(struct connectdata *conn)
  * Curl_pgrsUpdate() returns 0 for success or the value returned by the
  * progress callback!
  */
-int Curl_pgrsUpdate(struct connectdata *conn)
+int Curl_pgrsUpdate(struct Curl_easy *data)
 {
-  struct Curl_easy *data = conn->data;
   struct curltime now = Curl_now(); /* what time is it */
-  bool showprogress = progress_calc(conn, now);
+  bool showprogress = progress_calc(data, now);
   if(!(data->progress.flags & PGRS_HIDE)) {
     if(data->set.fxferinfo) {
       int result;
@@ -623,7 +617,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     }
 
     if(showprogress)
-      progress_meter(conn);
+      progress_meter(data);
   }
 
   return 0;

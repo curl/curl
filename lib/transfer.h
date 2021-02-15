@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 #define Curl_headersep(x) ((((x)==':') || ((x)==';')))
-char *Curl_checkheaders(const struct connectdata *conn,
+char *Curl_checkheaders(const struct Curl_easy *data,
                         const char *thisheader);
 
 void Curl_init_CONNECT(struct Curl_easy *data);
@@ -36,9 +36,8 @@ typedef enum {
                    allow initing to this */
   FOLLOW_FAKE,  /* only records stuff, not actually following */
   FOLLOW_RETRY, /* set if this is a request retry as opposed to a real
-                          redirect following */
-  FOLLOW_REDIR, /* a full true redirect */
-  FOLLOW_LAST   /* never used */
+                   redirect following */
+  FOLLOW_REDIR /* a full true redirect */
 } followtype;
 
 CURLcode Curl_follow(struct Curl_easy *data, char *newurl,
@@ -46,16 +45,16 @@ CURLcode Curl_follow(struct Curl_easy *data, char *newurl,
 CURLcode Curl_readwrite(struct connectdata *conn,
                         struct Curl_easy *data, bool *done,
                         bool *comeback);
-int Curl_single_getsock(const struct connectdata *conn,
-                        curl_socket_t *socks);
-CURLcode Curl_readrewind(struct connectdata *conn);
-CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
+int Curl_single_getsock(struct Curl_easy *data,
+                        struct connectdata *conn, curl_socket_t *socks);
+CURLcode Curl_readrewind(struct Curl_easy *data);
+CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
                              size_t *nreadp);
-CURLcode Curl_retry_request(struct connectdata *conn, char **url);
+CURLcode Curl_retry_request(struct Curl_easy *data, char **url);
 bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
 CURLcode Curl_get_upload_buffer(struct Curl_easy *data);
 
-CURLcode Curl_done_sending(struct connectdata *conn,
+CURLcode Curl_done_sending(struct Curl_easy *data,
                            struct SingleRequest *k);
 
 /* This sets up a forthcoming transfer */

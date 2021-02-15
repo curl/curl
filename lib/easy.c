@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -79,6 +79,7 @@
 #include "http2.h"
 #include "dynbuf.h"
 #include "altsvc.h"
+#include "hsts.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -121,6 +122,10 @@ curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 
 #if defined(_MSC_VER) && defined(_DLL) && !defined(__POCC__)
 #  pragma warning(default:4232) /* MSVC extension, dllimport identity */
+#endif
+
+#ifdef DEBUGBUILD
+static char *leakpointer;
 #endif
 
 /**
@@ -188,6 +193,12 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #endif
 
   init_flags = flags;
+
+#ifdef DEBUGBUILD
+  if(getenv("CURL_GLOBAL_INIT"))
+    /* alloc data that will leak if *cleanup() is not called! */
+    leakpointer = malloc(1);
+#endif
 
   return CURLE_OK;
 
@@ -263,6 +274,9 @@ void curl_global_cleanup(void)
 
 #ifdef USE_WOLFSSH
   (void)wolfSSH_Cleanup();
+#endif
+#ifdef DEBUGBUILD
+  free(leakpointer);
 #endif
 
   init_flags  = 0;
@@ -881,10 +895,21 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
       (void)Curl_altsvc_load(outcurl->asi, outcurl->set.str[STRING_ALTSVC]);
   }
 #endif
+#ifdef USE_HSTS
+  if(data->hsts) {
+    outcurl->hsts = Curl_hsts_init();
+    if(!outcurl->hsts)
+      goto fail;
+    if(outcurl->set.str[STRING_HSTS])
+      (void)Curl_hsts_loadfile(outcurl,
+                               outcurl->hsts, outcurl->set.str[STRING_HSTS]);
+    (void)Curl_hsts_loadcb(outcurl, outcurl->hsts);
+  }
+#endif
   /* Clone the resolver handle, if present, for the new handle */
   if(Curl_resolver_duphandle(outcurl,
-                             &outcurl->state.resolver,
-                             data->state.resolver))
+                             &outcurl->state.async.resolver,
+                             data->state.async.resolver))
     goto fail;
 
 #ifdef USE_ARES
@@ -929,6 +954,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
     Curl_safefree(outcurl->change.url);
     Curl_safefree(outcurl->change.referer);
     Curl_altsvc_cleanup(&outcurl->asi);
+    Curl_hsts_cleanup(&outcurl->hsts);
     Curl_freeset(outcurl);
     free(outcurl);
   }
@@ -1046,7 +1072,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
         /* even if one function returns error, this loops through and frees
            all buffers */
         if(!result)
-          result = Curl_client_write(conn, writebuf[i].type,
+          result = Curl_client_write(data, writebuf[i].type,
                                      Curl_dyn_ptr(&writebuf[i].b),
                                      Curl_dyn_len(&writebuf[i].b));
         Curl_dyn_free(&writebuf[i].b);
@@ -1066,6 +1092,9 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   if((newstate & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
      (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) {
     Curl_expire(data, 0, EXPIRE_RUN_NOW); /* get this handle going again */
+
+    /* reset the too-slow time keeper */
+    data->state.keeps_speed.tv_sec = 0;
 
     if(!data->state.tempcount)
       /* if not pausing again, force a recv/send check of this connection as
@@ -1127,8 +1156,13 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
   if(result)
     return result;
 
+  if(!data->conn)
+    /* on first invoke, the transfer has been detached from the connection and
+       needs to be reattached */
+    Curl_attach_connnection(data, c);
+
   *n = 0;
-  result = Curl_read(c, sfd, buffer, buflen, &n1);
+  result = Curl_read(data, sfd, buffer, buflen, &n1);
 
   if(result)
     return result;
@@ -1157,8 +1191,13 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
   if(result)
     return result;
 
+  if(!data->conn)
+    /* on first invoke, the transfer has been detached from the connection and
+       needs to be reattached */
+    Curl_attach_connnection(data, c);
+
   *n = 0;
-  result = Curl_write(c, sfd, buffer, buflen, &n1);
+  result = Curl_write(data, sfd, buffer, buflen, &n1);
 
   if(n1 == -1)
     return CURLE_SEND_ERROR;
@@ -1177,16 +1216,16 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
  *
  * Returns always 0.
  */
-static int conn_upkeep(struct connectdata *conn,
+static int conn_upkeep(struct Curl_easy *data,
+                       struct connectdata *conn,
                        void *param)
 {
   /* Param is unused. */
   (void)param;
 
-  if(conn->handler->connection_check) {
+  if(conn->handler->connection_check)
     /* Do a protocol-specific keepalive check on the connection. */
-    conn->handler->connection_check(conn, CONNCHECK_KEEPALIVE);
-  }
+    conn->handler->connection_check(data, conn, CONNCHECK_KEEPALIVE);
 
   return 0; /* continue iteration */
 }

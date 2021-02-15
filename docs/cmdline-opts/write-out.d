@@ -29,6 +29,12 @@ The variables available are:
 .B content_type
 The Content-Type of the requested document, if there was any.
 .TP
+.B errormsg
+The error message. (Added in 7.75.0)
+.TP
+.B exitcode
+The numerical exitcode. (Added in 7.75.0)
+.TP
 .B filename_effective
 The ultimate filename that curl writes out to. This is only meaningful if curl
 is told to write to a file with the --remote-name or --output
@@ -73,6 +79,10 @@ The number of response headers in the most recent request (restarted at each
 .TP
 .B num_redirects
 Number of redirects that were followed in the request. (Added in 7.12.3)
+.TP
+.B onerror
+The rest of the output is only shown if the transfer returned a non-zero error
+(Added in 7.75.0)
 .TP
 .B proxy_ssl_verify_result
 The result of the HTTPS proxy's SSL peer certificate verification that was
@@ -160,6 +170,12 @@ server needed to calculate the result.
 .TP
 .B time_total
 The total time, in seconds, that the full operation lasted.
+.TP
+.B url
+The URL that was fetched. (Added in 7.75.0)
+.TP
+.B urlnum
+The URL index number of this transfer, 0-indexed. (Added in 7.75.0)
 .TP
 .B url_effective
 The URL that was fetched last. This is most meaningful if you've told curl

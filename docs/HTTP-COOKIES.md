@@ -15,7 +15,7 @@
   servers with the Cookie: header.
 
   For a very long time, the only spec explaining how to use cookies was the
-  original [Netscape spec from 1994](https://curl.haxx.se/rfc/cookie_spec.html).
+  original [Netscape spec from 1994](https://curl.se/rfc/cookie_spec.html).
 
   In 2011, [RFC6265](https://www.ietf.org/rfc/rfc6265.txt) was finally
   published and details how cookies work within HTTP. In 2016, an update which

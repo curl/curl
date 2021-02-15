@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -73,7 +73,7 @@ stages:
         torture:
           name: torture
           install: libnghttp2-dev
-          configure: --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
+          configure: --enable-debug --disable-shared --disable-threaded-resolver
           tests: -n -t --shallow=40 !FTP
     steps:
     - script: sudo apt-get update && sudo apt-get install -y stunnel4 python-impacket libzstd-dev libbrotli-dev $(install)
@@ -83,7 +83,7 @@ stages:
       displayName: 'configure $(name)'
 
     - script: make
-      displayName: 'make'
+      displayName: 'make && cd tests && make'
 
     - script: make test-nonflaky
       displayName: 'test'
@@ -188,11 +188,14 @@ stages:
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && ./buildconf && ./configure $(configure)"
       displayName: 'configure $(name)'
 
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make"
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make && cd tests && make"
       displayName: 'make'
+
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
+      displayName: 'install'
 
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make test-nonflaky"
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "-r $(tests)"
+        TFLAGS: "-vc /usr/bin/curl.exe -r $(tests)"

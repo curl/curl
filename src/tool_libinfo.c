@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,15 +55,18 @@ CURLcode get_libcurl_info(void)
     { "ftp",    CURLPROTO_FTP    },
     { "ftps",   CURLPROTO_FTPS   },
     { "gopher", CURLPROTO_GOPHER },
+    { "gophers",CURLPROTO_GOPHERS},
     { "http",   CURLPROTO_HTTP   },
     { "https",  CURLPROTO_HTTPS  },
     { "imap",   CURLPROTO_IMAP   },
     { "imaps",  CURLPROTO_IMAPS  },
     { "ldap",   CURLPROTO_LDAP   },
     { "ldaps",  CURLPROTO_LDAPS  },
+    { "mqtt",   CURLPROTO_MQTT   },
     { "pop3",   CURLPROTO_POP3   },
     { "pop3s",  CURLPROTO_POP3S  },
     { "rtmp",   CURLPROTO_RTMP   },
+    { "rtmps",  CURLPROTO_RTMPS  },
     { "rtsp",   CURLPROTO_RTSP   },
     { "scp",    CURLPROTO_SCP    },
     { "sftp",   CURLPROTO_SFTP   },

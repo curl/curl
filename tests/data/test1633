@@ -57,10 +57,10 @@ Connection: close
 <server>
 http
 </server>
- <name>
-HTTP GET
- </name>
- <command>
+<name>
+--retry with a 429 response and Retry-After:
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/1633 -d moo --retry 1 -L
 </command>
 </client>

@@ -5,11 +5,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -24,11 +24,9 @@
 #
 # Assumes you've unpacked curl with long-file names
 # I.e use "set LFN=y" before untaring on Win9x/XP.
-# Requires sed, yacc, rm and the usual stuff.
+# Requires sed, rm and the usual stuff.
 #
 # Define TOPDIR before including this file.
-
-.SUFFIXES: .exe .y
 
 MAKEFILE = Makefile.dj
 OBJ_DIR = djgpp
@@ -61,42 +59,62 @@ else
   DS     = \$(NOTHING)
 endif
 
+ifeq ($(OS),Windows_NT)
+  #
+  # Windows hosted djgpp cross compiler. Get it from:
+  #   https://github.com/andrewwutw/build-djgpp/releases
+  #
+  DJ_PREFIX ?= c:/some-path/djgpp/bin/i586-pc-msdosdjgpp-
+  CC = $(DJ_PREFIX)gcc
+
+else
+  #
+  # The normal djgpp 'gcc' for MSDOS.
+  #
+  CC = gcc
+endif
+
 #
 # OpenSSL is available from www.openssl.org and builds okay
 # with djgpp/Watt-32. Set to 0 if you don't need https URLs
 # (reduces curl.exe with approx 700 kB)
 #
-USE_SSL = 0
+USE_OPENSSL ?= 0
 
 #
-# Use zlib for contents encoding
+# Use zlib for contents encoding. Needed for 'USE_OPENSSL=1' too.
 #
-USE_ZLIB = 0
+USE_ZLIB ?= 0
 
 #
 # Use libidn for international domain names
 #
-USE_IDNA = 0
+USE_IDNA ?= 0
 
 #
 # Use Watt-32 IPv6 stack (only IPv6 name resolution working at the moment)
 #
-USE_IPV6 = 0
+USE_IPV6 ?= 0
 
 #
 # Use C-Ares resolver library
 #
-USE_ARES = 0
+USE_ARES ?= 0
 
 #
 # Enable debug code in libcurl/curl
 #
-USE_DEBUG = 0
+USE_DEBUG ?= 0
 
 #
 # Enable memory tracking code in libcurl/curl
 #
-USE_CURLDEBUG = 0
+USE_CURLDEBUG ?= 0
+
+#
+# Generate a .map file in 'link_EXE' macro
+#
+MAKE_MAP_FILE ?= 0
 
 default: all
 
@@ -104,20 +122,40 @@ default: all
 # Root directory for Waterloo tcp/ip etc. Change to suite.
 # WATT_ROOT should be set during Watt-32 install.
 #
-WATT32_ROOT  = $(subst \,/,$(WATT_ROOT))
-OPENSSL_ROOT = e:/net/openssl.099
-ZLIB_ROOT    = $(DJDIR)/contrib/zlib
-LIBIDN_ROOT  = $(TOPDIR)/../IDN/libidn
-ARES_ROOT    = $(TOPDIR)/ares
-
-CC   = gcc
-YACC = bison -y
+WATT32_ROOT   = $(realpath $(WATT_ROOT))
+OPENSSL_ROOT ?= $(TOPDIR)/../crypto/OpenSSL
+ZLIB_ROOT    ?= e:/djgpp/contrib/zlib
+LIBIDN_ROOT  ?= $(TOPDIR)/../IDN/libidn
+ARES_ROOT    ?= $(TOPDIR)/../DNS/c-ares
 
 CFLAGS = -g -O2 -I. -I$(TOPDIR)/include -I$(TOPDIR)/lib \
          -I$(WATT32_ROOT)/inc -Wall -DHAVE_CONFIG_H
 
-ifeq ($(USE_SSL),1)
-  CFLAGS += -DUSE_OPENSSL -I$(OPENSSL_ROOT)
+ifeq ($(USE_OPENSSL),1)
+  CFLAGS += -DUSE_OPENSSL -I$(OPENSSL_ROOT)/include
+
+  #
+  # Squelch the warnings on deprecated functions.
+  #
+  CFLAGS += -DOPENSSL_SUPPRESS_DEPRECATED
+
+  #
+  # Use some of these too?
+  #
+  # CFLAGS += -DUSE_TLS_SRP=1                    \
+  #           -DHAVE_ENGINE_LOAD_BUILTIN_ENGINES \
+  #           -DHAVE_OPENSSL_PKCS12_H            \
+  #           -DHAVE_SSLV2_CLIENT_METHOD         \
+  #           -DOPENSSL_NO_DEPRECATED
+
+  #
+  # 'libcomm.a' is normally 'libcommon.a'. But to keep it 8+3 clean, it's
+  # shortened to 'libcomm.a'. The official OpenSSL build was recently changed
+  # and this "Common" library was added for several of the Crypto Providers.
+  #
+  OPENSSL_LIBS = $(OPENSSL_ROOT)/lib/libssl.a   \
+                 $(OPENSSL_ROOT)/lib/libcrypt.a \
+                 $(OPENSSL_ROOT)/lib/libcomm.a
 endif
 
 ifeq ($(USE_ZLIB),1)
@@ -129,7 +167,7 @@ ifeq ($(USE_IPV6),1)
 endif
 
 ifeq ($(USE_ARES),1)
-  CFLAGS += -DUSE_ARES -I$(ARES_ROOT)
+  CFLAGS += -DUSE_ARES -I$(ARES_ROOT)/include
 endif
 
 ifeq ($(USE_IDNA),1)
@@ -152,6 +190,34 @@ $(OBJ_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 	@echo
 
+#
+# Link-EXE macro:
+#   $(1): the .exe
+#   $(2): the .o-files and libraries
+#
+ifeq ($(MAKE_MAP_FILE),1)
+  define link_EXE
+    $(CC) -o $(1) $(LDFLAGS) -Wl,--print-map,--sort-common $(2) > $(1:.exe=.map)
+  endef
+else
+  define link_EXE
+    $(CC) $(LDFLAGS) -o $(1) $(2)
+  endef
+endif
+
+$(TOPDIR)/docs/curl.1: $(wildcard $(TOPDIR)/docs/cmdline-opts/*.d)
+	cd $(TOPDIR)/docs/cmdline-opts; \
+	perl gen.pl mainpage > ../$(TOPDIR)/docs/curl.1
+
+DEP_REPLACE = sed -e 's@\(.*\)\.o: @\n$$(OBJ_DIR)\/\1.o: @' \
+                  -e 's@$(ARES_ROOT)@$$(ARES_ROOT)@g'       \
+                  -e 's@$(OPENSSL_ROOT)@$$(OPENSSL_ROOT)@g' \
+                  -e 's@$(WATT32_ROOT)@$$(WATT32_ROOT)@g'   \
+                  -e 's@$(ZLIB_ROOT)@$$(ZLIB_ROOT)@g'
+
+#
+# One may have to do 'make -f Makefile.dj clean' first in case
+# a foreign 'curl_config.h' is making trouble.
+#
 depend: $(DEPEND_PREREQ) $(MAKEFILE)
-	$(CC) -MM $(CFLAGS) $(CSOURCES) | \
-	sed -e 's/^\([a-zA-Z0-9_-]*\.o:\)/$$(OBJ_DIR)\/\1/' > depend.dj
+	$(CC) -MM $(CFLAGS) $(CSOURCES) | $(DEP_REPLACE) > depend.dj

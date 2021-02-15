@@ -14,4 +14,4 @@ The server connection is verified by making sure the server's certificate
 contains the right name and verifies successfully using the cert store.
 
 See this online resource for further details:
- https://curl.haxx.se/docs/sslcerts.html
+ https://curl.se/docs/sslcerts.html

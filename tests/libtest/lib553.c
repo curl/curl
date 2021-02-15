@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@
 
 #define POSTLEN 40960
 
-static size_t myreadfunc(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t myreadfunc(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   static size_t total = POSTLEN;
   static char buf[1024];

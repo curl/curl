@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -22,9 +22,13 @@
  *
  ***************************************************************************/
 
+#include "llist.h"
+#include "hash.h"
 #include "conncache.h"
 #include "psl.h"
 #include "socketpair.h"
+
+struct connectdata;
 
 struct Curl_message {
   struct Curl_llist_element list;
@@ -79,7 +83,7 @@ typedef enum {
 struct Curl_multi {
   /* First a simple identifier to easier detect if a user mix up
      this multi handle with an easy handle. Set this to CURL_MULTI_HANDLE. */
-  long type;
+  unsigned int magic;
 
   /* We have a doubly-linked list with easy handles */
   struct Curl_easy *easyp;
@@ -138,13 +142,9 @@ struct Curl_multi {
                                     previous callback */
   unsigned int max_concurrent_streams;
 
-#ifdef USE_WINSOCK
-  WSAEVENT wsa_event; /* winsock event used for waits */
-#else
 #ifdef ENABLE_WAKEUP
   curl_socket_t wakeup_pair[2]; /* socketpair() used for wakeup
                                    0 is used for read, 1 is used for write */
-#endif
 #endif
   /* multiplexing wanted */
   bool multiplexing;

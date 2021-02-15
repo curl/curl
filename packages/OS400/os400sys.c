@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -60,78 +60,70 @@
 
 #include "os400sys.h"
 
-
 /**
-***     QADRT OS/400 ASCII runtime defines only the most used procedures, but
-***             but a lot of them are not supported. This module implements
-***             ASCII wrappers for those that are used by libcurl, but not
-***             defined by QADRT.
+*** QADRT OS/400 ASCII runtime defines only the most used procedures, but a
+*** lot of them are not supported. This module implements ASCII wrappers for
+*** those that are used by libcurl, but not defined by QADRT.
 **/
 
 #pragma convert(0)                              /* Restore EBCDIC. */
 
-
 #define MIN_BYTE_GAIN   1024    /* Minimum gain when shortening a buffer. */
 
-typedef struct {
-        unsigned long   size;                   /* Buffer size. */
-        char *          buf;                    /* Buffer address. */
-}               buffer_t;
+struct buffer_t {
+  unsigned long size;            /* Buffer size. */
+  char *buf;                     /* Buffer address. */
+};
 
 
-static char *   buffer_undef(localkey_t key, long size);
-static char *   buffer_threaded(localkey_t key, long size);
-static char *   buffer_unthreaded(localkey_t key, long size);
+static char *buffer_undef(localkey_t key, long size);
+static char *buffer_threaded(localkey_t key, long size);
+static char *buffer_unthreaded(localkey_t key, long size);
 
 static pthread_mutex_t  mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_key_t    thdkey;
-static buffer_t *       locbufs;
+static struct buffer_t *locbufs;
 
-char *  (* Curl_thread_buffer)(localkey_t key, long size) = buffer_undef;
+char *(*Curl_thread_buffer)(localkey_t key, long size) = buffer_undef;
 
-
-static void
-thdbufdestroy(void * private)
-
+static void thdbufdestroy(void *private)
 {
   if(private) {
-    buffer_t * p = (buffer_t *) private;
+    struct buffer_t *p = (struct buffer_t *) private;
     localkey_t i;
 
     for(i = (localkey_t) 0; i < LK_LAST; i++) {
       free(p->buf);
       p++;
-      }
+    }
 
     free(private);
-    }
+  }
 }
 
 
 static void
 terminate(void)
-
 {
   if(Curl_thread_buffer == buffer_threaded) {
     locbufs = pthread_getspecific(thdkey);
     pthread_setspecific(thdkey, (void *) NULL);
     pthread_key_delete(thdkey);
-    }
+  }
 
   if(Curl_thread_buffer != buffer_undef) {
     thdbufdestroy((void *) locbufs);
-    locbufs = (buffer_t *) NULL;
-    }
+    locbufs = (struct buffer_t *) NULL;
+  }
 
   Curl_thread_buffer = buffer_undef;
 }
 
 
 static char *
-get_buffer(buffer_t * buf, long size)
-
+get_buffer(struct buffer_t *buf, long size)
 {
-  char * cp;
+  char *cp;
 
   /* If `size' >= 0, make sure buffer at `buf' is at least `size'-byte long.
      Return the buffer address. */
@@ -171,7 +163,6 @@ get_buffer(buffer_t * buf, long size)
 
 static char *
 buffer_unthreaded(localkey_t key, long size)
-
 {
   return get_buffer(locbufs + key, size);
 }
@@ -179,15 +170,14 @@ buffer_unthreaded(localkey_t key, long size)
 
 static char *
 buffer_threaded(localkey_t key, long size)
-
 {
-  buffer_t * bufs;
+  struct buffer_t *bufs;
 
   /* Get the buffer for the given local key in the current thread, and
      make sure it is at least `size'-byte long. Set `size' to < 0 to get
      its address only. */
 
-  bufs = (buffer_t *) pthread_getspecific(thdkey);
+  bufs = (struct buffer_t *) pthread_getspecific(thdkey);
 
   if(!bufs) {
     if(size < 0)
@@ -211,7 +201,6 @@ buffer_threaded(localkey_t key, long size)
 
 static char *
 buffer_undef(localkey_t key, long size)
-
 {
   /* Define the buffer system, get the buffer for the given local key in
      the current thread, and make sure it is at least `size'-byte long.
@@ -224,15 +213,18 @@ buffer_undef(localkey_t key, long size)
   if(Curl_thread_buffer == buffer_undef) {      /* If unchanged during lock. */
     if(!pthread_key_create(&thdkey, thdbufdestroy))
       Curl_thread_buffer = buffer_threaded;
-    else if(!(locbufs = calloc((size_t) LK_LAST, sizeof(*locbufs)))) {
-      pthread_mutex_unlock(&mutex);
-      return (char *) NULL;
+    else {
+      locbufs = calloc((size_t) LK_LAST, sizeof(*locbufs));
+      if(!locbufs) {
+        pthread_mutex_unlock(&mutex);
+        return (char *) NULL;
       }
-    else
+      else
         Curl_thread_buffer = buffer_unthreaded;
+    }
 
     atexit(terminate);
-    }
+  }
 
   pthread_mutex_unlock(&mutex);
   return Curl_thread_buffer(key, size);
@@ -240,11 +232,10 @@ buffer_undef(localkey_t key, long size)
 
 
 static char *
-set_thread_string(localkey_t key, const char * s)
-
+set_thread_string(localkey_t key, const char *s)
 {
   int i;
-  char * cp;
+  char *cp;
 
   if(!s)
     return (char *) NULL;
@@ -262,11 +253,10 @@ set_thread_string(localkey_t key, const char * s)
 
 
 int
-Curl_getnameinfo_a(const struct sockaddr * sa, curl_socklen_t salen,
-              char * nodename, curl_socklen_t nodenamelen,
-              char * servname, curl_socklen_t servnamelen,
-              int flags)
-
+Curl_getnameinfo_a(const struct sockaddr *sa, curl_socklen_t salen,
+                   char *nodename, curl_socklen_t nodenamelen,
+                   char *servname, curl_socklen_t servnamelen,
+                   int flags)
 {
   char *enodename = NULL;
   char *eservname = NULL;
@@ -293,31 +283,29 @@ Curl_getnameinfo_a(const struct sockaddr * sa, curl_socklen_t salen,
     int i;
     if(enodename) {
       i = QadrtConvertE2A(nodename, enodename,
-        nodenamelen - 1, strlen(enodename));
+                          nodenamelen - 1, strlen(enodename));
       nodename[i] = '\0';
-      }
+    }
 
     if(eservname) {
       i = QadrtConvertE2A(servname, eservname,
-        servnamelen - 1, strlen(eservname));
+                          servnamelen - 1, strlen(eservname));
       servname[i] = '\0';
-      }
     }
+  }
 
   free(enodename);
   free(eservname);
   return status;
 }
 
-
 int
-Curl_getaddrinfo_a(const char * nodename, const char * servname,
-            const struct addrinfo * hints,
-            struct addrinfo * * res)
-
+Curl_getaddrinfo_a(const char *nodename, const char *servname,
+                   const struct addrinfo *hints,
+                   struct addrinfo **res)
 {
-  char * enodename;
-  char * eservname;
+  char *enodename;
+  char *eservname;
   int status;
   int i;
 
@@ -354,7 +342,6 @@ Curl_getaddrinfo_a(const char * nodename, const char * servname,
   return status;
 }
 
-
 #ifdef USE_GSKIT
 
 /* ASCII wrappers for the GSKit procedures. */
@@ -370,22 +357,19 @@ Curl_getaddrinfo_a(const char * nodename, const char * servname,
  */
 
 struct gskstrlist {
-  struct gskstrlist * next;
-  const char * ebcdicstr;
-  const char * asciistr;
+  struct gskstrlist *next;
+  const char *ebcdicstr;
+  const char *asciistr;
 };
 
 struct Curl_gsk_descriptor {
   gsk_handle h;
-  struct gskstrlist * strlist;
+  struct gskstrlist *strlist;
 };
 
-
-int
-Curl_gsk_environment_open(gsk_handle * my_env_handle)
-
+int Curl_gsk_environment_open(gsk_handle *my_env_handle)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
   int rc;
 
   if(!my_env_handle)
@@ -402,13 +386,10 @@ Curl_gsk_environment_open(gsk_handle * my_env_handle)
   return rc;
 }
 
-
-int
-Curl_gsk_secure_soc_open(gsk_handle my_env_handle,
-                         gsk_handle * my_session_handle)
-
+int Curl_gsk_secure_soc_open(gsk_handle my_env_handle,
+                             gsk_handle *my_session_handle)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
   gsk_handle h;
   int rc;
 
@@ -429,12 +410,9 @@ Curl_gsk_secure_soc_open(gsk_handle my_env_handle,
   return rc;
 }
 
-
-static void
-gsk_free_handle(struct Curl_gsk_descriptor * p)
-
+static void gsk_free_handle(struct Curl_gsk_descriptor *p)
 {
-  struct gskstrlist * q;
+  struct gskstrlist *q;
 
   while((q = p->strlist)) {
     p->strlist = q;
@@ -444,12 +422,9 @@ gsk_free_handle(struct Curl_gsk_descriptor * p)
   free(p);
 }
 
-
-int
-Curl_gsk_environment_close(gsk_handle * my_env_handle)
-
+int Curl_gsk_environment_close(gsk_handle *my_env_handle)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
   int rc;
 
   if(!my_env_handle)
@@ -466,11 +441,9 @@ Curl_gsk_environment_close(gsk_handle * my_env_handle)
 }
 
 
-int
-Curl_gsk_secure_soc_close(gsk_handle * my_session_handle)
-
+int Curl_gsk_secure_soc_close(gsk_handle *my_session_handle)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
   int rc;
 
   if(!my_session_handle)
@@ -486,12 +459,9 @@ Curl_gsk_secure_soc_close(gsk_handle * my_session_handle)
   return rc;
 }
 
-
-int
-Curl_gsk_environment_init(gsk_handle my_env_handle)
-
+int Curl_gsk_environment_init(gsk_handle my_env_handle)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
 
   if(!my_env_handle)
     return GSK_INVALID_HANDLE;
@@ -500,11 +470,9 @@ Curl_gsk_environment_init(gsk_handle my_env_handle)
 }
 
 
-int
-Curl_gsk_secure_soc_init(gsk_handle my_session_handle)
-
+int Curl_gsk_secure_soc_init(gsk_handle my_session_handle)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
 
   if(!my_session_handle)
     return GSK_INVALID_HANDLE;
@@ -515,11 +483,10 @@ Curl_gsk_secure_soc_init(gsk_handle my_session_handle)
 
 int
 Curl_gsk_attribute_set_buffer_a(gsk_handle my_gsk_handle, GSK_BUF_ID bufID,
-                                const char * buffer, int bufSize)
-
+                                const char *buffer, int bufSize)
 {
-  struct Curl_gsk_descriptor * p;
-  char * ebcdicbuf;
+  struct Curl_gsk_descriptor *p;
+  char *ebcdicbuf;
   int rc;
 
   if(!my_gsk_handle)
@@ -545,9 +512,8 @@ Curl_gsk_attribute_set_buffer_a(gsk_handle my_gsk_handle, GSK_BUF_ID bufID,
 int
 Curl_gsk_attribute_set_enum(gsk_handle my_gsk_handle, GSK_ENUM_ID enumID,
                             GSK_ENUM_VALUE enumValue)
-
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
 
   if(!my_gsk_handle)
     return GSK_INVALID_HANDLE;
@@ -559,9 +525,8 @@ Curl_gsk_attribute_set_enum(gsk_handle my_gsk_handle, GSK_ENUM_ID enumID,
 int
 Curl_gsk_attribute_set_numeric_value(gsk_handle my_gsk_handle,
                                      GSK_NUM_ID numID, int numValue)
-
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
 
   if(!my_gsk_handle)
     return GSK_INVALID_HANDLE;
@@ -573,10 +538,9 @@ Curl_gsk_attribute_set_numeric_value(gsk_handle my_gsk_handle,
 int
 Curl_gsk_attribute_set_callback(gsk_handle my_gsk_handle,
                                 GSK_CALLBACK_ID callBackID,
-                                void * callBackAreaPtr)
-
+                                void *callBackAreaPtr)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
 
   if(!my_gsk_handle)
     return GSK_INVALID_HANDLE;
@@ -586,13 +550,12 @@ Curl_gsk_attribute_set_callback(gsk_handle my_gsk_handle,
 
 
 static int
-cachestring(struct Curl_gsk_descriptor * p,
-            const char * ebcdicbuf, int bufsize, const char * * buffer)
-
+cachestring(struct Curl_gsk_descriptor *p,
+            const char *ebcdicbuf, int bufsize, const char **buffer)
 {
   int rc;
-  char * asciibuf;
-  struct gskstrlist * sp;
+  char *asciibuf;
+  struct gskstrlist *sp;
 
   for(sp = p->strlist; sp; sp = sp->next)
     if(sp->ebcdicstr == ebcdicbuf)
@@ -620,12 +583,11 @@ cachestring(struct Curl_gsk_descriptor * p,
 
 int
 Curl_gsk_attribute_get_buffer_a(gsk_handle my_gsk_handle, GSK_BUF_ID bufID,
-                                const char * * buffer, int * bufSize)
-
+                                const char **buffer, int *bufSize)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
   int rc;
-  const char * mybuf;
+  const char *mybuf;
   int mylen;
 
   if(!my_gsk_handle)
@@ -645,10 +607,9 @@ Curl_gsk_attribute_get_buffer_a(gsk_handle my_gsk_handle, GSK_BUF_ID bufID,
 
 int
 Curl_gsk_attribute_get_enum(gsk_handle my_gsk_handle, GSK_ENUM_ID enumID,
-                            GSK_ENUM_VALUE * enumValue)
-
+                            GSK_ENUM_VALUE *enumValue)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
 
   if(!my_gsk_handle)
     return GSK_INVALID_HANDLE;
@@ -659,10 +620,9 @@ Curl_gsk_attribute_get_enum(gsk_handle my_gsk_handle, GSK_ENUM_ID enumID,
 
 int
 Curl_gsk_attribute_get_numeric_value(gsk_handle my_gsk_handle,
-                                     GSK_NUM_ID numID, int * numValue)
-
+                                     GSK_NUM_ID numID, int *numValue)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
 
   if(!my_gsk_handle)
     return GSK_INVALID_HANDLE;
@@ -674,11 +634,10 @@ Curl_gsk_attribute_get_numeric_value(gsk_handle my_gsk_handle,
 int
 Curl_gsk_attribute_get_cert_info(gsk_handle my_gsk_handle,
                                  GSK_CERT_ID certID,
-                                 const gsk_cert_data_elem * * certDataElem,
-                                 int * certDataElementCount)
-
+                                 const gsk_cert_data_elem **certDataElem,
+                                 int *certDataElementCount)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
 
   if(!my_gsk_handle)
     return GSK_INVALID_HANDLE;
@@ -691,9 +650,8 @@ Curl_gsk_attribute_get_cert_info(gsk_handle my_gsk_handle,
 
 int
 Curl_gsk_secure_soc_misc(gsk_handle my_session_handle, GSK_MISC_ID miscID)
-
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
 
   if(!my_session_handle)
     return GSK_INVALID_HANDLE;
@@ -703,11 +661,10 @@ Curl_gsk_secure_soc_misc(gsk_handle my_session_handle, GSK_MISC_ID miscID)
 
 
 int
-Curl_gsk_secure_soc_read(gsk_handle my_session_handle, char * readBuffer,
-                         int readBufSize, int * amtRead)
-
+Curl_gsk_secure_soc_read(gsk_handle my_session_handle, char *readBuffer,
+                         int readBufSize, int *amtRead)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
 
   if(!my_session_handle)
     return GSK_INVALID_HANDLE;
@@ -717,11 +674,10 @@ Curl_gsk_secure_soc_read(gsk_handle my_session_handle, char * readBuffer,
 
 
 int
-Curl_gsk_secure_soc_write(gsk_handle my_session_handle, char * writeBuffer,
-                          int writeBufSize, int * amtWritten)
-
+Curl_gsk_secure_soc_write(gsk_handle my_session_handle, char *writeBuffer,
+                          int writeBufSize, int *amtWritten)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
 
   if(!my_session_handle)
     return GSK_INVALID_HANDLE;
@@ -732,7 +688,6 @@ Curl_gsk_secure_soc_write(gsk_handle my_session_handle, char * writeBuffer,
 
 const char *
 Curl_gsk_strerror_a(int gsk_return_value)
-
 {
   return set_thread_string(LK_GSK_ERROR, gsk_strerror(gsk_return_value));
 }
@@ -740,10 +695,9 @@ Curl_gsk_strerror_a(int gsk_return_value)
 int
 Curl_gsk_secure_soc_startInit(gsk_handle my_session_handle,
                               int IOCompletionPort,
-                              Qso_OverlappedIO_t * communicationsArea)
-
+                              Qso_OverlappedIO_t *communicationsArea)
 {
-  struct Curl_gsk_descriptor * p;
+  struct Curl_gsk_descriptor *p;
 
   if(!my_session_handle)
     return GSK_INVALID_HANDLE;
@@ -753,15 +707,12 @@ Curl_gsk_secure_soc_startInit(gsk_handle my_session_handle,
 
 #endif /* USE_GSKIT */
 
-
-
 #ifdef HAVE_GSSAPI
 
 /* ASCII wrappers for the GSSAPI procedures. */
 
 static int
-Curl_gss_convert_in_place(OM_uint32 * minor_status, gss_buffer_t buf)
-
+Curl_gss_convert_in_place(OM_uint32 *minor_status, gss_buffer_t buf)
 {
   unsigned int i = buf->length;
 
@@ -789,9 +740,8 @@ Curl_gss_convert_in_place(OM_uint32 * minor_status, gss_buffer_t buf)
 
 
 OM_uint32
-Curl_gss_import_name_a(OM_uint32 * minor_status, gss_buffer_t in_name,
-                       gss_OID in_name_type, gss_name_t * out_name)
-
+Curl_gss_import_name_a(OM_uint32 *minor_status, gss_buffer_t in_name,
+                       gss_OID in_name_type, gss_name_t *out_name)
 {
   int rc;
   unsigned int i;
@@ -818,17 +768,16 @@ Curl_gss_import_name_a(OM_uint32 * minor_status, gss_buffer_t in_name,
   return rc;
 }
 
-
 OM_uint32
-Curl_gss_display_status_a(OM_uint32 * minor_status, OM_uint32 status_value,
-                   int status_type, gss_OID mech_type,
-                   gss_msg_ctx_t * message_context, gss_buffer_t status_string)
-
+Curl_gss_display_status_a(OM_uint32 *minor_status, OM_uint32 status_value,
+                          int status_type, gss_OID mech_type,
+                          gss_msg_ctx_t *message_context,
+                          gss_buffer_t status_string)
 {
   int rc;
 
   rc = gss_display_status(minor_status, status_value, status_type,
-                              mech_type, message_context, status_string);
+                          mech_type, message_context, status_string);
 
   if(rc != GSS_S_COMPLETE || !status_string ||
      !status_string->length || !status_string->value)
@@ -844,19 +793,17 @@ Curl_gss_display_status_a(OM_uint32 * minor_status, OM_uint32 status_value,
   return rc;
 }
 
-
 OM_uint32
-Curl_gss_init_sec_context_a(OM_uint32 * minor_status,
+Curl_gss_init_sec_context_a(OM_uint32 *minor_status,
                             gss_cred_id_t cred_handle,
-                            gss_ctx_id_t * context_handle,
+                            gss_ctx_id_t *context_handle,
                             gss_name_t target_name, gss_OID mech_type,
                             gss_flags_t req_flags, OM_uint32 time_req,
                             gss_channel_bindings_t input_chan_bindings,
                             gss_buffer_t input_token,
-                            gss_OID * actual_mech_type,
-                            gss_buffer_t output_token, gss_flags_t * ret_flags,
-                            OM_uint32 * time_rec)
-
+                            gss_OID *actual_mech_type,
+                            gss_buffer_t output_token, gss_flags_t *ret_flags,
+                            OM_uint32 *time_rec)
 {
   int rc;
   gss_buffer_desc in;
@@ -885,13 +832,13 @@ Curl_gss_init_sec_context_a(OM_uint32 * minor_status,
   }
 
   rc = gss_init_sec_context(minor_status, cred_handle, context_handle,
-                             target_name, mech_type, req_flags, time_req,
-                             input_chan_bindings, inp, actual_mech_type,
-                             output_token, ret_flags, time_rec);
+                            target_name, mech_type, req_flags, time_req,
+                            input_chan_bindings, inp, actual_mech_type,
+                            output_token, ret_flags, time_rec);
   free(in.value);
 
   if(rc != GSS_S_COMPLETE || !output_token ||
-      !output_token->length || !output_token->value)
+     !output_token->length || !output_token->value)
     return rc;
 
   /* No way to allocate a buffer here, because it will be released by
@@ -906,17 +853,16 @@ Curl_gss_init_sec_context_a(OM_uint32 * minor_status,
 
 
 OM_uint32
-Curl_gss_delete_sec_context_a(OM_uint32 * minor_status,
-                              gss_ctx_id_t * context_handle,
+Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
+                              gss_ctx_id_t *context_handle,
                               gss_buffer_t output_token)
-
 {
   int rc;
 
   rc = gss_delete_sec_context(minor_status, context_handle, output_token);
 
   if(rc != GSS_S_COMPLETE || !output_token ||
-      !output_token->length || !output_token->value)
+     !output_token->length || !output_token->value)
     return rc;
 
   /* No way to allocate a buffer here, because it will be released by
@@ -931,18 +877,16 @@ Curl_gss_delete_sec_context_a(OM_uint32 * minor_status,
 
 #endif /* HAVE_GSSAPI */
 
-
 #ifndef CURL_DISABLE_LDAP
 
 /* ASCII wrappers for the LDAP procedures. */
 
 void *
-Curl_ldap_init_a(char * host, int port)
-
+Curl_ldap_init_a(char *host, int port)
 {
   unsigned int i;
-  char * ehost;
-  void * result;
+  char *ehost;
+  void *result;
 
   if(!host)
     return (void *) ldap_init(host, port);
@@ -960,14 +904,12 @@ Curl_ldap_init_a(char * host, int port)
   return result;
 }
 
-
 int
-Curl_ldap_simple_bind_s_a(void * ld, char * dn, char * passwd)
-
+Curl_ldap_simple_bind_s_a(void *ld, char *dn, char *passwd)
 {
   int i;
-  char * edn;
-  char * epasswd;
+  char *edn;
+  char *epasswd;
 
   edn = (char *) NULL;
   epasswd = (char *) NULL;
@@ -1002,22 +944,20 @@ Curl_ldap_simple_bind_s_a(void * ld, char * dn, char * passwd)
   return i;
 }
 
-
 int
-Curl_ldap_search_s_a(void * ld, char * base, int scope, char * filter,
-                     char * * attrs, int attrsonly, LDAPMessage * * res)
-
+Curl_ldap_search_s_a(void *ld, char *base, int scope, char *filter,
+                     char **attrs, int attrsonly, LDAPMessage **res)
 {
   int i;
   int j;
-  char * ebase;
-  char * efilter;
-  char * * eattrs;
+  char *ebase;
+  char *efilter;
+  char **eattrs;
   int status;
 
   ebase = (char *) NULL;
   efilter = (char *) NULL;
-  eattrs = (char * *) NULL;
+  eattrs = (char **) NULL;
   status = LDAP_SUCCESS;
 
   if(base) {
@@ -1063,9 +1003,9 @@ Curl_ldap_search_s_a(void * ld, char * base, int scope, char * filter,
 
         QadrtConvertA2E(eattrs[j], attrs[j], i, i);
         eattrs[j][i] = '\0';
-        }
       }
     }
+  }
 
   if(status == LDAP_SUCCESS)
     status = ldap_search_s(ld, ebase? ebase: "", scope,
@@ -1077,7 +1017,7 @@ Curl_ldap_search_s_a(void * ld, char * base, int scope, char * filter,
       free(eattrs[j]);
 
     free(eattrs);
-    }
+  }
 
   free(efilter);
   free(ebase);
@@ -1085,12 +1025,11 @@ Curl_ldap_search_s_a(void * ld, char * base, int scope, char * filter,
 }
 
 
-struct berval * *
-Curl_ldap_get_values_len_a(void * ld, LDAPMessage * entry, const char * attr)
-
+struct berval **
+Curl_ldap_get_values_len_a(void *ld, LDAPMessage *entry, const char *attr)
 {
-  char * cp;
-  struct berval * * result;
+  char *cp;
+  struct berval **result;
 
   cp = (char *) NULL;
 
@@ -1101,7 +1040,7 @@ Curl_ldap_get_values_len_a(void * ld, LDAPMessage * entry, const char * attr)
     if(!cp) {
       ldap_set_lderrno(ld, LDAP_NO_MEMORY, NULL,
                        ldap_err2string(LDAP_NO_MEMORY));
-      return (struct berval * *) NULL;
+      return (struct berval **) NULL;
     }
 
     QadrtConvertA2E(cp, attr, i, i);
@@ -1117,22 +1056,18 @@ Curl_ldap_get_values_len_a(void * ld, LDAPMessage * entry, const char * attr)
   return result;
 }
 
-
 char *
 Curl_ldap_err2string_a(int error)
-
 {
   return set_thread_string(LK_LDAP_ERROR, ldap_err2string(error));
 }
 
-
 char *
-Curl_ldap_get_dn_a(void * ld, LDAPMessage * entry)
-
+Curl_ldap_get_dn_a(void *ld, LDAPMessage *entry)
 {
   int i;
-  char * cp;
-  char * cp2;
+  char *cp;
+  char *cp2;
 
   cp = ldap_get_dn(ld, entry);
 
@@ -1157,15 +1092,13 @@ Curl_ldap_get_dn_a(void * ld, LDAPMessage * entry)
   return cp;
 }
 
-
 char *
-Curl_ldap_first_attribute_a(void * ld,
-                            LDAPMessage * entry, BerElement * * berptr)
-
+Curl_ldap_first_attribute_a(void *ld,
+                            LDAPMessage *entry, BerElement **berptr)
 {
   int i;
-  char * cp;
-  char * cp2;
+  char *cp;
+  char *cp2;
 
   cp = ldap_first_attribute(ld, entry, berptr);
 
@@ -1190,15 +1123,13 @@ Curl_ldap_first_attribute_a(void * ld,
   return cp;
 }
 
-
 char *
-Curl_ldap_next_attribute_a(void * ld,
-                           LDAPMessage * entry, BerElement * berptr)
-
+Curl_ldap_next_attribute_a(void *ld,
+                           LDAPMessage *entry, BerElement *berptr)
 {
   int i;
-  char * cp;
-  char * cp2;
+  char *cp;
+  char *cp2;
 
   cp = ldap_next_attribute(ld, entry, berptr);
 
@@ -1225,7 +1156,6 @@ Curl_ldap_next_attribute_a(void * ld,
 
 #endif /* CURL_DISABLE_LDAP */
 
-
 static int
 sockaddr2ebcdic(struct sockaddr_storage *dstaddr,
                 const struct sockaddr *srcaddr, int srclen)
@@ -1241,11 +1171,11 @@ sockaddr2ebcdic(struct sockaddr_storage *dstaddr,
      sizeof(srcaddr->sa_family) || srclen > sizeof(*dstaddr)) {
     errno = EINVAL;
     return -1;
-    }
+  }
 
   memcpy((char *) dstaddr, (char *) srcaddr, srclen);
 
-  switch (srcaddr->sa_family) {
+  switch(srcaddr->sa_family) {
 
   case AF_UNIX:
     srcu = (const struct sockaddr_un *) srcaddr;
@@ -1255,7 +1185,7 @@ sockaddr2ebcdic(struct sockaddr_storage *dstaddr,
     i = QadrtConvertA2E(dstu->sun_path, srcu->sun_path, dstsize - 1, srclen);
     dstu->sun_path[i] = '\0';
     srclen = i + offsetof(struct sockaddr_un, sun_path);
-    }
+  }
 
   return srclen;
 }
@@ -1278,13 +1208,13 @@ sockaddr2ascii(struct sockaddr *dstaddr, int dstlen,
   if(!srcaddr || srclen < 0) {
     errno = EINVAL;
     return -1;
-    }
+  }
 
   memcpy((char *) dstaddr, (char *) srcaddr, srclen);
 
   if(srclen >= offsetof(struct sockaddr_storage, ss_family) +
      sizeof(srcaddr->ss_family)) {
-    switch (srcaddr->ss_family) {
+    switch(srcaddr->ss_family) {
 
     case AF_UNIX:
       srcu = (const struct sockaddr_un *) srcaddr;
@@ -1303,9 +1233,8 @@ sockaddr2ascii(struct sockaddr *dstaddr, int dstlen,
   return srclen;
 }
 
-
 int
-Curl_os400_connect(int sd, struct sockaddr * destaddr, int addrlen)
+Curl_os400_connect(int sd, struct sockaddr *destaddr, int addrlen)
 {
   int i;
   struct sockaddr_storage laddr;
@@ -1318,9 +1247,8 @@ Curl_os400_connect(int sd, struct sockaddr * destaddr, int addrlen)
   return connect(sd, (struct sockaddr *) &laddr, i);
 }
 
-
 int
-Curl_os400_bind(int sd, struct sockaddr * localaddr, int addrlen)
+Curl_os400_bind(int sd, struct sockaddr *localaddr, int addrlen)
 {
   int i;
   struct sockaddr_storage laddr;
@@ -1333,10 +1261,9 @@ Curl_os400_bind(int sd, struct sockaddr * localaddr, int addrlen)
   return bind(sd, (struct sockaddr *) &laddr, i);
 }
 
-
 int
-Curl_os400_sendto(int sd, char * buffer, int buflen, int flags,
-                                struct sockaddr * dstaddr, int addrlen)
+Curl_os400_sendto(int sd, char *buffer, int buflen, int flags,
+                  struct sockaddr *dstaddr, int addrlen)
 {
   int i;
   struct sockaddr_storage laddr;
@@ -1349,10 +1276,9 @@ Curl_os400_sendto(int sd, char * buffer, int buflen, int flags,
   return sendto(sd, buffer, buflen, flags, (struct sockaddr *) &laddr, i);
 }
 
-
 int
-Curl_os400_recvfrom(int sd, char * buffer, int buflen, int flags,
-                                struct sockaddr * fromaddr, int * addrlen)
+Curl_os400_recvfrom(int sd, char *buffer, int buflen, int flags,
+                    struct sockaddr *fromaddr, int *addrlen)
 {
   int rcvlen;
   struct sockaddr_storage laddr;
@@ -1379,7 +1305,6 @@ Curl_os400_recvfrom(int sd, char * buffer, int buflen, int flags,
   return rcvlen;
 }
 
-
 int
 Curl_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen)
 {
@@ -1396,7 +1321,6 @@ Curl_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen)
 
   return retcode;
 }
-
 
 int
 Curl_os400_getsockname(int sd, struct sockaddr *addr, int *addrlen)
@@ -1419,17 +1343,15 @@ Curl_os400_getsockname(int sd, struct sockaddr *addr, int *addrlen)
 #ifdef HAVE_LIBZ
 const char *
 Curl_os400_zlibVersion(void)
-
 {
   return set_thread_string(LK_ZLIB_VERSION, zlibVersion());
 }
 
 
 int
-Curl_os400_inflateInit_(z_streamp strm, const char * version, int stream_size)
-
+Curl_os400_inflateInit_(z_streamp strm, const char *version, int stream_size)
 {
-  z_const char * msgb4 = strm->msg;
+  z_const char *msgb4 = strm->msg;
   int ret;
 
   ret = inflateInit(strm);
@@ -1440,13 +1362,11 @@ Curl_os400_inflateInit_(z_streamp strm, const char * version, int stream_size)
   return ret;
 }
 
-
 int
 Curl_os400_inflateInit2_(z_streamp strm, int windowBits,
-                                        const char * version, int stream_size)
-
+                         const char *version, int stream_size)
 {
-  z_const char * msgb4 = strm->msg;
+  z_const char *msgb4 = strm->msg;
   int ret;
 
   ret = inflateInit2(strm, windowBits);
@@ -1457,12 +1377,10 @@ Curl_os400_inflateInit2_(z_streamp strm, int windowBits,
   return ret;
 }
 
-
 int
 Curl_os400_inflate(z_streamp strm, int flush)
-
 {
-  z_const char * msgb4 = strm->msg;
+  z_const char *msgb4 = strm->msg;
   int ret;
 
   ret = inflate(strm, flush);
@@ -1473,12 +1391,10 @@ Curl_os400_inflate(z_streamp strm, int flush)
   return ret;
 }
 
-
 int
 Curl_os400_inflateEnd(z_streamp strm)
-
 {
-  z_const char * msgb4 = strm->msg;
+  z_const char *msgb4 = strm->msg;
   int ret;
 
   ret = inflateEnd(strm);

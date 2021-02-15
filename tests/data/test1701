@@ -71,13 +71,12 @@ accept-ranges: bytes
 content-length: 6
 content-type: text/html
 funny-head: yesyes
-server: cut-out
 via: 1.1 nghttpx
 
 -foo-
 </stdout>
 <stripfile>
-s/^server:.*/server: cut-out/
+s/^server: nghttpx.*\r?\n//
 </stripfile>
 </verify>
 </testcase>

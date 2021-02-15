@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -421,9 +421,6 @@
 
 /* Define if you can safely include both <sys/time.h> and <time.h>. */
 #define TIME_WITH_SYS_TIME
-
-/* Define to enable alt-svc support (experimental) */
-#undef USE_ALTSVC
 
 /* Define to enable HTTP3 support (experimental, requires NGTCP2 or QUICHE) */
 #undef ENABLE_QUIC

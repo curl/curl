@@ -11,7 +11,7 @@ followlocation
 <data>
 HTTP/1.1 302 This is a weirdo text message swsclose
 Connection: close
-Location:  
+Location: 
 
 This server reply is for testing
 </data>

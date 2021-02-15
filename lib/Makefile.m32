@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -76,6 +76,14 @@ endif
 # Edit the path below to point to the base of your nghttp2 package.
 ifndef NGHTTP2_PATH
 NGHTTP2_PATH = ../../nghttp2-1.0.0
+endif
+# Edit the path below to point to the base of your nghttp3 package.
+ifndef NGHTTP3_PATH
+NGHTTP3_PATH = ../../nghttp3-1.0.0
+endif
+# Edit the path below to point to the base of your ngtcp2 package.
+ifndef NGTCP2_PATH
+NGTCP2_PATH = ../../ngtcp2-1.0.0
 endif
 
 PROOT = ..
@@ -212,6 +220,15 @@ endif
 ifeq ($(findstring -nghttp2,$(CFG)),-nghttp2)
 NGHTTP2 = 1
 endif
+ifeq ($(findstring -nghttp3,$(CFG)),-nghttp3)
+NGHTTP3 = 1
+endif
+ifeq ($(findstring -ngtcp2,$(CFG)),-ngtcp2)
+NGTCP2 = 1
+endif
+ifeq ($(findstring -unicode,$(CFG)),-unicode)
+UNICODE = 1
+endif
 
 INCLUDES = -I. -I../include
 CFLAGS += -DBUILDING_LIBCURL
@@ -219,6 +236,9 @@ ifdef SSL
   ifdef WINSSL
     CFLAGS += -DCURL_WITH_MULTI_SSL
   endif
+endif
+ifdef UNICODE
+  CFLAGS += -DUNICODE -D_UNICODE
 endif
 
 ifdef SYNC
@@ -252,6 +272,17 @@ ifdef SSH2
   endif
 endif
 ifdef SSL
+  ifdef NGHTTP3
+    INCLUDES += -I"$(NGHTTP3_PATH)/include"
+    CFLAGS += -DUSE_NGHTTP3
+    DLL_LIBS += -L"$(NGHTTP3_PATH)/lib" -lnghttp3
+    ifdef NGTCP2
+      INCLUDES += -I"$(NGTCP2_PATH)/include"
+      CFLAGS += -DUSE_NGTCP2
+      DLL_LIBS += -L"$(NGTCP2_PATH)/lib" -lngtcp2 -lngtcp2_crypto_openssl
+    endif
+  endif
+
   ifndef OPENSSL_INCLUDE
     ifeq "$(wildcard $(OPENSSL_PATH)/outinc)" "$(OPENSSL_PATH)/outinc"
       OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc

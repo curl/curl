@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1997 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1997 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,19 +40,13 @@ struct Curl_tree *Curl_splayinsert(struct curltime key,
                                    struct Curl_tree *t,
                                    struct Curl_tree *newnode);
 
-#if 0
-struct Curl_tree *Curl_splayremove(struct curltime key,
-                                   struct Curl_tree *t,
-                                   struct Curl_tree **removed);
-#endif
-
 struct Curl_tree *Curl_splaygetbest(struct curltime key,
                                     struct Curl_tree *t,
                                     struct Curl_tree **removed);
 
-int Curl_splayremovebyaddr(struct Curl_tree *t,
-                           struct Curl_tree *removenode,
-                           struct Curl_tree **newroot);
+int Curl_splayremove(struct Curl_tree *t,
+                     struct Curl_tree *removenode,
+                     struct Curl_tree **newroot);
 
 #define Curl_splaycomparekeys(i,j) ( ((i.tv_sec)  < (j.tv_sec)) ? -1 : \
                                    ( ((i.tv_sec)  > (j.tv_sec)) ?  1 : \

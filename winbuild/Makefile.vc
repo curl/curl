@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -35,40 +35,7 @@ CFGSET=true
 # Usage
 #
 
-!MESSAGE Usage: nmake /f Makefile.vc mode=<static or dll> <options>
-!MESSAGE where <options> is one or many of:
-!MESSAGE   VC=<6,7,8,9,10,11,12,14,15>    - VC versions
-!MESSAGE   WITH_DEVEL=<path>              - Paths for the development files (SSL, zlib, etc.)
-!MESSAGE                                    Defaults to curl's sibling directory deps: ../deps
-!MESSAGE                                    Libraries can be fetched at https://windows.php.net/downloads/php-sdk/deps/
-!MESSAGE                                    Uncompress them into the deps folder.
-!MESSAGE   WITH_PREFIX=<path>             - Installation directory path
-!MESSAGE                                    Defaults to a configuration dependent (SSL, zlib, etc.)
-!MESSAGE                                    directory inside curl's subdirectory builds: ./builds
-!MESSAGE                                    Use backslashes as path separator
-!MESSAGE   WITH_SSL=<dll or static>       - Enable OpenSSL support, DLL or static
-!MESSAGE   WITH_NGHTTP2=<dll or static>   - Enable HTTP/2 support, DLL or static
-!MESSAGE   WITH_CARES=<dll or static>     - Enable c-ares support, DLL or static
-!MESSAGE   WITH_ZLIB=<dll or static>      - Enable zlib support, DLL or static
-!MESSAGE   WITH_SSH2=<dll or static>      - Enable libSSH2 support, DLL or static
-!MESSAGE   WITH_MBEDTLS=<dll or static>   - Enable mbedTLS support, DLL or static
-!MESSAGE   ENABLE_IDN=<yes or no>         - Enable use of Windows IDN APIs, defaults to yes
-!MESSAGE                                    Requires Windows Vista or later
-!MESSAGE   ENABLE_IPV6=<yes or no>        - Enable IPv6, defaults to yes
-!MESSAGE   ENABLE_SSPI=<yes or no>        - Enable SSPI support, defaults to yes
-!MESSAGE   ENABLE_SCHANNEL=<yes or no>      - Enable native Windows SSL support, defaults to yes
-!MESSAGE   ENABLE_OPENSSL_AUTO_LOAD_CONFIG=<yes or no>
-!MESSAGE                                  - Whether the OpenSSL configuration will be loaded automatically, defaults to yes
-!MESSAGE   ENABLE_UNICODE=<yes or no>     - Enable UNICODE support, defaults to no
-!MESSAGE   GEN_PDB=<yes or no>            - Generate Program Database (debug symbols for release build)
-!MESSAGE   DEBUG=<yes or no>              - Debug builds
-!MESSAGE   MACHINE=<x86 or x64>           - Target architecture (default x64 on AMD64, x86 on others)
-!MESSAGE   CARES_PATH=<path to cares>     - Custom path for c-ares
-!MESSAGE   MBEDTLS_PATH=<path to mbedTLS> - Custom path for mbedTLS
-!MESSAGE   NGHTTP2_PATH=<path to HTTP/2>  - Custom path for nghttp2
-!MESSAGE   SSH2_PATH=<path to libSSH2>    - Custom path for libSSH2
-!MESSAGE   SSL_PATH=<path to OpenSSL>     - Custom path for OpenSSL
-!MESSAGE   ZLIB_PATH=<path to zlib>       - Custom path for zlib
+!MESSAGE See winbuild/README.md for usage
 !ERROR please choose a valid mode
 
 !ENDIF

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -105,6 +105,7 @@ struct getout {
   char          *outfile;   /* where to store the output */
   char          *infile;    /* file to upload, if GETOUT_UPLOAD is set */
   int            flags;     /* options - composed of GETOUT_* bits */
+  int            num;       /* which URL number in an invocation */
 };
 
 #define GETOUT_OUTFILE    (1<<0)  /* set when outfile is deemed done */

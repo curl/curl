@@ -280,7 +280,7 @@ are meant to never change.
 Daniel Stenberg is the main author, but the whole list of contributors is
 found in the separate THANKS file.
 .SH WWW
-https://curl.haxx.se
+https://curl.se
 .SH "SEE ALSO"
 .BR ftp (1),
 .BR wget (1)

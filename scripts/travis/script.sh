@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -25,7 +25,7 @@ set -eo pipefail
 ./buildconf
 
 if [ "$T" = "coverage" ]; then
-  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --enable-alt-svc --with-libssh2
+  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2
   make
   make TFLAGS=-n test-nonflaky
   make "TFLAGS=-n -e" test-nonflaky
@@ -36,7 +36,7 @@ if [ "$T" = "coverage" ]; then
 fi
 
 if [ "$T" = "torture" ]; then
-  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --enable-alt-svc --with-libssh2
+  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2
   make
   make TFLAGS=-n test-nonflaky
   make "TFLAGS=-n -e" test-nonflaky
@@ -49,7 +49,7 @@ if [ "$T" = "debug" ]; then
   make
   make examples
   if [ -z $NOTESTS ]; then
-    make TFLAGS=-n test-nonflaky
+    make test-nonflaky
   fi
 fi
 
@@ -62,7 +62,7 @@ fi
 if [ "$T" = "debug-mesalink" ]; then
   ./configure --enable-debug --enable-werror $C
   make
-  make "TFLAGS=-n !313 !3001" test-nonflaky
+  make "TFLAGS=-n !313 !410 !3001" test-nonflaky
 fi
 
 if [ "$T" = "novalgrind" ]; then
@@ -106,6 +106,7 @@ fi
 if [ "$T" = "cmake" ]; then
   cmake -H. -Bbuild -DCURL_WERROR=ON $C
   cmake --build build
+  env TFLAGS="!1139 $TFLAGS" cmake --build build --target test-nonflaky
 fi
 
 if [ "$T" = "distcheck" ]; then

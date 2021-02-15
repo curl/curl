@@ -28,6 +28,8 @@ This curl uses a libcurl built with Debug. This enables more error-tracking
 and memory debugging etc. For curl-developers only!
 .IP "GSS-API"
 GSS-API is supported.
+.IP "HSTS"
+HSTS support is present.
 .IP "HTTP2"
 HTTP/2 support has been built-in.
 .IP "HTTP3"

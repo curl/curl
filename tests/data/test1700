@@ -82,7 +82,6 @@ accept-ranges: bytes
 content-length: 6
 content-type: text/html
 funny-head: yesyes
-server: cut-out
 via: 1.1 nghttpx
 
 -foo-
@@ -90,13 +89,12 @@ HTTP/2 200
 date: Thu, 09 Nov 2010 14:49:00 GMT
 content-length: 6
 content-type: text/html
-server: cut-out
 via: 1.1 nghttpx
 
 -maa-
 </stdout>
 <stripfile>
-s/^server:.*/server: cut-out/
+s/^server: nghttpx.*\r?\n//
 </stripfile>
 </verify>
 </testcase>

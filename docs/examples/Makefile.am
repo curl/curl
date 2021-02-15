@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -23,7 +23,7 @@
 AUTOMAKE_OPTIONS = foreign nostdinc
 
 EXTRA_DIST = README.md Makefile.example Makefile.inc Makefile.m32 \
-  Makefile.netware makefile.dj $(COMPLICATED_EXAMPLES)
+  Makefile.netware makefile.dj $(COMPLICATED_EXAMPLES) .checksrc
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library

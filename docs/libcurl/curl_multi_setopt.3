@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,7 @@ CURLMcode curl_multi_setopt(CURLM * multi_handle, CURLMoption option, param);
 .SH DESCRIPTION
 \fIcurl_multi_setopt(3)\fP is used to tell a libcurl multi handle how to
 behave. By using the appropriate options to \fIcurl_multi_setopt(3)\fP, you
-can change libcurl's behaviour when using that multi handle.  All options are
+can change libcurl's behavior when using that multi handle.  All options are
 set with the \fIoption\fP followed by the parameter \fIparam\fP. That
 parameter can be a \fBlong\fP, a \fBfunction pointer\fP, an \fBobject
 pointer\fP or a \fBcurl_off_t\fP type, depending on what the specific option

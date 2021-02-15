@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,6 +31,7 @@
 #include "tool_easysrc.h"
 #include "tool_setopt.h"
 #include "tool_convert.h"
+#include "tool_msgs.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -59,6 +60,11 @@ const struct NameValue setopt_nv_CURL_SOCKS_PROXY[] = {
   NV(CURLPROXY_SOCKS5),
   NV(CURLPROXY_SOCKS4A),
   NV(CURLPROXY_SOCKS5_HOSTNAME),
+  NVEND,
+};
+
+const struct NameValueUnsigned setopt_nv_CURLHSTS[] = {
+  NV(CURLHSTS_ENABLE),
   NVEND,
 };
 
@@ -310,7 +316,11 @@ CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
     }
   }
 
- nomem:
+#ifdef DEBUGBUILD
+  if(ret)
+    warnf(config, "option %s returned error (%d)\n", name, (int)ret);
+#endif
+  nomem:
   return ret;
 }
 

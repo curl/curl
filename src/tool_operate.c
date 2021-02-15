@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -99,7 +99,7 @@ CURLcode curl_easy_perform_ev(CURL *easy);
 #endif
 
 #define CURL_CA_CERT_ERRORMSG                                               \
-  "More details here: https://curl.haxx.se/docs/sslcerts.html\n\n"          \
+  "More details here: https://curl.se/docs/sslcerts.html\n\n"          \
   "curl failed to verify the legitimacy of the server and therefore "       \
   "could not\nestablish a secure connection to it. To learn more about "    \
   "this situation and\nhow to fix it, please visit the web page mentioned " \
@@ -322,6 +322,9 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
 
     if(uploadfilesize != -1) {
       struct OperationConfig *config = per->config; /* for the macro below */
+#ifdef CURL_DISABLE_LIBCURL_OPTION
+      (void)config;
+#endif
       my_setopt(per->curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
     }
     per->input.fd = per->infd;
@@ -359,10 +362,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   }
   else
 #endif
-    if(config->synthetic_error) {
-      ;
-    }
-    else if(result && global->showerror) {
+    if(!config->synthetic_error && result && global->showerror) {
       fprintf(global->errors, "curl: (%d) %s\n", result,
               (per->errorbuffer[0]) ? per->errorbuffer :
               curl_easy_strerror(result));
@@ -374,13 +374,13 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   if(!result && config->xattr && outs->fopened && outs->stream) {
     int rc = fwrite_xattr(curl, fileno(outs->stream));
     if(rc)
-      warnf(config->global, "Error setting extended attributes: %s\n",
-            strerror(errno));
+      warnf(config->global, "Error setting extended attributes on '%s': %s\n",
+            outs->filename, strerror(errno));
   }
 
   if(!result && !outs->stream && !outs->bytes) {
     /* we have received no data despite the transfer was successful
-       ==> force cration of an empty output file (if an output file
+       ==> force creation of an empty output file (if an output file
        was specified) */
     long cond_unmet = 0L;
     /* do not create (or even overwrite) the file in case we get no
@@ -396,7 +396,8 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
-      fprintf(global->errors, "(%d) Failed writing body\n", result);
+      if(global->showerror)
+        fprintf(global->errors, "curl: (%d) Failed writing body\n", result);
     }
   }
 
@@ -471,6 +472,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 
         switch(response) {
+        case 408: /* Request Timeout */
         case 429: /* Too Many Requests (RFC6585) */
         case 500: /* Internal Server Error */
         case 502: /* Bad Gateway */
@@ -558,9 +560,9 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         if(ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we can't just append as then we'll
              create something strange, bail out */
-          if(!global->mute)
+          if(global->showerror)
             fprintf(global->errors,
-                    "failed to truncate, exiting\n");
+                    "curl: (23) Failed to truncate file\n");
           return CURLE_WRITE_ERROR;
         }
         /* now seek to the end of the file, the position where we
@@ -574,9 +576,9 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         rc = fseek(outs->stream, (long)outs->init, SEEK_SET);
 #endif
         if(rc) {
-          if(!global->mute)
+          if(global->showerror)
             fprintf(global->errors,
-                    "failed seeking to end of file, exiting\n");
+                    "curl: (23) Failed seeking to end of file\n");
           return CURLE_WRITE_ERROR;
         }
         outs->bytes = 0; /* clear for next round */
@@ -624,7 +626,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     fputs("\n", per->progressbar.out);
 
   if(config->writeout)
-    ourWriteOut(per->curl, per, config->writeout);
+    ourWriteOut(per->curl, per, config->writeout, result);
 
   /* Close the outs file */
   if(outs->fopened && outs->stream) {
@@ -632,7 +634,8 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
-      fprintf(global->errors, "(%d) Failed writing body\n", result);
+      if(global->showerror)
+        fprintf(global->errors, "curl: (%d) Failed writing body\n", result);
     }
   }
 
@@ -641,7 +644,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     /* Ask libcurl if we got a remote file time */
     curl_off_t filetime = -1;
     curl_easy_getinfo(curl, CURLINFO_FILETIME_T, &filetime);
-    setfiletime(filetime, outs->filename, config->global->errors);
+    setfiletime(filetime, outs->filename, global);
   }
 
   /* Close function-local opened file descriptors */
@@ -869,6 +872,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         *added = TRUE;
         per->config = config;
         per->curl = curl;
+        per->urlnum = urlnode->num;
 
         /* default headers output stream is stdout */
         heads = &per->heads;
@@ -881,7 +885,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             FILE *newfile;
             newfile = fopen(config->headerfile, per->prev == NULL?"wb":"ab");
             if(!newfile) {
-              warnf(config->global, "Failed to open %s\n", config->headerfile);
+              warnf(global, "Failed to open %s\n", config->headerfile);
               result = CURLE_WRITE_ERROR;
               break;
             }
@@ -918,7 +922,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           /* open file for reading: */
           FILE *file = fopen(config->etag_compare_file, FOPEN_READTEXT);
           if(!file && !config->etag_save_file) {
-            errorf(config->global,
+            errorf(global,
                    "Failed to open %s\n", config->etag_compare_file);
             result = CURLE_READ_ERROR;
             break;
@@ -935,7 +939,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           if(!header) {
             if(file)
               fclose(file);
-            errorf(config->global,
+            errorf(global,
                    "Failed to allocate memory for custom etag header\n");
             result = CURLE_OUT_OF_MEMORY;
             break;
@@ -961,7 +965,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             FILE *newfile = fopen(config->etag_save_file, "wb");
             if(!newfile) {
               warnf(
-                config->global,
+                global,
                 "Failed to open %s\n", config->etag_save_file);
 
               result = CURLE_WRITE_ERROR;
@@ -1049,7 +1053,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             Curl_safefree(storefile);
             if(result) {
               /* bad globbing */
-              warnf(config->global, "bad output glob!\n");
+              warnf(global, "bad output glob!\n");
               break;
             }
           }
@@ -1149,7 +1153,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
            * we should warn him/her.
            */
           if(config->proxyanyauth || (authbits>1)) {
-            warnf(config->global,
+            warnf(global,
                   "Using --anyauth or --proxy-anyauth with upload from stdin"
                   " involves a big risk of it not working. Use a temporary"
                   " file or a fixed auth type instead!\n");
@@ -1161,7 +1165,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           set_binmode(stdin);
           if(!strcmp(per->uploadfile, ".")) {
             if(curlx_nonblock((curl_socket_t)per->infd, TRUE) < 0)
-              warnf(config->global,
+              warnf(global,
                     "fcntl failed on fd=%d: %s\n", per->infd, strerror(errno));
           }
         }
@@ -1274,7 +1278,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
          * lib/telnet.c will Curl_poll() on the input file descriptor
          * rather then calling the READFUNCTION at regular intervals.
          * The circumstances in which it is preferable to enable this
-         * behaviour, by omitting to set the READFUNCTION & READDATA options,
+         * behavior, by omitting to set the READFUNCTION & READDATA options,
          * have not been determined.
          */
         my_setopt(curl, CURLOPT_READDATA, input);
@@ -1489,7 +1493,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->capath) {
           result = res_setopt_str(curl, CURLOPT_CAPATH, config->capath);
           if(result == CURLE_NOT_BUILT_IN) {
-            warnf(config->global, "ignoring %s, not supported by libcurl\n",
+            warnf(global, "ignoring %s, not supported by libcurl\n",
                   capath_from_env?
                   "SSL_CERT_DIR environment variable":"--capath");
           }
@@ -1506,7 +1510,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                                    config->capath));
           if(result == CURLE_NOT_BUILT_IN) {
             if(config->proxy_capath) {
-              warnf(config->global,
+              warnf(global,
                     "ignoring --proxy-capath, not supported by libcurl\n");
             }
           }
@@ -1657,6 +1661,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_SSLKEYTYPE, config->key_type);
           my_setopt_str(curl, CURLOPT_PROXY_SSLKEYTYPE,
                         config->proxy_key_type);
+          my_setopt_str(curl, CURLOPT_AWS_SIGV4,
+                        config->aws_sigv4);
 
           if(config->insecure_ok) {
             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -1707,30 +1713,25 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->path_as_is)
           my_setopt(curl, CURLOPT_PATH_AS_IS, 1L);
 
-        if(built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP)) {
-          if(!config->insecure_ok) {
-            char *home;
-            char *file;
-            result = CURLE_FAILED_INIT;
-            home = homedir(NULL);
-            if(home) {
-              file = aprintf("%s/.ssh/known_hosts", home);
-              if(file) {
-                /* new in curl 7.19.6 */
-                result = res_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, file);
-                curl_free(file);
-                if(result == CURLE_UNKNOWN_OPTION)
-                  /* libssh2 version older than 1.1.1 */
-                  result = CURLE_OK;
-              }
-              Curl_safefree(home);
+        if((built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP)) &&
+           !config->insecure_ok) {
+          char *home = homedir(NULL);
+          if(home) {
+            char *file = aprintf("%s/.ssh/known_hosts", home);
+            if(file) {
+              /* new in curl 7.19.6 */
+              result = res_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, file);
+              curl_free(file);
+              if(result == CURLE_UNKNOWN_OPTION)
+                /* libssh2 version older than 1.1.1 */
+                result = CURLE_OK;
             }
-            else {
-              errorf(global, "Failed to figure out user's home dir!");
-            }
+            Curl_safefree(home);
             if(result)
               break;
           }
+          else
+            warnf(global, "No home dir, couldn't find known_hosts file!");
         }
 
         if(config->no_body || config->remote_time) {
@@ -2068,6 +2069,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->altsvc)
           my_setopt_str(curl, CURLOPT_ALTSVC, config->altsvc);
 
+        if(config->hsts)
+          my_setopt_str(curl, CURLOPT_HSTS, config->hsts);
+
 #ifdef USE_METALINK
         if(!metalink && config->use_metalink) {
           outs->metalink_parser = metalink_parser_context_new();
@@ -2075,11 +2079,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             result = CURLE_OUT_OF_MEMORY;
             break;
           }
-          fprintf(config->global->errors,
+          fprintf(global->errors,
                   "Metalink: parsing (%s) metalink/XML...\n", per->this_url);
         }
         else if(metalink)
-          fprintf(config->global->errors,
+          fprintf(global->errors,
                   "Metalink: fetching (%s) from (%s)...\n",
                   mlfile->filename, per->this_url);
 #endif /* USE_METALINK */
@@ -2171,7 +2175,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
 
     result = pre_transfer(global, per);
     if(result)
-      break;
+      return result;
 
     /* parallel connect means that we don't set PIPEWAIT since pipewait
        will make libcurl prefer multiplexing */
@@ -2537,7 +2541,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 
   /* Parse .curlrc if necessary */
   if((argc == 1) ||
-     (!curl_strequal(first_arg, "-q") &&
+     (first_arg && strncmp(first_arg, "-q", 2) &&
       !curl_strequal(first_arg, "--disable"))) {
     parseconfig(NULL, global); /* ignore possible failure */
 

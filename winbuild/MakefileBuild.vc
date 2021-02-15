@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,24 +22,9 @@
 
 ###########################################################################
 #
-# Makefile for building libcurl with MSVC 6 through to 15
+# Makefile for building libcurl with MSVC
 #
-# Usage: see usage message below
-#        Should be invoked from winbuild directory
-#        Edit the paths and desired library name
-#        SSL path is only required if you intend compiling
-#        with SSL.
-#
-# This make file leaves the result either a .lib or .dll file
-# in the \lib directory. It should be called from the \lib
-# directory.
-#
-# An option would have been to allow the source directory to
-# be specified, but I saw no requirement.
-#
-# Another option would have been to leave the .lib and .dll
-# files in the "cfg" directory, but then the make file
-# in \src would need to be changed.
+# Usage: see README.md
 #
 ##############################################################
 
@@ -72,7 +57,7 @@ LFLAGS     = /nologo /machine:$(MACHINE)
 LNKDLL     = link.exe /DLL
 # Use lib.exe instead of link.exe as link.exe /lib has the following bad habits:
 # - optimizing options like /opt:ref raises warnings (at least in Visual Studio 2015)
-# - all (including Windows) dependencies are aggregated (as static parts) 
+# - all (including Windows) dependencies are aggregated (as static parts)
 # - link.exe /lib is not documented (anymore) at MSDN
 # Instead of id: just create an archive, that contains all objects
 LNKLIB     = lib.exe
@@ -237,8 +222,8 @@ ZLIB_INC_DIR = $(DEVEL_INCLUDE)
 ZLIB_LIB_DIR = $(DEVEL_LIB)
 !ENDIF
 
-# Depending on how zlib is built the libraries have different names, we 
-# try to handle them all. 
+# Depending on how zlib is built the libraries have different names, we
+# try to handle them all.
 !IF "$(WITH_ZLIB)"=="dll"
 !IF EXISTS("$(ZLIB_LIB_DIR)\zlibwapi.lib")
 ZLIB_LIBS = zlibwapi.lib
@@ -622,7 +607,7 @@ CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
  $(CURL_DIROBJ)\curl_multibyte.obj \
  $(CURL_DIROBJ)\version_win32.obj \
  $(CURL_DIROBJ)\dynbuf.obj
- 
+
 $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(CURL_LINK) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(WIN_LIBS) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(MANIFESTTOOL)

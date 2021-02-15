@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -180,6 +180,12 @@ man_MANS =                                      \
   CURLOPT_HEADERDATA.3                          \
   CURLOPT_HEADERFUNCTION.3                      \
   CURLOPT_HEADEROPT.3                           \
+  CURLOPT_HSTS.3                                \
+  CURLOPT_HSTSREADDATA.3                        \
+  CURLOPT_HSTSREADFUNCTION.3                    \
+  CURLOPT_HSTSWRITEDATA.3                       \
+  CURLOPT_HSTSWRITEFUNCTION.3                   \
+  CURLOPT_HSTS_CTRL.3                           \
   CURLOPT_HTTP09_ALLOWED.3                      \
   CURLOPT_HTTP200ALIASES.3                      \
   CURLOPT_HTTPAUTH.3                            \
@@ -376,6 +382,7 @@ man_MANS =                                      \
   CURLOPT_USERNAME.3                            \
   CURLOPT_USERPWD.3                             \
   CURLOPT_USE_SSL.3                             \
+  CURLOPT_AWS_SIGV4.3                           \
   CURLOPT_VERBOSE.3                             \
   CURLOPT_WILDCARDMATCH.3                       \
   CURLOPT_WRITEDATA.3                           \

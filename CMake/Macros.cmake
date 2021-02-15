@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -105,5 +105,16 @@ macro(curl_nroff_check)
     endif()
   else()
     message(WARNING "Found no *nroff program")
+  endif()
+endmacro()
+
+macro(optional_dependency DEPENDENCY)
+  set(CURL_${DEPENDENCY} AUTO CACHE STRING "Build curl with ${DEPENDENCY} support (AUTO, ON or OFF)")
+  set_property(CACHE CURL_${DEPENDENCY} PROPERTY STRINGS AUTO ON OFF)
+
+  if(CURL_${DEPENDENCY} STREQUAL AUTO)
+    find_package(${DEPENDENCY})
+  elseif(CURL_${DEPENDENCY})
+    find_package(${DEPENDENCY} REQUIRED)
   endif()
 endmacro()

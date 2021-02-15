@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -497,7 +497,8 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
   return result;
 }
 
-UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname)
+UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname,
+                                   bool has_scheme)
 {
   char *portptr = NULL;
   char endbracket;
@@ -542,10 +543,14 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname)
 
     /* Browser behavior adaptation. If there's a colon with no digits after,
        just cut off the name there which makes us ignore the colon and just
-       use the default port. Firefox, Chrome and Safari all do that. */
+       use the default port. Firefox, Chrome and Safari all do that.
+
+       Don't do it if the URL has no scheme, to make something that looks like
+       a scheme not work!
+    */
     if(!portptr[1]) {
       *portptr = '\0';
-      return CURLUE_OK;
+      return has_scheme ? CURLUE_OK : CURLUE_BAD_PORT_NUMBER;
     }
 
     if(!ISDIGIT(portptr[1]))
@@ -904,7 +909,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
     if(result)
       return result;
 
-    result = Curl_parse_port(u, hostname);
+    result = Curl_parse_port(u, hostname, url_has_scheme);
     if(result)
       return result;
 
@@ -978,12 +983,14 @@ void curl_url_cleanup(CURLU *u)
   }
 }
 
-#define DUP(dest, src, name)         \
-  if(src->name) {                    \
-    dest->name = strdup(src->name);  \
-    if(!dest->name)                  \
-      goto fail;                     \
-  }
+#define DUP(dest, src, name)                    \
+  do {                                          \
+    if(src->name) {                             \
+      dest->name = strdup(src->name);           \
+      if(!dest->name)                           \
+        goto fail;                              \
+    }                                           \
+  } while(0)
 
 CURLU *curl_url_dup(CURLU *in)
 {
@@ -1387,28 +1394,17 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     if(urlencode) {
       const unsigned char *i;
       char *o;
-      bool free_part = FALSE;
       char *enc = malloc(nalloc * 3 + 1); /* for worst case! */
       if(!enc)
         return CURLUE_OUT_OF_MEMORY;
-      if(plusencode) {
-        /* space to plus */
-        i = (const unsigned char *)part;
-        for(o = enc; *i; ++o, ++i)
-          *o = (*i == ' ') ? '+' : *i;
-        *o = 0; /* null-terminate */
-        part = strdup(enc);
-        if(!part) {
-          free(enc);
-          return CURLUE_OUT_OF_MEMORY;
-        }
-        free_part = TRUE;
-      }
       for(i = (const unsigned char *)part, o = enc; *i; i++) {
-        if(Curl_isunreserved(*i) ||
-           ((*i == '/') && urlskipslash) ||
-           ((*i == '=') && equalsencode) ||
-           ((*i == '+') && plusencode)) {
+        if((*i == ' ') && plusencode) {
+          *o = '+';
+          o++;
+        }
+        else if(Curl_isunreserved(*i) ||
+                ((*i == '/') && urlskipslash) ||
+                ((*i == '=') && equalsencode)) {
           if((*i == '=') && equalsencode)
             /* only skip the first equals sign */
             equalsencode = FALSE;
@@ -1422,8 +1418,6 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       }
       *o = 0; /* null-terminate */
       newp = enc;
-      if(free_part)
-        free((char *)part);
     }
     else {
       char *p;

@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,12 +34,12 @@ struct Cookie {
   char *domain;      /* domain = <this> */
   curl_off_t expires;  /* expires = <this> */
   char *expirestr;   /* the plain text version */
-  bool tailmatch;    /* whether we do tail-matching of the domain name */
 
   /* RFC 2109 keywords. Version=1 means 2109-compliant cookie sending */
   char *version;     /* Version = <value> */
   char *maxage;      /* Max-Age = <value> */
 
+  bool tailmatch;    /* whether we do tail-matching of the domain name */
   bool secure;       /* whether the 'secure' keyword was used */
   bool livecookie;   /* updated from a server, not a stored file */
   bool httponly;     /* true if the httponly directive is present */
@@ -61,8 +61,8 @@ struct CookieInfo {
   struct Cookie *cookies[COOKIE_HASH_SIZE];
 
   char *filename;  /* file we read from/write to */
-  bool running;    /* state info, for cookie adding information */
   long numcookies; /* number of cookies in the "jar" */
+  bool running;    /* state info, for cookie adding information */
   bool newsession; /* new session, discard session cookies on load */
   int lastct;      /* last creation-time used in the jar */
 };

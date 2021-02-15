@@ -1,0 +1,69 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+CURLOPT_AWS_SIGV4
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 302 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+Location: /19350002
+
+</data>
+<data2>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# this relies on the debug feature which allow to set the time
+<features>
+SSL
+debug
+crypto
+</features>
+
+<name>
+HTTP AWS_SIGV4 with two providers and region
+</name>
+<tool>
+lib1935
+</tool>
+
+<command>
+http://%HOSTIP:%HTTPPORT/1935/testapi/test
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+^Content-Type:.*
+^Accept:.*
+</strip>
+<protocol>
+GET /1935/testapi/test HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/rrr/127/xxx4_request, SignedHeaders=content-type;host;x-yyy-date, Signature=240750deb9263d4c8ece71c016f3919b56e518249390ef075740f94ef8df846f
+X-Yyy-Date: 19700101T000000Z
+
+</protocol>
+</verify>
+</testcase>

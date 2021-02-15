@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -61,12 +61,14 @@
    It converts digest text to ASCII so the MD5 will be correct for
    what ultimately goes over the network.
 */
-#define CURL_OUTPUT_DIGEST_CONV(a, b) \
-  result = Curl_convert_to_network(a, b, strlen(b)); \
-  if(result) { \
-    free(b); \
-    return result; \
-  }
+#define CURL_OUTPUT_DIGEST_CONV(a, b)                  \
+  do {                                                 \
+    result = Curl_convert_to_network(a, b, strlen(b)); \
+    if(result) {                                       \
+      free(b);                                         \
+      return result;                                   \
+    }                                                  \
+  } while(0)
 #endif /* !USE_WINDOWS_SSPI */
 
 bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,

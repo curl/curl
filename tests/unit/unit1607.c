@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -49,6 +49,9 @@ struct testcase {
   const char *host;
   int port;
 
+  /* whether we expect a permanent or non-permanent cache entry */
+  bool permanent;
+
   /* 0 to 9 addresses expected from hostcache */
   const char *address[10];
 };
@@ -67,34 +70,37 @@ static const char skip = 0;
 static const struct testcase tests[] = {
   /* spaces aren't allowed, for now */
   { "test.com:80:127.0.0.1, 127.0.0.2",
-    "test.com", 80, { NULL, }
+    "test.com", 80, TRUE, { NULL, }
   },
   { "TEST.com:80:,,127.0.0.1,,,127.0.0.2,,,,::1,,,",
-    "test.com", 80, { "127.0.0.1", "127.0.0.2", IPV6ONLY("::1"), }
+    "test.com", 80, TRUE, { "127.0.0.1", "127.0.0.2", IPV6ONLY("::1"), }
   },
   { "test.com:80:::1,127.0.0.1",
-    "test.com", 80, { IPV6ONLY("::1"), "127.0.0.1", }
+    "test.com", 80, TRUE, { IPV6ONLY("::1"), "127.0.0.1", }
   },
   { "test.com:80:[::1],127.0.0.1",
-    "test.com", 80, { IPV6ONLY("::1"), "127.0.0.1", }
+    "test.com", 80, TRUE, { IPV6ONLY("::1"), "127.0.0.1", }
   },
   { "test.com:80:::1",
-    "test.com", 80, { IPV6ONLY("::1"), }
+    "test.com", 80, TRUE, { IPV6ONLY("::1"), }
   },
   { "test.com:80:[::1]",
-    "test.com", 80, { IPV6ONLY("::1"), }
+    "test.com", 80, TRUE, { IPV6ONLY("::1"), }
   },
   { "test.com:80:127.0.0.1",
-    "test.com", 80, { "127.0.0.1", }
+    "test.com", 80, TRUE, { "127.0.0.1", }
   },
   { "test.com:80:,127.0.0.1",
-    "test.com", 80, { "127.0.0.1", }
+    "test.com", 80, TRUE, { "127.0.0.1", }
   },
   { "test.com:80:127.0.0.1,",
-    "test.com", 80, { "127.0.0.1", }
+    "test.com", 80, TRUE, { "127.0.0.1", }
   },
   { "test.com:0:127.0.0.1",
-    "test.com", 0, { "127.0.0.1", }
+    "test.com", 0, TRUE, { "127.0.0.1", }
+  },
+  { "+test.com:80:127.0.0.1,",
+    "test.com", 80, FALSE, { "127.0.0.1", }
   },
 };
 
@@ -188,10 +194,18 @@ UNITTEST_START
         break;
       }
 
-      if(dns->timestamp != 0) {
-        fprintf(stderr, "%s:%d tests[%d] failed. the timestamp is not zero. "
-                "for tests[%d].address[%d\n",
-                __FILE__, __LINE__, i, i, j);
+      if(dns->timestamp != 0 && tests[i].permanent) {
+        fprintf(stderr, "%s:%d tests[%d] failed. the timestamp is not zero "
+                "but tests[%d].permanent is TRUE\n",
+                __FILE__, __LINE__, i, i);
+        problem = true;
+        break;
+      }
+
+      if(dns->timestamp == 0 && !tests[i].permanent) {
+        fprintf(stderr, "%s:%d tests[%d] failed. the timestamp is zero "
+                "but tests[%d].permanent is FALSE\n",
+                __FILE__, __LINE__, i, i);
         problem = true;
         break;
       }

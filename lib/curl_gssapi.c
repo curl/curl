@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2011 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -131,6 +131,10 @@ void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
   display_gss_error(minor, GSS_C_MECH_CODE, buf, len);
 
   infof(data, "%s%s\n", prefix, buf);
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)data;
+  (void)prefix;
+#endif
 }
 
 #endif /* HAVE_GSSAPI */

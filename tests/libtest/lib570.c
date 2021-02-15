@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -101,8 +101,12 @@ int test(char *URL)
   stream_uri = NULL;
 
   res = curl_easy_perform(curl);
-  if(res != CURLE_RTSP_SESSION_ERROR) {
+  if(res == CURLE_RTSP_SESSION_ERROR) {
+    res = 0;
+  }
+  else {
     fprintf(stderr, "Failed to detect a Session ID mismatch");
+    res = 1;
   }
 
 test_cleanup:

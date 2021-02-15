@@ -52,7 +52,11 @@ Accept: */*
 Transfer-Encoding: chunked
 Content-Type: application/x-www-form-urlencoded
 
+%if hyper
+C
+%else
 c
+%endif
 we post this
 0
 

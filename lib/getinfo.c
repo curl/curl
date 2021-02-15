@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -101,6 +101,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     if(!m) {
       if(data->set.opt_no_body)
         m = "HEAD";
+#ifndef CURL_DISABLE_HTTP
       else {
         switch(data->state.httpreq) {
         case HTTPREQ_POST:
@@ -120,6 +121,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
           break;
         }
       }
+#endif
     }
     *param_charp = m;
   }

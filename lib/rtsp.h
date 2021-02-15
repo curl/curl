@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,11 +21,15 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#ifdef USE_HYPER
+#define CURL_DISABLE_RTSP
+#endif
+
 #ifndef CURL_DISABLE_RTSP
 
 extern const struct Curl_handler Curl_handler_rtsp;
 
-CURLcode Curl_rtsp_parseheader(struct connectdata *conn, char *header);
+CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header);
 
 #else
 /* disabled */

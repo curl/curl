@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -137,8 +137,8 @@ sub onecommit {
         $ref = $closes[0];
     }
 
-    if($ref =~ /^(\d+)/) {
-        $ref = "https://curl.haxx.se/bug/?i=$1"
+    if($ref =~ /^#?(\d+)/) {
+        $ref = "https://curl.se/bug/?i=$1"
     }
     if($ref) {
         my $r = getref();

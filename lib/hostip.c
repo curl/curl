@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -253,14 +253,12 @@ sigjmp_buf curl_jmpenv;
 #endif
 
 /* lookup address, returns entry if found and not stale */
-static struct Curl_dns_entry *
-fetch_addr(struct connectdata *conn,
-                const char *hostname,
-                int port)
+static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
+                                         const char *hostname,
+                                         int port)
 {
   struct Curl_dns_entry *dns = NULL;
   size_t entry_len;
-  struct Curl_easy *data = conn->data;
   char entry_id[MAX_HOSTCACHE_LEN];
 
   /* Create an entry id, based upon the hostname and port */
@@ -311,17 +309,16 @@ fetch_addr(struct connectdata *conn,
  * use, or we'll leak memory!
  */
 struct Curl_dns_entry *
-Curl_fetch_addr(struct connectdata *conn,
+Curl_fetch_addr(struct Curl_easy *data,
                 const char *hostname,
                 int port)
 {
-  struct Curl_easy *data = conn->data;
   struct Curl_dns_entry *dns = NULL;
 
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-  dns = fetch_addr(conn, hostname, port);
+  dns = fetch_addr(data, hostname, port);
 
   if(dns)
     dns->inuse++; /* we use it! */
@@ -444,7 +441,7 @@ Curl_cache_addr(struct Curl_easy *data,
   dns->addr = addr; /* this is the address(es) */
   time(&dns->timestamp);
   if(dns->timestamp == 0)
-    dns->timestamp = 1;   /* zero indicates CURLOPT_RESOLVE entry */
+    dns->timestamp = 1;   /* zero indicates permanent CURLOPT_RESOLVE entry */
 
   /* Store the resolved data in our DNS cache. */
   dns2 = Curl_hash_add(data->dns.hostcache, entry_id, entry_len + 1,
@@ -480,16 +477,16 @@ Curl_cache_addr(struct Curl_easy *data,
  * CURLRESOLV_PENDING  (1) = waiting for response, no pointer
  */
 
-enum resolve_t Curl_resolv(struct connectdata *conn,
+enum resolve_t Curl_resolv(struct Curl_easy *data,
                            const char *hostname,
                            int port,
                            bool allowDOH,
                            struct Curl_dns_entry **entry)
 {
   struct Curl_dns_entry *dns = NULL;
-  struct Curl_easy *data = conn->data;
   CURLcode result;
   enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
+  struct connectdata *conn = data->conn;
 
   *entry = NULL;
   conn->bits.doh = FALSE; /* default is not */
@@ -497,7 +494,7 @@ enum resolve_t Curl_resolv(struct connectdata *conn,
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-  dns = fetch_addr(conn, hostname, port);
+  dns = fetch_addr(data, hostname, port);
 
   if(dns) {
     infof(data, "Hostname %s was found in DNS cache\n", hostname);
@@ -523,7 +520,7 @@ enum resolve_t Curl_resolv(struct connectdata *conn,
     if(data->set.resolver_start) {
       int st;
       Curl_set_in_callback(data, true);
-      st = data->set.resolver_start(data->state.resolver, NULL,
+      st = data->set.resolver_start(data->state.async.resolver, NULL,
                                     data->set.resolver_start_client);
       Curl_set_in_callback(data, false);
       if(st)
@@ -565,17 +562,17 @@ enum resolve_t Curl_resolv(struct connectdata *conn,
     if(!addr) {
       /* Check what IP specifics the app has requested and if we can provide
        * it. If not, bail out. */
-      if(!Curl_ipvalid(conn))
+      if(!Curl_ipvalid(data, conn))
         return CURLRESOLV_ERROR;
 
       if(allowDOH && data->set.doh && !ipnum) {
-        addr = Curl_doh(conn, hostname, port, &respwait);
+        addr = Curl_doh(data, hostname, port, &respwait);
       }
       else {
         /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
            non-zero value indicating that we need to wait for the response to
            the resolve call */
-        addr = Curl_getaddrinfo(conn,
+        addr = Curl_getaddrinfo(data,
 #ifdef DEBUGBUILD
                                 (data->set.str[STRING_DEVICE]
                                  && !strcmp(data->set.str[STRING_DEVICE],
@@ -589,7 +586,7 @@ enum resolve_t Curl_resolv(struct connectdata *conn,
         /* the response to our resolve call will come asynchronously at
            a later time, good or bad */
         /* First, check that we haven't received the info by now */
-        result = Curl_resolv_check(conn, &dns);
+        result = Curl_resolv_check(data, &dns);
         if(result) /* error detected */
           return CURLRESOLV_ERROR;
         if(dns)
@@ -658,7 +655,7 @@ RETSIGTYPE alarmfunc(int sig)
  * CURLRESOLV_PENDING  (1) = waiting for response, no pointer
  */
 
-enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
+enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
                                    const char *hostname,
                                    int port,
                                    struct Curl_dns_entry **entry,
@@ -676,7 +673,6 @@ enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
 #endif /* HAVE_SIGACTION */
   volatile long timeout;
   volatile unsigned int prev_alarm = 0;
-  struct Curl_easy *data = conn->data;
 #endif /* USE_ALARM_TIMEOUT */
   enum resolve_t rc;
 
@@ -695,7 +691,7 @@ enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
 
   if(!timeout)
     /* USE_ALARM_TIMEOUT defined, but no timeout actually requested */
-    return Curl_resolv(conn, hostname, port, TRUE, entry);
+    return Curl_resolv(data, hostname, port, TRUE, entry);
 
   if(timeout < 1000) {
     /* The alarm() function only provides integer second resolution, so if
@@ -728,7 +724,7 @@ enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
     keep_copysig = TRUE; /* yes, we have a copy */
     sigact.sa_handler = alarmfunc;
 #ifdef SA_RESTART
-    /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
+    /* HPUX doesn't have SA_RESTART but defaults to that behavior! */
     sigact.sa_flags &= ~SA_RESTART;
 #endif
     /* now set the new struct */
@@ -748,7 +744,7 @@ enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
 #else
 #ifndef CURLRES_ASYNCH
   if(timeoutms)
-    infof(conn->data, "timeout on name lookup is not supported\n");
+    infof(data, "timeout on name lookup is not supported\n");
 #else
   (void)timeoutms; /* timeoutms not used with an async resolver */
 #endif
@@ -757,7 +753,7 @@ enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
   /* Perform the actual name resolution. This might be interrupted by an
    * alarm if it takes too long.
    */
-  rc = Curl_resolv(conn, hostname, port, TRUE, entry);
+  rc = Curl_resolv(data, hostname, port, TRUE, entry);
 
 #ifdef USE_ALARM_TIMEOUT
 clean_up:
@@ -784,7 +780,7 @@ clean_up:
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
     timediff_t elapsed_secs = Curl_timediff(Curl_now(),
-                                            conn->created) / 1000;
+                                            data->conn->created) / 1000;
 
     /* the alarm period is counted in even number of seconds */
     unsigned long alarm_set = (unsigned long)(prev_alarm - elapsed_secs);
@@ -916,17 +912,24 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       char *addr_end;
       char *port_ptr;
       char *end_ptr;
+      bool permanent = TRUE;
+      char *host_begin;
       char *host_end;
       unsigned long tmp_port;
       bool error = true;
 
-      host_end = strchr(hostp->data, ':');
+      host_begin = hostp->data;
+      if(host_begin[0] == '+') {
+        host_begin++;
+        permanent = FALSE;
+      }
+      host_end = strchr(host_begin, ':');
       if(!host_end ||
-         ((host_end - hostp->data) >= (ptrdiff_t)sizeof(hostname)))
+         ((host_end - host_begin) >= (ptrdiff_t)sizeof(hostname)))
         goto err;
 
-      memcpy(hostname, hostp->data, host_end - hostp->data);
-      hostname[host_end - hostp->data] = '\0';
+      memcpy(hostname, host_begin, host_end - host_begin);
+      hostname[host_end - host_begin] = '\0';
 
       port_ptr = host_end + 1;
       tmp_port = strtoul(port_ptr, &end_ptr, 10);
@@ -1008,18 +1011,22 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-      /* See if its already in our dns cache */
+      /* See if it's already in our dns cache */
       dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
       if(dns) {
         infof(data, "RESOLVE %s:%d is - old addresses discarded!\n",
                 hostname, port);
-        /* delete old entry entry, there are two reasons for this
+        /* delete old entry, there are two reasons for this
          1. old entry may have different addresses.
          2. even if entry with correct addresses is already in the cache,
             but if it is close to expire, then by the time next http
             request is made, it can get expired and pruned because old
-            entry is not necessarily marked as added by CURLOPT_RESOLVE. */
+            entry is not necessarily marked as permanent.
+         3. when adding a non-permanent entry, we want it to remove and
+            replace an existing permanent entry.
+         4. when adding a non-permanent entry, we want it to get a "fresh"
+            timeout that starts _now_. */
 
         Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
       }
@@ -1027,10 +1034,11 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       /* put this new host in the cache */
       dns = Curl_cache_addr(data, head, hostname, port);
       if(dns) {
-        dns->timestamp = 0; /* mark as added by CURLOPT_RESOLVE */
+        if(permanent)
+          dns->timestamp = 0; /* mark as permanent */
         /* release the returned reference; the cache itself will keep the
          * entry alive: */
-            dns->inuse--;
+        dns->inuse--;
       }
 
       if(data->share)
@@ -1040,8 +1048,8 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         Curl_freeaddrinfo(head);
         return CURLE_OUT_OF_MEMORY;
       }
-      infof(data, "Added %s:%d:%s to DNS cache\n",
-            hostname, port, addresses);
+      infof(data, "Added %s:%d:%s to DNS cache%s\n",
+            hostname, port, addresses, permanent ? "" : " (non-permanent)");
 
       /* Wildcard hostname */
       if(hostname[0] == '*' && hostname[1] == '\0') {
@@ -1056,29 +1064,29 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-CURLcode Curl_resolv_check(struct connectdata *conn,
+CURLcode Curl_resolv_check(struct Curl_easy *data,
                            struct Curl_dns_entry **dns)
 {
 #if defined(CURL_DISABLE_DOH) && !defined(CURLRES_ASYNCH)
   (void)dns;
 #endif
 
-  if(conn->bits.doh)
-    return Curl_doh_is_resolved(conn, dns);
-  return Curl_resolver_is_resolved(conn, dns);
+  if(data->conn->bits.doh)
+    return Curl_doh_is_resolved(data, dns);
+  return Curl_resolver_is_resolved(data, dns);
 }
 
-int Curl_resolv_getsock(struct connectdata *conn,
+int Curl_resolv_getsock(struct Curl_easy *data,
                         curl_socket_t *socks)
 {
 #ifdef CURLRES_ASYNCH
-  if(conn->bits.doh)
+  if(data->conn->bits.doh)
     /* nothing to wait for during DOH resolve, those handles have their own
        sockets */
     return GETSOCK_BLANK;
-  return Curl_resolver_getsock(conn, socks);
+  return Curl_resolver_getsock(data, socks);
 #else
-  (void)conn;
+  (void)data;
   (void)socks;
   return GETSOCK_BLANK;
 #endif
@@ -1089,21 +1097,19 @@ int Curl_resolv_getsock(struct connectdata *conn,
 
    Note: this function disconnects and frees the conn data in case of
    resolve failure */
-CURLcode Curl_once_resolved(struct connectdata *conn,
-                            bool *protocol_done)
+CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
 {
   CURLcode result;
+  struct connectdata *conn = data->conn;
 
-  if(conn->async.dns) {
-    conn->dns_entry = conn->async.dns;
-    conn->async.dns = NULL;
+  if(data->state.async.dns) {
+    conn->dns_entry = data->state.async.dns;
+    data->state.async.dns = NULL;
   }
 
-  result = Curl_setup_conn(conn, protocol_done);
+  result = Curl_setup_conn(data, protocol_done);
 
   if(result) {
-    struct Curl_easy *data = conn->data;
-    DEBUGASSERT(data);
     Curl_detach_connnection(data);
     Curl_conncache_remove_conn(data, conn, TRUE);
     Curl_disconnect(data, conn, TRUE);

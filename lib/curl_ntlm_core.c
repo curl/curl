@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -580,15 +580,11 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
   unsigned char *identity;
   CURLcode result = CURLE_OK;
 
-  /* we do the length checks below separately to avoid integer overflow risk
-     on extreme data lengths */
-  if((userlen > SIZE_T_MAX/2) ||
-     (domlen > SIZE_T_MAX/2) ||
-     ((userlen + domlen) > SIZE_T_MAX/2))
+  if((userlen > CURL_MAX_INPUT_LENGTH) || (domlen > CURL_MAX_INPUT_LENGTH))
     return CURLE_OUT_OF_MEMORY;
 
   identity_len = (userlen + domlen) * 2;
-  identity = malloc(identity_len);
+  identity = malloc(identity_len + 1);
 
   if(!identity)
     return CURLE_OUT_OF_MEMORY;

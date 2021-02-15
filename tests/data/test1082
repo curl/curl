@@ -32,7 +32,7 @@ http
 HTTP GET with localhost --interface
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1082 --interface localhost
+http://%HOSTIP:%HTTPPORT/1082 -4 --interface localhost
 </command>
 <precheck>
 perl -e "print 'Test requires default test client host address' if ( '%CLIENTIP' ne '127.0.0.1' );"

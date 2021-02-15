@@ -10,12 +10,19 @@ automate their retrieval.
 1996
 ----
 
-Daniel adopted an existing command-line open-source tool, httpget, that
-Brazilian Rafael Sagula had written and recently released version 0.1
-of. After a few minor adjustments, it did just what he needed.
+On November 11, 1996 the Brazilian developer Rafael Sagula wrote and released
+HttpGet version 0.1.
+
+Daniel extended this existing command-line open-source tool. After a few minor
+adjustments, it did just what he needed. The first release with Daniel's
+additions was 0.2, released on December 17, 1996. Daniel quickly became the
+new maintainer of the project.
 
 1997
 ----
+
+HttpGet 0.3 was released in January 1997 and now it accepted HTTP URLs on the
+command line.
 
 HttpGet 1.0 was released on April 8th 1997 with brand new HTTP proxy support.
 
@@ -23,13 +30,25 @@ We soon found and fixed support for getting currencies over GOPHER.  Once FTP
 download support was added, the name of the project was changed and urlget 2.0
 was released in August 1997. The http-only days were already passed.
 
+Version 2.2 was released on August 14 1997 and introduced support to build for
+and run on Windows and Solaris.
+
+November 24 1997: Version 3.1 added FTP upload support.
+
+Version 3.5 added support for HTTP POST.
+
 1998
 ----
 
-The project slowly grew bigger. When upload capabilities were added and the
-name once again was misleading, a second name change was made and on March 20,
-1998 curl 4 was released. (The version numbering from the previous names was
-kept.)
+February 4: urlget 3.10
+
+February 9: urlget 3.11
+
+March 14: urlget 3.12 added proxy authentication.
+
+The project slowly grew bigger. With upload capabilities, the name was once
+again misleading and a second name change was made. On March 20, 1998 curl 4
+was released. (The version numbering from the previous names was kept.)
 
 (Unrelated to this project a company called Curl Corporation registered a US
 trademark on the name "CURL" on May 18 1998. That company had then already
@@ -140,13 +159,13 @@ Starting with 7.10, curl verifies SSL server certificates by default.
 January: Started working on the distributed curl tests. The autobuilds.
 
 February: the curl site averages at 20000 visits weekly. At any given moment,
-there's an average of 3 people browsing the curl.haxx.se site.
+there's an average of 3 people browsing the website.
 
 Multiple new authentication schemes are supported: Digest (May), NTLM (June)
 and Negotiate (June).
 
 November: curl 7.10.8 is released. 45000 lines of code. ~55000 unique visitors
-to the curl.haxx.se site. Five official web mirrors.
+to the website. Five official web mirrors.
 
 December: full-fledged SSL for FTP is supported.
 
@@ -382,3 +401,6 @@ April: added the cyassl backend (later renamed to WolfSSL)
  April: experimental MQTT support
 
  August: zstd support
+
+ November: the website moves to www.curl.se. The website serves 10TB data
+ monthly.

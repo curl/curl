@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,7 @@ static void unit_stop(void)
 #if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
     defined(USE_WOLFSSL) || defined(USE_SCHANNEL)
 
-/* cert captured from gdb when connecting to curl.haxx.se on October 26
+/* cert captured from gdb when connecting to curl.se on October 26
    2018 */
 static unsigned char cert[] = {
   0x30, 0x82, 0x0F, 0x5B, 0x30, 0x82, 0x0E, 0x43, 0xA0, 0x03, 0x02, 0x01, 0x02,
@@ -346,7 +346,6 @@ static unsigned char cert[] = {
 UNITTEST_START
 {
   CURLcode result;
-  struct connectdata conn;
   const char *beg = (const char *)&cert[0];
   const char *end = (const char *)&cert[sizeof(cert)];
   struct Curl_easy *data = curl_easy_init();
@@ -355,11 +354,7 @@ UNITTEST_START
   if(!data)
     return 2;
 
-  memset(&conn, 0, sizeof(struct connectdata));
-  /* this is a lot of assuming, but we expect the parsing function to only
-     really need the easy handle pointer */
-  conn.data = data;
-  result = Curl_extract_certinfo(&conn, 0, beg, end);
+  result = Curl_extract_certinfo(data, 0, beg, end);
 
   fail_unless(result == CURLE_OK, "Curl_extract_certinfo returned error");
 
@@ -369,7 +364,7 @@ UNITTEST_START
     for(i = 0; i < 45; i++) {
       char backup = cert[i];
       cert[i] = (unsigned char) (byte & 0xff);
-      (void) Curl_extract_certinfo(&conn, 0, beg, end);
+      (void) Curl_extract_certinfo(data, 0, beg, end);
       cert[i] = backup;
     }
   }

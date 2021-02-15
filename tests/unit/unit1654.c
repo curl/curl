@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2019 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,11 +36,10 @@ unit_stop(void)
   curl_global_cleanup();
 }
 
-#if defined(CURL_DISABLE_HTTP) || !defined(USE_ALTSVC)
+#if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_ALTSVC)
 UNITTEST_START
 {
-  return 0; /* nothing to do when HTTP is disabled or alt-svc support is
-               missing */
+  return 0; /* nothing to do when HTTP or alt-svc is disabled */
 }
 UNITTEST_STOP
 #else
@@ -57,6 +56,7 @@ UNITTEST_START
     Curl_altsvc_cleanup(&asi);
     return result;
   }
+  curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(!curl)
     goto fail;
@@ -111,7 +111,7 @@ UNITTEST_START
   result =
     Curl_altsvc_parse(curl, asi,
                       "h2=\":443\", h3=\":443\"; ma = 120; persist = 1\r\n",
-                      ALPN_h1, "curl.haxx.se", 80);
+                      ALPN_h1, "curl.se", 80);
   if(result) {
     fprintf(stderr, "Curl_altsvc_parse(5) failed!\n");
     unitfail++;
@@ -120,7 +120,7 @@ UNITTEST_START
 
   /* clear that one again and decrease the counter */
   result = Curl_altsvc_parse(curl, asi, "clear;\r\n",
-                             ALPN_h1, "curl.haxx.se", 80);
+                             ALPN_h1, "curl.se", 80);
   if(result) {
     fprintf(stderr, "Curl_altsvc_parse(6) failed!\n");
     unitfail++;
@@ -130,8 +130,10 @@ UNITTEST_START
   Curl_altsvc_save(curl, asi, outname);
 
   curl_easy_cleanup(curl);
+  curl_global_cleanup();
   fail:
   Curl_altsvc_cleanup(&asi);
+  curl_global_cleanup();
   return unitfail;
 }
 UNITTEST_STOP
