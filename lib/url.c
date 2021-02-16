@@ -1901,13 +1901,12 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
   if(data->set.str[STRING_DEFAULT_PROTOCOL] &&
      !Curl_is_absolute_url(data->change.url, NULL, MAX_SCHEME_LEN)) {
-    char *url;
-    if(data->change.url_alloc)
-      free(data->change.url);
-    url = aprintf("%s://%s", data->set.str[STRING_DEFAULT_PROTOCOL],
-                  data->change.url);
+    char *url = aprintf("%s://%s", data->set.str[STRING_DEFAULT_PROTOCOL],
+                        data->change.url);
     if(!url)
       return CURLE_OUT_OF_MEMORY;
+    if(data->change.url_alloc)
+      free(data->change.url);
     data->change.url = url;
     data->change.url_alloc = TRUE;
   }
