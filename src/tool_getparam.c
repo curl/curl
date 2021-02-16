@@ -1547,10 +1547,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       else
         config->autoreferer = FALSE;
-      if(*nextarg)
-        GetStr(&config->referer, nextarg);
-      else
-        GetStr(&config->referer, NULL);
+      ptr = *nextarg ? nextarg : NULL;
+      GetStr(&config->referer, ptr);
     }
     break;
     case 'E':
