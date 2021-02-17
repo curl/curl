@@ -770,32 +770,32 @@ wolfssl_connect_step3(struct Curl_easy *data, struct connectdata *conn,
 
   if(SSL_SET_OPTION(primary.sessionid)) {
     bool incache;
-    SSL_SESSION *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;
+    SSL_SESSION *our_ssl_sessionid = SSL_get_session(backend->handle);
 
-    our_ssl_sessionid = SSL_get_session(backend->handle);
-
-    Curl_ssl_sessionid_lock(data);
-    incache = !(Curl_ssl_getsessionid(data, conn, &old_ssl_sessionid, NULL,
-                                      sockindex));
-    if(incache) {
-      if(old_ssl_sessionid != our_ssl_sessionid) {
-        infof(data, "old SSL session ID is stale, removing\n");
-        Curl_ssl_delsessionid(data, old_ssl_sessionid);
-        incache = FALSE;
+    if(our_ssl_sessionid) {
+      Curl_ssl_sessionid_lock(data);
+      incache = !(Curl_ssl_getsessionid(data, conn, &old_ssl_sessionid, NULL,
+                                        sockindex));
+      if(incache) {
+        if(old_ssl_sessionid != our_ssl_sessionid) {
+          infof(data, "old SSL session ID is stale, removing\n");
+          Curl_ssl_delsessionid(data, old_ssl_sessionid);
+          incache = FALSE;
+        }
       }
-    }
 
-    if(!incache) {
-      result = Curl_ssl_addsessionid(data, conn, our_ssl_sessionid,
-                                     0 /* unknown size */, sockindex);
-      if(result) {
-        Curl_ssl_sessionid_unlock(data);
-        failf(data, "failed to store ssl session");
-        return result;
+      if(!incache) {
+        result = Curl_ssl_addsessionid(data, conn, our_ssl_sessionid,
+                                       0 /* unknown size */, sockindex);
+        if(result) {
+          Curl_ssl_sessionid_unlock(data);
+          failf(data, "failed to store ssl session");
+          return result;
+        }
       }
+      Curl_ssl_sessionid_unlock(data);
     }
-    Curl_ssl_sessionid_unlock(data);
   }
 
   connssl->connecting_state = ssl_connect_done;
