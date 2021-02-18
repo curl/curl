@@ -166,12 +166,14 @@ curl_verbose_msg="enabled (--disable-verbose)"
   curl_mtlnk_msg="no      (--with-libmetalink)"
     curl_psl_msg="no      (--with-libpsl)"
  curl_altsvc_msg="enabled";
+   curl_hsts_msg="enabled (--disable-hsts)";
     ssl_backends=
      curl_h1_msg="enabled (internal)"
      curl_h2_msg="no      (--with-nghttp2, --with-hyper)"
      curl_h3_msg="no      (--with-ngtcp2, --with-quiche)"
 
 enable_altsvc="yes"
+enable_hsts="yes"
 
 dnl
 dnl Save some initial values the user might have provided
@@ -395,6 +397,7 @@ AC_HELP_STRING([--disable-http],[Disable HTTP support]),
        curl_h1_msg="no      (--enable-http, --with-hyper)"
        curl_altsvc_msg="no";
        enable_altsvc="no"
+       enable_hsts="no"
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -2932,6 +2935,8 @@ esac
 
 if test -n "$ssl_backends"; then
   curl_ssl_msg="enabled ($ssl_backends)"
+else
+  enable_hsts="no"
 fi
 
 if test no = "$VALID_DEFAULT_SSL_BACKEND"
@@ -5064,7 +5069,6 @@ AC_HELP_STRING([--disable-alt-svc],[Disable alt-svc support]),
 dnl ************************************************************
 dnl switch on/off hsts
 dnl
-curl_hsts_msg="no      (--enable-hsts)";
 AC_MSG_CHECKING([whether to support HSTS])
 AC_ARG_ENABLE(hsts,
 AC_HELP_STRING([--enable-hsts],[Enable HSTS support])
@@ -5072,10 +5076,10 @@ AC_HELP_STRING([--disable-hsts],[Disable HSTS support]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
+       curl_hsts_msg="no";
+       enable_hsts="no"
        ;;
   *) AC_MSG_RESULT(yes)
-       curl_hsts_msg="enabled";
-       enable_hsts="yes"
        ;;
   esac ],
        AC_MSG_RESULT(no)
