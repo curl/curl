@@ -59,10 +59,8 @@ static time_t debugtime(void *unused)
 {
   char *timestr = getenv("CURL_TIME");
   (void)unused;
-  if(timestr) {
-    unsigned long val = strtol(timestr, NULL, 10) + deltatime;
-    return (time_t)val;
-  }
+  if(timestr)
+    return strtol(timestr, NULL, 10) + deltatime;
   return time(NULL);
 }
 #define time(x) debugtime(x)
