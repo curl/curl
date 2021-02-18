@@ -103,6 +103,17 @@ static struct stsentry *hsts_entry(void)
   return calloc(sizeof(struct stsentry), 1);
 }
 
+static time_t to_time_t(curl_off_t timestamp)
+{
+#if SIZEOF_TIME_T < SIZEOF_CURL_OFF_T
+  if(timestamp > TIME_T_MAX)
+    return TIME_T_MAX;
+  else if(timestamp < TIME_T_MIN)
+    return TIME_T_MIN;
+#endif
+  return (time_t)timestamp;
+}
+
 static CURLcode hsts_create(struct hsts *h,
                             const char *hostname,
                             bool subdomains,
@@ -112,7 +123,7 @@ static CURLcode hsts_create(struct hsts *h,
   if(!sts)
     return CURLE_OUT_OF_MEMORY;
 
-  sts->expires = expires;
+  sts->expires = to_time_t(expires);
   sts->includeSubDomains = subdomains;
   sts->host = strdup(hostname);
   if(!sts->host) {
@@ -209,7 +220,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
   sts = Curl_hsts(h, hostname, FALSE);
   if(sts) {
     /* just update these fields */
-    sts->expires = expires;
+    sts->expires = to_time_t(expires);
     sts->includeSubDomains = subdomains;
   }
   else
@@ -289,7 +300,7 @@ static CURLcode hsts_push(struct Curl_easy *data,
 }
 
 /*
- * Write this single hsts entry to a single output line
+ * Write this single HSTS entry to a single output line
  */
 static CURLcode hsts_out(struct stsentry *sts, FILE *fp)
 {
