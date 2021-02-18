@@ -2621,9 +2621,10 @@ sectransp_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     connssl->connecting_state = ssl_connect_3;
 
 #ifdef SECTRANSP_PINNEDPUBKEY
-    if(data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG]) {
-      CURLcode result = pkp_pin_peer_pubkey(data, backend->ssl_ctx,
-                            data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG]);
+    if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
+      CURLcode result =
+        pkp_pin_peer_pubkey(data, backend->ssl_ctx,
+                            data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
       if(result) {
         failf(data, "SSL: public key does not match pinned public key!");
         return result;

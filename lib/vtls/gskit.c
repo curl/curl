@@ -1036,7 +1036,7 @@ static CURLcode gskit_connect_step3(struct Curl_easy *data,
 
   /* Check pinned public key. */
   ptr = SSL_IS_PROXY() ? data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-                         data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
   if(!result && ptr) {
     curl_X509certificate x509;
     curl_asn1Element *p;

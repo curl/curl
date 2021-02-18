@@ -1252,7 +1252,7 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
 
   pubkey_ptr = SSL_IS_PROXY() ?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
   if(pubkey_ptr) {
     result = pkp_pin_peer_pubkey(data, conn, sockindex, pubkey_ptr);
     if(result) {
