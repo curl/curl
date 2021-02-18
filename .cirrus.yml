@@ -29,7 +29,6 @@ task:
       # A stable 13.0 image likely won't be available before early 2021
       # image_family: freebsd-13-0-snap
       image_family: freebsd-12-2
-      image_family: freebsd-12-1
       image_family: freebsd-11-4
 
   env:
