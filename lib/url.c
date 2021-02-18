@@ -1959,8 +1959,10 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       if(uc)
         return Curl_uc_to_curlcode(uc);
       uc = curl_url_get(uh, CURLUPART_SCHEME, &data->state.up.scheme, 0);
-      if(uc)
+      if(uc) {
+        free(url);
         return Curl_uc_to_curlcode(uc);
+      }
       data->change.url = url;
       data->change.url_alloc = TRUE;
       infof(data, "Switched from HTTP to HTTPS due to HSTS => %s\n",
