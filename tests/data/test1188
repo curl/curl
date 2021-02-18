@@ -27,7 +27,7 @@ http
 --write-out with %{onerror} and %{urlnum} to stderr
  </name>
 <command>
-http://%HOSTIP:%NOLISTENPORT/we/want/our/1188 http://%HOSTIP:%HTTPPORT/we/want/our/1188 -w '%{onerror}%{stderr}%{urlnum} says %{exitcode} %{errormsg}\n' -s
+http://non-existing-host.haxx.se:%NOLISTENPORT/we/want/our/1188 http://%HOSTIP:%HTTPPORT/we/want/our/1188 -w '%{onerror}%{stderr}%{urlnum} says %{exitcode} %{errormsg}\n' -s
 </command>
 </client>
 
@@ -41,7 +41,7 @@ Accept: */*
 
 </protocol>
 <stderr mode="text">
-0 says 7 Failed to connect to %HOSTIP port %NOLISTENPORT: Connection refused
+0 says 6 Could not resolve host: non-existing-host.haxx.se
 </stderr>
 </verify>
 </testcase>
