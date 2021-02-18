@@ -557,12 +557,12 @@ wolfssl_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     conn->http_proxy.host.dispname : conn->host.dispname;
   const char * const pinnedpubkey = SSL_IS_PROXY() ?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 #else
   const char * const hostname = conn->host.name;
   const char * const dispname = conn->host.dispname;
   const char * const pinnedpubkey =
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 #endif
 
   conn->recv[sockindex] = wolfssl_recv;

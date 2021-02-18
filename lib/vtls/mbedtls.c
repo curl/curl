@@ -550,10 +550,10 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = SSL_IS_PROXY() ?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 #else
   const char * const pinnedpubkey =
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 #endif
 
   conn->recv[sockindex] = mbed_recv;

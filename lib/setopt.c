@@ -177,7 +177,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_SSL_CIPHER_LIST:
     /* set a list of cipher we want to use in the SSL connection */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST_ORIG],
+    result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST],
                             va_arg(param, char *));
     break;
 #ifndef CURL_DISABLE_PROXY
@@ -190,7 +190,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_TLS13_CIPHERS:
     if(Curl_ssl_tls13_ciphersuites()) {
       /* set preferred list of TLS 1.3 cipher suites */
-      result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST_ORIG],
+      result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST],
                               va_arg(param, char *));
     }
     else
@@ -1662,14 +1662,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * String that holds file name of the SSL certificate to use
      */
-    result = Curl_setstropt(&data->set.str[STRING_CERT_ORIG],
+    result = Curl_setstropt(&data->set.str[STRING_CERT],
                             va_arg(param, char *));
     break;
   case CURLOPT_SSLCERT_BLOB:
     /*
      * Blob that holds file name of the SSL certificate to use
      */
-    result = Curl_setblobopt(&data->set.blobs[BLOB_CERT_ORIG],
+    result = Curl_setblobopt(&data->set.blobs[BLOB_CERT],
                              va_arg(param, struct curl_blob *));
     break;
 #ifndef CURL_DISABLE_PROXY
@@ -1692,7 +1692,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * String that holds file type of the SSL certificate to use
      */
-    result = Curl_setstropt(&data->set.str[STRING_CERT_TYPE_ORIG],
+    result = Curl_setstropt(&data->set.str[STRING_CERT_TYPE],
                             va_arg(param, char *));
     break;
 #ifndef CURL_DISABLE_PROXY
@@ -1708,14 +1708,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * String that holds file name of the SSL key to use
      */
-    result = Curl_setstropt(&data->set.str[STRING_KEY_ORIG],
+    result = Curl_setstropt(&data->set.str[STRING_KEY],
                             va_arg(param, char *));
     break;
   case CURLOPT_SSLKEY_BLOB:
     /*
      * Blob that holds file name of the SSL key to use
      */
-    result = Curl_setblobopt(&data->set.blobs[BLOB_KEY_ORIG],
+    result = Curl_setblobopt(&data->set.blobs[BLOB_KEY],
                              va_arg(param, struct curl_blob *));
     break;
 #ifndef CURL_DISABLE_PROXY
@@ -1738,7 +1738,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * String that holds file type of the SSL key to use
      */
-    result = Curl_setstropt(&data->set.str[STRING_KEY_TYPE_ORIG],
+    result = Curl_setstropt(&data->set.str[STRING_KEY_TYPE],
                             va_arg(param, char *));
     break;
 #ifndef CURL_DISABLE_PROXY
@@ -1754,7 +1754,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * String that holds the SSL or SSH private key password.
      */
-    result = Curl_setstropt(&data->set.str[STRING_KEY_PASSWD_ORIG],
+    result = Curl_setstropt(&data->set.str[STRING_KEY_PASSWD],
                             va_arg(param, char *));
     break;
 #ifndef CURL_DISABLE_PROXY
@@ -1991,7 +1991,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
 #ifdef USE_SSL
     if(Curl_ssl->supports & SSLSUPP_PINNEDPUBKEY)
-      result = Curl_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG],
+      result = Curl_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY],
                               va_arg(param, char *));
     else
 #endif
@@ -2016,7 +2016,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * Set CA info for SSL connection. Specify file name of the CA certificate
      */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_CAFILE_ORIG],
+    result = Curl_setstropt(&data->set.str[STRING_SSL_CAFILE],
                             va_arg(param, char *));
     break;
 #ifndef CURL_DISABLE_PROXY
@@ -2037,7 +2037,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #ifdef USE_SSL
     if(Curl_ssl->supports & SSLSUPP_CA_PATH)
       /* This does not work on windows. */
-      result = Curl_setstropt(&data->set.str[STRING_SSL_CAPATH_ORIG],
+      result = Curl_setstropt(&data->set.str[STRING_SSL_CAPATH],
                               va_arg(param, char *));
     else
 #endif
@@ -2064,7 +2064,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set CRL file info for SSL connection. Specify file name of the CRL
      * to check certificates revocation
      */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_CRLFILE_ORIG],
+    result = Curl_setstropt(&data->set.str[STRING_SSL_CRLFILE],
                             va_arg(param, char *));
     break;
 #ifndef CURL_DISABLE_PROXY
@@ -2082,14 +2082,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set Issuer certificate file
      * to check certificates issuer
      */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_ISSUERCERT_ORIG],
+    result = Curl_setstropt(&data->set.str[STRING_SSL_ISSUERCERT],
                             va_arg(param, char *));
     break;
   case CURLOPT_ISSUERCERT_BLOB:
     /*
      * Blob that holds Issuer certificate to check certificates issuer
      */
-    result = Curl_setblobopt(&data->set.blobs[BLOB_SSL_ISSUERCERT_ORIG],
+    result = Curl_setblobopt(&data->set.blobs[BLOB_SSL_ISSUERCERT],
                              va_arg(param, struct curl_blob *));
     break;
 #ifndef CURL_DISABLE_PROXY
@@ -2688,9 +2688,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
 #ifdef USE_TLS_SRP
   case CURLOPT_TLSAUTH_USERNAME:
-    result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_USERNAME_ORIG],
+    result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_USERNAME],
                             va_arg(param, char *));
-    if(data->set.str[STRING_TLSAUTH_USERNAME_ORIG] && !data->set.ssl.authtype)
+    if(data->set.str[STRING_TLSAUTH_USERNAME] && !data->set.ssl.authtype)
       data->set.ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
   case CURLOPT_PROXY_TLSAUTH_USERNAME:
@@ -2703,9 +2703,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
     break;
   case CURLOPT_TLSAUTH_PASSWORD:
-    result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_ORIG],
+    result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD],
                             va_arg(param, char *));
-    if(data->set.str[STRING_TLSAUTH_USERNAME_ORIG] && !data->set.ssl.authtype)
+    if(data->set.str[STRING_TLSAUTH_USERNAME] && !data->set.ssl.authtype)
       data->set.ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
   case CURLOPT_PROXY_TLSAUTH_PASSWORD:

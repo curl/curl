@@ -1515,9 +1515,9 @@ struct Curl_multi;    /* declared and used only in multi.c */
  * are catered for in curl_easy_setopt_ccsid()
  */
 enum dupstring {
-  STRING_CERT_ORIG,       /* client certificate file name */
+  STRING_CERT,            /* client certificate file name */
   STRING_CERT_PROXY,      /* client certificate file name */
-  STRING_CERT_TYPE_ORIG,  /* format for certificate (default: PEM)*/
+  STRING_CERT_TYPE,       /* format for certificate (default: PEM)*/
   STRING_CERT_TYPE_PROXY, /* format for certificate (default: PEM)*/
   STRING_COOKIE,          /* HTTP cookie string to send */
   STRING_COOKIEJAR,       /* dump all cookies to this file */
@@ -1528,11 +1528,11 @@ enum dupstring {
   STRING_FTP_ACCOUNT,     /* ftp account data */
   STRING_FTP_ALTERNATIVE_TO_USER, /* command to send if USER/PASS fails */
   STRING_FTPPORT,         /* port to send with the FTP PORT command */
-  STRING_KEY_ORIG,        /* private key file name */
+  STRING_KEY,             /* private key file name */
   STRING_KEY_PROXY,       /* private key file name */
-  STRING_KEY_PASSWD_ORIG, /* plain text private key password */
+  STRING_KEY_PASSWD,      /* plain text private key password */
   STRING_KEY_PASSWD_PROXY, /* plain text private key password */
-  STRING_KEY_TYPE_ORIG,   /* format for private key (default: PEM) */
+  STRING_KEY_TYPE,        /* format for private key (default: PEM) */
   STRING_KEY_TYPE_PROXY,  /* format for private key (default: PEM) */
   STRING_KRB_LEVEL,       /* krb security level */
   STRING_NETRC_FILE,      /* if not NULL, use this instead of trying to find
@@ -1542,22 +1542,22 @@ enum dupstring {
   STRING_SET_RANGE,       /* range, if used */
   STRING_SET_REFERER,     /* custom string for the HTTP referer field */
   STRING_SET_URL,         /* what original URL to work on */
-  STRING_SSL_CAPATH_ORIG, /* CA directory name (doesn't work on windows) */
+  STRING_SSL_CAPATH,      /* CA directory name (doesn't work on windows) */
   STRING_SSL_CAPATH_PROXY, /* CA directory name (doesn't work on windows) */
-  STRING_SSL_CAFILE_ORIG, /* certificate file to verify peer against */
+  STRING_SSL_CAFILE,      /* certificate file to verify peer against */
   STRING_SSL_CAFILE_PROXY, /* certificate file to verify peer against */
-  STRING_SSL_PINNEDPUBLICKEY_ORIG, /* public key file to verify peer against */
+  STRING_SSL_PINNEDPUBLICKEY, /* public key file to verify peer against */
   STRING_SSL_PINNEDPUBLICKEY_PROXY, /* public key file to verify proxy */
-  STRING_SSL_CIPHER_LIST_ORIG, /* list of ciphers to use */
+  STRING_SSL_CIPHER_LIST, /* list of ciphers to use */
   STRING_SSL_CIPHER_LIST_PROXY, /* list of ciphers to use */
-  STRING_SSL_CIPHER13_LIST_ORIG, /* list of TLS 1.3 ciphers to use */
+  STRING_SSL_CIPHER13_LIST, /* list of TLS 1.3 ciphers to use */
   STRING_SSL_CIPHER13_LIST_PROXY, /* list of TLS 1.3 ciphers to use */
   STRING_SSL_EGDSOCKET,   /* path to file containing the EGD daemon socket */
   STRING_SSL_RANDOM_FILE, /* path to file containing "random" data */
   STRING_USERAGENT,       /* User-Agent string */
-  STRING_SSL_CRLFILE_ORIG, /* crl file to check certificate */
+  STRING_SSL_CRLFILE,     /* crl file to check certificate */
   STRING_SSL_CRLFILE_PROXY, /* crl file to check certificate */
-  STRING_SSL_ISSUERCERT_ORIG, /* issuer cert file to check certificate */
+  STRING_SSL_ISSUERCERT, /* issuer cert file to check certificate */
   STRING_SSL_ISSUERCERT_PROXY, /* issuer cert file to check certificate */
   STRING_SSL_ENGINE,      /* name of ssl engine */
   STRING_USERNAME,        /* <username>, if used */
@@ -1578,9 +1578,9 @@ enum dupstring {
   STRING_SERVICE_NAME,    /* Service name */
   STRING_MAIL_FROM,
   STRING_MAIL_AUTH,
-  STRING_TLSAUTH_USERNAME_ORIG,  /* TLS auth <username> */
+  STRING_TLSAUTH_USERNAME,  /* TLS auth <username> */
   STRING_TLSAUTH_USERNAME_PROXY, /* TLS auth <username> */
-  STRING_TLSAUTH_PASSWORD_ORIG,  /* TLS auth <password> */
+  STRING_TLSAUTH_PASSWORD,  /* TLS auth <password> */
   STRING_TLSAUTH_PASSWORD_PROXY, /* TLS auth <password> */
   STRING_BEARER,                /* <bearer>, if used */
   STRING_UNIX_SOCKET_PATH,      /* path to Unix socket, if used */
@@ -1609,11 +1609,11 @@ enum dupstring {
 };
 
 enum dupblob {
-  BLOB_CERT_ORIG,
+  BLOB_CERT,
   BLOB_CERT_PROXY,
-  BLOB_KEY_ORIG,
+  BLOB_KEY,
   BLOB_KEY_PROXY,
-  BLOB_SSL_ISSUERCERT_ORIG,
+  BLOB_SSL_ISSUERCERT,
   BLOB_SSL_ISSUERCERT_PROXY,
   BLOB_LAST
 };
