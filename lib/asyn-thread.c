@@ -484,35 +484,6 @@ static bool init_resolve_thread(struct Curl_easy *data,
 }
 
 /*
- * resolver_error() calls failf() with the appropriate message after a resolve
- * error
- */
-
-static CURLcode resolver_error(struct Curl_easy *data)
-{
-  const char *host_or_proxy;
-  CURLcode result;
-
-#ifndef CURL_DISABLE_PROXY
-  struct connectdata *conn = data->conn;
-  if(conn->bits.httpproxy) {
-    host_or_proxy = "proxy";
-    result = CURLE_COULDNT_RESOLVE_PROXY;
-  }
-  else
-#endif
-  {
-    host_or_proxy = "host";
-    result = CURLE_COULDNT_RESOLVE_HOST;
-  }
-
-  failf(data, "Could not resolve %s: %s", host_or_proxy,
-        data->state.async.hostname);
-
-  return result;
-}
-
-/*
  * 'entry' may be NULL and then no data is returned
  */
 static CURLcode thread_wait_resolv(struct Curl_easy *data,
@@ -542,7 +513,7 @@ static CURLcode thread_wait_resolv(struct Curl_easy *data,
 
   if(!data->state.async.dns && report)
     /* a name was not resolved, report error */
-    result = resolver_error(data);
+    result = Curl_resolver_error(data);
 
   destroy_async_data(&data->state.async);
 
@@ -616,7 +587,7 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
     getaddrinfo_complete(data);
 
     if(!data->state.async.dns) {
-      CURLcode result = resolver_error(data);
+      CURLcode result = Curl_resolver_error(data);
       destroy_async_data(&data->state.async);
       return result;
     }

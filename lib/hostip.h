@@ -245,4 +245,5 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
 int Curl_resolv_getsock(struct Curl_easy *data,
                         curl_socket_t *socks);
 
+CURLcode Curl_resolver_error(struct Curl_easy *data);
 #endif /* HEADER_CURL_HOSTIP_H */

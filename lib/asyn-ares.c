@@ -384,13 +384,8 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
        them */
     res->temp_ai = NULL;
 
-    if(!data->state.async.dns) {
-      failf(data, "Could not resolve: %s (%s)",
-            data->state.async.hostname,
-            ares_strerror(data->state.async.status));
-      result = data->conn->bits.proxy?CURLE_COULDNT_RESOLVE_PROXY:
-        CURLE_COULDNT_RESOLVE_HOST;
-    }
+    if(!data->state.async.dns)
+      result = Curl_resolver_error(data);
     else
       *dns = data->state.async.dns;
 

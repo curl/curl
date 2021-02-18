@@ -1124,3 +1124,32 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
   }
   return result;
 }
+
+/*
+ * Curl_resolver_error() calls failf() with the appropriate message after a
+ * resolve error
+ */
+
+CURLcode Curl_resolver_error(struct Curl_easy *data)
+{
+  const char *host_or_proxy;
+  CURLcode result;
+
+#ifndef CURL_DISABLE_PROXY
+  struct connectdata *conn = data->conn;
+  if(conn->bits.httpproxy) {
+    host_or_proxy = "proxy";
+    result = CURLE_COULDNT_RESOLVE_PROXY;
+  }
+  else
+#endif
+  {
+    host_or_proxy = "host";
+    result = CURLE_COULDNT_RESOLVE_HOST;
+  }
+
+  failf(data, "Could not resolve %s: %s", host_or_proxy,
+        data->state.async.hostname);
+
+  return result;
+}
