@@ -35,14 +35,8 @@
 #include <gnutls/abstract.h>
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
-
-#ifdef USE_GNUTLS_NETTLE
 #include <gnutls/crypto.h>
-#include <nettle/md5.h>
 #include <nettle/sha2.h>
-#else
-#include <gcrypt.h>
-#endif
 
 #include "urldata.h"
 #include "sendf.h"
@@ -1583,39 +1577,14 @@ static size_t gtls_version(char *buffer, size_t size)
   return msnprintf(buffer, size, "GnuTLS/%s", gnutls_check_version(NULL));
 }
 
-#ifndef USE_GNUTLS_NETTLE
-static int gtls_seed(struct Curl_easy *data)
-{
-  /* we have the "SSL is seeded" boolean static to prevent multiple
-     time-consuming seedings in vain */
-  static bool ssl_seeded = FALSE;
-
-  /* Quickly add a bit of entropy */
-  gcry_fast_random_poll();
-
-  if(!ssl_seeded || data->set.str[STRING_SSL_RANDOM_FILE] ||
-     data->set.str[STRING_SSL_EGDSOCKET]) {
-    ssl_seeded = TRUE;
-  }
-  return 0;
-}
-#endif
-
 /* data might be NULL! */
 static CURLcode gtls_random(struct Curl_easy *data,
                             unsigned char *entropy, size_t length)
 {
-#if defined(USE_GNUTLS_NETTLE)
   int rc;
   (void)data;
   rc = gnutls_rnd(GNUTLS_RND_RANDOM, entropy, length);
   return rc?CURLE_FAILED_INIT:CURLE_OK;
-#elif defined(USE_GNUTLS)
-  if(data)
-    gtls_seed(data); /* Initiate the seed if not already done */
-  gcry_randomize(entropy, length, GCRY_STRONG_RANDOM);
-#endif
-  return CURLE_OK;
 }
 
 static CURLcode gtls_sha256sum(const unsigned char *tmp, /* input */
@@ -1623,18 +1592,10 @@ static CURLcode gtls_sha256sum(const unsigned char *tmp, /* input */
                                unsigned char *sha256sum, /* output */
                                size_t sha256len)
 {
-#if defined(USE_GNUTLS_NETTLE)
   struct sha256_ctx SHA256pw;
   sha256_init(&SHA256pw);
   sha256_update(&SHA256pw, (unsigned int)tmplen, tmp);
   sha256_digest(&SHA256pw, (unsigned int)sha256len, sha256sum);
-#elif defined(USE_GNUTLS)
-  gcry_md_hd_t SHA256pw;
-  gcry_md_open(&SHA256pw, GCRY_MD_SHA256, 0);
-  gcry_md_write(SHA256pw, tmp, tmplen);
-  memcpy(sha256sum, gcry_md_read(SHA256pw, 0), sha256len);
-  gcry_md_close(SHA256pw);
-#endif
   return CURLE_OK;
 }
 
