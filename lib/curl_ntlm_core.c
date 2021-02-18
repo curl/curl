@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,13 +34,12 @@
 /* Please keep the SSL backend-specific #if branches in this order:
 
    1. USE_OPENSSL
-   2. USE_GNUTLS_NETTLE
-   3. USE_GNUTLS
-   4. USE_NSS
-   5. USE_MBEDTLS
-   6. USE_SECTRANSP
-   7. USE_OS400CRYPTO
-   8. USE_WIN32_CRYPTO
+   2. USE_GNUTLS
+   3. USE_NSS
+   4. USE_MBEDTLS
+   5. USE_SECTRANSP
+   6. USE_OS400CRYPTO
+   7. USE_WIN32_CRYPTO
 
    This ensures that:
    - the same SSL branch gets activated throughout this source
@@ -74,13 +73,9 @@
 #    define DESKEY(x) &x
 #  endif
 
-#elif defined(USE_GNUTLS_NETTLE)
-
-#  include <nettle/des.h>
-
 #elif defined(USE_GNUTLS)
 
-#  include <gcrypt.h>
+#  include <nettle/des.h>
 
 #elif defined(USE_NSS)
 
@@ -159,7 +154,7 @@ static void setup_des_key(const unsigned char *key_56,
   DES_set_key(&key, ks);
 }
 
-#elif defined(USE_GNUTLS_NETTLE)
+#elif defined(USE_GNUTLS)
 
 static void setup_des_key(const unsigned char *key_56,
                           struct des_ctx *des)
@@ -174,26 +169,6 @@ static void setup_des_key(const unsigned char *key_56,
 
   /* Set the key */
   des_set_key(des, (const uint8_t *) key);
-}
-
-#elif defined(USE_GNUTLS)
-
-/*
- * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.
- */
-static void setup_des_key(const unsigned char *key_56,
-                          gcry_cipher_hd_t *des)
-{
-  char key[8];
-
-  /* Expand the 56-bit key to 64-bits */
-  extend_key_56_to_64(key_56, key);
-
-  /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
-
-  /* Set the key */
-  gcry_cipher_setkey(*des, key, sizeof(key));
 }
 
 #elif defined(USE_NSS)
@@ -402,7 +377,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   setup_des_key(keys + 14, DESKEY(ks));
   DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results + 16),
                   DESKEY(ks), DES_ENCRYPT);
-#elif defined(USE_GNUTLS_NETTLE)
+#elif defined(USE_GNUTLS)
   struct des_ctx des;
   setup_des_key(keys, &des);
   des_encrypt(&des, 8, results, plaintext);
@@ -410,23 +385,6 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   des_encrypt(&des, 8, results + 8, plaintext);
   setup_des_key(keys + 14, &des);
   des_encrypt(&des, 8, results + 16, plaintext);
-#elif defined(USE_GNUTLS)
-  gcry_cipher_hd_t des;
-
-  gcry_cipher_open(&des, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
-  setup_des_key(keys, &des);
-  gcry_cipher_encrypt(des, results, 8, plaintext, 8);
-  gcry_cipher_close(des);
-
-  gcry_cipher_open(&des, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
-  setup_des_key(keys + 7, &des);
-  gcry_cipher_encrypt(des, results + 8, 8, plaintext, 8);
-  gcry_cipher_close(des);
-
-  gcry_cipher_open(&des, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
-  setup_des_key(keys + 14, &des);
-  gcry_cipher_encrypt(des, results + 16, 8, plaintext, 8);
-  gcry_cipher_close(des);
 #elif defined(USE_NSS) || defined(USE_MBEDTLS) || defined(USE_SECTRANSP) \
   || defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
   encrypt_des(plaintext, results, keys);
@@ -473,24 +431,12 @@ CURLcode Curl_ntlm_core_mk_lm_hash(struct Curl_easy *data,
     setup_des_key(pw + 7, DESKEY(ks));
     DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)(lmbuffer + 8),
                     DESKEY(ks), DES_ENCRYPT);
-#elif defined(USE_GNUTLS_NETTLE)
+#elif defined(USE_GNUTLS)
     struct des_ctx des;
     setup_des_key(pw, &des);
     des_encrypt(&des, 8, lmbuffer, magic);
     setup_des_key(pw + 7, &des);
     des_encrypt(&des, 8, lmbuffer + 8, magic);
-#elif defined(USE_GNUTLS)
-    gcry_cipher_hd_t des;
-
-    gcry_cipher_open(&des, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
-    setup_des_key(pw, &des);
-    gcry_cipher_encrypt(des, lmbuffer, 8, magic, 8);
-    gcry_cipher_close(des);
-
-    gcry_cipher_open(&des, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
-    setup_des_key(pw + 7, &des);
-    gcry_cipher_encrypt(des, lmbuffer + 8, 8, magic, 8);
-    gcry_cipher_close(des);
 #elif defined(USE_NSS) || defined(USE_MBEDTLS) || defined(USE_SECTRANSP) \
   || defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
     encrypt_des(magic, lmbuffer, pw);
