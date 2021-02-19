@@ -145,6 +145,10 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
        option had been enabled! */
     *param_charp = data->info.wouldredirect;
     break;
+  case CURLINFO_REFERER:
+    /* Return the referrer header for this request, or NULL if unset */
+    *param_charp = data->change.referer;
+    break;
   case CURLINFO_PRIMARY_IP:
     /* Return the ip address of the most recent (primary) connection */
     *param_charp = data->info.conn_primary_ip;

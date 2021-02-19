@@ -1690,6 +1690,8 @@
      d                 c                   X'0010003A'
      d  CURLINFO_PROXY_ERROR...                                                 CURLINFO_LONG + 59
      d                 c                   X'0020003B'
+     d  CURLINFO_REFERER...                                                     CURLINFO_STRING + 60
+     d                 c                   X'0010003C'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
