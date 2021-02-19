@@ -9,12 +9,11 @@ HTTP GET
 
 # Server-side
 <reply>
-<data nocheck="yes">
-HTTP/1.1 200 OK
-Content-Length: 3
+<data>
+HTTP/1.1 404 Not Found
+Content-Length: 0
 Connection: close
 
-hi
 </data>
 </reply>
 
@@ -27,7 +26,7 @@ http
 --write-out with %{onerror} and %{urlnum} to stderr
  </name>
 <command>
-http://non-existing-host.haxx.se:%NOLISTENPORT/we/want/our/1188 http://%HOSTIP:%HTTPPORT/we/want/our/1188 -w '%{onerror}%{stderr}%{urlnum} says %{exitcode} %{errormsg}\n' -s
+-f -s -w '%{onerror}%{stderr}%{urlnum} says %{exitcode} %{errormsg}\n' http://%HOSTIP:%HTTPPORT/we/want/our/1188 http://%HOSTIP:%HTTPPORT/we/want/our/1188
 </command>
 </client>
 
@@ -39,9 +38,19 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
+GET /we/want/our/1188 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
 </protocol>
 <stderr mode="text">
-0 says 6 Could not resolve host: non-existing-host.haxx.se
+0 says 22 The requested URL returned error: 404
+1 says 22 The requested URL returned error: 404
 </stderr>
+# 22 is CURLE_HTTP_RETURNED_ERROR
+<errorcode>
+22
+</errorcode>
 </verify>
 </testcase>
