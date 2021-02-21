@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -502,9 +502,14 @@
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #endif
 
-/* VS2005 and later default size for time_t is 64-bit, unless
-   _USE_32BIT_TIME_T has been defined to get a 32-bit time_t. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+/* mingw-w64, mingw using >= MSVCR80, and visual studio >= 2005 (MSVCR80)
+   all default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
+#ifdef __MINGW32__
+#  include <_mingw.h>
+#endif
+#if defined(__MINGW64_VERSION_MAJOR) || \
+    (defined(__MINGW32__) && (__MSVCRT_VERSION__ >= 0x0800)) || \
+    (defined(_MSC_VER) && (_MSC_VER >= 1400))
 #  ifndef _USE_32BIT_TIME_T
 #    define SIZEOF_TIME_T 8
 #  else
