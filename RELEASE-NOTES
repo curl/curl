@@ -4,46 +4,65 @@ curl and libcurl 7.76.0
  Command line options:         240
  curl_easy_setopt() options:   288
  Public functions in libcurl:  85
- Contributors:                 2329
+ Contributors:                 2332
 
 This release includes the following changes:
 
  o curl: add --fail-with-body [17]
  o doh: add options to disable ssl verification [5]
+ o http: add support to read and store the referrer header [30]
  o sasl: support SCRAM-SHA-1 and SCRAM-SHA-256 via libgsasl [4]
  o vtls: initial implementation of rustls backend [3]
 
 This release includes the following bugfixes:
 
+ o asyn-ares: use consistent resolve error message [37]
  o BUG-BOUNTY: removed the cooperation mention
  o build: fix --disable-dateparse [1]
  o build: fix --disable-http-auth
+ o ci: stop building on freebsd-12-1 [38]
  o cmake: fix import library name for non-MS compiler on Windows [10]
+ o curl_multibyte: always return a heap-allocated copy of string [29]
  o curl_multibyte: fall back to local code page stat/access on Windows [8]
+ o curl_url_set.3: mention CURLU_PATH_AS_IS [13]
  o CURLOPT_QUOTE.3: clarify that libcurl doesn't parse what's sent [16]
  o docs/Makefile.inc: format to be update-friendly [11]
  o docs: fix FILE example url in --metalink documentation [19]
+ o doh: Fix sharing user's resolve list with DOH handles [46]
  o file: Support unicode urls on windows [9]
  o ftp: add 'list_only' to the transfer state struct [35]
  o ftp: add 'prefer_ascii' to the transfer state struct [36]
  o ftp: avoid SIZE when asking for a TYPE A file [23]
  o ftp: fix Codacy/cppcheck warning about null pointer arithmetic [34]
  o ftp: never set data->set.ftp_append outside setopt [14]
+ o gnutls: assume nettle crypto support [33]
  o gskit: correct the gskit_send() prototype [21]
  o hostip: fix build with sync resolver [20]
  o hostip: fix crash in sync resolver builds that use DOH [12]
+ o http: do not add a referrer header with empty value [44]
  o http: use credentials from transfer, not connection [25]
+ o lib: remove 'conn->data' completely [45]
+ o memdebug: close debug logfile explicitly on exit [28]
+ o multi: rename the multi transfer states [43]
  o ngtcp2: adapt to the new recv_datagram callback
  o ngtcp2: clarify calculation precedence [27]
  o OS400: update for CURLOPT_AWS_SIGV4 [2]
+ o parse_proxy: fix a memory leak in the OOM path [41]
  o quiche: fix build error: use 'int' for port number
  o runtests.pl: add %TESTNUMBER variable to make copying tests more convenient
  o runtests.pl: add a -P option to specify an external proxy
+ o test1188: change error to check for: --fail HTTP status [26]
  o tests: disable .curlrc in more environments [7]
+ o time: enable 64-bit time_t in supported mingw environments [24]
  o tool_help: add missing argument for --create-file-mode [18]
+ o url.c: use consistent error message for failed resolve
+ o url: fix memory leak if OOM in the HSTS handling [32]
+ o url: fix possible use-after-free in default protocol [42]
  o urldata: don't touch data->set.httpversion at run-time [6]
  o urldata: fix build without HTTP and MQTT [22]
  o urldata: remove the 'rtspversion' field [15]
+ o urldata: remove the _ORIG suffix from string names [31]
+ o wolfssl: don't store a NULL sessionid [40]
 
 This release includes the following known bugs:
 
@@ -52,12 +71,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alex Xu, awesomenode on github, Benbuck Nason, Bodo Bergmann, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, David Goerger, Fabian Keil, Firefox OS,
-  Ikko Ashimine, Jack Boos Yu, Jacob Hoffman-Andrews, Jon Rumsey, Joseph Chen,
-  Marcel Raad, Ray Satiro, Simon Josefsson, Stephan Szabo, Viktor Szakats,
-  Vincent Torri, ZimCodes on github,
-  (22 contributors)
+  Alex Xu, arvids-kokins-bidstack on github, awesomenode on github,
+  Benbuck Nason, Bodo Bergmann, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, David Demelier, David Goerger, Emil Engler, Fabian Keil,
+  Firefox OS, Gisle Vanem, Ikko Ashimine, Jack Boos Yu, Jacob Hoffman-Andrews,
+  Jon Rumsey, Joseph Chen, Manuj Bhatia, Marcel Raad, Ray Satiro,
+  Simon Josefsson, Stephan Szabo, Viktor Szakats, Vincent Torri,
+  ZimCodes on github,
+  (27 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -73,6 +94,7 @@ References to bug reports and discussions on issues:
  [10] = https://curl.se/bug/?i=6225
  [11] = https://curl.se/bug/?i=6593
  [12] = https://curl.se/bug/?i=6603
+ [13] = https://curl.se/mail/lib-2021-02/0046.html
  [14] = https://curl.se/bug/?i=6579
  [15] = https://curl.se/bug/?i=6581
  [16] = https://curl.se/bug/?i=6577
@@ -83,8 +105,25 @@ References to bug reports and discussions on issues:
  [21] = https://curl.se/bug/?i=6569
  [22] = https://curl.se/bug/?i=6562
  [23] = https://curl.se/bug/?i=6564
+ [24] = https://curl.se/bug/?i=6636
  [25] = https://curl.se/bug/?i=6542
+ [26] = https://curl.se/bug/?i=6637
  [27] = https://curl.se/bug/?i=6576
+ [28] = https://github.com/curl/curl/pull/6591#issuecomment-780396541
+ [29] = https://curl.se/bug/?i=6602
+ [30] = https://curl.se/bug/?i=6591
+ [31] = https://curl.se/bug/?i=6624
+ [32] = https://github.com/curl/curl/pull/6627#issuecomment-781626205
+ [33] = https://curl.se/bug/?i=6625
  [34] = https://curl.se/bug/?i=6576
  [35] = https://curl.se/bug/?i=6578
  [36] = https://curl.se/bug/?i=6578
+ [37] = https://curl.se/bug/?i=6626
+ [38] = https://curl.se/bug/?i=6622
+ [40] = https://curl.se/bug/?i=6616
+ [41] = https://github.com/curl/curl/pull/6591#issuecomment-780396541
+ [42] = https://github.com/curl/curl/issues/6604#issuecomment-780138219
+ [43] = https://curl.se/bug/?i=6612
+ [44] = https://curl.se/bug/?i=6610
+ [45] = https://curl.se/bug/?i=6608
+ [46] = https://curl.se/bug/?i=6589
