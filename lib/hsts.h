@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2020 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,7 +35,7 @@ struct stsentry {
   struct Curl_llist_element node;
   const char *host;
   bool includeSubDomains;
-  time_t expires; /* the timestamp of this entry's expiry */
+  curl_off_t expires; /* the timestamp of this entry's expiry */
 };
 
 /* The HSTS cache. Needs to be able to tailmatch host names. */

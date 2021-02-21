@@ -123,7 +123,7 @@ static CURLcode hsts_create(struct hsts *h,
   if(!sts)
     return CURLE_OUT_OF_MEMORY;
 
-  sts->expires = to_time_t(expires);
+  sts->expires = expires;
   sts->includeSubDomains = subdomains;
   sts->host = strdup(hostname);
   if(!sts->host) {
@@ -143,7 +143,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
   bool gotinc = FALSE;
   bool subdomains = FALSE;
   struct stsentry *sts;
-  time_t now = time(NULL);
+  curl_off_t now = (curl_off_t)time(NULL);
 
   do {
     while(*p && ISSPACE(*p))
@@ -220,7 +220,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
   sts = Curl_hsts(h, hostname, FALSE);
   if(sts) {
     /* just update these fields */
-    sts->expires = to_time_t(expires);
+    sts->expires = expires;
     sts->includeSubDomains = subdomains;
   }
   else
@@ -239,7 +239,7 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
                            bool subdomain)
 {
   if(h) {
-    time_t now = time(NULL);
+    curl_off_t now = (curl_off_t)time(NULL);
     size_t hlen = strlen(hostname);
     struct Curl_llist_element *e;
     struct Curl_llist_element *n;
@@ -285,7 +285,7 @@ static CURLcode hsts_push(struct Curl_easy *data,
   e.namelen = strlen(sts->host);
   e.includeSubDomains = sts->includeSubDomains;
 
-  result = Curl_gmtime(sts->expires, &stamp);
+  result = Curl_gmtime(to_time_t(sts->expires), &stamp);
   if(result)
     return result;
 
@@ -305,7 +305,7 @@ static CURLcode hsts_push(struct Curl_easy *data,
 static CURLcode hsts_out(struct stsentry *sts, FILE *fp)
 {
   struct tm stamp;
-  CURLcode result = Curl_gmtime(sts->expires, &stamp);
+  CURLcode result = Curl_gmtime(to_time_t(sts->expires), &stamp);
   if(result)
     return result;
 
@@ -405,7 +405,7 @@ static CURLcode hsts_add(struct hsts *h, char *line)
               "%" MAX_HSTS_HOSTLENSTR "s \"%" MAX_HSTS_DATELENSTR "[^\"]\"",
               host, date);
   if(2 == rc) {
-    time_t expires = Curl_getdate_capped(date);
+    curl_off_t expires = Curl_getdate_capped(date);
     CURLcode result;
     char *p = host;
     bool subdomain = FALSE;
@@ -441,7 +441,7 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
       e.name[0] = 0; /* just to make it clean */
       sc = data->set.hsts_read(data, &e, data->set.hsts_read_userp);
       if(sc == CURLSTS_OK) {
-        time_t expires;
+        curl_off_t expires;
         CURLcode result;
         if(!e.name[0])
           /* bail out if no name was stored */
@@ -449,7 +449,7 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
         if(e.expire[0])
           expires = Curl_getdate_capped(e.expire);
         else
-          expires = TIME_T_MAX; /* the end of time */
+          expires = CURL_OFF_T_MAX; /* the end of time */
         result = hsts_create(h, e.name, e.includeSubDomains, expires);
         if(result)
           return result;
