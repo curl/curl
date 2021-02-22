@@ -26,6 +26,12 @@ CURLOPT_PROXY_SSLCERT_BLOB \- SSL proxy client certificate from memory blob
 .SH SYNOPSIS
 #include <curl/curl.h>
 
+struct curl_blob {
+  const void *data;
+  size_t len;
+  unsigned int flags;
+};
+
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLCERT_BLOB, struct curl_blob *blob);
 .SH DESCRIPTION
 Pass a pointer to a curl_blob structure, which contains information (pointer

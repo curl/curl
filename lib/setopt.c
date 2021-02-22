@@ -100,8 +100,9 @@ CURLcode Curl_setblobopt(struct curl_blob **blobp,
     *nblob = *blob;
     if(blob->flags & CURL_BLOB_COPY) {
       /* put the data after the blob struct in memory */
-      nblob->data = (char *)nblob + sizeof(struct curl_blob);
-      memcpy(nblob->data, blob->data, blob->len);
+      char *p = (char *)nblob + sizeof(struct curl_blob);
+      memcpy(p, blob->data, blob->len);
+      nblob->data = p;
     }
 
     *blobp = nblob;

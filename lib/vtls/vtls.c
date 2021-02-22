@@ -98,6 +98,7 @@ static CURLcode blobdup(struct curl_blob **dest,
   DEBUGASSERT(!*dest);
   if(src) {
     /* only if there's data to dupe! */
+    char *p;
     struct curl_blob *d;
     d = malloc(sizeof(struct curl_blob) + src->len);
     if(!d)
@@ -106,8 +107,9 @@ static CURLcode blobdup(struct curl_blob **dest,
     /* Always duplicate because the connection may survive longer than the
        handle that passed in the blob. */
     d->flags = CURL_BLOB_COPY;
-    d->data = (void *)((char *)d + sizeof(struct curl_blob));
-    memcpy(d->data, src->data, src->len);
+    p = (char *)d + sizeof(struct curl_blob);
+    memcpy(p, src->data, src->len);
+    d->data = p;
     *dest = d;
   }
   return CURLE_OK;

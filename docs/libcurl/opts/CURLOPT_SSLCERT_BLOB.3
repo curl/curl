@@ -26,6 +26,12 @@ CURLOPT_SSLCERT_BLOB \- SSL client certificate from memory blob
 .SH SYNOPSIS
 #include <curl/curl.h>
 
+struct curl_blob {
+  const void *data;
+  size_t len;
+  unsigned int flags;
+};
+
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLCERT_BLOB, struct curl_blob *stblob);
 .SH DESCRIPTION
 Pass a pointer to a curl_blob structure, which contains (pointer and size) a

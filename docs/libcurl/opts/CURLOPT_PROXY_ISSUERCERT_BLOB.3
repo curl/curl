@@ -27,6 +27,12 @@ CURLOPT_ISSUERCERT_BLOB \- proxy issuer SSL certificate from memory blob
 .nf
 #include <curl/curl.h>
 
+struct curl_blob {
+  const void *data;
+  size_t len;
+  unsigned int flags;
+};
+
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_ISSUERCERT_BLOB,
                           struct curl_blob *blob);
 .fi

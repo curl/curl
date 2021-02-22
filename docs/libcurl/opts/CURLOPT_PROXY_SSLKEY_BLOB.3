@@ -27,6 +27,12 @@ CURLOPT_PROXY_SSLKEY_BLOB \- private key for proxy cert from memory blob
 .nf
 #include <curl/curl.h>
 
+struct curl_blob {
+  const void *data;
+  size_t len;
+  unsigned int flags;
+};
+
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLKEY_BLOB,
                           struct curl_blob *blob);
 .fi
