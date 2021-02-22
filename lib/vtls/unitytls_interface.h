@@ -221,7 +221,7 @@ typedef void                        (*unitytls_random_generate_bytes_t)(UInt8* b
 
 /* Interface struct used to integrate UnityTLS into external libraries. */
 /* See InterfaceStruct.cpp in UnityTLS. */
-typedef struct
+typedef struct unitytls_interface_struct
 {
     UInt64 INVALID_HANDLE;
     unitytls_tlsctx_protocolrange UNITYTLS_TLSCTX_PROTOCOLRANGE_DEFAULT;

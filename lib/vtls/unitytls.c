@@ -49,9 +49,9 @@ static unitytls_interface_struct* unitytls = NULL;
 extern unitytls_interface_struct* unitytls_get_interface_struct();
 #endif
 
-void curl_unitytls_set_interface(void* interface)
+void curl_unitytls_set_interface(struct unitytls_interface_struct* interface)
 {
-  unitytls = (unitytls_interface_struct*)interface;
+  unitytls = interface;
 }
 
 static bool unitytls_check_interface_available(struct Curl_easy* data)

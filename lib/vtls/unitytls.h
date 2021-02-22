@@ -6,7 +6,9 @@
 
 #ifdef USE_UNITYTLS
 
-CURL_EXTERN void curl_unitytls_set_interface(void* interface);
+struct unitytls_interface_struct;
+
+CURL_EXTERN void curl_unitytls_set_interface(struct unitytls_interface_struct* interface);
 
 extern const struct Curl_ssl Curl_ssl_unitytls;
 
