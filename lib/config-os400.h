@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -351,12 +351,6 @@
 
 /* Define if you have the <sys/ioctl.h> header file. */
 #define HAVE_SYS_IOCTL_H
-
-/* Define if you have the `tcgetattr' function. */
-#undef HAVE_TCGETATTR
-
-/* Define if you have the `tcsetattr' function. */
-#undef HAVE_TCSETATTR
 
 /* Define if you have the <termios.h> header file. */
 #undef HAVE_TERMIOS_H

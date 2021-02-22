@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -205,9 +205,6 @@
 /* Define if you have the stricmp function. */
 /* #define HAVE_STRICMP 1 */
 
-/* Define if you have the strncasecmp function. */
-/* #define HAVE_STRNCASECMP 1 */
-
 /* Define if you have the strnicmp function. */
 /* #define HAVE_STRNICMP 1 */
 
@@ -218,12 +215,6 @@
 #if defined(__MINGW32__) || defined(__WATCOMC__)
 #define HAVE_STRTOLL 1
 #endif
-
-/* Define if you have the tcgetattr function.  */
-/* #define HAVE_TCGETATTR 1 */
-
-/* Define if you have the tcsetattr function.  */
-/* #define HAVE_TCSETATTR 1 */
 
 /* Define if you have the utime function */
 #define HAVE_UTIME 1
