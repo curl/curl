@@ -105,8 +105,8 @@ static const char * const statename[]={
 /* function pointer called once when switching TO a state */
 typedef void (*init_multistate_func)(struct Curl_easy *data);
 
-/* called when the PERFORM state starts  */
-static void init_perform(struct Curl_easy *data)
+/* called in DID state, before PERFORMING state */
+static void before_perform(struct Curl_easy *data)
 {
   data->req.chunk = FALSE;
   Curl_pgrsTime(data, TIMER_PRETRANSFER);
@@ -142,8 +142,8 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     Curl_connect_free, /* DO */
     NULL,              /* DOING */
     NULL,              /* DOING_MORE */
-    NULL,              /* DID */
-    init_perform,      /* PERFORMING */
+    before_perform,    /* DID */
+    NULL,              /* PERFORMING */
     NULL,              /* RATELIMITING */
     NULL,              /* DONE */
     init_completed,    /* COMPLETED */
