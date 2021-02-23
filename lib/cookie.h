@@ -91,13 +91,13 @@ struct Curl_easy;
  */
 
 struct Cookie *Curl_cookie_add(struct Curl_easy *data,
-                               struct CookieInfo *, bool header, bool noexpiry,
-                               char *lineptr,
+                               struct CookieInfo *c, bool header,
+                               bool noexpiry, char *lineptr,
                                const char *domain, const char *path,
                                bool secure);
 
-struct Cookie *Curl_cookie_getlist(struct CookieInfo *, const char *,
-                                   const char *, bool);
+struct Cookie *Curl_cookie_getlist(struct CookieInfo *c, const char *host,
+                                   const char *path, bool secure);
 void Curl_cookie_freelist(struct Cookie *cookies);
 void Curl_cookie_clearall(struct CookieInfo *cookies);
 void Curl_cookie_clearsess(struct CookieInfo *cookies);
@@ -110,9 +110,10 @@ void Curl_cookie_clearsess(struct CookieInfo *cookies);
 #define Curl_flush_cookies(x,y) Curl_nop_stmt
 #else
 void Curl_flush_cookies(struct Curl_easy *data, bool cleanup);
-void Curl_cookie_cleanup(struct CookieInfo *);
+void Curl_cookie_cleanup(struct CookieInfo *c);
 struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
-                                    const char *, struct CookieInfo *, bool);
+                                    const char *file, struct CookieInfo *inc,
+                                    bool newsession);
 struct curl_slist *Curl_cookie_list(struct Curl_easy *data);
 void Curl_cookie_loadfiles(struct Curl_easy *data);
 #endif
