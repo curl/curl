@@ -1581,6 +1581,9 @@ CURLcode Curl_follow(struct Curl_easy *data,
       data->state.followlocation++; /* count location-followers */
 
       if(data->set.http_auto_referer) {
+        CURLU *u;
+        char *referer;
+
         /* We are asked to automatically set the previous URL as the referer
            when we get the next URL. We pick the ->url field, which may or may
            not be 100% correct */
@@ -1590,9 +1593,27 @@ CURLcode Curl_follow(struct Curl_easy *data,
           data->state.referer_alloc = FALSE;
         }
 
-        data->state.referer = strdup(data->state.url);
-        if(!data->state.referer)
+        /* Make a copy of the URL without crenditals and fragment */
+        u = curl_url();
+        if(!u)
           return CURLE_OUT_OF_MEMORY;
+
+        uc = curl_url_set(u, CURLUPART_URL, data->state.url, 0);
+        if(!uc)
+          uc = curl_url_set(u, CURLUPART_FRAGMENT, NULL, 0);
+        if(!uc)
+          uc = curl_url_set(u, CURLUPART_USER, NULL, 0);
+        if(!uc)
+          uc = curl_url_set(u, CURLUPART_PASSWORD, NULL, 0);
+        if(!uc)
+          uc = curl_url_get(u, CURLUPART_URL, &referer, 0);
+
+        curl_url_cleanup(u);
+
+        if(uc || referer == NULL)
+          return CURLE_OUT_OF_MEMORY;
+
+        data->state.referer = referer;
         data->state.referer_alloc = TRUE; /* yes, free this later */
       }
     }
