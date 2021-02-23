@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -89,8 +89,6 @@ if(NOT UNIX)
     set(HAVE_INET_ADDR 1)
     set(HAVE_INET_NTOA 1)
     set(HAVE_INET_NTOA_R 0)
-    set(HAVE_TCGETATTR 0)
-    set(HAVE_TCSETATTR 0)
     set(HAVE_PERROR 1)
     set(HAVE_CLOSESOCKET 1)
     set(HAVE_SETVBUF 0)

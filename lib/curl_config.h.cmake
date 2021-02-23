@@ -659,9 +659,6 @@
 /* Define to 1 if you have the `strlcpy' function. */
 #cmakedefine HAVE_STRLCPY 1
 
-/* Define to 1 if you have the strncasecmp function. */
-#cmakedefine HAVE_STRNCASECMP 1
-
 /* Define to 1 if you have the strncmpi function. */
 #cmakedefine HAVE_STRNCMPI 1
 
