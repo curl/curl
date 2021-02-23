@@ -1,0 +1,58 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_HTTP09_ALLOWED 3 "17 Dec 2018" "libcurl 7.64.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_HTTP09 \- allow HTTP/0.9 response
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTP09_ALLOWED, long allowed);
+.SH DESCRIPTION
+Pass the long argument \fIallowed\fP set to 1L to allow HTTP/0.9 responses.
+
+A HTTP/0.9 response is a server response entirely without headers and only a
+body. You can connect to lots of random TCP services and still get a response
+that curl might consider to be HTTP/0.9!
+.SH DEFAULT
+curl allowed HTTP/0.9 responses by default before 7.66.0
+
+Since 7.66.0, libcurl requires this option set to 1L to allow HTTP/0.9
+responses.
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode ret;
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  curl_easy_setopt(curl, CURLOPT_HTTP09_ALLOWED, 1L);
+  ret = curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Option added in 7.64.0, present along with HTTP.
+.SH RETURN VALUE
+Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_SSLVERSION "(3), " CURLOPT_HTTP_VERSION "(3), "

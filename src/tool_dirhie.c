@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -41,16 +41,16 @@
 #  endif
 #endif
 
-#ifdef WIN32
+#if defined(WIN32) || (defined(MSDOS) && !defined(__DJGPP__))
 #  define mkdir(x,y) (mkdir)((x))
-#  ifndef __POCC__
+#  ifndef F_OK
 #    define F_OK 0
 #  endif
 #endif
 
 static void show_dir_errno(FILE *errors, const char *name)
 {
-  switch(ERRNO) {
+  switch(errno) {
 #ifdef EACCES
   case EACCES:
     fprintf(errors, "You don't have permission to create %s.\n", name);
@@ -91,7 +91,7 @@ static void show_dir_errno(FILE *errors, const char *name)
  *  should create all the dir* automagically
  */
 
-#ifdef WIN32
+#if defined(WIN32) || defined(__DJGPP__)
 /* systems that may use either or when specifying a path */
 #define PATH_DELIMITERS "\\/"
 #else
@@ -125,26 +125,39 @@ CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
   tempdir = strtok(outdup, PATH_DELIMITERS);
 
   while(tempdir != NULL) {
+    bool skip = false;
     tempdir2 = strtok(NULL, PATH_DELIMITERS);
     /* since strtok returns a token for the last word even
        if not ending with DIR_CHAR, we need to prune it */
     if(tempdir2 != NULL) {
       size_t dlen = strlen(dirbuildup);
       if(dlen)
-        snprintf(&dirbuildup[dlen], outlen - dlen, "%s%s", DIR_CHAR, tempdir);
+        msnprintf(&dirbuildup[dlen], outlen - dlen, "%s%s", DIR_CHAR, tempdir);
       else {
-        if(outdup == tempdir)
+        if(outdup == tempdir) {
+#if defined(MSDOS) || defined(WIN32)
+          /* Skip creating a drive's current directory.
+             It may seem as though that would harmlessly fail but it could be
+             a corner case if X: did not exist, since we would be creating it
+             erroneously.
+             eg if outfile is X:\foo\bar\filename then don't mkdir X:
+             This logic takes into account unsupported drives !:, 1:, etc. */
+          char *p = strchr(tempdir, ':');
+          if(p && !p[1])
+            skip = true;
+#endif
           /* the output string doesn't start with a separator */
           strcpy(dirbuildup, tempdir);
-        else
-          snprintf(dirbuildup, outlen, "%s%s", DIR_CHAR, tempdir);
-      }
-      if(access(dirbuildup, F_OK) == -1) {
-        if(-1 == mkdir(dirbuildup, (mode_t)0000750)) {
-          show_dir_errno(errors, dirbuildup);
-          result = CURLE_WRITE_ERROR;
-          break; /* get out of loop */
         }
+        else
+          msnprintf(dirbuildup, outlen, "%s%s", DIR_CHAR, tempdir);
+      }
+      /* Create directory. Ignore access denied error to allow traversal. */
+      if(!skip && (-1 == mkdir(dirbuildup, (mode_t)0000750)) &&
+         (errno != EACCES) && (errno != EEXIST)) {
+        show_dir_errno(errors, dirbuildup);
+        result = CURLE_WRITE_ERROR;
+        break; /* get out of loop */
       }
     }
     tempdir = tempdir2;
@@ -155,4 +168,3 @@ CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
 
   return result;
 }
-

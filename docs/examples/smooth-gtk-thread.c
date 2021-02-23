@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -64,17 +64,15 @@ size_t write_file(void *ptr, size_t size, size_t nmemb, FILE *stream)
   return fwrite(ptr, size, nmemb, stream);
 }
 
-/* http://xoap.weather.com/weather/local/46214?cc=*&dayf=5&unit=i */
+/* https://weather.com/weather/today/l/46214?cc=*&dayf=5&unit=i */
 void *pull_one_url(void *NaN)
 {
-  CURL *curl;
-  CURLcode res;
-  gchar *http;
-  FILE *outfile;
-
   /* Stop threads from entering unless j is incremented */
   pthread_mutex_lock(&lock);
   while(j < num_urls) {
+    CURL *curl;
+    gchar *http;
+
     printf("j = %d\n", j);
 
     http =
@@ -86,7 +84,7 @@ void *pull_one_url(void *NaN)
     curl = curl_easy_init();
     if(curl) {
 
-      outfile = fopen(urls[j], "wb");
+      FILE *outfile = fopen(urls[j], "wb");
 
       /* Set the URL and transfer type */
       curl_easy_setopt(curl, CURLOPT_URL, http);
@@ -98,14 +96,14 @@ void *pull_one_url(void *NaN)
       j++;  /* critical line */
       pthread_mutex_unlock(&lock);
 
-      res = curl_easy_perform(curl);
+      curl_easy_perform(curl);
 
       fclose(outfile);
       printf("fclose\n");
 
       curl_easy_cleanup(curl);
     }
-    g_free (http);
+    g_free(http);
 
     /* Adds more latency, testing the mutex.*/
     sleep(1);
@@ -118,7 +116,7 @@ void *pull_one_url(void *NaN)
 gboolean pulse_bar(gpointer data)
 {
   gdk_threads_enter();
-  gtk_progress_bar_pulse (GTK_PROGRESS_BAR (data));
+  gtk_progress_bar_pulse(GTK_PROGRESS_BAR (data));
   gdk_threads_leave();
 
   /* Return true so the function will be called again;
@@ -131,14 +129,13 @@ void *create_thread(void *progress_bar)
 {
   pthread_t tid[NUMT];
   int i;
-  int error;
 
   /* Make sure I don't create more threads than urls. */
-  for(i=0; i < NUMT && i < num_urls ; i++) {
-    error = pthread_create(&tid[i],
-                           NULL, /* default attributes please */
-                           pull_one_url,
-                           NULL);
+  for(i = 0; i < NUMT && i < num_urls ; i++) {
+    int error = pthread_create(&tid[i],
+                               NULL, /* default attributes please */
+                               pull_one_url,
+                               NULL);
     if(0 != error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
     else
@@ -146,8 +143,8 @@ void *create_thread(void *progress_bar)
   }
 
   /* Wait for all threads to terminate. */
-  for(i=0; i < NUMT && i < num_urls; i++) {
-    error = pthread_join(tid[i], NULL);
+  for(i = 0; i < NUMT && i < num_urls; i++) {
+    pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }
 
@@ -182,8 +179,8 @@ int main(int argc, char **argv)
 
   /* Init thread */
   g_thread_init(NULL);
-  gdk_threads_init ();
-  gdk_threads_enter ();
+  gdk_threads_init();
+  gdk_threads_enter();
 
   gtk_init(&argc, &argv);
 
@@ -203,9 +200,9 @@ int main(int argc, char **argv)
 
   /* Progress bar */
   progress_bar = gtk_progress_bar_new();
-  gtk_progress_bar_pulse (GTK_PROGRESS_BAR (progress_bar));
+  gtk_progress_bar_pulse(GTK_PROGRESS_BAR (progress_bar));
   /* Make uniform pulsing */
-  gint pulse_ref = g_timeout_add (300, pulse_bar, progress_bar);
+  gint pulse_ref = g_timeout_add(300, pulse_bar, progress_bar);
   g_object_set_data(G_OBJECT(progress_bar), "pulse_id",
                     GINT_TO_POINTER(pulse_ref));
   gtk_container_add(GTK_CONTAINER(inside_frame), progress_bar);

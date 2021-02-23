@@ -1,0 +1,75 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+followlocation
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 303 OK swsclose
+Location: moo.html&testcase=/15240002
+Connection: close
+
+</data>
+<data2>
+HTTP/1.1 200 OK swsclose
+Location: this should be ignored
+Connection: close
+
+body
+</data2>
+<datacheck>
+HTTP/1.1 303 OK swsclose
+Location: moo.html&testcase=/15240002
+Connection: close
+
+HTTP/1.1 200 OK swsclose
+Location: this should be ignored
+Connection: close
+
+body
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP PUT with 303 redirect
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/blah/1524 -L -T log/upload1524.txt
+</command>
+<file name="log/upload1524.txt">
+moo
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol nonewline="yes">
+PUT /blah/1524 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 4
+Expect: 100-continue
+
+moo
+GET /blah/moo.html&testcase=/15240002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+
+</protocol>
+</verify>
+</testcase>

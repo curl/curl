@@ -1,6 +1,7 @@
 Long: proxy1.0
 Arg: <host[:port]>
 Help: Use HTTP/1.0 proxy on given port
+Category: proxy
 ---
 Use the specified HTTP 1.0 proxy. If the port number is not specified, it is
 assumed at port 1080.

@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,14 +24,14 @@
 
 #include "urldata.h"
 
-const char *Curl_strerror (struct connectdata *conn, int err);
+#define STRERROR_LEN 256 /* a suitable length */
 
-#ifdef USE_LIBIDN2
-const char *Curl_idn_strerror (struct connectdata *conn, int err);
+const char *Curl_strerror(int err, char *buf, size_t buflen);
+#if defined(WIN32) || defined(_WIN32_WCE)
+const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen);
 #endif
-
 #ifdef USE_WINDOWS_SSPI
-const char *Curl_sspi_strerror (struct connectdata *conn, int err);
+const char *Curl_sspi_strerror(int err, char *buf, size_t buflen);
 #endif
 
 #endif /* HEADER_CURL_STRERROR_H */

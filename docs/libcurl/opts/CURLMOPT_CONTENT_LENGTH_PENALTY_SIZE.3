@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,6 +28,8 @@ CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE \- size threshold for pipelining penalty
 
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE, long size);
 .SH DESCRIPTION
+No function since pipelining was removed in 7.62.0.
+
 Pass a long with a \fBsize\fP in bytes. If a pipelined connection is currently
 processing a request with a Content-Length larger than this
 \fICURLMOPT_CONTENT_LENGTH_PENALTY_SIZE(3)\fP, that pipeline will then not be
@@ -38,7 +40,11 @@ The default value is 0, which means that the size penalization is inactive.
 .SH PROTOCOLS
 HTTP(S)
 .SH EXAMPLE
-TODO
+.nf
+CURLM *m = curl_multi_init();
+long maxlength = 10000;
+curl_multi_setopt(m, CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE, maxlength);
+.fi
 .SH AVAILABILITY
 Added in 7.30.0
 .SH RETURN VALUE

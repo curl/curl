@@ -9,7 +9,7 @@ HTTP Digest auth
 
 # Server-side
 <reply>
-# reply back and ask for Digest auth
+# First reply back and ask for Digest auth
 <data1>
 HTTP/1.1 401 Authorization Required swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
@@ -19,6 +19,17 @@ Content-Length: 26
 
 This is not the real page
 </data1>
+
+# second reply back
+<data2>
+HTTP/1.1 401 Authorization Required swsclose
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604145"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
+
+This is not the real page
+</data2>
 
 # This is supposed to be returned when the server gets a
 # Authorization: Digest line passed-in from the client
@@ -40,7 +51,7 @@ HTTP/1.1 401 Authorization re-negotiation please swsbounce
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 WWW-Authenticate: Digest realm="testrealm", algorithm=MD5, nonce="999999", stale=true, qop="auth"
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 25
+Content-Length: 26
 
 This is not the real page
 </data1002>
@@ -78,29 +89,34 @@ http://%HOSTIP:%HTTPPORT/1530001 -u testuser:testpass --digest http://%HOSTIP:%H
 <verify>
 <strip>
 ^Authorization.*cnonce
-^User-Agent:.*
 </strip>
 <protocol>
 GET /1530001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /1530001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/1530001", response="f4f83139396995bac665f24a1f1055c7"
-User-Agent: curl/7.10.5 (i686-pc-linux-gnu) libcurl/7.10.5 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /1530002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /1530002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/1530002", response="f84511b014fdd0ba6494f42871079c32"
-User-Agent: curl/7.11.0-CVS (i686-pc-linux-gnu) libcurl/7.11.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /1530002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="999999", uri="/1530002", cnonce="MTA4MzIy", nc="00000001", qop="auth", response="25291c357671604a16c0242f56721c07", algorithm="MD5"
-User-Agent: curl/7.11.0-CVS (i686-pc-linux-gnu) libcurl/7.11.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS
+Authorization: Digest username="testuser", realm="testrealm", nonce="999999", uri="/1530002", cnonce="MTA4MzIy", nc="00000001", qop="auth", response="25291c357671604a16c0242f56721c07", algorithm=MD5
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
@@ -117,11 +133,17 @@ Content-Type: text/html; charset=iso-8859-1
 Content-Length: 23
 
 This IS the real page!
+HTTP/1.1 401 Authorization Required swsclose
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604145"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
+
 HTTP/1.1 401 Authorization re-negotiation please swsbounce
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 WWW-Authenticate: Digest realm="testrealm", algorithm=MD5, nonce="999999", stale=true, qop="auth"
 Content-Type: text/html; charset=iso-8859-1
-Content-Length: 25
+Content-Length: 26
 
 HTTP/1.1 200 OK
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2

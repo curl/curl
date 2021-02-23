@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -36,7 +36,7 @@ sense and is only usable when doing multiple streams over the same
 connections, which thus implies that you use \fICURLMOPT_PIPELINING(3)\fP.
 
 This option can be set during transfer and will then cause the updated weight
-info get sent to the server the next time a HTTP/2 frame is sent to the
+info get sent to the server the next time an HTTP/2 frame is sent to the
 server.
 
 See section 5.3 of RFC 7540 for protocol details:
@@ -53,7 +53,20 @@ is 16.
 .SH PROTOCOLS
 HTTP/2
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+CURL *curl2 = curl_easy_init(); /* a second handle */
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/one");
+  curl_easy_setopt(curl, CURLOPT_STREAM_WEIGHT, 10L);
+
+  /* the second has twice the weight */
+  curl_easy_setopt(curl2, CURLOPT_URL, "https://example.com/two");
+  curl_easy_setopt(curl2, CURLOPT_STREAM_WEIGHT, 20L);
+
+  /* then add both to a multi handle and transfer them! */
+}
+.fi
 .SH AVAILABILITY
 Added in 7.46.0
 .SH RETURN VALUE

@@ -23,7 +23,7 @@ tftp
 TFTP get first a non-existing file then an existing
  </name>
  <command>
-tftp://%HOSTIP:%TFTPPORT/an/invalid-file tftp://%HOSTIP:%TFTPPORT//1099 --trace-ascii log/traceit
+tftp://%HOSTIP:%TFTPPORT/an/invalid-file tftp://%HOSTIP:%TFTPPORT//1099
 </command>
 </client>
 

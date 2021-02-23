@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -34,13 +34,18 @@ use serverhelp qw(
     server_logfilename
     );
 
+use sshhelp qw(
+    exe_ext
+    );
+
 my $verbose = 0;     # set to 1 for debugging
 my $port = 8997;     # just a default
 my $ipvnum = 4;      # default IP version of tftp server
-my $idnum = 1;       # dafault tftp server instance number
+my $idnum = 1;       # default tftp server instance number
 my $proto = 'tftp';  # protocol the tftp server speaks
-my $pidfile;         # tftp server pid file
-my $logfile;         # tftp server log file
+my $pidfile;
+my $portfile;
+my $logfile;
 my $srcdir;
 my $fork;
 
@@ -52,6 +57,12 @@ while(@ARGV) {
     if($ARGV[0] eq '--pidfile') {
         if($ARGV[1]) {
             $pidfile = $ARGV[1];
+            shift @ARGV;
+        }
+    }
+    elsif($ARGV[0] eq '--portfile') {
+        if($ARGV[1]) {
+            $portfile = $ARGV[1];
             shift @ARGV;
         }
     }
@@ -104,7 +115,9 @@ if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
-$flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+$flags .= "--pidfile \"$pidfile\" ".
+    "--portfile \"$portfile\" ".
+    "--logfile \"$logfile\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
-exec("server/tftpd $flags");
+exec("server/tftpd".exe_ext('SRV')." $flags");

@@ -30,13 +30,10 @@ http://%HOSTIP:%HTTPPORT/24 --fail --silent --show-error
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
 GET /24 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
@@ -44,7 +41,7 @@ Accept: */*
 22
 </errorcode>
 <file2 name="log/stderr24" mode="text">
-curl: (22) The requested URL returned error: 404 BAD BOY
+curl: (22) The requested URL returned error: 404
 </file2>
 </verify>
 </testcase>

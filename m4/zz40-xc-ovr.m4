@@ -2,7 +2,7 @@
 #
 # zz40-xc-ovr.m4
 #
-# Copyright (c) 2013 Daniel Stenberg <daniel@haxx.se>
+# Copyright (c) 2013 - 2018 Daniel Stenberg <daniel@haxx.se>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,9 +17,6 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 #---------------------------------------------------------------------------
-
-# serial 1
-
 
 dnl The funny name of this file is intentional in order to make it
 dnl sort alphabetically after any libtool, autoconf or automake
@@ -398,9 +395,10 @@ if test $xc_tst_dirs_sem -eq $xc_tst_dirs_col; then
   # When both counting methods give the same result we do not want to
   # chose one over the other, and consider auto-detection not possible.
   if test -z "$PATH_SEPARATOR"; then
-    # Stop dead until user provides 'PATH_SEPARATOR' definition.
-    echo "$xc_msg_err 'PATH_SEPARATOR' variable not set. $xc_msg_abrt" >&2
-    exit 1
+    # User should provide the correct 'PATH_SEPARATOR' definition.
+    # Until then, guess that it is colon!
+    echo "$xc_msg_warn path separator not determined, guessing colon" >&2
+    PATH_SEPARATOR=':'
   fi
 else
   # Separator with the greater directory count is the auto-detected one.
@@ -665,4 +663,3 @@ dnl
 m4_pattern_forbid([^_*XC])dnl
 m4_define([$0],[])dnl
 ])
-

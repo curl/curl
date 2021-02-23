@@ -1,0 +1,38 @@
+<testcase>
+<info>
+<keywords>
+URL
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+http
+</features>
+ <name>
+reject non-numerical port number in URL
+ </name>
+ <command>
+http://%HOSTIP:alpha/beta/1281
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# 3 == CURLE_URL_MALFORMAT
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

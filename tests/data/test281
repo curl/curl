@@ -14,11 +14,8 @@ HTTP/1.1 401 Bad Auth swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 WWW-Authenticate: Basic Realm=authenticate
 Server: test-server/fake
-</data>
-<datacheck>
-HTTP/1.1 100 Continue
 
-</datacheck>
+</data>
 
 </reply>
 
@@ -46,12 +43,10 @@ Weird
 <errorcode>
 22
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 PUT /we/want/281 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 38
 Expect: 100-continue

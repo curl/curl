@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_TRANSFER_ENCODING \- ask for HTTP Transfer Encoding
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TRANSFER_ENCODING, long enable);
 .SH DESCRIPTION
-Pass a long set to 1 to \fIenable\fP or 0 to disable.
+Pass a long set to 1L to \fIenable\fP or 0 to disable.
 
 Adds a request for compressed Transfer Encoding in the outgoing HTTP
 request. If the server supports this and so desires, it can respond with the
@@ -45,7 +45,14 @@ by both HTTP clients and HTTP servers.
 .SH PROTOCOLS
 HTTP
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  curl_easy_setopt(curl, CURLOPT_TRANSFER_ENCODING, 1L);
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.21.6
 .SH RETURN VALUE

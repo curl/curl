@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,12 +24,12 @@
  * </DESC>
  */
 /*
- * LibTidy => http://tidy.sourceforge.net
+ * LibTidy => https://www.html-tidy.org/
  */
 
 #include <stdio.h>
-#include <tidy/tidy.h>
-#include <tidy/buffio.h>
+#include <tidy.h>
+#include <tidybuffio.h>
 #include <curl/curl.h>
 
 /* curl write callback, to fill tidy's input buffer...  */
@@ -52,7 +52,7 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
       TidyAttr attr;
       printf("%*.*s%s ", indent, indent, "<", name);
       /* walk the attribute list */
-      for(attr=tidyAttrFirst(child); attr; attr=tidyAttrNext(attr) ) {
+      for(attr = tidyAttrFirst(child); attr; attr = tidyAttrNext(attr) ) {
         printf(tidyAttrName(attr));
         tidyAttrValue(attr)?printf("=\"%s\" ",
                                    tidyAttrValue(attr)):printf(" ");
@@ -74,13 +74,14 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
 
 int main(int argc, char **argv)
 {
-  CURL *curl;
-  char curl_errbuf[CURL_ERROR_SIZE];
-  TidyDoc tdoc;
-  TidyBuffer docbuf = {0};
-  TidyBuffer tidy_errbuf = {0};
-  int err;
   if(argc == 2) {
+    CURL *curl;
+    char curl_errbuf[CURL_ERROR_SIZE];
+    TidyDoc tdoc;
+    TidyBuffer docbuf = {0};
+    TidyBuffer tidy_errbuf = {0};
+    int err;
+
     curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_errbuf);
@@ -95,7 +96,7 @@ int main(int argc, char **argv)
     tidyBufInit(&docbuf);
 
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &docbuf);
-    err=curl_easy_perform(curl);
+    err = curl_easy_perform(curl);
     if(!err) {
       err = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
       if(err >= 0) {

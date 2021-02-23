@@ -1,0 +1,71 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_DOH_URL 3 "18 Jun 2018" "libcurl 7.62.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_DOH_URL \- provide the DNS-over-HTTPS URL
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_URL, char *URL);
+.SH DESCRIPTION
+Pass in a pointer to a \fIURL\fP for the DOH server to use for name
+resolving. The parameter should be a char * to a null-terminated string which
+must be URL-encoded in the following format: "https://host:port/path". It MUST
+specify a HTTPS URL.
+
+libcurl doesn't validate the syntax or use this variable until the transfer is
+issued. Even if you set a crazy value here, \fIcurl_easy_setopt(3)\fP will
+still return \fICURLE_OK\fP.
+
+curl sends POST requests to the given DNS-over-HTTPS URL.
+
+To find the DOH server itself, which might be specified using a name, libcurl
+will use the default name lookup function. You can bootstrap that by providing
+the address for the DOH server with \fICURLOPT_RESOLVE(3)\fP.
+
+Disable DOH use again by setting this option to NULL.
+.SH DEFAULT
+NULL - there is no default DOH URL. If this option isn't set, libcurl will use
+the default name resolver.
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  curl_easy_setopt(curl, CURLOPT_DOH_URL, "https://dns.example.com");
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.62.0
+.SH RETURN VALUE
+Returns CURLE_OK on success or CURLE_OUT_OF_MEMORY if there was insufficient
+heap space.
+
+Note that \fIcurl_easy_setopt(3)\fP won't actually parse the given string so
+given a bad DOH URL, curl will not detect a problem until it tries to resolve
+a name with it.
+.SH "SEE ALSO"
+.BR CURLOPT_VERBOSE "(3), " CURLOPT_RESOLVE "(3), "

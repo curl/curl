@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,35 +43,37 @@ void libtest_debug_dump(const char *timebuf, const char *text, FILE *stream,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s%s, %d bytes (0x%x)\n", timebuf, text,
-          (int)size, (int)size);
+  fprintf(stream, "%s%s, %zu bytes (0x%zx)\n", timebuf, text,
+          size, size);
 
   for(i = 0; i < size; i += width) {
 
-    fprintf(stream, "%04x: ", (int)i);
+    fprintf(stream, "%04zx: ", i);
 
     if(!nohex) {
       /* hex not disabled, show it */
       for(c = 0; c < width; c++)
-        if(i+c < size)
-          fprintf(stream, "%02x ", ptr[i+c]);
+        if(i + c < size)
+          fprintf(stream, "%02x ", ptr[i + c]);
         else
           fputs("   ", stream);
     }
 
-    for(c = 0; (c < width) && (i+c < size); c++) {
+    for(c = 0; (c < width) && (i + c < size); c++) {
       /* check for 0D0A; if found, skip past and start a new line of output */
       if(nohex &&
-         (i+c+1 < size) && (ptr[i+c] == 0x0D) && (ptr[i+c+1] == 0x0A)) {
-        i += (c+2-width);
+         (i + c + 1 < size) && (ptr[i + c] == 0x0D) &&
+         (ptr[i + c + 1] == 0x0A)) {
+        i += (c + 2 - width);
         break;
       }
-      fprintf(stream, "%c", ((ptr[i+c] >= 0x20) && (ptr[i+c] < 0x80)) ?
-              ptr[i+c] : '.');
+      fprintf(stream, "%c", ((ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80)) ?
+              ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if(nohex &&
-         (i+c+2 < size) && (ptr[i+c+1] == 0x0D) && (ptr[i+c+2] == 0x0A)) {
-        i += (c+3-width);
+         (i + c + 2 < size) && (ptr[i + c + 1] == 0x0D) &&
+         (ptr[i + c + 2] == 0x0A)) {
+        i += (c + 3 - width);
         break;
       }
     }
@@ -88,7 +90,6 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
   struct libtest_trace_cfg *trace_cfg = userp;
   const char *text;
   struct timeval tv;
-  struct tm *now;
   char timebuf[20];
   char *timestr;
   time_t secs;
@@ -99,6 +100,7 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
   timestr = &timebuf[0];
 
   if(trace_cfg->tracetime) {
+    struct tm *now;
     tv = tutil_tvnow();
     if(!known_offset) {
       epoch_offset = time(NULL) - tv.tv_sec;
@@ -106,13 +108,14 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
     }
     secs = epoch_offset + tv.tv_sec;
     now = localtime(&secs);  /* not thread safe but we don't care */
-    snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
-             now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
+    msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
+              now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
   }
 
-  switch (type) {
+  switch(type) {
   case CURLINFO_TEXT:
     fprintf(stderr, "%s== Info: %s", timestr, (char *)data);
+    /* FALLTHROUGH */
   default: /* in case a new one is introduced to shock us */
     return 0;
 
@@ -139,4 +142,3 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
   libtest_debug_dump(timebuf, text, stderr, data, size, trace_cfg->nohex);
   return 0;
 }
-

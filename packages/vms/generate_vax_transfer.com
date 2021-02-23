@@ -14,7 +14,7 @@ $!     gnv_libcurl_xfer.obj
 $!     gnv_libcurl_xfer.opt
 $!     macro32_exactcase.exe
 $!
-$! Copyright 2013, John Malmberg
+$! Copyright 2013 - 2020, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -219,7 +219,7 @@ $deck
 ; The first for upper case which matches the tradition method of generating
 ; VAX transfer vectors.
 ;
-; The second is the exact case for compatibilty with open source C programs
+; The second is the exact case for compatibility with open source C programs
 ; that expect exact case symbols in images.  These are separated because a
 ; previous kit had only upper case symbols.
 ;

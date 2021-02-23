@@ -2,6 +2,7 @@ Long: upload-file
 Short: T
 Arg: <file>
 Help: Transfer local FILE to destination
+Category: important upload
 ---
 This transfers the specified local file to the remote URL. If there is no file
 part in the specified URL, curl will append the local file name. NOTE that you

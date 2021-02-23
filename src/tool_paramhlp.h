@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,8 +33,9 @@ void cleanarg(char *str);
 
 ParameterError str2num(long *val, const char *str);
 ParameterError str2unum(long *val, const char *str);
-ParameterError str2double(double *val, const char *str);
-ParameterError str2udouble(double *val, const char *str);
+ParameterError oct2nummax(long *val, const char *str, long max);
+ParameterError str2unummax(long *val, const char *str, long max);
+ParameterError str2udouble(double *val, const char *str, long max);
 
 long proto2num(struct OperationConfig *config, long *val, const char *str);
 
@@ -50,6 +51,8 @@ int ftpfilemethod(struct OperationConfig *config, const char *str);
 
 int ftpcccmethod(struct OperationConfig *config, const char *str);
 
-long delegation(struct OperationConfig *config, char *str);
+long delegation(struct OperationConfig *config, const char *str);
+
+ParameterError str2tls_max(long *val, const char *str);
 
 #endif /* HEADER_CURL_TOOL_PARAMHLP_H */

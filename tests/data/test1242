@@ -27,7 +27,7 @@ tftp
 TFTP retrieve without TFTP options requests
  </name>
  <command>
-tftp://%HOSTIP:%TFTPPORT//1242 --tftp-no-options --trace-ascii log/traceit
+tftp://%HOSTIP:%TFTPPORT//1242 --tftp-no-options
 </command>
 </client>
 

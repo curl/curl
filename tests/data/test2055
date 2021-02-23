@@ -1,0 +1,81 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+CURLOPT_CONNECT_TO
+SOCKS5
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<connect>
+HTTP/1.1 200 Connection established
+
+</connect>
+
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 3
+Content-Type: text/plain
+
+OK
+</data>
+
+<datacheck>
+HTTP/1.1 200 Connection established
+
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 3
+Content-Type: text/plain
+
+OK
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+http-proxy
+socks5
+</server>
+ <name>
+Connect to specific host via SOCKS proxy and HTTP proxy (switch to tunnel mode automatically)
+ </name>
+<features>
+proxy
+</features>
+ <command>
+http://www.example.com.2055/2055 --connect-to ::connect.example.com.2055:%HTTPPORT -x %HOSTIP:%PROXYPORT --preproxy socks5://%HOSTIP:%SOCKSPORT
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<proxy>
+CONNECT connect.example.com.2055:%HTTPPORT HTTP/1.1
+Host: connect.example.com.2055:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</proxy>
+<protocol>
+GET /2055 HTTP/1.1
+Host: www.example.com.2055
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+</verify>
+</testcase>

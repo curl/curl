@@ -1,0 +1,67 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+progressbar
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 60
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+progress-bar
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1148 -# --stderr log/stderrlog1148
+</command>
+<setenv>
+LC_ALL=
+LC_NUMERIC=en_US.UTF-8
+</setenv>
+</client>
+
+#
+<verify>
+<protocol>
+GET /1148 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+# Check that the progress finished at 100% and has the right bar width.
+# Note the dot in 100.0% is regex to match any character since different
+# locales use different separators.
+<file name="log/stderrlog1148" mode="text">
+correct
+</file>
+<stripfile>
+s/.*\r#{72} 100.0%/correct/
+</stripfile>
+
+</verify>
+</testcase>

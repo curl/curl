@@ -2,6 +2,7 @@ Long: metalink
 Help: Process given URLs as metalink XML file
 Added: 7.27.0
 Requires: metalink
+Category: misc
 ---
 This option can tell curl to parse and process a given URI as Metalink file
 (both version 3 and 4 (RFC 5854) are supported) and make use of the mirrors
@@ -24,4 +25,3 @@ Metalink file at the time of this writing. Also note that if --metalink and
 including headers in the response will break Metalink parser and if the
 headers are included in the file described in Metalink file, hash check will
 fail.
-

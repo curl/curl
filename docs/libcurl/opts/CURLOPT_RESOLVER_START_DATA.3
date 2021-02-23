@@ -1,0 +1,63 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_RESOLVER_START_DATA 3 "14 Feb 2018" "libcurl 7.59.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_RESOLVER_START_DATA \- custom pointer passed to the resolver start callback
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RESOLVER_START_DATA, void *pointer);
+.SH DESCRIPTION
+Pass a \fIpointer\fP that will be untouched by libcurl and passed as the third
+argument in the resolver start callback set with
+\fICURLOPT_RESOLVER_START_FUNCTION(3)\fP.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+static int resolver_start_cb(void *resolver_state, void *reserved,
+                             void *userdata)
+{
+  (void)reserved;
+  printf("Received resolver_state=%p userdata=%p\\n",
+         resolver_state, userdata);
+  return 0;
+}
+
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_RESOLVER_START_FUNCTION, resolver_start_cb);
+  curl_easy_setopt(curl, CURLOPT_RESOLVER_START_DATA, curl);
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.59.0
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_RESOLVER_START_FUNCTION "(3) "

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -57,18 +57,18 @@
 static bool use_ipv6 = FALSE;
 static const char *ipv_inuse = "IPv4";
 
-const char *serverlogfile=""; /* for a util.c function we don't use */
+const char *serverlogfile = ""; /* for a util.c function we don't use */
 
 int main(int argc, char *argv[])
 {
-  int arg=1;
+  int arg = 1;
   const char *host = NULL;
   int rc = 0;
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("resolve IPv4%s\n",
-#ifdef ENABLE_IPV6
+#if defined(CURLRES_IPV6)
              "/IPv6"
 #else
              ""
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     puts("Usage: resolve [option] <host>\n"
          " --version\n"
          " --ipv4"
-#ifdef ENABLE_IPV6
+#if defined(CURLRES_IPV6)
          "\n --ipv6"
 #endif
          );
@@ -107,16 +107,8 @@ int main(int argc, char *argv[])
   atexit(win32_cleanup);
 #endif
 
-  if(!use_ipv6) {
-    /* gethostbyname() resolve */
-    struct hostent *he;
-
-    he = gethostbyname(host);
-
-    rc = !he;
-  }
-  else {
-#ifdef ENABLE_IPV6
+#if defined(CURLRES_IPV6)
+  if(use_ipv6) {
     /* Check that the system has IPv6 enabled before checking the resolver */
     curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
     if(s == CURL_SOCKET_BAD)
@@ -125,28 +117,38 @@ int main(int argc, char *argv[])
     else {
       sclose(s);
     }
+  }
 
-    if(rc == 0) {
-      /* getaddrinfo() resolve */
-      struct addrinfo *ai;
-      struct addrinfo hints;
+  if(rc == 0) {
+    /* getaddrinfo() resolve */
+    struct addrinfo *ai;
+    struct addrinfo hints;
 
-      memset(&hints, 0, sizeof(hints));
-      hints.ai_family = PF_INET6;
-      hints.ai_socktype = SOCK_STREAM;
-      hints.ai_flags = AI_CANONNAME;
-      /* Use parenthesis around functions to stop them from being replaced by
-         the macro in memdebug.h */
-      rc = (getaddrinfo)(host, "80", &hints, &ai);
-      if(rc == 0)
-        (freeaddrinfo)(ai);
-    }
-
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = use_ipv6 ? PF_INET6 : PF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = 0;
+    /* Use parenthesis around functions to stop them from being replaced by
+       the macro in memdebug.h */
+    rc = (getaddrinfo)(host, "80", &hints, &ai);
+    if(rc == 0)
+      (freeaddrinfo)(ai);
+  }
 #else
+  if(use_ipv6) {
     puts("IPv6 support has been disabled in this program");
     return 1;
-#endif
   }
+  else {
+    /* gethostbyname() resolve */
+    struct hostent *he;
+
+    he = gethostbyname(host);
+
+    rc = !he;
+  }
+#endif
+
   if(rc)
     printf("Resolving %s '%s' didn't work\n", ipv_inuse, host);
 

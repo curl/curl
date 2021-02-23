@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -30,16 +30,28 @@ CURLOPT_UNRESTRICTED_AUTH \- send credentials to other hosts too
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UNRESTRICTED_AUTH,
                           long goahead);
 .SH DESCRIPTION
-A long parameter set to 1 tells libcurl it can continue to send authentication
-(user+password) credentials when following locations, even when hostname
-changed. This option is meaningful only when setting
+Set the long \fIgohead\fP parameter to 1L to make libcurl continue to send
+authentication (user+password) credentials when following locations, even when
+hostname changed. This option is meaningful only when setting
 \fICURLOPT_FOLLOWLOCATION(3)\fP.
+
+By default, libcurl will only send given credentials to the initial host name
+as given in the original URL, to avoid leaking username + password to other
+sites.
 .SH DEFAULT
 0
 .SH PROTOCOLS
 HTTP
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  curl_easy_setopt(curl, CURLOPT_UNRESTRICTED_AUTH, 1L);
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Along with HTTP
 .SH RETURN VALUE

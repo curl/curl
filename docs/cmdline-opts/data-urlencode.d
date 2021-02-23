@@ -4,6 +4,7 @@ Help: HTTP POST data url encoded
 Protocols: HTTP
 See-also: data data-raw
 Added: 7.18.0
+Category: http post upload
 ---
 This posts data, similar to the other --data options with the exception
 that this performs URL-encoding.

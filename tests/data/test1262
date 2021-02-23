@@ -1,0 +1,40 @@
+<testcase>
+# similar to test 139 but with a reversed time condition
+<info>
+<keywords>
+FTP
+RETR
+-z
+</keywords>
+</info>
+# Server-side
+<reply>
+<mdtm>
+213 20030409102659
+</mdtm>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP request and denied to download an older file with -z
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/blalbla/1262 -z "-1 jan 2001"
+</command>
+</client>
+
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD blalbla
+MDTM 1262
+QUIT
+</protocol>
+</verify>
+</testcase>

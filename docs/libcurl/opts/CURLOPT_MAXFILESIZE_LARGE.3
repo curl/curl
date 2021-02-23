@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -43,7 +43,17 @@ None
 .SH PROTOCOLS
 FTP and HTTP
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode ret;
+  curl_off_t ridiculous = 1 << 48;
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  /* refuse to download if larger than ridiculous */
+  curl_easy_setopt(curl, CURLOPT_MAXFILESIZE_LARGE, ridiculous);
+  ret = curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.11.0
 .SH RETURN VALUE

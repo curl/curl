@@ -50,6 +50,9 @@ Check same headers are generated with CURLOPT_HEADEROPT == CURLHEADER_UNIFIED
  <command>
  http://the.old.moo.1527:%HTTPPORT/1527 %HOSTIP:%PROXYPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

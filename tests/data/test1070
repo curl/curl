@@ -32,7 +32,7 @@ http
 HTTP POST with server closing connection before (all) data is received
  </name>
  <command>
- -d @log/input1070 http://%HOSTIP:%HTTPPORT/1070
+ -d @log/input1070 http://%HOSTIP:%HTTPPORT/1070 -H "Expect: 100-continue"
 </command>
 <file name="log/input1070">
 This creates the named file with this content before the test case is run,
@@ -48,16 +48,14 @@ OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
 POST /1070 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
+Expect: 100-continue
 Content-Length: 2313
 Content-Type: application/x-www-form-urlencoded
-Expect: 100-continue
 
 This creates 
 </protocol>

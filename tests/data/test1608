@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+curlopt_dns_shuffle_addresses
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+verify DNS shuffling
+ </name>
+</client>
+</testcase>

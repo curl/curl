@@ -43,7 +43,7 @@ FTP-IPv6 dir list, EPRT with specified IP
 </command>
 # --interface doesn't accept an address surrounded by [] so %CLIENT6IP is out
 <precheck>
-perl -e "print 'Test requires default test server host address' if ( '%CLIENT6IP' ne '[::1]' );"
+perl -e "print 'Test requires default test client host address' if ( '%CLIENT6IP' ne '[::1]' );"
 </precheck>
 </client>
 

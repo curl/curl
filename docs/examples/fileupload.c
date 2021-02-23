@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,7 @@ int main(void)
   CURL *curl;
   CURLcode res;
   struct stat file_info;
-  double speed_upload, total_time;
+  curl_off_t speed_upload, total_time;
   FILE *fd;
 
   fd = fopen("debugit", "rb"); /* open file to upload */
@@ -72,11 +72,13 @@ int main(void)
     }
     else {
       /* now extract transfer info */
-      curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed_upload);
-      curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
+      curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD_T, &speed_upload);
+      curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &total_time);
 
-      fprintf(stderr, "Speed: %.3f bytes/sec during %.3f seconds\n",
-              speed_upload, total_time);
+      fprintf(stderr, "Speed: %" CURL_FORMAT_CURL_OFF_T " bytes/sec during %"
+              CURL_FORMAT_CURL_OFF_T ".%06ld seconds\n",
+              speed_upload,
+              (total_time / 1000000), (long)(total_time % 1000000));
 
     }
     /* always cleanup */

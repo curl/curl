@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2009 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,9 +55,12 @@ struct SMTP {
   curl_pp_transfer transfer;
   char *custom;            /* Custom Request */
   struct curl_slist *rcpt; /* Recipient list */
+  bool rcpt_had_ok;        /* Whether any of RCPT TO commands (depends on
+                              total number of recipients) succeeded so far */
+  bool trailing_crlf;      /* Specifies if the trailing CRLF is present */
+  int rcpt_last_error;     /* The last error received for RCPT TO command */
   size_t eob;              /* Number of bytes of the EOB (End Of Body) that
                               have been received so far */
-  bool trailing_crlf;      /* Specifies if the tailing CRLF is present */
 };
 
 /* smtp_conn is used for struct connection-oriented data in the connectdata
@@ -71,6 +74,8 @@ struct smtp_conn {
   bool tls_supported;      /* StartTLS capability supported by server */
   bool size_supported;     /* If server supports SIZE extension according to
                               RFC 1870 */
+  bool utf8_supported;     /* If server supports SMTPUTF8 extension according
+                              to RFC 6531 */
   bool auth_supported;     /* AUTH capability supported by server */
 };
 
@@ -86,6 +91,6 @@ extern const struct Curl_handler Curl_handler_smtps;
 #define SMTP_EOB_REPL "\x0d\x0a\x2e\x2e"
 #define SMTP_EOB_REPL_LEN 4
 
-CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread);
+CURLcode Curl_smtp_escape_eob(struct Curl_easy *data, const ssize_t nread);
 
 #endif /* HEADER_CURL_SMTP_H */

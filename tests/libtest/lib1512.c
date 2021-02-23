@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2016, Linus Nielsen Feltzing <linus@haxx.se>
+ * Copyright (C) 2013 - 2020, Linus Nielsen Feltzing <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -49,19 +49,19 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  snprintf(dnsentry, sizeof(dnsentry), "server.example.curl:%s:%s",
-           port, address);
+  msnprintf(dnsentry, sizeof(dnsentry), "server.example.curl:%s:%s",
+            port, address);
   printf("%s\n", dnsentry);
   slist = curl_slist_append(slist, dnsentry);
 
   /* get NUM_HANDLES easy handles */
-  for(i=0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < NUM_HANDLES; i++) {
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
-    snprintf(target_url, sizeof(target_url),
-             "http://server.example.curl:%s/path/1512%04i",
-             port, i + 1);
+    msnprintf(target_url, sizeof(target_url),
+              "http://server.example.curl:%s/path/1512%04i",
+              port, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go verbose */
@@ -76,7 +76,7 @@ int test(char *URL)
   easy_setopt(curl[0], CURLOPT_RESOLVE, slist);
 
   /* run NUM_HANDLES transfers */
-  for(i=0; (i < NUM_HANDLES) && !res; i++)
+  for(i = 0; (i < NUM_HANDLES) && !res; i++)
     res = curl_easy_perform(curl[i]);
 
 test_cleanup:
@@ -88,4 +88,3 @@ test_cleanup:
 
   return res;
 }
-

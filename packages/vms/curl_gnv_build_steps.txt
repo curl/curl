@@ -1,6 +1,6 @@
 From File: curl_gnv_build_steps.txt
 
- Copyright 2009, John Malmberg
+ Copyright 2009 - 2020, John Malmberg
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -36,7 +36,7 @@ time that this document was written.
 [gnv.common_src]curl_*_original_src.bck is the original source of the curl kit
 as provided by the curl project.  [gnv.vms_src]curl-*_vms_src.bck, if present,
 has the OpenVMS specific files that are used for building that are not yet in
-the curl source kits for that release distributed https://curl.haxx.se
+the curl source kits for that release distributed https://curl.se
 
 These backup savesets should be restored to different directory trees on
 an ODS-5 volume(s) which are referenced by concealed rooted logical names.
@@ -125,7 +125,7 @@ or
   $ @build_gnv_curl.com.
 
 The GNV configure procedure takes considerably longer than the DCL build
-procecure takes.  It is of use for testing the GNV build environment, and
+procedure takes.  It is of use for testing the GNV build environment, and
 may not have been kept up to date.
 
 The pcsi_product_gnv_curl.com needs the following logical names which
@@ -198,7 +198,7 @@ The *.EXE files are not moved to the new_gnu: directory.
 After you are satisfied with the results of your build, you can move the
 files from new_gnu: to old_gnu: at your convenience.
 
-Building a PCSI kit for an archictecture takes the following steps after
+Building a PCSI kit for an architecture takes the following steps after
 making sure that you have a working build environment.
 
 Note that it requires manually creating two logical names as described
@@ -235,7 +235,7 @@ branding the PCSI kit based on who is making the kit.
       Since at this time curl does not need this alias procedure, the steps
       to automatically build it are not included here.
 
-      While newer versions of PCSI can support ODS-5 filenames, not all verions
+      While newer versions of PCSI can support ODS-5 filenames, not all versions
       of PCSI on systems that have ODS-5 filenames do.  So as a post install
       step, the PCSI kit built by these steps does a rename to the correct
       case as a post install step.

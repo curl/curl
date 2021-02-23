@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -60,9 +60,6 @@
 
 /* Define if you have the <io.h> header file. */
 #define HAVE_IO_H 1
-
-/* Define if you have the <limits.h> header file. */
-#define HAVE_LIMITS_H 1
 
 /* Define if you have the <locale.h> header file. */
 #define HAVE_LOCALE_H 1
@@ -186,7 +183,13 @@
 /* #define HAVE_DOPRNT 1 */
 
 /* Define if you have the ftruncate function. */
-#define HAVE_FTRUNCATE 1
+/* #define HAVE_FTRUNCATE 1 */
+
+/* Define to 1 if you have the `getpeername' function. */
+#define HAVE_GETPEERNAME 1
+
+/* Define to 1 if you have the getsockname function. */
+#define HAVE_GETSOCKNAME 1
 
 /* Define if you have the gethostbyaddr function. */
 #define HAVE_GETHOSTBYADDR 1
@@ -399,12 +402,18 @@
 /* Define to the size of `short', as computed by sizeof. */
 #define SIZEOF_SHORT 2
 
+/* Define to the size of `long', as computed by sizeof. */
+#define SIZEOF_LONG 4
+
 /* Define to the size of `size_t', as computed by sizeof. */
 #if defined(_WIN64)
 #  define SIZEOF_SIZE_T 8
 #else
 #  define SIZEOF_SIZE_T 4
 #endif
+
+/* Define to the size of `curl_off_t', as computed by sizeof. */
+#define SIZEOF_CURL_OFF_T 8
 
 /* ---------------------------------------------------------------- */
 /*               BSD-style lwIP TCP/IP stack SPECIFIC               */
@@ -493,7 +502,7 @@
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #endif
 
-/* VS2005 and later dafault size for time_t is 64-bit, unless
+/* VS2005 and later default size for time_t is 64-bit, unless
    _USE_32BIT_TIME_T has been defined to get a 32-bit time_t. */
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
 #  ifndef _USE_32BIT_TIME_T
@@ -514,7 +523,7 @@
 #  define VS2008_MIN_TARGET 0x0500
 
    /* The minimum build target for VS2012 is Vista unless Update 1 is installed
-      and the v110_xp toolset is choosen. */
+      and the v110_xp toolset is chosen. */
 #  if defined(_USING_V110_SDK71_)
 #    define VS2012_MIN_TARGET 0x0501
 #  else
@@ -526,7 +535,7 @@
 #  define VS2008_DEF_TARGET 0x0501
 
    /* VS2012 default build target is Windows Vista unless Update 1 is installed
-      and the v110_xp toolset is choosen. */
+      and the v110_xp toolset is chosen. */
 #  if defined(_USING_V110_SDK71_)
 #    define VS2012_DEF_TARGET 0x0501
 #  else
@@ -576,8 +585,9 @@ Vista
 #  endif
 #endif
 
-/* Availability of freeaddrinfo, getaddrinfo and getnameinfo functions is
-   quite convoluted, compiler dependent and even build target dependent. */
+/* Availability of freeaddrinfo, getaddrinfo, getnameinfo and if_nametoindex
+   functions is quite convoluted, compiler dependent and even build target
+   dependent. */
 #if defined(HAVE_WS2TCPIP_H)
 #  if defined(__POCC__)
 #    define HAVE_FREEADDRINFO           1
@@ -688,6 +698,7 @@ Vista
 #define HAVE_LDAP_URL_PARSE 1
 #else
 #undef HAVE_LDAP_URL_PARSE
+#define HAVE_LDAP_SSL 1
 #define USE_WIN32_LDAP 1
 #endif
 
@@ -703,8 +714,25 @@ Vista
 #endif
 
 /* Define to use the Windows crypto library. */
-#if !defined(USE_OPENSSL) && !defined(USE_NSS)
+#if !defined(CURL_WINDOWS_APP)
 #define USE_WIN32_CRYPTO
+#endif
+
+/* On MinGW the ADDRESS_FAMILY typedef was committed alongside LUP_SECURE,
+   so we use it to check for the presence of the typedef. */
+#include <ws2tcpip.h>
+#if !defined(__MINGW32__) || defined(LUP_SECURE)
+/* Define to use Unix sockets. */
+#define USE_UNIX_SOCKETS
+#if !defined(UNIX_PATH_MAX)
+  /* Replicating logic present in afunix.h of newer Windows 10 SDK versions */
+# define UNIX_PATH_MAX 108
+  /* !checksrc! disable TYPEDEFSTRUCT 1 */
+  typedef struct sockaddr_un {
+    ADDRESS_FAMILY sun_family;
+    char sun_path[UNIX_PATH_MAX];
+  } SOCKADDR_UN, *PSOCKADDR_UN;
+#endif
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -717,8 +745,12 @@ Vista
 #define OS "i386-pc-win32"
 #elif defined(_M_X64) || defined(__x86_64__) /* x86_64 (MSVC >=2005 or gcc) */
 #define OS "x86_64-pc-win32"
-#elif defined(_M_IA64) /* Itanium */
+#elif defined(_M_IA64) || defined(__ia64__) /* Itanium */
 #define OS "ia64-pc-win32"
+#elif defined(_M_ARM_NT) || defined(__arm__) /* ARMv7-Thumb2 (Windows RT) */
+#define OS "thumbv7a-pc-win32"
+#elif defined(_M_ARM64) || defined(__aarch64__) /* ARM64 (Windows 10) */
+#define OS "aarch64-pc-win32"
 #else
 #define OS "unknown-pc-win32"
 #endif

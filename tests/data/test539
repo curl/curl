@@ -64,7 +64,7 @@ SYST
 CWD /
 EPSV
 TYPE A
-LIST path/to/the/file/539./
+LIST path/to/the/file/539.
 QUIT
 </protocol>
 </verify>

@@ -1,0 +1,54 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+FETCH
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+From: me@somewhere
+To: fake@nowhere
+
+body
+
+--
+  yours sincerely
+</data>
+<datacheck>
+</datacheck>
+<servercmd>
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP cleanup before a connection was created
+ </name>
+# tool is what to use instead of 'curl'
+<tool>
+lib1553
+</tool>
+
+# it is important this uses a host name that resolves successfully
+<command>
+imap://localhost:%IMAPPORT/1590
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+</protocol>
+</verify>
+</testcase>

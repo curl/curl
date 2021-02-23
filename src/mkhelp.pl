@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env perl
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -32,14 +32,6 @@ if($ARGV[0] eq "-c") {
     $c=1;
     shift @ARGV;
 }
-
-my $README = $ARGV[0];
-
-if($README eq "") {
-    print "usage: mkreadme.pl [-c] <README> < manpage\n";
-    exit;
-}
-
 
 push @out, "                                  _   _ ____  _\n";
 push @out, "  Project                     ___| | | |  _ \\| |\n";
@@ -89,84 +81,53 @@ while (<STDIN>) {
 }
 push @out, "\n"; # just an extra newline
 
-open(READ, "<$README") ||
-    die "couldn't read the README infile $README";
-
-while(<READ>) {
-    my $line = $_;
-
-    # remove trailing CR from line. msysgit checks out files as line+CRLF
-    $line =~ s/\r$//;
-
-    push @out, $line;
-}
-close(READ);
-
-# if compressed
-if($c) {
-    my @test = `gzip --version 2>&1`;
-    if($test[0] =~ /gzip/) {
-        open(GZIP, ">dumpit") ||
-            die "can't create the dumpit file, try without -c";
-        binmode GZIP;
-        for(@out) {
-            print GZIP $_;
-            $gzip += length($_);
-        }
-        close(GZIP);
-
-        system("gzip --best --no-name dumpit");
-
-        open(GZIP, "<dumpit.gz") ||
-             die "can't read the dumpit.gz file, try without -c";
-        binmode GZIP;
-        while(<GZIP>) {
-            push @gzip, $_;
-            $gzipped += length($_);
-        }
-        close(GZIP);
-
-        unlink("dumpit.gz");
-    }
-    else {
-        # no gzip, no compression!
-        undef $c;
-        print STDERR "MEEEP: Couldn't find gzip, disable compression\n";
-    }
-}
-
-$now = localtime;
 print <<HEAD
 /*
  * NEVER EVER edit this manually, fix the mkhelp.pl script instead!
- * Generation time: $now
  */
 #ifdef USE_MANUAL
 #include "tool_hugehelp.h"
 HEAD
     ;
 if($c) {
+    # If compression requested, check that the Gzip module is available
+    # or else disable compression
+    $c = eval
+    {
+      require IO::Compress::Gzip;
+      IO::Compress::Gzip->import();
+      1;
+    };
+    print STDERR "Warning: compression requested but Gzip is not available\n" if (!$c)
+}
+
+if($c)
+{
+    my $content = join("", @out);
+    my $gzippedContent;
+    IO::Compress::Gzip::gzip(
+        \$content, \$gzippedContent, Level => 9, TextFlag => 1, Time=>0) or die "gzip failed:";
+    $gzip = length($content);
+    $gzipped = length($gzippedContent);
+
     print <<HEAD
 #include <zlib.h>
 #include "memdebug.h" /* keep this as LAST include */
 static const unsigned char hugehelpgz[] = {
   /* This mumbo-jumbo is the huge help text compressed with gzip.
-     Thanks to this operation, the size of this data shrunk from $gzip
+     Thanks to this operation, the size of this data shrank from $gzip
      to $gzipped bytes. You can disable the use of compressed help
      texts by NOT passing -c to the mkhelp.pl tool. */
 HEAD
 ;
+
     my $c=0;
     print " ";
-    for(@gzip) {
-        my @all=split(//, $_);
-        for(@all) {
-            my $num=ord($_);
-            printf(" 0x%02x,", 0+$num);
-            if(++$c>11) {
-                print "\n ";
-                $c=0;
-            }
+    for(split(//, $gzippedContent)) {
+        my $num=ord($_);
+        printf(" 0x%02x,", 0+$num);
+        if(!(++$c % 12)) {
+            print "\n ";
         }
     }
     print "\n};\n";

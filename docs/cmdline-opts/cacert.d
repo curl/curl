@@ -1,7 +1,8 @@
 Long: cacert
-Arg: <CA certificate>
+Arg: <file>
 Help: CA certificate to verify peer against
 Protocols: TLS
+Category: tls
 ---
 Tells curl to use the specified certificate file to verify the peer. The file
 may contain multiple CA certificates. The certificate(s) must be in PEM
@@ -24,5 +25,10 @@ option is supported for backward compatibility with other SSL engines, but it
 should not be set. If the option is not set, then curl will use the
 certificates in the system and user Keychain to verify the peer, which is the
 preferred method of verifying the peer's certificate chain.
+
+(Schannel only) This option is supported for Schannel in Windows 7 or later with
+libcurl 7.60 or later. This option is supported for backward compatibility
+with other SSL engines; instead it is recommended to use Windows' store of
+root certificates (the default for Schannel).
 
 If this option is used several times, the last one will be used.

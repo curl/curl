@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -38,7 +38,20 @@ data for you.
 .SH PROTOCOLS
 All TLS based ones.
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode res;
+  struct curl_slist *engines;
+  res = curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
+  if((res == CURLE_OK) && engines) {
+    /* we have a list, free it when done using it */
+    curl_slist_free_all(engines);
+  }
+
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.12.3. Available in OpenSSL builds with "engine" support.
 .SH RETURN VALUE

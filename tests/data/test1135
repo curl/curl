@@ -16,7 +16,7 @@ none
 # The VMS and OS/400 builds extract the CURL_EXTERN protos and use in
 # the build. We break binary compatibility by changing order. Only add
 # new entries last or bump the SONAME.
-# 
+#
  <name>
 Verify CURL_EXTERN order
  </name>
@@ -28,8 +28,20 @@ Verify CURL_EXTERN order
 
 <verify>
 <stdout>
-CURL_EXTERN int (curl_strequal)(const char *s1, const char *s2);
-CURL_EXTERN int (curl_strnequal)(const char *s1, const char *s2, size_t n);
+CURL_EXTERN int curl_strequal(const char *s1, const char *s2);
+CURL_EXTERN int curl_strnequal(const char *s1, const char *s2, size_t n);
+CURL_EXTERN curl_mime *curl_mime_init(CURL *easy);
+CURL_EXTERN void curl_mime_free(curl_mime *mime);
+CURL_EXTERN curl_mimepart *curl_mime_addpart(curl_mime *mime);
+CURL_EXTERN CURLcode curl_mime_name(curl_mimepart *part, const char *name);
+CURL_EXTERN CURLcode curl_mime_filename(curl_mimepart *part,
+CURL_EXTERN CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype);
+CURL_EXTERN CURLcode curl_mime_encoder(curl_mimepart *part,
+CURL_EXTERN CURLcode curl_mime_data(curl_mimepart *part,
+CURL_EXTERN CURLcode curl_mime_filedata(curl_mimepart *part,
+CURL_EXTERN CURLcode curl_mime_data_cb(curl_mimepart *part,
+CURL_EXTERN CURLcode curl_mime_subparts(curl_mimepart *part,
+CURL_EXTERN CURLcode curl_mime_headers(curl_mimepart *part,
 CURL_EXTERN CURLFORMcode curl_formadd(struct curl_httppost **httppost,
 CURL_EXTERN int curl_formget(struct curl_httppost *form, void *arg,
 CURL_EXTERN void curl_formfree(struct curl_httppost *form);
@@ -43,6 +55,7 @@ CURL_EXTERN void curl_free(void *p);
 CURL_EXTERN CURLcode curl_global_init(long flags);
 CURL_EXTERN CURLcode curl_global_init_mem(long flags,
 CURL_EXTERN void curl_global_cleanup(void);
+CURL_EXTERN CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
 CURL_EXTERN struct curl_slist *curl_slist_append(struct curl_slist *,
 CURL_EXTERN void curl_slist_free_all(struct curl_slist *);
 CURL_EXTERN time_t curl_getdate(const char *p, const time_t *unused);
@@ -62,6 +75,7 @@ CURL_EXTERN CURL *curl_easy_duphandle(CURL *curl);
 CURL_EXTERN void curl_easy_reset(CURL *curl);
 CURL_EXTERN CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen,
 CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
+CURL_EXTERN CURLcode curl_easy_upkeep(CURL *curl);
 CURL_EXTERN int curl_mprintf(const char *format, ...);
 CURL_EXTERN int curl_mfprintf(FILE *fd, const char *format, ...);
 CURL_EXTERN int curl_msprintf(char *buffer, const char *format, ...);
@@ -77,6 +91,8 @@ CURL_EXTERN CURLMcode curl_multi_add_handle(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_wait(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_poll(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_wakeup(CURLM *multi_handle);
 CURL_EXTERN CURLMcode curl_multi_perform(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi_handle);
 CURL_EXTERN CURLMsg *curl_multi_info_read(CURLM *multi_handle,

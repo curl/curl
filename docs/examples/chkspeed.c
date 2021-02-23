@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
           prttime = 1;
         }
         else if(strncasecmp(*argv, "-M=", 3) == 0) {
-          long m = strtol((*argv)+3, NULL, 10);
+          long m = strtol((*argv) + 3, NULL, 10);
           switch(m) {
           case 1:
             url = URL_1M;
@@ -165,33 +165,37 @@ int main(int argc, char *argv[])
   res = curl_easy_perform(curl_handle);
 
   if(CURLE_OK == res) {
-    double val;
+    curl_off_t val;
 
     /* check for bytes downloaded */
-    res = curl_easy_getinfo(curl_handle, CURLINFO_SIZE_DOWNLOAD, &val);
+    res = curl_easy_getinfo(curl_handle, CURLINFO_SIZE_DOWNLOAD_T, &val);
     if((CURLE_OK == res) && (val>0))
-      printf("Data downloaded: %0.0f bytes.\n", val);
+      printf("Data downloaded: %" CURL_FORMAT_CURL_OFF_T " bytes.\n", val);
 
     /* check for total download time */
-    res = curl_easy_getinfo(curl_handle, CURLINFO_TOTAL_TIME, &val);
+    res = curl_easy_getinfo(curl_handle, CURLINFO_TOTAL_TIME_T, &val);
     if((CURLE_OK == res) && (val>0))
-      printf("Total download time: %0.3f sec.\n", val);
+      printf("Total download time: %" CURL_FORMAT_CURL_OFF_T ".%06ld sec.\n",
+             (val / 1000000), (long)(val % 1000000));
 
     /* check for average download speed */
-    res = curl_easy_getinfo(curl_handle, CURLINFO_SPEED_DOWNLOAD, &val);
+    res = curl_easy_getinfo(curl_handle, CURLINFO_SPEED_DOWNLOAD_T, &val);
     if((CURLE_OK == res) && (val>0))
-      printf("Average download speed: %0.3f kbyte/sec.\n", val / 1024);
+      printf("Average download speed: %" CURL_FORMAT_CURL_OFF_T
+             " kbyte/sec.\n", val / 1024);
 
     if(prtall) {
       /* check for name resolution time */
-      res = curl_easy_getinfo(curl_handle, CURLINFO_NAMELOOKUP_TIME, &val);
+      res = curl_easy_getinfo(curl_handle, CURLINFO_NAMELOOKUP_TIME_T, &val);
       if((CURLE_OK == res) && (val>0))
-        printf("Name lookup time: %0.3f sec.\n", val);
+        printf("Name lookup time: %" CURL_FORMAT_CURL_OFF_T ".%06ld sec.\n",
+               (val / 1000000), (long)(val % 1000000));
 
       /* check for connect time */
-      res = curl_easy_getinfo(curl_handle, CURLINFO_CONNECT_TIME, &val);
+      res = curl_easy_getinfo(curl_handle, CURLINFO_CONNECT_TIME_T, &val);
       if((CURLE_OK == res) && (val>0))
-        printf("Connect time: %0.3f sec.\n", val);
+        printf("Connect time: %" CURL_FORMAT_CURL_OFF_T ".%06ld sec.\n",
+               (val / 1000000), (long)(val % 1000000));
     }
   }
   else {

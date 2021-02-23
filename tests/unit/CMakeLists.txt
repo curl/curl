@@ -1,3 +1,27 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
+
+# TODO build a special libcurlu library for unittests.
+return()
 
 set(UT_SRC
   unit1300.c
@@ -21,6 +45,8 @@ set(UT_SRC
   unit1603.c
 # Broken link on Linux
 #  unit1604.c
+  unit1620.c
+  unit1655.c
   )
 
 set(UT_COMMON_FILES ../libtest/first.c ../libtest/test.h curlcheck.h)
@@ -29,26 +55,15 @@ include_directories(
   ${CURL_SOURCE_DIR}/tests/libtest
   ${CURL_SOURCE_DIR}/src
   ${CURL_BINARY_DIR}/lib          # To be able to reach "curl_config.h"
-  ${CURL_BINARY_DIR}/include      # To be able to reach "curl/curlbuild.h"
+  ${CURL_BINARY_DIR}/include      # To be able to reach "curl/curl.h"
 )
 
 foreach(_testfile ${UT_SRC})
 
   get_filename_component(_testname ${_testfile} NAME_WE)
-  add_executable(${_testname} ${_testfile} ${UT_COMMON_FILES})
+  add_executable(${_testname} EXCLUDE_FROM_ALL ${_testfile} ${UT_COMMON_FILES})
+  #add_dependencies(testdeps ${_testname})
   target_link_libraries(${_testname} libcurl ${CURL_LIBS})
   set_target_properties(${_testname}
       PROPERTIES COMPILE_DEFINITIONS "UNITTESTS")
-
-  if(HIDES_CURL_PRIVATE_SYMBOLS)
-    set_target_properties(${_testname}
-	  PROPERTIES
-		EXCLUDE_FROM_ALL TRUE
-		EXCLUDE_FROM_DEFAULT_BUILD TRUE
-	)
-  else()
-    add_test(NAME ${_testname}
-             COMMAND ${_testname} "http://www.google.com"
-    )
-  endif()
 endforeach()

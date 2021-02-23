@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+VRFY
+IDN
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+CAPA SMTPUTF8
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<features>
+idn
+!win32
+</features>
+<setenv>
+LC_ALL=en_US.UTF-8
+LC_CTYPE=en_US.UTF-8
+</setenv>
+<precheck>
+perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
+</precheck>
+ <name>
+SMTP VRFY with SMTPUTF8 support
+ </name>
+<command>
+smtp://%HOSTIP:%SMTPPORT/968 --mail-rcpt Användaren
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO 968
+VRFY Användaren SMTPUTF8
+QUIT
+</protocol>
+</verify>
+</testcase>

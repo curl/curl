@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- *  Copyright (c) 2000 David Odin (aka DindinX) for MandrakeSoft
+ * Copyright (c) 2000 - 2020 David Odin (aka DindinX) for MandrakeSoft
  */
 /* <DESC>
  * use the libcurl in a gtk-threaded application
@@ -19,21 +19,21 @@
 
 GtkWidget *Bar;
 
-size_t my_write_func(void *ptr, size_t size, size_t nmemb, FILE *stream)
+static size_t my_write_func(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
   return fwrite(ptr, size, nmemb, stream);
 }
 
-size_t my_read_func(void *ptr, size_t size, size_t nmemb, FILE *stream)
+static size_t my_read_func(char *ptr, size_t size, size_t nmemb, FILE *stream)
 {
   return fread(ptr, size, nmemb, stream);
 }
 
-int my_progress_func(GtkWidget *bar,
-                     double t, /* dltotal */
-                     double d, /* dlnow */
-                     double ultotal,
-                     double ulnow)
+static int my_progress_func(GtkWidget *bar,
+                            double t, /* dltotal */
+                            double d, /* dlnow */
+                            double ultotal,
+                            double ulnow)
 {
 /*  printf("%d / %d (%g %%)\n", d, t, d*100.0/t);*/
   gdk_threads_enter();
@@ -42,17 +42,15 @@ int my_progress_func(GtkWidget *bar,
   return 0;
 }
 
-void *my_thread(void *ptr)
+static void *my_thread(void *ptr)
 {
   CURL *curl;
-  CURLcode res;
-  FILE *outfile;
-  gchar *url = ptr;
 
   curl = curl_easy_init();
   if(curl) {
+    gchar *url = ptr;
     const char *filename = "test.curl";
-    outfile = fopen(filename, "wb");
+    FILE *outfile = fopen(filename, "wb");
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, outfile);
@@ -62,7 +60,7 @@ void *my_thread(void *ptr)
     curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, my_progress_func);
     curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, Bar);
 
-    res = curl_easy_perform(curl);
+    curl_easy_perform(curl);
 
     fclose(outfile);
     /* always cleanup */
@@ -100,10 +98,8 @@ int main(int argc, char **argv)
   if(!g_thread_create(&my_thread, argv[1], FALSE, NULL) != 0)
     g_warning("can't create the thread");
 
-
   gdk_threads_enter();
   gtk_main();
   gdk_threads_leave();
   return 0;
 }
-

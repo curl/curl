@@ -1,0 +1,66 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_HSTSWRITEDATA 3 "14 Sep 2020" "libcurl 7.74.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_HSTSWRITEDATA \- pointer passed to the HSTS write callback
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTSWRITEDATA, void *pointer);
+.SH EXPERIMENTAL
+Warning: this feature is early code and is marked as experimental. It can only
+be enabled by explicitly telling configure with \fB--enable-hsts\fP. You are
+advised to not ship this in production before the experimental label is
+removed.
+.SH DESCRIPTION
+Data \fIpointer\fP to pass to the HSTS write function. If you use the
+\fICURLOPT_HSTSWRITEFUNCTION(3)\fP option, this is the pointer you'll get as
+input in the 4th argument to the callback.
+
+This option doesn't enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
+do that.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+This feature is only used for HTTP(S) transfer.
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+struct MyData this;
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+
+  /* pass pointer that gets passed in to the
+     CURLOPT_HSTSWRITEFUNCTION callback */
+  curl_easy_setopt(curl, CURLOPT_HSTSWRITEDATA, &this);
+
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.74.0
+.SH RETURN VALUE
+This will return CURLE_OK.
+.SH "SEE ALSO"
+.BR CURLOPT_HSTSWRITEFUNCTION "(3), " CURLOPT_HSTSREADDATA "(3), "
+.BR CURLOPT_HSTSREADFUNCTION "(3), "

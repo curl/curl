@@ -41,8 +41,12 @@ http
 idn
 </features>
 <setenv>
-CHARSET=UTF-8
+LC_ALL=en_US.UTF-8
+LC_CTYPE=en_US.UTF-8
 </setenv>
+<precheck>
+perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
+</precheck>
  <name>
 Connection re-use with IDN host name
  </name>
@@ -55,16 +59,15 @@ http://åäö.se:%HTTPPORT/2046 --resolve xn--4cab6c.se:%HTTPPORT:%HOSTIP -w "%{
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /2046 HTTP/1.1
 Host: xn--4cab6c.se:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /20460001 HTTP/1.1
 Host: xn--4cab6c.se:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

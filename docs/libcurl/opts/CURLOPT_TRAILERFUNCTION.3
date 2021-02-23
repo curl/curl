@@ -1,0 +1,101 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_TRAILERFUNCTION 3 "14 Aug 2018" "libcurl 7.64.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_TRAILERFUNCTION \- Set callback for sending trailing headers
+.SH SYNOPSIS
+#include <curl.h>
+
+int curl_trailer_callback(struct curl_slist ** list, void *userdata);
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TRAILERFUNCTION, curl_trailer_callback *func);
+.SH DESCRIPTION
+Pass a pointer to a callback function.
+
+This callback function will be called once right before sending the final
+CR LF in an HTTP chunked transfer to fill a list of trailing headers to be
+sent before finishing the HTTP transfer.
+
+You can set the userdata argument with the CURLOPT_TRAILERDATA option.
+
+The trailing headers included in the linked list must not be CRLF-terminated,
+because libcurl will add the appropriate line termination characters after
+each header item.
+
+If you use curl_slist_append to add trailing headers to the curl_slist then
+libcurl will duplicate the strings, and will free the curl_slist and the
+duplicates once the trailers have been sent.
+
+If one of the trailing headers is not formatted correctly
+(i.e. HeaderName: headerdata) it will be ignored and an info message
+will be emitted.
+
+The return value can either be CURL_TRAILERFUNC_OK or CURL_TRAILERFUNC_ABORT
+which would respectively instruct libcurl to either continue with sending the
+trailers or to abort the request.
+
+If you set this option to NULL, then the transfer proceeds as usual
+without any interruptions.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+#include <curl/curl.h>
+
+static int trailer_cb(struct curl_slist **tr, void *data)
+{
+  /* libcurl will free the list */
+  tr = curl_slist_append(*tr, "My-super-awesome-trailer: trailer-stuff");
+  return CURL_TRAILERFUNC_OK;
+}
+
+CURL *curl = curl_easy_init();
+if(curl) {
+  /* Set the URL of the request */
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  /* Now set it as a put */
+  curl_easy_setopt(curl, CURLOPT_PUT, 1L);
+
+  /* Assuming we have a function that will return the data to be pushed
+     Let that function be read_cb */
+  curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
+
+  struct curl_slist *headers = NULL;
+  headers = curl_slist_append(headers, "Trailer: My-super-awesome-trailer");
+  res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+  /* Set the trailers filling callback */
+  curl_easy_setopt(curl, CURLOPT_TRAILERFUNCTION, trailer_cb);
+
+  /* Perform the request, res will get the return code */
+  res = curl_easy_perform(curl);
+
+  curl_easy_cleanup(curl);
+
+  curl_slist_free_all(headers);
+}
+.SH AVAILABILITY
+This option was added in curl 7.64.0 and is present if HTTP support is enabled
+.SH "SEE ALSO"
+.BR CURLOPT_TRAILERDATA "(3), "

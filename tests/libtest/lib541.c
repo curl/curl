@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,7 +38,6 @@ int test(char *URL)
   FILE *hd_src;
   int hd;
   struct_stat file_info;
-  int error;
 
   if(!libtest_arg2) {
     fprintf(stderr, "Usage: <url> <file-to-upload>\n");
@@ -47,9 +46,8 @@ int test(char *URL)
 
   hd_src = fopen(libtest_arg2, "rb");
   if(NULL == hd_src) {
-    error = ERRNO;
     fprintf(stderr, "fopen failed with error: %d %s\n",
-            error, strerror(error));
+            errno, strerror(errno));
     fprintf(stderr, "Error opening file: %s\n", libtest_arg2);
     return -2; /* if this happens things are major weird */
   }
@@ -58,15 +56,14 @@ int test(char *URL)
   hd = fstat(fileno(hd_src), &file_info);
   if(hd == -1) {
     /* can't open file, bail out */
-    error = ERRNO;
     fprintf(stderr, "fstat() failed with error: %d %s\n",
-            error, strerror(error));
+            errno, strerror(errno));
     fprintf(stderr, "ERROR: cannot open file %s\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if(! file_info.st_size) {
+  if(!file_info.st_size) {
     fprintf(stderr, "ERROR: file %s has zero size!\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
@@ -79,7 +76,8 @@ int test(char *URL)
   }
 
   /* get a curl handle */
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     fclose(hd_src);
@@ -99,7 +97,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_READDATA, hd_src);
 
   /* Now run off and do what you've been told! */
-  res = curl_easy_perform(curl);
+  curl_easy_perform(curl);
 
   /* and now upload the exact same again, but without rewinding so it already
      is at end of file */

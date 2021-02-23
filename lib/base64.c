@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -23,6 +23,14 @@
 /* Base64 encoding/decoding */
 
 #include "curl_setup.h"
+
+#if !defined(CURL_DISABLE_HTTP_AUTH) || defined(USE_SSH) || \
+  !defined(CURL_DISABLE_LDAP) || \
+  !defined(CURL_DISABLE_SMTP) || \
+  !defined(CURL_DISABLE_POP3) || \
+  !defined(CURL_DISABLE_IMAP) || \
+  !defined(CURL_DISABLE_DOH) || defined(USE_SSL)
+
 #include "urldata.h" /* for the Curl_easy definition */
 #include "warnless.h"
 #include "curl_base64.h"
@@ -49,13 +57,12 @@ static size_t decodeQuantum(unsigned char *dest, const char *src)
   unsigned long i, x = 0;
 
   for(i = 0, s = src; i < 4; i++, s++) {
-    unsigned long v = 0;
-
     if(*s == '=') {
       x = (x << 6);
       padding++;
     }
     else {
+      unsigned long v = 0;
       p = base64;
 
       while(*p && (*p != *s)) {
@@ -234,24 +241,24 @@ static CURLcode base64_encode(const char *table64,
 
     switch(inputparts) {
     case 1: /* only one byte read */
-      snprintf(output, 5, "%c%c==",
-               table64[obuf[0]],
-               table64[obuf[1]]);
+      msnprintf(output, 5, "%c%c==",
+                table64[obuf[0]],
+                table64[obuf[1]]);
       break;
 
     case 2: /* two bytes read */
-      snprintf(output, 5, "%c%c%c=",
-               table64[obuf[0]],
-               table64[obuf[1]],
-               table64[obuf[2]]);
+      msnprintf(output, 5, "%c%c%c=",
+                table64[obuf[0]],
+                table64[obuf[1]],
+                table64[obuf[2]]);
       break;
 
     default:
-      snprintf(output, 5, "%c%c%c%c",
-               table64[obuf[0]],
-               table64[obuf[1]],
-               table64[obuf[2]],
-               table64[obuf[3]]);
+      msnprintf(output, 5, "%c%c%c%c",
+                table64[obuf[0]],
+                table64[obuf[1]],
+                table64[obuf[2]],
+                table64[obuf[3]]);
       break;
     }
     output += 4;
@@ -318,3 +325,5 @@ CURLcode Curl_base64url_encode(struct Curl_easy *data,
 {
   return base64_encode(base64url, data, inputbuff, insize, outptr, outlen);
 }
+
+#endif /* no users so disabled */

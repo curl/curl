@@ -1,0 +1,64 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+CURLPAUSE_RECV
+chunked Transfer-Encoding
+Trailer:
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK swsclose
+Transfer-Encoding: chunked
+Trailer: MyCoolTrailerHeader
+
+4
+data
+5
+d474
+
+0
+MyCoolTrailerHeader: amazingtrailer
+
+</data>
+<datacheck>
+HTTP/1.1 200 OK swsclose
+Transfer-Encoding: chunked
+Trailer: MyCoolTrailerHeader
+
+Got 4 bytes but pausing!
+datad474
+MyCoolTrailerHeader: amazingtrailer
+</datacheck>
+
+</reply>
+# Client-side
+<client>
+<server>
+http
+</server>
+<tool>
+lib1540
+</tool>
+ <name>
+chunked with trailers and pausing the receive
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1540
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /1540 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

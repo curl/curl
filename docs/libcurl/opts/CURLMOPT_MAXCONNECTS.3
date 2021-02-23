@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -51,7 +51,11 @@ See DESCRIPTION
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-TODO
+.nf
+CURLM *m = curl_multi_init();
+/* only keep 10 connections in the cache */
+curl_multi_setopt(m, CURLMOPT_MAXCONNECTS, 10L);
+.fi
 .SH AVAILABILITY
 Added in 7.16.3
 .SH RETURN VALUE
@@ -59,4 +63,3 @@ Returns CURLM_OK if the option is supported, and CURLM_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR CURLMOPT_MAX_HOST_CONNECTIONS "(3), "
 .BR CURLOPT_MAXCONNECTS "(3), "
-

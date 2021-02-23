@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLINFO_LOCAL_IP \- get local IP address of last connection
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_LOCAL_IP, char **ip);
 .SH DESCRIPTION
-Pass a pointer to a char pointer to receive the pointer to a zero-terminated
+Pass a pointer to a char pointer to receive the pointer to a null-terminated
 string holding the IP address of the local end of most recent connection done
 with this \fBcurl\fP handle. This string may be IPv6 when that is
 enabled. Note that you get a pointer to a memory area that will be re-used at
@@ -41,7 +41,24 @@ corresponding CURL handle.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-TODO
+.nf
+{
+  char *ip;
+
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+
+  /* Perform the request, res will get the return code */
+  res = curl_easy_perform(curl);
+  /* Check for errors */
+  if((res == CURLE_OK) &&
+     !curl_easy_getinfo(curl, CURLINFO_LOCAL_IP, &ip) && ip) {
+    printf("Local IP: %s\\n", ip);
+  }
+
+  /* always cleanup */
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.21.0
 .SH RETURN VALUE

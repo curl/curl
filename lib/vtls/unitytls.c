@@ -25,6 +25,16 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+/* struct for data related to each SSL connection */
+struct ssl_backend_data {
+  unitytls_x509list* cacert;
+  unitytls_x509list* clicert;
+  unitytls_key* pk;
+  unitytls_tlsctx* ctx;
+  struct connectdata* conn;
+  curl_socket_t sockfd;
+};
+
 /*
 * UnityTls interface
 *
@@ -39,7 +49,7 @@ static unitytls_interface_struct* unitytls = NULL;
 extern unitytls_interface_struct* unitytls_get_interface_struct();
 #endif
 
-void curl_unitytls_set_interface(unitytls_interface_struct* interface)
+void curl_unitytls_set_interface(struct unitytls_interface_struct* interface)
 {
   unitytls = interface;
 }
@@ -130,12 +140,12 @@ static bool unitytls_parse_all_pem_in_dir(struct Curl_easy* data, const char* pa
   memcpy(pathFilename, path, len);
   pathFilename[len++] = '\\';
   pathFilename[len++] = '*';
-  pathFilenameWChar = Curl_convert_UTF8_to_wchar(pathFilename);
+  pathFilenameWChar = curlx_convert_UTF8_to_wchar(pathFilename);
 
   hFind = FindFirstFileExW(pathFilenameWChar, FindExInfoBasic, &file_data, FindExSearchNameMatch, NULL, 0);
   free(pathFilenameWChar);
   if(hFind == INVALID_HANDLE_VALUE)
-    return CURLE_SSL_CACERT;
+    return CURLE_SSL_CACERT_BADFILE;
 
   do
   {
@@ -143,7 +153,7 @@ static bool unitytls_parse_all_pem_in_dir(struct Curl_easy* data, const char* pa
       continue;
 
     /* Try adding the file. Might or might not be a PEM file, so failure is not an error */
-    foundFilenameUTF8 = Curl_convert_wchar_to_UTF8(file_data.cFileName);
+    foundFilenameUTF8 = curlx_convert_wchar_to_UTF8(file_data.cFileName);
     unitytls_append_pem_file(foundFilenameUTF8, list, err);
     free(foundFilenameUTF8);
     if(err->code != UNITYTLS_SUCCESS)
@@ -193,11 +203,11 @@ static bool unitytls_parse_all_pem_in_dir(struct Curl_easy* data, const char* pa
 
 static size_t on_read(void* userData, UInt8* buffer, size_t bufferLen, unitytls_errorstate* errorState)
 {
-  struct ssl_connect_data* connssl = (struct ssl_connect_data*)userData;
+  struct ssl_backend_data* backend = ((struct ssl_connect_data*)userData)->backend;
   CURLcode result;
   ssize_t read = 0;
 
-  result = Curl_read_plain(connssl->sockfd, (char*)(buffer), bufferLen, &read);
+  result = Curl_read_plain(backend->sockfd, (char*)(buffer), bufferLen, &read);
   if(result == CURLE_AGAIN) {
     unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WOULD_BLOCK);
     return 0;
@@ -212,11 +222,16 @@ static size_t on_read(void* userData, UInt8* buffer, size_t bufferLen, unitytls_
 
 static size_t on_write(void* userData, const UInt8* data, size_t bufferLen, unitytls_errorstate* errorState)
 {
-  struct ssl_connect_data* connssl = (struct ssl_connect_data*)userData;
+  struct ssl_backend_data* backend = ((struct ssl_connect_data*)userData)->backend;
   CURLcode result;
   ssize_t written = 0;
 
-  result = Curl_write_plain(connssl->conn, connssl->sockfd, data, bufferLen, &written);
+  if (backend->conn->data == NULL) {
+    unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WRITE_FAILED);
+    return 0;
+  }
+
+  result = Curl_write_plain(backend->conn->data, backend->sockfd, data, bufferLen, &written);
   if(result == CURLE_AGAIN) {
     unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WOULD_BLOCK);
     return 0;
@@ -235,18 +250,18 @@ static void on_certificate_request(void* userData, unitytls_tlsctx* ctx,
                                    unitytls_x509list_ref* chain, unitytls_key_ref* key,
                                    unitytls_errorstate* errorState)
 {
-  struct ssl_connect_data* connssl = (struct ssl_connect_data*)userData;
+  struct ssl_backend_data* backend = ((struct ssl_connect_data*)userData)->backend;
 
-  if(connssl->clicert)
-    *chain = unitytls->unitytls_x509list_get_ref(connssl->clicert, errorState);
-  if(connssl->pk)
-    *key = unitytls->unitytls_key_get_ref(connssl->pk, errorState);
+  if(backend->clicert)
+    *chain = unitytls->unitytls_x509list_get_ref(backend->clicert, errorState);
+  if(backend->pk)
+    *key = unitytls->unitytls_key_get_ref(backend->pk, errorState);
 }
 
 static unitytls_x509verify_result on_verify(void* userData, unitytls_x509list_ref chain, unitytls_errorstate* errorState)
 {
-  struct ssl_connect_data* connssl = (struct ssl_connect_data*)userData;
-  struct connectdata* conn = connssl->conn;
+  struct ssl_backend_data* backend = ((struct ssl_connect_data*)userData)->backend;
+  struct connectdata* conn = backend->conn;
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const bool verifyhost = SSL_CONN_CONFIG(verifyhost);
   const char* const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name : conn->host.name;
@@ -255,8 +270,8 @@ static unitytls_x509verify_result on_verify(void* userData, unitytls_x509list_re
   /* According to documentation the options verifypeer and verifyhost are independent of each other! */
   /* UnityTls however, verifies both the certificate as well as the hostname in the same call. */
   if(verifypeer || verifyhost) {
-    if(connssl->cacert) {
-      unitytls_x509list_ref trustCAref = unitytls->unitytls_x509list_get_ref(connssl->cacert, errorState);
+    if(backend->cacert) {
+      unitytls_x509list_ref trustCAref = unitytls->unitytls_x509list_get_ref(backend->cacert, errorState);
       verify_result = unitytls->unitytls_x509verify_explicit_ca(chain, trustCAref, hostname, strlen(hostname), NULL, NULL, errorState);
     }
     else {
@@ -280,21 +295,24 @@ static unitytls_x509verify_result on_verify(void* userData, unitytls_x509list_re
   return verify_result;
 }
 
-static ssize_t unitytls_send(struct connectdata *conn, int sockindex,
+static ssize_t unitytls_send(struct Curl_easy *data, int sockindex,
                              const void *mem, size_t len,
                              CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct ssl_backend_data *backend = connssl->backend;
+
   size_t written = 0;
   unitytls_errorstate err = unitytls->unitytls_errorstate_create();
-
-  written = unitytls->unitytls_tlsctx_write(conn->ssl[sockindex].ctx, (const UInt8*)mem, len, &err);
+  written = unitytls->unitytls_tlsctx_write(backend->ctx, (const UInt8*)mem, len, &err);
 
   if(err.code != UNITYTLS_SUCCESS) {
     if(err.code == UNITYTLS_USER_WOULD_BLOCK)
       *curlcode = CURLE_AGAIN;
     else {
       *curlcode = CURLE_SEND_ERROR;
-      failf(conn->data, "Sending data failed with unitytls error code %i", err.code);
+      failf(data, "Sending data failed with unitytls error code %i", err.code);
     }
     return -1;
   }
@@ -302,14 +320,18 @@ static ssize_t unitytls_send(struct connectdata *conn, int sockindex,
   return written;
 }
 
-static ssize_t unitytls_recv(struct connectdata *conn, int sockindex,
+static ssize_t unitytls_recv(struct Curl_easy *data, int sockindex,
                              char *buf, size_t buffersize,
                              CURLcode *curlcode)
 {
+  struct connectdata *conn = data->conn;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct ssl_backend_data *backend = connssl->backend;
+
   size_t read = 0;
   unitytls_errorstate err = unitytls->unitytls_errorstate_create();
 
-  read = unitytls->unitytls_tlsctx_read(conn->ssl[sockindex].ctx, (UInt8*)buf, buffersize, &err);
+  read = unitytls->unitytls_tlsctx_read(backend->ctx, (UInt8*)buf, buffersize, &err);
 
   // Curl expects us to ignore gracefully closed connections on read.
   if(err.code == UNITYTLS_STREAM_CLOSED)
@@ -320,7 +342,7 @@ static ssize_t unitytls_recv(struct connectdata *conn, int sockindex,
       *curlcode = CURLE_AGAIN;
     else {
       *curlcode = CURLE_RECV_ERROR;
-      failf(conn->data, "Receiving data failed with unitytls error code %i", err.code);
+      failf(data, "Receiving data failed with unitytls error code %i", err.code);
     }
     return -1;
   }
@@ -332,11 +354,12 @@ static ssize_t unitytls_recv(struct connectdata *conn, int sockindex,
 static CURLcode unitytls_connect_step1(struct connectdata* conn, int sockindex)
 {
   struct Curl_easy* data = conn->data;
-  struct ssl_connect_data* connssl = &conn->ssl[sockindex];
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct ssl_backend_data *backend = connssl->backend;
   const char* const ssl_cafile = SSL_CONN_CONFIG(CAfile);
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char* const ssl_capath = SSL_CONN_CONFIG(CApath);
-  char* const ssl_cert = SSL_SET_OPTION(cert);
+  char* const ssl_cert = SSL_SET_OPTION(primary.clientcert);
   const char* const ssl_crlfile = SSL_SET_OPTION(CRLfile);
   const char* const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name : conn->host.name;
 
@@ -355,10 +378,10 @@ static CURLcode unitytls_connect_step1(struct connectdata* conn, int sockindex)
 
   /* Load the trusted CA */
   if (ssl_cafile || ssl_capath)
-    connssl->cacert = unitytls->unitytls_x509list_create(&err);
+    backend->cacert = unitytls->unitytls_x509list_create(&err);
 
   if(ssl_cafile) {
-    if(!unitytls_append_pem_file(ssl_cafile, connssl->cacert, &err) || err.code != UNITYTLS_SUCCESS) {
+    if(!unitytls_append_pem_file(ssl_cafile, backend->cacert, &err) || err.code != UNITYTLS_SUCCESS) {
       failf(data, "Error reading ca cert file from %s", ssl_cafile);
       if(verifypeer)
         return CURLE_SSL_CACERT_BADFILE;
@@ -367,18 +390,18 @@ static CURLcode unitytls_connect_step1(struct connectdata* conn, int sockindex)
   }
 
   if(ssl_capath) {
-    if(!unitytls_parse_all_pem_in_dir(data, ssl_capath, connssl->cacert, &err) || err.code != UNITYTLS_SUCCESS) {
+    if(!unitytls_parse_all_pem_in_dir(data, ssl_capath, backend->cacert, &err) || err.code != UNITYTLS_SUCCESS) {
       failf(data, "Error reading ca cert path from %s", ssl_cafile);
       if(verifypeer)
-        return CURLE_SSL_CACERT;
+        return CURLE_SSL_CACERT_BADFILE;
       err = unitytls->unitytls_errorstate_create(); /* ignore any errors that came up */
     }
   }
 
   /* Load the client certificate */
   if(ssl_cert) {
-    connssl->clicert = unitytls->unitytls_x509list_create(&err);
-    if(unitytls_append_pem_file(ssl_cert, connssl->clicert, &err) != CURLE_OK || err.code != UNITYTLS_SUCCESS) {
+    backend->clicert = unitytls->unitytls_x509list_create(&err);
+    if(unitytls_append_pem_file(ssl_cert, backend->clicert, &err) != CURLE_OK || err.code != UNITYTLS_SUCCESS) {
       failf(data, "Error reading client cert file %s", ssl_cafile);
       return CURLE_SSL_CERTPROBLEM;
     }
@@ -386,14 +409,14 @@ static CURLcode unitytls_connect_step1(struct connectdata* conn, int sockindex)
 
   /* Load the client private key */
   if(SSL_SET_OPTION(key)) {
-    connssl->pk = unitytls_key_parse_pem_from_file(SSL_SET_OPTION(key), SSL_SET_OPTION(key_passwd), &err);
-    if(!connssl->pk || err.code != UNITYTLS_SUCCESS) {
+    backend->pk = unitytls_key_parse_pem_from_file(SSL_SET_OPTION(key), SSL_SET_OPTION(key_passwd), &err);
+    if(!backend->pk || err.code != UNITYTLS_SUCCESS) {
       failf(data, "Error reading private key %s", SSL_SET_OPTION(key));
       return CURLE_SSL_CERTPROBLEM;
     }
   }
   else {
-    connssl->pk = NULL;
+    backend->pk = NULL;
   }
 
   /* We don't support CRL */
@@ -420,21 +443,21 @@ static CURLcode unitytls_connect_step1(struct connectdata* conn, int sockindex)
       return CURLE_SSL_CONNECT_ERROR;
   }
 
-  connssl->ctx = unitytls->unitytls_tlsctx_create_client(protocol_range, callbacks, hostname, strlen(hostname), &err);
-  unitytls->unitytls_tlsctx_set_certificate_callback(connssl->ctx, on_certificate_request, connssl, &err);
-  unitytls->unitytls_tlsctx_set_x509verify_callback(connssl->ctx, on_verify, connssl, &err);
+  backend->ctx = unitytls->unitytls_tlsctx_create_client(protocol_range, callbacks, hostname, strlen(hostname), &err);
+  unitytls->unitytls_tlsctx_set_certificate_callback(backend->ctx, on_certificate_request, connssl, &err);
+  unitytls->unitytls_tlsctx_set_x509verify_callback(backend->ctx, on_verify, connssl, &err);
   if(err.code != UNITYTLS_SUCCESS) {
     failf(data, "Error creating and configuring untiytls context: %i", err.code);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  connssl->conn = conn;
-  connssl->sockfd = conn->sock[sockindex];
+  backend->conn = conn;
+  backend->sockfd = conn->sock[sockindex];
   connssl->connecting_state = ssl_connect_2;
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
-    CURLcode result = (*data->set.ssl.fsslctx)(data, connssl->ctx, data->set.ssl.fsslctxp);
+    CURLcode result = (*data->set.ssl.fsslctx)(data, backend->ctx, data->set.ssl.fsslctxp);
     if(result != CURLE_OK) {
       failf(data, "error signaled by ssl ctx callback");
       return result;
@@ -446,8 +469,10 @@ static CURLcode unitytls_connect_step1(struct connectdata* conn, int sockindex)
 
 static CURLcode unitytls_connect_step2(struct Curl_easy* data, struct ssl_connect_data* connssl)
 {
+  struct ssl_backend_data* backend = connssl->backend;
+
   unitytls_errorstate err = unitytls->unitytls_errorstate_create();
-  unitytls_x509verify_result verifyresult = unitytls->unitytls_tlsctx_process_handshake(connssl->ctx, &err);
+  unitytls_x509verify_result verifyresult = unitytls->unitytls_tlsctx_process_handshake(backend->ctx, &err);
   CURLcode result = CURLE_OK;
 
   if (err.code == UNITYTLS_USER_WOULD_BLOCK) {
@@ -489,7 +514,7 @@ static CURLcode unitytls_connect_step2(struct Curl_easy* data, struct ssl_connec
 
       if(verifyresult & UNITYTLS_X509VERIFY_FLAG_REVOKED) {
         failf(data, "Cert verify failed: UNITYTLS_X509VERIFY_FLAG_REVOKED");
-        return CURLE_SSL_CACERT;
+        return CURLE_SSL_CACERT_BADFILE;
       }
       /* Note that UNITYTLS_X509VERIFY_NOT_DONE is always always an error as well since we are never running in server mode (unitytls_tlsctx_create_server)
       * which means that authentification method should always be called. 
@@ -521,13 +546,13 @@ static CURLcode unitytls_connect_step3(struct ssl_connect_data* connssl)
   return CURLE_OK;
 }
 
-static CURLcode unitytls_connect_common(struct connectdata *conn,
+static CURLcode unitytls_connect_common(struct Curl_easy *data,
+                                        struct connectdata *conn,
                                         int sockindex,
                                         bool nonblocking,
                                         bool *done)
 {
   CURLcode retcode;
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
 
@@ -589,12 +614,12 @@ static CURLcode unitytls_connect_common(struct connectdata *conn,
   return CURLE_OK;
 }
 
-CURLcode Curl_unitytls_connect(struct connectdata *conn, int sockindex)
+static CURLcode Curl_unitytls_connect(struct Curl_easy *data, struct connectdata *conn, int sockindex)
 {
   CURLcode retcode;
   bool done = false;
 
-  retcode = unitytls_connect_common(conn, sockindex, false, &done);
+  retcode = unitytls_connect_common(data, conn, sockindex, false, &done);
   if(retcode)
     return retcode;
 
@@ -603,52 +628,99 @@ CURLcode Curl_unitytls_connect(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-CURLcode Curl_unitytls_connect_nonblocking(struct connectdata *conn, int sockindex, bool *done)
+static CURLcode Curl_unitytls_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn, int sockindex, bool *done)
 {
-  return unitytls_connect_common(conn, sockindex, true, done);
+  return unitytls_connect_common(data, conn, sockindex, true, done);
 }
 
-void Curl_unitytls_close(struct connectdata *conn, int sockindex)
+static void Curl_unitytls_close(struct Curl_easy *data, struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
+  struct ssl_backend_data* backend = connssl->backend;
+
   unitytls_errorstate err;
   if(!unitytls_check_interface_available(NULL))
     return;
 
-  if (connssl->ctx) {
+  if (backend->ctx) {
+
+    // During close both data->conn and conn->data are already NULL (but the objects are still valid)
+    // Our write function uses Curl_write_plain for convenience (instead of doing sendto on the socket directly like most TLS backends do)
+    // which assumes that these pointers are still in order. So we patch it up temporarily.
+    // Note that schannel.c also uses Curl_write_plain, but doesn't close off the TLS context like we do.
+    backend->conn->data = data;
     err = unitytls->unitytls_errorstate_create();
-    unitytls->unitytls_tlsctx_notify_close(connssl->ctx, &err);
-    unitytls->unitytls_tlsctx_free(connssl->ctx);
-    connssl->ctx = NULL;
+    unitytls->unitytls_tlsctx_notify_close(backend->ctx, &err);
+    backend->conn->data = NULL;
+
+    unitytls->unitytls_tlsctx_free(backend->ctx);
+    backend->ctx = NULL;
   }
 
-  unitytls->unitytls_x509list_free(connssl->cacert);
-  connssl->cacert = NULL;
-  unitytls->unitytls_x509list_free(connssl->clicert);
-  connssl->clicert = NULL;
-  unitytls->unitytls_key_free(connssl->pk);
-  connssl->pk = NULL;
+  unitytls->unitytls_x509list_free(backend->cacert);
+  backend->cacert = NULL;
+  unitytls->unitytls_x509list_free(backend->clicert);
+  backend->clicert = NULL;
+  unitytls->unitytls_key_free(backend->pk);
+  backend->pk = NULL;
 }
 
-size_t Curl_unitytls_version(char *buffer, size_t size)
+static size_t Curl_unitytls_version(char *buffer, size_t size)
 {
   return snprintf(buffer, size, "UnityTls");
 }
 
-int Curl_unitytls_random(struct Curl_easy *data, unsigned char *entropy, size_t length)
+static CURLcode Curl_unitytls_random(struct Curl_easy *data, unsigned char *entropy, size_t length)
 {
   unitytls_errorstate err;
 
   if(!unitytls_check_interface_available(data))
-    return 1;
+    return CURLE_FAILED_INIT;
 
   err = unitytls->unitytls_errorstate_create();
   unitytls->unitytls_random_generate_bytes(entropy, length, &err);
 
   if(err.code != UNITYTLS_SUCCESS)
-    return 1;
+    return CURLE_FAILED_INIT;
 
-  return 0;
+  return CURLE_OK;
 }
+
+static void *Curl_unitytls_get_internals(struct ssl_connect_data *connssl,
+                                        CURLINFO info UNUSED_PARAM)
+{
+  struct ssl_backend_data *backend = connssl->backend;
+  (void)info;
+  return backend->ctx;
+}
+
+const struct Curl_ssl Curl_ssl_unitytls = {
+  { CURLSSLBACKEND_UNITYTLS, "unitytls" }, /* info */
+
+  SSLSUPP_CA_PATH |
+  SSLSUPP_SSL_CTX,
+
+  sizeof(struct ssl_backend_data),
+
+  Curl_none_init,                   /* init */
+  Curl_none_cleanup,                /* cleanup */
+  Curl_unitytls_version,            /* version */
+  Curl_none_check_cxn,              /* check_cxn */
+  Curl_none_shutdown,               /* shutdown */
+  Curl_none_data_pending,           /* data_pending */
+  Curl_unitytls_random,             /* random */
+  Curl_none_cert_status_request,    /* cert_status_request */
+  Curl_unitytls_connect,            /* connect */
+  Curl_unitytls_connect_nonblocking,/* connect_nonblocking */
+  Curl_unitytls_get_internals,      /* get_internals */
+  Curl_unitytls_close,              /* close_one */
+  Curl_none_close_all,              /* close_all */
+  Curl_none_session_free,           /* session_free */
+  Curl_none_set_engine,             /* set_engine */
+  Curl_none_set_engine_default,     /* set_engine_default */
+  Curl_none_engines_list,           /* engines_list */
+  Curl_none_false_start,            /* false_start */
+  NULL                              /* sha256sum */
+};
 
 #endif /* USE_UNITYTLS */

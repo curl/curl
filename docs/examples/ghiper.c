@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -98,15 +98,15 @@ static void mcode_or_die(const char *where, CURLMcode code)
 {
   if(CURLM_OK != code) {
     const char *s;
-    switch (code) {
-    case     CURLM_BAD_HANDLE:         s="CURLM_BAD_HANDLE";         break;
-    case     CURLM_BAD_EASY_HANDLE:    s="CURLM_BAD_EASY_HANDLE";    break;
-    case     CURLM_OUT_OF_MEMORY:      s="CURLM_OUT_OF_MEMORY";      break;
-    case     CURLM_INTERNAL_ERROR:     s="CURLM_INTERNAL_ERROR";     break;
-    case     CURLM_BAD_SOCKET:         s="CURLM_BAD_SOCKET";         break;
-    case     CURLM_UNKNOWN_OPTION:     s="CURLM_UNKNOWN_OPTION";     break;
-    case     CURLM_LAST:               s="CURLM_LAST";               break;
-    default: s="CURLM_unknown";
+    switch(code) {
+    case     CURLM_BAD_HANDLE:         s = "CURLM_BAD_HANDLE";         break;
+    case     CURLM_BAD_EASY_HANDLE:    s = "CURLM_BAD_EASY_HANDLE";    break;
+    case     CURLM_OUT_OF_MEMORY:      s = "CURLM_OUT_OF_MEMORY";      break;
+    case     CURLM_INTERNAL_ERROR:     s = "CURLM_INTERNAL_ERROR";     break;
+    case     CURLM_BAD_SOCKET:         s = "CURLM_BAD_SOCKET";         break;
+    case     CURLM_UNKNOWN_OPTION:     s = "CURLM_UNKNOWN_OPTION";     break;
+    case     CURLM_LAST:               s = "CURLM_LAST";               break;
+    default: s = "CURLM_unknown";
     }
     MSG_OUT("ERROR: %s returns %s\n", where, s);
     exit(code);
@@ -156,14 +156,21 @@ static gboolean timer_cb(gpointer data)
 static int update_timeout_cb(CURLM *multi, long timeout_ms, void *userp)
 {
   struct timeval timeout;
-  GlobalInfo *g=(GlobalInfo *)userp;
+  GlobalInfo *g = (GlobalInfo *)userp;
   timeout.tv_sec = timeout_ms/1000;
   timeout.tv_usec = (timeout_ms%1000)*1000;
 
   MSG_OUT("*** update_timeout_cb %ld => %ld:%ld ***\n",
           timeout_ms, timeout.tv_sec, timeout.tv_usec);
 
-  g->timer_event = g_timeout_add(timeout_ms, timer_cb, g);
+  /*
+   * if timeout_ms is -1, just delete the timer
+   *
+   * For other values of timeout_ms, this should set or *update* the timer to
+   * the new value
+   */
+  if(timeout_ms >= 0)
+    g->timer_event = g_timeout_add(timeout_ms, timer_cb, g);
   return 0;
 }
 
@@ -172,11 +179,11 @@ static gboolean event_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
 {
   GlobalInfo *g = (GlobalInfo*) data;
   CURLMcode rc;
-  int fd=g_io_channel_unix_get_fd(ch);
+  int fd = g_io_channel_unix_get_fd(ch);
 
   int action =
-    (condition & G_IO_IN ? CURL_CSELECT_IN : 0) |
-    (condition & G_IO_OUT ? CURL_CSELECT_OUT : 0);
+    ((condition & G_IO_IN) ? CURL_CSELECT_IN : 0) |
+    ((condition & G_IO_OUT) ? CURL_CSELECT_OUT : 0);
 
   rc = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", rc);
@@ -211,7 +218,8 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
                     GlobalInfo *g)
 {
   GIOCondition kind =
-    (act&CURL_POLL_IN?G_IO_IN:0)|(act&CURL_POLL_OUT?G_IO_OUT:0);
+    ((act & CURL_POLL_IN) ? G_IO_IN : 0) |
+    ((act & CURL_POLL_OUT) ? G_IO_OUT : 0);
 
   f->sockfd = s;
   f->action = act;
@@ -219,7 +227,7 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
   if(f->ev) {
     g_source_remove(f->ev);
   }
-  f->ev=g_io_add_watch(f->ch, kind, event_cb, g);
+  f->ev = g_io_add_watch(f->ch, kind, event_cb, g);
 }
 
 /* Initialize a new SockInfo structure */
@@ -228,7 +236,7 @@ static void addsock(curl_socket_t s, CURL *easy, int action, GlobalInfo *g)
   SockInfo *fdp = g_malloc0(sizeof(SockInfo));
 
   fdp->global = g;
-  fdp->ch=g_io_channel_unix_new(s);
+  fdp->ch = g_io_channel_unix_new(s);
   setsock(fdp, s, easy, action, g);
   curl_multi_assign(g->multi, s, fdp);
 }
@@ -248,8 +256,8 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
   else {
     if(!fdp) {
       MSG_OUT("Adding data: %s%s\n",
-              what&CURL_POLL_IN?"READ":"",
-              what&CURL_POLL_OUT?"WRITE":"");
+              (what & CURL_POLL_IN) ? "READ" : "",
+              (what & CURL_POLL_OUT) ? "WRITE" : "");
       addsock(s, e, what, g);
     }
     else {
@@ -272,8 +280,8 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 }
 
 /* CURLOPT_PROGRESSFUNCTION */
-static int prog_cb (void *p, double dltotal, double dlnow, double ult,
-                    double uln)
+static int prog_cb(void *p, double dltotal, double dlnow, double ult,
+                   double uln)
 {
   ConnInfo *conn = (ConnInfo *)p;
   MSG_OUT("Progress: %s (%g/%g)\n", conn->url, dlnow, dltotal);
@@ -310,7 +318,7 @@ static void new_conn(char *url, GlobalInfo *g)
   curl_easy_setopt(conn->easy, CURLOPT_LOW_SPEED_TIME, 30L);
 
   MSG_OUT("Adding easy %p to multi %p (%s)\n", conn->easy, g->multi, url);
-  rc =curl_multi_add_handle(g->multi, conn->easy);
+  rc = curl_multi_add_handle(g->multi, conn->easy);
   mcode_or_die("new_conn: curl_multi_add_handle", rc);
 
   /* note that the add_handle() will set a time-out to trigger very soon so
@@ -318,15 +326,15 @@ static void new_conn(char *url, GlobalInfo *g)
 }
 
 /* This gets called by glib whenever data is received from the fifo */
-static gboolean fifo_cb (GIOChannel *ch, GIOCondition condition, gpointer data)
+static gboolean fifo_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
 {
 #define BUF_SIZE 1024
   gsize len, tp;
-  gchar *buf, *tmp, *all=NULL;
+  gchar *buf, *tmp, *all = NULL;
   GIOStatus rv;
 
   do {
-    GError *err=NULL;
+    GError *err = NULL;
     rv = g_io_channel_read_line(ch, &buf, &len, &tp, &err);
     if(buf) {
       if(tp) {
@@ -336,15 +344,15 @@ static gboolean fifo_cb (GIOChannel *ch, GIOCondition condition, gpointer data)
       g_free(buf);
     }
     else {
-      buf = g_malloc(BUF_SIZE+1);
+      buf = g_malloc(BUF_SIZE + 1);
       while(TRUE) {
         buf[BUF_SIZE]='\0';
         g_io_channel_read_chars(ch, buf, BUF_SIZE, &len, &err);
         if(len) {
           buf[len]='\0';
           if(all) {
-            tmp=all;
-            all=g_strdup_printf("%s%s", tmp, buf);
+            tmp = all;
+            all = g_strdup_printf("%s%s", tmp, buf);
             g_free(tmp);
           }
           else {
@@ -380,21 +388,21 @@ int init_fifo(void)
     if((st.st_mode & S_IFMT) == S_IFREG) {
       errno = EEXIST;
       perror("lstat");
-      exit (1);
+      exit(1);
     }
   }
 
-  unlink (fifo);
+  unlink(fifo);
   if(mkfifo (fifo, 0600) == -1) {
     perror("mkfifo");
-    exit (1);
+    exit(1);
   }
 
-  socket = open (fifo, O_RDWR | O_NONBLOCK, 0);
+  socket = open(fifo, O_RDWR | O_NONBLOCK, 0);
 
   if(socket == -1) {
     perror("open");
-    exit (1);
+    exit(1);
   }
   MSG_OUT("Now, pipe some URL's into > %s\n", fifo);
 
@@ -404,16 +412,15 @@ int init_fifo(void)
 int main(int argc, char **argv)
 {
   GlobalInfo *g;
-  CURLMcode rc;
   GMainLoop*gmain;
   int fd;
   GIOChannel* ch;
-  g=g_malloc0(sizeof(GlobalInfo));
+  g = g_malloc0(sizeof(GlobalInfo));
 
-  fd=init_fifo();
-  ch=g_io_channel_unix_new(fd);
+  fd = init_fifo();
+  ch = g_io_channel_unix_new(fd);
   g_io_add_watch(ch, G_IO_IN, fifo_cb, g);
-  gmain=g_main_loop_new(NULL, FALSE);
+  gmain = g_main_loop_new(NULL, FALSE);
   g->multi = curl_multi_init();
   curl_multi_setopt(g->multi, CURLMOPT_SOCKETFUNCTION, sock_cb);
   curl_multi_setopt(g->multi, CURLMOPT_SOCKETDATA, g);

@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -290,7 +290,7 @@ at least briefly.
 
 .SH "Upload Data to a Remote Site"
 libcurl tries to keep a protocol independent approach to most transfers, thus
-uploading to a remote FTP site is very similar to uploading data to a HTTP
+uploading to a remote FTP site is very similar to uploading data to an HTTP
 server with a PUT request.
 
 Of course, first you either create an easy handle or you re-use one existing
@@ -477,12 +477,65 @@ multi-part because they're built by a chain of parts, each part being a single
 unit of data. Each part has its own name and contents. You can in fact create
 and post a multi-part formpost with the regular libcurl POST support described
 above, but that would require that you build a formpost yourself and provide
-to libcurl. To make that easier, libcurl provides \fIcurl_formadd(3)\fP. Using
-this function, you add parts to the form. When you're done adding parts, you
-post the whole form.
+to libcurl. To make that easier, libcurl provides a MIME API consisting in
+several functions: using those, you can create and fill a multi-part form.
+Function \fIcurl_mime_init(3)\fP creates a multi-part body; you can then
+append new parts to a multi-part body using \fIcurl_mime_addpart(3)\fP.
+There are three possible data sources for a part: memory using
+\fIcurl_mime_data(3)\fP, file using \fIcurl_mime_filedata(3)\fP and
+user-defined data read callback using \fIcurl_mime_data_cb(3)\fP.
+\fIcurl_mime_name(3)\fP sets a part's (i.e.: form field) name, while
+\fIcurl_mime_filename(3)\fP fills in the remote file name. With
+\fIcurl_mime_type(3)\fP, you can tell the MIME type of a part,
+\fIcurl_mime_headers(3)\fP allows defining the part's headers. When a
+multi-part body is no longer needed, you can destroy it using
+\fIcurl_mime_free(3)\fP.
 
 The following example sets two simple text parts with plain textual contents,
 and then a file with binary contents and uploads the whole thing.
+
+.nf
+ curl_mime *multipart = curl_mime_init(easyhandle);
+ curl_mimepart *part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "name");
+ curl_mime_data(part, "daniel", CURL_ZERO_TERMINATED);
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "project");
+ curl_mime_data(part, "curl", CURL_ZERO_TERMINATED);
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "logotype-image");
+ curl_mime_filedata(part, "curl.png");
+
+ /* Set the form info */
+ curl_easy_setopt(easyhandle, CURLOPT_MIMEPOST, multipart);
+
+ curl_easy_perform(easyhandle); /* post away! */
+
+ /* free the post data again */
+ curl_mime_free(multipart);
+.fi
+
+To post multiple files for a single form field, you must supply each file in
+a separate part, all with the same field name. Although function
+\fIcurl_mime_subparts(3)\fP implements nested multi-parts, this way of
+multiple files posting is deprecated by RFC 7578, chapter 4.3.
+
+To set the data source from an already opened FILE pointer, use:
+
+.nf
+ curl_mime_data_cb(part, filesize, (curl_read_callback) fread,
+                   (curl_seek_callback) fseek, NULL, filepointer);
+.fi
+
+A deprecated \fIcurl_formadd(3)\fP function is still supported in libcurl.
+It should however not be used anymore for new designs and programs using it
+ought to be converted to the MIME API. It is however described here as an
+aid to conversion.
+
+Using \fIcurl_formadd\fP, you add parts to the form. When you're done adding
+parts, you post the whole form.
+
+The MIME API example above is expressed as follows using this function:
 
 .nf
  struct curl_httppost *post=NULL;
@@ -541,6 +594,136 @@ request. You force an easyhandle to go back to GET by using the
 
 Just setting \fICURLOPT_POSTFIELDS(3)\fP to "" or NULL will *not* stop libcurl
 from doing a POST. It will just make it POST without any data to send!
+
+.SH "Converting from deprecated form API to MIME API"
+Four rules have to be respected in building the multi-part:
+.br
+- The easy handle must be created before building the multi-part.
+.br
+- The multi-part is always created by a call to curl_mime_init(easyhandle).
+.br
+- Each part is created by a call to curl_mime_addpart(multipart).
+.br
+- When complete, the multi-part must be bound to the easy handle using
+\fICURLOPT_MIMEPOST(3)\fP instead of \fICURLOPT_HTTPPOST(3)\fP.
+
+Here are some example of \fIcurl_formadd\fP calls to MIME API sequences:
+
+.nf
+ curl_formadd(&post, &last,
+              CURLFORM_COPYNAME, "id",
+              CURLFORM_COPYCONTENTS, "daniel", CURLFORM_END);
+              CURLFORM_CONTENTHEADER, headers,
+              CURLFORM_END);
+.fi
+becomes:
+.nf
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "id");
+ curl_mime_data(part, "daniel", CURL_ZERO_TERMINATED);
+ curl_mime_headers(part, headers, FALSE);
+.fi
+
+Setting the last \fIcurl_mime_headers\fP argument to TRUE would have caused
+the headers to be automatically released upon destroyed the multi-part, thus
+saving a clean-up call to \fIcurl_slist_free_all(3)\fP.
+
+.nf
+ curl_formadd(&post, &last,
+              CURLFORM_PTRNAME, "logotype-image",
+              CURLFORM_FILECONTENT, "-",
+              CURLFORM_END);
+.fi
+becomes:
+.nf
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "logotype-image");
+ curl_mime_data_cb(part, (curl_off_t) -1, fread, fseek, NULL, stdin);
+.fi
+
+\fIcurl_mime_name\fP always copies the field name. The special file name "-"
+is not supported by \fIcurl_mime_file\fP: to read an open file, use
+a callback source using fread(). The transfer will be chunked since the data
+size is unknown.
+
+.nf
+ curl_formadd(&post, &last,
+              CURLFORM_COPYNAME, "datafile[]",
+              CURLFORM_FILE, "file1",
+              CURLFORM_FILE, "file2",
+              CURLFORM_END);
+.fi
+becomes:
+.nf
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "datafile[]");
+ curl_mime_filedata(part, "file1");
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "datafile[]");
+ curl_mime_filedata(part, "file2");
+.fi
+
+The deprecated multipart/mixed implementation of multiple files field is
+translated to two distinct parts with the same name.
+
+.nf
+ curl_easy_setopt(easyhandle, CURLOPT_READFUNCTION, myreadfunc);
+ curl_formadd(&post, &last,
+              CURLFORM_COPYNAME, "stream",
+              CURLFORM_STREAM, arg,
+              CURLFORM_CONTENTLEN, (curl_off_t) datasize,
+              CURLFORM_FILENAME, "archive.zip",
+              CURLFORM_CONTENTTYPE, "application/zip",
+              CURLFORM_END);
+.fi
+becomes:
+.nf
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "stream");
+ curl_mime_data_cb(part, (curl_off_t) datasize,
+                   myreadfunc, NULL, NULL, arg);
+ curl_mime_filename(part, "archive.zip");
+ curl_mime_type(part, "application/zip");
+.fi
+
+\fICURLOPT_READFUNCTION\fP callback is not used: it is replace by directly
+setting the part source data from the callback read function.
+
+.nf
+ curl_formadd(&post, &last,
+              CURLFORM_COPYNAME, "memfile",
+              CURLFORM_BUFFER, "memfile.bin",
+              CURLFORM_BUFFERPTR, databuffer,
+              CURLFORM_BUFFERLENGTH, (long) sizeof databuffer,
+              CURLFORM_END);
+.fi
+becomes:
+.nf
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "memfile");
+ curl_mime_data(part, databuffer, (curl_off_t) sizeof databuffer);
+ curl_mime_filename(part, "memfile.bin");
+.fi
+
+\fIcurl_mime_data\fP always copies the initial data: data buffer is thus
+free for immediate reuse.
+
+.nf
+ curl_formadd(&post, &last,
+              CURLFORM_COPYNAME, "message",
+              CURLFORM_FILECONTENT, "msg.txt",
+              CURLFORM_END);
+.fi
+becomes:
+.nf
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "message");
+ curl_mime_filedata(part, "msg.txt");
+ curl_mime_filename(part, NULL);
+.fi
+
+Use of \fIcurl_mime_filedata\fP sets the remote file name as a side effect: it
+is therefore necessary to clear it for \fICURLFORM_FILECONTENT\fP emulation.
 
 .SH "Showing Progress"
 
@@ -608,12 +791,12 @@ identified in the URL.
 If you're using a SOCKS proxy, you may find that libcurl doesn't quite support
 all operations through it.
 
-For HTTP proxies: the fact that the proxy is a HTTP proxy puts certain
+For HTTP proxies: the fact that the proxy is an HTTP proxy puts certain
 restrictions on what can actually happen. A requested URL that might not be a
 HTTP URL will be still be passed to the HTTP proxy to deliver back to
 libcurl. This happens transparently, and an application may not need to
 know. I say "may", because at times it is very important to understand that
-all operations over a HTTP proxy use the HTTP protocol. For example, you
+all operations over an HTTP proxy use the HTTP protocol. For example, you
 can't invoke your own custom FTP commands or even proper FTP directory
 listings.
 
@@ -633,7 +816,7 @@ If you want to, you can specify the host name only in the
 \fICURLOPT_PROXYPORT(3)\fP.
 
 Tell libcurl what kind of proxy it is with \fICURLOPT_PROXYTYPE(3)\fP (if not,
-it will default to assume a HTTP proxy):
+it will default to assume an HTTP proxy):
 
  curl_easy_setopt(easyhandle, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
 
@@ -669,11 +852,11 @@ variables, set the proxy name to "" - an empty string - with
 SSL is for secure point-to-point connections. This involves strong encryption
 and similar things, which effectively makes it impossible for a proxy to
 operate as a "man in between" which the proxy's task is, as previously
-discussed. Instead, the only way to have SSL work over a HTTP proxy is to ask
+discussed. Instead, the only way to have SSL work over an HTTP proxy is to ask
 the proxy to tunnel trough everything without being able to check or fiddle
 with the traffic.
 
-Opening an SSL connection over a HTTP proxy is therefor a matter of asking the
+Opening an SSL connection over an HTTP proxy is therefore a matter of asking the
 proxy for a straight connection to the target host on a specified port. This
 is made with the HTTP request CONNECT. ("please mr proxy, connect me to that
 remote host").
@@ -693,7 +876,7 @@ you or your application.
 
 As tunneling opens a direct connection from your application to the remote
 machine, it suddenly also re-introduces the ability to do non-HTTP
-operations over a HTTP proxy. You can in fact use things such as FTP
+operations over an HTTP proxy. You can in fact use things such as FTP
 upload or FTP custom commands this way.
 
 Again, this is often prevented by the administrators of proxies and is
@@ -873,7 +1056,7 @@ you can tell libcurl to use 1.0 instead by doing something like this:
 Not all protocols are HTTP-like, and thus the above may not help you when
 you want to make, for example, your FTP transfers to behave differently.
 
-Sending custom commands to a FTP server means that you need to send the
+Sending custom commands to an FTP server means that you need to send the
 commands exactly as the FTP server expects them (RFC959 is a good guide
 here), and you can only use commands that work on the control-connection
 alone. All kinds of commands that require data interchange and thus need
@@ -917,7 +1100,7 @@ combine with \fICURLOPT_NOBODY(3)\fP. If this option is set, no actual file
 content transfer will be performed.
 
 .IP "FTP Custom CUSTOMREQUEST"
-If you do want to list the contents of a FTP directory using your own defined
+If you do want to list the contents of an FTP directory using your own defined
 FTP command, \fICURLOPT_CUSTOMREQUEST(3)\fP will do just that. "NLST" is the
 default one for listing directories but you're free to pass in your idea of a
 good alternative.
@@ -1005,6 +1188,81 @@ When doing the "PORT" approach, libcurl will attempt to use the EPRT and the
 LPRT before trying PORT, as they work with more protocols. You can disable
 this behavior by setting \fICURLOPT_FTP_USE_EPRT(3)\fP to zero.
 
+.SH "MIME API revisited for SMTP and IMAP"
+In addition to support HTTP multi-part form fields, the MIME API can be used
+to build structured e-mail messages and send them via SMTP or append such
+messages to IMAP directories.
+
+A structured e-mail message may contain several parts: some are displayed
+inline by the MUA, some are attachments. Parts can also be structured as
+multi-part, for example to include another e-mail message or to offer several
+text formats alternatives. This can be nested to any level.
+
+To build such a message, you prepare the nth-level multi-part and then include
+it as a source to the parent multi-part using function
+\fIcurl_mime_subparts(3)\fP. Once it has been
+bound to its parent multi-part, a nth-level multi-part belongs to it and
+should not be freed explicitly.
+
+E-mail messages data is not supposed to be non-ascii and line length is
+limited: fortunately, some transfer encodings are defined by the standards
+to support the transmission of such incompatible data. Function
+\fIcurl_mime_encoder(3)\fP tells a part that its source data must be encoded
+before being sent. It also generates the corresponding header for that part.
+If the part data you want to send is already encoded in such a scheme,
+do not use this function (this would over-encode it), but explicitly set the
+corresponding part header.
+
+Upon sending such a message, libcurl prepends it with the header list
+set with \fICURLOPT_HTTPHEADER(3)\fP, as 0th-level mime part headers.
+
+Here is an example building an e-mail message with an inline plain/html text
+alternative and a file attachment encoded in base64:
+
+.nf
+ curl_mime *message = curl_mime_init(easyhandle);
+
+ /* The inline part is an alternative proposing the html and the text
+    versions of the e-mail. */
+ curl_mime *alt = curl_mime_init(easyhandle);
+
+ /* HTML message. */
+ curl_mimepart *part = curl_mime_addpart(alt);
+ curl_mime_data(part, "<html><body><p>This is HTML</p></body></html>",
+                      CURL_ZERO_TERMINATED);
+ curl_mime_type(part, "text/html");
+
+ /* Text message. */
+ part = curl_mime_addpart(alt);
+ curl_mime_data(part, "This is plain text message",
+                      CURL_ZERO_TERMINATED);
+
+ /* Create the inline part. */
+ part = curl_mime_addpart(message);
+ curl_mime_subparts(part, alt);
+ curl_mime_type(part, "multipart/alternative");
+ struct curl_slist *headers = curl_slist_append(NULL,
+                   "Content-Disposition: inline");
+ curl_mime_headers(part, headers, TRUE);
+
+ /* Add the attachment. */
+ part = curl_mime_addpart(message);
+ curl_mime_filedata(part, "manual.pdf");
+ curl_mime_encoder(part, "base64");
+
+ /* Build the mail headers. */
+ headers = curl_slist_append(NULL, "From: me@example.com");
+ headers = curl_slist_append(headers, "To: you@example.com");
+
+ /* Set these into the easy handle. */
+ curl_easy_setopt(easyhandle, CURLOPT_HTTPHEADER, headers);
+ curl_easy_setopt(easyhandle, CURLOPT_MIMEPOST, mime);
+.fi
+
+It should be noted that appending a message to an IMAP directory requires
+the message size to be known prior upload. It is therefore not possible to
+include parts with unknown data size in this context.
+
 .SH "Headers Equal Fun"
 
 Some protocols provide "headers", meta-data separated from the normal
@@ -1028,234 +1286,7 @@ etc.
 actually true headers, but in this case we pretend they are! ;-)
 
 .SH "Post Transfer Information"
-
- [ curl_easy_getinfo ]
-
-.SH "Security Considerations"
-
-The libcurl project takes security seriously.  The library is written with
-caution and precautions are taken to mitigate many kinds of risks encountered
-while operating with potentially malicious servers on the Internet.  It is a
-powerful library, however, which allows application writers to make trade offs
-between ease of writing and exposure to potential risky operations.  If
-used the right way, you can use libcurl to transfer data pretty safely.
-
-Many applications are used in closed networks where users and servers
-can be trusted, but many others are used on arbitrary servers and are fed
-input from potentially untrusted users.  Following is a discussion about
-some risks in the ways in which applications commonly use libcurl and
-potential mitigations of those risks. It is by no means comprehensive, but
-shows classes of attacks that robust applications should consider. The
-Common Weakness Enumeration project at https://cwe.mitre.org/ is a good
-reference for many of these and similar types of weaknesses of which
-application writers should be aware.
-
-.IP "Command Lines"
-If you use a command line tool (such as curl) that uses libcurl, and you give
-options to the tool on the command line those options can very likely get read
-by other users of your system when they use 'ps' or other tools to list
-currently running processes.
-
-To avoid this problem, never feed sensitive things to programs using command
-line options. Write them to a protected file and use the \-K option to
-avoid this.
-
-.IP ".netrc"
-\&.netrc is a pretty handy file/feature that allows you to login quickly and
-automatically to frequently visited sites. The file contains passwords in
-clear text and is a real security risk. In some cases, your .netrc is also
-stored in a home directory that is NFS mounted or used on another network
-based file system, so the clear text password will fly through your network
-every time anyone reads that file!
-
-To avoid this problem, don't use .netrc files and never store passwords in
-plain text anywhere.
-
-.IP "Clear Text Passwords"
-Many of the protocols libcurl supports send name and password unencrypted as
-clear text (HTTP Basic authentication, FTP, TELNET etc). It is very easy for
-anyone on your network or a network nearby yours to just fire up a network
-analyzer tool and eavesdrop on your passwords. Don't let the fact that HTTP
-Basic uses base64 encoded passwords fool you. They may not look readable at a
-first glance, but they very easily "deciphered" by anyone within seconds.
-
-To avoid this problem, use an authentication mechanism or other protocol that
-doesn't let snoopers see your password: Digest, CRAM-MD5, Kerberos, SPNEGO or
-NTLM authentication, HTTPS, FTPS, SCP and SFTP are a few examples.
-
-.IP "Redirects"
-The \fICURLOPT_FOLLOWLOCATION(3)\fP option automatically follows HTTP
-redirects sent by a remote server.  These redirects can refer to any kind of
-URL, not just HTTP. By default libcurl will allow all protocols on redirect
-except several disabled for security reasons: Since 7.19.4 FILE and SCP are
-disabled, and since 7.40.0 SMB and SMBS are also disabled.
-
-A redirect to a file: URL would cause the libcurl to read (or write) arbitrary
-files from the local filesystem.  If the application returns the data back to
-the user (as would happen in some kinds of CGI scripts), an attacker could
-leverage this to read otherwise forbidden data (e.g.
-file://localhost/etc/passwd).
-
-If authentication credentials are stored in the ~/.netrc file, or Kerberos
-is in use, any other URL type (not just file:) that requires
-authentication is also at risk.  A redirect such as
-ftp://some-internal-server/private-file would then return data even when
-the server is password protected.
-
-In the same way, if an unencrypted SSH private key has been configured for
-the user running the libcurl application, SCP: or SFTP: URLs could access
-password or private-key protected resources,
-e.g. sftp://user@some-internal-server/etc/passwd
-
-The \fICURLOPT_REDIR_PROTOCOLS(3)\fP and \fICURLOPT_NETRC(3)\fP options can be
-used to mitigate against this kind of attack.
-
-A redirect can also specify a location available only on the machine running
-libcurl, including servers hidden behind a firewall from the attacker.
-e.g. http://127.0.0.1/ or http://intranet/delete-stuff.cgi?delete=all or
-tftp://bootp-server/pc-config-data
-
-Apps can mitigate against this by disabling \fICURLOPT_FOLLOWLOCATION(3)\fP
-and handling redirects itself, sanitizing URLs as necessary. Alternately, an
-app could leave \fICURLOPT_FOLLOWLOCATION(3)\fP enabled but set
-\fICURLOPT_REDIR_PROTOCOLS(3)\fP and install a
-\fICURLOPT_OPENSOCKETFUNCTION(3)\fP callback function in which addresses are
-sanitized before use.
-
-.IP "Private Resources"
-A user who can control the DNS server of a domain being passed in within a URL
-can change the address of the host to a local, private address which a
-server-side libcurl-using application could then use. e.g. the innocuous URL
-http://fuzzybunnies.example.com/ could actually resolve to the IP address of a
-server behind a firewall, such as 127.0.0.1 or 10.1.2.3.  Apps can mitigate
-against this by setting a \fICURLOPT_OPENSOCKETFUNCTION(3)\fP and checking the
-address before a connection.
-
-All the malicious scenarios regarding redirected URLs apply just as well to
-non-redirected URLs, if the user is allowed to specify an arbitrary URL that
-could point to a private resource. For example, a web app providing a
-translation service might happily translate file://localhost/etc/passwd and
-display the result.  Apps can mitigate against this with the
-\fICURLOPT_PROTOCOLS(3)\fP option as well as by similar mitigation techniques
-for redirections.
-
-A malicious FTP server could in response to the PASV command return an IP
-address and port number for a server local to the app running libcurl but
-behind a firewall.  Apps can mitigate against this by using the
-\fICURLOPT_FTP_SKIP_PASV_IP(3)\fP option or \fICURLOPT_FTPPORT(3)\fP.
-
-.IP "IPv6 Addresses"
-libcurl will normally handle IPv6 addresses transparently and just as easily
-as IPv4 addresses. That means that a sanitizing function that filters out
-addressses like 127.0.0.1 isn't sufficient--the equivalent IPv6 addresses ::1,
-::, 0:00::0:1, ::127.0.0.1 and ::ffff:7f00:1 supplied somehow by an attacker
-would all bypass a naive filter and could allow access to undesired local
-resources.  IPv6 also has special address blocks like link-local and site-local
-that generally shouldn't be accessed by a server-side libcurl-using
-application.  A poorly-configured firewall installed in a data center,
-organization or server may also be configured to limit IPv4 connections but
-leave IPv6 connections wide open.  In some cases, the CURL_IPRESOLVE_V4 option
-can be used to limit resolved addresses to IPv4 only and bypass these issues.
-
-.IP Uploads
-When uploading, a redirect can cause a local (or remote) file to be
-overwritten.  Apps must not allow any unsanitized URL to be passed in for
-uploads.  Also, \fICURLOPT_FOLLOWLOCATION(3)\fP should not be used on uploads.
-Instead, the app should handle redirects itself, sanitizing each URL first.
-
-.IP Authentication
-Use of \fICURLOPT_UNRESTRICTED_AUTH(3)\fP could cause authentication
-information to be sent to an unknown second server.  Apps can mitigate against
-this by disabling \fICURLOPT_FOLLOWLOCATION(3)\fP and handling redirects
-itself, sanitizing where necessary.
-
-Use of the CURLAUTH_ANY option to \fICURLOPT_HTTPAUTH(3)\fP could result in
-user name and password being sent in clear text to an HTTP server.  Instead,
-use CURLAUTH_ANYSAFE which ensures that the password is encrypted over the
-network, or else fail the request.
-
-Use of the CURLUSESSL_TRY option to \fICURLOPT_USE_SSL(3)\fP could result in
-user name and password being sent in clear text to an FTP server.  Instead,
-use CURLUSESSL_CONTROL to ensure that an encrypted connection is used or else
-fail the request.
-
-.IP Cookies
-If cookies are enabled and cached, then a user could craft a URL which
-performs some malicious action to a site whose authentication is already
-stored in a cookie. e.g. http://mail.example.com/delete-stuff.cgi?delete=all
-Apps can mitigate against this by disabling cookies or clearing them
-between requests.
-
-.IP "Dangerous URLs"
-SCP URLs can contain raw commands within the scp: URL, which is a side effect
-of how the SCP protocol is designed. e.g.
-scp://user:pass@host/a;date >/tmp/test;
-Apps must not allow unsanitized SCP: URLs to be passed in for downloads.
-
-.IP "Denial of Service"
-A malicious server could cause libcurl to effectively hang by sending a
-trickle of data through, or even no data at all but just keeping the TCP
-connection open.  This could result in a denial-of-service attack. The
-\fICURLOPT_TIMEOUT(3)\fP and/or \fICURLOPT_LOW_SPEED_LIMIT(3)\fP options can
-be used to mitigate against this.
-
-A malicious server could cause libcurl to effectively hang by starting to send
-data, then severing the connection without cleanly closing the TCP connection.
-The app could install a \fICURLOPT_SOCKOPTFUNCTION(3)\fP callback function and
-set the TCP SO_KEEPALIVE option to mitigate against this.  Setting one of the
-timeout options would also work against this attack.
-
-A malicious server could cause libcurl to download an infinite amount of data,
-potentially causing all of memory or disk to be filled. Setting the
-\fICURLOPT_MAXFILESIZE_LARGE(3)\fP option is not sufficient to guard against
-this.  Instead, the app should monitor the amount of data received within the
-write or progress callback and abort once the limit is reached.
-
-A malicious HTTP server could cause an infinite redirection loop, causing a
-denial-of-service. This can be mitigated by using the
-\fICURLOPT_MAXREDIRS(3)\fP option.
-
-.IP "Arbitrary Headers"
-User-supplied data must be sanitized when used in options like
-\fICURLOPT_USERAGENT(3)\fP, \fICURLOPT_HTTPHEADER(3)\fP,
-\fICURLOPT_POSTFIELDS(3)\fP and others that are used to generate structured
-data. Characters like embedded carriage returns or ampersands could allow the
-user to create additional headers or fields that could cause malicious
-transactions.
-
-.IP "Server-supplied Names"
-A server can supply data which the application may, in some cases, use as
-a file name. The curl command-line tool does this with --remote-header-name,
-using the Content-disposition: header to generate a file name.  An application
-could also use CURLINFO_EFFECTIVE_URL to generate a file name from a
-server-supplied redirect URL. Special care must be taken to sanitize such
-names to avoid the possibility of a malicious server supplying one like
-"/etc/passwd", "\\autoexec.bat", "prn:" or even ".bashrc".
-
-.IP "Server Certificates"
-A secure application should never use the \fICURLOPT_SSL_VERIFYPEER(3)\fP
-option to disable certificate validation. There are numerous attacks that are
-enabled by apps that fail to properly validate server TLS/SSL certificates,
-thus enabling a malicious server to spoof a legitimate one. HTTPS without
-validated certificates is potentially as insecure as a plain HTTP connection.
-
-.IP "Showing What You Do"
-On a related issue, be aware that even in situations like when you have
-problems with libcurl and ask someone for help, everything you reveal in order
-to get best possible help might also impose certain security related
-risks. Host names, user names, paths, operating system specifics, etc. (not to
-mention passwords of course) may in fact be used by intruders to gain
-additional information of a potential target.
-
-Be sure to limit access to application logs if they could hold private or
-security-related data.  Besides the obvious candidates like user names and
-passwords, things like URLs, cookies or even file names could also hold
-sensitive data.
-
-To avoid this problem, you must of course use your common sense. Often, you
-can just edit out the sensitive data or just search/replace your true
-information with faked data.
-
+See \fIcurl_easy_getinfo(3)\fP.
 .SH "The multi Interface"
 The easy interface as described in detail in this document is a synchronous
 interface that transfers one file at a time and doesn't return until it is

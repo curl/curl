@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,19 +31,19 @@ int main(void)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  struct curl_slist *host = NULL;
 
   /* Each single name resolve string should be written using the format
      HOST:PORT:ADDRESS where HOST is the name libcurl will try to resolve,
      PORT is the port number of the service where libcurl wants to connect to
      the HOST and ADDRESS is the numerical IP address
    */
-  host = curl_slist_append(NULL, "example.com:80:127.0.0.1");
+  struct curl_slist *host = curl_slist_append(NULL,
+                                              "example.com:443:127.0.0.1");
 
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_RESOLVE, host);
-    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     res = curl_easy_perform(curl);
 
     /* always cleanup */

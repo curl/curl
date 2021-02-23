@@ -74,12 +74,10 @@ Content-Type: text/html
 
 -foo-
 </stdout>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 POST /1130 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Expect: 100-continue
 Content-Length: 100
@@ -87,6 +85,7 @@ Content-Type: application/x-www-form-urlencoded
 
 POST /11300001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Expect: 100-continue
 Content-Length: 100

@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -39,7 +39,34 @@ NULL
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-TODO
+.nf
+static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
+{
+  GlobalInfo *g = (GlobalInfo*) cbp;
+  SockInfo *fdp = (SockInfo*) sockp;
+
+  if(what == CURL_POLL_REMOVE) {
+    remsock(fdp);
+  }
+  else {
+    if(!fdp) {
+      addsock(s, e, what, g);
+    }
+    else {
+      setsock(fdp, s, e, what, g);
+    }
+  }
+  return 0;
+}
+
+main()
+{
+  GlobalInfo setup;
+  /* ... use socket callback and custom pointer */
+  curl_multi_setopt(multi, CURLMOPT_SOCKETFUNCTION, sock_cb);
+  curl_multi_setopt(multi, CURLMOPT_SOCKETDATA, &setup);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.15.4
 .SH RETURN VALUE

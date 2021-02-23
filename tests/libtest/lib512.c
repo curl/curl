@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,15 +29,13 @@
 int test(char *URL)
 {
   CURLcode code;
-  CURL *curl;
-  CURL *curl2;
   int rc = 99;
 
   code = curl_global_init(CURL_GLOBAL_ALL);
   if(code == CURLE_OK) {
-
-    curl = curl_easy_init();
+    CURL *curl = curl_easy_init();
     if(curl) {
+      CURL *curl2;
 
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
       curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
@@ -74,4 +72,3 @@ int test(char *URL)
 
   return rc;
 }
-

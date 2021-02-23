@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013, Linus Nielsen Feltzing <linus@haxx.se>
+ * Copyright (C) 2013 - 2020, Linus Nielsen Feltzing <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,9 +43,9 @@ int test(char *URL)
   (void)URL;
 
   /* Create fake DNS entries for serverX.example.com for all handles */
-  for(i=0; i < NUM_URLS; i++) {
-    snprintf(dnsentry, sizeof(dnsentry), "server%d.example.com:%s:%s", i + 1,
-             port, address);
+  for(i = 0; i < NUM_URLS; i++) {
+    msnprintf(dnsentry, sizeof(dnsentry), "server%d.example.com:%s:%s", i + 1,
+              port, address);
     printf("%s\n", dnsentry);
     slist2 = curl_slist_append(slist, dnsentry);
     if(!slist2) {
@@ -72,11 +72,11 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_MAXCONNECTS, 3L);
 
   /* get NUM_HANDLES easy handles */
-  for(i=0; i < NUM_URLS; i++) {
+  for(i = 0; i < NUM_URLS; i++) {
     /* specify target */
-    snprintf(target_url, sizeof(target_url),
-             "http://server%d.example.com:%s/path/1510%04i",
-             i + 1, port, i + 1);
+    msnprintf(target_url, sizeof(target_url),
+              "http://server%d.example.com:%s/path/1510%04i",
+              i + 1, port, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl, CURLOPT_URL, target_url);
 

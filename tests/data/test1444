@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+FTP
+EPSV
+RETR
+--remote-time
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+file data
+</data>
+<mdtm>
+213 20090213233130
+</mdtm>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP with --remote-time
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/1444 --remote-time
+</command>
+# Verify the mtime of the file. The mtime is specifically chosen to be an even
+# number so that it can be represented exactly on a FAT filesystem.
+<postcheck>
+perl -e 'exit((stat("log/curl1444.out"))[9] != 1234567890)'
+</postcheck>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+MDTM 1444
+EPSV
+TYPE I
+SIZE 1444
+RETR 1444
+QUIT
+</protocol>
+</verify>
+</testcase>

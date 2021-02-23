@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -33,6 +33,9 @@ my $reallocs=0;
 my $strdups=0;
 my $wcsdups=0;
 my $showlimit;
+my $sends=0;
+my $recvs=0;
+my $sockets=0;
 
 while(1) {
     if($ARGV[0] eq "-v") {
@@ -258,6 +261,7 @@ while(<FILE>) {
             $filedes{$1}=1;
             $getfile{$1}="$source:$linenum";
             $openfile++;
+            $sockets++; # number of socket() calls
         }
         elsif($function =~ /socketpair\(\) = (\d*) (\d*)/) {
             $filedes{$1}=1;
@@ -313,6 +317,14 @@ while(<FILE>) {
     # GETNAME url.c:1901 getnameinfo()
     elsif($_ =~ /^GETNAME ([^ ]*):(\d*) (.*)/) {
         # not much to do
+    }
+    # SEND url.c:1901 send(83) = 83
+    elsif($_ =~ /^SEND ([^ ]*):(\d*) (.*)/) {
+        $sends++;
+    }
+    # RECV url.c:1901 recv(102400) = 256
+    elsif($_ =~ /^RECV ([^ ]*):(\d*) (.*)/) {
+        $recvs++;
     }
 
     # ADDR url.c:1282 getaddrinfo() = 0x5ddd
@@ -398,12 +410,16 @@ if($addrinfos) {
 
 if($verbose) {
     print "Mallocs: $mallocs\n",
-    "Reallocs: $reallocs\n",
-    "Callocs: $callocs\n",
-    "Strdups:  $strdups\n",
-    "Wcsdups:  $wcsdups\n",
-    "Frees: $frees\n",
-    "Allocations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups)."\n";
+        "Reallocs: $reallocs\n",
+        "Callocs: $callocs\n",
+        "Strdups:  $strdups\n",
+        "Wcsdups:  $wcsdups\n",
+        "Frees: $frees\n",
+        "Sends: $sends\n",
+        "Recvs: $recvs\n",
+        "Sockets: $sockets\n",
+        "Allocations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups)."\n",
+        "Operations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups + $sends + $recvs + $sockets)."\n";
 
     print "Maximum allocated: $maxmem\n";
 }

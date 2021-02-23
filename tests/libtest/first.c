@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -72,8 +72,8 @@ void wait_ms(int ms)
   select_wrapper(0, NULL, NULL, NULL, &t);
 }
 
-char *libtest_arg2=NULL;
-char *libtest_arg3=NULL;
+char *libtest_arg2 = NULL;
+char *libtest_arg3 = NULL;
 int test_argc;
 char **test_argv;
 
@@ -96,10 +96,10 @@ static void memory_tracking_init(void)
       env[CURL_MT_LOGFNAME_BUFSIZE-1] = '\0';
     strcpy(fname, env);
     curl_free(env);
-    curl_memdebug(fname);
-    /* this weird stuff here is to make curl_free() get called
-       before curl_memdebug() as otherwise memory tracking will
-       log a free() without an alloc! */
+    curl_dbg_memdebug(fname);
+    /* this weird stuff here is to make curl_free() get called before
+       curl_dbg_memdebug() as otherwise memory tracking will log a free()
+       without an alloc! */
   }
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
   env = curl_getenv("CURL_MEMLIMIT");
@@ -107,7 +107,7 @@ static void memory_tracking_init(void)
     char *endptr;
     long num = strtol(env, &endptr, 10);
     if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
-      curl_memlimit(num);
+      curl_dbg_memlimit(num);
     curl_free(env);
   }
 }
@@ -116,15 +116,15 @@ static void memory_tracking_init(void)
 #endif
 
 /* returns a hexdump in a static memory area */
-char *hexdump(unsigned char *buffer, size_t len)
+char *hexdump(const unsigned char *buffer, size_t len)
 {
-  static char dump[200*3+1];
+  static char dump[200 * 3 + 1];
   char *p = dump;
   size_t i;
   if(len > 200)
     return NULL;
-  for(i=0; i<len; i++, p += 3)
-    snprintf(p, 4, "%02x ", buffer[i]);
+  for(i = 0; i<len; i++, p += 3)
+    msnprintf(p, 4, "%02x ", buffer[i]);
   return dump;
 }
 
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
 
   /*
    * Setup proper locale from environment. This is needed to enable locale-
-   * specific behaviour by the C library in order to test for undesired side
+   * specific behavior by the C library in order to test for undesired side
    * effects that could cause in libcurl.
    */
 #ifdef HAVE_SETLOCALE
@@ -162,10 +162,10 @@ int main(int argc, char **argv)
   test_argv = argv;
 
   if(argc>2)
-    libtest_arg2=argv[2];
+    libtest_arg2 = argv[2];
 
   if(argc>3)
-    libtest_arg3=argv[3];
+    libtest_arg3 = argv[3];
 
   URL = argv[1]; /* provide this to the rest */
 

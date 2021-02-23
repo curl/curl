@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -73,7 +73,7 @@ char *decc$getenv(const char *__name);
 #   endif
 #endif
 
-    struct passwd * decc_getpwuid(uid_t uid);
+    struct passwd *decc_getpwuid(uid_t uid);
 
 #ifdef __DECC
 #   if __INITIAL_POINTER_SIZE == 32
@@ -138,9 +138,9 @@ static char *vms_getenv(const char *envvar)
 
 static struct passwd vms_passwd_cache;
 
-static struct passwd * vms_getpwuid(uid_t uid)
+static struct passwd *vms_getpwuid(uid_t uid)
 {
-  struct passwd * my_passwd;
+  struct passwd *my_passwd;
 
 /* Hack needed to support 64 bit builds, decc_getpwnam is 32 bit only */
 #ifdef __DECC

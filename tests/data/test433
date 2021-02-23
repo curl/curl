@@ -1,0 +1,57 @@
+<testcase>
+<info>
+<keywords>
+--config
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/1
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<file1 name="log/.curlrc">
+--next
+header = "a: a"
+data = "curlrc read"
+</file1>
+<server>
+http
+</server>
+<setenv>
+XDG_CONFIG_HOME=%PWD/log
+</setenv>
+<name>
+Verify XDG_CONFIG_HOME use to find .curlrc
+</name>
+<command>
+%HOSTIP:%HTTPPORT/433
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol nonewline="yes">
+POST /433 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+a: a
+Content-Length: 11
+Content-Type: application/x-www-form-urlencoded
+
+curlrc read
+</protocol>
+</verify>
+</testcase>

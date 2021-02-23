@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,11 +25,19 @@
 /*
  * Prototypes for library-wide functions provided by multi.c
  */
-void Curl_expire(struct Curl_easy *data, time_t milli);
+
+void Curl_updatesocket(struct Curl_easy *data);
+void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id);
 void Curl_expire_clear(struct Curl_easy *data);
-void Curl_expire_latest(struct Curl_easy *data, time_t milli);
-bool Curl_pipeline_wanted(const struct Curl_multi* multi, int bits);
-void Curl_multi_handlePipeBreak(struct Curl_easy *data);
+void Curl_expire_done(struct Curl_easy *data, expire_id id);
+void Curl_update_timer(struct Curl_multi *multi);
+void Curl_attach_connnection(struct Curl_easy *data,
+                             struct connectdata *conn);
+void Curl_detach_connnection(struct Curl_easy *data);
+bool Curl_multiplex_wanted(const struct Curl_multi *multi);
+void Curl_set_in_callback(struct Curl_easy *data, bool value);
+bool Curl_is_in_callback(struct Curl_easy *easy);
+CURLcode Curl_preconnect(struct Curl_easy *data);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket and connection hashes */
@@ -55,27 +63,14 @@ struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize);
 void Curl_multi_dump(struct Curl_multi *multi);
 #endif
 
-void Curl_multi_process_pending_handles(struct Curl_multi *multi);
-
 /* Return the value of the CURLMOPT_MAX_HOST_CONNECTIONS option */
 size_t Curl_multi_max_host_connections(struct Curl_multi *multi);
-
-/* Return the value of the CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE option */
-curl_off_t Curl_multi_content_length_penalty_size(struct Curl_multi *multi);
-
-/* Return the value of the CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE option */
-curl_off_t Curl_multi_chunk_length_penalty_size(struct Curl_multi *multi);
-
-/* Return the value of the CURLMOPT_PIPELINING_SITE_BL option */
-struct curl_llist *Curl_multi_pipelining_site_bl(struct Curl_multi *multi);
-
-/* Return the value of the CURLMOPT_PIPELINING_SERVER_BL option */
-struct curl_llist *Curl_multi_pipelining_server_bl(struct Curl_multi *multi);
 
 /* Return the value of the CURLMOPT_MAX_TOTAL_CONNECTIONS option */
 size_t Curl_multi_max_total_connections(struct Curl_multi *multi);
 
-void Curl_multi_connchanged(struct Curl_multi *multi);
+void Curl_multiuse_state(struct Curl_easy *data,
+                         int bundlestate); /* use BUNDLE_* defines */
 
 /*
  * Curl_multi_closed()
@@ -87,7 +82,7 @@ void Curl_multi_connchanged(struct Curl_multi *multi);
  * socket again and it gets the same file descriptor number.
  */
 
-void Curl_multi_closed(struct connectdata *conn, curl_socket_t s);
+void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s);
 
 /*
  * Add a handle and move it into PERFORM state at once. For pushed streams.
@@ -95,4 +90,9 @@ void Curl_multi_closed(struct connectdata *conn, curl_socket_t s);
 CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
                                  struct Curl_easy *data,
                                  struct connectdata *conn);
+
+
+/* Return the value of the CURLMOPT_MAX_CONCURRENT_STREAMS option */
+unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
+
 #endif /* HEADER_CURL_MULTIIF_H */

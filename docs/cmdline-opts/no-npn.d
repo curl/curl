@@ -6,6 +6,7 @@ Mutexed:
 See-also: no-alpn http2
 Requires: TLS
 Help: Disable the NPN TLS extension
+Category: tls http
 ---
 Disable the NPN TLS extension. NPN is enabled by default if libcurl was built
 with an SSL library that supports NPN. NPN is used by a libcurl that supports

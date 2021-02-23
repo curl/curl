@@ -15,10 +15,19 @@
   servers with the Cookie: header.
 
   For a very long time, the only spec explaining how to use cookies was the
-  original [Netscape spec from 1994](https://curl.haxx.se/rfc/cookie_spec.html).
+  original [Netscape spec from 1994](https://curl.se/rfc/cookie_spec.html).
 
   In 2011, [RFC6265](https://www.ietf.org/rfc/rfc6265.txt) was finally
-  published and details how cookies work within HTTP.
+  published and details how cookies work within HTTP. In 2016, an update which
+  added support for prefixes was
+  [proposed](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-prefixes-00),
+  and in 2017, another update was
+  [drafted](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-01)
+  to deprecate modification of 'secure' cookies from non-secure origins. Both
+  of these drafts have been incorporated into a proposal to
+  [replace](https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-02)
+  RFC6265. Cookie prefixes and secure cookie modification protection has been
+  implemented by curl.
 
 ## Cookies saved to disk
 
@@ -33,6 +42,27 @@
 
   When libcurl saves a cookiejar, it creates a file header of its own in which
   there is a URL mention that will link to the web version of this document.
+
+## Cookie file format
+
+  The cookie file format is text based and stores one cookie per line. Lines
+  that start with `#` are treated as comments.
+
+  Each line that each specifies a single cookie consists of seven text fields
+  separated with TAB characters. A valid line must end with a newline
+  character.
+
+### Fields in the file
+
+  Field number, what type and example data and the meaning of it:
+
+  0. string `example.com` - the domain name
+  1. boolean `FALSE` - include subdomains
+  2. string `/foobar/` - path
+  3. boolean `TRUE` - send/receive over HTTPS only
+  4. number `1462299217` - expires at - seconds since Jan 1st 1970, or 0
+  5. string `person` - name of the cookie
+  6. string `daniel` - value of the cookie
 
 ## Cookies with curl the command line tool
 
@@ -99,6 +129,6 @@
   Since curl and libcurl are plain HTTP clients without any knowledge of or
   capability to handle javascript, such cookies will not be detected or used.
 
-  Often, if you want to mimic what a browser does on such web sites, you can
+  Often, if you want to mimic what a browser does on such websites, you can
   record web browser HTTP traffic when using such a site and then repeat the
   cookie operations using curl or libcurl.

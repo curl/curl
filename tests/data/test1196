@@ -1,0 +1,62 @@
+<testcase>
+<info>
+<keywords>
+MQTT
+MQTT SUBSCRIBE
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+hello
+</data>
+<datacheck hex="yes">
+00 04 31 31 39 30   68 65 6c 6c 6f 5b 4c 46 5d 0a
+</datacheck>
+
+# error 1 - "Connection Refused, unacceptable protocol version"
+<servercmd>
+error-CONNACK 1
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+mqtt
+</features>
+<server>
+mqtt
+</server>
+<name>
+MQTT with error in CONNACK
+</name>
+<command option="binary-trace">
+mqtt://%HOSTIP:%MQTTPORT/1196
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# These are hexadecimal protocol dumps from the client
+#
+# Strip out the random part of the client id from the CONNECT message
+# before comparison
+<strippart>
+s/^(.* 00044d5154540402003c000c6375726c).*/$1/
+</strippart>
+<protocol>
+client CONNECT 18 00044d5154540402003c000c6375726c
+server CONNACK 2 20020001
+</protocol>
+
+# 8 is CURLE_WEIRD_SERVER_REPLY
+<errorcode>
+8
+</errorcode>
+</verify>
+</testcase>

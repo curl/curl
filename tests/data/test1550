@@ -1,0 +1,29 @@
+<testcase>
+<info>
+<keywords>
+multi
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib1550
+</tool>
+
+ <name>
+verify setting pipeling blocklisting options
+ </name>
+ <command>
+http://%HOSTIP:%NOLISTENPORT/1550
+</command>
+</client>
+</testcase>

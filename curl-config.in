@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2001 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2001 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -44,6 +44,7 @@ Available values for OPTION include:
   --libs      library linking information
   --prefix    curl install prefix
   --protocols newline separated list of enabled protocols
+  --ssl-backends output the SSL backends libcurl was built to support
   --static-libs static libcurl library linking information
   --version   output version information
   --vernum    output the version information as a number (hexadecimal)
@@ -106,17 +107,29 @@ while test $# -gt 0; do
         # when extracting the patch part we strip off everything after a
         # dash as that's used for things like version 1.2.3-CVS
         cpatch=`echo $checkfor | cut -d. -f3 | cut -d- -f1`
-        checknum=`echo "$cmajor*256*256 + $cminor*256 + ${cpatch:-0}" | bc`
-        numuppercase=`echo @VERSIONNUM@ | tr 'a-f' 'A-F'`
-        nownum=`echo "obase=10; ibase=16; $numuppercase" | bc`
 
-        if test "$nownum" -ge "$checknum"; then
-          # silent success
-          exit 0
-        else
-          echo "requested version $checkfor is newer than existing @CURLVERSION@"
-          exit 1
+        vmajor=`echo @CURLVERSION@ | cut -d. -f1`
+        vminor=`echo @CURLVERSION@ | cut -d. -f2`
+        # when extracting the patch part we strip off everything after a
+        # dash as that's used for things like version 1.2.3-CVS
+        vpatch=`echo @CURLVERSION@ | cut -d. -f3 | cut -d- -f1`
+
+        if test "$vmajor" -gt "$cmajor"; then
+            exit 0;
         fi
+        if test "$vmajor" -eq "$cmajor"; then
+            if test "$vminor" -gt "$cminor"; then
+                exit 0
+            fi
+            if test "$vminor" -eq "$cminor"; then
+                if test "$cpatch" -le "$vpatch"; then
+                    exit 0
+                fi
+            fi
+        fi
+
+        echo "requested version $checkfor is newer than existing @CURLVERSION@"
+        exit 1
         ;;
 
     --vernum)
@@ -147,11 +160,14 @@ while test $# -gt 0; do
         else
            CURLLIBDIR=""
         fi
-        if test "X@REQUIRE_LIB_DEPS@" = "Xyes"; then
+        if test "X@ENABLE_SHARED@" = "Xno"; then
           echo ${CURLLIBDIR}-lcurl @LIBCURL_LIBS@
         else
           echo ${CURLLIBDIR}-lcurl
         fi
+        ;;
+    --ssl-backends)
+        echo "@SSL_BACKENDS@"
         ;;
 
     --static-libs)

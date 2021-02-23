@@ -1,0 +1,49 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP replaced headers
+CURLOPT_TIMECONDITION
+If-Modified-Since
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 429 Too Many Requests
+Date: Thu, 11 Jul 2019 02:26:59 GMT
+Server: test-server/swsclose
+Retry-After: Thu, 11 Jul 2024 02:26:59 GMT
+
+</data>
+</reply>
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP Retry-After header parsing using a date
+</name>
+<tool>
+lib1596
+</tool>
+<command>
+http://%HOSTIP:%HTTPPORT/1596
+</command>
+</client>
+
+<verify>
+<protocol>
+GET /1596 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<stdout>
+Retry-After: 172066
+</stdout>
+</verify>
+</testcase>

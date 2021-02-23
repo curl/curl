@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,44 +26,32 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-
 #include <curl/curl.h>
 
-#if defined(_MSC_VER) && (_MSC_VER < 1300)
-#  error _snscanf requires MSVC 7.0 or later.
-#endif
-
-/* The MinGW headers are missing a few Win32 function definitions,
-   you shouldn't need this if you use VC++ */
-#if defined(__MINGW32__) && !defined(__MINGW64__)
-int __cdecl _snscanf(const char *input, size_t length,
-                     const char *format, ...);
-#endif
-
-
 /* parse headers for Content-Length */
-size_t getcontentlengthfunc(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t getcontentlengthfunc(void *ptr, size_t size, size_t nmemb,
+                                   void *stream)
 {
   int r;
   long len = 0;
 
-  /* _snscanf() is Win32 specific */
-  r = _snscanf(ptr, size * nmemb, "Content-Length: %ld\n", &len);
-
-  if(r) /* Microsoft: we don't read the specs */
+  r = sscanf(ptr, "Content-Length: %ld\n", &len);
+  if(r)
     *((long *) stream) = len;
 
   return size * nmemb;
 }
 
 /* discard downloaded data */
-size_t discardfunc(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t discardfunc(void *ptr, size_t size, size_t nmemb, void *stream)
 {
+  (void)ptr;
+  (void)stream;
   return size * nmemb;
 }
 
 /* read data to upload */
-size_t readfunc(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t readfunc(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   FILE *f = stream;
   size_t n;
@@ -77,8 +65,8 @@ size_t readfunc(void *ptr, size_t size, size_t nmemb, void *stream)
 }
 
 
-int upload(CURL *curlhandle, const char *remotepath, const char *localpath,
-           long timeout, long tries)
+static int upload(CURL *curlhandle, const char *remotepath,
+                  const char *localpath, long timeout, long tries)
 {
   FILE *f;
   long uploaded_len = 0;
@@ -156,7 +144,7 @@ int upload(CURL *curlhandle, const char *remotepath, const char *localpath,
   }
 }
 
-int main(int c, char **argv)
+int main(void)
 {
   CURL *curlhandle = NULL;
 

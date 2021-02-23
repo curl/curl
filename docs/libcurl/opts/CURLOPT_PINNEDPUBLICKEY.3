@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_PINNEDPUBLICKEY \- set pinned public key
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PINNEDPUBLICKEY, char *pinnedpubkey);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. The string can be the
+Pass a pointer to a null-terminated string as parameter. The string can be the
 file name of your pinned public key. The file format expected is "PEM" or "DER".
 The string can also be any number of base64 encoded sha256 hashes preceded by
 "sha256//" and separated by ";"
@@ -39,6 +39,9 @@ if it does not exactly match the public key provided to this option, curl will
 abort the connection before sending or receiving any data.
 
 On mismatch, \fICURLE_SSL_PINNEDPUBKEYNOTMATCH\fP is returned.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
@@ -92,21 +95,27 @@ footer:
 .SH AVAILABILITY
 PEM/DER support:
 
-  7.39.0: OpenSSL, GnuTLS and GSKit
+  7.39.0: OpenSSL, GnuTLS
 
-  7.43.0: NSS and wolfSSL/CyaSSL
+  7.39.0-7.48.0,7.58.1+: GSKit
+
+  7.43.0: NSS and wolfSSL
 
   7.47.0: mbedtls
 
-  7.49.0: PolarSSL
+  7.54.1: SecureTransport on macOS 10.7+/iOS 10+
+
+  7.58.1: SChannel
 
 sha256 support:
 
-  7.44.0: OpenSSL, GnuTLS, NSS and wolfSSL/CyaSSL
+  7.44.0: OpenSSL, GnuTLS, NSS and wolfSSL
 
   7.47.0: mbedtls
 
-  7.49.0: PolarSSL
+  7.54.1: SecureTransport on macOS 10.7+/iOS 10+
+
+  7.58.1: SChannel Windows XP SP3+
 
 Other SSL backends not supported.
 .SH RETURN VALUE

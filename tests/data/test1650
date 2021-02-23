@@ -1,0 +1,23 @@
+<testcase>
+<info>
+<keywords>
+unittest
+DOH
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+DoH
+</features>
+ <name>
+DOH
+ </name>
+</client>
+</testcase>

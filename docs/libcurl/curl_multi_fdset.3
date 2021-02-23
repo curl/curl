@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -58,9 +58,10 @@ libcurl set. When libcurl returns -1 in \fImax_fd\fP, it is because libcurl
 currently does something that isn't possible for your application to monitor
 with a socket and unfortunately you can then not know exactly when the current
 action is completed using select(). You then need to wait a while before you
-proceed and call \fIcurl_multi_perform(3)\fP anyway. How long to wait? We
-suggest 100 milliseconds at least, but you may want to test it out in your own
-particular conditions to find a suitable value.
+proceed and call \fIcurl_multi_perform(3)\fP anyway. How long to wait? Unless
+\fIcurl_multi_timeout(3)\fP gives you a lower number, we suggest 100
+milliseconds or so, but you may want to test it out in your own particular
+conditions to find a suitable value.
 
 When doing select(), you should use \fIcurl_multi_timeout(3)\fP to figure out
 how long to wait for action. Call \fIcurl_multi_perform(3)\fP even if no

@@ -28,7 +28,7 @@ tftp
 TFTP retrieve with localhost --interface
  </name>
  <command>
-tftp://%HOSTIP:%TFTPPORT//1049 --trace-ascii log/traceit --interface %CLIENTIP
+tftp://%HOSTIP:%TFTPPORT//1049 --interface %CLIENTIP
 </command>
 </client>
 

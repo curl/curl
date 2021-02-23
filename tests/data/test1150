@@ -1,0 +1,57 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP proxy
+</keywords>
+</info>
+# Server-side
+<reply>
+
+# this is returned when we get a GET!
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 7
+Content-Type: text/html
+Funny-head: yesyes
+
+daniel
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP proxy with URLs using different ports
+ </name>
+ <command>
+--proxy http://%HOSTIP:%HTTPPORT http://test.remote.example.com.1150:150/path http://test.remote.example.com.1150:1234/path/
+</command>
+<features>
+proxy
+</features>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET http://test.remote.example.com.1150:150/path HTTP/1.1
+Host: test.remote.example.com.1150:150
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://test.remote.example.com.1150:1234/path/ HTTP/1.1
+Host: test.remote.example.com.1150:1234
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

@@ -32,7 +32,8 @@ FTP URL with type=a
 USER anonymous
 PASS ftp@example.com
 PWD
-CWD /tmp
+CWD /
+CWD tmp
 CWD moo
 EPSV
 TYPE A

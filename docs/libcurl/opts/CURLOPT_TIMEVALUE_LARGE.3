@@ -1,0 +1,64 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_TIMEVALUE_LARGE 3 "25 Jan 2018" "libcurl 7.59.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_TIMEVALUE_LARGE \- set time value for conditional
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMEVALUE_LARGE, curl_off_t val);
+.SH DESCRIPTION
+Pass a curl_off_t \fIval\fP as parameter. This should be the time counted as
+seconds since 1 Jan 1970, and the time will be used in a condition as
+specified with \fICURLOPT_TIMECONDITION(3)\fP.
+
+The difference between this option and \fICURLOPT_TIMEVALUE(3)\fP is the type
+of the argument. On systems where 'long' is only 32 bit wide, this option has
+to be used to set dates beyond the year 2038.
+.SH DEFAULT
+0
+.SH PROTOCOLS
+HTTP, FTP, RTSP, and FILE
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+
+  /* January 1, 2020 is 1577833200 */
+  curl_easy_setopt(curl, CURLOPT_TIMEVALUE_LARGE, (curl_off_t)1577833200);
+
+  /* If-Modified-Since the above time stamp */
+  curl_easy_setopt(curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
+
+  /* Perform the request */
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.59.0.
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_TIMECONDITION "(3), "
+.BR CURLOPT_TIMEVALUE_LARGE "(3), "

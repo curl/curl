@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2011 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,6 +26,11 @@
 
 #include "curl_gssapi.h"
 #include "sendf.h"
+
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
+#include "memdebug.h"
 
 static char spnego_oid_bytes[] = "\x2b\x06\x01\x05\x05\x02";
 gss_OID_desc Curl_spnego_mech_oid = { 6, &spnego_oid_bytes };
@@ -92,9 +97,9 @@ static size_t display_gss_error(OM_uint32 status, int type,
                                   &msg_ctx,
                                   &status_string);
     if(GSS_LOG_BUFFER_LEN > len + status_string.length + 3) {
-      len += snprintf(buf + len, GSS_LOG_BUFFER_LEN - len,
-                      "%.*s. ", (int)status_string.length,
-                      (char *)status_string.value);
+      len += msnprintf(buf + len, GSS_LOG_BUFFER_LEN - len,
+                       "%.*s. ", (int)status_string.length,
+                       (char *)status_string.value);
     }
     gss_release_buffer(&min_stat, &status_string);
   } while(!GSS_ERROR(maj_stat) && msg_ctx != 0);
@@ -126,6 +131,10 @@ void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
   display_gss_error(minor, GSS_C_MECH_CODE, buf, len);
 
   infof(data, "%s%s\n", prefix, buf);
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)data;
+  (void)prefix;
+#endif
 }
 
 #endif /* HAVE_GSSAPI */

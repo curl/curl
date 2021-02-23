@@ -1,0 +1,95 @@
+<testcase>
+# Derived from on https://github.com/curl/curl/issues/5120
+<info>
+<keywords>
+--next
+--config
+POST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data1>
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/1
+
+-foo-
+</data1>
+<data2>
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/2
+
+-foo-
+</data2>
+<data3>
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/3
+
+-foo-
+</data3>
+</reply>
+
+#
+# Client-side
+<client>
+<file1 name="log/config431-a">
+--next
+url = %HOSTIP:%HTTPPORT/4310001
+header = "a: a"
+data = "a"
+</file1>
+<file2 name="log/config431-b">
+--next
+url = %HOSTIP:%HTTPPORT/4310002
+header = "b: b"
+data = "b"
+</file2>
+
+<server>
+http
+</server>
+ <name>
+Two -K uses with --next and then one on cmdline
+ </name>
+ <command>
+-K log/config431-a -K log/config431-b --next -d c %HOSTIP:%HTTPPORT/4310003 -H "c: c"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol nonewline="yes">
+POST /4310001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+a: a
+Content-Length: 1
+Content-Type: application/x-www-form-urlencoded
+
+aPOST /4310002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+b: b
+Content-Length: 1
+Content-Type: application/x-www-form-urlencoded
+
+bPOST /4310003 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+c: c
+Content-Length: 1
+Content-Type: application/x-www-form-urlencoded
+
+c
+</protocol>
+</verify>
+</testcase>

@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+URL escape
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<tool>
+lib1537
+</tool>
+
+<name>
+libcurl URL escape/unescape tests
+</name>
+<command>
+nothing
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+%2F%3A%3B%3C%3D%3E%3F%91%A2%B3%C4%D5%E6%F7
+%2F%3A%3B%3C%3D%3E%3F%91%A2%B3%C4%D5%E6%F7
+outlen == 14
+unescape == original? YES
+[old] outlen == 14
+[old] unescape == original? YES
+escape -1 length: (nil)
+unescape -1 length: (nil) 2017
+</stdout>
+</verify>
+
+</testcase>

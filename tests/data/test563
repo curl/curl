@@ -23,8 +23,8 @@ hello
 # Client-side
 <client>
 <server>
-ftp
 http
+ftp
 </server>
 <tool>
 lib562
@@ -32,7 +32,9 @@ lib562
  <name>
 FTP type=A URL and CURLOPT_PORT set and proxy
  </name>
-
+<features>
+proxy
+</features>
 <setenv>
 ftp_proxy=http://%HOSTIP:%HTTPPORT/
 </setenv>
@@ -47,7 +49,7 @@ ftp_proxy=http://%HOSTIP:%HTTPPORT/
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET FTP://%HOSTIP:%FTPPORT/563;type=A HTTP/1.1
+GET ftp://%HOSTIP:%FTPPORT/563;type=A HTTP/1.1
 Host: %HOSTIP:%FTPPORT
 Accept: */*
 Proxy-Connection: Keep-Alive

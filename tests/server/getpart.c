@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -66,6 +66,35 @@ curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 #  pragma warning(default:4232) /* MSVC extension, dllimport identity */
 #endif
 
+
+/*
+ * Curl_convert_clone() returns a malloced copy of the source string (if
+ * returning CURLE_OK), with the data converted to network format. This
+ * function is used by base64 code in libcurl built to support data
+ * conversion. This is a DUMMY VERSION that returns data unmodified - for
+ * use by the test server only.
+ */
+CURLcode Curl_convert_clone(struct Curl_easy *data,
+                            const char *indata,
+                            size_t insize,
+                            char **outbuf);
+CURLcode Curl_convert_clone(struct Curl_easy *data,
+                            const char *indata,
+                            size_t insize,
+                            char **outbuf)
+{
+  char *convbuf;
+  (void)data;
+
+  convbuf = malloc(insize);
+  if(!convbuf)
+    return CURLE_OUT_OF_MEMORY;
+
+  memcpy(convbuf, indata, insize);
+  *outbuf = convbuf;
+  return CURLE_OK;
+}
+
 /*
  * readline()
  *
@@ -87,7 +116,6 @@ curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 static int readline(char **buffer, size_t *bufsize, FILE *stream)
 {
   size_t offset = 0;
-  size_t length;
   char *newptr;
 
   if(!*buffer) {
@@ -98,6 +126,7 @@ static int readline(char **buffer, size_t *bufsize, FILE *stream)
   }
 
   for(;;) {
+    size_t length;
     int bytestoread = curlx_uztosi(*bufsize - offset);
 
     if(!fgets(*buffer + offset, bytestoread, stream))
@@ -190,7 +219,7 @@ static int appenddata(char  **dst_buf,   /* dest buffer */
 static int decodedata(char  **buf,   /* dest buffer */
                       size_t *len)   /* dest buffer data length */
 {
-  int error = 0;
+  CURLcode error = CURLE_OK;
   unsigned char *buf64 = NULL;
   size_t src_len = 0;
 
@@ -198,7 +227,7 @@ static int decodedata(char  **buf,   /* dest buffer */
     return GPE_OK;
 
   /* base64 decode the given buffer */
-  error = (int) Curl_base64_decode(*buf, &buf64, &src_len);
+  error = Curl_base64_decode(*buf, &buf64, &src_len);
   if(error)
     return GPE_OUT_OF_MEMORY;
 
@@ -250,11 +279,11 @@ int getpart(char **outbuf, size_t *outlen,
             const char *main, const char *sub, FILE *stream)
 {
 # define MAX_TAG_LEN 79
-  char couter[MAX_TAG_LEN+1]; /* current outermost section */
-  char cmain[MAX_TAG_LEN+1];  /* current main section */
-  char csub[MAX_TAG_LEN+1];   /* current sub section */
-  char ptag[MAX_TAG_LEN+1];   /* potential tag */
-  char patt[MAX_TAG_LEN+1];   /* potential attributes */
+  char couter[MAX_TAG_LEN + 1]; /* current outermost section */
+  char cmain[MAX_TAG_LEN + 1];  /* current main section */
+  char csub[MAX_TAG_LEN + 1];   /* current sub section */
+  char ptag[MAX_TAG_LEN + 1];   /* potential tag */
+  char patt[MAX_TAG_LEN + 1];   /* potential attributes */
   char *buffer = NULL;
   char *ptr;
   char *end;
@@ -309,7 +338,8 @@ int getpart(char **outbuf, size_t *outlen,
       ptr++;
       end = ptr;
       EAT_WORD(end);
-      if((len.sig = end - ptr) > MAX_TAG_LEN) {
+      len.sig = end - ptr;
+      if(len.sig > MAX_TAG_LEN) {
         error = GPE_NO_BUFFER_SPACE;
         break;
       }
@@ -370,7 +400,8 @@ int getpart(char **outbuf, size_t *outlen,
       /* get potential tag */
       end = ptr;
       EAT_WORD(end);
-      if((len.sig = end - ptr) > MAX_TAG_LEN) {
+      len.sig = end - ptr;
+      if(len.sig > MAX_TAG_LEN) {
         error = GPE_NO_BUFFER_SPACE;
         break;
       }
@@ -389,7 +420,8 @@ int getpart(char **outbuf, size_t *outlen,
       end = ptr;
       while(*end && ('>' != *end))
         end++;
-      if((len.sig = end - ptr) > MAX_TAG_LEN) {
+      len.sig = end - ptr;
+      if(len.sig > MAX_TAG_LEN) {
         error = GPE_NO_BUFFER_SPACE;
         break;
       }
@@ -448,4 +480,3 @@ int getpart(char **outbuf, size_t *outlen,
 
   return error;
 }
-

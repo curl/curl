@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -42,7 +42,7 @@ and when to ask libcurl to get/send data.
 complicated for the application.
 
 3. Enable the application to wait for action on its own file descriptors and
-curl's file descriptors simultaneous easily.
+curl's file descriptors simultaneously.
 
 4. Enable event-based handling and scaling transfers up to and beyond
 thousands of parallel connections.
@@ -85,20 +85,19 @@ returns back to the calling application.
 
 Your application extracts info from libcurl about when it would like to get
 invoked to transfer data or do other work. The most convenient way is to use
-\fIcurl_multi_wait(3)\fP that will help you wait until the application should
+\fIcurl_multi_poll(3)\fP that will help you wait until the application should
 call libcurl again. The older API to accomplish the same thing is
 \fIcurl_multi_fdset(3)\fP that extracts fd_sets from libcurl to use in
 select() or poll() calls in order to get to know when the transfers in the
 multi stack might need attention. Both these APIs allow for your program to
-wait for input on your own private file descriptors at the same time
+wait for input on your own private file descriptors at the same time.
 \fIcurl_multi_timeout(3)\fP also helps you with providing a suitable timeout
 period for your select() calls.
 
 \fIcurl_multi_perform(3)\fP stores the number of still running transfers in
 one of its input arguments, and by reading that you can figure out when all
 the transfers in the multi handles are done. 'done' does not mean
-successful. One or more of the transfers may have failed. Tracking when this
-number changes, you know when one or more transfers are done.
+successful. One or more of the transfers may have failed. 
 
 To get information about completed transfers, to figure out success or not and
 similar, \fIcurl_multi_info_read(3)\fP should be called. It can return a
@@ -132,24 +131,24 @@ using large numbers of simultaneous connections.
 
 When using this API, you add easy handles to the multi handle just as with the
 normal multi interface. Then you also set two callbacks with the
-CURLMOPT_SOCKETFUNCTION and CURLMOPT_TIMERFUNCTION options to
-\fIcurl_multi_setopt(3)\fP. They are two callback functions that libcurl will
-call with information about what sockets to wait for, and for what activity,
-and what the current timeout time is - if that expires libcurl should be
-notified.
+\fICURLMOPT_SOCKETFUNCTION(3)\fP and \fICURLMOPT_TIMERFUNCTION(3)\fP options
+to \fIcurl_multi_setopt(3)\fP. They are two callback functions that libcurl
+will call with information about what sockets to wait for, and for what
+activity, and what the current timeout time is - if that expires libcurl
+should be notified.
 
 The multi_socket API is designed to inform your application about which
 sockets libcurl is currently using and for what activities (read and/or write)
 on those sockets your application is expected to wait for.
 
 Your application must make sure to receive all sockets informed about in the
-CURLMOPT_SOCKETFUNCTION callback and make sure it reacts on the given activity
-on them. When a socket has the given activity, you call
+\fICURLMOPT_SOCKETFUNCTION(3)\fP callback and make sure it reacts on the given
+activity on them. When a socket has the given activity, you call
 \fIcurl_multi_socket_action(3)\fP specifying which socket and action there
 are.
 
-The CURLMOPT_TIMERFUNCTION callback is called to set a timeout. When that
-timeout expires, your application should call the
+The \fICURLMOPT_TIMERFUNCTION(3)\fP callback is called to set a timeout. When
+that timeout expires, your application should call the
 \fIcurl_multi_socket_action(3)\fP function saying it was due to a timeout.
 
 This API is typically used with an event-driven underlying functionality (like
@@ -173,8 +172,6 @@ the future, you should be aware of the following current restrictions:
 
 .nf
  - Name resolves unless the c-ares or threaded-resolver backends are used
- - NSS SSL connections
- - HTTP proxy CONNECT operations
  - SOCKS proxy handshakes
  - file:// transfers
  - TELNET transfers

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -56,7 +56,6 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
     /* Ask for filetime */
     curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
-    /* No header output: TODO 14.1 http-style HEAD output for ftp */
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, throw_away);
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
     /* Switch on full protocol/debug output */
@@ -65,7 +64,7 @@ int main(void)
     res = curl_easy_perform(curl);
 
     if(CURLE_OK == res) {
-      /* https://curl.haxx.se/libcurl/c/curl_easy_getinfo.html */
+      /* https://curl.se/libcurl/c/curl_easy_getinfo.html */
       res = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
       if((CURLE_OK == res) && (filetime >= 0)) {
         time_t file_time = (time_t)filetime;

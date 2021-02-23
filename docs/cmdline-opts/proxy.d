@@ -2,14 +2,20 @@ Long: proxy
 Short: x
 Arg: [protocol://]host[:port]
 Help: Use this proxy
+Category: proxy
 ---
 Use the specified proxy.
 
-The proxy string can be specified with a protocol:// prefix to specify
-alternative proxy protocols. Use socks4://, socks4a://, socks5:// or
-socks5h:// to request the specific SOCKS version to be used. No protocol
-specified, http:// and all others will be treated as HTTP proxies. (The
-protocol support was added in curl 7.21.7)
+The proxy string can be specified with a protocol:// prefix. No protocol
+specified or http:// will be treated as HTTP proxy. Use socks4://, socks4a://,
+socks5:// or socks5h:// to request a specific SOCKS version to be used.
+(The protocol support was added in curl 7.21.7)
+
+HTTPS proxy support via https:// protocol prefix was added in 7.52.0 for
+OpenSSL, GnuTLS and NSS.
+
+Unrecognized and unsupported proxy protocols cause an error since 7.52.0.
+Prior versions may ignore the protocol and use http:// instead.
 
 If the port number is not specified in the proxy string, it is assumed to be
 1080.

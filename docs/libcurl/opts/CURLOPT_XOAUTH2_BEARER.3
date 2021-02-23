@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,18 +28,29 @@ CURLOPT_XOAUTH2_BEARER \- specify OAuth 2.0 access token
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_XOAUTH2_BEARER, char *token);
 .SH DESCRIPTION
-Pass a char * as parameter, which should point to the zero terminated OAuth
-2.0 Bearer Access Token for use with IMAP, POP3 and SMTP servers that support
-the OAuth 2.0 Authorization Framework.
+Pass a char * as parameter, which should point to the null-terminated OAuth
+2.0 Bearer Access Token for use with HTTP, IMAP, POP3 and SMTP servers
+that support the OAuth 2.0 Authorization Framework.
 
-Note: The user name used to generate the Bearer Token should be supplied via
-the \fICURLOPT_USERNAME(3)\fP option.
+Note: For IMAP, POP3 and SMTP, the user name used to generate the Bearer Token
+should be supplied via the \fICURLOPT_USERNAME(3)\fP option.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
 IMAP, POP3 and SMTP
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "pop3://example.com/");
+  curl_easy_setopt(curl, CURLOPT_XOAUTH2_BEARER, "1ab9cb22ba269a7");
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.33.0
 .SH RETURN VALUE

@@ -1,0 +1,137 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH libcurl 3 "10 Sep 2018" "libcurl" "libcurl url interface"
+.SH NAME
+libcurl-url \- URL interface overview
+.SH DESCRIPTION
+The URL interface provides a set of functions for parsing and generating URLs.
+.SH INCLUDE
+You still only include <curl/curl.h> in your code. Note that the URL API was
+introduced in 7.62.0.
+.SH CREATE
+Create a handle that holds URL info and resources with \fIcurl_url(3)\fP:
+
+  CURLU *h = curl_url();
+.SH CLEANUP
+When done with it, clean it up with \fIcurl_url_cleanup(3)\fP:
+
+  curl_url_cleanup(h);
+.SH DUPLICATE
+When you need a copy of a handle, just duplicate it with \fIcurl_url_dup(3)\fP:
+
+  CURLU *nh = curl_url_dup(h);
+.SH PARSING
+By "setting" a URL to the handle with \fIcurl_url_set(3)\fP, the URL is parsed
+and stored in the handle. If the URL is not syntactically correct it will
+return an error instead.
+
+.nf
+  rc = curl_url_set(h, CURLUPART_URL,
+                    "https://example.com:449/foo/bar?name=moo", 0);
+.fi
+
+The zero in the fourth argument is a bitmask for changing specific features.
+
+If successful, this stores the URL in its individual parts within the handle.
+.SH REDIRECT
+When a handle already contains info about a URL, setting a relative URL will
+make it "redirect" to adapt to it.
+
+  rc = curl_url_set(h, CURLUPART_URL, "../test?another", 0);
+.SH "GET URL"
+The `CURLU` handle represents a URL and you can easily extract that with
+\fIcurl_url_get(3)\fP:
+
+  char *url;
+  rc = curl_url_get(h, CURLUPART_URL, &url, 0);
+  curl_free(url);
+
+The zero in the fourth argument is a bitmask for changing specific features.
+.SH "GET PARTS"
+When a URL has been parsed or parts have been set, you can extract those
+pieces from the handle at any time.
+
+.nf
+  rc = curl_url_get(h, CURLUPART_HOST, &host, 0);
+  rc = curl_url_get(h, CURLUPART_SCHEME, &scheme, 0);
+  rc = curl_url_get(h, CURLUPART_USER, &user, 0);
+  rc = curl_url_get(h, CURLUPART_PASSWORD, &password, 0);
+  rc = curl_url_get(h, CURLUPART_PORT, &port, 0);
+  rc = curl_url_get(h, CURLUPART_PATH, &path, 0);
+  rc = curl_url_get(h, CURLUPART_QUERY, &query, 0);
+  rc = curl_url_get(h, CURLUPART_FRAGMENT, &fragment, 0);
+.fi
+
+Extracted parts are not URL decoded unless the user also asks for it with the
+CURLU_URLDECODE flag set in the fourth bitmask argument.
+
+Remember to free the returned string with \fIcurl_free(3)\fP when you're done
+with it!
+.SH "SET PARTS"
+A user set individual URL parts, either after having parsed a full URL or
+instead of parsing such.
+
+.nf
+  rc = curl_url_set(urlp, CURLUPART_HOST, "www.example.com", 0);
+  rc = curl_url_set(urlp, CURLUPART_SCHEME, "https", 0);
+  rc = curl_url_set(urlp, CURLUPART_USER, "john", 0);
+  rc = curl_url_set(urlp, CURLUPART_PASSWORD, "doe", 0);
+  rc = curl_url_set(urlp, CURLUPART_PORT, "443", 0);
+  rc = curl_url_set(urlp, CURLUPART_PATH, "/index.html", 0);
+  rc = curl_url_set(urlp, CURLUPART_QUERY, "name=john", 0);
+  rc = curl_url_set(urlp, CURLUPART_FRAGMENT, "anchor", 0);
+.fi
+
+Set parts are not URL encoded unless the user asks for it with the
+`CURLU_URLENCODE` flag.
+.SH "APPENDQUERY"
+An application can append a string to the right end of the query part with the
+`CURLU_APPENDQUERY` flag to \fIcurl_url_set(3)\fP.
+
+Imagine a handle that holds the URL `https://example.com/?shoes=2`. An
+application can then add the string `hat=1` to the query part like this:
+
+.nf
+  rc = curl_url_set(urlp, CURLUPART_QUERY, "hat=1", CURLU_APPENDQUERY);
+.fi
+
+It will even notice the lack of an ampersand (`&`) separator so it will inject
+one too, and the handle's full URL will then equal
+`https://example.com/?shoes=2&hat=1`.
+
+The appended string can of course also get URL encoded on add, and if asked to
+URL encode, the encoding process will skip the '=' character. For example,
+append `candy=N&N` to what we already have, and URL encode it to deal with the
+ampersand in the data:
+
+.nf
+  rc = curl_url_set(urlp, CURLUPART_QUERY, "candy=N&N",
+                    CURLU_APPENDQUERY | CURLU_URLENCODE);
+.fi
+
+Now the URL looks like
+.nf
+  https://example.com/?shoes=2&hat=1&candy=N%26N`
+.fi
+.SH "SEE ALSO"
+.BR curl_url "(3), " curl_url_cleanup "(3), " curl_url_get "(3), "
+.BR curl_url_dup "(3), " curl_url_set "(3), " CURLOPT_URL "(3), "

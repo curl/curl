@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -39,17 +39,20 @@ shown above.
 This function gets called by libcurl as soon as it has received header
 data. The header callback will be called once for each header and only
 complete header lines are passed on to the callback. Parsing headers is very
-easy using this. The size of the data pointed to by \fIbuffer\fP is \fIsize\fP
-multiplied with \fInmemb\fP. Do not assume that the header line is zero
-terminated! The pointer named \fIuserdata\fP is the one you set with the
-\fICURLOPT_HEADERDATA(3)\fP option. This callback function must return the
-number of bytes actually taken care of. If that amount differs from the amount
-passed in to your function, it'll signal an error to the library. This will
-cause the transfer to get aborted and the libcurl function in progress will
-return \fICURLE_WRITE_ERROR\fP.
+easy using this. \fIbuffer\fP points to the delivered data, and the size of
+that data is \fInitems\fP; \fIsize\fP is always 1. Do not assume that the
+header line is null-terminated!
+
+The pointer named \fIuserdata\fP is the one you set with the
+\fICURLOPT_HEADERDATA(3)\fP option.
+
+This callback function must return the number of bytes actually taken care of.
+If that amount differs from the amount passed in to your function, it'll signal
+an error to the library. This will cause the transfer to get aborted and the
+libcurl function in progress will return \fICURLE_WRITE_ERROR\fP.
 
 A complete HTTP header that is passed to this function can be up to
-\fICURL_MAX_HTTP_HEADER\fP (100K) bytes.
+\fICURL_MAX_HTTP_HEADER\fP (100K) bytes and includes the final line terminator.
 
 If this option is not set, or if it is set to NULL, but
 \fICURLOPT_HEADERDATA(3)\fP is set to anything but NULL, the function used to
@@ -64,8 +67,11 @@ negotiation. If you need to operate on only the headers from the final
 response, you will need to collect headers in the callback yourself and use
 HTTP status lines, for example, to delimit response boundaries.
 
+For an HTTP transfer, the status line and the blank line preceding the response
+body are both included as headers and passed to this function.
+
 When a server sends a chunked encoded transfer, it may contain a trailer. That
-trailer is identical to a HTTP header and if such a trailer is received it is
+trailer is identical to an HTTP header and if such a trailer is received it is
 passed to the application using this callback as well. There are several ways
 to detect it being a trailer and not an ordinary header: 1) it comes after the
 response-body. 2) it comes after the final header line (CR LF) 3) a Trailer:
@@ -74,6 +80,11 @@ the trailer.
 
 For non-HTTP protocols like FTP, POP3, IMAP and SMTP this function will get
 called with the server responses to the commands that libcurl sends.
+.SH LIMITATIONS
+libcurl does not unfold HTTP "folded headers" (deprecated since RFC 7230). A
+folded header is a header that continues on a subsequent line and starts with
+a whitespace. Such folds will be passed to the header callback as a separate
+one, although strictly it is just a continuation of the previous line.
 .SH DEFAULT
 Nothing.
 .SH PROTOCOLS
@@ -91,7 +102,7 @@ static size_t header_callback(char *buffer, size_t size,
 
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
 

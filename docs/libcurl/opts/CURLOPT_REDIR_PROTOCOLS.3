@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -37,10 +37,11 @@ redirections.
 Protocols denied by \fICURLOPT_PROTOCOLS(3)\fP are not overridden by this
 option.
 
-By default libcurl will allow all protocols on redirect except several disabled
-for security reasons: Since 7.19.4 FILE and SCP are disabled, and since 7.40.0
-SMB and SMBS are also disabled. \fICURLPROTO_ALL\fP enables all protocols on
-redirect, including those disabled for security.
+By default libcurl will allow HTTP, HTTPS, FTP and FTPS on redirect (7.65.2).
+Older versions of libcurl allowed all protocols on redirect except several
+disabled for security reasons: Since 7.19.4 FILE and SCP are disabled, and
+since 7.40.0 SMB and SMBS are also disabled. \fICURLPROTO_ALL\fP enables all
+protocols on redirect, including those disabled for security.
 
 These are the available protocol defines:
 .nf
@@ -74,7 +75,10 @@ CURLPROTO_TELNET
 CURLPROTO_TFTP
 .fi
 .SH DEFAULT
-All protocols except for FILE, SCP and since 7.40.0 SMB and SMBS.
+HTTP, HTTPS, FTP and FTPS (Since 7.65.2).
+
+Older versions defaulted to all protocols except FILE, SCP and since 7.40.0
+SMB and SMBS.
 .SH PROTOCOLS
 All
 .SH EXAMPLE

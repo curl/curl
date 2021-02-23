@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -64,7 +64,7 @@ bool Curl_auth_is_spnego_supported(void)
  *
  * data        [in]     - The session handle.
  * userp       [in]     - The user name in the format User or Domain\User.
- * passdwp     [in]     - The user's password.
+ * passwdp     [in]     - The user's password.
  * service     [in]     - The service type such as http, smtp, pop or imap.
  * host        [in]     - The host name.
  * chlg64      [in]     - The optional base64 encoded challenge message.
@@ -97,7 +97,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     /* We finished successfully our part of authentication, but server
      * rejected it (since we're again here). Exit with an error since we
      * can't invent anything better */
-    Curl_auth_spnego_cleanup(nego);
+    Curl_auth_cleanup_spnego(nego);
     return CURLE_LOGIN_DENIED;
   }
 
@@ -121,7 +121,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
       free(spn);
 
-      return CURLE_OUT_OF_MEMORY;
+      return CURLE_AUTH_ERROR;
     }
 
     free(spn);
@@ -170,15 +170,19 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     Curl_gss_log_error(data, "gss_init_sec_context() failed: ",
                        major_status, minor_status);
 
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_AUTH_ERROR;
   }
 
   if(!output_token.value || !output_token.length) {
     if(output_token.value)
       gss_release_buffer(&unused_status, &output_token);
 
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_AUTH_ERROR;
   }
+
+  /* Free previous token */
+  if(nego->output_token.length && nego->output_token.value)
+    gss_release_buffer(&unused_status, &nego->output_token);
 
   nego->output_token = output_token;
 
@@ -234,7 +238,7 @@ CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
 }
 
 /*
- * Curl_auth_spnego_cleanup()
+ * Curl_auth_cleanup_spnego()
  *
  * This is used to clean up the SPNEGO (Negotiate) specific data.
  *
@@ -243,7 +247,7 @@ CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
  * nego     [in/out] - The Negotiate data struct being cleaned up.
  *
  */
-void Curl_auth_spnego_cleanup(struct negotiatedata *nego)
+void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
 {
   OM_uint32 minor_status;
 
@@ -269,6 +273,10 @@ void Curl_auth_spnego_cleanup(struct negotiatedata *nego)
 
   /* Reset any variables */
   nego->status = 0;
+  nego->noauthpersist = FALSE;
+  nego->havenoauthpersist = FALSE;
+  nego->havenegdata = FALSE;
+  nego->havemultiplerequests = FALSE;
 }
 
 #endif /* HAVE_GSSAPI && USE_SPNEGO */

@@ -1,3 +1,24 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
 include(CheckCSourceCompiles)
 # The begin of the sources (macros and includes)
 set(_source_epilogue "#undef inline")
@@ -5,8 +26,8 @@ set(_source_epilogue "#undef inline")
 macro(add_header_include check header)
   if(${check})
     set(_source_epilogue "${_source_epilogue}\n#include <${header}>")
-  endif(${check})
-endmacro(add_header_include)
+  endif()
+endmacro()
 
 set(signature_call_conv)
 if(HAVE_WINDOWS_H)
@@ -19,10 +40,12 @@ if(HAVE_WINDOWS_H)
   if(HAVE_LIBWS2_32)
     set(CMAKE_REQUIRED_LIBRARIES ws2_32)
   endif()
-else(HAVE_WINDOWS_H)
+else()
   add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
   add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
-endif(HAVE_WINDOWS_H)
+endif()
+
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 check_c_source_compiles("${_source_epilogue}
 int main(void) {
@@ -30,16 +53,19 @@ int main(void) {
     return 0;
 }" curl_cv_recv)
 if(curl_cv_recv)
-  if(NOT DEFINED curl_cv_func_recv_args OR "${curl_cv_func_recv_args}" STREQUAL "unknown")
+  if(NOT DEFINED curl_cv_func_recv_args OR curl_cv_func_recv_args STREQUAL "unknown")
     foreach(recv_retv "int" "ssize_t" )
-      foreach(recv_arg1 "int" "ssize_t" "SOCKET")
-        foreach(recv_arg2 "void *" "char *")
-          foreach(recv_arg3 "size_t" "int" "socklen_t" "unsigned int")
+      foreach(recv_arg1 "SOCKET" "int" )
+        foreach(recv_arg2 "char *" "void *" )
+          foreach(recv_arg3 "int" "size_t" "socklen_t" "unsigned int")
             foreach(recv_arg4 "int" "unsigned int")
               if(NOT curl_cv_func_recv_done)
                 unset(curl_cv_func_recv_test CACHE)
                 check_c_source_compiles("
                   ${_source_epilogue}
+                  #ifdef WINSOCK_API_LINKAGE
+                  WINSOCK_API_LINKAGE
+                  #endif
                   extern ${recv_retv} ${signature_call_conv}
                   recv(${recv_arg1}, ${recv_arg2}, ${recv_arg3}, ${recv_arg4});
                   int main(void) {
@@ -64,13 +90,13 @@ if(curl_cv_recv)
                   set(RECV_TYPE_RETV "${recv_retv}")
                   set(HAVE_RECV 1)
                   set(curl_cv_func_recv_done 1)
-                endif(curl_cv_func_recv_test)
-              endif(NOT curl_cv_func_recv_done)
-            endforeach(recv_arg4)
-          endforeach(recv_arg3)
-        endforeach(recv_arg2)
-      endforeach(recv_arg1)
-    endforeach(recv_retv)
+                endif()
+              endif()
+            endforeach()
+          endforeach()
+        endforeach()
+      endforeach()
+    endforeach()
   else()
     string(REGEX REPLACE "^([^,]*),[^,]*,[^,]*,[^,]*,[^,]*$" "\\1" RECV_TYPE_ARG1 "${curl_cv_func_recv_args}")
     string(REGEX REPLACE "^[^,]*,([^,]*),[^,]*,[^,]*,[^,]*$" "\\1" RECV_TYPE_ARG2 "${curl_cv_func_recv_args}")
@@ -79,12 +105,12 @@ if(curl_cv_recv)
     string(REGEX REPLACE "^[^,]*,[^,]*,[^,]*,[^,]*,([^,]*)$" "\\1" RECV_TYPE_RETV "${curl_cv_func_recv_args}")
   endif()
 
-  if("${curl_cv_func_recv_args}" STREQUAL "unknown")
+  if(curl_cv_func_recv_args STREQUAL "unknown")
     message(FATAL_ERROR "Cannot find proper types to use for recv args")
-  endif("${curl_cv_func_recv_args}" STREQUAL "unknown")
-else(curl_cv_recv)
+  endif()
+else()
   message(FATAL_ERROR "Unable to link function recv")
-endif(curl_cv_recv)
+endif()
 set(curl_cv_func_recv_args "${curl_cv_func_recv_args}" CACHE INTERNAL "Arguments for recv")
 set(HAVE_RECV 1)
 
@@ -96,14 +122,17 @@ int main(void) {
 if(curl_cv_send)
   if(NOT DEFINED curl_cv_func_send_args OR "${curl_cv_func_send_args}" STREQUAL "unknown")
     foreach(send_retv "int" "ssize_t" )
-      foreach(send_arg1 "int" "ssize_t" "SOCKET")
-        foreach(send_arg2 "const void *" "void *" "char *" "const char *")
-          foreach(send_arg3 "size_t" "int" "socklen_t" "unsigned int")
+      foreach(send_arg1 "SOCKET" "int" "ssize_t" )
+        foreach(send_arg2 "const char *" "const void *" "void *" "char *")
+          foreach(send_arg3 "int" "size_t" "socklen_t" "unsigned int")
             foreach(send_arg4 "int" "unsigned int")
               if(NOT curl_cv_func_send_done)
                 unset(curl_cv_func_send_test CACHE)
                 check_c_source_compiles("
                   ${_source_epilogue}
+                  #ifdef WINSOCK_API_LINKAGE
+                  WINSOCK_API_LINKAGE
+                  #endif
                   extern ${send_retv} ${signature_call_conv}
                   send(${send_arg1}, ${send_arg2}, ${send_arg3}, ${send_arg4});
                   int main(void) {
@@ -130,13 +159,13 @@ if(curl_cv_send)
                   set(SEND_TYPE_RETV "${send_retv}")
                   set(HAVE_SEND 1)
                   set(curl_cv_func_send_done 1)
-                endif(curl_cv_func_send_test)
-              endif(NOT curl_cv_func_send_done)
-            endforeach(send_arg4)
-          endforeach(send_arg3)
-        endforeach(send_arg2)
-      endforeach(send_arg1)
-    endforeach(send_retv)
+                endif()
+              endif()
+            endforeach()
+          endforeach()
+        endforeach()
+      endforeach()
+    endforeach()
   else()
     string(REGEX REPLACE "^([^,]*),[^,]*,[^,]*,[^,]*,[^,]*,[^,]*$" "\\1" SEND_TYPE_ARG1 "${curl_cv_func_send_args}")
     string(REGEX REPLACE "^[^,]*,([^,]*),[^,]*,[^,]*,[^,]*,[^,]*$" "\\1" SEND_TYPE_ARG2 "${curl_cv_func_send_args}")
@@ -148,11 +177,11 @@ if(curl_cv_send)
 
   if("${curl_cv_func_send_args}" STREQUAL "unknown")
     message(FATAL_ERROR "Cannot find proper types to use for send args")
-  endif("${curl_cv_func_send_args}" STREQUAL "unknown")
+  endif()
   set(SEND_QUAL_ARG2 "const")
-else(curl_cv_send)
+else()
   message(FATAL_ERROR "Unable to link function send")
-endif(curl_cv_send)
+endif()
 set(curl_cv_func_send_args "${curl_cv_func_send_args}" CACHE INTERNAL "Arguments for send")
 set(HAVE_SEND 1)
 
@@ -177,29 +206,12 @@ int main(void) {
   return 0;
 }" HAVE_STRUCT_TIMEVAL)
 
-
-include(CheckCSourceRuns)
-# See HAVE_POLL in CMakeLists.txt for why poll is disabled on macOS
-if(NOT APPLE)
-  set(CMAKE_REQUIRED_FLAGS)
-  if(HAVE_SYS_POLL_H)
-    set(CMAKE_REQUIRED_FLAGS "-DHAVE_SYS_POLL_H")
-  endif(HAVE_SYS_POLL_H)
-  check_c_source_runs("
-    #ifdef HAVE_SYS_POLL_H
-    #  include <sys/poll.h>
-    #endif
-    int main(void) {
-      return poll((void *)0, 0, 10 /*ms*/);
-    }" HAVE_POLL_FINE)
-endif()
-
 set(HAVE_SIG_ATOMIC_T 1)
 set(CMAKE_REQUIRED_FLAGS)
 if(HAVE_SIGNAL_H)
   set(CMAKE_REQUIRED_FLAGS "-DHAVE_SIGNAL_H")
   set(CMAKE_EXTRA_INCLUDE_FILES "signal.h")
-endif(HAVE_SIGNAL_H)
+endif()
 check_type_size("sig_atomic_t" SIZEOF_SIG_ATOMIC_T)
 if(HAVE_SIZEOF_SIG_ATOMIC_T)
   check_c_source_compiles("
@@ -213,8 +225,8 @@ if(HAVE_SIZEOF_SIG_ATOMIC_T)
     }" HAVE_SIG_ATOMIC_T_NOT_VOLATILE)
   if(NOT HAVE_SIG_ATOMIC_T_NOT_VOLATILE)
     set(HAVE_SIG_ATOMIC_T_VOLATILE 1)
-  endif(NOT HAVE_SIG_ATOMIC_T_NOT_VOLATILE)
-endif(HAVE_SIZEOF_SIG_ATOMIC_T)
+  endif()
+endif()
 
 if(HAVE_WINDOWS_H)
   set(CMAKE_EXTRA_INCLUDE_FILES winsock2.h)
@@ -222,11 +234,58 @@ else()
   set(CMAKE_EXTRA_INCLUDE_FILES)
   if(HAVE_SYS_SOCKET_H)
     set(CMAKE_EXTRA_INCLUDE_FILES sys/socket.h)
-  endif(HAVE_SYS_SOCKET_H)
+  endif()
 endif()
 
 check_type_size("struct sockaddr_storage" SIZEOF_STRUCT_SOCKADDR_STORAGE)
 if(HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE)
   set(HAVE_STRUCT_SOCKADDR_STORAGE 1)
-endif(HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE)
+endif()
+
+unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
+
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+  # if not cross-compilation...
+  include(CheckCSourceRuns)
+  set(CMAKE_REQUIRED_FLAGS "")
+  if(HAVE_SYS_POLL_H)
+    set(CMAKE_REQUIRED_FLAGS "-DHAVE_SYS_POLL_H")
+  elseif(HAVE_POLL_H)
+    set(CMAKE_REQUIRED_FLAGS "-DHAVE_POLL_H")
+  endif()
+  check_c_source_runs("
+    #include <stdlib.h>
+    #include <sys/time.h>
+
+    #ifdef HAVE_SYS_POLL_H
+    #  include <sys/poll.h>
+    #elif  HAVE_POLL_H
+    #  include <poll.h>
+    #endif
+
+    int main(void)
+    {
+        if(0 != poll(0, 0, 10)) {
+          return 1; /* fail */
+        }
+        else {
+          /* detect the 10.12 poll() breakage */
+          struct timeval before, after;
+          int rc;
+          size_t us;
+
+          gettimeofday(&before, NULL);
+          rc = poll(NULL, 0, 500);
+          gettimeofday(&after, NULL);
+
+          us = (after.tv_sec - before.tv_sec) * 1000000 +
+            (after.tv_usec - before.tv_usec);
+
+          if(us < 400000) {
+            return 1;
+          }
+        }
+        return 0;
+    }" HAVE_POLL_FINE)
+endif()
 

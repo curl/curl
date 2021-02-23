@@ -1,11 +1,17 @@
 Gisle Vanem made curl build fine on DOS (and MingW) with djgpp, OpenSSL and his
 Watt-32 stack.
 
-'make djgpp' in the root curl dir should build it fine.
+'make -f Makefile.dist djgpp' in the root curl dir should build it fine.
+Or enter 'lib' and do a 'make -f Makefile.dj clean all' to first delete
+'lib/curl_config.h' which is possibly from a previous incompatible Windows-build.
 
 Note 1: djgpp 2.04 beta has a sscanf() bug so the URL parsing isn't
-        done proberly. Use djgpp 2.03 until they fix it.
+        done properly. Use djgpp 2.03 until they fix it.
 
 Note 2: Compile Watt-32 (and OpenSSL) with the same version of djgpp.
         Otherwise things go wrong because things like FS-extensions and
         errnos have been changed between releases.
+        
+Note 3: Several 'USE_x' variables in 'common.dj' are on the 'USE_x ?= 0'
+        form (conditional variable assignment). So one can build like this:
+          c:\curl\lib> make -f makefile.dj USE_OPENSSL=1 USE_ZLIB=1 clean all

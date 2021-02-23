@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,6 +19,7 @@
  * KIND, either express or implied.
  *
  * RFC2831 DIGEST-MD5 authentication
+ * RFC7616 DIGEST-SHA256, DIGEST-SHA512-256 authentication
  *
  ***************************************************************************/
 
@@ -34,6 +35,7 @@
 #include "curl_base64.h"
 #include "curl_hmac.h"
 #include "curl_md5.h"
+#include "curl_sha256.h"
 #include "vtls/vtls.h"
 #include "warnless.h"
 #include "strtok.h"
@@ -59,12 +61,14 @@
    It converts digest text to ASCII so the MD5 will be correct for
    what ultimately goes over the network.
 */
-#define CURL_OUTPUT_DIGEST_CONV(a, b) \
-  result = Curl_convert_to_network(a, (char *)b, strlen((const char *)b)); \
-  if(result) { \
-    free(b); \
-    return result; \
-  }
+#define CURL_OUTPUT_DIGEST_CONV(a, b)                  \
+  do {                                                 \
+    result = Curl_convert_to_network(a, b, strlen(b)); \
+    if(result) {                                       \
+      free(b);                                         \
+      return result;                                   \
+    }                                                  \
+  } while(0)
 #endif /* !USE_WINDOWS_SSPI */
 
 bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
@@ -141,13 +145,22 @@ static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
 {
   int i;
   for(i = 0; i < 16; i++)
-    snprintf((char *) &dest[i * 2], 3, "%02x", source[i]);
+    msnprintf((char *) &dest[i * 2], 3, "%02x", source[i]);
+}
+
+/* Convert sha256 chunk to RFC7616 -suitable ascii string*/
+static void auth_digest_sha256_to_ascii(unsigned char *source, /* 32 bytes */
+                                     unsigned char *dest) /* 65 bytes */
+{
+  int i;
+  for(i = 0; i < 32; i++)
+    msnprintf((char *) &dest[i * 2], 3, "%02x", source[i]);
 }
 
 /* Perform quoted-string escaping as described in RFC2616 and its errata */
 static char *auth_digest_string_quoted(const char *source)
 {
-  char *dest, *d;
+  char *dest;
   const char *s = source;
   size_t n = 1; /* null terminator */
 
@@ -162,8 +175,8 @@ static char *auth_digest_string_quoted(const char *source)
 
   dest = malloc(n);
   if(dest) {
+    char *d = dest;
     s = source;
-    d = dest;
     while(*s) {
       if(*s == '"' || *s == '\\') {
         *d++ = '\\';
@@ -205,7 +218,7 @@ static CURLcode auth_digest_get_qop_values(const char *options, int *value)
 {
   char *tmp;
   char *token;
-  char *tok_buf;
+  char *tok_buf = NULL;
 
   /* Initialise the output */
   *value = 0;
@@ -237,7 +250,7 @@ static CURLcode auth_digest_get_qop_values(const char *options, int *value)
  * auth_decode_digest_md5_message()
  *
  * This is used internally to decode an already encoded DIGEST-MD5 challenge
- * message into the seperate attributes.
+ * message into the separate attributes.
  *
  * Parameters:
  *
@@ -331,7 +344,7 @@ bool Curl_auth_is_digest_supported(void)
  * data    [in]     - The session handle.
  * chlg64  [in]     - The base64 encoded challenge message.
  * userp   [in]     - The user name.
- * passdwp [in]     - The user's password.
+ * passwdp [in]     - The user's password.
  * service [in]     - The service type such as http, smtp, pop or imap.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
@@ -346,9 +359,8 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const char *service,
                                              char **outptr, size_t *outlen)
 {
-  CURLcode result = CURLE_OK;
   size_t i;
-  MD5_context *ctxt;
+  struct MD5_context *ctxt;
   char *response = NULL;
   unsigned char digest[MD5_DIGEST_LEN];
   char HA1_hex[2 * MD5_DIGEST_LEN + 1];
@@ -360,17 +372,18 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   char qop_options[64];
   int qop_values;
   char cnonce[33];
-  unsigned int entropy[4];
   char nonceCount[] = "00000001";
   char method[]     = "AUTHENTICATE";
   char qop[]        = DIGEST_QOP_VALUE_STRING_AUTH;
   char *spn         = NULL;
 
-  /* Decode the challange message */
-  result = auth_decode_digest_md5_message(chlg64, nonce, sizeof(nonce),
-                                          realm, sizeof(realm),
-                                          algorithm, sizeof(algorithm),
-                                          qop_options, sizeof(qop_options));
+  /* Decode the challenge message */
+  CURLcode result = auth_decode_digest_md5_message(chlg64, nonce,
+                                                   sizeof(nonce), realm,
+                                                   sizeof(realm), algorithm,
+                                                   sizeof(algorithm),
+                                                   qop_options,
+                                                   sizeof(qop_options));
   if(result)
     return result;
 
@@ -387,14 +400,10 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   if(!(qop_values & DIGEST_QOP_VALUE_AUTH))
     return CURLE_BAD_CONTENT_ENCODING;
 
-  /* Generate 16 bytes of random data */
-  result = Curl_rand(data, &entropy[0], 4);
+  /* Generate 32 random hex chars, 32 bytes + 1 zero termination */
+  result = Curl_rand_hex(data, (unsigned char *)cnonce, sizeof(cnonce));
   if(result)
     return result;
-
-  /* Convert the random data into a 32 byte hex string */
-  snprintf(cnonce, sizeof(cnonce), "%08x%08x%08x%08x",
-           entropy[0], entropy[1], entropy[2], entropy[3]);
 
   /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
@@ -426,7 +435,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 
   /* Convert calculated 16 octet hex into 32 bytes string */
   for(i = 0; i < MD5_DIGEST_LEN; i++)
-    snprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
+    msnprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Generate our SPN */
   spn = Curl_auth_build_spn(service, realm, NULL);
@@ -449,7 +458,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   Curl_MD5_final(ctxt, digest);
 
   for(i = 0; i < MD5_DIGEST_LEN; i++)
-    snprintf(&HA2_hex[2 * i], 3, "%02x", digest[i]);
+    msnprintf(&HA2_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Now calculate the response hash */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
@@ -479,7 +488,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   Curl_MD5_final(ctxt, digest);
 
   for(i = 0; i < MD5_DIGEST_LEN; i++)
-    snprintf(&resp_hash_hex[2 * i], 3, "%02x", digest[i]);
+    msnprintf(&resp_hash_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Generate the response */
   response = aprintf("username=\"%s\",realm=\"%s\",nonce=\"%s\","
@@ -502,7 +511,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 /*
  * Curl_auth_decode_digest_http_message()
  *
- * This is used to decode a HTTP DIGEST challenge message into the seperate
+ * This is used to decode a HTTP DIGEST challenge message into the separate
  * attributes.
  *
  * Parameters:
@@ -563,7 +572,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
           return CURLE_OUT_OF_MEMORY;
       }
       else if(strcasecompare(value, "qop")) {
-        char *tok_buf;
+        char *tok_buf = NULL;
         /* Tokenize the list and choose auth if possible, use a temporary
            clone of the buffer since strtok_r() ruins it */
         tmp = strdup(content);
@@ -607,8 +616,21 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
           digest->algo = CURLDIGESTALGO_MD5SESS;
         else if(strcasecompare(content, "MD5"))
           digest->algo = CURLDIGESTALGO_MD5;
+        else if(strcasecompare(content, "SHA-256"))
+          digest->algo = CURLDIGESTALGO_SHA256;
+        else if(strcasecompare(content, "SHA-256-SESS"))
+          digest->algo = CURLDIGESTALGO_SHA256SESS;
+        else if(strcasecompare(content, "SHA-512-256"))
+          digest->algo = CURLDIGESTALGO_SHA512_256;
+        else if(strcasecompare(content, "SHA-512-256-SESS"))
+          digest->algo = CURLDIGESTALGO_SHA512_256SESS;
         else
           return CURLE_BAD_CONTENT_ENCODING;
+      }
+      else if(strcasecompare(value, "userhash")) {
+        if(strcasecompare(content, "true")) {
+          digest->userhash = TRUE;
+        }
       }
       else {
         /* Unknown specifier, ignore it! */
@@ -640,7 +662,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 }
 
 /*
- * Curl_auth_create_digest_http_message()
+ * auth_create_digest_http_message()
  *
  * This is used to generate a HTTP DIGEST response message ready for sending
  * to the recipient.
@@ -649,7 +671,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
  *
  * data    [in]     - The session handle.
  * userp   [in]     - The user name.
- * passdwp [in]     - The user's password.
+ * passwdp [in]     - The user's password.
  * request [in]     - The HTTP request.
  * uripath [in]     - The path of the HTTP uri.
  * digest  [in/out] - The digest data struct being used and modified.
@@ -659,37 +681,40 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
-                                              const char *userp,
-                                              const char *passwdp,
-                                              const unsigned char *request,
-                                              const unsigned char *uripath,
-                                              struct digestdata *digest,
-                                              char **outptr, size_t *outlen)
+static CURLcode auth_create_digest_http_message(
+                  struct Curl_easy *data,
+                  const char *userp,
+                  const char *passwdp,
+                  const unsigned char *request,
+                  const unsigned char *uripath,
+                  struct digestdata *digest,
+                  char **outptr, size_t *outlen,
+                  void (*convert_to_ascii)(unsigned char *, unsigned char *),
+                  void (*hash)(unsigned char *, const unsigned char *,
+                               const size_t))
 {
   CURLcode result;
-  unsigned char md5buf[16]; /* 16 bytes/128 bits */
-  unsigned char request_digest[33];
-  unsigned char *md5this;
-  unsigned char ha1[33];    /* 32 digits and 1 zero byte */
-  unsigned char ha2[33];    /* 32 digits and 1 zero byte */
-  char cnoncebuf[33];
+  unsigned char hashbuf[32]; /* 32 bytes/256 bits */
+  unsigned char request_digest[65];
+  unsigned char ha1[65];    /* 64 digits and 1 zero byte */
+  unsigned char ha2[65];    /* 64 digits and 1 zero byte */
+  char userh[65];
   char *cnonce = NULL;
   size_t cnonce_sz = 0;
   char *userp_quoted;
   char *response = NULL;
+  char *hashthis = NULL;
   char *tmp = NULL;
 
   if(!digest->nc)
     digest->nc = 1;
 
   if(!digest->cnonce) {
-    unsigned int rnd[4];
-    result = Curl_rand(data, &rnd[0], 4);
+    char cnoncebuf[33];
+    result = Curl_rand_hex(data, (unsigned char *)cnoncebuf,
+                           sizeof(cnoncebuf));
     if(result)
       return result;
-    snprintf(cnoncebuf, sizeof(cnoncebuf), "%08x%08x%08x%08x",
-             rnd[0], rnd[1], rnd[2], rnd[3]);
 
     result = Curl_base64_encode(data, cnoncebuf, strlen(cnoncebuf),
                                 &cnonce, &cnonce_sz);
@@ -697,6 +722,17 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       return result;
 
     digest->cnonce = cnonce;
+  }
+
+  if(digest->userhash) {
+    hashthis = aprintf("%s:%s", userp, digest->realm);
+    if(!hashthis)
+      return CURLE_OUT_OF_MEMORY;
+
+    CURL_OUTPUT_DIGEST_CONV(data, hashthis);
+    hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
+    free(hashthis);
+    convert_to_ascii(hashbuf, (unsigned char *)userh);
   }
 
   /*
@@ -710,26 +746,28 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
            unq(nonce-value) ":" unq(cnonce-value)
   */
 
-  md5this = (unsigned char *)
-    aprintf("%s:%s:%s", userp, digest->realm, passwdp);
-  if(!md5this)
+  hashthis = aprintf("%s:%s:%s", digest->userhash ? userh : userp,
+                                 digest->realm, passwdp);
+  if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
-  CURL_OUTPUT_DIGEST_CONV(data, md5this); /* convert on non-ASCII machines */
-  Curl_md5it(md5buf, md5this);
-  free(md5this);
-  auth_digest_md5_to_ascii(md5buf, ha1);
+  CURL_OUTPUT_DIGEST_CONV(data, hashthis); /* convert on non-ASCII machines */
+  hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
+  free(hashthis);
+  convert_to_ascii(hashbuf, ha1);
 
-  if(digest->algo == CURLDIGESTALGO_MD5SESS) {
+  if(digest->algo == CURLDIGESTALGO_MD5SESS ||
+     digest->algo == CURLDIGESTALGO_SHA256SESS ||
+     digest->algo == CURLDIGESTALGO_SHA512_256SESS) {
     /* nonce and cnonce are OUTSIDE the hash */
     tmp = aprintf("%s:%s:%s", ha1, digest->nonce, digest->cnonce);
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
 
     CURL_OUTPUT_DIGEST_CONV(data, tmp); /* Convert on non-ASCII machines */
-    Curl_md5it(md5buf, (unsigned char *) tmp);
+    hash(hashbuf, (unsigned char *) tmp, strlen(tmp));
     free(tmp);
-    auth_digest_md5_to_ascii(md5buf, ha1);
+    convert_to_ascii(hashbuf, ha1);
   }
 
   /*
@@ -745,48 +783,46 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     5.1.1 of RFC 2616)
   */
 
-  md5this = (unsigned char *) aprintf("%s:%s", request, uripath);
+  hashthis = aprintf("%s:%s", request, uripath);
+  if(!hashthis)
+    return CURLE_OUT_OF_MEMORY;
 
   if(digest->qop && strcasecompare(digest->qop, "auth-int")) {
-    /* We don't support auth-int for PUT or POST at the moment.
-       TODO: replace md5 of empty string with entity-body for PUT/POST */
-    unsigned char *md5this2 = (unsigned char *)
-      aprintf("%s:%s", md5this, "d41d8cd98f00b204e9800998ecf8427e");
-    free(md5this);
-    md5this = md5this2;
+    /* We don't support auth-int for PUT or POST */
+    char hashed[65];
+    char *hashthis2;
+
+    hash(hashbuf, (const unsigned char *)"", 0);
+    convert_to_ascii(hashbuf, (unsigned char *)hashed);
+
+    hashthis2 = aprintf("%s:%s", hashthis, hashed);
+    free(hashthis);
+    hashthis = hashthis2;
   }
 
-  if(!md5this)
+  if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
-  CURL_OUTPUT_DIGEST_CONV(data, md5this); /* convert on non-ASCII machines */
-  Curl_md5it(md5buf, md5this);
-  free(md5this);
-  auth_digest_md5_to_ascii(md5buf, ha2);
+  CURL_OUTPUT_DIGEST_CONV(data, hashthis); /* convert on non-ASCII machines */
+  hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
+  free(hashthis);
+  convert_to_ascii(hashbuf, ha2);
 
   if(digest->qop) {
-    md5this = (unsigned char *) aprintf("%s:%s:%08x:%s:%s:%s",
-                                        ha1,
-                                        digest->nonce,
-                                        digest->nc,
-                                        digest->cnonce,
-                                        digest->qop,
-                                        ha2);
+    hashthis = aprintf("%s:%s:%08x:%s:%s:%s", ha1, digest->nonce, digest->nc,
+                       digest->cnonce, digest->qop, ha2);
   }
   else {
-    md5this = (unsigned char *) aprintf("%s:%s:%s",
-                                        ha1,
-                                        digest->nonce,
-                                        ha2);
+    hashthis = aprintf("%s:%s:%s", ha1, digest->nonce, ha2);
   }
 
-  if(!md5this)
+  if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
-  CURL_OUTPUT_DIGEST_CONV(data, md5this); /* convert on non-ASCII machines */
-  Curl_md5it(md5buf, md5this);
-  free(md5this);
-  auth_digest_md5_to_ascii(md5buf, request_digest);
+  CURL_OUTPUT_DIGEST_CONV(data, hashthis); /* convert on non-ASCII machines */
+  hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
+  free(hashthis);
+  convert_to_ascii(hashbuf, request_digest);
 
   /* For test case 64 (snooped from a Mozilla 1.3a request)
 
@@ -801,7 +837,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
      characters.  algorithm and qop with standard values only contain web-safe
      characters.
   */
-  userp_quoted = auth_digest_string_quoted(userp);
+  userp_quoted = auth_digest_string_quoted(digest->userhash ? userh : userp);
   if(!userp_quoted)
     return CURLE_OUT_OF_MEMORY;
 
@@ -857,7 +893,17 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
   if(digest->algorithm) {
     /* Append the algorithm */
-    tmp = aprintf("%s, algorithm=\"%s\"", response, digest->algorithm);
+    tmp = aprintf("%s, algorithm=%s", response, digest->algorithm);
+    free(response);
+    if(!tmp)
+      return CURLE_OUT_OF_MEMORY;
+
+    response = tmp;
+  }
+
+  if(digest->userhash) {
+    /* Append the userhash */
+    tmp = aprintf("%s, userhash=true", response);
     free(response);
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
@@ -870,6 +916,58 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
   *outlen = strlen(response);
 
   return CURLE_OK;
+}
+
+/*
+ * Curl_auth_create_digest_http_message()
+ *
+ * This is used to generate a HTTP DIGEST response message ready for sending
+ * to the recipient.
+ *
+ * Parameters:
+ *
+ * data    [in]     - The session handle.
+ * userp   [in]     - The user name.
+ * passwdp [in]     - The user's password.
+ * request [in]     - The HTTP request.
+ * uripath [in]     - The path of the HTTP uri.
+ * digest  [in/out] - The digest data struct being used and modified.
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
+                                              const char *userp,
+                                              const char *passwdp,
+                                              const unsigned char *request,
+                                              const unsigned char *uripath,
+                                              struct digestdata *digest,
+                                              char **outptr, size_t *outlen)
+{
+  switch(digest->algo) {
+  case CURLDIGESTALGO_MD5:
+  case CURLDIGESTALGO_MD5SESS:
+    return auth_create_digest_http_message(data, userp, passwdp,
+                                           request, uripath, digest,
+                                           outptr, outlen,
+                                           auth_digest_md5_to_ascii,
+                                           Curl_md5it);
+
+  case CURLDIGESTALGO_SHA256:
+  case CURLDIGESTALGO_SHA256SESS:
+  case CURLDIGESTALGO_SHA512_256:
+  case CURLDIGESTALGO_SHA512_256SESS:
+    return auth_create_digest_http_message(data, userp, passwdp,
+                                           request, uripath, digest,
+                                           outptr, outlen,
+                                           auth_digest_sha256_to_ascii,
+                                           Curl_sha256it);
+
+  default:
+    return CURLE_UNSUPPORTED_PROTOCOL;
+  }
 }
 
 /*
@@ -894,6 +992,7 @@ void Curl_auth_digest_cleanup(struct digestdata *digest)
   digest->nc = 0;
   digest->algo = CURLDIGESTALGO_MD5; /* default algorithm */
   digest->stale = FALSE; /* default means normal, not stale */
+  digest->userhash = FALSE;
 }
 #endif  /* !USE_WINDOWS_SSPI */
 

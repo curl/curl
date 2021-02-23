@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP proxy
+--request-target
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Sat, 29 Feb 2020 16:10:44 GMT
+Server: Blafasel/1.1
+Last-Modified: Sat, 29 Feb 2020 16:10:44 GMT
+Content-Length: 0
+Connection: close
+Content-Type: text/html
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Send "OPTIONS *" with --request-target to a proxy
+</name>
+<features>
+proxy
+</features>
+<command>
+--request-target '*' -X OPTIONS --proxy http://%HOSTIP:%HTTPPORT/ -H "Testno: 1613" http://www.example.org/
+</command>
+</client>
+
+<verify>
+<protocol>
+OPTIONS * HTTP/1.1
+Host: www.example.org
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+Testno: 1613
+
+</protocol>
+</verify>
+</testcase>

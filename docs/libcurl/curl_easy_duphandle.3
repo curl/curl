@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -39,14 +39,15 @@ will be pointed to by the new handle as well. You must therefore make sure to
 keep the data around until both handles have been cleaned up.
 
 The new handle will \fBnot\fP inherit any state information, no connections,
-no SSL sessions and no cookies.
+no SSL sessions and no cookies. It also will not inherit any share object
+states or options (it will be made as if \fICURLOPT_SHARE(3)\fP was set to
+NULL).
 
-\fBNote\fP that even in multi-threaded programs, this function must be called
-in a synchronous way, the input handle may not be in use when cloned.
+In multi-threaded programs, this function must be called in a synchronous way,
+the input handle may not be in use when cloned.
 .SH RETURN VALUE
 If this function returns NULL, something went wrong and no valid handle was
 returned.
 .SH "SEE ALSO"
 .BR curl_easy_init "(3)," curl_easy_cleanup "(3)," curl_easy_reset "(3),"
 .BR curl_global_init "(3)"
-

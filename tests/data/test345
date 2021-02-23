@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-11111"
+Accept-Ranges: bytes
+Content-Length: 0
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Both --etag-compare and -save store new Etag using one pre-existing file
+</name>
+<file name="log/etag345">
+"21025-dc7-39462498"
+</file>
+<command>
+http://%HOSTIP:%HTTPPORT/345 --etag-compare log/etag345 --etag-save log/etag345
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /345 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+If-None-Match: "21025-dc7-39462498"
+
+</protocol>
+<file name="log/etag345">
+"21025-dc7-11111"
+</file>
+</verify>
+</testcase>

@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -29,13 +29,13 @@ CURLOPT_TCP_NODELAY \- set the TCP_NODELAY option
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TCP_NODELAY, long nodelay);
 .SH DESCRIPTION
 Pass a long specifying whether the TCP_NODELAY option is to be set or cleared
-(1 = set, 0 = clear). The option is set by default. This will have no effect
+(1L = set, 0 = clear). The option is set by default. This will have no effect
 after the connection has been established.
 
-Setting this option will disable TCP's Nagle algorithm. The purpose of this
-algorithm is to try to minimize the number of small packets on the network
-(where "small packets" means TCP segments less than the Maximum Segment Size
-(MSS) for the network).
+Setting this option to 1L will disable TCP's Nagle algorithm on this
+connection. The purpose of this algorithm is to try to minimize the number of
+small packets on the network (where "small packets" means TCP segments less
+than the Maximum Segment Size (MSS) for the network).
 
 Maximizing the amount of data sent per TCP segment is good because it
 amortizes the overhead of the send. However, in some cases small segments may
@@ -47,7 +47,15 @@ overdone.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  /* leave Nagle enabled */
+  curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 0);
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Always. The default was changed to 1 from 0 in 7.50.2.
 .SH RETURN VALUE

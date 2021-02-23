@@ -1,3 +1,24 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
 # - Try to find the libssh2 library
 # Once done this will define
 #
@@ -5,31 +26,18 @@
 # LIBSSH2_INCLUDE_DIR - the libssh2 include directory
 # LIBSSH2_LIBRARY - the libssh2 library name
 
-if (LIBSSH2_INCLUDE_DIR AND LIBSSH2_LIBRARY)
-  set(LibSSH2_FIND_QUIETLY TRUE)
-endif (LIBSSH2_INCLUDE_DIR AND LIBSSH2_LIBRARY)
+find_path(LIBSSH2_INCLUDE_DIR libssh2.h)
 
-FIND_PATH(LIBSSH2_INCLUDE_DIR libssh2.h
-)
-
-FIND_LIBRARY(LIBSSH2_LIBRARY NAMES ssh2
-)
+find_library(LIBSSH2_LIBRARY NAMES ssh2 libssh2)
 
 if(LIBSSH2_INCLUDE_DIR)
-  file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" libssh2_version_str REGEX "^#define[\t ]+LIBSSH2_VERSION_NUM[\t ]+0x[0-9][0-9][0-9][0-9][0-9][0-9].*")
-
-  string(REGEX REPLACE "^.*LIBSSH2_VERSION_NUM[\t ]+0x([0-9][0-9]).*$" "\\1" LIBSSH2_VERSION_MAJOR "${libssh2_version_str}")
-  string(REGEX REPLACE "^.*LIBSSH2_VERSION_NUM[\t ]+0x[0-9][0-9]([0-9][0-9]).*$" "\\1" LIBSSH2_VERSION_MINOR  "${libssh2_version_str}")
-  string(REGEX REPLACE "^.*LIBSSH2_VERSION_NUM[\t ]+0x[0-9][0-9][0-9][0-9]([0-9][0-9]).*$" "\\1" LIBSSH2_VERSION_PATCH "${libssh2_version_str}")
-
-  string(REGEX REPLACE "^0(.+)" "\\1" LIBSSH2_VERSION_MAJOR "${LIBSSH2_VERSION_MAJOR}")
-  string(REGEX REPLACE "^0(.+)" "\\1" LIBSSH2_VERSION_MINOR "${LIBSSH2_VERSION_MINOR}")
-  string(REGEX REPLACE "^0(.+)" "\\1" LIBSSH2_VERSION_PATCH "${LIBSSH2_VERSION_PATCH}")
-
-  set(LIBSSH2_VERSION "${LIBSSH2_VERSION_MAJOR}.${LIBSSH2_VERSION_MINOR}.${LIBSSH2_VERSION_PATCH}")
-endif(LIBSSH2_INCLUDE_DIR)
+  file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" libssh2_version_str REGEX "^#define[\t ]+LIBSSH2_VERSION[\t ]+\"(.*)\"")
+  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1"  LIBSSH2_VERSION "${libssh2_version_str}")
+endif()
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibSSH2 DEFAULT_MSG LIBSSH2_INCLUDE_DIR LIBSSH2_LIBRARY )
+find_package_handle_standard_args(LibSSH2
+    REQUIRED_VARS LIBSSH2_LIBRARY LIBSSH2_INCLUDE_DIR
+    VERSION_VAR LIBSSH2_VERSION)
 
-MARK_AS_ADVANCED(LIBSSH2_INCLUDE_DIR LIBSSH2_LIBRARY LIBSSH2_VERSION_MAJOR LIBSSH2_VERSION_MINOR LIBSSH2_VERSION_PATCH LIBSSH2_VERSION)
+mark_as_advanced(LIBSSH2_INCLUDE_DIR LIBSSH2_LIBRARY)

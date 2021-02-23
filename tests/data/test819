@@ -14,7 +14,7 @@ RFC4616
 <servercmd>
 AUTH PLAIN
 REPLY AUTHENTICATE +
-REPLY dXNlcgB1c2VyAHNlY3JldA== A002 OK AUTHENTICATE completed
+REPLY AHVzZXIAc2VjcmV0 A002 OK AUTHENTICATE completed
 </servercmd>
 <data>
 From: me@somewhere
@@ -37,7 +37,7 @@ imap
 IMAP plain authentication
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/819/;UID=1' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/819/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 
@@ -47,7 +47,7 @@ IMAP plain authentication
 <protocol>
 A001 CAPABILITY
 A002 AUTHENTICATE PLAIN
-dXNlcgB1c2VyAHNlY3JldA==
+AHVzZXIAc2VjcmV0
 A003 SELECT 819
 A004 FETCH 1 BODY[]
 A005 LOGOUT

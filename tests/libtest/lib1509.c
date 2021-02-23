@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@
 size_t WriteOutput(void *ptr, size_t size, size_t nmemb, void *stream);
 size_t WriteHeader(void *ptr, size_t size, size_t nmemb, void *stream);
 
-unsigned long realHeaderSize = 0;
+static unsigned long realHeaderSize = 0;
 
 int test(char *URL)
 {
@@ -69,7 +69,7 @@ int test(char *URL)
     goto test_cleanup;
   }
 
-  printf("header length is ........: %lu\n", headerSize);
+  printf("header length is ........: %ld\n", headerSize);
   printf("header length should be..: %lu\n", realHeaderSize);
 
 test_cleanup:

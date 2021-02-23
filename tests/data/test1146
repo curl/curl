@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+FILE
+--proto-default
+</keywords>
+</info>
+
+<reply>
+<data>
+foo
+   bar
+bar
+   foo
+moo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+file
+</server>
+<name>
+--proto-default file
+</name>
+<command option="no-include">
+--proto-default file %PWD/log/test1146.txt
+</command>
+<file name="log/test1146.txt">
+foo
+   bar
+bar
+   foo
+moo
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

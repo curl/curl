@@ -19,9 +19,5 @@ NTLM
  <name>
 NTLM unit tests
  </name>
-<tool>
-unit1600
-</tool>
 </client>
-
 </testcase>

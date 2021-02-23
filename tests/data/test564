@@ -1,4 +1,6 @@
 <testcase>
+# Warning: if this test fails to start the SSH server, check that none of
+# the user's shell profiles sends output to stdout of a non-interactive shell.
 <info>
 <keywords>
 FTP
@@ -36,6 +38,9 @@ FTP RETR a file over a SOCKS proxy using the multi interface
 <command>
 ftp://%HOSTIP:%FTPPORT/path/564 %HOSTIP:%SOCKSPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

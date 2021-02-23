@@ -1,6 +1,7 @@
 Long: disable-epsv
 Help: Inhibit using EPSV
 Protocols: FTP
+Category: ftp
 ---
 (FTP) Tell curl to disable the use of the EPSV command when doing passive FTP
 transfers. Curl will normally always first attempt to use EPSV before PASV,

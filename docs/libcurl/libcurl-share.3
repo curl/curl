@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -34,10 +34,9 @@ The share interface was added to enable sharing of data between curl
 \&"handles".
 .SH "ONE SET OF DATA - MANY TRANSFERS"
 You can have multiple easy handles share data between them. Have them update
-and use the \fBsame\fP cookie database, DNS cache, TLS session cache! This
-way, each single transfer will take advantage from data updates made by the
-other transfer(s). The sharing interface, however, does not share active or
-persistent connections between different easy handles.
+and use the \fBsame\fP cookie database, DNS cache, TLS session cache and/or
+connection cache! This way, each single transfer will take advantage from data
+updates made by the other transfer(s).
 .SH "SHARE OBJECT"
 You create a shared object with \fIcurl_share_init(3)\fP. It returns a handle
 for a newly created one.

@@ -38,24 +38,25 @@ http://www1.example.com:8081/2049 --connect-to ::%HOSTIP:%HTTPPORT --next http:/
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET /2049 HTTP/1.1
 Host: www1.example.com:8081
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /2049 HTTP/1.1
 Host: www2.example.com:8082
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /2049 HTTP/1.1
 Host: www3.example.com:8083
+User-Agent: curl/%VERSION
 Accept: */*
 
 GET /2049 HTTP/1.1
 Host: www4.example.com:8084
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

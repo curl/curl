@@ -4,7 +4,7 @@ Building via IDE Project Files
    This document describes how to compile, build and install curl and libcurl
    from sources using an IDE based development tool such as Visual Studio.
 
-   Project files are currently available for Visual C++ v6.0 to v14.0. The
+   Project files are currently available for Visual C++ v6.0 to v15.0. The
    following directory structure has been used to cater for this:
 
    somedirectory\
@@ -74,9 +74,6 @@ Building with Visual C++
    If you require support for Internationalized Domain Names via Windows IDN
    then you will need either:
 
-    * Microsoft Internationalized Domain Name (IDN) Mitigation APIs:
-      https://www.microsoft.com/en-us/download/details.aspx?id=734
-
     * Microsoft Windows SDK Update for Windows Vista:
       https://www.microsoft.com/en-us/download/details.aspx?id=23719
 
@@ -108,7 +105,7 @@ Running DLL based configurations
 
    ... where 'Path to DLL` is the configuration specific path. For example the
    following configurations in Visual Studio 2010 might be:
-   
+
    DLL Debug - DLL OpenSSL (Win32):
    PATH=..\..\..\..\..\openssl\build\Win32\VC10\DLL Debug;C:\Windows\system32;
         C:\Windows;C:\Windows\System32\Wbem
@@ -133,7 +130,7 @@ Notes
 =====
 
    The following keywords have been used in the directory hierarchy:
-   
+
    <platform>      - The platform (For example: Windows)
    <ide>           - The IDE (For example: VC6, VC10, BCC5)
    <architecture>  - The platform architecture (For example: Win32, Win64)
@@ -142,21 +139,21 @@ Notes
 
    If you are using the source code from the git repository, rather than a
    release archive or nightly build, you will need to generate the project
-   files. Please run "generate -help" for usage details. 
+   files. Please run "generate -help" for usage details.
 
    Should you wish to help out with some of the items on the TODO list, or
    find bugs in the project files that need correcting, and would like to
    submit updated files back then please note that, whilst the solution files
-   can be edited directly, the templates for the project files (which are 
+   can be edited directly, the templates for the project files (which are
    stored in the git repositoty) will need to be modified rather than the
    generated project files that Visual Studio uses.
 
 Legacy Windows and SSL
 ======================
 
-   Some of the project configurations allow the use of WinSSL (specifically
-   SChannel from Windows SSPI), the native SSL library in Windows. However,
-   WinSSL in Windows <= XP is unable to connect to servers that no longer
-   support the legacy handshakes and algorithms used by those versions. If
-   you will be using curl in one of those earlier versions of Windows you
-   should choose another SSL backend such as OpenSSL.
+   Some of the project configurations allow the use of Schannel, the native
+   SSL library in Windows which forms part of Windows SSPI. However, Schannel
+   in Windows <= XP is unable to connect to servers that no longer support the
+   legacy handshakes and algorithms used by those versions. If you will be
+   using curl in one of those earlier versions of Windows you should choose
+   another SSL backend such as OpenSSL.

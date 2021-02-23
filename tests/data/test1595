@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP replaced headers
+CURLOPT_TIMECONDITION
+If-Modified-Since
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 503 Error
+Date: Thu, 11 Jul 2019 02:26:59 GMT
+Server: test-server/swsclose
+
+</data>
+</reply>
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP Retry-After header extraction (without header)
+</name>
+<tool>
+lib1594
+</tool>
+<command>
+http://%HOSTIP:%HTTPPORT/1595
+</command>
+</client>
+
+<verify>
+<protocol>
+GET /1595 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<stdout>
+Retry-After: 0
+</stdout>
+</verify>
+</testcase>

@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -63,7 +63,7 @@ my $pidfile;          # stunnel pid file
 my $logfile;          # stunnel log file
 my $loglevel = 5;     # stunnel log level
 my $ipvnum = 4;       # default IP version of stunneled server
-my $idnum = 1;        # dafault stunneled server instance number
+my $idnum = 1;        # default stunneled server instance number
 my $proto = 'https';  # default secure server protocol
 my $conffile;         # stunnel configuration file
 my $capath;           # certificate chain PEM folder
@@ -172,7 +172,7 @@ while(@ARGV) {
 }
 
 #***************************************************************************
-# Initialize command line option dependant variables
+# Initialize command line option dependent variables
 #
 if(!$pidfile) {
     $pidfile = "$path/". server_pidfilename($proto, $ipvnum, $idnum);
@@ -181,7 +181,7 @@ if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
-$conffile = "$path/stunnel.conf";
+$conffile = "$path/${proto}_stunnel.conf";
 
 $capath = abs_path($path);
 $certfile = "$srcdir/". ($stuncert?"certs/$stuncert":"stunnel.pem");
@@ -264,6 +264,11 @@ if($stunnel_version < 400) {
 #
 if($stunnel_version >= 400) {
     $socketopt = "a:SO_REUSEADDR=1";
+    if(($stunnel_version >= 534) && $tstunnel_windows) {
+        # SO_EXCLUSIVEADDRUSE is on by default on Vista or newer,
+        # but does not work together with SO_REUSEADDR being on.
+        $socketopt .= "\nsocket = a:SO_EXCLUSIVEADDRUSE=0";
+    }
     $cmd  = "$stunnel $conffile ";
     $cmd .= ">$logfile 2>&1";
     # setup signal handler
@@ -324,6 +329,7 @@ if($stunnel_version >= 400) {
 # Set file permissions on certificate pem file.
 #
 chmod(0600, $certfile) if(-f $certfile);
+print STDERR "RUN: $cmd\n" if($verbose);
 
 #***************************************************************************
 # Run tstunnel on Windows.
@@ -336,8 +342,10 @@ if($tstunnel_windows) {
     }
 
     # Put an "exec" in front of the command so that the child process
-    # keeps this child's process ID.
+    # keeps this child's process ID by being tied to the spawned shell.
     exec("exec $cmd") || die "Can't exec() $cmd: $!";
+    # exec() will create a new process, but ties the existence of the
+    # new process to the parent waiting perl.exe and sh.exe processes.
 
     # exec() should never return back here to this process. We protect
     # ourselves by calling die() just in case something goes really bad.

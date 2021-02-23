@@ -1,5 +1,5 @@
-#ifndef __CURL_EASY_H
-#define __CURL_EASY_H
+#ifndef CURLINC_EASY_H
+#define CURLINC_EASY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,6 +24,17 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
+
+/* Flag bits in the curl_blob struct: */
+#define CURL_BLOB_COPY   1 /* tell libcurl to copy the data */
+#define CURL_BLOB_NOCOPY 0 /* tell libcurl to NOT copy the data */
+
+struct curl_blob {
+  void *data;
+  size_t len;
+  unsigned int flags; /* bit 0 is defined, the rest are reserved and should be
+                         left zeroes */
+};
 
 CURL_EXTERN CURL *curl_easy_init(void);
 CURL_EXTERN CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);
@@ -94,6 +105,16 @@ CURL_EXTERN CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen,
  */
 CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
                                     size_t buflen, size_t *n);
+
+
+/*
+ * NAME curl_easy_upkeep()
+ *
+ * DESCRIPTION
+ *
+ * Performs connection upkeep for the given session handle.
+ */
+CURL_EXTERN CURLcode curl_easy_upkeep(CURL *curl);
 
 #ifdef  __cplusplus
 }

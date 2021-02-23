@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2011 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,19 +26,6 @@
 #include "urldata.h"
 
 #ifdef HAVE_GSSAPI
-
-#ifdef HAVE_GSSGNU
-#  include <gss.h>
-#elif defined HAVE_GSSMIT
-   /* MIT style */
-#  include <gssapi/gssapi.h>
-#  include <gssapi/gssapi_generic.h>
-#  include <gssapi/gssapi_krb5.h>
-#else
-   /* Heimdal-style */
-#  include <gssapi.h>
-#endif
-
 extern gss_OID_desc Curl_spnego_mech_oid;
 extern gss_OID_desc Curl_krb5_mech_oid;
 
@@ -71,5 +58,4 @@ void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
 #define GSSAUTH_P_PRIVACY   4
 
 #endif /* HAVE_GSSAPI */
-
 #endif /* HEADER_CURL_GSSAPI_H */

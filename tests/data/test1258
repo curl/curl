@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP replaced headers
+cookies
+httponly
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.0 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Type: text/html
+Set-Cookie: I-am=here; domain=localhost;
+
+boo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP, use cookies with localhost
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/1258 http://%HOSTIP:%HTTPPORT/we/want?hoge=fuga -b non-existing -H "Host: localhost"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /we/want/1258 HTTP/1.1
+Host: localhost
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /we/want?hoge=fuga HTTP/1.1
+Host: localhost
+User-Agent: curl/%VERSION
+Accept: */*
+Cookie: I-am=here
+
+</protocol>
+</verify>
+</testcase>

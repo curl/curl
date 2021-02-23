@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -48,7 +48,6 @@ CURLcode Curl_convert_from_network(struct Curl_easy *data,
                                  char *buffer, size_t length);
 CURLcode Curl_convert_from_utf8(struct Curl_easy *data,
                                  char *buffer, size_t length);
-CURLcode Curl_convert_form(struct Curl_easy *data, struct FormData *form);
 #else
 #define Curl_convert_clone(a,b,c,d) ((void)a, CURLE_OK)
 #define Curl_convert_init(x) Curl_nop_stmt
@@ -57,7 +56,6 @@ CURLcode Curl_convert_form(struct Curl_easy *data, struct FormData *form);
 #define Curl_convert_to_network(a,b,c) ((void)a, CURLE_OK)
 #define Curl_convert_from_network(a,b,c) ((void)a, CURLE_OK)
 #define Curl_convert_from_utf8(a,b,c) ((void)a, CURLE_OK)
-#define Curl_convert_form(a,b) CURLE_OK
 #endif
 
 #endif /* HEADER_CURL_NON_ASCII_H */

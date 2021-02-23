@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,52 +20,31 @@
  *
  ***************************************************************************/
 /* <DESC>
- * HTTP PUT upload with authentiction using "any" method. libcurl picks the
+ * HTTP PUT upload with authentication using "any" method. libcurl picks the
  * one the server supports/wants.
  * </DESC>
  */
 #include <stdio.h>
 #include <fcntl.h>
-#ifdef WIN32
-#  include <io.h>
-#else
-#  ifdef __VMS
-     typedef int intptr_t;
-#  endif
-#  if !defined(_AIX) && !defined(__sgi) && !defined(__osf__)
-#    include <stdint.h>
-#  endif
-#  include <unistd.h>
-#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef _MSC_VER
-#  ifdef _WIN64
-     typedef __int64 intptr_t;
-#  else
-     typedef int intptr_t;
-#  endif
-#endif
-
 #include <curl/curl.h>
+
+#ifdef WIN32
+#  include <io.h>
+#  define READ_3RD_ARG unsigned int
+#else
+#  include <unistd.h>
+#  define READ_3RD_ARG size_t
+#endif
 
 #if LIBCURL_VERSION_NUM < 0x070c03
 #error "upgrade your libcurl to no less than 7.12.3"
 #endif
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#if defined(_AIX) || defined(__sgi) || defined(__osf__)
-#ifndef intptr_t
-#define intptr_t long
-#endif
-#endif
-
 /*
- * This example shows a HTTP PUT operation with authentiction using "any"
+ * This example shows a HTTP PUT operation with authentication using "any"
  * type. It PUTs a file given as a command line argument to the URL also given
  * on the command line.
  *
@@ -99,7 +78,7 @@ static curlioerr my_ioctl(CURL *handle, curliocmd cmd, void *userp)
 }
 
 /* read callback function, fread() look alike */
-static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   ssize_t retcode;
   curl_off_t nread;
@@ -107,7 +86,7 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
   int *fdp = (int *)stream;
   int fd = *fdp;
 
-  retcode = read(fd, ptr, size * nmemb);
+  retcode = read(fd, ptr, (READ_3RD_ARG)(size * nmemb));
 
   nread = (curl_off_t)retcode;
 
@@ -130,7 +109,7 @@ int main(int argc, char **argv)
   if(argc < 3)
     return 1;
 
-  file= argv[1];
+  file = argv[1];
   url = argv[2];
 
   /* get the file size of the local file */

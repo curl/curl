@@ -1,0 +1,67 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+Two globbed HTTP PUTs
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/490 -T '{log/in490,log/in490}'
+</command>
+<file name="log/in490">
+surprise!
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+PUT /490 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 10
+Expect: 100-continue
+
+surprise!
+PUT /490 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 10
+Expect: 100-continue
+
+surprise!
+</protocol>
+</verify>
+</testcase>

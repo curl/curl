@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,11 +26,12 @@
 #include <curl/curl.h> /* for curl_socket_t */
 #endif
 
+#define CURLX_FUNCTION_CAST(target_type, func) \
+  (target_type)(void (*) (void))(func)
+
 unsigned short curlx_ultous(unsigned long ulnum);
 
 unsigned char curlx_ultouc(unsigned long ulnum);
-
-int curlx_ultosi(unsigned long ulnum);
 
 int curlx_uztosi(size_t uznum);
 
@@ -53,10 +54,6 @@ size_t curlx_sotouz(curl_off_t sonum);
 int curlx_sztosi(ssize_t sznum);
 
 unsigned short curlx_uitous(unsigned int uinum);
-
-unsigned char curlx_uitouc(unsigned int uinum);
-
-int curlx_uitosi(unsigned int uinum);
 
 size_t curlx_sitouz(int sinum);
 
@@ -94,19 +91,6 @@ void curlx_FD_ZERO(fd_set *fdset);
 unsigned short curlx_htons(unsigned short usnum);
 
 unsigned short curlx_ntohs(unsigned short usnum);
-
-#ifndef BUILDING_WARNLESS_C
-#  undef  FD_ISSET
-#  define FD_ISSET(a,b) curlx_FD_ISSET((a),(b))
-#  undef  FD_SET
-#  define FD_SET(a,b)   curlx_FD_SET((a),(b))
-#  undef  FD_ZERO
-#  define FD_ZERO(a)    curlx_FD_ZERO((a))
-#  undef  htons
-#  define htons(a)      curlx_htons((a))
-#  undef  ntohs
-#  define ntohs(a)      curlx_ntohs((a))
-#endif
 
 #endif /* __INTEL_COMPILER && __unix__ */
 

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 # ***************************************************************************
 # *                                  _   _ ____  _
 # *  Project                     ___| | | |  _ \| |
@@ -6,11 +6,11 @@
 # *                            | (__| |_| |  _ <| |___
 # *                             \___|\___/|_| \_\_____|
 # *
-# * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 # *
 # * This software is licensed as described in the file COPYING, which
 # * you should have received as part of this distribution. The terms
-# * are also available at https://curl.haxx.se/docs/copyright.html.
+# * are also available at https://curl.se/docs/copyright.html.
 # *
 # * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # * copies of the Software, and permit persons to whom the Software is
@@ -34,9 +34,11 @@ use Encode;
 use Getopt::Std;
 use MIME::Base64;
 use strict;
+use warnings;
 use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_k $opt_l $opt_m $opt_n $opt_p $opt_q $opt_s $opt_t $opt_u $opt_v $opt_w);
 use List::Util;
 use Text::Wrap;
+use Time::Local;
 my $MOD_SHA = "Digest::SHA";
 eval "require $MOD_SHA";
 if ($@) {
@@ -47,11 +49,9 @@ eval "require LWP::UserAgent";
 
 my %urls = (
   'nss' =>
-    'https://hg.mozilla.org/projects/nss/raw-file/tip/lib/ckfw/builtins/certdata.txt',
+    'https://hg.mozilla.org/projects/nss/raw-file/default/lib/ckfw/builtins/certdata.txt',
   'central' =>
     'https://hg.mozilla.org/mozilla-central/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
-  'aurora' =>
-    'https://hg.mozilla.org/releases/mozilla-aurora/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'beta' =>
     'https://hg.mozilla.org/releases/mozilla-beta/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'release' =>
@@ -63,7 +63,7 @@ $opt_d = 'release';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.27';
+my $version = '1.28';
 
 $opt_w = 76; # default base64 encoded lines length
 
@@ -137,6 +137,7 @@ if ($opt_i) {
   print "Perl Version                     : $]\n";
   print "Operating System Name            : $^O\n";
   print "Getopt::Std.pm Version           : ${Getopt::Std::VERSION}\n";
+  print "Encode::Encoding.pm Version      : ${Encode::Encoding::VERSION}\n";
   print "MIME::Base64.pm Version          : ${MIME::Base64::VERSION}\n";
   print "LWP::UserAgent.pm Version        : ${LWP::UserAgent::VERSION}\n" if($LWP::UserAgent::VERSION);
   print "LWP.pm Version                   : ${LWP::VERSION}\n" if($LWP::VERSION);
@@ -310,7 +311,7 @@ if(!$opt_n) {
         my $proto = !$opt_k ? "--proto =https" : "";
         my $quiet = $opt_q ? "-s" : "";
         my @out = `curl -w %{response_code} $proto $quiet -o "$txt" "$url"`;
-        if(@out && $out[0] == 200) {
+        if(!$? && @out && $out[0] == 200) {
           $fetched = 1;
           report "Downloaded $txt";
         }
@@ -377,6 +378,9 @@ my $newhash= sha256($txt);
 
 if(!$opt_f && $oldhash eq $newhash) {
     report "Downloaded file identical to previous run\'s source file. Exiting";
+    if($opt_u && -e $txt && !unlink($txt)) {
+        report "Failed to remove $txt: $!\n";
+    }
     exit;
 }
 
@@ -418,6 +422,8 @@ my $certnum = 0;
 my $skipnum = 0;
 my $start_of_cert = 0;
 my @precert;
+my $cka_value;
+my $valid = 1;
 
 open(TXT,"$txt") or die "Couldn't open $txt: $!\n";
 while (<TXT>) {
@@ -432,6 +438,7 @@ while (<TXT>) {
   }
   elsif(/^# (Issuer|Serial Number|Subject|Not Valid Before|Not Valid After |Fingerprint \(MD5\)|Fingerprint \(SHA1\)):/) {
       push @precert, $_;
+      $valid = 1;
       next;
   }
   elsif(/^#|^\s*$/) {
@@ -439,6 +446,49 @@ while (<TXT>) {
       next;
   }
   chomp;
+
+  # Example:
+  # CKA_NSS_SERVER_DISTRUST_AFTER MULTILINE_OCTAL
+  # \062\060\060\066\061\067\060\060\060\060\060\060\132
+  # END
+
+  if (/^CKA_NSS_SERVER_DISTRUST_AFTER (CK_BBOOL CK_FALSE|MULTILINE_OCTAL)/) {
+      if($1 eq "MULTILINE_OCTAL") {
+          my @timestamp;
+          while (<TXT>) {
+              last if (/^END/);
+              chomp;
+              my @octets = split(/\\/);
+              shift @octets;
+              for (@octets) {
+                  push @timestamp, chr(oct);
+              }
+          }
+          # A trailing Z in the timestamp signifies UTC
+          if($timestamp[12] ne "Z") {
+              report "distrust date stamp is not using UTC";
+          }
+          # Example date: 200617000000Z
+          # Means 2020-06-17 00:00:00 UTC
+          my $distrustat =
+            timegm($timestamp[10] . $timestamp[11], # second
+                   $timestamp[8] . $timestamp[9],   # minute
+                   $timestamp[6] . $timestamp[7],   # hour
+                   $timestamp[4] . $timestamp[5],   # day
+                   ($timestamp[2] . $timestamp[3]) - 1, # month
+                   "20" . $timestamp[0] . $timestamp[1]); # year
+          if(time >= $distrustat) {
+              # not trusted anymore
+              $skipnum++;
+              report "Skipping: $caname is not trusted anymore" if ($opt_v);
+              $valid = 0;
+          }
+          else {
+              # still trusted
+          }
+      }
+      next;
+  }
 
   # this is a match for the start of a certificate
   if (/^CKA_CLASS CK_OBJECT_CLASS CKO_CERTIFICATE/) {
@@ -449,21 +499,18 @@ while (<TXT>) {
   }
   my %trust_purposes_by_level;
   if ($start_of_cert && /^CKA_VALUE MULTILINE_OCTAL/) {
-    my $data;
+    $cka_value="";
     while (<TXT>) {
       last if (/^END/);
       chomp;
       my @octets = split(/\\/);
       shift @octets;
       for (@octets) {
-        $data .= chr(oct);
+        $cka_value .= chr(oct);
       }
     }
-    # scan forwards until the trust part
-    while (<TXT>) {
-      last if (/^CKA_CLASS CK_OBJECT_CLASS CKO_NSS_TRUST/);
-      chomp;
-    }
+  }
+  if(/^CKA_CLASS CK_OBJECT_CLASS CKO_NSS_TRUST/ && $valid) {
     # now scan the trust part to determine how we should trust this cert
     while (<TXT>) {
       last if (/^#/);
@@ -480,7 +527,15 @@ while (<TXT>) {
 
     if ( !should_output_cert(%trust_purposes_by_level) ) {
       $skipnum ++;
+      report "Skipping: $caname" if ($opt_v);
     } else {
+      my $data = $cka_value;
+      $cka_value = "";
+
+      if(!length($data)) {
+          # if empty, skip
+          next;
+      }
       my $encoded = MIME::Base64::encode_base64($data, '');
       $encoded =~ s/(.{1,${opt_w}})/$1\n/g;
       my $pem = "-----BEGIN CERTIFICATE-----\n"
@@ -488,9 +543,9 @@ while (<TXT>) {
               . "-----END CERTIFICATE-----\n";
       print CRT "\n$caname\n";
       print CRT @precert if($opt_m);
-      my $maxStringLength = length(decode('UTF-8', $caname, Encode::FB_CROAK));
+      my $maxStringLength = length(decode('UTF-8', $caname, Encode::FB_CROAK | Encode::LEAVE_SRC));
       if ($opt_t) {
-        foreach my $key (keys %trust_purposes_by_level) {
+        foreach my $key (sort keys %trust_purposes_by_level) {
            my $string = $key . ": " . join(", ", @{$trust_purposes_by_level{$key}});
            $maxStringLength = List::Util::max( length($string), $maxStringLength );
            print CRT $string . "\n";

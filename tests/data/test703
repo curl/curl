@@ -12,6 +12,10 @@ FAILURE
 <reply>
 <data>
 </data>
+# 1 is socks5 failure
+<servercmd>
+response 1
+</servercmd>
 </reply>
 
 # Client-side
@@ -21,19 +25,20 @@ socks5
 </server>
 <features>
 http
+proxy
 </features>
  <name>
 Attempt connect to non-listening HTTP server via SOCKS5 proxy
  </name>
  <command>
---socks5 %HOSTIP:%SOCKSPORT http://%HOSTIP:60000
+--socks5 %HOSTIP:%SOCKSPORT http://%HOSTIP:%NOLISTENPORT
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-7
+97
 </errorcode>
 </verify>
 </testcase>

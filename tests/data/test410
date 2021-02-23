@@ -1,0 +1,55 @@
+<testcase>
+<info>
+<keywords>
+HTTPS
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 7
+
+MooMoo
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+https
+</server>
+ <name>
+HTTPS GET with very long request header
+ </name>
+# 14 characters repeated 3500 times makes 49000 bytes
+<file name="log/file410">
+Long: %repeat[3500 x header content]%
+</file>
+ <command>
+-k https://%HOSTIP:%HTTPSPORT/410 -H @log/file410
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /410 HTTP/1.1
+Host: %HOSTIP:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Long: %repeat[3500 x header content]%
+
+</protocol>
+</verify>
+</testcase>

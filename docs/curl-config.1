@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -63,6 +63,10 @@ the time of writing, this list may include HTTP, HTTPS, FTP, FTPS, FILE,
 TELNET, LDAP, DICT. Do not assume any particular order. The protocols will
 be listed using uppercase and are separated by newlines. There may be none,
 one, or several protocols in the list. (Added in 7.13.0)
+.IP "--ssl-backends"
+Lists the SSL backends that were enabled when libcurl was built. It might be
+no, one or several names. If more than one name, they will appear
+comma-separated. (Added in 7.58.0)
 .IP "--static-libs"
 Shows the complete set of libs and other linker options you will need in order
 to link your application with libcurl statically. (Added in 7.17.1)
@@ -70,8 +74,8 @@ to link your application with libcurl statically. (Added in 7.17.1)
 Outputs version information about the installed libcurl.
 .IP "--vernum"
 Outputs version information about the installed libcurl, in numerical mode.
-This outputs the version number, in hexadecimal, with 8 bits for each part;
-major, minor, patch. So that libcurl 7.7.4 would appear as 070704 and libcurl
+This outputs the version number, in hexadecimal, with 8 bits for each part:
+major, minor, and patch. So that libcurl 7.7.4 would appear as 070704 and libcurl
 12.13.14 would appear as 0c0d0e... Note that the initial zero might be
 omitted. (This option was broken in the 7.15.0 release.)
 .SH "EXAMPLES"

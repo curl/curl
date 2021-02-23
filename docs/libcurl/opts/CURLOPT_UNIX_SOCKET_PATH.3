@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -46,6 +46,9 @@ are not supported. Proxy options such as
 .BR CURLOPT_PROXY "(3)
 have no effect either as these are TCP-oriented, and asking a proxy server to
 connect to a certain Unix domain socket is not possible.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 Default is NULL, meaning that no Unix domain sockets are used.
 .SH PROTOCOLS
@@ -53,7 +56,7 @@ All protocols except for file:// and FTP are supported in theory. HTTP, IMAP,
 POP3 and SMTP should in particular work (including their SSL/TLS variants).
 .SH EXAMPLE
 Given that you have an nginx server running, listening on /tmp/nginx.sock, you
-can request a HTTP resource with:
+can request an HTTP resource with:
 
 .nf
     curl_easy_setopt(curl_handle, CURLOPT_UNIX_SOCKET_PATH, "/tmp/nginx.sock");

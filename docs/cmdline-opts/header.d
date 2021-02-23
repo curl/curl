@@ -1,10 +1,11 @@
 Long: header
 Short: H
-Arg: <header>
-Help: Pass custom header LINE to server
+Arg: <header/@file>
+Help: Pass custom header(s) to server
 Protocols: HTTP
+Category: http
+See-also: user-agent referer
 ---
-
 Extra header to include in the request when sending HTTP to a server. You may
 specify any number of extra headers. Note that if you should add a custom
 header that has the same name as one of the internal ones curl would use, your
@@ -18,13 +19,18 @@ as \-H \&"X-Custom-Header;" to send "X-Custom-Header:".
 
 curl will make sure that each header you add/replace is sent with the proper
 end-of-line marker, you should thus \fBnot\fP add that as a part of the header
-content: do not add newlines or carriage returns, they will only mess things up
-for you.
+content: do not add newlines or carriage returns, they will only mess things
+up for you.
 
-See also the --user-agent and --referer options.
+This option can take an argument in @filename style, which then adds a header
+for each line in the input file. Using @- will make curl read the header file
+from stdin. Added in 7.55.0.
 
-Starting in 7.37.0, you need --proxy-header to send custom headers intended
-for a proxy.
+You need --proxy-header to send custom headers intended for a HTTP
+proxy. Added in 7.37.0.
+
+Passing on a "Transfer-Encoding: chunked" header when doing a HTTP request
+with a request body, will make curl send the data using chunked encoding.
 
 Example:
 

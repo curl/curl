@@ -1,0 +1,61 @@
+<testcase>
+<info>
+<keywords>
+HSTS
+url_effective
+</keywords>
+</info>
+
+<reply>
+
+# we use this as response to a CONNECT
+<data nocheck="yes">
+HTTP/1.1 403 not OK at all
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<features>
+HSTS
+</features>
+
+<file name="log/input493">
+.hsts.example "20311001 04:47:41"
+</file>
+
+<name>
+HSTS and %{url_effective} after upgrade
+</name>
+<command>
+-x http://%HOSTIP:%HTTPPORT http://this.hsts.example/493 --hsts log/input493 -w '%{url_effective}\n'
+</command>
+</client>
+
+<verify>
+# we let it CONNECT to the server to confirm HSTS but deny from there
+<protocol>
+CONNECT this.hsts.example:443 HTTP/1.1
+Host: this.hsts.example:443
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</protocol>
+<stdout>
+https://this.hsts.example/493
+</stdout>
+# Proxy CONNECT aborted
+<errorcode>
+56
+</errorcode>
+</verify>
+</testcase>
