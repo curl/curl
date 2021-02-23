@@ -600,15 +600,9 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
       BYTE cert_thumbprint_data[CERT_THUMBPRINT_DATA_LEN];
       HCERTSTORE cert_store = NULL;
       FILE *fInCert = NULL;
-      void *certdata = NULL;
-      size_t certsize = 0;
       bool blob = data->set.ssl.primary.cert_blob != NULL;
       TCHAR *cert_path = NULL;
-      if(blob) {
-        certdata = data->set.ssl.primary.cert_blob->data;
-        certsize = data->set.ssl.primary.cert_blob->len;
-      }
-      else {
+      if(!blob) {
         cert_path = curlx_convert_UTF8_to_tchar(
           data->set.ssl.primary.clientcert);
         if(!cert_path)
@@ -643,10 +637,12 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
              https://social.msdn.microsoft.com/Forums/windowsdesktop/
                             en-US/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
         */
-        CRYPT_DATA_BLOB datablob;
+        CRYPT_DATA_BLOB datablob = { 0, NULL };
         WCHAR* pszPassword;
         size_t pwd_len = 0;
         int str_w_len = 0;
+        void *certdata = NULL;
+        size_t certsize = 0;
         const char *cert_showfilename_error = blob ?
           "(memory blob)" : data->set.ssl.primary.clientcert;
         curlx_unicodefree(cert_path);
@@ -673,11 +669,18 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
             free(certdata);
             return CURLE_SSL_CERTPROBLEM;
           }
+          /* Convert key-pair data to the in-memory certificate store */
+          datablob.pbData = (BYTE*)certdata;
+          datablob.cbData = (DWORD)certsize;
         }
-
-        /* Convert key-pair data to the in-memory certificate store */
-        datablob.pbData = (BYTE*)certdata;
-        datablob.cbData = (DWORD)certsize;
+        else if(blob) {
+          datablob.pbData = (BYTE*)data->set.ssl.primary.cert_blob->data;
+          datablob.cbData = (DWORD)data->set.ssl.primary.cert_blob->len;
+        }
+        else {
+          failf(data, "schannel: Client certificate no method available");
+          return CURLE_SSL_CERTPROBLEM;
+        }
 
         if(data->set.ssl.key_passwd != NULL)
           pwd_len = strlen(data->set.ssl.key_passwd);
