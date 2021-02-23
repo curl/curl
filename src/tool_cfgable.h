@@ -54,9 +54,9 @@ struct OperationConfig {
   char *random_file;
   char *egd_file;
   char *useragent;
-  char *cookie;             /* single line with specified cookies */
+  struct curl_slist *cookies;  /* cookies to serialize into a single line */
   char *cookiejar;          /* write to this file */
-  char *cookiefile;         /* read from this file */
+  struct curl_slist *cookiefiles;  /* file(s) to load cookies from */
   char *altsvc;             /* alt-svc cache file name */
   char *hsts;               /* HSTS cache file name */
   bool cookiesession;       /* new session? */
