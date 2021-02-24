@@ -2526,7 +2526,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
   curl_socket_t s;
   int num;
   unsigned int curraction;
-  int actions[MAX_SOCKSPEREASYHANDLE];
+  unsigned char actions[MAX_SOCKSPEREASYHANDLE];
 
   for(i = 0; i< MAX_SOCKSPEREASYHANDLE; i++)
     socks[i] = CURL_SOCKET_BAD;
@@ -2543,9 +2543,9 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
   for(i = 0; (i< MAX_SOCKSPEREASYHANDLE) &&
         (curraction & (GETSOCK_READSOCK(i) | GETSOCK_WRITESOCK(i)));
       i++) {
-    unsigned int action = CURL_POLL_NONE;
-    unsigned int prevaction = 0;
-    unsigned int comboaction;
+    unsigned char action = CURL_POLL_NONE;
+    unsigned char prevaction = 0;
+    int comboaction;
     bool sincebefore = FALSE;
 
     s = socks[i];
@@ -2603,10 +2603,10 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
     }
 
     comboaction = (entry->writers? CURL_POLL_OUT : 0) |
-      (entry->readers ? CURL_POLL_IN : 0);
+                   (entry->readers ? CURL_POLL_IN : 0);
 
     /* socket existed before and has the same action set as before */
-    if(sincebefore && (entry->action == comboaction))
+    if(sincebefore && ((int)entry->action == comboaction))
       /* same, continue */
       continue;
 
@@ -2639,7 +2639,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
     /* if this is NULL here, the socket has been closed and notified so
        already by Curl_multi_closed() */
     if(entry) {
-      int oldactions = data->actions[i];
+      unsigned char oldactions = data->actions[i];
       /* this socket has been removed. Decrease user count */
       entry->users--;
       if(oldactions & CURL_POLL_OUT)
@@ -2664,7 +2664,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
   } /* for loop over numsocks */
 
   memcpy(data->sockets, socks, num*sizeof(curl_socket_t));
-  memcpy(data->actions, actions, num*sizeof(int));
+  memcpy(data->actions, actions, num*sizeof(char));
   data->numsocks = num;
   return CURLM_OK;
 }

@@ -1918,8 +1918,8 @@ struct Curl_easy {
      the state etc are also kept. This array is mostly used to detect when a
      socket is to be removed from the hash. See singlesocket(). */
   curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
-  int actions[MAX_SOCKSPEREASYHANDLE]; /* action for each socket in
-                                          sockets[] */
+  unsigned char actions[MAX_SOCKSPEREASYHANDLE]; /* action for each socket in
+                                                    sockets[] */
   int numsocks;
 
   struct Names dns;
