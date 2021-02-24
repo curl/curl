@@ -4005,7 +4005,7 @@ dnl **********************************************************************
 dnl Check for quiche (QUIC)
 dnl **********************************************************************
 
-OPT_QUICHE="yes"
+OPT_QUICHE="no"
 
 if test "x$disable_http" = "xyes" -o "x$USE_NGTCP" = "x1"; then
   # without HTTP or with ngtcp2, quiche is no use
@@ -4077,9 +4077,7 @@ if test X"$want_quiche" != Xno; then
        )
       ],
         dnl not found, revert back to clean variables
-        LDFLAGS=$CLEANLDFLAGS
-        CPPFLAGS=$CLEANCPPFLAGS
-        LIBS=$CLEANLIBS
+        AC_MSG_ERROR([couldn't use quiche])
     )
   else
     dnl no quiche pkg-config found, deal with it
