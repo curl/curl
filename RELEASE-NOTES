@@ -4,7 +4,7 @@ curl and libcurl 7.76.0
  Command line options:         240
  curl_easy_setopt() options:   288
  Public functions in libcurl:  85
- Contributors:                 2332
+ Contributors:                 2334
 
 This release includes the following changes:
 
@@ -18,15 +18,20 @@ This release includes the following bugfixes:
 
  o asyn-ares: use consistent resolve error message [37]
  o BUG-BOUNTY: removed the cooperation mention
+ o build: delete unused feature guards [51]
  o build: fix --disable-dateparse [1]
  o build: fix --disable-http-auth
  o ci: stop building on freebsd-12-1 [38]
  o cmake: fix import library name for non-MS compiler on Windows [10]
+ o cmake: use CMAKE_INSTALL_INCLUDEDIR indirection [49]
+ o configure: fail if --with-quiche is used and quiche isn't found [48]
+ o configure: make hyper opt-in, and fail if missing [53]
  o curl_multibyte: always return a heap-allocated copy of string [29]
  o curl_multibyte: fall back to local code page stat/access on Windows [8]
  o curl_url_set.3: mention CURLU_PATH_AS_IS [13]
  o CURLOPT_QUOTE.3: clarify that libcurl doesn't parse what's sent [16]
  o docs/Makefile.inc: format to be update-friendly [11]
+ o docs: add CURLOPT_CURLU to 'See also' in curl_url_ functions [52]
  o docs: fix FILE example url in --metalink documentation [19]
  o doh: Fix sharing user's resolve list with DOH handles [46]
  o file: Support unicode urls on windows [9]
@@ -43,6 +48,8 @@ This release includes the following bugfixes:
  o http: use credentials from transfer, not connection [25]
  o lib: remove 'conn->data' completely [45]
  o memdebug: close debug logfile explicitly on exit [28]
+ o mingw: enable using strcasecmp() [50]
+ o multi: do once-per-transfer inits in before_perform in DID state [54]
  o multi: rename the multi transfer states [43]
  o ngtcp2: adapt to the new recv_datagram callback
  o ngtcp2: clarify calculation precedence [27]
@@ -60,6 +67,7 @@ This release includes the following bugfixes:
  o url: fix possible use-after-free in default protocol [42]
  o urldata: don't touch data->set.httpversion at run-time [6]
  o urldata: fix build without HTTP and MQTT [22]
+ o urldata: make 'actions[]' use unsigned char instead of int [47]
  o urldata: remove the 'rtspversion' field [15]
  o urldata: remove the _ORIG suffix from string names [31]
  o wolfssl: don't store a NULL sessionid [40]
@@ -71,14 +79,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alex Xu, arvids-kokins-bidstack on github, awesomenode on github,
-  Benbuck Nason, Bodo Bergmann, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, David Demelier, David Goerger, Emil Engler, Fabian Keil,
-  Firefox OS, Gisle Vanem, Ikko Ashimine, Jack Boos Yu, Jacob Hoffman-Andrews,
-  Jon Rumsey, Joseph Chen, Manuj Bhatia, Marcel Raad, Ray Satiro,
-  Simon Josefsson, Stephan Szabo, Viktor Szakats, Vincent Torri,
-  ZimCodes on github,
-  (27 contributors)
+  Alex Xu, Amaury Denoyelle, arvids-kokins-bidstack on github,
+  awesomenode on github, Benbuck Nason, Bodo Bergmann, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, David Demelier, David Goerger,
+  Emil Engler, Fabian Keil, Firefox OS, Gisle Vanem, Gregor Jasny,
+  Ikko Ashimine, Jack Boos Yu, Jacob Hoffman-Andrews, Jon Rumsey, Joseph Chen,
+  Manuj Bhatia, Marcel Raad, Ray Satiro, Sergei Nikulov, Simon Josefsson,
+  Stephan Szabo, Viktor Szakats, Vincent Torri, ZimCodes on github,
+  (30 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -127,3 +135,11 @@ References to bug reports and discussions on issues:
  [44] = https://curl.se/bug/?i=6610
  [45] = https://curl.se/bug/?i=6608
  [46] = https://curl.se/bug/?i=6589
+ [47] = https://curl.se/bug/?i=6648
+ [48] = https://curl.se/bug/?i=6652
+ [49] = https://curl.se/bug/?i=6440
+ [50] = https://curl.se/bug/?i=6644
+ [51] = https://curl.se/bug/?i=6645
+ [52] = https://curl.se/bug/?i=6639
+ [53] = https://curl.se/bug/?i=6598
+ [54] = https://curl.se/bug/?i=6640
