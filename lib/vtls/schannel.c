@@ -428,12 +428,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 #endif
   TCHAR *host_name;
   CURLcode result;
-#ifndef CURL_DISABLE_PROXY
-  char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
-    conn->host.name;
-#else
-  char * const hostname = conn->host.name;
-#endif
+  char * const hostname = SSL_HOST_NAME();
 
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
@@ -995,12 +990,7 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
   bool doread;
-#ifndef CURL_DISABLE_PROXY
-  char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
-    conn->host.name;
-#else
-  char * const hostname = conn->host.name;
-#endif
+  char * const hostname = SSL_HOST_NAME();
   const char *pubkey_ptr;
 
   doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
@@ -1249,9 +1239,7 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     DEBUGF(infof(data, "schannel: SSL/TLS handshake complete\n"));
   }
 
-  pubkey_ptr = SSL_IS_PROXY() ?
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  pubkey_ptr = SSL_PINNED_PUB_KEY();
   if(pubkey_ptr) {
     result = pkp_pin_peer_pubkey(data, conn, sockindex, pubkey_ptr);
     if(result) {
@@ -1338,8 +1326,7 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
   CERT_CONTEXT *ccert_context = NULL;
   bool isproxy = SSL_IS_PROXY();
 #ifdef DEBUGBUILD
-  const char * const hostname = isproxy ? conn->http_proxy.host.name :
-    conn->host.name;
+  const char * const hostname = SSL_HOST_NAME();
 #endif
 #ifdef HAS_ALPN
   SecPkgContext_ApplicationProtocol alpn_result;
@@ -2126,12 +2113,7 @@ static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
    * Shutting Down an Schannel Connection
    */
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-#ifndef CURL_DISABLE_PROXY
-  char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
-    conn->host.name;
-#else
-  char * const hostname = conn->host.name;
-#endif
+  char * const hostname = SSL_HOST_NAME();
 
   DEBUGASSERT(data);
 

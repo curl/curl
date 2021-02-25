@@ -1664,16 +1664,9 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
   const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(primary.cert_blob);
-#ifndef CURL_DISABLE_PROXY
   bool isproxy = SSL_IS_PROXY();
-  const char * const hostname = isproxy ? conn->http_proxy.host.name :
-    conn->host.name;
-  const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
-#else
-  const isproxy = FALSE;
-  const char * const hostname = conn->host.name;
-  const long int port = conn->remote_port;
-#endif
+  const char * const hostname = SSL_HOST_NAME();
+  const long int port = SSL_HOST_PORT();
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
@@ -2508,12 +2501,7 @@ sectransp_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   OSStatus err;
   SSLCipherSuite cipher;
   SSLProtocol protocol = 0;
-#ifndef CURL_DISABLE_PROXY
-  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
-    conn->host.name;
-#else
-  const char * const hostname = conn->host.name;
-#endif
+  const char * const hostname = SSL_HOST_NAME();
 
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
               || ssl_connect_2_reading == connssl->connecting_state
