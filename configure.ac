@@ -2221,7 +2221,7 @@ if test -z "$ssl_backends" -o "x$OPT_GNUTLS" != xno; then
 fi
 
 dnl ---
-dnl Check which crypto backend GnuTLS uses
+dnl Check which crypto backend GnuTLS uses, only nettle is supported
 dnl ---
 
 if test "$GNUTLS_ENABLED" = "1"; then
