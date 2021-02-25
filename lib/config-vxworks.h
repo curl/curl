@@ -838,9 +838,6 @@
 /* Define if you want to enable c-ares support */
 /* #undef USE_ARES */
 
-/* Define to disable non-blocking sockets. */
-/* #undef USE_BLOCKING_SOCKETS */
-
 /* if GnuTLS is enabled */
 /* #undef USE_GNUTLS */
 
