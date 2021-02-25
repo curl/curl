@@ -98,8 +98,7 @@ mesalink_connect_step1(struct Curl_easy *data,
 #ifdef ENABLE_IPV6
   struct in6_addr addr6;
 #endif
-  const char *const hostname =
-    SSL_IS_PROXY() ? conn->http_proxy.host.name : conn->host.name;
+  const char * const hostname = SSL_HOST_NAME();
   size_t hostname_len = strlen(hostname);
 
   SSL_METHOD *req_method = NULL;

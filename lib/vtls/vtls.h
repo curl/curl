@@ -148,6 +148,8 @@ bool Curl_ssl_tls13_ciphersuites(void);
   (SSL_IS_PROXY() ? conn->http_proxy.host.name : conn->host.name)
 #define SSL_HOST_DISPNAME()                                             \
   (SSL_IS_PROXY() ? conn->http_proxy.host.dispname : conn->host.dispname)
+#define SSL_HOST_PORT()                                                 \
+  (SSL_IS_PROXY() ? conn->port : conn->remote_port)
 #define SSL_PINNED_PUB_KEY() (SSL_IS_PROXY()                            \
   ? data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]                     \
   : data->set.str[STRING_SSL_PINNEDPUBLICKEY])
@@ -158,6 +160,7 @@ bool Curl_ssl_tls13_ciphersuites(void);
 #define SSL_CONN_CONFIG(var) conn->ssl_config.var
 #define SSL_HOST_NAME() conn->host.name
 #define SSL_HOST_DISPNAME() conn->host.dispname
+#define SSL_HOST_PORT() conn->remote_port
 #define SSL_PINNED_PUB_KEY()                                            \
   data->set.str[STRING_SSL_PINNEDPUBLICKEY]
 #endif

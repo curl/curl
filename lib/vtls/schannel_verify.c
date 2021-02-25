@@ -536,13 +536,7 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
   const CERT_CHAIN_CONTEXT *pChainContext = NULL;
   HCERTCHAINENGINE cert_chain_engine = NULL;
   HCERTSTORE trust_store = NULL;
-#ifndef CURL_DISABLE_PROXY
-  const char * const conn_hostname = SSL_IS_PROXY() ?
-    conn->http_proxy.host.name :
-    conn->host.name;
-#else
-  const char * const conn_hostname = conn->host.name;
-#endif
+  const char * const conn_hostname = SSL_HOST_NAME();
 
   sspi_status =
     s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,

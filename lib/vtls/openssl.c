@@ -3308,11 +3308,7 @@ static CURLcode ossl_connect_step2(struct Curl_easy *data,
        */
       if(CURLE_SSL_CONNECT_ERROR == result && errdetail == 0) {
         const char * const hostname = SSL_HOST_NAME();
-#ifndef CURL_DISABLE_PROXY
-        const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
-#else
-        const long int port = conn->remote_port;
-#endif
+        const long int port = SSL_HOST_PORT();
         char extramsg[80]="";
         int sockerr = SOCKERRNO;
         if(sockerr && detail == SSL_ERROR_SYSCALL)
@@ -3925,8 +3921,7 @@ static CURLcode servercert(struct Curl_easy *data,
     /* when not strict, we don't bother about the verify cert problems */
     result = CURLE_OK;
 
-  ptr = SSL_IS_PROXY() ? data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  ptr = SSL_PINNED_PUB_KEY();
   if(!result && ptr) {
     result = pkp_pin_peer_pubkey(data, backend->server_cert, ptr);
     if(result)

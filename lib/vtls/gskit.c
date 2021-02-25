@@ -705,8 +705,7 @@ static CURLcode gskit_connect_step1(struct Curl_easy *data,
   const char * const keyringlabel = SSL_SET_OPTION(primary.clientcert);
   const long int ssl_version = SSL_CONN_CONFIG(version);
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
-  const char * const hostname = SSL_IS_PROXY()? conn->http_proxy.host.name:
-    conn->host.name;
+  const char * const hostname = SSL_HOST_NAME();
   const char *sni;
   unsigned int protoflags = 0;
   Qso_OverlappedIO_t commarea;
@@ -1035,8 +1034,7 @@ static CURLcode gskit_connect_step3(struct Curl_easy *data,
   }
 
   /* Check pinned public key. */
-  ptr = SSL_IS_PROXY() ? data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  ptr = SSL_PINNED_PUB_KEY();
   if(!result && ptr) {
     curl_X509certificate x509;
     curl_asn1Element *p;
