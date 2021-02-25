@@ -70,7 +70,7 @@ typedef enum {
 
 #define CURLPIPE_ANY (CURLPIPE_MULTIPLEX)
 
-#if !defined(CURL_DISABLE_SOCKETPAIR) && !defined(USE_BLOCKING_SOCKETS)
+#if !defined(CURL_DISABLE_SOCKETPAIR)
 #define ENABLE_WAKEUP
 #endif
 

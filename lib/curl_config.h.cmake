@@ -960,9 +960,6 @@ ${SIZEOF_TIME_T_CODE}
 /* Define if you want to enable WIN32 threaded DNS lookup */
 #cmakedefine USE_THREADS_WIN32 1
 
-/* Define to disable non-blocking sockets. */
-#cmakedefine USE_BLOCKING_SOCKETS 1
-
 /* if GnuTLS is enabled */
 #cmakedefine USE_GNUTLS 1
 

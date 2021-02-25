@@ -201,7 +201,6 @@
 #define STRERROR_R_TYPE_ARG3 int
 
 #define TIME_WITH_SYS_TIME 1
-#define USE_BLOCKING_SOCKETS 1
 #define USE_MANUAL 1
 
 #define __attribute__(x)
