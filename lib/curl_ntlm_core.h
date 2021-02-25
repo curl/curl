@@ -30,7 +30,6 @@
    then it must be initialized to be used by NTLM. */
 #if !defined(USE_OPENSSL) && \
     !defined(USE_WOLFSSL) && \
-    !defined(USE_GNUTLS_NETTLE) && \
     !defined(USE_GNUTLS) && \
     defined(USE_NSS)
 #define NTLM_NEEDS_NSS_INIT
