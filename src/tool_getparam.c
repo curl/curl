@@ -1320,11 +1320,15 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         }
         else if(strchr(nextarg, '=')) {
           /* A cookie string must have a =-letter */
-          GetStr(&config->cookie, nextarg);
+          err = add2list(&config->cookies, nextarg);
+          if(err)
+            return err;
           break;
         }
         /* We have a cookie file to read from! */
-        GetStr(&config->cookiefile, nextarg);
+        err = add2list(&config->cookiefiles, nextarg);
+        if(err)
+          return err;
       }
       break;
     case 'B':
