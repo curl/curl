@@ -219,6 +219,26 @@ static const struct cipher_s cipherlist[] = {
  {"aes_256_gcm_sha_384",              TLS_AES_256_GCM_SHA384},
  {"chacha20_poly1305_sha_256",        TLS_CHACHA20_POLY1305_SHA256},
 #endif
+#ifdef TLS_DHE_DSS_WITH_AES_128_CBC_SHA256
+  /* Introduced in release 3.20 */
+  {"dhe_dss_aes_128_sha_256",        TLS_DHE_DSS_WITH_AES_128_CBC_SHA256},
+  {"dhe_dss_aes_256_sha_256",        TLS_DHE_DSS_WITH_AES_256_CBC_SHA256},
+#endif
+#ifdef TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA
+  /* Introduced in release 3.12 */
+  {"dhe_rsa_camellia_128_sha",        TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA},
+  {"dhe_dss_camellia_128_sha",        TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA},
+  {"dhe_rsa_camellia_256_sha",        TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA},
+  {"dhe_dss_camellia_256_sha",        TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA},
+  {"rsa_camellia_128_sha",            TLS_RSA_WITH_CAMELLIA_128_CBC_SHA},
+  {"rsa_camellia_256_sha",            TLS_RSA_WITH_CAMELLIA_256_CBC_SHA},
+#endif
+  {"dhe_rsa_3des_sha",                TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA},
+  {"dhe_dss_3des_sha",                TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA},
+  {"rsa_seed_sha",                    TLS_RSA_WITH_SEED_CBC_SHA},
+  {"dhe_rsa_des_sha",                 TLS_DHE_RSA_WITH_DES_CBC_SHA},
+  {"dhe_dss_des_sha",                 TLS_DHE_DSS_WITH_DES_CBC_SHA},
+  {"tls_dhe_dss_rc4_128_sha",         TLS_DHE_DSS_WITH_RC4_128_SHA},
 };
 
 #if defined(WIN32)
