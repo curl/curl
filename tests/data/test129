@@ -1,52 +1,57 @@
 <testcase>
 <info>
 <keywords>
-FTP
-EPSV
-TYPE A
-RETR
-type=
+HTTP
+HTTP GET
 </keywords>
 </info>
+
+#
 # Server-side
 <reply>
-<size>
-37
-</size>
-<data>
-data
-    to
-      see
-that FTP
-works
-  so does it?
+<data nocheck="yes">
+HTTP/1.2 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
 </data>
 </reply>
 
+#
 # Client-side
 <client>
 <server>
-ftp
+http
 </server>
  <name>
-FTP GET with type=A style ASCII URL and understated server SIZE
+HTTP/1.2 is rejected
  </name>
  <command>
-"ftp://%HOSTIP:%FTPPORT/129;type=A"
+http://%HOSTIP:%HTTPPORT/129
 </command>
 </client>
 
+#
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-USER anonymous
-PASS ftp@example.com
-PWD
-EPSV
-TYPE A
-SIZE 129
-RETR 129
-QUIT
+GET /129 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
 </protocol>
+# CURLE_UNSUPPORTED_PROTOCOL
+<errorcode>
+1
+</errorcode>
 </verify>
 </testcase>

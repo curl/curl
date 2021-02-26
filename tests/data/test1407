@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
   curl_easy_setopt(hnd, CURLOPT_DIRLISTONLY, 1L);
   curl_easy_setopt(hnd, CURLOPT_USERPWD, "user:secret");
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(hnd, CURLOPT_FTP_SKIP_PASV_IP, 1L);
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 
   /* Here is a list of options the curl code used that cannot get generated

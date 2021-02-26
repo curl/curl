@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -169,10 +169,12 @@ sub single {
         }
         elsif(/^---/) {
             if(!$long) {
-                print STDERR "WARN: no 'Long:' in $f\n";
+                print STDERR "ERROR: no 'Long:' in $f\n";
+                exit 1;
             }
             if(!$category) {
-                print STDERR "WARN: no 'Category:' in $f\n";
+                print STDERR "ERROR: no 'Category:' in $f\n";
+                exit 2;
             }
             last;
         }
@@ -367,8 +369,11 @@ sub listhelp {
 
         my $line = sprintf "  {\"%s\",\n   \"%s\",\n   %s},\n", $opt, $desc, $bitmask;
 
-        if(length($opt) + length($desc) > 78) {
-            print STDERR "WARN: the --$long line is too long\n";
+        if(length($opt) > 78) {
+            print STDERR "WARN: the --$long name is too long\n";
+        }
+        elsif(length($desc) > 78) {
+            print STDERR "WARN: the --$long description is too long\n";
         }
         print $line;
     }

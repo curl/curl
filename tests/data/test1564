@@ -12,6 +12,9 @@ wakeup
 
 # Client-side
 <client>
+<features>
+wakeup
+</features>
 <server>
 none
 </server>

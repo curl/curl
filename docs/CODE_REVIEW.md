@@ -162,7 +162,7 @@ used as input to string functions.
 # Commit messages
 
 Tightly coupled with a code review is making sure that the commit message is
-good. It is the responsibilitiy of the person who merges the code to make sure
+good. It is the responsibility of the person who merges the code to make sure
 that the commit message follows our standard (detailed in the
 [CONTRIBUTE.md](CONTRIBUTE.md) document). This includes making sure the PR
 identifies related issues and giving credit to reporters and helpers.

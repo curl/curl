@@ -238,10 +238,10 @@ static bool socket_domain_is_ip(void)
 /* parse the file on disk that might have a test number for us */
 static int parse_cmdfile(struct httprequest *req)
 {
-  int testnum = DOCNUMBER_NOTHING;
-  char buf[256];
   FILE *f = fopen(cmdfile, FOPEN_READTEXT);
   if(f) {
+    int testnum = DOCNUMBER_NOTHING;
+    char buf[256];
     while(fgets(buf, sizeof(buf), f)) {
       if(1 == sscanf(buf, "Testnum %d", &testnum)) {
         logmsg("[%s] cmdfile says testnum %d", cmdfile, testnum);
@@ -748,7 +748,6 @@ static int ProcessRequest(struct httprequest *req)
 
   if(req->open &&
      req->prot_version >= 11 &&
-     end &&
      req->reqbuf + req->offset > end + strlen(end_of_headers) &&
      !req->cl &&
      (!strncmp(req->reqbuf, "GET", strlen("GET")) ||

@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--fail-with-body
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.0 404 BAD BOY swsclose
+Content-Type: text/html
+
+This silly page doesn't reaaaaaly exist so you should not get it.
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP GET --fail-with-body on HTTP error return - twice
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/361 http://%HOSTIP:%HTTPPORT/361 --fail-with-body
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /361 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /361 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+22
+</errorcode>
+</verify>
+</testcase>

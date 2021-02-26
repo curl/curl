@@ -5,6 +5,7 @@ HTTP
 HTTP GET
 IDN
 followlocation
+--resolve
 --write-out
 </keywords>
 </info>
@@ -14,7 +15,7 @@ followlocation
 <reply>
 <data nocheck="yes">
 HTTP/1.1 302 OK swsbounce
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Content-Type: text/plain
 Location: ./20460001
@@ -23,7 +24,7 @@ redirect
 </data>
 <data1 nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Content-Type: text/plain; charset=us-ascii
 
@@ -74,13 +75,13 @@ Accept: */*
 
 <stdout>
 HTTP/1.1 302 OK swsbounce
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Content-Type: text/plain
 Location: ./20460001
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Content-Type: text/plain; charset=us-ascii
 

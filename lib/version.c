@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -100,7 +100,7 @@ static size_t zstd_version(char *buf, size_t bufsz)
  * zeros in the data.
  */
 
-#define VERSION_PARTS 14 /* number of substrings we can concatenate */
+#define VERSION_PARTS 16 /* number of substrings we can concatenate */
 
 char *curl_version(void)
 {
@@ -143,6 +143,12 @@ char *curl_version(void)
 #endif
 #ifdef USE_LIBRTMP
   char rtmp_version[40];
+#endif
+#ifdef USE_HYPER
+  char hyper_buf[30];
+#endif
+#ifdef USE_GSASL
+  char gsasl_buf[30];
 #endif
   int i = 0;
   int j;
@@ -228,6 +234,15 @@ char *curl_version(void)
     src[i++] = rtmp_version;
   }
 #endif
+#ifdef USE_HYPER
+  msnprintf(hyper_buf, sizeof(hyper_buf), "Hyper/%s", hyper_version());
+  src[i++] = hyper_buf;
+#endif
+#ifdef USE_GSASL
+  msnprintf(gsasl_buf, sizeof(gsasl_buf), "libgsasl/%s",
+            gsasl_check_version(NULL));
+  src[i++] = gsasl_buf;
+#endif
 
   DEBUGASSERT(i <= VERSION_PARTS);
 
@@ -273,6 +288,9 @@ static const char * const protocols[] = {
 #endif
 #ifndef CURL_DISABLE_GOPHER
   "gopher",
+#endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_GOPHER)
+  "gophers",
 #endif
 #ifndef CURL_DISABLE_HTTP
   "http",
@@ -394,7 +412,7 @@ static curl_version_info_data version_info = {
 #if defined(USE_TLS_SRP)
   | CURL_VERSION_TLSAUTH_SRP
 #endif
-#if defined(USE_NGHTTP2)
+#if defined(USE_NGHTTP2) || defined(USE_HYPER)
   | CURL_VERSION_HTTP2
 #endif
 #if defined(ENABLE_QUIC)
@@ -420,6 +438,9 @@ static curl_version_info_data version_info = {
 #endif
 #if defined(USE_HSTS)
   | CURL_VERSION_HSTS
+#endif
+#if defined(USE_GSASL)
+  | CURL_VERSION_GSASL
 #endif
   ,
   NULL, /* ssl_version */
@@ -447,7 +468,8 @@ static curl_version_info_data version_info = {
   NULL,
 #endif
   0,    /* zstd_ver_num */
-  NULL  /* zstd version */
+  NULL, /* zstd version */
+  NULL  /* Hyper version */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
@@ -468,7 +490,6 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #ifdef HAVE_ZSTD
   static char zstd_buffer[80];
 #endif
-
 
 #ifdef USE_SSL
   Curl_ssl_version(ssl_buffer, sizeof(ssl_buffer));
@@ -541,6 +562,14 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
     static char quicbuffer[80];
     Curl_quic_ver(quicbuffer, sizeof(quicbuffer));
     version_info.quic_version = quicbuffer;
+  }
+#endif
+
+#ifdef USE_HYPER
+  {
+    static char hyper_buffer[30];
+    msnprintf(hyper_buffer, sizeof(hyper_buffer), "Hyper/%s", hyper_version());
+    version_info.hyper_version = hyper_buffer;
   }
 #endif
 

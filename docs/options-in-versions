@@ -14,6 +14,7 @@
 --alt-svc                            7.64.1
 --anyauth                            7.10.6
 --append (-a)                        4.8
+--aws-sigv4                          7.75.0
 --basic                              7.10.6
 --cacert                             7.5
 --capath                             7.9.8
@@ -30,6 +31,7 @@
 --cookie (-b)                        4.9
 --cookie-jar (-c)                    7.9
 --create-dirs                        7.10.3
+--create-file-mode                   7.75.0
 --crlf                               5.7
 --crlfile                            7.19.7
 --curves                             7.73.0
@@ -48,6 +50,8 @@
 --dns-ipv4-addr                      7.33.0
 --dns-ipv6-addr                      7.33.0
 --dns-servers                        7.33.0
+--doh-cert-status                    7.76.0
+--doh-insecure                       7.76.0
 --doh-url                            7.62.0
 --dump-header (-D)                   5.7
 --egd-file                           7.7
@@ -57,6 +61,7 @@
 --expect100-timeout                  7.47.0
 --fail (-f)                          4.0
 --fail-early                         7.52.0
+--fail-with-body                     7.76.0
 --false-start                        7.42.0
 --form (-F)                          5.0
 --form-string                        7.13.2

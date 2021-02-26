@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2003 - 2007, Gisle Vanem <gvanem@yahoo.no>.
+# Copyright (C) 2003 - 2021, Gisle Vanem <gvanem@yahoo.no>.
 # Copyright (C) 2003 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
@@ -29,13 +29,15 @@ DEPEND_PREREQ = # tool_hugehelp.c
 
 TOPDIR = ..
 
+vpath %.c ../lib
+
 include ../packages/DOS/common.dj
 include Makefile.inc
 
-CSOURCES = $(CURL_CFILES)
+CSOURCES = $(CURL_CFILES) $(CURLX_CFILES)
 
-ifeq ($(USE_SSL),1)
-  EX_LIBS += $(OPENSSL_ROOT)/lib/libssl.a $(OPENSSL_ROOT)/lib/libcrypt.a
+ifeq ($(USE_OPENSSL),1)
+  EX_LIBS += $(OPENSSL_LIBS)
 endif
 
 ifeq ($(USE_ARES),1)
@@ -53,8 +55,8 @@ endif
 
 EX_LIBS += $(WATT32_ROOT)/lib/libwatt.a
 
-PROGRAM  = curl.exe
-OBJECTS += $(addprefix $(OBJ_DIR)/, $(CSOURCES:.c=.o))
+PROGRAM = curl.exe
+OBJECTS = $(addprefix $(OBJ_DIR)/, $(notdir $(CSOURCES:.c=.o)))
 
 all: $(OBJ_DIR) $(PROGRAM)
 	@echo Welcome to curl
@@ -64,10 +66,14 @@ $(PROGRAM): $(OBJECTS) ../lib/libcurl.a
 
 #
 # groff 1.18+ requires "-P -c"
+# If 'USE_ZLIB = 1', create a compressed help-file.
 #
-tool_hugehelp.c: ../docs/MANUAL ../docs/curl.1 mkhelp.pl
-	groff -Tascii -man ../docs/curl.1 | \
-	perl -w mkhelp.pl ../docs/MANUAL > $@
+ifeq ($(USE_ZLIB),1)
+  COMPRESS_OPT = -c
+endif
+
+tool_hugehelp.c: ../docs/curl.1 mkhelp.pl Makefile.dj
+	groff -Tascii -man $< | perl -w mkhelp.pl $(COMPRESS_OPT) $< > $@
 
 # clean generated files
 #

@@ -35,17 +35,12 @@
 #ifdef USE_OPENSSL
 #  include <openssl/md5.h>
 #  include <openssl/sha.h>
-#elif defined(USE_GNUTLS_NETTLE)
+#elif defined(USE_GNUTLS)
 #  include <nettle/md5.h>
 #  include <nettle/sha.h>
 #  define MD5_CTX    struct md5_ctx
 #  define SHA_CTX    struct sha1_ctx
 #  define SHA256_CTX struct sha256_ctx
-#elif defined(USE_GNUTLS)
-#  include <gcrypt.h>
-#  define MD5_CTX    gcry_md_hd_t
-#  define SHA_CTX    gcry_md_hd_t
-#  define SHA256_CTX gcry_md_hd_t
 #elif defined(USE_NSS)
 #  include <nss.h>
 #  include <pk11pub.h>
@@ -116,7 +111,7 @@ struct win32_crypto_hash {
 
 #if defined(USE_OPENSSL)
 /* Functions are already defined */
-#elif defined(USE_GNUTLS_NETTLE)
+#elif defined(USE_GNUTLS)
 
 static int MD5_Init(MD5_CTX *ctx)
 {
@@ -170,65 +165,6 @@ static void SHA256_Update(SHA256_CTX *ctx,
 static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
 {
   sha256_digest(ctx, 32, digest);
-}
-
-#elif defined(USE_GNUTLS)
-
-static int MD5_Init(MD5_CTX *ctx)
-{
-  gcry_md_open(ctx, GCRY_MD_MD5, 0);
-  return 1;
-}
-
-static void MD5_Update(MD5_CTX *ctx,
-                       const unsigned char *input,
-                       unsigned int inputLen)
-{
-  gcry_md_write(*ctx, input, inputLen);
-}
-
-static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
-{
-  memcpy(digest, gcry_md_read(*ctx, 0), 16);
-  gcry_md_close(*ctx);
-}
-
-static int SHA1_Init(SHA_CTX *ctx)
-{
-  gcry_md_open(ctx, GCRY_MD_SHA1, 0);
-  return 1;
-}
-
-static void SHA1_Update(SHA_CTX *ctx,
-                        const unsigned char *input,
-                        unsigned int inputLen)
-{
-  gcry_md_write(*ctx, input, inputLen);
-}
-
-static void SHA1_Final(unsigned char digest[20], SHA_CTX *ctx)
-{
-  memcpy(digest, gcry_md_read(*ctx, 0), 20);
-  gcry_md_close(*ctx);
-}
-
-static int SHA256_Init(SHA256_CTX *ctx)
-{
-  gcry_md_open(ctx, GCRY_MD_SHA256, 0);
-  return 1;
-}
-
-static void SHA256_Update(SHA256_CTX *ctx,
-                          const unsigned char *input,
-                          unsigned int inputLen)
-{
-  gcry_md_write(*ctx, input, inputLen);
-}
-
-static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
-{
-  memcpy(digest, gcry_md_read(*ctx, 0), 32);
-  gcry_md_close(*ctx);
 }
 
 #elif defined(USE_NSS)

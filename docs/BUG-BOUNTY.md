@@ -22,7 +22,7 @@ details.
 
 # What are the reward amounts?
 
-The curl projects offer monetary compensation for reported and published
+The curl project offers monetary compensation for reported and published
 security vulnerabilities. The amount of money that is rewarded depends on how
 serious the flaw is determined to be.
 
@@ -46,18 +46,14 @@ before a bug bounty will be considered.
 Bounties need to be requested within twelve months from the publication of the
 vulnerability.
 
-The vulnerabilities must not have been made public before February 1st, 2019.
-We do not retroactively pay for old, already known, or published security
-problems.
-
 # Product vulnerabilities only
 
 This bug bounty only concerns the curl and libcurl products and thus their
 respective source codes - when running on existing hardware. It does not
 include documentation, websites, or other infrastructure.
 
-The curl security team will be the sole arbiter if a reported flaw can be
-subject to a bounty or not.
+The curl security team is the sole arbiter if a reported flaw is subject to a
+bounty or not.
 
 # How are vulnerabilities graded?
 
@@ -85,22 +81,3 @@ In the event that the individual receiving a curl bug bounty needs to pay
 taxes on the reward money, the responsibility lies with the receiver. The
 curl project or its security team never actually receive any of this money,
 hold the money, or pay out the money.
-
-## Bonus levels
-
-In cooperation with [Dropbox](https://www.dropbox.com) the curl bug bounty can
-offer the highest levels of rewards if the issue covers one of the interest
-areas of theirs - and only if the bug is graded *high* or *critical*. A
-non-exhaustive list of vulnerabilities Dropbox is interested in are:
-
- - RCE
- - URL parsing vulnerabilities with demonstrable security impact
-
-Dropbox would generally hand out rewards for critical vulnerabilities ranging
-from 12k-32k USD where RCE is on the upper end of the spectrum.
-
-URL parsing vulnerabilities with demonstrable security impact might include
-incorrectly determining the authority of a URL when a special character is
-inserted into the path of the URL (as a hypothetical). This type of
-vulnerability would likely yield 6k-12k unless further impact could be
-demonstrated.

@@ -7,6 +7,7 @@
 <keywords>
 HTTP
 HTTP GET
+HTTP proxy
 followlocation
 </keywords>
 </info>
@@ -16,14 +17,14 @@ followlocation
 <data>
 HTTP/1.1 302 OK
 Location: http://example.net/there/it/is/../../tes t case=/6630002? yes no
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0
 
 </data>
 <data2>
 HTTP/1.1 200 OK
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 5
 
 body
@@ -31,12 +32,12 @@ body
 <datacheck>
 HTTP/1.1 302 OK
 Location: http://example.net/there/it/is/../../tes t case=/6630002? yes no
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0
 
 HTTP/1.1 200 OK
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 5
 
 body

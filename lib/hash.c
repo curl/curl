@@ -175,7 +175,7 @@ Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
   return NULL;
 }
 
-#if defined(DEBUGBUILD) && defined(AGGRESIVE_TEST)
+#if defined(DEBUGBUILD) && defined(AGGRESSIVE_TEST)
 void
 Curl_hash_apply(Curl_hash *h, void *user,
                 void (*cb)(void *user, void *ptr))

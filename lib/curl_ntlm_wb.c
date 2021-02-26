@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -329,12 +329,15 @@ done:
   return CURLE_REMOTE_ACCESS_DENIED;
 }
 
-CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
+CURLcode Curl_input_ntlm_wb(struct Curl_easy *data,
+                            struct connectdata *conn,
                             bool proxy,
                             const char *header)
 {
   struct ntlmdata *ntlm = proxy ? &conn->proxyntlm : &conn->ntlm;
   curlntlm *state = proxy ? &conn->proxy_ntlm_state : &conn->http_ntlm_state;
+
+  (void) data;  /* In case it gets unused by nop log macros. */
 
   if(!checkprefix("NTLM", header))
     return CURLE_BAD_CONTENT_ENCODING;
@@ -352,17 +355,17 @@ CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
   }
   else {
     if(*state == NTLMSTATE_LAST) {
-      infof(conn->data, "NTLM auth restarted\n");
+      infof(data, "NTLM auth restarted\n");
       Curl_http_auth_cleanup_ntlm_wb(conn);
     }
     else if(*state == NTLMSTATE_TYPE3) {
-      infof(conn->data, "NTLM handshake rejected\n");
+      infof(data, "NTLM handshake rejected\n");
       Curl_http_auth_cleanup_ntlm_wb(conn);
       *state = NTLMSTATE_NONE;
       return CURLE_REMOTE_ACCESS_DENIED;
     }
     else if(*state >= NTLMSTATE_TYPE1) {
-      infof(conn->data, "NTLM handshake failure (internal error)\n");
+      infof(data, "NTLM handshake failure (internal error)\n");
       return CURLE_REMOTE_ACCESS_DENIED;
     }
 
@@ -376,7 +379,8 @@ CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
  * This is for creating ntlm header output by delegating challenge/response
  * to Samba's winbind daemon helper ntlm_auth.
  */
-CURLcode Curl_output_ntlm_wb(struct connectdata *conn, bool proxy)
+CURLcode Curl_output_ntlm_wb(struct Curl_easy *data, struct connectdata *conn,
+                             bool proxy)
 {
   /* point to the address of the pointer that holds the string to send to the
      server, which is for a plain host or for a HTTP proxy */
@@ -386,12 +390,11 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn, bool proxy)
   struct ntlmdata *ntlm;
   curlntlm *state;
   struct auth *authp;
-  struct Curl_easy *data = conn->data;
 
   CURLcode res = CURLE_OK;
 
   DEBUGASSERT(conn);
-  DEBUGASSERT(conn->data);
+  DEBUGASSERT(data);
 
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
@@ -399,7 +402,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn, bool proxy)
     userp = conn->http_proxy.user;
     ntlm = &conn->proxyntlm;
     state = &conn->proxy_ntlm_state;
-    authp = &conn->data->state.authproxy;
+    authp = &data->state.authproxy;
 #else
     return CURLE_NOT_BUILT_IN;
 #endif
@@ -409,7 +412,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn, bool proxy)
     userp = conn->user;
     ntlm = &conn->ntlm;
     state = &conn->http_ntlm_state;
-    authp = &conn->data->state.authhost;
+    authp = &data->state.authhost;
   }
   authp->done = FALSE;
 
@@ -433,10 +436,10 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn, bool proxy)
      * request handling process.
      */
     /* Create communication with ntlm_auth */
-    res = ntlm_wb_init(conn->data, ntlm, userp);
+    res = ntlm_wb_init(data, ntlm, userp);
     if(res)
       return res;
-    res = ntlm_wb_response(conn->data, ntlm, "YR\n", *state);
+    res = ntlm_wb_response(data, ntlm, "YR\n", *state);
     if(res)
       return res;
 
@@ -454,7 +457,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn, bool proxy)
     char *input = aprintf("TT %s\n", ntlm->challenge);
     if(!input)
       return CURLE_OUT_OF_MEMORY;
-    res = ntlm_wb_response(conn->data, ntlm, input, *state);
+    res = ntlm_wb_response(data, ntlm, input, *state);
     free(input);
     if(res)
       return res;

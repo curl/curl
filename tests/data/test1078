@@ -21,7 +21,7 @@ Server: test tunnel 2000
 
 <data nocheck="yes">
 HTTP/1.0 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
@@ -77,7 +77,7 @@ HTTP/1.1 200 Mighty fine indeed
 Server: test tunnel 2000
 
 HTTP/1.0 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
@@ -86,7 +86,7 @@ Connection: keep-alive
 
 contents
 HTTP/1.0 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes

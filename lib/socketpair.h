@@ -30,7 +30,4 @@ int Curl_socketpair(int domain, int type, int protocol,
 #define Curl_socketpair(a,b,c,d) socketpair(a,b,c,d)
 #endif
 
-/* Defined here to allow specific build configs to disable it completely */
-#define USE_SOCKETPAIR 1
-
 #endif /* HEADER_CURL_SOCKETPAIR_H */

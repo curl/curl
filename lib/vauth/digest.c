@@ -61,12 +61,14 @@
    It converts digest text to ASCII so the MD5 will be correct for
    what ultimately goes over the network.
 */
-#define CURL_OUTPUT_DIGEST_CONV(a, b) \
-  result = Curl_convert_to_network(a, b, strlen(b)); \
-  if(result) { \
-    free(b); \
-    return result; \
-  }
+#define CURL_OUTPUT_DIGEST_CONV(a, b)                  \
+  do {                                                 \
+    result = Curl_convert_to_network(a, b, strlen(b)); \
+    if(result) {                                       \
+      free(b);                                         \
+      return result;                                   \
+    }                                                  \
+  } while(0)
 #endif /* !USE_WINDOWS_SSPI */
 
 bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,

@@ -68,6 +68,36 @@ For example, to insert the word hello a 100 times:
 
     %repeat[100 x hello]%
 
+## Conditional lines
+
+Lines in the test file can be made to appear conditionally on a specific
+feature (see the "features" section below) being set or not set. If the
+specific feature is present, the following lines will be output, otherwise it
+outputs nothing, until a following else or endif clause. Like this:
+
+    %if brotli
+    Accept-Encoding
+    %endif
+
+It can also check for the inversed condition, so if the feature us *not* set by
+the use of an exclamation mark:
+
+    %if !brotli
+    Accept-Encoding: not-brotli
+    %endif
+
+You can also make an "else" clause to get output for the opposite condition,
+like:
+
+    %if brotli
+    Accept-Encoding: brotli
+    %else
+    Accept-Encoding: nothing
+    %endif
+
+**Note** that there can be no nested conditions. You can only do one
+conditional at a time and you can only check for a single feature in it.
+
 # Variables
 
 When the test is preprocessed, a range of "variables" in the test file will be
@@ -87,6 +117,7 @@ Available substitute variables include:
 - `%FTPTIME3` - Even longer than %FTPTIME2
 - `%GOPHER6PORT` - IPv6 port number of the Gopher server
 - `%GOPHERPORT` - Port number of the Gopher server
+- `%GOPHERSPORT` - Port number of the Gophers server
 - `%HOST6IP` - IPv6 address of the host running this test
 - `%HOSTIP` - IPv4 address of the host running this test
 - `%HTTP6PORT` - IPv6 port number of the HTTP server
@@ -118,6 +149,7 @@ Available substitute variables include:
 - `%SSHPORT` - Port number of the SCP/SFTP server
 - `%SSHSRVMD5` - MD5 of SSH server's public key
 - `%SSH_PWD` - Current directory friendly for the SSH server
+- `%TESTNUMBER` - Number of the test case
 - `%TFTP6PORT` - IPv6 port number of the TFTP server
 - `%TFTPPORT` - Port number of the TFTP server
 - `%USER` - Login ID of the user running the test
@@ -169,7 +201,7 @@ part number and will then increase the part number with one. This is useful
 for auth tests and similar.
 
 `sendzero=yes` means that the (FTP) server will "send" the data even if the
-size is zero bytes. Used to verify curl's behaviour on zero bytes transfers.
+size is zero bytes. Used to verify curl's behavior on zero bytes transfers.
 
 `base64=yes` means that the data provided in the test-file is a chunk of data
 encoded with base64. It is the only way a test case can contain binary
@@ -299,6 +331,8 @@ What server(s) this test case requires/uses. Available servers:
 - `ftp-ipv6`
 - `ftp`
 - `ftps`
+- `gopher`
+- `gophers`
 - `http-ipv6`
 - `http-proxy`
 - `http-unix`
@@ -344,6 +378,7 @@ Features testable here are:
 - `HSTS`
 - `HTTP-auth`
 - `http/2`
+- `hyper`
 - `idn`
 - `ipv6`
 - `Kerberos`
@@ -371,9 +406,11 @@ Features testable here are:
 - `TLS-SRP`
 - `TrackMemory`
 - `typecheck`
+- `Unicode`
 - `unittest`
 - `unix-sockets`
 - `verbose-strings`
+- `wakeup`
 - `win32`
 
 as well as each protocol that curl supports.  A protocol only needs to be

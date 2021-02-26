@@ -15,7 +15,7 @@ HTTP proxy Digest auth
 # sent!
 <data>
 HTTP/1.1 407 no, tell me who you are first
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Proxy-Authenticate: Digest realm="many secrets", nonce="911"
 Content-Length: 0
@@ -31,7 +31,7 @@ ok
 </data1000>
 <datacheck>
 HTTP/1.1 407 no, tell me who you are first
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Proxy-Authenticate: Digest realm="many secrets", nonce="911"
 Content-Length: 0

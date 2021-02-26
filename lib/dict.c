@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -67,7 +67,7 @@
  * Forward declarations.
  */
 
-static CURLcode dict_do(struct connectdata *conn, bool *done);
+static CURLcode dict_do(struct Curl_easy *data, bool *done);
 
 /*
  * DICT protocol handler.
@@ -129,10 +129,9 @@ static char *unescape_word(struct Curl_easy *data, const char *inputbuff)
 }
 
 /* sendf() sends formatted data to the server */
-static CURLcode sendf(curl_socket_t sockfd, struct connectdata *conn,
+static CURLcode sendf(curl_socket_t sockfd, struct Curl_easy *data,
                       const char *fmt, ...)
 {
-  struct Curl_easy *data = conn->data;
   ssize_t bytes_written;
   size_t write_len;
   CURLcode result = CURLE_OK;
@@ -151,7 +150,7 @@ static CURLcode sendf(curl_socket_t sockfd, struct connectdata *conn,
 
   for(;;) {
     /* Write the buffer to the socket */
-    result = Curl_write(conn, sockfd, sptr, write_len, &bytes_written);
+    result = Curl_write(data, sockfd, sptr, write_len, &bytes_written);
 
     if(result)
       break;
@@ -173,7 +172,7 @@ static CURLcode sendf(curl_socket_t sockfd, struct connectdata *conn,
   return result;
 }
 
-static CURLcode dict_do(struct connectdata *conn, bool *done)
+static CURLcode dict_do(struct Curl_easy *data, bool *done)
 {
   char *word;
   char *eword;
@@ -183,7 +182,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
   char *nthdef = NULL; /* This is not part of the protocol, but required
                           by RFC 2229 */
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
   char *path = data->state.up.path;
@@ -230,7 +229,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
     if(!eword)
       return CURLE_OUT_OF_MEMORY;
 
-    result = sendf(sockfd, conn,
+    result = sendf(sockfd, data,
                    "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
                    "MATCH "
                    "%s "    /* database */
@@ -278,7 +277,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
     if(!eword)
       return CURLE_OUT_OF_MEMORY;
 
-    result = sendf(sockfd, conn,
+    result = sendf(sockfd, data,
                    "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
                    "DEFINE "
                    "%s "     /* database */
@@ -306,7 +305,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
         if(ppath[i] == ':')
           ppath[i] = ' ';
       }
-      result = sendf(sockfd, conn,
+      result = sendf(sockfd, data,
                      "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
                      "%s\r\n"
                      "QUIT\r\n", ppath);

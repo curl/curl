@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -130,6 +130,7 @@ int Curl_wait_ms(timediff_t timeout_ms)
   return r;
 }
 
+#ifndef HAVE_POLL_FINE
 /*
  * This is a wrapper around select() to aid in Windows compatibility.
  * A negative timeout value makes this function wait indefinitely,
@@ -141,11 +142,11 @@ int Curl_wait_ms(timediff_t timeout_ms)
  *    0 = timeout
  *    N = number of signalled file descriptors
  */
-int Curl_select(curl_socket_t maxfd,   /* highest socket number */
-                fd_set *fds_read,      /* sockets ready for reading */
-                fd_set *fds_write,     /* sockets ready for writing */
-                fd_set *fds_err,       /* sockets with errors */
-                timediff_t timeout_ms) /* milliseconds to wait */
+static int our_select(curl_socket_t maxfd,   /* highest socket number */
+                      fd_set *fds_read,      /* sockets ready for reading */
+                      fd_set *fds_write,     /* sockets ready for writing */
+                      fd_set *fds_err,       /* sockets with errors */
+                      timediff_t timeout_ms) /* milliseconds to wait */
 {
   struct timeval pending_tv;
   struct timeval *ptimeout;
@@ -219,6 +220,8 @@ int Curl_select(curl_socket_t maxfd,   /* highest socket number */
   return select((int)maxfd + 1, fds_read, fds_write, fds_err, ptimeout);
 #endif
 }
+
+#endif
 
 /*
  * Wait for read or write events on a set of file descriptors. It uses poll()
@@ -412,7 +415,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
      curl_socket_t is unsigned in such cases and thus -1 is the largest
      value).
   */
-  r = Curl_select(maxfd, &fds_read, &fds_write, &fds_err, timeout_ms);
+  r = our_select(maxfd, &fds_read, &fds_write, &fds_err, timeout_ms);
   if(r <= 0)
     return r;
 

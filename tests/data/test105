@@ -19,7 +19,6 @@ works
 </data>
 <servercmd>
 REPLY EPSV 500 no such command
-REPLY SIZE 500 no such command
 </servercmd>
 </reply>
 
@@ -45,7 +44,6 @@ PWD
 EPSV
 PASV
 TYPE A
-SIZE 105
 RETR 105
 QUIT
 </protocol>

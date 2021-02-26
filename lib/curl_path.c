@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,12 +31,11 @@
 #include "memdebug.h"
 
 /* figure out the path to work with in this particular request */
-CURLcode Curl_getworkingpath(struct connectdata *conn,
+CURLcode Curl_getworkingpath(struct Curl_easy *data,
                              char *homedir,  /* when SFTP is used */
                              char **path) /* returns the  allocated
                                              real path to work with */
 {
-  struct Curl_easy *data = conn->data;
   char *real_path = NULL;
   char *working_path;
   size_t working_path_len;
@@ -47,7 +46,7 @@ CURLcode Curl_getworkingpath(struct connectdata *conn,
     return result;
 
   /* Check for /~/, indicating relative to the user's home directory */
-  if(conn->handler->protocol & CURLPROTO_SCP) {
+  if(data->conn->handler->protocol & CURLPROTO_SCP) {
     real_path = malloc(working_path_len + 1);
     if(real_path == NULL) {
       free(working_path);
@@ -59,7 +58,7 @@ CURLcode Curl_getworkingpath(struct connectdata *conn,
     else
       memcpy(real_path, working_path, 1 + working_path_len);
   }
-  else if(conn->handler->protocol & CURLPROTO_SFTP) {
+  else if(data->conn->handler->protocol & CURLPROTO_SFTP) {
     if((working_path_len > 1) && (working_path[1] == '~')) {
       size_t homelen = strlen(homedir);
       real_path = malloc(homelen + working_path_len + 1);

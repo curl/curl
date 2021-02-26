@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -142,7 +142,8 @@ bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
          psnd->recv_size > psnd->recv_processed;
 }
 
-static CURLcode pre_receive_plain(struct connectdata *conn, int num)
+static CURLcode pre_receive_plain(struct Curl_easy *data,
+                                  struct connectdata *conn, int num)
 {
   const curl_socket_t sockfd = conn->sock[num];
   struct postponed_data * const psnd = &(conn->postponed[num]);
@@ -161,7 +162,7 @@ static CURLcode pre_receive_plain(struct connectdata *conn, int num)
       /* Have some incoming data */
       if(!psnd->buffer) {
         /* Use buffer double default size for intermediate buffer */
-        psnd->allocated_size = 2 * conn->data->set.buffer_size;
+        psnd->allocated_size = 2 * data->set.buffer_size;
         psnd->buffer = malloc(psnd->allocated_size);
         if(!psnd->buffer)
           return CURLE_OUT_OF_MEMORY;
@@ -230,7 +231,7 @@ bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
   (void)sockindex;
   return false;
 }
-#define pre_receive_plain(c,n) CURLE_OK
+#define pre_receive_plain(d,c,n) CURLE_OK
 #define get_pre_recved(c,n,b,l) 0
 #endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
 
@@ -267,6 +268,7 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
 
 void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
 {
+  DEBUGASSERT(!strchr(fmt, '\n'));
   if(data->set.verbose || data->set.errorbuffer) {
     va_list ap;
     size_t len;
@@ -292,7 +294,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
  * If the write would block (CURLE_AGAIN), we return CURLE_OK and
  * (*written == 0). Otherwise we return regular CURLcode value.
  */
-CURLcode Curl_write(struct connectdata *conn,
+CURLcode Curl_write(struct Curl_easy *data,
                     curl_socket_t sockfd,
                     const void *mem,
                     size_t len,
@@ -300,9 +302,14 @@ CURLcode Curl_write(struct connectdata *conn,
 {
   ssize_t bytes_written;
   CURLcode result = CURLE_OK;
-  int num = (sockfd == conn->sock[SECONDARYSOCKET]);
+  struct connectdata *conn;
+  int num;
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+  conn = data->conn;
+  num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
-  bytes_written = conn->send[num](conn, num, mem, len, &result);
+  bytes_written = conn->send[num](data, num, mem, len, &result);
 
   *written = bytes_written;
   if(bytes_written >= 0)
@@ -325,17 +332,23 @@ CURLcode Curl_write(struct connectdata *conn,
   }
 }
 
-ssize_t Curl_send_plain(struct connectdata *conn, int num,
+ssize_t Curl_send_plain(struct Curl_easy *data, int num,
                         const void *mem, size_t len, CURLcode *code)
 {
-  curl_socket_t sockfd = conn->sock[num];
+  struct connectdata *conn;
+  curl_socket_t sockfd;
   ssize_t bytes_written;
+
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+  conn = data->conn;
+  sockfd = conn->sock[num];
   /* WinSock will destroy unread received data if send() is
      failed.
      To avoid lossage of received data, recv() must be
      performed before every send() if any incoming data is
      available. */
-  if(pre_receive_plain(conn, num)) {
+  if(pre_receive_plain(data, conn, num)) {
     *code = CURLE_OUT_OF_MEMORY;
     return -1;
   }
@@ -372,9 +385,9 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
     }
     else {
       char buffer[STRERROR_LEN];
-      failf(conn->data, "Send failure: %s",
+      failf(data, "Send failure: %s",
             Curl_strerror(err, buffer, sizeof(buffer)));
-      conn->data->state.os_errno = err;
+      data->state.os_errno = err;
       *code = CURLE_SEND_ERROR;
     }
   }
@@ -386,28 +399,33 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
  * server using plain sockets only. Otherwise meant to have the exact same
  * proto as Curl_write()
  */
-CURLcode Curl_write_plain(struct connectdata *conn,
+CURLcode Curl_write_plain(struct Curl_easy *data,
                           curl_socket_t sockfd,
                           const void *mem,
                           size_t len,
                           ssize_t *written)
 {
-  ssize_t bytes_written;
   CURLcode result;
-  int num = (sockfd == conn->sock[SECONDARYSOCKET]);
+  struct connectdata *conn = data->conn;
+  int num;
+  DEBUGASSERT(conn);
+  num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
-  bytes_written = Curl_send_plain(conn, num, mem, len, &result);
-
-  *written = bytes_written;
+  *written = Curl_send_plain(data, num, mem, len, &result);
 
   return result;
 }
 
-ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
+ssize_t Curl_recv_plain(struct Curl_easy *data, int num, char *buf,
                         size_t len, CURLcode *code)
 {
-  curl_socket_t sockfd = conn->sock[num];
+  struct connectdata *conn;
+  curl_socket_t sockfd;
   ssize_t nread;
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+  conn = data->conn;
+  sockfd = conn->sock[num];
   /* Check and return data that already received and storied in internal
      intermediate buffer */
   nread = get_pre_recved(conn, num, buf, len);
@@ -438,9 +456,9 @@ ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
     }
     else {
       char buffer[STRERROR_LEN];
-      failf(conn->data, "Recv failure: %s",
+      failf(data, "Recv failure: %s",
             Curl_strerror(err, buffer, sizeof(buffer)));
-      conn->data->state.os_errno = err;
+      data->state.os_errno = err;
       *code = CURLE_RECV_ERROR;
     }
   }
@@ -480,9 +498,7 @@ static CURLcode pausewrite(struct Curl_easy *data,
     /* store this information in the state struct for later use */
     Curl_dyn_init(&s->tempwrite[i].b, DYN_PAUSE_BUFFER);
     s->tempwrite[i].type = type;
-
-    if(newtype)
-      s->tempcount++;
+    s->tempcount++;
   }
 
   if(Curl_dyn_addn(&s->tempwrite[i].b, (unsigned char *)ptr, len))
@@ -499,12 +515,12 @@ static CURLcode pausewrite(struct Curl_easy *data,
  * client write callback(s) and takes care of pause requests from the
  * callbacks.
  */
-static CURLcode chop_write(struct connectdata *conn,
+static CURLcode chop_write(struct Curl_easy *data,
                            int type,
                            char *optr,
                            size_t olen)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   curl_write_callback writeheader = NULL;
   curl_write_callback writebody = NULL;
   char *ptr = optr;
@@ -594,13 +610,12 @@ static CURLcode chop_write(struct connectdata *conn,
    local character encoding.  This is a problem and should be changed in
    the future to leave the original data alone.
  */
-CURLcode Curl_client_write(struct connectdata *conn,
+CURLcode Curl_client_write(struct Curl_easy *data,
                            int type,
                            char *ptr,
                            size_t len)
 {
-  struct Curl_easy *data = conn->data;
-
+  struct connectdata *conn = data->conn;
   if(0 == len)
     len = strlen(ptr);
 
@@ -622,7 +637,7 @@ CURLcode Curl_client_write(struct connectdata *conn,
 #endif /* CURL_DO_LINEEND_CONV */
     }
 
-  return chop_write(conn, type, ptr, len);
+  return chop_write(data, type, ptr, len);
 }
 
 CURLcode Curl_read_plain(curl_socket_t sockfd,
@@ -657,7 +672,7 @@ CURLcode Curl_read_plain(curl_socket_t sockfd,
  *
  * Returns a regular CURLcode value.
  */
-CURLcode Curl_read(struct connectdata *conn, /* connection data */
+CURLcode Curl_read(struct Curl_easy *data,   /* transfer */
                    curl_socket_t sockfd,     /* read from this socket */
                    char *buf,                /* store read data here */
                    size_t sizerequested,     /* max amount to read */
@@ -667,7 +682,7 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
   ssize_t nread = 0;
   size_t bytesfromsocket = 0;
   char *buffertofill = NULL;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
 
   /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
      If it is the second socket, we set num to 1. Otherwise to 0. This lets
@@ -679,7 +694,7 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
   bytesfromsocket = CURLMIN(sizerequested, (size_t)data->set.buffer_size);
   buffertofill = buf;
 
-  nread = conn->recv[num](conn, num, buffertofill, bytesfromsocket, &result);
+  nread = conn->recv[num](data, num, buffertofill, bytesfromsocket, &result);
   if(nread < 0)
     return result;
 

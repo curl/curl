@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,8 @@
  *
  ***************************************************************************/
 #include "tool_filetime.h"
-
+#include "tool_cfgable.h"
+#include "tool_msgs.h"
 #include "curlx.h"
 
 #ifdef HAVE_UTIME_H
@@ -34,7 +35,7 @@
 #pragma GCC diagnostic ignored "-Wformat"
 #endif
 
-curl_off_t getfiletime(const char *filename, FILE *error_stream)
+curl_off_t getfiletime(const char *filename, struct GlobalConfig *global)
 {
   curl_off_t result = -1;
 
@@ -57,26 +58,23 @@ curl_off_t getfiletime(const char *filename, FILE *error_stream)
           | ((curl_off_t)ft.dwHighDateTime) << 32;
 
       if(converted < CURL_OFF_T_C(116444736000000000)) {
-        fprintf(error_stream,
-                "Failed to get filetime: underflow\n");
+        warnf(global, "Failed to get filetime: underflow\n");
       }
       else {
         result = (converted - CURL_OFF_T_C(116444736000000000)) / 10000000;
       }
     }
     else {
-      fprintf(error_stream,
-              "Failed to get filetime: "
-              "GetFileTime failed: GetLastError %u\n",
-              (unsigned int)GetLastError());
+      warnf(global, "Failed to get filetime: "
+            "GetFileTime failed: GetLastError %u\n",
+            (unsigned int)GetLastError());
     }
     CloseHandle(hfile);
   }
   else if(GetLastError() != ERROR_FILE_NOT_FOUND) {
-    fprintf(error_stream,
-            "Failed to get filetime: "
-            "CreateFile failed: GetLastError %u\n",
-            (unsigned int)GetLastError());
+    warnf(global, "Failed to get filetime: "
+          "CreateFile failed: GetLastError %u\n",
+          (unsigned int)GetLastError());
   }
 #else
   struct_stat statbuf;
@@ -84,17 +82,16 @@ curl_off_t getfiletime(const char *filename, FILE *error_stream)
     result = (curl_off_t)statbuf.st_mtime;
   }
   else if(errno != ENOENT) {
-    fprintf(error_stream,
-            "Failed to get filetime: %s\n", strerror(errno));
+    warnf(global, "Failed to get filetime: %s\n", strerror(errno));
   }
 #endif
   return result;
 }
 
-#if defined(HAVE_UTIME) || defined(HAVE_UTIMES) || \
-    (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8))
+#if defined(HAVE_UTIME) || defined(HAVE_UTIMES) ||      \
+  (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8))
 void setfiletime(curl_off_t filetime, const char *filename,
-    FILE *error_stream)
+                 struct GlobalConfig *global)
 {
   if(filetime >= 0) {
 /* Windows utime() may attempt to adjust the unix GMT file time by a daylight
@@ -107,37 +104,34 @@ void setfiletime(curl_off_t filetime, const char *filename,
     /* 910670515199 is the maximum unix filetime that can be used as a
        Windows FILETIME without overflow: 30827-12-31T23:59:59. */
     if(filetime > CURL_OFF_T_C(910670515199)) {
-      fprintf(error_stream,
-              "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-              " on outfile: overflow\n", filetime);
+      warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+            " on outfile: overflow\n", filetime);
       curlx_unicodefree(tchar_filename);
       return;
     }
 
     hfile = CreateFile(tchar_filename, FILE_WRITE_ATTRIBUTES,
-                        (FILE_SHARE_READ | FILE_SHARE_WRITE |
-                         FILE_SHARE_DELETE),
-                        NULL, OPEN_EXISTING, 0, NULL);
+                       (FILE_SHARE_READ | FILE_SHARE_WRITE |
+                        FILE_SHARE_DELETE),
+                       NULL, OPEN_EXISTING, 0, NULL);
     curlx_unicodefree(tchar_filename);
     if(hfile != INVALID_HANDLE_VALUE) {
       curl_off_t converted = ((curl_off_t)filetime * 10000000) +
-                             CURL_OFF_T_C(116444736000000000);
+        CURL_OFF_T_C(116444736000000000);
       FILETIME ft;
       ft.dwLowDateTime = (DWORD)(converted & 0xFFFFFFFF);
       ft.dwHighDateTime = (DWORD)(converted >> 32);
       if(!SetFileTime(hfile, NULL, &ft, &ft)) {
-        fprintf(error_stream,
-                "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-                " on outfile: SetFileTime failed: GetLastError %u\n",
-                filetime, (unsigned int)GetLastError());
+        warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+              " on outfile: SetFileTime failed: GetLastError %u\n",
+              filetime, (unsigned int)GetLastError());
       }
       CloseHandle(hfile);
     }
     else {
-      fprintf(error_stream,
-              "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-              " on outfile: CreateFile failed: GetLastError %u\n",
-              filetime, (unsigned int)GetLastError());
+      warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+            " on outfile: CreateFile failed: GetLastError %u\n",
+            filetime, (unsigned int)GetLastError());
     }
 
 #elif defined(HAVE_UTIMES)
@@ -145,9 +139,8 @@ void setfiletime(curl_off_t filetime, const char *filename,
     times[0].tv_sec = times[1].tv_sec = (time_t)filetime;
     times[0].tv_usec = times[1].tv_usec = 0;
     if(utimes(filename, times)) {
-      fprintf(error_stream,
-              "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-              " on outfile: %s\n", filetime, strerror(errno));
+      warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+            " on '%s': %s\n", filetime, filename, strerror(errno));
     }
 
 #elif defined(HAVE_UTIME)
@@ -155,9 +148,8 @@ void setfiletime(curl_off_t filetime, const char *filename,
     times.actime = (time_t)filetime;
     times.modtime = (time_t)filetime;
     if(utime(filename, &times)) {
-      fprintf(error_stream,
-              "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-              " on outfile: %s\n", filetime, strerror(errno));
+      warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+            " on '%s': %s\n", filetime, filename, strerror(errno));
     }
 #endif
   }

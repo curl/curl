@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,6 +37,8 @@ struct connectdata;
 #define SASL_MECH_NTLM              (1 << 6)
 #define SASL_MECH_XOAUTH2           (1 << 7)
 #define SASL_MECH_OAUTHBEARER       (1 << 8)
+#define SASL_MECH_SCRAM_SHA_1       (1 << 9)
+#define SASL_MECH_SCRAM_SHA_256     (1 << 10)
 
 /* Authentication mechanism values */
 #define SASL_AUTH_NONE          0
@@ -53,6 +55,8 @@ struct connectdata;
 #define SASL_MECH_STRING_NTLM         "NTLM"
 #define SASL_MECH_STRING_XOAUTH2      "XOAUTH2"
 #define SASL_MECH_STRING_OAUTHBEARER  "OAUTHBEARER"
+#define SASL_MECH_STRING_SCRAM_SHA_1  "SCRAM-SHA-1"
+#define SASL_MECH_STRING_SCRAM_SHA_256 "SCRAM-SHA-256"
 
 /* SASL machine states */
 typedef enum {
@@ -71,6 +75,7 @@ typedef enum {
   SASL_GSSAPI_NO_DATA,
   SASL_OAUTH2,
   SASL_OAUTH2_RESP,
+  SASL_GSASL,
   SASL_CANCEL,
   SASL_FINAL
 } saslstate;
@@ -88,10 +93,12 @@ struct SASLproto {
   int contcode;            /* Code to receive when continuation is expected */
   int finalcode;           /* Code to receive upon authentication success */
   size_t maxirlen;         /* Maximum initial response length */
-  CURLcode (*sendauth)(struct connectdata *conn,
+  CURLcode (*sendauth)(struct Curl_easy *data,
+                       struct connectdata *conn,
                        const char *mech, const char *ir);
                            /* Send authentication command */
-  CURLcode (*sendcont)(struct connectdata *conn, const char *contauth);
+  CURLcode (*sendcont)(struct Curl_easy *data,
+                       struct connectdata *conn, const char *contauth);
                            /* Send authentication continuation */
   void (*getmessage)(char *buffer, char **outptr);
                            /* Get SASL response message */
@@ -133,11 +140,13 @@ void Curl_sasl_init(struct SASL *sasl, const struct SASLproto *params);
 bool Curl_sasl_can_authenticate(struct SASL *sasl, struct connectdata *conn);
 
 /* Calculate the required login details for SASL authentication  */
-CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
+CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
+                         struct connectdata *conn,
                          bool force_ir, saslprogress *progress);
 
 /* Continue an SASL authentication  */
-CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
+CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
+                            struct connectdata *conn,
                             int code, saslprogress *progress);
 
 #endif /* HEADER_CURL_SASL_H */

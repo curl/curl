@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2020 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -325,7 +325,7 @@ CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
     /* no cache activated */
     return CURLE_OK;
 
-  /* if not new name is given, use the one we stored from the load */
+  /* if no new name is given, use the one we stored from the load */
   if(!file && h->filename)
     file = h->filename;
 
@@ -457,7 +457,7 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
  * format is documented here:
  * https://github.com/curl/curl/wiki/HSTS
  *
- * This function only returns error on major problems that prevents hsts
+ * This function only returns error on major problems that prevent hsts
  * handling to work completely. It will ignore individual syntactical errors
  * etc.
  */

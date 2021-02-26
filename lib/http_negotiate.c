@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,11 +34,10 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
-                              const char *header)
+CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
+                              bool proxy, const char *header)
 {
   CURLcode result;
-  struct Curl_easy *data = conn->data;
   size_t len;
 
   /* Point to the username, password, service and host */
@@ -90,7 +89,7 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
   neg_ctx->havenegdata = len != 0;
   if(!len) {
     if(state == GSS_AUTHSUCC) {
-      infof(conn->data, "Negotiate auth restarted\n");
+      infof(data, "Negotiate auth restarted\n");
       Curl_http_auth_cleanup_negotiate(conn);
     }
     else if(state != GSS_AUTHNONE) {
@@ -116,15 +115,14 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
   return result;
 }
 
-CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
+CURLcode Curl_output_negotiate(struct Curl_easy *data,
+                               struct connectdata *conn, bool proxy)
 {
   struct negotiatedata *neg_ctx = proxy ? &conn->proxyneg :
     &conn->negotiate;
-  struct auth *authp = proxy ? &conn->data->state.authproxy :
-    &conn->data->state.authhost;
+  struct auth *authp = proxy ? &data->state.authproxy : &data->state.authhost;
   curlnegotiate *state = proxy ? &conn->proxy_negotiate_state :
     &conn->http_negotiate_state;
-  struct Curl_easy *data = conn->data;
   char *base64 = NULL;
   size_t len = 0;
   char *userp;
@@ -147,12 +145,12 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
     (*state != GSS_AUTHDONE && *state != GSS_AUTHSUCC)) {
 
     if(neg_ctx->noauthpersist && *state == GSS_AUTHSUCC) {
-      infof(conn->data, "Curl_output_negotiate, "
+      infof(data, "Curl_output_negotiate, "
        "no persistent authentication: cleanup existing context");
       Curl_http_auth_cleanup_negotiate(conn);
     }
     if(!neg_ctx->context) {
-      result = Curl_input_negotiate(conn, proxy, "Negotiate");
+      result = Curl_input_negotiate(data, conn, proxy, "Negotiate");
       if(result == CURLE_AUTH_ERROR) {
         /* negotiate auth failed, let's continue unauthenticated to stay
          * compatible with the behavior before curl-7_64_0-158-g6c6035532 */
@@ -163,8 +161,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
         return result;
     }
 
-    result = Curl_auth_create_spnego_message(conn->data,
-      neg_ctx, &base64, &len);
+    result = Curl_auth_create_spnego_message(data, neg_ctx, &base64, &len);
     if(result)
       return result;
 

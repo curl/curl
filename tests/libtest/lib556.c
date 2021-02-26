@@ -64,10 +64,10 @@ int test(char *URL)
 #ifdef CURL_DOES_CONVERSIONS
       /* ASCII representation with escape sequences for non-ASCII platforms */
       "\x47\x45\x54\x20\x2f\x35\x35\x36\x20\x48\x54\x54\x50\x2f\x31\x2e"
-      "\x32\x0d\x0a\x48\x6f\x73\x74\x3a\x20\x6e\x69\x6e\x6a\x61\x0d\x0a"
+      "\x31\x0d\x0a\x48\x6f\x73\x74\x3a\x20\x6e\x69\x6e\x6a\x61\x0d\x0a"
       "\x0d\x0a";
 #else
-      "GET /556 HTTP/1.2\r\n"
+      "GET /556 HTTP/1.1\r\n"
       "Host: ninja\r\n\r\n";
 #endif
     size_t iolen = 0;

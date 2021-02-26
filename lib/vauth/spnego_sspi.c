@@ -130,7 +130,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                                       TEXT(SP_NAME_NEGOTIATE),
                                                       &SecurityPackage);
     if(nego->status != SEC_E_OK) {
-      failf(data, "SSPI: couldn't get auth info\n");
+      failf(data, "SSPI: couldn't get auth info");
       return CURLE_AUTH_ERROR;
     }
 

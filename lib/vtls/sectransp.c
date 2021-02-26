@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
+ * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2012 - 2017, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1291,9 +1291,9 @@ static CURLcode sectransp_version_from_curl(SSLProtocol *darwinver,
 #endif
 
 static CURLcode
-set_ssl_version_min_max(struct connectdata *conn, int sockindex)
+set_ssl_version_min_max(struct Curl_easy *data, struct connectdata *conn,
+                        int sockindex)
 {
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   long ssl_version = SSL_CONN_CONFIG(version);
@@ -1387,10 +1387,10 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
 }
 
 
-static CURLcode sectransp_connect_step1(struct connectdata *conn,
+static CURLcode sectransp_connect_step1(struct Curl_easy *data,
+                                        struct connectdata *conn,
                                         int sockindex)
 {
-  struct Curl_easy *data = conn->data;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -1478,7 +1478,7 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
       {
-        CURLcode result = set_ssl_version_min_max(conn, sockindex);
+        CURLcode result = set_ssl_version_min_max(data, conn, sockindex);
         if(result != CURLE_OK)
           return result;
         break;
@@ -1527,7 +1527,7 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
       {
-        CURLcode result = set_ssl_version_min_max(conn, sockindex);
+        CURLcode result = set_ssl_version_min_max(data, conn, sockindex);
         if(result != CURLE_OK)
           return result;
         break;
@@ -1611,7 +1611,7 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
                                                        &kCFTypeArrayCallBacks);
 
 #ifdef USE_NGHTTP2
-      if(data->set.httpversion >= CURL_HTTP_VERSION_2
+      if(data->state.httpversion >= CURL_HTTP_VERSION_2
 #ifndef CURL_DISABLE_PROXY
          && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
 #endif
@@ -1952,12 +1952,12 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
     char *ssl_sessionid;
     size_t ssl_sessionid_len;
 
-    Curl_ssl_sessionid_lock(conn);
-    if(!Curl_ssl_getsessionid(conn, (void **)&ssl_sessionid,
+    Curl_ssl_sessionid_lock(data);
+    if(!Curl_ssl_getsessionid(data, conn, (void **)&ssl_sessionid,
                               &ssl_sessionid_len, sockindex)) {
       /* we got a session id, use it! */
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
-      Curl_ssl_sessionid_unlock(conn);
+      Curl_ssl_sessionid_unlock(data);
       if(err != noErr) {
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
         return CURLE_SSL_CONNECT_ERROR;
@@ -1976,14 +1976,14 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
 
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
       if(err != noErr) {
-        Curl_ssl_sessionid_unlock(conn);
+        Curl_ssl_sessionid_unlock(data);
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
         return CURLE_SSL_CONNECT_ERROR;
       }
 
-      result = Curl_ssl_addsessionid(conn, ssl_sessionid, ssl_sessionid_len,
-                                     sockindex);
-      Curl_ssl_sessionid_unlock(conn);
+      result = Curl_ssl_addsessionid(data, conn, ssl_sessionid,
+                                     ssl_sessionid_len, sockindex);
+      Curl_ssl_sessionid_unlock(data);
       if(result) {
         failf(data, "failed to store ssl session");
         return result;
@@ -2379,9 +2379,9 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
 #endif /* SECTRANSP_PINNEDPUBKEY */
 
 static CURLcode
-sectransp_connect_step2(struct connectdata *conn, int sockindex)
+sectransp_connect_step2(struct Curl_easy *data, struct connectdata *conn,
+                        int sockindex)
 {
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   OSStatus err;
@@ -2418,7 +2418,7 @@ sectransp_connect_step2(struct connectdata *conn, int sockindex)
             return result;
         }
         /* the documentation says we need to call SSLHandshake() again */
-        return sectransp_connect_step2(conn, sockindex);
+        return sectransp_connect_step2(data, conn, sockindex);
 
       /* Problem with encrypt / decrypt */
       case errSSLPeerDecodeError:
@@ -2621,9 +2621,10 @@ sectransp_connect_step2(struct connectdata *conn, int sockindex)
     connssl->connecting_state = ssl_connect_3;
 
 #ifdef SECTRANSP_PINNEDPUBKEY
-    if(data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG]) {
-      CURLcode result = pkp_pin_peer_pubkey(data, backend->ssl_ctx,
-                            data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG]);
+    if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
+      CURLcode result =
+        pkp_pin_peer_pubkey(data, backend->ssl_ctx,
+                            data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
       if(result) {
         failf(data, "SSL: public key does not match pinned public key!");
         return result;
@@ -2693,7 +2694,7 @@ sectransp_connect_step2(struct connectdata *conn, int sockindex)
         else
           infof(data, "ALPN, server did not agree to a protocol\n");
 
-        Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+        Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                             BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
 
         /* chosenProtocol is a reference to the string within alpnArr
@@ -2711,10 +2712,10 @@ sectransp_connect_step2(struct connectdata *conn, int sockindex)
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 /* This should be called during step3 of the connection at the earliest */
 static void
-show_verbose_server_cert(struct connectdata *conn,
+show_verbose_server_cert(struct Curl_easy *data,
+                         struct connectdata *conn,
                          int sockindex)
 {
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   CFArrayRef server_certs = NULL;
@@ -2817,10 +2818,9 @@ show_verbose_server_cert(struct connectdata *conn,
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 static CURLcode
-sectransp_connect_step3(struct connectdata *conn,
+sectransp_connect_step3(struct Curl_easy *data, struct connectdata *conn,
                         int sockindex)
 {
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   /* There is no step 3!
@@ -2828,7 +2828,7 @@ sectransp_connect_step3(struct connectdata *conn,
    * server certificates. */
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(data->set.verbose)
-    show_verbose_server_cert(conn, sockindex);
+    show_verbose_server_cert(data, conn, sockindex);
 #endif
 
   connssl->connecting_state = ssl_connect_done;
@@ -2839,13 +2839,13 @@ static Curl_recv sectransp_recv;
 static Curl_send sectransp_send;
 
 static CURLcode
-sectransp_connect_common(struct connectdata *conn,
+sectransp_connect_common(struct Curl_easy *data,
+                         struct connectdata *conn,
                          int sockindex,
                          bool nonblocking,
                          bool *done)
 {
   CURLcode result;
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
   int what;
@@ -2866,7 +2866,7 @@ sectransp_connect_common(struct connectdata *conn,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    result = sectransp_connect_step1(conn, sockindex);
+    result = sectransp_connect_step1(data, conn, sockindex);
     if(result)
       return result;
   }
@@ -2920,7 +2920,7 @@ sectransp_connect_common(struct connectdata *conn,
      * before step2 has completed while ensuring that a client using select()
      * or epoll() will always have a valid fdset to wait on.
      */
-    result = sectransp_connect_step2(conn, sockindex);
+    result = sectransp_connect_step2(data, conn, sockindex);
     if(result || (nonblocking &&
                   (ssl_connect_2 == connssl->connecting_state ||
                    ssl_connect_2_reading == connssl->connecting_state ||
@@ -2931,7 +2931,7 @@ sectransp_connect_common(struct connectdata *conn,
 
 
   if(ssl_connect_3 == connssl->connecting_state) {
-    result = sectransp_connect_step3(conn, sockindex);
+    result = sectransp_connect_step3(data, conn, sockindex);
     if(result)
       return result;
   }
@@ -2951,18 +2951,20 @@ sectransp_connect_common(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static CURLcode Curl_sectransp_connect_nonblocking(struct connectdata *conn,
-                                                   int sockindex, bool *done)
+static CURLcode sectransp_connect_nonblocking(struct Curl_easy *data,
+                                              struct connectdata *conn,
+                                              int sockindex, bool *done)
 {
-  return sectransp_connect_common(conn, sockindex, TRUE, done);
+  return sectransp_connect_common(data, conn, sockindex, TRUE, done);
 }
 
-static CURLcode Curl_sectransp_connect(struct connectdata *conn, int sockindex)
+static CURLcode sectransp_connect(struct Curl_easy *data,
+                                  struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
 
-  result = sectransp_connect_common(conn, sockindex, FALSE, &done);
+  result = sectransp_connect_common(data, conn, sockindex, FALSE, &done);
 
   if(result)
     return result;
@@ -2972,10 +2974,13 @@ static CURLcode Curl_sectransp_connect(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-static void Curl_sectransp_close(struct connectdata *conn, int sockindex)
+static void sectransp_close(struct Curl_easy *data, struct connectdata *conn,
+                            int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
+
+  (void) data;
 
   if(backend->ssl_ctx) {
     (void)SSLClose(backend->ssl_ctx);
@@ -2994,11 +2999,11 @@ static void Curl_sectransp_close(struct connectdata *conn, int sockindex)
   backend->ssl_sockfd = 0;
 }
 
-static int Curl_sectransp_shutdown(struct connectdata *conn, int sockindex)
+static int sectransp_shutdown(struct Curl_easy *data,
+                              struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
-  struct Curl_easy *data = conn->data;
   ssize_t nread;
   int what;
   int rc;
@@ -3012,7 +3017,7 @@ static int Curl_sectransp_shutdown(struct connectdata *conn, int sockindex)
     return 0;
 #endif
 
-  Curl_sectransp_close(conn, sockindex);
+  sectransp_close(data, conn, sockindex);
 
   rc = 0;
 
@@ -3050,7 +3055,7 @@ static int Curl_sectransp_shutdown(struct connectdata *conn, int sockindex)
   return rc;
 }
 
-static void Curl_sectransp_session_free(void *ptr)
+static void sectransp_session_free(void *ptr)
 {
   /* ST, as of iOS 5 and Mountain Lion, has no public method of deleting a
      cached session ID inside the Security framework. There is a private
@@ -3061,7 +3066,7 @@ static void Curl_sectransp_session_free(void *ptr)
   Curl_safefree(ptr);
 }
 
-static size_t Curl_sectransp_version(char *buffer, size_t size)
+static size_t sectransp_version(char *buffer, size_t size)
 {
   return msnprintf(buffer, size, "SecureTransport");
 }
@@ -3074,7 +3079,7 @@ static size_t Curl_sectransp_version(char *buffer, size_t size)
  *     0 means the connection has been closed
  *    -1 means the connection status is unknown
  */
-static int Curl_sectransp_check_cxn(struct connectdata *conn)
+static int sectransp_check_cxn(struct connectdata *conn)
 {
   struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
   struct ssl_backend_data *backend = connssl->backend;
@@ -3090,8 +3095,8 @@ static int Curl_sectransp_check_cxn(struct connectdata *conn)
   return 0;
 }
 
-static bool Curl_sectransp_data_pending(const struct connectdata *conn,
-                                        int connindex)
+static bool sectransp_data_pending(const struct connectdata *conn,
+                                   int connindex)
 {
   const struct ssl_connect_data *connssl = &conn->ssl[connindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -3108,8 +3113,8 @@ static bool Curl_sectransp_data_pending(const struct connectdata *conn,
     return false;
 }
 
-static CURLcode Curl_sectransp_random(struct Curl_easy *data UNUSED_PARAM,
-                                      unsigned char *entropy, size_t length)
+static CURLcode sectransp_random(struct Curl_easy *data UNUSED_PARAM,
+                                 unsigned char *entropy, size_t length)
 {
   /* arc4random_buf() isn't available on cats older than Lion, so let's
      do this manually for the benefit of the older cats. */
@@ -3128,27 +3133,17 @@ static CURLcode Curl_sectransp_random(struct Curl_easy *data UNUSED_PARAM,
   return CURLE_OK;
 }
 
-static CURLcode Curl_sectransp_md5sum(unsigned char *tmp, /* input */
-                                      size_t tmplen,
-                                      unsigned char *md5sum, /* output */
-                                      size_t md5len)
-{
-  (void)md5len;
-  (void)CC_MD5(tmp, (CC_LONG)tmplen, md5sum);
-  return CURLE_OK;
-}
-
-static CURLcode Curl_sectransp_sha256sum(const unsigned char *tmp, /* input */
-                                     size_t tmplen,
-                                     unsigned char *sha256sum, /* output */
-                                     size_t sha256len)
+static CURLcode sectransp_sha256sum(const unsigned char *tmp, /* input */
+                                    size_t tmplen,
+                                    unsigned char *sha256sum, /* output */
+                                    size_t sha256len)
 {
   assert(sha256len >= CURL_SHA256_DIGEST_LENGTH);
   (void)CC_SHA256(tmp, (CC_LONG)tmplen, sha256sum);
   return CURLE_OK;
 }
 
-static bool Curl_sectransp_false_start(void)
+static bool sectransp_false_start(void)
 {
 #if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
   if(SSLSetSessionOption != NULL)
@@ -3157,13 +3152,13 @@ static bool Curl_sectransp_false_start(void)
   return FALSE;
 }
 
-static ssize_t sectransp_send(struct connectdata *conn,
+static ssize_t sectransp_send(struct Curl_easy *data,
                               int sockindex,
                               const void *mem,
                               size_t len,
                               CURLcode *curlcode)
 {
-  /*struct Curl_easy *data = conn->data;*/
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   size_t processed = 0UL;
@@ -3198,7 +3193,7 @@ static ssize_t sectransp_send(struct connectdata *conn,
         *curlcode = CURLE_AGAIN;
         return -1L;
       default:
-        failf(conn->data, "SSLWrite() returned error %d", err);
+        failf(data, "SSLWrite() returned error %d", err);
         *curlcode = CURLE_SEND_ERROR;
         return -1L;
     }
@@ -3215,7 +3210,7 @@ static ssize_t sectransp_send(struct connectdata *conn,
           *curlcode = CURLE_AGAIN;
           return -1L;
         default:
-          failf(conn->data, "SSLWrite() returned error %d", err);
+          failf(data, "SSLWrite() returned error %d", err);
           *curlcode = CURLE_SEND_ERROR;
           return -1L;
       }
@@ -3224,13 +3219,13 @@ static ssize_t sectransp_send(struct connectdata *conn,
   return (ssize_t)processed;
 }
 
-static ssize_t sectransp_recv(struct connectdata *conn,
+static ssize_t sectransp_recv(struct Curl_easy *data,
                               int num,
                               char *buf,
                               size_t buffersize,
                               CURLcode *curlcode)
 {
-  /*struct Curl_easy *data = conn->data;*/
+  struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[num];
   struct ssl_backend_data *backend = connssl->backend;
   size_t processed = 0UL;
@@ -3262,14 +3257,14 @@ static ssize_t sectransp_recv(struct connectdata *conn,
            Leopard's headers */
       case -9841:
         if(SSL_CONN_CONFIG(CAfile) && SSL_CONN_CONFIG(verifypeer)) {
-          CURLcode result = verify_cert(SSL_CONN_CONFIG(CAfile), conn->data,
+          CURLcode result = verify_cert(SSL_CONN_CONFIG(CAfile), data,
                                         backend->ssl_ctx);
           if(result)
             return result;
         }
         goto again;
       default:
-        failf(conn->data, "SSLRead() return error %d", err);
+        failf(data, "SSLRead() return error %d", err);
         *curlcode = CURLE_RECV_ERROR;
         return -1L;
         break;
@@ -3278,8 +3273,8 @@ static ssize_t sectransp_recv(struct connectdata *conn,
   return (ssize_t)processed;
 }
 
-static void *Curl_sectransp_get_internals(struct ssl_connect_data *connssl,
-                                          CURLINFO info UNUSED_PARAM)
+static void *sectransp_get_internals(struct ssl_connect_data *connssl,
+                                     CURLINFO info UNUSED_PARAM)
 {
   struct ssl_backend_data *backend = connssl->backend;
   (void)info;
@@ -3299,24 +3294,24 @@ const struct Curl_ssl Curl_ssl_sectransp = {
 
   Curl_none_init,                     /* init */
   Curl_none_cleanup,                  /* cleanup */
-  Curl_sectransp_version,             /* version */
-  Curl_sectransp_check_cxn,           /* check_cxn */
-  Curl_sectransp_shutdown,            /* shutdown */
-  Curl_sectransp_data_pending,        /* data_pending */
-  Curl_sectransp_random,              /* random */
+  sectransp_version,                  /* version */
+  sectransp_check_cxn,                /* check_cxn */
+  sectransp_shutdown,                 /* shutdown */
+  sectransp_data_pending,             /* data_pending */
+  sectransp_random,                   /* random */
   Curl_none_cert_status_request,      /* cert_status_request */
-  Curl_sectransp_connect,             /* connect */
-  Curl_sectransp_connect_nonblocking, /* connect_nonblocking */
-  Curl_sectransp_get_internals,       /* get_internals */
-  Curl_sectransp_close,               /* close_one */
+  sectransp_connect,                  /* connect */
+  sectransp_connect_nonblocking,      /* connect_nonblocking */
+  Curl_ssl_getsock,                   /* getsock */
+  sectransp_get_internals,            /* get_internals */
+  sectransp_close,                    /* close_one */
   Curl_none_close_all,                /* close_all */
-  Curl_sectransp_session_free,        /* session_free */
+  sectransp_session_free,             /* session_free */
   Curl_none_set_engine,               /* set_engine */
   Curl_none_set_engine_default,       /* set_engine_default */
   Curl_none_engines_list,             /* engines_list */
-  Curl_sectransp_false_start,         /* false_start */
-  Curl_sectransp_md5sum,              /* md5sum */
-  Curl_sectransp_sha256sum            /* sha256sum */
+  sectransp_false_start,              /* false_start */
+  sectransp_sha256sum                 /* sha256sum */
 };
 
 #ifdef __clang__

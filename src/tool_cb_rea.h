@@ -27,7 +27,7 @@
 ** callback for CURLOPT_READFUNCTION
 */
 
-size_t tool_read_cb(void *buffer, size_t sz, size_t nmemb, void *userdata);
+size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata);
 
 /*
 ** callback for CURLOPT_XFERINFOFUNCTION used to unpause busy reads

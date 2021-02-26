@@ -211,7 +211,7 @@ int main(void)
    * load the certificate and key by installing a function doing the necessary
    * "modifications" to the SSL CONTEXT just before link init
    */
-  curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
+  curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
   rv = curl_easy_perform(ch);
   if(rv == CURLE_OK) {
     printf("*** transfer succeeded ***\n");

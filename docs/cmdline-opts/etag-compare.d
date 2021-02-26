@@ -15,5 +15,5 @@ line with a desired ETag. An empty file is parsed as an empty ETag.
 Use the option --etag-save to first save the ETag from a response, and
 then use this option to compare using the saved ETag in a subsequent request.
 
-\fCOMPARISON\fP: There are 2 types of comparison or ETags, Weak and Strong.
+\fBCOMPARISON\fP: There are 2 types of comparison or ETags: Weak and Strong.
 This option expects, and uses a strong comparison.

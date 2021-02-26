@@ -11,7 +11,7 @@ Range
 <reply>
 <data nocheck="yes">
 HTTP/1.1 416 Requested Range Not Satisfiable
-Date: Thu, 09 Sep 2010 14:49:00 GMT
+Date: Tue, 09 Sep 2010 14:49:00 GMT
 Accept-Ranges: bytes
 Content-Length: 115
 
@@ -21,7 +21,7 @@ guaranteed to split it into two packets.
 
 <data1>
 HTTP/1.1 206 Partial Content
-Date: Thu, 09 Sep 2010 14:49:01 GMT
+Date: Tue, 09 Sep 2010 14:49:01 GMT
 Accept-Ranges: bytes
 Content-Range: bytes 10-18/155
 Content-Length: 13
@@ -52,14 +52,14 @@ HTTP with invalid range then another URL
 <verify>
 <stdout>
 HTTP/1.1 416 Requested Range Not Satisfiable
-Date: Thu, 09 Sep 2010 14:49:00 GMT
+Date: Tue, 09 Sep 2010 14:49:00 GMT
 Accept-Ranges: bytes
 Content-Length: 115
 
 This is a long error message that is large enough that the test server is
 guaranteed to split it into two packets.
 HTTP/1.1 206 Partial Content
-Date: Thu, 09 Sep 2010 14:49:01 GMT
+Date: Tue, 09 Sep 2010 14:49:01 GMT
 Accept-Ranges: bytes
 Content-Range: bytes 10-18/155
 Content-Length: 13

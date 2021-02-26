@@ -115,7 +115,7 @@ particular build may not support them all.
 Lets you lookup words using online dictionaries.
 .IP FILE
 Read or write local files. curl does not support accessing file:// URL
-remotely, but when running on Microsft Windows using the native UNC approach
+remotely, but when running on Microsoft Windows using the native UNC approach
 will work.
 .IP FTP(S)
 curl supports the File Transfer Protocol with a lot of tweaks and levers. With

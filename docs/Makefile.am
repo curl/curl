@@ -67,6 +67,7 @@ EXTRA_DIST =                                    \
  HTTP-COOKIES.md                                \
  HTTP2.md                                       \
  HTTP3.md                                       \
+ HYPER.md                                       \
  INSTALL                                        \
  INSTALL.cmake                                  \
  INSTALL.md                                     \
@@ -86,6 +87,7 @@ EXTRA_DIST =                                    \
  THANKS                                         \
  TODO                                           \
  TheArtOfHttpScripting.md                       \
+ URL-SYNTAX.md                                  \
  VERSIONS.md
 
 MAN2HTML= roffit $< >$@

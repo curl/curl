@@ -13,7 +13,7 @@ HTTP replaced headers
 <reply>
 <data1>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Set-Cookie: foo=123; path=/; secure;
 Content-Length: 7
@@ -22,7 +22,7 @@ nomnom
 </data1>
 <data2>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Set-Cookie: foo=; Expires=Thu, 01-Jan-1970 00:00:00 GMT; Max-Age=0; Path=/
 Content-Length: 7

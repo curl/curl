@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,6 +22,10 @@
 #include "tool_setup.h"
 
 #include <sys/stat.h>
+
+#ifdef WIN32
+#include <tchar.h>
+#endif
 
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
@@ -225,51 +229,6 @@ static void main_free(struct GlobalConfig *config)
   config->last = NULL;
 }
 
-#ifdef WIN32
-/* TerminalSettings for Windows */
-static struct TerminalSettings {
-  HANDLE hStdOut;
-  DWORD dwOutputMode;
-} TerminalSettings;
-
-static void configure_terminal(void)
-{
-  /*
-   * If we're running Windows, enable VT output.
-   * Note: VT mode flag can be set on any version of Windows, but VT
-   * processing only performed on Win10 >= Creators Update)
-   */
-
-  /* Define the VT flags in case we're building with an older SDK */
-#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
-    #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
-#endif
-
-  memset(&TerminalSettings, 0, sizeof(TerminalSettings));
-
-  /* Enable VT output */
-  TerminalSettings.hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-  if((TerminalSettings.hStdOut != INVALID_HANDLE_VALUE)
-    && (GetConsoleMode(TerminalSettings.hStdOut,
-                       &TerminalSettings.dwOutputMode))) {
-    SetConsoleMode(TerminalSettings.hStdOut,
-                   TerminalSettings.dwOutputMode
-                   | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-  }
-}
-#else
-#define configure_terminal()
-#endif
-
-static void restore_terminal(void)
-{
-#ifdef WIN32
-  /* Restore Console output mode and codepage to whatever they were
-   * when Curl started */
-  SetConsoleMode(TerminalSettings.hStdOut, TerminalSettings.dwOutputMode);
-#endif
-}
-
 /*
 ** curl tool main function.
 */
@@ -284,7 +243,6 @@ int main(int argc, char *argv[])
   memset(&global, 0, sizeof(global));
 
 #ifdef WIN32
-#ifdef _tcscmp
   /* Undocumented diagnostic option to list the full paths of all loaded
      modules. This is purposely pre-init. */
   if(argc == 2 && !_tcscmp(argv[1], _T("--dump-module-paths"))) {
@@ -294,7 +252,6 @@ int main(int argc, char *argv[])
     curl_slist_free_all(head);
     return head ? 0 : 1;
   }
-#endif /* _tcscmp */
   /* win32_init must be called before other init routines. */
   result = win32_init();
   if(result) {
@@ -302,9 +259,6 @@ int main(int argc, char *argv[])
     return result;
   }
 #endif
-
-  /* Perform any platform-specific terminal configuration */
-  configure_terminal();
 
   main_checkfds();
 
@@ -325,9 +279,6 @@ int main(int argc, char *argv[])
     /* Perform the main cleanup */
     main_free(&global);
   }
-
-  /* Return the terminal to its original state */
-  restore_terminal();
 
 #ifdef __NOVELL_LIBC__
   if(getenv("_IN_NETWARE_BASH_") == NULL)

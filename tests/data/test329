@@ -10,7 +10,7 @@ cookies
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
@@ -33,6 +33,9 @@ moo
 <file name="log/jar329.txt" mode="text">
 .host.foo.com	TRUE	/we/want/	FALSE	2147483647	test	no
 </file>
+<file name="log/jar329-2.txt" mode="text">
+.host.foo.com	TRUE	/we/want/	FALSE	2147483647	tester	yes
+</file>
 <server>
 http
 </server>
@@ -46,7 +49,7 @@ HTTP cookie with Max-Age=0
 TZ=GMT
 </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/329 -b log/jar329.txt -H "Host: host.foo.com" http://%HOSTIP:%HTTPPORT/we/want/3290002
+http://%HOSTIP:%HTTPPORT/we/want/329 -b log/jar329.txt -b log/jar329-2.txt -H "Host: host.foo.com" http://%HOSTIP:%HTTPPORT/we/want/3290002
 </command>
 </client>
 
@@ -57,12 +60,13 @@ GET /we/want/329 HTTP/1.1
 Host: host.foo.com
 User-Agent: curl/%VERSION
 Accept: */*
-Cookie: test=no
+Cookie: tester=yes; test=no
 
 GET /we/want/3290002 HTTP/1.1
 Host: host.foo.com
 User-Agent: curl/%VERSION
 Accept: */*
+Cookie: tester=yes
 
 </protocol>
 </verify>

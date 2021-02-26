@@ -59,6 +59,10 @@ endif
 ifndef LIBRTMP_PATH
 LIBRTMP_PATH = ../../librtmp-2.4
 endif
+# Edit the path below to point to the base of your libgsasl package.
+ifndef LIBGSASL_PATH
+LIBGSASL_PATH = ../../libgsasl-1.10.0
+endif
 # Edit the path below to point to the base of your libidn2 package.
 ifndef LIBIDN2_PATH
 LIBIDN2_PATH = ../../libidn2-2.0.3
@@ -197,6 +201,9 @@ ZSTD = 1
 endif
 ifeq ($(findstring -brotli,$(CFG)),-brotli)
 BROTLI = 1
+endif
+ifeq ($(findstring -gsasl,$(CFG)),-gsasl)
+GSASL = 1
 endif
 ifeq ($(findstring -idn2,$(CFG)),-idn2)
 IDN2 = 1
@@ -345,6 +352,11 @@ ifdef BROTLI
   else
     DLL_LIBS += -lbrotlidec
   endif
+endif
+ifdef GSASL
+  INCLUDES += -I"$(LIBGSASL_PATH)/include"
+  CFLAGS += -DUSE_GSASL
+  DLL_LIBS += -L"$(LIBGSASL_PATH)/lib" -lgsasl
 endif
 ifdef IDN2
   INCLUDES += -I"$(LIBIDN2_PATH)/include"

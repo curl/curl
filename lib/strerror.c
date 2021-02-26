@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -721,7 +721,9 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   if(!buflen)
     return NULL;
 
+#ifndef WIN32
   DEBUGASSERT(err >= 0);
+#endif
 
   max = buflen - 1;
   *buf = '\0';

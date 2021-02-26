@@ -55,8 +55,23 @@ struct memdebug {
  */
 
 FILE *curl_dbg_logfile = NULL;
+static bool registered_cleanup = FALSE; /* atexit registered cleanup */
 static bool memlimit = FALSE; /* enable memory limit */
 static long memsize = 0;  /* set number of mallocs allowed */
+
+/* LeakSantizier (LSAN) calls _exit() instead of exit() when a leak is detected
+   on exit so the logfile must be closed explicitly or data could be lost.
+   Though _exit() does not call atexit handlers such as this, LSAN's call to
+   _exit() comes after the atexit handlers are called. curl/curl#6620 */
+static void curl_dbg_cleanup(void)
+{
+  if(curl_dbg_logfile &&
+     curl_dbg_logfile != stderr &&
+     curl_dbg_logfile != stdout) {
+    fclose(curl_dbg_logfile);
+  }
+  curl_dbg_logfile = NULL;
+}
 
 /* this sets the log file name */
 void curl_dbg_memdebug(const char *logname)
@@ -72,6 +87,8 @@ void curl_dbg_memdebug(const char *logname)
       setbuf(curl_dbg_logfile, (char *)NULL);
 #endif
   }
+  if(!registered_cleanup)
+    registered_cleanup = !atexit(curl_dbg_cleanup);
 }
 
 /* This function sets the number of malloc() calls that should return
@@ -91,15 +108,13 @@ static bool countcheck(const char *func, int line, const char *source)
      should not be made */
   if(memlimit && source) {
     if(!memsize) {
-      if(source) {
-        /* log to file */
-        curl_dbg_log("LIMIT %s:%d %s reached memlimit\n",
-                     source, line, func);
-        /* log to stderr also */
-        fprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
-                source, line, func);
-        fflush(curl_dbg_logfile); /* because it might crash now */
-      }
+      /* log to file */
+      curl_dbg_log("LIMIT %s:%d %s reached memlimit\n",
+                   source, line, func);
+      /* log to stderr also */
+      fprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
+              source, line, func);
+      fflush(curl_dbg_logfile); /* because it might crash now */
       errno = ENOMEM;
       return TRUE; /* RETURN ERROR! */
     }

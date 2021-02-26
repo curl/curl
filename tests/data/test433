@@ -30,6 +30,8 @@ http
 </server>
 <setenv>
 XDG_CONFIG_HOME=%PWD/log
+HOME=
+CURL_HOME=
 </setenv>
 <name>
 Verify XDG_CONFIG_HOME use to find .curlrc

@@ -31,7 +31,7 @@ name then both will be sent on a future transfer to that server, likely not
 what you intended.  To address these issues set a domain in Set-Cookie (doing
 that will include sub domains) or use the Netscape format.
 
-If this option is used several times, the last one will be used.
+This option can be used multiple times.
 
 Users very often want to both read cookies from a file and write updated
 cookies back to a file, so using both --cookie and --cookie-jar in the same

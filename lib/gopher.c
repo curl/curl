@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,6 +33,7 @@
 #include "gopher.h"
 #include "select.h"
 #include "strdup.h"
+#include "vtls/vtls.h"
 #include "url.h"
 #include "escape.h"
 #include "warnless.h"
@@ -45,7 +46,11 @@
  * Forward declarations.
  */
 
-static CURLcode gopher_do(struct connectdata *conn, bool *done);
+static CURLcode gopher_do(struct Curl_easy *data, bool *done);
+#ifdef USE_SSL
+static CURLcode gopher_connect(struct Curl_easy *data, bool *done);
+static CURLcode gopher_connecting(struct Curl_easy *data, bool *done);
+#endif
 
 /*
  * Gopher protocol handler.
@@ -75,10 +80,51 @@ const struct Curl_handler Curl_handler_gopher = {
   PROTOPT_NONE                          /* flags */
 };
 
-static CURLcode gopher_do(struct connectdata *conn, bool *done)
+#ifdef USE_SSL
+const struct Curl_handler Curl_handler_gophers = {
+  "GOPHERS",                            /* scheme */
+  ZERO_NULL,                            /* setup_connection */
+  gopher_do,                            /* do_it */
+  ZERO_NULL,                            /* done */
+  ZERO_NULL,                            /* do_more */
+  gopher_connect,                       /* connect_it */
+  gopher_connecting,                    /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_getsock */
+  ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
+  ZERO_NULL,                            /* perform_getsock */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
+  PORT_GOPHER,                          /* defport */
+  CURLPROTO_GOPHERS,                    /* protocol */
+  CURLPROTO_GOPHER,                     /* family */
+  PROTOPT_SSL                           /* flags */
+};
+
+static CURLcode gopher_connect(struct Curl_easy *data, bool *done)
+{
+  (void)data;
+  (void)done;
+  return CURLE_OK;
+}
+
+static CURLcode gopher_connecting(struct Curl_easy *data, bool *done)
+{
+  struct connectdata *conn = data->conn;
+  CURLcode result = Curl_ssl_connect(data, conn, FIRSTSOCKET);
+  if(result)
+    connclose(conn, "Failed TLS connection");
+  *done = TRUE;
+  return result;
+}
+#endif
+
+static CURLcode gopher_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   char *gopherpath;
   char *path = data->state.up.path;
@@ -127,9 +173,14 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   k = curlx_uztosz(len);
 
   for(;;) {
-    result = Curl_write(conn, sockfd, sel, k, &amount);
+    /* Break out of the loop if the selector is empty because OpenSSL and/or
+       LibreSSL fail with errno 0 if this is the case. */
+    if(strlen(sel) < 1)
+      break;
+
+    result = Curl_write(data, sockfd, sel, k, &amount);
     if(!result) { /* Which may not have written it all! */
-      result = Curl_client_write(conn, CLIENTWRITE_HEADER, sel, amount);
+      result = Curl_client_write(data, CLIENTWRITE_HEADER, sel, amount);
       if(result)
         break;
 
@@ -141,7 +192,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
     else
       break;
 
-    timeout_ms = Curl_timeleft(conn->data, NULL, FALSE);
+    timeout_ms = Curl_timeleft(data, NULL, FALSE);
     if(timeout_ms < 0) {
       result = CURLE_OPERATION_TIMEDOUT;
       break;
@@ -169,12 +220,12 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   free(sel_org);
 
   if(!result)
-    result = Curl_write(conn, sockfd, "\r\n", 2, &amount);
+    result = Curl_write(data, sockfd, "\r\n", 2, &amount);
   if(result) {
     failf(data, "Failed sending Gopher request");
     return result;
   }
-  result = Curl_client_write(conn, CLIENTWRITE_HEADER, (char *)"\r\n", 2);
+  result = Curl_client_write(data, CLIENTWRITE_HEADER, (char *)"\r\n", 2);
   if(result)
     return result;
 

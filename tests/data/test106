@@ -44,7 +44,6 @@ CWD path with  spaces
 CWD and things2
 EPSV
 TYPE A
-SIZE 106
 RETR 106
 QUIT
 </protocol>

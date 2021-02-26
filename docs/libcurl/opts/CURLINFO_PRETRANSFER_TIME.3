@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -29,10 +29,11 @@ CURLINFO_PRETRANSFER_TIME \- get the time until the file transfer start
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PRETRANSFER_TIME, double *timep);
 .SH DESCRIPTION
 Pass a pointer to a double to receive the time, in seconds, it took from the
-start until the file transfer is just about to begin. This includes all
-pre-transfer commands and negotiations that are specific to the particular
-protocol(s) involved. It does \fInot\fP involve the sending of the protocol-
-specific request that triggers a transfer.
+start until the file transfer is just about to begin.
+
+This time-stamp includes all pre-transfer commands and negotiations that are
+specific to the particular protocol(s) involved. It includes the sending of
+the protocol- specific protocol instructions that triggers a transfer.
 
 When a redirect is followed, the time from each request is added together.
 

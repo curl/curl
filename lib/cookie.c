@@ -264,6 +264,11 @@ static const char *get_top_domain(const char * const domain, size_t *outlen)
   return first? first: domain;
 }
 
+/* Avoid C1001, an "internal error" with MSVC14 */
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma optimize("", off)
+#endif
+
 /*
  * A case-insensitive hash for the cookie domains.
  */
@@ -279,6 +284,10 @@ static size_t cookie_hash_domain(const char *domain, const size_t len)
 
   return (h % COOKIE_HASH_SIZE);
 }
+
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#pragma optimize("", on)
+#endif
 
 /*
  * Hash this domain.

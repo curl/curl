@@ -38,7 +38,7 @@
 #endif
 
 #ifndef LIB548
-static size_t readcallback(void  *ptr,
+static size_t readcallback(char  *ptr,
                            size_t size,
                            size_t nmemb,
                            void *clientp)

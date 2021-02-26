@@ -12,7 +12,7 @@ Expect: 100-continue
 <reply>
 <data nocheck="yes">
 HTTP/1.1 404 NOOOOOOOOO
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Content-Type: text/html
@@ -22,7 +22,7 @@ Content-Type: text/html
 
 <data1>
 HTTP/1.1 404 NEITHER
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Content-Type: text/html
@@ -60,14 +60,14 @@ HTTP POST forced expect 100-continue with a 404
 <verify>
 <stdout>
 HTTP/1.1 404 NOOOOOOOOO
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Content-Type: text/html
 
 -foo-
 HTTP/1.1 404 NEITHER
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Content-Type: text/html

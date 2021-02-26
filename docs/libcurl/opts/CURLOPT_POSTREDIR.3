@@ -40,7 +40,7 @@ libcurl maintain the request method after a 302 redirect whilst setting bit 2
 after a 303 redirect. The value \fBCURL_REDIR_POST_ALL\fP is a convenience
 define that sets all three bits.
 
-The non-RFC behaviour is ubiquitous in web browsers, so the library does the
+The non-RFC behavior is ubiquitous in web browsers, so the library does the
 conversion by default to maintain consistency. However, a server may require a
 POST to remain a POST after such a redirection. This option is meaningful only
 when setting \fICURLOPT_FOLLOWLOCATION(3)\fP.

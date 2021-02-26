@@ -125,7 +125,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                                 TEXT(SP_NAME_KERBEROS),
                                                 &SecurityPackage);
     if(status != SEC_E_OK) {
-      failf(data, "SSPI: couldn't get auth info\n");
+      failf(data, "SSPI: couldn't get auth info");
       return CURLE_AUTH_ERROR;
     }
 

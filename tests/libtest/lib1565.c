@@ -70,7 +70,7 @@ static void *run_thread(void *ptr)
 
     pthread_mutex_unlock(&lock);
 
-    multi_wakeup(multi);
+    res_multi_wakeup(multi);
   }
 
 test_cleanup:

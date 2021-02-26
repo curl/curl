@@ -37,7 +37,6 @@ CWD tmp
 CWD moo
 EPSV
 TYPE A
-SIZE 143
 RETR 143
 QUIT
 </protocol>
