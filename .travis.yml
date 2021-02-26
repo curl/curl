@@ -34,9 +34,9 @@ env:
 
 addons:
   apt:
-    config: &id001
+    config: &common_apt
       retries: true
-    packages: &id002
+    packages: &common_packages
     - cmake
     - valgrind
     - libev-dev
@@ -55,9 +55,9 @@ jobs:
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -70,9 +70,9 @@ jobs:
     - eval "$(gimme stable)"; gimme --list
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -85,10 +85,10 @@ jobs:
     compiler: clang
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - &id003
-          - *id002
+        - &clang_packages
+          - *common_packages
           - clang-9
         - libpsl-dev
         - libbrotli-dev
@@ -99,9 +99,9 @@ jobs:
     compiler: clang
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id003
+        - *clang_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -110,9 +110,9 @@ jobs:
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - krb5-user
         - libssh2-1-dev
         - libbrotli-dev
@@ -126,9 +126,9 @@ jobs:
     compiler: clang
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id003
+        - *clang_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -139,9 +139,9 @@ jobs:
     compiler: clang
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id003
+        - *clang_packages
         - libgnutls28-dev
         - libpsl-dev
         - libbrotli-dev
@@ -153,9 +153,9 @@ jobs:
     compiler: clang
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id003
+        - *clang_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -164,7 +164,7 @@ jobs:
     dist: focal
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
         - cmake
         - valgrind
@@ -183,9 +183,9 @@ jobs:
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - lcov
         - libpsl-dev
         - libbrotli-dev
@@ -198,9 +198,9 @@ jobs:
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -220,9 +220,9 @@ jobs:
     arch: arm64
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -245,9 +245,9 @@ jobs:
     arch: ppc64le
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -264,9 +264,9 @@ jobs:
     compiler: clang
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id003
+        - *clang_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -276,9 +276,9 @@ jobs:
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -288,9 +288,9 @@ jobs:
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -299,9 +299,9 @@ jobs:
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -311,9 +311,9 @@ jobs:
     arch: s390x
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -328,9 +328,9 @@ jobs:
     compiler: clang
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id003
+        - *clang_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -339,9 +339,9 @@ jobs:
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -350,9 +350,9 @@ jobs:
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -362,9 +362,9 @@ jobs:
     compiler: clang
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id003
+        - *clang_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -373,9 +373,9 @@ jobs:
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id002
+        - *common_packages
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -385,9 +385,9 @@ jobs:
     compiler: clang
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id003
+        - *clang_packages
         - clang-tidy-9
         - libpsl-dev
         - libbrotli-dev
@@ -398,9 +398,9 @@ jobs:
     compiler: clang
     addons:
       apt:
-        config: *id001
+        config: *common_apt
         packages:
-        - *id003
+        - *clang_packages
         - libnss3-dev
         - libpsl-dev
         - libbrotli-dev
