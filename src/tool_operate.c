@@ -2574,7 +2574,7 @@ static CURLcode run_all_transfers(struct GlobalConfig *global,
 CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 {
   CURLcode result = CURLE_OK;
-  char *first_arg = curlx_convert_tchar_to_UTF8(argv[1]);
+  char *first_arg = curlx_convert_tchar_to_UTF8(argc > 1 ? argv[1] : "");
 
   /* Setup proper locale from environment */
 #ifdef HAVE_SETLOCALE
