@@ -67,7 +67,7 @@ jobs:
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     - PKG_CONFIG_PATH="$HOME/quiche/target/release"
     before_install:
-    - eval "$(gimme stable)"; gimme --list
+    - eval "$(gimme stable)"; gimme --list  # Install latest Go (for boringssl)
     addons:
       apt:
         config: *common_apt
@@ -161,6 +161,7 @@ jobs:
         - libzstd-dev
   - env:
     - T=normal C=--with-libssh
+    # Avoid bionic, its pre-release libssh version triggers deprecation warnings.    
     dist: focal
     addons:
       apt:
@@ -174,6 +175,7 @@ jobs:
         - stunnel4
         - libidn2-dev
         - gnutls-bin
+        # The above list is common_packages minus impacket.        
         - libssh-dev
         - ninja-build
   - env:
@@ -238,7 +240,7 @@ jobs:
     - T=novalgrind BORINGSSL=yes C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     before_install:
-    - eval "$(gimme stable)"; gimme --list
+    - eval "$(gimme stable)"; gimme --list  # Install latest Go (for boringssl)
   - env:
     - T=debug C="" TFLAGS=-n
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
