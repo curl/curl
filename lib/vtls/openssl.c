@@ -2254,35 +2254,6 @@ select_next_proto_cb(SSL *ssl,
 }
 #endif /* HAS_NPN */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-static const char *
-get_ssl_version_txt(SSL *ssl)
-{
-  if(!ssl)
-    return "";
-
-  switch(SSL_version(ssl)) {
-#ifdef TLS1_3_VERSION
-  case TLS1_3_VERSION:
-    return "TLSv1.3";
-#endif
-#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
-  case TLS1_2_VERSION:
-    return "TLSv1.2";
-  case TLS1_1_VERSION:
-    return "TLSv1.1";
-#endif
-  case TLS1_VERSION:
-    return "TLSv1.0";
-  case SSL3_VERSION:
-    return "SSLv3";
-  case SSL2_VERSION:
-    return "SSLv2";
-  }
-  return "unknown";
-}
-#endif
-
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) /* 1.1.0 */
 static CURLcode
 set_ssl_version_min_max(SSL_CTX *ctx, struct connectdata *conn)
@@ -3386,7 +3357,7 @@ static CURLcode ossl_connect_step2(struct Curl_easy *data,
 
     /* Informational message */
     infof(data, "SSL connection using %s / %s\n",
-          get_ssl_version_txt(backend->handle),
+          SSL_get_version(backend->handle),
           SSL_get_cipher(backend->handle));
 
 #ifdef HAS_ALPN
