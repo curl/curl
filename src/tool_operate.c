@@ -2001,6 +2001,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->ftp_pret)
           my_setopt(curl, CURLOPT_FTP_USE_PRET, 1L);
 
+        if(config->create_file_mode)
+          my_setopt(curl, CURLOPT_NEW_FILE_PERMS, config->create_file_mode);
+
         if(config->proto_present)
           my_setopt_flags(curl, CURLOPT_PROTOCOLS, config->proto);
         if(config->proto_redir_present)
