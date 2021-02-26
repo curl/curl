@@ -139,9 +139,15 @@ static const struct cipher_s cipherlist[] = {
   {"fortezza",                   SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA},
   {"fortezza_rc4_128_sha",       SSL_FORTEZZA_DMS_WITH_RC4_128_SHA},
   {"fortezza_null",              SSL_FORTEZZA_DMS_WITH_NULL_SHA},
+  {"dhe_rsa_3des_sha",           SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA},
+  {"dhe_dss_3des_sha",           SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA},
+  {"dhe_rsa_des_sha",            SSL_DHE_RSA_WITH_DES_CBC_SHA},
+  {"dhe_dss_des_sha",            SSL_DHE_DSS_WITH_DES_CBC_SHA},
   /* TLS 1.0: Exportable 56-bit Cipher Suites. */
   {"rsa_des_56_sha",             TLS_RSA_EXPORT1024_WITH_DES_CBC_SHA},
   {"rsa_rc4_56_sha",             TLS_RSA_EXPORT1024_WITH_RC4_56_SHA},
+  /* Ephemeral DH with RC4 bulk encryption */
+  {"dhe_dss_rc4_128_sha",    TLS_DHE_DSS_WITH_RC4_128_SHA},
   /* AES ciphers. */
   {"dhe_dss_aes_128_cbc_sha",    TLS_DHE_DSS_WITH_AES_128_CBC_SHA},
   {"dhe_dss_aes_256_cbc_sha",    TLS_DHE_DSS_WITH_AES_256_CBC_SHA},
@@ -218,6 +224,25 @@ static const struct cipher_s cipherlist[] = {
  {"aes_128_gcm_sha_256",              TLS_AES_128_GCM_SHA256},
  {"aes_256_gcm_sha_384",              TLS_AES_256_GCM_SHA384},
  {"chacha20_poly1305_sha_256",        TLS_CHACHA20_POLY1305_SHA256},
+#endif
+#ifdef TLS_DHE_DSS_WITH_AES_128_CBC_SHA256
+  /* AES CBC cipher suites in RFC 5246. Introduced in NSS release 3.20 */
+  {"dhe_dss_aes_128_sha_256",         TLS_DHE_DSS_WITH_AES_128_CBC_SHA256},
+  {"dhe_dss_aes_256_sha_256",         TLS_DHE_DSS_WITH_AES_256_CBC_SHA256},
+#endif
+#ifdef TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA
+  /* Camellia cipher suites in RFC 4132/5932.
+     Introduced in NSS release 3.12 */
+  {"dhe_rsa_camellia_128_sha",        TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA},
+  {"dhe_dss_camellia_128_sha",        TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA},
+  {"dhe_rsa_camellia_256_sha",        TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA},
+  {"dhe_dss_camellia_256_sha",        TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA},
+  {"rsa_camellia_128_sha",            TLS_RSA_WITH_CAMELLIA_128_CBC_SHA},
+  {"rsa_camellia_256_sha",            TLS_RSA_WITH_CAMELLIA_256_CBC_SHA},
+#endif
+#ifdef TLS_RSA_WITH_SEED_CBC_SHA
+  /* SEED cipher suite in RFC 4162. Introduced in NSS release 3.12.3 */
+  {"rsa_seed_sha",                    TLS_RSA_WITH_SEED_CBC_SHA},
 #endif
 };
 
