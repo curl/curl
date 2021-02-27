@@ -550,6 +550,12 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                    "schannel: disabled server cert revocation checks\n"));
     }
 
+    if(SSL_SET_OPTION(no_default_creds)) {
+      schannel_cred.dwFlags &= ~SCH_CRED_USE_DEFAULT_CREDS;
+      schannel_cred.dwFlags |= SCH_CRED_NO_DEFAULT_CREDS;
+      DEBUGF(infof(data, "schannel: disabled auto default credentials\n"));
+    }
+
     if(!conn->ssl_config.verifyhost) {
       schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
       DEBUGF(infof(data, "schannel: verifyhost setting prevents Schannel from "
@@ -896,6 +902,9 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   BACKEND->req_flags = ISC_REQ_SEQUENCE_DETECT | ISC_REQ_REPLAY_DETECT |
     ISC_REQ_CONFIDENTIALITY | ISC_REQ_ALLOCATE_MEMORY |
     ISC_REQ_STREAM;
+
+  if(SSL_SET_OPTION(no_default_creds))
+    BACKEND->req_flags |= ISC_REQ_USE_SUPPLIED_CREDS;
 
   /* allocate memory for the security context handle */
   BACKEND->ctxt = (struct Curl_schannel_ctxt *)

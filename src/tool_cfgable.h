@@ -267,6 +267,9 @@ struct OperationConfig {
                                   revocation list errors */
 
   bool native_ca_store;        /* use the native os ca store */
+  bool ssl_no_default_creds;   /* do not automatically send default credentials
+                                  when requested by the server (Schannel) */
+  bool proxy_ssl_no_default_creds;  /* proxy version of ssl_no_default_creds */
 
   bool use_metalink;        /* process given URLs as metalink XML file */
   struct metalinkfile *metalinkfile_list; /* point to the first node */

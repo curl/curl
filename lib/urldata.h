@@ -286,6 +286,8 @@ struct ssl_config_data {
   BIT(revoke_best_effort); /* ignore SSL revocation offline/missing revocation
                               list errors */
   BIT(native_ca_store); /* use the native ca store of operating system */
+  BIT(no_default_creds); /* do not automatically send default credentials
+                            when requested by the server (Schannel) */
 };
 
 struct ssl_general_config {

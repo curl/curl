@@ -888,6 +888,11 @@ typedef enum {
    operating system. Currently implemented under MS-Windows. */
 #define CURLSSLOPT_NATIVE_CA (1<<4)
 
+/* - CURLSSLOPT_NO_DEFAULT_CREDS tells libcurl to not automatically locate and
+   use a client certificate for authentication. This option is only supported
+   for Schannel since it is the only known SSL backend to do that. */
+#define CURLSSLOPT_NO_DEFAULT_CREDS (1<<5)
+
 /* The default connection attempt delay in milliseconds for happy eyeballs.
    CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3 and happy-eyeballs-timeout-ms.d document
    this value, keep them in sync. */

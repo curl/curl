@@ -2268,6 +2268,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.ssl.no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
     data->set.ssl.revoke_best_effort = !!(arg & CURLSSLOPT_REVOKE_BEST_EFFORT);
     data->set.ssl.native_ca_store = !!(arg & CURLSSLOPT_NATIVE_CA);
+    data->set.ssl.no_default_creds = !!(arg & CURLSSLOPT_NO_DEFAULT_CREDS);
     /* If a setting is added here it should also be added in dohprobe()
        which sets its own CURLOPT_SSL_OPTIONS based on these settings. */
     break;
@@ -2279,9 +2280,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       (bool)((arg&CURLSSLOPT_ALLOW_BEAST) ? TRUE : FALSE);
     data->set.proxy_ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     data->set.proxy_ssl.no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
-    data->set.proxy_ssl.native_ca_store = !!(arg & CURLSSLOPT_NATIVE_CA);
     data->set.proxy_ssl.revoke_best_effort =
       !!(arg & CURLSSLOPT_REVOKE_BEST_EFFORT);
+    data->set.proxy_ssl.native_ca_store = !!(arg & CURLSSLOPT_NATIVE_CA);
+    data->set.proxy_ssl.no_default_creds =
+      !!(arg & CURLSSLOPT_NO_DEFAULT_CREDS);
     break;
 #endif
 
