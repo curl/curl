@@ -266,7 +266,10 @@ struct OperationConfig {
   bool ssl_revoke_best_effort; /* ignore SSL revocation offline/missing
                                   revocation list errors */
 
-  bool native_ca_store;        /* use the native os ca store */
+  bool native_ca_store;     /* use the native os ca store */
+  bool ssl_auto_creds;      /* automatically locate and use a client
+                               certificate for authentication (Schannel) */
+  bool proxy_ssl_auto_creds;   /* proxy version of ssl_auto_creds */
 
   bool use_metalink;        /* process given URLs as metalink XML file */
   struct metalinkfile *metalinkfile_list; /* point to the first node */
