@@ -247,7 +247,8 @@ static const struct LongShort aliases[]= {
   {"El", "tlspassword",              ARG_STRING},
   {"Em", "tlsauthtype",              ARG_STRING},
   {"En", "ssl-allow-beast",          ARG_BOOL},
-  /* Eo */
+  {"Eo", "ssl-auto-client-cert",     ARG_BOOL},
+  {"EO", "proxy-ssl-auto-client-cert", ARG_BOOL},
   {"Ep", "pinnedpubkey",             ARG_STRING},
   {"EP", "proxy-pinnedpubkey",       ARG_STRING},
   {"Eq", "cert-status",              ARG_BOOL},
@@ -1649,6 +1650,16 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 'n': /* no empty SSL fragments, --ssl-allow-beast */
         if(curlinfo->features & CURL_VERSION_SSL)
           config->ssl_allow_beast = toggle;
+        break;
+
+      case 'o': /* --ssl-auto-client-cert */
+        if(curlinfo->features & CURL_VERSION_SSL)
+          config->ssl_auto_client_cert = toggle;
+        break;
+
+      case 'O': /* --proxy-ssl-auto-client-cert */
+        if(curlinfo->features & CURL_VERSION_SSL)
+          config->proxy_ssl_auto_client_cert = toggle;
         break;
 
       case 'p': /* Pinned public key DER file */

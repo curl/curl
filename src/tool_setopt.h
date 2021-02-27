@@ -76,6 +76,7 @@ extern const struct NameValueUnsigned setopt_nv_CURLHSTS[];
 #define setopt_nv_CURLOPT_FTP_SSL_CCC setopt_nv_CURLFTPSSL_CCC
 #define setopt_nv_CURLOPT_USE_SSL setopt_nv_CURLUSESSL
 #define setopt_nv_CURLOPT_SSL_OPTIONS setopt_nv_CURLSSLOPT
+#define setopt_nv_CURLOPT_PROXY_SSL_OPTIONS setopt_nv_CURLSSLOPT
 #define setopt_nv_CURLOPT_NETRC setopt_nv_CURL_NETRC
 #define setopt_nv_CURLOPT_PROTOCOLS setopt_nv_CURLPROTO
 #define setopt_nv_CURLOPT_REDIR_PROTOCOLS setopt_nv_CURLPROTO

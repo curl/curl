@@ -351,7 +351,10 @@ static CURLcode dohprobe(struct Curl_easy *data,
         (data->set.ssl.revoke_best_effort ?
          CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
         (data->set.ssl.native_ca_store ?
-         CURLSSLOPT_NATIVE_CA : 0);
+         CURLSSLOPT_NATIVE_CA : 0) |
+        (data->set.ssl.auto_client_cert ?
+         CURLSSLOPT_AUTO_CLIENT_CERT : 0);
+
       curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS, mask);
     }
 

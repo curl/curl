@@ -1720,20 +1720,31 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
           {
             long mask =
-              (config->ssl_allow_beast ? CURLSSLOPT_ALLOW_BEAST : 0) |
+              (config->ssl_allow_beast ?
+               CURLSSLOPT_ALLOW_BEAST : 0) |
+              (config->ssl_no_revoke ?
+               CURLSSLOPT_NO_REVOKE : 0) |
               (config->ssl_revoke_best_effort ?
                CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
               (config->native_ca_store ?
                CURLSSLOPT_NATIVE_CA : 0) |
-              (config->ssl_no_revoke ? CURLSSLOPT_NO_REVOKE : 0);
+              (config->ssl_auto_client_cert ?
+               CURLSSLOPT_AUTO_CLIENT_CERT : 0);
 
             if(mask)
               my_setopt_bitmask(curl, CURLOPT_SSL_OPTIONS, mask);
           }
 
-          if(config->proxy_ssl_allow_beast)
-            my_setopt(curl, CURLOPT_PROXY_SSL_OPTIONS,
-                      (long)CURLSSLOPT_ALLOW_BEAST);
+          {
+            long mask =
+              (config->proxy_ssl_allow_beast ?
+               CURLSSLOPT_ALLOW_BEAST : 0) |
+              (config->proxy_ssl_auto_client_cert ?
+               CURLSSLOPT_AUTO_CLIENT_CERT : 0);
+
+            if(mask)
+              my_setopt_bitmask(curl, CURLOPT_PROXY_SSL_OPTIONS, mask);
+          }
         }
 
         if(config->path_as_is)
