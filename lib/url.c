@@ -843,7 +843,7 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
     dead_connection = TRUE;
 
   /* temporarily attach the connection to this transfer handle for the
-     disonnect and shutdown */
+     disconnect and shutdown */
   Curl_attach_connnection(data, conn);
 
   if(conn->handler->disconnect)
