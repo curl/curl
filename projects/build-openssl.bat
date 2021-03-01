@@ -27,9 +27,13 @@ rem ***************************************************************************
 
   rem Set our variables
   setlocal ENABLEDELAYEDEXPANSION
-  set VC_VER=
-  set BUILD_PLATFORM=
   set BUILD_CONFIG=
+  set BUILD_PLATFORM=
+  set SAVED_PATH=
+  set SOURCE_PATH=
+  set TMP_BUILD_PATH=
+  set TMP_INSTALL_PATH=
+  set VC_VER=
 
   rem Ensure we have the required arguments
   if /i "%~1" == "" goto syntax
@@ -142,7 +146,7 @@ rem ***************************************************************************
       )
     ) else (
       if not defined START_DIR (
-        set START_DIR=%~1%
+        set "START_DIR=%~1%"
       ) else (
         goto unknown
       )
@@ -226,7 +230,7 @@ rem ***************************************************************************
 
 :start
   echo.
-  set SAVED_PATH=%CD%
+  set "SAVED_PATH=%CD%"
 
   if "%VC_VER%" == "6.0" (
     call "%ABS_VC_PATH%\bin\vcvars32"
@@ -243,8 +247,29 @@ rem ***************************************************************************
   )
 
   echo.
-  cd /d %SAVED_PATH%
-  if defined START_DIR cd /d %START_DIR%
+
+  cd /d "%START_DIR%" || (echo Error: Failed cd start & exit /B 1)
+  rem Save the full path of the openssl source dir
+  set "SOURCE_PATH=%CD%"
+
+  rem Set temporary paths for building and installing OpenSSL. If a temporary
+  rem path is not the same as the source path then it is *removed* after the
+  rem installation is completed.
+  rem
+  rem For legacy OpenSSL the temporary build path must be the source path.
+  rem
+  rem For OpenSSL 1.1.x the temporary paths must be separate not a descendant
+  rem of the other, otherwise pdb files will be lost between builds.
+  rem https://github.com/openssl/openssl/issues/10005
+  rem
+  if "%LEGACY_BUILD%" == "TRUE" (
+    set "TMP_BUILD_PATH=%SOURCE_PATH%"
+    set "TMP_INSTALL_PATH=%SOURCE_PATH%"
+  ) else (
+    set "TMP_BUILD_PATH=%SOURCE_PATH%\build\tmp_build"
+    set "TMP_INSTALL_PATH=%SOURCE_PATH%\build\tmp_install"
+  )
+
   goto %BUILD_PLATFORM%
 
 :x64
@@ -356,10 +381,10 @@ rem
   if "%3" == "" exit /B 1
   if "%4" == "" exit /B 1
 
-  if "%4" == "TRUE" (
-    rem Calculate the build directory
-    set build_dir=%cd%
+  if not exist "%TMP_BUILD_PATH%" mkdir "%TMP_BUILD_PATH%"
+  cd /d "%TMP_BUILD_PATH%" || (echo Error: Failed cd build & exit /B 1)
 
+  if "%4" == "TRUE" (
     rem Calculate the configure options
     if "%1" == "x86" (
       if "%2" == "debug" (
@@ -392,9 +417,6 @@ rem
       del makefile 1>nul
     )
 
-    rem Calculate the build directory
-    set build_dir=%cd%\build\tmp
-
     rem Calculate the configure options
     if "%1" == "x86" (
       set options=VC-WIN32
@@ -423,12 +445,10 @@ rem
     exit /B 1
   )
 
-  set options=%options% --prefix=%build_dir%
-
   rem Run the configure
-  perl Configure %options%
+  perl "%SOURCE_PATH%\Configure" %options% "--prefix=%TMP_INSTALL_PATH%"
 
-  exit /B %ERRORLEVEL
+  exit /B %ERRORLEVEL%
 
 rem Main build function.
 rem
@@ -442,6 +462,8 @@ rem
   if "%1" == "" exit /B 1
   if "%2" == "" exit /B 1
   if "%3" == "" exit /B 1
+
+  cd /d "%TMP_BUILD_PATH%" || (echo Error: Failed cd build & exit /B 1)
 
   if "%3" == "TRUE" (
     if "%1" == "x86" (
@@ -459,7 +481,7 @@ rem
     ) else (
       exit /B 1
     )
-  ) else if "%2" == "FALSE" (
+  ) else if "%3" == "FALSE" (
     nmake
   ) else (
     exit /B 1
@@ -482,6 +504,10 @@ rem
 
   rem Copy the generated files to our directory structure
   if "%3" == "TRUE" (
+    rem There's no actual installation for legacy OpenSSL, the files are copied
+    rem from the build dir (for legacy this is same as source dir) to the final
+    rem location.
+    cd /d "%SOURCE_PATH%" || (echo Error: Failed cd source & exit /B 1)
     if "%1" == "debug" (
       if "%2" == "static" (
         rem Move the output directories
@@ -546,11 +572,12 @@ rem
       )
     )
   ) else if "%3" == "FALSE" (
-    rem Calculate the build directory
-    set build_dir=%cd%\build\tmp
+    cd /d "%TMP_BUILD_PATH%" || (echo Error: Failed cd build & exit /B 1)
 
     rem Perform the installation
     nmake install_sw
+
+    cd /d "%SOURCE_PATH%" || (echo Error: Failed cd source & exit /B 1)
 
     rem Move the output directories
     if "%1" == "debug" (
@@ -559,17 +586,23 @@ rem
           mkdir "%OUTDIR%\LIB Debug" 1>nul
         )
 
-        move !build_dir!\lib\*.lib "%OUTDIR%\LIB Debug" 1>nul
-        move !build_dir!\bin\*.exe "%OUTDIR%\LIB Debug" 1>nul
+        move "%TMP_INSTALL_PATH%\lib\*.lib" "%OUTDIR%\LIB Debug" 1>nul
+        move "%TMP_INSTALL_PATH%\lib\*.pdb" "%OUTDIR%\LIB Debug" 1>nul
+        move "%TMP_INSTALL_PATH%\bin\*.exe" "%OUTDIR%\LIB Debug" 1>nul
+        move "%TMP_INSTALL_PATH%\bin\*.pdb" "%OUTDIR%\LIB Debug" 1>nul
+        xcopy /E /I /Y "%TMP_INSTALL_PATH%\include" "%OUTDIR%\LIB Debug\include" 1>nul
       ) else if "%2" == "shared" (
         if not exist "%OUTDIR%\DLL Debug" (
           mkdir "%OUTDIR%\DLL Debug" 1>nul
         )
 
-        move !build_dir!\lib\*.lib "%OUTDIR%\DLL Debug" 1>nul
-        move !build_dir!\bin\*.dll "%OUTDIR%\DLL Debug" 1>nul
-        move !build_dir!\bin\*.exe "%OUTDIR%\DLL Debug" 1>nul
-        move !build_dir!\bin\*.pdb "%OUTDIR%\DLL Debug" 1>nul
+        move "%TMP_INSTALL_PATH%\lib\*.lib" "%OUTDIR%\DLL Debug" 1>nul
+        move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.dll" "%OUTDIR%\DLL Debug" 1>nul
+        move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.pdb" "%OUTDIR%\DLL Debug" 1>nul
+        move "%TMP_INSTALL_PATH%\bin\*.dll" "%OUTDIR%\DLL Debug" 1>nul
+        move "%TMP_INSTALL_PATH%\bin\*.exe" "%OUTDIR%\DLL Debug" 1>nul
+        move "%TMP_INSTALL_PATH%\bin\*.pdb" "%OUTDIR%\DLL Debug" 1>nul
+        xcopy /E /I /Y "%TMP_INSTALL_PATH%\include" "%OUTDIR%\DLL Debug\include" 1>nul
       ) else (
         exit /B 1
       )
@@ -579,16 +612,23 @@ rem
           mkdir "%OUTDIR%\LIB Release" 1>nul
         )
 
-        move !build_dir!\lib\*.lib "%OUTDIR%\LIB Release" 1>nul
-        move !build_dir!\bin\*.exe "%OUTDIR%\LIB Release" 1>nul
+        move "%TMP_INSTALL_PATH%\lib\*.lib" "%OUTDIR%\LIB Release" 1>nul
+        move "%TMP_INSTALL_PATH%\lib\*.pdb" "%OUTDIR%\LIB Release" 1>nul
+        move "%TMP_INSTALL_PATH%\bin\*.exe" "%OUTDIR%\LIB Release" 1>nul
+        move "%TMP_INSTALL_PATH%\bin\*.pdb" "%OUTDIR%\LIB Release" 1>nul
+        xcopy /E /I /Y "%TMP_INSTALL_PATH%\include" "%OUTDIR%\LIB Release\include" 1>nul
       ) else if "%2" == "shared" (
         if not exist "%OUTDIR%\DLL Release" (
           mkdir "%OUTDIR%\DLL Release" 1>nul
         )
 
-        move !build_dir!\lib\*.lib "%OUTDIR%\DLL Release" 1>nul
-        move !build_dir!\bin\*.dll "%OUTDIR%\DLL Release" 1>nul
-        move !build_dir!\bin\*.exe "%OUTDIR%\DLL Release" 1>nul
+        move "%TMP_INSTALL_PATH%\lib\*.lib" "%OUTDIR%\DLL Release" 1>nul
+        move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.dll" "%OUTDIR%\DLL Release" 1>nul
+        move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.pdb" "%OUTDIR%\DLL Release" 1>nul
+        move "%TMP_INSTALL_PATH%\bin\*.dll" "%OUTDIR%\DLL Release" 1>nul
+        move "%TMP_INSTALL_PATH%\bin\*.exe" "%OUTDIR%\DLL Release" 1>nul
+        move "%TMP_INSTALL_PATH%\bin\*.pdb" "%OUTDIR%\DLL Release" 1>nul
+        xcopy /E /I /Y "%TMP_INSTALL_PATH%\include" "%OUTDIR%\DLL Release\include" 1>nul
       ) else (
         exit /B 1
       )
@@ -597,7 +637,12 @@ rem
     )
 
     rem Remove the output directories
-    rd !build_dir! /s /q
+    if not "%SOURCE_PATH%" == "%TMP_BUILD_PATH%" (
+      rd "%TMP_BUILD_PATH%" /s /q
+    )
+    if not "%SOURCE_PATH%" == "%TMP_INSTALL_PATH%" (
+      rd "%TMP_INSTALL_PATH%" /s /q
+    )
   ) else (
     exit /B 1
   )
@@ -637,12 +682,13 @@ rem
   echo.
   echo directory - Specifies the OpenSSL source directory
   echo.
-  echo -VSpath - Specify the custom VS path if Visual Studio is installed at other location
-  echo           then "C:/<ProgramFiles>/Microsoft Visual Studio[version]
+  echo -VSpath - Specify the custom VS path if Visual Studio is not located at
+  echo           "C:\<ProgramFiles>\Microsoft Visual Studio <version>"
   echo           For e.g. -VSpath "C:\apps\MVS14"
   echo.
-  echo -perlpath - Specify the custom perl root path if perl is not located at "C:\Perl" and it is a
-  echo             portable copy of perl and not installed on the win system
+  echo -perlpath - Specify the custom perl root path if perl is not located at
+  echo             "C:\Perl" and it is a portable copy of perl and not
+  echo             installed on the win system.
   echo             For e.g. -perlpath "D:\strawberry-perl-5.24.3.1-64bit-portable"
   goto error
 
@@ -690,6 +736,6 @@ rem
   exit /B 1
 
 :success
-  cd /d %SAVED_PATH%
+  cd /d "%SAVED_PATH%"
   endlocal
   exit /B 0

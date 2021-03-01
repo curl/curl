@@ -650,7 +650,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win32\VC9\DLL Debug\include;..\..\..\..\..\openssl\include"
 				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_OPENSSL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -671,7 +671,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcrypto.lib libssl.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win32\VC9\DLL Debug"
@@ -735,7 +735,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win64\VC9\DLL Debug\include;..\..\..\..\..\openssl\include"
 				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_OPENSSL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -756,7 +756,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcrypto.lib libssl.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win64\VC9\DLL Debug"
@@ -820,7 +820,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win32\VC9\DLL Release\include;..\..\..\..\..\openssl\include"
 				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_OPENSSL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -840,7 +840,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcrypto.lib libssl.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win32\VC9\DLL Release"
@@ -903,7 +903,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win64\VC9\DLL Release\include;..\..\..\..\..\openssl\include"
 				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_OPENSSL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -923,7 +923,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcrypto.lib libssl.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win64\VC9\DLL Release"
@@ -1318,7 +1318,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win32\VC9\DLL Debug\include;..\..\..\..\..\openssl\include;..\..\..\..\..\libssh2\include"
 				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -1339,7 +1339,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib libssh2d.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcrypto.lib libssl.lib libssh2d.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win32\VC9\DLL Debug;..\..\..\..\..\libssh2\build\Win32\VC9\DLL Debug"
@@ -1403,7 +1403,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win64\VC9\DLL Debug\include;..\..\..\..\..\openssl\include;..\..\..\..\..\libssh2\include"
 				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -1424,7 +1424,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib libssh2d.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcrypto.lib libssl.lib libssh2d.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win64\VC9\DLL Debug;..\..\..\..\..\libssh2\build\Win64\VC9\DLL Debug"
@@ -1488,7 +1488,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win32\VC9\DLL Release\include;..\..\..\..\..\openssl\include;..\..\..\..\..\libssh2\include"
 				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -1508,7 +1508,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib libssh2.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcrypto.lib libssl.lib libssh2.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win32\VC9\DLL Release;..\..\..\..\..\libssh2\build\Win32\VC9\DLL Release"
@@ -1571,7 +1571,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win64\VC9\DLL Release\include;..\..\..\..\..\openssl\include;..\..\..\..\..\libssh2\include"
 				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -1591,7 +1591,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libeay32.lib ssleay32.lib libssh2.lib"
+				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcrypto.lib libssl.lib libssh2.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win64\VC9\DLL Release;..\..\..\..\..\libssh2\build\Win64\VC9\DLL Release"
@@ -1647,7 +1647,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win32\VC9\DLL Debug\include;..\..\..\..\..\openssl\include"
 				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -1714,7 +1714,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win64\VC9\DLL Debug\include;..\..\..\..\..\openssl\include"
 				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -1780,7 +1780,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win32\VC9\DLL Debug\include;..\..\..\..\..\openssl\include;..\..\..\..\..\libssh2\include"
 				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -1847,7 +1847,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win64\VC9\DLL Debug\include;..\..\..\..\..\openssl\include;..\..\..\..\..\libssh2\include"
 				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -2046,7 +2046,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win32\VC9\LIB Debug\include;..\..\..\..\..\openssl\include"
 				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -2113,7 +2113,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win64\VC9\LIB Debug\include;..\..\..\..\..\openssl\include"
 				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -2179,7 +2179,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win32\VC9\LIB Debug\include;..\..\..\..\..\openssl\include;..\..\..\..\..\libssh2\include"
 				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -2246,7 +2246,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win64\VC9\LIB Debug\include;..\..\..\..\..\openssl\include;..\..\..\..\..\libssh2\include"
 				PreprocessorDefinitions="_DEBUG;BUILDING_LIBCURL;DEBUGBUILD;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -2313,7 +2313,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win32\VC9\DLL Release\include;..\..\..\..\..\openssl\include"
 				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -2380,7 +2380,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win64\VC9\DLL Release\include;..\..\..\..\..\openssl\include"
 				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -2446,7 +2446,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win32\VC9\DLL Release\include;..\..\..\..\..\openssl\include;..\..\..\..\..\libssh2\include"
 				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -2513,7 +2513,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win64\VC9\DLL Release\include;..\..\..\..\..\openssl\include;..\..\..\..\..\libssh2\include"
 				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -2712,7 +2712,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win32\VC9\LIB Release\include;..\..\..\..\..\openssl\include"
 				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -2779,7 +2779,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win64\VC9\LIB Release\include;..\..\..\..\..\openssl\include"
 				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_IPV6"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -2845,7 +2845,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win32\VC9\LIB Release\include;..\..\..\..\..\openssl\include;..\..\..\..\..\libssh2\include"
 				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -2912,7 +2912,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\inc32;..\..\..\..\..\libssh2\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\lib;..\..\..\..\..\openssl\include\..\build\Win64\VC9\LIB Release\include;..\..\..\..\..\openssl\include;..\..\..\..\..\libssh2\include"
 				PreprocessorDefinitions="NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_OPENSSL;USE_LIBSSH2;USE_IPV6;HAVE_LIBSSH2_H"
 				StringPooling="true"
 				RuntimeLibrary="2"
