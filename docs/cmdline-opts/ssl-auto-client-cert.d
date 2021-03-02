@@ -1,7 +1,7 @@
-Long: ssl-auto-creds
+Long: ssl-auto-client-cert
 Help: Use auto credentials (Schannel)
 Added: 7.76.0
-See-also: proxy-ssl-auto-creds
+See-also: proxy-ssl-auto-client-cert
 Category: tls
 ---
 Tell libcurl to automatically locate and use a client certificate for

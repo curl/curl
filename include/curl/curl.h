@@ -888,9 +888,9 @@ typedef enum {
    operating system. Currently implemented under MS-Windows. */
 #define CURLSSLOPT_NATIVE_CA (1<<4)
 
-/* - CURLSSLOPT_AUTO_CREDS tells libcurl to automatically locate and use a
-   client certificate for authentication. (Schannel) */
-#define CURLSSLOPT_AUTO_CREDS (1<<5)
+/* - CURLSSLOPT_AUTO_CLIENT_CERT tells libcurl to automatically locate and use
+   a client certificate for authentication. (Schannel) */
+#define CURLSSLOPT_AUTO_CLIENT_CERT (1<<5)
 
 /* The default connection attempt delay in milliseconds for happy eyeballs.
    CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3 and happy-eyeballs-timeout-ms.d document

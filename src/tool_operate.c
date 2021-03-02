@@ -1724,8 +1724,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
               (config->native_ca_store ?
                CURLSSLOPT_NATIVE_CA : 0) |
-              (config->ssl_auto_creds ?
-               CURLSSLOPT_AUTO_CREDS : 0);
+              (config->ssl_auto_client_cert ?
+               CURLSSLOPT_AUTO_CLIENT_CERT : 0);
 
             if(mask)
               my_setopt_bitmask(curl, CURLOPT_SSL_OPTIONS, mask);
@@ -1735,8 +1735,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             long mask =
               (config->proxy_ssl_allow_beast ?
                CURLSSLOPT_ALLOW_BEAST : 0) |
-              (config->proxy_ssl_auto_creds ?
-               CURLSSLOPT_AUTO_CREDS : 0);
+              (config->proxy_ssl_auto_client_cert ?
+               CURLSSLOPT_AUTO_CLIENT_CERT : 0);
 
             if(mask)
               my_setopt_bitmask(curl, CURLOPT_PROXY_SSL_OPTIONS, mask);

@@ -286,8 +286,8 @@ struct ssl_config_data {
   BIT(revoke_best_effort); /* ignore SSL revocation offline/missing revocation
                               list errors */
   BIT(native_ca_store); /* use the native ca store of operating system */
-  BIT(auto_creds);   /* automatically locate and use a client
-                        certificate for authentication (Schannel) */
+  BIT(auto_client_cert);   /* automatically locate and use a client
+                              certificate for authentication (Schannel) */
 };
 
 struct ssl_general_config {

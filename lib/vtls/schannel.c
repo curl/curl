@@ -562,7 +562,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
       ISC_REQ_CONFIDENTIALITY | ISC_REQ_ALLOCATE_MEMORY |
       ISC_REQ_STREAM;
 
-    if(!SSL_SET_OPTION(auto_creds)) {
+    if(!SSL_SET_OPTION(auto_client_cert)) {
       schannel_cred.dwFlags &= ~SCH_CRED_USE_DEFAULT_CREDS;
       schannel_cred.dwFlags |= SCH_CRED_NO_DEFAULT_CREDS;
       BACKEND->req_flags |= ISC_REQ_USE_SUPPLIED_CREDS;
