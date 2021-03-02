@@ -566,10 +566,10 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
       schannel_cred.dwFlags &= ~SCH_CRED_USE_DEFAULT_CREDS;
       schannel_cred.dwFlags |= SCH_CRED_NO_DEFAULT_CREDS;
       BACKEND->req_flags |= ISC_REQ_USE_SUPPLIED_CREDS;
-      infof(data, "schannel: disabled auto credentials\n");
+      infof(data, "schannel: disabled automatic use of client certificate\n");
     }
     else
-      infof(data, "schannel: enabled auto credentials\n");
+      infof(data, "schannel: enabled automatic use of client certificate\n");
 
     switch(conn->ssl_config.version) {
     case CURL_SSLVERSION_DEFAULT:

@@ -1,5 +1,5 @@
 Long: ssl-auto-client-cert
-Help: Use auto credentials (Schannel)
+Help: Use auto client certificate (Schannel)
 Added: 7.76.0
 See-also: proxy-ssl-auto-client-cert
 Category: tls
