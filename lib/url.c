@@ -621,6 +621,9 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->fnmatch = ZERO_NULL;
   set->upkeep_interval_ms = CURL_UPKEEP_INTERVAL_DEFAULT;
   set->maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
+#ifdef USE_NGHTTP2
+  set->stream_window_size = DEFAULT_STREAM_WINDOW_SIZE; /* for easy handles */
+#endif
   set->maxage_conn = 118;
   set->http09_allowed = FALSE;
   set->httpwant =

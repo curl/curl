@@ -2105,6 +2105,9 @@ typedef enum {
      this option is used only if PROXY_SSL_VERIFYPEER is true */
   CURLOPT(CURLOPT_PROXY_CAINFO_BLOB, CURLOPTTYPE_BLOB, 310),
 
+  /* Stream window size */
+  CURLOPT(CURLOPT_STREAM_WINDOW_SIZE, CURLOPTTYPE_LONG, 311),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
