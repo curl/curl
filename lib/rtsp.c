@@ -269,51 +269,56 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
    * support custom requests like HTTP.
    **/
   data->set.opt_no_body = TRUE; /* most requests don't contain a body */
-  switch(rtspreq) {
-  default:
-    failf(data, "Got invalid RTSP request");
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  case RTSPREQ_OPTIONS:
-    p_request = "OPTIONS";
-    break;
-  case RTSPREQ_DESCRIBE:
-    p_request = "DESCRIBE";
-    data->set.opt_no_body = FALSE;
-    break;
-  case RTSPREQ_ANNOUNCE:
-    p_request = "ANNOUNCE";
-    break;
-  case RTSPREQ_SETUP:
-    p_request = "SETUP";
-    break;
-  case RTSPREQ_PLAY:
-    p_request = "PLAY";
-    break;
-  case RTSPREQ_PAUSE:
-    p_request = "PAUSE";
-    break;
-  case RTSPREQ_TEARDOWN:
-    p_request = "TEARDOWN";
-    break;
-  case RTSPREQ_GET_PARAMETER:
-    /* GET_PARAMETER's no_body status is determined later */
-    p_request = "GET_PARAMETER";
-    data->set.opt_no_body = FALSE;
-    break;
-  case RTSPREQ_SET_PARAMETER:
-    p_request = "SET_PARAMETER";
-    break;
-  case RTSPREQ_RECORD:
-    p_request = "RECORD";
-    break;
-  case RTSPREQ_RECEIVE:
-    p_request = "";
-    /* Treat interleaved RTP as body*/
-    data->set.opt_no_body = FALSE;
-    break;
-  case RTSPREQ_LAST:
-    failf(data, "Got invalid RTSP request: RTSPREQ_LAST");
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(data->set.str[STRING_CUSTOMREQUEST])
+    p_request = data->set.str[STRING_CUSTOMREQUEST];
+  else {
+    switch(rtspreq) {
+    default:
+      failf(data, "Got invalid RTSP request");
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    case RTSPREQ_OPTIONS:
+      p_request = "OPTIONS";
+      break;
+    case RTSPREQ_DESCRIBE:
+      p_request = "DESCRIBE";
+      data->set.opt_no_body = FALSE;
+      break;
+    case RTSPREQ_ANNOUNCE:
+      p_request = "ANNOUNCE";
+      break;
+    case RTSPREQ_SETUP:
+      p_request = "SETUP";
+      break;
+    case RTSPREQ_PLAY:
+      p_request = "PLAY";
+      break;
+    case RTSPREQ_PAUSE:
+      p_request = "PAUSE";
+      break;
+    case RTSPREQ_TEARDOWN:
+      p_request = "TEARDOWN";
+      break;
+    case RTSPREQ_GET_PARAMETER:
+      /* GET_PARAMETER's no_body status is determined later */
+      p_request = "GET_PARAMETER";
+      data->set.opt_no_body = FALSE;
+      break;
+    case RTSPREQ_SET_PARAMETER:
+      p_request = "SET_PARAMETER";
+      break;
+    case RTSPREQ_RECORD:
+      p_request = "RECORD";
+      break;
+    case RTSPREQ_RECEIVE:
+      p_request = "";
+      /* Treat interleaved RTP as body*/
+      data->set.opt_no_body = FALSE;
+      break;
+    case RTSPREQ_LAST:
+      failf(data, "Got invalid RTSP request: RTSPREQ_LAST");
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
   }
 
   if(rtspreq == RTSPREQ_RECEIVE) {
