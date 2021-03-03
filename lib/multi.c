@@ -2949,7 +2949,7 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
       long stream_window_size = va_arg(param, long);
       if((stream_window_size > 0) &&
          ((unsigned long)stream_window_size <= ((1UL << 31) - 1)))
-        multi->stream_window_size = stream_window_size;
+        multi->stream_window_size = curlx_sltoui(stream_window_size);
       else
         return CURLM_BAD_FUNCTION_ARGUMENT;
     }
