@@ -889,7 +889,7 @@ static void print_category(curlhelp_t category)
   unsigned int i;
   for(i = 0; helptext[i].opt; ++i)
     if(helptext[i].categories & category) {
-      printf(" %-19s %s\n", helptext[i].opt, helptext[i].desc);
+      printf(" %-18s  %s\n", helptext[i].opt, helptext[i].desc);
     }
 }
 

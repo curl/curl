@@ -338,6 +338,7 @@ my $anyway;
 my $gdbthis;      # run test case with gdb debugger
 my $gdbxwin;      # use windowed gdb when using gdb
 my $keepoutfiles; # keep stdout and stderr files after tests
+my $clearlocks;   # force removal of files by killing locking processes
 my $listonly;     # only list the tests
 my $postmortem;   # display detailed info about failed tests
 my $run_event_based; # run curl with --test-event to test the event API
@@ -2738,11 +2739,41 @@ sub responsive_httptls_server {
 }
 
 #######################################################################
+# Kill the processes that still lock files in a directory
+#
+sub clearlocks {
+    my $dir = $_[0];
+    my $done = 0;
+
+    if(pathhelp::os_is_win()) {
+        $dir = pathhelp::sys_native_abs_path($dir);
+        $dir =~ s/\//\\\\/g;
+        my $handle = "handle.exe";
+        if($ENV{"PROCESSOR_ARCHITECTURE"} =~ /64$/) {
+            $handle = "handle64.exe";
+        }
+        my @handles = `$handle $dir -accepteula -nobanner`;
+        for $handle (@handles) {
+            if($handle =~ /^(\S+)\s+pid:\s+(\d+)\s+type:\s+(\w+)\s+([0-9A-F]+):\s+(.+)\r\r/) {
+                logmsg "Found $3 lock of '$5' ($4) by $1 ($2)\n";
+                # Ignore stunnel since we cannot do anything about its locks
+                if("$3" eq "File" && "$1" ne "tstunnel.exe") {
+                    logmsg "Killing IMAGENAME eq $1 and PID eq $2\n";
+                    system("taskkill.exe -f -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1");
+                    $done = 1;
+                }
+            }
+        }
+    }
+    return $done;
+}
+
+#######################################################################
 # Remove all files in the specified directory
 #
 sub cleardir {
     my $dir = $_[0];
-    my $count;
+    my $done = 1;
     my $file;
 
     # Get all files
@@ -2751,17 +2782,23 @@ sub cleardir {
     while($file = readdir($dh)) {
         if(($file !~ /^(\.|\.\.)\z/)) {
             if(-d "$dir/$file") {
-                cleardir("$dir/$file");
-                rmdir("$dir/$file");
+                if(!cleardir("$dir/$file")) {
+                    $done = 0;
+                }
+                if(!rmdir("$dir/$file")) {
+                    $done = 0;
+                }
             }
             else {
-                unlink("$dir/$file");
+                # Ignore stunnel since we cannot do anything about its locks
+                if(!unlink("$dir/$file") && "$file" !~ /_stunnel\.log$/) {
+                    $done = 0;
+                }
             }
-            $count++;
         }
     }
     closedir $dh;
-    return $count;
+    return $done;
 }
 
 #######################################################################
@@ -3508,7 +3545,10 @@ sub singletest {
     my $errorreturncode = 1; # 1 means normal error, 2 means ignored error
 
     # fist, remove all lingering log files
-    cleardir($LOGDIR);
+    if(!cleardir($LOGDIR) && $clearlocks) {
+        clearlocks($LOGDIR);
+        cleardir($LOGDIR);
+    }
 
     # copy test number to a global scope var, this allows
     # testnum checking when starting test harness servers.
@@ -5496,6 +5536,10 @@ while(@ARGV) {
             $fullstats=1;
         }
     }
+    elsif($ARGV[0] eq "-rm") {
+        # force removal of files by killing locking processes
+        $clearlocks=1;
+    }
     elsif(($ARGV[0] eq "-h") || ($ARGV[0] eq "--help")) {
         # show help text
         print <<EOHELP
@@ -5519,6 +5563,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -R       scrambled order (uses the random seed, see --seed)
   -r       run time statistics
   -rf      full run time statistics
+  -rm      force removal of files by killing locking processes (Windows only)
   -s       short output
   --seed=[num] set the random seed to a fixed number
   --shallow=[num] randomly makes the torture tests "thinner"
