@@ -1172,7 +1172,7 @@ static void populate_settings(struct Curl_easy *data,
   iv[0].value = Curl_multi_max_concurrent_streams(data->multi);
 
   iv[1].settings_id = NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE;
-  iv[1].value = conn->data->multi->stream_window_size;
+  iv[1].value = data->multi->stream_window_size;
 
   iv[2].settings_id = NGHTTP2_SETTINGS_ENABLE_PUSH;
   iv[2].value = data->multi->push_cb != NULL;
