@@ -26,6 +26,9 @@ curl was built with support for character set conversions (like EBCDIC)
 .IP "Debug"
 This curl uses a libcurl built with Debug. This enables more error-tracking
 and memory debugging etc. For curl-developers only!
+.IP "gsasl"
+The built-in SASL authentication includes extensions to support SCRAM because
+libcurl was built with libgsasl.
 .IP "GSS-API"
 GSS-API is supported.
 .IP "HSTS"
@@ -40,20 +43,21 @@ This curl is built to support HTTPS proxy.
 This curl supports IDN - international domain names.
 .IP "IPv6"
 You can use IPv6 with this.
-.IP "krb4"
-Krb4 for FTP is supported.
+.IP "Kerberos"
+Kerberos V5 authentication is supported.
 .IP "Largefile"
 This curl supports transfers of large files, files larger than 2GB.
 .IP "libz"
-Automatic decompression of compressed files over HTTP is supported.
+Automatic decompression (via gzip, deflate) of compressed files over HTTP is
+supported.
 .IP "Metalink"
-This curl supports Metalink
+This curl supports Metalink.
 .IP "MultiSSL"
 This curl supports multiple TLS backends.
 .IP "NTLM"
 NTLM authentication is supported.
-.IP "NTLM"
-NTLM authentication is supported.
+.IP "NTLM_WB"
+NTLM delegation to winbind helper is supported.
 .IP "PSL"
 PSL is short for Public Suffix List and means that this curl has been built
 with knowledge about "public suffixes".
@@ -66,6 +70,12 @@ and so on.
 SSPI is supported.
 .IP "TLS-SRP"
 SRP (Secure Remote Password) authentication is supported for TLS.
+.IP "TrackMemory"
+Debug memory tracking is supported.
+.IP "Unicode"
+Unicode support on Windows.
 .IP "UnixSockets"
 Unix sockets support is provided.
+.IP "zstd"
+Automatic decompression (via zstd) of compressed files over HTTP is supported.
 .RE
