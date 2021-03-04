@@ -359,7 +359,11 @@ static CURLcode dohprobe(struct Curl_easy *data,
     doh->set.dohfor = data; /* identify for which transfer this is done */
     p->easy = doh;
 
-    /* add this transfer to the multi handle */
+    /* DOH private_data must be null because the user must have a way to
+       distinguish their transfer's handle from DOH handles in user
+       callbacks (ie SSL CTX callback). */
+    DEBUGASSERT(!data->set.private_data);
+
     if(curl_multi_add_handle(multi, doh))
       goto error;
   }
