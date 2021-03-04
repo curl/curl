@@ -624,7 +624,7 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
                                 NULL,
                                 pCertContextServer->hCertStore,
                                 &ChainPara,
-                                (data->set.ssl.no_revoke ? 0 :
+                                (SSL_SET_OPTION(no_revoke) ? 0 :
                                  CERT_CHAIN_REVOCATION_CHECK_CHAIN),
                                 NULL,
                                 &pChainContext)) {
