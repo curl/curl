@@ -742,7 +742,7 @@ static const struct helptxt helptext[] = {
   {"-3, --sslv3",
    "Use SSLv3",
    CURLHELP_TLS},
-  {"    --stderr",
+  {"    --stderr <file>",
    "Where to redirect stderr",
    CURLHELP_VERBOSE},
   {"    --styled-output",

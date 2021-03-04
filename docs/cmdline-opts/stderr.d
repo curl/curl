@@ -1,4 +1,4 @@
-Long: stderr
+Long: stderr <file>
 Help: Where to redirect stderr
 See-also: verbose silent
 Category: verbose
