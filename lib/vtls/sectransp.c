@@ -1941,7 +1941,7 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
      specifically doesn't want us doing that: */
   if(SSLSetSessionOption != NULL) {
     SSLSetSessionOption(backend->ssl_ctx, kSSLSessionOptionSendOneByteRecord,
-                      !data->set.ssl.enable_beast);
+                        !SSL_SET_OPTION(enable_beast));
     SSLSetSessionOption(backend->ssl_ctx, kSSLSessionOptionFalseStart,
                       data->set.ssl.falsestart); /* false start support */
   }
