@@ -62,6 +62,11 @@ to reach in and modify SSL details in the connection without libcurl itself
 knowing anything about it, which then subsequently can lead to libcurl
 unknowingly reusing SSL connections with different properties. To remedy this
 you may set \fICURLOPT_FORBID_REUSE(3)\fP from the callback function.
+
+WARNING: The callback is also called for each internal DNS-over-HTTPS (DOH)
+easy handle created for a DNS lookup, if you turned on DOH via
+\fICURLOPT_DOH_URL(3)\fP. You may compare the passed in handle to determine
+whether it's the handle for your transfer.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
