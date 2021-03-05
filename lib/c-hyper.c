@@ -464,8 +464,6 @@ CURLcode Curl_hyper_header(struct Curl_easy *data, hyper_headers *headers,
     else
       linelen = 2; /* CRLF ending */
     linelen += (p - n);
-    if(!n)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
     vlen = p - v;
 
     if(HYPERE_OK != hyper_headers_add(headers, (uint8_t *)n, nlen,
