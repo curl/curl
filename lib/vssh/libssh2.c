@@ -199,8 +199,8 @@ kbd_callback(const char *name, int name_len, const char *instruction,
   (void)instruction_len;
 #endif  /* CURL_LIBSSH2_DEBUG */
   if(num_prompts == 1) {
-    responses[0].text = strdup(conn->passwd);
-    responses[0].length = curlx_uztoui(strlen(conn->passwd));
+    responses[0].text = conn->passwd ? strdup(conn->passwd): "";
+    responses[0].length = conn->passwd ? curlx_uztoui(strlen(conn->passwd)) : 0;
   }
   (void)prompts;
   (void)abstract;
@@ -865,8 +865,8 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
        * So always specify it here.
        */
       sshc->authlist = libssh2_userauth_list(sshc->ssh_session,
-                                             conn->user,
-                                             curlx_uztoui(strlen(conn->user)));
+                                             conn->user ? conn->user : "",
+                                             conn->user ? curlx_uztoui(strlen(conn->user)) : 0);
 
       if(!sshc->authlist) {
         if(libssh2_userauth_authenticated(sshc->ssh_session)) {
@@ -983,7 +983,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       /* The function below checks if the files exists, no need to stat() here.
        */
       rc = libssh2_userauth_publickey_fromfile_ex(sshc->ssh_session,
-                                                  conn->user,
+                                                  conn->user ? conn->user : "",
                                                   curlx_uztoui(
                                                     strlen(conn->user)),
                                                   sshc->rsa_pub,
@@ -1022,10 +1022,10 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       break;
 
     case SSH_AUTH_PASS:
-      rc = libssh2_userauth_password_ex(sshc->ssh_session, conn->user,
-                                        curlx_uztoui(strlen(conn->user)),
-                                        conn->passwd,
-                                        curlx_uztoui(strlen(conn->passwd)),
+      rc = libssh2_userauth_password_ex(sshc->ssh_session, conn->user ? conn->user : "",
+                                        conn->user ? curlx_uztoui(strlen(conn->user)) : 0,
+                                        conn->passwd ? conn->passwd: "",
+                                        conn->passwd ? curlx_uztoui(strlen(conn->passwd)) : 0,
                                         NULL);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
@@ -1120,7 +1120,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
 
       if(rc == 0) {
-        rc = libssh2_agent_userauth(sshc->ssh_agent, conn->user,
+        rc = libssh2_agent_userauth(sshc->ssh_agent, conn->user ? conn->user : "",
                                     sshc->sshagent_identity);
 
         if(rc < 0) {
@@ -1162,9 +1162,9 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
     case SSH_AUTH_KEY:
       /* Authentication failed. Continue with keyboard-interactive now. */
       rc = libssh2_userauth_keyboard_interactive_ex(sshc->ssh_session,
-                                                    conn->user,
-                                                    curlx_uztoui(
-                                                      strlen(conn->user)),
+                                                    conn->user ? conn->user : "",
+                                                    conn->user ? curlx_uztoui(
+                                                    strlen(conn->user)) : 0,
                                                     &kbd_callback);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
