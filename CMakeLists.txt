@@ -310,7 +310,6 @@ check_function_exists(gethostname HAVE_GETHOSTNAME)
 if(WIN32)
   check_library_exists_concat("ws2_32" getch        HAVE_LIBWS2_32)
   check_library_exists_concat("winmm"  getch        HAVE_LIBWINMM)
-  list(APPEND CURL_LIBS "advapi32")
 endif()
 
 # check SSL libraries
@@ -356,7 +355,6 @@ if(CMAKE_USE_SCHANNEL)
   set(SSL_ENABLED ON)
   set(USE_SCHANNEL ON) # Windows native SSL/TLS support
   set(USE_WINDOWS_SSPI ON) # CMAKE_USE_SCHANNEL implies CURL_WINDOWS_SSPI
-  list(APPEND CURL_LIBS "crypt32")
 endif()
 if(CURL_WINDOWS_SSPI)
   set(USE_WINDOWS_SSPI ON)
@@ -503,10 +501,6 @@ if(USE_QUICHE)
   set(CMAKE_REQUIRED_LIBRARIES  "${QUICHE_LIBRARIES}")
   check_symbol_exists(quiche_conn_set_qlog_fd "quiche.h" HAVE_QUICHE_CONN_SET_QLOG_FD)
   cmake_pop_check_state()
-endif()
-
-if(WIN32)
-  set(USE_WIN32_CRYPTO ON)
 endif()
 
 if(NOT CURL_DISABLE_LDAP)
@@ -874,9 +868,7 @@ if(NOT UNIX)
   check_include_file_concat("winsock.h"      HAVE_WINSOCK_H)
   check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)
   check_include_file_concat("winsock2.h"     HAVE_WINSOCK2_H)
-  if(NOT CURL_WINDOWS_SSPI AND USE_OPENSSL)
-    set(CURL_LIBS ${CURL_LIBS} "crypt32")
-  endif()
+  check_include_file_concat("wincrypt.h"     HAVE_WINCRYPT_H)
 endif()
 
 check_include_file_concat("stdio.h"          HAVE_STDIO_H)
@@ -1252,6 +1244,19 @@ if(WIN32)
 
   # Use the manifest embedded in the Windows Resource
   set(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} -DCURL_EMBED_MANIFEST")
+
+  # Check if crypto functions in wincrypt.h are actually available
+  if(HAVE_WINCRYPT_H)
+    check_symbol_exists(CryptAcquireContext "${CURL_INCLUDES}" USE_WINCRYPT)
+  endif()
+  if(USE_WINCRYPT)
+    set(USE_WIN32_CRYPTO ON)
+  endif()
+
+  # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
+  if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
+    list(APPEND CURL_LIBS "advapi32" "crypt32")
+  endif()
 endif()
 
 if(MSVC)
@@ -1333,14 +1338,6 @@ if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
-# NTLM support requires crypto function adaptions from various SSL libs
-# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_DARWINSSL OR USE_MBEDTLS OR USE_WIN32_CRYPTO))
-  set(use_ntlm ON)
-else()
-  set(use_ntlm OFF)
-endif()
-
 # Helper to populate a list (_items) with a label when conditions (the remaining
 # args) are satisfied
 macro(_add_if label)
@@ -1349,6 +1346,13 @@ macro(_add_if label)
     set(_items ${_items} "${label}")
   endif()
 endmacro()
+
+# NTLM support requires crypto function adaptions from various SSL libs
+# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
+if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_MBEDTLS OR
+                                     USE_DARWINSSL OR USE_WIN32_CRYPTO))
+  set(use_curl_ntlm_core ON)
+endif()
 
 # Clear list and try to detect available features
 set(_items)
@@ -1373,9 +1377,10 @@ _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-_add_if("NTLM"        use_ntlm OR USE_WINDOWS_SSPI)
+_add_if("NTLM"          (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
 # TODO missing option (autoconf: --enable-ntlm-wb)
-_add_if("NTLM_WB"     use_ntlm AND NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
+_add_if("NTLM_WB"       (use_curl_ntlm_core OR USE_WINDOWS_SSPI) AND
+                        NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
 # TODO missing option (--enable-tls-srp), depends on GNUTLS_SRP/OPENSSL_SRP
 _add_if("TLS-SRP"       USE_TLS_SRP)
 # TODO option --with-nghttp2 tests for nghttp2 lib and nghttp2/nghttp2.h header
@@ -1409,8 +1414,10 @@ _add_if("POP3"          NOT CURL_DISABLE_POP3)
 _add_if("POP3S"         NOT CURL_DISABLE_POP3 AND SSL_ENABLED)
 _add_if("IMAP"          NOT CURL_DISABLE_IMAP)
 _add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND SSL_ENABLED)
-_add_if("SMB"           NOT CURL_DISABLE_SMB AND use_ntlm)
-_add_if("SMBS"          NOT CURL_DISABLE_SMB AND SSL_ENABLED AND use_ntlm)
+_add_if("SMB"           NOT CURL_DISABLE_SMB AND
+                        use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+_add_if("SMBS"          NOT CURL_DISABLE_SMB AND SSL_ENABLED AND
+                        use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
 _add_if("SMTP"          NOT CURL_DISABLE_SMTP)
 _add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND SSL_ENABLED)
 _add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH)
@@ -1426,7 +1433,7 @@ message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS}")
 
 # Clear list and collect SSL backends
 set(_items)
-_add_if("Schannel"         SSL_ENABLED AND USE_WINDOWS_SSPI)
+_add_if("Schannel"         SSL_ENABLED AND USE_SCHANNEL)
 _add_if("OpenSSL"          SSL_ENABLED AND USE_OPENSSL)
 _add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
 _add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)
