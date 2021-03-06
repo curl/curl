@@ -4,10 +4,11 @@ curl and libcurl 7.76.0
  Command line options:         240
  curl_easy_setopt() options:   288
  Public functions in libcurl:  85
- Contributors:                 2334
+ Contributors:                 2339
 
 This release includes the following changes:
 
+ o cookies: Support multiple -b parameters [69]
  o curl: add --fail-with-body [17]
  o doh: add options to disable ssl verification [5]
  o http: add support to read and store the referrer header [30]
@@ -21,19 +22,26 @@ This release includes the following bugfixes:
  o build: delete unused feature guards [51]
  o build: fix --disable-dateparse [1]
  o build: fix --disable-http-auth
+ o build: remove all traces of USE_BLOCKING_SOCKETS [70]
+ o c-hyper: Remove superfluous pointer check [56]
+ o CI/azure: replace python-impacket with python3-impacket [61]
  o ci: stop building on freebsd-12-1 [38]
  o cmake: fix import library name for non-MS compiler on Windows [10]
  o cmake: use CMAKE_INSTALL_INCLUDEDIR indirection [49]
  o configure: fail if --with-quiche is used and quiche isn't found [48]
  o configure: make hyper opt-in, and fail if missing [53]
+ o curl: set CURLOPT_NEW_FILE_PERMS if requested [65]
  o curl_multibyte: always return a heap-allocated copy of string [29]
  o curl_multibyte: fall back to local code page stat/access on Windows [8]
  o curl_url_set.3: mention CURLU_PATH_AS_IS [13]
  o CURLOPT_QUOTE.3: clarify that libcurl doesn't parse what's sent [16]
  o docs/Makefile.inc: format to be update-friendly [11]
  o docs: add CURLOPT_CURLU to 'See also' in curl_url_ functions [52]
+ o docs: add missing Arg tag to --stderr [58]
  o docs: fix FILE example url in --metalink documentation [19]
  o doh: Fix sharing user's resolve list with DOH handles [46]
+ o doh: Inherit CURLOPT_STDERR from user's easy handle [60]
+ o dynbuf: bump the max HTTP request to 1MB [39]
  o file: Support unicode urls on windows [9]
  o ftp: add 'list_only' to the transfer state struct [35]
  o ftp: add 'prefer_ascii' to the transfer state struct [36]
@@ -46,6 +54,7 @@ This release includes the following bugfixes:
  o hostip: fix crash in sync resolver builds that use DOH [12]
  o http: do not add a referrer header with empty value [44]
  o http: use credentials from transfer, not connection [25]
+ o ldap: use correct memory free function [63]
  o lib: remove 'conn->data' completely [45]
  o memdebug: close debug logfile explicitly on exit [28]
  o mingw: enable using strcasecmp() [50]
@@ -53,15 +62,20 @@ This release includes the following bugfixes:
  o multi: rename the multi transfer states [43]
  o ngtcp2: adapt to the new recv_datagram callback
  o ngtcp2: clarify calculation precedence [27]
+ o openssl: remove get_ssl_version_txt in favor of SSL_get_version [67]
  o OS400: update for CURLOPT_AWS_SIGV4 [2]
  o parse_proxy: fix a memory leak in the OOM path [41]
+ o pathhelp.pm: fix use of pwd -L in Msys environment
+ o projects: Update VS projects for OpenSSL 1.1.x [59]
  o quiche: fix build error: use 'int' for port number
  o runtests.pl: add %TESTNUMBER variable to make copying tests more convenient
  o runtests.pl: add a -P option to specify an external proxy
+ o runtests.pl: kill processes locking test log files [62]
  o test1188: change error to check for: --fail HTTP status [26]
  o tests: disable .curlrc in more environments [7]
  o time: enable 64-bit time_t in supported mingw environments [24]
  o tool_help: add missing argument for --create-file-mode [18]
+ o tool_help: Increase space between option and description [64]
  o url.c: use consistent error message for failed resolve
  o url: fix memory leak if OOM in the HSTS handling [32]
  o url: fix possible use-after-free in default protocol [42]
@@ -70,6 +84,7 @@ This release includes the following bugfixes:
  o urldata: make 'actions[]' use unsigned char instead of int [47]
  o urldata: remove the 'rtspversion' field [15]
  o urldata: remove the _ORIG suffix from string names [31]
+ o version.d: Add missing features to the features list [57]
  o wolfssl: don't store a NULL sessionid [40]
 
 This release includes the following known bugs:
@@ -79,14 +94,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alex Xu, Amaury Denoyelle, arvids-kokins-bidstack on github,
-  awesomenode on github, Benbuck Nason, Bodo Bergmann, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, David Demelier, David Goerger,
-  Emil Engler, Fabian Keil, Firefox OS, Gisle Vanem, Gregor Jasny,
-  Ikko Ashimine, Jack Boos Yu, Jacob Hoffman-Andrews, Jon Rumsey, Joseph Chen,
-  Manuj Bhatia, Marcel Raad, Ray Satiro, Sergei Nikulov, Simon Josefsson,
-  Stephan Szabo, Viktor Szakats, Vincent Torri, ZimCodes on github,
-  (30 contributors)
+  Ádler Jonas Gross, Alex Xu, Amaury Denoyelle,
+  arvids-kokins-bidstack on github, awesomenode on github, Benbuck Nason,
+  Bodo Bergmann, Carl Zogheib, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, David Demelier, David Goerger, Emil Engler, Fabian Keil,
+  Firefox OS, Gisle Vanem, Gregor Jasny, Ikko Ashimine, Jack Boos Yu,
+  Jacob Hoffman-Andrews, Jean-Philippe Menil, Johannes Lesr, Jon Rumsey,
+  Joseph Chen, Manuj Bhatia, Marcel Raad, Marc Hörsken, Ray Satiro,
+  Sergei Nikulov, Simon Josefsson, Stephan Szabo, Viktor Szakats,
+  Vincent Torri, Vladimir Varlamov, ZimCodes on github,
+  (36 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -128,6 +145,7 @@ References to bug reports and discussions on issues:
  [36] = https://curl.se/bug/?i=6578
  [37] = https://curl.se/bug/?i=6626
  [38] = https://curl.se/bug/?i=6622
+ [39] = https://curl.se/bug/?i=6681
  [40] = https://curl.se/bug/?i=6616
  [41] = https://github.com/curl/curl/pull/6591#issuecomment-780396541
  [42] = https://github.com/curl/curl/issues/6604#issuecomment-780138219
@@ -143,3 +161,16 @@ References to bug reports and discussions on issues:
  [52] = https://curl.se/bug/?i=6639
  [53] = https://curl.se/bug/?i=6598
  [54] = https://curl.se/bug/?i=6640
+ [56] = https://curl.se/bug/?i=6697
+ [57] = https://curl.se/bug/?i=6677
+ [58] = https://curl.se/bug/?i=6692
+ [59] = https://curl.se/bug/?i=984
+ [60] = https://github.com/curl/curl/issues/6605
+ [61] = https://curl.se/bug/?i=6678
+ [62] = https://curl.se/bug/?i=6179
+ [63] = https://curl.se/bug/?i=6671
+ [64] = https://curl.se/bug/?i=6674
+ [65] = https://curl.se/bug/?i=6657
+ [67] = https://curl.se/bug/?i=6665
+ [69] = https://curl.se/bug/?i=6649
+ [70] = https://curl.se/bug/?i=6655
