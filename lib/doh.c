@@ -359,7 +359,12 @@ static CURLcode dohprobe(struct Curl_easy *data,
     doh->set.dohfor = data; /* identify for which transfer this is done */
     p->easy = doh;
 
-    /* add this transfer to the multi handle */
+    /* Since the DOH handles are passed to the user's SSL CTX callback, the
+       user must have a way to distinguish their transfer's handle from DOH
+       transfer handles. A documented way to do that is they set the private
+       pointer on their transfer's handle. The DOH private must be NULL. */
+    DEBUGASSERT(!data->set.private_data);
+
     if(curl_multi_add_handle(multi, doh))
       goto error;
   }
