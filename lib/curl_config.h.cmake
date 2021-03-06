@@ -98,7 +98,7 @@
 #endif
 
 /* Allow SMB to work on Windows */
-#cmakedefine USE_WIN32_CRYPTO
+#cmakedefine USE_WIN32_CRYPTO 1
 
 /* Use Windows LDAP implementation */
 #cmakedefine USE_WIN32_LDAP 1

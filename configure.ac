@@ -357,6 +357,7 @@ case X-"$curl_cv_native_windows" in
     CURL_CHECK_HEADER_WINSOCK
     CURL_CHECK_HEADER_WINSOCK2
     CURL_CHECK_HEADER_WS2TCPIP
+    CURL_CHECK_HEADER_WINCRYPT
     CURL_CHECK_HEADER_WINLDAP
     CURL_CHECK_HEADER_WINBER
     ;;
@@ -364,11 +365,13 @@ case X-"$curl_cv_native_windows" in
     curl_cv_header_winsock_h="no"
     curl_cv_header_winsock2_h="no"
     curl_cv_header_ws2tcpip_h="no"
+    curl_cv_header_wincrypt_h="no"
     curl_cv_header_winldap_h="no"
     curl_cv_header_winber_h="no"
     ;;
 esac
 CURL_CHECK_WIN32_LARGEFILE
+CURL_CHECK_WIN32_CRYPTO
 
 CURL_MAC_CFLAGS
 CURL_SUPPORTS_BUILTIN_AVAILABLE
@@ -1648,13 +1651,17 @@ if test -z "$ssl_backends" -o "x$OPT_SCHANNEL" != xno; then
     AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
     AC_SUBST(USE_WINDOWS_SSPI, [1])
     curl_sspi_msg="enabled"
-    LIBS="-lcrypt32 $LIBS"
   else
     AC_MSG_RESULT(no)
   fi
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 else
   AC_MSG_RESULT(no)
+fi
+
+dnl link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
+if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$USE_SCHANNEL" = "x1"; then
+  LIBS="-ladvapi32 -lcrypt32 $LIBS"
 fi
 
 OPT_SECURETRANSPORT=no
@@ -5222,17 +5229,23 @@ if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
   SUPPORT_FEATURES="$SUPPORT_FEATURES Kerberos"
 fi
 
-if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
-  if test "x$OPENSSL_ENABLED" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
-      -o "x$GNUTLS_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
-      -o "x$NSS_ENABLED" = "x1" -o "x$SECURETRANSPORT_ENABLED" = "x1" \
-      -o "x$WOLFSSL_NTLM" = "x1"; then
-    SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
+if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
+    \( "x$OPENSSL_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
+      -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
+      -o "x$SECURETRANSPORT_ENABLED" = "x1" \
+      -o "x$USE_WIN32_CRYPTO" = "x1" \
+      -o "x$WOLFSSL_NTLM" = "x1" \); then
+  use_curl_ntlm_core=yes
+else
+  use_curl_ntlm_core=no
+fi
+if test "x$use_curl_ntlm_core" = "xyes" \
+    -o "x$USE_WINDOWS_SSPI" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
 
-    if test "x$CURL_DISABLE_HTTP" != "x1" -a \
-        "x$NTLM_WB_ENABLED" = "x1"; then
-      SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM_WB"
-    fi
+  if test "x$CURL_DISABLE_HTTP" != "x1" -a \
+      "x$NTLM_WB_ENABLED" = "x1"; then
+    SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM_WB"
   fi
 fi
 
@@ -5333,11 +5346,7 @@ if test "x$CURL_DISABLE_IMAP" != "x1"; then
   fi
 fi
 if test "x$CURL_DISABLE_SMB" != "x1" \
-    -a "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" \
-    -a \( "x$OPENSSL_ENABLED" = "x1" \
-      -o "x$GNUTLS_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
-      -o "x$NSS_ENABLED" = "x1" -o "x$SECURETRANSPORT_ENABLED" = "x1" \
-      -o "x$WOLFSSL_NTLM" = "x1" \); then
+    -a "x$use_curl_ntlm_core" = "xyes"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMB"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMBS"
