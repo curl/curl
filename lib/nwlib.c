@@ -32,8 +32,8 @@
 #include <nks/thread.h>
 #include <nks/synch.h>
 
+/* The last include files should be in this order: */
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 struct libthreaddata {
@@ -304,6 +304,10 @@ void DisposeThreadData(void *data)
 #else /* __NOVELL_LIBC__ */
 /* For native CLib-based NLM seems we can do a bit more simple. */
 #include <nwthread.h>
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 int main(void)
 {

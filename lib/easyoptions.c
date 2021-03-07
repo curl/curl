@@ -25,6 +25,10 @@
 #include "curl_setup.h"
 #include "easyoptions.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 /* all easy setopt options listed in alphabetical order */
 struct curl_easyoption Curl_easyopts[] = {
   {"ABSTRACT_UNIX_SOCKET", CURLOPT_ABSTRACT_UNIX_SOCKET, CURLOT_STRING, 0},

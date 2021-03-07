@@ -28,7 +28,6 @@
 #include "http2.h"
 #include "vssh/ssh.h"
 #include "quic.h"
-#include "curl_printf.h"
 
 #ifdef USE_ARES
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
@@ -65,6 +64,11 @@
 #ifdef HAVE_ZSTD
 #include <zstd.h>
 #endif
+
+/* The last include files should be in this order: */
+#include "curl_printf.h"
+#include "curl_memory.h"
+#include "memdebug.h"
 
 #ifdef HAVE_BROTLI
 static size_t brotli_version(char *buf, size_t bufsz)

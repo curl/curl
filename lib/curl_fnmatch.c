@@ -25,12 +25,12 @@
 #include <curl/curl.h>
 
 #include "curl_fnmatch.h"
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 #ifndef HAVE_FNMATCH
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 #define CURLFNM_CHARSET_LEN (sizeof(char) * 256)
 #define CURLFNM_CHSET_SIZE (CURLFNM_CHARSET_LEN + 15)
@@ -361,6 +361,10 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
 }
 #else
 #include <fnmatch.h>
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
 /*
  * @unittest: 1307
  */

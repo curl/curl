@@ -82,6 +82,10 @@
 #include "warnless.h"
 #include "parsedate.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 /*
  * parsedate()
  *

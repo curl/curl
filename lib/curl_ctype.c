@@ -22,6 +22,10 @@
 
 #include "curl_setup.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 #ifndef CURL_DOES_CONVERSIONS
 
 #undef _U

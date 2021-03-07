@@ -36,12 +36,12 @@
 #include "url.h"
 #include "escape.h"
 #include "warnless.h"
-#include "curl_printf.h"
-#include "curl_memory.h"
 #include "multiif.h"
 #include "rand.h"
 
-/* The last #include file should be: */
+/* The last include files should be in this order: */
+#include "curl_printf.h"
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #define MQTT_MSG_CONNECT   0x10

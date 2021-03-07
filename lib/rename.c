@@ -20,9 +20,9 @@
  *
  ***************************************************************************/
 
-#include "rename.h"
-
 #include "curl_setup.h"
+
+#include "rename.h"
 
 #if (!defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_COOKIES)) || \
   !defined(CURL_DISABLE_ALTSVC)

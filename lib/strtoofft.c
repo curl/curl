@@ -20,10 +20,15 @@
  *
  ***************************************************************************/
 
-#include <errno.h>
 #include "curl_setup.h"
 
+#include <errno.h>
+
 #include "strtoofft.h"
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 /*
  * NOTE:

@@ -48,9 +48,8 @@
 
 #include <nettle/md4.h>
 
+/* The last include files should be in this order: */
 #include "curl_memory.h"
-
-/* The last #include file should be: */
 #include "memdebug.h"
 
 typedef struct md4_ctx MD4_CTX;
@@ -74,6 +73,10 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 /* When OpenSSL is available we use the MD4-functions from OpenSSL */
 #include <openssl/md4.h>
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
        defined(__MAC_OS_X_VERSION_MIN_ALLOWED) && \
@@ -83,9 +86,8 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #include <CommonCrypto/CommonDigest.h>
 
+/* The last include files should be in this order: */
 #include "curl_memory.h"
-
-/* The last #include file should be: */
 #include "memdebug.h"
 
 typedef CC_MD4_CTX MD4_CTX;
@@ -109,9 +111,8 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #include <wincrypt.h>
 
+/* The last include files should be in this order: */
 #include "curl_memory.h"
-
-/* The last #include file should be: */
 #include "memdebug.h"
 
 struct md4_ctx {
@@ -155,9 +156,8 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #include <mbedtls/md4.h>
 
+/* The last include files should be in this order: */
 #include "curl_memory.h"
-
-/* The last #include file should be: */
 #include "memdebug.h"
 
 struct md4_ctx {
@@ -239,6 +239,10 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 
 #include <string.h>
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 /* Any 32-bit or wider unsigned integer data type will do */
 typedef unsigned int MD4_u32plus;

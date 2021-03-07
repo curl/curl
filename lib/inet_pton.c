@@ -32,6 +32,10 @@
 
 #include "inet_pton.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 #define IN6ADDRSZ       16
 #define INADDRSZ         4
 #define INT16SZ          2

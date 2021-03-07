@@ -68,9 +68,8 @@
 
 #include <nettle/sha.h>
 
+/* The last include files should be in this order: */
 #include "curl_memory.h"
-
-/* The last #include file should be: */
 #include "memdebug.h"
 
 typedef struct sha256_ctx SHA256_CTX;
@@ -96,9 +95,8 @@ static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
 
 #include <mbedtls/sha256.h>
 
+/* The last include files should be in this order: */
 #include "curl_memory.h"
-
-/* The last #include file should be: */
 #include "memdebug.h"
 
 typedef mbedtls_sha256_context SHA256_CTX;
@@ -139,9 +137,8 @@ static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
 
 #include <CommonCrypto/CommonDigest.h>
 
+/* The last include files should be in this order: */
 #include "curl_memory.h"
-
-/* The last #include file should be: */
 #include "memdebug.h"
 
 typedef CC_SHA256_CTX SHA256_CTX;
@@ -166,6 +163,10 @@ static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
 #elif defined(USE_WIN32_CRYPTO)
 
 #include <wincrypt.h>
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 struct sha256_ctx {
   HCRYPTPROV hCryptProv;
@@ -208,6 +209,10 @@ static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
 }
 
 #else
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 /* When no other crypto library is available we use this code segment */
 

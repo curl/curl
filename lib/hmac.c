@@ -29,10 +29,10 @@
 #include <curl/curl.h>
 
 #include "curl_hmac.h"
-#include "curl_memory.h"
 #include "warnless.h"
 
-/* The last #include file should be: */
+/* The last include files should be in this order: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /*

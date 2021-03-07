@@ -25,9 +25,11 @@
 #if defined(USE_SSH)
 
 #include <curl/curl.h>
-#include "curl_memory.h"
 #include "curl_path.h"
 #include "escape.h"
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* figure out the path to work with in this particular request */

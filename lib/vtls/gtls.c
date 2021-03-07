@@ -38,6 +38,8 @@
 #include <gnutls/crypto.h>
 #include <nettle/sha2.h>
 
+# include <gnutls/ocsp.h>
+
 #include "urldata.h"
 #include "sendf.h"
 #include "inet_pton.h"
@@ -50,9 +52,10 @@
 #include "warnless.h"
 #include "x509asn1.h"
 #include "multiif.h"
+
+/* The last include files should be in this order: */
 #include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
@@ -69,8 +72,6 @@ static bool gtls_inited = FALSE;
 #if !defined(GNUTLS_VERSION_NUMBER) || (GNUTLS_VERSION_NUMBER < 0x03010a)
 #error "too old GnuTLS version"
 #endif
-
-# include <gnutls/ocsp.h>
 
 struct ssl_backend_data {
   gnutls_session_t session;

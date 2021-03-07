@@ -40,6 +40,11 @@
 #include "rand.h"
 #include "slist.h"
 #include "strcase.h"
+
+#ifdef __VMS
+#include <fabdef.h>
+#endif
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -131,8 +136,6 @@ static const char aschex[] =
 #define fopen_read fopen
 
 #else
-
-#include <fabdef.h>
 /*
  * get_vms_file_size does what it takes to get the real size of the file
  *

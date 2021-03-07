@@ -26,6 +26,10 @@
 #include "sendf.h"
 #include "strtoofft.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 /* Only include this function if one or more of FTP, FILE are enabled. */
 #if !defined(CURL_DISABLE_FTP) || !defined(CURL_DISABLE_FILE)
 

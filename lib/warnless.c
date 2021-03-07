@@ -37,6 +37,10 @@
 
 #include "warnless.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 #define CURL_MASK_SCHAR  0x7F
 #define CURL_MASK_UCHAR  0xFF
 

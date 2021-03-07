@@ -37,6 +37,7 @@
 #include "strtoofft.h"
 #include "strdup.h"
 #include "dynbuf.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -2453,6 +2454,10 @@ bool Curl_h2_http_1_1_error(struct connectdata *conn)
 
 /* Satisfy external references even if http2 is not compiled in. */
 #include <curl/curl.h>
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num)
 {

@@ -90,6 +90,10 @@
 #include <openssl/engine.h>
 #endif
 
+#ifdef USE_OPENSSL_ENGINE
+#include <openssl/ui.h>
+#endif
+
 #include "warnless.h"
 #include "non-ascii.h" /* for Curl_convert_from_utf8 prototype */
 
@@ -106,10 +110,6 @@
 
 #ifndef OPENSSL_VERSION_NUMBER
 #error "OPENSSL_VERSION_NUMBER not defined"
-#endif
-
-#ifdef USE_OPENSSL_ENGINE
-#include <openssl/ui.h>
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x00909000L

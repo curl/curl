@@ -17,9 +17,20 @@ none
 Verify memory #include files in libcurl's C source files
  </name>
 
-<command type="perl">
-%SRCDIR/mem-include-scan.pl %SRCDIR/../lib
+<command type="shell">
+log/test1132.sh
 </command>
+<file name="log/test1132.sh">
+#!/bin/sh
+find "%SRCDIR/../lib" -type d -exec \
+  perl "-I%SRCDIR" "%SRCDIR/mem-include-scan.pl" {} \;
+echo done>&2
+</file>
 </client>
 
+<verify>
+<stderr>
+done
+</stderr>
+</verify>
 </testcase>

@@ -29,10 +29,10 @@
 #ifdef USE_WIN32_IDN
 
 #include "curl_multibyte.h"
-#include "curl_memory.h"
 #include "warnless.h"
 
-  /* The last #include file should be: */
+/* The last include files should be in this order: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #ifdef WANT_IDN_PROTOTYPES

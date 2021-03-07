@@ -24,6 +24,10 @@
 
 #include "splay.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 /*
  * This macro compares two node keys i and j and returns:
  *

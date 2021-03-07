@@ -26,6 +26,10 @@
 
 #include "strcase.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 static char raw_tolower(char in);
 
 /* Portable, consistent toupper (remember EBCDIC). Do not use toupper() because

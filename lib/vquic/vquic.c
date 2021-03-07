@@ -29,8 +29,12 @@
 #endif
 #include "urldata.h"
 #include "dynbuf.h"
-#include "curl_printf.h"
 #include "vquic.h"
+
+/* The last include files should be in this order: */
+#include "curl_printf.h"
+#include "curl_memory.h"
+#include "memdebug.h"
 
 #ifdef O_BINARY
 #define QLOGMODE O_WRONLY|O_CREAT|O_BINARY

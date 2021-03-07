@@ -33,7 +33,11 @@
 #endif
 
 #include "inet_ntop.h"
+
+/* The last include files should be in this order: */
 #include "curl_printf.h"
+#include "curl_memory.h"
+#include "memdebug.h"
 
 #define IN6ADDRSZ       16
 #define INADDRSZ         4

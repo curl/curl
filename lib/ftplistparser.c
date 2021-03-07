@@ -48,9 +48,10 @@
 #include "ftp.h"
 #include "ftplistparser.h"
 #include "curl_fnmatch.h"
-#include "curl_memory.h"
 #include "multiif.h"
-/* The last #include file should be: */
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* allocs buffer which will contain one line of LIST command response */

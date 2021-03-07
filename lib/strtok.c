@@ -27,6 +27,10 @@
 
 #include "strtok.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 char *
 Curl_strtok_r(char *ptr, const char *sep, char **end)
 {

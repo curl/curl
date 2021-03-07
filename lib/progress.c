@@ -27,7 +27,11 @@
 #include "multiif.h"
 #include "progress.h"
 #include "timeval.h"
+
+/* The last include files should be in this order: */
 #include "curl_printf.h"
+#include "curl_memory.h"
+#include "memdebug.h"
 
 /* check rate limits within this many recent milliseconds, at minimum. */
 #define MIN_RATE_LIMIT_PERIOD 3000

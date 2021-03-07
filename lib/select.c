@@ -55,6 +55,10 @@
 #include "timeval.h"
 #include "warnless.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 /*
  * Internal function used for waiting a specific amount of ms
  * in Curl_socket_check() and Curl_poll() when no file descriptor

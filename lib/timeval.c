@@ -20,9 +20,15 @@
  *
  ***************************************************************************/
 
+#include "curl_setup.h"
+
 #include "timeval.h"
 
 #if defined(WIN32) && !defined(MSDOS)
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 /* set in win32_init() */
 extern LARGE_INTEGER Curl_freq;
@@ -57,6 +63,10 @@ struct curltime Curl_now(void)
 }
 
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC)
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 struct curltime Curl_now(void)
 {
@@ -117,6 +127,10 @@ struct curltime Curl_now(void)
 #include <stdint.h>
 #include <mach/mach_time.h>
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 struct curltime Curl_now(void)
 {
   /*
@@ -145,6 +159,10 @@ struct curltime Curl_now(void)
 
 #elif defined(HAVE_GETTIMEOFDAY)
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 struct curltime Curl_now(void)
 {
   /*
@@ -161,6 +179,10 @@ struct curltime Curl_now(void)
 }
 
 #else
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 struct curltime Curl_now(void)
 {

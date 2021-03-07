@@ -26,6 +26,10 @@
 
 #include "curl_des.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 /*
  * Curl_des_set_odd_parity()
  *

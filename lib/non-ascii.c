@@ -32,10 +32,6 @@
 #include "urldata.h"
 #include "multiif.h"
 
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
-
 #ifdef HAVE_ICONV
 #include <iconv.h>
 /* set default codesets for iconv */
@@ -47,6 +43,10 @@
 #endif
 #define ICONV_ERROR  (size_t)-1
 #endif /* HAVE_ICONV */
+
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 /*
  * Curl_convert_clone() returns a malloced copy of the source string (if

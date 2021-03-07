@@ -35,50 +35,48 @@ my $dir = $ARGV[0] || die "specify directory!";
 
 sub scanfile {
     my ($file) = @_;
-    my $memfunc;
-    my $memdebug;
-    my $curlmem;
-
-    print STDERR "checking $file...\n";
+    my @includes;
+    my $problems = 0;
+    my $libcurl;
+    my $curltool;
 
     open(F, "<$file");
     while(<F>) {
-        if($_ =~ /(free|alloc|strdup)\(/) {
-            $memfunc++;
-        }
-        elsif($_ =~ /^ *# *include \"memdebug.h\"/) {
-            $memdebug++;
-        }
-        elsif($_ =~ /^ *# *include \"curl_memory.h\"/) {
-            $curlmem++;
-        }
-        elsif($_ =~ /mem-include-scan/) {
+        if(/mem-include-scan/) {
             # free pass
             close(F);
             return 0;
         }
-        if($memfunc && $memdebug && $curlmem) {
-            last;
+        if(/^ *# *include [<"](.+)[">]$/) {
+            push @includes, $1;
         }
     }
     close(F);
 
-
-    if($memfunc) {
-        if($memdebug && $curlmem) {
-            return 0;
-        }
-        else {
-            if(!$memdebug) {
-                print STDERR "$file doesn't include \"memdebug.h\"!\n";
-            }
-            if(!$curlmem) {
-                print STDERR "$file doesn't include \"curl_memory.h\"!\n";
-            }
-            return 1;
-        }
+    if(defined($includes[0]) && $includes[0] eq "curl_setup.h") {
+        $libcurl = 1;
     }
-    return 0;
+    elsif(defined($includes[0]) && $includes[0] eq "tool_setup.h") {
+        $curltool = 1;
+    }
+    else {
+        print STDERR "$file has unexpected first include! " .
+                     "Expected curl_setup.h (libcurl) or " .
+                     "tool_setup.h (curltool).\n";
+        return 1;
+    }
+
+    if(!defined($includes[-1]) || $includes[-1] ne "memdebug.h") {
+        print STDERR "$file doesn't include \"memdebug.h\" as last include!\n";
+        $problems++;
+    }
+    if(!defined($includes[-2]) || $includes[-2] ne "curl_memory.h") {
+        print STDERR "$file doesn't include \"curl_memory.h\" " .
+                     "as 2nd to last include!\n";
+        $problems++;
+    }
+
+    return $problems;
 }
 
 opendir(my $dh, $dir) || die "can't opendir $dir: $!";

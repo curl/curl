@@ -1,3 +1,7 @@
+#ifdef HEADER_CURL_MEMDEBUG_H
+#error "Header memdebug.h was already included. It should be the last include."
+#endif
+
 #ifndef HEADER_CURL_MEMDEBUG_H
 #define HEADER_CURL_MEMDEBUG_H
 #ifdef CURLDEBUG

@@ -24,6 +24,10 @@
 
 #include "curl_endian.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 /*
  * Curl_read16_le()
  *

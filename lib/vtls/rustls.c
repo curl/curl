@@ -36,6 +36,10 @@
 
 #include "multiif.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 struct ssl_backend_data
 {
   const struct rustls_client_config *config;

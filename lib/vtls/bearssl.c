@@ -33,8 +33,11 @@
 #include "connect.h"
 #include "select.h"
 #include "multiif.h"
+
+/* The last include files should be in this order: */
 #include "curl_printf.h"
 #include "curl_memory.h"
+#include "memdebug.h"
 
 struct x509_context {
   const br_x509_class *vtable;

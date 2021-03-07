@@ -28,6 +28,10 @@
 #include "multiif.h"
 #include "speedcheck.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 void Curl_speedinit(struct Curl_easy *data)
 {
   memset(&data->state.keeps_speed, 0, sizeof(struct curltime));

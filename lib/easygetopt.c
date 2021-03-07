@@ -24,6 +24,10 @@
 #include "strcase.h"
 #include "easyoptions.h"
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 #ifndef CURL_DISABLE_GETOPTIONS
 
 /* Lookups easy options at runtime */

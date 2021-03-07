@@ -45,6 +45,10 @@ NETDB_DEFINE_CONTEXT
 #include <arpa/inet.h>
 NETINET_DEFINE_CONTEXT
 
+/* The last include files should be in this order: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
 int netware_init(void)
 {
   int rc = 0;
