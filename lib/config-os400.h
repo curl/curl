@@ -400,9 +400,6 @@
 /* The size of `size_t', as computed by sizeof. */
 #define SIZEOF_SIZE_T           4
 
-/* The size of `curl_off_t', as computed by sizeof. */
-#define SIZEOF_CURL_OFF_T       8
-
 /* Whether long long constants must be suffixed by LL. */
 
 #define HAVE_LL

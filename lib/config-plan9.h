@@ -51,7 +51,6 @@
 #define SIZEOF_SHORT 2
 #define SIZEOF_LONG 4
 #define SIZEOF_OFF_T 8
-#define SIZEOF_CURL_OFF_T 4 /* curl_off_t = timediff_t = int */
 #define SIZEOF_SIZE_T 4
 #define SIZEOF_TIME_T 4
 #endif

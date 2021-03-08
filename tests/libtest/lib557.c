@@ -35,7 +35,7 @@
 
 #include "memdebug.h"
 
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+#if (CURL_SIZEOF_CURL_OFF_T > SIZEOF_LONG)
 #  define MPRNT_SUFFIX_CURL_OFF_T  LL
 #else
 #  define MPRNT_SUFFIX_CURL_OFF_T  L
@@ -1157,50 +1157,7 @@ static int test_curl_off_t_formatting(void)
   int num_cofft_tests = 0;
   int failed = 0;
 
-#if (SIZEOF_CURL_OFF_T == 2)
-
-  i = 1; co_test[i].num = MPRNT_OFF_T_C(0x7FFF); co_test[i].expected = "32767";
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x7FFE); co_test[i].expected = "32766";
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x7FFD); co_test[i].expected = "32765";
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x7F00); co_test[i].expected = "32512";
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x07F0); co_test[i].expected = "2032";
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x007F); co_test[i].expected = "127";
-
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x7000); co_test[i].expected = "28672";
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x0700); co_test[i].expected = "1792";
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x0070); co_test[i].expected = "112";
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x0007); co_test[i].expected = "7";
-
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x5000); co_test[i].expected = "20480";
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x0500); co_test[i].expected = "1280";
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x0050); co_test[i].expected = "80";
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x0005); co_test[i].expected = "5";
-
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x0001); co_test[i].expected = "1";
-  i++; co_test[i].num = MPRNT_OFF_T_C(0x0000); co_test[i].expected = "0";
-
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x7FFF) -MPRNT_OFF_T_C(1); co_test[i].expected = "-32768";
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x7FFE) -MPRNT_OFF_T_C(1); co_test[i].expected = "-32767";
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x7FFD) -MPRNT_OFF_T_C(1); co_test[i].expected = "-32766";
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x7F00) -MPRNT_OFF_T_C(1); co_test[i].expected = "-32513";
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x07F0) -MPRNT_OFF_T_C(1); co_test[i].expected = "-2033";
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x007F) -MPRNT_OFF_T_C(1); co_test[i].expected = "-128";
-
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x7000) -MPRNT_OFF_T_C(1); co_test[i].expected = "-28673";
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x0700) -MPRNT_OFF_T_C(1); co_test[i].expected = "-1793";
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x0070) -MPRNT_OFF_T_C(1); co_test[i].expected = "-113";
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x0007) -MPRNT_OFF_T_C(1); co_test[i].expected = "-8";
-
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x5000) -MPRNT_OFF_T_C(1); co_test[i].expected = "-20481";
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x0500) -MPRNT_OFF_T_C(1); co_test[i].expected = "-1281";
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x0050) -MPRNT_OFF_T_C(1); co_test[i].expected = "-81";
-  i++; co_test[i].num = -MPRNT_OFF_T_C(0x0005) -MPRNT_OFF_T_C(1); co_test[i].expected = "-6";
-
-  i++; co_test[i].num =  MPRNT_OFF_T_C(0x0000) -MPRNT_OFF_T_C(1); co_test[i].expected = "-1";
-
-  num_cofft_tests = i;
-
-#elif (SIZEOF_CURL_OFF_T == 4)
+#if (CURL_SIZEOF_CURL_OFF_T == 4)
 
   i = 1; co_test[i].num = MPRNT_OFF_T_C(0x7FFFFFFF); co_test[i].expected = "2147483647";
   i++; co_test[i].num = MPRNT_OFF_T_C(0x7FFFFFFE); co_test[i].expected = "2147483646";
@@ -1267,7 +1224,7 @@ static int test_curl_off_t_formatting(void)
 
   num_cofft_tests = i;
 
-#elif (SIZEOF_CURL_OFF_T == 8)
+#elif (CURL_SIZEOF_CURL_OFF_T == 8)
 
   i = 1; co_test[i].num = MPRNT_OFF_T_C(0x7FFFFFFFFFFFFFFF); co_test[i].expected = "9223372036854775807";
   i++; co_test[i].num = MPRNT_OFF_T_C(0x7FFFFFFFFFFFFFFE); co_test[i].expected = "9223372036854775806";
@@ -1350,6 +1307,8 @@ static int test_curl_off_t_formatting(void)
 
   num_cofft_tests = i;
 
+#else
+#error "Unexpected size of CURL_SIZEOF_CURL_OFF_T"
 #endif
 
   for(i = 1; i <= num_cofft_tests; i++) {

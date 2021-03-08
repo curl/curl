@@ -29,7 +29,7 @@ struct connectdata;
  * Neither RFC2616 nor the later HTTP specs define a maximum chunk size.
  * For 64 bit curl_off_t we support 16 digits. For 32 bit, 8 digits.
  */
-#define CHUNK_MAXNUM_LEN (SIZEOF_CURL_OFF_T * 2)
+#define CHUNK_MAXNUM_LEN (CURL_SIZEOF_CURL_OFF_T * 2)
 
 typedef enum {
   /* await and buffer all hexadecimal digits until we get one that isn't a

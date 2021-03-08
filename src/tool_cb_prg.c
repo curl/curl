@@ -114,13 +114,6 @@ static void fly(struct ProgressData *bar, bool moved)
 
 #define MAX_BARLENGTH 256
 
-#if (SIZEOF_CURL_OFF_T == 4)
-#  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFF)
-#else
-   /* assume CURL_SIZEOF_CURL_OFF_T == 8 */
-#  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
-#endif
-
 int tool_progress_cb(void *clientp,
                      curl_off_t dltotal, curl_off_t dlnow,
                      curl_off_t ultotal, curl_off_t ulnow)

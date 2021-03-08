@@ -137,6 +137,13 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   if(initialized++)
     return CURLE_OK;
 
+#ifdef DEBUGBUILD
+  if(sizeof(curl_off_t) != CURL_SIZEOF_CURL_OFF_T) {
+    DEBUGF(fprintf(stderr, "Warning: curl_off_t is size %d but expected %d\n",
+                   (int)sizeof(curl_off_t), CURL_SIZEOF_CURL_OFF_T));
+  }
+#endif
+
   if(memoryfuncs) {
     /* Setup the default memory functions here (again) */
     Curl_cmalloc = (curl_malloc_callback)malloc;

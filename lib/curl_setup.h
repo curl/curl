@@ -151,8 +151,6 @@
 
 #include <curl/curl.h>
 
-#define CURL_SIZEOF_CURL_OFF_T SIZEOF_CURL_OFF_T
-
 /*
  * Disable other protocols when http is the only one desired.
  */
@@ -409,14 +407,6 @@
 #  endif
 #endif
 
-#if (SIZEOF_CURL_OFF_T == 4)
-#  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFF)
-#else
-   /* assume CURL_SIZEOF_CURL_OFF_T == 8 */
-#  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
-#endif
-#define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - CURL_OFF_T_C(1))
-
 #if (SIZEOF_TIME_T == 4)
 #  ifdef HAVE_TIME_T_UNSIGNED
 #  define TIME_T_MAX UINT_MAX
@@ -442,6 +432,14 @@
 #else
 #define SIZE_T_MAX 4294967295U
 #endif
+#endif
+
+/* !checksrc! disable BANNEDMACRO 2 */
+#ifdef SIZEOF_CURL_OFF_T
+#error "SIZEOF_CURL_OFF_T deprecated in favor of CURL_SIZEOF_CURL_OFF_T"
+#endif
+#ifndef CURL_SIZEOF_CURL_OFF_T
+#error "Missing CURL_SIZEOF_CURL_OFF_T, should be defined in system.h"
 #endif
 
 /*

@@ -64,6 +64,7 @@ my %warnings = (
     'PARENBRACE'       => '){ without sufficient space',
     'SPACESEMICOLON'   => 'space before semicolon',
     'BANNEDFUNC'       => 'a banned function was used',
+    'BANNEDMACRO'      => 'a banned macro was used',
     'FOPENMODE'        => 'fopen needs a macro for the mode string',
     'BRACEPOS'         => 'wrong position for an open brace',
     'INDENTATION'      => 'wrong start column for code',
@@ -618,6 +619,16 @@ sub scanfile {
                    \s*\(
                  /x) {
             checkwarn("BANNEDFUNC",
+                      $line, length($1), $file, $ol,
+                      "use of $2 is banned");
+        }
+
+        # scan for use of banned macros
+        if($l =~ /^(^|.*\W)
+                   (SIZEOF_CURL_OFF_T)  # Use CURL_SIZEOF_CURL_OFF_T instead
+                   (?:\W|$)
+                 /x) {
+            checkwarn("BANNEDMACRO",
                       $line, length($1), $file, $ol,
                       "use of $2 is banned");
         }

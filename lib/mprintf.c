@@ -323,7 +323,7 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
           break;
 #if defined(MP_HAVE_INT_EXTENSIONS)
         case 'I':
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+#if (CURL_SIZEOF_CURL_OFF_T > SIZEOF_LONG)
           flags |= FLAGS_LONGLONG;
 #else
           flags |= FLAGS_LONG;
@@ -352,7 +352,7 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
 #endif
           break;
         case 'O':
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+#if (CURL_SIZEOF_CURL_OFF_T > SIZEOF_LONG)
           flags |= FLAGS_LONGLONG;
 #else
           flags |= FLAGS_LONG;
