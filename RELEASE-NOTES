@@ -1,10 +1,10 @@
 curl and libcurl 7.76.0
 
- Public curl releases:         197
+ Public curl releases:         198
  Command line options:         240
  curl_easy_setopt() options:   288
  Public functions in libcurl:  85
- Contributors:                 2339
+ Contributors:                 2340
 
 This release includes the following changes:
 
@@ -100,10 +100,10 @@ advice from friends like these:
   Daniel Stenberg, David Demelier, David Goerger, Emil Engler, Fabian Keil,
   Firefox OS, Gisle Vanem, Gregor Jasny, Ikko Ashimine, Jack Boos Yu,
   Jacob Hoffman-Andrews, Jean-Philippe Menil, Johannes Lesr, Jon Rumsey,
-  Joseph Chen, Manuj Bhatia, Marcel Raad, Marc Hörsken, Ray Satiro,
-  Sergei Nikulov, Simon Josefsson, Stephan Szabo, Viktor Szakats,
+  Joseph Chen, kokke on github, Manuj Bhatia, Marcel Raad, Marc Hörsken,
+  Ray Satiro, Sergei Nikulov, Simon Josefsson, Stephan Szabo, Viktor Szakats,
   Vincent Torri, Vladimir Varlamov, ZimCodes on github,
-  (36 contributors)
+  (37 contributors)
 
 References to bug reports and discussions on issues:
 
