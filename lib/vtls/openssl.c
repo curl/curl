@@ -3492,6 +3492,12 @@ typedef size_t numcert_t;
 typedef int numcert_t;
 #endif
 
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+#define OSSL3_CONST const
+#else
+#define OSSL3_CONST
+#endif
+
 static CURLcode get_cert_chain(struct Curl_easy *data,
                                struct ssl_connect_data *connssl)
 {
@@ -3599,7 +3605,7 @@ static CURLcode get_cert_chain(struct Curl_easy *data,
       switch(pktype) {
       case EVP_PKEY_RSA:
       {
-        RSA *rsa;
+        OSSL3_CONST RSA *rsa;
 #ifdef HAVE_OPAQUE_EVP_PKEY
         rsa = EVP_PKEY_get0_RSA(pubkey);
 #else
@@ -3629,7 +3635,7 @@ static CURLcode get_cert_chain(struct Curl_easy *data,
       case EVP_PKEY_DSA:
       {
 #ifndef OPENSSL_NO_DSA
-        DSA *dsa;
+        OSSL3_CONST DSA *dsa;
 #ifdef HAVE_OPAQUE_EVP_PKEY
         dsa = EVP_PKEY_get0_DSA(pubkey);
 #else
@@ -3661,7 +3667,7 @@ static CURLcode get_cert_chain(struct Curl_easy *data,
       }
       case EVP_PKEY_DH:
       {
-        DH *dh;
+        OSSL3_CONST DH *dh;
 #ifdef HAVE_OPAQUE_EVP_PKEY
         dh = EVP_PKEY_get0_DH(pubkey);
 #else
