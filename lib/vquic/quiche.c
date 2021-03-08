@@ -360,6 +360,8 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
   uint8_t *buf = (uint8_t *)data->state.buffer;
   size_t bufsize = data->set.buffer_size;
 
+  DEBUGASSERT(qs->conn);
+
   /* in case the timeout expired */
   quiche_conn_on_timeout(qs->conn);
 
