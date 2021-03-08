@@ -8,7 +8,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2014, Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
- * Copyright (C) 2018 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -244,12 +244,12 @@ struct smb_tree_disconnect {
 #endif /* BUILDING_CURL_SMB_C */
 
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
-    (CURL_SIZEOF_CURL_OFF_T > 4)
+    (SIZEOF_CURL_OFF_T > 4)
 
 extern const struct Curl_handler Curl_handler_smb;
 extern const struct Curl_handler Curl_handler_smbs;
 
 #endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE &&
-          CURL_SIZEOF_CURL_OFF_T > 4 */
+          SIZEOF_CURL_OFF_T > 4 */
 
 #endif /* HEADER_CURL_SMB_H */
