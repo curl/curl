@@ -1360,7 +1360,7 @@ _add_if("brotli"        HAVE_BROTLI)
 _add_if("zstd"          HAVE_ZSTD)
 _add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
 _add_if("IDN"           HAVE_LIBIDN2)
-_add_if("Largefile"     (CURL_SIZEOF_CURL_OFF_T GREATER 4) AND
+_add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
                         ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
 # TODO SSP1 (Schannel) check is missing
 _add_if("SSPI"          USE_WINDOWS_SSPI)

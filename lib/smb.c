@@ -24,7 +24,7 @@
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) &&  \
-  (CURL_SIZEOF_CURL_OFF_T > 4)
+  (SIZEOF_CURL_OFF_T > 4)
 
 #define BUILDING_CURL_SMB_C
 
@@ -1022,4 +1022,4 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
 }
 
 #endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE &&
-          CURL_SIZEOF_CURL_OFF_T > 4 */
+          SIZEOF_CURL_OFF_T > 4 */
