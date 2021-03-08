@@ -895,7 +895,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
       (void)Curl_altsvc_load(outcurl->asi, outcurl->set.str[STRING_ALTSVC]);
   }
 #endif
-#ifdef USE_HSTS
+#ifndef CURL_DISABLE_HSTS
   if(data->hsts) {
     outcurl->hsts = Curl_hsts_init();
     if(!outcurl->hsts)

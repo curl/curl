@@ -1664,7 +1664,7 @@ struct UserDefined {
   curl_conv_callback convtonetwork;
   /* function to convert from UTF-8 encoding: */
   curl_conv_callback convfromutf8;
-#ifdef USE_HSTS
+#ifndef CURL_DISABLE_HSTS
   curl_hstsread_callback hsts_read;
   void *hsts_read_userp;
   curl_hstswrite_callback hsts_write;
@@ -1926,7 +1926,7 @@ struct Curl_easy {
                                   NOTE that the 'cookie' field in the
                                   UserDefined struct defines if the "engine"
                                   is to be used or not. */
-#ifdef USE_HSTS
+#ifndef CURL_DISABLE_HSTS
   struct hsts *hsts;
 #endif
 #ifndef CURL_DISABLE_ALTSVC
