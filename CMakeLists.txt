@@ -210,6 +210,8 @@ endif()
 
 option(CURL_DISABLE_ALTSVC "to disable alt-svc support" OFF)
 mark_as_advanced(CURL_DISABLE_ALTSVC)
+option(CURL_DISABLE_HSTS "to disable HSTS support" OFF)
+mark_as_advanced(CURL_DISABLE_HSTS)
 option(CURL_DISABLE_COOKIES "to disable cookies support" OFF)
 mark_as_advanced(CURL_DISABLE_COOKIES)
 option(CURL_DISABLE_CRYPTO_AUTH "to disable cryptographic authentication" OFF)
@@ -1371,6 +1373,7 @@ _add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
 _add_if("SSPI"          USE_WINDOWS_SSPI)
 _add_if("GSS-API"       HAVE_GSSAPI)
 _add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
+_add_if("HSTS"          NOT CURL_DISABLE_HSTS)
 # TODO SSP1 missing for SPNEGO
 _add_if("SPNEGO"        NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))

@@ -1944,7 +1944,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
   }
 
-#ifdef USE_HSTS
+#ifndef CURL_DISABLE_HSTS
   if(data->hsts && strcasecompare("http", data->state.up.scheme)) {
     if(Curl_hsts(data->hsts, data->state.up.hostname, TRUE)) {
       char *url;

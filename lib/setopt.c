@@ -2911,7 +2911,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.trailer_data = va_arg(param, void *);
 #endif
     break;
-#ifdef USE_HSTS
+#ifndef CURL_DISABLE_HSTS
   case CURLOPT_HSTSREADFUNCTION:
     data->set.hsts_read = va_arg(param, curl_hstsread_callback);
     break;

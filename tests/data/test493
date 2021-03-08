@@ -27,6 +27,7 @@ http
 </server>
 <features>
 HSTS
+proxy
 </features>
 
 <file name="log/input%TESTNUMBER">

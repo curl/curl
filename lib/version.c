@@ -436,7 +436,7 @@ static curl_version_info_data version_info = {
 #ifndef CURL_DISABLE_ALTSVC
   | CURL_VERSION_ALTSVC
 #endif
-#if defined(USE_HSTS)
+#ifndef CURL_DISABLE_HSTS
   | CURL_VERSION_HSTS
 #endif
 #if defined(USE_GSASL)
