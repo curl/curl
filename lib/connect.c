@@ -908,8 +908,10 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
         connkeep(conn, "HTTP/3 default");
         return CURLE_OK;
       }
-      if(result)
+      if(result) {
+        conn->tempsock[i] = CURL_SOCKET_BAD;
         error = SOCKERRNO;
+      }
     }
     else
 #endif
