@@ -4335,13 +4335,6 @@ AX_COMPILE_CHECK_SIZEOF(short)
 AX_COMPILE_CHECK_SIZEOF(time_t)
 AX_COMPILE_CHECK_SIZEOF(off_t)
 
-o=$CPPFLAGS
-CPPFLAGS="-I$srcdir/include $CPPFLAGS"
-AX_COMPILE_CHECK_SIZEOF(curl_off_t, [
-#include <curl/system.h>
-])
-CPPFLAGS=$o
-
 AC_CHECK_TYPE(long long,
    [AC_DEFINE(HAVE_LONGLONG, 1,
       [Define to 1 if the compiler supports the 'long long' data type.])]

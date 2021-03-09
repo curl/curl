@@ -94,11 +94,7 @@
 #  elif defined(_MSC_VER)
 #    define CURL_TYPEID_CURL_OFF_T     CURL_TYPEID_INT64
 #  else
-#    define CURL_TYPEOF_CURL_OFF_T     long long
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#    define CURL_TYPEID_CURL_OFF_T     CURL_TYPEID_LONG_LONG
 #  endif
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
 
@@ -441,10 +437,22 @@
 #      define CURL_MASK_SCOFFT       CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
 #      define CURL_MASK_UCOFFT       CURL_OFF_TU_C(0xFFFFFFFFFFFFFFFF)
 #    else
-#      error "CURL_OFF_T_MAX unexpected value: != 0x7FFFFFFFFFFFFFFF"
+#      if CURL_OFF_T_MAX > CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
+#        if CURL_OFF_T_MAX == CURL_OFF_T_C(0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+#          define CURL_SIZEOF_CURL_OFF_T 16
+#          define CURL_MASK_SCOFFT   \
+             CURL_OFF_T_C(0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+#          define CURL_MASK_UCOFFT   \
+             CURL_OFF_TU_C(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+#        else
+#          error "CURL_OFF_T_MAX != 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+#        endif
+#      else
+#        error "CURL_OFF_T_MAX < 0x7FFFFFFFFFFFFFFF"
+#      endif
 #    endif
 #  else
-#    error "CURL_OFF_T_MAX unexpected value: < 0x7FFFFFFF"
+#    error "CURL_OFF_T_MAX < 0x7FFFFFFF"
 #  endif
 #endif
 

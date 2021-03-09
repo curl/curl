@@ -1125,12 +1125,6 @@ if(HAVE_FILE_OFFSET_BITS)
 endif()
 check_type_size("off_t"  SIZEOF_OFF_T)
 
-# include this header to get the type
-set(CMAKE_REQUIRED_INCLUDES "${CURL_SOURCE_DIR}/include")
-set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
-check_type_size("curl_off_t"  SIZEOF_CURL_OFF_T)
-set(CMAKE_EXTRA_INCLUDE_FILES "")
-
 set(CMAKE_REQUIRED_FLAGS)
 
 foreach(CURL_TEST
@@ -1360,8 +1354,7 @@ _add_if("brotli"        HAVE_BROTLI)
 _add_if("zstd"          HAVE_ZSTD)
 _add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
 _add_if("IDN"           HAVE_LIBIDN2)
-_add_if("Largefile"     (CURL_SIZEOF_CURL_OFF_T GREATER 4) AND
-                        ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
+_add_if("Largefile"     ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
 # TODO SSP1 (Schannel) check is missing
 _add_if("SSPI"          USE_WINDOWS_SSPI)
 _add_if("GSS-API"       HAVE_GSSAPI)
