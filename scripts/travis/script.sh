@@ -38,9 +38,8 @@ fi
 if [ "$T" = "torture" ]; then
   ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2
   make
-  make TFLAGS=-n test-nonflaky
-  make "TFLAGS=-n -e" test-nonflaky
-  tests="1 200 300 500 700 800 900 1000 1100 1200 1302 1400 1502 3000"
+  tests="!TLS-SRP"
+  make "TFLAGS=-n -e $tests" test-nonflaky
   make "TFLAGS=-n --shallow=40 -t $tests" test-nonflaky
 fi
 
