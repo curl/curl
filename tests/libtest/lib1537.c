@@ -47,11 +47,11 @@ int test(char *URL)
 
   /* deprecated API */
   ptr = curl_escape((char *)a, asize);
-  printf("%s\n", ptr);
   if(!ptr) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
+  printf("%s\n", ptr);
 
   raw = curl_easy_unescape(NULL, ptr, (int)strlen(ptr), &outlen);
   printf("outlen == %d\n", outlen);
