@@ -1834,8 +1834,10 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
      HAVECRYPTO="yes"
      LIBS="-lcrypto $LIBS"
      ],[
-     LDFLAGS="$CLEANLDFLAGS -L$LIB_OPENSSL"
-     if test "$PKGCONFIG" = "no" ; then
+     if test -n "$LIB_OPENSSL" ; then
+       LDFLAGS="$CLEANLDFLAGS -L$LIB_OPENSSL"
+     fi
+     if test "$PKGCONFIG" = "no" -a -n "$PREFIX_OPENSSL" ; then
        # only set this if pkg-config wasn't used
        CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include/openssl -I$PREFIX_OPENSSL/include"
      fi
