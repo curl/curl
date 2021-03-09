@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -44,7 +44,7 @@ $curl_protocols =~ /\w+: (.*)$/;
 @curl = split / /,$1;
 
 # These features are not supported by curl-config
-@curl = grep(!/^(Debug|TrackMemory|Metalink|Largefile|CharConv)$/i, @curl);
+@curl = grep(!/^(Debug|TrackMemory|Metalink|CharConv)$/i, @curl);
 @curl = sort @curl;
 
 # Read the output of curl-config
