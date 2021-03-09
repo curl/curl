@@ -824,6 +824,17 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     }
   }
 
+  /* Remove from the pending list if it is there. Otherwise this will
+     remain on the pending list forever due to the state change. */
+  for(e = multi->pending.head; e; e = e->next) {
+    struct Curl_easy *curr_data = e->ptr;
+
+    if(curr_data == data) {
+      Curl_llist_remove(&multi->pending, e, NULL);
+      break;
+    }
+  }
+
   /* make the previous node point to our next */
   if(data->prev)
     data->prev->next = data->next;
@@ -839,6 +850,8 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   /* NOTE NOTE NOTE
      We do not touch the easy handle here! */
   multi->num_easy--; /* one less to care about now */
+
+  process_pending_handles(multi);
 
   Curl_update_timer(multi);
   return CURLM_OK;
