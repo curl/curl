@@ -32,12 +32,15 @@ extern bool Curl_isVistaOrGreater;
 struct curltime Curl_now(void)
 {
   struct curltime now;
+#ifndef CURL_WINDOWS_APP
   if(Curl_isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
+#endif
     LARGE_INTEGER count;
     QueryPerformanceCounter(&count);
     now.tv_sec = (time_t)(count.QuadPart / Curl_freq.QuadPart);
     now.tv_usec = (int)((count.QuadPart % Curl_freq.QuadPart) * 1000000 /
                         Curl_freq.QuadPart);
+#ifndef CURL_WINDOWS_APP
   }
   else {
     /* Disable /analyze warning that GetTickCount64 is preferred  */
@@ -53,6 +56,7 @@ struct curltime Curl_now(void)
     now.tv_sec = milliseconds / 1000;
     now.tv_usec = (milliseconds % 1000) * 1000;
   }
+#endif
   return now;
 }
 

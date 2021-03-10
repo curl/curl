@@ -35,12 +35,15 @@ extern bool tool_isVistaOrGreater;
 struct timeval tvnow(void)
 {
   struct timeval now;
+#ifndef CURL_WINDOWS_APP
   if(tool_isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
+#endif
     LARGE_INTEGER count;
     QueryPerformanceCounter(&count);
     now.tv_sec = (long)(count.QuadPart / tool_freq.QuadPart);
     now.tv_usec = (long)((count.QuadPart % tool_freq.QuadPart) * 1000000 /
                          tool_freq.QuadPart);
+#ifndef CURL_WINDOWS_APP
   }
   else {
     /* Disable /analyze warning that GetTickCount64 is preferred  */
@@ -56,6 +59,7 @@ struct timeval tvnow(void)
     now.tv_sec = (long)(milliseconds / 1000);
     now.tv_usec = (long)((milliseconds % 1000) * 1000);
   }
+#endif
   return now;
 }
 
