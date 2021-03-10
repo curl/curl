@@ -851,7 +851,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
      We do not touch the easy handle here! */
   multi->num_easy--; /* one less to care about now */
 
-  process_pending_handles(multi );
+  process_pending_handles(multi);
 
   Curl_update_timer(multi);
   return CURLM_OK;
