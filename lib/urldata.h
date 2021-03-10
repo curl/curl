@@ -273,6 +273,11 @@ struct ssl_config_data {
   struct curl_blob *key_blob;
   char *key_type; /* format for private key (default: PEM) */
   char *key_passwd; /* plain text private key password */
+#if defined(USE_SCHANNEL)
+  curl_ssl_dn_callback fdistnames; /* function to return
+                                              distinguished names */
+#endif
+  void *fdistnamesp;     /* parameter for call back */
 #ifdef USE_TLS_SRP
   char *username; /* TLS username (for, e.g., SRP) */
   char *password; /* TLS password (for, e.g., SRP) */
