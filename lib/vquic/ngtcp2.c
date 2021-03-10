@@ -808,8 +808,8 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
     return CURLE_QUIC_CONNECT_ERROR;
 
   ngtcp2_addr_init(&path.local, (struct sockaddr *)&qs->local_addr,
-                   qs->local_addrlen, NULL);
-  ngtcp2_addr_init(&path.remote, addr, addrlen, NULL);
+                   qs->local_addrlen);
+  ngtcp2_addr_init(&path.remote, addr, addrlen);
 
   rc = ngtcp2_conn_client_new(&qs->qconn, &qs->dcid, &qs->scid, &path,
                               NGTCP2_PROTO_VER_MIN, &ng_callbacks,
@@ -1730,9 +1730,9 @@ static CURLcode ng_process_ingress(struct Curl_easy *data,
     }
 
     ngtcp2_addr_init(&path.local, (struct sockaddr *)&qs->local_addr,
-                     qs->local_addrlen, NULL);
+                     qs->local_addrlen);
     ngtcp2_addr_init(&path.remote, (struct sockaddr *)&remote_addr,
-                     remote_addrlen, NULL);
+                     remote_addrlen);
 
     rv = ngtcp2_conn_read_pkt(qs->qconn, &path, &pi, buf, recvd, ts);
     if(rv != 0) {
