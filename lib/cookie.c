@@ -951,8 +951,12 @@ Curl_cookie_add(struct Curl_easy *data,
     remove_expired(c);
 
 #ifdef USE_LIBPSL
-  /* Check if the domain is a Public Suffix and if yes, ignore the cookie. */
-  if(domain && co->domain && !isip(co->domain)) {
+  /*
+   * Check if the domain is a Public Suffix and if yes, ignore the cookie. We
+   * must also check that the data handle isn't NULL since the psl code will
+   * dereference it.
+   */
+  if(data && (domain && co->domain && !isip(co->domain))) {
     const psl_ctx_t *psl = Curl_psl_use(data);
     int acceptable;
 
