@@ -3023,10 +3023,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     if(!data->state.aptr.accept_encoding)
       return CURLE_OUT_OF_MEMORY;
   }
-  else {
+  else
     Curl_safefree(data->state.aptr.accept_encoding);
-    data->state.aptr.accept_encoding = NULL;
-  }
 
 #ifdef HAVE_LIBZ
   /* we only consider transfer-encoding magic if libz support is built-in */
