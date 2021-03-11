@@ -182,7 +182,11 @@ http://%HOSTIP:%HTTPPORT/314 --compressed
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
+%if hyper
+s/^Accept-Encoding: .*/Accept-Encoding: xxx/
+%else
 s/^Accept-Encoding: .*/Accept-Encoding: xxx/
+%endif
 </strippart>
 <protocol>
 GET /314 HTTP/1.1
