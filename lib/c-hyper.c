@@ -51,6 +51,7 @@
 #include "transfer.h"
 #include "multiif.h"
 #include "progress.h"
+#include "content_encoding.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -175,7 +176,11 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
   if(k->ignorebody)
     return HYPER_ITER_CONTINUE;
   Curl_debug(data, CURLINFO_DATA_IN, buf, len);
-  result = Curl_client_write(data, CLIENTWRITE_BODY, buf, len);
+  if(!data->set.http_ce_skip && k->writer_stack)
+    /* content-encoded data */
+    result = Curl_unencode_write(data, k->writer_stack, buf, len);
+  else
+    result = Curl_client_write(data, CLIENTWRITE_BODY, buf, len);
 
   if(result) {
     data->state.hresult = result;
@@ -812,6 +817,19 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     if(Curl_hyper_header(data, headers, data->state.aptr.ref))
       goto error;
   }
+
+  if(!Curl_checkheaders(data, "Accept-Encoding") &&
+     data->set.str[STRING_ENCODING]) {
+    Curl_safefree(data->state.aptr.accept_encoding);
+    data->state.aptr.accept_encoding =
+      aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
+    if(!data->state.aptr.accept_encoding)
+      return CURLE_OUT_OF_MEMORY;
+    if(Curl_hyper_header(data, headers, data->state.aptr.accept_encoding))
+      goto error;
+  }
+  else
+    Curl_safefree(data->state.aptr.accept_encoding);
 
   result = cookies(data, conn, headers);
   if(result)
