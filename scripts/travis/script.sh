@@ -38,9 +38,15 @@ fi
 if [ "$T" = "torture" ]; then
   ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2
   make
+  tests="!TLS-SRP !FTP"
+  make "TFLAGS=-n --shallow=20 -t $tests" test-nonflaky
+fi
+
+if [ "$T" = "events" ]; then
+  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2
+  make
   tests="!TLS-SRP"
   make "TFLAGS=-n -e $tests" test-nonflaky
-  make "TFLAGS=-n --shallow=40 -t $tests" test-nonflaky
 fi
 
 if [ "$T" = "debug" ]; then
