@@ -2708,8 +2708,9 @@ sectransp_connect_step2(struct Curl_easy *data, struct connectdata *conn,
 #if CURL_BUILD_MAC_10_6
       /* Only returned when kSSLSessionOptionBreakOnCertRequested is set */
       case errSSLClientCertRequested:
-        failf(data, "The server has requested a client certificate");
-        break;
+        failf(data, "Server requested a client certificate during the "
+              "handshake");
+        return CURLE_SSL_CLIENTCERT;
 #endif
 #if CURL_BUILD_MAC_10_9
       /* Alias for errSSLLast, end of error range */
