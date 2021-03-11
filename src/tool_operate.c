@@ -1460,6 +1460,10 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           /* new in libcurl 7.64.0 */
           my_setopt(curl, CURLOPT_HTTP09_ALLOWED,
                     config->http09_allowed ? 1L : 0L);
+          if(result) {
+            errorf(global, "HTTP/0.9 is not supported in this build!\n");
+            return result;
+          }
 
         } /* (built_in_protos & CURLPROTO_HTTP) */
 
