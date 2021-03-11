@@ -43,7 +43,7 @@ if [ "$NGTCP2" = yes ]; then
     make install
   else
     cd $HOME
-    git clone --depth 1 -b OpenSSL_1_1_1g-quic-draft-29 https://github.com/tatsuhiro-t/openssl possl
+    git clone --depth 1 -b OpenSSL_1_1_1j+quic https://github.com/quictls/openssl possl
     cd possl
     ./config enable-tls1_3 --prefix=$HOME/ngbuild
     make
