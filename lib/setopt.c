@@ -906,7 +906,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, unsigned long);
     if(arg > 1L)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-#if USE_HYPER
+#ifdef USE_HYPER
     /* Hyper does not support HTTP/0.9 */
     if(arg)
       return CURLE_BAD_FUNCTION_ARGUMENT;
