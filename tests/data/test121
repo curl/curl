@@ -29,7 +29,7 @@ ftp
 ftp download with post- and pre-transfer delete operations
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/121 -Q "-DELE after_transfer" -Q "DELE before_transfer"
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -Q "-DELE after_transfer" -Q "DELE before_transfer"
 </command>
 </client>
 
@@ -42,8 +42,8 @@ PWD
 DELE before_transfer
 EPSV
 TYPE I
-SIZE 121
-RETR 121
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 DELE after_transfer
 QUIT
 </protocol>

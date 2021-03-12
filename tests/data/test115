@@ -23,7 +23,7 @@ ftp
 FTP download, failed PASV
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/115
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 

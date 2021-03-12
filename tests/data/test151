@@ -28,14 +28,14 @@ http
 HTTP GET with an error code that might trick authentication
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/151
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /151 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

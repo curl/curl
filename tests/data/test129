@@ -35,7 +35,7 @@ http
 HTTP/1.2 is rejected
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/129
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -43,7 +43,7 @@ http://%HOSTIP:%HTTPPORT/129
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /129 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

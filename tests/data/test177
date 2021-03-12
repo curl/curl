@@ -13,7 +13,7 @@ followlocation
 <data>
 HTTP/1.1 302 *MOVED* swsclose swsbounce
 Server: Microsoft-IIS/6.0
-Location: /mooooo/177
+Location: /mooooo/%TESTNUMBER
 Content-Type: text/html; charset=iso-8859-1
 
 </data>
@@ -32,14 +32,14 @@ crypto
 HTTP POST --digest to server doing a 302-location response
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/177 -u auser:apasswd --digest -d "junkelijunk"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -d "junkelijunk"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-POST /177 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

@@ -26,7 +26,7 @@ ftp
 FTP download, failed PWD
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/124
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -39,8 +39,8 @@ PWD
 EPSV
 PASV
 TYPE I
-SIZE 124
-RETR 124
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

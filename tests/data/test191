@@ -21,7 +21,7 @@ ftp
 FTP URL with ?-letters in username and password 
  </name>
  <command>
-"ftp://use%3fr:pass%3fword@%HOSTIP:%FTPPORT/191"
+"ftp://use%3fr:pass%3fword@%HOSTIP:%FTPPORT/%TESTNUMBER"
 </command>
 </client>
 
@@ -33,8 +33,8 @@ PASS pass?word
 PWD
 EPSV
 TYPE I
-SIZE 191
-RETR 191
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

@@ -26,7 +26,7 @@ ftp
 FTP download with multiple replies at once in RETR
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/blalbla/lululul/126
+ftp://%HOSTIP:%FTPPORT/blalbla/lululul/%TESTNUMBER
 </command>
 </client>
 
@@ -40,8 +40,8 @@ CWD blalbla
 CWD lululul
 EPSV
 TYPE I
-SIZE 126
-RETR 126
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

@@ -37,9 +37,9 @@ ftp
 FTP (optional .netrc; user/passwd supplied) dir list PASV
  </name>
  <command>
---netrc-optional --netrc-file log/netrc132 ftp://mary:mark@%HOSTIP:%FTPPORT/
+--netrc-optional --netrc-file log/netrc%TESTNUMBER ftp://mary:mark@%HOSTIP:%FTPPORT/
 </command>
-<file name="log/netrc132" >
+<file name="log/netrc%TESTNUMBER" >
 # the following two lines were created while testing curl
 machine %HOSTIP login user1 password passwd1
 machine %HOSTIP login user2 password passwd2

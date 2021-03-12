@@ -15,7 +15,7 @@ ftp
  <name>
 FTP PASV upload file
  </name>
-<file name="log/test107.txt">
+<file name="log/test%TESTNUMBER.txt">
 data
     to
       see
@@ -24,7 +24,7 @@ works
   so does it?
 </file>
  <command>
-ftp://%HOSTIP:%FTPPORT/107 -T log/test107.txt
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/test%TESTNUMBER.txt
 </command>
 </client>
 
@@ -44,7 +44,7 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-STOR 107
+STOR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

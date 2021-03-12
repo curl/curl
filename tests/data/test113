@@ -21,7 +21,7 @@ ftp
 FTP download, failed login: USER not valid
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/113
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 

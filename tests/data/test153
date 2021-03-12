@@ -81,7 +81,7 @@ crypto
 HTTP with Digest authorization with stale=true
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1530001 -u testuser:testpass --digest http://%HOSTIP:%HTTPPORT/1530002
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -u testuser:testpass --digest http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
 </command>
 </client>
 
@@ -91,31 +91,31 @@ http://%HOSTIP:%HTTPPORT/1530001 -u testuser:testpass --digest http://%HOSTIP:%H
 ^Authorization.*cnonce
 </strip>
 <protocol>
-GET /1530001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /1530001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/1530001", response="f4f83139396995bac665f24a1f1055c7"
+Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/%TESTNUMBER0001", response="f4f83139396995bac665f24a1f1055c7"
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /1530002 HTTP/1.1
+GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /1530002 HTTP/1.1
+GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/1530002", response="f84511b014fdd0ba6494f42871079c32"
+Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/%TESTNUMBER0002", response="f84511b014fdd0ba6494f42871079c32"
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /1530002 HTTP/1.1
+GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="999999", uri="/1530002", cnonce="MTA4MzIy", nc="00000001", qop="auth", response="25291c357671604a16c0242f56721c07", algorithm=MD5
+Authorization: Digest username="testuser", realm="testrealm", nonce="999999", uri="/%TESTNUMBER0002", cnonce="MTA4MzIy", nc="00000001", qop="auth", response="25291c357671604a16c0242f56721c07", algorithm=MD5
 User-Agent: curl/%VERSION
 Accept: */*
 

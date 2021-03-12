@@ -58,14 +58,14 @@ http
 HTTP POST --ntlm to server not requiring any auth at all
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/176 -u auser:apasswd --ntlm -d "junkelijunk"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --ntlm -d "junkelijunk"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol nonewline="yes">
-POST /176 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/%VERSION
@@ -73,7 +73,7 @@ Accept: */*
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
-POST /176 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

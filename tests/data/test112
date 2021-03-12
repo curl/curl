@@ -20,9 +20,9 @@ ftp
 FTP PASV upload resume
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/112 -T log/upload112 -C 40
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/upload%TESTNUMBER -C 40
 </command>
-<file name="log/upload112">
+<file name="log/upload%TESTNUMBER">
 this is the *****crap******** that we're gonna upload
 
 worx?
@@ -37,7 +37,7 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-APPE 112
+APPE %TESTNUMBER
 QUIT
 </protocol>
 <upload>

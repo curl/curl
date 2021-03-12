@@ -21,9 +21,9 @@ ftp
 FTP PASV upload append
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/109 -T log/upload109 --append
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/upload%TESTNUMBER --append
 </command>
-<file name="log/upload109">
+<file name="log/upload%TESTNUMBER">
 Moooooooooooo
  upload this
 </file>
@@ -37,7 +37,7 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-APPE 109
+APPE %TESTNUMBER
 QUIT
 </protocol>
 <upload>

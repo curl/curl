@@ -21,9 +21,9 @@ ftp
 FTP PORT upload with CWD
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/CWD/STOR/RETR/108 -T log/upload108 -P -
+ftp://%HOSTIP:%FTPPORT/CWD/STOR/RETR/%TESTNUMBER -T log/upload%TESTNUMBER -P -
 </command>
-<file name="log/upload108">
+<file name="log/upload%TESTNUMBER">
 Moooooooooooo
  upload this
 </file>
@@ -45,7 +45,7 @@ CWD STOR
 CWD RETR
 PORT 127,0,0,1,5,109
 TYPE I
-STOR 108
+STOR %TESTNUMBER
 QUIT
 </protocol>
 <upload>

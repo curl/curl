@@ -25,7 +25,7 @@ ftp
 FTP with --ftp-create-dirs (failing CWD)
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/first/dir/here/147 --ftp-create-dirs
+ftp://%HOSTIP:%FTPPORT/first/dir/here/%TESTNUMBER --ftp-create-dirs
 </command>
 </client>
 
@@ -47,8 +47,8 @@ CWD dir
 CWD here
 EPSV
 TYPE I
-SIZE 147
-RETR 147
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

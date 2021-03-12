@@ -60,7 +60,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/159 -u testuser:testpass --ntlm -0
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --ntlm -0
 </command>
 <precheck>
 chkhostname curlhost
@@ -70,7 +70,7 @@ chkhostname curlhost
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /159 HTTP/1.0
+GET /%TESTNUMBER HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/%VERSION

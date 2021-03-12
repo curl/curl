@@ -22,7 +22,7 @@ ftp
 FTP download, failed TYPE
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/117
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 

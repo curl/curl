@@ -21,7 +21,7 @@ ftp
 FTP response 530 after PASS, temporarily not allowed access
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/195
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 

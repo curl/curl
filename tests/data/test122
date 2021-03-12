@@ -25,7 +25,7 @@ ftp
 FTP download resume with whole file already downloaded
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/122 -C 5
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -C 5
 </command>
 </client>
 
@@ -38,7 +38,7 @@ PWD
 EPSV
 PASV
 TYPE I
-SIZE 122
+SIZE %TESTNUMBER
 QUIT
 </protocol>
 </verify>
