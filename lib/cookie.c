@@ -105,6 +105,8 @@ Example set of cookies:
 #include "curl_memory.h"
 #include "memdebug.h"
 
+static void strstore(char **str, const char *newstr);
+
 static void freecookie(struct Cookie *co)
 {
   free(co->expirestr);
@@ -197,8 +199,7 @@ static bool pathmatch(const char *cookie_path, const char *request_uri)
 
   /* #-fragments are already cut off! */
   if(0 == strlen(uri_path) || uri_path[0] != '/') {
-    free(uri_path);
-    uri_path = strdup("/");
+    strstore(&uri_path, "/");
     if(!uri_path)
       return FALSE;
   }
@@ -333,8 +334,7 @@ static char *sanitize_cookie_path(const char *cookie_path)
   /* RFC6265 5.2.4 The Path Attribute */
   if(new_path[0] != '/') {
     /* Let cookie-path be the default-path. */
-    free(new_path);
-    new_path = strdup("/");
+    strstore(&new_path, "/");
     return new_path;
   }
 
