@@ -35,7 +35,7 @@ proxy
 HTTPS GET with failed proxy auth (CONNECT 1.0)
  </name>
  <command>
-https://test.anything.really.com:94 --proxy1.0 %HOSTIP:%HTTPPORT
+https://test.anything.really.com:%TESTNUMBER --proxy1.0 %HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -46,8 +46,8 @@ https://test.anything.really.com:94 --proxy1.0 %HOSTIP:%HTTPPORT
 56
 </errorcode>
 <protocol>
-CONNECT test.anything.really.com:94 HTTP/1.0
-Host: test.anything.really.com:94
+CONNECT test.anything.really.com:%TESTNUMBER HTTP/1.0
+Host: test.anything.really.com:%TESTNUMBER
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 

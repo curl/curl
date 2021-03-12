@@ -28,7 +28,7 @@ http
 --write-out test
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/15 --write-out "%{url_effective} %{http_code} %{size_download}\n"
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER --write-out "%{url_effective} %{http_code} %{size_download}\n"
 </command>
 </client>
 
@@ -42,10 +42,10 @@ Fake: yes
 Content-Length: 26
 
 Repeated nonsense-headers
-http://%HOSTIP:%HTTPPORT/want/15 200 26
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER 200 26
 </stdout>
 <protocol>
-GET /want/15 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

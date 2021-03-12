@@ -26,9 +26,9 @@ http
 simple HTTP PUT from file
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/10 -T log/test10.txt
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T log/test%TESTNUMBER.txt
 </command>
-<file name="log/test10.txt">
+<file name="log/test%TESTNUMBER.txt">
 Weird
      file
          to
@@ -44,7 +44,7 @@ the
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-PUT /we/want/10 HTTP/1.1
+PUT /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

@@ -42,7 +42,7 @@ http
 HTTP GET with bad chunked Transfer-Encoding
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/36
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -53,7 +53,7 @@ http://%HOSTIP:%HTTPPORT/36
 56
 </errorcode>
 <protocol>
-GET /36 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

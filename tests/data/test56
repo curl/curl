@@ -38,14 +38,14 @@ header "Transfer-Encoding: chunked"
 #
  </stdin>
  <command>
--K - %HOSTIP:%HTTPPORT/that.site.com/56
+-K - %HOSTIP:%HTTPPORT/that.site.com/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-POST /that.site.com/56 HTTP/1.1
+POST /that.site.com/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: %repeat[99999 x a]%
 Accept: */*

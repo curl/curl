@@ -25,14 +25,14 @@ http
 specify more -o than URLs
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/26 -o - -o -
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -o - -o -
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /want/26 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
