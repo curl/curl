@@ -44,7 +44,7 @@ LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/921 --mail-rcpt recipient@example.com --mail-from sender@example.com -u testuser:testpass --sasl-ir -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u testuser:testpass --sasl-ir -T -
 </command>
 <precheck>
 chkhostname curlhost
@@ -55,7 +55,7 @@ chkhostname curlhost
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 921
+EHLO %TESTNUMBER
 AUTH NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
 MAIL FROM:<sender@example.com>

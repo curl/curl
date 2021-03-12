@@ -24,13 +24,13 @@ DELAY TYPE 2
 ftp
 </server>
 <tool>
-lib1501
+lib%TESTNUMBER
 </tool>
  <name>
 FTP with multi interface and slow LIST response 
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1501/
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER/
 </command>
 </client>
 # Verify data after the test has been "shot"
@@ -42,7 +42,7 @@ ftp://%HOSTIP:%FTPPORT/1501/
 USER anonymous
 PASS ftp@example.com
 PWD
-CWD 1501
+CWD %TESTNUMBER
 EPSV
 TYPE A
 LIST

@@ -35,10 +35,10 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify that the %TESTNUMBER has been resolved to 1183
+# Verify that the %TESTNUMBER has been resolved to %TESTNUMBER
 <verify>
 <protocol>
-GET /1183 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

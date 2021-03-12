@@ -35,7 +35,7 @@ http
 HTTP GET special path with --request-target
  </name>
  <command>
---request-target "XXX" "http://%HOSTIP:%HTTPPORT/" -H "Testno: 1298"
+--request-target "XXX" "http://%HOSTIP:%HTTPPORT/" -H "Testno: %TESTNUMBER"
 </command>
 </client>
 
@@ -47,7 +47,7 @@ GET XXX HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Testno: 1298
+Testno: %TESTNUMBER
 
 </protocol>
 </verify>

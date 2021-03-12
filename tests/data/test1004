@@ -36,7 +36,7 @@ http
 HTTP GET with empty proxy
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1004 --proxy ""
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --proxy ""
 </command>
 </client>
 
@@ -44,7 +44,7 @@ http://%HOSTIP:%HTTPPORT/1004 --proxy ""
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1004 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

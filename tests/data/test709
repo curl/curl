@@ -40,7 +40,7 @@ http_proxy=socks5://%HOSTIP:%SOCKSPORT
 HTTP GET via SOCKS5 set in http_proxy environment variable
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/709
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -48,7 +48,7 @@ http://%HOSTIP:%HTTPPORT/709
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /709 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

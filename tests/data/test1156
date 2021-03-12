@@ -52,7 +52,7 @@ body
 http
 </server>
 <tool>
-lib1156
+lib%TESTNUMBER
 </tool>
  <name>
 HTTP resume/range fail range-error content-range combinations

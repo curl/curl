@@ -19,7 +19,7 @@ IMAP CONNECT_ONLY option
  </name>
 
 <command>
-imap://%HOSTIP:%IMAPPORT/660
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER
 </command>
 
 </client>

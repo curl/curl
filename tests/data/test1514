@@ -24,13 +24,13 @@ Connection: close
 http
 </server>
 <tool>
-lib1514
+lib%TESTNUMBER
 </tool>
 <name>
 HTTP POST with read callback and unknown data size
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/1514
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -39,7 +39,7 @@ http://%HOSTIP:%HTTPPORT/1514
 # Content-Length header is not present
 # Transfer-Encoding header is added automatically
 <protocol>
-POST /1514 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked

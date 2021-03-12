@@ -33,13 +33,13 @@ Long: %repeat[100001 x A]%
 http
 </server>
 <tool>
-lib1556
+lib%TESTNUMBER
 </tool>
  <name>
 send long HTTP headers to header callback
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1556
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -47,7 +47,7 @@ http://%HOSTIP:%HTTPPORT/1556
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1556 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

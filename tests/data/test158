@@ -24,7 +24,7 @@ http
 HTTP multipart formpost with only a 100 reply
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/158 -F name=daniel
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F name=daniel
 </command>
 </client>
 
@@ -35,7 +35,7 @@ http://%HOSTIP:%HTTPPORT/158 -F name=daniel
 ^-----------------------.*
 </strip>
 <protocol>
-POST /158 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

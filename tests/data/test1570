@@ -33,7 +33,7 @@ FTP first type=D then regular URL
 lib1569
 </tool>
 <command>
-"ftp://%HOSTIP:%FTPPORT/1570;type=D" ftp://%HOSTIP:%FTPPORT/1570
+"ftp://%HOSTIP:%FTPPORT/%TESTNUMBER;type=D" ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 
 </client>
@@ -50,8 +50,8 @@ TYPE A
 NLST
 PASV
 TYPE I
-SIZE 1570
-RETR 1570
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

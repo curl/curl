@@ -39,7 +39,7 @@ pop3
 POP3 external authentication with initial response without credentials
  </name>
  <command>
-'pop3://;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/886' --sasl-ir
+'pop3://;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/%TESTNUMBER' --sasl-ir
 </command>
 </client>
 
@@ -49,7 +49,7 @@ POP3 external authentication with initial response without credentials
 <protocol>
 CAPA
 AUTH EXTERNAL =
-RETR 886
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

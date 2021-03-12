@@ -50,13 +50,13 @@ http
 http
 </features>
 <tool>
-lib1511
+lib%TESTNUMBER
 </tool>
 <name>
 HTTP GET time conditions in repeated requests
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/1511
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

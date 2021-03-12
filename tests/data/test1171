@@ -48,7 +48,7 @@ http
 HTTP GET transfer-encoding with blanked Connection:
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1171 --tr-encoding -H "Connection;"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --tr-encoding -H "Connection;"
 </command>
 </client>
 
@@ -56,7 +56,7 @@ http://%HOSTIP:%HTTPPORT/1171 --tr-encoding -H "Connection;"
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1171 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

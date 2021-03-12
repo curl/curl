@@ -42,20 +42,20 @@ MyCoolTrailerHeader: amazingtrailer
 http
 </server>
 <tool>
-lib1540
+lib%TESTNUMBER
 </tool>
  <name>
 chunked with trailers and pausing the receive
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1540
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1540 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

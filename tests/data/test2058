@@ -72,9 +72,9 @@ proxy
 HTTP POST --digest with PUT, resumed upload, modified method and SHA-256
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/2058 -u auser:apasswd --digest -T log/2058 -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -T log/%TESTNUMBER -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
 </command>
-<file name="log/2058">
+<file name="log/%TESTNUMBER">
 test
 </file>
 </client>
@@ -82,7 +82,7 @@ test
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET http://%HOSTIP:%HTTPPORT/2058 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Content-Range: bytes 2-4/5
 User-Agent: curl/%VERSION
@@ -90,9 +90,9 @@ Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
 
-GET http://%HOSTIP:%HTTPPORT/2058 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/2058", response="fbed69f9f3fd304c8f1acb1a43eb32688b933c0e28055c16b926cbcec070aeed", algorithm=SHA-256
+Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="fbed69f9f3fd304c8f1acb1a43eb32688b933c0e28055c16b926cbcec070aeed", algorithm=SHA-256
 Content-Range: bytes 2-4/5
 User-Agent: curl/%VERSION
 Accept: */*

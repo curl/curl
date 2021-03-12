@@ -39,7 +39,7 @@ http
 HTTP downgrade to HTTP/1.0 on second request
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/1074 http://%HOSTIP:%HTTPPORT/wantmore/10740001
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/wantmore/%TESTNUMBER0001
 </command>
 </client>
 
@@ -60,12 +60,12 @@ surprise2
 </stdout>
 
 <protocol>
-GET /want/1074 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /wantmore/10740001 HTTP/1.0
+GET /wantmore/%TESTNUMBER0001 HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

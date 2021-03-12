@@ -15,7 +15,7 @@ pop3
 POP3 with URL-encoded CR LF in the URL
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/%0d%0a/875
+pop3://%HOSTIP:%POP3PORT/%0d%0a/%TESTNUMBER
 </command>
 </client>
 

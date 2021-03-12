@@ -39,7 +39,7 @@ SMTP CRAM-MD5 authentication with SASL downgrade
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/935 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>
 
@@ -47,7 +47,7 @@ smtp://%HOSTIP:%SMTPPORT/935 --mail-rcpt recipient@example.com --mail-from sende
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 935
+EHLO %TESTNUMBER
 AUTH CRAM-MD5
 *
 AUTH PLAIN

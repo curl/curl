@@ -33,14 +33,14 @@ Access a non-proxied host with using the combination of http_proxy env var and -
 http_proxy=http://dummy:%PROXYPORT/
 </setenv>
 <command>
-http://user:secret@%HOSTIP:%HTTPPORT/1250 --noproxy %HOSTIP --max-time 5
+http://user:secret@%HOSTIP:%HTTPPORT/%TESTNUMBER --noproxy %HOSTIP --max-time 5
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1250 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dXNlcjpzZWNyZXQ=
 User-Agent: curl/%VERSION

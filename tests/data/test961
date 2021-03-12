@@ -32,7 +32,7 @@ perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(lan
 SMTP external VRFY without SMTPUTF8 support - UTF-8 based recipient (host part only)
  </name>
 <command>
-smtp://%HOSTIP:%SMTPPORT/961 --mail-rcpt user@åäö.se
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt user@åäö.se
 </command>
 </client>
 
@@ -44,7 +44,7 @@ smtp://%HOSTIP:%SMTPPORT/961 --mail-rcpt user@åäö.se
 56
 </errorcode>
 <protocol>
-EHLO 961
+EHLO %TESTNUMBER
 VRFY user@åäö.se
 QUIT
 </protocol>

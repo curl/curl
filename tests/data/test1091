@@ -24,7 +24,7 @@ ftp
 FTP URL with type=i
  </name>
  <command>
-"ftp://%HOSTIP:%FTPPORT/%2ftmp/moo/1091;type=i" --use-ascii
+"ftp://%HOSTIP:%FTPPORT/%2ftmp/moo/%TESTNUMBER;type=i" --use-ascii
 </command>
 </client>
 
@@ -39,8 +39,8 @@ CWD tmp
 CWD moo
 EPSV
 TYPE I
-SIZE 1091
-RETR 1091
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

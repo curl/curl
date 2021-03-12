@@ -18,9 +18,9 @@ ftp
 FTP with multiple uploads
  </name>
  <command>
--T log/upload149 ftp://%HOSTIP:%FTPPORT/dir1/149 -T log/upload149 ftp://%HOSTIP:%FTPPORT/dir2/149
+-T log/upload%TESTNUMBER ftp://%HOSTIP:%FTPPORT/dir1/%TESTNUMBER -T log/upload%TESTNUMBER ftp://%HOSTIP:%FTPPORT/dir2/%TESTNUMBER
 </command>
-<file name="log/upload149">
+<file name="log/upload%TESTNUMBER">
 send away this contents
 </file>
 </client>
@@ -39,14 +39,14 @@ PWD
 CWD dir1
 EPSV
 TYPE I
-STOR 149
+STOR %TESTNUMBER
 CWD /
 CWD dir2
 EPSV
-STOR 149
+STOR %TESTNUMBER
 QUIT
 </protocol>
-<file name="log/upload149">
+<file name="log/upload%TESTNUMBER">
 send away this contents
 </file>
 </verify>

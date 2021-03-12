@@ -39,7 +39,7 @@ pop3
 POP3 OAuth 2.0 (XOAUTH2) authentication with initial response
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/874 -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir
 </command>
 </client>
 
@@ -49,7 +49,7 @@ pop3://%HOSTIP:%POP3PORT/874 -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir
 <protocol>
 CAPA
 AUTH XOAUTH2 dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB
-RETR 874
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

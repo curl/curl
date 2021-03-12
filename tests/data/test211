@@ -24,7 +24,7 @@ ftp
 Get two FTP files with no remote EPSV support
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/a/path/211 ftp://%HOSTIP:%FTPPORT/a/path/211
+ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER
 </command>
 <stdout>
 data blobb
@@ -43,11 +43,11 @@ CWD path
 EPSV
 PASV
 TYPE I
-SIZE 211
-RETR 211
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 PASV
-SIZE 211
-RETR 211
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

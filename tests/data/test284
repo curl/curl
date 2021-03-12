@@ -51,7 +51,7 @@ tftp
 TFTP retrieve of boundary case 512 byte file
  </name>
  <command>
-tftp://%HOSTIP:%TFTPPORT//284
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER
 </command>
 </client>
 
@@ -64,7 +64,7 @@ mode: octet
 tsize: 0
 blksize: 512
 timeout: 6
-filename: /284
+filename: /%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

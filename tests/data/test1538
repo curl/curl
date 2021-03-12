@@ -17,7 +17,7 @@ verbose logs
 none
 </server>
 <tool>
-lib1538
+lib%TESTNUMBER
 </tool>
 
 <name>

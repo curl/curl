@@ -32,7 +32,7 @@ This is not the real page either!
 HTTP/1.1 302 Thanks for this, but we want to redir you!
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Location: /1100
+Location: /%TESTNUMBER
 Content-Length: 34
 
 This is not the real page either!
@@ -48,7 +48,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4Ab
 HTTP/1.1 302 Thanks for this, but we want to redir you!
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
-Location: /1100
+Location: /%TESTNUMBER
 Content-Length: 34
 
 HTTP/1.1 200 Thanks for this! swsclose
@@ -80,7 +80,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/1100 -u testuser:testpass --ntlm -L -d "stuff to send away" 
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --ntlm -L -d "stuff to send away" 
 </command>
 <precheck>
 chkhostname curlhost
@@ -89,7 +89,7 @@ chkhostname curlhost
 
 # Verify data after the test has been "shot"
 <verify>
-POST /1100 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/%VERSION
@@ -97,7 +97,7 @@ Accept: */*
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
-POST /1100 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
 User-Agent: curl/%VERSION
@@ -105,7 +105,7 @@ Accept: */*
 Content-Length: 18
 Content-Type: application/x-www-form-urlencoded
 
-stuff to send awayGET /1100 HTTP/1.1
+stuff to send awayGET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

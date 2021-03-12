@@ -31,14 +31,14 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib559
+lib%TESTNUMBER
 </tool>
 
 <name>
 use tiny CURLOPT_BUFFERSIZE
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/559
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

@@ -25,14 +25,14 @@ proxy
 </features>
 # tool is what to use instead of 'curl'
 <tool>
-lib504
+lib%TESTNUMBER
 </tool>
 
  <name>
 simple multi through local proxy without listener
  </name>
  <command>
-http://%HOSTIP:%NOLISTENPORT/504 %HOSTIP:%NOLISTENPORT
+http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER %HOSTIP:%NOLISTENPORT
 </command>
 </client>
 

@@ -13,7 +13,7 @@ CURLOPT_FOLLOWLOCATION
 <data>
 HTTP/1.1 302 OK
 Content-Length: 6
-Location: /15670002
+Location: /%TESTNUMBER0002
 
 -foo-
 </data>
@@ -36,32 +36,32 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib1567
+lib%TESTNUMBER
 </tool>
 
  <name>
 re-run redirected transfer without setting CURLU URL again
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1567
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 <verify>
 <protocol>
-GET /1567 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /15670002 HTTP/1.1
+GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /1567 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /15670002 HTTP/1.1
+GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
