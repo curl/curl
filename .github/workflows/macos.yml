@@ -55,6 +55,11 @@ jobs:
           configure: --enable-debug --disable-shared --disable-threaded-resolver
           tflags: -n -t --shallow=25 !FTP
           macosx-version-min: 10.9
+        - name: torture-ftp
+          install: nghttp2 openssl
+          configure: --enable-debug --disable-shared --disable-threaded-resolver
+          tflags: -n -t --shallow=20 FTP
+          macosx-version-min: 10.9
         - name: macOS 10.15
           install: nghttp2 libmetalink libssh2
           configure: --enable-debug --disable-ldap
