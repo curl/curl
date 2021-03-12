@@ -36,6 +36,12 @@
 static void dump(const char *timebuf, const char *text,
                  FILE *stream, const unsigned char *ptr, size_t size,
                  trace tracetype, curl_infotype infotype);
+static void dump_binary(const struct GlobalConfig* config, 
+                        const unsigned char* ptr, 
+                        size_t size, 
+                        trace tracetype, 
+                        curl_infotype infotype);
+static bool open_dump_stream(struct GlobalConfig* config);
 
 /*
 ** callback for CURLOPT_DEBUGFUNCTION
@@ -91,6 +97,9 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
 
   if(!output) {
     warnf(config, "Failed to create/open output");
+    return 0;
+  }
+  if(!open_dump_stream(config)) {
     return 0;
   }
 
@@ -214,6 +223,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
 
   dump(timebuf, text, output, (unsigned char *) data, size, config->tracetype,
        type);
+  dump_binary(config, data, size, config->tracetype, type);
   return 0;
 }
 
@@ -279,4 +289,106 @@ static void dump(const char *timebuf, const char *text,
     fputc('\n', stream); /* newline */
   }
   fflush(stream);
+}
+
+static void dump_binary(const struct GlobalConfig* config, const unsigned char* ptr, size_t size, trace tracetype, curl_infotype infotype) {
+  if (!config) {
+      return;
+  }
+  if (!config->dump_enable) {
+    return;
+  }
+  
+  if (!ptr) {
+      return;
+  }
+  if (size == 0) {
+      return;
+  }
+  switch (infotype) {
+  case CURLINFO_HEADER_OUT:
+      fwrite(ptr, size, 1, config->dump_request_header_stream);
+      fwrite(ptr, size, 1, config->dump_request_stream);
+    break;
+  case CURLINFO_DATA_OUT:
+      fwrite(ptr, size, 1, config->dump_request_body_stream);
+      fwrite(ptr, size, 1, config->dump_request_stream);
+      break;
+  case CURLINFO_HEADER_IN:
+      fwrite(ptr, size, 1, config->dump_response_header_stream);
+      fwrite(ptr, size, 1, config->dump_response_stream);
+    break;
+  case CURLINFO_DATA_IN:
+      fwrite(ptr, size, 1, config->dump_response_body_stream);
+      fwrite(ptr, size, 1, config->dump_response_stream);
+      break;
+
+   default:
+      break;
+  }
+}
+
+static bool open_dump_stream(struct GlobalConfig* config)
+{
+  if (!config) {
+      return FALSE;
+  }
+  if(!config->dump_enable) {
+    return TRUE;
+  }
+  //full request
+  if (!config->dump_request_stream) {
+      config->dump_request_stream = fopen(config->dump_request_filename, "wb");
+      config->dump_request_fopened = TRUE;
+      if (!config->dump_request_stream) {
+          warnf(config, "Failed to create/open dump request output");
+          return FALSE;
+      }
+  }
+  //request header
+  if (!config->dump_request_header_stream) {
+      config->dump_request_header_stream = fopen(config->dump_request_header_filename, "wb");
+      config->dump_request_header_fopened = TRUE;
+      if (!config->dump_request_header_stream) {
+          warnf(config, "Failed to create/open dump request-header output");
+          return FALSE;
+      }
+  }
+  //request body
+  if (!config->dump_request_body_stream) {
+      config->dump_request_body_stream = fopen(config->dump_request_body_filename, "wb");
+      config->dump_request_body_fopened = TRUE;
+      if (!config->dump_request_body_stream) {
+          warnf(config, "Failed to create/open dump request-body output");
+          return FALSE;
+      }
+  }
+  //full response
+  if (!config->dump_response_stream) {
+      config->dump_response_stream = fopen(config->dump_response_filename, "wb");
+      config->dump_response_fopened = TRUE;
+      if (!config->dump_response_stream) {
+          warnf(config, "Failed to create/open dump response output");
+          return FALSE;
+      }
+  }
+  //response header
+  if (!config->dump_response_header_stream) {
+      config->dump_response_header_stream = fopen(config->dump_response_header_filename, "wb");
+      config->dump_response_header_fopened = TRUE;
+      if (!config->dump_response_header_stream) {
+          warnf(config, "Failed to create/open dump response-header output");
+          return FALSE;
+      }
+  }
+  //response body
+  if (!config->dump_response_body_stream) {
+      config->dump_response_body_stream = fopen(config->dump_response_body_filename, "wb");
+      config->dump_response_body_fopened = TRUE;
+      if (!config->dump_response_body_stream) {
+          warnf(config, "Failed to create/open dump response-body output");
+          return FALSE;
+      }
+  }
+  return TRUE;
 }

@@ -187,6 +187,43 @@ static CURLcode main_init(struct GlobalConfig *config)
   return result;
 }
 
+static void free_dump_binary_related(struct GlobalConfig *config)
+{
+  Curl_safefree(config->dump_request_filename);
+  Curl_safefree(config->dump_request_header_filename);
+  Curl_safefree(config->dump_request_body_filename);
+
+  Curl_safefree(config->dump_response_filename);
+  Curl_safefree(config->dump_response_header_filename);
+  Curl_safefree(config->dump_response_body_filename);
+  if (config->dump_enable)
+  {
+    if(config->dump_request_fopened && config->dump_request_stream)
+      fclose(config->dump_request_stream);
+    config->dump_request_stream = NULL;
+
+    if(config->dump_request_header_fopened && config->dump_request_header_stream)
+      fclose(config->dump_request_header_stream);
+    config->dump_request_header_stream = NULL;
+    
+    if(config->dump_request_body_fopened && config->dump_request_body_stream)
+      fclose(config->dump_request_body_stream);
+    config->dump_request_body_stream = NULL;
+    
+    if(config->dump_response_fopened && config->dump_response_stream)
+      fclose(config->dump_response_stream);
+    config->dump_response_stream = NULL;
+
+    if(config->dump_response_header_fopened && config->dump_response_header_stream)
+      fclose(config->dump_response_header_stream);
+    config->dump_response_header_stream = NULL;
+    
+    if(config->dump_response_body_fopened && config->dump_response_body_stream)
+      fclose(config->dump_response_body_stream);
+    config->dump_response_body_stream = NULL;
+  }
+}
+
 static void free_globalconfig(struct GlobalConfig *config)
 {
   Curl_safefree(config->trace_dump);
@@ -200,6 +237,7 @@ static void free_globalconfig(struct GlobalConfig *config)
   config->trace_stream = NULL;
 
   Curl_safefree(config->libcurl);
+  free_dump_binary_related(config);
 }
 
 /*

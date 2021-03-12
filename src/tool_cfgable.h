@@ -307,6 +307,25 @@ struct GlobalConfig {
   char *trace_dump;               /* file to dump the network trace to */
   FILE *trace_stream;
   bool trace_fopened;
+  bool dump_enable; /* Whether enable */
+  char *dump_request_filename; /* full request */
+  FILE *dump_request_stream;
+  bool dump_request_fopened;
+  char *dump_request_header_filename; /* only request header */
+  FILE *dump_request_header_stream;
+  bool dump_request_header_fopened;
+  char *dump_request_body_filename; /* only request body */
+  FILE *dump_request_body_stream;
+  bool dump_request_body_fopened;
+  char *dump_response_filename; /* full response */
+  FILE *dump_response_stream;
+  bool dump_response_fopened;
+  char *dump_response_header_filename; /* only response header */
+  FILE *dump_response_header_stream;
+  bool dump_response_header_fopened;
+  char *dump_response_body_filename; /* only response body */
+  FILE *dump_response_body_stream;
+  bool dump_response_body_fopened;
   trace tracetype;
   bool tracetime;                 /* include timestamp? */
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */

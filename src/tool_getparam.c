@@ -125,6 +125,7 @@ static const struct LongShort aliases[]= {
          /* 'eprt' made like this to make --no-eprt and --eprt to work
              although --disable-eprt is the documented option */
   {"*~", "xattr",                    ARG_BOOL},
+  {"*<", "dump-bin",                 ARG_FILENAME},
   {"$a", "ftp-ssl",                  ARG_BOOL},
          /* 'ftp-ssl' deprecated name since 7.20.0 */
   {"$a", "ssl",                      ARG_BOOL},
@@ -339,6 +340,7 @@ static const struct LongShort aliases[]= {
   {"#m", "progress-meter",           ARG_BOOL},
   {":",  "next",                     ARG_NONE},
 };
+static ParameterError get_dump_filename(const char* nextarg,struct GlobalConfig* global);
 
 /* Split the argument of -E to 'certname' and 'passphrase' separated by colon.
  * We allow ':' and '\' to be escaped by '\' so that we can use certificate
@@ -860,6 +862,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case '~': /* --xattr */
         config->xattr = toggle;
+        break;
+      case '<': /* --dump-bin */
+        if(get_dump_filename(nextarg,global) != PARAM_OK) {
+          return PARAM_NO_MEM;
+        }
         break;
       case '@': /* the URL! */
       {
@@ -2162,9 +2169,19 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         global->trace_dump = strdup("%");
         if(!global->trace_dump)
           return PARAM_NO_MEM;
-        if(global->tracetype && (global->tracetype != TRACE_PLAIN))
+        if (global->tracetype && (global->tracetype != TRACE_PLAIN)) {
+          if (global->dump_enable) {
+            global->dump_enable = FALSE;
+            Curl_safefree(global->dump_request_filename);
+            Curl_safefree(global->dump_request_header_filename);
+            Curl_safefree(global->dump_request_body_filename);
+            Curl_safefree(global->dump_response_filename);
+            Curl_safefree(global->dump_response_header_filename);
+            Curl_safefree(global->dump_response_body_filename);
+          }
           warnf(global,
-                "-v, --verbose overrides an earlier trace/verbose option\n");
+                "-v, --verbose overrides an earlier trace/verbose/dump option\n");
+        }
         global->tracetype = TRACE_PLAIN;
       }
       else
@@ -2386,4 +2403,119 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
 
   curlx_unicodefree(orig_opt);
   return result;
+}
+
+static ParameterError get_dump_filename(const char* nextarg,struct GlobalConfig* global)
+{
+  const char* basename;
+  int basename_len;
+  char* full_req_filename;
+  char* req_header_filename;
+  char* req_body_filename;
+  char* full_resp_filename;
+  char* resp_header_filename;
+  char* resp_body_filename;
+  char* trace_filename;
+  if (!nextarg || !global)
+  {
+    return PARAM_NO_MEM;
+  }
+  
+  basename = nextarg;
+  if (!basename)
+  {
+    return PARAM_NO_MEM;
+  }
+  
+  basename_len = strlen(basename);
+  if(basename_len==0)
+  {
+    return PARAM_NO_MEM;
+  }
+  
+  full_req_filename = calloc(1,basename_len + sizeof(".req"));
+  if(!full_req_filename)
+  {
+      return PARAM_NO_MEM;
+  }
+
+  req_header_filename = calloc(1,basename_len + sizeof(".reqheader"));
+  if(!req_header_filename)
+  {
+      return PARAM_NO_MEM;
+  }
+
+  req_body_filename = calloc(1,basename_len + sizeof(".reqbody"));
+  if(!req_body_filename)
+  {
+      return PARAM_NO_MEM;
+  }
+ 
+  full_resp_filename = calloc(1,basename_len + sizeof(".resp"));
+  if(!full_resp_filename)
+  {
+      return PARAM_NO_MEM;
+  }
+
+  resp_header_filename = calloc(1,basename_len + sizeof(".respheader"));
+  if(!resp_header_filename)
+  {
+      return PARAM_NO_MEM;
+  }
+
+  resp_body_filename = calloc(1,basename_len + sizeof(".respbody"));
+  if(!resp_body_filename)
+  {
+      return PARAM_NO_MEM;
+  }
+ 
+  trace_filename = calloc(1,basename_len + sizeof(".trace"));
+  if (!trace_filename)
+  {
+      return PARAM_NO_MEM;
+  }
+  
+
+  /*request*/
+  memcpy(full_req_filename,basename,basename_len);
+  memcpy(full_req_filename+basename_len,".req",sizeof(".req")-1);
+
+  memcpy(req_header_filename,basename,basename_len);
+  memcpy(req_header_filename+basename_len,".reqheader",sizeof(".reqheader")-1);
+
+  memcpy(req_body_filename,basename,basename_len);
+  memcpy(req_body_filename+basename_len,".reqbody",sizeof(".reqbody")-1);
+
+  /*response*/
+  memcpy(full_resp_filename,basename,basename_len);
+  memcpy(full_resp_filename+basename_len,".resp",sizeof(".resp")-1);
+
+  memcpy(resp_header_filename,basename,basename_len);
+  memcpy(resp_header_filename+basename_len,".respheader",sizeof(".respheader")-1);
+
+  memcpy(resp_body_filename,basename,basename_len);
+  memcpy(resp_body_filename+basename_len,".respbody",sizeof(".respbody")-1);
+  
+  /*trace*/
+  memcpy(trace_filename,basename,basename_len);
+  memcpy(trace_filename+basename_len,".trace",sizeof(".trace")-1);
+
+  if (global->tracetype && (global->tracetype != TRACE_BIN))
+  {
+      warnf(global, "--dump-bin overrides an earlier trace/verbose option\n");
+  }
+
+  global->dump_request_filename = full_req_filename;
+  global->dump_request_header_filename = req_header_filename;
+  global->dump_request_body_filename = req_body_filename;
+
+  global->dump_response_filename = full_resp_filename;
+  global->dump_response_header_filename = resp_header_filename;
+  global->dump_response_body_filename = resp_body_filename;
+  
+  global->trace_dump = trace_filename;
+  
+  global->tracetype = TRACE_BIN;
+  global->dump_enable = TRUE;
+  return PARAM_OK;
 }
