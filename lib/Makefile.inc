@@ -95,6 +95,7 @@ LIB_CFILES =         \
   altsvc.c           \
   amigaos.c          \
   asyn-ares.c        \
+  asyn-gai.c         \
   asyn-thread.c      \
   base64.c           \
   c-hyper.c          \

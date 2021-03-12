@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 19
+# serial 20
 
 dnl CURL_CHECK_OPTION_THREADED_RESOLVER
 dnl -------------------------------------------------
@@ -47,6 +47,40 @@ AC_HELP_STRING([--disable-threaded-resolver],[Disable threaded resolver]),
       ;;
   esac
   AC_MSG_RESULT([$want_thres])
+])
+
+dnl CURL_CHECK_OPTION_ASYNCH_RESOLVER
+dnl -------------------------------------------------
+dnl Verify if configure has been invoked with option
+dnl --enable-asynch-resolver or --disable-asynch-resolver, and
+dnl set shell variable want_agres as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_ASYNCH_RESOLVER], [
+  AC_MSG_CHECKING([whether to enable the asynch resolver])
+  OPT_AGRES="default"
+  AC_ARG_ENABLE(asynch_resolver,
+AC_HELP_STRING([--enable-asynch-resolver],[Enable asynch resolver])
+AC_HELP_STRING([--disable-asynch-resolver],[Disable asynch resolver]),
+  OPT_AGRES=$enableval)
+  case "$OPT_AGRES" in
+    no)
+      dnl --disable-asynch-resolver option used
+      want_agres="no"
+      ;;
+    *)
+      dnl configure option not specified
+      want_agres="yes"
+      if test "$curl_cv_func_getaddrinfo_a" = "yes" \
+          -a "$want_thres" != "yes"; then
+        dnl finally asynch resolver will be used
+        want_thres=no
+        AC_DEFINE(USE_AGRES, 1, [Define to enable asynch getaddrinfo support])
+        AC_SUBST([USE_AGRES], [1])
+        curl_res_msg="asynch getaddrinfo"
+      fi
+      ;;
+  esac
+  AC_MSG_RESULT([$want_agres])
 ])
 
 dnl CURL_CHECK_OPTION_ARES
@@ -80,7 +114,7 @@ AC_HELP_STRING([--disable-ares],[Disable c-ares for DNS lookups]),
         want_ares_path="$enableval"
       fi
       ;;
-  esac
+  esac  
   AC_MSG_RESULT([$want_ares])
 ])
 

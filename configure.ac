@@ -151,7 +151,7 @@ dnl initialize all the info variables
     curl_gss_msg="no      (--with-gssapi)"
   curl_gsasl_msg="no      (--with-gsasl)"
 curl_tls_srp_msg="no      (--enable-tls-srp)"
-    curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
+    curl_res_msg="default (--enable-ares / --enable-threaded-resolver / --enable-asynch-resolver)"
    curl_ipv6_msg="no      (--enable-ipv6)"
 curl_unix_sockets_msg="no      (--enable-unix-sockets)"
     curl_idn_msg="no      (--with-{libidn2,winidn})"
@@ -4460,6 +4460,7 @@ CURL_CHECK_FUNC_FREEIFADDRS
 CURL_CHECK_FUNC_FSETXATTR
 CURL_CHECK_FUNC_FTRUNCATE
 CURL_CHECK_FUNC_GETADDRINFO
+CURL_CHECK_FUNC_GETADDRINFO_A
 CURL_CHECK_FUNC_GAI_STRERROR
 CURL_CHECK_FUNC_GETHOSTBYADDR
 CURL_CHECK_FUNC_GETHOSTBYADDR_R
@@ -4621,6 +4622,7 @@ AM_CONDITIONAL(BUILD_LIBHOSTNAME, test x$build_libhostname = xyes)
 
 if test "x$want_ares" != xyes; then
   CURL_CHECK_OPTION_THREADED_RESOLVER
+  CURL_CHECK_OPTION_ASYNCH_RESOLVER
 fi
 
 dnl ************************************************************
@@ -4659,7 +4661,8 @@ if test "$want_pthreads" != "no"; then
 fi
 
 dnl turn off pthreads if no threaded resolver
-if test "$want_pthreads" != "no" && test "$want_thres" != "yes"; then
+if test "$want_pthreads" != "no" && test "$want_thres" != "yes" && \
+    test "$want_agres" != "yes"; then
   want_pthreads=no
 fi
 
@@ -5183,7 +5186,8 @@ if test "x$HAVE_ZSTD" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES zstd"
 fi
 if test "x$USE_ARES" = "x1" -o "x$USE_THREADS_POSIX" = "x1" \
-                            -o "x$USE_THREADS_WIN32" = "x1"; then
+                            -o "x$USE_THREADS_WIN32" = "x1" \
+                            -o "x$USE_AGRES" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
 fi
 if test "x$IDN_ENABLED" = "x1"; then

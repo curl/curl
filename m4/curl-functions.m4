@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 73
+# serial 74
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -2226,6 +2226,158 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   fi
 ])
 
+dnl CURL_CHECK_FUNC_GETADDRINFO_A
+dnl -------------------------------------------------
+dnl Verify if getaddrinfo_a is available, prototyped, can
+dnl be compiled and seems to work. If all of these are
+dnl true, and usage has not been previously disallowed
+dnl with shell variable curl_disallow_getaddrinfo_a, then
+dnl HAVE_GETADDRINFO_A will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO_A], [
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
+  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_NETDB])dnl
+  #
+  tst_links_getaddrinfo_a="unknown"
+  tst_proto_getaddrinfo_a="unknown"
+  tst_compi_getaddrinfo_a="unknown"
+  tst_works_getaddrinfo_a="unknown"
+  tst_allow_getaddrinfo_a="unknown"
+  #
+  AC_MSG_CHECKING([if getaddrinfo_a can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_sys_socket
+      $curl_includes_netdb
+    ]],[[
+      if(0 != getaddrinfo_a(0, 0, 0, 0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_getaddrinfo_a="yes"
+  ],[
+    tmp_LIBS="$LIBS"
+    LIBS="-lanl"
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_sys_socket
+        $curl_includes_netdb
+      ]],[[
+        if(0 != getaddrinfo_a(0, 0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_links_getaddrinfo_a="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_links_getaddrinfo_a="no"
+      LIBS=
+    ])
+    LIBS="$LIBS $tmp_LIBS"
+  ])
+  #
+  if test "$tst_links_getaddrinfo_a" = "yes"; then
+    AC_MSG_CHECKING([if getaddrinfo_a is prototyped])
+    AC_EGREP_CPP([getaddrinfo_a],[
+      $curl_includes_sys_socket
+      $curl_includes_netdb
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_getaddrinfo_a="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_getaddrinfo_a="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_getaddrinfo_a" = "yes"; then
+    AC_MSG_CHECKING([if getaddrinfo_a is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_sys_socket
+        $curl_includes_netdb
+      ]],[[
+        if(0 != getaddrinfo_a(0, 0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_getaddrinfo_a="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_getaddrinfo_a="no"
+    ])
+  fi
+  #
+  dnl only do runtime verification when not cross-compiling
+  if test "x$cross_compiling" != "xyes" &&
+    test "$tst_compi_getaddrinfo_a" = "yes"; then
+    AC_MSG_CHECKING([if getaddrinfo_a seems to work])
+    CURL_RUN_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_stdlib
+        $curl_includes_string
+        $curl_includes_sys_socket
+        $curl_includes_netdb
+      ]],[[
+        struct addrinfo hints;
+        struct gaicb cb, *arr[1];
+        int error;
+
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_flags = AI_NUMERICHOST;
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_STREAM;
+        cb.ar_name = "127.0.0.1";
+        cb.ar_service = "0";
+        cb.ar_request = &hints;
+        arr[0] = &cb;
+        error = getaddrinfo_a(GAI_WAIT, arr, 1, 0);
+        if(error || !cb.ar_result)
+          exit(1); /* fail */
+        else
+          exit(0);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_works_getaddrinfo_a="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_works_getaddrinfo_a="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_getaddrinfo_a" = "yes" &&
+    test "$tst_works_getaddrinfo_a" != "no"; then
+    AC_MSG_CHECKING([if getaddrinfo_a usage allowed])
+    if test "x$curl_disallow_getaddrinfo_a" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_getaddrinfo_a="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_getaddrinfo_a="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if getaddrinfo_a might be used])
+  if test "$tst_links_getaddrinfo_a" = "yes" &&
+     test "$tst_proto_getaddrinfo_a" = "yes" &&
+     test "$tst_compi_getaddrinfo_a" = "yes" &&
+     test "$tst_allow_getaddrinfo_a" = "yes" &&
+     test "$tst_works_getaddrinfo_a" != "no"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_GETADDRINFO_A, 1,
+      [Define to 1 if you have a working getaddrinfo_a function.])
+    curl_cv_func_getaddrinfo_a="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_getaddrinfo_a="no"
+  fi
+])
 
 dnl CURL_CHECK_FUNC_GETHOSTBYADDR
 dnl -------------------------------------------------

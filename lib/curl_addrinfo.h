@@ -67,6 +67,9 @@ Curl_getaddrinfo_ex(const char *nodename,
                     const char *servname,
                     const struct addrinfo *hints,
                     struct Curl_addrinfo **result);
+
+int
+Curl_ai2ca(struct addrinfo *aihead, struct Curl_addrinfo **result);
 #endif
 
 struct Curl_addrinfo *

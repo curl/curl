@@ -91,39 +91,14 @@ Curl_freeaddrinfo(struct Curl_addrinfo *cahead)
 
 
 #ifdef HAVE_GETADDRINFO
-/*
- * Curl_getaddrinfo_ex()
- *
- * This is a wrapper function around system's getaddrinfo(), with
- * the only difference that instead of returning a linked list of
- * addrinfo structs this one returns a linked list of Curl_addrinfo
- * ones. The memory allocated by this function *MUST* be free'd with
- * Curl_freeaddrinfo().  For each successful call to this function
- * there must be an associated call later to Curl_freeaddrinfo().
- *
- * There should be no single call to system's getaddrinfo() in the
- * whole library, any such call should be 'routed' through this one.
- */
-
-int
-Curl_getaddrinfo_ex(const char *nodename,
-                    const char *servname,
-                    const struct addrinfo *hints,
-                    struct Curl_addrinfo **result)
+int Curl_ai2ca(struct addrinfo *aihead, struct Curl_addrinfo **result)
 {
-  const struct addrinfo *ai;
-  struct addrinfo *aihead;
+  struct addrinfo *ai;
   struct Curl_addrinfo *cafirst = NULL;
   struct Curl_addrinfo *calast = NULL;
   struct Curl_addrinfo *ca;
   size_t ss_size;
-  int error;
-
-  *result = NULL; /* assume failure */
-
-  error = getaddrinfo(nodename, servname, hints, &aihead);
-  if(error)
-    return error;
+  int error = 0;
 
   /* traverse the addrinfo list */
 
@@ -208,6 +183,38 @@ Curl_getaddrinfo_ex(const char *nodename,
   }
 
   *result = cafirst;
+
+  return error;
+}
+
+/*
+ * Curl_getaddrinfo_ex()
+ *
+ * This is a wrapper function around system's getaddrinfo(), with
+ * the only difference that instead of returning a linked list of
+ * addrinfo structs this one returns a linked list of Curl_addrinfo
+ * ones. The memory allocated by this function *MUST* be free'd with
+ * Curl_freeaddrinfo().  For each successful call to this function
+ * there must be an associated call later to Curl_freeaddrinfo().
+ *
+ * There should be no single call to system's getaddrinfo() in the
+ * whole library, any such call should be 'routed' through this one.
+ */
+
+int
+Curl_getaddrinfo_ex(const char *nodename,
+                    const char *servname,
+                    const struct addrinfo *hints,
+                    struct Curl_addrinfo **result)
+{
+  struct addrinfo *aihead;
+  int error;
+
+  *result = NULL; /* assume failure */
+
+  error = getaddrinfo(nodename, servname, hints, &aihead);
+  if(error == 0)
+    error = Curl_ai2ca(aihead, result);
 
   /* This is not a CURLcode */
   return error;
