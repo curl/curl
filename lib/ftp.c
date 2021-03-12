@@ -3325,8 +3325,10 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
       connclose(conn, "Timeout or similar in FTP DONE operation"); /* close */
     }
 
-    if(result)
+    if(result) {
+      Curl_safefree(ftp->pathalloc);
       return result;
+    }
 
     if(ftpc->dont_check && data->req.maxdownload > 0) {
       /* we have just sent ABOR and there is no reliable way to check if it was
