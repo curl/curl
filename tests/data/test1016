@@ -23,9 +23,9 @@ file
 X-Y range on a file:// URL to stdout
  </name>
 <command option="no-include">
--r 1-4 file://localhost%FILE_PWD/log/test1016.txt 
+-r 1-4 file://localhost%FILE_PWD/log/test%TESTNUMBER.txt 
 </command>
-<file name="log/test1016.txt">
+<file name="log/test%TESTNUMBER.txt">
 1234567890
 </file>
 </client>

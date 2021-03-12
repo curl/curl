@@ -28,7 +28,7 @@ imap
 IMAP plain authentication with alternative authorization identity (Not authorized)
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/849/;MAILINDEX=1' -u kurt:xipj3plmq --sasl-authzid ursel
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u kurt:xipj3plmq --sasl-authzid ursel
 </command>
 </client>
 

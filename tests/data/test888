@@ -40,7 +40,7 @@ pop3
 POP3 OAuth 2.0 (OAUTHBEARER) authentication with initial response
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/888 -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir
 </command>
 </client>
 
@@ -50,7 +50,7 @@ pop3://%HOSTIP:%POP3PORT/888 -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir
 <protocol>
 CAPA
 AUTH OAUTHBEARER %b64[n,a=user,%01host=127.0.0.1%01port=%POP3PORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
-RETR 888
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

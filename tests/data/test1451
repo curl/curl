@@ -26,7 +26,7 @@ smb
 Basic SMB request
 </name>
 <command>
--u 'curltest:curltest' smb://%HOSTIP:%SMBPORT/TESTS/1451
+-u 'curltest:curltest' smb://%HOSTIP:%SMBPORT/TESTS/%TESTNUMBER
 </command>
 <precheck>
 python -c "__import__('pkgutil').find_loader('impacket') or (__import__('sys').stdout.write('Test only works if Python package impacket is installed\n'), __import__('sys').exit(1))"

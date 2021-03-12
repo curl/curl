@@ -46,7 +46,7 @@ crypto
 IMAP DIGEST-MD5 authentication with SASL downgrade
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/835/;MAILINDEX=1' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 
@@ -59,7 +59,7 @@ A002 AUTHENTICATE DIGEST-MD5
 *
 A003 AUTHENTICATE PLAIN
 AHVzZXIAc2VjcmV0
-A004 SELECT 835
+A004 SELECT %TESTNUMBER
 A005 FETCH 1 BODY[]
 A006 LOGOUT
 </protocol>

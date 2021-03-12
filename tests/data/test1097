@@ -53,21 +53,21 @@ proxy
 HTTP POST using CONNECT with --proxy-ntlm but no auth is required
  </name>
  <command>
-http://test.a.galaxy.far.far.away.1097:%HTTPPORT/1097 --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-ntlm -d "dummy=value" -p
+http://test.a.galaxy.far.far.away.%TESTNUMBER:%HTTPPORT/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-ntlm -d "dummy=value" -p
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol nonewline="yes">
-CONNECT test.a.galaxy.far.far.away.1097:%HTTPPORT HTTP/1.1
-Host: test.a.galaxy.far.far.away.1097:%HTTPPORT
+CONNECT test.a.galaxy.far.far.away.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: test.a.galaxy.far.far.away.%TESTNUMBER:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
-POST /1097 HTTP/1.1
-Host: test.a.galaxy.far.far.away.1097:%HTTPPORT
+POST /%TESTNUMBER HTTP/1.1
+Host: test.a.galaxy.far.far.away.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 11

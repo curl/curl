@@ -31,7 +31,7 @@ This is not the real page either!
 HTTP/1.1 301 Things are fine in server land swsclose
 Server: Microsoft-IIS/5.0
 Connection: close
-Location: /you/890010
+Location: /you/%TESTNUMBER0010
 
 </data1002>
 
@@ -67,7 +67,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4Ab
 HTTP/1.1 301 Things are fine in server land swsclose
 Server: Microsoft-IIS/5.0
 Connection: close
-Location: /you/890010
+Location: /you/%TESTNUMBER0010
 
 HTTP/1.1 401 Now gimme that second round of crap
 Server: Microsoft-IIS/5.0
@@ -106,7 +106,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/89 -u testuser:testpass --ntlm -L
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --ntlm -L
 </command>
 <precheck>
 chkhostname curlhost
@@ -116,25 +116,25 @@ chkhostname curlhost
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /89 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /89 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /you/890010 HTTP/1.1
+GET /you/%TESTNUMBER0010 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /you/890010 HTTP/1.1
+GET /you/%TESTNUMBER0010 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADYzMjE3MzIxAAAAAAAAAAAAAAAAAAAAAEcJ4YHOeb5ga2TCPwDhkyUIuHjBUHcLaHRlc3R1c2VyY3VybGhvc3Q=
 User-Agent: curl/%VERSION

@@ -46,7 +46,7 @@ http/2
 HTTP/2 GET with Upgrade:
  </name>
  <command>
-http://%HOSTIP:%HTTP2PORT/1700 --http2 http://%HOSTIP:%HTTP2PORT/17000001
+http://%HOSTIP:%HTTP2PORT/%TESTNUMBER --http2 http://%HOSTIP:%HTTP2PORT/%TESTNUMBER0001
 </command>
 </client>
 
@@ -58,12 +58,12 @@ http://%HOSTIP:%HTTP2PORT/1700 --http2 http://%HOSTIP:%HTTP2PORT/17000001
 ^Via:.*
 </strip>
 <protocol>
-GET /1700 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTP2PORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /17000001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTP2PORT
 User-Agent: curl/%VERSION
 Accept: */*

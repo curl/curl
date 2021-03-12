@@ -37,7 +37,7 @@ http
 HTTP GET with maximum filesize exceeded
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/293 --max-filesize 2
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --max-filesize 2
 </command>
 </client>
 
@@ -48,7 +48,7 @@ http://%HOSTIP:%HTTPPORT/293 --max-filesize 2
 63
 </errorcode>
 <protocol>
-GET /293 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

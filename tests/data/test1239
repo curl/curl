@@ -34,7 +34,7 @@ http
 HTTP with -z + -w response_code and simulated 304
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1239 -z "-dec 12 12:00:00 1999 GMT" -w '%{response_code}'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -z "-dec 12 12:00:00 1999 GMT" -w '%{response_code}'
 </command>
 </client>
 
@@ -42,7 +42,7 @@ http://%HOSTIP:%HTTPPORT/1239 -z "-dec 12 12:00:00 1999 GMT" -w '%{response_code
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1239 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

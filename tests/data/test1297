@@ -33,7 +33,7 @@ http-proxy
 CONNECT to peer that returns nothing
 </name>
 <command>
---proxytunnel --proxy %HOSTIP:%PROXYPORT http://%HOSTIP.1297:%HTTPPORT/we/want/that/page/1297
+--proxytunnel --proxy %HOSTIP:%PROXYPORT http://%HOSTIP.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER
 </command>
 <features>
 proxy
@@ -44,15 +44,15 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <proxy>
-CONNECT %HOSTIP.1297:%HTTPPORT HTTP/1.1
-Host: %HOSTIP.1297:%HTTPPORT
+CONNECT %HOSTIP.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol>
-GET /we/want/that/page/1297 HTTP/1.1
-Host: %HOSTIP.1297:%HTTPPORT
+GET /we/want/that/page/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 

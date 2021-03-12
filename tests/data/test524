@@ -18,7 +18,7 @@ UPLOAD
 ftp
 </server>
 <tool>
-lib524
+lib%TESTNUMBER
 </tool>
  <name>
 FTP upload with target URL ending with slash

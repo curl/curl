@@ -26,7 +26,7 @@ ftp
 FTP with rubbish before name in 257-response
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/get/file/1217 ftp://%HOSTIP:%FTPPORT/get/file/again/1217 --ftp-method singlecwd
+ftp://%HOSTIP:%FTPPORT/get/file/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/get/file/again/%TESTNUMBER --ftp-method singlecwd
 </command>
 </client>
 
@@ -44,13 +44,13 @@ PWD
 CWD get/file
 EPSV
 TYPE I
-SIZE 1217
-RETR 1217
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 CWD /this/is/the/path
 CWD get/file/again
 EPSV
-SIZE 1217
-RETR 1217
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

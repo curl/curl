@@ -19,7 +19,7 @@ ftplistparser
 ftp
 </server>
 <tool>
-lib576
+lib%TESTNUMBER
 </tool>
  <name>
 FTP wildcard download - skip/parser_correctness/CURLOPT_FNMATCH_FUNCTION (Unix)

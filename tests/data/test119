@@ -24,7 +24,7 @@ ftp
 FTP download, failed RETR with PORT
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/119 -P -
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P -
 </command>
 </client>
 
@@ -43,8 +43,8 @@ USER anonymous
 PASS ftp@example.com
 PWD
 TYPE I
-SIZE 119
-RETR 119
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

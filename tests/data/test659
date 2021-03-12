@@ -28,7 +28,7 @@ Funny-head: yesyes
 http
 </server>
 <tool>
-lib659
+lib%TESTNUMBER
 </tool>
 <name>
 CURLOPT_CURLU without the path set - over proxy

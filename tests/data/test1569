@@ -30,10 +30,10 @@ ftp
 FTP first type=A then regular URL
  </name>
 <tool>
-lib1569
+lib%TESTNUMBER
 </tool>
 <command>
-"ftp://%HOSTIP:%FTPPORT/1569;type=A" ftp://%HOSTIP:%FTPPORT/1569
+"ftp://%HOSTIP:%FTPPORT/%TESTNUMBER;type=A" ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 
 </client>
@@ -47,11 +47,11 @@ PWD
 EPSV
 PASV
 TYPE A
-RETR 1569
+RETR %TESTNUMBER
 PASV
 TYPE I
-SIZE 1569
-RETR 1569
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

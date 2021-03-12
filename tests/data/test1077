@@ -50,7 +50,7 @@ proxy
 FTP over HTTP proxy with downgrade to HTTP 1.0
  </name>
  <command>
--x %HOSTIP:%HTTPPORT ftp://%HOSTIP:%HTTPPORT/we/want/that/page/1077 ftp://%HOSTIP:%HTTPPORT/we/want/that/page/10770002
+-x %HOSTIP:%HTTPPORT ftp://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER ftp://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER0002
 </command>
 </client>
 
@@ -58,13 +58,13 @@ FTP over HTTP proxy with downgrade to HTTP 1.0
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/1077 HTTP/1.1
+GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/10770002 HTTP/1.0
+GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER0002 HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

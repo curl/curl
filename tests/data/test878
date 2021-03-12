@@ -36,7 +36,7 @@ crypto
 POP3 DIGEST-MD5 graceful cancellation
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/878 -u user:secret
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 

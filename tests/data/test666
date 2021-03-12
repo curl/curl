@@ -36,14 +36,14 @@ OK
 http
 </server>
 <tool>
-lib666
+lib%TESTNUMBER
 </tool>
 
  <name>
 HTTP mime post with binary-encoded huge data contents
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/666
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -55,7 +55,7 @@ s/^--------------------------[a-z0-9]*/------------------------------/
 s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
 </strippart>
 <protocol>
-POST /666 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 17225

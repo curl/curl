@@ -11,9 +11,9 @@ LIST
 # Server-side
 <reply>
 <data>
-* LIST () "/" /806/blurdybloop
-* LIST (\Noselect) "/" /806/foo
-* LIST () "/" /806/foo/bar
+* LIST () "/" /%TESTNUMBER/blurdybloop
+* LIST (\Noselect) "/" /%TESTNUMBER/foo
+* LIST () "/" /%TESTNUMBER/foo/bar
 </data>
 </reply>
 
@@ -27,7 +27,7 @@ imap
 IMAP LIST mailbox
  </name>
  <command>
-imap://%HOSTIP:%IMAPPORT/806 -u user:secret
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
@@ -37,7 +37,7 @@ imap://%HOSTIP:%IMAPPORT/806 -u user:secret
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 LIST "806" *
+A003 LIST "%TESTNUMBER" *
 A004 LOGOUT
 </protocol>
 </verify>

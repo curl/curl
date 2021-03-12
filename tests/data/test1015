@@ -28,9 +28,9 @@ http
 --data-urlencode
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1015 --data-urlencode "my name is moo[]" --data-urlencode "y e s=s_i_r" --data-urlencode "v_alue@log/1015.txt" --data-urlencode @log/1015.txt 
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --data-urlencode "my name is moo[]" --data-urlencode "y e s=s_i_r" --data-urlencode "v_alue@log/%TESTNUMBER.txt" --data-urlencode @log/%TESTNUMBER.txt 
 </command>
-<file name="log/1015.txt">
+<file name="log/%TESTNUMBER.txt">
 content to _?!#$'|<>
 </file>
 </client>
@@ -39,7 +39,7 @@ content to _?!#$'|<>
 # Verify data after the test has been "shot"
 <verify>
 <protocol nonewline="yes">
-POST /1015 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

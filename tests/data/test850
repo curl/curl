@@ -31,7 +31,7 @@ pop3
 POP3 RETR message
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/850 -u user:secret
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
@@ -42,7 +42,7 @@ pop3://%HOSTIP:%POP3PORT/850 -u user:secret
 CAPA
 USER user
 PASS secret
-RETR 850
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

@@ -23,12 +23,12 @@ unix-sockets
 file name argument looks like a flag
  </name>
  <command>
---stderr log/moo1268 --unix-socket -k hej://moo
+--stderr log/moo%TESTNUMBER --unix-socket -k hej://moo
 </command>
 </client>
 
 <verify>
-<file name="log/moo1268" mode="text">
+<file name="log/moo%TESTNUMBER" mode="text">
 Warning: The file name argument '-k' looks like a flag.
 curl: (1) Protocol "hej" not supported or disabled in libcurl
 </file>

@@ -27,7 +27,7 @@ tftp
 TFTP retrieve without TFTP options requests
  </name>
  <command>
-tftp://%HOSTIP:%TFTPPORT//1242 --tftp-no-options
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --tftp-no-options
 </command>
 </client>
 
@@ -37,7 +37,7 @@ tftp://%HOSTIP:%TFTPPORT//1242 --tftp-no-options
 <protocol>
 opcode: 1
 mode: octet
-filename: /1242
+filename: /%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

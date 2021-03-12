@@ -29,7 +29,7 @@ Funny-head: yesyes
 http
 </server>
 <tool>
-lib1522
+lib%TESTNUMBER
 </tool>
 
 <name>
@@ -37,7 +37,7 @@ CURLINFO_SIZE_UPLOAD with small SO_SNDBUF
 </name>
 
 <command>
-http://%HOSTIP:%HTTPPORT/1522
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
