@@ -37,11 +37,16 @@
 
 #include "multiif.h"
 
+/* Per https://www.bearssl.org/api1.html, max TLS record size plus max
+   per-record overhead. */
+#define TLSBUF_SIZE (16384 + 325)
+
 struct ssl_backend_data
 {
   const struct rustls_client_config *config;
   struct rustls_client_session *session;
   bool data_pending;
+  uint8_t *tlsbuf;
 };
 
 /* For a given rustls_result error code, return the best-matching CURLcode. */
@@ -98,9 +103,6 @@ cr_recv(struct Curl_easy *data, int sockindex,
   struct ssl_backend_data *const backend = connssl->backend;
   struct rustls_client_session *const session = backend->session;
   curl_socket_t sockfd = conn->sock[sockindex];
-  /* Per https://www.bearssl.org/api1.html, max TLS record size plus max
-     per-record overhead. */
-  uint8_t tlsbuf[16384 + 325];
   size_t n = 0;
   ssize_t tls_bytes_read = 0;
   size_t tls_bytes_processed = 0;
@@ -108,7 +110,7 @@ cr_recv(struct Curl_easy *data, int sockindex,
   rustls_result rresult = 0;
   char errorbuf[255];
 
-  tls_bytes_read = sread(sockfd, tlsbuf, sizeof(tlsbuf));
+  tls_bytes_read = sread(sockfd, backend->tlsbuf, TLSBUF_SIZE);
   if(tls_bytes_read == 0) {
     failf(data, "EOF in sread");
     *err = CURLE_READ_ERROR;
@@ -131,7 +133,7 @@ cr_recv(struct Curl_easy *data, int sockindex,
   DEBUGASSERT(tls_bytes_read > 0);
   while(tls_bytes_processed < (size_t)tls_bytes_read) {
     rresult = rustls_client_session_read_tls(session,
-      (uint8_t *)tlsbuf + tls_bytes_processed,
+      backend->tlsbuf + tls_bytes_processed,
       tls_bytes_read - tls_bytes_processed,
       &n);
     if(rresult != RUSTLS_RESULT_OK) {
@@ -214,8 +216,6 @@ cr_send(struct Curl_easy *data, int sockindex,
   size_t plainwritten = 0;
   size_t tlslen = 0;
   size_t tlswritten = 0;
-  /* Max size of a TLS message, plus some space for TLS framing overhead. */
-  uint8_t tlsbuf[16384 + 325];
   rustls_result rresult;
 
   if(plainlen > 0) {
@@ -235,7 +235,7 @@ cr_send(struct Curl_easy *data, int sockindex,
 
   while(rustls_client_session_wants_write(session)) {
     rresult = rustls_client_session_write_tls(
-      session, tlsbuf, sizeof(tlsbuf), &tlslen);
+      session, backend->tlsbuf, TLSBUF_SIZE, &tlslen);
     if(rresult != RUSTLS_RESULT_OK) {
       failf(data, "error in rustls_client_session_write_tls");
       *err = CURLE_WRITE_ERROR;
@@ -250,7 +250,7 @@ cr_send(struct Curl_easy *data, int sockindex,
     tlswritten = 0;
 
     while(tlswritten < tlslen) {
-      n = swrite(sockfd, tlsbuf + tlswritten, tlslen - tlswritten);
+      n = swrite(sockfd, backend->tlsbuf + tlswritten, tlslen - tlswritten);
       if(n < 0) {
         if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
           /* Since recv is called from poll, there should be room to
@@ -314,6 +314,11 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
   char errorbuf[256];
   size_t errorlen;
   int result;
+
+  backend->tlsbuf = calloc(TLSBUF_SIZE, 1);
+  if(backend->tlsbuf == NULL) {
+    return CURLE_OUT_OF_MEMORY;
+  }
 
   config_builder = rustls_client_config_builder_new();
   if(!verifypeer) {
@@ -518,6 +523,7 @@ cr_close(struct Curl_easy *data, struct connectdata *conn,
     rustls_client_config_free(backend->config);
     backend->config = NULL;
   }
+  free(backend->tlsbuf);
 }
 
 const struct Curl_ssl Curl_ssl_rustls = {
