@@ -27,7 +27,7 @@ ftp
 FTP download maximum filesize not exceeded
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/291 --max-filesize 100
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --max-filesize 100
 </command>
 </client>
 
@@ -39,8 +39,8 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 291
-RETR 291
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

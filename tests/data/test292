@@ -36,7 +36,7 @@ http
 HTTP GET with maximum filesize not exceeded
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/292 --max-filesize 1000
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --max-filesize 1000
 </command>
 </client>
 
@@ -44,7 +44,7 @@ http://%HOSTIP:%HTTPPORT/292 --max-filesize 1000
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /292 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

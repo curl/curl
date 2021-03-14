@@ -29,9 +29,9 @@ file:/path URL with a single slash
 MSYS2_ARG_CONV_EXCL=file:
 </setenv>
 <command option="no-include">
-file:%FILE_PWD/log/test203.txt
+file:%FILE_PWD/log/test%TESTNUMBER.txt
 </command>
-<file name="log/test203.txt">
+<file name="log/test%TESTNUMBER.txt">
 foo
    bar
 bar

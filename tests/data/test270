@@ -30,7 +30,7 @@ ftp
 FTP RETR PASV --ftp-skip-pasv-ip
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/270 --ftp-skip-pasv-ip --disable-epsv
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ftp-skip-pasv-ip --disable-epsv
 </command>
 </client>
 
@@ -42,8 +42,8 @@ PASS ftp@example.com
 PWD
 PASV
 TYPE I
-SIZE 270
-RETR 270
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

@@ -25,7 +25,7 @@ ftp
 FTP CWD with --ftp-method nocwd
  </name>
  <command>
---ftp-method nocwd ftp://%HOSTIP:%FTPPORT/first/second/th%69rd/298
+--ftp-method nocwd ftp://%HOSTIP:%FTPPORT/first/second/th%69rd/%TESTNUMBER
 </command>
 </client>
 
@@ -37,8 +37,8 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE first/second/third/298
-RETR first/second/third/298
+SIZE first/second/third/%TESTNUMBER
+RETR first/second/third/%TESTNUMBER
 QUIT
 </protocol>
 </verify>

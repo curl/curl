@@ -67,7 +67,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/239 --proxy http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-ntlm -d "postit"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-ntlm -d "postit"
 </command>
 <precheck>
 chkhostname curlhost
@@ -77,7 +77,7 @@ chkhostname curlhost
 # Verify data after the test has been "shot"
 <verify>
 <protocol nonewline="yes">
-POST http://%HOSTIP:%HTTPPORT/239 HTTP/1.1
+POST http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/%VERSION
@@ -86,7 +86,7 @@ Proxy-Connection: Keep-Alive
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
-POST http://%HOSTIP:%HTTPPORT/239 HTTP/1.1
+POST http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
 User-Agent: curl/%VERSION

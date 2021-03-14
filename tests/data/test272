@@ -22,7 +22,7 @@ ftp
 FTP timed conditioned get file with identical time stamp 
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/272 -z "2004 jan 1 12:12:12 UTC"
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -z "2004 jan 1 12:12:12 UTC"
 </command>
 
 </client>
@@ -33,7 +33,7 @@ ftp://%HOSTIP:%FTPPORT/272 -z "2004 jan 1 12:12:12 UTC"
 USER anonymous
 PASS ftp@example.com
 PWD
-MDTM 272
+MDTM %TESTNUMBER
 QUIT
 </protocol>
 </verify>

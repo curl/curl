@@ -47,7 +47,7 @@ http
 HTTP GET gzip compressed content
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/220 --compressed
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>
 
@@ -62,7 +62,7 @@ s/^Accept-Encoding: .*/Accept-Encoding: xxx/
 %endif
 </strippart>
 <protocol>
-GET /220 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

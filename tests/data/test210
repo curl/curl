@@ -23,7 +23,7 @@ ftp
 Get two FTP files from the same remote dir: no second CWD
  </name>
 <command option="no-include">
-ftp://%HOSTIP:%FTPPORT/a/path/210 ftp://%HOSTIP:%FTPPORT/a/path/210
+ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER
 </command>
 <stdout>
 data blobb
@@ -41,11 +41,11 @@ CWD a
 CWD path
 EPSV
 TYPE I
-SIZE 210
-RETR 210
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 EPSV
-SIZE 210
-RETR 210
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

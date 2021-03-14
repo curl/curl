@@ -15,7 +15,7 @@ ftp
 FTP %0d-code in URL's CWD part
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/226%0d
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER%0d
 </command>
 </client>
 

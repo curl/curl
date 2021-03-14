@@ -31,7 +31,7 @@ ftp
 FTP with quote ops
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/227 -Q "NOOP 1" -Q "+NOOP 2" -Q "-NOOP 3" -Q "*FAIL" -Q "+*FAIL HARD"
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -Q "NOOP 1" -Q "+NOOP 2" -Q "-NOOP 3" -Q "*FAIL" -Q "+*FAIL HARD"
 </command>
 </client>
 
@@ -48,8 +48,8 @@ PASV
 TYPE I
 NOOP 2
 FAIL HARD
-SIZE 227
-RETR 227
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 NOOP 3
 QUIT
 </protocol>

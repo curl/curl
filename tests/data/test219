@@ -24,7 +24,7 @@ proxy
 try using proxy with unsupported scheme
  </name>
  <command>
--x foo://%HOSTIP:%NOLISTENPORT/219 http://%HOSTIP:%NOLISTENPORT/219
+-x foo://%HOSTIP:%NOLISTENPORT/%TESTNUMBER http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
 </command>
 </client>
 

@@ -35,7 +35,7 @@ ftp
 FTP dir listing with nocwd and URL encoded path
  </name>
  <command>
---ftp-method nocwd ftp://%HOSTIP:%FTPPORT/fir%23t/th%69rd/244/
+--ftp-method nocwd ftp://%HOSTIP:%FTPPORT/fir%23t/th%69rd/%TESTNUMBER/
 </command>
 </client>
 
@@ -47,7 +47,7 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE A
-LIST fir#t/third/244
+LIST fir#t/third/%TESTNUMBER
 QUIT
 </protocol>
 </verify>

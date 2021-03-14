@@ -23,7 +23,7 @@ ftp
 FTP RETR with bad ACCT
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/229 --ftp-account "one count"
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ftp-account "one count"
 </command>
 </client>
 

@@ -17,7 +17,7 @@ ftp
 FTP resume upload but denied access to local file
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/289 -T log/illegal-nonexistent-file -C -
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/illegal-nonexistent-file -C -
 </command>
 </client>
 

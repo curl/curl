@@ -25,7 +25,7 @@ ftp
 FTP CWD with --ftp-method multicwd
  </name>
  <command>
---ftp-method multicwd ftp://%HOSTIP:%FTPPORT/first/second/third/296
+--ftp-method multicwd ftp://%HOSTIP:%FTPPORT/first/second/third/%TESTNUMBER
 </command>
 </client>
 
@@ -40,8 +40,8 @@ CWD second
 CWD third
 EPSV
 TYPE I
-SIZE 296
-RETR 296
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>
