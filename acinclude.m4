@@ -2198,9 +2198,9 @@ AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
   AC_MSG_CHECKING([default CA cert bundle/path])
 
   AC_ARG_WITH(ca-bundle,
-AC_HELP_STRING([--with-ca-bundle=FILE],
+AS_HELP_STRING([--with-ca-bundle=FILE],
 [Path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
-AC_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
+AS_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   [
     want_ca="$withval"
     if test "x$want_ca" = "xyes"; then
@@ -2209,12 +2209,12 @@ AC_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   ],
   [ want_ca="unset" ])
   AC_ARG_WITH(ca-path,
-AC_HELP_STRING([--with-ca-path=DIRECTORY],
+AS_HELP_STRING([--with-ca-path=DIRECTORY],
 [Path to a directory containing CA certificates stored individually, with \
 their filenames in a hash format. This option can be used with the OpenSSL, \
 GnuTLS and mbedTLS backends. Refer to OpenSSL c_rehash for details. \
 (example: /etc/certificates)])
-AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
+AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   [
     want_capath="$withval"
     if test "x$want_capath" = "xyes"; then
@@ -2324,8 +2324,8 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
 
   AC_MSG_CHECKING([whether to use builtin CA store of SSL library])
   AC_ARG_WITH(ca-fallback,
-AC_HELP_STRING([--with-ca-fallback], [Use the built in CA store of the SSL library])
-AC_HELP_STRING([--without-ca-fallback], [Don't use the built in CA store of the SSL library]),
+AS_HELP_STRING([--with-ca-fallback], [Use the built in CA store of the SSL library])
+AS_HELP_STRING([--without-ca-fallback], [Don't use the built in CA store of the SSL library]),
   [
     if test "x$with_ca_fallback" != "xyes" -a "x$with_ca_fallback" != "xno"; then
       AC_MSG_ERROR([--with-ca-fallback only allows yes or no as parameter])
