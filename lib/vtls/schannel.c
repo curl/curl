@@ -117,6 +117,10 @@
 #define SP_PROT_TLS1_2_CLIENT           0x00000800
 #endif
 
+#ifndef SCH_USE_STRONG_CRYPTO
+#define SCH_USE_STRONG_CRYPTO           0x00400000
+#endif
+
 #ifndef SECBUFFER_ALERT
 #define SECBUFFER_ALERT                 17
 #endif
@@ -335,11 +339,9 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
       alg = get_alg_id_by_name(startCur);
     if(alg)
       algIds[algCount++] = alg;
-#ifdef SCH_USE_STRONG_CRYPTO
     else if(strncmp(startCur, "USE_STRONG_CRYPTO",
                     sizeof("USE_STRONG_CRYPTO") - 1) == 0)
       schannel_cred->dwFlags |= SCH_USE_STRONG_CRYPTO;
-#endif
     else
       return CURLE_SSL_CIPHER;
     startCur = strchr(startCur, ':');
