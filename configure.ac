@@ -4246,13 +4246,6 @@ case "$OPT_FISH_FPATH" in
     ;;
 esac
 
-dnl **********************************************************************
-dnl Back to "normal" configuring
-dnl **********************************************************************
-
-dnl Checks for header files.
-AC_HEADER_STDC
-
 CURL_CHECK_HEADER_MALLOC
 CURL_CHECK_HEADER_MEMORY
 
