@@ -4246,13 +4246,6 @@ case "$OPT_FISH_FPATH" in
     ;;
 esac
 
-dnl **********************************************************************
-dnl Back to "normal" configuring
-dnl **********************************************************************
-
-dnl Checks for header files.
-AC_HEADER_STDC
-
 CURL_CHECK_HEADER_MALLOC
 CURL_CHECK_HEADER_MEMORY
 
@@ -4338,7 +4331,7 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 CURL_CHECK_VARIADIC_MACROS
 AC_TYPE_SIZE_T
-AC_HEADER_TIME
+
 CURL_CHECK_STRUCT_TIMEVAL
 CURL_VERIFY_RUNTIMELIBS
 
@@ -4452,8 +4445,6 @@ TYPE_IN_ADDR_T
 TYPE_SOCKADDR_STORAGE
 
 TYPE_SIG_ATOMIC_T
-
-AC_TYPE_SIGNAL
 
 CURL_CHECK_FUNC_SELECT
 

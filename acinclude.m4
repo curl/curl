@@ -1408,7 +1408,6 @@ dnl -------------------------------------------------
 dnl Check for timeval struct
 
 AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
-  AC_REQUIRE([AC_HEADER_TIME])dnl
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
   AC_CHECK_HEADERS(sys/types.h sys/time.h time.h sys/socket.h)
@@ -1606,7 +1605,6 @@ dnl -------------------------------------------------
 dnl Check if monotonic clock_gettime is available.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
-  AC_REQUIRE([AC_HEADER_TIME])dnl
   AC_CHECK_HEADERS(sys/types.h sys/time.h time.h)
   AC_MSG_CHECKING([for monotonic clock_gettime])
   #
