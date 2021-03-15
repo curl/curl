@@ -32,11 +32,11 @@ https
 HTTPS GET with very long request header
  </name>
 # 14 characters repeated 3500 times makes 49000 bytes
-<file name="log/file410">
+<file name="log/file%TESTNUMBER">
 Long: %repeat[3500 x header content]%
 </file>
  <command>
--k https://%HOSTIP:%HTTPSPORT/410 -H @log/file410
+-k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER -H @log/file%TESTNUMBER
 </command>
 </client>
 
@@ -44,7 +44,7 @@ Long: %repeat[3500 x header content]%
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /410 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
 User-Agent: curl/%VERSION
 Accept: */*

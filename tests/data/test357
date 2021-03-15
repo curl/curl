@@ -51,9 +51,9 @@ http
 HTTP PUT with Expect: 100-continue and 417 response
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/357 -T log/test357.txt
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T log/test%TESTNUMBER.txt
 </command>
-<file name="log/test357.txt">
+<file name="log/test%TESTNUMBER.txt">
 Weird
      file
          to
@@ -69,14 +69,14 @@ the
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-PUT /we/want/357 HTTP/1.1
+PUT /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 78
 Expect: 100-continue
 
-PUT /we/want/357 HTTP/1.1
+PUT /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

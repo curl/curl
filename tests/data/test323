@@ -19,7 +19,7 @@ TLS-SRP
 TLS-SRP to non-TLS-SRP server
  </name>
 <command>
---insecure --tlsauthtype SRP --tlsuser jsmith --tlspassword badpass https://%HOSTIP:%HTTPSPORT/want/323
+--insecure --tlsauthtype SRP --tlsuser jsmith --tlspassword badpass https://%HOSTIP:%HTTPSPORT/want/%TESTNUMBER
 </command>
 </client>
 

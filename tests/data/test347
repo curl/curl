@@ -39,7 +39,7 @@ http
 --etag-save with blank incoming header
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/347 --etag-save log/etag347
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-save log/etag%TESTNUMBER
 </command>
 </client>
 
@@ -47,13 +47,13 @@ http://%HOSTIP:%HTTPPORT/347 --etag-save log/etag347
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /347 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/etag347">
+<file name="log/etag%TESTNUMBER">
 </file>
 </verify>
 

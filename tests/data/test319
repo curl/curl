@@ -37,7 +37,7 @@ http
 HTTP GET gzip transfer-encoded data in raw mode
  </name>
  <command option="no-include">
-http://%HOSTIP:%HTTPPORT/319 --raw
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --raw
  </command>
 </client>
 
@@ -45,7 +45,7 @@ http://%HOSTIP:%HTTPPORT/319 --raw
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /319 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

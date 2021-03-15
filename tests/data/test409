@@ -19,7 +19,7 @@ ftps
  <name>
 FTPS PASV upload file
  </name>
-<file name="log/test409.txt">
+<file name="log/test%TESTNUMBER.txt">
 data
     to
       see
@@ -28,7 +28,7 @@ works
   so does it?
 </file>
  <command>
--k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/409 -T log/test409.txt
+-k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/%TESTNUMBER -T log/test%TESTNUMBER.txt
 </command>
 </client>
 
@@ -50,7 +50,7 @@ PROT C
 PWD
 EPSV
 TYPE I
-STOR 409
+STOR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

@@ -29,14 +29,14 @@ OpenSSL
 https
 </server>
 <precheck>
-perl %SRCDIR/libtest/test307.pl %CURL
+perl %SRCDIR/libtest/test%TESTNUMBER.pl %CURL
 </precheck>
 
  <name>
 simple HTTPS GET with openssl engine
  </name>
  <command>
---engine openssl -k https://%HOSTIP:%HTTPSPORT/307
+--engine openssl -k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -44,7 +44,7 @@ simple HTTPS GET with openssl engine
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /307 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
 User-Agent: curl/%VERSION
 Accept: */*

@@ -64,7 +64,7 @@ http
 HTTP GET brotli compressed content with broken header
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/315 --compressed
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>
 
@@ -75,7 +75,7 @@ http://%HOSTIP:%HTTPPORT/315 --compressed
 s/^Accept-Encoding: .*/Accept-Encoding: xxx/
 </strippart>
 <protocol>
-GET /315 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

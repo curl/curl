@@ -26,7 +26,7 @@ tftp
 TFTP retrieve with blksize 400
  </name>
  <command>
-tftp://%HOSTIP:%TFTPPORT//332 --tftp-blksize 400
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --tftp-blksize 400
 </command>
 </client>
 
@@ -39,7 +39,7 @@ mode: octet
 tsize: 0
 blksize: 400
 timeout: 6
-filename: /332
+filename: /%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

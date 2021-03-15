@@ -174,7 +174,7 @@ http
 HTTP GET brotli compressed content
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/314 --compressed
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>
 
@@ -189,7 +189,7 @@ s/^Accept-Encoding: .*/Accept-Encoding: xxx/
 %endif
 </strippart>
 <protocol>
-GET /314 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

@@ -21,7 +21,7 @@ https
 simple HTTPS GET with invalid crypto engine
  </name>
  <command>
---engine invalid-crypto-engine-xyzzy -k https://%HOSTIP:%HTTPSPORT/308
+--engine invalid-crypto-engine-xyzzy -k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

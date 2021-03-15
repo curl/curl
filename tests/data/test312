@@ -25,7 +25,7 @@ https Server-localhost.nn-sv.pem
 HTTPS GET to localhost and null-prefixed CN cert
  </name>
  <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/312
+--cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost because we're checking the host name
 <precheck>

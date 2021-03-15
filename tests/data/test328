@@ -35,7 +35,7 @@ libz
 HTTP with "Content-Encoding: none
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/hello/328 --compressed
+http://%HOSTIP:%HTTPPORT/hello/%TESTNUMBER --compressed
 </command>
 </client>
 
@@ -45,7 +45,7 @@ http://%HOSTIP:%HTTPPORT/hello/328 --compressed
 ^Accept-Encoding:.*
 </strip>
 <protocol>
-GET /hello/328 HTTP/1.1
+GET /hello/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

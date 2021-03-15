@@ -33,7 +33,7 @@ https
 HTTPS GET with user and password
  </name>
  <command>
--k -u fake:user https://%HOSTIP:%HTTPSPORT/301
+-k -u fake:user https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -41,7 +41,7 @@ HTTPS GET with user and password
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /301 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
 Authorization: Basic ZmFrZTp1c2Vy
 User-Agent: curl/%VERSION

@@ -19,7 +19,7 @@ ftp
 FTPS operation to FTP port
  </name>
  <command>
--m 5 -k ftps://%HOSTIP:%FTPPORT/path/to/file/405
+-m 5 -k ftps://%HOSTIP:%FTPPORT/path/to/file/%TESTNUMBER
 </command>
 </client>
 

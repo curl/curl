@@ -25,7 +25,7 @@ https Server-localhost0h-sv.pem
 HTTPS wrong subjectAltName but right CN
  </name>
  <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/311
+--cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost because we're checking the host name
 <precheck>

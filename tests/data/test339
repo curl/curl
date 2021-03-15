@@ -39,7 +39,7 @@ http
 Check if --etag-save saved correct etag to a file
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/339 --etag-save log/etag339
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-save log/etag%TESTNUMBER
 </command>
 </client>
 
@@ -47,13 +47,13 @@ http://%HOSTIP:%HTTPPORT/339 --etag-save log/etag339
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /339 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/etag339">
+<file name="log/etag%TESTNUMBER">
 W/"asdf"
 </file>
 </verify>
