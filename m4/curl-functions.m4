@@ -446,7 +446,6 @@ dnl Set up variable with list of headers that must be
 dnl included when time.h is to be included.
 
 AC_DEFUN([CURL_INCLUDES_TIME], [
-AC_REQUIRE([AC_HEADER_TIME])dnl
 curl_includes_time="\
 /* includes start */
 #ifdef HAVE_SYS_TYPES_H
