@@ -1321,7 +1321,8 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
        ;;
   esac ],
 
-  AC_TRY_RUN([ /* are AF_INET6 and sockaddr_in6 available? */
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+/* are AF_INET6 and sockaddr_in6 available? */
 #include <sys/types.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
@@ -1343,6 +1344,7 @@ main()
  else
    exit(0);
 }
+]])
 ],
   AC_MSG_RESULT(yes)
   ipv6=yes,
@@ -1359,7 +1361,7 @@ if test "$ipv6" = yes; then
   AC_SUBST(IPV6_ENABLED)
 
   AC_MSG_CHECKING([if struct sockaddr_in6 has sin6_scope_id member])
-  AC_TRY_COMPILE([
+  AC_COMPILE_IFELSE([ AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
@@ -1369,7 +1371,9 @@ if test "$ipv6" = yes; then
 #if defined (__TANDEM)
 # include <netinet/in6.h>
 #endif
-#endif] ,
+#endif
+]])
+] ,
   struct sockaddr_in6 s; s.sin6_scope_id = 0; , have_sin6_scope_id=yes)
   if test "$have_sin6_scope_id" = yes; then
     AC_MSG_RESULT([yes])
@@ -1751,15 +1755,19 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
       AC_MSG_CHECKING([for gdi32])
       my_ac_save_LIBS=$LIBS
       LIBS="-lgdi32 $LIBS"
-      AC_TRY_LINK([#include <windef.h>
-                   #include <wingdi.h>],
-                   [GdiFlush();],
-                   [ dnl worked!
-                   AC_MSG_RESULT([yes])],
-                   [ dnl failed, restore LIBS
-                   LIBS=$my_ac_save_LIBS
-                   AC_MSG_RESULT(no)]
-                  )
+      AC_LINK_IFELSE([ AC_LANG_PROGRAM([[
+        #include <windef.h>
+        #include <wingdi.h>
+        ]],
+        [[
+          GdiFlush();
+        ]])],
+        [ dnl worked!
+        AC_MSG_RESULT([yes])],
+        [ dnl failed, restore LIBS
+        LIBS=$my_ac_save_LIBS
+        AC_MSG_RESULT(no)]
+        )
       ;;
   esac
 
@@ -1857,13 +1865,11 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
        dnl still no, but what about with -ldl?
        AC_MSG_CHECKING([OpenSSL linking with -ldl])
        LIBS="$CLEANLIBS -lcrypto -ldl"
-       AC_TRY_LINK(
-       [
+       AC_LINK_IFELSE([ AC_LANG_PROGRAM([[
          #include <openssl/err.h>
-       ],
-       [
+       ]], [[
          ERR_clear_error();
-       ],
+       ]]) ],
        [
          AC_MSG_RESULT(yes)
          HAVECRYPTO="yes"
@@ -1875,13 +1881,12 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
 
          AC_MSG_CHECKING([OpenSSL linking with -ldl and -lpthread])
          LIBS="$CLEANLIBS -lcrypto -ldl -lpthread"
-         AC_TRY_LINK(
-         [
+         AC_LINK_IFELSE([
+           AC_LANG_PROGRAM([[
            #include <openssl/err.h>
-         ],
-         [
+         ]], [[
            ERR_clear_error();
-         ],
+         ]])],
          [
            AC_MSG_RESULT(yes)
            HAVECRYPTO="yes"
