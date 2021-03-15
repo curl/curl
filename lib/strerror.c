@@ -323,6 +323,9 @@ curl_easy_strerror(CURLcode error)
  case CURLE_PROXY:
     return "proxy handshake error";
 
+  case CURLE_OUTPUT_FILE_COULDNT_WRITE_FILE:
+    return "Couldn't write file";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:
