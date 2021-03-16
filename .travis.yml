@@ -26,7 +26,6 @@ cache:
   directories:
   - $HOME/wolfssl-4.7.0-stable
   - $HOME/mesalink-1.0.0
-  - $HOME/nghttp2-1.39.2
 
 env:
   global:
@@ -48,6 +47,7 @@ addons:
     - python-impacket
     - ninja-build
     - libgsasl7-dev
+    - libnghttp2-dev
 
 jobs:
   include:

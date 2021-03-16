@@ -175,16 +175,4 @@ if [ $TRAVIS_OS_NAME = linux ]; then
     sudo make install
 
   fi
-
-  if [ ! -e $HOME/nghttp2-1.39.2/Makefile ]; then
-    cd $HOME
-    curl -LO https://github.com/nghttp2/nghttp2/releases/download/v1.39.2/nghttp2-1.39.2.tar.gz
-    tar -xzf nghttp2-1.39.2.tar.gz
-    cd nghttp2-1.39.2
-    CXX="g++-8" CC="gcc-8" CFLAGS="" LDFLAGS="" LIBS="" ./configure --disable-threads --enable-app
-    make
-  fi
-
-  cd $HOME/nghttp2-1.39.2
-  sudo make install
 fi
