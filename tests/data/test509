@@ -19,7 +19,7 @@ http
 </features>
 # tool is what to use instead of 'curl'
 <tool>
-lib509
+lib%TESTNUMBER
 </tool>
 
 <name>

@@ -49,14 +49,14 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib598
+lib%TESTNUMBER
 </tool>
 
  <name>
 curl_easy_reset with referer and other strings set
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/598
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -64,14 +64,14 @@ http://%HOSTIP:%HTTPPORT/598
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /598 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: the-moo agent next generation
 Accept: */*
 Referer: http://example.com/the-moo
 Cookie: name=moo
 
-GET /598 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

@@ -51,7 +51,7 @@ http
 </server>
 # tool to use
 <tool>
-lib552
+lib%TESTNUMBER
 </tool>
 <features>
 !SSPI
@@ -62,23 +62,23 @@ proxy
 HTTP proxy auth Digest with 70K POST data from read callback
  </name>
  <command>
-http://test.remote.example.com/path/552 http://s1lly:pers0n@%HOSTIP:%HTTPPORT/
+http://test.remote.example.com/path/%TESTNUMBER http://s1lly:pers0n@%HOSTIP:%HTTPPORT/
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol nonewline="yes">
-POST http://test.remote.example.com/path/552 HTTP/1.1
+POST http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: test.remote.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 70000
 Content-Type: application/x-www-form-urlencoded
 
-%repeat[7000 x test data%00]%POST http://test.remote.example.com/path/552 HTTP/1.1
+%repeat[7000 x test data%00]%POST http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: test.remote.example.com
-Proxy-Authorization: Digest username="s1lly", realm="something fun to read", nonce="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", uri="/path/552", response="be7aedc47d821b6d847c445ded782c43"
+Proxy-Authorization: Digest username="s1lly", realm="something fun to read", nonce="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", uri="/path/%TESTNUMBER", response="be7aedc47d821b6d847c445ded782c43"
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 70000

@@ -38,7 +38,7 @@ lib585
 FTP and open/close socket callbacks
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/586
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -51,8 +51,8 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 586
-RETR 586
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

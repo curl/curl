@@ -70,7 +70,7 @@ http
 </server>
 # tool to use
 <tool>
-lib590
+lib%TESTNUMBER
 </tool>
 <features>
 NTLM
@@ -89,7 +89,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://test.remote.example.com/path/590 http://%HOSTIP:%HTTPPORT
+http://test.remote.example.com/path/%TESTNUMBER http://%HOSTIP:%HTTPPORT
 </command>
 <precheck>
 chkhostname curlhost
@@ -100,18 +100,18 @@ chkhostname curlhost
 <verify>
 
 <protocol>
-GET http://test.remote.example.com/path/590 HTTP/1.1
+GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: test.remote.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://test.remote.example.com/path/590 HTTP/1.1
+GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: test.remote.example.com
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://test.remote.example.com/path/590 HTTP/1.1
+GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: test.remote.example.com
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAAAgACAHAAAAAIAAgAcgAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAAIWYOdZV0iKA8ytf+dU+Bz9TpMJ4mBKu221lY3VybGhvc3Q=
 Accept: */*

@@ -63,14 +63,14 @@ crypto
 </features>
 # tool is what to use instead of 'curl'
 <tool>
-lib565
+lib%TESTNUMBER
 </tool>
 
  <name>
 send HTTP POST using read callback, chunked transfer-encoding and Digest
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/565
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -78,7 +78,7 @@ http://%HOSTIP:%HTTPPORT/565
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-POST /565 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked
@@ -86,9 +86,9 @@ Content-Type: application/x-www-form-urlencoded
 
 0
 
-POST /565 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="foo", realm="testrealm", nonce="1053604144", uri="/565", response="877424f750af047634dbd94f9933217b"
+Authorization: Digest username="foo", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="877424f750af047634dbd94f9933217b"
 Accept: */*
 Transfer-Encoding: chunked
 Content-Type: application/x-www-form-urlencoded

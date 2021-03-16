@@ -66,17 +66,17 @@ Informational: Empty Options Response
 rtsp
 </server>
 <tool>
-lib572
+lib%TESTNUMBER
 </tool>
 
 <name>
 RTSP GET_PARAMETER (Put/Heartbeat/Post)
 </name>
 <command>
-rtsp://%HOSTIP:%RTSPPORT/572
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 </command>
 # file written before test command runs
-<file name="log/file572.txt">
+<file name="log/file%TESTNUMBER.txt">
 scale
 speed
 </file>
@@ -87,11 +87,11 @@ speed
 ^If-Modified-Since:.*
 </strip>
 <protocol>
-SETUP rtsp://%HOSTIP:%RTSPPORT/5720001 RTSP/1.0
+SETUP rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 RTSP/1.0
 CSeq: 1
 Transport: Planes/Trains/Automobiles
 
-GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/5720002 RTSP/1.0
+GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0002 RTSP/1.0
 CSeq: 2
 Session: getparams-test
 Content-Length: 12
@@ -99,11 +99,11 @@ Content-Type: text/parameters
 
 scale
 speed
-GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/5720003 RTSP/1.0
+GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0003 RTSP/1.0
 CSeq: 3
 Session: getparams-test
 
-GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/5720004 RTSP/1.0
+GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0004 RTSP/1.0
 CSeq: 4
 Session: getparams-test
 Content-Length: 24
@@ -111,7 +111,7 @@ Content-Type: text/parameters
 
 packets_received
 jitter
-OPTIONS rtsp://%HOSTIP:%RTSPPORT/5720005 RTSP/1.0
+OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0005 RTSP/1.0
 CSeq: 5
 Session: getparams-test
 

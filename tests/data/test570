@@ -43,14 +43,14 @@ CSeq: 1000
 rtsp
 </server>
 <tool>
-lib570
+lib%TESTNUMBER
 </tool>
 
 <name>
 RTSP CSeq and Session Mismatch checks
 </name>
 <command>
-rtsp://%HOSTIP:%RTSPPORT/570
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -59,14 +59,14 @@ rtsp://%HOSTIP:%RTSPPORT/570
 ^If-Modified-Since:.*
 </strip>
 <protocol>
-OPTIONS rtsp://%HOSTIP:%RTSPPORT/5700001 RTSP/1.0
+OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 RTSP/1.0
 CSeq: 1
 
-SETUP rtsp://%HOSTIP:%RTSPPORT/5700002 RTSP/1.0
+SETUP rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0002 RTSP/1.0
 CSeq: 999
 Transport: RAW/RAW/UDP;unicast;client_port=3056-3057
 
-PLAY rtsp://%HOSTIP:%RTSPPORT/5700003 RTSP/1.0
+PLAY rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0003 RTSP/1.0
 CSeq: 1000
 Session: asdf
 

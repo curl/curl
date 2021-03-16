@@ -1,7 +1,7 @@
 <testcase>
 #
 # For this test the server rejects the EPRT command,
-# code in lib591 makes use of curl_multi_timeout()
+# code in lib%TESTNUMBER makes use of curl_multi_timeout()
 # and server does not establish data connection.
 #
 <info>
@@ -31,16 +31,16 @@ REPLY EPRT 500 we don't like EPRT now
 ftp
 </server>
 <tool>
-lib591
+lib%TESTNUMBER
 </tool>
  <name>
 FTP multi PORT and 425 on upload
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/path/591 %FTPTIME2 log/upload591
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %FTPTIME2 log/upload%TESTNUMBER
 </command>
-<file name="log/upload591">
-Moooooooooooo for 591
+<file name="log/upload%TESTNUMBER">
+Moooooooooooo for %TESTNUMBER
  upload this
 </file>
 </client>
@@ -60,7 +60,7 @@ CWD path
 EPRT |1|
 PORT
 TYPE I
-STOR 591
+STOR %TESTNUMBER
 QUIT
 </protocol>
 # CURLE_FTP_ACCEPT_FAILED = 10

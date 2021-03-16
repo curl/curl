@@ -22,7 +22,7 @@ ftplistparser
 ftp
 </server>
 <tool>
-lib574
+lib%TESTNUMBER
 </tool>
 <name>
 FTP wildcard download - changed fnmatch, 2x perform (Unix LIST response)

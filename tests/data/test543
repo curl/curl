@@ -12,7 +12,7 @@ curl_easy_escape
 none
 </server>
 <tool>
-lib543
+lib%TESTNUMBER
 </tool>
  <name>
 curl_easy_escape
