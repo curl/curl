@@ -1372,15 +1372,15 @@ if test "$ipv6" = yes; then
 # include <netinet/in6.h>
 #endif
 #endif
-]])
-] ,
-  struct sockaddr_in6 s; s.sin6_scope_id = 0; , have_sin6_scope_id=yes)
-  if test "$have_sin6_scope_id" = yes; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID, 1, [Define to 1 if struct sockaddr_in6 has the sin6_scope_id member])
-  else
+]], [[
+  struct sockaddr_in6 s;
+  s.sin6_scope_id = 0;
+]])], [
+  AC_MSG_RESULT([yes])
+  AC_DEFINE(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID, 1, [Define to 1 if struct sockaddr_in6 has the sin6_scope_id member])
+ ], [
     AC_MSG_RESULT([no])
-  fi
+ ])
 fi
 
 dnl **********************************************************************
