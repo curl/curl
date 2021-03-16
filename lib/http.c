@@ -1095,6 +1095,14 @@ static bool http_should_fail(struct Curl_easy *data)
     return FALSE;
 
   /*
+  ** A 416 response to a resume request is presumably because the file is
+  ** already completely downloaded and thus not actually a fail.
+  */
+  if(data->state.resume_from && data->state.httpreq == HTTPREQ_GET &&
+     httpcode == 416)
+    return FALSE;
+
+  /*
   ** Any code >= 400 that's not 401 or 407 is always
   ** a terminal error
   */
