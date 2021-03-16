@@ -4,7 +4,7 @@ curl and libcurl 7.76.0
  Command line options:         240
  curl_easy_setopt() options:   288
  Public functions in libcurl:  85
- Contributors:                 2345
+ Contributors:                 2348
 
 This release includes the following changes:
 
@@ -29,6 +29,8 @@ This release includes the following bugfixes:
  o ci: stop building on freebsd-12-1 [38]
  o cmake: fix import library name for non-MS compiler on Windows [10]
  o cmake: use CMAKE_INSTALL_INCLUDEDIR indirection [49]
+ o config: fix building SMB with configure using Win32 Crypto [91]
+ o config: fix detection of restricted Windows App environment
  o configure: fail if --with-quiche is used and quiche isn't found [48]
  o configure: make hyper opt-in, and fail if missing [53]
  o configure: only add OpenSSL paths if they are defined [68]
@@ -39,6 +41,7 @@ This release includes the following bugfixes:
  o curl_multibyte: fall back to local code page stat/access on Windows [8]
  o curl_url_set.3: mention CURLU_PATH_AS_IS [13]
  o CURLOPT_QUOTE.3: clarify that libcurl doesn't parse what's sent [16]
+ o docs/HTTP2: remove the outdated remark about multiplexing for the tool
  o docs/Makefile.inc: format to be update-friendly [11]
  o docs: add CURLOPT_CURLU to 'See also' in curl_url_ functions [52]
  o docs: add missing Arg tag to --stderr [58]
@@ -52,11 +55,17 @@ This release includes the following bugfixes:
  o FTP: allow SIZE to fail when doing (resumed) upload [78]
  o ftp: avoid SIZE when asking for a TYPE A file [23]
  o ftp: fix Codacy/cppcheck warning about null pointer arithmetic [34]
+ o ftp: fix memory leak in ftp_done [96]
  o ftp: never set data->set.ftp_append outside setopt [14]
+ o gen.pl: quote "bare" minuses in the nroff curl.1 [92]
+ o github: add torture-ftp for FTP-only torture testing [94]
  o gnutls: assume nettle crypto support [33]
  o gskit: correct the gskit_send() prototype [21]
  o hostip: fix build with sync resolver [20]
  o hostip: fix crash in sync resolver builds that use DOH [12]
+ o hsts: remove unused defines [93]
+ o http2: don't set KEEP_SEND when there's no more data to be sent [90]
+ o http2: fail if connection terminated without END_STREAM [97]
  o http: do not add a referrer header with empty value [44]
  o http: remove superfluous NULL assign [75]
  o http: use credentials from transfer, not connection [25]
@@ -85,6 +94,7 @@ This release includes the following bugfixes:
  o runtests.pl: add %TESTNUMBER variable to make copying tests more convenient
  o runtests.pl: add a -P option to specify an external proxy
  o runtests.pl: kill processes locking test log files [62]
+ o rustls: allocate a buffer for TLS data. [88]
  o rustls: support CURLOPT_SSL_VERIFYPEER [55]
  o setopt: error on CURLOPT_HTTP09_ALLOWED set true with Hyper [77]
  o test1188: change error to check for: --fail HTTP status [26]
@@ -96,7 +106,12 @@ This release includes the following bugfixes:
  o tool_help: add missing argument for --create-file-mode [18]
  o tool_help: Increase space between option and description [64]
  o tool_operate: bail if set CURLOPT_HTTP09_ALLOWED returns error [76]
+ o travis: add a rustls build [89]
+ o travis: bump wolfssl to 4.7.0
+ o travis: only build wolfssl when needed [85]
+ o travis: split "torture" into a separate "events" build [95]
  o travis: switch ngtcp2 build over to quictls [73]
+ o travis: use ubuntu nghttp2 package instead of build our own [80]
  o url.c: use consistent error message for failed resolve
  o url: fix memory leak if OOM in the HSTS handling [32]
  o url: fix possible use-after-free in default protocol [42]
@@ -115,17 +130,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Ádler Jonas Gross, Alex Xu, Amaury Denoyelle,
+  Ádler Jonas Gross, Alejandro Colomar, Alex Xu, Amaury Denoyelle,
   arvids-kokins-bidstack on github, awesomenode on github, Benbuck Nason,
   Bodo Bergmann, Carl Zogheib, Dan Fandrich, Daniel Gustafsson,
   Daniel Stenberg, David Demelier, David Goerger, ebejan on github,
   Emil Engler, Fabian Keil, Firefox OS, Gisle Vanem, Gregor Jasny,
   Ikko Ashimine, Jack Boos Yu, Jacob Hoffman-Andrews, Jean-Philippe Menil,
-  Johannes Lesr, Jon Rumsey, Jordan Brown, Joseph Chen, Jun-ya Kato,
-  kokke on github, Lawrence Gripper, Manuj Bhatia, Marcel Raad, Marc Hörsken,
-  Michael Hordijk, Ray Satiro, Sergei Nikulov, Simon Josefsson, Stephan Szabo,
-  Viktor Szakats, Vincent Torri, Vladimir Varlamov, ZimCodes on github, ウさん
-  (43 contributors)
+  Joel Teichroeb, Johannes Lesr, Jon Rumsey, Jordan Brown, Joseph Chen,
+  Jun-ya Kato, kokke on github, Lawrence Gripper, Manuj Bhatia, Marcel Raad,
+  Marc Hörsken, Michael Hordijk, Ray Satiro, Robert Ronto, Sergei Nikulov,
+  Simon Josefsson, Stephan Szabo, Viktor Szakats, Vincent Torri,
+  Vladimir Varlamov, ZimCodes on github, ウさん
+  (46 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -208,9 +224,21 @@ References to bug reports and discussions on issues:
  [77] = https://curl.se/bug/?i=6727
  [78] = https://curl.se/bug/?i=6715
  [79] = https://curl.se/bug/?i=6702
+ [80] = https://curl.se/bug/?i=6751
  [81] = https://curl.se/bug/?i=6716
  [82] = https://curl.se/bug/?i=6713
  [83] = https://curl.se/bug/?i=6710
  [84] = https://curl.se/bug/?i=6707
+ [85] = https://curl.se/bug/?i=6751
  [86] = https://curl.se/bug/?i=6703
  [87] = https://curl.se/bug/?i=6664
+ [88] = https://curl.se/bug/?i=6742
+ [89] = https://curl.se/bug/?i=6750
+ [90] = https://curl.se/bug/?i=6747
+ [91] = https://curl.se/bug/?i=6277
+ [92] = https://curl.se/bug/?i=6698
+ [93] = https://curl.se/bug/?i=6741
+ [94] = https://curl.se/bug/?i=6728
+ [95] = https://curl.se/bug/?i=6728
+ [96] = https://curl.se/bug/?i=6737
+ [97] = https://curl.se/bug/?i=6736
