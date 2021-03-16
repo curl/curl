@@ -64,7 +64,7 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<stderr>
+<stderr mode="text">
 URL: http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 0
 </stderr>
