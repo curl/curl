@@ -126,6 +126,17 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
 fi
 
+if [ "$TRAVIS_OS_NAME" = linux -a "$RUSTLS" ]; then
+  cd $HOME
+  git clone --depth=1 --recursive https://github.com/abetterinternet/crustls.git
+  curl https://sh.rustup.rs -sSf | sh -s -- -y
+  source $HOME/.cargo/env
+  cargo install cbindgen
+  cd $HOME/crustls
+  make
+  make DESTDIR=$HOME/crust install
+fi
+
 # Install common libraries.
 # The library build directories are set to be cached by .travis.yml. If you are
 # changing a build directory name below (eg a version change) then you must

@@ -125,6 +125,16 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
+    - T=debug RUSTLS="yes" C="--with-rustls=$HOME/crust --without-ssl" NOTESTS=1
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
     - T=novalgrind LIBRESSL=yes C="--with-ssl=$HOME/libressl" LD_LIBRARY_PATH=/home/travis/libressl/lib:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
   - env:
