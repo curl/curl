@@ -126,11 +126,7 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
 fi
 
-# Install common libraries.
-# The library build directories are set to be cached by .travis.yml. If you are
-# changing a build directory name below (eg a version change) then you must
-# change it in .travis.yml `cache: directories:` as well.
-if [ $TRAVIS_OS_NAME = linux ]; then
+if [ $TRAVIS_OS_NAME = linux -a "$WOLFSSL" ]; then
   if [ ! -e $HOME/wolfssl-4.4.0-stable/Makefile ]; then
     cd $HOME
     curl -LO https://github.com/wolfSSL/wolfssl/archive/v4.4.0-stable.tar.gz
@@ -144,6 +140,13 @@ if [ $TRAVIS_OS_NAME = linux ]; then
 
   cd $HOME/wolfssl-4.4.0-stable
   sudo make install
+fi
+
+# Install common libraries.
+# The library build directories are set to be cached by .travis.yml. If you are
+# changing a build directory name below (eg a version change) then you must
+# change it in .travis.yml `cache: directories:` as well.
+if [ $TRAVIS_OS_NAME = linux ]; then
 
   if [ "$MESALINK" = "yes" ]; then
     if [ ! -e $HOME/mesalink-1.0.0/Makefile ]; then

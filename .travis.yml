@@ -160,7 +160,7 @@ jobs:
         - libtasn1-6-dev
         - nettle-dev
   - env:
-    - T=debug-wolfssl C="--with-wolfssl --without-ssl"
+    - T=debug-wolfssl C="--with-wolfssl --without-ssl" WOLFSSL="yes"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
