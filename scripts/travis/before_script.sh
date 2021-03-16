@@ -127,18 +127,18 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
 fi
 
 if [ $TRAVIS_OS_NAME = linux -a "$WOLFSSL" ]; then
-  if [ ! -e $HOME/wolfssl-4.4.0-stable/Makefile ]; then
+  if [ ! -e $HOME/wolfssl-4.7.0-stable/Makefile ]; then
     cd $HOME
-    curl -LO https://github.com/wolfSSL/wolfssl/archive/v4.4.0-stable.tar.gz
-    tar -xzf v4.4.0-stable.tar.gz
-    cd wolfssl-4.4.0-stable
+    curl -LO https://github.com/wolfSSL/wolfssl/archive/v4.7.0-stable.tar.gz
+    tar -xzf v4.7.0-stable.tar.gz
+    cd wolfssl-4.7.0-stable
     ./autogen.sh
     ./configure --enable-tls13 --enable-all
     touch wolfssl/wolfcrypt/fips.h
     make
   fi
 
-  cd $HOME/wolfssl-4.4.0-stable
+  cd $HOME/wolfssl-4.7.0-stable
   sudo make install
 fi
 
