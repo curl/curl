@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,7 +28,6 @@
 
 #include "vauth/vauth.h"
 #include "urldata.h"
-#include "curl_base64.h"
 #include "curl_ntlm_core.h"
 #include "warnless.h"
 #include "curl_multibyte.h"
@@ -78,9 +77,7 @@ bool Curl_auth_is_ntlm_supported(void)
  * service [in]     - The service type such as http, smtp, pop or imap.
  * host    [in]     - The host name.
  * ntlm    [in/out] - The NTLM data struct being used and modified.
- * outptr  [in/out] - The address where a pointer to newly allocated memory
- *                    holding the result will be stored upon completion.
- * outlen  [out]    - The length of the output message.
+ * out     [out]    - The result storage.
  *
  * Returns CURLE_OK on success.
  */
@@ -90,7 +87,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              const char *service,
                                              const char *host,
                                              struct ntlmdata *ntlm,
-                                             char **outptr, size_t *outlen)
+                                             struct bufref *out)
 {
   PSecPkgInfo SecurityPackage;
   SecBuffer type_1_buf;
@@ -181,9 +178,9 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED)
     return CURLE_AUTH_ERROR;
 
-  /* Base64 encode the response */
-  return Curl_base64_encode(data, (char *) ntlm->output_token,
-                            type_1_buf.cbBuffer, outptr, outlen);
+  /* Return the response. */
+  Curl_bufref_set(out, ntlm->output_token, type_1_buf.cbBuffer, NULL);
+  return CURLE_OK;
 }
 
 /*
@@ -194,42 +191,34 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
  * Parameters:
  *
  * data     [in]     - The session handle.
- * type2msg [in]     - The base64 encoded type-2 message.
+ * type2    [in]     - The type-2 message.
  * ntlm     [in/out] - The NTLM data struct being used and modified.
  *
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
-                                             const char *type2msg,
+                                             const struct bufref *type2,
                                              struct ntlmdata *ntlm)
 {
-  CURLcode result = CURLE_OK;
-  unsigned char *type2 = NULL;
-  size_t type2_len = 0;
-
 #if defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void) data;
 #endif
 
-  /* Decode the base-64 encoded type-2 message */
-  if(strlen(type2msg) && *type2msg != '=') {
-    result = Curl_base64_decode(type2msg, &type2, &type2_len);
-    if(result)
-      return result;
-  }
-
   /* Ensure we have a valid type-2 message */
-  if(!type2) {
+  if(!Curl_bufref_len(type2)) {
     infof(data, "NTLM handshake failure (empty type-2 message)\n");
-
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
-  /* Simply store the challenge for use later */
-  ntlm->input_token = type2;
-  ntlm->input_token_len = type2_len;
+  /* Store the challenge for later use */
+  ntlm->input_token = malloc(Curl_bufref_len(type2) + 1);
+  if(!ntlm->input_token)
+    return CURLE_OUT_OF_MEMORY;
+  memcpy(ntlm->input_token, Curl_bufref_ptr(type2), Curl_bufref_len(type2));
+  ntlm->input_token[Curl_bufref_len(type2)] = '\0';
+  ntlm->input_token_len = Curl_bufref_len(type2);
 
-  return result;
+  return CURLE_OK;
 }
 
 /*
@@ -245,9 +234,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
  * userp   [in]     - The user name in the format User or Domain\User.
  * passwdp [in]     - The user's password.
  * ntlm    [in/out] - The NTLM data struct being used and modified.
- * outptr  [in/out] - The address where a pointer to newly allocated memory
- *                    holding the result will be stored upon completion.
- * outlen  [out]    - The length of the output message.
+ * out     [out]    - The result storage.
  *
  * Returns CURLE_OK on success.
  */
@@ -255,7 +242,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,
-                                             char **outptr, size_t *outlen)
+                                             struct bufref *out)
 {
   CURLcode result = CURLE_OK;
   SecBuffer type_2_bufs[2];
@@ -331,12 +318,9 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     return CURLE_AUTH_ERROR;
   }
 
-  /* Base64 encode the response */
-  result = Curl_base64_encode(data, (char *) ntlm->output_token,
-                              type_3_buf.cbBuffer, outptr, outlen);
-
+  /* Return the response. */
+  result = Curl_bufref_memdup(out, ntlm->output_token, type_3_buf.cbBuffer);
   Curl_auth_cleanup_ntlm(ntlm);
-
   return result;
 }
 
