@@ -70,6 +70,12 @@ if [ "$T" = "debug-mesalink" ]; then
   make "TFLAGS=-n !313 !410 !3001" test-nonflaky
 fi
 
+if [ "$T" = "debug-rustls" ]; then
+  ./configure --enable-debug --enable-werror $C
+  make
+  make "TFLAGS=HTTPS !313" test-nonflaky
+fi
+
 if [ "$T" = "novalgrind" ]; then
   ./configure --enable-werror $C
   make
