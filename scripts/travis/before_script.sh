@@ -126,9 +126,9 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
 fi
 
-if [ "$TRAVIS_OS_NAME" = linux -a "$RUSTLS" ]; then
+if [ "$TRAVIS_OS_NAME" = linux -a "$RUSTLS_VERSION" ]; then
   cd $HOME
-  git clone --depth=1 --recursive https://github.com/abetterinternet/crustls.git
+  git clone --depth=1 --recursive https://github.com/abetterinternet/crustls.git -b "$RUSTLS_VERSION"
   curl https://sh.rustup.rs -sSf | sh -s -- -y
   source $HOME/.cargo/env
   cargo install cbindgen

@@ -80,6 +80,7 @@ EXTRA_DIST =                                    \
  PARALLEL-TRANSFERS.md                          \
  README.md                                      \
  RELEASE-PROCEDURE.md                           \
+ RUSTLS.md                                      \
  ROADMAP.md                                     \
  SECURITY-PROCESS.md                            \
  SSL-PROBLEMS.md                                \
