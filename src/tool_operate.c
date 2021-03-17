@@ -2634,6 +2634,17 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
       }
 #endif
 
+      {
+        int i;
+        fprintf(stderr, "\n");
+        for(i = 0; i < argc; ++i) {
+          char *p = curlx_convert_tchar_to_UTF8(argv[i]);
+          fprintf(stderr, "DEBUG: argv[%d]: %s\n", i, p);
+          curlx_unicodefree(p);
+        }
+        fprintf(stderr, "\n");
+      }
+
       /* Perform the main operations */
       if(!result) {
         size_t count = 0;
