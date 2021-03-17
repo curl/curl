@@ -82,6 +82,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   struct OperationConfig *operation = global->last;
   char *pathalloc = NULL;
 
+  fprintf(stderr, "DEBUG: parseconfig \"%s\"\n",
+    filename ? filename : "(null)");
+
   if(!filename || !*filename) {
     /* NULL or no file name attempts to load .curlrc from the homedir! */
 
@@ -89,6 +92,8 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #ifndef WIN32
     if(home) {
       pathalloc = curl_maprintf("%s%s.curlrc", home, DIR_CHAR);
+      fprintf(stderr, "DEBUG: pathalloc: %s\n",
+        pathalloc ? pathalloc : "(null)");
       if(!pathalloc) {
         free(home);
         return 1; /* out of memory */
@@ -130,8 +135,10 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   }
 
   if(!file && filename) { /* no need to fopen() again */
-    if(strcmp(filename, "-"))
+    if(strcmp(filename, "-")) {
       file = fopen(filename, FOPEN_READTEXT);
+      fprintf(stderr, "DEBUG: file: %p\n", file);
+    }
     else
       file = stdin;
   }

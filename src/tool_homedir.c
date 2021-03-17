@@ -77,16 +77,24 @@ char *homedir(const char *fname)
 {
   char *home;
 
+  fprintf(stderr, "DEBUG: homedir(\"%s\")\n", fname ? fname : "(null)");
+
   home = GetEnv("CURL_HOME");
+  fprintf(stderr, "DEBUG: CURL_HOME: %s\n", home ? home : "(null)");
   if(home)
     return home;
 
   if(fname) {
     home = GetEnv("XDG_CONFIG_HOME");
+    fprintf(stderr, "DEBUG: XDG_CONFIG_HOME: %s\n", home ? home : "(null)");
     if(home) {
       char *c = curl_maprintf("%s" DIR_CHAR "%s", home, fname);
+      fprintf(stderr, "DEBUG: c: %s\n", c ? c : "(null)");
       if(c) {
         int fd = open(c, O_RDONLY);
+        fprintf(stderr, "DEBUG: fd: %d\n", fd);
+        if(fd == -1)
+          fprintf(stderr, "DEBUG: errno: %d\n", errno);
         curl_free(c);
         if(fd >= 0) {
           close(fd);
