@@ -3757,6 +3757,12 @@ sub singletest {
             }
         }
     }
+
+    #
+    # Dump the environment
+    #
+    print "\n\n"; print "$_ => $ENV{$_}\n" for (sort keys %ENV); print "\n\n";
+
     if($use_external_proxy) {
         $ENV{http_proxy} = $proxy_address;
         $ENV{HTTPS_PROXY} = $proxy_address;
@@ -5627,6 +5633,11 @@ EOHELP
     }
     shift @ARGV;
 }
+
+#
+# Override to test test433
+#
+push @testthis, 433;
 
 if(!$randseed) {
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
