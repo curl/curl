@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -153,7 +153,7 @@ CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
           msnprintf(dirbuildup, outlen, "%s%s", DIR_CHAR, tempdir);
       }
       /* Create directory. Ignore access denied error to allow traversal. */
-      if(!skip && (-1 == mkdir(dirbuildup, (mode_t)0000750)) &&
+      if(!skip && (-1 == mkdir(dirbuildup, (mode_t)0000777)) &&
          (errno != EACCES) && (errno != EEXIST)) {
         show_dir_errno(errors, dirbuildup);
         result = CURLE_WRITE_ERROR;
