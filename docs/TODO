@@ -35,6 +35,7 @@
  1.16 Try to URL encode given URL
  1.17 Add support for IRIs
  1.18 try next proxy if one doesn't work
+ 1.19 provide timing info for each redirect
  1.20 SRV and URI DNS records
  1.22 CURLINFO_PAUSE_STATE
  1.23 Offer API to flush the connection pool
@@ -349,6 +350,15 @@
  using PACs.
 
  https://github.com/curl/curl/issues/896
+
+1.19 provide timing info for each redirect
+
+ curl and libcurl provide timing information via a set of different
+ time-stamps (CURLINFO_*_TIME). When curl is following redirects, those
+ returned time value are the accumulated sums. An improvement could be to
+ offer separate timings for each redirect.
+
+ https://github.com/curl/curl/issues/6743
 
 1.20 SRV and URI DNS records
 
