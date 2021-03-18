@@ -112,7 +112,7 @@ cr_recv(struct Curl_easy *data, int sockindex,
 
   tls_bytes_read = sread(sockfd, backend->tlsbuf, TLSBUF_SIZE);
   if(tls_bytes_read == 0) {
-    failf(data, "EOF in sread");
+    failf(data, "connection closed without TLS close_notify alert");
     *err = CURLE_READ_ERROR;
     return -1;
   }
@@ -163,7 +163,11 @@ cr_recv(struct Curl_easy *data, int sockindex,
       (uint8_t *)plainbuf + plain_bytes_copied,
       plainlen - plain_bytes_copied,
       &n);
-    if(rresult != RUSTLS_RESULT_OK) {
+    if(rresult == RUSTLS_RESULT_ALERT_CLOSE_NOTIFY) {
+      *err = CURLE_OK;
+      return 0;
+    }
+    else if(rresult != RUSTLS_RESULT_OK) {
       failf(data, "error in rustls_client_session_read");
       *err = CURLE_READ_ERROR;
       return -1;
