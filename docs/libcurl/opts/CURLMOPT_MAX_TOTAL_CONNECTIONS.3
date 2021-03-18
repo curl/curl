@@ -42,7 +42,7 @@ that happens, the \fICURLOPT_TIMEOUT_MS(3)\fP timeout will be counted
 inclusive of the waiting time, meaning that if you set a too narrow timeout in
 such a case the transfer might never even start before it times out.
 
-Even in the queued up situation, the \fPCURLOPT_CONNECTTIMEOUT_MS(3)\fP
+Even in the queued up situation, the \fICURLOPT_CONNECTTIMEOUT_MS(3)\fP
 timeout is however treated as a per-connect timeout.
 .SH DEFAULT
 The default value is 0, which means that there is no limit. It is then simply
