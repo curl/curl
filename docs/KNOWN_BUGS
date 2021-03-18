@@ -114,6 +114,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.12 'no_proxy' string-matches IPv6 numerical addresses
  11.13 wakeup socket disconnect causes havoc
  11.14 Multi perform hangs waiting for threaded resolver
+ 11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
 
  12. LDAP
  12.1 OpenLDAP hangs after returning results
@@ -866,6 +867,15 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/2975 and
  https://github.com/curl/curl/issues/4852
+
+11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
+
+ When libcurl creates sockets with socketpair(), those are not "exposed" in
+ CURLOPT_OPENSOCKETFUNCTION and therefore might surprise and be unknown to
+ applications that expects and wants all sockets known beforehand. One way to
+ address this issue is to introduce a CURLOPT_OPENSOCKETPAIRFUNCTION callback.
+
+ https://github.com/curl/curl/issues/5747
 
 12. LDAP
 
