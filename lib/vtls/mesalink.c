@@ -261,7 +261,9 @@ mesalink_connect_step1(struct Curl_easy *data,
     void *ssl_sessionid = NULL;
 
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(data, conn, &ssl_sessionid, NULL, sockindex)) {
+    if(!Curl_ssl_getsessionid(data, conn,
+                              SSL_IS_PROXY() ? TRUE : FALSE,
+                              &ssl_sessionid, NULL, sockindex)) {
       /* we got a session id, use it! */
       if(!SSL_set_session(BACKEND->handle, ssl_sessionid)) {
         Curl_ssl_sessionid_unlock(data);
@@ -345,13 +347,14 @@ mesalink_connect_step3(struct connectdata *conn, int sockindex)
     bool incache;
     SSL_SESSION *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;
+    bool isproxy = SSL_IS_PROXY() ? TRUE : FALSE;
 
     our_ssl_sessionid = SSL_get_session(BACKEND->handle);
 
     Curl_ssl_sessionid_lock(data);
     incache =
-      !(Curl_ssl_getsessionid(data, conn,
-                              &old_ssl_sessionid, NULL, sockindex));
+      !(Curl_ssl_getsessionid(data, conn, isproxy, &old_ssl_sessionid, NULL,
+                              sockindex));
     if(incache) {
       if(old_ssl_sessionid != our_ssl_sessionid) {
         infof(data, "old SSL session ID is stale, removing\n");
@@ -361,8 +364,9 @@ mesalink_connect_step3(struct connectdata *conn, int sockindex)
     }
 
     if(!incache) {
-      result = Curl_ssl_addsessionid(
-        data, conn, our_ssl_sessionid, 0 /* unknown size */, sockindex);
+      result =
+        Curl_ssl_addsessionid(data, conn, isproxy, our_ssl_sessionid, 0,
+                              sockindex);
       if(result) {
         Curl_ssl_sessionid_unlock(data);
         failf(data, "failed to store ssl session");

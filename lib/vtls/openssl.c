@@ -393,12 +393,23 @@ static int ossl_get_ssl_conn_index(void)
  */
 static int ossl_get_ssl_sockindex_index(void)
 {
-  static int ssl_ex_data_sockindex_index = -1;
-  if(ssl_ex_data_sockindex_index < 0) {
-    ssl_ex_data_sockindex_index = SSL_get_ex_new_index(0, NULL, NULL, NULL,
-        NULL);
+  static int sockindex_index = -1;
+  if(sockindex_index < 0) {
+    sockindex_index = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
   }
-  return ssl_ex_data_sockindex_index;
+  return sockindex_index;
+}
+
+/* Return an extra data index for proxy boolean.
+ * This index can be used with SSL_get_ex_data() and SSL_set_ex_data().
+ */
+static int ossl_get_proxy_index(void)
+{
+  static int proxy_index = -1;
+  if(proxy_index < 0) {
+    proxy_index = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
+  }
+  return proxy_index;
 }
 
 static int passwd_callback(char *buf, int num, int encrypting,
@@ -1174,7 +1185,7 @@ static int ossl_init(void)
 
   /* Initialize the extra data indexes */
   if(ossl_get_ssl_data_index() < 0 || ossl_get_ssl_conn_index() < 0 ||
-     ossl_get_ssl_sockindex_index() < 0)
+     ossl_get_ssl_sockindex_index() < 0 || ossl_get_proxy_index() < 0)
     return 0;
 
   return 1;
@@ -2432,8 +2443,10 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   int data_idx = ossl_get_ssl_data_index();
   int connectdata_idx = ossl_get_ssl_conn_index();
   int sockindex_idx = ossl_get_ssl_sockindex_index();
+  int proxy_idx = ossl_get_proxy_index();
+  bool isproxy;
 
-  if(data_idx < 0 || connectdata_idx < 0 || sockindex_idx < 0)
+  if(data_idx < 0 || connectdata_idx < 0 || sockindex_idx < 0 || proxy_idx < 0)
     return 0;
 
   conn = (struct connectdata*) SSL_get_ex_data(ssl, connectdata_idx);
@@ -2446,13 +2459,18 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   sockindex_ptr = (curl_socket_t*) SSL_get_ex_data(ssl, sockindex_idx);
   sockindex = (int)(sockindex_ptr - conn->sock);
 
+  isproxy = SSL_get_ex_data(ssl, proxy_idx) ? TRUE : FALSE;
+
   if(SSL_SET_OPTION(primary.sessionid)) {
     bool incache;
     void *old_ssl_sessionid = NULL;
 
     Curl_ssl_sessionid_lock(data);
-    incache = !(Curl_ssl_getsessionid(data, conn, &old_ssl_sessionid, NULL,
-                                      sockindex));
+    if(isproxy)
+      incache = FALSE;
+    else
+      incache = !(Curl_ssl_getsessionid(data, conn, isproxy,
+                                        &old_ssl_sessionid, NULL, sockindex));
     if(incache) {
       if(old_ssl_sessionid != ssl_sessionid) {
         infof(data, "old SSL session ID is stale, removing\n");
@@ -2462,8 +2480,8 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
     }
 
     if(!incache) {
-      if(!Curl_ssl_addsessionid(data, conn, ssl_sessionid,
-                                      0 /* unknown size */, sockindex)) {
+      if(!Curl_ssl_addsessionid(data, conn, isproxy, ssl_sessionid,
+                                0 /* unknown size */, sockindex)) {
         /* the session has been put into the session cache */
         res = 1;
       }
@@ -3193,17 +3211,27 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
     int data_idx = ossl_get_ssl_data_index();
     int connectdata_idx = ossl_get_ssl_conn_index();
     int sockindex_idx = ossl_get_ssl_sockindex_index();
+    int proxy_idx = ossl_get_proxy_index();
 
-    if(data_idx >= 0 && connectdata_idx >= 0 && sockindex_idx >= 0) {
+    if(data_idx >= 0 && connectdata_idx >= 0 && sockindex_idx >= 0 &&
+       proxy_idx >= 0) {
       /* Store the data needed for the "new session" callback.
        * The sockindex is stored as a pointer to an array element. */
       SSL_set_ex_data(backend->handle, data_idx, data);
       SSL_set_ex_data(backend->handle, connectdata_idx, conn);
       SSL_set_ex_data(backend->handle, sockindex_idx, conn->sock + sockindex);
+#ifndef CURL_DISABLE_PROXY
+      SSL_set_ex_data(backend->handle, proxy_idx, SSL_IS_PROXY() ? (void *) 1:
+                      NULL);
+#else
+      SSL_set_ex_data(backend->handle, proxy_idx, NULL);
+#endif
+
     }
 
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(data, conn, &ssl_sessionid, NULL, sockindex)) {
+    if(!Curl_ssl_getsessionid(data, conn, SSL_IS_PROXY() ? TRUE : FALSE,
+                              &ssl_sessionid, NULL, sockindex)) {
       /* we got a session id, use it! */
       if(!SSL_set_session(backend->handle, ssl_sessionid)) {
         Curl_ssl_sessionid_unlock(data);

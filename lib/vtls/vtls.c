@@ -367,6 +367,7 @@ void Curl_ssl_sessionid_unlock(struct Curl_easy *data)
  */
 bool Curl_ssl_getsessionid(struct Curl_easy *data,
                            struct connectdata *conn,
+                           const bool isProxy,
                            void **ssl_sessionid,
                            size_t *idsize, /* set 0 if unknown */
                            int sockindex)
@@ -377,7 +378,6 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
   bool no_match = TRUE;
 
 #ifndef CURL_DISABLE_PROXY
-  const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
     &conn->proxy_ssl_config :
     &conn->ssl_config;
@@ -389,9 +389,14 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
   struct ssl_primary_config * const ssl_config = &conn->ssl_config;
   const char * const name = conn->host.name;
   int port = conn->remote_port;
-  (void)sockindex;
 #endif
+  (void)sockindex;
   *ssl_sessionid = NULL;
+
+#ifdef CURL_DISABLE_PROXY
+  if(isProxy)
+    return TRUE;
+#endif
 
   DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
@@ -480,6 +485,7 @@ void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid)
  */
 CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
                                struct connectdata *conn,
+                               bool isProxy,
                                void *ssl_sessionid,
                                size_t idsize,
                                int sockindex)
@@ -492,7 +498,6 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
   int conn_to_port;
   long *general_age;
 #ifndef CURL_DISABLE_PROXY
-  const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
     &conn->proxy_ssl_config :
     &conn->ssl_config;
@@ -505,6 +510,7 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
   const char *hostname = conn->host.name;
   (void)sockindex;
 #endif
+  (void)sockindex;
   DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
   clone_host = strdup(hostname);

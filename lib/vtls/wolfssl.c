@@ -516,7 +516,9 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     void *ssl_sessionid = NULL;
 
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(data, conn, &ssl_sessionid, NULL, sockindex)) {
+    if(!Curl_ssl_getsessionid(data, conn,
+                              SSL_IS_PROXY() ? TRUE : FALSE,
+                              &ssl_sessionid, NULL, sockindex)) {
       /* we got a session id, use it! */
       if(!SSL_set_session(backend->handle, ssl_sessionid)) {
         char error_buffer[WOLFSSL_MAX_ERROR_SZ];
@@ -772,11 +774,12 @@ wolfssl_connect_step3(struct Curl_easy *data, struct connectdata *conn,
     bool incache;
     void *old_ssl_sessionid = NULL;
     SSL_SESSION *our_ssl_sessionid = SSL_get_session(backend->handle);
+    bool isproxy = SSL_IS_PROXY() ? TRUE : FALSE;
 
     if(our_ssl_sessionid) {
       Curl_ssl_sessionid_lock(data);
-      incache = !(Curl_ssl_getsessionid(data, conn, &old_ssl_sessionid, NULL,
-                                        sockindex));
+      incache = !(Curl_ssl_getsessionid(data, conn, isproxy,
+                                        &old_ssl_sessionid, NULL, sockindex));
       if(incache) {
         if(old_ssl_sessionid != our_ssl_sessionid) {
           infof(data, "old SSL session ID is stale, removing\n");
@@ -786,8 +789,8 @@ wolfssl_connect_step3(struct Curl_easy *data, struct connectdata *conn,
       }
 
       if(!incache) {
-        result = Curl_ssl_addsessionid(data, conn, our_ssl_sessionid,
-                                       0 /* unknown size */, sockindex);
+        result = Curl_ssl_addsessionid(data, conn, isproxy, our_ssl_sessionid,
+                                       0, sockindex);
         if(result) {
           Curl_ssl_sessionid_unlock(data);
           failf(data, "failed to store ssl session");

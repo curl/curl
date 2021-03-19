@@ -463,7 +463,9 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     void *old_session = NULL;
 
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(data, conn, &old_session, NULL, sockindex)) {
+    if(!Curl_ssl_getsessionid(data, conn,
+                              SSL_IS_PROXY() ? TRUE : FALSE,
+                              &old_session, NULL, sockindex)) {
       ret = mbedtls_ssl_set_session(&backend->ssl, old_session);
       if(ret) {
         Curl_ssl_sessionid_unlock(data);
@@ -724,6 +726,7 @@ mbed_connect_step3(struct Curl_easy *data, struct connectdata *conn,
     int ret;
     mbedtls_ssl_session *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;
+    bool isproxy = SSL_IS_PROXY() ? TRUE : FALSE;
 
     our_ssl_sessionid = malloc(sizeof(mbedtls_ssl_session));
     if(!our_ssl_sessionid)
@@ -742,11 +745,12 @@ mbed_connect_step3(struct Curl_easy *data, struct connectdata *conn,
 
     /* If there's already a matching session in the cache, delete it */
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(data, conn, &old_ssl_sessionid, NULL, sockindex))
+    if(!Curl_ssl_getsessionid(data, conn, isproxy, &old_ssl_sessionid, NULL,
+                              sockindex))
       Curl_ssl_delsessionid(data, old_ssl_sessionid);
 
-    retcode = Curl_ssl_addsessionid(data, conn,
-                                    our_ssl_sessionid, 0, sockindex);
+    retcode = Curl_ssl_addsessionid(data, conn, isproxy, our_ssl_sessionid,
+                                    0, sockindex);
     Curl_ssl_sessionid_unlock(data);
     if(retcode) {
       mbedtls_ssl_session_free(our_ssl_sessionid);
