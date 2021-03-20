@@ -3159,6 +3159,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     sshc->kh = libssh2_knownhost_init(sshc->ssh_session);
     if(!sshc->kh) {
       libssh2_session_free(sshc->ssh_session);
+      sshc->ssh_session = NULL;
       return CURLE_FAILED_INIT;
     }
 
