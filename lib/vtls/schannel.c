@@ -572,11 +572,9 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
       break;
     }
     case CURL_SSLVERSION_SSLv3:
-      schannel_cred.grbitEnabledProtocols = SP_PROT_SSL3_CLIENT;
-      break;
     case CURL_SSLVERSION_SSLv2:
-      schannel_cred.grbitEnabledProtocols = SP_PROT_SSL2_CLIENT;
-      break;
+      failf(data, "SSL versions not supported");
+      return CURLE_NOT_BUILT_IN;
     default:
       failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
       return CURLE_SSL_CONNECT_ERROR;

@@ -1486,21 +1486,9 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
         break;
       }
     case CURL_SSLVERSION_SSLv3:
-      err = SSLSetProtocolVersionMin(backend->ssl_ctx, kSSLProtocol3);
-      if(err != noErr) {
-        failf(data, "Your version of the OS does not support SSLv3");
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-      (void)SSLSetProtocolVersionMax(backend->ssl_ctx, kSSLProtocol3);
-      break;
     case CURL_SSLVERSION_SSLv2:
-      err = SSLSetProtocolVersionMin(backend->ssl_ctx, kSSLProtocol2);
-      if(err != noErr) {
-        failf(data, "Your version of the OS does not support SSLv2");
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-      (void)SSLSetProtocolVersionMax(backend->ssl_ctx, kSSLProtocol2);
-      break;
+      failf(data, "SSL versions not supported");
+      return CURLE_NOT_BUILT_IN;
     default:
       failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
       return CURLE_SSL_CONNECT_ERROR;
@@ -1535,23 +1523,9 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
         break;
       }
     case CURL_SSLVERSION_SSLv3:
-      err = SSLSetProtocolVersionEnabled(backend->ssl_ctx,
-                                         kSSLProtocol3,
-                                         true);
-      if(err != noErr) {
-        failf(data, "Your version of the OS does not support SSLv3");
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-      break;
     case CURL_SSLVERSION_SSLv2:
-      err = SSLSetProtocolVersionEnabled(backend->ssl_ctx,
-                                         kSSLProtocol2,
-                                         true);
-      if(err != noErr) {
-        failf(data, "Your version of the OS does not support SSLv2");
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-      break;
+      failf(data, "SSL versions not supported");
+      return CURLE_NOT_BUILT_IN;
     default:
       failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
       return CURLE_SSL_CONNECT_ERROR;
@@ -1583,23 +1557,9 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
     failf(data, "Your version of the OS does not support TLSv1.3");
     return CURLE_SSL_CONNECT_ERROR;
   case CURL_SSLVERSION_SSLv2:
-    err = SSLSetProtocolVersionEnabled(backend->ssl_ctx,
-                                       kSSLProtocol2,
-                                       true);
-    if(err != noErr) {
-      failf(data, "Your version of the OS does not support SSLv2");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-    break;
   case CURL_SSLVERSION_SSLv3:
-    err = SSLSetProtocolVersionEnabled(backend->ssl_ctx,
-                                       kSSLProtocol3,
-                                       true);
-    if(err != noErr) {
-      failf(data, "Your version of the OS does not support SSLv3");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-    break;
+    failf(data, "SSL versions not supported");
+    return CURLE_NOT_BUILT_IN;
   default:
     failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;

@@ -1699,8 +1699,7 @@ static CURLcode nss_sslver_from_curl(PRUint16 *nssver, long version)
     return CURLE_OK;
 
   case CURL_SSLVERSION_SSLv3:
-    *nssver = SSL_LIBRARY_VERSION_3_0;
-    return CURLE_OK;
+    return CURLE_NOT_BUILT_IN;
 
   case CURL_SSLVERSION_TLSv1_0:
     *nssver = SSL_LIBRARY_VERSION_TLS_1_0;
