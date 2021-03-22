@@ -426,6 +426,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       version_max = C_SSLVERSION_MAX_VALUE(arg);
 
       if(version < CURL_SSLVERSION_DEFAULT ||
+         version == CURL_SSLVERSION_SSLv2 ||
+         version == CURL_SSLVERSION_SSLv3 ||
          version >= CURL_SSLVERSION_LAST ||
          version_max < CURL_SSLVERSION_MAX_NONE ||
          version_max >= CURL_SSLVERSION_MAX_LAST)

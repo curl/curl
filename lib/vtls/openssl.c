@@ -122,12 +122,6 @@
 #define HAVE_ERR_REMOVE_THREAD_STATE 1
 #endif
 
-#if !defined(HAVE_SSLV2_CLIENT_METHOD) || \
-  OPENSSL_VERSION_NUMBER >= 0x10100000L /* 1.1.0+ has no SSLv2 */
-#undef OPENSSL_NO_SSL2 /* undef first to avoid compiler warnings */
-#define OPENSSL_NO_SSL2
-#endif
-
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && /* OpenSSL 1.1.0+ */ \
     !(defined(LIBRESSL_VERSION_NUMBER) && \
       LIBRESSL_VERSION_NUMBER < 0x20700000L)
@@ -2539,31 +2533,11 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
     use_sni(TRUE);
     break;
   case CURL_SSLVERSION_SSLv2:
-#ifdef OPENSSL_NO_SSL2
-    failf(data, OSSL_PACKAGE " was built without SSLv2 support");
+    failf(data, "No SSLv2 support");
     return CURLE_NOT_BUILT_IN;
-#else
-#ifdef USE_OPENSSL_SRP
-    if(ssl_authtype == CURL_TLSAUTH_SRP)
-      return CURLE_SSL_CONNECT_ERROR;
-#endif
-    req_method = SSLv2_client_method();
-    use_sni(FALSE);
-    break;
-#endif
   case CURL_SSLVERSION_SSLv3:
-#ifdef OPENSSL_NO_SSL3_METHOD
-    failf(data, OSSL_PACKAGE " was built without SSLv3 support");
+    failf(data, "No SSLv3 support");
     return CURLE_NOT_BUILT_IN;
-#else
-#ifdef USE_OPENSSL_SRP
-    if(ssl_authtype == CURL_TLSAUTH_SRP)
-      return CURLE_SSL_CONNECT_ERROR;
-#endif
-    req_method = SSLv3_client_method();
-    use_sni(FALSE);
-    break;
-#endif
   default:
     failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;
@@ -2650,41 +2624,9 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 #endif
 
   switch(ssl_version) {
-    /* "--sslv2" option means SSLv2 only, disable all others */
     case CURL_SSLVERSION_SSLv2:
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L /* 1.1.0 */
-      SSL_CTX_set_min_proto_version(backend->ctx, SSL2_VERSION);
-      SSL_CTX_set_max_proto_version(backend->ctx, SSL2_VERSION);
-#else
-      ctx_options |= SSL_OP_NO_SSLv3;
-      ctx_options |= SSL_OP_NO_TLSv1;
-#  if OPENSSL_VERSION_NUMBER >= 0x1000100FL
-      ctx_options |= SSL_OP_NO_TLSv1_1;
-      ctx_options |= SSL_OP_NO_TLSv1_2;
-#    ifdef TLS1_3_VERSION
-      ctx_options |= SSL_OP_NO_TLSv1_3;
-#    endif
-#  endif
-#endif
-      break;
-
-    /* "--sslv3" option means SSLv3 only, disable all others */
     case CURL_SSLVERSION_SSLv3:
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L /* 1.1.0 */
-      SSL_CTX_set_min_proto_version(backend->ctx, SSL3_VERSION);
-      SSL_CTX_set_max_proto_version(backend->ctx, SSL3_VERSION);
-#else
-      ctx_options |= SSL_OP_NO_SSLv2;
-      ctx_options |= SSL_OP_NO_TLSv1;
-#  if OPENSSL_VERSION_NUMBER >= 0x1000100FL
-      ctx_options |= SSL_OP_NO_TLSv1_1;
-      ctx_options |= SSL_OP_NO_TLSv1_2;
-#    ifdef TLS1_3_VERSION
-      ctx_options |= SSL_OP_NO_TLSv1_3;
-#    endif
-#  endif
-#endif
-      break;
+      return CURLE_NOT_BUILT_IN;
 
     /* "--tlsv<x.y>" options mean TLS >= version <x.y> */
     case CURL_SSLVERSION_DEFAULT:

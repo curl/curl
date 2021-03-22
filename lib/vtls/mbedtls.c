@@ -263,10 +263,10 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   char errorbuf[128];
   errorbuf[0] = 0;
 
-  /* mbedTLS only supports SSLv3 and TLSv1 */
-  if(SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv2) {
-    failf(data, "mbedTLS does not support SSLv2");
-    return CURLE_SSL_CONNECT_ERROR;
+  if((SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv2) ||
+     (SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv3)) {
+    failf(data, "Not supported SSL version");
+    return CURLE_NOT_BUILT_IN;
   }
 
 #ifdef THREADING_SUPPORT
@@ -413,13 +413,6 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     mbedtls_ssl_conf_min_version(&backend->config, MBEDTLS_SSL_MAJOR_VERSION_3,
                                  MBEDTLS_SSL_MINOR_VERSION_1);
     infof(data, "mbedTLS: Set min SSL version to TLS 1.0\n");
-    break;
-  case CURL_SSLVERSION_SSLv3:
-    mbedtls_ssl_conf_min_version(&backend->config, MBEDTLS_SSL_MAJOR_VERSION_3,
-                                 MBEDTLS_SSL_MINOR_VERSION_0);
-    mbedtls_ssl_conf_max_version(&backend->config, MBEDTLS_SSL_MAJOR_VERSION_3,
-                                 MBEDTLS_SSL_MINOR_VERSION_0);
-    infof(data, "mbedTLS: Set SSL version to SSLv3\n");
     break;
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:
