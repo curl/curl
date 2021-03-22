@@ -740,7 +740,9 @@ static ngtcp2_callbacks ng_callbacks = {
   NULL, /* recv_new_token */
   ngtcp2_crypto_delete_crypto_aead_ctx_cb,
   ngtcp2_crypto_delete_crypto_cipher_ctx_cb,
-  NULL /* recv_datagram */
+  NULL, /* recv_datagram */
+  NULL, /* ack_datagram */
+  NULL  /* lost_datagram */
 };
 
 /*
@@ -828,7 +830,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
  */
 int Curl_quic_ver(char *p, size_t len)
 {
-  ngtcp2_info *ng2 = ngtcp2_version(0);
+  const ngtcp2_info *ng2 = ngtcp2_version(0);
   nghttp3_info *ht3 = nghttp3_version(0);
   return msnprintf(p, len, "ngtcp2/%s nghttp3/%s",
                    ng2->version_str, ht3->version_str);
