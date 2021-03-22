@@ -1306,11 +1306,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case '2':
       /* SSL version 2 */
-      config->ssl_version = CURL_SSLVERSION_SSLv2;
+      warnf(global, "Ignores instruction to use SSLv2\n");
       break;
     case '3':
       /* SSL version 3 */
-      config->ssl_version = CURL_SSLVERSION_SSLv3;
+      warnf(global, "Ignores instruction to use SSLv3\n");
       break;
     case '4':
       /* IPv4 */
