@@ -71,7 +71,7 @@ The supported proxy protocol prefixes are as follows:
 .IP "http://"
 Makes it use it as an HTTP proxy. The default if no scheme prefix is used.
 .IP "https://"
-Makes it treated as an \fBHTTPS\fP proxy.
+Makes it treated as an **HTTPS** proxy.
 .IP "socks4://"
 Makes it the equivalent of --socks4
 .IP "socks4a://"

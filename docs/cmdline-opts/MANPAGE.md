@@ -3,7 +3,8 @@
 This is the curl man page generator. It generates a single nroff man page
 output from the set of sources files in this directory.
 
-There is one source file for each supported command line option. The format is
+There is one source file for each supported command line option. The output
+gets `page-header` prepended and `page-footer` appended. The format is
 described below.
 
 ## Option files
@@ -32,13 +33,18 @@ Each file has a set of meta-data and a body of text.
 ### Body
 
 The body of the description. Only refer to options with their long form option
-version, like --verbose. The output generator will replace such with the
+version, like `--verbose`. The output generator will replace such with the
 correct markup that shows both short and long version.
 
-## Header
+Text written within `*asterisks*` will get shown using italics. Text within
+two `**asterisks**` will get shown using bold.
 
-`page-header` is the nroff formatted file that will be output before the
-generated options output for the master man page.
+## Header and footer
+
+`page-header` is the file that will be output before the generated options
+output for the master man page.
+
+`page-footer` is appended after all the individual options.
 
 ## Generate
 

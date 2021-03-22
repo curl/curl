@@ -4,5 +4,5 @@ Mutexed: netrc
 See-also: netrc-file
 Category: curl
 ---
-Very similar to --netrc, but this option makes the .netrc usage \fBoptional\fP
+Very similar to --netrc, but this option makes the .netrc usage **optional**
 and not mandatory as the --netrc option does.

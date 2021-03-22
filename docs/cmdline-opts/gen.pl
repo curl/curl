@@ -63,6 +63,12 @@ sub manpageify {
 sub printdesc {
     my @desc = @_;
     for my $d (@desc) {
+        if($d !~ /^.\\"/) {
+            # **bold**
+            $d =~ s/\*\*([^ ]*)\*\*/\\fB$1\\fP/g;
+            # *italics*
+            $d =~ s/\*([^ ]*)\*/\\fI$1\\fP/g;
+        }
         # skip lines starting with space (examples)
         if($d =~ /^[^ ]/) {
             for my $k (keys %optlong) {
