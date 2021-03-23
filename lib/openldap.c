@@ -369,6 +369,9 @@ static CURLcode ldap_disconnect(struct Curl_easy *data,
 
   if(li) {
     if(li->ld) {
+      Sockbuf *sb;
+      ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
+      ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, NULL);
       ldap_unbind_ext(li->ld, NULL, NULL);
       li->ld = NULL;
     }
@@ -726,14 +729,18 @@ static ber_slen_t
 ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
 {
   struct Curl_easy *data = sbiod->sbiod_pvt;
-  struct connectdata *conn = data->conn;
-  struct ldapconninfo *li = conn->proto.ldapc;
-  ber_slen_t ret;
-  CURLcode err = CURLE_RECV_ERROR;
+  ber_slen_t ret = 0;
+  if(data) {
+    struct connectdata *conn = data->conn;
+    if(conn) {
+      struct ldapconninfo *li = conn->proto.ldapc;
+      CURLcode err = CURLE_RECV_ERROR;
 
-  ret = (li->recv)(data, FIRSTSOCKET, buf, len, &err);
-  if(ret < 0 && err == CURLE_AGAIN) {
-    SET_SOCKERRNO(EWOULDBLOCK);
+      ret = (li->recv)(data, FIRSTSOCKET, buf, len, &err);
+      if(ret < 0 && err == CURLE_AGAIN) {
+        SET_SOCKERRNO(EWOULDBLOCK);
+      }
+    }
   }
   return ret;
 }
@@ -742,14 +749,17 @@ static ber_slen_t
 ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
 {
   struct Curl_easy *data = sbiod->sbiod_pvt;
-  struct connectdata *conn = data->conn;
-  struct ldapconninfo *li = conn->proto.ldapc;
-  ber_slen_t ret;
-  CURLcode err = CURLE_SEND_ERROR;
-
-  ret = (li->send)(data, FIRSTSOCKET, buf, len, &err);
-  if(ret < 0 && err == CURLE_AGAIN) {
-    SET_SOCKERRNO(EWOULDBLOCK);
+  ber_slen_t ret = 0;
+  if(data) {
+    struct connectdata *conn = data->conn;
+    if(conn) {
+      struct ldapconninfo *li = conn->proto.ldapc;
+      CURLcode err = CURLE_SEND_ERROR;
+      ret = (li->send)(data, FIRSTSOCKET, buf, len, &err);
+      if(ret < 0 && err == CURLE_AGAIN) {
+        SET_SOCKERRNO(EWOULDBLOCK);
+      }
+    }
   }
   return ret;
 }
