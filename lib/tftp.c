@@ -218,7 +218,7 @@ static CURLcode tftp_set_timeouts(struct tftp_state_data *state)
   }
 
   /* timeout in milliseconds */
-  state->max_time = timeout_ms;
+  state->max_time = (time_t)timeout_ms;
 
   if(timeout_ms > 0)
     maxtime = (time_t)(timeout_ms + 500) / 1000;
