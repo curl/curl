@@ -97,6 +97,7 @@ LIB_CFILES =         \
   asyn-ares.c        \
   asyn-thread.c      \
   base64.c           \
+  bufref.c           \
   c-hyper.c          \
   conncache.c        \
   connect.c          \
@@ -217,6 +218,7 @@ LIB_HFILES =         \
   amigaos.h          \
   arpa_telnet.h      \
   asyn.h             \
+  bufref.h           \
   c-hyper.h          \
   conncache.h        \
   connect.h          \
