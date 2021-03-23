@@ -129,8 +129,6 @@ struct tftp_state_data {
   int             retries;
   int             retry_time;
   int             retry_max;
-  time_t          start_time;
-  time_t          max_time;
   time_t          rx_time;
   struct Curl_sockaddr_storage   local_addr;
   struct Curl_sockaddr_storage   remote_addr;
@@ -206,8 +204,6 @@ static CURLcode tftp_set_timeouts(struct tftp_state_data *state)
   timediff_t timeout_ms;
   bool start = (state->state == TFTP_STATE_START) ? TRUE : FALSE;
 
-  time(&state->start_time);
-
   /* Compute drop-dead time */
   timeout_ms = Curl_timeleft(state->data, NULL, start);
 
@@ -216,9 +212,6 @@ static CURLcode tftp_set_timeouts(struct tftp_state_data *state)
     failf(state->data, "Connection time-out");
     return CURLE_OPERATION_TIMEDOUT;
   }
-
-  /* timeout in milliseconds */
-  state->max_time = timeout_ms;
 
   if(timeout_ms > 0)
     maxtime = (time_t)(timeout_ms + 500) / 1000;
