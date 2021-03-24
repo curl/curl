@@ -371,7 +371,7 @@ static CURLcode ldap_disconnect(struct Curl_easy *data,
     if(li->ld) {
       Sockbuf *sb;
       ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
-      ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, NULL);
+      ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
       ldap_unbind_ext(li->ld, NULL, NULL);
       li->ld = NULL;
     }
