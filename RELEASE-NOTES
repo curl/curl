@@ -4,7 +4,7 @@ curl and libcurl 7.76.0
  Command line options:         240
  curl_easy_setopt() options:   288
  Public functions in libcurl:  85
- Contributors:                 2350
+ Contributors:                 2352
 
 This release includes the following changes:
 
@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o build: remove all traces of USE_BLOCKING_SOCKETS [70]
  o c-hyper: Remove superfluous pointer check [56]
  o c-hyper: support automatic content-encoding [74]
+ o CI/azure: disable test 433 on azure-ubuntu [105]
  o CI/azure: replace python-impacket with python3-impacket [61]
  o ci: stop building on freebsd-12-1 [38]
  o cmake: fix import library name for non-MS compiler on Windows [10]
@@ -53,6 +54,7 @@ This release includes the following bugfixes:
  o docs: clarify timeouts for queued transfers in multi API [101]
  o docs: Explain DOH transfers inherit some SSL settings [107]
  o docs: fix FILE example url in --metalink documentation [19]
+ o docs: make gen.pl support *italic* and **bold** [112]
  o doh: Fix sharing user's resolve list with DOH handles [46]
  o doh: Inherit CURLOPT_STDERR from user's easy handle [60]
  o dynbuf: bump the max HTTP request to 1MB [39]
@@ -76,11 +78,13 @@ This release includes the following bugfixes:
  o http: do not add a referrer header with empty value [44]
  o http: make 416 not fail with resume + CURLOPT_FAILONERRROR [108]
  o http: remove superfluous NULL assign [75]
+ o http: strip default port from URL sent to proxy [104]
  o http: use credentials from transfer, not connection [25]
  o ldap: use correct memory free function [63]
  o lib1536: check ptr against NULL before dereferencing it [83]
  o lib1537: check ptr against NULL before dereferencing it [84]
  o lib: remove 'conn->data' completely [45]
+ o libssh2: kdb_callback: get the right struct pointer [99]
  o libssh2:ssh_connect: clear session pointer after free [98]
  o memdebug: close debug logfile explicitly on exit [28]
  o mingw: enable using strcasecmp() [50]
@@ -90,6 +94,8 @@ This release includes the following bugfixes:
  o ngtcp2: adapt to the new recv_datagram callback
  o ngtcp2: clarify calculation precedence [27]
  o ngtcp2: Fix build error due to change in ngtcp2_addr_init [81]
+ o ngtcp2: sync with recent API updates [113]
+ o openldap: avoid NULL pointer dereferences [102]
  o openssl: adapt to v3's new const for a few API calls [86]
  o openssl: remove get_ssl_version_txt in favor of SSL_get_version [67]
  o OS400: update for CURLOPT_AWS_SIGV4 [2]
@@ -110,6 +116,7 @@ This release includes the following bugfixes:
  o test306: make it not run with Hyper
  o tests: disable .curlrc in more environments [7]
  o tests: use %TESTNUMBER instead of fixed number [103]
+ o tftp: remove the 3600 second default timeout [111]
  o time: enable 64-bit time_t in supported mingw environments [24]
  o tool_help: add missing argument for --create-file-mode [18]
  o tool_help: Increase space between option and description [64]
@@ -140,16 +147,17 @@ advice from friends like these:
 
   Ádler Jonas Gross, Alejandro Colomar, Alex Xu, Amaury Denoyelle, Andrei Bica,
   arvids-kokins-bidstack on github, awesomenode on github, Benbuck Nason,
-  Bodo Bergmann, Carl Zogheib, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, David Demelier, David Goerger, ebejan on github,
-  Emil Engler, Fabian Keil, Firefox OS, Gisle Vanem, Gregor Jasny,
-  Ikko Ashimine, Jack Boos Yu, Jacob Hoffman-Andrews, Jean-Philippe Menil,
-  Joel Teichroeb, Johannes Lesr, Jonathan Watt, Jon Rumsey, Jordan Brown,
-  Joseph Chen, Jun-ya Kato, kokke on github, Lawrence Gripper, Manuj Bhatia,
-  Marcel Raad, Marc Hörsken, Michael Hordijk, Ray Satiro, Robert Ronto,
-  Sergei Nikulov, Simon Josefsson, Stephan Szabo, Viktor Szakats,
+  Bodo Bergmann, Carl Zogheib, Christian Schmitz, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, David Demelier, David Goerger,
+  ebejan on github, Emil Engler, Fabian Keil, Firefox OS, Gisle Vanem,
+  Gregor Jasny, Ikko Ashimine, Jack Boos Yu, Jacob Hoffman-Andrews,
+  Jean-Philippe Menil, Joel Teichroeb, Johannes Lesr, Jonathan Watt,
+  Jon Rumsey, Jordan Brown, Joseph Chen, Jun-ya Kato, kokke on github,
+  Lawrence Gripper, Manuj Bhatia, Marcel Raad, Marc Hörsken, Michael Brown,
+  Michael Hordijk, Patrick Monnerat, Per Jensen, Ray Satiro, Robert Ronto,
+  Sergei Nikulov, Simon Josefsson, Stephan Szabo, Tomas Berger, Viktor Szakats,
   Vincent Torri, Vladimir Varlamov, ZimCodes on github, ウさん
-  (48 contributors)
+  (53 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -249,10 +257,17 @@ References to bug reports and discussions on issues:
  [96] = https://curl.se/bug/?i=6737
  [97] = https://curl.se/bug/?i=6736
  [98] = https://curl.se/bug/?i=6764
+ [99] = https://curl.se/bug/?i=6691
  [101] = https://curl.se/bug/?i=6758
+ [102] = https://curl.se/bug/?i=6676
  [103] = https://curl.se/bug/?i=6738
+ [104] = https://curl.se/bug/?i=6769
+ [105] = https://curl.se/bug/?i=6739
  [106] = https://curl.se/bug/?i=6755
  [107] = https://curl.se/bug/?i=6688
  [108] = https://curl.se/bug/?i=6740
  [109] = https://curl.se/bug/?i=6744
  [110] = https://curl.se/bug/?i=6647
+ [111] = https://curl.se/bug/?i=6774
+ [112] = https://curl.se/bug/?i=6771
+ [113] = https://curl.se/bug/?i=6770
