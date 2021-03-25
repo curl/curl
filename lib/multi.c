@@ -2158,6 +2158,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         if(!ret) {
           infof(data, "Downgrades to HTTP/1.1!\n");
+          connclose(data->conn, "Disconnect HTTP/2 for HTTP/1");
           data->state.httpwant = CURL_HTTP_VERSION_1_1;
           /* clear the error message bit too as we ignore the one we got */
           data->state.errorbuf = FALSE;
