@@ -2749,7 +2749,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
     /* expects length prefixed preference ordered list of protocols in wire
      * format
      */
-    if(SSL_CTX_set_alpn_protos(backend->ctx, protocols, cur) != 0) {
+    if(SSL_CTX_set_alpn_protos(backend->ctx, protocols, cur)) {
       failf(data, "Error setting ALPN");
       return CURLE_SSL_CONNECT_ERROR;
     }
