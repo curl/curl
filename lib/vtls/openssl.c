@@ -2588,6 +2588,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
     /* the SSL trace callback is only used for verbose logging */
     SSL_CTX_set_msg_callback(backend->ctx, ossl_trace);
     SSL_CTX_set_msg_callback_arg(backend->ctx, conn);
+    set_logger(conn, data);
   }
 #endif
 
