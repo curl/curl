@@ -574,7 +574,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
      read or we get a CURLE_AGAIN */
   do {
     bool is_empty_data = FALSE;
-    size_t buffersize = data->set.buffer_size;
+    long buffersize = data->set.buffer_size;
     size_t bytestoread = buffersize;
 #ifdef USE_NGHTTP2
     bool is_http2 = ((conn->handler->protocol & PROTO_FAMILY_HTTP) &&

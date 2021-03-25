@@ -2823,7 +2823,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
     case FTP_PWD:
       if(ftpcode == 257) {
         char *ptr = &data->state.buffer[4];  /* start on the first letter */
-        const size_t buf_size = data->set.buffer_size;
+        const long buf_size = data->set.buffer_size;
         char *dir;
         bool entry_extracted = FALSE;
 

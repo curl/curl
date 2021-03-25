@@ -107,12 +107,12 @@ static size_t decodeQuantum(unsigned char *dest, const char *src)
 CURLcode Curl_base64_decode(const char *src,
                             unsigned char **outptr, size_t *outlen)
 {
-  size_t srclen = 0;
+  size_t srclen;
   size_t length = 0;
   size_t padding = 0;
   size_t i;
   size_t numQuantums;
-  size_t rawlen = 0;
+  size_t rawlen;
   unsigned char *pos;
   unsigned char *newstr;
 

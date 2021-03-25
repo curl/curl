@@ -1370,13 +1370,13 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
          */
         const char *p = strchr(nextarg, '=');
         size_t nlen;
-        char is_file;
+        size_t is_file;
         if(!p)
           /* there was no '=' letter, check for a '@' instead */
           p = strchr(nextarg, '@');
         if(p) {
           nlen = p - nextarg; /* length of the name part */
-          is_file = *p++; /* pass the separator */
+          is_file = (size_t)*p++; /* pass the separator */
         }
         else {
           /* neither @ nor =, so no name and it isn't a file */

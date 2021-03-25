@@ -94,7 +94,7 @@ CURLcode Curl_auth_create_cram_md5_message(struct Curl_easy *data,
                                            const char *passwdp,
                                            char **outptr, size_t *outlen)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   size_t chlglen = 0;
   struct HMAC_context *ctxt;
   unsigned char digest[MD5_DIGEST_LEN];

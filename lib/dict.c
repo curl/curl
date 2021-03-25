@@ -134,7 +134,7 @@ static CURLcode sendf(curl_socket_t sockfd, struct Curl_easy *data,
 {
   ssize_t bytes_written;
   size_t write_len;
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   char *s;
   char *sptr;
   va_list ap;
@@ -181,7 +181,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
   char *strategy = NULL;
   char *nthdef = NULL; /* This is not part of the protocol, but required
                           by RFC 2229 */
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 

@@ -245,7 +245,7 @@ static int mqtt_encode_len(char *buf, size_t len)
 
 static CURLcode mqtt_subscribe(struct Curl_easy *data)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   char *topic = NULL;
   size_t topiclen;
   unsigned char *packet = NULL;
@@ -441,7 +441,7 @@ static CURLcode mqtt_read_publish(struct Curl_easy *data, bool *done)
   size_t remlen;
   struct mqtt_conn *mqtt = &conn->proto.mqtt;
   struct MQTT *mq = data->req.p.mqtt;
-  unsigned char packet;
+  int packet;
 
   switch(mqtt->state) {
   MQTT_SUBACK_COMING:

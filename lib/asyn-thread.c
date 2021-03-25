@@ -569,7 +569,7 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
                                    struct Curl_dns_entry **entry)
 {
   struct thread_data *td = data->state.async.tdata;
-  int done = 0;
+  int done;
 
   DEBUGASSERT(entry);
   *entry = NULL;

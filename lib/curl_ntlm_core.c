@@ -524,7 +524,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
   /* Unicode representation */
   size_t identity_len;
   unsigned char *identity;
-  CURLcode result = CURLE_OK;
+  CURLcode result;
 
   if((userlen > CURL_MAX_INPUT_LENGTH) || (domlen > CURL_MAX_INPUT_LENGTH))
     return CURLE_OUT_OF_MEMORY;
@@ -583,12 +583,12 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 ------------------------------------------------------------------------------
 */
 
-  unsigned int len = 0;
+  unsigned int len;
   unsigned char *ptr = NULL;
   unsigned char hmac_output[HMAC_MD5_LENGTH];
   curl_off_t tw;
 
-  CURLcode result = CURLE_OK;
+  CURLcode result;
 
 #if SIZEOF_CURL_OFF_T < 8
 #error "this section needs 64bit support to work"
@@ -663,7 +663,7 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
 {
   unsigned char data[16];
   unsigned char hmac_output[16];
-  CURLcode result = CURLE_OK;
+  CURLcode result;
 
   memcpy(&data[0], challenge_server, 8);
   memcpy(&data[8], challenge_client, 8);

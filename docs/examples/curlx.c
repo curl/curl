@@ -457,7 +457,7 @@ int main(int argc, char **argv)
                                   given access type */
     serverurl = my_get_ext(p.usercert, p.accesstype, NID_info_access);
     if(!serverurl) {
-      int j = 0;
+      int j;
       BIO_printf(p.errorbio, "no service URL in user cert "
                  "searching in others certificates\n");
       for(j = 0; j<sk_X509_num(p.ca); j++) {

@@ -1172,7 +1172,7 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
                                  char *buffer, ssize_t nread)
 {
   ssize_t escapes, i, outlen;
-  unsigned char *outbuf = NULL;
+  char *outbuf = NULL;
   CURLcode result = CURLE_OK;
   ssize_t bytes_written, total_written;
   struct connectdata *conn = data->conn;
@@ -1180,12 +1180,12 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
   /* Determine size of new buffer after escaping */
   escapes = 0;
   for(i = 0; i < nread; i++)
-    if((unsigned char)buffer[i] == CURL_IAC)
+    if((char)buffer[i] == (char)CURL_IAC)
       escapes++;
   outlen = nread + escapes;
 
   if(outlen == nread)
-    outbuf = (unsigned char *)buffer;
+    outbuf = (char *)buffer;
   else {
     ssize_t j;
     outbuf = malloc(nread + escapes + 1);
@@ -1195,8 +1195,8 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
     j = 0;
     for(i = 0; i < nread; i++) {
       outbuf[j++] = buffer[i];
-      if((unsigned char)buffer[i] == CURL_IAC)
-        outbuf[j++] = CURL_IAC;
+      if((char)buffer[i] == (char)CURL_IAC)
+        outbuf[j++] = (char)CURL_IAC;
     }
     outbuf[j] = '\0';
   }
@@ -1224,7 +1224,7 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
   }
 
   /* Free malloc copy if escaped */
-  if(outbuf != (unsigned char *)buffer)
+  if(outbuf != (char *)buffer)
     free(outbuf);
 
   return result;

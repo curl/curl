@@ -62,11 +62,12 @@ static enum alpnid alpn2alpnid(char *name)
 {
   if(strcasecompare(name, "h1"))
     return ALPN_h1;
-  if(strcasecompare(name, "h2"))
+  else if(strcasecompare(name, "h2"))
     return ALPN_h2;
-  if(strcasecompare(name, H3VERSION))
+  else if(strcasecompare(name, H3VERSION))
     return ALPN_h3;
-  return ALPN_none; /* unknown, probably rubbish input */
+  else
+    return ALPN_none; /* unknown, probably rubbish input */
 }
 
 /* Given the ALPN ID, return the name */
@@ -149,7 +150,7 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
   char date[MAX_ALTSVC_DATELEN + 1];
   unsigned int srcport;
   unsigned int dstport;
-  unsigned int prio;
+  int prio;
   unsigned int persist;
   int rc;
 

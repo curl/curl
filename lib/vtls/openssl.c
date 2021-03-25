@@ -2722,7 +2722,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 
 #ifdef HAS_ALPN
   if(conn->bits.tls_enable_alpn) {
-    int cur = 0;
+    unsigned cur = 0;
     unsigned char protocols[128];
 
 #ifdef USE_NGHTTP2
@@ -4353,7 +4353,7 @@ static size_t ossl_version(char *buffer, size_t size)
   }
   else {
     if(ssleay_value&0xff0) {
-      int minor_ver = (ssleay_value >> 4) & 0xff;
+      unsigned long minor_ver = (ssleay_value >> 4) & 0xff;
       if(minor_ver > 26) {
         /* handle extended version introduced for 0.9.8za */
         sub[1] = (char) ((minor_ver - 1) % 26 + 'a' + 1);

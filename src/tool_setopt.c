@@ -232,8 +232,7 @@ static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
 static char *c_escape(const char *str, curl_off_t len)
 {
   const char *s;
-  unsigned char c;
-  char *escaped, *e;
+  char c, *escaped, *e;
   unsigned int cutoff = 0;
 
   if(len == ZERO_TERMINATED)
