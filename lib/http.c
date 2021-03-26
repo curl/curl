@@ -1167,7 +1167,7 @@ static size_t readmoredata(char *buffer,
   /* make sure that a HTTP request is never sent away chunked! */
   data->req.forbidchunk = (http->sending == HTTPSEND_REQUEST)?TRUE:FALSE;
 
-  if((data->set.max_send_speed > 0) &&
+  if(data->set.max_send_speed &&
      (data->set.max_send_speed < http->postsize))
     /* speed limit */
     fullsize = (size_t)data->set.max_send_speed;

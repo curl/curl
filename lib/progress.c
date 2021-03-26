@@ -321,14 +321,14 @@ void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 void Curl_ratelimit(struct Curl_easy *data, struct curltime now)
 {
   /* don't set a new stamp unless the time since last update is long enough */
-  if(data->set.max_recv_speed > 0) {
+  if(data->set.max_recv_speed) {
     if(Curl_timediff(now, data->progress.dl_limit_start) >=
        MIN_RATE_LIMIT_PERIOD) {
       data->progress.dl_limit_start = now;
       data->progress.dl_limit_size = data->progress.downloaded;
     }
   }
-  if(data->set.max_send_speed > 0) {
+  if(data->set.max_send_speed) {
     if(Curl_timediff(now, data->progress.ul_limit_start) >=
        MIN_RATE_LIMIT_PERIOD) {
       data->progress.ul_limit_start = now;
