@@ -2164,7 +2164,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           data->state.errorbuf = FALSE;
           if(!newurl)
             /* typically for HTTP_1_1_REQUIRED error on first flight */
-            newurl = strdup(data->change.url);
+            newurl = strdup(data->state.url);
           /* if we are to retry, set the result to OK and consider the request
              as done */
           retry = TRUE;

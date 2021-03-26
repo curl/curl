@@ -296,10 +296,10 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   *done = TRUE; /* unconditionally */
   infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d\n",
           LDAP_VENDOR_NAME, LDAP_VENDOR_VERSION);
-  infof(data, "LDAP local: %s\n", data->change.url);
+  infof(data, "LDAP local: %s\n", data->state.url);
 
 #ifdef HAVE_LDAP_URL_PARSE
-  rc = ldap_url_parse(data->change.url, &ludp);
+  rc = ldap_url_parse(data->state.url, &ludp);
 #else
   rc = _ldap_url_parse(data, conn, &ludp);
 #endif

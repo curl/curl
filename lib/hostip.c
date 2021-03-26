@@ -269,7 +269,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
   dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
   /* No entry found in cache, check if we might have a wildcard entry */
-  if(!dns && data->change.wildcard_resolve) {
+  if(!dns && data->state.wildcard_resolve) {
     create_hostcache_id("*", port, entry_id, sizeof(entry_id));
     entry_len = strlen(entry_id);
 
@@ -878,9 +878,9 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
   int port = 0;
 
   /* Default is no wildcard found */
-  data->change.wildcard_resolve = false;
+  data->state.wildcard_resolve = false;
 
-  for(hostp = data->change.resolve; hostp; hostp = hostp->next) {
+  for(hostp = data->state.resolve; hostp; hostp = hostp->next) {
     char entry_id[MAX_HOSTCACHE_LEN];
     if(!hostp->data)
       continue;
@@ -1061,11 +1061,11 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       if(hostname[0] == '*' && hostname[1] == '\0') {
         infof(data, "RESOLVE %s:%d is wildcard, enabling wildcard checks\n",
               hostname, port);
-        data->change.wildcard_resolve = true;
+        data->state.wildcard_resolve = true;
       }
     }
   }
-  data->change.resolve = NULL; /* dealt with now */
+  data->state.resolve = NULL; /* dealt with now */
 
   return CURLE_OK;
 }

@@ -179,7 +179,7 @@ static CURLcode ldap_setup_connection(struct Curl_easy *data,
   int rc, proto;
   CURLcode status;
 
-  rc = ldap_url_parse(data->change.url, &lud);
+  rc = ldap_url_parse(data->state.url, &lud);
   if(rc != LDAP_URL_SUCCESS) {
     const char *msg = "url parsing problem";
     status = CURLE_URL_MALFORMAT;
@@ -393,9 +393,9 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
   connkeep(conn, "OpenLDAP do");
 
-  infof(data, "LDAP local: %s\n", data->change.url);
+  infof(data, "LDAP local: %s\n", data->state.url);
 
-  rc = ldap_url_parse(data->change.url, &ludp);
+  rc = ldap_url_parse(data->state.url, &ludp);
   if(rc != LDAP_URL_SUCCESS) {
     const char *msg = "url parsing problem";
     status = CURLE_URL_MALFORMAT;

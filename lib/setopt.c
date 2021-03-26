@@ -669,13 +669,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * String to set in the HTTP Referer: field.
      */
-    if(data->change.referer_alloc) {
-      Curl_safefree(data->change.referer);
-      data->change.referer_alloc = FALSE;
+    if(data->state.referer_alloc) {
+      Curl_safefree(data->state.referer);
+      data->state.referer_alloc = FALSE;
     }
     result = Curl_setstropt(&data->set.str[STRING_SET_REFERER],
                             va_arg(param, char *));
-    data->change.referer = data->set.str[STRING_SET_REFERER];
+    data->state.referer = data->set.str[STRING_SET_REFERER];
     break;
 
   case CURLOPT_USERAGENT:
@@ -744,13 +744,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         return CURLE_BAD_FUNCTION_ARGUMENT;
       /* append the cookie file name to the list of file names, and deal with
          them later */
-      cl = curl_slist_append(data->change.cookielist, argptr);
+      cl = curl_slist_append(data->state.cookielist, argptr);
       if(!cl) {
-        curl_slist_free_all(data->change.cookielist);
-        data->change.cookielist = NULL;
+        curl_slist_free_all(data->state.cookielist);
+        data->state.cookielist = NULL;
         return CURLE_OUT_OF_MEMORY;
       }
-      data->change.cookielist = cl; /* store the list for later use */
+      data->state.cookielist = cl; /* store the list for later use */
     }
     break;
 
@@ -1338,14 +1338,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * The URL to fetch.
      */
-    if(data->change.url_alloc) {
+    if(data->state.url_alloc) {
       /* the already set URL is allocated, free it first! */
-      Curl_safefree(data->change.url);
-      data->change.url_alloc = FALSE;
+      Curl_safefree(data->state.url);
+      data->state.url_alloc = FALSE;
     }
     result = Curl_setstropt(&data->set.str[STRING_SET_URL],
                             va_arg(param, char *));
-    data->change.url = data->set.str[STRING_SET_URL];
+    data->state.url = data->set.str[STRING_SET_URL];
     break;
   case CURLOPT_PORT:
     /*
@@ -1476,7 +1476,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * that aren't actually in use right now will be pruned immediately.
      */
     data->set.resolve = va_arg(param, struct curl_slist *);
-    data->change.resolve = data->set.resolve;
+    data->state.resolve = data->set.resolve;
     break;
   case CURLOPT_PROGRESSFUNCTION:
     /*
