@@ -527,10 +527,10 @@ static int set_transfer_url(struct Curl_easy *data,
     return 4;
   curl_url_cleanup(u);
 
-  if(data->change.url_alloc)
-    free(data->change.url);
-  data->change.url_alloc = TRUE;
-  data->change.url = url;
+  if(data->state.url_alloc)
+    free(data->state.url);
+  data->state.url_alloc = TRUE;
+  data->state.url = url;
   return 0;
 }
 

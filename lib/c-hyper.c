@@ -810,8 +810,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 #endif
 
   Curl_safefree(data->state.aptr.ref);
-  if(data->change.referer && !Curl_checkheaders(data, "Referer")) {
-    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
+  if(data->state.referer && !Curl_checkheaders(data, "Referer")) {
+    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->state.referer);
     if(!data->state.aptr.ref)
       return CURLE_OUT_OF_MEMORY;
     if(Curl_hyper_header(data, headers, data->state.aptr.ref))

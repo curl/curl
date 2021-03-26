@@ -404,8 +404,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
   /* Referrer */
   Curl_safefree(data->state.aptr.ref);
-  if(data->change.referer && !Curl_checkheaders(data, "Referer"))
-    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
+  if(data->state.referer && !Curl_checkheaders(data, "Referer"))
+    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->state.referer);
   else
     data->state.aptr.ref = NULL;
 

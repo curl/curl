@@ -622,7 +622,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
        we must make sure to free it before allocating a new one. As figured
        out in bug #2284386 */
     Curl_safefree(data->req.newurl);
-    data->req.newurl = strdup(data->change.url); /* clone URL */
+    data->req.newurl = strdup(data->state.url); /* clone URL */
     if(!data->req.newurl)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -635,7 +635,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
        we didn't try HEAD or GET */
     if((data->state.httpreq != HTTPREQ_GET) &&
        (data->state.httpreq != HTTPREQ_HEAD)) {
-      data->req.newurl = strdup(data->change.url); /* clone URL */
+      data->req.newurl = strdup(data->state.url); /* clone URL */
       if(!data->req.newurl)
         return CURLE_OUT_OF_MEMORY;
       data->state.authhost.done = TRUE;
@@ -950,7 +950,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
           CURLcode result = Curl_input_negotiate(data, conn, proxy, auth);
           if(!result) {
             DEBUGASSERT(!data->req.newurl);
-            data->req.newurl = strdup(data->change.url);
+            data->req.newurl = strdup(data->state.url);
             if(!data->req.newurl)
               return CURLE_OUT_OF_MEMORY;
             data->state.authproblem = FALSE;
@@ -3017,8 +3017,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 
   Curl_safefree(data->state.aptr.ref);
-  if(data->change.referer && !Curl_checkheaders(data, "Referer")) {
-    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
+  if(data->state.referer && !Curl_checkheaders(data, "Referer")) {
+    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->state.referer);
     if(!data->state.aptr.ref)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -3137,7 +3137,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
                    *data->set.str[STRING_ENCODING] &&
                    data->state.aptr.accept_encoding)?
                   data->state.aptr.accept_encoding:"",
-                  (data->change.referer && data->state.aptr.ref)?
+                  (data->state.referer && data->state.aptr.ref)?
                   data->state.aptr.ref:"" /* Referer: <data> */,
 #ifndef CURL_DISABLE_PROXY
                   (conn->bits.httpproxy &&
@@ -4008,7 +4008,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                 infof(data, "Got 417 while waiting for a 100\n");
                 data->state.disableexpect = TRUE;
                 DEBUGASSERT(!data->req.newurl);
-                data->req.newurl = strdup(data->change.url);
+                data->req.newurl = strdup(data->state.url);
                 Curl_done_sending(data, k);
               }
               else if(data->set.http_keep_sending_on_error) {

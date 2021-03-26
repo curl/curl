@@ -94,7 +94,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
 {
   switch(info) {
   case CURLINFO_EFFECTIVE_URL:
-    *param_charp = data->change.url?data->change.url:(char *)"";
+    *param_charp = data->state.url?data->state.url:(char *)"";
     break;
   case CURLINFO_EFFECTIVE_METHOD: {
     const char *m = data->set.str[STRING_CUSTOMREQUEST];
@@ -147,7 +147,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_REFERER:
     /* Return the referrer header for this request, or NULL if unset */
-    *param_charp = data->change.referer;
+    *param_charp = data->state.referer;
     break;
   case CURLINFO_PRIMARY_IP:
     /* Return the ip address of the most recent (primary) connection */
