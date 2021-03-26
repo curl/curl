@@ -58,7 +58,7 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
 CURLcode Curl_buffer_send(struct dynbuf *in,
                           struct Curl_easy *data,
                           curl_off_t *bytes_written,
-                          size_t included_body_bytes,
+                          curl_off_t included_body_bytes,
                           int socketindex);
 #else
 #define Curl_buffer_send(a,b,c,d,e) CURLE_OK
