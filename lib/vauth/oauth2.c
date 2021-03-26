@@ -65,7 +65,7 @@ CURLcode Curl_auth_create_oauth_bearer_message(struct Curl_easy *data,
                                                const char *bearer,
                                                char **outptr, size_t *outlen)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   char *oauth = NULL;
 
   /* Generate the message */
@@ -108,7 +108,7 @@ CURLcode Curl_auth_create_xoauth_bearer_message(struct Curl_easy *data,
                                                const char *bearer,
                                                char **outptr, size_t *outlen)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
 
   /* Generate the message */
   char *xoauth = aprintf("user=%s\1auth=Bearer %s\1\1", user, bearer);

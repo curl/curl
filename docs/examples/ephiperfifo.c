@@ -220,7 +220,7 @@ static void timer_cb(GlobalInfo* g, int revents)
 {
   CURLMcode rc;
   uint64_t count = 0;
-  ssize_t err = 0;
+  ssize_t err;
 
   err = read(g->tfd, &count, sizeof(uint64_t));
   if(err == -1) {
@@ -392,7 +392,7 @@ static void new_conn(char *url, GlobalInfo *g)
 static void fifo_cb(GlobalInfo* g, int revents)
 {
   char s[1024];
-  long int rv = 0;
+  long int rv;
   int n = 0;
 
   do {

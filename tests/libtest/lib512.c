@@ -29,7 +29,7 @@
 int test(char *URL)
 {
   CURLcode code;
-  int rc = 99;
+  int rc;
 
   code = curl_global_init(CURL_GLOBAL_ALL);
   if(code == CURLE_OK) {

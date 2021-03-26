@@ -47,7 +47,7 @@ static size_t readfunc(char *ptr, size_t size, size_t nmemb, void *stream)
  */
 static curl_off_t sftpGetRemoteFileSize(const char *i_remoteFile)
 {
-  CURLcode result = CURLE_GOT_NOTHING;
+  CURLcode result;
   curl_off_t remoteFileSizeByte = -1;
   CURL *curlHandlePtr = curl_easy_init();
 
@@ -78,7 +78,7 @@ static int sftpResumeUpload(CURL *curlhandle, const char *remotepath,
                             const char *localpath)
 {
   FILE *f = NULL;
-  CURLcode result = CURLE_GOT_NOTHING;
+  CURLcode result;
 
   curl_off_t remoteFileSizeByte = sftpGetRemoteFileSize(remotepath);
   if(-1 == remoteFileSizeByte) {

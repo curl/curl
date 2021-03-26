@@ -230,7 +230,7 @@ int wait_ms(int timeout_ms)
   struct timeval initial_tv;
   int pending_ms;
 #endif
-  int r = 0;
+  int r;
 
   if(!timeout_ms)
     return 0;

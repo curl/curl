@@ -195,7 +195,7 @@ bool progress_meter(struct GlobalConfig *global,
     bool ulknown = TRUE;
     curl_off_t all_running = 0; /* in progress */
     curl_off_t all_queued = 0;  /* pending */
-    curl_off_t speed = 0;
+    curl_off_t speed;
     unsigned int i;
     stamp = now;
 

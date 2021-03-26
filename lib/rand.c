@@ -39,7 +39,7 @@
 static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 {
   unsigned int r;
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   static unsigned int randseed;
   static bool seeded = FALSE;
 
@@ -164,7 +164,7 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
 
   if((num/2 >= sizeof(buffer)) || !(num&1))
     /* make sure it fits in the local buffer and that it is an odd number! */
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return result;
 
   num--; /* save one for zero termination */
 

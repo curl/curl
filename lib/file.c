@@ -401,7 +401,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   if(fstated && !data->state.range && data->set.timecondition) {
     if(!Curl_meets_timecondition(data, data->info.filetime)) {
       *done = TRUE;
-      return CURLE_OK;
+      return result;
     }
   }
 

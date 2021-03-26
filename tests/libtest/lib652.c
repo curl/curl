@@ -40,7 +40,7 @@ int test(char *URL)
   for(i = 0; i < size ; i++)
     memset(&buffer[i * 10], 65 + (i % 26), 10);
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+  if(curl_global_init(CURL_GLOBAL_ALL) != res) {
     fprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }

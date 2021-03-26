@@ -62,7 +62,7 @@ int test(char *URL)
   struct curl_forms formarray[3];
   size_t formlength = 0;
   char flbuf[32];
-  long contentlength = 0;
+  long contentlength;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");

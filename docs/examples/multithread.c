@@ -65,7 +65,7 @@ static void *pull_one_url(void *url)
    void * (*start_func)(void *), void *arg);
 */
 
-int main(int argc, char **argv)
+int main(void)
 {
   pthread_t tid[NUMT];
   int i;

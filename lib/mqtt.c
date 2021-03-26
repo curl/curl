@@ -111,7 +111,7 @@ static CURLcode mqtt_setup_conn(struct Curl_easy *data,
 static CURLcode mqtt_send(struct Curl_easy *data,
                           char *buf, size_t len)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   struct MQTT *mq = data->req.p.mqtt;
@@ -144,7 +144,7 @@ static int mqtt_getsock(struct Curl_easy *data,
 
 static CURLcode mqtt_connect(struct Curl_easy *data)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   const size_t client_id_offset = 14;
   const size_t packetlen = client_id_offset + MQTT_CLIENTID_LEN;
   char client_id[MQTT_CLIENTID_LEN + 1] = "curl";
@@ -173,9 +173,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
 
 static CURLcode mqtt_disconnect(struct Curl_easy *data)
 {
-  CURLcode result = CURLE_OK;
-  result = mqtt_send(data, (char *)"\xe0\x00", 2);
-  return result;
+  return mqtt_send(data, (char *)"\xe0\x00", 2);
 }
 
 static CURLcode mqtt_verify_connack(struct Curl_easy *data)
@@ -212,7 +210,7 @@ fail:
 static CURLcode mqtt_get_topic(struct Curl_easy *data,
                                char **topic, size_t *topiclen)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   char *path = data->state.up.path;
 
   if(strlen(path) > 1) {
@@ -527,7 +525,7 @@ static CURLcode mqtt_read_publish(struct Curl_easy *data, bool *done)
 
 static CURLcode mqtt_do(struct Curl_easy *data, bool *done)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   *done = FALSE; /* unconditionally */
 
   result = mqtt_connect(data);

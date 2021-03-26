@@ -42,7 +42,7 @@ int test(char *URL)
     else
       buffer[i] = (char) (0x41 + i % 26); /* A...Z */
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+  if(curl_global_init(CURL_GLOBAL_ALL) != res) {
     fprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }

@@ -679,8 +679,8 @@ CURLcode Curl_read(struct Curl_easy *data,   /* transfer */
                    ssize_t *n)               /* amount bytes read */
 {
   CURLcode result = CURLE_RECV_ERROR;
-  ssize_t nread = 0;
-  size_t bytesfromsocket = 0;
+  ssize_t nread;
+  size_t bytesfromsocket;
   char *buffertofill = NULL;
   struct connectdata *conn = data->conn;
 

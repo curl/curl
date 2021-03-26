@@ -202,26 +202,26 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       word++;
       database = strchr(word, ':');
       if(database) {
-        *database++ = (char)0;
+        *database++ = '\0';
         strategy = strchr(database, ':');
         if(strategy) {
-          *strategy++ = (char)0;
+          *strategy++ = '\0';
           nthdef = strchr(strategy, ':');
           if(nthdef) {
-            *nthdef = (char)0;
+            *nthdef = '\0';
           }
         }
       }
     }
 
-    if((word == NULL) || (*word == (char)0)) {
+    if((word == NULL) || (*word == '\0')) {
       infof(data, "lookup word is missing\n");
       word = (char *)"default";
     }
-    if((database == NULL) || (*database == (char)0)) {
+    if((database == NULL) || (*database == '\0')) {
       database = (char *)"!";
     }
-    if((strategy == NULL) || (*strategy == (char)0)) {
+    if((strategy == NULL) || (*strategy == '\0')) {
       strategy = (char *)".";
     }
 
@@ -257,19 +257,19 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       word++;
       database = strchr(word, ':');
       if(database) {
-        *database++ = (char)0;
+        *database++ = '\0';
         nthdef = strchr(database, ':');
         if(nthdef) {
-          *nthdef = (char)0;
+          *nthdef = '\0';
         }
       }
     }
 
-    if((word == NULL) || (*word == (char)0)) {
+    if((word == NULL) || (*word == '\0')) {
       infof(data, "lookup word is missing\n");
       word = (char *)"default";
     }
-    if((database == NULL) || (*database == (char)0)) {
+    if((database == NULL) || (*database == '\0')) {
       database = (char *)"!";
     }
 

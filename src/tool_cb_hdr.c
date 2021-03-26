@@ -221,7 +221,7 @@ static char *parse_filename(const char *ptr, size_t len)
   char *copy;
   char *p;
   char *q;
-  char  stop = '\0';
+  char  stop;
 
   /* simple implementation of strndup() */
   copy = malloc(len + 1);

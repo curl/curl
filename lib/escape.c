@@ -193,7 +193,7 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
       return CURLE_URL_MALFORMAT;
     }
 
-    ns[strindex++] = in;
+    ns[strindex++] = (char)in;
     string++;
   }
   ns[strindex] = 0; /* terminate it */
@@ -205,7 +205,7 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
   /* store output string */
   *ostring = ns;
 
-  return CURLE_OK;
+  return result;
 }
 
 /*

@@ -316,7 +316,7 @@ static CURLcode auth_decode_digest_md5_message(const char *chlg64,
 
   free(chlg);
 
-  return CURLE_OK;
+  return result;
 }
 
 /*

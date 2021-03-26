@@ -79,7 +79,7 @@ static int _getch(void)
 /* send RTSP OPTIONS request */
 static void rtsp_options(CURL *curl, const char *uri)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode res;
   printf("\nRTSP: OPTIONS %s\n", uri);
   my_curl_easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, uri);
   my_curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, (long)CURL_RTSPREQ_OPTIONS);
@@ -91,7 +91,7 @@ static void rtsp_options(CURL *curl, const char *uri)
 static void rtsp_describe(CURL *curl, const char *uri,
                           const char *sdp_filename)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode res;
   FILE *sdp_fp = fopen(sdp_filename, "wb");
   printf("\nRTSP: DESCRIBE %s\n", uri);
   if(sdp_fp == NULL) {
@@ -113,7 +113,7 @@ static void rtsp_describe(CURL *curl, const char *uri,
 /* send RTSP SETUP request */
 static void rtsp_setup(CURL *curl, const char *uri, const char *transport)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode res;
   printf("\nRTSP: SETUP %s\n", uri);
   printf("      TRANSPORT %s\n", transport);
   my_curl_easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, uri);
@@ -126,7 +126,7 @@ static void rtsp_setup(CURL *curl, const char *uri, const char *transport)
 /* send RTSP PLAY request */
 static void rtsp_play(CURL *curl, const char *uri, const char *range)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode res;
   printf("\nRTSP: PLAY %s\n", uri);
   my_curl_easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, uri);
   my_curl_easy_setopt(curl, CURLOPT_RANGE, range);
@@ -141,7 +141,7 @@ static void rtsp_play(CURL *curl, const char *uri, const char *range)
 /* send RTSP TEARDOWN request */
 static void rtsp_teardown(CURL *curl, const char *uri)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode res;
   printf("\nRTSP: TEARDOWN %s\n", uri);
   my_curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, (long)CURL_RTSPREQ_TEARDOWN);
   my_curl_easy_perform(curl);

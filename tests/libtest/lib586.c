@@ -156,10 +156,9 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if(CURLSHE_OK == scode) {
-    printf("CURLSHOPT_LOCKFUNC\n");
-    scode = curl_share_setopt(share, CURLSHOPT_LOCKFUNC, my_lock);
-  }
+  printf("CURLSHOPT_LOCKFUNC\n");
+  scode = curl_share_setopt(share, CURLSHOPT_LOCKFUNC, my_lock);
+
   if(CURLSHE_OK == scode) {
     printf("CURLSHOPT_UNLOCKFUNC\n");
     scode = curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, my_unlock);

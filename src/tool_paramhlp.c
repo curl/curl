@@ -601,7 +601,7 @@ ParameterError str2tls_max(long *val, const char *str)
     { "1.2",     CURL_SSLVERSION_MAX_TLSv1_2 },
     { "1.3",     CURL_SSLVERSION_MAX_TLSv1_3 }
   };
-  size_t i = 0;
+  size_t i;
   if(!str)
     return PARAM_REQUIRES_PARAMETER;
   for(i = 0; i < sizeof(tls_max_array)/sizeof(tls_max_array[0]); i++) {

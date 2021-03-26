@@ -323,7 +323,7 @@ static void state(struct Curl_easy *data, pop3state newstate)
 static CURLcode pop3_perform_capa(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   pop3c->sasl.authmechs = SASL_AUTH_NONE; /* No known auth. mechanisms yet */
@@ -476,7 +476,7 @@ static CURLcode pop3_perform_auth(struct Curl_easy *data,
                                   const char *mech,
                                   const char *initresp)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   if(initresp) {                                  /* AUTH <mech> ...<crlf> */
@@ -565,7 +565,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
  */
 static CURLcode pop3_perform_command(struct Curl_easy *data)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct connectdata *conn = data->conn;
   struct POP3 *pop3 = data->req.p.pop3;
   const char *command = NULL;
@@ -620,7 +620,7 @@ static CURLcode pop3_state_servergreet_resp(struct Curl_easy *data,
                                             int pop3code,
                                             pop3state instate)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   const char *line = data->state.buffer;
@@ -771,7 +771,7 @@ static CURLcode pop3_state_starttls_resp(struct Curl_easy *data,
                                          int pop3code,
                                          pop3state instate)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   (void)instate; /* no use for this yet */
 
   if(pop3code != '+') {
@@ -793,7 +793,7 @@ static CURLcode pop3_state_auth_resp(struct Curl_easy *data,
                                      int pop3code,
                                      pop3state instate)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   saslprogress progress;
@@ -852,7 +852,7 @@ static CURLcode pop3_state_apop_resp(struct Curl_easy *data, int pop3code,
 static CURLcode pop3_state_user_resp(struct Curl_easy *data, int pop3code,
                                      pop3state instate)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct connectdata *conn = data->conn;
   (void)instate; /* no use for this yet */
 
@@ -948,7 +948,7 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
 static CURLcode pop3_statemachine(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int pop3code;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -1024,7 +1024,7 @@ static CURLcode pop3_statemachine(struct Curl_easy *data,
 /* Called repeatedly until done from multi.c */
 static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
@@ -1087,7 +1087,7 @@ static int pop3_getsock(struct Curl_easy *data,
  */
 static CURLcode pop3_connect(struct Curl_easy *data, bool *done)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
@@ -1166,7 +1166,7 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
                              bool *dophase_done)
 {
   /* This is POP3 and no proxy */
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct connectdata *conn = data->conn;
   struct POP3 *pop3 = data->req.p.pop3;
 
@@ -1205,7 +1205,7 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
  */
 static CURLcode pop3_do(struct Curl_easy *data, bool *done)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   *done = FALSE; /* default to false */
 
   /* Parse the URL path */
@@ -1294,7 +1294,7 @@ static CURLcode pop3_doing(struct Curl_easy *data, bool *dophase_done)
 static CURLcode pop3_regular_transfer(struct Curl_easy *data,
                                       bool *dophase_done)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   bool connected = FALSE;
 
   /* Make sure size is unknown at this point */

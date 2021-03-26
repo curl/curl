@@ -73,17 +73,17 @@ bool Curl_ipv6works(struct Curl_easy *data)
     return data->multi->ipv6_works;
   }
   else {
-    int ipv6_works = -1;
+    bool ipv6_works;
     /* probe to see if we have a working IPv6 stack */
     curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
     if(s == CURL_SOCKET_BAD)
       /* an IPv6 address was requested but we can't get/use one */
-      ipv6_works = 0;
+      ipv6_works = FALSE;
     else {
-      ipv6_works = 1;
+      ipv6_works = TRUE;
       sclose(s);
     }
-    return (ipv6_works>0)?TRUE:FALSE;
+    return ipv6_works;
   }
 }
 

@@ -360,7 +360,7 @@ static void new_conn(char *url, GlobalInfo *g)
 static void fifo_cb(int fd, short event, void *arg)
 {
   char s[1024];
-  long int rv = 0;
+  long int rv;
   int n = 0;
   GlobalInfo *g = (GlobalInfo *)arg;
   (void)fd;

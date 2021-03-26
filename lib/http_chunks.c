@@ -113,7 +113,7 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
                               ssize_t *wrotep,
                               CURLcode *extrap)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct connectdata *conn = data->conn;
   struct Curl_chunker *ch = &conn->chunk;
   struct SingleRequest *k = &data->req;

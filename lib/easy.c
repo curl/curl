@@ -649,7 +649,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
 {
   struct Curl_multi *multi;
   CURLMcode mcode;
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   SIGPIPE_VARIABLE(pipe_st);
 
   if(!data)
@@ -765,7 +765,7 @@ CURLcode curl_easy_getinfo(struct Curl_easy *data, CURLINFO info, ...)
 
 static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   enum dupstring i;
   enum dupblob j;
 

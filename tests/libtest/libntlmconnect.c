@@ -128,7 +128,6 @@ int test(char *url)
     fd_set fdexcep;
     long timeout = -99;
     int maxfd = -99;
-    bool found_new_socket = FALSE;
 
     /* Start a new handle if we aren't at the max */
     if(state == ReadyForNewHandle) {
@@ -175,7 +174,7 @@ int test(char *url)
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
     if(state == NeedSocketForNewHandle) {
-      if(maxfd != -1 && !found_new_socket) {
+      if(maxfd != -1) {
         fprintf(stderr, "Warning: socket did not open immediately for new "
                 "handle (trying again)\n");
         continue;

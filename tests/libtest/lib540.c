@@ -105,7 +105,7 @@ static int loop(int num, CURLM *cm, const char *url, const char *userpwd,
   int Q, U = -1;
   fd_set R, W, E;
   struct timeval T;
-  int res = 0;
+  int res;
 
   res = init(num, cm, url, userpwd, headers);
   if(res)

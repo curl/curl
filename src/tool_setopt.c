@@ -290,7 +290,7 @@ CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
                           const char *name, CURLoption tag,
                           const struct NameValue *nvlist, long lval)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode ret;
   bool skip = FALSE;
 
   ret = curl_easy_setopt(curl, tag, lval);
@@ -328,7 +328,7 @@ CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
                            const char *name, CURLoption tag,
                            const struct NameValue *nvlist, long lval)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode ret;
   bool skip = FALSE;
 
   ret = curl_easy_setopt(curl, tag, lval);
@@ -371,7 +371,7 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
                              const struct NameValueUnsigned *nvlist,
                              long lval)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode ret;
   bool skip = FALSE;
 
   ret = curl_easy_setopt(curl, tag, lval);
@@ -446,7 +446,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
                                            struct tool_mime *part,
                                            int mimeno)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode ret;
   int submimeno = 0;
   char *escaped = NULL;
   const char *data = NULL;
@@ -579,7 +579,7 @@ static CURLcode libcurl_generate_mime(CURL *curl,
                                       struct tool_mime *toolmime,
                                       int *mimeno)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode ret;
 
   /* May need several mime variables, so invent name. */
   *mimeno = ++easysrc_mime_count;
@@ -624,7 +624,7 @@ CURLcode tool_setopt_slist(CURL *curl, struct GlobalConfig *config,
                            const char *name, CURLoption tag,
                            struct curl_slist *list)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode ret;
 
   ret = curl_easy_setopt(curl, tag, list);
 
@@ -653,7 +653,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
   bool skip = FALSE;
   bool escape = FALSE;
   char *escaped = NULL;
-  CURLcode ret = CURLE_OK;
+  CURLcode ret;
 
   va_start(arg, tag);
 

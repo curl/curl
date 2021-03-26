@@ -181,7 +181,7 @@ static int appenddata(char  **dst_buf,   /* dest buffer */
                       char   *src_buf,   /* source buffer */
                       int     src_b64)   /* != 0 if source is base64 encoded */
 {
-  size_t need_alloc = 0;
+  size_t need_alloc;
   size_t src_len = strlen(src_buf);
 
   if(!src_len)
@@ -219,7 +219,7 @@ static int appenddata(char  **dst_buf,   /* dest buffer */
 static int decodedata(char  **buf,   /* dest buffer */
                       size_t *len)   /* dest buffer data length */
 {
-  CURLcode error = CURLE_OK;
+  CURLcode error;
   unsigned char *buf64 = NULL;
   size_t src_len = 0;
 

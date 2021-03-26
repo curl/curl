@@ -73,7 +73,7 @@
  */
 int Curl_wait_ms(timediff_t timeout_ms)
 {
-  int r = 0;
+  int r;
 
   if(!timeout_ms)
     return 0;

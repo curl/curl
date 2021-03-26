@@ -173,7 +173,7 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
                                          struct ntlmdata *ntlm)
 {
   unsigned short target_info_len = 0;
-  unsigned int target_info_offset = 0;
+  unsigned int target_info_offset;
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void) data;

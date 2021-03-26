@@ -36,8 +36,8 @@ static void unit_stop(void)
 UNITTEST_START
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  const char string1[] = "1";
-  const char string2[] = "hello-you-fool";
+  /* const char string1[] = "1";
+  const char string2[] = "hello-you-fool"; */
   unsigned char output[MD5_DIGEST_LEN];
   unsigned char *testp = output;
 

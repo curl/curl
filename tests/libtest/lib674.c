@@ -35,7 +35,7 @@ int test(char *URL)
   CURL *handle2;
   CURLcode res = 0;
   CURLU *urlp = NULL;
-  CURLUcode uc = 0;
+  CURLUcode uc;
 
   global_init(CURL_GLOBAL_ALL);
   easy_init(handle);

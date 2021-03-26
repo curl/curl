@@ -79,7 +79,7 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
 {
   /* The token will be encoded in base64 */
   int length = APPROX_TOKEN_LEN * 3 / 4;
-  int used = 0;
+  int used;
   char *token = NULL;
   const char *creds = NULL;
   gss_ctx_id_t ctx = NULL;

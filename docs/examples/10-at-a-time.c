@@ -106,7 +106,7 @@ int main(void)
 {
   CURLM *cm;
   CURLMsg *msg;
-  unsigned int transfers = 0;
+  unsigned int transfers;
   int msgs_left = -1;
   int still_alive = 1;
 

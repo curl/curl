@@ -179,7 +179,7 @@ int test(char *URL)
   mres = curl_multi_add_handle(multi, pooh.easy);
   while(!mres) {
     struct timeval timeout;
-    int rc = 0;
+    int rc;
     fd_set fdread;
     fd_set fdwrite;
     fd_set fdexcept;

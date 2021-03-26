@@ -38,7 +38,7 @@
 #define EXPECTED_STRING_LASTZEROTERMINATED  (STRING_SSL_EC_CURVES + 1)
 #define EXPECTED_STRING_LAST                (STRING_AWS_SIGV4 + 1)
 
-int main(int argc, char *argv[])
+int main(void)
 {
   int rc = 0;
 

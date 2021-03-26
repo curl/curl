@@ -729,7 +729,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   int maxretr = 10;
   int delay = 20;
   int attempt = 0;
-  int error = 0;
+  int error;
 
   do {
     attempt++;
@@ -857,7 +857,7 @@ int main(int argc, char *argv[])
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
-  int wroteportfile = 0;
+  int wroteportfile;
   const char *pidname = ".mqttd.pid";
   const char *portname = ".mqttd.port";
   bool juggle_again;
@@ -993,7 +993,7 @@ int main(int argc, char *argv[])
 
 mqttd_cleanup:
 
-  if((msgsock != sock) && (msgsock != CURL_SOCKET_BAD))
+  if(msgsock != sock)
     sclose(msgsock);
 
   if(sock != CURL_SOCKET_BAD)

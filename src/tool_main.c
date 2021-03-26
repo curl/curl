@@ -142,7 +142,7 @@ static void memory_tracking_init(void)
  */
 static CURLcode main_init(struct GlobalConfig *config)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
 
 #if defined(__DJGPP__) || defined(__GO32__)
   /* stop stat() wasting time */
@@ -238,7 +238,7 @@ int wmain(int argc, wchar_t *argv[])
 int main(int argc, char *argv[])
 #endif
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct GlobalConfig global;
   memset(&global, 0, sizeof(global));
 
