@@ -42,8 +42,8 @@ http
 idn
 </features>
 <setenv>
-LC_ALL=en_US.UTF-8
-LC_CTYPE=en_US.UTF-8
+LC_ALL=UTF-8
+LC_CTYPE=UTF-8
 </setenv>
 <precheck>
 perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'

@@ -39,7 +39,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -# --stderr log/stderrlog%TESTNUMBER
 </command>
 <setenv>
 LC_ALL=
-LC_NUMERIC=en_US.UTF-8
+LC_NUMERIC=UTF-8
 </setenv>
 </client>
 
