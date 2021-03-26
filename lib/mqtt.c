@@ -441,7 +441,7 @@ static CURLcode mqtt_read_publish(struct Curl_easy *data, bool *done)
   size_t remlen;
   struct mqtt_conn *mqtt = &conn->proto.mqtt;
   struct MQTT *mq = data->req.p.mqtt;
-  int packet;
+  unsigned char packet;
 
   switch(mqtt->state) {
   MQTT_SUBACK_COMING:

@@ -169,7 +169,7 @@ static unsigned char byteval(char *value)
 static unsigned short shortval(char *value)
 {
   unsigned long num = strtoul(value, NULL, 10);
-  return (short)num & 0xffff;
+  return (unsigned short)num & 0xffff;
 }
 
 static void getconfig(void)

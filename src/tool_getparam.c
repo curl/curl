@@ -1370,7 +1370,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
          */
         const char *p = strchr(nextarg, '=');
         size_t nlen;
-        size_t is_file;
+        char is_file;
         if(!p)
           /* there was no '=' letter, check for a '@' instead */
           p = strchr(nextarg, '@');

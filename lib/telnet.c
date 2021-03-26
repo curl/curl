@@ -1172,7 +1172,7 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
                                  char *buffer, ssize_t nread)
 {
   ssize_t escapes, i, outlen;
-  char *outbuf = NULL;
+  unsigned char *outbuf = NULL;
   CURLcode result = CURLE_OK;
   ssize_t bytes_written, total_written;
   struct connectdata *conn = data->conn;
@@ -1180,12 +1180,12 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
   /* Determine size of new buffer after escaping */
   escapes = 0;
   for(i = 0; i < nread; i++)
-    if((char)buffer[i] == (char)CURL_IAC)
+    if(buffer[i] == CURL_IAC)
       escapes++;
   outlen = nread + escapes;
 
   if(outlen == nread)
-    outbuf = (char *)buffer;
+    outbuf = buffer;
   else {
     ssize_t j;
     outbuf = malloc(nread + escapes + 1);
