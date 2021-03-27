@@ -1570,7 +1570,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
           data->state.referer_alloc = FALSE;
         }
 
-        /* Make a copy of the URL without crenditals and fragment */
+        /* Make a copy of the URL without credentials and fragment */
         u = curl_url();
         if(!u)
           return CURLE_OUT_OF_MEMORY;

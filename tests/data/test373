@@ -53,7 +53,7 @@ X-Control: swsclose
 http
 </server>
 <name>
-Chunked transfer encoding - Multple valid chunks with binary zeros.
+Chunked transfer encoding - Multiple valid chunks with binary zeros.
 </name>
 <features>
 proxy
