@@ -5225,23 +5225,25 @@ if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
   SUPPORT_FEATURES="$SUPPORT_FEATURES Kerberos"
 fi
 
-if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
-    \( "x$OPENSSL_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
+use_curl_ntlm_core=no
+
+if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
+  if test "x$OPENSSL_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
       -o "x$SECURETRANSPORT_ENABLED" = "x1" \
       -o "x$USE_WIN32_CRYPTO" = "x1" \
-      -o "x$WOLFSSL_NTLM" = "x1" \); then
-  use_curl_ntlm_core=yes
-else
-  use_curl_ntlm_core=no
-fi
-if test "x$use_curl_ntlm_core" = "xyes" \
-    -o "x$USE_WINDOWS_SSPI" = "x1"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
+      -o "x$WOLFSSL_NTLM" = "x1"; then
+    use_curl_ntlm_core=yes
+  fi
 
-  if test "x$CURL_DISABLE_HTTP" != "x1" -a \
-      "x$NTLM_WB_ENABLED" = "x1"; then
-    SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM_WB"
+  if test "x$use_curl_ntlm_core" = "xyes" \
+      -o "x$USE_WINDOWS_SSPI" = "x1"; then
+    SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
+
+    if test "x$CURL_DISABLE_HTTP" != "x1" -a \
+        "x$NTLM_WB_ENABLED" = "x1"; then
+      SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM_WB"
+    fi
   fi
 fi
 
