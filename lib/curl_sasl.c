@@ -523,7 +523,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   case SASL_EXTERNAL:
     result = Curl_auth_create_external_message(data, conn->user, &resp, &len);
     break;
-
+#ifndef CURL_DISABLE_CRYPTO_AUTH
 #ifdef USE_GSASL
   case SASL_GSASL:
     sasl->params->getmessage(data->state.buffer, &serverdata);
@@ -533,7 +533,6 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
       newstate = SASL_GSASL;
     break;
 #endif
-#ifndef CURL_DISABLE_CRYPTO_AUTH
   case SASL_CRAMMD5:
     sasl->params->getmessage(data->state.buffer, &serverdata);
     result = Curl_auth_decode_cram_md5_message(serverdata, &chlg, &chlglen);
