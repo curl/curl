@@ -83,6 +83,8 @@ static bool is_proxy = FALSE;
 
 #define REQBUFSIZ (2*1024*1024)
 
+#define MAX_SLEEP_TIME_MS 250
+
 static long prevtestno = -1;    /* previous test number we served */
 static long prevpartno = -1;    /* previous part number we served */
 static bool prevbounce = FALSE; /* instructs the server to increase the part
@@ -108,7 +110,7 @@ struct httprequest {
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */
   bool ntlm;      /* Authorization ntlm header found */
-  int writedelay; /* if non-zero, delay this number of seconds between
+  int writedelay; /* if non-zero, delay this number of milliseconds between
                      writes in the response */
   int skip;       /* if non-zero, the server is instructed to not read this
                      many bytes from a PUT/POST request. Ie the client sends N
@@ -323,7 +325,7 @@ static int parse_servercmd(struct httprequest *req)
         req->noexpect = TRUE;
       }
       else if(1 == sscanf(cmd, "writedelay: %d", &num)) {
-        logmsg("instructed to delay %d secs between packets", num);
+        logmsg("instructed to delay %d msecs between packets", num);
         req->writedelay = num;
       }
       else {
@@ -1126,11 +1128,18 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     buffer += written;
 
     if(req->writedelay) {
-      int quarters = req->writedelay * 4;
-      logmsg("Pausing %d seconds", req->writedelay);
-      while((quarters > 0) && !got_exit_signal) {
-        quarters--;
-        wait_ms(250);
+      int msecs_left = req->writedelay;
+      int intervals = msecs_left / MAX_SLEEP_TIME_MS;
+      if(msecs_left%MAX_SLEEP_TIME_MS)
+        intervals++;
+      logmsg("Pausing %d milliseconds after writing %d bytes",
+         msecs_left, written);
+      while((intervals > 0) && !got_exit_signal) {
+        int sleep_time = msecs_left > MAX_SLEEP_TIME_MS ?
+          MAX_SLEEP_TIME_MS : msecs_left;
+        intervals--;
+        wait_ms(sleep_time);
+        msecs_left -= sleep_time;
       }
     }
   } while((count > 0) && !got_exit_signal);
