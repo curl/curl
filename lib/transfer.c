@@ -1582,7 +1582,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
 
       if(data->set.http_auto_referer) {
         CURLU *u;
-        char *referer;
+        char *referer = NULL;
 
         /* We are asked to automatically set the previous URL as the referer
            when we get the next URL. We pick the ->url field, which may or may
@@ -1610,7 +1610,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
 
         curl_url_cleanup(u);
 
-        if(uc || referer == NULL)
+        if(uc || !referer)
           return CURLE_OUT_OF_MEMORY;
 
         data->state.referer = referer;
