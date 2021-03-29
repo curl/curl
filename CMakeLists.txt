@@ -619,6 +619,14 @@ if(USE_LIBIDN2)
   check_library_exists_concat("idn2" idn2_lookup_ul HAVE_LIBIDN2)
 endif()
 
+if(WIN32)
+  option(USE_WIN32_IDN "Use WinIDN for IDN support" OFF)
+  if(USE_WIN32_IDN)
+    list(APPEND CURL_LIBS "Normaliz")
+    set(WANT_IDN_PROTOTYPES ON)
+  endif()
+endif()
+
 # Check for symbol dlopen (same as HAVE_LIBDL)
 check_library_exists("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
 
@@ -1363,7 +1371,7 @@ _add_if("libz"          HAVE_LIBZ)
 _add_if("brotli"        HAVE_BROTLI)
 _add_if("zstd"          HAVE_ZSTD)
 _add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
-_add_if("IDN"           HAVE_LIBIDN2)
+_add_if("IDN"           HAVE_LIBIDN2 OR USE_WIN32_IDN)
 _add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
                         ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
 # TODO SSP1 (Schannel) check is missing
