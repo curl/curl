@@ -504,11 +504,8 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
   const char *hostname = isProxy ? conn->http_proxy.host.name :
     conn->host.name;
 #else
-  /* proxy support disabled */
-  const bool isProxy = FALSE;
   struct ssl_primary_config * const ssl_config = &conn->ssl_config;
   const char *hostname = conn->host.name;
-  (void)sockindex;
 #endif
   (void)sockindex;
   DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
