@@ -19,6 +19,12 @@ Connection: close
 
 This server reply is for testing a simple Location: following
 </data>
+<data2>
+HTTP/1.1 200 This is another weirdo text message swsclose
+Connection: close
+
+Thanks for following.
+</data2>
 </reply>
 
 # Client-side
@@ -36,9 +42,6 @@ http://user:pass@%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER#anchor --location --r
 
 # Verify data after the test has been "shot"
 <verify>
-<errorcode>
-52
-</errorcode>
 <protocol>
 GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
@@ -60,6 +63,10 @@ Location: data/%TESTNUMBER0002.txt?coolsite=yes
 Content-Length: 62
 Connection: close
 
+HTTP/1.1 200 This is another weirdo text message swsclose
+Connection: close
+
+Thanks for following.
 http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER
 </stdout>
 </verify>
