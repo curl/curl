@@ -34,7 +34,9 @@ Got 4 bytes but pausing!
 datad474
 MyCoolTrailerHeader: amazingtrailer
 </datacheck>
-
+<servercmd>
+writedelay: 10
+</servercmd>
 </reply>
 # Client-side
 <client>
