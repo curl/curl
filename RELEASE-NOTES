@@ -4,7 +4,7 @@ curl and libcurl 7.76.0
  Command line options:         240
  curl_easy_setopt() options:   288
  Public functions in libcurl:  85
- Contributors:                 2352
+ Contributors:                 2356
 
 This release includes the following changes:
 
@@ -17,6 +17,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2021-22876: strip credentials from the auto-referer header field [88]
+ o CVE-2021-22890: add 'isproxy' argument to Curl_ssl_get/addsessionid() [55]
  o asyn-ares: use consistent resolve error message [37]
  o BUG-BOUNTY: removed the cooperation mention
  o build: delete unused feature guards [51]
@@ -30,6 +32,7 @@ This release includes the following bugfixes:
  o ci: stop building on freebsd-12-1 [38]
  o cmake: fix import library name for non-MS compiler on Windows [10]
  o cmake: use CMAKE_INSTALL_INCLUDEDIR indirection [49]
+ o cmake: support WinIDN [100]
  o config: fix building SMB with configure using Win32 Crypto [91]
  o config: fix detection of restricted Windows App environment
  o configure: fail if --with-quiche is used and quiche isn't found [48]
@@ -41,6 +44,7 @@ This release includes the following bugfixes:
  o configure: s/AC_HELP_STRING/AS_HELP_STRING [110]
  o cookies: Fix potential NULL pointer deref with PSL [66]
  o curl: set CURLOPT_NEW_FILE_PERMS if requested [65]
+ o curl_easy_setopt.3: add curl_easy_option* functions to SEE ALSO
  o curl_multibyte: always return a heap-allocated copy of string [29]
  o curl_multibyte: fall back to local code page stat/access on Windows [8]
  o Curl_timeleft: check both timeouts during connect [109]
@@ -58,6 +62,7 @@ This release includes the following bugfixes:
  o doh: Fix sharing user's resolve list with DOH handles [46]
  o doh: Inherit CURLOPT_STDERR from user's easy handle [60]
  o dynbuf: bump the max HTTP request to 1MB [39]
+ o examples: Remove threaded-shared-conn.c due to bug [119]
  o file: Support unicode urls on windows [9]
  o ftp: add 'list_only' to the transfer state struct [35]
  o ftp: add 'prefer_ascii' to the transfer state struct [36]
@@ -75,6 +80,7 @@ This release includes the following bugfixes:
  o hsts: remove unused defines [93]
  o http2: don't set KEEP_SEND when there's no more data to be sent [90]
  o http2: fail if connection terminated without END_STREAM [97]
+ o http: cap body data amount during send speed limiting [116]
  o http: do not add a referrer header with empty value [44]
  o http: make 416 not fail with resume + CURLOPT_FAILONERRROR [108]
  o http: remove superfluous NULL assign [75]
@@ -88,6 +94,7 @@ This release includes the following bugfixes:
  o libssh2:ssh_connect: clear session pointer after free [98]
  o memdebug: close debug logfile explicitly on exit [28]
  o mingw: enable using strcasecmp() [50]
+ o multi: close the connection when h2=>h1 downgrading [122]
  o multi: do once-per-transfer inits in before_perform in DID state [54]
  o multi: rename the multi transfer states [43]
  o multi: update pending list when removing handle [82]
@@ -97,7 +104,9 @@ This release includes the following bugfixes:
  o ngtcp2: sync with recent API updates [113]
  o openldap: avoid NULL pointer dereferences [102]
  o openssl: adapt to v3's new const for a few API calls [86]
+ o openssl: ensure to check SSL_CTX_set_alpn_protos return values [121]
  o openssl: remove get_ssl_version_txt in favor of SSL_get_version [67]
+ o openssl: set the transfer pointer for logging early [123]
  o OS400: update for CURLOPT_AWS_SIGV4 [2]
  o parse_proxy: fix a memory leak in the OOM path [41]
  o pathhelp.pm: fix use of pwd -L in Msys environment
@@ -133,6 +142,7 @@ This release includes the following bugfixes:
  o urldata: don't touch data->set.httpversion at run-time [6]
  o urldata: fix build without HTTP and MQTT [22]
  o urldata: make 'actions[]' use unsigned char instead of int [47]
+ o urldata: merge "struct DynamicStatic" into "struct UrlState" [117]
  o urldata: remove the 'rtspversion' field [15]
  o urldata: remove the _ORIG suffix from string names [31]
  o version.d: Add missing features to the features list [57]
@@ -146,18 +156,19 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Ádler Jonas Gross, Alejandro Colomar, Alex Xu, Amaury Denoyelle, Andrei Bica,
-  arvids-kokins-bidstack on github, awesomenode on github, Benbuck Nason,
-  Bodo Bergmann, Carl Zogheib, Christian Schmitz, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, David Demelier, David Goerger,
+  Anthony Ramine, arvids-kokins-bidstack on github, awesomenode on github,
+  Benbuck Nason, Bodo Bergmann, Carl Zogheib, Christian Schmitz, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, David Demelier, David Goerger, David Hu,
   ebejan on github, Emil Engler, Fabian Keil, Firefox OS, Gisle Vanem,
   Gregor Jasny, Ikko Ashimine, Jack Boos Yu, Jacob Hoffman-Andrews,
   Jean-Philippe Menil, Joel Teichroeb, Johannes Lesr, Jonathan Watt,
   Jon Rumsey, Jordan Brown, Joseph Chen, Jun-ya Kato, kokke on github,
-  Lawrence Gripper, Manuj Bhatia, Marcel Raad, Marc Hörsken, Michael Brown,
-  Michael Hordijk, Patrick Monnerat, Per Jensen, Ray Satiro, Robert Ronto,
-  Sergei Nikulov, Simon Josefsson, Stephan Szabo, Tomas Berger, Viktor Szakats,
-  Vincent Torri, Vladimir Varlamov, ZimCodes on github, ウさん
-  (53 contributors)
+  Lawrence Gripper, Li Xinwei, Manuj Bhatia, Marcel Raad, Marc Hörsken,
+  Michael Brown, Michael Hordijk, Mingtao Yang, Oumph on github,
+  Patrick Monnerat, Per Jensen, Ray Satiro, Robert Ronto, Sergei Nikulov,
+  Simon Josefsson, Stephan Szabo, Tomas Berger, Viktor Szakats, Vincent Torri,
+  Vladimir Varlamov, ZimCodes on github, ウさん
+  (58 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -215,6 +226,7 @@ References to bug reports and discussions on issues:
  [52] = https://curl.se/bug/?i=6639
  [53] = https://curl.se/bug/?i=6598
  [54] = https://curl.se/bug/?i=6640
+ [55] = https://curl.se/docs/CVE-2021-22890.html
  [56] = https://curl.se/bug/?i=6697
  [57] = https://curl.se/bug/?i=6677
  [58] = https://curl.se/bug/?i=6692
@@ -247,6 +259,7 @@ References to bug reports and discussions on issues:
  [85] = https://curl.se/bug/?i=6751
  [86] = https://curl.se/bug/?i=6703
  [87] = https://curl.se/bug/?i=6664
+ [88] = https://curl.se/docs/CVE-2021-22876.html
  [89] = https://curl.se/bug/?i=6750
  [90] = https://curl.se/bug/?i=6747
  [91] = https://curl.se/bug/?i=6277
@@ -258,6 +271,7 @@ References to bug reports and discussions on issues:
  [97] = https://curl.se/bug/?i=6736
  [98] = https://curl.se/bug/?i=6764
  [99] = https://curl.se/bug/?i=6691
+ [100] = https://curl.se/bug/?i=6807
  [101] = https://curl.se/bug/?i=6758
  [102] = https://curl.se/bug/?i=6676
  [103] = https://curl.se/bug/?i=6738
@@ -271,3 +285,9 @@ References to bug reports and discussions on issues:
  [111] = https://curl.se/bug/?i=6774
  [112] = https://curl.se/bug/?i=6771
  [113] = https://curl.se/bug/?i=6770
+ [116] = https://curl.se/mail/lib-2021-03/0042.html
+ [117] = https://curl.se/bug/?i=6798
+ [119] = https://curl.se/bug/?i=6795
+ [121] = https://curl.se/bug/?i=6794
+ [122] = https://curl.se/bug/?i=6788
+ [123] = https://curl.se/bug/?i=6783
