@@ -352,6 +352,6 @@ struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return ((CURLOPT_LASTENTRY%10000) != (308 + 1));
+  return ((CURLOPT_LASTENTRY%10000) != (309 + 1));
 }
 #endif

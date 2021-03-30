@@ -1,0 +1,99 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_IPTIMEOUT_MS 3 "30 Mar 2021" "libcurl 7.77.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_IPTIMEOUT_MS \- connection timeout per address
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_IPTIMEOUT_MS, long timeout);
+.SH DESCRIPTION
+Pass a long. It should contain the maximum time in milliseconds that you allow
+a connect attempt to a single IP address to take.
+
+When \fICURLOPT_IPTIMEOUT_MS(3)\fP is at 0, libcurl allows half the remaining
+time for each new connect attempt if there are more addresses to try - and it
+tries both IPv4 and IPv6 in parallel. See the connect description below.
+
+When \fICURLOPT_IPTIMEOUT_MS(3)\fP is set to a non-zero value, this is the
+maximum time allowed for each individual connect to an IP address attempt.
+Independently of the number of addresses libcurl will try.
+
+The \fICURLOPT_CONNECTTIMEOUT_MS(3)\fP timeout still sets the limit for the
+maximum time the entire connection phase is allowed to take and
+\fICURLOPT_TIMEOUT_MS(3)\fP sets the limit for the entire transfer.
+.SH "CONNECT TIMEOUT HALFING"
+This "half method" is used when \fICURLOPT_IPTIMEOUT_MS(3)\fP is not set.
+
+libcurl resolves the host name and gets a set of addresses back. "example.com"
+gets converted into let's say 3 IPv4 addresses and 2 IPv6 addresses. If
+\fICURLOPT_CONNECTTIMEOUT_MS(3)\fP sets the timeout to 10 seconds, libcurl
+will first allow 5 seconds (half of 10) to complete both an IPv4 and an IPv6
+connect attempt. The first to complete a connection wins.
+
+If any of them fails early, the next address in line will be attempted at
+once. If they instead both timeout after the 5 seconds, libcurl will move on
+to try the next IPv4 and IPv6 addresses and since there are no more IPv6
+address in the list will now allow the full 5 remaining seconds for that but
+as there more IPv4 addresses it will only give 2.5 seconds (half of the
+remaining 5) for that connect attempt.
+.SH "CONNECT TIMEOUT PER ADDRESS"
+This timeout method is used when \fICURLOPT_IPTIMEOUT_MS(3)\fP is set to a
+non-zero value.
+
+libcurl resolves the host name and gets a set of addresses back. "example.com"
+gets converted into let's say 3 IPv4 addresses and 2 IPv6 addresses. If
+\fICURLOPT_CONNECTTIMEOUT_MS(3)\fP sets the timeout to 10 seconds and
+\fICURLOPT_IPTIMEOUT_MS(3)\fP is set to 4 seconds, libcurl will first allow 4
+seconds to complete both an IPv4 and an IPv6 connect attempt. The first to
+complete a connection wins.
+
+If any of them fails early, the next address in line will be attempted at
+once. If they instead timeout after the 4 seconds, libcurl will move on to try
+more IPv4 and IPv6 addresses and again give them 4 seconds each to
+complete. This continues until it runs out of adresses or the total timeout is
+reached. If all addresses timeout, the third IPv4 address will only get 2
+seconds to complete since the first two got 4 each.
+.SH DEFAULT
+0
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+
+  /* spend only 500 milliseconds per connect attempt */
+  curl_easy_setopt(curl, CURLOPT_IPTIMEOUT_MS, 500L);
+
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.77.0
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_CONNECTTIMEOUT_MS "(3), "
+.BR CURLOPT_TIMEOUT_MS "(3), " CURLOPT_LOW_SPEED_LIMIT "(3), "

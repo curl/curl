@@ -845,6 +845,24 @@ static void post_SOCKS(struct Curl_easy *data,
 }
 
 /*
+ * timeout_per_addr() returns the time to spend on this connect attempt.
+ *
+ * If there are more addresses to try, this function returns half of the
+ * available time to allow furter attempts to more addresses rather than to
+ * spend the entire time on the current.
+ */
+static timediff_t timeout_per_addr(struct Curl_easy *data,
+                                   timediff_t timeout_ms, bool another)
+{
+  if(data->set.timeout_per_addr) {
+    /* if the total timeout left is smaller, return that */
+    return (data->set.timeout_per_addr < timeout_ms) ?
+      data->set.timeout_per_addr : timeout_ms;
+  }
+  return another ? timeout_ms / 2 : timeout_ms;
+}
+
+/*
  * Curl_is_connected() checks if the socket has connected.
  */
 
@@ -994,8 +1012,8 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
               Curl_strerror(error, buffer, sizeof(buffer)));
 #endif
 
-        conn->timeoutms_per_addr[i] = conn->tempaddr[i]->ai_next == NULL ?
-          allow : allow / 2;
+        conn->timeoutms_per_addr[i] =
+          timeout_per_addr(data, allow, conn->tempaddr[i]->ai_next != NULL);
         ainext(conn, i, TRUE);
         status = trynextip(data, conn, sockindex, i);
         if((status != CURLE_COULDNT_CONNECT) ||
@@ -1363,9 +1381,9 @@ CURLcode Curl_connecthost(struct Curl_easy *data,
 
   /* Max time for the next connection attempt */
   conn->timeoutms_per_addr[0] =
-    conn->tempaddr[0]->ai_next == NULL ? timeout_ms : timeout_ms / 2;
+    timeout_per_addr(data, timeout_ms, conn->tempaddr[0]->ai_next != NULL);
   conn->timeoutms_per_addr[1] =
-    conn->tempaddr[1]->ai_next == NULL ? timeout_ms : timeout_ms / 2;
+    timeout_per_addr(data, timeout_ms, conn->tempaddr[1]->ai_next != NULL);
 
   conn->tempfamily[0] = conn->tempaddr[0]?
     conn->tempaddr[0]->ai_family:0;

@@ -2088,6 +2088,9 @@ typedef enum {
   /* Same as CURLOPT_SSL_VERIFYSTATUS but for DOH (DNS-over-HTTPS) servers. */
   CURLOPT(CURLOPT_DOH_SSL_VERIFYSTATUS, CURLOPTTYPE_LONG, 308),
 
+  /* Connection timeout per address attempt in milliseconds */
+  CURLOPT(CURLOPT_IPTIMEOUT_MS, CURLOPTTYPE_LONG, 309),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

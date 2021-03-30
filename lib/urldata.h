@@ -1674,6 +1674,7 @@ struct UserDefined {
   void *ioctl_client;   /* pointer to pass to the ioctl callback */
   long timeout;         /* in milliseconds, 0 means no timeout */
   long connecttimeout;  /* in milliseconds, 0 means no timeout */
+  long timeout_per_addr; /* in milliseconds, 0 means "remaining/2" */
   long accepttimeout;   /* in milliseconds, 0 means no timeout */
   long happy_eyeballs_timeout; /* in milliseconds, 0 is a valid value */
   long server_response_timeout; /* in milliseconds, 0 means no timeout */
