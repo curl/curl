@@ -5763,6 +5763,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -r       run time statistics
   -rf      full run time statistics
   -rm      force removal of files by killing locking processes (Windows only)
+  --repeat=[num] run the given tests this many times
   -s       short output
   --seed=[num] set the random seed to a fixed number
   --shallow=[num] randomly makes the torture tests "thinner"
