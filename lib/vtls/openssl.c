@@ -755,10 +755,28 @@ int cert_stuff(struct Curl_easy *data,
 
     switch(file_type) {
     case SSL_FILETYPE_PEM:
+    {
       /* SSL_CTX_use_certificate_chain_file() only works on PEM files */
-      cert_use_result = cert_bio ?
-          SSL_CTX_use_certificate_chain_bio(ctx, cert_bio, key_passwd) :
+
+      BIO *copy_cert_bio = NULL;
+      if(cert_bio != NULL) {
+        BUF_MEM *bptr = NULL;
+        BIO_get_mem_ptr(cert_bio, &bptr);
+        /* fprintf(stderr, "cert_bio %p with data %p %d\n",
+           cert_bio, bptr->data, (int) bptr->length ); */
+        copy_cert_bio = BIO_new_mem_buf(bptr->data, (int) bptr->length);
+      }
+
+
+      cert_use_result = copy_cert_bio ?
+          SSL_CTX_use_certificate_chain_bio(ctx, copy_cert_bio, key_passwd) :
           SSL_CTX_use_certificate_chain_file(ctx, cert_file);
+
+      if(copy_cert_bio != NULL) {
+        BIO_free(copy_cert_bio);
+        copy_cert_bio = NULL;
+      }
+
       if(cert_use_result != 1) {
         failf(data,
               "could not load PEM client certificate, " OSSL_PACKAGE
@@ -769,7 +787,7 @@ int cert_stuff(struct Curl_easy *data,
         return 0;
       }
       break;
-
+    }
     case SSL_FILETYPE_ASN1:
       /* SSL_CTX_use_certificate_file() works with either PEM or ASN1, but
          we use the case above for PEM so this can only be performed with
@@ -977,15 +995,32 @@ int cert_stuff(struct Curl_easy *data,
         break;
       /* FALLTHROUGH */
     case SSL_FILETYPE_ASN1:
-      cert_use_result = key_bio ?
-        SSL_CTX_use_PrivateKey_bio(ctx, key_bio, file_type, key_passwd) :
+    {
+      BIO *copy_key_bio = NULL;
+      if(key_bio != NULL) {
+        BUF_MEM *bptr = NULL;
+        BIO_get_mem_ptr(key_bio, &bptr);
+        /* fprintf(stderr, "key_bio %p with data %p %d\n",
+           key_bio, bptr->data, (int) bptr->length ); */
+        copy_key_bio = BIO_new_mem_buf(bptr->data, (int) bptr->length);
+      }
+
+      cert_use_result = copy_key_bio ?
+        SSL_CTX_use_PrivateKey_bio(ctx, copy_key_bio, file_type, key_passwd) :
         SSL_CTX_use_PrivateKey_file(ctx, key_file, file_type);
+
+      if(copy_key_bio != NULL) {
+        BIO_free(copy_key_bio);
+        copy_key_bio = NULL;
+      }
+
       if(cert_use_result != 1) {
         failf(data, "unable to set private key file: '%s' type %s",
               key_file?key_file:"(memory blob)", key_type?key_type:"PEM");
         return 0;
       }
       break;
+    }
     case SSL_FILETYPE_ENGINE:
 #ifdef USE_OPENSSL_ENGINE
       {                         /* XXXX still needs some work */
