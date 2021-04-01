@@ -862,7 +862,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     list_start_index = cur;
 
 #ifdef USE_NGHTTP2
-    if(data->state.httpversion >= CURL_HTTP_VERSION_2) {
+    if(data->state.httpwant >= CURL_HTTP_VERSION_2) {
       memcpy(&alpn_buffer[cur], NGHTTP2_PROTO_ALPN, NGHTTP2_PROTO_ALPN_LEN);
       cur += NGHTTP2_PROTO_ALPN_LEN;
       infof(data, "schannel: ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);

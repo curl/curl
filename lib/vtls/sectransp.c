@@ -1613,7 +1613,7 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
                                                        &kCFTypeArrayCallBacks);
 
 #ifdef USE_NGHTTP2
-      if(data->state.httpversion >= CURL_HTTP_VERSION_2
+      if(data->state.httpwant >= CURL_HTTP_VERSION_2
 #ifndef CURL_DISABLE_PROXY
          && (!isproxy || !conn->bits.tunnel_proxy)
 #endif

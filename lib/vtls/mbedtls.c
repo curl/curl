@@ -497,7 +497,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   if(conn->bits.tls_enable_alpn) {
     const char **p = &backend->protocols[0];
 #ifdef USE_NGHTTP2
-    if(data->state.httpversion >= CURL_HTTP_VERSION_2)
+    if(data->state.httpwant >= CURL_HTTP_VERSION_2)
       *p++ = NGHTTP2_PROTO_VERSION_ID;
 #endif
     *p++ = ALPN_HTTP_1_1;
