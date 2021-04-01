@@ -1130,6 +1130,7 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
  * resolve error
  */
 
+#ifdef USE_CURL_ASYNC
 CURLcode Curl_resolver_error(struct Curl_easy *data)
 {
   const char *host_or_proxy;
@@ -1153,3 +1154,4 @@ CURLcode Curl_resolver_error(struct Curl_easy *data)
 
   return result;
 }
+#endif /* USE_CURL_ASYNC */
