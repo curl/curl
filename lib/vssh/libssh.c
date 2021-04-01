@@ -1453,15 +1453,14 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
           if((sshc->readdir_attrs->flags & SSH_FILEXFER_ATTR_PERMISSIONS) &&
              ((sshc->readdir_attrs->permissions & S_IFMT) ==
               S_IFLNK)) {
-            sshc->readdir_linkPath = malloc(PATH_MAX + 1);
+            sshc->readdir_linkPath = aprintf("%s%s", protop->path,
+                                             sshc->readdir_filename);
+
             if(sshc->readdir_linkPath == NULL) {
               state(data, SSH_SFTP_CLOSE);
               sshc->actualcode = CURLE_OUT_OF_MEMORY;
               break;
             }
-
-            msnprintf(sshc->readdir_linkPath, PATH_MAX, "%s%s", protop->path,
-                      sshc->readdir_filename);
 
             state(data, SSH_SFTP_READDIR_LINK);
             break;
