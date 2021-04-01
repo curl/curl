@@ -2602,7 +2602,14 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
     if(ssl_authtype == CURL_TLSAUTH_SRP)
       return CURLE_SSL_CONNECT_ERROR;
 #endif
+    /*
+     * Some OpenSSLs consider SSLv3 as deprecated but we know it better in this
+     * case!
+     */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     req_method = SSLv3_client_method();
+#pragma GCC diagnostic pop
     use_sni(FALSE);
     break;
 #endif
