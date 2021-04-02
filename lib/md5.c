@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,7 +38,7 @@
 #endif
 #endif /* USE_MBEDTLS */
 
-#if defined(USE_GNUTLS_NETTLE)
+#if defined(USE_GNUTLS)
 
 #include <nettle/md5.h>
 #include "curl_memory.h"
@@ -62,33 +62,6 @@ static void MD5_Update(MD5_CTX *ctx,
 static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 {
   md5_digest(ctx, 16, digest);
-}
-
-#elif defined(USE_GNUTLS)
-
-#include <gcrypt.h>
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
-
-typedef gcry_md_hd_t MD5_CTX;
-
-static void MD5_Init(MD5_CTX *ctx)
-{
-  gcry_md_open(ctx, GCRY_MD_MD5, 0);
-}
-
-static void MD5_Update(MD5_CTX *ctx,
-                       const unsigned char *input,
-                       unsigned int inputLen)
-{
-  gcry_md_write(*ctx, input, inputLen);
-}
-
-static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
-{
-  memcpy(digest, gcry_md_read(*ctx, 0), 16);
-  gcry_md_close(*ctx);
 }
 
 #elif defined(USE_OPENSSL) && !defined(USE_AMISSL)

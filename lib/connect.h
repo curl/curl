@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,11 +27,13 @@
 #include "sockaddr.h"
 #include "timeval.h"
 
-CURLcode Curl_is_connected(struct connectdata *conn,
+CURLcode Curl_is_connected(struct Curl_easy *data,
+                           struct connectdata *conn,
                            int sockindex,
                            bool *connected);
 
-CURLcode Curl_connecthost(struct connectdata *conn,
+CURLcode Curl_connecthost(struct Curl_easy *data,
+                          struct connectdata *conn,
                           const struct Curl_dns_entry *host);
 
 /* generic function that returns how much time there's left to run, according
@@ -52,7 +54,7 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp);
 
 bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
-                      char *addr, long *port);
+                      char *addr, int *port);
 
 /*
  * Check if a connection seems to be alive.
@@ -74,11 +76,16 @@ void Curl_sndbufset(curl_socket_t sockfd);
 #define Curl_sndbufset(y) Curl_nop_stmt
 #endif
 
-void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd);
-void Curl_conninfo_remote(struct connectdata *conn, curl_socket_t sockfd);
-void Curl_conninfo_local(struct connectdata *conn, curl_socket_t sockfd);
-void Curl_persistconninfo(struct connectdata *conn);
-int Curl_closesocket(struct connectdata *conn, curl_socket_t sock);
+void Curl_updateconninfo(struct Curl_easy *data, struct connectdata *conn,
+                         curl_socket_t sockfd);
+void Curl_conninfo_remote(struct Curl_easy *data, struct connectdata *conn,
+                          curl_socket_t sockfd);
+void Curl_conninfo_local(struct Curl_easy *data, curl_socket_t sockfd,
+                         char *local_ip, int *local_port);
+void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
+                          char *local_ip, int local_port);
+int Curl_closesocket(struct Curl_easy *data, struct connectdata *conn,
+                     curl_socket_t sock);
 
 /*
  * The Curl_sockaddr_ex structure is basically libcurl's external API
@@ -106,7 +113,7 @@ struct Curl_sockaddr_ex {
  * socket callback is set, used that!
  *
  */
-CURLcode Curl_socket(struct connectdata *conn,
+CURLcode Curl_socket(struct Curl_easy *data,
                      const struct Curl_addrinfo *ai,
                      struct Curl_sockaddr_ex *addr,
                      curl_socket_t *sockfd);

@@ -983,12 +983,14 @@ void curl_url_cleanup(CURLU *u)
   }
 }
 
-#define DUP(dest, src, name)         \
-  if(src->name) {                    \
-    dest->name = strdup(src->name);  \
-    if(!dest->name)                  \
-      goto fail;                     \
-  }
+#define DUP(dest, src, name)                    \
+  do {                                          \
+    if(src->name) {                             \
+      dest->name = strdup(src->name);           \
+      if(!dest->name)                           \
+        goto fail;                              \
+    }                                           \
+  } while(0)
 
 CURLU *curl_url_dup(CURLU *in)
 {

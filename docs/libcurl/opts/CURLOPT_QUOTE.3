@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -33,13 +33,20 @@ prior to your request. This will be done before any other commands are issued
 (even before the CWD command for FTP). The linked list should be a fully valid
 list of 'struct curl_slist' structs properly filled in with text strings. Use
 \fIcurl_slist_append(3)\fP to append strings (commands) to the list, and clear
-the entire list afterwards with \fIcurl_slist_free_all(3)\fP. Disable this
-operation again by setting a NULL to this option. When speaking to an FTP
-server, prefix the command with an asterisk (*) to make libcurl continue even
-if the command fails as by default libcurl will stop at first failure.
+the entire list afterwards with \fIcurl_slist_free_all(3)\fP.
+
+Disable this operation again by setting a NULL to this option.
+
+When speaking to an FTP server, prefix the command with an asterisk (*) to
+make libcurl continue even if the command fails as by default libcurl will
+stop at first failure.
 
 The set of valid FTP commands depends on the server (see RFC959 for a list of
 mandatory commands).
+
+libcurl does not inspect, parse or "understand" the commands passed to the
+server using this option. If you change connection state, working directory or
+similar using quote commands, libcurl will not know about it.
 
 The valid SFTP commands are:
 .RS

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1112,6 +1112,7 @@ curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
 
   case CURLOPT_ABSTRACT_UNIX_SOCKET:
   case CURLOPT_ALTSVC:
+  case CURLOPT_AWS_SIGV4:
   case CURLOPT_CAINFO:
   case CURLOPT_CAPATH:
   case CURLOPT_COOKIE:

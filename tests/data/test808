@@ -32,7 +32,7 @@ imap
 IMAP EXAMINE mailbox (CUSTOMREQUEST)
  </name>
  <command>
-imap://%HOSTIP:%IMAPPORT -u user:secret -X 'EXAMINE 808'
+imap://%HOSTIP:%IMAPPORT -u user:secret -X 'EXAMINE %TESTNUMBER'
 </command>
 </client>
 
@@ -42,7 +42,7 @@ imap://%HOSTIP:%IMAPPORT -u user:secret -X 'EXAMINE 808'
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 EXAMINE 808
+A003 EXAMINE %TESTNUMBER
 A004 LOGOUT
 </protocol>
 </verify>

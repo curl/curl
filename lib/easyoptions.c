@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             ___|___/|_| ______|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,6 +35,7 @@ struct curl_easyoption Curl_easyopts[] = {
   {"ALTSVC_CTRL", CURLOPT_ALTSVC_CTRL, CURLOT_LONG, 0},
   {"APPEND", CURLOPT_APPEND, CURLOT_LONG, 0},
   {"AUTOREFERER", CURLOPT_AUTOREFERER, CURLOT_LONG, 0},
+  {"AWS_SIGV4", CURLOPT_AWS_SIGV4, CURLOT_STRING, 0},
   {"BUFFERSIZE", CURLOPT_BUFFERSIZE, CURLOT_LONG, 0},
   {"CAINFO", CURLOPT_CAINFO, CURLOT_STRING, 0},
   {"CAPATH", CURLOPT_CAPATH, CURLOT_STRING, 0},
@@ -77,6 +78,9 @@ struct curl_easyoption Curl_easyopts[] = {
   {"DNS_SERVERS", CURLOPT_DNS_SERVERS, CURLOT_STRING, 0},
   {"DNS_SHUFFLE_ADDRESSES", CURLOPT_DNS_SHUFFLE_ADDRESSES, CURLOT_LONG, 0},
   {"DNS_USE_GLOBAL_CACHE", CURLOPT_DNS_USE_GLOBAL_CACHE, CURLOT_LONG, 0},
+  {"DOH_SSL_VERIFYHOST", CURLOPT_DOH_SSL_VERIFYHOST, CURLOT_LONG, 0},
+  {"DOH_SSL_VERIFYPEER", CURLOPT_DOH_SSL_VERIFYPEER, CURLOT_LONG, 0},
+  {"DOH_SSL_VERIFYSTATUS", CURLOPT_DOH_SSL_VERIFYSTATUS, CURLOT_LONG, 0},
   {"DOH_URL", CURLOPT_DOH_URL, CURLOT_STRING, 0},
   {"EGDSOCKET", CURLOPT_EGDSOCKET, CURLOT_STRING, 0},
   {"ENCODING", CURLOPT_ACCEPT_ENCODING, CURLOT_STRING, CURLOT_FLAG_ALIAS},
@@ -348,6 +352,6 @@ struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return (CURLOPT_LASTENTRY != (304 + 1));
+  return ((CURLOPT_LASTENTRY%10000) != (308 + 1));
 }
 #endif

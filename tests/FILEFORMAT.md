@@ -149,6 +149,7 @@ Available substitute variables include:
 - `%SSHPORT` - Port number of the SCP/SFTP server
 - `%SSHSRVMD5` - MD5 of SSH server's public key
 - `%SSH_PWD` - Current directory friendly for the SSH server
+- `%TESTNUMBER` - Number of the test case
 - `%TFTP6PORT` - IPv6 port number of the TFTP server
 - `%TFTPPORT` - Port number of the TFTP server
 - `%USER` - Login ID of the user running the test
@@ -200,7 +201,7 @@ part number and will then increase the part number with one. This is useful
 for auth tests and similar.
 
 `sendzero=yes` means that the (FTP) server will "send" the data even if the
-size is zero bytes. Used to verify curl's behaviour on zero bytes transfers.
+size is zero bytes. Used to verify curl's behavior on zero bytes transfers.
 
 `base64=yes` means that the data provided in the test-file is a chunk of data
 encoded with base64. It is the only way a test case can contain binary
@@ -405,6 +406,7 @@ Features testable here are:
 - `TLS-SRP`
 - `TrackMemory`
 - `typecheck`
+- `Unicode`
 - `unittest`
 - `unix-sockets`
 - `verbose-strings`

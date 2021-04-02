@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2003 - 2008, Gisle Vanem <gvanem@yahoo.no>.
+# Copyright (C) 2003 - 2021, Gisle Vanem <gvanem@yahoo.no>.
 # Copyright (C) 2003 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
@@ -26,7 +26,7 @@
 #
 
 DEPEND_PREREQ = curl_config.h
-VPATH  = vtls vauth
+VPATH  = vtls vauth vquic vssh
 TOPDIR = ..
 
 include ../packages/DOS/common.dj

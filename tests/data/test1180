@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP proxy
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Server: Blafasel/5.0
+Date: Sat, 16 Jan 2021 14:48:30 GMT
+Content-Length: 12
+
+Bla bla bla
+</data>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+proxy
+</features>
+ <name>
+HTTP GET request with proxy and -H "Proxy-Connection: keep-alive"
+ </name>
+ <command>
+--proxy http://%HOSTIP:%HTTPPORT -H "Proxy-Connection: Keep-Alive" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol>
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

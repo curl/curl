@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -33,8 +33,8 @@ AC_DEFUN([CURL_CHECK_OPTION_THREADED_RESOLVER], [
   AC_MSG_CHECKING([whether to enable the threaded resolver])
   OPT_THRES="default"
   AC_ARG_ENABLE(threaded_resolver,
-AC_HELP_STRING([--enable-threaded-resolver],[Enable threaded resolver])
-AC_HELP_STRING([--disable-threaded-resolver],[Disable threaded resolver]),
+AS_HELP_STRING([--enable-threaded-resolver],[Enable threaded resolver])
+AS_HELP_STRING([--disable-threaded-resolver],[Disable threaded resolver]),
   OPT_THRES=$enableval)
   case "$OPT_THRES" in
     no)
@@ -61,8 +61,8 @@ dnl   AC_BEFORE([$0],[CURL_CHECK_OPTION_THREADS])dnl
   AC_MSG_CHECKING([whether to enable c-ares for DNS lookups])
   OPT_ARES="default"
   AC_ARG_ENABLE(ares,
-AC_HELP_STRING([--enable-ares@<:@=PATH@:>@],[Enable c-ares for DNS lookups])
-AC_HELP_STRING([--disable-ares],[Disable c-ares for DNS lookups]),
+AS_HELP_STRING([--enable-ares@<:@=PATH@:>@],[Enable c-ares for DNS lookups])
+AS_HELP_STRING([--disable-ares],[Disable c-ares for DNS lookups]),
   OPT_ARES=$enableval)
   case "$OPT_ARES" in
     no)
@@ -96,8 +96,8 @@ AC_DEFUN([CURL_CHECK_OPTION_CURLDEBUG], [
   AC_MSG_CHECKING([whether to enable curl debug memory tracking])
   OPT_CURLDEBUG_BUILD="default"
   AC_ARG_ENABLE(curldebug,
-AC_HELP_STRING([--enable-curldebug],[Enable curl debug memory tracking])
-AC_HELP_STRING([--disable-curldebug],[Disable curl debug memory tracking]),
+AS_HELP_STRING([--enable-curldebug],[Enable curl debug memory tracking])
+AS_HELP_STRING([--disable-curldebug],[Disable curl debug memory tracking]),
   OPT_CURLDEBUG_BUILD=$enableval)
   case "$OPT_CURLDEBUG_BUILD" in
     no)
@@ -151,8 +151,8 @@ AC_DEFUN([CURL_CHECK_OPTION_DEBUG], [
   AC_MSG_CHECKING([whether to enable debug build options])
   OPT_DEBUG_BUILD="default"
   AC_ARG_ENABLE(debug,
-AC_HELP_STRING([--enable-debug],[Enable debug build options])
-AC_HELP_STRING([--disable-debug],[Disable debug build options]),
+AS_HELP_STRING([--enable-debug],[Enable debug build options])
+AS_HELP_STRING([--disable-debug],[Disable debug build options]),
   OPT_DEBUG_BUILD=$enableval)
   case "$OPT_DEBUG_BUILD" in
     no)
@@ -184,8 +184,8 @@ AC_DEFUN([CURL_CHECK_OPTION_OPTIMIZE], [
   AC_MSG_CHECKING([whether to enable compiler optimizer])
   OPT_COMPILER_OPTIMIZE="default"
   AC_ARG_ENABLE(optimize,
-AC_HELP_STRING([--enable-optimize],[Enable compiler optimizations])
-AC_HELP_STRING([--disable-optimize],[Disable compiler optimizations]),
+AS_HELP_STRING([--enable-optimize],[Enable compiler optimizations])
+AS_HELP_STRING([--disable-optimize],[Disable compiler optimizations]),
   OPT_COMPILER_OPTIMIZE=$enableval)
   case "$OPT_COMPILER_OPTIMIZE" in
     no)
@@ -239,12 +239,12 @@ AC_DEFUN([CURL_CHECK_OPTION_SYMBOL_HIDING], [
   AC_MSG_CHECKING([whether to enable hiding of library internal symbols])
   OPT_SYMBOL_HIDING="default"
   AC_ARG_ENABLE(symbol-hiding,
-AC_HELP_STRING([--enable-symbol-hiding],[Enable hiding of library internal symbols])
-AC_HELP_STRING([--disable-symbol-hiding],[Disable hiding of library internal symbols]),
+AS_HELP_STRING([--enable-symbol-hiding],[Enable hiding of library internal symbols])
+AS_HELP_STRING([--disable-symbol-hiding],[Disable hiding of library internal symbols]),
   OPT_SYMBOL_HIDING=$enableval)
   AC_ARG_ENABLE(hidden-symbols,
-AC_HELP_STRING([--enable-hidden-symbols],[To be deprecated, use --enable-symbol-hiding])
-AC_HELP_STRING([--disable-hidden-symbols],[To be deprecated, use --disable-symbol-hiding]),
+AS_HELP_STRING([--enable-hidden-symbols],[To be deprecated, use --enable-symbol-hiding])
+AS_HELP_STRING([--disable-hidden-symbols],[To be deprecated, use --disable-symbol-hiding]),
   OPT_SYMBOL_HIDING=$enableval)
   case "$OPT_SYMBOL_HIDING" in
     no)
@@ -283,8 +283,8 @@ dnl   AC_BEFORE([$0],[CURL_CHECK_LIB_THREADS])dnl
 dnl   AC_MSG_CHECKING([whether to enable threads for DNS lookups])
 dnl   OPT_THREADS="default"
 dnl   AC_ARG_ENABLE(threads,
-dnl AC_HELP_STRING([--enable-threads@<:@=PATH@:>@],[Enable threads for DNS lookups])
-dnl AC_HELP_STRING([--disable-threads],[Disable threads for DNS lookups]),
+dnl AS_HELP_STRING([--enable-threads@<:@=PATH@:>@],[Enable threads for DNS lookups])
+dnl AS_HELP_STRING([--disable-threads],[Disable threads for DNS lookups]),
 dnl   OPT_THREADS=$enableval)
 dnl   case "$OPT_THREADS" in
 dnl     no)
@@ -330,7 +330,7 @@ AC_DEFUN([CURL_CHECK_OPTION_RT], [
   AC_MSG_CHECKING([whether to disable dependency on -lrt])
   OPT_RT="default"
   AC_ARG_ENABLE(rt,
- AC_HELP_STRING([--disable-rt],[disable dependency on -lrt]),
+ AS_HELP_STRING([--disable-rt],[disable dependency on -lrt]),
   OPT_RT=$enableval)
   case "$OPT_RT" in
     no)
@@ -364,8 +364,8 @@ AC_DEFUN([CURL_CHECK_OPTION_WARNINGS], [
   AC_MSG_CHECKING([whether to enable strict compiler warnings])
   OPT_COMPILER_WARNINGS="default"
   AC_ARG_ENABLE(warnings,
-AC_HELP_STRING([--enable-warnings],[Enable strict compiler warnings])
-AC_HELP_STRING([--disable-warnings],[Disable strict compiler warnings]),
+AS_HELP_STRING([--enable-warnings],[Enable strict compiler warnings])
+AS_HELP_STRING([--disable-warnings],[Disable strict compiler warnings]),
   OPT_COMPILER_WARNINGS=$enableval)
   case "$OPT_COMPILER_WARNINGS" in
     no)
@@ -396,8 +396,8 @@ AC_DEFUN([CURL_CHECK_OPTION_WERROR], [
   AC_MSG_CHECKING([whether to enable compiler warnings as errors])
   OPT_COMPILER_WERROR="default"
   AC_ARG_ENABLE(werror,
-AC_HELP_STRING([--enable-werror],[Enable compiler warnings as errors])
-AC_HELP_STRING([--disable-werror],[Disable compiler warnings as errors]),
+AS_HELP_STRING([--enable-werror],[Enable compiler warnings as errors])
+AS_HELP_STRING([--disable-werror],[Disable compiler warnings as errors]),
   OPT_COMPILER_WERROR=$enableval)
   case "$OPT_COMPILER_WERROR" in
     no)
@@ -600,8 +600,8 @@ AC_DEFUN([CURL_CHECK_OPTION_NTLM_WB], [
   AC_BEFORE([$0],[CURL_CHECK_NTLM_WB])dnl
   OPT_NTLM_WB="default"
   AC_ARG_ENABLE(ntlm-wb,
-AC_HELP_STRING([--enable-ntlm-wb@<:@=FILE@:>@],[Enable NTLM delegation to winbind's ntlm_auth helper, where FILE is ntlm_auth's absolute filename (default: /usr/bin/ntlm_auth)])
-AC_HELP_STRING([--disable-ntlm-wb],[Disable NTLM delegation to winbind's ntlm_auth helper]),
+AS_HELP_STRING([--enable-ntlm-wb@<:@=FILE@:>@],[Enable NTLM delegation to winbind's ntlm_auth helper, where FILE is ntlm_auth's absolute filename (default: /usr/bin/ntlm_auth)])
+AS_HELP_STRING([--disable-ntlm-wb],[Disable NTLM delegation to winbind's ntlm_auth helper]),
   OPT_NTLM_WB=$enableval)
   want_ntlm_wb_file="/usr/bin/ntlm_auth"
   case "$OPT_NTLM_WB" in
@@ -659,8 +659,8 @@ AC_DEFUN([CURL_CHECK_OPTION_ECH], [
   AC_MSG_CHECKING([whether to enable ECH support])
   OPT_ECH="default"
   AC_ARG_ENABLE(ech,
-AC_HELP_STRING([--enable-ech],[Enable ECH support])
-AC_HELP_STRING([--disable-ech],[Disable ECH support]),
+AS_HELP_STRING([--enable-ech],[Enable ECH support])
+AS_HELP_STRING([--disable-ech],[Disable ECH support]),
   OPT_ECH=$enableval)
   case "$OPT_ECH" in
     no)

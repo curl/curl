@@ -48,7 +48,7 @@
  *                        0 - no auth
  *                        1 - GSSAPI (not supported)
  *                        2 - user + password
- * "response [number]" - the decimal number to repsond to a connect
+ * "response [number]" - the decimal number to respond to a connect
  *                       SOCKS5: 0 is OK, SOCKS4: 90 is ok
  *
  */

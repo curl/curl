@@ -24,14 +24,14 @@ http
 HTTP HEAD with Connection: close
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/14 -i --head
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -i --head
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-HEAD /want/14 HTTP/1.1
+HEAD /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

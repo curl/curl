@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -38,10 +38,15 @@ fi
 if [ "$T" = "torture" ]; then
   ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2
   make
-  make TFLAGS=-n test-nonflaky
-  make "TFLAGS=-n -e" test-nonflaky
-  tests="1 200 300 500 700 800 900 1000 1100 1200 1302 1400 1502 3000"
-  make "TFLAGS=-n --shallow=40 -t $tests" test-nonflaky
+  tests="!TLS-SRP !FTP"
+  make "TFLAGS=-n --shallow=20 -t $tests" test-nonflaky
+fi
+
+if [ "$T" = "events" ]; then
+  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2
+  make
+  tests="!TLS-SRP"
+  make "TFLAGS=-n -e $tests" test-nonflaky
 fi
 
 if [ "$T" = "debug" ]; then
@@ -62,7 +67,13 @@ fi
 if [ "$T" = "debug-mesalink" ]; then
   ./configure --enable-debug --enable-werror $C
   make
-  make "TFLAGS=-n !313 !3001" test-nonflaky
+  make "TFLAGS=-n !313 !410 !3001" test-nonflaky
+fi
+
+if [ "$T" = "debug-rustls" ]; then
+  ./configure --enable-debug --enable-werror $C
+  make
+  make "TFLAGS=HTTPS !313" test-nonflaky
 fi
 
 if [ "$T" = "novalgrind" ]; then
@@ -106,7 +117,7 @@ fi
 if [ "$T" = "cmake" ]; then
   cmake -H. -Bbuild -DCURL_WERROR=ON $C
   cmake --build build
-  env TFLAGS="!1139" cmake --build build --target test-nonflaky
+  env TFLAGS="!1139 $TFLAGS" cmake --build build --target test-nonflaky
 fi
 
 if [ "$T" = "distcheck" ]; then

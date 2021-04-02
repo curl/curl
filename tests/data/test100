@@ -36,7 +36,7 @@ ftp
 FTP dir list PASV
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/test-100/
+ftp://%HOSTIP:%FTPPORT/test-%TESTNUMBER/
 </command>
 </client>
 
@@ -47,7 +47,7 @@ ftp://%HOSTIP:%FTPPORT/test-100/
 USER anonymous
 PASS ftp@example.com
 PWD
-CWD test-100
+CWD test-%TESTNUMBER
 EPSV
 TYPE A
 LIST

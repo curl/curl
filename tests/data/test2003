@@ -17,7 +17,7 @@ multiprotocol
 <reply>
 <data1 nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -58,9 +58,9 @@ tftp
 HTTP GET followed by FTP RETR followed by FILE followed by TFTP RRQ then again in reverse order
  </name>
 <command option="no-include">
-http://%HOSTIP:%HTTPPORT/20030001 ftp://%HOSTIP:%FTPPORT/20030002 file://localhost%FILE_PWD/log/test2003.txt tftp://%HOSTIP:%TFTPPORT//20030003 tftp://%HOSTIP:%TFTPPORT//20030003 file://localhost%FILE_PWD/log/test2003.txt ftp://%HOSTIP:%FTPPORT/20030002 http://%HOSTIP:%HTTPPORT/20030001
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 file://localhost%FILE_PWD/log/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER0003 tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER0003 file://localhost%FILE_PWD/log/test%TESTNUMBER.txt ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
-<file name="log/test2003.txt">
+<file name="log/test%TESTNUMBER.txt">
 foo
    bar
 bar
@@ -73,7 +73,7 @@ moo
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /20030001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
@@ -83,24 +83,24 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 20030002
-RETR 20030002
+SIZE %TESTNUMBER0002
+RETR %TESTNUMBER0002
 opcode: 1
 mode: octet
 tsize: 0
 blksize: 512
 timeout: 6
-filename: /20030003
+filename: /%TESTNUMBER0003
 opcode: 1
 mode: octet
 tsize: 0
 blksize: 512
 timeout: 6
-filename: /20030003
+filename: /%TESTNUMBER0003
 EPSV
-SIZE 20030002
-RETR 20030002
-GET /20030001 HTTP/1.1
+SIZE %TESTNUMBER0002
+RETR %TESTNUMBER0002
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

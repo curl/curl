@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -143,7 +143,7 @@ int main (void)
 dnl CURL_CHECK_AIX_ALL_SOURCE
 dnl -------------------------------------------------
 dnl Provides a replacement of traditional AC_AIX with
-dnl an uniform behaviour across all autoconf versions,
+dnl an uniform behavior across all autoconf versions,
 dnl and with our own placement rules.
 
 AC_DEFUN([CURL_CHECK_AIX_ALL_SOURCE], [
@@ -342,6 +342,39 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
     yes)
       AC_DEFINE_UNQUOTED(HAVE_WS2TCPIP_H, 1,
         [Define to 1 if you have the ws2tcpip.h header file.])
+      ;;
+  esac
+])
+
+
+dnl CURL_CHECK_HEADER_WINCRYPT
+dnl -------------------------------------------------
+dnl Check for compilable and valid wincrypt.h header
+
+AC_DEFUN([CURL_CHECK_HEADER_WINCRYPT], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_CACHE_CHECK([for wincrypt.h], [curl_cv_header_wincrypt_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#undef inline
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <wincrypt.h>
+      ]],[[
+        int dummy=2*PROV_RSA_FULL;
+      ]])
+    ],[
+      curl_cv_header_wincrypt_h="yes"
+    ],[
+      curl_cv_header_wincrypt_h="no"
+    ])
+  ])
+  case "$curl_cv_header_wincrypt_h" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_WINCRYPT_H, 1,
+        [Define to 1 if you have the wincrypt.h header file.])
       ;;
   esac
 ])
@@ -1375,7 +1408,6 @@ dnl -------------------------------------------------
 dnl Check for timeval struct
 
 AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
-  AC_REQUIRE([AC_HEADER_TIME])dnl
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
   AC_CHECK_HEADERS(sys/types.h sys/time.h time.h sys/socket.h)
@@ -1573,7 +1605,6 @@ dnl -------------------------------------------------
 dnl Check if monotonic clock_gettime is available.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
-  AC_REQUIRE([AC_HEADER_TIME])dnl
   AC_CHECK_HEADERS(sys/types.h sys/time.h time.h)
   AC_MSG_CHECKING([for monotonic clock_gettime])
   #
@@ -2165,9 +2196,9 @@ AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
   AC_MSG_CHECKING([default CA cert bundle/path])
 
   AC_ARG_WITH(ca-bundle,
-AC_HELP_STRING([--with-ca-bundle=FILE],
+AS_HELP_STRING([--with-ca-bundle=FILE],
 [Path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
-AC_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
+AS_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   [
     want_ca="$withval"
     if test "x$want_ca" = "xyes"; then
@@ -2176,12 +2207,12 @@ AC_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   ],
   [ want_ca="unset" ])
   AC_ARG_WITH(ca-path,
-AC_HELP_STRING([--with-ca-path=DIRECTORY],
+AS_HELP_STRING([--with-ca-path=DIRECTORY],
 [Path to a directory containing CA certificates stored individually, with \
 their filenames in a hash format. This option can be used with the OpenSSL, \
 GnuTLS and mbedTLS backends. Refer to OpenSSL c_rehash for details. \
 (example: /etc/certificates)])
-AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
+AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   [
     want_capath="$withval"
     if test "x$want_capath" = "xyes"; then
@@ -2291,8 +2322,8 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
 
   AC_MSG_CHECKING([whether to use builtin CA store of SSL library])
   AC_ARG_WITH(ca-fallback,
-AC_HELP_STRING([--with-ca-fallback], [Use the built in CA store of the SSL library])
-AC_HELP_STRING([--without-ca-fallback], [Don't use the built in CA store of the SSL library]),
+AS_HELP_STRING([--with-ca-fallback], [Use the built in CA store of the SSL library])
+AS_HELP_STRING([--without-ca-fallback], [Don't use the built in CA store of the SSL library]),
   [
     if test "x$with_ca_fallback" != "xyes" -a "x$with_ca_fallback" != "xno"; then
       AC_MSG_ERROR([--with-ca-fallback only allows yes or no as parameter])
@@ -2353,11 +2384,54 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
       AC_MSG_RESULT([yes (large file enabled)])
       AC_DEFINE_UNQUOTED(USE_WIN32_LARGE_FILES, 1,
         [Define to 1 if you are building a Windows target with large file support.])
+      AC_SUBST(USE_WIN32_LARGE_FILES, [1])
       ;;
     win32_small_files)
       AC_MSG_RESULT([yes (large file disabled)])
       AC_DEFINE_UNQUOTED(USE_WIN32_SMALL_FILES, 1,
         [Define to 1 if you are building a Windows target without large file support.])
+      AC_SUBST(USE_WIN32_SMALL_FILES, [1])
+      ;;
+    *)
+      AC_MSG_RESULT([no])
+      ;;
+  esac
+])
+
+dnl CURL_CHECK_WIN32_CRYPTO
+dnl -------------------------------------------------
+dnl Check if curl's WIN32 crypto lib can be used
+
+AC_DEFUN([CURL_CHECK_WIN32_CRYPTO], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINCRYPT])dnl
+  AC_MSG_CHECKING([whether build target supports WIN32 crypto API])
+  curl_win32_crypto_api="no"
+  if test "$curl_cv_header_wincrypt_h" = "yes"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#undef inline
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <wincrypt.h>
+      ]],[[
+        HCRYPTPROV hCryptProv;
+        if(CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
+                               CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
+          CryptReleaseContext(hCryptProv, 0);
+        }
+      ]])
+    ],[
+      curl_win32_crypto_api="yes"
+    ])
+  fi
+  case "$curl_win32_crypto_api" in
+    yes)
+      AC_MSG_RESULT([yes])
+      AC_DEFINE_UNQUOTED(USE_WIN32_CRYPTO, 1,
+        [Define to 1 if you are building a Windows target with crypto API support.])
+      AC_SUBST(USE_WIN32_CRYPTO, [1])
       ;;
     *)
       AC_MSG_RESULT([no])

@@ -33,7 +33,7 @@ Content-Type: text/html; charset=iso-8859-1
 # this is returned when we get a GET!
 <data2>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 7
 Connection: close
 Content-Type: text/html
@@ -60,7 +60,7 @@ Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 7
 Connection: close
 Content-Type: text/html
@@ -92,7 +92,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://test.remote.example.com.213:%HTTPPORT/path/2130002 --proxy1.0 http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-ntlm --proxytunnel -d "postit"
+http://test.remote.example.com.%TESTNUMBER:%HTTPPORT/path/%TESTNUMBER0002 --proxy1.0 http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-ntlm --proxytunnel -d "postit"
 </command>
 <precheck>
 chkhostname curlhost
@@ -102,20 +102,20 @@ chkhostname curlhost
 # Verify data after the test has been "shot"
 <verify>
 <protocol nonewline="yes">
-CONNECT test.remote.example.com.213:%HTTPPORT HTTP/1.0
-Host: test.remote.example.com.213:%HTTPPORT
+CONNECT test.remote.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.0
+Host: test.remote.example.com.%TESTNUMBER:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.example.com.213:%HTTPPORT HTTP/1.0
-Host: test.remote.example.com.213:%HTTPPORT
+CONNECT test.remote.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.0
+Host: test.remote.example.com.%TESTNUMBER:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
-POST /path/2130002 HTTP/1.1
-Host: test.remote.example.com.213:%HTTPPORT
+POST /path/%TESTNUMBER0002 HTTP/1.1
+Host: test.remote.example.com.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 6

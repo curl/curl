@@ -8,15 +8,15 @@ RETR
 
 # Server-side
 <reply>
-# file1357 contents...
+# file%TESTNUMBER contents...
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1357; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 MOOOO
 </data>
@@ -39,10 +39,10 @@ FTP download, file with C-D inside, using -O -D file
 CURL_TESTDIR=%PWD/log
 </setenv>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file1357 -O -D log/heads1357
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O -D log/heads%TESTNUMBER
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/name1357
+perl %SRCDIR/libtest/notexists.pl log/name%TESTNUMBER
 </postcheck>
 </client>
 
@@ -55,24 +55,24 @@ PWD
 CWD path
 EPSV
 TYPE I
-SIZE file1357
-RETR file1357
+SIZE file%TESTNUMBER
+RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/file1357">
+<file1 name="log/file%TESTNUMBER">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1357; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 MOOOO
 </file1>
 
-<file2 name="log/heads1357">
+<file2 name="log/heads%TESTNUMBER">
 220-        _   _ ____  _     
 220-    ___| | | |  _ \| |    
 220-   / __| | | | |_) | |    
@@ -85,14 +85,14 @@ MOOOO
 229 Entering Passive Mode (stripped)
 200 I modify TYPE as you wanted
 213 214
-150 Binary data connection for 1357 () (214 bytes).
+150 Binary data connection for %TESTNUMBER () (214 bytes).
 226 File transfer complete
 </file2>
 <stripfile2>
 s/^(229 Entering Passive Mode \().*(\).*)/${1}stripped${2}/
 </stripfile2>
 
-<file3 name="log/stdout1357">
+<file3 name="log/stdout%TESTNUMBER">
 </file3>
 
 </verify>

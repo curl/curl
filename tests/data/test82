@@ -35,14 +35,14 @@ http
 HTTP with proxy requiring NTLM, but we send Basic
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/82 --proxy-user testuser:testpass -x http://%HOSTIP:%HTTPPORT
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --proxy-user testuser:testpass -x http://%HOSTIP:%HTTPPORT
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET http://%HOSTIP:%HTTPPORT/82 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 User-Agent: curl/%VERSION

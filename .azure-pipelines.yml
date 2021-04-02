@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -49,7 +49,7 @@ stages:
     variables:
       install: ''
       configure: ''
-      tests: ''
+      tests: '!433'
     timeoutInMinutes: 60
     pool:
       vmImage: 'ubuntu-latest'
@@ -76,7 +76,7 @@ stages:
           configure: --enable-debug --disable-shared --disable-threaded-resolver
           tests: -n -t --shallow=40 !FTP
     steps:
-    - script: sudo apt-get update && sudo apt-get install -y stunnel4 python-impacket libzstd-dev libbrotli-dev $(install)
+    - script: sudo apt-get update && sudo apt-get install -y stunnel4 python3-impacket libzstd-dev libbrotli-dev $(install)
       displayName: 'apt install'
 
     - script: ./buildconf && ./configure --enable-warnings --enable-werror $(configure)
@@ -198,4 +198,4 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "-vc /usr/bin/curl.exe -r $(tests)"
+        TFLAGS: "-vc /usr/bin/curl.exe -r -rm $(tests)"

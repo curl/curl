@@ -89,7 +89,7 @@ ftps
 FTPS download with strict timeout and slow data transfer
  </name>
  <command timeout="1">
--k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/1112 -m 16
+-k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/%TESTNUMBER -m 16
 </command>
 </client>
 
@@ -107,8 +107,8 @@ PROT C
 PWD
 EPSV
 TYPE I
-SIZE 1112
-RETR 1112
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 </protocol>
 </verify>
 </testcase>

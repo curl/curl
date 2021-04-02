@@ -20,37 +20,47 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_AWS_SIGV4 3 "03 Jun 2020" "libcurl 7.72.0" "curl_easy_setopt options"
+.TH CURLOPT_AWS_SIGV4 3 "03 Jun 2020" "libcurl 7.75.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_AWS_SIGV4 \- V4 signature
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_AWS_SIGV4,
-                          char *providers_infos);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_AWS_SIGV4, char *param);
+.fi
 .SH DESCRIPTION
-provides AWS V4 signature authentication on HTTPS header
-
-The provider argument is a string that is merged to some authentication
-parameters use by the algorithm.
-It's used by "Algorithm", "date", "request type", "signed headers" arguments,
-
-NOTE: This call set CURLOPT_HTTPAUTH to CURLAUTH_AWS_SIGV4.
-Calling CURLOPT_HTTPAUTH with CURLAUTH_AWS_SIGV4 is the same as calling
-this with "aws:amz" in paramater.
-
-Example with "Test:Try", when curl will do the algorithm, it will Generate:
-"TEST-HMAC-SHA256" for "Algorithm"
-"x-try-date" and "X-Try-Date" for "date"
-"test4_request" for "request type"
+Provides AWS V4 signature authentication on HTTP(S) header.
+.PP
+Pass a char * that is the collection of specific arguments are used for
+creating outgoing authentication headers.
+The format of the param option is:
+.IP provider1[:provider2[:region[:service]]]
+.IP provider1,\ provider2
+The providers arguments are used for generating some authentication parameters
+such as "Algorithm", "date", "request type" and "signed headers".
+.IP region
+The argument is a geographic area of a resources collection.
+It is extracted from the host name specified in the URL if omitted.
+.IP service
+The argument is a function provided by a cloud.
+It is extracted from the host name specified in the URL if omitted.
+.PP
+NOTE: This call set \fICURLOPT_HTTPAUTH(3)\fP to CURLAUTH_AWS_SIGV4.
+Calling \fICURLOPT_HTTPAUTH(3)\fP with CURLAUTH_AWS_SIGV4 is the same
+as calling this with "aws:amz" in parameter.
+.PP
+Example with "Test:Try", when curl will do the algorithm, it will generate
+"TEST-HMAC-SHA256" for "Algorithm", "x-try-date" and "X-Try-Date" for "date",
+"test4_request" for "request type",
 "SignedHeaders=content-type;host;x-try-date" for "signed headers"
-
+.PP
 If you use just "test", instead of "test:try",
 test will be use for every strings generated
-
 .SH DEFAULT
-NULL
+By default, the value of this parameter is NULL.
+Calling \fICURLOPT_HTTPAUTH(3)\fP with CURLAUTH_AWS_SIGV4 is the same
+as calling this with "aws:amz" in parameter.
 .SH PROTOCOLS
 HTTP
 .SH EXAMPLE
@@ -61,22 +71,27 @@ struct curl_slist *list = NULL;
 
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL,
-  "https://api_type.region.example.com/uri");
+                  "https://service.region.example.com/uri");
+  curl_easy_setopt(c, CURLOPT_AWS_SIGV4, "provider1:provider2");
 
-  curl_easy_setopt(c, CURLOPT_AWS_SIGV4, "xxx:yyy");
+  /* service and region also could be set in CURLOPT_AWS_SIGV4 */
+  /*
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/uri");
+  curl_easy_setopt(c, CURLOPT_AWS_SIGV4,
+                   "provider1:provider2:region:service");
+  */
+
   curl_easy_setopt(c, CURLOPT_USERPWD, "MY_ACCESS_KEY:MY_SECRET_KEY");
   curl_easy_perform(curl);
 }
 .fi
-
 .SH AVAILABILITY
 Added in 7.75.0
-
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
-
 .SH NOTES
-this option overrides the other auth types you might have set in CURL_HTTPAUTH which should be highlighted as this makes this auth method special. It could probably also be mentioned that this method can't be combined with other auth types.
-
+This option overrides the other auth types you might have set in CURL_HTTPAUTH
+which should be highlighted as this makes this auth method special.
+This method can't be combined with other auth types.
 .SH "SEE ALSO"
 .BR CURLOPT_HEADEROPT "(3), " CURLOPT_HTTPHEADER "(3), "

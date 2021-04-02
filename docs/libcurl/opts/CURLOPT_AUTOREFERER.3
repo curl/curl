@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -29,8 +29,8 @@ CURLOPT_AUTOREFERER \- automatically update the referer header
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_AUTOREFERER, long autorefer);
 .SH DESCRIPTION
 Pass a parameter set to 1 to enable this. When enabled, libcurl will
-automatically set the Referer: header field in HTTP requests where it follows
-a Location: redirect.
+automatically set the Referer: header field in HTTP requests to the full URL
+where it follows a Location: redirect.
 .SH DEFAULT
 0, disabled
 .SH PROTOCOLS

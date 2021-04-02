@@ -52,7 +52,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-'imap://%HOSTIP:%IMAPPORT/834/;MAILINDEX=1' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>
 <precheck>
 chkhostname curlhost
@@ -69,7 +69,7 @@ TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 *
 A003 AUTHENTICATE PLAIN
 AHVzZXIAc2VjcmV0
-A004 SELECT 834
+A004 SELECT %TESTNUMBER
 A005 FETCH 1 BODY[]
 A006 LOGOUT
 </protocol>

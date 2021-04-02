@@ -12,7 +12,7 @@ HTTP MIME POST
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
@@ -21,14 +21,14 @@ hello
 </data>
 <datacheck>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
 
 hello
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
@@ -44,16 +44,16 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib654
+lib%TESTNUMBER
 </tool>
 
  <name>
 HTTP duplicate easy handle with mime data
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/654
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
-<file name="log/file654.txt">
+<file name="log/file%TESTNUMBER.txt">
 This is data from a file
 </file>
 </client>
@@ -69,12 +69,12 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 # boundary string and since 5 of them are in the body contents, we see
 # (5*12) == 60 bytes less
 <protocol>
-POST /654 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 0
 
-POST /654 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked
@@ -86,11 +86,11 @@ Expect: 100-continue
 Content-Disposition: form-data; name="greeting"
 Content-Type: application/X-Greeting
 Content-Transfer-Encoding: base64
-X-Test-Number: 654
+X-Test-Number: %TESTNUMBER
 
 aGVsbG8=
 ------------------------------
-Content-Disposition: form-data; filename="file654.txt"
+Content-Disposition: form-data; filename="file%TESTNUMBER.txt"
 Content-Type: text/plain
 
 This is data from a file

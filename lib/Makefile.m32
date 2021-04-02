@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -58,6 +58,10 @@ endif
 # Edit the path below to point to the base of your librtmp package.
 ifndef LIBRTMP_PATH
 LIBRTMP_PATH = ../../librtmp-2.4
+endif
+# Edit the path below to point to the base of your libgsasl package.
+ifndef LIBGSASL_PATH
+LIBGSASL_PATH = ../../libgsasl-1.10.0
 endif
 # Edit the path below to point to the base of your libidn2 package.
 ifndef LIBIDN2_PATH
@@ -197,6 +201,9 @@ ZSTD = 1
 endif
 ifeq ($(findstring -brotli,$(CFG)),-brotli)
 BROTLI = 1
+endif
+ifeq ($(findstring -gsasl,$(CFG)),-gsasl)
+GSASL = 1
 endif
 ifeq ($(findstring -idn2,$(CFG)),-idn2)
 IDN2 = 1
@@ -345,6 +352,11 @@ ifdef BROTLI
   else
     DLL_LIBS += -lbrotlidec
   endif
+endif
+ifdef GSASL
+  INCLUDES += -I"$(LIBGSASL_PATH)/include"
+  CFLAGS += -DUSE_GSASL
+  DLL_LIBS += -L"$(LIBGSASL_PATH)/lib" -lgsasl
 endif
 ifdef IDN2
   INCLUDES += -I"$(LIBIDN2_PATH)/include"

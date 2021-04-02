@@ -15,7 +15,7 @@ HTTP proxy Digest auth
 # sent!
 <data>
 HTTP/1.1 407 no, tell me who you are first
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Proxy-Authenticate: Digest realm="many secrets", nonce="911"
 Content-Length: 0
@@ -31,7 +31,7 @@ ok
 </data1000>
 <datacheck>
 HTTP/1.1 407 no, tell me who you are first
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Proxy-Authenticate: Digest realm="many secrets", nonce="911"
 Content-Length: 0
@@ -60,10 +60,10 @@ proxy
 HTTP POST multipart with Expect: header using proxy anyauth (Digest)
  </name>
  <command>
--x http://%HOSTIP:%HTTPPORT http://remotehost:54321/we/want/259 -F name=daniel -F tool=curl -F file=@log/test259.txt -U uuuser:pppassword --proxy-anyauth -H "Expect: 100-continue"
+-x http://%HOSTIP:%HTTPPORT http://remotehost:54321/we/want/%TESTNUMBER -F name=daniel -F tool=curl -F file=@log/test%TESTNUMBER.txt -U uuuser:pppassword --proxy-anyauth -H "Expect: 100-continue"
 </command>
 # We create this file before the command is invoked!
-<file name="log/test259.txt">
+<file name="log/test%TESTNUMBER.txt">
 foo-
 This is a moo-
 bar
@@ -76,7 +76,7 @@ bar
 ^(Content-Type: multipart/form-data;|------).*
 </strip>
 <protocol>
-POST http://remotehost:54321/we/want/259 HTTP/1.1
+POST http://remotehost:54321/we/want/%TESTNUMBER HTTP/1.1
 Host: remotehost:54321
 User-Agent: curl/%VERSION
 Accept: */*
@@ -94,7 +94,7 @@ Content-Disposition: form-data; name="tool"
 
 curl
 ------------------------------7c633d5c27ce
-Content-Disposition: form-data; name="file"; filename="test259.txt"
+Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER.txt"
 Content-Type: text/plain
 
 foo-
@@ -102,9 +102,9 @@ This is a moo-
 bar
 
 ------------------------------7c633d5c27ce--
-POST http://remotehost:54321/we/want/259 HTTP/1.1
+POST http://remotehost:54321/we/want/%TESTNUMBER HTTP/1.1
 Host: remotehost:54321
-Proxy-Authorization: Digest username="uuuser", realm="many secrets", nonce="911", uri="/we/want/259", response="b479994d13e60f3aa192a67c5892ddc5"
+Proxy-Authorization: Digest username="uuuser", realm="many secrets", nonce="911", uri="/we/want/%TESTNUMBER", response="b479994d13e60f3aa192a67c5892ddc5"
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
@@ -121,7 +121,7 @@ Content-Disposition: form-data; name="tool"
 
 curl
 ------------------------------7c633d5c27ce
-Content-Disposition: form-data; name="file"; filename="test259.txt"
+Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER.txt"
 Content-Type: text/plain
 
 foo-

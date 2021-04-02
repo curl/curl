@@ -12,7 +12,7 @@ HTTP GET
 <reply>
 <data nocheck="yes">
 HTTP/1.1 304 Not modified
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -32,12 +32,12 @@ http
 --etag-compare that gets a 304 back shouldn't overwrite the file
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1566 -o log/output1566 --etag-compare log/etag1566
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/output%TESTNUMBER --etag-compare log/etag%TESTNUMBER
 </command>
-<file name="log/etag1566">
+<file name="log/etag%TESTNUMBER">
 "123456"
 </file>
-<file1 name="log/output1566">
+<file1 name="log/output%TESTNUMBER">
 downloaded already
 </file1>
 
@@ -47,7 +47,7 @@ downloaded already
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1566 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
@@ -56,7 +56,7 @@ If-None-Match: "123456"
 </protocol>
 
 # verify that the target file is untouched
-<file name="log/output1566">
+<file name="log/output%TESTNUMBER">
 downloaded already
 </file>
 </verify>

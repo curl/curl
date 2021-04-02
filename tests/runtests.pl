@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -163,6 +163,10 @@ my $SMBSPORT=$noport;    # SMBS server port
 my $TELNETPORT=$noport;  # TELNET server port with negotiation
 my $HTTPUNIXPATH;        # HTTP server Unix domain socket path
 
+my $use_external_proxy = 0;
+my $proxy_address;
+my %custom_skip_reasons;
+
 my $SSHSRVMD5 = "[uninitialized]"; # MD5 of ssh server public key
 my $VERSION;             # curl's reported version number
 
@@ -264,6 +268,7 @@ my $has_manual;     # set if built with built-in manual
 my $has_win32;      # set if built for Windows
 my $has_mingw;      # set if built with MinGW (as opposed to MinGW-w64)
 my $has_hyper = 0;  # set if built with Hyper
+my $has_unicode;    # set if libcurl is built with Unicode support
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
@@ -333,6 +338,7 @@ my $anyway;
 my $gdbthis;      # run test case with gdb debugger
 my $gdbxwin;      # use windowed gdb when using gdb
 my $keepoutfiles; # keep stdout and stderr files after tests
+my $clearlocks;   # force removal of files by killing locking processes
 my $listonly;     # only list the tests
 my $postmortem;   # display detailed info about failed tests
 my $run_event_based; # run curl with --test-event to test the event API
@@ -381,7 +387,10 @@ if (!$USER) {
 $ENV{'CURL_MEMDEBUG'} = $memdump;
 $ENV{'CURL_ENTROPY'}="12345678";
 $ENV{'CURL_FORCETIME'}=1; # for debug NTLM magic
+$ENV{'CURL_GLOBAL_INIT'}=1; # debug curl_global_init/cleanup use
 $ENV{'HOME'}=$pwd;
+$ENV{'CURL_HOME'}=$ENV{'HOME'};
+$ENV{'XDG_CONFIG_HOME'}=$ENV{'HOME'};
 $ENV{'COLUMNS'}=79; # screen width!
 
 sub catch_zap {
@@ -407,7 +416,7 @@ foreach $protocol (('ftp', 'http', 'ftps', 'https', 'no', 'all')) {
 }
 
 # make sure we don't get affected by other variables that control our
-# behaviour
+# behavior
 
 delete $ENV{'SSL_CERT_DIR'} if($ENV{'SSL_CERT_DIR'});
 delete $ENV{'SSL_CERT_PATH'} if($ENV{'SSL_CERT_PATH'});
@@ -840,6 +849,13 @@ sub stopserver {
 }
 
 #######################################################################
+# Return flags to let curl use an external HTTP proxy
+#
+sub getexternalproxyflags {
+    return " --proxy $proxy_address ";
+}
+
+#######################################################################
 # Verify that the server that runs on $ip, $port is our server.  This also
 # implies that we can speak with it, as there might be occasions when the
 # server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
@@ -873,6 +889,9 @@ sub verifyhttp {
     $flags .= "--globoff ";
     $flags .= "--unix-socket '$port_or_path' " if $ipvnum eq "unix";
     $flags .= "--insecure " if($proto eq 'https');
+    if($use_external_proxy) {
+        $flags .= getexternalproxyflags();
+    }
     $flags .= "\"$proto://$ip:$port/${bonus}verifiedserver\"";
 
     my $cmd = "$VCURL $flags 2>$verifylog";
@@ -947,6 +966,9 @@ sub verifyftp {
     $flags .= "--verbose ";
     $flags .= "--globoff ";
     $flags .= $extra;
+    if($use_external_proxy) {
+        $flags .= getexternalproxyflags();
+    }
     $flags .= "\"$proto://$ip:$port/verifiedserver\"";
 
     my $cmd = "$VCURL $flags 2>$verifylog";
@@ -1009,6 +1031,9 @@ sub verifyrtsp {
     $flags .= "--silent ";
     $flags .= "--verbose ";
     $flags .= "--globoff ";
+    if($use_external_proxy) {
+        $flags .= getexternalproxyflags();
+    }
     # currently verification is done using http
     $flags .= "\"http://$ip:$port/verifiedserver\"";
 
@@ -1150,6 +1175,9 @@ sub verifyhttptls {
     $flags .= "--tlsauthtype SRP ";
     $flags .= "--tlsuser jsmith ";
     $flags .= "--tlspassword abc ";
+    if($use_external_proxy) {
+        $flags .= getexternalproxyflags();
+    }
     $flags .= "\"https://$ip:$port/verifiedserver\"";
 
     my $cmd = "$VCURL $flags 2>$verifylog";
@@ -1559,7 +1587,7 @@ sub runhttpserver {
     } else {
         $flags .= "--ipv$ipvnum --port 0 ";
     }
-    $flags .= "--srcdir \"$srcdir\"";
+    $flags .= "--srcdir \"$TESTDIR/..\"";
 
     my $cmd = "$exe $flags";
     my ($httppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
@@ -2251,7 +2279,7 @@ sub runsshserver {
 }
 
 #######################################################################
-# Start the socks server
+# Start the MQTT server
 #
 sub runmqttserver {
     my ($id, $verbose, $ipv6) = @_;
@@ -2711,11 +2739,41 @@ sub responsive_httptls_server {
 }
 
 #######################################################################
+# Kill the processes that still lock files in a directory
+#
+sub clearlocks {
+    my $dir = $_[0];
+    my $done = 0;
+
+    if(pathhelp::os_is_win()) {
+        $dir = pathhelp::sys_native_abs_path($dir);
+        $dir =~ s/\//\\\\/g;
+        my $handle = "handle.exe";
+        if($ENV{"PROCESSOR_ARCHITECTURE"} =~ /64$/) {
+            $handle = "handle64.exe";
+        }
+        my @handles = `$handle $dir -accepteula -nobanner`;
+        for $handle (@handles) {
+            if($handle =~ /^(\S+)\s+pid:\s+(\d+)\s+type:\s+(\w+)\s+([0-9A-F]+):\s+(.+)\r\r/) {
+                logmsg "Found $3 lock of '$5' ($4) by $1 ($2)\n";
+                # Ignore stunnel since we cannot do anything about its locks
+                if("$3" eq "File" && "$1" ne "tstunnel.exe") {
+                    logmsg "Killing IMAGENAME eq $1 and PID eq $2\n";
+                    system("taskkill.exe -f -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1");
+                    $done = 1;
+                }
+            }
+        }
+    }
+    return $done;
+}
+
+#######################################################################
 # Remove all files in the specified directory
 #
 sub cleardir {
     my $dir = $_[0];
-    my $count;
+    my $done = 1;
     my $file;
 
     # Get all files
@@ -2724,17 +2782,23 @@ sub cleardir {
     while($file = readdir($dh)) {
         if(($file !~ /^(\.|\.\.)\z/)) {
             if(-d "$dir/$file") {
-                cleardir("$dir/$file");
-                rmdir("$dir/$file");
+                if(!cleardir("$dir/$file")) {
+                    $done = 0;
+                }
+                if(!rmdir("$dir/$file")) {
+                    $done = 0;
+                }
             }
             else {
-                unlink("$dir/$file");
+                # Ignore stunnel since we cannot do anything about its locks
+                if(!unlink("$dir/$file") && "$file" !~ /_stunnel\.log$/) {
+                    $done = 0;
+                }
             }
-            $count++;
         }
     }
     closedir $dh;
-    return $count;
+    return $done;
 }
 
 #######################################################################
@@ -2802,6 +2866,7 @@ sub setupfeatures {
     $feature{"threaded-resolver"} = $has_threadedres;
     $feature{"TLS-SRP"} = $has_tls_srp;
     $feature{"TrackMemory"} = $has_memory_tracking;
+    $feature{"Unicode"} = $has_unicode;
     $feature{"unittest"} = $debug_build;
     $feature{"unix-sockets"} = $has_unix;
     $feature{"win32"} = $has_win32;
@@ -3069,6 +3134,9 @@ sub checksystem {
                 # 'https-proxy' is used as "server" so consider it a protocol
                 push @protocols, 'https-proxy';
             }
+            if($feat =~ /Unicode/i) {
+                $has_unicode = 1;
+            }
         }
         #
         # Test harness currently uses a non-stunnel server in order to
@@ -3224,7 +3292,7 @@ sub checksystem {
 # a command, in either case passed by reference
 #
 sub subVariables {
-    my ($thing, $prefix) = @_;
+    my ($thing, $testnum, $prefix) = @_;
 
     if(!$prefix) {
         $prefix = "%";
@@ -3280,6 +3348,7 @@ sub subVariables {
     $$thing =~ s/${prefix}PWD/$pwd/g;
     $$thing =~ s/${prefix}POSIX_PWD/$posix_pwd/g;
     $$thing =~ s/${prefix}VERSION/$VERSION/g;
+    $$thing =~ s/${prefix}TESTNUMBER/$testnum/g;
 
     my $file_pwd = $pwd;
     if($file_pwd !~ /^\//) {
@@ -3368,15 +3437,6 @@ sub subNewlines {
     }
 }
 
-sub fixarray {
-    my @in = @_;
-
-    for(@in) {
-        subVariables(\$_);
-    }
-    return @in;
-}
-
 #######################################################################
 # Provide time stamps for single test skipped events
 #
@@ -3427,6 +3487,47 @@ sub timestampskippedevents {
     }
 }
 
+#
+# 'prepro' processes the input array and replaces %-variables in the array
+# etc. Returns the processed version of the array
+
+sub prepro {
+    my $testnum = shift;
+    my (@entiretest) = @_;
+    my $show = 1;
+    my @out;
+    for my $s (@entiretest) {
+        my $f = $s;
+        if($s =~ /^ *%if (.*)/) {
+            my $cond = $1;
+            my $rev = 0;
+
+            if($cond =~ /^!(.*)/) {
+                $cond = $1;
+                $rev = 1;
+            }
+            $rev ^= $feature{$cond} ? 1 : 0;
+            $show = $rev;
+            next;
+        }
+        elsif($s =~ /^ *%else/) {
+            $show ^= 1;
+            next;
+        }
+        elsif($s =~ /^ *%endif/) {
+            $show = 1;
+            next;
+        }
+        if($show) {
+            subVariables(\$s, $testnum, "%");
+            subBase64(\$s);
+            subNewlines(\$s) if($has_hyper);
+            push @out, $s;
+        }
+    }
+    return @out;
+}
+
 #######################################################################
 # Run a single specified test case
 #
@@ -3444,7 +3545,10 @@ sub singletest {
     my $errorreturncode = 1; # 1 means normal error, 2 means ignored error
 
     # fist, remove all lingering log files
-    cleardir($LOGDIR);
+    if(!cleardir($LOGDIR) && $clearlocks) {
+        clearlocks($LOGDIR);
+        cleardir($LOGDIR);
+    }
 
     # copy test number to a global scope var, this allows
     # testnum checking when starting test harness servers.
@@ -3543,6 +3647,31 @@ sub singletest {
         }
     }
 
+    if (!$why && defined $custom_skip_reasons{test}{$testnum}) {
+        $why = $custom_skip_reasons{test}{$testnum};
+    }
+
+    if (!$why && defined $custom_skip_reasons{tool}) {
+        foreach my $tool (getpart("client", "tool")) {
+            foreach my $tool_skip_pattern (keys %{$custom_skip_reasons{tool}}) {
+                if ($tool =~ /$tool_skip_pattern/i) {
+                    $why = $custom_skip_reasons{tool}{$tool_skip_pattern};
+                }
+            }
+        }
+    }
+
+    if (!$why && defined $custom_skip_reasons{keyword}) {
+        foreach my $keyword (getpart("info", "keywords")) {
+            foreach my $keyword_skip_pattern (keys %{$custom_skip_reasons{keyword}}) {
+                if ($keyword =~ /$keyword_skip_pattern/i) {
+                    $why = $custom_skip_reasons{keyword}{$keyword_skip_pattern};
+                }
+            }
+        }
+    }
+
+
     # test definition may instruct to (un)set environment vars
     # this is done this early, so that the precheck can use environment
     # variables and still bail out fine on errors
@@ -3585,52 +3714,16 @@ sub singletest {
     # "basic" test case readers to enjoy variable replacements.
     my @entiretest = fulltest();
     my $otest = "log/test$testnum";
-    open(D, ">$otest");
-    my $diff;
-    my $show = 1;
-    for my $s (@entiretest) {
-        my $f = $s;
-        if($s =~ /^ *%if (.*)/) {
-            my $cond = $1;
-            my $rev = 0;
 
-            if($cond =~ /^!(.*)/) {
-                $cond = $1;
-                $rev = 1;
-            }
-            $rev ^= $feature{$cond} ? 1 : 0;
-            $show = $rev;
-            next;
-        }
-        elsif($s =~ /^ *%else/) {
-            $show ^= 1;
-            next;
-        }
-        elsif($s =~ /^ *%endif/) {
-            $show = 1;
-            next;
-        }
-        if($show) {
-            subVariables(\$s, "%");
-            subBase64(\$s);
-            subNewlines(\$s) if($has_hyper);
-            if($f ne $s) {
-                $diff++;
-            }
-            print D $s;
-        }
-        else {
-            $diff++;
-        }
-    }
+    @entiretest = prepro($testnum, @entiretest);
+
+    # save the new version
+    open(D, ">$otest");
+    print D @entiretest;
     close(D);
 
-    # remove the separate test file again if nothing was updated to keep
-    # things simpler
-    unlink($otest) if(!$diff);
-
     # in case the process changed the file, reload it
-    loadtest("log/test${testnum}") if($diff);
+    loadtest("log/test${testnum}");
 
     # timestamp required servers verification end
     $timesrvrend{$testnum} = Time::HiRes::time();
@@ -3639,7 +3732,6 @@ sub singletest {
     if(@setenv) {
         foreach my $s (@setenv) {
             chomp $s;
-            subVariables(\$s);
             if($s =~ /([^=]*)=(.*)/) {
                 my ($var, $content) = ($1, $2);
                 # remember current setting, to restore it once test runs
@@ -3665,13 +3757,16 @@ sub singletest {
             }
         }
     }
+    if($use_external_proxy) {
+        $ENV{http_proxy} = $proxy_address;
+        $ENV{HTTPS_PROXY} = $proxy_address;
+    }
 
     if(!$why) {
         my @precheck = getpart("client", "precheck");
         if(@precheck) {
             $cmd = $precheck[0];
             chomp $cmd;
-            subVariables(\$cmd);
             if($cmd) {
                 my @p = split(/ /, $cmd);
                 if($p[0] !~ /\//) {
@@ -3750,23 +3845,20 @@ sub singletest {
             map s/\n/\r\n/g, @reply;
         }
     }
-    for my $r (@reply) {
-        subVariables(\$r);
-    }
 
     # this is the valid protocol blurb curl should generate
-    my @protocol= fixarray ( getpart("verify", "protocol") );
+    my @protocol= getpart("verify", "protocol");
 
     # this is the valid protocol blurb curl should generate to a proxy
-    my @proxyprot = fixarray ( getpart("verify", "proxy") );
+    my @proxyprot = getpart("verify", "proxy");
 
     # redirected stdout/stderr to these files
     $STDOUT="$LOGDIR/stdout$testnum";
     $STDERR="$LOGDIR/stderr$testnum";
 
     # if this section exists, we verify that the stdout contained this:
-    my @validstdout = fixarray ( getpart("verify", "stdout") );
-    my @validstderr = fixarray ( getpart("verify", "stderr") );
+    my @validstdout = getpart("verify", "stdout");
+    my @validstderr = getpart("verify", "stderr");
 
     # if this section exists, we verify upload
     my @upload = getpart("verify", "upload");
@@ -3779,7 +3871,7 @@ sub singletest {
     }
 
     # if this section exists, it might be FTP server instructions:
-    my @ftpservercmd = fixarray ( getpart("reply", "servercmd") );
+    my @ftpservercmd = getpart("reply", "servercmd");
 
     my $CURLOUT="$LOGDIR/curl$testnum.out"; # curl output if not stdout
 
@@ -3817,7 +3909,6 @@ sub singletest {
         # make some nice replace operations
         $cmd =~ s/\n//g; # no newlines please
         # substitute variables in the command line
-        subVariables(\$cmd);
     }
     else {
         # there was no command given, use something silly
@@ -3839,7 +3930,6 @@ sub singletest {
                 return -1;
             }
             my $fileContent = join('', @inputfile);
-            subVariables(\$fileContent);
             open(OUTFILE, ">$filename");
             binmode OUTFILE; # for crapage systems, use binary
             if($fileattr{'nonewline'}) {
@@ -3917,6 +4007,9 @@ sub singletest {
             $fail_due_event_based--;
         }
         $cmdargs .= $cmd;
+        if ($use_external_proxy) {
+            $cmdargs .= " --proxy $proxy_address ";
+        }
     }
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
@@ -4111,7 +4204,6 @@ sub singletest {
     if(@postcheck) {
         $cmd = join("", @postcheck);
         chomp $cmd;
-        subVariables(\$cmd);
         if($cmd) {
             logmsg "postcheck $cmd\n" if($verbose);
             my $rc = runclient("$cmd");
@@ -4171,9 +4263,6 @@ sub singletest {
             @actual = @newgen;
         }
 
-        # variable-replace in the stdout we have from the test case file
-        @validstdout = fixarray(@validstdout);
-
         # get all attributes
         my %hash = getpartattr("verify", "stdout");
 
@@ -4221,9 +4310,6 @@ sub singletest {
             # length) because of replacements
             @actual = @newgen;
         }
-
-        # variable-replace in the stderr we have from the test case file
-        @validstderr = fixarray(@validstderr);
 
         # get all attributes
         my %hash = getpartattr("verify", "stderr");
@@ -4280,7 +4366,7 @@ sub singletest {
         # what parts to cut off from the protocol
         my @strippart = getpart("verify", "strippart");
         my $strip;
-        @strippart = fixarray(@strippart);
+
         for $strip (@strippart) {
             chomp $strip;
             for(@out) {
@@ -4434,8 +4520,6 @@ sub singletest {
                 # length) because of replacements
                 @generated = @newgen;
             }
-
-            @outfile = fixarray(@outfile);
 
             $res = compare($testnum, $testname, "output ($filename)",
                            \@generated, \@outfile);
@@ -5277,12 +5361,6 @@ sub runtimestats {
     logmsg "\n";
 }
 
-# globally disabled tests
-disabledtests("$TESTDIR/DISABLED");
-
-# locally disabled tests, ignored by git etc
-disabledtests("$TESTDIR/DISABLED.local");
-
 #######################################################################
 # Check options to this test program
 #
@@ -5324,6 +5402,28 @@ while(@ARGV) {
     elsif($ARGV[0] eq "-e") {
         # run the tests cases event based if possible
         $run_event_based=1;
+    }
+    elsif($ARGV[0] eq "-E") {
+        # load additional reasons to skip tests
+        shift @ARGV;
+        my $exclude_file = $ARGV[0];
+        open(my $fd, "<", $exclude_file) or die "Couldn't open '$exclude_file': $!";
+        while(my $line = <$fd>) {
+            next if ($line =~ /^#/);
+            chomp $line;
+            my ($type, $patterns, $skip_reason) = split(/\s*:\s*/, $line, 3);
+
+            die "Unsupported type: $type\n" if($type !~ /^keyword|test|tool$/);
+
+            foreach my $pattern (split(/,/, $patterns)) {
+                if($type =~ /^test$/) {
+                    # Strip leading zeros in the test number
+                    $pattern = int($pattern);
+                }
+                $custom_skip_reasons{$type}{$pattern} = $skip_reason;
+            }
+        }
+        close($fd);
     }
     elsif ($ARGV[0] eq "-g") {
         # run this test with gdb
@@ -5378,8 +5478,27 @@ while(@ARGV) {
         # continue anyway, even if a test fail
         $anyway=1;
     }
+    elsif($ARGV[0] eq "-o") {
+        shift @ARGV;
+        if ($ARGV[0] =~ /^(\w+)=([\w.:\/\[\]-]+)$/) {
+            my ($variable, $value) = ($1, $2);
+            eval "\$$variable='$value'" or die "Failed to set \$$variable to $value: $@";
+        } else {
+            die "Failed to parse '-o $ARGV[0]'. May contain unexpected characters.\n";
+        }
+    }
     elsif($ARGV[0] eq "-p") {
         $postmortem=1;
+    }
+    elsif($ARGV[0] eq "-P") {
+        shift @ARGV;
+        $use_external_proxy=1;
+        $proxy_address=$ARGV[0];
+    }
+    elsif($ARGV[0] eq "-L") {
+        # require additional library file
+        shift @ARGV;
+        require $ARGV[0];
     }
     elsif($ARGV[0] eq "-l") {
         # lists the test case names only
@@ -5417,6 +5536,10 @@ while(@ARGV) {
             $fullstats=1;
         }
     }
+    elsif($ARGV[0] eq "-rm") {
+        # force removal of files by killing locking processes
+        $clearlocks=1;
+    }
     elsif(($ARGV[0] eq "-h") || ($ARGV[0] eq "--help")) {
         # show help text
         print <<EOHELP
@@ -5426,16 +5549,21 @@ Usage: runtests.pl [options] [test selection(s)]
   -c path  use this curl executable
   -d       display server debug info
   -e       event-based execution
+  -E file  load the specified file to exclude certain tests
   -g       run the test case with gdb
   -gw      run the test case with gdb as a windowed application
   -h       this help text
   -k       keep stdout and stderr files present after tests
+  -L path  require an additional perl library file to replace certain functions
   -l       list all test case names/descriptions
   -n       no valgrind
+  -o variable=value set internal variable to the specified value
+  -P proxy use the specified proxy
   -p       print log file contents when a test fails
   -R       scrambled order (uses the random seed, see --seed)
   -r       run time statistics
   -rf      full run time statistics
+  -rm      force removal of files by killing locking processes (Windows only)
   -s       short output
   --seed=[num] set the random seed to a fixed number
   --shallow=[num] randomly makes the torture tests "thinner"
@@ -5594,12 +5722,16 @@ if(!$listonly) {
     checksystem();
 }
 
+# globally disabled tests
+disabledtests("$TESTDIR/DISABLED");
+
 #######################################################################
 # Fetch all disabled tests, if there are any
 #
 
 sub disabledtests {
     my ($file) = @_;
+    my @input;
 
     if(open(D, "<$file")) {
         while(<D>) {
@@ -5607,17 +5739,29 @@ sub disabledtests {
                 # allow comments
                 next;
             }
-            if($_ =~ /(\d+)/) {
+            push @input, $_;
+        }
+        close(D);
+
+        # preprocess the input to make conditionally disabled tests depending
+        # on variables
+        my @pp = prepro(0, @input);
+        for my $t (@pp) {
+            if($t =~ /(\d+)/) {
                 my ($n) = $1;
                 $disabled{$n}=$n; # disable this test number
                 if(! -f "$srcdir/data/test$n") {
-                    print STDERR "WARNING! Non-existing test $n in DISABLED!\n";
+                    print STDERR "WARNING! Non-existing test $n in $file!\n";
                     # fail hard to make user notice
                     exit 1;
                 }
+                logmsg "DISABLED: test $n\n" if ($verbose);
+            }
+            else {
+                print STDERR "$file: rubbish content: $t\n";
+                exit 2;
             }
         }
-        close(D);
     }
 }
 
@@ -5877,6 +6021,49 @@ my $all = $total + $skipped;
 
 runtimestats($lasttest);
 
+if($all) {
+    logmsg "TESTDONE: $all tests were considered during ".
+        sprintf("%.0f", $sofar) ." seconds.\n";
+}
+
+if($skipped && !$short) {
+    my $s=0;
+    # Temporary hash to print the restraints sorted by the number
+    # of their occurences
+    my %restraints;
+    logmsg "TESTINFO: $skipped tests were skipped due to these restraints:\n";
+
+    for(keys %skipped) {
+        my $r = $_;
+        my $skip_count = $skipped{$r};
+        my $log_line = sprintf("TESTINFO: \"%s\" %d time%s (", $r, $skip_count,
+                           ($skip_count == 1) ? "" : "s");
+
+        # now gather all test case numbers that had this reason for being
+        # skipped
+        my $c=0;
+        my $max = 9;
+        for(0 .. scalar @teststat) {
+            my $t = $_;
+            if($teststat[$t] && ($teststat[$t] eq $r)) {
+                if($c < $max) {
+                    $log_line .= ", " if($c);
+                    $log_line .= $t;
+                }
+                $c++;
+            }
+        }
+        if($c > $max) {
+            $log_line .= " and ".($c-$max)." more";
+        }
+        $log_line .= ")\n";
+        $restraints{$log_line} = $skip_count;
+    }
+    foreach my $log_line (sort {$restraints{$b} <=> $restraints{$a}} keys %restraints) {
+        logmsg $log_line;
+    }
+}
+
 if($total) {
     logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
                    $ok/$total*100);
@@ -5893,40 +6080,6 @@ else {
             logmsg "$_ ";
         }
         logmsg "\n";
-    }
-}
-
-if($all) {
-    logmsg "TESTDONE: $all tests were considered during ".
-        sprintf("%.0f", $sofar) ." seconds.\n";
-}
-
-if($skipped && !$short) {
-    my $s=0;
-    logmsg "TESTINFO: $skipped tests were skipped due to these restraints:\n";
-
-    for(keys %skipped) {
-        my $r = $_;
-        printf "TESTINFO: \"%s\" %d times (", $r, $skipped{$_};
-
-        # now show all test case numbers that had this reason for being
-        # skipped
-        my $c=0;
-        my $max = 9;
-        for(0 .. scalar @teststat) {
-            my $t = $_;
-            if($teststat[$_] && ($teststat[$_] eq $r)) {
-                if($c < $max) {
-                    logmsg ", " if($c);
-                    logmsg $_;
-                }
-                $c++;
-            }
-        }
-        if($c > $max) {
-            logmsg " and ".($c-$max)." more";
-        }
-        logmsg ")\n";
     }
 }
 

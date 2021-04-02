@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -64,8 +64,7 @@ static const struct testparams params[] = {
   { F_RESUME |             F_FAIL | F_CONTENTRANGE,                CURLE_OK },
   { F_RESUME | F_HTTP416 |                           F_IGNOREBODY, CURLE_OK },
   { F_RESUME | F_HTTP416 |          F_CONTENTRANGE | F_IGNOREBODY, CURLE_OK },
-  { F_RESUME | F_HTTP416 | F_FAIL |                  F_IGNOREBODY,
-                                                  CURLE_HTTP_RETURNED_ERROR },
+  { F_RESUME | F_HTTP416 | F_FAIL |                  F_IGNOREBODY, CURLE_OK },
   { F_RESUME | F_HTTP416 | F_FAIL | F_CONTENTRANGE | F_IGNOREBODY,
                                                   CURLE_HTTP_RETURNED_ERROR }
 };
@@ -82,7 +81,8 @@ static size_t writedata(char *data, size_t size, size_t nmemb, void *userdata)
   return size * nmemb;
 }
 
-static int onetest(CURL *curl, const char *url, const struct testparams *p)
+static int onetest(CURL *curl, const char *url, const struct testparams *p,
+                   size_t num)
 {
   CURLcode res;
   unsigned int replyselector;
@@ -100,22 +100,22 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p)
   hasbody = 0;
   res = curl_easy_perform(curl);
   if(res != p->result) {
-    fprintf(stderr, "bad error code (%d): resume=%s, fail=%s, http416=%s, "
-                    "content-range=%s, expected=%d\n", res,
-                    (p->flags & F_RESUME)? "yes": "no",
-                    (p->flags & F_FAIL)? "yes": "no",
-                    (p->flags & F_HTTP416)? "yes": "no",
-                    (p->flags & F_CONTENTRANGE)? "yes": "no",
-                    p->result);
+    fprintf(stderr, "%d: bad error code (%d): resume=%s, fail=%s, http416=%s, "
+            "content-range=%s, expected=%d\n", num, res,
+            (p->flags & F_RESUME)? "yes": "no",
+            (p->flags & F_FAIL)? "yes": "no",
+            (p->flags & F_HTTP416)? "yes": "no",
+            (p->flags & F_CONTENTRANGE)? "yes": "no",
+            p->result);
     return 1;
   }
   if(hasbody && (p->flags & F_IGNOREBODY)) {
     fprintf(stderr, "body should be ignored and is not: resume=%s, fail=%s, "
-                    "http416=%s, content-range=%s\n",
-                    (p->flags & F_RESUME)? "yes": "no",
-                    (p->flags & F_FAIL)? "yes": "no",
-                    (p->flags & F_HTTP416)? "yes": "no",
-                    (p->flags & F_CONTENTRANGE)? "yes": "no");
+            "http416=%s, content-range=%s\n",
+            (p->flags & F_RESUME)? "yes": "no",
+            (p->flags & F_FAIL)? "yes": "no",
+            (p->flags & F_HTTP416)? "yes": "no",
+            (p->flags & F_CONTENTRANGE)? "yes": "no");
     return 1;
   }
   return 0;
@@ -147,10 +147,11 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_WRITEFUNCTION, writedata);
 
   for(i = 0; i < sizeof(params) / sizeof(params[0]); i++)
-    status |= onetest(curl, URL, params + i);
+    status |= onetest(curl, URL, params + i, i);
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
+  fprintf(stderr, "%d\n", status);
   return status;
 
   test_cleanup:

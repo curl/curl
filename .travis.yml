@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -24,9 +24,8 @@ os: linux
 dist: bionic
 cache:
   directories:
-  - $HOME/wolfssl-4.4.0-stable
+  - $HOME/wolfssl-4.7.0-stable
   - $HOME/mesalink-1.0.0
-  - $HOME/nghttp2-1.39.2
 
 env:
   global:
@@ -47,6 +46,8 @@ addons:
     - gnutls-bin
     - python-impacket
     - ninja-build
+    - libgsasl7-dev
+    - libnghttp2-dev
 
 jobs:
   include:
@@ -124,6 +125,16 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
+    - T=debug-rustls RUSTLS_VERSION="v0.4.0" C="--with-rustls=$HOME/crust --without-ssl"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
     - T=novalgrind LIBRESSL=yes C="--with-ssl=$HOME/libressl" LD_LIBRARY_PATH=/home/travis/libressl/lib:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
   - env:
@@ -159,7 +170,7 @@ jobs:
         - libtasn1-6-dev
         - nettle-dev
   - env:
-    - T=debug-wolfssl C="--with-wolfssl --without-ssl"
+    - T=debug-wolfssl C="--with-wolfssl --without-ssl" WOLFSSL="yes"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -258,7 +269,7 @@ jobs:
     - T=iconv
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
   - env:
-    - T=cmake BORINGSSL=yes QUICHE=yes C="-GNinja -DUSE_QUICHE=1 -DOPENSSL_ROOT_DIR=$HOME/boringssl -DCURL_BROTLI=1 -DCURL_ZSTD=1"
+    - T=cmake BORINGSSL=yes QUICHE=yes C="-GNinja -DUSE_QUICHE=1 -DOPENSSL_ROOT_DIR=$HOME/boringssl -DCURL_BROTLI=1 -DCURL_ZSTD=1" TFLAGS="https ftps"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     - PKG_CONFIG_PATH="$HOME/quiche/target/release"
     before_install:
@@ -286,6 +297,19 @@ jobs:
         - libzstd-dev
   - env:
     - T=torture
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - lcov
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libssh2-1-dev
+  - env:
+    - T=events
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:

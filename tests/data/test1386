@@ -8,15 +8,15 @@ RETR
 
 # Server-side
 <reply>
-# file1386 contents...
+# file%TESTNUMBER contents...
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1386; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 MOOOO
 </data>
@@ -31,10 +31,10 @@ ftp
 FTP DL, file with Content-Disposition inside, using -o fname
 </name>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file1386 -o log/download1386
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o log/download%TESTNUMBER
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/file1386 log/name1386
+perl %SRCDIR/libtest/notexists.pl log/file%TESTNUMBER log/name%TESTNUMBER
 </postcheck>
 </client>
 
@@ -47,24 +47,24 @@ PWD
 CWD path
 EPSV
 TYPE I
-SIZE file1386
-RETR file1386
+SIZE file%TESTNUMBER
+RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/download1386">
+<file1 name="log/download%TESTNUMBER">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1386; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 MOOOO
 </file1>
 
-<file2 name="log/stdout1386">
+<file2 name="log/stdout%TESTNUMBER">
 </file2>
 
 </verify>

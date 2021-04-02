@@ -62,6 +62,14 @@ to reach in and modify SSL details in the connection without libcurl itself
 knowing anything about it, which then subsequently can lead to libcurl
 unknowingly reusing SSL connections with different properties. To remedy this
 you may set \fICURLOPT_FORBID_REUSE(3)\fP from the callback function.
+
+WARNING: If you are using DNS-over-HTTPS (DOH) via \fICURLOPT_DOH_URL(3)\fP
+then the CTX callback will also be called for those transfers and the curl
+handle is set to an internal handle. \fBThis behavior is subject to change.\fP
+We recommend before performing your transfer set \fICURLOPT_PRIVATE(3)\fP on
+your curl handle so you can identify it in the CTX callback. If you have a
+reason to modify DOH SSL context please let us know on the curl-library mailing
+list because we are considering removing this capability.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

@@ -37,14 +37,14 @@ request MOOO
 --max-time 180
  </stdin>
  <command>
--K - %HOSTIP:%HTTPPORT/that.site.com/17
+-K - %HOSTIP:%HTTPPORT/that.site.com/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-MOOO /that.site.com/17 HTTP/1.1
+MOOO /that.site.com/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: agent007 license to drill	
 Accept: */*

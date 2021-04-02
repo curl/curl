@@ -18,7 +18,7 @@ Date: Sun, 13 Sep 2020 15:00 GMT
 Content-Length: 8
 Connection: close
 Content-Type: text/plain
-Location: ./30150001
+Location: ./%TESTNUMBER0001
 
 monster
 </data>
@@ -50,7 +50,7 @@ http
 HTTP GET -w num_headers with redirected fetch (2 connects)
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/3015 -w "%{num_headers}\n" -L -o/dev/null
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_headers}\n" -L -o/dev/null
 </command>
 </client>
 
@@ -58,12 +58,12 @@ http://%HOSTIP:%HTTPPORT/3015 -w "%{num_headers}\n" -L -o/dev/null
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /3015 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /30150001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

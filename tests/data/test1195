@@ -34,7 +34,7 @@ mqtt
 MQTT SUBSCRIBE with short PUBLISH
 </name>
 <command option="binary-trace">
-mqtt://%HOSTIP:%MQTTPORT/1195
+mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER
 </command>
 </client>
 

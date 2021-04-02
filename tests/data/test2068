@@ -60,23 +60,23 @@ HTTP POST --digest with SHA-512-256, userhash=false and user-specified Content-L
 # even when there is a user-specified Content-Length header.
 # https://github.com/curl/curl/pull/1242
 <command>
--H "Content-Length: 11" -u auser:apasswd --digest -d "junkelijunk" http://%HOSTIP:%HTTPPORT/2068
+-H "Content-Length: 11" -u auser:apasswd --digest -d "junkelijunk" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol nonewline="yes">
-POST /2068 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
-POST /2068 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/2068", response="4bc9c97a72f1856bcec9b0e1518c6b7ee28773f91357d56840bdc30bd89ca68f", algorithm=SHA-512-256
+Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="4bc9c97a72f1856bcec9b0e1518c6b7ee28773f91357d56840bdc30bd89ca68f", algorithm=SHA-512-256
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 11

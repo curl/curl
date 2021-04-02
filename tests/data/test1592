@@ -14,14 +14,14 @@ speedcheck
 none
 </server>
 <tool>
-lib1592
+lib%TESTNUMBER
 </tool>
  <name>
 HTTP request, remove handle while resolving, don't block
  </name>
 
  <command>
-http://a-site-never-accessed.example.org/1592
+http://a-site-never-accessed.example.org/%TESTNUMBER
 </command>
 </client>
 

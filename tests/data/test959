@@ -40,7 +40,7 @@ To: another
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/959 --mail-rcpt recipient@example.com --mail-from sender@åäö.se -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@åäö.se -T -
 </command>
 </client>
 
@@ -52,7 +52,7 @@ smtp://%HOSTIP:%SMTPPORT/959 --mail-rcpt recipient@example.com --mail-from sende
 55
 </errorcode>
 <protocol>
-EHLO 959
+EHLO %TESTNUMBER
 MAIL FROM:<sender@åäö.se>
 QUIT
 </protocol>

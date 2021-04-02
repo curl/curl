@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -348,7 +348,7 @@ static char *sanitize_cookie_path(const char *cookie_path)
  */
 void Curl_cookie_loadfiles(struct Curl_easy *data)
 {
-  struct curl_slist *list = data->change.cookielist;
+  struct curl_slist *list = data->state.cookielist;
   if(list) {
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
     while(list) {
@@ -365,8 +365,8 @@ void Curl_cookie_loadfiles(struct Curl_easy *data)
         data->cookies = newcookies;
       list = list->next;
     }
-    curl_slist_free_all(data->change.cookielist); /* clean up list */
-    data->change.cookielist = NULL; /* don't do this again! */
+    curl_slist_free_all(data->state.cookielist); /* clean up list */
+    data->state.cookielist = NULL; /* don't do this again! */
     Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
   }
 }
@@ -951,8 +951,12 @@ Curl_cookie_add(struct Curl_easy *data,
     remove_expired(c);
 
 #ifdef USE_LIBPSL
-  /* Check if the domain is a Public Suffix and if yes, ignore the cookie. */
-  if(domain && co->domain && !isip(co->domain)) {
+  /*
+   * Check if the domain is a Public Suffix and if yes, ignore the cookie. We
+   * must also check that the data handle isn't NULL since the psl code will
+   * dereference it.
+   */
+  if(data && (domain && co->domain && !isip(co->domain))) {
     const psl_ctx_t *psl = Curl_psl_use(data);
     int acceptable;
 
@@ -1652,7 +1656,7 @@ struct curl_slist *Curl_cookie_list(struct Curl_easy *data)
 void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
 {
   if(data->set.str[STRING_COOKIEJAR]) {
-    if(data->change.cookielist) {
+    if(data->state.cookielist) {
       /* If there is a list of cookie files to read, do it first so that
          we have all the told files read before we write the new jar.
          Curl_cookie_loadfiles() LOCKS and UNLOCKS the share itself! */
@@ -1667,11 +1671,11 @@ void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
             data->set.str[STRING_COOKIEJAR]);
   }
   else {
-    if(cleanup && data->change.cookielist) {
+    if(cleanup && data->state.cookielist) {
       /* since nothing is written, we can just free the list of cookie file
          names */
-      curl_slist_free_all(data->change.cookielist); /* clean up list */
-      data->change.cookielist = NULL;
+      curl_slist_free_all(data->state.cookielist); /* clean up list */
+      data->state.cookielist = NULL;
     }
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
   }

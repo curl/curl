@@ -33,7 +33,7 @@ The Content-Type of the requested document, if there was any.
 The error message. (Added in 7.75.0)
 .TP
 .B exitcode
-The numerical exitcode. (Added in 7.75.0)
+The numerical exitcode of the transfer. (Added in 7.75.0)
 .TP
 .B filename_effective
 The ultimate filename that curl writes out to. This is only meaningful if curl
@@ -47,7 +47,7 @@ server. (Added in 7.15.4)
 .TP
 .B http_code
 The numerical response code that was found in the last retrieved HTTP(S) or
-FTP(s) transfer. In 7.18.2 the alias \fBresponse_code\fP was added to show the
+FTP(s) transfer. In 7.18.2 the alias **response_code** was added to show the
 same info.
 .TP
 .B http_connect
@@ -91,7 +91,10 @@ requested. 0 means the verification was successful. (Added in 7.52.0)
 .B redirect_url
 When an HTTP request was made without --location to follow redirects (or when
 --max-redir is met), this variable will show the actual URL a redirect
-\fIwould\fP have gone to. (Added in 7.18.2)
+*would* have gone to. (Added in 7.18.2)
+.TP
+.B referer
+The Referer: header, if there was any. (Added in 7.76.0)
 .TP
 .B remote_ip
 The remote IP address of the most recently done connection - can be either

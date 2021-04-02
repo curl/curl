@@ -24,7 +24,7 @@ ftp
 FTP RETR PASV with PRET not supported
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1108 --ftp-pret
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ftp-pret
 </command>
 
 </client>
@@ -35,7 +35,7 @@ ftp://%HOSTIP:%FTPPORT/1108 --ftp-pret
 USER anonymous
 PASS ftp@example.com
 PWD
-PRET RETR 1108
+PRET RETR %TESTNUMBER
 </protocol>
 # we expect that the server doesn't understand PRET
 <errorcode>

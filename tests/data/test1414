@@ -32,7 +32,7 @@ ftp
 FTP PORT without SIZE or EPRT support
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1414 -P -
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P -
 </command>
 </client>
 
@@ -49,8 +49,8 @@ PWD
 EPRT |1|
 PORT
 TYPE I
-SIZE 1414
-RETR 1414
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

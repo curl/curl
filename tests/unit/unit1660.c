@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2020 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -125,9 +125,14 @@ UNITTEST_START
   CURL *easy;
   if(!h)
     return 1;
+
+  curl_global_init(CURL_GLOBAL_ALL);
   easy = curl_easy_init();
-  if(!easy)
+  if(!easy) {
+    Curl_hsts_cleanup(&h);
+    curl_global_cleanup();
     return 1;
+  }
 
   Curl_hsts_loadfile(easy, h, "log/input1660");
 
@@ -165,6 +170,7 @@ UNITTEST_START
   (void)Curl_hsts_save(easy, h, "log/hsts1660");
   Curl_hsts_cleanup(&h);
   curl_easy_cleanup(easy);
+  curl_global_cleanup();
   return unitfail;
 }
 UNITTEST_STOP

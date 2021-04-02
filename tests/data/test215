@@ -34,7 +34,7 @@ ftp
 Get two FTP dir listings from the same remote dir: no second CWD
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/a/path/215/ ftp://%HOSTIP:%FTPPORT/a/path/215/
+ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER/ ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER/
 </command>
 </client>
 
@@ -46,7 +46,7 @@ PASS ftp@example.com
 PWD
 CWD a
 CWD path
-CWD 215
+CWD %TESTNUMBER
 EPSV
 TYPE A
 LIST

@@ -27,7 +27,7 @@ ftp
 FTP fetch a file from the root directory with singlecwd
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT//1226 --ftp-method singlecwd
+ftp://%HOSTIP:%FTPPORT//%TESTNUMBER --ftp-method singlecwd
 </command>
 
 </client>
@@ -41,8 +41,8 @@ PWD
 CWD /
 EPSV
 TYPE I
-SIZE 1226
-RETR 1226
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

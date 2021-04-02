@@ -11,7 +11,7 @@ HTTP FORMPOST
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 
 blablabla
@@ -28,7 +28,7 @@ http
 HTTP custom Content-Type with parameter
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/669 -H 'Content-type: multipart/form-data; charset=utf-8' -F name=daniel -F tool=curl
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -H 'Content-type: multipart/form-data; charset=utf-8' -F name=daniel -F tool=curl
 </command>
 </client>
 
@@ -39,7 +39,7 @@ s/^--------------------------[a-z0-9]*/------------------------------/
 s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
 </strippart>
 <protocol>
-POST /we/want/669 HTTP/1.1
+POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

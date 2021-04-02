@@ -2,6 +2,7 @@
 <info>
 <keywords>
 HTTP
+HTTP proxy
 followlocation
 cookies
 </keywords>
@@ -11,11 +12,11 @@ cookies
 <reply>
 <data>
 HTTP/1.1 302 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
-Location: http://goto.second.host.now/3170002
+Location: http://goto.second.host.now/%TESTNUMBER0002
 Content-Length: 8
 Connection: close
 
@@ -23,7 +24,7 @@ contents
 </data>
 <data2>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
@@ -34,16 +35,16 @@ contents
 
 <datacheck>
 HTTP/1.1 302 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
-Location: http://goto.second.host.now/3170002
+Location: http://goto.second.host.now/%TESTNUMBER0002
 Content-Length: 8
 Connection: close
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
@@ -63,7 +64,7 @@ http
 HTTP with custom Cookie: and redirect to new host
  </name>
  <command>
-http://first.host.it.is/we/want/that/page/317 -x %HOSTIP:%HTTPPORT -H "Cookie: test=yes" --location
+http://first.host.it.is/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT -H "Cookie: test=yes" --location
 </command>
 <features>
 proxy
@@ -74,14 +75,14 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET http://first.host.it.is/we/want/that/page/317 HTTP/1.1
+GET http://first.host.it.is/we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: first.host.it.is
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: test=yes
 
-GET http://goto.second.host.now/3170002 HTTP/1.1
+GET http://goto.second.host.now/%TESTNUMBER0002 HTTP/1.1
 Host: goto.second.host.now
 User-Agent: curl/%VERSION
 Accept: */*

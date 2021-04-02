@@ -12,7 +12,7 @@ HTTP MIME POST
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
@@ -21,7 +21,7 @@ hello
 </data>
 <datacheck>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
@@ -37,14 +37,14 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib667
+lib%TESTNUMBER
 </tool>
 
  <name>
 HTTP chunked mimepost using single-byte read callback with encoder
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/667
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -59,7 +59,7 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 # boundary string and since 5 of them are in the body contents, we see
 # (5*12) == 60 bytes less
 <protocol>
-POST /667 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked

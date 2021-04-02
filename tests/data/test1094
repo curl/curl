@@ -34,7 +34,7 @@ tftp
 TFTP retrieve with mode=netascii
  </name>
  <command>
-"tftp://%HOSTIP:%TFTPPORT//1094;mode=netascii"
+"tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER;mode=netascii"
 </command>
 </client>
 
@@ -47,7 +47,7 @@ mode: netascii
 tsize: 0
 blksize: 512
 timeout: 6
-filename: /1094
+filename: /%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2017, Florin Petriuc, <petriuc.florin@gmail.com>
- * Copyright (C) 2018 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -50,11 +50,10 @@
 /* Please keep the SSL backend-specific #if branches in this order:
  *
  * 1. USE_OPENSSL
- * 2. USE_GNUTLS_NETTLE
- * 3. USE_GNUTLS
- * 4. USE_MBEDTLS
- * 5. USE_COMMON_CRYPTO
- * 6. USE_WIN32_CRYPTO
+ * 2. USE_GNUTLS
+ * 3. USE_MBEDTLS
+ * 4. USE_COMMON_CRYPTO
+ * 5. USE_WIN32_CRYPTO
  *
  * This ensures that the same SSL branch gets activated throughout this source
  * file even if multiple backends are enabled at the same time.
@@ -65,7 +64,7 @@
 /* When OpenSSL is available we use the SHA256-function from OpenSSL */
 #include <openssl/sha.h>
 
-#elif defined(USE_GNUTLS_NETTLE)
+#elif defined(USE_GNUTLS)
 
 #include <nettle/sha.h>
 
@@ -91,35 +90,6 @@ static void SHA256_Update(SHA256_CTX *ctx,
 static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
 {
   sha256_digest(ctx, SHA256_DIGEST_SIZE, digest);
-}
-
-#elif defined(USE_GNUTLS)
-
-#include <gcrypt.h>
-
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
-
-typedef gcry_md_hd_t SHA256_CTX;
-
-static void SHA256_Init(SHA256_CTX *ctx)
-{
-  gcry_md_open(ctx, GCRY_MD_SHA256, 0);
-}
-
-static void SHA256_Update(SHA256_CTX *ctx,
-                          const unsigned char *data,
-                          unsigned int length)
-{
-  gcry_md_write(*ctx, data, length);
-}
-
-static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
-{
-  memcpy(digest, gcry_md_read(*ctx, 0), SHA256_DIGEST_LENGTH);
-  gcry_md_close(*ctx);
 }
 
 #elif defined(USE_MBEDTLS)
@@ -344,11 +314,14 @@ static int sha256_compress(struct sha256_state *md,
   }
 
   /* Compress */
-#define RND(a,b,c,d,e,f,g,h,i)                                  \
-  unsigned long t0 = h + Sigma1(e) + Ch(e, f, g) + K[i] + W[i]; \
-  unsigned long t1 = Sigma0(a) + Maj(a, b, c);                  \
-  d += t0;                                                      \
-  h = t0 + t1;
+#define RND(a,b,c,d,e,f,g,h,i)                                          \
+  do {                                                                  \
+    unsigned long t0 = h + Sigma1(e) + Ch(e, f, g) + K[i] + W[i];       \
+    unsigned long t1 = Sigma0(a) + Maj(a, b, c);                        \
+    d += t0;                                                            \
+    h = t0 + t1;                                                        \
+  } while(0)
+
   for(i = 0; i < 64; ++i) {
     unsigned long t;
     RND(S[0], S[1], S[2], S[3], S[4], S[5], S[6], S[7], i);

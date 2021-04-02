@@ -31,9 +31,9 @@ ftp
 FTP download resume from end of empty file
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1037 -C -
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -C -
 </command>
-<file name="log/curl1037.out">
+<file name="log/curl%TESTNUMBER.out">
 </file>
 </client>
 
@@ -46,8 +46,8 @@ PWD
 EPSV
 PASV
 TYPE I
-SIZE 1037
-RETR 1037
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -117,7 +117,11 @@ If set, skips authority checks. The RFC allows individual schemes to omit the
 host part (normally the only mandatory part of the authority), but libcurl
 cannot know whether this is permitted for custom schemes. Specifying the flag
 permits empty authority sections, similar to how file scheme is handled.
-
+.IP CURLU_PATH_AS_IS
+When set for \fBCURLUPART_URL\fP, this makes libcurl skip the normalization of
+the path. That's the procedure where curl otherwise removes sequences of
+dot-slash and dot-dot etc. The same option used for transfers is called
+\fICURLOPT_PATH_AS_IS(3)\fP.
 .SH RETURN VALUE
 Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
 fine.
@@ -143,4 +147,4 @@ If this function returns an error, no URL part is set.
 Added in curl 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
 .SH "SEE ALSO"
 .BR curl_url_cleanup "(3), " curl_url "(3), " curl_url_get "(3), "
-.BR curl_url_dup "(3), "
+.BR curl_url_dup "(3), " CURLOPT_CURLU "(3), "

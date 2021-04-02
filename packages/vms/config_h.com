@@ -2129,7 +2129,7 @@ $!
 $write tf " /* Allow compiler builtins */"
 $write tf "/*-------------------------*/"
 $write tf "#ifdef __DECC_VER"
-$write tf "#include <non_existant_dir:builtins.h>"
+$write tf "#include <non_existent_dir:builtins.h>"
 $write tf "#endif"
 $!
 $write tf ""

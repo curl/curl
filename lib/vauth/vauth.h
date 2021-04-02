@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2020, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2014 - 2021, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,6 +40,10 @@ struct kerberos5data;
 
 #if (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)) && defined(USE_SPNEGO)
 struct negotiatedata;
+#endif
+
+#if defined(USE_GSASL)
+struct gsasldata;
 #endif
 
 #if defined(USE_WINDOWS_SSPI)
@@ -114,6 +118,27 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 /* This is used to clean up the digest specific data */
 void Curl_auth_digest_cleanup(struct digestdata *digest);
 #endif /* !CURL_DISABLE_CRYPTO_AUTH */
+
+#ifdef USE_GSASL
+/* This is used to evaluate if MECH is supported by gsasl */
+bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
+                                  const char *mech,
+                                  struct gsasldata *gsasl);
+/* This is used to start a gsasl method */
+CURLcode Curl_auth_gsasl_start(struct Curl_easy *data,
+                               const char *userp,
+                               const char *passwdp,
+                               struct gsasldata *gsasl);
+
+/* This is used to process and generate a new SASL token */
+CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
+                               const char *chlg64,
+                               struct gsasldata *gsasl,
+                               char **outptr, size_t *outlen);
+
+/* This is used to clean up the gsasl specific data */
+void Curl_auth_gsasl_cleanup(struct gsasldata *digest);
+#endif
 
 #if defined(USE_NTLM)
 /* This is used to evaluate if NTLM is supported */

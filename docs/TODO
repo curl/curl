@@ -35,6 +35,7 @@
  1.16 Try to URL encode given URL
  1.17 Add support for IRIs
  1.18 try next proxy if one doesn't work
+ 1.19 provide timing info for each redirect
  1.20 SRV and URI DNS records
  1.22 CURLINFO_PAUSE_STATE
  1.23 Offer API to flush the connection pool
@@ -101,7 +102,8 @@
  11.3 Use NTLMv2
  11.4 Create remote directories
 
- 12. New protocols
+ 12. FILE
+ 12.1 Directory listing for FILE:
 
  13. SSL
  13.1 TLS-PSK with OpenSSL
@@ -115,7 +117,6 @@
  13.9 TLS record padding
  13.10 Support Authority Information Access certificate extension (AIA)
  13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
- 13.12 Support HSTS
  13.13 Make sure we forbid TLS 1.3 post-handshake authentication
  13.14 Support the clienthello extension
 
@@ -162,9 +163,11 @@
  18.19 expand ~/ in config files
  18.20 host name sections in config files
  18.21 retry on the redirected-to URL
+ 18.22 --fail-with-body
  18.23 Set the modification date on an uploaded file
  18.24 Use multiple parallel transfers for a single download
  18.25 Prevent terminal injection when writing to terminal
+ 18.26 Custom progress meter update interval
 
  19. Build
  19.1 roffit
@@ -182,20 +185,6 @@
  20.7 Support LD_PRELOAD on macOS
  20.8 Run web-platform-tests url tests
  20.9 Use "random" ports for the test servers
-
- 21. Next SONAME bump
- 21.1 http-style HEAD output for FTP
- 21.2 combine error codes
- 21.3 extend CURLOPT_SOCKOPTFUNCTION prototype
-
- 22. Next major release
- 22.1 cleanup return codes
- 22.2 remove obsolete defines
- 22.3 size_t
- 22.4 remove several functions
- 22.5 remove CURLOPT_FAILONERROR
- 22.7 remove progress meter from libcurl
- 22.8 remove 'curl_httppost' from public
 
 ==============================================================================
 
@@ -362,6 +351,15 @@
  using PACs.
 
  https://github.com/curl/curl/issues/896
+
+1.19 provide timing info for each redirect
+
+ curl and libcurl provide timing information via a set of different
+ time-stamps (CURLINFO_*_TIME). When curl is following redirects, those
+ returned time value are the accumulated sums. An improvement could be to
+ offer separate timings for each redirect.
+
+ https://github.com/curl/curl/issues/6743
 
 1.20 SRV and URI DNS records
 
@@ -611,7 +609,7 @@
 
  The alt-svc: header provides a set of alternative services for curl to use
  instead of the original. If the first attempted one fails, it should try the
- next etc and if all alterantives fail go back to the original.
+ next etc and if all alternatives fail go back to the original.
 
  See https://github.com/curl/curl/issues/4908
 
@@ -691,23 +689,31 @@
 
 11.1 File listing support
 
-Add support for listing the contents of a SMB share. The output should probably
-be the same as/similar to FTP.
+ Add support for listing the contents of a SMB share. The output should
+ probably be the same as/similar to FTP.
 
 11.2 Honor file timestamps
 
-The timestamp of the transferred file should reflect that of the original file.
+ The timestamp of the transferred file should reflect that of the original
+ file.
 
 11.3 Use NTLMv2
 
-Currently the SMB authentication uses NTLMv1.
+ Currently the SMB authentication uses NTLMv1.
 
 11.4 Create remote directories
 
-Support for creating remote directories when uploading a file to a directory
-that doesn't exist on the server, just like --ftp-create-dirs.
+ Support for creating remote directories when uploading a file to a directory
+ that doesn't exist on the server, just like --ftp-create-dirs.
 
-12. New protocols
+
+12. FILE
+
+12.1 Directory listing for FILE:
+
+ Add support for listing the contents of a directory accessed with FILE. The
+ output should probably be the same as/similar to FTP.
+
 
 13. SSL
 
@@ -813,16 +819,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  Adding this feature would make curls pinning 100% compatible to HPKP and
  allow more flexible pinning.
-
-13.12 Support HSTS
-
- "HTTP Strict Transport Security" is TOFU (trust on first use), time-based
- features indicated by a HTTP header send by the webserver. It is widely used
- in browsers and it's purpose is to prevent insecure HTTP connections after a
- previous HTTPS connection. It protects against SSLStripping attacks.
-
- Doc: https://developer.mozilla.org/en-US/docs/Web/Security/HTTP_strict_transport_security
- RFC 6797: https://tools.ietf.org/html/rfc6797
 
 13.13 Make sure we forbid TLS 1.3 post-handshake authentication
 
@@ -1151,6 +1147,14 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  See https://github.com/curl/curl/issues/5462
 
+18.22 --fail-with-body
+
+ Lots of users who want --fail still want the response body saved as well -
+ which --fail doesn't offer. The current solution for users is to use
+ --write-out with %{response_code} and script the missing logic, but adding a
+ --fail-with-body option could be an easier way for users without requiring
+ external conditional checks.
+
 18.23 Set the modification date on an uploaded file
 
  For SFTP and possibly FTP, curl could offer an option to set the
@@ -1187,6 +1191,12 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  See https://github.com/curl/curl/issues/6150
 
+18.26 Custom progress meter update interval
+
+ Users who are for example doing large downloads in CI or remote setups might
+ want the occasional progress meter update to see that the transfer is
+ progressing and hasn't stuck, but they may not appreciate the
+ many-times-a-second frequency curl can end up doing it with now.
 
 19. Build
 
@@ -1292,102 +1302,3 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  We could then remove the "check that it is our server that's running"-check
  and we would immediately detect when we write tests wrongly to use hard-coded
  port numbers.
-
-21. Next SONAME bump
-
-21.1 http-style HEAD output for FTP
-
- #undef CURL_FTP_HTTPSTYLE_HEAD in lib/ftp.c to remove the HTTP-style headers
- from being output in NOBODY requests over FTP
-
-21.2 combine error codes
-
- Combine some of the error codes to remove duplicates.  The original
- numbering should not be changed, and the old identifiers would be
- macroed to the new ones in an CURL_NO_OLDIES section to help with
- backward compatibility.
-
- Candidates for removal and their replacements:
-
-    CURLE_FILE_COULDNT_READ_FILE => CURLE_REMOTE_FILE_NOT_FOUND
-
-    CURLE_FTP_COULDNT_RETR_FILE => CURLE_REMOTE_FILE_NOT_FOUND
-
-    CURLE_FTP_COULDNT_USE_REST => CURLE_RANGE_ERROR
-
-    CURLE_FUNCTION_NOT_FOUND => CURLE_FAILED_INIT
-
-    CURLE_LDAP_INVALID_URL => CURLE_URL_MALFORMAT
-
-    CURLE_TFTP_NOSUCHUSER => CURLE_TFTP_ILLEGAL
-
-    CURLE_TFTP_NOTFOUND => CURLE_REMOTE_FILE_NOT_FOUND
-
-    CURLE_TFTP_PERM => CURLE_REMOTE_ACCESS_DENIED
-
-21.3 extend CURLOPT_SOCKOPTFUNCTION prototype
-
- The current prototype only provides 'purpose' that tells what the
- connection/socket is for, but not any protocol or similar. It makes it hard
- for applications to differentiate on TCP vs UDP and even HTTP vs FTP and
- similar.
-
-22. Next major release
-
-22.1 cleanup return codes
-
- curl_easy_cleanup() returns void, but curl_multi_cleanup() returns a
- CURLMcode. These should be changed to be the same.
-
-22.2 remove obsolete defines
-
- remove obsolete defines from curl/curl.h
-
-22.3 size_t
-
- make several functions use size_t instead of int in their APIs
-
-22.4 remove several functions
-
- remove the following functions from the public API:
-
- curl_getenv
-
- curl_mprintf (and variations)
-
- curl_strequal
-
- curl_strnequal
-
- They will instead become curlx_ - alternatives. That makes the curl app
- still capable of using them, by building with them from source.
-
- These functions have no purpose anymore:
-
- curl_multi_socket
-
- curl_multi_socket_all
-
-22.5 remove CURLOPT_FAILONERROR
-
- Remove support for CURLOPT_FAILONERROR, it has gotten too kludgy and weird
- internally. Let the app judge success or not for itself.
-
-22.7 remove progress meter from libcurl
-
- The internally provided progress meter output doesn't belong in the library.
- Basically no application wants it (apart from curl) but instead applications
- can and should do their own progress meters using the progress callback.
-
- The progress callback should then be bumped as well to get proper 64bit
- variable types passed to it instead of doubles so that big files work
- correctly.
-
-22.8 remove 'curl_httppost' from public
-
- curl_formadd() was made to fill in a public struct, but the fact that the
- struct is public is never really used by application for their own advantage
- but instead often restricts how the form functions can or can't be modified.
-
- Changing them to return a private handle will benefit the implementation and
- allow us much greater freedoms while still maintaining a solid API and ABI.

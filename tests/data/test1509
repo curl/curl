@@ -22,7 +22,7 @@ Server: the beast that eats naughty clients
 
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -33,7 +33,7 @@ HTTP/1.1 200 Mighty fine indeed
 Server: the beast that eats naughty clients
 
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -51,7 +51,7 @@ http-proxy
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib1509
+lib%TESTNUMBER
 </tool>
 <features>
 proxy
@@ -60,9 +60,9 @@ proxy
 simple multi http:// through proxytunnel with authentication info
  </name>
  <command>
-http://the.old.moo.1509:%HTTPPORT/1509 %HOSTIP:%PROXYPORT
+http://the.old.moo.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 </command>
-<file name="log/test1509.txt">
+<file name="log/test%TESTNUMBER.txt">
 foo
    bar
 bar
@@ -74,14 +74,14 @@ moo
 # Verify data after the test has been "shot"
 <verify>
 <proxy>
-CONNECT the.old.moo.1509:%HTTPPORT HTTP/1.1
-Host: the.old.moo.1509:%HTTPPORT
+CONNECT the.old.moo.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol>
-GET /1509 HTTP/1.1
-Host: the.old.moo.1509:%HTTPPORT
+GET /%TESTNUMBER HTTP/1.1
+Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Accept: */*
 
 [DISCONNECT]

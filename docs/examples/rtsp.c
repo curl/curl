@@ -61,17 +61,20 @@ static int _getch(void)
 #define VERSION_STR  "V1.0"
 
 /* error handling macros */
-#define my_curl_easy_setopt(A, B, C)                             \
-  res = curl_easy_setopt((A), (B), (C));                         \
-  if(res != CURLE_OK)                                            \
-    fprintf(stderr, "curl_easy_setopt(%s, %s, %s) failed: %d\n", \
-            #A, #B, #C, res);
+#define my_curl_easy_setopt(A, B, C)                               \
+  do {                                                             \
+    res = curl_easy_setopt((A), (B), (C));                         \
+    if(res != CURLE_OK)                                            \
+      fprintf(stderr, "curl_easy_setopt(%s, %s, %s) failed: %d\n", \
+              #A, #B, #C, res);                                    \
+  } while(0)
 
-#define my_curl_easy_perform(A)                                     \
-  res = curl_easy_perform(A);                                       \
-  if(res != CURLE_OK)                                               \
-    fprintf(stderr, "curl_easy_perform(%s) failed: %d\n", #A, res);
-
+#define my_curl_easy_perform(A)                                         \
+  do {                                                                  \
+    res = curl_easy_perform(A);                                         \
+    if(res != CURLE_OK)                                                 \
+      fprintf(stderr, "curl_easy_perform(%s) failed: %d\n", #A, res);   \
+  } while(0)
 
 /* send RTSP OPTIONS request */
 static void rtsp_options(CURL *curl, const char *uri)

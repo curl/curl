@@ -25,14 +25,14 @@ http
 HTTP custom request 'DELETE'
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/13 -X DELETE
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -X DELETE
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-DELETE /want/13 HTTP/1.1
+DELETE /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

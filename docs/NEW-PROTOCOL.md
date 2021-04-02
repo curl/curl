@@ -38,8 +38,8 @@ session".
 ### Transfer oriented
 
 The protocol itself should be focused on *transfers*. Be it uploads or
-downloads or both. I should at least be possible to view the transfers as
-such, like we can view reading emails over POP3 as a downloading and sending
+downloads or both. It should at least be possible to view the transfers as
+such, like we can view reading emails over POP3 as a download and sending
 emails over SMTP as an upload.
 
 If you cannot even shoehorn the protocol into a transfer focused view, then

@@ -10,7 +10,7 @@ config file
 <reply>
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 11
 
@@ -30,14 +30,14 @@ HTTP and -F upload in config file
 <stdin>
 -F name=daniel
 -F tool=curl
--F file=@log/test71.txt
+-F file=@log/test%TESTNUMBER.txt
 user-agent = ""
 </stdin>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/71 -K -
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -K -
 </command>
 # We create this file before the command is invoked!
-<file name="log/test71.txt">
+<file name="log/test%TESTNUMBER.txt">
 foo-
 This is a moo-
 bar
@@ -50,7 +50,7 @@ bar
 ^(Content-Type: multipart/form-data;|------------).*
 </strip>
 <protocol>
-POST /we/want/71 HTTP/1.1
+POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 408
@@ -65,7 +65,7 @@ Content-Disposition: form-data; name="tool"
 
 curl
 ------------------------------9ef8d6205763
-Content-Disposition: form-data; name="file"; filename="test71.txt"
+Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER.txt"
 Content-Type: text/plain
 
 foo-

@@ -25,7 +25,7 @@ gopher
 Gopher index
  </name>
  <command>
-gopher://%HOSTIP:%GOPHERPORT/1/1200
+gopher://%HOSTIP:%GOPHERPORT/1/%TESTNUMBER
 </command>
 </client>
 
@@ -33,7 +33,7 @@ gopher://%HOSTIP:%GOPHERPORT/1/1200
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-/1200
+/%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

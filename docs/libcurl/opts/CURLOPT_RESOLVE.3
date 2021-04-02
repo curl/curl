@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -37,7 +37,7 @@ list of \fBstruct curl_slist\fP structs properly filled in. Use
 to clean up an entire list.
 
 Each single name resolve string should be written using the format
-HOST:PORT:ADDRESS[,ADDRESS]... where HOST is the name libcurl will try
+[+]HOST:PORT:ADDRESS[,ADDRESS]... where HOST is the name libcurl will try
 to resolve, PORT is the port number of the service where libcurl wants
 to connect to the HOST and ADDRESS is one or more numerical IP
 addresses. If you specify multiple ip addresses they need to be
@@ -46,14 +46,16 @@ ADDRESS entries can of course be either IPv4 or IPv6 style addressing.
 
 This option effectively pre-populates the DNS cache with entries for the
 host+port pair so redirects and everything that operations against the
-HOST+PORT will instead use your provided ADDRESS. Addresses set with
-\fICURLOPT_RESOLVE(3)\fP will not time-out from the DNS cache like ordinary
-entries.
+HOST+PORT will instead use your provided ADDRESS.
 
-If the DNS cache already have an entry for the given host+port pair, then
+The optional leading "+" signifies whether the new entry should time-out or
+not. Entries added with "HOST:..." will never time-out whereas entries added
+with "+HOST:..." will time-out just like ordinary DNS cache entries.
+
+If the DNS cache already has an entry for the given host+port pair, then
 this entry will be removed and a new entry will be created. This is because
-old entry may have have different addresses or be ordinary entries with
-time-outs.
+the old entry may have have different addresses or a different time-out
+setting.
 
 The provided ADDRESS set by this option will be used even if
 \fICURLOPT_IPRESOLVE(3)\fP is set to make libcurl use another IP version.
@@ -66,6 +68,9 @@ and port number must exactly match what was already added previously.
 Support for providing the ADDRESS within [brackets] was added in 7.57.0.
 
 Support for providing multiple IP addresses per entry was added in 7.59.0.
+
+Support for adding non-permanent entries by using the "+" prefix was added in
+7.75.0.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

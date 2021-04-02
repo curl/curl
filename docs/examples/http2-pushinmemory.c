@@ -163,7 +163,7 @@ int main(void)
      * easy handles but *we* need to clean them up when they are done.
      */
     do {
-      int msgq = 0;;
+      int msgq = 0;
       m = curl_multi_info_read(multi, &msgq);
       if(m && (m->msg == CURLMSG_DONE)) {
         CURL *e = m->easy_handle;

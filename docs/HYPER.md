@@ -22,9 +22,9 @@ repository](https://github.com/hyperium/hyper/tree/hyper-capi).
 
 Build hyper and enable the C API:
 
-     % git clone -b hyper-capi https://github.com/hyperium/hyper
+     % git clone https://github.com/hyperium/hyper
      % cd hyper
-     % cargo build --no-default-features --features ffi
+     % RUSTFLAGS="--cfg hyper_unstable_ffi" cargo build --features client,http1,http2,ffi
 
 Build curl to use hyper's C API:
 
@@ -39,9 +39,26 @@ Build curl to use hyper's C API:
 Hyper is a low level HTTP transport library. curl itself provides all HTTP
 headers and Hyper provides all received headers back to curl.
 
-Therefore, msost of the "header logic" in curl as in responding to and acting
+Therefore, most of the "header logic" in curl as in responding to and acting
 on specific input and output headers are done the same way in curl code.
 
 The API in Hyper delivers received HTTP headers as (cleaned up) name=value
 pairs, making it impossible for curl to know the exact byte representation
 over the wire with Hyper.
+
+## Remaining issues
+
+This backend is still not feature complete with the native backend. Areas that
+still need attention and verification include:
+
+- multiplexed HTTP/2
+- h2 Upgrade:
+- pausing transfers
+- co-exist with a HTTP/3 build
+- receiving HTTP/1 trailers
+- sending HTTP/1 trailers
+- accept-encoding
+- transfer encoding
+- alt-svc
+- hsts
+- DoH ([#6389](https://github.com/curl/curl/issues/6389))

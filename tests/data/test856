@@ -25,7 +25,7 @@ pop3
 POP3 invalid login
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/856 -u user:wrong
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:wrong
 </command>
 </client>
 

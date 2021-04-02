@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -94,7 +94,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
 {
   switch(info) {
   case CURLINFO_EFFECTIVE_URL:
-    *param_charp = data->change.url?data->change.url:(char *)"";
+    *param_charp = data->state.url?data->state.url:(char *)"";
     break;
   case CURLINFO_EFFECTIVE_METHOD: {
     const char *m = data->set.str[STRING_CUSTOMREQUEST];
@@ -144,6 +144,10 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     /* Return the URL this request would have been redirected to if that
        option had been enabled! */
     *param_charp = data->info.wouldredirect;
+    break;
+  case CURLINFO_REFERER:
+    /* Return the referrer header for this request, or NULL if unset */
+    *param_charp = data->state.referer;
     break;
   case CURLINFO_PRIMARY_IP:
     /* Return the ip address of the most recent (primary) connection */
@@ -235,7 +239,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     break;
 #endif
   case CURLINFO_REDIRECT_COUNT:
-    *param_longp = data->set.followlocation;
+    *param_longp = data->state.followlocation;
     break;
   case CURLINFO_HTTPAUTH_AVAIL:
     lptr.to_long = param_longp;

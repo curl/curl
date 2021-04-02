@@ -15,16 +15,16 @@ followlocation
 <reply>
 <data nocheck="yes">
 HTTP/1.1 302 OK swsbounce
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Content-Type: text/plain
-Location: ./20470001
+Location: ./%TESTNUMBER0001
 
 redirect
 </data>
 <data1 nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Content-Type: text/plain; charset=us-ascii
 
@@ -54,7 +54,7 @@ Connection re-use with IDN host name over HTTP proxy
  </name>
 
  <command>
-http://åäö.se/2047 -x %HOSTIP:%HTTPPORT -w "%{num_connects}\n%{num_redirects}\n%{size_download}\n%{url_effective}\n%{content_type}\n%{response_code}\n" -L
+http://åäö.se/%TESTNUMBER -x %HOSTIP:%HTTPPORT -w "%{num_connects}\n%{num_redirects}\n%{size_download}\n%{url_effective}\n%{content_type}\n%{response_code}\n" -L
 </command>
 </client>
 
@@ -62,13 +62,13 @@ http://åäö.se/2047 -x %HOSTIP:%HTTPPORT -w "%{num_connects}\n%{num_redirects}
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET http://xn--4cab6c.se/2047 HTTP/1.1
+GET http://xn--4cab6c.se/%TESTNUMBER HTTP/1.1
 Host: xn--4cab6c.se
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://xn--4cab6c.se/20470001 HTTP/1.1
+GET http://xn--4cab6c.se/%TESTNUMBER0001 HTTP/1.1
 Host: xn--4cab6c.se
 User-Agent: curl/%VERSION
 Accept: */*
@@ -78,13 +78,13 @@ Proxy-Connection: Keep-Alive
 
 <stdout>
 HTTP/1.1 302 OK swsbounce
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Content-Type: text/plain
-Location: ./20470001
+Location: ./%TESTNUMBER0001
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Content-Type: text/plain; charset=us-ascii
 
@@ -92,7 +92,7 @@ OK
 1
 1
 3
-http://åäö.se/20470001
+http://åäö.se/%TESTNUMBER0001
 text/plain; charset=us-ascii
 200
 </stdout>

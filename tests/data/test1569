@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PASV
+RETR
+</keywords>
+</info>
+# Server-side
+<reply>
+<data nocheck="yes">
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+<servercmd>
+REPLY EPSV 500 no such command
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP first type=A then regular URL
+ </name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<command>
+"ftp://%HOSTIP:%FTPPORT/%TESTNUMBER;type=A" ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
+</command>
+
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+PASV
+TYPE A
+RETR %TESTNUMBER
+PASV
+TYPE I
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
+QUIT
+</protocol>
+</verify>
+<stdout>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</stdout>
+
+</testcase>

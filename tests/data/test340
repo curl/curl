@@ -22,7 +22,7 @@ ftp
 FTP using %00 in path with singlecwd
  </name>
  <command>
---ftp-method singlecwd ftp://%HOSTIP:%FTPPORT/%00first/second/third/340
+--ftp-method singlecwd ftp://%HOSTIP:%FTPPORT/%00first/second/third/%TESTNUMBER
 </command>
 </client>
 

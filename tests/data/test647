@@ -22,9 +22,9 @@ imap
 IMAP APPEND multipart using mime API
  </name>
  <command>
-imap://%HOSTIP:%IMAPPORT/647 -F "=(;type=multipart/alternative" -F "= <body>This is the html version</body>;type=text/html" -F "=This is the plain text version" -F "=)" -F "=@log/test647.txt" -H "Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)" -H "From: Fred Foobar <foobar@example.com>" -H "To: joe@example.com" -H "Message-Id: <B27397-0100000@example.com>" -H "Subject: afternoon meeting" -u user:secret
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -F "=(;type=multipart/alternative" -F "= <body>This is the html version</body>;type=text/html" -F "=This is the plain text version" -F "=)" -F "=@log/test%TESTNUMBER.txt" -H "Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)" -H "From: Fred Foobar <foobar@example.com>" -H "To: joe@example.com" -H "Message-Id: <B27397-0100000@example.com>" -H "Subject: afternoon meeting" -u user:secret
 </command>
-<file name="log/test647.txt">
+<file name="log/test%TESTNUMBER.txt">
 This is an attached file.
 
 It may contain any type of data.
@@ -41,7 +41,7 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 APPEND 647 (\Seen) {892}
+A003 APPEND %TESTNUMBER (\Seen) {892}
 A004 LOGOUT
 </protocol>
 <upload>
@@ -67,7 +67,7 @@ This is the plain text version
 --------------------------------
 
 ------------------------------
-Content-Disposition: attachment; filename="test647.txt"
+Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
 
 This is an attached file.
 

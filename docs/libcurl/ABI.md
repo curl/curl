@@ -9,17 +9,16 @@ ABI - Application Binary Interface
 
 ## Upgrades
 
- In the vast majority of all cases, a typical libcurl upgrade does not break
- the ABI at all. Your application can remain using libcurl just as before,
- only with less bugs and possibly with added new features. You need to read
- the release notes, and if they mention an ABI break/soname bump, you may have
- to verify that your application still builds fine and uses libcurl as it now
- is defined to work.
+ A libcurl upgrade does not break the ABI or change established and documented
+ behavior. Your application can remain using libcurl just as before, only with
+ less bugs and possibly with added new features.
 
 ## Version Numbers
 
- In libcurl land, you really can't tell by the libcurl version number if that
- libcurl is binary compatible or not with another libcurl version.
+ In libcurl land, you cannot tell by the libcurl version number if that
+ libcurl is binary compatible or not with another libcurl version. As a rule,
+ we don't break the ABI so you can *always* upgrade to a later version without
+ any loss or change in functionality.
 
 ## Soname Bumps
 
@@ -50,7 +49,7 @@ ABI - Application Binary Interface
 ## History
 
  The previous major library soname number bumps (breaking backwards
- compatibility) have happened the following times:
+ compatibility) happened the following times:
 
  0 - libcurl 7.1,   August 2000
 

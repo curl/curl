@@ -26,11 +26,11 @@ none
 HSTS read/write callbacks
 </name>
 <tool>
-lib1915
+lib%TESTNUMBER
 </tool>
 
 <command>
-http://%HOSTIP:%NOLISTENPORT/not-there/1915
+http://%HOSTIP:%NOLISTENPORT/not-there/%TESTNUMBER
 </command>
 </client>
 

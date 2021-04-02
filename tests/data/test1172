@@ -26,7 +26,7 @@ http
 HTTP/0.9 GET response denied
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1172 --no-http0.9
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --no-http0.9
 </command>
 </client>
 
@@ -34,7 +34,7 @@ http://%HOSTIP:%HTTPPORT/1172 --no-http0.9
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1172 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

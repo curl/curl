@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -346,7 +346,6 @@ static unsigned char cert[] = {
 UNITTEST_START
 {
   CURLcode result;
-  struct connectdata conn;
   const char *beg = (const char *)&cert[0];
   const char *end = (const char *)&cert[sizeof(cert)];
   struct Curl_easy *data = curl_easy_init();
@@ -355,11 +354,7 @@ UNITTEST_START
   if(!data)
     return 2;
 
-  memset(&conn, 0, sizeof(struct connectdata));
-  /* this is a lot of assuming, but we expect the parsing function to only
-     really need the easy handle pointer */
-  conn.data = data;
-  result = Curl_extract_certinfo(&conn, 0, beg, end);
+  result = Curl_extract_certinfo(data, 0, beg, end);
 
   fail_unless(result == CURLE_OK, "Curl_extract_certinfo returned error");
 
@@ -369,7 +364,7 @@ UNITTEST_START
     for(i = 0; i < 45; i++) {
       char backup = cert[i];
       cert[i] = (unsigned char) (byte & 0xff);
-      (void) Curl_extract_certinfo(&conn, 0, beg, end);
+      (void) Curl_extract_certinfo(data, 0, beg, end);
       cert[i] = backup;
     }
   }

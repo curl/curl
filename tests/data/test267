@@ -73,7 +73,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/267 -u testuser:testpass --ntlm -d "data" -H "Header1: yes" -H "Header2: no"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --ntlm -d "data" -H "Header1: yes" -H "Header2: no"
 </command>
 <precheck>
 chkhostname curlhost
@@ -83,7 +83,7 @@ chkhostname curlhost
 # Verify data after the test has been "shot"
 <verify>
 <protocol nonewline="yes">
-POST /267 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/%VERSION
@@ -93,7 +93,7 @@ Header2: no
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
-POST /267 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
 User-Agent: curl/%VERSION

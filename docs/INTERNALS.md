@@ -145,7 +145,7 @@ Windows vs Unix
 
    That's taken care of by the `curl_global_init()` call, but if other libs
    also do it etc there might be reasons for applications to alter that
-   behaviour.
+   behavior.
 
    We require WinSock version 2.2 and load this version during global init.
 

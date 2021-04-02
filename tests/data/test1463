@@ -37,9 +37,9 @@ curl file category --help
 <stdout mode="text">
 Usage: curl [options...] <url>
 file: FILE protocol options
-     --create-file-mode File mode for created files
+     --create-file-mode <mode>  File mode (octal) for created files
  -I, --head          Show document info only
- -r, --range <range> Retrieve only the bytes within RANGE
+ -r, --range <range>  Retrieve only the bytes within RANGE
 </stdout>
 </verify>
 </testcase>

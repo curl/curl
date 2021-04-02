@@ -24,15 +24,15 @@ telnet
 TELNET check of upload with stdout redirected
  </name>
 <stdin>
-GET /ignore/for/1327 HTTP/1.0
+GET /ignore/for/%TESTNUMBER HTTP/1.0
 
 </stdin>
-<file name="log/1327.txt">
-GET /we/want/1327 HTTP/1.0
+<file name="log/%TESTNUMBER.txt">
+GET /we/want/%TESTNUMBER HTTP/1.0
 
 </file>
  <command option="no-output">
-telnet://%HOSTIP:%HTTPPORT -T log/1327.txt
+telnet://%HOSTIP:%HTTPPORT -T log/%TESTNUMBER.txt
 </command>
 </client>
 
@@ -40,7 +40,7 @@ telnet://%HOSTIP:%HTTPPORT -T log/1327.txt
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /we/want/1327 HTTP/1.0
+GET /we/want/%TESTNUMBER HTTP/1.0
 
 </protocol>
 </verify>

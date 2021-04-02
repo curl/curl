@@ -25,23 +25,23 @@ Curl-Private: swsclose
 rtsp
 </server>
 <tool>
-lib567
+lib%TESTNUMBER
 </tool>
 
 <name>
 simple RTSP OPTIONS command
 </name>
 <command>
-rtsp://%HOSTIP:%RTSPPORT/567
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 </command>
 </client>
 
 <verify>
 <protocol>
-OPTIONS rtsp://%HOSTIP:%RTSPPORT/567 RTSP/1.0
+OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER RTSP/1.0
 CSeq: 1
-User-Agent: test567
-Test-Number: 567
+User-Agent: test%TESTNUMBER
+Test-Number: %TESTNUMBER
 
 </protocol>
 </verify>

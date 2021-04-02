@@ -21,7 +21,7 @@ ipv6
 </features>
 # tool is what to use instead of 'curl'
 <tool>
-lib558
+lib%TESTNUMBER
 </tool>
 
 <name>
@@ -36,11 +36,13 @@ nothing
 # Verify data after the test has been "shot"
 <verify>
 <file name="log/memdump">
-MEM lib558.c: malloc()
-MEM lib558.c: free()
+MEM easy.c: malloc()
+MEM lib%TESTNUMBER.c: malloc()
+MEM lib%TESTNUMBER.c: free()
 MEM dynbuf.c: realloc()
 MEM dynbuf.c: realloc()
 MEM escape.c: free()
+MEM easy.c: free()
 </file>
 <stripfile>
 s/^MEM escape.c:\d+ free\(\(nil\)\)[\n]$//

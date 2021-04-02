@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,27 +40,26 @@ struct Curl_message {
    well!
 */
 typedef enum {
-  CURLM_STATE_INIT,         /* 0 - start in this state */
-  CURLM_STATE_CONNECT_PEND, /* 1 - no connections, waiting for one */
-  CURLM_STATE_CONNECT,      /* 2 - resolve/connect has been sent off */
-  CURLM_STATE_WAITRESOLVE,  /* 3 - awaiting the resolve to finalize */
-  CURLM_STATE_WAITCONNECT,  /* 4 - awaiting the TCP connect to finalize */
-  CURLM_STATE_WAITPROXYCONNECT, /* 5 - awaiting HTTPS proxy SSL initialization
-                                   to complete and/or proxy CONNECT to
-                                   finalize */
-  CURLM_STATE_SENDPROTOCONNECT, /* 6 - initiate protocol connect procedure */
-  CURLM_STATE_PROTOCONNECT, /* 7 - completing the protocol-specific connect
-                                   phase */
-  CURLM_STATE_DO,           /* 8 - start send off the request (part 1) */
-  CURLM_STATE_DOING,        /* 9 - sending off the request (part 1) */
-  CURLM_STATE_DO_MORE,      /* 10 - send off the request (part 2) */
-  CURLM_STATE_DO_DONE,      /* 11 - done sending off request */
-  CURLM_STATE_PERFORM,      /* 12 - transfer data */
-  CURLM_STATE_TOOFAST,      /* 13 - wait because limit-rate exceeded */
-  CURLM_STATE_DONE,         /* 14 - post data transfer operation */
-  CURLM_STATE_COMPLETED,    /* 15 - operation complete */
-  CURLM_STATE_MSGSENT,      /* 16 - the operation complete message is sent */
-  CURLM_STATE_LAST          /* 17 - not a true state, never use this */
+  MSTATE_INIT,         /* 0 - start in this state */
+  MSTATE_PENDING,      /* 1 - no connections, waiting for one */
+  MSTATE_CONNECT,      /* 2 - resolve/connect has been sent off */
+  MSTATE_RESOLVING,    /* 3 - awaiting the resolve to finalize */
+  MSTATE_CONNECTING,   /* 4 - awaiting the TCP connect to finalize */
+  MSTATE_TUNNELING,    /* 5 - awaiting HTTPS proxy SSL initialization to
+                          complete and/or proxy CONNECT to finalize */
+  MSTATE_PROTOCONNECT, /* 6 - initiate protocol connect procedure */
+  MSTATE_PROTOCONNECTING, /* 7 - completing the protocol-specific connect
+                             phase */
+  MSTATE_DO,           /* 8 - start send off the request (part 1) */
+  MSTATE_DOING,        /* 9 - sending off the request (part 1) */
+  MSTATE_DOING_MORE,   /* 10 - send off the request (part 2) */
+  MSTATE_DID,          /* 11 - done sending off request */
+  MSTATE_PERFORMING,   /* 12 - transfer data */
+  MSTATE_RATELIMITING, /* 13 - wait because limit-rate exceeded */
+  MSTATE_DONE,         /* 14 - post data transfer operation */
+  MSTATE_COMPLETED,    /* 15 - operation complete */
+  MSTATE_MSGSENT,      /* 16 - the operation complete message is sent */
+  MSTATE_LAST          /* 17 - not a true state, never use this */
 } CURLMstate;
 
 /* we support N sockets per easy handle. Set the corresponding bit to what
@@ -71,8 +70,7 @@ typedef enum {
 
 #define CURLPIPE_ANY (CURLPIPE_MULTIPLEX)
 
-#if defined(USE_SOCKETPAIR) && !defined(USE_BLOCKING_SOCKETS) &&        \
-  !defined(CURL_DISABLE_SOCKETPAIR)
+#if !defined(CURL_DISABLE_SOCKETPAIR)
 #define ENABLE_WAKEUP
 #endif
 
@@ -83,7 +81,7 @@ typedef enum {
 struct Curl_multi {
   /* First a simple identifier to easier detect if a user mix up
      this multi handle with an easy handle. Set this to CURL_MULTI_HANDLE. */
-  long type;
+  unsigned int magic;
 
   /* We have a doubly-linked list with easy handles */
   struct Curl_easy *easyp;
@@ -96,7 +94,7 @@ struct Curl_multi {
   struct Curl_llist msglist; /* a list of messages from completed transfers */
 
   struct Curl_llist pending; /* Curl_easys that are in the
-                                CURLM_STATE_CONNECT_PEND state */
+                                MSTATE_PENDING state */
 
   /* callback function and user data pointer for the *socket() API */
   curl_socket_callback socket_cb;

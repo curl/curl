@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -113,7 +113,7 @@ static const struct LongShort aliases[]= {
   {"*t", "proxy-ntlm",               ARG_BOOL},
   {"*u", "crlf",                     ARG_BOOL},
   {"*v", "stderr",                   ARG_FILENAME},
-  {"*V", "aws-sigv4",             ARG_STRING},
+  {"*V", "aws-sigv4",                ARG_STRING},
   {"*w", "interface",                ARG_STRING},
   {"*x", "krb",                      ARG_STRING},
   {"*x", "krb4",                     ARG_STRING},
@@ -251,6 +251,7 @@ static const struct LongShort aliases[]= {
   {"Ep", "pinnedpubkey",             ARG_STRING},
   {"EP", "proxy-pinnedpubkey",       ARG_STRING},
   {"Eq", "cert-status",              ARG_BOOL},
+  {"EQ", "doh-cert-status",          ARG_BOOL},
   {"Er", "false-start",              ARG_BOOL},
   {"Es", "ssl-no-revoke",            ARG_BOOL},
   {"ES", "ssl-revoke-best-effort",   ARG_BOOL},
@@ -280,6 +281,7 @@ static const struct LongShort aliases[]= {
   {"fa", "fail-early",               ARG_BOOL},
   {"fb", "styled-output",            ARG_BOOL},
   {"fc", "mail-rcpt-allowfails",     ARG_BOOL},
+  {"fd", "fail-with-body",           ARG_BOOL},
   {"F",  "form",                     ARG_STRING},
   {"Fs", "form-string",              ARG_STRING},
   {"g",  "globoff",                  ARG_BOOL},
@@ -293,6 +295,7 @@ static const struct LongShort aliases[]= {
   {"j",  "junk-session-cookies",     ARG_BOOL},
   {"J",  "remote-header-name",       ARG_BOOL},
   {"k",  "insecure",                 ARG_BOOL},
+  {"kd", "doh-insecure",             ARG_BOOL},
   {"K",  "config",                   ARG_FILENAME},
   {"l",  "list-only",                ARG_BOOL},
   {"L",  "location",                 ARG_BOOL},
@@ -806,8 +809,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       case 'V': /* --aws-sigv4 */
         config->authtype |= CURLAUTH_AWS_SIGV4;
-        GetStr(&config->aws_sigv4_provider, nextarg);
+        GetStr(&config->aws_sigv4, nextarg);
         break;
+
       case 'v': /* --stderr */
         if(strcmp(nextarg, "-")) {
           FILE *newfile = fopen(nextarg, FOPEN_WRITETEXT);
@@ -1316,11 +1320,15 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         }
         else if(strchr(nextarg, '=')) {
           /* A cookie string must have a =-letter */
-          GetStr(&config->cookie, nextarg);
+          err = add2list(&config->cookies, nextarg);
+          if(err)
+            return err;
           break;
         }
         /* We have a cookie file to read from! */
-        GetStr(&config->cookiefile, nextarg);
+        err = add2list(&config->cookiefiles, nextarg);
+        if(err)
+          return err;
       }
       break;
     case 'B':
@@ -1543,7 +1551,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       else
         config->autoreferer = FALSE;
-      GetStr(&config->referer, nextarg);
+      ptr = *nextarg ? nextarg : NULL;
+      GetStr(&config->referer, ptr);
     }
     break;
     case 'E':
@@ -1622,6 +1631,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       case 'q': /* --cert-status */
         config->verifystatus = TRUE;
+        break;
+
+      case 'Q': /* --doh-cert-status */
+        config->doh_verifystatus = TRUE;
         break;
 
       case 'r': /* --false-start */
@@ -1765,8 +1778,17 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 'c': /* --mail-rcpt-allowfails */
         config->mail_rcpt_allowfails = toggle;
         break;
+      case 'd': /* --fail-with-body */
+        config->failwithbody = toggle;
+        break;
       default: /* --fail (hard on errors)  */
         config->failonerror = toggle;
+        break;
+      }
+      if(config->failonerror && config->failwithbody) {
+        errorf(config->global, "You must select either --fail or "
+               "--fail-with-body, not both.\n");
+        return PARAM_BAD_USE;
       }
       break;
     case 'F':
@@ -1876,7 +1898,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->content_disposition = toggle;
       break;
     case 'k': /* allow insecure SSL connects */
-      config->insecure_ok = toggle;
+      if(subletter == 'd') /* --doh-insecure */
+        config->doh_insecure_ok = toggle;
+      else
+        config->insecure_ok = toggle;
       break;
     case 'K': /* parse config file */
       if(parseconfig(nextarg, global))
@@ -1990,7 +2015,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* This makes the FTP sessions use PORT instead of PASV */
       /* use <eth0> or <192.168.10.10> style addresses. Anything except
          this will make us try to get the "default" address.
-         NOTE: this is a changed behaviour since the released 4.1!
+         NOTE: this is a changed behavior since the released 4.1!
       */
       GetStr(&config->ftpport, nextarg);
       break;
@@ -2253,7 +2278,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->condtime = (curl_off_t)curl_getdate(nextarg, &now);
       if(-1 == config->condtime) {
         /* now let's see if it is a file name to get the time from instead! */
-        curl_off_t filetime = getfiletime(nextarg, config->global->errors);
+        curl_off_t filetime = getfiletime(nextarg, global);
         if(filetime >= 0) {
           /* pull the time out from the file */
           config->condtime = filetime;

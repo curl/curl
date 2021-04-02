@@ -30,7 +30,7 @@
 
 #define POSTLEN 40960
 
-static size_t myreadfunc(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t myreadfunc(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   static size_t total = POSTLEN;
   static char buf[1024];

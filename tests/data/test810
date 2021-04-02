@@ -11,7 +11,7 @@ SEARCH
 # Server-side
 <reply>
 <data>
-* SEARCH 1 123 456 810
+* SEARCH 1 123 456 %TESTNUMBER
 </data>
 </reply>
 
@@ -25,7 +25,7 @@ imap
 IMAP SEARCH for NEW messages
  </name>
  <command>
-imap://%HOSTIP:%IMAPPORT/810?NEW -u user:secret
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER?NEW -u user:secret
 </command>
 </client>
 
@@ -35,7 +35,7 @@ imap://%HOSTIP:%IMAPPORT/810?NEW -u user:secret
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 SELECT 810
+A003 SELECT %TESTNUMBER
 A004 SEARCH NEW
 A005 LOGOUT
 </protocol>

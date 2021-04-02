@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2019 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,8 +29,5 @@ int Curl_socketpair(int domain, int type, int protocol,
 #else
 #define Curl_socketpair(a,b,c,d) socketpair(a,b,c,d)
 #endif
-
-/* Defined here to allow specific build configs to disable it completely */
-#define USE_SOCKETPAIR 1
 
 #endif /* HEADER_CURL_SOCKETPAIR_H */

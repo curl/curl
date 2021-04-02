@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -20,29 +20,76 @@
 #
 ###########################################################################
 
-LIB_VAUTH_CFILES = vauth/cleartext.c vauth/cram.c vauth/digest.c             \
-  vauth/digest_sspi.c vauth/krb5_gssapi.c vauth/krb5_sspi.c vauth/ntlm.c     \
-  vauth/ntlm_sspi.c vauth/oauth2.c vauth/spnego_gssapi.c vauth/spnego_sspi.c \
+LIB_VAUTH_CFILES =      \
+  vauth/cleartext.c     \
+  vauth/cram.c          \
+  vauth/digest.c        \
+  vauth/digest_sspi.c   \
+  vauth/gsasl.c         \
+  vauth/krb5_gssapi.c   \
+  vauth/krb5_sspi.c     \
+  vauth/ntlm.c          \
+  vauth/ntlm_sspi.c     \
+  vauth/oauth2.c        \
+  vauth/spnego_gssapi.c \
+  vauth/spnego_sspi.c   \
   vauth/vauth.c
 
-LIB_VAUTH_HFILES = vauth/digest.h vauth/ntlm.h vauth/vauth.h
+LIB_VAUTH_HFILES =      \
+  vauth/digest.h        \
+  vauth/ntlm.h          \
+  vauth/vauth.h
 
-LIB_VTLS_CFILES = vtls/bearssl.c vtls/gskit.c vtls/gtls.c vtls/keylog.c  \
-  vtls/mbedtls.c vtls/mbedtls_threadlock.c vtls/mesalink.c vtls/nss.c    \
-  vtls/openssl.c vtls/schannel.c vtls/schannel_verify.c vtls/sectransp.c \
-  vtls/vtls.c vtls/wolfssl.c
+LIB_VTLS_CFILES =           \
+  vtls/bearssl.c            \
+  vtls/gskit.c              \
+  vtls/gtls.c               \
+  vtls/keylog.c             \
+  vtls/mbedtls.c            \
+  vtls/mbedtls_threadlock.c \
+  vtls/mesalink.c           \
+  vtls/nss.c                \
+  vtls/openssl.c            \
+  vtls/rustls.c             \
+  vtls/schannel.c           \
+  vtls/schannel_verify.c    \
+  vtls/sectransp.c          \
+  vtls/vtls.c               \
+  vtls/wolfssl.c
 
-LIB_VTLS_HFILES = vtls/bearssl.h vtls/gskit.h vtls/gtls.h vtls/keylog.h      \
-  vtls/mbedtls.h vtls/mbedtls_threadlock.h vtls/mesalink.h vtls/nssg.h       \
-  vtls/openssl.h vtls/schannel.h vtls/sectransp.h vtls/vtls.h vtls/wolfssl.h
+LIB_VTLS_HFILES =           \
+  vtls/bearssl.h            \
+  vtls/gskit.h              \
+  vtls/gtls.h               \
+  vtls/keylog.h             \
+  vtls/mbedtls.h            \
+  vtls/mbedtls_threadlock.h \
+  vtls/mesalink.h           \
+  vtls/nssg.h               \
+  vtls/openssl.h            \
+  vtls/rustls.h             \
+  vtls/schannel.h           \
+  vtls/sectransp.h          \
+  vtls/vtls.h               \
+  vtls/wolfssl.h
 
-LIB_VQUIC_CFILES = vquic/ngtcp2.c vquic/quiche.c vquic/vquic.c
+LIB_VQUIC_CFILES = \
+  vquic/ngtcp2.c   \
+  vquic/quiche.c   \
+  vquic/vquic.c
 
-LIB_VQUIC_HFILES = vquic/ngtcp2.h vquic/quiche.h vquic/vquic.h
+LIB_VQUIC_HFILES = \
+  vquic/ngtcp2.h   \
+  vquic/quiche.h   \
+  vquic/vquic.h
 
-LIB_VSSH_CFILES = vssh/libssh.c vssh/libssh2.c vssh/wolfssh.c
+LIB_VSSH_CFILES =  \
+  vssh/libssh.c    \
+  vssh/libssh2.c   \
+  vssh/wolfssh.c
 
-LIB_VSSH_HFILES = vssh/ssh.h
+LIB_VSSH_HFILES =  \
+  vssh/ssh.h
 
 LIB_CFILES =         \
   altsvc.c           \

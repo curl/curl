@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,7 +44,7 @@
 #endif
 #endif /* USE_MBEDTLS */
 
-#if defined(USE_GNUTLS_NETTLE)
+#if defined(USE_GNUTLS)
 
 #include <nettle/md4.h>
 
@@ -68,33 +68,6 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
   md4_digest(ctx, MD4_DIGEST_SIZE, result);
-}
-
-#elif defined(USE_GNUTLS)
-
-#include <gcrypt.h>
-
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
-
-typedef gcry_md_hd_t MD4_CTX;
-
-static void MD4_Init(MD4_CTX *ctx)
-{
-  gcry_md_open(ctx, GCRY_MD_MD4, 0);
-}
-
-static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
-{
-  gcry_md_write(*ctx, data, size);
-}
-
-static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
-{
-  memcpy(result, gcry_md_read(*ctx, 0), MD4_DIGEST_LENGTH);
-  gcry_md_close(*ctx);
 }
 
 #elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)

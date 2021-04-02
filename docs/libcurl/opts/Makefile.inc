@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -64,6 +64,7 @@ man_MANS =                                      \
   CURLINFO_REDIRECT_TIME.3                      \
   CURLINFO_REDIRECT_TIME_T.3                    \
   CURLINFO_REDIRECT_URL.3                       \
+  CURLINFO_REFERER.3                            \
   CURLINFO_REQUEST_SIZE.3                       \
   CURLINFO_RESPONSE_CODE.3                      \
   CURLINFO_RETRY_AFTER.3                        \
@@ -150,6 +151,9 @@ man_MANS =                                      \
   CURLOPT_DNS_SERVERS.3                         \
   CURLOPT_DNS_SHUFFLE_ADDRESSES.3               \
   CURLOPT_DNS_USE_GLOBAL_CACHE.3                \
+  CURLOPT_DOH_SSL_VERIFYHOST.3                  \
+  CURLOPT_DOH_SSL_VERIFYPEER.3                  \
+  CURLOPT_DOH_SSL_VERIFYSTATUS.3                \
   CURLOPT_DOH_URL.3                             \
   CURLOPT_EGDSOCKET.3                           \
   CURLOPT_ERRORBUFFER.3                         \

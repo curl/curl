@@ -28,8 +28,8 @@ other places of the code, just that the names should be logical,
 understandable and be named according to what they're used for. File-local
 functions should be made static. We like lower case names.
 
-See the [INTERNALS](INTERNALS.md) document on how we name non-exported
-library-global symbols.
+See the [INTERNALS](https://curl.se/dev/internals.html#symbols) document on
+how we name non-exported library-global symbols.
 
 ## Indenting
 

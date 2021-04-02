@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,14 +24,12 @@
 #include "curl_setup.h"
 
 typedef enum {
-  HTTPREQ_NONE, /* first in list */
   HTTPREQ_GET,
   HTTPREQ_POST,
   HTTPREQ_POST_FORM, /* we make a difference internally */
   HTTPREQ_POST_MIME, /* we make a difference internally */
   HTTPREQ_PUT,
-  HTTPREQ_HEAD,
-  HTTPREQ_LAST /* last in list */
+  HTTPREQ_HEAD
 } Curl_HttpReq;
 
 #ifndef CURL_DISABLE_HTTP
@@ -53,21 +51,27 @@ bool Curl_compareheader(const char *headerline,  /* line to check */
 
 char *Curl_copy_header_value(const char *header);
 
-char *Curl_checkProxyheaders(const struct connectdata *conn,
+char *Curl_checkProxyheaders(struct Curl_easy *data,
+                             const struct connectdata *conn,
                              const char *thisheader);
 #ifndef USE_HYPER
 CURLcode Curl_buffer_send(struct dynbuf *in,
-                          struct connectdata *conn,
+                          struct Curl_easy *data,
                           curl_off_t *bytes_written,
-                          size_t included_body_bytes,
+                          curl_off_t included_body_bytes,
                           int socketindex);
 #else
 #define Curl_buffer_send(a,b,c,d,e) CURLE_OK
 #endif
 
-CURLcode Curl_add_timecondition(const struct connectdata *conn,
-                                struct dynbuf *buf);
-CURLcode Curl_add_custom_headers(struct connectdata *conn,
+CURLcode Curl_add_timecondition(struct Curl_easy *data,
+#ifndef USE_HYPER
+                                struct dynbuf *req
+#else
+                                void *headers
+#endif
+  );
+CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                                  bool is_connect,
 #ifndef USE_HYPER
                                  struct dynbuf *req
@@ -81,7 +85,7 @@ CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
 
 void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
                       const char **method, Curl_HttpReq *);
-CURLcode Curl_http_useragent(struct Curl_easy *data, struct connectdata *conn);
+CURLcode Curl_http_useragent(struct Curl_easy *data);
 CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_http_target(struct Curl_easy *data, struct connectdata *conn,
                           struct dynbuf *req);
@@ -105,21 +109,20 @@ CURLcode Curl_http_resume(struct Curl_easy *data,
                           struct connectdata *conn,
                           Curl_HttpReq httpreq);
 CURLcode Curl_http_range(struct Curl_easy *data,
-                         struct connectdata *conn,
                          Curl_HttpReq httpreq);
 CURLcode Curl_http_firstwrite(struct Curl_easy *data,
                               struct connectdata *conn,
                               bool *done);
 
 /* protocol-specific functions set up to be called by the main engine */
-CURLcode Curl_http(struct connectdata *conn, bool *done);
-CURLcode Curl_http_done(struct connectdata *, CURLcode, bool premature);
-CURLcode Curl_http_connect(struct connectdata *conn, bool *done);
+CURLcode Curl_http(struct Curl_easy *data, bool *done);
+CURLcode Curl_http_done(struct Curl_easy *data, CURLcode, bool premature);
+CURLcode Curl_http_connect(struct Curl_easy *data, bool *done);
 
 /* These functions are in http.c */
-CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
+CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                               const char *auth);
-CURLcode Curl_http_auth_act(struct connectdata *conn);
+CURLcode Curl_http_auth_act(struct Curl_easy *data);
 
 /* If only the PICKNONE bit is set, there has been a round-trip and we
    selected to use no auth at all. Ie, we actively select no auth, as opposed
@@ -248,9 +251,16 @@ struct h2settings {
 struct http_conn {
 #ifdef USE_NGHTTP2
 #define H2_BINSETTINGS_LEN 80
-  nghttp2_session *h2;
   uint8_t binsettings[H2_BINSETTINGS_LEN];
   size_t  binlen; /* length of the binsettings data */
+
+  /* We associate the connnectdata struct with the connection, but we need to
+     make sure we can identify the current "driving" transfer. This is a
+     work-around for the lack of nghttp2_session_set_user_data() in older
+     nghttp2 versions that we want to support. (Added in 1.31.0) */
+  struct Curl_easy *trnsfr;
+
+  nghttp2_session *h2;
   Curl_send *send_underlying; /* underlying send Curl_send callback */
   Curl_recv *recv_underlying; /* underlying recv Curl_recv callback */
   char *inbuf; /* buffer to receive data from underlying socket */
@@ -285,11 +295,13 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 /**
  * Curl_http_output_auth() setups the authentication headers for the
  * host/proxy and the correct authentication
- * method. conn->data->state.authdone is set to TRUE when authentication is
+ * method. data->state.authdone is set to TRUE when authentication is
  * done.
  *
+ * @param data all information about the current transfer
  * @param conn all information about the current connection
  * @param request pointer to the request keyword
+ * @param httpreq is the request type
  * @param path pointer to the requested path
  * @param proxytunnel boolean if this is the request setting up a "proxy
  * tunnel"
@@ -297,8 +309,10 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
  * @returns CURLcode
  */
 CURLcode
-Curl_http_output_auth(struct connectdata *conn,
+Curl_http_output_auth(struct Curl_easy *data,
+                      struct connectdata *conn,
                       const char *request,
+                      Curl_HttpReq httpreq,
                       const char *path,
                       bool proxytunnel); /* TRUE if this is the request setting
                                             up the proxy tunnel */

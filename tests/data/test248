@@ -19,7 +19,7 @@ ftp
  <name>
 FTP upload time condition evaluates FALSE => upload anyway
  </name>
-<file name="log/test248.txt">
+<file name="log/test%TESTNUMBER.txt">
 data
     to
       see
@@ -28,7 +28,7 @@ works
   so does it?
 </file>
  <command>
-ftp://%HOSTIP:%FTPPORT/248 -T log/test248.txt -z "apr 1 2005 08:00:00"
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/test%TESTNUMBER.txt -z "apr 1 2005 08:00:00"
 </command>
 </client>
 
@@ -46,10 +46,10 @@ works
 USER anonymous
 PASS ftp@example.com
 PWD
-MDTM 248
+MDTM %TESTNUMBER
 EPSV
 TYPE I
-STOR 248
+STOR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

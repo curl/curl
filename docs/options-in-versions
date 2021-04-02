@@ -50,6 +50,8 @@
 --dns-ipv4-addr                      7.33.0
 --dns-ipv6-addr                      7.33.0
 --dns-servers                        7.33.0
+--doh-cert-status                    7.76.0
+--doh-insecure                       7.76.0
 --doh-url                            7.62.0
 --dump-header (-D)                   5.7
 --egd-file                           7.7
@@ -59,6 +61,7 @@
 --expect100-timeout                  7.47.0
 --fail (-f)                          4.0
 --fail-early                         7.52.0
+--fail-with-body                     7.76.0
 --false-start                        7.42.0
 --form (-F)                          5.0
 --form-string                        7.13.2

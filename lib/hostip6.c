@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,16 +62,15 @@
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */
-bool Curl_ipv6works(struct connectdata *conn)
+bool Curl_ipv6works(struct Curl_easy *data)
 {
-  if(conn) {
+  if(data) {
     /* the nature of most system is that IPv6 status doesn't come and go
        during a program's lifetime so we only probe the first time and then we
        have the info kept for fast re-use */
-    DEBUGASSERT(conn);
-    DEBUGASSERT(conn->data);
-    DEBUGASSERT(conn->data->multi);
-    return conn->data->multi->ipv6_works;
+    DEBUGASSERT(data);
+    DEBUGASSERT(data->multi);
+    return data->multi->ipv6_works;
   }
   else {
     int ipv6_works = -1;
@@ -82,7 +81,7 @@ bool Curl_ipv6works(struct connectdata *conn)
       ipv6_works = 0;
     else {
       ipv6_works = 1;
-      Curl_closesocket(NULL, s);
+      sclose(s);
     }
     return (ipv6_works>0)?TRUE:FALSE;
   }
@@ -92,10 +91,10 @@ bool Curl_ipv6works(struct connectdata *conn)
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.
  */
-bool Curl_ipvalid(struct connectdata *conn)
+bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
 {
   if(conn->ip_version == CURL_IPRESOLVE_V6)
-    return Curl_ipv6works(conn);
+    return Curl_ipv6works(data);
 
   return TRUE;
 }
@@ -128,7 +127,7 @@ static void dump_addrinfo(struct connectdata *conn,
  * memory we need to free after use. That memory *MUST* be freed with
  * Curl_freeaddrinfo(), nothing else.
  */
-struct Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
+struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
                                        const char *hostname,
                                        int port,
                                        int *waitp)
@@ -142,14 +141,11 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   char addrbuf[128];
 #endif
   int pf;
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  struct Curl_easy *data = conn->data;
-#endif
 
   *waitp = 0; /* synchronous response only */
 
   /* Check if a limited name resolve has been requested */
-  switch(conn->ip_version) {
+  switch(data->set.ipver) {
   case CURL_IPRESOLVE_V4:
     pf = PF_INET;
     break;
@@ -161,13 +157,13 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     break;
   }
 
-  if((pf != PF_INET) && !Curl_ipv6works(conn))
+  if((pf != PF_INET) && !Curl_ipv6works(data))
     /* The stack seems to be a non-IPv6 one */
     pf = PF_INET;
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
-  hints.ai_socktype = (conn->transport == TRNSPRT_TCP) ?
+  hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ?
     SOCK_STREAM : SOCK_DGRAM;
 
 #ifndef USE_RESOLVE_ON_IPS

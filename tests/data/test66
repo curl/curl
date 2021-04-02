@@ -15,6 +15,9 @@ no headers swsclose
 
 # Client-side
 <client>
+<features>
+!hyper
+</features>
 <server>
 http
 </server>
@@ -22,7 +25,7 @@ http
 HTTP GET without headers in the response
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/66 --http0.9
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http0.9
 </command>
 </client>
 
@@ -30,7 +33,7 @@ http://%HOSTIP:%HTTPPORT/66 --http0.9
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /66 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

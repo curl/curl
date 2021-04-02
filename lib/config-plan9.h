@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -173,7 +173,6 @@
 #define HAVE_STRCASECMP 1
 #define HAVE_STRDUP 1
 #define HAVE_STRING_H 1
-#define HAVE_STRNCASECMP 1
 #define HAVE_STRSTR 1
 #define HAVE_STRTOK_R 1
 #define HAVE_STRTOLL 1
@@ -202,7 +201,6 @@
 #define STRERROR_R_TYPE_ARG3 int
 
 #define TIME_WITH_SYS_TIME 1
-#define USE_BLOCKING_SOCKETS 1
 #define USE_MANUAL 1
 
 #define __attribute__(x)

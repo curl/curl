@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -446,7 +446,6 @@ dnl Set up variable with list of headers that must be
 dnl included when time.h is to be included.
 
 AC_DEFUN([CURL_INCLUDES_TIME], [
-AC_REQUIRE([AC_HEADER_TIME])dnl
 curl_includes_time="\
 /* includes start */
 #ifdef HAVE_SYS_TYPES_H
@@ -6687,90 +6686,6 @@ AC_DEFUN([CURL_CHECK_FUNC_STRICMP], [
   fi
 ])
 
-dnl CURL_CHECK_FUNC_STRNCASECMP
-dnl -------------------------------------------------
-dnl Verify if strncasecmp is available, prototyped, and
-dnl can be compiled. If all of these are true, and
-dnl usage has not been previously disallowed with
-dnl shell variable curl_disallow_strncasecmp, then
-dnl HAVE_STRNCASECMP will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_STRNCASECMP], [
-  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
-  #
-  tst_links_strncasecmp="unknown"
-  tst_proto_strncasecmp="unknown"
-  tst_compi_strncasecmp="unknown"
-  tst_allow_strncasecmp="unknown"
-  #
-  AC_MSG_CHECKING([if strncasecmp can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([strncasecmp])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_strncasecmp="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_strncasecmp="no"
-  ])
-  #
-  if test "$tst_links_strncasecmp" = "yes"; then
-    AC_MSG_CHECKING([if strncasecmp is prototyped])
-    AC_EGREP_CPP([strncasecmp],[
-      $curl_includes_string
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_strncasecmp="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_strncasecmp="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_strncasecmp" = "yes"; then
-    AC_MSG_CHECKING([if strncasecmp is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_string
-      ]],[[
-        if(0 != strncasecmp(0, 0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_strncasecmp="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_strncasecmp="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_strncasecmp" = "yes"; then
-    AC_MSG_CHECKING([if strncasecmp usage allowed])
-    if test "x$curl_disallow_strncasecmp" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_strncasecmp="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_strncasecmp="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if strncasecmp might be used])
-  if test "$tst_links_strncasecmp" = "yes" &&
-     test "$tst_proto_strncasecmp" = "yes" &&
-     test "$tst_compi_strncasecmp" = "yes" &&
-     test "$tst_allow_strncasecmp" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_STRNCASECMP, 1,
-      [Define to 1 if you have the strncasecmp function.])
-    curl_cv_func_strncasecmp="yes"
-  else
-    AC_MSG_RESULT([no])
-    curl_cv_func_strncasecmp="no"
-  fi
-])
-
 
 dnl CURL_CHECK_FUNC_STRNCMPI
 dnl -------------------------------------------------
@@ -7310,7 +7225,7 @@ AC_DEFUN([CURL_COVERAGE],[
 
   dnl check if enabled by argument
   AC_ARG_ENABLE(code-coverage,
-     AC_HELP_STRING([--enable-code-coverage], [Provide code coverage]),
+     AS_HELP_STRING([--enable-code-coverage], [Provide code coverage]),
      coverage="$enableval")
 
   dnl if not gcc switch off again

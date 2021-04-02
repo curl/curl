@@ -22,7 +22,7 @@ smtp
 SMTP RSET (CUSTOMREQUEST)
  </name>
  <command>
-smtp://%HOSTIP:%SMTPPORT/930 -X RSET -I
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER -X RSET -I
 </command>
 </client>
 
@@ -30,7 +30,7 @@ smtp://%HOSTIP:%SMTPPORT/930 -X RSET -I
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 930
+EHLO %TESTNUMBER
 RSET
 QUIT
 </protocol>

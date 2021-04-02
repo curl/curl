@@ -17,7 +17,7 @@ $! and the [.lib]config-vms.h file do two different tasks and that the
 $! filenames are slightly different.
 $!
 $!
-$! Copyright 2013 - 2020, John Malmberg
+$! Copyright 2013 - 2021, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -278,15 +278,9 @@ $write cvh "#ifdef CURL_DISABLE_LIBCURL_OPTION"
 $write cvh "#undef CURL_DISABLE_LIBCURL_OPTION"
 $write cvh "#endif"
 $write cvh "#ifndef __VAX"
-$write cvh "#ifdef CURL_DISABLE_NTLM"
-$write cvh "#undef CURL_DISABLE_NTLM"
-$write cvh "#endif"
 $write cvh "#else"
 $! NTLM needs long long or int64 support, missing from DECC C.
 $write cvh "#ifdef __DECC
-$write cvh "#ifndef CURL_DISABLE_NTLM"
-$write cvh "#define CURL_DISABLE_NTLM 1"
-$write cvh "#endif"
 $write cvh "#endif"
 $write cvh "#endif"
 $write cvh "#ifdef CURL_DISABLE_POP3"
@@ -330,9 +324,6 @@ $write cvh "#undef USE_WOLFSSL"
 $write cvh "#endif"
 $write cvh "#ifdef USE_GNUTLS"
 $write cvh "#undef USE_GNUTLS"
-$write cvh "#endif"
-$write cvh "#ifdef USE_GNUTLS_NETTLE"
-$write cvh "#undef USE_GNUTLS_NETTLE"
 $write cvh "#endif"
 $write cvh "#ifdef USE_LIBRTMP"
 $write cvh "#undef USE_LIBRTMP"

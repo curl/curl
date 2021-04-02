@@ -12,7 +12,7 @@ HTTPS-proxy
 # This is the HTTPS proxy response
 <connect>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
@@ -22,7 +22,7 @@ Content-Length: 0
 
 # This is the FTP server response. The Life and Adventures of Robinson Crusoe
 <data>
-I was born in the year 1632, in the city of York, of a good family, though not
+I was born in the year %TESTNUMBER, in the city of York, of a good family, though not
 of that country, myfather being a foreigner of Bremen, who settled first at
 Hull.  He got a good estate by merchandise,and leaving off his trade, lived
 afterwards at York, from whence he had married my mother, whoserelations were
@@ -52,7 +52,7 @@ https-proxy
 FTP through HTTPS-proxy, with connection re-use
  </name>
  <command>
--p -x https://%HOSTIP:%HTTPSPROXYPORT ftp://ftp.site.thru.https.proxy:%FTPPORT/1632 --proxy-insecure ftp://ftp.site.thru.https.proxy:%FTPPORT/16320002
+-p -x https://%HOSTIP:%HTTPSPROXYPORT ftp://ftp.site.thru.https.proxy:%FTPPORT/%TESTNUMBER --proxy-insecure ftp://ftp.site.thru.https.proxy:%FTPPORT/%TESTNUMBER0002
 </command>
 <features>
 http
@@ -93,11 +93,11 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 1632
-RETR 1632
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 EPSV
-SIZE 16320002
-RETR 16320002
+SIZE %TESTNUMBER0002
+RETR %TESTNUMBER0002
 QUIT
 </protocol>
 </verify>

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,8 +32,18 @@ struct hyptransfer {
   hyper_waker *write_waker;
   hyper_waker *read_waker;
   const hyper_executor *exec;
-  bool init;
+  hyper_task *endtask;
 };
+
+size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
+                       uint8_t *buf, size_t buflen);
+size_t Curl_hyper_send(void *userp, hyper_context *ctx,
+                       const uint8_t *buf, size_t buflen);
+CURLcode Curl_hyper_stream(struct Curl_easy *data,
+                           struct connectdata *conn,
+                           int *didwhat,
+                           bool *done,
+                           int select_res);
 
 CURLcode Curl_hyper_header(struct Curl_easy *data, hyper_headers *headers,
                            const char *line);

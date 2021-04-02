@@ -20,7 +20,7 @@ unittest
 internal hash create/destroy testing
  </name>
 <command>
-1305
+%TESTNUMBER
 </command>
 </client>
 </testcase>

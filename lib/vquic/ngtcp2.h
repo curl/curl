@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,6 +48,7 @@ struct quicsocket {
   ngtcp2_cid scid;
   uint32_t version;
   ngtcp2_settings settings;
+  ngtcp2_transport_params transport_params;
 #ifdef USE_OPENSSL
   SSL_CTX *sslctx;
   SSL *ssl;

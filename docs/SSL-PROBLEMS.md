@@ -23,8 +23,18 @@
 ## CA bundle missing intermediate certificates
 
   When using said CA bundle to verify a server cert, you will experience
-  problems if your CA cert does not have the certificates for the
-  intermediates in the whole trust chain.
+  problems if your CA store does not contain the certificates for the
+  intermediates if the server doesn't provide them.
+
+  The TLS protocol mandates that the intermediate certificates are sent in the
+  handshake, but as browsers have ways to survive or work around such
+  omissions, missing intermediates in TLS handshakes still happen that
+  browser-users won't notice.
+
+  Browsers work around this problem in two ways: they cache intermediate
+  certificates from previous transfers and some implement the TLS "AIA"
+  extension that lets the client explicitly download such cerfificates on
+  demand.
 
 ## Protocol version
 
@@ -36,7 +46,8 @@
   An additional complication can be that modern SSL libraries sometimes are
   built with support for older SSL and TLS versions disabled!
 
-  All versions of SSL are considered insecure and should be avoided. Use TLS.
+  All versions of SSL and the TLS versions before 1.2 are considered insecure
+  and should be avoided. Use TLS 1.2 or later.
 
 ## Ciphers
 

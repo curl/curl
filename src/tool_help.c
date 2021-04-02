@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -133,6 +133,9 @@ static const struct helptxt helptext[] = {
   {"-a, --append",
    "Append to target file when uploading",
    CURLHELP_FTP | CURLHELP_SFTP},
+  {"    --aws-sigv4 <provider1[:provider2[:region[:service]]]>",
+   "Use AWS V4 signature authentication",
+   CURLHELP_AUTH | CURLHELP_HTTP},
   {"    --basic",
    "Use HTTP Basic Authentication",
    CURLHELP_AUTH},
@@ -146,7 +149,7 @@ static const struct helptxt helptext[] = {
    "Client certificate file and password",
    CURLHELP_TLS},
   {"    --cert-status",
-   "Verify the status of the server certificate",
+   "Verify the status of the server cert via OCSP-staple",
    CURLHELP_TLS},
   {"    --cert-type <type>",
    "Certificate type (DER/PEM/ENG)",
@@ -181,9 +184,9 @@ static const struct helptxt helptext[] = {
   {"    --create-dirs",
    "Create necessary local directory hierarchy",
    CURLHELP_CURL},
-  {"    --create-file-mode",
-   "File mode for created files",
-   CURLHELP_SFTP | CURLHELP_SCP | CURLHELP_FILE},
+  {"    --create-file-mode <mode>",
+   "File mode (octal) for created files",
+   CURLHELP_SFTP | CURLHELP_SCP | CURLHELP_FILE | CURLHELP_UPLOAD},
   {"    --crlf",
    "Convert LF to CRLF in upload",
    CURLHELP_FTP | CURLHELP_SMTP},
@@ -238,6 +241,12 @@ static const struct helptxt helptext[] = {
   {"    --dns-servers <addresses>",
    "DNS server addrs to use",
    CURLHELP_DNS},
+  {"    --doh-cert-status",
+   "Verify the status of the DOH server cert via OCSP-staple",
+   CURLHELP_DNS | CURLHELP_TLS},
+  {"    --doh-insecure",
+   "Allow insecure DOH server connections",
+   CURLHELP_DNS | CURLHELP_TLS},
   {"    --doh-url <URL>",
    "Resolve host names over DOH",
    CURLHELP_DNS},
@@ -265,6 +274,9 @@ static const struct helptxt helptext[] = {
   {"    --fail-early",
    "Fail on first transfer error, do not continue",
    CURLHELP_CURL},
+  {"    --fail-with-body",
+   "Fail on HTTP errors but save the body",
+   CURLHELP_HTTP | CURLHELP_OUTPUT},
   {"    --false-start",
    "Enable TLS False Start",
    CURLHELP_TLS},
@@ -646,7 +658,7 @@ static const struct helptxt helptext[] = {
   {"    --request-target",
    "Specify the target for this request",
    CURLHELP_HTTP},
-  {"    --resolve <host:port:addr[,addr]...>",
+  {"    --resolve <[+]host:port:addr[,addr]...>",
    "Resolve the host+port to this address",
    CURLHELP_CONNECTION},
   {"    --retry <num>",
@@ -730,7 +742,7 @@ static const struct helptxt helptext[] = {
   {"-3, --sslv3",
    "Use SSLv3",
    CURLHELP_TLS},
-  {"    --stderr",
+  {"    --stderr <file>",
    "Where to redirect stderr",
    CURLHELP_VERBOSE},
   {"    --styled-output",
@@ -817,8 +829,6 @@ static const struct helptxt helptext[] = {
   {"-A, --user-agent <name>",
    "Send User-Agent <name> to server",
    CURLHELP_IMPORTANT | CURLHELP_HTTP},
-  {"    --aws-sigv4 <provider1[:provider2]>",
-   "Use HTTP AWS V4 Signature", CURLHELP_HTTP},
   {"-v, --verbose",
    "Make the operation more talkative",
    CURLHELP_IMPORTANT | CURLHELP_VERBOSE},
@@ -871,6 +881,7 @@ static const struct feat feats[] = {
   {"PSL",            CURL_VERSION_PSL},
   {"alt-svc",        CURL_VERSION_ALTSVC},
   {"HSTS",           CURL_VERSION_HSTS},
+  {"gsasl",          CURL_VERSION_GSASL},
 };
 
 static void print_category(curlhelp_t category)
@@ -878,7 +889,7 @@ static void print_category(curlhelp_t category)
   unsigned int i;
   for(i = 0; helptext[i].opt; ++i)
     if(helptext[i].categories & category) {
-      printf(" %-19s %s\n", helptext[i].opt, helptext[i].desc);
+      printf(" %-18s  %s\n", helptext[i].opt, helptext[i].desc);
     }
 }
 

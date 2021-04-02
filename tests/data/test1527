@@ -18,7 +18,7 @@ We-are: good
 </connect>
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -28,7 +28,7 @@ HTTP/1.1 200 OK
 We-are: good
 
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -42,13 +42,13 @@ http
 http-proxy
 </server>
 <tool>
-lib1527
+lib%TESTNUMBER
 </tool>
  <name>
 Check same headers are generated with CURLOPT_HEADEROPT == CURLHEADER_UNIFIED
  </name>
  <command>
- http://the.old.moo.1527:%HTTPPORT/1527 %HOSTIP:%PROXYPORT
+ http://the.old.moo.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 </command>
 <features>
 proxy
@@ -58,16 +58,16 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <proxy>
-CONNECT the.old.moo.1527:%HTTPPORT HTTP/1.1
-Host: the.old.moo.1527:%HTTPPORT
+CONNECT the.old.moo.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Proxy-Connection: Keep-Alive
 User-Agent: Http Agent
 Expect: 100-continue
 
 </proxy>
 <protocol>
-PUT /1527 HTTP/1.1
-Host: the.old.moo.1527:%HTTPPORT
+PUT /%TESTNUMBER HTTP/1.1
+Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Accept: */*
 User-Agent: Http Agent
 Expect: 100-continue

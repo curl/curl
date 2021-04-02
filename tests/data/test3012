@@ -11,14 +11,14 @@
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 Accept-Ranges: bytes
 Content-Length: 6
 Connection: close
-Content-Disposition: inline; filename="MMM3012MMM"
+Content-Disposition: inline; filename="MMM%TESTNUMBERMMM"
 Content-Type: text/html
 Funny-head: yesyes
 
@@ -39,7 +39,7 @@ http
 --output-dir with -J
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/this/is/the/3012 -OJ --output-dir %PWD/log
+http://%HOSTIP:%HTTPPORT/this/is/the/%TESTNUMBER -OJ --output-dir %PWD/log
 </command>
 </client>
 
@@ -47,13 +47,13 @@ http://%HOSTIP:%HTTPPORT/this/is/the/3012 -OJ --output-dir %PWD/log
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /this/is/the/3012 HTTP/1.1
+GET /this/is/the/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/MMM3012MMM">
+<file name="log/MMM%TESTNUMBERMMM">
 -foo-
 </file>
 </verify>

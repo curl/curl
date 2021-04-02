@@ -315,7 +315,7 @@ int main(void)
      */
 
     do {
-      int msgq = 0;;
+      int msgq = 0;
       m = curl_multi_info_read(multi_handle, &msgq);
       if(m && (m->msg == CURLMSG_DONE)) {
         CURL *e = m->easy_handle;

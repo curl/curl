@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -59,7 +59,7 @@
 # define DEBUG_OUT(x) Curl_nop_stmt
 #endif
 
-CURLcode Curl_input_ntlm(struct connectdata *conn,
+CURLcode Curl_input_ntlm(struct Curl_easy *data,
                          bool proxy,         /* if proxy or not */
                          const char *header) /* rest of the www-authenticate:
                                                 header */
@@ -68,6 +68,7 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
   struct ntlmdata *ntlm;
   curlntlm *state;
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
 
   ntlm = proxy ? &conn->proxyntlm : &conn->ntlm;
   state = proxy ? &conn->proxy_ntlm_state : &conn->http_ntlm_state;
@@ -79,7 +80,7 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
       header++;
 
     if(*header) {
-      result = Curl_auth_decode_ntlm_type2_message(conn->data, header, ntlm);
+      result = Curl_auth_decode_ntlm_type2_message(data, header, ntlm);
       if(result)
         return result;
 
@@ -87,17 +88,17 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
     }
     else {
       if(*state == NTLMSTATE_LAST) {
-        infof(conn->data, "NTLM auth restarted\n");
+        infof(data, "NTLM auth restarted\n");
         Curl_http_auth_cleanup_ntlm(conn);
       }
       else if(*state == NTLMSTATE_TYPE3) {
-        infof(conn->data, "NTLM handshake rejected\n");
+        infof(data, "NTLM handshake rejected\n");
         Curl_http_auth_cleanup_ntlm(conn);
         *state = NTLMSTATE_NONE;
         return CURLE_REMOTE_ACCESS_DENIED;
       }
       else if(*state >= NTLMSTATE_TYPE1) {
-        infof(conn->data, "NTLM handshake failure (internal error)\n");
+        infof(data, "NTLM handshake failure (internal error)\n");
         return CURLE_REMOTE_ACCESS_DENIED;
       }
 
@@ -111,7 +112,7 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
 /*
  * This is for creating ntlm header output
  */
-CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
+CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 {
   char *base64 = NULL;
   size_t len = 0;
@@ -131,8 +132,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   struct ntlmdata *ntlm;
   curlntlm *state;
   struct auth *authp;
-  struct Curl_easy *data = conn->data;
-
+  struct connectdata *conn = data->conn;
 
   DEBUGASSERT(conn);
   DEBUGASSERT(data);
@@ -140,28 +140,28 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
     allocuserpwd = &data->state.aptr.proxyuserpwd;
-    userp = conn->http_proxy.user;
-    passwdp = conn->http_proxy.passwd;
-    service = conn->data->set.str[STRING_PROXY_SERVICE_NAME] ?
-              conn->data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
+    userp = data->state.aptr.proxyuser;
+    passwdp = data->state.aptr.proxypasswd;
+    service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
+      data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
     hostname = conn->http_proxy.host.name;
     ntlm = &conn->proxyntlm;
     state = &conn->proxy_ntlm_state;
-    authp = &conn->data->state.authproxy;
+    authp = &data->state.authproxy;
 #else
     return CURLE_NOT_BUILT_IN;
 #endif
   }
   else {
     allocuserpwd = &data->state.aptr.userpwd;
-    userp = conn->user;
-    passwdp = conn->passwd;
-    service = conn->data->set.str[STRING_SERVICE_NAME] ?
-              conn->data->set.str[STRING_SERVICE_NAME] : "HTTP";
+    userp = data->state.aptr.user;
+    passwdp = data->state.aptr.passwd;
+    service = data->set.str[STRING_SERVICE_NAME] ?
+      data->set.str[STRING_SERVICE_NAME] : "HTTP";
     hostname = conn->host.name;
     ntlm = &conn->ntlm;
     state = &conn->http_ntlm_state;
-    authp = &conn->data->state.authhost;
+    authp = &data->state.authhost;
   }
   authp->done = FALSE;
 
@@ -188,7 +188,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
     /* Create a type-1 message */
-    result = Curl_auth_create_ntlm_type1_message(conn->data, userp, passwdp,
+    result = Curl_auth_create_ntlm_type1_message(data, userp, passwdp,
                                                  service, hostname,
                                                  ntlm, &base64,
                                                  &len);
@@ -210,7 +210,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
 
   case NTLMSTATE_TYPE2:
     /* We already received the type-2 message, create a type-3 message */
-    result = Curl_auth_create_ntlm_type3_message(conn->data, userp, passwdp,
+    result = Curl_auth_create_ntlm_type3_message(data, userp, passwdp,
                                                  ntlm, &base64, &len);
     if(result)
       return result;

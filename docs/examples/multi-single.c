@@ -40,7 +40,7 @@
 /* Portable sleep for platforms other than Windows. */
 #define WAITMS(x)                               \
   struct timeval wait = { 0, (x) * 1000 };      \
-  (void)select(0, NULL, NULL, NULL, &wait);
+  (void)select(0, NULL, NULL, NULL, &wait)
 #endif
 
 /*

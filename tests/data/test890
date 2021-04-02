@@ -32,7 +32,7 @@ pop3
 POP3 OAuth 2.0 (OAUTHBEARER) failure as continuation with initial response
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/890 -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir
 </command>
 </client>
 

@@ -11,7 +11,7 @@ HTTP GET
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
 Connection: close
 Content-Type: text/html
@@ -30,7 +30,7 @@ http
 HTTP GET -w remote_ip and -w remote_port
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1223 -w 'IP %{remote_ip} and PORT %{remote_port}\n'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w 'IP %{remote_ip} and PORT %{remote_port}\n'
 </command>
 </client>
 
@@ -38,7 +38,7 @@ http://%HOSTIP:%HTTPPORT/1223 -w 'IP %{remote_ip} and PORT %{remote_port}\n'
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1223 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
@@ -46,7 +46,7 @@ Accept: */*
 </protocol>
 <stdout>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
 Connection: close
 Content-Type: text/html

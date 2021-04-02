@@ -10,7 +10,7 @@ globbing
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -34,7 +34,7 @@ http
 HTTP GET
  </name>
  <command option="no-output">
-http://%HOSTIP:%HTTPPORT/1176 -o 'log/base-#0'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o 'log/base-#0'
 </command>
 </client>
 
@@ -42,7 +42,7 @@ http://%HOSTIP:%HTTPPORT/1176 -o 'log/base-#0'
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1176 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
@@ -50,7 +50,7 @@ Accept: */*
 </protocol>
 <file name="log/base-#0">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"

@@ -12,7 +12,7 @@ FORM
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
@@ -28,7 +28,7 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib650
+lib%TESTNUMBER
 </tool>
 
  <name>
@@ -38,9 +38,9 @@ HTTP formpost using form API
  Some data from stdin
 </stdin>
  <command>
-http://%HOSTIP:%HTTPPORT/650 log/test650.filedata
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER log/test%TESTNUMBER.filedata
 </command>
-<file name="log/test650.filedata">
+<file name="log/test%TESTNUMBER.filedata">
 This is data from a file.
 </file>
 </client>
@@ -56,7 +56,7 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 # boundary string and since 5 of them are in the body contents, we see
 # (5*12) == 60 bytes less
 <protocol>
-POST /650 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked
@@ -80,13 +80,13 @@ Content-Disposition: form-data; name="multifile"
 Content-Type: multipart/mixed; boundary=----------------------------
 
 ------------------------------
-Content-Disposition: attachment; filename="test650.filedata"
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
 Content-Type: application/octet-stream
 
 This is data from a file.
 
 ------------------------------
-Content-Disposition: attachment; filename="test650.filedata"
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
 Content-Type: text/whatever
 
 
@@ -94,7 +94,7 @@ a5
 This is data from a file.
 
 ------------------------------
-Content-Disposition: attachment; filename="test650.filedata"
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
 Content-Type: text/whatever
 
 
