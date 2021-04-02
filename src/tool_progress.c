@@ -318,4 +318,12 @@ void progress_finalize(struct per_transfer *per)
   /* get the numbers before this transfer goes away */
   all_dlalready += per->dlnow;
   all_ulalready += per->ulnow;
+  if(!per->dltotal_added) {
+    all_dltotal += per->dltotal;
+    per->dltotal_added = TRUE;
+  }
+  if(!per->ultotal_added) {
+    all_ultotal += per->ultotal;
+    per->ultotal_added = TRUE;
+  }
 }
