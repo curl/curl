@@ -47,9 +47,8 @@
 #define USE_NTRESPONSES
 
 /* Define USE_NTLM2SESSION in order to make the type-3 message include the
-   NTLM2Session response message, requires USE_NTRESPONSES defined to 1 and
-   MD5 support */
-#if defined(USE_NTRESPONSES) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+   NTLM2Session response message, requires USE_NTRESPONSES defined to 1 */
+#if defined(USE_NTRESPONSES)
 #define USE_NTLM2SESSION
 #endif
 
