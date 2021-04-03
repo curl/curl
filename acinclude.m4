@@ -2580,14 +2580,13 @@ TEST EINVAL TEST
 ])
 
 
-dnl CURL_MAC_CFLAGS
+dnl CURL_DARWIN_CFLAGS
 dnl
-dnl Check if -mmacosx-version-min, -miphoneos-version-min or any
-dnl similar are set manually, otherwise do. And set
-dnl -Werror=partial-availability.
+dnl Set -Werror=partial-availability to detect possible breaking code
+dnl with very low deployment targets.
 dnl
 
-AC_DEFUN([CURL_MAC_CFLAGS], [
+AC_DEFUN([CURL_DARWIN_CFLAGS], [
 
   tst_cflags="no"
   case $host_os in
@@ -2596,28 +2595,10 @@ AC_DEFUN([CURL_MAC_CFLAGS], [
       ;;
   esac
 
-  AC_MSG_CHECKING([for good-to-use Mac CFLAGS])
+  AC_MSG_CHECKING([for good-to-use Darwin CFLAGS])
   AC_MSG_RESULT([$tst_cflags]);
 
   if test "$tst_cflags" = "yes"; then
-    AC_MSG_CHECKING([for *version-min set by user])
-    min=""
-    if test -n "$IPHONEOS_DEPLOYMENT_TARGET"; then
-      var="IPHONEOS_DEPLOYMENT_TARGET"
-    elif test -n "$MACOSX_DEPLOYMENT_TARGET"; then
-      var="MACOSX_DEPLOYMENT_TARGET"
-    elif test -z "$(echo $CFLAGS $CC | grep m.*os.*-version-min)"; then
-      min="-mmacosx-version-min=10.8"
-      CFLAGS="$CFLAGS $min"
-    else
-      var="CFLAGS or CC"
-    fi
-    if test -z "$min"; then
-      AC_MSG_RESULT([set by user in $var])
-    else
-      AC_MSG_RESULT([$min set])
-    fi
-
     old_CFLAGS=$CFLAGS
     CFLAGS="$CFLAGS -Werror=partial-availability"
     AC_MSG_CHECKING([whether $CC accepts -Werror=partial-availability])
