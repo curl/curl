@@ -417,12 +417,12 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       result = Curl_client_write(data, CLIENTWRITE_HEADER, header, 0);
       if(result)
         return result;
-    }
 
-    result = Curl_client_write(data, CLIENTWRITE_HEADER,
-                               (char *)"Accept-ranges: bytes\r\n", 0);
-    if(result)
-      return result;
+      result = Curl_client_write(data, CLIENTWRITE_HEADER,
+                                 (char *)"Accept-ranges: bytes\r\n", 0);
+      if(result != CURLE_OK)
+        return result;
+    }
 
     filetime = (time_t)statbuf.st_mtime;
     result = Curl_gmtime(filetime, &buffer);
@@ -464,18 +464,23 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     data->state.resume_from += (curl_off_t)statbuf.st_size;
   }
 
-  if(data->state.resume_from <= expected_size)
-    expected_size -= data->state.resume_from;
-  else {
-    failf(data, "failed to resume file:// transfer");
-    return CURLE_BAD_DOWNLOAD_RESUME;
+  if(data->state.resume_from > 0) {
+    /* We check explicitly if we have a start offset, because
+     * expected_size may be -1 if we don't know how large the file is,
+     * in which case we should not adjust it. */
+    if(data->state.resume_from <= expected_size)
+      expected_size -= data->state.resume_from;
+    else {
+      failf(data, "failed to resume file:// transfer");
+      return CURLE_BAD_DOWNLOAD_RESUME;
+    }
   }
 
   /* A high water mark has been specified so we obey... */
   if(data->req.maxdownload > 0)
     expected_size = data->req.maxdownload;
 
-  if(!fstated || (expected_size == 0))
+  if(!fstated || (expected_size <= 0))
     size_known = FALSE;
   else
     size_known = TRUE;
@@ -484,7 +489,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
      this is both more efficient than the former call to download() and
      it avoids problems with select() and recv() on file descriptors
      in Winsock */
-  if(fstated)
+  if(size_known)
     Curl_pgrsSetDownloadSize(data, expected_size);
 
   if(data->state.resume_from) {

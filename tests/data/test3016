@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
+FILE
 </keywords>
 </info>
 
@@ -13,8 +14,12 @@ HTTP GET
 file
 </server>
 <name>
-GET a file:// path
+GET a directory using file://
 </name>
+<!-- doesn't work on win32, see #6379 -->
+<features>
+!win32
+</features>
 <command>
 file://%PWD/
 </command>
