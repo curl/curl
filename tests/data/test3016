@@ -1,0 +1,29 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+file
+</server>
+<name>
+GET a file:// path
+</name>
+<command>
+file://%PWD/
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
