@@ -411,14 +411,15 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
     offsetof(curl_version_info_data, cainfo),
     offsetof(curl_version_info_data, capath),
     offsetof(curl_version_info_data, zstd_version),
-    offsetof(curl_version_info_data, hyper_version)
+    offsetof(curl_version_info_data, hyper_version),
+    offsetof(curl_version_info_data, gsasl_version)
   };
 
   /* The assertion below is possible, because although the second operand
      is an enum member, the first is a #define. In that case, the OS/400 C
      compiler seems to compare string values after substitution. */
 
-#if CURLVERSION_NOW != CURLVERSION_NINTH
+#if CURLVERSION_NOW != CURLVERSION_TENTH
 #error curl_version_info_data structure has changed: upgrade this procedure.
 #endif
 
