@@ -549,49 +549,52 @@ cleanup:
   return rc;
 }
 
-#define MOVE_TO_ERROR_STATE(_r) { \
+#define MOVE_TO_ERROR_STATE(_r) do { \
   state(data, SSH_SESSION_DISCONNECT); \
   sshc->actualcode = _r; \
   rc = SSH_ERROR; \
-  break; \
-}
+} while(0); \
+break
 
-#define MOVE_TO_SFTP_CLOSE_STATE() { \
+#define MOVE_TO_SFTP_CLOSE_STATE() do { \
   state(data, SSH_SFTP_CLOSE); \
   sshc->actualcode = sftp_error_to_CURLE(sftp_get_error(sshc->sftp_session)); \
   rc = SSH_ERROR; \
-  break; \
-}
+} while(0); \
+break
 
-#define MOVE_TO_LAST_AUTH \
+#define MOVE_TO_LAST_AUTH do { \
   if(sshc->auth_methods & SSH_AUTH_METHOD_PASSWORD) { \
     rc = SSH_OK; \
     state(data, SSH_AUTH_PASS_INIT); \
-    break; \
   } \
   else { \
     MOVE_TO_ERROR_STATE(CURLE_LOGIN_DENIED); \
-  }
+  } \
+} while(0); \
+break
 
-#define MOVE_TO_TERTIARY_AUTH \
+#define MOVE_TO_TERTIARY_AUTH do { \
   if(sshc->auth_methods & SSH_AUTH_METHOD_INTERACTIVE) { \
     rc = SSH_OK; \
     state(data, SSH_AUTH_KEY_INIT); \
-    break; \
   } \
   else { \
     MOVE_TO_LAST_AUTH; \
-  }
+  } \
+} while(0); \
+break
 
-#define MOVE_TO_SECONDARY_AUTH \
+#define MOVE_TO_SECONDARY_AUTH do { \
   if(sshc->auth_methods & SSH_AUTH_METHOD_GSSAPI_MIC) { \
     rc = SSH_OK; \
     state(data, SSH_AUTH_GSSAPI); \
-    break; \
   } \
   else { \
     MOVE_TO_TERTIARY_AUTH; \
-  }
+  } \
+} while(0); \
+break
 
 static
 int myssh_auth_interactive(struct connectdata *conn)
