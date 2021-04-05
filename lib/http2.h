@@ -29,7 +29,7 @@
 
 /* value for MAX_CONCURRENT_STREAMS we use until we get an updated setting
    from the peer */
-#define DEFAULT_MAX_CONCURRENT_STREAMS 13
+#define DEFAULT_MAX_CONCURRENT_STREAMS 100
 
 /*
  * Store nghttp2 version info in this buffer, Prefix with a space.  Return
