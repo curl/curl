@@ -358,7 +358,8 @@ static CURLcode CONNECT(struct Curl_easy *data,
           break;
         }
         else if(gotbytes <= 0) {
-          if(data->set.proxyauth && data->state.authproxy.avail) {
+          if(data->set.proxyauth && data->state.authproxy.avail &&
+             data->state.aptr.proxyuserpwd) {
             /* proxy auth was requested and there was proxy auth available,
                then deem this as "mere" proxy disconnect */
             conn->bits.proxy_connect_closed = TRUE;
