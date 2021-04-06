@@ -53,11 +53,15 @@
 #endif
 
 /* Define USE_NTLM_V2 in order to allow the type-3 message to include the
-   LMv2 and NTLMv2 response messages, requires USE_NTRESPONSES defined to 1
-   and support for 64-bit integers. */
-#if defined(USE_NTRESPONSES) && (SIZEOF_CURL_OFF_T > 4)
+   LMv2 and NTLMv2 response messages, requires USE_NTRESPONSES defined to 1 */
+#if defined(USE_NTRESPONSES)
 #define USE_NTLM_V2
 #endif
+
+/* Helpers to generate function byte arguments in little endian order */
+#define SHORTPAIR(x) ((int)((x) & 0xff)), ((int)(((x) >> 8) & 0xff))
+#define LONGQUARTET(x) ((int)((x) & 0xff)), ((int)(((x) >> 8) & 0xff)), \
+  ((int)(((x) >> 16) & 0xff)), ((int)(((x) >> 24) & 0xff))
 
 void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,

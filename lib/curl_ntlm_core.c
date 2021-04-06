@@ -513,6 +513,56 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
 
 #if defined(USE_NTLM_V2) && !defined(USE_WINDOWS_SSPI)
 
+/* Timestamp in tenths of a microsecond since January 1, 1601 00:00:00 UTC. */
+struct ms_filetime {
+  unsigned int dwLowDateTime;
+  unsigned int dwHighDateTime;
+};
+
+/* Convert a time_t to an MS FILETIME (MS-DTYP section 2.3.3). */
+static void time2filetime(struct ms_filetime *ft, time_t t)
+{
+#if SIZEOF_TIME_T > 4
+  t = (t + CURL_OFF_T_C(11644473600)) * 10000000;
+  ft->dwLowDateTime = (unsigned int) (t & 0xFFFFFFFF);
+  ft->dwHighDateTime = (unsigned int) (t >> 32);
+#else
+  unsigned int r, s;
+  unsigned int i;
+
+  ft->dwLowDateTime = t & 0xFFFFFFFF;
+  ft->dwHighDateTime = 0;
+
+# ifndef HAVE_TIME_T_UNSIGNED
+  /* Extend sign if needed. */
+  if(ft->dwLowDateTime & 0x80000000)
+    ft->dwHighDateTime = ~0;
+# endif
+
+  /* Bias seconds to Jan 1, 1601.
+     134774 days = 11644473600 seconds = 0x2B6109100 */
+  r = ft->dwLowDateTime;
+  ft->dwLowDateTime = (ft->dwLowDateTime + 0xB6109100U) & 0xFFFFFFFF;
+  ft->dwHighDateTime += ft->dwLowDateTime < r? 0x03: 0x02;
+
+  /* Convert to tenths of microseconds. */
+  ft->dwHighDateTime *= 10000000;
+  i = 32;
+  do {
+    i -= 8;
+    s = ((ft->dwLowDateTime >> i) & 0xFF) * (10000000 - 1);
+    r = (s << i) & 0xFFFFFFFF;
+    s >>= 1;   /* Split shift to avoid width overflow. */
+    s >>= 31 - i;
+    ft->dwLowDateTime = (ft->dwLowDateTime + r) & 0xFFFFFFFF;
+    if(ft->dwLowDateTime < r)
+      s++;
+    ft->dwHighDateTime += s;
+  } while(i);
+  ft->dwHighDateTime &= 0xFFFFFFFF;
+#endif
+}
+
 /* This creates the NTLMv2 hash by using NTLM hash as the key and Unicode
  * (uppercase UserName + Domain) as the data
  */
@@ -586,22 +636,18 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   unsigned int len = 0;
   unsigned char *ptr = NULL;
   unsigned char hmac_output[HMAC_MD5_LENGTH];
-  curl_off_t tw;
+  struct ms_filetime tw;
 
   CURLcode result = CURLE_OK;
-
-#if SIZEOF_CURL_OFF_T < 8
-#error "this section needs 64bit support to work"
-#endif
 
   /* Calculate the timestamp */
 #ifdef DEBUGBUILD
   char *force_timestamp = getenv("CURL_FORCETIME");
   if(force_timestamp)
-    tw = CURL_OFF_T_C(11644473600) * 10000000;
+    time2filetime(&tw, (time_t) 0);
   else
 #endif
-    tw = ((curl_off_t)time(NULL) + CURL_OFF_T_C(11644473600)) * 10000000;
+    time2filetime(&tw, time(NULL));
 
   /* Calculate the response len */
   len = HMAC_MD5_LENGTH + NTLMv2_BLOB_LEN;
@@ -613,13 +659,14 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 
   /* Create the BLOB structure */
   msnprintf((char *)ptr + HMAC_MD5_LENGTH, NTLMv2_BLOB_LEN,
-            "%c%c%c%c"   /* NTLMv2_BLOB_SIGNATURE */
-            "%c%c%c%c",  /* Reserved = 0 */
+            "%c%c%c%c"           /* NTLMv2_BLOB_SIGNATURE */
+            "%c%c%c%c"           /* Reserved = 0 */
+            "%c%c%c%c%c%c%c%c",  /* Timestamp */
             NTLMv2_BLOB_SIGNATURE[0], NTLMv2_BLOB_SIGNATURE[1],
             NTLMv2_BLOB_SIGNATURE[2], NTLMv2_BLOB_SIGNATURE[3],
-            0, 0, 0, 0);
+            0, 0, 0, 0,
+            LONGQUARTET(tw.dwLowDateTime), LONGQUARTET(tw.dwHighDateTime));
 
-  Curl_write64_le(tw, ptr + 24);
   memcpy(ptr + 32, challenge_client, 8);
   memcpy(ptr + 44, ntlm->target_info, ntlm->target_info_len);
 
