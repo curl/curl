@@ -873,8 +873,10 @@ static void qs_disconnect(struct quicsocket *qs)
 #endif
   qs->ssl = NULL;
 #ifdef USE_GNUTLS
-  if(qs->cred)
+  if(qs->cred) {
     gnutls_certificate_free_credentials(qs->cred);
+    qs->cred = NULL;
+  }
 #endif
   for(i = 0; i < 3; i++)
     Curl_safefree(qs->crypto_data[i].buf);
