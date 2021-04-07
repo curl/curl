@@ -214,24 +214,6 @@ if (sizeof (bool *) )
 #include <float.h>
 int main() { return 0; }
 #endif
-#ifdef RETSIGTYPE_TEST
-#include <sys/types.h>
-#include <signal.h>
-#ifdef signal
-# undef signal
-#endif
-#ifdef __cplusplus
-extern "C" void (*signal (int, void (*)(int)))(int);
-#else
-void (*signal ()) ();
-#endif
-
-int
-main ()
-{
-  return 0;
-}
-#endif
 #ifdef HAVE_INET_NTOA_R_DECL
 #include <arpa/inet.h>
 

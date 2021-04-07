@@ -351,15 +351,6 @@ typedef int sig_atomic_t;
 
 
 /*
- * Default return type for signal handlers.
- */
-
-#ifndef RETSIGTYPE
-#define RETSIGTYPE void
-#endif
-
-
-/*
  * Macro used to include code only in debug builds.
  */
 

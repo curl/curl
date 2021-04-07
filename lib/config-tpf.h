@@ -578,9 +578,6 @@
 /* a suitable file to read random data from */
 /* #undef RANDOM_FILE */
 
-/* Define as the return type of signal handlers (`int' or `void'). */
-#define RETSIGTYPE void
-
 /* Define to the type of arg 1 for `select'. */
 #define SELECT_TYPE_ARG1 int
 

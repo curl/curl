@@ -769,9 +769,6 @@
 /* Define to the function return type for recv. */
 #define RECV_TYPE_RETV int
 
-/* Define as the return type of signal handlers (`int' or `void'). */
-#define RETSIGTYPE void
-
 /* Define to the type qualifier of arg 5 for select. */
 #define SELECT_QUAL_ARG5
 

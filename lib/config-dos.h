@@ -84,7 +84,6 @@
 
 #define NEED_MALLOC_H          1
 
-#define RETSIGTYPE             void
 #define SIZEOF_INT             4
 #define SIZEOF_LONG            4
 #define SIZEOF_LONG_DOUBLE     16

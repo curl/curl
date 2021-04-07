@@ -631,7 +631,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
  * within a signal handler which is nonportable and could lead to problems.
  */
 static
-RETSIGTYPE alarmfunc(int sig)
+void alarmfunc(int sig)
 {
   /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
   (void)sig;

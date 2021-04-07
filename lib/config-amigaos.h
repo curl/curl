@@ -103,7 +103,6 @@
 #define PACKAGE_VERSION "-"
 #define CURL_CA_BUNDLE "s:curl-ca-bundle.crt"
 
-#define RETSIGTYPE void
 #define SELECT_TYPE_ARG1 int
 #define SELECT_TYPE_ARG234 (fd_set *)
 #define SELECT_TYPE_ARG5 (struct timeval *)

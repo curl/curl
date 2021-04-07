@@ -1855,16 +1855,6 @@ $	    write tf "#endif"
 $	    goto cfgh_in_loop1
 $	endif
 $!
-$!	Process RETSIGTYPE directive
-$!----------------------------------
-$	if key2 .eqs. "RETSIGTYPE"
-$	then
-$	    write tf "#ifndef RETSIGTYPE"
-$	    write tf "#define RETSIGTYPE void"
-$	    write tf "#endif"
-$	    goto cfgh_in_loop1
-$	endif
-$!
 $!	Process STDC_HEADERS (SAMBA!)
 $!---------------------------
 $	if key2 .eqs. "STDC_HEADERS"
