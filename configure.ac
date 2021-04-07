@@ -4277,7 +4277,6 @@ AC_CHECK_HEADERS(
         sgtty.h \
         fcntl.h \
         alloca.h \
-        time.h \
         io.h \
         pwd.h \
         utime.h \
