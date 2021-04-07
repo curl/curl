@@ -876,9 +876,6 @@
 /* Define to the function return type for recv. */
 #cmakedefine RECV_TYPE_RETV ${RECV_TYPE_RETV}
 
-/* Define as the return type of signal handlers (`int' or `void'). */
-#cmakedefine RETSIGTYPE ${RETSIGTYPE}
-
 /* Define to the type qualifier of arg 5 for select. */
 #cmakedefine SELECT_QUAL_ARG5 ${SELECT_QUAL_ARG5}
 

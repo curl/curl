@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -543,7 +543,7 @@ long timediff(struct timeval newer, struct timeval older)
 
 /* vars used to keep around previous signal handlers */
 
-typedef RETSIGTYPE (*SIGHANDLER_T)(int);
+typedef void (*SIGHANDLER_T)(int);
 
 #ifdef SIGHUP
 static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
@@ -591,7 +591,7 @@ HANDLE exit_event = NULL;
  * The first time this is called it will set got_exit_signal to one and
  * store in exit_signal the signal that triggered its execution.
  */
-static RETSIGTYPE exit_signal_handler(int signum)
+static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
   logmsg("exit_signal_handler: %d", signum);

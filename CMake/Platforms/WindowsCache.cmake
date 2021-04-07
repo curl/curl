@@ -132,7 +132,6 @@ if(NOT UNIX)
       set(HAVE_GETADDRINFO 0)
     endif()
     set(STDC_HEADERS 1)
-    set(RETSIGTYPE_TEST 1)
 
     set(HAVE_SIGACTION 0)
     set(HAVE_MACRO_SIGSETJMP 0)

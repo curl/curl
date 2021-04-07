@@ -28,7 +28,7 @@ $!
 $! This procedure may not guess the options correctly for all architectures,
 $! and is a work in progress.
 $!
-$! Copyright 2011 - 2020, John Malmberg
+$! Copyright 2011 - 2021, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -1851,16 +1851,6 @@ $	if key2 .eqs. "restrict"
 $	then
 $	    write tf "#ifndef restrict"
 $	    write tf "#define restrict __restrict"
-$	    write tf "#endif"
-$	    goto cfgh_in_loop1
-$	endif
-$!
-$!	Process RETSIGTYPE directive
-$!----------------------------------
-$	if key2 .eqs. "RETSIGTYPE"
-$	then
-$	    write tf "#ifndef RETSIGTYPE"
-$	    write tf "#define RETSIGTYPE void"
 $	    write tf "#endif"
 $	    goto cfgh_in_loop1
 $	endif
