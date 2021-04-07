@@ -4,7 +4,7 @@ curl and libcurl 7.76.1
  Command line options:         240
  curl_easy_setopt() options:   288
  Public functions in libcurl:  85
- Contributors:                 2356
+ Contributors:                 2362
 
 This release includes the following changes:
 
@@ -12,9 +12,16 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o file: support GETing directories again [10]
+ o h2: allow 100 streams by default [9]
+ o hostip: fix builds that disable all asynchronous DNS [1]
+ o http_proxy: only loop on 407 + close if we have credentials [8]
+ o libssh: get rid of PATH_MAX [7]
+ o ngtcp2+gnutls: clear credentials when freed [5]
+ o openssl: fix CURLOPT_SSLCERT_BLOB without CURLOPT_SSLCERT_KEY [2]
  o TLS: fix HTTP/2 selection [3]
- o hostip: Fix for builds that disable all asynchronous DNS [1]
- o openssl: Fix CURLOPT_SSLCERT_BLOB without CURLOPT_SSLCERT_KEY [2]
+ o tool_progress: fix progress meter final update in parallel mode [6]
+ o typecheck-gcc: make the ssl-ctx-cb check use SSL_CTX pointers [4]
 
 This release includes the following known bugs:
 
@@ -23,12 +30,21 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Benbuck Nason, Christian Schmitz, Daniel Stenberg, Gilles Vollant,
-  Kenneth Davidson, Ray Satiro, romamik om github,
-  (7 contributors)
+  Benbuck Nason, Cesar Eduardo Barros, Cherish98 on github, Christian Schmitz,
+  Daniel Kurečka, Daniel Stenberg, Emil Engler, Gilles Vollant,
+  Kenneth Davidson, locpyl-tidnyd on github, Luke Granger-Brown, Ray Satiro,
+  romamik om github, Viktor Szakats,
+  (14 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=6831
  [2] = https://curl.se/bug/?i=6816
  [3] = https://curl.se/bug/?i=6825
+ [4] = https://curl.se/bug/?i=6818
+ [5] = https://curl.se/bug/?i=6824
+ [6] = https://curl.se/bug/?i=6840
+ [7] = https://curl.se/bug/?i=6829
+ [8] = https://curl.se/bug/?i=6828
+ [9] = https://curl.se/bug/?i=6852
+ [10] = https://curl.se/bug/?i=6845
