@@ -262,13 +262,12 @@ no longer support the legacy handshakes and algorithms used by those
 versions. If you will be using curl in one of those earlier versions of
 Windows you should choose another SSL backend such as OpenSSL.
 
-# Apple iOS and macOS
+# Apple Platforms (macOS, iOS, tvOS, watchOS, and their simulator counterparts)
 
 On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
 implementation, Secure Transport, instead of OpenSSL. To build with Secure
-Transport for SSL/TLS, use the configure option `--with-secure-transport`. (It
-is not necessary to use the option `--without-ssl`.) This feature requires iOS
-5.0 or later, or OS X 10.5 ("Leopard") or later.
+Transport for SSL/TLS, use the configure option `--with-secure-transport`
+or `--with-darwin-ssl`. (It is not necessary to use the option `--without-ssl`.)
 
 When Secure Transport is in use, the curl options `--cacert` and `--capath`
 and their libcurl equivalents, will be ignored, because Secure Transport uses
@@ -277,22 +276,51 @@ the server. This, of course, includes the root certificates that ship with the
 OS. The `--cert` and `--engine` options, and their libcurl equivalents, are
 currently unimplemented in curl with Secure Transport.
 
-For macOS users: In OS X 10.8 ("Mountain Lion"), Apple made a major overhaul
-to the Secure Transport API that, among other things, added support for the
-newer TLS 1.1 and 1.2 protocols. To get curl to support TLS 1.1 and 1.2, you
-must build curl on Mountain Lion or later, or by using the equivalent SDK. If
-you set the `MACOSX_DEPLOYMENT_TARGET` environmental variable to an earlier
-version of macOS prior to building curl, then curl will use the new Secure
-Transport API on Mountain Lion and later, and fall back on the older API when
-the same curl binary is executed on older cats. For example, running these
-commands in curl's directory in the shell will build the code such that it
-will run on cats as old as OS X 10.6 ("Snow Leopard") (using bash):
+In general, a curl build for an Apple `ARCH/SDK/DEPLOYMENT_TARGET` combination
+can be taken by providing appropriate values for `ARCH`, `SDK`, `DEPLOYMENT_TARGET`
+below and running the commands:
 
 ```bash
-export MACOSX_DEPLOYMENT_TARGET="10.6"
-./configure --with-secure-transport
-make
+# Set these three according to your needs
+export ARCH=x86_64
+export SDK=macosx
+export DEPLOYMENT_TARGET=10.8
+
+export CFLAGS="-arch $ARCH -isysroot $(xcrun -sdk $SDK --show-sdk-path) -m$SDK-version-min=$DEPLOYMENT_TARGET"
+./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-darwin-ssl
+make -j8
+make install
 ```
+
+Above will build curl for macOS platform with `x86_64` architecture and `10.8` as deployment target.
+
+Here is an example for iOS device:
+
+```bash
+export ARCH=arm64
+export SDK=iphoneos
+export DEPLOYMENT_TARGET=11.0
+
+export CFLAGS="-arch $ARCH -isysroot $(xcrun -sdk $SDK --show-sdk-path) -m$SDK-version-min=$DEPLOYMENT_TARGET"
+./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-darwin-ssl
+make -j8
+make install
+```
+
+Another example for watchOS simulator for macs with Apple Silicon:
+
+```bash
+export ARCH=arm64
+export SDK=watchsimulator
+export DEPLOYMENT_TARGET=5.0
+
+export CFLAGS="-arch $ARCH -isysroot $(xcrun -sdk $SDK --show-sdk-path) -m$SDK-version-min=$DEPLOYMENT_TARGET"
+./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-darwin-ssl
+make -j8
+make install
+```
+
+In all above, the built libraries and executables can be found in `artifacts` folder.
 
 # Android
 
