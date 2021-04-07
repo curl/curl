@@ -32,6 +32,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <time.h>
 
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -55,13 +56,6 @@
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#ifdef TIME_WITH_SYS_TIME
-#include <time.h>
-#endif
-#else
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
 #endif
 
 #ifdef WIN32
