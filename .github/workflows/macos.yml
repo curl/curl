@@ -13,7 +13,7 @@ on:
 
 jobs:
   autotools:
-    name: macos ${{ matrix.build.name }}
+    name: ${{ matrix.build.sdk }} ${{ matrix.build.name }}
     runs-on: 'macos-latest'
     strategy:
       fail-fast: false
@@ -21,49 +21,76 @@ jobs:
         build:
         - name: normal
           install: nghttp2
-          macosx-version-min: 10.9
+          sdk: macosx
+          version-min: 10.9
         - name: debug
           install: nghttp2
           configure: --enable-debug --enable-mqtt
-          macosx-version-min: 10.9
+          sdk: macosx
+          version-min: 10.9
         - name: libssh2
           install: nghttp2 libssh2
           configure: --enable-debug --with-libssh2
-          macosx-version-min: 10.9
+          sdk: macosx
+          version-min: 10.9
         - name: c-ares
           install: nghttp2
           configure: --enable-debug --enable-ares
-          macosx-version-min: 10.9
+          sdk: macosx
+          version-min: 10.9
         - name: HTTP only
           install: nghttp2
           configure: --enable-debug --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libmetalink --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
-          macosx-version-min: 10.15
+          sdk: macosx
+          version-min: 10.15
         - name: SecureTransport metalink
           install: nghttp2 openssl libmetalink
           configure: --enable-debug --without-ssl --with-secure-transport --with-libmetalink
-          macosx-version-min: 10.8
+          sdk: macosx
+          version-min: 10.8
         - name: OpenSSL metalink
           install: nghttp2 openssl libmetalink
           configure: --enable-debug --with-ssl=/usr/local/opt/openssl --with-libmetalink
-          macosx-version-min: 10.9
+          sdk: macosx
+          version-min: 10.9
         - name: LibreSSL metalink
           install: nghttp2 libressl libmetalink
           configure: --enable-debug --with-ssl=/usr/local/opt/libressl --with-libmetalink
-          macosx-version-min: 10.9
+          sdk: macosx
+          version-min: 10.9
         - name: torture
           install: nghttp2 openssl
           configure: --enable-debug --disable-shared --disable-threaded-resolver
           tflags: -n -t --shallow=25 !FTP
-          macosx-version-min: 10.9
+          sdk: macosx
+          version-min: 10.9
         - name: torture-ftp
           install: nghttp2 openssl
           configure: --enable-debug --disable-shared --disable-threaded-resolver
           tflags: -n -t --shallow=20 FTP
-          macosx-version-min: 10.9
+          sdk: macosx
+          version-min: 10.9
         - name: macOS 10.15
           install: nghttp2 libmetalink libssh2
           configure: --enable-debug --disable-ldap
-          macosx-version-min: 10.15
+          sdk: macosx
+          version-min: 10.15
+        - name: arm64 11.0
+          arch: arm64
+          sdk: iphoneos
+          version-min: 11.0
+        - name: x86_64 9.0
+          arch: x86_64
+          sdk: iphonesimulator
+          version-min: 9.0
+        - name: '5.0'
+          arch: armv7k
+          sdk: watchos
+          version-min: 5.0
+        - name: '13.0'
+          arch: arm64
+          sdk: appletvos
+          version-min: 13.0
     steps:
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
@@ -73,16 +100,22 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - run: ./buildconf && ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+    - run: |
+        CFLAGS="-Wno-vla -m${{ matrix.build.sdk }}-version-min=${{ matrix.build.version-min }} -isysroot $(xcrun -sdk ${{ matrix.build.sdk }} --show-sdk-path)"
+        ARCH=${{ matrix.build.arch }}
+        if [[ $ARCH ]]; then
+            CFLAGS="$CFLAGS -arch $ARCH"
+            CONFIGURE_FLAGS="--host=$ARCH-apple-darwin"
+        fi
+        export CFLAGS
+        ./buildconf && ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} $CONFIGURE_FLAGS
       name: 'configure'
-      env:
-        # -Wvla is caused by brotli
-        CFLAGS: "-Wno-vla -mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
 
-    - run: make
+    - run: make -j $(getconf _NPROCESSORS_ONLN)
       name: 'make'
 
     - run: make test-nonflaky
+      if: ${{ matrix.build.sdk == 'macosx' }}
       name: 'test'
       env:
         TFLAGS: "${{ matrix.build.tflags }} ~1452"
