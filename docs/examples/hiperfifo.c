@@ -234,7 +234,9 @@ static void timer_cb(int fd, short kind, void *userp)
 static void remsock(SockInfo *f)
 {
   if(f) {
-    event_del(&f->ev);
+    if(event_initialized(&f->ev)) {
+      event_del(&f->ev);
+    }
     free(f);
   }
 }
@@ -252,7 +254,9 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
   f->sockfd = s;
   f->action = act;
   f->easy = e;
-  event_del(&f->ev);
+  if(event_initialized(&f->ev)) {
+    event_del(&f->ev);
+  }
   event_assign(&f->ev, g->evbase, f->sockfd, kind, event_cb, g);
   event_add(&f->ev, NULL);
 }
