@@ -41,7 +41,7 @@ void decc$exit(int __status);
 
 static int vms_shell = -1;
 
-/* VMS has a DCL shell and and also has Unix shells ported to it.
+/* VMS has a DCL shell and also has Unix shells ported to it.
  * When curl is running under a Unix shell, we want it to be as much
  * like Unix as possible.
  */
