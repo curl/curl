@@ -27,8 +27,8 @@ some more of them, that are used by libcurl and that QADRT left out.
   To support all the different variants of EBCDIC, non-standard wrapper
 procedures have been added to libcurl on OS/400: they provide an additional
 CCSID (numeric Coded Character Set ID specific to OS/400) parameter for each
-string argument. String values passed to callback procedures are NOT converted,
-so text gathered this way is (probably !) ASCII.
+string argument. Callback procedures arguments giving access to strings are
+NOT converted, so text gathered this way is (probably !) ASCII.
 
   Another OS/400 problem comes from the fact that the last fixed argument of a
 vararg procedure may not be of type char, unsigned char, short or unsigned
@@ -65,6 +65,7 @@ _ curl_easy_setopt_ccsid()
 options:
         CURLOPT_ABSTRACT_UNIX_SOCKET
         CURLOPT_ALTSVC
+        CURLOPT_AWS_SIGV4
         CURLOPT_CAINFO
         CURLOPT_CAPATH
         CURLOPT_COOKIE
@@ -82,6 +83,7 @@ options:
         CURLOPT_FTPPORT
         CURLOPT_FTP_ACCOUNT
         CURLOPT_FTP_ALTERNATIVE_TO_USER
+        CURLOPT_HSTS
         CURLOPT_INTERFACE
         CURLOPT_ISSUERCERT
         CURLOPT_KEYPASSWD
@@ -172,8 +174,8 @@ unconvertible strings and thus are NOT followed by a CCSID.
 
 _ curl_easy_getinfo_ccsid()
   The following options are followed by a 'char * *' and a CCSID. Unlike
-curl_easy_getinfo(), the value returned in the pointer should be freed after
-use:
+curl_easy_getinfo(), the value returned in the pointer should be released with
+curl_free() after use:
         CURLINFO_EFFECTIVE_URL
         CURLINFO_CONTENT_TYPE
         CURLINFO_FTP_ENTRY_PATH
@@ -189,16 +191,22 @@ CCSID.
         CURLINFO_COOKIELIST
 Lists returned should be released with curl_slist_free_all() after use.
   Option CURLINFO_CERTINFO is followed by a struct curl_certinfo * * and a
-CCSID. Returned structures should be free'ed using curl_certinfo_free_all()
+CCSID. Returned structures should be freed with curl_certinfo_free_all()
 after use.
   Other options are processed like in curl_easy_getinfo().
 
 _ curl_pushheader_bynum_cssid() and curl_pushheader_byname_ccsid()
   Although the prototypes are self-explanatory, the returned string pointer
-should be freed after use, as opposite to the non-ccsid versions of these
-procedures.
+should be released with curl_free() after use, as opposite to the non-ccsid
+versions of these procedures.
   Please note that HTTP2 is not (yet) implemented on OS/400, thus these
 functions will always return NULL.
+
+_ curl_easy_option_by_name_ccsid() returns a pointer to an untranslated option
+metadata structure. As each curl_easyoption structure holds the option name in
+ASCII, the curl_easy_option_get_name_ccsid() function allows getting it in any
+supported ccsid. However the caller should release the returned pointer with
+curl_free() after use.
 
 
   Standard compilation environment does support neither autotools nor make;
