@@ -163,7 +163,6 @@
  18.19 expand ~/ in config files
  18.20 host name sections in config files
  18.21 retry on the redirected-to URL
- 18.22 --fail-with-body
  18.23 Set the modification date on an uploaded file
  18.24 Use multiple parallel transfers for a single download
  18.25 Prevent terminal injection when writing to terminal
@@ -1146,14 +1145,6 @@
  redirects to a separate GET, and that GET is what gets the 529
 
  See https://github.com/curl/curl/issues/5462
-
-18.22 --fail-with-body
-
- Lots of users who want --fail still want the response body saved as well -
- which --fail doesn't offer. The current solution for users is to use
- --write-out with %{response_code} and script the missing logic, but adding a
- --fail-with-body option could be an easier way for users without requiring
- external conditional checks.
 
 18.23 Set the modification date on an uploaded file
 
