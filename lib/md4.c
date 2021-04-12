@@ -81,7 +81,9 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
       (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
               (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000) && \
        defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
-              (__IPHONE_OS_VERSION_MIN_REQUIRED < 130000))
+              (__IPHONE_OS_VERSION_MIN_REQUIRED < 130000)) || \
+      (defined(__TV_OS_VERSION_MIN_REQUIRED) && \
+              (__TV_OS_VERSION_MIN_REQUIRED < 130000))
 
 #include <CommonCrypto/CommonDigest.h>
 
