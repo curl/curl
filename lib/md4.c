@@ -76,10 +76,12 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
-       defined(__MAC_OS_X_VERSION_MIN_ALLOWED) && \
-              (__MAC_OS_X_VERSION_MIN_ALLOWED < 101500)) || \
+       defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
+              (__MAC_OS_X_VERSION_MIN_REQUIRED < 101500)) || \
       (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000))
+              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000) && \
+       defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
+              (__IPHONE_OS_VERSION_MIN_REQUIRED < 130000))
 
 #include <CommonCrypto/CommonDigest.h>
 
