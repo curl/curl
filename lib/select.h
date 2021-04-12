@@ -94,7 +94,7 @@ int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
    With Winsock the valid range is [0..INVALID_SOCKET-1] according to
    https://docs.microsoft.com/en-us/windows/win32/winsock/socket-data-type-2
 */
-#if defined(TPF)
+#if defined(USE_WINSOCK) || defined(TPF) || defined(FreeRTOS)
 #define VALID_SOCK(x) 1
 #define VERIFY_SOCK(x) Curl_nop_stmt
 #define FDSET_SOCK(x) 1

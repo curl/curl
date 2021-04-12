@@ -51,9 +51,11 @@
 #include <osreldate.h>
 #endif
 
+#ifndef CURL_AVOID_SYS_TYPES_H
 /* The include stuff here below is mainly for time_t! */
 #include <sys/types.h>
 #include <time.h>
+#endif
 
 #if defined(CURL_WIN32) && !defined(_WIN32_WCE) && !defined(__CYGWIN__)
 #if !(defined(_WINSOCKAPI_) || defined(_WINSOCK_H) || \
@@ -77,11 +79,13 @@
 #include <sys/select.h>
 #endif
 
-#if !defined(CURL_WIN32) && !defined(_WIN32_WCE)
+#if !defined(CURL_WIN32) && !defined(_WIN32_WCE) &&  \
+  !defined(CURL_AVOID_SYS_SOCKET_H)
 #include <sys/socket.h>
 #endif
 
-#if !defined(CURL_WIN32) && !defined(__WATCOMC__) && !defined(__VXWORKS__)
+#if !defined(CURL_WIN32) && !defined(__WATCOMC__) && !defined(__VXWORKS__) && \
+  !defined(CURL_AVOID_SYS_TIME_H)
 #include <sys/time.h>
 #endif
 
@@ -128,7 +132,10 @@ typedef void CURLSH;
 
 #ifndef curl_socket_typedef
 /* socket typedef */
-#if defined(CURL_WIN32) && !defined(__LWIP_OPT_H__) && !defined(LWIP_HDR_OPT_H)
+#ifdef FreeRTOS
+typedef Socket_t curl_socket_t;
+#define CURL_SOCKET_BAD FREERTOS_INVALID_SOCKET
+#elif defined(CURL_WIN32) && !defined(__LWIP_OPT_H__) && !defined(LWIP_HDR_OPT_H)
 typedef SOCKET curl_socket_t;
 #define CURL_SOCKET_BAD INVALID_SOCKET
 #else
@@ -407,7 +414,7 @@ struct curl_sockaddr {
   unsigned int addrlen; /* addrlen was a socklen_t type before 7.18.0 but it
                            turned really ugly and painful on the systems that
                            lack this type */
-  struct sockaddr addr;
+  struct curl_struct_sockaddr addr;
 };
 
 typedef curl_socket_t
