@@ -143,7 +143,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,mbedtls,wolfssl,schannel,secure-transport,mesalink,amissl,bearssl,rustls} )"
+    curl_ssl_msg="no      (--with-{openssl,gnutls,nss,mbedtls,wolfssl,schannel,secure-transport,mesalink,amissl,bearssl,rustls} )"
     curl_ssh_msg="no      (--with-{libssh,libssh2})"
    curl_zlib_msg="no      (--with-zlib)"
  curl_brotli_msg="no      (--with-brotli)"
@@ -1736,8 +1736,13 @@ OPT_SSL=off
 dnl Default to no CA bundle
 ca="no"
 AC_ARG_WITH(ssl,dnl
-AS_HELP_STRING([--with-ssl=PATH],[Where to look for OpenSSL, PATH points to the SSL installation (default: /usr/local/ssl); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
-AS_HELP_STRING([--without-ssl], [disable OpenSSL]),
+AS_HELP_STRING([--with-ssl=PATH],[old version of --with-openssl])
+AS_HELP_STRING([--without-ssl], [old version of --without-openssl]),
+  OPT_SSL=$withval)
+
+AC_ARG_WITH(openssl,dnl
+AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points to the SSL installation (default: /usr/local/ssl); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--without-openssl], [disable OpenSSL]),
   OPT_SSL=$withval)
 
 if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
@@ -1773,18 +1778,18 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
 
   case "$OPT_SSL" in
   yes)
-    dnl --with-ssl (without path) used
+    dnl --with-openssl (without path) used
     PKGTEST="yes"
     PREFIX_OPENSSL=/usr/local/ssl
     LIB_OPENSSL="$PREFIX_OPENSSL/lib$libsuff"
     ;;
   off)
-    dnl no --with-ssl option given, just check default places
+    dnl no --with-openssl option given, just check default places
     PKGTEST="yes"
     PREFIX_OPENSSL=
     ;;
   *)
-    dnl check the given --with-ssl spot
+    dnl check the given --with-openssl spot
     PKGTEST="no"
     PREFIX_OPENSSL=$OPT_SSL
 
@@ -1796,11 +1801,11 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
       AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
       PKGTEST="yes"
     elif test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
-      AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-ssl prefix!])
+      AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-openssl prefix!])
     fi
 
     dnl in case pkg-config comes up empty, use what we got
-    dnl via --with-ssl
+    dnl via --with-openssl
     LIB_OPENSSL="$PREFIX_OPENSSL/lib$libsuff"
     if test "$PREFIX_OPENSSL" != "/usr" ; then
       SSL_LDFLAGS="-L$LIB_OPENSSL"
@@ -1834,7 +1839,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
       dnl use the values pkg-config reported.  This is here
       dnl instead of below with CPPFLAGS and LDFLAGS because we only
       dnl learn about this via pkg-config.  If we only have
-      dnl the argument to --with-ssl we don't know what
+      dnl the argument to --with-openssl we don't know what
       dnl additional libs may be necessary.  Hope that we
       dnl don't need any.
       LIBS="$SSL_LIBS $LIBS"
@@ -1856,8 +1861,9 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
        # only set this if pkg-config wasn't used
        CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include/openssl -I$PREFIX_OPENSSL/include"
      fi
-     # Linking previously failed, try extra paths from --with-ssl or pkg-config.
-     # Use a different function name to avoid reusing the earlier cached result.
+     # Linking previously failed, try extra paths from --with-openssl or
+     # pkg-config.  Use a different function name to avoid reusing the earlier
+     # cached result.
      AC_CHECK_LIB(crypto, HMAC_Init_ex,[
        HAVECRYPTO="yes"
        LIBS="-lcrypto $LIBS"], [
@@ -2051,7 +2057,7 @@ if test X"$OPT_SSL" != Xoff &&
   test "$OPENSSL_ENABLED" != "1"; then
   AC_MSG_NOTICE([OPT_SSL: $OPT_SSL])
   AC_MSG_NOTICE([OPENSSL_ENABLED: $OPENSSL_ENABLED])
-  AC_MSG_ERROR([--with-ssl was given but OpenSSL could not be detected])
+  AC_MSG_ERROR([--with-openssl was given but OpenSSL could not be detected])
 fi
 
 dnl **********************************************************************
@@ -2925,7 +2931,7 @@ case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABL
 in
 x)
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss, --with-schannel, --with-secure-transport, --with-mesalink, --with-amissl or --with-bearssl to address this.])
+  AC_MSG_WARN([Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss, --with-schannel, --with-secure-transport, --with-mesalink, --with-amissl, --with-bearssl or --with-rustls to address this.])
   ;;
 x1)
   # one SSL backend is enabled

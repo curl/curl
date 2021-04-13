@@ -59,21 +59,21 @@ explicitly told not to. If you have OpenSSL installed in the default search
 path for your compiler/linker, you don't need to do anything special. If you
 have OpenSSL installed in `/usr/local/ssl`, you can run configure like:
 
-    ./configure --with-ssl
+    ./configure --with-openssl
 
 If you have OpenSSL installed somewhere else (for example, `/opt/OpenSSL`) and
 you have pkg-config installed, set the pkg-config path first, like this:
 
-    env PKG_CONFIG_PATH=/opt/OpenSSL/lib/pkgconfig ./configure --with-ssl
+    env PKG_CONFIG_PATH=/opt/OpenSSL/lib/pkgconfig ./configure --with-openssl
 
 Without pkg-config installed, use this:
 
-    ./configure --with-ssl=/opt/OpenSSL
+    ./configure --with-openssl=/opt/OpenSSL
 
 If you insist on forcing a build without SSL support, even though you may
 have OpenSSL installed in your system, you can run configure like this:
 
-    ./configure --without-ssl
+    ./configure --without-openssl
 
 If you have OpenSSL installed, but with the libraries in one place and the
 header files somewhere else, you have to set the `LDFLAGS` and `CPPFLAGS`
@@ -86,7 +86,7 @@ If you have shared SSL libs installed in a directory where your run-time
 linker doesn't find them (which usually causes configure failures), you can
 provide this option to gcc to set a hard-coded path to the run-time linker:
 
-    LDFLAGS=-Wl,-R/usr/local/ssl/lib ./configure --with-ssl
+    LDFLAGS=-Wl,-R/usr/local/ssl/lib ./configure --with-openssl
 
 ## More Options
 
@@ -112,14 +112,14 @@ want to alter it, you can select how to deal with each individual library.
 The default OpenSSL configure check will also detect and use BoringSSL or
 libressl.
 
- - GnuTLS: `--without-ssl --with-gnutls`.
- - wolfSSL: `--without-ssl --with-wolfssl`
- - NSS: `--without-ssl --with-nss`
- - mbedTLS: `--without-ssl --with-mbedtls`
- - schannel: `--without-ssl --with-schannel`
- - secure transport: `--without-ssl --with-secure-transport`
- - MesaLink: `--without-ssl --with-mesalink`
- - BearSSL: `--without-ssl --with-bearssl`
+ - GnuTLS: `--without-openssl --with-gnutls`.
+ - wolfSSL: `--without-openssl --with-wolfssl`
+ - NSS: `--without-openssl --with-nss`
+ - mbedTLS: `--without-openssl --with-mbedtls`
+ - schannel: `--without-openssl --with-schannel`
+ - secure transport: `--without-openssl --with-secure-transport`
+ - MesaLink: `--without-openssl --with-mesalink`
+ - BearSSL: `--without-openssl --with-bearssl`
 
 # Windows
 
@@ -267,7 +267,7 @@ Windows you should choose another SSL backend such as OpenSSL.
 On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
 implementation, Secure Transport, instead of OpenSSL. To build with Secure
 Transport for SSL/TLS, use the configure option `--with-secure-transport`
-or `--with-darwin-ssl`. (It is not necessary to use the option `--without-ssl`.)
+or `--with-darwin-ssl`. (It is not necessary to use the option `--without-openssl`.)
 
 When Secure Transport is in use, the curl options `--cacert` and `--capath`
 and their libcurl equivalents, will be ignored, because Secure Transport uses
@@ -358,8 +358,8 @@ OpenSSL, follow the OpenSSL build instructions and then install `libssl.a` and
 `libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy `include/openssl` to
 `$TOOLCHAIN/sysroot/usr/include`. Now you can build curl for Android using
 OpenSSL like this:
-    
-    ./configure --host aarch64-linux-android --with-pic --disable-shared --with-ssl="$TOOLCHAIN/sysroot/usr"
+
+    ./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
 
 Note, however, that you must target at least Android M (API level 23) or `configure`
 won't be able to detect OpenSSL since `stderr` (and the like) weren't defined
@@ -438,7 +438,7 @@ use, here are some other flags that can reduce the size of the library:
  - `--enable-hidden-symbols` (eliminates unneeded symbols in the shared library)
  - `--without-libidn` (disables support for the libidn DNS library)
  - `--without-librtmp` (disables support for RTMP)
- - `--without-ssl` (disables support for SSL/TLS)
+ - `--without-openssl` (disables support for SSL/TLS)
  - `--without-zlib` (disables support for on-the-fly decompression)
 
 The GNU compiler and linker have a number of options that can reduce the

@@ -65,7 +65,7 @@ Build curl
      % git clone https://github.com/curl/curl
      % cd curl
      % ./buildconf
-     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-ssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
 
 ## Build with GnuTLS
@@ -105,7 +105,7 @@ Build curl
      % git clone https://github.com/curl/curl
      % cd curl
      % ./buildconf
-     % ./configure --without-ssl --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % ./configure --without-openssl --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
 
 # quiche version
@@ -126,7 +126,7 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % ./buildconf
-     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-ssl=$PWD/../quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
+     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-openssl=$PWD/../quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
      % make
 
 ## Run
