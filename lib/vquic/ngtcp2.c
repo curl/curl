@@ -57,6 +57,8 @@
 #define H3BUGF(x) do { } while(0)
 #endif
 
+#define H3_ALPN_H3_29 "\x5h3-29"
+
 /*
  * This holds outgoing HTTP/3 stream data that is used by nghttp3 until acked.
  * It is used as a circular buffer. Add new bytes at the end until it reaches
@@ -351,8 +353,8 @@ static int quic_init_ssl(struct quicsocket *qs)
   SSL_set_app_data(qs->ssl, qs);
   SSL_set_connect_state(qs->ssl);
 
-  alpn = (const uint8_t *)NGHTTP3_ALPN_H3;
-  alpnlen = sizeof(NGHTTP3_ALPN_H3) - 1;
+  alpn = (const uint8_t *)H3_ALPN_H3_29;
+  alpnlen = sizeof(H3_ALPN_H3_29) - 1;
   if(alpn)
     SSL_set_alpn_protos(qs->ssl, alpn, (int)alpnlen);
 
@@ -529,8 +531,8 @@ static int quic_init_ssl(struct quicsocket *qs)
   }
 
   /* strip the first byte (the length) from NGHTTP3_ALPN_H3 */
-  alpn.data = (unsigned char *)NGHTTP3_ALPN_H3 + 1;
-  alpn.size = sizeof(NGHTTP3_ALPN_H3) - 2;
+  alpn.data = (unsigned char *)H3_ALPN_H3_29 + 1;
+  alpn.size = sizeof(H3_ALPN_H3_29) - 2;
   if(alpn.data)
     gnutls_alpn_set_protocols(qs->ssl, &alpn, 1, 0);
 
