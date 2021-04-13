@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -306,7 +306,7 @@ if (!$desc) {
 if (!$confopts) {
   if ($infixed < 4) {
     print "please enter your additional arguments to configure\n";
-    print "examples: --with-ssl --enable-debug --enable-ipv6 --with-krb4\n";
+    print "examples: --with-openssl --enable-debug --enable-ipv6\n";
     $confopts = <>;
     chomp $confopts;
   }

@@ -44,11 +44,11 @@ jobs:
           macosx-version-min: 10.8
         - name: OpenSSL metalink
           install: nghttp2 openssl libmetalink
-          configure: --enable-debug --with-ssl=/usr/local/opt/openssl --with-libmetalink
+          configure: --enable-debug --with-openssl=/usr/local/opt/openssl --with-libmetalink
           macosx-version-min: 10.9
         - name: LibreSSL metalink
           install: nghttp2 libressl libmetalink
-          configure: --enable-debug --with-ssl=/usr/local/opt/libressl --with-libmetalink
+          configure: --enable-debug --with-openssl=/usr/local/opt/libressl --with-libmetalink
           macosx-version-min: 10.9
         - name: torture
           install: nghttp2 openssl

@@ -99,12 +99,12 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=novalgrind BORINGSSL=yes C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
+    - T=novalgrind BORINGSSL=yes C="--with-openssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     before_install:
     - eval "$(gimme stable)"; gimme --list  # Install latest Go (for boringssl)
   - env:
-    - T=novalgrind QUICHE="yes" C="--with-ssl=$HOME/quiche/deps/boringssl/src --with-quiche=$HOME/quiche/target/release" LD_LIBRARY_PATH=$HOME/quiche/target/release:/usr/local/lib
+    - T=novalgrind QUICHE="yes" C="--with-openssl=$HOME/quiche/deps/boringssl/src --with-quiche=$HOME/quiche/target/release" LD_LIBRARY_PATH=$HOME/quiche/target/release:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -135,10 +135,10 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=novalgrind LIBRESSL=yes C="--with-ssl=$HOME/libressl" LD_LIBRARY_PATH=/home/travis/libressl/lib:/usr/local/lib
+    - T=novalgrind LIBRESSL=yes C="--with-openssl=$HOME/libressl" LD_LIBRARY_PATH=/home/travis/libressl/lib:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
   - env:
-    - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild" NOTESTS=
+    - T=novalgrind NGTCP2=yes C="--with-openssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild" NOTESTS=
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -181,7 +181,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug OPENSSL3="yes" C="--with-ssl=$HOME/openssl3" LD_LIBRARY_PATH=/home/travis/openssl3/lib:/usr/local/lib TFLAGS="https ftps"
+    - T=debug OPENSSL3="yes" C="--with-openssl=$HOME/openssl3" LD_LIBRARY_PATH=/home/travis/openssl3/lib:/usr/local/lib TFLAGS="https ftps"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
