@@ -119,18 +119,21 @@ cr_recv(struct Curl_easy *data, int sockindex,
   else if(tls_bytes_read < 0) {
     if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
       infof(data, "sread: EAGAIN or EWOULDBLOCK\n");
-      *err = CURLE_AGAIN;
+      /* There is no data in the socket right now, but there could still be
+         some data in the rustls session, so we need to read from it below. */
+      tls_bytes_read = 0;
+    }
+    else {
+      failf(data, "reading from socket: %s", strerror(SOCKERRNO));
+      *err = CURLE_READ_ERROR;
       return -1;
     }
-    failf(data, "reading from socket: %s", strerror(SOCKERRNO));
-    *err = CURLE_READ_ERROR;
-    return -1;
   }
 
   /*
   * Now pull those bytes from the buffer into ClientSession.
   */
-  DEBUGASSERT(tls_bytes_read > 0);
+  DEBUGASSERT(tls_bytes_read >= 0);
   while(tls_bytes_processed < (size_t)tls_bytes_read) {
     rresult = rustls_client_session_read_tls(session,
       backend->tlsbuf + tls_bytes_processed,
