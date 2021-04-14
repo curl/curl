@@ -752,6 +752,20 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       }
       data->state.cookielist = cl; /* store the list for later use */
     }
+    else {
+      /* clear the list of cookie files */
+      curl_slist_free_all(data->state.cookielist);
+      data->state.cookielist = NULL;
+
+      if(!data->share || !data->share->cookies) {
+        /* throw away all existing cookies if this isn't a shared cookie
+           container */
+        Curl_cookie_clearall(data->cookies);
+        Curl_cookie_cleanup(data->cookies);
+      }
+      /* disable the cookie engine */
+      data->cookies = NULL;
+    }
     break;
 
   case CURLOPT_COOKIEJAR:
