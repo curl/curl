@@ -90,7 +90,7 @@ test635 test636 test637 test638 test639 test640 test641 test642 \
 test643 test644 test645 test646 test647 test648 test649 test650 test651 \
 test652 test653 test654 test655 test656 test658 test659 test660 test661 \
 test662 test663 test664 test665 test666 test667 test668 test669 \
-test670 test671 test672 test673 test674 test675 \
+test670 test671 test672 test673 test674 test675 test676 \
 \
 test700 test701 test702 test703 test704 test705 test706 test707 test708 \
 test709 test710 test711 test712 test713 test714 test715 test716 test717 \
