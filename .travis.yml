@@ -52,7 +52,7 @@ addons:
 jobs:
   include:
   - env:
-    - T=normal C="--with-gssapi --with-libssh2" CHECKSRC=1
+    - T=normal C="--with-openssl --with-gssapi --with-libssh2" CHECKSRC=1
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -64,7 +64,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=normal C=--with-libssh
+    - T=normal C="--with-openssl --with-libssh"
     # Avoid bionic, its pre-release libssh version triggers deprecation warnings.
     dist: focal
     addons:
@@ -83,12 +83,12 @@ jobs:
         - libssh-dev
         - ninja-build
   - env:
-    - T=normal C="--enable-ares"
+    - T=normal C="--enable-ares --with-openssl"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
   - env:
-    - T=normal C="--disable-proxy"
+    - T=normal C="--disable-proxy --with-openssl"
   - env:
-    - T=normal C="--disable-verbose" CPPFLAGS="-Wno-variadic-macros" NOTESTS=1
+    - T=normal C="--disable-verbose --with-openssl" CPPFLAGS="-Wno-variadic-macros" NOTESTS=1
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -115,7 +115,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug HYPER="yes" C="--with-hyper=$HOME/hyper" LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib TFLAGS="1 to 29"
+    - T=debug HYPER="yes" C="--with-hyper=$HOME/hyper --with-openssl" LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib TFLAGS="1 to 29"
     addons:
       apt:
         <<: *common_apt
@@ -125,7 +125,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug-rustls RUSTLS_VERSION="v0.4.0" C="--with-rustls=$HOME/crust --without-ssl"
+    - T=debug-rustls RUSTLS_VERSION="v0.4.0" C="--with-rustls=$HOME/crust"
     addons:
       apt:
         <<: *common_apt
@@ -149,7 +149,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=novalgrind NGTCP2=yes GNUTLS=yes C="PKG_CONFIG_PATH=$HOME/ngbuild --without-ssl --with-gnutls=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild" NOTESTS=
+    - T=novalgrind NGTCP2=yes GNUTLS=yes C="PKG_CONFIG_PATH=$HOME/ngbuild  --with-gnutls=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild" NOTESTS=
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -170,7 +170,7 @@ jobs:
         - libtasn1-6-dev
         - nettle-dev
   - env:
-    - T=debug-wolfssl C="--with-wolfssl --without-ssl" WOLFSSL="yes"
+    - T=debug-wolfssl C="--with-wolfssl" WOLFSSL="yes"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -192,7 +192,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug-mesalink C="--with-mesalink --without-ssl" MESALINK=yes
+    - T=debug-mesalink C="--with-mesalink" MESALINK=yes
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
@@ -203,7 +203,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug
+    - T=debug C="--with-openssl"
     - &clang OVERRIDE_CC="CC=clang-9" OVERRIDE_CXX="CXX=clang++-9"
     compiler: clang
     addons:
@@ -215,7 +215,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug C="--enable-hsts --disable-alt-svc"
+    - T=debug C="--enable-hsts --disable-alt-svc --with-openssl"
     - *clang
     compiler: clang
     addons:
@@ -227,7 +227,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug C="--with-mbedtls --without-ssl"
+    - T=debug C="--with-mbedtls"
     - *clang
     compiler: clang
     addons:
@@ -240,7 +240,7 @@ jobs:
         - libzstd-dev
         - libmbedtls-dev
   - env:
-    - T=debug C="--with-gnutls --without-ssl"
+    - T=debug C="--with-gnutls"
     - *clang
     compiler: clang
     addons:
@@ -253,7 +253,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug C="--with-nss --without-ssl" NOTESTS=1 CPPFLAGS="-isystem /usr/include/nss"
+    - T=debug C="--with-nss" NOTESTS=1 CPPFLAGS="-isystem /usr/include/nss"
     - *clang
     compiler: clang
     addons:
@@ -266,7 +266,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=iconv
+    - T=iconv C="--with-openssl"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
   - env:
     - T=cmake BORINGSSL=yes QUICHE=yes C="-GNinja -DUSE_QUICHE=1 -DOPENSSL_ROOT_DIR=$HOME/boringssl -DCURL_BROTLI=1 -DCURL_ZSTD=1" TFLAGS="https ftps"
@@ -305,6 +305,7 @@ jobs:
         - *common_packages
         - lcov
         - libpsl-dev
+        - libssl-dev
         - libbrotli-dev
         - libzstd-dev
         - libssh2-1-dev
@@ -318,6 +319,7 @@ jobs:
         - *common_packages
         - lcov
         - libpsl-dev
+        - libssl-dev
         - libbrotli-dev
         - libzstd-dev
         - libssh2-1-dev
@@ -345,7 +347,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=tidy
+    - T=tidy C="--with-openssl"
     - *clang
     compiler: clang
     addons:
@@ -358,7 +360,21 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=scan-build
+    - T=scan-build C="--with-openssl --with-libssh2"
+    - *clang
+    compiler: clang
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *clang_packages
+        - libssl-dev
+        - libssh2-1-dev
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan" TFLAGS=-n C="--with-openssl"
     - *clang
     compiler: clang
     addons:
@@ -370,19 +386,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan" TFLAGS=-n
-    - *clang
-    compiler: clang
-    addons:
-      apt:
-        <<: *common_apt
-        packages:
-        - *clang_packages
-        - libpsl-dev
-        - libbrotli-dev
-        - libzstd-dev
-  - env:
-    - T=debug C="" TFLAGS=-n
+    - T=debug C="--with-openssl" TFLAGS=-n
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     arch: arm64
     addons:
@@ -400,7 +404,7 @@ jobs:
         - zlib1g-dev
 
   - env:
-    - T=debug C="" TFLAGS=-n
+    - T=debug C="--with-openssl" TFLAGS=-n
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     arch: ppc64le
     addons:
@@ -418,7 +422,7 @@ jobs:
         - zlib1g-dev
 
   - env:
-    - T=debug C="" TFLAGS=-n
+    - T=debug C="--with-openssl" TFLAGS=-n
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     arch: s390x
     addons:

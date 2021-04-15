@@ -21,26 +21,27 @@ jobs:
         build:
         - name: normal
           install: nghttp2
+          configure: --without-ssl
           macosx-version-min: 10.9
         - name: debug
           install: nghttp2
-          configure: --enable-debug --enable-mqtt
+          configure: --enable-debug --without-ssl
           macosx-version-min: 10.9
         - name: libssh2
           install: nghttp2 libssh2
-          configure: --enable-debug --with-libssh2
+          configure: --enable-debug --with-libssh2 --without-ssl
           macosx-version-min: 10.9
         - name: c-ares
           install: nghttp2
-          configure: --enable-debug --enable-ares
+          configure: --enable-debug --enable-ares --without-ssl
           macosx-version-min: 10.9
         - name: HTTP only
           install: nghttp2
           configure: --enable-debug --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libmetalink --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
           macosx-version-min: 10.15
         - name: SecureTransport metalink
-          install: nghttp2 openssl libmetalink
-          configure: --enable-debug --without-ssl --with-secure-transport --with-libmetalink
+          install: nghttp2 libmetalink
+          configure: --enable-debug --with-secure-transport --with-libmetalink
           macosx-version-min: 10.8
         - name: OpenSSL metalink
           install: nghttp2 openssl libmetalink
@@ -52,17 +53,17 @@ jobs:
           macosx-version-min: 10.9
         - name: torture
           install: nghttp2 openssl
-          configure: --enable-debug --disable-shared --disable-threaded-resolver
+          configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl
           tflags: -n -t --shallow=25 !FTP
           macosx-version-min: 10.9
         - name: torture-ftp
           install: nghttp2 openssl
-          configure: --enable-debug --disable-shared --disable-threaded-resolver
+          configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl
           tflags: -n -t --shallow=20 FTP
           macosx-version-min: 10.9
         - name: macOS 10.15
-          install: nghttp2 libmetalink libssh2
-          configure: --enable-debug --disable-ldap
+          install: nghttp2 libmetalink libssh2 openssl
+          configure: --enable-debug --disable-ldap --with-openssl=/usr/local/opt/openssl
           macosx-version-min: 10.15
     steps:
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
