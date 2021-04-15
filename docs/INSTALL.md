@@ -30,10 +30,12 @@ proceed.
 A normal Unix installation is made in three or four steps (after you've
 unpacked the source archive):
 
-    ./configure
+    ./configure --with-openssl [--with-gnutls --with-wolfssl]
     make
     make test (optional)
     make install
+
+(Adjust the configure line accordingly to use the TLS library you want.)
 
 You probably need to be root when doing the last command.
 
@@ -73,7 +75,7 @@ Without pkg-config installed, use this:
 If you insist on forcing a build without SSL support, even though you may
 have OpenSSL installed in your system, you can run configure like this:
 
-    ./configure --without-openssl
+    ./configure --without-ssl
 
 If you have OpenSSL installed, but with the libraries in one place and the
 header files somewhere else, you have to set the `LDFLAGS` and `CPPFLAGS`
@@ -109,17 +111,19 @@ want to alter it, you can select how to deal with each individual library.
 
 ## Select TLS backend
 
-The default OpenSSL configure check will also detect and use BoringSSL or
-libressl.
+These options are provided to select TLS backend to use.
 
- - GnuTLS: `--without-openssl --with-gnutls`.
- - wolfSSL: `--without-openssl --with-wolfssl`
- - NSS: `--without-openssl --with-nss`
- - mbedTLS: `--without-openssl --with-mbedtls`
- - schannel: `--without-openssl --with-schannel`
- - secure transport: `--without-openssl --with-secure-transport`
- - MesaLink: `--without-openssl --with-mesalink`
- - BearSSL: `--without-openssl --with-bearssl`
+ - AmiSSL: `--with-amissl`
+ - BearSSL: `--with-bearssl`
+ - GnuTLS: `--with-gnutls`.
+ - mbedTLS: `--with-mbedtls`
+ - MesaLink: `--with-mesalink`
+ - NSS: `--with-nss`
+ - OpenSSL: `--with-openssl` (also for BoringSSL and libressl)
+ - rustls: `--with-rustls`
+ - schannel: `--with-schannel`
+ - secure transport: `--with-secure-transport`
+ - wolfSSL: `--with-wolfssl`
 
 # Windows
 

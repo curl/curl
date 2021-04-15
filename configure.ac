@@ -181,6 +181,109 @@ dnl
 INITIAL_LDFLAGS=$LDFLAGS
 INITIAL_LIBS=$LIBS
 
+dnl **********************************************************************
+dnl See which TLS backend(s) that are requested. Just do all the
+dnl TLS AC_ARG_WITH() invokes here and do the checks later
+dnl **********************************************************************
+OPT_SCHANNEL=no
+AC_ARG_WITH(schannel,dnl
+AS_HELP_STRING([--with-schannel],[enable Windows native SSL/TLS]),
+  OPT_SCHANNEL=$withval
+  TLSCHOICE="schannel")
+
+OPT_SECURETRANSPORT=no
+AC_ARG_WITH(secure-transport,dnl
+AS_HELP_STRING([--with-secure-transport],[enable Apple OS native SSL/TLS]),
+  OPT_SECURETRANSPORT=$withval
+  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }Secure-Transport"
+)
+
+OPT_AMISSL=no
+AC_ARG_WITH(amissl,dnl
+AS_HELP_STRING([--with-amissl],[enable Amiga native SSL/TLS (AmiSSL)]),
+  OPT_AMISSL=$withval
+  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }AmiSSL")
+
+OPT_OPENSSL=no
+dnl Default to no CA bundle
+ca="no"
+AC_ARG_WITH(ssl,dnl
+AS_HELP_STRING([--with-ssl=PATH],[old version of --with-openssl])
+AS_HELP_STRING([--without-ssl], [build without any TLS library]),
+  OPT_SSL=$withval
+  OPT_OPENSSL=$withval
+  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL")
+
+AC_ARG_WITH(openssl,dnl
+AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points to the SSL installation (default: /usr/local/ssl); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option]),
+  OPT_OPENSSL=$withval
+  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL")
+
+OPT_GNUTLS=no
+AC_ARG_WITH(gnutls,dnl
+AS_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to the installation root]),
+  OPT_GNUTLS=$withval
+  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }GnuTLS")
+
+OPT_MBEDTLS=no
+AC_ARG_WITH(mbedtls,dnl
+AS_HELP_STRING([--with-mbedtls=PATH],[where to look for mbedTLS, PATH points to the installation root]),
+  OPT_MBEDTLS=$withval
+  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }mbedTLS")
+
+OPT_WOLFSSL=no
+AC_ARG_WITH(wolfssl,dnl
+AS_HELP_STRING([--with-wolfssl=PATH],[where to look for WolfSSL, PATH points to the installation root (default: system lib default)]),
+  OPT_WOLFSSL=$withval
+  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }wolfSSL")
+
+OPT_MESALINK=no
+AC_ARG_WITH(mesalink,dnl
+AS_HELP_STRING([--with-mesalink=PATH],[where to look for MesaLink, PATH points to the installation root]),
+  OPT_MESALINK=$withval
+  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }MesaLink")
+
+OPT_BEARSSL=no
+AC_ARG_WITH(bearssl,dnl
+AS_HELP_STRING([--with-bearssl=PATH],[where to look for BearSSL, PATH points to the installation root]),
+  OPT_BEARSSL=$withval
+  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }BearSSL")
+
+OPT_RUSTLS=no
+AC_ARG_WITH(rustls,dnl
+AS_HELP_STRING([--with-rustls=PATH],[where to look for rustls, PATH points to the installation root]),
+  OPT_RUSTLS=$withval
+  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }rustls")
+
+OPT_NSS=no
+AC_ARG_WITH(nss,dnl
+AS_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the installation root]),
+  OPT_NSS=$withval
+  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }NSS")
+
+dnl If no TLS choice has been made, check if it was explicitly disabled or
+dnl error out to force the user to decide.
+if test -z "$TLSCHOICE"; then
+  if test "x$OPT_SSL" != "xno"; then
+    AC_MSG_ERROR([select TLS backend(s) or disble TLS with --without-ssl.
+
+Select from these:
+
+  --with-amissl
+  --with-bearssl
+  --with-gnutls
+  --with-mbedtls
+  --with-mesalink
+  --with-nss
+  --with-openssl (also works for BoringSSL and libressl)
+  --with-rustls
+  --with-schannel
+  --with-secure-transport
+  --with-wolfssl
+])
+  fi
+fi
+
 dnl
 dnl Detect the canonical host and target build environment
 dnl
@@ -1634,26 +1737,15 @@ dnl -------------------------------------------------
 dnl check winssl option before other SSL libraries
 dnl -------------------------------------------------
 
-OPT_SCHANNEL=no
-AC_ARG_WITH(winssl,dnl
-AS_HELP_STRING([--with-winssl],[enable Windows native SSL/TLS])
-AS_HELP_STRING([--without-winssl], [disable Windows native SSL/TLS]),
-  OPT_SCHANNEL=$withval)
-
-AC_ARG_WITH(schannel,dnl
-AS_HELP_STRING([--with-schannel],[enable Windows native SSL/TLS])
-AS_HELP_STRING([--without-schannel], [disable Windows native SSL/TLS]),
-  OPT_SCHANNEL=$withval)
-
 AC_MSG_CHECKING([whether to enable Windows native SSL/TLS (Windows native builds only)])
-if test -z "$ssl_backends" -o "x$OPT_SCHANNEL" != xno; then
+if test "x$OPT_SCHANNEL" != xno; then
   ssl_msg=
   if test "x$OPT_SCHANNEL" != "xno"  &&
      test "x$curl_cv_native_windows" = "xyes"; then
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_SCHANNEL, 1, [to enable Windows native SSL/TLS support])
     AC_SUBST(USE_SCHANNEL, [1])
-    ssl_msg="Windows-native"
+    ssl_msg="Schannel"
     test schannel != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     SCHANNEL_ENABLED=1
     # --with-schannel implies --enable-sspi
@@ -1673,19 +1765,8 @@ if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$USE_SCHANNEL" = "x1"; then
   LIBS="-ladvapi32 -lcrypt32 $LIBS"
 fi
 
-OPT_SECURETRANSPORT=no
-AC_ARG_WITH(darwinssl,dnl
-AS_HELP_STRING([--with-darwinssl],[enable Apple OS native SSL/TLS])
-AS_HELP_STRING([--without-darwinssl], [disable Apple OS native SSL/TLS]),
-  OPT_SECURETRANSPORT=$withval)
-
-AC_ARG_WITH(secure-transport,dnl
-AS_HELP_STRING([--with-secure-transport],[enable Apple OS native SSL/TLS])
-AS_HELP_STRING([--without-secure-transport], [disable Apple OS native SSL/TLS]),
-  OPT_SECURETRANSPORT=$withval)
-
 AC_MSG_CHECKING([whether to enable Secure Transport])
-if test -z "$ssl_backends" -o "x$OPT_SECURETRANSPORT" != xno; then
+if test "x$OPT_SECURETRANSPORT" != xno; then
   if test "x$OPT_SECURETRANSPORT" != "xno" &&
      (test "x$cross_compiling" != "xno" || test -d "/System/Library/Frameworks/Security.framework"); then
     AC_MSG_RESULT(yes)
@@ -1703,15 +1784,9 @@ else
   AC_MSG_RESULT(no)
 fi
 
-OPT_AMISSL=no
-AC_ARG_WITH(amissl,dnl
-AS_HELP_STRING([--with-amissl],[enable Amiga native SSL/TLS (AmiSSL)])
-AS_HELP_STRING([--without-amissl], [disable Amiga native SSL/TLS (AmiSSL)]),
-  OPT_AMISSL=$withval)
-
 AC_MSG_CHECKING([whether to enable Amiga native SSL/TLS (AmiSSL)])
 if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
-  if test -z "$ssl_backends" -o "x$OPT_AMISSL" != xno; then
+  if test "x$OPT_AMISSL" != xno; then
     ssl_msg=
     if test "x$OPT_AMISSL" != "xno"; then
       AC_MSG_RESULT(yes)
@@ -1733,25 +1808,10 @@ else
 fi
 
 dnl **********************************************************************
-dnl Check for the presence of SSL libraries and headers
+dnl Check for OpenSSL libraries and headers
 dnl **********************************************************************
 
-dnl Default to compiler & linker defaults for SSL files & libraries.
-OPT_SSL=off
-dnl Default to no CA bundle
-ca="no"
-AC_ARG_WITH(ssl,dnl
-AS_HELP_STRING([--with-ssl=PATH],[old version of --with-openssl])
-AS_HELP_STRING([--without-ssl], [old version of --without-openssl]),
-  OPT_SSL=$withval)
-
-AC_ARG_WITH(openssl,dnl
-AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points to the SSL installation (default: /usr/local/ssl); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
-AS_HELP_STRING([--without-openssl], [disable OpenSSL]),
-  OPT_SSL=$withval)
-
-if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
-   test X"$OPT_SSL" != Xno; then
+if test "x$OPT_OPENSSL" != xno; then
   ssl_msg=
 
   dnl backup the pre-ssl variables
@@ -1781,7 +1841,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
       ;;
   esac
 
-  case "$OPT_SSL" in
+  case "$OPT_OPENSSL" in
   yes)
     dnl --with-openssl (without path) used
     PKGTEST="yes"
@@ -1796,12 +1856,12 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
   *)
     dnl check the given --with-openssl spot
     PKGTEST="no"
-    PREFIX_OPENSSL=$OPT_SSL
+    PREFIX_OPENSSL=$OPT_OPENSSL
 
     dnl Try pkg-config even when cross-compiling.  Since we
     dnl specify PKG_CONFIG_LIBDIR we're only looking where
     dnl the user told us to look
-    OPENSSL_PCDIR="$OPT_SSL/lib/pkgconfig"
+    OPENSSL_PCDIR="$OPT_OPENSSL/lib/pkgconfig"
     if test -f "$OPENSSL_PCDIR/openssl.pc"; then
       AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
       PKGTEST="yes"
@@ -1965,7 +2025,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
        LIBS="$CLEANLIBS"
     fi
 
-    if test X"$OPT_SSL" != Xoff &&
+    if test X"$OPT_OPENSSL" != Xoff &&
        test "$OPENSSL_ENABLED" != "1"; then
       AC_MSG_ERROR([OpenSSL libs and/or directories were not found where specified!])
     fi
@@ -2057,10 +2117,9 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-if test X"$OPT_SSL" != Xoff &&
-  test X"$OPT_SSL" != Xno &&
+if test X"$OPT_OPENSSL" != Xno &&
   test "$OPENSSL_ENABLED" != "1"; then
-  AC_MSG_NOTICE([OPT_SSL: $OPT_SSL])
+  AC_MSG_NOTICE([OPT_OPENSSL: $OPT_OPENSSL])
   AC_MSG_NOTICE([OPENSSL_ENABLED: $OPENSSL_ENABLED])
   AC_MSG_ERROR([--with-openssl was given but OpenSSL could not be detected])
 fi
@@ -2130,15 +2189,7 @@ dnl ----------------------------------------------------
 dnl check for GnuTLS
 dnl ----------------------------------------------------
 
-dnl Default to compiler & linker defaults for GnuTLS files & libraries.
-OPT_GNUTLS=no
-
-AC_ARG_WITH(gnutls,dnl
-AS_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to the installation root])
-AS_HELP_STRING([--without-gnutls], [disable GnuTLS detection]),
-  OPT_GNUTLS=$withval)
-
-if test -z "$ssl_backends" -o "x$OPT_GNUTLS" != xno; then
+if test "x$OPT_GNUTLS" != xno; then
   ssl_msg=
 
   if test X"$OPT_GNUTLS" != Xno; then
@@ -2279,16 +2330,9 @@ dnl ----------------------------------------------------
 dnl check for mbedTLS
 dnl ----------------------------------------------------
 
-OPT_MBEDTLS=no
-
-_cppflags=$CPPFLAGS
-_ldflags=$LDFLAGS
-AC_ARG_WITH(mbedtls,dnl
-AS_HELP_STRING([--with-mbedtls=PATH],[where to look for mbedTLS, PATH points to the installation root])
-AS_HELP_STRING([--without-mbedtls], [disable mbedTLS detection]),
-  OPT_MBEDTLS=$withval)
-
-if test -z "$ssl_backends" -o "x$OPT_MBEDTLS" != xno; then
+if test "x$OPT_MBEDTLS" != xno; then
+  _cppflags=$CPPFLAGS
+  _ldflags=$LDFLAGS
   ssl_msg=
 
   if test X"$OPT_MBEDTLS" != Xno; then
@@ -2371,17 +2415,6 @@ dnl ----------------------------------------------------
 dnl check for wolfSSL
 dnl ----------------------------------------------------
 
-dnl Default to compiler & linker defaults for wolfSSL files & libraries.
-OPT_WOLFSSL=no
-
-_cppflags=$CPPFLAGS
-_ldflags=$LDFLAGS
-
-AC_ARG_WITH(wolfssl,dnl
-AS_HELP_STRING([--with-wolfssl=PATH],[where to look for WolfSSL, PATH points to the installation root (default: system lib default)])
-AS_HELP_STRING([--without-wolfssl], [disable WolfSSL detection]),
-  OPT_WOLFSSL=$withval)
-
 case "$OPT_WOLFSSL" in
   yes|no)
     wolfpkg=""
@@ -2391,7 +2424,10 @@ case "$OPT_WOLFSSL" in
     ;;
 esac
 
-if test -z "$ssl_backends" -o "x$OPT_WOLFSSL" != xno; then
+if test "x$OPT_WOLFSSL" != xno; then
+  _cppflags=$CPPFLAGS
+  _ldflags=$LDFLAGS
+
   ssl_msg=
 
   if test X"$OPT_WOLFSSL" != Xno; then
@@ -2532,17 +2568,9 @@ dnl ----------------------------------------------------
 dnl check for MesaLink
 dnl ----------------------------------------------------
 
-dnl Default to compiler & linker defaults for MesaLink files & libraries.
-OPT_MESALINK=no
-
-_cppflags=$CPPFLAGS
-_ldflags=$LDFLAGS
-AC_ARG_WITH(mesalink,dnl
-AS_HELP_STRING([--with-mesalink=PATH],[where to look for MesaLink, PATH points to the installation root])
-AS_HELP_STRING([--without-mesalink], [disable MesaLink detection]),
-  OPT_MESALINK=$withval)
-
-if test -z "$ssl_backends" -o "x$OPT_MESALINK" != xno; then
+if test "x$OPT_MESALINK" != xno; then
+  _cppflags=$CPPFLAGS
+  _ldflags=$LDFLAGS
   ssl_msg=
 
   if test X"$OPT_MESALINK" != Xno; then
@@ -2624,16 +2652,9 @@ dnl ----------------------------------------------------
 dnl check for BearSSL
 dnl ----------------------------------------------------
 
-OPT_BEARSSL=no
-
-_cppflags=$CPPFLAGS
-_ldflags=$LDFLAGS
-AC_ARG_WITH(bearssl,dnl
-AS_HELP_STRING([--with-bearssl=PATH],[where to look for BearSSL, PATH points to the installation root])
-AS_HELP_STRING([--without-bearssl], [disable BearSSL detection]),
-  OPT_BEARSSL=$withval)
-
-if test -z "$ssl_backends" -o "x$OPT_BEARSSL" != xno; then
+if test "x$OPT_BEARSSL" != xno; then
+  _cppflags=$CPPFLAGS
+  _ldflags=$LDFLAGS
   ssl_msg=
 
   if test X"$OPT_BEARSSL" != Xno; then
@@ -2716,16 +2737,9 @@ dnl ----------------------------------------------------
 dnl check for rustls
 dnl ----------------------------------------------------
 
-OPT_RUSTLS=no
-
-_cppflags=$CPPFLAGS
-_ldflags=$LDFLAGS
-AC_ARG_WITH(rustls,dnl
-AS_HELP_STRING([--with-rustls=PATH],[where to look for rustls, PATH points to the installation root])
-AS_HELP_STRING([--without-rustls], [disable rustls detection]),
-  OPT_RUSTLS=$withval)
-
-if test -z "$ssl_backends" -o "x$OPT_RUSTLS" != xno; then
+if test "x$OPT_RUSTLS" != xno; then
+  _cppflags=$CPPFLAGS
+  _ldflags=$LDFLAGS
   ssl_msg=
 
   if test X"$OPT_RUSTLS" != Xno; then
@@ -2806,15 +2820,7 @@ dnl ----------------------------------------------------
 dnl NSS. Only check if GnuTLS and OpenSSL are not enabled
 dnl ----------------------------------------------------
 
-dnl Default to compiler & linker defaults for NSS files & libraries.
-OPT_NSS=no
-
-AC_ARG_WITH(nss,dnl
-AS_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the installation root])
-AS_HELP_STRING([--without-nss], [disable NSS detection]),
-  OPT_NSS=$withval)
-
-if test -z "$ssl_backends" -o "x$OPT_NSS" != xno; then
+if test "x$OPT_NSS" != xno; then
   ssl_msg=
 
   if test X"$OPT_NSS" != Xno; then
