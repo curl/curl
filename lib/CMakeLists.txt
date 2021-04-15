@@ -19,7 +19,7 @@
 # KIND, either express or implied.
 #
 ###########################################################################
-set(LIB_NAME libcurl)
+set(LIB_NAME libcurl CACHE STRING "Basename of the curl library")
 
 if(BUILD_SHARED_LIBS)
   set(CURL_STATICLIB NO)
