@@ -442,6 +442,34 @@ done:
   *certname_place = '\0';
 }
 
+/* Replace (in-place) '%20' by '+' according to RFC1866 */
+static size_t replace_url_encoded_space_by_plus(char *url)
+{
+  size_t orig_len = strlen(url);
+  size_t orig_index = 0;
+  size_t new_index = 0;
+
+  while(orig_index < orig_len) {
+    if((url[orig_index] == '%') &&
+       (url[orig_index + 1] == '2') &&
+       (url[orig_index + 2] == '0')) {
+      url[new_index] = '+';
+      orig_index += 3;
+    }
+    else{
+      if(new_index != orig_index) {
+        url[new_index] = url[orig_index];
+      }
+      orig_index++;
+    }
+    new_index++;
+  }
+
+  url[new_index] = 0; /* terminate string */
+
+  return new_index; /* new size */
+}
+
 static void
 GetFileAndPassword(char *nextarg, char **file, char **password)
 {
@@ -1422,9 +1450,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           char *enc = curl_easy_escape(NULL, postdata, (int)size);
           Curl_safefree(postdata); /* no matter if it worked or not */
           if(enc) {
+            /* replace (in-place) '%20' by '+' acording to RFC1866 */
+            size_t enclen = replace_url_encoded_space_by_plus(enc);
             /* now make a string with the name from above and append the
                encoded string */
-            size_t outlen = nlen + strlen(enc) + 2;
+            size_t outlen = nlen + enclen + 2;
             char *n = malloc(outlen);
             if(!n) {
               curl_free(enc);
