@@ -3054,17 +3054,15 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
 #ifdef CURL_LIBSSH2_DEBUG
   curl_socket_t sock;
 #endif
-  struct SSHPROTO *sshp = data->req.p.ssh;
   struct ssh_conn *sshc;
   CURLcode result;
   struct connectdata *conn = data->conn;
 
   /* initialize per-handle data if not already */
-  if(!sshp) {
+  if(!data->req.p.ssh) {
     result = ssh_setup_connection(data, conn);
     if(result)
       return result;
-    sshp = data->req.p.ssh;
   }
 
   /* We default to persistent connections. We set this already in this connect
