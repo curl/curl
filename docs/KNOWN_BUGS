@@ -48,7 +48,6 @@ problems may have been fixed or changed somewhat since this was written!
  4.1 -J and -O with %-encoded file names
  4.2 -J with -C - fails
  4.3 --retry and transfer timeouts
- 4.4 Improve --data-urlencode space encoding
 
  5. Build and portability issues
  5.1 OS400 port requires deprecated IBM library
@@ -410,13 +409,6 @@ problems may have been fixed or changed somewhat since this was written!
  original position where it was at before the previous failed attempt. See
  https://curl.se/mail/lib-2008-01/0080.html and Mandriva bug report
  https://qa.mandriva.com/show_bug.cgi?id=22565
-
-4.4 Improve --data-urlencode space encoding
-
- ASCII space characters in --data-urlencode are currently encoded as %20
- rather than +, which RFC 1866 says should be used.
-
- See https://github.com/curl/curl/issues/3229
 
 5. Build and portability issues
 
