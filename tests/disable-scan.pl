@@ -36,8 +36,9 @@ my %docs;
 my $root=$ARGV[0] || ".";
 my $DOCS="CURL-DISABLE.md";
 
-sub scan_configure {
-    open S, "<$root/configure.ac";
+sub scanconf {
+    my ($f)=@_;
+    open S, "<$f";
     while(<S>) {
         if(/(CURL_DISABLE_[A-Z_]+)/g) {
             my ($sym)=($1);
@@ -45,6 +46,17 @@ sub scan_configure {
         }
     }
     close S;
+}
+
+sub scan_configure {
+    opendir(my $m, "$root/m4") || die "Can't opendir $root/m4: $!";
+    my @m4 = grep { /\.m4$/ } readdir($m);
+    closedir $m;
+    scanconf("$root/configure.ac");
+    # scan all m4 files too
+    for my $e (@m4) {
+        scanconf("$root/m4/$e");
+    }
 }
 
 sub scan_file {
