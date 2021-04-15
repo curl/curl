@@ -30,13 +30,13 @@
 
 /* This is the version number of the libcurl package from which this header
    file origins: */
-#define LIBCURL_VERSION "7.76.1-DEV"
+#define LIBCURL_VERSION "7.77.0-DEV"
 
 /* The numeric version number is also available "in parts" by using these
    defines: */
 #define LIBCURL_VERSION_MAJOR 7
-#define LIBCURL_VERSION_MINOR 76
-#define LIBCURL_VERSION_PATCH 1
+#define LIBCURL_VERSION_MINOR 77
+#define LIBCURL_VERSION_PATCH 0
 
 /* This is the numeric version of the libcurl version number, meant for easier
    parsing and comparisons by programs. The LIBCURL_VERSION_NUM define will
@@ -57,7 +57,7 @@
    CURL_VERSION_BITS() macro since curl's own configure script greps for it
    and needs it to contain the full number.
 */
-#define LIBCURL_VERSION_NUM 0x074c01
+#define LIBCURL_VERSION_NUM 0x074d00
 
 /*
  * This is the date and time when the full source package was created. The
