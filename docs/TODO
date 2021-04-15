@@ -112,7 +112,6 @@
  13.4 Cache/share OpenSSL contexts
  13.5 Export session ids
  13.6 Provide callback for cert verification
- 13.7 improve configure --with-openssl
  13.8 Support DANE
  13.9 TLS record padding
  13.10 Support Authority Information Access certificate extension (AIA)
@@ -768,13 +767,6 @@
  OpenSSL supports a callback for customised verification of the peer
  certificate, but this doesn't seem to be exposed in the libcurl APIs. Could
  it be? There's so much that could be done if it were!
-
-13.7 improve configure --with-openssl
-
- Consider making the configure script not guess which TLS library to use (as
- it makes it harder to purposely select another library than the default).
- Maybe require specific TLS library option(s) or an explicit no-TLS-at-all
- option.
 
 13.8 Support DANE
 
