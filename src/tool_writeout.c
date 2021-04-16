@@ -259,12 +259,13 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
 
   if(valid) {
     if(use_json)
-      fprintf(stream, "\"%s\":", wovar->name);
-
-    if(wovar->id == VAR_HTTP_CODE || wovar->id == VAR_HTTP_CODE_PROXY)
-      fprintf(stream, "%03ld", longinfo);
-    else
-      fprintf(stream, "%ld", longinfo);
+      fprintf(stream, "\"%s\":%ld", wovar->name, longinfo);
+    else {
+      if(wovar->id == VAR_HTTP_CODE || wovar->id == VAR_HTTP_CODE_PROXY)
+        fprintf(stream, "%03ld", longinfo);
+      else
+        fprintf(stream, "%ld", longinfo);
+    }
   }
   else {
     if(use_json)
