@@ -211,6 +211,7 @@ struct HTTP {
   char **push_headers;       /* allocated array */
   size_t push_headers_used;  /* number of entries filled in */
   size_t push_headers_alloc; /* number of entries allocated */
+  uint32_t error; /* HTTP/2 stream error code */
 #endif
 #if defined(USE_NGHTTP2) || defined(USE_NGHTTP3)
   bool closed; /* TRUE on HTTP2 stream close */
@@ -281,7 +282,6 @@ struct http_conn {
   /* list of settings that will be sent */
   nghttp2_settings_entry local_settings[3];
   size_t local_settings_num;
-  uint32_t error_code; /* HTTP/2 error code */
 #else
   int unused; /* prevent a compiler warning */
 #endif
