@@ -2153,7 +2153,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
       }
       else if((CURLE_HTTP2_STREAM == result) &&
-              Curl_h2_http_1_1_error(data->conn)) {
+              Curl_h2_http_1_1_error(data)) {
         CURLcode ret = Curl_retry_request(data, &newurl);
 
         if(!ret) {
