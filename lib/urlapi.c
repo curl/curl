@@ -686,7 +686,11 @@ static bool ipv4_normalize(const char *hostname, char *outp, size_t olen)
 
   while(!done) {
     char *endp;
-    unsigned long l = strtoul(c, &endp, 0);
+    unsigned long l;
+    if((*c < '0') || (*c > '9'))
+      /* most importantly this doesn't allow a leading plus or minus */
+      return FALSE;
+    l = strtoul(c, &endp, 0);
 
     /* overflow or nothing parsed at all */
     if(((l == ULONG_MAX) && (errno == ERANGE)) ||  (endp == c))
