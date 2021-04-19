@@ -680,7 +680,7 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
     }
   }
 
-  if(rtp_dataleft != 0 && rtp[0] == '$') {
+  if(rtp_dataleft && rtp[0] == '$') {
     DEBUGF(infof(data, "RTP Rewinding %zd %s\n", rtp_dataleft,
           *readmore ? "(READMORE)" : ""));
 
@@ -824,7 +824,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
 
       /* Copy the id substring into a new buffer */
       data->set.str[STRING_RTSP_SESSION_ID] = malloc(idlen + 1);
-      if(data->set.str[STRING_RTSP_SESSION_ID] == NULL)
+      if(!data->set.str[STRING_RTSP_SESSION_ID])
         return CURLE_OUT_OF_MEMORY;
       memcpy(data->set.str[STRING_RTSP_SESSION_ID], start, idlen);
       (data->set.str[STRING_RTSP_SESSION_ID])[idlen] = '\0';

@@ -358,7 +358,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   size_t store_name_len;
 
   sep = _tcschr(path, TEXT('\\'));
-  if(sep == NULL)
+  if(!sep)
     return CURLE_SSL_CERTPROBLEM;
 
   store_name_len = sep - path;
@@ -388,7 +388,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   store_path_start = sep + 1;
 
   sep = _tcschr(store_path_start, TEXT('\\'));
-  if(sep == NULL)
+  if(!sep)
     return CURLE_SSL_CERTPROBLEM;
 
   *thumbprint = sep + 1;
@@ -398,7 +398,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   *sep = TEXT('\0');
   *store_path = _tcsdup(store_path_start);
   *sep = TEXT('\\');
-  if(*store_path == NULL)
+  if(!*store_path)
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;
@@ -698,7 +698,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
         }
         if(!blob)
           free(certdata);
-        if(cert_store == NULL) {
+        if(!cert_store) {
           DWORD errorcode = GetLastError();
           if(errorcode == ERROR_INVALID_PASSWORD)
             failf(data, "schannel: Failed to import cert file %s, "
@@ -715,7 +715,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
           cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
           CERT_FIND_ANY, NULL, NULL);
 
-        if(client_certs[0] == NULL) {
+        if(!client_certs[0]) {
           failf(data, "schannel: Failed to get certificate from file %s"
                 ", last error is 0x%x",
                 cert_showfilename_error, GetLastError());
@@ -1013,23 +1013,23 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
 
   /* buffer to store previously received and decrypted data */
-  if(BACKEND->decdata_buffer == NULL) {
+  if(!BACKEND->decdata_buffer) {
     BACKEND->decdata_offset = 0;
     BACKEND->decdata_length = CURL_SCHANNEL_BUFFER_INIT_SIZE;
     BACKEND->decdata_buffer = malloc(BACKEND->decdata_length);
-    if(BACKEND->decdata_buffer == NULL) {
+    if(!BACKEND->decdata_buffer) {
       failf(data, "schannel: unable to allocate memory");
       return CURLE_OUT_OF_MEMORY;
     }
   }
 
   /* buffer to store previously received and encrypted data */
-  if(BACKEND->encdata_buffer == NULL) {
+  if(!BACKEND->encdata_buffer) {
     BACKEND->encdata_is_incomplete = false;
     BACKEND->encdata_offset = 0;
     BACKEND->encdata_length = CURL_SCHANNEL_BUFFER_INIT_SIZE;
     BACKEND->encdata_buffer = malloc(BACKEND->encdata_length);
-    if(BACKEND->encdata_buffer == NULL) {
+    if(!BACKEND->encdata_buffer) {
       failf(data, "schannel: unable to allocate memory");
       return CURLE_OUT_OF_MEMORY;
     }
@@ -1044,7 +1044,7 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     reallocated_buffer = realloc(BACKEND->encdata_buffer,
                                  reallocated_length);
 
-    if(reallocated_buffer == NULL) {
+    if(!reallocated_buffer) {
       failf(data, "schannel: unable to re-allocate memory");
       return CURLE_OUT_OF_MEMORY;
     }
@@ -1099,7 +1099,7 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     InitSecBuffer(&outbuf[2], SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&outbuf_desc, outbuf, 3);
 
-    if(inbuf[0].pvBuffer == NULL) {
+    if(!inbuf[0].pvBuffer) {
       failf(data, "schannel: unable to allocate memory");
       return CURLE_OUT_OF_MEMORY;
     }
@@ -1451,7 +1451,7 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
                                        SECPKG_ATTR_REMOTE_CERT_CONTEXT,
                                        &ccert_context);
 
-    if((sspi_status != SEC_E_OK) || (ccert_context == NULL)) {
+    if((sspi_status != SEC_E_OK) || !ccert_context) {
       failf(data, "schannel: failed to retrieve remote cert context");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
@@ -1803,7 +1803,7 @@ schannel_recv(struct Curl_easy *data, int sockindex,
       }
       reallocated_buffer = realloc(BACKEND->encdata_buffer,
                                    reallocated_length);
-      if(reallocated_buffer == NULL) {
+      if(!reallocated_buffer) {
         *err = CURLE_OUT_OF_MEMORY;
         failf(data, "schannel: unable to re-allocate memory");
         goto cleanup;
@@ -1892,7 +1892,7 @@ schannel_recv(struct Curl_easy *data, int sockindex,
           }
           reallocated_buffer = realloc(BACKEND->decdata_buffer,
                                        reallocated_length);
-          if(reallocated_buffer == NULL) {
+          if(!reallocated_buffer) {
             *err = CURLE_OUT_OF_MEMORY;
             failf(data, "schannel: unable to re-allocate memory");
             goto cleanup;
@@ -2294,7 +2294,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
                                        SECPKG_ATTR_REMOTE_CERT_CONTEXT,
                                        &pCertContextServer);
 
-    if((sspi_status != SEC_E_OK) || (pCertContextServer == NULL)) {
+    if((sspi_status != SEC_E_OK) || !pCertContextServer) {
       char buffer[STRERROR_LEN];
       failf(data, "schannel: Failed to read remote certificate context: %s",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));

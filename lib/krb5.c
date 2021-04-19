@@ -305,7 +305,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
         break;
       }
 
-      if(output_buffer.length != 0) {
+      if(output_buffer.length) {
         char *cmd;
 
         result = Curl_base64_encode(data, (char *)output_buffer.value,
@@ -817,7 +817,7 @@ static CURLcode choose_mech(struct Curl_easy *data, struct connectdata *conn)
   const struct Curl_sec_client_mech *mech = &Curl_krb5_client_mech;
 
   tmp_allocation = realloc(conn->app_data, mech->size);
-  if(tmp_allocation == NULL) {
+  if(!tmp_allocation) {
     failf(data, "Failed realloc of size %zu", mech->size);
     mech = NULL;
     return CURLE_OUT_OF_MEMORY;

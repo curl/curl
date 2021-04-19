@@ -813,7 +813,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_COOKIELIST:
     argptr = va_arg(param, char *);
 
-    if(argptr == NULL)
+    if(!argptr)
       break;
 
     if(strcasecompare(argptr, "ALL")) {

@@ -65,7 +65,7 @@ static size_t convert_lineends(struct Curl_easy *data,
   char *inPtr, *outPtr;
 
   /* sanity check */
-  if((startPtr == NULL) || (size < 1)) {
+  if(!startPtr || (size < 1)) {
     return size;
   }
 

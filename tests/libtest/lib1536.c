@@ -69,7 +69,7 @@ int test(char *URL)
             __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
-  if(scheme == NULL || memcmp(scheme, "HTTP", 5) != 0) {
+  if(!scheme || memcmp(scheme, "HTTP", 5) != 0) {
     fprintf(stderr, "%s:%d scheme of http resource is incorrect; "
             "expected 'HTTP' but is %s\n",
             __FILE__, __LINE__,
@@ -95,7 +95,7 @@ int test(char *URL)
             __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
-  if(scheme != 0) {
+  if(scheme) {
     fprintf(stderr, "%s:%d scheme init failed; expected NULL\n",
             __FILE__, __LINE__);
     res = CURLE_FAILED_INIT;
@@ -114,7 +114,7 @@ int test(char *URL)
             __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
-  if(scheme != 0) {
+  if(scheme) {
     fprintf(stderr, "%s:%d scheme init failed; expected NULL\n",
             __FILE__, __LINE__);
     res = CURLE_FAILED_INIT;

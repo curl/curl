@@ -171,7 +171,7 @@ void win32_init(void)
   wVersionRequested = MAKEWORD(2, 2);
   err = WSAStartup(wVersionRequested, &wsaData);
 
-  if(err != 0) {
+  if(err) {
     perror("Winsock init failed");
     logmsg("Error initialising winsock -- aborting");
     exit(1);
@@ -317,8 +317,8 @@ void set_advisor_read_lock(const char *filename)
 
   do {
     lockfile = fopen(filename, "wb");
-  } while((lockfile == NULL) && ((error = errno) == EINTR));
-  if(lockfile == NULL) {
+  } while(!lockfile && ((error = errno) == EINTR));
+  if(!lockfile) {
     logmsg("Error creating lock file %s error: %d %s",
            filename, error, strerror(error));
     return;

@@ -179,7 +179,7 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
 
     free(base64);
 
-    if(userp == NULL) {
+    if(!userp) {
       return CURLE_OUT_OF_MEMORY;
     }
 

@@ -1242,7 +1242,7 @@ static CURLcode http2_init(struct Curl_easy *data, struct connectdata *conn)
     nghttp2_session_callbacks *callbacks;
 
     conn->proto.httpc.inbuf = malloc(H2_BUFSIZE);
-    if(conn->proto.httpc.inbuf == NULL)
+    if(!conn->proto.httpc.inbuf)
       return CURLE_OUT_OF_MEMORY;
 
     rc = nghttp2_session_callbacks_new(&callbacks);
@@ -1383,7 +1383,7 @@ static int h2_process_pending_input(struct Curl_easy *data,
   }
 
   rv = h2_session_send(data, httpc->h2);
-  if(rv != 0) {
+  if(rv) {
     *err = CURLE_SEND_ERROR;
     return -1;
   }
@@ -1447,7 +1447,7 @@ CURLcode Curl_http2_done_sending(struct Curl_easy *data,
 
       /* and attempt to send the pending frames */
       rv = h2_session_send(data, h2);
-      if(rv != 0)
+      if(rv)
         result = CURLE_SEND_ERROR;
 
       if(nghttp2_session_want_write(h2)) {
@@ -1963,7 +1963,7 @@ static ssize_t http2_send(struct Curl_easy *data, int sockindex,
      more space. */
   nheader += 1;
   nva = malloc(sizeof(nghttp2_nv) * nheader);
-  if(nva == NULL) {
+  if(!nva) {
     *err = CURLE_OUT_OF_MEMORY;
     return -1;
   }
@@ -2086,7 +2086,7 @@ static ssize_t http2_send(struct Curl_easy *data, int sockindex,
   }
 
   /* :authority must come before non-pseudo header fields */
-  if(authority_idx != 0 && authority_idx != AUTHORITY_DST_IDX) {
+  if(authority_idx && authority_idx != AUTHORITY_DST_IDX) {
     nghttp2_nv authority = nva[authority_idx];
     for(i = authority_idx; i > AUTHORITY_DST_IDX; --i) {
       nva[i] = nva[i - 1];
@@ -2156,7 +2156,7 @@ static ssize_t http2_send(struct Curl_easy *data, int sockindex,
   stream->stream_id = stream_id;
 
   rv = h2_session_send(data, h2);
-  if(rv != 0) {
+  if(rv) {
     H2BUGF(infof(data,
                  "http2_send() nghttp2_session_send error (%s)%d\n",
                  nghttp2_strerror(rv), rv));
@@ -2264,7 +2264,7 @@ CURLcode Curl_http2_switched(struct Curl_easy *data,
     /* queue SETTINGS frame (again) */
     rv = nghttp2_session_upgrade(httpc->h2, httpc->binsettings,
                                  httpc->binlen, NULL);
-    if(rv != 0) {
+    if(rv) {
       failf(data, "nghttp2_session_upgrade() failed: %s(%d)",
             nghttp2_strerror(rv), rv);
       return CURLE_HTTP2;
@@ -2287,7 +2287,7 @@ CURLcode Curl_http2_switched(struct Curl_easy *data,
     rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE,
                                  httpc->local_settings,
                                  httpc->local_settings_num);
-    if(rv != 0) {
+    if(rv) {
       failf(data, "nghttp2_submit_settings() failed: %s(%d)",
             nghttp2_strerror(rv), rv);
       return CURLE_HTTP2;
@@ -2296,7 +2296,7 @@ CURLcode Curl_http2_switched(struct Curl_easy *data,
 
   rv = nghttp2_session_set_local_window_size(httpc->h2, NGHTTP2_FLAG_NONE, 0,
                                              HTTP2_HUGE_WINDOW_SIZE);
-  if(rv != 0) {
+  if(rv) {
     failf(data, "nghttp2_session_set_local_window_size() failed: %s(%d)",
           nghttp2_strerror(rv), rv);
     return CURLE_HTTP2;

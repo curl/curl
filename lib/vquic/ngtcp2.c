@@ -226,7 +226,7 @@ static int write_client_handshake(struct quicsocket *qs,
   int rv;
 
   crypto_data = &qs->crypto_data[level];
-  if(crypto_data->buf == NULL) {
+  if(!crypto_data->buf) {
     crypto_data->buf = malloc(4096);
     if(!crypto_data->buf)
       return 0;
@@ -615,7 +615,7 @@ cb_acked_stream_data_offset(ngtcp2_conn *tconn, int64_t stream_id,
   (void)stream_user_data;
 
   rv = nghttp3_conn_add_ack_offset(qs->h3conn, stream_id, datalen);
-  if(rv != 0) {
+  if(rv) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -634,7 +634,7 @@ static int cb_stream_close(ngtcp2_conn *tconn, int64_t stream_id,
 
   rv = nghttp3_conn_close_stream(qs->h3conn, stream_id,
                                  app_error_code);
-  if(rv != 0) {
+  if(rv) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -653,7 +653,7 @@ static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
   (void)stream_user_data;
 
   rv = nghttp3_conn_reset_stream(qs->h3conn, stream_id);
-  if(rv != 0) {
+  if(rv) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -682,7 +682,7 @@ static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
   (void)stream_user_data;
 
   rv = nghttp3_conn_unblock_stream(qs->h3conn, stream_id);
-  if(rv != 0) {
+  if(rv) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -1309,7 +1309,7 @@ static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
 
     if(stream->h3out->used == 0) {
       int rv = nghttp3_conn_resume_stream(conn, stream_id);
-      if(rv != 0) {
+      if(rv) {
         return NGTCP2_ERR_CALLBACK_FAILURE;
       }
     }
@@ -1545,7 +1545,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   }
 
   /* :authority must come before non-pseudo header fields */
-  if(authority_idx != 0 && authority_idx != AUTHORITY_DST_IDX) {
+  if(authority_idx && authority_idx != AUTHORITY_DST_IDX) {
     nghttp3_nv authority = nva[authority_idx];
     for(i = authority_idx; i > AUTHORITY_DST_IDX; --i) {
       nva[i] = nva[i - 1];
@@ -1741,7 +1741,7 @@ static CURLcode ng_process_ingress(struct Curl_easy *data,
                      remote_addrlen);
 
     rv = ngtcp2_conn_read_pkt(qs->qconn, &path, &pi, buf, recvd, ts);
-    if(rv != 0) {
+    if(rv) {
       /* TODO Send CONNECTION_CLOSE if possible */
       return CURLE_RECV_ERROR;
     }
@@ -1785,7 +1785,7 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
   }
 
   rv = ngtcp2_conn_handle_expiry(qs->qconn, ts);
-  if(rv != 0) {
+  if(rv) {
     failf(data, "ngtcp2_conn_handle_expiry returned error: %s",
           ngtcp2_strerror(rv));
     return CURLE_SEND_ERROR;
@@ -1821,7 +1821,7 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
          outlen == NGTCP2_ERR_STREAM_SHUT_WR) {
         assert(ndatalen == -1);
         rv = nghttp3_conn_block_stream(qs->h3conn, stream_id);
-        if(rv != 0) {
+        if(rv) {
           failf(data, "nghttp3_conn_block_stream returned error: %s\n",
                 nghttp3_strerror(rv));
           return CURLE_SEND_ERROR;
@@ -1831,7 +1831,7 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
       else if(outlen == NGTCP2_ERR_WRITE_MORE) {
         assert(ndatalen >= 0);
         rv = nghttp3_conn_add_write_offset(qs->h3conn, stream_id, ndatalen);
-        if(rv != 0) {
+        if(rv) {
           failf(data, "nghttp3_conn_add_write_offset returned error: %s\n",
                 nghttp3_strerror(rv));
           return CURLE_SEND_ERROR;
@@ -1847,7 +1847,7 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
     }
     else if(ndatalen >= 0) {
       rv = nghttp3_conn_add_write_offset(qs->h3conn, stream_id, ndatalen);
-      if(rv != 0) {
+      if(rv) {
         failf(data, "nghttp3_conn_add_write_offset returned error: %s\n",
               nghttp3_strerror(rv));
         return CURLE_SEND_ERROR;

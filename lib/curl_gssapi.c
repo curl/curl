@@ -102,7 +102,7 @@ static size_t display_gss_error(OM_uint32 status, int type,
                        (char *)status_string.value);
     }
     gss_release_buffer(&min_stat, &status_string);
-  } while(!GSS_ERROR(maj_stat) && msg_ctx != 0);
+  } while(!GSS_ERROR(maj_stat) && msg_ctx);
 
   return len;
 }

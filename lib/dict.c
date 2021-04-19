@@ -214,14 +214,14 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       }
     }
 
-    if((word == NULL) || (*word == (char)0)) {
+    if(!word || (*word == (char)0)) {
       infof(data, "lookup word is missing\n");
       word = (char *)"default";
     }
-    if((database == NULL) || (*database == (char)0)) {
+    if(!database || (*database == (char)0)) {
       database = (char *)"!";
     }
-    if((strategy == NULL) || (*strategy == (char)0)) {
+    if(!strategy || (*strategy == (char)0)) {
       strategy = (char *)".";
     }
 
@@ -265,11 +265,11 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       }
     }
 
-    if((word == NULL) || (*word == (char)0)) {
+    if(!word || (*word == (char)0)) {
       infof(data, "lookup word is missing\n");
       word = (char *)"default";
     }
-    if((database == NULL) || (*database == (char)0)) {
+    if(!database || (*database == (char)0)) {
       database = (char *)"!";
     }
 

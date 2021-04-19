@@ -549,7 +549,7 @@ static ssize_t ldap_recv(struct Curl_easy *data, int sockindex, char *buf,
         rc = ldap_get_attribute_ber(li->ld, ent, ber, &bv, &bvals)) {
       int i;
 
-      if(bv.bv_val == NULL)
+      if(!bv.bv_val)
         break;
 
       if(bv.bv_len > 7 && !strncmp(bv.bv_val + bv.bv_len - 7, ";binary", 7))
@@ -557,7 +557,7 @@ static ssize_t ldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       else
         binary = 0;
 
-      if(bvals == NULL) {
+      if(!bvals) {
         writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
         if(writeerr) {
           *err = writeerr;

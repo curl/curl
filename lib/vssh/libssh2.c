@@ -956,7 +956,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
             out_of_memory = TRUE;
         }
 
-        if(out_of_memory || sshc->rsa == NULL) {
+        if(out_of_memory || !sshc->rsa) {
           Curl_safefree(sshc->rsa);
           Curl_safefree(sshc->rsa_pub);
           state(data, SSH_SESSION_FREE);
@@ -1359,7 +1359,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
          * command with a space so we can check for it unconditionally
          */
         cp = strchr(cmd, ' ');
-        if(cp == NULL) {
+        if(!cp) {
           failf(data, "Syntax error command '%s'. Missing parameter!",
                 cmd);
           state(data, SSH_SFTP_CLOSE);
@@ -1534,7 +1534,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         if(rc == LIBSSH2_ERROR_EAGAIN) {
           break;
         }
-        if(rc != 0 && !sshc->acceptfail) { /* get those attributes */
+        if(rc && !sshc->acceptfail) { /* get those attributes */
           sftperr = libssh2_sftp_last_error(sshc->sftp_session);
           Curl_safefree(sshc->quote_path1);
           Curl_safefree(sshc->quote_path2);
@@ -1633,7 +1633,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
-      if(rc != 0 && !sshc->acceptfail) {
+      if(rc && !sshc->acceptfail) {
         sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
         Curl_safefree(sshc->quote_path2);
@@ -1656,7 +1656,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
-      if(rc != 0 && !sshc->acceptfail) {
+      if(rc && !sshc->acceptfail) {
         sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
         Curl_safefree(sshc->quote_path2);
@@ -1677,7 +1677,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
-      if(rc != 0 && !sshc->acceptfail) {
+      if(rc && !sshc->acceptfail) {
         sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
         failf(data, "mkdir command failed: %s",
@@ -1702,7 +1702,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
-      if(rc != 0 && !sshc->acceptfail) {
+      if(rc && !sshc->acceptfail) {
         sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
         Curl_safefree(sshc->quote_path2);
@@ -1722,7 +1722,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
-      if(rc != 0 && !sshc->acceptfail) {
+      if(rc && !sshc->acceptfail) {
         sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
         failf(data, "rmdir command failed: %s",
@@ -1741,7 +1741,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
-      if(rc != 0 && !sshc->acceptfail) {
+      if(rc && !sshc->acceptfail) {
         sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
         failf(data, "rm command failed: %s", sftp_libssh2_strerror(sftperr));
@@ -1764,7 +1764,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
-      if(rc != 0 && !sshc->acceptfail) {
+      if(rc && !sshc->acceptfail) {
         sftperr = libssh2_sftp_last_error(sshc->sftp_session);
         Curl_safefree(sshc->quote_path1);
         failf(data, "statvfs command failed: %s",
@@ -1857,7 +1857,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
        *          same name as the last directory in the path.
        */
 
-      if(data->state.resume_from != 0) {
+      if(data->state.resume_from) {
         LIBSSH2_SFTP_ATTRIBUTES attrs;
         if(data->state.resume_from < 0) {
           rc = libssh2_sftp_stat_ex(sshc->sftp_session, sshp->path,
@@ -3084,7 +3084,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
   sshc->ssh_session = libssh2_session_init_ex(my_libssh2_malloc,
                                               my_libssh2_free,
                                               my_libssh2_realloc, data);
-  if(sshc->ssh_session == NULL) {
+  if(!sshc->ssh_session) {
     failf(data, "Failure initialising ssh session");
     return CURLE_FAILED_INIT;
   }

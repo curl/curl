@@ -923,14 +923,14 @@ socks_proxy_info_matches(const struct proxy_info *data,
   /* the user information is case-sensitive
      or at least it is not defined as case-insensitive
      see https://tools.ietf.org/html/rfc3986#section-3.2.1 */
-  if((data->user == NULL) != (needle->user == NULL))
+  if(!data->user != !needle->user)
     return FALSE;
   /* curl_strequal does a case insentive comparison, so do not use it here! */
   if(data->user &&
      needle->user &&
      strcmp(data->user, needle->user) != 0)
     return FALSE;
-  if((data->passwd == NULL) != (needle->passwd == NULL))
+  if(!data->passwd != !needle->passwd)
     return FALSE;
   /* curl_strequal does a case insentive comparison, so do not use it here! */
   if(data->passwd &&
@@ -3563,7 +3563,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 #ifdef USE_UNIX_SOCKETS
   if(data->set.str[STRING_UNIX_SOCKET_PATH]) {
     conn->unix_domain_socket = strdup(data->set.str[STRING_UNIX_SOCKET_PATH]);
-    if(conn->unix_domain_socket == NULL) {
+    if(!conn->unix_domain_socket) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
     }

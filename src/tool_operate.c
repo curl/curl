@@ -167,14 +167,14 @@ static curl_off_t vms_realfilesize(const char *name,
 
   /* !checksrc! disable FOPENMODE 1 */
   file = fopen(name, "r"); /* VMS */
-  if(file == NULL) {
+  if(!file) {
     return 0;
   }
   count = 0;
   ret_stat = 1;
   while(ret_stat > 0) {
     ret_stat = fread(buffer, 1, sizeof(buffer), file);
-    if(ret_stat != 0)
+    if(ret_stat)
       count += ret_stat;
   }
   fclose(file);
@@ -764,7 +764,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
     urlnode = config->state.urlnode;
     if(urlnode->flags & GETOUT_METALINK) {
       metalink = 1;
-      if(mlfile_last == NULL) {
+      if(!mlfile_last) {
         mlfile_last = config->metalinkfile_list;
       }
       mlfile = mlfile_last;
@@ -1979,7 +1979,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         /* curl 7.17.1 */
         if(!config->nokeepalive) {
           my_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-          if(config->alivetime != 0) {
+          if(config->alivetime) {
             my_setopt(curl, CURLOPT_TCP_KEEPIDLE, config->alivetime);
             my_setopt(curl, CURLOPT_TCP_KEEPINTVL, config->alivetime);
           }
@@ -2128,7 +2128,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 #ifdef USE_METALINK
         if(!metalink && config->use_metalink) {
           outs->metalink_parser = metalink_parser_context_new();
-          if(outs->metalink_parser == NULL) {
+          if(!outs->metalink_parser) {
             result = CURLE_OUT_OF_MEMORY;
             break;
           }

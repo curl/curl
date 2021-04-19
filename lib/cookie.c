@@ -1579,7 +1579,7 @@ static int cookie_output(struct Curl_easy *data,
 
     for(i = 0; i < nvalid; i++) {
       char *format_ptr = get_netscape_format(array[i]);
-      if(format_ptr == NULL) {
+      if(!format_ptr) {
         fprintf(out, "#\n# Fatal libcurl error\n");
         free(array);
         goto error;
@@ -1618,8 +1618,7 @@ static struct curl_slist *cookie_list(struct Curl_easy *data)
   char *line;
   unsigned int i;
 
-  if((data->cookies == NULL) ||
-      (data->cookies->numcookies == 0))
+  if(!data->cookies || (data->cookies->numcookies == 0))
     return NULL;
 
   for(i = 0; i < COOKIE_HASH_SIZE; i++) {

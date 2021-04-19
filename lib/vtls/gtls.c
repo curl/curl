@@ -263,7 +263,7 @@ static CURLcode handshake(struct Curl_easy *data,
         strerr = gnutls_alert_get_name(alert);
       }
 
-      if(strerr == NULL)
+      if(!strerr)
         strerr = gnutls_strerror(rc);
 
       infof(data, "gnutls_handshake() warning: %s\n", strerr);
@@ -277,7 +277,7 @@ static CURLcode handshake(struct Curl_easy *data,
         strerr = gnutls_alert_get_name(alert);
       }
 
-      if(strerr == NULL)
+      if(!strerr)
         strerr = gnutls_strerror(rc);
 
       failf(data, "gnutls_handshake() failed: %s", strerr);

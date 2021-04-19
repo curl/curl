@@ -369,7 +369,7 @@ static int ProcessRequest(struct httprequest *req)
                   memcpy(rtp_scratch + 4 + i, RTP_DATA, RTP_DATA_SIZE);
                 }
 
-                if(req->rtp_buffer == NULL) {
+                if(!req->rtp_buffer) {
                   req->rtp_buffer = rtp_scratch;
                   req->rtp_buffersize = rtp_size + 4;
                 }
@@ -599,15 +599,15 @@ static void storerequest(char *reqbuf, size_t totalsize)
   size_t writeleft;
   FILE *dump;
 
-  if(reqbuf == NULL)
+  if(!reqbuf)
     return;
   if(totalsize == 0)
     return;
 
   do {
     dump = fopen(REQUEST_DUMP, "ab");
-  } while((dump == NULL) && ((error = errno) == EINTR));
-  if(dump == NULL) {
+  } while(!dump && ((error = errno) == EINTR));
+  if(!dump) {
     logmsg("Error opening file %s error: %d %s",
            REQUEST_DUMP, error, strerror(error));
     logmsg("Failed to write request input to " REQUEST_DUMP);

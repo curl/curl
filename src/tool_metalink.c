@@ -534,7 +534,7 @@ int metalink_check_hash(struct GlobalConfig *config,
 {
   int rv;
   fprintf(config->errors, "Metalink: validating (%s)...\n", filename);
-  if(mlfile->checksum == NULL) {
+  if(!mlfile->checksum) {
     fprintf(config->errors,
             "Metalink: validating (%s) FAILED (digest missing)\n", filename);
     return -2;
@@ -649,7 +649,7 @@ static struct metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
          fileinfo->resources point to the target file. BitTorrent
          metainfo file URL may be appeared in fileinfo->metaurls.
       */
-      if((*p)->type == NULL ||
+      if(!(*p)->type ||
          curl_strequal((*p)->type, "http") ||
          curl_strequal((*p)->type, "https") ||
          curl_strequal((*p)->type, "ftp") ||
@@ -691,10 +691,10 @@ int parse_metalink(struct OperationConfig *config, struct OutStruct *outs,
   /* metlaink_parse_final deletes outs->metalink_parser */
   r = metalink_parse_final(outs->metalink_parser, NULL, 0, &metalink);
   outs->metalink_parser = NULL;
-  if(r != 0) {
+  if(r) {
     return -1;
   }
-  if(metalink->files == NULL) {
+  if(!metalink->files) {
     fprintf(config->global->errors, "Metalink: parsing (%s) WARNING "
             "(missing or invalid file name)\n",
             metalink_url);
@@ -824,7 +824,7 @@ static void delete_metalink_checksum(struct metalink_checksum *chksum)
 
 static void delete_metalink_resource(struct metalink_resource *res)
 {
-  if(res == NULL) {
+  if(!res) {
     return;
   }
   Curl_safefree(res->url);
@@ -834,7 +834,7 @@ static void delete_metalink_resource(struct metalink_resource *res)
 void delete_metalinkfile(struct metalinkfile *mlfile)
 {
   struct metalink_resource *res;
-  if(mlfile == NULL) {
+  if(!mlfile) {
     return;
   }
   Curl_safefree(mlfile->filename);

@@ -323,7 +323,7 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
   int result;
 
   backend->tlsbuf = calloc(TLSBUF_SIZE, 1);
-  if(backend->tlsbuf == NULL) {
+  if(!backend->tlsbuf) {
     return CURLE_OUT_OF_MEMORY;
   }
 

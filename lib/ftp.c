@@ -1090,7 +1090,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   else
     res = NULL; /* failure! */
 
-  if(res == NULL) {
+  if(!res) {
     failf(data, "failed to resolve the address provided to PORT: %s", host);
     free(addr);
     return CURLE_FTP_PORT_FAILED;

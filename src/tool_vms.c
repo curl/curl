@@ -56,7 +56,7 @@ int is_vms_shell(void)
   shell = getenv("SHELL");
 
   /* No shell, means DCL */
-  if(shell == NULL) {
+  if(!shell) {
     vms_shell = 1;
     return 1;
   }

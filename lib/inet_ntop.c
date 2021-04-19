@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1996-2019  Internet Software Consortium.
+ * Copyright (C) 1996-2021  Internet Software Consortium.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -134,7 +134,7 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
 
     /* Are we following an initial run of 0x00s or any real hex?
      */
-    if(i != 0)
+    if(i)
       *tp++ = ':';
 
     /* Is this address an encapsulated IPv4?

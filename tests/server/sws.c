@@ -792,15 +792,15 @@ static void storerequest(const char *reqbuf, size_t totalsize)
   FILE *dump;
   const char *dumpfile = is_proxy?REQUEST_PROXY_DUMP:REQUEST_DUMP;
 
-  if(reqbuf == NULL)
+  if(!reqbuf)
     return;
   if(totalsize == 0)
     return;
 
   do {
     dump = fopen(dumpfile, "ab");
-  } while((dump == NULL) && ((error = errno) == EINTR));
-  if(dump == NULL) {
+  } while(!dump && ((error = errno) == EINTR));
+  if(!dump) {
     logmsg("[2] Error opening file %s error: %d %s",
            dumpfile, error, strerror(error));
     logmsg("Failed to write request input ");
@@ -2313,7 +2313,7 @@ int main(int argc, char *argv[])
           }
 
           /* Reset the request, unless we're still in the middle of reading */
-          if(rc != 0)
+          if(rc)
             init_httprequest(&req);
         } while(rc > 0);
       }

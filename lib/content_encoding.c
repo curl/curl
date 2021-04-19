@@ -178,7 +178,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
   /* Dynamically allocate a buffer for decompression because it's uncommonly
      large to hold on the stack */
   decomp = malloc(DSIZ);
-  if(decomp == NULL)
+  if(!decomp)
     return exit_zlib(data, z, &zp->zlib_init, CURLE_OUT_OF_MEMORY);
 
   /* because the buffer size is fixed, iteratively decompress and transfer to
@@ -487,7 +487,7 @@ static CURLcode gzip_unencode_write(struct Curl_easy *data,
        */
       z->avail_in = (uInt) nbytes;
       z->next_in = malloc(z->avail_in);
-      if(z->next_in == NULL) {
+      if(!z->next_in) {
         return exit_zlib(data, z, &zp->zlib_init, CURLE_OUT_OF_MEMORY);
       }
       memcpy(z->next_in, buf, z->avail_in);
@@ -509,7 +509,7 @@ static CURLcode gzip_unencode_write(struct Curl_easy *data,
     ssize_t hlen;
     z->avail_in += (uInt) nbytes;
     z->next_in = Curl_saferealloc(z->next_in, z->avail_in);
-    if(z->next_in == NULL) {
+    if(!z->next_in) {
       return exit_zlib(data, z, &zp->zlib_init, CURLE_OUT_OF_MEMORY);
     }
     /* Append the new block of data to the previous one */

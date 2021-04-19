@@ -619,7 +619,7 @@ SSL_CTX_use_certificate_blob(SSL_CTX *ctx, const struct curl_blob *blob,
     goto end;
   }
 
-  if(x == NULL) {
+  if(!x) {
     ret = 0;
     goto end;
   }
@@ -650,7 +650,7 @@ SSL_CTX_use_PrivateKey_blob(SSL_CTX *ctx, const struct curl_blob *blob,
     ret = 0;
     goto end;
   }
-  if(pkey == NULL) {
+  if(!pkey) {
     ret = 0;
     goto end;
   }
@@ -681,7 +681,7 @@ SSL_CTX_use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
   x = PEM_read_bio_X509_AUX(in, NULL,
                             passwd_callback, (void *)key_passwd);
 
-  if(x == NULL) {
+  if(!x) {
     ret = 0;
     goto end;
   }
@@ -869,7 +869,7 @@ int cert_stuff(struct Curl_easy *data,
       STACK_OF(X509) *ca = NULL;
       if(cert_blob) {
         cert_bio = BIO_new_mem_buf(cert_blob->data, (int)(cert_blob->len));
-        if(cert_bio == NULL) {
+        if(!cert_bio) {
           failf(data,
                 "BIO_new_mem_buf NULL, " OSSL_PACKAGE
                 " error %s",
@@ -880,7 +880,7 @@ int cert_stuff(struct Curl_easy *data,
       }
       else {
         cert_bio = BIO_new(BIO_s_file());
-        if(cert_bio == NULL) {
+        if(!cert_bio) {
           failf(data,
                 "BIO_new return NULL, " OSSL_PACKAGE
                 " error %s",
@@ -3346,7 +3346,7 @@ static CURLcode ossl_connect_step2(struct Curl_easy *data,
       const unsigned char *neg_protocol;
       unsigned int len;
       SSL_get0_alpn_selected(backend->handle, &neg_protocol, &len);
-      if(len != 0) {
+      if(len) {
         infof(data, "ALPN, server accepted to use %.*s\n", len, neg_protocol);
 
 #ifdef USE_NGHTTP2
@@ -3838,7 +3838,7 @@ static CURLcode servercert(struct Curl_easy *data,
                              (int)SSL_SET_OPTION(issuercert_blob)->len);
       else {
         fp = BIO_new(BIO_s_file());
-        if(fp == NULL) {
+        if(!fp) {
           failf(data,
                 "BIO_new return NULL, " OSSL_PACKAGE
                 " error %s",

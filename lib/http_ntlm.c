@@ -186,10 +186,10 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     passwdp = "";
 
 #ifdef USE_WINDOWS_SSPI
-  if(s_hSecDll == NULL) {
+  if(!s_hSecDll) {
     /* not thread safe and leaks - use curl_global_init() to avoid */
     CURLcode err = Curl_sspi_global_init();
-    if(s_hSecDll == NULL)
+    if(!s_hSecDll)
       return err;
   }
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS

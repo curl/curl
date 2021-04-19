@@ -83,7 +83,7 @@ CURLcode Curl_auth_create_plain_message(const char *authzid,
     return CURLE_OUT_OF_MEMORY;
 
   /* Calculate the reply */
-  if(zlen != 0)
+  if(zlen)
     memcpy(plainauth, authzid, zlen);
   plainauth[zlen] = '\0';
   memcpy(plainauth + zlen + 1, authcid, clen);

@@ -303,7 +303,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #else
   rc = _ldap_url_parse(data, conn, &ludp);
 #endif
-  if(rc != 0) {
+  if(rc) {
     failf(data, "LDAP local: %s", ldap_err2string(rc));
     result = CURLE_LDAP_INVALID_URL;
     goto quit;
@@ -387,7 +387,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       goto quit;
     }
     server = ldapssl_init(host, (int)conn->port, 1);
-    if(server == NULL) {
+    if(!server) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
             conn->host.dispname, conn->port);
       result = CURLE_COULDNT_CONNECT;
@@ -428,7 +428,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       goto quit;
     }
     server = ldap_init(host, (int)conn->port);
-    if(server == NULL) {
+    if(!server) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
             conn->host.dispname, conn->port);
       result = CURLE_COULDNT_CONNECT;
@@ -464,7 +464,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   }
   else {
     server = ldap_init(host, (int)conn->port);
-    if(server == NULL) {
+    if(!server) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
             conn->host.dispname, conn->port);
       result = CURLE_COULDNT_CONNECT;
@@ -477,7 +477,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #else
   rc = ldap_simple_bind_s(server, user, passwd);
 #endif
-  if(!ldap_ssl && rc != 0) {
+  if(!ldap_ssl && rc) {
     ldap_proto = LDAP_VERSION2;
     ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
 #ifdef USE_WIN32_LDAP
@@ -486,7 +486,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     rc = ldap_simple_bind_s(server, user, passwd);
 #endif
   }
-  if(rc != 0) {
+  if(rc) {
 #ifdef USE_WIN32_LDAP
     failf(data, "LDAP local: bind via ldap_win_bind %s",
           ldap_err2string(rc));
@@ -501,7 +501,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   rc = ldap_search_s(server, ludp->lud_dn, ludp->lud_scope,
                      ludp->lud_filter, ludp->lud_attrs, 0, &ldapmsg);
 
-  if(rc != 0 && rc != LDAP_SIZELIMIT_EXCEEDED) {
+  if(rc && rc != LDAP_SIZELIMIT_EXCEEDED) {
     failf(data, "LDAP remote: %s", ldap_err2string(rc));
     result = CURLE_LDAP_SEARCH_FAILED;
     goto quit;

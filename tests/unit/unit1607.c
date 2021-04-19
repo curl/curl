@@ -194,7 +194,7 @@ UNITTEST_START
         break;
       }
 
-      if(dns->timestamp != 0 && tests[i].permanent) {
+      if(dns->timestamp && tests[i].permanent) {
         fprintf(stderr, "%s:%d tests[%d] failed. the timestamp is not zero "
                 "but tests[%d].permanent is TRUE\n",
                 __FILE__, __LINE__, i, i);

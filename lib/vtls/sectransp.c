@@ -1324,7 +1324,7 @@ CF_INLINE bool is_file(const char *filename)
 {
   struct_stat st;
 
-  if(filename == NULL)
+  if(!filename)
     return false;
 
   if(stat(filename, &st) == 0)
@@ -2142,21 +2142,21 @@ static long pem_to_der(const char *in, unsigned char **out, size_t *outlen)
 
   /* Jump through the separators at the beginning of the certificate. */
   sep_start = strstr(in, "-----");
-  if(sep_start == NULL)
+  if(!sep_start)
     return 0;
   cert_start = strstr(sep_start + 1, "-----");
-  if(cert_start == NULL)
+  if(!cert_start)
     return -1;
 
   cert_start += 5;
 
   /* Find separator after the end of the certificate. */
   cert_end = strstr(cert_start, "-----");
-  if(cert_end == NULL)
+  if(!cert_end)
     return -1;
 
   sep_end = strstr(cert_end + 1, "-----");
-  if(sep_end == NULL)
+  if(!sep_end)
     return -1;
   sep_end += 5;
 
@@ -2293,7 +2293,7 @@ static CURLcode verify_cert(const char *cafile, struct Curl_easy *data,
    */
   CFMutableArrayRef array = CFArrayCreateMutable(kCFAllocatorDefault, 0,
                                                  &kCFTypeArrayCallBacks);
-  if(array == NULL) {
+  if(!array) {
     free(certbuf);
     failf(data, "SSL: out of memory creating CA certificate array");
     return CURLE_OUT_OF_MEMORY;
@@ -2343,7 +2343,7 @@ static CURLcode verify_cert(const char *cafile, struct Curl_easy *data,
 
   SecTrustRef trust;
   OSStatus ret = SSLCopyPeerTrust(ctx, &trust);
-  if(trust == NULL) {
+  if(!trust) {
     failf(data, "SSL: error getting certificate chain");
     CFRelease(array);
     return CURLE_PEER_FAILED_VERIFICATION;
@@ -2416,19 +2416,19 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
   do {
     SecTrustRef trust;
     OSStatus ret = SSLCopyPeerTrust(ctx, &trust);
-    if(ret != noErr || trust == NULL)
+    if(ret != noErr || !trust)
       break;
 
     SecKeyRef keyRef = SecTrustCopyPublicKey(trust);
     CFRelease(trust);
-    if(keyRef == NULL)
+    if(!keyRef)
       break;
 
 #ifdef SECTRANSP_PINNEDPUBKEY_V1
 
     publicKeyBits = SecKeyCopyExternalRepresentation(keyRef, NULL);
     CFRelease(keyRef);
-    if(publicKeyBits == NULL)
+    if(!publicKeyBits)
       break;
 
 #elif SECTRANSP_PINNEDPUBKEY_V2
@@ -2436,7 +2436,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
     OSStatus success = SecItemExport(keyRef, kSecFormatOpenSSL, 0, NULL,
                                      &publicKeyBits);
     CFRelease(keyRef);
-    if(success != errSecSuccess || publicKeyBits == NULL)
+    if(success != errSecSuccess || !publicKeyBits)
       break;
 
 #endif /* SECTRANSP_PINNEDPUBKEY_V2 */

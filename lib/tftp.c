@@ -319,7 +319,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_state_data *state,
     const char *option, *value;
 
     tmp = tftp_option_get(tmp, ptr + len - tmp, &option, &value);
-    if(tmp == NULL) {
+    if(!tmp) {
       failf(data, "Malformed ACK packet, rejecting");
       return CURLE_TFTP_ILLEGAL;
     }
@@ -776,7 +776,7 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
         return result;
       state->sbytes += (int)cb;
       state->data->req.upload_fromhere += cb;
-    } while(state->sbytes < state->blksize && cb != 0);
+    } while(state->sbytes < state->blksize && cb);
 
     sbytes = sendto(state->sockfd, (void *) state->spacket.data,
                     4 + state->sbytes, SEND_4TH_ARG,
@@ -1256,7 +1256,7 @@ static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done)
       failf(data, "%s", Curl_strerror(error, buffer, sizeof(buffer)));
       state->event = TFTP_EVENT_ERROR;
     }
-    else if(rc != 0) {
+    else if(rc) {
       result = tftp_receive_packet(data);
       if(result)
         return result;

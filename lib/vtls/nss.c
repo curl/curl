@@ -405,7 +405,7 @@ static int is_file(const char *filename)
 {
   struct_stat st;
 
-  if(filename == NULL)
+  if(!filename)
     return 0;
 
   if(stat(filename, &st) == 0)
@@ -1448,7 +1448,7 @@ static CURLcode nss_setup(struct Curl_easy *data)
 static int nss_init(void)
 {
   /* curl_global_init() is not thread-safe so this test is ok */
-  if(nss_initlock == NULL) {
+  if(!nss_initlock) {
     PR_Init(PR_USER_THREAD, PR_PRIORITY_NORMAL, 0);
     nss_initlock = PR_NewLock();
     nss_crllock = PR_NewLock();

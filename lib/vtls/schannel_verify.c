@@ -389,7 +389,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     if(entry->dwAltNameChoice != CERT_ALT_NAME_DNS_NAME) {
       continue;
     }
-    if(entry->pwszDNSName == NULL) {
+    if(!entry->pwszDNSName) {
       infof(data, "schannel: Empty DNS name.");
       continue;
     }
@@ -549,7 +549,7 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
                                      SECPKG_ATTR_REMOTE_CERT_CONTEXT,
                                      &pCertContextServer);
 
-  if((sspi_status != SEC_E_OK) || (pCertContextServer == NULL)) {
+  if((sspi_status != SEC_E_OK) || !pCertContextServer) {
     char buffer[STRERROR_LEN];
     failf(data, "schannel: Failed to read remote certificate context: %s",
           Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
