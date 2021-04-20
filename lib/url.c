@@ -1315,6 +1315,13 @@ ConnectionExists(struct Curl_easy *data,
         }
       }
 
+      /* If multiplexing isn't enabled on the h2 connection and h1 is
+         explicitly requested, handle it: */
+      if((needle->handler->protocol & PROTO_FAMILY_HTTP) &&
+         (check->httpversion >= 20) &&
+         (data->state.httpwant < CURL_HTTP_VERSION_2_0))
+        continue;
+
       if((needle->handler->flags&PROTOPT_SSL)
 #ifndef CURL_DISABLE_PROXY
          || !needle->bits.httpproxy || needle->bits.tunnel_proxy
