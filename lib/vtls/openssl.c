@@ -663,7 +663,7 @@ SSL_CTX_use_PrivateKey_blob(SSL_CTX *ctx, const struct curl_blob *blob,
 
 static int
 SSL_CTX_use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
-                                  const char *key_passwd)
+                                   const char *key_passwd)
 {
 /* SSL_CTX_add1_chain_cert introduced in OpenSSL 1.0.2 */
 #if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) && /* OpenSSL 1.0.2 or later */ \
@@ -725,7 +725,7 @@ SSL_CTX_use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
   return ret;
 #else
   (void)ctx; /* unused */
-  (void)in; /* unused */
+  (void)blob; /* unused */
   (void)key_passwd; /* unused */
   return 0;
 #endif
