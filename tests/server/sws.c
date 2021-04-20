@@ -2092,11 +2092,13 @@ int main(int argc, char *argv[])
                unix_socket, errno, strerror(errno));
         goto sws_cleanup;
       }
+#ifdef S_IFSOCK
       if((statbuf.st_mode & S_IFSOCK) != S_IFSOCK) {
         logmsg("Error binding socket, failed to stat %s: (%d) %s",
                unix_socket, error, strerror(error));
         goto sws_cleanup;
       }
+#endif
       /* dead socket, cleanup and retry bind */
       rc = unlink(unix_socket);
       if(0 != rc) {
