@@ -8,12 +8,24 @@ curl and libcurl 7.77.0
 
 This release includes the following changes:
 
- o
+ o curl: ignore options asking for SSLv2 or SSLv3 [10]
+ o hsts: enable by default [8]
+ o vtls: refuse setting any SSL version [9]
 
 This release includes the following bugfixes:
 
+ o configure: provide --with-openssl, deprecate --with-ssl [15]
  o cookie: CURLOPT_COOKIEFILE set to NULL switches off cookies [1]
+ o libssh2: fix Value stored to 'sshp' is never read [13]
+ o libssh: fix "empty expression statement has no effect" warnings [7]
+ o openldap: protect SSL-specific code with proper #ifdef [12]
+ o openssl: fix build error with OpenSSL < 1.0.2 [4]
+ o README.md: delete Codacy UTM parameters [5]
  o rustls: only return CURLE_AGAIN when TLS session is fully drained [2]
+ o tool_getparam: replace (in-place) '%20' by '+' according to RFC1866 [14]
+ o tool_operate: don't discard failed parallel transfer result [16]
+ o tool_writeout: fix the HTTP_CODE json output [11]
+ o urlapi: "normalize" numerical IPv4 host names [6]
 
 This release includes the following known bugs:
 
@@ -22,10 +34,25 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Jacob Hoffman-Andrews, Javier Blazquez, Stefan Karpinski,
-  (4 contributors)
+  Daniel Stenberg, Emil Engler, Georeth Zhou, Jacob Hoffman-Andrews,
+  Javier Blazquez, Michal Rus, Ray Satiro, Stefan Karpinski, Victor Vieux,
+  Viktor Szakats,
+  (10 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=6889
  [2] = https://curl.se/bug/?i=6894
+ [4] = https://curl.se/bug/?i=6920
+ [5] = https://curl.se/bug/?i=6919
+ [6] = https://curl.se/bug/?i=6863
+ [7] = https://curl.se/bug/?i=6847
+ [8] = https://curl.se/bug/?i=6700
+ [9] = https://curl.se/bug/?i=6773
+ [10] = https://curl.se/bug/?i=6772
+ [11] = https://curl.se/bug/?i=6905
+ [12] = https://curl.se/bug/?i=6901
+ [13] = https://curl.se/bug/?i=6900
+ [14] = https://curl.se/bug/?i=6895
+ [15] = https://curl.se/bug/?i=6887
+ [16] = https://curl.se/bug/?i=6921
