@@ -2294,11 +2294,11 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
           long delay;
           struct per_transfer *ended;
           CURL *easy = msg->easy_handle;
-          result = msg->data.result;
+          CURLcode tres = msg->data.result;
           curl_easy_getinfo(easy, CURLINFO_PRIVATE, (void *)&ended);
           curl_multi_remove_handle(multi, easy);
 
-          result = post_per_transfer(global, ended, result, &retry, &delay);
+          tres = post_per_transfer(global, ended, tres, &retry, &delay);
           progress_finalize(ended); /* before it goes away */
           all_added--; /* one fewer added */
           checkmore = TRUE;
@@ -2307,8 +2307,11 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
             /* we delay retries in full integer seconds only */
             ended->startat = delay ? time(NULL) + delay/1000 : 0;
           }
-          else
+          else {
+            if(tres)
+              result = tres;
             (void)del_per_transfer(ended);
+          }
         }
       } while(msg);
       if(!checkmore) {
@@ -2320,9 +2323,11 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
       }
       if(checkmore) {
         /* one or more transfers completed, add more! */
-        (void)add_parallel_transfers(global, multi, share,
-                                     &more_transfers,
-                                     &added_transfers);
+        CURLcode tres = add_parallel_transfers(global, multi, share,
+                                               &more_transfers,
+                                               &added_transfers);
+        if(tres)
+          result = tres;
         if(added_transfers)
           /* we added new ones, make sure the loop doesn't exit yet */
           still_running = 1;
