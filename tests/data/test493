@@ -28,6 +28,7 @@ http
 <features>
 HSTS
 proxy
+https
 </features>
 
 <file name="log/input%TESTNUMBER">
