@@ -315,6 +315,8 @@ Curl_ssl_connect(struct Curl_easy *data, struct connectdata *conn,
 
   if(!result)
     Curl_pgrsTime(data, TIMER_APPCONNECT); /* SSL is connected */
+  else
+    conn->ssl[sockindex].use = FALSE;
 
   return result;
 }
@@ -338,7 +340,9 @@ Curl_ssl_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
   /* mark this is being ssl requested from here on. */
   conn->ssl[sockindex].use = TRUE;
   result = Curl_ssl->connect_nonblocking(data, conn, sockindex, done);
-  if(!result && *done)
+  if(result)
+    conn->ssl[sockindex].use = FALSE;
+  else if(*done)
     Curl_pgrsTime(data, TIMER_APPCONNECT); /* SSL is connected */
   return result;
 }
