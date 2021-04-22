@@ -369,7 +369,7 @@ static CURLcode ldap_disconnect(struct Curl_easy *data,
   if(li) {
     if(li->ld) {
 #ifdef USE_SSL
-      if(conn->ssl[FIRSTSOCKET].use) {
+      if(conn->ssl[FIRSTSOCKET].use && li->sslinst) {
         Sockbuf *sb;
         ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
         ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
