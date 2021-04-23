@@ -160,16 +160,6 @@ krb5_decode(void *app_data, void *buf, int len,
 }
 
 static int
-krb5_overhead(void *app_data, int level, int len)
-{
-  /* no arguments are used */
-  (void)app_data;
-  (void)level;
-  (void)len;
-  return 0;
-}
-
-static int
 krb5_encode(void *app_data, const void *from, int length, int level, void **to)
 {
   gss_ctx_id_t *context = app_data;
@@ -392,7 +382,7 @@ static struct Curl_sec_client_mech Curl_krb5_client_mech = {
   krb5_auth,
   krb5_end,
   krb5_check_prot,
-  krb5_overhead,
+
   krb5_encode,
   krb5_decode
 };
@@ -657,8 +647,6 @@ static ssize_t sec_write(struct Curl_easy *data, struct connectdata *conn,
 {
   ssize_t tx = 0, len = conn->buffer_size;
 
-  len -= conn->mech->overhead(conn->app_data, conn->data_prot,
-                              curlx_sztosi(len));
   if(len <= 0)
     len = length;
   while(length) {
