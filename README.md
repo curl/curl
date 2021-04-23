@@ -36,6 +36,11 @@ posting to a suitable [mailing list](https://curl.se/mail/).
 All contributors to the project are listed in [the THANKS
 document](https://curl.se/docs/thanks.html).
 
+## Commercial support
+
+For commercial support, maybe private and dedicated help with your problems or
+applications using (lib)curl: https://curl.se/support.html
+
 ## Website
 
 Visit the [curl website](https://curl.se/) for the latest news and
