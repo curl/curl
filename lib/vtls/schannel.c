@@ -328,12 +328,12 @@ get_alg_id_by_name(char *name)
 }
 
 static CURLcode
-set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
+set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
+                int *algIds)
 {
   char *startCur = ciphers;
   int algCount = 0;
-  static ALG_ID algIds[45]; /*There are 45 listed in the MS headers*/
-  while(startCur && (0 != *startCur) && (algCount < 45)) {
+  while(startCur && (0 != *startCur) && (algCount < NUMOF_CIPHERS)) {
     long alg = strtol(startCur, 0, 0);
     if(!alg)
       alg = get_alg_id_by_name(startCur);
@@ -593,7 +593,8 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     }
 
     if(SSL_CONN_CONFIG(cipher_list)) {
-      result = set_ssl_ciphers(&schannel_cred, SSL_CONN_CONFIG(cipher_list));
+      result = set_ssl_ciphers(&schannel_cred, SSL_CONN_CONFIG(cipher_list),
+                               BACKEND->algIds);
       if(CURLE_OK != result) {
         failf(data, "Unable to set ciphers to passed via SSL_CONN_CONFIG");
         return result;
