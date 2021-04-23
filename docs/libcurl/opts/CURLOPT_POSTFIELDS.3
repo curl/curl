@@ -54,7 +54,7 @@ the POST data from the read callback. If you want to send a zero-byte POST set
 
 libcurl will use assume this option points to a nul-terminated string unless
 you also set \fICURLOPT_POSTFIELDSIZE(3)\fP to specify the length of the
-provided data, which then is strictly required if you want to send off zero
+provided data, which then is strictly required if you want to send off nul
 bytes included in the data.
 
 Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header,
