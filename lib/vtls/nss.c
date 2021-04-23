@@ -1830,7 +1830,7 @@ static CURLcode nss_set_blocking(struct ssl_connect_data *connssl,
                                  struct Curl_easy *data,
                                  bool blocking)
 {
-  static PRSocketOptionData sock_opt;
+  PRSocketOptionData sock_opt;
   struct ssl_backend_data *backend = connssl->backend;
   sock_opt.option = PR_SockOpt_Nonblocking;
   sock_opt.value.non_blocking = !blocking;
