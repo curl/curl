@@ -265,7 +265,7 @@ dnl If no TLS choice has been made, check if it was explicitly disabled or
 dnl error out to force the user to decide.
 if test -z "$TLSCHOICE"; then
   if test "x$OPT_SSL" != "xno"; then
-    AC_MSG_ERROR([select TLS backend(s) or disble TLS with --without-ssl.
+    AC_MSG_ERROR([select TLS backend(s) or disable TLS with --without-ssl.
 
 Select from these:
 
