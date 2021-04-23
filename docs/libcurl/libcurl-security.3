@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -162,6 +162,12 @@ Allowing your application to connect to local hosts, be it the same machine
 that runs the application or a machine on the same local network, might be
 possible to exploit by an attacker who then perhaps can "port-scan" the
 particular hosts - depending on how the application and servers acts.
+.SH "IPv4 Addresses"
+Some users might be tempted to filter access to local resources or similar
+based on numerical IPv4 addresses used in URLs. This is a bad and error-prone
+idea because of the many different ways a numerical IPv4 address can be
+specified and libcurl accepts: one to four dot-separated fields using one of
+or a mix of decimal, octal or hexadecimal encoding.
 .SH "IPv6 Addresses"
 libcurl will normally handle IPv6 addresses transparently and just as easily
 as IPv4 addresses. That means that a sanitizing function that filters out
