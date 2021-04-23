@@ -581,7 +581,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         result = CURLE_OUT_OF_MEMORY;
 
         goto quit;
-    }
+      }
 #else
       char *attr = attribute;
 #endif
@@ -1061,13 +1061,23 @@ static void _ldap_free_urldesc(LDAPURLDesc *ludp)
   if(!ludp)
     return;
 
+#if defined(USE_WIN32_LDAP)
+  curlx_unicodefree(ludp->lud_dn);
+  curlx_unicodefree(ludp->lud_filter);
+#else
   free(ludp->lud_dn);
   free(ludp->lud_filter);
+#endif
 
   if(ludp->lud_attrs) {
     size_t i;
-    for(i = 0; i < ludp->lud_attrs_dups; i++)
+    for(i = 0; i < ludp->lud_attrs_dups; i++) {
+#if defined(USE_WIN32_LDAP)
+      curlx_unicodefree(ludp->lud_attrs[i]);
+#else
       free(ludp->lud_attrs[i]);
+#endif
+    }
     free(ludp->lud_attrs);
   }
 
