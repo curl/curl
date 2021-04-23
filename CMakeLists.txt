@@ -310,8 +310,21 @@ endif()
 check_function_exists(gethostname HAVE_GETHOSTNAME)
 
 if(WIN32)
-  check_library_exists_concat("ws2_32" socket       HAVE_LIBWS2_32)
-  check_library_exists_concat("winmm"  timeGetTime  HAVE_LIBWINMM)
+  check_library_exists_concat("ws2_32" getch HAVE_LIBWS2_32_getch)
+  if(HAVE_LIBWS2_32_getch)
+     set(HAVE_LIBWS2_32 1)
+  else()
+    check_library_exists_concat("ws2_32" socket HAVE_LIBWS2_32_socket)
+    set(HAVE_LIBWS2_32 ${HAVE_LIBWS2_32_socket})
+  endif()
+
+  check_library_exists_concat("winmm" getch HAVE_LIBWINMM_getch)
+  if(HAVE_LIBWINMM_getch)
+    set(HAVE_LIBWINMM 1)
+  else()
+    check_library_exists_concat("winmm" timeGetTime HAVE_LIBWINMM_timeGetTime)
+    set(HAVE_LIBWINMM ${HAVE_LIBWINMM_timeGetTime})
+  endif()
 endif()
 
 # check SSL libraries
