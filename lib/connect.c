@@ -1367,14 +1367,31 @@ CURLcode Curl_connecthost(struct Curl_easy *data,
   conn->timeoutms_per_addr[1] =
     conn->tempaddr[1]->ai_next == NULL ? timeout_ms : timeout_ms / 2;
 
-  conn->tempfamily[0] = conn->tempaddr[0]?
-    conn->tempaddr[0]->ai_family:0;
+  if(conn->ip_version == CURL_IPRESOLVE_WHATEVER) {
+    /* any IP version is allowed */
+    conn->tempfamily[0] = conn->tempaddr[0]?
+      conn->tempaddr[0]->ai_family:0;
 #ifdef ENABLE_IPV6
-  conn->tempfamily[1] = conn->tempfamily[0] == AF_INET6 ?
-    AF_INET : AF_INET6;
+    conn->tempfamily[1] = conn->tempfamily[0] == AF_INET6 ?
+      AF_INET : AF_INET6;
 #else
-  conn->tempfamily[1] = AF_UNSPEC;
+    conn->tempfamily[1] = AF_UNSPEC;
 #endif
+  }
+  else {
+    /* only one IP version is allowed */
+    conn->tempfamily[0] = (conn->ip_version == CURL_IPRESOLVE_V4) ?
+      AF_INET :
+#ifdef ENABLE_IPV6
+      AF_INET6;
+#else
+      AF_UNSPEC;
+#endif
+    conn->tempfamily[1] = AF_UNSPEC;
+
+    ainext(conn, 0, FALSE); /* find first address of the right type */
+  }
+
   ainext(conn, 1, FALSE); /* assigns conn->tempaddr[1] accordingly */
 
   DEBUGF(infof(data, "family0 == %s, family1 == %s\n",
