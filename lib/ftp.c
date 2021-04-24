@@ -2098,6 +2098,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
          data->set.get_filetime &&
          (data->info.filetime >= 0) ) {
         char headerbuf[128];
+        int headerbuflen;
         time_t filetime = data->info.filetime;
         struct tm buffer;
         const struct tm *tm = &buffer;
@@ -2107,7 +2108,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
           return result;
 
         /* format: "Tue, 15 Nov 1994 12:45:26" */
-        msnprintf(headerbuf, sizeof(headerbuf),
+        headerbuflen = msnprintf(headerbuf, sizeof(headerbuf),
                   "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
                   Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
                   tm->tm_mday,
@@ -2116,7 +2117,8 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
                   tm->tm_hour,
                   tm->tm_min,
                   tm->tm_sec);
-        result = Curl_client_write(data, CLIENTWRITE_BOTH, headerbuf, 0);
+        result = Curl_client_write(data, CLIENTWRITE_BOTH, headerbuf,
+                                   headerbuflen);
         if(result)
           return result;
       } /* end of a ridiculous amount of conditionals */
@@ -2321,9 +2323,9 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(-1 != filesize) {
       char clbuf[128];
-      msnprintf(clbuf, sizeof(clbuf),
+      int clbuflen = msnprintf(clbuf, sizeof(clbuf),
                 "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", filesize);
-      result = Curl_client_write(data, CLIENTWRITE_BOTH, clbuf, 0);
+      result = Curl_client_write(data, CLIENTWRITE_BOTH, clbuf, clbuflen);
       if(result)
         return result;
     }
@@ -2357,7 +2359,8 @@ static CURLcode ftp_state_rest_resp(struct Curl_easy *data,
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(ftpcode == 350) {
       char buffer[24]= { "Accept-ranges: bytes\r\n" };
-      result = Curl_client_write(data, CLIENTWRITE_BOTH, buffer, 0);
+      result = Curl_client_write(data, CLIENTWRITE_BOTH, buffer,
+                                 strlen(buffer));
       if(result)
         return result;
     }

@@ -410,16 +410,18 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     struct tm buffer;
     const struct tm *tm = &buffer;
     char header[80];
+    int headerlen;
+    char accept_ranges[24]= { "Accept-ranges: bytes\r\n" };
     if(expected_size >= 0) {
-      msnprintf(header, sizeof(header),
+      headerlen = msnprintf(header, sizeof(header),
                 "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
                 expected_size);
-      result = Curl_client_write(data, CLIENTWRITE_HEADER, header, 0);
+      result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
       if(result)
         return result;
 
       result = Curl_client_write(data, CLIENTWRITE_HEADER,
-                                 (char *)"Accept-ranges: bytes\r\n", 0);
+                                 accept_ranges, strlen(accept_ranges));
       if(result != CURLE_OK)
         return result;
     }
@@ -430,7 +432,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       return result;
 
     /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-    msnprintf(header, sizeof(header),
+    headerlen = msnprintf(header, sizeof(header),
               "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n%s",
               Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
               tm->tm_mday,
@@ -440,7 +442,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
               tm->tm_min,
               tm->tm_sec,
               data->set.opt_no_body ? "": "\r\n");
-    result = Curl_client_write(data, CLIENTWRITE_HEADER, header, 0);
+    result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
     if(result)
       return result;
     /* set the file size to make it available post transfer */
