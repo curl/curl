@@ -175,6 +175,8 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
   }
   if(k->ignorebody)
     return HYPER_ITER_CONTINUE;
+  if(0 == len)
+    return HYPER_ITER_CONTINUE;
   Curl_debug(data, CURLINFO_DATA_IN, buf, len);
   if(!data->set.http_ce_skip && k->writer_stack)
     /* content-encoded data */
