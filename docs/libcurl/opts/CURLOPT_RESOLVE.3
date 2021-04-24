@@ -57,8 +57,8 @@ this entry will be removed and a new entry will be created. This is because
 the old entry may have have different addresses or a different time-out
 setting.
 
-The provided ADDRESS set by this option will be used even if
-\fICURLOPT_IPRESOLVE(3)\fP is set to make libcurl use another IP version.
+An ADDRESS provided by this option will only be use if not restricted by
+the setting of \fICURLOPT_IPRESOLVE(3)\fP to a different IP version.
 
 Remove names from the DNS cache again, to stop providing these fake resolves,
 by including a string in the linked list that uses the format
