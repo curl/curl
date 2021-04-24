@@ -616,9 +616,8 @@ CURLcode Curl_client_write(struct Curl_easy *data,
                            size_t len)
 {
   struct connectdata *conn = data->conn;
-  if(0 == len)
-    len = strlen(ptr);
 
+  DEBUGASSERT(len);
   DEBUGASSERT(type <= 3);
 
   /* FTP data may need conversion. */
