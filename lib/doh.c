@@ -420,17 +420,15 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   if(!dohp->headers)
     goto error;
 
-  if(conn->ip_version != CURL_IPRESOLVE_V6) {
-    /* create IPv4 DOH request */
-    result = dohprobe(data, &dohp->probe[DOH_PROBE_SLOT_IPADDR_V4],
-                      DNS_TYPE_A, hostname, data->set.str[STRING_DOH],
-                      data->multi, dohp->headers);
-    if(result)
-      goto error;
-    dohp->pending++;
-  }
+  /* create IPv4 DOH request */
+  result = dohprobe(data, &dohp->probe[DOH_PROBE_SLOT_IPADDR_V4],
+                    DNS_TYPE_A, hostname, data->set.str[STRING_DOH],
+                    data->multi, dohp->headers);
+  if(result)
+    goto error;
+  dohp->pending++;
 
-  if(conn->ip_version != CURL_IPRESOLVE_V4) {
+  if(Curl_ipv6works(data)) {
     /* create IPv6 DOH request */
     result = dohprobe(data, &dohp->probe[DOH_PROBE_SLOT_IPADDR_V6],
                       DNS_TYPE_AAAA, hostname, data->set.str[STRING_DOH],

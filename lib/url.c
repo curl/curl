@@ -1172,6 +1172,12 @@ ConnectionExists(struct Curl_easy *data,
         continue;
       }
 
+      if(data->set.ipver != CURL_IPRESOLVE_WHATEVER
+          && data->set.ipver != check->ip_version) {
+        /* skip because the connection is not via the requested IP version */
+        continue;
+      }
+
       if(bundle->multiuse == BUNDLE_MULTIPLEX)
         multiplexed = CONN_INUSE(check);
 
