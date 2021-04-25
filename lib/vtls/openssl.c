@@ -2256,12 +2256,10 @@ select_next_proto_cb(SSL *ssl,
   struct connectdata *conn = data->conn;
   (void)ssl;
 
-#ifdef USE_NGHTTP2
+#ifdef USE_HTTP2
   if(data->state.httpwant >= CURL_HTTP_VERSION_2 &&
-     !select_next_protocol(out, outlen, in, inlen, NGHTTP2_PROTO_VERSION_ID,
-                           NGHTTP2_PROTO_VERSION_ID_LEN)) {
-    infof(data, "NPN, negotiated HTTP2 (%s)\n",
-          NGHTTP2_PROTO_VERSION_ID);
+     !select_next_protocol(out, outlen, in, inlen, ALPN_H2, ALPN_H2_LENGTH)) {
+    infof(data, "NPN, negotiated HTTP2 (%s)\n", ALPN_H2);
     conn->negnpn = CURL_HTTP_VERSION_2;
     return SSL_TLSEXT_ERR_OK;
   }
@@ -2710,18 +2708,17 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
     int cur = 0;
     unsigned char protocols[128];
 
-#ifdef USE_NGHTTP2
+#ifdef USE_HTTP2
     if(data->state.httpwant >= CURL_HTTP_VERSION_2
 #ifndef CURL_DISABLE_PROXY
        && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
 #endif
       ) {
-      protocols[cur++] = NGHTTP2_PROTO_VERSION_ID_LEN;
+      protocols[cur++] = ALPN_H2_LENGTH;
 
-      memcpy(&protocols[cur], NGHTTP2_PROTO_VERSION_ID,
-          NGHTTP2_PROTO_VERSION_ID_LEN);
-      cur += NGHTTP2_PROTO_VERSION_ID_LEN;
-      infof(data, "ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
+      memcpy(&protocols[cur], ALPN_H2, ALPN_H2_LENGTH);
+      cur += ALPN_H2_LENGTH;
+      infof(data, "ALPN, offering %s\n", ALPN_H2);
     }
 #endif
 
@@ -3345,9 +3342,9 @@ static CURLcode ossl_connect_step2(struct Curl_easy *data,
       if(len) {
         infof(data, "ALPN, server accepted to use %.*s\n", len, neg_protocol);
 
-#ifdef USE_NGHTTP2
-        if(len == NGHTTP2_PROTO_VERSION_ID_LEN &&
-           !memcmp(NGHTTP2_PROTO_VERSION_ID, neg_protocol, len)) {
+#ifdef USE_HTTP2
+        if(len == ALPN_H2_LENGTH &&
+           !memcmp(ALPN_H2, neg_protocol, len)) {
           conn->negnpn = CURL_HTTP_VERSION_2;
         }
         else

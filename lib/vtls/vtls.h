@@ -126,9 +126,11 @@ bool Curl_ssl_tls13_ciphersuites(void);
 #define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
 #endif
 
-/* see https://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg-04 */
+/* see https://www.iana.org/assignments/tls-extensiontype-values/ */
 #define ALPN_HTTP_1_1_LENGTH 8
 #define ALPN_HTTP_1_1 "http/1.1"
+#define ALPN_H2_LENGTH 2
+#define ALPN_H2 "h2"
 
 /* set of helper macros for the backends to access the correct fields. For the
    proxy or for the remote host - to properly support HTTPS proxy */

@@ -385,14 +385,14 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
      * protocols array in `struct ssl_backend_data`.
      */
 
-#ifdef USE_NGHTTP2
+#ifdef USE_HTTP2
     if(data->state.httpwant >= CURL_HTTP_VERSION_2
 #ifndef CURL_DISABLE_PROXY
       && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
 #endif
       ) {
-      backend->protocols[cur++] = NGHTTP2_PROTO_VERSION_ID;
-      infof(data, "ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
+      backend->protocols[cur++] = ALPN_H2;
+      infof(data, "ALPN, offering %s\n", ALPN_H2);
     }
 #endif
 
@@ -540,8 +540,8 @@ static CURLcode bearssl_connect_step3(struct Curl_easy *data,
     if(protocol) {
       infof(data, "ALPN, server accepted to use %s\n", protocol);
 
-#ifdef USE_NGHTTP2
-      if(!strcmp(protocol, NGHTTP2_PROTO_VERSION_ID))
+#ifdef USE_HTTP2
+      if(!strcmp(protocol, ALPN_H2))
         conn->negnpn = CURL_HTTP_VERSION_2;
       else
 #endif
