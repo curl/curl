@@ -321,6 +321,10 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
   char errorbuf[256];
   size_t errorlen;
   int result;
+  rustls_slice_bytes alpn[2] = {
+    { (const uint8_t *)ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH },
+    { (const uint8_t *)ALPN_H2, ALPN_H2_LENGTH },
+  };
 
   backend->tlsbuf = calloc(TLSBUF_SIZE, 1);
   if(!backend->tlsbuf) {
@@ -328,6 +332,13 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
   }
 
   config_builder = rustls_client_config_builder_new();
+#ifdef USE_HTTP2
+  infof(data, "offering ALPN for HTTP/1.1 and HTTP/2\n");
+  rustls_client_config_builder_set_protocols(config_builder, alpn, 2);
+#else
+  infof(data, "offering ALPN for HTTP/1.1 only\n");
+  rustls_client_config_builder_set_protocols(config_builder, alpn, 1);
+#endif
   if(!verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none, NULL);
@@ -372,6 +383,39 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
   return CURLE_OK;
 }
 
+static void
+cr_set_negotiated_alpn(struct Curl_easy *data, struct connectdata *conn,
+  const struct rustls_client_session *session)
+{
+  const uint8_t *protocol = NULL;
+  size_t len = 0;
+
+  rustls_client_session_get_alpn_protocol(session, &protocol, &len);
+  if(NULL == protocol) {
+    infof(data, "ALPN, server did not agree to a protocol\n");
+    return;
+  }
+
+#ifdef USE_HTTP2
+  if(len == ALPN_H2_LENGTH && 0 == memcmp(ALPN_H2, protocol, len)) {
+    infof(data, "ALPN, negotiated h2\n");
+    conn->negnpn = CURL_HTTP_VERSION_2;
+  }
+  else
+#endif
+  if(len == ALPN_HTTP_1_1_LENGTH &&
+      0 == memcmp(ALPN_HTTP_1_1, protocol, len)) {
+    infof(data, "ALPN, negotiated http/1.1\n");
+    conn->negnpn = CURL_HTTP_VERSION_1_1;
+  }
+  else {
+    infof(data, "ALPN, negotiated an unrecognized protocol\n");
+  }
+
+  Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                      BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+}
+
 static CURLcode
 cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
                        int sockindex, bool *done)
@@ -411,6 +455,9 @@ cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
       infof(data, "Done handshaking\n");
       /* Done with the handshake. Set up callbacks to send/receive data. */
       connssl->state = ssl_connection_complete;
+
+      cr_set_negotiated_alpn(data, conn, session);
+
       conn->recv[sockindex] = cr_recv;
       conn->send[sockindex] = cr_send;
       *done = TRUE;
