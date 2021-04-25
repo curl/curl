@@ -1829,14 +1829,14 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
       CFMutableArrayRef alpnArr = CFArrayCreateMutable(NULL, 0,
                                                        &kCFTypeArrayCallBacks);
 
-#ifdef USE_NGHTTP2
+#ifdef USE_HTTP2
       if(data->state.httpwant >= CURL_HTTP_VERSION_2
 #ifndef CURL_DISABLE_PROXY
          && (!isproxy || !conn->bits.tunnel_proxy)
 #endif
         ) {
-        CFArrayAppendValue(alpnArr, CFSTR(NGHTTP2_PROTO_VERSION_ID));
-        infof(data, "ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
+        CFArrayAppendValue(alpnArr, CFSTR(ALPN_H2));
+        infof(data, "ALPN, offering %s\n", ALPN_H2);
       }
 #endif
 
@@ -2788,10 +2788,9 @@ sectransp_connect_step2(struct Curl_easy *data, struct connectdata *conn,
         if(err == noErr && alpnArr && CFArrayGetCount(alpnArr) >= 1)
           chosenProtocol = CFArrayGetValueAtIndex(alpnArr, 0);
 
-#ifdef USE_NGHTTP2
+#ifdef USE_HTTP2
         if(chosenProtocol &&
-           !CFStringCompare(chosenProtocol, CFSTR(NGHTTP2_PROTO_VERSION_ID),
-                            0)) {
+           !CFStringCompare(chosenProtocol, CFSTR(ALPN_H2), 0)) {
           conn->negnpn = CURL_HTTP_VERSION_2;
         }
         else

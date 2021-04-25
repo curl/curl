@@ -801,6 +801,10 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define UNITTEST static
 #endif
 
+#if defined(USE_NGHTTP2) || defined(USE_HYPER)
+#define USE_HTTP2
+#endif
+
 #if defined(USE_NGTCP2) || defined(USE_QUICHE)
 #define ENABLE_QUIC
 #endif

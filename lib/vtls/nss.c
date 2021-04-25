@@ -870,8 +870,8 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
     }
 
 #ifdef USE_NGHTTP2
-    if(buflen == NGHTTP2_PROTO_VERSION_ID_LEN &&
-       !memcmp(NGHTTP2_PROTO_VERSION_ID, buf, NGHTTP2_PROTO_VERSION_ID_LEN)) {
+    if(buflen == ALPN_H2_LENGTH &&
+       !memcmp(ALPN_H2, buf, ALPN_H2_LENGTH)) {
       conn->negnpn = CURL_HTTP_VERSION_2;
     }
     else
@@ -2103,16 +2103,15 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
     int cur = 0;
     unsigned char protocols[128];
 
-#ifdef USE_NGHTTP2
+#ifdef USE_HTTP2
     if(data->state.httpwant >= CURL_HTTP_VERSION_2
 #ifndef CURL_DISABLE_PROXY
       && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
 #endif
       ) {
-      protocols[cur++] = NGHTTP2_PROTO_VERSION_ID_LEN;
-      memcpy(&protocols[cur], NGHTTP2_PROTO_VERSION_ID,
-          NGHTTP2_PROTO_VERSION_ID_LEN);
-      cur += NGHTTP2_PROTO_VERSION_ID_LEN;
+      protocols[cur++] = ALPN_H2;
+      memcpy(&protocols[cur], ALPN_H2, ALPN_H2_LENGTH);
+      cur += ALPN_H2_LENGTH;
     }
 #endif
     protocols[cur++] = ALPN_HTTP_1_1_LENGTH;

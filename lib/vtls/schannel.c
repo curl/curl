@@ -877,11 +877,11 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
     list_start_index = cur;
 
-#ifdef USE_NGHTTP2
+#ifdef USE_HTTP2
     if(data->state.httpwant >= CURL_HTTP_VERSION_2) {
-      memcpy(&alpn_buffer[cur], NGHTTP2_PROTO_ALPN, NGHTTP2_PROTO_ALPN_LEN);
-      cur += NGHTTP2_PROTO_ALPN_LEN;
-      infof(data, "schannel: ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
+      memcpy(&alpn_buffer[cur], ALPN_H2, ALPN_H2_LENGTH);
+      cur += ALPN_H2_LENGTH;
+      infof(data, "schannel: ALPN, offering %s\n", ALPN_H2);
     }
 #endif
 
@@ -1392,10 +1392,9 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
       infof(data, "schannel: ALPN, server accepted to use %.*s\n",
             alpn_result.ProtocolIdSize, alpn_result.ProtocolId);
 
-#ifdef USE_NGHTTP2
-      if(alpn_result.ProtocolIdSize == NGHTTP2_PROTO_VERSION_ID_LEN &&
-         !memcmp(NGHTTP2_PROTO_VERSION_ID, alpn_result.ProtocolId,
-                 NGHTTP2_PROTO_VERSION_ID_LEN)) {
+#ifdef USE_HTTP2
+      if(alpn_result.ProtocolIdSize == ALPN_H2_LENGTH &&
+         !memcmp(ALPN_H2, alpn_result.ProtocolId, ALPN_H2_LENGTH)) {
         conn->negnpn = CURL_HTTP_VERSION_2;
       }
       else
