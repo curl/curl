@@ -149,26 +149,14 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   if(!gopherpath)
     return CURLE_OUT_OF_MEMORY;
 
-  /* Create selector. Degenerate cases: / and /1 => convert to "" */
-  if(strlen(gopherpath) <= 2) {
-    sel = (char *)"";
-    len = strlen(sel);
-    free(gopherpath);
-  }
-  else {
-    char *newp;
+  char *newp = gopherpath;
 
-    /* Otherwise, drop / and the first character (i.e., item type) ... */
-    newp = gopherpath;
-    newp += 2;
-
-    /* ... and finally unescape */
-    result = Curl_urldecode(data, newp, 0, &sel, &len, REJECT_ZERO);
-    free(gopherpath);
-    if(result)
-      return result;
-    sel_org = sel;
-  }
+  /* Unescape URL */
+  result = Curl_urldecode(data, newp, 0, &sel, &len, REJECT_ZERO);
+  free(gopherpath);
+  if(result)
+    return result;
+  sel_org = sel;
 
   k = curlx_uztosz(len);
 

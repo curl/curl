@@ -877,11 +877,6 @@ sub verifyhttp {
         servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
-    if($proto eq "gopher") {
-        # gopher is funny
-        $bonus="1/";
-    }
-
     my $flags = "--max-time $server_response_maxtime ";
     $flags .= "--output $verifyout ";
     $flags .= "--silent ";
@@ -892,7 +887,7 @@ sub verifyhttp {
     if($use_external_proxy) {
         $flags .= getexternalproxyflags();
     }
-    $flags .= "\"$proto://$ip:$port/${bonus}verifiedserver\"";
+    $flags .= "\"$proto://$ip:$port/verifiedserver\"";
 
     my $cmd = "$VCURL $flags 2>$verifylog";
 

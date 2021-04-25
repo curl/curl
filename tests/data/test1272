@@ -26,7 +26,7 @@ gophers
 Gophers index
  </name>
  <command>
--k gophers://%HOSTIP:%GOPHERSPORT/1/%TESTNUMBER
+-k gophers://%HOSTIP:%GOPHERSPORT/%TESTNUMBER
 </command>
 </client>
 
