@@ -748,7 +748,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
 
   if(level) {
     char *pbsz;
-    static unsigned int buffer_size = 1 << 20; /* 1048576 */
+    unsigned int buffer_size = 1 << 20; /* 1048576 */
 
     code = ftp_send_command(data, "PBSZ %u", buffer_size);
     if(code < 0)
