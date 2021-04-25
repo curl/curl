@@ -149,7 +149,8 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   if(!gopherpath)
     return CURLE_OUT_OF_MEMORY;
 
-  char *newp = gopherpath;
+  char *newp;
+  newp = gopherpath;
 
   /* Unescape URL */
   result = Curl_urldecode(data, newp, 0, &sel, &len, REJECT_ZERO);
