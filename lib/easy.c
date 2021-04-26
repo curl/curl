@@ -1171,6 +1171,7 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
   CURLcode result;
   ssize_t n1;
   struct connectdata *c = NULL;
+  SIGPIPE_VARIABLE(pipe_st);
 
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
@@ -1185,7 +1186,9 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
     Curl_attach_connnection(data, c);
 
   *n = 0;
+  sigpipe_ignore(data, &pipe_st);
   result = Curl_write(data, sfd, buffer, buflen, &n1);
+  sigpipe_restore(&pipe_st);
 
   if(n1 == -1)
     return CURLE_SEND_ERROR;
