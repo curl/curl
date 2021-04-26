@@ -133,7 +133,7 @@ Build curl:
 
 Use HTTP/3 directly:
 
-    curl --http3 https://nghttp2.org:8443/
+    curl --http3 https://nghttp2.org:4433/
 
 Upgrade via Alt-Svc:
 
