@@ -208,8 +208,6 @@ static CURLcode status_line(struct Curl_easy *data,
   size_t wrote;
   size_t len;
   const char *vstr;
-  curl_write_callback writeheader =
-    data->set.fwrite_header? data->set.fwrite_header: data->set.fwrite_func;
   vstr = http_version == HYPER_HTTP_VERSION_1_1 ? "1.1" :
     (http_version == HYPER_HTTP_VERSION_2 ? "2" : "1.0");
   conn->httpversion =
@@ -232,12 +230,12 @@ static CURLcode status_line(struct Curl_easy *data,
   len = Curl_dyn_len(&data->state.headerb);
   Curl_debug(data, CURLINFO_HEADER_IN, Curl_dyn_ptr(&data->state.headerb),
              len);
-  Curl_set_in_callback(data, true);
-  wrote = writeheader(Curl_dyn_ptr(&data->state.headerb), 1, len,
-                      data->set.writeheader);
-  Curl_set_in_callback(data, false);
-  if(wrote != len)
-    return CURLE_WRITE_ERROR;
+  result = Curl_client_write(data, CLIENTWRITE_HEADER,
+                             Curl_dyn_ptr(&data->state.headerb), len);
+  if(result) {
+    data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
+    return HYPER_ITER_BREAK;
+  }
 
   data->info.header_size += (long)len;
   data->req.headerbytecount += (long)len;
