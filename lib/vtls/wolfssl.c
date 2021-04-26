@@ -786,7 +786,7 @@ static ssize_t wolfssl_send(struct Curl_easy *data,
   int memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
   int rc = SSL_write(backend->handle, mem, memlen);
 
-  if(rc < 0) {
+  if(rc <= 0) {
     int err = SSL_get_error(backend->handle, rc);
 
     switch(err) {
