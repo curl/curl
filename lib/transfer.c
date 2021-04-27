@@ -830,7 +830,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
              Make sure that ALL_CONTENT_ENCODINGS contains all the
              encodings handled here. */
           if(data->set.http_ce_skip || !k->writer_stack) {
-            if(!k->ignorebody) {
+            if(!k->ignorebody && nread) {
 #ifndef CURL_DISABLE_POP3
               if(conn->handler->protocol & PROTO_FAMILY_POP3)
                 result = Curl_pop3_write(data, k->str, nread);
@@ -840,7 +840,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                                            nread);
             }
           }
-          else if(!k->ignorebody)
+          else if(!k->ignorebody && nread)
             result = Curl_unencode_write(data, k->writer_stack, k->str, nread);
         }
         k->badheader = HEADER_NORMAL; /* taken care of now */
