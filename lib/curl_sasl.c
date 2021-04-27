@@ -630,7 +630,9 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
       }
       else
         /* Decode the security challenge and create the response message */
-        result = Curl_auth_create_gssapi_security_message(data, &serverdata,
+        result = Curl_auth_create_gssapi_security_message(data,
+                                                          conn->sasl_authzid,
+                                                          &serverdata,
                                                           &conn->krb5,
                                                           &resp);
     }
@@ -639,7 +641,9 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     /* Decode the security challenge and create the response message */
     result = get_server_message(sasl, data, &serverdata);
     if(!result)
-      result = Curl_auth_create_gssapi_security_message(data, &serverdata,
+      result = Curl_auth_create_gssapi_security_message(data,
+                                                        conn->sasl_authzid,
+                                                        &serverdata,
                                                         &conn->krb5,
                                                         &resp);
     break;
