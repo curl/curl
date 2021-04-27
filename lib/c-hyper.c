@@ -205,7 +205,6 @@ static CURLcode status_line(struct Curl_easy *data,
                             const uint8_t *reason, size_t rlen)
 {
   CURLcode result;
-  size_t wrote;
   size_t len;
   const char *vstr;
   vstr = http_version == HYPER_HTTP_VERSION_1_1 ? "1.1" :
