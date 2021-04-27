@@ -20,7 +20,7 @@ Before posting to one of the curl mailing lists, please read up on the
 We also hang out on IRC in #curl on irc.freenode.net
 
 If you're at all interested in the code side of things, consider clicking
-'watch' on the [curl repo on github](https://github.com/curl/curl) to be
+'watch' on the [curl repo on GitHub](https://github.com/curl/curl) to be
 notified of pull requests and new issues posted there.
 
 ### License and copyright
@@ -129,7 +129,7 @@ verified your changes.
 ### How to get your changes into the main sources
 
 Ideally you file a [pull request on
-github](https://github.com/curl/curl/pulls), but you can also send your plain
+GitHub](https://github.com/curl/curl/pulls), but you can also send your plain
 patch to [the curl-library mailing
 list](https://curl.se/mail/list.cgi?list=curl-library).
 
