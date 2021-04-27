@@ -178,7 +178,8 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
     target_info_len = Curl_read16_le(&type2[40]);
     target_info_offset = Curl_read32_le(&type2[44]);
     if(target_info_len > 0) {
-      if((target_info_offset + target_info_len) > type2len ||
+      if((target_info_offset > type2len) ||
+         (target_info_offset + target_info_len) > type2len ||
          target_info_offset < 48) {
         infof(data, "NTLM handshake failure (bad type-2 message). "
               "Target Info Offset Len is set incorrect by the peer\n");
