@@ -2109,7 +2109,7 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
       && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
 #endif
       ) {
-      protocols[cur++] = ALPN_H2;
+      protocols[cur++] = ALPN_H2_LENGTH;
       memcpy(&protocols[cur], ALPN_H2, ALPN_H2_LENGTH);
       cur += ALPN_H2_LENGTH;
     }
