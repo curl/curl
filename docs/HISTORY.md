@@ -257,7 +257,7 @@ January: Added support for RTSP
 
 February: security vulnerability: libcurl data callback excessive length
 
-March: The project switched over to use git (hosted by github) instead of CVS
+March: The project switched over to use git (hosted by GitHub) instead of CVS
 for source code control
 
 May: Added support for RTMP
