@@ -985,7 +985,8 @@ new_unencoding_writer(struct Curl_easy *data,
   return writer;
 }
 
-/* Write data using an unencoding writer stack. */
+/* Write data using an unencoding writer stack. "nbytes" is not
+   allowed to be 0. */
 CURLcode Curl_unencode_write(struct Curl_easy *data,
                              struct contenc_writer *writer,
                              const char *buf, size_t nbytes)
