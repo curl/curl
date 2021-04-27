@@ -292,6 +292,7 @@ static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
            !strcasecompare(imap->custom, "EXPUNGE") &&
            !strcasecompare(imap->custom, "LSUB") &&
            !strcasecompare(imap->custom, "UID") &&
+           !strcasecompare(imap->custom, "GETQUOTAROOT") &&
            !strcasecompare(imap->custom, "NOOP")))
           return FALSE;
         break;
