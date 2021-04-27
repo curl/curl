@@ -260,8 +260,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   SecBuffer wrap_buf[3];
   SecBufferDesc input_desc;
   SecBufferDesc wrap_desc;
-  unsigned long indata = 0;
-  unsigned long outdata = 0;
+  unsigned char *indata;
   unsigned long qop = 0;
   unsigned long sec_layer = 0;
   unsigned long max_size = 0;
@@ -326,19 +325,21 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
-  /* Copy the data out and free the challenge as it is not required anymore */
-  memcpy(&indata, input_buf[1].pvBuffer, 4);
+  /* Extract the security layer and the maximum message size */
+  indata = input_buf[1].pvBuffer;
+  sec_layer = indata[0];
+  max_size = (indata[1] << 16) | (indata[2] << 8) | indata[3];
+
+  /* Free the challenge as it is not required anymore */
   s_pSecFn->FreeContextBuffer(input_buf[1].pvBuffer);
 
-  /* Extract the security layer */
-  sec_layer = indata & 0x000000FF;
+  /* Process the security layer */
   if(!(sec_layer & KERB_WRAP_NO_ENCRYPT)) {
     infof(data, "GSSAPI handshake failure (invalid security layer)");
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
-  /* Extract the maximum message size the server can receive */
-  max_size = ntohl(indata & 0xFFFFFF00);
+  /* Process the maximum message size the server can receive */
   if(max_size > 0) {
     /* The server has told us it supports a maximum receive buffer, however, as
        we don't require one unless we are encrypting data, we tell the server
@@ -360,7 +361,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   }
 
   /* Allocate our message */
-  messagelen = sizeof(outdata) + strlen(user_name) + 1;
+  messagelen = 4 + strlen(user_name) + 1;
   message = malloc(messagelen);
   if(!message) {
     free(trailer);
@@ -374,9 +375,11 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
      terminator. Note: Despite RFC4752 Section 3.1 stating "The authorization
      identity is not terminated with the zero-valued (%x00) octet." it seems
      necessary to include it. */
-  outdata = htonl(max_size) | sec_layer;
-  memcpy(message, &outdata, sizeof(outdata));
-  strcpy((char *) message + sizeof(outdata), user_name);
+  message[0] = sec_layer & 0xFF;
+  message[1] = (max_size >> 16) & 0xFF;
+  message[2] = (max_size >> 8) & 0xFF;
+  message[3] = max_size & 0xFF;
+  strcpy((char *) message + 4, user_name);
   curlx_unicodefree(user_name);
 
   /* Allocate the padding */
