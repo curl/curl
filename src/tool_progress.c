@@ -101,6 +101,9 @@ int xferinfo_cb(void *clientp,
   per->ultotal = ultotal;
   per->ulnow = ulnow;
 
+  if(per->abort)
+    return 1;
+
   if(config->readbusy) {
     config->readbusy = FALSE;
     curl_easy_pause(per->curl, CURLPAUSE_CONT);

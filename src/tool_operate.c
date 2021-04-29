@@ -2123,6 +2123,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     (void)curl_easy_setopt(per->curl, CURLOPT_PRIVATE, per);
     (void)curl_easy_setopt(per->curl, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
     (void)curl_easy_setopt(per->curl, CURLOPT_XFERINFODATA, per);
+    (void)curl_easy_setopt(per->curl, CURLOPT_NOPROGRESS, 0L);
 
     mcode = curl_multi_add_handle(multi, per->curl);
     if(mcode)
@@ -2149,6 +2150,10 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
   struct timeval start = tvnow();
   bool more_transfers;
   bool added_transfers;
+  /* wrapitup is set TRUE after a critical error occurs to end all transfers */
+  bool wrapitup = FALSE;
+  /* wrapitup_processed is set TRUE after the per transfer abort flag is set */
+  bool wrapitup_processed = FALSE;
   time_t tick = time(NULL);
 
   multi = curl_multi_init();
@@ -2163,6 +2168,21 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
   }
 
   while(!mcode && (still_running || more_transfers)) {
+    /* If stopping prematurely (eg due to a --fail-early condition) then signal
+       that any transfers in the multi should abort (via progress callback). */
+    if(wrapitup) {
+      if(!still_running)
+        break;
+      if(!wrapitup_processed) {
+        struct per_transfer *per;
+        for(per = transfers; per; per = per->next) {
+          if(per->added)
+            per->abort = TRUE;
+        }
+        wrapitup_processed = TRUE;
+      }
+    }
+
     mcode = curl_multi_poll(multi, NULL, 0, 1000, NULL);
     if(!mcode)
       mcode = curl_multi_perform(multi, &still_running);
@@ -2184,6 +2204,10 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
           curl_easy_getinfo(easy, CURLINFO_PRIVATE, (void *)&ended);
           curl_multi_remove_handle(multi, easy);
 
+          if(ended->abort && tres == CURLE_ABORTED_BY_CALLBACK) {
+            msnprintf(ended->errorbuffer, sizeof(ended->errorbuffer),
+              "Transfer aborted due to critical error in another transfer");
+          }
           tres = post_per_transfer(global, ended, tres, &retry, &delay);
           progress_finalize(ended); /* before it goes away */
           all_added--; /* one fewer added */
@@ -2194,12 +2218,22 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
             ended->startat = delay ? time(NULL) + delay/1000 : 0;
           }
           else {
-            if(tres)
+            /* result receives this transfer's error unless the transfer was
+               marked for abort due to a critical error in another transfer */
+            if(tres && (!ended->abort || !result))
               result = tres;
+            if(is_fatal_error(result) || (result && global->fail_early))
+              wrapitup = TRUE;
             (void)del_per_transfer(ended);
           }
         }
       } while(msg);
+      if(wrapitup) {
+        if(still_running)
+          continue;
+        else
+          break;
+      }
       if(!checkmore) {
         time_t tock = time(NULL);
         if(tick != tock) {
@@ -2218,6 +2252,8 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
           /* we added new ones, make sure the loop doesn't exit yet */
           still_running = 1;
       }
+      if(is_fatal_error(result) || (result && global->fail_early))
+        wrapitup = TRUE;
     }
   }
 

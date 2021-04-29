@@ -56,6 +56,9 @@ struct per_transfer {
   time_t startat; /* when doing parallel transfers, this is a retry transfer
                      that has been set to sleep until this time before it
                      should get started (again) */
+  bool abort; /* when doing parallel transfers and this is TRUE then a critical
+                 error (eg --fail-early) has occurred in another transfer and
+                 this transfer will be aborted in the progress callback */
 
   /* for parallel progress bar */
   curl_off_t dltotal;
