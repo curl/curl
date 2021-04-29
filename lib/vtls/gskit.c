@@ -302,8 +302,9 @@ static CURLcode set_callback(struct Curl_easy *data,
 
 
 static CURLcode set_ciphers(struct Curl_easy *data,
-                                        gsk_handle h, unsigned int *protoflags)
+                            gsk_handle h, unsigned int *protoflags)
 {
+  struct connectdata *conn = data->conn;
   const char *cipherlist = SSL_CONN_CONFIG(cipher_list);
   const char *clp;
   const struct gskit_cipher *ctp;
@@ -665,6 +666,7 @@ static ssize_t gskit_recv(struct Curl_easy *data, int num, char *buf,
 static CURLcode
 set_ssl_version_min_max(unsigned int *protoflags, struct Curl_easy *data)
 {
+  struct connectdata *conn = data->conn;
   long ssl_version = SSL_CONN_CONFIG(version);
   long ssl_version_max = SSL_CONN_CONFIG(version_max);
   long i = ssl_version;
