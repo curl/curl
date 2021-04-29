@@ -117,6 +117,10 @@
 #define SP_PROT_TLS1_2_CLIENT           0x00000800
 #endif
 
+#ifndef SP_PROT_TLS1_3_CLIENT
+#define SP_PROT_TLS1_3_CLIENT           0x00002000
+#endif
+
 #ifndef SCH_USE_STRONG_CRYPTO
 #define SCH_USE_STRONG_CRYPTO           0x00400000
 #endif
@@ -177,7 +181,7 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct Curl_easy *data,
   switch(ssl_version_max) {
   case CURL_SSLVERSION_MAX_NONE:
   case CURL_SSLVERSION_MAX_DEFAULT:
-    ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+    ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
     break;
   }
   for(; i <= (ssl_version_max >> 16); ++i) {
@@ -192,8 +196,8 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct Curl_easy *data,
       schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_2_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_3:
-      failf(data, "schannel: TLS 1.3 is not yet supported");
-      return CURLE_SSL_CONNECT_ERROR;
+      schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_3_CLIENT;
+      break;
     }
   }
   return CURLE_OK;
