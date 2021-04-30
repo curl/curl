@@ -581,6 +581,7 @@ static int push_promise(struct Curl_easy *data,
 
     rv = set_transfer_url(newhandle, &heads);
     if(rv) {
+      (void)Curl_close(&newhandle);
       rv = CURL_PUSH_DENY;
       goto fail;
     }
