@@ -622,7 +622,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
        we must make sure to free it before allocating a new one. As figured
        out in bug #2284386 */
     Curl_safefree(data->req.newurl);
-    data->req.newurl = strdup(data->change.url); /* clone URL */
+    data->req.newurl = strdup(data->state.url); /* clone URL */
     if(!data->req.newurl)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -635,7 +635,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
        we didn't try HEAD or GET */
     if((data->state.httpreq != HTTPREQ_GET) &&
        (data->state.httpreq != HTTPREQ_HEAD)) {
-      data->req.newurl = strdup(data->change.url); /* clone URL */
+      data->req.newurl = strdup(data->state.url); /* clone URL */
       if(!data->req.newurl)
         return CURLE_OUT_OF_MEMORY;
       data->state.authhost.done = TRUE;
@@ -950,7 +950,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
           CURLcode result = Curl_input_negotiate(data, conn, proxy, auth);
           if(!result) {
             DEBUGASSERT(!data->req.newurl);
-            data->req.newurl = strdup(data->change.url);
+            data->req.newurl = strdup(data->state.url);
             if(!data->req.newurl)
               return CURLE_OUT_OF_MEMORY;
             data->state.authproblem = FALSE;
@@ -1095,6 +1095,14 @@ static bool http_should_fail(struct Curl_easy *data)
     return FALSE;
 
   /*
+  ** A 416 response to a resume request is presumably because the file is
+  ** already completely downloaded and thus not actually a fail.
+  */
+  if(data->state.resume_from && data->state.httpreq == HTTPREQ_GET &&
+     httpcode == 416)
+    return FALSE;
+
+  /*
   ** Any code >= 400 that's not 401 or 407 is always
   ** a terminal error
   */
@@ -1159,7 +1167,12 @@ static size_t readmoredata(char *buffer,
   /* make sure that a HTTP request is never sent away chunked! */
   data->req.forbidchunk = (http->sending == HTTPSEND_REQUEST)?TRUE:FALSE;
 
-  if(http->postsize <= (curl_off_t)fullsize) {
+  if(data->set.max_send_speed &&
+     (data->set.max_send_speed < http->postsize))
+    /* speed limit */
+    fullsize = (size_t)data->set.max_send_speed;
+
+  else if(http->postsize <= (curl_off_t)fullsize) {
     memcpy(buffer, http->postdata, (size_t)http->postsize);
     fullsize = (size_t)http->postsize;
 
@@ -1199,7 +1212,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
                              counter */
                           curl_off_t *bytes_written,
                           /* how much of the buffer contains body data */
-                          size_t included_body_bytes,
+                          curl_off_t included_body_bytes,
                           int socketindex)
 {
   ssize_t amount;
@@ -1222,10 +1235,10 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
   ptr = Curl_dyn_ptr(in);
   size = Curl_dyn_len(in);
 
-  headersize = size - included_body_bytes; /* the initial part that isn't body
-                                              is header */
+  headersize = size - (size_t)included_body_bytes; /* the initial part that
+                                                      isn't body is header */
 
-  DEBUGASSERT(size > included_body_bytes);
+  DEBUGASSERT(size > (size_t)included_body_bytes);
 
   result = Curl_convert_to_network(data, ptr, headersize);
   /* Curl_convert_to_network calls failf if unsuccessful */
@@ -1241,13 +1254,25 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
 #endif
        )
      && conn->httpversion != 20) {
+    /* Make sure this doesn't send more body bytes than what the max send
+       speed says. The request bytes do not count to the max speed.
+    */
+    if(data->set.max_send_speed &&
+       (included_body_bytes > data->set.max_send_speed)) {
+      curl_off_t overflow = included_body_bytes - data->set.max_send_speed;
+      DEBUGASSERT((size_t)overflow < size);
+      sendsize = size - (size_t)overflow;
+    }
+    else
+      sendsize = size;
+
     /* We never send more than CURL_MAX_WRITE_SIZE bytes in one single chunk
        when we speak HTTPS, as if only a fraction of it is sent now, this data
        needs to fit into the normal read-callback buffer later on and that
        buffer is using this size.
     */
-
-    sendsize = CURLMIN(size, CURL_MAX_WRITE_SIZE);
+    if(sendsize > CURL_MAX_WRITE_SIZE)
+      sendsize = CURL_MAX_WRITE_SIZE;
 
     /* OpenSSL is very picky and we must send the SAME buffer pointer to the
        library when we attempt to re-send this buffer. Sending the same data
@@ -1279,7 +1304,19 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
     }
     else
 #endif
-    sendsize = size;
+    {
+      /* Make sure this doesn't send more body bytes than what the max send
+         speed says. The request bytes do not count to the max speed.
+      */
+      if(data->set.max_send_speed &&
+         (included_body_bytes > data->set.max_send_speed)) {
+        curl_off_t overflow = included_body_bytes - data->set.max_send_speed;
+        DEBUGASSERT((size_t)overflow < size);
+        sendsize = size - (size_t)overflow;
+      }
+      else
+        sendsize = size;
+    }
   }
 
   result = Curl_write(data, sockfd, ptr, sendsize, &amount);
@@ -2181,7 +2218,7 @@ CURLcode Curl_http_target(struct Curl_easy *data,
     /* Extract the URL to use in the request. Store in STRING_TEMP_URL for
        clean-up reasons if the function returns before the free() further
        down. */
-    uc = curl_url_get(h, CURLUPART_URL, &url, 0);
+    uc = curl_url_get(h, CURLUPART_URL, &url, CURLU_NO_DEFAULT_PORT);
     if(uc) {
       curl_url_cleanup(h);
       return CURLE_OUT_OF_MEMORY;
@@ -2621,8 +2658,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       }
     }
     /* issue the request */
-    result = Curl_buffer_send(r, data, &data->info.request_size,
-                              (size_t)included_body, FIRSTSOCKET);
+    result = Curl_buffer_send(r, data, &data->info.request_size, included_body,
+                              FIRSTSOCKET);
 
     if(result)
       failf(data, "Failed sending HTTP POST request");
@@ -3009,8 +3046,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 
   Curl_safefree(data->state.aptr.ref);
-  if(data->change.referer && !Curl_checkheaders(data, "Referer")) {
-    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
+  if(data->state.referer && !Curl_checkheaders(data, "Referer")) {
+    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->state.referer);
     if(!data->state.aptr.ref)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -3023,10 +3060,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     if(!data->state.aptr.accept_encoding)
       return CURLE_OUT_OF_MEMORY;
   }
-  else {
+  else
     Curl_safefree(data->state.aptr.accept_encoding);
-    data->state.aptr.accept_encoding = NULL;
-  }
 
 #ifdef HAVE_LIBZ
   /* we only consider transfer-encoding magic if libz support is built-in */
@@ -3131,7 +3166,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
                    *data->set.str[STRING_ENCODING] &&
                    data->state.aptr.accept_encoding)?
                   data->state.aptr.accept_encoding:"",
-                  (data->change.referer && data->state.aptr.ref)?
+                  (data->state.referer && data->state.aptr.ref)?
                   data->state.aptr.ref:"" /* Referer: <data> */,
 #ifndef CURL_DISABLE_PROXY
                   (conn->bits.httpproxy &&
@@ -3583,7 +3618,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
     }
   }
 
-#ifdef USE_HSTS
+#ifndef CURL_DISABLE_HSTS
   /* If enabled, the header is incoming and this is over HTTPS */
   else if(data->hsts && checkprefix("Strict-Transport-Security:", headp) &&
           (conn->handler->flags & PROTOPT_SSL)) {
@@ -4002,7 +4037,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                 infof(data, "Got 417 while waiting for a 100\n");
                 data->state.disableexpect = TRUE;
                 DEBUGASSERT(!data->req.newurl);
-                data->req.newurl = strdup(data->change.url);
+                data->req.newurl = strdup(data->state.url);
                 Curl_done_sending(data, k);
               }
               else if(data->set.http_keep_sending_on_error) {

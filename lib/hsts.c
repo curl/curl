@@ -25,7 +25,7 @@
  */
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_HSTS)
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HSTS)
 #include <curl/curl.h>
 #include "urldata.h"
 #include "llist.h"
@@ -37,6 +37,7 @@
 #include "parsedate.h"
 #include "rand.h"
 #include "rename.h"
+#include "strtoofft.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -46,8 +47,6 @@
 #define MAX_HSTS_LINE 4095
 #define MAX_HSTS_HOSTLEN 256
 #define MAX_HSTS_HOSTLENSTR "256"
-#define MAX_HSTS_SUBLEN 4
-#define MAX_HSTS_SUBLENSTR "4"
 #define MAX_HSTS_DATELEN 64
 #define MAX_HSTS_DATELENSTR "64"
 
@@ -60,7 +59,10 @@ static time_t debugtime(void *unused)
   char *timestr = getenv("CURL_TIME");
   (void)unused;
   if(timestr) {
-    unsigned long val = strtol(timestr, NULL, 10) + deltatime;
+    curl_off_t val;
+    (void)curlx_strtoofft(timestr, NULL, 10, &val);
+
+    val += (curl_off_t)deltatime;
     return (time_t)val;
   }
   return time(NULL);
@@ -276,7 +278,7 @@ static CURLcode hsts_push(struct Curl_easy *data,
   e.namelen = strlen(sts->host);
   e.includeSubDomains = sts->includeSubDomains;
 
-  result = Curl_gmtime(sts->expires, &stamp);
+  result = Curl_gmtime((time_t)sts->expires, &stamp);
   if(result)
     return result;
 
@@ -296,7 +298,7 @@ static CURLcode hsts_push(struct Curl_easy *data,
 static CURLcode hsts_out(struct stsentry *sts, FILE *fp)
 {
   struct tm stamp;
-  CURLcode result = Curl_gmtime(sts->expires, &stamp);
+  CURLcode result = Curl_gmtime((time_t)sts->expires, &stamp);
   if(result)
     return result;
 
@@ -441,7 +443,10 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
           expires = Curl_getdate_capped(e.expire);
         else
           expires = TIME_T_MAX; /* the end of time */
-        result = hsts_create(h, e.name, e.includeSubDomains, expires);
+        result = hsts_create(h, e.name,
+                             /* bitfield to bool conversion: */
+                             e.includeSubDomains ? TRUE : FALSE,
+                             expires);
         if(result)
           return result;
       }
@@ -519,4 +524,4 @@ CURLcode Curl_hsts_loadcb(struct Curl_easy *data, struct hsts *h)
   return hsts_pull(data, h);
 }
 
-#endif /* CURL_DISABLE_HTTP || USE_HSTS */
+#endif /* CURL_DISABLE_HTTP || CURL_DISABLE_HSTS */

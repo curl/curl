@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -667,6 +667,94 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname)
 
 #define HOSTNAME_END(x) (((x) == '/') || ((x) == '?') || ((x) == '#'))
 
+/*
+ * Handle partial IPv4 numerical addresses and different bases, like
+ * '16843009', '0x7f', '0x7f.1' '0177.1.1.1' etc.
+ *
+ * If the given input string is syntactically wrong or any part for example is
+ * too big, this function returns FALSE and doesn't create any output.
+ *
+ * Output the "normalized" version of that input string in plain quad decimal
+ * integers and return TRUE.
+ */
+static bool ipv4_normalize(const char *hostname, char *outp, size_t olen)
+{
+  bool done = FALSE;
+  int n = 0;
+  const char *c = hostname;
+  unsigned long parts[4] = {0, 0, 0, 0};
+
+  while(!done) {
+    char *endp;
+    unsigned long l;
+    if((*c < '0') || (*c > '9'))
+      /* most importantly this doesn't allow a leading plus or minus */
+      return FALSE;
+    l = strtoul(c, &endp, 0);
+
+    /* overflow or nothing parsed at all */
+    if(((l == ULONG_MAX) && (errno == ERANGE)) ||  (endp == c))
+      return FALSE;
+
+#if SIZEOF_LONG > 4
+    /* a value larger than 32 bits */
+    if(l > UINT_MAX)
+      return FALSE;
+#endif
+
+    parts[n] = l;
+    c = endp;
+
+    switch (*c) {
+    case '.' :
+      if(n == 3)
+        return FALSE;
+      n++;
+      c++;
+      break;
+
+    case '\0':
+      done = TRUE;
+      break;
+
+    default:
+      return FALSE;
+    }
+  }
+
+  /* this is deemed a valid IPv4 numerical address */
+
+  switch(n) {
+  case 0: /* a -- 32 bits */
+    msnprintf(outp, olen, "%u.%u.%u.%u",
+              parts[0] >> 24, (parts[0] >> 16) & 0xff,
+              (parts[0] >> 8) & 0xff, parts[0] & 0xff);
+    break;
+  case 1: /* a.b -- 8.24 bits */
+    if((parts[0] > 0xff) || (parts[1] > 0xffffff))
+      return FALSE;
+    msnprintf(outp, olen, "%u.%u.%u.%u",
+              parts[0], (parts[1] >> 16) & 0xff,
+              (parts[1] >> 8) & 0xff, parts[1] & 0xff);
+    break;
+  case 2: /* a.b.c -- 8.8.16 bits */
+    if((parts[0] > 0xff) || (parts[1] > 0xff) || (parts[2] > 0xffff))
+      return FALSE;
+    msnprintf(outp, olen, "%u.%u.%u.%u",
+              parts[0], parts[1], (parts[2] >> 8) & 0xff,
+              parts[2] & 0xff);
+    break;
+  case 3: /* a.b.c.d -- 8.8.8.8 bits */
+    if((parts[0] > 0xff) || (parts[1] > 0xff) || (parts[2] > 0xff) ||
+       (parts[3] > 0xff))
+      return FALSE;
+    msnprintf(outp, olen, "%u.%u.%u.%u",
+              parts[0], parts[1], parts[2], parts[3]);
+    break;
+  }
+  return TRUE;
+}
+
 static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
 {
   char *path;
@@ -899,6 +987,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   }
 
   if(hostname) {
+    char normalized_ipv4[sizeof("255.255.255.255") + 1];
     /*
      * Parse the login details and strip them out of the host name.
      */
@@ -922,7 +1011,10 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
         return result;
     }
 
-    u->host = strdup(hostname);
+    if(ipv4_normalize(hostname, normalized_ipv4, sizeof(normalized_ipv4)))
+      u->host = strdup(normalized_ipv4);
+    else
+      u->host = strdup(hostname);
     if(!u->host)
       return CURLUE_OUT_OF_MEMORY;
 

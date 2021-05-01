@@ -26,12 +26,12 @@ ftp
 FTP with --remote-time
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1444 --remote-time
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --remote-time
 </command>
 # Verify the mtime of the file. The mtime is specifically chosen to be an even
 # number so that it can be represented exactly on a FAT filesystem.
 <postcheck>
-perl -e 'exit((stat("log/curl1444.out"))[9] != 1234567890)'
+perl -e 'exit((stat("log/curl%TESTNUMBER.out"))[9] != 1234567890)'
 </postcheck>
 </client>
 
@@ -41,11 +41,11 @@ perl -e 'exit((stat("log/curl1444.out"))[9] != 1234567890)'
 USER anonymous
 PASS ftp@example.com
 PWD
-MDTM 1444
+MDTM %TESTNUMBER
 EPSV
 TYPE I
-SIZE 1444
-RETR 1444
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

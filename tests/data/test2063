@@ -59,21 +59,21 @@ crypto
 HTTP with RFC7616 SHA-512-256 Digest authorization and userhash=true
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/2063 -u testuser:testpass --digest
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --digest
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /2063 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /2063 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="75af8a3500f771e58a52093a25e7905d6e428a511285c12ea1420c73078dfd61", realm="testrealm", nonce="1053604145", uri="/2063", response="43f7ab531dff687b5dc75617daa59d1fd67d648341d6d2655ca65ef5064cfb51", algorithm=SHA-512-256, userhash=true
+Authorization: Digest username="75af8a3500f771e58a52093a25e7905d6e428a511285c12ea1420c73078dfd61", realm="testrealm", nonce="1053604145", uri="/%TESTNUMBER", response="43f7ab531dff687b5dc75617daa59d1fd67d648341d6d2655ca65ef5064cfb51", algorithm=SHA-512-256, userhash=true
 User-Agent: curl/%VERSION
 Accept: */*
 

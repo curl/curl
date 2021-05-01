@@ -49,13 +49,20 @@ Tells libcurl to not accept "partial" certificate chains, which it otherwise
 does by default. This option is only supported for OpenSSL and will fail the
 certificate verification if the chain ends with an intermediate certificate
 and not with a root cert. (Added in 7.68.0)
-
 .IP CURLSSLOPT_REVOKE_BEST_EFFORT
 Tells libcurl to ignore certificate revocation checks in case of missing or
 offline distribution points for those SSL backends where such behavior is
 present. This option is only supported for Schannel (the native Windows SSL
 library). If combined with \fICURLSSLOPT_NO_REVOKE\fP, the latter takes
 precedence. (Added in 7.70.0)
+.IP CURLSSLOPT_AUTO_CLIENT_CERT
+Tell libcurl to automatically locate and use a client certificate for
+authentication, when requested by the server. This option is only supported
+for Schannel (the native Windows SSL library). Prior to 7.77.0 this was the
+default behavior in libcurl with Schannel. Since the server can request any
+certificate that supports client authentication in the OS certificate store it
+could be a privacy violation and unexpected.
+(Added in 7.77.0)
 .SH DEFAULT
 0
 .SH PROTOCOLS

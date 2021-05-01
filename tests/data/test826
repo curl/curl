@@ -38,7 +38,7 @@ imap
 IMAP login authentication with initial response
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/826/;MAILINDEX=1' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 
@@ -49,7 +49,7 @@ IMAP login authentication with initial response
 A001 CAPABILITY
 A002 AUTHENTICATE LOGIN dXNlcg==
 c2VjcmV0
-A003 SELECT 826
+A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>

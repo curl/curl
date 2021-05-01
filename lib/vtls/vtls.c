@@ -315,6 +315,8 @@ Curl_ssl_connect(struct Curl_easy *data, struct connectdata *conn,
 
   if(!result)
     Curl_pgrsTime(data, TIMER_APPCONNECT); /* SSL is connected */
+  else
+    conn->ssl[sockindex].use = FALSE;
 
   return result;
 }
@@ -338,7 +340,9 @@ Curl_ssl_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
   /* mark this is being ssl requested from here on. */
   conn->ssl[sockindex].use = TRUE;
   result = Curl_ssl->connect_nonblocking(data, conn, sockindex, done);
-  if(!result && *done)
+  if(result)
+    conn->ssl[sockindex].use = FALSE;
+  else if(*done)
     Curl_pgrsTime(data, TIMER_APPCONNECT); /* SSL is connected */
   return result;
 }
@@ -367,6 +371,7 @@ void Curl_ssl_sessionid_unlock(struct Curl_easy *data)
  */
 bool Curl_ssl_getsessionid(struct Curl_easy *data,
                            struct connectdata *conn,
+                           const bool isProxy,
                            void **ssl_sessionid,
                            size_t *idsize, /* set 0 if unknown */
                            int sockindex)
@@ -377,7 +382,6 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
   bool no_match = TRUE;
 
 #ifndef CURL_DISABLE_PROXY
-  const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
     &conn->proxy_ssl_config :
     &conn->ssl_config;
@@ -389,9 +393,14 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
   struct ssl_primary_config * const ssl_config = &conn->ssl_config;
   const char * const name = conn->host.name;
   int port = conn->remote_port;
-  (void)sockindex;
 #endif
+  (void)sockindex;
   *ssl_sessionid = NULL;
+
+#ifdef CURL_DISABLE_PROXY
+  if(isProxy)
+    return TRUE;
+#endif
 
   DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
@@ -480,6 +489,7 @@ void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid)
  */
 CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
                                struct connectdata *conn,
+                               bool isProxy,
                                void *ssl_sessionid,
                                size_t idsize,
                                int sockindex)
@@ -492,19 +502,16 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
   int conn_to_port;
   long *general_age;
 #ifndef CURL_DISABLE_PROXY
-  const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
     &conn->proxy_ssl_config :
     &conn->ssl_config;
   const char *hostname = isProxy ? conn->http_proxy.host.name :
     conn->host.name;
 #else
-  /* proxy support disabled */
-  const bool isProxy = FALSE;
   struct ssl_primary_config * const ssl_config = &conn->ssl_config;
   const char *hostname = conn->host.name;
-  (void)sockindex;
 #endif
+  (void)sockindex;
   DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
   clone_host = strdup(hostname);

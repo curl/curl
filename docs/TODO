@@ -35,6 +35,7 @@
  1.16 Try to URL encode given URL
  1.17 Add support for IRIs
  1.18 try next proxy if one doesn't work
+ 1.19 provide timing info for each redirect
  1.20 SRV and URI DNS records
  1.22 CURLINFO_PAUSE_STATE
  1.23 Offer API to flush the connection pool
@@ -111,7 +112,6 @@
  13.4 Cache/share OpenSSL contexts
  13.5 Export session ids
  13.6 Provide callback for cert verification
- 13.7 improve configure --with-ssl
  13.8 Support DANE
  13.9 TLS record padding
  13.10 Support Authority Information Access certificate extension (AIA)
@@ -125,7 +125,6 @@
  15. Schannel
  15.1 Extend support for client certificate authentication
  15.2 Extend support for the --ciphers option
- 15.3 Add option to disable client certificate auto-send
  15.4 Add option to allow abrupt server closure
 
  16. SASL
@@ -162,10 +161,10 @@
  18.19 expand ~/ in config files
  18.20 host name sections in config files
  18.21 retry on the redirected-to URL
- 18.22 --fail-with-body
  18.23 Set the modification date on an uploaded file
  18.24 Use multiple parallel transfers for a single download
  18.25 Prevent terminal injection when writing to terminal
+ 18.26 Custom progress meter update interval
 
  19. Build
  19.1 roffit
@@ -349,6 +348,15 @@
  using PACs.
 
  https://github.com/curl/curl/issues/896
+
+1.19 provide timing info for each redirect
+
+ curl and libcurl provide timing information via a set of different
+ time-stamps (CURLINFO_*_TIME). When curl is following redirects, those
+ returned time value are the accumulated sums. An improvement could be to
+ offer separate timings for each redirect.
+
+ https://github.com/curl/curl/issues/6743
 
 1.20 SRV and URI DNS records
 
@@ -759,11 +767,6 @@
  certificate, but this doesn't seem to be exposed in the libcurl APIs. Could
  it be? There's so much that could be done if it were!
 
-13.7 improve configure --with-ssl
-
- make the configure --with-ssl option first check for OpenSSL, then GnuTLS,
- then NSS...
-
 13.8 Support DANE
 
  DNS-Based Authentication of Named Entities (DANE) is a way to provide SSL
@@ -848,19 +851,6 @@
  by mapping the OpenSSL/GnuTLS cipher suites to the Schannel APIs, see
  - Specifying Schannel Ciphers and Cipher Strengths
    https://msdn.microsoft.com/en-us/library/windows/desktop/aa380161.aspx
-
-15.3 Add option to disable client certificate auto-send
-
- Microsoft says "By default, Schannel will, with no notification to the client,
- attempt to locate a client certificate and send it to the server." That could
- be considered a privacy violation and unexpected.
-
- Some Windows users have come to expect that default behavior and to change the
- default to make it consistent with other SSL backends would be a breaking
- change. An option should be added that can be used to disable the default
- Schannel auto-send behavior.
-
- https://github.com/curl/curl/issues/2262
 
 15.4 Add option to allow abrupt server closure
 
@@ -1136,14 +1126,6 @@
 
  See https://github.com/curl/curl/issues/5462
 
-18.22 --fail-with-body
-
- Lots of users who want --fail still want the response body saved as well -
- which --fail doesn't offer. The current solution for users is to use
- --write-out with %{response_code} and script the missing logic, but adding a
- --fail-with-body option could be an easier way for users without requiring
- external conditional checks.
-
 18.23 Set the modification date on an uploaded file
 
  For SFTP and possibly FTP, curl could offer an option to set the
@@ -1180,6 +1162,12 @@
 
  See https://github.com/curl/curl/issues/6150
 
+18.26 Custom progress meter update interval
+
+ Users who are for example doing large downloads in CI or remote setups might
+ want the occasional progress meter update to see that the transfer is
+ progressing and hasn't stuck, but they may not appreciate the
+ many-times-a-second frequency curl can end up doing it with now.
 
 19. Build
 

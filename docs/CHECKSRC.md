@@ -33,8 +33,9 @@ warnings are:
 - `ASSIGNWITHINCONDITION`: Assignment within a conditional expression. The
   code style mandates the assignment to be done outside of it.
 
-- `ASTERISKNOSPACE`: A pointer was declared like `char* name` instead of the more
-   appropriate `char *name` style. The asterisk should sit next to the name.
+- `ASTERISKNOSPACE`: A pointer was declared like `char* name` instead of the
+   more appropriate `char *name` style. The asterisk should sit next to the
+   name.
 
 - `ASTERISKSPACE`: A pointer was declared like `char * name` instead of the
    more appropriate `char *name` style. The asterisk should sit right next to
@@ -47,15 +48,27 @@ warnings are:
    strcat, strncat, gets are **never** allowed in curl source code.
 
 - `BRACEELSE`: '} else' on the same line. The else is supposed to be on the
-  following line.
+   following line.
 
 - `BRACEPOS`: wrong position for an open brace (`{`).
+
+- `BRACEWHILE`: more than once space between end brace and while keyword
 
 - `COMMANOSPACE`: a comma without following space
 
 - `COPYRIGHT`: the file is missing a copyright statement!
 
 - `CPPCOMMENTS`: `//` comment detected, that's not C89 compliant
+
+- `DOBRACE`: only use one space after do before open brace
+
+- `EMPTYLINEBRACE`: found empty line before open brace
+
+- `EQUALSNOSPACE`: no space after `=` sign
+
+- `EQUALSNULL`: comparison with `== NULL` used in if/while. We use `!var`.
+
+- `EXCLAMATIONSPACE`: space found after exclamations mark
 
 - `FOPENMODE`: `fopen()` needs a macro for the mode string, use it
 
@@ -69,6 +82,8 @@ warnings are:
 
 - `NOSPACEEQUALS`: An equals sign was found without preceding space. We prefer
   `a = 2` and *not* `a=2`.
+
+- `NOTEQUALSZERO`: check found using `!= 0`. We use plain `if(var)`.
 
 - `ONELINECONDITION`: do not put the conditional block on the same line as `if()`
 

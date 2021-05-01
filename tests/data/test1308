@@ -20,7 +20,7 @@ http
  <name>
 formpost unit tests
  </name>
-<file name="log/test-1308">
+<file name="log/test-%TESTNUMBER">
 Piece of the file that is to uploaded as a formpost
 </file>
 </client>

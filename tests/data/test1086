@@ -87,7 +87,7 @@ ftp
 FTP download with strict timeout and slow data transfer
  </name>
  <command timeout="1">
-ftp://%HOSTIP:%FTPPORT/1086 -m 7
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -m 7
 </command>
 </client>
 
@@ -103,8 +103,8 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 1086
-RETR 1086
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 </protocol>
 </verify>
 </testcase>

@@ -126,9 +126,11 @@ bool Curl_ssl_tls13_ciphersuites(void);
 #define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
 #endif
 
-/* see https://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg-04 */
+/* see https://www.iana.org/assignments/tls-extensiontype-values/ */
 #define ALPN_HTTP_1_1_LENGTH 8
 #define ALPN_HTTP_1_1 "http/1.1"
+#define ALPN_H2_LENGTH 2
+#define ALPN_H2 "h2"
 
 /* set of helper macros for the backends to access the correct fields. For the
    proxy or for the remote host - to properly support HTTPS proxy */
@@ -148,6 +150,8 @@ bool Curl_ssl_tls13_ciphersuites(void);
   (SSL_IS_PROXY() ? conn->http_proxy.host.name : conn->host.name)
 #define SSL_HOST_DISPNAME()                                             \
   (SSL_IS_PROXY() ? conn->http_proxy.host.dispname : conn->host.dispname)
+#define SSL_HOST_PORT()                                                 \
+  (SSL_IS_PROXY() ? conn->port : conn->remote_port)
 #define SSL_PINNED_PUB_KEY() (SSL_IS_PROXY()                            \
   ? data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]                     \
   : data->set.str[STRING_SSL_PINNEDPUBLICKEY])
@@ -158,6 +162,7 @@ bool Curl_ssl_tls13_ciphersuites(void);
 #define SSL_CONN_CONFIG(var) conn->ssl_config.var
 #define SSL_HOST_NAME() conn->host.name
 #define SSL_HOST_DISPNAME() conn->host.dispname
+#define SSL_HOST_PORT() conn->remote_port
 #define SSL_PINNED_PUB_KEY()                                            \
   data->set.str[STRING_SSL_PINNEDPUBLICKEY]
 #endif
@@ -235,6 +240,7 @@ void Curl_ssl_sessionid_unlock(struct Curl_easy *data);
  */
 bool Curl_ssl_getsessionid(struct Curl_easy *data,
                            struct connectdata *conn,
+                           const bool isproxy,
                            void **ssl_sessionid,
                            size_t *idsize, /* set 0 if unknown */
                            int sockindex);
@@ -245,6 +251,7 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
  */
 CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
                                struct connectdata *conn,
+                               const bool isProxy,
                                void *ssl_sessionid,
                                size_t idsize,
                                int sockindex);

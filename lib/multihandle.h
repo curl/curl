@@ -141,9 +141,13 @@ struct Curl_multi {
   unsigned int max_concurrent_streams;
   unsigned int stream_window_size;
 
+#ifdef USE_WINSOCK
+  WSAEVENT wsa_event; /* winsock event used for waits */
+#else
 #ifdef ENABLE_WAKEUP
   curl_socket_t wakeup_pair[2]; /* socketpair() used for wakeup
                                    0 is used for read, 1 is used for write */
+#endif
 #endif
   /* multiplexing wanted */
   bool multiplexing;

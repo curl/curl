@@ -26,7 +26,7 @@ To: another
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/3006 --mail-rcpt-allowfails --mail-rcpt invalid.one --mail-rcpt invalid.two --mail-rcpt invalid.three --mail-rcpt invalid.four --mail-rcpt invalid.five --mail-from sender@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt-allowfails --mail-rcpt invalid.one --mail-rcpt invalid.two --mail-rcpt invalid.three --mail-rcpt invalid.four --mail-rcpt invalid.five --mail-from sender@example.com -T -
 </command>
 </client>
 
@@ -38,7 +38,7 @@ smtp://%HOSTIP:%SMTPPORT/3006 --mail-rcpt-allowfails --mail-rcpt invalid.one --m
 55
 </errorcode>
 <protocol>
-EHLO 3006
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<invalid.one>
 RCPT TO:<invalid.two>

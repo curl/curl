@@ -37,6 +37,10 @@ about existing options to `curl_easy_setopt`.
 
 Disable the GOPHER protocol.
 
+## CURL_DISABLE_HSTS
+
+Disable the HTTP Strict Transport Security support.
+
 ## CURL_DISABLE_HTTP
 
 Disable the HTTP(S) protocols. Note that this then also disable HTTP proxy

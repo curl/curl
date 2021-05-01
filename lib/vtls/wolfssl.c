@@ -47,16 +47,6 @@
 #endif
 #endif
 
-/* WOLFSSL_ALLOW_SSLV3 is wolfSSL's build time symbol for enabling SSLv3 in
-   options.h, but is only seen in >= 3.6.6 since that's when they started
-   disabling SSLv3 by default. */
-#ifndef WOLFSSL_ALLOW_SSLV3
-#if (LIBWOLFSSL_VERSION_HEX < 0x03006006) || \
-  defined(HAVE_WOLFSSLV3_CLIENT_METHOD)
-#define WOLFSSL_ALLOW_SSLV3
-#endif
-#endif
-
 #include <limits.h>
 
 #include "urldata.h"
@@ -285,18 +275,10 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     failf(data, "wolfSSL: TLS 1.3 is not yet supported");
     return CURLE_SSL_CONNECT_ERROR;
 #endif
-  case CURL_SSLVERSION_SSLv3:
-#ifdef WOLFSSL_ALLOW_SSLV3
-    req_method = SSLv3_client_method();
-    use_sni(FALSE);
-#else
-    failf(data, "wolfSSL does not support SSLv3");
-    return CURLE_NOT_BUILT_IN;
-#endif
-    break;
   case CURL_SSLVERSION_SSLv2:
-    failf(data, "wolfSSL does not support SSLv2");
-    return CURLE_SSL_CONNECT_ERROR;
+  case CURL_SSLVERSION_SSLv3:
+    failf(data, "SSL versions not supported");
+    return CURLE_NOT_BUILT_IN;
   default:
     failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;
@@ -418,12 +400,7 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 #ifdef ENABLE_IPV6
     struct in6_addr addr6;
 #endif
-#ifndef CURL_DISABLE_PROXY
-    const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
-      conn->host.name;
-#else
-    const char * const hostname = conn->host.name;
-#endif
+    const char * const hostname = SSL_HOST_NAME();
     size_t hostname_len = strlen(hostname);
     if((hostname_len < USHRT_MAX) &&
        (0 == Curl_inet_pton(AF_INET, hostname, &addr4)) &&
@@ -474,10 +451,10 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     /* wolfSSL's ALPN protocol name list format is a comma separated string of
        protocols in descending order of preference, eg: "h2,http/1.1" */
 
-#ifdef USE_NGHTTP2
-    if(data->state.httpversion >= CURL_HTTP_VERSION_2) {
-      strcpy(protocols + strlen(protocols), NGHTTP2_PROTO_VERSION_ID ",");
-      infof(data, "ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
+#ifdef USE_HTTP2
+    if(data->state.httpwant >= CURL_HTTP_VERSION_2) {
+      strcpy(protocols + strlen(protocols), ALPN_H2 ",");
+      infof(data, "ALPN, offering %s\n", ALPN_H2);
     }
 #endif
 
@@ -516,7 +493,9 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     void *ssl_sessionid = NULL;
 
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(data, conn, &ssl_sessionid, NULL, sockindex)) {
+    if(!Curl_ssl_getsessionid(data, conn,
+                              SSL_IS_PROXY() ? TRUE : FALSE,
+                              &ssl_sessionid, NULL, sockindex)) {
       /* we got a session id, use it! */
       if(!SSL_set_session(backend->handle, ssl_sessionid)) {
         char error_buffer[WOLFSSL_MAX_ERROR_SZ];
@@ -550,20 +529,9 @@ wolfssl_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   int ret = -1;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
-#ifndef CURL_DISABLE_PROXY
-  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
-    conn->host.name;
-  const char * const dispname = SSL_IS_PROXY() ?
-    conn->http_proxy.host.dispname : conn->host.dispname;
-  const char * const pinnedpubkey = SSL_IS_PROXY() ?
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
-#else
-  const char * const hostname = conn->host.name;
-  const char * const dispname = conn->host.dispname;
-  const char * const pinnedpubkey =
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
-#endif
+  const char * const hostname = SSL_HOST_NAME();
+  const char * const dispname = SSL_HOST_DISPNAME();
+  const char * const pinnedpubkey = SSL_PINNED_PUB_KEY();
 
   conn->recv[sockindex] = wolfssl_recv;
   conn->send[sockindex] = wolfssl_send;
@@ -723,11 +691,10 @@ wolfssl_connect_step2(struct Curl_easy *data, struct connectdata *conn,
       if(protocol_len == ALPN_HTTP_1_1_LENGTH &&
          !memcmp(protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH))
         conn->negnpn = CURL_HTTP_VERSION_1_1;
-#ifdef USE_NGHTTP2
-      else if(data->state.httpversion >= CURL_HTTP_VERSION_2 &&
-              protocol_len == NGHTTP2_PROTO_VERSION_ID_LEN &&
-              !memcmp(protocol, NGHTTP2_PROTO_VERSION_ID,
-                      NGHTTP2_PROTO_VERSION_ID_LEN))
+#ifdef USE_HTTP2
+      else if(data->state.httpwant >= CURL_HTTP_VERSION_2 &&
+              protocol_len == ALPN_H2_LENGTH &&
+              !memcmp(protocol, ALPN_H2, ALPN_H2_LENGTH))
         conn->negnpn = CURL_HTTP_VERSION_2;
 #endif
       else
@@ -772,11 +739,12 @@ wolfssl_connect_step3(struct Curl_easy *data, struct connectdata *conn,
     bool incache;
     void *old_ssl_sessionid = NULL;
     SSL_SESSION *our_ssl_sessionid = SSL_get_session(backend->handle);
+    bool isproxy = SSL_IS_PROXY() ? TRUE : FALSE;
 
     if(our_ssl_sessionid) {
       Curl_ssl_sessionid_lock(data);
-      incache = !(Curl_ssl_getsessionid(data, conn, &old_ssl_sessionid, NULL,
-                                        sockindex));
+      incache = !(Curl_ssl_getsessionid(data, conn, isproxy,
+                                        &old_ssl_sessionid, NULL, sockindex));
       if(incache) {
         if(old_ssl_sessionid != our_ssl_sessionid) {
           infof(data, "old SSL session ID is stale, removing\n");
@@ -786,8 +754,8 @@ wolfssl_connect_step3(struct Curl_easy *data, struct connectdata *conn,
       }
 
       if(!incache) {
-        result = Curl_ssl_addsessionid(data, conn, our_ssl_sessionid,
-                                       0 /* unknown size */, sockindex);
+        result = Curl_ssl_addsessionid(data, conn, isproxy, our_ssl_sessionid,
+                                       0, sockindex);
         if(result) {
           Curl_ssl_sessionid_unlock(data);
           failf(data, "failed to store ssl session");
@@ -817,7 +785,7 @@ static ssize_t wolfssl_send(struct Curl_easy *data,
   int memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
   int rc = SSL_write(backend->handle, mem, memlen);
 
-  if(rc < 0) {
+  if(rc <= 0) {
     int err = SSL_get_error(backend->handle, rc);
 
     switch(err) {

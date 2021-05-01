@@ -19,7 +19,7 @@ ftp
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib661
+lib%TESTNUMBER
 </tool>
 
  <name>
@@ -40,22 +40,22 @@ PWD
 CWD /folderA
 EPSV
 TYPE I
-RETR 661
+RETR %TESTNUMBER
 CWD /folderB
 EPSV
-RETR 661
+RETR %TESTNUMBER
 QUIT
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-RETR /folderA/661
+RETR /folderA/%TESTNUMBER
 CWD /folderB
 EPSV
-RETR 661
+RETR %TESTNUMBER
 EPSV
-RETR /folderA/661
+RETR /folderA/%TESTNUMBER
 QUIT
 USER anonymous
 PASS ftp@example.com

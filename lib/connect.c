@@ -171,65 +171,63 @@ singleipconnect(struct Curl_easy *data,
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
  *
- * The start time is stored in progress.t_startsingle - as set with
- * Curl_pgrsTime(..., TIMER_STARTSINGLE);
- *
  * If 'nowp' is non-NULL, it points to the current time.
  * 'duringconnect' is FALSE if not during a connect, as then of course the
  * connect timeout is not taken into account!
  *
  * @unittest: 1303
  */
+
+#define TIMEOUT_CONNECT 1
+#define TIMEOUT_MAXTIME 2
+
 timediff_t Curl_timeleft(struct Curl_easy *data,
                          struct curltime *nowp,
                          bool duringconnect)
 {
-  int timeout_set = 0;
-  timediff_t timeout_ms = duringconnect?DEFAULT_CONNECT_TIMEOUT:0;
+  unsigned int timeout_set = 0;
+  timediff_t connect_timeout_ms = 0;
+  timediff_t maxtime_timeout_ms = 0;
+  timediff_t timeout_ms = 0;
   struct curltime now;
 
-  /* if a timeout is set, use the most restrictive one */
+  /* The duration of a connect and the total transfer are calculated from two
+     different time-stamps. It can end up with the total timeout being reached
+     before the connect timeout expires and we must acknowledge whichever
+     timeout that is reached first. The total timeout is set per entire
+     operation, while the connect timeout is set per connect. */
 
-  if(data->set.timeout > 0)
-    timeout_set |= 1;
-  if(duringconnect && (data->set.connecttimeout > 0))
-    timeout_set |= 2;
-
-  switch(timeout_set) {
-  case 1:
-    timeout_ms = data->set.timeout;
-    break;
-  case 2:
-    timeout_ms = data->set.connecttimeout;
-    break;
-  case 3:
-    if(data->set.timeout < data->set.connecttimeout)
-      timeout_ms = data->set.timeout;
-    else
-      timeout_ms = data->set.connecttimeout;
-    break;
-  default:
-    /* use the default */
-    if(!duringconnect)
-      /* if we're not during connect, there's no default timeout so if we're
-         at zero we better just return zero and not make it a negative number
-         by the math below */
-      return 0;
-    break;
+  if(data->set.timeout > 0) {
+    timeout_set = TIMEOUT_MAXTIME;
+    maxtime_timeout_ms = data->set.timeout;
   }
+  if(duringconnect) {
+    timeout_set |= TIMEOUT_CONNECT;
+    connect_timeout_ms = (data->set.connecttimeout > 0) ?
+      data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
+  }
+  if(!timeout_set)
+    /* no timeout  */
+    return 0;
 
   if(!nowp) {
     now = Curl_now();
     nowp = &now;
   }
 
-  /* subtract elapsed time */
-  if(duringconnect)
-    /* since this most recent connect started */
-    timeout_ms -= Curl_timediff(*nowp, data->progress.t_startsingle);
-  else
-    /* since the entire operation started */
-    timeout_ms -= Curl_timediff(*nowp, data->progress.t_startop);
+  if(timeout_set & TIMEOUT_MAXTIME) {
+    maxtime_timeout_ms -= Curl_timediff(*nowp, data->progress.t_startop);
+    timeout_ms = maxtime_timeout_ms;
+  }
+
+  if(timeout_set & TIMEOUT_CONNECT) {
+    connect_timeout_ms -= Curl_timediff(*nowp, data->progress.t_startsingle);
+
+    if(!(timeout_set & TIMEOUT_MAXTIME) ||
+       (connect_timeout_ms < maxtime_timeout_ms))
+      timeout_ms = connect_timeout_ms;
+  }
+
   if(!timeout_ms)
     /* avoid returning 0 as that means no timeout! */
     return -1;
@@ -662,7 +660,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 #endif
 #if defined(HAVE_SYS_UN_H) && defined(AF_UNIX)
     case AF_UNIX:
-      if(salen > (curl_socklen_t)sizeof(sa_family_t)) {
+      if(salen > (curl_socklen_t)sizeof(CURL_SA_FAMILY_T)) {
         su = (struct sockaddr_un*)sa;
         msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
       }
@@ -908,8 +906,10 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
         connkeep(conn, "HTTP/3 default");
         return CURLE_OK;
       }
-      if(result)
+      if(result) {
+        conn->tempsock[i] = CURL_SOCKET_BAD;
         error = SOCKERRNO;
+      }
     }
     else
 #endif

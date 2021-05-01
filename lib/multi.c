@@ -382,6 +382,11 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   multi->stream_window_size = 32 * 1024 * 1024; /* 32 MB */
   multi->ipv6_works = Curl_ipv6works(NULL);
 
+#ifdef USE_WINSOCK
+  multi->wsa_event = WSACreateEvent();
+  if(multi->wsa_event == WSA_INVALID_EVENT)
+    goto error;
+#else
 #ifdef ENABLE_WAKEUP
   if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, multi->wakeup_pair) < 0) {
     multi->wakeup_pair[0] = CURL_SOCKET_BAD;
@@ -394,6 +399,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
     multi->wakeup_pair[0] = CURL_SOCKET_BAD;
     multi->wakeup_pair[1] = CURL_SOCKET_BAD;
   }
+#endif
 #endif
 
   return multi;
@@ -825,6 +831,17 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     }
   }
 
+  /* Remove from the pending list if it is there. Otherwise this will
+     remain on the pending list forever due to the state change. */
+  for(e = multi->pending.head; e; e = e->next) {
+    struct Curl_easy *curr_data = e->ptr;
+
+    if(curr_data == data) {
+      Curl_llist_remove(&multi->pending, e, NULL);
+      break;
+    }
+  }
+
   /* make the previous node point to our next */
   if(data->prev)
     data->prev->next = data->next;
@@ -840,6 +857,8 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   /* NOTE NOTE NOTE
      We do not touch the easy handle here! */
   multi->num_easy--; /* one less to care about now */
+
+  process_pending_handles(multi);
 
   Curl_update_timer(multi);
   return CURLM_OK;
@@ -1071,6 +1090,10 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
   struct pollfd *ufds = &a_few_on_stack[0];
   bool ufds_malloc = FALSE;
+#ifdef USE_WINSOCK
+  WSANETWORKEVENTS wsa_events;
+  DEBUGASSERT(multi->wsa_event != WSA_INVALID_EVENT);
+#endif
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -1116,7 +1139,11 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   nfds += extra_nfds; /* add the externally provided ones */
 
 #ifdef ENABLE_WAKEUP
+#ifdef USE_WINSOCK
+  if(use_wakeup) {
+#else
   if(use_wakeup && multi->wakeup_pair[0] != CURL_SOCKET_BAD) {
+#endif
     ++nfds;
   }
 #endif
@@ -1144,22 +1171,40 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 
       for(i = 0; i < MAX_SOCKSPEREASYHANDLE; i++) {
         curl_socket_t s = CURL_SOCKET_BAD;
-
+#ifdef USE_WINSOCK
+        long mask = 0;
+#endif
         if(bitmap & GETSOCK_READSOCK(i)) {
-          ufds[nfds].fd = sockbunch[i];
+          s = sockbunch[i];
+#ifdef USE_WINSOCK
+          mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
+#endif
+          ufds[nfds].fd = s;
           ufds[nfds].events = POLLIN;
           ++nfds;
-          s = sockbunch[i];
         }
         if(bitmap & GETSOCK_WRITESOCK(i)) {
-          ufds[nfds].fd = sockbunch[i];
+          s = sockbunch[i];
+#ifdef USE_WINSOCK
+          mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
+          send(s, NULL, 0, 0); /* reset FD_WRITE */
+#endif
+          ufds[nfds].fd = s;
           ufds[nfds].events = POLLOUT;
           ++nfds;
-          s = sockbunch[i];
         }
+        /* s is only set if either being readable or writable is checked */
         if(s == CURL_SOCKET_BAD) {
+          /* break on entry not checked for being readable or writable */
           break;
         }
+#ifdef USE_WINSOCK
+        if(WSAEventSelect(s, multi->wsa_event, mask) != 0) {
+          if(ufds_malloc)
+            free(ufds);
+          return CURLM_INTERNAL_ERROR;
+        }
+#endif
       }
 
       data = data->next; /* check next handle */
@@ -1168,6 +1213,22 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 
   /* Add external file descriptions from poll-like struct curl_waitfd */
   for(i = 0; i < extra_nfds; i++) {
+#ifdef USE_WINSOCK
+    long mask = 0;
+    if(extra_fds[i].events & CURL_WAIT_POLLIN)
+      mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
+    if(extra_fds[i].events & CURL_WAIT_POLLPRI)
+      mask |= FD_OOB;
+    if(extra_fds[i].events & CURL_WAIT_POLLOUT) {
+      mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
+      send(extra_fds[i].fd, NULL, 0, 0); /* reset FD_WRITE */
+    }
+    if(WSAEventSelect(extra_fds[i].fd, multi->wsa_event, mask) != 0) {
+      if(ufds_malloc)
+        free(ufds);
+      return CURLM_INTERNAL_ERROR;
+    }
+#endif
     ufds[nfds].fd = extra_fds[i].fd;
     ufds[nfds].events = 0;
     if(extra_fds[i].events & CURL_WAIT_POLLIN)
@@ -1180,25 +1241,62 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   }
 
 #ifdef ENABLE_WAKEUP
+#ifndef USE_WINSOCK
   if(use_wakeup && multi->wakeup_pair[0] != CURL_SOCKET_BAD) {
     ufds[nfds].fd = multi->wakeup_pair[0];
     ufds[nfds].events = POLLIN;
     ++nfds;
   }
 #endif
+#endif
 
+#if defined(ENABLE_WAKEUP) && defined(USE_WINSOCK)
+  if(nfds || use_wakeup) {
+#else
   if(nfds) {
-    /* wait... */
-    int pollrc = Curl_poll(ufds, nfds, timeout_ms);
+#endif
+    int pollrc;
+#ifdef USE_WINSOCK
+    if(nfds)
+      pollrc = Curl_poll(ufds, nfds, 0); /* just pre-check with WinSock */
+    else
+      pollrc = 0;
+    if(pollrc <= 0) /* now wait... if not ready during the pre-check above */
+      WSAWaitForMultipleEvents(1, &multi->wsa_event, FALSE, timeout_ms, FALSE);
+#else
+    pollrc = Curl_poll(ufds, nfds, timeout_ms); /* wait... */
+#endif
+
     if(pollrc > 0) {
       retcode = pollrc;
+#ifdef USE_WINSOCK
+    }
+    /* With WinSock, we have to run the following section unconditionally
+       to call WSAEventSelect(fd, event, 0) on all the sockets */
+    {
+#endif
       /* copy revents results from the poll to the curl_multi_wait poll
          struct, the bit values of the actual underlying poll() implementation
          may not be the same as the ones in the public libcurl API! */
       for(i = 0; i < extra_nfds; i++) {
-        unsigned short mask = 0;
         unsigned r = ufds[curlfds + i].revents;
-
+        unsigned short mask = 0;
+#ifdef USE_WINSOCK
+        wsa_events.lNetworkEvents = 0;
+        if(WSAEnumNetworkEvents(extra_fds[i].fd, NULL, &wsa_events) == 0) {
+          if(wsa_events.lNetworkEvents & (FD_READ|FD_ACCEPT|FD_CLOSE))
+            mask |= CURL_WAIT_POLLIN;
+          if(wsa_events.lNetworkEvents & (FD_WRITE|FD_CONNECT|FD_CLOSE))
+            mask |= CURL_WAIT_POLLOUT;
+          if(wsa_events.lNetworkEvents & FD_OOB)
+            mask |= CURL_WAIT_POLLPRI;
+          if(ret && pollrc <= 0 && wsa_events.lNetworkEvents)
+            retcode++;
+        }
+        WSAEventSelect(extra_fds[i].fd, multi->wsa_event, 0);
+        if(pollrc <= 0)
+          continue;
+#endif
         if(r & POLLIN)
           mask |= CURL_WAIT_POLLIN;
         if(r & POLLOUT)
@@ -1208,6 +1306,35 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
         extra_fds[i].revents = mask;
       }
 
+#ifdef USE_WINSOCK
+      /* Count up all our own sockets that had activity,
+         and remove them from the event. */
+      if(curlfds) {
+        data = multi->easyp;
+        while(data) {
+          bitmap = multi_getsock(data, sockbunch);
+
+          for(i = 0; i < MAX_SOCKSPEREASYHANDLE; i++) {
+            if(bitmap & (GETSOCK_READSOCK(i) | GETSOCK_WRITESOCK(i))) {
+              wsa_events.lNetworkEvents = 0;
+              if(WSAEnumNetworkEvents(sockbunch[i], NULL, &wsa_events) == 0) {
+                if(ret && pollrc <= 0 && wsa_events.lNetworkEvents)
+                  retcode++;
+              }
+              WSAEventSelect(sockbunch[i], multi->wsa_event, 0);
+            }
+            else {
+              /* break on entry not checked for being readable or writable */
+              break;
+            }
+          }
+
+          data = data->next;
+        }
+      }
+
+      WSAResetEvent(multi->wsa_event);
+#else
 #ifdef ENABLE_WAKEUP
       if(use_wakeup && multi->wakeup_pair[0] != CURL_SOCKET_BAD) {
         if(ufds[curlfds + extra_nfds].revents & POLLIN) {
@@ -1220,10 +1347,8 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
                when there is no more data, breaking the loop. */
             nread = sread(multi->wakeup_pair[0], buf, sizeof(buf));
             if(nread <= 0) {
-#ifndef USE_WINSOCK
               if(nread < 0 && EINTR == SOCKERRNO)
                 continue;
-#endif
               break;
             }
           }
@@ -1232,6 +1357,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
         }
       }
 #endif
+#endif
     }
   }
 
@@ -1239,10 +1365,11 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     free(ufds);
   if(ret)
     *ret = retcode;
-  if(!extrawait || nfds)
-    /* if any socket was checked */
-    ;
-  else {
+#if defined(ENABLE_WAKEUP) && defined(USE_WINSOCK)
+  if(extrawait && !nfds && !use_wakeup) {
+#else
+  if(extrawait && !nfds) {
+#endif
     long sleep_ms = 0;
 
     /* Avoid busy-looping when there's nothing particular to wait for */
@@ -1291,6 +1418,10 @@ CURLMcode curl_multi_wakeup(struct Curl_multi *multi)
     return CURLM_BAD_HANDLE;
 
 #ifdef ENABLE_WAKEUP
+#ifdef USE_WINSOCK
+  if(WSASetEvent(multi->wsa_event))
+    return CURLM_OK;
+#else
   /* the wakeup_pair variable is only written during init and cleanup,
      making it safe to access from another thread after the init part
      and before cleanup */
@@ -1323,6 +1454,7 @@ CURLMcode curl_multi_wakeup(struct Curl_multi *multi)
       return CURLM_OK;
     }
   }
+#endif
 #endif
   return CURLM_WAKEUP_FAILURE;
 }
@@ -2057,7 +2189,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else {
         send_timeout_ms = 0;
-        if(data->set.max_send_speed > 0)
+        if(data->set.max_send_speed)
           send_timeout_ms =
             Curl_pgrsLimitWaitTime(data->progress.uploaded,
                                    data->progress.ul_limit_size,
@@ -2066,7 +2198,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                    *nowp);
 
         recv_timeout_ms = 0;
-        if(data->set.max_recv_speed > 0)
+        if(data->set.max_recv_speed)
           recv_timeout_ms =
             Curl_pgrsLimitWaitTime(data->progress.downloaded,
                                    data->progress.dl_limit_size,
@@ -2093,7 +2225,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       DEBUGASSERT(data->state.buffer);
       /* check if over send speed */
       send_timeout_ms = 0;
-      if(data->set.max_send_speed > 0)
+      if(data->set.max_send_speed)
         send_timeout_ms = Curl_pgrsLimitWaitTime(data->progress.uploaded,
                                                  data->progress.ul_limit_size,
                                                  data->set.max_send_speed,
@@ -2102,7 +2234,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       /* check if over recv speed */
       recv_timeout_ms = 0;
-      if(data->set.max_recv_speed > 0)
+      if(data->set.max_recv_speed)
         recv_timeout_ms = Curl_pgrsLimitWaitTime(data->progress.downloaded,
                                                  data->progress.dl_limit_size,
                                                  data->set.max_recv_speed,
@@ -2141,17 +2273,18 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
       }
       else if((CURLE_HTTP2_STREAM == result) &&
-              Curl_h2_http_1_1_error(data->conn)) {
+              Curl_h2_http_1_1_error(data)) {
         CURLcode ret = Curl_retry_request(data, &newurl);
 
         if(!ret) {
           infof(data, "Downgrades to HTTP/1.1!\n");
+          streamclose(data->conn, "Disconnect HTTP/2 for HTTP/1");
           data->state.httpwant = CURL_HTTP_VERSION_1_1;
           /* clear the error message bit too as we ignore the one we got */
           data->state.errorbuf = FALSE;
           if(!newurl)
             /* typically for HTTP_1_1_REQUIRED error on first flight */
-            newurl = strdup(data->change.url);
+            newurl = strdup(data->state.url);
           /* if we are to retry, set the result to OK and consider the request
              as done */
           retry = TRUE;
@@ -2465,9 +2598,13 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     Curl_hash_destroy(&multi->hostcache);
     Curl_psl_destroy(&multi->psl);
 
+#ifdef USE_WINSOCK
+    WSACloseEvent(multi->wsa_event);
+#else
 #ifdef ENABLE_WAKEUP
     sclose(multi->wakeup_pair[0]);
     sclose(multi->wakeup_pair[1]);
+#endif
 #endif
     free(multi);
 

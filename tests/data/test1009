@@ -28,7 +28,7 @@ tftp
 TFTP retrieve with --local-port
  </name>
  <command>
-tftp://%HOSTIP:%TFTPPORT//1009 --local-port 44444-45444
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --local-port 44444-45444
 </command>
 </client>
 
@@ -41,7 +41,7 @@ mode: octet
 tsize: 0
 blksize: 512
 timeout: 6
-filename: /1009
+filename: /%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

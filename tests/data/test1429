@@ -35,7 +35,7 @@ http
 HTTP GET with 4-digit response code
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1429 --write-out '%{response_code}' --http0.9
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out '%{response_code}' --http0.9
 </command>
 </client>
 
@@ -58,7 +58,7 @@ Funny-head: yesyes
 234
 </stdout>
 <protocol>
-GET /1429 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

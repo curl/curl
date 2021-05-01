@@ -52,7 +52,7 @@ proxy
 IMAP FETCH tunneled through HTTP proxy
  </name>
  <command>
-'imap://imap.1321:%IMAPPORT/1321/;MAILINDEX=1' -u user:secret -p -x %HOSTIP:%PROXYPORT
+'imap://imap.%TESTNUMBER:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>
 
@@ -62,13 +62,13 @@ IMAP FETCH tunneled through HTTP proxy
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 SELECT 1321
+A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>
 <proxy>
-CONNECT imap.1321:%IMAPPORT HTTP/1.1
-Host: imap.1321:%IMAPPORT
+CONNECT imap.%TESTNUMBER:%IMAPPORT HTTP/1.1
+Host: imap.%TESTNUMBER:%IMAPPORT
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 

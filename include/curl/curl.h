@@ -888,6 +888,10 @@ typedef enum {
    operating system. Currently implemented under MS-Windows. */
 #define CURLSSLOPT_NATIVE_CA (1<<4)
 
+/* - CURLSSLOPT_AUTO_CLIENT_CERT tells libcurl to automatically locate and use
+   a client certificate for authentication. (Schannel) */
+#define CURLSSLOPT_AUTO_CLIENT_CERT (1<<5)
+
 /* The default connection attempt delay in milliseconds for happy eyeballs.
    CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3 and happy-eyeballs-timeout-ms.d document
    this value, keep them in sync. */
@@ -2866,6 +2870,7 @@ typedef enum {
   CURLVERSION_SEVENTH,
   CURLVERSION_EIGHTH,
   CURLVERSION_NINTH,
+  CURLVERSION_TENTH,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -2874,7 +2879,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_NINTH
+#define CURLVERSION_NOW CURLVERSION_TENTH
 
 struct curl_version_info_data {
   CURLversion age;          /* age of the returned struct */
@@ -2927,6 +2932,9 @@ struct curl_version_info_data {
 
   /* These fields were added in CURLVERSION_NINTH */
   const char *hyper_version; /* human readable string. */
+
+  /* These fields were added in CURLVERSION_TENTH */
+  const char *gsasl_version; /* human readable string. */
 };
 typedef struct curl_version_info_data curl_version_info_data;
 

@@ -98,7 +98,7 @@
 #endif
 
 /* Allow SMB to work on Windows */
-#cmakedefine USE_WIN32_CRYPTO
+#cmakedefine USE_WIN32_CRYPTO 1
 
 /* Use Windows LDAP implementation */
 #cmakedefine USE_WIN32_LDAP 1
@@ -321,15 +321,6 @@
 
 /* Define to 1 if you have the `inet_addr' function. */
 #cmakedefine HAVE_INET_ADDR 1
-
-/* Define to 1 if you have the inet_ntoa_r function. */
-#cmakedefine HAVE_INET_NTOA_R 1
-
-/* inet_ntoa_r() takes 2 args */
-#cmakedefine HAVE_INET_NTOA_R_2 1
-
-/* inet_ntoa_r() takes 3 args */
-#cmakedefine HAVE_INET_NTOA_R_3 1
 
 /* Define to 1 if you have a IPv6 capable working inet_ntop function. */
 #cmakedefine HAVE_INET_NTOP 1
@@ -876,9 +867,6 @@
 /* Define to the function return type for recv. */
 #cmakedefine RECV_TYPE_RETV ${RECV_TYPE_RETV}
 
-/* Define as the return type of signal handlers (`int' or `void'). */
-#cmakedefine RETSIGTYPE ${RETSIGTYPE}
-
 /* Define to the type qualifier of arg 5 for select. */
 #cmakedefine SELECT_QUAL_ARG5 ${SELECT_QUAL_ARG5}
 
@@ -1073,3 +1061,9 @@ ${SIZEOF_TIME_T_CODE}
 
 /* Define to 1 if you have the mach_absolute_time function. */
 #cmakedefine HAVE_MACH_ABSOLUTE_TIME 1
+
+/* to enable Windows IDN */
+#cmakedefine USE_WIN32_IDN 1
+
+/* to make the compiler know the prototypes of Windows IDN APIs */
+#cmakedefine WANT_IDN_PROTOTYPES 1

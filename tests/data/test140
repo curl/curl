@@ -24,7 +24,7 @@ ftp
 FTP download file with -z, expected to not transfer
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/blalbla/140 -z "1 jan 2004"
+ftp://%HOSTIP:%FTPPORT/blalbla/%TESTNUMBER -z "1 jan 2004"
 </command>
 </client>
 
@@ -35,7 +35,7 @@ USER anonymous
 PASS ftp@example.com
 PWD
 CWD blalbla
-MDTM 140
+MDTM %TESTNUMBER
 QUIT
 </protocol>
 </verify>

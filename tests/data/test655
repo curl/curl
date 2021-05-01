@@ -29,14 +29,14 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib655
+lib%TESTNUMBER
 </tool>
 
  <name>
 resolver start callback
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/655
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

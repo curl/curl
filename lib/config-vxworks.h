@@ -56,9 +56,6 @@
 /* to disable LDAPS */
 #define CURL_DISABLE_LDAPS 1
 
-/* to disable NTLM authentication */
-#define CURL_DISABLE_NTLM 1
-
 /* to disable proxies */
 /* #undef CURL_DISABLE_PROXY */
 
@@ -274,15 +271,6 @@
 
 /* Define to 1 if you have the `inet_addr' function. */
 #define HAVE_INET_ADDR 1
-
-/* Define to 1 if you have the inet_ntoa_r function. */
-/* #undef HAVE_INET_NTOA_R */
-
-/* inet_ntoa_r() takes 2 args */
-/* #undef HAVE_INET_NTOA_R_2 */
-
-/* inet_ntoa_r() takes 3 args */
-/* #undef HAVE_INET_NTOA_R_3 */
 
 /* Define to 1 if you have a IPv6 capable working inet_ntop function. */
 /* #undef HAVE_INET_NTOP */
@@ -771,9 +759,6 @@
 
 /* Define to the function return type for recv. */
 #define RECV_TYPE_RETV int
-
-/* Define as the return type of signal handlers (`int' or `void'). */
-#define RETSIGTYPE void
 
 /* Define to the type qualifier of arg 5 for select. */
 #define SELECT_QUAL_ARG5

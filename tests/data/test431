@@ -37,15 +37,15 @@ Content-Type: text/3
 #
 # Client-side
 <client>
-<file1 name="log/config431-a">
+<file1 name="log/config%TESTNUMBER-a">
 --next
-url = %HOSTIP:%HTTPPORT/4310001
+url = %HOSTIP:%HTTPPORT/%TESTNUMBER0001
 header = "a: a"
 data = "a"
 </file1>
-<file2 name="log/config431-b">
+<file2 name="log/config%TESTNUMBER-b">
 --next
-url = %HOSTIP:%HTTPPORT/4310002
+url = %HOSTIP:%HTTPPORT/%TESTNUMBER0002
 header = "b: b"
 data = "b"
 </file2>
@@ -57,7 +57,7 @@ http
 Two -K uses with --next and then one on cmdline
  </name>
  <command>
--K log/config431-a -K log/config431-b --next -d c %HOSTIP:%HTTPPORT/4310003 -H "c: c"
+-K log/config%TESTNUMBER-a -K log/config%TESTNUMBER-b --next -d c %HOSTIP:%HTTPPORT/%TESTNUMBER0003 -H "c: c"
 </command>
 </client>
 
@@ -65,7 +65,7 @@ Two -K uses with --next and then one on cmdline
 # Verify data after the test has been "shot"
 <verify>
 <protocol nonewline="yes">
-POST /4310001 HTTP/1.1
+POST /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
@@ -73,7 +73,7 @@ a: a
 Content-Length: 1
 Content-Type: application/x-www-form-urlencoded
 
-aPOST /4310002 HTTP/1.1
+aPOST /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
@@ -81,7 +81,7 @@ b: b
 Content-Length: 1
 Content-Type: application/x-www-form-urlencoded
 
-bPOST /4310003 HTTP/1.1
+bPOST /%TESTNUMBER0003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

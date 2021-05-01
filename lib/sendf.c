@@ -65,7 +65,7 @@ static size_t convert_lineends(struct Curl_easy *data,
   char *inPtr, *outPtr;
 
   /* sanity check */
-  if((startPtr == NULL) || (size < 1)) {
+  if(!startPtr || (size < 1)) {
     return size;
   }
 
@@ -604,7 +604,7 @@ static CURLcode chop_write(struct Curl_easy *data,
 /* Curl_client_write() sends data to the write callback(s)
 
    The bit pattern defines to what "streams" to write to. Body and/or header.
-   The defines are in sendf.h of course.
+   The defines are in sendf.h of course. "len" is not allowed to be 0.
 
    If CURL_DO_LINEEND_CONV is enabled, data is converted IN PLACE to the
    local character encoding.  This is a problem and should be changed in
@@ -616,9 +616,8 @@ CURLcode Curl_client_write(struct Curl_easy *data,
                            size_t len)
 {
   struct connectdata *conn = data->conn;
-  if(0 == len)
-    len = strlen(ptr);
 
+  DEBUGASSERT(len);
   DEBUGASSERT(type <= 3);
 
   /* FTP data may need conversion. */

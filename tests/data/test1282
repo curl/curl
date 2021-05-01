@@ -25,7 +25,7 @@ GSS-API
 FTP with 633 response before gss initialized
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1282
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 
 </client>

@@ -131,7 +131,7 @@ within the area of personal expertise and experience.
 
 ### Recommendations
 
-- we require two-factor authentication enabled on your github account to
+- we require two-factor authentication enabled on your GitHub account to
   reduce risk of malicious source code tampering
 - consider enabling signed git commits for additional verification of changes
 
@@ -142,7 +142,7 @@ When you're merging patches/PRs...
 - make sure the commit messages follow our template
 - squash patch sets into a few logical commits even if the PR didn't, if
   necessary
-- avoid the "merge" button on github, do it "manually" instead to get full
+- avoid the "merge" button on GitHub, do it "manually" instead to get full
   control and full audit trail (github leaves out you as "Committer:")
 - remember to credit the reporter and the helpers!
 

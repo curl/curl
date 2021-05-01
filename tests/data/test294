@@ -42,7 +42,7 @@ ftp
 FTP --ftp-account on ACCT request
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/294/ --ftp-account "data for acct"
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER/ --ftp-account "data for acct"
 </command>
 </client>
 
@@ -54,7 +54,7 @@ USER anonymous
 PASS ftp@example.com
 ACCT data for acct
 PWD
-CWD 294
+CWD %TESTNUMBER
 EPSV
 TYPE A
 LIST

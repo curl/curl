@@ -77,7 +77,7 @@ http
 </server>
 # tool to use
 <tool>
-lib555
+lib%TESTNUMBER
 </tool>
 <features>
 NTLM
@@ -96,7 +96,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://test.remote.example.com/path/555 http://%HOSTIP:%HTTPPORT testuser:testpass
+http://test.remote.example.com/path/%TESTNUMBER http://%HOSTIP:%HTTPPORT testuser:testpass
 </command>
 <precheck>
 chkhostname curlhost
@@ -106,7 +106,7 @@ chkhostname curlhost
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-POST http://test.remote.example.com/path/555 HTTP/1.1
+POST http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: test.remote.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive
@@ -114,7 +114,7 @@ Content-Length: 36
 Content-Type: application/x-www-form-urlencoded
 
 this is the blurb we want to upload
-POST http://test.remote.example.com/path/555 HTTP/1.1
+POST http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: test.remote.example.com
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Accept: */*
@@ -122,9 +122,9 @@ Proxy-Connection: Keep-Alive
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
-POST http://test.remote.example.com/path/555 HTTP/1.1
+POST http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: test.remote.example.com
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyY3VybGhvc3Q=
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 36

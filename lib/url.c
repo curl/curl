@@ -234,7 +234,7 @@ static const struct Curl_handler * const protocols[] = {
 #endif
 
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
-   (CURL_SIZEOF_CURL_OFF_T > 4)
+   (SIZEOF_CURL_OFF_T > 4)
   &Curl_handler_smb,
 #ifdef USE_SSL
   &Curl_handler_smbs,
@@ -312,16 +312,16 @@ void Curl_freeset(struct Curl_easy *data)
     Curl_safefree(data->set.blobs[j]);
   }
 
-  if(data->change.referer_alloc) {
-    Curl_safefree(data->change.referer);
-    data->change.referer_alloc = FALSE;
+  if(data->state.referer_alloc) {
+    Curl_safefree(data->state.referer);
+    data->state.referer_alloc = FALSE;
   }
-  data->change.referer = NULL;
-  if(data->change.url_alloc) {
-    Curl_safefree(data->change.url);
-    data->change.url_alloc = FALSE;
+  data->state.referer = NULL;
+  if(data->state.url_alloc) {
+    Curl_safefree(data->state.url);
+    data->state.url_alloc = FALSE;
   }
-  data->change.url = NULL;
+  data->state.url = NULL;
 
   Curl_mime_cleanpart(&data->set.mimepost);
 }
@@ -405,11 +405,11 @@ CURLcode Curl_close(struct Curl_easy **datap)
   free(data->req.newurl);
   data->req.newurl = NULL;
 
-  if(data->change.referer_alloc) {
-    Curl_safefree(data->change.referer);
-    data->change.referer_alloc = FALSE;
+  if(data->state.referer_alloc) {
+    Curl_safefree(data->state.referer);
+    data->state.referer_alloc = FALSE;
   }
-  data->change.referer = NULL;
+  data->state.referer = NULL;
 
   up_free(data);
   Curl_safefree(data->state.buffer);
@@ -923,14 +923,14 @@ socks_proxy_info_matches(const struct proxy_info *data,
   /* the user information is case-sensitive
      or at least it is not defined as case-insensitive
      see https://tools.ietf.org/html/rfc3986#section-3.2.1 */
-  if((data->user == NULL) != (needle->user == NULL))
+  if(!data->user != !needle->user)
     return FALSE;
   /* curl_strequal does a case insentive comparison, so do not use it here! */
   if(data->user &&
      needle->user &&
      strcmp(data->user, needle->user) != 0)
     return FALSE;
-  if((data->passwd == NULL) != (needle->passwd == NULL))
+  if(!data->passwd != !needle->passwd)
     return FALSE;
   /* curl_strequal does a case insentive comparison, so do not use it here! */
   if(data->passwd &&
@@ -1314,6 +1314,13 @@ ConnectionExists(struct Curl_easy *data,
           continue;
         }
       }
+
+      /* If multiplexing isn't enabled on the h2 connection and h1 is
+         explicitly requested, handle it: */
+      if((needle->handler->protocol & PROTO_FAMILY_HTTP) &&
+         (check->httpversion >= 20) &&
+         (data->state.httpwant < CURL_HTTP_VERSION_2_0))
+        continue;
 
       if((needle->handler->flags&PROTOPT_SSL)
 #ifndef CURL_DISABLE_PROXY
@@ -1900,27 +1907,27 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   if(data->set.str[STRING_DEFAULT_PROTOCOL] &&
-     !Curl_is_absolute_url(data->change.url, NULL, MAX_SCHEME_LEN)) {
+     !Curl_is_absolute_url(data->state.url, NULL, MAX_SCHEME_LEN)) {
     char *url = aprintf("%s://%s", data->set.str[STRING_DEFAULT_PROTOCOL],
-                        data->change.url);
+                        data->state.url);
     if(!url)
       return CURLE_OUT_OF_MEMORY;
-    if(data->change.url_alloc)
-      free(data->change.url);
-    data->change.url = url;
-    data->change.url_alloc = TRUE;
+    if(data->state.url_alloc)
+      free(data->state.url);
+    data->state.url = url;
+    data->state.url_alloc = TRUE;
   }
 
   if(!use_set_uh) {
     char *newurl;
-    uc = curl_url_set(uh, CURLUPART_URL, data->change.url,
+    uc = curl_url_set(uh, CURLUPART_URL, data->state.url,
                     CURLU_GUESS_SCHEME |
                     CURLU_NON_SUPPORT_SCHEME |
                     (data->set.disallow_username_in_url ?
                      CURLU_DISALLOW_USER : 0) |
                     (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
     if(uc) {
-      DEBUGF(infof(data, "curl_url_set rejected %s\n", data->change.url));
+      DEBUGF(infof(data, "curl_url_set rejected %s\n", data->state.url));
       return Curl_uc_to_curlcode(uc);
     }
 
@@ -1928,10 +1935,10 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     uc = curl_url_get(uh, CURLUPART_URL, &newurl, 0);
     if(uc)
       return Curl_uc_to_curlcode(uc);
-    if(data->change.url_alloc)
-      free(data->change.url);
-    data->change.url = newurl;
-    data->change.url_alloc = TRUE;
+    if(data->state.url_alloc)
+      free(data->state.url);
+    data->state.url = newurl;
+    data->state.url_alloc = TRUE;
   }
 
   uc = curl_url_get(uh, CURLUPART_SCHEME, &data->state.up.scheme, 0);
@@ -1944,7 +1951,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
   }
 
-#ifdef USE_HSTS
+#ifndef CURL_DISABLE_HSTS
   if(data->hsts && strcasecompare("http", data->state.up.scheme)) {
     if(Curl_hsts(data->hsts, data->state.up.hostname, TRUE)) {
       char *url;
@@ -1952,8 +1959,8 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       uc = curl_url_set(uh, CURLUPART_SCHEME, "https", 0);
       if(uc)
         return Curl_uc_to_curlcode(uc);
-      if(data->change.url_alloc)
-        Curl_safefree(data->change.url);
+      if(data->state.url_alloc)
+        Curl_safefree(data->state.url);
       /* after update, get the updated version */
       uc = curl_url_get(uh, CURLUPART_URL, &url, 0);
       if(uc)
@@ -1963,10 +1970,10 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
         free(url);
         return Curl_uc_to_curlcode(uc);
       }
-      data->change.url = url;
-      data->change.url_alloc = TRUE;
+      data->state.url = url;
+      data->state.url_alloc = TRUE;
       infof(data, "Switched from HTTP to HTTPS due to HSTS => %s\n",
-            data->change.url);
+            data->state.url);
     }
   }
 #endif
@@ -3520,7 +3527,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   /*************************************************************
    * Check input data
    *************************************************************/
-  if(!data->change.url) {
+  if(!data->state.url) {
     result = CURLE_URL_MALFORMAT;
     goto out;
   }
@@ -3556,7 +3563,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 #ifdef USE_UNIX_SOCKETS
   if(data->set.str[STRING_UNIX_SOCKET_PATH]) {
     conn->unix_domain_socket = strdup(data->set.str[STRING_UNIX_SOCKET_PATH]);
-    if(conn->unix_domain_socket == NULL) {
+    if(!conn->unix_domain_socket) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
     }

@@ -35,7 +35,7 @@ idn
 SMTP mailing list EXPN (CUSTOMREQUEST) with SMTPUTF8 support
  </name>
  <command>
-smtp://%HOSTIP:%SMTPPORT/969 --mail-rcpt Friends -X EXPN
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Friends -X EXPN
 </command>
 </client>
 
@@ -43,7 +43,7 @@ smtp://%HOSTIP:%SMTPPORT/969 --mail-rcpt Friends -X EXPN
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 969
+EHLO %TESTNUMBER
 EXPN Friends SMTPUTF8
 QUIT
 </protocol>

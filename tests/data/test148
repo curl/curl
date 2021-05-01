@@ -22,7 +22,7 @@ ftp
 FTP with --ftp-create-dirs (failing MKD)
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/attempt/to/get/this/148 --ftp-create-dirs
+ftp://%HOSTIP:%FTPPORT/attempt/to/get/this/%TESTNUMBER --ftp-create-dirs
 </command>
 </client>
 

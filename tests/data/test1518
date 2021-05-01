@@ -29,14 +29,14 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib1518
+lib%TESTNUMBER
 </tool>
 
  <name>
 Extract Location: with broken URL
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1518
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -52,7 +52,7 @@ http://%HOSTIP:%HTTPPORT/1518
 res: 0
 status: 302
 redirects: 0
-effectiveurl: http://%HOSTIP:%HTTPPORT/1518
+effectiveurl: http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 redirecturl: http://1.2 .4.5/test
 </stdout>
 <errorcode>

@@ -285,6 +285,8 @@ static CURLcode dohprobe(struct Curl_easy *data,
 #endif
     ERROR_CHECK_SETOPT(CURLOPT_TIMEOUT_MS, (long)timeout_ms);
     ERROR_CHECK_SETOPT(CURLOPT_SHARE, data->share);
+    if(data->set.err && data->set.err != stderr)
+      ERROR_CHECK_SETOPT(CURLOPT_STDERR, data->set.err);
     if(data->set.verbose)
       ERROR_CHECK_SETOPT(CURLOPT_VERBOSE, 1L);
     if(data->set.no_signal)
@@ -349,7 +351,10 @@ static CURLcode dohprobe(struct Curl_easy *data,
         (data->set.ssl.revoke_best_effort ?
          CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
         (data->set.ssl.native_ca_store ?
-         CURLSSLOPT_NATIVE_CA : 0);
+         CURLSSLOPT_NATIVE_CA : 0) |
+        (data->set.ssl.auto_client_cert ?
+         CURLSSLOPT_AUTO_CLIENT_CERT : 0);
+
       curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS, mask);
     }
 
@@ -357,7 +362,11 @@ static CURLcode dohprobe(struct Curl_easy *data,
     doh->set.dohfor = data; /* identify for which transfer this is done */
     p->easy = doh;
 
-    /* add this transfer to the multi handle */
+    /* DOH private_data must be null because the user must have a way to
+       distinguish their transfer's handle from DOH handles in user
+       callbacks (ie SSL CTX callback). */
+    DEBUGASSERT(!data->set.private_data);
+
     if(curl_multi_add_handle(multi, doh))
       goto error;
   }

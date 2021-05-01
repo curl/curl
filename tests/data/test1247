@@ -23,7 +23,7 @@ http
 --fail-early
  </name>
  <command>
---fail-early h1234://%HOSTIP:%HTTPPORT/1247 http://%HOSTIP:%HTTPPORT/1247
+--fail-early h1234://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

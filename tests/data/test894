@@ -22,7 +22,7 @@ pop3
 POP3 with CR in username
  </name>
  <command>
-pop3://user%0dFRIGGING_cmd:secret@%HOSTIP:%POP3PORT/894
+pop3://user%0dFRIGGING_cmd:secret@%HOSTIP:%POP3PORT/%TESTNUMBER
 </command>
 </client>
 

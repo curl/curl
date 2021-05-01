@@ -18,7 +18,7 @@ multi
 smtp
 </server>
 <tool>
-lib1507
+lib%TESTNUMBER
 </tool>
 
 # based on bug report #1184
@@ -32,7 +32,7 @@ To: another
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/1507
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -40,9 +40,9 @@ smtp://%HOSTIP:%SMTPPORT/1507
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 1507
-MAIL FROM:<1507-realuser@example.com>
-RCPT TO:<1507-recipient@example.com>
+EHLO %TESTNUMBER
+MAIL FROM:<%TESTNUMBER-realuser@example.com>
+RCPT TO:<%TESTNUMBER-recipient@example.com>
 DATA
 </protocol>
 <upload>

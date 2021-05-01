@@ -198,7 +198,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       return CURLE_COULDNT_CONNECT;
     }
 
-    if(sspi_send_token.cbBuffer != 0) {
+    if(sspi_send_token.cbBuffer) {
       socksreq[0] = 1;    /* GSS-API subnegotiation version */
       socksreq[1] = 1;    /* authentication message type */
       us_length = htons((short)sspi_send_token.cbBuffer);

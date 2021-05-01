@@ -204,7 +204,7 @@ static CURLcode rtmp_setup_connection(struct Curl_easy *data,
 
   RTMP_Init(r);
   RTMP_SetBufferMS(r, DEF_BUFTIME);
-  if(!RTMP_SetupURL(r, data->change.url)) {
+  if(!RTMP_SetupURL(r, data->state.url)) {
     RTMP_Free(r);
     return CURLE_URL_MALFORMAT;
   }

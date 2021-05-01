@@ -296,14 +296,14 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   *done = TRUE; /* unconditionally */
   infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d\n",
           LDAP_VENDOR_NAME, LDAP_VENDOR_VERSION);
-  infof(data, "LDAP local: %s\n", data->change.url);
+  infof(data, "LDAP local: %s\n", data->state.url);
 
 #ifdef HAVE_LDAP_URL_PARSE
-  rc = ldap_url_parse(data->change.url, &ludp);
+  rc = ldap_url_parse(data->state.url, &ludp);
 #else
   rc = _ldap_url_parse(data, conn, &ludp);
 #endif
-  if(rc != 0) {
+  if(rc) {
     failf(data, "LDAP local: %s", ldap_err2string(rc));
     result = CURLE_LDAP_INVALID_URL;
     goto quit;
@@ -387,7 +387,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       goto quit;
     }
     server = ldapssl_init(host, (int)conn->port, 1);
-    if(server == NULL) {
+    if(!server) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
             conn->host.dispname, conn->port);
       result = CURLE_COULDNT_CONNECT;
@@ -428,7 +428,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       goto quit;
     }
     server = ldap_init(host, (int)conn->port);
-    if(server == NULL) {
+    if(!server) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
             conn->host.dispname, conn->port);
       result = CURLE_COULDNT_CONNECT;
@@ -464,7 +464,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   }
   else {
     server = ldap_init(host, (int)conn->port);
-    if(server == NULL) {
+    if(!server) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
             conn->host.dispname, conn->port);
       result = CURLE_COULDNT_CONNECT;
@@ -477,7 +477,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #else
   rc = ldap_simple_bind_s(server, user, passwd);
 #endif
-  if(!ldap_ssl && rc != 0) {
+  if(!ldap_ssl && rc) {
     ldap_proto = LDAP_VERSION2;
     ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
 #ifdef USE_WIN32_LDAP
@@ -486,7 +486,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     rc = ldap_simple_bind_s(server, user, passwd);
 #endif
   }
-  if(rc != 0) {
+  if(rc) {
 #ifdef USE_WIN32_LDAP
     failf(data, "LDAP local: bind via ldap_win_bind %s",
           ldap_err2string(rc));
@@ -501,7 +501,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   rc = ldap_search_s(server, ludp->lud_dn, ludp->lud_scope,
                      ludp->lud_filter, ludp->lud_attrs, 0, &ldapmsg);
 
-  if(rc != 0 && rc != LDAP_SIZELIMIT_EXCEEDED) {
+  if(rc && rc != LDAP_SIZELIMIT_EXCEEDED) {
     failf(data, "LDAP remote: %s", ldap_err2string(rc));
     result = CURLE_LDAP_SEARCH_FAILED;
     goto quit;
@@ -581,7 +581,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         result = CURLE_OUT_OF_MEMORY;
 
         goto quit;
-    }
+      }
 #else
       char *attr = attribute;
 #endif
@@ -1061,13 +1061,23 @@ static void _ldap_free_urldesc(LDAPURLDesc *ludp)
   if(!ludp)
     return;
 
+#if defined(USE_WIN32_LDAP)
+  curlx_unicodefree(ludp->lud_dn);
+  curlx_unicodefree(ludp->lud_filter);
+#else
   free(ludp->lud_dn);
   free(ludp->lud_filter);
+#endif
 
   if(ludp->lud_attrs) {
     size_t i;
-    for(i = 0; i < ludp->lud_attrs_dups; i++)
+    for(i = 0; i < ludp->lud_attrs_dups; i++) {
+#if defined(USE_WIN32_LDAP)
+      curlx_unicodefree(ludp->lud_attrs[i]);
+#else
       free(ludp->lud_attrs[i]);
+#endif
+    }
     free(ludp->lud_attrs);
   }
 

@@ -40,8 +40,6 @@
 #define RANDOM_FILE "/dev/random"
 #define VERSION "0.0.0" /* TODO */
 
-#define RETSIGTYPE void
-
 #define STDC_HEADERS 1
 
 #ifdef _BITS64

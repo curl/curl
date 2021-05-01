@@ -16,7 +16,7 @@ Server: test-server/fake
 Content-Type: text/html
 Content-Length: 0
 Retry-After: 2
-Location: /30100002
+Location: /%TESTNUMBER0002
 
 </data>
 <data2>
@@ -39,11 +39,11 @@ http
 HTTP retry-after reset
 </name>
 <tool>
-lib3010
+lib%TESTNUMBER
 </tool>
 
 <command>
-%HOSTIP:%HTTPPORT/3010
+%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

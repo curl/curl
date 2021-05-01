@@ -179,7 +179,7 @@ static CURLcode ldap_setup_connection(struct Curl_easy *data,
   int rc, proto;
   CURLcode status;
 
-  rc = ldap_url_parse(data->change.url, &lud);
+  rc = ldap_url_parse(data->state.url, &lud);
   if(rc != LDAP_URL_SUCCESS) {
     const char *msg = "url parsing problem";
     status = CURLE_URL_MALFORMAT;
@@ -365,10 +365,16 @@ static CURLcode ldap_disconnect(struct Curl_easy *data,
 {
   struct ldapconninfo *li = conn->proto.ldapc;
   (void) dead_connection;
-  (void) data;
 
   if(li) {
     if(li->ld) {
+#ifdef USE_SSL
+      if(conn->ssl[FIRSTSOCKET].use) {
+        Sockbuf *sb;
+        ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
+        ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
+      }
+#endif
       ldap_unbind_ext(li->ld, NULL, NULL);
       li->ld = NULL;
     }
@@ -390,9 +396,9 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
   connkeep(conn, "OpenLDAP do");
 
-  infof(data, "LDAP local: %s\n", data->change.url);
+  infof(data, "LDAP local: %s\n", data->state.url);
 
-  rc = ldap_url_parse(data->change.url, &ludp);
+  rc = ldap_url_parse(data->state.url, &ludp);
   if(rc != LDAP_URL_SUCCESS) {
     const char *msg = "url parsing problem";
     status = CURLE_URL_MALFORMAT;
@@ -543,7 +549,7 @@ static ssize_t ldap_recv(struct Curl_easy *data, int sockindex, char *buf,
         rc = ldap_get_attribute_ber(li->ld, ent, ber, &bv, &bvals)) {
       int i;
 
-      if(bv.bv_val == NULL)
+      if(!bv.bv_val)
         break;
 
       if(bv.bv_len > 7 && !strncmp(bv.bv_val + bv.bv_len - 7, ";binary", 7))
@@ -551,7 +557,7 @@ static ssize_t ldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       else
         binary = 0;
 
-      if(bvals == NULL) {
+      if(!bvals) {
         writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
         if(writeerr) {
           *err = writeerr;
@@ -660,7 +666,7 @@ static ssize_t ldap_recv(struct Curl_easy *data, int sockindex, char *buf,
 
           data->req.bytecount += bvals[i].bv_len + 1;
         }
-        writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 0);
+        writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
         if(writeerr) {
           *err = writeerr;
           return -1;
@@ -669,14 +675,14 @@ static ssize_t ldap_recv(struct Curl_easy *data, int sockindex, char *buf,
         data->req.bytecount++;
       }
       ber_memfree(bvals);
-      writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 0);
+      writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
       if(writeerr) {
         *err = writeerr;
         return -1;
       }
       data->req.bytecount++;
     }
-    writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 0);
+    writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
     if(writeerr) {
       *err = writeerr;
       return -1;
@@ -726,14 +732,18 @@ static ber_slen_t
 ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
 {
   struct Curl_easy *data = sbiod->sbiod_pvt;
-  struct connectdata *conn = data->conn;
-  struct ldapconninfo *li = conn->proto.ldapc;
-  ber_slen_t ret;
-  CURLcode err = CURLE_RECV_ERROR;
+  ber_slen_t ret = 0;
+  if(data) {
+    struct connectdata *conn = data->conn;
+    if(conn) {
+      struct ldapconninfo *li = conn->proto.ldapc;
+      CURLcode err = CURLE_RECV_ERROR;
 
-  ret = (li->recv)(data, FIRSTSOCKET, buf, len, &err);
-  if(ret < 0 && err == CURLE_AGAIN) {
-    SET_SOCKERRNO(EWOULDBLOCK);
+      ret = (li->recv)(data, FIRSTSOCKET, buf, len, &err);
+      if(ret < 0 && err == CURLE_AGAIN) {
+        SET_SOCKERRNO(EWOULDBLOCK);
+      }
+    }
   }
   return ret;
 }
@@ -742,14 +752,17 @@ static ber_slen_t
 ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
 {
   struct Curl_easy *data = sbiod->sbiod_pvt;
-  struct connectdata *conn = data->conn;
-  struct ldapconninfo *li = conn->proto.ldapc;
-  ber_slen_t ret;
-  CURLcode err = CURLE_SEND_ERROR;
-
-  ret = (li->send)(data, FIRSTSOCKET, buf, len, &err);
-  if(ret < 0 && err == CURLE_AGAIN) {
-    SET_SOCKERRNO(EWOULDBLOCK);
+  ber_slen_t ret = 0;
+  if(data) {
+    struct connectdata *conn = data->conn;
+    if(conn) {
+      struct ldapconninfo *li = conn->proto.ldapc;
+      CURLcode err = CURLE_SEND_ERROR;
+      ret = (li->send)(data, FIRSTSOCKET, buf, len, &err);
+      if(ret < 0 && err == CURLE_AGAIN) {
+        SET_SOCKERRNO(EWOULDBLOCK);
+      }
+    }
   }
   return ret;
 }

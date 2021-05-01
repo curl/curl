@@ -23,10 +23,10 @@ ftp
 FTP DL, file without C-D inside, using -o fname -i, without -D
 </name>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file1385 -o log/download1385 -i
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o log/download%TESTNUMBER -i
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/file1385
+perl %SRCDIR/libtest/notexists.pl log/file%TESTNUMBER
 </postcheck>
 </client>
 
@@ -39,17 +39,17 @@ PWD
 CWD path
 EPSV
 TYPE I
-SIZE file1385
-RETR file1385
+SIZE file%TESTNUMBER
+RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/download1385">
+<file1 name="log/download%TESTNUMBER">
 fooo
 mooo
 </file1>
 
-<file2 name="log/stdout1385">
+<file2 name="log/stdout%TESTNUMBER">
 </file2>
 
 </verify>

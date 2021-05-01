@@ -830,7 +830,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
              Make sure that ALL_CONTENT_ENCODINGS contains all the
              encodings handled here. */
           if(data->set.http_ce_skip || !k->writer_stack) {
-            if(!k->ignorebody) {
+            if(!k->ignorebody && nread) {
 #ifndef CURL_DISABLE_POP3
               if(conn->handler->protocol & PROTO_FAMILY_POP3)
                 result = Curl_pop3_write(data, k->str, nread);
@@ -840,7 +840,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                                            nread);
             }
           }
-          else if(!k->ignorebody)
+          else if(!k->ignorebody && nread)
             result = Curl_unencode_write(data, k->writer_stack, k->str, nread);
         }
         k->badheader = HEADER_NORMAL; /* taken care of now */
@@ -1392,20 +1392,20 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 {
   CURLcode result;
 
-  if(!data->change.url && !data->set.uh) {
+  if(!data->state.url && !data->set.uh) {
     /* we can't do anything without URL */
     failf(data, "No URL set!");
     return CURLE_URL_MALFORMAT;
   }
 
   /* since the URL may have been redirected in a previous use of this handle */
-  if(data->change.url_alloc) {
+  if(data->state.url_alloc) {
     /* the already set URL is allocated, free it first! */
-    Curl_safefree(data->change.url);
-    data->change.url_alloc = FALSE;
+    Curl_safefree(data->state.url);
+    data->state.url_alloc = FALSE;
   }
 
-  if(!data->change.url && data->set.uh) {
+  if(!data->state.url && data->set.uh) {
     CURLUcode uc;
     free(data->set.str[STRING_SET_URL]);
     uc = curl_url_get(data->set.uh,
@@ -1419,7 +1419,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.prefer_ascii = data->set.prefer_ascii;
   data->state.list_only = data->set.list_only;
   data->state.httpreq = data->set.method;
-  data->change.url = data->set.str[STRING_SET_URL];
+  data->state.url = data->set.str[STRING_SET_URL];
 
   /* Init the SSL session ID cache here. We do it here since we want to do it
      after the *_setopt() calls (that could specify the size of the cache) but
@@ -1451,11 +1451,11 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     data->state.infilesize = 0;
 
   /* If there is a list of cookie files to read, do it now! */
-  if(data->change.cookielist)
+  if(data->state.cookielist)
     Curl_cookie_loadfiles(data);
 
   /* If there is a list of host pairs to deal with */
-  if(data->change.resolve)
+  if(data->state.resolve)
     result = Curl_loadhostpairs(data);
 
   if(!result) {
@@ -1581,19 +1581,40 @@ CURLcode Curl_follow(struct Curl_easy *data,
       data->state.followlocation++; /* count location-followers */
 
       if(data->set.http_auto_referer) {
+        CURLU *u;
+        char *referer = NULL;
+
         /* We are asked to automatically set the previous URL as the referer
            when we get the next URL. We pick the ->url field, which may or may
            not be 100% correct */
 
-        if(data->change.referer_alloc) {
-          Curl_safefree(data->change.referer);
-          data->change.referer_alloc = FALSE;
+        if(data->state.referer_alloc) {
+          Curl_safefree(data->state.referer);
+          data->state.referer_alloc = FALSE;
         }
 
-        data->change.referer = strdup(data->change.url);
-        if(!data->change.referer)
+        /* Make a copy of the URL without crenditals and fragment */
+        u = curl_url();
+        if(!u)
           return CURLE_OUT_OF_MEMORY;
-        data->change.referer_alloc = TRUE; /* yes, free this later */
+
+        uc = curl_url_set(u, CURLUPART_URL, data->state.url, 0);
+        if(!uc)
+          uc = curl_url_set(u, CURLUPART_FRAGMENT, NULL, 0);
+        if(!uc)
+          uc = curl_url_set(u, CURLUPART_USER, NULL, 0);
+        if(!uc)
+          uc = curl_url_set(u, CURLUPART_PASSWORD, NULL, 0);
+        if(!uc)
+          uc = curl_url_get(u, CURLUPART_URL, &referer, 0);
+
+        curl_url_cleanup(u);
+
+        if(uc || !referer)
+          return CURLE_OUT_OF_MEMORY;
+
+        data->state.referer = referer;
+        data->state.referer_alloc = TRUE; /* yes, free this later */
       }
     }
   }
@@ -1641,13 +1662,13 @@ CURLcode Curl_follow(struct Curl_easy *data,
   if(disallowport)
     data->state.allow_port = FALSE;
 
-  if(data->change.url_alloc)
-    Curl_safefree(data->change.url);
+  if(data->state.url_alloc)
+    Curl_safefree(data->state.url);
 
-  data->change.url = newurl;
-  data->change.url_alloc = TRUE;
+  data->state.url = newurl;
+  data->state.url_alloc = TRUE;
 
-  infof(data, "Issue another request to this URL: '%s'\n", data->change.url);
+  infof(data, "Issue another request to this URL: '%s'\n", data->state.url);
 
   /*
    * We get here when the HTTP code is 300-399 (and 401). We need to perform
@@ -1808,7 +1829,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
     }
     infof(data, "Connection died, retrying a fresh connect\
 (retry count: %d)\n", data->state.retrycount);
-    *url = strdup(data->change.url);
+    *url = strdup(data->state.url);
     if(!*url)
       return CURLE_OUT_OF_MEMORY;
 

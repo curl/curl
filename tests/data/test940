@@ -23,7 +23,7 @@ SMTP with username and password but no AUTH capability
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/940 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>
 
@@ -31,7 +31,7 @@ smtp://%HOSTIP:%SMTPPORT/940 --mail-rcpt recipient@example.com --mail-from sende
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 940
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA

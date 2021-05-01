@@ -48,7 +48,6 @@ problems may have been fixed or changed somewhat since this was written!
  4.1 -J and -O with %-encoded file names
  4.2 -J with -C - fails
  4.3 --retry and transfer timeouts
- 4.4 Improve --data-urlencode space encoding
 
  5. Build and portability issues
  5.1 OS400 port requires deprecated IBM library
@@ -114,6 +113,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.12 'no_proxy' string-matches IPv6 numerical addresses
  11.13 wakeup socket disconnect causes havoc
  11.14 Multi perform hangs waiting for threaded resolver
+ 11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
 
  12. LDAP
  12.1 OpenLDAP hangs after returning results
@@ -409,13 +409,6 @@ problems may have been fixed or changed somewhat since this was written!
  original position where it was at before the previous failed attempt. See
  https://curl.se/mail/lib-2008-01/0080.html and Mandriva bug report
  https://qa.mandriva.com/show_bug.cgi?id=22565
-
-4.4 Improve --data-urlencode space encoding
-
- ASCII space characters in --data-urlencode are currently encoded as %20
- rather than +, which RFC 1866 says should be used.
-
- See https://github.com/curl/curl/issues/3229
 
 5. Build and portability issues
 
@@ -825,7 +818,17 @@ problems may have been fixed or changed somewhat since this was written!
 
 11.9 DoH doesn't inherit all transfer options
 
- https://github.com/curl/curl/issues/4578
+ Some options are not inherited because they are not relevant for the DoH SSL
+ connections, or inheriting the option may result in unexpected behavior. For
+ example the user's debug function callback is not inherited because it would
+ be unexpected for internal handles (ie DoH handles) to be passed to that
+ callback.
+
+ If an option is not inherited then it is not possible to set it separately for
+ DoH without a DoH-specific option. For example: CURLOPT_DOH_SSL_VERIFYHOST,
+ CURLOPT_DOH_SSL_VERIFYPEER and CURLOPT_DOH_SSL_VERIFYSTATUS.
+
+ See https://github.com/curl/curl/issues/6605
 
 11.10 Blocking socket operations in non-blocking API
 
@@ -866,6 +869,15 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/2975 and
  https://github.com/curl/curl/issues/4852
+
+11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
+
+ When libcurl creates sockets with socketpair(), those are not "exposed" in
+ CURLOPT_OPENSOCKETFUNCTION and therefore might surprise and be unknown to
+ applications that expects and wants all sockets known beforehand. One way to
+ address this issue is to introduce a CURLOPT_OPENSOCKETPAIRFUNCTION callback.
+
+ https://github.com/curl/curl/issues/5747
 
 12. LDAP
 

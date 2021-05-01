@@ -16,9 +16,9 @@ tftp
 TFTP send of boundary case 512 byte file
  </name>
  <command>
--T log/test286.txt tftp://%HOSTIP:%TFTPPORT//
+-T log/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//
 </command>
-<file name="log/test286.txt">
+<file name="log/test%TESTNUMBER.txt">
 A chunk of data which exactly fits into
 a 512 byte TFTP block, testing a boundary
 condition in the TFTP transmit code.
@@ -89,7 +89,7 @@ mode: octet
 tsize: 512
 blksize: 512
 timeout: 6
-filename: /test286.txt
+filename: /test%TESTNUMBER.txt
 </protocol>
 </verify>
 </testcase>

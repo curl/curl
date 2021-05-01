@@ -28,7 +28,7 @@ tftp
 TFTP retrieve with localhost --interface
  </name>
  <command>
-tftp://%HOSTIP:%TFTPPORT//1049 --interface %CLIENTIP
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --interface %CLIENTIP
 </command>
 </client>
 
@@ -41,7 +41,7 @@ mode: octet
 tsize: 0
 blksize: 512
 timeout: 6
-filename: /1049
+filename: /%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

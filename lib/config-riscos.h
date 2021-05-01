@@ -353,9 +353,6 @@
 /* Name of package */
 #undef PACKAGE
 
-/* Define as the return type of signal handlers (`int' or `void'). */
-#define RETSIGTYPE void
-
 /* The size of `int', as computed by sizeof. */
 #define SIZEOF_INT 4
 

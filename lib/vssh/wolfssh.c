@@ -388,7 +388,7 @@ static CURLcode wssh_connect(struct Curl_easy *data, bool *done)
   }
 
   sshc->ssh_session = wolfSSH_new(sshc->ctx);
-  if(sshc->ssh_session == NULL) {
+  if(!sshc->ssh_session) {
     failf(data, "No wolfSSH session");
     goto error;
   }
@@ -861,7 +861,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
           char *line = aprintf("%s\n",
                                data->set.list_only ?
                                name->fName : name->lName);
-          if(line == NULL) {
+          if(!line) {
             state(data, SSH_SFTP_CLOSE);
             sshc->actualcode = CURLE_OUT_OF_MEMORY;
             break;

@@ -28,7 +28,7 @@ tftp
 TFTP retrieve with mode=i
  </name>
  <command>
-"tftp://%HOSTIP:%TFTPPORT//1093;mode=i" --use-ascii
+"tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER;mode=i" --use-ascii
 </command>
 </client>
 
@@ -41,7 +41,7 @@ mode: octet
 tsize: 0
 blksize: 512
 timeout: 6
-filename: /1093
+filename: /%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

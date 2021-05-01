@@ -39,7 +39,7 @@ pop3
 POP3 login authentication with initial response
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/872 -u user:secret --sasl-ir
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --sasl-ir
 </command>
 </client>
 
@@ -50,7 +50,7 @@ pop3://%HOSTIP:%POP3PORT/872 -u user:secret --sasl-ir
 CAPA
 AUTH LOGIN dXNlcg==
 c2VjcmV0
-RETR 872
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

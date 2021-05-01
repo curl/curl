@@ -263,7 +263,7 @@ static CURLcode handshake(struct Curl_easy *data,
         strerr = gnutls_alert_get_name(alert);
       }
 
-      if(strerr == NULL)
+      if(!strerr)
         strerr = gnutls_strerror(rc);
 
       infof(data, "gnutls_handshake() warning: %s\n", strerr);
@@ -277,7 +277,7 @@ static CURLcode handshake(struct Curl_easy *data,
         strerr = gnutls_alert_get_name(alert);
       }
 
-      if(strerr == NULL)
+      if(!strerr)
         strerr = gnutls_strerror(rc);
 
       failf(data, "gnutls_handshake() failed: %s", strerr);
@@ -611,16 +611,16 @@ gtls_connect_step1(struct Curl_easy *data,
     int cur = 0;
     gnutls_datum_t protocols[2];
 
-#ifdef USE_NGHTTP2
-    if(data->state.httpversion >= CURL_HTTP_VERSION_2
+#ifdef USE_HTTP2
+    if(data->state.httpwant >= CURL_HTTP_VERSION_2
 #ifndef CURL_DISABLE_PROXY
        && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
 #endif
        ) {
-      protocols[cur].data = (unsigned char *)NGHTTP2_PROTO_VERSION_ID;
-      protocols[cur].size = NGHTTP2_PROTO_VERSION_ID_LEN;
+      protocols[cur].data = (unsigned char *)ALPN_H2;
+      protocols[cur].size = ALPN_H2_LENGTH;
       cur++;
-      infof(data, "ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
+      infof(data, "ALPN, offering %.*s\n", ALPN_H2_LENGTH, ALPN_H2);
     }
 #endif
 
@@ -727,6 +727,7 @@ gtls_connect_step1(struct Curl_easy *data,
 
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(data, conn,
+                              SSL_IS_PROXY() ? TRUE : FALSE,
                               &ssl_sessionid, &ssl_idsize, sockindex)) {
       /* we got a session id, use it! */
       gnutls_session_set_data(session, ssl_sessionid, ssl_idsize);
@@ -1177,8 +1178,7 @@ gtls_connect_step3(struct Curl_easy *data,
       infof(data, "\t server certificate activation date OK\n");
   }
 
-  ptr = SSL_IS_PROXY() ? data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  ptr = SSL_PINNED_PUB_KEY();
   if(ptr) {
     result = pkp_pin_peer_pubkey(data, x509_cert, ptr);
     if(result != CURLE_OK) {
@@ -1242,10 +1242,10 @@ gtls_connect_step3(struct Curl_easy *data,
       infof(data, "ALPN, server accepted to use %.*s\n", proto.size,
           proto.data);
 
-#ifdef USE_NGHTTP2
-      if(proto.size == NGHTTP2_PROTO_VERSION_ID_LEN &&
-         !memcmp(NGHTTP2_PROTO_VERSION_ID, proto.data,
-                 NGHTTP2_PROTO_VERSION_ID_LEN)) {
+#ifdef USE_HTTP2
+      if(proto.size == ALPN_H2_LENGTH &&
+         !memcmp(ALPN_H2, proto.data,
+                 ALPN_H2_LENGTH)) {
         conn->negnpn = CURL_HTTP_VERSION_2;
       }
       else
@@ -1286,8 +1286,9 @@ gtls_connect_step3(struct Curl_easy *data,
       gnutls_session_get_data(session, connect_sessionid, &connect_idsize);
 
       Curl_ssl_sessionid_lock(data);
-      incache = !(Curl_ssl_getsessionid(data, conn, &ssl_sessionid, NULL,
-                                        sockindex));
+      incache = !(Curl_ssl_getsessionid(data, conn,
+                                        SSL_IS_PROXY() ? TRUE : FALSE,
+                                        &ssl_sessionid, NULL, sockindex));
       if(incache) {
         /* there was one before in the cache, so instead of risking that the
            previous one was rejected, we just kill that and store the new */
@@ -1295,8 +1296,10 @@ gtls_connect_step3(struct Curl_easy *data,
       }
 
       /* store this session id */
-      result = Curl_ssl_addsessionid(data, conn, connect_sessionid,
-                                     connect_idsize, sockindex);
+      result = Curl_ssl_addsessionid(data, conn,
+                                     SSL_IS_PROXY() ? TRUE : FALSE,
+                                     connect_sessionid, connect_idsize,
+                                     sockindex);
       Curl_ssl_sessionid_unlock(data);
       if(result) {
         free(connect_sessionid);

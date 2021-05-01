@@ -23,7 +23,7 @@ ftp
 FTP request and denied to download an older file with -z
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/blalbla/1262 -z "-1 jan 2001"
+ftp://%HOSTIP:%FTPPORT/blalbla/%TESTNUMBER -z "-1 jan 2001"
 </command>
 </client>
 
@@ -33,7 +33,7 @@ USER anonymous
 PASS ftp@example.com
 PWD
 CWD blalbla
-MDTM 1262
+MDTM %TESTNUMBER
 QUIT
 </protocol>
 </verify>

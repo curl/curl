@@ -23,16 +23,16 @@ file
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib502
+lib%TESTNUMBER
 </tool>
 
  <name>
 simple multi file:// get
  </name>
  <command>
-file://%PWD/log/test502.txt
+file://%PWD/log/test%TESTNUMBER.txt
 </command>
-<file name="log/test502.txt">
+<file name="log/test%TESTNUMBER.txt">
 foo
    bar swsclose
 bar

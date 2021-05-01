@@ -141,7 +141,7 @@ Curl_getaddrinfo_ex(const char *nodename,
       continue;
 
     /* ignore elements without required address info */
-    if((ai->ai_addr == NULL) || !(ai->ai_addrlen > 0))
+    if(!ai->ai_addr || !(ai->ai_addrlen > 0))
       continue;
 
     /* ignore elements with bogus address size */

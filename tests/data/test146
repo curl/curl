@@ -23,7 +23,7 @@ ftp
 persistent FTP with different paths
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/first/dir/here/146 ftp://%HOSTIP:%FTPPORT/146
+ftp://%HOSTIP:%FTPPORT/first/dir/here/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -43,12 +43,12 @@ CWD dir
 CWD here
 EPSV
 TYPE I
-SIZE 146
-RETR 146
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 CWD /
 EPSV
-SIZE 146
-RETR 146
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

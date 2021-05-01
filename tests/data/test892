@@ -39,7 +39,7 @@ pop3
 POP3 plain authentication with alternative authorization identity
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/892 -u user:secret --sasl-authzid shared-mailbox
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --sasl-authzid shared-mailbox
 </command>
 </client>
 
@@ -50,7 +50,7 @@ pop3://%HOSTIP:%POP3PORT/892 -u user:secret --sasl-authzid shared-mailbox
 CAPA
 AUTH PLAIN
 c2hhcmVkLW1haWxib3gAdXNlcgBzZWNyZXQ=
-RETR 892
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

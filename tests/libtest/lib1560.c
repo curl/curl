@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -323,6 +323,22 @@ static struct testcase get_parts_list[] ={
 };
 
 static struct urltestcase get_url_list[] = {
+  /* IPv4 trickeries */
+  {"https://16843009", "https://1.1.1.1/", 0, 0, CURLUE_OK},
+  {"https://0x7f.1", "https://127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://0177.1", "https://127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://0111.02.0x3", "https://73.2.0.3/", 0, 0, CURLUE_OK},
+  {"https://0xff.0xff.0377.255", "https://255.255.255.255/", 0, 0, CURLUE_OK},
+  {"https://1.0xffffff", "https://1.255.255.255/", 0, 0, CURLUE_OK},
+  /* IPv4 numerical overflows or syntax errors will not normalize */
+  {"https://+127.0.0.1", "https://+127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://127.-0.0.1", "https://127.-0.0.1/", 0, 0, CURLUE_OK},
+  {"https://127.0. 1", "https://127.0.0.1/", 0, 0, CURLUE_MALFORMED_INPUT},
+  {"https://1.0x1000000", "https://1.0x1000000/", 0, 0, CURLUE_OK},
+  {"https://1.2.3.256", "https://1.2.3.256/", 0, 0, CURLUE_OK},
+  {"https://1.2.3.4.5", "https://1.2.3.4.5/", 0, 0, CURLUE_OK},
+  {"https://1.2.0x100.3", "https://1.2.0x100.3/", 0, 0, CURLUE_OK},
+  {"https://4294967296", "https://4294967296/", 0, 0, CURLUE_OK},
   /* 40 bytes scheme is the max allowed */
   {"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA://hostname/path",
    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa://hostname/path",

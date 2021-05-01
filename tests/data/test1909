@@ -36,7 +36,7 @@ http
 HTTP GET --retry-all-errors to overcome partial transfer
  </name>
  <command option="no-output,no-include">
---retry 1 --retry-all-errors -o log/outfile1909 http://%HOSTIP:%HTTPPORT/1909
+--retry 1 --retry-all-errors -o log/outfile%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -44,19 +44,19 @@ HTTP GET --retry-all-errors to overcome partial transfer
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1909 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /1909 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
-<file1 name="log/outfile1909">
+<file1 name="log/outfile%TESTNUMBER">
 data
 </file1>
 

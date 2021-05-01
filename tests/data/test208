@@ -33,9 +33,9 @@ proxy
 HTTP PUT to a FTP URL with username+password - over HTTP proxy
  </name>
  <command>
--x http://%HOSTIP:%HTTPPORT ftp://daniel:mysecret@host.com/we/want/208 -T log/test208.txt
+-x http://%HOSTIP:%HTTPPORT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER -T log/test%TESTNUMBER.txt
 </command>
-<file name="log/test208.txt">
+<file name="log/test%TESTNUMBER.txt">
 Weird
      file
          to
@@ -51,7 +51,7 @@ the
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-PUT ftp://daniel:mysecret@host.com/we/want/208 HTTP/1.1
+PUT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER HTTP/1.1
 Host: host.com:21
 Authorization: Basic ZGFuaWVsOm15c2VjcmV0
 User-Agent: curl/%VERSION

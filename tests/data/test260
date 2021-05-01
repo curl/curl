@@ -35,7 +35,7 @@ http
 HTTP GET URL without slash but with questionmark
  </name>
  <command>
-"http://%HOSTIP:%HTTPPORT?260"
+"http://%HOSTIP:%HTTPPORT?%TESTNUMBER"
 </command>
 </client>
 
@@ -43,7 +43,7 @@ HTTP GET URL without slash but with questionmark
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /?260 HTTP/1.1
+GET /?%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

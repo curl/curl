@@ -18,7 +18,7 @@ header with no-value then its header must be terminated with a semicolon, such
 as \-H \&"X-Custom-Header;" to send "X-Custom-Header:".
 
 curl will make sure that each header you add/replace is sent with the proper
-end-of-line marker, you should thus \fBnot\fP add that as a part of the header
+end-of-line marker, you should thus **not** add that as a part of the header
 content: do not add newlines or carriage returns, they will only mess things
 up for you.
 
@@ -36,7 +36,7 @@ Example:
 
  curl -H "X-First-Name: Joe" http://example.com/
 
-\fBWARNING\fP: headers set with this option will be set in all requests - even
+**WARNING**: headers set with this option will be set in all requests - even
 after redirects are followed, like when told with --location. This can lead to
 the header being sent to other hosts than the original host, so sensitive
 headers should be used with caution combined with following redirects.

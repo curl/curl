@@ -39,7 +39,7 @@ pop3
 POP3 external authentication without credentials
  </name>
  <command>
-'pop3://;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/884'
+'pop3://;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/%TESTNUMBER'
 </command>
 </client>
 
@@ -50,7 +50,7 @@ POP3 external authentication without credentials
 CAPA
 AUTH EXTERNAL
 =
-RETR 884
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

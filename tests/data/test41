@@ -19,7 +19,7 @@ http
 HTTP formpost with missing file
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/41 -F moo=@boo
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -F moo=@boo
 </command>
 </client>
 

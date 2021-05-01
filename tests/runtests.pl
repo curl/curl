@@ -3781,7 +3781,7 @@ sub singletest {
                     $cmd = join(" ", @p);
                 }
 
-                my @o = `$cmd 2>/dev/null`;
+                my @o = `$cmd 2>log/precheck-$testnum`;
                 if($o[0]) {
                     $why = $o[0];
                     chomp $why;

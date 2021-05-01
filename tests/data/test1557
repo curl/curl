@@ -14,7 +14,7 @@ crash
 none
 </server>
 <tool>
-lib1557
+lib%TESTNUMBER
 </tool>
 
 <name>

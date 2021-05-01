@@ -17,7 +17,7 @@ Server: test-server/fake
 Content-Length: 56
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name2019; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 Funny-head: yesyes
 
 Data that should not be delivered from an HTTP resource
@@ -38,10 +38,10 @@ Metalink
 Metalink local XML file, attempt Unix questionable file name II
  </name>
 <command option="no-output,no-include">
---metalink file://%PWD/log/test2019.metalink
+--metalink file://%PWD/log/test%TESTNUMBER.metalink
 </command>
 # local metalink file written before test command runs
-<file name="log/test2019.metalink">
+<file name="log/test%TESTNUMBER.metalink">
 <?xml version="1.0" encoding="utf-8"?>
 <metalink version="3.0" xmlns="http://www.metalinker.org/">
  <files>
@@ -50,26 +50,26 @@ Metalink local XML file, attempt Unix questionable file name II
     <hash type="sha256">c7d03debe90ca29492203ea921d76941fa98640cf3b744f2a16c9b58465eab82</hash>
    </verification>
    <resources maxconnections="1">
-    <url type="http" preference="90">http://%HOSTIP:%HTTPPORT/2019</url>
+    <url type="http" preference="90">http://%HOSTIP:%HTTPPORT/%TESTNUMBER</url>
    </resources>
   </file>
  </files>
 </metalink>
 </file>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/2019 log/name2019
+perl %SRCDIR/libtest/notexists.pl log/%TESTNUMBER log/name%TESTNUMBER
 </postcheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<file1 name="log/stdout2019">
+<file1 name="log/stdout%TESTNUMBER">
 </file1>
-<file2 name="log/stderr2019" mode="text">
-Metalink: parsing (file://%PWD/log/test2019.metalink) metalink/XML...
-Metalink: parsing (file://%PWD/log/test2019.metalink) WARNING (missing or invalid file name)
-Metalink: parsing (file://%PWD/log/test2019.metalink) FAILED
+<file2 name="log/stderr%TESTNUMBER" mode="text">
+Metalink: parsing (file://%PWD/log/test%TESTNUMBER.metalink) metalink/XML...
+Metalink: parsing (file://%PWD/log/test%TESTNUMBER.metalink) WARNING (missing or invalid file name)
+Metalink: parsing (file://%PWD/log/test%TESTNUMBER.metalink) FAILED
 </file2>
 <stripfile2>
 $_ = '' if (($_ !~ /^Metalink: /) && ($_ !~ /error/i) && ($_ !~ /warn/i))

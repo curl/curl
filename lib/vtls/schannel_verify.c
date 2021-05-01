@@ -389,7 +389,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     if(entry->dwAltNameChoice != CERT_ALT_NAME_DNS_NAME) {
       continue;
     }
-    if(entry->pwszDNSName == NULL) {
+    if(!entry->pwszDNSName) {
       infof(data, "schannel: Empty DNS name.");
       continue;
     }
@@ -536,20 +536,14 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
   const CERT_CHAIN_CONTEXT *pChainContext = NULL;
   HCERTCHAINENGINE cert_chain_engine = NULL;
   HCERTSTORE trust_store = NULL;
-#ifndef CURL_DISABLE_PROXY
-  const char * const conn_hostname = SSL_IS_PROXY() ?
-    conn->http_proxy.host.name :
-    conn->host.name;
-#else
-  const char * const conn_hostname = conn->host.name;
-#endif
+  const char * const conn_hostname = SSL_HOST_NAME();
 
   sspi_status =
     s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
                                      SECPKG_ATTR_REMOTE_CERT_CONTEXT,
                                      &pCertContextServer);
 
-  if((sspi_status != SEC_E_OK) || (pCertContextServer == NULL)) {
+  if((sspi_status != SEC_E_OK) || !pCertContextServer) {
     char buffer[STRERROR_LEN];
     failf(data, "schannel: Failed to read remote certificate context: %s",
           Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
@@ -624,7 +618,7 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
                                 NULL,
                                 pCertContextServer->hCertStore,
                                 &ChainPara,
-                                (data->set.ssl.no_revoke ? 0 :
+                                (SSL_SET_OPTION(no_revoke) ? 0 :
                                  CERT_CHAIN_REVOCATION_CHECK_CHAIN),
                                 NULL,
                                 &pChainContext)) {

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -44,6 +44,15 @@ pipeline on it.
 
 This set limit is also used for proxy connections, and then the proxy is
 considered to be the host for which this limit counts.
+
+When more transfers are added to the multi handle than what can be performed
+due to the set limit, they will be queued up waiting for their chance. When
+that happens, the \fICURLOPT_TIMEOUT_MS(3)\fP timeout will be counted
+inclusive of the waiting time, meaning that if you set a too narrow timeout in
+such a case the transfer might never even start before it times out.
+
+Even in the queued up situation, the \fICURLOPT_CONNECTTIMEOUT_MS(3)\fP
+timeout is however treated as a per-connect timeout.
 .SH DEFAULT
 0
 .SH PROTOCOLS

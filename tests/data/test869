@@ -45,7 +45,7 @@ crypto
 POP3 DIGEST-MD5 authentication
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/869 -u user:secret
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
@@ -57,7 +57,7 @@ CAPA
 AUTH DIGEST-MD5
 dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJwb3AvY3VybCIscmVzcG9uc2U9YzNhMGFiZTc5NDYyNTIyNGY5Njg3YTYzMTc3ZmRhNWIscW9wPWF1dGg=
 
-RETR 869
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

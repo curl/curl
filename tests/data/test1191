@@ -26,7 +26,7 @@ mqtt
 MQTT PUBLISH
 </name>
 <command option="binary-trace">
-mqtt://%HOSTIP:%MQTTPORT/1191 -d something
+mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER -d something
 </command>
 </client>
 

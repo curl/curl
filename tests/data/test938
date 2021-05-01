@@ -30,11 +30,11 @@ smtp
  <name>
 SMTP multiple connection authentication
  </name>
-<file name="log/upload938">
+<file name="log/upload%TESTNUMBER">
 mail body
 </file>
  <command>
-smtp://%HOSTIP:%SMTPPORT/938001 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.one:secret -T log/upload938 -: smtp://%HOSTIP:%SMTPPORT/938002 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.two:secret -T log/upload938
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER001 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.one:secret -T log/upload%TESTNUMBER -: smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER002 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.two:secret -T log/upload%TESTNUMBER
 </command>
 </client>
 
@@ -42,14 +42,14 @@ smtp://%HOSTIP:%SMTPPORT/938001 --mail-rcpt recipient@example.com --mail-from se
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 938001
+EHLO %TESTNUMBER001
 AUTH PLAIN
 dXNlci5vbmUAdXNlci5vbmUAc2VjcmV0
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
 QUIT
-EHLO 938002
+EHLO %TESTNUMBER002
 AUTH PLAIN
 dXNlci50d28AdXNlci50d28Ac2VjcmV0
 MAIL FROM:<sender@example.com>

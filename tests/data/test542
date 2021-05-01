@@ -28,13 +28,13 @@ Accept-ranges: bytes
 ftp
 </server>
 <tool>
-lib542
+lib%TESTNUMBER
 </tool>
  <name>
 FTP a file with NOBODY yes and HEADER no
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/542
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 
 </client>
@@ -49,7 +49,7 @@ USER anonymous
 PASS ftp@example.com
 PWD
 TYPE I
-SIZE 542
+SIZE %TESTNUMBER
 REST 0
 QUIT
 </protocol>

@@ -85,7 +85,7 @@ static char *max5data(curl_off_t bytes, char *max5)
               CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE,
               (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/CURL_OFF_T_C(10)) );
 
-#if (CURL_SIZEOF_CURL_OFF_T > 4)
+#if (SIZEOF_CURL_OFF_T > 4)
 
   else if(bytes < CURL_OFF_T_C(10000) * ONE_MEGABYTE)
     /* 'XXXXM' is good until we're at 10000MB or above */
@@ -321,14 +321,14 @@ void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 void Curl_ratelimit(struct Curl_easy *data, struct curltime now)
 {
   /* don't set a new stamp unless the time since last update is long enough */
-  if(data->set.max_recv_speed > 0) {
+  if(data->set.max_recv_speed) {
     if(Curl_timediff(now, data->progress.dl_limit_start) >=
        MIN_RATE_LIMIT_PERIOD) {
       data->progress.dl_limit_start = now;
       data->progress.dl_limit_size = data->progress.downloaded;
     }
   }
-  if(data->set.max_send_speed > 0) {
+  if(data->set.max_send_speed) {
     if(Curl_timediff(now, data->progress.ul_limit_start) >=
        MIN_RATE_LIMIT_PERIOD) {
       data->progress.ul_limit_start = now;

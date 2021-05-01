@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -97,7 +97,7 @@ int test(char *URL)
    }
 
    slist = curl_slist_append(NULL, "SYST");
-   if(slist == NULL) {
+   if(!slist) {
      fprintf(stderr, "curl_slist_append() failed\n");
      res = TEST_ERR_MAJOR_BAD;
      goto test_cleanup;

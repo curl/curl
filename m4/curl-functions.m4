@@ -446,7 +446,6 @@ dnl Set up variable with list of headers that must be
 dnl included when time.h is to be included.
 
 AC_DEFUN([CURL_INCLUDES_TIME], [
-AC_REQUIRE([AC_HEADER_TIME])dnl
 curl_includes_time="\
 /* includes start */
 #ifdef HAVE_SYS_TYPES_H
@@ -454,17 +453,11 @@ curl_includes_time="\
 #endif
 #ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
-#  ifdef TIME_WITH_SYS_TIME
-#    include <time.h>
-#  endif
-#else
-#  ifdef HAVE_TIME_H
-#    include <time.h>
-#  endif
 #endif
+#include <time.h>
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h sys/time.h time.h,
+    sys/types.h sys/time.h,
     [], [], [$curl_includes_time])
 ])
 
@@ -7226,7 +7219,7 @@ AC_DEFUN([CURL_COVERAGE],[
 
   dnl check if enabled by argument
   AC_ARG_ENABLE(code-coverage,
-     AC_HELP_STRING([--enable-code-coverage], [Provide code coverage]),
+     AS_HELP_STRING([--enable-code-coverage], [Provide code coverage]),
      coverage="$enableval")
 
   dnl if not gcc switch off again

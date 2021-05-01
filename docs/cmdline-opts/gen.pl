@@ -63,6 +63,12 @@ sub manpageify {
 sub printdesc {
     my @desc = @_;
     for my $d (@desc) {
+        if($d !~ /^.\\"/) {
+            # **bold**
+            $d =~ s/\*\*([^ ]*)\*\*/\\fB$1\\fP/g;
+            # *italics*
+            $d =~ s/\*([^ ]*)\*/\\fI$1\\fP/g;
+        }
         # skip lines starting with space (examples)
         if($d =~ /^[^ ]/) {
             for my $k (keys %optlong) {
@@ -70,6 +76,9 @@ sub printdesc {
                 $d =~ s/--$k([^a-z0-9_-])/$l$1/;
             }
         }
+        # quote "bare" minuses in the output
+        $d =~ s/( |\\fI|^)--/$1\\-\\-/g;
+        $d =~ s/([ -]|\\fI|^)-/$1\\-/g;
         print $d;
     }
 }
@@ -203,6 +212,9 @@ sub single {
         $opt .= " $arg";
     }
 
+    # quote "bare" minuses in opt
+    $opt =~ s/( |^)--/$1\\-\\-/g;
+    $opt =~ s/( |^)-/$1\\-/g;
     if($standalone) {
         print ".TH curl 1 \"30 Nov 2016\" \"curl 7.52.0\" \"curl manual\"\n";
         print ".SH OPTION\n";

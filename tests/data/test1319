@@ -56,7 +56,7 @@ proxy
 POP3 fetch tunneled through HTTP proxy
  </name>
  <command>
-pop3://pop.1319:%POP3PORT/1319 -p -x %HOSTIP:%PROXYPORT -u user:secret
+pop3://pop.%TESTNUMBER:%POP3PORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT -u user:secret
 </command>
 </client>
 
@@ -67,12 +67,12 @@ pop3://pop.1319:%POP3PORT/1319 -p -x %HOSTIP:%PROXYPORT -u user:secret
 CAPA
 USER user
 PASS secret
-RETR 1319
+RETR %TESTNUMBER
 QUIT
 </protocol>
 <proxy>
-CONNECT pop.1319:%POP3PORT HTTP/1.1
-Host: pop.1319:%POP3PORT
+CONNECT pop.%TESTNUMBER:%POP3PORT HTTP/1.1
+Host: pop.%TESTNUMBER:%POP3PORT
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 

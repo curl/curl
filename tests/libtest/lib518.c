@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -83,7 +83,7 @@ static int fopen_works(void)
   }
   for(i = 0; i < 3; i++) {
     fpa[i] = fopen(DEV_NULL, FOPEN_READTEXT);
-    if(fpa[i] == NULL) {
+    if(!fpa[i]) {
       store_errmsg("fopen failed", errno);
       fprintf(stderr, "%s\n", msgbuff);
       ret = 0;

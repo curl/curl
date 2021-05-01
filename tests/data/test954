@@ -5,7 +5,7 @@ SMTP
 SASL
 SASL AUTH PLAIN
 RFC4616
-RFC4954
+RFC4%TESTNUMBER
 </keywords>
 </info>
 
@@ -32,7 +32,7 @@ SMTP plain authentication with alternative authorization identity (Not authorize
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/954 --mail-rcpt recipient@example.com --mail-from sender@example.com -u kurt:xipj3plmq --sasl-authzid ursel -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u kurt:xipj3plmq --sasl-authzid ursel -T -
 </command>
 </client>
 
@@ -47,7 +47,7 @@ smtp://%HOSTIP:%SMTPPORT/954 --mail-rcpt recipient@example.com --mail-from sende
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "QUIT"
 <protocol>
-EHLO 954
+EHLO %TESTNUMBER
 AUTH PLAIN
 dXJzZWwAa3VydAB4aXBqM3BsbXE=
 </protocol>

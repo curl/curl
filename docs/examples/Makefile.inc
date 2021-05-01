@@ -139,7 +139,6 @@ COMPLICATED_EXAMPLES = \
   sessioninfo.c \
   smooth-gtk-thread.c \
   synctime.c \
-  threaded-shared-conn.c \
   threaded-ssl.c \
   usercertinmem.c \
   version-check.pl \

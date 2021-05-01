@@ -40,7 +40,7 @@ ftp
 FTP with uneven quote in PWD response
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/test-1152/
+ftp://%HOSTIP:%FTPPORT/test-%TESTNUMBER/
 </command>
 </client>
 
@@ -51,7 +51,7 @@ ftp://%HOSTIP:%FTPPORT/test-1152/
 USER anonymous
 PASS ftp@example.com
 PWD
-CWD test-1152
+CWD test-%TESTNUMBER
 EPSV
 TYPE A
 LIST

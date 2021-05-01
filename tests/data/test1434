@@ -58,9 +58,9 @@ http
 HTTP GET resume at exactly the existing file size is fine
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1434 -C 100
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 100
 </command>
-<file name="log/curl1434.out">
+<file name="log/curl%TESTNUMBER.out">
 012345678
 012345678
 012345678
@@ -77,7 +77,7 @@ http://%HOSTIP:%HTTPPORT/1434 -C 100
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1434 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=100-
 User-Agent: curl/%VERSION

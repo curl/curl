@@ -32,9 +32,9 @@ file
 FTP RETR followed by FILE
  </name>
 <command option="no-include">
-ftp://%HOSTIP:%FTPPORT/2000 file://localhost%FILE_PWD/log/test2000.txt
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER file://localhost%FILE_PWD/log/test%TESTNUMBER.txt
 </command>
-<file name="log/test2000.txt">
+<file name="log/test%TESTNUMBER.txt">
 foo
    bar
 bar
@@ -52,8 +52,8 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 2000
-RETR 2000
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 <stdout>
