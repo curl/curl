@@ -740,7 +740,7 @@ output_auth_headers(struct Curl_easy *data,
   if(authstatus->picked == CURLAUTH_BEARER) {
     /* Bearer */
     if((!proxy && data->set.str[STRING_BEARER] &&
-        !Curl_checkheaders(data, "Authorization:"))) {
+        !Curl_checkheaders(data, "Authorization"))) {
       auth = "Bearer";
       result = http_output_bearer(data);
       if(result)
