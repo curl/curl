@@ -3581,7 +3581,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
       return result;
   }
 #ifdef USE_SPNEGO
-  else if(checkprefix("Persistent-Auth", headp)) {
+  else if(checkprefix("Persistent-Auth:", headp)) {
     struct negotiatedata *negdata = &conn->negotiate;
     struct auth *authp = &data->state.authhost;
     if(authp->picked == CURLAUTH_NEGOTIATE) {
