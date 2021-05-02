@@ -725,6 +725,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
             handles[nfd] = signal;
             data[nth].signal = signal;
             data[nth].thread = handle;
+            nfd++;
             nth++;
           }
           else {
@@ -734,9 +735,11 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
       }
       else if(fd == fileno(stdout)) {
         handles[nfd] = GetStdHandle(STD_OUTPUT_HANDLE);
+        nfd++;
       }
       else if(fd == fileno(stderr)) {
         handles[nfd] = GetStdHandle(STD_ERROR_HANDLE);
+        nfd++;
       }
       else {
         wsaevent = WSACreateEvent();
@@ -763,6 +766,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
               if(FD_ISSET(wsasock, &exceptsock))
                 data[nfd].wsastate |= FD_OOB;
             }
+            nfd++;
             nws++;
           }
           else {
@@ -775,6 +779,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
                 handles[nfd] = signal;
                 data[nth].signal = signal;
                 data[nth].thread = handle;
+                nfd++;
                 nth++;
               }
               else {
@@ -784,7 +789,6 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
           }
         }
       }
-      nfd++;
     }
   }
 
