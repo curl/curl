@@ -1031,7 +1031,8 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
         }
         else
 #endif
-          if(checkprefix("Basic", auth) && is_valid_auth_separator(auth[5])) {
+          if(checkprefix("Basic", auth) &&
+             is_valid_auth_separator(auth[5])) {
             *availp |= CURLAUTH_BASIC;
             authp->avail |= CURLAUTH_BASIC;
             if(authp->picked == CURLAUTH_BASIC) {
@@ -1044,7 +1045,8 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
             }
           }
           else
-            if(checkprefix("Bearer", auth) && is_valid_auth_separator(auth[6])) {
+            if(checkprefix("Bearer", auth) &&
+               is_valid_auth_separator(auth[6])) {
               *availp |= CURLAUTH_BEARER;
               authp->avail |= CURLAUTH_BEARER;
               if(authp->picked == CURLAUTH_BEARER) {
