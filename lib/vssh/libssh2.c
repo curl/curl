@@ -2931,7 +2931,7 @@ static CURLcode ssh_multi_statemach(struct Curl_easy *data, bool *done)
 
 static CURLcode ssh_block_statemach(struct Curl_easy *data,
                                     struct connectdata *conn,
-                                    bool duringconnect)
+                                    bool disconnect)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
   CURLcode result = CURLE_OK;
@@ -2945,17 +2945,19 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
     if(result)
       break;
 
-    if(Curl_pgrsUpdate(data))
-      return CURLE_ABORTED_BY_CALLBACK;
+    if(!disconnect) {
+      if(Curl_pgrsUpdate(data))
+        return CURLE_ABORTED_BY_CALLBACK;
 
-    result = Curl_speedcheck(data, now);
-    if(result)
-      break;
+      result = Curl_speedcheck(data, now);
+      if(result)
+        break;
 
-    left = Curl_timeleft(data, NULL, duringconnect);
-    if(left < 0) {
-      failf(data, "Operation timed out");
-      return CURLE_OPERATION_TIMEDOUT;
+      left = Curl_timeleft(data, NULL, FALSE);
+      if(left < 0) {
+        failf(data, "Operation timed out");
+        return CURLE_OPERATION_TIMEDOUT;
+      }
     }
 
     if(block) {
@@ -3278,10 +3280,8 @@ static CURLcode scp_disconnect(struct Curl_easy *data,
 
   if(sshc->ssh_session) {
     /* only if there's a session still around to use! */
-
     state(data, SSH_SESSION_DISCONNECT);
-
-    result = ssh_block_statemach(data, conn, FALSE);
+    result = ssh_block_statemach(data, conn, TRUE);
   }
 
   return result;
@@ -3295,10 +3295,9 @@ static CURLcode ssh_done(struct Curl_easy *data, CURLcode status)
   struct SSHPROTO *sshp = data->req.p.ssh;
   struct connectdata *conn = data->conn;
 
-  if(!status) {
+  if(!status)
     /* run the state-machine */
     result = ssh_block_statemach(data, conn, FALSE);
-  }
   else
     result = status;
 
@@ -3438,7 +3437,7 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
   if(sshc->ssh_session) {
     /* only if there's a session still around to use! */
     state(data, SSH_SFTP_SHUTDOWN);
-    result = ssh_block_statemach(data, conn, FALSE);
+    result = ssh_block_statemach(data, conn, TRUE);
   }
 
   DEBUGF(infof(data, "SSH DISCONNECT is done\n"));
