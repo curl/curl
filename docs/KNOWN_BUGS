@@ -145,6 +145,8 @@ problems may have been fixed or changed somewhat since this was written!
  17. HTTP/2
  17.1 Excessive HTTP/2 packets with TCP_NODELAY
  17.2 HTTP/2 frames while in the connection pool kill reuse
+ 17.3 ENHANCE_YOUR_CALM causes infinite retries
+ 17.4 Connection failures with parallel HTTP/2
 
  18. HTTP/3
  18.1 If the HTTP/3 server closes connection during upload curl hangs
@@ -1025,6 +1027,18 @@ problems may have been fixed or changed somewhat since this was written!
 
  This is *best* fixed by adding monitoring to connections while they are kept
  in the pool so that pings can be responded to appropriately.
+
+17.3 ENHANCE_YOUR_CALM causes infinite retries
+
+ Infinite retries with 2 parallel requests on one connection receiving GOAWAY
+ with ENHANCE_YOUR_CALM error code.
+
+ See https://github.com/curl/curl/issues/5119
+
+17.4 Connection failures with parallel HTTP/2
+
+ See https://github.com/curl/curl/issues/5611
+
 
 18. HTTP/3
 
