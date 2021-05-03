@@ -2590,7 +2590,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
           if(http->postsize) {
             char chunk[16];
             /* Append the POST data chunky-style */
-            msnprintf(chunk, sizeof(chunk), "%x\r\n", (int)http->postsize);
+            msnprintf(chunk, sizeof(chunk), "%X\r\n", (int)http->postsize);
             result = Curl_dyn_add(r, chunk);
             if(!result) {
               included_body = http->postsize + strlen(chunk);

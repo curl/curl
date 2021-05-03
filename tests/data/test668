@@ -69,7 +69,7 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-c1
+C1
 ------------------------------
 Content-Disposition: form-data; name="field1"
 

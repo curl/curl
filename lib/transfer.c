@@ -318,7 +318,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
     if(data->state.trailers_state != TRAILERS_SENDING) {
       char hexbuffer[11] = "";
       hexlen = msnprintf(hexbuffer, sizeof(hexbuffer),
-                         "%zx%s", nread, endofline_native);
+                         "%zX%s", nread, endofline_native);
 
       /* move buffer pointer */
       data->req.upload_fromhere -= hexlen;
