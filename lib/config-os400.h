@@ -310,9 +310,6 @@
 /* Define if you have the <string.h> header file. */
 #define HAVE_STRING_H
 
-/* Define if you have the `strlcpy' function. */
-#undef HAVE_STRLCPY
-
 /* Define if you have the <stropts.h> header file. */
 #undef HAVE_STROPTS_H
 
