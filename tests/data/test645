@@ -108,7 +108,11 @@ y
 1
 
 
+%if hyper
+19A
+%else
 19a
+%endif
 
 ------------------------------
 Content-Disposition: form-data; name="filename"
@@ -169,7 +173,11 @@ y
 1
 
 
+%if hyper
+19A
+%else
 19a
+%endif
 
 ------------------------------
 Content-Disposition: form-data; name="filename"
