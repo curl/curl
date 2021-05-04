@@ -296,9 +296,6 @@
 /* Define if you have the <string.h> header file. */
 #define HAVE_STRING_H
 
-/* Define if you have the `strlcpy' function. */
-#undef HAVE_STRLCPY
-
 /* Define if you have the `strstr' function. */
 #define HAVE_STRSTR
 

@@ -14,6 +14,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o c-hyper: don't write to set.writeheader if null [67]
  o c-hyper: fix handling of zero-byte chunk from hyper [39]
  o checksrc: complain on == NULL or != 0 checks in conditions [20]
  o cmake: make libcurl output filename configurable [41]
@@ -22,34 +23,57 @@ This release includes the following bugfixes:
  o connect: use CURL_SA_FAMILY_T for portability [34]
  o ConnectionExists: respect requests for h1 connections better
  o cookie: CURLOPT_COOKIEFILE set to NULL switches off cookies [1]
+ o Curl_http_header: check for colon when matching Persistent-Auth [51]
+ o Curl_http_input_auth: require valid separator after negotiation type [52]
+ o Curl_input_digest: require space after Digest [50]
  o curl_setup: provide the shutdown flags wider [33]
  o curl_url_set.3: add memory management information [38]
+ o CURLcode: add CURLE_SSL_CLIENTCERT [47]
  o CURLOPT_POSTFIELDS.3: clarify how it gets the size of the data [40]
  o docs/HTTP3.md: fix nghttp2's HTTP/3 server port [21]
+ o docs: camelcase it like GitHub everywhere [62]
+ o docs: fix typo in fail-with-body doc [63]
+ o easy: ignore sigpipe in curl_easy_send [69]
+ o gskit: fix CURL_DISABLE_PROXY build [57]
+ o gskit: fix undefined reference to 'conn' [58]
  o http2: call the handle-closed function correctly on closed stream [37]
+ o http2: fix a resource leak in push_promise() [54]
+ o http2: fix resource leaks in set_transfer_url() [55]
  o http2: move the stream error field to the per-transfer storage [36]
+ o http: fix the check for 'Authorization' with Bearer [53]
+ o krb5/name_to_level: replace checkprefix with curl_strequal [49]
  o krb5: don't use 'static' to store PBSZ size response [23]
  o krb5: remove the unused 'overhead' function [35]
  o lib1564.c: enable last wakeup test part on Windows [26]
+ o lib: fix 0-length Curl_client_write calls [60]
+ o lib: fix some misuse of curlx_convert_UTF8_to_tchar [64]
+ o libcurl-security.3: be careful of setuid [66]
+ o libcurl-security.3: don't try to filter IPv4 hosts based on the URL [71]
  o libssh2: fix Value stored to 'sshp' is never read [13]
+ o libssh2: ignore timeout during disconnect [45]
  o libssh: fix "empty expression statement has no effect" warnings [7]
  o m4: add security frameworks on Mac when compiling rustls [31]
  o multi: don't close connection HTTP_1_1_REQUIRED
  o multi: fix slow write/upload performance on Windows [27]
  o multi: reduce Win32 API calls to improve performance [28]
  o NSS: add ciphers to map [30]
+ o nss_set_blocking: avoid static for sock_opt [72]
+ o ntlm: precaution against super huge type2 offsets [65]
  o openldap: protect SSL-specific code with proper #ifdef [12]
  o openssl: fix build error with OpenSSL < 1.0.2 [4]
  o os400: additional support for options metadata [24]
  o README.md: delete Codacy UTM parameters [5]
  o Revert "Revert 'multi: implement wait using winsock events'" [26]
  o rustls: only return CURLE_AGAIN when TLS session is fully drained [2]
+ o rustls: use ALPN [56]
  o schannel: Disable auto credentials; add an option to enable it [18]
  o schannel: Support strong crypto option [44]
  o sectransp: allow cipher name to be specified [29]
+ o sigpipe: ignore SIGPIPE when using wolfSSL as well [70]
  o sws: #ifdef S_IFSOCK use [32]
  o test server: take care of siginterrupt() deprecation [25]
  o tests/disable-scan.pl: also scan all m4 files [17]
+ o tls: add USE_HTTP2 define [59]
  o tool_getparam: replace (in-place) '%20' by '+' according to RFC1866 [14]
  o tool_operate: don't discard failed parallel transfer result [16]
  o tool_writeout: fix the HTTP_CODE json output [11]
@@ -58,6 +82,7 @@ This release includes the following bugfixes:
  o version: add gsasl_version to curl_version_info_data [43]
  o vtls: deduplicate some DISABLE_PROXY ifdefs [19]
  o vtls: reset ssl use flag upon negotiation failure [42]
+ o wolfssl: handle SSL_write() returns 0 for error [68]
 
 This release includes the following known bugs:
 
@@ -66,15 +91,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Emil Engler, Georeth Zhou, Gergely Nagy, Harry Sintonen,
-  Illarion Taev, Jacob Hoffman-Andrews, Jakub Zakrzewski, Javier Blazquez,
-  Jeroen Ooms, Johann150 on github, Jon Rumsey, Kevin Burke, Kevin R. Bulgrien,
-  Marcel Raad, Marc Hörsken, Martin Halle, Michael Kolechkin, Michał Antoniak,
-  Michal Rus, Morten Minde Neergaard, Patrick Monnerat, Pontus Lundkvist,
-  Ralph Langendam, Ray Satiro, rcombs on github, Rich FitzJohn,
-  Stefan Karpinski, tmkk on github, Tommy Odom, Tuomas Siipola, Victor Vieux,
+  Ayushman Singh Chauhan, Benjamin Riefenstahl, Blake Burkhart, Dan Fandrich,
+  Daniel Stenberg, ebejan on github, Emil Engler, Georeth Zhou, Gergely Nagy,
+  Harry Sintonen, Illarion Taev, Jacob Hoffman-Andrews, Jakub Zakrzewski,
+  Javier Blazquez, Jeroen Ooms, Johann150 on github, Jon Rumsey, Kamil Dudka,
+  Kevin Burke, Kevin R. Bulgrien, Lucas Servén Marín, MAntoniak on github,
+  Marcel Raad, Marc Hörsken, Martin Halle, Max Dymond, Michael Kolechkin,
+  Michał Antoniak, Michal Rus, Morten Minde Neergaard, Patrick Monnerat,
+  Pontus Lundkvist, Ralph Langendam, Ray Satiro, rcombs on github,
+  Rich FitzJohn, sergio-nsk on github, Stefan Karpinski, Timo Lange,
+  tmkk on github, Tobias Gabriel, Tommy Odom, Tuomas Siipola, Victor Vieux,
   Viktor Szakats, Wes Hinsley, Yusuke Nakamura,
-  (35 contributors)
+  (47 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -122,3 +150,28 @@ References to bug reports and discussions on issues:
  [42] = https://curl.se/bug/?i=6934
  [43] = https://curl.se/bug/?i=6843
  [44] = https://curl.se/bug/?i=6734
+ [45] = https://curl.se/bug/?i=6990
+ [47] = https://curl.se/bug/?i=6721
+ [49] = https://curl.se/bug/?i=6993
+ [50] = https://curl.se/bug/?i=6993
+ [51] = https://curl.se/bug/?i=6993
+ [52] = https://curl.se/bug/?i=6993
+ [53] = https://curl.se/bug/?i=6988
+ [54] = https://curl.se/bug/?i=6986
+ [55] = https://curl.se/bug/?i=6986
+ [56] = https://curl.se/bug/?i=6960
+ [57] = https://curl.se/bug/?i=6981
+ [58] = https://curl.se/bug/?i=6980
+ [59] = https://curl.se/bug/?i=6959
+ [60] = https://curl.se/bug/?i=6954
+ [62] = https://curl.se/bug/?i=6979
+ [63] = https://curl.se/bug/?i=6977
+ [64] = https://github.com/curl/curl/pull/6602#issuecomment-825236763
+ [65] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=33720
+ [66] = https://curl.se/bug/?i=6970
+ [67] = https://curl.se/bug/?i=6619
+ [68] = https://curl.se/bug/?i=6967
+ [69] = https://curl.se/bug/?i=6965
+ [70] = https://curl.se/bug/?i=6966
+ [71] = https://curl.se/bug/?i=6942
+ [72] = https://curl.se/bug/?i=6945

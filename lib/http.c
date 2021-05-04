@@ -897,6 +897,11 @@ Curl_http_output_auth(struct Curl_easy *data,
  * proxy CONNECT loop.
  */
 
+static int is_valid_auth_separator(char ch)
+{
+  return ch == '\0' || ch == ',' || ISSPACE(ch);
+}
+
 CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                               const char *auth) /* the first non-space */
 {
@@ -940,7 +945,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 
   while(*auth) {
 #ifdef USE_SPNEGO
-    if(checkprefix("Negotiate", auth)) {
+    if(checkprefix("Negotiate", auth) && is_valid_auth_separator(auth[9])) {
       if((authp->avail & CURLAUTH_NEGOTIATE) ||
          Curl_auth_is_spnego_supported()) {
         *availp |= CURLAUTH_NEGOTIATE;
@@ -966,7 +971,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 #endif
 #ifdef USE_NTLM
       /* NTLM support requires the SSL crypto libs */
-      if(checkprefix("NTLM", auth)) {
+      if(checkprefix("NTLM", auth) && is_valid_auth_separator(auth[4])) {
         if((authp->avail & CURLAUTH_NTLM) ||
            (authp->avail & CURLAUTH_NTLM_WB) ||
            Curl_auth_is_ntlm_supported()) {
@@ -1004,7 +1009,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
       else
 #endif
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-        if(checkprefix("Digest", auth)) {
+        if(checkprefix("Digest", auth) && is_valid_auth_separator(auth[6])) {
           if((authp->avail & CURLAUTH_DIGEST) != 0)
             infof(data, "Ignoring duplicate digest auth header.\n");
           else if(Curl_auth_is_digest_supported()) {
@@ -1026,7 +1031,8 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
         }
         else
 #endif
-          if(checkprefix("Basic", auth)) {
+          if(checkprefix("Basic", auth) &&
+             is_valid_auth_separator(auth[5])) {
             *availp |= CURLAUTH_BASIC;
             authp->avail |= CURLAUTH_BASIC;
             if(authp->picked == CURLAUTH_BASIC) {
@@ -1039,7 +1045,8 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
             }
           }
           else
-            if(checkprefix("Bearer", auth)) {
+            if(checkprefix("Bearer", auth) &&
+               is_valid_auth_separator(auth[6])) {
               *availp |= CURLAUTH_BEARER;
               authp->avail |= CURLAUTH_BEARER;
               if(authp->picked == CURLAUTH_BEARER) {
@@ -3574,7 +3581,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
       return result;
   }
 #ifdef USE_SPNEGO
-  else if(checkprefix("Persistent-Auth", headp)) {
+  else if(checkprefix("Persistent-Auth:", headp)) {
     struct negotiatedata *negdata = &conn->negotiate;
     struct auth *authp = &data->state.authhost;
     if(authp->picked == CURLAUTH_NEGOTIATE) {

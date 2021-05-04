@@ -90,7 +90,11 @@ Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
 Content-Type: text/whatever
 
 
+%if hyper
+A5
+%else
 a5
+%endif
 This is data from a file.
 
 ------------------------------
@@ -98,7 +102,11 @@ Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
 Content-Type: text/whatever
 
 
+%if hyper
+AF
+%else
 af
+%endif
 This is data from a file.
 
 --------------------------------
@@ -107,7 +115,11 @@ This is data from a file.
 Content-Disposition: form-data; name="filecontents"
 
 
+%if hyper
+10F
+%else
 10f
+%endif
 This is data from a file.
 
 ------------------------------

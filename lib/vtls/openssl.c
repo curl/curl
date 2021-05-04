@@ -3292,6 +3292,19 @@ static CURLcode ossl_connect_step2(struct Curl_easy *data,
              error_buffer */
           strcpy(error_buffer, "SSL certificate verification failed");
       }
+#if (OPENSSL_VERSION_NUMBER >= 0x10101000L && \
+    !defined(LIBRESSL_VERSION_NUMBER) && \
+    !defined(OPENSSL_IS_BORINGSSL))
+      /* SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED is only available on
+         OpenSSL version above v1.1.1, not Libre SSL nor BoringSSL */
+      else if((lib == ERR_LIB_SSL) &&
+              (reason == SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED)) {
+          /* If client certificate is required, communicate the
+             error to client */
+          result = CURLE_SSL_CLIENTCERT;
+          ossl_strerror(errdetail, error_buffer, sizeof(error_buffer));
+      }
+#endif
       else {
         result = CURLE_SSL_CONNECT_ERROR;
         ossl_strerror(errdetail, error_buffer, sizeof(error_buffer));

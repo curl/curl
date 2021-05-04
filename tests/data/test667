@@ -66,7 +66,11 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
+%if hyper
+7F
+%else
 7f
+%endif
 ------------------------------
 Content-Disposition: form-data; name="field"
 Content-Transfer-Encoding: base64
