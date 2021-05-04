@@ -81,7 +81,11 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
+%if hyper
+1AF
+%else
 1af
+%endif
 ------------------------------
 Content-Disposition: form-data; name="greeting"
 Content-Type: application/X-Greeting
