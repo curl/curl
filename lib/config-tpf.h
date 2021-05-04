@@ -450,9 +450,6 @@
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
 
-/* Define to 1 if you have the `strlcpy' function. */
-/* #undef HAVE_STRLCPY */
-
 /* Define to 1 if you have the `strstr' function. */
 #define HAVE_STRSTR 1
 

@@ -208,6 +208,9 @@
 /* Define to 1 if you have the `geteuid' function. */
 #cmakedefine HAVE_GETEUID 1
 
+/* Define to 1 if you have the `getppid' function. */
+#cmakedefine HAVE_GETPPID 1
+
 /* Define to 1 if you have the gethostbyaddr function. */
 #cmakedefine HAVE_GETHOSTBYADDR 1
 
@@ -500,9 +503,6 @@
 /* Define to 1 if you have the <pem.h> header file. */
 #cmakedefine HAVE_PEM_H 1
 
-/* Define to 1 if you have the `perror' function. */
-#cmakedefine HAVE_PERROR 1
-
 /* Define to 1 if you have the `pipe' function. */
 #cmakedefine HAVE_PIPE 1
 
@@ -644,12 +644,6 @@
 /* Define to 1 if you have the <string.h> header file. */
 #cmakedefine HAVE_STRING_H 1
 
-/* Define to 1 if you have the strlcat function. */
-#cmakedefine HAVE_STRLCAT 1
-
-/* Define to 1 if you have the `strlcpy' function. */
-#cmakedefine HAVE_STRLCPY 1
-
 /* Define to 1 if you have the strncmpi function. */
 #cmakedefine HAVE_STRNCMPI 1
 
@@ -739,6 +733,9 @@
 
 /* Define to 1 if you have the `utime' function. */
 #cmakedefine HAVE_UTIME 1
+
+/* Define to 1 if you have the `utimes' function. */
+#cmakedefine HAVE_UTIMES 1
 
 /* Define to 1 if you have the <utime.h> header file. */
 #cmakedefine HAVE_UTIME_H 1
