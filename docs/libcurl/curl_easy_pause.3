@@ -84,7 +84,9 @@ this because it needs to drain the socket for the other transfers and the
 already announced window size for the paused transfer will allow the server to
 continue sending data up to that window size amount. By default, libcurl
 announces a 32 megabyte window size, which thus can make libcurl end up
-buffering 32 megabyte of data for a paused stream.
+buffering 32 megabyte of data for a paused stream. The window size can be
+changed with \fICURLOPT_STREAM_WINDOW_SIZE(3)\fP (easy interface) or
+\fICURLMOPT_STREAM_WINDOW_SIZE(3)\fP (multi interface).
 
 When such a paused stream is unpaused again, any buffered data will be
 delivered first.
@@ -104,4 +106,5 @@ in a very large data amount needing to be allocated to save the data during
 the pause. This said, you should probably consider not using paused receiving
 if you allow libcurl to uncompress data automatically.
 .SH "SEE ALSO"
-.BR curl_easy_cleanup "(3), " curl_easy_reset "(3)"
+.BR curl_easy_cleanup "(3), " curl_easy_reset "(3), "
+.BR CURLOPT_STREAM_WINDOW_SIZE "(3), " CURLMOPT_STREAM_WINDOW_SIZE "(3)"

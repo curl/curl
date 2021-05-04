@@ -31,6 +31,9 @@
    from the peer */
 #define DEFAULT_MAX_CONCURRENT_STREAMS 100
 
+/* default initial stream window size */
+#define DEFAULT_STREAM_WINDOW_SIZE (32 * 1024 * 1024) /* 32 MB */
+
 /*
  * Store nghttp2 version info in this buffer, Prefix with a space.  Return
  * total length written.

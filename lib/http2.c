@@ -56,8 +56,6 @@
 #define NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE 1
 #endif
 
-#define HTTP2_CONNECTION_WINDOW_SIZE (32 * 1024 * 1024) /* 32 MB */
-
 #ifdef DEBUG_HTTP2
 #define H2BUGF(x) x
 #else
@@ -500,32 +498,42 @@ static int set_transfer_url(struct Curl_easy *data,
   CURLU *u = curl_url();
   CURLUcode uc;
   char *url;
+  int rc = 0;
 
   v = curl_pushheader_byname(hp, ":scheme");
   if(v) {
     uc = curl_url_set(u, CURLUPART_SCHEME, v, 0);
-    if(uc)
-      return 1;
+    if(uc) {
+      rc = 1;
+      goto fail;
+    }
   }
 
   v = curl_pushheader_byname(hp, ":authority");
   if(v) {
     uc = curl_url_set(u, CURLUPART_HOST, v, 0);
-    if(uc)
-      return 2;
+    if(uc) {
+      rc = 2;
+      goto fail;
+    }
   }
 
   v = curl_pushheader_byname(hp, ":path");
   if(v) {
     uc = curl_url_set(u, CURLUPART_PATH, v, 0);
-    if(uc)
-      return 3;
+    if(uc) {
+      rc = 3;
+      goto fail;
+    }
   }
 
   uc = curl_url_get(u, CURLUPART_URL, &url, 0);
   if(uc)
-    return 4;
+    rc = 4;
+  fail:
   curl_url_cleanup(u);
+  if(rc)
+    return rc;
 
   if(data->state.url_alloc)
     free(data->state.url);
@@ -571,6 +579,7 @@ static int push_promise(struct Curl_easy *data,
 
     rv = set_transfer_url(newhandle, &heads);
     if(rv) {
+      (void)Curl_close(&newhandle);
       rv = CURL_PUSH_DENY;
       goto fail;
     }
@@ -2295,7 +2304,7 @@ CURLcode Curl_http2_switched(struct Curl_easy *data,
   }
 
   rv = nghttp2_session_set_local_window_size(httpc->h2, NGHTTP2_FLAG_NONE, 0,
-                                             HTTP2_CONNECTION_WINDOW_SIZE);
+                                             DEFAULT_STREAM_WINDOW_SIZE);
   if(rv) {
     failf(data, "nghttp2_session_set_local_window_size() failed: %s(%d)",
           nghttp2_strerror(rv), rv);
