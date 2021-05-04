@@ -344,8 +344,8 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
 
   /* Allocate our message */
   messagelen = 4;
-  if(authzid && *authzid)
-    messagelen += strlen(authzid) + 1;
+  if(authzid)
+    messagelen += strlen(authzid);
   message = malloc(messagelen);
   if(!message) {
     free(trailer);
@@ -360,13 +360,10 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   message[2] = (max_size >> 8) & 0xFF;
   message[3] = max_size & 0xFF;
 
-  /* If given, append the authorization identity including the 0x00 based
-     terminator. Note: Despite RFC4752 Section 3.1 stating "The authorization
-     identity is not terminated with the zero-valued (%x00) octet." it seems
-     necessary to include it. */
+  /* If given, append the authorization identity. */
 
   if(authzid && *authzid)
-    strcpy((char *) message + 4, authzid);
+    memcpy(message + 4, authzid, messagelen - 4);
 
   /* Allocate the padding */
   padding = malloc(sizes.cbBlockSize);
