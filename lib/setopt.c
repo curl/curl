@@ -2979,6 +2979,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return result;
     break;
 #endif
+  case CURLOPT_STREAM_WINDOW_SIZE:
+    {
+      long stream_window_size = va_arg(param, long);
+      if((stream_window_size > 0) &&
+         ((unsigned long)stream_window_size <= 0x7FFFFFFF))
+        data->set.stream_window_size = curlx_sltoui(stream_window_size);
+      else
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

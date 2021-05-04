@@ -99,6 +99,8 @@ char *Curl_checkheaders(const struct Curl_easy *data,
 {
   struct curl_slist *head;
   size_t thislen = strlen(thisheader);
+  DEBUGASSERT(thislen);
+  DEBUGASSERT(thisheader[thislen-1] != ':');
 
   for(head = data->set.headers; head; head = head->next) {
     if(strncasecompare(head->data, thisheader, thislen) &&

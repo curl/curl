@@ -379,7 +379,9 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   /* -1 means it not set by user, use the default value */
   multi->maxconnects = -1;
   multi->max_concurrent_streams = 100;
-  multi->stream_window_size = 32 * 1024 * 1024; /* 32 MB */
+#ifdef USE_NGHTTP2
+  multi->stream_window_size = DEFAULT_STREAM_WINDOW_SIZE;
+#endif
   multi->ipv6_works = Curl_ipv6works(NULL);
 
 #ifdef USE_WINSOCK
