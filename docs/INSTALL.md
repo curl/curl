@@ -337,7 +337,7 @@ Note, however, that you must target at least Android M (API level 23) or `config
 won't be able to detect OpenSSL since `stderr` (and the like) weren't defined
 before Android M.
 
-# IBM i specific notes
+# IBM i
 
 For IBM i (formerly OS/400), you can use curl in two different ways:
 
@@ -368,7 +368,7 @@ Don't panic! curl and your program aren't broken. You can fix this by:
 
 * Set the environment variable `QIBM_MULTI_THREADED` to `Y` before starting
   your program. This can be done at whatever scope you feel is appropriate.
-* Alternatively, tart the job with the `ALWMLTTHD` parameter set to `*YES`.
+* Alternatively, start the job with the `ALWMLTTHD` parameter set to `*YES`.
 
 # Cross compile
 
