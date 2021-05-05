@@ -329,7 +329,7 @@ get_alg_id_by_name(char *name)
 
 static CURLcode
 set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
-                int *algIds)
+                ALG_ID *algIds)
 {
   char *startCur = ciphers;
   int algCount = 0;
@@ -2750,7 +2750,9 @@ const struct Curl_ssl Curl_ssl_schannel = {
   Curl_none_set_engine_default,      /* set_engine_default */
   Curl_none_engines_list,            /* engines_list */
   Curl_none_false_start,             /* false_start */
-  schannel_sha256sum                 /* sha256sum */
+  schannel_sha256sum,                /* sha256sum */
+  NULL,                              /* associate_connection */
+  NULL                               /* disassociate_connection */
 };
 
 #endif /* USE_SCHANNEL */

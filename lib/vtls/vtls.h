@@ -84,6 +84,11 @@ struct Curl_ssl {
   bool (*false_start)(void);
   CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
+
+  void (*associate_connection)(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               int sockindex);
+  void (*disassociate_connection)(struct Curl_easy *data, int sockindex);
 };
 
 #ifdef USE_SSL
@@ -283,6 +288,11 @@ bool Curl_ssl_cert_status_request(void);
 
 bool Curl_ssl_false_start(void);
 
+void Curl_ssl_associate_conn(struct Curl_easy *data,
+                             struct connectdata *conn);
+void Curl_ssl_detach_conn(struct Curl_easy *data,
+                          struct connectdata *conn);
+
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 #else /* if not USE_SSL */
@@ -309,6 +319,8 @@ bool Curl_ssl_false_start(void);
 #define Curl_ssl_cert_status_request() FALSE
 #define Curl_ssl_false_start() FALSE
 #define Curl_ssl_tls13_ciphersuites() FALSE
+#define Curl_ssl_associate_conn(a,b) Curl_nop_stmt
+#define Curl_ssl_detach_conn(a,b) Curl_nop_stmt
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */
