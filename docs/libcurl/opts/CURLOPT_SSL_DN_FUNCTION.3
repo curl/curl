@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -39,11 +39,20 @@ This function gets called by libcurl when the TLS backend receives a client cert
 
 The function should return a CURL_SSL_DN_FUNCTION_OK on success, CURL_SSL_DN_FUNCTION_FAIL on failure.
 
+Sample usage:
+1. Set curl option: curl_easy_setopt(m_curl, CURLOPT_SSL_DN_FUNCTION, DistNamesCallback)
+2. Implement callback:
+int DistNamesCallback(void* distNames, void* state){
+if(s_backend == CURLSSLBACKEND_SCHANNEL){
+const auto issuerList = reinterpret_cast<const SecPkgContext_IssuerListInfoEx*>(distNames);
+....
+}
+}
+
 .SH PROTOCOLS
-As of now SChannel only
+As of now SSL/TLS, SChannel provider only
 .SH AVAILABILITY
 Added in 7.77.0.
-
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

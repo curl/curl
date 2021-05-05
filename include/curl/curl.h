@@ -744,13 +744,13 @@ typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
                                                           mbedtls_ssl_config */
                                           void *userptr);
 
-/* This is a return codes for the ssl distinguished name callback that, when returned
-   imply that distinguished name fetching succeeded or failed */
+/* These are return codes for the ssl distinguished name callback that, when
+   returned imply that distinguished name fetching succeeded or failed */
 #define CURL_SSL_DN_FUNCTION_OK   0
 #define CURL_SSL_DN_FUNCTION_FAIL 1
 
 /* Prototype of distinguished name fetch callbacks */
-typedef CURLcode (*curl_ssl_dn_callback)(void *dist_names,
+typedef int (*curl_ssl_dn_callback)(void *dist_names,
                                                  void *userptr);
 
 typedef enum {
@@ -2109,16 +2109,14 @@ typedef enum {
   /* The CA certificates as "blob" used to validate the proxy certificate
      this option is used only if PROXY_SSL_VERIFYPEER is true */
   CURLOPT(CURLOPT_PROXY_CAINFO_BLOB, CURLOPTTYPE_BLOB, 310),
-  
-  /* Set the distributed names callback function, currently only for.
-     The function must be matching the curl_ssl_dn_callback
-     proto. */
+
+  /* Set the distributed names callback function. The function must be 
+     matching the curl_ssl_dn_callback proto. */
   CURLOPT(CURLOPT_SSL_DN_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 311),
 
   /* Set the userdata for the distributed names callback function's third
      argument */
   CURLOPT(CURLOPT_SSL_DN_DATA, CURLOPTTYPE_OBJECTPOINT, 312),
-
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

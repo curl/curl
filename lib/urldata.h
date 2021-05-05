@@ -275,7 +275,7 @@ struct ssl_config_data {
   char *key_type; /* format for private key (default: PEM) */
   char *key_passwd; /* plain text private key password */
 #if defined(USE_SCHANNEL)
-  curl_ssl_dn_callback fdistnames; /* function to return
+  curl_ssl_dn_callback fdistnames; /* callback to return
                                               distinguished names */
 #endif
   void *fdistnamesp;     /* parameter for call back */

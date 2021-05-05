@@ -529,7 +529,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
         return CURLE_OUT_OF_MEMORY;
       result = get_cert_location(cert_path, &cert_store_name,
         &cert_store_path, &cert_thumbprint_str);
-      if(result && (data->set.ssl.primary.clientcert[0]!='\0'))
+      if(result && (data->set.ssl.primary.clientcert[0] != '\0'))
         fInCert = fopen(data->set.ssl.primary.clientcert, "rb");
       if(result && !fInCert) {
         failf(data, "schannel: Failed to get certificate location"
@@ -605,7 +605,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
       }
       if(!blob)
         free(certdata);
-      if(cert_store == NULL) {
+      if(!cert_store) {
         DWORD errorcode = GetLastError();
         if(errorcode == ERROR_INVALID_PASSWORD)
           failf(data, "schannel: Failed to import cert file %s, "
@@ -620,7 +620,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
       client_certs[0] = CertFindCertificateInStore(
         cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
         CERT_FIND_ANY, NULL, NULL);
-      if(client_certs[0] == NULL) {
+      if(!client_certs[0]) {
         failf(data, "schannel: Failed to get certificate from file %s"
               ", last error is 0x%x",
               cert_showfilename_error, GetLastError());
@@ -750,7 +750,7 @@ schannel_client_certificate(struct Curl_easy *data, struct connectdata *conn,
     if(data->set.ssl.fdistnames) {
       result = (*data->set.ssl.fdistnames)(&dist_names,
                                            data->set.ssl.fdistnamesp);
-      if(result) {
+      if(result != CURL_SSL_DN_FUNCTION_OK) {
         failf(data, "dist names callback failed. status = %d, %ul ", status,
               flags);
          s_pSecFn->FreeContextBuffer(dist_names.aIssuers);
@@ -759,18 +759,16 @@ schannel_client_certificate(struct Curl_easy *data, struct connectdata *conn,
       data->set.ssl.primary.clientcert = data->set.str[STRING_CERT];
     }
 
+    result = CURLE_OK;
     /* The application might have set the certificate. */
     if(data->set.ssl.primary.clientcert) {
       schannel_session_free(BACKEND->cred);
       result = schannel_acquire_credential_handle(data, conn, sockindex);
-      if(result != CURLE_OK) {
-        return result;
-      }
     }
   }
 
   s_pSecFn->FreeContextBuffer(dist_names.aIssuers);
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode
@@ -786,8 +784,6 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 #ifdef HAS_ALPN
   unsigned char alpn_buffer[128];
 #endif
-  SCHANNEL_CRED schannel_cred;
-  PCCERT_CONTEXT client_certs[1] = { NULL };
   SECURITY_STATUS sspi_status = SEC_E_OK;
   struct Curl_schannel_cred *old_cred = NULL;
   struct in_addr addr;

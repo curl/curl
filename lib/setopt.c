@@ -1989,7 +1989,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_SSL_DN_FUNCTION:
     /*
-     * Set a SSL_CTX callback
+     * Set a SSL_DN callback
      */
 #if defined(USE_SSL) && defined(USE_SCHANNEL)
     if(Curl_ssl->supports & SSLSUPP_DISTNAMES)
@@ -2001,9 +2001,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_SSL_DN_DATA:
     /*
-     * Set a SSL_CTX callback parameter pointer
+     * Set a SSL_DN callback parameter pointer
      */
-#ifdef USE_SSL
+#if defined(USE_SSL) && defined(USE_SCHANNEL)
     if(Curl_ssl->supports & SSLSUPP_DISTNAMES)
       data->set.ssl.fdistnamesp = va_arg(param, void *);
     else
