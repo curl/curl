@@ -586,6 +586,25 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+void Curl_ssl_associate_conn(struct Curl_easy *data,
+                             struct connectdata *conn)
+{
+  if(Curl_ssl->associate_connection) {
+    Curl_ssl->associate_connection(data, conn, FIRSTSOCKET);
+    if(conn->sock[SECONDARYSOCKET] && conn->bits.sock_accepted)
+      Curl_ssl->associate_connection(data, conn, SECONDARYSOCKET);
+  }
+}
+
+void Curl_ssl_detach_conn(struct Curl_easy *data,
+                          struct connectdata *conn)
+{
+  if(Curl_ssl->disassociate_connection) {
+    Curl_ssl->disassociate_connection(data, FIRSTSOCKET);
+    if(conn->sock[SECONDARYSOCKET] && conn->bits.sock_accepted)
+      Curl_ssl->disassociate_connection(data, SECONDARYSOCKET);
+  }
+}
 
 void Curl_ssl_close_all(struct Curl_easy *data)
 {
@@ -1214,7 +1233,9 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_none_set_engine_default,      /* set_engine_default */
   Curl_none_engines_list,            /* engines_list */
   Curl_none_false_start,             /* false_start */
-  NULL                               /* sha256sum */
+  NULL,                              /* sha256sum */
+  NULL,                              /* associate_connection */
+  NULL                               /* disassociate_connection */
 };
 
 const struct Curl_ssl *Curl_ssl =
