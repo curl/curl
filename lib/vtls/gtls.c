@@ -308,7 +308,9 @@ static gnutls_x509_crt_fmt_t do_file_type(const char *type)
 #define GNUTLS_SRP "+SRP"
 
 static CURLcode
-set_ssl_version_min_max(const char **prioritylist, struct Curl_easy *data)
+set_ssl_version_min_max(struct Curl_easy *data,
+                        const char **prioritylist,
+                        const char *tls13support)
 {
   struct connectdata *conn = data->conn;
   long ssl_version = SSL_CONN_CONFIG(version);
@@ -319,6 +321,15 @@ set_ssl_version_min_max(const char **prioritylist, struct Curl_easy *data)
     ssl_version = CURL_SSLVERSION_TLSv1_0;
   if(ssl_version_max == CURL_SSLVERSION_MAX_NONE)
     ssl_version_max = CURL_SSLVERSION_MAX_DEFAULT;
+  if(!tls13support) {
+    /* If the running GnuTLS doesn't support TLS 1.3, we must not specify a
+       prioritylist involving that since it will make GnuTLS return an en
+       error back at us */
+    if((ssl_version_max == CURL_SSLVERSION_MAX_TLSv1_3) ||
+       (ssl_version_max == CURL_SSLVERSION_MAX_DEFAULT)) {
+      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+    }
+  }
 
   switch(ssl_version | ssl_version_max) {
   case CURL_SSLVERSION_TLSv1_0 | CURL_SSLVERSION_MAX_TLSv1_0:
@@ -398,6 +409,7 @@ gtls_connect_step1(struct Curl_easy *data,
   const char *err = NULL;
   const char * const hostname = SSL_HOST_NAME();
   long * const certverifyresult = &SSL_SET_OPTION_LVALUE(certverifyresult);
+  const char *tls13support;
 
   if(connssl->state == ssl_connection_complete)
     /* to make us tolerant against being called more than once for the
@@ -545,27 +557,34 @@ gtls_connect_step1(struct Curl_easy *data,
   if(rc != GNUTLS_E_SUCCESS)
     return CURLE_SSL_CONNECT_ERROR;
 
+  /* "In GnuTLS 3.6.5, TLS 1.3 is enabled by default" */
+  tls13support = gnutls_check_version("3.6.5");
+
   /* Ensure +SRP comes at the *end* of all relevant strings so that it can be
    * removed if a run-time error indicates that SRP is not supported by this
    * GnuTLS version */
   switch(SSL_CONN_CONFIG(version)) {
+    case CURL_SSLVERSION_TLSv1_3:
+      if(!tls13support) {
+        failf(data, "This GnuTLS installation does not support TLS 1.3");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+      /* FALLTHROUGH */
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
-    case CURL_SSLVERSION_TLSv1_2:
-    case CURL_SSLVERSION_TLSv1_3: {
-      CURLcode result = set_ssl_version_min_max(&prioritylist, data);
+    case CURL_SSLVERSION_TLSv1_2: {
+      CURLcode result = set_ssl_version_min_max(data, &prioritylist,
+                                                tls13support);
       if(result)
         return result;
       break;
     }
     case CURL_SSLVERSION_SSLv2:
     case CURL_SSLVERSION_SSLv3:
-      failf(data, "GnuTLS does not support SSLv2 or SSLv3");
-      return CURLE_SSL_CONNECT_ERROR;
     default:
-      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+      failf(data, "GnuTLS does not support SSLv2 or SSLv3");
       return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -580,7 +599,6 @@ gtls_connect_step1(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
     strcpy(prioritysrp, prioritylist);
     strcpy(prioritysrp + len, ":" GNUTLS_SRP);
-
     rc = gnutls_priority_set_direct(session, prioritysrp, &err);
     free(prioritysrp);
 
