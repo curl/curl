@@ -33,7 +33,7 @@ imap
 IMAP PREAUTH response
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/846/;MAILINDEX=1' -u notused:still-provided
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u notused:still-provided
 </command>
 </client>
 
@@ -42,7 +42,7 @@ IMAP PREAUTH response
 <verify>
 <protocol>
 A001 CAPABILITY
-A002 SELECT 846
+A002 SELECT %TESTNUMBER
 A003 FETCH 1 BODY[]
 A004 LOGOUT
 </protocol>

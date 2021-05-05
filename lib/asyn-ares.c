@@ -309,7 +309,7 @@ static int waitperform(struct Curl_easy *data, timediff_t timeout_ms)
       pfd[i].fd = socks[i];
       pfd[i].events |= POLLWRNORM|POLLOUT;
     }
-    if(pfd[i].events != 0)
+    if(pfd[i].events)
       num++;
     else
       break;

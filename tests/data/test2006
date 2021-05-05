@@ -18,7 +18,7 @@ Server: test-server/fake
 Content-Length: 42
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name2006; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 Funny-head: yesyes
 
 Some data delivered from an HTTP resource
@@ -46,27 +46,27 @@ Metalink local XML file, HTTP resource, using -O -D file
 CURL_TESTDIR=%PWD/log
 </setenv>
 <command option="no-output,no-include">
---metalink file://%PWD/log/test2006.metalink -O -D log/heads2006
+--metalink file://%PWD/log/test%TESTNUMBER.metalink -O -D log/heads%TESTNUMBER
 </command>
 # local metalink file written before test command runs
-<file name="log/test2006.metalink">
+<file name="log/test%TESTNUMBER.metalink">
 <?xml version="1.0" encoding="utf-8"?>
 <metalink version="3.0" xmlns="http://www.metalinker.org/">
  <files>
-  <file name="log/download2006">
+  <file name="log/download%TESTNUMBER">
    <verification>
     <hash type="md5">we-only-check-the-strongest-hash-provided</hash>
     <hash type="sha256">319cb6be756734b7ff689628ca3265580cdae6a0e38f42d4ac612ff4fba143b0</hash>
    </verification>
    <resources maxconnections="1">
-    <url type="http" preference="90">http://%HOSTIP:%HTTPPORT/2006</url>
+    <url type="http" preference="90">http://%HOSTIP:%HTTPPORT/%TESTNUMBER</url>
    </resources>
   </file>
  </files>
 </metalink>
 </file>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/2006 log/name2006
+perl %SRCDIR/libtest/notexists.pl log/%TESTNUMBER log/name%TESTNUMBER
 </postcheck>
 </client>
 
@@ -74,13 +74,13 @@ perl %SRCDIR/libtest/notexists.pl log/2006 log/name2006
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /2006 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file1 name="log/download2006">
+<file1 name="log/download%TESTNUMBER">
 Some data delivered from an HTTP resource
 </file1>
 
@@ -90,7 +90,7 @@ Some data delivered from an HTTP resource
 s/Last-Modified:.*//
 s/Content-Length: 49[67]/Content-Length: yeps/
 </stripfile2>
-<file2 name="log/heads2006">
+<file2 name="log/heads%TESTNUMBER">
 Content-Length: yeps
 Accept-ranges: bytes
 
@@ -101,19 +101,19 @@ Server: test-server/fake
 Content-Length: 42
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name2006; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 Funny-head: yesyes
 
 </file2>
-<file3 name="log/stdout2006">
+<file3 name="log/stdout%TESTNUMBER">
 </file3>
-<file4 name="log/stderr2006" mode="text">
-Metalink: parsing (file://%PWD/log/test2006.metalink) metalink/XML...
-Metalink: parsing (file://%PWD/log/test2006.metalink) OK
-Metalink: fetching (log/download2006) from (http://%HOSTIP:%HTTPPORT/2006)...
-Metalink: fetching (log/download2006) from (http://%HOSTIP:%HTTPPORT/2006) OK
-Metalink: validating (log/download2006)...
-Metalink: validating (log/download2006) [sha-256] OK
+<file4 name="log/stderr%TESTNUMBER" mode="text">
+Metalink: parsing (file://%PWD/log/test%TESTNUMBER.metalink) metalink/XML...
+Metalink: parsing (file://%PWD/log/test%TESTNUMBER.metalink) OK
+Metalink: fetching (log/download%TESTNUMBER) from (http://%HOSTIP:%HTTPPORT/%TESTNUMBER)...
+Metalink: fetching (log/download%TESTNUMBER) from (http://%HOSTIP:%HTTPPORT/%TESTNUMBER) OK
+Metalink: validating (log/download%TESTNUMBER)...
+Metalink: validating (log/download%TESTNUMBER) [sha-256] OK
 </file4>
 <stripfile4>
 $_ = '' if (($_ !~ /^Metalink: /) && ($_ !~ /error/i) && ($_ !~ /warn/i))

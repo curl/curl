@@ -39,7 +39,7 @@ To: another
 body
 </stdin>
  <command>
-smtp://smtp.1320:%SMTPPORT/1320 --mail-rcpt recipient@example.com --mail-from sender@example.com -T - -p -x %HOSTIP:%PROXYPORT
+smtp://smtp.%TESTNUMBER:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T - -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>
 
@@ -47,7 +47,7 @@ smtp://smtp.1320:%SMTPPORT/1320 --mail-rcpt recipient@example.com --mail-from se
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 1320
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
@@ -61,8 +61,8 @@ body
 .
 </upload>
 <proxy>
-CONNECT smtp.1320:%SMTPPORT HTTP/1.1
-Host: smtp.1320:%SMTPPORT
+CONNECT smtp.%TESTNUMBER:%SMTPPORT HTTP/1.1
+Host: smtp.%TESTNUMBER:%SMTPPORT
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 

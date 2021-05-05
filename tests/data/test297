@@ -25,7 +25,7 @@ ftp
 FTP CWD with --ftp-method singlecwd
  </name>
  <command>
---ftp-method singlecwd ftp://%HOSTIP:%FTPPORT/first/second/third/297
+--ftp-method singlecwd ftp://%HOSTIP:%FTPPORT/first/second/third/%TESTNUMBER
 </command>
 </client>
 
@@ -38,8 +38,8 @@ PWD
 CWD first/second/third
 EPSV
 TYPE I
-SIZE 297
-RETR 297
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

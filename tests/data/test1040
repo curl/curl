@@ -47,9 +47,9 @@ http
 HTTP GET with resume from end of entirely-downloaded file
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1040 -C -
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C -
 </command>
-<file name="log/curl1040.out">
+<file name="log/curl%TESTNUMBER.out">
 012345678
 012345678
 012345678
@@ -66,7 +66,7 @@ http://%HOSTIP:%HTTPPORT/1040 -C -
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1040 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=100-
 User-Agent: curl/%VERSION

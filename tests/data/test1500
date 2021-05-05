@@ -31,14 +31,14 @@ http
 </features>
 # tool is what to use instead of 'curl'
 <tool>
-lib1500
+lib%TESTNUMBER
 </tool>
 
  <name>
 curl_multi_wait
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1500
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 </testcase>

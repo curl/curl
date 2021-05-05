@@ -28,7 +28,7 @@ ftp
 FTP OS/400 server name format check
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1102
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -43,8 +43,8 @@ SITE NAMEFMT 1
 PWD
 EPSV
 TYPE I
-SIZE 1102
-RETR 1102
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

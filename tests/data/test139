@@ -25,7 +25,7 @@ ftp
 FTP download a newer file with -z
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/blalbla/139 -z "1 jan 1989"
+ftp://%HOSTIP:%FTPPORT/blalbla/%TESTNUMBER -z "1 jan 1989"
 </command>
 </client>
 
@@ -36,11 +36,11 @@ USER anonymous
 PASS ftp@example.com
 PWD
 CWD blalbla
-MDTM 139
+MDTM %TESTNUMBER
 EPSV
 TYPE I
-SIZE 139
-RETR 139
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

@@ -71,9 +71,9 @@ proxy
 HTTP PUT with Digest auth, resumed upload and modified method, twice
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1002.upload1 -T log/1002 http://%HOSTIP:%HTTPPORT/1002.upload2 -T log/1002 -u auser:apasswd --digest -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 -T log/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload2 -T log/%TESTNUMBER -u auser:apasswd --digest -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
 </command>
-<file name="log/1002">
+<file name="log/%TESTNUMBER">
 test
 </file>
 </client>
@@ -81,7 +81,7 @@ test
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET http://%HOSTIP:%HTTPPORT/1002.upload1 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Content-Range: bytes 2-4/5
 User-Agent: curl/%VERSION
@@ -89,9 +89,9 @@ Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
 
-GET http://%HOSTIP:%HTTPPORT/1002.upload1 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/1002.upload1", response="198aa9b6acb4b0c71d02a197a5e41f54"
+Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER.upload1", response="198aa9b6acb4b0c71d02a197a5e41f54"
 Content-Range: bytes 2-4/5
 User-Agent: curl/%VERSION
 Accept: */*
@@ -100,7 +100,7 @@ Content-Length: 3
 Expect: 100-continue
 
 st
-GET http://%HOSTIP:%HTTPPORT/1002.upload2 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload2 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Content-Range: bytes 2-4/5
 User-Agent: curl/%VERSION
@@ -108,9 +108,9 @@ Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
 
-GET http://%HOSTIP:%HTTPPORT/1002.upload2 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload2 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/1002.upload2", response="d711f0d2042786d930de635ba0d1a1d0"
+Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER.upload2", response="d711f0d2042786d930de635ba0d1a1d0"
 Content-Range: bytes 2-4/5
 User-Agent: curl/%VERSION
 Accept: */*

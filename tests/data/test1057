@@ -30,7 +30,7 @@ ftp
 FTP retrieve a byte-range relative to end of file
  </name>
  <command>
--r -12 ftp://%HOSTIP:%FTPPORT/1057
+-r -12 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -42,9 +42,9 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 1057
+SIZE %TESTNUMBER
 REST 52
-RETR 1057
+RETR %TESTNUMBER
 ABOR
 QUIT
 </protocol>

@@ -24,7 +24,7 @@ http
 reject non-numerical port number in URL
  </name>
  <command>
-http://%HOSTIP:alpha/beta/1281
+http://%HOSTIP:alpha/beta/%TESTNUMBER
 </command>
 </client>
 

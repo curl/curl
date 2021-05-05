@@ -109,15 +109,7 @@ int test(char *URL)
 
   abort_on_test_timeout();
 
-#if !defined(WIN32) && !defined(_WIN32) && !defined(__WIN32__) \
-    && !defined(__CYGWIN__)
-  /* Even lots of previous wakeups should not wake up this.
-
-     On Windows (particularly when using MinGW), the socketpair
-     used for curl_multi_wakeup() is really asynchronous,
-     meaning when it's called a lot, it can take some time
-     before all of the data can be read. Sometimes it can wake
-     up more than one curl_multi_poll() call. */
+  /* Even lots of previous wakeups should not wake up this. */
 
   time_before_wait = tutil_tvnow();
   multi_poll(multi, NULL, 0, 1000, &numfds);
@@ -131,7 +123,6 @@ int test(char *URL)
   }
 
   abort_on_test_timeout();
-#endif
 
 test_cleanup:
 

@@ -20,7 +20,7 @@ smtp
  <name>
 SMTP with --crlf
  </name>
-<file name="log/upload941">
+<file name="log/upload%TESTNUMBER">
 From: different
 To: another
 
@@ -34,7 +34,7 @@ the
 --crlf option
 </file>
  <command>
-smtp://%HOSTIP:%SMTPPORT/941 --mail-rcpt recipient@example.com --mail-from sender@example.com -T log/upload941 --crlf
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T log/upload%TESTNUMBER --crlf
 </command>
 </client>
 
@@ -42,7 +42,7 @@ smtp://%HOSTIP:%SMTPPORT/941 --mail-rcpt recipient@example.com --mail-from sende
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 941
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA

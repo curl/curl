@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -34,7 +34,16 @@ handle. For each new session, libcurl will open a new connection up to the
 limit set by \fICURLMOPT_MAX_TOTAL_CONNECTIONS(3)\fP. When the limit is
 reached, the sessions will be pending until there are available
 connections. If \fICURLMOPT_PIPELINING(3)\fP is enabled, libcurl will try to
-pipeline or use multiplexing if the host is capable of it.
+use multiplexing if the host is capable of it.
+
+When more transfers are added to the multi handle than what can be performed
+due to the set limit, they will be queued up waiting for their chance. When
+that happens, the \fICURLOPT_TIMEOUT_MS(3)\fP timeout will be counted
+inclusive of the waiting time, meaning that if you set a too narrow timeout in
+such a case the transfer might never even start before it times out.
+
+Even in the queued up situation, the \fICURLOPT_CONNECTTIMEOUT_MS(3)\fP
+timeout is however treated as a per-connect timeout.
 .SH DEFAULT
 The default value is 0, which means that there is no limit. It is then simply
 controlled by the number of easy handles added.

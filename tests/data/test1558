@@ -17,16 +17,16 @@ none
 file
 </features>
 <tool>
-lib1558
+lib%TESTNUMBER
 </tool>
 
 <name>
 CURLINFO_PROTOCOL for file:// transfer
 </name>
 <command>
-file://%FILE_PWD/log/data1558
+file://%FILE_PWD/log/data%TESTNUMBER
 </command>
-<file name="log/data1558">
+<file name="log/data%TESTNUMBER">
 hello
 </file>
 </client>

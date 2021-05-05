@@ -40,7 +40,7 @@ http-ipv6
 HTTP-IPv6 GET with PROXY protocol
  </name>
  <command>
--g "http://%HOST6IP:%HTTP6PORT/1456" --haproxy-protocol
+-g "http://%HOST6IP:%HTTP6PORT/%TESTNUMBER" --haproxy-protocol
 </command>
 <features>
 proxy
@@ -57,7 +57,7 @@ s/PROXY TCP6 ::1 ::1 (\d+) (\d+)/PROXY TCP6 ::1 ::1 $2/
 </strippart>
 <protocol>
 PROXY TCP6 ::1 ::1 %HTTP6PORT
-GET /1456 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
 User-Agent: curl/%VERSION
 Accept: */*

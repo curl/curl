@@ -48,7 +48,7 @@ http
 HTTP GET gzip transfer-encoded content
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1122 --tr-encoding
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --tr-encoding
 </command>
 </client>
 
@@ -56,7 +56,7 @@ http://%HOSTIP:%HTTPPORT/1122 --tr-encoding
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1122 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

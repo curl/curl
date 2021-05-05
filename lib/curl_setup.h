@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,6 +54,16 @@
 #  ifndef NOGDI
 #    define NOGDI
 #  endif
+/* Detect Windows App environment which has a restricted access
+ * to the Win32 APIs. */
+# if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
+  defined(WINAPI_FAMILY)
+#  include <winapifamily.h>
+#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
+     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#    define CURL_WINDOWS_APP
+#  endif
+# endif
 #endif
 
 /*
@@ -150,8 +160,6 @@
 /* ================================================================ */
 
 #include <curl/curl.h>
-
-#define CURL_SIZEOF_CURL_OFF_T SIZEOF_CURL_OFF_T
 
 /*
  * Disable other protocols when http is the only one desired.
@@ -412,7 +420,7 @@
 #if (SIZEOF_CURL_OFF_T == 4)
 #  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFF)
 #else
-   /* assume CURL_SIZEOF_CURL_OFF_T == 8 */
+   /* assume SIZEOF_CURL_OFF_T == 8 */
 #  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
 #endif
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - CURL_OFF_T_C(1))
@@ -633,7 +641,7 @@ int netware_init(void);
 #endif
 
 /* Single point where USE_NTLM definition might be defined */
-#if !defined(CURL_DISABLE_NTLM) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+#ifndef CURL_DISABLE_CRYPTO_AUTH
 #if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                     \
   defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) ||  \
   defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
@@ -707,13 +715,19 @@ int netware_init(void);
 #endif
 
 /*
- * Portable symbolic names for Winsock shutdown() mode flags.
+ * shutdown() flags for systems that don't define them
  */
 
-#ifdef USE_WINSOCK
-#  define SHUT_RD   0x00
-#  define SHUT_WR   0x01
-#  define SHUT_RDWR 0x02
+#ifndef SHUT_RD
+#define SHUT_RD 0x00
+#endif
+
+#ifndef SHUT_WR
+#define SHUT_WR 0x01
+#endif
+
+#ifndef SHUT_RDWR
+#define SHUT_RDWR 0x02
 #endif
 
 /* Define S_ISREG if not defined by system headers, f.e. MSVC */
@@ -764,17 +778,6 @@ endings either CRLF or LF so 't' is appropriate.
 #  endif
 #endif /* DONT_USE_RECV_BEFORE_SEND_WORKAROUND */
 
-/* Detect Windows App environment which has a restricted access
- * to the Win32 APIs. */
-# if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
-  defined(WINAPI_FAMILY)
-#  include <winapifamily.h>
-#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
-     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-#    define CURL_WINDOWS_APP
-#  endif
-# endif
-
 /* for systems that don't detect this in configure, use a sensible default */
 #ifndef CURL_SA_FAMILY_T
 #define CURL_SA_FAMILY_T unsigned short
@@ -796,6 +799,10 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define UNITTEST
 #else
 #define UNITTEST static
+#endif
+
+#if defined(USE_NGHTTP2) || defined(USE_HYPER)
+#define USE_HTTP2
 #endif
 
 #if defined(USE_NGTCP2) || defined(USE_QUICHE)

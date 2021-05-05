@@ -396,6 +396,7 @@ Features testable here are:
 - `proxy`
 - `PSL`
 - `Schannel`
+- `sectransp`
 - `shuffle-dns`
 - `socks`
 - `SPNEGO`

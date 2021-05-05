@@ -117,6 +117,10 @@
 #define SP_PROT_TLS1_2_CLIENT           0x00000800
 #endif
 
+#ifndef SCH_USE_STRONG_CRYPTO
+#define SCH_USE_STRONG_CRYPTO           0x00400000
+#endif
+
 #ifndef SECBUFFER_ALERT
 #define SECBUFFER_ALERT                 17
 #endif
@@ -335,6 +339,11 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
       alg = get_alg_id_by_name(startCur);
     if(alg)
       algIds[algCount++] = alg;
+    else if(!strncmp(startCur, "USE_STRONG_CRYPTO",
+                     sizeof("USE_STRONG_CRYPTO") - 1) ||
+            !strncmp(startCur, "SCH_USE_STRONG_CRYPTO",
+                     sizeof("SCH_USE_STRONG_CRYPTO") - 1))
+      schannel_cred->dwFlags |= SCH_USE_STRONG_CRYPTO;
     else
       return CURLE_SSL_CIPHER;
     startCur = strchr(startCur, ':');
@@ -358,7 +367,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   size_t store_name_len;
 
   sep = _tcschr(path, TEXT('\\'));
-  if(sep == NULL)
+  if(!sep)
     return CURLE_SSL_CERTPROBLEM;
 
   store_name_len = sep - path;
@@ -388,7 +397,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   store_path_start = sep + 1;
 
   sep = _tcschr(store_path_start, TEXT('\\'));
-  if(sep == NULL)
+  if(!sep)
     return CURLE_SSL_CERTPROBLEM;
 
   *thumbprint = sep + 1;
@@ -398,7 +407,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   *sep = TEXT('\0');
   *store_path = _tcsdup(store_path_start);
   *sep = TEXT('\\');
-  if(*store_path == NULL)
+  if(!*store_path)
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;
@@ -787,12 +796,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 #endif
   TCHAR *host_name;
   CURLcode result;
-#ifndef CURL_DISABLE_PROXY
-  char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
-    conn->host.name;
-#else
-  char * const hostname = conn->host.name;
-#endif
+  char * const hostname = SSL_HOST_NAME();
 
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
@@ -828,7 +832,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 #endif
 #else
 #ifdef HAS_MANUAL_VERIFY_API
-  if(SSL_CONN_CONFIG(CAfile)) {
+  if(SSL_CONN_CONFIG(CAfile) || SSL_CONN_CONFIG(ca_info_blob)) {
     if(curlx_verify_windows_version(6, 1, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
       BACKEND->use_manual_cred_validation = true;
@@ -842,7 +846,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   else
     BACKEND->use_manual_cred_validation = false;
 #else
-  if(SSL_CONN_CONFIG(CAfile)) {
+  if(SSL_CONN_CONFIG(CAfile) || SSL_CONN_CONFIG(ca_info_blob)) {
     failf(data, "schannel: CA cert support not built in");
     return CURLE_NOT_BUILT_IN;
   }
@@ -855,6 +859,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   if(SSL_SET_OPTION(primary.sessionid)) {
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(data, conn,
+                              SSL_IS_PROXY() ? TRUE : FALSE,
                               (void **)&old_cred, NULL, sockindex)) {
       BACKEND->cred = old_cred;
       DEBUGF(infof(data, "schannel: re-using existing credential handle\n"));
@@ -909,11 +914,11 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
     list_start_index = cur;
 
-#ifdef USE_NGHTTP2
-    if(data->state.httpversion >= CURL_HTTP_VERSION_2) {
-      memcpy(&alpn_buffer[cur], NGHTTP2_PROTO_ALPN, NGHTTP2_PROTO_ALPN_LEN);
-      cur += NGHTTP2_PROTO_ALPN_LEN;
-      infof(data, "schannel: ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
+#ifdef USE_HTTP2
+    if(data->state.httpwant >= CURL_HTTP_VERSION_2) {
+      memcpy(&alpn_buffer[cur], ALPN_H2, ALPN_H2_LENGTH);
+      cur += ALPN_H2_LENGTH;
+      infof(data, "schannel: ALPN, offering %s\n", ALPN_H2);
     }
 #endif
 
@@ -940,11 +945,6 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   /* setup output buffer */
   InitSecBuffer(&outbuf, SECBUFFER_EMPTY, NULL, 0);
   InitSecBufferDesc(&outbuf_desc, &outbuf, 1);
-
-  /* setup request flags */
-  BACKEND->req_flags = ISC_REQ_SEQUENCE_DETECT | ISC_REQ_REPLAY_DETECT |
-    ISC_REQ_CONFIDENTIALITY | ISC_REQ_ALLOCATE_MEMORY |
-    ISC_REQ_STREAM;
 
   /* allocate memory for the security context handle */
   BACKEND->ctxt = (struct Curl_schannel_ctxt *)
@@ -1045,12 +1045,7 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
   bool doread;
-#ifndef CURL_DISABLE_PROXY
-  char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
-    conn->host.name;
-#else
-  char * const hostname = conn->host.name;
-#endif
+  char * const hostname = SSL_HOST_NAME();
   const char *pubkey_ptr;
 
   doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
@@ -1063,23 +1058,23 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
 
   /* buffer to store previously received and decrypted data */
-  if(BACKEND->decdata_buffer == NULL) {
+  if(!BACKEND->decdata_buffer) {
     BACKEND->decdata_offset = 0;
     BACKEND->decdata_length = CURL_SCHANNEL_BUFFER_INIT_SIZE;
     BACKEND->decdata_buffer = malloc(BACKEND->decdata_length);
-    if(BACKEND->decdata_buffer == NULL) {
+    if(!BACKEND->decdata_buffer) {
       failf(data, "schannel: unable to allocate memory");
       return CURLE_OUT_OF_MEMORY;
     }
   }
 
   /* buffer to store previously received and encrypted data */
-  if(BACKEND->encdata_buffer == NULL) {
+  if(!BACKEND->encdata_buffer) {
     BACKEND->encdata_is_incomplete = false;
     BACKEND->encdata_offset = 0;
     BACKEND->encdata_length = CURL_SCHANNEL_BUFFER_INIT_SIZE;
     BACKEND->encdata_buffer = malloc(BACKEND->encdata_length);
-    if(BACKEND->encdata_buffer == NULL) {
+    if(!BACKEND->encdata_buffer) {
       failf(data, "schannel: unable to allocate memory");
       return CURLE_OUT_OF_MEMORY;
     }
@@ -1094,7 +1089,7 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     reallocated_buffer = realloc(BACKEND->encdata_buffer,
                                  reallocated_length);
 
-    if(reallocated_buffer == NULL) {
+    if(!reallocated_buffer) {
       failf(data, "schannel: unable to re-allocate memory");
       return CURLE_OUT_OF_MEMORY;
     }
@@ -1149,7 +1144,7 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     InitSecBuffer(&outbuf[2], SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&outbuf_desc, outbuf, 3);
 
-    if(inbuf[0].pvBuffer == NULL) {
+    if(!inbuf[0].pvBuffer) {
       failf(data, "schannel: unable to allocate memory");
       return CURLE_OUT_OF_MEMORY;
     }
@@ -1299,9 +1294,7 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     DEBUGF(infof(data, "schannel: SSL/TLS handshake complete\n"));
   }
 
-  pubkey_ptr = SSL_IS_PROXY() ?
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  pubkey_ptr = SSL_PINNED_PUB_KEY();
   if(pubkey_ptr) {
     result = pkp_pin_peer_pubkey(data, conn, sockindex, pubkey_ptr);
     if(result) {
@@ -1386,9 +1379,9 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CERT_CONTEXT *ccert_context = NULL;
+  bool isproxy = SSL_IS_PROXY();
 #ifdef DEBUGBUILD
-  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
-    conn->host.name;
+  const char * const hostname = SSL_HOST_NAME();
 #endif
 #ifdef HAS_ALPN
   SecPkgContext_ApplicationProtocol alpn_result;
@@ -1436,10 +1429,9 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
       infof(data, "schannel: ALPN, server accepted to use %.*s\n",
             alpn_result.ProtocolIdSize, alpn_result.ProtocolId);
 
-#ifdef USE_NGHTTP2
-      if(alpn_result.ProtocolIdSize == NGHTTP2_PROTO_VERSION_ID_LEN &&
-         !memcmp(NGHTTP2_PROTO_VERSION_ID, alpn_result.ProtocolId,
-                 NGHTTP2_PROTO_VERSION_ID_LEN)) {
+#ifdef USE_HTTP2
+      if(alpn_result.ProtocolIdSize == ALPN_H2_LENGTH &&
+         !memcmp(ALPN_H2, alpn_result.ProtocolId, ALPN_H2_LENGTH)) {
         conn->negnpn = CURL_HTTP_VERSION_2;
       }
       else
@@ -1463,8 +1455,8 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
     struct Curl_schannel_cred *old_cred = NULL;
 
     Curl_ssl_sessionid_lock(data);
-    incache = !(Curl_ssl_getsessionid(data, conn, (void **)&old_cred, NULL,
-                                      sockindex));
+    incache = !(Curl_ssl_getsessionid(data, conn, isproxy, (void **)&old_cred,
+                                      NULL, sockindex));
     if(incache) {
       if(old_cred != BACKEND->cred) {
         DEBUGF(infof(data,
@@ -1475,7 +1467,7 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
       }
     }
     if(!incache) {
-      result = Curl_ssl_addsessionid(data, conn, (void *)BACKEND->cred,
+      result = Curl_ssl_addsessionid(data, conn, isproxy, BACKEND->cred,
                                      sizeof(struct Curl_schannel_cred),
                                      sockindex);
       if(result) {
@@ -1500,7 +1492,7 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
                                        SECPKG_ATTR_REMOTE_CERT_CONTEXT,
                                        &ccert_context);
 
-    if((sspi_status != SEC_E_OK) || (ccert_context == NULL)) {
+    if((sspi_status != SEC_E_OK) || !ccert_context) {
       failf(data, "schannel: failed to retrieve remote cert context");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
@@ -1852,7 +1844,7 @@ schannel_recv(struct Curl_easy *data, int sockindex,
       }
       reallocated_buffer = realloc(BACKEND->encdata_buffer,
                                    reallocated_length);
-      if(reallocated_buffer == NULL) {
+      if(!reallocated_buffer) {
         *err = CURLE_OUT_OF_MEMORY;
         failf(data, "schannel: unable to re-allocate memory");
         goto cleanup;
@@ -1941,7 +1933,7 @@ schannel_recv(struct Curl_easy *data, int sockindex,
           }
           reallocated_buffer = realloc(BACKEND->decdata_buffer,
                                        reallocated_length);
-          if(reallocated_buffer == NULL) {
+          if(!reallocated_buffer) {
             *err = CURLE_OUT_OF_MEMORY;
             failf(data, "schannel: unable to re-allocate memory");
             goto cleanup;
@@ -2175,12 +2167,7 @@ static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
    * Shutting Down an Schannel Connection
    */
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-#ifndef CURL_DISABLE_PROXY
-  char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
-    conn->host.name;
-#else
-  char * const hostname = conn->host.name;
-#endif
+  char * const hostname = SSL_HOST_NAME();
 
   DEBUGASSERT(data);
 
@@ -2343,7 +2330,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
                                        SECPKG_ATTR_REMOTE_CERT_CONTEXT,
                                        &pCertContextServer);
 
-    if((sspi_status != SEC_E_OK) || (pCertContextServer == NULL)) {
+    if((sspi_status != SEC_E_OK) || !pCertContextServer) {
       char buffer[STRERROR_LEN];
       failf(data, "schannel: Failed to read remote certificate context: %s",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
@@ -2453,6 +2440,9 @@ const struct Curl_ssl Curl_ssl_schannel = {
   { CURLSSLBACKEND_SCHANNEL, "schannel" }, /* info */
 
   SSLSUPP_CERTINFO |
+#ifdef HAS_MANUAL_VERIFY_API
+  SSLSUPP_CAINFO_BLOB |
+#endif
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_DISTNAMES,
 

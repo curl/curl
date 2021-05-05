@@ -23,9 +23,9 @@ imap
 IMAP APPEND message
  </name>
  <command>
-imap://%HOSTIP:%IMAPPORT/805 -T log/upload805 -u user:secret
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -T log/upload%TESTNUMBER -u user:secret
 </command>
-<file name="log/upload805">
+<file name="log/upload%TESTNUMBER">
 Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)
 From: Fred Foobar <foobar@example.COM>
 Subject: afternoon meeting
@@ -44,7 +44,7 @@ Hello Joe, do you think we can meet at 3:30 tomorrow?
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 APPEND 805 (\Seen) {295}
+A003 APPEND %TESTNUMBER (\Seen) {295}
 A004 LOGOUT
 </protocol>
 <upload>

@@ -36,11 +36,17 @@ if [ "$T" = "coverage" ]; then
 fi
 
 if [ "$T" = "torture" ]; then
-  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2
+  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2 --with-openssl
+  make
+  tests="!TLS-SRP !FTP"
+  make "TFLAGS=-n --shallow=20 -t $tests" test-nonflaky
+fi
+
+if [ "$T" = "events" ]; then
+  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2 --with-openssl
   make
   tests="!TLS-SRP"
   make "TFLAGS=-n -e $tests" test-nonflaky
-  make "TFLAGS=-n --shallow=40 -t $tests" test-nonflaky
 fi
 
 if [ "$T" = "debug" ]; then
@@ -62,6 +68,12 @@ if [ "$T" = "debug-mesalink" ]; then
   ./configure --enable-debug --enable-werror $C
   make
   make "TFLAGS=-n !313 !410 !3001" test-nonflaky
+fi
+
+if [ "$T" = "debug-rustls" ]; then
+  ./configure --enable-debug --enable-werror $C
+  make
+  make "TFLAGS=HTTPS !313" test-nonflaky
 fi
 
 if [ "$T" = "novalgrind" ]; then
@@ -111,13 +123,13 @@ fi
 if [ "$T" = "distcheck" ]; then
   # find BOM markers and exit if we do
   ! git grep `printf '\xef\xbb\xbf'`
-  ./configure
+  ./configure --without-ssl
   make
   ./maketgz 99.98.97
   # verify in-tree build - and install it
   tar xf curl-99.98.97.tar.gz
   cd curl-99.98.97
-  ./configure --prefix=$HOME/temp
+  ./configure --prefix=$HOME/temp --without-ssl
   make
   make TFLAGS=1 test
   make install
@@ -130,7 +142,7 @@ if [ "$T" = "distcheck" ]; then
   touch curl-99.98.97/docs/{cmdline-opts,libcurl}/Makefile.inc
   mkdir build
   cd build
-  ../curl-99.98.97/configure
+  ../curl-99.98.97/configure --without-ssl
   make
   make TFLAGS='-p 1 1139' test
   # verify cmake build

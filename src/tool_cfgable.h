@@ -267,6 +267,9 @@ struct OperationConfig {
                                   revocation list errors */
 
   bool native_ca_store;        /* use the native os ca store */
+  bool ssl_auto_client_cert;   /* automatically locate and use a client
+                                  certificate for authentication (Schannel) */
+  bool proxy_ssl_auto_client_cert; /* proxy version of ssl_auto_client_cert */
 
   bool use_metalink;        /* process given URLs as metalink XML file */
   struct metalinkfile *metalinkfile_list; /* point to the first node */

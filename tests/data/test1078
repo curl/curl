@@ -43,7 +43,7 @@ http-proxy
 HTTP 1.0 CONNECT with proxytunnel and downgrade GET to HTTP/1.0
  </name>
  <command>
---proxy1.0 %HOSTIP:%PROXYPORT -p http://%HOSTIP.1078:%HTTPPORT/we/want/that/page/1078 http://%HOSTIP.1078:%HTTPPORT/we/want/that/page/1078
+--proxy1.0 %HOSTIP:%PROXYPORT -p http://%HOSTIP.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER http://%HOSTIP.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER
 </command>
 <features>
 proxy
@@ -54,20 +54,20 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <proxy>
-CONNECT %HOSTIP.1078:%HTTPPORT HTTP/1.0
-Host: %HOSTIP.1078:%HTTPPORT
+CONNECT %HOSTIP.%TESTNUMBER:%HTTPPORT HTTP/1.0
+Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol>
-GET /we/want/that/page/1078 HTTP/1.1
-Host: %HOSTIP.1078:%HTTPPORT
+GET /we/want/that/page/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /we/want/that/page/1078 HTTP/1.0
-Host: %HOSTIP.1078:%HTTPPORT
+GET /we/want/that/page/%TESTNUMBER HTTP/1.0
+Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 

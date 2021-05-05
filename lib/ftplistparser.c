@@ -424,7 +424,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
                 endptr++;
               while(ISDIGIT(*endptr))
                 endptr++;
-              if(*endptr != 0) {
+              if(*endptr) {
                 parser->error = CURLE_FTP_BAD_FILE_LIST;
                 goto fail;
               }

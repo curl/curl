@@ -28,7 +28,7 @@ Funny-head: yesyes
 http
 </server>
 <tool>
-lib659
+lib%TESTNUMBER
 </tool>
 <name>
 CURLOPT_CURLU without the path set - over proxy
@@ -43,7 +43,7 @@ proxy
 
 <verify>
 <protocol>
-GET http://www.example.com:80/ HTTP/1.1
+GET http://www.example.com/ HTTP/1.1
 Host: www.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive

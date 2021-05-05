@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -2092,8 +2092,7 @@ my @ftpdir=("total 20\r\n",
     logmsg "pass LIST data on data connection\n";
 
     if($cwd_testno) {
-        loadtest("$logdir/test$cwd_testno") ||
-            loadtest("$srcdir/data/test$cwd_testno");
+        loadtest("$logdir/test$cwd_testno");
 
         my @data = getpart("reply", "data");
         for(@data) {
@@ -2156,8 +2155,7 @@ sub MDTM_ftp {
         $testno = int($testno / 10000);
     }
 
-    loadtest("$logdir/test$testno") ||
-        loadtest("$srcdir/data/test$testno");
+    loadtest("$logdir/test$testno");
 
     my @data = getpart("reply", "mdtm");
 
@@ -2210,9 +2208,7 @@ sub SIZE_ftp {
         $testno = int($testno / 10000);
     }
 
-    loadtest("$logdir/test$testno") ||
-        loadtest("$srcdir/data/test$testno");
-
+    loadtest("$logdir/test$testno");
     my @data = getpart("reply", "size");
 
     my $size = $data[0];
@@ -2300,8 +2296,7 @@ sub RETR_ftp {
         $testno = int($testno / 10000);
     }
 
-    loadtest("$logdir/test$testno") ||
-        loadtest("$srcdir/data/test$testno");
+    loadtest("$logdir/test$testno");
 
     my @data = getpart("reply", "data$testpart");
 
@@ -3090,8 +3085,7 @@ while(1) {
     $| = 1;
 
     &customize(); # read test control instructions
-    loadtest("$logdir/test$testno") ||
-        loadtest("$srcdir/data/test$testno");
+    loadtest("$logdir/test$testno");
 
     my $welcome = $commandreply{"welcome"};
     if(!$welcome) {

@@ -35,7 +35,7 @@ http
 HTTP HEAD with --range
  </name>
  <command>
---range 1-3 --head http://%HOSTIP:%HTTPPORT/1032
+--range 1-3 --head http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -43,7 +43,7 @@ HTTP HEAD with --range
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-HEAD /1032 HTTP/1.1
+HEAD /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=1-3
 User-Agent: curl/%VERSION

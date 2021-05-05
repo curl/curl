@@ -26,7 +26,7 @@ https Server-localhost-sv.pem
 pinnedpubkey no-match must fail even when insecure
 </name>
 <command>
---insecure --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost.nn-sv.pub.der https://localhost:%HTTPSPORT/2048
+--insecure --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost.nn-sv.pub.der https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

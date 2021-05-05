@@ -1515,8 +1515,17 @@ CURLcode Curl_pop3_write(struct Curl_easy *data, char *str, size_t nread)
       if(prev) {
         /* If the partial match was the CRLF and dot then only write the CRLF
            as the server would have inserted the dot */
-        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)POP3_EOB,
-                                   strip_dot ? prev - 1 : prev);
+        if(strip_dot && prev - 1 > 0) {
+          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)POP3_EOB,
+                                     prev - 1);
+        }
+        else if(!strip_dot) {
+          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)POP3_EOB,
+                                     prev);
+        }
+        else {
+          result = CURLE_OK;
+        }
 
         if(result)
           return result;

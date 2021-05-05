@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -668,7 +668,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* allocate internal array for the internal data */
   data = calloc(nfds, sizeof(struct select_ws_data));
-  if(data == NULL) {
+  if(!data) {
     CloseHandle(abort);
     CloseHandle(mutex);
     errno = ENOMEM;
@@ -677,7 +677,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* allocate internal array for the internal event handles */
   handles = calloc(nfds + 1, sizeof(HANDLE));
-  if(handles == NULL) {
+  if(!handles) {
     CloseHandle(abort);
     CloseHandle(mutex);
     free(data);

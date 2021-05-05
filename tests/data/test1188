@@ -26,19 +26,19 @@ http
 --write-out with %{onerror} and %{urlnum} to stderr
  </name>
 <command>
--f -s -w '%{onerror}%{stderr}%{urlnum} says %{exitcode} %{errormsg}\n' http://%HOSTIP:%HTTPPORT/we/want/our/1188 http://%HOSTIP:%HTTPPORT/we/want/our/1188
+-f -s -w '%{onerror}%{stderr}%{urlnum} says %{exitcode} %{errormsg}\n' http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /we/want/our/1188 HTTP/1.1
+GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /we/want/our/1188 HTTP/1.1
+GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

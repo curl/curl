@@ -18,7 +18,7 @@ none
 verify that curl_easy_setopt() rejects too long string inputs
 </name>
 <tool>
-lib1911
+lib%TESTNUMBER
 </tool>
 
 </client>

@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2016 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2016 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -66,12 +66,19 @@ sub scanmanpage {
     my ($file, @words) = @_;
 
     open(M, "<$file");
-    my @m = <M>;
+    my @m;
+    while(<M>) {
+        if($_ =~ /^\.IP (.*)/) {
+            my $w = $1;
+            # "unquote" minuses
+            $w =~ s/\\-/-/g;
+            push @m, $w;
+        }
+    }
     close(M);
 
     foreach my $m (@words) {
-
-        my @g = grep(/^\.IP $m/, @m);
+        my @g = grep(/$m/, @m);
         if(!$g[0]) {
             print STDERR "Missing mention of $m in $file\n";
             $errors++;
@@ -206,7 +213,8 @@ my @manpage; # store all parsed parameters
 while(<R>) {
     chomp;
     my $l= $_;
-    if(/^\.IP \"(-[^\"]*)\"/) {
+    $l =~ s/\\-/-/g;
+    if($l =~ /^\.IP \"(-[^\"]*)\"/) {
         my $str = $1;
         my $combo;
         if($str =~ /^-(.), --([a-z0-9.-]*)/) {

@@ -450,9 +450,6 @@
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
 
-/* Define to 1 if you have the `strlcpy' function. */
-/* #undef HAVE_STRLCPY */
-
 /* Define to 1 if you have the `strstr' function. */
 #define HAVE_STRSTR 1
 
@@ -577,9 +574,6 @@
 
 /* a suitable file to read random data from */
 /* #undef RANDOM_FILE */
-
-/* Define as the return type of signal handlers (`int' or `void'). */
-#define RETSIGTYPE void
 
 /* Define to the type of arg 1 for `select'. */
 #define SELECT_TYPE_ARG1 int

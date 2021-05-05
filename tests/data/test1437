@@ -59,21 +59,21 @@ crypto
 HTTP with duplicated WWW-Authenticate parameters
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1437 -u testuser:testpass --digest
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --digest
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1437 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /1437 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="2", uri="/1437", response="4376eb639bf8e7343a6e7b56e1b89c4f", algorithm=MD5
+Authorization: Digest username="testuser", realm="testrealm", nonce="2", uri="/%TESTNUMBER", response="4376eb639bf8e7343a6e7b56e1b89c4f", algorithm=MD5
 User-Agent: curl/%VERSION
 Accept: */*
 

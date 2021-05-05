@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <crustls.h>
 
+#include "inet_pton.h"
 #include "urldata.h"
 #include "sendf.h"
 #include "vtls.h"
@@ -36,11 +37,16 @@
 
 #include "multiif.h"
 
+/* Per https://www.bearssl.org/api1.html, max TLS record size plus max
+   per-record overhead. */
+#define TLSBUF_SIZE (16384 + 325)
+
 struct ssl_backend_data
 {
   const struct rustls_client_config *config;
   struct rustls_client_session *session;
   bool data_pending;
+  uint8_t *tlsbuf;
 };
 
 /* For a given rustls_result error code, return the best-matching CURLcode. */
@@ -97,9 +103,6 @@ cr_recv(struct Curl_easy *data, int sockindex,
   struct ssl_backend_data *const backend = connssl->backend;
   struct rustls_client_session *const session = backend->session;
   curl_socket_t sockfd = conn->sock[sockindex];
-  /* Per https://www.bearssl.org/api1.html, max TLS record size plus max
-     per-record overhead. */
-  uint8_t tlsbuf[16384 + 325];
   size_t n = 0;
   ssize_t tls_bytes_read = 0;
   size_t tls_bytes_processed = 0;
@@ -107,30 +110,33 @@ cr_recv(struct Curl_easy *data, int sockindex,
   rustls_result rresult = 0;
   char errorbuf[255];
 
-  tls_bytes_read = sread(sockfd, tlsbuf, sizeof(tlsbuf));
+  tls_bytes_read = sread(sockfd, backend->tlsbuf, TLSBUF_SIZE);
   if(tls_bytes_read == 0) {
-    failf(data, "EOF in sread");
+    failf(data, "connection closed without TLS close_notify alert");
     *err = CURLE_READ_ERROR;
     return -1;
   }
   else if(tls_bytes_read < 0) {
     if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
       infof(data, "sread: EAGAIN or EWOULDBLOCK\n");
-      *err = CURLE_AGAIN;
+      /* There is no data in the socket right now, but there could still be
+         some data in the rustls session, so we need to read from it below. */
+      tls_bytes_read = 0;
+    }
+    else {
+      failf(data, "reading from socket: %s", strerror(SOCKERRNO));
+      *err = CURLE_READ_ERROR;
       return -1;
     }
-    failf(data, "reading from socket: %s", strerror(SOCKERRNO));
-    *err = CURLE_READ_ERROR;
-    return -1;
   }
 
   /*
   * Now pull those bytes from the buffer into ClientSession.
   */
-  DEBUGASSERT(tls_bytes_read > 0);
+  DEBUGASSERT(tls_bytes_read >= 0);
   while(tls_bytes_processed < (size_t)tls_bytes_read) {
     rresult = rustls_client_session_read_tls(session,
-      (uint8_t *)tlsbuf + tls_bytes_processed,
+      backend->tlsbuf + tls_bytes_processed,
       tls_bytes_read - tls_bytes_processed,
       &n);
     if(rresult != RUSTLS_RESULT_OK) {
@@ -160,7 +166,11 @@ cr_recv(struct Curl_easy *data, int sockindex,
       (uint8_t *)plainbuf + plain_bytes_copied,
       plainlen - plain_bytes_copied,
       &n);
-    if(rresult != RUSTLS_RESULT_OK) {
+    if(rresult == RUSTLS_RESULT_ALERT_CLOSE_NOTIFY) {
+      *err = CURLE_OK;
+      return 0;
+    }
+    else if(rresult != RUSTLS_RESULT_OK) {
       failf(data, "error in rustls_client_session_read");
       *err = CURLE_READ_ERROR;
       return -1;
@@ -202,7 +212,7 @@ cr_recv(struct Curl_easy *data, int sockindex,
  */
 static ssize_t
 cr_send(struct Curl_easy *data, int sockindex,
-            const void *plainbuf, size_t plainlen, CURLcode *err)
+        const void *plainbuf, size_t plainlen, CURLcode *err)
 {
   struct connectdata *conn = data->conn;
   struct ssl_connect_data *const connssl = &conn->ssl[sockindex];
@@ -213,13 +223,11 @@ cr_send(struct Curl_easy *data, int sockindex,
   size_t plainwritten = 0;
   size_t tlslen = 0;
   size_t tlswritten = 0;
-  /* Max size of a TLS message, plus some space for TLS framing overhead. */
-  uint8_t tlsbuf[16384 + 325];
   rustls_result rresult;
 
   if(plainlen > 0) {
     rresult = rustls_client_session_write(session,
-        plainbuf, plainlen, &plainwritten);
+                                          plainbuf, plainlen, &plainwritten);
     if(rresult != RUSTLS_RESULT_OK) {
       failf(data, "error in rustls_client_session_write");
       *err = CURLE_WRITE_ERROR;
@@ -234,7 +242,7 @@ cr_send(struct Curl_easy *data, int sockindex,
 
   while(rustls_client_session_wants_write(session)) {
     rresult = rustls_client_session_write_tls(
-        session, tlsbuf, sizeof(tlsbuf), &tlslen);
+      session, backend->tlsbuf, TLSBUF_SIZE, &tlslen);
     if(rresult != RUSTLS_RESULT_OK) {
       failf(data, "error in rustls_client_session_write_tls");
       *err = CURLE_WRITE_ERROR;
@@ -249,11 +257,11 @@ cr_send(struct Curl_easy *data, int sockindex,
     tlswritten = 0;
 
     while(tlswritten < tlslen) {
-      n = swrite(sockfd, tlsbuf + tlswritten, tlslen - tlswritten);
+      n = swrite(sockfd, backend->tlsbuf + tlswritten, tlslen - tlswritten);
       if(n < 0) {
         if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
           /* Since recv is called from poll, there should be room to
-            write at least some bytes before hitting EAGAIN. */
+             write at least some bytes before hitting EAGAIN. */
           infof(data, "swrite: EAGAIN after %ld bytes\n", tlswritten);
           DEBUGASSERT(tlswritten > 0);
           break;
@@ -276,16 +284,146 @@ cr_send(struct Curl_easy *data, int sockindex,
   return plainwritten;
 }
 
+/* A server certificate verify callback for rustls that always returns
+   RUSTLS_RESULT_OK, or in other words disable certificate verification. */
+static enum rustls_result
+cr_verify_none(void *userdata UNUSED_PARAM,
+               const rustls_verify_server_cert_params *params UNUSED_PARAM)
+{
+  return RUSTLS_RESULT_OK;
+}
+
+static bool
+cr_hostname_is_ip(const char *hostname)
+{
+  struct in_addr in;
+#ifdef ENABLE_IPV6
+  struct in6_addr in6;
+  if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0) {
+    return true;
+  }
+#endif /* ENABLE_IPV6 */
+  if(Curl_inet_pton(AF_INET, hostname, &in) > 0) {
+    return true;
+  }
+  return false;
+}
+
+static CURLcode
+cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
+                struct ssl_backend_data *const backend)
+{
+  struct rustls_client_session *session = backend->session;
+  struct rustls_client_config_builder *config_builder = NULL;
+  const char *const ssl_cafile = SSL_CONN_CONFIG(CAfile);
+  const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
+  const char *hostname = conn->host.name;
+  char errorbuf[256];
+  size_t errorlen;
+  int result;
+  rustls_slice_bytes alpn[2] = {
+    { (const uint8_t *)ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH },
+    { (const uint8_t *)ALPN_H2, ALPN_H2_LENGTH },
+  };
+
+  backend->tlsbuf = calloc(TLSBUF_SIZE, 1);
+  if(!backend->tlsbuf) {
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  config_builder = rustls_client_config_builder_new();
+#ifdef USE_HTTP2
+  infof(data, "offering ALPN for HTTP/1.1 and HTTP/2\n");
+  rustls_client_config_builder_set_protocols(config_builder, alpn, 2);
+#else
+  infof(data, "offering ALPN for HTTP/1.1 only\n");
+  rustls_client_config_builder_set_protocols(config_builder, alpn, 1);
+#endif
+  if(!verifypeer) {
+    rustls_client_config_builder_dangerous_set_certificate_verifier(
+      config_builder, cr_verify_none, NULL);
+    /* rustls doesn't support IP addresses (as of 0.19.0), and will reject
+     * sessions created with an IP address, even when certificate verification
+     * is turned off. Set a placeholder hostname and disable SNI. */
+    if(cr_hostname_is_ip(hostname)) {
+      rustls_client_config_builder_set_enable_sni(config_builder, false);
+      hostname = "example.invalid";
+    }
+  }
+  else if(ssl_cafile) {
+    result = rustls_client_config_builder_load_roots_from_file(
+      config_builder, ssl_cafile);
+    if(result != RUSTLS_RESULT_OK) {
+      failf(data, "failed to load trusted certificates");
+      rustls_client_config_free(
+        rustls_client_config_builder_build(config_builder));
+      return CURLE_SSL_CACERT_BADFILE;
+    }
+  }
+  else {
+    result = rustls_client_config_builder_load_native_roots(config_builder);
+    if(result != RUSTLS_RESULT_OK) {
+      failf(data, "failed to load trusted certificates");
+      rustls_client_config_free(
+        rustls_client_config_builder_build(config_builder));
+      return CURLE_SSL_CACERT_BADFILE;
+    }
+  }
+
+  backend->config = rustls_client_config_builder_build(config_builder);
+  DEBUGASSERT(session == NULL);
+  result = rustls_client_session_new(
+    backend->config, hostname, &session);
+  if(result != RUSTLS_RESULT_OK) {
+    rustls_error(result, errorbuf, sizeof(errorbuf), &errorlen);
+    failf(data, "failed to create client session: %.*s", errorlen, errorbuf);
+    return CURLE_COULDNT_CONNECT;
+  }
+  backend->session = session;
+  return CURLE_OK;
+}
+
+static void
+cr_set_negotiated_alpn(struct Curl_easy *data, struct connectdata *conn,
+  const struct rustls_client_session *session)
+{
+  const uint8_t *protocol = NULL;
+  size_t len = 0;
+
+  rustls_client_session_get_alpn_protocol(session, &protocol, &len);
+  if(NULL == protocol) {
+    infof(data, "ALPN, server did not agree to a protocol\n");
+    return;
+  }
+
+#ifdef USE_HTTP2
+  if(len == ALPN_H2_LENGTH && 0 == memcmp(ALPN_H2, protocol, len)) {
+    infof(data, "ALPN, negotiated h2\n");
+    conn->negnpn = CURL_HTTP_VERSION_2;
+  }
+  else
+#endif
+  if(len == ALPN_HTTP_1_1_LENGTH &&
+      0 == memcmp(ALPN_HTTP_1_1, protocol, len)) {
+    infof(data, "ALPN, negotiated http/1.1\n");
+    conn->negnpn = CURL_HTTP_VERSION_1_1;
+  }
+  else {
+    infof(data, "ALPN, negotiated an unrecognized protocol\n");
+  }
+
+  Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                      BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+}
+
 static CURLcode
 cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
-                                int sockindex, bool *done)
+                       int sockindex, bool *done)
 {
   struct ssl_connect_data *const connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_backend_data *const backend = connssl->backend;
-  struct rustls_client_session *session = backend->session;
-  struct rustls_client_config_builder *config_builder = NULL;
-  const char *const ssl_cafile = SSL_CONN_CONFIG(CAfile);
+  struct rustls_client_session *session = NULL;
   CURLcode tmperr = CURLE_OK;
   int result;
   int what;
@@ -293,43 +431,16 @@ cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
   bool wants_write;
   curl_socket_t writefd;
   curl_socket_t readfd;
-  char errorbuf[256];
-  size_t errorlen;
 
   if(ssl_connection_none == connssl->state) {
-    config_builder = rustls_client_config_builder_new();
-    if(ssl_cafile) {
-      result = rustls_client_config_builder_load_roots_from_file(
-        config_builder, ssl_cafile);
-      if(result != RUSTLS_RESULT_OK) {
-        failf(data, "failed to load trusted certificates");
-        rustls_client_config_free(
-          rustls_client_config_builder_build(config_builder));
-        return CURLE_SSL_CACERT_BADFILE;
-      }
+    result = cr_init_backend(data, conn, connssl->backend);
+    if(result != CURLE_OK) {
+      return result;
     }
-    else {
-      result = rustls_client_config_builder_load_native_roots(config_builder);
-      if(result != RUSTLS_RESULT_OK) {
-        failf(data, "failed to load trusted certificates");
-        rustls_client_config_free(
-          rustls_client_config_builder_build(config_builder));
-        return CURLE_SSL_CACERT_BADFILE;
-      }
-    }
-
-    backend->config = rustls_client_config_builder_build(config_builder);
-    DEBUGASSERT(session == NULL);
-    result = rustls_client_session_new(
-      backend->config, conn->host.name, &session);
-    if(result != RUSTLS_RESULT_OK) {
-      rustls_error(result, errorbuf, sizeof(errorbuf), &errorlen);
-      failf(data, "failed to create client session: %.*s", errorlen, errorbuf);
-      return CURLE_COULDNT_CONNECT;
-    }
-    backend->session = session;
     connssl->state = ssl_connection_negotiating;
   }
+
+  session = backend->session;
 
   /* Read/write data until the handshake is done or the socket would block. */
   for(;;) {
@@ -344,6 +455,9 @@ cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
       infof(data, "Done handshaking\n");
       /* Done with the handshake. Set up callbacks to send/receive data. */
       connssl->state = ssl_connection_complete;
+
+      cr_set_negotiated_alpn(data, conn, session);
+
       conn->recv[sockindex] = cr_recv;
       conn->send[sockindex] = cr_send;
       *done = TRUE;
@@ -434,7 +548,7 @@ cr_getsock(struct connectdata *conn, curl_socket_t *socks)
 
 static void *
 cr_get_internals(struct ssl_connect_data *connssl,
-                          CURLINFO info UNUSED_PARAM)
+                 CURLINFO info UNUSED_PARAM)
 {
   struct ssl_backend_data *backend = connssl->backend;
   return &backend->session;
@@ -442,7 +556,7 @@ cr_get_internals(struct ssl_connect_data *connssl,
 
 static void
 cr_close(struct Curl_easy *data, struct connectdata *conn,
-                  int sockindex)
+         int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
@@ -463,6 +577,7 @@ cr_close(struct Curl_easy *data, struct connectdata *conn,
     rustls_client_config_free(backend->config);
     backend->config = NULL;
   }
+  free(backend->tlsbuf);
 }
 
 const struct Curl_ssl Curl_ssl_rustls = {

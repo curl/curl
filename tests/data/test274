@@ -28,14 +28,14 @@ http
 HTTP Location: following with --max-redirs 0
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/274 -L --max-redirs 0
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L --max-redirs 0
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /want/274 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

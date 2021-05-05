@@ -29,7 +29,7 @@ gopher-ipv6
 Gopher IPv6 index
  </name>
  <command>
--g gopher://%HOST6IP:%GOPHER6PORT/1/moo/1203
+-g gopher://%HOST6IP:%GOPHER6PORT/1/moo/%TESTNUMBER
 </command>
 </client>
 
@@ -37,7 +37,7 @@ Gopher IPv6 index
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-/moo/1203
+/moo/%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

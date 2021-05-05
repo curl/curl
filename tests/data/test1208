@@ -27,7 +27,7 @@ ftp
 FTP PORT download, no data conn and no transient negative reply
  </name>
  <command>
---max-time %FTPTIME2 ftp://%HOSTIP:%FTPPORT/1208 -P -
+--max-time %FTPTIME2 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P -
 </command>
 
 </client>
@@ -48,8 +48,8 @@ PASS ftp@example.com
 PWD
 EPRT |1|
 TYPE I
-SIZE 1208
-RETR 1208
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 </protocol>
 <errorcode>
 28

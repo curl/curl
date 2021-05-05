@@ -37,7 +37,7 @@ slow TFTP retrieve cancel due to -Y and -y
  </name>
 # if less than 1000 bytes/sec within 2 seconds, abort!
  <command>
-tftp://%HOSTIP:%TFTPPORT//1238 -Y1000 -y2
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER -Y1000 -y2
 </command>
 </client>
 
@@ -50,7 +50,7 @@ mode: octet
 tsize: 0
 blksize: 512
 timeout: 6
-filename: /1238
+filename: /%TESTNUMBER
 </protocol>
 # 28 = CURLE_OPERATION_TIMEDOUT
 <errorcode>

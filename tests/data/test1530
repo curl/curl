@@ -13,7 +13,7 @@ none
 http
 </features>
 <tool>
-lib1530
+lib%TESTNUMBER
 </tool>
  <name>
 CURLOPT_OPENSOCKETFUNCTION returns bad socket

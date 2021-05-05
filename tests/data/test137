@@ -25,7 +25,7 @@ ftp
 FTP download without size in RETR string
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/blalbla/lululul/137
+ftp://%HOSTIP:%FTPPORT/blalbla/lululul/%TESTNUMBER
 </command>
 </client>
 
@@ -39,8 +39,8 @@ CWD blalbla
 CWD lululul
 EPSV
 TYPE I
-SIZE 137
-RETR 137
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

@@ -160,16 +160,6 @@ krb5_decode(void *app_data, void *buf, int len,
 }
 
 static int
-krb5_overhead(void *app_data, int level, int len)
-{
-  /* no arguments are used */
-  (void)app_data;
-  (void)level;
-  (void)len;
-  return 0;
-}
-
-static int
 krb5_encode(void *app_data, const void *from, int length, int level, void **to)
 {
   gss_ctx_id_t *context = app_data;
@@ -305,7 +295,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
         break;
       }
 
-      if(output_buffer.length != 0) {
+      if(output_buffer.length) {
         char *cmd;
 
         result = Curl_base64_encode(data, (char *)output_buffer.value,
@@ -392,7 +382,7 @@ static struct Curl_sec_client_mech Curl_krb5_client_mech = {
   krb5_auth,
   krb5_end,
   krb5_check_prot,
-  krb5_overhead,
+
   krb5_encode,
   krb5_decode
 };
@@ -412,7 +402,7 @@ name_to_level(const char *name)
 {
   int i;
   for(i = 0; i < (int)sizeof(level_names)/(int)sizeof(level_names[0]); i++)
-    if(checkprefix(name, level_names[i].name))
+    if(curl_strequal(name, level_names[i].name))
       return level_names[i].level;
   return PROT_NONE;
 }
@@ -657,8 +647,6 @@ static ssize_t sec_write(struct Curl_easy *data, struct connectdata *conn,
 {
   ssize_t tx = 0, len = conn->buffer_size;
 
-  len -= conn->mech->overhead(conn->app_data, conn->data_prot,
-                              curlx_sztosi(len));
   if(len <= 0)
     len = length;
   while(length) {
@@ -760,7 +748,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
 
   if(level) {
     char *pbsz;
-    static unsigned int buffer_size = 1 << 20; /* 1048576 */
+    unsigned int buffer_size = 1 << 20; /* 1048576 */
 
     code = ftp_send_command(data, "PBSZ %u", buffer_size);
     if(code < 0)
@@ -817,7 +805,7 @@ static CURLcode choose_mech(struct Curl_easy *data, struct connectdata *conn)
   const struct Curl_sec_client_mech *mech = &Curl_krb5_client_mech;
 
   tmp_allocation = realloc(conn->app_data, mech->size);
-  if(tmp_allocation == NULL) {
+  if(!tmp_allocation) {
     failf(data, "Failed realloc of size %zu", mech->size);
     mech = NULL;
     return CURLE_OUT_OF_MEMORY;

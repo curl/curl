@@ -20,15 +20,15 @@ multi
 ftp
 </server>
 <tool>
-lib525
+lib%TESTNUMBER
 </tool>
  <name>
 FTP PORT upload using multi interface
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/path/525 log/upload525
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER log/upload%TESTNUMBER
 </command>
-<file name="log/upload525">
+<file name="log/upload%TESTNUMBER">
 Moooooooooooo
  upload this
 </file>
@@ -48,7 +48,7 @@ PWD
 CWD path
 PORT 127,0,0,1,5,109
 TYPE I
-STOR 525
+STOR %TESTNUMBER
 QUIT
 </protocol>
 <upload>

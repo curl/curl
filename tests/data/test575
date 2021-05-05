@@ -21,7 +21,7 @@ ftplistparser
 ftp
 </server>
 <tool>
-lib575
+lib%TESTNUMBER
 </tool>
  <name>
 FTP wildcard download - dup_handle and multi interface

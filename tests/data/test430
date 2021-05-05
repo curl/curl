@@ -37,21 +37,21 @@ Content-Type: text/3
 #
 # Client-side
 <client>
-<file1 name="log/config430-a">
+<file1 name="log/config%TESTNUMBER-a">
 --next
-url = %HOSTIP:%HTTPPORT/4300001
+url = %HOSTIP:%HTTPPORT/%TESTNUMBER0001
 header = "a: a"
 data = "a"
 </file1>
-<file2 name="log/config430-b">
+<file2 name="log/config%TESTNUMBER-b">
 --next
-url = %HOSTIP:%HTTPPORT/4300002
+url = %HOSTIP:%HTTPPORT/%TESTNUMBER0002
 header = "b: b"
 data = "b"
 </file2>
-<file3 name="log/config430-c">
+<file3 name="log/config%TESTNUMBER-c">
 --next
-url = %HOSTIP:%HTTPPORT/4300003
+url = %HOSTIP:%HTTPPORT/%TESTNUMBER0003
 header = "c: c"
 data = "c"
 </file3>
@@ -63,7 +63,7 @@ http
 Three -K uses with --next and --data in each
  </name>
  <command>
--K log/config430-a -K log/config430-b -K log/config430-c
+-K log/config%TESTNUMBER-a -K log/config%TESTNUMBER-b -K log/config%TESTNUMBER-c
 </command>
 </client>
 
@@ -71,7 +71,7 @@ Three -K uses with --next and --data in each
 # Verify data after the test has been "shot"
 <verify>
 <protocol nonewline="yes">
-POST /4300001 HTTP/1.1
+POST /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
@@ -79,7 +79,7 @@ a: a
 Content-Length: 1
 Content-Type: application/x-www-form-urlencoded
 
-aPOST /4300002 HTTP/1.1
+aPOST /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
@@ -87,7 +87,7 @@ b: b
 Content-Length: 1
 Content-Type: application/x-www-form-urlencoded
 
-bPOST /4300003 HTTP/1.1
+bPOST /%TESTNUMBER0003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

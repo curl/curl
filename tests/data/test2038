@@ -26,7 +26,7 @@ https Server-localhost-sv.pem
 HTTPS wrong PEM pinnedpubkey but right CN
  </name>
  <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.pem https://localhost:%HTTPSPORT/2038
+--cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.pem https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost because we're checking the host name
 <precheck>

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -84,7 +84,6 @@
 
 #define NEED_MALLOC_H          1
 
-#define RETSIGTYPE             void
 #define SIZEOF_INT             4
 #define SIZEOF_LONG            4
 #define SIZEOF_LONG_DOUBLE     16

@@ -97,6 +97,12 @@ typedef struct {
   unsigned int zstd_ver_num; /* Numeric Zstd version
                                   (MAJOR << 24) | (MINOR << 12) | PATCH */
   const char *zstd_version; /* human readable string. */
+  /* when 'age' is CURLVERSION_NINTH or higher (>= 7.75.0), the members
+     below exist */
+  const char *hyper_version; /* human readable string. */
+  /* when 'age' is CURLVERSION_TENTH or higher (>= 7.77.0), the members
+     below exist */
+  const char *gsasl_version; /* human readable string. */
 } curl_version_info_data;
 .fi
 

@@ -28,7 +28,7 @@ ftp
 FTP with excessively large number of server command response lines (boundary condition)
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/path/1006
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
 </command>
 </client>
 
@@ -41,8 +41,8 @@ PWD
 CWD path
 EPSV
 TYPE I
-SIZE 1006
-RETR 1006
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

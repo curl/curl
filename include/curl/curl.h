@@ -612,6 +612,7 @@ typedef enum {
   CURLE_HTTP3,                   /* 95 - An HTTP/3 layer problem */
   CURLE_QUIC_CONNECT_ERROR,      /* 96 - QUIC connection error */
   CURLE_PROXY,                   /* 97 - proxy handshake error */
+  CURLE_SSL_CLIENTCERT,          /* 98 - client-side certificate required */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -896,6 +897,10 @@ typedef enum {
 /* - CURLSSLOPT_NATIVE_CA tells libcurl to use standard certificate store of
    operating system. Currently implemented under MS-Windows. */
 #define CURLSSLOPT_NATIVE_CA (1<<4)
+
+/* - CURLSSLOPT_AUTO_CLIENT_CERT tells libcurl to automatically locate and use
+   a client certificate for authentication. (Schannel) */
+#define CURLSSLOPT_AUTO_CLIENT_CERT (1<<5)
 
 /* The default connection attempt delay in milliseconds for happy eyeballs.
    CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3 and happy-eyeballs-timeout-ms.d document
@@ -2097,14 +2102,23 @@ typedef enum {
   /* Same as CURLOPT_SSL_VERIFYSTATUS but for DOH (DNS-over-HTTPS) servers. */
   CURLOPT(CURLOPT_DOH_SSL_VERIFYSTATUS, CURLOPTTYPE_LONG, 308),
 
+  /* The CA certificates as "blob" used to validate the peer certificate
+     this option is used only if SSL_VERIFYPEER is true */
+  CURLOPT(CURLOPT_CAINFO_BLOB, CURLOPTTYPE_BLOB, 309),
+
+  /* The CA certificates as "blob" used to validate the proxy certificate
+     this option is used only if PROXY_SSL_VERIFYPEER is true */
+  CURLOPT(CURLOPT_PROXY_CAINFO_BLOB, CURLOPTTYPE_BLOB, 310),
+  
   /* Set the distributed names callback function, currently only for.
      The function must be matching the curl_ssl_dn_callback
      proto. */
-  CURLOPT(CURLOPT_SSL_DN_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 309),
+  CURLOPT(CURLOPT_SSL_DN_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 311),
 
   /* Set the userdata for the distributed names callback function's third
      argument */
-  CURLOPT(CURLOPT_SSL_DN_DATA, CURLOPTTYPE_OBJECTPOINT, 310),
+  CURLOPT(CURLOPT_SSL_DN_DATA, CURLOPTTYPE_OBJECTPOINT, 312),
+
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
@@ -2884,6 +2898,7 @@ typedef enum {
   CURLVERSION_SEVENTH,
   CURLVERSION_EIGHTH,
   CURLVERSION_NINTH,
+  CURLVERSION_TENTH,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -2892,7 +2907,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_NINTH
+#define CURLVERSION_NOW CURLVERSION_TENTH
 
 struct curl_version_info_data {
   CURLversion age;          /* age of the returned struct */
@@ -2945,6 +2960,9 @@ struct curl_version_info_data {
 
   /* These fields were added in CURLVERSION_NINTH */
   const char *hyper_version; /* human readable string. */
+
+  /* These fields were added in CURLVERSION_TENTH */
+  const char *gsasl_version; /* human readable string. */
 };
 typedef struct curl_version_info_data curl_version_info_data;
 

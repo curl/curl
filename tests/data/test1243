@@ -16,9 +16,9 @@ tftp
 TFTP send without TFTP options requests
  </name>
  <command>
--T log/test1243.txt tftp://%HOSTIP:%TFTPPORT// --tftp-no-options
+-T log/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT// --tftp-no-options
 </command>
-<file name="log/test1243.txt">
+<file name="log/test%TESTNUMBER.txt">
 a chunk of
 data
 sent
@@ -38,7 +38,7 @@ sent
 <protocol>
 opcode: 2
 mode: octet
-filename: /test1243.txt
+filename: /test%TESTNUMBER.txt
 </protocol>
 </verify>
 </testcase>

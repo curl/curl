@@ -28,7 +28,7 @@ wakeup
 http
 </server>
 <tool>
-lib1565
+lib%TESTNUMBER
 </tool>
 <name>
 wakeup from another thread

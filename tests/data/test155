@@ -93,12 +93,12 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/155 -T log/put155 -u testuser:testpass --anyauth
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T log/put%TESTNUMBER -u testuser:testpass --anyauth
 </command>
 <precheck>
 chkhostname curlhost
 </precheck>
-<file name="log/put155">
+<file name="log/put%TESTNUMBER">
 This is data we upload with PUT
 a second line
 line three
@@ -109,23 +109,23 @@ four is the number of lines
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-PUT /155 HTTP/1.1
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 85
 Expect: 100-continue
 
-PUT /155 HTTP/1.1
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 0
 
-PUT /155 HTTP/1.1
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyY3VybGhvc3Q=
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 85

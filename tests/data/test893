@@ -30,7 +30,7 @@ pop3
 POP3 plain authentication with alternative authorization identity (Not authorized)
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/893 -u kurt:xipj3plmq --sasl-authzid ursel
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u kurt:xipj3plmq --sasl-authzid ursel
 </command>
 </client>
 

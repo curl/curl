@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -92,10 +92,10 @@ int test(char *URL)
             break;
         }
 
-      } while((res == CURLE_OK && iolen != 0) || (res == CURLE_AGAIN));
+      } while((res == CURLE_OK && iolen) || (res == CURLE_AGAIN));
     }
 
-    if(iolen != 0)
+    if(iolen)
       res = (CURLcode)TEST_ERR_FAILURE;
   }
 

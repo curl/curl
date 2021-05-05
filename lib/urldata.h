@@ -253,6 +253,7 @@ struct ssl_primary_config {
   char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
   char *pinned_key;
   struct curl_blob *cert_blob;
+  struct curl_blob *ca_info_blob;
   char *curves;          /* list of curves to use */
   BIT(verifypeer);       /* set TRUE if this is desired */
   BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
@@ -291,6 +292,8 @@ struct ssl_config_data {
   BIT(revoke_best_effort); /* ignore SSL revocation offline/missing revocation
                               list errors */
   BIT(native_ca_store); /* use the native ca store of operating system */
+  BIT(auto_client_cert);   /* automatically locate and use a client
+                              certificate for authentication (Schannel) */
 };
 
 struct ssl_general_config {
@@ -1326,8 +1329,6 @@ struct urlpieces {
 struct UrlState {
   /* Points to the connection cache */
   struct conncache *conn_cache;
-  int retrycount; /* number of retries on a new connection */
-
   /* buffers to store authentication data in, as parsed from input options */
   struct curltime keeps_speed; /* for the progress meter really */
 
@@ -1344,6 +1345,7 @@ struct UrlState {
                        following not keep sending user+password... This is
                        strdup() data.
                     */
+  int retrycount; /* number of retries on a new connection */
   int first_remote_port; /* remote port of the first (not followed) request */
   struct Curl_ssl_session *session; /* array of 'max_ssl_sessions' size */
   long sessionage;                  /* number of the most recent session */
@@ -1413,6 +1415,12 @@ struct UrlState {
   CURLU *uh; /* URL handle for the current parsed URL */
   struct urlpieces up;
   Curl_HttpReq httpreq; /* what kind of HTTP request (if any) is this */
+  char *url;        /* work URL, copied from UserDefined */
+  char *referer;    /* referer string */
+  struct curl_slist *cookielist; /* list of cookie files set by
+                                    curl_easy_setopt(COOKIEFILE) calls */
+  struct curl_slist *resolve; /* set to point to the set.resolve list when
+                                 this should be dealt with in pretransfer */
 #ifndef CURL_DISABLE_HTTP
   size_t trailers_bytes_sent;
   struct dynbuf trailers_buf; /* a buffer containing the compiled trailing
@@ -1470,34 +1478,16 @@ struct UrlState {
   BIT(use_range);
   BIT(rangestringalloc); /* the range string is malloc()'ed */
   BIT(done); /* set to FALSE when Curl_init_do() is called and set to TRUE
-                  when multi_done() is called, to prevent multi_done() to get
-                  invoked twice when the multi interface is used. */
+                when multi_done() is called, to prevent multi_done() to get
+                invoked twice when the multi interface is used. */
   BIT(stream_depends_e); /* set or don't set the Exclusive bit */
   BIT(previouslypending); /* this transfer WAS in the multi->pending queue */
   BIT(cookie_engine);
   BIT(prefer_ascii);   /* ASCII rather than binary */
   BIT(list_only);      /* list directory contents */
-};
-
-
-/*
- * This 'DynamicStatic' struct defines dynamic states that actually change
- * values in the 'UserDefined' area, which MUST be taken into consideration
- * if the UserDefined struct is cloned or similar. You can probably just
- * copy these, but each one indicate a special action on other data.
- */
-
-struct DynamicStatic {
-  char *url;        /* work URL, copied from UserDefined */
-  char *referer;    /* referer string */
-  struct curl_slist *cookielist; /* list of cookie files set by
-                                    curl_easy_setopt(COOKIEFILE) calls */
-  struct curl_slist *resolve; /* set to point to the set.resolve list when
-                                 this should be dealt with in pretransfer */
   BIT(url_alloc);   /* URL string is malloc()'ed */
   BIT(referer_alloc); /* referer string is malloc()ed */
-  BIT(wildcard_resolve); /* Set to true if any resolve change is a
-                              wildcard */
+  BIT(wildcard_resolve); /* Set to true if any resolve change is a wildcard */
 };
 
 /*
@@ -1620,6 +1610,8 @@ enum dupblob {
   BLOB_KEY_PROXY,
   BLOB_SSL_ISSUERCERT,
   BLOB_SSL_ISSUERCERT_PROXY,
+  BLOB_CAINFO,
+  BLOB_CAINFO_PROXY,
   BLOB_LAST
 };
 
@@ -1682,7 +1674,7 @@ struct UserDefined {
   curl_conv_callback convtonetwork;
   /* function to convert from UTF-8 encoding: */
   curl_conv_callback convfromutf8;
-#ifdef USE_HSTS
+#ifndef CURL_DISABLE_HSTS
   curl_hstsread_callback hsts_read;
   void *hsts_read_userp;
   curl_hstswrite_callback hsts_write;
@@ -1940,12 +1932,11 @@ struct Curl_easy {
 #endif
   struct SingleRequest req;    /* Request-specific data */
   struct UserDefined set;      /* values set by the libcurl user */
-  struct DynamicStatic change; /* possibly modified userdefined data */
   struct CookieInfo *cookies;  /* the cookies, read from files and servers.
                                   NOTE that the 'cookie' field in the
                                   UserDefined struct defines if the "engine"
                                   is to be used or not. */
-#ifdef USE_HSTS
+#ifndef CURL_DISABLE_HSTS
   struct hsts *hsts;
 #endif
 #ifndef CURL_DISABLE_ALTSVC

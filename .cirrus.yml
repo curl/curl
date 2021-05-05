@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -52,7 +52,7 @@ task:
         export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
         export LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" ;;
       esac
-    - ./configure --prefix="${HOME}"/install --enable-debug --with-libssh2 --with-brotli --with-gssapi --with-libidn2 --enable-manual --enable-ldap --enable-ldaps --with-librtmp --with-libmetalink --with-libpsl --with-nghttp2 || { tail -300 config.log; false; }
+    - ./configure --prefix="${HOME}"/install --enable-debug --with-openssl --with-libssh2 --with-brotli --with-gssapi --with-libidn2 --enable-manual --enable-ldap --enable-ldaps --with-librtmp --with-libmetalink --with-libpsl --with-nghttp2 || { tail -300 config.log; false; }
   compile_script:
     - make V=1
   test_script:

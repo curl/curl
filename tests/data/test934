@@ -35,7 +35,7 @@ crypto
 SMTP DIGEST-MD5 graceful cancellation
  </name>
  <command>
-smtp://%HOSTIP:%SMTPPORT/934 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>
 
@@ -50,7 +50,7 @@ smtp://%HOSTIP:%SMTPPORT/934 --mail-rcpt recipient@example.com --mail-from sende
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "QUIT"
 <protocol>
-EHLO 934
+EHLO %TESTNUMBER
 AUTH DIGEST-MD5
 *
 </protocol>

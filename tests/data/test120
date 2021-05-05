@@ -31,7 +31,7 @@ ftp
 ftp download with post-quote delete operation
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/120 -Q "-DELE file"
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -Q "-DELE file"
 </command>
 </client>
 
@@ -44,8 +44,8 @@ PWD
 EPSV
 PASV
 TYPE I
-SIZE 120
-RETR 120
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 DELE file
 QUIT
 </protocol>

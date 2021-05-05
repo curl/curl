@@ -30,7 +30,7 @@ ftp
 FTP RETR PASV
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/102
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 
 </client>
@@ -44,8 +44,8 @@ PWD
 EPSV
 PASV
 TYPE I
-SIZE 102
-RETR 102
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

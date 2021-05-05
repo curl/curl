@@ -26,6 +26,7 @@
 #include <iconv.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <errno.h>
 #include <stdarg.h>
 
@@ -343,7 +344,7 @@ curl_slist_append_ccsid(struct curl_slist *list,
 
 
 time_t
-curl_getdate_ccsid(const char *p, const time_t * unused, unsigned int ccsid)
+curl_getdate_ccsid(const char *p, const time_t *unused, unsigned int ccsid)
 {
   char *s;
   time_t t;
@@ -363,8 +364,8 @@ curl_getdate_ccsid(const char *p, const time_t * unused, unsigned int ccsid)
 
 
 static int
-convert_version_info_string(const char * * stringp,
-                            char * * bufp, int *left, unsigned int ccsid)
+convert_version_info_string(const char **stringp,
+                            char **bufp, int *left, unsigned int ccsid)
 {
   /* Helper for curl_version_info_ccsid(): convert a string if defined.
      Result is stored in the `*left'-byte buffer at `*bufp'.
@@ -394,12 +395,31 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
   int n;
   int nproto;
   curl_version_info_data *id;
+  int i;
+  const char *cpp;
+  static const size_t charfields[] = {
+    offsetof(curl_version_info_data, version),
+    offsetof(curl_version_info_data, host),
+    offsetof(curl_version_info_data, ssl_version),
+    offsetof(curl_version_info_data, libz_version),
+    offsetof(curl_version_info_data, ares),
+    offsetof(curl_version_info_data, libidn),
+    offsetof(curl_version_info_data, libssh_version),
+    offsetof(curl_version_info_data, brotli_version),
+    offsetof(curl_version_info_data, nghttp2_version),
+    offsetof(curl_version_info_data, quic_version),
+    offsetof(curl_version_info_data, cainfo),
+    offsetof(curl_version_info_data, capath),
+    offsetof(curl_version_info_data, zstd_version),
+    offsetof(curl_version_info_data, hyper_version),
+    offsetof(curl_version_info_data, gsasl_version)
+  };
 
   /* The assertion below is possible, because although the second operand
      is an enum member, the first is a #define. In that case, the OS/400 C
      compiler seems to compare string values after substitution. */
 
-#if CURLVERSION_NOW != CURLVERSION_FOURTH
+#if CURLVERSION_NOW != CURLVERSION_TENTH
 #error curl_version_info_data structure has changed: upgrade this procedure.
 #endif
 
@@ -425,26 +445,11 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
     n += nproto++;
     }
 
-  if(p->version)
-    n += strlen(p->version) + 1;
-
-  if(p->host)
-    n += strlen(p->host) + 1;
-
-  if(p->ssl_version)
-    n += strlen(p->ssl_version) + 1;
-
-  if(p->libz_version)
-    n += strlen(p->libz_version) + 1;
-
-  if(p->ares)
-    n += strlen(p->ares) + 1;
-
-  if(p->libidn)
-    n += strlen(p->libidn) + 1;
-
-  if(p->libssh_version)
-    n += strlen(p->libssh_version) + 1;
+  for(i = 0; i < sizeof(charfields) / sizeof(charfields[0]); i++) {
+    cpp = (const char **) ((char *) p + charfields[i]);
+    if(*cpp)
+      n += strlen(*cpp) + 1;
+  }
 
   /* Allocate thread space. */
 
@@ -476,28 +481,13 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
       if(convert_version_info_string(((const char * *) id->protocols) + i,
                                       &cp, &n, ccsid))
         return (curl_version_info_data *) NULL;
-    }
+  }
 
-  if(convert_version_info_string(&id->version, &cp, &n, ccsid))
-    return (curl_version_info_data *) NULL;
-
-  if(convert_version_info_string(&id->host, &cp, &n, ccsid))
-    return (curl_version_info_data *) NULL;
-
-  if(convert_version_info_string(&id->ssl_version, &cp, &n, ccsid))
-    return (curl_version_info_data *) NULL;
-
-  if(convert_version_info_string(&id->libz_version, &cp, &n, ccsid))
-    return (curl_version_info_data *) NULL;
-
-  if(convert_version_info_string(&id->ares, &cp, &n, ccsid))
-    return (curl_version_info_data *) NULL;
-
-  if(convert_version_info_string(&id->libidn, &cp, &n, ccsid))
-    return (curl_version_info_data *) NULL;
-
-  if(convert_version_info_string(&id->libssh_version, &cp, &n, ccsid))
-    return (curl_version_info_data *) NULL;
+  for(i = 0; i < sizeof(charfields) / sizeof(charfields[0]); i++) {
+    cpp = (const char **) ((char *) p + charfields[i]);
+    if(*cpp)
+      if(convert_version_info_string(cpp, &cp, &n, ccsid))
+  }
 
   return id;
 }
@@ -771,8 +761,8 @@ Curl_formadd_convert(struct curl_forms *forms,
 
 
 CURLFORMcode
-curl_formadd_ccsid(struct curl_httppost * * httppost,
-                   struct curl_httppost * * last_post, ...)
+curl_formadd_ccsid(struct curl_httppost **httppost,
+                   struct curl_httppost **last_post, ...)
 {
   va_list arg;
   CURLformoption option;
@@ -1132,6 +1122,7 @@ curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
   case CURLOPT_FTPPORT:
   case CURLOPT_FTP_ACCOUNT:
   case CURLOPT_FTP_ALTERNATIVE_TO_USER:
+  case CURLOPT_HSTS:
   case CURLOPT_INTERFACE:
   case CURLOPT_ISSUERCERT:
   case CURLOPT_KEYPASSWD:
@@ -1436,4 +1427,34 @@ curl_url_set_ccsid(CURLU *handle, CURLUPart what, const char *part,
   if(s)
     free(s);
   return result;
+}
+
+const struct curl_easyoption *
+curl_easy_option_by_name_ccsid(const char *name, unsigned int ccsid)
+{
+  const struct curl_easyoption *option = NULL;
+
+  if(name) {
+    char *s = dynconvert(ASCII_CCSID, name, -1, ccsid);
+
+    if(s) {
+      option = curl_easy_option_by_name(s);
+      free(s);
+    }
+  }
+
+  return option;
+}
+
+/* Return option name in the given ccsid. */
+const char *
+curl_easy_option_get_name_ccsid(const struct curl_easyoption *option,
+                                unsigned int ccsid)
+{
+  char *name = NULL;
+
+  if(option && option->name)
+    name = dynconvert(ccsid, option->name, -1, ASCII_CCSID);
+
+  return (const char *) name;
 }
