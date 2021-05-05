@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -24,10 +24,10 @@
 libcurl \- client-side URL transfers
 .SH DESCRIPTION
 This is a short overview on how to use libcurl in your C programs. There are
-specific man pages for each function mentioned in here. There are also the
-\fIlibcurl-easy(3)\fP man page, the \fIlibcurl-multi(3)\fP man page, the
-\fIlibcurl-share(3)\fP man page and the \fIlibcurl-tutorial(3)\fP man page for
-in-depth understanding on how to program with libcurl.
+specific man pages for each function mentioned in here. See
+\fIlibcurl-easy(3)\fP, \fIlibcurl-multi(3)\fP, \fIlibcurl-share(3)\fP,
+\fIlibcurl-url(3)\fP and \fIlibcurl-tutorial(3)\fP for in-depth understanding
+on how to program with libcurl.
 
 There are many bindings available that bring libcurl access to your favourite
 language. Look elsewhere for documentation on those.
@@ -84,6 +84,8 @@ free a list built with \fIcurl_formadd(3)\fP
 builds a linked list
 .IP curl_slist_free_all()
 frees a whole curl_slist
+.IP curl_url_set()
+parses a URL
 .RE
 
 .SH "LINKING WITH LIBCURL"
