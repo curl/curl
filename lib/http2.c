@@ -499,7 +499,7 @@ static int set_transfer_url(struct Curl_easy *data,
   const char *v;
   CURLU *u = curl_url();
   CURLUcode uc;
-  char *url;
+  char *url = NULL;
   int rc = 0;
 
   v = curl_pushheader_byname(hp, ":scheme");
