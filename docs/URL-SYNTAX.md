@@ -173,10 +173,14 @@ brackets). For example:
 If curl was built with International Domain Name (IDN) support, it can also
 handle host names using non-ASCII characters.
 
-curl supports IDN host names using the IDNA 2008 standard. This differs from
-browsers that follow the WHATWG URL spec, which dictates IDNA 2003 to be used.
-The two standards have a huge overlap but differ slightly, perhaps most
-famously in how they deal with the German "double s" (`ß`).
+When built with libidn2, curl uses the IDNA 2008 standard. This is equivalent
+to the WHATWG URL spec, but differs from certain browsers that use IDNA 2003
+Transitional Processing. The two standards have a huge overlap but differ
+slightly, perhaps most famously in how they deal with the German "double s"
+(`ß`).
+
+When winidn is used, curl uses IDNA 2003 Transitional Processing, like the rest
+of Windows.
 
 ## Port number
 
