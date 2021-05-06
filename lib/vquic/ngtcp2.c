@@ -603,7 +603,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
 
 static int
 cb_acked_stream_data_offset(ngtcp2_conn *tconn, int64_t stream_id,
-                            uint64_t offset, size_t datalen, void *user_data,
+                            uint64_t offset, uint64_t datalen, void *user_data,
                             void *stream_user_data)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
