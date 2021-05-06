@@ -384,13 +384,19 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
   timespent_ms = (curl_off_t)data->progress.timespent/1000; /* ms */
 
   /* The average download speed this far */
-  if(dl < CURL_OFF_T_MAX/1000)
+  if(dl < CURL_OFF_T_MAX/1000000)
+    data->progress.dlspeed =
+      (dl * 1000000 / (data->progress.timespent?data->progress.timespent:1));
+  else if(dl < CURL_OFF_T_MAX/1000)
     data->progress.dlspeed = (dl * 1000 / (timespent_ms>0?timespent_ms:1));
   else
     data->progress.dlspeed = (dl / (timespent>0?timespent:1));
 
   /* The average upload speed this far */
-  if(ul < CURL_OFF_T_MAX/1000)
+  if(ul < CURL_OFF_T_MAX/1000000)
+    data->progress.ulspeed =
+      (ul * 1000000 / (data->progress.timespent?data->progress.timespent:1));
+  else if(ul < CURL_OFF_T_MAX/1000)
     data->progress.ulspeed = (ul * 1000 / (timespent_ms>0?timespent_ms:1));
   else
     data->progress.ulspeed = (ul / (timespent>0?timespent:1));
