@@ -2198,7 +2198,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     else if(arg < UPLOADBUFFER_MIN)
       arg = UPLOADBUFFER_MIN;
 
-    data->set.upload_buffer_size = (int)arg;
+    data->set.upload_buffer_size = (unsigned int)arg;
     Curl_safefree(data->state.ulbuf); /* force a realloc next opportunity */
     break;
 
