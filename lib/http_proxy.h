@@ -38,15 +38,39 @@ CURLcode Curl_proxy_connect(struct Curl_easy *data, int sockindex);
 
 bool Curl_connect_complete(struct connectdata *conn);
 bool Curl_connect_ongoing(struct connectdata *conn);
+int Curl_connect_getsock(struct connectdata *conn);
 
 #else
 #define Curl_proxyCONNECT(x,y,z,w) CURLE_NOT_BUILT_IN
 #define Curl_proxy_connect(x,y) CURLE_OK
 #define Curl_connect_complete(x) CURLE_OK
 #define Curl_connect_ongoing(x) FALSE
+#define Curl_connect_getsock(x) 0
 #endif
 
 void Curl_connect_free(struct Curl_easy *data);
 void Curl_connect_done(struct Curl_easy *data);
+
+/* struct for HTTP CONNECT state data */
+struct http_connect_state {
+  struct HTTP http_proxy;
+  struct HTTP *prot_save;
+  struct dynbuf rcvbuf;
+  struct dynbuf req;
+  size_t nsend;
+  enum keeponval {
+    KEEPON_DONE,
+    KEEPON_CONNECT,
+    KEEPON_IGNORE
+  } keepon;
+  curl_off_t cl; /* size of content to read and ignore */
+  enum {
+    TUNNEL_INIT,    /* init/default/no tunnel state */
+    TUNNEL_CONNECT, /* CONNECT has been sent off */
+    TUNNEL_COMPLETE /* CONNECT response received completely */
+  } tunnel_state;
+  BIT(chunked_encoding);
+  BIT(close_connection);
+};
 
 #endif /* HEADER_CURL_HTTP_PROXY_H */

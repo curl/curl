@@ -936,10 +936,8 @@ static int waitproxyconnect_getsock(struct connectdata *conn,
 {
   sock[0] = conn->sock[FIRSTSOCKET];
 
-  /* when we've sent a CONNECT to a proxy, we should rather wait for the
-     socket to become readable to be able to get the response headers */
   if(conn->connect_state)
-    return GETSOCK_READSOCK(0);
+    return Curl_connect_getsock(conn);
 
   return GETSOCK_WRITESOCK(0);
 }
@@ -1111,11 +1109,11 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     for(i = 0; i< MAX_SOCKSPEREASYHANDLE; i++) {
       curl_socket_t s = CURL_SOCKET_BAD;
 
-      if(bitmap & GETSOCK_READSOCK(i)) {
+      if((bitmap & GETSOCK_READSOCK(i)) && VALID_SOCK((sockbunch[i]))) {
         ++nfds;
         s = sockbunch[i];
       }
-      if(bitmap & GETSOCK_WRITESOCK(i)) {
+      if((bitmap & GETSOCK_WRITESOCK(i)) && VALID_SOCK((sockbunch[i]))) {
         ++nfds;
         s = sockbunch[i];
       }

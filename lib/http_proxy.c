@@ -39,6 +39,8 @@
 #include "connect.h"
 #include "curlx.h"
 #include "vtls/vtls.h"
+#include "transfer.h"
+#include "multiif.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -88,28 +90,11 @@ CURLcode Curl_proxy_connect(struct Curl_easy *data, int sockindex)
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
 #ifndef CURL_DISABLE_PROXY
     /* for [protocol] tunneled through HTTP proxy */
-    struct HTTP http_proxy;
-    void *prot_save;
     const char *hostname;
     int remote_port;
     CURLcode result;
 
-    /* BLOCKING */
     /* We want "seamless" operations through HTTP proxy tunnel */
-
-    /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the
-     * member conn->proto.http; we want [protocol] through HTTP and we have
-     * to change the member temporarily for connecting to the HTTP
-     * proxy. After Curl_proxyCONNECT we have to set back the member to the
-     * original pointer
-     *
-     * This function might be called several times in the multi interface case
-     * if the proxy's CONNECT response is not instant.
-     */
-    prot_save = data->req.p.http;
-    memset(&http_proxy, 0, sizeof(http_proxy));
-    data->req.p.http = &http_proxy;
-    connkeep(conn, "HTTP proxy CONNECT");
 
     /* for the secondary socket (FTP), use the "connect to host"
      * but ignore the "connect to port" (use the secondary port)
@@ -128,8 +113,8 @@ CURLcode Curl_proxy_connect(struct Curl_easy *data, int sockindex)
       remote_port = conn->conn_to_port;
     else
       remote_port = conn->remote_port;
+
     result = Curl_proxyCONNECT(data, sockindex, hostname, remote_port);
-    data->req.p.http = prot_save;
     if(CURLE_OK != result)
       return result;
     Curl_safefree(data->state.aptr.proxyuserpwd);
@@ -153,18 +138,53 @@ bool Curl_connect_ongoing(struct connectdata *conn)
     (conn->connect_state->tunnel_state != TUNNEL_COMPLETE);
 }
 
+/* when we've sent a CONNECT to a proxy, we should rather either wait for the
+   socket to become readable to be able to get the response headers or if
+   we're still sending the request, wait for write. */
+int Curl_connect_getsock(struct connectdata *conn)
+{
+  struct HTTP *http;
+  DEBUGASSERT(conn);
+  DEBUGASSERT(conn->connect_state);
+  http = &conn->connect_state->http_proxy;
+
+  if(http->sending)
+    return GETSOCK_WRITESOCK(0);
+
+  return GETSOCK_READSOCK(0);
+}
+
 static CURLcode connect_init(struct Curl_easy *data, bool reinit)
 {
   struct http_connect_state *s;
   struct connectdata *conn = data->conn;
   if(!reinit) {
+    CURLcode result;
     DEBUGASSERT(!conn->connect_state);
+    /* we might need the upload buffer for streaming a partial request */
+    result = Curl_get_upload_buffer(data);
+    if(result)
+      return result;
+
     s = calloc(1, sizeof(struct http_connect_state));
     if(!s)
       return CURLE_OUT_OF_MEMORY;
     infof(data, "allocate connect buffer!\n");
     conn->connect_state = s;
     Curl_dyn_init(&s->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
+
+    /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the
+     * member conn->proto.http; we want [protocol] through HTTP and we have
+     * to change the member temporarily for connecting to the HTTP
+     * proxy. After Curl_proxyCONNECT we have to set back the member to the
+     * original pointer
+     *
+     * This function might be called several times in the multi interface case
+     * if the proxy's CONNECT response is not instant.
+     */
+    s->prot_save = data->req.p.http;
+    data->req.p.http = &s->http_proxy;
+    connkeep(conn, "HTTP proxy CONNECT");
   }
   else {
     DEBUGASSERT(conn->connect_state);
@@ -184,6 +204,10 @@ static void connect_done(struct Curl_easy *data)
   struct http_connect_state *s = conn->connect_state;
   s->tunnel_state = TUNNEL_COMPLETE;
   Curl_dyn_free(&s->rcvbuf);
+  Curl_dyn_free(&s->req);
+
+  /* retore the protocol pointer */
+  data->req.p.http = s->prot_save;
   infof(data, "CONNECT phase completed!\n");
 }
 
@@ -231,6 +255,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
   struct http_connect_state *s = conn->connect_state;
+  struct HTTP *http = data->req.p.http;
   char *linep;
   size_t perline;
 
@@ -246,7 +271,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
     timediff_t check;
     if(TUNNEL_INIT == s->tunnel_state) {
       /* BEGIN CONNECT PHASE */
-      struct dynbuf req;
+      struct dynbuf *req = &s->req;
       char *hostheader = NULL;
       char *host = NULL;
 
@@ -259,8 +284,8 @@ static CURLcode CONNECT(struct Curl_easy *data,
       free(data->req.newurl);
       data->req.newurl = NULL;
 
-      /* initialize a dynamic send-buffer */
-      Curl_dyn_init(&req, DYN_HTTP_REQUEST);
+      /* initialize send-buffer */
+      Curl_dyn_init(req, DYN_HTTP_REQUEST);
 
       result = CONNECT_host(data, conn,
                             hostname, remote_port, &hostheader, &host);
@@ -285,7 +310,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
           useragent = data->state.aptr.uagent;
 
         result =
-          Curl_dyn_addf(&req,
+          Curl_dyn_addf(req,
                         "CONNECT %s HTTP/%s\r\n"
                         "%s"  /* Host: */
                         "%s"  /* Proxy-Authorization */
@@ -300,16 +325,15 @@ static CURLcode CONNECT(struct Curl_easy *data,
                         proxyconn);
 
         if(!result)
-          result = Curl_add_custom_headers(data, TRUE, &req);
+          result = Curl_add_custom_headers(data, TRUE, req);
 
         if(!result)
           /* CRLF terminate the request */
-          result = Curl_dyn_add(&req, "\r\n");
+          result = Curl_dyn_add(req, "\r\n");
 
         if(!result) {
           /* Send the connect request to the proxy */
-          /* BLOCKING */
-          result = Curl_buffer_send(&req, data, &data->info.request_size, 0,
+          result = Curl_buffer_send(req, data, &data->info.request_size, 0,
                                     sockindex);
         }
         if(result)
@@ -317,7 +341,6 @@ static CURLcode CONNECT(struct Curl_easy *data,
       }
       free(host);
       free(hostheader);
-      Curl_dyn_free(&req);
       if(result)
         return result;
 
@@ -330,12 +353,42 @@ static CURLcode CONNECT(struct Curl_easy *data,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    if(!Curl_conn_data_pending(conn, sockindex))
+    if(!Curl_conn_data_pending(conn, sockindex) && !http->sending)
       /* return so we'll be called again polling-style */
       return CURLE_OK;
 
     /* at this point, the tunnel_connecting phase is over. */
 
+    if(http->sending == HTTPSEND_REQUEST) {
+      if(!s->nsend) {
+        size_t fillcount;
+        k->upload_fromhere = data->state.ulbuf;
+        result = Curl_fillreadbuffer(data, data->set.upload_buffer_size,
+                                     &fillcount);
+        if(result)
+          return result;
+        s->nsend = fillcount;
+      }
+      if(s->nsend) {
+        ssize_t bytes_written;
+        /* write to socket (send away data) */
+        result = Curl_write(data,
+                            conn->writesockfd,  /* socket to send to */
+                            k->upload_fromhere, /* buffer pointer */
+                            s->nsend,           /* buffer size */
+                            &bytes_written);    /* actually sent */
+
+        if(!result)
+          /* send to debug callback! */
+          result = Curl_debug(data, CURLINFO_HEADER_OUT,
+                              k->upload_fromhere, bytes_written);
+
+        s->nsend -= bytes_written;
+        k->upload_fromhere += bytes_written;
+        return result;
+      }
+      /* if nothing left to send, continue */
+    }
     { /* READING RESPONSE PHASE */
       int error = SELECT_OK;
 

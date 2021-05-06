@@ -309,6 +309,18 @@ CURLcode Curl_write(struct Curl_easy *data,
   conn = data->conn;
   num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
+#ifdef CURLDEBUG
+  {
+    /* Allow debug builds to override this logic to force short sends
+    */
+    char *p = getenv("CURL_SMALLSENDS");
+    if(p) {
+      size_t altsize = (size_t)strtoul(p, NULL, 10);
+      if(altsize)
+        len = CURLMIN(len, altsize);
+    }
+  }
+#endif
   bytes_written = conn->send[num](data, num, mem, len, &result);
 
   *written = bytes_written;
