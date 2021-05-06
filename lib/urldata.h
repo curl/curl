@@ -858,25 +858,8 @@ struct proxy_info {
   char *passwd;  /* proxy password string, allocated */
 };
 
-/* struct for HTTP CONNECT state data */
-struct http_connect_state {
-  struct dynbuf rcvbuf;
-  enum keeponval {
-    KEEPON_DONE,
-    KEEPON_CONNECT,
-    KEEPON_IGNORE
-  } keepon;
-  curl_off_t cl; /* size of content to read and ignore */
-  enum {
-    TUNNEL_INIT,    /* init/default/no tunnel state */
-    TUNNEL_CONNECT, /* CONNECT has been sent off */
-    TUNNEL_COMPLETE /* CONNECT response received completely */
-  } tunnel_state;
-  BIT(chunked_encoding);
-  BIT(close_connection);
-};
-
 struct ldapconninfo;
+struct http_connect_state;
 
 /* for the (SOCKS) connect state machine */
 enum connect_t {
