@@ -184,8 +184,7 @@ struct HTTP {
   enum {
     HTTPSEND_NADA,    /* init */
     HTTPSEND_REQUEST, /* sending a request */
-    HTTPSEND_BODY,    /* sending body */
-    HTTPSEND_LAST     /* never use this */
+    HTTPSEND_BODY     /* sending body */
   } sending;
 
 #ifndef CURL_DISABLE_HTTP

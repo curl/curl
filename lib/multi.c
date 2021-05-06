@@ -936,10 +936,8 @@ static int waitproxyconnect_getsock(struct connectdata *conn,
 {
   sock[0] = conn->sock[FIRSTSOCKET];
 
-  /* when we've sent a CONNECT to a proxy, we should rather wait for the
-     socket to become readable to be able to get the response headers */
   if(conn->connect_state)
-    return GETSOCK_READSOCK(0);
+    return Curl_connect_getsock(conn);
 
   return GETSOCK_WRITESOCK(0);
 }
