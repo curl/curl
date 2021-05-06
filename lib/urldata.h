@@ -1133,6 +1133,8 @@ struct connectdata {
   int socks5_gssapi_enctype;
 #endif
   unsigned short localport;
+
+  bool is_send_proxy_header;
 };
 
 /* The end of connectdata. */

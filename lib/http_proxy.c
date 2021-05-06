@@ -309,6 +309,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
         if(!result) {
           /* Send the connect request to the proxy */
           /* BLOCKING */
+          conn->is_send_proxy_header = true;
           result = Curl_buffer_send(&req, data, &data->info.request_size, 0,
                                     sockindex);
         }
