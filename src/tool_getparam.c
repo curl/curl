@@ -2355,6 +2355,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
 
   for(i = 1, stillflags = TRUE; i < argc && !result; i++) {
     orig_opt = curlx_convert_tchar_to_UTF8(argv[i]);
+    if(!orig_opt)
+      return PARAM_NO_MEM;
 
     if(stillflags && ('-' == orig_opt[0])) {
       bool passarg;
