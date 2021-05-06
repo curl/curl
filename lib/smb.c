@@ -627,9 +627,8 @@ static CURLcode smb_send_and_recv(struct Curl_easy *data, void **msg)
 
   /* Check if there is data in the transfer buffer */
   if(!smbc->send_size && smbc->upload_size) {
-    size_t nread = smbc->upload_size > data->set.upload_buffer_size ?
-      data->set.upload_buffer_size :
-      smbc->upload_size;
+    size_t nread = smbc->upload_size > (size_t)data->set.upload_buffer_size ?
+      (size_t)data->set.upload_buffer_size : smbc->upload_size;
     data->req.upload_fromhere = data->state.ulbuf;
     result = Curl_fillreadbuffer(data, nread, &nread);
     if(result && result != CURLE_AGAIN)
