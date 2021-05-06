@@ -3120,6 +3120,10 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   /* initialize a dynamic send-buffer */
   Curl_dyn_init(&req, DYN_HTTP_REQUEST);
 
+  /* make sure the header buffer is reset - if there are leftovers from a
+     previous transfer */
+  Curl_dyn_reset(&data->state.headerb);
+
   /* add the main request stuff */
   /* GET/HEAD/POST/PUT */
   result = Curl_dyn_addf(&req, "%s ", request);
