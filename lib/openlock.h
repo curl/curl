@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_RENAME_H
-#define HEADER_CURL_RENAME_H
+#ifndef HEADER_CURL_OPENLOCK_H
+#define HEADER_CURL_OPENLOCK_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2019 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,7 +21,14 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "curl_setup.h"
 
-int Curl_rename(const char *oldpath, const char *newpath);
+struct openlock {
+  int fd;
+  FILE *out;
+};
 
-#endif /* HEADER_CURL_RENAME_H */
+CURLcode Curl_openlock(const char *file, struct openlock *o);
+void Curl_openunlock(struct openlock *o);
+
+#endif /* HEADER_CURL_OPENLOCK_H */
