@@ -1821,7 +1821,7 @@ CURLcode Curl_smtp_escape_eob(struct Curl_easy *data, const ssize_t nread)
       return CURLE_OUT_OF_MEMORY;
     }
   }
-  DEBUGASSERT(data->set.upload_buffer_size >= (size_t)nread);
+  DEBUGASSERT((size_t)data->set.upload_buffer_size >= (size_t)nread);
 
   /* Have we already sent part of the EOB? */
   eob_sent = smtp->eob;
