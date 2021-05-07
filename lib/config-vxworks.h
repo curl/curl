@@ -56,6 +56,9 @@
 /* to disable LDAPS */
 #define CURL_DISABLE_LDAPS 1
 
+/* to disable NTLM authentication */
+#define CURL_DISABLE_NTLM 1
+
 /* to disable proxies */
 /* #undef CURL_DISABLE_PROXY */
 

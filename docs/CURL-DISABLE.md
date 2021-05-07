@@ -12,6 +12,10 @@ Disable support for HTTP cookies.
 
 Disable support for authentication methods using crypto.
 
+## CURL_DISABLE_NTLM
+
+Disable support for NTLM.
+
 ## CURL_DISABLE_DICT
 
 Disable the DICT protocol
