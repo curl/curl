@@ -216,6 +216,8 @@ option(CURL_DISABLE_COOKIES "to disable cookies support" OFF)
 mark_as_advanced(CURL_DISABLE_COOKIES)
 option(CURL_DISABLE_CRYPTO_AUTH "to disable cryptographic authentication" OFF)
 mark_as_advanced(CURL_DISABLE_CRYPTO_AUTH)
+option(CURL_DISABLE_NTLM "to disable NTLM support" OFF)
+mark_as_advanced(CURL_DISABLE_NTLM)
 option(CURL_DISABLE_VERBOSE_STRINGS "to disable verbose strings" OFF)
 mark_as_advanced(CURL_DISABLE_VERBOSE_STRINGS)
 option(ENABLE_IPV6 "Define if you want to enable IPv6 support" ON)
@@ -1352,8 +1354,8 @@ endmacro()
 
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_MBEDTLS OR
-                                     USE_DARWINSSL OR USE_WIN32_CRYPTO))
+if(NOT (CURL_DISABLE_CRYPTO_AUTH OR CURL_DISABLE_NTLM) AND
+    (USE_OPENSSL OR USE_MBEDTLS OR USE_DARWINSSL OR USE_WIN32_CRYPTO))
   set(use_curl_ntlm_core ON)
 endif()
 
@@ -1381,10 +1383,10 @@ _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-_add_if("NTLM"          NOT CURL_DISABLE_CRYPTO_AUTH AND
+_add_if("NTLM"          NOT (CURL_DISABLE_CRYPTO_AUTH OR CURL_DISABLE_NTLM) AND
                         (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
 # TODO missing option (autoconf: --enable-ntlm-wb)
-_add_if("NTLM_WB"       NOT CURL_DISABLE_CRYPTO_AUTH AND
+_add_if("NTLM_WB"       NOT (CURL_DISABLE_CRYPTO_AUTH OR CURL_DISABLE_NTLM) AND
                         (use_curl_ntlm_core OR USE_WINDOWS_SSPI) AND
                         NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
 # TODO missing option (--enable-tls-srp), depends on GNUTLS_SRP/OPENSSL_SRP
