@@ -150,8 +150,8 @@ int Curl_connect_getsock(struct connectdata *conn)
 
   if(http->sending)
     return GETSOCK_WRITESOCK(0);
-  else
-    return GETSOCK_READSOCK(0);
+
+  return GETSOCK_READSOCK(0);
 }
 
 static CURLcode connect_init(struct Curl_easy *data, bool reinit)
