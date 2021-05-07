@@ -644,24 +644,20 @@ int netware_init(void);
 #endif
 
 /* Single point where USE_NTLM definition might be defined */
-#ifndef CURL_DISABLE_CRYPTO_AUTH
-#if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                     \
-  defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) ||  \
-  defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
-  (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
-
-#define USE_CURL_NTLM_CORE
-
-#  if defined(USE_MBEDTLS)
-/* Get definition of MBEDTLS_MD4_C */
-#  include <mbedtls/md4.h>
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(CURL_DISABLE_NTLM)
+#  if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                       \
+      defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) ||  \
+      defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
+      (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
+#    define USE_CURL_NTLM_CORE
+#    if defined(USE_MBEDTLS)
+       /* Get definition of MBEDTLS_MD4_C */
+#      include <mbedtls/md4.h>
+#    endif
 #  endif
-
-#endif
-
-#if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
-#define USE_NTLM
-#endif
+#  if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
+#    define USE_NTLM
+#  endif
 #endif
 
 #ifdef CURL_WANTS_CA_BUNDLE_ENV
