@@ -3386,7 +3386,8 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
   if(!k->http_bodyless &&
      !data->set.ignorecl && checkprefix("Content-Length:", headp)) {
     curl_off_t contentlength;
-    CURLofft offt = curlx_strtoofft(headp + 15, NULL, 10, &contentlength);
+    CURLofft offt = curlx_strtoofft(headp + strlen("Content-Length:"),
+                                    NULL, 10, &contentlength);
 
     if(offt == CURL_OFFT_OK) {
       if(data->set.max_filesize &&
@@ -3485,7 +3486,9 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
      * of chunks, and a chunk-data set to zero signals the
      * end-of-chunks. */
 
-    result = Curl_build_unencoding_stack(data, headp + 18, TRUE);
+    result = Curl_build_unencoding_stack(data,
+                                         headp + strlen("Transfer-Encoding:"),
+                                         TRUE);
     if(result)
       return result;
   }
@@ -3498,17 +3501,20 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
      * 2616). zlib cannot handle compress.  However, errors are
      * handled further down when the response body is processed
      */
-    result = Curl_build_unencoding_stack(data, headp + 17, FALSE);
+    result = Curl_build_unencoding_stack(data,
+                                         headp + strlen("Content-Encoding:"),
+                                         FALSE);
     if(result)
       return result;
   }
   else if(checkprefix("Retry-After:", headp)) {
     /* Retry-After = HTTP-date / delay-seconds */
     curl_off_t retry_after = 0; /* zero for unknown or "now" */
-    time_t date = Curl_getdate_capped(&headp[12]);
+    time_t date = Curl_getdate_capped(headp + strlen("Retry-After:"));
     if(-1 == date) {
       /* not a date, try it as a decimal number */
-      (void)curlx_strtoofft(&headp[12], NULL, 10, &retry_after);
+      (void)curlx_strtoofft(headp + strlen("Retry-After:"),
+                            NULL, 10, &retry_after);
     }
     else
       /* convert date to number of seconds into the future */
@@ -3527,7 +3533,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
        The forth means the requested range was unsatisfied.
     */
 
-    char *ptr = headp + 14;
+    char *ptr = headp + strlen("Content-Range:");
 
     /* Move forward until first digit or asterisk */
     while(*ptr && !ISDIGIT(*ptr) && *ptr != '*')
@@ -3550,7 +3556,8 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
                     CURL_LOCK_ACCESS_SINGLE);
     Curl_cookie_add(data,
-                    data->cookies, TRUE, FALSE, headp + 11,
+                    data->cookies, TRUE, FALSE,
+                    headp + strlen("Set-Cookie:"),
                     /* If there is a custom-set Host: name, use it
                        here, or else use real peer host name. */
                     data->state.aptr.cookiehost?
@@ -3635,7 +3642,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
           (conn->handler->flags & PROTOPT_SSL)) {
     CURLcode check =
       Curl_hsts_parse(data->hsts, data->state.up.hostname,
-                      &headp[ sizeof("Strict-Transport-Security:") -1 ]);
+                      headp + strlen("Strict-Transport-Security:"));
     if(check)
       infof(data, "Illegal STS header skipped\n");
 #ifdef DEBUGBUILD
@@ -3659,7 +3666,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
     /* the ALPN of the current request */
     enum alpnid id = (conn->httpversion == 20) ? ALPN_h2 : ALPN_h1;
     result = Curl_altsvc_parse(data, data->asi,
-                               &headp[ strlen("Alt-Svc:") ],
+                               headp + strlen("Alt-Svc:"),
                                id, conn->host.name,
                                curlx_uitous(conn->remote_port));
     if(result)
