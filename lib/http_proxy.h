@@ -38,17 +38,18 @@ CURLcode Curl_proxy_connect(struct Curl_easy *data, int sockindex);
 
 bool Curl_connect_complete(struct connectdata *conn);
 bool Curl_connect_ongoing(struct connectdata *conn);
+int Curl_connect_getsock(struct connectdata *conn);
 
 #else
 #define Curl_proxyCONNECT(x,y,z,w) CURLE_NOT_BUILT_IN
 #define Curl_proxy_connect(x,y) CURLE_OK
 #define Curl_connect_complete(x) CURLE_OK
 #define Curl_connect_ongoing(x) FALSE
+#define Curl_connect_getsock(x) 0
 #endif
 
 void Curl_connect_free(struct Curl_easy *data);
 void Curl_connect_done(struct Curl_easy *data);
-int Curl_connect_getsock(struct connectdata *conn);
 
 /* struct for HTTP CONNECT state data */
 struct http_connect_state {
