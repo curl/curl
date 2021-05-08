@@ -181,7 +181,7 @@
  20.6 Use the RFC6265 test suite
  20.7 Support LD_PRELOAD on macOS
  20.8 Run web-platform-tests url tests
- 20.9 Use "random" ports for the test servers
+ 20.9 Bring back libssh tests on Travis
 
 ==============================================================================
 
@@ -1263,13 +1263,8 @@
 
  See https://github.com/curl/curl/issues/4477
 
-20.9 Use "random" ports for the test servers
+20.9 Bring back libssh tests on Travis
 
- Instead of insisting and using fixed port numbers for the tests (even though
- they can be changed with a switch), consider letting each server pick a
- random available one at start-up, store that info in a file and let the test
- suite use that.
-
- We could then remove the "check that it is our server that's running"-check
- and we would immediately detect when we write tests wrongly to use hard-coded
- port numbers.
+ In https://github.com/curl/curl/pull/7012 we remove the libssh builds and
+ tests from Travis CI due to them not working. This should be remedied and
+ libssh builds be brought back.
