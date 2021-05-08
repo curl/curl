@@ -369,8 +369,9 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
   }
 }
 
-/* returns the average speed */
-static curl_off_t trspeed(curl_off_t size, curl_off_t us)
+/* returns the average speed in bytes / second */
+static curl_off_t trspeed(curl_off_t size, /* number of bytes */
+                          curl_off_t us)   /* microseconds */
 {
   if(us < 1)
     return size * 1000000;
