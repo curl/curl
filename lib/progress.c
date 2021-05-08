@@ -372,23 +372,9 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
 /* returns the average speed */
 static curl_off_t trspeed(curl_off_t size, curl_off_t us)
 {
-  curl_off_t sec;
-  if(size < CURL_OFF_T_MAX/1000000) {
-    if(us < 1)
-      return size * 1000000;
-    return (size * 1000000) / us;
-  }
-  else if(size < CURL_OFF_T_MAX/1000) {
-    curl_off_t ms = us/1000;
-    if(ms < 1)
-      return size * 1000;
-    return (size * 1000) / ms;
-  }
-  sec = us / 1000000;
-  if(sec < 1)
-    return size;
-
-  return size / sec;
+  if(us < 1)
+    return size * 1000000;
+  return (curl_off_t)((long double)size/us * 1000000);
 }
 
 /* returns TRUE if it's time to show the progress meter */
