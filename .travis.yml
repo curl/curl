@@ -63,25 +63,25 @@ jobs:
         - libssh2-1-dev
         - libbrotli-dev
         - libzstd-dev
-  - env:
-    - T=normal C="--with-openssl --with-libssh"
-    # Avoid bionic, its pre-release libssh version triggers deprecation warnings.
-    dist: focal
-    addons:
-      apt:
-        <<: *common_apt
-        packages:
-        - cmake
-        - valgrind
-        - libev-dev
-        - libc-ares-dev
-        - g++-8
-        - stunnel4
-        - libidn2-dev
-        - gnutls-bin
-        # The above list is common_packages minus impacket.
-        - libssh-dev
-        - ninja-build
+#  - env:
+#    - T=normal C="--with-openssl --with-libssh"
+#    # Avoid bionic, its pre-release libssh version triggers deprecation warnings.
+#    dist: focal
+#    addons:
+#      apt:
+#        <<: *common_apt
+#        packages:
+#        - cmake
+#        - valgrind
+#        - libev-dev
+#        - libc-ares-dev
+#        - g++-8
+#        - stunnel4
+#        - libidn2-dev
+#        - gnutls-bin
+#        # The above list is common_packages minus impacket.
+#        - libssh-dev
+#        - ninja-build
   - env:
     - T=normal C="--enable-ares --with-openssl"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
