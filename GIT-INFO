@@ -13,7 +13,7 @@ inner sanctum.
 To build in environments that support configure, after having extracted
 everything from git, do this:
 
-./buildconf
+autoreconf -fi
 ./configure
 make
 
