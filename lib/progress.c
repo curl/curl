@@ -369,37 +369,39 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
   }
 }
 
+/* returns the average speed */
+static curl_off_t trspeed(curl_off_t size, curl_off_t us)
+{
+  curl_off_t sec;
+  if(size < CURL_OFF_T_MAX/1000000) {
+    if(us < 1)
+      return size * 1000000;
+    return (size * 1000000) / us;
+  }
+  else if(size < CURL_OFF_T_MAX/1000) {
+    curl_off_t ms = us/1000;
+    if(ms < 1)
+      return size * 1000;
+    return (size * 1000) / ms;
+  }
+  sec = us / 1000000;
+  if(sec < 1)
+    return size;
+
+  return size / sec;
+}
+
 /* returns TRUE if it's time to show the progress meter */
 static bool progress_calc(struct Curl_easy *data, struct curltime now)
 {
-  curl_off_t timespent;
-  curl_off_t timespent_ms; /* milliseconds */
-  curl_off_t dl = data->progress.downloaded;
-  curl_off_t ul = data->progress.uploaded;
   bool timetoshow = FALSE;
 
-  /* The time spent so far (from the start) */
+  /* The time spent so far (from the start) in microseconds */
   data->progress.timespent = Curl_timediff_us(now, data->progress.start);
-  timespent = (curl_off_t)data->progress.timespent/1000000; /* seconds */
-  timespent_ms = (curl_off_t)data->progress.timespent/1000; /* ms */
-
-  /* The average download speed this far */
-  if(dl < CURL_OFF_T_MAX/1000000)
-    data->progress.dlspeed =
-      (dl * 1000000 / (data->progress.timespent?data->progress.timespent:1));
-  else if(dl < CURL_OFF_T_MAX/1000)
-    data->progress.dlspeed = (dl * 1000 / (timespent_ms>0?timespent_ms:1));
-  else
-    data->progress.dlspeed = (dl / (timespent>0?timespent:1));
-
-  /* The average upload speed this far */
-  if(ul < CURL_OFF_T_MAX/1000000)
-    data->progress.ulspeed =
-      (ul * 1000000 / (data->progress.timespent?data->progress.timespent:1));
-  else if(ul < CURL_OFF_T_MAX/1000)
-    data->progress.ulspeed = (ul * 1000 / (timespent_ms>0?timespent_ms:1));
-  else
-    data->progress.ulspeed = (ul / (timespent>0?timespent:1));
+  data->progress.dlspeed = trspeed(data->progress.downloaded,
+                                   data->progress.timespent);
+  data->progress.ulspeed = trspeed(data->progress.uploaded,
+                                   data->progress.timespent);
 
   /* Calculations done at most once a second, unless end is reached */
   if(data->progress.lastshow != now.tv_sec) {
