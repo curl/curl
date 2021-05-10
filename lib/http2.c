@@ -1619,8 +1619,15 @@ static ssize_t http2_recv(struct Curl_easy *data, int sockindex,
     return -1;
   }
 
-  if(stream->closed)
-    /* closed overrides paused */
+  /*
+   * Closed overrides paused.
+   * However the residual data right after finished protocol switching (h2c
+   * upgrade) needs special handling, for some servers (e.g. nghttp2's reverse
+   * proxy) may start sending the response payload immediately following the
+   * server-side connection preface, other than waiting for the client's
+   * connection preface and possible setting negotiations.
+   */
+  if(stream->closed && (data->req.upgr101 != UPGR101_RECEIVED))
     return http2_handle_stream_close(conn, data, stream, err);
 
   /* Nullify here because we call nghttp2_session_send() and they
