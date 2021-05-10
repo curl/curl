@@ -1665,6 +1665,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
    * no need to inspect the error, any error case should have jumped into the
    * error block below.
    */
+  free(tempstore);
   return CURLE_OK;
 
 error:
