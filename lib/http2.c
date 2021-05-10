@@ -2273,10 +2273,10 @@ CURLcode Curl_http2_switched(struct Curl_easy *data,
     /* stream 1 is opened implicitly on upgrade */
     stream->stream_id = 1;
     /* queue SETTINGS frame (again) */
-    rv = nghttp2_session_upgrade(httpc->h2, httpc->binsettings,
-                                 httpc->binlen, NULL);
+    rv = nghttp2_session_upgrade2(httpc->h2, httpc->binsettings, httpc->binlen,
+                                  data->state.httpreq == HTTPREQ_HEAD, NULL);
     if(rv) {
-      failf(data, "nghttp2_session_upgrade() failed: %s(%d)",
+      failf(data, "nghttp2_session_upgrade2() failed: %s(%d)",
             nghttp2_strerror(rv), rv);
       return CURLE_HTTP2;
     }
