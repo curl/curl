@@ -62,7 +62,7 @@ test343 test344 test345 test346 test347 test348 test349 test350 test351 \
 test352 test353 test354 test355 test356 test357 test358 test359 test360 \
 test361 test362 test363 test364 \
 \
-test393 test394 test395 test396 test397 \
+test392 test393 test394 test395 test396 test397 \
 \
 test400 test401 test402 test403 test404 test405 test406 test407 test408 \
 test409 test410 \
