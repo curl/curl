@@ -709,7 +709,7 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
       for(;;) {
         size_t llen;
         size_t wordlen;
-        unsigned int mechbit;
+        unsigned short mechbit;
 
         while(len &&
               (*line == ' ' || *line == '\t' ||
