@@ -4,7 +4,7 @@ curl and libcurl 7.77.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2397
+ Contributors:                 2399
 
 This release includes the following changes:
 
@@ -39,6 +39,7 @@ This release includes the following bugfixes:
  o docs: fix typo in fail-with-body doc [63]
  o easy: ignore sigpipe in curl_easy_send [69]
  o FILEFORMAT: mention sectransp as a feature [89]
+ o GIT-INFO: suggest using autoreconf instead of buildconf [96]
  o GnuTLS: don't allow TLS 1.3 for versions that don't support it [77]
  o gnutls: make setting only the MAX TLS allowed version work [83]
  o gskit: fix CURL_DISABLE_PROXY build [57]
@@ -47,8 +48,14 @@ This release includes the following bugfixes:
  o http2: fix a resource leak in push_promise() [54]
  o http2: fix resource leaks in set_transfer_url() [55]
  o http2: move the stream error field to the per-transfer storage [36]
+ o http2: skip immediate parsing of payload following protocol switch [90]
+ o http2: use nghttp2_session_upgrade2 instead of nghttp2_session_upgrade [91]
+ o HTTP3: make the ngtcp2 build use the quictls fork [98]
+ o http: deal with partial CONNECT sends [97]
  o http: fix the check for 'Authorization' with Bearer [53]
+ o http: limit the initial send amount to used upload buffer size [99]
  o http: reset the header buffer when sending the request [61]
+ o http: use offsets inst of integer literals for header parsing [95]
  o INSTALL: add IBM i specific quirks [75]
  o krb5/name_to_level: replace checkprefix with curl_strequal [49]
  o krb5: don't use 'static' to store PBSZ size response [23]
@@ -74,7 +81,9 @@ This release includes the following bugfixes:
  o openldap: protect SSL-specific code with proper #ifdef [12]
  o openldap: replace ldap_ prefix on private functions [84]
  o openssl: fix build error with OpenSSL < 1.0.2 [4]
+ o openssl: remove unneeded cast for CertOpenSystemStore() [93]
  o os400: additional support for options metadata [24]
+ o progress: fix scan-build-11 warnings [92]
  o progress: when possible, calculate transfer speeds with microseconds [48]
  o README.md: delete Codacy UTM parameters [5]
  o Revert "Revert 'multi: implement wait using winsock events'" [26]
@@ -95,6 +104,7 @@ This release includes the following bugfixes:
  o tool_getparam: replace (in-place) '%20' by '+' according to RFC1866 [14]
  o tool_operate: don't discard failed parallel transfer result [16]
  o tool_writeout: fix the HTTP_CODE json output [11]
+ o travis: disable the failing libssh build [94]
  o URL-SYNTAX: update IDNA section for WHATWG spec changes [74]
  o urlapi: "normalize" numerical IPv4 host names [6]
  o vauth: factor base64 conversions out of authentication procedures [22]
@@ -111,19 +121,21 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   3eka on github, Ayushman Singh Chauhan, Benjamin Riefenstahl, Blake Burkhart,
-  Calvin Buckley, Dan Fandrich, Daniel Carpenter, Daniel Stenberg, David Cook,
-  Dmitry Karpov, Dmitry Kostjuchenko, ebejan on github, Emil Engler,
-  Georeth Zhou, Gergely Nagy, Gilles Vollant, Harry Sintonen, Illarion Taev,
+  Calvin Buckley, Cameron Cawley, Dan Fandrich, Daniel Carpenter,
+  Daniel Gustafsson, Daniel Stenberg, David Cook, Dmitry Karpov,
+  Dmitry Kostjuchenko, ebejan on github, Emil Engler, Georeth Zhou,
+  Gergely Nagy, Gilles Vollant, Harry Sintonen, Illarion Taev,
   Jacob Hoffman-Andrews, Jakub Zakrzewski, Javier Blazquez, J. Bromley,
   Jeroen Ooms, Johann150 on github, Jon Rumsey, Kamil Dudka, Kevin Burke,
   Kevin R. Bulgrien, Lucas Servén Marín, MAntoniak on github, Marcel Raad,
   Marc Hörsken, Martin Halle, Max Dymond, Michael Kolechkin, Michał Antoniak,
-  Michal Rus, Morten Minde Neergaard, Patrick Monnerat, Pontus Lundkvist,
-  Ralph Langendam, Ray Satiro, rcombs on github, Rich FitzJohn,
-  sergio-nsk on github, Stefan Karpinski, Timo Lange, Timothy Gu,
-  tmkk on github, Tobias Gabriel, Tommy Odom, Travis Burtrum on github,
-  Tuomas Siipola, Victor Vieux, Viktor Szakats, Wes Hinsley, Yusuke Nakamura,
-  (57 contributors)
+  Michal Rus, Morten Minde Neergaard, Patrick Monnerat, Peng-Yu Chen,
+  Pontus Lundkvist, Ralph Langendam, Ray Satiro, rcombs on github,
+  Rich FitzJohn, sergio-nsk on github, Stefan Karpinski, Timo Lange,
+  Timothy Gu, tmkk on github, Tobias Gabriel, Tommy Odom,
+  Travis Burtrum on github, Tuomas Siipola, ustcqidi on github, Victor Vieux,
+  Viktor Szakats, Wes Hinsley, Yusuke Nakamura,
+  (61 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -215,3 +227,13 @@ References to bug reports and discussions on issues:
  [87] = https://curl.se/bug/?i=6997
  [88] = https://curl.se/bug/?i=6999
  [89] = https://curl.se/bug/?i=7001
+ [90] = https://curl.se/bug/?i=7036
+ [91] = https://curl.se/bug/?i=7041
+ [92] = https://curl.se/mail/lib-2021-05/0022.html
+ [93] = https://curl.se/bug/?i=7025
+ [94] = https://curl.se/bug/?i=7011
+ [95] = https://curl.se/bug/?i=7032
+ [96] = https://curl.se/bug/?i=7033
+ [97] = https://curl.se/bug/?i=6950
+ [98] = https://curl.se/bug/?i=7031
+ [99] = https://curl.se/bug/?i=7022
