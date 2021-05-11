@@ -919,7 +919,7 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
       /* Do we have a SASL based authentication mechanism? */
       else if(wordlen > 5 && !memcmp(line, "AUTH=", 5)) {
         size_t llen;
-        unsigned int mechbit;
+        unsigned short mechbit;
 
         line += 5;
         wordlen -= 5;

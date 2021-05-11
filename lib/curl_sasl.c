@@ -58,7 +58,7 @@
 static const struct {
   const char   *name;  /* Name */
   size_t        len;   /* Name length */
-  unsigned int  bit;   /* Flag bit */
+  unsigned short bit;   /* Flag bit */
 } mechtable[] = {
   { "LOGIN",        5,  SASL_MECH_LOGIN },
   { "PLAIN",        5,  SASL_MECH_PLAIN },
@@ -128,7 +128,8 @@ void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
  *
  * Returns the SASL mechanism token or 0 if no match.
  */
-unsigned int Curl_sasl_decode_mech(const char *ptr, size_t maxlen, size_t *len)
+unsigned short Curl_sasl_decode_mech(const char *ptr, size_t maxlen,
+                                     size_t *len)
 {
   unsigned int i;
   char c;
@@ -173,7 +174,7 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
   if(!strncmp(value, "*", len))
     sasl->prefmech = SASL_AUTH_DEFAULT;
   else {
-    unsigned int mechbit = Curl_sasl_decode_mech(value, len, &mechlen);
+    unsigned short mechbit = Curl_sasl_decode_mech(value, len, &mechlen);
     if(mechbit && mechlen == len)
       sasl->prefmech |= mechbit;
     else

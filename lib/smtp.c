@@ -894,7 +894,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
       for(;;) {
         size_t llen;
         size_t wordlen;
-        unsigned int mechbit;
+        unsigned short mechbit;
 
         while(len &&
               (*line == ' ' || *line == '\t' ||
