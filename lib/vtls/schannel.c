@@ -562,15 +562,9 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                    "names in server certificates.\n"));
     }
 
-    /* security request flags */
-    BACKEND->req_flags = ISC_REQ_SEQUENCE_DETECT | ISC_REQ_REPLAY_DETECT |
-      ISC_REQ_CONFIDENTIALITY | ISC_REQ_ALLOCATE_MEMORY |
-      ISC_REQ_STREAM;
-
     if(!SSL_SET_OPTION(auto_client_cert)) {
       schannel_cred.dwFlags &= ~SCH_CRED_USE_DEFAULT_CREDS;
       schannel_cred.dwFlags |= SCH_CRED_NO_DEFAULT_CREDS;
-      BACKEND->req_flags |= ISC_REQ_USE_SUPPLIED_CREDS;
       infof(data, "schannel: disabled automatic use of client certificate\n");
     }
     else
@@ -908,6 +902,15 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   /* setup output buffer */
   InitSecBuffer(&outbuf, SECBUFFER_EMPTY, NULL, 0);
   InitSecBufferDesc(&outbuf_desc, &outbuf, 1);
+
+  /* security request flags */
+  BACKEND->req_flags = ISC_REQ_SEQUENCE_DETECT | ISC_REQ_REPLAY_DETECT |
+    ISC_REQ_CONFIDENTIALITY | ISC_REQ_ALLOCATE_MEMORY |
+    ISC_REQ_STREAM;
+
+  if(!SSL_SET_OPTION(auto_client_cert)) {
+    BACKEND->req_flags |= ISC_REQ_USE_SUPPLIED_CREDS;
+  }
 
   /* allocate memory for the security context handle */
   BACKEND->ctxt = (struct Curl_schannel_ctxt *)
