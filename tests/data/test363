@@ -42,8 +42,9 @@ contents
 #
 # Client-side
 <client>
-<fetures>
+<features>
 debug
+proxy
 </features>
 <server>
 http
@@ -61,9 +62,6 @@ CURL_SMALLSENDS=40
  <command>
 http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT -d "datatopost=ohthatsfunyesyes"
 </command>
-<features>
-proxy
-</features>
 </client>
 
 #

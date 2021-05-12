@@ -24,7 +24,7 @@ Server: test-server/fake
 Content-Type: text/html
 Content-Length: 0
 
-</data>
+</data2>
 </reply>
 
 # Client-side
