@@ -129,6 +129,10 @@ struct querycase {
 };
 
 static struct testcase get_parts_list[] ={
+  {"https://u ser:pass word@example.net/ge t?this=and what",
+   "https | u ser | pass word | [13] | example.net | [15] | /ge t | "
+   "this=and what | [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK },
   {"[::1]",
    "http | [11] | [12] | [13] | [::1] | [15] | / | [16] | [17]",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK },
