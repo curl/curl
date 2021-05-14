@@ -789,7 +789,6 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   /* duplicate all blobs */
   for(j = (enum dupblob)0; j < BLOB_LAST; j++) {
     result = Curl_setblobopt(&dst->set.blobs[j], src->set.blobs[j]);
-    /* Curl_setstropt return CURLE_BAD_FUNCTION_ARGUMENT with blob */
     if(result)
       return result;
   }
