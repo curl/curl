@@ -267,6 +267,8 @@ char *curl_version(void)
       msnprintf(ldap_buf, sizeof(ldap_buf), "%s/%u.%u.%u",
                 api.ldapai_vendor_name, major, minor, patch);
       src[i++] = ldap_buf;
+      ldap_memfree(api.ldapai_vendor_name);
+      ber_memvfree((void **)api.ldapai_extensions);
     }
   }
 #endif
