@@ -510,7 +510,8 @@ static int data_pending(const struct Curl_easy *data)
        a workaround, we return nonzero here to call http2_recv. */
     ((conn->handler->protocol&PROTO_FAMILY_HTTP) && conn->httpversion >= 20) ||
 #endif
-    Curl_ssl_data_pending(conn, FIRSTSOCKET);
+    Curl_ssl_data_pending(conn, FIRSTSOCKET) ||
+    Curl_ssl_data_pending(conn, SECONDARYSOCKET);
 }
 
 /*
