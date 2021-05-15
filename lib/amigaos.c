@@ -90,6 +90,45 @@ void Curl_amiga_X509_free(X509 *a)
 {
   X509_free(a);
 }
+
+/* AmiSSL replaces many functions with macros. Curl requires pointer
+ * to some of these functions. Thus, we have to encapsulate these macros.
+ */   
+
+#include "warnless.h"
+
+#pragma push_macro("SHA256_Init")
+#undef SHA256_Init
+int SHA256_Init(SHA256_CTX *c)
+{
+#pragma pop_macro("SHA256_Init")
+  return SHA256_Init(c);
+};
+
+#pragma push_macro("SHA256_Update")
+#undef SHA256_Update
+int SHA256_Update(SHA256_CTX *c, const void *data, size_t len)
+{
+#pragma pop_macro("SHA256_Update")
+  return SHA256_Update(c, data, curlx_uztoui(len));
+};
+
+#pragma push_macro("SHA256_Final")
+#undef SHA256_Final
+int SHA256_Final(unsigned char *md, SHA256_CTX *c)
+{
+#pragma pop_macro("SHA256_Final")
+  return SHA256_Final(md, c);
+};
+
+#pragma push_macro("X509_INFO_free")
+#undef X509_INFO_free
+void X509_INFO_free(X509_INFO *a)
+{
+#pragma pop_macro("X509_INFO_free")
+  X509_INFO_free(a);
+};
+
 #endif /* USE_AMISSL */
 #endif /* __AMIGA__ */
 
