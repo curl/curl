@@ -11,7 +11,7 @@ all_proxy
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -45,7 +45,7 @@ SOCKS5 proxy auth
 
 # target a port that won't work without the SOCKS magic
  <command>
-http://%HOSTIP:1/717 -x socks5://uz3r:p4ssworm@%HOSTIP:%SOCKSPORT
+http://%HOSTIP:1/%TESTNUMBER -x socks5://uz3r:p4ssworm@%HOSTIP:%SOCKSPORT
 </command>
 <features>
 proxy
@@ -56,7 +56,7 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /717 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:1
 User-Agent: curl/%VERSION
 Accept: */*

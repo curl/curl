@@ -37,7 +37,7 @@ ftp
 FTP dir list multicwd then again nocwd
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/list/this/path/1149/ --ftp-method multicwd --next ftp://%HOSTIP:%FTPPORT/list/this/path/1149/ --ftp-method nocwd
+ftp://%HOSTIP:%FTPPORT/list/this/path/%TESTNUMBER/ --ftp-method multicwd --next ftp://%HOSTIP:%FTPPORT/list/this/path/%TESTNUMBER/ --ftp-method nocwd
 </command>
 </client>
 
@@ -51,13 +51,13 @@ PWD
 CWD list
 CWD this
 CWD path
-CWD 1149
+CWD %TESTNUMBER
 EPSV
 TYPE A
 LIST
 CWD /
 EPSV
-LIST list/this/path/1149
+LIST list/this/path/%TESTNUMBER
 QUIT
 </protocol>
 </verify>

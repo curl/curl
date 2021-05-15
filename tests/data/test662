@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
+HTTP proxy
 followlocation
 </keywords>
 </info>
@@ -11,28 +12,28 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 302 OK
-Location: http://example.net/tes t case=/6620002
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Location: http://example.net/tes t case=/%TESTNUMBER0002
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0
 
 </data>
 <data2>
 HTTP/1.1 200 OK
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 5
 
 body
 </data2>
 <datacheck>
 HTTP/1.1 302 OK
-Location: http://example.net/tes t case=/6620002
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Location: http://example.net/tes t case=/%TESTNUMBER0002
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0
 
 HTTP/1.1 200 OK
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 5
 
 body
@@ -49,7 +50,7 @@ http
 HTTP redirect with whitespace in absolute Location: URL
  </name>
  <command>
-http://example.com/please/gimme/662 -L -x http://%HOSTIP:%HTTPPORT
+http://example.com/please/gimme/%TESTNUMBER -L -x http://%HOSTIP:%HTTPPORT
 </command>
 <features>
 proxy
@@ -60,13 +61,13 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET http://example.com/please/gimme/662 HTTP/1.1
+GET http://example.com/please/gimme/%TESTNUMBER HTTP/1.1
 Host: example.com
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://example.net/tes%20t%20case=/6620002 HTTP/1.1
+GET http://example.net/tes%20t%20case=/%TESTNUMBER0002 HTTP/1.1
 Host: example.net
 User-Agent: curl/%VERSION
 Accept: */*

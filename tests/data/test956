@@ -36,7 +36,7 @@ To: another
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/956 --mail-rcpt Stödmottagaren@example.com --mail-from sender@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Stödmottagaren@example.com --mail-from sender@example.com -T -
 </command>
 </client>
 
@@ -48,7 +48,7 @@ smtp://%HOSTIP:%SMTPPORT/956 --mail-rcpt Stödmottagaren@example.com --mail-from
 55
 </errorcode>
 <protocol>
-EHLO 956
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<Stödmottagaren@example.com>
 QUIT

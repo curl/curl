@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2009 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -61,6 +61,7 @@ struct pop3_conn {
   struct pingpong pp;
   pop3state state;        /* Always use pop3.c:state() to change state! */
   bool ssldone;           /* Is connect() over SSL done? */
+  bool tls_supported;     /* StartTLS capability supported by server */
   size_t eob;             /* Number of bytes of the EOB (End Of Body) that
                              have been received so far */
   size_t strip;           /* Number of bytes from the start to ignore as
@@ -69,7 +70,6 @@ struct pop3_conn {
   unsigned int authtypes; /* Accepted authentication types */
   unsigned int preftype;  /* Preferred authentication type */
   char *apoptimestamp;    /* APOP timestamp from the server greeting */
-  bool tls_supported;     /* StartTLS capability supported by server */
 };
 
 extern const struct Curl_handler Curl_handler_pop3;
@@ -90,6 +90,6 @@ extern const struct Curl_handler Curl_handler_pop3s;
 
 /* This function scans the body after the end-of-body and writes everything
  * until the end is found */
-CURLcode Curl_pop3_write(struct connectdata *conn, char *str, size_t nread);
+CURLcode Curl_pop3_write(struct Curl_easy *data, char *str, size_t nread);
 
 #endif /* HEADER_CURL_POP3_H */

@@ -720,19 +720,22 @@ static int get_param_part(struct OperationConfig *config, char endchar,
  ***************************************************************************/
 
 /* Convenience macros for null pointer check. */
-#define NULL_CHECK(ptr, init, retcode) {                                \
-  (ptr) = (init);                                                       \
-  if(!(ptr)) {                                                          \
-    warnf(config->global, "out of memory!\n");                          \
-    curl_slist_free_all(headers);                                       \
-    Curl_safefree(contents);                                            \
-    return retcode;                                                     \
-  }                                                                     \
-}
-#define SET_TOOL_MIME_PTR(m, field, retcode) {                          \
-  if(field)                                                             \
-    NULL_CHECK((m)->field, strdup(field), retcode);                     \
-}
+#define NULL_CHECK(ptr, init, retcode)                                  \
+  do {                                                                  \
+    (ptr) = (init);                                                     \
+    if(!(ptr)) {                                                        \
+      warnf(config->global, "out of memory!\n");                        \
+      curl_slist_free_all(headers);                                     \
+      Curl_safefree(contents);                                          \
+      return retcode;                                                   \
+    }                                                                   \
+  } while(0)
+
+#define SET_TOOL_MIME_PTR(m, field, retcode)                            \
+  do {                                                                  \
+    if(field)                                                           \
+      NULL_CHECK((m)->field, strdup(field), retcode);                   \
+  } while(0)
 
 int formparse(struct OperationConfig *config,
               const char *input,

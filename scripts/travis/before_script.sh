@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -35,7 +35,7 @@ if [ "$NGTCP2" = yes ]; then
     make install
 
     cd $HOME
-    git clone --depth 1 -b tmp-quic https://gitlab.com/gnutls/gnutls.git pgtls
+    git clone --depth 1 https://gitlab.com/gnutls/gnutls.git pgtls
     cd pgtls
     ./bootstrap
     ./configure PKG_CONFIG_PATH=$HOME/ngbuild/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --with-included-libtasn1 --with-included-unistring --disable-guile --disable-doc --prefix=$HOME/ngbuild
@@ -43,7 +43,7 @@ if [ "$NGTCP2" = yes ]; then
     make install
   else
     cd $HOME
-    git clone --depth 1 -b OpenSSL_1_1_1g-quic-draft-29 https://github.com/tatsuhiro-t/openssl possl
+    git clone --depth 1 -b OpenSSL_1_1_1j+quic https://github.com/quictls/openssl possl
     cd possl
     ./config enable-tls1_3 --prefix=$HOME/ngbuild
     make
@@ -62,7 +62,10 @@ if [ "$NGTCP2" = yes ]; then
   git clone --depth 1 https://github.com/ngtcp2/ngtcp2
   cd ngtcp2
   autoreconf -i
-  ./configure PKG_CONFIG_PATH=$HOME/ngbuild/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --prefix=$HOME/ngbuild --enable-lib-only
+  if test -n "$GNUTLS"; then
+      WITHGNUTLS="--with-gnutls"
+  fi
+  ./configure PKG_CONFIG_PATH=$HOME/ngbuild/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --prefix=$HOME/ngbuild --enable-lib-only $WITHGNUTLS
   make
   make install
 fi
@@ -103,15 +106,51 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
   make install
 fi
 
+if [ "$TRAVIS_OS_NAME" = linux -a "$HYPER" ]; then
+  cd $HOME
+  git clone --depth=1 https://github.com/hyperium/hyper.git
+  curl https://sh.rustup.rs -sSf | sh -s -- -y
+  source $HOME/.cargo/env
+  cd $HOME/hyper
+  RUSTFLAGS="--cfg hyper_unstable_ffi" cargo build --features client,http1,http2,ffi
+fi
+
 if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   cd $HOME
   git clone --depth=1 --recursive https://github.com/cloudflare/quiche.git
   curl https://sh.rustup.rs -sSf | sh -s -- -y
   source $HOME/.cargo/env
   cd $HOME/quiche
-  cargo build -v --release --features pkg-config-meta,qlog
+  cargo build -v --release --features ffi,pkg-config-meta,qlog
   mkdir -v deps/boringssl/src/lib
   ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
+fi
+
+if [ "$TRAVIS_OS_NAME" = linux -a "$RUSTLS_VERSION" ]; then
+  cd $HOME
+  git clone --depth=1 --recursive https://github.com/abetterinternet/crustls.git -b "$RUSTLS_VERSION"
+  curl https://sh.rustup.rs -sSf | sh -s -- -y
+  source $HOME/.cargo/env
+  cargo install cbindgen
+  cd $HOME/crustls
+  make
+  make DESTDIR=$HOME/crust install
+fi
+
+if [ $TRAVIS_OS_NAME = linux -a "$WOLFSSL" ]; then
+  if [ ! -e $HOME/wolfssl-4.7.0-stable/Makefile ]; then
+    cd $HOME
+    curl -LO https://github.com/wolfSSL/wolfssl/archive/v4.7.0-stable.tar.gz
+    tar -xzf v4.7.0-stable.tar.gz
+    cd wolfssl-4.7.0-stable
+    ./autogen.sh
+    ./configure --enable-tls13 --enable-all
+    touch wolfssl/wolfcrypt/fips.h
+    make
+  fi
+
+  cd $HOME/wolfssl-4.7.0-stable
+  sudo make install
 fi
 
 # Install common libraries.
@@ -119,19 +158,6 @@ fi
 # changing a build directory name below (eg a version change) then you must
 # change it in .travis.yml `cache: directories:` as well.
 if [ $TRAVIS_OS_NAME = linux ]; then
-  if [ ! -e $HOME/wolfssl-4.4.0-stable/Makefile ]; then
-    cd $HOME
-    curl -LO https://github.com/wolfSSL/wolfssl/archive/v4.4.0-stable.tar.gz
-    tar -xzf v4.4.0-stable.tar.gz
-    cd wolfssl-4.4.0-stable
-    ./autogen.sh
-    ./configure --enable-tls13 --enable-all
-    touch wolfssl/wolfcrypt/fips.h
-    make
-  fi
-
-  cd $HOME/wolfssl-4.4.0-stable
-  sudo make install
 
   if [ "$MESALINK" = "yes" ]; then
     if [ ! -e $HOME/mesalink-1.0.0/Makefile ]; then
@@ -149,16 +175,4 @@ if [ $TRAVIS_OS_NAME = linux ]; then
     sudo make install
 
   fi
-
-  if [ ! -e $HOME/nghttp2-1.39.2/Makefile ]; then
-    cd $HOME
-    curl -LO https://github.com/nghttp2/nghttp2/releases/download/v1.39.2/nghttp2-1.39.2.tar.gz
-    tar -xzf nghttp2-1.39.2.tar.gz
-    cd nghttp2-1.39.2
-    CXX="g++-8" CC="gcc-8" CFLAGS="" LDFLAGS="" LIBS="" ./configure --disable-threads --enable-app
-    make
-  fi
-
-  cd $HOME/nghttp2-1.39.2
-  sudo make install
 fi

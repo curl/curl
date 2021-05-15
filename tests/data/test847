@@ -31,7 +31,7 @@ imap
 IMAP FETCH message
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/847/;UID=1' -u '"user:sec"ret{'
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;UID=1' -u '"user:sec"ret{'
 </command>
 </client>
 
@@ -41,7 +41,7 @@ IMAP FETCH message
 <protocol>
 A001 CAPABILITY
 A002 LOGIN "\"user" "sec\"ret{"
-A003 SELECT 847
+A003 SELECT %TESTNUMBER
 A004 UID FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>

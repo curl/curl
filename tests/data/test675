@@ -1,0 +1,55 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Basic auth
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Type: text/html
+Content-Length: 26
+
+the content would go here
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP connection re-use and different credentials
+ </name>
+
+<command>
+http://user1:foo1@%HOSTIP:%HTTPPORT/user1/%TESTNUMBER http://user2:foo2@%HOSTIP:%HTTPPORT/user2/%TESTNUMBER
+</command>
+<features>
+proxy
+</features>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /user1/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dXNlcjE6Zm9vMQ==
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /user2/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dXNlcjI6Zm9vMg==
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

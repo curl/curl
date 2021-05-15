@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2010 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2010 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -43,7 +43,7 @@ sub scanfile {
 
     open(F, "<$file");
     while(<F>) {
-        if($_ =~ /(free|alloc|strdup)\(/) {
+        if($_ =~ /\W(free|alloc|strdup)\(/) {
             $memfunc++;
         }
         elsif($_ =~ /^ *# *include \"memdebug.h\"/) {

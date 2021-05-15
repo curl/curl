@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH runtests.pl 1 "2 Feb 2010" "Curl 7.69.0" "runtests"
+.TH runtests.pl 1 "19 Jan 2021" "Curl 7.75.0" "runtests"
 .SH NAME
 runtests.pl \- run one or more test cases
 .SH SYNOPSIS
@@ -60,6 +60,14 @@ Provide a path to a custom curl binary to run the tests with. Default is the
 curl executable in the build tree.
 .IP "-d"
 Enable protocol debug: have the servers display protocol output.
+.IP "-E <exclude_file>"
+Load the \fBexclude_file\fP with additional reasons why certain tests
+should be skipped. Useful when testing with external HTTP proxies in
+which case some of the tests aren't appropriate.
+The file contains colon-delimited lines. The first field contains the
+type of exclusion, the second field contains a pattern and the final
+field contains the reason why matching tests should be skipped.
+The exclusion types are \fkeyword\fP, \ftest\fP, and \ftool\fP.
 .IP "-e"
 Run the test event-based (if possible). This will make runtests invoke curl
 with --test-event option. This option only works if both curl and libcurl were
@@ -74,10 +82,23 @@ Displays a help text about this program's command line options.
 .IP "-k"
 Keep output and log files in log/ after a test run, even if no error was
 detected. Useful for debugging.
+.IP "-L <file>"
+Load and execute the specified file which should contain perl code.
+This option allows to change \fIruntests.pl\fP behaviour by overwriting
+functions and variables and is useful when testing external proxies
+using curl's regression test suite.
 .IP "-l"
 Lists all test case names.
 .IP "-n"
 Disable the check for and use of valgrind.
+.IP "-o <variablename=value>"
+Overwrite the specified internal \fBvariable\fP with \fBvalue\fP.
+Useful to change variables that didn't get a dedicated flag to change them.
+Check the source to see which variables are available.
+.IP "-P <proxy>"
+Use the specified HTTP proxy when executing tests, even if the tests
+themselves don't specify a proxy. This option allows to test external
+proxies using curl's regression test suite.
 .IP "-p"
 Prints out all files in "log/" to stdout when a test case fails. Very
 practical when used in the automated and distributed tests since then the
@@ -92,6 +113,9 @@ The random seed initially set for this is fixed per month and can be set with
 Display run time statistics. (Requires Perl Time::HiRes module)
 .IP "-rf"
 Display full run time statistics. (Requires Perl Time::HiRes module)
+.IP "-rm"
+Force removal of files by killing locking processes. (Windows only,
+requires Sysinternals handle[64].exe to be on PATH)
 .IP "--repeat=[num]"
 This will repeat the given set of test numbers this many times. If no test
 numbers are given, it will repeat ALL tests this many times. It iteratively

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,11 +26,11 @@
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 
 /* this is for digest header input */
-CURLcode Curl_input_digest(struct connectdata *conn,
+CURLcode Curl_input_digest(struct Curl_easy *data,
                            bool proxy, const char *header);
 
 /* this is for creating digest header output */
-CURLcode Curl_output_digest(struct connectdata *conn,
+CURLcode Curl_output_digest(struct Curl_easy *data,
                             bool proxy,
                             const unsigned char *request,
                             const unsigned char *uripath);

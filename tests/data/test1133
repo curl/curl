@@ -9,7 +9,7 @@ HTTP FORMPOST
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 10
 
@@ -26,10 +26,10 @@ http
 HTTP RFC1867-type formposting with filename/data contains ',', ';', '"'
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/1133 -F "file=@\"log/test1133,and;.txt\";type=mo/foo;filename=\"faker,and;.txt\"" -F 'file2=@"log/test1133,and;.txt"' -F 'file3=@"log/test1133,and;.txt";type=m/f,"log/test1133,and;.txt"' -F a="{\"field1\":\"value1\",\"field2\":\"value2\"}" -F 'b=" \\value1;type=\"whatever\" "; type=text/foo; charset=utf-8 ; filename=param_b'
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "file=@\"log/test%TESTNUMBER,and;.txt\";type=mo/foo;filename=\"faker,and;.txt\"" -F 'file2=@"log/test%TESTNUMBER,and;.txt"' -F 'file3=@"log/test%TESTNUMBER,and;.txt";type=m/f,"log/test%TESTNUMBER,and;.txt"' -F a="{\"field1\":\"value1\",\"field2\":\"value2\"}" -F 'b=" \\value1;type=\"whatever\" "; type=text/foo; charset=utf-8 ; filename=param_b'
 </command>
 # We create this file before the command is invoked!
-<file name="log/test1133,and;.txt">
+<file name="log/test%TESTNUMBER,and;.txt">
 foo bar
 This is a bar foo
 bar
@@ -43,7 +43,7 @@ foo
 ^(Content-Type: multipart/form-data;|Content-Type: multipart/mixed; boundary=|-------).*
 </strip>
 <protocol>
-POST /we/want/1133 HTTP/1.1
+POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
@@ -60,7 +60,7 @@ bar
 foo
 
 ------------------------------24e78000bd32
-Content-Disposition: form-data; name="file2"; filename="test1133,and;.txt"
+Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER,and;.txt"
 Content-Type: text/plain
 
 foo bar
@@ -72,7 +72,7 @@ foo
 Content-Disposition: form-data; name="file3"
 Content-Type: multipart/mixed; boundary=----------------------------7f0e85a48b0b
 
-Content-Disposition: attachment; filename="test1133,and;.txt"
+Content-Disposition: attachment; filename="test%TESTNUMBER,and;.txt"
 Content-Type: m/f
 
 foo bar
@@ -80,7 +80,7 @@ This is a bar foo
 bar
 foo
 
-Content-Disposition: attachment; filename="test1133,and;.txt"
+Content-Disposition: attachment; filename="test%TESTNUMBER,and;.txt"
 Content-Type: text/plain
 
 foo bar

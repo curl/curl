@@ -9,7 +9,7 @@
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -36,7 +36,7 @@ http
 --output-dir
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/this/is/the/3008 -O --output-dir %PWD/log
+http://%HOSTIP:%HTTPPORT/this/is/the/%TESTNUMBER -O --output-dir %PWD/log
 </command>
 </client>
 
@@ -44,13 +44,13 @@ http://%HOSTIP:%HTTPPORT/this/is/the/3008 -O --output-dir %PWD/log
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /this/is/the/3008 HTTP/1.1
+GET /this/is/the/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/3008">
+<file name="log/%TESTNUMBER">
 -foo-
 </file>
 </verify>

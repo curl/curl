@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -369,7 +369,7 @@ static int ProcessRequest(struct httprequest *req)
                   memcpy(rtp_scratch + 4 + i, RTP_DATA, RTP_DATA_SIZE);
                 }
 
-                if(req->rtp_buffer == NULL) {
+                if(!req->rtp_buffer) {
                   req->rtp_buffer = rtp_scratch;
                   req->rtp_buffersize = rtp_size + 4;
                 }
@@ -552,7 +552,6 @@ static int ProcessRequest(struct httprequest *req)
   if(!req->pipe &&
      req->open &&
      req->prot_version >= 11 &&
-     end &&
      req->reqbuf + req->offset > end + strlen(END_OF_HEADERS) &&
      (!strncmp(req->reqbuf, "GET", strlen("GET")) ||
       !strncmp(req->reqbuf, "HEAD", strlen("HEAD")))) {
@@ -600,15 +599,15 @@ static void storerequest(char *reqbuf, size_t totalsize)
   size_t writeleft;
   FILE *dump;
 
-  if(reqbuf == NULL)
+  if(!reqbuf)
     return;
   if(totalsize == 0)
     return;
 
   do {
     dump = fopen(REQUEST_DUMP, "ab");
-  } while((dump == NULL) && ((error = errno) == EINTR));
-  if(dump == NULL) {
+  } while(!dump && ((error = errno) == EINTR));
+  if(!dump) {
     logmsg("Error opening file %s error: %d %s",
            REQUEST_DUMP, error, strerror(error));
     logmsg("Failed to write request input to " REQUEST_DUMP);

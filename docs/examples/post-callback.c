@@ -41,7 +41,7 @@ struct WriteThis {
   size_t sizeleft;
 };
 
-static size_t read_callback(void *dest, size_t size, size_t nmemb, void *userp)
+static size_t read_callback(char *dest, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *wt = (struct WriteThis *)userp;
   size_t buffer_size = size*nmemb;

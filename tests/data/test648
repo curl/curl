@@ -27,9 +27,9 @@ To: another
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/648 --mail-rcpt recipient@example.com --mail-from sender@example.com -F '=This is the e-mail inline text with a very long line containing the special character = and that should be split by encoder.;headers=Content-disposition: "inline";encoder=quoted-printable' -F "=@log/test648.txt;encoder=base64" -H "From: different" -H "To: another"
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -F '=This is the e-mail inline text with a very long line containing the special character = and that should be split by encoder.;headers=Content-disposition: "inline";encoder=quoted-printable' -F "=@log/test%TESTNUMBER.txt;encoder=base64" -H "From: different" -H "To: another"
 </command>
-<file name="log/test648.txt">
+<file name="log/test%TESTNUMBER.txt">
 This is an attached file.
 
 It may contain any type of data and will be encoded in base64 for transfer.
@@ -44,7 +44,7 @@ s/^--------------------------[a-z0-9]*/------------------------------/
 s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
 </strippart>
 <protocol>
-EHLO 648
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
@@ -63,7 +63,7 @@ Content-disposition: "inline"
 This is the e-mail inline text with a very long line containing the special=
  character =3D and that should be split by encoder.
 ------------------------------
-Content-Disposition: attachment; filename="test648.txt"
+Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
 Content-Transfer-Encoding: base64
 
 VGhpcyBpcyBhbiBhdHRhY2hlZCBmaWxlLgoKSXQgbWF5IGNvbnRhaW4gYW55IHR5cGUgb2YgZGF0

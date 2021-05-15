@@ -11,7 +11,7 @@ flaky
 <reply>
 <data1>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 47
 
@@ -19,7 +19,7 @@ file contents should appear once for each file
 </data1>
 <data2>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 47
 
@@ -27,7 +27,7 @@ file contents should appear once for each file
 </data2>
 <data3>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 47
 
@@ -35,7 +35,7 @@ file contents should appear once for each file
 </data3>
 <data4>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 47
 
@@ -49,32 +49,32 @@ file contents should appear once for each file
 http
 </server>
 <tool>
-lib1510
+lib%TESTNUMBER
 </tool>
  <name>
 HTTP GET connection cache limit (CURLOPT_MAXCONNECTS)
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/path/1510 %HOSTIP %HTTPPORT
+http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER %HOSTIP %HTTPPORT
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /path/15100001 HTTP/1.1
+GET /path/%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /path/15100002 HTTP/1.1
+GET /path/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /path/15100003 HTTP/1.1
+GET /path/%TESTNUMBER0003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /path/15100004 HTTP/1.1
+GET /path/%TESTNUMBER0004 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
@@ -82,7 +82,7 @@ Accept: */*
 <strip>
 ^Host:.*
 </strip>
-<file name="log/stderr1510" mode="text">
+<file name="log/stderr%TESTNUMBER" mode="text">
 * Connection #0 to host server1.example.com left intact
 * Connection #1 to host server2.example.com left intact
 * Connection #2 to host server3.example.com left intact

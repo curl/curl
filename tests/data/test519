@@ -11,7 +11,7 @@ HTTP GET
 <reply>
 <data>
 HTTP/1.1 200 OK swsbounce
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 8
 
@@ -19,7 +19,7 @@ content
 </data>
 <data1>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 9
 
@@ -27,13 +27,13 @@ content2
 </data1>
 <datacheck>
 HTTP/1.1 200 OK swsbounce
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 8
 
 content
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 9
 
@@ -48,14 +48,14 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib519
+lib%TESTNUMBER
 </tool>
 
  <name>
 GET same URL twice with different users
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/519
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -63,12 +63,12 @@ http://%HOSTIP:%HTTPPORT/519
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /519 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic bW9uc3Rlcjp1bmRlcmJlZA==
 Accept: */*
 
-GET /519 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic YW5vdGhlcm1vbnN0ZXI6aW53YXJkcm9iZQ==
 Accept: */*

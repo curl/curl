@@ -12,7 +12,7 @@ chunked Transfer-Encoding
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
@@ -28,14 +28,14 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib510
+lib%TESTNUMBER
 </tool>
 
  <name>
 send HTTP POST using read callback, using chunked transfer-encoding
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/510
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -43,7 +43,7 @@ http://%HOSTIP:%HTTPPORT/510
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-POST /510 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked
@@ -56,7 +56,11 @@ one
 two
 5
 three
+%if hyper
+1D
+%else
 1d
+%endif
 and a final longer crap: four
 0
 

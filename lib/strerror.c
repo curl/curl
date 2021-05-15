@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -320,8 +320,11 @@ curl_easy_strerror(CURLcode error)
   case CURLE_QUIC_CONNECT_ERROR:
     return "QUIC connection error";
 
- case CURLE_PROXY:
+  case CURLE_PROXY:
     return "proxy handshake error";
+
+  case CURLE_SSL_CLIENTCERT:
+    return "SSL Client Certificate required";
 
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
@@ -721,7 +724,9 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   if(!buflen)
     return NULL;
 
+#ifndef WIN32
   DEBUGASSERT(err >= 0);
+#endif
 
   max = buflen - 1;
   *buf = '\0';

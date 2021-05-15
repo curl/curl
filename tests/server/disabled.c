@@ -30,6 +30,7 @@
  */
 
 #include "curl_setup.h"
+#include "multihandle.h" /* for ENABLE_WAKEUP */
 #include <stdio.h>
 
 static const char *disabled[]={
@@ -65,6 +66,9 @@ static const char *disabled[]={
 #endif
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   "verbose-strings",
+#endif
+#ifndef ENABLE_WAKEUP
+  "wakeup",
 #endif
   NULL
 };

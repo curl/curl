@@ -37,10 +37,10 @@ lib591
 FTP multi PORT upload, no data conn and no positive prelim. reply
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/path/594 %FTPTIME2 log/upload594
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %FTPTIME2 log/upload%TESTNUMBER
 </command>
-<file name="log/upload594">
-Moooooooooooo for 594
+<file name="log/upload%TESTNUMBER">
+Moooooooooooo for %TESTNUMBER
  upload this
 </file>
 </client>
@@ -60,7 +60,7 @@ CWD path
 EPRT |1|
 PORT
 TYPE I
-STOR 594
+STOR %TESTNUMBER
 QUIT
 </protocol>
 <errorcode>

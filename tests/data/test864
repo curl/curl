@@ -37,7 +37,7 @@ crypto
 POP3 APOP authentication
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/864 -u user:secret
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
@@ -47,7 +47,7 @@ pop3://%HOSTIP:%POP3PORT/864 -u user:secret
 <protocol>
 CAPA
 APOP user 7501b4cdc224d469940e65e7b5e4d6eb
-RETR 864
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

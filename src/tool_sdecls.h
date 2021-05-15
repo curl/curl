@@ -105,6 +105,7 @@ struct getout {
   char          *outfile;   /* where to store the output */
   char          *infile;    /* file to upload, if GETOUT_UPLOAD is set */
   int            flags;     /* options - composed of GETOUT_* bits */
+  int            num;       /* which URL number in an invocation */
 };
 
 #define GETOUT_OUTFILE    (1<<0)  /* set when outfile is deemed done */

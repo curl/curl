@@ -40,19 +40,13 @@ struct Curl_tree *Curl_splayinsert(struct curltime key,
                                    struct Curl_tree *t,
                                    struct Curl_tree *newnode);
 
-#if 0
-struct Curl_tree *Curl_splayremove(struct curltime key,
-                                   struct Curl_tree *t,
-                                   struct Curl_tree **removed);
-#endif
-
 struct Curl_tree *Curl_splaygetbest(struct curltime key,
                                     struct Curl_tree *t,
                                     struct Curl_tree **removed);
 
-int Curl_splayremovebyaddr(struct Curl_tree *t,
-                           struct Curl_tree *removenode,
-                           struct Curl_tree **newroot);
+int Curl_splayremove(struct Curl_tree *t,
+                     struct Curl_tree *removenode,
+                     struct Curl_tree **newroot);
 
 #define Curl_splaycomparekeys(i,j) ( ((i.tv_sec)  < (j.tv_sec)) ? -1 : \
                                    ( ((i.tv_sec)  > (j.tv_sec)) ?  1 : \

@@ -31,9 +31,9 @@ http
 HTTP cookie domains tailmatching the host name
  </name>
  <command>
-http://example.fake/c/1216 http://bexample.fake/c/1216 -b log/injar1216 -x %HOSTIP:%HTTPPORT
+http://example.fake/c/%TESTNUMBER http://bexample.fake/c/%TESTNUMBER -b log/injar%TESTNUMBER -x %HOSTIP:%HTTPPORT
 </command>
-<file name="log/injar1216">
+<file name="log/injar%TESTNUMBER">
 example.fake	FALSE	/a	FALSE	2139150993	mooo	indeed
 example.fake	FALSE	/b	FALSE	0		moo1	indeed
 example.fake	FALSE	/c	FALSE	2139150993	moo2	indeed
@@ -47,14 +47,14 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET http://example.fake/c/1216 HTTP/1.1
+GET http://example.fake/c/%TESTNUMBER HTTP/1.1
 Host: example.fake
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: moo3=indeed; moo2=indeed
 
-GET http://bexample.fake/c/1216 HTTP/1.1
+GET http://bexample.fake/c/%TESTNUMBER HTTP/1.1
 Host: bexample.fake
 User-Agent: curl/%VERSION
 Accept: */*

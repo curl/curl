@@ -19,7 +19,6 @@ works
 </data>
 <servercmd>
 REPLY EPSV 500 no such command
-REPLY SIZE 500 no such command
 </servercmd>
 </reply>
 
@@ -32,7 +31,7 @@ ftp
 FTP user+password in URL and ASCII transfer
  </name>
  <command>
-ftp://userdude:passfellow@%HOSTIP:%FTPPORT/105 --use-ascii
+ftp://userdude:passfellow@%HOSTIP:%FTPPORT/%TESTNUMBER --use-ascii
 </command>
 </client>
 
@@ -45,8 +44,7 @@ PWD
 EPSV
 PASV
 TYPE A
-SIZE 105
-RETR 105
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

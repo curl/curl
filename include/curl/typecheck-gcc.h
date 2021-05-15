@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -334,6 +334,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_URL ||                                                 \
    (option) == CURLOPT_USERAGENT ||                                           \
    (option) == CURLOPT_USERNAME ||                                            \
+   (option) == CURLOPT_AWS_SIGV4 ||                                           \
    (option) == CURLOPT_USERPWD ||                                             \
    (option) == CURLOPT_XOAUTH2_BEARER ||                                      \
    (option) == CURLOPT_SSL_EC_CURVES ||                                       \
@@ -666,11 +667,11 @@ typedef CURLcode (*_curl_ssl_ctx_callback4)(CURL *, const void *,
 /* hack: if we included OpenSSL's ssl.h, we know about SSL_CTX
  * this will of course break if we're included before OpenSSL headers...
  */
-typedef CURLcode (*_curl_ssl_ctx_callback5)(CURL *, SSL_CTX, void *);
-typedef CURLcode (*_curl_ssl_ctx_callback6)(CURL *, SSL_CTX, const void *);
-typedef CURLcode (*_curl_ssl_ctx_callback7)(CURL *, const SSL_CTX, void *);
-typedef CURLcode (*_curl_ssl_ctx_callback8)(CURL *, const SSL_CTX,
-                                           const void *);
+typedef CURLcode (*_curl_ssl_ctx_callback5)(CURL *, SSL_CTX *, void *);
+typedef CURLcode (*_curl_ssl_ctx_callback6)(CURL *, SSL_CTX *, const void *);
+typedef CURLcode (*_curl_ssl_ctx_callback7)(CURL *, const SSL_CTX *, void *);
+typedef CURLcode (*_curl_ssl_ctx_callback8)(CURL *, const SSL_CTX *,
+                                            const void *);
 #else
 typedef _curl_ssl_ctx_callback1 _curl_ssl_ctx_callback5;
 typedef _curl_ssl_ctx_callback1 _curl_ssl_ctx_callback6;

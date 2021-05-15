@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,8 +37,12 @@
 #define CURL_VOLATILE volatile
 #endif
 
+#define CURL_GOOD_SHARE 0x7e117a1e
+#define GOOD_SHARE_HANDLE(x) ((x) && (x)->magic == CURL_GOOD_SHARE)
+
 /* this struct is libcurl-private, don't export details */
 struct Curl_share {
+  unsigned int magic; /* CURL_GOOD_SHARE */
   unsigned int specifier;
   CURL_VOLATILE unsigned int dirty;
 

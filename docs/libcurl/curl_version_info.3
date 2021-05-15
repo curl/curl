@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -97,6 +97,12 @@ typedef struct {
   unsigned int zstd_ver_num; /* Numeric Zstd version
                                   (MAJOR << 24) | (MINOR << 12) | PATCH */
   const char *zstd_version; /* human readable string. */
+  /* when 'age' is CURLVERSION_NINTH or higher (>= 7.75.0), the members
+     below exist */
+  const char *hyper_version; /* human readable string. */
+  /* when 'age' is CURLVERSION_TENTH or higher (>= 7.77.0), the members
+     below exist */
+  const char *gsasl_version; /* human readable string. */
 } curl_version_info_data;
 .fi
 
@@ -136,6 +142,9 @@ libcurl was built with memory tracking debug capabilities. This is mainly of
 interest for libcurl hackers. (added in 7.19.6)
 .IP CURL_VERSION_DEBUG
 libcurl was built with debug capabilities (added in 7.10.6)
+.IP CURL_VERSION_GSASL
+libcurl was built with libgsasl and thus with some extra SCRAM-SHA
+authentication methods. (added in 7.76.0)
 .IP CURL_VERSION_GSSAPI
 libcurl was built with support for GSS-API. This makes libcurl use provided
 functions for Kerberos and SPNEGO authentication. It also allows libcurl

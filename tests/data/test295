@@ -27,7 +27,7 @@ ftp
 FTP ACCT request without --ftp-account
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/295/
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER/
 </command>
 </client>
 

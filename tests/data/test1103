@@ -27,7 +27,7 @@ ftp
 FTP non-OS/400 server
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1103
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -40,8 +40,8 @@ PWD
 SYST
 EPSV
 TYPE I
-SIZE 1103
-RETR 1103
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

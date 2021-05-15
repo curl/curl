@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -37,7 +37,7 @@ does it automatically.  This may be lethal in multi-threaded cases, since
 \fIcurl_global_init(3)\fP is not thread-safe, and it may result in resource
 problems because there is no corresponding cleanup.
 
-You are strongly advised to not allow this automatic behaviour, by calling
+You are strongly advised to not allow this automatic behavior, by calling
 \fIcurl_global_init(3)\fP yourself properly.  See the description in
 \fBlibcurl\fP(3) of global environment requirements for details of how to use
 this function.

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -88,6 +88,11 @@ CURL_EXTERN CURLUcode curl_url_get_ccsid(CURLU *handle, CURLUPart what,
                                          unsigned int ccsid);
 CURL_EXTERN CURLUcode curl_url_set_ccsid(CURLU *handle, CURLUPart what,
                                          const char *part, unsigned int flags,
+                                         unsigned int ccsid);
+CURL_EXTERN const struct curl_easyoption *curl_easy_option_by_name_ccsid(
+                                         const char *name, unsigned int ccsid);
+CURL_EXTERN const char *curl_easy_option_get_name_ccsid(
+                                         const struct curl_easyoption *option,
                                          unsigned int ccsid);
 
 #endif

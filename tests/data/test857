@@ -42,7 +42,7 @@ pop3
 POP3 RETR message with dot-prefixed line
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/857 -u user:secret
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
@@ -53,7 +53,7 @@ pop3://%HOSTIP:%POP3PORT/857 -u user:secret
 CAPA
 USER user
 PASS secret
-RETR 857
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

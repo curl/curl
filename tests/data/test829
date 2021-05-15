@@ -15,7 +15,7 @@ imap
 IMAP with URL-encoded CR LF in the URL
  </name>
  <command>
-imap://%HOSTIP:%IMAPPORT/%0d%0a/829
+imap://%HOSTIP:%IMAPPORT/%0d%0a/%TESTNUMBER
 </command>
 </client>
 

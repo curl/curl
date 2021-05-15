@@ -26,7 +26,7 @@ To: another
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/3005 --mail-rcpt-allowfails --mail-rcpt invalid.one --mail-rcpt recipient.two@example.com --mail-rcpt invalid.three --mail-rcpt invalid.four --mail-rcpt invalid.five --mail-from sender@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt-allowfails --mail-rcpt invalid.one --mail-rcpt recipient.two@example.com --mail-rcpt invalid.three --mail-rcpt invalid.four --mail-rcpt invalid.five --mail-from sender@example.com -T -
 </command>
 </client>
 
@@ -34,7 +34,7 @@ smtp://%HOSTIP:%SMTPPORT/3005 --mail-rcpt-allowfails --mail-rcpt invalid.one --m
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 3005
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<invalid.one>
 RCPT TO:<recipient.two@example.com>

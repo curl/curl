@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,7 +31,7 @@ extern const struct Curl_handler Curl_handler_ftp;
 extern const struct Curl_handler Curl_handler_ftps;
 #endif
 
-CURLcode Curl_GetFTPResponse(ssize_t *nread, struct connectdata *conn,
+CURLcode Curl_GetFTPResponse(struct Curl_easy *data, ssize_t *nread,
                              int *ftpcode);
 #endif /* CURL_DISABLE_FTP */
 
@@ -116,9 +116,9 @@ struct FTP {
 struct ftp_conn {
   struct pingpong pp;
   char *entrypath; /* the PWD reply when we logged on */
+  char *file;    /* url-decoded file name (or path) */
   char **dirs;   /* realloc()ed array for path components */
   int dirdepth;  /* number of entries used in the 'dirs' array */
-  char *file;    /* url-decoded file name (or path) */
   bool dont_check;  /* Set to TRUE to prevent the final (post-transfer)
                        file size and 226/250 status check. It should still
                        read the line, just ignore the result. */
@@ -131,6 +131,10 @@ struct ftp_conn {
   bool cwdfail;     /* set TRUE if a CWD command fails, as then we must prevent
                        caching the current directory */
   bool wait_data_conn; /* this is set TRUE if data connection is waited */
+  /* newhost is the (allocated) IP addr or host name to connect the data
+     connection to */
+  unsigned short newport;
+  char *newhost;
   char *prevpath;   /* url-decoded conn->path from the previous transfer */
   char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
                         and others (A/I or zero) */
@@ -145,10 +149,6 @@ struct ftp_conn {
   curl_off_t known_filesize; /* file size is different from -1, if wildcard
                                 LIST parsing was done and wc_statemach set
                                 it */
-  /* newhost is the (allocated) IP addr or host name to connect the data
-     connection to */
-  char *newhost;          /* this is the pair to connect the DATA... */
-  unsigned short newport; /* connection to */
 };
 
 #define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */

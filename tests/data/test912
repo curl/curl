@@ -23,14 +23,14 @@ smtp
  <name>
 SMTP with SIZE support
  </name>
-<file name="log/test912.eml">
+<file name="log/test%TESTNUMBER.eml">
 From: different
 To: another
 
 body
 </file>
  <command>
-smtp://%HOSTIP:%SMTPPORT/912 --mail-rcpt recipient@example.com --mail-from sender@example.com -T log/test912.eml
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T log/test%TESTNUMBER.eml
 </command>
 </client>
 
@@ -38,7 +38,7 @@ smtp://%HOSTIP:%SMTPPORT/912 --mail-rcpt recipient@example.com --mail-from sende
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 912
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com> SIZE=38
 RCPT TO:<recipient@example.com>
 DATA

@@ -35,7 +35,7 @@ struct WriteThis {
   size_t sizeleft;
 };
 
-static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *pooh = (struct WriteThis *)userp;
 
@@ -43,7 +43,7 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
     return 0;
 
   if(pooh->sizeleft) {
-    *(char *)ptr = pooh->readptr[0]; /* copy one single byte */
+    *ptr = pooh->readptr[0]; /* copy one single byte */
     pooh->readptr++;                 /* advance pointer */
     pooh->sizeleft--;                /* less data left */
     return 1;                        /* we return 1 byte at a time! */

@@ -21,7 +21,7 @@ ftp
  <name>
 FTP upload file with 552 disk full response
  </name>
-<file name="log/test348.txt">
+<file name="log/test%TESTNUMBER.txt">
 data
     to
       see
@@ -30,7 +30,7 @@ works
   so does it?
 </file>
  <command>
-ftp://%HOSTIP:%FTPPORT/348 -T log/test348.txt
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/test%TESTNUMBER.txt
 </command>
 </client>
 
@@ -50,7 +50,7 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-STOR 348
+STOR %TESTNUMBER
 QUIT
 </protocol>
 # 70 - CURLE_REMOTE_DISK_FULL

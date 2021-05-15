@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,8 +48,10 @@ static CURLcode unit_setup(void)
 {
   int rc;
   data = curl_easy_init();
-  if(!data)
+  if(!data) {
+    curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
+  }
 
   rc = Curl_mk_dnscache(&hp);
   if(rc) {

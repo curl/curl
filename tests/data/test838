@@ -37,7 +37,7 @@ imap
 IMAP external authentication without credentials
  </name>
  <command>
-'imap://;AUTH=EXTERNAL@%HOSTIP:%IMAPPORT/838/;MAILINDEX=1'
+'imap://;AUTH=EXTERNAL@%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1'
 </command>
 </client>
 
@@ -48,7 +48,7 @@ IMAP external authentication without credentials
 A001 CAPABILITY
 A002 AUTHENTICATE EXTERNAL
 =
-A003 SELECT 838
+A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>

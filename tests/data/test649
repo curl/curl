@@ -27,9 +27,9 @@ To: another
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/649 --mail-rcpt recipient@example.com --mail-from sender@example.com -F '=This is valid;encoder=7bit' -F "=@log/test649.txt;encoder=7bit" -H "From: different" -H "To: another"
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -F '=This is valid;encoder=7bit' -F "=@log/test%TESTNUMBER.txt;encoder=7bit" -H "From: different" -H "To: another"
 </command>
-<file name="log/test649.txt">
+<file name="log/test%TESTNUMBER.txt">
 This is an attached file (in french: pièce jointe).
 
 It contains at least an 8-bit byte value.
@@ -44,7 +44,7 @@ s/^--------------------------[a-z0-9]*/------------------------------/
 s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
 </strippart>
 <protocol>
-EHLO 649
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
@@ -60,7 +60,7 @@ Content-Transfer-Encoding: 7bit
 
 This is valid
 ------------------------------
-Content-Disposition: attachment; filename="test649.txt"
+Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
 Content-Transfer-Encoding: 7bit
 
 This is an attached file (in french: pi

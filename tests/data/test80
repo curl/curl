@@ -16,7 +16,7 @@ proxytunnel
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
@@ -32,7 +32,7 @@ HTTP/1.1 200 Mighty fine indeed
 HTTP/1.1 200 Mighty fine indeed
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
@@ -53,7 +53,7 @@ http-proxy
 HTTP 1.0 CONNECT with proxytunnel and proxy+host Basic authentication
  </name>
  <command>
-http://test.80:%HTTPPORT/we/want/that/page/80 -p --proxy1.0 %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself
+http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p --proxy1.0 %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself
 </command>
 <features>
 proxy
@@ -64,16 +64,16 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <proxy>
-CONNECT test.80:%HTTPPORT HTTP/1.0
-Host: test.80:%HTTPPORT
+CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.0
+Host: test.%TESTNUMBER:%HTTPPORT
 Proxy-Authorization: Basic eW91YXJlOnlvdXJzZWxm
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol>
-GET /we/want/that/page/80 HTTP/1.1
-Host: test.80:%HTTPPORT
+GET /we/want/that/page/%TESTNUMBER HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
 Authorization: Basic aWFtOm15c2VsZg==
 User-Agent: curl/%VERSION
 Accept: */*

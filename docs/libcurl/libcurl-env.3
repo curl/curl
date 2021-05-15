@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2018 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 2018 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -45,8 +45,11 @@ set.
 .IP CURL_SSL_BACKEND
 When libcurl is built to support multiple SSL backends, it will select a
 specific backend at first use. If no selection is done by the program using
-libcurl, this variable's selection will be used. It should be set to the full
-SSL backend name to use (case insensitive).
+libcurl, this variable's selection will be used. Setting a name that isn't a
+built-in alternative will make libcurl stay with the default.
+
+SSL backend names (case-insensitive): bearssl, gnutls, gskit, mbedtls,
+mesalink, nss, openssl, rustls, schannel, secure-transport, wolfssl
 .IP HOME
 When the netrc feature is used (\fICURLOPT_NETRC(3)\fP), this variable is
 checked as the primary way to find the "current" home directory in which

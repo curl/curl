@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,13 +47,7 @@
 int curlx_nonblock(curl_socket_t sockfd,    /* operate on this */
                    int nonblock   /* TRUE or FALSE */)
 {
-#if defined(USE_BLOCKING_SOCKETS)
-  (void)sockfd;
-  (void)nonblock;
-  return 0; /* returns success */
-
-#elif defined(HAVE_FCNTL_O_NONBLOCK)
-
+#if defined(HAVE_FCNTL_O_NONBLOCK)
   /* most recent unix versions */
   int flags;
   flags = sfcntl(sockfd, F_GETFL, 0);

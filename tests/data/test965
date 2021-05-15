@@ -41,7 +41,7 @@ To: another
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/965 --mail-rcpt recipient@example.com --mail-from Avsändaren@åäö.se -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from Avsändaren@åäö.se -T -
 </command>
 </client>
 
@@ -49,7 +49,7 @@ smtp://%HOSTIP:%SMTPPORT/965 --mail-rcpt recipient@example.com --mail-from Avsä
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 965
+EHLO %TESTNUMBER
 MAIL FROM:<Avsändaren@xn--4cab6c.se> SMTPUTF8
 RCPT TO:<recipient@example.com>
 DATA

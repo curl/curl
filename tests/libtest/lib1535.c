@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,7 +44,7 @@ int test(char *URL)
             __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
-  if(protocol != 0) {
+  if(protocol) {
     fprintf(stderr, "%s:%d protocol init failed; expected 0 but is %ld\n",
             __FILE__, __LINE__, protocol);
     res = CURLE_FAILED_INIT;
@@ -94,7 +94,7 @@ int test(char *URL)
             __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
-  if(protocol != 0) {
+  if(protocol) {
     fprintf(stderr, "%s:%d protocol init failed; expected 0 but is %ld\n",
             __FILE__, __LINE__, protocol);
     res = CURLE_FAILED_INIT;
@@ -113,7 +113,7 @@ int test(char *URL)
             __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
-  if(protocol != 0) {
+  if(protocol) {
     fprintf(stderr, "%s:%d protocol init failed; expected 0 but is %ld\n",
             __FILE__, __LINE__, protocol);
     res = CURLE_FAILED_INIT;

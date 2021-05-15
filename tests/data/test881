@@ -48,7 +48,7 @@ crypto
 POP3 DIGEST-MD5 authentication with SASL downgrade
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/881 -u user:secret
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
@@ -61,7 +61,7 @@ AUTH DIGEST-MD5
 *
 AUTH PLAIN
 AHVzZXIAc2VjcmV0
-RETR 881
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

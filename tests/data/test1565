@@ -21,11 +21,14 @@ OK
 
 # Client-side
 <client>
+<features>
+wakeup
+</features>
 <server>
 http
 </server>
 <tool>
-lib1565
+lib%TESTNUMBER
 </tool>
 <name>
 wakeup from another thread

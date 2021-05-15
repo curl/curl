@@ -145,7 +145,7 @@ Windows vs Unix
 
    That's taken care of by the `curl_global_init()` call, but if other libs
    also do it etc there might be reasons for applications to alter that
-   behaviour.
+   behavior.
 
    We require WinSock version 2.2 and load this version during global init.
 
@@ -184,8 +184,9 @@ Library
 
  `curl_global_init()` and `curl_global_cleanup()` should be called by the
  application to initialize and clean up global stuff in the library. As of
- today, it can handle the global SSL initing if SSL is enabled and it can init
- the socket layer on windows machines. libcurl itself has no "global" scope.
+ today, it can handle the global SSL initialization if SSL is enabled and it
+ can initialize the socket layer on Windows machines. libcurl itself has no
+ "global" scope.
 
  All printf()-style functions use the supplied clones in `lib/mprintf.c`. This
  makes sure we stay absolutely platform independent.
@@ -226,7 +227,7 @@ Curl_connect()
    This function makes sure there's an allocated and initiated `connectdata`
    struct that is used for this particular connection only (although there may
    be several requests performed on the same connect). A bunch of things are
-   inited/inherited from the `Curl_easy` struct.
+   initialized/inherited from the `Curl_easy` struct.
 
 <a name="multi_do"></a>
 multi_do()
@@ -236,11 +237,9 @@ multi_do()
    The functions are named after the protocols they handle.
 
    The protocol-specific functions of course deal with protocol-specific
-   negotiations and setup. They have access to the `Curl_sendf()` (from
-   `lib/sendf.c`) function to send printf-style formatted data to the remote
-   host and when they're ready to make the actual file transfer they call the
-   `Curl_setup_transfer()` function (in `lib/transfer.c`) to setup the
-   transfer and returns.
+   negotiations and setup. When they're ready to start the actual file
+   transfer they call the `Curl_setup_transfer()` function (in
+   `lib/transfer.c`) to setup the transfer and returns.
 
    If this DO function fails and the connection is being re-used, libcurl will
    then close this connection, setup a new connection and re-issue the DO
@@ -775,7 +774,9 @@ Track Down Memory Leaks
 
   Add a line in your application code:
 
-       `curl_dbg_memdebug("dump");`
+```c
+  curl_dbg_memdebug("dump");
+```
 
   This will make the malloc debug system output a full trace of all resource
   using functions to the given file name. Make sure you rebuild your program
@@ -983,8 +984,8 @@ for older and later versions as things don't change drastically that often.
   protocol specific data that then gets associated with that `Curl_easy` for
   the rest of this transfer. It gets freed again at the end of the transfer.
   It will be called before the `connectdata` for the transfer has been
-  selected/created. Most protocols will allocate its private
-  `struct [PROTOCOL]` here and assign `Curl_easy->req.protop` to point to it.
+  selected/created. Most protocols will allocate its private `struct
+  [PROTOCOL]` here and assign `Curl_easy->req.p.[protocol]` to it.
 
   `->connect_it` allows a protocol to do some specific actions after the TCP
   connect is done, that can still be considered part of the connection phase.

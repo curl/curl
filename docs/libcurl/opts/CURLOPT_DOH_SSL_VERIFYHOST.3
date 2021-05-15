@@ -1,0 +1,85 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_DOH_SSL_VERIFYHOST 3 "11 Feb 2021" "libcurl 7.76.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_DOH_SSL_VERIFYHOST \- verify the host name in the DOH SSL certificate
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_SSL_VERIFYHOST, long verify);
+.SH DESCRIPTION
+Pass a long set to 2L as asking curl to \fIverify\fP the DOH (DNS-over-HTTPS)
+server's certificate name fields against the host name.
+
+This option is the DOH equivalent of \fICURLOPT_SSL_VERIFYHOST(3)\fP and
+only affects requests to the DOH server.
+
+When \fICURLOPT_DOH_SSL_VERIFYHOST(3)\fP is 2, the SSL certificate provided by
+the DOH server must indicate that the server name is the same as the server
+name to which you meant to connect to, or the connection fails.
+
+Curl considers the DOH server the intended one when the Common Name field or a
+Subject Alternate Name field in the certificate matches the host name in the
+DOH URL to which you told Curl to connect.
+
+When the \fIverify\fP value is set to 1L it is treated the same as 2L. However
+for consistency with the other VERIFYHOST options we suggest use 2 and not 1.
+
+When the \fIverify\fP value is set to 0L, the connection succeeds regardless of
+the names used in the certificate. Use that ability with caution!
+
+See also \fICURLOPT_DOH_SSL_VERIFYPEER(3)\fP to verify the digital signature
+of the DOH server certificate.  If libcurl is built against NSS and
+\fICURLOPT_DOH_SSL_VERIFYPEER(3)\fP is zero,
+\fICURLOPT_DOH_SSL_VERIFYHOST(3)\fP is also set to zero and cannot be
+overridden.
+.SH DEFAULT
+2
+.SH PROTOCOLS
+DOH
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+
+  curl_easy_setopt(curl, CURLOPT_DOH_URL, "https://cloudflare-dns.com/dns-query");
+
+  /* Disable host name verification of the DOH server */
+  curl_easy_setopt(curl, CURLOPT_DOH_SSL_VERIFYHOST, 0L);
+
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.76.0
+
+If built TLS enabled.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_DOH_SSL_VERIFYPEER "(3), "
+.BR CURLOPT_SSL_VERIFYHOST "(3), "
+.BR CURLOPT_SSL_VERIFYPEER "(3), "
+.BR CURLOPT_PROXY_SSL_VERIFYPEER "(3), "
+.BR CURLOPT_PROXY_SSL_VERIFYHOST "(3), "

@@ -372,7 +372,7 @@ int main(int argc, char **argv)
     args++;
   }
 
-  if(mimetype == NULL || mimetypeaccept == NULL || p.p12file == NULL)
+  if(!mimetype || !mimetypeaccept || !p.p12file)
     badarg = 1;
 
   if(badarg) {
@@ -385,11 +385,11 @@ int main(int argc, char **argv)
   /* set input */
 
   in = BIO_new(BIO_s_file());
-  if(in == NULL) {
+  if(!in) {
     BIO_printf(p.errorbio, "Error setting input bio\n");
     goto err;
   }
-  else if(infile == NULL)
+  else if(!infile)
     BIO_set_fp(in, stdin, BIO_NOCLOSE|BIO_FP_TEXT);
   else if(BIO_read_filename(in, infile) <= 0) {
     BIO_printf(p.errorbio, "Error opening input file %s\n", infile);
@@ -400,11 +400,11 @@ int main(int argc, char **argv)
   /* set output  */
 
   out = BIO_new(BIO_s_file());
-  if(out == NULL) {
+  if(!out) {
     BIO_printf(p.errorbio, "Error setting output bio.\n");
     goto err;
   }
-  else if(outfile == NULL)
+  else if(!outfile)
     BIO_set_fp(out, stdout, BIO_NOCLOSE|BIO_FP_TEXT);
   else if(BIO_write_filename(out, outfile) <= 0) {
     BIO_printf(p.errorbio, "Error opening output file %s\n", outfile);
@@ -453,8 +453,8 @@ int main(int argc, char **argv)
     serverurl = malloc(len);
     snprintf(serverurl, len, "https://%s", hostporturl);
   }
-  else if(p.accesstype != 0) { /* see whether we can find an AIA or SIA for a
-                                  given access type */
+  else if(p.accesstype) { /* see whether we can find an AIA or SIA for a
+                             given access type */
     serverurl = my_get_ext(p.usercert, p.accesstype, NID_info_access);
     if(!serverurl) {
       int j = 0;

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,6 +54,16 @@
 #  ifndef NOGDI
 #    define NOGDI
 #  endif
+/* Detect Windows App environment which has a restricted access
+ * to the Win32 APIs. */
+# if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
+  defined(WINAPI_FAMILY)
+#  include <winapifamily.h>
+#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
+     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#    define CURL_WINDOWS_APP
+#  endif
+# endif
 #endif
 
 /*
@@ -151,8 +161,6 @@
 
 #include <curl/curl.h>
 
-#define CURL_SIZEOF_CURL_OFF_T SIZEOF_CURL_OFF_T
-
 /*
  * Disable other protocols when http is the only one desired.
  */
@@ -238,7 +246,7 @@
  * interface doesn't support IPv4, but supports IPv6, NAT64, and DNS64,
  * performing this task will result in a synthesized IPv6 address.
  */
-#ifdef  __APPLE__
+#if defined(__APPLE__) && !defined(USE_ARES)
 #define USE_RESOLVE_ON_IPS 1
 #endif
 
@@ -335,8 +343,10 @@
 #  define stat(fname,stp)            curlx_win32_stat(fname, stp)
 #  define struct_stat                struct _stati64
 #  define LSEEK_ERROR                (__int64)-1
+#  define open                       curlx_win32_open
 #  define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
 #  define access(fname,mode)         curlx_win32_access(fname, mode)
+   int curlx_win32_open(const char *filename, int oflag, ...);
    int curlx_win32_stat(const char *path, struct_stat *buffer);
    FILE *curlx_win32_fopen(const char *filename, const char *mode);
    int curlx_win32_access(const char *path, int mode);
@@ -356,9 +366,11 @@
 #    define fstat(fdes,stp)            _fstat(fdes, stp)
 #    define stat(fname,stp)            curlx_win32_stat(fname, stp)
 #    define struct_stat                struct _stat
+#    define open                       curlx_win32_open
 #    define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
 #    define access(fname,mode)         curlx_win32_access(fname, mode)
      int curlx_win32_stat(const char *path, struct_stat *buffer);
+     int curlx_win32_open(const char *filename, int oflag, ...);
      FILE *curlx_win32_fopen(const char *filename, const char *mode);
      int curlx_win32_access(const char *path, int mode);
 #  endif
@@ -408,7 +420,7 @@
 #if (SIZEOF_CURL_OFF_T == 4)
 #  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFF)
 #else
-   /* assume CURL_SIZEOF_CURL_OFF_T == 8 */
+   /* assume SIZEOF_CURL_OFF_T == 8 */
 #  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
 #endif
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - CURL_OFF_T_C(1))
@@ -612,7 +624,7 @@ int netware_init(void);
     defined(USE_MBEDTLS) || \
     defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
     defined(USE_SECTRANSP) || defined(USE_GSKIT) || defined(USE_MESALINK) || \
-    defined(USE_BEARSSL)
+    defined(USE_BEARSSL) || defined(USE_RUSTLS)
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
@@ -629,7 +641,7 @@ int netware_init(void);
 #endif
 
 /* Single point where USE_NTLM definition might be defined */
-#if !defined(CURL_DISABLE_NTLM) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+#ifndef CURL_DISABLE_CRYPTO_AUTH
 #if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                     \
   defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) ||  \
   defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
@@ -703,13 +715,19 @@ int netware_init(void);
 #endif
 
 /*
- * Portable symbolic names for Winsock shutdown() mode flags.
+ * shutdown() flags for systems that don't define them
  */
 
-#ifdef USE_WINSOCK
-#  define SHUT_RD   0x00
-#  define SHUT_WR   0x01
-#  define SHUT_RDWR 0x02
+#ifndef SHUT_RD
+#define SHUT_RD 0x00
+#endif
+
+#ifndef SHUT_WR
+#define SHUT_WR 0x01
+#endif
+
+#ifndef SHUT_RDWR
+#define SHUT_RDWR 0x02
 #endif
 
 /* Define S_ISREG if not defined by system headers, f.e. MSVC */
@@ -760,17 +778,6 @@ endings either CRLF or LF so 't' is appropriate.
 #  endif
 #endif /* DONT_USE_RECV_BEFORE_SEND_WORKAROUND */
 
-/* Detect Windows App environment which has a restricted access
- * to the Win32 APIs. */
-# if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
-  defined(WINAPI_FAMILY)
-#  include <winapifamily.h>
-#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
-     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-#    define CURL_WINDOWS_APP
-#  endif
-# endif
-
 /* for systems that don't detect this in configure, use a sensible default */
 #ifndef CURL_SA_FAMILY_T
 #define CURL_SA_FAMILY_T unsigned short
@@ -792,6 +799,10 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define UNITTEST
 #else
 #define UNITTEST static
+#endif
+
+#if defined(USE_NGHTTP2) || defined(USE_HYPER)
+#define USE_HTTP2
 #endif
 
 #if defined(USE_NGTCP2) || defined(USE_QUICHE)

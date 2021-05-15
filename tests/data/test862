@@ -32,7 +32,7 @@ pop3
 POP3 retrieve message header (CUSTOMREQUEST)
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT -u user:secret -X 'TOP 862 0'
+pop3://%HOSTIP:%POP3PORT -u user:secret -X 'TOP %TESTNUMBER 0'
 </command>
 </client>
 
@@ -43,7 +43,7 @@ pop3://%HOSTIP:%POP3PORT -u user:secret -X 'TOP 862 0'
 CAPA
 USER user
 PASS secret
-TOP 862 0
+TOP %TESTNUMBER 0
 QUIT
 </protocol>
 </verify>

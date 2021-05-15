@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,7 +51,7 @@ static char *max5data(curl_off_t bytes, char *max5)
               CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE,
               (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/CURL_OFF_T_C(10)) );
 
-#if (CURL_SIZEOF_CURL_OFF_T > 4)
+#if (SIZEOF_CURL_OFF_T > 4)
 
   else if(bytes < CURL_OFF_T_C(10000) * ONE_MEGABYTE)
     /* 'XXXXM' is good until we're at 10000MB or above */
@@ -227,11 +227,11 @@ bool progress_meter(struct GlobalConfig *global,
     }
     if(dlknown && all_dltotal)
       /* TODO: handle integer overflow */
-      msnprintf(dlpercen, sizeof(dlpercen), "%3d",
+      msnprintf(dlpercen, sizeof(dlpercen), "%3" CURL_FORMAT_CURL_OFF_T,
                 all_dlnow * 100 / all_dltotal);
     if(ulknown && all_ultotal)
       /* TODO: handle integer overflow */
-      msnprintf(ulpercen, sizeof(ulpercen), "%3d",
+      msnprintf(ulpercen, sizeof(ulpercen), "%3" CURL_FORMAT_CURL_OFF_T,
                 all_ulnow * 100 / all_ultotal);
 
     /* get the transfer speed, the higher of the two */
@@ -318,4 +318,12 @@ void progress_finalize(struct per_transfer *per)
   /* get the numbers before this transfer goes away */
   all_dlalready += per->dlnow;
   all_ulalready += per->ulnow;
+  if(!per->dltotal_added) {
+    all_dltotal += per->dltotal;
+    per->dltotal_added = TRUE;
+  }
+  if(!per->ultotal_added) {
+    all_ultotal += per->ultotal;
+    per->ultotal_added = TRUE;
+  }
 }

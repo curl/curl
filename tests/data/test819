@@ -37,7 +37,7 @@ imap
 IMAP plain authentication
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/819/;MAILINDEX=1' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 
@@ -48,7 +48,7 @@ IMAP plain authentication
 A001 CAPABILITY
 A002 AUTHENTICATE PLAIN
 AHVzZXIAc2VjcmV0
-A003 SELECT 819
+A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>

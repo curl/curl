@@ -29,6 +29,12 @@ The variables available are:
 .B content_type
 The Content-Type of the requested document, if there was any.
 .TP
+.B errormsg
+The error message. (Added in 7.75.0)
+.TP
+.B exitcode
+The numerical exitcode of the transfer. (Added in 7.75.0)
+.TP
 .B filename_effective
 The ultimate filename that curl writes out to. This is only meaningful if curl
 is told to write to a file with the --remote-name or --output
@@ -41,7 +47,7 @@ server. (Added in 7.15.4)
 .TP
 .B http_code
 The numerical response code that was found in the last retrieved HTTP(S) or
-FTP(s) transfer. In 7.18.2 the alias \fBresponse_code\fP was added to show the
+FTP(s) transfer. In 7.18.2 the alias **response_code** was added to show the
 same info.
 .TP
 .B http_connect
@@ -74,6 +80,10 @@ The number of response headers in the most recent request (restarted at each
 .B num_redirects
 Number of redirects that were followed in the request. (Added in 7.12.3)
 .TP
+.B onerror
+The rest of the output is only shown if the transfer returned a non-zero error
+(Added in 7.75.0)
+.TP
 .B proxy_ssl_verify_result
 The result of the HTTPS proxy's SSL peer certificate verification that was
 requested. 0 means the verification was successful. (Added in 7.52.0)
@@ -81,7 +91,10 @@ requested. 0 means the verification was successful. (Added in 7.52.0)
 .B redirect_url
 When an HTTP request was made without --location to follow redirects (or when
 --max-redir is met), this variable will show the actual URL a redirect
-\fIwould\fP have gone to. (Added in 7.18.2)
+*would* have gone to. (Added in 7.18.2)
+.TP
+.B referer
+The Referer: header, if there was any. (Added in 7.76.0)
 .TP
 .B remote_ip
 The remote IP address of the most recently done connection - can be either
@@ -160,6 +173,12 @@ server needed to calculate the result.
 .TP
 .B time_total
 The total time, in seconds, that the full operation lasted.
+.TP
+.B url
+The URL that was fetched. (Added in 7.75.0)
+.TP
+.B urlnum
+The URL index number of this transfer, 0-indexed. (Added in 7.75.0)
 .TP
 .B url_effective
 The URL that was fetched last. This is most meaningful if you've told curl

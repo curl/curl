@@ -26,7 +26,7 @@ ftp
 FTP PORT and 421 on download
  </name>
  <command>
---max-time %FTPTIME2 ftp://%HOSTIP:%FTPPORT/1207 -P -
+--max-time %FTPTIME2 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P -
 </command>
 
 </client>
@@ -42,8 +42,8 @@ PASS ftp@example.com
 PWD
 EPRT |1|
 TYPE I
-SIZE 1207
-RETR 1207
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 <errorcode>

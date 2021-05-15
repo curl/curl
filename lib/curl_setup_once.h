@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,6 +32,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <time.h>
 
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -55,13 +56,6 @@
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#ifdef TIME_WITH_SYS_TIME
-#include <time.h>
-#endif
-#else
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
 #endif
 
 #ifdef WIN32
@@ -347,15 +341,6 @@ typedef int sig_atomic_t;
 #define SIG_ATOMIC_T static sig_atomic_t
 #else
 #define SIG_ATOMIC_T static volatile sig_atomic_t
-#endif
-
-
-/*
- * Default return type for signal handlers.
- */
-
-#ifndef RETSIGTYPE
-#define RETSIGTYPE void
 #endif
 
 

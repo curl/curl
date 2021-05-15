@@ -16,16 +16,16 @@ ftp
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib505
+lib%TESTNUMBER
 </tool>
 
  <name>
 FTP upload with rename after transfer
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/505 log/upload505
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER log/upload%TESTNUMBER
 </command>
-<file name="log/upload505">
+<file name="log/upload%TESTNUMBER">
 Contents
 of
 a file
@@ -57,9 +57,9 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-STOR 505
-RNFR 505
-RNTO 505-forreal
+STOR %TESTNUMBER
+RNFR %TESTNUMBER
+RNTO %TESTNUMBER-forreal
 QUIT
 </protocol>
 </verify>

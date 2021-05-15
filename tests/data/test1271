@@ -27,16 +27,16 @@ http
 --write-out from file with empty file
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/our/1271 -w @log/blank1271
+http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER -w @log/blank%TESTNUMBER
 </command>
-<file name="log/blank1271">
+<file name="log/blank%TESTNUMBER">
 </file>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /we/want/our/1271 HTTP/1.1
+GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

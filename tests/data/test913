@@ -23,14 +23,14 @@ smtp
  <name>
 SMTP with large message SIZE
  </name>
-<file name="log/test913.eml">
+<file name="log/test%TESTNUMBER.eml">
 From: different
 To: another
 
 body
 </file>
  <command>
-smtp://%HOSTIP:%SMTPPORT/913 --mail-rcpt recipient@example.com --mail-from sender@example.com -T log/test913.eml
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T log/test%TESTNUMBER.eml
 </command>
 </client>
 
@@ -42,7 +42,7 @@ smtp://%HOSTIP:%SMTPPORT/913 --mail-rcpt recipient@example.com --mail-from sende
 55
 </errorcode>
 <protocol>
-EHLO 913
+EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com> SIZE=38
 QUIT
 </protocol>

@@ -4,7 +4,7 @@ How to contribute to curl
 Join the community
 ------------------
 
- 1. Click 'watch' on the github repo
+ 1. Click 'watch' on the GitHub repo
 
  2. Subscribe to the suitable [mailing lists](https://curl.se/mail/)
 

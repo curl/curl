@@ -17,9 +17,9 @@ tftp
 TFTP send with invalid permission on server
  </name>
  <command>
--T log/test1007.txt tftp://%HOSTIP:%TFTPPORT//invalid-file
+-T log/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//invalid-file
 </command>
-<file name="log/test1007.txt">
+<file name="log/test%TESTNUMBER.txt">
 This data will not be sent
 </file>
 </client>

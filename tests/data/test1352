@@ -32,7 +32,7 @@ FTP download, file without C-D inside, using -O -J -D stdout
 CURL_TESTDIR=%PWD/log
 </setenv>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file1352 -O -J -D -
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O -J -D -
 </command>
 </client>
 
@@ -45,19 +45,19 @@ PWD
 CWD path
 EPSV
 TYPE I
-SIZE file1352
-RETR file1352
+SIZE file%TESTNUMBER
+RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/file1352">
+<file1 name="log/file%TESTNUMBER">
 fooo
 mooo
 </file1>
 
 # The final "221 bye bye baby" response to QUIT will not be recorded
 # since that is not considered part of this particular transfer!
-<file2 name="log/stdout1352">
+<file2 name="log/stdout%TESTNUMBER">
 220-        _   _ ____  _     
 220-    ___| | | |  _ \| |    
 220-   / __| | | | |_) | |    
@@ -70,7 +70,7 @@ mooo
 229 Entering Passive Mode (stripped)
 200 I modify TYPE as you wanted
 213 10
-150 Binary data connection for 1352 () (10 bytes).
+150 Binary data connection for %TESTNUMBER () (10 bytes).
 226 File transfer complete
 </file2>
 <stripfile2>

@@ -26,7 +26,7 @@ with as an entry-point into the project, perhaps because you are a newcomer or
 even maybe not a terribly experienced developer, here's our advice:
 
  - Read through this document to get a grasp on a general approach to use
- - Consider adding a test case for something not currentled tested (correctly)
+ - Consider adding a test case for something not currently tested (correctly)
  - Consider updating or adding documentation
  - One way to get your feet wet gently in the project, is to participate in an
    existing issue/PR and help out by reproducing the issue, review the code in

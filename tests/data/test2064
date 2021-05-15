@@ -59,21 +59,21 @@ crypto
 HTTP with RFC7616 Digest authorization with bad password and SHA256
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/2064 -u testuser:test2pass --digest
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:test2pass --digest
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /2064 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /2064 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="2053604145", uri="/2064", response="a9c3ec1036068b336cbabefe9dfcad52ee8b89bc7c91ddbb5bb415c6acdf38a5", algorithm=SHA-256
+Authorization: Digest username="testuser", realm="testrealm", nonce="2053604145", uri="/%TESTNUMBER", response="a9c3ec1036068b336cbabefe9dfcad52ee8b89bc7c91ddbb5bb415c6acdf38a5", algorithm=SHA-256
 User-Agent: curl/%VERSION
 Accept: */*
 

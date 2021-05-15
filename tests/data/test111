@@ -23,7 +23,7 @@ ftp
 FTP download resume beyond file size
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/111 -C 2000
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -C 2000
 </command>
 </client>
 
@@ -38,7 +38,7 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 111
+SIZE %TESTNUMBER
 QUIT
 </protocol>
 </verify>

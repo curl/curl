@@ -59,14 +59,14 @@ CSeq: 6
 rtsp
 </server>
 <tool>
-lib569
+lib%TESTNUMBER
 </tool>
 
 <name>
 RTSP Session ID parsing
 </name>
 <command>
-rtsp://%HOSTIP:%RTSPPORT/569 log/idfile569.txt
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER log/idfile%TESTNUMBER.txt
 </command>
 </client>
 
@@ -75,32 +75,32 @@ rtsp://%HOSTIP:%RTSPPORT/569 log/idfile569.txt
 ^If-Modified-Since:.*
 </strip>
 <protocol>
-SETUP rtsp://%HOSTIP:%RTSPPORT/5690001 RTSP/1.0
+SETUP rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 RTSP/1.0
 CSeq: 1
 Transport: Fake/NotReal/JustATest;foo=baz
 
-TEARDOWN rtsp://%HOSTIP:%RTSPPORT/5690002 RTSP/1.0
+TEARDOWN rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0002 RTSP/1.0
 CSeq: 2
 Session: 00.+1-am-aSe55ion_id\$yes-i-am\$
 
-SETUP rtsp://%HOSTIP:%RTSPPORT/5690003 RTSP/1.0
+SETUP rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0003 RTSP/1.0
 CSeq: 3
 Transport: Fake/NotReal/JustATest;foo=baz
 
-TEARDOWN rtsp://%HOSTIP:%RTSPPORT/5690004 RTSP/1.0
+TEARDOWN rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0004 RTSP/1.0
 CSeq: 4
 Session: \$extraspaces
 
-SETUP rtsp://%HOSTIP:%RTSPPORT/5690005 RTSP/1.0
+SETUP rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0005 RTSP/1.0
 CSeq: 5
 Transport: Fake/NotReal/JustATest;foo=baz
 
-TEARDOWN rtsp://%HOSTIP:%RTSPPORT/5690006 RTSP/1.0
+TEARDOWN rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0006 RTSP/1.0
 CSeq: 6
 Session: A
 
 </protocol>
-<file name="log/idfile569.txt">
+<file name="log/idfile%TESTNUMBER.txt">
 Got Session ID: [00.+1-am-aSe55ion_id\$yes-i-am\$]
 Got Session ID: [\$extraspaces]
 Got Session ID: [A]

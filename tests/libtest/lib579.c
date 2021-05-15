@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -64,7 +64,7 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
   return 0;
 }
 
-static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *pooh = (struct WriteThis *)userp;
   const char *data;
@@ -104,7 +104,7 @@ int test(char *URL)
   }
 
   slist = curl_slist_append(slist, "Transfer-Encoding: chunked");
-  if(slist == NULL) {
+  if(!slist) {
     fprintf(stderr, "curl_slist_append() failed\n");
     curl_easy_cleanup(curl);
     curl_global_cleanup();

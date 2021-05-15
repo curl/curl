@@ -23,7 +23,7 @@ ftp
 FTP --disable-epsv
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/path/to/file/127 --disable-epsv
+ftp://%HOSTIP:%FTPPORT/path/to/file/%TESTNUMBER --disable-epsv
 </command>
 </client>
 
@@ -38,8 +38,8 @@ CWD to
 CWD file
 PASV
 TYPE I
-SIZE 127
-RETR 127
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

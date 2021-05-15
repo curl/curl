@@ -39,7 +39,7 @@ pop3
 POP3 plain authentication
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/865 -u user:secret
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
@@ -50,7 +50,7 @@ pop3://%HOSTIP:%POP3PORT/865 -u user:secret
 CAPA
 AUTH PLAIN
 AHVzZXIAc2VjcmV0
-RETR 865
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

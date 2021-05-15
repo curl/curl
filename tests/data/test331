@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
+HTTP proxy
 cookies
 </keywords>
 </info>
@@ -11,7 +12,7 @@ cookies
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Content-Length: 4
@@ -21,7 +22,7 @@ hej
 </data>
 <data2>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Content-Length: 0
@@ -39,7 +40,7 @@ http
 HTTP with cookie using host name 'moo'
  </name>
  <command>
--x http://%HOSTIP:%HTTPPORT http://moo/we/want/331 -b none http://moo/we/want/3310002
+-x http://%HOSTIP:%HTTPPORT http://moo/we/want/%TESTNUMBER -b none http://moo/we/want/%TESTNUMBER0002
 </command>
 <features>
 proxy
@@ -49,13 +50,13 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET http://moo/we/want/331 HTTP/1.1
+GET http://moo/we/want/%TESTNUMBER HTTP/1.1
 Host: moo
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://moo/we/want/3310002 HTTP/1.1
+GET http://moo/we/want/%TESTNUMBER0002 HTTP/1.1
 Host: moo
 User-Agent: curl/%VERSION
 Accept: */*

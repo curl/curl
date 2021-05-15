@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -29,7 +29,6 @@ task:
       # A stable 13.0 image likely won't be available before early 2021
       # image_family: freebsd-13-0-snap
       image_family: freebsd-12-2
-      image_family: freebsd-12-1
       image_family: freebsd-11-4
 
   env:
@@ -53,7 +52,7 @@ task:
         export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
         export LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" ;;
       esac
-    - ./configure --prefix="${HOME}"/install --enable-debug --with-libssh2 --with-brotli --with-gssapi --with-libidn2 --enable-manual --enable-ldap --enable-ldaps --with-librtmp --with-libmetalink --with-libpsl --with-nghttp2 || { tail -300 config.log; false; }
+    - ./configure --prefix="${HOME}"/install --enable-debug --with-openssl --with-libssh2 --with-brotli --with-gssapi --with-libidn2 --enable-manual --enable-ldap --enable-ldaps --with-librtmp --with-libmetalink --with-libpsl --with-nghttp2 || { tail -300 config.log; false; }
   compile_script:
     - make V=1
   test_script:
@@ -64,15 +63,8 @@ task:
     # Some tests won't run if run as root so run them as another user.
     # Make directories world writable so the test step can write wherever it needs.
     - find . -type d -exec chmod 777 {} \;
-    # TODO: A number of tests are failing on different FreeBSD versions and so
-    # are disabled.  This should be investigated.
-    - SKIP_TESTS=''
-    - uname -r
-    - case `uname -r` in
-        13.0*) SKIP_TESTS='!SFTP !SCP';;
-        12.1*) SKIP_TESTS='!SFTP !SCP';;
-        11.*) SKIP_TESTS='!SFTP !SCP';;
-      esac
-    - sudo -u nobody make V=1 TFLAGS="-n -a -p !flaky ${SKIP_TESTS}" test-nonflaky
+    # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
+    # therefore the SFTP and SCP tests are disabled right away from the beginning.
+    - sudo -u nobody make V=1 TFLAGS="-n -a -p !flaky !SFTP !SCP" test-nonflaky
   install_script:
     - make V=1 install

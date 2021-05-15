@@ -36,7 +36,7 @@ ftp
 FTP dir list nocwd
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT//list/this/path/1010/ ftp://%HOSTIP:%FTPPORT//list/this/path/1010/ --ftp-method nocwd
+ftp://%HOSTIP:%FTPPORT//list/this/path/%TESTNUMBER/ ftp://%HOSTIP:%FTPPORT//list/this/path/%TESTNUMBER/ --ftp-method nocwd
 </command>
 </client>
 
@@ -49,9 +49,9 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE A
-LIST /list/this/path/1010
+LIST /list/this/path/%TESTNUMBER
 EPSV
-LIST /list/this/path/1010
+LIST /list/this/path/%TESTNUMBER
 QUIT
 </protocol>
 </verify>

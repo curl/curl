@@ -24,7 +24,7 @@ smtp
 SMTP unknown user VRFY
  </name>
  <command>
-smtp://%HOSTIP:%SMTPPORT/926 --mail-rcpt recipient
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient
 </command>
 </client>
 
@@ -36,7 +36,7 @@ smtp://%HOSTIP:%SMTPPORT/926 --mail-rcpt recipient
 56
 </errorcode>
 <protocol>
-EHLO 926
+EHLO %TESTNUMBER
 VRFY recipient
 QUIT
 </protocol>

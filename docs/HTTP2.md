@@ -7,7 +7,7 @@ HTTP/2 with curl
 Build prerequisites
 -------------------
   - nghttp2
-  - OpenSSL, libressl, BoringSSL, NSS, GnutTLS, mbedTLS, wolfSSL or Schannel
+  - OpenSSL, libressl, BoringSSL, NSS, GnuTLS, mbedTLS, wolfSSL or Schannel
     with a new enough version.
 
 [nghttp2](https://nghttp2.org/)
@@ -104,11 +104,6 @@ Since 7.47.0, the curl tool enables HTTP/2 by default for HTTPS connections.
 
 curl tool limitations
 ---------------------
-
-The command line tool won't do any HTTP/2 multiplexing even though libcurl
-supports it, simply because the curl tool is not written to take advantage of
-the libcurl API that's necessary for this (the multi interface). We have an
-outstanding TODO item for this and **you** can help us make it happen.
 
 The command line tool also doesn't support HTTP/2 server push for the same
 reason it doesn't do multiplexing: it needs to use the multi interface for

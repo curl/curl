@@ -10,7 +10,7 @@ HTTP POST
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -31,21 +31,21 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib578
+lib%TESTNUMBER
 </tool>
 
  <name>
 HTTP POST lower than MAX_INITIAL_POST_SIZE with progress callback
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/578 log/ip578
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER log/ip%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/ip578">
+<file name="log/ip%TESTNUMBER">
 PASSED, UL data matched data size
 </file>
 </verify>

@@ -159,7 +159,7 @@ int my_trace(CURL *handle, curl_infotype type,
   return 0;
 }
 
-static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct input *i = userp;
   size_t retcode = fread(ptr, size, nmemb, i->in);

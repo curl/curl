@@ -21,7 +21,7 @@ ftp
 FTP download range with integer overflow
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1449 -r 36893488147419103232-
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -r 36893488147419103232-
 </command>
 </client>
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -213,24 +213,6 @@ if (sizeof (bool *) )
 #include <string.h>
 #include <float.h>
 int main() { return 0; }
-#endif
-#ifdef RETSIGTYPE_TEST
-#include <sys/types.h>
-#include <signal.h>
-#ifdef signal
-# undef signal
-#endif
-#ifdef __cplusplus
-extern "C" void (*signal (int, void (*)(int)))(int);
-#else
-void (*signal ()) ();
-#endif
-
-int
-main ()
-{
-  return 0;
-}
 #endif
 #ifdef HAVE_INET_NTOA_R_DECL
 #include <arpa/inet.h>

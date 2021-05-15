@@ -307,12 +307,14 @@ Example:
 
 (page located at `http://www.formpost.com/getthis/`)
 
-    <form action="post.cgi" method="post">
-    <input name=user size=10>
-    <input name=pass type=password size=10>
-    <input name=id type=hidden value="blablabla">
-    <input name=ding value="submit">
-    </form>
+```html
+<form action="post.cgi" method="post">
+<input name=user size=10>
+<input name=pass type=password size=10>
+<input name=id type=hidden value="blablabla">
+<input name=ding value="submit">
+</form>
+```
 
 We want to enter user 'foobar' with password '12345'.
 
@@ -419,7 +421,9 @@ if it should be used on secure connections only (`secure`).
 
 If you've received a page from a server that contains a header like:
 
-    Set-Cookie: sessionid=boo123; path="/foo";
+```http
+Set-Cookie: sessionid=boo123; path="/foo";
+```
 
 it means the server wants that first pair passed on when we get anything in a
 path beginning with "/foo".
@@ -964,7 +968,7 @@ Example to use a remote Metalink file:
 To use a Metalink file in the local file system, use FILE protocol
 (`file://`):
 
-    curl --metalink file://example.metalink
+    curl --metalink file:///example.metalink
 
 Please note that if FILE protocol is disabled, there is no way to use a local
 Metalink file at the time of this writing. Also note that if `--metalink` and

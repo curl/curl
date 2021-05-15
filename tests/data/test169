@@ -92,7 +92,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://data.from.server.requiring.digest.hohoho.com/169 --proxy http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-ntlm --digest --user digest:alot
+http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-ntlm --digest --user digest:alot
 </command>
 <precheck>
 chkhostname curlhost
@@ -102,23 +102,23 @@ chkhostname curlhost
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET http://data.from.server.requiring.digest.hohoho.com/169 HTTP/1.1
+GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://data.from.server.requiring.digest.hohoho.com/169 HTTP/1.1
+GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyY3VybGhvc3Q=
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://data.from.server.requiring.digest.hohoho.com/169 HTTP/1.1
+GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-Authorization: Digest username="digest", realm="r e a l m", nonce="abcdef", uri="/169", response="95d48591985a03c4b49cb962aa7bd3e6"
+Authorization: Digest username="digest", realm="r e a l m", nonce="abcdef", uri="/%TESTNUMBER", response="95d48591985a03c4b49cb962aa7bd3e6"
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

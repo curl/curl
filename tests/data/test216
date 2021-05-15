@@ -18,9 +18,9 @@ ftp
 FTP upload two files to the same dir
  </name>
  <command>
--T log/upload.216 ftp://%HOSTIP:%FTPPORT/a/path/216/ -T log/upload.216 ftp://%HOSTIP:%FTPPORT/a/path/216/%2e%2eanotherup.216
+-T log/upload.%TESTNUMBER ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER/ -T log/upload.%TESTNUMBER ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER/%2e%2eanotherup.%TESTNUMBER
 </command>
-<file name="log/upload.216">
+<file name="log/upload.%TESTNUMBER">
 upload this file twice
 </file>
 </client>
@@ -33,12 +33,12 @@ PASS ftp@example.com
 PWD
 CWD a
 CWD path
-CWD 216
+CWD %TESTNUMBER
 EPSV
 TYPE I
-STOR upload.216
+STOR upload.%TESTNUMBER
 EPSV
-STOR ..anotherup.216
+STOR ..anotherup.%TESTNUMBER
 QUIT
 </protocol>
 </verify>

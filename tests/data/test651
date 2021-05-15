@@ -12,7 +12,7 @@ FORM
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
@@ -28,7 +28,7 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib651
+lib%TESTNUMBER
 </tool>
 
  <name>
@@ -38,9 +38,9 @@ curl_formadd with huge COPYCONTENTS
  Some data from stdin
 </stdin>
  <command>
-http://%HOSTIP:%HTTPPORT/651 log/test651.filedata
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER log/test%TESTNUMBER.filedata
 </command>
-<file name="log/test651.filedata">
+<file name="log/test%TESTNUMBER.filedata">
 This is data from a file.
 </file>
 </client>
@@ -56,7 +56,7 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 # boundary string and since 5 of them are in the body contents, we see
 # (5*12) == 60 bytes less
 <protocol>
-POST /651 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 17139

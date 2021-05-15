@@ -25,7 +25,7 @@ ftp
 FTP RETR PASV
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/161
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -40,8 +40,8 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 161
-RETR 161
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 </protocol>
 # CURLE_PARTIAL_FILE = 18
 <errorcode>

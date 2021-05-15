@@ -12,7 +12,7 @@ CURLOPT_HTTPTRAILER_DATA
 <reply>
 <data nocheck="yes">
 HTTP/1.0 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 </data>
 </reply>
@@ -28,10 +28,10 @@ http
 HTTP PUT with trailers at the end
 </name>
 <tool>
-lib1591
+lib%TESTNUMBER
 </tool>
 <command>
-http://%HOSTIP:%HTTPPORT/bzz/1591
+http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER
 </command>
 <stdin>
 more than one byte
@@ -41,14 +41,18 @@ more than one byte
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-PUT /bzz/1591 HTTP/1.1
+PUT /bzz/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked
 Trailer: my-super-awesome-trailer, my-other-awesome-trailer
 Expect: 100-continue
 
+%if hyper
+E
+%else
 e
+%endif
 Hello Cloud!
 
 0

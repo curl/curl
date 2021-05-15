@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,7 @@
 #endif
 
 #ifdef WIN32
+#  include <stdlib.h>
 #  include <tlhelp32.h>
 #  include "tool_cfgable.h"
 #  include "tool_libinfo.h"
@@ -702,6 +703,64 @@ cleanup:
   return slist;
 }
 
+/* The terminal settings to restore on exit */
+static struct TerminalSettings {
+  HANDLE hStdOut;
+  DWORD dwOutputMode;
+  LONG valid;
+} TerminalSettings;
+
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
+
+static void restore_terminal(void)
+{
+  if(InterlockedExchange(&TerminalSettings.valid, (LONG)FALSE))
+    SetConsoleMode(TerminalSettings.hStdOut, TerminalSettings.dwOutputMode);
+}
+
+/* This is the console signal handler.
+ * The system calls it in a separate thread.
+ */
+static BOOL WINAPI signal_handler(DWORD type)
+{
+  if(type == CTRL_C_EVENT || type == CTRL_BREAK_EVENT)
+    restore_terminal();
+  return FALSE;
+}
+
+static void init_terminal(void)
+{
+  TerminalSettings.hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+  /*
+   * Enable VT (Virtual Terminal) output.
+   * Note: VT mode flag can be set on any version of Windows, but VT
+   * processing only performed on Win10 >= Creators Update)
+   */
+  if((TerminalSettings.hStdOut != INVALID_HANDLE_VALUE) &&
+     GetConsoleMode(TerminalSettings.hStdOut,
+                    &TerminalSettings.dwOutputMode) &&
+     !(TerminalSettings.dwOutputMode &
+       ENABLE_VIRTUAL_TERMINAL_PROCESSING)) {
+    /* The signal handler is set before attempting to change the console mode
+       because otherwise a signal would not be caught after the change but
+       before the handler was installed. */
+    (void)InterlockedExchange(&TerminalSettings.valid, (LONG)TRUE);
+    if(SetConsoleCtrlHandler(signal_handler, TRUE)) {
+      if(SetConsoleMode(TerminalSettings.hStdOut,
+                        (TerminalSettings.dwOutputMode |
+                         ENABLE_VIRTUAL_TERMINAL_PROCESSING))) {
+        atexit(restore_terminal);
+      }
+      else {
+        SetConsoleCtrlHandler(signal_handler, FALSE);
+        (void)InterlockedExchange(&TerminalSettings.valid, (LONG)FALSE);
+      }
+    }
+  }
+}
+
 LARGE_INTEGER tool_freq;
 bool tool_isVistaOrGreater;
 
@@ -714,6 +773,9 @@ CURLcode win32_init(void)
     tool_isVistaOrGreater = false;
 
   QueryPerformanceFrequency(&tool_freq);
+
+  init_terminal();
+
   return CURLE_OK;
 }
 

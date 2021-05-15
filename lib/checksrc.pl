@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2011 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2011 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -86,6 +86,8 @@ my %warnings = (
     'BRACEWHILE'       => 'A single space between open brace and while',
     'EXCLAMATIONSPACE' => 'Whitespace after exclamation mark in expression',
     'EMPTYLINEBRACE'   => 'Empty line before the open brace',
+    'EQUALSNULL'       => 'if/while comparison with == NULL',
+    'NOTEQUALSZERO'    => 'if/while comparison with != 0'
     );
 
 sub readskiplist {
@@ -470,6 +472,21 @@ sub scanfile {
                 checkwarn("SPACEBEFOREPAREN", $line, length($1)+length($2), $file, $l,
                           "$2 with space");
             }
+        }
+        # check for '== NULL' in if/while conditions but not if the thing on
+        # the left of it is a function call
+        if($nostr =~ /^(.*)(if|while)(\(.*[^)]) == NULL/) {
+            checkwarn("EQUALSNULL", $line,
+                      length($1) + length($2) + length($3),
+                      $file, $l, "we prefer !variable instead of \"== NULL\" comparisons");
+        }
+
+        # check for '!= 0' in if/while conditions but not if the thing on
+        # the left of it is a function call
+        if($nostr =~ /^(.*)(if|while)(\(.*[^)]) != 0[^x]/) {
+            checkwarn("NOTEQUALSZERO", $line,
+                      length($1) + length($2) + length($3),
+                      $file, $l, "we prefer if(rc) instead of \"rc != 0\" comparisons");
         }
 
         # check spaces in 'do {'

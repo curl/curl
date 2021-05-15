@@ -14,7 +14,7 @@ HTTP/1.1 200 swsclose
   12345
 fooo
 54 3 2 1
-Content-Disposition: filename=name1460; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 </data>
 </reply>
@@ -37,9 +37,9 @@ HTTP GET with -Ji and Content-Disposition with existing file
 CURL_TESTDIR=%PWD/log
 </setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1460 -Ji -O
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -Ji -O
 </command>
-<file name="log/name1460">
+<file name="log/name%TESTNUMBER">
 initial content
 </file>
 </client>
@@ -51,7 +51,7 @@ initial content
 <errorcode>
 2
 </errorcode>
-<file name="log/name1460">
+<file name="log/name%TESTNUMBER">
 initial content
 </file>
 
