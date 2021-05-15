@@ -331,7 +331,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       infof(data, "hyperstream is done!\n");
       break;
     }
-    else if(t != HYPER_TASK_RESPONSE) {
+    else if(t != HYPER_TASK_RESPONSE && t != HYPER_TASK_EMPTY) {
       *didwhat = KEEP_RECV;
       break;
     }
