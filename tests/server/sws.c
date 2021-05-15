@@ -81,8 +81,7 @@ static bool use_gopher = FALSE;
 static int serverlogslocked = 0;
 static bool is_proxy = FALSE;
 
-#define REQBUFSIZ 150000
-#define REQBUFSIZ_TXT "149999"
+#define REQBUFSIZ (2*1024*1024)
 
 static long prevtestno = -1;    /* previous test number we served */
 static long prevpartno = -1;    /* previous part number we served */
