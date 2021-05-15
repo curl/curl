@@ -1989,7 +1989,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       default:
         /* pick info from .netrc, if this is used for http, curl will
-           automatically enfore user+password with the request */
+           automatically enforce user+password with the request */
         config->netrc = toggle;
         break;
       }
