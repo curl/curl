@@ -83,8 +83,8 @@ stages:
     - script: ./buildconf && ./configure --enable-warnings --enable-werror $(configure)
       displayName: 'configure $(name)'
 
-    - script: make
-      displayName: 'make && cd tests && make'
+    - script: make V=1 && cd tests && make V=1
+      displayName: 'compile'
 
     - script: make test-nonflaky
       displayName: 'test'
@@ -114,14 +114,14 @@ stages:
     strategy:
       matrix:
         msys2_mingw32_debug_openssl:
-          name: 32-bit OpenSSL
+          name: 32-bit OpenSSL/libssh2
           container_img: mback2k/curl-docker-winbuildenv-msys2-mingw32:ltsc2019
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2
           configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --with-libssh2 --with-openssl
           tests: ~571 ~612 ~1056 ~1299 !SCP
         msys2_mingw64_debug_openssl:
-          name: 64-bit OpenSSL
+          name: 64-bit OpenSSL/libssh2
           container_img: mback2k/curl-docker-winbuildenv-msys2-mingw64:ltsc2019
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
@@ -146,14 +146,14 @@ stages:
           configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --without-zlib --without-ssl
           tests: ~203 ~1056 ~1143 ~1299
         msys2_mingw32_debug_schannel:
-          name: 32-bit Schannel/SSPI/WinIDN
+          name: 32-bit Schannel/SSPI/WinIDN/libssh2
           container_img: mback2k/curl-docker-winbuildenv-msys2-mingw32:ltsc2019
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2
           configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
           tests: ~165 ~310 ~571 ~612 ~1056 ~1299 ~1448 ~2034 ~2037 ~2041 ~2046 ~2047 ~3000 ~3001 !SCP
         msys2_mingw64_debug_schannel:
-          name: 64-bit Schannel/SSPI/WinIDN
+          name: 64-bit Schannel/SSPI/WinIDN/libssh2
           container_img: mback2k/curl-docker-winbuildenv-msys2-mingw64:ltsc2019
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
@@ -189,13 +189,13 @@ stages:
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && ./buildconf && ./configure $(configure)"
       displayName: 'configure $(name)'
 
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make && cd tests && make"
-      displayName: 'make'
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 && cd tests && make V=1"
+      displayName: 'compile'
 
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
       displayName: 'install'
 
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make test-nonflaky"
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 test-nonflaky"
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
