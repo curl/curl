@@ -125,7 +125,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug-rustls RUSTLS_VERSION="v0.5.0" C="--with-rustls=$HOME/crust"
+    - T=debug-rustls RUSTLS_VERSION="v0.6.0" C="--with-rustls=$HOME/crust"
     addons:
       apt:
         <<: *common_apt
