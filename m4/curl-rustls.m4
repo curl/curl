@@ -70,7 +70,7 @@ if test "x$OPT_RUSTLS" != xno; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-      AC_CHECK_LIB(crustls, rustls_client_session_read,
+      AC_CHECK_LIB(crustls, rustls_connection_read,
        [
        AC_DEFINE(USE_RUSTLS, 1, [if rustls is enabled])
        AC_SUBST(USE_RUSTLS, [1])
