@@ -319,6 +319,7 @@ static const struct Curl_handler Curl_handler_http2 = {
   http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
   http2_conncheck,                      /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
   CURLPROTO_HTTP,                       /* family */
@@ -341,6 +342,7 @@ static const struct Curl_handler Curl_handler_http2_ssl = {
   http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
   http2_conncheck,                      /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
   CURLPROTO_HTTP,                       /* family */

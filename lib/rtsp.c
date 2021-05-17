@@ -109,6 +109,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   rtsp_disconnect,                      /* disconnect */
   rtsp_rtp_readwrite,                   /* readwrite */
   rtsp_conncheck,                       /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_RTSP,                            /* defport */
   CURLPROTO_RTSP,                       /* protocol */
   CURLPROTO_RTSP,                       /* family */

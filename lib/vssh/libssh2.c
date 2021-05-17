@@ -121,6 +121,7 @@ static int ssh_getsock(struct Curl_easy *data, struct connectdata *conn,
                        curl_socket_t *sock);
 static CURLcode ssh_setup_connection(struct Curl_easy *data,
                                      struct connectdata *conn);
+static void ssh_attach(struct Curl_easy *data, struct connectdata *conn);
 
 /*
  * SCP protocol handler.
@@ -142,6 +143,7 @@ const struct Curl_handler Curl_handler_scp = {
   scp_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ssh_attach,
   PORT_SSH,                             /* defport */
   CURLPROTO_SCP,                        /* protocol */
   CURLPROTO_SCP,                        /* family */
@@ -170,6 +172,7 @@ const struct Curl_handler Curl_handler_sftp = {
   sftp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ssh_attach,
   PORT_SSH,                             /* defport */
   CURLPROTO_SFTP,                       /* protocol */
   CURLPROTO_SFTP,                       /* family */
@@ -3604,4 +3607,21 @@ size_t Curl_ssh_version(char *buffer, size_t buflen)
   return msnprintf(buffer, buflen, "libssh2/%s", LIBSSH2_VERSION);
 }
 
+/* The SSH session is associated with the *CONNECTION* but the callback user
+ * pointer is an easy handle pointer. This function allows us to reassign the
+ * user pointer to the *CURRENT* (new) easy handle.
+ */
+static void ssh_attach(struct Curl_easy *data, struct connectdata *conn)
+{
+  DEBUGASSERT(data);
+  DEBUGASSERT(conn);
+  if(conn->handler->protocol & PROTO_FAMILY_SSH) {
+    struct ssh_conn *sshc = &conn->proto.sshc;
+    if(sshc->ssh_session) {
+      /* only re-attach if the session already exists */
+      void **abstract = libssh2_session_abstract(sshc->ssh_session);
+      *abstract = data;
+    }
+  }
+}
 #endif /* USE_LIBSSH2 */
