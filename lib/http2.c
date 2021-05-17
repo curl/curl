@@ -2353,7 +2353,8 @@ CURLcode Curl_http2_stream_pause(struct Curl_easy *data, bool pause)
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
   /* if it isn't HTTP/2, we're done */
-  if(!data->conn->proto.httpc.h2)
+  if(!(data->conn->handler->protocol & PROTO_FAMILY_HTTP) ||
+     !data->conn->proto.httpc.h2)
     return CURLE_OK;
 #ifdef NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE
   else {
