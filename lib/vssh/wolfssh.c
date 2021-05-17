@@ -91,6 +91,7 @@ const struct Curl_handler Curl_handler_scp = {
   wscp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_SSH,                             /* defport */
   CURLPROTO_SCP,                        /* protocol */
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION
@@ -119,6 +120,7 @@ const struct Curl_handler Curl_handler_sftp = {
   wsftp_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_SSH,                             /* defport */
   CURLPROTO_SFTP,                       /* protocol */
   CURLPROTO_SFTP,                       /* family */

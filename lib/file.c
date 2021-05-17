@@ -111,6 +111,7 @@ const struct Curl_handler Curl_handler_file = {
   file_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   0,                                    /* defport */
   CURLPROTO_FILE,                       /* protocol */
   CURLPROTO_FILE,                       /* family */

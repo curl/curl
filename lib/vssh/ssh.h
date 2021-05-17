@@ -263,9 +263,12 @@ extern const struct Curl_handler Curl_handler_sftp;
 CURLcode Curl_ssh_init(void);
 void Curl_ssh_cleanup(void);
 size_t Curl_ssh_version(char *buffer, size_t buflen);
+void Curl_ssh_attach(struct Curl_easy *data,
+                     struct connectdata *conn);
 #else
 /* for non-SSH builds */
 #define Curl_ssh_cleanup()
+#define Curl_ssh_attach(x,y)
 #endif
 
 #endif /* HEADER_CURL_SSH_H */
