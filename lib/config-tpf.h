@@ -77,18 +77,6 @@
 /* Define if struct sockaddr_in6 has the sin6_scope_id member */
 /* #undef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID */
 
-/* Define to the type of arg 1 for getnameinfo. */
-/* #undef GETNAMEINFO_TYPE_ARG1 */
-
-/* Define to the type of arg 2 for getnameinfo. */
-/* #undef GETNAMEINFO_TYPE_ARG2 */
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-/* #undef GETNAMEINFO_TYPE_ARG46 */
-
-/* Define to the type of arg 7 for getnameinfo. */
-/* #undef GETNAMEINFO_TYPE_ARG7 */
-
 /* Define to 1 if you have the alarm function. */
 #define HAVE_ALARM 1
 
@@ -161,9 +149,6 @@
 
 /* gethostbyname_r() takes 6 args */
 /* #undef HAVE_GETHOSTBYNAME_R_6 1 */
-
-/* Define to 1 if you have the getnameinfo function. */
-/* #undef HAVE_GETNAMEINFO */
 
 /* Define to 1 if you have the `getpass_r' function. */
 /* #undef HAVE_GETPASS_R */
@@ -656,24 +641,6 @@
 
 /* the signed version of size_t */
 /* #undef ssize_t */
-
-/* Define to 1 if you have the getnameinfo function. */
-/* #undef HAVE_GETNAMEINFO 1 */
-
-/* Define to the type qualifier of arg 1 for getnameinfo. */
-/* #undef GETNAMEINFO_QUAL_ARG1 const */
-
-/* Define to the type of arg 1 for getnameinfo. */
-/* #undef GETNAMEINFO_TYPE_ARG1 struct sockaddr * */
-
-/* Define to the type of arg 2 for getnameinfo. */
-/* #undef GETNAMEINFO_TYPE_ARG2 socklen_t */
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-/* #undef GETNAMEINFO_TYPE_ARG46 size_t */
-
-/* Define to the type of arg 7 for getnameinfo. */
-/* #undef GETNAMEINFO_TYPE_ARG7 int */
 
 /* Define to 1 if you have the recv function. */
 #define HAVE_RECV 1

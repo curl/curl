@@ -517,7 +517,6 @@
 #    undef HAVE_GETADDRINFO_THREADSAFE
 #    undef HAVE_FREEADDRINFO
 #    undef HAVE_GETADDRINFO
-#    undef HAVE_GETNAMEINFO
 #    undef ENABLE_IPV6
 #  endif
 #endif

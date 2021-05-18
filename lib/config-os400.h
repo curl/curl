@@ -449,25 +449,6 @@
 /* Define if you have the ldap_url_parse procedure. */
 /* #define HAVE_LDAP_URL_PARSE */    /* Disabled because of an IBM bug. */
 
-/* Define if you have the getnameinfo function. */
-/* OS400 has no ASCII version of this procedure: wrapped in setup-os400.h. */
-#define HAVE_GETNAMEINFO
-
-/* Define to the type qualifier of arg 1 for getnameinfo. */
-#define GETNAMEINFO_QUAL_ARG1 const
-
-/* Define to the type of arg 1 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-
-/* Define to the type of arg 2 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG2 socklen_t
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG46 socklen_t
-
-/* Define to the type of arg 7 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG7 int
-
 /* Define if you have the recv function. */
 #define HAVE_RECV
 
