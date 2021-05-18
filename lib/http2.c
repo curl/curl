@@ -319,6 +319,7 @@ static const struct Curl_handler Curl_handler_http2 = {
   http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
   http2_conncheck,                      /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
   CURLPROTO_HTTP,                       /* family */
@@ -341,6 +342,7 @@ static const struct Curl_handler Curl_handler_http2_ssl = {
   http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
   http2_conncheck,                      /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
   CURLPROTO_HTTP,                       /* family */
@@ -2353,7 +2355,8 @@ CURLcode Curl_http2_stream_pause(struct Curl_easy *data, bool pause)
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
   /* if it isn't HTTP/2, we're done */
-  if(!data->conn->proto.httpc.h2)
+  if(!(data->conn->handler->protocol & PROTO_FAMILY_HTTP) ||
+     !data->conn->proto.httpc.h2)
     return CURLE_OK;
 #ifdef NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE
   else {

@@ -98,7 +98,7 @@ jobs:
         compiler:
         - CC: clang
           CXX: clang++
-          CFLAGS: "-mmacosx-version-min=10.15"
+          CFLAGS: "-mmacosx-version-min=10.15 -Wno-deprecated-declarations"
         - CC: gcc-8
           CXX: g++-8
           CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
@@ -112,6 +112,9 @@ jobs:
         - name: LibreSSL
           install: nghttp2 libressl
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+        - name: libssh2
+          install: nghttp2 openssl libssh2
+          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCMAKE_USE_LIBSSH2=ON
     steps:
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'

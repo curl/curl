@@ -124,12 +124,10 @@ if test "x$OPT_WOLFSSL" != xno; then
 
       LIBS="$addlib -lm $LIBS"
 
-      dnl Recent WolfSSL versions build without SSLv3 by default
       dnl WolfSSL needs configure --enable-opensslextra to have *get_peer*
       dnl DES* is needed for NTLM support and lives in the OpenSSL compatibility
       dnl layer
-      AC_CHECK_FUNCS(wolfSSLv3_client_method \
-                     wolfSSL_get_peer_certificate \
+      AC_CHECK_FUNCS(wolfSSL_get_peer_certificate \
                      wolfSSL_UseALPN )
 
       dnl if this symbol is present, we want the include path to include the
@@ -148,8 +146,8 @@ if test "x$OPT_WOLFSSL" != xno; then
             else
               dnl user didn't give a path, so guess/hope they installed wolfssl
               dnl headers to system default location
-              CPPFLAGS="-I$includedir/wolfssl $CPPFLAGS"
-              AC_MSG_NOTICE([Add $includedir/wolfssl to CPPFLAGS])
+              CPPFLAGS="-I/usr/include/wolfssl $CPPFLAGS"
+              AC_MSG_NOTICE([Add /usr/include/wolfssl to CPPFLAGS])
             fi
             WOLFSSL_NTLM=1
         ]

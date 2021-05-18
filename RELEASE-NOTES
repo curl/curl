@@ -4,7 +4,7 @@ curl and libcurl 7.77.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2399
+ Contributors:                 2401
 
 This release includes the following changes:
 
@@ -19,9 +19,12 @@ This release includes the following bugfixes:
  o build: fix compilation for Windows UWP platform [82]
  o c-hyper: don't write to set.writeheader if null [67]
  o c-hyper: fix handling of zero-byte chunk from hyper [39]
+ o c-hyper: handle body on HYPER_TASK_EMPTY [104]
  o checksrc: complain on == NULL or != 0 checks in conditions [20]
+ o CI/cirrus: add shared and static Windows release builds [102]
  o cmake: check for getppid and utimes [87]
  o cmake: make libcurl output filename configurable [41]
+ o configure: if asked for, fail if ldap is not found [109]
  o configure: provide --with-openssl, deprecate --with-ssl [15]
  o connect: use CURL_SA_FAMILY_T for portability [34]
  o ConnectionExists: respect requests for h1 connections better
@@ -33,6 +36,7 @@ This release includes the following bugfixes:
  o curl_setup: provide the shutdown flags wider [33]
  o curl_url_set.3: add memory management information [38]
  o CURLcode: add CURLE_SSL_CLIENTCERT [47]
+ o CURLOPT_CAPATH.3: defaults to a path, not NULL [103]
  o CURLOPT_POSTFIELDS.3: clarify how it gets the size of the data [40]
  o docs/HTTP3.md: fix nghttp2's HTTP/3 server port [21]
  o docs: camelcase it like GitHub everywhere [62]
@@ -40,10 +44,12 @@ This release includes the following bugfixes:
  o easy: ignore sigpipe in curl_easy_send [69]
  o FILEFORMAT: mention sectransp as a feature [89]
  o GIT-INFO: suggest using autoreconf instead of buildconf [96]
+ o github: add a workflow with libssh2 on macOS using cmake [81]
  o GnuTLS: don't allow TLS 1.3 for versions that don't support it [77]
  o gnutls: make setting only the MAX TLS allowed version work [83]
  o gskit: fix CURL_DISABLE_PROXY build [57]
  o gskit: fix undefined reference to 'conn' [58]
+ o hostip: remove the debug code for LocalHost [113]
  o http2: call the handle-closed function correctly on closed stream [37]
  o http2: fix a resource leak in push_promise() [54]
  o http2: fix resource leaks in set_transfer_url() [55]
@@ -84,11 +90,13 @@ This release includes the following bugfixes:
  o openssl: remove unneeded cast for CertOpenSystemStore() [93]
  o os400: additional support for options metadata [24]
  o progress: fix scan-build-11 warnings [92]
+ o progress: reset limit_size variables at transfer start [114]
  o progress: when possible, calculate transfer speeds with microseconds [48]
  o README.md: delete Codacy UTM parameters [5]
  o Revert "Revert 'multi: implement wait using winsock events'" [26]
  o rustls: only return CURLE_AGAIN when TLS session is fully drained [2]
  o rustls: use ALPN [56]
+ o sasl: use 'unsigned short' to store mechanism [112]
  o schannel: Disable auto credentials; add an option to enable it [18]
  o schannel: Support strong crypto option [44]
  o sectransp: allow cipher name to be specified [29]
@@ -96,6 +104,7 @@ This release includes the following bugfixes:
  o sockfilt: avoid getting stuck waiting for writable socket [80]
  o sockfilt: fix invalid increment of handles index variable nfd [79]
  o sws: #ifdef S_IFSOCK use [32]
+ o sws: allow HTTP requests up to 2MB in size [100]
  o test server: take care of siginterrupt() deprecation [25]
  o tests/disable-scan.pl: also scan all m4 files [17]
  o tests: ignore case of chunked hex numbers in tests [86]
@@ -109,6 +118,7 @@ This release includes the following bugfixes:
  o urlapi: "normalize" numerical IPv4 host names [6]
  o vauth: factor base64 conversions out of authentication procedures [22]
  o version: add gsasl_version to curl_version_info_data [43]
+ o version: add OpenLDAP version in the output [110]
  o vtls: deduplicate some DISABLE_PROXY ifdefs [19]
  o vtls: reset ssl use flag upon negotiation failure [42]
  o wolfssl: handle SSL_write() returns 0 for error [68]
@@ -120,22 +130,23 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  3eka on github, Ayushman Singh Chauhan, Benjamin Riefenstahl, Blake Burkhart,
-  Calvin Buckley, Cameron Cawley, Dan Fandrich, Daniel Carpenter,
-  Daniel Gustafsson, Daniel Stenberg, David Cook, Dmitry Karpov,
-  Dmitry Kostjuchenko, ebejan on github, Emil Engler, Georeth Zhou,
-  Gergely Nagy, Gilles Vollant, Harry Sintonen, Illarion Taev,
-  Jacob Hoffman-Andrews, Jakub Zakrzewski, Javier Blazquez, J. Bromley,
-  Jeroen Ooms, Johann150 on github, Jon Rumsey, Kamil Dudka, Kevin Burke,
-  Kevin R. Bulgrien, Lucas Servén Marín, MAntoniak on github, Marcel Raad,
-  Marc Hörsken, Martin Halle, Max Dymond, Michael Kolechkin, Michał Antoniak,
-  Michal Rus, Morten Minde Neergaard, Patrick Monnerat, Peng-Yu Chen,
-  Pontus Lundkvist, Ralph Langendam, Ray Satiro, rcombs on github,
-  Rich FitzJohn, sergio-nsk on github, Stefan Karpinski, Timo Lange,
-  Timothy Gu, tmkk on github, Tobias Gabriel, Tommy Odom,
-  Travis Burtrum on github, Tuomas Siipola, ustcqidi on github, Victor Vieux,
-  Viktor Szakats, Wes Hinsley, Yusuke Nakamura,
-  (61 contributors)
+  3eka on github, Andrew Barnert, Ayushman Singh Chauhan, Benjamin Riefenstahl,
+  Blake Burkhart, Calvin Buckley, Cameron Cawley, Dan Fandrich,
+  Daniel Carpenter, Daniel Gustafsson, Daniel Stenberg, David Cook,
+  Dmitry Karpov, Dmitry Kostjuchenko, ebejan on github, Emil Engler,
+  Georeth Zhou, Gergely Nagy, Gilles Vollant, Harry Sintonen, Howard Chu,
+  Ikko Ashimine, Illarion Taev, Jacob Hoffman-Andrews, Jakub Zakrzewski,
+  Javier Blazquez, J. Bromley, Jeroen Ooms, Joel Depooter, Johann150 on github,
+  Jon Rumsey, Kamil Dudka, Kevin Burke, Kevin R. Bulgrien, Lucas Servén Marín,
+  MAntoniak on github, Marcel Raad, Marc Hörsken, Martin Halle, Max Dymond,
+  Michael Kolechkin, Michał Antoniak, Michal Rus, Morten Minde Neergaard,
+  Patrick Monnerat, Peng-Yu Chen, Pontus Lundkvist, Ralph Langendam,
+  Ray Satiro, rcombs on github, Rich FitzJohn, sergio-nsk on github,
+  Stefan Karpinski, Timo Lange, Timothy Gu, tmkk on github, Tobias Gabriel,
+  Tommy Odom, Travis Burtrum on github, Tuomas Siipola, ustcqidi on github,
+  Victor Vieux, Viktor Szakats, Wes Hinsley, Ymir1711 on github,
+  Yusuke Nakamura,
+  (66 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -219,6 +230,7 @@ References to bug reports and discussions on issues:
  [78] = https://curl.se/bug/?i=7023
  [79] = https://curl.se/bug/?i=6992
  [80] = https://curl.se/bug/?i=6992
+ [81] = https://curl.se/bug/?i=7047
  [82] = https://curl.se/bug/?i=7006
  [83] = https://curl.se/bug/?i=6998
  [84] = https://curl.se/bug/?i=7004
@@ -237,3 +249,12 @@ References to bug reports and discussions on issues:
  [97] = https://curl.se/bug/?i=6950
  [98] = https://curl.se/bug/?i=7031
  [99] = https://curl.se/bug/?i=7022
+ [100] = https://curl.se/bug/?i=7075
+ [102] = https://curl.se/bug/?i=6991
+ [103] = https://curl.se/bug/?i=7062
+ [104] = https://curl.se/bug/?i=7064
+ [109] = https://curl.se/bug/?i=7053
+ [110] = https://curl.se/bug/?i=7054
+ [112] = https://curl.se/bug/?i=7045
+ [113] = https://curl.se/bug/?i=7044
+ [114] = https://curl.se/bug/?i=7042
