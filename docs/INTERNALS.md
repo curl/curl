@@ -976,6 +976,8 @@ for older and later versions as things don't change drastically that often.
   from a single array which is scanned through when a URL is given to libcurl
   to work with.
 
+  The concrete function pointer prototypes can be found in `lib/urldata.h`.
+
   `->scheme` is the URL scheme name, usually spelled out in uppercase. That's
   "HTTP" or "FTP" etc. SSL versions of the protocol need their own
   `Curl_handler` setup so HTTPS separate from HTTP.
@@ -1017,7 +1019,7 @@ for older and later versions as things don't change drastically that often.
   `->domore_getsock`
   `->perform_getsock`
   Functions that return socket information. Which socket(s) to wait for which
-  action(s) during the particular multi state.
+  I/O action(s) during the particular multi state.
 
   `->disconnect` is called immediately before the TCP connection is shutdown.
 
