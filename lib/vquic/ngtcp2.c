@@ -934,6 +934,7 @@ static const struct Curl_handler Curl_handler_http3 = {
   ng_disconnect,                        /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ng_conncheck,                         /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
   CURLPROTO_HTTP,                       /* family */
