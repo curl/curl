@@ -136,15 +136,6 @@ void Curl_hostcache_prune(struct Curl_easy *data);
 /* Return # of addresses in a Curl_addrinfo struct */
 int Curl_num_addresses(const struct Curl_addrinfo *addr);
 
-#if defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO)
-int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
-                       GETNAMEINFO_TYPE_ARG2 salen,
-                       char *host, GETNAMEINFO_TYPE_ARG46 hostlen,
-                       char *serv, GETNAMEINFO_TYPE_ARG46 servlen,
-                       GETNAMEINFO_TYPE_ARG7 flags,
-                       int line, const char *source);
-#endif
-
 /* IPv4 threadsafe resolve function used for synch and asynch builds */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
