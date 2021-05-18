@@ -810,6 +810,10 @@ static void wolfssl_close(struct Curl_easy *data, struct connectdata *conn,
   (void) data;
 
   if(backend->handle) {
+    char buf[32];
+    /* Maybe the server has already sent a close notify alert.
+       Read it to avoid an RST on the TCP connection. */
+    (void)SSL_read(backend->handle, buf, (int)sizeof(buf));
     (void)SSL_shutdown(backend->handle);
     SSL_free(backend->handle);
     backend->handle = NULL;

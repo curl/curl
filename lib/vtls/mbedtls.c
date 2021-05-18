@@ -813,8 +813,13 @@ static void mbedtls_close(struct Curl_easy *data,
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
-
+  char buf[32];
   (void) data;
+
+  /* Maybe the server has already sent a close notify alert.
+     Read it to avoid an RST on the TCP connection. */
+  (void)mbedtls_ssl_read(&backend->ssl, (unsigned char *)buf, sizeof(buf));
+
   mbedtls_pk_free(&backend->pk);
   mbedtls_x509_crt_free(&backend->clicert);
   mbedtls_x509_crt_free(&backend->cacert);
