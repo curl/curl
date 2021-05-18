@@ -373,14 +373,14 @@ before Android M.
 
 For IBM i (formerly OS/400), you can use curl in two different ways:
 
-* Natively, running in the **ILE**. The obvious use is being able to call curl
+- Natively, running in the **ILE**. The obvious use is being able to call curl
   from ILE C or RPG applications.
-  * You will need to build this from source. See `packages/OS400/README` for
+  - You will need to build this from source. See `packages/OS400/README` for
     the ILE specific build instructions.
-* In the **PASE** environment, which runs AIX programs. curl will be built as
+- In the **PASE** environment, which runs AIX programs. curl will be built as
   it would be on AIX.
-  * IBM provides builds of curl in their Yum repository for PASE software.
-  * To build from source, follow the Unix instructions.
+  - IBM provides builds of curl in their Yum repository for PASE software.
+  - To build from source, follow the Unix instructions.
 
 There are some additional limitations and quirks with curl on this platform;
 they affect both environments.
@@ -398,9 +398,9 @@ getaddrinfo() thread failed to start
 
 Don't panic! curl and your program aren't broken. You can fix this by:
 
-* Set the environment variable `QIBM_MULTI_THREADED` to `Y` before starting
+- Set the environment variable `QIBM_MULTI_THREADED` to `Y` before starting
   your program. This can be done at whatever scope you feel is appropriate.
-* Alternatively, start the job with the `ALWMLTTHD` parameter set to `*YES`.
+- Alternatively, start the job with the `ALWMLTTHD` parameter set to `*YES`.
 
 # Cross compile
 
