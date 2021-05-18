@@ -148,8 +148,8 @@ if test "x$OPT_WOLFSSL" != xno; then
             else
               dnl user didn't give a path, so guess/hope they installed wolfssl
               dnl headers to system default location
-              CPPFLAGS="-I$includedir/wolfssl $CPPFLAGS"
-              AC_MSG_NOTICE([Add $includedir/wolfssl to CPPFLAGS])
+              CPPFLAGS="-I/usr/include/wolfssl $CPPFLAGS"
+              AC_MSG_NOTICE([Add /usr/include/wolfssl to CPPFLAGS])
             fi
             WOLFSSL_NTLM=1
         ]
