@@ -277,21 +277,6 @@
 #define HAVE_UTIME 1
 #endif
 
-/* Define to the type qualifier of arg 1 for getnameinfo. */
-#define GETNAMEINFO_QUAL_ARG1 const
-
-/* Define to the type of arg 1 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-
-/* Define to the type of arg 2 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG2 socklen_t
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG46 DWORD
-
-/* Define to the type of arg 7 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG7 int
-
 /* Define if you have the recv function. */
 #define HAVE_RECV 1
 
@@ -419,7 +404,6 @@
 #  undef HAVE_WS2TCPIP_H
 #  undef HAVE_ERRNO_H
 #  undef HAVE_GETHOSTNAME
-#  undef HAVE_GETNAMEINFO
 #  undef LWIP_POSIX_SOCKETS_IO_NAMES
 #  undef RECV_TYPE_ARG1
 #  undef RECV_TYPE_ARG3
@@ -450,7 +434,6 @@
   #undef HAVE_WINSOCK2_H
   #undef HAVE_WS2TCPIP_H
   #define HAVE_GETADDRINFO
-  #define HAVE_GETNAMEINFO
   #define HAVE_SYS_IOCTL_H
   #define HAVE_SYS_SOCKET_H
   #define HAVE_NETINET_IN_H
@@ -580,7 +563,7 @@ Vista
 #  endif
 #endif
 
-/* Availability of freeaddrinfo, getaddrinfo, getnameinfo and if_nametoindex
+/* Availability of freeaddrinfo, getaddrinfo, and if_nametoindex
    functions is quite convoluted, compiler dependent and even build target
    dependent. */
 #if defined(HAVE_WS2TCPIP_H)
@@ -588,17 +571,14 @@ Vista
 #    define HAVE_FREEADDRINFO           1
 #    define HAVE_GETADDRINFO            1
 #    define HAVE_GETADDRINFO_THREADSAFE 1
-#    define HAVE_GETNAMEINFO            1
 #  elif defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0501)
 #    define HAVE_FREEADDRINFO           1
 #    define HAVE_GETADDRINFO            1
 #    define HAVE_GETADDRINFO_THREADSAFE 1
-#    define HAVE_GETNAMEINFO            1
 #  elif defined(_MSC_VER) && (_MSC_VER >= 1200)
 #    define HAVE_FREEADDRINFO           1
 #    define HAVE_GETADDRINFO            1
 #    define HAVE_GETADDRINFO_THREADSAFE 1
-#    define HAVE_GETNAMEINFO            1
 #  endif
 #endif
 

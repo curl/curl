@@ -128,13 +128,6 @@
 #  define LONG_MIN (-0x7fffffffL-1)
 #endif
 
-#define HAVE_GETNAMEINFO 1
-#define GETNAMEINFO_QUAL_ARG1 const
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-#define GETNAMEINFO_TYPE_ARG2 int
-#define GETNAMEINFO_TYPE_ARG46 size_t
-#define GETNAMEINFO_TYPE_ARG7 int
-
 #define HAVE_RECV 1
 #define RECV_TYPE_ARG1 long
 #define RECV_TYPE_ARG2 char *

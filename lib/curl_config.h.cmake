@@ -112,21 +112,6 @@
 /* Define if you want to enable IPv6 support */
 #cmakedefine ENABLE_IPV6 1
 
-/* Define to the type qualifier of arg 1 for getnameinfo. */
-#cmakedefine GETNAMEINFO_QUAL_ARG1 ${GETNAMEINFO_QUAL_ARG1}
-
-/* Define to the type of arg 1 for getnameinfo. */
-#cmakedefine GETNAMEINFO_TYPE_ARG1 ${GETNAMEINFO_TYPE_ARG1}
-
-/* Define to the type of arg 2 for getnameinfo. */
-#cmakedefine GETNAMEINFO_TYPE_ARG2 ${GETNAMEINFO_TYPE_ARG2}
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-#cmakedefine GETNAMEINFO_TYPE_ARG46 ${GETNAMEINFO_TYPE_ARG46}
-
-/* Define to the type of arg 7 for getnameinfo. */
-#cmakedefine GETNAMEINFO_TYPE_ARG7 ${GETNAMEINFO_TYPE_ARG7}
-
 /* Specifies the number of arguments to getservbyport_r */
 #cmakedefine GETSERVBYPORT_R_ARGS ${GETSERVBYPORT_R_ARGS}
 
@@ -246,9 +231,6 @@
 
 /* Define to 1 if you have a working getifaddrs function. */
 #cmakedefine HAVE_GETIFADDRS 1
-
-/* Define to 1 if you have the getnameinfo function. */
-#cmakedefine HAVE_GETNAMEINFO 1
 
 /* Define to 1 if you have the `getpass_r' function. */
 #cmakedefine HAVE_GETPASS_R 1
