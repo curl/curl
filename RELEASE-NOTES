@@ -4,7 +4,7 @@ curl and libcurl 7.77.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2401
+ Contributors:                 2404
 
 This release includes the following changes:
 
@@ -24,11 +24,14 @@ This release includes the following bugfixes:
  o CI/cirrus: add shared and static Windows release builds [102]
  o cmake: check for getppid and utimes [87]
  o cmake: make libcurl output filename configurable [41]
+ o config: remove now-unused macros [107]
  o configure: if asked for, fail if ldap is not found [109]
  o configure: provide --with-openssl, deprecate --with-ssl [15]
+ o conn: add 'attach' to protocol handler, make libssh2 use it [119]
  o connect: use CURL_SA_FAMILY_T for portability [34]
  o ConnectionExists: respect requests for h1 connections better
  o cookie: CURLOPT_COOKIEFILE set to NULL switches off cookies [1]
+ o curl-wolfssl.m4: without custom include path, assume /usr/include [116]
  o Curl_http_header: check for colon when matching Persistent-Auth [51]
  o Curl_http_input_auth: require valid separator after negotiation type [52]
  o Curl_input_digest: require space after Digest [50]
@@ -38,25 +41,32 @@ This release includes the following bugfixes:
  o CURLcode: add CURLE_SSL_CLIENTCERT [47]
  o CURLOPT_CAPATH.3: defaults to a path, not NULL [103]
  o CURLOPT_POSTFIELDS.3: clarify how it gets the size of the data [40]
- o docs/HTTP3.md: fix nghttp2's HTTP/3 server port [21]
+ o data_pending: check only SECONDARY socket for FTP(S) transfers [117]
  o docs: camelcase it like GitHub everywhere [62]
+ o docs: cookies from HTTP headers need domain set [121]
  o docs: fix typo in fail-with-body doc [63]
+ o docs: improve INTERNALS.md regarding getsock cb [105]
+ o docs: replace dots with dashes in markdown enums [101]
  o easy: ignore sigpipe in curl_easy_send [69]
  o FILEFORMAT: mention sectransp as a feature [89]
  o GIT-INFO: suggest using autoreconf instead of buildconf [96]
  o github: add a workflow with libssh2 on macOS using cmake [81]
+ o github: inhibit deprecated declarations for clang on macOS [118]
  o GnuTLS: don't allow TLS 1.3 for versions that don't support it [77]
  o gnutls: make setting only the MAX TLS allowed version work [83]
  o gskit: fix CURL_DISABLE_PROXY build [57]
  o gskit: fix undefined reference to 'conn' [58]
+ o hostip.h: remove declaration of unimplemented function [108]
  o hostip: remove the debug code for LocalHost [113]
  o http2: call the handle-closed function correctly on closed stream [37]
  o http2: fix a resource leak in push_promise() [54]
  o http2: fix resource leaks in set_transfer_url() [55]
+ o http2: make sure pause is done on HTTP [120]
  o http2: move the stream error field to the per-transfer storage [36]
  o http2: skip immediate parsing of payload following protocol switch [90]
  o http2: use nghttp2_session_upgrade2 instead of nghttp2_session_upgrade [91]
- o HTTP3: make the ngtcp2 build use the quictls fork [98]
+ o HTTP3.md: fix nghttp2's HTTP/3 server port [21]
+ o HTTP3.md: make the ngtcp2 build use the quictls fork [98]
  o http: deal with partial CONNECT sends [97]
  o http: fix the check for 'Authorization' with Bearer [53]
  o http: limit the initial send amount to used upload buffer size [99]
@@ -122,6 +132,7 @@ This release includes the following bugfixes:
  o vtls: deduplicate some DISABLE_PROXY ifdefs [19]
  o vtls: reset ssl use flag upon negotiation failure [42]
  o wolfssl: handle SSL_write() returns 0 for error [68]
+ o wolfssl: remove SSLv3 support leftovers [115]
 
 This release includes the following known bugs:
 
@@ -133,20 +144,21 @@ advice from friends like these:
   3eka on github, Andrew Barnert, Ayushman Singh Chauhan, Benjamin Riefenstahl,
   Blake Burkhart, Calvin Buckley, Cameron Cawley, Dan Fandrich,
   Daniel Carpenter, Daniel Gustafsson, Daniel Stenberg, David Cook,
-  Dmitry Karpov, Dmitry Kostjuchenko, ebejan on github, Emil Engler,
-  Georeth Zhou, Gergely Nagy, Gilles Vollant, Harry Sintonen, Howard Chu,
-  Ikko Ashimine, Illarion Taev, Jacob Hoffman-Andrews, Jakub Zakrzewski,
-  Javier Blazquez, J. Bromley, Jeroen Ooms, Joel Depooter, Johann150 on github,
-  Jon Rumsey, Kamil Dudka, Kevin Burke, Kevin R. Bulgrien, Lucas Servén Marín,
-  MAntoniak on github, Marcel Raad, Marc Hörsken, Martin Halle, Max Dymond,
-  Michael Kolechkin, Michał Antoniak, Michal Rus, Morten Minde Neergaard,
-  Patrick Monnerat, Peng-Yu Chen, Pontus Lundkvist, Ralph Langendam,
-  Ray Satiro, rcombs on github, Rich FitzJohn, sergio-nsk on github,
-  Stefan Karpinski, Timo Lange, Timothy Gu, tmkk on github, Tobias Gabriel,
-  Tommy Odom, Travis Burtrum on github, Tuomas Siipola, ustcqidi on github,
-  Victor Vieux, Viktor Szakats, Wes Hinsley, Ymir1711 on github,
-  Yusuke Nakamura,
-  (66 contributors)
+  Denis Goleshchikhin, Dmitry Karpov, Dmitry Kostjuchenko, ebejan on github,
+  Emil Engler, Georeth Zhou, Gergely Nagy, Gilles Vollant, Harry Sintonen,
+  Howard Chu, Ikko Ashimine, Illarion Taev, Jacob Hoffman-Andrews,
+  Jakub Zakrzewski, Javier Blazquez, J. Bromley, Jeroen Ooms, Joel Depooter,
+  Joel Jakobsson, Johann150 on github, Jon Rumsey, Kamil Dudka, Kevin Burke,
+  Kevin R. Bulgrien, Lucas Servén Marín, MAntoniak on github, Marc Aldorasi,
+  Marcel Raad, Marc Hörsken, Martin Dorey, Martin Halle, Max Dymond,
+  Michael Kolechkin, Michael O'Farrell, Michał Antoniak, Michal Rus,
+  Morten Minde Neergaard, Patrick Monnerat, Peng-Yu Chen, Pontus Lundkvist,
+  Ralph Langendam, Ray Satiro, rcombs on github, Rich FitzJohn,
+  sergio-nsk on github, Stefan Karpinski, Timo Lange, Timothy Gu,
+  tmkk on github, Tobias Gabriel, Tommy Odom, Travis Burtrum on github,
+  Tuomas Siipola, ustcqidi on github, Victor Vieux, Viktor Szakats,
+  Wes Hinsley, Ymir1711 on github, Yusuke Nakamura,
+  (71 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -250,11 +262,22 @@ References to bug reports and discussions on issues:
  [98] = https://curl.se/bug/?i=7031
  [99] = https://curl.se/bug/?i=7022
  [100] = https://curl.se/bug/?i=7075
+ [101] = https://curl.se/bug/?i=7093
  [102] = https://curl.se/bug/?i=6991
  [103] = https://curl.se/bug/?i=7062
  [104] = https://curl.se/bug/?i=7064
+ [105] = https://curl.se/bug/?i=7092
+ [107] = https://curl.se/bug/?i=7094
+ [108] = https://curl.se/bug/?i=7094
  [109] = https://curl.se/bug/?i=7053
  [110] = https://curl.se/bug/?i=7054
  [112] = https://curl.se/bug/?i=7045
  [113] = https://curl.se/bug/?i=7044
  [114] = https://curl.se/bug/?i=7042
+ [115] = https://curl.se/bug/?i=7088
+ [116] = https://curl.se/bug/?i=7085
+ [117] = https://curl.se/bug/?i=7068
+ [118] = https://curl.se/bug/?i=7081
+ [119] = https://curl.se/bug/?i=6898
+ [120] = https://curl.se/bug/?i=7079
+ [121] = https://curl.se/bug/?i=6723
