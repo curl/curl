@@ -321,7 +321,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
                         host?host:"",
                         data->state.aptr.proxyuserpwd?
                         data->state.aptr.proxyuserpwd:"",
-                        useragent,
+                        useragent?useragent:"",
                         proxyconn);
 
         if(!result)
