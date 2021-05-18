@@ -1024,6 +1024,8 @@ for older and later versions as things don't change drastically that often.
   `->readwrite` gets called during transfer to allow the protocol to do extra
   reads/writes
 
+  `->attach` attaches a transfer to the connection.
+
   `->defport` is the default report TCP or UDP port this protocol uses
 
   `->protocol` is one or more bits in the `CURLPROTO_*` set. The SSL versions
