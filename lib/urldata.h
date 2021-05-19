@@ -753,22 +753,22 @@ struct Curl_handler {
   CURLcode (*doing)(struct Curl_easy *data, bool *done);
 
   /* Called from the multi interface during the PROTOCONNECT phase, and it
-     should then return a proper fd set */
+     should then return a proper fd_set */
   int (*proto_getsock)(struct Curl_easy *data,
                        struct connectdata *conn, curl_socket_t *socks);
 
   /* Called from the multi interface during the DOING phase, and it should
-     then return a proper fd set */
+     then return a proper fd_set */
   int (*doing_getsock)(struct Curl_easy *data,
                        struct connectdata *conn, curl_socket_t *socks);
 
   /* Called from the multi interface during the DO_MORE phase, and it should
-     then return a proper fd set */
+     then return a proper fd_set */
   int (*domore_getsock)(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks);
 
   /* Called from the multi interface during the DO_DONE, PERFORM and
-     WAITPERFORM phases, and it should then return a proper fd set. Not setting
+     WAITPERFORM phases, and it should then return a proper fd_set. Not setting
      this will make libcurl use the generic default one. */
   int (*perform_getsock)(struct Curl_easy *data,
                          struct connectdata *conn, curl_socket_t *socks);
