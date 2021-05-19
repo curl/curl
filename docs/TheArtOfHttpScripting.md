@@ -47,7 +47,7 @@
 
  Sometimes even `--verbose` is not enough. Then
  [`--trace`](https://curl.se/docs/manpage.html#-trace) and
- [`--trace-ascii`]((https://curl.se/docs/manpage.html#--trace-ascii)
+ [`--trace-ascii`](https://curl.se/docs/manpage.html#--trace-ascii)
  offer even more details as they show **everything** curl sends and
  receives. Use it like this:
 
@@ -58,7 +58,7 @@
  Many times you may wonder what exactly is taking all the time, or you just
  want to know the amount of milliseconds between two points in a transfer. For
  those, and other similar situations, the
- [`--trace-time`]((https://curl.se/docs/manpage.html#--trace-time) option
+ [`--trace-time`](https://curl.se/docs/manpage.html#--trace-time) option
  is what you need. It'll prepend the time to each trace output line:
 
     curl --trace-ascii d.txt --trace-time http://example.com/
