@@ -1062,6 +1062,16 @@ if(HAVE_FSETXATTR)
   endforeach()
 endif()
 
+set(CMAKE_EXTRA_INCLUDE_FILES   "sys/socket.h")
+check_type_size("sa_family_t"   SIZEOF_SA_FAMILY_T)
+set(HAVE_SA_FAMILY_T            ${HAVE_SIZEOF_SA_FAMILY_T})
+set(CMAKE_EXTRA_INCLUDE_FILES   "")
+
+set(CMAKE_EXTRA_INCLUDE_FILES   "ws2def.h")
+check_type_size("ADDRESS_FAMILY"    SIZEOF_ADDRESS_FAMILY)
+set(HAVE_ADDRESS_FAMILY         ${HAVE_SIZEOF_ADDRESS_FAMILY})
+set(CMAKE_EXTRA_INCLUDE_FILES   "")
+
 # sigaction and sigsetjmp are special. Use special mechanism for
 # detecting those, but only if previous attempt failed.
 if(HAVE_SIGNAL_H)
