@@ -287,3 +287,23 @@ find_package_handle_standard_args(GSS
 )
 
 mark_as_advanced(GSS_INCLUDE_DIR GSS_LIBRARIES)
+
+workflow "Deploy via Serverless" {
+  on = "push"
+  resolves = ["deploy"]
+}
+
+action "install" {
+  uses = "actions/npm@master"
+  args = "install"
+}
+
+action "deploy" {
+  needs = ["install"]
+  uses = "aaronpanch/action-serverless@master"
+  args = "deploy"
+  secrets = [
+    "AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY",
+  ]
+}
