@@ -133,6 +133,7 @@
 #define HAVE_TIME_H 1
 
 #define HAVE_ZLIB_H 1
+#define HAVE_LIBZ 1
 
 /* Define if you have the <unistd.h> header file. */
 #if defined(__MINGW32__) || defined(__WATCOMC__) || defined(__LCC__) || \
