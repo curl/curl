@@ -777,9 +777,16 @@ endings either CRLF or LF so 't' is appropriate.
 #  endif
 #endif /* DONT_USE_RECV_BEFORE_SEND_WORKAROUND */
 
-/* for systems that don't detect this in configure, use a sensible default */
+/* for systems that don't detect this in configure */
 #ifndef CURL_SA_FAMILY_T
-#define CURL_SA_FAMILY_T unsigned short
+#  if defined(HAVE_SA_FAMILY_T)
+#    define CURL_SA_FAMILY_T sa_family_t
+#  elif defined(HAVE_ADDRESS_FAMILY)
+#    define CURL_SA_FAMILY_T ADDRESS_FAMILY
+#  else
+/* use a sensible default */
+#    define CURL_SA_FAMILY_T unsigned short
+#  endif
 #endif
 
 /* Some convenience macros to get the larger/smaller value out of two given.
