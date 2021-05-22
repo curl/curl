@@ -25,13 +25,13 @@ SSL
 https
 </server>
  <name>
-HTTPS PUT of large file
+HTTPS PUT of small file
  </name>
  <command>
 -k https://%HOSTIP:%HTTPSPORT/we/want/%TESTNUMBER -T log/test%TESTNUMBER.txt
 </command>
 <file name="log/test%TESTNUMBER.txt">
-%repeat[200000 x banana]%
+%repeat[200 x banana]%
 </file>
 </client>
 
@@ -42,10 +42,10 @@ PUT /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 1200001
+Content-Length: 1201
 Expect: 100-continue
 
-%repeat[200000 x banana]%
+%repeat[200 x banana]%
 </protocol>
 </verify>
 </testcase>
