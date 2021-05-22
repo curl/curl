@@ -4,7 +4,7 @@ curl and libcurl 7.77.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2404
+ Contributors:                 2408
 
 This release includes the following changes:
 
@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o AmigaOS: add functions definitions for SHA256 [126]
  o build: fix compilation for Windows UWP platform [82]
  o c-hyper: don't write to set.writeheader if null [67]
  o c-hyper: fix handling of zero-byte chunk from hyper [39]
@@ -23,7 +24,10 @@ This release includes the following bugfixes:
  o checksrc: complain on == NULL or != 0 checks in conditions [20]
  o CI/cirrus: add shared and static Windows release builds [102]
  o cmake: check for getppid and utimes [87]
+ o cmake: detect CURL_SA_FAMILY_T [124]
+ o cmake: fix two invokes result in different curl_config.h [123]
  o cmake: make libcurl output filename configurable [41]
+ o cmake: Use multithreaded compilation on VS 2008+ [122]
  o config: remove now-unused macros [107]
  o configure: if asked for, fail if ldap is not found [109]
  o configure: provide --with-openssl, deprecate --with-ssl [15]
@@ -32,6 +36,7 @@ This release includes the following bugfixes:
  o ConnectionExists: respect requests for h1 connections better
  o cookie: CURLOPT_COOKIEFILE set to NULL switches off cookies [1]
  o curl-wolfssl.m4: without custom include path, assume /usr/include [116]
+ o curl: include libmetalink version in --version output [111]
  o Curl_http_header: check for colon when matching Persistent-Auth [51]
  o Curl_http_input_auth: require valid separator after negotiation type [52]
  o Curl_input_digest: require space after Digest [50]
@@ -40,8 +45,10 @@ This release includes the following bugfixes:
  o curl_url_set.3: add memory management information [38]
  o CURLcode: add CURLE_SSL_CLIENTCERT [47]
  o CURLOPT_CAPATH.3: defaults to a path, not NULL [103]
+ o CURLOPT_IPRESOLVE: preventing wrong IP version from being used [125]
  o CURLOPT_POSTFIELDS.3: clarify how it gets the size of the data [40]
  o data_pending: check only SECONDARY socket for FTP(S) transfers [117]
+ o docs/TheArtOfHttpScripting: fix markdown links [129]
  o docs: camelcase it like GitHub everywhere [62]
  o docs: cookies from HTTP headers need domain set [121]
  o docs: fix typo in fail-with-body doc [63]
@@ -92,6 +99,7 @@ This release includes the following bugfixes:
  o multi: reduce Win32 API calls to improve performance [28]
  o ngtcp2: fix the cb_acked_stream_data_offset proto [46]
  o NSS: add ciphers to map [30]
+ o NSS: make colons, commas and spaces valid separators in cipher list [106]
  o nss_set_blocking: avoid static for sock_opt [72]
  o ntlm: precaution against super huge type2 offsets [65]
  o openldap: protect SSL-specific code with proper #ifdef [12]
@@ -116,7 +124,9 @@ This release includes the following bugfixes:
  o sws: #ifdef S_IFSOCK use [32]
  o sws: allow HTTP requests up to 2MB in size [100]
  o test server: take care of siginterrupt() deprecation [25]
+ o test2100: make it run with and require IPv6 [127]
  o tests/disable-scan.pl: also scan all m4 files [17]
+ o tests/getpart: generate output URL encoded for better diffs [128]
  o tests: ignore case of chunked hex numbers in tests [86]
  o tls: add USE_HTTP2 define [59]
  o tool_getparam: handle failure of curlx_convert_tchar_to_UTF8() [78]
@@ -149,16 +159,17 @@ advice from friends like these:
   Howard Chu, Ikko Ashimine, Illarion Taev, Jacob Hoffman-Andrews,
   Jakub Zakrzewski, Javier Blazquez, J. Bromley, Jeroen Ooms, Joel Depooter,
   Joel Jakobsson, Johann150 on github, Jon Rumsey, Kamil Dudka, Kevin Burke,
-  Kevin R. Bulgrien, Lucas Servén Marín, MAntoniak on github, Marc Aldorasi,
-  Marcel Raad, Marc Hörsken, Martin Dorey, Martin Halle, Max Dymond,
-  Michael Kolechkin, Michael O'Farrell, Michał Antoniak, Michal Rus,
-  Morten Minde Neergaard, Patrick Monnerat, Peng-Yu Chen, Pontus Lundkvist,
+  Kevin R. Bulgrien, Lucas Clemente Vella, Lucas Servén Marín,
+  MAntoniak on github, Marc Aldorasi, Marcel Raad, Marc Hörsken, Martin Dorey,
+  Martin Halle, Matias N. Goldberg, Max Dymond, Michael Kolechkin,
+  Michael O'Farrell, Michał Antoniak, Michal Rus, Morten Minde Neergaard,
+  Oliver Urbann, Patrick Monnerat, Peng-Yu Chen, Pontus Lundkvist,
   Ralph Langendam, Ray Satiro, rcombs on github, Rich FitzJohn,
-  sergio-nsk on github, Stefan Karpinski, Timo Lange, Timothy Gu,
-  tmkk on github, Tobias Gabriel, Tommy Odom, Travis Burtrum on github,
-  Tuomas Siipola, ustcqidi on github, Victor Vieux, Viktor Szakats,
-  Wes Hinsley, Ymir1711 on github, Yusuke Nakamura,
-  (71 contributors)
+  Ryan Beck-Buysse, Sergey Markelov, sergio-nsk on github, Stefan Karpinski,
+  Timo Lange, Timothy Gu, tmkk on github, Tobias Gabriel, Tommy Odom,
+  Travis Burtrum on github, Tuomas Siipola, ustcqidi on github, Victor Vieux,
+  Viktor Szakats, Wes Hinsley, Ymir1711 on github, Yusuke Nakamura,
+  (76 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -267,10 +278,12 @@ References to bug reports and discussions on issues:
  [103] = https://curl.se/bug/?i=7062
  [104] = https://curl.se/bug/?i=7064
  [105] = https://curl.se/bug/?i=7092
+ [106] = https://curl.se/bug/?i=7110
  [107] = https://curl.se/bug/?i=7094
  [108] = https://curl.se/bug/?i=7094
  [109] = https://curl.se/bug/?i=7053
  [110] = https://curl.se/bug/?i=7054
+ [111] = https://curl.se/bug/?i=7112
  [112] = https://curl.se/bug/?i=7045
  [113] = https://curl.se/bug/?i=7044
  [114] = https://curl.se/bug/?i=7042
@@ -281,3 +294,11 @@ References to bug reports and discussions on issues:
  [119] = https://curl.se/bug/?i=6898
  [120] = https://curl.se/bug/?i=7079
  [121] = https://curl.se/bug/?i=6723
+ [122] = https://curl.se/bug/?i=7109
+ [123] = https://curl.se/bug/?i=7100
+ [124] = https://curl.se/bug/?i=7049
+ [125] = https://curl.se/bug/?i=6853
+ [126] = https://github.com/jens-maus/amissl/issues/15
+ [127] = https://curl.se/bug/?i=7083
+ [128] = https://curl.se/bug/?i=7083
+ [129] = https://curl.se/bug/?i=7097
