@@ -9,7 +9,7 @@ HTTP PUT
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 
 blablabla
@@ -26,21 +26,19 @@ http
 HTTP PUT from file with weird letters
 </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/ -T log/58te[]st.txt -g
+http://%HOSTIP:%HTTPPORT/we/want/ -T log/%TESTNUMBERte[]st.txt -g
 </command>
-<file name="log/58te[]st.txt">
+<file name="log/%TESTNUMBERte[]st.txt">
 a few bytes
 </file>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-PUT /we/want/58te%5B%5Dst.txt HTTP/1.1
+PUT /we/want/%TESTNUMBERte%5B%5Dst.txt HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 12
 Expect: 100-continue

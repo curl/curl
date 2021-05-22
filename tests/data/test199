@@ -11,7 +11,7 @@ globbing
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -35,23 +35,22 @@ http
 HTTP with -d, -G and {}
  </name>
  <command>
--d "foo=moo&moo=poo" "http://%HOSTIP:%HTTPPORT/{199,199}" -G
+-d "foo=moo&moo=poo" "http://%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER}" -G
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /199?foo=moo&moo=poo HTTP/1.1
+GET /%TESTNUMBER?foo=moo&moo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /199?foo=moo&moo=poo HTTP/1.1
+GET /%TESTNUMBER?foo=moo&moo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

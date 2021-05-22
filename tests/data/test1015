@@ -28,9 +28,9 @@ http
 --data-urlencode
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1015 --data-urlencode "my name is moo[]" --data-urlencode "y e s=s_i_r" --data-urlencode "v_alue@log/1015.txt" --data-urlencode @log/1015.txt 
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --data-urlencode "my name is moo[]" --data-urlencode "y e s=s_i_r" --data-urlencode "v_alue@log/%TESTNUMBER.txt" --data-urlencode @log/%TESTNUMBER.txt 
 </command>
-<file name="log/1015.txt">
+<file name="log/%TESTNUMBER.txt">
 content to _?!#$'|<>
 </file>
 </client>
@@ -38,18 +38,15 @@ content to _?!#$'|<>
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
-POST /1015 HTTP/1.1
-User-Agent: curl/7.17.2-CVS (i686-pc-linux-gnu) libcurl/7.17.2-CVS OpenSSL/0.9.8g zlib/1.2.3.3 c-ares/1.5.2-CVS libidn/1.1 libssh2/0.19.0-C
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 133
+Content-Length: 119
 Content-Type: application/x-www-form-urlencoded
 
-my%20name%20is%20moo%5B%5D&y e s=s_i_r&v_alue=content%20to%20_%3F%21%23%24%27%7C%3C%3E%0A&content%20to%20_%3F%21%23%24%27%7C%3C%3E%0A
+my+name+is+moo%5B%5D&y e s=s_i_r&v_alue=content+to+_%3F%21%23%24%27%7C%3C%3E%0A&content+to+_%3F%21%23%24%27%7C%3C%3E%0A
 </protocol>
 </verify>
 </testcase>

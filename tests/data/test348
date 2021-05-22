@@ -1,0 +1,61 @@
+<testcase>
+<info>
+<keywords>
+FTP
+EPSV
+STOR
+</keywords>
+</info>
+
+<reply>
+<servercmd>
+STOR 552 disk full
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP upload file with 552 disk full response
+ </name>
+<file name="log/test%TESTNUMBER.txt">
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</file>
+ <command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/test%TESTNUMBER.txt
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<upload>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</upload>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+STOR %TESTNUMBER
+QUIT
+</protocol>
+# 70 - CURLE_REMOTE_DISK_FULL
+<errorcode>
+70
+</errorcode>
+</verify>
+</testcase>

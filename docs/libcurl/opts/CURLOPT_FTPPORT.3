@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_FTPPORT \- make FTP transfer active
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTPPORT, char *spec);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. It specifies that the
+Pass a pointer to a null-terminated string as parameter. It specifies that the
 FTP transfer will be made actively and the given string will be used to get
 the IP address to use for the FTP PORT instruction.
 

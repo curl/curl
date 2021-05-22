@@ -11,7 +11,7 @@ HTTP Basic auth
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
@@ -29,25 +29,20 @@ http
 HTTP GET with user and password
  </name>
  <command>
- -u fake:user http://%HOSTIP:%HTTPPORT/2
+ -u fake:user http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /2 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic ZmFrZTp1c2Vy
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<data>
-[insert full protocol verifiction dump here]
-</data>
 </verify>
 </testcase>

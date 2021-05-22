@@ -1,0 +1,61 @@
+<testcase>
+<info>
+<keywords>
+--help
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+ <name>
+curl invalid category --help
+ </name>
+ <command>
+--help sdfafdsfadsfsd
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+<stdout mode="text">
+Usage: curl [options...] <url>
+Invalid category provided, here is a list of all categories:
+
+ auth        Different types of authentication methods
+ connection  Low level networking operations
+ curl        The command line tool itself
+ dns         General DNS options
+ file        FILE protocol options
+ ftp         FTP protocol options
+ http        HTTP and HTTPS protocol options
+ imap        IMAP protocol options
+ misc        Options that don't fit into any other category
+ output      Filesystem output
+ pop3        POP3 protocol options
+ post        HTTP Post specific options
+ proxy       All options related to proxies
+ scp         SCP protocol options
+ sftp        SFTP protocol options
+ smtp        SMTP protocol options
+ ssh         SSH protocol options
+ telnet      TELNET protocol options
+ tftp        TFTP protocol options
+ tls         All TLS/SSL related options
+ upload      All options for uploads
+ verbose     Options related to any kind of command line output of curl
+</stdout>
+</verify>
+</testcase>

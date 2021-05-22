@@ -14,7 +14,7 @@ IPv6
 
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 
 mooooooo
@@ -22,16 +22,16 @@ mooooooo
 
 <connect>
 HTTP/1.1 200 welcome dear
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 
 </connect>
 
 <datacheck>
 HTTP/1.1 200 welcome dear
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 
 mooooooo
@@ -43,6 +43,7 @@ mooooooo
 <client>
 <features>
 ipv6
+proxy
 </features>
 <server>
 http-proxy
@@ -52,25 +53,24 @@ http
  <name>
 HTTP CONNECT to IPv6 numerical address
  </name>
-# 0x4ce == 1230, the test number
+# 0x4ce == %TESTNUMBER, the test number
  <command>
-http://[1234:1234:1234::4ce]:%HTTPPORT/wanted/page/1230 -p -x %HOSTIP:%HTTPPORT
+http://[1234:1234:1234::4ce]:%HTTPPORT/wanted/page/%TESTNUMBER -p -x %HOSTIP:%HTTPPORT
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 CONNECT [1234:1234:1234::4ce]:%HTTPPORT HTTP/1.1
 Host: [1234:1234:1234::4ce]:%HTTPPORT
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
-GET /wanted/page/1230 HTTP/1.1
+GET /wanted/page/%TESTNUMBER HTTP/1.1
 Host: [1234:1234:1234::4ce]:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

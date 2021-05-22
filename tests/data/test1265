@@ -12,7 +12,7 @@ noproxy
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 4
 Content-Type: text/html
@@ -34,18 +34,16 @@ http_proxy=http://%HOSTIP:%HTTPPORT
 NO_PROXY=::1
 </setenv>
 <command>
-http://%HOST6IP:%HTTP6PORT/1265
+http://%HOST6IP:%HTTP6PORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1265 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

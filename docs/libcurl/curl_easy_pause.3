@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -23,10 +23,11 @@
 .SH NAME
 curl_easy_pause - pause and unpause a connection
 .SH SYNOPSIS
+.nf
 .B #include <curl/curl.h>
 
-.BI "CURLcode curl_easy_pause(CURL *"handle ", int "bitmask " );"
-
+.BI "CURLcode curl_easy_pause(CURL *"handle ", int "bitmask ");"
+.fi
 .SH DESCRIPTION
 Using this function, you can explicitly mark a running connection to get
 paused, and you can unpause a connection that was previously paused.
@@ -36,18 +37,22 @@ the write callbacks return the proper magic return code
 (\fICURL_READFUNC_PAUSE\fP and \fICURL_WRITEFUNC_PAUSE\fP). A write callback
 that returns pause signals to the library that it couldn't take care of any
 data at all, and that data will then be delivered again to the callback when
-the writing is later unpaused.
+the transfer is unpaused.
 
 While it may feel tempting, take care and notice that you cannot call this
 function from another thread. To unpause, you may for example call it from the
 progress callback (\fICURLOPT_PROGRESSFUNCTION(3)\fP), which gets called at
 least once per second, even if the connection is paused.
 
-When this function is called to unpause reading, the chance is high that you
+When this function is called to unpause receiving, the chance is high that you
 will get your write callback called before this function returns.
 
-The \fBhandle\fP argument is of course identifying the handle that operates on
-the connection you want to pause or unpause.
+The \fBhandle\fP argument identifies the transfer you want to pause or
+unpause.
+
+A paused transfer is excluded from low speed cancels via the
+\fICURLOPT_LOW_SPEED_LIMIT(3)\fP option and unpausing a transfer will reset
+the time period required for the low speed limit to be met.
 
 The \fBbitmask\fP argument is a set of bits that sets the new state of the
 connection. The following bits can be used:
@@ -71,25 +76,24 @@ code means something wrong occurred after the new state was set.  See the
 The pausing of transfers does not work with protocols that work without
 network connectivity, like FILE://. Trying to pause such a transfer, in any
 direction, will cause problems in the worst case or an error in the best case.
-.SH AVAILABILITY
-This function was added in libcurl 7.18.0. Before this version, there was no
-explicit support for pausing transfers.
-.SH "USAGE WITH THE MULTI-SOCKET INTERFACE"
-Before libcurl 7.32.0, when a specific handle was unpaused with this function,
-there was no particular forced rechecking or similar of the socket's state,
-which made the continuation of the transfer get delayed until next
-multi-socket call invoke or even longer. Alternatively, the user could
-forcibly call for example \fIcurl_multi_socket_all(3)\fP - with a rather hefty
-performance penalty.
+.SH MULTIPLEXED
+When a connection is used multiplexed, like for HTTP/2, and one of the
+transfers over the connection is paused and the others continue flowing,
+libcurl might end up buffering contents for the paused transfer. It has to do
+this because it needs to drain the socket for the other transfers and the
+already announced window size for the paused transfer will allow the server to
+continue sending data up to that window size amount. By default, libcurl
+announces a 32 megabyte window size, which thus can make libcurl end up
+buffering 32 megabyte of data for a paused stream.
 
-Starting in libcurl 7.32.0, unpausing a transfer will schedule a timeout
-trigger for that handle 1 millisecond into the future, so that a
-curl_multi_socket_action( ... CURL_SOCKET_TIMEOUT) can be used immediately
-afterwards to get the transfer going again as desired.
+When such a paused stream is unpaused again, any buffered data will be
+delivered first.
+.SH AVAILABILITY
+Added in libcurl 7.18.0.
 .SH "MEMORY USE"
 When pausing a read by returning the magic return code from a write callback,
 the read data is already in libcurl's internal buffers so it'll have to keep
-it in an allocated buffer until the reading is again unpaused using this
+it in an allocated buffer until the receiving is again unpaused using this
 function.
 
 If the downloaded data is compressed and is asked to get uncompressed
@@ -97,7 +101,7 @@ automatically on download, libcurl will continue to uncompress the entire
 downloaded chunk and it will cache the data uncompressed. This has the side-
 effect that if you download something that is compressed a lot, it can result
 in a very large data amount needing to be allocated to save the data during
-the pause. This said, you should probably consider not using paused reading if
-you allow libcurl to uncompress data automatically.
+the pause. This said, you should probably consider not using paused receiving
+if you allow libcurl to uncompress data automatically.
 .SH "SEE ALSO"
 .BR curl_easy_cleanup "(3), " curl_easy_reset "(3)"

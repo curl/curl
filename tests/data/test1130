@@ -12,7 +12,7 @@ Expect: 100-continue
 <reply>
 <data nocheck="yes">
 HTTP/1.1 404 NOOOOOOOOO
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Content-Type: text/html
@@ -22,7 +22,7 @@ Content-Type: text/html
 
 <data1>
 HTTP/1.1 404 NEITHER
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Content-Type: text/html
@@ -41,7 +41,7 @@ skip: 100
 # Client-side
 <client>
 # 100 x 'x'
-<file name="log/file1130">
+<file name="log/file%TESTNUMBER">
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 </file>
 <server>
@@ -51,7 +51,7 @@ http
 HTTP POST forced expect 100-continue with a 404
  </name>
  <command option="no-output">
--d @log/file1130 http://%HOSTIP:%HTTPPORT/1130 http://%HOSTIP:%HTTPPORT/11300001 -H "Expect: 100-continue"
+-d @log/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -H "Expect: 100-continue"
 </command>
 </client>
 
@@ -60,33 +60,32 @@ HTTP POST forced expect 100-continue with a 404
 <verify>
 <stdout>
 HTTP/1.1 404 NOOOOOOOOO
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Content-Type: text/html
 
 -foo-
 HTTP/1.1 404 NEITHER
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Content-Type: text/html
 
 -foo-
 </stdout>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-POST /1130 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Expect: 100-continue
 Content-Length: 100
 Content-Type: application/x-www-form-urlencoded
 
-POST /11300001 HTTP/1.1
+POST /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Expect: 100-continue
 Content-Length: 100

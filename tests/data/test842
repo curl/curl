@@ -15,7 +15,7 @@ RFC7628
 <servercmd>
 AUTH OAUTHBEARER
 REPLY AUTHENTICATE +
-REPLY bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMwFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ== A002 OK AUTHENTICATE completed
+REPLY %b64[n,a=user,%01host=127.0.0.1%01port=%IMAPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64% A002 OK AUTHENTICATE completed
 </servercmd>
 <data>
 From: me@somewhere
@@ -38,13 +38,10 @@ imap
 IMAP OAuth 2.0 (OAUTHBEARER) authentication
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/842/;MAILINDEX=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
 # The protocol section doesn't support ways of specifying the raw data in the
 # base64 encoded message so we must assert this
-<precheck>
-perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%IMAPPORT' ne '9003' );"
-</precheck>
 </client>
 
 #
@@ -53,8 +50,8 @@ perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' 
 <protocol>
 A001 CAPABILITY
 A002 AUTHENTICATE OAUTHBEARER
-bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMwFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
-A003 SELECT 842
+%b64[n,a=user,%01host=127.0.0.1%01port=%IMAPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
+A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>

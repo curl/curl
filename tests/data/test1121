@@ -27,19 +27,17 @@ http
 HTTP multiple provided Host: headers
  </name>
  <command>
--H "Host: host1" -H "Host: host2" -H "Host: host3" http://%HOSTIP:%HTTPPORT/1121
+-H "Host: host1" -H "Host: host2" -H "Host: host3" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1121 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: host1
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

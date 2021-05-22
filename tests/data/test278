@@ -11,7 +11,7 @@ HTTP proxy Basic auth
 <reply>
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Type: text/html
 Content-Length: 27
 
@@ -28,19 +28,20 @@ http
 HTTP with proxy string including http:// and user+empty password
  </name>
  <command>
-http://we.want.that.site.com/278 -x http://f%61ke:@%HOSTIP:%HTTPPORT
+http://we.want.that.site.com/%TESTNUMBER -x http://f%61ke:@%HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://we.want.that.site.com/278 HTTP/1.1
+GET http://we.want.that.site.com/%TESTNUMBER HTTP/1.1
 Host: we.want.that.site.com
 Proxy-Authorization: Basic ZmFrZTo=
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

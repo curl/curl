@@ -45,7 +45,7 @@ lib1515
 caching of manual libcurl DNS entries after dead connection
 </name>
 <command>
-/path/1516 %HOSTIP %HTTPPORT
+/path/%TESTNUMBER %HOSTIP %HTTPPORT
 </command>
 </client>
 

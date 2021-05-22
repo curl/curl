@@ -33,19 +33,17 @@ http
 HTTP range relative to end of file
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/1058 -r -101
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -r -101
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /want/1058 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=-101
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

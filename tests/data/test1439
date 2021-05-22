@@ -9,7 +9,7 @@ HTTP
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Connection: close
 Content-Type: text/plain
@@ -26,10 +26,10 @@ http
 </server>
 
 <name>
-Check if %{scheme} returns HTTP
+Check if %{http_version} returns 1.1
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/1439 --write-out '%{http_version}'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out '%{http_version}'
 </command>
 </client>
 
@@ -37,7 +37,7 @@ http://%HOSTIP:%HTTPPORT/1439 --write-out '%{http_version}'
 <verify>
 <stdout nonewline="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Connection: close
 Content-Type: text/plain
@@ -46,13 +46,11 @@ testdata
 1.1
 </stdout>
 <protocol>
-GET /1439 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<strip>
-^User-Agent:.*
-</strip>
 </verify>
 </testcase>

@@ -27,7 +27,7 @@ none
 HTTP GET with invalid --interface
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1084 --interface non-existing-host.haxx.se.
+http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER --interface non-existing-host.haxx.se.
 </command>
 </client>
 

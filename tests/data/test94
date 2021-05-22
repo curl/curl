@@ -29,12 +29,13 @@ http
 </server>
 <features>
 SSL
+proxy
 </features>
  <name>
 HTTPS GET with failed proxy auth (CONNECT 1.0)
  </name>
  <command>
-https://test.anything.really.com:94 --proxy1.0 %HOSTIP:%HTTPPORT
+https://test.anything.really.com:%TESTNUMBER --proxy1.0 %HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -44,13 +45,10 @@ https://test.anything.really.com:94 --proxy1.0 %HOSTIP:%HTTPPORT
 <errorcode>
 56
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-CONNECT test.anything.really.com:94 HTTP/1.0
-User-Agent: curl/7.11.0-CVS (i686-pc-linux-gnu) libcurl/7.11.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4
-Host: test.anything.really.com:94
+CONNECT test.anything.really.com:%TESTNUMBER HTTP/1.0
+Host: test.anything.really.com:%TESTNUMBER
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </protocol>

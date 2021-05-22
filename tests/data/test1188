@@ -1,0 +1,56 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--write-out
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 404 Not Found
+Content-Length: 0
+Connection: close
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+--write-out with %{onerror} and %{urlnum} to stderr
+ </name>
+<command>
+-f -s -w '%{onerror}%{stderr}%{urlnum} says %{exitcode} %{errormsg}\n' http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /we/want/our/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /we/want/our/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stderr mode="text">
+0 says 22 The requested URL returned error: 404
+1 says 22 The requested URL returned error: 404
+</stderr>
+# 22 is CURLE_HTTP_RETURNED_ERROR
+<errorcode>
+22
+</errorcode>
+</verify>
+</testcase>

@@ -9,7 +9,7 @@ protocol
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Connection: close
 Content-Type: text/plain
@@ -29,7 +29,7 @@ http
 Check if %{scheme} returns HTTP
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/1438 --write-out '%{scheme}'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out '%{scheme}'
 </command>
 </client>
 
@@ -37,7 +37,7 @@ http://%HOSTIP:%HTTPPORT/1438 --write-out '%{scheme}'
 <verify>
 <stdout nonewline="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Connection: close
 Content-Type: text/plain
@@ -46,13 +46,11 @@ testdata
 HTTP
 </stdout>
 <protocol>
-GET /1438 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<strip>
-^User-Agent:.*
-</strip>
 </verify>
 </testcase>

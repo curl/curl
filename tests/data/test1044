@@ -32,7 +32,7 @@ ftp
 FTP download large file info with -I
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/blalbla/1044 -I
+ftp://%HOSTIP:%FTPPORT/blalbla/%TESTNUMBER -I
 </command>
 </client>
 
@@ -43,9 +43,9 @@ USER anonymous
 PASS ftp@example.com
 PWD
 CWD blalbla
-MDTM 1044
+MDTM %TESTNUMBER
 TYPE I
-SIZE 1044
+SIZE %TESTNUMBER
 REST 0
 QUIT
 </protocol>

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -22,6 +22,10 @@
 #include "tool_setup.h"
 
 #include <sys/stat.h>
+
+#ifdef WIN32
+#include <tchar.h>
+#endif
 
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
@@ -166,17 +170,17 @@ static CURLcode main_init(struct GlobalConfig *config)
         config->first->global = config;
       }
       else {
-        helpf(stderr, "error retrieving curl library information\n");
+        errorf(config, "error retrieving curl library information\n");
         free(config->first);
       }
     }
     else {
-      helpf(stderr, "error initializing curl library\n");
+      errorf(config, "error initializing curl library\n");
       free(config->first);
     }
   }
   else {
-    helpf(stderr, "error initializing curl\n");
+    errorf(config, "error initializing curl\n");
     result = CURLE_FAILED_INIT;
   }
 
@@ -225,62 +229,36 @@ static void main_free(struct GlobalConfig *config)
   config->last = NULL;
 }
 
-#ifdef WIN32
-/* TerminalSettings for Windows */
-static struct TerminalSettings {
-  HANDLE hStdOut;
-  DWORD dwOutputMode;
-} TerminalSettings;
-
-static void configure_terminal(void)
-{
-  /*
-   * If we're running Windows, enable VT output.
-   * Note: VT mode flag can be set on any version of Windows, but VT
-   * processing only performed on Win10 >= Creators Update)
-   */
-
-  /* Define the VT flags in case we're building with an older SDK */
-#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
-    #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
-#endif
-
-  memset(&TerminalSettings, 0, sizeof(TerminalSettings));
-
-  /* Enable VT output */
-  TerminalSettings.hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-  if((TerminalSettings.hStdOut != INVALID_HANDLE_VALUE)
-    && (GetConsoleMode(TerminalSettings.hStdOut,
-                       &TerminalSettings.dwOutputMode))) {
-    SetConsoleMode(TerminalSettings.hStdOut,
-                   TerminalSettings.dwOutputMode
-                   | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-  }
-}
-#else
-#define configure_terminal()
-#endif
-
-static void restore_terminal(void)
-{
-#ifdef WIN32
-  /* Restore Console output mode and codepage to whatever they were
-   * when Curl started */
-  SetConsoleMode(TerminalSettings.hStdOut, TerminalSettings.dwOutputMode);
-#endif
-}
-
 /*
 ** curl tool main function.
 */
+#ifdef _UNICODE
+int wmain(int argc, wchar_t *argv[])
+#else
 int main(int argc, char *argv[])
+#endif
 {
   CURLcode result = CURLE_OK;
   struct GlobalConfig global;
   memset(&global, 0, sizeof(global));
 
-  /* Perform any platform-specific terminal configuration */
-  configure_terminal();
+#ifdef WIN32
+  /* Undocumented diagnostic option to list the full paths of all loaded
+     modules. This is purposely pre-init. */
+  if(argc == 2 && !_tcscmp(argv[1], _T("--dump-module-paths"))) {
+    struct curl_slist *item, *head = GetLoadedModulePaths();
+    for(item = head; item; item = item->next)
+      printf("%s\n", item->data);
+    curl_slist_free_all(head);
+    return head ? 0 : 1;
+  }
+  /* win32_init must be called before other init routines. */
+  result = win32_init();
+  if(result) {
+    fprintf(stderr, "curl: (%d) Windows-specific init failed.\n", result);
+    return result;
+  }
+#endif
 
   main_checkfds();
 
@@ -294,36 +272,13 @@ int main(int argc, char *argv[])
   /* Initialize the curl library - do not call any libcurl functions before
      this point */
   result = main_init(&global);
-
-#ifdef WIN32
-  /* Undocumented diagnostic option to list the full paths of all loaded
-     modules, regardless of whether or not initialization succeeded. */
-  if(argc == 2 && !strcmp(argv[1], "--dump-module-paths")) {
-    struct curl_slist *item, *head = GetLoadedModulePaths();
-    for(item = head; item; item = item->next) {
-      printf("%s\n", item->data);
-    }
-    curl_slist_free_all(head);
-    if(!result)
-      main_free(&global);
-  }
-  else
-#endif /* WIN32 */
   if(!result) {
     /* Start our curl operation */
     result = operate(&global, argc, argv);
 
-#ifdef __SYMBIAN32__
-    if(global.showerror)
-      tool_pressanykey();
-#endif
-
     /* Perform the main cleanup */
     main_free(&global);
   }
-
-  /* Return the terminal to its original state */
-  restore_terminal();
 
 #ifdef __NOVELL_LIBC__
   if(getenv("_IN_NETWARE_BASH_") == NULL)

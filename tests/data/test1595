@@ -30,16 +30,13 @@ HTTP Retry-After header extraction (without header)
 lib1594
 </tool>
 <command>
-http://%HOSTIP:%HTTPPORT/1595
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1595 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

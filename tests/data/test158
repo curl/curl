@@ -24,21 +24,20 @@ http
 HTTP multipart formpost with only a 100 reply
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/158 -F name=daniel
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F name=daniel
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^Content-Type: multipart/form-data.*
 ^-----------------------.*
 </strip>
 <protocol>
-POST /158 HTTP/1.1
-User-Agent: curl/7.11.2-CVS (i686-pc-linux-gnu) libcurl/7.11.2-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 145
 Content-Type: multipart/form-data; boundary=----------------------------4f12fcdaa3bc

@@ -192,7 +192,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/2027 digest digest
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER digest digest
 </command>
 <precheck>
 chkhostname curlhost
@@ -201,46 +201,43 @@ chkhostname curlhost
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /20270100 HTTP/1.1
+GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /20270100 HTTP/1.1
+GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="1", uri="/20270100", response="f7fd60eefaff5225971bf9b3d80d6ba6"
+Authorization: Digest username="testuser", realm="testrealm", nonce="1", uri="/%TESTNUMBER0100", response="f7fd60eefaff5225971bf9b3d80d6ba6"
 Accept: */*
 
-GET /20270200 HTTP/1.1
+GET /%TESTNUMBER0200 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="2", uri="/20270200", response="785ca3ef511999f7e9c178195f5b388c"
+Authorization: Digest username="testuser", realm="testrealm", nonce="2", uri="/%TESTNUMBER0200", response="785ca3ef511999f7e9c178195f5b388c"
 Accept: */*
 
-GET /20270300 HTTP/1.1
+GET /%TESTNUMBER0300 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /20270300 HTTP/1.1
+GET /%TESTNUMBER0300 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="4", uri="/20270300", response="4c735d2360fd6848e7cb32a11ae3612b"
+Authorization: Digest username="testuser", realm="testrealm", nonce="4", uri="/%TESTNUMBER0300", response="4c735d2360fd6848e7cb32a11ae3612b"
 Accept: */*
 
-GET /20270400 HTTP/1.1
+GET /%TESTNUMBER0400 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/20270400", response="f5906785511fb60a2af8b1cd53008ead"
+Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/%TESTNUMBER0400", response="f5906785511fb60a2af8b1cd53008ead"
 Accept: */*
 
-GET /20270400 HTTP/1.1
+GET /%TESTNUMBER0400 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/20270400", response="f5906785511fb60a2af8b1cd53008ead"
+Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/%TESTNUMBER0400", response="f5906785511fb60a2af8b1cd53008ead"
 Accept: */*
 
-GET /20270500 HTTP/1.1
+GET /%TESTNUMBER0500 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="7", uri="/20270500", response="8ef4d935fd964a46c3965c0863b52cf1"
+Authorization: Digest username="testuser", realm="testrealm", nonce="7", uri="/%TESTNUMBER0500", response="8ef4d935fd964a46c3965c0863b52cf1"
 Accept: */*
 
 </protocol>

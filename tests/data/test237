@@ -21,7 +21,7 @@ ftp
 FTP getting bad host in 227-response to PASV
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/237 --disable-epsv
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --disable-epsv
 </command>
 </client>
 

@@ -30,29 +30,32 @@ http
 HTTP cookies and domains with same prefix
  </name>
  <command>
-http://example.fake/c/1218 http://example.fake/c/1218 http://bexample.fake/c/1218 -b nonexisting -x %HOSTIP:%HTTPPORT
+http://example.fake/c/%TESTNUMBER http://example.fake/c/%TESTNUMBER http://bexample.fake/c/%TESTNUMBER -b nonexisting -x %HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://example.fake/c/1218 HTTP/1.1
+GET http://example.fake/c/%TESTNUMBER HTTP/1.1
 Host: example.fake
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://example.fake/c/1218 HTTP/1.1
+GET http://example.fake/c/%TESTNUMBER HTTP/1.1
 Host: example.fake
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: bug=fixed
 
-GET http://bexample.fake/c/1218 HTTP/1.1
+GET http://bexample.fake/c/%TESTNUMBER HTTP/1.1
 Host: bexample.fake
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

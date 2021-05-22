@@ -35,16 +35,13 @@ perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(lan
 HTTP over proxy with too long IDN host name
  </name>
  <command>
-http://too-long-IDN-name-cürl-rüles-la-la-la-dee-da-flooby-nooby.local/page/1035 -x %HOSTIP:%HTTPPORT
+http://too-long-IDN-name-cürl-rüles-la-la-la-dee-da-flooby-nooby.local/page/%TESTNUMBER -x %HOSTIP:%NOLISTENPORT
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <errorcode>
 3
 </errorcode>

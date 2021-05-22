@@ -29,19 +29,17 @@ http
 HTTP POST with custom content-type
  </name>
  <command>
- -d "hejsanallabarn" -H "Content-Type: silly/type" http://%HOSTIP:%HTTPPORT/97
+ -d "hejsanallabarn" -H "Content-Type: silly/type" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
-POST /97 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Type: silly/type
 Content-Length: 14

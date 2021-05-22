@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,17 @@ output when doing what would otherwise be a download. For HTTP(S), this makes
 libcurl do a HEAD request. For most other protocols it means just not asking
 to transfer the body data.
 
-Enabling this option means asking for a download but without a body.
+For HTTP operations when \fICURLOPT_NOBODY(3)\fP has been set, unsetting the
+option (with 0) will make it a GET again - only if the method is still set to
+be HEAD. The proper way to get back to a GET request is to set
+\fICURLOPT_HTTPGET(3)\fP and for other methods, use the POST or UPLOAD
+options.
+
+Enabling \fICURLOPT_NOBODY(3)\fP means asking for a download without a body.
+
+If you do a transfer with HTTP that involves a method other than HEAD, you
+will get a body (unless the resource and server sends a zero byte body for the
+specific URL you request).
 .SH DEFAULT
 0, the body is transferred
 .SH PROTOCOLS
@@ -42,9 +52,9 @@ Most
 .nf
 curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* get us the resource without a body! */
+  /* get us the resource without a body - use HEAD! */
   curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
 
   /* Perform the request */
@@ -56,5 +66,5 @@ Always
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"
-.BR CURLOPT_HTTPGET "(3), " CURLOPT_POST "(3), "
-.BR CURLOPT_REQUEST_TARGET "(3), "
+.BR CURLOPT_HTTPGET "(3), " CURLOPT_POSTFIELDS "(3), " CURLOPT_UPLOAD "(3), "
+.BR CURLOPT_REQUEST_TARGET "(3), " CURLOPT_MIMEPOST "(3), "

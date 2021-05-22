@@ -15,11 +15,11 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 302 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
-Location: http://goto.second.host.now/2340002
+Location: http://goto.second.host.now/%TESTNUMBER0002
 Content-Length: 8
 Connection: close
 
@@ -27,7 +27,7 @@ contents
 </data>
 <data2>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
@@ -38,16 +38,16 @@ contents
 
 <datacheck>
 HTTP/1.1 302 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
-Location: http://goto.second.host.now/2340002
+Location: http://goto.second.host.now/%TESTNUMBER0002
 Content-Length: 8
 Connection: close
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
@@ -67,28 +67,30 @@ http
 HTTP, proxy, site+proxy auth and Location: to new host using location-trusted
  </name>
  <command>
-http://first.host.it.is/we/want/that/page/234 -x %HOSTIP:%HTTPPORT --user iam:myself --proxy-user testing:this --location-trusted
+http://first.host.it.is/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT --user iam:myself --proxy-user testing:this --location-trusted
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://first.host.it.is/we/want/that/page/234 HTTP/1.1
+GET http://first.host.it.is/we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: first.host.it.is
 Proxy-Authorization: Basic dGVzdGluZzp0aGlz
 Authorization: Basic aWFtOm15c2VsZg==
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://goto.second.host.now/2340002 HTTP/1.1
+GET http://goto.second.host.now/%TESTNUMBER0002 HTTP/1.1
 Host: goto.second.host.now
 Proxy-Authorization: Basic dGVzdGluZzp0aGlz
 Authorization: Basic aWFtOm15c2VsZg==
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

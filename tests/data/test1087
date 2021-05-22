@@ -22,18 +22,18 @@ Content-Length: 0
 </data1000>
 <data1001 nocheck="yes">
 HTTP/1.1 302 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/plain
 Funny-head: yesyes
-Location: http://goto.second.host.now/10871002
+Location: http://goto.second.host.now/%TESTNUMBER1002
 Content-Length: 0
 Connection: close
 
 </data1001>
 <data1002 nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/plain
 Funny-head: yesyes
@@ -49,16 +49,16 @@ Content-Type: text/plain
 Content-Length: 0
 
 HTTP/1.1 302 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/plain
 Funny-head: yesyes
-Location: http://goto.second.host.now/10871002
+Location: http://goto.second.host.now/%TESTNUMBER1002
 Content-Length: 0
 Connection: close
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/plain
 Funny-head: yesyes
@@ -78,30 +78,33 @@ http
 HTTP, proxy with --anyauth and Location: to new host
  </name>
  <command>
-http://first.host.it.is/we/want/that/page/10871000 -x %HOSTIP:%HTTPPORT --user iam:myself --location --anyauth
+http://first.host.it.is/we/want/that/page/%TESTNUMBER1000 -x %HOSTIP:%HTTPPORT --user iam:myself --location --anyauth
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://first.host.it.is/we/want/that/page/10871000 HTTP/1.1
+GET http://first.host.it.is/we/want/that/page/%TESTNUMBER1000 HTTP/1.1
 Host: first.host.it.is
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://first.host.it.is/we/want/that/page/10871000 HTTP/1.1
+GET http://first.host.it.is/we/want/that/page/%TESTNUMBER1000 HTTP/1.1
 Host: first.host.it.is
 Authorization: Basic aWFtOm15c2VsZg==
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://goto.second.host.now/10871002 HTTP/1.1
+GET http://goto.second.host.now/%TESTNUMBER1002 HTTP/1.1
 Host: goto.second.host.now
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

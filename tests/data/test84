@@ -12,7 +12,7 @@ HTTP proxy
 <reply>
 <data>
 HTTP/1.0 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
@@ -31,21 +31,21 @@ http
 HTTP over proxy with site authentication
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/that/page/84 -x %HOSTIP:%HTTPPORT --user iam:myself
+http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT --user iam:myself
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://%HOSTIP:%HTTPPORT/we/want/that/page/84 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic aWFtOm15c2VsZg==
-User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

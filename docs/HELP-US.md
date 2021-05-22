@@ -15,6 +15,23 @@ found yourself or perhaps got annoyed at in the past. It can be a spelling
 error in an error text or a weirdly phrased section in a man page. Hunt it
 down and report the bug. Or make your first pull request with a fix for that.
 
+## Smaller tasks
+
+Some projects mark small issues as "beginner friendly", "bite-sized" or
+similar. We don't do that in curl since such issues never linger around long
+enough. Simple issues get handled very fast.
+
+If you're looking for a smaller or simpler task in the project to help out
+with as an entry-point into the project, perhaps because you are a newcomer or
+even maybe not a terribly experienced developer, here's our advice:
+
+ - Read through this document to get a grasp on a general approach to use
+ - Consider adding a test case for something not currently tested (correctly)
+ - Consider updating or adding documentation
+ - One way to get your feet wet gently in the project, is to participate in an
+   existing issue/PR and help out by reproducing the issue, review the code in
+   the PR etc.
+
 ## Help wanted
 
 In the issue tracker we occasionally mark bugs with [help
@@ -28,14 +45,14 @@ one that piques your interest.
 
 Some bugs are known and haven't yet received attention and work enough to get
 fixed. We collect such known existing flaws in the
-[KNOWN_BUGS](https://curl.haxx.se/docs/knownbugs.html) page. Many of them link
+[KNOWN_BUGS](https://curl.se/docs/knownbugs.html) page. Many of them link
 to the original bug report with some additional details, but some may also
 have aged a bit and may require some verification that the bug still exists in
 the same way and that what was said about it in the past is still valid.
 
 ## Fix autobuild problems
 
-On the [autobuilds page](https://curl.haxx.se/dev/builds.html) we show a
+On the [autobuilds page](https://curl.se/dev/builds.html) we show a
 collection of test results from the automatic curl build and tests that are
 performed by volunteers. Fixing compiler warnings and errors shown there is
 something we value greatly. Also, if you own or run systems or architectures
@@ -46,7 +63,7 @@ volunteers running builds automatically to help us keep curl portable.
 
 Ideas for features and functions that we have considered worthwhile to
 implement and provide are kept in the
-[TODO](https://curl.haxx.se/docs/todo.html) file. Some of the ideas are
+[TODO](https://curl.se/docs/todo.html) file. Some of the ideas are
 rough. Some are well thought out. Some probably aren't really suitable
 anymore.
 
@@ -64,7 +81,7 @@ the specific implementation. Either way is fine.
 
 ## CONTRIBUTE
 
-We offer [guidelines](https://curl.haxx.se/dev/contribute.html) that are
+We offer [guidelines](https://curl.se/dev/contribute.html) that are
 suitable to be familiar with before you decide to contribute to curl. If
 you're used to open source development, you'll probably not find many
 surprises in there.

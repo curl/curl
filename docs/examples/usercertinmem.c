@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2013 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -119,7 +119,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
   /* get a BIO */
   bio = BIO_new_mem_buf((char *)mypem, -1);
 
-  if(bio == NULL) {
+  if(!bio) {
     printf("BIO_new_mem_buf failed\n");
   }
 
@@ -127,7 +127,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
    * structure that SSL can use
    */
   cert = PEM_read_bio_X509(bio, NULL, 0, NULL);
-  if(cert == NULL) {
+  if(!cert) {
     printf("PEM_read_bio_X509 failed...\n");
   }
 
@@ -139,13 +139,13 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
 
   /*create a bio for the RSA key*/
   kbio = BIO_new_mem_buf((char *)mykey, -1);
-  if(kbio == NULL) {
+  if(!kbio) {
     printf("BIO_new_mem_buf failed\n");
   }
 
   /*read the key bio into an RSA object*/
   rsa = PEM_read_bio_RSAPrivateKey(kbio, NULL, 0, NULL);
-  if(rsa == NULL) {
+  if(!rsa) {
     printf("Failed to create key bio\n");
   }
 
@@ -211,7 +211,7 @@ int main(void)
    * load the certificate and key by installing a function doing the necessary
    * "modifications" to the SSL CONTEXT just before link init
    */
-  curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
+  curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
   rv = curl_easy_perform(ch);
   if(rv == CURLE_OK) {
     printf("*** transfer succeeded ***\n");

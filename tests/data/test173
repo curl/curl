@@ -10,7 +10,7 @@ HTTP POST
 <reply>
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 11
 
@@ -28,7 +28,7 @@ http
 HTTP RFC1867-formpost a file from stdin with "faked" filename
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/173 -F field1=contents1 -F "fileupload=@-;filename=/dev/null;type=text/x-null;format=x-curl"
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F field1=contents1 -F "fileupload=@-;filename=/dev/null;type=text/x-null;format=x-curl"
 </command>
 
 <stdin>
@@ -46,12 +46,12 @@ line8
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^(User-Agent:|Content-Type: multipart/form-data;|------------).*
+^(Content-Type: multipart/form-data;|------------).*
 </strip>
 <protocol>
-POST /we/want/173 HTTP/1.1
-User-Agent: curl/7.12.1-CVS (i686-pc-linux-gnu) libcurl/7.12.1-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.6
+POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 360
 Content-Type: multipart/form-data; boundary=----------------------------5dbea401cd8c

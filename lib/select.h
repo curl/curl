@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -74,34 +74,37 @@ struct pollfd
 
 int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
                       curl_socket_t writefd,
-                      time_t timeout_ms);
-
+                      timediff_t timeout_ms);
 #define SOCKET_READABLE(x,z) \
-  Curl_socket_check(x, CURL_SOCKET_BAD, CURL_SOCKET_BAD, (time_t)z)
+  Curl_socket_check(x, CURL_SOCKET_BAD, CURL_SOCKET_BAD, z)
 #define SOCKET_WRITABLE(x,z) \
-  Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, x, (time_t)z)
+  Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, x, z)
 
-int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms);
-
-/* On non-DOS and non-Winsock platforms, when Curl_ack_eintr is set,
- * EINTR condition is honored and function might exit early without
- * awaiting full timeout.  Otherwise EINTR will be ignored and full
- * timeout will elapse. */
-extern int Curl_ack_eintr;
-
-int Curl_wait_ms(int timeout_ms);
+int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
+int Curl_wait_ms(timediff_t timeout_ms);
 
 #ifdef TPF
 int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
-                       fd_set* excepts, struct timeval* tv);
+                       fd_set* excepts, struct timeval *tv);
 #endif
 
-/* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1], which
+/* TPF sockets are not in range [0..FD_SETSIZE-1], which
    unfortunately makes it impossible for us to easily check if they're valid
+
+   With Winsock the valid range is [0..INVALID_SOCKET-1] according to
+   https://docs.microsoft.com/en-us/windows/win32/winsock/socket-data-type-2
 */
-#if defined(USE_WINSOCK) || defined(TPF)
+#if defined(TPF)
 #define VALID_SOCK(x) 1
 #define VERIFY_SOCK(x) Curl_nop_stmt
+#elif defined(USE_WINSOCK)
+#define VALID_SOCK(s) ((s) < INVALID_SOCKET)
+#define VERIFY_SOCK(x) do { \
+  if(!VALID_SOCK(x)) { \
+    SET_SOCKERRNO(WSAEINVAL); \
+    return -1; \
+  } \
+} while(0)
 #else
 #define VALID_SOCK(s) (((s) >= 0) && ((s) < FD_SETSIZE))
 #define VERIFY_SOCK(x) do { \
@@ -109,7 +112,7 @@ int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
     SET_SOCKERRNO(EINVAL); \
     return -1; \
   } \
-} WHILE_FALSE
+} while(0)
 #endif
 
 #endif /* HEADER_CURL_SELECT_H */

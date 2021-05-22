@@ -16,7 +16,7 @@ RFC7628
 <servercmd>
 AUTH OAUTHBEARER
 REPLY AUTH 334 OAUTHBEARER supported
-REPLY bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwNQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ== 334 eyJzdGF0dXMiOiJpbnZhbGlkX3Rva2VuIiwic2NvcGUiOiJleGFtcGxlX3Njb3BlIiwib3BlbmlkLWNvbmZpZ3VyYXRpb24iOiJodHRwczovL2V4YW1wbGUuY29tLy53ZWxsLWtub3duL29wZW5pZC1jb25maWd1cmF0aW9uIn0
+REPLY %b64[n,a=user,%01host=127.0.0.1%01port=%SMTPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64% 334 eyJzdGF0dXMiOiJpbnZhbGlkX3Rva2VuIiwic2NvcGUiOiJleGFtcGxlX3Njb3BlIiwib3BlbmlkLWNvbmZpZ3VyYXRpb24iOiJodHRwczovL2V4YW1wbGUuY29tLy53ZWxsLWtub3duL29wZW5pZC1jb25maWd1cmF0aW9uIn0
 REPLY AQ== 535 Username and Password not accepted. Learn more at\r\n535 http://support.example.com/mail/oauth
 </servercmd>
 </reply>
@@ -34,13 +34,8 @@ SMTP OAuth 2.0 (OAUTHBEARER) failure as continuation
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/948 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user --oauth2-bearer mF_9.B5f-4.1JqM -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user --oauth2-bearer mF_9.B5f-4.1JqM -T -
 </command>
-# The protocol section doesn't support ways of specifying the raw data in the
-# base64 encoded message so we must assert this
-<precheck>
-perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%SMTPPORT' ne '9005' );"
-</precheck>
 </client>
 
 #
@@ -54,9 +49,9 @@ perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' 
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "QUIT"
 <protocol>
-EHLO 948
+EHLO %TESTNUMBER
 AUTH OAUTHBEARER
-bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwNQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
+%b64[n,a=user,%01host=127.0.0.1%01port=%SMTPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
 AQ==
 </protocol>
 </verify>

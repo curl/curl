@@ -10,7 +10,7 @@ HTTP POST
 <reply>
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 10
 
@@ -27,10 +27,10 @@ http
 HTTP formpost a file with spaces in name
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/166 -F "name=@log/fie ld 166"
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=@log/fie ld %TESTNUMBER"
 </command>
 # We create this file before the command is invoked!
-<file name="log/fie ld 166">
+<file name="log/fie ld %TESTNUMBER">
 data inside the file
 </file>
 </client>
@@ -38,18 +38,18 @@ data inside the file
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^(User-Agent:|Content-Type: multipart/form-data;|------------).*
+^(Content-Type: multipart/form-data;|------------).*
 </strip>
 <protocol>
-POST /we/want/166 HTTP/1.1
-User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
+POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 223
 Content-Type: multipart/form-data; boundary=----------------------------b0b3d6d23991
 
 ------------------------------b0b3d6d23991
-Content-Disposition: form-data; name="name"; filename="fie ld 166"
+Content-Disposition: form-data; name="name"; filename="fie ld %TESTNUMBER"
 Content-Type: application/octet-stream
 
 data inside the file

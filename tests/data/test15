@@ -9,7 +9,7 @@ HTTP GET
 # Server-side
 <reply>
 <data nocheck="yes">
-HTTP/1.4 200 OK
+HTTP/1.1 200 OK
 Fake: yes
 Fake: yes
 Fake: yes
@@ -28,28 +28,26 @@ http
 --write-out test
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/15 --write-out "%{url_effective} %{http_code} %{size_download}\n"
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER --write-out "%{url_effective} %{http_code} %{size_download}\n"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <stdout>
-HTTP/1.4 200 OK
+HTTP/1.1 200 OK
 Fake: yes
 Fake: yes
 Fake: yes
 Content-Length: 26
 
 Repeated nonsense-headers
-http://%HOSTIP:%HTTPPORT/want/15 200 26
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER 200 26
 </stdout>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /want/15 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,7 @@ way. For example, the web server may assume that this data is url-encoded.
 
 The data pointed to is NOT copied by the library: as a consequence, it must be
 preserved by the calling application until the associated transfer finishes.
-This behaviour can be changed (so libcurl does copy the data) by setting the
+This behavior can be changed (so libcurl does copy the data) by setting the
 \fICURLOPT_COPYPOSTFIELDS(3)\fP option.
 
 This POST is a normal application/x-www-form-urlencoded kind (and libcurl will
@@ -52,10 +52,15 @@ the POST data from the read callback. If you want to send a zero-byte POST set
 \fICURLOPT_POSTFIELDS(3)\fP to an empty string, or set \fICURLOPT_POST(3)\fP to
 1 and \fICURLOPT_POSTFIELDSIZE(3)\fP to 0.
 
+libcurl will use assume this option points to a nul-terminated string unless
+you also set \fICURLOPT_POSTFIELDSIZE(3)\fP to specify the length of the
+provided data, which then is strictly required if you want to send off nul
+bytes included in the data.
+
 Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header,
 and libcurl will add that header automatically if the POST is either known to
-be larger than 1024 bytes or if the expected size is unknown. You can disable
-this header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
+be larger than 1MB or if the expected size is unknown. You can disable this
+header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
 
 To make multipart/formdata posts (aka RFC2388-posts), check out the
 \fICURLOPT_HTTPPOST(3)\fP option combined with \fIcurl_formadd(3)\fP.
@@ -69,7 +74,7 @@ CURL *curl = curl_easy_init();
 if(curl) {
   const char *data = "data to send";
 
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* size of the POST data */
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 12L);

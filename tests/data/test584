@@ -2,42 +2,36 @@
 <info>
 <keywords>
 HTTP
-pipelining
-multi
+HTTP POST
+HTTP MIME
 </keywords>
 </info>
 
+#
 # Server-side
-# Silly division of the first request is solely to appease the server which expects n_data_items == n_requests
 <reply>
-<data1>
-HTTP/1.1 200 OK
+<data>
+HTTP/1.1 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Content-Length: 4
+Content-Length: 3
 
-584
-</data1>
-<data2>
-HTTP/1.1 200 OK
-</data2>
-<data3>
+OK
+</data>
+<datacheck>
+HTTP/1.1 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-</data3>
-<data4>
-Content-Length: 0
+Content-Length: 3
 
-HTTP/1.1 200 OK
+OK
+HTTP/1.1 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Content-Length: 5
+Content-Length: 3
 
-585
-
-HTTP/1.1 200 OK
-Server: test-server/fake
-Content-Length: 4
-
-586
-</data4>
+OK
+</datacheck>
 </reply>
 
 # Client-side
@@ -45,58 +39,43 @@ Content-Length: 4
 <server>
 http
 </server>
+# tool to invoke
 <tool>
-lib530
+lib%TESTNUMBER
 </tool>
+
  <name>
-HTTP GET using pipelining (nonzero length after zero length)
+CURLOPT_MIMEPOST first set then set to NULL
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/path/584
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
+#
 # Verify data after the test has been "shot"
 <verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/--------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=------------------------/
+</strippart>
 <protocol>
-GET /path/5840001 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
+Content-Length: 144
+Content-Type: multipart/form-data; boundary=------------------------
 
-GET /path/5840002 HTTP/1.1
+--------------------------
+Content-Disposition: form-data; name="fake"
+
+party
+----------------------------
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-
-GET /path/5840003 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-
-GET /path/5840004 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-
-</protocol>
-<stdout>
-HTTP/1.1 200 OK
-Server: test-server/fake
-Content-Length: 4
-
-584
-HTTP/1.1 200 OK
-Server: test-server/fake
 Content-Length: 0
 
-HTTP/1.1 200 OK
-Server: test-server/fake
-Content-Length: 5
-
-585
-
-HTTP/1.1 200 OK
-Server: test-server/fake
-Content-Length: 4
-
-586
-</stdout>
+</protocol>
 </verify>
 </testcase>

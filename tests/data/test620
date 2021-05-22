@@ -16,9 +16,9 @@ sftp
 SFTP retrieval of missing file followed by good file
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/not-a-valid-file-moooo sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/file620.txt --insecure
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/not-a-valid-file-moooo sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/file%TESTNUMBER.txt --insecure
 </command>
-<file name="log/file620.txt">
+<file name="log/file%TESTNUMBER.txt">
 Test data
 for ssh test
 </file>

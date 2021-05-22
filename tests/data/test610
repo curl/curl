@@ -21,18 +21,18 @@ Dummy test file for rmdir test
 sftp
 </server>
 <precheck>
-perl %SRCDIR/libtest/test610.pl mkdir %PWD/log/test610.dir
+perl %SRCDIR/libtest/test%TESTNUMBER.pl mkdir %PWD/log/test%TESTNUMBER.dir
 </precheck>
  <name>
 SFTP post-quote rmdir
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-rmdir %PWD/log/test610.dir" sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/file610.txt --insecure
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-rmdir %PWD/log/test%TESTNUMBER.dir" sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/file%TESTNUMBER.txt --insecure
 </command>
 <postcheck>
-perl %SRCDIR/libtest/test610.pl gone %PWD/log/test610.dir
+perl %SRCDIR/libtest/test%TESTNUMBER.pl gone %PWD/log/test%TESTNUMBER.dir
 </postcheck>
-<file name="log/file610.txt">
+<file name="log/file%TESTNUMBER.txt">
 Dummy test file for rmdir test
 </file>
 </client>

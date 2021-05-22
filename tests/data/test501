@@ -19,14 +19,14 @@ http
 </features>
 # tool is what to use instead of 'curl'
 <tool>
-lib501
+lib%TESTNUMBER
 </tool>
 
  <name>
 simple libcurl attempt operation without URL set
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/501
+http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
 </command>
 </client>
 

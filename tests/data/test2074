@@ -12,7 +12,7 @@ AUTH OAUTHBEARER
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -36,20 +36,18 @@ http
 HTTP GET
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/2074 --oauth2-bearer mF_9.B5f-4.1JqM
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /2074 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Bearer mF_9.B5f-4.1JqM
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

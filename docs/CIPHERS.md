@@ -1,15 +1,15 @@
 # Ciphers
 
 With curl's options
-[`CURLOPT_SSL_CIPHER_LIST`](https://curl.haxx.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html)
+[`CURLOPT_SSL_CIPHER_LIST`](https://curl.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html)
 and
-[`--ciphers`](https://curl.haxx.se/docs/manpage.html#--ciphers)
+[`--ciphers`](https://curl.se/docs/manpage.html#--ciphers)
 users can control which ciphers to consider when negotiating TLS connections.
 
 TLS 1.3 ciphers are supported since curl 7.61 for OpenSSL 1.1.1+ with options
-[`CURLOPT_TLS13_CIPHERS`](https://curl.haxx.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html)
+[`CURLOPT_TLS13_CIPHERS`](https://curl.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html)
 and
-[`--tls13-ciphers`](https://curl.haxx.se/docs/manpage.html#--tls13-ciphers)
+[`--tls13-ciphers`](https://curl.se/docs/manpage.html#--tls13-ciphers)
 . If you are using a different SSL backend you can try setting TLS 1.3 cipher
 suites by using the respective regular cipher option.
 
@@ -514,3 +514,9 @@ and the request will fail.
 `CALG_ECMQV`,
 `CALG_ECDSA`,
 `CALG_ECDH_EPHEM`,
+
+As of curl 7.77.0, you can also pass `SCH_USE_STRONG_CRYPTO` as a cipher name
+to [constrain the set of available ciphers as specified in the schannel
+documentation](https://docs.microsoft.com/en-us/windows/win32/secauthn/tls-cipher-suites-in-windows-server-2022).
+Note that the supported ciphers in this case follows the OS version, so if you
+are running an outdated OS you might still be supporting weak ciphers.

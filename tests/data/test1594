@@ -28,19 +28,16 @@ http
 HTTP Retry-After header parsing and extraction
 </name>
 <tool>
-lib1594
+lib%TESTNUMBER
 </tool>
 <command>
-http://%HOSTIP:%HTTPPORT/1594
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1594 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

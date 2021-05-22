@@ -5,11 +5,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -143,7 +143,7 @@ int main (void)
 dnl CURL_CHECK_AIX_ALL_SOURCE
 dnl -------------------------------------------------
 dnl Provides a replacement of traditional AC_AIX with
-dnl an uniform behaviour across all autoconf versions,
+dnl an uniform behavior across all autoconf versions,
 dnl and with our own placement rules.
 
 AC_DEFUN([CURL_CHECK_AIX_ALL_SOURCE], [
@@ -342,6 +342,39 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
     yes)
       AC_DEFINE_UNQUOTED(HAVE_WS2TCPIP_H, 1,
         [Define to 1 if you have the ws2tcpip.h header file.])
+      ;;
+  esac
+])
+
+
+dnl CURL_CHECK_HEADER_WINCRYPT
+dnl -------------------------------------------------
+dnl Check for compilable and valid wincrypt.h header
+
+AC_DEFUN([CURL_CHECK_HEADER_WINCRYPT], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_CACHE_CHECK([for wincrypt.h], [curl_cv_header_wincrypt_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#undef inline
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <wincrypt.h>
+      ]],[[
+        int dummy=2*PROV_RSA_FULL;
+      ]])
+    ],[
+      curl_cv_header_wincrypt_h="yes"
+    ],[
+      curl_cv_header_wincrypt_h="no"
+    ])
+  ])
+  case "$curl_cv_header_wincrypt_h" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_WINCRYPT_H, 1,
+        [Define to 1 if you have the wincrypt.h header file.])
       ;;
   esac
 ])
@@ -661,7 +694,7 @@ dnl -------------------------------------------------
 dnl Check for libraries needed for WINLDAP support,
 dnl and prepended to LIBS any needed libraries.
 dnl This macro can take an optional parameter with a
-dnl white space separated list of libraries to check
+dnl whitespace separated list of libraries to check
 dnl before the WINLDAP default ones.
 
 AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
@@ -755,7 +788,7 @@ dnl -------------------------------------------------
 dnl Check for libraries needed for LDAP support,
 dnl and prepended to LIBS any needed libraries.
 dnl This macro can take an optional parameter with a
-dnl white space separated list of libraries to check
+dnl whitespace separated list of libraries to check
 dnl before the default ones.
 
 AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
@@ -1375,10 +1408,9 @@ dnl -------------------------------------------------
 dnl Check for timeval struct
 
 AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
-  AC_REQUIRE([AC_HEADER_TIME])dnl
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/time.h time.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/types.h sys/time.h sys/socket.h)
   AC_CACHE_CHECK([for struct timeval], [curl_cv_struct_timeval], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -1401,14 +1433,8 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#ifdef TIME_WITH_SYS_TIME
+#endif
 #include <time.h>
-#endif
-#else
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -1573,8 +1599,7 @@ dnl -------------------------------------------------
 dnl Check if monotonic clock_gettime is available.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
-  AC_REQUIRE([AC_HEADER_TIME])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/time.h time.h)
+  AC_CHECK_HEADERS(sys/types.h sys/time.h)
   AC_MSG_CHECKING([for monotonic clock_gettime])
   #
   if test "x$dontwant_rt" = "xno" ; then
@@ -1585,14 +1610,8 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#ifdef TIME_WITH_SYS_TIME
+#endif
 #include <time.h>
-#endif
-#else
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-#endif
       ]],[[
         struct timespec ts;
         (void)clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -1639,14 +1658,8 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#ifdef TIME_WITH_SYS_TIME
+#endif
 #include <time.h>
-#endif
-#else
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-#endif
           ]],[[
             struct timespec ts;
             (void)clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -1694,14 +1707,8 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#ifdef TIME_WITH_SYS_TIME
+#endif
 #include <time.h>
-#endif
-#else
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-#endif
         ]],[[
           struct timespec ts;
           if (0 == clock_gettime(CLOCK_MONOTONIC, &ts))
@@ -1871,25 +1878,21 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#ifdef TIME_WITH_SYS_TIME
+#endif
 #include <time.h>
-#endif
-#else
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-#endif
 #ifndef HAVE_WINDOWS_H
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#elif defined(HAVE_UNISTD_H)
+#include <unistd.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 #ifdef HAVE_PROTO_BSDSOCKET_H
 #include <proto/bsdsocket.h>
 struct Library *SocketBase = NULL;
 #define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
-#endif
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
 #endif
 #endif
     ]],[[
@@ -1934,25 +1937,21 @@ struct Library *SocketBase = NULL;
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#ifdef TIME_WITH_SYS_TIME
+#endif
 #include <time.h>
-#endif
-#else
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-#endif
 #ifndef HAVE_WINDOWS_H
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#elif defined(HAVE_UNISTD_H)
+#include <unistd.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 #ifdef HAVE_PROTO_BSDSOCKET_H
 #include <proto/bsdsocket.h>
 struct Library *SocketBase = NULL;
 #define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
-#endif
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
 #endif
 #define SELECTCALLCONV
 #endif
@@ -2161,9 +2160,9 @@ AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
   AC_MSG_CHECKING([default CA cert bundle/path])
 
   AC_ARG_WITH(ca-bundle,
-AC_HELP_STRING([--with-ca-bundle=FILE],
+AS_HELP_STRING([--with-ca-bundle=FILE],
 [Path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
-AC_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
+AS_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   [
     want_ca="$withval"
     if test "x$want_ca" = "xyes"; then
@@ -2172,12 +2171,12 @@ AC_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   ],
   [ want_ca="unset" ])
   AC_ARG_WITH(ca-path,
-AC_HELP_STRING([--with-ca-path=DIRECTORY],
+AS_HELP_STRING([--with-ca-path=DIRECTORY],
 [Path to a directory containing CA certificates stored individually, with \
-their filenames in a hash format. This option can be used with OpenSSL, \
-GnuTLS and PolarSSL backends. Refer to OpenSSL c_rehash for details. \
+their filenames in a hash format. This option can be used with the OpenSSL, \
+GnuTLS and mbedTLS backends. Refer to OpenSSL c_rehash for details. \
 (example: /etc/certificates)])
-AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
+AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   [
     want_capath="$withval"
     if test "x$want_capath" = "xyes"; then
@@ -2201,8 +2200,8 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     capath="no"
   elif test "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
     dnl --with-ca-path given
-    if test "x$OPENSSL_ENABLED" != "x1" -a "x$GNUTLS_ENABLED" != "x1" -a "x$POLARSSL_ENABLED" != "x1"; then
-      AC_MSG_ERROR([--with-ca-path only works with OpenSSL, GnuTLS or PolarSSL])
+    if test "x$OPENSSL_ENABLED" != "x1" -a "x$GNUTLS_ENABLED" != "x1" -a "x$MBEDTLS_ENABLED" != "x1"; then
+      AC_MSG_ERROR([--with-ca-path only works with OpenSSL, GnuTLS or mbedTLS])
     fi
     capath="$want_capath"
     ca="no"
@@ -2287,8 +2286,8 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
 
   AC_MSG_CHECKING([whether to use builtin CA store of SSL library])
   AC_ARG_WITH(ca-fallback,
-AC_HELP_STRING([--with-ca-fallback], [Use the built in CA store of the SSL library])
-AC_HELP_STRING([--without-ca-fallback], [Don't use the built in CA store of the SSL library]),
+AS_HELP_STRING([--with-ca-fallback], [Use the built in CA store of the SSL library])
+AS_HELP_STRING([--without-ca-fallback], [Don't use the built in CA store of the SSL library]),
   [
     if test "x$with_ca_fallback" != "xyes" -a "x$with_ca_fallback" != "xno"; then
       AC_MSG_ERROR([--with-ca-fallback only allows yes or no as parameter])
@@ -2349,11 +2348,54 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
       AC_MSG_RESULT([yes (large file enabled)])
       AC_DEFINE_UNQUOTED(USE_WIN32_LARGE_FILES, 1,
         [Define to 1 if you are building a Windows target with large file support.])
+      AC_SUBST(USE_WIN32_LARGE_FILES, [1])
       ;;
     win32_small_files)
       AC_MSG_RESULT([yes (large file disabled)])
       AC_DEFINE_UNQUOTED(USE_WIN32_SMALL_FILES, 1,
         [Define to 1 if you are building a Windows target without large file support.])
+      AC_SUBST(USE_WIN32_SMALL_FILES, [1])
+      ;;
+    *)
+      AC_MSG_RESULT([no])
+      ;;
+  esac
+])
+
+dnl CURL_CHECK_WIN32_CRYPTO
+dnl -------------------------------------------------
+dnl Check if curl's WIN32 crypto lib can be used
+
+AC_DEFUN([CURL_CHECK_WIN32_CRYPTO], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINCRYPT])dnl
+  AC_MSG_CHECKING([whether build target supports WIN32 crypto API])
+  curl_win32_crypto_api="no"
+  if test "$curl_cv_header_wincrypt_h" = "yes"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#undef inline
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <wincrypt.h>
+      ]],[[
+        HCRYPTPROV hCryptProv;
+        if(CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
+                               CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
+          CryptReleaseContext(hCryptProv, 0);
+        }
+      ]])
+    ],[
+      curl_win32_crypto_api="yes"
+    ])
+  fi
+  case "$curl_win32_crypto_api" in
+    yes)
+      AC_MSG_RESULT([yes])
+      AC_DEFINE_UNQUOTED(USE_WIN32_CRYPTO, 1,
+        [Define to 1 if you are building a Windows target with crypto API support.])
+      AC_SUBST(USE_WIN32_CRYPTO, [1])
       ;;
     *)
       AC_MSG_RESULT([no])
@@ -2502,14 +2544,13 @@ TEST EINVAL TEST
 ])
 
 
-dnl CURL_MAC_CFLAGS
+dnl CURL_DARWIN_CFLAGS
 dnl
-dnl Check if -mmacosx-version-min, -miphoneos-version-min or any
-dnl similar are set manually, otherwise do. And set
-dnl -Werror=partial-availability.
+dnl Set -Werror=partial-availability to detect possible breaking code
+dnl with very low deployment targets.
 dnl
 
-AC_DEFUN([CURL_MAC_CFLAGS], [
+AC_DEFUN([CURL_DARWIN_CFLAGS], [
 
   tst_cflags="no"
   case $host_os in
@@ -2518,22 +2559,10 @@ AC_DEFUN([CURL_MAC_CFLAGS], [
       ;;
   esac
 
-  AC_MSG_CHECKING([for good-to-use Mac CFLAGS])
+  AC_MSG_CHECKING([for good-to-use Darwin CFLAGS])
   AC_MSG_RESULT([$tst_cflags]);
 
   if test "$tst_cflags" = "yes"; then
-    AC_MSG_CHECKING([for *version-min in CFLAGS])
-    min=""
-    if test -z "$(echo $CFLAGS | grep m.*os.*-version-min)"; then
-      min="-mmacosx-version-min=10.8"
-      CFLAGS="$CFLAGS $min"
-    fi
-    if test -z "$min"; then
-      AC_MSG_RESULT([set by user])
-    else
-      AC_MSG_RESULT([$min set])
-    fi
-
     old_CFLAGS=$CFLAGS
     CFLAGS="$CFLAGS -Werror=partial-availability"
     AC_MSG_CHECKING([whether $CC accepts -Werror=partial-availability])

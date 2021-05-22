@@ -2,6 +2,7 @@ Long: socks4a
 Arg: <host[:port]>
 Help: SOCKS4a proxy on given host + port
 Added: 7.18.0
+Category: proxy
 ---
 Use the specified SOCKS4a proxy. If the port number is not specified, it is
 assumed at port 1080.

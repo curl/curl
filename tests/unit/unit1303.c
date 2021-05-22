@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,8 +33,10 @@ static CURLcode unit_setup(void)
 
   global_init(CURL_GLOBAL_ALL);
   data = curl_easy_init();
-  if(!data)
+  if(!data) {
+    curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
+  }
   return res;
 }
 
@@ -68,7 +70,7 @@ struct timetest {
   int timeout_ms;
   int connecttimeout_ms;
   bool connecting;
-  time_t result;
+  timediff_t result;
   const char *comment;
 };
 
@@ -138,7 +140,7 @@ UNITTEST_START
   data->progress.t_startop.tv_usec = 0;
 
   for(i = 0; i < sizeof(run)/sizeof(run[0]); i++) {
-    time_t timeout;
+    timediff_t timeout;
     NOW(run[i].now_s, run[i].now_us);
     TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);
     timeout =  Curl_timeleft(data, &now, run[i].connecting);

@@ -87,32 +87,33 @@ crypto
 HTTP with --anyauth and connection re-use
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1418 -u testuser:testpass --anyauth http://%HOSTIP:%HTTPPORT/14180003
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth http://%HOSTIP:%HTTPPORT/%TESTNUMBER0003
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1418 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /1418 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/1418", response="986238b7e0077754944c966f56d9bc77"
+Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/%TESTNUMBER", response="986238b7e0077754944c966f56d9bc77"
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /14180003 HTTP/1.1
+GET /%TESTNUMBER0003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /14180003 HTTP/1.1
+GET /%TESTNUMBER0003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/14180003", response="1c6390a67bac3283a9b023402f3b3540"
+Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/%TESTNUMBER0003", response="1c6390a67bac3283a9b023402f3b3540"
+User-Agent: curl/%VERSION
 Accept: */*
 
 [DISCONNECT]

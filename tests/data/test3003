@@ -1,0 +1,55 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP with multiple and invalid (last) --mail-rcpt and --mail-rcpt-allowfails
+ </name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt-allowfails --mail-rcpt recipient.one@example.com --mail-rcpt recipient.two@example.com --mail-rcpt recipient.three@example.com --mail-rcpt recipient.four@example.com --mail-rcpt invalid.five --mail-from sender@example.com -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO %TESTNUMBER
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient.one@example.com>
+RCPT TO:<recipient.two@example.com>
+RCPT TO:<recipient.three@example.com>
+RCPT TO:<recipient.four@example.com>
+RCPT TO:<invalid.five>
+DATA
+QUIT
+</protocol>
+<upload>
+From: different
+To: another
+
+body
+.
+</upload>
+</verify>
+</testcase>

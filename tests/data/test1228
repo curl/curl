@@ -29,23 +29,25 @@ http
 HTTP cookie path match
  </name>
  <command>
-http://example.fake/hoge/1228 http://example.fake/hogege/ -b nonexisting -x %HOSTIP:%HTTPPORT
+http://example.fake/hoge/%TESTNUMBER http://example.fake/hogege/ -b nonexisting -x %HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://example.fake/hoge/1228 HTTP/1.1
+GET http://example.fake/hoge/%TESTNUMBER HTTP/1.1
 Host: example.fake
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://example.fake/hogege/ HTTP/1.1
 Host: example.fake
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: path1=root

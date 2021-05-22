@@ -13,7 +13,7 @@ CURLOPT_PROXY
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -32,6 +32,7 @@ http
 </server>
 <features>
 ftp
+proxy
 </features>
 <tool>
 lib549
@@ -41,18 +42,15 @@ FTP RETR over proxy with CURLOPT_PROXY_TRANSFER_MODE and ASCII transfer
  </name>
 # first URL then proxy
  <command>
-ftp://www.example.com/moo/550 http://%HOSTIP:%HTTPPORT ascii
+ftp://www.example.com/moo/%TESTNUMBER http://%HOSTIP:%HTTPPORT ascii
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET ftp://www.example.com/moo/550;type=a HTTP/1.1
+GET ftp://www.example.com/moo/%TESTNUMBER;type=a HTTP/1.1
 Host: www.example.com:21
 Accept: */*
 Proxy-Connection: Keep-Alive

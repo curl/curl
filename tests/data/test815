@@ -27,7 +27,7 @@ imap
 IMAP STORE - delete message (CUSTOMREQUEST)
  </name>
  <command>
-imap://%HOSTIP:%IMAPPORT/815 -X 'STORE 123 +Flags \Deleted' -u user:secret -: imap://%HOSTIP:%IMAPPORT/815 -X CLOSE -u user:secret
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -X 'STORE 123 +Flags \Deleted' -u user:secret -: imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -X CLOSE -u user:secret
 </command>
 </client>
 
@@ -37,7 +37,7 @@ imap://%HOSTIP:%IMAPPORT/815 -X 'STORE 123 +Flags \Deleted' -u user:secret -: im
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 SELECT 815
+A003 SELECT %TESTNUMBER
 A004 STORE 123 +Flags \Deleted
 A005 CLOSE
 A006 LOGOUT

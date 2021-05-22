@@ -11,14 +11,11 @@ HTTP PUT
 HTTP/1.1 100 Continue
 
 HTTP/1.1 401 Bad Auth swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 WWW-Authenticate: Basic Realm=authenticate
 Server: test-server/fake
-</data>
-<datacheck>
-HTTP/1.1 100 Continue
 
-</datacheck>
+</data>
 
 </reply>
 
@@ -31,9 +28,9 @@ http
 HTTP PUT from file with 100 + 401 responses and -f without auth given
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/281 -f -T log/test281.txt
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -f -T log/test%TESTNUMBER.txt
 </command>
-<file name="log/test281.txt">
+<file name="log/test%TESTNUMBER.txt">
 Weird
      file
          to
@@ -46,12 +43,10 @@ Weird
 <errorcode>
 22
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-PUT /we/want/281 HTTP/1.1
+PUT /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 38
 Expect: 100-continue

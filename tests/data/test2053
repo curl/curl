@@ -12,7 +12,7 @@ CURLOPT_CONNECT_TO
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Content-Type: text/plain
 
@@ -31,23 +31,22 @@ Connect to specific host with IP addresses
  </name>
 
  <command>
-http://10.0.0.1:8081/2053 --connect-to 10.0.0.1:8081:%HOSTIP:%HTTPPORT --next http://[fc00::1]:8082/2053 --connect-to [fc00::1]:8082:%HOSTIP:%HTTPPORT
+http://10.0.0.1:8081/%TESTNUMBER --connect-to 10.0.0.1:8081:%HOSTIP:%HTTPPORT --next http://[fc00::1]:8082/%TESTNUMBER --connect-to [fc00::1]:8082:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /2053 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: 10.0.0.1:8081
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /2053 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: [fc00::1]:8082
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

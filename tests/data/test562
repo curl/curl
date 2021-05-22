@@ -20,7 +20,7 @@ over FTP
 ftp
 </server>
 <tool>
-lib562
+lib%TESTNUMBER
 </tool>
  <name>
 FTP a type=A URL and CURLOPT_PORT set
@@ -29,7 +29,7 @@ FTP a type=A URL and CURLOPT_PORT set
 # note that we need quotes around the URL below to make sure the shell doesn't
 # treat the semicolon as a separator!
  <command>
-'ftp://%HOSTIP:23456/562;type=A' %FTPPORT
+'ftp://%HOSTIP:23456/%TESTNUMBER;type=A' %FTPPORT
 </command>
 
 </client>
@@ -45,8 +45,7 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE A
-SIZE 562
-RETR 562
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

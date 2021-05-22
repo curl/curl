@@ -29,10 +29,10 @@ http
 HTTP RFC1867-type formposting - -F with three files, one with explicit type
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/1315 -F name=value -F 'file=@log/test1315.txt,log/test1315.txt;type=magic/content,log/test1315.txt'
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=value -F 'file=@log/test%TESTNUMBER.txt,log/test%TESTNUMBER.txt;type=magic/content,log/test%TESTNUMBER.txt'
 </command>
 # We create this file before the command is invoked!
-<file name="log/test1315.txt">
+<file name="log/test%TESTNUMBER.txt">
 dummy data
 </file>
 </client>
@@ -40,12 +40,12 @@ dummy data
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-(^User-Agent:.*|-----+\w+)
+-----+\w+
 </strip>
 <protocol>
-POST /we/want/1315 HTTP/1.1
-User-Agent: curl/7.18.2 (i686-pc-linux-gnu) libcurl/7.18.2 OpenSSL/0.9.7a ipv6 zlib/1.1.4
+POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 797
 Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763
@@ -58,19 +58,19 @@ value
 Content-Disposition: form-data; name="file"
 Content-Type: multipart/mixed; boundary=----------------------------aaaaaaaaaaaa
 
-Content-Disposition: attachment; filename="test1315.txt"
+Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
 Content-Type: text/plain
 
 dummy data
 
 ------------------------------9ef8d6205763
-Content-Disposition: attachment; filename="test1315.txt"
+Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
 Content-Type: magic/content
 
 dummy data
 
 ------------------------------9ef8d6205763
-Content-Disposition: attachment; filename="test1315.txt"
+Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
 Content-Type: text/plain
 
 dummy data

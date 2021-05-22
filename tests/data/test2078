@@ -29,7 +29,7 @@ GSS-API
 curl --negotiate should not send empty POST request only
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/2078 -u : --negotiate --data name=value
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u : --negotiate --data name=value
 </command>
 </client>
 
@@ -38,12 +38,10 @@ http://%HOSTIP:%HTTPPORT/2078 -u : --negotiate --data name=value
 <errorcode>
 0
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
-POST /2078 HTTP/1.1
-Host: 127.0.0.1:8990
+POST /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 10
 Content-Type: application/x-www-form-urlencoded

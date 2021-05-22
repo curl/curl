@@ -18,7 +18,7 @@ chunked Transfer-Encoding
 HTTP/1.0 301 Redirect swsclose
 Server: testcurl
 Content-Type: text/plain
-Location: /newlocation/10730002
+Location: /newlocation/%TESTNUMBER0002
 Content-Length: 0
 Connection: close
 
@@ -34,7 +34,7 @@ http
 HTTP chunked PUT to HTTP 1.0 server with redirect
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1073 -T - -L
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T - -L
 </command>
 <stdin>
 This is data we upload with PUT
@@ -49,17 +49,19 @@ which is impossible in HTTP/1.0
 <errorcode>
 25
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-PUT /1073 HTTP/1.1
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Transfer-Encoding: chunked
 Expect: 100-continue
 
+%if hyper
+7A
+%else
 7a
+%endif
 This is data we upload with PUT
 it comes from stdin so MUST be sent
 with chunked encoding

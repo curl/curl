@@ -11,7 +11,7 @@ Alt-Svc
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
 Connection: close
 Content-Type: text/html
@@ -34,9 +34,9 @@ http
 load Alt-Svc from file and use
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/355 --alt-svc ""
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --alt-svc ""
 </command>
-<file name="log/altsvc-355">
+<file name="log/altsvc-%TESTNUMBER">
 h1 example.com 80 h1 %HOSTIP %HTTPPORT "20290222 22:19:28" 0 0
 </file>
 </client>
@@ -44,12 +44,10 @@ h1 example.com 80 h1 %HOSTIP %HTTPPORT "20290222 22:19:28" 0 0
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /355 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

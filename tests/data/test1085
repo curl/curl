@@ -29,7 +29,7 @@ none
 HTTP-IPv6 GET with invalid --interface
  </name>
  <command>
--g "http://%HOST6IP:%HTTP6PORT/1085" --interface non-existing-host.haxx.se.
+-g "http://%HOST6IP:%NOLISTENPORT/%TESTNUMBER" --interface non-existing-host.haxx.se.
 </command>
 # Ensure the IPv6 stack is operational before running this test (other tests
 # use the startup of the IPv6 test server as a substitute check for this).

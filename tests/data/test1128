@@ -11,7 +11,7 @@ If-Modified-Since
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 1980 12:10:00 GMT
 Content-Length: 11
@@ -21,7 +21,7 @@ Content-Type: text/html
 </data>
 <data1>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:01 GMT
+Date: Tue, 09 Nov 2010 14:49:01 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2002 12:10:00 GMT
 Content-Length: 11
@@ -41,24 +41,23 @@ http
 HTTP 200 If-Modified-Since with old+new documents
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1128 http://%HOSTIP:%HTTPPORT/11280001 -z "dec 12 12:00:00 1999 GMT"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -z "dec 12 12:00:00 1999 GMT"
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1128 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 If-Modified-Since: Sun, 12 Dec 1999 12:00:00 GMT
 
-GET /11280001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 If-Modified-Since: Sun, 12 Dec 1999 12:00:00 GMT
 
@@ -66,14 +65,14 @@ If-Modified-Since: Sun, 12 Dec 1999 12:00:00 GMT
 
 <stdout>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 1980 12:10:00 GMT
 Content-Length: 11
 Content-Type: text/html
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:01 GMT
+Date: Tue, 09 Nov 2010 14:49:01 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2002 12:10:00 GMT
 Content-Length: 11

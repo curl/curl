@@ -1,3 +1,24 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
 set(EXE_NAME curl)
 
 if(USE_MANUAL)
@@ -46,6 +67,23 @@ add_executable(
   ${CURL_FILES}
   )
 
+add_executable(
+  ${PROJECT_NAME}::${EXE_NAME}
+  ALIAS ${EXE_NAME}
+  )
+
+if(CURL_HAS_LTO)
+  set_target_properties(${EXE_NAME} PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+    INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE)
+endif()
+
+if(ENABLE_UNICODE AND MINGW)
+  target_link_libraries(${EXE_NAME} -municode)
+  # GCC doesn't know about wmain
+  set_source_files_properties(tool_main.c PROPERTIES COMPILE_FLAGS "-Wno-missing-prototypes -Wno-missing-declarations")
+endif()
+
 source_group("curlX source files" FILES ${CURLX_CFILES})
 source_group("curl source files" FILES ${CURL_CFILES})
 source_group("curl header files" FILES ${CURL_HFILES})
@@ -72,5 +110,5 @@ target_link_libraries(${EXE_NAME} libcurl ${CURL_LIBS})
 install(TARGETS ${EXE_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
 export(TARGETS ${EXE_NAME}
        APPEND FILE ${PROJECT_BINARY_DIR}/curl-target.cmake
-       NAMESPACE CURL::
+       NAMESPACE ${PROJECT_NAME}::
 )

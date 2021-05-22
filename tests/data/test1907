@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+CURLINFO_EFFECTIVE_URL
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes swsclose
+Content-Length: 0
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+CURLINFO_EFFECTIVE_URL with non-scheme URL
+ </name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+%HOSTIP:%HTTPPORT/hello/../%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<stdout>
+Effective URL: http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</stdout>
+</verify>
+</testcase>

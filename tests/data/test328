@@ -11,7 +11,7 @@ Content-Encoding
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Type: text/html
 Content-Encoding: none
 Content-Length: 38
@@ -35,19 +35,19 @@ libz
 HTTP with "Content-Encoding: none
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/hello/328 --compressed
+http://%HOSTIP:%HTTPPORT/hello/%TESTNUMBER --compressed
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^Accept-Encoding:.*
 </strip>
 <protocol>
-GET /hello/328 HTTP/1.1
+GET /hello/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

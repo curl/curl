@@ -3,6 +3,7 @@ Arg: <address>
 Help: Mail to this address
 Protocols: SMTP
 Added: 7.20.0
+Category: smtp
 ---
 Specify a single address, user name or mailing list name. Repeat this
 option several times to send to multiple recipients.

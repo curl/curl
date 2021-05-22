@@ -24,12 +24,20 @@ writedelay: 2
 <server>
 tftp
 </server>
+# Always kill the TFTP server to not affect following tests, due
+# to this test potentially keeping the TFTP server busy waiting
+# for another 5 seconds after this test has already terminated.
+# On some platforms and CI not enough time passes between this
+# test and the next tests 1242 and 1243, causing them to fail.
+<killserver>
+tftp
+</killserver>
  <name>
 slow TFTP retrieve cancel due to -Y and -y
  </name>
 # if less than 1000 bytes/sec within 2 seconds, abort!
  <command>
-tftp://%HOSTIP:%TFTPPORT//1238 -Y1000 -y2
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER -Y1000 -y2
 </command>
 </client>
 
@@ -42,7 +50,7 @@ mode: octet
 tsize: 0
 blksize: 512
 timeout: 6
-filename: /1238
+filename: /%TESTNUMBER
 </protocol>
 # 28 = CURLE_OPERATION_TIMEDOUT
 <errorcode>

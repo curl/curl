@@ -12,7 +12,7 @@ persistent connection
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
 
 moo
@@ -28,25 +28,25 @@ http
 HTTP GET two URLs over a single proxy with persistent connection
  </name>
  <command>
-http://deathstar.another.galaxy/183 http://a.galaxy.far.far.away/183 --proxy http://%HOSTIP:%HTTPPORT
+http://deathstar.another.galaxy/%TESTNUMBER http://a.galaxy.far.far.away/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
-GET http://deathstar.another.galaxy/183 HTTP/1.1
-User-Agent: curl/7.12.2-CVS (i686-pc-linux-gnu) libcurl/7.12.2-CVS OpenSSL/0.9.6b zlib/1.1.4 libidn/0.4.6
+GET http://deathstar.another.galaxy/%TESTNUMBER HTTP/1.1
 Host: deathstar.another.galaxy
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://a.galaxy.far.far.away/183 HTTP/1.1
-User-Agent: curl/7.12.2-CVS (i686-pc-linux-gnu) libcurl/7.12.2-CVS OpenSSL/0.9.6b zlib/1.1.4 libidn/0.4.6
+GET http://a.galaxy.far.far.away/%TESTNUMBER HTTP/1.1
 Host: a.galaxy.far.far.away
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

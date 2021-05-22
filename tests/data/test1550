@@ -16,14 +16,14 @@ none
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib1550
+lib%TESTNUMBER
 </tool>
 
  <name>
-verify setting pipeling blacklisting options
+verify setting pipeling blocklisting options
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1550
+http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
 </command>
 </client>
 </testcase>

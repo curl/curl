@@ -68,22 +68,20 @@ http
 HTTP GET deflate compressed content with broken deflate header
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/223 --compressed
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <strippart>
 s/^Accept-Encoding: .*/Accept-Encoding: xxx/
 </strippart>
 <protocol>
-GET /223 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Accept-Encoding: xxx
 

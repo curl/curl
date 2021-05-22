@@ -28,19 +28,16 @@ http
 HTTP Location: following with --max-redirs 0
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/274 -L --max-redirs 0
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L --max-redirs 0
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
-GET /want/274 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

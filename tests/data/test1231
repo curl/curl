@@ -37,23 +37,22 @@ http
 HTTP URL with dotdot removal from path
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/../../hej/but/who/../1231?stupid=me/../1231#soo/../1231 http://%HOSTIP:%HTTPPORT/../../hej/but/who/../12310001#/../12310001
+http://%HOSTIP:%HTTPPORT/../../hej/but/who/../%TESTNUMBER?stupid=me/../%TESTNUMBER#soo/../%TESTNUMBER http://%HOSTIP:%HTTPPORT/../../hej/but/who/../%TESTNUMBER0001#/../%TESTNUMBER0001
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /hej/but/1231?stupid=me/../1231 HTTP/1.1
+GET /hej/but/%TESTNUMBER?stupid=me/../%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /hej/but/12310001 HTTP/1.1
+GET /hej/but/%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

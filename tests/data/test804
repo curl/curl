@@ -28,7 +28,7 @@ imap
 IMAP doesn't perform SELECT if re-using the same mailbox
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/804/;MAILINDEX=123/;SECTION=1' 'imap://%HOSTIP:%IMAPPORT/804/;MAILINDEX=456/;SECTION=2.3' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=123/;SECTION=1' 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=456/;SECTION=2.3' -u user:secret
 </command>
 </client>
 
@@ -38,7 +38,7 @@ IMAP doesn't perform SELECT if re-using the same mailbox
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 SELECT 804
+A003 SELECT %TESTNUMBER
 A004 FETCH 123 BODY[1]
 A005 FETCH 456 BODY[2.3]
 A006 LOGOUT

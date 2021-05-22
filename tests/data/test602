@@ -21,9 +21,9 @@ sftp
 SFTP put
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file602.txt sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/upload.602 --insecure
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/upload.%TESTNUMBER --insecure
 </command>
-<file name="log/file602.txt">
+<file name="log/file%TESTNUMBER.txt">
 Test data
 for ssh upload test
 </file>

@@ -39,24 +39,26 @@ http
 HTTP URL with dotdot removal from path using an HTTP proxy
  </name>
  <command>
---proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.1232:8990/../../hej/but/who/../1232?stupid=me/../1232#soo/../1232 http://test.remote.haxx.se.1232:8990/../../hej/but/who/../12320001#/../12320001
+--proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.%TESTNUMBER:8990/../../hej/but/who/../%TESTNUMBER?stupid=me/../%TESTNUMBER#soo/../%TESTNUMBER http://test.remote.haxx.se.%TESTNUMBER:8990/../../hej/but/who/../%TESTNUMBER0001#/../%TESTNUMBER0001
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://test.remote.haxx.se.1232:8990/hej/but/1232?stupid=me/../1232 HTTP/1.1
-Host: test.remote.haxx.se.1232:8990
+GET http://test.remote.haxx.se.%TESTNUMBER:8990/hej/but/%TESTNUMBER?stupid=me/../%TESTNUMBER HTTP/1.1
+Host: test.remote.haxx.se.%TESTNUMBER:8990
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://test.remote.haxx.se.1232:8990/hej/but/12320001 HTTP/1.1
-Host: test.remote.haxx.se.1232:8990
+GET http://test.remote.haxx.se.%TESTNUMBER:8990/hej/but/%TESTNUMBER0001 HTTP/1.1
+Host: test.remote.haxx.se.%TESTNUMBER:8990
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

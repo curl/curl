@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -119,6 +119,7 @@ void logmsg(const char *msg, ...)
     known_offset = 1;
   }
   sec = epoch_offset + tv.tv_sec;
+  /* !checksrc! disable BANNEDFUNC 1 */
   now = localtime(&sec); /* not thread safe but we don't care */
 
   msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
@@ -150,7 +151,8 @@ void win32_perror(const char *msg)
   char buf[512];
   DWORD err = SOCKERRNO;
 
-  if(!FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
+  if(!FormatMessageA((FORMAT_MESSAGE_FROM_SYSTEM |
+                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
                      LANG_NEUTRAL, buf, sizeof(buf), NULL))
     msnprintf(buf, sizeof(buf), "Unknown error %lu (%#lx)", err, err);
   if(msg)
@@ -165,18 +167,18 @@ void win32_init(void)
   WORD wVersionRequested;
   WSADATA wsaData;
   int err;
-  wVersionRequested = MAKEWORD(USE_WINSOCK, USE_WINSOCK);
 
+  wVersionRequested = MAKEWORD(2, 2);
   err = WSAStartup(wVersionRequested, &wsaData);
 
-  if(err != 0) {
+  if(err) {
     perror("Winsock init failed");
     logmsg("Error initialising winsock -- aborting");
     exit(1);
   }
 
-  if(LOBYTE(wsaData.wVersion) != USE_WINSOCK ||
-     HIBYTE(wsaData.wVersion) != USE_WINSOCK) {
+  if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
+     HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
     WSACleanup();
     perror("Winsock init failed");
     logmsg("No suitable winsock.dll found -- aborting");
@@ -193,11 +195,21 @@ void win32_cleanup(void)
 /* set by the main code to point to where the test dir is */
 const char *path = ".";
 
-char *test2file(long testno)
+FILE *test2fopen(long testno)
 {
-  static char filename[256];
+  FILE *stream;
+  char filename[256];
+  /* first try the alternative, preprocessed, file */
+  msnprintf(filename, sizeof(filename), ALTTEST_DATA_PATH, ".", testno);
+  stream = fopen(filename, "rb");
+  if(stream)
+    return stream;
+
+  /* then try the source version */
   msnprintf(filename, sizeof(filename), TEST_DATA_PATH, path, testno);
-  return filename;
+  stream = fopen(filename, "rb");
+
+  return stream;
 }
 
 /*
@@ -260,17 +272,40 @@ int wait_ms(int timeout_ms)
 int write_pidfile(const char *filename)
 {
   FILE *pidfile;
-  long pid;
+  curl_off_t pid;
 
-  pid = (long)getpid();
+  pid = (curl_off_t)getpid();
   pidfile = fopen(filename, "wb");
   if(!pidfile) {
     logmsg("Couldn't write pid file: %s %s", filename, strerror(errno));
     return 0; /* fail */
   }
-  fprintf(pidfile, "%ld\n", pid);
+#if defined(WIN32) || defined(_WIN32)
+  /* store pid + 65536 to avoid conflict with Cygwin/msys PIDs, see also:
+   * - https://cygwin.com/git/?p=newlib-cygwin.git;a=commit; ↵
+   *   h=b5e1003722cb14235c4f166be72c09acdffc62ea
+   * - https://cygwin.com/git/?p=newlib-cygwin.git;a=commit; ↵
+   *   h=448cf5aa4b429d5a9cebf92a0da4ab4b5b6d23fe
+   */
+  pid += 65536;
+#endif
+  fprintf(pidfile, "%" CURL_FORMAT_CURL_OFF_T "\n", pid);
   fclose(pidfile);
-  logmsg("Wrote pid %ld to %s", pid, filename);
+  logmsg("Wrote pid %" CURL_FORMAT_CURL_OFF_T " to %s", pid, filename);
+  return 1; /* success */
+}
+
+/* store the used port number in a file */
+int write_portfile(const char *filename, int port)
+{
+  FILE *portfile = fopen(filename, "wb");
+  if(!portfile) {
+    logmsg("Couldn't write port file: %s %s", filename, strerror(errno));
+    return 0; /* fail */
+  }
+  fprintf(portfile, "%d\n", port);
+  fclose(portfile);
+  logmsg("Wrote port %d to %s", port, filename);
   return 1; /* success */
 }
 
@@ -282,8 +317,8 @@ void set_advisor_read_lock(const char *filename)
 
   do {
     lockfile = fopen(filename, "wb");
-  } while((lockfile == NULL) && ((error = errno) == EINTR));
-  if(lockfile == NULL) {
+  } while(!lockfile && ((error = errno) == EINTR));
+  if(!lockfile) {
     logmsg("Error creating lock file %s error: %d %s",
            filename, error, strerror(error));
     return;
@@ -441,7 +476,7 @@ static struct timeval tvnow(void)
   struct timespec tsnow;
   if(0 == clock_gettime(CLOCK_MONOTONIC, &tsnow)) {
     now.tv_sec = tsnow.tv_sec;
-    now.tv_usec = tsnow.tv_nsec / 1000;
+    now.tv_usec = (int)(tsnow.tv_nsec / 1000);
   }
   /*
   ** Even when the configure process has truly detected monotonic clock
@@ -498,4 +533,324 @@ long timediff(struct timeval newer, struct timeval older)
     return LONG_MIN;
   return (long)(newer.tv_sec-older.tv_sec)*1000+
     (long)(newer.tv_usec-older.tv_usec)/1000;
+}
+
+/* vars used to keep around previous signal handlers */
+
+typedef void (*SIGHANDLER_T)(int);
+
+#ifdef SIGHUP
+static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
+#endif
+
+#ifdef SIGPIPE
+static SIGHANDLER_T old_sigpipe_handler = SIG_ERR;
+#endif
+
+#ifdef SIGALRM
+static SIGHANDLER_T old_sigalrm_handler = SIG_ERR;
+#endif
+
+#ifdef SIGINT
+static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
+#endif
+
+#ifdef SIGTERM
+static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
+#endif
+
+#if defined(SIGBREAK) && defined(WIN32)
+static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
+#endif
+
+#ifdef WIN32
+static DWORD thread_main_id = 0;
+static HANDLE thread_main_window = NULL;
+static HWND hidden_main_window = NULL;
+#endif
+
+/* var which if set indicates that the program should finish execution */
+volatile int got_exit_signal = 0;
+
+/* if next is set indicates the first signal handled in exit_signal_handler */
+volatile int exit_signal = 0;
+
+#ifdef WIN32
+/* event which if set indicates that the program should finish */
+HANDLE exit_event = NULL;
+#endif
+
+/* signal handler that will be triggered to indicate that the program
+ * should finish its execution in a controlled manner as soon as possible.
+ * The first time this is called it will set got_exit_signal to one and
+ * store in exit_signal the signal that triggered its execution.
+ */
+static void exit_signal_handler(int signum)
+{
+  int old_errno = errno;
+  logmsg("exit_signal_handler: %d", signum);
+  if(got_exit_signal == 0) {
+    got_exit_signal = 1;
+    exit_signal = signum;
+#ifdef WIN32
+    if(exit_event)
+      (void)SetEvent(exit_event);
+#endif
+  }
+  (void)signal(signum, exit_signal_handler);
+  errno = old_errno;
+}
+
+#ifdef WIN32
+/* CTRL event handler for Windows Console applications to simulate
+ * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
+ *
+ * Background information from MSDN:
+ * SIGINT is not supported for any Win32 application. When a CTRL+C
+ * interrupt occurs, Win32 operating systems generate a new thread
+ * to specifically handle that interrupt. This can cause a single-thread
+ * application, such as one in UNIX, to become multithreaded and cause
+ * unexpected behavior.
+ * [...]
+ * The SIGILL and SIGTERM signals are not generated under Windows.
+ * They are included for ANSI compatibility. Therefore, you can set
+ * signal handlers for these signals by using signal, and you can also
+ * explicitly generate these signals by calling raise. Source:
+ * https://docs.microsoft.com/de-de/cpp/c-runtime-library/reference/signal
+ */
+static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
+{
+  int signum = 0;
+  logmsg("ctrl_event_handler: %d", dwCtrlType);
+  switch(dwCtrlType) {
+#ifdef SIGINT
+    case CTRL_C_EVENT: signum = SIGINT; break;
+#endif
+#ifdef SIGTERM
+    case CTRL_CLOSE_EVENT: signum = SIGTERM; break;
+#endif
+#ifdef SIGBREAK
+    case CTRL_BREAK_EVENT: signum = SIGBREAK; break;
+#endif
+    default: return FALSE;
+  }
+  if(signum) {
+    logmsg("ctrl_event_handler: %d -> %d", dwCtrlType, signum);
+    raise(signum);
+  }
+  return TRUE;
+}
+/* Window message handler for Windows applications to add support
+ * for graceful process termination via taskkill (without /f) which
+ * sends WM_CLOSE to all Windows of a process (even hidden ones).
+ *
+ * Therefore we create and run a hidden Window in a separate thread
+ * to receive and handle the WM_CLOSE message as SIGTERM signal.
+ */
+static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
+                                         WPARAM wParam, LPARAM lParam)
+{
+  int signum = 0;
+  if(hwnd == hidden_main_window) {
+    switch(uMsg) {
+#ifdef SIGTERM
+      case WM_CLOSE: signum = SIGTERM; break;
+#endif
+      case WM_DESTROY: PostQuitMessage(0); break;
+    }
+    if(signum) {
+      logmsg("main_window_proc: %d -> %d", uMsg, signum);
+      raise(signum);
+    }
+  }
+  return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+/* Window message queue loop for hidden main window, details see above.
+ */
+static DWORD WINAPI main_window_loop(LPVOID lpParameter)
+{
+  WNDCLASS wc;
+  BOOL ret;
+  MSG msg;
+
+  ZeroMemory(&wc, sizeof(wc));
+  wc.lpfnWndProc = (WNDPROC)main_window_proc;
+  wc.hInstance = (HINSTANCE)lpParameter;
+  wc.lpszClassName = TEXT("MainWClass");
+  if(!RegisterClass(&wc)) {
+    perror("RegisterClass failed");
+    return (DWORD)-1;
+  }
+
+  hidden_main_window = CreateWindowEx(0, TEXT("MainWClass"),
+                                      TEXT("Recv WM_CLOSE msg"),
+                                      WS_OVERLAPPEDWINDOW,
+                                      CW_USEDEFAULT, CW_USEDEFAULT,
+                                      CW_USEDEFAULT, CW_USEDEFAULT,
+                                      (HWND)NULL, (HMENU)NULL,
+                                      wc.hInstance, (LPVOID)NULL);
+  if(!hidden_main_window) {
+    perror("CreateWindowEx failed");
+    return (DWORD)-1;
+  }
+
+  do {
+    ret = GetMessage(&msg, NULL, 0, 0);
+    if(ret == -1) {
+      perror("GetMessage failed");
+      return (DWORD)-1;
+    }
+    else if(ret) {
+      if(msg.message == WM_APP) {
+        DestroyWindow(hidden_main_window);
+      }
+      else if(msg.hwnd && !TranslateMessage(&msg)) {
+        DispatchMessage(&msg);
+      }
+    }
+  } while(ret);
+
+  hidden_main_window = NULL;
+  return (DWORD)msg.wParam;
+}
+#endif
+
+static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
+                               bool restartable)
+{
+#if defined(HAVE_SIGACTION) && defined(SA_RESTART)
+  struct sigaction sa, oldsa;
+
+  memset(&sa, 0, sizeof(sa));
+  sa.sa_handler = handler;
+  sigemptyset(&sa.sa_mask);
+  sigaddset(&sa.sa_mask, signum);
+  sa.sa_flags = restartable? SA_RESTART: 0;
+
+  if(sigaction(signum, &sa, &oldsa))
+    return SIG_ERR;
+
+  return oldsa.sa_handler;
+#else
+  SIGHANDLER_T oldhdlr = signal(signum, handler);
+
+#ifdef HAVE_SIGINTERRUPT
+  if(oldhdlr != SIG_ERR)
+    siginterrupt(signum, (int) restartable);
+#else
+  (void) restartable;
+#endif
+
+  return oldhdlr;
+#endif
+}
+
+void install_signal_handlers(bool keep_sigalrm)
+{
+#ifdef WIN32
+  /* setup windows exit event before any signal can trigger */
+  exit_event = CreateEvent(NULL, TRUE, FALSE, NULL);
+  if(!exit_event)
+    logmsg("cannot create exit event");
+#endif
+#ifdef SIGHUP
+  /* ignore SIGHUP signal */
+  old_sighup_handler = set_signal(SIGHUP, SIG_IGN, FALSE);
+  if(old_sighup_handler == SIG_ERR)
+    logmsg("cannot install SIGHUP handler: %s", strerror(errno));
+#endif
+#ifdef SIGPIPE
+  /* ignore SIGPIPE signal */
+  old_sigpipe_handler = set_signal(SIGPIPE, SIG_IGN, FALSE);
+  if(old_sigpipe_handler == SIG_ERR)
+    logmsg("cannot install SIGPIPE handler: %s", strerror(errno));
+#endif
+#ifdef SIGALRM
+  if(!keep_sigalrm) {
+    /* ignore SIGALRM signal */
+    old_sigalrm_handler = set_signal(SIGALRM, SIG_IGN, FALSE);
+    if(old_sigalrm_handler == SIG_ERR)
+      logmsg("cannot install SIGALRM handler: %s", strerror(errno));
+  }
+#else
+  (void)keep_sigalrm;
+#endif
+#ifdef SIGINT
+  /* handle SIGINT signal with our exit_signal_handler */
+  old_sigint_handler = set_signal(SIGINT, exit_signal_handler, TRUE);
+  if(old_sigint_handler == SIG_ERR)
+    logmsg("cannot install SIGINT handler: %s", strerror(errno));
+#endif
+#ifdef SIGTERM
+  /* handle SIGTERM signal with our exit_signal_handler */
+  old_sigterm_handler = set_signal(SIGTERM, exit_signal_handler, TRUE);
+  if(old_sigterm_handler == SIG_ERR)
+    logmsg("cannot install SIGTERM handler: %s", strerror(errno));
+#endif
+#if defined(SIGBREAK) && defined(WIN32)
+  /* handle SIGBREAK signal with our exit_signal_handler */
+  old_sigbreak_handler = set_signal(SIGBREAK, exit_signal_handler, TRUE);
+  if(old_sigbreak_handler == SIG_ERR)
+    logmsg("cannot install SIGBREAK handler: %s", strerror(errno));
+#endif
+#ifdef WIN32
+  if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
+    logmsg("cannot install CTRL event handler");
+  thread_main_window = CreateThread(NULL, 0,
+                                    &main_window_loop,
+                                    (LPVOID)GetModuleHandle(NULL),
+                                    0, &thread_main_id);
+  if(!thread_main_window || !thread_main_id)
+    logmsg("cannot start main window loop");
+#endif
+}
+
+void restore_signal_handlers(bool keep_sigalrm)
+{
+#ifdef SIGHUP
+  if(SIG_ERR != old_sighup_handler)
+    (void) set_signal(SIGHUP, old_sighup_handler, FALSE);
+#endif
+#ifdef SIGPIPE
+  if(SIG_ERR != old_sigpipe_handler)
+    (void) set_signal(SIGPIPE, old_sigpipe_handler, FALSE);
+#endif
+#ifdef SIGALRM
+  if(!keep_sigalrm) {
+    if(SIG_ERR != old_sigalrm_handler)
+      (void) set_signal(SIGALRM, old_sigalrm_handler, FALSE);
+  }
+#else
+  (void)keep_sigalrm;
+#endif
+#ifdef SIGINT
+  if(SIG_ERR != old_sigint_handler)
+    (void) set_signal(SIGINT, old_sigint_handler, FALSE);
+#endif
+#ifdef SIGTERM
+  if(SIG_ERR != old_sigterm_handler)
+    (void) set_signal(SIGTERM, old_sigterm_handler, FALSE);
+#endif
+#if defined(SIGBREAK) && defined(WIN32)
+  if(SIG_ERR != old_sigbreak_handler)
+    (void) set_signal(SIGBREAK, old_sigbreak_handler, FALSE);
+#endif
+#ifdef WIN32
+  (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
+  if(thread_main_window && thread_main_id) {
+    if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
+      if(WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE)) {
+        if(CloseHandle(thread_main_window)) {
+          thread_main_window = NULL;
+          thread_main_id = 0;
+        }
+      }
+    }
+  }
+  if(exit_event) {
+    if(CloseHandle(exit_event)) {
+      exit_event = NULL;
+    }
+  }
+#endif
 }

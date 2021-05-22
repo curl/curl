@@ -23,10 +23,10 @@ ftp
 FTP DL, file without C-D inside, using -o fname -i -D stdout
 </name>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file1384 -o log/download1384 -i -D -
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o log/download%TESTNUMBER -i -D -
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/file1384
+perl %SRCDIR/libtest/notexists.pl log/file%TESTNUMBER
 </postcheck>
 </client>
 
@@ -39,17 +39,17 @@ PWD
 CWD path
 EPSV
 TYPE I
-SIZE file1384
-RETR file1384
+SIZE file%TESTNUMBER
+RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/download1384">
+<file1 name="log/download%TESTNUMBER">
 fooo
 mooo
 </file1>
 
-<file2 name="log/stdout1384">
+<file2 name="log/stdout%TESTNUMBER">
 220-        _   _ ____  _     
 220-    ___| | | |  _ \| |    
 220-   / __| | | | |_) | |    
@@ -62,7 +62,7 @@ mooo
 229 Entering Passive Mode (stripped)
 200 I modify TYPE as you wanted
 213 10
-150 Binary data connection for 1384 () (10 bytes).
+150 Binary data connection for %TESTNUMBER () (10 bytes).
 226 File transfer complete
 </file2>
 <stripfile2>

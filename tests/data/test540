@@ -62,45 +62,43 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib540
+lib%TESTNUMBER
 </tool>
 <features>
 !SSPI
 crypto
+proxy
 </features>
  <name>
 HTTP proxy auth Digest multi API re-using connection
  </name>
  <command>
-http://test.remote.example.com/path/540 http://%HOSTIP:%HTTPPORT silly:person custom.set.host.name
+http://test.remote.example.com/path/%TESTNUMBER http://%HOSTIP:%HTTPPORT silly:person custom.set.host.name
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
-GET http://test.remote.example.com/path/540 HTTP/1.1
+GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: custom.set.host.name
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://test.remote.example.com/path/540 HTTP/1.1
+GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: custom.set.host.name
-Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/540", response="ca507dcf189196b6a5374d3233042261"
+Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/%TESTNUMBER", response="ca507dcf189196b6a5374d3233042261"
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://test.remote.example.com/path/540 HTTP/1.1
+GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: custom.set.host.name
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://test.remote.example.com/path/540 HTTP/1.1
+GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: custom.set.host.name
-Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/540", response="ca507dcf189196b6a5374d3233042261"
+Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="/path/%TESTNUMBER", response="ca507dcf189196b6a5374d3233042261"
 Accept: */*
 Proxy-Connection: Keep-Alive
 

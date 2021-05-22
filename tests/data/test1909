@@ -1,0 +1,64 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+retry
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK swsclose swsbounce
+Content-Length: 5
+Connection: close
+
+bbb
+</data>
+<data1>
+HTTP/1.1 200 OK
+Content-Length: 5
+Connection: close
+
+data
+</data1>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP GET --retry-all-errors to overcome partial transfer
+ </name>
+ <command option="no-output,no-include">
+--retry 1 --retry-all-errors -o log/outfile%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+<file1 name="log/outfile%TESTNUMBER">
+data
+</file1>
+
+</verify>
+</testcase>

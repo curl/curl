@@ -11,12 +11,12 @@ HTTP GET
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: inline; filename="name1312;weird"
+Content-Disposition: inline; filename="name%TESTNUMBER;weird"
 
 12345
 </data>
@@ -40,23 +40,21 @@ HTTP GET with -J, Content-Disposition and ; in filename
 CURL_TESTDIR=%PWD/log
 </setenv>
 <command option="no-output,no-include">
-%HOSTIP:%HTTPPORT/1312 -J -O
+%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1312 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/name1312;weird">
+<file name="log/name%TESTNUMBER;weird">
 12345
 </file>
 

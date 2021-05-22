@@ -28,15 +28,18 @@ http
 HTTP proxy CONNECT with custom User-Agent header
  </name>
  <command>
-http://test.remote.example.com.287:%HTTPPORT/path/287 -H "User-Agent: looser/2015" --proxy http://%HOSTIP:%HTTPPORT --proxytunnel --proxy-header "User-Agent: looser/2007"
+http://test.remote.example.com.%TESTNUMBER:%HTTPPORT/path/%TESTNUMBER -H "User-Agent: looser/2015" --proxy http://%HOSTIP:%HTTPPORT --proxytunnel --proxy-header "User-Agent: looser/2007"
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-CONNECT test.remote.example.com.287:%HTTPPORT HTTP/1.1
-Host: test.remote.example.com.287:%HTTPPORT
+CONNECT test.remote.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: test.remote.example.com.%TESTNUMBER:%HTTPPORT
 Proxy-Connection: Keep-Alive
 User-Agent: looser/2007
 

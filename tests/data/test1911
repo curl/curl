@@ -1,0 +1,29 @@
+<testcase>
+<info>
+<keywords>
+curl_easy_option
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<name>
+verify that curl_easy_setopt() rejects too long string inputs
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

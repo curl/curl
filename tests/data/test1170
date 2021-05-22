@@ -48,19 +48,17 @@ http
 HTTP GET transfer-encoding with removed Connection:
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1170 --tr-encoding -H "Connection:"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --tr-encoding -H "Connection:"
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1170 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Connection: TE
 TE: gzip

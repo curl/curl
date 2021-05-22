@@ -12,7 +12,7 @@ If-Modified-Since
 # Server-side
 <reply>
 <data nocheck="yes">
-HTTP/1.1 503 Error
+HTTP/1.1 429 Too Many Requests
 Date: Thu, 11 Jul 2019 02:26:59 GMT
 Server: test-server/swsclose
 Retry-After: Thu, 11 Jul 2024 02:26:59 GMT
@@ -28,19 +28,16 @@ http
 HTTP Retry-After header parsing using a date
 </name>
 <tool>
-lib1596
+lib%TESTNUMBER
 </tool>
 <command>
-http://%HOSTIP:%HTTPPORT/1596
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1596 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

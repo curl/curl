@@ -29,12 +29,15 @@ http
 HTTP resume request over proxy with auth without server supporting it
  </name>
  <command option="no-output">
--x http://%HOSTIP:%HTTPPORT http://%HOSTIP:%HTTPPORT/want/256 -C - --no-include -o log/fewl256.txt -U daniel:stenberg
+-x http://%HOSTIP:%HTTPPORT http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C - --no-include -o log/fewl%TESTNUMBER.txt -U daniel:stenberg
 </command>
-<file name="log/fewl256.txt">
+<file name="log/fewl%TESTNUMBER.txt">
 This text is here to simulate a partly downloaded file to resume
 download on.
 </file>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
@@ -42,21 +45,19 @@ download on.
 <errorcode>
 33
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://%HOSTIP:%HTTPPORT/want/256 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: Basic ZGFuaWVsOnN0ZW5iZXJn
 Range: bytes=78-
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 </protocol>
 
 # the download target file must remain untouched
-<file name="log/fewl256.txt">
+<file name="log/fewl%TESTNUMBER.txt">
 This text is here to simulate a partly downloaded file to resume
 download on.
 </file>

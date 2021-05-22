@@ -169,7 +169,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/2026 digest basic
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER digest basic
 </command>
 <precheck>
 chkhostname curlhost
@@ -178,39 +178,36 @@ chkhostname curlhost
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /20260100 HTTP/1.1
+GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /20260100 HTTP/1.1
+GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="1", uri="/20260100", response="5f992a2e761ab926256419f7c685f85b"
+Authorization: Digest username="testuser", realm="testrealm", nonce="1", uri="/%TESTNUMBER0100", response="5f992a2e761ab926256419f7c685f85b"
 Accept: */*
 
-GET /20260200 HTTP/1.1
+GET /%TESTNUMBER0200 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Accept: */*
 
-GET /20260300 HTTP/1.1
+GET /%TESTNUMBER0300 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /20260300 HTTP/1.1
+GET /%TESTNUMBER0300 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="3", uri="/20260300", response="132242e602882251929be93228c830ae"
+Authorization: Digest username="testuser", realm="testrealm", nonce="3", uri="/%TESTNUMBER0300", response="132242e602882251929be93228c830ae"
 Accept: */*
 
-GET /20260400 HTTP/1.1
+GET /%TESTNUMBER0400 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
 Accept: */*
 
-GET /20260500 HTTP/1.1
+GET /%TESTNUMBER0500 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Accept: */*

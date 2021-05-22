@@ -37,6 +37,29 @@ accesses the target URL through the proxy.
 The list of host names can also be include numerical IP addresses, and IPv6
 versions should then be given without enclosing brackets.
 
+IPv6 numerical addresses are compared as strings, so they will only match if
+the representations are the same: "::1" is the same as "::0:1" but they don't
+match.
+.IP "CURL_SSL_BACKEND <TLS backend>"
+If curl was built with support for "MultiSSL", meaning that it has built-in
+support for more than one TLS backend, this environment variable can be set to
+the case insensitive name of the particular backend to use when curl is
+invoked. Setting a name that isn't a built-in alternative will make curl
+stay with the default.
+
+SSL backend names (case-insensitive): bearssl, gnutls, gskit, mbedtls,
+mesalink, nss, openssl, rustls, schannel, secure-transport, wolfssl
+.IP "QLOGDIR <directory name>"
+If curl was built with HTTP/3 support, setting this environment variable to a
+local directory will make curl produce qlogs in that directory, using file
+names named after the destination connection id (in hex). Do note that these
+files can become rather large. Works with both QUIC backends.
+.IP "SSLKEYLOGFILE <file name>"
+If you set this environment variable to a file name, curl will store TLS
+secrets from its connections in that file when invoked to enable you to
+analyze the TLS traffic in real time using network analyzing tools such as
+Wireshark. This works with the following TLS backends: OpenSSL, libressl,
+BoringSSL, GnuTLS, NSS and wolfSSL.
 .SH "PROXY PROTOCOL PREFIXES"
 Since curl version 7.21.7, the proxy string may be specified with a
 protocol:// prefix to specify alternative proxy protocols.
@@ -48,7 +71,7 @@ The supported proxy protocol prefixes are as follows:
 .IP "http://"
 Makes it use it as an HTTP proxy. The default if no scheme prefix is used.
 .IP "https://"
-Makes it treated as an \fBHTTPS\fP proxy.
+Makes it treated as an **HTTPS** proxy.
 .IP "socks4://"
 Makes it the equivalent of --socks4
 .IP "socks4a://"
@@ -243,6 +266,16 @@ SSL public key does not matched pinned public key
 Invalid SSL certificate status.
 .IP 92
 Stream error in HTTP/2 framing layer.
+.IP 93
+An API function was called from inside a callback.
+.IP 94
+An authentication function returned an error.
+.IP 95
+A problem was detected in the HTTP/3 layer. This is somewhat generic and can
+be one out of several problems, see the error message for details.
+.IP 96
+QUIC connection error. This error may be caused by an SSL library error. QUIC
+is the protocol used for HTTP/3 transfers.
 .IP XX
 More error codes will appear here in future releases. The existing ones
 are meant to never change.
@@ -250,7 +283,7 @@ are meant to never change.
 Daniel Stenberg is the main author, but the whole list of contributors is
 found in the separate THANKS file.
 .SH WWW
-https://curl.haxx.se
+https://curl.se
 .SH "SEE ALSO"
 .BR ftp (1),
 .BR wget (1)

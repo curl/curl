@@ -179,19 +179,17 @@ http
 HTTP GET deflate transfer-encoded content
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1123 --tr-encoding
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --tr-encoding
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1123 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Connection: TE
 TE: gzip

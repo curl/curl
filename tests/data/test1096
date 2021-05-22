@@ -11,6 +11,7 @@ FAILURE
 <reply>
 <servercmd>
 REPLY RETR 550 no such file!
+REPLY SIZE 500 command not understood
 </servercmd>
 </reply>
 
@@ -23,7 +24,7 @@ ftp
 Two FTP downloads, with failed RETR but re-used control connection
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/dir/1096 ftp://%HOSTIP:%FTPPORT/dir/1096
+ftp://%HOSTIP:%FTPPORT/dir/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/dir/%TESTNUMBER
 </command>
 </client>
 
@@ -39,11 +40,11 @@ PWD
 CWD dir
 EPSV
 TYPE I
-SIZE 1096
-RETR 1096
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 EPSV
-SIZE 1096
-RETR 1096
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

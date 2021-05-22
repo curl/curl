@@ -19,12 +19,8 @@ unittest
  <name>
 internal hash create/destroy testing
  </name>
-<tool>
-unit1305
-</tool>
 <command>
-1305
+%TESTNUMBER
 </command>
 </client>
-
 </testcase>

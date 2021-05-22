@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_SSLKEY \- specify private keyfile for TLS and SSL client cert
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLKEY, char *keyfile);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string as parameter. The string should be
+Pass a pointer to a null-terminated string as parameter. The string should be
 the file name of your private key. The default format is "PEM" and can be
 changed with \fICURLOPT_SSLKEYTYPE(3)\fP.
 

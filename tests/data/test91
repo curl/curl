@@ -73,6 +73,7 @@ Finally, this is the real page!
 <client>
 <features>
 NTLM
+SSL
 !SSPI
 debug
 </features>
@@ -89,7 +90,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/91 --anyauth -u mydomain\\myself:secret
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --anyauth -u mydomain\\myself:secret
 </command>
 <precheck>
 chkhostname curlhost
@@ -98,25 +99,22 @@ chkhostname curlhost
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /91 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /91 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /91 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAgACABwAAAABgAGAHgAAAAIAAgAfgAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAAKBS3rdGYZEGsqW8otYHWXWBxC5mCuFmYm15ZG9tYWlubXlzZWxmY3VybGhvc3Q=
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAgACABwAAAABgAGAHgAAAAIAAgAfgAAAAAAAAAAAAAAhoIBAMIyJpR5mHpg2FZha5kRaFZ9436GAxPu0C5llxexSQ5QzVkiLSfkcpVyRgCXXqR+Am15ZG9tYWlubXlzZWxmY3VybGhvc3Q=
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

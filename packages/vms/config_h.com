@@ -28,7 +28,7 @@ $!
 $! This procedure may not guess the options correctly for all architectures,
 $! and is a work in progress.
 $!
-$! Copyright 2011, John Malmberg
+$! Copyright 2011 - 2021, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -800,28 +800,6 @@ $	then
 $	    write tf "#ifndef ''key2'"
 $	    write tf "#define ''key2' 1"
 $	    write tf "#endif"
-$	    goto cfgh_in_loop1
-$	endif
-$!
-$	if key2 .eqs. "HAVE_ENGINE_LOAD_BUILTIN_ENGINES"
-$	then
-$	    if f$search("''ssl_header_dir'engine.h") .nes. ""
-$	    then
-$		search_key = key2 - "HAVE_"
-$		define/user sys$output nl:
-$		define/user sys$error nl:
-$		search/output=nl: 'ssl_header_dir'engine.h 'search_key'
-$		if '$severity' .eq. 1
-$		then
-$		    write tf "#ifndef ''key2'"
-$		    write tf "#define ''key2' 1"
-$		    write tf "#endif"
-$		else
-$		    write tf "/* #undef ''key2' */"
-$		endif
-$	    else
-$		write tf "/* #undef ''key2' */"
-$	    endif
 $	    goto cfgh_in_loop1
 $	endif
 $!
@@ -1877,16 +1855,6 @@ $	    write tf "#endif"
 $	    goto cfgh_in_loop1
 $	endif
 $!
-$!	Process RETSIGTYPE directive
-$!----------------------------------
-$	if key2 .eqs. "RETSIGTYPE"
-$	then
-$	    write tf "#ifndef RETSIGTYPE"
-$	    write tf "#define RETSIGTYPE void"
-$	    write tf "#endif"
-$	    goto cfgh_in_loop1
-$	endif
-$!
 $!	Process STDC_HEADERS (SAMBA!)
 $!---------------------------
 $	if key2 .eqs. "STDC_HEADERS"
@@ -2151,7 +2119,7 @@ $!
 $write tf " /* Allow compiler builtins */"
 $write tf "/*-------------------------*/"
 $write tf "#ifdef __DECC_VER"
-$write tf "#include <non_existant_dir:builtins.h>"
+$write tf "#include <non_existent_dir:builtins.h>"
 $write tf "#endif"
 $!
 $write tf ""

@@ -10,7 +10,7 @@ HTTP GET
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
@@ -30,33 +30,31 @@ http
 HTTP GET -o fname without Content-Disposition, -D file
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1364 -o log/outfile1364 -D log/heads1364
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/outfile%TESTNUMBER -D log/heads%TESTNUMBER
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/1364
+perl %SRCDIR/libtest/notexists.pl log/%TESTNUMBER
 </postcheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1364 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
-<file1 name="log/outfile1364">
+<file1 name="log/outfile%TESTNUMBER">
 12345
 </file1>
 
-<file2 name="log/heads1364">
+<file2 name="log/heads%TESTNUMBER">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
@@ -64,7 +62,7 @@ Content-Type: text/html
 
 </file2>
 
-<file3 name="log/stdout1364">
+<file3 name="log/stdout%TESTNUMBER">
 </file3>
 
 </verify>

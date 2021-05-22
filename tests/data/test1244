@@ -32,11 +32,14 @@ wrong
 http
 https
 </server>
- <name>
+<features>
+proxy
+</features>
+<name>
 HTTP GET same URL - different proxy ports
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/1244 -x %HOSTIP:%HTTPPORT --next http://%HOSTIP:%HTTPPORT/124400001 -x %HOSTIP:%HTTPSPORT
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -x %HOSTIP:%HTTPPORT --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER00001 -x %HOSTIP:%HTTPSPORT
 </command>
 </client>
 
@@ -47,12 +50,10 @@ http://%HOSTIP:%HTTPPORT/1244 -x %HOSTIP:%HTTPPORT --next http://%HOSTIP:%HTTPPO
 <errorcode>
 56
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://%HOSTIP:%HTTPPORT/1244 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

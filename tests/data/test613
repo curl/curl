@@ -10,8 +10,6 @@ directory
 # Server-side
 <reply>
 <datacheck>
-d?????????    N U         U               N ???  N NN:NN .
-d?????????    N U         U               N ???  N NN:NN ..
 d?????????    N U         U               N ???  N NN:NN asubdir
 -rw?rw?rw?    1 U         U              37 Jan  1  2000 plainfile.txt
 -r-?r-?r-?    1 U         U              47 Dec 31  2000 rofile.txt
@@ -25,16 +23,16 @@ d?????????    N U         U               N ???  N NN:NN asubdir
 sftp
 </server>
 <precheck>
-perl %SRCDIR/libtest/test613.pl prepare %PWD/log/test613.dir
+perl %SRCDIR/libtest/test%TESTNUMBER.pl prepare %PWD/log/test%TESTNUMBER.dir
 </precheck>
  <name>
 SFTP directory retrieval
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/test613.dir/ --insecure
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/test%TESTNUMBER.dir/ --insecure
 </command>
 <postcheck>
-perl %SRCDIR/libtest/test613.pl postprocess %PWD/log/test613.dir %PWD/log/curl613.out
+perl %SRCDIR/libtest/test%TESTNUMBER.pl postprocess %PWD/log/test%TESTNUMBER.dir %PWD/log/curl%TESTNUMBER.out
 </postcheck>
 </client>
 

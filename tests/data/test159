@@ -43,6 +43,7 @@ This is not the real page either!
 <client>
 <features>
 NTLM
+SSL
 !SSPI
 debug
 </features>
@@ -59,7 +60,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/159 -u testuser:testpass --ntlm -0
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --ntlm -0
 </command>
 <precheck>
 chkhostname curlhost
@@ -68,14 +69,11 @@ chkhostname curlhost
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /159 HTTP/1.0
+GET /%TESTNUMBER HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -10,7 +10,7 @@ cookies
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
@@ -30,8 +30,11 @@ moo
 
 # Client-side
 <client>
-<file name="log/jar329.txt" mode="text">
+<file name="log/jar%TESTNUMBER.txt" mode="text">
 .host.foo.com	TRUE	/we/want/	FALSE	2147483647	test	no
+</file>
+<file name="log/jar%TESTNUMBER-2.txt" mode="text">
+.host.foo.com	TRUE	/we/want/	FALSE	2147483647	tester	yes
 </file>
 <server>
 http
@@ -46,24 +49,24 @@ HTTP cookie with Max-Age=0
 TZ=GMT
 </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/329 -b log/jar329.txt -H "Host: host.foo.com" http://%HOSTIP:%HTTPPORT/we/want/3290002
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b log/jar%TESTNUMBER.txt -b log/jar%TESTNUMBER-2.txt -H "Host: host.foo.com" http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER0002
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /we/want/329 HTTP/1.1
+GET /we/want/%TESTNUMBER HTTP/1.1
 Host: host.foo.com
+User-Agent: curl/%VERSION
 Accept: */*
-Cookie: test=no
+Cookie: tester=yes; test=no
 
-GET /we/want/3290002 HTTP/1.1
+GET /we/want/%TESTNUMBER0002 HTTP/1.1
 Host: host.foo.com
+User-Agent: curl/%VERSION
 Accept: */*
+Cookie: tester=yes
 
 </protocol>
 </verify>

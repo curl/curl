@@ -11,7 +11,7 @@ HTTP proxy
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
@@ -33,18 +33,19 @@ HTTP with proxy and URL with ? and no slash separator
 # for normal server use, and we need to make sure it gets converted to
 # RFC style even for proxies
  <command>
--x %HOSTIP:%HTTPPORT http://we.want.that.site.com.1214?moo=foo
+-x %HOSTIP:%HTTPPORT http://we.want.that.site.com.%TESTNUMBER?moo=foo
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://we.want.that.site.com.1214/?moo=foo HTTP/1.1
-Host: we.want.that.site.com.1214
+GET http://we.want.that.site.com.%TESTNUMBER/?moo=foo HTTP/1.1
+Host: we.want.that.site.com.%TESTNUMBER
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

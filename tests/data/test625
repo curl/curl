@@ -22,12 +22,12 @@ sftp
 SFTP put with --ftp-create-dirs twice
  </name>
  <command>
---ftp-create-dirs --key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file625.txt sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/test625.a/upload.625 -T log/file625.txt sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/test625.b/upload.625 --insecure
+--ftp-create-dirs --key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/test%TESTNUMBER.a/upload.%TESTNUMBER -T log/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/test%TESTNUMBER.b/upload.%TESTNUMBER --insecure
 </command>
 <postcheck>
-perl %SRCDIR/libtest/test610.pl move %PWD/log/test625.a/upload.625 %PWD/log/upload.625 rmdir %PWD/log/test625.a rm %PWD/log/test625.b/upload.625 rmdir %PWD/log/test625.b
+perl %SRCDIR/libtest/test610.pl move %PWD/log/test%TESTNUMBER.a/upload.%TESTNUMBER %PWD/log/upload.%TESTNUMBER rmdir %PWD/log/test%TESTNUMBER.a rm %PWD/log/test%TESTNUMBER.b/upload.%TESTNUMBER rmdir %PWD/log/test%TESTNUMBER.b
 </postcheck>
-<file name="log/file625.txt">
+<file name="log/file%TESTNUMBER.txt">
 Test data
 for ssh upload test
 </file>

@@ -8,11 +8,11 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2014, Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
- * Copyright (C) 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -193,7 +193,6 @@ struct smb_nt_create_response {
   unsigned int ext_file_attributes;
   curl_off_t allocation_size;
   curl_off_t end_of_file;
-
 } PACK;
 
 struct smb_read {
@@ -244,16 +243,13 @@ struct smb_tree_disconnect {
 
 #endif /* BUILDING_CURL_SMB_C */
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM) && \
-    (CURL_SIZEOF_CURL_OFF_T > 4)
-
-#if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
+#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
+    (SIZEOF_CURL_OFF_T > 4)
 
 extern const struct Curl_handler Curl_handler_smb;
 extern const struct Curl_handler Curl_handler_smbs;
 
-#endif /* !USE_WINDOWS_SSPI || USE_WIN32_CRYPTO */
-
-#endif /* CURL_DISABLE_SMB && USE_NTLM && CURL_SIZEOF_CURL_OFF_T > 4 */
+#endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE &&
+          SIZEOF_CURL_OFF_T > 4 */
 
 #endif /* HEADER_CURL_SMB_H */

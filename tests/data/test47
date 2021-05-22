@@ -11,7 +11,7 @@ HTTP/1.0
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 
 -foo- within foo -!foo-
@@ -28,19 +28,17 @@ http
 simple HTTP 1.0 GET
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/47 -0
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -0
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /47 HTTP/1.0
+GET /%TESTNUMBER HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

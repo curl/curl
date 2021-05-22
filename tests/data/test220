@@ -47,24 +47,30 @@ http
 HTTP GET gzip compressed content
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/220 --compressed
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <strippart>
+%if hyper
+s/^Accept-Encoding: .*/Accept-Encoding: xxx/
+%else
 s/^Accept-Encoding: .*/Accept-Encoding: xxx/
+%endif
 </strippart>
 <protocol>
-GET /220 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
+%if hyper
 Accept-Encoding: xxx
+%else
+Accept-Encoding: xxx
+%endif
 
 </protocol>
 </verify>

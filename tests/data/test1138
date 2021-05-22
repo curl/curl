@@ -11,28 +11,28 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 302 OK swsclose
-Location: ../moo.html/?name=آغاز-سم-زدایی-از-بازار-پول&testcase=/11380002    
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Location: ../moo.html/?name=آغاز-سم-زدایی-از-بازار-پول&testcase=/%TESTNUMBER0002    
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 </data>
 <data2>
 HTTP/1.1 200 OK swsclose
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 body
 </data2>
 <datacheck>
 HTTP/1.1 302 OK swsclose
-Location: ../moo.html/?name=آغاز-سم-زدایی-از-بازار-پول&testcase=/11380002    
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Location: ../moo.html/?name=آغاز-سم-زدایی-از-بازار-پول&testcase=/%TESTNUMBER0002    
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 HTTP/1.1 200 OK swsclose
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 body
@@ -49,24 +49,22 @@ http
 HTTP redirect with UTF-8 characters
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/are/all/twits/1138 -L
+http://%HOSTIP:%HTTPPORT/we/are/all/twits/%TESTNUMBER -L
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /we/are/all/twits/1138 HTTP/1.1
+GET /we/are/all/twits/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /we/are/all/moo.html/?name=%d8%a2%d8%ba%d8%a7%d8%b2-%d8%b3%d9%85-%d8%b2%d8%af%d8%a7%db%8c%db%8c-%d8%a7%d8%b2-%d8%a8%d8%a7%d8%b2%d8%a7%d8%b1-%d9%be%d9%88%d9%84&testcase=/11380002 HTTP/1.1
-User-Agent: curl/7.10 (i686-pc-linux-gnu) libcurl/7.10 OpenSSL/0.9.6c ipv6 zlib/1.1.3
+GET /we/are/all/moo.html/?name=%d8%a2%d8%ba%d8%a7%d8%b2-%d8%b3%d9%85-%d8%b2%d8%af%d8%a7%db%8c%db%8c-%d8%a7%d8%b2-%d8%a8%d8%a7%d8%b2%d8%a7%d8%b1-%d9%be%d9%88%d9%84&testcase=/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

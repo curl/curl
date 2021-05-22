@@ -10,9 +10,9 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 301 This is a weirdo text message swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: data/2760002.txt?coolsite=http://anotherurl/?a_second/2760002
+Location: data/%TESTNUMBER0002.txt?coolsite=http://anotherurl/?a_second/%TESTNUMBER0002
 Connection: close
 
 This server reply is for testing a simple Location: following
@@ -20,7 +20,7 @@ This server reply is for testing a simple Location: following
 </data>
 <data2>
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -29,13 +29,13 @@ If this is received, the location following worked
 </data2>
 <datacheck>
 HTTP/1.1 301 This is a weirdo text message swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: data/2760002.txt?coolsite=http://anotherurl/?a_second/2760002
+Location: data/%TESTNUMBER0002.txt?coolsite=http://anotherurl/?a_second/%TESTNUMBER0002
 Connection: close
 
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -53,22 +53,21 @@ http
 HTTP Location: following with multiple question marks in URLs
  </name>
  <command>
-"http://%HOSTIP:%HTTPPORT/want?uri=http://anything/276?secondq/276" -L
+"http://%HOSTIP:%HTTPPORT/want?uri=http://anything/%TESTNUMBER?secondq/%TESTNUMBER" -L
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /want?uri=http://anything/276?secondq/276 HTTP/1.1
+GET /want?uri=http://anything/%TESTNUMBER?secondq/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /data/2760002.txt?coolsite=http://anotherurl/?a_second/2760002 HTTP/1.1
+GET /data/%TESTNUMBER0002.txt?coolsite=http://anotherurl/?a_second/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

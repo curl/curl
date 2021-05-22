@@ -18,7 +18,7 @@ multi
 sftp
 </server>
 <tool>
-lib583
+lib%TESTNUMBER
 </tool>
  <name>
 SFTP with multi interface, remove handle early
@@ -29,7 +29,7 @@ SFTP with multi interface, remove handle early
 # name resolve will cause it to return rather quickly and thus we could trigger
 # the problem we're looking to verify.
  <command>
-sftp://localhost:%SSHPORT%POSIX_PWD/log/upload583.txt %USER:
+sftp://localhost:%SSHPORT%SSH_PWD/log/upload%TESTNUMBER.txt %USER:
 </command>
 </client>
 

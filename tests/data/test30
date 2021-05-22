@@ -21,18 +21,16 @@ http
 HTTP with no data in server reply
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/30
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /want/30 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

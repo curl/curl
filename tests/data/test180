@@ -10,7 +10,7 @@ HTTP/1.0
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 
 blablabla
@@ -27,9 +27,9 @@ http
 HTTP 1.0 PUT
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/180 -T log/test180.txt --http1.0
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T log/test%TESTNUMBER.txt --http1.0
 </command>
-<file name="log/test180.txt">
+<file name="log/test%TESTNUMBER.txt">
 Weird
      file
          to
@@ -44,12 +44,10 @@ the
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-PUT /we/want/180 HTTP/1.0
+PUT /we/want/%TESTNUMBER HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 78
 

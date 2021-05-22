@@ -11,12 +11,12 @@ HTTP GET
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1341; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 12345
 </data>
@@ -40,37 +40,35 @@ HTTP GET with -O -J and Content-Disposition, -D stdout
 CURL_TESTDIR=%PWD/log
 </setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1341 -J -O -D -
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O -D - -w "curl: Saved to filename %{filename_effective}\n"
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1341 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
-<file1 name="log/name1341">
+<file1 name="log/name%TESTNUMBER">
 12345
 </file1>
 
-<file2 name="log/stdout1341">
+<file2 name="log/stdout%TESTNUMBER">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1341; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
-curl: Saved to filename '%PWD/log/name1341'
+curl: Saved to filename %PWD/log/name%TESTNUMBER
 </file2>
 
 </verify>

@@ -13,7 +13,7 @@ followlocation
 <reply>
 <data nocheck="yes">
 HTTP/1.1 301 This is a weirdo text message swsclose
-Location: data/10810099.txt?coolsite=yes
+Location: data/%TESTNUMBER0099.txt?coolsite=yes
 Content-Length: 62
 Connection: close
 
@@ -21,7 +21,7 @@ This server reply is for testing a simple Location: following
 </data>
 <data2 nocheck="yes">
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 41
 
@@ -38,35 +38,34 @@ http
 HTTP no Location: on second URL 'redirect_url' check
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/our/1081 http://%HOSTIP:%HTTPPORT/we/want/our/10810002 -w '%{redirect_url}\n'
+http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER0002 -w '%{redirect_url}\n'
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /we/want/our/1081 HTTP/1.1
+GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /we/want/our/10810002 HTTP/1.1
+GET /we/want/our/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 <stdout>
 HTTP/1.1 301 This is a weirdo text message swsclose
-Location: data/10810099.txt?coolsite=yes
+Location: data/%TESTNUMBER0099.txt?coolsite=yes
 Content-Length: 62
 Connection: close
 
 This server reply is for testing a simple Location: following
-http://%HOSTIP:%HTTPPORT/we/want/our/data/10810099.txt?coolsite=yes
+http://%HOSTIP:%HTTPPORT/we/want/our/data/%TESTNUMBER0099.txt?coolsite=yes
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 41
 

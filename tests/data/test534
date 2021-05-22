@@ -16,7 +16,7 @@ non-existing host
 
 <servercmd>
 REPLY RETR 550 the file doesn't exist
-REPLY SIZE 550 Can't check for file existence
+REPLY SIZE 500 Can't check for file existence
 </servercmd>
 </reply>
 
@@ -32,7 +32,7 @@ lib533
 FTP RETR twice using multi: non-existing host and non-existing file
  </name>
  <command>
-ftp://non-existing-host.haxx.se/path/534 ftp://%HOSTIP:%FTPPORT/path/534
+ftp://non-existing-host.haxx.se/path/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
 </command>
 </client>
 
@@ -45,8 +45,8 @@ PWD
 CWD path
 EPSV
 TYPE I
-SIZE 534
-RETR 534
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

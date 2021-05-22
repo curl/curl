@@ -21,7 +21,7 @@ ftp
 FTP getting bad port in response to EPSV
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/238
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 

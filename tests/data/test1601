@@ -18,9 +18,5 @@ unittest
  <name>
 MD5 unit tests
  </name>
-<tool>
-unit1601
-</tool>
 </client>
-
 </testcase>

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,27 +27,35 @@
 
 #if defined(WIN32) && !defined(MSDOS)
 
+/* set in win32_init() */
+extern LARGE_INTEGER tool_freq;
+extern bool tool_isVistaOrGreater;
+
+/* In case of bug fix this function has a counterpart in timeval.c */
 struct timeval tvnow(void)
 {
-  /*
-  ** GetTickCount() is available on _all_ Windows versions from W95 up
-  ** to nowadays. Returns milliseconds elapsed since last system boot,
-  ** increases monotonically and wraps once 49.7 days have elapsed.
-  **
-  ** GetTickCount64() is available on Windows version from Windows Vista
-  ** and Windows Server 2008 up to nowadays. The resolution of the
-  ** function is limited to the resolution of the system timer, which
-  ** is typically in the range of 10 milliseconds to 16 milliseconds.
-  */
   struct timeval now;
-#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600) && \
-    (!defined(__MINGW32__) || defined(__MINGW64_VERSION_MAJOR))
-  ULONGLONG milliseconds = GetTickCount64();
-#else
-  DWORD milliseconds = GetTickCount();
+  if(tool_isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
+    LARGE_INTEGER count;
+    QueryPerformanceCounter(&count);
+    now.tv_sec = (long)(count.QuadPart / tool_freq.QuadPart);
+    now.tv_usec = (long)((count.QuadPart % tool_freq.QuadPart) * 1000000 /
+                         tool_freq.QuadPart);
+  }
+  else {
+    /* Disable /analyze warning that GetTickCount64 is preferred  */
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:28159)
 #endif
-  now.tv_sec = (long)(milliseconds / 1000);
-  now.tv_usec = (long)((milliseconds % 1000) * 1000);
+    DWORD milliseconds = GetTickCount();
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
+
+    now.tv_sec = (long)(milliseconds / 1000);
+    now.tv_usec = (long)((milliseconds % 1000) * 1000);
+  }
   return now;
 }
 
@@ -66,7 +74,7 @@ struct timeval tvnow(void)
   struct timespec tsnow;
   if(0 == clock_gettime(CLOCK_MONOTONIC, &tsnow)) {
     now.tv_sec = tsnow.tv_sec;
-    now.tv_usec = tsnow.tv_nsec / 1000;
+    now.tv_usec = (int)(tsnow.tv_nsec / 1000);
   }
   /*
   ** Even when the configure process has truly detected monotonic clock

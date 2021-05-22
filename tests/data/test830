@@ -33,7 +33,7 @@ crypto
 IMAP CRAM-MD5 graceful cancellation
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/830/;MAILINDEX=1' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 

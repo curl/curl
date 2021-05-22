@@ -20,7 +20,7 @@ none
 Try a non-boolean command line option with --no-
  </name>
  <command>
---no-proxy "hey" http://%HOSTIP:%HTTPPORT/333
+--no-proxy "hey" http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
 </command>
 </client>
 

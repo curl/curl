@@ -41,23 +41,22 @@ http
 HTTP Basic authorization, then without authorization
 </name>
 <command option="no-output,no-include">
--u testuser:testpass http://%HOSTIP:%HTTPPORT/20400100 --next --no-basic http://%HOSTIP:%HTTPPORT/20400200
+-u testuser:testpass http://%HOSTIP:%HTTPPORT/%TESTNUMBER0100 --next --no-basic http://%HOSTIP:%HTTPPORT/%TESTNUMBER0200
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /20400100 HTTP/1.1
+GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /20400200 HTTP/1.1
+GET /%TESTNUMBER0200 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

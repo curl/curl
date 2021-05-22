@@ -10,14 +10,14 @@ HTTP GET
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 
 surprise
 </data>
 <data1>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 surprise2
@@ -37,7 +37,7 @@ http
 HTTP with delayed close, conn reuse, connection reset and retry
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/160 http://%HOSTIP:%HTTPPORT/wantmore/1600001
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/wantmore/%TESTNUMBER0001
 </command>
 </client>
 
@@ -45,27 +45,26 @@ http://%HOSTIP:%HTTPPORT/want/160 http://%HOSTIP:%HTTPPORT/wantmore/1600001
 <verify>
 <stdout>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 
 surprise
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 surprise2
 </stdout>
 
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /want/160 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /wantmore/1600001 HTTP/1.1
+GET /wantmore/%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

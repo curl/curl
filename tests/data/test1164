@@ -29,19 +29,17 @@ http
 HTTP/0.9 GET and all zeroes
  </name>
  <command option="force-output">
-http://%HOSTIP:%HTTPPORT/1164 -w '%{size_download}\n' --http0.9
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{size_download}\n' --http0.9
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1164 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

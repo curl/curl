@@ -1,11 +1,33 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2009 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
 set(TARGET_LABEL_PREFIX "Test server ")
 
 if(MSVC)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4127 /wd4306")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4306")
 endif()
 
 function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
-  add_executable(${TEST_NAME} ${ARGN})
+  add_executable(${TEST_NAME} EXCLUDE_FROM_ALL ${ARGN})
+  add_dependencies(testdeps ${TEST_NAME})
   string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)
 
   include_directories(

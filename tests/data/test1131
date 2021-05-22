@@ -12,7 +12,7 @@ Expect: 100-continue
 <reply>
 <data nocheck="yes">
 HTTP/1.1 400 NOOOOOOOOO
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 9
 Content-Type: text/html
@@ -22,7 +22,7 @@ FAILURE1
 
 <data1>
 HTTP/1.1 400 NEITHER
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 9
 Content-Type: text/html
@@ -41,7 +41,7 @@ skip: 100
 # Client-side
 <client>
 # 100 x 'x'
-<file name="log/file1131">
+<file name="log/file%TESTNUMBER">
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 </file>
 <server>
@@ -51,7 +51,7 @@ http
 HTTP PUT expect 100-continue with a 400
  </name>
  <command option="no-output">
--T log/file1131 http://%HOSTIP:%HTTPPORT/1131 -T log/file1131 http://%HOSTIP:%HTTPPORT/11310001
+-T log/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T log/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
 </client>
 
@@ -60,32 +60,31 @@ HTTP PUT expect 100-continue with a 400
 <verify>
 <stdout>
 HTTP/1.1 400 NOOOOOOOOO
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 9
 Content-Type: text/html
 
 FAILURE1
 HTTP/1.1 400 NEITHER
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 9
 Content-Type: text/html
 
 FAILURE2
 </stdout>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-PUT /1131 HTTP/1.1
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 100
 Expect: 100-continue
 
-PUT /11310001 HTTP/1.1
+PUT /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 100
 Expect: 100-continue

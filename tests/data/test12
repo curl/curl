@@ -36,19 +36,17 @@ http
 HTTP range support
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/12 -r 100-200
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -r 100-200
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /want/12 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=100-200
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

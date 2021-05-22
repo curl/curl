@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -44,7 +44,7 @@ BEGIN
   BEGIN
     BLOCK "040904b0"
     BEGIN
-      VALUE "CompanyName",      "The curl library, https://curl.haxx.se/\0"
+      VALUE "CompanyName",      "The curl library, https://curl.se/\0"
       VALUE "FileDescription",  "libcurl Shared Library\0"
       VALUE "FileVersion",      LIBCURL_VERSION "\0"
       VALUE "InternalName",     "libcurl\0"
@@ -52,7 +52,7 @@ BEGIN
       VALUE "ProductName",      "The curl library\0"
       VALUE "ProductVersion",   LIBCURL_VERSION "\0"
       VALUE "LegalCopyright",   "\xa9 " LIBCURL_COPYRIGHT "\0"  /* a9: Copyright symbol */
-      VALUE "License",          "https://curl.haxx.se/docs/copyright.html\0"
+      VALUE "License",          "https://curl.se/docs/copyright.html\0"
     END
   END
 

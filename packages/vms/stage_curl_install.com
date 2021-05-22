@@ -24,7 +24,7 @@ $!     [usr.share.man.man3]curl*.3
 $!     [usr.share.man.man3]libcurl*.3
 $! Future: A symbolic link to the release notes?
 $!
-$! Copyright 2012, John Malmberg
+$! Copyright 2012 - 2020, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above

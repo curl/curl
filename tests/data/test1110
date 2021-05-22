@@ -27,19 +27,17 @@ http
 HTTP GET with URL that contains a fragment after the query part
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1110?q=foobar#fragment
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER?q=foobar#fragment
 </command>
 </client>
 
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1110?q=foobar HTTP/1.1
+GET /%TESTNUMBER?q=foobar HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

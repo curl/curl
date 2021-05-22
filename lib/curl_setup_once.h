@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,6 +32,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <time.h>
 
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -55,13 +56,6 @@
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#ifdef TIME_WITH_SYS_TIME
-#include <time.h>
-#endif
-#else
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
 #endif
 
 #ifdef WIN32
@@ -330,27 +324,6 @@ struct timeval {
 #include "curl_ctype.h"
 
 /*
- * Macro WHILE_FALSE may be used to build single-iteration do-while loops,
- * avoiding compiler warnings. Mostly intended for other macro definitions.
- */
-
-#define WHILE_FALSE  while(0)
-
-#if defined(_MSC_VER) && !defined(__POCC__)
-#  undef WHILE_FALSE
-#  if (_MSC_VER < 1500)
-#    define WHILE_FALSE  while(1, 0)
-#  else
-#    define WHILE_FALSE \
-__pragma(warning(push)) \
-__pragma(warning(disable:4127)) \
-while(0) \
-__pragma(warning(pop))
-#  endif
-#endif
-
-
-/*
  * Typedef to 'int' if sig_atomic_t is not an available 'typedefed' type.
  */
 
@@ -372,22 +345,13 @@ typedef int sig_atomic_t;
 
 
 /*
- * Default return type for signal handlers.
- */
-
-#ifndef RETSIGTYPE
-#define RETSIGTYPE void
-#endif
-
-
-/*
  * Macro used to include code only in debug builds.
  */
 
 #ifdef DEBUGBUILD
 #define DEBUGF(x) x
 #else
-#define DEBUGF(x) do { } WHILE_FALSE
+#define DEBUGF(x) do { } while(0)
 #endif
 
 
@@ -395,10 +359,11 @@ typedef int sig_atomic_t;
  * Macro used to include assertion code only in debug builds.
  */
 
+#undef DEBUGASSERT
 #if defined(DEBUGBUILD) && defined(HAVE_ASSERT_H)
 #define DEBUGASSERT(x) assert(x)
 #else
-#define DEBUGASSERT(x) do { } WHILE_FALSE
+#define DEBUGASSERT(x) do { } while(0)
 #endif
 
 
@@ -501,6 +466,8 @@ typedef int sig_atomic_t;
 
 #ifdef __VMS
 #define argv_item_t  __char_ptr32
+#elif defined(_UNICODE)
+#define argv_item_t wchar_t *
 #else
 #define argv_item_t  char *
 #endif

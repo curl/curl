@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -46,6 +46,8 @@ UNITTEST_START
   bool protocol_connect = FALSE;
 
   rc = Curl_open(&empty);
+  if(rc)
+    goto unit_test_abort;
   fail_unless(rc == CURLE_OK, "Curl_open() failed");
 
   rc = Curl_connect(empty, &async, &protocol_connect);
@@ -71,10 +73,6 @@ UNITTEST_START
   fail_unless(rc == CURLE_OK,
               "Curl_parse_login_details() failed");
 
-  rc = Curl_disconnect(empty, empty->conn, FALSE);
-  fail_unless(rc == CURLE_OK,
-              "Curl_disconnect() with dead_connection set FALSE failed");
-
   Curl_freeset(empty);
   for(i = (enum dupstring)0; i < STRING_LAST; i++) {
     fail_unless(empty->set.str[i] == NULL,
@@ -83,7 +81,7 @@ UNITTEST_START
 
   Curl_free_request_state(empty);
 
-  rc = Curl_close(empty);
+  rc = Curl_close(&empty);
   fail_unless(rc == CURLE_OK, "Curl_close() failed");
 
 }

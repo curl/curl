@@ -10,7 +10,7 @@ globbing
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
 Connection: close
 
@@ -27,30 +27,31 @@ http
 simple [a-d] globbing
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/[a-d]/1280
+http://%HOSTIP:%HTTPPORT/[a-d]/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /a/1280 HTTP/1.1
+GET /a/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /b/1280 HTTP/1.1
+GET /b/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /c/1280 HTTP/1.1
+GET /c/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /d/1280 HTTP/1.1
+GET /d/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

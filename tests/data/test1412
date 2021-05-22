@@ -94,9 +94,9 @@ crypto
 HTTP GET with --anyauth with two URLs (picking Digest) 
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1412 -u testuser:testpass --anyauth http://%HOSTIP:%HTTPPORT/14120001
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
-<file name="log/put1412">
+<file name="log/put%TESTNUMBER">
 This is data we upload with PUT
 a second line
 line three
@@ -106,29 +106,27 @@ four is the number of lines
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1412 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /1412 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="gimme all yer s3cr3ts", nonce="11223344", uri="/1412", response="0390dbe89e31adca0413d11f91f30e7f"
-User-Agent: curl/7.10.5 (i686-pc-linux-gnu) libcurl/7.10.5 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Authorization: Digest username="testuser", realm="gimme all yer s3cr3ts", nonce="11223344", uri="/%TESTNUMBER", response="0390dbe89e31adca0413d11f91f30e7f"
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /14120001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/7.10.5 (i686-pc-linux-gnu) libcurl/7.10.5 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /14120001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="gimme all yer s3cr3ts", nonce="11223344", uri="/14120001", response="0085df91870374c8bf4e94415e7fbf8e"
-User-Agent: curl/7.10.5 (i686-pc-linux-gnu) libcurl/7.10.5 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Authorization: Digest username="testuser", realm="gimme all yer s3cr3ts", nonce="11223344", uri="/%TESTNUMBER0001", response="0085df91870374c8bf4e94415e7fbf8e"
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

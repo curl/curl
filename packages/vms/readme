@@ -168,8 +168,8 @@ in other ways.  Product files (.EXE, .H, .LIS, .MAP, .OBJ, .OLB, ...)
 should be produced in an architecture-specific subdirectory under this
 directory ([.ALPHA], [.IA64], [.VAX]).
 
-The file curl_gnv_build_steps.txt contains information on buildling using
-the GNV tool kit, building a shared libcurl, and producting a PCSI kit for
+The file curl_gnv_build_steps.txt contains information on building using
+the GNV tool kit, building a shared libcurl, and producing a PCSI kit for
 distribution.  The curl_gnv_build_steps.text is included in the release
 notes file of the PCSI kit.
 
@@ -194,7 +194,7 @@ LDAP and Kerberos installed, you can use the GNV_LINK_CURL.COM file.
 The GNV_LINK_CURL.COM contains information on how to link and run with a newer
 version of HP SSL than what may be install on an Alpha or IA64 based system.
 
-To build the PCSI kit, follow the the instructions in the file
+To build the PCSI kit, follow the instructions in the file
 curl_gnv_build_steps.txt.
 
 Other Notes:
@@ -206,7 +206,7 @@ The libcurl formdata.c module and Curl tools post form now have some
 understanding of VMS file types.  Files will be posted in STREAM_LF format.
 
 The Curl tool now has some understanding of VMS file types and will upload the
-files in STREAM_LF fomat.
+files in STREAM_LF format.
 
 When CURL is uploading a VARIABLE format VMS file, it is less efficient as in
 order to get the file size, it will first read the entire file once, and then

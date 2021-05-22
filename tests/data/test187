@@ -11,9 +11,9 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 301 This is a weirdo text message
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: /root/1870002.txt?coolsite=yes
+Location: /root/%TESTNUMBER0002.txt?coolsite=yes
 Connection: close
 
 This server reply is for testing a simple Location: following
@@ -21,7 +21,7 @@ This server reply is for testing a simple Location: following
 </data>
 <data2>
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -30,13 +30,13 @@ If this is received, the location following worked
 </data2>
 <datacheck>
 HTTP/1.1 301 This is a weirdo text message
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: /root/1870002.txt?coolsite=yes
+Location: /root/%TESTNUMBER0002.txt?coolsite=yes
 Connection: close
 
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -54,22 +54,21 @@ http
 HTTP redirect with bad host name separation and slash in parameters
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT?oh=what-weird=test/187 -L
+http://%HOSTIP:%HTTPPORT?oh=what-weird=test/%TESTNUMBER -L
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /?oh=what-weird=test/187 HTTP/1.1
+GET /?oh=what-weird=test/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /root/1870002.txt?coolsite=yes HTTP/1.1
+GET /root/%TESTNUMBER0002.txt?coolsite=yes HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

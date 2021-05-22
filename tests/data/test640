@@ -23,9 +23,9 @@ sftp
 SFTP --head retrieval
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/file640.txt --insecure --head
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/file%TESTNUMBER.txt --insecure --head
 </command>
-<file name="log/file640.txt">
+<file name="log/file%TESTNUMBER.txt">
 Test data
 for ssh test
 </file>

@@ -11,12 +11,12 @@ HTTP GET
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1370; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 12345
 </data>
@@ -32,42 +32,40 @@ http
 HTTP GET -o fname -J and Content-Disposition, -D file
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1370 -J -o log/outfile1370 -D log/heads1370
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -o log/outfile%TESTNUMBER -D log/heads%TESTNUMBER
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/1370 log/name1370
+perl %SRCDIR/libtest/notexists.pl log/%TESTNUMBER log/name%TESTNUMBER
 </postcheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1370 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
-<file1 name="log/outfile1370">
+<file1 name="log/outfile%TESTNUMBER">
 12345
 </file1>
 
-<file2 name="log/heads1370">
+<file2 name="log/heads%TESTNUMBER">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1370; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 </file2>
 
-<file3 name="log/stdout1370">
+<file3 name="log/stdout%TESTNUMBER">
 </file3>
 
 </verify>

@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_NETRC_FILE \- file name to read .netrc info from
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NETRC_FILE, char *file);
 .SH DESCRIPTION
-Pass a char * as parameter, pointing to a zero terminated string containing
+Pass a char * as parameter, pointing to a null-terminated string containing
 the full path name to the \fIfile\fP you want libcurl to use as .netrc
 file. If this option is omitted, and \fICURLOPT_NETRC(3)\fP is set, libcurl
 will attempt to find a .netrc file in the current user's home

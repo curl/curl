@@ -30,7 +30,7 @@ ftp
 FTP RETR with ACCT
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/228 --ftp-account "one count"
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ftp-account "one count"
 </command>
 </client>
 
@@ -44,8 +44,8 @@ ACCT one count
 PWD
 EPSV
 TYPE I
-SIZE 228
-RETR 228
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

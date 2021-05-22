@@ -28,26 +28,30 @@ other places of the code, just that the names should be logical,
 understandable and be named according to what they're used for. File-local
 functions should be made static. We like lower case names.
 
-See the [INTERNALS](INTERNALS.md) document on how we name non-exported
-library-global symbols.
+See the [INTERNALS](https://curl.se/dev/internals.html#symbols) document on
+how we name non-exported library-global symbols.
 
 ## Indenting
 
 We use only spaces for indentation, never TABs. We use two spaces for each new
 open brace.
 
-    if(something_is_true) {
-      while(second_statement == fine) {
-        moo();
-      }
-    }
+```c
+if(something_is_true) {
+  while(second_statement == fine) {
+    moo();
+  }
+}
+```
 
 ## Comments
 
 Since we write C89 code, **//** comments are not allowed. They weren't
 introduced in the C standard until C99. We use only **/* comments */**.
 
-    /* this is a comment */
+```c
+/* this is a comment */
+```
 
 ## Long lines
 
@@ -69,42 +73,52 @@ In if/while/do/for expressions, we write the open brace on the same line as
 the keyword and we then set the closing brace on the same indentation level as
 the initial keyword. Like this:
 
-    if(age < 40) {
-      /* clearly a youngster */
-    }
+```c
+if(age < 40) {
+  /* clearly a youngster */
+}
+```
 
 You may omit the braces if they would contain only a one-line statement:
 
-    if(!x)
-      continue;
+```c
+if(!x)
+  continue;
+```
 
 For functions the opening brace should be on a separate line:
 
-    int main(int argc, char **argv)
-    {
-      return 1;
-    }
+```c
+int main(int argc, char **argv)
+{
+  return 1;
+}
+```
 
 ## 'else' on the following line
 
 When adding an **else** clause to a conditional expression using braces, we
 add it on a new line after the closing brace. Like this:
 
-    if(age < 40) {
-      /* clearly a youngster */
-    }
-    else {
-      /* probably grumpy */
-    }
+```c
+if(age < 40) {
+  /* clearly a youngster */
+}
+else {
+  /* probably grumpy */
+}
+```
 
 ## No space before parentheses
 
 When writing expressions using if/while/do/for, there shall be no space
 between the keyword and the open parenthesis. Like this:
 
-    while(1) {
-      /* loop forever */
-    }
+```c
+while(1) {
+  /* loop forever */
+}
+```
 
 ## Use boolean conditions
 
@@ -112,40 +126,50 @@ Rather than test a conditional value such as a bool against TRUE or FALSE, a
 pointer against NULL or != NULL and an int against zero or not zero in
 if/while conditions we prefer:
 
-    result = do_something();
-    if(!result) {
-      /* something went wrong */
-      return result;
-    }
+```c
+result = do_something();
+if(!result) {
+  /* something went wrong */
+  return result;
+}
+```
 
 ## No assignments in conditions
 
 To increase readability and reduce complexity of conditionals, we avoid
 assigning variables within if/while conditions. We frown upon this style:
 
-    if((ptr = malloc(100)) == NULL)
-      return NULL;
+```c
+if((ptr = malloc(100)) == NULL)
+  return NULL;
+```
 
 and instead we encourage the above version to be spelled out more clearly:
 
-    ptr = malloc(100);
-    if(!ptr)
-      return NULL;
+```c
+ptr = malloc(100);
+if(!ptr)
+  return NULL;
+```
 
 ## New block on a new line
 
 We never write multiple statements on the same source line, even for very
 short if() conditions.
 
-    if(a)
-      return TRUE;
-    else if(b)
-      return FALSE;
+```c
+if(a)
+  return TRUE;
+else if(b)
+  return FALSE;
+```
 
 and NEVER:
 
-    if(a) return TRUE;
-    else if(b) return FALSE;
+```c
+if(a) return TRUE;
+else if(b) return FALSE;
+```
 
 ## Space around operators
 
@@ -155,33 +179,39 @@ have no space.
 
 Examples:
 
-    bla = func();
-    who = name[0];
-    age += 1;
-    true = !false;
-    size += -2 + 3 * (a + b);
-    ptr->member = a++;
-    struct.field = b--;
-    ptr = &address;
-    contents = *pointer;
-    complement = ~bits;
-    empty = (!*string) ? TRUE : FALSE;
+```c
+bla = func();
+who = name[0];
+age += 1;
+true = !false;
+size += -2 + 3 * (a + b);
+ptr->member = a++;
+struct.field = b--;
+ptr = &address;
+contents = *pointer;
+complement = ~bits;
+empty = (!*string) ? TRUE : FALSE;
+```
 
 ## No parentheses for return values
 
 We use the 'return' statement without extra parentheses around the value:
 
-    int works(void)
-    {
-      return TRUE;
-    }
+```c
+int works(void)
+{
+  return TRUE;
+}
+```
 
 ## Parentheses for sizeof arguments
 
 When using the sizeof operator in code, we prefer it to be written with
 parentheses around its argument:
 
-    int size = sizeof(int);
+```c
+int size = sizeof(int);
+```
 
 ## Column alignment
 
@@ -195,32 +225,40 @@ the statement it is. Operators should not start continuation lines. In other
 cases follow the 2-space indent guideline. Here are some examples from
 libcurl:
 
-    if(Curl_pipeline_wanted(handle->multi, CURLPIPE_HTTP1) &&
-       (handle->set.httpversion != CURL_HTTP_VERSION_1_0) &&
-       (handle->set.httpreq == HTTPREQ_GET ||
-        handle->set.httpreq == HTTPREQ_HEAD))
-      /* didn't ask for HTTP/1.0 and a GET or HEAD */
-      return TRUE;
+```c
+if(Curl_pipeline_wanted(handle->multi, CURLPIPE_HTTP1) &&
+   (handle->set.httpversion != CURL_HTTP_VERSION_1_0) &&
+   (handle->set.httpreq == HTTPREQ_GET ||
+    handle->set.httpreq == HTTPREQ_HEAD))
+  /* didn't ask for HTTP/1.0 and a GET or HEAD */
+  return TRUE;
+```
 
 If no parenthesis, use the default indent:
 
-    data->set.http_disable_hostname_check_before_authentication =
-      (0 != va_arg(param, long)) ? TRUE : FALSE;
+```c
+data->set.http_disable_hostname_check_before_authentication =
+  (0 != va_arg(param, long)) ? TRUE : FALSE;
+```
 
 Function invoke with an open parenthesis:
 
-    if(option) {
-      result = parse_login_details(option, strlen(option),
-                                   (userp ? &user : NULL),
-                                   (passwdp ? &passwd : NULL),
-                                   NULL);
-    }
+```c
+if(option) {
+  result = parse_login_details(option, strlen(option),
+                               (userp ? &user : NULL),
+                               (passwdp ? &passwd : NULL),
+                               NULL);
+}
+```
 
 Align with the "current open" parenthesis:
 
-    DEBUGF(infof(data, "Curl_pp_readresp_ %d bytes of trailing "
-                 "server response left\n",
-                 (int)clipamount));
+```c
+DEBUGF(infof(data, "Curl_pp_readresp_ %d bytes of trailing "
+             "server response left\n",
+             (int)clipamount));
+```
 
 ## Platform dependent code
 
@@ -234,13 +272,38 @@ to constants when libcurl is built without that feature, to make the code
 seamless. Like this example where the **magic()** function works differently
 depending on a build-time conditional:
 
-    #ifdef HAVE_MAGIC
-    void magic(int a)
-    {
-      return a + 2;
-    }
-    #else
-    #define magic(x) 1
-    #endif
+```c
+#ifdef HAVE_MAGIC
+void magic(int a)
+{
+  return a + 2;
+}
+#else
+#define magic(x) 1
+#endif
 
-    int content = magic(3);
+int content = magic(3);
+```
+
+## No typedefed structs
+
+Use structs by all means, but do not typedef them. Use the `struct name` way
+of identifying them:
+
+```c
+struct something {
+   void *valid;
+   size_t way_to_write;
+};
+struct something instance;
+```
+
+**Not okay**:
+
+```c
+typedef struct {
+   void *wrong;
+   size_t way_to_write;
+} something;
+something instance;
+```

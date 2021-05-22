@@ -14,10 +14,7 @@ none
 unittest
 </features>
 <name>
-urlapi
+urlapi port number parsing
 </name>
-<tool>
-unit1653
-</tool>
 </client>
 </testcase>

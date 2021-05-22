@@ -62,25 +62,22 @@ http
 HTTP with Digest *OR* NTLM authorization
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/70 -u testuser:testpass --anyauth
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /70 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /70 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="1053604199", uri="/70", response="2c9a6f00af0d86497b177b90e90c688a"
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Authorization: Digest username="testuser", realm="testrealm", nonce="1053604199", uri="/%TESTNUMBER", response="2c9a6f00af0d86497b177b90e90c688a"
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -78,11 +78,10 @@ struct data {
   const char *input;
   int flags;
   const char *expected_output;
-  CURLcode expected_result;
+  SANITIZEcode expected_result;
 };
 
 UNITTEST_START
-
 { /* START sanitize_file_name */
   struct data data[] = {
     { "", 0,
@@ -304,8 +303,9 @@ UNITTEST_START
     char *flagstr = NULL;
     char *received_ccstr = NULL;
     char *expected_ccstr = NULL;
+    SANITIZEcode res;
 
-    CURLcode res = sanitize_file_name(&output, data[i].input, data[i].flags);
+    res = sanitize_file_name(&output, data[i].input, data[i].flags);
 
     if(res == data[i].expected_result &&
        ((!output && !data[i].expected_output) ||
@@ -348,7 +348,6 @@ UNITTEST_START
 
 #else
 UNITTEST_START
-
 {
   fprintf(stderr, "Skipped test not for this platform\n");
 }

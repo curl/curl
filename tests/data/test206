@@ -30,7 +30,7 @@ And you should ignore this data.
 # this is returned when we get a GET!
 <data2>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 7
 Connection: close
 Content-Type: text/html
@@ -55,7 +55,7 @@ HTTP/1.1 200 OK swsbounce
 Server: no
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 7
 Connection: close
 Content-Type: text/html
@@ -73,33 +73,33 @@ http
 <features>
 !SSPI
 crypto
+proxy
 </features>
  <name>
 HTTP proxy CONNECT auth Digest
  </name>
  <command>
-http://test.remote.haxx.se.206:8990/path/2060002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-digest --proxytunnel
+http://test.remote.haxx.se.%TESTNUMBER:8990/path/%TESTNUMBER0002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-digest --proxytunnel
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
-CONNECT test.remote.haxx.se.206:8990 HTTP/1.1
-Host: test.remote.haxx.se.206:8990
+CONNECT test.remote.haxx.se.%TESTNUMBER:8990 HTTP/1.1
+Host: test.remote.haxx.se.%TESTNUMBER:8990
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.haxx.se.206:8990 HTTP/1.1
-Host: test.remote.haxx.se.206:8990
-Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="test.remote.haxx.se.206:8990", response="003e36decb4dbf6366b3ecb9b87c24ec"
+CONNECT test.remote.haxx.se.%TESTNUMBER:8990 HTTP/1.1
+Host: test.remote.haxx.se.%TESTNUMBER:8990
+Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="test.remote.haxx.se.%TESTNUMBER:8990", response="003e36decb4dbf6366b3ecb9b87c24ec"
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
-GET /path/2060002 HTTP/1.1
-User-Agent: curl/7.12.3-CVS (i686-pc-linux-gnu) libcurl/7.12.3-CVS OpenSSL/0.9.6b zlib/1.1.4
-Host: test.remote.haxx.se.206:8990
+GET /path/%TESTNUMBER0002 HTTP/1.1
+Host: test.remote.haxx.se.%TESTNUMBER:8990
+User-Agent: curl/%VERSION
 Accept: */*
 
 [DISCONNECT]

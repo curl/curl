@@ -40,13 +40,8 @@ pop3
 POP3 OAuth 2.0 (OAUTHBEARER) authentication with initial response
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/888 -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir
 </command>
-# The protocol section doesn't support ways of specifying the raw data in the
-# base64 encoded message so we must assert this
-<precheck>
-perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%POP3PORT' ne '9001' );"
-</precheck>
 </client>
 
 #
@@ -54,8 +49,8 @@ perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' 
 <verify>
 <protocol>
 CAPA
-AUTH OAUTHBEARER bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
-RETR 888
+AUTH OAUTHBEARER %b64[n,a=user,%01host=127.0.0.1%01port=%POP3PORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

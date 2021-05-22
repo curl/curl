@@ -73,9 +73,9 @@ crypto
 Downgraded HTTP PUT to HTTP 1.0 with authorization
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1071 -T log/put1071 -u testuser:testpass --anyauth
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T log/put%TESTNUMBER -u testuser:testpass --anyauth
 </command>
-<file name="log/put1071">
+<file name="log/put%TESTNUMBER">
 This is data we upload with PUT
 a second line
 line three
@@ -85,12 +85,10 @@ four is the number of lines
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-PUT /1071 HTTP/1.1
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 85
 Expect: 100-continue
@@ -99,9 +97,10 @@ This is data we upload with PUT
 a second line
 line three
 four is the number of lines
-PUT /1071 HTTP/1.0
+PUT /%TESTNUMBER HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="gimme all yer s3cr3ts", nonce="11223344", uri="/1071", response="df4cef6b52a30e65d472dd848d2055a1"
+Authorization: Digest username="testuser", realm="gimme all yer s3cr3ts", nonce="11223344", uri="/%TESTNUMBER", response="df4cef6b52a30e65d472dd848d2055a1"
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 85
 

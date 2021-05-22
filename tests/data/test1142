@@ -12,7 +12,7 @@ followlocation
 <data>
 HTTP/1.1 302 This is a weirdo text message
 Connection: close
-Location: http:////foo.example.com/want/11420001
+Location: http:////foo.example.com/want/%TESTNUMBER0001
 
 This server reply is for testing
 </data>
@@ -26,7 +26,7 @@ hej
 <datacheck>
 HTTP/1.1 302 This is a weirdo text message
 Connection: close
-Location: http:////foo.example.com/want/11420001
+Location: http:////foo.example.com/want/%TESTNUMBER0001
 
 </datacheck>
 </reply>
@@ -40,18 +40,19 @@ http
 HTTP redirect to http://// (four slashes!)
  </name>
  <command>
-%HOSTIP:%HTTPPORT/want/1142 -L -x http://%HOSTIP:%HTTPPORT
+%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -x http://%HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://%HOSTIP:%HTTPPORT/want/1142 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

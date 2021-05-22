@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -40,7 +40,7 @@ libcurl maintain the request method after a 302 redirect whilst setting bit 2
 after a 303 redirect. The value \fBCURL_REDIR_POST_ALL\fP is a convenience
 define that sets all three bits.
 
-The non-RFC behaviour is ubiquitous in web browsers, so the library does the
+The non-RFC behavior is ubiquitous in web browsers, so the library does the
 conversion by default to maintain consistency. However, a server may require a
 POST to remain a POST after such a redirection. This option is meaningful only
 when setting \fICURLOPT_FOLLOWLOCATION(3)\fP.
@@ -52,7 +52,7 @@ HTTP(S)
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* a silly POST example */
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "data=true");

@@ -10,7 +10,7 @@ HTTP HEAD
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -30,25 +30,22 @@ Funny-head: yesyes
 http
 </server>
 <tool>
-lib514
+lib%TESTNUMBER
 </tool>
  <name>
 First set options to POST and then to make HEAD
  </name>
 # the 1s post-command delay helps to prevent a spurious failure on s390
  <command delay="1">
-http://%HOSTIP:%HTTPPORT/514
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-HEAD /514 HTTP/1.1
+HEAD /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

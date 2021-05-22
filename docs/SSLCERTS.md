@@ -14,7 +14,7 @@ If libcurl was built with Schannel or Secure Transport support (the native SSL
 libraries included in Windows and Mac OS X), then this does not apply to
 you. Scroll down for details on how the OS-native engines handle SSL
 certificates. If you're not sure, then run "curl -V" and read the results. If
-the version string says "WinSSL" in it, then it was built with Schannel
+the version string says `Schannel` in it, then it was built with Schannel
 support.
 
 It is about trust
@@ -55,13 +55,13 @@ server, do one of the following:
 
  2. Get a CA certificate that can verify the remote server and use the proper
     option to point out this CA cert for verification when connecting. For
-    libcurl hackers: `curl_easy_setopt(curl, CURLOPT_CAPATH, capath);`
+    libcurl hackers: `curl_easy_setopt(curl, CURLOPT_CAINFO, cacert);`
 
     With the curl command line tool: --cacert [file]
 
  3. Add the CA cert for your server to the existing default CA certificate
-    store. The default CA certificate store can changed at compile time with the
-    following configure options:
+    store. The default CA certificate store can be changed at compile time with
+    the following configure options:
 
     --with-ca-bundle=FILE: use the specified file as CA certificate store. CA
     certificates need to be concatenated in PEM format into this file.
@@ -104,7 +104,7 @@ server, do one of the following:
        the security is no better than the way you obtained the certificate.
 
  4. If you're using the curl command line tool, you can specify your own CA
-    cert path by setting the environment variable `CURL_CA_BUNDLE` to the path
+    cert file by setting the environment variable `CURL_CA_BUNDLE` to the path
     of your choice.
 
     If you're using the curl command line tool on Windows, curl will search
@@ -119,7 +119,7 @@ server, do one of the following:
  5. Get a better/different/newer CA cert bundle! One option is to extract the
     one a recent Firefox browser uses by running 'make ca-bundle' in the curl
     build tree root, or possibly download a version that was generated this
-    way for you: [CA Extract](https://curl.haxx.se/docs/caextract.html)
+    way for you: [CA Extract](https://curl.se/docs/caextract.html)
 
 Neglecting to use one of the above methods when dealing with a server using a
 certificate that isn't signed by one of the certificates in the installed CA

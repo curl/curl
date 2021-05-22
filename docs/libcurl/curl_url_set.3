@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -35,9 +35,12 @@ Given the \fIurl\fP handle of an already parsed URL, this function lets the
 user set/update individual pieces of it.
 
 The \fIpart\fP argument should identify the particular URL part (see list
-below) to set or change, with \fIcontent\fP pointing to a zero terminated
+below) to set or change, with \fIcontent\fP pointing to a null-terminated
 string with the new contents for that URL part. The contents should be in the
 form and encoding they'd use in a URL: URL encoded.
+
+The application does not have to keep \fIcontent\fP around after a successful
+call.
 
 Setting a part to a NULL pointer will effectively remove that part's contents
 from the CURLU handle.
@@ -51,7 +54,7 @@ populated with a URL, the new URL can be relative to the previous.
 When successfully setting a new URL, relative or absolute, the handle contents
 will be replaced with the information of the newly set URL.
 
-Pass a pointer to a zero terminated string to the \fIurl\fP parameter. The
+Pass a pointer to a null-terminated string to the \fIurl\fP parameter. The
 string must point to a correctly formatted "RFC 3986+" URL or be a NULL
 pointer.
 .IP CURLUPART_SCHEME
@@ -60,8 +63,9 @@ Scheme cannot be URL decoded on set.
 .IP CURLUPART_PASSWORD
 .IP CURLUPART_OPTIONS
 .IP CURLUPART_HOST
-The host name can use IDNA. The string must then be encoded as your locale
-says or UTF-8 (when winidn is used).
+The host name. If it is IDNA the string must then be encoded as your locale
+says or UTF-8 (when WinIDN is used). If it is a bracketed IPv6 numeric address
+it may contain a zone id (or you can use CURLUPART_ZONEID).
 .IP CURLUPART_ZONEID
 If the host name is a numeric IPv6 address, this field can also be set.
 .IP CURLUPART_PORT
@@ -111,11 +115,25 @@ instead "guesses" which scheme that was intended based on the host name.  If
 the outermost sub-domain name matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then
 that scheme will be used, otherwise it picks HTTP. Conflicts with the
 \fICURLU_DEFAULT_SCHEME\fP option which takes precedence if both are set.
+.IP CURLU_NO_AUTHORITY
+If set, skips authority checks. The RFC allows individual schemes to omit the
+host part (normally the only mandatory part of the authority), but libcurl
+cannot know whether this is permitted for custom schemes. Specifying the flag
+permits empty authority sections, similar to how file scheme is handled.
+.IP CURLU_PATH_AS_IS
+When set for \fBCURLUPART_URL\fP, this makes libcurl skip the normalization of
+the path. That's the procedure where curl otherwise removes sequences of
+dot-slash and dot-dot etc. The same option used for transfers is called
+\fICURLOPT_PATH_AS_IS(3)\fP.
 .SH RETURN VALUE
 Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
 fine.
 
-If this function returns an error, no URL part is returned.
+A URL string passed on to \fIcurl_url_set(3)\fP for the \fBCURLUPART_URL\fP
+part, must be shorter than 8000000 bytes otherwise it returns
+\fBCURLUE_MALFORMED_INPUT\fP (added in 7.65.0).
+
+If this function returns an error, no URL part is set.
 .SH EXAMPLE
 .nf
   CURLUcode rc;
@@ -132,4 +150,4 @@ If this function returns an error, no URL part is returned.
 Added in curl 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
 .SH "SEE ALSO"
 .BR curl_url_cleanup "(3), " curl_url "(3), " curl_url_get "(3), "
-.BR curl_url_dup "(3), "
+.BR curl_url_dup "(3), " CURLOPT_CURLU "(3), "

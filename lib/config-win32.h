@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -183,7 +183,7 @@
 /* #define HAVE_DOPRNT 1 */
 
 /* Define if you have the ftruncate function. */
-#define HAVE_FTRUNCATE 1
+/* #define HAVE_FTRUNCATE 1 */
 
 /* Define to 1 if you have the `getpeername' function. */
 #define HAVE_GETPEERNAME 1
@@ -247,7 +247,9 @@
 #define HAVE_SOCKET 1
 
 /* Define if you have the strcasecmp function. */
-/* #define HAVE_STRCASECMP 1 */
+#ifdef __MINGW32__
+#define HAVE_STRCASECMP 1
+#endif
 
 /* Define if you have the strdup function. */
 #define HAVE_STRDUP 1
@@ -257,9 +259,6 @@
 
 /* Define if you have the stricmp function. */
 #define HAVE_STRICMP 1
-
-/* Define if you have the strncasecmp function. */
-/* #define HAVE_STRNCASECMP 1 */
 
 /* Define if you have the strnicmp function. */
 #define HAVE_STRNICMP 1
@@ -273,31 +272,10 @@
 #define HAVE_STRTOLL 1
 #endif
 
-/* Define if you have the tcgetattr function. */
-/* #define HAVE_TCGETATTR 1 */
-
-/* Define if you have the tcsetattr function. */
-/* #define HAVE_TCSETATTR 1 */
-
 /* Define if you have the utime function. */
 #ifndef __BORLANDC__
 #define HAVE_UTIME 1
 #endif
-
-/* Define to the type qualifier of arg 1 for getnameinfo. */
-#define GETNAMEINFO_QUAL_ARG1 const
-
-/* Define to the type of arg 1 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-
-/* Define to the type of arg 2 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG2 socklen_t
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG46 DWORD
-
-/* Define to the type of arg 7 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG7 int
 
 /* Define if you have the recv function. */
 #define HAVE_RECV 1
@@ -369,9 +347,6 @@
 /* Define if in_addr_t is not an available 'typedefed' type. */
 #define in_addr_t unsigned long
 
-/* Define to the return type of signal handlers (int or void). */
-#define RETSIGTYPE void
-
 /* Define if ssize_t is not an available 'typedefed' type. */
 #ifndef _SSIZE_T_DEFINED
 #  if (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || \
@@ -429,7 +404,6 @@
 #  undef HAVE_WS2TCPIP_H
 #  undef HAVE_ERRNO_H
 #  undef HAVE_GETHOSTNAME
-#  undef HAVE_GETNAMEINFO
 #  undef LWIP_POSIX_SOCKETS_IO_NAMES
 #  undef RECV_TYPE_ARG1
 #  undef RECV_TYPE_ARG3
@@ -460,7 +434,6 @@
   #undef HAVE_WINSOCK2_H
   #undef HAVE_WS2TCPIP_H
   #define HAVE_GETADDRINFO
-  #define HAVE_GETNAMEINFO
   #define HAVE_SYS_IOCTL_H
   #define HAVE_SYS_SOCKET_H
   #define HAVE_NETINET_IN_H
@@ -502,9 +475,14 @@
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #endif
 
-/* VS2005 and later default size for time_t is 64-bit, unless
-   _USE_32BIT_TIME_T has been defined to get a 32-bit time_t. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+/* mingw-w64, mingw using >= MSVCR80, and visual studio >= 2005 (MSVCR80)
+   all default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
+#ifdef __MINGW32__
+#  include <_mingw.h>
+#endif
+#if defined(__MINGW64_VERSION_MAJOR) || \
+    (defined(__MINGW32__) && (__MSVCRT_VERSION__ >= 0x0800)) || \
+    (defined(_MSC_VER) && (_MSC_VER >= 1400))
 #  ifndef _USE_32BIT_TIME_T
 #    define SIZEOF_TIME_T 8
 #  else
@@ -585,7 +563,7 @@ Vista
 #  endif
 #endif
 
-/* Availability of freeaddrinfo, getaddrinfo, getnameinfo and if_nametoindex
+/* Availability of freeaddrinfo, getaddrinfo, and if_nametoindex
    functions is quite convoluted, compiler dependent and even build target
    dependent. */
 #if defined(HAVE_WS2TCPIP_H)
@@ -593,17 +571,14 @@ Vista
 #    define HAVE_FREEADDRINFO           1
 #    define HAVE_GETADDRINFO            1
 #    define HAVE_GETADDRINFO_THREADSAFE 1
-#    define HAVE_GETNAMEINFO            1
 #  elif defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0501)
 #    define HAVE_FREEADDRINFO           1
 #    define HAVE_GETADDRINFO            1
 #    define HAVE_GETADDRINFO_THREADSAFE 1
-#    define HAVE_GETNAMEINFO            1
 #  elif defined(_MSC_VER) && (_MSC_VER >= 1200)
 #    define HAVE_FREEADDRINFO           1
 #    define HAVE_GETADDRINFO            1
 #    define HAVE_GETADDRINFO_THREADSAFE 1
-#    define HAVE_GETNAMEINFO            1
 #  endif
 #endif
 
@@ -714,14 +689,24 @@ Vista
 #endif
 
 /* Define to use the Windows crypto library. */
+#if !defined(CURL_WINDOWS_APP)
 #define USE_WIN32_CRYPTO
+#endif
 
+/* On MinGW the ADDRESS_FAMILY typedef was committed alongside LUP_SECURE,
+   so we use it to check for the presence of the typedef. */
+#include <ws2tcpip.h>
+#if !defined(__MINGW32__) || defined(LUP_SECURE)
 /* Define to use Unix sockets. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1500)
-/* sdkddkver.h first shipped with Platform SDK v6.0A included with VS2008 */
-#include <sdkddkver.h>
-#if defined(NTDDI_WIN10_RS4)
 #define USE_UNIX_SOCKETS
+#if !defined(UNIX_PATH_MAX)
+  /* Replicating logic present in afunix.h of newer Windows 10 SDK versions */
+# define UNIX_PATH_MAX 108
+  /* !checksrc! disable TYPEDEFSTRUCT 1 */
+  typedef struct sockaddr_un {
+    ADDRESS_FAMILY sun_family;
+    char sun_path[UNIX_PATH_MAX];
+  } SOCKADDR_UN, *PSOCKADDR_UN;
 #endif
 #endif
 
@@ -735,8 +720,12 @@ Vista
 #define OS "i386-pc-win32"
 #elif defined(_M_X64) || defined(__x86_64__) /* x86_64 (MSVC >=2005 or gcc) */
 #define OS "x86_64-pc-win32"
-#elif defined(_M_IA64) /* Itanium */
+#elif defined(_M_IA64) || defined(__ia64__) /* Itanium */
 #define OS "ia64-pc-win32"
+#elif defined(_M_ARM_NT) || defined(__arm__) /* ARMv7-Thumb2 (Windows RT) */
+#define OS "thumbv7a-pc-win32"
+#elif defined(_M_ARM64) || defined(__aarch64__) /* ARM64 (Windows 10) */
+#define OS "aarch64-pc-win32"
 #else
 #define OS "unknown-pc-win32"
 #endif

@@ -13,7 +13,7 @@ IDN
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
@@ -29,9 +29,10 @@ http
 </server>
 <features>
 idn
+proxy
 </features>
 <setenv>
-LC_ALL=
+LC_ALL=en_US.UTF-8
 LC_CTYPE=en_US.UTF-8
 </setenv>
 <precheck>
@@ -41,24 +42,23 @@ perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(lan
 HTTP over proxy with IDN host name
  </name>
  <command>
-http://www.åäö.se/page/165 -x %HOSTIP:%HTTPPORT http://www.große.de/page/165
+http://www.åäö.se/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT http://www.große.de/page/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://www.xn--4cab6c.se/page/165 HTTP/1.1
+GET http://www.xn--4cab6c.se/page/%TESTNUMBER HTTP/1.1
 Host: www.xn--4cab6c.se
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://www.xn--groe-xna.de/page/165 HTTP/1.1
+GET http://www.xn--groe-xna.de/page/%TESTNUMBER HTTP/1.1
 Host: www.xn--groe-xna.de
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

@@ -37,6 +37,7 @@ verify
 <client>
 <features>
 SSL
+!hyper
 </features>
 <server>
 https
@@ -45,19 +46,17 @@ https
 HTTPS GET, receive no headers only data!
  </name>
  <command>
--k https://%HOSTIP:%HTTPSPORT/306 --http0.9
+-k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER --http0.9
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /306 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

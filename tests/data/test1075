@@ -52,9 +52,9 @@ http
 HTTP PUT with --anyauth authorization (picking Basic)
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1075 -T log/put1075 -u testuser:testpass --anyauth
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T log/put%TESTNUMBER -u testuser:testpass --anyauth
 </command>
-<file name="log/put1075">
+<file name="log/put%TESTNUMBER">
 This is data we upload with PUT
 a second line
 line three
@@ -64,12 +64,10 @@ four is the number of lines
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-PUT /1075 HTTP/1.1
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 85
 Expect: 100-continue
@@ -78,9 +76,10 @@ This is data we upload with PUT
 a second line
 line three
 four is the number of lines
-PUT /1075 HTTP/1.1
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 85
 Expect: 100-continue

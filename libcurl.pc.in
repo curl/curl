@@ -5,11 +5,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -31,9 +31,9 @@ supported_protocols="@SUPPORT_PROTOCOLS@"
 supported_features="@SUPPORT_FEATURES@"
 
 Name: libcurl
-URL: https://curl.haxx.se/
+URL: https://curl.se/
 Description: Library to transfer files with ftp, http, etc.
 Version: @CURLVERSION@
-Libs: -L${libdir} -lcurl
+Libs: -L${libdir} -lcurl @LIBCURL_NO_SHARED@
 Libs.private: @LIBCURL_LIBS@
 Cflags: -I${includedir} @CPPFLAG_CURL_STATICLIB@

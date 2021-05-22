@@ -35,22 +35,21 @@ http
 HTTP --dump-header - with two URLs
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/1066 http://%HOSTIP:%HTTPPORT/want/10660001 --dump-header -
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER0001 --dump-header -
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /want/1066 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /want/10660001 HTTP/1.1
+GET /want/%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

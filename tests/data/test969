@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+EXPN
+CUSTOMREQUEST
+IDN
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+CAPA SMTPUTF8
+</servercmd>
+<data>
+250-Joe Smith <joe.smith@example.com>
+250-Harry Smith <harry.smith@example.com>
+250 Melvin Smith <melvin.smith@example.com>
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<features>
+idn
+!win32
+</features>
+ <name>
+SMTP mailing list EXPN (CUSTOMREQUEST) with SMTPUTF8 support
+ </name>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Friends -X EXPN
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO %TESTNUMBER
+EXPN Friends SMTPUTF8
+QUIT
+</protocol>
+</verify>
+</testcase>

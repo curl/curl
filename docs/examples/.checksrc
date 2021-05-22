@@ -1,0 +1,3 @@
+disable TYPEDEFSTRUCT
+disable SNPRINTF
+disable BANNEDFUNC

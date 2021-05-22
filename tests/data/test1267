@@ -26,19 +26,17 @@ http
 HTTP GET with a invalid HTTP/1 response line start
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1267 --http0.9
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http0.9
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1267 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

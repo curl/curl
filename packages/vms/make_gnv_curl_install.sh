@@ -7,7 +7,7 @@
 # This makes the library, the curl binary and attempts an install.
 # A search list should be set up for GNU (GNV$GNU).
 #
-# Copyright 2009, John Malmberg
+# Copyright 2009 - 2020, John Malmberg
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above

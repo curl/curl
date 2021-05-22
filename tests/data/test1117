@@ -11,7 +11,7 @@ Range
 <reply>
 <data nocheck="yes">
 HTTP/1.1 416 Requested Range Not Satisfiable
-Date: Thu, 09 Sep 2010 14:49:00 GMT
+Date: Tue, 09 Sep 2010 14:49:00 GMT
 Accept-Ranges: bytes
 Content-Length: 115
 
@@ -21,7 +21,7 @@ guaranteed to split it into two packets.
 
 <data1>
 HTTP/1.1 206 Partial Content
-Date: Thu, 09 Sep 2010 14:49:01 GMT
+Date: Tue, 09 Sep 2010 14:49:01 GMT
 Accept-Ranges: bytes
 Content-Range: bytes 10-18/155
 Content-Length: 13
@@ -44,7 +44,7 @@ http
 HTTP with invalid range then another URL
  </name>
  <command>
--r 10-22 http://%HOSTIP:%HTTPPORT/want/1117 http://%HOSTIP:%HTTPPORT/wantmore/11170001
+-r 10-22 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/wantmore/%TESTNUMBER0001
 </command>
 </client>
 
@@ -52,14 +52,14 @@ HTTP with invalid range then another URL
 <verify>
 <stdout>
 HTTP/1.1 416 Requested Range Not Satisfiable
-Date: Thu, 09 Sep 2010 14:49:00 GMT
+Date: Tue, 09 Sep 2010 14:49:00 GMT
 Accept-Ranges: bytes
 Content-Length: 115
 
 This is a long error message that is large enough that the test server is
 guaranteed to split it into two packets.
 HTTP/1.1 206 Partial Content
-Date: Thu, 09 Sep 2010 14:49:01 GMT
+Date: Tue, 09 Sep 2010 14:49:01 GMT
 Accept-Ranges: bytes
 Content-Range: bytes 10-18/155
 Content-Length: 13
@@ -68,18 +68,17 @@ Content-Type: text/plain
 partial body
 </stdout>
 
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /want/1117 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=10-22
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /wantmore/11170001 HTTP/1.1
+GET /wantmore/%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=10-22
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

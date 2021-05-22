@@ -40,7 +40,7 @@ crypto
 IMAP CRAM-MD5 authentication
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/821/;MAILINDEX=1' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 
@@ -51,7 +51,7 @@ IMAP CRAM-MD5 authentication
 A001 CAPABILITY
 A002 AUTHENTICATE CRAM-MD5
 dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg==
-A003 SELECT 821
+A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>

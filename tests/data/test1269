@@ -20,7 +20,7 @@ none
 too large --retry-delay value
  </name>
  <command>
---retry 3 --retry-delay 9223372036854776 http://%HOSTIP:%HTTPPORT/1269
+--retry 3 --retry-delay 9223372036854776 http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
 </command>
 </client>
 

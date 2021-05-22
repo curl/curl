@@ -27,7 +27,7 @@ smtp
 SMTP ambiguous VRFY
  </name>
  <command>
-smtp://%HOSTIP:%SMTPPORT/924 --mail-rcpt smith
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt smith
 </command>
 </client>
 
@@ -35,7 +35,7 @@ smtp://%HOSTIP:%SMTPPORT/924 --mail-rcpt smith
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 924
+EHLO %TESTNUMBER
 VRFY smith
 QUIT
 </protocol>

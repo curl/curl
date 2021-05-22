@@ -27,27 +27,27 @@ http
 Get same cookie page several times
  </name>
  <command>
-"http://%HOSTIP:%HTTPPORT/want/{27,27,27}" -b none
+"http://%HOSTIP:%HTTPPORT/want/{%TESTNUMBER,%TESTNUMBER,%TESTNUMBER}" -b none
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl.*
-</strip>
 <protocol>
-GET /want/27 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /want/27 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: thewinneris=nowayyouwin
 
-GET /want/27 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: thewinneris=nowayyouwin
 

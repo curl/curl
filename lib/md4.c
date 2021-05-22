@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,12 +29,22 @@
 
 #ifdef USE_OPENSSL
 #include <openssl/opensslconf.h>
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+/* OpenSSL 3.0.0 marks the MD4 functions as deprecated */
+#define OPENSSL_NO_MD4
 #endif
+#endif /* USE_OPENSSL */
+
 #ifdef USE_MBEDTLS
 #include <mbedtls/config.h>
-#endif
+#include <mbedtls/version.h>
 
-#if defined(USE_GNUTLS_NETTLE)
+#if(MBEDTLS_VERSION_NUMBER >= 0x02070000)
+  #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
+#endif
+#endif /* USE_MBEDTLS */
+
+#if defined(USE_GNUTLS)
 
 #include <nettle/md4.h>
 
@@ -60,74 +70,39 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
   md4_digest(ctx, MD4_DIGEST_SIZE, result);
 }
 
-#elif defined(USE_GNUTLS)
-
-#include <gcrypt.h>
-
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
-
-typedef struct gcry_md_hd_t MD4_CTX;
-
-static void MD4_Init(MD4_CTX *ctx)
-{
-  gcry_md_open(ctx, GCRY_MD_MD4, 0);
-}
-
-static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
-{
-  gcry_md_write(*ctx, data, size);
-}
-
-static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
-{
-  memcpy(result, gcry_md_read(ctx, 0), MD4_DIGEST_LENGTH);
-  gcry_md_close(ctx);
-}
-
 #elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
 /* When OpenSSL is available we use the MD4-functions from OpenSSL */
 #include <openssl/md4.h>
 
-#elif defined(USE_SECTRANSP)
+#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
+       defined(__MAC_OS_X_VERSION_MIN_ALLOWED) && \
+              (__MAC_OS_X_VERSION_MIN_ALLOWED < 101500)) || \
+      (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000))
 
 #include <CommonCrypto/CommonDigest.h>
 
 #include "curl_memory.h"
+
 /* The last #include file should be: */
 #include "memdebug.h"
 
-typedef struct {
-  void *data;
-  unsigned long size;
-} MD4_CTX;
+typedef CC_MD4_CTX MD4_CTX;
 
 static void MD4_Init(MD4_CTX *ctx)
 {
-  ctx->data = NULL;
-  ctx->size = 0;
+  (void)CC_MD4_Init(ctx);
 }
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
-  if(ctx->data == NULL) {
-    ctx->data = malloc(size);
-    if(ctx->data != NULL) {
-      memcpy(ctx->data, data, size);
-      ctx->size = size;
-    }
-  }
+  (void)CC_MD4_Update(ctx, data, (CC_LONG)size);
 }
 
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
-  if(ctx->data != NULL) {
-    (void)CC_MD4(ctx->data, (CC_LONG) ctx->size, result);
-
-    Curl_safefree(ctx->data);
-    ctx->size = 0;
-  }
+  (void)CC_MD4_Final(result, ctx);
 }
 
 #elif defined(USE_WIN32_CRYPTO)
@@ -135,13 +110,15 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 #include <wincrypt.h>
 
 #include "curl_memory.h"
- /* The last #include file should be: */
+
+/* The last #include file should be: */
 #include "memdebug.h"
 
-typedef struct {
+struct md4_ctx {
   HCRYPTPROV hCryptProv;
   HCRYPTHASH hHash;
-} MD4_CTX;
+};
+typedef struct md4_ctx MD4_CTX;
 
 static void MD4_Init(MD4_CTX *ctx)
 {
@@ -149,14 +126,14 @@ static void MD4_Init(MD4_CTX *ctx)
   ctx->hHash = 0;
 
   if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
-                         CRYPT_VERIFYCONTEXT)) {
+                         CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
     CryptCreateHash(ctx->hCryptProv, CALG_MD4, 0, 0, &ctx->hHash);
   }
 }
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
-  CryptHashData(ctx->hHash, data, (unsigned int) size, 0);
+  CryptHashData(ctx->hHash, (BYTE *)data, (unsigned int) size, 0);
 }
 
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
@@ -179,13 +156,15 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 #include <mbedtls/md4.h>
 
 #include "curl_memory.h"
+
 /* The last #include file should be: */
 #include "memdebug.h"
 
-typedef struct {
+struct md4_ctx {
   void *data;
   unsigned long size;
-} MD4_CTX;
+};
+typedef struct md4_ctx MD4_CTX;
 
 static void MD4_Init(MD4_CTX *ctx)
 {
@@ -195,7 +174,7 @@ static void MD4_Init(MD4_CTX *ctx)
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
-  if(ctx->data == NULL) {
+  if(!ctx->data) {
     ctx->data = malloc(size);
     if(ctx->data != NULL) {
       memcpy(ctx->data, data, size);
@@ -207,7 +186,11 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
   if(ctx->data != NULL) {
+#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
     mbedtls_md4(ctx->data, ctx->size, result);
+#else
+    (void) mbedtls_md4_ret(ctx->data, ctx->size, result);
+#endif
 
     Curl_safefree(ctx->data);
     ctx->size = 0;
@@ -260,12 +243,13 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 /* Any 32-bit or wider unsigned integer data type will do */
 typedef unsigned int MD4_u32plus;
 
-typedef struct {
+struct md4_ctx {
   MD4_u32plus lo, hi;
   MD4_u32plus a, b, c, d;
   unsigned char buffer[64];
   MD4_u32plus block[16];
-} MD4_CTX;
+};
+typedef struct md4_ctx MD4_CTX;
 
 static void MD4_Init(MD4_CTX *ctx);
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size);
@@ -505,9 +489,11 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #endif /* CRYPTO LIBS */
 
-void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len)
+void Curl_md4it(unsigned char *output, const unsigned char *input,
+                const size_t len)
 {
   MD4_CTX ctx;
+
   MD4_Init(&ctx);
   MD4_Update(&ctx, input, curlx_uztoui(len));
   MD4_Final(output, &ctx);

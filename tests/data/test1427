@@ -15,7 +15,7 @@ none
 too large -m timeout value
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1427 -m 184467440737095510
+http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER -m 184467440737095510
 </command>
 </client>
 

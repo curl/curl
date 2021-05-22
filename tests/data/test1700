@@ -12,7 +12,7 @@ HTTP/2
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -26,7 +26,7 @@ Funny-head: yesyes
 </data>
 <data1>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
 Connection: close
 Content-Type: text/html
@@ -46,7 +46,7 @@ http/2
 HTTP/2 GET with Upgrade:
  </name>
  <command>
-http://%HOSTIP:%HTTP2PORT/1700 --http2 http://%HOSTIP:%HTTP2PORT/17000001
+http://%HOSTIP:%HTTP2PORT/%TESTNUMBER --http2 http://%HOSTIP:%HTTP2PORT/%TESTNUMBER0001
 </command>
 </client>
 
@@ -54,17 +54,18 @@ http://%HOSTIP:%HTTP2PORT/1700 --http2 http://%HOSTIP:%HTTP2PORT/17000001
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^X-Forwarded-Proto:.*
 ^Via:.*
 </strip>
 <protocol>
-GET /1700 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTP2PORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /17000001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTP2PORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
@@ -74,28 +75,26 @@ Connection: Upgrade
 Upgrade: h2c
 
 HTTP/2 200 
-date: Thu, 09 Nov 2010 14:49:00 GMT
+date: Tue, 09 Nov 2010 14:49:00 GMT
 last-modified: Tue, 13 Jun 2000 12:10:00 GMT
 etag: "21025-dc7-39462498"
 accept-ranges: bytes
 content-length: 6
 content-type: text/html
 funny-head: yesyes
-server: cut-out
 via: 1.1 nghttpx
 
 -foo-
 HTTP/2 200 
-date: Thu, 09 Nov 2010 14:49:00 GMT
+date: Tue, 09 Nov 2010 14:49:00 GMT
 content-length: 6
 content-type: text/html
-server: cut-out
 via: 1.1 nghttpx
 
 -maa-
 </stdout>
 <stripfile>
-s/^server:.*/server: cut-out/
+s/^server: nghttpx.*\r?\n//
 </stripfile>
 </verify>
 </testcase>

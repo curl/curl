@@ -13,7 +13,7 @@ CURLOPT_CLOSESOCKETFUNCTION
 <reply>
 <data>
 HTTP/1.1 302 eat this!
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Location: this-is-the-first.html
 Content-Length: 0
@@ -23,7 +23,7 @@ Connection: close
 <datacheck>
 [OPEN] counter: 1
 HTTP/1.1 302 eat this!
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Location: this-is-the-first.html
 Content-Length: 0
@@ -43,24 +43,21 @@ http
 </features>
 # tool is what to use instead of 'curl'
 <tool>
-lib585
+lib%TESTNUMBER
 </tool>
 
  <name>
 socket open/close callbacks
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/585
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /585 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

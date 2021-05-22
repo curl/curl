@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,20 +24,21 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM)
+#if defined(USE_CURL_NTLM_CORE)
 
 /* If NSS is the first available SSL backend (see order in curl_ntlm_core.c)
    then it must be initialized to be used by NTLM. */
 #if !defined(USE_OPENSSL) && \
-    !defined(USE_GNUTLS_NETTLE) && \
+    !defined(USE_WOLFSSL) && \
     !defined(USE_GNUTLS) && \
     defined(USE_NSS)
 #define NTLM_NEEDS_NSS_INIT
 #endif
 
-#if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
-
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
+#ifdef USE_WOLFSSL
+#  include <wolfssl/options.h>
+#endif
 #  include <openssl/ssl.h>
 #endif
 
@@ -46,18 +47,21 @@
 #define USE_NTRESPONSES
 
 /* Define USE_NTLM2SESSION in order to make the type-3 message include the
-   NTLM2Session response message, requires USE_NTRESPONSES defined to 1 and a
-   Crypto engine that we have curl_ssl_md5sum() for. */
-#if defined(USE_NTRESPONSES) && !defined(USE_WIN32_CRYPTO)
+   NTLM2Session response message, requires USE_NTRESPONSES defined to 1 */
+#if defined(USE_NTRESPONSES)
 #define USE_NTLM2SESSION
 #endif
 
 /* Define USE_NTLM_V2 in order to allow the type-3 message to include the
-   LMv2 and NTLMv2 response messages, requires USE_NTRESPONSES defined to 1
-   and support for 64-bit integers. */
-#if defined(USE_NTRESPONSES) && (CURL_SIZEOF_CURL_OFF_T > 4)
+   LMv2 and NTLMv2 response messages, requires USE_NTRESPONSES defined to 1 */
+#if defined(USE_NTRESPONSES)
 #define USE_NTLM_V2
 #endif
+
+/* Helpers to generate function byte arguments in little endian order */
+#define SHORTPAIR(x) ((int)((x) & 0xff)), ((int)(((x) >> 8) & 0xff))
+#define LONGQUARTET(x) ((int)((x) & 0xff)), ((int)(((x) >> 8) & 0xff)), \
+  ((int)(((x) >> 16) & 0xff)), ((int)(((x) >> 24) & 0xff))
 
 void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
@@ -98,8 +102,6 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
 
 #endif /* USE_NTRESPONSES */
 
-#endif /* !USE_WINDOWS_SSPI || USE_WIN32_CRYPTO */
-
-#endif /* USE_NTLM */
+#endif /* USE_CURL_NTLM_CORE */
 
 #endif /* HEADER_CURL_NTLM_CORE_H */

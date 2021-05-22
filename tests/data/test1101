@@ -11,7 +11,7 @@ NO_PROXY
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 4
 Content-Type: text/html
@@ -34,19 +34,17 @@ no_proxy=%HOSTIP
 http_proxy=http://non-existing-host.haxx.se:3128/
 </setenv>
  <command>
-http://user:secret@%HOSTIP:%HTTPPORT/gimme/1101
+http://user:secret@%HOSTIP:%HTTPPORT/gimme/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /gimme/1101 HTTP/1.1
+GET /gimme/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dXNlcjpzZWNyZXQ=
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -17,7 +17,7 @@ RFC7628
 <servercmd>
 AUTH OAUTHBEARER
 REPLY AUTH +
-REPLY bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ== +OK Login successful
+REPLY %b64[n,a=user,%01host=127.0.0.1%01port=%POP3PORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64% +OK Login successful
 </servercmd>
 <data>
 From: me@somewhere
@@ -40,13 +40,8 @@ pop3
 POP3 OAuth 2.0 (OAUTHBEARER) authentication
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/887 -u user --oauth2-bearer mF_9.B5f-4.1JqM
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
-# The protocol section doesn't support ways of specifying the raw data in the
-# base64 encoded message so we must assert this
-<precheck>
-perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%POP3PORT' ne '9001' );"
-</precheck>
 </client>
 
 #
@@ -55,8 +50,8 @@ perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' 
 <protocol>
 CAPA
 AUTH OAUTHBEARER
-bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
-RETR 887
+%b64[n,a=user,%01host=127.0.0.1%01port=%POP3PORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

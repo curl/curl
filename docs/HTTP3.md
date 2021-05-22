@@ -13,7 +13,7 @@ and libcurl.
 
 ## QUIC libraries
 
-QUIC libraries we're experiementing with:
+QUIC libraries we're experimenting with:
 
 [ngtcp2](https://github.com/ngtcp2/ngtcp2)
 
@@ -29,11 +29,11 @@ in the master branch using pull-requests, just like ordinary changes.
 
 # ngtcp2 version
 
-## Build
+## Build with OpenSSL
 
 Build (patched) OpenSSL
 
-     % git clone --depth 1 -b openssl-quic-draft-22 https://github.com/tatsuhiro-t/openssl
+     % git clone --depth 1 -b OpenSSL_1_1_1k+quic https://github.com/quictls/openssl
      % cd openssl
      % ./config enable-tls1_3 --prefix=<somewhere1>
      % make
@@ -52,10 +52,10 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b draft-22 https://github.com/ngtcp2/ngtcp2
+     % git clone https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -i
-     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somehere1>/lib" --prefix==<somewhere3>
+     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
      % make
      % make install
 
@@ -65,57 +65,78 @@ Build curl
      % git clone https://github.com/curl/curl
      % cd curl
      % ./buildconf
-     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure -with-ssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
 
-## Running
+## Build with GnuTLS
 
-Make sure the custom OpenSSL library is the one used at run-time, as otherwise
-you'll just get ld.so linker errors.
+Build GnuTLS
 
-## Invoke from command line
+     % git clone --depth 1 https://gitlab.com/gnutls/gnutls.git
+     % cd gnutls
+     % ./bootstrap
+     % ./configure --disable-doc --prefix=<somewhere1>
+     % make
+     % make install
 
-    curl --http3 https://nghttp2.org:8443/
+Build nghttp3
 
-# quiche version
-
-## build
-
-Clone quiche and BoringSSL:
-
-     % git clone --recursive https://github.com/cloudflare/quiche
-
-Build BoringSSL (it needs to be built manually so it can be reused with curl):
-
-     % cd quiche/deps/boringssl
-     % mkdir build
-     % cd build
-     % cmake -DCMAKE_POSITION_INDEPENDENT_CODE=on ..
-     % make -j`nproc`
      % cd ..
-     % mkdir .openssl/lib -p
-     % cp build/crypto/libcrypto.a build/ssl/libssl.a .openssl/lib
-     % ln -s $PWD/include .openssl
+     % git clone https://github.com/ngtcp2/nghttp3
+     % cd nghttp3
+     % autoreconf -i
+     % ./configure --prefix=<somewhere2> --enable-lib-only
+     % make
+     % make install
 
-Build quiche:
+Build ngtcp2
 
-     % cd ../..
-     % QUICHE_BSSL_PATH=$PWD/deps/boringssl cargo build --release --features pkg-config-meta
+     % cd ..
+     % git clone https://github.com/ngtcp2/ngtcp2
+     % cd ngtcp2
+     % autoreconf -i
+     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-gnutls
+     % make
+     % make install
 
-Clone and build curl:
+Build curl
 
      % cd ..
      % git clone https://github.com/curl/curl
      % cd curl
      % ./buildconf
-     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-ssl=$PWD/../quiche/deps/boringssl/.openssl --with-quiche=$PWD/../quiche/target/release
-     % make -j`nproc`
+     % ./configure --without-openssl --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % make
 
-## Running
+# quiche version
 
-Make an HTTP/3 request.
+## build
 
-     % src/curl --http3 https://cloudflare-quic.com/
-     % src/curl --http3 https://facebook.com/
-     % src/curl --http3 https://quic.aiortc.org:4433/
-     % src/curl --http3 https://quic.rocks:4433/
+Build quiche and BoringSSL:
+
+     % git clone --recursive https://github.com/cloudflare/quiche
+     % cd quiche
+     % cargo build --release --features ffi,pkg-config-meta,qlog
+     % mkdir deps/boringssl/src/lib
+     % ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
+
+Build curl:
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % ./buildconf
+     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-openssl=$PWD/../quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
+     % make
+
+## Run
+
+Use HTTP/3 directly:
+
+    curl --http3 https://nghttp2.org:4433/
+
+Upgrade via Alt-Svc:
+
+    curl --alt-svc altsvc.cache https://quic.aiortc.org/
+
+See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)

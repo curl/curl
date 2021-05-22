@@ -38,24 +38,26 @@ http
 HTTP _without_ dotdot removal
  </name>
  <command>
---path-as-is --proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.1241:8990/../../hej/but/who/../1241?stupid=me/../1241#soo/../1241 http://test.remote.haxx.se.1241:8990/../../hej/but/who/../12410001#/../12410001
+--path-as-is --proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.%TESTNUMBER:8990/../../hej/but/who/../%TESTNUMBER?stupid=me/../%TESTNUMBER#soo/../%TESTNUMBER http://test.remote.haxx.se.%TESTNUMBER:8990/../../hej/but/who/../%TESTNUMBER0001#/../%TESTNUMBER0001
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://test.remote.haxx.se.1241:8990/../../hej/but/who/../1241?stupid=me/../1241 HTTP/1.1
-Host: test.remote.haxx.se.1241:8990
+GET http://test.remote.haxx.se.%TESTNUMBER:8990/../../hej/but/who/../%TESTNUMBER?stupid=me/../%TESTNUMBER HTTP/1.1
+Host: test.remote.haxx.se.%TESTNUMBER:8990
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://test.remote.haxx.se.1241:8990/../../hej/but/who/../12410001 HTTP/1.1
-Host: test.remote.haxx.se.1241:8990
+GET http://test.remote.haxx.se.%TESTNUMBER:8990/../../hej/but/who/../%TESTNUMBER0001 HTTP/1.1
+Host: test.remote.haxx.se.%TESTNUMBER:8990
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

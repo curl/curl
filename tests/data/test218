@@ -29,9 +29,9 @@ http
 HTTP PUT from a file but enforce chunked transfer-encoding
  </name>
  <command>
- -T log/file218 -H "Transfer-Encoding: chunked" http://%HOSTIP:%HTTPPORT/218
+ -T log/file%TESTNUMBER -H "Transfer-Encoding: chunked" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
-<file name="log/file218">
+<file name="log/file%TESTNUMBER">
 just some tiny teeny contents
 </file>
 </client>
@@ -39,17 +39,19 @@ just some tiny teeny contents
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-PUT /218 HTTP/1.1
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Transfer-Encoding: chunked
 Expect: 100-continue
 
+%if hyper
+1E
+%else
 1e
+%endif
 just some tiny teeny contents
 
 0

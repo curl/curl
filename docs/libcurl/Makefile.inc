@@ -1,3 +1,25 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2008 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
+
 # Shared between Makefile.am and CMakeLists.txt
 
 man_MANS = \
@@ -6,6 +28,9 @@ man_MANS = \
  curl_easy_escape.3 \
  curl_easy_getinfo.3 \
  curl_easy_init.3 \
+ curl_easy_option_by_id.3 \
+ curl_easy_option_by_name.3 \
+ curl_easy_option_next.3 \
  curl_easy_pause.3 \
  curl_easy_perform.3 \
  curl_easy_recv.3 \
@@ -54,6 +79,7 @@ man_MANS = \
  curl_multi_socket_all.3 \
  curl_multi_strerror.3 \
  curl_multi_timeout.3 \
+ curl_multi_wakeup.3 \
  curl_multi_wait.3 \
  curl_share_cleanup.3 \
  curl_share_init.3 \

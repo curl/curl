@@ -11,9 +11,9 @@ chunked Transfer-Encoding
 <reply>
 <data>
 HTTP/1.1 302 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: 5990001
+Location: %TESTNUMBER0001
 Content-Length: 6
 Connection: close
 Content-Type: text/html
@@ -22,7 +22,7 @@ Content-Type: text/html
 </data>
 <data1>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Transfer-Encoding: chunked
 Connection: close
@@ -37,15 +37,15 @@ this data is slightly larger than the first piece
 
 <datacheck>
 HTTP/1.1 302 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: 5990001
+Location: %TESTNUMBER0001
 Content-Length: 6
 Connection: close
 Content-Type: text/html
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Transfer-Encoding: chunked
 Connection: close
@@ -63,7 +63,7 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib599
+lib%TESTNUMBER
 </tool>
 
 # Bug 3510057 pointed out that when following a location to a larger chunked
@@ -72,14 +72,14 @@ lib599
 HTTP GET with progress callback and redirects changing content sizes
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/599 log/ip599
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER log/ip%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/ip599">
+<file name="log/ip%TESTNUMBER">
 CL: -1
 </file>
 </verify>

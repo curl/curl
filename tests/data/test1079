@@ -49,7 +49,7 @@ crypto
 HTTP retry after closed connection and empty response
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1079 -u testuser:testpass --digest
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --digest
 </command>
 </client>
 
@@ -58,17 +58,16 @@ http://%HOSTIP:%HTTPPORT/1079 -u testuser:testpass --digest
 <errorcode>
 52
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1079 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /1079 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/1079", response="e340c7cdca0950462070f46ee139e9f7"
+Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/%TESTNUMBER", response="e340c7cdca0950462070f46ee139e9f7"
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

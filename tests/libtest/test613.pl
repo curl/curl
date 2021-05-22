@@ -1,4 +1,25 @@
 #!/usr/bin/env perl
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
 # Prepare a directory with known files and clean up afterwards
 use Time::Local;
 
@@ -76,15 +97,29 @@ elsif ($ARGV[0] eq "postprocess")
         my @canondir;
         open(IN, "<$logfile") || die "$!";
         while (<IN>) {
-            /^(.)(..).(..).(..).\s*(\S+)\s+\S+\s+\S+\s+(\S+)\s+(\S+\s+\S+\s+\S+)(.*)$/;
+            /^(.)(..).(..).(..).\s*(\S+)\s+\S+\s+\S+\s+(\S+)\s+(\S+\s+\S+\s+\S+)\s+(.*)$/;
             if ($1 eq "d") {
+                # Skip current and parent directory listing, because some SSH
+                # servers (eg. OpenSSH for Windows) are not listing those
+                if ($8 eq "." || $8 eq "..") {
+                    next;
+                }
                 # Erase all directory metadata except for the name, as it is not
                 # consistent for across all test systems and filesystems
-                push @canondir, "d?????????    N U         U               N ???  N NN:NN$8\n";
+                push @canondir, "d?????????    N U         U               N ???  N NN:NN $8\n";
             } elsif ($1 eq "-") {
+                # Replace missing group and other permissions with user
+                # permissions (eg. on Windows) due to them being shown as *
+                my ($u, $g, $o) = ($2, $3, $4);
+                if($g eq "**") {
+                    $g = $u;
+                }
+                if($o eq "**") {
+                    $o = $u;
+                }
                 # Erase user and group names, as they are not consistent across
                 # all test systems
-                my $line = sprintf("%s%s?%s?%s?%5d U         U %15d %s%s\n", $1,$2,$3,$4,$5,$6,$7,$8);
+                my $line = sprintf("%s%s?%s?%s?%5d U         U %15d %s %s\n", $1,$u,$g,$o,$5,$6,$7,$8);
                 push @canondir, $line;
             } else {
                 # Unexpected format; just pass it through and let the test fail

@@ -48,19 +48,17 @@ http
 HTTP range with multiple ranges
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/164 -r 0-10,12-15
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -r 0-10,12-15
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /want/164 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=0-10,12-15
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

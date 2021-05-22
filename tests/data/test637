@@ -23,9 +23,9 @@ sftp
 SFTP retrieval with invalid X- range
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/file637.txt -r 99- --insecure
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/file%TESTNUMBER.txt -r 99- --insecure
 </command>
-<file name="log/file637.txt">
+<file name="log/file%TESTNUMBER.txt">
 Test data
 for ssh test
 </file>

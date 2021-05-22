@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -41,13 +41,11 @@ Proxy-Authenticate: Digest realm="testrealm", nonce="1053604598"
 
 */
 
-CURLcode Curl_input_digest(struct connectdata *conn,
+CURLcode Curl_input_digest(struct Curl_easy *data,
                            bool proxy,
                            const char *header) /* rest of the *-authenticate:
                                                   header */
 {
-  struct Curl_easy *data = conn->data;
-
   /* Point to the correct struct with this */
   struct digestdata *digest;
 
@@ -58,7 +56,7 @@ CURLcode Curl_input_digest(struct connectdata *conn,
     digest = &data->state.digest;
   }
 
-  if(!checkprefix("Digest", header))
+  if(!checkprefix("Digest", header) || !ISSPACE(header[6]))
     return CURLE_BAD_CONTENT_ENCODING;
 
   header += strlen("Digest");
@@ -68,13 +66,12 @@ CURLcode Curl_input_digest(struct connectdata *conn,
   return Curl_auth_decode_digest_http_message(header, digest);
 }
 
-CURLcode Curl_output_digest(struct connectdata *conn,
+CURLcode Curl_output_digest(struct Curl_easy *data,
                             bool proxy,
                             const unsigned char *request,
                             const unsigned char *uripath)
 {
   CURLcode result;
-  struct Curl_easy *data = conn->data;
   unsigned char *path = NULL;
   char *tmp = NULL;
   char *response;
@@ -94,17 +91,21 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   struct auth *authp;
 
   if(proxy) {
+#ifdef CURL_DISABLE_PROXY
+    return CURLE_NOT_BUILT_IN;
+#else
     digest = &data->state.proxydigest;
-    allocuserpwd = &conn->allocptr.proxyuserpwd;
-    userp = conn->http_proxy.user;
-    passwdp = conn->http_proxy.passwd;
+    allocuserpwd = &data->state.aptr.proxyuserpwd;
+    userp = data->state.aptr.proxyuser;
+    passwdp = data->state.aptr.proxypasswd;
     authp = &data->state.authproxy;
+#endif
   }
   else {
     digest = &data->state.digest;
-    allocuserpwd = &conn->allocptr.userpwd;
-    userp = conn->user;
-    passwdp = conn->passwd;
+    allocuserpwd = &data->state.aptr.userpwd;
+    userp = data->state.aptr.user;
+    passwdp = data->state.aptr.passwd;
     authp = &data->state.authhost;
   }
 

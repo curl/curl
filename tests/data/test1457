@@ -9,7 +9,7 @@ protocol
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Connection: close
 Content-Type: text/plain
@@ -29,7 +29,7 @@ http
 Check if %{stderr} and %{stdout} switch between stdout and stderr.
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/1457 --silent --write-out 'line1%{stderr}line2%{stdout}line3'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --silent --write-out 'line1%{stderr}line2%{stdout}line3'
 </command>
 </client>
 
@@ -37,7 +37,7 @@ http://%HOSTIP:%HTTPPORT/1457 --silent --write-out 'line1%{stderr}line2%{stdout}
 <verify>
 <stdout nonewline="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Connection: close
 Content-Type: text/plain
@@ -49,13 +49,11 @@ line1line3
 line2
 </stderr>
 <protocol>
-GET /1457 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<strip>
-^User-Agent:.*
-</strip>
 </verify>
 </testcase>

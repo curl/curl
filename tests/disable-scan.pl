@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2010-2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2010 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -29,12 +29,16 @@ use warnings;
 my %disable;
 # the DISABLE options that are used in C files
 my %file;
+# the DISABLE options that are documented
+my %docs;
 
 # we may get the dir root pointed out
 my $root=$ARGV[0] || ".";
+my $DOCS="CURL-DISABLE.md";
 
-sub scan_configure {
-    open S, "<$root/configure.ac";
+sub scanconf {
+    my ($f)=@_;
+    open S, "<$f";
     while(<S>) {
         if(/(CURL_DISABLE_[A-Z_]+)/g) {
             my ($sym)=($1);
@@ -42,6 +46,17 @@ sub scan_configure {
         }
     }
     close S;
+}
+
+sub scan_configure {
+    opendir(my $m, "$root/m4") || die "Can't opendir $root/m4: $!";
+    my @m4 = grep { /\.m4$/ } readdir($m);
+    closedir $m;
+    scanconf("$root/configure.ac");
+    # scan all m4 files too
+    for my $e (@m4) {
+        scanconf("$root/m4/$e");
+    }
 }
 
 sub scan_file {
@@ -59,7 +74,7 @@ sub scan_file {
 sub scan_dir {
     my ($dir)=@_;
     opendir(my $dh, $dir) || die "Can't opendir $dir: $!";
-    my @cfiles = grep { /\.c\z/ && -f "$dir/$_" } readdir($dh);
+    my @cfiles = grep { /\.[ch]\z/ && -f "$dir/$_" } readdir($dh);
     closedir $dh;
     for my $f (sort @cfiles) {
         scan_file("$dir/$f");
@@ -73,8 +88,22 @@ sub scan_sources {
     scan_dir("$root/lib/vauth");
 }
 
+sub scan_docs {
+    open F, "<$root/docs/$DOCS";
+    my $line = 0;
+    while(<F>) {
+        $line++;
+        if(/^## (CURL_DISABLE_[A-Z_]+)/g) {
+            my ($sym)=($1);
+            $docs{$sym} = $line;
+        }
+    }
+    close F;
+}
+
 scan_configure();
 scan_sources();
+scan_docs();
 
 
 my $error = 0;
@@ -84,12 +113,32 @@ for my $s (sort keys %disable) {
         printf "Present in configure.ac, not used by code: %s\n", $s;
         $error++;
     }
+    if(!$docs{$s}) {
+        printf "Present in configure.ac, not documented in $DOCS: %s\n", $s;
+        $error++;
+    }
 }
 
 # Check the code symbols for use in configure
 for my $s (sort keys %file) {
     if(!$disable{$s}) {
         printf "Not set by configure: %s (%s)\n", $s, $file{$s};
+        $error++;
+    }
+    if(!$docs{$s}) {
+        printf "Used in code, not documented in $DOCS: %s\n", $s;
+        $error++;
+    }
+}
+
+# Check the documented symbols
+for my $s (sort keys %docs) {
+    if(!$disable{$s}) {
+        printf "Documented but not in configure: %s\n", $s;
+        $error++;
+    }
+    if(!$file{$s}) {
+        printf "Documented, but not used by code: %s\n", $s;
         $error++;
     }
 }

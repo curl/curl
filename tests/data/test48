@@ -14,7 +14,7 @@ connection-monitor
 </servercmd>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 
 </data>
 </reply>
@@ -29,23 +29,22 @@ http
 HTTP with -d and -G and -I
  </name>
  <command>
--d "foo=moo&moo=poo" http://%HOSTIP:%HTTPPORT/48 -G -I http://%HOSTIP:%HTTPPORT/48
+-d "foo=moo&moo=poo" http://%HOSTIP:%HTTPPORT/%TESTNUMBER -G -I http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-HEAD /48?foo=moo&moo=poo HTTP/1.1
+HEAD /%TESTNUMBER?foo=moo&moo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-HEAD /48?foo=moo&moo=poo HTTP/1.1
+HEAD /%TESTNUMBER?foo=moo&moo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 [DISCONNECT]

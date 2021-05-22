@@ -17,7 +17,7 @@ RFC7628
 <servercmd>
 AUTH OAUTHBEARER
 REPLY AUTH +
-REPLY bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ== + eyJzdGF0dXMiOiJpbnZhbGlkX3Rva2VuIiwic2NvcGUiOiJleGFtcGxlX3Njb3BlIiwib3BlbmlkLWNvbmZpZ3VyYXRpb24iOiJodHRwczovL2V4YW1wbGUuY29tLy53ZWxsLWtub3duL29wZW5pZC1jb25maWd1cmF0aW9uIn0
+REPLY %b64[n,a=user,%01host=127.0.0.1%01port=%POP3PORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64% + eyJzdGF0dXMiOiJpbnZhbGlkX3Rva2VuIiwic2NvcGUiOiJleGFtcGxlX3Njb3BlIiwib3BlbmlkLWNvbmZpZ3VyYXRpb24iOiJodHRwczovL2V4YW1wbGUuY29tLy53ZWxsLWtub3duL29wZW5pZC1jb25maWd1cmF0aW9uIn0
 REPLY AQ== -ERR Authentication failed
 </servercmd>
 </reply>
@@ -32,13 +32,8 @@ pop3
 POP3 OAuth 2.0 (OAUTHBEARER) failure as continuation
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/889 -u user --oauth2-bearer mF_9.B5f-4.1JqM
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
-# The protocol section doesn't support ways of specifying the raw data in the
-# base64 encoded message so we must assert this
-<precheck>
-perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%POP3PORT' ne '9001' );"
-</precheck>
 </client>
 
 #
@@ -54,7 +49,7 @@ perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' 
 <protocol>
 CAPA
 AUTH OAUTHBEARER
-bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
+%b64[n,a=user,%01host=127.0.0.1%01port=%POP3PORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
 AQ==
 </protocol>
 </verify>

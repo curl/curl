@@ -11,7 +11,7 @@ HTTP GET
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
@@ -39,30 +39,28 @@ HTTP GET with -O -J without Content-Disposition, -D stdout
 CURL_TESTDIR=%PWD/log
 </setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1339 -J -O -D -
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O -D -
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1339 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
-<file1 name="log/1339">
+<file1 name="log/%TESTNUMBER">
 12345
 </file1>
 
-<file2 name="log/stdout1339">
+<file2 name="log/stdout%TESTNUMBER">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close

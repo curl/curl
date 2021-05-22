@@ -23,9 +23,9 @@ scp
 SCP --head retrieval
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%POSIX_PWD/log/file641.txt --insecure --head
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%SSH_PWD/log/file%TESTNUMBER.txt --insecure --head
 </command>
-<file name="log/file641.txt">
+<file name="log/file%TESTNUMBER.txt">
 Test data
 for ssh test
 </file>

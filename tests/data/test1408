@@ -13,7 +13,7 @@ cookiejar
 <reply>
 <data1>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
 Connection: close
 Content-Type: text/html
@@ -23,7 +23,7 @@ Set-Cookie: time=1
 </data1>
 <data2>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
 Connection: close
 Content-Type: text/html
@@ -48,23 +48,22 @@ http-ipv6
 HTTP receive cookies over IPV6
  </name>
  <command>
--c log/jar1408 -g http://%HOST6IP:%HTTP6PORT/path/14080001 http://%HOST6IP:%HTTP6PORT/path/14080002
+-c log/jar%TESTNUMBER -g http://%HOST6IP:%HTTP6PORT/path/%TESTNUMBER0001 http://%HOST6IP:%HTTP6PORT/path/%TESTNUMBER0002
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /path/14080001 HTTP/1.1
+GET /path/%TESTNUMBER0001 HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /path/14080002 HTTP/1.1
+GET /path/%TESTNUMBER0002 HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: time=1
 

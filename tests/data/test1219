@@ -30,7 +30,7 @@ ftp
 FTP with no user+password required (230 response)
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1219
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 
 </client>
@@ -41,8 +41,8 @@ ftp://%HOSTIP:%FTPPORT/1219
 PWD
 EPSV
 TYPE I
-SIZE 1219
-RETR 1219
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

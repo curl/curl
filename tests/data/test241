@@ -12,7 +12,7 @@ IPv6-hostname
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 
@@ -33,7 +33,7 @@ http-ipv6
 HTTP-IPv6 GET (using ip6-localhost)
  </name>
  <command>
--g "http://ip6-localhost:%HTTP6PORT/241"
+-g "http://ip6-localhost:%HTTP6PORT/%TESTNUMBER"
 </command>
 <precheck>
 ./server/resolve --ipv6 ip6-localhost
@@ -43,12 +43,10 @@ HTTP-IPv6 GET (using ip6-localhost)
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:
-</strip>
 <protocol>
-GET /241 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: ip6-localhost:%HTTP6PORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

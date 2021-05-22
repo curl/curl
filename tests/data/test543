@@ -12,7 +12,7 @@ curl_easy_escape
 none
 </server>
 <tool>
-lib543
+lib%TESTNUMBER
 </tool>
  <name>
 curl_easy_escape
@@ -30,6 +30,8 @@ curl_easy_escape
 <verify>
 <stdout>
 %9C%26K%3DI%04%A1%01%E0%D8%7C%20%B7%EFS%29%FA%1DW%E1
+IN: '' OUT: ''
+IN: ' 12' OUT: '%2012'
 </stdout>
 </verify>
 </testcase>

@@ -12,7 +12,7 @@ chunked Transfer-Encoding
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Accept-Ranges: bytes
 Content-Length: 6
 Connection: close
@@ -31,19 +31,17 @@ http
 HTTP POST zero length, chunked-encoded
  </name>
  <command>
--d "" --header "Transfer-Encoding: chunked" http://%HOSTIP:%HTTPPORT/1333
+-d "" --header "Transfer-Encoding: chunked" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-POST /1333 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Transfer-Encoding: chunked
 Content-Type: application/x-www-form-urlencoded

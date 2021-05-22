@@ -13,7 +13,7 @@ followlocation
 <data>
 HTTP/1.1 301 This is a weirdo text message swsbounce
 Server: test-server/fake
-Location: //somewhere.example.com/reply/1314
+Location: //somewhere.example.com/reply/%TESTNUMBER
 Content-Length: 32
 Connection: close
 
@@ -32,7 +32,7 @@ moo
 <datacheck>
 HTTP/1.1 301 This is a weirdo text message swsbounce
 Server: test-server/fake
-Location: //somewhere.example.com/reply/1314
+Location: //somewhere.example.com/reply/%TESTNUMBER
 Content-Length: 32
 Connection: close
 
@@ -54,23 +54,25 @@ http
 HTTP Location: following a // prefixed url
  </name>
  <command>
-http://firstplace.example.com/want/1314 -L -x http://%HOSTIP:%HTTPPORT
+http://firstplace.example.com/want/%TESTNUMBER -L -x http://%HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
-GET http://firstplace.example.com/want/1314 HTTP/1.1
+GET http://firstplace.example.com/want/%TESTNUMBER HTTP/1.1
 Host: firstplace.example.com
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://somewhere.example.com/reply/1314 HTTP/1.1
+GET http://somewhere.example.com/reply/%TESTNUMBER HTTP/1.1
 Host: somewhere.example.com
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

@@ -26,7 +26,7 @@ http
 HTTP URL with http:/ (one slash!)
  </name>
  <command>
-http:/%HOSTIP:%HTTPPORT/want/1143
+http:/%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 </command>
 <setenv>
 # Needed for MSYS2 to not treat the argument as a POSIX path list
@@ -37,12 +37,10 @@ MSYS2_ARG_CONV_EXCL=http:/
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /want/1143 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

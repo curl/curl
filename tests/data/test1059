@@ -14,7 +14,7 @@ FAILURE
 <reply>
 <connect>
 HTTP/1.1 501 Method not implemented swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 Content-Length: 0
 
@@ -26,6 +26,7 @@ Content-Length: 0
 <client>
 <features>
 ftp
+proxy
 </features>
 <server>
 http
@@ -34,7 +35,7 @@ http
 HTTP CONNECT with proxytunnel to unsupported FTP URL
  </name>
  <command>
-ftp://test-number:1059/wanted/page -p -x %HOSTIP:%HTTPPORT
+ftp://test-number:%TESTNUMBER/wanted/page -p -x %HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -45,12 +46,10 @@ ftp://test-number:1059/wanted/page -p -x %HOSTIP:%HTTPPORT
 <errorcode>
 56
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-CONNECT test-number:1059 HTTP/1.1
-Host: test-number:1059
+CONNECT test-number:%TESTNUMBER HTTP/1.1
+Host: test-number:%TESTNUMBER
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </protocol>

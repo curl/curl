@@ -12,7 +12,7 @@ chunked Transfer-Encoding
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 
 blablabla
@@ -29,7 +29,7 @@ http
 HTTP PUT from stdin
 </name>
  <command>
-http://%HOSTIP:%HTTPPORT/bzz/1068 -T -
+http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T -
 </command>
 <stdin>
 more than one byte
@@ -38,12 +38,10 @@ more than one byte
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-PUT /bzz/1068 HTTP/1.1
+PUT /bzz/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Transfer-Encoding: chunked
 Expect: 100-continue

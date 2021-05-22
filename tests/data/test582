@@ -18,15 +18,15 @@ multi
 sftp
 </server>
 <tool>
-lib582
+lib%TESTNUMBER
 </tool>
  <name>
 SFTP upload using multi interface
  </name>
  <command>
-Sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/upload582.txt %PWD/log/file582.txt %USER:
+Sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/upload%TESTNUMBER.txt %PWD/log/file%TESTNUMBER.txt %USER:
 </command>
-<file name="log/file582.txt">
+<file name="log/file%TESTNUMBER.txt">
 Moooooooooooo
  upload this
 </file>
@@ -41,7 +41,7 @@ disable
 </strip>
 <protocol>
 </protocol>
-<file name="log/file582.txt">
+<file name="log/file%TESTNUMBER.txt">
 Moooooooooooo
  upload this
 </file>

@@ -13,7 +13,7 @@ FAILURE
 <reply>
 <data>
 HTTP/1.1 404 Nah
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 Content-Length: 13
 Funny-head: yesyes
@@ -23,7 +23,7 @@ Funny-head: yesyes
 
 <datacheck>
 HTTP/1.1 404 Nah
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 Content-Length: 13
 Funny-head: yesyes
@@ -44,7 +44,7 @@ http
 HTTP GET with large-file resume point and failed resume
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/99 -C 9999999999
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 9999999999
 </command>
 </client>
 
@@ -55,13 +55,11 @@ http://%HOSTIP:%HTTPPORT/99 -C 9999999999
 <errorcode>
 33
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /99 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=9999999999-
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

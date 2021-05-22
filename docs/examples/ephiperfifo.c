@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -146,7 +146,7 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
   fprintf(MSG_OUT, "multi_timer_cb: Setting timeout to %ld ms\n", timeout_ms);
 
   if(timeout_ms > 0) {
-    its.it_interval.tv_sec = 1;
+    its.it_interval.tv_sec = 0;
     its.it_interval.tv_nsec = 0;
     its.it_value.tv_sec = timeout_ms / 1000;
     its.it_value.tv_nsec = (timeout_ms % 1000) * 1000 * 1000;
@@ -155,7 +155,7 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
     /* libcurl wants us to timeout now, however setting both fields of
      * new_value.it_value to zero disarms the timer. The closest we can
      * do is to schedule the timer to fire in 1 ns. */
-    its.it_interval.tv_sec = 1;
+    its.it_interval.tv_sec = 0;
     its.it_interval.tv_nsec = 0;
     its.it_value.tv_sec = 0;
     its.it_value.tv_nsec = 1;
@@ -488,7 +488,7 @@ int main(int argc, char **argv)
   }
 
   memset(&its, 0, sizeof(struct itimerspec));
-  its.it_interval.tv_sec = 1;
+  its.it_interval.tv_sec = 0;
   its.it_value.tv_sec = 1;
   timerfd_settime(g.tfd, 0, &its, NULL);
 

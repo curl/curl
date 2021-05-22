@@ -11,7 +11,7 @@ HTTP GET
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2010 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -34,26 +34,24 @@ http
 HTTP with -z + -w response_code and simulated 304
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1239 -z "-dec 12 12:00:00 1999 GMT" -w '%{response_code}'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -z "-dec 12 12:00:00 1999 GMT" -w '%{response_code}'
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1239 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 If-Unmodified-Since: Sun, 12 Dec 1999 12:00:00 GMT
 
 </protocol>
 <stdout nonewline="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2010 12:10:00 GMT
 ETag: "21025-dc7-39462498"

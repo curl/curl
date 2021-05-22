@@ -42,25 +42,25 @@ http-unix
 HTTP requests with multiple connections over Unix socket
  </name>
  <command>
---unix-socket %HTTPUNIXPATH http://one.example.com/14360001 http://two.example.com/14360002 http://one.example.com/14360003
+--unix-socket %HTTPUNIXPATH http://one.example.com/%TESTNUMBER0001 http://two.example.com/%TESTNUMBER0002 http://one.example.com/%TESTNUMBER0003
 </command>
 </client>
 
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /14360001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: one.example.com
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /14360002 HTTP/1.1
+GET /%TESTNUMBER0002 HTTP/1.1
 Host: two.example.com
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /14360003 HTTP/1.1
+GET /%TESTNUMBER0003 HTTP/1.1
 Host: one.example.com
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

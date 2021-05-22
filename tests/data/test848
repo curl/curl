@@ -37,7 +37,7 @@ imap
 IMAP plain authentication with alternative authorization identity
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/848/;MAILINDEX=1' -u user:secret --sasl-authzid shared-mailbox
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret --sasl-authzid shared-mailbox
 </command>
 </client>
 
@@ -48,7 +48,7 @@ IMAP plain authentication with alternative authorization identity
 A001 CAPABILITY
 A002 AUTHENTICATE PLAIN
 c2hhcmVkLW1haWxib3gAdXNlcgBzZWNyZXQ=
-A003 SELECT 848
+A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>

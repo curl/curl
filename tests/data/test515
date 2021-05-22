@@ -10,7 +10,7 @@ HTTP POST
 <reply>
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 3
 
@@ -25,25 +25,22 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib515
+lib%TESTNUMBER
 </tool>
 
  <name>
 make a POSTFIELDS set to NULL with POSTFIELDSIZE set to zero
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/515
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-POST /515 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 0

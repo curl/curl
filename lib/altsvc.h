@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2019 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_ALTSVC)
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_ALTSVC)
 #include <curl/curl.h>
 #include "llist.h"
 
@@ -46,22 +46,22 @@ struct altsvc {
   time_t expires;
   bool persist;
   int prio;
-  struct curl_llist_element node;
+  struct Curl_llist_element node;
 };
 
 struct altsvcinfo {
   char *filename;
-  struct curl_llist list; /* list of entries */
-  size_t num; /* number of alt-svc entries */
+  struct Curl_llist list; /* list of entries */
   long flags; /* the publicly set bitmask */
 };
 
 const char *Curl_alpnid2str(enum alpnid id);
 struct altsvcinfo *Curl_altsvc_init(void);
 CURLcode Curl_altsvc_load(struct altsvcinfo *asi, const char *file);
-CURLcode Curl_altsvc_save(struct altsvcinfo *asi, const char *file);
+CURLcode Curl_altsvc_save(struct Curl_easy *data,
+                          struct altsvcinfo *asi, const char *file);
 CURLcode Curl_altsvc_ctrl(struct altsvcinfo *asi, const long ctrl);
-void Curl_altsvc_cleanup(struct altsvcinfo *altsvc);
+void Curl_altsvc_cleanup(struct altsvcinfo **altsvc);
 CURLcode Curl_altsvc_parse(struct Curl_easy *data,
                            struct altsvcinfo *altsvc, const char *value,
                            enum alpnid srcalpn, const char *srchost,
@@ -70,9 +70,10 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
                         enum alpnid srcalpnid, const char *srchost,
                         int srcport,
                         struct altsvc **dstentry,
-                        int versions); /* one or more CURLALTSVC_H* bits */
+                        const int versions); /* CURLALTSVC_H* bits */
 #else
 /* disabled */
-#define Curl_altsvc_save(a,b)
-#endif /* CURL_DISABLE_HTTP || USE_ALTSVC */
+#define Curl_altsvc_save(a,b,c)
+#define Curl_altsvc_cleanup(x)
+#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_ALTSVC */
 #endif /* HEADER_CURL_ALTSVC_H */

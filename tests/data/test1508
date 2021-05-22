@@ -12,19 +12,19 @@ multi
 none
 </server>
 <tool>
-lib1508
+lib%TESTNUMBER
 </tool>
  <name>
 Close a multi handle without using it
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/path/1508
+http://%HOSTIP:%NOLISTENPORT/path/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/stdout1508">
+<file name="log/stdout%TESTNUMBER">
 We are done
 </file>
 </verify>

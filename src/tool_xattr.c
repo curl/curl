@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -44,9 +44,10 @@ static const struct xattr_mapping {
   /* mappings proposed by
    * https://freedesktop.org/wiki/CommonExtendedAttributes/
    */
-  { "user.xdg.origin.url", CURLINFO_EFFECTIVE_URL },
-  { "user.mime_type",      CURLINFO_CONTENT_TYPE },
-  { NULL,                  CURLINFO_NONE } /* last element, abort loop here */
+  { "user.xdg.referrer.url", CURLINFO_REFERER },
+  { "user.xdg.origin.url",   CURLINFO_EFFECTIVE_URL },
+  { "user.mime_type",        CURLINFO_CONTENT_TYPE },
+  { NULL,                    CURLINFO_NONE } /* last element, abort here */
 };
 
 /* returns TRUE if a new URL is returned, that then needs to be freed */

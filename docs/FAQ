@@ -24,11 +24,8 @@ FAQ
   1.15 How do I port libcurl to my OS?
 
  2. Install Related Problems
-  2.1 configure doesn't find OpenSSL even when it is installed
-   2.1.1 native linker doesn't find OpenSSL
-   2.1.2 only the libssl lib is missing
+  2.1 configure fails when using static libraries
   2.2 Does curl work/build with other SSL libraries?
-  2.3 Where can I find a copy of LIBEAY32.DLL?
   2.4 Does curl support SOCKS (RFC 1928) ?
 
  3. Usage Problems
@@ -56,7 +53,6 @@ FAQ
   3.22 curl -X gives me HTTP problems
 
  4. Running Problems
-  4.1 Problems connecting to SSL servers.
   4.2 Why do I get problems when I use & or % in the URL?
   4.3 How can I use {, }, [ or ] to specify multiple URLs?
   4.4 Why do I get downloaded data even though the web page doesn't exist?
@@ -68,9 +64,9 @@ FAQ
    4.5.5 "405 Method Not Allowed"
    4.5.6 "301 Moved Permanently"
   4.6 Can you tell me what error code 142 means?
-  4.7 How do I keep user names and passwords secret in Curl command lines?
+  4.7 How do I keep user names and passwords secret in curl command lines?
   4.8 I found a bug!
-  4.9 Curl can't authenticate to the server that requires NTLM?
+  4.9 curl can't authenticate to the server that requires NTLM?
   4.10 My HTTP request using HEAD, PUT or DELETE doesn't work!
   4.11 Why do my HTTP range requests return the full document?
   4.12 Why do I get "certificate verify failed" ?
@@ -82,13 +78,12 @@ FAQ
   4.18 file:// URLs containing drive letters (Windows, NetWare)
   4.19 Why doesn't curl return an error when the network cable is unplugged?
   4.20 curl doesn't return error for HTTP non-200 responses!
-  4.21 Why is there a HTTP/1.1 in my HTTP/2 request?
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
   5.2 How can I receive all data into a large memory chunk?
   5.3 How do I fetch multiple files with libcurl?
-  5.4 Does libcurl do Winsock initing on win32 systems?
+  5.4 Does libcurl do Winsock initialization on win32 systems?
   5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on win32 ?
   5.6 What about Keep-Alive or persistent connections?
   5.7 Link errors when building libcurl on Windows!
@@ -129,15 +124,16 @@ FAQ
   originally with URL spelled in uppercase to make it obvious it deals with
   URLs. The fact it can also be pronounced 'see URL' also helped, it works as
   an abbreviation for "Client URL Request Library" or why not the recursive
-  version: "Curl URL Request Library".
+  version: "curl URL Request Library".
 
   The cURL project produces two products:
 
   libcurl
 
     A free and easy-to-use client-side URL transfer library, supporting DICT,
-    FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3,
-    POP3S, RTMP, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET and TFTP.
+    FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT,
+    POP3, POP3S, RTMP, RTMPS, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET
+    and TFTP.
 
     libcurl supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading,
     Kerberos, SPNEGO, HTTP form based upload, proxies, cookies, user+password
@@ -184,22 +180,22 @@ FAQ
 
   1.3 What is curl not?
 
-  Curl is not a wget clone. That is a common misconception.  Never, during
+  curl is not a wget clone. That is a common misconception.  Never, during
   curl's development, have we intended curl to replace wget or compete on its
-  market. Curl is targeted at single-shot file transfers.
+  market. curl is targeted at single-shot file transfers.
 
-  Curl is not a web site mirroring program. If you want to use curl to mirror
-  something: fine, go ahead and write a script that wraps around curl to make
-  it reality (like curlmirror.pl does).
+  curl is not a website mirroring program. If you want to use curl to mirror
+  something: fine, go ahead and write a script that wraps around curl or use
+  libcurl to make it reality.
 
-  Curl is not an FTP site mirroring program. Sure, get and send FTP with curl
+  curl is not an FTP site mirroring program. Sure, get and send FTP with curl
   but if you want systematic and sequential behavior you should write a
   script (or write a new program that interfaces libcurl) and do it.
 
-  Curl is not a PHP tool, even though it works perfectly well when used from
+  curl is not a PHP tool, even though it works perfectly well when used from
   or with PHP (when using the PHP/CURL module).
 
-  Curl is not a program for a single operating system. Curl exists, compiles,
+  curl is not a program for a single operating system. curl exists, compiles,
   builds and runs under a wide range of operating systems, including all
   modern Unixes (and a bunch of older ones too), Windows, Amiga, BeOS, OS/2,
   OS X, QNX etc.
@@ -210,12 +206,12 @@ FAQ
   better. We do however believe in a few rules when it comes to the future of
   curl:
 
-  Curl -- the command line tool -- is to remain a non-graphical command line
+  curl -- the command line tool -- is to remain a non-graphical command line
   tool. If you want GUIs or fancy scripting capabilities, you should look for
   another tool that uses libcurl.
 
   We do not add things to curl that other small and available tools already do
-  very well at the side. Curl's output can be piped into another program or
+  very well at the side. curl's output can be piped into another program or
   redirected to another file for the next program to interpret.
 
   We focus on protocol related issues and improvements. If you want to do more
@@ -246,20 +242,21 @@ FAQ
 
   1.6 What do you get for making curl?
 
-  Project cURL is entirely free and open. No person gets paid for developing
-  curl full time. We do this voluntarily, mostly in our spare time.
-  Occasionally companies pay individual developers to work on curl, but that's
-  up to each company and developer. This is not controlled by nor supervised in
-  any way by the project.
+  Project cURL is entirely free and open. We do this voluntarily, mostly in
+  our spare time.  Companies may pay individual developers to work on curl,
+  but that's up to each company and developer. This is not controlled by nor
+  supervised in any way by the curl project.
 
-  We still get help from companies. Haxx provides web site, bandwidth, mailing
-  lists etc, GitHub hosts the primary git repository and other services like
-  the bug tracker at https://github.com/curl/curl. Also again, some companies
-  have sponsored certain parts of the development in the past and I hope some
-  will continue to do so in the future.
+  We get help from companies. Haxx provides website, bandwidth, mailing lists
+  etc, GitHub hosts the primary git repository and other services like the bug
+  tracker at https://github.com/curl/curl. Also again, some companies have
+  sponsored certain parts of the development in the past and I hope some will
+  continue to do so in the future.
 
   If you want to support our project, consider a donation or a banner-program
   or even better: by helping us with coding, documenting or testing etc.
+
+  See also: https://curl.se/sponsors.html
 
   1.7 What about CURL from curl.com?
 
@@ -281,7 +278,7 @@ FAQ
   Please do not mail any single individual unless you really need to. Keep
   curl-related questions on a suitable mailing list. All available mailing
   lists are listed in the MANUAL document and online at
-  https://curl.haxx.se/mail/
+  https://curl.se/mail/
 
   Keeping curl-related questions and discussions on mailing lists allows
   others to join in and help, to share their ideas, to contribute their
@@ -301,8 +298,8 @@ FAQ
   curl is fully open source. It means you can hire any skilled engineer to fix
   your curl-related problems.
 
-  We list available alternatives on the curl web site:
-  https://curl.haxx.se/support.html
+  We list available alternatives on the curl website:
+  https://curl.se/support.html
 
   1.10 How many are using curl?
 
@@ -316,21 +313,14 @@ FAQ
   We don't know how many users that downloaded or installed curl and then
   never use it.
 
-  In May 2012 Daniel did a counting game and came up with a number that may
-  be completely wrong or somewhat accurate. Over 500 million!
-
-  See https://daniel.haxx.se/blog/2012/05/16/300m-users/
+  In 2020, we estimate that curl runs in roughly ten billion installations
+  world wide.
 
   1.11 Why don't you update ca-bundle.crt
 
-  The ca cert bundle that used to be shipped with curl was very outdated and
-  must be replaced with an up-to-date version by anyone who wants to verify
-  peers. It is no longer provided by curl. The last curl release that ever
-  shipped a ca cert bundle was curl 7.18.0.
-
   In the cURL project we've decided not to attempt to keep this file updated
-  (or even present anymore) since deciding what to add to a ca cert bundle is
-  an undertaking we've not been ready to accept, and the one we can get from
+  (or even present) since deciding what to add to a ca cert bundle is an
+  undertaking we've not been ready to accept, and the one we can get from
   Mozilla is perfectly fine so there's no need to duplicate that work.
 
   Today, with many services performed over HTTPS, every operating system
@@ -341,7 +331,7 @@ FAQ
   If you want the most recent collection of ca certs that Mozilla Firefox
   uses, we recommend that you extract the collection yourself from Mozilla
   Firefox (by running 'make ca-bundle), or by using our online service setup
-  for this purpose: https://curl.haxx.se/docs/caextract.html
+  for this purpose: https://curl.se/docs/caextract.html
 
   1.12 I have a problem who can I chat with?
 
@@ -373,18 +363,16 @@ FAQ
 
   1.14 How do I submit my patch?
 
-  When you have made a patch or a change of whatever sort, and want to submit
-  that to the project, there are a few different ways we prefer:
+  We strongly encourage you to submit changes and improvements directly as
+  "pull requests" on github: https://github.com/curl/curl/pulls
 
-  o send a patch to the curl-library mailing list. We're many subscribers
-    there and there are lots of people who can review patches, comment on them
-    and "receive" them properly.
+  If you for any reason can't or won't deal with github, send your patch to
+  the curl-library mailing list. We're many subscribers there and there are
+  lots of people who can review patches, comment on them and "receive" them
+  properly.
 
-  o if your patch changes or fixes a bug, you can also opt to submit a bug
-    report in the bug tracker and attach your patch there. There are less
-    people involved there.
-
-  Lots of more details are found in the CONTRIBUTE and INTERNALS docs.
+  Lots of more details are found in the CONTRIBUTE.md and INTERNALS.md
+  documents.
 
   1.15 How do I port libcurl to my OS?
 
@@ -402,68 +390,39 @@ FAQ
 
 2. Install Related Problems
 
-  2.1 configure doesn't find OpenSSL even when it is installed
+  2.1 configure fails when using static libraries
 
-  This may be because of several reasons.
+  You may find that configure fails to properly detect the entire dependency
+  chain of libraries when you provide static versions of the libraries that
+  configure checks for.
 
-    2.1.1 native linker doesn't find openssl
+  The reason why static libraries is much harder to deal with is that for them
+  we don't get any help but the script itself must know or check what more
+  libraries that are needed (with shared libraries, that dependency "chain" is
+  handled automatically). This is a very error-prone process and one that also
+  tends to vary over time depending on the release versions of the involved
+  components and may also differ between operating systems.
 
-    Affected platforms:
-      Solaris (native cc compiler)
-      HPUX (native cc compiler)
-      SGI IRIX (native cc compiler)
-      SCO UNIX (native cc compiler)
+  For that reason, configure does very little attempts to actually figure this
+  out and you are instead encouraged to set LIBS and LDFLAGS accordingly when
+  you invoke configure, and point out the needed libraries and set the
+  necessary flags yourself.
 
-    When configuring curl, I specify --with-ssl. OpenSSL is installed in
-    /usr/local/ssl Configure reports SSL in /usr/local/ssl, but fails to find
-    CRYPTO_lock in -lcrypto
+  2.2 Does curl work with other SSL libraries?
 
-    Cause: The cc for this test places the -L/usr/local/ssl/lib AFTER
-    -lcrypto, so ld can't find the library. This is due to a bug in the GNU
-    autoconf tool.
-
-    Workaround: Specifying "LDFLAGS=-L/usr/local/ssl/lib" in front of
-    ./configure places the -L/usr/local/ssl/lib early enough in the command
-    line to make things work
-
-    2.1.2 only the libssl lib is missing
-
-    If all include files and the libcrypto lib is present, with only the
-    libssl being missing according to configure, this is most likely because
-    a few functions are left out from the libssl.
-
-    If the function names missing include RSA or RSAREF you can be certain
-    that this is because libssl requires the RSA and RSAREF libs to build.
-
-    See the INSTALL file section that explains how to add those libs to
-    configure. Make sure that you remove the config.cache file before you
-    rerun configure with the new flags.
-
-  2.2 Does curl work/build with other SSL libraries?
-
-  Curl has been written to use a generic SSL function layer internally, and
+  curl has been written to use a generic SSL function layer internally, and
   that SSL functionality can then be provided by one out of many different SSL
   backends.
 
   curl can be built to use one of the following SSL alternatives: OpenSSL,
   libressl, BoringSSL, GnuTLS, wolfSSL, NSS, mbedTLS, MesaLink, Secure
-  Transport (native iOS/OS X), Schannel (native Windows) or GSKit (native IBM
-  i). They all have their pros and cons, and we try to maintain a comparison
-  of them here: https://curl.haxx.se/docs/ssl-compared.html
-
-  2.3 Where can I find a copy of LIBEAY32.DLL?
-
-  That is an OpenSSL binary built for Windows.
-
-  Curl can be built with OpenSSL to do the SSL stuff. The LIBEAY32.DLL is then
-  what curl needs on a windows machine to do https:// etc. Check out the curl
-  web site to find accurate and up-to-date pointers to recent OpenSSL DLLs and
-  other binary packages.
+  Transport (native iOS/OS X), Schannel (native Windows), GSKit (native IBM
+  i), BearSSL, or Rustls. They all have their pros and cons, and we try to
+  maintain a comparison of them here: https://curl.se/docs/ssl-compared.html
 
   2.4 Does curl support SOCKS (RFC 1928) ?
 
   Yes, SOCKS 4 and 5 are supported.
-
 
 3. Usage problems
 
@@ -488,18 +447,18 @@ FAQ
 
   3.2 How do I tell curl to resume a transfer?
 
-  Curl supports resumed transfers both ways on both FTP and HTTP.
+  curl supports resumed transfers both ways on both FTP and HTTP.
   Try the -C option.
 
   3.3 Why doesn't my posting using -F work?
 
-  You can't arbitrarily use -F or -d, the choice between -F or -d depends on the
-  HTTP operation you need curl to do and what the web server that will receive
-  your post expects.
+  You can't arbitrarily use -F or -d, the choice between -F or -d depends on
+  the HTTP operation you need curl to do and what the web server that will
+  receive your post expects.
 
-  If the form you're trying to submit uses the type 'multipart/form-data', then
-  and only then you must use the -F type. In all the most common cases, you
-  should use -d which then causes a posting with the type
+  If the form you're trying to submit uses the type 'multipart/form-data',
+  then and only then you must use the -F type. In all the most common cases,
+  you should use -d which then causes a posting with the type
   'application/x-www-form-urlencoded'.
 
   This is described in some detail in the MANUAL and TheArtOfHttpScripting
@@ -547,7 +506,7 @@ FAQ
 
   3.8 How do I tell curl to follow HTTP redirects?
 
-  Curl does not follow so-called redirects by default. The Location: header
+  curl does not follow so-called redirects by default. The Location: header
   that informs the client about this is only interpreted if you're using the
   -L/--location option. As in:
 
@@ -562,8 +521,8 @@ FAQ
   a language, you may prefer to use one of these interfaces instead.
 
   Find out more about which languages that support curl directly, and how to
-  install and use them, in the libcurl section of the curl web site:
-  https://curl.haxx.se/libcurl/
+  install and use them, in the libcurl section of the curl website:
+  https://curl.se/libcurl/
 
   All the various bindings to libcurl are made by other projects and people,
   outside of the cURL project. The cURL project itself only produces libcurl
@@ -582,7 +541,7 @@ FAQ
 
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
-  Curl adheres to the HTTP spec, which basically means you can play with *any*
+  curl adheres to the HTTP spec, which basically means you can play with *any*
   protocol that is built on top of HTTP. Protocols such as SOAP, WEBDAV and
   XML-RPC are all such ones. You can use -X to set custom requests and -H to
   set custom headers (or replace internally generated ones).
@@ -634,7 +593,7 @@ FAQ
 
   3.14 Does curl support Javascript or PAC (automated proxy config)?
 
-  Many web pages do magic stuff using embedded Javascript. Curl and libcurl
+  Many web pages do magic stuff using embedded Javascript. curl and libcurl
   have no built-in support for that, so it will be treated just like any other
   contents.
 
@@ -697,7 +656,7 @@ FAQ
   certificate. Server certificate verification is enabled by default in curl
   and libcurl and is often the reason for problems as explained in FAQ entry
   4.12 and the SSLCERTS document
-  (https://curl.haxx.se/docs/sslcerts.html). Server certificates that are
+  (https://curl.se/docs/sslcerts.html). Server certificates that are
   "self-signed" or otherwise signed by a CA that you do not have a CA cert
   for, cannot be verified. If the verification during a connect fails, you are
   refused access. You then need to explicitly disable the verification to
@@ -723,7 +682,7 @@ FAQ
 
   3.19 How do I get HTTP from a host using a specific IP address?
 
-  For example, you may be trying out a web site installation that isn't yet in
+  For example, you may be trying out a website installation that isn't yet in
   the DNS. Or you have a site using multiple IP addresses for a given host
   name and you want to address a specific one out of the set.
 
@@ -798,21 +757,6 @@ FAQ
 
 4. Running Problems
 
-  4.1 Problems connecting to SSL servers.
-
-  It took a very long time before we could sort out why curl had problems to
-  connect to certain SSL servers when using SSLeay or OpenSSL v0.9+.  The
-  error sometimes showed up similar to:
-
-  16570:error:1407D071:SSL routines:SSL2_READ:bad mac decode:s2_pkt.c:233:
-
-  It turned out to be because many older SSL servers don't deal with SSLv3
-  requests properly. To correct this problem, tell curl to select SSLv2 from
-  the command line (-2/--sslv2).
-
-  There have also been examples where the remote server didn't like the SSLv2
-  request and instead you had to force curl to use SSLv3 with -3/--sslv3.
-
   4.2 Why do I get problems when I use & or % in the URL?
 
   In general unix shells, the & symbol is treated specially and when used, it
@@ -849,7 +793,7 @@ FAQ
 
   4.4 Why do I get downloaded data even though the web page doesn't exist?
 
-  Curl asks remote servers for the page you specify. If the page doesn't exist
+  curl asks remote servers for the page you specify. If the page doesn't exist
   at the server, the HTTP protocol defines how the server should respond and
   that means that headers and a "page" will be returned. That's simply how
   HTTP works.
@@ -908,7 +852,7 @@ FAQ
   appreciate a detailed bug report from you that describes how we could go
   ahead and repeat this!
 
-  4.7 How do I keep user names and passwords secret in Curl command lines?
+  4.7 How do I keep user names and passwords secret in curl command lines?
 
   This problem has two sides:
 
@@ -942,7 +886,7 @@ FAQ
   If there is a bug, read the BUGS document first. Then report it as described
   in there.
 
-  4.9 Curl can't authenticate to the server that requires NTLM?
+  4.9 curl can't authenticate to the server that requires NTLM?
 
   NTLM support requires OpenSSL, GnuTLS, mbedTLS, NSS, Secure Transport, or
   Microsoft Windows libraries at build-time to provide this functionality.
@@ -968,27 +912,32 @@ FAQ
 
   4.12 Why do I get "certificate verify failed" ?
 
-  You invoke curl 7.10 or later to communicate on a https:// URL and get an
-  error back looking something similar to this:
+  When you invoke curl and get an error 60 error back it means that curl
+  couldn't verify that the server's certificate was good. curl verifies the
+  certificate using the CA cert bundle and verifying for which names the
+  certificate has been granted.
 
-      curl: (35) SSL: error:14090086:SSL routines:
-      SSL3_GET_SERVER_CERTIFICATE:certificate verify failed
+  To completely disable the certificate verification, use -k. This does
+  however enable man-in-the-middle attacks and makes the transfer INSECURE.
+  We strongly advice against doing this for more than experiments.
 
-  Then it means that curl couldn't verify that the server's certificate was
-  good. Curl verifies the certificate using the CA cert bundle that comes with
-  the curl installation.
+  If you get this failure with a CA cert bundle installed and used, the
+  server's certificate might not be signed by one of the CA's in yout CA
+  store. It might for example be self-signed. You then correct this problem by
+  obtaining a valid CA cert for the server. Or again, decrease the security by
+  disabling this check.
 
-  To disable the verification (which makes it act like curl did before 7.10),
-  use -k. This does however enable man-in-the-middle attacks.
+  At times, you find that the verification works in your favorite browser but
+  fails in curl. When this happens, the reason is usually that the server
+  sends an incomplete cert chain. The server is mandated to send all
+  "intermediate certificates" but doesn't. This typically works with browsers
+  anyway since they A) cache such certs and B) supports AIA which downloads
+  such missing certificates on demand. This is a server misconfiguration. A
+  good way to figure out if this is the case it to use the SSL Labs server
+  test and check the certificate chain: https://www.ssllabs.com/ssltest/
 
-  If you get this failure but are having a CA cert bundle installed and used,
-  the server's certificate is not signed by one of the CA's in the bundle. It
-  might for example be self-signed. You then correct this problem by obtaining
-  a valid CA cert for the server. Or again, decrease the security by disabling
-  this check.
-
-  Details are also in the SSLCERTS file in the release archives, found online
-  here: https://curl.haxx.se/docs/sslcerts.html
+  Details are also in the SSLCERTS.md document, found online here:
+  https://curl.se/docs/sslcerts.html
 
   4.13 Why is curl -R on Windows one hour off?
 
@@ -1141,17 +1090,6 @@ FAQ
   You can also use the -w option and the variable %{response_code} to extract
   the exact response code that was returned in the response.
 
-  4.21 Why is there a HTTP/1.1 in my HTTP/2 request?
-
-  If you use verbose to see the HTTP request when you send off a HTTP/2
-  request, it will still say 1.1.
-
-  The reason for this is that we first generate the request to send using the
-  old 1.1 style and show that request in the verbose output, and then we
-  convert it over to the binary header-compressed HTTP/2 style. The actual
-  "1.1" part from that request is then not actually used in the transfer.
-  The binary HTTP/2 headers are not human readable.
-
 5. libcurl Issues
 
   5.1 Is libcurl thread-safe?
@@ -1165,7 +1103,7 @@ FAQ
 
   There may be some exceptions to thread safety depending on how libcurl was
   built. Please review the guidelines for thread safety to learn more:
-  https://curl.haxx.se/libcurl/c/threadsafe.html
+  https://curl.se/libcurl/c/threadsafe.html
 
   5.2 How can I receive all data into a large memory chunk?
 
@@ -1227,7 +1165,7 @@ FAQ
   5.6 What about Keep-Alive or persistent connections?
 
   curl and libcurl have excellent support for persistent connections when
-  transferring several files from the same server.  Curl will attempt to reuse
+  transferring several files from the same server.  curl will attempt to reuse
   connections for all URLs specified on the same command line/config file, and
   libcurl will reuse connections for all transfers that are made using the
   same libcurl handle.
@@ -1446,7 +1384,7 @@ FAQ
 
 6. License Issues
 
-  Curl and libcurl are released under a MIT/X derivate license. The license is
+  curl and libcurl are released under a MIT/X derivative license. The license is
   very liberal and should not impose a problem for your project. This section
   is just a brief summary for the cases we get the most questions. (Parts of
   this section was much enhanced by Bjorn Reese.)
@@ -1461,7 +1399,7 @@ FAQ
 
   Yes!
 
-  Since libcurl may be distributed under the MIT/X derivate license, it can be
+  Since libcurl may be distributed under the MIT/X derivative license, it can be
   used together with GPL in any software.
 
   6.2 I have a closed-source program, can I use the libcurl library?
@@ -1486,7 +1424,7 @@ FAQ
 
   Yes!
 
-  The MIT/X derivate license practically allows you to do almost anything with
+  The MIT/X derivative license practically allows you to do almost anything with
   the sources, on the condition that the copyright texts in the sources are
   left intact.
 
@@ -1520,7 +1458,7 @@ FAQ
   notice" somewhere. Most probably like in the documentation or in the section
   where other third party dependencies already are mentioned and acknowledged.
 
-  As can be seen here: https://curl.haxx.se/docs/companies.html and elsewhere,
+  As can be seen here: https://curl.se/docs/companies.html and elsewhere,
   more and more companies are discovering the power of libcurl and take
   advantage of it even in commercial environments.
 

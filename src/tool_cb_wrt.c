@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,6 +20,13 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+
+#ifdef HAVE_FCNTL_H
+/* for open() */
+#include <fcntl.h>
+#endif
+
+#include <sys/stat.h>
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -32,12 +39,24 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-/* create a local file for writing, return TRUE on success */
-bool tool_create_output_file(struct OutStruct *outs)
-{
-  struct GlobalConfig *global = outs->config->global;
-  FILE *file;
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+#ifdef WIN32
+#define OPENMODE S_IREAD | S_IWRITE
+#else
+#define OPENMODE S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
+#endif
 
+/* create a local file for writing, return TRUE on success */
+bool tool_create_output_file(struct OutStruct *outs,
+                             struct OperationConfig *config)
+{
+  struct GlobalConfig *global;
+  FILE *file = NULL;
+  DEBUGASSERT(outs);
+  DEBUGASSERT(config);
+  global = config->global;
   if(!outs->filename || !*outs->filename) {
     warnf(global, "Remote filename has no length!\n");
     return FALSE;
@@ -45,17 +64,29 @@ bool tool_create_output_file(struct OutStruct *outs)
 
   if(outs->is_cd_filename) {
     /* don't overwrite existing files */
-    file = fopen(outs->filename, "rb");
-    if(file) {
-      fclose(file);
-      warnf(global, "Refusing to overwrite %s: %s\n", outs->filename,
-            strerror(EEXIST));
-      return FALSE;
+    int fd;
+    char *name = outs->filename;
+    char *aname = NULL;
+    if(config->output_dir) {
+      aname = aprintf("%s/%s", config->output_dir, name);
+      if(!aname) {
+        errorf(global, "out of memory\n");
+        return FALSE;
+      }
+      name = aname;
     }
+    fd = open(name, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
+    if(fd != -1) {
+      file = fdopen(fd, "wb");
+      if(!file)
+        close(fd);
+    }
+    free(aname);
   }
+  else
+    /* open file for writing */
+    file = fopen(outs->filename, "wb");
 
-  /* open file for writing */
-  file = fopen(outs->filename, "wb");
   if(!file) {
     warnf(global, "Failed to create the file %s: %s\n", outs->filename,
           strerror(errno));
@@ -78,7 +109,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   size_t rc;
   struct per_transfer *per = userdata;
   struct OutStruct *outs = &per->outs;
-  struct OperationConfig *config = outs->config;
+  struct OperationConfig *config = per->config;
   size_t bytes = sz * nmemb;
   bool is_tty = config->global->isatty;
 #ifdef WIN32
@@ -147,7 +178,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   }
 #endif
 
-  if(!outs->stream && !tool_create_output_file(outs))
+  if(!outs->stream && !tool_create_output_file(outs, per->config))
     return failure;
 
   if(is_tty && (outs->bytes < 2000) && !config->terminal_binary_ok) {

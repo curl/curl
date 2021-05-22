@@ -12,7 +12,7 @@ HTTP GET
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -35,21 +35,19 @@ http
 HTTP GET special path with --request-target
  </name>
  <command>
---request-target "XXX" "http://%HOSTIP:%HTTPPORT/" -H "Testno: 1298"
+--request-target "XXX" "http://%HOSTIP:%HTTPPORT/" -H "Testno: %TESTNUMBER"
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
 GET XXX HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
-Testno: 1298
+Testno: %TESTNUMBER
 
 </protocol>
 </verify>

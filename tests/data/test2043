@@ -10,7 +10,7 @@ HTTP GET
 # Client-side
 <client>
 <features>
-WinSSL
+Schannel
 </features>
 <server>
 none
@@ -19,7 +19,7 @@ none
 Disable certificate revocation checks
  </name>
  <command>
---ssl-no-revoke -I https://revoked.grc.com/
+--ssl-no-revoke -I https://revoked.badssl.com/
 </command>
 </client>
 

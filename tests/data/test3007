@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP with invalid --mail-rcpt and --mail-rcpt-allowfails
+ </name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt-allowfails --mail-rcpt invalid.one --mail-from sender@example.com -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 55 - CURLE_SEND_ERROR
+<errorcode>
+55
+</errorcode>
+<protocol>
+EHLO %TESTNUMBER
+MAIL FROM:<sender@example.com>
+RCPT TO:<invalid.one>
+QUIT
+</protocol>
+</verify>
+</testcase>

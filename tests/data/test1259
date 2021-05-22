@@ -10,7 +10,7 @@ HTTP GET
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Type: text/html
 Set-Cookie: I-am=here; domain=localhost;
 
@@ -27,19 +27,17 @@ http
 HTTP URL with semicolon in password
  </name>
  <command>
-"http://user:pass;word@%HOSTIP:%HTTPPORT/we/want/1259"
+"http://user:pass;word@%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /we/want/1259 HTTP/1.1
+GET /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dXNlcjpwYXNzO3dvcmQ=
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -15,10 +15,10 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 301 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 0
-Location: ftp://127.0.0.1:8992/1245
+Location: ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 Connection: close
 
 </data>
@@ -35,23 +35,17 @@ ftp
 --proto deny must override --proto-redir allow
 </name>
 <command>
---location --proto +all,-ftp --proto-redir -all,+ftp http://%HOSTIP:%HTTPPORT/1245
+--location --proto +all,-ftp --proto-redir -all,+ftp http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
-# The data section doesn't do variable substitution, so we must assert this
-<precheck>
-perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%FTPPORT' ne '8992' );"
-</precheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1245 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_NOPROXY \- disable proxy use for specific hosts
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOPROXY, char *noproxy);
 .SH DESCRIPTION
-Pass a pointer to a zero terminated string. The string consists of a comma
+Pass a pointer to a null-terminated string. The string consists of a comma
 separated list of host names that do not require a proxy to get reached, even
 if one is specified.  The only wildcard available is a single * character,
 which matches all hosts, and effectively disables the proxy. Each name in this
@@ -48,6 +48,10 @@ Enter IPv6 numerical addresses in the list of host names without enclosing
 brackets:
 
  "example.com,::1,localhost"
+
+IPv6 numerical addresses are compared as strings, so they will only match if
+the representations are the same: "::1" is the same as "::0:1" but they don't
+match.
 
 The application does not have to keep the string around after setting this
 option.

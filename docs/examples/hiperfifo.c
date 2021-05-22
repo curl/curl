@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -234,7 +234,9 @@ static void timer_cb(int fd, short kind, void *userp)
 static void remsock(SockInfo *f)
 {
   if(f) {
-    event_del(&f->ev);
+    if(event_initialized(&f->ev)) {
+      event_del(&f->ev);
+    }
     free(f);
   }
 }
@@ -252,7 +254,9 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
   f->sockfd = s;
   f->action = act;
   f->easy = e;
-  event_del(&f->ev);
+  if(event_initialized(&f->ev)) {
+    event_del(&f->ev);
+  }
   event_assign(&f->ev, g->evbase, f->sockfd, kind, event_cb, g);
   event_add(&f->ev, NULL);
 }

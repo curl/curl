@@ -1,0 +1,90 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+Two globbed HTTP PUTs to two globbed URLs
+ </name>
+ <command>
+'http://%HOSTIP:%HTTPPORT/{one,two}/' -T '{log/first%TESTNUMBER,log/second%TESTNUMBER}' -H "Testno: %TESTNUMBER"
+</command>
+<file name="log/first%TESTNUMBER">
+first %TESTNUMBER contents
+</file>
+<file1 name="log/second%TESTNUMBER">
+second %TESTNUMBER contents
+</file1>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+PUT /one/first%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Testno: %TESTNUMBER
+Content-Length: 19
+Expect: 100-continue
+
+first %TESTNUMBER contents
+PUT /two/first%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Testno: %TESTNUMBER
+Content-Length: 19
+Expect: 100-continue
+
+first %TESTNUMBER contents
+PUT /one/second%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Testno: %TESTNUMBER
+Content-Length: 20
+Expect: 100-continue
+
+second %TESTNUMBER contents
+PUT /two/second%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Testno: %TESTNUMBER
+Content-Length: 20
+Expect: 100-continue
+
+second %TESTNUMBER contents
+</protocol>
+</verify>
+</testcase>

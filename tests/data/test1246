@@ -38,24 +38,26 @@ http
 URL with '#' at end of host name instead of '/'
  </name>
  <command>
---proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.1246:%HTTPPORT#@127.0.0.1/tricked.html no-scheme-url.com.1246:%HTTPPORT#@127.127.127.127/again.html
+--proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.%TESTNUMBER:%HTTPPORT#@127.0.0.1/tricked.html no-scheme-url.com.%TESTNUMBER:%HTTPPORT#@127.127.127.127/again.html
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://test.remote.haxx.se.1246:%HTTPPORT/ HTTP/1.1
-Host: test.remote.haxx.se.1246:%HTTPPORT
+GET http://test.remote.haxx.se.%TESTNUMBER:%HTTPPORT/ HTTP/1.1
+Host: test.remote.haxx.se.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://no-scheme-url.com.1246:%HTTPPORT/ HTTP/1.1
-Host: no-scheme-url.com.1246:%HTTPPORT
+GET http://no-scheme-url.com.%TESTNUMBER:%HTTPPORT/ HTTP/1.1
+Host: no-scheme-url.com.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

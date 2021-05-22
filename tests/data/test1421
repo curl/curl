@@ -33,8 +33,11 @@ http
 Re-using HTTP proxy connection for two different host names
  </name>
  <command>
---proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.1421:8990/ http://different.remote.haxx.se.1421:8990
+--proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.%TESTNUMBER:8990/ http://different.remote.haxx.se.%TESTNUMBER:8990
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #
@@ -52,17 +55,16 @@ Content-Length: 6
 
 -foo-
 </stdout>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://test.remote.haxx.se.1421:8990/ HTTP/1.1
-Host: test.remote.haxx.se.1421:8990
+GET http://test.remote.haxx.se.%TESTNUMBER:8990/ HTTP/1.1
+Host: test.remote.haxx.se.%TESTNUMBER:8990
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://different.remote.haxx.se.1421:8990/ HTTP/1.1
-Host: different.remote.haxx.se.1421:8990
+GET http://different.remote.haxx.se.%TESTNUMBER:8990/ HTTP/1.1
+Host: different.remote.haxx.se.%TESTNUMBER:8990
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

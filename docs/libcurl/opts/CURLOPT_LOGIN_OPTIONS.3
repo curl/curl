@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ CURLOPT_LOGIN_OPTIONS \- set login options
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_LOGIN_OPTIONS, char *options);
 .SH DESCRIPTION
-Pass a char * as parameter, which should be pointing to the zero terminated
+Pass a char * as parameter, which should be pointing to the null-terminated
 \fIoptions\fP string to use for the transfer.
 
 For more information about the login options please see RFC2384, RFC5092 and

@@ -21,18 +21,18 @@ Dummy test file for rename test
 sftp
 </server>
 <precheck>
-perl %SRCDIR/libtest/test610.pl mkdir %PWD/log/test611.dir
+perl %SRCDIR/libtest/test610.pl mkdir %PWD/log/test%TESTNUMBER.dir
 </precheck>
  <name>
 SFTP post-quote rename
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-rename %PWD/log/test611.dir %PWD/log/test611.new" sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/file611.txt --insecure
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-rename %PWD/log/test%TESTNUMBER.dir %PWD/log/test%TESTNUMBER.new" sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/file%TESTNUMBER.txt --insecure
 </command>
 <postcheck>
-perl %SRCDIR/libtest/test610.pl rmdir %PWD/log/test611.new
+perl %SRCDIR/libtest/test610.pl rmdir %PWD/log/test%TESTNUMBER.new
 </postcheck>
-<file name="log/file611.txt">
+<file name="log/file%TESTNUMBER.txt">
 Dummy test file for rename test
 </file>
 </client>

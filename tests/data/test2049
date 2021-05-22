@@ -12,7 +12,7 @@ CURLOPT_CONNECT_TO
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Content-Type: text/plain
 
@@ -31,31 +31,32 @@ Connect to specific host
  </name>
 
  <command>
-http://www1.example.com:8081/2049 --connect-to ::%HOSTIP:%HTTPPORT --next http://www2.example.com:8082/2049 --connect-to :8082:%HOSTIP:%HTTPPORT --next http://www3.example.com:8083/2049 --connect-to www3.example.com::%HOSTIP:%HTTPPORT --next http://www4.example.com:8084/2049 --connect-to www4.example.com:8084:%HOSTIP:%HTTPPORT
+http://www1.example.com:8081/%TESTNUMBER --connect-to ::%HOSTIP:%HTTPPORT --next http://www2.example.com:8082/%TESTNUMBER --connect-to :8082:%HOSTIP:%HTTPPORT --next http://www3.example.com:8083/%TESTNUMBER --connect-to www3.example.com::%HOSTIP:%HTTPPORT --next http://www4.example.com:8084/%TESTNUMBER --connect-to www4.example.com:8084:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /2049 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: www1.example.com:8081
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /2049 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: www2.example.com:8082
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /2049 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: www3.example.com:8083
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /2049 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: www4.example.com:8084
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -12,7 +12,7 @@ HTTP proxy
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 
 blablabla
@@ -27,14 +27,15 @@ http
 </server>
 <features>
 ftp
+proxy
 </features>
  <name>
 HTTP PUT to a FTP URL with username+password - over HTTP proxy
  </name>
  <command>
--x http://%HOSTIP:%HTTPPORT ftp://daniel:mysecret@host.com/we/want/208 -T log/test208.txt
+-x http://%HOSTIP:%HTTPPORT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER -T log/test%TESTNUMBER.txt
 </command>
-<file name="log/test208.txt">
+<file name="log/test%TESTNUMBER.txt">
 Weird
      file
          to
@@ -49,13 +50,11 @@ the
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-PUT ftp://daniel:mysecret@host.com/we/want/208 HTTP/1.1
+PUT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER HTTP/1.1
 Host: host.com:21
 Authorization: Basic ZGFuaWVsOm15c2VjcmV0
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 78

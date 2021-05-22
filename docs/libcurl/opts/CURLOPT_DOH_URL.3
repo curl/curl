@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,7 @@ CURLOPT_DOH_URL \- provide the DNS-over-HTTPS URL
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_URL, char *URL);
 .SH DESCRIPTION
 Pass in a pointer to a \fIURL\fP for the DOH server to use for name
-resolving. The parameter should be a char * to a zero terminated string which
+resolving. The parameter should be a char * to a null-terminated string which
 must be URL-encoded in the following format: "https://host:port/path". It MUST
 specify a HTTPS URL.
 
@@ -44,6 +44,12 @@ will use the default name lookup function. You can bootstrap that by providing
 the address for the DOH server with \fICURLOPT_RESOLVE(3)\fP.
 
 Disable DOH use again by setting this option to NULL.
+
+\fBAdvanced:\fP The DOH lookups use SSL so some SSL settings from your transfer
+are inherited. The hostname and peer certificate verification settings are not
+inherited and can be controlled separately via
+\fICURLOPT_DOH_SSL_VERIFYHOST(3)\fP and \fICURLOPT_DOH_SSL_VERIFYPEER(3)\fP.
+Note \fICURLOPT_SSL_CTX_FUNCTION(3)\fP is inherited.
 .SH DEFAULT
 NULL - there is no default DOH URL. If this option isn't set, libcurl will use
 the default name resolver.
@@ -53,7 +59,7 @@ All
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
   curl_easy_setopt(curl, CURLOPT_DOH_URL, "https://dns.example.com");
   curl_easy_perform(curl);
 }

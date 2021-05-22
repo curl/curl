@@ -1,0 +1,30 @@
+<testcase>
+<info>
+<keywords>
+curl_easy_option
+typecheck
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<name>
+Cross validate that gcc-typecheck macros match the option types.
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

@@ -48,19 +48,17 @@ http
 HTTP GET transfer-encoding with custom Connection:
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1125 --tr-encoding -H "Connection: close"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --tr-encoding -H "Connection: close"
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1125 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Connection: close, TE
 TE: gzip

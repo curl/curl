@@ -11,7 +11,7 @@ NO_PROXY
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 4
 Content-Type: text/html
@@ -32,19 +32,17 @@ Access a non-proxied host with using the combination of --proxy option and NO_PR
 NO_PROXY=%HOSTIP
 </setenv>
 <command>
-http://user:secret@%HOSTIP:%HTTPPORT/1249 --proxy http://dummy:%PROXYPORT/ --max-time 5
+http://user:secret@%HOSTIP:%HTTPPORT/%TESTNUMBER --proxy http://dummy:%NOLISTENPORT/ --max-time 5
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1249 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dXNlcjpzZWNyZXQ=
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

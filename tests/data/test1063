@@ -28,9 +28,9 @@ Invalid large X- range on a file://
 # This range value is 2**32+7, which will be truncated to the valid value 7
 # if the large file support is not working correctly
  <command>
--r 4294967303- file://localhost/%PWD/log/test1063.txt 
+-r 4294967303- file://localhost%FILE_PWD/log/test%TESTNUMBER.txt 
 </command>
-<file name="log/test1063.txt">
+<file name="log/test%TESTNUMBER.txt">
 1234567890
 1234567890
 </file>

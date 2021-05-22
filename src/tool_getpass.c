@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -100,11 +100,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #define DONE
 #endif /* __VMS */
 
-#ifdef __SYMBIAN32__
-#  define getch() getchar()
-#endif
-
-#if defined(WIN32) || defined(__SYMBIAN32__)
+#if defined(WIN32)
 
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
@@ -123,10 +119,8 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
            previous one as well */
         i = i - (i >= 1 ? 2 : 1);
   }
-#ifndef __SYMBIAN32__
   /* since echo is disabled, print a newline */
   fputs("\n", stderr);
-#endif
   /* if user didn't hit ENTER, terminate buffer */
   if(i == buflen)
     buffer[buflen-1] = '\0';
@@ -134,7 +128,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   return buffer; /* we always return success */
 }
 #define DONE
-#endif /* WIN32 || __SYMBIAN32__ */
+#endif /* WIN32 */
 
 #ifdef NETWARE
 /* NetWare implementation */
@@ -238,7 +232,7 @@ char *getpass_r(const char *prompt, /* prompt to display */
   fputs(prompt, stderr);
   nread = read(fd, password, buflen);
   if(nread > 0)
-    password[--nread] = '\0'; /* zero terminate where enter is stored */
+    password[--nread] = '\0'; /* null-terminate where enter is stored */
   else
     password[0] = '\0'; /* got nothing */
 

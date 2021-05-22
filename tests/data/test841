@@ -33,7 +33,7 @@ imap
 IMAP custom request doesn't check continuation data
  </name>
  <command>
- imap://%HOSTIP:%IMAPPORT/841/ -u user:secret -X 'FETCH 123 BODY[1]'
+ imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/ -u user:secret -X 'FETCH 123 BODY[1]'
 </command>
 </client>
 
@@ -43,7 +43,7 @@ IMAP custom request doesn't check continuation data
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 SELECT 841
+A003 SELECT %TESTNUMBER
 A004 FETCH 123 BODY[1]
 A005 LOGOUT
 </protocol>

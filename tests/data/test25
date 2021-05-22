@@ -12,7 +12,7 @@ followlocation
 <data>
 HTTP/1.1 301 This is a weirdo text message
 Server: test-server/fake
-Location: data/reply/25
+Location: data/reply/%TESTNUMBER
 Content-Length: 32
 Connection: close
 
@@ -21,37 +21,37 @@ Redirect to the same URL again!
 <datacheck>
 HTTP/1.1 301 This is a weirdo text message
 Server: test-server/fake
-Location: data/reply/25
+Location: data/reply/%TESTNUMBER
 Content-Length: 32
 Connection: close
 
 HTTP/1.1 301 This is a weirdo text message
 Server: test-server/fake
-Location: data/reply/25
+Location: data/reply/%TESTNUMBER
 Content-Length: 32
 Connection: close
 
 HTTP/1.1 301 This is a weirdo text message
 Server: test-server/fake
-Location: data/reply/25
+Location: data/reply/%TESTNUMBER
 Content-Length: 32
 Connection: close
 
 HTTP/1.1 301 This is a weirdo text message
 Server: test-server/fake
-Location: data/reply/25
+Location: data/reply/%TESTNUMBER
 Content-Length: 32
 Connection: close
 
 HTTP/1.1 301 This is a weirdo text message
 Server: test-server/fake
-Location: data/reply/25
+Location: data/reply/%TESTNUMBER
 Content-Length: 32
 Connection: close
 
 HTTP/1.1 301 This is a weirdo text message
 Server: test-server/fake
-Location: data/reply/25
+Location: data/reply/%TESTNUMBER
 Content-Length: 32
 Connection: close
 
@@ -67,44 +67,41 @@ http
 looping HTTP Location: following with --max-redirs
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/25 -L --max-redirs 5
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L --max-redirs 5
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
-GET /want/25 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /want/data/reply/25 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+GET /want/data/reply/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /want/data/reply/data/reply/25 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+GET /want/data/reply/data/reply/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /want/data/reply/data/reply/data/reply/25 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+GET /want/data/reply/data/reply/data/reply/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /want/data/reply/data/reply/data/reply/data/reply/25 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+GET /want/data/reply/data/reply/data/reply/data/reply/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /want/data/reply/data/reply/data/reply/data/reply/data/reply/25 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+GET /want/data/reply/data/reply/data/reply/data/reply/data/reply/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

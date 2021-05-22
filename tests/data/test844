@@ -15,9 +15,7 @@ RFC7628
 <servercmd>
 AUTH OAUTHBEARER
 REPLY AUTHENTICATE +
-REPLY bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMwFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ== +
-eyJzdGF0dXMiOiJpbnZhbGlkX3Rva2VuIiwic2NvcGUiOiJleGFtcGxlX3Njb3BlIiwib3BlbmlkLWNvbmZpZ3VyYXRpb24iOiJodHRwczovL2V4YW1wbGUuY29tLy53ZWxsLWtub3duL29wZW5pZC1jb25maWd1cmF0aW9uIn0=
-REPLY AQ== A002 NO Authentication failed
+REPLY %b64[n,a=user,%01host=127.0.0.1%01port=%IMAPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64% A002 NO Authentication failed
 </servercmd>
 </reply>
 
@@ -31,13 +29,8 @@ imap
 IMAP OAuth 2.0 (OAUTHBEARER) failure as continuation
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/844/;MAILINDEX=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
-# The protocol section doesn't support ways of specifying the raw data in the
-# base64 encoded message so we must assert this
-<precheck>
-perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%IMAPPORT' ne '9003' );"
-</precheck>
 </client>
 
 #
@@ -53,8 +46,7 @@ perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' 
 <protocol>
 A001 CAPABILITY
 A002 AUTHENTICATE OAUTHBEARER
-bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMwFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
-AQ==
+%b64[n,a=user,%01host=127.0.0.1%01port=%IMAPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
 </protocol>
 </verify>
 </testcase>

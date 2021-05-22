@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,9 +33,11 @@ void Curl_expire_done(struct Curl_easy *data, expire_id id);
 void Curl_update_timer(struct Curl_multi *multi);
 void Curl_attach_connnection(struct Curl_easy *data,
                              struct connectdata *conn);
+void Curl_detach_connnection(struct Curl_easy *data);
 bool Curl_multiplex_wanted(const struct Curl_multi *multi);
 void Curl_set_in_callback(struct Curl_easy *data, bool value);
 bool Curl_is_in_callback(struct Curl_easy *easy);
+CURLcode Curl_preconnect(struct Curl_easy *data);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket and connection hashes */
@@ -67,7 +69,7 @@ size_t Curl_multi_max_host_connections(struct Curl_multi *multi);
 /* Return the value of the CURLMOPT_MAX_TOTAL_CONNECTIONS option */
 size_t Curl_multi_max_total_connections(struct Curl_multi *multi);
 
-void Curl_multiuse_state(struct connectdata *conn,
+void Curl_multiuse_state(struct Curl_easy *data,
                          int bundlestate); /* use BUNDLE_* defines */
 
 /*
@@ -88,5 +90,9 @@ void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s);
 CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
                                  struct Curl_easy *data,
                                  struct connectdata *conn);
+
+
+/* Return the value of the CURLMOPT_MAX_CONCURRENT_STREAMS option */
+unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
 
 #endif /* HEADER_CURL_MULTIIF_H */

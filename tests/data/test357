@@ -1,0 +1,96 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+Expect
+</keywords>
+</info>
+# Server-side
+<reply>
+# 417 means the server didn't like the Expect header
+<data>
+HTTP/1.1 417 OK swsbounce
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+
+</data>
+<data1>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 10
+
+blablabla
+</data1>
+<datacheck>
+HTTP/1.1 417 OK swsbounce
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 10
+
+blablabla
+</datacheck>
+<servercmd>
+no-expect
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP PUT with Expect: 100-continue and 417 response
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T log/test%TESTNUMBER.txt
+</command>
+<file name="log/test%TESTNUMBER.txt">
+Weird
+     file
+         to
+   upload
+for
+   testing
+the
+   PUT
+      feature
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+PUT /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 78
+Expect: 100-continue
+
+PUT /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 78
+
+Weird
+     file
+         to
+   upload
+for
+   testing
+the
+   PUT
+      feature
+</protocol>
+</verify>
+</testcase>

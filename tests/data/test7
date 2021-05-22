@@ -12,7 +12,7 @@ header dump
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes swsclose
@@ -32,24 +32,22 @@ http
 HTTP with cookie parser and header recording
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/7 -b none -D log/heads7.txt
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b none -D log/heads%TESTNUMBER.txt
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /we/want/7 HTTP/1.1
+GET /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/heads7.txt">
+<file name="log/heads%TESTNUMBER.txt">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes swsclose

@@ -12,7 +12,7 @@ HTTP proxy
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
 Content-Type: text/html
 
@@ -25,6 +25,7 @@ hello
 <client>
 <features>
 ipv6
+proxy
 </features>
 <server>
 http-ipv6
@@ -33,19 +34,17 @@ http-ipv6
 HTTP-IPv6 GET with proxy specified using IPv6-numerical address
  </name>
  <command>
--g -x "http://%HOST6IP:%HTTP6PORT" http://veryveryremotesite.com/263
+-g -x "http://%HOST6IP:%HTTP6PORT" http://veryveryremotesite.com/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:
-</strip>
 <protocol>
-GET http://veryveryremotesite.com/263 HTTP/1.1
+GET http://veryveryremotesite.com/%TESTNUMBER HTTP/1.1
 Host: veryveryremotesite.com
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

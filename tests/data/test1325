@@ -13,28 +13,28 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 308 OK swsclose
-Location: 13250002
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Location: %TESTNUMBER0002
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 </data>
 <data2>
 HTTP/1.1 200 OK swsclose
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 body
 </data2>
 <datacheck>
 HTTP/1.1 308 OK swsclose
-Location: 13250002
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Location: %TESTNUMBER0002
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 HTTP/1.1 200 OK swsclose
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 body
@@ -51,25 +51,24 @@ http
 HTTP 308-redirect with POST
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/1325 -L -d "moo"
+http://%HOSTIP:%HTTPPORT/we/%TESTNUMBER -L -d "moo"
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
-POST /we/1325 HTTP/1.1
+POST /we/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 3
 Content-Type: application/x-www-form-urlencoded
 
-mooPOST /we/13250002 HTTP/1.1
+mooPOST /we/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 3
 Content-Type: application/x-www-form-urlencoded

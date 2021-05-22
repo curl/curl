@@ -12,7 +12,7 @@ globbing
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -43,27 +43,26 @@ http
 HTTP, urlglob {}-retrieval and -o #[num] usage
  </name>
  <command option="no-output">
-"http://%HOSTIP:%HTTPPORT/{74,740001}" -o "log/dumpit#1.dump"
+"http://%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER0001}" -o "log/dumpit#1.dump"
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /74 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /740001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/dumpit740001.dump">
+<file name="log/dumpit%TESTNUMBER0001.dump">
 HTTP/1.0 200 OK
 Content-Type: text/html
 Funny-head: swsclose

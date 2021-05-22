@@ -35,7 +35,7 @@ pop3
 POP3 multiple connection authentication
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/882001 -u user.one:secret -: pop3://%HOSTIP:%POP3PORT/882002 -u user.two:secret
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER001 -u user.one:secret -: pop3://%HOSTIP:%POP3PORT/%TESTNUMBER002 -u user.two:secret
 </command>
 </client>
 
@@ -46,12 +46,12 @@ pop3://%HOSTIP:%POP3PORT/882001 -u user.one:secret -: pop3://%HOSTIP:%POP3PORT/8
 CAPA
 USER user.one
 PASS secret
-RETR 882001
+RETR %TESTNUMBER001
 QUIT
 CAPA
 USER user.two
 PASS secret
-RETR 882002
+RETR %TESTNUMBER002
 QUIT
 </protocol>
 </verify>

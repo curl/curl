@@ -30,18 +30,16 @@ http
 HTTP Location: and 'redirect_url' with non-supported scheme
  </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/our/1159 -w '%{redirect_url}\n'
+http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER -w '%{redirect_url}\n'
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /we/want/our/1159 HTTP/1.1
+GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

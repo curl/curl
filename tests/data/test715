@@ -43,12 +43,13 @@ socks5
 </server>
 <features>
 http
+proxy
 </features>
  <name>
 FTP fetch with --preproxy, --proxy and --connect-to
  </name>
  <command>
-ftp://ftp.example.com.715/715 --connect-to ::connect.example.com.715:%FTPPORT --proxytunnel --proxy %HOSTIP:%PROXYPORT --preproxy socks5://%HOSTIP:%SOCKSPORT 
+ftp://ftp.example.com.%TESTNUMBER/%TESTNUMBER --connect-to ::connect.example.com.%TESTNUMBER:%FTPPORT --proxytunnel --proxy %HOSTIP:%PROXYPORT --preproxy socks5://%HOSTIP:%SOCKSPORT 
 </command>
 </client>
 
@@ -61,8 +62,8 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 715
-RETR 715
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

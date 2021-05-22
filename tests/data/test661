@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+FTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib%TESTNUMBER
+</tool>
+
+ <name>
+Avoid redundant CWDs
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD /folderA
+EPSV
+TYPE I
+RETR %TESTNUMBER
+CWD /folderB
+EPSV
+RETR %TESTNUMBER
+QUIT
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+RETR /folderA/%TESTNUMBER
+CWD /folderB
+EPSV
+RETR %TESTNUMBER
+EPSV
+RETR /folderA/%TESTNUMBER
+QUIT
+USER anonymous
+PASS ftp@example.com
+PWD
+SYST
+QUIT
+USER anonymous
+PASS ftp@example.com
+PWD
+SYST
+SYST
+QUIT
+</protocol>
+</verify>
+</testcase>

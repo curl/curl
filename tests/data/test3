@@ -36,20 +36,18 @@ http
 HTTP POST with auth and contents but with content-length set to 0
  </name>
  <command>
- -d "fooo=mooo&pooo=clue&doo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HTTPPORT/3
+ -d "fooo=mooo&pooo=clue&doo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
-POST /3 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic ZmFrZTotdXNlcg==
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 37
 Content-Type: application/x-www-form-urlencoded

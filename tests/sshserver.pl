@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -28,6 +28,9 @@ use strict;
 use warnings;
 use Cwd;
 use Cwd 'abs_path';
+use Digest::MD5;
+use Digest::MD5 'md5_hex';
+use MIME::Base64;
 
 #***************************************************************************
 # Variables and subs imported from sshhelp module
@@ -48,6 +51,7 @@ use sshhelp qw(
     $sftpcmds
     $hstprvkeyf
     $hstpubkeyf
+    $hstpubmd5f
     $cliprvkeyf
     $clipubkeyf
     display_sshdconfig
@@ -357,10 +361,11 @@ if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
 #
 if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
    (! -e $hstpubkeyf) || (! -s $hstpubkeyf) ||
+   (! -e $hstpubmd5f) || (! -s $hstpubmd5f) ||
    (! -e $cliprvkeyf) || (! -s $cliprvkeyf) ||
    (! -e $clipubkeyf) || (! -s $clipubkeyf)) {
     # Make sure all files are gone so ssh-keygen doesn't complain
-    unlink($hstprvkeyf, $hstpubkeyf, $cliprvkeyf, $clipubkeyf);
+    unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f, $cliprvkeyf, $clipubkeyf);
     logmsg 'generating host keys...' if($verbose);
     if(system "\"$sshkeygen\" -q -t rsa -f $hstprvkeyf -C 'curl test server' -N ''") {
         logmsg 'Could not generate host key';
@@ -369,6 +374,24 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
     logmsg 'generating client keys...' if($verbose);
     if(system "\"$sshkeygen\" -q -t rsa -f $cliprvkeyf -C 'curl test client' -N ''") {
         logmsg 'Could not generate client key';
+        exit 1;
+    }
+    # Make sure that permissions are restricted so openssh doesn't complain
+    system "chmod 600 $hstprvkeyf";
+    system "chmod 600 $cliprvkeyf";
+    # Save md5 hash of public host key
+    open(RSAKEYFILE, "<$hstpubkeyf");
+    my @rsahostkey = do { local $/ = ' '; <RSAKEYFILE> };
+    close(RSAKEYFILE);
+    if(!$rsahostkey[1]) {
+        logmsg 'Failed parsing base64 encoded RSA host key';
+        exit 1;
+    }
+    open(PUBMD5FILE, ">$hstpubmd5f");
+    print PUBMD5FILE md5_hex(decode_base64($rsahostkey[1]));
+    close(PUBMD5FILE);
+    if((! -e $hstpubmd5f) || (! -s $hstpubmd5f)) {
+        logmsg 'Failed writing md5 hash of RSA host key';
         exit 1;
     }
 }
@@ -382,7 +405,7 @@ my $hstprvkeyf_config = abs_path("$path/$hstprvkeyf");
 my $pidfile_config = $pidfile;
 my $sftpsrv_config = $sftpsrv;
 
-if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
+if (pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
     $clipubkeyf_config = pathhelp::build_sys_abs_path($clipubkeyf_config);
     $hstprvkeyf_config = pathhelp::build_sys_abs_path($hstprvkeyf_config);
@@ -499,6 +522,11 @@ push @cfgarr, '#';
 # and do not support quotes around values for some unknown reason.
 if ($sshdid =~ /OpenSSH-Windows/) {
     my $username_lc = lc $username;
+    if (exists $ENV{USERDOMAIN}) {
+        my $userdomain_lc = lc $ENV{USERDOMAIN};
+        $username_lc = "$userdomain_lc\\$username_lc";
+    }
+    $username_lc =~ s/ /\?/g; # replace space with ?
     push @cfgarr, "DenyUsers !$username_lc";
     push @cfgarr, "AllowUsers $username_lc";
 } else {
@@ -512,7 +540,9 @@ push @cfgarr, '#';
 push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
 push @cfgarr, "AuthorizedKeysFile2 $clipubkeyf_config";
 push @cfgarr, "HostKey $hstprvkeyf_config";
-push @cfgarr, "PidFile $pidfile_config";
+if ($sshdid !~ /OpenSSH-Windows/) {
+    push @cfgarr, "PidFile $pidfile_config";
+}
 push @cfgarr, '#';
 push @cfgarr, "Port $port";
 push @cfgarr, "ListenAddress $listenaddr";
@@ -774,7 +804,7 @@ if((! -e $knownhosts) || (! -s $knownhosts)) {
 my $identity_config = abs_path("$path/$identity");
 my $knownhosts_config = abs_path("$path/$knownhosts");
 
-if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
+if (pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
     $identity_config = pathhelp::build_sys_abs_path($identity_config);
     $knownhosts_config = pathhelp::build_sys_abs_path($knownhosts_config);
@@ -1075,12 +1105,38 @@ if($error) {
 }
 @cfgarr = ();
 
+#***************************************************************************
+# Prepare command line of ssh server daemon
+#
+my $cmd = "\"$sshd\" -e -D -f $sshdconfig > $sshdlog 2>&1";
+logmsg "SCP/SFTP server listening on port $port" if($verbose);
+logmsg "RUN: $cmd" if($verbose);
+
+#***************************************************************************
+# Start the ssh server daemon on Windows without forking it
+#
+if ($sshdid =~ /OpenSSH-Windows/) {
+    # Fake pidfile for ssh server on Windows.
+    if(open(OUT, ">$pidfile")) {
+        print OUT $$ . "\n";
+        close(OUT);
+    }
+
+    # Put an "exec" in front of the command so that the child process
+    # keeps this child's process ID by being tied to the spawned shell.
+    exec("exec $cmd") || die "Can't exec() $cmd: $!";
+    # exec() will create a new process, but ties the existence of the
+    # new process to the parent waiting perl.exe and sh.exe processes.
+
+    # exec() should never return back here to this process. We protect
+    # ourselves by calling die() just in case something goes really bad.
+    die "error: exec() has returned";
+}
 
 #***************************************************************************
 # Start the ssh server daemon without forking it
 #
-logmsg "SCP/SFTP server listening on port $port" if($verbose);
-my $rc = system "\"$sshd\" -e -D -f $sshdconfig > $sshdlog 2>&1";
+my $rc = system($cmd);
 if($rc == -1) {
     logmsg "\"$sshd\" failed with: $!";
 }
@@ -1096,8 +1152,8 @@ elsif($verbose && ($rc >> 8)) {
 #***************************************************************************
 # Clean up once the server has stopped
 #
-unlink($hstprvkeyf, $hstpubkeyf, $cliprvkeyf, $clipubkeyf, $knownhosts);
-unlink($sshdconfig, $sshconfig, $sftpconfig);
-
+unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f,
+       $cliprvkeyf, $clipubkeyf, $knownhosts,
+       $sshdconfig, $sshconfig, $sftpconfig);
 
 exit 0;

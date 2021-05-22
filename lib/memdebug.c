@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,52 +35,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/*
- * Until 2011-08-17 libcurl's Memory Tracking feature also performed
- * automatic malloc and free filling operations using 0xA5 and 0x13
- * values. Our own preinitialization of dynamically allocated memory
- * might be useful when not using third party memory debuggers, but
- * on the other hand this would fool memory debuggers into thinking
- * that all dynamically allocated memory is properly initialized.
- *
- * As a default setting, libcurl's Memory Tracking feature no longer
- * performs preinitialization of dynamically allocated memory on its
- * own. If you know what you are doing, and really want to retain old
- * behavior, you can achieve this compiling with preprocessor symbols
- * CURL_MT_MALLOC_FILL and CURL_MT_FREE_FILL defined with appropriate
- * values.
- */
-
-#ifdef CURL_MT_MALLOC_FILL
-# if (CURL_MT_MALLOC_FILL < 0) || (CURL_MT_MALLOC_FILL > 0xff)
-#   error "invalid CURL_MT_MALLOC_FILL or out of range"
-# endif
-#endif
-
-#ifdef CURL_MT_FREE_FILL
-# if (CURL_MT_FREE_FILL < 0) || (CURL_MT_FREE_FILL > 0xff)
-#   error "invalid CURL_MT_FREE_FILL or out of range"
-# endif
-#endif
-
-#if defined(CURL_MT_MALLOC_FILL) && defined(CURL_MT_FREE_FILL)
-# if (CURL_MT_MALLOC_FILL == CURL_MT_FREE_FILL)
-#   error "CURL_MT_MALLOC_FILL same as CURL_MT_FREE_FILL"
-# endif
-#endif
-
-#ifdef CURL_MT_MALLOC_FILL
-#  define mt_malloc_fill(buf,len) memset((buf), CURL_MT_MALLOC_FILL, (len))
-#else
-#  define mt_malloc_fill(buf,len) Curl_nop_stmt
-#endif
-
-#ifdef CURL_MT_FREE_FILL
-#  define mt_free_fill(buf,len) memset((buf), CURL_MT_FREE_FILL, (len))
-#else
-#  define mt_free_fill(buf,len) Curl_nop_stmt
-#endif
-
 struct memdebug {
   size_t size;
   union {
@@ -101,8 +55,23 @@ struct memdebug {
  */
 
 FILE *curl_dbg_logfile = NULL;
+static bool registered_cleanup = FALSE; /* atexit registered cleanup */
 static bool memlimit = FALSE; /* enable memory limit */
 static long memsize = 0;  /* set number of mallocs allowed */
+
+/* LeakSantizier (LSAN) calls _exit() instead of exit() when a leak is detected
+   on exit so the logfile must be closed explicitly or data could be lost.
+   Though _exit() does not call atexit handlers such as this, LSAN's call to
+   _exit() comes after the atexit handlers are called. curl/curl#6620 */
+static void curl_dbg_cleanup(void)
+{
+  if(curl_dbg_logfile &&
+     curl_dbg_logfile != stderr &&
+     curl_dbg_logfile != stdout) {
+    fclose(curl_dbg_logfile);
+  }
+  curl_dbg_logfile = NULL;
+}
 
 /* this sets the log file name */
 void curl_dbg_memdebug(const char *logname)
@@ -118,6 +87,8 @@ void curl_dbg_memdebug(const char *logname)
       setbuf(curl_dbg_logfile, (char *)NULL);
 #endif
   }
+  if(!registered_cleanup)
+    registered_cleanup = !atexit(curl_dbg_cleanup);
 }
 
 /* This function sets the number of malloc() calls that should return
@@ -137,15 +108,13 @@ static bool countcheck(const char *func, int line, const char *source)
      should not be made */
   if(memlimit && source) {
     if(!memsize) {
-      if(source) {
-        /* log to file */
-        curl_dbg_log("LIMIT %s:%d %s reached memlimit\n",
-                     source, line, func);
-        /* log to stderr also */
-        fprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
-                source, line, func);
-        fflush(curl_dbg_logfile); /* because it might crash now */
-      }
+      /* log to file */
+      curl_dbg_log("LIMIT %s:%d %s reached memlimit\n",
+                   source, line, func);
+      /* log to stderr also */
+      fprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
+              source, line, func);
+      fflush(curl_dbg_logfile); /* because it might crash now */
       errno = ENOMEM;
       return TRUE; /* RETURN ERROR! */
     }
@@ -173,8 +142,6 @@ void *curl_dbg_malloc(size_t wantedsize, int line, const char *source)
 
   mem = (Curl_cmalloc)(size);
   if(mem) {
-    /* fill memory with junk */
-    mt_malloc_fill(mem->mem, wantedsize);
     mem->size = wantedsize;
   }
 
@@ -321,14 +288,11 @@ void curl_dbg_free(void *ptr, int line, const char *source)
 #  pragma warning(pop)
 #endif
 
-    /* destroy */
-    mt_free_fill(mem->mem, mem->size);
-
     /* free for real */
     (Curl_cfree)(mem);
   }
 
-  if(source)
+  if(source && ptr)
     curl_dbg_log("MEM %s:%d free(%p)\n", source, line, (void *)ptr);
 }
 
@@ -453,6 +417,16 @@ FILE *curl_dbg_fopen(const char *file, const char *mode,
     curl_dbg_log("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
                 source, line, file, mode, (void *)res);
 
+  return res;
+}
+
+FILE *curl_dbg_fdopen(int filedes, const char *mode,
+                      int line, const char *source)
+{
+  FILE *res = fdopen(filedes, mode);
+  if(source)
+    curl_dbg_log("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
+                 source, line, filedes, mode, (void *)res);
   return res;
 }
 

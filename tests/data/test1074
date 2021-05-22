@@ -11,7 +11,7 @@ HTTP/1.0
 <reply>
 <data nocheck="yes">
 HTTP/1.0 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Connection: Keep-Alive
 
@@ -19,7 +19,7 @@ surprise
 </data>
 <data1>
 HTTP/1.0 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 surprise2
@@ -39,7 +39,7 @@ http
 HTTP downgrade to HTTP/1.0 on second request
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/1074 http://%HOSTIP:%HTTPPORT/wantmore/10740001
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/wantmore/%TESTNUMBER0001
 </command>
 </client>
 
@@ -47,28 +47,27 @@ http://%HOSTIP:%HTTPPORT/want/1074 http://%HOSTIP:%HTTPPORT/wantmore/10740001
 <verify>
 <stdout>
 HTTP/1.0 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Connection: Keep-Alive
 
 surprise
 HTTP/1.0 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 surprise2
 </stdout>
 
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /want/1074 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /wantmore/10740001 HTTP/1.0
+GET /wantmore/%TESTNUMBER0001 HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

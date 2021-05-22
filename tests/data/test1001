@@ -72,31 +72,29 @@ proxy
 HTTP POST --digest with PUT and resumed upload and modified method
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1001 -u auser:apasswd --digest -T log/1001 -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -T log/%TESTNUMBER -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
 </command>
-<file name="log/1001">
+<file name="log/%TESTNUMBER">
 test
 </file>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://%HOSTIP:%HTTPPORT/1001 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Content-Range: bytes 2-4/5
-User-Agent: curl/7.12.1-CVS (i686-pc-linux-gnu) libcurl/7.12.1-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.6
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
 
-GET http://%HOSTIP:%HTTPPORT/1001 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/1001", response="6af4d89c952f4dd4cc215a6878dc499d"
+Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="6af4d89c952f4dd4cc215a6878dc499d"
 Content-Range: bytes 2-4/5
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 3

@@ -29,7 +29,7 @@ http
 HTTP PUT from stdin with set size, disabling chunked transfer-encoding
  </name>
  <command>
- -T - -H "Transfer-Encoding:" -H "Content-Length: 14" http://%HOSTIP:%HTTPPORT/98
+ -T - -H "Transfer-Encoding:" -H "Content-Length: 14" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 <stdin>
 data on stdin
@@ -39,12 +39,10 @@ data on stdin
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-PUT /98 HTTP/1.1
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 14
 Expect: 100-continue

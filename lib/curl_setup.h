@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,11 +27,18 @@
 #endif
 
 /*
+ * Disable Visual Studio warnings:
+ * 4127 "conditional expression is constant"
+ */
+#ifdef _MSC_VER
+#pragma warning(disable:4127)
+#endif
+
+/*
  * Define WIN32 when build target is Win32 API
  */
 
-#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32) && \
-    !defined(__SYMBIAN32__)
+#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32)
 #define WIN32
 #endif
 
@@ -47,6 +54,16 @@
 #  ifndef NOGDI
 #    define NOGDI
 #  endif
+/* Detect Windows App environment which has a restricted access
+ * to the Win32 APIs. */
+# if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
+  defined(WINAPI_FAMILY)
+#  include <winapifamily.h>
+#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
+     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#    define CURL_WINDOWS_APP
+#  endif
+# endif
 #endif
 
 /*
@@ -78,10 +95,6 @@
 
 #ifdef __AMIGA__
 #  include "config-amigaos.h"
-#endif
-
-#ifdef __SYMBIAN32__
-#  include "config-symbian.h"
 #endif
 
 #ifdef __OS400__
@@ -147,8 +160,6 @@
 /* ================================================================ */
 
 #include <curl/curl.h>
-
-#define CURL_SIZEOF_CURL_OFF_T SIZEOF_CURL_OFF_T
 
 /*
  * Disable other protocols when http is the only one desired.
@@ -223,64 +234,20 @@
 #endif
 
 /*
+ * Windows setup file includes some system headers.
+ */
+
+#ifdef HAVE_WINDOWS_H
+#  include "setup-win32.h"
+#endif
+
+/*
  * Use getaddrinfo to resolve the IPv4 address literal. If the current network
  * interface doesn't support IPv4, but supports IPv6, NAT64, and DNS64,
  * performing this task will result in a synthesized IPv6 address.
  */
-#ifdef  __APPLE__
+#if defined(__APPLE__) && !defined(USE_ARES)
 #define USE_RESOLVE_ON_IPS 1
-#endif
-
-/*
- * Include header files for windows builds before redefining anything.
- * Use this preprocessor block only to include or exclude windows.h,
- * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs
- * to any other further and independent block.  Under Cygwin things work
- * just as under linux (e.g. <sys/socket.h>) and the winsock headers should
- * never be included when __CYGWIN__ is defined.  configure script takes
- * care of this, not defining HAVE_WINDOWS_H, HAVE_WINSOCK_H, HAVE_WINSOCK2_H,
- * neither HAVE_WS2TCPIP_H when __CYGWIN__ is defined.
- */
-
-#ifdef HAVE_WINDOWS_H
-#  if defined(UNICODE) && !defined(_UNICODE)
-#    define _UNICODE
-#  endif
-#  if defined(_UNICODE) && !defined(UNICODE)
-#    define UNICODE
-#  endif
-#  include <winerror.h>
-#  include <windows.h>
-#  ifdef HAVE_WINSOCK2_H
-#    include <winsock2.h>
-#    ifdef HAVE_WS2TCPIP_H
-#      include <ws2tcpip.h>
-#    endif
-#  else
-#    ifdef HAVE_WINSOCK_H
-#      include <winsock.h>
-#    endif
-#  endif
-#  include <tchar.h>
-#  ifdef UNICODE
-     typedef wchar_t *(*curl_wcsdup_callback)(const wchar_t *str);
-#  endif
-#endif
-
-/*
- * Define USE_WINSOCK to 2 if we have and use WINSOCK2 API, else
- * define USE_WINSOCK to 1 if we have and use WINSOCK  API, else
- * undefine USE_WINSOCK.
- */
-
-#undef USE_WINSOCK
-
-#ifdef HAVE_WINSOCK2_H
-#  define USE_WINSOCK 2
-#else
-#  ifdef HAVE_WINSOCK_H
-#    define USE_WINSOCK 1
-#  endif
 #endif
 
 #ifdef USE_LWIPSOCK
@@ -318,10 +285,16 @@
 #  include <exec/execbase.h>
 #  include <proto/exec.h>
 #  include <proto/dos.h>
+#  include <unistd.h>
 #  ifdef HAVE_PROTO_BSDSOCKET_H
 #    include <proto/bsdsocket.h> /* ensure bsdsocket.library use */
 #    define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
 #  endif
+/*
+ * In clib2 arpa/inet.h warns that some prototypes may clash
+ * with bsdsocket.library. This avoids the definition of those.
+ */
+#  define __NO_NET_API
 #endif
 
 #include <stdio.h>
@@ -367,9 +340,16 @@
 #  undef  fstat
 #  define fstat(fdes,stp)            _fstati64(fdes, stp)
 #  undef  stat
-#  define stat(fname,stp)            _stati64(fname, stp)
+#  define stat(fname,stp)            curlx_win32_stat(fname, stp)
 #  define struct_stat                struct _stati64
 #  define LSEEK_ERROR                (__int64)-1
+#  define open                       curlx_win32_open
+#  define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
+#  define access(fname,mode)         curlx_win32_access(fname, mode)
+   int curlx_win32_open(const char *filename, int oflag, ...);
+   int curlx_win32_stat(const char *path, struct_stat *buffer);
+   FILE *curlx_win32_fopen(const char *filename, const char *mode);
+   int curlx_win32_access(const char *path, int mode);
 #endif
 
 /*
@@ -384,8 +364,15 @@
 #    undef  lseek
 #    define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
 #    define fstat(fdes,stp)            _fstat(fdes, stp)
-#    define stat(fname,stp)            _stat(fname, stp)
+#    define stat(fname,stp)            curlx_win32_stat(fname, stp)
 #    define struct_stat                struct _stat
+#    define open                       curlx_win32_open
+#    define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
+#    define access(fname,mode)         curlx_win32_access(fname, mode)
+     int curlx_win32_stat(const char *path, struct_stat *buffer);
+     int curlx_win32_open(const char *filename, int oflag, ...);
+     FILE *curlx_win32_fopen(const char *filename, const char *mode);
+     int curlx_win32_access(const char *path, int mode);
 #  endif
 #  define LSEEK_ERROR                (long)-1
 #endif
@@ -433,7 +420,7 @@
 #if (SIZEOF_CURL_OFF_T == 4)
 #  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFF)
 #else
-   /* assume CURL_SIZEOF_CURL_OFF_T == 8 */
+   /* assume SIZEOF_CURL_OFF_T == 8 */
 #  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
 #endif
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - CURL_OFF_T_C(1))
@@ -530,7 +517,6 @@
 #    undef HAVE_GETADDRINFO_THREADSAFE
 #    undef HAVE_FREEADDRINFO
 #    undef HAVE_GETADDRINFO
-#    undef HAVE_GETNAMEINFO
 #    undef ENABLE_IPV6
 #  endif
 #endif
@@ -563,6 +549,12 @@
  * Mutually exclusive CURLRES_* definitions.
  */
 
+#if defined(ENABLE_IPV6) && defined(HAVE_GETADDRINFO)
+#  define CURLRES_IPV6
+#else
+#  define CURLRES_IPV4
+#endif
+
 #ifdef USE_ARES
 #  define CURLRES_ASYNCH
 #  define CURLRES_ARES
@@ -577,21 +569,7 @@
 #  define CURLRES_SYNCH
 #endif
 
-#ifdef ENABLE_IPV6
-#  define CURLRES_IPV6
-#else
-#  define CURLRES_IPV4
-#endif
-
 /* ---------------------------------------------------------------- */
-
-/*
- * When using WINSOCK, TELNET protocol requires WINSOCK2 API.
- */
-
-#if defined(USE_WINSOCK) && (USE_WINSOCK != 2)
-#  define CURL_DISABLE_TELNET 1
-#endif
 
 /*
  * msvc 6.0 does not have struct sockaddr_storage and
@@ -644,7 +622,8 @@ int netware_init(void);
 #if defined(USE_GNUTLS) || defined(USE_OPENSSL) || defined(USE_NSS) || \
     defined(USE_MBEDTLS) || \
     defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
-    defined(USE_SECTRANSP) || defined(USE_GSKIT) || defined(USE_MESALINK)
+    defined(USE_SECTRANSP) || defined(USE_GSKIT) || defined(USE_MESALINK) || \
+    defined(USE_BEARSSL) || defined(USE_RUSTLS)
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
@@ -661,19 +640,23 @@ int netware_init(void);
 #endif
 
 /* Single point where USE_NTLM definition might be defined */
-#if !defined(CURL_DISABLE_NTLM) && !defined(CURL_DISABLE_CRYPTO_AUTH)
-#if defined(USE_OPENSSL) || defined(USE_WINDOWS_SSPI) || \
-    defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) || \
-    defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) || \
-    defined(USE_MBEDTLS)
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+#if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                     \
+  defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) ||  \
+  defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
+  (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
 
-#define USE_NTLM
+#define USE_CURL_NTLM_CORE
 
 #  if defined(USE_MBEDTLS)
 /* Get definition of MBEDTLS_MD4_C */
 #  include <mbedtls/md4.h>
 #  endif
 
+#endif
+
+#if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
+#define USE_NTLM
 #endif
 #endif
 
@@ -713,7 +696,7 @@ int netware_init(void);
  */
 
 #ifndef Curl_nop_stmt
-#  define Curl_nop_stmt do { } WHILE_FALSE
+#  define Curl_nop_stmt do { } while(0)
 #endif
 
 /*
@@ -726,18 +709,24 @@ int netware_init(void);
      defined(HAVE_WINSOCK_H) || \
      defined(HAVE_WINSOCK2_H) || \
      defined(HAVE_WS2TCPIP_H)
-#    error "Winsock and lwIP TCP/IP stack definitions shall not coexist!"
+#    error "WinSock and lwIP TCP/IP stack definitions shall not coexist!"
 #  endif
 #endif
 
 /*
- * Portable symbolic names for Winsock shutdown() mode flags.
+ * shutdown() flags for systems that don't define them
  */
 
-#ifdef USE_WINSOCK
-#  define SHUT_RD   0x00
-#  define SHUT_WR   0x01
-#  define SHUT_RDWR 0x02
+#ifndef SHUT_RD
+#define SHUT_RD 0x00
+#endif
+
+#ifndef SHUT_WR
+#define SHUT_WR 0x01
+#endif
+
+#ifndef SHUT_RDWR
+#define SHUT_RDWR 0x02
 #endif
 
 /* Define S_ISREG if not defined by system headers, f.e. MSVC */
@@ -788,20 +777,16 @@ endings either CRLF or LF so 't' is appropriate.
 #  endif
 #endif /* DONT_USE_RECV_BEFORE_SEND_WORKAROUND */
 
-/* Detect Windows App environment which has a restricted access
- * to the Win32 APIs. */
-# if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
-  defined(WINAPI_FAMILY)
-#  include <winapifamily.h>
-#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
-     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-#    define CURL_WINDOWS_APP
-#  endif
-# endif
-
-/* for systems that don't detect this in configure, use a sensible default */
+/* for systems that don't detect this in configure */
 #ifndef CURL_SA_FAMILY_T
-#define CURL_SA_FAMILY_T unsigned short
+#  if defined(HAVE_SA_FAMILY_T)
+#    define CURL_SA_FAMILY_T sa_family_t
+#  elif defined(HAVE_ADDRESS_FAMILY)
+#    define CURL_SA_FAMILY_T ADDRESS_FAMILY
+#  else
+/* use a sensible default */
+#    define CURL_SA_FAMILY_T unsigned short
+#  endif
 #endif
 
 /* Some convenience macros to get the larger/smaller value out of two given.
@@ -820,6 +805,10 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define UNITTEST
 #else
 #define UNITTEST static
+#endif
+
+#if defined(USE_NGHTTP2) || defined(USE_HYPER)
+#define USE_HTTP2
 #endif
 
 #if defined(USE_NGTCP2) || defined(USE_QUICHE)

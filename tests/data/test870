@@ -39,7 +39,7 @@ pop3
 POP3 OAuth 2.0 (XOAUTH2) authentication
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/870 -u user --oauth2-bearer mF_9.B5f-4.1JqM
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
 </client>
 
@@ -50,7 +50,7 @@ pop3://%HOSTIP:%POP3PORT/870 -u user --oauth2-bearer mF_9.B5f-4.1JqM
 CAPA
 AUTH XOAUTH2
 dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB
-RETR 870
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

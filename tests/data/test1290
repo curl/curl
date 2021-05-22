@@ -29,18 +29,16 @@ http
 Verify URL globbing ignores []
 </name>
 <command>
-"http://%HOSTIP:%HTTPPORT/we/want/[]/page/1290"
+"http://%HOSTIP:%HTTPPORT/we/want/[]/page/%TESTNUMBER"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /we/want/[]/page/1290 HTTP/1.1
+GET /we/want/[]/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

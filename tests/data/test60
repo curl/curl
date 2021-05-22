@@ -11,7 +11,7 @@ chunked Transfer-Encoding
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 
 blablabla
@@ -28,7 +28,7 @@ http
 HTTP PUT from stdin with wrong content-length
 </name>
  <command>
-http://%HOSTIP:%HTTPPORT/bzz/60 -T - -H "Content-Length: 1"
+http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T - -H "Content-Length: 1"
 </command>
 <stdin>
 more than one byte
@@ -37,15 +37,15 @@ more than one byte
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-PUT /bzz/60 HTTP/1.1
+PUT /bzz/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Transfer-Encoding: chunked
+%if !hyper
 Content-Length: 1
+%endif
 Expect: 100-continue
 
 13

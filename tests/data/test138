@@ -15,6 +15,7 @@ this is file contents
 </size>
 <servercmd>
 RETRNOSIZE
+REPLY SIZE 500 command not understood
 </servercmd>
 </reply>
 
@@ -27,7 +28,7 @@ ftp
 FTP download without size in RETR string and no SIZE command
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/blalbla/lululul/138
+ftp://%HOSTIP:%FTPPORT/blalbla/lululul/%TESTNUMBER
 </command>
 </client>
 
@@ -41,8 +42,8 @@ CWD blalbla
 CWD lululul
 EPSV
 TYPE I
-SIZE 138
-RETR 138
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

@@ -12,27 +12,27 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 301 OK swsbounce
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
-Location: go/west/185
+Location: go/west/%TESTNUMBER
 
 moo
 </data>
 <data1>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
 
 moo
 </data1>
 <datacheck>
 HTTP/1.1 301 OK swsbounce
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
-Location: go/west/185
+Location: go/west/%TESTNUMBER
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
 
 moo
@@ -48,24 +48,25 @@ http
 HTTP replace Host: when following Location: on the same host
  </name>
  <command>
-http://deathstar.another.galaxy/185 -L -H "Host: another.visitor.stay.a.while.stay.foreeeeeever" --proxy http://%HOSTIP:%HTTPPORT
+http://deathstar.another.galaxy/%TESTNUMBER -L -H "Host: another.visitor.stay.a.while.stay.foreeeeeever" --proxy http://%HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent: curl/.*
-</strip>
 <protocol>
-GET http://deathstar.another.galaxy/185 HTTP/1.1
+GET http://deathstar.another.galaxy/%TESTNUMBER HTTP/1.1
 Host: another.visitor.stay.a.while.stay.foreeeeeever
-User-Agent: curl/7.12.2-CVS (i686-pc-linux-gnu) libcurl/7.12.2-CVS OpenSSL/0.9.6b zlib/1.1.4 libidn/0.4.6
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://deathstar.another.galaxy/go/west/185 HTTP/1.1
+GET http://deathstar.another.galaxy/go/west/%TESTNUMBER HTTP/1.1
 Host: another.visitor.stay.a.while.stay.foreeeeeever
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

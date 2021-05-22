@@ -74,10 +74,10 @@ CURL_NTLM_WB_FILE=%PWD/server/fake_ntlm
 # set source directory so fake_ntlm can find the test files
 CURL_NTLM_AUTH_SRCDIR=%SRCDIR
 # set the test number
-CURL_NTLM_AUTH_TESTNUM=1310
+CURL_NTLM_AUTH_TESTNUM=%TESTNUMBER
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/1310 -u testuser:anypasswd --ntlm-wb
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:anypasswd --ntlm-wb
 </command>
 <precheck>
 chkhostname curlhost
@@ -86,20 +86,17 @@ chkhostname curlhost
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1310 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAwAAAA
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /1310 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAADAAAAGAAYAE8AAAAYABgAZwAAAAAAAABAAAAACAAIAEAAAAAHAAcASAAAAAAAAAAAAAAAggEAAHRlc3R1c2VyVU5LTk9XTlpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOQ==
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

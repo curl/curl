@@ -179,22 +179,20 @@ http
 HTTP GET multiply compressed content
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/230 --compressed
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <strippart>
 s/^Accept-Encoding: .*/Accept-Encoding: xxx/
 </strippart>
 <protocol>
-GET /230 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Accept-Encoding: xxx
 

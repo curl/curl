@@ -12,7 +12,7 @@ FAILURE
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -36,7 +36,7 @@ http
 HTTP with rubbish in Content-Length
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/394
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -46,12 +46,10 @@ http://%HOSTIP:%HTTPPORT/394
 <errorcode>
 8
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /394 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

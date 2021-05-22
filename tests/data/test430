@@ -1,0 +1,101 @@
+<testcase>
+# Derived from on https://github.com/curl/curl/issues/5120
+<info>
+<keywords>
+--next
+--config
+POST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data1>
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/1
+
+-foo-
+</data1>
+<data2>
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/2
+
+-foo-
+</data2>
+<data3>
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/3
+
+-foo-
+</data3>
+</reply>
+
+#
+# Client-side
+<client>
+<file1 name="log/config%TESTNUMBER-a">
+--next
+url = %HOSTIP:%HTTPPORT/%TESTNUMBER0001
+header = "a: a"
+data = "a"
+</file1>
+<file2 name="log/config%TESTNUMBER-b">
+--next
+url = %HOSTIP:%HTTPPORT/%TESTNUMBER0002
+header = "b: b"
+data = "b"
+</file2>
+<file3 name="log/config%TESTNUMBER-c">
+--next
+url = %HOSTIP:%HTTPPORT/%TESTNUMBER0003
+header = "c: c"
+data = "c"
+</file3>
+
+<server>
+http
+</server>
+ <name>
+Three -K uses with --next and --data in each
+ </name>
+ <command>
+-K log/config%TESTNUMBER-a -K log/config%TESTNUMBER-b -K log/config%TESTNUMBER-c
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol nonewline="yes">
+POST /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+a: a
+Content-Length: 1
+Content-Type: application/x-www-form-urlencoded
+
+aPOST /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+b: b
+Content-Length: 1
+Content-Type: application/x-www-form-urlencoded
+
+bPOST /%TESTNUMBER0003 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+c: c
+Content-Length: 1
+Content-Type: application/x-www-form-urlencoded
+
+c
+</protocol>
+</verify>
+</testcase>

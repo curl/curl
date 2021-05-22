@@ -9,7 +9,7 @@ HTTP
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fakem
 Last-Modified: Mon, 22 Apr 2013 17:45:05 GMT
 Content-Type: text/html
@@ -21,7 +21,7 @@ Hello World
 
 <datacheck>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fakem
 Last-Modified: Mon, 22 Apr 2013 17:45:05 GMT
 Content-Type: text/html
@@ -29,7 +29,7 @@ Content-Length: 12
 Connection: close
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fakem
 Last-Modified: Mon, 22 Apr 2013 17:45:05 GMT
 Content-Type: text/html
@@ -50,13 +50,13 @@ http
 http
 </features>
 <tool>
-lib1511
+lib%TESTNUMBER
 </tool>
 <name>
 HTTP GET time conditions in repeated requests
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/1511
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

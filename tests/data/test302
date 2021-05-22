@@ -24,6 +24,7 @@ And you should ignore this data.
 <client>
 <features>
 SSL
+proxy
 </features>
 <server>
 https
@@ -32,7 +33,7 @@ https
 HTTPS GET over HTTP proxy fails
  </name>
  <command>
--k -U fake:user -x %HOSTIP:%HTTPPORT https://bad.fakeurl-to.test:302/slash/302
+-k -U fake:user -x %HOSTIP:%HTTPPORT https://bad.fakeurl-to.test:%TESTNUMBER/slash/%TESTNUMBER
 </command>
 </client>
 
@@ -42,9 +43,6 @@ HTTPS GET over HTTP proxy fails
 <errorcode>
 56
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <data>
 </data>
 </verify>

@@ -18,12 +18,13 @@ none
 </server>
 <features>
 http
+proxy
 </features>
  <name>
 try using proxy with unsupported scheme
  </name>
  <command>
--x foo://%HOSTIP:%HTTPPORT/219 http://%HOSTIP:%HTTPPORT/219
+-x foo://%HOSTIP:%NOLISTENPORT/%TESTNUMBER http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
 </command>
 </client>
 

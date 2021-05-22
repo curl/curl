@@ -13,7 +13,7 @@ HTTP replaced headers
 <reply>
 <data1>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Set-Cookie: foo=123; path=/; secure;
 Content-Length: 7
@@ -22,7 +22,7 @@ nomnom
 </data1>
 <data2>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Set-Cookie: foo=; Expires=Thu, 01-Jan-1970 00:00:00 GMT; Max-Age=0; Path=/
 Content-Length: 7
@@ -44,25 +44,25 @@ https
 Expire secure cookies over HTTPS
 </name>
 <command>
--k https://%HOSTIP:%HTTPSPORT/15620001 -H "Host: www.example.com" https://%HOSTIP:%HTTPSPORT/15620002 -b "non-existing" https://%HOSTIP:%HTTPSPORT/15620001
+-k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0001 -H "Host: www.example.com" https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0002 -b "non-existing" https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0001
 </command>
 </client>
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /15620001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: www.example.com
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /15620002 HTTP/1.1
+GET /%TESTNUMBER0002 HTTP/1.1
 Host: www.example.com
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: foo=123
 
-GET /15620001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: www.example.com
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

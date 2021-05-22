@@ -14,18 +14,18 @@ FAILURE
 sftp
 </server>
 <precheck>
-perl %SRCDIR/libtest/test613.pl prepare %PWD/log/test615.dir
+perl %SRCDIR/libtest/test613.pl prepare %PWD/log/test%TESTNUMBER.dir
 </precheck>
  <name>
 SFTP put remote failure
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file615.txt sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/test615.dir/rofile.txt --insecure
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/test%TESTNUMBER.dir/rofile.txt --insecure
 </command>
 <postcheck>
-perl %SRCDIR/libtest/test613.pl postprocess %PWD/log/test615.dir
+perl %SRCDIR/libtest/test613.pl postprocess %PWD/log/test%TESTNUMBER.dir
 </postcheck>
-<file name="log/file615.txt">
+<file name="log/file%TESTNUMBER.txt">
 Test data
 for ssh upload test
 </file>

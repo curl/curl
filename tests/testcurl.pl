@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -32,7 +32,7 @@
 # curl-autocompile@haxx.se to be dealt with automatically (make sure the
 # subject includes the word "autobuild" as the mail gets silently discarded
 # otherwise).  The most current build status (with a reasonable backlog) will
-# be published on the curl site, at https://curl.haxx.se/auto/
+# be published on the curl site, at https://curl.se/auto/
 
 # USAGE:
 # testcurl.pl [options] [curl-daily-name] > output
@@ -173,7 +173,7 @@ if ($^O eq 'MSWin32' || $targetos) {
   }
 }
 
-if (($^O eq 'MSWin32' || $^O eq 'msys') &&
+if (($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') &&
     ($targetos =~ /vc/ || $targetos =~ /mingw32/ ||
      $targetos =~ /borland/ || $targetos =~ /watcom/)) {
 
@@ -306,7 +306,7 @@ if (!$desc) {
 if (!$confopts) {
   if ($infixed < 4) {
     print "please enter your additional arguments to configure\n";
-    print "examples: --with-ssl --enable-debug --enable-ipv6 --with-krb4\n";
+    print "examples: --with-openssl --enable-debug --enable-ipv6\n";
     $confopts = <>;
     chomp $confopts;
   }
@@ -481,21 +481,13 @@ if ($git) {
     open(LOG, ">$buildlog") or die;
     while (<F>) {
       my $ll = $_;
-      # ignore messages pertaining to third party m4 files we don't care
-      next if ($ll =~ /aclocal\/gtk\.m4/);
-      next if ($ll =~ /aclocal\/gtkextra\.m4/);
       print $ll;
       print LOG $ll;
     }
     close(F);
     close(LOG);
 
-    if (grepfile("^buildconf: OK", $buildlog)) {
-      logit "buildconf was successful";
-    }
-    else {
-      mydie "buildconf was NOT successful";
-    }
+    logit "buildconf was successful";
   }
   else {
     logit "buildconf was successful (dummy message)";

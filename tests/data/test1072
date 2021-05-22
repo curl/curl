@@ -40,7 +40,7 @@ crypto
 HTTP chunked PUT to HTTP 1.0 server with authorization
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1072 -T - -u testuser:testpass --anyauth
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T - -u testuser:testpass --anyauth
 </command>
 <stdin>
 This is data we upload with PUT
@@ -55,17 +55,19 @@ which is impossible in HTTP/1.0
 <errorcode>
 25
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-PUT /1072 HTTP/1.1
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Transfer-Encoding: chunked
 Expect: 100-continue
 
+%if hyper
+7A
+%else
 7a
+%endif
 This is data we upload with PUT
 it comes from stdin so MUST be sent
 with chunked encoding

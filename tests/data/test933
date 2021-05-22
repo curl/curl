@@ -28,6 +28,7 @@ smtp
 </server>
 <features>
 NTLM
+SSL
 !SSPI
 </features>
  <name>
@@ -40,7 +41,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-smtp://%HOSTIP:%SMTPPORT/933 --mail-rcpt recipient@example.com --mail-from sender@example.com -u testuser:testpass -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u testuser:testpass -T -
 </command>
 <precheck>
 chkhostname curlhost
@@ -58,7 +59,7 @@ chkhostname curlhost
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "QUIT"
 <protocol>
-EHLO 933
+EHLO %TESTNUMBER
 AUTH NTLM
 TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 *

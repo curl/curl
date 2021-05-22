@@ -18,13 +18,9 @@ unittest
  <name>
 netrc parsing unit tests
  </name>
-<tool>
-unit1304
-</tool>
-<file name="log/netrc1304">
+<file name="log/netrc%TESTNUMBER">
 machine example.com login admin password passwd
 machine curl.example.com login none password none
 </file>
 </client>
-
 </testcase>

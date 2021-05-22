@@ -12,7 +12,7 @@ HTTP/2
 HTTP/1.1 101 Switching!
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 Content-Length: 6
@@ -43,18 +43,16 @@ http/2
 HTTP/2 upgrade with lying server
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1801 --http2
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http2
 </command>
 
 </client>
 
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1801 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Connection: Upgrade, HTTP2-Settings
 Upgrade: %H2CVER

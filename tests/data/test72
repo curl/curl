@@ -61,25 +61,22 @@ crypto
 HTTP with Digest *OR* Basic authorization
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/72 -u testuser:testpass --anyauth
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /72 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /72 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="1053604199", uri="/72", response="9fcd1330377365a09bbcb33b2cbb25bd"
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Authorization: Digest username="testuser", realm="testrealm", nonce="1053604199", uri="/%TESTNUMBER", response="9fcd1330377365a09bbcb33b2cbb25bd"
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -13,16 +13,16 @@ followlocation
 <reply>
 <data nocheck="yes">
 HTTP/1.1 302 OK swsbounce swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 8
 Connection: close
-Location: ./193
+Location: ./%TESTNUMBER
 
 monster
 </data>
 <data1 nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 8
 Connection: close
 
@@ -41,36 +41,35 @@ http
 HTTP GET -w num_connects with redirected fetch (2 connects)
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/193 -w "%{num_connects}\n" -L
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n" -L
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /193 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /193 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
 <stdout>
 HTTP/1.1 302 OK swsbounce swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 8
 Connection: close
-Location: ./193
+Location: ./%TESTNUMBER
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 8
 Connection: close
 

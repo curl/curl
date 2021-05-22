@@ -4,6 +4,7 @@
 HTTP
 HTTP GET
 CURLOPT_CONNECT_TO
+--resolve
 </keywords>
 </info>
 
@@ -12,7 +13,7 @@ CURLOPT_CONNECT_TO
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Content-Type: text/plain
 
@@ -31,30 +32,29 @@ Connect to specific host: Do not mix connections with and without a "connect to 
  </name>
 
  <command>
-http://www.example.com:%HTTPPORT/2052 --resolve www.example.com:%HTTPPORT:%HOSTIP -w "%{num_connects}\n" --next --resolve -www.example.com:%HTTPPORT --connect-to ::%HOSTIP:%HTTPPORT http://www.example.com:%HTTPPORT/2052 -w "%{num_connects}\n"
+http://www.example.com:%HTTPPORT/%TESTNUMBER --resolve www.example.com:%HTTPPORT:%HOSTIP -w "%{num_connects}\n" --next --resolve -www.example.com:%HTTPPORT --connect-to ::%HOSTIP:%HTTPPORT http://www.example.com:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n"
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /2052 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: www.example.com:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /2052 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: www.example.com:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
 <stdout>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Content-Type: text/plain
 

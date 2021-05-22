@@ -46,29 +46,27 @@ http
 <name>
 HTTP GET -o fname without Content-Disposition (unmet time condition)
 </name>
-<file name="log/outfile1424">
+<file name="log/outfile%TESTNUMBER">
 original contents
 </file>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1424 -z "dec 12 11:00:00 1999 GMT" -o log/outfile1424
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -z "dec 12 11:00:00 1999 GMT" -o log/outfile%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1424 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 If-Modified-Since: Sun, 12 Dec 1999 11:00:00 GMT
 
 </protocol>
 
-<file1 name="log/outfile1424">
+<file1 name="log/outfile%TESTNUMBER">
 original contents
 </file1>
 

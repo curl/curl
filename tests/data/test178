@@ -11,7 +11,7 @@ HTTP GET
 <reply>
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: -6
 Content-Type: text/html
 Funny-head: yesyes
@@ -20,7 +20,7 @@ moooooooooooo
 </data>
 <datacheck>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 </datacheck>
 </reply>
 
@@ -34,19 +34,17 @@ http
 HTTP response with negative Content-Length
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/178
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /178 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

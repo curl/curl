@@ -25,22 +25,21 @@ http
 glob [0-1] with stuff after range (7.33.0 regression)
  </name>
  <command>
-"%HOSTIP:%HTTPPORT/0[0-1]/1240"
+"%HOSTIP:%HTTPPORT/0[0-1]/%TESTNUMBER"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /00/1240 HTTP/1.1
+GET /00/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /01/1240 HTTP/1.1
+GET /01/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

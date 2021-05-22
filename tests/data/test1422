@@ -11,12 +11,12 @@ HTTP GET
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 0
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1422; charset=funny; option=str//nge
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=str//nge
 
 </data>
 </reply>
@@ -40,24 +40,22 @@ HTTP GET with -O -J and Content-Disposition (empty file)
 CURL_TESTDIR=%PWD/log
 </setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1422 -J -O file://%PWD/log/name1422
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O file://%PWD/log/name%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1422 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
-<file1 name="log/name1422">
+<file1 name="log/name%TESTNUMBER">
 </file1>
 
 </verify>

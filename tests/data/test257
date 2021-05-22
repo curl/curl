@@ -14,9 +14,9 @@ netrc
 <reply>
 <data>
 HTTP/1.1 301 This is a weirdo text message swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: http://anotherone.com/2570002
+Location: http://anotherone.com/%TESTNUMBER0002
 Connection: close
 
 This server reply is for testing a simple Location: following
@@ -24,16 +24,16 @@ This server reply is for testing a simple Location: following
 </data>
 <data2>
 HTTP/1.1 302 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: http://athird.com/2570003
+Location: http://athird.com/%TESTNUMBER0003
 
 If this is received, the location following worked
 
 </data2>
 <data3>
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -42,18 +42,18 @@ If this is received, the location following worked
 </data3>
 <datacheck>
 HTTP/1.1 301 This is a weirdo text message swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: http://anotherone.com/2570002
+Location: http://anotherone.com/%TESTNUMBER0002
 Connection: close
 
 HTTP/1.1 302 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: http://athird.com/2570003
+Location: http://athird.com/%TESTNUMBER0003
 
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -71,11 +71,13 @@ http
 HTTP Location: following with --netrc-optional
  </name>
  <command>
-http://supersite.com/want/257 -L -x http://%HOSTIP:%HTTPPORT --netrc-optional --netrc-file log/netrc257
+http://supersite.com/want/%TESTNUMBER -L -x http://%HOSTIP:%HTTPPORT --netrc-optional --netrc-file log/netrc%TESTNUMBER
 </command>
-
+<features>
+proxy
+</features>
 # netrc auth for two out of three sites:
-<file name="log/netrc257">
+<file name="log/netrc%TESTNUMBER">
 machine supersite.com login user1 password passwd1
 machine anotherone.com login user2 password passwd2
 </file>
@@ -83,27 +85,24 @@ machine anotherone.com login user2 password passwd2
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://supersite.com/want/257 HTTP/1.1
+GET http://supersite.com/want/%TESTNUMBER HTTP/1.1
 Host: supersite.com
 Authorization: Basic dXNlcjE6cGFzc3dkMQ==
-User-Agent: curl/7.14.0-CVS (i686-pc-linux-gnu) libcurl/7.14.0-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://anotherone.com/2570002 HTTP/1.1
+GET http://anotherone.com/%TESTNUMBER0002 HTTP/1.1
 Host: anotherone.com
 Authorization: Basic dXNlcjI6cGFzc3dkMg==
-User-Agent: curl/7.14.0-CVS (i686-pc-linux-gnu) libcurl/7.14.0-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://athird.com/2570003 HTTP/1.1
+GET http://athird.com/%TESTNUMBER0003 HTTP/1.1
 Host: athird.com
-User-Agent: curl/7.14.0-CVS (i686-pc-linux-gnu) libcurl/7.14.0-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

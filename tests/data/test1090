@@ -14,17 +14,17 @@ chunked Transfer-Encoding
 <reply>
 <data nocheck="yes">
 HTTP/1.1 302 OK swsbounce swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 8
 Connection: close
 Content-Type: text/plain
-Location: ./10900001
+Location: ./%TESTNUMBER0001
 
 monster
 </data>
 <data1 nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Transfer-Encoding: chunked
 Connection: close
 Content-Type: text/plain; charset=us-ascii
@@ -50,37 +50,36 @@ http
 HTTP GET --write-out with redirected fetch and chunked reply
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1090 -w "%{num_connects}\n%{num_redirects}\n%{size_download}\n%{url_effective}\n%{content_type}\n%{response_code}\n" -L
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n%{num_redirects}\n%{size_download}\n%{url_effective}\n%{content_type}\n%{response_code}\n" -L
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1090 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /10900001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
 <stdout>
 HTTP/1.1 302 OK swsbounce swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 8
 Connection: close
 Content-Type: text/plain
-Location: ./10900001
+Location: ./%TESTNUMBER0001
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Transfer-Encoding: chunked
 Connection: close
 Content-Type: text/plain; charset=us-ascii
@@ -89,7 +88,7 @@ bigger monster
 2
 1
 15
-http://%HOSTIP:%HTTPPORT/10900001
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 text/plain; charset=us-ascii
 200
 </stdout>

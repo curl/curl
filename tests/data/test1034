@@ -40,10 +40,10 @@ HTTP over proxy with malformatted IDN host name
 # This host name contains an invalid UTF-8 byte sequence that can't be
 # converted into an IDN name
 <stdin>
-url = "http://invalid-utf8-‚ê.local/page/1034"
+url = "http://invalid-utf8-‚ê.local/page/%TESTNUMBER"
 </stdin>
  <command>
--K - -x %HOSTIP:%HTTPPORT
+-K - -x %HOSTIP:%NOLISTENPORT
 </command>
 </client>
 

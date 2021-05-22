@@ -34,57 +34,54 @@ http
 multiple requests using {}{} in the URL
  </name>
  <command>
-"%HOSTIP:%HTTPPORT/{1235,1235}{0001,0002}"
+"%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER}{0001,0002}"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /12350001 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /12350002 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /12350001 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /12350002 HTTP/1.1
-User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 <stdout>
---_curl_--%HOSTIP:%HTTPPORT/12350001
+--_curl_--%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 15
 
 the number one
---_curl_--%HOSTIP:%HTTPPORT/12350002
+--_curl_--%HOSTIP:%HTTPPORT/%TESTNUMBER0002
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 16
 
 two is nice too
---_curl_--%HOSTIP:%HTTPPORT/12350001
+--_curl_--%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 15
 
 the number one
---_curl_--%HOSTIP:%HTTPPORT/12350002
+--_curl_--%HOSTIP:%HTTPPORT/%TESTNUMBER0002
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 16

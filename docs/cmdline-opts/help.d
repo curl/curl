@@ -1,6 +1,12 @@
 Long: help
+Arg: <category>
 Short: h
-Help: This help text
+Help: Get help for commands
+Category: important curl
 ---
-Usage help. This lists all current command line options with a short
-description.
+Usage help. This lists all commands of the <category>.
+If no arg was provided, curl will display the most important
+command line arguments.
+If the argument "all" was provided, curl will display all options available.
+If the argument "category" was provided, curl will display all categories and
+their meanings.

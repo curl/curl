@@ -11,7 +11,7 @@ CURLOPT_RESOLVE
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -32,24 +32,21 @@ Funny-head: yesyes
 http
 </server>
 <tool>
-lib1503
+lib%TESTNUMBER
 </tool>
  <name>
 HTTP multi with CURLOPT_RESOLVE, cleanup sequence PA
  </name>
  <command>
-http://google.com:%HTTPPORT/1503 %HTTPPORT %HOSTIP
+http://google.com:%HTTPPORT/%TESTNUMBER %HTTPPORT %HOSTIP
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1503 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: google.com:%HTTPPORT
 Accept: */*
 

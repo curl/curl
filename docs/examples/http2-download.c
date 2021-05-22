@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 /* somewhat unix-specific */
 #include <sys/time.h>
@@ -33,6 +34,7 @@
 
 /* curl stuff */
 #include <curl/curl.h>
+#include <curl/mprintf.h>
 
 #ifndef CURLPIPE_MULTIPLEX
 /* This little trick will just make sure that we don't enable pipelining for
@@ -146,9 +148,14 @@ static void setup(struct transfer *t, int num)
 
   hnd = t->easy = curl_easy_init();
 
-  snprintf(filename, 128, "dl-%d", num);
+  curl_msnprintf(filename, 128, "dl-%d", num);
 
   t->out = fopen(filename, "wb");
+  if(!t->out) {
+    fprintf(stderr, "error: could not open file %s for writing: %s\n",
+            filename, strerror(errno));
+    exit(1);
+  }
 
   /* write to this file */
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, t->out);

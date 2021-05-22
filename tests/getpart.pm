@@ -5,11 +5,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -23,15 +23,20 @@
 #use strict;
 
 my @xml;
+my $xmlfile;
 
 my $warning=0;
 my $trace=0;
 
-sub decode_base64 {
-  tr:A-Za-z0-9+/::cd;                   # remove non-base64 chars
-  tr:A-Za-z0-9+/: -_:;                  # convert to uuencoded format
-  my $len = pack("c", 32 + 0.75*length);   # compute length byte
-  return unpack("u", $len . $_);         # uudecode and print
+use MIME::Base64;
+
+sub decode_hex {
+    my $s = $_;
+    # remove everything not hex
+    $s =~ s/[^A-Fa-f0-9]//g;
+    # encode everything
+    $s =~ s/([a-fA-F0-9][a-fA-F0-9])/chr(hex($1))/eg;
+    return $s;
 }
 
 sub getpartattr {
@@ -80,11 +85,11 @@ sub getpart {
     my @this;
     my $inside=0;
     my $base64=0;
-
- #   print "Section: $section, part: $part\n";
+    my $hex=0;
+    my $line;
 
     for(@xml) {
- #       print "$inside: $_";
+        $line++;
         if(!$inside && ($_ =~ /^ *\<$section/)) {
             $inside++;
         }
@@ -96,6 +101,10 @@ sub getpart {
                 # attempt to detect our base64 encoded part
                 $base64=1;
             }
+            elsif($_ =~ /$part [^>]*hex=/) {
+                # attempt to detect a hex-encoded part
+                $hex=1;
+            }
             $inside++;
         }
         elsif(($inside >= 2) && ($_ =~ /^ *\<\/$part[ \>]/)) {
@@ -105,6 +114,10 @@ sub getpart {
             $inside--;
         }
         elsif(($inside >= 1) && ($_ =~ /^ *\<\/$section/)) {
+            if($inside > 1) {
+                print STDERR "$xmlfile:$line:1: error: missing </$part> tag before </$section>\n";
+                @this = ("format error in $xmlfile");
+            }
             if($trace && @this) {
                 print STDERR "*** getpart.pm: $section/$part returned data!\n";
             }
@@ -115,6 +128,13 @@ sub getpart {
                 # decode the whole array before returning it!
                 for(@this) {
                     my $decoded = decode_base64($_);
+                    $_ = $decoded;
+                }
+            }
+            elsif($hex) {
+                # decode the whole array before returning it!
+                for(@this) {
+                    my $decoded = decode_hex($_);
                     $_ = $decoded;
                 }
             }
@@ -165,11 +185,37 @@ sub loadtest {
     my ($file)=@_;
 
     undef @xml;
+    $xmlfile = $file;
 
     if(open(XML, "<$file")) {
         binmode XML; # for crapage systems, use binary
         while(<XML>) {
             push @xml, $_;
+        }
+        close(XML);
+    }
+    else {
+        # failure
+        if($warning) {
+            print STDERR "file $file wouldn't open!\n";
+        }
+        return 1;
+    }
+    return 0;
+}
+
+sub fulltest {
+    return @xml;
+}
+
+# write the test to the given file
+sub savetest {
+    my ($file)=@_;
+
+    if(open(XML, ">$file")) {
+        binmode XML; # for crapage systems, use binary
+        for(@xml) {
+            print XML $_;
         }
         close(XML);
     }
@@ -267,6 +313,7 @@ sub showdiff {
         my $l = $_;
         $l =~ s/\r/[CR]/g;
         $l =~ s/\n/[LF]/g;
+        $l =~ s/([^\x20-\x7f])/sprintf "%%%02x", ord $1/eg;
         print TEMP $l;
         print TEMP "\n";
     }
@@ -277,6 +324,7 @@ sub showdiff {
         my $l = $_;
         $l =~ s/\r/[CR]/g;
         $l =~ s/\n/[LF]/g;
+        $l =~ s/([^\x20-\x7f])/sprintf "%%%02x", ord $1/eg;
         print TEMP $l;
         print TEMP "\n";
     }

@@ -11,9 +11,9 @@ HTTP proxy
 <reply>
 <data>
 HTTP/1.1 301 This is a weirdo text message
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: data/430002.txt?coolsite=yes
+Location: data/%TESTNUMBER0002.txt?coolsite=yes
 Connection: close
 
 This server reply is for testing a simple Location: following
@@ -21,7 +21,7 @@ This server reply is for testing a simple Location: following
 </data>
 <data2>
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -30,13 +30,13 @@ If this is received, the location following worked
 </data2>
 <datacheck>
 HTTP/1.1 301 This is a weirdo text message
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: data/430002.txt?coolsite=yes
+Location: data/%TESTNUMBER0002.txt?coolsite=yes
 Connection: close
 
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -54,23 +54,25 @@ http
 HTTP Location: following over HTTP proxy
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/43 -L -x %HOSTIP:%HTTPPORT
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -x %HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET http://%HOSTIP:%HTTPPORT/want/43 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://%HOSTIP:%HTTPPORT/want/data/430002.txt?coolsite=yes HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/want/data/%TESTNUMBER0002.txt?coolsite=yes HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

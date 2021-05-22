@@ -11,28 +11,28 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 301 OK
-Location: moo.html&testcase=/10110002
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Location: moo.html&testcase=/%TESTNUMBER0002
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0
 
 </data>
 <data2>
 HTTP/1.1 200 OK swsclose
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 body
 </data2>
 <datacheck>
 HTTP/1.1 301 OK
-Location: moo.html&testcase=/10110002
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Location: moo.html&testcase=/%TESTNUMBER0002
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0
 
 HTTP/1.1 200 OK swsclose
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 body
@@ -49,26 +49,24 @@ http
 HTTP POST with 301 redirect
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/blah/1011 -L -d "moo"
+http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -d "moo"
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-POST /blah/1011 HTTP/1.1
+POST /blah/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 3
 Content-Type: application/x-www-form-urlencoded
 
-mooGET /blah/moo.html&testcase=/10110002 HTTP/1.1
-User-Agent: curl/7.10 (i686-pc-linux-gnu) libcurl/7.10 OpenSSL/0.9.6c ipv6 zlib/1.1.3
+mooGET /blah/moo.html&testcase=/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

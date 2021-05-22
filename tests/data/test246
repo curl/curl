@@ -67,27 +67,24 @@ crypto
 HTTP POST --digest with server doing a 100 before 401 response
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/246 -u auser:apasswd --digest -d "junkelijunk"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -d "junkelijunk"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
-POST /246 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/7.12.1-CVS (i686-pc-linux-gnu) libcurl/7.12.1-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.6
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
-POST /246 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/246", response="761e6fc9a760c39d587092e8d840e740"
-User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
+Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="761e6fc9a760c39d587092e8d840e740"
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 11
 Content-Type: application/x-www-form-urlencoded

@@ -47,19 +47,17 @@ http
 HTTP HEAD, receive no headers only body
  </name>
  <command>
--I http://%HOSTIP:%HTTPPORT/1144 --http0.9
+-I http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http0.9
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-HEAD /1144 HTTP/1.1
+HEAD /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

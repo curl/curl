@@ -10,7 +10,7 @@ CURLOPT_BUFFERSIZE
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -31,14 +31,14 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib559
+lib%TESTNUMBER
 </tool>
 
 <name>
 use tiny CURLOPT_BUFFERSIZE
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/559
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

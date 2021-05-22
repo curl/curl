@@ -12,7 +12,7 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 301 OK swsclose
-Location: moo/testcase/10540002
+Location: moo/testcase/%TESTNUMBER0002
 Date: Thu, 31 Jul 2008 14:49:00 GMT
 Connection: close
 
@@ -26,7 +26,7 @@ body
 </data2>
 <datacheck>
 HTTP/1.1 301 OK swsclose
-Location: moo/testcase/10540002
+Location: moo/testcase/%TESTNUMBER0002
 Date: Thu, 31 Jul 2008 14:49:00 GMT
 Connection: close
 
@@ -47,29 +47,28 @@ http
  <name>
 HTTP POST from file with 301 redirect and --post301
  </name>
-<file name="log/test1054.txt">
+<file name="log/test%TESTNUMBER.txt">
 field=data
 </file>
  <command>
-http://%HOSTIP:%HTTPPORT/blah/1054 -L -d @log/test1054.txt --post301
+http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -d @log/test%TESTNUMBER.txt --post301
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol nonewline="yes">
-POST /blah/1054 HTTP/1.1
+POST /blah/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 10
 Content-Type: application/x-www-form-urlencoded
 
-field=dataPOST /blah/moo/testcase/10540002 HTTP/1.1
+field=dataPOST /blah/moo/testcase/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 10
 Content-Type: application/x-www-form-urlencoded

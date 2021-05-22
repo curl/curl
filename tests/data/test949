@@ -34,13 +34,8 @@ SMTP OAuth 2.0 (OAUTHBEARER) failure as continuation with initial response
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/949 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir -T -
 </command>
-# The protocol section doesn't support ways of specifying the raw data in the
-# base64 encoded message so we must assert this
-<precheck>
-perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%SMTPPORT' ne '9005' );"
-</precheck>
 </client>
 
 #
@@ -54,8 +49,8 @@ perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' 
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "QUIT"
 <protocol>
-EHLO 949
-AUTH OAUTHBEARER bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwNQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
+EHLO %TESTNUMBER
+AUTH OAUTHBEARER %b64[n,a=user,%01host=127.0.0.1%01port=%SMTPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
 AQ==
 </protocol>
 </verify>

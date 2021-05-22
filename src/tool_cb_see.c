@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -48,7 +48,7 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
 {
   struct InStruct *in = userdata;
 
-#if(CURL_SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(USE_WIN32_LARGE_FILES)
+#if(SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(USE_WIN32_LARGE_FILES)
 
   /* The offset check following here is only interesting if curl_off_t is
      larger than off_t and we are not using the WIN32 large file support
@@ -88,7 +88,7 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
   return CURL_SEEKFUNC_OK;
 }
 
-#if defined(WIN32) && !defined(__MINGW64__)
+#ifdef USE_TOOL_FTRUNCATE
 
 #ifdef __BORLANDC__
 /* 64-bit lseek-like function unavailable */
@@ -129,4 +129,4 @@ int tool_ftruncate64(int fd, curl_off_t where)
   return 0;
 }
 
-#endif /* WIN32  && ! __MINGW64__ */
+#endif /* USE_TOOL_FTRUNCATE */

@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -98,9 +98,6 @@
 /* Define if you have the <crypto.h> header file. */
 #undef HAVE_CRYPTO_H
 
-/* Define if you have the <des.h> header file. */
-#undef HAVE_DES_H
-
 /* Define if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H
 
@@ -164,9 +161,6 @@
 /* Define if you have the <krb.h> header file. */
 #undef HAVE_KRB_H
 
-/* Define if you have the `crypto' library (-lcrypto). */
-#undef HAVE_LIBCRYPTO
-
 /* Define if you have the `nsl' library (-lnsl). */
 #undef HAVE_LIBNSL
 
@@ -178,9 +172,6 @@
 
 /* Define if you have the `socket' library (-lsocket). */
 #undef HAVE_LIBSOCKET
-
-/* Define if you have the `ssl' library (-lssl). */
-#undef HAVE_LIBSSL
 
 /* Define if you have the `ucb' library (-lucb). */
 #undef HAVE_LIBUCB
@@ -305,9 +296,6 @@
 /* Define if you have the <string.h> header file. */
 #define HAVE_STRING_H
 
-/* Define if you have the `strlcpy' function. */
-#undef HAVE_STRLCPY
-
 /* Define if you have the `strstr' function. */
 #define HAVE_STRSTR
 
@@ -338,12 +326,6 @@
 /* Define if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H
 
-/* Define if you have the `tcgetattr' function. */
-#define HAVE_TCGETATTR
-
-/* Define if you have the `tcsetattr' function. */
-#define HAVE_TCSETATTR
-
 /* Define if you have the <termios.h> header file. */
 #define HAVE_TERMIOS_H
 
@@ -367,9 +349,6 @@
 
 /* Name of package */
 #undef PACKAGE
-
-/* Define as the return type of signal handlers (`int' or `void'). */
-#define RETSIGTYPE void
 
 /* The size of `int', as computed by sizeof. */
 #define SIZEOF_INT 4
@@ -425,24 +404,6 @@
 
 /* to disable LDAP */
 #define CURL_DISABLE_LDAP
-
-/* Define if you have the getnameinfo function. */
-#define HAVE_GETNAMEINFO 1
-
-/* Define to the type qualifier of arg 1 for getnameinfo. */
-#define GETNAMEINFO_QUAL_ARG1 const
-
-/* Define to the type of arg 1 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-
-/* Define to the type of arg 2 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG2 socklen_t
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG46 size_t
-
-/* Define to the type of arg 7 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG7 int
 
 /* Define if you have the recv function. */
 #define HAVE_RECV 1

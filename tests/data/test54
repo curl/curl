@@ -11,7 +11,7 @@ followlocation
 <data>
 HTTP/1.1 302 This is a weirdo text message swsclose
 Connection: close
-Location:  
+Location: 
 
 This server reply is for testing
 </data>
@@ -26,18 +26,16 @@ http
 HTTP with blank Location:
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/54 -L
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /want/54 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

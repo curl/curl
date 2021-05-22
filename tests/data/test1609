@@ -18,9 +18,5 @@ unittest
  <name>
 CURLOPT_RESOLVE parsing
  </name>
-<tool>
-unit1609
-</tool>
 </client>
-
 </testcase>

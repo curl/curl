@@ -26,19 +26,17 @@ http
 HTTP GET with a single-byte HTTP/0.9 response
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1266 --http0.9
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http0.9
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1266 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

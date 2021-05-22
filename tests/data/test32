@@ -11,7 +11,7 @@ HTTP GET
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -35,20 +35,17 @@ http
 HTTP with -d and -G
  </name>
  <command>
--d "foo=moo&moo=poo" http://%HOSTIP:%HTTPPORT/32 -G
+-d "foo=moo&moo=poo" http://%HOSTIP:%HTTPPORT/%TESTNUMBER -G
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /32?foo=moo&moo=poo HTTP/1.1
-User-Agent: curl/7.9.5 (i686-pc-linux-gnu) libcurl 7.9.5-cvs (OpenSSL 0.9.5) (ipv6 enabled)
+GET /%TESTNUMBER?foo=moo&moo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

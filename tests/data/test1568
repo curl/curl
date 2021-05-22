@@ -1,0 +1,87 @@
+<testcase>
+# based on test 64
+
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Digest auth
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 401 Authorization Required swsclose
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604145"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
+
+This is not the real page
+</data>
+
+# This is supposed to be returned when the server gets a
+# Authorization: Digest line passed-in from the client
+<data1000>
+HTTP/1.1 200 OK swsclose
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 23
+
+This IS the real page!
+</data1000>
+
+<datacheck>
+HTTP/1.1 401 Authorization Required swsclose
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604145"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
+
+HTTP/1.1 200 OK swsclose
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 23
+
+This IS the real page!
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+!SSPI
+crypto
+</features>
+<name>
+HTTP with Digest authorization on custom CURLOPT_PORT
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<command>
+http://%HOSTIP/%TESTNUMBER %HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: lib%TESTNUMBER
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/%TESTNUMBER", response="9cbbd857a37e45f2bcad5c7d088191df"
+User-Agent: lib%TESTNUMBER
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

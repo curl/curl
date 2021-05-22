@@ -10,7 +10,7 @@ cookies
 <reply>
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 
 </data>
@@ -25,13 +25,13 @@ http
 HTTP with cookie parsing from header file
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/8 -b log/heads8.txt
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b log/heads%TESTNUMBER.txt
 </command>
 
 # We create this file before the command is invoked!
-<file name="log/heads8.txt">
+<file name="log/heads%TESTNUMBER.txt">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
@@ -55,12 +55,10 @@ perl -e 'if ("%HOSTIP" !~ /\.0\.0\.1$/) {print "Test only works for HOSTIPs endi
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /we/want/8 HTTP/1.1
+GET /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Cookie: name with space=is weird but; trailingspace=removed; cookie=perhaps; cookie=yes; foobar=name; blexp=yesyes
 

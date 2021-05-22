@@ -1,0 +1,57 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP Basic
+RETRY-AFTER
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 301 Moved Permanently
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+Retry-After: 2
+Location: /%TESTNUMBER0002
+
+</data>
+<data2>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+
+<name>
+HTTP retry-after reset
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+Retry-After: 2
+Retry-After: 0
+</stdout>
+</verify>
+</testcase>

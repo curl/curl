@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,7 +40,7 @@
 #include "memdebug.h" /* LAST include file */
 
 static struct Curl_easy *data;
-static struct curl_hash hp;
+static struct Curl_hash hp;
 static char *data_key;
 static struct Curl_dns_entry *data_node;
 
@@ -48,8 +48,10 @@ static CURLcode unit_setup(void)
 {
   int rc;
   data = curl_easy_init();
-  if(!data)
+  if(!data) {
+    curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
+  }
 
   rc = Curl_mk_dnscache(&hp);
   if(rc) {
@@ -73,26 +75,21 @@ static void unit_stop(void)
   curl_global_cleanup();
 }
 
-static Curl_addrinfo *fake_ai(void)
+static struct Curl_addrinfo *fake_ai(void)
 {
-  static Curl_addrinfo *ai;
+  static struct Curl_addrinfo *ai;
+  static const char dummy[]="dummy";
+  size_t namelen = sizeof(dummy); /* including the zero terminator */
 
-  ai = calloc(1, sizeof(Curl_addrinfo));
+  ai = calloc(1, sizeof(struct Curl_addrinfo) + sizeof(struct sockaddr_in) +
+              namelen);
   if(!ai)
     return NULL;
 
-  ai->ai_canonname = strdup("dummy");
-  if(!ai->ai_canonname) {
-    free(ai);
-    return NULL;
-  }
-
-  ai->ai_addr = calloc(1, sizeof(struct sockaddr_in));
-  if(!ai->ai_addr) {
-    free(ai->ai_canonname);
-    free(ai);
-    return NULL;
-  }
+  ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
+  ai->ai_canonname = (void *)((char *)ai->ai_addr +
+                              sizeof(struct sockaddr_in));
+  memcpy(ai->ai_canonname, dummy, namelen);
 
   ai->ai_family = AF_INET;
   ai->ai_addrlen = sizeof(struct sockaddr_in);

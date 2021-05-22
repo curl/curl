@@ -12,7 +12,7 @@ If-Modified-Since
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2010 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -35,19 +35,17 @@ http
 HTTP with -z "older date"
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/77 -z "dec 12 12:00:00 1999 GMT"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -z "dec 12 12:00:00 1999 GMT"
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /77 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 If-Modified-Since: Sun, 12 Dec 1999 12:00:00 GMT
 

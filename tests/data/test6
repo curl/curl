@@ -11,7 +11,7 @@ cookies
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
@@ -29,20 +29,18 @@ http
 HTTP with simple cookie send
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/that/page/6 -b "name=contents;name2=content2"
+http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER -b "name=contents;name2=content2" -b name3=content3
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /we/want/that/page/6 HTTP/1.1
+GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
-Cookie: name=contents;name2=content2
+Cookie: name=contents;name2=content2;name3=content3
 
 </protocol>
 </verify>

@@ -2,6 +2,7 @@ Long: proxy-user
 Short: U
 Arg: <user:password>
 Help: Proxy user and password
+Category: proxy auth
 ---
 Specify the user name and password to use for proxy authentication.
 

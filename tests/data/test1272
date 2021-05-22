@@ -1,0 +1,40 @@
+<testcase>
+<info>
+<keywords>
+GOPHER
+GOPHERS
+INDEX
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+iMenu results		error.host	1
+0Selector 	/bar	bar.foo.invalid	70
+.
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+gophers
+</server>
+ <name>
+Gophers index
+ </name>
+ <command>
+-k gophers://%HOSTIP:%GOPHERSPORT/1/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+/%TESTNUMBER
+</protocol>
+</verify>
+</testcase>

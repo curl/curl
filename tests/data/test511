@@ -21,29 +21,29 @@ ftp
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib511
+lib%TESTNUMBER
 </tool>
 
  <name>
 FTP with FILETIME and NOBODY but missing file
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/511
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-# CURLE_FTP_COULDNT_RETR_FILE
+# CURLE_REMOTE_FILE_NOT_FOUND
 <errorcode>
-19
+78
 </errorcode>
 <protocol>
 USER anonymous
 PASS ftp@example.com
 PWD
-MDTM 511
+MDTM %TESTNUMBER
 QUIT
 </protocol>
 </verify>

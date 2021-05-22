@@ -1,0 +1,66 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+IDN
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+CAPA SMTPUTF8
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<features>
+idn
+!win32
+</features>
+<setenv>
+LC_ALL=en_US.UTF-8
+LC_CTYPE=en_US.UTF-8
+</setenv>
+<precheck>
+perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
+</precheck>
+ <name>
+SMTP with SMTPUTF8 support - UTF-8 based sender
+ </name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from Avsändaren@åäö.se -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO %TESTNUMBER
+MAIL FROM:<Avsändaren@xn--4cab6c.se> SMTPUTF8
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+From: different
+To: another
+
+body
+.
+</upload>
+</verify>
+</testcase>

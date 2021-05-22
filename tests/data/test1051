@@ -13,7 +13,7 @@ followlocation
 HTTP/1.1 301 Redirect swsclose
 Date: Thu, 29 Jul 2008 14:49:00 GMT
 Server: test-server/fake
-Location: data/10510002.txt?coolsite=yes
+Location: data/%TESTNUMBER0002.txt?coolsite=yes
 Content-Length: 0
 Connection: close
 
@@ -32,7 +32,7 @@ If this is received, the location following worked
 HTTP/1.1 301 Redirect swsclose
 Date: Thu, 29 Jul 2008 14:49:00 GMT
 Server: test-server/fake
-Location: data/10510002.txt?coolsite=yes
+Location: data/%TESTNUMBER0002.txt?coolsite=yes
 Content-Length: 0
 Connection: close
 
@@ -56,9 +56,9 @@ http
 HTTP PUT with Location: following
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/1051 -L -T log/test1051.txt
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -T log/test%TESTNUMBER.txt
 </command>
-<file name="log/test1051.txt">
+<file name="log/test%TESTNUMBER.txt">
 Weird
      file
          to
@@ -73,9 +73,6 @@ the
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 
 # The primary reason libcurl sends the data part twice in this test is that
 # the test HTTP server is blocking until it has read the entire request,
@@ -83,8 +80,9 @@ the
 # server says 301 and 100 _after_ the entire PUT body has been sent.
 
 <protocol>
-PUT /want/1051 HTTP/1.1
+PUT /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 78
 Expect: 100-continue
@@ -98,8 +96,9 @@ for
 the
    PUT
       feature
-PUT /want/data/10510002.txt?coolsite=yes HTTP/1.1
+PUT /want/data/%TESTNUMBER0002.txt?coolsite=yes HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 78
 Expect: 100-continue

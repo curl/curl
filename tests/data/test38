@@ -28,9 +28,9 @@ http
 HTTP resume request without server supporting it
  </name>
  <command option="no-output">
-http://%HOSTIP:%HTTPPORT/want/38 -C - --no-include -o log/fewl38.txt
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C - --no-include -o log/fewl%TESTNUMBER.txt
 </command>
-<file name="log/fewl38.txt">
+<file name="log/fewl%TESTNUMBER.txt">
 This text is here to simulate a partly downloaded file to resume
 download on.
 </file>
@@ -41,19 +41,17 @@ download on.
 <errorcode>
 33
 </errorcode>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /want/38 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=78-
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
 # the download target file must remain untouched
-<file name="log/fewl38.txt">
+<file name="log/fewl%TESTNUMBER.txt">
 This text is here to simulate a partly downloaded file to resume
 download on.
 </file>

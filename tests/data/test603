@@ -21,9 +21,9 @@ scp
 SCP upload
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file603.txt scp://%HOSTIP:%SSHPORT%POSIX_PWD/log/upload.603 --insecure
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file%TESTNUMBER.txt scp://%HOSTIP:%SSHPORT%SSH_PWD/log/upload.%TESTNUMBER --insecure
 </command>
-<file name="log/file603.txt">
+<file name="log/file%TESTNUMBER.txt">
 Test data
 for ssh upload test
 </file>

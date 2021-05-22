@@ -11,7 +11,7 @@ progressbar
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -35,11 +35,8 @@ http
 progress-bar
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1148 -# --stderr log/stderrlog1148
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -# --stderr log/stderrlog%TESTNUMBER
 </command>
-<precheck>
-perl -e '$ENV{"LC_NUMERIC"} = "en_US.UTF-8"; print "Test requires point as decimal separator" if system("./libtest/chkdecimalpoint");'
-</precheck>
 <setenv>
 LC_ALL=
 LC_NUMERIC=en_US.UTF-8
@@ -48,22 +45,23 @@ LC_NUMERIC=en_US.UTF-8
 
 #
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1148 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-# This allows the last 4 letters of the bar to get updated without it
-# matters. We're mostly checking the width of it anyway.
-<file name="log/stderrlog1148" mode="text">
-bar 100.0%
+
+# Check that the progress finished at 100% and has the right bar width.
+# Note the dot in 100.0% is regex to match any character since different
+# locales use different separators.
+<file name="log/stderrlog%TESTNUMBER" mode="text">
+correct
 </file>
 <stripfile>
-s/####################################################################..../bar/
+s/.*\r#{72} 100.0%/correct/
 </stripfile>
+
 </verify>
 </testcase>

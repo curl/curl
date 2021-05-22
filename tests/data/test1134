@@ -14,14 +14,14 @@ connection-monitor
 </servercmd>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 10
 
 contents1
 </data>
 <data1>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 10
 
 contents2
@@ -38,25 +38,24 @@ http
 HTTP connection re-use with different credentials
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1134 -u user1:password1 --next http://%HOSTIP:%HTTPPORT/11340001 -u 2user:password2
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u user1:password1 --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -u 2user:password2
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /1134 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dXNlcjE6cGFzc3dvcmQx
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /11340001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic MnVzZXI6cGFzc3dvcmQy
+User-Agent: curl/%VERSION
 Accept: */*
 
 [DISCONNECT]

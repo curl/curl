@@ -1,3 +1,24 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
 #File defines convenience macros for available feature testing
 
 # This macro checks if the symbol exists in the library and if it
@@ -84,5 +105,16 @@ macro(curl_nroff_check)
     endif()
   else()
     message(WARNING "Found no *nroff program")
+  endif()
+endmacro()
+
+macro(optional_dependency DEPENDENCY)
+  set(CURL_${DEPENDENCY} AUTO CACHE STRING "Build curl with ${DEPENDENCY} support (AUTO, ON or OFF)")
+  set_property(CACHE CURL_${DEPENDENCY} PROPERTY STRINGS AUTO ON OFF)
+
+  if(CURL_${DEPENDENCY} STREQUAL AUTO)
+    find_package(${DEPENDENCY})
+  elseif(CURL_${DEPENDENCY})
+    find_package(${DEPENDENCY} REQUIRED)
   endif()
 endmacro()

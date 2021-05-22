@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -41,7 +41,7 @@ void decc$exit(int __status);
 
 static int vms_shell = -1;
 
-/* VMS has a DCL shell and and also has Unix shells ported to it.
+/* VMS has a DCL shell and also has Unix shells ported to it.
  * When curl is running under a Unix shell, we want it to be as much
  * like Unix as possible.
  */
@@ -56,7 +56,7 @@ int is_vms_shell(void)
   shell = getenv("SHELL");
 
   /* No shell, means DCL */
-  if(shell == NULL) {
+  if(!shell) {
     vms_shell = 1;
     return 1;
   }
@@ -122,13 +122,13 @@ void vms_special_exit(int code, int vms_show)
  */
 
 /* Structure to hold a DECC$* feature name and its desired value. */
-typedef struct {
+struct decc_feat_t {
   char *name;
   int value;
-} decc_feat_t;
+};
 
 /* Array of DECC$* feature names and their desired values. */
-static decc_feat_t decc_feat_array[] = {
+static struct decc_feat_t decc_feat_array[] = {
   /* Preserve command-line case with SET PROCESS/PARSE_STYLE=EXTENDED */
   { "DECC$ARGV_PARSE_STYLE", 1 },
   /* Preserve case for file names on ODS5 disks. */

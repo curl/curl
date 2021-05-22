@@ -10,7 +10,7 @@ HTTP GET
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
 Content-Type: text/html
 Funny-head: yesyes
@@ -29,7 +29,7 @@ http
 HTTP URL with escaped { and }
  </name>
 <command>
-"http://%HOSTIP:%HTTPPORT/\{\}\/214"
+"http://%HOSTIP:%HTTPPORT/\{\}\/%TESTNUMBER"
 </command>
 <setenv>
 # Needed for MSYS2 to not convert all backslashes to forward slashes
@@ -40,12 +40,10 @@ MSYS2_ARG_CONV_EXCL=http://
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /{}\/214 HTTP/1.1
+GET /{}\/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

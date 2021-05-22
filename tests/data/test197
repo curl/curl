@@ -11,14 +11,14 @@ retry
 <reply>
 <data nocheck="yes">
 HTTP/1.1 503 OK swsbounce
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 21
 
 server not available
 </data>
 <data1 nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Connection: close
 
@@ -37,35 +37,34 @@ http
 HTTP GET --retry on 503 error with output to stdout
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/197 --retry 1000
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 1000
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol>
-GET /197 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
-GET /197 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 
 <stdout>
 HTTP/1.1 503 OK swsbounce
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 21
 
 server not available
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Connection: close
 
