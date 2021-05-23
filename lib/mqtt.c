@@ -197,7 +197,7 @@ static void add_user(const char *username, const size_t ulen,
 static void init_connpack(char *packet, size_t packetlen)
 {
   const size_t client_id_offset = 14;
-  bzero(packet, packetlen);
+  memset(packet, 0, packetlen);
 
   packet[0] = MQTT_MSG_CONNECT;  /* packet type */
   packet[1] = packtlen_flag(packetlen); /*overall packet length*/
