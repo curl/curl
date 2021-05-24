@@ -76,6 +76,7 @@ static const struct LongShort aliases[]= {
      mention. */
   {"*@", "url",                      ARG_STRING},
   {"*4", "dns-ipv4-addr",            ARG_STRING},
+  {"*5", "ssl-no-verify-subject-name", ARG_BOOL},
   {"*6", "dns-ipv6-addr",            ARG_STRING},
   {"*a", "random-file",              ARG_FILENAME},
   {"*b", "egd-file",                 ARG_STRING},
@@ -655,6 +656,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case '4': /* --dns-ipv4-addr */
         /* addr in dot notation */
         GetStr(&config->dns_ipv4_addr, nextarg);
+        break;
+      case '5': /* --ssl-no-verify-subject-name */
+        if(curlinfo->features & CURL_VERSION_SSL)
+          config->ssl_no_verify_peer_subject_name = TRUE;
         break;
       case '6': /* --dns-ipv6-addr */
         /* addr in dot notation */

@@ -287,6 +287,9 @@ struct OperationConfig {
   curl_error synthetic_error;     /* if non-zero, it overrides any libcurl
                                      error */
   bool ssh_compression;           /* enable/disable SSH compression */
+  bool ssl_no_verify_peer_subject_name;  /* Disable verify peer certificate's
+                                            SN (or SAN) */
+
   long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
                                      0 is valid. default: CURL_HET_DEFAULT. */
   bool haproxy_protocol;          /* whether to send HAProxy protocol v1 */

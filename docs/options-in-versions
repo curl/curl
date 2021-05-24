@@ -215,6 +215,7 @@
 --ssl-allow-beast                    7.25.0
 --ssl-auto-client-cert               7.77.0
 --ssl-no-revoke                      7.44.0
+--ssl-no-verify-subject-name         7.77.0
 --ssl-reqd                           7.20.0
 --ssl-revoke-best-effort             7.70.0
 --sslv2 (-2)                         5.9

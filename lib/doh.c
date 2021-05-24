@@ -354,6 +354,8 @@ static CURLcode dohprobe(struct Curl_easy *data,
          CURLSSLOPT_NO_PARTIALCHAIN : 0) |
         (data->set.ssl.revoke_best_effort ?
          CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
+        (data->set.ssl.no_verify_peer_subject_name ?
+         CURLSSLOPT_NO_VERIFY_SUBJECT_NAME : 0) |
         (data->set.ssl.native_ca_store ?
          CURLSSLOPT_NATIVE_CA : 0) |
         (data->set.ssl.auto_client_cert ?

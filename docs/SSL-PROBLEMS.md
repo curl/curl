@@ -93,6 +93,13 @@
   be bypassed. This option may have broader support to accommodate other SSL
   backends in the future.
 
+## Disabling subject name and SAN verification
+
+  Some hosts have a certificate with wrong domain name. This is sometimes done
+  during the development of a service, when a temporary DNS name is used.
+  The --ssl-no-verify-subject-name option was introduced in 7.77.0 to disable
+  verification of the Subject Name and Subject Alternative Names.
+
   References:
 
   https://curl.se/docs/ssl-compared.html

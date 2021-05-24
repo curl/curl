@@ -226,6 +226,7 @@ DPAGES = \
   ssl-allow-beast.d \
   ssl-auto-client-cert.d \
   ssl-no-revoke.d \
+  ssl-no-verify-subject-name.d \
   ssl-reqd.d \
   ssl-revoke-best-effort.d \
   ssl.d \

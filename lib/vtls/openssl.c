@@ -1733,7 +1733,7 @@ static CURLcode verifyhost(struct Curl_easy *data, struct connectdata *conn,
     }
     GENERAL_NAMES_free(altnames);
 
-    if(dnsmatched || ipmatched)
+    if(dnsmatched || ipmatched || data->set.ssl.no_verify_peer_subject_name)
       matched = TRUE;
   }
 
@@ -1817,7 +1817,8 @@ static CURLcode verifyhost(struct Curl_easy *data, struct connectdata *conn,
             "SSL: unable to obtain common name from peer certificate");
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
-    else if(!Curl_cert_hostcheck((const char *)peer_CN, hostname)) {
+    else if(!data->set.ssl.no_verify_peer_subject_name &&
+            !Curl_cert_hostcheck((const char *)peer_CN, hostname)) {
       failf(data, "SSL: certificate subject name '%s' does not match "
             "target host name '%s'", peer_CN, dispname);
       result = CURLE_PEER_FAILED_VERIFICATION;

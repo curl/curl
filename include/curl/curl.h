@@ -893,6 +893,10 @@ typedef enum {
    a client certificate for authentication. (Schannel) */
 #define CURLSSLOPT_AUTO_CLIENT_CERT (1<<5)
 
+/* - CURLSSLOPT_NO_VERIFY_SUBJECT_NAME tells libcurl not to verify the Subject
+   Name (or SAN) in the peer's certificate */
+#define CURLSSLOPT_NO_VERIFY_SUBJECT_NAME (1<<6)
+
 /* The default connection attempt delay in milliseconds for happy eyeballs.
    CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3 and happy-eyeballs-timeout-ms.d document
    this value, keep them in sync. */

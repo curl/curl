@@ -1729,7 +1729,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               (config->native_ca_store ?
                CURLSSLOPT_NATIVE_CA : 0) |
               (config->ssl_auto_client_cert ?
-               CURLSSLOPT_AUTO_CLIENT_CERT : 0);
+               CURLSSLOPT_AUTO_CLIENT_CERT : 0) |
+              (config->ssl_no_verify_peer_subject_name ?
+               CURLSSLOPT_NO_VERIFY_SUBJECT_NAME : 0);
 
             if(mask)
               my_setopt_bitmask(curl, CURLOPT_SSL_OPTIONS, mask);

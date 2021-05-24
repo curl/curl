@@ -289,6 +289,8 @@ struct ssl_config_data {
   BIT(native_ca_store); /* use the native ca store of operating system */
   BIT(auto_client_cert);   /* automatically locate and use a client
                               certificate for authentication (Schannel) */
+  BIT(no_verify_peer_subject_name); /* disable verify peer certificate's SN
+                                       (or SAN) */
 };
 
 struct ssl_general_config {
