@@ -329,7 +329,7 @@ get_alg_id_by_name(char *name)
 
 static CURLcode
 set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
-                int *algIds)
+                ALG_ID *algIds)
 {
   char *startCur = ciphers;
   int algCount = 0;
