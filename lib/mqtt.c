@@ -199,15 +199,28 @@ static void init_connpack(char *packet, size_t packetlen)
   const size_t client_id_offset = 14;
   memset(packet, 0, packetlen);
 
-  packet[0] = MQTT_MSG_CONNECT;  /* packet type */
-  packet[1] = packtlen_flag(packetlen); /*overall packet length*/
-  packet[2] = 0x00, packet[3] = 0x04;  /* protocol length */
-  packet[4] = 'M', packet[5] = 'Q';
-  packet[6] = 'T', packet[7] = 'T'; /* protocol name */
-  packet[8] = 0x04;   /* protocol level */
-  packet[9] = 0x02;   /* CONNECT flag: CleanSession */
-  packet[10] = 0x00, packet[11] = 0x3c; /* keep-alive 0 = disabled */
-  packet[12] = 0x00, packet[13] = 0x00; /* payload1 length */
+  /* packet type */
+  packet[0] = MQTT_MSG_CONNECT;
+  /*overall packet length*/
+  packet[1] = packtlen_flag(packetlen);
+  /* protocol length */
+  packet[2] = 0x00;
+  packet[3] = 0x04;
+  /* protocol name */
+  packet[4] = 'M';
+  packet[5] = 'Q';
+  packet[6] = 'T';
+  packet[7] = 'T';
+  /* protocol level */
+  packet[8] = 0x04;
+  /* CONNECT flag: CleanSession */
+  packet[9] = 0x02;
+  packet[10] = 0x00;
+  /* keep-alive 0 = disabled */
+  packet[11] = 0x3c;
+  packet[12] = 0x00;
+  /* payload1 length */
+  packet[13] = 0x00;
   packet[client_id_offset - 1] = MQTT_CLIENTID_LEN;
 }
 
