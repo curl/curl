@@ -2466,6 +2466,8 @@ const struct Curl_ssl Curl_ssl_nss = {
   Curl_none_engines_list,       /* engines_list */
   nss_false_start,              /* false_start */
   nss_sha256sum                 /* sha256sum */
+  NULL,                         /* associate_connection */
+  NULL                          /* disassociate_connection */
 };
 
 #endif /* USE_NSS */

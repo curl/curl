@@ -3453,6 +3453,8 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   Curl_none_engines_list,             /* engines_list */
   sectransp_false_start,              /* false_start */
   sectransp_sha256sum                 /* sha256sum */
+  NULL,                               /* associate_connection */
+  NULL                                /* disassociate_connection */
 };
 
 #ifdef __clang__
