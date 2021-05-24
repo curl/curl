@@ -68,6 +68,10 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifdef USE_RESOLVE_ON_IPS
+#include <SystemConfiguration/SystemConfiguration.h>
+#endif
+
 #if defined(CURLRES_SYNCH) && \
     defined(HAVE_ALARM) && defined(SIGALRM) && defined(HAVE_SIGSETJMP)
 /* alarm-based timeouts can only be used with all the dependencies satisfied */
@@ -528,6 +532,16 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       if(st)
         return CURLRESOLV_ERROR;
     }
+
+#ifdef USE_RESOLVE_ON_IPS
+    /*
+     * The automagic conversion from IPv4 literal to IPv6 literal only works
+     * when the SCDynamicStoreCopyProxies is called. Curl currently doesn't
+     * support system-wide HTTP proxies, we therefore don't further use the
+     * value this function returns.
+     */
+    SCDynamicStoreCopyProxies(NULL);
+#endif
 
 #ifndef USE_RESOLVE_ON_IPS
     /* First check if this is an IPv4 address string */

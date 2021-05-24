@@ -64,7 +64,7 @@ if test "x$OPT_RUSTLS" != xno; then
 
       LDFLAGS="$LDFLAGS $addld"
       if (test -d "/System/Library/Frameworks/Security.framework" && test "x$cross_compiling" != "xyes"); then
-        LDFLAGS="$LDFLAGS -framework CoreFoundation -framework Security"
+        LDFLAGS="$LDFLAGS -framework CoreFoundation -framework Security -framework SystemConfiguration"
       fi
       if test "$addcflags" != "-I/usr/include"; then
          CPPFLAGS="$CPPFLAGS $addcflags"

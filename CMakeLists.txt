@@ -378,9 +378,14 @@ if(CMAKE_USE_SECTRANSP)
      message(FATAL_ERROR "Security framework not found")
   endif()
 
+  find_library(SYSTEMCONFIGURATION_FRAMEWORK "SystemConfiguration")
+  if(NOT SYSTEMCONFIGURATION_FRAMEWORK)
+     message(FATAL_ERROR "SystemConfiguration framework not found")
+  endif()
+
   set(SSL_ENABLED ON)
   set(USE_SECTRANSP ON)
-  list(APPEND CURL_LIBS "${COREFOUNDATION_FRAMEWORK}" "${SECURITY_FRAMEWORK}")
+  list(APPEND CURL_LIBS "${COREFOUNDATION_FRAMEWORK}" "${SECURITY_FRAMEWORK}" "${SYSTEMCONFIGURATION_FRAMEWORK}")
 endif()
 
 if(CMAKE_USE_OPENSSL)
