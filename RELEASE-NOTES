@@ -16,6 +16,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2021-22297: schannel cipher selection surprise [132]
+ o CVE-2021-22298: TELNET stack contents disclosure [131]
+ o CVE-2021-22901: TLS session caching disaster [130]
  o AmigaOS: add functions definitions for SHA256 [126]
  o build: fix compilation for Windows UWP platform [82]
  o c-hyper: don't write to set.writeheader if null [67]
@@ -23,6 +26,7 @@ This release includes the following bugfixes:
  o c-hyper: handle body on HYPER_TASK_EMPTY [104]
  o checksrc: complain on == NULL or != 0 checks in conditions [20]
  o CI/cirrus: add shared and static Windows release builds [102]
+ o cmake: add CURL_ENABLE_EXPORT_TARGET option [133]
  o cmake: check for getppid and utimes [87]
  o cmake: detect CURL_SA_FAMILY_T [124]
  o cmake: fix two invokes result in different curl_config.h [123]
@@ -83,6 +87,7 @@ This release includes the following bugfixes:
  o krb5/name_to_level: replace checkprefix with curl_strequal [49]
  o krb5: don't use 'static' to store PBSZ size response [23]
  o krb5: remove the unused 'overhead' function [35]
+ o lib/hostip6.c: make NAT64 address synthesis on macOS work [135]
  o lib1564.c: enable last wakeup test part on Windows [26]
  o lib: fix 0-length Curl_client_write calls [60]
  o lib: fix some misuse of curlx_convert_UTF8_to_tchar [64]
@@ -118,6 +123,7 @@ This release includes the following bugfixes:
  o schannel: Disable auto credentials; add an option to enable it [18]
  o schannel: Support strong crypto option [44]
  o sectransp: allow cipher name to be specified [29]
+ o sectransp: fix EXC_BAD_ACCESS caused by uninitialized buffer [136]
  o sigpipe: ignore SIGPIPE when using wolfSSL as well [70]
  o sockfilt: avoid getting stuck waiting for writable socket [80]
  o sockfilt: fix invalid increment of handles index variable nfd [79]
@@ -151,25 +157,26 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  3eka on github, Andrew Barnert, Ayushman Singh Chauhan, Benjamin Riefenstahl,
-  Blake Burkhart, Calvin Buckley, Cameron Cawley, Dan Fandrich,
-  Daniel Carpenter, Daniel Gustafsson, Daniel Stenberg, David Cook,
-  Denis Goleshchikhin, Dmitry Karpov, Dmitry Kostjuchenko, ebejan on github,
-  Emil Engler, Georeth Zhou, Gergely Nagy, Gilles Vollant, Harry Sintonen,
-  Howard Chu, Ikko Ashimine, Illarion Taev, Jacob Hoffman-Andrews,
-  Jakub Zakrzewski, Javier Blazquez, J. Bromley, Jeroen Ooms, Joel Depooter,
-  Joel Jakobsson, Johann150 on github, Jon Rumsey, Kamil Dudka, Kevin Burke,
-  Kevin R. Bulgrien, Lucas Clemente Vella, Lucas Servén Marín,
-  MAntoniak on github, Marc Aldorasi, Marcel Raad, Marc Hörsken, Martin Dorey,
-  Martin Halle, Matias N. Goldberg, Max Dymond, Michael Kolechkin,
-  Michael O'Farrell, Michał Antoniak, Michal Rus, Morten Minde Neergaard,
-  Oliver Urbann, Patrick Monnerat, Peng-Yu Chen, Pontus Lundkvist,
+  3eka on github, Alessandro Ghedini, Andrew Barnert, Ayushman Singh Chauhan,
+  Benjamin Riefenstahl, Blake Burkhart, Brad Spencer, Calvin Buckley,
+  Cameron Cawley, Dan Fandrich, Daniel Carpenter, Daniel Gustafsson,
+  Daniel Stenberg, David Cook, Denis Goleshchikhin, Dmitry Karpov,
+  Dmitry Kostjuchenko, ebejan on github, Emil Engler, Georeth Zhou,
+  Gergely Nagy, Gilles Vollant, Harry Sintonen, Howard Chu, Ikko Ashimine,
+  Illarion Taev, Jacob Hoffman-Andrews, Jakub Zakrzewski, Javier Blazquez,
+  J. Bromley, Jeroen Ooms, Joel Depooter, Joel Jakobsson, Johann150 on github,
+  Jon Rumsey, Kamil Dudka, Kevin Burke, Kevin R. Bulgrien, Koichi Shiraishi,
+  Lucas Clemente Vella, Lucas Servén Marín, MAntoniak on github, Marc Aldorasi,
+  Marcel Raad, Marc Hörsken, Martin Dorey, Martin Halle, Matias N. Goldberg,
+  Max Dymond, Michael Kolechkin, Michael O'Farrell, Michał Antoniak,
+  Michal Rus, Morten Minde Neergaard, Oliver Urbann, Orgad Shaneh,
+  Patrick Monnerat, Paweł Wegner, Peng-Yu Chen, Pontus Lundkvist, Radek Zajic,
   Ralph Langendam, Ray Satiro, rcombs on github, Rich FitzJohn,
   Ryan Beck-Buysse, Sergey Markelov, sergio-nsk on github, Stefan Karpinski,
   Timo Lange, Timothy Gu, tmkk on github, Tobias Gabriel, Tommy Odom,
-  Travis Burtrum on github, Tuomas Siipola, ustcqidi on github, Victor Vieux,
+  Travis Burtrum, Tuomas Siipola, ustcqidi on github, Victor Vieux,
   Viktor Szakats, Wes Hinsley, Ymir1711 on github, Yusuke Nakamura,
-  (76 contributors)
+  (82 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -302,3 +309,9 @@ References to bug reports and discussions on issues:
  [127] = https://curl.se/bug/?i=7083
  [128] = https://curl.se/bug/?i=7083
  [129] = https://curl.se/bug/?i=7097
+ [130] = https://curl.se/docs/CVE-2021-22901.html
+ [131] = https://curl.se/docs/CVE-2021-22898.html
+ [132] = https://curl.se/docs/CVE-2021-22897.html
+ [133] = https://curl.se/bug/?i=7060
+ [135] = https://curl.se/bug/?i=7121
+ [136] = https://curl.se/bug/?i=7126
