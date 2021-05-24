@@ -20,22 +20,11 @@
 #
 #***************************************************************************
 
-AC_DEFUN([CURL_WITH_SECURETRANSPORT], [
-AC_MSG_CHECKING([whether to enable Secure Transport])
-if test "x$OPT_SECURETRANSPORT" != xno; then
-  if test "x$OPT_SECURETRANSPORT" != "xno" &&
-     (test "x$cross_compiling" != "xno" || test -d "/System/Library/Frameworks/Security.framework"); then
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(USE_SECTRANSP, 1, [enable Secure Transport])
-    AC_SUBST(USE_SECTRANSP, [1])
-    ssl_msg="Secure Transport"
-    test secure-transport != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-    SECURETRANSPORT_ENABLED=1
-    LDFLAGS="$LDFLAGS -framework CoreFoundation -framework Security"
-  else
-    AC_MSG_RESULT(no)
-  fi
-  test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
+AC_DEFUN([CURL_DARWIN_SYSTEMCONFIGURATION], [
+AC_MSG_CHECKING([whether to link macOS SystemConfiguration framework])
+if (test "x$cross_compiling" != "xno" || test -d "/System/Library/Frameworks/SystemConfiguration.framework"); then
+  AC_MSG_RESULT(yes)
+  LDFLAGS="$LDFLAGS -framework SystemConfiguration"
 else
   AC_MSG_RESULT(no)
 fi
