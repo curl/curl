@@ -146,7 +146,7 @@ static int mqtt_getsock(struct Curl_easy *data,
 /* Add the username flag to the CONNECT Variable Header*/
 static char user_flag(char flag)
 {
-  char usr_flag = 0x80;
+  char usr_flag = (char)0x80;
   flag |= usr_flag;
   return flag;
 }
@@ -154,7 +154,7 @@ static char user_flag(char flag)
 /* Add the password flag to the CONNECT Variable Header */
 static char passwd_flag(char flag)
 {
-  char pwd_flag = 0x40;
+  char pwd_flag = (char)0x40;
   flag |= pwd_flag;
   return flag;
 }
