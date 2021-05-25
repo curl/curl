@@ -533,17 +533,19 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
         return CURLRESOLV_ERROR;
     }
 
-#if (USE_RESOLVE_ON_IPS && ENABLE_IPV6 && TARGET_OS_OSX)
+#ifdef ENABLE_IPV6
+#if defined(USE_RESOLVE_ON_IPS) && TARGET_OS_OSX
     /*
-     * The automagic conversion from IPv4 literal to IPv6 literal only works
-     * when the SCDynamicStoreCopyProxies is called. Curl currently doesn't
-     * support system-wide HTTP proxies, we therefore don't further use the
-     * value this function returns.
+     * The automagic conversion from IPv4 literals to IPv6 literals only works
+     * if the SCDynamicStoreCopyProxies system function gets called first. As
+     * Curl currently doesn't support system-wide HTTP proxies, we therefore
+     * don't use any value this function might return.
      *
      * This function is only available on a macOS and is not needed for
      * IPv4-only builds, hence the conditions above.
      */
     SCDynamicStoreCopyProxies(NULL);
+#endif
 #endif
 
 #ifndef USE_RESOLVE_ON_IPS
