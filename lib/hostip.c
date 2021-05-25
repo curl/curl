@@ -69,7 +69,7 @@
 #include "memdebug.h"
 
 #if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
-#include <SystemConfiguration/SystemConfiguration.h>
+#include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
 #endif
 
 #if defined(CURLRES_SYNCH) && \
