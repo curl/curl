@@ -146,7 +146,7 @@ static int mqtt_getsock(struct Curl_easy *data,
 /* Add the username flag to the CONNECT Variable Header*/
 static char user_flag(char flag)
 {
-  char usr_flag = (char)0x80;
+  char usr_flag = 0x80;
   flag |= usr_flag;
   return flag;
 }
@@ -154,7 +154,7 @@ static char user_flag(char flag)
 /* Add the password flag to the CONNECT Variable Header */
 static char passwd_flag(char flag)
 {
-  char pwd_flag = (char)0x40;
+  char pwd_flag = 0x40;
   flag |= pwd_flag;
   return flag;
 }
@@ -199,10 +199,14 @@ static void init_connpack(char *packet, size_t packetlen)
   const size_t client_id_offset = 14;
   memset(packet, 0, packetlen);
 
+  /*Fixed header starts*/
   /* packet type */
   packet[0] = MQTT_MSG_CONNECT;
-  /*overall packet length*/
+  /*remaining length field*/
   packet[1] = packtlen_flag(packetlen);
+  /*Fixed header ends*/
+
+  /*Variable header starts*/
   /* protocol length */
   packet[2] = 0x00;
   packet[3] = 0x04;
@@ -215,12 +219,11 @@ static void init_connpack(char *packet, size_t packetlen)
   packet[8] = 0x04;
   /* CONNECT flag: CleanSession */
   packet[9] = 0x02;
-  packet[10] = 0x00;
   /* keep-alive 0 = disabled */
+  packet[10] = 0x00;
   packet[11] = 0x3c;
-  packet[12] = 0x00;
   /* payload1 length */
-  packet[13] = 0x00;
+  packet[12] = 0x00;
   packet[client_id_offset - 1] = MQTT_CLIENTID_LEN;
 }
 
@@ -270,11 +273,11 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   memcpy(&packet[client_id_offset], client_id, MQTT_CLIENTID_LEN);
   infof(data, "Using client id '%s'\n", client_id);
 
-  /*if user was provided then added to the packet*/
+  /*if user was provided then add it to the packet*/
   if(ulen > 0)
     add_user(username, ulen, packet, start_user);
 
-  /*if passwd was provided then added to the packet */
+  /*if passwd was provided then add it to the packet */
   if(plen > 0)
     add_passwd(passwd, plen, packet, start_pwd);
 

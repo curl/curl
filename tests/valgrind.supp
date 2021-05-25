@@ -140,3 +140,91 @@
    fun:PEM_X509_INFO_read_bio
    fun:X509_load_cert_crl_file
 }
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:RAND_DRBG_generate
+   fun:RAND_DRBG_bytes
+   fun:ossl_random
+   fun:Curl_rand
+   fun:Curl_rand_hex
+   fun:mqtt_do
+   fun:multi_runsingle
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:operate
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:Curl_rand_hex
+   fun:mqtt_do
+   fun:multi_runsingle
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:operate
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:RAND_DRBG_generate
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:RAND_DRBG_instantiate
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:RAND_DRBG_get0_public
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ossl_random
+   fun:Curl_rand
+   fun:Curl_rand_hex
+   fun:mqtt_do
+   fun:multi_runsingle
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:operate
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:RAND_DRBG_generate
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:RAND_DRBG_instantiate
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:RAND_DRBG_get0_public
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ossl_random
+   fun:Curl_rand
+   fun:Curl_rand_hex
+   fun:mqtt_do
+   fun:multi_runsingle
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:operate
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:RAND_DRBG_generate
+   fun:RAND_DRBG_bytes
+   fun:ossl_random
+   fun:Curl_rand
+   fun:Curl_rand_hex
+   fun:mqtt_do
+   fun:multi_runsingle
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:operate
+   fun:main
+}
