@@ -247,7 +247,11 @@
  * performing this task will result in a synthesized IPv6 address.
  */
 #if defined(__APPLE__) && !defined(USE_ARES)
+#include <TargetConditionals.h>
 #define USE_RESOLVE_ON_IPS 1
+#  if defined(TARGET_OS_OSX) && TARGET_OS_OSX
+#    define CURL_OSX_CALL_COPYPROXIES 1
+#  endif
 #endif
 
 #ifdef USE_LWIPSOCK

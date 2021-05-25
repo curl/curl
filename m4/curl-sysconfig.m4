@@ -22,8 +22,8 @@
 
 AC_DEFUN([CURL_DARWIN_SYSTEMCONFIGURATION], [
 AC_MSG_CHECKING([whether to link macOS SystemConfiguration framework])
-if test "x$curl_cv_native_windows" != xyes; then
-  if (test "x$cross_compiling" != "xno" || test -d "/System/Library/Frameworks/SystemConfiguration.framework"); then
+case $host_os in
+  darwin*)
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #include <TargetConditionals.h>
@@ -41,14 +41,12 @@ if test "x$curl_cv_native_windows" != xyes; then
     ])
     if test "x$build_for_macos" != xno; then
       AC_MSG_RESULT(yes)
+      LDFLAGS="$LDFLAGS -framework SystemConfiguration"
     else
       AC_MSG_RESULT(no)
     fi
-  else
+    ;;
+  *)
     AC_MSG_RESULT(no)
-  fi
-else
-  AC_MSG_RESULT(no)
-fi
-
+esac
 ])

@@ -68,7 +68,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifdef USE_RESOLVE_ON_IPS
+#if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
 #include <SystemConfiguration/SystemConfiguration.h>
 #endif
 
@@ -533,8 +533,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
         return CURLRESOLV_ERROR;
     }
 
-#ifdef ENABLE_IPV6
-#if defined(USE_RESOLVE_ON_IPS) && TARGET_OS_OSX
+#if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
     /*
      * The automagic conversion from IPv4 literals to IPv6 literals only works
      * if the SCDynamicStoreCopyProxies system function gets called first. As
@@ -545,7 +544,6 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
      * IPv4-only builds, hence the conditions above.
      */
     SCDynamicStoreCopyProxies(NULL);
-#endif
 #endif
 
 #ifndef USE_RESOLVE_ON_IPS
