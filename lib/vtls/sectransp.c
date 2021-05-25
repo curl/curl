@@ -1090,9 +1090,9 @@ static OSStatus CopyIdentityWithLabel(char *label,
 #if CURL_BUILD_IOS
           common_name = SecCertificateCopySubjectSummary(cert);
 #elif CURL_BUILD_MAC_10_7
-          SecCertificateCopyCommonName(cert, &common_name);
+          OSStatus copy_status = SecCertificateCopyCommonName(cert, &common_name);
 #endif
-          if(CFStringCompare(common_name, label_cf, 0) == kCFCompareEqualTo) {
+          if(copy_status == errSecSuccess && CFStringCompare(common_name, label_cf, 0) == kCFCompareEqualTo) {
             CFRelease(cert);
             CFRelease(common_name);
             CFRetain(identity);
