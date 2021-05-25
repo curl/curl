@@ -37,6 +37,7 @@
  1.18 try next proxy if one doesn't work
  1.19 provide timing info for each redirect
  1.20 SRV and URI DNS records
+ 1.21 netrc caching and sharing
  1.22 CURLINFO_PAUSE_STATE
  1.23 Offer API to flush the connection pool
  1.24 TCP Fast Open for windows
@@ -362,6 +363,13 @@
 
  Offer support for resolving SRV and URI DNS records for libcurl to know which
  server to connect to for various protocols (including HTTP!).
+
+1.21 netrc caching and sharing
+
+ The netrc file is read and parsed each time a connection is setup, which
+ means that if a transfer needs multiple connections for authentication or
+ redirects, the file might be reread (and parsed) multiple times. This makes
+ it impossible to provide the file as a pipe.
 
 1.22 CURLINFO_PAUSE_STATE
 
