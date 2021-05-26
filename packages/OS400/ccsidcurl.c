@@ -396,7 +396,7 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
   int nproto;
   curl_version_info_data *id;
   int i;
-  const char *cpp;
+  const char **cpp;
   static const size_t charfields[] = {
     offsetof(curl_version_info_data, version),
     offsetof(curl_version_info_data, host),
@@ -485,8 +485,8 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
 
   for(i = 0; i < sizeof(charfields) / sizeof(charfields[0]); i++) {
     cpp = (const char **) ((char *) p + charfields[i]);
-    if(*cpp)
-      if(convert_version_info_string(cpp, &cp, &n, ccsid))
+    if (*cpp && convert_version_info_string(cpp, &cp, &n, ccsid))
+      return (curl_version_info_data *) NULL;
   }
 
   return id;
