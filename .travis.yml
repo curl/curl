@@ -26,6 +26,7 @@ cache:
   directories:
   - $HOME/wolfssl-4.7.0-stable
   - $HOME/mesalink-1.0.0
+  - $HOME/bearssl-0.6
 
 env:
   global:
@@ -126,6 +127,16 @@ jobs:
         - libzstd-dev
   - env:
     - T=debug-rustls RUSTLS_VERSION="v0.6.0" C="--with-rustls=$HOME/crust"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=debug-bearssl C="--with-bearssl" BEARSSL="yes"
     addons:
       apt:
         <<: *common_apt
