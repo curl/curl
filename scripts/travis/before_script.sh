@@ -175,4 +175,18 @@ if [ $TRAVIS_OS_NAME = linux ]; then
     sudo make install
 
   fi
+
+  if [ "$BEARSSL" = "yes" ]; then
+    if [ ! -e $HOME/bearssl-0.6/Makefile ]; then
+      cd $HOME
+      curl -LO https://bearssl.org/bearssl-0.6.tar.gz
+      tar -xzf bearssl-0.6.tar.gz
+      cd bearssl-0.6
+      make
+    fi
+    cd $HOME/bearssl-0.6
+    sudo cp inc/*.h /usr/local/include
+    sudo cp build/libbearssl.* /usr/local/lib
+  fi
+
 fi
