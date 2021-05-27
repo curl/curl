@@ -874,6 +874,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
 #ifdef USE_HTTP2
     if(data->state.httpwant >= CURL_HTTP_VERSION_2) {
+      alpn_buffer[cur++] = ALPN_H2_LENGTH;
       memcpy(&alpn_buffer[cur], ALPN_H2, ALPN_H2_LENGTH);
       cur += ALPN_H2_LENGTH;
       infof(data, "schannel: ALPN, offering %s\n", ALPN_H2);
