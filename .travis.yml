@@ -116,7 +116,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug HYPER="yes" C="--with-hyper=$HOME/hyper --with-openssl" LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib TFLAGS="1 to 93"
+    - T=debug HYPER="yes" C="--with-hyper=$HOME/hyper --with-openssl" LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib TFLAGS="1 to 153"
     addons:
       apt:
         <<: *common_apt
