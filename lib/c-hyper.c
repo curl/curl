@@ -881,6 +881,10 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
   conn->datastream = Curl_hyper_stream;
 
+  /* clear userpwd and proxyuserpwd to avoid re-using old credentials
+   * from re-used connections */
+  Curl_safefree(data->state.aptr.userpwd);
+  Curl_safefree(data->state.aptr.proxyuserpwd);
   return CURLE_OK;
   error:
 
