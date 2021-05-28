@@ -48,6 +48,10 @@
 #endif /* !INADDR_LOOPBACK */
 #endif /* !WIN32 */
 
+#include "nonblock.h" /* for curlx_nonblock */
+#include "timeval.h"  /* needed before select.h */
+#include "select.h"   /* for Curl_poll */
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -63,9 +67,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   curl_socket_t listener;
   curl_socklen_t addrlen = sizeof(a.inaddr);
   int reuse = 1;
-  unsigned long nonblock = 1;
-  struct timeval timeout = {10, 0}; /* 10 seconds */
-  fd_set fds;
+  struct pollfd pfd[1];
   (void)domain;
   (void)type;
   (void)protocol;
@@ -98,13 +100,12 @@ int Curl_socketpair(int domain, int type, int protocol,
     goto error;
 
   /* use non-blocking accept to make sure we don't block forever */
-  if(ioctlsocket(listener, FIONBIO, &nonblock) == -1)
+  if(curlx_nonblock(listener, TRUE) < 0)
     goto error;
-  FD_ZERO(&fds);
-  FD_SET(listener, &fds);
-  /* this is Windows-only code -> using select is fine regardless
-     of the _value_ of the socket descriptor, also nfds is ignored */
-  select(0, &fds, NULL, NULL, &timeout);
+  pfd[0].fd = listener;
+  pfd[0].events = POLLIN;
+  pfd[0].revents = 0;
+  (void)Curl_poll(pfd, 1, 10*1000); /* 10 seconds */
   socks[1] = accept(listener, NULL, NULL);
   if(socks[1] == CURL_SOCKET_BAD)
     goto error;
