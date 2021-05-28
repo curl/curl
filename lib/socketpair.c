@@ -59,12 +59,13 @@ int Curl_socketpair(int domain, int type, int protocol,
   union {
     struct sockaddr_in inaddr;
     struct sockaddr addr;
-  } a;
+  } a, a2;
   curl_socket_t listener;
   curl_socklen_t addrlen = sizeof(a.inaddr);
   int reuse = 1;
-  char data[2][12];
-  ssize_t dlen;
+  unsigned long nonblock = 1;
+  struct timeval timeout = {10, 0}; /* 10 seconds */
+  fd_set fds;
   (void)domain;
   (void)type;
   (void)protocol;
@@ -85,7 +86,8 @@ int Curl_socketpair(int domain, int type, int protocol,
     goto error;
   if(bind(listener, &a.addr, sizeof(a.inaddr)) == -1)
     goto error;
-  if(getsockname(listener, &a.addr, &addrlen) == -1)
+  if(getsockname(listener, &a.addr, &addrlen) == -1 ||
+     addrlen < (int)sizeof(a.inaddr))
     goto error;
   if(listen(listener, 1) == -1)
     goto error;
@@ -94,18 +96,31 @@ int Curl_socketpair(int domain, int type, int protocol,
     goto error;
   if(connect(socks[0], &a.addr, sizeof(a.inaddr)) == -1)
     goto error;
+
+  /* use non-blocking accept to make sure we don't block forever */
+  if(ioctlsocket(listener, FIONBIO, &nonblock) == -1)
+    goto error;
+  FD_ZERO(&fds);
+  FD_SET(listener, &fds);
+  /* this is Windows-only code -> using select is fine regardless
+     of the _value_ of the socket descriptor, also nfds is ignored */
+  select(0, &fds, NULL, NULL, &timeout);
   socks[1] = accept(listener, NULL, NULL);
   if(socks[1] == CURL_SOCKET_BAD)
     goto error;
 
   /* verify that nothing else connected */
-  msnprintf(data[0], sizeof(data[0]), "%p", socks);
-  dlen = strlen(data[0]);
-  if(swrite(socks[0], data[0], dlen) != dlen)
+  addrlen = sizeof(a.inaddr);
+  if(getsockname(socks[0], &a.addr, &addrlen) == -1 ||
+     addrlen < (int)sizeof(a.inaddr))
     goto error;
-  if(sread(socks[1], data[1], sizeof(data[1])) != dlen)
+  addrlen = sizeof(a2.inaddr);
+  if(getpeername(socks[1], &a2.addr, &addrlen) == -1 ||
+     addrlen < (int)sizeof(a2.inaddr))
     goto error;
-  if(memcmp(data[0], data[1], dlen))
+  if(a.inaddr.sin_family != a2.inaddr.sin_family ||
+     a.inaddr.sin_addr.s_addr != a2.inaddr.sin_addr.s_addr ||
+     a.inaddr.sin_port != a2.inaddr.sin_port)
     goto error;
 
   sclose(listener);
