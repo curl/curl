@@ -461,6 +461,25 @@ Curl_cache_addr(struct Curl_easy *data,
 }
 
 /*
+ * Curl_host_is_ipnum() returns TRUE if the given string is a numerical IPv4
+ * (or IPv6 if supported) address.
+ */
+bool Curl_host_is_ipnum(const char *hostname)
+{
+  struct in_addr in;
+#ifdef ENABLE_IPV6
+  struct in6_addr in6;
+#endif
+  if(Curl_inet_pton(AF_INET, hostname, &in) > 0
+#ifdef ENABLE_IPV6
+     || Curl_inet_pton(AF_INET6, hostname, &in6) > 0
+#endif
+    )
+    return TRUE;
+  return FALSE;
+}
+
+/*
  * Curl_resolv() is the main name resolve function within libcurl. It resolves
  * a name and returns a pointer to the entry in the 'entry' argument (if one
  * is provided). This function might return immediately if we're using asynch

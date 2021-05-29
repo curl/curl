@@ -147,31 +147,6 @@ static bool tailmatch(const char *cooke_domain, const char *hostname)
 }
 
 /*
- * isip
- *
- * Returns true if the given string is an IPv4 or IPv6 address (if IPv6 has
- * been enabled while building libcurl, and false otherwise.
- */
-static bool isip(const char *domain)
-{
-  struct in_addr addr;
-#ifdef ENABLE_IPV6
-  struct in6_addr addr6;
-#endif
-
-  if(Curl_inet_pton(AF_INET, domain, &addr)
-#ifdef ENABLE_IPV6
-     || Curl_inet_pton(AF_INET6, domain, &addr6)
-#endif
-    ) {
-    /* domain name given as IP address */
-    return TRUE;
-  }
-
-  return FALSE;
-}
-
-/*
  * matching cookie path and url path
  * RFC6265 5.1.4 Paths and Path-Match
  */
@@ -303,7 +278,7 @@ static size_t cookiehash(const char * const domain)
   const char *top;
   size_t len;
 
-  if(!domain || isip(domain))
+  if(!domain || Curl_host_is_ipnum(domain))
     return 0;
 
   top = get_top_domain(domain, &len);
@@ -645,7 +620,7 @@ Curl_cookie_add(struct Curl_easy *data,
             domain = ":";
 #endif
 
-          is_ip = isip(domain ? domain : whatptr);
+          is_ip = Curl_host_is_ipnum(domain ? domain : whatptr);
 
           if(!domain
              || (is_ip && !strcmp(whatptr, domain))
@@ -996,7 +971,7 @@ Curl_cookie_add(struct Curl_easy *data,
    * must also check that the data handle isn't NULL since the psl code will
    * dereference it.
    */
-  if(data && (domain && co->domain && !isip(co->domain))) {
+  if(data && (domain && co->domain && !Curl_host_is_ipnum(co->domain))) {
     const psl_ctx_t *psl = Curl_psl_use(data);
     int acceptable;
 
@@ -1355,7 +1330,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
   remove_expired(c);
 
   /* check if host is an IP(v4|v6) address */
-  is_ip = isip(host);
+  is_ip = Curl_host_is_ipnum(host);
 
   co = c->cookies[myhash];
 
