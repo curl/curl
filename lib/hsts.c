@@ -138,6 +138,11 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
   struct stsentry *sts;
   time_t now = time(NULL);
 
+  if(Curl_host_is_ipnum(hostname))
+    /* "explicit IP address identification of all forms is excluded."
+       / RFC 6797 */
+    return CURLE_OK;
+
   do {
     while(*p && ISSPACE(*p))
       p++;
