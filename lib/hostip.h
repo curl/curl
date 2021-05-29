@@ -71,6 +71,8 @@ struct Curl_dns_entry {
   long inuse;
 };
 
+bool Curl_host_is_ipnum(const char *hostname);
+
 /*
  * Curl_resolv() returns an entry with the info for the specified host
  * and port.
