@@ -166,6 +166,18 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
 
   if(0 == k->bodywrites++) {
     bool done = FALSE;
+#if defined(USE_NTLM)
+    struct connectdata *conn = data->conn;
+    if(conn->bits.close &&
+       (((data->req.httpcode == 401) &&
+         (conn->http_ntlm_state == NTLMSTATE_TYPE2)) ||
+        ((data->req.httpcode == 407) &&
+         (conn->proxy_ntlm_state == NTLMSTATE_TYPE2)))) {
+      infof(data, "Connection closed while negotiating NTLM\n");
+      data->state.authproblem = TRUE;
+      Curl_safefree(data->req.newurl);
+    }
+#endif
     result = Curl_http_firstwrite(data, data->conn, &done);
     if(result || done) {
       infof(data, "Return early from hyper_body_chunk\n");
