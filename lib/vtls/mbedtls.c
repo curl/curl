@@ -250,6 +250,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
   char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
+  const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(primary.cert_blob);
   const char * const ssl_crlfile = SSL_SET_OPTION(CRLfile);
   const char * const hostname = SSL_HOST_NAME();
   const long int port = SSL_HOST_PORT();
@@ -341,25 +342,62 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     }
   }
 
-  /* Load the client private key */
-  mbedtls_pk_init(&backend->pk);
-
-  if(SSL_SET_OPTION(key)) {
-    ret = mbedtls_pk_parse_keyfile(&backend->pk, SSL_SET_OPTION(key),
-                                   SSL_SET_OPTION(key_passwd));
-    if(ret == 0 && !(mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_RSA) ||
-                     mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_ECKEY)))
-      ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
+  if(ssl_cert_blob) {
+    const unsigned char *blob_data =
+      (const unsigned char *)ssl_cert_blob->data;
+    ret = mbedtls_x509_crt_parse(&backend->clicert, blob_data,
+                                 ssl_cert_blob->len);
 
     if(ret) {
 #ifdef MBEDTLS_ERROR_C
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
-      failf(data, "Error reading private key %s - mbedTLS: (-0x%04X) %s",
-            SSL_SET_OPTION(key), -ret, errorbuf);
+      failf(data, "Error parsing client cert blob - mbedTLS: (-0x%04X) %s",
+            -ret, errorbuf);
 
       return CURLE_SSL_CERTPROBLEM;
     }
+  }
+
+  /* Load the client private key */
+  mbedtls_pk_init(&backend->pk);
+
+  if(SSL_SET_OPTION(key) || SSL_SET_OPTION(key_blob)) {
+    if(SSL_SET_OPTION(key)) {
+      ret = mbedtls_pk_parse_keyfile(&backend->pk, SSL_SET_OPTION(key),
+                                     SSL_SET_OPTION(key_passwd));
+
+      if(ret) {
+#ifdef MBEDTLS_ERROR_C
+        mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* MBEDTLS_ERROR_C */
+        failf(data, "Error reading private key %s - mbedTLS: (-0x%04X) %s",
+              SSL_SET_OPTION(key), -ret, errorbuf);
+        return CURLE_SSL_CERTPROBLEM;
+      }
+    }
+    else {
+      const struct curl_blob *ssl_key_blob = SSL_SET_OPTION(key_blob);
+      const unsigned char *key_data =
+        (const unsigned char *)ssl_key_blob->data;
+      const char *passwd = SSL_SET_OPTION(key_passwd);
+      ret = mbedtls_pk_parse_key(&backend->pk, key_data, ssl_key_blob->len,
+                                 (const unsigned char *)passwd,
+                                 passwd ? strlen(passwd) : 0);
+
+      if(ret) {
+#ifdef MBEDTLS_ERROR_C
+        mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* MBEDTLS_ERROR_C */
+        failf(data, "Error parsing private key - mbedTLS: (-0x%04X) %s",
+              -ret, errorbuf);
+        return CURLE_SSL_CERTPROBLEM;
+      }
+    }
+
+    if(ret == 0 && !(mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_RSA) ||
+                     mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_ECKEY)))
+      ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
   }
 
   /* Load the CRL */
@@ -468,7 +506,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                             &backend->cacert,
                             &backend->crl);
 
-  if(SSL_SET_OPTION(key)) {
+  if(SSL_SET_OPTION(key) || SSL_SET_OPTION(key_blob)) {
     mbedtls_ssl_conf_own_cert(&backend->config,
                               &backend->clicert, &backend->pk);
   }
