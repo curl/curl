@@ -63,6 +63,7 @@
 #include "multiif.h"
 #include "doh.h"
 #include "warnless.h"
+#include "strcase.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -460,6 +461,75 @@ Curl_cache_addr(struct Curl_easy *data,
   return dns;
 }
 
+#ifdef ENABLE_IPV6
+/* return a static IPv6 resolve for 'localhost' */
+static struct Curl_addrinfo *get_localhost6(int port)
+{
+  struct Curl_addrinfo *ca;
+  const size_t ss_size = sizeof(struct sockaddr_in6);
+  const size_t hostlen = strlen("localhost");
+  struct sockaddr_in6 sa6;
+  unsigned char ipv6[16];
+  unsigned short port16 = (unsigned short)(port & 0xffff);
+  ca = calloc(sizeof(struct Curl_addrinfo) + ss_size + hostlen + 1, 1);
+  if(!ca)
+    return NULL;
+
+  sa6.sin6_family = AF_INET6;
+  sa6.sin6_port = htons(port16);
+  sa6.sin6_flowinfo = 0;
+  sa6.sin6_scope_id = 0;
+  Curl_inet_pton(AF_INET6, "::1", ipv6);
+  memcpy(&sa6.sin6_addr, ipv6, sizeof(ipv6));
+
+  ca->ai_flags     = 0;
+  ca->ai_family    = AF_INET6;
+  ca->ai_socktype  = SOCK_STREAM;
+  ca->ai_protocol  = IPPROTO_TCP;
+  ca->ai_addrlen   = (curl_socklen_t)ss_size;
+  ca->ai_next      = NULL;
+  ca->ai_addr = (void *)((char *)ca + sizeof(struct Curl_addrinfo));
+  memcpy(ca->ai_addr, &sa6, ss_size);
+  ca->ai_canonname = (char *)ca->ai_addr + ss_size;
+  strcpy(ca->ai_canonname, "localhost");
+  return ca;
+}
+#else
+#define get_localhost6(x) NULL
+#endif
+
+/* return a static IPv4 resolve for 'localhost' */
+static struct Curl_addrinfo *get_localhost(int port)
+{
+  struct Curl_addrinfo *ca;
+  const size_t ss_size = sizeof(struct sockaddr_in);
+  const size_t hostlen = strlen("localhost");
+  struct sockaddr_in sa;
+  unsigned int ipv4;
+  unsigned short port16 = (unsigned short)(port & 0xffff);
+  ca = calloc(sizeof(struct Curl_addrinfo) + ss_size + hostlen + 1, 1);
+  if(!ca)
+    return NULL;
+
+  sa.sin_family = AF_INET;
+  sa.sin_port = htons(port16);
+  Curl_inet_pton(AF_INET, "127.0.0.1", (char *)&ipv4);
+  memcpy(&sa.sin_addr, &ipv4, sizeof(ipv4));
+
+  ca->ai_flags     = 0;
+  ca->ai_family    = AF_INET;
+  ca->ai_socktype  = SOCK_STREAM;
+  ca->ai_protocol  = IPPROTO_TCP;
+  ca->ai_addrlen   = (curl_socklen_t)ss_size;
+  ca->ai_next      = NULL;
+  ca->ai_addr = (void *)((char *)ca + sizeof(struct Curl_addrinfo));
+  memcpy(ca->ai_addr, &sa, ss_size);
+  ca->ai_canonname = (char *)ca->ai_addr + ss_size;
+  strcpy(ca->ai_canonname, "localhost");
+  ca->ai_next = get_localhost6(port);
+  return ca;
+}
+
 /*
  * Curl_host_is_ipnum() returns TRUE if the given string is a numerical IPv4
  * (or IPv6 if supported) address.
@@ -603,9 +673,10 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       if(!Curl_ipvalid(data, conn))
         return CURLRESOLV_ERROR;
 
-      if(allowDOH && data->set.doh && !ipnum) {
+      if(strcasecompare(hostname, "localhost"))
+        addr = get_localhost(port);
+      else if(allowDOH && data->set.doh && !ipnum)
         addr = Curl_doh(data, hostname, port, &respwait);
-      }
       else {
         /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
            non-zero value indicating that we need to wait for the response to
