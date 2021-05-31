@@ -79,6 +79,7 @@ typedef enum {
 #define CURLU_GUESS_SCHEME (1<<9)       /* legacy curl-style guessing */
 #define CURLU_NO_AUTHORITY (1<<10)      /* Allow empty authority when the
                                            scheme is unknown. */
+#define CURLU_ALLOW_SPACE (1<<11)       /* Allow spaces in the URL */
 
 typedef struct Curl_URL CURLU;
 

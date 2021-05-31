@@ -125,6 +125,15 @@ When set for \fBCURLUPART_URL\fP, this makes libcurl skip the normalization of
 the path. That's the procedure where curl otherwise removes sequences of
 dot-slash and dot-dot etc. The same option used for transfers is called
 \fICURLOPT_PATH_AS_IS(3)\fP.
+.IP CURLU_ALLOW_SPACE
+If set, a the URL parser allows space (ASCII 32) where possible. The URL
+syntax does normally not allow spaces anywhere, but they should be encoded as
+%20 or '+'. When spaces are allowed, they are still not allowed in the scheme.
+When space is used and allowed in a URL, it will be stored as-is unless
+\fICURLU_URLENCODE\fP is also set, which then makes libcurl URL-encode the
+space before stored. This affects how the URL will be constructed when
+\fIcurl_url_get(3)\fP is subsequently used to extract the full URL or
+individual parts.
 .SH RETURN VALUE
 Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
 fine.
