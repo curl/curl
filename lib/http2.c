@@ -638,6 +638,8 @@ static int push_promise(struct Curl_easy *data,
       rv = CURL_PUSH_DENY;
       goto fail;
     }
+    Curl_dyn_init(&newstream->header_recvbuf, DYN_H2_HEADERS);
+    Curl_dyn_init(&newstream->trailer_recvbuf, DYN_H2_TRAILERS);
   }
   else {
     H2BUGF(infof(data, "Got PUSH_PROMISE, ignore it!\n"));
