@@ -864,6 +864,7 @@ CURLUSESSL_ALL                  7.17.0
 CURLUSESSL_CONTROL              7.17.0
 CURLUSESSL_NONE                 7.17.0
 CURLUSESSL_TRY                  7.17.0
+CURLU_ALLOW_SPACE               7.78.0
 CURLU_APPENDQUERY               7.62.0
 CURLU_DEFAULT_PORT              7.62.0
 CURLU_DEFAULT_SCHEME            7.62.0
