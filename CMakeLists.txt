@@ -383,7 +383,7 @@ if(CMAKE_USE_SECTRANSP)
 
   set(SSL_ENABLED ON)
   set(USE_SECTRANSP ON)
-  list(APPEND CURL_LIBS "${COREFOUNDATION_FRAMEWORK}" "${SECURITY_FRAMEWORK}")
+  list(APPEND CURL_LIBS "-framework CoreFoundation" "-framework Security")
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -391,7 +391,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   if(NOT SYSTEMCONFIGURATION_FRAMEWORK)
      message(FATAL_ERROR "SystemConfiguration framework not found")
   endif()
-  list(APPEND CURL_LIBS "${SYSTEMCONFIGURATION_FRAMEWORK}")
+  list(APPEND CURL_LIBS "-framework SystemConfiguration")
 endif()
 
 if(CMAKE_USE_OPENSSL)
