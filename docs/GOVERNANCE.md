@@ -59,9 +59,24 @@ mailing lists, runs bug trackers etc to facilitate communication and work.
 
 However, Daniel works for wolfSSL and we offer commercial curl support there.
 
-## Key roles
+# Key roles
 
-### Maintainers
+## User
+
+Someone who uses or has used curl or libcurl.
+
+## Contributor
+
+Someone who has helped the curl project, who has contributed to bring it
+forward. Contributing could be to provide advice, debug a problem, file a bug
+report, run test infrastructure or writing code etc.
+
+## Commit author
+
+Sometimes also called 'committer'. Someone who has authored a commit in the
+curl source code repository. Committers are recorded as `Author` in git.
+
+## Maintainers
 
 A maintainer in the curl project is an individual who has been given
 permissions to push commits to one of the git repositories.
@@ -69,9 +84,9 @@ permissions to push commits to one of the git repositories.
 Maintainers are free to push commits to the repositories at their own will.
 Maintainers are however expected to listen to feedback from users and any
 change that is non-trivial in size or nature *should* be brought to the
-project as a PR to allow others to comment/object before merge.
+project as a Pull-Request (PR) to allow others to comment/object before merge.
 
-### Former maintainers
+## Former maintainers
 
 A maintainer who stops being active in the project will at some point get
 their push permissions removed. We do this for security reasons but also to
@@ -81,7 +96,7 @@ stuff to curl".
 Getting push permissions removed is not a punishment. Everyone who ever worked
 on maintaining curl is considered a hero, for all time hereafter.
 
-### Security team members
+## Security team members
 
 We have a security team. That's the team of people who are subscribed to the
 curl-security mailing list; the receivers of security reports from users and
@@ -93,7 +108,7 @@ persons. We invite new members when the team seems to need it, and we also
 expect to retire security team members as they "drift off" from the project or
 just find themselves unable to perform their duties there.
 
-### Server admins
+## Server admins
 
 We run a web server, a mailing list and more on the curl project's primary
 server. That physical machine is owned and run by Haxx. Daniel is the primary
@@ -106,7 +121,7 @@ server bunker in Stockholm Sweden, operated by the company Portlane.
 The website contents are served to the web via Fastly and Daniel is the
 primary curl contact with Fastly.
 
-### BDFL
+## BDFL
 
 That's Daniel.
 
