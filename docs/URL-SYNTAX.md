@@ -168,6 +168,15 @@ brackets). For example:
 
     http://[2001:1890:1112:1::20]/
 
+### "localhost"
+
+Starting in curl 7.77.0, curl will use loopback IP addresses for the name
+`localhost`: `127.0.0.1` and `::1`. It will not try to resolve the name using
+the resolver functions.
+
+This is done to make sure the host accessed is truly the localhost - the local
+machine.
+
 ### IDNA
 
 If curl was built with International Domain Name (IDN) support, it can also
