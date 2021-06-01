@@ -428,11 +428,11 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
   memset(&schannel_cred, 0, sizeof(schannel_cred));
   schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
 
-   if(conn->ssl_config.verifypeer) {
+  if(conn->ssl_config.verifypeer) {
 #ifdef HAS_MANUAL_VERIFY_API
-      if(BACKEND->use_manual_cred_validation)
-        schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION;
-      else
+    if(BACKEND->use_manual_cred_validation)
+      schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION;
+    else
 #endif
       schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION;
 
