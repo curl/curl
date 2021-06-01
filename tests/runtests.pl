@@ -253,7 +253,6 @@ my $has_kerberos;   # set if libcurl is built with Kerberos support
 my $has_spnego;     # set if libcurl is built with SPNEGO support
 my $has_charconv;   # set if libcurl is built with CharConv support
 my $has_tls_srp;    # set if libcurl is built with TLS-SRP support
-my $has_metalink;   # set if curl is built with Metalink support
 my $has_http2;      # set if libcurl is built with HTTP2 support
 my $has_httpsproxy; # set if libcurl is built with HTTPS-proxy support
 my $has_crypto;     # set if libcurl is built with cryptographic support
@@ -2852,7 +2851,6 @@ sub setupfeatures {
     $feature{"ld_preload"} = ($has_ldpreload && !$debug_build);
     $feature{"libz"} = $has_libz;
     $feature{"manual"} = $has_manual;
-    $feature{"Metalink"} = $has_metalink;
     $feature{"MinGW"} = $has_mingw;
     $feature{"MultiSSL"} = $has_multissl;
     $feature{"NSS"} = $has_nss;
@@ -3102,10 +3100,6 @@ sub checksystem {
             if($feat =~ /TLS-SRP/i) {
                 # TLS-SRP enabled
                 $has_tls_srp=1;
-            }
-            if($feat =~ /Metalink/i) {
-                # Metalink enabled
-                $has_metalink=1;
             }
             if($feat =~ /PSL/i) {
                 # PSL enabled
