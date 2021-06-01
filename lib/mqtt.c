@@ -477,6 +477,12 @@ static CURLcode mqtt_read_publish(struct Curl_easy *data, bool *done)
     /* -- switched state -- */
     remlen = mq->remaining_length;
     infof(data, "Remaining length: %zd bytes\n", remlen);
+    if(data->set.max_filesize &&
+       (curl_off_t)remlen > data->set.max_filesize) {
+      failf(data, "Maximum file size exceeded");
+      result = CURLE_FILESIZE_EXCEEDED;
+      goto end;
+    }
     Curl_pgrsSetDownloadSize(data, remlen);
     data->req.bytecount = 0;
     data->req.size = remlen;
@@ -582,6 +588,10 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
       Curl_debug(data, CURLINFO_HEADER_IN, (char *)&byte, 1);
       pkt[mq->npacket++] = byte;
     } while((byte & 0x80) && (mq->npacket < 4));
+    if(nread && (byte & 0x80))
+      /* MQTT supports up to 127 * 128^0 + 127 * 128^1 + 127 * 128^2 +
+         127 * 128^3 bytes. server tried to send more */
+      result = CURLE_WEIRD_SERVER_REPLY;
     if(result)
       break;
     mq->remaining_length = mqtt_decode_len(&pkt[0], mq->npacket, NULL);
