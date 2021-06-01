@@ -498,8 +498,10 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
    * network encoding not the host encoding.
    */
   result = Curl_convert_to_network(data, (char *)pw, len * 2);
-  if(result)
+  if(result) {
+    free(pw);
     return result;
+  }
 
   /* Create NT hashed password. */
   Curl_md4it(ntbuffer, pw, 2 * len);
