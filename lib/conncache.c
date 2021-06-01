@@ -34,6 +34,7 @@
 #include "share.h"
 #include "sigpipe.h"
 #include "connect.h"
+#include "strcase.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -161,6 +162,7 @@ static void hashkey(struct connectdata *conn, char *buf,
 
   /* put the number first so that the hostname gets cut off if too long */
   msnprintf(buf, len, "%ld%s", port, hostname);
+  Curl_strntolower(buf, buf, len);
 }
 
 /* Returns number of connections currently held in the connection cache.
