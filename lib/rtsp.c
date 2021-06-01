@@ -109,6 +109,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   rtsp_disconnect,                      /* disconnect */
   rtsp_rtp_readwrite,                   /* readwrite */
   rtsp_conncheck,                       /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_RTSP,                            /* defport */
   CURLPROTO_RTSP,                       /* protocol */
   CURLPROTO_RTSP,                       /* family */
@@ -404,8 +405,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
   /* Referrer */
   Curl_safefree(data->state.aptr.ref);
-  if(data->change.referer && !Curl_checkheaders(data, "Referer"))
-    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
+  if(data->state.referer && !Curl_checkheaders(data, "Referer"))
+    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->state.referer);
   else
     data->state.aptr.ref = NULL;
 
@@ -680,7 +681,7 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
     }
   }
 
-  if(rtp_dataleft != 0 && rtp[0] == '$') {
+  if(rtp_dataleft && rtp[0] == '$') {
     DEBUGF(infof(data, "RTP Rewinding %zd %s\n", rtp_dataleft,
           *readmore ? "(READMORE)" : ""));
 
@@ -824,7 +825,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
 
       /* Copy the id substring into a new buffer */
       data->set.str[STRING_RTSP_SESSION_ID] = malloc(idlen + 1);
-      if(data->set.str[STRING_RTSP_SESSION_ID] == NULL)
+      if(!data->set.str[STRING_RTSP_SESSION_ID])
         return CURLE_OUT_OF_MEMORY;
       memcpy(data->set.str[STRING_RTSP_SESSION_ID], start, idlen);
       (data->set.str[STRING_RTSP_SESSION_ID])[idlen] = '\0';

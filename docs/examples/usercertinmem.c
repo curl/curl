@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2013 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -119,7 +119,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
   /* get a BIO */
   bio = BIO_new_mem_buf((char *)mypem, -1);
 
-  if(bio == NULL) {
+  if(!bio) {
     printf("BIO_new_mem_buf failed\n");
   }
 
@@ -127,7 +127,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
    * structure that SSL can use
    */
   cert = PEM_read_bio_X509(bio, NULL, 0, NULL);
-  if(cert == NULL) {
+  if(!cert) {
     printf("PEM_read_bio_X509 failed...\n");
   }
 
@@ -139,13 +139,13 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
 
   /*create a bio for the RSA key*/
   kbio = BIO_new_mem_buf((char *)mykey, -1);
-  if(kbio == NULL) {
+  if(!kbio) {
     printf("BIO_new_mem_buf failed\n");
   }
 
   /*read the key bio into an RSA object*/
   rsa = PEM_read_bio_RSAPrivateKey(kbio, NULL, 0, NULL);
-  if(rsa == NULL) {
+  if(!rsa) {
     printf("Failed to create key bio\n");
   }
 

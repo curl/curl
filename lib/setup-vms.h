@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -87,7 +87,7 @@ static char *vms_translate_path(const char *path)
   /* See if the result is in VMS format, if not, we are done */
   /* Assume that this is a PATH, not just some data */
   test_str = strpbrk(path, ":[<^");
-  if(test_str == NULL) {
+  if(!test_str) {
     return (char *)path;
   }
 
@@ -119,7 +119,7 @@ static char *vms_getenv(const char *envvar)
 
   /* first use the DECC getenv() function */
   result = decc$getenv(envvar);
-  if(result == NULL) {
+  if(!result) {
     return result;
   }
 
@@ -154,7 +154,7 @@ static struct passwd *vms_getpwuid(uid_t uid)
 #endif
 
   my_passwd = decc_getpwuid(uid);
-  if(my_passwd == NULL) {
+  if(!my_passwd) {
     return my_passwd;
   }
 

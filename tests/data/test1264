@@ -22,7 +22,7 @@ http
 HTTP URL with space in host name
  </name>
  <command>
--g "http://127.0.0.1 www.example.com/we/want/1264"
+-g "http://127.0.0.1 www.example.com/we/want/%TESTNUMBER"
 </command>
 </client>
 

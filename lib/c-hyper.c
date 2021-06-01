@@ -51,6 +51,7 @@
 #include "transfer.h"
 #include "multiif.h"
 #include "progress.h"
+#include "content_encoding.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -165,6 +166,18 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
 
   if(0 == k->bodywrites++) {
     bool done = FALSE;
+#if defined(USE_NTLM)
+    struct connectdata *conn = data->conn;
+    if(conn->bits.close &&
+       (((data->req.httpcode == 401) &&
+         (conn->http_ntlm_state == NTLMSTATE_TYPE2)) ||
+        ((data->req.httpcode == 407) &&
+         (conn->proxy_ntlm_state == NTLMSTATE_TYPE2)))) {
+      infof(data, "Connection closed while negotiating NTLM\n");
+      data->state.authproblem = TRUE;
+      Curl_safefree(data->req.newurl);
+    }
+#endif
     result = Curl_http_firstwrite(data, data->conn, &done);
     if(result || done) {
       infof(data, "Return early from hyper_body_chunk\n");
@@ -174,8 +187,14 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
   }
   if(k->ignorebody)
     return HYPER_ITER_CONTINUE;
+  if(0 == len)
+    return HYPER_ITER_CONTINUE;
   Curl_debug(data, CURLINFO_DATA_IN, buf, len);
-  result = Curl_client_write(data, CLIENTWRITE_BODY, buf, len);
+  if(!data->set.http_ce_skip && k->writer_stack)
+    /* content-encoded data */
+    result = Curl_unencode_write(data, k->writer_stack, buf, len);
+  else
+    result = Curl_client_write(data, CLIENTWRITE_BODY, buf, len);
 
   if(result) {
     data->state.hresult = result;
@@ -198,11 +217,8 @@ static CURLcode status_line(struct Curl_easy *data,
                             const uint8_t *reason, size_t rlen)
 {
   CURLcode result;
-  size_t wrote;
   size_t len;
   const char *vstr;
-  curl_write_callback writeheader =
-    data->set.fwrite_header? data->set.fwrite_header: data->set.fwrite_func;
   vstr = http_version == HYPER_HTTP_VERSION_1_1 ? "1.1" :
     (http_version == HYPER_HTTP_VERSION_2 ? "2" : "1.0");
   conn->httpversion =
@@ -225,12 +241,12 @@ static CURLcode status_line(struct Curl_easy *data,
   len = Curl_dyn_len(&data->state.headerb);
   Curl_debug(data, CURLINFO_HEADER_IN, Curl_dyn_ptr(&data->state.headerb),
              len);
-  Curl_set_in_callback(data, true);
-  wrote = writeheader(Curl_dyn_ptr(&data->state.headerb), 1, len,
-                      data->set.writeheader);
-  Curl_set_in_callback(data, false);
-  if(wrote != len)
-    return CURLE_WRITE_ERROR;
+  result = Curl_client_write(data, CLIENTWRITE_HEADER,
+                             Curl_dyn_ptr(&data->state.headerb), len);
+  if(result) {
+    data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
+    return HYPER_ITER_BREAK;
+  }
 
   data->info.header_size += (long)len;
   data->req.headerbytecount += (long)len;
@@ -314,6 +330,8 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
         failf(data, "Hyper: [%d] %.*s", (int)code, (int)errlen, errbuf);
         if((code == HYPERE_UNEXPECTED_EOF) && !data->req.bytecount)
           result = CURLE_GOT_NOTHING;
+        else if(code == HYPERE_INVALID_PEER_MESSAGE)
+          result = CURLE_UNSUPPORTED_PROTOCOL; /* maybe */
         else
           result = CURLE_RECV_ERROR;
       }
@@ -526,8 +544,12 @@ static int uploadpostfields(void *userdata, hyper_context *ctx,
     *chunk = NULL; /* nothing more to deliver */
   else {
     /* send everything off in a single go */
-    *chunk = hyper_buf_copy(data->set.postfields,
-                            (size_t)data->req.p.http->postsize);
+    hyper_buf *copy = hyper_buf_copy(data->set.postfields,
+                                     (size_t)data->req.p.http->postsize);
+    if(copy)
+      *chunk = copy;
+    else
+      return HYPER_POLL_ERROR;
     data->req.upload_done = TRUE;
   }
   return HYPER_POLL_READY;
@@ -546,8 +568,13 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
   if(!fillcount)
     /* done! */
     *chunk = NULL;
-  else
-    *chunk = hyper_buf_copy((uint8_t *)data->state.ulbuf, fillcount);
+  else {
+    hyper_buf *copy = hyper_buf_copy((uint8_t *)data->state.ulbuf, fillcount);
+    if(copy)
+      *chunk = copy;
+    else
+      return HYPER_POLL_ERROR;
+  }
   return HYPER_POLL_READY;
 }
 
@@ -805,13 +832,26 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 #endif
 
   Curl_safefree(data->state.aptr.ref);
-  if(data->change.referer && !Curl_checkheaders(data, "Referer")) {
-    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
+  if(data->state.referer && !Curl_checkheaders(data, "Referer")) {
+    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->state.referer);
     if(!data->state.aptr.ref)
       return CURLE_OUT_OF_MEMORY;
     if(Curl_hyper_header(data, headers, data->state.aptr.ref))
       goto error;
   }
+
+  if(!Curl_checkheaders(data, "Accept-Encoding") &&
+     data->set.str[STRING_ENCODING]) {
+    Curl_safefree(data->state.aptr.accept_encoding);
+    data->state.aptr.accept_encoding =
+      aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
+    if(!data->state.aptr.accept_encoding)
+      return CURLE_OUT_OF_MEMORY;
+    if(Curl_hyper_header(data, headers, data->state.aptr.accept_encoding))
+      goto error;
+  }
+  else
+    Curl_safefree(data->state.aptr.accept_encoding);
 
   result = cookies(data, conn, headers);
   if(result)
@@ -864,6 +904,10 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
   conn->datastream = Curl_hyper_stream;
 
+  /* clear userpwd and proxyuserpwd to avoid re-using old credentials
+   * from re-used connections */
+  Curl_safefree(data->state.aptr.userpwd);
+  Curl_safefree(data->state.aptr.proxyuserpwd);
   return CURLE_OK;
   error:
 

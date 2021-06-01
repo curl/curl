@@ -33,14 +33,14 @@ http/2
 HTTP/2 upgrade refused
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1800 --http2
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http2
 </command>
 
 </client>
 
 <verify>
 <protocol>
-GET /1800 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

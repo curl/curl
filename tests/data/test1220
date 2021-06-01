@@ -21,9 +21,9 @@ file
 file:// URLs with query string
  </name>
 <command option="no-include">
-file://localhost%FILE_PWD/log/test1220.txt?a_query=foobar#afragment
+file://localhost%FILE_PWD/log/test%TESTNUMBER.txt?a_query=foobar#afragment
 </command>
-<file name="log/test1220.txt">
+<file name="log/test%TESTNUMBER.txt">
 contents in a single file
 </file>
 </client>

@@ -15,7 +15,7 @@ http
 /-prefixed proxy name
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/that/page/1329 -x "/server"
+http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER -x "/server"
 </command>
 <features>
 proxy

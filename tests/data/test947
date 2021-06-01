@@ -33,7 +33,7 @@ SMTP OAuth 2.0 (OAUTHBEARER) authentication with initial response
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/947 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir -T -
 </command>
 </client>
 
@@ -41,7 +41,7 @@ smtp://%HOSTIP:%SMTPPORT/947 --mail-rcpt recipient@example.com --mail-from sende
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 947
+EHLO %TESTNUMBER
 AUTH OAUTHBEARER %b64[n,a=user,%01host=127.0.0.1%01port=%SMTPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>

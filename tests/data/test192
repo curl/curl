@@ -29,7 +29,7 @@ http
 HTTP GET -w num_connects with one simple connect
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/192 -w "%{num_connects}\n"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n"
 </command>
 </client>
 
@@ -37,7 +37,7 @@ http://%HOSTIP:%HTTPPORT/192 -w "%{num_connects}\n"
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /192 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

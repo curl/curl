@@ -39,6 +39,9 @@ below) to set or change, with \fIcontent\fP pointing to a null-terminated
 string with the new contents for that URL part. The contents should be in the
 form and encoding they'd use in a URL: URL encoded.
 
+The application does not have to keep \fIcontent\fP around after a successful
+call.
+
 Setting a part to a NULL pointer will effectively remove that part's contents
 from the CURLU handle.
 

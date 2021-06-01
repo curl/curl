@@ -169,6 +169,7 @@
 --proxy-pinnedpubkey                 7.59.0
 --proxy-service-name                 7.43.0
 --proxy-ssl-allow-beast              7.52.0
+--proxy-ssl-auto-client-cert         7.77.0
 --proxy-tls13-ciphers                7.61.0
 --proxy-tlsauthtype                  7.52.0
 --proxy-tlspassword                  7.52.0
@@ -212,6 +213,7 @@
 --speed-time (-y)                    4.7
 --ssl                                7.20.0
 --ssl-allow-beast                    7.25.0
+--ssl-auto-client-cert               7.77.0
 --ssl-no-revoke                      7.44.0
 --ssl-reqd                           7.20.0
 --ssl-revoke-best-effort             7.70.0

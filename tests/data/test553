@@ -27,7 +27,7 @@ http
 </server>
 # tool to use
 <tool>
-lib553
+lib%TESTNUMBER
 </tool>
 <features>
 </features>
@@ -35,14 +35,14 @@ lib553
 HTTP post with huge request headers and post data from callback
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/path/553
+http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol nonewline="yes">
-POST /path/553 HTTP/1.1
+POST /path/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Header0: %repeat[5000 x A]%

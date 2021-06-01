@@ -32,7 +32,7 @@ SMTP OAuth 2.0 (XOAUTH2) authentication with initial response
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/922 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir -T -
 </command>
 </client>
 
@@ -40,7 +40,7 @@ smtp://%HOSTIP:%SMTPPORT/922 --mail-rcpt recipient@example.com --mail-from sende
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 922
+EHLO %TESTNUMBER
 AUTH XOAUTH2 dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>

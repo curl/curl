@@ -18,7 +18,7 @@ HTTP/1.1 302 OK swsbounce
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Content-Type: text/plain
-Location: ./20460001
+Location: ./%TESTNUMBER0001
 
 redirect
 </data>
@@ -53,7 +53,7 @@ Connection re-use with IDN host name
  </name>
 
  <command>
-http://åäö.se:%HTTPPORT/2046 --resolve xn--4cab6c.se:%HTTPPORT:%HOSTIP -w "%{num_connects}\n%{num_redirects}\n%{size_download}\n%{url_effective}\n%{content_type}\n%{response_code}\n" -L
+http://åäö.se:%HTTPPORT/%TESTNUMBER --resolve xn--4cab6c.se:%HTTPPORT:%HOSTIP -w "%{num_connects}\n%{num_redirects}\n%{size_download}\n%{url_effective}\n%{content_type}\n%{response_code}\n" -L
 </command>
 </client>
 
@@ -61,12 +61,12 @@ http://åäö.se:%HTTPPORT/2046 --resolve xn--4cab6c.se:%HTTPPORT:%HOSTIP -w "%{
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /2046 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: xn--4cab6c.se:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /20460001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: xn--4cab6c.se:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
@@ -78,7 +78,7 @@ HTTP/1.1 302 OK swsbounce
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Content-Type: text/plain
-Location: ./20460001
+Location: ./%TESTNUMBER0001
 
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
@@ -89,7 +89,7 @@ OK
 1
 1
 3
-http://åäö.se:%HTTPPORT/20460001
+http://åäö.se:%HTTPPORT/%TESTNUMBER0001
 text/plain; charset=us-ascii
 200
 </stdout>

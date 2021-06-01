@@ -296,9 +296,6 @@
 /* Define if you have the <string.h> header file. */
 #define HAVE_STRING_H
 
-/* Define if you have the `strlcpy' function. */
-#undef HAVE_STRLCPY
-
 /* Define if you have the `strstr' function. */
 #define HAVE_STRSTR
 
@@ -352,9 +349,6 @@
 
 /* Name of package */
 #undef PACKAGE
-
-/* Define as the return type of signal handlers (`int' or `void'). */
-#define RETSIGTYPE void
 
 /* The size of `int', as computed by sizeof. */
 #define SIZEOF_INT 4
@@ -410,24 +404,6 @@
 
 /* to disable LDAP */
 #define CURL_DISABLE_LDAP
-
-/* Define if you have the getnameinfo function. */
-#define HAVE_GETNAMEINFO 1
-
-/* Define to the type qualifier of arg 1 for getnameinfo. */
-#define GETNAMEINFO_QUAL_ARG1 const
-
-/* Define to the type of arg 1 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-
-/* Define to the type of arg 2 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG2 socklen_t
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG46 size_t
-
-/* Define to the type of arg 7 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG7 int
 
 /* Define if you have the recv function. */
 #define HAVE_RECV 1

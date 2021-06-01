@@ -11,7 +11,7 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 301 OK
-Location: moo.html&testcase=/10110002
+Location: moo.html&testcase=/%TESTNUMBER0002
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0
 
@@ -26,7 +26,7 @@ body
 </data2>
 <datacheck>
 HTTP/1.1 301 OK
-Location: moo.html&testcase=/10110002
+Location: moo.html&testcase=/%TESTNUMBER0002
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0
 
@@ -49,7 +49,7 @@ http
 HTTP POST with 301 redirect
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/blah/1011 -L -d "moo"
+http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -d "moo"
 </command>
 </client>
 
@@ -57,14 +57,14 @@ http://%HOSTIP:%HTTPPORT/blah/1011 -L -d "moo"
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-POST /blah/1011 HTTP/1.1
+POST /blah/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 3
 Content-Type: application/x-www-form-urlencoded
 
-mooGET /blah/moo.html&testcase=/10110002 HTTP/1.1
+mooGET /blah/moo.html&testcase=/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

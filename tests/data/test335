@@ -67,30 +67,30 @@ proxy
 HTTP with proxy Digest and site Digest with creds in URLs
  </name>
  <command>
-http://digest:alot@data.from.server.requiring.digest.hohoho.com/335 --proxy http://foo:bar@%HOSTIP:%HTTPPORT --proxy-digest --digest
+http://digest:alot@data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://foo:bar@%HOSTIP:%HTTPPORT --proxy-digest --digest
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET http://data.from.server.requiring.digest.hohoho.com/335 HTTP/1.1
+GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://data.from.server.requiring.digest.hohoho.com/335 HTTP/1.1
+GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/335", response="f61609cd8f5bb205ef4e169b2c5626cb"
+Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/%TESTNUMBER", response="f61609cd8f5bb205ef4e169b2c5626cb"
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://data.from.server.requiring.digest.hohoho.com/335 HTTP/1.1
+GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/335", response="f61609cd8f5bb205ef4e169b2c5626cb"
-Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/335", response="08a2e2e684047f4219a38ddc189ac00c"
+Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/%TESTNUMBER", response="f61609cd8f5bb205ef4e169b2c5626cb"
+Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/%TESTNUMBER", response="08a2e2e684047f4219a38ddc189ac00c"
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

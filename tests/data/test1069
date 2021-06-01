@@ -20,7 +20,7 @@ http
 HTTP 1.0 PUT from stdin with no content length
 </name>
  <command>
-http://%HOSTIP:%HTTPPORT/bzz/1069 -T - -0
+http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T - -0
 </command>
 <stdin>
 this data can't be sent

@@ -426,7 +426,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
    */
 
   /* wrong version ? */
-  if(socksreq[0] != 0) {
+  if(socksreq[0]) {
     failf(data,
           "SOCKS4 reply has wrong version, version should be 0.");
     return CURLPX_BAD_VERSION;
@@ -742,7 +742,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
       return CURLPX_OK;
     }
     /* ignore the first (VER) byte */
-    else if(socksreq[1] != 0) { /* status */
+    else if(socksreq[1]) { /* status */
       failf(data, "User was rejected by the SOCKS5 server (%d %d).",
             socksreq[0], socksreq[1]);
       return CURLPX_USER_REJECTED;
@@ -927,7 +927,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
             "SOCKS5 reply has wrong version, version should be 5.");
       return CURLPX_BAD_VERSION;
     }
-    else if(socksreq[1] != 0) { /* Anything besides 0 is an error */
+    else if(socksreq[1]) { /* Anything besides 0 is an error */
       CURLproxycode rc = CURLPX_REPLY_UNASSIGNED;
       int code = socksreq[1];
       failf(data, "Can't complete SOCKS5 connection to %s. (%d)",

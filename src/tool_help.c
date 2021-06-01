@@ -23,10 +23,14 @@
 #if defined(HAVE_STRCASECMP) && defined(HAVE_STRINGS_H)
 #include <strings.h>
 #endif
+#define ENABLE_CURLX_PRINTF
+/* use our own printf() functions */
+#include "curlx.h"
 
 #include "tool_panykey.h"
 #include "tool_help.h"
 #include "tool_libinfo.h"
+#include "tool_metalink.h"
 #include "tool_version.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -598,6 +602,9 @@ static const struct helptxt helptext[] = {
   {"    --proxy-ssl-allow-beast",
    "Allow security flaw for interop for HTTPS proxy",
    CURLHELP_PROXY | CURLHELP_TLS},
+  {"    --proxy-ssl-auto-client-cert",
+   "Use auto client certificate for proxy (Schannel)",
+   CURLHELP_PROXY | CURLHELP_TLS},
   {"    --proxy-tls13-ciphers <ciphersuite list>",
    "TLS 1.3 proxy cipher suites",
    CURLHELP_PROXY | CURLHELP_TLS},
@@ -726,6 +733,9 @@ static const struct helptxt helptext[] = {
    CURLHELP_TLS},
   {"    --ssl-allow-beast",
    "Allow security flaw to improve interop",
+   CURLHELP_TLS},
+  {"    --ssl-auto-client-cert",
+   "Use auto client certificate (Schannel)",
    CURLHELP_TLS},
   {"    --ssl-no-revoke",
    "Disable cert revocation checks (Schannel)",
@@ -957,11 +967,27 @@ featcomp(const void *p1, const void *p2)
 #endif
 }
 
+#ifdef USE_METALINK
+static const char *metalnk_version(void)
+{
+  static char version[25];
+  int major = 0;
+  int minor = 0;
+  int patch = 0;
+  metalink_get_version(&major, &minor, &patch);
+  msnprintf(version, sizeof(version), " libmetalink/%u.%u.%u",
+            major, minor, patch);
+  return version;
+}
+#else
+#define metalnk_version() ""
+#endif
+
 void tool_version_info(void)
 {
   const char *const *proto;
 
-  printf(CURL_ID "%s\n", curl_version());
+  printf(CURL_ID "%s%s\n", curl_version(), metalnk_version());
 #ifdef CURL_PATCHSTAMP
   printf("Release-Date: %s, security patched: %s\n",
          LIBCURL_TIMESTAMP, CURL_PATCHSTAMP);

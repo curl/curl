@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -127,7 +127,7 @@ CURLcode Curl_convert_to_network(struct Curl_easy *data,
                &output_ptr, &out_bytes);
     if(!data)
       iconv_close(tmpcd);
-    if((rc == ICONV_ERROR) || (in_bytes != 0)) {
+    if((rc == ICONV_ERROR) || (in_bytes)) {
       failf(data,
             "The Curl_convert_to_network iconv call failed with errno %i: %s",
             errno, strerror(errno));
@@ -193,7 +193,7 @@ CURLcode Curl_convert_from_network(struct Curl_easy *data,
                &output_ptr, &out_bytes);
     if(!data)
       iconv_close(tmpcd);
-    if((rc == ICONV_ERROR) || (in_bytes != 0)) {
+    if((rc == ICONV_ERROR) || (in_bytes)) {
       failf(data,
             "Curl_convert_from_network iconv call failed with errno %i: %s",
             errno, strerror(errno));
@@ -260,7 +260,7 @@ CURLcode Curl_convert_from_utf8(struct Curl_easy *data,
                &output_ptr, &out_bytes);
     if(!data)
       iconv_close(tmpcd);
-    if((rc == ICONV_ERROR) || (in_bytes != 0)) {
+    if((rc == ICONV_ERROR) || (in_bytes)) {
       failf(data,
             "The Curl_convert_from_utf8 iconv call failed with errno %i: %s",
             errno, strerror(errno));

@@ -157,6 +157,7 @@ static const struct Curl_handler Curl_handler_http3 = {
   quiche_disconnect,                    /* disconnect */
   ZERO_NULL,                            /* readwrite */
   quiche_conncheck,                     /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
   CURLPROTO_HTTP,                       /* family */
@@ -225,7 +226,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
     quiche_config_log_keys(qs->cfg);
 
   qs->conn = quiche_connect(conn->host.name, (const uint8_t *) qs->scid,
-                            sizeof(qs->scid), qs->cfg);
+                            sizeof(qs->scid), addr, addrlen, qs->cfg);
   if(!qs->conn) {
     failf(data, "can't create quiche connection");
     return CURLE_OUT_OF_MEMORY;
@@ -359,6 +360,9 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
   ssize_t recvd;
   uint8_t *buf = (uint8_t *)data->state.buffer;
   size_t bufsize = data->set.buffer_size;
+  struct sockaddr_storage from;
+  socklen_t from_len;
+  quiche_recv_info recv_info;
 
   DEBUGASSERT(qs->conn);
 
@@ -366,17 +370,24 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
   quiche_conn_on_timeout(qs->conn);
 
   do {
-    recvd = recv(sockfd, buf, bufsize, 0);
+    from_len = sizeof(from);
+
+    recvd = recvfrom(sockfd, buf, bufsize, 0,
+                     (struct sockaddr *)&from, &from_len);
+
     if((recvd < 0) && ((SOCKERRNO == EAGAIN) || (SOCKERRNO == EWOULDBLOCK)))
       break;
 
     if(recvd < 0) {
-      failf(data, "quiche: recv() unexpectedly returned %zd "
+      failf(data, "quiche: recvfrom() unexpectedly returned %zd "
             "(errno: %d, socket %d)", recvd, SOCKERRNO, sockfd);
       return CURLE_RECV_ERROR;
     }
 
-    recvd = quiche_conn_recv(qs->conn, buf, recvd);
+    recv_info.from = (struct sockaddr *) &from;
+    recv_info.from_len = from_len;
+
+    recvd = quiche_conn_recv(qs->conn, buf, recvd, &recv_info);
     if(recvd == QUICHE_ERR_DONE)
       break;
 
@@ -399,9 +410,10 @@ static CURLcode flush_egress(struct Curl_easy *data, int sockfd,
   ssize_t sent;
   uint8_t out[1200];
   int64_t timeout_ns;
+  quiche_send_info send_info;
 
   do {
-    sent = quiche_conn_send(qs->conn, out, sizeof(out));
+    sent = quiche_conn_send(qs->conn, out, sizeof(out), &send_info);
     if(sent == QUICHE_ERR_DONE)
       break;
 
@@ -410,9 +422,10 @@ static CURLcode flush_egress(struct Curl_easy *data, int sockfd,
       return CURLE_SEND_ERROR;
     }
 
-    sent = send(sockfd, out, sent, 0);
+    sent = sendto(sockfd, out, sent, 0,
+                  (struct sockaddr *)&send_info.to, send_info.to_len);
     if(sent < 0) {
-      failf(data, "send() returned %zd", sent);
+      failf(data, "sendto() returned %zd", sent);
       return CURLE_SEND_ERROR;
     }
   } while(1);
@@ -750,7 +763,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   }
 
   /* :authority must come before non-pseudo header fields */
-  if(authority_idx != 0 && authority_idx != AUTHORITY_DST_IDX) {
+  if(authority_idx && authority_idx != AUTHORITY_DST_IDX) {
     quiche_h3_header authority = nva[authority_idx];
     for(i = authority_idx; i > AUTHORITY_DST_IDX; --i) {
       nva[i] = nva[i - 1];

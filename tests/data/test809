@@ -12,7 +12,7 @@ CUSTOMREQUEST
 # Server-side
 <reply>
 <data>
-* STATUS 809 (MESSAGES 231 UIDNEXT 44292)
+* STATUS %TESTNUMBER (MESSAGES 231 UIDNEXT 44292)
 </data>
 </reply>
 
@@ -26,7 +26,7 @@ imap
 IMAP mailbox STATUS (CUSTOMREQUEST)
  </name>
  <command>
-imap://%HOSTIP:%IMAPPORT -u user:secret -X 'STATUS 809 (UIDNEXT MESSAGES)'
+imap://%HOSTIP:%IMAPPORT -u user:secret -X 'STATUS %TESTNUMBER (UIDNEXT MESSAGES)'
 </command>
 </client>
 
@@ -36,7 +36,7 @@ imap://%HOSTIP:%IMAPPORT -u user:secret -X 'STATUS 809 (UIDNEXT MESSAGES)'
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 STATUS 809 (UIDNEXT MESSAGES)
+A003 STATUS %TESTNUMBER (UIDNEXT MESSAGES)
 A004 LOGOUT
 </protocol>
 </verify>

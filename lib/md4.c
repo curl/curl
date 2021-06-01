@@ -174,7 +174,7 @@ static void MD4_Init(MD4_CTX *ctx)
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
-  if(ctx->data == NULL) {
+  if(!ctx->data) {
     ctx->data = malloc(size);
     if(ctx->data != NULL) {
       memcpy(ctx->data, data, size);

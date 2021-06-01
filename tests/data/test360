@@ -15,7 +15,7 @@ http
 Error on both --fail-with-body and --fail
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/360 --fail-with-body --fail
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --fail-with-body --fail
 </command>
 </client>
 

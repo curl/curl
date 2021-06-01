@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -44,6 +44,7 @@ EXTRA_DIST =                                    \
  $(noinst_man_MANS)                             \
  ALTSVC.md                                      \
  BINDINGS.md                                    \
+ BUFREF.md                                      \
  BUG-BOUNTY.md                                  \
  BUGS.md                                        \
  CHECKSRC.md                                    \
@@ -80,6 +81,7 @@ EXTRA_DIST =                                    \
  PARALLEL-TRANSFERS.md                          \
  README.md                                      \
  RELEASE-PROCEDURE.md                           \
+ RUSTLS.md                                      \
  ROADMAP.md                                     \
  SECURITY-PROCESS.md                            \
  SSL-PROBLEMS.md                                \

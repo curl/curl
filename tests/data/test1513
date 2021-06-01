@@ -22,7 +22,7 @@ wait 10
 http
 </server>
 <tool>
-lib1513
+lib%TESTNUMBER
 </tool>
  <name>
 return failure immediately from progress callback
@@ -30,7 +30,7 @@ return failure immediately from progress callback
 
 # this server/host won't be used for real
  <command>
-http://%HOSTIP:%HTTPPORT/1513
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

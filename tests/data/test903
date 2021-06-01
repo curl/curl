@@ -32,7 +32,7 @@ SMTP plain authentication
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/903 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>
 
@@ -40,7 +40,7 @@ smtp://%HOSTIP:%SMTPPORT/903 --mail-rcpt recipient@example.com --mail-from sende
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 903
+EHLO %TESTNUMBER
 AUTH PLAIN
 AHVzZXIAc2VjcmV0
 MAIL FROM:<sender@example.com>

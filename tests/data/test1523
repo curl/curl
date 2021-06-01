@@ -27,7 +27,7 @@ writedelay: 1
 http
 </server>
 <tool>
-lib1523
+lib%TESTNUMBER
 </tool>
 
 <name>
@@ -35,7 +35,7 @@ CURLINFO_LOW_SPEED_LIMIT
 </name>
 
 <command>
-http://%HOSTIP:%HTTPPORT/1523
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 <killserver>
 http

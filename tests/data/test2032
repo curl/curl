@@ -86,7 +86,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/2032
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 <precheck>
 chkhostname curlhost
@@ -96,22 +96,22 @@ chkhostname curlhost
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /20320100 HTTP/1.1
+GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Accept: */*
 
-GET /20320100 HTTP/1.1
+GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Accept: */*
 
-GET /20320200 HTTP/1.1
+GET /%TESTNUMBER0200 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Accept: */*
 
-GET /20320200 HTTP/1.1
+GET /%TESTNUMBER0200 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoABAI+/Fp9IERAQ74OsdNPbBpg7o8CVwLSO4DtFyIcZHUMKVktWIu92s2892OVpd2JzqnRlc3R1c2VyY3VybGhvc3Q=
 Accept: */*

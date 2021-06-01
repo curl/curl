@@ -44,7 +44,7 @@ in the curl-www repo
 
   (the website then updates its contents automatically)
 
-on github
+on GitHub
 ---------
 
 - edit the newly made release tag so that it is listed as the latest release

@@ -247,7 +247,8 @@ static const struct LongShort aliases[]= {
   {"El", "tlspassword",              ARG_STRING},
   {"Em", "tlsauthtype",              ARG_STRING},
   {"En", "ssl-allow-beast",          ARG_BOOL},
-  /* Eo */
+  {"Eo", "ssl-auto-client-cert",     ARG_BOOL},
+  {"EO", "proxy-ssl-auto-client-cert", ARG_BOOL},
   {"Ep", "pinnedpubkey",             ARG_STRING},
   {"EP", "proxy-pinnedpubkey",       ARG_STRING},
   {"Eq", "cert-status",              ARG_BOOL},
@@ -440,6 +441,34 @@ void parse_cert_parameter(const char *cert_parameter,
   }
 done:
   *certname_place = '\0';
+}
+
+/* Replace (in-place) '%20' by '+' according to RFC1866 */
+static size_t replace_url_encoded_space_by_plus(char *url)
+{
+  size_t orig_len = strlen(url);
+  size_t orig_index = 0;
+  size_t new_index = 0;
+
+  while(orig_index < orig_len) {
+    if((url[orig_index] == '%') &&
+       (url[orig_index + 1] == '2') &&
+       (url[orig_index + 2] == '0')) {
+      url[new_index] = '+';
+      orig_index += 3;
+    }
+    else{
+      if(new_index != orig_index) {
+        url[new_index] = url[orig_index];
+      }
+      orig_index++;
+    }
+    new_index++;
+  }
+
+  url[new_index] = 0; /* terminate string */
+
+  return new_index; /* new size */
 }
 
 static void
@@ -1278,11 +1307,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case '2':
       /* SSL version 2 */
-      config->ssl_version = CURL_SSLVERSION_SSLv2;
+      warnf(global, "Ignores instruction to use SSLv2\n");
       break;
     case '3':
       /* SSL version 3 */
-      config->ssl_version = CURL_SSLVERSION_SSLv3;
+      warnf(global, "Ignores instruction to use SSLv3\n");
       break;
     case '4':
       /* IPv4 */
@@ -1422,9 +1451,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           char *enc = curl_easy_escape(NULL, postdata, (int)size);
           Curl_safefree(postdata); /* no matter if it worked or not */
           if(enc) {
+            /* replace (in-place) '%20' by '+' acording to RFC1866 */
+            size_t enclen = replace_url_encoded_space_by_plus(enc);
             /* now make a string with the name from above and append the
                encoded string */
-            size_t outlen = nlen + strlen(enc) + 2;
+            size_t outlen = nlen + enclen + 2;
             char *n = malloc(outlen);
             if(!n) {
               curl_free(enc);
@@ -1619,6 +1650,16 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 'n': /* no empty SSL fragments, --ssl-allow-beast */
         if(curlinfo->features & CURL_VERSION_SSL)
           config->ssl_allow_beast = toggle;
+        break;
+
+      case 'o': /* --ssl-auto-client-cert */
+        if(curlinfo->features & CURL_VERSION_SSL)
+          config->ssl_auto_client_cert = toggle;
+        break;
+
+      case 'O': /* --proxy-ssl-auto-client-cert */
+        if(curlinfo->features & CURL_VERSION_SSL)
+          config->proxy_ssl_auto_client_cert = toggle;
         break;
 
       case 'p': /* Pinned public key DER file */
@@ -1948,7 +1989,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       default:
         /* pick info from .netrc, if this is used for http, curl will
-           automatically enfore user+password with the request */
+           automatically enforce user+password with the request */
         config->netrc = toggle;
         break;
       }
@@ -2314,6 +2355,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
 
   for(i = 1, stillflags = TRUE; i < argc && !result; i++) {
     orig_opt = curlx_convert_tchar_to_UTF8(argv[i]);
+    if(!orig_opt)
+      return PARAM_NO_MEM;
 
     if(stillflags && ('-' == orig_opt[0])) {
       bool passarg;

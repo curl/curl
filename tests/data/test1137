@@ -31,7 +31,7 @@ ftp
 FTP RETR --ignore-content-length
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1137 --ignore-content-length
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ignore-content-length
 </command>
 
 </client>
@@ -45,7 +45,7 @@ PWD
 EPSV
 PASV
 TYPE I
-RETR 1137
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

@@ -24,13 +24,13 @@ Connection: close
 http
 </server>
 <tool>
-lib1539
+lib%TESTNUMBER
 </tool>
 <name>
 HTTP 1.0 POST with read callback and unknown data size
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/1539
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

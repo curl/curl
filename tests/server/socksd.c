@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -479,7 +479,7 @@ static curl_socket_t sockit(curl_socket_t fd)
     return CURL_SOCKET_BAD;
   }
   /* reserved, should be zero */
-  if(buffer[SOCKS5_RESERVED] != 0) {
+  if(buffer[SOCKS5_RESERVED]) {
     logmsg("Request COMMAND byte not %d", config.reqcmd);
     return CURL_SOCKET_BAD;
   }

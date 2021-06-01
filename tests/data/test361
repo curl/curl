@@ -25,19 +25,19 @@ http
 HTTP GET --fail-with-body on HTTP error return - twice
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/361 http://%HOSTIP:%HTTPPORT/361 --fail-with-body
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER --fail-with-body
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /361 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /361 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

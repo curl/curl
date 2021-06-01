@@ -11,7 +11,7 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 303 OK swsclose
-Location: moo.html&testcase=/15240002
+Location: moo.html&testcase=/%TESTNUMBER0002
 Connection: close
 
 </data>
@@ -24,7 +24,7 @@ body
 </data2>
 <datacheck>
 HTTP/1.1 303 OK swsclose
-Location: moo.html&testcase=/15240002
+Location: moo.html&testcase=/%TESTNUMBER0002
 Connection: close
 
 HTTP/1.1 200 OK swsclose
@@ -45,9 +45,9 @@ http
 HTTP PUT with 303 redirect
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/blah/1524 -L -T log/upload1524.txt
+http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -T log/upload%TESTNUMBER.txt
 </command>
-<file name="log/upload1524.txt">
+<file name="log/upload%TESTNUMBER.txt">
 moo
 </file>
 </client>
@@ -56,7 +56,7 @@ moo
 # Verify data after the test has been "shot"
 <verify>
 <protocol nonewline="yes">
-PUT /blah/1524 HTTP/1.1
+PUT /blah/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
@@ -64,7 +64,7 @@ Content-Length: 4
 Expect: 100-continue
 
 moo
-GET /blah/moo.html&testcase=/15240002 HTTP/1.1
+GET /blah/moo.html&testcase=/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

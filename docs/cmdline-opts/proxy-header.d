@@ -11,7 +11,7 @@ but is for proxy communication only like in CONNECT requests when you want a
 separate header sent to the proxy to what is sent to the actual remote host.
 
 curl will make sure that each header you add/replace is sent with the proper
-end-of-line marker, you should thus \fBnot\fP add that as a part of the header
+end-of-line marker, you should thus **not** add that as a part of the header
 content: do not add newlines or carriage returns, they will only mess things
 up for you.
 

@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2018-2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2018-2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -77,6 +77,7 @@ $taggednice=`git for-each-ref --format="%(refname:short) | %(creatordate)" refs/
 chomp $taggednice;
 $now=`date +%s`;
 $elapsed=$now - $tagged; # number of seconds since tag
+$total=$now - `date -d 19980320 +%s`;
 
 # Number of public functions in libcurl
 $apublic=`git grep ^CURL_EXTERN -- include/curl | wc -l`;
@@ -119,9 +120,10 @@ close(F);
 # Produce the summary
 
 print "== Since $start $taggednice ==\n";
-printf "Elapsed time:                   %.1f days\n",
-    $elapsed / 3600 / 24;
-printf "Commits:                        %d (out of %d)\n",
+printf "Elapsed time:                   %.1f days (total %d)\n",
+    $elapsed / 3600 / 24,
+    $total / 3600 / 24;
+printf "Commits:                        %d (total %d)\n",
     $commits, $acommits;
 printf "Commit authors:                 %d, %d new (total %d)\n",
     $committers, $ncommitters, $acommitters;

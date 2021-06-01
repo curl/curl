@@ -21,7 +21,7 @@ ftp
 FTP download, failed login: PASS not valid
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/114
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 

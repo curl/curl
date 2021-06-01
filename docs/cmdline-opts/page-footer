@@ -44,8 +44,11 @@ match.
 If curl was built with support for "MultiSSL", meaning that it has built-in
 support for more than one TLS backend, this environment variable can be set to
 the case insensitive name of the particular backend to use when curl is
-invoked. Setting a name that isn't a built-in alternative, will make curl
+invoked. Setting a name that isn't a built-in alternative will make curl
 stay with the default.
+
+SSL backend names (case-insensitive): bearssl, gnutls, gskit, mbedtls,
+mesalink, nss, openssl, rustls, schannel, secure-transport, wolfssl
 .IP "QLOGDIR <directory name>"
 If curl was built with HTTP/3 support, setting this environment variable to a
 local directory will make curl produce qlogs in that directory, using file
@@ -68,7 +71,7 @@ The supported proxy protocol prefixes are as follows:
 .IP "http://"
 Makes it use it as an HTTP proxy. The default if no scheme prefix is used.
 .IP "https://"
-Makes it treated as an \fBHTTPS\fP proxy.
+Makes it treated as an **HTTPS** proxy.
 .IP "socks4://"
 Makes it the equivalent of --socks4
 .IP "socks4a://"

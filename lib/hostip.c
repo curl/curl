@@ -63,10 +63,15 @@
 #include "multiif.h"
 #include "doh.h"
 #include "warnless.h"
+#include "strcase.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+#if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
+#include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
+#endif
 
 #if defined(CURLRES_SYNCH) && \
     defined(HAVE_ALARM) && defined(SIGALRM) && defined(HAVE_SIGSETJMP)
@@ -269,7 +274,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
   dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
   /* No entry found in cache, check if we might have a wildcard entry */
-  if(!dns && data->change.wildcard_resolve) {
+  if(!dns && data->state.wildcard_resolve) {
     create_hostcache_id("*", port, entry_id, sizeof(entry_id));
     entry_len = strlen(entry_id);
 
@@ -456,6 +461,94 @@ Curl_cache_addr(struct Curl_easy *data,
   return dns;
 }
 
+#ifdef ENABLE_IPV6
+/* return a static IPv6 resolve for 'localhost' */
+static struct Curl_addrinfo *get_localhost6(int port)
+{
+  struct Curl_addrinfo *ca;
+  const size_t ss_size = sizeof(struct sockaddr_in6);
+  const size_t hostlen = strlen("localhost");
+  struct sockaddr_in6 sa6;
+  unsigned char ipv6[16];
+  unsigned short port16 = (unsigned short)(port & 0xffff);
+  ca = calloc(sizeof(struct Curl_addrinfo) + ss_size + hostlen + 1, 1);
+  if(!ca)
+    return NULL;
+
+  sa6.sin6_family = AF_INET6;
+  sa6.sin6_port = htons(port16);
+  sa6.sin6_flowinfo = 0;
+  sa6.sin6_scope_id = 0;
+  Curl_inet_pton(AF_INET6, "::1", ipv6);
+  memcpy(&sa6.sin6_addr, ipv6, sizeof(ipv6));
+
+  ca->ai_flags     = 0;
+  ca->ai_family    = AF_INET6;
+  ca->ai_socktype  = SOCK_STREAM;
+  ca->ai_protocol  = IPPROTO_TCP;
+  ca->ai_addrlen   = (curl_socklen_t)ss_size;
+  ca->ai_next      = NULL;
+  ca->ai_addr = (void *)((char *)ca + sizeof(struct Curl_addrinfo));
+  memcpy(ca->ai_addr, &sa6, ss_size);
+  ca->ai_canonname = (char *)ca->ai_addr + ss_size;
+  strcpy(ca->ai_canonname, "localhost");
+  return ca;
+}
+#else
+#define get_localhost6(x) NULL
+#endif
+
+/* return a static IPv4 resolve for 'localhost' */
+static struct Curl_addrinfo *get_localhost(int port)
+{
+  struct Curl_addrinfo *ca;
+  const size_t ss_size = sizeof(struct sockaddr_in);
+  const size_t hostlen = strlen("localhost");
+  struct sockaddr_in sa;
+  unsigned int ipv4;
+  unsigned short port16 = (unsigned short)(port & 0xffff);
+  ca = calloc(sizeof(struct Curl_addrinfo) + ss_size + hostlen + 1, 1);
+  if(!ca)
+    return NULL;
+
+  sa.sin_family = AF_INET;
+  sa.sin_port = htons(port16);
+  Curl_inet_pton(AF_INET, "127.0.0.1", (char *)&ipv4);
+  memcpy(&sa.sin_addr, &ipv4, sizeof(ipv4));
+
+  ca->ai_flags     = 0;
+  ca->ai_family    = AF_INET;
+  ca->ai_socktype  = SOCK_STREAM;
+  ca->ai_protocol  = IPPROTO_TCP;
+  ca->ai_addrlen   = (curl_socklen_t)ss_size;
+  ca->ai_next      = NULL;
+  ca->ai_addr = (void *)((char *)ca + sizeof(struct Curl_addrinfo));
+  memcpy(ca->ai_addr, &sa, ss_size);
+  ca->ai_canonname = (char *)ca->ai_addr + ss_size;
+  strcpy(ca->ai_canonname, "localhost");
+  ca->ai_next = get_localhost6(port);
+  return ca;
+}
+
+/*
+ * Curl_host_is_ipnum() returns TRUE if the given string is a numerical IPv4
+ * (or IPv6 if supported) address.
+ */
+bool Curl_host_is_ipnum(const char *hostname)
+{
+  struct in_addr in;
+#ifdef ENABLE_IPV6
+  struct in6_addr in6;
+#endif
+  if(Curl_inet_pton(AF_INET, hostname, &in) > 0
+#ifdef ENABLE_IPV6
+     || Curl_inet_pton(AF_INET6, hostname, &in6) > 0
+#endif
+    )
+    return TRUE;
+  return FALSE;
+}
+
 /*
  * Curl_resolv() is the main name resolve function within libcurl. It resolves
  * a name and returns a pointer to the entry in the 'entry' argument (if one
@@ -465,10 +558,6 @@ Curl_cache_addr(struct Curl_easy *data,
  * The cache entry we return will get its 'inuse' counter increased when this
  * function is used. You MUST call Curl_resolv_unlock() later (when you're
  * done using this struct) to decrease the counter again.
- *
- * In debug mode, we specifically test for an interface name "LocalHost"
- * and resolve "localhost" instead as a means to permit test cases
- * to connect to a local test server with any host name.
  *
  * Return codes:
  *
@@ -533,6 +622,19 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
         return CURLRESOLV_ERROR;
     }
 
+#if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
+    /*
+     * The automagic conversion from IPv4 literals to IPv6 literals only works
+     * if the SCDynamicStoreCopyProxies system function gets called first. As
+     * Curl currently doesn't support system-wide HTTP proxies, we therefore
+     * don't use any value this function might return.
+     *
+     * This function is only available on a macOS and is not needed for
+     * IPv4-only builds, hence the conditions above.
+     */
+    SCDynamicStoreCopyProxies(NULL);
+#endif
+
 #ifndef USE_RESOLVE_ON_IPS
     /* First check if this is an IPv4 address string */
     if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
@@ -571,20 +673,15 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       if(!Curl_ipvalid(data, conn))
         return CURLRESOLV_ERROR;
 
-      if(allowDOH && data->set.doh && !ipnum) {
+      if(strcasecompare(hostname, "localhost"))
+        addr = get_localhost(port);
+      else if(allowDOH && data->set.doh && !ipnum)
         addr = Curl_doh(data, hostname, port, &respwait);
-      }
       else {
         /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
            non-zero value indicating that we need to wait for the response to
            the resolve call */
-        addr = Curl_getaddrinfo(data,
-#ifdef DEBUGBUILD
-                                (data->set.str[STRING_DEVICE]
-                                 && !strcmp(data->set.str[STRING_DEVICE],
-                                            "LocalHost"))?"localhost":
-#endif
-                                hostname, port, &respwait);
+        addr = Curl_getaddrinfo(data, hostname, port, &respwait);
       }
     }
     if(!addr) {
@@ -631,7 +728,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
  * within a signal handler which is nonportable and could lead to problems.
  */
 static
-RETSIGTYPE alarmfunc(int sig)
+void alarmfunc(int sig)
 {
   /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
   (void)sig;
@@ -878,9 +975,9 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
   int port = 0;
 
   /* Default is no wildcard found */
-  data->change.wildcard_resolve = false;
+  data->state.wildcard_resolve = false;
 
-  for(hostp = data->change.resolve; hostp; hostp = hostp->next) {
+  for(hostp = data->state.resolve; hostp; hostp = hostp->next) {
     char entry_id[MAX_HOSTCACHE_LEN];
     if(!hostp->data)
       continue;
@@ -1061,11 +1158,11 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       if(hostname[0] == '*' && hostname[1] == '\0') {
         infof(data, "RESOLVE %s:%d is wildcard, enabling wildcard checks\n",
               hostname, port);
-        data->change.wildcard_resolve = true;
+        data->state.wildcard_resolve = true;
       }
     }
   }
-  data->change.resolve = NULL; /* dealt with now */
+  data->state.resolve = NULL; /* dealt with now */
 
   return CURLE_OK;
 }
@@ -1130,6 +1227,7 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
  * resolve error
  */
 
+#ifdef USE_CURL_ASYNC
 CURLcode Curl_resolver_error(struct Curl_easy *data)
 {
   const char *host_or_proxy;
@@ -1153,3 +1251,4 @@ CURLcode Curl_resolver_error(struct Curl_easy *data)
 
   return result;
 }
+#endif /* USE_CURL_ASYNC */

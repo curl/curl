@@ -50,6 +50,12 @@
 #  define in_addr_t unsigned long
 #endif
 
+#if defined(USE_UNIX_SOCKETS) && defined(WINAPI_FAMILY) && \
+    (WINAPI_FAMILY == WINAPI_FAMILY_APP)
+   /* Required for sockaddr_un type */
+#  include <afunix.h>
+#endif
+
 #include <stddef.h>
 
 #include "curl_addrinfo.h"
@@ -141,7 +147,7 @@ Curl_getaddrinfo_ex(const char *nodename,
       continue;
 
     /* ignore elements without required address info */
-    if((ai->ai_addr == NULL) || !(ai->ai_addrlen > 0))
+    if(!ai->ai_addr || !(ai->ai_addrlen > 0))
       continue;
 
     /* ignore elements with bogus address size */

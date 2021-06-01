@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -76,6 +76,7 @@ extern const struct NameValueUnsigned setopt_nv_CURLHSTS[];
 #define setopt_nv_CURLOPT_FTP_SSL_CCC setopt_nv_CURLFTPSSL_CCC
 #define setopt_nv_CURLOPT_USE_SSL setopt_nv_CURLUSESSL
 #define setopt_nv_CURLOPT_SSL_OPTIONS setopt_nv_CURLSSLOPT
+#define setopt_nv_CURLOPT_PROXY_SSL_OPTIONS setopt_nv_CURLSSLOPT
 #define setopt_nv_CURLOPT_NETRC setopt_nv_CURL_NETRC
 #define setopt_nv_CURLOPT_PROTOCOLS setopt_nv_CURLPROTO
 #define setopt_nv_CURLOPT_REDIR_PROTOCOLS setopt_nv_CURLPROTO

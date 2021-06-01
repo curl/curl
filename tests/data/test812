@@ -23,7 +23,7 @@ imap
 IMAP DELETE mailbox (CUSTOMREQUEST)
  </name>
  <command>
-imap://%HOSTIP:%IMAPPORT -u user:secret -X 'DELETE 812'
+imap://%HOSTIP:%IMAPPORT -u user:secret -X 'DELETE %TESTNUMBER'
 </command>
 </client>
 
@@ -33,7 +33,7 @@ imap://%HOSTIP:%IMAPPORT -u user:secret -X 'DELETE 812'
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 DELETE 812
+A003 DELETE %TESTNUMBER
 A004 LOGOUT
 </protocol>
 </verify>

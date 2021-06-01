@@ -43,14 +43,14 @@ http/2
 HTTP/2 upgrade with lying server
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1801 --http2
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http2
 </command>
 
 </client>
 
 <verify>
 <protocol>
-GET /1801 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

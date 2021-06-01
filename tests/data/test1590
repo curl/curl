@@ -41,7 +41,7 @@ lib1553
 
 # it is important this uses a host name that resolves successfully
 <command>
-imap://localhost:%IMAPPORT/1590
+imap://localhost:%IMAPPORT/%TESTNUMBER
 </command>
 </client>
 

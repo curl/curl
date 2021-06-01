@@ -31,7 +31,7 @@ ftp
 FTP RETR PASV with PRET
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1107 --ftp-pret
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ftp-pret
 </command>
 
 </client>
@@ -42,11 +42,11 @@ ftp://%HOSTIP:%FTPPORT/1107 --ftp-pret
 USER anonymous
 PASS ftp@example.com
 PWD
-PRET RETR 1107
+PRET RETR %TESTNUMBER
 EPSV
 TYPE I
-SIZE 1107
-RETR 1107
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

@@ -16,7 +16,7 @@ URL escape
 none
 </server>
 <tool>
-lib1537
+lib%TESTNUMBER
 </tool>
 
 <name>

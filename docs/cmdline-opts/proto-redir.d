@@ -15,5 +15,5 @@ Example, allow only HTTP and HTTPS on redirect:
 By default curl will allow HTTP, HTTPS, FTP and FTPS on redirect (7.65.2).
 Older versions of curl allowed all protocols on redirect except several
 disabled for security reasons: Since 7.19.4 FILE and SCP are disabled, and
-since 7.40.0 SMB and SMBS are also disabled. Specifying \fIall\fP or \fI+all\fP
+since 7.40.0 SMB and SMBS are also disabled. Specifying *all* or *+all*
 enables all protocols on redirect, including those disabled for security.

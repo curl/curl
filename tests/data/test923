@@ -21,7 +21,7 @@ smtp
 SMTP VRFY
  </name>
  <command>
-smtp://%HOSTIP:%SMTPPORT/923 --mail-rcpt recipient
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient
 </command>
 </client>
 
@@ -29,7 +29,7 @@ smtp://%HOSTIP:%SMTPPORT/923 --mail-rcpt recipient
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 923
+EHLO %TESTNUMBER
 VRFY recipient
 QUIT
 </protocol>

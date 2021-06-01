@@ -1,0 +1,66 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+referer
+followlocation
+--write-out
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 301 This is a weirdo text message swsclose
+Location: data/%TESTNUMBER0002.txt?coolsite=yes
+Content-Length: 62
+Connection: close
+
+This server reply is for testing a simple Location: following
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+Automatic referrer credential and anchor stripping check
+ </name>
+ <command>
+http://user:pass@%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER#anchor --location --referer ';auto' --write-out '%{referer}\n'
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+52
+</errorcode>
+<protocol>
+GET /we/want/our/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dXNlcjpwYXNz
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /we/want/our/data/%TESTNUMBER0002.txt?coolsite=yes HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dXNlcjpwYXNz
+User-Agent: curl/%VERSION
+Accept: */*
+Referer: http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER
+
+</protocol>
+<stdout>
+HTTP/1.1 301 This is a weirdo text message swsclose
+Location: data/%TESTNUMBER0002.txt?coolsite=yes
+Content-Length: 62
+Connection: close
+
+http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER
+</stdout>
+</verify>
+</testcase>

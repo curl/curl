@@ -24,7 +24,7 @@ ftp
 FTP dir list PASV with -I
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1000/ -I
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER/ -I
 </command>
 </client>
 
@@ -35,7 +35,7 @@ ftp://%HOSTIP:%FTPPORT/1000/ -I
 USER anonymous
 PASS ftp@example.com
 PWD
-CWD 1000
+CWD %TESTNUMBER
 QUIT
 </protocol>
 </verify>

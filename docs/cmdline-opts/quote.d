@@ -30,7 +30,7 @@ all supported SFTP quote commands:
 .IP "atime date file"
 The atime command sets the last access time of the file named by the file
 operand. The <date expression> can be all sorts of date strings, see the
-\fIcurl_getdate(3)\fP man page for date expression details. (Added in 7.73.0)
+*curl_getdate(3)* man page for date expression details. (Added in 7.73.0)
 .IP "chgrp group file"
 The chgrp command sets the group ID of the file named by the file operand to
 the group ID specified by the group operand. The group operand is a decimal
@@ -50,7 +50,7 @@ The mkdir command creates the directory named by the directory_name operand.
 .IP "mtime date file"
 The mtime command sets the last modification time of the file named by the
 file operand. The <date expression> can be all sorts of date strings, see the
-\fIcurl_getdate(3)\fP man page for date expression details. (Added in 7.73.0)
+*curl_getdate(3)* man page for date expression details. (Added in 7.73.0)
 .IP "pwd"
 The pwd command returns the absolute pathname of the current working directory.
 .IP "rename source target"

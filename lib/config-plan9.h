@@ -40,8 +40,6 @@
 #define RANDOM_FILE "/dev/random"
 #define VERSION "0.0.0" /* TODO */
 
-#define RETSIGTYPE void
-
 #define STDC_HEADERS 1
 
 #ifdef _BITS64
@@ -55,13 +53,6 @@
 #define SIZEOF_SIZE_T 4
 #define SIZEOF_TIME_T 4
 #endif
-
-#define HAVE_GETNAMEINFO 1
-#define GETNAMEINFO_QUAL_ARG1 const
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-#define GETNAMEINFO_TYPE_ARG2 int
-#define GETNAMEINFO_TYPE_ARG46 long
-#define GETNAMEINFO_TYPE_ARG7 int
 
 #define HAVE_RECV 1
 #define RECV_TYPE_ARG1 int

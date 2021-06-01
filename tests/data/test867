@@ -42,7 +42,7 @@ crypto
 POP3 CRAM-MD5 authentication
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/867 -u user:secret
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
@@ -53,7 +53,7 @@ pop3://%HOSTIP:%POP3PORT/867 -u user:secret
 CAPA
 AUTH CRAM-MD5
 dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg==
-RETR 867
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

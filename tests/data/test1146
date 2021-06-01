@@ -25,9 +25,9 @@ file
 --proto-default file
 </name>
 <command option="no-include">
---proto-default file %PWD/log/test1146.txt
+--proto-default file %PWD/log/test%TESTNUMBER.txt
 </command>
-<file name="log/test1146.txt">
+<file name="log/test%TESTNUMBER.txt">
 foo
    bar
 bar

@@ -19,9 +19,9 @@ file:// bad host
 # This command should not succeed since we only accept
 # file:/// file://localhost/ file://127.0.0.1/
 <command>
-file://bad-host%PWD/log/test1145.txt
+file://bad-host%PWD/log/test%TESTNUMBER.txt
 </command>
-<file name="log/test1145.txt">
+<file name="log/test%TESTNUMBER.txt">
 foo
    bar
 bar

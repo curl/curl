@@ -313,6 +313,10 @@ static CURLcode dohprobe(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_CAINFO,
                          data->set.str[STRING_SSL_CAFILE]);
     }
+    if(data->set.blobs[BLOB_CAINFO]) {
+      ERROR_CHECK_SETOPT(CURLOPT_CAINFO_BLOB,
+                         data->set.blobs[BLOB_CAINFO]);
+    }
     if(data->set.str[STRING_SSL_CAPATH]) {
       ERROR_CHECK_SETOPT(CURLOPT_CAPATH,
                          data->set.str[STRING_SSL_CAPATH]);
@@ -351,7 +355,10 @@ static CURLcode dohprobe(struct Curl_easy *data,
         (data->set.ssl.revoke_best_effort ?
          CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
         (data->set.ssl.native_ca_store ?
-         CURLSSLOPT_NATIVE_CA : 0);
+         CURLSSLOPT_NATIVE_CA : 0) |
+        (data->set.ssl.auto_client_cert ?
+         CURLSSLOPT_AUTO_CLIENT_CERT : 0);
+
       curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS, mask);
     }
 
@@ -359,7 +366,11 @@ static CURLcode dohprobe(struct Curl_easy *data,
     doh->set.dohfor = data; /* identify for which transfer this is done */
     p->easy = doh;
 
-    /* add this transfer to the multi handle */
+    /* DOH private_data must be null because the user must have a way to
+       distinguish their transfer's handle from DOH handles in user
+       callbacks (ie SSL CTX callback). */
+    DEBUGASSERT(!data->set.private_data);
+
     if(curl_multi_add_handle(multi, doh))
       goto error;
   }
@@ -409,17 +420,15 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   if(!dohp->headers)
     goto error;
 
-  if(conn->ip_version != CURL_IPRESOLVE_V6) {
-    /* create IPv4 DOH request */
-    result = dohprobe(data, &dohp->probe[DOH_PROBE_SLOT_IPADDR_V4],
-                      DNS_TYPE_A, hostname, data->set.str[STRING_DOH],
-                      data->multi, dohp->headers);
-    if(result)
-      goto error;
-    dohp->pending++;
-  }
+  /* create IPv4 DOH request */
+  result = dohprobe(data, &dohp->probe[DOH_PROBE_SLOT_IPADDR_V4],
+                    DNS_TYPE_A, hostname, data->set.str[STRING_DOH],
+                    data->multi, dohp->headers);
+  if(result)
+    goto error;
+  dohp->pending++;
 
-  if(conn->ip_version != CURL_IPRESOLVE_V4) {
+  if(Curl_ipv6works(data)) {
     /* create IPv6 DOH request */
     result = dohprobe(data, &dohp->probe[DOH_PROBE_SLOT_IPADDR_V6],
                       DNS_TYPE_AAAA, hostname, data->set.str[STRING_DOH],

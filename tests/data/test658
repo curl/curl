@@ -27,19 +27,19 @@ Funny-head: yesyes
 http
 </server>
 <tool>
-lib658
+lib%TESTNUMBER
 </tool>
 <name>
 Pass URL to libcurl with CURLOPT_CURLU
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/658
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 <verify>
 <protocol>
-GET /658 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

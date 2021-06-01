@@ -37,7 +37,7 @@ imap
 IMAP external authentication
  </name>
  <command>
-'imap://user;AUTH=EXTERNAL@%HOSTIP:%IMAPPORT/837/;MAILINDEX=1'
+'imap://user;AUTH=EXTERNAL@%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1'
 </command>
 </client>
 
@@ -48,7 +48,7 @@ IMAP external authentication
 A001 CAPABILITY
 A002 AUTHENTICATE EXTERNAL
 dXNlcg==
-A003 SELECT 837
+A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>

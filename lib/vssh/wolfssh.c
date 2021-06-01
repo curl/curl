@@ -91,6 +91,7 @@ const struct Curl_handler Curl_handler_scp = {
   wscp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_SSH,                             /* defport */
   CURLPROTO_SCP,                        /* protocol */
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION
@@ -119,6 +120,7 @@ const struct Curl_handler Curl_handler_sftp = {
   wsftp_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_SSH,                             /* defport */
   CURLPROTO_SFTP,                       /* protocol */
   CURLPROTO_SFTP,                       /* family */
@@ -388,7 +390,7 @@ static CURLcode wssh_connect(struct Curl_easy *data, bool *done)
   }
 
   sshc->ssh_session = wolfSSH_new(sshc->ctx);
-  if(sshc->ssh_session == NULL) {
+  if(!sshc->ssh_session) {
     failf(data, "No wolfSSH session");
     goto error;
   }
@@ -861,7 +863,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
           char *line = aprintf("%s\n",
                                data->set.list_only ?
                                name->fName : name->lName);
-          if(line == NULL) {
+          if(!line) {
             state(data, SSH_SFTP_CLOSE);
             sshc->actualcode = CURLE_OUT_OF_MEMORY;
             break;

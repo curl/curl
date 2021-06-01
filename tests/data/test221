@@ -47,7 +47,7 @@ http
 HTTP GET gzip compressed content with broken gzip header
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/221 --compressed
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>
 
@@ -58,7 +58,7 @@ http://%HOSTIP:%HTTPPORT/221 --compressed
 s/^Accept-Encoding: .*/Accept-Encoding: xxx/
 </strippart>
 <protocol>
-GET /221 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

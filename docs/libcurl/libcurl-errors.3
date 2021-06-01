@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -262,6 +262,8 @@ be one out of several problems, see the error buffer for details.
 .IP "CURLE_QUIC_CONNECT_ERROR (96)"
 QUIC connection error. This error may be caused by an SSL library error. QUIC
 is the protocol used for HTTP/3 transfers.
+.IP "CURLE_SSL_CLIENTCERT (98)"
+SSL Client Certificate required.
 .IP "CURLE_OBSOLETE*"
 These error codes will never be returned. They were used in an old libcurl
 version and are currently unused.

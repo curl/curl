@@ -52,20 +52,21 @@ body
 http
 </server>
 <tool>
-lib1156
+lib%TESTNUMBER
 </tool>
  <name>
 HTTP resume/range fail range-error content-range combinations
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/1156
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<errorcode>
+<stderr mode="text">
+URL: http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 0
-</errorcode>
+</stderr>
 </verify>
 </testcase>

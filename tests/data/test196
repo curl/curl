@@ -22,7 +22,7 @@ ftp
 FTP transient error, retry request once
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/196 --retry 1
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --retry 1
 </command>
 </client>
 

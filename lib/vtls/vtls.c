@@ -135,6 +135,7 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      (data->verifyhost == needle->verifyhost) &&
      (data->verifystatus == needle->verifystatus) &&
      blobcmp(data->cert_blob, needle->cert_blob) &&
+     blobcmp(data->ca_info_blob, needle->ca_info_blob) &&
      Curl_safe_strcasecompare(data->CApath, needle->CApath) &&
      Curl_safe_strcasecompare(data->CAfile, needle->CAfile) &&
      Curl_safe_strcasecompare(data->clientcert, needle->clientcert) &&
@@ -161,6 +162,7 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   dest->sessionid = source->sessionid;
 
   CLONE_BLOB(cert_blob);
+  CLONE_BLOB(ca_info_blob);
   CLONE_STRING(CApath);
   CLONE_STRING(CAfile);
   CLONE_STRING(clientcert);
@@ -185,6 +187,7 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
   Curl_safefree(sslc->cipher_list13);
   Curl_safefree(sslc->pinned_key);
   Curl_safefree(sslc->cert_blob);
+  Curl_safefree(sslc->ca_info_blob);
   Curl_safefree(sslc->curves);
 }
 
@@ -315,6 +318,8 @@ Curl_ssl_connect(struct Curl_easy *data, struct connectdata *conn,
 
   if(!result)
     Curl_pgrsTime(data, TIMER_APPCONNECT); /* SSL is connected */
+  else
+    conn->ssl[sockindex].use = FALSE;
 
   return result;
 }
@@ -338,7 +343,9 @@ Curl_ssl_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
   /* mark this is being ssl requested from here on. */
   conn->ssl[sockindex].use = TRUE;
   result = Curl_ssl->connect_nonblocking(data, conn, sockindex, done);
-  if(!result && *done)
+  if(result)
+    conn->ssl[sockindex].use = FALSE;
+  else if(*done)
     Curl_pgrsTime(data, TIMER_APPCONNECT); /* SSL is connected */
   return result;
 }
@@ -367,6 +374,7 @@ void Curl_ssl_sessionid_unlock(struct Curl_easy *data)
  */
 bool Curl_ssl_getsessionid(struct Curl_easy *data,
                            struct connectdata *conn,
+                           const bool isProxy,
                            void **ssl_sessionid,
                            size_t *idsize, /* set 0 if unknown */
                            int sockindex)
@@ -377,7 +385,6 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
   bool no_match = TRUE;
 
 #ifndef CURL_DISABLE_PROXY
-  const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
     &conn->proxy_ssl_config :
     &conn->ssl_config;
@@ -389,14 +396,20 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
   struct ssl_primary_config * const ssl_config = &conn->ssl_config;
   const char * const name = conn->host.name;
   int port = conn->remote_port;
-  (void)sockindex;
 #endif
+  (void)sockindex;
   *ssl_sessionid = NULL;
+
+#ifdef CURL_DISABLE_PROXY
+  if(isProxy)
+    return TRUE;
+#endif
 
   DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
-  if(!SSL_SET_OPTION(primary.sessionid))
-    /* session ID re-use is disabled */
+  if(!SSL_SET_OPTION(primary.sessionid) || !data->state.session)
+    /* session ID re-use is disabled or the session cache has not been
+       setup */
     return TRUE;
 
   /* Lock if shared */
@@ -480,31 +493,34 @@ void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid)
  */
 CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
                                struct connectdata *conn,
+                               bool isProxy,
                                void *ssl_sessionid,
                                size_t idsize,
                                int sockindex)
 {
   size_t i;
-  struct Curl_ssl_session *store = &data->state.session[0];
-  long oldest_age = data->state.session[0].age; /* zero if unused */
+  struct Curl_ssl_session *store;
+  long oldest_age;
   char *clone_host;
   char *clone_conn_to_host;
   int conn_to_port;
   long *general_age;
 #ifndef CURL_DISABLE_PROXY
-  const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
     &conn->proxy_ssl_config :
     &conn->ssl_config;
   const char *hostname = isProxy ? conn->http_proxy.host.name :
     conn->host.name;
 #else
-  /* proxy support disabled */
-  const bool isProxy = FALSE;
   struct ssl_primary_config * const ssl_config = &conn->ssl_config;
   const char *hostname = conn->host.name;
-  (void)sockindex;
 #endif
+  (void)sockindex;
+  if(!data->state.session)
+    return CURLE_OK;
+
+  store = &data->state.session[0];
+  oldest_age = data->state.session[0].age; /* zero if unused */
   DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
   clone_host = strdup(hostname);
@@ -576,6 +592,25 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+void Curl_ssl_associate_conn(struct Curl_easy *data,
+                             struct connectdata *conn)
+{
+  if(Curl_ssl->associate_connection) {
+    Curl_ssl->associate_connection(data, conn, FIRSTSOCKET);
+    if(conn->sock[SECONDARYSOCKET] && conn->bits.sock_accepted)
+      Curl_ssl->associate_connection(data, conn, SECONDARYSOCKET);
+  }
+}
+
+void Curl_ssl_detach_conn(struct Curl_easy *data,
+                          struct connectdata *conn)
+{
+  if(Curl_ssl->disassociate_connection) {
+    Curl_ssl->disassociate_connection(data, FIRSTSOCKET);
+    if(conn->sock[SECONDARYSOCKET] && conn->bits.sock_accepted)
+      Curl_ssl->disassociate_connection(data, SECONDARYSOCKET);
+  }
+}
 
 void Curl_ssl_close_all(struct Curl_easy *data)
 {
@@ -1204,7 +1239,9 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_none_set_engine_default,      /* set_engine_default */
   Curl_none_engines_list,            /* engines_list */
   Curl_none_false_start,             /* false_start */
-  NULL                               /* sha256sum */
+  NULL,                              /* sha256sum */
+  NULL,                              /* associate_connection */
+  NULL                               /* disassociate_connection */
 };
 
 const struct Curl_ssl *Curl_ssl =

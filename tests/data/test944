@@ -32,7 +32,7 @@ SMTP external authentication with initial response
 mail body
 </stdin>
  <command>
-'smtp://user;AUTH=EXTERNAL@%HOSTIP:%SMTPPORT/944' --mail-rcpt recipient@example.com --mail-from sender@example.com --sasl-ir -T -
+'smtp://user;AUTH=EXTERNAL@%HOSTIP:%SMTPPORT/%TESTNUMBER' --mail-rcpt recipient@example.com --mail-from sender@example.com --sasl-ir -T -
 </command>
 </client>
 
@@ -40,7 +40,7 @@ mail body
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 944
+EHLO %TESTNUMBER
 AUTH EXTERNAL dXNlcg==
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>

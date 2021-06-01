@@ -25,7 +25,7 @@ manual
 error when using unknown command line option
 </name>
 <command>
---never-implemented http://never.use.this.example.com/1179
+--never-implemented http://never.use.this.example.com/%TESTNUMBER
 </command>
 </client>
 

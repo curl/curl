@@ -19,7 +19,7 @@ ftp
  <name>
 FTP upload time condition evaluates TRUE => skip upload
  </name>
-<file name="log/test247.txt">
+<file name="log/test%TESTNUMBER.txt">
 data
     to
       see
@@ -28,7 +28,7 @@ works
   so does it?
 </file>
  <command>
-ftp://%HOSTIP:%FTPPORT/247 -T log/test247.txt -z "apr 1 2005 08:00:00"
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/test%TESTNUMBER.txt -z "apr 1 2005 08:00:00"
 </command>
 </client>
 
@@ -40,7 +40,7 @@ ftp://%HOSTIP:%FTPPORT/247 -T log/test247.txt -z "apr 1 2005 08:00:00"
 USER anonymous
 PASS ftp@example.com
 PWD
-MDTM 247
+MDTM %TESTNUMBER
 QUIT
 </protocol>
 </verify>

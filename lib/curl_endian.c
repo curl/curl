@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -81,7 +81,7 @@ unsigned short Curl_read16_be(const unsigned char *buf)
                           ((unsigned short)buf[1]));
 }
 
-#if (CURL_SIZEOF_CURL_OFF_T > 4)
+#if (SIZEOF_CURL_OFF_T > 4)
 /*
  * write32_le()
  *
@@ -121,4 +121,4 @@ void Curl_write64_le(const __int64 value, unsigned char *buffer)
   write32_le((int)value, buffer);
   write32_le((int)(value >> 32), buffer + 4);
 }
-#endif /* CURL_SIZEOF_CURL_OFF_T > 4 */
+#endif /* SIZEOF_CURL_OFF_T > 4 */

@@ -5,8 +5,8 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2004 - 2015, Guenter Knauf
-# Copyright (C) 2001 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2004 - 2015, 2021, Guenter Knauf
+# Copyright (C) 2001 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -599,7 +599,6 @@ endif
 	@echo $(DL)#define HAVE_UTIME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_UTIME_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_WRITEV 1$(DL) >> $@
-	@echo $(DL)#define RETSIGTYPE void$(DL) >> $@
 	@echo $(DL)#define SIZEOF_INT 4$(DL) >> $@
 	@echo $(DL)#define SIZEOF_SHORT 2$(DL) >> $@
 	@echo $(DL)#define SIZEOF_STRUCT_IN_ADDR 4$(DL) >> $@

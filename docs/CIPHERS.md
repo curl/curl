@@ -514,3 +514,9 @@ and the request will fail.
 `CALG_ECMQV`,
 `CALG_ECDSA`,
 `CALG_ECDH_EPHEM`,
+
+As of curl 7.77.0, you can also pass `SCH_USE_STRONG_CRYPTO` as a cipher name
+to [constrain the set of available ciphers as specified in the schannel
+documentation](https://docs.microsoft.com/en-us/windows/win32/secauthn/tls-cipher-suites-in-windows-server-2022).
+Note that the supported ciphers in this case follows the OS version, so if you
+are running an outdated OS you might still be supporting weak ciphers.
