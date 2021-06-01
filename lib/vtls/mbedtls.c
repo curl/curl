@@ -89,6 +89,10 @@ struct ssl_backend_data {
 #define THREADING_SUPPORT
 #endif
 
+#ifndef MBEDTLS_ERROR_C
+#define mbedtls_strerror(a,b,c) b[0] = 0
+#endif
+
 #if defined(THREADING_SUPPORT)
 static mbedtls_entropy_context ts_entropy;
 
@@ -256,7 +260,6 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   const long int port = SSL_HOST_PORT();
   int ret = -1;
   char errorbuf[128];
-  errorbuf[0] = 0;
 
   if((SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv2) ||
      (SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv3)) {
@@ -271,9 +274,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   ret = mbedtls_ctr_drbg_seed(&backend->ctr_drbg, entropy_func_mutex,
                               &ts_entropy, NULL, 0);
   if(ret) {
-#ifdef MBEDTLS_ERROR_C
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-#endif /* MBEDTLS_ERROR_C */
     failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
           -ret, errorbuf);
   }
@@ -284,9 +285,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   ret = mbedtls_ctr_drbg_seed(&backend->ctr_drbg, mbedtls_entropy_func,
                               &backend->entropy, NULL, 0);
   if(ret) {
-#ifdef MBEDTLS_ERROR_C
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-#endif /* MBEDTLS_ERROR_C */
     failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
           -ret, errorbuf);
   }
@@ -299,9 +298,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     ret = mbedtls_x509_crt_parse_file(&backend->cacert, ssl_cafile);
 
     if(ret<0) {
-#ifdef MBEDTLS_ERROR_C
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-#endif /* MBEDTLS_ERROR_C */
       failf(data, "Error reading ca cert file %s - mbedTLS: (-0x%04X) %s",
             ssl_cafile, -ret, errorbuf);
 
@@ -314,9 +311,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     ret = mbedtls_x509_crt_parse_path(&backend->cacert, ssl_capath);
 
     if(ret<0) {
-#ifdef MBEDTLS_ERROR_C
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-#endif /* MBEDTLS_ERROR_C */
       failf(data, "Error reading ca cert path %s - mbedTLS: (-0x%04X) %s",
             ssl_capath, -ret, errorbuf);
 
@@ -332,9 +327,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     ret = mbedtls_x509_crt_parse_file(&backend->clicert, ssl_cert);
 
     if(ret) {
-#ifdef MBEDTLS_ERROR_C
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-#endif /* MBEDTLS_ERROR_C */
       failf(data, "Error reading client cert file %s - mbedTLS: (-0x%04X) %s",
             ssl_cert, -ret, errorbuf);
 
@@ -349,12 +342,9 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                                  ssl_cert_blob->len);
 
     if(ret) {
-#ifdef MBEDTLS_ERROR_C
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-#endif /* MBEDTLS_ERROR_C */
-      failf(data, "Error parsing client cert blob - mbedTLS: (-0x%04X) %s",
-            -ret, errorbuf);
-
+      failf(data, "Error reading private key %s - mbedTLS: (-0x%04X) %s",
+            SSL_SET_OPTION(key), -ret, errorbuf);
       return CURLE_SSL_CERTPROBLEM;
     }
   }
@@ -368,9 +358,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                                      SSL_SET_OPTION(key_passwd));
 
       if(ret) {
-#ifdef MBEDTLS_ERROR_C
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-#endif /* MBEDTLS_ERROR_C */
         failf(data, "Error reading private key %s - mbedTLS: (-0x%04X) %s",
               SSL_SET_OPTION(key), -ret, errorbuf);
         return CURLE_SSL_CERTPROBLEM;
@@ -386,9 +374,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                                  passwd ? strlen(passwd) : 0);
 
       if(ret) {
-#ifdef MBEDTLS_ERROR_C
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-#endif /* MBEDTLS_ERROR_C */
         failf(data, "Error parsing private key - mbedTLS: (-0x%04X) %s",
               -ret, errorbuf);
         return CURLE_SSL_CERTPROBLEM;
@@ -407,9 +393,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     ret = mbedtls_x509_crl_parse_file(&backend->crl, ssl_crlfile);
 
     if(ret) {
-#ifdef MBEDTLS_ERROR_C
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-#endif /* MBEDTLS_ERROR_C */
       failf(data, "Error reading CRL file %s - mbedTLS: (-0x%04X) %s",
             ssl_crlfile, -ret, errorbuf);
 
@@ -591,10 +575,7 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   }
   else if(ret) {
     char errorbuf[128];
-    errorbuf[0] = 0;
-#ifdef MBEDTLS_ERROR_C
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-#endif /* MBEDTLS_ERROR_C */
     failf(data, "ssl_handshake returned - mbedTLS: (-0x%04X) %s",
           -ret, errorbuf);
     return CURLE_SSL_CONNECT_ERROR;
@@ -882,15 +863,12 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
   mbedtls_ctr_drbg_context ctr_drbg;
   mbedtls_entropy_init(&ctr_entropy);
   mbedtls_ctr_drbg_init(&ctr_drbg);
-  errorbuf[0] = 0;
 
   ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func,
                               &ctr_entropy, NULL, 0);
 
   if(ret) {
-#ifdef MBEDTLS_ERROR_C
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-#endif /* MBEDTLS_ERROR_C */
     failf(data, "Failed - mbedTLS: ctr_drbg_seed returned (-0x%04X) %s",
           -ret, errorbuf);
   }
@@ -898,9 +876,7 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
     ret = mbedtls_ctr_drbg_random(&ctr_drbg, entropy, length);
 
     if(ret) {
-#ifdef MBEDTLS_ERROR_C
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-#endif /* MBEDTLS_ERROR_C */
       failf(data, "mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
             -ret, errorbuf);
     }
