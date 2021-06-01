@@ -386,7 +386,6 @@ Features testable here are:
 - `ld_preload`
 - `libz`
 - `manual`
-- `Metalink`
 - `Mime`
 - `netrc`
 - `NSS`

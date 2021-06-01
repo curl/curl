@@ -163,7 +163,6 @@ curl_verbose_msg="enabled (--disable-verbose)"
   curl_ldaps_msg="no      (--enable-ldaps)"
    curl_rtsp_msg="no      (--enable-rtsp)"
    curl_rtmp_msg="no      (--with-librtmp)"
-  curl_mtlnk_msg="no      (--with-libmetalink)"
     curl_psl_msg="no      (--with-libpsl)"
  curl_altsvc_msg="enabled (--disable-alt-svc)"
    curl_hsts_msg="enabled (--disable-hsts)"
@@ -1849,100 +1848,6 @@ if test $with_libgsasl != "no"; then
   )
 fi
 AM_CONDITIONAL([USE_GSASL], [test "$curl_gsasl_msg" = "enabled"])
-
-dnl **********************************************************************
-dnl Check for libmetalink
-dnl **********************************************************************
-
-OPT_LIBMETALINK=no
-
-AC_ARG_WITH(libmetalink,dnl
-AS_HELP_STRING([--with-libmetalink=PATH],[where to look for libmetalink, PATH points to the installation root])
-AS_HELP_STRING([--without-libmetalink], [disable libmetalink detection]),
-  OPT_LIBMETALINK=$withval)
-
-if test X"$OPT_LIBMETALINK" != Xno; then
-
-  addld=""
-  addlib=""
-  addcflags=""
-  version=""
-  libmetalinklib=""
-
-  PKGTEST="no"
-  if test "x$OPT_LIBMETALINK" = "xyes"; then
-    dnl this is with no partiular path given
-    PKGTEST="yes"
-    CURL_CHECK_PKGCONFIG(libmetalink)
-  else
-    dnl When particular path is given, set PKG_CONFIG_LIBDIR using the path.
-    LIBMETALINK_PCDIR="$OPT_LIBMETALINK/lib/pkgconfig"
-    AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$LIBMETALINK_PCDIR"])
-    if test -f "$LIBMETALINK_PCDIR/libmetalink.pc"; then
-      PKGTEST="yes"
-    fi
-    if test "$PKGTEST" = "yes"; then
-      CURL_CHECK_PKGCONFIG(libmetalink, [$LIBMETALINK_PCDIR])
-    fi
-  fi
-  if test "$PKGTEST" = "yes" && test "$PKGCONFIG" != "no"; then
-    addlib=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
-      $PKGCONFIG --libs-only-l libmetalink`
-    addld=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
-      $PKGCONFIG --libs-only-L libmetalink`
-    addcflags=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
-      $PKGCONFIG --cflags-only-I libmetalink`
-    version=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
-      $PKGCONFIG --modversion libmetalink`
-    libmetalinklib=`echo $addld | $SED -e 's/^-L//'`
-  fi
-  if test -n "$addlib"; then
-
-    clean_CPPFLAGS="$CPPFLAGS"
-    clean_LDFLAGS="$LDFLAGS"
-    clean_LIBS="$LIBS"
-    CPPFLAGS="$clean_CPPFLAGS $addcflags"
-    LDFLAGS="$clean_LDFLAGS $addld"
-    LIBS="$addlib $clean_LIBS"
-    AC_MSG_CHECKING([if libmetalink is recent enough])
-    AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-#       include <metalink/metalink.h>
-      ]],[[
-        if(0 != metalink_strerror(0)) /* added in 0.1.0 */
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes ($version)])
-      want_metalink="yes"
-    ],[
-      AC_MSG_RESULT([no ($version)])
-      AC_MSG_NOTICE([libmetalink library defective or too old])
-      want_metalink="no"
-    ])
-    if test "x$OPENSSL_ENABLED" != "x1" -a "x$USE_WINDOWS_SSPI" != "x1" \
-        -a "x$GNUTLS_ENABLED" != "x1" -a "x$NSS_ENABLED" != "x1" \
-        -a "x$SECURETRANSPORT_ENABLED" != "x1"; then
-      AC_MSG_WARN([metalink support requires a compatible SSL/TLS backend])
-      want_metalink="no"
-    fi
-    CPPFLAGS="$clean_CPPFLAGS"
-    LDFLAGS="$clean_LDFLAGS"
-    LIBS="$clean_LIBS"
-    if test "$want_metalink" = "yes"; then
-      dnl finally libmetalink will be used
-      AC_DEFINE(USE_METALINK, 1, [Define to enable metalink support])
-      LIBMETALINK_LIBS=$addlib
-      LIBMETALINK_LDFLAGS=$addld
-      LIBMETALINK_CPPFLAGS=$addcflags
-      AC_SUBST([LIBMETALINK_LIBS])
-      AC_SUBST([LIBMETALINK_LDFLAGS])
-      AC_SUBST([LIBMETALINK_CPPFLAGS])
-      curl_mtlnk_msg="enabled"
-    fi
-
-  fi
-fi
 
 dnl **********************************************************************
 dnl Check for the presence of LIBSSH2 libraries and headers
@@ -4339,7 +4244,6 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   LDAPS:            ${curl_ldaps_msg}
   RTSP:             ${curl_rtsp_msg}
   RTMP:             ${curl_rtmp_msg}
-  Metalink:         ${curl_mtlnk_msg}
   PSL:              ${curl_psl_msg}
   Alt-svc:          ${curl_altsvc_msg}
   HSTS:             ${curl_hsts_msg}

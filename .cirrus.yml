@@ -41,7 +41,7 @@ freebsd_task:
 
   pkginstall_script:
     - pkg update -f
-    - pkg install -y autoconf automake libtool pkgconf brotli openldap-client heimdal libpsl libmetalink libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
+    - pkg install -y autoconf automake libtool pkgconf brotli openldap-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
     - case `python -V` in
         Python?3.7*) pkg install -y py37-impacket ;;
         Python?2.7*) pkg install -y py27-impacket ;;
@@ -56,7 +56,7 @@ freebsd_task:
         export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
         export LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" ;;
       esac
-    - ./configure --prefix="${HOME}"/install --enable-debug --with-openssl --with-libssh2 --with-brotli --with-gssapi --with-libidn2 --enable-manual --enable-ldap --enable-ldaps --with-librtmp --with-libmetalink --with-libpsl --with-nghttp2 || { tail -300 config.log; false; }
+    - ./configure --prefix="${HOME}"/install --enable-debug --with-openssl --with-libssh2 --with-brotli --with-gssapi --with-libidn2 --enable-manual --enable-ldap --enable-ldaps --with-librtmp --with-libpsl --with-nghttp2 || { tail -300 config.log; false; }
   compile_script:
     - make V=1 && cd tests && make V=1
   test_script:

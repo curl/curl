@@ -30,7 +30,6 @@
 #include "tool_panykey.h"
 #include "tool_help.h"
 #include "tool_libinfo.h"
-#include "tool_metalink.h"
 #include "tool_version.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -967,27 +966,11 @@ featcomp(const void *p1, const void *p2)
 #endif
 }
 
-#ifdef USE_METALINK
-static const char *metalnk_version(void)
-{
-  static char version[25];
-  int major = 0;
-  int minor = 0;
-  int patch = 0;
-  metalink_get_version(&major, &minor, &patch);
-  msnprintf(version, sizeof(version), " libmetalink/%u.%u.%u",
-            major, minor, patch);
-  return version;
-}
-#else
-#define metalnk_version() ""
-#endif
-
 void tool_version_info(void)
 {
   const char *const *proto;
 
-  printf(CURL_ID "%s%s\n", curl_version(), metalnk_version());
+  printf(CURL_ID "%s\n", curl_version());
 #ifdef CURL_PATCHSTAMP
   printf("Release-Date: %s, security patched: %s\n",
          LIBCURL_TIMESTAMP, CURL_PATCHSTAMP);
@@ -1010,9 +993,6 @@ void tool_version_info(void)
       if(curlinfo->features & feats[i].bitmask)
         featp[numfeat++] = (char *)feats[i].name;
     }
-#ifdef USE_METALINK
-    featp[numfeat++] = (char *)"Metalink";
-#endif
     qsort(&featp[0], numfeat, sizeof(char *), featcomp);
     for(i = 0; i< numfeat; i++)
       printf(" %s", featp[i]);

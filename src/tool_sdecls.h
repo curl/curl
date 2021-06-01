@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,9 +22,6 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
-#ifdef USE_METALINK
-#  include <metalink/metalink.h>
-#endif /* USE_METALINK */
 
 /*
  * OutStruct variables keep track of information relative to curl's
@@ -58,8 +55,6 @@
  * 'init' member holds original file size or offset at which truncation is
  * taking place. Always zero unless appending to a non-empty regular file.
  *
- * 'metalink_parser' member is a pointer to Metalink XML parser
- * context.
  */
 
 struct OutStruct {
@@ -71,9 +66,6 @@ struct OutStruct {
   FILE *stream;
   curl_off_t bytes;
   curl_off_t init;
-#ifdef USE_METALINK
-  metalink_parser_context_t *metalink_parser;
-#endif /* USE_METALINK */
 };
 
 
@@ -113,7 +105,6 @@ struct getout {
 #define GETOUT_USEREMOTE  (1<<2)  /* use remote file name locally */
 #define GETOUT_UPLOAD     (1<<3)  /* if set, -T has been used */
 #define GETOUT_NOUPLOAD   (1<<4)  /* if set, -T "" has been used */
-#define GETOUT_METALINK   (1<<5)  /* set when Metalink download */
 
 /*
  * 'trace' enumeration represents curl's output look'n feel possibilities.

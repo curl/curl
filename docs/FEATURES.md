@@ -8,7 +8,6 @@
  - multiple file upload on a single command line
  - custom maximum transfer rate
  - redirectable stderr
- - metalink support (13)
  - parallel transfers
 
 ## libcurl
@@ -79,7 +78,7 @@
 
  - download
  - authentication
- - Kerberos 5 (14)
+ - Kerberos 5 (13)
  - active/passive using PORT, EPRT, PASV or EPSV
  - single file size information (compare to HTTP HEAD)
  - 'type=' URL support
@@ -218,6 +217,4 @@
   10. -
   11. requires libidn2 or Windows
   12. requires libz, brotli and/or zstd
-  13. requires libmetalink, and either an Apple or Microsoft operating
-      system, or OpenSSL, or GnuTLS, or NSS
-  14. requires a GSS-API implementation (such as Heimdal or MIT Kerberos)
+  13. requires a GSS-API implementation (such as Heimdal or MIT Kerberos)
