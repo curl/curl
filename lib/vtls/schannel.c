@@ -849,7 +849,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
   if(!BACKEND->cred) {
     result = schannel_acquire_credential_handle(data, conn, sockindex);
-    if (result != CURLE_OK) {
+    if(result != CURLE_OK) {
       return result;
     }
   }
