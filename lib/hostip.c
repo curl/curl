@@ -512,12 +512,12 @@ static struct Curl_addrinfo *get_localhost(int port)
   if(!ca)
     return NULL;
 
+  /* memset to clear the sa.sin_zero field */
   memset(&sa, 0, sizeof(sa));
   sa.sin_family = AF_INET;
   sa.sin_port = htons(port16);
   if(Curl_inet_pton(AF_INET, "127.0.0.1", (char *)&ipv4) < 1)
     return NULL;
-  /* memset to clear the sa.sin_zero field */
   memcpy(&sa.sin_addr, &ipv4, sizeof(ipv4));
 
   ca->ai_flags     = 0;
