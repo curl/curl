@@ -91,7 +91,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^Accept-Encoding: .*/Accept-Encoding: xxx/
+s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
 </strippart>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
