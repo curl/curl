@@ -4,17 +4,41 @@ curl and libcurl 7.77.1
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2410
+ Contributors:                 2411
 
 This release includes the following changes:
 
- o
+ o hostip: make 'localhost' return fixed values [16]
+ o mbedtls: add support for cert and key blob options [11]
 
 This release includes the following bugfixes:
 
- o travis: add bearssl build [1]
  o bearssl: explicitly initialize all fields of Curl_ssl [1]
  o bearssl: remove incorrect const on variable that is modified [1]
+ o c-hyper: clear NTLM auth buffer when request is issued [23]
+ o c-hyper: convert HYPERE_INVALID_PEER_MESSAGE to CURLE_UNSUPPORTED_PROTOCOL [21]
+ o c-hyper: fix NTLM on closed connection tested with test159 [4]
+ o c-hyper: handle NULL from hyper_buf_copy() [19]
+ o ccsidcurl: fix the compile errors [27]
+ o cmake: try well-known send/recv signature for Apple [12]
+ o conncache: lowercase the hash key for better match [5]
+ o Curl_ntlm_core_mk_nt_hash: fix OOM in error path [8]
+ o Curl_ssl_getsessionid: fail if no session cache exists [14]
+ o docs: use --max-redirs instead of --max-redir [28]
+ o GOVERNANCE: add 'user', 'committer' and 'contributor' [15]
+ o hsts: ignore numberical IP address hosts [17]
+ o HSTS: not experimental anymore
+ o http2: init recvbuf struct for pushed streams [13]
+ o http_proxy: deal with non-200 CONNECT response with Hyper [22]
+ o HYPER: remove mentions of deprecated development branch
+ o mbedtls: make mbedtls_strerror always work [6]
+ o Revert "c-hyper: handle body on HYPER_TASK_EMPTY" [26]
+ o schannel: set ALPN length correctly for HTTP/2 [24]
+ o setopt: fix incorrect comments [10]
+ o ssl: read pending close notify alert before closing the connection [9]
+ o travis: add bearssl build [1]
+ o travis: delete --enable-hsts option (it is the default now) [ci skip] [2]
+ o vtls: exit addsessionid if no cache is inited [7]
 
 This release includes the following known bugs:
 
@@ -23,9 +47,35 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Michael Forney, Viktor Szakats,
-  (3 contributors)
+  Christoph M. Becker, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  Douglas R. Reno, Gregor Jasny, Harry Sintonen, Joel Depooter, Jon Rumsey,
+  Kevin Burke, Laurent Dufresne, Michael Forney, Michael Kaufmann,
+  Viktor Szakats,
+  (14 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=7133
+ [2] = https://curl.se/bug/?i=7167
+ [4] = https://curl.se/bug/?i=7154
+ [5] = https://curl.se/bug/?i=7159
+ [6] = https://curl.se/bug/?i=7162
+ [7] = https://curl.se/bug/?i=7165
+ [8] = https://curl.se/bug/?i=7164
+ [9] = https://curl.se/bug/?i=7095
+ [10] = https://curl.se/bug/?i=7157
+ [11] = https://curl.se/bug/?i=7157
+ [12] = https://curl.se/bug/?i=7158
+ [13] = https://curl.se/bug/?i=7153
+ [14] = https://curl.se/bug/?i=7148
+ [15] = https://curl.se/bug/?i=7151
+ [16] = https://curl.se/bug/?i=7039
+ [17] = https://curl.se/bug/?i=7146
+ [19] = https://curl.se/bug/?i=7143
+ [21] = https://curl.se/bug/?i=7141
+ [22] = https://curl.se/bug/?i=7141
+ [23] = https://curl.se/bug/?i=7139
+ [24] = https://curl.se/bug/?i=7138
+ [26] = https://curl.se/bug/?i=7122
+ [27] = https://curl.se/bug/?i=7134
+ [28] = https://curl.se/bug/?i=7130
