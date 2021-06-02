@@ -120,6 +120,7 @@ CURLE_RTSP_CSEQ_ERROR           7.20.0
 CURLE_RTSP_SESSION_ERROR        7.20.0
 CURLE_SEND_ERROR                7.10
 CURLE_SEND_FAIL_REWIND          7.12.3
+CURLE_SETOPT_OPTION_SYNTAX      7.78.0
 CURLE_SHARE_IN_USE              7.9.6         7.17.0
 CURLE_SSH                       7.16.1
 CURLE_SSL_CACERT                7.10          7.62.0

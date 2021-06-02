@@ -160,8 +160,9 @@ An option passed to libcurl is not recognized/known. Refer to the appropriate
 documentation. This is most likely a problem in the program that uses
 libcurl. The error buffer might contain more specific information about which
 exact option it concerns.
-.IP "CURLE_TELNET_OPTION_SYNTAX (49)"
-A telnet option string was Illegally formatted.
+.IP "CURLE_SETOPT_OPTION_SYNTAX (49)"
+An option passed in to a setopt was wrongly formatted. See error message for
+details about what option.
 .IP "CURLE_GOT_NOTHING (52)"
 Nothing was returned from the server, and under the circumstances, getting
 nothing is considered an error.
