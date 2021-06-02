@@ -31,7 +31,7 @@ EXTRA_DIST = $(TESTCASES) DISABLED CMakeLists.txt
 filecheck:
 	@mkdir test-place; \
 	cp "$(top_srcdir)"/tests/data/test[0-9]* test-place/; \
-	rm test-place/*~; \
+	rm -f test-place/*~; \
 	for f in $(EXTRA_DIST); do \
 	  if test -f "$(top_srcdir)/tests/data/$$f"; then \
 	    rm -f "test-place/$$f"; \
