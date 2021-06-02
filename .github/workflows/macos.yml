@@ -15,7 +15,7 @@ jobs:
   autotools:
     name: macos ${{ matrix.build.name }}
     runs-on: 'macos-latest'
-    timeout-minutes: ${{ matrix.build.timeout }}
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -57,7 +57,6 @@ jobs:
           configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl
           tflags: -n -t --shallow=25 !FTP
           macosx-version-min: 10.9
-          timeout: 90
         - name: torture-ftp
           install: nghttp2 openssl
           configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl
