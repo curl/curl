@@ -703,7 +703,7 @@ sub torture {
                 $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
                 $valgrindcmd .= "--quiet --leak-check=yes ";
                 $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
-                # $valgrindcmd .= "--gen-suppressions=all ";
+                $valgrindcmd .= "--gen-suppressions=all ";
                 $valgrindcmd .= "--num-callers=16 ";
                 $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
                 $cmd = "$valgrindcmd $testcmd";
