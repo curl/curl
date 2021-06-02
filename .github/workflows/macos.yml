@@ -15,6 +15,7 @@ jobs:
   autotools:
     name: macos ${{ matrix.build.name }}
     runs-on: 'macos-latest'
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
