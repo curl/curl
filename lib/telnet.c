@@ -834,7 +834,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
           tn->us_preferred[CURL_TELOPT_NAWS] = CURL_YES;
         else {
           failf(data, "Syntax error in telnet option: %s", head->data);
-          result = CURLE_TELNET_OPTION_SYNTAX;
+          result = CURLE_SETOPT_OPTION_SYNTAX;
           break;
         }
         continue;
@@ -855,7 +855,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
       break;
     }
     failf(data, "Syntax error in telnet option: %s", head->data);
-    result = CURLE_TELNET_OPTION_SYNTAX;
+    result = CURLE_SETOPT_OPTION_SYNTAX;
     break;
   }
 
