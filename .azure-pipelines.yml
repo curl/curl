@@ -203,4 +203,4 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "-vc /usr/bin/curl.exe -r -rm $(tests)"
+        TFLAGS: "-u -vc /usr/bin/curl.exe -r -rm $(tests)"

@@ -303,7 +303,7 @@ test_script:
           cmake --build . --config %PRJ_CFG% --target test-nonflaky
         ) else (
           echo APPVEYOR_API_URL=%APPVEYOR_API_URL% &&
-          bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -p !flaky %DISABLED_TESTS%" ))
+          bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -p -u !flaky %DISABLED_TESTS%" ))
 
 # select branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
