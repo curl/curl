@@ -1107,7 +1107,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         infof(data, "Couldn't parse CURLOPT_RESOLVE entry '%s'!\n",
               hostp->data);
         Curl_freeaddrinfo(head);
-        continue;
+        return CURLE_COULDNT_RESOLVE_HOST;
       }
 
       /* Create an entry id, based upon the hostname and port */
