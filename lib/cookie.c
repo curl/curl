@@ -95,7 +95,6 @@ Example set of cookies:
 #include "strcase.h"
 #include "curl_get_line.h"
 #include "curl_memrchr.h"
-#include "inet_pton.h"
 #include "parsedate.h"
 #include "rand.h"
 #include "rename.h"
