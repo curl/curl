@@ -71,7 +71,7 @@ freebsd_task:
     - find . -type d -exec chmod 777 {} \;
     # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
     # therefore the SFTP and SCP tests are disabled right away from the beginning.
-    - sudo -u nobody make V=1 TFLAGS="-n -a -p !flaky !SFTP !SCP" test-nonflaky
+    - sudo -u nobody make V=1 TFLAGS="-n -a -p -u !flaky !SFTP !SCP" test-nonflaky
   install_script:
     - make V=1 install
 
@@ -129,4 +129,4 @@ windows_task:
   install_script: |
     %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
   test_script: |
-    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 TFLAGS='-r -rm %tests%' test-nonflaky"
+    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 TFLAGS='-u -r -rm %tests%' test-nonflaky"
