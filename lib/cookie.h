@@ -65,6 +65,7 @@ struct CookieInfo {
   bool running;    /* state info, for cookie adding information */
   bool newsession; /* new session, discard session cookies on load */
   int lastct;      /* last creation-time used in the jar */
+  curl_off_t next_expiration; /* the next time at which expiration happens */
 };
 
 /* This is the maximum line length we accept for a cookie line. RFC 2109
