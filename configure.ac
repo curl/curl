@@ -1849,6 +1849,9 @@ if test $with_libgsasl != "no"; then
 fi
 AM_CONDITIONAL([USE_GSASL], [test "$curl_gsasl_msg" = "enabled"])
 
+AC_ARG_WITH(libmetalink,,
+  AC_MSG_ERROR([--with-libmetalink no longer works!]))
+
 dnl **********************************************************************
 dnl Check for the presence of LIBSSH2 libraries and headers
 dnl **********************************************************************
