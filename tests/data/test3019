@@ -19,7 +19,7 @@ HTTP GET
 http
 </server>
 <name>
-HTTP with invalid --resolve
+HTTP with invalid --resolve syntax
 </name>
 <command>
 --resolve %HTTPPORT:example.com:%HOSTIP http://example.com:%HTTPPORT/%TESTNUMBER
