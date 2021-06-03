@@ -3524,7 +3524,8 @@ sub prepro {
         if($show) {
             subVariables(\$s, $testnum, "%");
             subBase64(\$s);
-            subNewlines(\$s) if($has_hyper);
+            subNewlines(\$s) if($has_hyper && ($keywords{"HTTP"} ||
+                                               $keywords{"HTTPS"}));
             push @out, $s;
         }
     }
