@@ -236,7 +236,6 @@ test3016 \
 \
 test3017 test3018 \
 \
-test3019
-
+test3019 \
 \
 test4000 test4001 test4002 test4003 test4004
