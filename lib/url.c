@@ -2995,6 +2995,7 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
   char *host_portno;
   char *portptr;
   int port = -1;
+  CURLcode result = CURLE_OK;
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void) data;
@@ -3043,8 +3044,8 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
      */
 #else
     failf(data, "Use of IPv6 in *_CONNECT_TO without IPv6 support built-in!");
-    free(host_dup);
-    return CURLE_NOT_BUILT_IN;
+    result = CURLE_NOT_BUILT_IN;
+    goto error;
 #endif
   }
 
@@ -3057,10 +3058,12 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
     if(*host_portno) {
       long portparse = strtol(host_portno, &endp, 10);
       if((endp && *endp) || (portparse < 0) || (portparse > 65535)) {
-        infof(data, "No valid port number in connect to host string (%s)\n",
+        failf(data, "No valid port number in connect to host string (%s)",
               host_portno);
         hostptr = NULL;
         port = -1;
+        result = CURLE_SETOPT_OPTION_SYNTAX;
+        goto error;
       }
       else
         port = (int)portparse; /* we know it will fit */
@@ -3071,15 +3074,16 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
   if(hostptr) {
     *hostname_result = strdup(hostptr);
     if(!*hostname_result) {
-      free(host_dup);
-      return CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
+      goto error;
     }
   }
 
   *port_result = port;
 
+  error:
   free(host_dup);
-  return CURLE_OK;
+  return result;
 }
 
 /*
