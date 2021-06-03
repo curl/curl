@@ -1221,7 +1221,8 @@ fail:
  *
  * Helper function to sort cookies such that the longest path gets before the
  * shorter path. Path, domain and name lengths are considered in that order,
- * with tge creationtime as the tiebreaker.
+ * with the creationtime as the tiebreaker. The creationtime is guaranteed to
+ * be unique per cookie, so we know we will get an ordering at that point.
  */
 static int cookie_sort(const void *p1, const void *p2)
 {
