@@ -17,7 +17,7 @@ to individuals.
 Before posting to one of the curl mailing lists, please read up on the
 [mailing list etiquette](https://curl.se/mail/etiquette.html).
 
-We also hang out on IRC in #curl on irc.freenode.net
+We also hang out on IRC in #curl on libera.chat
 
 If you're at all interested in the code side of things, consider clicking
 'watch' on the [curl repo on GitHub](https://github.com/curl/curl) to be

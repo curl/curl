@@ -188,8 +188,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_UNKNOWN_OPTION:
     return "An unknown option was passed in to libcurl";
 
-  case CURLE_TELNET_OPTION_SYNTAX :
-    return "Malformed telnet option";
+  case CURLE_SETOPT_OPTION_SYNTAX :
+    return "Malformed option provided in a setopt";
 
   case CURLE_GOT_NOTHING:
     return "Server returned nothing (no headers, no data)";

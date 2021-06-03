@@ -90,7 +90,7 @@ requested. 0 means the verification was successful. (Added in 7.52.0)
 .TP
 .B redirect_url
 When an HTTP request was made without --location to follow redirects (or when
---max-redir is met), this variable will show the actual URL a redirect
+--max-redirs is met), this variable will show the actual URL a redirect
 *would* have gone to. (Added in 7.18.2)
 .TP
 .B referer

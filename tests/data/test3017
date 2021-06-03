@@ -1,0 +1,67 @@
+<testcase>
+<info>
+<keywords>
+MQTT
+MQTT SUBSCRIBE
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+hello
+</data>
+<datacheck hex="yes">
+00 04 33 30 31 37   68 65 6c 6c 6f 5b 4c 46 5d 0a
+</datacheck>
+<servercmd>
+excessive-remaining TRUE
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+mqtt
+</features>
+<server>
+mqtt
+</server>
+<name>
+MQTT SUBSCRIBE with pathological PUBLISH length
+</name>
+<command option="binary-trace">
+mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER -m 3
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# These are hexadecimal protocol dumps from the client
+#
+# Strip out the random part of the client id from the CONNECT message
+# before comparison
+<strippart>
+s/^(.* 00044d5154540402003c000c6375726c).*/$1/
+</strippart>
+# on windows the disconnect is never seen - no idea why
+<strip>
+^server DISCONNECT 0 e000
+</strip>
+<protocol>
+client CONNECT 18 00044d5154540402003c000c6375726c
+server CONNACK 2 20020000
+client SUBSCRIBE 9 000100043330313700
+server SUBACK 3 9003000100
+server PUBLISH c 30ffffff8000043330313768656c6c6f0a
+</protocol>
+
+# 8 is CURLE_WEIRD_SERVER_REPLY
+<errorcode>
+8
+</errorcode>
+</verify>
+</testcase>

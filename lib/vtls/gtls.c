@@ -1438,6 +1438,10 @@ static void close_one(struct ssl_connect_data *connssl)
 {
   struct ssl_backend_data *backend = connssl->backend;
   if(backend->session) {
+    char buf[32];
+    /* Maybe the server has already sent a close notify alert.
+       Read it to avoid an RST on the TCP connection. */
+    (void)gnutls_record_recv(backend->session, buf, sizeof(buf));
     gnutls_bye(backend->session, GNUTLS_SHUT_WR);
     gnutls_deinit(backend->session);
     backend->session = NULL;
@@ -1656,7 +1660,9 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   Curl_none_set_engine_default,  /* set_engine_default */
   Curl_none_engines_list,        /* engines_list */
   Curl_none_false_start,         /* false_start */
-  gtls_sha256sum                 /* sha256sum */
+  gtls_sha256sum,                /* sha256sum */
+  NULL,                          /* associate_connection */
+  NULL                           /* disassociate_connection */
 };
 
 #endif /* USE_GNUTLS */

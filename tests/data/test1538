@@ -81,7 +81,7 @@ e45: Failed binding local connection end
 e46: Unknown error
 e47: Number of redirects hit maximum amount
 e48: An unknown option was passed in to libcurl
-e49: Malformed telnet option
+e49: Malformed option provided in a setopt
 e50: Unknown error
 e51: Unknown error
 e52: Server returned nothing (no headers, no data)

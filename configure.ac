@@ -479,6 +479,7 @@ CURL_CHECK_WIN32_LARGEFILE
 CURL_CHECK_WIN32_CRYPTO
 
 CURL_DARWIN_CFLAGS
+CURL_DARWIN_SYSTEMCONFIGURATION
 CURL_SUPPORTS_BUILTIN_AVAILABLE
 
 
@@ -2925,6 +2926,11 @@ if test X"$want_quiche" != Xno; then
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_QUICHE"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_QUICHE to CURL_LIBRARY_PATH]),
+          [],
+          [
+AC_INCLUDES_DEFAULT
+#include <sys/socket.h>
+          ]
        )
       ],
         dnl not found, revert back to clean variables
@@ -3639,6 +3645,25 @@ AS_HELP_STRING([--disable-crypto-auth],[Disable cryptographic authentication]),
        AC_MSG_RESULT(yes)
 )
 
+dnl ************************************************************
+dnl disable NTLM support
+dnl
+AC_MSG_CHECKING([whether to support NTLM])
+AC_ARG_ENABLE(ntlm,
+AS_HELP_STRING([--enable-ntlm],[Enable NTLM support])
+AS_HELP_STRING([--disable-ntlm],[Disable NTLM support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_NTLM, 1, [to disable NTLM support])
+       CURL_DISABLE_NTLM=1
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
 CURL_CHECK_OPTION_NTLM_WB
 
 CURL_CHECK_NTLM_WB
@@ -4068,7 +4093,8 @@ fi
 
 use_curl_ntlm_core=no
 
-if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
+if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
+    "x$CURL_DISABLE_NTLM" != "x1"; then
   if test "x$OPENSSL_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
       -o "x$SECURETRANSPORT_ENABLED" = "x1" \

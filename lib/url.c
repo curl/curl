@@ -92,7 +92,6 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "speedcheck.h"
 #include "warnless.h"
 #include "non-ascii.h"
-#include "inet_pton.h"
 #include "getinfo.h"
 #include "urlapi-int.h"
 #include "system_win32.h"

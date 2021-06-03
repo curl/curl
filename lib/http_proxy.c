@@ -243,11 +243,11 @@ static CURLcode CONNECT_host(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#ifndef USE_HYPER
 static CURLcode CONNECT(struct Curl_easy *data,
                         int sockindex,
                         const char *hostname,
                         int remote_port)
-#ifndef USE_HYPER
 {
   int subversion = 0;
   struct SingleRequest *k = &data->req;
@@ -702,6 +702,10 @@ static CURLcode CONNECT(struct Curl_easy *data,
 }
 #else
 /* The Hyper version of CONNECT */
+static CURLcode CONNECT(struct Curl_easy *data,
+                        int sockindex,
+                        const char *hostname,
+                        int remote_port)
 {
   struct connectdata *conn = data->conn;
   struct hyptransfer *h = &data->hyp;
@@ -875,7 +879,6 @@ static CURLcode CONNECT(struct Curl_easy *data,
         goto error;
       if(!done)
         break;
-      fprintf(stderr, "done\n");
       s->tunnel_state = TUNNEL_COMPLETE;
       if(h->exec) {
         hyper_executor_free(h->exec);
@@ -897,6 +900,33 @@ static CURLcode CONNECT(struct Curl_easy *data,
   } while(data->req.newurl);
 
   result = CURLE_OK;
+  if(s->tunnel_state == TUNNEL_COMPLETE) {
+    data->info.httpproxycode = data->req.httpcode;
+    if(data->info.httpproxycode/100 != 2) {
+      if(conn->bits.close && data->req.newurl) {
+        conn->bits.proxy_connect_closed = TRUE;
+        infof(data, "Connect me again please\n");
+        connect_done(data);
+      }
+      else {
+        free(data->req.newurl);
+        data->req.newurl = NULL;
+        /* failure, close this connection to avoid re-use */
+        streamclose(conn, "proxy CONNECT failure");
+        Curl_closesocket(data, conn, conn->sock[sockindex]);
+        conn->sock[sockindex] = CURL_SOCKET_BAD;
+      }
+
+      /* to back to init state */
+      s->tunnel_state = TUNNEL_INIT;
+
+      if(!conn->bits.proxy_connect_closed) {
+        failf(data, "Received HTTP code %d from proxy after CONNECT",
+              data->req.httpcode);
+        result = CURLE_RECV_ERROR;
+      }
+    }
+  }
   error:
   free(host);
   free(hostheader);
@@ -917,7 +947,6 @@ static CURLcode CONNECT(struct Curl_easy *data,
   }
   return result;
 }
-
 #endif
 
 void Curl_connect_free(struct Curl_easy *data)

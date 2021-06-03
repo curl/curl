@@ -240,6 +240,10 @@ struct ssl_backend_data {
 #endif
 };
 
+static void ossl_associate_connection(struct Curl_easy *data,
+                                      struct connectdata *conn,
+                                      int sockindex);
+
 /*
  * Number of bytes to read from the random number seed file. This must be
  * a finite value (because some entropy "files" like /dev/urandom have
@@ -1396,7 +1400,13 @@ static void ossl_closeone(struct Curl_easy *data,
 {
   struct ssl_backend_data *backend = connssl->backend;
   if(backend->handle) {
+    char buf[32];
     set_logger(conn, data);
+
+    /* Maybe the server has already sent a close notify alert.
+       Read it to avoid an RST on the TCP connection. */
+    (void)SSL_read(backend->handle, buf, (int)sizeof(buf));
+
     (void)SSL_shutdown(backend->handle);
     SSL_set_connect_state(backend->handle);
 
@@ -2581,6 +2591,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   ctx_option_t ctx_options = 0;
+  void *ssl_sessionid = NULL;
 
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
   bool sni;
@@ -3225,46 +3236,23 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
   }
 #endif
 
-  /* Check if there's a cached ID we can/should use here! */
-  if(SSL_SET_OPTION(primary.sessionid)) {
-    void *ssl_sessionid = NULL;
-    int data_idx = ossl_get_ssl_data_index();
-    int connectdata_idx = ossl_get_ssl_conn_index();
-    int sockindex_idx = ossl_get_ssl_sockindex_index();
-    int proxy_idx = ossl_get_proxy_index();
+  ossl_associate_connection(data, conn, sockindex);
 
-    if(data_idx >= 0 && connectdata_idx >= 0 && sockindex_idx >= 0 &&
-       proxy_idx >= 0) {
-      /* Store the data needed for the "new session" callback.
-       * The sockindex is stored as a pointer to an array element. */
-      SSL_set_ex_data(backend->handle, data_idx, data);
-      SSL_set_ex_data(backend->handle, connectdata_idx, conn);
-      SSL_set_ex_data(backend->handle, sockindex_idx, conn->sock + sockindex);
-#ifndef CURL_DISABLE_PROXY
-      SSL_set_ex_data(backend->handle, proxy_idx, SSL_IS_PROXY() ? (void *) 1:
-                      NULL);
-#else
-      SSL_set_ex_data(backend->handle, proxy_idx, NULL);
-#endif
-
+  Curl_ssl_sessionid_lock(data);
+  if(!Curl_ssl_getsessionid(data, conn, SSL_IS_PROXY() ? TRUE : FALSE,
+                            &ssl_sessionid, NULL, sockindex)) {
+    /* we got a session id, use it! */
+    if(!SSL_set_session(backend->handle, ssl_sessionid)) {
+      Curl_ssl_sessionid_unlock(data);
+      failf(data, "SSL: SSL_set_session failed: %s",
+            ossl_strerror(ERR_get_error(), error_buffer,
+                          sizeof(error_buffer)));
+      return CURLE_SSL_CONNECT_ERROR;
     }
-
-    Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(data, conn, SSL_IS_PROXY() ? TRUE : FALSE,
-                              &ssl_sessionid, NULL, sockindex)) {
-      /* we got a session id, use it! */
-      if(!SSL_set_session(backend->handle, ssl_sessionid)) {
-        Curl_ssl_sessionid_unlock(data);
-        failf(data, "SSL: SSL_set_session failed: %s",
-              ossl_strerror(ERR_get_error(), error_buffer,
-                            sizeof(error_buffer)));
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-      /* Informational message */
-      infof(data, "SSL re-using session ID\n");
-    }
-    Curl_ssl_sessionid_unlock(data);
+    /* Informational message */
+    infof(data, "SSL re-using session ID\n");
   }
+  Curl_ssl_sessionid_unlock(data);
 
 #ifndef CURL_DISABLE_PROXY
   if(conn->proxy_ssl[sockindex].use) {
@@ -4498,6 +4486,90 @@ static void *ossl_get_internals(struct ssl_connect_data *connssl,
          (void *)backend->ctx : (void *)backend->handle;
 }
 
+static void ossl_associate_connection(struct Curl_easy *data,
+                                      struct connectdata *conn,
+                                      int sockindex)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct ssl_backend_data *backend = connssl->backend;
+
+  /* If we don't have SSL context, do nothing. */
+  if(!backend->handle)
+    return;
+
+  if(SSL_SET_OPTION(primary.sessionid)) {
+    int data_idx = ossl_get_ssl_data_index();
+    int connectdata_idx = ossl_get_ssl_conn_index();
+    int sockindex_idx = ossl_get_ssl_sockindex_index();
+    int proxy_idx = ossl_get_proxy_index();
+
+    if(data_idx >= 0 && connectdata_idx >= 0 && sockindex_idx >= 0 &&
+       proxy_idx >= 0) {
+      /* Store the data needed for the "new session" callback.
+       * The sockindex is stored as a pointer to an array element. */
+      SSL_set_ex_data(backend->handle, data_idx, data);
+      SSL_set_ex_data(backend->handle, connectdata_idx, conn);
+      SSL_set_ex_data(backend->handle, sockindex_idx, conn->sock + sockindex);
+#ifndef CURL_DISABLE_PROXY
+      SSL_set_ex_data(backend->handle, proxy_idx, SSL_IS_PROXY() ? (void *) 1:
+                      NULL);
+#else
+      SSL_set_ex_data(backend->handle, proxy_idx, NULL);
+#endif
+    }
+  }
+}
+
+/*
+ * Starting with TLS 1.3, the ossl_new_session_cb callback gets called after
+ * the handshake. If the transfer that sets up the callback gets killed before
+ * this callback arrives, we must make sure to properly clear the data to
+ * avoid UAF problems. A future optimization could be to instead store another
+ * transfer that might still be using the same connection.
+ */
+
+static void ossl_disassociate_connection(struct Curl_easy *data,
+                                         int sockindex)
+{
+  struct connectdata *conn = data->conn;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct ssl_backend_data *backend = connssl->backend;
+
+  /* If we don't have SSL context, do nothing. */
+  if(!backend->handle)
+    return;
+
+  if(SSL_SET_OPTION(primary.sessionid)) {
+    bool isproxy = FALSE;
+    bool incache;
+    void *old_ssl_sessionid = NULL;
+    int data_idx = ossl_get_ssl_data_index();
+    int connectdata_idx = ossl_get_ssl_conn_index();
+    int sockindex_idx = ossl_get_ssl_sockindex_index();
+    int proxy_idx = ossl_get_proxy_index();
+
+    if(data_idx >= 0 && connectdata_idx >= 0 && sockindex_idx >= 0 &&
+       proxy_idx >= 0) {
+      /* Invalidate the session cache entry, if any */
+      isproxy = SSL_get_ex_data(backend->handle, proxy_idx) ? TRUE : FALSE;
+
+      /* Disable references to data in "new session" callback to avoid
+       * accessing a stale pointer. */
+      SSL_set_ex_data(backend->handle, data_idx, NULL);
+      SSL_set_ex_data(backend->handle, connectdata_idx, NULL);
+      SSL_set_ex_data(backend->handle, sockindex_idx, NULL);
+      SSL_set_ex_data(backend->handle, proxy_idx, NULL);
+    }
+
+    Curl_ssl_sessionid_lock(data);
+    incache = !(Curl_ssl_getsessionid(data, conn, isproxy,
+                                      &old_ssl_sessionid, NULL, sockindex));
+    if(incache)
+      Curl_ssl_delsessionid(data, old_ssl_sessionid);
+    Curl_ssl_sessionid_unlock(data);
+  }
+}
+
 const struct Curl_ssl Curl_ssl_openssl = {
   { CURLSSLBACKEND_OPENSSL, "openssl" }, /* info */
 
@@ -4533,10 +4605,12 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_engines_list,        /* engines_list */
   Curl_none_false_start,    /* false_start */
 #if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
-  ossl_sha256sum            /* sha256sum */
+  ossl_sha256sum,           /* sha256sum */
 #else
-  NULL                      /* sha256sum */
+  NULL,                     /* sha256sum */
 #endif
+  ossl_associate_connection, /* associate_connection */
+  ossl_disassociate_connection /* disassociate_connection */
 };
 
 #endif /* USE_OPENSSL */

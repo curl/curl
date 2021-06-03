@@ -14,9 +14,7 @@ changes.
 
 ## Hyper version
 
-The C API for Hyper is brand new and under development. This description
-assumes that you get and build that C API off [the branch in Hyper's git
-repository](https://github.com/hyperium/hyper/tree/hyper-capi).
+The C API for Hyper is brand new and is still under development.
 
 ## build curl with hyper
 

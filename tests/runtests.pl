@@ -578,12 +578,15 @@ sub checkcmd {
 #
 my $disttests;
 sub get_disttests {
-    my $makeCmd = 'make';
-    if(-f "../CMakeCache.txt") {
-        $makeCmd = 'cmake --build ../.. --target';
+    open(D, "<$TESTDIR/Makefile.inc");
+    while(<D>) {
+        chomp $_;
+        if(($_ =~ /^#/) ||($_ !~ /test/)) {
+            next;
+        }
+        $disttests .= join("", $_);
     }
-    my @dist = `cd data && $makeCmd show`;
-    $disttests = join("", @dist);
+    close(D);
 }
 
 #######################################################################

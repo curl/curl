@@ -42,7 +42,7 @@ void Curl_bufref_set(struct bufref *br, const void *buffer, size_t length,
                      void (*destructor)(void *));
 ```
 
-Releases the previouly referenced buffer, then assigns the new `buffer` to
+Releases the previously referenced buffer, then assigns the new `buffer` to
 the structure, associated with its `destructor` function. The later can be
 specified as `NULL`: this will be the case when the referenced buffer is
 static.
@@ -55,7 +55,7 @@ if `buffer` is NULL, `length`must be zero.
 CURLcode Curl_bufref_memdup(struct bufref *br, const void *data, size_t length);
 ```
 
-Releases the previouly referenced buffer, then duplicates the `length`-byte
+Releases the previously referenced buffer, then duplicates the `length`-byte
 `data` into a buffer allocated via `malloc()` and references the later
 associated with destructor `curl_free()`.
 
@@ -70,7 +70,7 @@ Returns `CURLE_OK` if successful, else `CURLE_OUT_OF_MEMORY`.
 const unsigned char *Curl_bufref_ptr(const struct bufref *br);
 ```
 
-Returns a `const unsigned char *` to the referenced bufffer.
+Returns a `const unsigned char *` to the referenced buffer.
 
 ## len
 
