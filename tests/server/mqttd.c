@@ -106,6 +106,7 @@ struct configurable {
                             this */
   bool publish_before_suback;
   bool short_publish;
+  bool excessive_remaining;
   unsigned char error_connack;
   int testnum;
 };
@@ -130,6 +131,7 @@ static void resetdefaults(void)
   config.version = CONFIG_VERSION;
   config.publish_before_suback = FALSE;
   config.short_publish = FALSE;
+  config.excessive_remaining = FALSE;
   config.error_connack = 0;
   config.testnum = 0;
 }
@@ -170,6 +172,10 @@ static void getconfig(void)
         else if(!strcmp(key, "Testnum")) {
           config.testnum = atoi(value);
           logmsg("testnum = %d", config.testnum);
+        }
+        else if(!strcmp(key, "excessive-remaining")) {
+          logmsg("excessive-remaining set");
+          config.excessive_remaining = TRUE;
         }
       }
     }
@@ -337,7 +343,8 @@ static int disconnect(FILE *dump, curl_socket_t fd)
 */
 
 /* return number of bytes used */
-static int encode_length(size_t packetlen, char *remlength) /* 4 bytes */
+static int encode_length(size_t packetlen,
+                         unsigned char *remlength) /* 4 bytes */
 {
   int bytes = 0;
   unsigned char encode;
@@ -393,10 +400,19 @@ static int publish(FILE *dump,
   ssize_t packetlen;
   ssize_t sendamount;
   ssize_t rc;
-  char rembuffer[4];
+  unsigned char rembuffer[4];
   int encodedlen;
 
-  encodedlen = encode_length(remaininglength, rembuffer);
+  if(config.excessive_remaining) {
+    /* manually set illegal remaining length */
+    rembuffer[0] = 0xff;
+    rembuffer[1] = 0xff;
+    rembuffer[2] = 0xff;
+    rembuffer[3] = 0x80; /* maximum allowed here by spec is 0x7f */
+    encodedlen = 4;
+  }
+  else
+    encodedlen = encode_length(remaininglength, rembuffer);
 
   /* one packet type byte (possibly two more for packetid) */
   packetlen = remaininglength + encodedlen + 1;

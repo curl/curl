@@ -1689,7 +1689,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_SSLCERT_BLOB:
     /*
-     * Blob that holds file name of the SSL certificate to use
+     * Blob that holds file content of the SSL certificate to use
      */
     result = Curl_setblobopt(&data->set.blobs[BLOB_CERT],
                              va_arg(param, struct curl_blob *));
@@ -1704,7 +1704,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_PROXY_SSLCERT_BLOB:
     /*
-     * Blob that holds file name of the SSL certificate to use for proxy
+     * Blob that holds file content of the SSL certificate to use for proxy
      */
     result = Curl_setblobopt(&data->set.blobs[BLOB_CERT_PROXY],
                              va_arg(param, struct curl_blob *));
@@ -1735,7 +1735,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_SSLKEY_BLOB:
     /*
-     * Blob that holds file name of the SSL key to use
+     * Blob that holds file content of the SSL key to use
      */
     result = Curl_setblobopt(&data->set.blobs[BLOB_KEY],
                              va_arg(param, struct curl_blob *));
@@ -1750,7 +1750,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_PROXY_SSLKEY_BLOB:
     /*
-     * Blob that holds file name of the SSL key to use for proxy
+     * Blob that holds file content of the SSL key to use for proxy
      */
     result = Curl_setblobopt(&data->set.blobs[BLOB_KEY_PROXY],
                              va_arg(param, struct curl_blob *));
@@ -2311,8 +2311,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_SSL_OPTIONS:
     arg = va_arg(param, long);
-    data->set.ssl.enable_beast =
-      (bool)((arg&CURLSSLOPT_ALLOW_BEAST) ? TRUE : FALSE);
+    data->set.ssl.enable_beast = !!(arg & CURLSSLOPT_ALLOW_BEAST);
     data->set.ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     data->set.ssl.no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
     data->set.ssl.revoke_best_effort = !!(arg & CURLSSLOPT_REVOKE_BEST_EFFORT);
@@ -2325,8 +2324,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSL_OPTIONS:
     arg = va_arg(param, long);
-    data->set.proxy_ssl.enable_beast =
-      (bool)((arg&CURLSSLOPT_ALLOW_BEAST) ? TRUE : FALSE);
+    data->set.proxy_ssl.enable_beast = !!(arg & CURLSSLOPT_ALLOW_BEAST);
     data->set.proxy_ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     data->set.proxy_ssl.no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
     data->set.proxy_ssl.revoke_best_effort =

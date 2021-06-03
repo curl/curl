@@ -26,6 +26,7 @@ cache:
   directories:
   - $HOME/wolfssl-4.7.0-stable
   - $HOME/mesalink-1.0.0
+  - $HOME/bearssl-0.6
 
 env:
   global:
@@ -115,7 +116,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug HYPER="yes" C="--with-hyper=$HOME/hyper --with-openssl" LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib TFLAGS="1 to 29"
+    - T=debug HYPER="yes" C="--with-hyper=$HOME/hyper --with-openssl" LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib TFLAGS="1 to 153 220 221 222 223 224 230 232 314 315 316 396 397"
     addons:
       apt:
         <<: *common_apt
@@ -125,7 +126,17 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug-rustls RUSTLS_VERSION="v0.5.0" C="--with-rustls=$HOME/crust"
+    - T=debug-rustls RUSTLS_VERSION="v0.6.0" C="--with-rustls=$HOME/crust"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+  - env:
+    - T=debug-bearssl C="--with-bearssl" BEARSSL="yes"
     addons:
       apt:
         <<: *common_apt
@@ -215,7 +226,7 @@ jobs:
         - libbrotli-dev
         - libzstd-dev
   - env:
-    - T=debug C="--enable-hsts --disable-alt-svc --with-openssl"
+    - T=debug C="--disable-alt-svc --with-openssl"
     - *clang
     compiler: clang
     addons:

@@ -18,30 +18,35 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-###########################################################################
-iall:
-install:
-test:
+#***************************************************************************
 
-# TESTCASES are taken from Makefile.inc
-include Makefile.inc
-
-EXTRA_DIST = $(TESTCASES) DISABLED CMakeLists.txt
-
-filecheck:
-	@mkdir test-place; \
-	cp "$(top_srcdir)"/tests/data/test[0-9]* test-place/; \
-	rm -f test-place/*~; \
-	for f in $(EXTRA_DIST); do \
-	  if test -f "$(top_srcdir)/tests/data/$$f"; then \
-	    rm -f "test-place/$$f"; \
-	  else \
-	    echo "$$f is listed but missing!"; \
-	  fi \
-	done; \
-	echo "Local files not present in EXTRA_DIST:" ; \
-	ls test-place; \
-	! ls test-place | grep . >/dev/null ; \
-	RC=$$? ; \
-	rm -rf test-place ; \
-	exit $$RC
+AC_DEFUN([CURL_DARWIN_SYSTEMCONFIGURATION], [
+AC_MSG_CHECKING([whether to link macOS SystemConfiguration framework])
+case $host_os in
+  darwin*)
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <TargetConditionals.h>
+      ]],[[
+#if (TARGET_OS_OSX)
+      return 0;
+#else
+#error Not a macOS
+#endif
+      ]])
+    ],[
+      build_for_macos="yes"
+    ],[
+      build_for_macos="no"
+    ])
+    if test "x$build_for_macos" != xno; then
+      AC_MSG_RESULT(yes)
+      LDFLAGS="$LDFLAGS -framework SystemConfiguration"
+    else
+      AC_MSG_RESULT(no)
+    fi
+    ;;
+  *)
+    AC_MSG_RESULT(no)
+esac
+])

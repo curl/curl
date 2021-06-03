@@ -328,12 +328,12 @@ get_alg_id_by_name(char *name)
 }
 
 static CURLcode
-set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
+set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
+                ALG_ID *algIds)
 {
   char *startCur = ciphers;
   int algCount = 0;
-  static ALG_ID algIds[45]; /*There are 45 listed in the MS headers*/
-  while(startCur && (0 != *startCur) && (algCount < 45)) {
+  while(startCur && (0 != *startCur) && (algCount < NUMOF_CIPHERS)) {
     long alg = strtol(startCur, 0, 0);
     if(!alg)
       alg = get_alg_id_by_name(startCur);
@@ -593,7 +593,8 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     }
 
     if(SSL_CONN_CONFIG(cipher_list)) {
-      result = set_ssl_ciphers(&schannel_cred, SSL_CONN_CONFIG(cipher_list));
+      result = set_ssl_ciphers(&schannel_cred, SSL_CONN_CONFIG(cipher_list),
+                               BACKEND->algIds);
       if(CURLE_OK != result) {
         failf(data, "Unable to set ciphers to passed via SSL_CONN_CONFIG");
         return result;
@@ -873,6 +874,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
 #ifdef USE_HTTP2
     if(data->state.httpwant >= CURL_HTTP_VERSION_2) {
+      alpn_buffer[cur++] = ALPN_H2_LENGTH;
       memcpy(&alpn_buffer[cur], ALPN_H2, ALPN_H2_LENGTH);
       cur += ALPN_H2_LENGTH;
       infof(data, "schannel: ALPN, offering %s\n", ALPN_H2);
@@ -2432,7 +2434,9 @@ const struct Curl_ssl Curl_ssl_schannel = {
   Curl_none_set_engine_default,      /* set_engine_default */
   Curl_none_engines_list,            /* engines_list */
   Curl_none_false_start,             /* false_start */
-  schannel_sha256sum                 /* sha256sum */
+  schannel_sha256sum,                /* sha256sum */
+  NULL,                              /* associate_connection */
+  NULL                               /* disassociate_connection */
 };
 
 #endif /* USE_SCHANNEL */

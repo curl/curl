@@ -1546,6 +1546,14 @@ static void close_one(struct ssl_connect_data *connssl)
   const bool client_cert = (backend->client_nickname != NULL)
     || (backend->obj_clicert != NULL);
 
+  if(backend->handle) {
+    char buf[32];
+    /* Maybe the server has already sent a close notify alert.
+       Read it to avoid an RST on the TCP connection. */
+    (void)PR_Recv(backend->handle, buf, (int)sizeof(buf), 0,
+                  PR_INTERVAL_NO_WAIT);
+  }
+
   free(backend->client_nickname);
   backend->client_nickname = NULL;
 
@@ -2465,7 +2473,9 @@ const struct Curl_ssl Curl_ssl_nss = {
   Curl_none_set_engine_default, /* set_engine_default */
   Curl_none_engines_list,       /* engines_list */
   nss_false_start,              /* false_start */
-  nss_sha256sum                 /* sha256sum */
+  nss_sha256sum,                /* sha256sum */
+  NULL,                         /* associate_connection */
+  NULL                          /* disassociate_connection */
 };
 
 #endif /* USE_NSS */

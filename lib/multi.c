@@ -878,8 +878,10 @@ bool Curl_multiplex_wanted(const struct Curl_multi *multi)
 void Curl_detach_connnection(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
-  if(conn)
+  if(conn) {
     Curl_llist_remove(&conn->easyq, &data->conn_queue, NULL);
+    Curl_ssl_detach_conn(data, conn);
+  }
   data->conn = NULL;
 }
 
@@ -898,6 +900,7 @@ void Curl_attach_connnection(struct Curl_easy *data,
                          &data->conn_queue);
   if(conn->handler->attach)
     conn->handler->attach(data, conn);
+  Curl_ssl_associate_conn(data, conn);
 }
 
 static int waitconnect_getsock(struct connectdata *conn,
