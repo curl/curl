@@ -3057,10 +3057,11 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
     if(*host_portno) {
       long portparse = strtol(host_portno, &endp, 10);
       if((endp && *endp) || (portparse < 0) || (portparse > 65535)) {
-        infof(data, "No valid port number in connect to host string (%s)\n",
+        failf(data, "No valid port number in connect to host string (%s)",
               host_portno);
         hostptr = NULL;
         port = -1;
+        return CURLE_SETOPT_OPTION_SYNTAX;
       }
       else
         port = (int)portparse; /* we know it will fit */

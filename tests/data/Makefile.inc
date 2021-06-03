@@ -236,4 +236,4 @@ test3016 \
 \
 test3017 test3018 \
 \
-test3019
+test3019 test3020
