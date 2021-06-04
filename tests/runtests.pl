@@ -584,7 +584,7 @@ sub get_disttests {
         if(($_ =~ /^#/) ||($_ !~ /test/)) {
             next;
         }
-        $disttests .= join("", $_);
+        $disttests .= $_;
     }
     close(D);
 }
