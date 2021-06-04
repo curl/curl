@@ -200,7 +200,7 @@ static bool http2_connisdead(struct Curl_easy *data, struct connectdata *conn)
               (int)nread);
         httpc->nread_inbuf = 0;
         httpc->inbuflen = nread;
-        if(h2_process_pending_input(conn, httpc, &result) < 0)
+        if(h2_process_pending_input(data, httpc, &result) < 0)
           /* immediate error, considered dead */
           dead = TRUE;
       }
