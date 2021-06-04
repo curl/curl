@@ -143,32 +143,135 @@ static int mqtt_getsock(struct Curl_easy *data,
   return GETSOCK_READSOCK(FIRSTSOCKET);
 }
 
+/* Compute packet length byte */
+static char packetlen_byte(size_t packetlen)
+{
+  DEBUGASSERT(packetlen < 125);
+  return (packetlen - 2) & 0x7f;
+}
+
+/* add the passwd to the CONNECT packet */
+static void add_passwd(const char *passwd, const size_t plen,
+                       char *pkt, const size_t start)
+{
+  /* magic number that need to be set properly */
+  const size_t conn_flags_pos = 9;
+
+  /* set password flag */
+  pkt[conn_flags_pos] |= 0x40;
+
+  /* length of password provided */
+  pkt[start + 1] = (char)plen;
+  memcpy(&pkt[start + 2], passwd, plen);
+}
+
+/* add user to the CONN packet */
+static void add_user(const char *username, const size_t ulen,
+                     unsigned char *pkt, const size_t start)
+{
+  /* magic number that need to be set properly */
+  const size_t conn_flags_pos = 9;
+
+  /* set username flag */
+  pkt[conn_flags_pos] |= 0x80;
+  /* length of username provided */
+  pkt[start + 1] = (char)ulen;
+  memcpy(&pkt[start + 2], username, ulen);
+}
+
+/* Set initial values of CONN packet */
+static void init_connpack(char *packet, size_t packetlen)
+{
+  const size_t client_id_offset = 14;
+  memset(packet, 0, packetlen);
+
+  /* Fixed header starts */
+  /* packet type */
+  packet[0] = MQTT_MSG_CONNECT;
+  /* remaining length field */
+  packet[1] = packetlen_byte(packetlen);
+  /* Fixed header ends */
+
+  /* Variable header starts */
+  /* protocol length */
+  packet[2] = 0x00;
+  packet[3] = 0x04;
+  /* protocol name */
+  packet[4] = 'M';
+  packet[5] = 'Q';
+  packet[6] = 'T';
+  packet[7] = 'T';
+  /* protocol level */
+  packet[8] = 0x04;
+  /* CONNECT flag: CleanSession */
+  packet[9] = 0x02;
+  /* keep-alive 0 = disabled */
+  packet[10] = 0x00;
+  packet[11] = 0x3c;
+  /* payload1 length */
+  packet[12] = 0x00;
+  packet[client_id_offset - 1] = MQTT_CLIENTID_LEN;
+}
+
 static CURLcode mqtt_connect(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
   const size_t client_id_offset = 14;
-  const size_t packetlen = client_id_offset + MQTT_CLIENTID_LEN;
+  size_t packetlen = client_id_offset + MQTT_CLIENTID_LEN;
   char client_id[MQTT_CLIENTID_LEN + 1] = "curl";
   const size_t clen = strlen("curl");
-  char packet[32] = {
-    MQTT_MSG_CONNECT,  /* packet type */
-    0x00,              /* remaining length */
-    0x00, 0x04,        /* protocol length */
-    'M','Q','T','T',   /* protocol name */
-    0x04,              /* protocol level */
-    0x02,              /* CONNECT flag: CleanSession */
-    0x00, 0x3c,        /* keep-alive 0 = disabled */
-    0x00, 0x00         /* payload1 length */
-  };
-  packet[1] = (packetlen - 2) & 0x7f;
-  packet[client_id_offset - 1] = MQTT_CLIENTID_LEN;
+  char *packet = NULL;
+
+  /* extracting username from request */
+  const char *username = data->state.aptr.user ?
+    data->state.aptr.user : "";
+  const size_t ulen = strlen(username);
+  /* position where starts the user payload */
+  const size_t start_user = packetlen;
+  /* extracting password from request */
+  const char *passwd = data->state.aptr.passwd ?
+    data->state.aptr.passwd : "";
+  const size_t plen = strlen(passwd);
+  /* position where starts the password payload */
+  size_t start_pwd = packetlen + ulen;
+  if(ulen > 0)
+    start_pwd += 2;
+
+  packetlen = packetlen + ulen + plen;
+  /* The plus 2 are for the MSB and LSB describing the length of the string to
+   * be added on the payload. Refer to spec 1.5.2 and 1.5.4 */
+  if(ulen > 0)
+    packetlen += 2;
+  if(plen > 0)
+    packetlen += 2;
+
+  /* allocating packet, given that the username and password
+   * are supplied*/
+  packet = malloc(packetlen);
+  if(!packet)
+    return CURLE_OUT_OF_MEMORY;
+  /* setting initial values for CONN pack */
+  init_connpack(packet, packetlen);
 
   result = Curl_rand_hex(data, (unsigned char *)&client_id[clen],
                          MQTT_CLIENTID_LEN - clen + 1);
   memcpy(&packet[client_id_offset], client_id, MQTT_CLIENTID_LEN);
   infof(data, "Using client id '%s'\n", client_id);
+
+  /* if user name was provided then add it to the packet */
+  if(ulen > 0)
+    add_user(username, ulen, (unsigned char *)packet, start_user);
+
+  /* if passwd was provided then add it to the packet */
+  if(plen > 0)
+    add_passwd(passwd, plen, packet, start_pwd);
+
   if(!result)
     result = mqtt_send(data, packet, packetlen);
+
+  free(packet);
+  Curl_safefree(data->state.aptr.user);
+  Curl_safefree(data->state.aptr.passwd);
   return result;
 }
 
