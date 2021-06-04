@@ -50,12 +50,6 @@
 #  define in_addr_t unsigned long
 #endif
 
-#if defined(USE_UNIX_SOCKETS) && defined(WINAPI_FAMILY) && \
-    (WINAPI_FAMILY == WINAPI_FAMILY_APP)
-   /* Required for sockaddr_un type */
-#  include <afunix.h>
-#endif
-
 #include <stddef.h>
 
 #include "curl_addrinfo.h"

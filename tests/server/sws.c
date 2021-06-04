@@ -2072,9 +2072,9 @@ int main(int argc, char *argv[])
     strncpy(me.sau.sun_path, unix_socket, sizeof(me.sau.sun_path) - 1);
     rc = bind(sock, &me.sa, sizeof(me.sau));
     if(0 != rc && errno == EADDRINUSE) {
-      struct stat statbuf;
+      struct_stat statbuf;
       /* socket already exists. Perhaps it is stale? */
-      int unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
+      curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
       if(CURL_SOCKET_BAD == unixfd) {
         error = SOCKERRNO;
         logmsg("Error binding socket, failed to create socket at %s: (%d) %s",
@@ -2084,15 +2084,19 @@ int main(int argc, char *argv[])
       /* check whether the server is alive */
       rc = connect(unixfd, &me.sa, sizeof(me.sau));
       error = errno;
-      close(unixfd);
+      sclose(unixfd);
       if(ECONNREFUSED != error) {
         logmsg("Error binding socket, failed to connect to %s: (%d) %s",
                unix_socket, error, strerror(error));
         goto sws_cleanup;
       }
-      /* socket server is not alive, now check if it was actually a socket.
-       * Systems which have Unix sockets will also have lstat */
+      /* socket server is not alive, now check if it was actually a socket. */
+#ifdef WIN32
+      /* Windows does not have lstat function. */
+      rc = curlx_win32_stat(unix_socket, &statbuf);
+#else
       rc = lstat(unix_socket, &statbuf);
+#endif
       if(0 != rc) {
         logmsg("Error binding socket, failed to stat %s: (%d) %s",
                unix_socket, errno, strerror(errno));
