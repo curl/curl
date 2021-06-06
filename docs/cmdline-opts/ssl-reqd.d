@@ -1,6 +1,6 @@
 Long: ssl-reqd
 Help: Require SSL/TLS
-Protocols: FTP IMAP POP3 SMTP
+Protocols: FTP IMAP POP3 SMTP LDAP (openldap only)
 Added: 7.20.0
 Category: tls
 Example: --ssl-reqd ftp://example.com

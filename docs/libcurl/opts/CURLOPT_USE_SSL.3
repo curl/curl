@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -38,7 +38,8 @@ This is for enabling SSL/TLS when you use FTP, SMTP, POP3, IMAP etc.
 .IP CURLUSESSL_NONE
 do not attempt to use SSL.
 .IP CURLUSESSL_TRY
-Try using SSL, proceed as normal otherwise.
+Try using SSL, proceed as normal otherwise. Note that server may close the
+connection if the negotiation does not succeed.
 .IP CURLUSESSL_CONTROL
 Require SSL for the control connection or fail with \fICURLE_USE_SSL_FAILED\fP.
 .IP CURLUSESSL_ALL
@@ -46,7 +47,7 @@ Require SSL for all communication or fail with \fICURLE_USE_SSL_FAILED\fP.
 .SH DEFAULT
 CURLUSESSL_NONE
 .SH PROTOCOLS
-FTP, SMTP, POP3, IMAP
+FTP, SMTP, POP3, IMAP, LDAP (openldap only)
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
