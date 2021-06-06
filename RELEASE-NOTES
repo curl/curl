@@ -4,15 +4,17 @@ curl and libcurl 7.77.1
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2411
+ Contributors:                 2414
 
 This release includes the following changes:
 
+ o CURLE_SETOPT_OPTION_SYNTAX: new error name for wrong setopt syntax [40]
  o hostip: make 'localhost' return fixed values [16]
  o mbedtls: add support for cert and key blob options [11]
 
 This release includes the following bugfixes:
 
+ o ares: always store IPv6 addresses first [20]
  o bearssl: explicitly initialize all fields of Curl_ssl [1]
  o bearssl: remove incorrect const on variable that is modified [1]
  o c-hyper: clear NTLM auth buffer when request is issued [23]
@@ -20,25 +22,41 @@ This release includes the following bugfixes:
  o c-hyper: fix NTLM on closed connection tested with test159 [4]
  o c-hyper: handle NULL from hyper_buf_copy() [19]
  o ccsidcurl: fix the compile errors [27]
+ o cmake: add CURL_DISABLE_NTLM option [44]
+ o cmake: avoid leaking absolute paths into exported config [3]
  o cmake: try well-known send/recv signature for Apple [12]
+ o configure: add --disable-ntlm option [45]
  o conncache: lowercase the hash key for better match [5]
  o Curl_ntlm_core_mk_nt_hash: fix OOM in error path [8]
  o Curl_ssl_getsessionid: fail if no session cache exists [14]
  o docs: use --max-redirs instead of --max-redir [28]
+ o filecheck: quietly remove test-place/*~ [39]
+ o github: timeout jobs on macOS after 90 minutes [42]
  o GOVERNANCE: add 'user', 'committer' and 'contributor' [15]
+ o hostip: bad CURLOPT_RESOLVE syntax now returns error [35]
  o hsts: ignore numberical IP address hosts [17]
  o HSTS: not experimental anymore
  o http2: init recvbuf struct for pushed streams [13]
+ o http2_connisdead: handle trailing GOAWAY better [18]
  o http_proxy: deal with non-200 CONNECT response with Hyper [22]
  o HYPER: remove mentions of deprecated development branch
  o mbedtls: make mbedtls_strerror always work [6]
+ o mqtt: detect illegal and too large file size [43]
  o Revert "c-hyper: handle body on HYPER_TASK_EMPTY" [26]
+ o runtests: enable 'hyper mode' only for HTTP tests [34]
+ o runtests: parse data/Makefile.inc instead of using make [38]
  o schannel: set ALPN length correctly for HTTP/2 [24]
  o setopt: fix incorrect comments [10]
+ o socketpair: fix potential hangs [37]
  o ssl: read pending close notify alert before closing the connection [9]
+ o test269: disable for hyper [33]
+ o tests: fix Accept-Encoding strips to work with Hyper builds [41]
  o travis: add bearssl build [1]
  o travis: delete --enable-hsts option (it is the default now) [ci skip] [2]
+ o url: bad CURLOPT_CONNECT_TO syntax now returns error [31]
  o vtls: exit addsessionid if no cache is inited [7]
+ o warnless: simplify type size handling [30]
+ o Win32: fix build with Watt-32
 
 This release includes the following known bugs:
 
@@ -47,16 +65,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Christoph M. Becker, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Douglas R. Reno, Gregor Jasny, Harry Sintonen, Joel Depooter, Jon Rumsey,
-  Kevin Burke, Laurent Dufresne, Michael Forney, Michael Kaufmann,
-  Viktor Szakats,
-  (14 contributors)
+  Alexis Vachette, Christoph M. Becker, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, Dmitry Karpov, Dmitry Kostjuchenko, Douglas R. Reno,
+  Ebe Janchivdorj, Gisle Vanem, Gregor Jasny, Harry Sintonen, Joel Depooter,
+  Jon Rumsey, Kevin Burke, Laurent Dufresne, Marc Hörsken, Michael Forney,
+  Michael Kaufmann, Paul Groke, Shikha Sharma, Viktor Szakats,
+  (22 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=7133
  [2] = https://curl.se/bug/?i=7167
+ [3] = https://curl.se/bug/?i=7152
  [4] = https://curl.se/bug/?i=7154
  [5] = https://curl.se/bug/?i=7159
  [6] = https://curl.se/bug/?i=7162
@@ -71,7 +91,9 @@ References to bug reports and discussions on issues:
  [15] = https://curl.se/bug/?i=7151
  [16] = https://curl.se/bug/?i=7039
  [17] = https://curl.se/bug/?i=7146
+ [18] = https://curl.se/mail/lib-2021-06/0001.html
  [19] = https://curl.se/bug/?i=7143
+ [20] = https://curl.se/mail/lib-2021-06/0003.html
  [21] = https://curl.se/bug/?i=7141
  [22] = https://curl.se/bug/?i=7141
  [23] = https://curl.se/bug/?i=7139
@@ -79,3 +101,17 @@ References to bug reports and discussions on issues:
  [26] = https://curl.se/bug/?i=7122
  [27] = https://curl.se/bug/?i=7134
  [28] = https://curl.se/bug/?i=7130
+ [30] = https://curl.se/bug/?i=7181
+ [31] = https://curl.se/bug/?i=7183
+ [33] = https://curl.se/bug/?i=7184
+ [34] = https://curl.se/bug/?i=7185
+ [35] = https://curl.se/bug/?i=7170
+ [37] = https://curl.se/bug/?i=7144
+ [38] = https://curl.se/bug/?i=7177
+ [39] = https://curl.se/bug/?i=7179
+ [40] = https://curl.se/bug/?i=7175
+ [41] = https://curl.se/bug/?i=7169
+ [42] = https://curl.se/bug/?i=7173
+ [43] = https://curl.se/bug/?i=7166
+ [44] = https://curl.se/bug/?i=7028
+ [45] = https://curl.se/bug/?i=7028
