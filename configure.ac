@@ -284,6 +284,9 @@ Select from these:
   fi
 fi
 
+AC_ARG_WITH(darwinssl,,
+  AC_MSG_ERROR([--with-darwin-ssl no longer works!]))
+
 dnl
 dnl Detect the canonical host and target build environment
 dnl
