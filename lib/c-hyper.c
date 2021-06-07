@@ -124,6 +124,7 @@ static int hyper_each_header(void *userdata,
   size_t len;
   char *headp;
   CURLcode result;
+  int writetype;
   Curl_dyn_reset(&data->state.headerb);
   if(name_len) {
     if(Curl_dyn_addf(&data->state.headerb, "%.*s: %.*s\r\n",
@@ -145,7 +146,10 @@ static int hyper_each_header(void *userdata,
 
   Curl_debug(data, CURLINFO_HEADER_IN, headp, len);
 
-  result = Curl_client_write(data, CLIENTWRITE_HEADER, headp, len);
+  writetype = CLIENTWRITE_HEADER;
+  if(data->set.include_header)
+    writetype |= CLIENTWRITE_BODY;
+  result = Curl_client_write(data, writetype, headp, len);
   if(result) {
     data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
     return HYPER_ITER_BREAK;
@@ -219,6 +223,7 @@ static CURLcode status_line(struct Curl_easy *data,
   CURLcode result;
   size_t len;
   const char *vstr;
+  int writetype;
   vstr = http_version == HYPER_HTTP_VERSION_1_1 ? "1.1" :
     (http_version == HYPER_HTTP_VERSION_2 ? "2" : "1.0");
   conn->httpversion =
@@ -241,7 +246,10 @@ static CURLcode status_line(struct Curl_easy *data,
   len = Curl_dyn_len(&data->state.headerb);
   Curl_debug(data, CURLINFO_HEADER_IN, Curl_dyn_ptr(&data->state.headerb),
              len);
-  result = Curl_client_write(data, CLIENTWRITE_HEADER,
+  writetype = CLIENTWRITE_HEADER;
+  if(data->set.include_header)
+    writetype |= CLIENTWRITE_BODY;
+  result = Curl_client_write(data, writetype,
                              Curl_dyn_ptr(&data->state.headerb), len);
   if(result) {
     data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
