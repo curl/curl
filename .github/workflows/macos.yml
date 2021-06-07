@@ -1,4 +1,4 @@
-name: CI
+name: macOS
 
 on:
   # Trigger the workflow on push or pull requests, but only for the
@@ -13,7 +13,7 @@ on:
 
 jobs:
   autotools:
-    name: macos ${{ matrix.build.name }}
+    name: ${{ matrix.build.name }}
     runs-on: 'macos-latest'
     timeout-minutes: 90
     strategy:
@@ -90,7 +90,7 @@ jobs:
         TFLAGS: "${{ matrix.build.tflags }} ~1452"
 
   cmake:
-    name: macos cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
+    name: cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
     runs-on: 'macos-latest'
     env: ${{ matrix.compiler }}
     strategy:
