@@ -3804,7 +3804,7 @@ dnl ************************************************************
 dnl disable the curl_easy_options API
 dnl
 AC_MSG_CHECKING([whether to support curl_easy_option*])
-AC_ARG_ENABLE(get-easy-option,
+AC_ARG_ENABLE(get-easy-options,
 AS_HELP_STRING([--enable-get-easy-options],[Enable curl_easy_options])
 AS_HELP_STRING([--disable-get-easy-options],[Disable curl_easy_options]),
 [ case "$enableval" in
