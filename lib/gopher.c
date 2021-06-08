@@ -116,7 +116,7 @@ static CURLcode gopher_connecting(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   CURLcode result = Curl_ssl_connect(data, conn, FIRSTSOCKET);
-  if(result)
+  if(result != CURLE_OK)
     connclose(conn, "Failed TLS connection");
   *done = TRUE;
   return result;
@@ -167,7 +167,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     /* ... and finally unescape */
     result = Curl_urldecode(data, newp, 0, &sel, &len, REJECT_ZERO);
     free(gopherpath);
-    if(result)
+    if(result != CURLE_OK)
       return result;
     sel_org = sel;
   }
@@ -181,9 +181,9 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
       break;
 
     result = Curl_write(data, sockfd, sel, k, &amount);
-    if(!result) { /* Which may not have written it all! */
+    if(result != CURLE_OK) { /* Which may not have written it all! */
       result = Curl_client_write(data, CLIENTWRITE_HEADER, sel, amount);
-      if(result)
+      if(result != CURLE_OK)
         break;
 
       k -= amount;
@@ -221,14 +221,14 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
 
   free(sel_org);
 
-  if(!result)
+  if(result == CURLE_OK)
     result = Curl_write(data, sockfd, "\r\n", 2, &amount);
-  if(result) {
+  if(result != CURLE_OK) {
     failf(data, "Failed sending Gopher request");
     return result;
   }
   result = Curl_client_write(data, CLIENTWRITE_HEADER, (char *)"\r\n", 2);
-  if(result)
+  if(result != CURLE_OK)
     return result;
 
   Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
