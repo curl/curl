@@ -39,13 +39,13 @@ HTTP GET with CURLINFO_CONTENT_LENGTH_DOWNLOAD and 0 bytes transfer
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER log/ip%TESTNUMBER
 </command>
-</client> 
+</client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
 <file name="log/ip%TESTNUMBER">
-CL: 0
+CL 0
 </file>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
