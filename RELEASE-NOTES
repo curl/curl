@@ -11,6 +11,7 @@ This release includes the following changes:
  o CURLE_SETOPT_OPTION_SYNTAX: new error name for wrong setopt syntax [40]
  o hostip: make 'localhost' return fixed values [16]
  o mbedtls: add support for cert and key blob options [11]
+ o metalink: remove [54]
 
 This release includes the following bugfixes:
 
@@ -21,16 +22,23 @@ This release includes the following bugfixes:
  o c-hyper: convert HYPERE_INVALID_PEER_MESSAGE to CURLE_UNSUPPORTED_PROTOCOL [21]
  o c-hyper: fix NTLM on closed connection tested with test159 [4]
  o c-hyper: handle NULL from hyper_buf_copy() [19]
+ o c-hyper: support CURLINFO_STARTTRANSFER_TIME [29]
+ o c-hyper: support CURLOPT_HEADER [32]
  o ccsidcurl: fix the compile errors [27]
  o cmake: add CURL_DISABLE_NTLM option [44]
  o cmake: avoid leaking absolute paths into exported config [3]
  o cmake: try well-known send/recv signature for Apple [12]
  o configure: add --disable-ntlm option [45]
  o conncache: lowercase the hash key for better match [5]
+ o cookies: track expiration in jar to optimize removals [25]
  o Curl_ntlm_core_mk_nt_hash: fix OOM in error path [8]
  o Curl_ssl_getsessionid: fail if no session cache exists [14]
+ o docs/INSTALL: remove mentions of configure --with-darwin-ssl [55]
  o docs: use --max-redirs instead of --max-redir [28]
  o filecheck: quietly remove test-place/*~ [39]
+ o GHA: add a linux-hyper job [52]
+ o GHA: add several libcurl tests to the hyper job
+ o GHA: run the newly fixed tests with hyper [36]
  o github: timeout jobs on macOS after 90 minutes [42]
  o GOVERNANCE: add 'user', 'committer' and 'contributor' [15]
  o hostip: bad CURLOPT_RESOLVE syntax now returns error [35]
@@ -50,9 +58,18 @@ This release includes the following bugfixes:
  o socketpair: fix potential hangs [37]
  o ssl: read pending close notify alert before closing the connection [9]
  o test269: disable for hyper [33]
+ o test328: avoid a header-looking body to make hyper mode work [53]
+ o test339: CRLFify better to work in hyper mode [51]
+ o test347: CRLFify to work in hyper mode [50]
+ o test393: make Content-Length fit within 64 bit for hyper [49]
+ o test394: hyper returns a different error [48]
+ o test395: hyper cannot work around > 64 bit content-lengths like built-in [47]
+ o test433: adjust for hyper mode [46]
+ o test500: adjust to work with hyper mode
  o tests: fix Accept-Encoding strips to work with Hyper builds [41]
  o travis: add bearssl build [1]
  o travis: delete --enable-hsts option (it is the default now) [ci skip] [2]
+ o travis: remove the hyper build
  o url: bad CURLOPT_CONNECT_TO syntax now returns error [31]
  o vtls: exit addsessionid if no cache is inited [7]
  o warnless: simplify type size handling [30]
@@ -65,12 +82,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexis Vachette, Christoph M. Becker, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, Dmitry Karpov, Dmitry Kostjuchenko, Douglas R. Reno,
-  Ebe Janchivdorj, Gisle Vanem, Gregor Jasny, Harry Sintonen, Joel Depooter,
-  Jon Rumsey, Kevin Burke, Laurent Dufresne, Marc Hörsken, Michael Forney,
-  Michael Kaufmann, Paul Groke, Shikha Sharma, Viktor Szakats,
-  (22 contributors)
+  Alexis Vachette, Christoph M. Becker, Dan Fandrich, Vadim Grinshpun
+  Daniel Gustafsson, Daniel Stenberg, Dmitry Karpov, Dmitry Kostjuchenko,
+  Douglas R. Reno, Ebe Janchivdorj, Gisle Vanem, Gregor Jasny, Harry Sintonen,
+  Joel Depooter, Jon Rumsey, Kevin Burke, Laurent Dufresne, Marc Hörsken,
+  Michael Forney, Michael Kaufmann, Paul Groke, Shikha Sharma, Viktor Szakats
+  (23 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -98,14 +115,18 @@ References to bug reports and discussions on issues:
  [22] = https://curl.se/bug/?i=7141
  [23] = https://curl.se/bug/?i=7139
  [24] = https://curl.se/bug/?i=7138
+ [25] = https://curl.se/bug/?i=7172
  [26] = https://curl.se/bug/?i=7122
  [27] = https://curl.se/bug/?i=7134
  [28] = https://curl.se/bug/?i=7130
+ [29] = https://curl.se/bug/?i=7204
  [30] = https://curl.se/bug/?i=7181
  [31] = https://curl.se/bug/?i=7183
+ [32] = https://curl.se/bug/?i=7204
  [33] = https://curl.se/bug/?i=7184
  [34] = https://curl.se/bug/?i=7185
  [35] = https://curl.se/bug/?i=7170
+ [36] = https://curl.se/bug/?i=7205
  [37] = https://curl.se/bug/?i=7144
  [38] = https://curl.se/bug/?i=7177
  [39] = https://curl.se/bug/?i=7179
@@ -115,3 +136,13 @@ References to bug reports and discussions on issues:
  [43] = https://curl.se/bug/?i=7166
  [44] = https://curl.se/bug/?i=7028
  [45] = https://curl.se/bug/?i=7028
+ [46] = https://curl.se/bug/?i=7205
+ [47] = https://curl.se/bug/?i=7205
+ [48] = https://curl.se/bug/?i=7205
+ [49] = https://curl.se/bug/?i=7205
+ [50] = https://curl.se/bug/?i=7205
+ [51] = https://curl.se/bug/?i=7205
+ [52] = https://curl.se/bug/?i=7206
+ [53] = https://curl.se/bug/?i=7203
+ [54] = https://curl.se/bug/?i=7176
+ [55] = https://curl.se/mail/lib-2021-06/0008.html
