@@ -371,13 +371,29 @@ static void strstore(char **str, const char *newstr)
  *
  * Remove expired cookies from the hash by inspecting the expires timestamp on
  * each cookie in the hash, freeing and deleting any where the timestamp is in
- * the past.
+ * the past.  If the cookiejar has recorded the next timestamp at which one or
+ * more cookies expire, then processing will exit early in case this timestamp
+ * is in the future.
  */
 static void remove_expired(struct CookieInfo *cookies)
 {
   struct Cookie *co, *nx;
   curl_off_t now = (curl_off_t)time(NULL);
   unsigned int i;
+
+  /*
+   * If the earliest expiration timestamp in the jar is in the future we can
+   * skip scanning the whole jar and instead exit early as there won't be any
+   * cookies to evict.  If we need to evict however, reset the next_expiration
+   * counter in order to track the next one. In case the recorded first
+   * expiration is the max offset, then perform the safe fallback of checking
+   * all cookies.
+   */
+  if(now < cookies->next_expiration &&
+      cookies->next_expiration != CURL_OFF_T_MAX)
+    return;
+  else
+    cookies->next_expiration = CURL_OFF_T_MAX;
 
   for(i = 0; i < COOKIE_HASH_SIZE; i++) {
     struct Cookie *pv = NULL;
@@ -395,6 +411,12 @@ static void remove_expired(struct CookieInfo *cookies)
         freecookie(co);
       }
       else {
+        /*
+         * If this cookie has an expiration timestamp earlier than what we've
+         * seen so far then record it for the next round of expirations.
+         */
+        if(co->expires && co->expires < cookies->next_expiration)
+          cookies->next_expiration = co->expires;
         pv = co;
       }
       co = nx;
@@ -1108,6 +1130,13 @@ Curl_cookie_add(struct Curl_easy *data,
     c->numcookies++; /* one more cookie in the jar */
   }
 
+  /*
+   * Now that we've added a new cookie to the jar, update the expiration
+   * tracker in case it is the next one to expire.
+   */
+  if(co->expires && (co->expires < c->next_expiration))
+    c->next_expiration = co->expires;
+
   return co;
 }
 
@@ -1143,6 +1172,11 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
     c->filename = strdup(file?file:"none"); /* copy the name just in case */
     if(!c->filename)
       goto fail; /* failed to get memory */
+    /*
+     * Initialize the next_expiration time to signal that we don't have enough
+     * information yet.
+     */
+    c->next_expiration = CURL_OFF_T_MAX;
   }
   else {
     /* we got an already existing one, use that */
