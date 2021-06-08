@@ -744,6 +744,8 @@ static CURLcode CONNECT(struct Curl_easy *data,
       hyper_io_set_write(io, Curl_hyper_send);
       conn->sockfd = tunnelsocket;
 
+      data->state.hconnect = TRUE;
+
       /* create an executor to poll futures */
       if(!h->exec) {
         h->exec = hyper_executor_new();

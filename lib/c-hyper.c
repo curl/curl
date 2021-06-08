@@ -186,7 +186,13 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
       Curl_safefree(data->req.newurl);
     }
 #endif
-    result = Curl_http_firstwrite(data, data->conn, &done);
+    if(data->state.hconnect &&
+       (data->req.httpcode/100 != 2)) {
+      done = TRUE;
+      result = CURLE_OK;
+    }
+    else
+      result = Curl_http_firstwrite(data, data->conn, &done);
     if(result || done) {
       infof(data, "Return early from hyper_body_chunk\n");
       data->state.hresult = result;
