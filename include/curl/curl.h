@@ -2110,7 +2110,7 @@ typedef enum {
      this option is used only if PROXY_SSL_VERIFYPEER is true */
   CURLOPT(CURLOPT_PROXY_CAINFO_BLOB, CURLOPTTYPE_BLOB, 310),
 
-  /* Set the distributed names callback function. The function must be 
+  /* Set the distributed names callback function. The function must be
      matching the curl_ssl_dn_callback proto. */
   CURLOPT(CURLOPT_SSL_DN_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 311),
 
