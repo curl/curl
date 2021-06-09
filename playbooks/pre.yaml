@@ -1,0 +1,34 @@
+---
+- hosts: all
+  tasks:
+  - name: Install common dependencies
+    become: true
+    apt:
+      pkg:
+      - autoconf
+      - automake
+      - cmake
+      - valgrind
+      - libev-dev
+      - libc-ares-dev
+      - libssl-dev
+      - libtool
+      - g++-8
+      - stunnel4
+      - libidn2-dev
+      - gnutls-bin
+      - python-impacket
+      - ninja-build
+      - libgsasl7-dev
+      - libnghttp2-dev
+
+  - name: Install job-specific packages
+    become: true
+    apt:
+      pkg: "{{ curl_apt_packages }}"
+
+  - name: Run before script
+    shell: "./scripts/travis/before_script.sh"
+    args:
+      chdir: "{{ zuul.project.src_dir }}"
+...

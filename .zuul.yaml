@@ -1,0 +1,43 @@
+---
+- job:
+    name: curl-base
+    abstract: true
+    pre-run: playbooks/pre.yaml
+    run: playbooks/run.yaml
+    post-run: playbooks/post.yaml
+    nodeset: ubuntu-bionic
+    timeout: 3600
+    vars:
+      curl_env:
+        LD_LIBRARY_PATH: /usr/local/lib
+        # NOTE(mnaser): Workaround to keep existing Travis scripts compatible
+        TRAVIS_OS_NAME: linux
+
+- job:
+    name: curl-normal-openssl-with-gssapi-libssh2-checksrc
+    parent: curl-base
+    vars:
+      curl_env:
+        T: normal
+        C: --with-openssl --with-gssapi --with-libssh2
+        CHECKSRC: 1
+      curl_apt_packages:
+        - krb5-user
+        - libssh2-1-dev
+        - libbrotli-dev
+        - libzstd-dev
+
+- job:
+    name: curl-normal-openssl-with-gssapi-libssh2-checksrc-gcc8
+    parent: curl-normal-openssl-with-gssapi-libssh2-checksrc
+    vars:
+      curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
+
+- project:
+    check:
+      jobs:
+      - curl-normal-openssl-with-gssapi-libssh2-checksrc
+      - curl-normal-openssl-with-gssapi-libssh2-checksrc-gcc8
+...
