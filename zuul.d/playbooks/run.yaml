@@ -1,0 +1,12 @@
+---
+- hosts: all
+  tasks:
+  - name: Print environment variables
+    debug:
+      var: curl_env
+
+  - name: Run tests
+    environment: "{{ curl_env }}"
+    shell: "./scripts/travis/script.sh"
+    args:
+      chdir: "{{ zuul.project.src_dir }}"
