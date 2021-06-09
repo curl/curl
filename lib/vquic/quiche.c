@@ -886,6 +886,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
 
   *written = (ssize_t) len;
 
+  bool fin = TRUE;
   switch(data->state.httpreq) {
   case HTTPREQ_POST:
   case HTTPREQ_POST_FORM:
@@ -902,10 +903,10 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
       upload_left = -1; /* unknown, but not zero */
     }
 
-    stream3_id = quiche_h3_send_request(qs->h3c, qs->conn, nva, nheader,
-                                        upload_left ? FALSE: TRUE);
+    fin = upload_left ? FALSE : TRUE;
+    stream3_id = quiche_h3_send_request(qs->h3c, qs->conn, nva, nheader, fin);
     if(stream3_id >= 0 && data->set.postfields && upload_left > 0) {
-      bool fin = data->state.infilesize > upload_left ? FALSE : TRUE;
+      fin = data->state.infilesize > upload_left ? FALSE : TRUE;
       ssize_t sent = quiche_h3_send_body(qs->h3c, qs->conn, stream3_id,
                                          (uint8_t *)data->set.postfields,
                                          upload_left, fin);
@@ -942,6 +943,8 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
       result = CURLE_SEND_ERROR;
     }
     return result;
+  } else if (fin) {
+    stream->upload_done = TRUE;
   }
 
   infof(data, "Using HTTP/3 Stream ID: %x (easy handle %p)\n",
