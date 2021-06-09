@@ -1,0 +1,26 @@
+---
+- job:
+    name: curl-base
+    abstract: true
+
+- job:
+    name: curl-normal-openssl-with-gssapi-libssh2-checksrc
+    vars:
+      curl_env:
+        T: normal
+        C: --with-openssl --with-gssapi --with-libssh2
+        CHECKSRC: 1
+      curl_apt_packages:
+        - krb5-user
+        - libssh2-1-dev
+        - libbrotli-dev
+        - libzstd-dev
+
+- job:
+    name: curl-normal-openssl-with-gssapi-libssh2-checksrc-gcc8
+    parent: curl-normal-openssl-with-gssapi-libssh2-checksrc
+    vars:
+      curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
+...

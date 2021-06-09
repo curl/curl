@@ -1,0 +1,30 @@
+---
+- hosts: all
+  tasks:
+  - name: Install common dependencies
+    apt:
+      pkgs:
+      - cmake
+      - valgrind
+      - libev-dev
+      - libc-ares-dev
+      - g++-8
+      - stunnel4
+      - libidn2-dev
+      - gnutls-bin
+      - python-impacket
+      - ninja-build
+      - libgsasl7-dev
+      - libnghttp2-dev
+
+  - name: Install job-specific packages
+    apt:
+      pkgs: "{{ curl_apt_packages }}"
+
+  - name: Print environment variables
+    debug:
+      var: curl_env
+
+  - name: Run tests
+    shell: ./scripts/travis/script.sh
+    env: "{{ curl_env }}"
