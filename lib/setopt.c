@@ -1987,6 +1987,29 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
       result = CURLE_NOT_BUILT_IN;
     break;
+  case CURLOPT_SSL_DN_FUNCTION:
+    /*
+     * Set a SSL_DN callback
+     */
+#if defined(USE_SSL) && defined(USE_SCHANNEL)
+    if(Curl_ssl->supports & SSLSUPP_DISTNAMES)
+      data->set.ssl.fdistnames = va_arg(param,
+                                      curl_ssl_dn_callback);
+    else
+#endif
+      result = CURLE_NOT_BUILT_IN;
+    break;
+  case CURLOPT_SSL_DN_DATA:
+    /*
+     * Set a SSL_DN callback parameter pointer
+     */
+#if defined(USE_SSL) && defined(USE_SCHANNEL)
+    if(Curl_ssl->supports & SSLSUPP_DISTNAMES)
+      data->set.ssl.fdistnamesp = va_arg(param, void *);
+    else
+#endif
+      result = CURLE_NOT_BUILT_IN;
+    break;
   case CURLOPT_SSL_FALSESTART:
     /*
      * Enable TLS false start.

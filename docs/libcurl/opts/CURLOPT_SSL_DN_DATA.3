@@ -1,0 +1,46 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SSL_DN_DATA 3 "9 June 2021" "libcurl 7.78.0" "curl_easy_setopt options"
+
+.SH NAME
+CURLOPT_SSL_DN_DATA \- custom pointer passed to distinguished names callback
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_DN_DATA,
+                          void *ptr);
+.SH DESCRIPTION
+Data \fIpointer\fP to pass to the distinguished names callback function. If you
+use the \fICURLOPT_SSL_DN_DATA(3)\fP option, this is the pointer you'll get
+as input.
+.SH DEFAULT
+If you don't set this, NULL is passed to the callback.
+.SH PROTOCOLS
+As of now SSL/TLS, SChannel provider only
+.SH AVAILABILITY
+Added in 7.78.0.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_SSL_DN_FUNCTION "(3), "
