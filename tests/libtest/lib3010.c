@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020 - 2020, Nicolas Sterchele, <nicolas@sterchelen.net>
+ * Copyright (C) 2020 - 2021, Nicolas Sterchele, <nicolas@sterchelen.net>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -43,7 +43,7 @@ int test(char *URL)
     }
     curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &follow_url);
     curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
-    printf("Retry-After: %" CURL_FORMAT_CURL_OFF_T "\n", retry_after);
+    printf("Retry-After %" CURL_FORMAT_CURL_OFF_T "\n", retry_after);
     curl_easy_setopt(curl, CURLOPT_URL, follow_url);
     ret = curl_easy_perform(curl);
     if(ret) {
@@ -54,7 +54,7 @@ int test(char *URL)
 
     curl_easy_reset(curl);
     curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
-    printf("Retry-After: %" CURL_FORMAT_CURL_OFF_T "\n", retry_after);
+    printf("Retry-After %" CURL_FORMAT_CURL_OFF_T "\n", retry_after);
   }
 
 test_cleanup:
