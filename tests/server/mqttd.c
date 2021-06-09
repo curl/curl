@@ -490,7 +490,8 @@ static int fixedheader(curl_socket_t fd,
 
 static curl_socket_t mqttit(curl_socket_t fd)
 {
-  unsigned char buffer[10*1024];
+  size_t buff_size = 10*1024;
+  unsigned char *buffer = NULL;
   ssize_t rc;
   unsigned char byte;
   unsigned short packet_id;
@@ -502,6 +503,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
   char client_id[MAX_CLIENT_ID_LENGTH];
   long testno;
   FILE *stream = NULL;
+
 
   static const char protocol[7] = {
     0x00, 0x04,       /* protocol length */
@@ -519,6 +521,12 @@ static curl_socket_t mqttit(curl_socket_t fd)
   if(testno)
     logmsg("Found test number %ld", testno);
 
+  buffer = malloc(buff_size);
+  if(!buffer) {
+    logmsg("Out of memory, unable to allocate buffer");
+    goto end;
+  }
+
   do {
     unsigned char usr_flag = 0x80;
     unsigned char passwd_flag = 0x40;
@@ -531,6 +539,16 @@ static curl_socket_t mqttit(curl_socket_t fd)
     rc = fixedheader(fd, &byte, &remaining_length, &bytes);
     if(rc)
       break;
+
+    if(remaining_length >= buff_size) {
+      buff_size = remaining_length;
+      buffer = realloc(buffer, buff_size);
+      if(!buffer) {
+        logmsg("Failed realloc of size %lu", buff_size);
+        goto end;
+      }
+    }
+
     if(remaining_length) {
       /* reading variable header and payload into buffer */
       rc = sread(fd, (char *)buffer, remaining_length);
@@ -680,6 +698,8 @@ static curl_socket_t mqttit(curl_socket_t fd)
   } while(1);
 
   end:
+  if(buffer)
+    free(buffer);
   if(dump)
     fclose(dump);
   if(stream)

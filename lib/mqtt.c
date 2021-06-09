@@ -143,81 +143,105 @@ static int mqtt_getsock(struct Curl_easy *data,
   return GETSOCK_READSOCK(FIRSTSOCKET);
 }
 
-/* Compute packet length byte */
-static char packetlen_byte(size_t packetlen)
+static int mqtt_encode_len(char *buf, size_t len)
 {
-  DEBUGASSERT(packetlen < 125);
-  return (packetlen - 2) & 0x7f;
+  unsigned char encoded;
+  int i;
+
+  for(i = 0; (len > 0) && (i<4); i++) {
+    encoded = len % 0x80;
+    len /= 0x80;
+    if(len)
+      encoded |= 0x80;
+    buf[i] = encoded;
+  }
+
+  return i;
 }
 
 /* add the passwd to the CONNECT packet */
 static void add_passwd(const char *passwd, const size_t plen,
-                       char *pkt, const size_t start)
+                       char *pkt, const size_t start, int remain_pos)
 {
   /* magic number that need to be set properly */
-  const size_t conn_flags_pos = 9;
+  const size_t conn_flags_pos = remain_pos + 8;
 
   /* set password flag */
   pkt[conn_flags_pos] |= 0x40;
 
   /* length of password provided */
-  pkt[start + 1] = (char)plen;
+  DEBUGASSERT(plen < 65535);
+  pkt[start] = (char)((plen >> 8) & 0xFF);
+  pkt[start + 1] = (char)(plen & 0xFF);
   memcpy(&pkt[start + 2], passwd, plen);
 }
 
 /* add user to the CONN packet */
 static void add_user(const char *username, const size_t ulen,
-                     unsigned char *pkt, const size_t start)
+                     unsigned char *pkt, const size_t start, int remain_pos)
 {
   /* magic number that need to be set properly */
-  const size_t conn_flags_pos = 9;
+  const size_t conn_flags_pos = remain_pos + 8;
 
   /* set username flag */
   pkt[conn_flags_pos] |= 0x80;
   /* length of username provided */
-  pkt[start + 1] = (char)ulen;
+  DEBUGASSERT(ulen < 65535);
+  pkt[start] = (char)((ulen >> 8) & 0xFF);
+  pkt[start + 1] = (char)(ulen & 0xFF);
   memcpy(&pkt[start + 2], username, ulen);
 }
 
-/* Set initial values of CONN packet */
-static void init_connpack(char *packet, size_t packetlen)
+/* add client ID to the CONN packet */
+static void add_client_id(const char *client_id,
+                     char *pkt, const size_t start)
 {
-  const size_t client_id_offset = 14;
-  memset(packet, 0, packetlen);
+  pkt[start] = 0x00;
+  pkt[start + 1] = MQTT_CLIENTID_LEN;
+  memcpy(&pkt[start + 2], client_id, MQTT_CLIENTID_LEN);
+}
 
+/* Set initial values of CONN packet */
+static int init_connpack(char *packet, char *remain, int remain_pos)
+{
   /* Fixed header starts */
   /* packet type */
   packet[0] = MQTT_MSG_CONNECT;
   /* remaining length field */
-  packet[1] = packetlen_byte(packetlen);
+  memcpy(&packet[1], remain, remain_pos);
   /* Fixed header ends */
 
   /* Variable header starts */
   /* protocol length */
-  packet[2] = 0x00;
-  packet[3] = 0x04;
+  packet[remain_pos + 1] = 0x00;
+  packet[remain_pos + 2] = 0x04;
   /* protocol name */
-  packet[4] = 'M';
-  packet[5] = 'Q';
-  packet[6] = 'T';
-  packet[7] = 'T';
+  packet[remain_pos + 3] = 'M';
+  packet[remain_pos + 4] = 'Q';
+  packet[remain_pos + 5] = 'T';
+  packet[remain_pos + 6] = 'T';
   /* protocol level */
-  packet[8] = 0x04;
+  packet[remain_pos + 7] = 0x04;
   /* CONNECT flag: CleanSession */
-  packet[9] = 0x02;
+  packet[remain_pos + 8] = 0x02;
   /* keep-alive 0 = disabled */
-  packet[10] = 0x00;
-  packet[11] = 0x3c;
-  /* payload1 length */
-  packet[12] = 0x00;
-  packet[client_id_offset - 1] = MQTT_CLIENTID_LEN;
+  packet[remain_pos + 9] = 0x00;
+  packet[remain_pos + 10] = 0x3c;
+  /*end of variable header*/
+  return remain_pos + 10;
 }
 
 static CURLcode mqtt_connect(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
-  const size_t client_id_offset = 14;
-  size_t packetlen = client_id_offset + MQTT_CLIENTID_LEN;
+  int pos = 0;
+  /*remain length*/
+  int remain_pos = 0;
+  char remain[4] = {0};
+  size_t packetlen = 0;
+  size_t payloadlen = 0;
+  size_t start_user = 0;
+  size_t start_pwd = 0;
   char client_id[MQTT_CLIENTID_LEN + 1] = "curl";
   const size_t clen = strlen("curl");
   char *packet = NULL;
@@ -226,45 +250,60 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   const char *username = data->state.aptr.user ?
     data->state.aptr.user : "";
   const size_t ulen = strlen(username);
-  /* position where starts the user payload */
-  const size_t start_user = packetlen;
   /* extracting password from request */
   const char *passwd = data->state.aptr.passwd ?
     data->state.aptr.passwd : "";
   const size_t plen = strlen(passwd);
-  /* position where starts the password payload */
-  size_t start_pwd = packetlen + ulen;
-  if(ulen > 0)
-    start_pwd += 2;
 
-  packetlen = packetlen + ulen + plen;
+  payloadlen = ulen + plen + MQTT_CLIENTID_LEN + 2;
   /* The plus 2 are for the MSB and LSB describing the length of the string to
    * be added on the payload. Refer to spec 1.5.2 and 1.5.4 */
   if(ulen > 0)
-    packetlen += 2;
+    payloadlen += 2;
   if(plen > 0)
-    packetlen += 2;
+    payloadlen += 2;
+
+  /*getting how much occupy the remain length*/
+  remain_pos = mqtt_encode_len(remain, payloadlen + 10);
+  infof(data, "Remain Position: %d\n", remain_pos);
+
+  /*10 length of variable header and
+   * 1 the first byte of the fixed header*/
+  packetlen = payloadlen + 10 + remain_pos + 1;
 
   /* allocating packet, given that the username and password
    * are supplied*/
+  /*the check is allows an extremely long packet, up to 256 mgb
+   * Read section 2.2.3 Remaining Length from spect*/
+  DEBUGASSERT(packetlen < 268435455);
   packet = malloc(packetlen);
   if(!packet)
     return CURLE_OUT_OF_MEMORY;
+  memset(packet, 0, packetlen);
+
   /* setting initial values for CONN pack */
-  init_connpack(packet, packetlen);
+  pos = init_connpack(packet, remain, remain_pos);
 
   result = Curl_rand_hex(data, (unsigned char *)&client_id[clen],
                          MQTT_CLIENTID_LEN - clen + 1);
-  memcpy(&packet[client_id_offset], client_id, MQTT_CLIENTID_LEN);
+  /*adding client id*/
+  add_client_id(client_id, packet, pos + 1);
   infof(data, "Using client id '%s'\n", client_id);
+
+  /* position where starts the user payload */
+  start_user = pos + 3 + MQTT_CLIENTID_LEN;
+  /* position where starts the password payload */
+  start_pwd = start_user + ulen;
+  if(ulen > 0)
+    start_pwd += 2;
 
   /* if user name was provided then add it to the packet */
   if(ulen > 0)
-    add_user(username, ulen, (unsigned char *)packet, start_user);
+    add_user(username, ulen, (unsigned char *)packet, start_user, remain_pos);
 
   /* if passwd was provided then add it to the packet */
   if(plen > 0)
-    add_passwd(passwd, plen, packet, start_pwd);
+    add_passwd(passwd, plen, packet, start_pwd, remain_pos);
 
   if(!result)
     result = mqtt_send(data, packet, packetlen);
@@ -331,21 +370,6 @@ static CURLcode mqtt_get_topic(struct Curl_easy *data,
 }
 
 
-static int mqtt_encode_len(char *buf, size_t len)
-{
-  unsigned char encoded;
-  int i;
-
-  for(i = 0; (len > 0) && (i<4); i++) {
-    encoded = len % 0x80;
-    len /= 0x80;
-    if(len)
-      encoded |= 0x80;
-    buf[i] = encoded;
-  }
-
-  return i;
-}
 
 static CURLcode mqtt_subscribe(struct Curl_easy *data)
 {
