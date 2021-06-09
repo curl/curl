@@ -129,13 +129,13 @@ CURLcode Curl_proxy_connect(struct Curl_easy *data, int sockindex)
 bool Curl_connect_complete(struct connectdata *conn)
 {
   return !conn->connect_state ||
-    (conn->connect_state->tunnel_state == TUNNEL_COMPLETE);
+    (conn->connect_state->tunnel_state >= TUNNEL_COMPLETE);
 }
 
 bool Curl_connect_ongoing(struct connectdata *conn)
 {
   return conn->connect_state &&
-    (conn->connect_state->tunnel_state != TUNNEL_COMPLETE);
+    (conn->connect_state->tunnel_state <= TUNNEL_COMPLETE);
 }
 
 /* when we've sent a CONNECT to a proxy, we should rather either wait for the
@@ -202,13 +202,16 @@ static void connect_done(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   struct http_connect_state *s = conn->connect_state;
-  s->tunnel_state = TUNNEL_COMPLETE;
-  Curl_dyn_free(&s->rcvbuf);
-  Curl_dyn_free(&s->req);
+  if(s->tunnel_state != TUNNEL_EXIT) {
+    s->tunnel_state = TUNNEL_EXIT;
+    Curl_dyn_free(&s->rcvbuf);
+    Curl_dyn_free(&s->req);
 
-  /* retore the protocol pointer */
-  data->req.p.http = s->prot_save;
-  infof(data, "CONNECT phase completed!\n");
+    /* retore the protocol pointer */
+    data->req.p.http = s->prot_save;
+    s->prot_save = NULL;
+    infof(data, "CONNECT phase completed!\n");
+  }
 }
 
 static CURLcode CONNECT_host(struct Curl_easy *data,
