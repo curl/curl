@@ -47,4 +47,5 @@
     shell: "./scripts/travis/before_script.sh"
     args:
       chdir: "{{ zuul.project.src_dir }}"
+    environment: "{{ curl_env }}"
 ...
