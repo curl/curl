@@ -38,6 +38,7 @@
       - libnghttp2-dev
 
   - name: Install job-specific packages
+    when: curl_apt_packages is defined
     become: true
     apt:
       pkg: "{{ curl_apt_packages }}"
