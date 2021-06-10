@@ -16,6 +16,13 @@
         vars:
           go_version: "{{ go_stable.content | regex_replace('^go', '') }}"
 
+      - name: Symlink /usr/local/go/bin/go to /usr/bin/go
+        become: true
+        file:
+          src: /usr/local/go/bin/go
+          dest: /usr/bin/go
+          state: link
+
   - name: Install common dependencies
     become: true
     apt:
