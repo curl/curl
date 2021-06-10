@@ -161,7 +161,7 @@
 
   gcc provides a tool that can determine the code coverage figures for the
   test suite.  To use it, configure curl with `CFLAGS='-fprofile-arcs
-  -ftest-coverage -g -O0`.  Make sure you run the normal and torture tests to
+  -ftest-coverage -g -O0'`.  Make sure you run the normal and torture tests to
   get more full coverage, i.e. do:
 
     make test
