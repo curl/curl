@@ -1,6 +1,21 @@
 ---
 - hosts: all
   tasks:
+
+  - name: Install latest stable release of go
+    when: gimme_stable|default(false)
+    block:
+      - name: Find latest stable version
+        register: go_stable
+        uri:
+          url: https://golang.org/VERSION?m=text
+          return_content: true
+      - name: Install Go
+        include_role:
+          name: ensure-go
+        vars:
+          go_version: "{{ go_stable.content | regex_replace('^go', '') }}"
+
   - name: Install common dependencies
     become: true
     apt:

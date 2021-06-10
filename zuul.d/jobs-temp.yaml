@@ -1,0 +1,94 @@
+- job:
+    name: curl-normal-with-openssl-enable-ares
+    parent: curl-base
+    vars:
+      curl_env:
+        T: normal
+        C: >-
+          --with-openssl
+          --enable-ares
+
+- job:
+    name: curl-normal-with-openssl-enable-ares-gcc8
+    parent: curl-normal-with-openssl-enable-ares
+    vars:
+      curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
+
+- job:
+    name: curl-normal-with-openssl-disable-proxy
+    parent: curl-base
+    vars:
+      curl_env:
+        T: normal
+        C: >-
+          --with-openssl
+          --disable-proxy
+
+- job:
+    name: curl-normal-with-openssl-disable-verbose-notests
+    parent: curl-base
+    vars:
+      curl_env:
+        T: normal
+        C: >-
+          --with-openssl
+          --disable-verbose
+        CPPFLAGS: -Wno-variadic-macros
+        NOTESTS: 1
+
+- job:
+    name: curl-normal-with-openssl-disable-verbose-notests-gcc8
+    parent: curl-normal-with-openssl-disable-verbose-notests
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
+
+- job:
+    name: curl-novalgrind-boringssl-with-openssl
+    parent: curl-base
+    vars:
+      gimme_stable: true
+      curl_env:
+        T: novalgrind
+        BORINGSSL: yes
+        C: >-
+          --with-openssl=$HOME/boringssl
+        LD_LIBRARY_PATH: $HOME/boringssl/lib:/usr/local/lib
+
+- job:
+    name: curl-novalgrind-boringssl-with-openssl-gcc8
+    parent: curl-novalgrind-boringssl-with-openssl
+    vars:
+      curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
+
+- job:
+    name: curl-novalgrind-boringssl-with-openssl-quiche
+    parent: curl-base
+    vars:
+      gimme_stable: true
+      curl_env:
+        T: novalgrind
+        BORINGSSL: yes
+        C: >-
+          --with-openssl=$HOME/boringssl
+        LD_LIBRARY_PATH: $HOME/boringssl/lib:/usr/local/lib
+
+- project:
+    check:
+      jobs:
+      - curl-normal-with-openssl-enable-ares
+      - curl-normal-with-openssl-enable-ares-gcc8
+      - curl-normal-with-openssl-disable-proxy
+      - curl-normal-with-openssl-disable-verbose-notests
+      - curl-normal-with-openssl-disable-verbose-notests-gcc8
+      - curl-novalgrind-boringssl-with-openssl
+      - curl-novalgrind-boringssl-with-openssl-gcc8
