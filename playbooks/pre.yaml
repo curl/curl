@@ -28,6 +28,7 @@
       - libc-ares-dev
       - libssl-dev
       - libtool
+      - g++
       - g++-8
       - stunnel4
       - libidn2-dev
