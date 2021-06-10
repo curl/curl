@@ -59,8 +59,8 @@
         T: novalgrind
         BORINGSSL: yes
         C: >-
-          --with-openssl=$HOME/boringssl
-        LD_LIBRARY_PATH: $HOME/boringssl/lib:/usr/local/lib
+          --with-openssl={{ ansible_user_dir }}/boringssl
+        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/boringssl/lib:/usr/local/lib"
 
 - job:
     name: curl-novalgrind-boringssl-with-openssl-gcc8
@@ -79,8 +79,8 @@
         T: novalgrind
         BORINGSSL: yes
         C: >-
-          --with-openssl=$HOME/boringssl
-        LD_LIBRARY_PATH: $HOME/boringssl/lib:/usr/local/lib
+          --with-openssl={{ ansible_user_dir }}/boringssl
+        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/boringssl/lib:/usr/local/lib"
 
 - project:
     check:
