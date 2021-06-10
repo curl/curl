@@ -970,7 +970,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             }
           }
 
-          if(config->output_dir) {
+          if(config->output_dir && *config->output_dir) {
             char *d = aprintf("%s/%s", config->output_dir, per->outfile);
             if(!d) {
               result = CURLE_WRITE_ERROR;
