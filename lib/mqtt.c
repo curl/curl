@@ -273,7 +273,6 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
 
   /*getting how much occupy the remain length*/
   remain_pos = mqtt_encode_len(remain, payloadlen + 10);
-  infof(data, "Remain Position: %d\n", remain_pos);
 
   /*10 length of variable header and
    * 1 the first byte of the fixed header*/
@@ -298,7 +297,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   /*adding client id*/
   rc = add_client_id(client_id, strlen(client_id), packet, pos + 1);
   if(rc) {
-    infof(data, "Client ID length mismatched: [%lu]\n", strlen(client_id));
+    failf(data, "Client ID length mismatched: [%lu]", strlen(client_id));
     result = CURLE_WEIRD_SERVER_REPLY;
     goto end;
   }
@@ -316,7 +315,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
     rc = add_user(username, ulen,
         (unsigned char *)packet, start_user, remain_pos);
     if(rc) {
-      infof(data, "Username is too large: [%lu]\n", ulen);
+      failf(data, "Username is too large: [%lu]", ulen);
       result = CURLE_WEIRD_SERVER_REPLY;
       goto end;
     }
@@ -326,7 +325,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   if(plen > 0) {
     rc = add_passwd(passwd, plen, packet, start_pwd, remain_pos);
     if(rc) {
-      infof(data, "Password is too large: [%lu]\n", plen);
+      failf(data, "Password is too large: [%lu]", plen);
       result = CURLE_WEIRD_SERVER_REPLY;
       goto end;
     }
