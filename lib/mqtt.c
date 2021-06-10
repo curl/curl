@@ -160,7 +160,7 @@ static int mqtt_encode_len(char *buf, size_t len)
 }
 
 /* add the passwd to the CONNECT packet */
-static void add_passwd(const char *passwd, const size_t plen,
+static int add_passwd(const char *passwd, const size_t plen,
                        char *pkt, const size_t start, int remain_pos)
 {
   /* magic number that need to be set properly */
@@ -170,14 +170,16 @@ static void add_passwd(const char *passwd, const size_t plen,
   pkt[conn_flags_pos] |= 0x40;
 
   /* length of password provided */
-  DEBUGASSERT(plen < 65535);
+  if(plen > 65535)
+    return 1;
   pkt[start] = (char)((plen >> 8) & 0xFF);
   pkt[start + 1] = (char)(plen & 0xFF);
   memcpy(&pkt[start + 2], passwd, plen);
+  return 0;
 }
 
 /* add user to the CONN packet */
-static void add_user(const char *username, const size_t ulen,
+static int add_user(const char *username, const size_t ulen,
                      unsigned char *pkt, const size_t start, int remain_pos)
 {
   /* magic number that need to be set properly */
@@ -186,19 +188,24 @@ static void add_user(const char *username, const size_t ulen,
   /* set username flag */
   pkt[conn_flags_pos] |= 0x80;
   /* length of username provided */
-  DEBUGASSERT(ulen < 65535);
+  if(ulen > 65535)
+    return 1;
   pkt[start] = (char)((ulen >> 8) & 0xFF);
   pkt[start + 1] = (char)(ulen & 0xFF);
   memcpy(&pkt[start + 2], username, ulen);
+  return 0;
 }
 
 /* add client ID to the CONN packet */
-static void add_client_id(const char *client_id,
+static int add_client_id(const char *client_id, const size_t client_id_len,
                      char *pkt, const size_t start)
 {
+  if(client_id_len != MQTT_CLIENTID_LEN)
+    return 1;
   pkt[start] = 0x00;
   pkt[start + 1] = MQTT_CLIENTID_LEN;
   memcpy(&pkt[start + 2], client_id, MQTT_CLIENTID_LEN);
+  return 0;
 }
 
 /* Set initial values of CONN packet */
@@ -235,6 +242,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
   int pos = 0;
+  int rc = 0;
   /*remain length*/
   int remain_pos = 0;
   char remain[4] = {0};
@@ -275,7 +283,8 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
    * are supplied*/
   /*the check is allows an extremely long packet, up to 256 mgb
    * Read section 2.2.3 Remaining Length from spect*/
-  DEBUGASSERT(packetlen < 268435455);
+  if(packetlen > 268435455)
+    return CURLE_WEIRD_SERVER_REPLY;
   packet = malloc(packetlen);
   if(!packet)
     return CURLE_OUT_OF_MEMORY;
@@ -287,7 +296,12 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   result = Curl_rand_hex(data, (unsigned char *)&client_id[clen],
                          MQTT_CLIENTID_LEN - clen + 1);
   /*adding client id*/
-  add_client_id(client_id, packet, pos + 1);
+  rc = add_client_id(client_id, strlen(client_id), packet, pos + 1);
+  if(rc) {
+    infof(data, "Client ID length mismatched: [%lu]\n", strlen(client_id));
+    result = CURLE_WEIRD_SERVER_REPLY;
+    goto end;
+  }
   infof(data, "Using client id '%s'\n", client_id);
 
   /* position where starts the user payload */
@@ -298,17 +312,32 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
     start_pwd += 2;
 
   /* if user name was provided then add it to the packet */
-  if(ulen > 0)
-    add_user(username, ulen, (unsigned char *)packet, start_user, remain_pos);
+  if(ulen > 0) {
+    rc = add_user(username, ulen,
+        (unsigned char *)packet, start_user, remain_pos);
+    if(rc) {
+      infof(data, "Username is too large: [%lu]\n", ulen);
+      result = CURLE_WEIRD_SERVER_REPLY;
+      goto end;
+    }
+  }
 
   /* if passwd was provided then add it to the packet */
-  if(plen > 0)
-    add_passwd(passwd, plen, packet, start_pwd, remain_pos);
+  if(plen > 0) {
+    rc = add_passwd(passwd, plen, packet, start_pwd, remain_pos);
+    if(rc) {
+      infof(data, "Password is too large: [%lu]\n", plen);
+      result = CURLE_WEIRD_SERVER_REPLY;
+      goto end;
+    }
+  }
 
   if(!result)
     result = mqtt_send(data, packet, packetlen);
 
-  free(packet);
+end:
+  if(packet)
+    free(packet);
   Curl_safefree(data->state.aptr.user);
   Curl_safefree(data->state.aptr.passwd);
   return result;
