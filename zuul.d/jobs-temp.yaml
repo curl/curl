@@ -3,18 +3,12 @@
     parent: curl-base
     vars:
       curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
         T: normal
         C: >-
           --with-openssl
           --enable-ares
-
-- job:
-    name: curl-normal-with-openssl-enable-ares-gcc8
-    parent: curl-normal-with-openssl-enable-ares
-    vars:
-      curl_env:
-        OVERRIDE_CC: CC=gcc-8
-        OVERRIDE_CXX: CXX=g++-8
 
 - job:
     name: curl-normal-with-openssl-disable-proxy
@@ -30,7 +24,13 @@
     name: curl-normal-with-openssl-disable-verbose-notests
     parent: curl-base
     vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
       curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
         T: normal
         C: >-
           --with-openssl
@@ -39,8 +39,22 @@
         NOTESTS: 1
 
 - job:
-    name: curl-normal-with-openssl-disable-verbose-notests-gcc8
-    parent: curl-normal-with-openssl-disable-verbose-notests
+    name: curl-novalgrind-boringssl-with-openssl
+    parent: curl-base
+    vars:
+      gimme_stable: true
+      curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
+        T: novalgrind
+        BORINGSSL: yes
+        C: >-
+          --with-openssl={{ ansible_user_dir }}/boringssl
+        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/boringssl/lib:/usr/local/lib"
+
+- job:
+    name: curl-novalgrind-boringssl-with-openssl-quiche
+    parent: curl-base
     vars:
       curl_apt_packages:
         - libpsl-dev
@@ -49,46 +63,149 @@
       curl_env:
         OVERRIDE_CC: CC=gcc-8
         OVERRIDE_CXX: CXX=g++-8
+        T: novalgrind
+        QUICHE: yes
+        C: >-
+          --with-openssl={{ ansible_user_dir }}/quiche/deps/boringssl/src
+          --with-quiche={{ ansible_user_dir }}/quiche/target/release
+        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/quiche/target/release:/usr/local/lib"
 
 - job:
-    name: curl-novalgrind-boringssl-with-openssl
+    name: curl-debug-rustls
     parent: curl-base
     vars:
-      gimme_stable: true
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
       curl_env:
-        T: novalgrind
-        BORINGSSL: yes
+        T: debug-rustls
+        RUSTLS_VERSION: v0.6.0
         C: >-
-          --with-openssl={{ ansible_user_dir }}/boringssl
-        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/boringssl/lib:/usr/local/lib"
+          --with-rustls={{ ansible_user_dir }}/crust
 
 - job:
-    name: curl-novalgrind-boringssl-with-openssl-gcc8
-    parent: curl-novalgrind-boringssl-with-openssl
+    name: curl-debug-bearssl
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        T: debug-bearssl
+        BEARSSL: yes
+        C: >-
+          --with-bearssl
+
+- job:
+    name: curl-novalgrind-libressl
+    parent: curl-base
     vars:
       curl_env:
         OVERRIDE_CC: CC=gcc-8
         OVERRIDE_CXX: CXX=g++-8
+        T: novalgrind
+        LIBRESSL: yes
+        C: >-
+          --with-openssl={{ ansible_user_dir }}/libressl
+        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/libressl/lib:/usr/local/lib"
 
 - job:
-    name: curl-novalgrind-boringssl-with-openssl-quiche
+    name: curl-novalgrind-ngtcp2-with-openssl
     parent: curl-base
     vars:
-      gimme_stable: true
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
       curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
         T: novalgrind
-        BORINGSSL: yes
+        NGTCP2: yes
         C: >-
-          --with-openssl={{ ansible_user_dir }}/boringssl
-        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/boringssl/lib:/usr/local/lib"
+          --with-openssl={{ ansible_user_dir }}/ngbuild
+          --with-ngtcp2={{ ansible_user_dir }}/ngbuild
+          --with-nghttp3={{ ansible_user_dir }}/ngbuild
+        NOTESTS:
+
+- job:
+    name: curl-novalgrind-ngtcp2-gnutls
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - autogen
+        - automake
+        - autopoint
+        - bison
+        - gperf
+        - libgmp-dev
+        - libopts25-dev
+        - libp11-kit-dev
+        - libtasn1-6-dev
+        - nettle-dev
+      curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
+        T: novalgrind
+        NGTCP2: yes
+        GNUTLS: yes
+        C: >-
+          PKG_CONFIG_PATH={{ ansible_user_dir }}/ngbuild 
+          --with-gnutls={{ ansible_user_dir }}/ngbuild
+          --with-ngtcp2={{ ansible_user_dir }}/ngbuild
+          --with-nghttp3={{ ansible_user_dir }}/ngbuild
+        NOTESTS:
+
+- job:
+    name: curl-debug-wolfssl
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
+        T: debug-wolfssl
+        WOLFSSL: yes
+        C: >-
+          --with-wolfssl
+
+- job:
+    name: curl-debug-openssl3
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
+        T: debug
+        OPENSSL3: yes
+        C: >-
+          --with-openssl={{ ansible_user_dir }}/openssl3
+        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/openssl3/lib:/usr/local/lib"
+        TFLAGS: https ftps
 
 - project:
     check:
       jobs:
       - curl-normal-with-openssl-enable-ares
-      - curl-normal-with-openssl-enable-ares-gcc8
       - curl-normal-with-openssl-disable-proxy
       - curl-normal-with-openssl-disable-verbose-notests
-      - curl-normal-with-openssl-disable-verbose-notests-gcc8
       - curl-novalgrind-boringssl-with-openssl
-      - curl-novalgrind-boringssl-with-openssl-gcc8
+      - curl-debug-rustls
+      - curl-debug-bearssl
+      - curl-novalgrind-libressl
+      - curl-novalgrind-ngtcp2-with-openssl
+      - curl-novalgrind-ngtcp2-gnutls
+      - curl-debug-wolfssl
+      - curl-debug-wolfssl
