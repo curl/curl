@@ -4540,9 +4540,6 @@ static void ossl_disassociate_connection(struct Curl_easy *data,
     return;
 
   if(SSL_SET_OPTION(primary.sessionid)) {
-    bool isproxy = FALSE;
-    bool incache;
-    void *old_ssl_sessionid = NULL;
     int data_idx = ossl_get_ssl_data_index();
     int connectdata_idx = ossl_get_ssl_conn_index();
     int sockindex_idx = ossl_get_ssl_sockindex_index();
@@ -4550,9 +4547,6 @@ static void ossl_disassociate_connection(struct Curl_easy *data,
 
     if(data_idx >= 0 && connectdata_idx >= 0 && sockindex_idx >= 0 &&
        proxy_idx >= 0) {
-      /* Invalidate the session cache entry, if any */
-      isproxy = SSL_get_ex_data(backend->handle, proxy_idx) ? TRUE : FALSE;
-
       /* Disable references to data in "new session" callback to avoid
        * accessing a stale pointer. */
       SSL_set_ex_data(backend->handle, data_idx, NULL);
@@ -4560,13 +4554,6 @@ static void ossl_disassociate_connection(struct Curl_easy *data,
       SSL_set_ex_data(backend->handle, sockindex_idx, NULL);
       SSL_set_ex_data(backend->handle, proxy_idx, NULL);
     }
-
-    Curl_ssl_sessionid_lock(data);
-    incache = !(Curl_ssl_getsessionid(data, conn, isproxy,
-                                      &old_ssl_sessionid, NULL, sockindex));
-    if(incache)
-      Curl_ssl_delsessionid(data, old_ssl_sessionid);
-    Curl_ssl_sessionid_unlock(data);
   }
 }
 
