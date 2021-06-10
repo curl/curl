@@ -58,7 +58,7 @@
   the SOCKS functionality and requires a SSH client and server.
 
   The base port number (8990), which all the individual port numbers are
-  indexed from, can be set explicitly using runtests.pl' -b option to allow
+  indexed from, can be set explicitly using runtests.pl's `-b` option to allow
   running more than one instance of the test suite simultaneously on one
   machine, or just move the servers in case you have local services on any of
   those ports.
