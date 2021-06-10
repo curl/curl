@@ -1441,9 +1441,14 @@ static void http_connect(curl_socket_t *infdp,
         /* a new connection on listener socket (most likely from client) */
         curl_socket_t datafd = accept(rootfd, NULL, NULL);
         if(datafd != CURL_SOCKET_BAD) {
-          struct httprequest req2;
+          static struct httprequest *req2;
           int err = 0;
-          memset(&req2, 0, sizeof(req2));
+          if(!req2) {
+            req2 = malloc(sizeof(*req2));
+            if(!req2)
+              exit(1);
+          }
+          memset(req2, 0, sizeof(*req2));
           logmsg("====> Client connect DATA");
 #ifdef TCP_NODELAY
           if(socket_domain_is_ip()) {
@@ -1454,9 +1459,9 @@ static void http_connect(curl_socket_t *infdp,
               logmsg("====> TCP_NODELAY for client DATA connection failed");
           }
 #endif
-          init_httprequest(&req2);
-          while(!req2.done_processing) {
-            err = get_request(datafd, &req2);
+          init_httprequest(req2);
+          while(!req2->done_processing) {
+            err = get_request(datafd, req2);
             if(err < 0) {
               /* this socket must be closed, done or not */
               break;
@@ -1465,14 +1470,14 @@ static void http_connect(curl_socket_t *infdp,
 
           /* skip this and close the socket if err < 0 */
           if(err >= 0) {
-            err = send_doc(datafd, &req2);
-            if(!err && req2.connect_request) {
+            err = send_doc(datafd, req2);
+            if(!err && req2->connect_request) {
               /* sleep to prevent triggering libcurl known bug #39. */
               for(loop = 2; (loop > 0) && !got_exit_signal; loop--)
                 wait_ms(250);
               if(!got_exit_signal) {
                 /* connect to the server */
-                serverfd[DATA] = connect_to(ipaddr, req2.connect_port);
+                serverfd[DATA] = connect_to(ipaddr, req2->connect_port);
                 if(serverfd[DATA] != CURL_SOCKET_BAD) {
                   /* secondary tunnel established, now we have two
                      connections */
@@ -1871,7 +1876,7 @@ int main(int argc, char *argv[])
 #endif
   const char *pidname = ".http.pid";
   const char *portname = ".http.port";
-  struct httprequest req;
+  struct httprequest *req;
   int rc = 0;
   int error;
   int arg = 1;
@@ -1884,7 +1889,9 @@ int main(int argc, char *argv[])
   /* a default CONNECT port is basically pointless but still ... */
   size_t socket_idx;
 
-  memset(&req, 0, sizeof(req));
+  req = calloc(1, sizeof(*req));
+  if(!req)
+    return 0;
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
@@ -2199,7 +2206,7 @@ int main(int argc, char *argv[])
      the pipelining struct field must be initialized previously to FALSE
      every time a new connection arrives. */
 
-  init_httprequest(&req);
+  init_httprequest(req);
 
   for(;;) {
     fd_set input;
@@ -2278,20 +2285,20 @@ int main(int argc, char *argv[])
 
         /* Service this connection until it has nothing available */
         do {
-          rc = service_connection(all_sockets[socket_idx], &req, sock,
+          rc = service_connection(all_sockets[socket_idx], req, sock,
                                   connecthost);
           if(got_exit_signal)
             goto sws_cleanup;
 
           if(rc < 0) {
-            logmsg("====> Client disconnect %d", req.connmon);
+            logmsg("====> Client disconnect %d", req->connmon);
 
-            if(req.connmon) {
+            if(req->connmon) {
               const char *keepopen = "[DISCONNECT]\n";
               storerequest(keepopen, strlen(keepopen));
             }
 
-            if(!req.open)
+            if(!req->open)
               /* When instructed to close connection after server-reply we
                  wait a very small amount of time before doing so. If this
                  is not done client might get an ECONNRESET before reading
@@ -2307,13 +2314,13 @@ int main(int argc, char *argv[])
             if(!serverlogslocked)
               clear_advisor_read_lock(SERVERLOGS_LOCK);
 
-            if(req.testno == DOCNUMBER_QUIT)
+            if(req->testno == DOCNUMBER_QUIT)
               goto sws_cleanup;
           }
 
           /* Reset the request, unless we're still in the middle of reading */
           if(rc)
-            init_httprequest(&req);
+            init_httprequest(req);
         } while(rc > 0);
       }
     }
