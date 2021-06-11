@@ -26,6 +26,7 @@
   - name: Install common dependencies
     become: true
     apt:
+      update_cache: true
       pkg:
       - autoconf
       - automake
