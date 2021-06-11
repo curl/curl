@@ -217,7 +217,6 @@
     vars:
       curl_apt_packages:
         - clang-9
-        - clang++-9
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -234,7 +233,6 @@
     vars:
       curl_apt_packages:
         - clang-9
-        - clang++-9
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -252,7 +250,6 @@
     vars:
       curl_apt_packages:
         - clang-9
-        - clang++-9
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -270,7 +267,6 @@
     vars:
       curl_apt_packages:
         - clang-9
-        - clang++-9
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
@@ -288,7 +284,6 @@
     vars:
       curl_apt_packages:
         - clang-9
-        - clang++-9
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
