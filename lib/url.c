@@ -62,6 +62,14 @@
 #ifdef USE_LIBIDN2
 #include <idn2.h>
 
+#if defined(WIN32) && defined(UNICODE)
+#define IDN2_LOOKUP(name, host, flags) \
+  idn2_lookup_u8((const uint8_t *)name, (uint8_t **)host, flags)
+#else
+#define IDN2_LOOKUP(name, host, flags) \
+  idn2_lookup_ul((const char *)name, (char **)host, flags)
+#endif
+
 #elif defined(USE_WIN32_IDN)
 /* prototype for curl_win32_idn_to_ascii() */
 bool curl_win32_idn_to_ascii(const char *in, char **out);
@@ -1576,12 +1584,12 @@ CURLcode Curl_idnconvert_hostname(struct Curl_easy *data,
 #else
       int flags = IDN2_NFC_INPUT;
 #endif
-      int rc = idn2_lookup_ul((const char *)host->name, &ace_hostname, flags);
+      int rc = IDN2_LOOKUP(host->name, &ace_hostname, flags);
       if(rc != IDN2_OK)
         /* fallback to TR46 Transitional mode for better IDNA2003
            compatibility */
-        rc = idn2_lookup_ul((const char *)host->name, &ace_hostname,
-                            IDN2_TRANSITIONAL);
+        rc = IDN2_LOOKUP(host->name, &ace_hostname,
+                         IDN2_TRANSITIONAL);
       if(rc == IDN2_OK) {
         host->encalloc = (char *)ace_hostname;
         /* change the name pointer to point to the encoded hostname */
