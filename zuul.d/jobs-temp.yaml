@@ -47,7 +47,7 @@
         OVERRIDE_CC: CC=gcc-8
         OVERRIDE_CXX: CXX=g++-8
         T: novalgrind
-        BORINGSSL: yes
+        BORINGSSL: "yes"
         C: >-
           --with-openssl={{ ansible_user_dir }}/boringssl
         LD_LIBRARY_PATH: "{{ ansible_user_dir }}/boringssl/lib:/usr/local/lib"
@@ -64,7 +64,7 @@
         OVERRIDE_CC: CC=gcc-8
         OVERRIDE_CXX: CXX=g++-8
         T: novalgrind
-        QUICHE: yes
+        QUICHE: "yes"
         C: >-
           --with-openssl={{ ansible_user_dir }}/quiche/deps/boringssl/src
           --with-quiche={{ ansible_user_dir }}/quiche/target/release
@@ -94,7 +94,7 @@
         - libzstd-dev
       curl_env:
         T: debug-bearssl
-        BEARSSL: yes
+        BEARSSL: "yes"
         C: >-
           --with-bearssl
 
@@ -106,7 +106,7 @@
         OVERRIDE_CC: CC=gcc-8
         OVERRIDE_CXX: CXX=g++-8
         T: novalgrind
-        LIBRESSL: yes
+        LIBRESSL: "yes"
         C: >-
           --with-openssl={{ ansible_user_dir }}/libressl
         LD_LIBRARY_PATH: "{{ ansible_user_dir }}/libressl/lib:/usr/local/lib"
@@ -123,7 +123,7 @@
         OVERRIDE_CC: CC=gcc-8
         OVERRIDE_CXX: CXX=g++-8
         T: novalgrind
-        NGTCP2: yes
+        NGTCP2: "yes"
         C: >-
           --with-openssl={{ ansible_user_dir }}/ngbuild
           --with-ngtcp2={{ ansible_user_dir }}/ngbuild
@@ -152,8 +152,8 @@
         OVERRIDE_CC: CC=gcc-8
         OVERRIDE_CXX: CXX=g++-8
         T: novalgrind
-        NGTCP2: yes
-        GNUTLS: yes
+        NGTCP2: "yes"
+        GNUTLS: "yes"
         C: >-
           PKG_CONFIG_PATH={{ ansible_user_dir }}/ngbuild 
           --with-gnutls={{ ansible_user_dir }}/ngbuild
@@ -173,7 +173,7 @@
         OVERRIDE_CC: CC=gcc-8
         OVERRIDE_CXX: CXX=g++-8
         T: debug-wolfssl
-        WOLFSSL: yes
+        WOLFSSL: "yes"
         C: >-
           --with-wolfssl
 
@@ -189,7 +189,7 @@
         OVERRIDE_CC: CC=gcc-8
         OVERRIDE_CXX: CXX=g++-8
         T: debug
-        OPENSSL3: yes
+        OPENSSL3: "yes"
         C: >-
           --with-openssl={{ ansible_user_dir }}/openssl3
         LD_LIBRARY_PATH: "{{ ansible_user_dir }}/openssl3/lib:/usr/local/lib"
