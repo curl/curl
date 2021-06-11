@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,7 +42,8 @@
 enum host_lookup_state {
   NOTHING,
   HOSTFOUND,    /* the 'machine' keyword was found */
-  HOSTVALID     /* this is "our" machine! */
+  HOSTVALID,    /* this is "our" machine! */
+  MACDEF
 };
 
 #define NETRC_FILE_MISSING 1
@@ -84,12 +85,17 @@ static int parsenetrc(const char *host,
     int  netrcbuffsize = (int)sizeof(netrcbuffer);
 
     while(!done && fgets(netrcbuffer, netrcbuffsize, file)) {
+      if(state == MACDEF) {
+        if((netrcbuffer[0] == '\n') || (netrcbuffer[0] == '\r'))
+          state = NOTHING;
+        else
+          continue;
+      }
       tok = strtok_r(netrcbuffer, " \t\n", &tok_buf);
       if(tok && *tok == '#')
         /* treat an initial hash as a comment line */
         continue;
       while(tok) {
-
         if((login && *login) && (password && *password)) {
           done = TRUE;
           break;
@@ -97,7 +103,13 @@ static int parsenetrc(const char *host,
 
         switch(state) {
         case NOTHING:
-          if(strcasecompare("machine", tok)) {
+          if(strcasecompare("macdef", tok)) {
+            /* Define a macro. A macro is defined with the specified name; its
+               contents begin with the next .netrc line and continue until a
+               null line (consecutive new-line characters) is encountered. */
+            state = MACDEF;
+          }
+          else if(strcasecompare("machine", tok)) {
             /* the next tok is the machine name, this is in itself the
                delimiter that starts the stuff entered for this machine,
                after this we need to search for 'login' and
@@ -107,6 +119,11 @@ static int parsenetrc(const char *host,
           else if(strcasecompare("default", tok)) {
             state = HOSTVALID;
             retcode = NETRC_SUCCESS; /* we did find our host */
+          }
+          break;
+        case MACDEF:
+          if(!strlen(tok)) {
+            state = NOTHING;
           }
           break;
         case HOSTFOUND:
