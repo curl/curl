@@ -195,6 +195,148 @@
         LD_LIBRARY_PATH: "{{ ansible_user_dir }}/openssl3/lib:/usr/local/lib"
         TFLAGS: https ftps
 
+- job:
+    name: curl-debug-mesalink
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
+        T: debug-mesalink
+        MESALINK: "yes"
+        C: >-
+          --with-mesalink
+
+- job:
+    name: curl-debug-clang-with-openssl
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang-9
+        - clang++-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        OVERRIDE_CC: CC=clang-9
+        OVERRIDE_CXX: CXX=clang++-9
+        T: debug
+        C: >-
+          --with-openssl
+
+- job:
+    name: curl-debug-clang-disable-alt-svc-with-openssl
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang-9
+        - clang++-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        OVERRIDE_CC: CC=clang-9
+        OVERRIDE_CXX: CXX=clang++-9
+        T: debug
+        C: >-
+          --with-openssl
+          --disable-alt-svc
+
+- job:
+    name: curl-debug-clang-with-mbedtls
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang-9
+        - clang++-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libmbedtls-dev
+      curl_env:
+        OVERRIDE_CC: CC=clang-9
+        OVERRIDE_CXX: CXX=clang++-9
+        T: debug
+        C: >-
+          --with-mbedtls
+
+- job:
+    name: curl-debug-clang-with-gnutls
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang-9
+        - clang++-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libgnutls28-dev
+      curl_env:
+        OVERRIDE_CC: CC=clang-9
+        OVERRIDE_CXX: CXX=clang++-9
+        T: debug
+        C: >-
+          --with-gnutls
+
+- job:
+    name: curl-debug-clang-with-nss
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang-9
+        - clang++-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libnss3-dev
+      curl_env:
+        OVERRIDE_CC: CC=clang-9
+        OVERRIDE_CXX: CXX=clang++-9
+        T: debug
+        C: >-
+          --with-nss
+        CPPFLAGS: -isystem /usr/include/nss
+        NOTESTS: 1
+
+- job:
+    name: curl-iconv-with-openssl
+    parent: curl-base
+    vars:
+      curl_env:
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
+        T: iconv
+        C: >-
+          --with-openssl
+
+- job:
+    name: curl-cmake-boringssl-quiche
+    parent: curl-base
+    vars:
+      gimme_stable: true
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        BORINGSSL: "yes"
+        QUICHE: "yes"
+        OVERRIDE_CC: CC=gcc-8
+        OVERRIDE_CXX: CXX=g++-8
+        T: cmake
+        C: >-
+          -GNinja
+          -DUSE_QUICHE=1
+          -DOPENSSL_ROOT_DIR=$HOME/boringssl
+          -DCURL_BROTLI=1
+          -DCURL_ZSTD=!
+          -TFLAGS="https ftps"
+        PKG_CONFIG_PATH: $HOME/quiche/target/release
+
 - project:
     check:
       jobs:
@@ -209,3 +351,11 @@
       - curl-novalgrind-ngtcp2-gnutls
       - curl-debug-wolfssl
       - curl-debug-wolfssl
+      - curl-debug-mesalink
+      - curl-debug-clang-with-openssl
+      - curl-debug-clang-disable-alt-svc-with-openssl
+      - curl-debug-clang-with-mbedtls
+      - curl-debug-clang-with-gnutls
+      - curl-debug-clang-with-nss
+      - curl-iconv-with-openssl
+      - curl-cmake-boringssl-quiche
