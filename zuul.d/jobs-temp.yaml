@@ -328,8 +328,8 @@
           -DUSE_QUICHE=1
           -DOPENSSL_ROOT_DIR=$HOME/boringssl
           -DCURL_BROTLI=1
-          -DCURL_ZSTD=!
-          -TFLAGS="https ftps"
+          -DCURL_ZSTD=1
+        TFLAGS: https ftps
         PKG_CONFIG_PATH: $HOME/quiche/target/release
 
 - project:
