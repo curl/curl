@@ -106,7 +106,11 @@ int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
   } \
 } while(0)
 #else
+#ifdef HAVE_POLL_FINE
+#define VALID_SOCK(s) ((s) >= 0)  /* FD_SETSIZE is irrelevant for poll */
+#else
 #define VALID_SOCK(s) (((s) >= 0) && ((s) < FD_SETSIZE))
+#endif
 #define VERIFY_SOCK(x) do { \
   if(!VALID_SOCK(x)) { \
     SET_SOCKERRNO(EINVAL); \
