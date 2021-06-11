@@ -3,8 +3,8 @@
     parent: curl-base
     vars:
       curl_env:
-        OVERRIDE_CC: CC=gcc-8
-        OVERRIDE_CXX: CXX=g++-8
+        CC: gcc-8
+        CXX: g++-8
         T: normal
         C: >-
           --with-openssl
@@ -29,8 +29,8 @@
         - libbrotli-dev
         - libzstd-dev
       curl_env:
-        OVERRIDE_CC: CC=gcc-8
-        OVERRIDE_CXX: CXX=g++-8
+        CC: gcc-8
+        CXX: g++-8
         T: normal
         C: >-
           --with-openssl
@@ -44,8 +44,8 @@
     vars:
       gimme_stable: true
       curl_env:
-        OVERRIDE_CC: CC=gcc-8
-        OVERRIDE_CXX: CXX=g++-8
+        CC: gcc-8
+        CXX: g++-8
         T: novalgrind
         BORINGSSL: "yes"
         C: >-
@@ -61,8 +61,8 @@
         - libbrotli-dev
         - libzstd-dev
       curl_env:
-        OVERRIDE_CC: CC=gcc-8
-        OVERRIDE_CXX: CXX=g++-8
+        CC: gcc-8
+        CXX: g++-8
         T: novalgrind
         QUICHE: "yes"
         C: >-
@@ -103,8 +103,8 @@
     parent: curl-base
     vars:
       curl_env:
-        OVERRIDE_CC: CC=gcc-8
-        OVERRIDE_CXX: CXX=g++-8
+        CC: gcc-8
+        CXX: g++-8
         T: novalgrind
         LIBRESSL: "yes"
         C: >-
@@ -120,8 +120,8 @@
         - libbrotli-dev
         - libzstd-dev
       curl_env:
-        OVERRIDE_CC: CC=gcc-8
-        OVERRIDE_CXX: CXX=g++-8
+        CC: gcc-8
+        CXX: g++-8
         T: novalgrind
         NGTCP2: "yes"
         C: >-
@@ -149,8 +149,8 @@
         - libtasn1-6-dev
         - nettle-dev
       curl_env:
-        OVERRIDE_CC: CC=gcc-8
-        OVERRIDE_CXX: CXX=g++-8
+        CC: gcc-8
+        CXX: g++-8
         T: novalgrind
         NGTCP2: "yes"
         GNUTLS: "yes"
@@ -170,8 +170,8 @@
         - libbrotli-dev
         - libzstd-dev
       curl_env:
-        OVERRIDE_CC: CC=gcc-8
-        OVERRIDE_CXX: CXX=g++-8
+        CC: gcc-8
+        CXX: g++-8
         T: debug-wolfssl
         WOLFSSL: "yes"
         C: >-
@@ -186,8 +186,8 @@
         - libbrotli-dev
         - libzstd-dev
       curl_env:
-        OVERRIDE_CC: CC=gcc-8
-        OVERRIDE_CXX: CXX=g++-8
+        CC: gcc-8
+        CXX: g++-8
         T: debug
         OPENSSL3: "yes"
         C: >-
@@ -204,8 +204,8 @@
         - libbrotli-dev
         - libzstd-dev
       curl_env:
-        OVERRIDE_CC: CC=gcc-8
-        OVERRIDE_CXX: CXX=g++-8
+        CC: gcc-8
+        CXX: g++-8
         T: debug-mesalink
         MESALINK: "yes"
         C: >-
@@ -221,8 +221,8 @@
         - libbrotli-dev
         - libzstd-dev
       curl_env:
-        OVERRIDE_CC: CC=clang-9
-        OVERRIDE_CXX: CXX=clang++-9
+        CC: clang-9
+        CXX: clang++-9
         T: debug
         C: >-
           --with-openssl
@@ -237,8 +237,8 @@
         - libbrotli-dev
         - libzstd-dev
       curl_env:
-        OVERRIDE_CC: CC=clang-9
-        OVERRIDE_CXX: CXX=clang++-9
+        CC: clang-9
+        CXX: clang++-9
         T: debug
         C: >-
           --with-openssl
@@ -255,8 +255,8 @@
         - libzstd-dev
         - libmbedtls-dev
       curl_env:
-        OVERRIDE_CC: CC=clang-9
-        OVERRIDE_CXX: CXX=clang++-9
+        CC: clang-9
+        CXX: clang++-9
         T: debug
         C: >-
           --with-mbedtls
@@ -272,8 +272,8 @@
         - libzstd-dev
         - libgnutls28-dev
       curl_env:
-        OVERRIDE_CC: CC=clang-9
-        OVERRIDE_CXX: CXX=clang++-9
+        CC: clang-9
+        CXX: clang++-9
         T: debug
         C: >-
           --with-gnutls
@@ -289,8 +289,8 @@
         - libzstd-dev
         - libnss3-dev
       curl_env:
-        OVERRIDE_CC: CC=clang-9
-        OVERRIDE_CXX: CXX=clang++-9
+        CC: clang-9
+        CXX: clang++-9
         T: debug
         C: >-
           --with-nss
@@ -302,8 +302,8 @@
     parent: curl-base
     vars:
       curl_env:
-        OVERRIDE_CC: CC=gcc-8
-        OVERRIDE_CXX: CXX=g++-8
+        CC: gcc-8
+        CXX: g++-8
         T: iconv
         C: >-
           --with-openssl
@@ -320,8 +320,8 @@
       curl_env:
         BORINGSSL: "yes"
         QUICHE: "yes"
-        OVERRIDE_CC: CC=gcc-8
-        OVERRIDE_CXX: CXX=g++-8
+        CC: gcc-8
+        CXX: g++-8
         T: cmake
         C: >-
           -GNinja
