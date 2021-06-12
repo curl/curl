@@ -3069,8 +3069,6 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
       if((endp && *endp) || (portparse < 0) || (portparse > 65535)) {
         failf(data, "No valid port number in connect to host string (%s)",
               host_portno);
-        hostptr = NULL;
-        port = -1;
         result = CURLE_SETOPT_OPTION_SYNTAX;
         goto error;
       }
