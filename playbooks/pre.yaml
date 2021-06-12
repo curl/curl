@@ -52,6 +52,16 @@
     apt:
       pkg: "{{ curl_apt_packages }}"
 
+  - name: Symlink /usr/bin/scan-build-10 to /usr/bin/scan-build
+    when:
+      - curl_apt_packages is defined
+      - '"clang-tools-10" in curl_apt_packages'
+    become: true
+    file:
+      src: /usr/bin/scan-build-10
+      dest: /usr/bin/scan-build
+      state: link
+
   - name: Run before script
     shell: "./scripts/travis/before_script.sh"
     args:
