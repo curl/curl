@@ -206,7 +206,8 @@ static void destroy_async_data(struct Curl_async *async);
  */
 void Curl_resolver_cancel(struct Curl_easy *data)
 {
-  if(data && data->state.async.resolver)
+  DEBUGASSERT(data);
+  if(data->state.async.resolver)
     ares_cancel((ares_channel)data->state.async.resolver);
   destroy_async_data(&data->state.async);
 }
