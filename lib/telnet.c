@@ -920,12 +920,17 @@ static void suboption(struct Curl_easy *data)
         size_t tmplen = (strlen(v->data) + 1);
         /* Add the variable only if it fits */
         if(len + tmplen < (int)sizeof(temp)-6) {
-          if(sscanf(v->data, "%127[^,],%127s", varname, varval) == 2) {
-            msnprintf((char *)&temp[len], sizeof(temp) - len,
-                      "%c%s%c%s", CURL_NEW_ENV_VAR, varname,
-                      CURL_NEW_ENV_VALUE, varval);
-            len += tmplen;
-          }
+          int rv;
+          char sep[2] = "";
+          varval[0] = 0;
+          rv = sscanf(v->data, "%127[^,]%1[,]%127s", varname, sep, varval);
+          if(rv == 1)
+            len += msnprintf((char *)&temp[len], sizeof(temp) - len,
+                             "%c%s", CURL_NEW_ENV_VAR, varname);
+          else if(rv >= 2)
+            len += msnprintf((char *)&temp[len], sizeof(temp) - len,
+                             "%c%s%c%s", CURL_NEW_ENV_VAR, varname,
+                             CURL_NEW_ENV_VALUE, varval);
         }
       }
       msnprintf((char *)&temp[len], sizeof(temp) - len,
