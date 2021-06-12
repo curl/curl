@@ -466,7 +466,7 @@
     parent: curl-base
     vars:
       curl_apt_packages:
-        - clang-tools
+        - clang-tools-10
         - clang-9
         - libssl-dev
         - libssh2-1-dev
