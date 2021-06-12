@@ -434,6 +434,7 @@
     parent: curl-base
     vars:
       curl_apt_packages:
+        - clang
         - clang-9
         - libpsl-dev
         - libbrotli-dev
@@ -448,6 +449,8 @@
     parent: curl-base
     vars:
       curl_apt_packages:
+        - clang
+        - clang-tidy
         - clang-9
         - clang-tidy-9
         - libpsl-dev
@@ -464,6 +467,7 @@
     parent: curl-base
     vars:
       curl_apt_packages:
+        - clang-tools
         - clang-9
         - libssl-dev
         - libssh2-1-dev
