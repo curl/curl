@@ -14,7 +14,7 @@
         TRAVIS_OS_NAME: linux
 
 - job:
-    name: curl-normal-openssl-with-gssapi-libssh2-checksrc
+    name: curl-normal-with-openssl-gssapi-libssh2-checksrc
     parent: curl-base
     vars:
       curl_env:
