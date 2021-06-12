@@ -373,7 +373,6 @@
         - libnss3-dev
       curl_env:
         NGTCP2: "yes"
-        QUICHE: "yes"
         CC: clang-9
         CXX: clang++-9
         T: cmake
