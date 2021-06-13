@@ -2,9 +2,9 @@
 - job:
     name: curl-base
     abstract: true
-    pre-run: playbooks/pre.yaml
-    run: playbooks/run.yaml
-    post-run: playbooks/post.yaml
+    pre-run: zuul.d/playbooks/pre.yaml
+    run: zuul.d/playbooks/run.yaml
+    post-run: zuul.d/playbooks/post.yaml
     nodeset: ubuntu-bionic
     timeout: 3600
     vars:
