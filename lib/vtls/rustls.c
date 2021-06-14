@@ -332,15 +332,6 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
       return CURLE_SSL_CACERT_BADFILE;
     }
   }
-  else {
-    result = rustls_client_config_builder_load_native_roots(config_builder);
-    if(result != RUSTLS_RESULT_OK) {
-      failf(data, "failed to load trusted certificates");
-      rustls_client_config_free(
-        rustls_client_config_builder_build(config_builder));
-      return CURLE_SSL_CACERT_BADFILE;
-    }
-  }
 
   backend->config = rustls_client_config_builder_build(config_builder);
   DEBUGASSERT(rconn == NULL);
