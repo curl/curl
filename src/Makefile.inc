@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -74,7 +74,6 @@ CURL_CFILES = \
   tool_hugehelp.c \
   tool_libinfo.c \
   tool_main.c \
-  tool_metalink.c \
   tool_msgs.c \
   tool_operate.c \
   tool_operhlp.c \
@@ -117,7 +116,6 @@ CURL_HFILES = \
   tool_hugehelp.h \
   tool_libinfo.h \
   tool_main.h \
-  tool_metalink.h \
   tool_msgs.h \
   tool_operate.h \
   tool_operhlp.h \

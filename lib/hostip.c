@@ -1104,10 +1104,10 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       error = false;
    err:
       if(error) {
-        infof(data, "Couldn't parse CURLOPT_RESOLVE entry '%s'!\n",
+        failf(data, "Couldn't parse CURLOPT_RESOLVE entry '%s'!",
               hostp->data);
         Curl_freeaddrinfo(head);
-        continue;
+        return CURLE_SETOPT_OPTION_SYNTAX;
       }
 
       /* Create an entry id, based upon the hostname and port */

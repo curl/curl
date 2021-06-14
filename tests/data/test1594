@@ -43,7 +43,7 @@ Accept: */*
 
 </protocol>
 <stdout>
-Retry-After: 22
+Retry-After 22
 </stdout>
 </verify>
 </testcase>

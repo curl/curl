@@ -1043,7 +1043,12 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
 
   data = multi->easyp;
   while(data) {
-    int bitmap = multi_getsock(data, sockbunch);
+    int bitmap;
+#ifdef __clang_analyzer_
+    /* to prevent "The left operand of '>=' is a garbage value" warnings */
+    memset(sockbunch, 0, sizeof(sockbunch));
+#endif
+    bitmap = multi_getsock(data, sockbunch);
 
     for(i = 0; i< MAX_SOCKSPEREASYHANDLE; i++) {
       curl_socket_t s = CURL_SOCKET_BAD;

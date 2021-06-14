@@ -270,8 +270,8 @@ Windows you should choose another SSL backend such as OpenSSL.
 
 On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
 implementation, Secure Transport, instead of OpenSSL. To build with Secure
-Transport for SSL/TLS, use the configure option `--with-secure-transport`
-or `--with-darwin-ssl`. (It is not necessary to use the option `--without-openssl`.)
+Transport for SSL/TLS, use the configure option `--with-secure-transport`. (It
+is not necessary to use the option `--without-openssl`.)
 
 When Secure Transport is in use, the curl options `--cacert` and `--capath`
 and their libcurl equivalents, will be ignored, because Secure Transport uses
@@ -291,7 +291,7 @@ export SDK=macosx
 export DEPLOYMENT_TARGET=10.8
 
 export CFLAGS="-arch $ARCH -isysroot $(xcrun -sdk $SDK --show-sdk-path) -m$SDK-version-min=$DEPLOYMENT_TARGET"
-./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-darwin-ssl
+./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-secure-transport
 make -j8
 make install
 ```
@@ -306,7 +306,7 @@ export SDK=iphoneos
 export DEPLOYMENT_TARGET=11.0
 
 export CFLAGS="-arch $ARCH -isysroot $(xcrun -sdk $SDK --show-sdk-path) -m$SDK-version-min=$DEPLOYMENT_TARGET"
-./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-darwin-ssl
+./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-secure-transport
 make -j8
 make install
 ```
@@ -319,7 +319,7 @@ export SDK=watchsimulator
 export DEPLOYMENT_TARGET=5.0
 
 export CFLAGS="-arch $ARCH -isysroot $(xcrun -sdk $SDK --show-sdk-path) -m$SDK-version-min=$DEPLOYMENT_TARGET"
-./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-darwin-ssl
+./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-secure-transport
 make -j8
 make install
 ```

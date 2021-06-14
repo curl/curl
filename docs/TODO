@@ -184,6 +184,9 @@
  20.8 Run web-platform-tests url tests
  20.9 Bring back libssh tests on Travis
 
+ 21. MQTT
+ 21.1 Support rate-limiting
+
 ==============================================================================
 
 1. libcurl
@@ -1276,3 +1279,11 @@
  In https://github.com/curl/curl/pull/7012 we remove the libssh builds and
  tests from Travis CI due to them not working. This should be remedied and
  libssh builds be brought back.
+
+
+21. MQTT
+
+21.1 Support rate-limiting
+
+ The rate-limiting logic is done in the PERFORMING state in multi.c but MQTT
+ is not (yet) implemented to use that!

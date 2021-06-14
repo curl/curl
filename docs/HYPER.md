@@ -44,6 +44,13 @@ The API in Hyper delivers received HTTP headers as (cleaned up) name=value
 pairs, making it impossible for curl to know the exact byte representation
 over the wire with Hyper.
 
+## Limitations
+
+The hyper backend doesn't support
+
+- `CURLOPT_IGNORE_CONTENT_LENGTH`
+- RTSP
+
 ## Remaining issues
 
 This backend is still not feature complete with the native backend. Areas that

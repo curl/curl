@@ -26,6 +26,9 @@ muahahaha
 #
 # Client-side
 <client>
+<features>
+!hyper
+</features>
 <server>
 http
 </server>

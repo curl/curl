@@ -206,7 +206,8 @@ static void destroy_async_data(struct Curl_async *async);
  */
 void Curl_resolver_cancel(struct Curl_easy *data)
 {
-  if(data && data->state.async.resolver)
+  DEBUGASSERT(data);
+  if(data->state.async.resolver)
     ares_cancel((ares_channel)data->state.async.resolver);
   destroy_async_data(&data->state.async);
 }
@@ -493,17 +494,31 @@ CURLcode Curl_resolver_wait_resolv(struct Curl_easy *data,
 static void compound_results(struct thread_data *res,
                              struct Curl_addrinfo *ai)
 {
-  struct Curl_addrinfo *ai_tail;
   if(!ai)
     return;
-  ai_tail = ai;
 
-  while(ai_tail->ai_next)
-    ai_tail = ai_tail->ai_next;
+#ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
+  if(res->temp_ai && res->temp_ai->ai_family == PF_INET6) {
+    /* We have results already, put the new IPv6 entries at the head of the
+       list. */
+    struct Curl_addrinfo *temp_ai_tail = res->temp_ai;
 
-  /* Add the new results to the list of old results. */
-  ai_tail->ai_next = res->temp_ai;
-  res->temp_ai = ai;
+    while(temp_ai_tail->ai_next)
+      temp_ai_tail = temp_ai_tail->ai_next;
+
+    temp_ai_tail->ai_next = ai;
+  }
+  else
+#endif /* CURLRES_IPV6 */
+  {
+    /* Add the new results to the list of old results. */
+    struct Curl_addrinfo *ai_tail = ai;
+    while(ai_tail->ai_next)
+      ai_tail = ai_tail->ai_next;
+
+    ai_tail->ai_next = res->temp_ai;
+    res->temp_ai = ai;
+  }
 }
 
 /*

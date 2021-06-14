@@ -1411,6 +1411,7 @@ struct UrlState {
   trailers_state trailers_state; /* whether we are sending trailers
                                        and what stage are we at */
 #ifdef USE_HYPER
+  bool hconnect;  /* set if a CONNECT request */
   CURLcode hresult; /* used to pass return codes back from hyper callbacks */
 #endif
 

@@ -102,7 +102,7 @@ This will return CURLE_OK.
    return realsize;
  }
 
- struct memory chunk;
+ struct memory chunk = {0};
 
  /* send all data to this function  */
  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, cb);

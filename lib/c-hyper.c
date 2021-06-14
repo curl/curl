@@ -124,6 +124,11 @@ static int hyper_each_header(void *userdata,
   size_t len;
   char *headp;
   CURLcode result;
+  int writetype;
+
+  if(!data->req.bytecount)
+    Curl_pgrsTime(data, TIMER_STARTTRANSFER);
+
   Curl_dyn_reset(&data->state.headerb);
   if(name_len) {
     if(Curl_dyn_addf(&data->state.headerb, "%.*s: %.*s\r\n",
@@ -145,7 +150,10 @@ static int hyper_each_header(void *userdata,
 
   Curl_debug(data, CURLINFO_HEADER_IN, headp, len);
 
-  result = Curl_client_write(data, CLIENTWRITE_HEADER, headp, len);
+  writetype = CLIENTWRITE_HEADER;
+  if(data->set.include_header)
+    writetype |= CLIENTWRITE_BODY;
+  result = Curl_client_write(data, writetype, headp, len);
   if(result) {
     data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
     return HYPER_ITER_BREAK;
@@ -178,7 +186,13 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
       Curl_safefree(data->req.newurl);
     }
 #endif
-    result = Curl_http_firstwrite(data, data->conn, &done);
+    if(data->state.hconnect &&
+       (data->req.httpcode/100 != 2)) {
+      done = TRUE;
+      result = CURLE_OK;
+    }
+    else
+      result = Curl_http_firstwrite(data, data->conn, &done);
     if(result || done) {
       infof(data, "Return early from hyper_body_chunk\n");
       data->state.hresult = result;
@@ -219,6 +233,7 @@ static CURLcode status_line(struct Curl_easy *data,
   CURLcode result;
   size_t len;
   const char *vstr;
+  int writetype;
   vstr = http_version == HYPER_HTTP_VERSION_1_1 ? "1.1" :
     (http_version == HYPER_HTTP_VERSION_2 ? "2" : "1.0");
   conn->httpversion =
@@ -241,7 +256,10 @@ static CURLcode status_line(struct Curl_easy *data,
   len = Curl_dyn_len(&data->state.headerb);
   Curl_debug(data, CURLINFO_HEADER_IN, Curl_dyn_ptr(&data->state.headerb),
              len);
-  result = Curl_client_write(data, CLIENTWRITE_HEADER,
+  writetype = CLIENTWRITE_HEADER;
+  if(data->set.include_header)
+    writetype |= CLIENTWRITE_BODY;
+  result = Curl_client_write(data, writetype,
                              Curl_dyn_ptr(&data->state.headerb), len);
   if(result) {
     data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
@@ -550,6 +568,10 @@ static int uploadpostfields(void *userdata, hyper_context *ctx,
       *chunk = copy;
     else
       return HYPER_POLL_ERROR;
+    /* increasing the writebytecount here is a little premature but we
+       don't know exactly when the body is sent*/
+    data->req.writebytecount += (size_t)data->req.p.http->postsize;
+    Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
     data->req.upload_done = TRUE;
   }
   return HYPER_POLL_READY;
@@ -574,6 +596,10 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
       *chunk = copy;
     else
       return HYPER_POLL_ERROR;
+    /* increasing the writebytecount here is a little premature but we
+       don't know exactly when the body is sent*/
+    data->req.writebytecount += fillcount;
+    Curl_pgrsSetUploadCounter(data, fillcount);
   }
   return HYPER_POLL_READY;
 }

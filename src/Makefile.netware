@@ -6,7 +6,7 @@
 #                             \___|\___/|_| \_\_____|
 #
 # Copyright (C) 2004 - 2014, Guenter Knauf
-# Copyright (C) 2001 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2001 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -67,11 +67,6 @@ endif
 # Edit the path below to point to the base of your fbopenssl package.
 ifndef FBOPENSSL_PATH
 FBOPENSSL_PATH = ../../fbopenssl-0.4
-endif
-
-# Edit the path below to point to the base of your libmetalink package.
-ifndef LIBMETALINK_PATH
-LIBMETALINK_PATH = ../../libmetalink-0.1.2
 endif
 
 # Edit the path below to point to the base of your libexpat package.
@@ -243,10 +238,6 @@ endif
 ifeq ($(findstring -idn,$(CFG)),-idn)
 WITH_IDN = 1
 endif
-ifeq ($(findstring -metalink,$(CFG)),-metalink)
-WITH_METALINK = 1
-WITH_SSL = 1
-endif
 ifeq ($(findstring -nghttp2,$(CFG)),-nghttp2)
 WITH_NGHTTP2 = 1
 endif
@@ -300,25 +291,6 @@ endif
 ifdef WITH_NGHTTP2
   INCLUDES += -I$(NGHTTP2_PATH)/include
   LDLIBS += $(NGHTTP2_PATH)/lib/libnghttp2.$(LIBEXT)
-endif
-ifdef WITH_METALINK
-  CFLAGS += -DUSE_METALINK
-  INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)
-  INCLUDES += -I$(LIBMETALINK_PATH)/include
-  LDLIBS += $(LIBMETALINK_PATH)/lib/libmetalink.$(LIBEXT)
-  ifdef WITH_LIBEXPAT
-    ifeq ($(LIBARCH),LIBC)
-      IMPORTS += @$(LIBEXPAT_PATH)/imports/expatlbc.imp
-      MODULES += expatlbc
-    else
-      IMPORTS += @$(LIBEXPAT_PATH)/imports/expatlib.imp
-      MODULES += expatlib
-  endif
-else
-ifdef WITH_LIBXML2
-  IMPORTS += @$(LIBXML2_PATH)/lib/libxml2.imp
-  MODULES += libxml2
-endif
 endif
 endif
 

@@ -59,10 +59,6 @@ endif
 ifndef LIBRTMP_PATH
 LIBRTMP_PATH = ../../librtmp-2.4
 endif
-# Edit the path below to point to the base of your libmetalink package.
-ifndef LIBMETALINK_PATH
-LIBMETALINK_PATH = ../../libmetalink-0.1.3
-endif
 # Edit the path below to point to the base of your libexpat package.
 ifndef LIBEXPAT_PATH
 LIBEXPAT_PATH = ../../expat-2.1.0
@@ -229,9 +225,6 @@ endif
 ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
 IPV6 = 1
 endif
-ifeq ($(findstring -metalink,$(CFG)),-metalink)
-METALINK = 1
-endif
 ifeq ($(findstring -winssl,$(CFG)),-winssl)
 WINSSL = 1
 SSPI = 1
@@ -378,18 +371,6 @@ ifdef WINIDN
   CFLAGS += -DUSE_WIN32_IDN
   curl_LDADD += -L"$(WINIDN_PATH)" -lnormaliz
 endif
-endif
-ifdef METALINK
-  INCLUDES += -I"$(LIBMETALINK_PATH)/include"
-  CFLAGS += -DUSE_METALINK
-  curl_LDADD += -L"$(LIBMETALINK_PATH)/lib" -lmetalink
-  ifndef DYN
-    ifeq ($(findstring libexpat_metalink_parser.o,$(shell $(AR) t "$(LIBMETALINK_PATH)/lib/libmetalink.a")),libexpat_metalink_parser.o)
-      curl_LDADD += -L"$(LIBEXPAT_PATH)/lib" -lexpat
-    else
-      curl_LDADD += -L"$(LIBXML2_PATH)/lib" -lxml2
-    endif
-  endif
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI

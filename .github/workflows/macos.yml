@@ -1,4 +1,4 @@
-name: CI
+name: macOS
 
 on:
   # Trigger the workflow on push or pull requests, but only for the
@@ -13,7 +13,7 @@ on:
 
 jobs:
   autotools:
-    name: macos ${{ matrix.build.name }}
+    name: ${{ matrix.build.name }}
     runs-on: 'macos-latest'
     timeout-minutes: 90
     strategy:
@@ -38,19 +38,19 @@ jobs:
           macosx-version-min: 10.9
         - name: HTTP only
           install: nghttp2
-          configure: --enable-debug --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libmetalink --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
+          configure: --enable-debug --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
           macosx-version-min: 10.15
-        - name: SecureTransport metalink
-          install: nghttp2 libmetalink
-          configure: --enable-debug --with-secure-transport --with-libmetalink
+        - name: SecureTransport http2
+          install: nghttp2
+          configure: --enable-debug --with-secure-transport
           macosx-version-min: 10.8
-        - name: OpenSSL metalink
-          install: nghttp2 openssl libmetalink
-          configure: --enable-debug --with-openssl=/usr/local/opt/openssl --with-libmetalink
+        - name: OpenSSL http2
+          install: nghttp2 openssl
+          configure: --enable-debug --with-openssl=/usr/local/opt/openssl
           macosx-version-min: 10.9
-        - name: LibreSSL metalink
-          install: nghttp2 libressl libmetalink
-          configure: --enable-debug --with-openssl=/usr/local/opt/libressl --with-libmetalink
+        - name: LibreSSL http2
+          install: nghttp2 libressl
+          configure: --enable-debug --with-openssl=/usr/local/opt/libressl
           macosx-version-min: 10.9
         - name: torture
           install: nghttp2 openssl
@@ -63,7 +63,7 @@ jobs:
           tflags: -n -t --shallow=20 FTP
           macosx-version-min: 10.9
         - name: macOS 10.15
-          install: nghttp2 libmetalink libssh2 openssl
+          install: nghttp2 libssh2 openssl
           configure: --enable-debug --disable-ldap --with-openssl=/usr/local/opt/openssl
           macosx-version-min: 10.15
     steps:
@@ -90,7 +90,7 @@ jobs:
         TFLAGS: "${{ matrix.build.tflags }} ~1452"
 
   cmake:
-    name: macos cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
+    name: cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
     runs-on: 'macos-latest'
     env: ${{ matrix.compiler }}
     strategy:
@@ -100,9 +100,6 @@ jobs:
         - CC: clang
           CXX: clang++
           CFLAGS: "-mmacosx-version-min=10.15 -Wno-deprecated-declarations"
-        - CC: gcc-8
-          CXX: g++-8
-          CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
         - CC: gcc-9
           CXX: g++-9
           CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
