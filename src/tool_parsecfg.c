@@ -57,9 +57,9 @@ static FILE *execpath(const TCHAR *filename)
     if(lastdirchar) {
       *lastdirchar = TEXT('\0');
     }
-    if(_tcslen(filebuffer) + _tcslen(filename) + 1 < ARRAYSIZE(filebuffer)) {
-      _tcscat(filebuffer, TEXT(DIR_CHAR));
-      _tcscat(filebuffer, filename);
+    if(lstrlen(filebuffer) + lstrlen(filename) + 1 < ARRAYSIZE(filebuffer)) {
+      lstrcat(filebuffer, TEXT(DIR_CHAR));
+      lstrcat(filebuffer, filename);
       return _tfopen(filebuffer, TEXT(FOPEN_READTEXT));
     }
   }
