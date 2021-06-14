@@ -45,6 +45,14 @@ static const char *unslashquote(const char *line, char *param);
 static bool my_get_line(FILE *fp, struct curlx_dynbuf *, bool *error);
 
 #ifdef WIN32
+static TCHAR *append(TCHAR *dst, const TCHAR *src, size_t size)
+{
+  size_t len_dst = _tcslen(dst), len_src = _tcslen(src);
+  if (len_dst + len_src < size)
+    return _tcsncpy(dst + len_dst, src, size - len_dst);
+  return NULL;
+}
+
 static FILE *execpath(const TCHAR *filename)
 {
   TCHAR filebuffer[512];
@@ -54,14 +62,11 @@ static FILE *execpath(const TCHAR *filename)
   DWORD len = GetModuleFileName(NULL, filebuffer, ARRAYSIZE(filebuffer));
   if((len > 0) && (len < ARRAYSIZE(filebuffer))) {
     TCHAR *lastdirchar = _tcsrchr(filebuffer, TEXT(DIR_CHAR)[0]);
-    if(lastdirchar) {
+    if(lastdirchar)
       *lastdirchar = TEXT('\0');
-    }
-    if(lstrlen(filebuffer) + lstrlen(filename) + 1 < ARRAYSIZE(filebuffer)) {
-      lstrcat(filebuffer, TEXT(DIR_CHAR));
-      lstrcat(filebuffer, filename);
+    if(append(filebuffer, TEXT(DIR_CHAR), ARRAYSIZE(filebuffer)) &&
+       append(filebuffer, filename, ARRAYSIZE(filebuffer)))
       return _tfopen(filebuffer, TEXT(FOPEN_READTEXT));
-    }
   }
   return NULL;
 }
