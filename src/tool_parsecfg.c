@@ -45,29 +45,25 @@ static const char *unslashquote(const char *line, char *param);
 static bool my_get_line(FILE *fp, struct curlx_dynbuf *, bool *error);
 
 #ifdef WIN32
-static FILE *execpath(const char *filename)
+#define MAX_MODULE_FILE_LENGTH 512
+static FILE *execpath(const TCHAR *filename)
 {
-  char filebuffer[512];
+  TCHAR filebuffer[MAX_MODULE_FILE_LENGTH];
   /* Get the filename of our executable. GetModuleFileName is already declared
-   * via inclusions done in setup header file.  We assume that we are using
-   * the ASCII version here.
+   * via inclusions done in setup header file.
    */
-  unsigned long len = GetModuleFileNameA(0, filebuffer, sizeof(filebuffer));
-  if(len > 0 && len < sizeof(filebuffer)) {
-    /* We got a valid filename - get the directory part */
-    char *lastdirchar = strrchr(filebuffer, '\\');
+  unsigned long len = GetModuleFileName(0, filebuffer, MAX_MODULE_FILE_LENGTH);
+  if ((len > 0) && (len < MAX_MODULE_FILE_LENGTH)) {
+    TCHAR *lastdirchar = _tcsrchr(filebuffer, TEXT(DIR_CHAR));
     if(lastdirchar) {
-      size_t remaining;
-      *lastdirchar = 0;
-      /* If we have enough space, build the RC filename */
-      remaining = sizeof(filebuffer) - strlen(filebuffer);
-      if(strlen(filename) < remaining - 1) {
-        msnprintf(lastdirchar, remaining, "%s%s", DIR_CHAR, filename);
-        return fopen(filebuffer, FOPEN_READTEXT);
-      }
+      *lastdirchar = TEXT('\0');
+    }
+    if (_tcslen(filebuffer) + _tcslen(filename) + 1U < MAX_MODULE_FILE_LENGTH) {
+      _tcscat(filebuffer, TEXT(DIR_CHAR));
+      _tcscat(filebuffer, filename);
+      return _tfopen(filebuffer, TEXT(FOPEN_READTEXT));
     }
   }
-
   return NULL;
 }
 #endif
@@ -120,9 +116,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     }
     if(!filename) {
       /* check for .curlrc then _curlrc in the dir of the executable */
-      file = execpath(".curlrc");
+      file = execpath(TEXT(".curlrc"));
       if(!file)
-        file = execpath("_curlrc");
+        file = execpath(TEXT("_curlrc"));
     }
 #endif
 
