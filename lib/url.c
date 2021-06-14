@@ -1585,7 +1585,13 @@ CURLcode Curl_idnconvert_hostname(struct Curl_easy *data,
 #else
       int flags = IDN2_NFC_INPUT;
 #endif
-      int rc = idn2_lookup_ul((const char *)host->name, &ace_hostname, flags);
+      int rc;
+#if defined(WIN32) && defined(UNICODE)
+      rc = idn2_lookup_u8((uint8_t *)host->name,
+                          (uint8_t **)&ace_hostname, flags);
+      if(rc != IDN2_OK)
+#endif
+        rc = idn2_lookup_ul((const char *)host->name, &ace_hostname, flags);
       if(rc != IDN2_OK)
         /* fallback to TR46 Transitional mode for better IDNA2003
            compatibility */
