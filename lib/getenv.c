@@ -28,7 +28,7 @@
 #include "memdebug.h"
 
 #ifdef WIN32
-static TCHAR GetEnvWin32(const TCHAR *variable)
+static TCHAR *GetEnvWin32(const TCHAR *variable)
 {
   /* This uses Windows API instead of C runtime getenv() to get the environment
      variable since some changes aren't always visible to the latter. #4774 */
