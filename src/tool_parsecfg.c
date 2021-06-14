@@ -52,7 +52,7 @@ static FILE *execpath(const TCHAR *filename)
    * via inclusions done in setup header file.
    */
   DWORD len = GetModuleFileName(NULL, filebuffer, ARRAYSIZE(filebuffer));
-  if ((len > 0) && (len < ARRAYSIZE(filebuffer))) {
+  if((len > 0) && (len < ARRAYSIZE(filebuffer))) {
     TCHAR *lastdirchar = _tcsrchr(filebuffer, TEXT(DIR_CHAR)[0]);
     if(lastdirchar) {
       *lastdirchar = TEXT('\0');
