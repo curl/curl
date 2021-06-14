@@ -73,6 +73,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   size_t len;
   const char *tmp0;
   const char *tmp1;
+  const char *tmp2;
   char *provider0_low = NULL;
   char *provider0_up = NULL;
   char *provider1_low = NULL;
@@ -137,6 +138,12 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   }
   Curl_strntolower(provider0_low, tmp0, len);
   provider0_low[len] = '\0';
+  /*
+  * Handle specific regions of provider0..
+  * e.g. AWS-CN
+  */
+  tmp2 = strchr(tmp0, '-');
+  len = tmp2 ? (size_t)(tmp2 - tmp0) : len;
   Curl_strntoupper(provider0_up, tmp0, len);
   provider0_up[len] = '\0';
 
