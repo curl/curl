@@ -45,20 +45,19 @@ static const char *unslashquote(const char *line, char *param);
 static bool my_get_line(FILE *fp, struct curlx_dynbuf *, bool *error);
 
 #ifdef WIN32
-#define MAX_MODULE_FILE_LENGTH 512
 static FILE *execpath(const TCHAR *filename)
 {
-  TCHAR filebuffer[MAX_MODULE_FILE_LENGTH];
+  TCHAR filebuffer[512];
   /* Get the filename of our executable. GetModuleFileName is already declared
    * via inclusions done in setup header file.
    */
-  unsigned long len = GetModuleFileName(0, filebuffer, MAX_MODULE_FILE_LENGTH);
-  if ((len > 0) && (len < MAX_MODULE_FILE_LENGTH)) {
-    TCHAR *lastdirchar = _tcsrchr(filebuffer, TEXT(DIR_CHAR));
+  DWORD len = GetModuleFileName(NULL, filebuffer, ARRAYSIZE(filebuffer));
+  if ((len > 0) && (len < ARRAYSIZE(filebuffer))) {
+    TCHAR *lastdirchar = _tcsrchr(filebuffer, TEXT(DIR_CHAR)[0]);
     if(lastdirchar) {
       *lastdirchar = TEXT('\0');
     }
-    if (_tcslen(filebuffer) + _tcslen(filename) + 1U < MAX_MODULE_FILE_LENGTH) {
+    if(_tcslen(filebuffer) + _tcslen(filename) + 1 < ARRAYSIZE(filebuffer)) {
       _tcscat(filebuffer, TEXT(DIR_CHAR));
       _tcscat(filebuffer, filename);
       return _tfopen(filebuffer, TEXT(FOPEN_READTEXT));
