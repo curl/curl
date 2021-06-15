@@ -2234,7 +2234,7 @@ CURLcode Curl_http2_setup(struct Curl_easy *data,
     return result;
   }
 
-  infof(data, "Using HTTP2, server supports multi-use\n");
+  infof(data, "Using HTTP2, server supports multiplexing\n");
   stream->upload_left = 0;
   stream->upload_mem = NULL;
   stream->upload_len = 0;
