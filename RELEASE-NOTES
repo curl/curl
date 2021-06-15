@@ -1,10 +1,10 @@
-curl and libcurl 7.77.1
+curl and libcurl 7.78.0
 
  Public curl releases:         201
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2421
+ Contributors:                 2426
 
 This release includes the following changes:
 
@@ -12,10 +12,12 @@ This release includes the following changes:
  o hostip: make 'localhost' return fixed values [16]
  o mbedtls: add support for cert and key blob options [11]
  o metalink: remove [54]
+ o mqtt: add support for username and password [91]
 
 This release includes the following bugfixes:
 
  o ares: always store IPv6 addresses first [20]
+ o asyn-ares: remove check for 'data' in Curl_resolver_cancel [89]
  o bearssl: explicitly initialize all fields of Curl_ssl [1]
  o bearssl: remove incorrect const on variable that is modified [1]
  o c-hyper: abort CONNECT response reading early on non 2xx responses [75]
@@ -27,6 +29,8 @@ This release includes the following bugfixes:
  o c-hyper: support CURLINFO_STARTTRANSFER_TIME [29]
  o c-hyper: support CURLOPT_HEADER [32]
  o ccsidcurl: fix the compile errors [27]
+ o CI: add Circle CI [92]
+ o CI: add jobs using Zuul [86]
  o cmake: add CURL_DISABLE_NTLM option [44]
  o cmake: avoid leaking absolute paths into exported config [3]
  o cmake: try well-known send/recv signature for Apple [12]
@@ -52,6 +56,7 @@ This release includes the following bugfixes:
  o hostip: bad CURLOPT_RESOLVE syntax now returns error [35]
  o hsts: ignore numberical IP address hosts [17]
  o HSTS: not experimental anymore
+ o http2: clarify 'Using HTTP2' verbose message [63]
  o http2: init recvbuf struct for pushed streams [13]
  o http2_connisdead: handle trailing GOAWAY better [18]
  o http_proxy: deal with non-200 CONNECT response with Hyper [22]
@@ -59,6 +64,8 @@ This release includes the following bugfixes:
  o lib: don't compare fd to FD_SETSIZE when using poll [61]
  o mbedtls: make mbedtls_strerror always work [6]
  o mqtt: detect illegal and too large file size [43]
+ o multi: add scan-build-6 work-around in curl_multi_fdset [88]
+ o netrc: skip 'macdef' definitions [87]
  o ngtcp2: disable TLSv1.3 compatible mode when using GnuTLS [83]
  o openssl: don't remove session id entry in disassociate [56]
  o Revert "c-hyper: handle body on HYPER_TASK_EMPTY" [26]
@@ -67,6 +74,7 @@ This release includes the following bugfixes:
  o runtests: init $VERSION to avoid warnings when using -l
  o runtests: parse data/Makefile.inc instead of using make [38]
  o runtests: skip disabled tests unless -f is used [82]
+ o rustls: remove native_roots fallback [65]
  o schannel: set ALPN length correctly for HTTP/2 [24]
  o setopt: fix incorrect comments [10]
  o socketpair: fix potential hangs [37]
@@ -95,11 +103,14 @@ This release includes the following bugfixes:
  o tests: fix Accept-Encoding strips to work with Hyper builds [41]
  o travis: add bearssl build [1]
  o travis: delete --enable-hsts option (it is the default now) [ci skip] [2]
+ o travis: remove the arm job
  o travis: remove the hyper build
+ o url.c: remove two variable assigns that are never read [90]
  o url: bad CURLOPT_CONNECT_TO syntax now returns error [31]
  o vtls: exit addsessionid if no cache is inited [7]
  o warnless: simplify type size handling [30]
  o Win32: fix build with Watt-32
+ o winbuild/README: VC should be set to 6 'or larger' [64]
 
 This release includes the following known bugs:
 
@@ -108,15 +119,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexis Vachette, Alex Xu, Bastian Krause, Christian Weisgerber,
+  Albin Vass, Alexis Vachette, Alex Xu, Bastian Krause, Christian Weisgerber,
   Christoph M. Becker, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Dmitry Karpov, Dmitry Kostjuchenko, Douglas R. Reno, Ebe Janchivdorj,
-  Fawad Mirza, Gergely Nagy, Gisle Vanem, Gregor Jasny, Harry Sintonen,
-  Joel Depooter, Jon Rumsey, Jun-ya Kato, Kevin Burke, Laurent Dufresne,
-  Marc Hörsken, Mark Swaanenburg, Michael Forney, Michael Kaufmann,
-  nian6324 on github, Paul Groke, Phil E. Taylor, Shikha Sharma,
-  Vadim Grinshpun, Viktor Szakats, Zhang Xiuhua,
-  (33 contributors)
+  David Hu, Dmitry Karpov, Dmitry Kostjuchenko, Douglas R. Reno,
+  Ebe Janchivdorj, Fawad Mirza, Gabriel Simmer, Gealber Morales, Gergely Nagy,
+  Gisle Vanem, Gregor Jasny, Harry Sintonen, Hugh Macdonald,
+  Jacob Hoffman-Andrews, Joel Depooter, Jon Rumsey, Jun-ya Kato, Kevin Burke,
+  Laurent Dufresne, Marc Hörsken, Mark Swaanenburg, Michael Forney,
+  Michael Kaufmann, Mohammed Naser, nian6324 on github, Paul Groke,
+  Phil E. Taylor, Ray Satiro, Shikha Sharma, Vadim Grinshpun, Viktor Szakats,
+  Zhang Xiuhua,
+  (41 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -181,6 +194,9 @@ References to bug reports and discussions on issues:
  [60] = https://curl.se/mail/lib-2021-06/0018.html
  [61] = https://curl.se/bug/?i=7240
  [62] = https://curl.se/bug/?i=7227
+ [63] = https://github.com/curl/curl/discussions/7255
+ [64] = https://curl.se/bug/?i=7253
+ [65] = https://curl.se/bug/?i=7250
  [66] = https://curl.se/bug/?i=7209
  [67] = https://curl.se/bug/?i=7209
  [68] = https://curl.se/bug/?i=7209
@@ -200,3 +216,10 @@ References to bug reports and discussions on issues:
  [82] = https://curl.se/bug/?i=7212
  [83] = https://curl.se/bug/?i=6896
  [84] = https://curl.se/bug/?i=7208
+ [86] = https://curl.se/bug/?i=7245
+ [87] = https://curl.se/bug/?i=7238
+ [88] = https://curl.se/bug/?i=7248
+ [89] = https://curl.se/bug/?i=7248
+ [90] = https://curl.se/bug/?i=7248
+ [91] = https://curl.se/bug/?i=7243
+ [92] = https://curl.se/bug/?i=7239
