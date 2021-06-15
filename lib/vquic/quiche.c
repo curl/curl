@@ -422,10 +422,9 @@ static CURLcode flush_egress(struct Curl_easy *data, int sockfd,
       return CURLE_SEND_ERROR;
     }
 
-    sent = sendto(sockfd, out, sent, 0,
-                  (struct sockaddr *)&send_info.to, send_info.to_len);
+    sent = send(sockfd, out, sent, 0);
     if(sent < 0) {
-      failf(data, "sendto() returned %zd", sent);
+      failf(data, "send() returned %zd", sent);
       return CURLE_SEND_ERROR;
     }
   } while(1);
