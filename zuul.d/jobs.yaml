@@ -516,13 +516,14 @@
       - curl-normal-with-openssl-disable-proxy
       - curl-normal-with-openssl-disable-verbose-notests
       - curl-novalgrind-boringssl-with-openssl
+      - curl-novalgrind-boringssl-with-openssl-quiche
       - curl-debug-rustls
       - curl-debug-bearssl
       - curl-novalgrind-libressl
       - curl-novalgrind-ngtcp2-with-openssl
       - curl-novalgrind-ngtcp2-gnutls
       - curl-debug-wolfssl
-      - curl-debug-wolfssl
+      - curl-debug-openssl3
       - curl-debug-mesalink
       - curl-debug-clang-with-openssl
       - curl-debug-clang-disable-alt-svc-with-openssl
