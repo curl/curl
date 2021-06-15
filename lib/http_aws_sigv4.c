@@ -135,7 +135,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   * Handle specific regions of provider0..
   * e.g. AWS-CN
   */
-  tmp2 = strchr(tmp0, '-');
+  tmp2 = memchr(tmp0, '-', len);
   len = tmp2 ? (size_t)(tmp2 - tmp0) : len;
 
   provider0_low = malloc(len + 1);
