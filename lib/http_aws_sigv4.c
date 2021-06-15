@@ -131,6 +131,13 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     ret = CURLE_BAD_FUNCTION_ARGUMENT;
     goto fail;
   }
+  /*
+  * Handle specific regions of provider0..
+  * e.g. AWS-CN
+  */
+  tmp2 = strchr(tmp0, '-');
+  len = tmp2 ? (size_t)(tmp2 - tmp0) : len;
+
   provider0_low = malloc(len + 1);
   provider0_up = malloc(len + 1);
   if(!provider0_low || !provider0_up) {
@@ -138,15 +145,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   }
   Curl_strntolower(provider0_low, tmp0, len);
   provider0_low[len] = '\0';
-  /*
-  * Handle specific regions of provider0..
-  * e.g. AWS-CN
-  */
-  tmp2 = strchr(tmp0, '-');
-  len = tmp2 ? (size_t)(tmp2 - tmp0) : len;
   Curl_strntoupper(provider0_up, tmp0, len);
   provider0_up[len] = '\0';
-
   if(tmp1) {
     tmp0 = tmp1 + 1;
     tmp1 = strchr(tmp0, ':');
