@@ -70,6 +70,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.8 RTSP authentication breaks without redirect support
  6.9 SHA-256 digest not supported in Windows SSPI builds
  6.10 curl never completes Negotiate over HTTP
+ 6.11 Negotiate on Windows fails
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -583,6 +584,15 @@ problems may have been fixed or changed somewhat since this was written!
  Apparently it isn't working correctly...?
 
  See https://github.com/curl/curl/issues/5235
+
+6.11 Negotiate on Windows fails
+
+ When using --negotiate (or NTLM) with curl on Windows, SSL/TSL handshake
+ fails despite having a valid kerberos ticket cached. Works without any issue
+ in Unix/Linux.
+
+ https://github.com/curl/curl/issues/5881
+
 
 7. FTP
 
