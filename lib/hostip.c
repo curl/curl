@@ -636,9 +636,8 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
      * IPv4-only builds, hence the conditions above.
      */
     CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
-    if (dict) {
+    if(dict)
         CFRelease(dict);
-    }
 #endif
 
 #ifndef USE_RESOLVE_ON_IPS
