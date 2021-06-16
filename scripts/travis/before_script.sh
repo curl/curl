@@ -88,18 +88,14 @@ if [ "$BORINGSSL" = "yes" ]; then
 fi
 
 if [ "$OPENSSL3" = "yes" ]; then
-  cd $HOME
-  git clone --depth=1 https://github.com/openssl/openssl
-  cd openssl
+  cd $HOME/src/github.com/openssl/openssl
   ./config enable-tls1_3 --prefix=$HOME/openssl3
   make
   make install_sw
 fi
 
 if [ "$LIBRESSL" = "yes" ]; then
-  cd $HOME
-  git clone --depth=1 -b v3.1.4 https://github.com/libressl-portable/portable.git libressl-git
-  cd libressl-git
+  cd $HOME/src/github.com/libressl-portable/portable
   ./autogen.sh
   ./configure --prefix=$HOME/libressl
   make
@@ -107,23 +103,19 @@ if [ "$LIBRESSL" = "yes" ]; then
 fi
 
 if [ "$QUICHE" = "yes" ]; then
-  cd $HOME
-  git clone --depth=1 --recursive https://github.com/cloudflare/quiche.git
   curl https://sh.rustup.rs -sSf | sh -s -- -y
   source $HOME/.cargo/env
-  cd $HOME/quiche
+  cd $HOME/src/github.com/cloudflare/quiche
   cargo build -v --release --features ffi,pkg-config-meta,qlog
   mkdir -v deps/boringssl/src/lib
   ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
 fi
 
 if [ -z "${RUSTLS_VERSION}" ]; then
-  cd $HOME
-  git clone --depth=1 --recursive https://github.com/abetterinternet/crustls.git -b "$RUSTLS_VERSION"
   curl https://sh.rustup.rs -sSf | sh -s -- -y
   source $HOME/.cargo/env
   cargo install cbindgen
-  cd $HOME/crustls
+  cd $HOME/src/github.com/abetterinternet/crustls
   make
   make DESTDIR=$HOME/crust install
 fi
