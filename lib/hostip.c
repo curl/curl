@@ -579,6 +579,9 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
   CURLcode result;
   enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
   struct connectdata *conn = data->conn;
+#if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
+  CFDictionaryRef dict;
+#endif
 
   *entry = NULL;
   conn->bits.doh = FALSE; /* default is not */
@@ -635,7 +638,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
      * This function is only available on a macOS and is not needed for
      * IPv4-only builds, hence the conditions above.
      */
-    CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
+    dict = SCDynamicStoreCopyProxies(NULL);
     if(dict)
         CFRelease(dict);
 #endif
