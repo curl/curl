@@ -90,11 +90,8 @@ if [ "$T" = "novalgrind" ]; then
 fi
 
 if [ "$T" = "normal" ]; then
-  if [ $TRAVIS_OS_NAME = linux ]; then
-    # Remove system curl to make sure we don't rely on it.
-    # Only done on Linux since we're not permitted to on mac.
-    sudo rm -f /usr/bin/curl
-  fi
+  # Remove system curl to make sure we don't rely on it.
+  sudo rm -f /usr/bin/curl
   ./configure --enable-warnings --enable-werror $C
   make
   make examples

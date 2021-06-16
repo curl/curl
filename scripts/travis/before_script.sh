@@ -24,8 +24,8 @@ set -eo pipefail
 
 ./buildconf
 
-if [ "$NGTCP2" = yes ]; then
-  if [ "$TRAVIS_OS_NAME" = linux -a "$GNUTLS" ]; then
+if [ "$NGTCP2" = "yes" ]; then
+  if [ "$GNUTLS" = "yes" ]; then
     cd $HOME
     git clone --depth 1 https://gitlab.com/gnutls/nettle.git
     cd nettle
@@ -70,7 +70,7 @@ if [ "$NGTCP2" = yes ]; then
   make install
 fi
 
-if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
+if [ "$BORINGSSL" = "yes" ]; then
   cd $HOME
   git clone --depth=1 https://boringssl.googlesource.com/boringssl
   cd boringssl
@@ -87,7 +87,7 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
   export LIBS=-lpthread
 fi
 
-if [ "$TRAVIS_OS_NAME" = linux -a "$OPENSSL3" ]; then
+if [ "$OPENSSL3" = "yes" ]; then
   cd $HOME
   git clone --depth=1 https://github.com/openssl/openssl
   cd openssl
@@ -96,7 +96,7 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$OPENSSL3" ]; then
   make install_sw
 fi
 
-if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
+if [ "$LIBRESSL" = "yes" ]; then
   cd $HOME
   git clone --depth=1 -b v3.1.4 https://github.com/libressl-portable/portable.git libressl-git
   cd libressl-git
@@ -106,7 +106,7 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
   make install
 fi
 
-if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
+if [ "$QUICHE" = "yes" ]; then
   cd $HOME
   git clone --depth=1 --recursive https://github.com/cloudflare/quiche.git
   curl https://sh.rustup.rs -sSf | sh -s -- -y
@@ -117,7 +117,7 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
 fi
 
-if [ "$TRAVIS_OS_NAME" = linux -a "$RUSTLS_VERSION" ]; then
+if [ -z "${RUSTLS_VERSION}" ]; then
   cd $HOME
   git clone --depth=1 --recursive https://github.com/abetterinternet/crustls.git -b "$RUSTLS_VERSION"
   curl https://sh.rustup.rs -sSf | sh -s -- -y
@@ -128,7 +128,7 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$RUSTLS_VERSION" ]; then
   make DESTDIR=$HOME/crust install
 fi
 
-if [ $TRAVIS_OS_NAME = linux -a "$WOLFSSL" ]; then
+if [ "$WOLFSSL" = "yes" ]; then
   if [ ! -e $HOME/wolfssl-4.7.0-stable/Makefile ]; then
     cd $HOME
     curl -LO https://github.com/wolfSSL/wolfssl/archive/v4.7.0-stable.tar.gz
@@ -148,36 +148,32 @@ fi
 # The library build directories are set to be cached by .travis.yml. If you are
 # changing a build directory name below (eg a version change) then you must
 # change it in .travis.yml `cache: directories:` as well.
-if [ $TRAVIS_OS_NAME = linux ]; then
-
-  if [ "$MESALINK" = "yes" ]; then
-    if [ ! -e $HOME/mesalink-1.0.0/Makefile ]; then
-      cd $HOME
-      curl https://sh.rustup.rs -sSf | sh -s -- -y
-      source $HOME/.cargo/env
-      curl -LO https://github.com/mesalock-linux/mesalink/archive/v1.0.0.tar.gz
-      tar -xzf v1.0.0.tar.gz
-      cd mesalink-1.0.0
-      ./autogen.sh
-      ./configure --enable-tls13
-      make
-    fi
-    cd $HOME/mesalink-1.0.0
-    sudo make install
-
+if [ "$MESALINK" = "yes" ]; then
+  if [ ! -e $HOME/mesalink-1.0.0/Makefile ]; then
+    cd $HOME
+    curl https://sh.rustup.rs -sSf | sh -s -- -y
+    source $HOME/.cargo/env
+    curl -LO https://github.com/mesalock-linux/mesalink/archive/v1.0.0.tar.gz
+    tar -xzf v1.0.0.tar.gz
+    cd mesalink-1.0.0
+    ./autogen.sh
+    ./configure --enable-tls13
+    make
   fi
+  cd $HOME/mesalink-1.0.0
+  sudo make install
 
-  if [ "$BEARSSL" = "yes" ]; then
-    if [ ! -e $HOME/bearssl-0.6/Makefile ]; then
-      cd $HOME
-      curl -LO https://bearssl.org/bearssl-0.6.tar.gz
-      tar -xzf bearssl-0.6.tar.gz
-      cd bearssl-0.6
-      make
-    fi
-    cd $HOME/bearssl-0.6
-    sudo cp inc/*.h /usr/local/include
-    sudo cp build/libbearssl.* /usr/local/lib
+fi
+
+if [ "$BEARSSL" = "yes" ]; then
+  if [ ! -e $HOME/bearssl-0.6/Makefile ]; then
+    cd $HOME
+    curl -LO https://bearssl.org/bearssl-0.6.tar.gz
+    tar -xzf bearssl-0.6.tar.gz
+    cd bearssl-0.6
+    make
   fi
-
+  cd $HOME/bearssl-0.6
+  sudo cp inc/*.h /usr/local/include
+  sudo cp build/libbearssl.* /usr/local/lib
 fi

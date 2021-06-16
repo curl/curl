@@ -10,8 +10,6 @@
     vars:
       curl_env:
         LD_LIBRARY_PATH: /usr/local/lib
-        # NOTE(mnaser): Workaround to keep existing Travis scripts compatible
-        TRAVIS_OS_NAME: linux
 
 - job:
     name: curl-normal-with-openssl-gssapi-libssh2-checksrc
