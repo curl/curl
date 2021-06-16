@@ -566,8 +566,10 @@ static int uploadpostfields(void *userdata, hyper_context *ctx,
                                      (size_t)data->req.p.http->postsize);
     if(copy)
       *chunk = copy;
-    else
+    else {
+      data->state.hresult = CURLE_OUT_OF_MEMORY;
       return HYPER_POLL_ERROR;
+    }
     /* increasing the writebytecount here is a little premature but we
        don't know exactly when the body is sent*/
     data->req.writebytecount += (size_t)data->req.p.http->postsize;
@@ -585,8 +587,10 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
   CURLcode result =
     Curl_fillreadbuffer(data, data->set.upload_buffer_size, &fillcount);
   (void)ctx;
-  if(result)
+  if(result) {
+    data->state.hresult = result;
     return HYPER_POLL_ERROR;
+  }
   if(!fillcount)
     /* done! */
     *chunk = NULL;
@@ -594,8 +598,10 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
     hyper_buf *copy = hyper_buf_copy((uint8_t *)data->state.ulbuf, fillcount);
     if(copy)
       *chunk = copy;
-    else
+    else {
+      data->state.hresult = CURLE_OUT_OF_MEMORY;
       return HYPER_POLL_ERROR;
+    }
     /* increasing the writebytecount here is a little premature but we
        don't know exactly when the body is sent*/
     data->req.writebytecount += fillcount;
@@ -952,6 +958,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     hyper_code code = hyper_error_code(hypererr);
     failf(data, "Hyper: [%d] %.*s", (int)code, (int)errlen, errbuf);
     hyper_error_free(hypererr);
+    if(data->state.hresult)
+      return data->state.hresult;
   }
   return CURLE_OUT_OF_MEMORY;
 }
