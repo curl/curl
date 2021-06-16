@@ -635,7 +635,10 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
      * This function is only available on a macOS and is not needed for
      * IPv4-only builds, hence the conditions above.
      */
-    SCDynamicStoreCopyProxies(NULL);
+    CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
+    if (dict) {
+        CFRelease(dict);
+    }
 #endif
 
 #ifndef USE_RESOLVE_ON_IPS
