@@ -579,7 +579,6 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
   CURLcode result;
   enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
   struct connectdata *conn = data->conn;
-
   *entry = NULL;
   conn->bits.doh = FALSE; /* default is not */
 
@@ -626,16 +625,20 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
     }
 
 #if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
-    /*
-     * The automagic conversion from IPv4 literals to IPv6 literals only works
-     * if the SCDynamicStoreCopyProxies system function gets called first. As
-     * Curl currently doesn't support system-wide HTTP proxies, we therefore
-     * don't use any value this function might return.
-     *
-     * This function is only available on a macOS and is not needed for
-     * IPv4-only builds, hence the conditions above.
-     */
-    SCDynamicStoreCopyProxies(NULL);
+    {
+      /*
+       * The automagic conversion from IPv4 literals to IPv6 literals only
+       * works if the SCDynamicStoreCopyProxies system function gets called
+       * first. As Curl currently doesn't support system-wide HTTP proxies, we
+       * therefore don't use any value this function might return.
+       *
+       * This function is only available on a macOS and is not needed for
+       * IPv4-only builds, hence the conditions above.
+       */
+      CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
+      if(dict)
+        CFRelease(dict);
+    }
 #endif
 
 #ifndef USE_RESOLVE_ON_IPS
