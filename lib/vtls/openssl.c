@@ -1448,6 +1448,7 @@ static int ossl_shutdown(struct Curl_easy *data,
   int err;
   bool done = FALSE;
   struct ssl_backend_data *backend = connssl->backend;
+  int loop = 10;
 
 #ifndef CURL_DISABLE_FTP
   /* This has only been tested on the proftpd server, and the mod_tls code
@@ -1461,7 +1462,7 @@ static int ossl_shutdown(struct Curl_easy *data,
 
   if(backend->handle) {
     buffsize = (int)sizeof(buf);
-    while(!done) {
+    while(!done && loop--) {
       int what = SOCKET_READABLE(conn->sock[sockindex],
                                  SSL_SHUTDOWN_TIMEOUT);
       if(what > 0) {
