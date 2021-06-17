@@ -1192,6 +1192,7 @@ static int gskit_shutdown(struct Curl_easy *data,
   int what;
   int rc;
   char buf[120];
+  int loop = 10; /* don't get stuck */
 
   if(!BACKEND->handle)
     return 0;
@@ -1206,7 +1207,7 @@ static int gskit_shutdown(struct Curl_easy *data,
   what = SOCKET_READABLE(conn->sock[sockindex],
                          SSL_SHUTDOWN_TIMEOUT);
 
-  for(;;) {
+  while(loop--) {
     ssize_t nread;
 
     if(what < 0) {

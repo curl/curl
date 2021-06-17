@@ -70,6 +70,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.8 RTSP authentication breaks without redirect support
  6.9 SHA-256 digest not supported in Windows SSPI builds
  6.10 curl never completes Negotiate over HTTP
+ 6.11 Negotiate on Windows fails
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -112,6 +113,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.13 wakeup socket disconnect causes havoc
  11.14 Multi perform hangs waiting for threaded resolver
  11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
+ 11.16 libcurl uses renames instead of locking for atomic operations
 
  12. LDAP
  12.1 OpenLDAP hangs after returning results
@@ -583,6 +585,15 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/5235
 
+6.11 Negotiate on Windows fails
+
+ When using --negotiate (or NTLM) with curl on Windows, SSL/TSL handshake
+ fails despite having a valid kerberos ticket cached. Works without any issue
+ in Unix/Linux.
+
+ https://github.com/curl/curl/issues/5881
+
+
 7. FTP
 
 7.1 FTP without or slow 220 response
@@ -867,6 +878,15 @@ problems may have been fixed or changed somewhat since this was written!
  address this issue is to introduce a CURLOPT_OPENSOCKETPAIRFUNCTION callback.
 
  https://github.com/curl/curl/issues/5747
+
+11.16 libcurl uses renames instead of locking for atomic operations
+
+ For saving cookies, alt-svc and hsts files. This is bad when for example the
+ file is stored in a directory where the application has no write permission
+ but it has permission for the file.
+
+ https://github.com/curl/curl/issues/6882
+ https://github.com/curl/curl/pull/6884
 
 12. LDAP
 

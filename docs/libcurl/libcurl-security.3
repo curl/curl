@@ -351,10 +351,6 @@ enabled by applications that fail to properly validate server TLS/SSL
 certificates, thus enabling a malicious server to spoof a legitimate
 one. HTTPS without validated certificates is potentially as insecure as a
 plain HTTP connection.
-.SH "Report Security Problems"
-Should you detect or just suspect a security problem in libcurl or curl,
-contact the project curl security team immediately. See
-https://curl.se/dev/secprocess.html for details.
 .SH "Showing What You Do"
 Relatedly, be aware that in situations when you have problems with libcurl and
 ask someone for help, everything you reveal in order to get best possible help
@@ -383,3 +379,16 @@ that the user is otherwise not able to view (like credentials for a login
 etc), it should be noted that libcurl still might understand proxy environment
 variables that allow the user to redirect libcurl operations to use a proxy
 controlled by the user.
+.SH "File descriptors, fork and ntlm_wb"
+An application that uses libcurl and invokes `fork()` will get all file
+descriptors duplicated in the child process, including the ones libcurl
+created.
+
+libcurl itself uses `fork()` and `execl()` if told to use the
+`CURLAUTH_NTLM_WB` authentication method which then will invoke the helper
+command in a child process with file descriptors duplicated. Make sure that
+only the trusted and reliable helper program is invoked!
+.SH "Report Security Problems"
+Should you detect or just suspect a security problem in libcurl or curl,
+contact the project curl security team immediately. See
+https://curl.se/dev/secprocess.html for details.

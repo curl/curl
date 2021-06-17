@@ -5,7 +5,8 @@ Added: 7.15.2
 Category: proxy
 ---
 Use the specified SOCKS4 proxy. If the port number is not specified, it is
-assumed at port 1080.
+assumed at port 1080. Using this socket type make curl resolve the host name
+and passing the address on to the proxy.
 
 This option overrides any previous use of --proxy, as they are mutually
 exclusive.
