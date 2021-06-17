@@ -229,7 +229,12 @@ struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
     timediff_t us = Curl_timediff_us(now, data->progress.t_startsingle);
     if(us < 1)
       us = 1; /* make sure at least one microsecond passed */
-    *delta += us;
+    /* make sure we don't add t_appconnect twice when */
+    /* building TLS-in-TLS for HTTPS proxy */
+    if(timer == TIMER_APPCONNECT)
+      *delta = us;
+    else
+      *delta += us;
   }
   return now;
 }
