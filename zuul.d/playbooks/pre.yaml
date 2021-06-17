@@ -62,12 +62,13 @@
       dest: /usr/bin/scan-build
       state: link
 
-
   - name: ngtcp2 enabled
     when: curl_ngtcp2 is true
     block:
     - name: gnutls enabled
       when: curl_gnutls is true
+      args:
+        executable: /bin/bash
       shell: |
         cd $HOME
         git clone --depth 1 https://gitlab.com/gnutls/nettle.git
@@ -86,6 +87,8 @@
         make install
     - name: gnutls disabled
       when: curl_gnutls is not true
+      args:
+        executable: /bin/bash
       shell: |
         cd $HOME
         git clone --depth 1 -b OpenSSL_1_1_1j+quic https://github.com/quictls/openssl possl
@@ -94,6 +97,8 @@
         make
         make install_sw
     - name: nghttp3
+      args:
+        executable: /bin/bash
       shell: |
         cd $HOME
         git clone --depth 1 https://github.com/ngtcp2/nghttp3
@@ -103,6 +108,8 @@
         make
         make install
     - name: ngtcp2
+      args:
+        executable: /bin/bash
       shell: |
         cd $HOME
         git clone --depth 1 https://github.com/ngtcp2/ngtcp2
@@ -117,6 +124,8 @@
 
   - name: boringssl
     when: curl_boringssl is true
+    args:
+      executable: /bin/bash
     shell: |
       cd $HOME
       git clone --depth=1 https://boringssl.googlesource.com/boringssl
@@ -135,6 +144,8 @@
 
   - name: openssl3
     when: curl_boringssl is true
+    args:
+      executable: /bin/bash
     shell: |
       cd $HOME/src/github.com/openssl/openssl
       ./config enable-tls1_3 --prefix=$HOME/openssl3
@@ -143,6 +154,8 @@
 
   - name: libressl
     when: curl_libressl is true
+    args:
+      executable: /bin/bash
     shell: |
       cd $HOME/src/github.com/libressl-portable/portable
       ./autogen.sh
@@ -152,6 +165,8 @@
 
   - name: quiche
     when: curl_quiche is true
+    args:
+      executable: /bin/bash
     shell: |
       curl https://sh.rustup.rs -sSf | sh -s -- -y
       source $HOME/.cargo/env
@@ -162,6 +177,8 @@
 
   - name: rustls
     when: curl_rustls is defined
+    args:
+      executable: /bin/bash
     shell: |
       curl https://sh.rustup.rs -sSf | sh -s -- -y
       source $HOME/.cargo/env
@@ -172,6 +189,8 @@
 
   - name: wolfssl
     when: curl_wolfssl is true
+    args:
+      executable: /bin/bash
     shell: |
       if [ ! -e $HOME/wolfssl-4.7.0-stable/Makefile ]; then
         cd $HOME
@@ -188,6 +207,8 @@
 
   - name: mesalink
     when: curl_mesalink is true
+    args:
+      executable: /bin/bash
     shell: |
       if [ ! -e $HOME/mesalink-1.0.0/Makefile ]; then
         cd $HOME
@@ -205,6 +226,8 @@
 
   - name: bearssl
     when: curl_bearssl is true
+    args:
+      executable: /bin/bash
     shell: |
       if [ ! -e $HOME/bearssl-0.6/Makefile ]; then
         cd $HOME
