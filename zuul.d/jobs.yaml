@@ -8,6 +8,15 @@
     nodeset: ubuntu-bionic
     timeout: 3600
     vars:
+      curl_ngtcp2: false
+      curl_gnutls: false
+      curl_boringssl: false
+      curl_openssl3: false
+      curl_libressl: false
+      curl_quiche: false
+      curl_wolfssl: false
+      curl_mesalink: false
+      curl_bearssl: false
       curl_env:
         LD_LIBRARY_PATH: /usr/local/lib
 
@@ -70,11 +79,11 @@
     parent: curl-base
     vars:
       gimme_stable: true
+      curl_boringssl: true
       curl_env:
         CC: gcc-8
         CXX: g++-8
         T: novalgrind
-        BORINGSSL: "yes"
         C: >-
           --with-openssl={{ ansible_user_dir }}/boringssl
         LD_LIBRARY_PATH: "{{ ansible_user_dir }}/boringssl/lib:/usr/local/lib"
@@ -89,11 +98,11 @@
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
+      curl_quiche: true
       curl_env:
         CC: gcc-8
         CXX: g++-8
         T: novalgrind
-        QUICHE: "yes"
         C: >-
           --with-openssl={{ ansible_user_dir }}/quiche/deps/boringssl/src
           --with-quiche={{ ansible_user_dir }}/quiche/target/release
@@ -110,9 +119,9 @@
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
+      curl_rustls: v0.6.0
       curl_env:
         T: debug-rustls
-        RUSTLS_VERSION: v0.6.0
         C: >-
           --with-rustls={{ ansible_user_dir }}/crust
 
@@ -124,9 +133,9 @@
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
+      curl_bearssl: true
       curl_env:
         T: debug-bearssl
-        BEARSSL: "yes"
         C: >-
           --with-bearssl
 
@@ -137,11 +146,11 @@
       - name: github.com/libressl-portable/portable
         override-checkout: v3.1.4
     vars:
+      curl_libressl: true
       curl_env:
         CC: gcc-8
         CXX: g++-8
         T: novalgrind
-        LIBRESSL: "yes"
         C: >-
           --with-openssl={{ ansible_user_dir }}/libressl
         LD_LIBRARY_PATH: "{{ ansible_user_dir }}/libressl/lib:/usr/local/lib"
@@ -154,11 +163,11 @@
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
+      curl_ngtcp2: true
       curl_env:
         CC: gcc-8
         CXX: g++-8
         T: novalgrind
-        NGTCP2: "yes"
         C: >-
           --with-openssl={{ ansible_user_dir }}/ngbuild
           --with-ngtcp2={{ ansible_user_dir }}/ngbuild
@@ -183,12 +192,12 @@
         - libp11-kit-dev
         - libtasn1-6-dev
         - nettle-dev
+      curl_gnutls: true
+      curl_ngtcp2: true
       curl_env:
         CC: gcc-8
         CXX: g++-8
-        T: novalgrind
-        NGTCP2: "yes"
-        GNUTLS: "yes"
+        T: novalgrin
         C: >-
           PKG_CONFIG_PATH={{ ansible_user_dir }}/ngbuild 
           --with-gnutls={{ ansible_user_dir }}/ngbuild
@@ -204,11 +213,11 @@
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
+      curl_wolfssl: true
       curl_env:
         CC: gcc-8
         CXX: g++-8
         T: debug-wolfssl
-        WOLFSSL: "yes"
         C: >-
           --with-wolfssl
 
@@ -222,11 +231,11 @@
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
+      curl_openssl3: true
       curl_env:
         CC: gcc-8
         CXX: g++-8
         T: debug
-        OPENSSL3: "yes"
         C: >-
           --with-openssl={{ ansible_user_dir }}/openssl3
         LD_LIBRARY_PATH: "{{ ansible_user_dir }}/openssl3/lib:/usr/local/lib"
@@ -240,11 +249,11 @@
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
+      curl_mesalink: true
       curl_env:
         CC: gcc-8
         CXX: g++-8
         T: debug-mesalink
-        MESALINK: "yes"
         C: >-
           --with-mesalink
 
@@ -356,9 +365,9 @@
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
+      curl_boringssl: true
+      curl_quiche: true
       curl_env:
-        BORINGSSL: "yes"
-        QUICHE: "yes"
         CC: gcc-8
         CXX: g++-8
         T: cmake
@@ -381,8 +390,8 @@
         - libbrotli-dev
         - libzstd-dev
         - libnss3-dev
+      curl_ngtcp2: true
       curl_env:
-        NGTCP2: "yes"
         CC: clang-9
         CXX: clang++-9
         T: cmake
