@@ -372,28 +372,29 @@ if(CMAKE_USE_DARWINSSL)
   message(FATAL_ERROR "The cmake option CMAKE_USE_DARWINSSL was renamed to CMAKE_USE_SECTRANSP.")
 endif()
 
-if(CMAKE_USE_SECTRANSP)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   find_library(COREFOUNDATION_FRAMEWORK "CoreFoundation")
   if(NOT COREFOUNDATION_FRAMEWORK)
       message(FATAL_ERROR "CoreFoundation framework not found")
   endif()
 
-  find_library(SECURITY_FRAMEWORK "Security")
-  if(NOT SECURITY_FRAMEWORK)
-     message(FATAL_ERROR "Security framework not found")
-  endif()
-
-  set(SSL_ENABLED ON)
-  set(USE_SECTRANSP ON)
-  list(APPEND CURL_LIBS "-framework CoreFoundation" "-framework Security")
-endif()
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   find_library(SYSTEMCONFIGURATION_FRAMEWORK "SystemConfiguration")
   if(NOT SYSTEMCONFIGURATION_FRAMEWORK)
      message(FATAL_ERROR "SystemConfiguration framework not found")
   endif()
-  list(APPEND CURL_LIBS "-framework SystemConfiguration")
+
+  list(APPEND CURL_LIBS "-framework CoreFoundation" "-framework SystemConfiguration")
+
+  if(CMAKE_USE_SECTRANSP)
+    find_library(SECURITY_FRAMEWORK "Security")
+    if(NOT SECURITY_FRAMEWORK)
+       message(FATAL_ERROR "Security framework not found")
+    endif()
+
+    set(SSL_ENABLED ON)
+    set(USE_SECTRANSP ON)
+    list(APPEND CURL_LIBS "-framework Security")
+  endif()
 endif()
 
 if(CMAKE_USE_OPENSSL)

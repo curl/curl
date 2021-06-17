@@ -21,7 +21,7 @@
 #***************************************************************************
 
 AC_DEFUN([CURL_DARWIN_SYSTEMCONFIGURATION], [
-AC_MSG_CHECKING([whether to link macOS SystemConfiguration framework])
+AC_MSG_CHECKING([whether to link macOS CoreFoundation and SystemConfiguration framework])
 case $host_os in
   darwin*)
     AC_COMPILE_IFELSE([
@@ -41,7 +41,7 @@ case $host_os in
     ])
     if test "x$build_for_macos" != xno; then
       AC_MSG_RESULT(yes)
-      LDFLAGS="$LDFLAGS -framework SystemConfiguration"
+      LDFLAGS="$LDFLAGS -framework CoreFoundation -framework SystemConfiguration"
     else
       AC_MSG_RESULT(no)
     fi
