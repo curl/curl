@@ -163,9 +163,6 @@
 /* Define to 1 if you have the freeaddrinfo function. */
 #cmakedefine HAVE_FREEADDRINFO 1
 
-/* Define to 1 if you have the freeifaddrs function. */
-#cmakedefine HAVE_FREEIFADDRS 1
-
 /* Define to 1 if you have the ftruncate function. */
 #cmakedefine HAVE_FTRUNCATE 1
 

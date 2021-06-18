@@ -131,9 +131,6 @@
 /* Define to 1 if you have the freeaddrinfo function. */
 #define HAVE_FREEADDRINFO 1
 
-/* Define to 1 if you have the freeifaddrs function. */
-#define HAVE_FREEIFADDRS 1
-
 /* Define to 1 if you have the ftruncate function. */
 #define HAVE_FTRUNCATE 1
 
