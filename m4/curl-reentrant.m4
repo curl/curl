@@ -214,43 +214,6 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRTOK_R], [
 ])
 
 
-dnl CURL_CHECK_NEED_REENTRANT_INET_NTOA_R
-dnl -------------------------------------------------
-dnl Checks if the preprocessor _REENTRANT definition
-dnl makes function inet_ntoa_r compiler visible.
-
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_INET_NTOA_R], [
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([inet_ntoa_r])
-  ],[
-    tmp_inet_ntoa_r="yes"
-  ],[
-    tmp_inet_ntoa_r="no"
-  ])
-  if test "$tmp_inet_ntoa_r" = "yes"; then
-    AC_EGREP_CPP([inet_ntoa_r],[
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-    ],[
-      tmp_inet_ntoa_r="proto_declared"
-    ],[
-      AC_EGREP_CPP([inet_ntoa_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-      ],[
-        tmp_inet_ntoa_r="proto_needs_reentrant"
-        tmp_need_reentrant="yes"
-      ])
-    ])
-  fi
-])
-
-
 dnl CURL_CHECK_NEED_REENTRANT_GETHOSTBYADDR_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
@@ -368,9 +331,6 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_FUNCTIONS_R], [
   fi
   if test "$tmp_need_reentrant" = "no"; then
     CURL_CHECK_NEED_REENTRANT_STRTOK_R
-  fi
-  if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_INET_NTOA_R
   fi
   if test "$tmp_need_reentrant" = "no"; then
     CURL_CHECK_NEED_REENTRANT_GETHOSTBYADDR_R

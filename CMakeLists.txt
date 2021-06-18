@@ -1019,8 +1019,6 @@ check_symbol_exists(gethostbyaddr "${CURL_INCLUDES}" HAVE_GETHOSTBYADDR)
 check_symbol_exists(gethostbyaddr_r "${CURL_INCLUDES}" HAVE_GETHOSTBYADDR_R)
 check_symbol_exists(gettimeofday  "${CURL_INCLUDES}" HAVE_GETTIMEOFDAY)
 check_symbol_exists(inet_addr     "${CURL_INCLUDES}" HAVE_INET_ADDR)
-check_symbol_exists(inet_ntoa     "${CURL_INCLUDES}" HAVE_INET_NTOA)
-check_symbol_exists(inet_ntoa_r   "${CURL_INCLUDES}" HAVE_INET_NTOA_R)
 check_symbol_exists(closesocket   "${CURL_INCLUDES}" HAVE_CLOSESOCKET)
 check_symbol_exists(sigsetjmp     "${CURL_INCLUDES}" HAVE_SIGSETJMP)
 check_symbol_exists(getpass_r     "${CURL_INCLUDES}" HAVE_GETPASS_R)
@@ -1128,8 +1126,6 @@ foreach(CURL_TEST
     HAVE_IN_ADDR_T
     HAVE_BOOL_T
     STDC_HEADERS
-    HAVE_INET_NTOA_R_DECL
-    HAVE_INET_NTOA_R_DECL_REENTRANT
     HAVE_GETADDRINFO
     HAVE_FILE_OFFSET_BITS
     HAVE_VARIADIC_MACROS_C99
@@ -1166,8 +1162,7 @@ foreach(CURL_TEST
     HAVE_GETHOSTBYADDR_R_8
     HAVE_GETHOSTBYNAME_R_3
     HAVE_GETHOSTBYNAME_R_5
-    HAVE_GETHOSTBYNAME_R_6
-    HAVE_INET_NTOA_R_DECL_REENTRANT)
+    HAVE_GETHOSTBYNAME_R_6)
   if(NOT ${CURL_TEST})
     if(${CURL_TEST}_REENTRANT)
       set(NEED_REENTRANT 1)
@@ -1188,11 +1183,6 @@ if(NEED_REENTRANT)
       set(${CURL_TEST} 1)
     endif()
   endforeach()
-endif()
-
-if(HAVE_INET_NTOA_R_DECL_REENTRANT)
-  set(HAVE_INET_NTOA_R_DECL 1)
-  set(NEED_REENTRANT 1)
 endif()
 
 # Check clock_gettime(CLOCK_MONOTONIC, x) support
