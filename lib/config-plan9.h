@@ -96,7 +96,6 @@
 #define HAVE_ERRNO_H 1
 #define HAVE_FCNTL 1
 #define HAVE_FCNTL_H 1
-#define HAVE_FDOPEN 1
 #define HAVE_FORK 1
 #define HAVE_FREEADDRINFO 1
 #define HAVE_FTRUNCATE 1
