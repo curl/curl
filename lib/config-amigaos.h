@@ -55,7 +55,6 @@
 #define HAVE_RAND_STATUS 1
 #define HAVE_SELECT 1
 #define HAVE_SETJMP_H 1
-#define HAVE_SGTTY_H 1
 #define HAVE_SIGNAL 1
 #define HAVE_SIGNAL_H 1
 #define HAVE_SIG_ATOMIC_T 1

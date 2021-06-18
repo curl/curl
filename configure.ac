@@ -3036,7 +3036,6 @@ AC_CHECK_HEADERS(
         sys/param.h \
         termios.h \
         termio.h \
-        sgtty.h \
         fcntl.h \
         alloca.h \
         io.h \
