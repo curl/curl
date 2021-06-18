@@ -1588,7 +1588,7 @@ static CURLcode https_connecting(struct Curl_easy *data, bool *done)
 #endif
 
   /* perform SSL initialization for this socket */
-  result = Curl_ssl_connect_nonblocking(data, conn, FIRSTSOCKET, done);
+  result = Curl_ssl_connect_nonblocking(data, conn, FALSE, FIRSTSOCKET, done);
   if(result)
     connclose(conn, "Failed HTTPS connection");
 

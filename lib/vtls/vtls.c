@@ -326,7 +326,7 @@ Curl_ssl_connect(struct Curl_easy *data, struct connectdata *conn,
 
 CURLcode
 Curl_ssl_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
-                             int sockindex, bool *done)
+                             bool isproxy, int sockindex, bool *done)
 {
   CURLcode result;
 
@@ -345,7 +345,7 @@ Curl_ssl_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
   result = Curl_ssl->connect_nonblocking(data, conn, sockindex, done);
   if(result)
     conn->ssl[sockindex].use = FALSE;
-  else if(*done)
+  else if(*done && !isproxy)
     Curl_pgrsTime(data, TIMER_APPCONNECT); /* SSL is connected */
   return result;
 }

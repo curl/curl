@@ -670,7 +670,7 @@ static CURLcode smb_connection_state(struct Curl_easy *data, bool *done)
 #ifdef USE_SSL
     if((conn->handler->flags & PROTOPT_SSL)) {
       bool ssl_done = FALSE;
-      result = Curl_ssl_connect_nonblocking(data, conn,
+      result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
                                             FIRSTSOCKET, &ssl_done);
       if(result && result != CURLE_AGAIN)
         return result;
