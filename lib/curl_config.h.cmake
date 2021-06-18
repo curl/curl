@@ -175,21 +175,6 @@
 /* Define to 1 if you have the `getppid' function. */
 #cmakedefine HAVE_GETPPID 1
 
-/* Define to 1 if you have the gethostbyaddr function. */
-#cmakedefine HAVE_GETHOSTBYADDR 1
-
-/* Define to 1 if you have the gethostbyaddr_r function. */
-#cmakedefine HAVE_GETHOSTBYADDR_R 1
-
-/* gethostbyaddr_r() takes 5 args */
-#cmakedefine HAVE_GETHOSTBYADDR_R_5 1
-
-/* gethostbyaddr_r() takes 7 args */
-#cmakedefine HAVE_GETHOSTBYADDR_R_7 1
-
-/* gethostbyaddr_r() takes 8 args */
-#cmakedefine HAVE_GETHOSTBYADDR_R_8 1
-
 /* Define to 1 if you have the gethostbyname function. */
 #cmakedefine HAVE_GETHOSTBYNAME 1
 

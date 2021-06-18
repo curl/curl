@@ -214,39 +214,6 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRTOK_R], [
 ])
 
 
-dnl CURL_CHECK_NEED_REENTRANT_GETHOSTBYADDR_R
-dnl -------------------------------------------------
-dnl Checks if the preprocessor _REENTRANT definition
-dnl makes function gethostbyaddr_r compiler visible.
-
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETHOSTBYADDR_R], [
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([gethostbyaddr_r])
-  ],[
-    tmp_gethostbyaddr_r="yes"
-  ],[
-    tmp_gethostbyaddr_r="no"
-  ])
-  if test "$tmp_gethostbyaddr_r" = "yes"; then
-    AC_EGREP_CPP([gethostbyaddr_r],[
-#include <sys/types.h>
-#include <netdb.h>
-    ],[
-      tmp_gethostbyaddr_r="proto_declared"
-    ],[
-      AC_EGREP_CPP([gethostbyaddr_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <netdb.h>
-      ],[
-        tmp_gethostbyaddr_r="proto_needs_reentrant"
-        tmp_need_reentrant="yes"
-      ])
-    ])
-  fi
-])
-
-
 dnl CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
@@ -331,9 +298,6 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_FUNCTIONS_R], [
   fi
   if test "$tmp_need_reentrant" = "no"; then
     CURL_CHECK_NEED_REENTRANT_STRTOK_R
-  fi
-  if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_GETHOSTBYADDR_R
   fi
   if test "$tmp_need_reentrant" = "no"; then
     CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R

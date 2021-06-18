@@ -182,9 +182,6 @@
 /* Define to 1 if you have the getsockname function. */
 #define HAVE_GETSOCKNAME 1
 
-/* Define if you have the gethostbyaddr function. */
-#define HAVE_GETHOSTBYADDR 1
-
 /* Define if you have the gethostname function. */
 #define HAVE_GETHOSTNAME 1
 
