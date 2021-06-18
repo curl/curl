@@ -140,21 +140,6 @@
 /* Define to 1 if you have the `geteuid' function. */
 /* #undef HAVE_GETEUID */
 
-/* Define to 1 if you have the gethostbyaddr function. */
-#define HAVE_GETHOSTBYADDR 1
-
-/* Define to 1 if you have the gethostbyaddr_r function. */
-#define HAVE_GETHOSTBYADDR_R 1
-
-/* gethostbyaddr_r() takes 5 args */
-/* #undef HAVE_GETHOSTBYADDR_R_5 */
-
-/* gethostbyaddr_r() takes 7 args */
-/* #undef HAVE_GETHOSTBYADDR_R_7 */
-
-/* gethostbyaddr_r() takes 8 args */
-#define HAVE_GETHOSTBYADDR_R_8 1
-
 /* Define to 1 if you have the gethostbyname function. */
 #define HAVE_GETHOSTBYNAME 1
 

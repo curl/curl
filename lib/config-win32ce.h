@@ -142,9 +142,6 @@
 /* Define if you don't have vprintf but do have _doprnt.  */
 /* #define HAVE_DOPRNT 1 */
 
-/* Define if you have the gethostbyaddr function.  */
-#define HAVE_GETHOSTBYADDR 1
-
 /* Define if you have the gethostname function.  */
 #define HAVE_GETHOSTNAME 1
 

@@ -120,9 +120,6 @@
 /* Define to 1 if you have the `geteuid' function. */
 #define HAVE_GETEUID 1
 
-/* Define to 1 if you have the `gethostbyaddr' function. */
-#define HAVE_GETHOSTBYADDR 1
-
 /* If you have gethostbyname */
 #define HAVE_GETHOSTBYNAME 1
 

@@ -41,15 +41,6 @@
 /* Define if you want the built-in manual */
 #define USE_MANUAL
 
-/* Define if you have the gethostbyaddr_r() function with 5 arguments */
-#undef HAVE_GETHOSTBYADDR_R_5
-
-/* Define if you have the gethostbyaddr_r() function with 7 arguments */
-#undef HAVE_GETHOSTBYADDR_R_7
-
-/* Define if you have the gethostbyaddr_r() function with 8 arguments */
-#undef HAVE_GETHOSTBYADDR_R_8
-
 /* Define if you have the gethostbyname_r() function with 3 arguments */
 #undef HAVE_GETHOSTBYNAME_R_3
 
@@ -109,12 +100,6 @@
 
 /* Define if you have the `geteuid' function. */
 #undef HAVE_GETEUID
-
-/* Define if you have the `gethostbyaddr' function. */
-#define HAVE_GETHOSTBYADDR
-
-/* Define if you have the `gethostbyaddr_r' function. */
-#undef HAVE_GETHOSTBYADDR_R
 
 /* Define if you have the `gethostbyname_r' function. */
 #undef HAVE_GETHOSTBYNAME_R
