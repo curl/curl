@@ -113,9 +113,6 @@
 /* Define to 1 if you have the `CRYPTO_cleanup_all_ex_data' function. */
 #define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
 
-/* Define to 1 if you have the <crypto.h> header file. */
-/* #undef HAVE_CRYPTO_H */
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
 
