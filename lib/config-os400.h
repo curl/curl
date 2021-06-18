@@ -238,9 +238,6 @@
 /* Define if you have the `RAND_status' function. */
 #undef HAVE_RAND_STATUS
 
-/* Define if you have the <rsa.h> header file. */
-#undef HAVE_RSA_H
-
 /* Define if you have the `select' function. */
 #define HAVE_SELECT
 
