@@ -151,9 +151,6 @@
 /* Define to 1 if you have the <errno.h> header file. */
 #cmakedefine HAVE_ERRNO_H 1
 
-/* Define to 1 if you have the <err.h> header file. */
-#cmakedefine HAVE_ERR_H 1
-
 /* Define to 1 if you have the fcntl function. */
 #cmakedefine HAVE_FCNTL 1
 
