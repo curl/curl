@@ -6,20 +6,28 @@ CONNECT_ONLY
 </keywords>
 </info>
 
+#
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+#
 # Client-side
 <client>
 <server>
 imap
 </server>
-<tool>
-lib597
-</tool>
  <name>
-IMAP CONNECT_ONLY option
+IMAP with CONNECT_ONLY, custom command then exit
  </name>
+<tool>
+lib%TESTNUMBER
+</tool>
 
 <command>
-imap://%HOSTIP:%IMAPPORT/%TESTNUMBER
+imap://%HOSTIP:%IMAPPORT/677
 </command>
 
 </client>
@@ -29,6 +37,7 @@ imap://%HOSTIP:%IMAPPORT/%TESTNUMBER
 <verify>
 <protocol>
 A001 CAPABILITY
+A1 IDLE
 </protocol>
 </verify>
 </testcase>
