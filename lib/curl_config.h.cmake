@@ -160,9 +160,6 @@
 /* Define to 1 if you have a working fcntl O_NONBLOCK function. */
 #cmakedefine HAVE_FCNTL_O_NONBLOCK 1
 
-/* Define to 1 if you have the `fork' function. */
-#cmakedefine HAVE_FORK 1
-
 /* Define to 1 if you have the freeaddrinfo function. */
 #cmakedefine HAVE_FREEADDRINFO 1
 

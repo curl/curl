@@ -128,9 +128,6 @@
 /* Define to 1 if you have a working fcntl O_NONBLOCK function. */
 #define HAVE_FCNTL_O_NONBLOCK 1
 
-/* Define to 1 if you have the `fork' function. */
-#define HAVE_FORK 1
-
 /* Define to 1 if you have the freeaddrinfo function. */
 #define HAVE_FREEADDRINFO 1
 

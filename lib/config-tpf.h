@@ -111,10 +111,6 @@
 /* Define to 1 if you have a working fcntl O_NONBLOCK function. */
 #define HAVE_FCNTL_O_NONBLOCK 1
 
-/* Define to 1 if you have the `fork' function. */
-/* #undef HAVE_FORK */
-#define HAVE_FORK 1
-
 /* Define to 1 if you have the `ftruncate' function. */
 #define HAVE_FTRUNCATE 1
 
