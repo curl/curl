@@ -350,39 +350,6 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETPROTOBYNAME_R], [
 ])
 
 
-dnl CURL_CHECK_NEED_REENTRANT_GETSERVBYPORT_R
-dnl -------------------------------------------------
-dnl Checks if the preprocessor _REENTRANT definition
-dnl makes function getservbyport_r compiler visible.
-
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETSERVBYPORT_R], [
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([getservbyport_r])
-  ],[
-    tmp_getservbyport_r="yes"
-  ],[
-    tmp_getservbyport_r="no"
-  ])
-  if test "$tmp_getservbyport_r" = "yes"; then
-    AC_EGREP_CPP([getservbyport_r],[
-#include <sys/types.h>
-#include <netdb.h>
-    ],[
-      tmp_getservbyport_r="proto_declared"
-    ],[
-      AC_EGREP_CPP([getservbyport_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <netdb.h>
-      ],[
-        tmp_getservbyport_r="proto_needs_reentrant"
-        tmp_need_reentrant="yes"
-      ])
-    ])
-  fi
-])
-
-
 dnl CURL_CHECK_NEED_REENTRANT_FUNCTIONS_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
@@ -413,9 +380,6 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_FUNCTIONS_R], [
   fi
   if test "$tmp_need_reentrant" = "no"; then
     CURL_CHECK_NEED_REENTRANT_GETPROTOBYNAME_R
-  fi
-  if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_GETSERVBYPORT_R
   fi
 ])
 

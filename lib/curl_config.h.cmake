@@ -112,12 +112,6 @@
 /* Define if you want to enable IPv6 support */
 #cmakedefine ENABLE_IPV6 1
 
-/* Specifies the number of arguments to getservbyport_r */
-#cmakedefine GETSERVBYPORT_R_ARGS ${GETSERVBYPORT_R_ARGS}
-
-/* Specifies the size of the buffer to pass to getservbyport_r */
-#cmakedefine GETSERVBYPORT_R_BUFSIZE ${GETSERVBYPORT_R_BUFSIZE}
-
 /* Define to 1 if you have the alarm function. */
 #cmakedefine HAVE_ALARM 1
 
@@ -258,9 +252,6 @@
 
 /* Define to 1 if you have the `getrlimit' function. */
 #cmakedefine HAVE_GETRLIMIT 1
-
-/* Define to 1 if you have the getservbyport_r function. */
-#cmakedefine HAVE_GETSERVBYPORT_R 1
 
 /* Define to 1 if you have the `gettimeofday' function. */
 #cmakedefine HAVE_GETTIMEOFDAY 1

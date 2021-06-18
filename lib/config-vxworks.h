@@ -83,12 +83,6 @@
 /* Define if you want to enable IPv6 support */
 #define ENABLE_IPV6 1
 
-/* Specifies the number of arguments to getservbyport_r */
-#define GETSERVBYPORT_R_ARGS 6
-
-/* Specifies the size of the buffer to pass to getservbyport_r */
-#define GETSERVBYPORT_R_BUFSIZE 4096
-
 /* Define to 1 if you have the alarm function. */
 #define HAVE_ALARM 1
 
@@ -208,9 +202,6 @@
 
 /* Define to 1 if you have the `getrlimit' function. */
 #define HAVE_GETRLIMIT 1
-
-/* Define to 1 if you have the getservbyport_r function. */
-/* #undef HAVE_GETSERVBYPORT_R */
 
 /* Define to 1 if you have the `gettimeofday' function. */
 /* #undef HAVE_GETTIMEOFDAY */
