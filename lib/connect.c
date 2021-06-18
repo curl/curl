@@ -985,6 +985,7 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
               Curl_strerror(error, buffer, sizeof(buffer)));
 #endif
 
+        allow = Curl_timeleft(data, &now, TRUE);
         conn->timeoutms_per_addr[i] = conn->tempaddr[i]->ai_next == NULL ?
           allow : allow / 2;
         ainext(conn, i, TRUE);
