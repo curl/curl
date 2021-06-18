@@ -475,8 +475,8 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
 {
   /* Start the SSL connection */
   struct imap_conn *imapc = &conn->proto.imapc;
-  CURLcode result = Curl_ssl_connect_nonblocking(data, conn, FIRSTSOCKET,
-                                                 &imapc->ssldone);
+  CURLcode result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
+                                                 FIRSTSOCKET, &imapc->ssldone);
 
   if(!result) {
     if(imapc->state != IMAP_UPGRADETLS)
@@ -1369,7 +1369,7 @@ static CURLcode imap_multi_statemach(struct Curl_easy *data, bool *done)
   struct imap_conn *imapc = &conn->proto.imapc;
 
   if((conn->handler->flags & PROTOPT_SSL) && !imapc->ssldone) {
-    result = Curl_ssl_connect_nonblocking(data, conn,
+    result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
                                           FIRSTSOCKET, &imapc->ssldone);
     if(result || !imapc->ssldone)
       return result;
