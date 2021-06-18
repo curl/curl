@@ -236,9 +236,6 @@
 /* Define if you have the `setvbuf' function. */
 #undef HAVE_SETVBUF
 
-/* Define if you have the <sgtty.h> header file. */
-#define HAVE_SGTTY_H
-
 /* Define if you have the `sigaction' function. */
 #undef HAVE_SIGACTION
 

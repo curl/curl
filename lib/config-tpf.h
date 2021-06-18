@@ -364,9 +364,6 @@
 /* Define to 1 if you have a working setsockopt SO_NONBLOCK function. */
 /* #undef HAVE_SETSOCKOPT_SO_NONBLOCK */
 
-/* Define to 1 if you have the <sgtty.h> header file. */
-/* #undef HAVE_SGTTY_H 1 */
-
 /* Define to 1 if you have the `sigaction' function. */
 #define HAVE_SIGACTION 1
 

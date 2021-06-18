@@ -60,9 +60,6 @@
 /* Define if you have the <signal.h> header file. */
 #define HAVE_SIGNAL_H 1
 
-/* Define if you have the <sgtty.h> header file.  */
-/* #define HAVE_SGTTY_H 1 */
-
 /* Define if you have the <ssl.h> header file.  */
 /* #define HAVE_SSL_H 1 */
 
