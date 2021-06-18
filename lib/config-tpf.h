@@ -99,10 +99,6 @@
 /* #undef HAVE_CRYPTO_CLEANUP_ALL_EX_DATA */
 #define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
 
-/* Define to 1 if you have the <crypto.h> header file. */
-/* #undef HAVE_CRYPTO_H */
-#define HAVE_CRYPTO_H 1
-
 /* Define to 1 if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H 1
 
