@@ -90,6 +90,7 @@ UNITTEST_START
   data.progress.t_redirect = 0;
   data.progress.start.tv_sec = now.tv_sec - 2;
   data.progress.start.tv_usec = now.tv_usec;
+  data.progress.set_t_appconnect = true;
   fake_t_startsingle_time(&data, now, -2);
 
   Curl_pgrsTime(&data, TIMER_NAMELOOKUP);

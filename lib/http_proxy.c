@@ -59,10 +59,13 @@ static CURLcode https_proxy_connect(struct Curl_easy *data, int sockindex)
   CURLcode result = CURLE_OK;
   DEBUGASSERT(conn->http_proxy.proxytype == CURLPROXY_HTTPS);
   if(!conn->bits.proxy_ssl_connected[sockindex]) {
+    /* only record set_t_appconnect when connect to destination */
+    data->progress.set_t_appconnect = false;
     /* perform SSL initialization for this socket */
     result =
       Curl_ssl_connect_nonblocking(data, conn, sockindex,
                                    &conn->bits.proxy_ssl_connected[sockindex]);
+    data->progress.set_t_appconnect = true;
     if(result)
       /* a failed connection is marked for closure to prevent (bad) re-use or
          similar */

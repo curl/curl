@@ -1212,6 +1212,7 @@ struct Progress {
   int speeder_c;
   BIT(callback);  /* set when progress callback is used */
   BIT(is_t_startransfer_set);
+  BIT(set_t_appconnect);
 };
 
 typedef enum {

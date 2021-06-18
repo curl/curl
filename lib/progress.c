@@ -198,6 +198,11 @@ struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
     delta = &data->progress.t_connect;
     break;
   case TIMER_APPCONNECT:
+    /* we only set t_appconnect when building SSL connection to destination */
+    /* set_t_appconnect would be set to false when connect to HTTPS proxy */
+    if(!data->progress.set_t_appconnect) {
+      return now;
+    }
     delta = &data->progress.t_appconnect;
     break;
   case TIMER_PRETRANSFER:
@@ -229,12 +234,7 @@ struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
     timediff_t us = Curl_timediff_us(now, data->progress.t_startsingle);
     if(us < 1)
       us = 1; /* make sure at least one microsecond passed */
-    /* make sure we don't add t_appconnect twice when */
-    /* building TLS-in-TLS for HTTPS proxy */
-    if(timer == TIMER_APPCONNECT)
-      *delta = us;
-    else
-      *delta += us;
+    *delta += us;
   }
   return now;
 }
@@ -244,6 +244,7 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
   data->progress.speeder_c = 0; /* reset the progress meter display */
   data->progress.start = Curl_now();
   data->progress.is_t_startransfer_set = false;
+  data->progress.set_t_appconnect = true;
   data->progress.ul_limit_start = data->progress.start;
   data->progress.dl_limit_start = data->progress.start;
   data->progress.ul_limit_size = 0;
