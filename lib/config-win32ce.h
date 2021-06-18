@@ -166,9 +166,6 @@
 /* Define if you have a working ioctlsocket FIONBIO function. */
 #define HAVE_IOCTLSOCKET_FIONBIO 1
 
-/* Define if you have the perror function.  */
-#define HAVE_PERROR 1
-
 /* Define if you have the RAND_screen function when using SSL  */
 #define HAVE_RAND_SCREEN 1
 

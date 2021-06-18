@@ -388,9 +388,6 @@
 /* Define to 1 if you have the <pem.h> header file. */
 /* #undef HAVE_PEM_H */
 
-/* Define to 1 if you have the `perror' function. */
-#define HAVE_PERROR 1
-
 /* Define to 1 if you have the `pipe' function. */
 #define HAVE_PIPE 1
 
