@@ -214,37 +214,6 @@ if (sizeof (bool *) )
 #include <float.h>
 int main() { return 0; }
 #endif
-#ifdef HAVE_INET_NTOA_R_DECL
-#include <arpa/inet.h>
-
-typedef void (*func_type)();
-
-int main()
-{
-#ifndef inet_ntoa_r
-  func_type func;
-  func = (func_type)inet_ntoa_r;
-  (void)func;
-#endif
-  return 0;
-}
-#endif
-#ifdef HAVE_INET_NTOA_R_DECL_REENTRANT
-#define _REENTRANT
-#include <arpa/inet.h>
-
-typedef void (*func_type)();
-
-int main()
-{
-#ifndef inet_ntoa_r
-  func_type func;
-  func = (func_type)&inet_ntoa_r;
-  (void)func;
-#endif
-  return 0;
-}
-#endif
 #ifdef HAVE_GETADDRINFO
 #include <netdb.h>
 #include <sys/types.h>

@@ -40,7 +40,7 @@
 #define INT16SZ          2
 
 /*
- * Format an IPv4 address, more or less like inet_ntoa().
+ * Format an IPv4 address, more or less like inet_ntop().
  *
  * Returns `dst' (as a const)
  * Note:
