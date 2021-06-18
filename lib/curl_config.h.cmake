@@ -512,9 +512,6 @@
 /* Define to 1 if you have the recvfrom function. */
 #cmakedefine HAVE_RECVFROM 1
 
-/* Define to 1 if you have the <rsa.h> header file. */
-#cmakedefine HAVE_RSA_H 1
-
 /* Define to 1 if you have the select function. */
 #cmakedefine HAVE_SELECT 1
 

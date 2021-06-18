@@ -430,9 +430,6 @@
 /* Define to 1 if you have the recvfrom function. */
 #define HAVE_RECVFROM 1
 
-/* Define to 1 if you have the <rsa.h> header file. */
-/* #undef HAVE_RSA_H */
-
 /* Define to 1 if you have the select function. */
 #define HAVE_SELECT 1
 

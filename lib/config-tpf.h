@@ -346,10 +346,6 @@
 /* #undef HAVE_RAND_STATUS */
 #define HAVE_RAND_STATUS 1
 
-/* Define to 1 if you have the <rsa.h> header file. */
-/* #undef HAVE_RSA_H */
-#define HAVE_RSA_H 1
-
 /* Define to 1 if you have the `select' function. */
 #define HAVE_SELECT 1
 
