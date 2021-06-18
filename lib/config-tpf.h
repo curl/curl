@@ -102,10 +102,6 @@
 /* Define to 1 if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H 1
 
-/* Define to 1 if you have the <err.h> header file. */
-/* #undef HAVE_ERR_H */
-#define HAVE_ERR_H 1
-
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
 
