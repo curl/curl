@@ -856,7 +856,7 @@ gtls_connect_step3(struct Curl_easy *data,
   if(!chainp) {
     if(SSL_CONN_CONFIG(verifypeer) ||
        SSL_CONN_CONFIG(verifyhost) ||
-       SSL_SET_OPTION(issuercert)) {
+       SSL_CONN_CONFIG(issuercert)) {
 #ifdef HAVE_GNUTLS_SRP
       if(SSL_SET_OPTION(authtype) == CURL_TLSAUTH_SRP
          && SSL_SET_OPTION(username) != NULL
@@ -1040,21 +1040,21 @@ gtls_connect_step3(struct Curl_easy *data,
        gnutls_x509_crt_t format */
     gnutls_x509_crt_import(x509_cert, chainp, GNUTLS_X509_FMT_DER);
 
-  if(SSL_SET_OPTION(issuercert)) {
+  if(SSL_CONN_CONFIG(issuercert)) {
     gnutls_x509_crt_init(&x509_issuer);
-    issuerp = load_file(SSL_SET_OPTION(issuercert));
+    issuerp = load_file(SSL_CONN_CONFIG(issuercert));
     gnutls_x509_crt_import(x509_issuer, &issuerp, GNUTLS_X509_FMT_PEM);
     rc = gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
     gnutls_x509_crt_deinit(x509_issuer);
     unload_file(issuerp);
     if(rc <= 0) {
       failf(data, "server certificate issuer check failed (IssuerCert: %s)",
-            SSL_SET_OPTION(issuercert)?SSL_SET_OPTION(issuercert):"none");
+            SSL_CONN_CONFIG(issuercert)?SSL_CONN_CONFIG(issuercert):"none");
       gnutls_x509_crt_deinit(x509_cert);
       return CURLE_SSL_ISSUER_ERROR;
     }
     infof(data, "  server certificate issuer check OK (Issuer Cert: %s)",
-          SSL_SET_OPTION(issuercert)?SSL_SET_OPTION(issuercert):"none");
+          SSL_SET_OPTION(issuercert)?SSL_CONN_CONFIG(issuercert):"none");
   }
 
   size = sizeof(certname);

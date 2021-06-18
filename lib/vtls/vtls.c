@@ -125,6 +125,16 @@ static bool blobcmp(struct curl_blob *first, struct curl_blob *second)
   return !memcmp(first->data, second->data, first->len); /* same data */
 }
 
+static bool safecmp(char *a, char *b)
+{
+  if(a && b)
+    return !strcmp(a, b);
+  else if(!a && !b)
+    return TRUE; /* match */
+  return FALSE; /* no match */
+}
+
+
 bool
 Curl_ssl_config_matches(struct ssl_primary_config *data,
                         struct ssl_primary_config *needle)
@@ -136,11 +146,13 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      (data->verifystatus == needle->verifystatus) &&
      blobcmp(data->cert_blob, needle->cert_blob) &&
      blobcmp(data->ca_info_blob, needle->ca_info_blob) &&
-     Curl_safe_strcasecompare(data->CApath, needle->CApath) &&
-     Curl_safe_strcasecompare(data->CAfile, needle->CAfile) &&
-     Curl_safe_strcasecompare(data->clientcert, needle->clientcert) &&
-     Curl_safe_strcasecompare(data->random_file, needle->random_file) &&
-     Curl_safe_strcasecompare(data->egdsocket, needle->egdsocket) &&
+     blobcmp(data->issuercert_blob, needle->issuercert_blob) &&
+     safecmp(data->CApath, needle->CApath) &&
+     safecmp(data->CAfile, needle->CAfile) &&
+     safecmp(data->issuercert, needle->issuercert) &&
+     safecmp(data->clientcert, needle->clientcert) &&
+     safecmp(data->random_file, needle->random_file) &&
+     safecmp(data->egdsocket, needle->egdsocket) &&
      Curl_safe_strcasecompare(data->cipher_list, needle->cipher_list) &&
      Curl_safe_strcasecompare(data->cipher_list13, needle->cipher_list13) &&
      Curl_safe_strcasecompare(data->curves, needle->curves) &&
@@ -163,8 +175,10 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
 
   CLONE_BLOB(cert_blob);
   CLONE_BLOB(ca_info_blob);
+  CLONE_BLOB(issuercert_blob);
   CLONE_STRING(CApath);
   CLONE_STRING(CAfile);
+  CLONE_STRING(issuercert);
   CLONE_STRING(clientcert);
   CLONE_STRING(random_file);
   CLONE_STRING(egdsocket);
@@ -180,6 +194,7 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
 {
   Curl_safefree(sslc->CApath);
   Curl_safefree(sslc->CAfile);
+  Curl_safefree(sslc->issuercert);
   Curl_safefree(sslc->clientcert);
   Curl_safefree(sslc->random_file);
   Curl_safefree(sslc->egdsocket);
@@ -188,6 +203,7 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
   Curl_safefree(sslc->pinned_key);
   Curl_safefree(sslc->cert_blob);
   Curl_safefree(sslc->ca_info_blob);
+  Curl_safefree(sslc->issuercert_blob);
   Curl_safefree(sslc->curves);
 }
 
