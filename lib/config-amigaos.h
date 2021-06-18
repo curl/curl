@@ -49,7 +49,6 @@
 #define HAVE_OPENSSL_RSA_H 1
 #define HAVE_OPENSSL_SSL_H 1
 #define HAVE_OPENSSL_X509_H 1
-#define HAVE_PERROR 1
 #define HAVE_PWD_H 1
 #define HAVE_RAND_EGD 1
 #define HAVE_RAND_STATUS 1

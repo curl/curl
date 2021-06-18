@@ -223,9 +223,6 @@
 /* Define if you have the <pem.h> header file. */
 #undef HAVE_PEM_H
 
-/* Define if you have the `perror' function. */
-#define HAVE_PERROR
-
 /* Define if you have the <pwd.h> header file. */
 #define HAVE_PWD_H
 

@@ -134,7 +134,6 @@
 #define HAVE_OPENSSL_SSL_H 1
 #define HAVE_OPENSSL_X509_H 1
 
-#define HAVE_PERROR 1
 #define HAVE_PIPE 1
 #define HAVE_POLL 1
 #define HAVE_POLL_FINE 1
