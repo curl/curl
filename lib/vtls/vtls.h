@@ -247,7 +247,7 @@ void Curl_ssl_sessionid_unlock(struct Curl_easy *data);
  */
 bool Curl_ssl_getsessionid(struct Curl_easy *data,
                            struct connectdata *conn,
-                           const bool isproxy,
+                           const bool isProxy,
                            void **ssl_sessionid,
                            size_t *idsize, /* set 0 if unknown */
                            int sockindex);
