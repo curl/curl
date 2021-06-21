@@ -1751,12 +1751,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     if(data->conn &&
        (data->mstate >= MSTATE_CONNECT) &&
        (data->mstate < MSTATE_COMPLETED)) {
-      /* Check for overall operation timeout here but defer handling the 
+      /* Check for overall operation timeout here but defer handling the
        * connection timeout to later, to allow for a connection to be set up
-       * in the window since we last checked timeout. This prevents us 
+       * in the window since we last checked timeout. This prevents us
        * tearing down a completed connection in the case where we were slow
        * to check the timeout (e.g. process descheduled during this loop).
-       * We set connect_timeout=FALSE to do this.*/
+       * We set connect_timeout=FALSE to do this. */
 
       /* we need to wait for the connect state as only then is the start time
          stored, but we must not check already completed handles */
@@ -2441,7 +2441,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     if(data->conn &&
        data->mstate >= MSTATE_CONNECT &&
-       data->mstate <= MSTATE_DO &&
+       data->mstate < MSTATE_DO &&
        rc != CURLM_CALL_MULTI_PERFORM &&
        !multi_ischanged(multi, false)) {
       /* We now handle stream timeouts if and only if this will be the last
