@@ -1869,24 +1869,28 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
     bool is_cert_file = (!is_cert_data) && is_file(ssl_cert);
     SecIdentityRef cert_and_key = NULL;
 
-    /* User wants to authenticate with a client cert. Look for it:
-       If we detect that this is a file on disk, then let's load it.
-       Otherwise, assume that the user wants to use an identity loaded
-       from the Keychain. */
-    if(is_cert_file || is_cert_data) {
+    /* User wants to authenticate with a client cert. Look for it. Assume that
+       the user wants to use an identity loaded from the Keychain. If not, try
+       it as a file on disk */
+
+    if(!is_cert_data)
+      err = CopyIdentityWithLabel(ssl_cert, &cert_and_key);
+    else
+      err = !noErr;
+    if((err != noErr) && (is_cert_file || is_cert_data)) {
       if(!SSL_SET_OPTION(cert_type))
-        infof(data, "WARNING: SSL: Certificate type not set, assuming "
-                    "PKCS#12 format.");
-      else if(strncmp(SSL_SET_OPTION(cert_type), "P12",
-        strlen(SSL_SET_OPTION(cert_type))) != 0)
-        infof(data, "WARNING: SSL: The Security framework only supports "
-                    "loading identities that are in PKCS#12 format.");
+        infof(data, "SSL: Certificate type not set, assuming "
+              "PKCS#12 format.");
+      else if(!strcasecompare(SSL_SET_OPTION(cert_type), "P12")) {
+        failf(data, "SSL: The Security framework only supports "
+              "loading identities that are in PKCS#12 format.");
+        return CURLE_SSL_CERTPROBLEM;
+      }
 
       err = CopyIdentityFromPKCS12File(ssl_cert, ssl_cert_blob,
-        SSL_SET_OPTION(key_passwd), &cert_and_key);
+                                       SSL_SET_OPTION(key_passwd),
+                                       &cert_and_key);
     }
-    else
-      err = CopyIdentityWithLabel(ssl_cert, &cert_and_key);
 
     if(err == noErr && cert_and_key) {
       SecCertificateRef cert = NULL;
