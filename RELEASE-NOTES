@@ -4,10 +4,11 @@ curl and libcurl 7.78.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2426
+ Contributors:                 2429
 
 This release includes the following changes:
 
+ o curl_url_set: reject spaces in URLs w/o CURLU_ALLOW_SPACE [118]
  o CURLE_SETOPT_OPTION_SYNTAX: new error name for wrong setopt syntax [40]
  o hostip: make 'localhost' return fixed values [16]
  o mbedtls: add support for cert and key blob options [11]
@@ -16,6 +17,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o --socks4[a]: clarify where the host name is resolved [107]
  o ares: always store IPv6 addresses first [20]
  o asyn-ares: remove check for 'data' in Curl_resolver_cancel [89]
  o bearssl: explicitly initialize all fields of Curl_ssl [1]
@@ -34,13 +36,18 @@ This release includes the following bugfixes:
  o cmake: add CURL_DISABLE_NTLM option [44]
  o cmake: avoid leaking absolute paths into exported config [3]
  o cmake: try well-known send/recv signature for Apple [12]
+ o configure.ac: make non-executable [109]
+ o configure/cmake: remove checks for many unused functions [95]
  o configure: add --disable-ntlm option [45]
  o configure: disable RTSP when hyper is selected [68]
+ o configure: do not strip out debug flags [110]
  o configure: rename get-easy-option configure option to get-easy-options [81]
  o conn_shutdown: if closed during CONNECT cleanup properly [59]
  o conncache: lowercase the hash key for better match [5]
  o cookies: track expiration in jar to optimize removals [25]
  o curl: ignore blank --output-dir [57]
+ o curl_endian: remove the unused Curl_write64_le function [85]
+ o curl_multibyte: Remove local encoding fallbacks [58]
  o Curl_ntlm_core_mk_nt_hash: fix OOM in error path [8]
  o Curl_ssl_getsessionid: fail if no session cache exists [14]
  o CURLOPT_WRITEFUNCTION.3: minor update of the example [80]
@@ -52,6 +59,7 @@ This release includes the following bugfixes:
  o GHA: add several libcurl tests to the hyper job
  o GHA: run the newly fixed tests with hyper [36]
  o github: timeout jobs on macOS after 90 minutes [42]
+ o gnutls: set the preferred TLS versions in correct order [94]
  o GOVERNANCE: add 'user', 'committer' and 'contributor' [15]
  o hostip: bad CURLOPT_RESOLVE syntax now returns error [35]
  o hsts: ignore numberical IP address hosts [17]
@@ -60,8 +68,12 @@ This release includes the following bugfixes:
  o http2: init recvbuf struct for pushed streams [13]
  o http2_connisdead: handle trailing GOAWAY better [18]
  o http_proxy: deal with non-200 CONNECT response with Hyper [22]
+ o hyper: propagate errors back up from read callbacks [113]
  o HYPER: remove mentions of deprecated development branch
+ o idn: fix libidn2 with windows unicode builds [117]
  o lib: don't compare fd to FD_SETSIZE when using poll [61]
+ o libcurl-security.3: mention file descriptors and forks [108]
+ o libssh2: limit time a disconnect can take to 1 second [111]
  o mbedtls: make mbedtls_strerror always work [6]
  o mqtt: detect illegal and too large file size [43]
  o multi: add scan-build-6 work-around in curl_multi_fdset [88]
@@ -101,6 +113,7 @@ This release includes the following bugfixes:
  o test599: adjusted to work in hyper mode [77]
  o test644: remove as duplicate of test 587 [84]
  o tests: fix Accept-Encoding strips to work with Hyper builds [41]
+ o TLS: prevent shutdown loops to get stuck [112]
  o travis: add bearssl build [1]
  o travis: delete --enable-hsts option (it is the default now) [ci skip] [2]
  o travis: remove the arm job
@@ -108,6 +121,7 @@ This release includes the following bugfixes:
  o url.c: remove two variable assigns that are never read [90]
  o url: bad CURLOPT_CONNECT_TO syntax now returns error [31]
  o vtls: exit addsessionid if no cache is inited [7]
+ o vtls: only store TIMER_APPCONNECT for non-proxy connect [93]
  o warnless: simplify type size handling [30]
  o Win32: fix build with Watt-32
  o winbuild/README: VC should be set to 6 'or larger' [64]
@@ -120,16 +134,17 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Albin Vass, Alexis Vachette, Alex Xu, Bastian Krause, Christian Weisgerber,
-  Christoph M. Becker, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  David Hu, Dmitry Karpov, Dmitry Kostjuchenko, Douglas R. Reno,
-  Ebe Janchivdorj, Fawad Mirza, Gabriel Simmer, Gealber Morales, Gergely Nagy,
-  Gisle Vanem, Gregor Jasny, Harry Sintonen, Hugh Macdonald,
-  Jacob Hoffman-Andrews, Joel Depooter, Jon Rumsey, Jun-ya Kato, Kevin Burke,
-  Laurent Dufresne, Marc Hörsken, Mark Swaanenburg, Michael Forney,
-  Michael Kaufmann, Mohammed Naser, nian6324 on github, Paul Groke,
+  Christoph M. Becker, civodul on github, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, David Hu, dEajL3kA on github, Dmitry Karpov,
+  Dmitry Kostjuchenko, Douglas R. Reno, Ebe Janchivdorj, Fawad Mirza,
+  Gabriel Simmer, Gealber Morales, Gergely Nagy, Gisle Vanem, Gregor Jasny,
+  Harry Sintonen, Hugh Macdonald, Jacob Hoffman-Andrews, Joel Depooter,
+  Jon Rumsey, Jun-ya Kato, Kevin Burke, Laurent Dufresne, Marcel Raad,
+  Marc Hörsken, Mark Swaanenburg, Michael Forney, Michael Kaufmann,
+  Mohammed Naser, nian6324 on github, Nikos Mavrogiannopoulos, Paul Groke,
   Phil E. Taylor, Ray Satiro, Shikha Sharma, Vadim Grinshpun, Viktor Szakats,
-  Zhang Xiuhua,
-  (41 contributors)
+  Yongkang Huang, Zhang Xiuhua,
+  (46 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -190,6 +205,7 @@ References to bug reports and discussions on issues:
  [55] = https://curl.se/mail/lib-2021-06/0008.html
  [56] = https://curl.se/bug/?i=7222
  [57] = https://curl.se/bug/?i=7218
+ [58] = https://curl.se/bug/?i=7257
  [59] = https://curl.se/bug/?i=7236
  [60] = https://curl.se/mail/lib-2021-06/0018.html
  [61] = https://curl.se/bug/?i=7240
@@ -216,6 +232,7 @@ References to bug reports and discussions on issues:
  [82] = https://curl.se/bug/?i=7212
  [83] = https://curl.se/bug/?i=6896
  [84] = https://curl.se/bug/?i=7208
+ [85] = https://curl.se/bug/?i=7280
  [86] = https://curl.se/bug/?i=7245
  [87] = https://curl.se/bug/?i=7238
  [88] = https://curl.se/bug/?i=7248
@@ -223,3 +240,15 @@ References to bug reports and discussions on issues:
  [90] = https://curl.se/bug/?i=7248
  [91] = https://curl.se/bug/?i=7243
  [92] = https://curl.se/bug/?i=7239
+ [93] = https://curl.se/bug/?i=7274
+ [94] = https://curl.se/bug/?i=7277
+ [95] = https://curl.se/bug/?i=7276
+ [107] = https://curl.se/bug/?i=7273
+ [108] = https://curl.se/bug/?i=7270
+ [109] = https://curl.se/bug/?i=7272
+ [110] = https://curl.se/bug/?i=7216
+ [111] = https://curl.se/bug/?i=7271
+ [112] = https://curl.se/bug/?i=7271
+ [113] = https://curl.se/bug/?i=7266
+ [117] = https://curl.se/bug/?i=7228
+ [118] = https://curl.se/bug/?i=7073
