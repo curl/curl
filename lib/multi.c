@@ -709,7 +709,6 @@ static int close_connect_only(struct Curl_easy *data,
     return 1;
 
   connclose(conn, "Removing connect-only easy handle");
-  conn->bits.connect_only = FALSE;
 
   return 1;
 }
