@@ -1537,38 +1537,35 @@ static int http_getsock_do(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
 static CURLcode add_haproxy_protocol_header(struct Curl_easy *data)
 {
-  char proxy_header[128];
   struct dynbuf req;
   CURLcode result;
-  char tcp_version[5];
+  const char *tcp_version;
   DEBUGASSERT(data->conn);
-
-  /* Emit the correct prefix for IPv6 */
-  if(data->conn->bits.ipv6) {
-    strcpy(tcp_version, "TCP6");
-  }
-  else {
-    strcpy(tcp_version, "TCP4");
-  }
-
-  msnprintf(proxy_header,
-            sizeof(proxy_header),
-            "PROXY %s %s %s %i %i\r\n",
-            tcp_version,
-            data->info.conn_local_ip,
-            data->info.conn_primary_ip,
-            data->info.conn_local_port,
-            data->info.conn_primary_port);
-
   Curl_dyn_init(&req, DYN_HAXPROXY);
 
-  result = Curl_dyn_add(&req, proxy_header);
-  if(result)
-    return result;
+#ifdef USE_UNIX_SOCKETS
+  if(data->conn->unix_domain_socket)
+    /* the buffer is large enough to hold this! */
+    result = Curl_dyn_add(&req, "PROXY UNKNOWN\r\n");
+  else {
+#endif
+  /* Emit the correct prefix for IPv6 */
+  tcp_version = data->conn->bits.ipv6 ? "TCP6" : "TCP4";
 
-  result = Curl_buffer_send(&req, data, &data->info.request_size,
-                            0, FIRSTSOCKET);
+  result = Curl_dyn_addf(&req, "PROXY %s %s %s %i %i\r\n",
+                         tcp_version,
+                         data->info.conn_local_ip,
+                         data->info.conn_primary_ip,
+                         data->info.conn_local_port,
+                         data->info.conn_primary_port);
 
+#ifdef USE_UNIX_SOCKETS
+  }
+#endif
+
+  if(!result)
+    result = Curl_buffer_send(&req, data, &data->info.request_size,
+                              0, FIRSTSOCKET);
   return result;
 }
 #endif
