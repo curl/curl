@@ -109,7 +109,7 @@
         - libzstd-dev
       curl_env:
         T: debug-rustls
-        RUSTLS_VERSION: v0.6.0
+        RUSTLS_VERSION: v0.7.0
         C: >-
           --with-rustls={{ ansible_user_dir }}/crust
 
