@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -277,7 +277,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
 #else
       current_form->flags |= HTTPPOST_PTRNAME; /* fall through */
 #endif
-      /* FALLTHROUGH */
+      FALLTHROUGH;
     case CURLFORM_COPYNAME:
       if(current_form->name)
         return_value = CURL_FORMADD_OPTION_TWICE;
@@ -303,7 +303,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
        */
     case CURLFORM_PTRCONTENTS:
       current_form->flags |= HTTPPOST_PTRCONTENTS;
-      /* FALLTHROUGH */
+      FALLTHROUGH;
     case CURLFORM_COPYCONTENTS:
       if(current_form->value)
         return_value = CURL_FORMADD_OPTION_TWICE;

@@ -465,7 +465,7 @@ static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
       switch(st->bufend - st->bufbeg) {
       case 2:
         i = (st->buf[st->bufbeg + 1] & 0xFF) << 8;
-        /* FALLTHROUGH */
+        FALLTHROUGH;
       case 1:
         i |= (st->buf[st->bufbeg] & 0xFF) << 16;
         ptr[0] = base64[(i >> 18) & 0x3F];
@@ -803,7 +803,7 @@ static size_t read_part_content(curl_mimepart *part,
     case MIMEKIND_FILE:
       if(part->fp && feof(part->fp))
         break;  /* At EOF. */
-      /* FALLTHROUGH */
+      FALLTHROUGH;
     default:
       if(part->readfunc) {
         if(!(part->flags & MIME_FAST_READ)) {
@@ -925,7 +925,7 @@ static size_t readback_part(curl_mimepart *part,
         mimesetstate(&part->state, MIMESTATE_USERHEADERS, hdr->next);
         break;
       }
-      /* FALLTHROUGH */
+      FALLTHROUGH;
     case MIMESTATE_CURLHEADERS:
       if(!hdr)
         mimesetstate(&part->state, MIMESTATE_USERHEADERS, part->userheaders);
@@ -967,7 +967,7 @@ static size_t readback_part(curl_mimepart *part,
           fclose(part->fp);
           part->fp = NULL;
         }
-        /* FALLTHROUGH */
+        FALLTHROUGH;
       case CURL_READFUNC_ABORT:
       case CURL_READFUNC_PAUSE:
       case READ_ERROR:

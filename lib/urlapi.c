@@ -160,7 +160,7 @@ static size_t strlen_url(const char *url, bool relative)
     switch(*ptr) {
     case '?':
       left = FALSE;
-      /* FALLTHROUGH */
+      FALLTHROUGH;
     default:
       if(urlchar_needs_escaping(*ptr))
         newlen += 2;
@@ -205,7 +205,7 @@ static void strcpy_url(char *output, const char *url, bool relative)
     switch(*iptr) {
     case '?':
       left = FALSE;
-      /* FALLTHROUGH */
+      FALLTHROUGH;
     default:
       if(urlchar_needs_escaping(*iptr)) {
         msnprintf(optr, 4, "%%%02x", *iptr);

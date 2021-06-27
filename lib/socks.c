@@ -275,7 +275,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
         return CURLPX_OK;
       }
     }
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   CONNECT_RESOLVED:
   case CONNECT_RESOLVED: {
     struct Curl_addrinfo *hp = NULL;
@@ -313,7 +313,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
       return CURLPX_RESOLVE_HOST;
     }
   }
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   CONNECT_REQ_INIT:
   case CONNECT_REQ_INIT:
     /*
@@ -358,7 +358,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
       sx->outstanding = packetsize;
       sxstate(data, CONNECT_REQ_SENDING);
     }
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   case CONNECT_REQ_SENDING:
     /* Send request */
     result = Curl_write_plain(data, sockfd, (char *)sx->outp,
@@ -379,7 +379,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
     sx->outp = socksreq;
     sxstate(data, CONNECT_SOCKS_READ);
 
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   case CONNECT_SOCKS_READ:
     /* Receive response */
     result = Curl_read_plain(sockfd, (char *)sx->outp,
@@ -587,12 +587,12 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
       sx->outp += written;
       return CURLPX_OK;
     }
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   CONNECT_SOCKS_READ_INIT:
   case CONNECT_SOCKS_READ_INIT:
     sx->outstanding = 2; /* expect two bytes */
     sx->outp = socksreq; /* store it here */
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   case CONNECT_SOCKS_READ:
     result = Curl_read_plain(sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);
@@ -705,7 +705,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
     sx->outstanding = len;
     sx->outp = socksreq;
   }
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   case CONNECT_AUTH_SEND:
     result = Curl_write_plain(data, sockfd, (char *)sx->outp,
                               sx->outstanding, &written);
@@ -722,7 +722,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
     sx->outp = socksreq;
     sx->outstanding = 2;
     sxstate(data, CONNECT_AUTH_READ);
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   case CONNECT_AUTH_READ:
     result = Curl_read_plain(sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);
@@ -750,7 +750,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
 
     /* Everything is good so far, user was authenticated! */
     sxstate(data, CONNECT_REQ_INIT);
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   CONNECT_REQ_INIT:
   case CONNECT_REQ_INIT:
     if(socks5_resolve_local) {
@@ -789,7 +789,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
         return CURLPX_OK;
       }
     }
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   CONNECT_RESOLVED:
   case CONNECT_RESOLVED: {
     struct Curl_addrinfo *hp = NULL;
@@ -861,7 +861,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
       infof(data, "SOCKS5 connect to %s:%d (remotely resolved)\n",
             hostname, remote_port);
     }
-    /* FALLTHROUGH */
+    FALLTHROUGH;
 
   CONNECT_REQ_SEND:
   case CONNECT_REQ_SEND:
@@ -879,7 +879,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
     sx->outp = socksreq;
     sx->outstanding = len;
     sxstate(data, CONNECT_REQ_SENDING);
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   case CONNECT_REQ_SENDING:
     result = Curl_write_plain(data, sockfd, (char *)sx->outp,
                               sx->outstanding, &written);
@@ -902,7 +902,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
     sx->outstanding = 10; /* minimum packet size is 10 */
     sx->outp = socksreq;
     sxstate(data, CONNECT_REQ_READ);
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   case CONNECT_REQ_READ:
     result = Curl_read_plain(sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);
@@ -1001,7 +1001,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
     }
 #endif
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   case CONNECT_REQ_READ_MORE:
     result = Curl_read_plain(sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);

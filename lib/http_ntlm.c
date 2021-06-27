@@ -250,7 +250,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     /* connection is already authenticated,
      * don't send a header in future requests */
     *state = NTLMSTATE_LAST;
-    /* FALLTHROUGH */
+    FALLTHROUGH;
   case NTLMSTATE_LAST:
     Curl_safefree(*allocuserpwd);
     authp->done = TRUE;

@@ -1612,3 +1612,26 @@ AC_DEFUN([CURL_ADD_COMPILER_WARNINGS], [
   [$1]="$[$1] $ac_var_added_warnings"
   squeeze [$1]
 ])
+
+AC_DEFUN([CURL_FALLTHROUGH_WORKS], [
+  AC_MSG_CHECKING([if attribute fallthrough works])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+    ]],[[
+      int i = 1;
+      switch(i) {
+        case 1:
+          __attribute__((__fallthrough__));
+        case 0:
+          break;
+      }
+    ]])
+  ],[
+    fallthrough_works="yes"
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(CURL_ATTRIBUTE_FALLTHROUGH, 1, [this attribute works])
+  ],[
+    tmp_compiler_works="no"
+    AC_MSG_RESULT([no])
+  ])
+])

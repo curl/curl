@@ -615,6 +615,28 @@ if(NOT CURL_DISABLE_LDAP)
   endif()
 endif()
 
+set(_SRC_STRING
+     "
+     ${_INCLUDE_STRING}
+     int main(int argc, char ** argv)
+     {
+       int i = 1;
+       switch(i) {
+         case 1:
+           __attribute__((__fallthrough__));
+         case 0:
+           break;
+       }
+       return 0;
+     }"
+   )
+
+check_c_source_compiles("${_SRC_STRING}" ATTRIBUTE_FALLTHROUGH_WORKS)
+if(ATTRIBUTE_FALLTHROUGH_WORKS)
+  set(CURL_ATTRIBUTE_FALLTHROUGH ON)
+endif()
+
+
 # No ldap, no ldaps.
 if(CURL_DISABLE_LDAP)
   if(NOT CURL_DISABLE_LDAPS)

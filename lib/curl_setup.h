@@ -154,6 +154,12 @@
 #  endif
 #endif
 
+#ifdef CURL_ATTRIBUTE_FALLTHROUGH
+# define FALLTHROUGH __attribute__((__fallthrough__))
+#else
+# define FALLTHROUGH do {} while
+#endif
+
 /* ================================================================ */
 /*  If you need to include a system header file for your platform,  */
 /*  please, do it beyond the point further indicated in this file.  */

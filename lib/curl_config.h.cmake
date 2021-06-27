@@ -320,6 +320,9 @@
 /* Define to 1 if you have the lber.h header file. */
 #cmakedefine HAVE_LBER_H 1
 
+/* Define to 1 if this attribute works */
+#cmakedefine CURL_ATTRIBUTE_FALLTHROUGH 1
+
 /* Define to 1 if you have the ldapssl.h header file. */
 #cmakedefine HAVE_LDAPSSL_H 1
 

@@ -240,7 +240,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
         }
         zp->zlib_init = ZLIB_UNINIT;    /* inflateEnd() already called. */
       }
-      /* FALLTHROUGH */
+      FALLTHROUGH;
     default:
       result = exit_zlib(data, z, &zp->zlib_init, process_zlib_error(data, z));
       break;

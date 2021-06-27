@@ -361,7 +361,7 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
         case '0':
           if(!(flags & FLAGS_LEFT))
             flags |= FLAGS_PAD_NIL;
-          /* FALLTHROUGH */
+          FALLTHROUGH;
         case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9':
           flags |= FLAGS_WIDTH;
@@ -397,7 +397,7 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
       switch (*fmt) {
       case 'S':
         flags |= FLAGS_ALT;
-        /* FALLTHROUGH */
+        FALLTHROUGH;
       case 's':
         vto[i].type = FORMAT_STRING;
         break;

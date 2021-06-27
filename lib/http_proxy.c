@@ -874,7 +874,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
         }
       } while(task);
       s->tunnel_state = TUNNEL_CONNECT;
-      /* FALLTHROUGH */
+      FALLTHROUGH;
     case TUNNEL_CONNECT: {
       int didwhat;
       bool done = FALSE;
@@ -898,7 +898,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
         h->write_waker = NULL;
       }
     }
-      /* FALLTHROUGH */
+    FALLTHROUGH;
     default:
       break;
     }

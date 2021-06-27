@@ -408,6 +408,8 @@ CURL_CHECK_COMPILER_SYMBOL_HIDING
 CURL_CHECK_CURLDEBUG
 AM_CONDITIONAL(CURLDEBUG, test x$want_curldebug = xyes)
 
+CURL_FALLTHROUGH_WORKS
+
 supports_unittests=yes
 # cross-compilation of unit tests static library/programs fails when
 # libcurl shared library is built. This might be due to a libtool or
