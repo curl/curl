@@ -31,7 +31,7 @@ static char buf[1024];
 int test(char *URL)
 {
   CURLM *mcurl;
-  CURL *curl;
+  CURL *curl = NULL;
   int mrun;
   curl_socket_t sock = CURL_SOCKET_BAD;
   time_t start = time(NULL);
@@ -41,20 +41,23 @@ int test(char *URL)
   curl_global_init(CURL_GLOBAL_DEFAULT);
   mcurl = curl_multi_init();
   if(!mcurl)
-    return 1;
+    goto fail;
   curl = curl_easy_init();
   if(!curl)
     goto fail;
 
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(curl, CURLOPT_URL, URL);
+  if(curl_easy_setopt(curl, CURLOPT_URL, URL))
+    goto fail;
   curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
-  curl_multi_add_handle(mcurl, curl);
+  if(curl_multi_add_handle(mcurl, curl))
+    goto fail;
 
   while(time(NULL) - start < 5) {
     struct curl_waitfd waitfd;
 
-    curl_multi_perform(mcurl, &mrun);
+    if(curl_multi_perform(mcurl, &mrun))
+      goto fail;
     for(;;) {
       int i;
       struct CURLMsg *m = curl_multi_info_read(mcurl, &i);
@@ -64,7 +67,7 @@ int test(char *URL)
       if(m->msg == CURLMSG_DONE && m->easy_handle == curl) {
         curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sock);
         if(sock == CURL_SOCKET_BAD)
-          return 3;
+          goto fail;
         printf("Connected fine, extracted socket. Moving on\n");
       }
     }
