@@ -275,8 +275,8 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
         return CURLPX_OK;
       }
     }
-    FALLTHROUGH;
   CONNECT_RESOLVED:
+    FALLTHROUGH;
   case CONNECT_RESOLVED: {
     struct Curl_addrinfo *hp = NULL;
     char buf[64];
@@ -313,8 +313,8 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
       return CURLPX_RESOLVE_HOST;
     }
   }
-    FALLTHROUGH;
   CONNECT_REQ_INIT:
+    FALLTHROUGH;
   case CONNECT_REQ_INIT:
     /*
      * This is currently not supporting "Identification Protocol (RFC1413)".
@@ -587,8 +587,8 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
       sx->outp += written;
       return CURLPX_OK;
     }
-    FALLTHROUGH;
   CONNECT_SOCKS_READ_INIT:
+    FALLTHROUGH;
   case CONNECT_SOCKS_READ_INIT:
     sx->outstanding = 2; /* expect two bytes */
     sx->outp = socksreq; /* store it here */
@@ -750,8 +750,8 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
 
     /* Everything is good so far, user was authenticated! */
     sxstate(data, CONNECT_REQ_INIT);
-    FALLTHROUGH;
   CONNECT_REQ_INIT:
+    FALLTHROUGH;
   case CONNECT_REQ_INIT:
     if(socks5_resolve_local) {
       enum resolve_t rc = Curl_resolv(data, hostname, remote_port,
@@ -789,8 +789,8 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
         return CURLPX_OK;
       }
     }
-    FALLTHROUGH;
   CONNECT_RESOLVED:
+    FALLTHROUGH;
   case CONNECT_RESOLVED: {
     struct Curl_addrinfo *hp = NULL;
     size_t destlen;
@@ -861,9 +861,8 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
       infof(data, "SOCKS5 connect to %s:%d (remotely resolved)\n",
             hostname, remote_port);
     }
-    FALLTHROUGH;
-
   CONNECT_REQ_SEND:
+    FALLTHROUGH;
   case CONNECT_REQ_SEND:
     /* PORT MSB */
     socksreq[len++] = (unsigned char)((remote_port >> 8) & 0xff);
