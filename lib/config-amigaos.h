@@ -55,7 +55,6 @@
 #define HAVE_SETJMP_H 1
 #define HAVE_SIGNAL 1
 #define HAVE_SIGNAL_H 1
-#define HAVE_SIG_ATOMIC_T 1
 #define HAVE_SOCKET 1
 #define HAVE_STRCASECMP 1
 #define HAVE_STRDUP 1

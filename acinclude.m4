@@ -1458,50 +1458,6 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
 ])
 
 
-dnl TYPE_SIG_ATOMIC_T
-dnl -------------------------------------------------
-dnl Check if the sig_atomic_t type is available, and
-dnl verify if it is already defined as volatile.
-
-AC_DEFUN([TYPE_SIG_ATOMIC_T], [
-  AC_CHECK_HEADERS(signal.h)
-  AC_CHECK_TYPE([sig_atomic_t],[
-    AC_DEFINE(HAVE_SIG_ATOMIC_T, 1,
-      [Define to 1 if sig_atomic_t is an available typedef.])
-  ], ,[
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-#endif
-  ])
-  case "$ac_cv_type_sig_atomic_t" in
-    yes)
-      #
-      AC_MSG_CHECKING([if sig_atomic_t is already defined as volatile])
-      AC_LINK_IFELSE([
-        AC_LANG_PROGRAM([[
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-#endif
-        ]],[[
-          static volatile sig_atomic_t dummy = 0;
-        ]])
-      ],[
-        AC_MSG_RESULT([no])
-        curl_cv_sig_atomic_t_volatile="no"
-      ],[
-        AC_MSG_RESULT([yes])
-        curl_cv_sig_atomic_t_volatile="yes"
-      ])
-      #
-      if test "$curl_cv_sig_atomic_t_volatile" = "yes"; then
-        AC_DEFINE(HAVE_SIG_ATOMIC_T_VOLATILE, 1,
-          [Define to 1 if sig_atomic_t is already defined as volatile.])
-      fi
-      ;;
-  esac
-])
-
-
 dnl TYPE_IN_ADDR_T
 dnl -------------------------------------------------
 dnl Check for in_addr_t: it is used to receive the return code of inet_addr()
