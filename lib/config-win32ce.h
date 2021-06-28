@@ -48,7 +48,7 @@
 /* Define if you have the <io.h> header file.  */
 #define HAVE_IO_H 1
 
-/* Define if you need the malloc.h header header file even with stdlib.h  */
+/* Define if you need the malloc.h header file even with stdlib.h  */
 #define NEED_MALLOC_H 1
 
 /* Define if you have the <netdb.h> header file.  */
