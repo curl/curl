@@ -1223,7 +1223,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
 
     /*
      * Remove expired cookies from the hash. We must make sure to run this
-     * after reading the file, and not not on every cookie.
+     * after reading the file, and not on every cookie.
      */
     remove_expired(c);
 
