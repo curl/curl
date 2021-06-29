@@ -1177,6 +1177,7 @@ static size_t readmoredata(char *buffer,
   data->req.forbidchunk = (http->sending == HTTPSEND_REQUEST)?TRUE:FALSE;
 
   if(data->set.max_send_speed &&
+     (data->set.max_send_speed < (curl_off_t)fullsize) &&
      (data->set.max_send_speed < http->postsize))
     /* speed limit */
     fullsize = (size_t)data->set.max_send_speed;
