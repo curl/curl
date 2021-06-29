@@ -79,6 +79,9 @@ my @skiplist=(
     # checksrc control files
     '\.checksrc$',
 
+    # an empty control file
+    "^zuul.d/playbooks/.zuul.ignore",
+
     );
 
 sub scanfile {
