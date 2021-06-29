@@ -123,10 +123,6 @@ This release includes the following bugfixes:
  o test644: remove as duplicate of test 587 [84]
  o tests: fix Accept-Encoding strips to work with Hyper builds [41]
  o TLS: prevent shutdown loops to get stuck [112]
- o travis: add bearssl build [1]
- o travis: delete --enable-hsts option (it is the default now) [ci skip] [2]
- o travis: remove the arm job
- o travis: remove the hyper build
  o url.c: remove two variable assigns that are never read [90]
  o url: bad CURLOPT_CONNECT_TO syntax now returns error [31]
  o vtls: exit addsessionid if no cache is inited [7]

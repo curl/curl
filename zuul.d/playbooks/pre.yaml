@@ -63,7 +63,7 @@
       state: link
 
   - name: Run before script
-    shell: "./scripts/travis/before_script.sh"
+    shell: "./scripts/zuul/before_script.sh"
     args:
       chdir: "{{ zuul.project.src_dir }}"
     environment: "{{ curl_env }}"
