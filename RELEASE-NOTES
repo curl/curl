@@ -4,7 +4,7 @@ curl and libcurl 7.78.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2438
+ Contributors:                 2442
 
 This release includes the following changes:
 
@@ -31,8 +31,10 @@ This release includes the following bugfixes:
  o c-hyper: support CURLINFO_STARTTRANSFER_TIME [29]
  o c-hyper: support CURLOPT_HEADER [32]
  o ccsidcurl: fix the compile errors [27]
+ o CI: add bearssl build [1]
  o CI: add Circle CI [92]
  o CI: add jobs using Zuul [86]
+ o CI: delete --enable-hsts option (it is the default now) [2]
  o cmake: add CURL_DISABLE_NTLM option [44]
  o cmake: avoid leaking absolute paths into exported config [3]
  o cmake: fix support for UnixSockets feature on Win32 [104]
@@ -42,10 +44,12 @@ This release includes the following bugfixes:
  o configure: add --disable-ntlm option [45]
  o configure: disable RTSP when hyper is selected [68]
  o configure: do not strip out debug flags [110]
+ o configure: inhibit the implicit-fallthrough warning on gcc-12 [106]
  o configure: rename get-easy-option configure option to get-easy-options [81]
  o conn_shutdown: if closed during CONNECT cleanup properly [59]
  o conncache: lowercase the hash key for better match [5]
  o cookies: track expiration in jar to optimize removals [25]
+ o crustls: bump crustls version and use new URL [119]
  o curl.h: <sys/select.h> is supported by VxWorks7 [102]
  o curl.h: include sys/select.h for NuttX RTOS [100]
  o curl: ignore blank --output-dir [57]
@@ -54,6 +58,7 @@ This release includes the following bugfixes:
  o Curl_ntlm_core_mk_nt_hash: fix OOM in error path [8]
  o Curl_ssl_getsessionid: fail if no session cache exists [14]
  o CURLOPT_WRITEFUNCTION.3: minor update of the example [80]
+ o docs/BINDINGS: fix outdated links [116]
  o docs/INSTALL: remove mentions of configure --with-darwin-ssl [55]
  o docs: use --max-redirs instead of --max-redir [28]
  o doh: fix wrong DEBUGASSERT for doh private_data [62]
@@ -87,6 +92,7 @@ This release includes the following bugfixes:
  o multi: do not switch off connect_only flag when closing [98]
  o netrc: skip 'macdef' definitions [87]
  o ngtcp2: disable TLSv1.3 compatible mode when using GnuTLS [83]
+ o openssl: avoid static variable for seed flag [101]
  o openssl: don't remove session id entry in disassociate [56]
  o quiche: use send() instead of sendto() to avoid macOS issue [103]
  o Revert "c-hyper: handle body on HYPER_TASK_EMPTY" [26]
@@ -123,10 +129,6 @@ This release includes the following bugfixes:
  o test644: remove as duplicate of test 587 [84]
  o tests: fix Accept-Encoding strips to work with Hyper builds [41]
  o TLS: prevent shutdown loops to get stuck [112]
- o travis: add bearssl build [1]
- o travis: delete --enable-hsts option (it is the default now) [ci skip] [2]
- o travis: remove the arm job
- o travis: remove the hyper build
  o url.c: remove two variable assigns that are never read [90]
  o url: bad CURLOPT_CONNECT_TO syntax now returns error [31]
  o vtls: exit addsessionid if no cache is inited [7]
@@ -142,20 +144,21 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Albin Vass, Aleksander Mazur, Alexis Vachette, Alex Xu, Bachue Zhou,
-  Bastian Krause, Bin Lan, Bin Meng, Christian Weisgerber, Christoph M. Becker,
-  civodul on github, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  David Hu, dEajL3kA on github, Dmitry Karpov, Dmitry Kostjuchenko,
-  Douglas R. Reno, Ebe Janchivdorj, Fawad Mirza, Gabriel Simmer,
-  Gealber Morales, Gergely Nagy, Gisle Vanem, Gregor Jasny, Gregory Muchka,
-  Harry Sintonen, Hugh Macdonald, Jacob Hoffman-Andrews, Jishan Shaikh,
-  Joel Depooter, Jon Rumsey, Jun-ya Kato, Kevin Burke, Laurent Dufresne,
-  Li Xinwei, Marcel Raad, Marc Hörsken, Mark Swaanenburg, Martin Howarth,
-  Michael Forney, Michael Kaufmann, Mohammed Naser, nian6324 on github,
-  Nikos Mavrogiannopoulos, Paul Groke, Phil E. Taylor, Ray Satiro,
-  Richard Whitehouse, Shikha Sharma, Vadim Grinshpun, Valentín Gutiérrez,
-  Viktor Szakats, Xiang Xiao, Yongkang Huang, Zhang Xiuhua,
-  (57 contributors)
+  Albin Vass, Aleksander Mazur, Alexis Vachette, Alex Xu, Andrei Rybak,
+  Bachue Zhou, Bastian Krause, Bin Lan, Bin Meng, Christian Weisgerber,
+  Christoph M. Becker, civodul on github, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, David Hu, dEajL3kA on github, Dmitry Karpov,
+  Dmitry Kostjuchenko, Douglas R. Reno, Ebe Janchivdorj, Fawad Mirza,
+  Gabriel Simmer, Gealber Morales, Gergely Nagy, Gerrit Renker, Gisle Vanem,
+  Gregor Jasny, Gregory Muchka, Harry Sintonen, Hugh Macdonald,
+  Jacob Hoffman-Andrews, Jishan Shaikh, Joel Depooter, Jon Rumsey, Jun-ya Kato,
+  Kevin Burke, Laurent Dufresne, Li Xinwei, Marcel Raad, Marc Hörsken,
+  Mark Swaanenburg, Martin Howarth, Michael Forney, Michael Kaufmann,
+  Mohammed Naser, nian6324 on github, Nikos Mavrogiannopoulos, Paul Groke,
+  Phil E. Taylor, Ray Satiro, Richard Whitehouse, Shikha Sharma, Tommy Chiang,
+  Vadim Grinshpun, Valentín Gutiérrez, Viktor Szakats, Xiang Xiao,
+  Yongkang Huang, Younes El-karama, Zhang Xiuhua,
+  (61 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -259,10 +262,12 @@ References to bug reports and discussions on issues:
  [98] = https://curl.se/mail/lib-2021-06/0024.html
  [99] = https://curl.se/bug/?i=7290
  [100] = https://curl.se/bug/?i=7287
+ [101] = https://curl.se/bug/?i=7296
  [102] = https://curl.se/bug/?i=7285
  [103] = https://curl.se/bug/?i=7260
  [104] = https://curl.se/bug/?i=7034
  [105] = https://curl.se/bug/?i=7265
+ [106] = https://curl.se/bug/?i=7295
  [107] = https://curl.se/bug/?i=7273
  [108] = https://curl.se/bug/?i=7270
  [109] = https://curl.se/bug/?i=7272
@@ -270,5 +275,7 @@ References to bug reports and discussions on issues:
  [111] = https://curl.se/bug/?i=7271
  [112] = https://curl.se/bug/?i=7271
  [113] = https://curl.se/bug/?i=7266
+ [116] = https://curl.se/bug/?i=7301
  [117] = https://curl.se/bug/?i=7228
  [118] = https://curl.se/bug/?i=7073
+ [119] = https://curl.se/bug/?i=7297
