@@ -145,9 +145,6 @@ if [ $TRAVIS_OS_NAME = linux -a "$WOLFSSL" ]; then
 fi
 
 # Install common libraries.
-# The library build directories are set to be cached by .travis.yml. If you are
-# changing a build directory name below (eg a version change) then you must
-# change it in .travis.yml `cache: directories:` as well.
 if [ $TRAVIS_OS_NAME = linux ]; then
 
   if [ "$MESALINK" = "yes" ]; then

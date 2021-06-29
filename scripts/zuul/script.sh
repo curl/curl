@@ -113,7 +113,7 @@ if [ "$T" = "tidy" ]; then
 fi
 
 if [ "$T" = "iconv" ]; then
-  source scripts/travis/iconv-env.sh
+  source scripts/zuul/iconv-env.sh
   ./configure --enable-debug --enable-werror $C
   make
   make examples
