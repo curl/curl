@@ -1148,9 +1148,9 @@ static int wssh_getsock(struct Curl_easy *data,
   return bitmap;
 }
 
-size_t Curl_ssh_version(char *buffer, size_t buflen)
+void Curl_ssh_version(char *buffer, size_t buflen)
 {
-  return msnprintf(buffer, buflen, "wolfssh/%s", LIBWOLFSSH_VERSION_STRING);
+  (void)msnprintf(buffer, buflen, "wolfssh/%s", LIBWOLFSSH_VERSION_STRING);
 }
 
 CURLcode Curl_ssh_init(void)

@@ -210,7 +210,7 @@ struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data);
 
 /* init the SSL session ID cache */
 CURLcode Curl_ssl_initsessions(struct Curl_easy *, size_t);
-size_t Curl_ssl_version(char *buffer, size_t size);
+void Curl_ssl_version(char *buffer, size_t size);
 bool Curl_ssl_data_pending(const struct connectdata *conn,
                            int connindex);
 int Curl_ssl_check_cxn(struct connectdata *conn);
