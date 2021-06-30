@@ -75,28 +75,26 @@
 #endif
 
 #ifdef HAVE_BROTLI
-static size_t brotli_version(char *buf, size_t bufsz)
+static void brotli_version(char *buf, size_t bufsz)
 {
   uint32_t brotli_version = BrotliDecoderVersion();
   unsigned int major = brotli_version >> 24;
   unsigned int minor = (brotli_version & 0x00FFFFFF) >> 12;
   unsigned int patch = brotli_version & 0x00000FFF;
-
-  return msnprintf(buf, bufsz, "%u.%u.%u", major, minor, patch);
+  (void)msnprintf(buf, bufsz, "%u.%u.%u", major, minor, patch);
 }
 #endif
 
 #ifdef HAVE_ZSTD
-static size_t zstd_version(char *buf, size_t bufsz)
+static void zstd_version(char *buf, size_t bufsz)
 {
   unsigned long zstd_version = (unsigned long)ZSTD_versionNumber();
   unsigned int major = (unsigned int)(zstd_version / (100 * 100));
   unsigned int minor = (unsigned int)((zstd_version -
-                         (major * 100 * 100)) / 100);
+                                       (major * 100 * 100)) / 100);
   unsigned int patch = (unsigned int)(zstd_version -
-                         (major * 100 * 100) - (minor * 100));
-
-  return msnprintf(buf, bufsz, "%u.%u.%u", major, minor, patch);
+                                      (major * 100 * 100) - (minor * 100));
+  (void)msnprintf(buf, bufsz, "%u.%u.%u", major, minor, patch);
 }
 #endif
 

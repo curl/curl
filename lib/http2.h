@@ -32,10 +32,9 @@
 #define DEFAULT_MAX_CONCURRENT_STREAMS 100
 
 /*
- * Store nghttp2 version info in this buffer, Prefix with a space.  Return
- * total length written.
+ * Store nghttp2 version info in this buffer.
  */
-int Curl_http2_ver(char *p, size_t len);
+void Curl_http2_ver(char *p, size_t len);
 
 const char *Curl_http2_strerror(uint32_t err);
 

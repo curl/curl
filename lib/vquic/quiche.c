@@ -604,12 +604,11 @@ static ssize_t h3_stream_send(struct Curl_easy *data,
 }
 
 /*
- * Store quiche version info in this buffer, Prefix with a space.  Return total
- * length written.
+ * Store quiche version info in this buffer.
  */
-int Curl_quic_ver(char *p, size_t len)
+void Curl_quic_ver(char *p, size_t len)
 {
-  return msnprintf(p, len, "quiche/%s", quiche_version());
+  (void)msnprintf(p, len, "quiche/%s", quiche_version());
 }
 
 /* Index where :authority header field will appear in request header
