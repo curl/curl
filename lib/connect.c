@@ -1038,7 +1038,7 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
     else
       hostname = conn->host.name;
 
-    failf(data, "Failed to connect to %s port %ld after %ld ms: %s",
+    failf(data, "Failed to connect to %s port %u after %ld ms: %s",
         hostname, conn->port,
         Curl_timediff(now, data->progress.t_startsingle),
         Curl_strerror(error, buffer, sizeof(buffer)));
