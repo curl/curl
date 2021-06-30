@@ -1155,7 +1155,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       const struct Curl_handler *h =
         Curl_builtin_scheme(u->scheme);
       if(h) {
-        msnprintf(portbuf, sizeof(portbuf), "%ld", h->defport);
+        msnprintf(portbuf, sizeof(portbuf), "%u", h->defport);
         ptr = portbuf;
       }
     }
@@ -1214,7 +1214,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
         /* there's no stored port number, but asked to deliver
            a default one for the scheme */
         if(h) {
-          msnprintf(portbuf, sizeof(portbuf), "%ld", h->defport);
+          msnprintf(portbuf, sizeof(portbuf), "%u", h->defport);
           port = portbuf;
         }
       }
