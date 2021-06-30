@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -894,7 +894,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
           result = curl_mime_data_cb(part, clen,
                                      fread_func, NULL, NULL, post->userp);
         else {
-          result = curl_mime_data(part, post->contents, (ssize_t) clen);
+          result = curl_mime_data(part, post->contents, (size_t) clen);
 #ifdef CURL_DOES_CONVERSIONS
           /* Convert textual contents now. */
           if(!result && data && part->datasize)
