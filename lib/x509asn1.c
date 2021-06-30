@@ -518,7 +518,7 @@ static const char *GTime2str(const char *beg, const char *end)
                        beg, beg + 4, beg + 6,
                        beg + 8, beg + 10, sec1, sec2,
                        fracl? ".": "", fracl, fracp,
-                       sep, tzl, tzp);
+                       sep, (int)tzl, tzp);
 }
 
 /*
