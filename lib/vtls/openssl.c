@@ -4250,7 +4250,7 @@ static ssize_t ossl_send(struct Curl_easy *data,
 #endif
         ) {
         char ver[120];
-        ossl_version(ver, 120);
+        (void)ossl_version(ver, sizeof(ver));
         failf(data, "Error: %s does not support double SSL tunneling.", ver);
       }
       else
