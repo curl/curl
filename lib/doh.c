@@ -359,7 +359,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
         (data->set.ssl.auto_client_cert ?
          CURLSSLOPT_AUTO_CLIENT_CERT : 0);
 
-      curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS, mask);
+      (void)curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS, mask);
     }
 
     doh->set.fmultidone = doh_done;
