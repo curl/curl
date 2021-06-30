@@ -3873,7 +3873,7 @@ static CURLcode servercert(struct Curl_easy *data,
 
     ASN1_TIME_print(mem, X509_get0_notAfter(backend->server_cert));
     len = BIO_get_mem_data(mem, (char **) &ptr);
-    infof(data, " expire date: %.*s\n", len, ptr);
+    infof(data, " expire date: %.*s\n", (int)len, ptr);
     (void)BIO_reset(mem);
   }
 #endif
