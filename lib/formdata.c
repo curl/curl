@@ -865,8 +865,6 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
 
         if(post->flags & CURL_HTTPPOST_LARGE)
           clen = post->contentlen;
-        if(!clen)
-          clen = -1;
 
         if(post->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE)) {
           if(!strcmp(file->contents, "-")) {
@@ -888,13 +886,21 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
         else if(post->flags & HTTPPOST_BUFFER)
           result = curl_mime_data(part, post->buffer,
                                   post->bufferlength? post->bufferlength: -1);
-        else if(post->flags & HTTPPOST_CALLBACK)
+        else if(post->flags & HTTPPOST_CALLBACK) {
           /* the contents should be read with the callback and the size is set
              with the contentslength */
+          if(!clen)
+            clen = -1;
           result = curl_mime_data_cb(part, clen,
                                      fread_func, NULL, NULL, post->userp);
+        }
         else {
-          result = curl_mime_data(part, post->contents, (size_t) clen);
+          size_t uclen;
+          if(!clen)
+            uclen = CURL_ZERO_TERMINATED;
+          else
+            uclen = (size_t)clen;
+          result = curl_mime_data(part, post->contents, uclen);
 #ifdef CURL_DOES_CONVERSIONS
           /* Convert textual contents now. */
           if(!result && data && part->datasize)
