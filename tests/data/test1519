@@ -49,11 +49,11 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <protocol>
 </protocol>
 <stdout>
-res: 0
-status: 302
-redirects: 0
-effectiveurl: http://%HOSTIP:%HTTPPORT/%TESTNUMBER
-redirecturl: http://%HOSTIP:%HTTPPORT/h%20ttp://1.2.4.5/test
+res 0
+status 302
+redirects 0
+effectiveurl http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+redirecturl http://%HOSTIP:%HTTPPORT/h%20ttp://1.2.4.5/test
 </stdout>
 <errorcode>
 0
