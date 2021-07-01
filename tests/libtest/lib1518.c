@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -53,11 +53,11 @@ int test(char *URL)
   curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effectiveUrl);
   curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redirectUrl);
 
-  printf("res: %d\n"
-         "status: %d\n"
-         "redirects: %d\n"
-         "effectiveurl: %s\n"
-         "redirecturl: %s\n",
+  printf("res %d\n"
+         "status %d\n"
+         "redirects %d\n"
+         "effectiveurl %s\n"
+         "redirecturl %s\n",
          (int)res,
          (int)curlResponseCode,
          (int)curlRedirectCount,
