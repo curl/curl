@@ -109,7 +109,6 @@
  13. SSL
  13.1 TLS-PSK with OpenSSL
  13.2 Provide mutex locking API
- 13.3 Support in-memory certs/ca certs/keys
  13.4 Cache/share OpenSSL contexts
  13.5 Export session ids
  13.6 Provide callback for cert verification
@@ -739,14 +738,6 @@
  Provide a libcurl API for setting mutex callbacks in the underlying SSL
  library, so that the same application code can use mutex-locking
  independently of OpenSSL or GnutTLS being used.
-
-13.3 Support in-memory certs/ca certs/keys
-
- You can specify the private and public keys for SSH/SSL as file paths. Some
- programs want to avoid using files and instead just pass them as in-memory
- data blobs. There's probably a challenge to make this work across the
- plethora of different TLS and SSH backends that curl supports.
- https://github.com/curl/curl/issues/2310
 
 13.4 Cache/share OpenSSL contexts
 
