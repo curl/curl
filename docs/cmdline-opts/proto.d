@@ -35,7 +35,7 @@ only enables http and https
 .B --proto =http,https
 also only enables http and https
 .RE
-
+.IP
 Unknown protocols produce a warning. This allows scripts to safely rely on
 being able to disable potentially dangerous protocols, without relying upon
 support for that protocol being built into curl to avoid an error.
