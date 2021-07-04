@@ -356,21 +356,6 @@
 /* Define to 1 if you have the `ssh2' library (-lssh2). */
 #cmakedefine HAVE_LIBSSH2 1
 
-/* Define to 1 if libssh2 provides `libssh2_version'. */
-#cmakedefine HAVE_LIBSSH2_VERSION 1
-
-/* Define to 1 if libssh2 provides `libssh2_init'. */
-#cmakedefine HAVE_LIBSSH2_INIT 1
-
-/* Define to 1 if libssh2 provides `libssh2_exit'. */
-#cmakedefine HAVE_LIBSSH2_EXIT 1
-
-/* Define to 1 if libssh2 provides `libssh2_scp_send64'. */
-#cmakedefine HAVE_LIBSSH2_SCP_SEND64 1
-
-/* Define to 1 if libssh2 provides `libssh2_session_handshake'. */
-#cmakedefine HAVE_LIBSSH2_SESSION_HANDSHAKE 1
-
 /* Define to 1 if you have the <libssh2.h> header file. */
 #cmakedefine HAVE_LIBSSH2_H 1
 
