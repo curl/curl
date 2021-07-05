@@ -4,7 +4,7 @@ curl and libcurl 7.78.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2442
+ Contributors:                 2446
 
 This release includes the following changes:
 
@@ -23,6 +23,8 @@ This release includes the following bugfixes:
  o bearssl: explicitly initialize all fields of Curl_ssl [1]
  o bearssl: remove incorrect const on variable that is modified [1]
  o c-hyper: abort CONNECT response reading early on non 2xx responses [75]
+ o c-hyper: add support for transfer-encoding in the request [121]
+ o c-hyper: bail on too long response headers [115]
  o c-hyper: clear NTLM auth buffer when request is issued [23]
  o c-hyper: convert HYPERE_INVALID_PEER_MESSAGE to CURLE_UNSUPPORTED_PROTOCOL [21]
  o c-hyper: fix NTLM on closed connection tested with test159 [4]
@@ -35,9 +37,11 @@ This release includes the following bugfixes:
  o CI: add Circle CI [92]
  o CI: add jobs using Zuul [86]
  o CI: delete --enable-hsts option (it is the default now) [2]
+ o CI: remove travis details [144]
  o cmake: add CURL_DISABLE_NTLM option [44]
  o cmake: avoid leaking absolute paths into exported config [3]
  o cmake: fix support for UnixSockets feature on Win32 [104]
+ o cmake: remove libssh2 feature checks [122]
  o cmake: try well-known send/recv signature for Apple [12]
  o configure.ac: make non-executable [109]
  o configure/cmake: remove checks for many unused functions [95]
@@ -49,6 +53,7 @@ This release includes the following bugfixes:
  o conn_shutdown: if closed during CONNECT cleanup properly [59]
  o conncache: lowercase the hash key for better match [5]
  o cookies: track expiration in jar to optimize removals [25]
+ o copyright: add boiler-plate headers to CI config files [143]
  o crustls: bump crustls version and use new URL [119]
  o curl.h: <sys/select.h> is supported by VxWorks7 [102]
  o curl.h: include sys/select.h for NuttX RTOS [100]
@@ -61,13 +66,18 @@ This release includes the following bugfixes:
  o docs/BINDINGS: fix outdated links [116]
  o docs/INSTALL: remove mentions of configure --with-darwin-ssl [55]
  o docs: use --max-redirs instead of --max-redir [28]
+ o doh: (void)-prefix call to curl_easy_setopt
  o doh: fix wrong DEBUGASSERT for doh private_data [62]
  o examples: length-limit two sscanf() uses of %s [96]
+ o examples: safer and more proper read callback logic [127]
  o filecheck: quietly remove test-place/*~ [39]
+ o formdata: avoid "Argument cannot be negative" warning [131]
+ o formdata: correct typecast in curl_mime_data call [137]
  o GHA: add a linux-hyper job [52]
  o GHA: add several libcurl tests to the hyper job
  o GHA: run the newly fixed tests with hyper [36]
  o github: timeout jobs on macOS after 90 minutes [42]
+ o glob: pass an 'int' as len when using printf's %*s [139]
  o gnutls: set the preferred TLS versions in correct order [94]
  o GOVERNANCE: add 'user', 'committer' and 'contributor' [15]
  o hostip: (macOS) free returned memory of SCDynamicStoreCopyProxies [105]
@@ -77,16 +87,21 @@ This release includes the following bugfixes:
  o http2: clarify 'Using HTTP2' verbose message [63]
  o http2: init recvbuf struct for pushed streams [13]
  o http2_connisdead: handle trailing GOAWAY better [18]
+ o http: fix crash in rate-limited upload [142]
  o http: make the haproxy support work with unix domain sockets [99]
  o http_proxy: deal with non-200 CONNECT response with Hyper [22]
  o hyper: propagate errors back up from read callbacks [113]
  o HYPER: remove mentions of deprecated development branch
  o idn: fix libidn2 with windows unicode builds [117]
  o lib: don't compare fd to FD_SETSIZE when using poll [61]
+ o lib: fix type of len passed to *printf's %*s [133]
+ o lib: more %u for port and int for %*s fixes [132]
+ o lib: use %u instead of %ld for port number printf [134]
  o libcurl-security.3: mention file descriptors and forks [108]
  o libssh2: limit time a disconnect can take to 1 second [111]
  o mbedtls: make mbedtls_strerror always work [6]
  o mqtt: detect illegal and too large file size [43]
+ o mqtt: extend the error message for no topic [136]
  o multi: add scan-build-6 work-around in curl_multi_fdset [88]
  o multi: alter transfer timeout ordering [97]
  o multi: do not switch off connect_only flag when closing [98]
@@ -94,6 +109,8 @@ This release includes the following bugfixes:
  o ngtcp2: disable TLSv1.3 compatible mode when using GnuTLS [83]
  o openssl: avoid static variable for seed flag [101]
  o openssl: don't remove session id entry in disassociate [56]
+ o pinnedpubkey.d: fix formatting for version support lists [126]
+ o proto.d: fix formatting for paragraphs after margin changes [125]
  o quiche: use send() instead of sendto() to avoid macOS issue [103]
  o Revert "c-hyper: handle body on HYPER_TASK_EMPTY" [26]
  o runtests: also find the last test in Makefile.inc [66]
@@ -105,13 +122,20 @@ This release includes the following bugfixes:
  o schannel: set ALPN length correctly for HTTP/2 [24]
  o setopt: fix incorrect comments [10]
  o socketpair: fix potential hangs [37]
+ o socks4: scan for the IPv4 address in resolve results [124]
  o ssl: read pending close notify alert before closing the connection [9]
  o sws: malloc request struct instead of using stack [60]
+ o test1116: hyper doesn't pass through "surprise-trailers" [123]
+ o test1147: hyper doesn't allow "crazy" request headers like built-in [114]
+ o test1151: added missing CRLF to work with hyper [120]
  o test1216: adjusted for hyper mode [73]
  o test1218: adjusted for hyper mode [72]
  o test1230: adjust to work in hyper mode [74]
  o test1340/1341: adjusted for hyper mode [71]
  o test1438/1457: add HTTP keyword to make hyper mode work [70]
+ o test1514: add a CRLF to the response to make it correct [130]
+ o test1518: adjusted to work with hyper [129]
+ o test1519: adjusted to work with hyper [128]
  o test1594/1595/1596: fix to work in hyper mode [69]
  o test269: disable for hyper [33]
  o test3010: work with hyper mode [67]
@@ -130,12 +154,16 @@ This release includes the following bugfixes:
  o tests: fix Accept-Encoding strips to work with Hyper builds [41]
  o TLS: prevent shutdown loops to get stuck [112]
  o url.c: remove two variable assigns that are never read [90]
+ o url: (void)-prefix a curl_url_get() call [138]
  o url: bad CURLOPT_CONNECT_TO syntax now returns error [31]
+ o version: turn version number functions into returning void [135]
  o vtls: exit addsessionid if no cache is inited [7]
  o vtls: only store TIMER_APPCONNECT for non-proxy connect [93]
+ o vtls: use free() not curl_free() [140]
  o warnless: simplify type size handling [30]
  o Win32: fix build with Watt-32
  o winbuild/README: VC should be set to 6 'or larger' [64]
+ o zuul: use the new rustls directory name [141]
 
 This release includes the following known bugs:
 
@@ -144,21 +172,22 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Albin Vass, Aleksander Mazur, Alexis Vachette, Alex Xu, Andrei Rybak,
-  Bachue Zhou, Bastian Krause, Bin Lan, Bin Meng, Christian Weisgerber,
-  Christoph M. Becker, civodul on github, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, David Hu, dEajL3kA on github, Dmitry Karpov,
-  Dmitry Kostjuchenko, Douglas R. Reno, Ebe Janchivdorj, Fawad Mirza,
-  Gabriel Simmer, Gealber Morales, Gergely Nagy, Gerrit Renker, Gisle Vanem,
-  Gregor Jasny, Gregory Muchka, Harry Sintonen, Hugh Macdonald,
+  Albin Vass, Aleksander Mazur, Alexis Vachette, Alex Xu, Andrea Pappacoda,
+  Andrei Rybak, Bachue Zhou, Bastian Krause, Bin Lan, Bin Meng,
+  Christian Weisgerber, Christoph M. Becker, civodul on github, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, David Hu, dEajL3kA on github,
+  Dmitry Karpov, Dmitry Kostjuchenko, Douglas R. Reno, Ebe Janchivdorj,
+  Fawad Mirza, Gabriel Simmer, Gealber Morales, Gergely Nagy, Gerrit Renker,
+  Gisle Vanem, Gregor Jasny, Gregory Muchka, Harry Sintonen, Hugh Macdonald,
   Jacob Hoffman-Andrews, Jishan Shaikh, Joel Depooter, Jon Rumsey, Jun-ya Kato,
   Kevin Burke, Laurent Dufresne, Li Xinwei, Marcel Raad, Marc Hörsken,
   Mark Swaanenburg, Martin Howarth, Michael Forney, Michael Kaufmann,
   Mohammed Naser, nian6324 on github, Nikos Mavrogiannopoulos, Paul Groke,
-  Phil E. Taylor, Ray Satiro, Richard Whitehouse, Shikha Sharma, Tommy Chiang,
-  Vadim Grinshpun, Valentín Gutiérrez, Viktor Szakats, Xiang Xiao,
-  Yongkang Huang, Younes El-karama, Zhang Xiuhua,
-  (61 contributors)
+  Peter Körner, Phil E. Taylor, Ray Satiro, Red Hat Product Security,
+  Richard Marion, Richard Whitehouse, Shikha Sharma, shithappens2016 on github,
+  Tommy Chiang, Vadim Grinshpun, Valentín Gutiérrez, Viktor Szakats,
+  Xiang Xiao, Yongkang Huang, Younes El-karama, Zhang Xiuhua,
+  (66 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -275,7 +304,34 @@ References to bug reports and discussions on issues:
  [111] = https://curl.se/bug/?i=7271
  [112] = https://curl.se/bug/?i=7271
  [113] = https://curl.se/bug/?i=7266
+ [114] = https://curl.se/bug/?i=7349
+ [115] = https://curl.se/bug/?i=7350
  [116] = https://curl.se/bug/?i=7301
  [117] = https://curl.se/bug/?i=7228
  [118] = https://curl.se/bug/?i=7073
  [119] = https://curl.se/bug/?i=7297
+ [120] = https://curl.se/bug/?i=7350
+ [121] = https://curl.se/bug/?i=7348
+ [122] = https://curl.se/bug/?i=7343
+ [123] = https://curl.se/bug/?i=7344
+ [124] = https://curl.se/bug/?i=7345
+ [125] = https://curl.se/bug/?i=7341
+ [126] = https://curl.se/bug/?i=7340
+ [127] = https://curl.se/bug/?i=7330
+ [128] = https://curl.se/bug/?i=7333
+ [129] = https://curl.se/bug/?i=7333
+ [130] = https://curl.se/bug/?i=7334
+ [131] = https://curl.se/bug/?i=7328
+ [132] = https://curl.se/bug/?i=7329
+ [133] = https://curl.se/bug/?i=7326
+ [134] = https://curl.se/bug/?i=7325
+ [135] = https://curl.se/bug/?i=7319
+ [136] = https://curl.se/bug/?i=7316
+ [137] = https://curl.se/bug/?i=7327
+ [138] = https://curl.se/bug/?i=7320
+ [139] = https://curl.se/bug/?i=7324
+ [140] = https://curl.se/bug/?i=7318
+ [141] = https://curl.se/bug/?i=7311
+ [142] = https://curl.se/bug/?i=7308
+ [143] = https://curl.se/bug/?i=7314
+ [144] = https://curl.se/bug/?i=7313
