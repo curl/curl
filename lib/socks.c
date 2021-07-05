@@ -279,18 +279,21 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
   CONNECT_RESOLVED:
   case CONNECT_RESOLVED: {
     struct Curl_addrinfo *hp = NULL;
-    char buf[64];
     /*
      * We cannot use 'hostent' as a struct that Curl_resolv() returns.  It
      * returns a Curl_addrinfo pointer that may not always look the same.
      */
-    if(dns)
+    if(dns) {
       hp = dns->addr;
-    if(hp) {
-      Curl_printable_address(hp, buf, sizeof(buf));
 
-      if(hp->ai_family == AF_INET) {
+      /* scan for the first IPv4 address */
+      while(hp && (hp->ai_family != AF_INET))
+        hp = hp->ai_next;
+
+      if(hp) {
         struct sockaddr_in *saddr_in;
+        char buf[64];
+        Curl_printable_address(hp, buf, sizeof(buf));
 
         saddr_in = (struct sockaddr_in *)(void *)hp->ai_addr;
         socksreq[4] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[0];
@@ -299,19 +302,18 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
         socksreq[7] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[3];
 
         infof(data, "SOCKS4 connect to IPv4 %s (locally resolved)\n", buf);
-      }
-      else {
-        hp = NULL; /* fail! */
-        failf(data, "SOCKS4 connection to %s not supported", buf);
-      }
 
-      Curl_resolv_unlock(data, dns); /* not used anymore from now on */
+        Curl_resolv_unlock(data, dns); /* not used anymore from now on */
+      }
+      else
+        failf(data, "SOCKS4 connection to %s not supported", hostname);
     }
-    if(!hp) {
+    else
       failf(data, "Failed to resolve \"%s\" for SOCKS4 connect.",
             hostname);
+
+    if(!hp)
       return CURLPX_RESOLVE_HOST;
-    }
   }
     /* FALLTHROUGH */
   CONNECT_REQ_INIT:
