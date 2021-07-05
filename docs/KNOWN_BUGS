@@ -58,6 +58,7 @@ problems may have been fixed or changed somewhat since this was written!
  5.9 Utilize Requires.private directives in libcurl.pc
  5.10 SMB tests fail with Python 2
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
+ 5.12 flaky Windows CI builds
 
  6. Authentication
  6.1 NTLM authentication and unicode
@@ -502,6 +503,16 @@ problems may have been fixed or changed somewhat since this was written!
  ... unless you also pass --with-gssapi-libs
 
  https://github.com/curl/curl/issues/3841
+
+5.12 flaky Windows CI builds
+
+ We run many CI builds for each commit and PR on github, and especially a
+ number of the Windows builds are very flaky. This means that we rarely get
+ all CI builds go green and complete without errors. This is very unfortunate
+ as it makes us sometimes miss actual build problems and it is surprising to
+ newcomers to the project who (rightfully) don't expect this.
+
+ See https://github.com/curl/curl/issues/6972
 
 6. Authentication
 
