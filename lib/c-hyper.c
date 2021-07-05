@@ -885,6 +885,15 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   else
     Curl_safefree(data->state.aptr.accept_encoding);
 
+#ifdef HAVE_LIBZ
+  /* we only consider transfer-encoding magic if libz support is built-in */
+  result = Curl_transferencode(data);
+  if(result)
+    return result;
+  if(Curl_hyper_header(data, headers, data->state.aptr.te))
+    goto error;
+#endif
+
   result = cookies(data, conn, headers);
   if(result)
     return result;
