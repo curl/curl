@@ -494,15 +494,11 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                               &ssl_sessionid, NULL, sockindex)) {
       /* we got a session id, use it! */
       if(!SSL_set_session(backend->handle, ssl_sessionid)) {
-        char error_buffer[WOLFSSL_MAX_ERROR_SZ];
-        Curl_ssl_sessionid_unlock(data);
-        failf(data, "SSL: SSL_set_session failed: %s",
-              ERR_error_string(SSL_get_error(backend->handle, 0),
-                               error_buffer));
-        return CURLE_SSL_CONNECT_ERROR;
+        Curl_ssl_delsessionid(data, ssl_sessionid);
+        infof(data, "Can't use session ID, going on without\n");
       }
-      /* Informational message */
-      infof(data, "SSL re-using session ID\n");
+      else
+        infof(data, "SSL re-using session ID\n");
     }
     Curl_ssl_sessionid_unlock(data);
   }
