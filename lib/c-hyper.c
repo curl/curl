@@ -504,7 +504,7 @@ CURLcode Curl_hyper_header(struct Curl_easy *data, hyper_headers *headers,
 
     if(HYPERE_OK != hyper_headers_add(headers, (uint8_t *)n, nlen,
                                       (uint8_t *)v, vlen)) {
-      failf(data, "hyper_headers_add host");
+      failf(data, "hyper refused to add header '%s'", line);
       return CURLE_OUT_OF_MEMORY;
     }
     if(data->set.verbose) {
