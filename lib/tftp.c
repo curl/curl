@@ -239,7 +239,7 @@ static CURLcode tftp_set_timeouts(struct tftp_state_data *state)
 
   infof(state->data,
         "set timeouts for state %d; Total % " CURL_FORMAT_CURL_OFF_T
-        ", retry %d maxtry %d\n",
+        ", retry %d maxtry %d",
         (int)state->state, timeout_ms, state->retry_time, state->retry_max);
 
   /* init RX time */
@@ -325,7 +325,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_state_data *state,
       return CURLE_TFTP_ILLEGAL;
     }
 
-    infof(data, "got option=(%s) value=(%s)\n", option, value);
+    infof(data, "got option=(%s) value=(%s)", option, value);
 
     if(checkprefix(option, TFTP_OPTION_BLKSIZE)) {
       long blksize;
@@ -356,14 +356,14 @@ static CURLcode tftp_parse_option_ack(struct tftp_state_data *state,
       }
 
       state->blksize = (int)blksize;
-      infof(data, "%s (%d) %s (%d)\n", "blksize parsed from OACK",
+      infof(data, "%s (%d) %s (%d)", "blksize parsed from OACK",
             state->blksize, "requested", state->requested_blksize);
     }
     else if(checkprefix(option, TFTP_OPTION_TSIZE)) {
       long tsize = 0;
 
       tsize = strtol(value, NULL, 10);
-      infof(data, "%s (%ld)\n", "tsize parsed from OACK", tsize);
+      infof(data, "%s (%ld)", "tsize parsed from OACK", tsize);
 
       /* tsize should be ignored on upload: Who cares about the size of the
          remote file? */
@@ -397,7 +397,7 @@ static CURLcode tftp_connect_for_tx(struct tftp_state_data *state,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   struct Curl_easy *data = state->data;
 
-  infof(data, "%s\n", "Connected for transmit");
+  infof(data, "%s", "Connected for transmit");
 #endif
   state->state = TFTP_STATE_TX;
   result = tftp_set_timeouts(state);
@@ -413,7 +413,7 @@ static CURLcode tftp_connect_for_rx(struct tftp_state_data *state,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   struct Curl_easy *data = state->data;
 
-  infof(data, "%s\n", "Connected for receive");
+  infof(data, "%s", "Connected for receive");
 #endif
   state->state = TFTP_STATE_RX;
   result = tftp_set_timeouts(state);
@@ -596,12 +596,12 @@ static CURLcode tftp_rx(struct tftp_state_data *state,
     else if(state->block == rblock) {
       /* This is the last recently received block again. Log it and ACK it
          again. */
-      infof(data, "Received last DATA packet block %d again.\n", rblock);
+      infof(data, "Received last DATA packet block %d again.", rblock);
     }
     else {
       /* totally unexpected, just log it */
       infof(data,
-            "Received unexpected DATA packet block %d, expecting block %d\n",
+            "Received unexpected DATA packet block %d, expecting block %d",
             rblock, NEXT_BLOCKNUM(state->block));
       break;
     }
@@ -653,7 +653,7 @@ static CURLcode tftp_rx(struct tftp_state_data *state,
     /* Increment the retry count and fail if over the limit */
     state->retries++;
     infof(data,
-          "Timeout waiting for block %d ACK.  Retries = %d\n",
+          "Timeout waiting for block %d ACK.  Retries = %d",
           NEXT_BLOCKNUM(state->block), state->retries);
     if(state->retries > state->retry_max) {
       state->error = TFTP_ERR_TIMEOUT;
@@ -724,7 +724,7 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
           * */
          !(state->block == 0 && rblock == 65535)) {
         /* This isn't the expected block.  Log it and up the retry counter */
-        infof(data, "Received ACK for block %d, expecting %d\n",
+        infof(data, "Received ACK for block %d, expecting %d",
               rblock, state->block);
         state->retries++;
         /* Bail out if over the maximum */
@@ -797,7 +797,7 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
     /* Increment the retry counter and log the timeout */
     state->retries++;
     infof(data, "Timeout waiting for block %d ACK. "
-          " Retries = %d\n", NEXT_BLOCKNUM(state->block), state->retries);
+          " Retries = %d", NEXT_BLOCKNUM(state->block), state->retries);
     /* Decide if we've had enough */
     if(state->retries > state->retry_max) {
       state->error = TFTP_ERR_TIMEOUT;
@@ -906,22 +906,22 @@ static CURLcode tftp_state_machine(struct tftp_state_data *state,
 
   switch(state->state) {
   case TFTP_STATE_START:
-    DEBUGF(infof(data, "TFTP_STATE_START\n"));
+    DEBUGF(infof(data, "TFTP_STATE_START"));
     result = tftp_send_first(state, event);
     break;
   case TFTP_STATE_RX:
-    DEBUGF(infof(data, "TFTP_STATE_RX\n"));
+    DEBUGF(infof(data, "TFTP_STATE_RX"));
     result = tftp_rx(state, event);
     break;
   case TFTP_STATE_TX:
-    DEBUGF(infof(data, "TFTP_STATE_TX\n"));
+    DEBUGF(infof(data, "TFTP_STATE_TX"));
     result = tftp_tx(state, event);
     break;
   case TFTP_STATE_FIN:
-    infof(data, "%s\n", "TFTP finished");
+    infof(data, "%s", "TFTP finished");
     break;
   default:
-    DEBUGF(infof(data, "STATE: %d\n", state->state));
+    DEBUGF(infof(data, "STATE: %d", state->state));
     failf(data, "%s", "Internal state machine error");
     result = CURLE_TFTP_ILLEGAL;
     break;
@@ -1153,7 +1153,7 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data)
       size_t strn = state->rbytes - 4;
       state->error = (tftp_error_t)error;
       if(tftp_strnlen(str, strn) < strn)
-        infof(data, "TFTP error: %s\n", str);
+        infof(data, "TFTP error: %s", str);
       break;
     }
     case TFTP_EVENT_ACK:
@@ -1288,7 +1288,7 @@ static CURLcode tftp_doing(struct Curl_easy *data, bool *dophase_done)
   result = tftp_multi_statemach(data, dophase_done);
 
   if(*dophase_done) {
-    DEBUGF(infof(data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete"));
   }
   else if(!result) {
     /* The multi code doesn't have this logic for the DOING state so we
@@ -1325,7 +1325,7 @@ static CURLcode tftp_perform(struct Curl_easy *data, bool *dophase_done)
   tftp_multi_statemach(data, dophase_done);
 
   if(*dophase_done)
-    DEBUGF(infof(data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete"));
 
   return result;
 }

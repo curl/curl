@@ -349,7 +349,7 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
         return ret;
       }
       infof(data, "error setting certificate verify locations,"
-            " continuing anyway:\n");
+            " continuing anyway:");
     }
   }
 
@@ -373,7 +373,7 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
     if(!Curl_ssl_getsessionid(data, conn, SSL_IS_PROXY() ? TRUE : FALSE,
                               &session, NULL, sockindex)) {
       br_ssl_engine_set_session_parameters(&backend->ctx.eng, session);
-      infof(data, "BearSSL: re-using session ID\n");
+      infof(data, "BearSSL: re-using session ID");
     }
     Curl_ssl_sessionid_unlock(data);
   }
@@ -392,12 +392,12 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
 #endif
       ) {
       backend->protocols[cur++] = ALPN_H2;
-      infof(data, "ALPN, offering %s\n", ALPN_H2);
+      infof(data, "ALPN, offering %s", ALPN_H2);
     }
 #endif
 
     backend->protocols[cur++] = ALPN_HTTP_1_1;
-    infof(data, "ALPN, offering %s\n", ALPN_HTTP_1_1);
+    infof(data, "ALPN, offering %s", ALPN_HTTP_1_1);
 
     br_ssl_engine_set_protocol_names(&backend->ctx.eng,
                                      backend->protocols, cur);
@@ -538,7 +538,7 @@ static CURLcode bearssl_connect_step3(struct Curl_easy *data,
 
     protocol = br_ssl_engine_get_selected_protocol(&backend->ctx.eng);
     if(protocol) {
-      infof(data, "ALPN, server accepted to use %s\n", protocol);
+      infof(data, "ALPN, server accepted to use %s", protocol);
 
 #ifdef USE_HTTP2
       if(!strcmp(protocol, ALPN_H2))
@@ -548,12 +548,12 @@ static CURLcode bearssl_connect_step3(struct Curl_easy *data,
       if(!strcmp(protocol, ALPN_HTTP_1_1))
         conn->negnpn = CURL_HTTP_VERSION_1_1;
       else
-        infof(data, "ALPN, unrecognized protocol %s\n", protocol);
+        infof(data, "ALPN, unrecognized protocol %s", protocol);
       Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                           BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
     }
     else
-      infof(data, "ALPN, server did not agree to a protocol\n");
+      infof(data, "ALPN, server did not agree to a protocol");
   }
 
   if(SSL_SET_OPTION(primary.sessionid)) {

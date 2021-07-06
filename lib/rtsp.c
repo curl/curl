@@ -231,7 +231,7 @@ static CURLcode rtsp_done(struct Curl_easy *data,
     }
     if(data->set.rtspreq == RTSPREQ_RECEIVE &&
             (data->conn->proto.rtspc.rtp_channel == -1)) {
-      infof(data, "Got an RTP Receive with a CSeq of %ld\n", CSeq_recv);
+      infof(data, "Got an RTP Receive with a CSeq of %ld", CSeq_recv);
     }
   }
 
@@ -651,7 +651,7 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
       }
       /* We have the full RTP interleaved packet
        * Write out the header including the leading '$' */
-      DEBUGF(infof(data, "RTP write channel %d rtp_length %d\n",
+      DEBUGF(infof(data, "RTP write channel %d rtp_length %d",
              rtspc->rtp_channel, rtp_length));
       result = rtp_client_write(data, &rtp[0], rtp_length + 4);
       if(result) {
@@ -682,7 +682,7 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
   }
 
   if(rtp_dataleft && rtp[0] == '$') {
-    DEBUGF(infof(data, "RTP Rewinding %zd %s\n", rtp_dataleft,
+    DEBUGF(infof(data, "RTP Rewinding %zd %s", rtp_dataleft,
           *readmore ? "(READMORE)" : ""));
 
     /* Store the incomplete RTP packet for a "rewind" */

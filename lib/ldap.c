@@ -296,9 +296,9 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   char *passwd = NULL;
 
   *done = TRUE; /* unconditionally */
-  infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d\n",
+  infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d",
           LDAP_VENDOR_NAME, LDAP_VENDOR_VERSION);
-  infof(data, "LDAP local: %s\n", data->state.url);
+  infof(data, "LDAP local: %s", data->state.url);
 
 #ifdef HAVE_LDAP_URL_PARSE
   rc = ldap_url_parse(data->state.url, &ludp);
@@ -314,7 +314,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   /* Get the URL scheme (either ldap or ldaps) */
   if(conn->given->flags & PROTOPT_SSL)
     ldap_ssl = 1;
-  infof(data, "LDAP local: trying to establish %s connection\n",
+  infof(data, "LDAP local: trying to establish %s connection",
           ldap_ssl ? "encrypted" : "cleartext");
 
 #if defined(USE_WIN32_LDAP)
@@ -366,14 +366,14 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         result = CURLE_SSL_CERTPROBLEM;
         goto quit;
       }
-      infof(data, "LDAP local: using %s CA cert '%s'\n",
-              (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"),
-              ldap_ca);
+      infof(data, "LDAP local: using %s CA cert '%s'",
+            (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"),
+            ldap_ca);
       rc = ldapssl_add_trusted_cert(ldap_ca, cert_type);
       if(rc != LDAP_SUCCESS) {
         failf(data, "LDAP local: ERROR setting %s CA cert: %s",
-                (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"),
-                ldap_err2string(rc));
+              (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"),
+              ldap_err2string(rc));
         result = CURLE_SSL_CERTPROBLEM;
         goto quit;
       }
@@ -409,7 +409,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         result = CURLE_SSL_CERTPROBLEM;
         goto quit;
       }
-      infof(data, "LDAP local: using PEM CA cert: %s\n", ldap_ca);
+      infof(data, "LDAP local: using PEM CA cert: %s", ldap_ca);
       rc = ldap_set_option(NULL, LDAP_OPT_X_TLS_CACERTFILE, ldap_ca);
       if(rc != LDAP_SUCCESS) {
         failf(data, "LDAP local: ERROR setting PEM CA cert: %s",
@@ -718,7 +718,7 @@ quit:
     LDAP_TRACE(("Received %d entries\n", num));
   }
   if(rc == LDAP_SIZELIMIT_EXCEEDED)
-    infof(data, "There are more than %d entries\n", num);
+    infof(data, "There are more than %d entries", num);
   if(ludp)
     ldap_free_urldesc(ludp);
   if(server)

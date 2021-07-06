@@ -204,12 +204,12 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
   if(result == CURLE_OK) {
     if(!num_certs) {
       infof(data,
-            "schannel: did not add any certificates from CA file '%s'\n",
+            "schannel: did not add any certificates from CA file '%s'",
             ca_file_text);
     }
     else {
       infof(data,
-            "schannel: added %d certificate(s) from CA file '%s'\n",
+            "schannel: added %d certificate(s) from CA file '%s'",
             num_certs, ca_file_text);
     }
   }
@@ -526,7 +526,7 @@ static CURLcode verify_host(struct Curl_easy *data,
       if(match_result == CURL_HOST_MATCH) {
         infof(data,
               "schannel: connection hostname (%s) validated "
-              "against certificate name (%s)\n",
+              "against certificate name (%s)",
               conn_hostname, cert_hostname);
         result = CURLE_OK;
       }
@@ -535,7 +535,7 @@ static CURLcode verify_host(struct Curl_easy *data,
 
         infof(data,
               "schannel: connection hostname (%s) did not match "
-              "against certificate name (%s)\n",
+              "against certificate name (%s)",
               conn_hostname, cert_hostname);
 
         cert_hostname_len =

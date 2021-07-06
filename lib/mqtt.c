@@ -297,7 +297,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
     result = CURLE_WEIRD_SERVER_REPLY;
     goto end;
   }
-  infof(data, "Using client id '%s'\n", client_id);
+  infof(data, "Using client id '%s'", client_id);
 
   /* position where starts the user payload */
   start_user = pos + 3 + MQTT_CLIENTID_LEN;
@@ -560,7 +560,7 @@ static void mqstate(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   struct mqtt_conn *mqtt = &conn->proto.mqtt;
 #ifdef CURLDEBUG
-  infof(data, "%s (from %s) (next is %s)\n",
+  infof(data, "%s (from %s) (next is %s)",
         statenames[state],
         statenames[mqtt->state],
         (state == MQTT_FIRST)? statenames[nextstate] : "");
@@ -607,7 +607,7 @@ static CURLcode mqtt_read_publish(struct Curl_easy *data, bool *done)
       goto MQTT_SUBACK_COMING;
     }
     else if(packet == MQTT_MSG_DISCONNECT) {
-      infof(data, "Got DISCONNECT\n");
+      infof(data, "Got DISCONNECT");
       *done = TRUE;
       goto end;
     }
@@ -618,7 +618,7 @@ static CURLcode mqtt_read_publish(struct Curl_easy *data, bool *done)
 
     /* -- switched state -- */
     remlen = mq->remaining_length;
-    infof(data, "Remaining length: %zd bytes\n", remlen);
+    infof(data, "Remaining length: %zd bytes", remlen);
     if(data->set.max_filesize &&
        (curl_off_t)remlen > data->set.max_filesize) {
       failf(data, "Maximum file size exceeded");
@@ -639,12 +639,12 @@ static CURLcode mqtt_read_publish(struct Curl_easy *data, bool *done)
     result = Curl_read(data, sockfd, (char *)pkt, rest, &nread);
     if(result) {
       if(CURLE_AGAIN == result) {
-        infof(data, "EEEE AAAAGAIN\n");
+        infof(data, "EEEE AAAAGAIN");
       }
       goto end;
     }
     if(!nread) {
-      infof(data, "server disconnected\n");
+      infof(data, "server disconnected");
       result = CURLE_PARTIAL_FILE;
       goto end;
     }
@@ -710,7 +710,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
       return result;
   }
 
-  infof(data, "mqtt_doing: state [%d]\n", (int) mqtt->state);
+  infof(data, "mqtt_doing: state [%d]", (int) mqtt->state);
   switch(mqtt->state) {
   case MQTT_FIRST:
     /* Read the initial byte only */
@@ -745,7 +745,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
     mqstate(data, MQTT_FIRST, MQTT_FIRST);
 
     if(mq->firstbyte == MQTT_MSG_DISCONNECT) {
-      infof(data, "Got DISCONNECT\n");
+      infof(data, "Got DISCONNECT");
       *done = TRUE;
     }
     break;

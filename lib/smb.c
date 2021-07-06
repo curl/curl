@@ -204,7 +204,7 @@ static void conn_state(struct Curl_easy *data, enum smb_conn_state newstate)
   };
 
   if(smbc->state != newstate)
-    infof(data, "SMB conn %p state change from %s to %s\n",
+    infof(data, "SMB conn %p state change from %s to %s",
           (void *)smbc, names[smbc->state], names[newstate]);
 #endif
 
@@ -230,7 +230,7 @@ static void request_state(struct Curl_easy *data,
   };
 
   if(req->state != newstate)
-    infof(data, "SMB request %p state change from %s to %s\n",
+    infof(data, "SMB request %p state change from %s to %s",
           (void *)req, names[req->state], names[newstate]);
 #endif
 

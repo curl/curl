@@ -779,7 +779,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
-  infof(data, "Connect socket %d over QUIC to %s:%d\n",
+  infof(data, "Connect socket %d over QUIC to %s:%d",
         sockfd, ipbuf, port);
 
   qs->version = NGTCP2_PROTO_VER_MAX;
@@ -951,7 +951,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
   (void)stream_id;
   (void)app_error_code;
   (void)user_data;
-  H3BUGF(infof(data, "cb_h3_stream_close CALLED\n"));
+  H3BUGF(infof(data, "cb_h3_stream_close CALLED"));
 
   stream->closed = TRUE;
   Curl_expire(data, 0, EXPIRE_QUIC);
@@ -1287,7 +1287,7 @@ static ssize_t ngh3_stream_recv(struct Curl_easy *data,
     return 0;
   }
 
-  infof(data, "ngh3_stream_recv returns 0 bytes and EAGAIN\n");
+  infof(data, "ngh3_stream_recv returns 0 bytes and EAGAIN");
   *curlcode = CURLE_AGAIN;
   return -1;
 }
@@ -1304,7 +1304,7 @@ static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
   if(!data->set.postfields) {
     stream->h3out->used -= datalen;
     H3BUGF(infof(data,
-                 "cb_h3_acked_stream_data, %zd bytes, %zd left unacked\n",
+                 "cb_h3_acked_stream_data, %zd bytes, %zd left unacked",
                  datalen, stream->h3out->used));
     DEBUGASSERT(stream->h3out->used < H3_SEND_SIZE);
 
@@ -1366,13 +1366,13 @@ static ssize_t cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
       if(!stream->upload_left)
         *pflags = NGHTTP3_DATA_FLAG_EOF;
     }
-    H3BUGF(infof(data, "cb_h3_readfunction %zd bytes%s (at %zd unacked)\n",
+    H3BUGF(infof(data, "cb_h3_readfunction %zd bytes%s (at %zd unacked)",
                  nread, *pflags == NGHTTP3_DATA_FLAG_EOF?" EOF":"",
                  out->used));
   }
   if(stream->upload_done && !stream->upload_len &&
      (stream->upload_left <= 0)) {
-    H3BUGF(infof(data, "!!!!!!!!! cb_h3_readfunction sets EOF\n"));
+    H3BUGF(infof(data, "!!!!!!!!! cb_h3_readfunction sets EOF"));
     *pflags = NGHTTP3_DATA_FLAG_EOF;
     return nread ? 1 : 0;
   }
@@ -1565,7 +1565,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
     if(acc > MAX_ACC) {
       infof(data, "http_request: Warning: The cumulative length of all "
             "headers exceeds %d bytes and that could cause the "
-            "stream to be rejected.\n", MAX_ACC);
+            "stream to be rejected.", MAX_ACC);
     }
   }
 
@@ -1611,7 +1611,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
 
   Curl_safefree(nva);
 
-  infof(data, "Using HTTP/3 Stream ID: %x (easy handle %p)\n",
+  infof(data, "Using HTTP/3 Stream ID: %x (easy handle %p)",
         stream3_id, (void *)data);
 
   return CURLE_OK;
@@ -1641,7 +1641,7 @@ static ssize_t ngh3_stream_send(struct Curl_easy *data,
     sent = len;
   }
   else {
-    H3BUGF(infof(data, "ngh3_stream_send() wants to send %zd bytes\n",
+    H3BUGF(infof(data, "ngh3_stream_send() wants to send %zd bytes",
                  len));
     if(!stream->upload_len) {
       stream->upload_mem = mem;

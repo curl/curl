@@ -268,9 +268,9 @@ static void printoption(struct Curl_easy *data,
   if(data->set.verbose) {
     if(cmd == CURL_IAC) {
       if(CURL_TELCMD_OK(option))
-        infof(data, "%s IAC %s\n", direction, CURL_TELCMD(option));
+        infof(data, "%s IAC %s", direction, CURL_TELCMD(option));
       else
-        infof(data, "%s IAC %d\n", direction, option);
+        infof(data, "%s IAC %d", direction, option);
     }
     else {
       const char *fmt = (cmd == CURL_WILL) ? "WILL" :
@@ -287,12 +287,12 @@ static void printoption(struct Curl_easy *data,
           opt = NULL;
 
         if(opt)
-          infof(data, "%s %s %s\n", direction, fmt, opt);
+          infof(data, "%s %s %s", direction, fmt, opt);
         else
-          infof(data, "%s %s %d\n", direction, fmt, option);
+          infof(data, "%s %s %d", direction, fmt, option);
       }
       else
-        infof(data, "%s %d %d\n", direction, cmd, option);
+        infof(data, "%s %d %d", direction, cmd, option);
     }
   }
 }
@@ -765,8 +765,6 @@ static void printsub(struct Curl_easy *data,
         break;
       }
     }
-    if(direction)
-      infof(data, "\n");
   }
 }
 

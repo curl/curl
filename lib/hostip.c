@@ -290,7 +290,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     user.cache_timeout = data->set.dns_cache_timeout;
 
     if(hostcache_timestamp_remove(&user, dns)) {
-      infof(data, "Hostname in DNS cache was stale, zapped\n");
+      infof(data, "Hostname in DNS cache was stale, zapped");
       dns = NULL; /* the memory deallocation is being handled by the hash */
       Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
     }
@@ -588,7 +588,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
   dns = fetch_addr(data, hostname, port);
 
   if(dns) {
-    infof(data, "Hostname %s was found in DNS cache\n", hostname);
+    infof(data, "Hostname %s was found in DNS cache", hostname);
     dns->inuse++; /* we use it! */
     rc = CURLRESOLV_RESOLVED;
   }
@@ -853,7 +853,7 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
 #else
 #ifndef CURLRES_ASYNCH
   if(timeoutms)
-    infof(data, "timeout on name lookup is not supported\n");
+    infof(data, "timeout on name lookup is not supported");
 #else
   (void)timeoutms; /* timeoutms not used with an async resolver */
 #endif
@@ -991,7 +991,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       size_t entry_len;
 
       if(2 != sscanf(hostp->data + 1, "%255[^:]:%d", hostname, &port)) {
-        infof(data, "Couldn't parse CURLOPT_RESOLVE removal entry '%s'!\n",
+        infof(data, "Couldn't parse CURLOPT_RESOLVE removal entry '%s'",
               hostp->data);
         continue;
       }
@@ -1080,7 +1080,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 
 #ifndef ENABLE_IPV6
         if(strchr(address, ':')) {
-          infof(data, "Ignoring resolve address '%s', missing IPv6 support.\n",
+          infof(data, "Ignoring resolve address '%s', missing IPv6 support.",
                 address);
           continue;
         }
@@ -1088,7 +1088,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 
         ai = Curl_str2addr(address, port);
         if(!ai) {
-          infof(data, "Resolve address '%s' found illegal!\n", address);
+          infof(data, "Resolve address '%s' found illegal!", address);
           goto err;
         }
 
@@ -1124,7 +1124,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
       if(dns) {
-        infof(data, "RESOLVE %s:%d is - old addresses discarded!\n",
+        infof(data, "RESOLVE %s:%d is - old addresses discarded!",
                 hostname, port);
         /* delete old entry, there are two reasons for this
          1. old entry may have different addresses.
@@ -1157,12 +1157,12 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         Curl_freeaddrinfo(head);
         return CURLE_OUT_OF_MEMORY;
       }
-      infof(data, "Added %s:%d:%s to DNS cache%s\n",
+      infof(data, "Added %s:%d:%s to DNS cache%s",
             hostname, port, addresses, permanent ? "" : " (non-permanent)");
 
       /* Wildcard hostname */
       if(hostname[0] == '*' && hostname[1] == '\0') {
-        infof(data, "RESOLVE %s:%d is wildcard, enabling wildcard checks\n",
+        infof(data, "RESOLVE %s:%d is wildcard, enabling wildcard checks",
               hostname, port);
         data->state.wildcard_resolve = true;
       }

@@ -169,7 +169,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
       connection_id = data->conn->connection_id;
 
     infof(data,
-          "STATE: %s => %s handle %p; line %d (connection #%ld)\n",
+          "STATE: %s => %s handle %p; line %d (connection #%ld)",
           statename[oldstate], statename[data->mstate],
           (void *)data, lineno, connection_id);
   }
@@ -562,7 +562,7 @@ static CURLcode multi_done(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   unsigned int i;
 
-  DEBUGF(infof(data, "multi_done\n"));
+  DEBUGF(infof(data, "multi_done"));
 
   if(data->state.done)
     /* Stop if multi_done() has already been called */
@@ -610,7 +610,7 @@ static CURLcode multi_done(struct Curl_easy *data,
     /* Stop if still used. */
     CONNCACHE_UNLOCK(data);
     DEBUGF(infof(data, "Connection still in use %zu, "
-                 "no more multi_done now!\n",
+                 "no more multi_done now!",
                  conn->easyq.size));
     return CURLE_OK;
   }
@@ -687,7 +687,7 @@ static CURLcode multi_done(struct Curl_easy *data,
     if(Curl_conncache_return_conn(data, conn)) {
       /* remember the most recently used connection */
       data->state.lastconnect_id = conn->connection_id;
-      infof(data, "%s\n", buffer);
+      infof(data, "%s", buffer);
     }
     else
       data->state.lastconnect_id = -1;
@@ -1740,7 +1740,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     rc = CURLM_OK;
 
     if(multi_ischanged(multi, TRUE)) {
-      DEBUGF(infof(data, "multi changed, check CONNECT_PEND queue!\n"));
+      DEBUGF(infof(data, "multi changed, check CONNECT_PEND queue!"));
       process_pending_handles(multi); /* multiplexed */
     }
 
@@ -1816,7 +1816,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else if(data->state.previouslypending) {
         /* this transfer comes from the pending queue so try move another */
-        infof(data, "Transfer was pending, now try another\n");
+        infof(data, "Transfer was pending, now try another");
         process_pending_handles(data->multi);
       }
 
@@ -1871,7 +1871,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         data->state.async.done = TRUE;
 #endif
         result = CURLE_OK;
-        infof(data, "Hostname '%s' was found in DNS cache\n", hostname);
+        infof(data, "Hostname '%s' was found in DNS cache", hostname);
       }
 
       if(!dns)
@@ -2303,7 +2303,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         CURLcode ret = Curl_retry_request(data, &newurl);
 
         if(!ret) {
-          infof(data, "Downgrades to HTTP/1.1!\n");
+          infof(data, "Downgrades to HTTP/1.1!");
           streamclose(data->conn, "Disconnect HTTP/2 for HTTP/1");
           data->state.httpwant = CURL_HTTP_VERSION_1_1;
           /* clear the error message bit too as we ignore the one we got */
@@ -3378,7 +3378,7 @@ void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
     rc = Curl_splayremove(multi->timetree, &data->state.timenode,
                           &multi->timetree);
     if(rc)
-      infof(data, "Internal error removing splay node = %d\n", rc);
+      infof(data, "Internal error removing splay node = %d", rc);
   }
 
   /* Indicate that we are in the splay tree and insert the new timer expiry
@@ -3425,7 +3425,7 @@ void Curl_expire_clear(struct Curl_easy *data)
     rc = Curl_splayremove(multi->timetree, &data->state.timenode,
                           &multi->timetree);
     if(rc)
-      infof(data, "Internal error clearing splay node = %d\n", rc);
+      infof(data, "Internal error clearing splay node = %d", rc);
 
     /* flush the timeout list too */
     while(list->size > 0) {
@@ -3433,7 +3433,7 @@ void Curl_expire_clear(struct Curl_easy *data)
     }
 
 #ifdef DEBUGBUILD
-    infof(data, "Expire cleared (transfer %p)\n", data);
+    infof(data, "Expire cleared (transfer %p)", data);
 #endif
     nowp->tv_sec = 0;
     nowp->tv_usec = 0;

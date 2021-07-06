@@ -1644,7 +1644,7 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
     }
   }
   /* All cipher suites in the list are found. Report to logs as-is */
-  infof(data, "SSL: Setting cipher suites list \"%s\"\n", ciphers);
+  infof(data, "SSL: Setting cipher suites list \"%s\"", ciphers);
 
   err = SSLSetEnabledCiphers(ssl_ctx, selected_ciphers, ciphers_count);
   if(err != noErr) {
@@ -1840,19 +1840,19 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
 #endif
         ) {
         CFArrayAppendValue(alpnArr, CFSTR(ALPN_H2));
-        infof(data, "ALPN, offering %s\n", ALPN_H2);
+        infof(data, "ALPN, offering %s", ALPN_H2);
       }
 #endif
 
       CFArrayAppendValue(alpnArr, CFSTR(ALPN_HTTP_1_1));
-      infof(data, "ALPN, offering %s\n", ALPN_HTTP_1_1);
+      infof(data, "ALPN, offering %s", ALPN_HTTP_1_1);
 
       /* expects length prefixed preference ordered list of protocols in wire
        * format
        */
       err = SSLSetALPNProtocols(backend->ssl_ctx, alpnArr);
       if(err != noErr)
-        infof(data, "WARNING: failed to set ALPN protocols; OSStatus %d\n",
+        infof(data, "WARNING: failed to set ALPN protocols; OSStatus %d",
               err);
       CFRelease(alpnArr);
     }
@@ -1861,7 +1861,7 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
 
   if(SSL_SET_OPTION(key)) {
     infof(data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
-          "Transport. The private key must be in the Keychain.\n");
+          "Transport. The private key must be in the Keychain.");
   }
 
   if(ssl_cert || ssl_cert_blob) {
@@ -1876,11 +1876,11 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
     if(is_cert_file || is_cert_data) {
       if(!SSL_SET_OPTION(cert_type))
         infof(data, "WARNING: SSL: Certificate type not set, assuming "
-                    "PKCS#12 format.\n");
+                    "PKCS#12 format.");
       else if(strncmp(SSL_SET_OPTION(cert_type), "P12",
         strlen(SSL_SET_OPTION(cert_type))) != 0)
         infof(data, "WARNING: SSL: The Security framework only supports "
-                    "loading identities that are in PKCS#12 format.\n");
+                    "loading identities that are in PKCS#12 format.");
 
       err = CopyIdentityFromPKCS12File(ssl_cert, ssl_cert_blob,
         SSL_SET_OPTION(key_passwd), &cert_and_key);
@@ -1899,7 +1899,7 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
         char *certp;
         CURLcode result = CopyCertSubject(data, cert, &certp);
         if(!result) {
-          infof(data, "Client certificate: %s\n", certp);
+          infof(data, "Client certificate: %s", certp);
           free(certp);
         }
 
@@ -2025,7 +2025,7 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
     strlen(hostname));
 
     if(err != noErr) {
-      infof(data, "WARNING: SSL: SSLSetPeerDomainName() failed: OSStatus %d\n",
+      infof(data, "WARNING: SSL: SSLSetPeerDomainName() failed: OSStatus %d",
             err);
     }
 
@@ -2035,11 +2035,11 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
   #endif
        ) {
       infof(data, "WARNING: using IP address, SNI is being disabled by "
-            "the OS.\n");
+            "the OS.");
     }
   }
   else {
-    infof(data, "WARNING: disabling hostname validation also disables SNI.\n");
+    infof(data, "WARNING: disabling hostname validation also disables SNI.");
   }
 
   ciphers = SSL_CONN_CONFIG(cipher_list);
@@ -2082,7 +2082,7 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
         return CURLE_SSL_CONNECT_ERROR;
       }
       /* Informational message */
-      infof(data, "SSL re-using session ID\n");
+      infof(data, "SSL re-using session ID");
     }
     /* If there isn't one, then let's make one up! This has to be done prior
        to starting the handshake. */
@@ -2487,7 +2487,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
         spkiHeaderLength = 23;
         break;
       default:
-        infof(data, "SSL: unhandled public key length: %d\n", pubkeylen);
+        infof(data, "SSL: unhandled public key length: %d", pubkeylen);
 #elif SECTRANSP_PINNEDPUBKEY_V2
       default:
         /* ecDSA secp256r1 pubkeylen == 91 header already included?
@@ -2778,35 +2778,35 @@ sectransp_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     (void)SSLGetNegotiatedProtocolVersion(backend->ssl_ctx, &protocol);
     switch(protocol) {
       case kSSLProtocol2:
-        infof(data, "SSL 2.0 connection using %s\n",
+        infof(data, "SSL 2.0 connection using %s",
               TLSCipherNameForNumber(cipher));
         break;
       case kSSLProtocol3:
-        infof(data, "SSL 3.0 connection using %s\n",
+        infof(data, "SSL 3.0 connection using %s",
               TLSCipherNameForNumber(cipher));
         break;
       case kTLSProtocol1:
-        infof(data, "TLS 1.0 connection using %s\n",
+        infof(data, "TLS 1.0 connection using %s",
               TLSCipherNameForNumber(cipher));
         break;
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
       case kTLSProtocol11:
-        infof(data, "TLS 1.1 connection using %s\n",
+        infof(data, "TLS 1.1 connection using %s",
               TLSCipherNameForNumber(cipher));
         break;
       case kTLSProtocol12:
-        infof(data, "TLS 1.2 connection using %s\n",
+        infof(data, "TLS 1.2 connection using %s",
               TLSCipherNameForNumber(cipher));
         break;
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 #if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
       case kTLSProtocol13:
-        infof(data, "TLS 1.3 connection using %s\n",
+        infof(data, "TLS 1.3 connection using %s",
               TLSCipherNameForNumber(cipher));
         break;
 #endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
       default:
-        infof(data, "Unknown protocol connection\n");
+        infof(data, "Unknown protocol connection");
         break;
     }
 
@@ -2832,7 +2832,7 @@ sectransp_connect_step2(struct Curl_easy *data, struct connectdata *conn,
           conn->negnpn = CURL_HTTP_VERSION_1_1;
         }
         else
-          infof(data, "ALPN, server did not agree to a protocol\n");
+          infof(data, "ALPN, server did not agree to a protocol");
 
         Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                             BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
@@ -2881,7 +2881,7 @@ show_verbose_server_cert(struct Curl_easy *data,
       server_cert = SecTrustGetCertificateAtIndex(trust, i);
       result = CopyCertSubject(data, server_cert, &certp);
       if(!result) {
-        infof(data, "Server certificate: %s\n", certp);
+        infof(data, "Server certificate: %s", certp);
         free(certp);
       }
     }
@@ -2907,7 +2907,7 @@ show_verbose_server_cert(struct Curl_easy *data,
         server_cert = SecTrustGetCertificateAtIndex(trust, i);
         result = CopyCertSubject(data, server_cert, &certp);
         if(!result) {
-          infof(data, "Server certificate: %s\n", certp);
+          infof(data, "Server certificate: %s", certp);
           free(certp);
         }
       }
@@ -2927,7 +2927,7 @@ show_verbose_server_cert(struct Curl_easy *data,
                                                                 i);
         result = CopyCertSubject(data, server_cert, &certp);
         if(!result) {
-          infof(data, "Server certificate: %s\n", certp);
+          infof(data, "Server certificate: %s", certp);
           free(certp);
         }
       }
@@ -2947,7 +2947,7 @@ show_verbose_server_cert(struct Curl_easy *data,
       server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs, i);
       result = CopyCertSubject(data, server_cert, &certp);
       if(!result) {
-        infof(data, "Server certificate: %s\n", certp);
+        infof(data, "Server certificate: %s", certp);
         free(certp);
       }
     }

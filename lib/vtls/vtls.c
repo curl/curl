@@ -444,7 +444,7 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
     }
   }
 
-  DEBUGF(infof(data, "%s Session ID in cache for %s %s://%s:%d\n",
+  DEBUGF(infof(data, "%s Session ID in cache for %s %s://%s:%d",
                no_match? "Didn't find": "Found",
                isProxy ? "proxy" : "host",
                conn->handler->scheme, name, port));
@@ -593,7 +593,7 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  DEBUGF(infof(data, "Added Session ID to cache for %s://%s:%d [%s]\n",
+  DEBUGF(infof(data, "Added Session ID to cache for %s://%s:%d [%s]",
                store->scheme, store->name, store->remote_port,
                isProxy ? "PROXY" : "server"));
   return CURLE_OK;
@@ -953,7 +953,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     if(encode)
       return encode;
 
-    infof(data, "\t public key hash: sha256//%s\n", encoded);
+    infof(data, " public key hash: sha256//%s", encoded);
 
     /* it starts with sha256//, copy so we can modify it */
     pinkeylen = strlen(pinnedpubkey) + 1;

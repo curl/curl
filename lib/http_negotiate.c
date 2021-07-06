@@ -89,7 +89,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   neg_ctx->havenegdata = len != 0;
   if(!len) {
     if(state == GSS_AUTHSUCC) {
-      infof(data, "Negotiate auth restarted\n");
+      infof(data, "Negotiate auth restarted");
       Curl_http_auth_cleanup_negotiate(conn);
     }
     else if(state != GSS_AUTHNONE) {
@@ -142,11 +142,11 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
   }
 
   if(neg_ctx->noauthpersist ||
-    (*state != GSS_AUTHDONE && *state != GSS_AUTHSUCC)) {
+     (*state != GSS_AUTHDONE && *state != GSS_AUTHSUCC)) {
 
     if(neg_ctx->noauthpersist && *state == GSS_AUTHSUCC) {
       infof(data, "Curl_output_negotiate, "
-       "no persistent authentication: cleanup existing context");
+            "no persistent authentication: cleanup existing context");
       Curl_http_auth_cleanup_negotiate(conn);
     }
     if(!neg_ctx->context) {

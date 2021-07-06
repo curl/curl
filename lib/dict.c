@@ -216,7 +216,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
     }
 
     if(!word || (*word == (char)0)) {
-      infof(data, "lookup word is missing\n");
+      infof(data, "lookup word is missing");
       word = (char *)"default";
     }
     if(!database || (*database == (char)0)) {
@@ -267,7 +267,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
     }
 
     if(!word || (*word == (char)0)) {
-      infof(data, "lookup word is missing\n");
+      infof(data, "lookup word is missing");
       word = (char *)"default";
     }
     if(!database || (*database == (char)0)) {
