@@ -401,7 +401,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     }
   }
 
-  infof(data, "mbedTLS: Connecting to %s:%ld\n", hostname, port);
+  infof(data, "mbedTLS: Connecting to %s:%ld", hostname, port);
 
   mbedtls_ssl_config_init(&backend->config);
 
@@ -428,7 +428,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   case CURL_SSLVERSION_TLSv1:
     mbedtls_ssl_conf_min_version(&backend->config, MBEDTLS_SSL_MAJOR_VERSION_3,
                                  MBEDTLS_SSL_MINOR_VERSION_1);
-    infof(data, "mbedTLS: Set min SSL version to TLS 1.0\n");
+    infof(data, "mbedTLS: Set min SSL version to TLS 1.0");
     break;
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:
@@ -481,7 +481,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
         failf(data, "mbedtls_ssl_set_session returned -0x%x", -ret);
         return CURLE_SSL_CONNECT_ERROR;
       }
-      infof(data, "mbedTLS re-using session\n");
+      infof(data, "mbedTLS re-using session");
     }
     Curl_ssl_sessionid_unlock(data);
   }
@@ -519,7 +519,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
       return CURLE_SSL_CONNECT_ERROR;
     }
     for(p = &backend->protocols[0]; *p; ++p)
-      infof(data, "ALPN, offering %s\n", *p);
+      infof(data, "ALPN, offering %s", *p);
   }
 #endif
 
@@ -581,9 +581,8 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  infof(data, "mbedTLS: Handshake complete, cipher is %s\n",
-        mbedtls_ssl_get_ciphersuite(&backend->ssl)
-    );
+  infof(data, "mbedTLS: Handshake complete, cipher is %s",
+        mbedtls_ssl_get_ciphersuite(&backend->ssl));
 
   ret = mbedtls_ssl_get_verify_result(&backend->ssl);
 
@@ -620,9 +619,9 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
       return CURLE_OUT_OF_MEMORY;
 
     if(mbedtls_x509_crt_info(buffer, bufsize, "* ", peercert) > 0)
-      infof(data, "Dumping cert info:\n%s\n", buffer);
+      infof(data, "Dumping cert info: %s", buffer);
     else
-      infof(data, "Unable to dump certificate information.\n");
+      infof(data, "Unable to dump certificate information");
 
     free(buffer);
   }
@@ -683,7 +682,7 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     const char *next_protocol = mbedtls_ssl_get_alpn_protocol(&backend->ssl);
 
     if(next_protocol) {
-      infof(data, "ALPN, server accepted to use %s\n", next_protocol);
+      infof(data, "ALPN, server accepted to use %s", next_protocol);
 #ifdef USE_NGHTTP2
       if(!strncmp(next_protocol, NGHTTP2_PROTO_VERSION_ID,
                   NGHTTP2_PROTO_VERSION_ID_LEN) &&
@@ -698,7 +697,7 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
         }
     }
     else {
-      infof(data, "ALPN, server did not agree to a protocol\n");
+      infof(data, "ALPN, server did not agree to a protocol");
     }
     Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                         BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
@@ -706,7 +705,7 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
 #endif
 
   connssl->connecting_state = ssl_connect_3;
-  infof(data, "SSL connected\n");
+  infof(data, "SSL connected");
 
   return CURLE_OK;
 }

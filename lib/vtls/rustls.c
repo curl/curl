@@ -73,7 +73,7 @@ cr_connect(struct Curl_easy *data UNUSED_PARAM,
                     struct connectdata *conn UNUSED_PARAM,
                     int sockindex UNUSED_PARAM)
 {
-  infof(data, "rustls_connect: unimplemented\n");
+  infof(data, "rustls_connect: unimplemented");
   return CURLE_SSL_CONNECT_ERROR;
 }
 
@@ -129,7 +129,7 @@ cr_recv(struct Curl_easy *data, int sockindex,
   io_error = rustls_connection_read_tls(rconn, read_cb,
     &conn->sock[sockindex], &tls_bytes_read);
   if(io_error == EAGAIN || io_error == EWOULDBLOCK) {
-    infof(data, "sread: EAGAIN or EWOULDBLOCK\n");
+    infof(data, "sread: EAGAIN or EWOULDBLOCK");
   }
   else if(io_error) {
     failf(data, "reading from socket: %s", strerror(io_error));
@@ -142,7 +142,7 @@ cr_recv(struct Curl_easy *data, int sockindex,
     return -1;
   }
 
-  infof(data, "cr_recv read %ld bytes from the network\n", tls_bytes_read);
+  infof(data, "cr_recv read %ld bytes from the network", tls_bytes_read);
 
   rresult = rustls_connection_process_new_packets(rconn);
   if(rresult != RUSTLS_RESULT_OK) {
@@ -173,12 +173,12 @@ cr_recv(struct Curl_easy *data, int sockindex,
         available data has been read." If we bring in more ciphertext with
         read_tls, more plaintext will become available. So don't tell curl
         this is an EOF. Instead, say "come back later." */
-      infof(data, "cr_recv got 0 bytes of plaintext\n");
+      infof(data, "cr_recv got 0 bytes of plaintext");
       backend->data_pending = FALSE;
       break;
     }
     else {
-      infof(data, "cr_recv copied out %ld bytes of plaintext\n", n);
+      infof(data, "cr_recv copied out %ld bytes of plaintext", n);
       plain_bytes_copied += n;
     }
   }
@@ -218,7 +218,7 @@ cr_send(struct Curl_easy *data, int sockindex,
   rustls_result rresult;
   rustls_io_result io_error;
 
-  infof(data, "cr_send %ld bytes of plaintext\n", plainlen);
+  infof(data, "cr_send %ld bytes of plaintext", plainlen);
 
   if(plainlen > 0) {
     rresult = rustls_connection_write(rconn, plainbuf, plainlen,
@@ -239,7 +239,7 @@ cr_send(struct Curl_easy *data, int sockindex,
     io_error = rustls_connection_write_tls(rconn, write_cb,
       &conn->sock[sockindex], &tlswritten);
     if(io_error == EAGAIN || io_error == EWOULDBLOCK) {
-      infof(data, "swrite: EAGAIN after %ld bytes\n", tlswritten_total);
+      infof(data, "swrite: EAGAIN after %ld bytes", tlswritten_total);
       *err = CURLE_AGAIN;
       return -1;
     }
@@ -253,7 +253,7 @@ cr_send(struct Curl_easy *data, int sockindex,
       *err = CURLE_WRITE_ERROR;
       return -1;
     }
-    infof(data, "cr_send wrote %ld bytes to network\n", tlswritten);
+    infof(data, "cr_send wrote %ld bytes to network", tlswritten);
     tlswritten_total += tlswritten;
   }
 
@@ -304,10 +304,10 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
 
   config_builder = rustls_client_config_builder_new();
 #ifdef USE_HTTP2
-  infof(data, "offering ALPN for HTTP/1.1 and HTTP/2\n");
+  infof(data, "offering ALPN for HTTP/1.1 and HTTP/2");
   rustls_client_config_builder_set_protocols(config_builder, alpn, 2);
 #else
-  infof(data, "offering ALPN for HTTP/1.1 only\n");
+  infof(data, "offering ALPN for HTTP/1.1 only");
   rustls_client_config_builder_set_protocols(config_builder, alpn, 1);
 #endif
   if(!verifypeer) {
@@ -355,24 +355,24 @@ cr_set_negotiated_alpn(struct Curl_easy *data, struct connectdata *conn,
 
   rustls_connection_get_alpn_protocol(rconn, &protocol, &len);
   if(NULL == protocol) {
-    infof(data, "ALPN, server did not agree to a protocol\n");
+    infof(data, "ALPN, server did not agree to a protocol");
     return;
   }
 
 #ifdef USE_HTTP2
   if(len == ALPN_H2_LENGTH && 0 == memcmp(ALPN_H2, protocol, len)) {
-    infof(data, "ALPN, negotiated h2\n");
+    infof(data, "ALPN, negotiated h2");
     conn->negnpn = CURL_HTTP_VERSION_2;
   }
   else
 #endif
   if(len == ALPN_HTTP_1_1_LENGTH &&
       0 == memcmp(ALPN_HTTP_1_1, protocol, len)) {
-    infof(data, "ALPN, negotiated http/1.1\n");
+    infof(data, "ALPN, negotiated http/1.1");
     conn->negnpn = CURL_HTTP_VERSION_1_1;
   }
   else {
-    infof(data, "ALPN, negotiated an unrecognized protocol\n");
+    infof(data, "ALPN, negotiated an unrecognized protocol");
   }
 
   Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
@@ -415,7 +415,7 @@ cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
     * once the handshake is done.
     */
     if(!rustls_connection_is_handshaking(rconn)) {
-      infof(data, "Done handshaking\n");
+      infof(data, "Done handshaking");
       /* Done with the handshake. Set up callbacks to send/receive data. */
       connssl->state = ssl_connection_complete;
 
@@ -440,22 +440,19 @@ cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
       return CURLE_SSL_CONNECT_ERROR;
     }
     if(0 == what) {
-      infof(data, "Curl_socket_check: %s would block\n",
-          wants_read&&wants_write ?
-            "writing and reading" :
-            wants_write ?
-              "writing" :
-              "reading");
+      infof(data, "Curl_socket_check: %s would block",
+            wants_read&&wants_write ? "writing and reading" :
+            wants_write ? "writing" : "reading");
       *done = FALSE;
       return CURLE_OK;
     }
     /* socket is readable or writable */
 
     if(wants_write) {
-      infof(data, "rustls_connection wants us to write_tls.\n");
+      infof(data, "rustls_connection wants us to write_tls.");
       cr_send(data, sockindex, NULL, 0, &tmperr);
       if(tmperr == CURLE_AGAIN) {
-        infof(data, "writing would block\n");
+        infof(data, "writing would block");
         /* fall through */
       }
       else if(tmperr != CURLE_OK) {
@@ -464,11 +461,11 @@ cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
     }
 
     if(wants_read) {
-      infof(data, "rustls_connection wants us to read_tls.\n");
+      infof(data, "rustls_connection wants us to read_tls.");
 
       cr_recv(data, sockindex, NULL, 0, &tmperr);
       if(tmperr == CURLE_AGAIN) {
-        infof(data, "reading would block\n");
+        infof(data, "reading would block");
         /* fall through */
       }
       else if(tmperr != CURLE_OK) {

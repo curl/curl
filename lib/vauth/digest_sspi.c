@@ -112,7 +112,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 
   /* Ensure we have a valid challenge message */
   if(!Curl_bufref_len(chlg)) {
-    infof(data, "DIGEST-MD5 handshake failure (empty challenge message)\n");
+    infof(data, "DIGEST-MD5 handshake failure (empty challenge message)");
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
@@ -207,7 +207,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     if(status == SEC_E_INSUFFICIENT_MEMORY)
       return CURLE_OUT_OF_MEMORY;
 
-    infof(data, "schannel: InitializeSecurityContext failed: %s\n",
+    infof(data, "schannel: InitializeSecurityContext failed: %s",
           Curl_sspi_strerror(status, buffer, sizeof(buffer)));
 
     return CURLE_AUTH_ERROR;
@@ -461,7 +461,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     if(status == SEC_E_OK)
       output_token_len = chlg_buf[4].cbBuffer;
     else { /* delete the context so a new one can be made */
-      infof(data, "digest_sspi: MakeSignature failed, error 0x%08lx\n",
+      infof(data, "digest_sspi: MakeSignature failed, error 0x%08lx",
             (long)status);
       s_pSecFn->DeleteSecurityContext(digest->http_context);
       Curl_safefree(digest->http_context);
@@ -597,7 +597,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       if(status == SEC_E_INSUFFICIENT_MEMORY)
         return CURLE_OUT_OF_MEMORY;
 
-      infof(data, "schannel: InitializeSecurityContext failed: %s\n",
+      infof(data, "schannel: InitializeSecurityContext failed: %s",
             Curl_sspi_strerror(status, buffer, sizeof(buffer)));
 
       return CURLE_AUTH_ERROR;

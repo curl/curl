@@ -308,7 +308,7 @@ static void state(struct Curl_easy *data, pop3state newstate)
   };
 
   if(pop3c->state != newstate)
-    infof(data, "POP3 %p state change from %s to %s\n",
+    infof(data, "POP3 %p state change from %s to %s",
           (void *)pop3c, names[pop3c->state], names[newstate]);
 #endif
 
@@ -552,7 +552,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
       result = pop3_perform_user(data, conn);
     else {
       /* Other mechanisms not supported */
-      infof(data, "No known authentication mechanisms supported!\n");
+      infof(data, "No known authentication mechanisms supported!");
       result = CURLE_LOGIN_DENIED;
     }
   }
@@ -1173,7 +1173,7 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
   struct connectdata *conn = data->conn;
   struct POP3 *pop3 = data->req.p.pop3;
 
-  DEBUGF(infof(data, "DO phase starts\n"));
+  DEBUGF(infof(data, "DO phase starts"));
 
   if(data->set.opt_no_body) {
     /* Requested no body means no transfer */
@@ -1192,7 +1192,7 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done)
-    DEBUGF(infof(data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete"));
 
   return result;
 }
@@ -1275,11 +1275,11 @@ static CURLcode pop3_doing(struct Curl_easy *data, bool *dophase_done)
   CURLcode result = pop3_multi_statemach(data, dophase_done);
 
   if(result)
-    DEBUGF(infof(data, "DO phase failed\n"));
+    DEBUGF(infof(data, "DO phase failed"));
   else if(*dophase_done) {
     result = pop3_dophase_done(data, FALSE /* not connected */);
 
-    DEBUGF(infof(data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete"));
   }
 
   return result;

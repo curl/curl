@@ -340,7 +340,7 @@ void Curl_cookie_loadfiles(struct Curl_easy *data)
          * Failure may be due to OOM or a bad cookie; both are ignored
          * but only the first should be
          */
-        infof(data, "ignoring failed cookie_init for %s\n", list->data);
+        infof(data, "ignoring failed cookie_init for %s", list->data);
       else
         data->cookies = newcookies;
       list = list->next;
@@ -520,7 +520,7 @@ Curl_cookie_add(struct Curl_easy *data,
         if(nlen >= (MAX_NAME-1) || len >= (MAX_NAME-1) ||
            ((nlen + len) > MAX_NAME)) {
           freecookie(co);
-          infof(data, "oversized cookie dropped, name/val %zu + %zu bytes\n",
+          infof(data, "oversized cookie dropped, name/val %zu + %zu bytes",
                 nlen, len);
           return NULL;
         }
@@ -661,7 +661,7 @@ Curl_cookie_add(struct Curl_easy *data,
              * not a domain to which the current host belongs. Mark as bad.
              */
             badcookie = TRUE;
-            infof(data, "skipped cookie with bad tailmatch domain: %s\n",
+            infof(data, "skipped cookie with bad tailmatch domain: %s",
                   whatptr);
           }
         }
@@ -1005,7 +1005,7 @@ Curl_cookie_add(struct Curl_easy *data,
 
     if(!acceptable) {
       infof(data, "cookie '%s' dropped, domain '%s' must not "
-                  "set cookies for '%s'\n", co->name, domain, co->domain);
+                  "set cookies for '%s'", co->name, domain, co->domain);
       freecookie(co);
       return NULL;
     }
@@ -1117,7 +1117,7 @@ Curl_cookie_add(struct Curl_easy *data,
   if(c->running)
     /* Only show this when NOT reading the cookies from a file */
     infof(data, "%s cookie %s=\"%s\" for domain %s, path %s, "
-          "expire %" CURL_FORMAT_CURL_OFF_T "\n",
+          "expire %" CURL_FORMAT_CURL_OFF_T,
           replace_old?"Replaced":"Added", co->name, co->value,
           co->domain, co->path, co->expires);
 
@@ -1743,7 +1743,7 @@ void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
     /* if we have a destination file for all the cookies to get dumped to */
     res = cookie_output(data, data->cookies, data->set.str[STRING_COOKIEJAR]);
     if(res)
-      infof(data, "WARNING: failed to save cookies in %s: %s\n",
+      infof(data, "WARNING: failed to save cookies in %s: %s",
             data->set.str[STRING_COOKIEJAR], curl_easy_strerror(res));
   }
   else {

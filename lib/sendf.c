@@ -236,29 +236,22 @@ bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
 #endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
 
 /* Curl_infof() is for info message along the way */
+#define MAXINFO 2048
 
 void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
 {
+  DEBUGASSERT(!strchr(fmt, '\n'));
   if(data && data->set.verbose) {
     va_list ap;
     size_t len;
-    char print_buffer[2048 + 1];
+    char buffer[MAXINFO + 2];
     va_start(ap, fmt);
-    len = mvsnprintf(print_buffer, sizeof(print_buffer), fmt, ap);
-    /*
-     * Indicate truncation of the input by replacing the last 3 characters
-     * with "...", and transfer the newline over in case the format had one.
-     */
-    if(len >= sizeof(print_buffer)) {
-      len = strlen(fmt);
-      if(fmt[--len] == '\n')
-        msnprintf(print_buffer + (sizeof(print_buffer) - 5), 5, "...\n");
-      else
-        msnprintf(print_buffer + (sizeof(print_buffer) - 4), 4, "...");
-    }
+    (void)mvsnprintf(buffer, MAXINFO, fmt, ap);
+    len = strlen(buffer);
     va_end(ap);
-    len = strlen(print_buffer);
-    Curl_debug(data, CURLINFO_TEXT, print_buffer, len);
+    buffer[len++] = '\n';
+    buffer[len] = '\0';
+    Curl_debug(data, CURLINFO_TEXT, buffer, len);
   }
 }
 
@@ -282,6 +275,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
       data->state.errorbuf = TRUE; /* wrote error string */
     }
     error[len++] = '\n';
+    error[len] = '\0';
     Curl_debug(data, CURLINFO_TEXT, error, len);
     va_end(ap);
   }

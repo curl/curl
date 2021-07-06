@@ -187,7 +187,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
          (conn->http_ntlm_state == NTLMSTATE_TYPE2)) ||
         ((data->req.httpcode == 407) &&
          (conn->proxy_ntlm_state == NTLMSTATE_TYPE2)))) {
-      infof(data, "Connection closed while negotiating NTLM\n");
+      infof(data, "Connection closed while negotiating NTLM");
       data->state.authproblem = TRUE;
       Curl_safefree(data->req.newurl);
     }
@@ -200,7 +200,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
     else
       result = Curl_http_firstwrite(data, data->conn, &done);
     if(result || done) {
-      infof(data, "Return early from hyper_body_chunk\n");
+      infof(data, "Return early from hyper_body_chunk");
       data->state.hresult = result;
       return HYPER_ITER_BREAK;
     }
@@ -345,7 +345,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       if(errnum == HYPERE_ABORTED_BY_CALLBACK) {
         /* override Hyper's view, might not even be an error */
         result = data->state.hresult;
-        infof(data, "hyperstream is done (by early callback)\n");
+        infof(data, "hyperstream is done (by early callback)");
       }
       else {
         uint8_t errbuf[256];
@@ -366,7 +366,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     else if(h->endtask == task) {
       /* end of transfer */
       *done = TRUE;
-      infof(data, "hyperstream is done!\n");
+      infof(data, "hyperstream is done!");
       break;
     }
     else if(t != HYPER_TASK_RESPONSE) {
@@ -707,7 +707,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
 
-  infof(data, "Time for the Hyper dance\n");
+  infof(data, "Time for the Hyper dance");
   memset(h, 0, sizeof(struct hyptransfer));
 
   result = Curl_http_host(data, conn);

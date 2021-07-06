@@ -193,9 +193,9 @@ static int doh_done(struct Curl_easy *doh, CURLcode result)
   struct dohdata *dohp = data->req.doh;
   /* so one of the DOH request done for the 'data' transfer is now complete! */
   dohp->pending--;
-  infof(data, "a DOH request is completed, %u to go\n", dohp->pending);
+  infof(data, "a DOH request is completed, %u to go", dohp->pending);
   if(result)
-    infof(data, "DOH request %s\n", curl_easy_strerror(result));
+    infof(data, "DOH request %s", curl_easy_strerror(result));
 
   if(!dohp->pending) {
     /* DOH completed */
@@ -764,11 +764,11 @@ static void showdoh(struct Curl_easy *data,
                     const struct dohentry *d)
 {
   int i;
-  infof(data, "TTL: %u seconds\n", d->ttl);
+  infof(data, "TTL: %u seconds", d->ttl);
   for(i = 0; i < d->numaddr; i++) {
     const struct dohaddr *a = &d->addr[i];
     if(a->type == DNS_TYPE_A) {
-      infof(data, "DOH A: %u.%u.%u.%u\n",
+      infof(data, "DOH A: %u.%u.%u.%u",
             a->ip.v4[0], a->ip.v4[1],
             a->ip.v4[2], a->ip.v4[3]);
     }
@@ -788,11 +788,11 @@ static void showdoh(struct Curl_easy *data,
         len -= l;
         ptr += l;
       }
-      infof(data, "%s\n", buffer);
+      infof(data, "%s", buffer);
     }
   }
   for(i = 0; i < d->numcname; i++) {
-    infof(data, "CNAME: %s\n", Curl_dyn_ptr(&d->cname[i]));
+    infof(data, "CNAME: %s", Curl_dyn_ptr(&d->cname[i]));
   }
 }
 #else
@@ -958,7 +958,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                             &de);
       Curl_dyn_free(&p->serverdoh);
       if(rc[slot]) {
-        infof(data, "DOH: %s type %s for %s\n", doh_strerror(rc[slot]),
+        infof(data, "DOH: %s type %s for %s", doh_strerror(rc[slot]),
               type2name(p->dnstype), dohp->host);
       }
     } /* next slot */
@@ -969,7 +969,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       struct Curl_dns_entry *dns;
       struct Curl_addrinfo *ai;
 
-      infof(data, "DOH Host name: %s\n", dohp->host);
+      infof(data, "DOH Host name: %s", dohp->host);
       showdoh(data, &de);
 
       ai = doh2ai(&de, dohp->host, dohp->port);

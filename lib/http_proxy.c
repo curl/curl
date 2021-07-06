@@ -169,7 +169,7 @@ static CURLcode connect_init(struct Curl_easy *data, bool reinit)
     s = calloc(1, sizeof(struct http_connect_state));
     if(!s)
       return CURLE_OUT_OF_MEMORY;
-    infof(data, "allocate connect buffer!\n");
+    infof(data, "allocate connect buffer!");
     conn->connect_state = s;
     Curl_dyn_init(&s->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
 
@@ -210,7 +210,7 @@ static void connect_done(struct Curl_easy *data)
     /* retore the protocol pointer */
     data->req.p.http = s->prot_save;
     s->prot_save = NULL;
-    infof(data, "CONNECT phase completed!\n");
+    infof(data, "CONNECT phase completed!");
   }
 }
 
@@ -278,7 +278,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
       char *hostheader = NULL;
       char *host = NULL;
 
-      infof(data, "Establish HTTP proxy tunnel to %s:%d\n",
+      infof(data, "Establish HTTP proxy tunnel to %s:%d",
             hostname, remote_port);
 
         /* This only happens if we've looped here due to authentication
@@ -419,7 +419,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
             /* proxy auth was requested and there was proxy auth available,
                then deem this as "mere" proxy disconnect */
             conn->bits.proxy_connect_closed = TRUE;
-            infof(data, "Proxy CONNECT connection closed\n");
+            infof(data, "Proxy CONNECT connection closed");
           }
           else {
             error = SELECT_ERROR;
@@ -454,7 +454,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
             r = Curl_httpchunk_read(data, &byte, 1, &tookcareof, &extra);
             if(r == CHUNKE_STOP) {
               /* we're done reading chunks! */
-              infof(data, "chunk reading DONE\n");
+              infof(data, "chunk reading DONE");
               s->keepon = KEEPON_DONE;
               /* we did the full CONNECT treatment, go COMPLETE */
               s->tunnel_state = TUNNEL_COMPLETE;
@@ -513,13 +513,13 @@ static CURLcode CONNECT(struct Curl_easy *data,
 
             if(s->cl) {
               infof(data, "Ignore %" CURL_FORMAT_CURL_OFF_T
-                    " bytes of response-body\n", s->cl);
+                    " bytes of response-body", s->cl);
             }
             else if(s->chunked_encoding) {
               CHUNKcode r;
               CURLcode extra;
 
-              infof(data, "Ignore chunked response-body\n");
+              infof(data, "Ignore chunked response-body");
 
               /* We set ignorebody true here since the chunked decoder
                  function will acknowledge that. Pay attention so that this is
@@ -536,7 +536,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
                                       &extra);
               if(r == CHUNKE_STOP) {
                 /* we're done reading chunks! */
-                infof(data, "chunk reading DONE\n");
+                infof(data, "chunk reading DONE");
                 s->keepon = KEEPON_DONE;
                 /* we did the full CONNECT treatment, go to COMPLETE */
                 s->tunnel_state = TUNNEL_COMPLETE;
@@ -582,7 +582,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
             /* A client MUST ignore any Content-Length or Transfer-Encoding
                header fields received in a successful response to CONNECT.
                "Successful" described as: 2xx (Successful). RFC 7231 4.3.6 */
-            infof(data, "Ignoring Content-Length in CONNECT %03d response\n",
+            infof(data, "Ignoring Content-Length in CONNECT %03d response",
                   k->httpcode);
           }
           else {
@@ -598,11 +598,11 @@ static CURLcode CONNECT(struct Curl_easy *data,
                header fields received in a successful response to CONNECT.
                "Successful" described as: 2xx (Successful). RFC 7231 4.3.6 */
             infof(data, "Ignoring Transfer-Encoding in "
-                  "CONNECT %03d response\n", k->httpcode);
+                  "CONNECT %03d response", k->httpcode);
           }
           else if(Curl_compareheader(linep,
                                      "Transfer-Encoding:", "chunked")) {
-            infof(data, "CONNECT responded chunked\n");
+            infof(data, "CONNECT responded chunked");
             s->chunked_encoding = TRUE;
             /* init our chunky engine */
             Curl_httpchunk_init(data);
@@ -660,7 +660,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
   if(data->info.httpproxycode/100 != 2) {
     if(s->close_connection && data->req.newurl) {
       conn->bits.proxy_connect_closed = TRUE;
-      infof(data, "Connect me again please\n");
+      infof(data, "Connect me again please");
       connect_done(data);
     }
     else {
@@ -695,7 +695,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
   data->state.authproxy.done = TRUE;
   data->state.authproxy.multipass = FALSE;
 
-  infof(data, "Proxy replied %d to CONNECT request\n",
+  infof(data, "Proxy replied %d to CONNECT request",
         data->info.httpproxycode);
   data->req.ignorebody = FALSE; /* put it (back) to non-ignore state */
   conn->bits.rewindaftersend = FALSE; /* make sure this isn't set for the
@@ -910,7 +910,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
     if(data->info.httpproxycode/100 != 2) {
       if(conn->bits.close && data->req.newurl) {
         conn->bits.proxy_connect_closed = TRUE;
-        infof(data, "Connect me again please\n");
+        infof(data, "Connect me again please");
         connect_done(data);
       }
       else {

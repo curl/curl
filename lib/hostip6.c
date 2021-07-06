@@ -172,7 +172,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 
   error = Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &res);
   if(error) {
-    infof(data, "getaddrinfo(3) failed for %s:%d\n", hostname, port);
+    infof(data, "getaddrinfo(3) failed for %s:%d", hostname, port);
     return NULL;
   }
 
