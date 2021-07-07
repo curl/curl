@@ -250,6 +250,7 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
     len = strlen(buffer);
     va_end(ap);
     buffer[len++] = '\n';
+    buffer[len] = '\0';
     Curl_debug(data, CURLINFO_TEXT, buffer, len);
   }
 }
@@ -274,6 +275,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
       data->state.errorbuf = TRUE; /* wrote error string */
     }
     error[len++] = '\n';
+    error[len] = '\0';
     Curl_debug(data, CURLINFO_TEXT, error, len);
     va_end(ap);
   }
