@@ -246,8 +246,7 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
     size_t len;
     char buffer[MAXINFO + 2];
     va_start(ap, fmt);
-    (void)mvsnprintf(buffer, MAXINFO, fmt, ap);
-    len = strlen(buffer);
+    len = mvsnprintf(buffer, MAXINFO, fmt, ap);
     va_end(ap);
     buffer[len++] = '\n';
     buffer[len] = '\0';
@@ -267,8 +266,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
     size_t len;
     char error[CURL_ERROR_SIZE + 2];
     va_start(ap, fmt);
-    (void)mvsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
-    len = strlen(error);
+    len = mvsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
 
     if(data->set.errorbuffer && !data->state.errorbuf) {
       strcpy(data->set.errorbuffer, error);

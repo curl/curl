@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1541,8 +1541,9 @@ static int test_weird_arguments(void)
   buf[0] = 0;
   rc = curl_msnprintf(buf, sizeof(buf), "%d, %.*1$d", 500, 1);
 
-  if(rc != 256) {
-    printf("curl_mprintf() returned %d and not 256!\n", rc);
+  if(rc != sizeof(buf) - 1) {
+    printf("curl_mprintf() returned %d and not %d!\n", rc,
+           sizeof(buf) - 1);
     errors++;
   }
 
@@ -1669,6 +1670,36 @@ static int test_float_formatting(void)
 }
 /* !checksrc! enable LONGLINE */
 
+static int test_return_codes(void)
+{
+  char buf[128];
+  int rc;
+
+  rc = curl_msnprintf(buf, 100, "%d", 9999);
+  if(rc != 4)
+    return 1;
+
+  rc = curl_msnprintf(buf, 100, "%d", 99999);
+  if(rc != 5)
+    return 1;
+
+  /* returns the length excluding the nul byte */
+  rc = curl_msnprintf(buf, 5, "%d", 99999);
+  if(rc != 4)
+    return 1;
+
+  /* returns the length excluding the nul byte */
+  rc = curl_msnprintf(buf, 5, "%s", "helloooooooo");
+  if(rc != 4)
+    return 1;
+
+  /* returns the length excluding the nul byte */
+  rc = curl_msnprintf(buf, 6, "%s", "helloooooooo");
+  if(rc != 5)
+    return 1;
+
+  return 0;
+}
 int test(char *URL)
 {
   int errors = 0;
@@ -1701,6 +1732,8 @@ int test(char *URL)
   errors += test_string_formatting();
 
   errors += test_float_formatting();
+
+  errors += test_return_codes();
 
   if(errors)
     return TEST_ERR_MAJOR_BAD;

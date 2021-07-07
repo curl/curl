@@ -108,7 +108,7 @@ fail_unless(verify(result, "(nil)") == 0, "Passing NULL as string");
 
 /* A string just long enough to not be truncated */
 memset(input, '\0', sizeof(input));
-memset(input, 'A', 2048);
+memset(input, 'A', 2047);
 Curl_infof(data, "%s", input);
 fail_unless(strlen(result) == 2048, "No truncation of infof input");
 fail_unless(verify(result, input) == 0, "No truncation of infof input");
