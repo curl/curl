@@ -246,8 +246,8 @@ not use them in new programs or projects.
 The \fBcurl_maprintf\fP and \fBcurl_mvaprintf\fP functions return a pointer to
 a newly allocated string, or NULL if it failed.
 
-All other functions return the number of characters they actually
-outputted. Note that this differs from how the POSIX versions of these
-functions work.
+All other functions return the number of characters actually printed
+(excluding the null byte used to end output to strings). Note that this
+sometimes differ from how the POSIX versions of these functions work.
 .SH "SEE ALSO"
 .BR printf "(3), " sprintf "(3), " fprintf "(3), " vprintf "(3) "
