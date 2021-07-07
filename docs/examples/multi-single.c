@@ -68,11 +68,12 @@ int main(void)
   do {
     CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
 
-    /* wait for activity, timeout or "nothing" */
-    mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+    if(!mc)
+      /* wait for activity, timeout or "nothing" */
+      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
-    if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi_wait() failed, code %d.\n", mc);
+    if(mc) {
+      fprintf(stderr, "curl_multi_poll() failed, code %d.\n", (int)mc);
       break;
     }
 
