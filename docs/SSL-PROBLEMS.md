@@ -33,7 +33,7 @@
 
   Browsers work around this problem in two ways: they cache intermediate
   certificates from previous transfers and some implement the TLS "AIA"
-  extension that lets the client explicitly download such cerfificates on
+  extension that lets the client explicitly download such certificates on
   demand.
 
 ## Protocol version
