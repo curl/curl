@@ -3915,7 +3915,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
         $curl_includes_stropts
       ]],[[
         long flags = 0;
-        if(0 != ioctlsocket(0, FIONBIO, &flags))
+        if(0 != IoctlSocket(0, FIONBIO, &flags))
           return 1;
       ]])
     ],[
