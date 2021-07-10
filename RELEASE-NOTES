@@ -4,7 +4,7 @@ curl and libcurl 7.78.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2446
+ Contributors:                 2449
 
 This release includes the following changes:
 
@@ -64,10 +64,13 @@ This release includes the following bugfixes:
  o Curl_ssl_getsessionid: fail if no session cache exists [14]
  o CURLOPT_WRITEFUNCTION.3: minor update of the example [80]
  o docs/BINDINGS: fix outdated links [116]
+ o docs/examples: use curl_multi_poll() in multi examples [152]
  o docs/INSTALL: remove mentions of configure --with-darwin-ssl [55]
+ o docs: Fix typos [146]
  o docs: use --max-redirs instead of --max-redir [28]
  o doh: (void)-prefix call to curl_easy_setopt
  o doh: fix wrong DEBUGASSERT for doh private_data [62]
+ o examples/multi-single: fix scan-build warning [150]
  o examples: length-limit two sscanf() uses of %s [96]
  o examples: safer and more proper read callback logic [127]
  o filecheck: quietly remove test-place/*~ [39]
@@ -93,6 +96,7 @@ This release includes the following bugfixes:
  o hyper: propagate errors back up from read callbacks [113]
  o HYPER: remove mentions of deprecated development branch
  o idn: fix libidn2 with windows unicode builds [117]
+ o infof: remove newline from format strings, always append it [149]
  o lib: don't compare fd to FD_SETSIZE when using poll [61]
  o lib: fix type of len passed to *printf's %*s [133]
  o lib: more %u for port and int for %*s fixes [132]
@@ -102,6 +106,7 @@ This release includes the following bugfixes:
  o mbedtls: make mbedtls_strerror always work [6]
  o mqtt: detect illegal and too large file size [43]
  o mqtt: extend the error message for no topic [136]
+ o msnprintf: return number of printed characters excluding null byte [148]
  o multi: add scan-build-6 work-around in curl_multi_fdset [88]
  o multi: alter transfer timeout ordering [97]
  o multi: do not switch off connect_only flag when closing [98]
@@ -113,6 +118,7 @@ This release includes the following bugfixes:
  o proto.d: fix formatting for paragraphs after margin changes [125]
  o quiche: use send() instead of sendto() to avoid macOS issue [103]
  o Revert "c-hyper: handle body on HYPER_TASK_EMPTY" [26]
+ o Revert "ftp: Expression 'ftpc->wait_data_conn' is always false" [147]
  o runtests: also find the last test in Makefile.inc [66]
  o runtests: enable 'hyper mode' only for HTTP tests [34]
  o runtests: init $VERSION to avoid warnings when using -l
@@ -163,6 +169,8 @@ This release includes the following bugfixes:
  o warnless: simplify type size handling [30]
  o Win32: fix build with Watt-32
  o winbuild/README: VC should be set to 6 'or larger' [64]
+ o wolfssl: failing to set a session id is not reason to error out [151]
+ o write-out.d: Clarify urlnum is not unique for de-globbed URLs [145]
  o zuul: use the new rustls directory name [141]
 
 This release includes the following known bugs:
@@ -177,17 +185,19 @@ advice from friends like these:
   Christian Weisgerber, Christoph M. Becker, civodul on github, Dan Fandrich,
   Daniel Gustafsson, Daniel Stenberg, David Hu, dEajL3kA on github,
   Dmitry Karpov, Dmitry Kostjuchenko, Douglas R. Reno, Ebe Janchivdorj,
-  Fawad Mirza, Gabriel Simmer, Gealber Morales, Gergely Nagy, Gerrit Renker,
-  Gisle Vanem, Gregor Jasny, Gregory Muchka, Harry Sintonen, Hugh Macdonald,
-  Jacob Hoffman-Andrews, Jishan Shaikh, Joel Depooter, Jon Rumsey, Jun-ya Kato,
-  Kevin Burke, Laurent Dufresne, Li Xinwei, Marcel Raad, Marc Hörsken,
-  Mark Swaanenburg, Martin Howarth, Michael Forney, Michael Kaufmann,
-  Mohammed Naser, nian6324 on github, Nikos Mavrogiannopoulos, Paul Groke,
-  Peter Körner, Phil E. Taylor, Ray Satiro, Red Hat Product Security,
-  Richard Marion, Richard Whitehouse, Shikha Sharma, shithappens2016 on github,
-  Tommy Chiang, Vadim Grinshpun, Valentín Gutiérrez, Viktor Szakats,
-  Xiang Xiao, Yongkang Huang, Younes El-karama, Zhang Xiuhua,
-  (66 contributors)
+  Fawad Mirza, Francisco Munoz, Gabriel Simmer, Gealber Morales, Gergely Nagy,
+  Gerrit Renker, Gisle Vanem, Gregor Jasny, Gregory Muchka, Harry Sintonen,
+  Hugh Macdonald, Jacob Hoffman-Andrews, Jishan Shaikh, Joel Depooter,
+  Jonathan Wernberg, Jon Rumsey, Jun-ya Kato, Kevin Burke, Laurent Dufresne,
+  Li Xinwei, Marcel Raad, Marc Hörsken, Mark Swaanenburg, Martin Howarth,
+  Michael Forney, Michael Kaufmann, Mohammed Naser, nian6324 on github,
+  Nikos Mavrogiannopoulos, Paul Groke, Peter Körner, Phil E. Taylor,
+  Ray Satiro, Red Hat Product Security, Richard Marion, Richard Whitehouse,
+  Shikha Sharma, shithappens2016 on github, Tommy Chiang, Vadim Grinshpun,
+  Valentín Gutiérrez, Viktor Szakats, William Desportes, Xiang Xiao,
+  Yongkang Huang, Younes El-karama, Zhang Xiuhua,
+  Коваленко Анатолий Викторович,
+  (70 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -335,3 +345,11 @@ References to bug reports and discussions on issues:
  [142] = https://curl.se/bug/?i=7308
  [143] = https://curl.se/bug/?i=7314
  [144] = https://curl.se/bug/?i=7313
+ [145] = https://curl.se/bug/?i=7342
+ [146] = https://curl.se/bug/?i=7370
+ [147] = https://curl.se/mail/lib-2021-07/0025.html
+ [148] = https://curl.se/bug/?i=7361
+ [149] = https://curl.se/bug/?i=7357
+ [150] = https://curl.se/bug/?i=7360
+ [151] = https://curl.se/bug/?i=7358
+ [152] = https://curl.se/bug/?i=7352
