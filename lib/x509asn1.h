@@ -26,7 +26,7 @@
 #include "curl_setup.h"
 
 #if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
-    defined(USE_WOLFSSL) || defined(USE_SCHANNEL)
+    defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP)
 
 #include "urldata.h"
 
@@ -129,5 +129,6 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data, int certnum,
                                const char *beg, const char *end);
 CURLcode Curl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
                          const char *beg, const char *end);
-#endif /* USE_GSKIT or USE_NSS or USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL */
+#endif /* USE_GSKIT or USE_NSS or USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL
+        * or USE_SECTRANSP */
 #endif /* HEADER_CURL_X509ASN1_H */

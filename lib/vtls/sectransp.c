@@ -33,6 +33,7 @@
 #include "strtok.h"
 #include "multiif.h"
 #include "strcase.h"
+#include "x509asn1.h"
 
 #ifdef USE_SECTRANSP
 
@@ -2854,13 +2855,60 @@ sectransp_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   }
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-/* This should be called during step3 of the connection at the earliest */
-static void
-show_verbose_server_cert(struct Curl_easy *data,
-                         struct connectdata *conn,
-                         int sockindex)
+static CURLcode
+add_cert_to_certinfo(struct Curl_easy *data,
+                     SecCertificateRef server_cert,
+                     int idx)
 {
+  CURLcode result = CURLE_OK;
+  const char *beg;
+  const char *end;
+  CFDataRef cert_data = SecCertificateCopyData(server_cert);
+
+  if(!cert_data)
+    return CURLE_PEER_FAILED_VERIFICATION;
+
+  beg = (const char *)CFDataGetBytePtr(cert_data);
+  end = beg + CFDataGetLength(cert_data);
+  result = Curl_extract_certinfo(data, idx, beg, end);
+  CFRelease(cert_data);
+  return result;
+}
+
+static CURLcode
+collect_server_cert_single(struct Curl_easy *data,
+                           SecCertificateRef server_cert,
+                           CFIndex idx)
+{
+  CURLcode result = CURLE_OK;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  if(data->set.verbose) {
+    char *certp;
+    result = CopyCertSubject(data, server_cert, &certp);
+    if(!result) {
+      infof(data, "Server certificate: %s", certp);
+      free(certp);
+    }
+  }
+#endif
+  if(data->set.ssl.certinfo)
+    result = add_cert_to_certinfo(data, server_cert, (int)idx);
+  return result;
+}
+
+/* This should be called during step3 of the connection at the earliest */
+static CURLcode
+collect_server_cert(struct Curl_easy *data,
+                    struct connectdata *conn,
+                    int sockindex)
+{
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  const bool show_verbose_server_cert = data->set.verbose;
+#else
+  const bool show_verbose_server_cert = false;
+#endif
+  CURLcode result = data->set.ssl.certinfo ?
+    CURLE_PEER_FAILED_VERIFICATION : CURLE_OK;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   CFArrayRef server_certs = NULL;
@@ -2869,8 +2917,11 @@ show_verbose_server_cert(struct Curl_easy *data,
   CFIndex i, count;
   SecTrustRef trust = NULL;
 
+  if(!show_verbose_server_cert && !data->set.ssl.certinfo)
+    return CURLE_OK;
+
   if(!backend->ssl_ctx)
-    return;
+    return result;
 
 #if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
 #if CURL_BUILD_IOS
@@ -2880,15 +2931,11 @@ show_verbose_server_cert(struct Curl_easy *data,
      a null trust, so be on guard for that: */
   if(err == noErr && trust) {
     count = SecTrustGetCertificateCount(trust);
-    for(i = 0L ; i < count ; i++) {
-      CURLcode result;
-      char *certp;
+    if(data->set.ssl.certinfo)
+      result = Curl_ssl_init_certinfo(data, (int)count);
+    for(i = 0L ; !result && (i < count) ; i++) {
       server_cert = SecTrustGetCertificateAtIndex(trust, i);
-      result = CopyCertSubject(data, server_cert, &certp);
-      if(!result) {
-        infof(data, "Server certificate: %s", certp);
-        free(certp);
-      }
+      result = collect_server_cert_single(data, server_cert, i);
     }
     CFRelease(trust);
   }
@@ -2906,15 +2953,11 @@ show_verbose_server_cert(struct Curl_easy *data,
        a null trust, so be on guard for that: */
     if(err == noErr && trust) {
       count = SecTrustGetCertificateCount(trust);
-      for(i = 0L ; i < count ; i++) {
-        char *certp;
-        CURLcode result;
+      if(data->set.ssl.certinfo)
+        result = Curl_ssl_init_certinfo(data, (int)count);
+      for(i = 0L ; !result && (i < count) ; i++) {
         server_cert = SecTrustGetCertificateAtIndex(trust, i);
-        result = CopyCertSubject(data, server_cert, &certp);
-        if(!result) {
-          infof(data, "Server certificate: %s", certp);
-          free(certp);
-        }
+        result = collect_server_cert_single(data, server_cert, i);
       }
       CFRelease(trust);
     }
@@ -2925,16 +2968,12 @@ show_verbose_server_cert(struct Curl_easy *data,
     /* Just in case SSLCopyPeerCertificates() returns null too... */
     if(err == noErr && server_certs) {
       count = CFArrayGetCount(server_certs);
-      for(i = 0L ; i < count ; i++) {
-        char *certp;
-        CURLcode result;
+      if(data->set.ssl.certinfo)
+        result = Curl_ssl_init_certinfo(data, (int)count);
+      for(i = 0L ; !result && (i < count) ; i++) {
         server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs,
                                                                 i);
-        result = CopyCertSubject(data, server_cert, &certp);
-        if(!result) {
-          infof(data, "Server certificate: %s", certp);
-          free(certp);
-        }
+        result = collect_server_cert_single(data, server_cert, i);
       }
       CFRelease(server_certs);
     }
@@ -2946,21 +2985,17 @@ show_verbose_server_cert(struct Curl_easy *data,
   err = SSLCopyPeerCertificates(backend->ssl_ctx, &server_certs);
   if(err == noErr) {
     count = CFArrayGetCount(server_certs);
-    for(i = 0L ; i < count ; i++) {
-      CURLcode result;
-      char *certp;
+    if(data->set.ssl.certinfo)
+      result = Curl_ssl_init_certinfo(data, (int)count);
+    for(i = 0L ; !result && (i < count) ; i++) {
       server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs, i);
-      result = CopyCertSubject(data, server_cert, &certp);
-      if(!result) {
-        infof(data, "Server certificate: %s", certp);
-        free(certp);
-      }
+      result = collect_server_cert_single(data, server_cert, i);
     }
     CFRelease(server_certs);
   }
 #endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
+  return result;
 }
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 static CURLcode
 sectransp_connect_step3(struct Curl_easy *data, struct connectdata *conn,
@@ -2969,12 +3004,11 @@ sectransp_connect_step3(struct Curl_easy *data, struct connectdata *conn,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   /* There is no step 3!
-   * Well, okay, if verbose mode is on, let's print the details of the
-   * server certificates. */
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  if(data->set.verbose)
-    show_verbose_server_cert(data, conn, sockindex);
-#endif
+   * Well, okay, let's collect server certificates, and if verbose mode is on,
+   * let's print the details of the server certificates. */
+  const CURLcode result = collect_server_cert(data, conn, sockindex);
+  if(result)
+    return result;
 
   connssl->connecting_state = ssl_connect_done;
   return CURLE_OK;
@@ -3433,6 +3467,7 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   { CURLSSLBACKEND_SECURETRANSPORT, "secure-transport" }, /* info */
 
   SSLSUPP_CAINFO_BLOB |
+  SSLSUPP_CERTINFO |
 #ifdef SECTRANSP_PINNEDPUBKEY
   SSLSUPP_PINNEDPUBKEY,
 #else
