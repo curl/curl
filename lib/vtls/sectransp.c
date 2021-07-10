@@ -2858,7 +2858,7 @@ sectransp_connect_step2(struct Curl_easy *data, struct connectdata *conn,
 static CURLcode
 add_cert_to_certinfo(struct Curl_easy *data,
                      SecCertificateRef server_cert,
-                     CFIndex idx)
+                     int idx)
 {
   CURLcode result = CURLE_OK;
   const char *beg;
@@ -2870,8 +2870,29 @@ add_cert_to_certinfo(struct Curl_easy *data,
 
   beg = (const char *)CFDataGetBytePtr(cert_data);
   end = beg + CFDataGetLength(cert_data);
-  result = Curl_extract_certinfo(data, (int)idx, beg, end);
+  result = Curl_extract_certinfo(data, idx, beg, end);
   CFRelease(cert_data);
+  return result;
+}
+
+static CURLcode
+collect_server_cert_single(struct Curl_easy *data,
+                           SecCertificateRef server_cert,
+                           CFIndex idx)
+{
+  CURLcode result = CURLE_OK;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  if(data->set.verbose) {
+    char *certp;
+    result = CopyCertSubject(data, server_cert, &certp);
+    if(!result) {
+      infof(data, "Server certificate: %s", certp);
+      free(certp);
+    }
+  }
+#endif
+  if(data->set.ssl.certinfo)
+    result = add_cert_to_certinfo(data, server_cert, (int)idx);
   return result;
 }
 
@@ -2911,21 +2932,10 @@ collect_server_cert(struct Curl_easy *data,
   if(err == noErr && trust) {
     count = SecTrustGetCertificateCount(trust);
     if(data->set.ssl.certinfo)
-      result = Curl_ssl_init_certinfo(data, count);
+      result = Curl_ssl_init_certinfo(data, (int)count);
     for(i = 0L ; !result && (i < count) ; i++) {
       server_cert = SecTrustGetCertificateAtIndex(trust, i);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      if(show_verbose_server_cert) {
-        char *certp;
-        result = CopyCertSubject(data, server_cert, &certp);
-        if(!result) {
-          infof(data, "Server certificate: %s", certp);
-          free(certp);
-        }
-      }
-#endif
-      if(data->set.ssl.certinfo)
-        result = add_cert_to_certinfo(data, server_cert, i);
+      result = collect_server_cert_single(data, server_cert, i);
     }
     CFRelease(trust);
   }
@@ -2944,21 +2954,10 @@ collect_server_cert(struct Curl_easy *data,
     if(err == noErr && trust) {
       count = SecTrustGetCertificateCount(trust);
       if(data->set.ssl.certinfo)
-        result = Curl_ssl_init_certinfo(data, count);
+        result = Curl_ssl_init_certinfo(data, (int)count);
       for(i = 0L ; !result && (i < count) ; i++) {
         server_cert = SecTrustGetCertificateAtIndex(trust, i);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-        if(show_verbose_server_cert) {
-          char *certp;
-          result = CopyCertSubject(data, server_cert, &certp);
-          if(!result) {
-            infof(data, "Server certificate: %s", certp);
-            free(certp);
-          }
-        }
-#endif
-        if(data->set.ssl.certinfo)
-          result = add_cert_to_certinfo(data, server_cert, i);
+        result = collect_server_cert_single(data, server_cert, i);
       }
       CFRelease(trust);
     }
@@ -2970,22 +2969,11 @@ collect_server_cert(struct Curl_easy *data,
     if(err == noErr && server_certs) {
       count = CFArrayGetCount(server_certs);
       if(data->set.ssl.certinfo)
-        result = Curl_ssl_init_certinfo(data, count);
+        result = Curl_ssl_init_certinfo(data, (int)count);
       for(i = 0L ; !result && (i < count) ; i++) {
         server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs,
                                                                 i);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-        if(show_verbose_server_cert) {
-          char *certp;
-          result = CopyCertSubject(data, server_cert, &certp);
-          if(!result) {
-            infof(data, "Server certificate: %s", certp);
-            free(certp);
-          }
-        }
-#endif
-        if(data->set.ssl.certinfo)
-          result = add_cert_to_certinfo(data, server_cert, i);
+        result = collect_server_cert_single(data, server_cert, i);
       }
       CFRelease(server_certs);
     }
@@ -2998,21 +2986,10 @@ collect_server_cert(struct Curl_easy *data,
   if(err == noErr) {
     count = CFArrayGetCount(server_certs);
     if(data->set.ssl.certinfo)
-      result = Curl_ssl_init_certinfo(data, count);
-    for(i = 0L ; result && (i < count) ; i++) {
+      result = Curl_ssl_init_certinfo(data, (int)count);
+    for(i = 0L ; !result && (i < count) ; i++) {
       server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs, i);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-      char *certp;
-      result = CopyCertSubject(data, server_cert, &certp);
-      if(show_verbose_server_cert) {
-        if(!result) {
-          infof(data, "Server certificate: %s", certp);
-          free(certp);
-        }
-      }
-#endif
-      if(data->set.ssl.certinfo)
-        result = add_cert_to_certinfo(data, server_cert, i);
+      result = collect_server_cert_single(data, server_cert, i);
     }
     CFRelease(server_certs);
   }
