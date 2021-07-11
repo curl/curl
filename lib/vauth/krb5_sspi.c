@@ -272,6 +272,9 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
 
   /* Ensure we have a valid challenge message */
   if(!Curl_bufref_len(chlg)) {
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+    (void) data;
+#endif
     infof(data, "GSSAPI handshake failure (empty security message)");
     return CURLE_BAD_CONTENT_ENCODING;
   }

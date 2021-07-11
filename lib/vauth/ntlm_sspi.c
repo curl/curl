@@ -309,6 +309,9 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                                &type_3_desc,
                                                &attrs, &expiry);
   if(status != SEC_E_OK) {
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+    (void) data;
+#endif
     infof(data, "NTLM handshake failure (type-3 message): Status=%x",
           status);
 
