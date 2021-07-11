@@ -1092,9 +1092,11 @@ static void nosigpipe(struct Curl_easy *data,
   int onoff = 1;
   if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&onoff,
                 sizeof(onoff)) < 0) {
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
     char buffer[STRERROR_LEN];
     infof(data, "Could not set SO_NOSIGPIPE: %s",
           Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+#endif
   }
 }
 #else

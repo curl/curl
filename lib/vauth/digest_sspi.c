@@ -197,7 +197,9 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
      status == SEC_I_COMPLETE_AND_CONTINUE)
     s_pSecFn->CompleteAuthToken(&credentials, &resp_desc);
   else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
     char buffer[STRERROR_LEN];
+#endif
 
     s_pSecFn->FreeCredentialsHandle(&credentials);
     Curl_sspi_free_identity(p_identity);
@@ -585,7 +587,9 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
        status == SEC_I_COMPLETE_AND_CONTINUE)
       s_pSecFn->CompleteAuthToken(&credentials, &resp_desc);
     else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
       char buffer[STRERROR_LEN];
+#endif
 
       s_pSecFn->FreeCredentialsHandle(&credentials);
 
