@@ -787,7 +787,7 @@ static const struct helptxt helptext[] = {
   {"    --tlsauthtype <type>",
    "TLS authentication type",
    CURLHELP_TLS | CURLHELP_AUTH},
-  {"    --tlspassword",
+  {"    --tlspassword <string>",
    "TLS password",
    CURLHELP_TLS | CURLHELP_AUTH},
   {"    --tlsuser <name>",
