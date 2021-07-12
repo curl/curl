@@ -23,6 +23,20 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-char *homedir(const char *fname);
+/* returns home directory in current locale encoding.
+   windows unicode builds expect filename param 'fname' in UTF-8 encoding. */
+char *homedir_local(const char *fname);
+
+#if defined(WIN32) && defined(_UNICODE)
+/* returns home directory in unicode utf-8 encoding */
+char *homedir_utf8(const char *fname);
+/* Windows Unicode builds of curl/libcurl always expect UTF-8 strings for
+   internal file paths, regardless of current locale. For paths passed to a
+   dependency that always expects local encoding, call homedir_local directly
+   instead. */
+#define homedir(variable) homedir_utf8(variable)
+#else
+#define homedir(variable) homedir_local(variable)
+#endif
 
 #endif /* HEADER_CURL_TOOL_HOMEDIR_H */

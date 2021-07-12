@@ -29,6 +29,7 @@
 #include "vssh/ssh.h"
 #include "quic.h"
 #include "curl_printf.h"
+#include "getenv.h"
 
 #ifdef USE_ARES
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
@@ -164,10 +165,11 @@ char *curl_version(void)
 
 #ifdef DEBUGBUILD
   /* Override version string when environment variable CURL_VERSION is set */
-  const char *debugversion = getenv("CURL_VERSION");
+  char *debugversion = Curl_getenv("CURL_VERSION");
   if(debugversion) {
     strncpy(out, debugversion, sizeof(out)-1);
     out[sizeof(out)-1] = '\0';
+    free(debugversion);
     return out;
   }
 #endif

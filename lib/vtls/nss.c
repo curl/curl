@@ -69,6 +69,7 @@
 #include "strcase.h"
 #include "warnless.h"
 #include "x509asn1.h"
+#include "getenv.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -1394,12 +1395,13 @@ static CURLcode nss_setup(struct Curl_easy *data)
   /* list of all CRL items we need to destroy in nss_cleanup() */
   Curl_llist_init(&nss_crl_list, nss_destroy_crl_item);
 
-  /* First we check if $SSL_DIR points to a valid dir */
-  cert_dir = getenv("SSL_DIR");
+  /* First we check if $SSL_DIR points to a valid dir.
+     $SSL_DIR is passed to NSS in current locale encoding. */
+  cert_dir = Curl_getenv_local("SSL_DIR");
   if(cert_dir) {
     if((stat(cert_dir, &st) != 0) ||
         (!S_ISDIR(st.st_mode))) {
-      cert_dir = NULL;
+      Curl_safefree(cert_dir);
     }
   }
 
@@ -1407,7 +1409,9 @@ static CURLcode nss_setup(struct Curl_easy *data)
   if(!cert_dir) {
     if((stat(SSL_DIR, &st) == 0) &&
         (S_ISDIR(st.st_mode))) {
-      cert_dir = (char *)SSL_DIR;
+      cert_dir = strdup((char *)SSL_DIR);
+      if(!cert_dir)
+        return CURLE_OUT_OF_MEMORY;
     }
   }
 
@@ -1428,14 +1432,17 @@ static CURLcode nss_setup(struct Curl_easy *data)
   }
 
   result = nss_init_core(data, cert_dir);
-  if(result)
+  if(result) {
+    free(cert_dir);
     return result;
+  }
 
   if(!any_cipher_enabled())
     NSS_SetDomesticPolicy();
 
   initialized = 1;
 
+  free(cert_dir);
   return CURLE_OK;
 }
 

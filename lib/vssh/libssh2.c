@@ -82,6 +82,7 @@
 #include "select.h"
 #include "warnless.h"
 #include "curl_path.h"
+#include "getenv.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -911,7 +912,8 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         else {
           /* To ponder about: should really the lib be messing about with the
              HOME environment variable etc? */
-          char *home = curl_getenv("HOME");
+          /* $HOME is passed to libssh2 in current locale encoding */
+          char *home = Curl_getenv_local("HOME");
 
           /* If no private key file is specified, try some common paths. */
           if(home) {

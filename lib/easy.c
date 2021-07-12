@@ -80,6 +80,7 @@
 #include "dynbuf.h"
 #include "altsvc.h"
 #include "hsts.h"
+#include "getenv.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -195,7 +196,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   init_flags = flags;
 
 #ifdef DEBUGBUILD
-  if(getenv("CURL_GLOBAL_INIT"))
+  if(Curl_env_exist("CURL_GLOBAL_INIT"))
     /* alloc data that will leak if *cleanup() is not called! */
     leakpointer = malloc(1);
 #endif

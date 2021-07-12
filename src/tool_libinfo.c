@@ -35,6 +35,11 @@
 
 curl_version_info_data *curlinfo = NULL;
 long built_in_protos = 0;
+curl_sslbackend ssl_backend = CURLSSLBACKEND_NONE;
+
+#ifdef WIN32
+bool ssl_paths_use_utf8 = false;
+#endif
 
 /*
  * libcurl_info_init: retrieves run-time information about libcurl,
@@ -99,6 +104,61 @@ CURLcode get_libcurl_info(void)
       }
     }
   }
+
+  if((curlinfo->features & CURL_VERSION_SSL)) {
+    CURL *curl = curl_easy_init();
+    struct curl_tlssessioninfo *tlsinfo = NULL;
+    CURLcode result;
+
+    if(!curl)
+      return CURLE_FAILED_INIT;
+
+    result = curl_easy_getinfo(curl, CURLINFO_TLS_SSL_PTR, &tlsinfo);
+    if(result)
+      return result;
+
+    ssl_backend = tlsinfo->backend;
+  }
+
+#if defined(WIN32)
+  /*
+   * Paths that are ultimately passed to SSL libraries are expected in current
+   * locale encoding. In Windows, two exceptions to this are Schannel in
+   * Unicode build and OpenSSL 1.0.0a+, which expect UTF-8 but if invalid will
+   * fall back to the current locale. Forks of OpenSSL (BoringSSL, LibreSSL) do
+   * not expect UTF-8. So, for just those two exceptions we signal to use UTF-8
+   * paths since that is more correct.
+   */
+  if(ssl_backend == CURLSSLBACKEND_OPENSSL) {
+    char c = 0;
+    unsigned int x, y, z;
+    const char *p = curlinfo->ssl_version;
+
+    /* Skip inactive backend versions in MultiSSL version strings.
+       Example: "(foo) (bar (baz)) OpenSSL/1.0.1 (qux)" */
+    if((curlinfo->features & CURL_VERSION_MULTI_SSL)) {
+      size_t open = 0;
+      for(; *p; ++p) {
+        if(*p == '(')
+          ++open;
+        else if(open && *p == ')')
+          --open;
+        else if(!open && *p != ' ')
+          break;
+      }
+    }
+
+    /* SSL paths use UTF-8 if OpenSSL/1.0.0a or later */
+    if(3 <= sscanf(p, "OpenSSL/%u.%u.%u%c", &x, &y, &z, &c) &&
+       (x > 1 || (x == 1 && (y || z || (c >= 'a' && c <= 'z')))))
+      ssl_paths_use_utf8 = true;
+  }
+#ifdef _UNICODE
+  else if(ssl_backend == CURLSSLBACKEND_SCHANNEL)
+    ssl_paths_use_utf8 = true;
+#endif
+
+#endif /* WIN32 */
 
   return CURLE_OK;
 }

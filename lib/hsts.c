@@ -38,6 +38,7 @@
 #include "rand.h"
 #include "rename.h"
 #include "strtoofft.h"
+#include "getenv.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -56,12 +57,12 @@
 time_t deltatime; /* allow for "adjustments" for unit test purposes */
 static time_t debugtime(void *unused)
 {
-  char *timestr = getenv("CURL_TIME");
+  char *timestr = Curl_getenv("CURL_TIME");
   (void)unused;
   if(timestr) {
     curl_off_t val;
     (void)curlx_strtoofft(timestr, NULL, 10, &val);
-
+    Curl_safefree(timestr);
     val += (curl_off_t)deltatime;
     return (time_t)val;
   }

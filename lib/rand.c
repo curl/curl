@@ -30,6 +30,7 @@
 #include "vtls/vtls.h"
 #include "sendf.h"
 #include "rand.h"
+#include "getenv.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -44,7 +45,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
   static bool seeded = FALSE;
 
 #ifdef CURLDEBUG
-  char *force_entropy = getenv("CURL_ENTROPY");
+  char *force_entropy = Curl_getenv("CURL_ENTROPY");
   if(force_entropy) {
     if(!seeded) {
       unsigned int seed = 0;
@@ -58,6 +59,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
     else
       randseed++;
     *rnd = randseed;
+    free(force_entropy);
     return CURLE_OK;
   }
 #endif

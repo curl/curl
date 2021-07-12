@@ -600,7 +600,7 @@ char **__crt0_glob_function(char *arg)
 /*
  * Function to find CACert bundle on a Win32 platform using SearchPath.
  * (SearchPath is already declared via inclusions done in setup header file)
- * (Use the ASCII version instead of the unicode one!)
+ *
  * The order of the directories it searches is:
  *  1. application's directory
  *  2. current working directory
@@ -613,7 +613,6 @@ char **__crt0_glob_function(char *arg)
  */
 
 CURLcode FindWin32CACert(struct OperationConfig *config,
-                         curl_sslbackend backend,
                          const TCHAR *bundle_file)
 {
   CURLcode result = CURLE_OK;
@@ -624,8 +623,8 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
    * ignored. We allow setting CA location for schannel only when explicitly
    * specified by the user via CURLOPT_CAINFO / --cacert.
    */
-  if((curlinfo->features & CURL_VERSION_SSL) &&
-     backend != CURLSSLBACKEND_SCHANNEL) {
+  if(ssl_backend != CURLSSLBACKEND_NONE &&
+     ssl_backend != CURLSSLBACKEND_SCHANNEL) {
 
     DWORD res_len;
     TCHAR buf[PATH_MAX];
@@ -635,14 +634,28 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
 
     res_len = SearchPath(NULL, bundle_file, NULL, PATH_MAX, buf, &ptr);
     if(res_len > 0) {
-      Curl_safefree(config->cacert);
+      char *convbuf;
+
 #ifdef UNICODE
-      config->cacert = curlx_convert_wchar_to_UTF8(buf);
+      if(ssl_paths_use_utf8)
+        convbuf = curlx_convert_wchar_to_UTF8(buf);
+      else
+        convbuf = curlx_convert_wchar_to_ANSI(buf);
 #else
-      config->cacert = strdup(buf);
+      if(ssl_paths_use_utf8)
+        convbuf = curlx_convert_ANSI_to_UTF8(buf);
+      else
+        convbuf = curlx_convert_ANSI_to_tchar(buf);
 #endif
-      if(!config->cacert)
-        result = CURLE_OUT_OF_MEMORY;
+      /* ignore failed conversions, wchar -> ANSI may fail */
+
+      if(convbuf) {
+        Curl_safefree(config->cacert);
+        config->cacert = strdup(convbuf);
+        curlx_unicodefree(convbuf);
+        if(!config->cacert)
+          result = CURLE_OUT_OF_MEMORY;
+      }
     }
   }
 

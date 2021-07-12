@@ -27,6 +27,11 @@
 
 extern curl_version_info_data *curlinfo;
 extern long built_in_protos;
+extern curl_sslbackend ssl_backend;
+
+#ifdef WIN32
+extern bool ssl_paths_use_utf8;
+#endif
 
 CURLcode get_libcurl_info(void);
 

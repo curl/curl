@@ -31,6 +31,15 @@
 
 wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8);
 char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
+
+wchar_t *curlx_convert_ANSI_to_wchar(const char *str_ansi);
+char *curlx_convert_wchar_to_ANSI(const wchar_t *str_w);
+
+char *curlx_convert_UTF8_to_ANSI(const char *str_utf8);
+char *curlx_convert_ANSI_to_UTF8(const char *str_ansi);
+
+bool curlx_is_str_utf8(const char *str);
+
 #endif /* WIN32 */
 
 /*
@@ -54,8 +63,15 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
 
 #if defined(UNICODE) && defined(WIN32)
 
+#ifndef _UNICODE
+#error "UNICODE is defined but _UNICODE is not"
+#endif
+
 #define curlx_convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar((ptr))
 #define curlx_convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8((ptr))
+
+#define curlx_convert_ANSI_to_tchar(ptr) curlx_convert_ANSI_to_wchar(ptr)
+#define curlx_convert_tchar_to_ANSI(ptr) curlx_convert_wchar_to_ANSI(ptr)
 
 typedef union {
   unsigned short       *tchar_ptr;
@@ -68,6 +84,9 @@ typedef union {
 
 #define curlx_convert_UTF8_to_tchar(ptr) (strdup)(ptr)
 #define curlx_convert_tchar_to_UTF8(ptr) (strdup)(ptr)
+
+#define curlx_convert_ANSI_to_tchar(ptr) (strdup)(ptr)
+#define curlx_convert_tchar_to_ANSI(ptr) (strdup)(ptr)
 
 typedef union {
   char                *tchar_ptr;

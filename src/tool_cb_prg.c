@@ -33,6 +33,7 @@
 #include "tool_cb_prg.h"
 #include "tool_util.h"
 #include "tool_operate.h"
+#include "getenv.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -221,14 +222,14 @@ void progressbarinit(struct ProgressData *bar,
   if(config->use_resume)
     bar->initial_size = config->resume_from;
 
-  colp = curlx_getenv("COLUMNS");
+  colp = Curl_getenv("COLUMNS");
   if(colp) {
     char *endptr;
     long num = strtol(colp, &endptr, 10);
     if((endptr != colp) && (endptr == colp + strlen(colp)) && (num > 20) &&
        (num < 10000))
       bar->width = (int)num;
-    curl_free(colp);
+    free(colp);
   }
 
   if(!bar->width) {

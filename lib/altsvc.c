@@ -36,6 +36,7 @@
 #include "warnless.h"
 #include "rand.h"
 #include "rename.h"
+#include "getenv.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -420,10 +421,11 @@ static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
    return */
 static time_t debugtime(void *unused)
 {
-  char *timestr = getenv("CURL_TIME");
+  char *timestr = Curl_getenv("CURL_TIME");
   (void)unused;
   if(timestr) {
     unsigned long val = strtol(timestr, NULL, 10);
+    Curl_safefree(timestr);
     return (time_t)val;
   }
   return time(NULL);

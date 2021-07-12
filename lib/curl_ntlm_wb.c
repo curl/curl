@@ -54,6 +54,7 @@
 #include "strerror.h"
 #include "strdup.h"
 #include "strcase.h"
+#include "getenv.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -118,6 +119,7 @@ static CURLcode ntlm_wb_init(struct Curl_easy *data, struct ntlmdata *ntlm,
   curl_socket_t sockfds[2];
   pid_t child_pid;
   const char *username;
+  char *username_alloc = NULL;
   char *slash, *domain = NULL;
   const char *ntlm_auth = NULL;
   char *ntlm_auth_alloc = NULL;
@@ -146,26 +148,37 @@ static CURLcode ntlm_wb_init(struct Curl_easy *data, struct ntlmdata *ntlm,
      empty one anyway. Perhaps they have an implementation of the
      ntlm_auth helper which *doesn't* need it so we might as well try */
   if(!username || !username[0]) {
-    username = getenv("NTLMUSER");
-    if(!username || !username[0])
-      username = getenv("LOGNAME");
-    if(!username || !username[0])
-      username = getenv("USER");
-#if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
-    if((!username || !username[0]) &&
-       !getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res) &&
-       pw_res) {
-      username = pw.pw_name;
+    username_alloc = Curl_getenv_local("NTLMUSER");
+    if(!username_alloc || !username_alloc[0]) {
+      free(username_alloc);
+      username_alloc = Curl_getenv_local("LOGNAME");
     }
+    if(!username_alloc || !username_alloc[0]) {
+      free(username_alloc);
+      username_alloc = Curl_getenv_local("USER");
+    }
+    if(username_alloc && username_alloc[0])
+      username = username_alloc;
+    else {
+      Curl_safefree(username_alloc);
+      username = NULL;
+#if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
+      if(!getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res) &&
+         pw_res) {
+        username = pw.pw_name;
+      }
 #endif
-    if(!username || !username[0])
-      username = userp;
+      if(!username || !username[0])
+        username = userp;
+    }
   }
   slash = strpbrk(username, "\\/");
   if(slash) {
     domain = strdup(username);
-    if(!domain)
+    if(!domain) {
+      free(username_alloc);
       return CURLE_OUT_OF_MEMORY;
+    }
     slash = domain + (slash - username);
     *slash = '\0';
     username = username + (slash - domain) + 1;
@@ -176,7 +189,7 @@ static CURLcode ntlm_wb_init(struct Curl_easy *data, struct ntlmdata *ntlm,
      NTLM challenge/response which only accepts commands and output
      strings pre-written in test case definitions */
 #ifdef DEBUGBUILD
-  ntlm_auth_alloc = curl_getenv("CURL_NTLM_WB_FILE");
+  ntlm_auth_alloc = Curl_getenv("CURL_NTLM_WB_FILE");
   if(ntlm_auth_alloc)
     ntlm_auth = ntlm_auth_alloc;
   else
@@ -247,11 +260,13 @@ static CURLcode ntlm_wb_init(struct Curl_easy *data, struct ntlmdata *ntlm,
   ntlm->ntlm_auth_hlpr_pid = child_pid;
   free(domain);
   free(ntlm_auth_alloc);
+  free(username_alloc);
   return CURLE_OK;
 
 done:
   free(domain);
   free(ntlm_auth_alloc);
+  free(username_alloc);
   return CURLE_REMOTE_ACCESS_DENIED;
 }
 

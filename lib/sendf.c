@@ -46,6 +46,7 @@
 #include "select.h"
 #include "strdup.h"
 #include "http2.h"
+#include "getenv.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -305,11 +306,12 @@ CURLcode Curl_write(struct Curl_easy *data,
   {
     /* Allow debug builds to override this logic to force short sends
     */
-    char *p = getenv("CURL_SMALLSENDS");
+    char *p = Curl_getenv("CURL_SMALLSENDS");
     if(p) {
       size_t altsize = (size_t)strtoul(p, NULL, 10);
       if(altsize)
         len = CURLMIN(len, altsize);
+      free(p);
     }
   }
 #endif

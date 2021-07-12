@@ -37,7 +37,8 @@ CURLX_CFILES = \
   ../lib/curl_ctype.c \
   ../lib/curl_multibyte.c \
   ../lib/version_win32.c \
-  ../lib/dynbuf.c
+  ../lib/dynbuf.c \
+  ../lib/getenv.c
 
 CURLX_HFILES = \
   ../lib/curl_setup.h \
@@ -47,7 +48,8 @@ CURLX_HFILES = \
   ../lib/curl_ctype.h \
   ../lib/curl_multibyte.h \
   ../lib/version_win32.h \
-  ../lib/dynbuf.h
+  ../lib/dynbuf.h \
+  ../lib/getenv.h
 
 CURL_CFILES = \
   slist_wc.c \

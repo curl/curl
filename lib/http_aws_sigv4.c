@@ -32,10 +32,10 @@
 #include "http_aws_sigv4.h"
 #include "curl_sha256.h"
 #include "transfer.h"
-
 #include "strcase.h"
 #include "parsedate.h"
 #include "sendf.h"
+#include "getenv.h"
 
 #include <time.h>
 
@@ -80,9 +80,6 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char *region = NULL;
   char *service = NULL;
   const char *hostname = conn->host.name;
-#ifdef DEBUGBUILD
-  char *force_timestamp;
-#endif
   time_t clock;
   struct tm tm;
   char timestamp[17];
@@ -231,11 +228,12 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   }
 
 #ifdef DEBUGBUILD
-  force_timestamp = getenv("CURL_FORCETIME");
-  if(force_timestamp)
-    clock = 0;
-  else
-    time(&clock);
+  {
+    if(Curl_env_exist("CURL_FORCETIME"))
+      clock = 0;
+    else
+      time(&clock);
+  }
 #else
   time(&clock);
 #endif

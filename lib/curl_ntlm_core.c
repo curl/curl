@@ -111,6 +111,7 @@
 #include "curl_endian.h"
 #include "curl_des.h"
 #include "curl_md4.h"
+#include "getenv.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -639,8 +640,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 
   /* Calculate the timestamp */
 #ifdef DEBUGBUILD
-  char *force_timestamp = getenv("CURL_FORCETIME");
-  if(force_timestamp)
+  if(Curl_env_exist("CURL_FORCETIME"))
     time2filetime(&tw, (time_t) 0);
   else
 #endif

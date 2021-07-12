@@ -31,6 +31,7 @@
 #include "tool_convert.h"
 #include "tool_doswin.h"
 #include "tool_operhlp.h"
+#include "getenv.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -179,13 +180,13 @@ CURLcode get_url_file_name(char **filename, const char *url)
    */
 #ifdef DEBUGBUILD
   {
-    char *tdir = curlx_getenv("CURL_TESTDIR");
+    char *tdir = Curl_getenv("CURL_TESTDIR");
     if(tdir) {
       char buffer[512]; /* suitably large */
       msnprintf(buffer, sizeof(buffer), "%s/%s", tdir, *filename);
       Curl_safefree(*filename);
       *filename = strdup(buffer); /* clone the buffer */
-      curl_free(tdir);
+      free(tdir);
       if(!*filename)
         return CURLE_OUT_OF_MEMORY;
     }

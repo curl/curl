@@ -32,6 +32,7 @@
 #include "curlx.h"
 
 #include "curlmsg_vms.h"
+#include "getenv.h"
 #include "tool_vms.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -53,7 +54,7 @@ int is_vms_shell(void)
   if(vms_shell >= 0)
     return vms_shell;
 
-  shell = getenv("SHELL");
+  shell = Curl_getenv("SHELL");
 
   /* No shell, means DCL */
   if(!shell) {
@@ -63,10 +64,12 @@ int is_vms_shell(void)
 
   /* Have to make sure some one did not set shell to DCL */
   if(strcmp(shell, "DCL") == 0) {
+    free(shell);
     vms_shell = 1;
     return 1;
   }
 
+  free(shell);
   vms_shell = 0;
   return 0;
 }

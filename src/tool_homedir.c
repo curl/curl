@@ -33,24 +33,11 @@
 #include <fcntl.h>
 #endif
 
-#include <curl/mprintf.h>
-
 #include "tool_homedir.h"
+#include "curlx.h"
+#include "getenv.h"
 
 #include "memdebug.h" /* keep this as LAST include */
-
-static char *GetEnv(const char *variable)
-{
-  char *dupe, *env;
-
-  env = curl_getenv(variable);
-  if(!env)
-    return NULL;
-
-  dupe = strdup(env);
-  curl_free(env);
-  return dupe;
-}
 
 /* return the home directory of the current user as an allocated string */
 
@@ -71,18 +58,26 @@ static char *GetEnv(const char *variable)
  * 4. Non-windows: use getpwuid
  * 5. Windows: use APPDATA if set
  * 6. Windows: use "USERPROFILE\Application Data" is set
+ *
+ * funcptr_getenv is a function pointer to the getenv to use, either Unicode
+ * UTF-8 encoding (Curl_getenv_utf8) or the current locale encoding
+ * (Curl_getenv_local). The former is only available in Windows Unicode builds
+ * since in those builds curl/libcurl uses UTF-8 for internal file paths
+ * regardless of the current locale. However, even in that case some
+ * dependencies may still expect file paths in the current locale.
  */
 
-char *homedir(const char *fname)
+static char *gethomedir(const char *fname,
+                        char *(*funcptr_getenv)(const char *))
 {
   char *home;
 
-  home = GetEnv("CURL_HOME");
+  home = funcptr_getenv("CURL_HOME");
   if(home)
     return home;
 
   if(fname) {
-    home = GetEnv("XDG_CONFIG_HOME");
+    home = funcptr_getenv("XDG_CONFIG_HOME");
     if(home) {
       char *c = curl_maprintf("%s" DIR_CHAR "%s", home, fname);
       if(c) {
@@ -97,7 +92,7 @@ char *homedir(const char *fname)
     }
   }
 
-  home = GetEnv("HOME");
+  home = funcptr_getenv("HOME");
   if(home)
     return home;
 
@@ -115,9 +110,9 @@ char *homedir(const char *fname)
  }
 #endif /* PWD-stuff */
 #ifdef WIN32
-  home = GetEnv("APPDATA");
+  home = funcptr_getenv("APPDATA");
   if(!home) {
-    char *env = GetEnv("USERPROFILE");
+    char *env = funcptr_getenv("USERPROFILE");
     if(env) {
       char *path = curl_maprintf("%s\\Application Data", env);
       if(path) {
@@ -130,3 +125,15 @@ char *homedir(const char *fname)
 #endif /* WIN32 */
   return home;
 }
+
+char *homedir_local(const char *fname)
+{
+  return gethomedir(fname, Curl_getenv_local);
+}
+
+#if defined(WIN32) && defined(_UNICODE)
+char *homedir_utf8(const char *fname)
+{
+  return gethomedir(fname, Curl_getenv_utf8);
+}
+#endif

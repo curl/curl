@@ -82,6 +82,7 @@
 #include "tool_hugehelp.h"
 #include "tool_progress.h"
 #include "dynbuf.h"
+#include "getenv.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -1644,7 +1645,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         if((built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP)) &&
            !config->insecure_ok) {
-          char *home = homedir(NULL);
+          char *home = homedir_local(NULL);
           if(home) {
             char *file = aprintf("%s/.ssh/known_hosts", home);
             if(file) {
@@ -2329,18 +2330,6 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
   if(!config->cacert &&
      !config->capath &&
      (!config->insecure_ok || (config->doh_url && !config->doh_insecure_ok))) {
-    CURL *curltls = curl_easy_init();
-    struct curl_tlssessioninfo *tls_backend_info = NULL;
-
-    /* With the addition of CAINFO support for Schannel, this search could find
-     * a certificate bundle that was previously ignored. To maintain backward
-     * compatibility, only perform this search if not using Schannel.
-     */
-    result = curl_easy_getinfo(curltls, CURLINFO_TLS_SSL_PTR,
-                               &tls_backend_info);
-    if(result)
-      return result;
-
     /* Set the CA cert locations specified in the environment. For Windows if
      * no environment-specified filename is found then check for CA bundle
      * default filename curl-ca-bundle.crt in the user's PATH.
@@ -2349,51 +2338,38 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
      * ignored. We allow setting CA location for schannel only when explicitly
      * specified by the user via CURLOPT_CAINFO / --cacert.
      */
-    if(tls_backend_info->backend != CURLSSLBACKEND_SCHANNEL) {
+    if(ssl_backend != CURLSSLBACKEND_NONE &&
+       ssl_backend != CURLSSLBACKEND_SCHANNEL) {
       char *env;
-      env = curlx_getenv("CURL_CA_BUNDLE");
-      if(env) {
-        config->cacert = strdup(env);
-        if(!config->cacert) {
-          curl_free(env);
-          errorf(global, "out of memory\n");
-          return CURLE_OUT_OF_MEMORY;
-        }
-      }
+      char *(*GetEnv)(const char *) = Curl_getenv_local;
+
+#ifdef WIN32
+      if(ssl_paths_use_utf8)
+        GetEnv = Curl_getenv_utf8;
+#endif
+
+      env = GetEnv("CURL_CA_BUNDLE");
+      if(env)
+        config->cacert = env;
       else {
-        env = curlx_getenv("SSL_CERT_DIR");
+        env = GetEnv("SSL_CERT_DIR");
         if(env) {
-          config->capath = strdup(env);
-          if(!config->capath) {
-            curl_free(env);
-            helpf(global->errors, "out of memory\n");
-            return CURLE_OUT_OF_MEMORY;
-          }
+          config->capath = env;
           capath_from_env = true;
         }
         else {
-          env = curlx_getenv("SSL_CERT_FILE");
-          if(env) {
-            config->cacert = strdup(env);
-            if(!config->cacert) {
-              curl_free(env);
-              errorf(global, "out of memory\n");
-              return CURLE_OUT_OF_MEMORY;
-            }
-          }
+          env = GetEnv("SSL_CERT_FILE");
+          if(env)
+            config->cacert = env;
         }
       }
 
-      if(env)
-        curl_free(env);
 #ifdef WIN32
-      else {
-        result = FindWin32CACert(config, tls_backend_info->backend,
-                                 TEXT("curl-ca-bundle.crt"));
+      if(!env) {
+        result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
       }
 #endif
     }
-    curl_easy_cleanup(curltls);
   }
 
   if(!result)

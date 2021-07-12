@@ -84,6 +84,7 @@
 #include "altsvc.h"
 #include "hsts.h"
 #include "c-hyper.h"
+#include "getenv.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1304,13 +1305,14 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
     /* Allow debug builds to override this logic to force short initial
        sends
      */
-    char *p = getenv("CURL_SMALLREQSEND");
+    char *p = Curl_getenv("CURL_SMALLREQSEND");
     if(p) {
       size_t altsize = (size_t)strtoul(p, NULL, 10);
       if(altsize)
         sendsize = CURLMIN(size, altsize);
       else
         sendsize = size;
+      free(p);
     }
     else
 #endif
@@ -3667,7 +3669,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
           ((conn->handler->flags & PROTOPT_SSL) ||
 #ifdef CURLDEBUG
            /* allow debug builds to circumvent the HTTPS restriction */
-           getenv("CURL_ALTSVC_HTTP")
+           Curl_env_exist("CURL_ALTSVC_HTTP")
 #else
            0
 #endif

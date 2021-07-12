@@ -31,6 +31,7 @@
 #include "netrc.h"
 #include "strtok.h"
 #include "strcase.h"
+#include "getenv.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -236,7 +237,7 @@ int Curl_parsenetrc(const char *host,
 
   if(!netrcfile) {
     char *home = NULL;
-    char *homea = curl_getenv("HOME"); /* portable environment reader */
+    char *homea = Curl_getenv("HOME"); /* portable environment reader */
     if(homea) {
       home = homea;
 #if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)

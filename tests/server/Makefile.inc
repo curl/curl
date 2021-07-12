@@ -31,7 +31,8 @@ CURLX_SRCS = \
  ../../lib/curl_ctype.c \
  ../../lib/dynbuf.c \
  ../../lib/strdup.c \
- ../../lib/curl_multibyte.c
+ ../../lib/curl_multibyte.c \
+ ../../lib/getenv.c
 
 CURLX_HDRS = \
  ../../lib/curlx.h \
@@ -41,7 +42,8 @@ CURLX_HDRS = \
  ../../lib/curl_ctype.h \
  ../../lib/dynbuf.h \
  ../../lib/strdup.h \
- ../../lib/curl_multibyte.h
+ ../../lib/curl_multibyte.h \
+ ../../lib/getenv.h
 
 USEFUL = \
  getpart.c \

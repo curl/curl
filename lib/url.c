@@ -104,6 +104,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "urlapi-int.h"
 #include "system_win32.h"
 #include "hsts.h"
+#include "getenv.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -2316,7 +2317,7 @@ static char *detect_proxy(struct Curl_easy *data,
   strcpy(envp, "_proxy");
 
   /* read the protocol proxy: */
-  prox = curl_getenv(proxy_env);
+  prox = Curl_getenv(proxy_env);
 
   /*
    * We don't try the uppercase version of HTTP_PROXY because of
@@ -2333,7 +2334,7 @@ static char *detect_proxy(struct Curl_easy *data,
   if(!prox && !strcasecompare("http_proxy", proxy_env)) {
     /* There was no lowercase variable, try the uppercase version: */
     Curl_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
-    prox = curl_getenv(proxy_env);
+    prox = Curl_getenv(proxy_env);
   }
 
   envp = proxy_env;
@@ -2342,10 +2343,10 @@ static char *detect_proxy(struct Curl_easy *data,
   }
   else {
     envp = (char *)"all_proxy";
-    proxy = curl_getenv(envp); /* default proxy to use */
+    proxy = Curl_getenv(envp); /* default proxy to use */
     if(!proxy) {
       envp = (char *)"ALL_PROXY";
-      proxy = curl_getenv(envp);
+      proxy = Curl_getenv(envp);
     }
   }
   if(proxy)
@@ -2586,10 +2587,10 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
 
   if(!data->set.str[STRING_NOPROXY]) {
     const char *p = "no_proxy";
-    no_proxy = curl_getenv(p);
+    no_proxy = Curl_getenv(p);
     if(!no_proxy) {
       p = "NO_PROXY";
-      no_proxy = curl_getenv(p);
+      no_proxy = Curl_getenv(p);
     }
     if(no_proxy) {
       infof(data, "Uses proxy env variable %s == '%s'", p, no_proxy);
@@ -3221,7 +3222,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
      ((conn->handler->protocol == CURLPROTO_HTTPS) ||
 #ifdef CURLDEBUG
       /* allow debug builds to circumvent the HTTPS restriction */
-      getenv("CURL_ALTSVC_HTTP")
+      Curl_env_exist("CURL_ALTSVC_HTTP")
 #else
       0
 #endif

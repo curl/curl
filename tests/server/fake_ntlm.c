@@ -31,6 +31,8 @@
 
 #define ENABLE_CURLX_PRINTF
 #include "curlx.h" /* from the private lib dir */
+#include "getenv.h"
+
 #include "getpart.h"
 #include "util.h"
 
@@ -110,6 +112,7 @@ static char *printable(char *inbuf, size_t inlength)
 int main(int argc, char *argv[])
 {
   char buf[1024];
+  char pathbuf[256];
   char logfilename[256];
   FILE *stream;
   int error;
@@ -157,7 +160,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  env = getenv("CURL_NTLM_AUTH_TESTNUM");
+  env = Curl_getenv("CURL_NTLM_AUTH_TESTNUM");
   if(env) {
     char *endptr;
     long lnum = strtol(env, &endptr, 10);
@@ -166,6 +169,7 @@ int main(int argc, char *argv[])
       exit(1);
     }
     testnum = lnum;
+    Curl_safefree(env);
   }
   else {
     fprintf(stderr, "Test number not specified in CURL_NTLM_AUTH_TESTNUM");
@@ -180,9 +184,16 @@ int main(int argc, char *argv[])
          helper_user, helper_proto, helper_domain,
          (use_cached_creds) ? "yes" : "no");
 
-  env = getenv("CURL_NTLM_AUTH_SRCDIR");
+  env = Curl_getenv("CURL_NTLM_AUTH_SRCDIR");
   if(env) {
-    path = env;
+    if(strlen(env) >= sizeof(pathbuf)) {
+      logmsg("CURL_NTLM_AUTH_SRCDIR path too long");
+      exit(1);
+    }
+    strncpy(pathbuf, env, sizeof(pathbuf));
+    pathbuf[sizeof(pathbuf)-1] = '\0';
+    path = pathbuf;
+    Curl_safefree(env);
   }
 
   stream = test2fopen(testnum);

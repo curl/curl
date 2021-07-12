@@ -228,7 +228,16 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
   size_t ca_file_bufsize = 0;
   DWORD total_bytes_read = 0;
 
-  ca_file_tstr = curlx_convert_UTF8_to_tchar((char *)ca_file);
+  if(curlx_is_str_utf8(ca_file)) {
+#ifdef UNICODE
+    ca_file_tstr = curlx_convert_UTF8_to_wchar(ca_file);
+#else
+    ca_file_tstr = curlx_convert_UTF8_to_ANSI(ca_file);
+#endif
+  }
+  else
+    ca_file_tstr = curlx_convert_ANSI_to_tchar(ca_file);
+
   if(!ca_file_tstr) {
     char buffer[STRERROR_LEN];
     failf(data,

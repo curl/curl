@@ -23,6 +23,7 @@
 #include "curl_setup.h"
 
 #include "curl_gethostname.h"
+#include "getenv.h"
 
 /*
  * Curl_gethostname() is a wrapper around gethostname() which allows
@@ -64,10 +65,11 @@ int Curl_gethostname(char * const name, GETHOSTNAME_TYPE_ARG2 namelen)
 #ifdef DEBUGBUILD
 
   /* Override host name when environment variable CURL_GETHOSTNAME is set */
-  const char *force_hostname = getenv("CURL_GETHOSTNAME");
+  char *force_hostname = Curl_getenv("CURL_GETHOSTNAME");
   if(force_hostname) {
     strncpy(name, force_hostname, namelen);
     err = 0;
+    free(force_hostname);
   }
   else {
     name[0] = '\0';

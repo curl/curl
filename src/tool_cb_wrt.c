@@ -36,6 +36,7 @@
 #include "tool_msgs.h"
 #include "tool_cb_wrt.h"
 #include "tool_operate.h"
+#include "getenv.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -126,13 +127,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   const size_t failure = bytes ? 0 : 1;
 
 #ifdef DEBUGBUILD
-  {
-    char *tty = curlx_getenv("CURL_ISATTY");
-    if(tty) {
-      is_tty = TRUE;
-      curl_free(tty);
-    }
-  }
+  is_tty = Curl_env_exist("CURL_ISATTY");
 
   if(config->show_headers) {
     if(bytes > (size_t)CURL_MAX_HTTP_HEADER) {

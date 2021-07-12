@@ -33,6 +33,7 @@
 #include "tool_cb_hdr.h"
 #include "tool_cb_wrt.h"
 #include "tool_operate.h"
+#include "getenv.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -295,7 +296,7 @@ static char *parse_filename(const char *ptr, size_t len)
    */
 #ifdef DEBUGBUILD
   {
-    char *tdir = curlx_getenv("CURL_TESTDIR");
+    char *tdir = Curl_getenv("CURL_TESTDIR");
     if(tdir) {
       char buffer[512]; /* suitably large */
       msnprintf(buffer, sizeof(buffer), "%s/%s", tdir, copy);
@@ -304,7 +305,7 @@ static char *parse_filename(const char *ptr, size_t len)
                                 aprintf() or similar since we want to use the
                                 same memory code as the "real" parse_filename
                                 function */
-      curl_free(tdir);
+      free(tdir);
     }
   }
 #endif

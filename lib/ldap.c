@@ -66,6 +66,7 @@
 #include "curl_multibyte.h"
 #include "curl_base64.h"
 #include "connect.h"
+#include "getenv.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -744,8 +745,9 @@ static void _ldap_trace(const char *fmt, ...)
   va_list args;
 
   if(do_trace == -1) {
-    const char *env = getenv("CURL_TRACE");
+    char *env = Curl_getenv("CURL_TRACE");
     do_trace = (env && strtol(env, NULL, 10) > 0);
+    free(env);
   }
   if(!do_trace)
     return;

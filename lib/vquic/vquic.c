@@ -31,6 +31,7 @@
 #include "dynbuf.h"
 #include "curl_printf.h"
 #include "vquic.h"
+#include "getenv.h"
 
 #ifdef O_BINARY
 #define QLOGMODE O_WRONLY|O_CREAT|O_BINARY
@@ -51,7 +52,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
                       size_t scidlen,
                       int *qlogfdp)
 {
-  const char *qlog_dir = getenv("QLOGDIR");
+  char *qlog_dir = Curl_getenv("QLOGDIR");
   *qlogfdp = -1;
   if(qlog_dir) {
     struct dynbuf fname;
@@ -76,6 +77,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
         *qlogfdp = qlogfd;
     }
     Curl_dyn_free(&fname);
+    Curl_safefree(qlog_dir);
     if(result)
       return result;
   }

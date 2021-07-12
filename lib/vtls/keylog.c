@@ -22,6 +22,7 @@
 #include "curl_setup.h"
 
 #include "keylog.h"
+#include "getenv.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -48,7 +49,7 @@ Curl_tls_keylog_open(void)
   char *keylog_file_name;
 
   if(!keylog_file_fp) {
-    keylog_file_name = curl_getenv("SSLKEYLOGFILE");
+    keylog_file_name = Curl_getenv("SSLKEYLOGFILE");
     if(keylog_file_name) {
       keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
       if(keylog_file_fp) {

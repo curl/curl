@@ -82,6 +82,88 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w)
   return str_utf8;
 }
 
+wchar_t *curlx_convert_ANSI_to_wchar(const char *str_ansi)
+{
+  wchar_t *str_w = NULL;
+
+  if(str_ansi) {
+    int str_w_len = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS,
+                                        str_ansi, -1, NULL, 0);
+    if(str_w_len > 0) {
+      str_w = malloc(str_w_len * sizeof(wchar_t));
+      if(str_w) {
+        if(MultiByteToWideChar(CP_ACP, 0, str_ansi, -1, str_w,
+                               str_w_len) == 0) {
+          free(str_w);
+          return NULL;
+        }
+      }
+    }
+  }
+
+  return str_w;
+}
+
+char *curlx_convert_wchar_to_ANSI(const wchar_t *str_w)
+{
+  char *str_ansi = NULL;
+
+  if(str_w) {
+    int bytes = WideCharToMultiByte(CP_ACP, MB_ERR_INVALID_CHARS, str_w, -1,
+                                    NULL, 0, NULL, NULL);
+    if(bytes > 0) {
+      str_ansi = malloc(bytes);
+      if(str_ansi) {
+        if(WideCharToMultiByte(CP_ACP, 0, str_w, -1, str_ansi, bytes,
+                               NULL, NULL) == 0) {
+          free(str_ansi);
+          return NULL;
+        }
+      }
+    }
+  }
+
+  return str_ansi;
+}
+
+char *curlx_convert_UTF8_to_ANSI(const char *str_utf8)
+{
+  char *str_ansi = NULL;
+  wchar_t *str_w = curlx_convert_UTF8_to_wchar(str_utf8);
+
+  if(str_w) {
+    str_ansi = curlx_convert_wchar_to_ANSI(str_w);
+    free(str_w);
+  }
+
+  return str_ansi;
+}
+
+char *curlx_convert_ANSI_to_UTF8(const char *str_ansi)
+{
+  char *str_utf8 = NULL;
+  wchar_t *str_w = curlx_convert_ANSI_to_wchar(str_ansi);
+
+  if(str_w) {
+    str_utf8 = curlx_convert_wchar_to_UTF8(str_w);
+    free(str_w);
+  }
+
+  return str_utf8;
+}
+
+bool curlx_is_str_utf8(const char *str)
+{
+  if(MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+                         str, strlen(str), NULL, 0) > 0) {
+    return true;
+  }
+  else {
+    DEBUGASSERT(GetLastError() == ERROR_NO_UNICODE_TRANSLATION);
+    return false;
+  }
+}
+
 #endif /* WIN32 */
 
 #if defined(USE_WIN32_LARGE_FILES) || defined(USE_WIN32_SMALL_FILES)

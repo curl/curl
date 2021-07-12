@@ -358,7 +358,7 @@ sub nostrings {
 
 sub scanfile {
     my ($file) = @_;
-
+    my $istoolsrc = ($file =~ /(^|[\\\/])(src[\\\/]|tool_)[^\\\/]+$/) ? 1 : 0;
     my $line = 1;
     my $prevl="";
     my $l;
@@ -631,7 +631,8 @@ sub scanfile {
                     strtok|
                     v?sprintf|
                     (str|_mbs|_tcs|_wcs)n?cat|
-                    LoadLibrary(Ex)?(A|W)?)
+                    LoadLibrary(Ex)?(A|W)?|
+                    (?<!\$)(curlx?_)?getenv) # banned in favor of Curl_getenv
                    \s*\(
                  /x) {
             checkwarn("BANNEDFUNC",

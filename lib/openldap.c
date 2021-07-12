@@ -46,6 +46,7 @@
 #include "curl_ldap.h"
 #include "curl_base64.h"
 #include "connect.h"
+#include "getenv.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -228,8 +229,9 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 
 #ifdef CURL_OPENLDAP_DEBUG
   static int do_trace = 0;
-  const char *env = getenv("CURL_OPENLDAP_TRACE");
+  char *env = Curl_getenv("CURL_OPENLDAP_TRACE");
   do_trace = (env && strtol(env, NULL, 10) > 0);
+  free(env);
   if(do_trace) {
     ldap_set_option(li->ld, LDAP_OPT_DEBUG_LEVEL, &do_trace);
   }

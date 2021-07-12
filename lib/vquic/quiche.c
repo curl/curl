@@ -35,6 +35,7 @@
 #include "connect.h"
 #include "strerror.h"
 #include "vquic.h"
+#include "getenv.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -220,7 +221,8 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   if(result)
     return result;
 
-  keylog_file = getenv("SSLKEYLOGFILE");
+  /* $SSLKEYLOGFILE is passed to quiche in current locale encoding */
+  keylog_file = Curl_getenv_local("SSLKEYLOGFILE");
 
   if(keylog_file)
     quiche_config_log_keys(qs->cfg);
@@ -229,11 +231,14 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
                             sizeof(qs->scid), addr, addrlen, qs->cfg);
   if(!qs->conn) {
     failf(data, "can't create quiche connection");
+    free(keylog_file);
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(keylog_file)
+  if(keylog_file) {
     quiche_conn_set_keylog_path(qs->conn, keylog_file);
+    Curl_safefree(keylog_file);
+  }
 
   /* Known to not work on Windows */
 #if !defined(WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
