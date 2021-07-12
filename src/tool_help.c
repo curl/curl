@@ -853,10 +853,6 @@ static const struct helptxt helptext[] = {
   { NULL, NULL, CURLHELP_HIDDEN }
 };
 
-#ifdef NETWARE
-#  define PRINT_LINES_PAUSE 23
-#endif
-
 struct feat {
   const char *name;
   int bitmask;
