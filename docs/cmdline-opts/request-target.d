@@ -1,4 +1,5 @@
 Long: request-target
+Arg: <path>
 Help: Specify the target for this request
 Protocols: HTTP
 Added: 7.55.0
