@@ -186,6 +186,9 @@
  21. MQTT
  21.1 Support rate-limiting
 
+ 22. mbedTLS
+ 22.1 Support 3.0
+
 ==============================================================================
 
 1. libcurl
@@ -1278,3 +1281,13 @@
 
  The rate-limiting logic is done in the PERFORMING state in multi.c but MQTT
  is not (yet) implemented to use that!
+
+
+22. mbedTLS
+
+22.1 Support mbedTLS 3.0
+
+ Version 3.0 is not backwards compatible with pre-3.0 versions, and curl no
+ longer builds due to breaking changes in the API.
+
+ See https://github.com/curl/curl/issues/7385
