@@ -1213,9 +1213,16 @@ static int conn_upkeep(struct Curl_easy *data,
   /* Param is unused. */
   (void)param;
 
-  if(conn->handler->connection_check)
+  if(conn->handler->connection_check) {
+    /* briefly attach the connection to this transfer for the purpose of
+       checking it */
+    Curl_attach_connnection(data, conn);
+
     /* Do a protocol-specific keepalive check on the connection. */
     conn->handler->connection_check(data, conn, CONNCHECK_KEEPALIVE);
+    /* detach the connection again */
+    Curl_detach_connnection(data);
+  }
 
   return 0; /* continue iteration */
 }
