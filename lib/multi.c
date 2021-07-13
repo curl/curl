@@ -1180,7 +1180,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #ifdef USE_WINSOCK
         long mask = 0;
 #endif
-        if(bitmap & GETSOCK_READSOCK(i)) {
+        if((bitmap & GETSOCK_READSOCK(i)) && VALID_SOCK((sockbunch[i]))) {
           s = sockbunch[i];
 #ifdef USE_WINSOCK
           mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
@@ -1189,7 +1189,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
           ufds[nfds].events = POLLIN;
           ++nfds;
         }
-        if(bitmap & GETSOCK_WRITESOCK(i)) {
+        if((bitmap & GETSOCK_WRITESOCK(i)) && VALID_SOCK((sockbunch[i]))) {
           s = sockbunch[i];
 #ifdef USE_WINSOCK
           mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
