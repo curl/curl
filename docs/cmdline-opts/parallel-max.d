@@ -1,4 +1,5 @@
 Long: parallel-max
+Arg: <num>
 Help: Maximum concurrency for parallel transfers
 Added: 7.66.0
 See-also: parallel
