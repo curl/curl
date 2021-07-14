@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -347,7 +347,8 @@ CURLcode tool2curlmime(CURL *curl, struct tool_mime *m, curl_mime **mime)
  * after call get_parm_word, str either point to string end
  * or point to any of end chars.
  */
-static char *get_param_word(char **str, char **end_pos, char endchar)
+static char *get_param_word(struct OperationConfig *config, char **str,
+                            char **end_pos, char endchar)
 {
   char *ptr = *str;
   /* the first non-space char is here */
@@ -369,6 +370,7 @@ static char *get_param_word(char **str, char **end_pos, char endchar)
         }
       }
       if(*ptr == '"') {
+        bool trailing_data = FALSE;
         *end_pos = ptr;
         if(escape) {
           /* has escape, we restore the unescaped string here */
@@ -381,8 +383,14 @@ static char *get_param_word(char **str, char **end_pos, char endchar)
           while(ptr < *end_pos);
           *end_pos = ptr2;
         }
-        while(*ptr && *ptr != ';' && *ptr != endchar)
+        ++ptr;
+        while(*ptr && *ptr != ';' && *ptr != endchar) {
+          if(!ISSPACE(*ptr))
+            trailing_data = TRUE;
           ++ptr;
+        }
+        if(trailing_data)
+          warnf(config->global, "Trailing data after quoted form parameter\n");
         *str = ptr;
         return word_begin + 1;
       }
@@ -501,7 +509,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
   while(ISSPACE(*p))
     p++;
   tp = p;
-  *pdata = get_param_word(&p, &endpos, endchar);
+  *pdata = get_param_word(config, &p, &endpos, endchar);
   /* If not quoted, strip trailing spaces. */
   if(*pdata == tp)
     while(endpos > *pdata && ISSPACE(endpos[-1]))
@@ -540,7 +548,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
       for(p += 9; ISSPACE(*p); p++)
         ;
       tp = p;
-      filename = get_param_word(&p, &endpos, endchar);
+      filename = get_param_word(config, &p, &endpos, endchar);
       /* If not quoted, strip trailing spaces. */
       if(filename == tp)
         while(endpos > filename && ISSPACE(endpos[-1]))
@@ -563,7 +571,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
           p++;
         } while(ISSPACE(*p));
         tp = p;
-        hdrfile = get_param_word(&p, &endpos, endchar);
+        hdrfile = get_param_word(config, &p, &endpos, endchar);
         /* If not quoted, strip trailing spaces. */
         if(hdrfile == tp)
           while(endpos > hdrfile && ISSPACE(endpos[-1]))
@@ -590,7 +598,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
         while(ISSPACE(*p))
           p++;
         tp = p;
-        hdr = get_param_word(&p, &endpos, endchar);
+        hdr = get_param_word(config, &p, &endpos, endchar);
         /* If not quoted, strip trailing spaces. */
         if(hdr == tp)
           while(endpos > hdr && ISSPACE(endpos[-1]))
@@ -612,7 +620,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
       for(p += 8; ISSPACE(*p); p++)
         ;
       tp = p;
-      encoder = get_param_word(&p, &endpos, endchar);
+      encoder = get_param_word(config, &p, &endpos, endchar);
       /* If not quoted, strip trailing spaces. */
       if(encoder == tp)
         while(endpos > encoder && ISSPACE(endpos[-1]))
@@ -629,7 +637,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
     }
     else {
       /* unknown prefix, skip to next block */
-      char *unknown = get_param_word(&p, &endpos, endchar);
+      char *unknown = get_param_word(config, &p, &endpos, endchar);
 
       sep = *p;
       *endpos = '\0';
