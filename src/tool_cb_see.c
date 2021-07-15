@@ -100,6 +100,7 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
 /* 64-bit lseek-like function unavailable */
 #    define _lseeki64(hnd,ofs,whence) _lseek(hnd,ofs,whence)
 #  else
+#    undef _lseeki64
 #    define _lseeki64(hnd,ofs,whence) _lseek64(hnd,ofs,whence)
 #  endif
 #endif
