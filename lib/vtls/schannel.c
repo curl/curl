@@ -143,6 +143,16 @@
 
 #define BACKEND connssl->backend
 
+/* PellesC v10 does not have this in it's <tchar.h>
+ */
+#ifndef _tcsnccmp
+#  ifdef UNICODE
+#    define _tcsnccmp wcsncmp
+#  else
+#    define _tcsnccmp strncmp
+#  endif
+#endif
+
 static Curl_recv schannel_recv;
 static Curl_send schannel_send;
 
