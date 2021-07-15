@@ -568,6 +568,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     if(!strncmp(word, "no-", 3)) {
       /* disable this option but ignore the "no-" part when looking for it */
       word += 3;
+      fnam -= 3;
       toggle = FALSE;
       noflagged = TRUE;
     }
