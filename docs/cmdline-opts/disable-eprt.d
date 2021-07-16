@@ -3,12 +3,12 @@ Help: Inhibit using EPRT or LPRT
 Protocols: FTP
 Category: ftp
 ---
-Tell curl to disable the use of the EPRT and LPRT commands when doing active
-FTP transfers. Curl will normally always first attempt to use EPRT, then LPRT
-before using PORT, but with this option, it will use PORT right away. EPRT and
-LPRT are extensions to the original FTP protocol, and may not work on all
-servers, but they enable more functionality in a better way than the
-traditional PORT command.
+(FTP) Tell curl to disable the use of the EPRT and LPRT commands when doing
+active FTP transfers. Curl will normally always first attempt to use EPRT,
+then LPRT before using PORT, but with this option, it will use PORT right
+away. EPRT and LPRT are extensions to the original FTP protocol, and may not
+work on all servers, but they enable more functionality in a better way than
+the traditional PORT command.
 
 --eprt can be used to explicitly enable EPRT again and --no-eprt is an alias
 for --disable-eprt.
