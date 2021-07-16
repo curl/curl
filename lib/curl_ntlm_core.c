@@ -86,7 +86,6 @@
 #elif defined(USE_MBEDTLS)
 
 #  include <mbedtls/des.h>
-#  include "curl_md4.h"
 
 #elif defined(USE_SECTRANSP)
 

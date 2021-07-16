@@ -659,10 +659,6 @@ int netware_init(void);
       defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
       (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
 #    define USE_CURL_NTLM_CORE
-#    if defined(USE_MBEDTLS)
-       /* Get definition of MBEDTLS_MD4_C */
-#      include <mbedtls/md4.h>
-#    endif
 #  endif
 #  if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
 #    define USE_NTLM
