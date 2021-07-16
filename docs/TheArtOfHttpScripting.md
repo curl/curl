@@ -277,7 +277,7 @@
 
  The data you send to the server MUST already be properly encoded, curl will
  not do that for you. For example, if you want the data to contain a space,
- you need to replace that space with %20 etc. Failing to comply with this will
+ you need to replace that space with `%20`, etc. Failing to comply with this will
  most likely cause your data to be received wrongly and messed up.
 
  Recent curl versions can in fact url-encode POST data for you, like this:
