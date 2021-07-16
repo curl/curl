@@ -273,7 +273,7 @@
     curl --data "birthyear=1905&press=%20OK%20" http://www.example.com/when.cgi
 
  This kind of POST will use the Content-Type
- `application/x-www-form-urlencoded' and is the most widely used POST kind.
+ `application/x-www-form-urlencoded` and is the most widely used POST kind.
 
  The data you send to the server MUST already be properly encoded, curl will
  not do that for you. For example, if you want the data to contain a space,
