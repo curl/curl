@@ -4,7 +4,7 @@ curl and libcurl 7.78.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2449
+ Contributors:                 2454
 
 This release includes the following changes:
 
@@ -12,7 +12,7 @@ This release includes the following changes:
  o CURLE_SETOPT_OPTION_SYNTAX: new error name for wrong setopt syntax [40]
  o hostip: make 'localhost' return fixed values [16]
  o mbedtls: add support for cert and key blob options [11]
- o metalink: remove [54]
+ o metalink: remove all support for it [54]
  o mqtt: add support for username and password [91]
 
 This release includes the following bugfixes:
@@ -22,6 +22,7 @@ This release includes the following bugfixes:
  o asyn-ares: remove check for 'data' in Curl_resolver_cancel [89]
  o bearssl: explicitly initialize all fields of Curl_ssl [1]
  o bearssl: remove incorrect const on variable that is modified [1]
+ o build: fix compiler warnings when CURL_DISABLE_VERBOSE_STRINGS [155]
  o c-hyper: abort CONNECT response reading early on non 2xx responses [75]
  o c-hyper: add support for transfer-encoding in the request [121]
  o c-hyper: bail on too long response headers [115]
@@ -40,6 +41,7 @@ This release includes the following bugfixes:
  o CI: remove travis details [144]
  o cmake: add CURL_DISABLE_NTLM option [44]
  o cmake: avoid leaking absolute paths into exported config [3]
+ o cmake: fix IoctlSocket FIONBIO check [156]
  o cmake: fix support for UnixSockets feature on Win32 [104]
  o cmake: remove libssh2 feature checks [122]
  o cmake: try well-known send/recv signature for Apple [12]
@@ -48,6 +50,7 @@ This release includes the following bugfixes:
  o configure: add --disable-ntlm option [45]
  o configure: disable RTSP when hyper is selected [68]
  o configure: do not strip out debug flags [110]
+ o configure: fix nghttp2 library name for static builds [157]
  o configure: inhibit the implicit-fallthrough warning on gcc-12 [106]
  o configure: rename get-easy-option configure option to get-easy-options [81]
  o conn_shutdown: if closed during CONNECT cleanup properly [59]
@@ -66,6 +69,9 @@ This release includes the following bugfixes:
  o docs/BINDINGS: fix outdated links [116]
  o docs/examples: use curl_multi_poll() in multi examples [152]
  o docs/INSTALL: remove mentions of configure --with-darwin-ssl [55]
+ o docs: document missing arguments to commands [160]
+ o docs: fix inconsistencies in EGDSOCKET documentation [159]
+ o docs: fix incorrect argument name reference [161]
  o docs: Fix typos [146]
  o docs: use --max-redirs instead of --max-redir [28]
  o doh: (void)-prefix call to curl_easy_setopt
@@ -110,6 +116,7 @@ This release includes the following bugfixes:
  o multi: add scan-build-6 work-around in curl_multi_fdset [88]
  o multi: alter transfer timeout ordering [97]
  o multi: do not switch off connect_only flag when closing [98]
+ o multi: fix crash in curl_multi_wait / curl_multi_poll [153]
  o netrc: skip 'macdef' definitions [87]
  o ngtcp2: disable TLSv1.3 compatible mode when using GnuTLS [83]
  o openssl: avoid static variable for seed flag [101]
@@ -126,6 +133,7 @@ This release includes the following bugfixes:
  o runtests: skip disabled tests unless -f is used [82]
  o rustls: remove native_roots fallback [65]
  o schannel: set ALPN length correctly for HTTP/2 [24]
+ o SChannel: Use '_tcsncmp()' instead [164]
  o setopt: fix incorrect comments [10]
  o socketpair: fix potential hangs [37]
  o socks4: scan for the IPv4 address in resolve results [124]
@@ -159,6 +167,9 @@ This release includes the following bugfixes:
  o test644: remove as duplicate of test 587 [84]
  o tests: fix Accept-Encoding strips to work with Hyper builds [41]
  o TLS: prevent shutdown loops to get stuck [112]
+ o tool: make _lseeki64() macro work with the PellesC compiler [163]
+ o tool_help: document that --tlspassword takes a password [162]
+ o tool_help: remove unused define [154]
  o url.c: remove two variable assigns that are never read [90]
  o url: (void)-prefix a curl_url_get() call [138]
  o url: bad CURLOPT_CONNECT_TO syntax now returns error [31]
@@ -170,7 +181,7 @@ This release includes the following bugfixes:
  o Win32: fix build with Watt-32
  o winbuild/README: VC should be set to 6 'or larger' [64]
  o wolfssl: failing to set a session id is not reason to error out [151]
- o write-out.d: Clarify urlnum is not unique for de-globbed URLs [145]
+ o write-out.d: clarify urlnum is not unique for de-globbed URLs [145]
  o zuul: use the new rustls directory name [141]
 
 This release includes the following known bugs:
@@ -191,13 +202,13 @@ advice from friends like these:
   Jonathan Wernberg, Jon Rumsey, Jun-ya Kato, Kevin Burke, Laurent Dufresne,
   Li Xinwei, Marcel Raad, Marc Hörsken, Mark Swaanenburg, Martin Howarth,
   Michael Forney, Michael Kaufmann, Mohammed Naser, nian6324 on github,
-  Nikos Mavrogiannopoulos, Paul Groke, Peter Körner, Phil E. Taylor,
+  Nikos Mavrogiannopoulos, Paul Groke, Peter Körner, Phil E. Taylor, Randolf J,
   Ray Satiro, Red Hat Product Security, Richard Marion, Richard Whitehouse,
-  Shikha Sharma, shithappens2016 on github, Tommy Chiang, Vadim Grinshpun,
-  Valentín Gutiérrez, Viktor Szakats, William Desportes, Xiang Xiao,
-  Yongkang Huang, Younes El-karama, Zhang Xiuhua,
-  Коваленко Анатолий Викторович,
-  (70 contributors)
+  Sergey Markelov, Shikha Sharma, shithappens2016 on github, sylgal on github,
+  Tommy Chiang, User Sg, Vadim Grinshpun, Valentín Gutiérrez, Viktor Szakats,
+  William Desportes, Wyatt OʼDay, Xiang Xiao, Yongkang Huang, Younes El-karama,
+  Zhang Xiuhua, Борис Верховский, Коваленко Анатолий Викторович,
+  (76 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -353,3 +364,14 @@ References to bug reports and discussions on issues:
  [150] = https://curl.se/bug/?i=7360
  [151] = https://curl.se/bug/?i=7358
  [152] = https://curl.se/bug/?i=7352
+ [153] = https://curl.se/bug/?i=7379
+ [154] = https://curl.se/bug/?i=7380
+ [155] = https://curl.se/bug/?i=7377
+ [156] = https://curl.se/bug/?i=7375
+ [157] = https://curl.se/bug/?i=7367
+ [159] = https://curl.se/bug/?i=7391
+ [160] = https://curl.se/bug/?i=7382
+ [161] = https://curl.se/bug/?i=7383
+ [162] = https://curl.se/bug/?i=7378
+ [163] = https://curl.se/bug/?i=7397
+ [164] = https://curl.se/bug/?i=7398
