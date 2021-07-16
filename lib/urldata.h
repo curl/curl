@@ -1848,9 +1848,9 @@ struct UserDefined {
   BIT(disallow_username_in_url); /* disallow username in url */
   BIT(doh); /* DNS-over-HTTPS enabled */
   BIT(doh_get); /* use GET for DoH requests, instead of POST */
-  BIT(doh_verifypeer);     /* DOH certificate peer verification */
-  BIT(doh_verifyhost);     /* DOH certificate hostname verification */
-  BIT(doh_verifystatus);   /* DOH certificate status verification */
+  BIT(doh_verifypeer);     /* DoH certificate peer verification */
+  BIT(doh_verifyhost);     /* DoH certificate hostname verification */
+  BIT(doh_verifystatus);   /* DoH certificate status verification */
   BIT(http09_allowed); /* allow HTTP/0.9 responses */
   BIT(mail_rcpt_allowfails); /* allow RCPT TO command to fail for some
                                 recipients */

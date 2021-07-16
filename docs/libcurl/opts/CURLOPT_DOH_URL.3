@@ -28,7 +28,7 @@ CURLOPT_DOH_URL \- provide the DNS-over-HTTPS URL
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_URL, char *URL);
 .SH DESCRIPTION
-Pass in a pointer to a \fIURL\fP for the DOH server to use for name
+Pass in a pointer to a \fIURL\fP for the DoH server to use for name
 resolving. The parameter should be a char * to a null-terminated string which
 must be URL-encoded in the following format: "https://host:port/path". It MUST
 specify a HTTPS URL.
@@ -39,19 +39,19 @@ still return \fICURLE_OK\fP.
 
 curl sends POST requests to the given DNS-over-HTTPS URL.
 
-To find the DOH server itself, which might be specified using a name, libcurl
+To find the DoH server itself, which might be specified using a name, libcurl
 will use the default name lookup function. You can bootstrap that by providing
-the address for the DOH server with \fICURLOPT_RESOLVE(3)\fP.
+the address for the DoH server with \fICURLOPT_RESOLVE(3)\fP.
 
-Disable DOH use again by setting this option to NULL.
+Disable DoH use again by setting this option to NULL.
 
-\fBAdvanced:\fP The DOH lookups use SSL so some SSL settings from your transfer
+\fBAdvanced:\fP The DoH lookups use SSL so some SSL settings from your transfer
 are inherited. The hostname and peer certificate verification settings are not
 inherited and can be controlled separately via
 \fICURLOPT_DOH_SSL_VERIFYHOST(3)\fP and \fICURLOPT_DOH_SSL_VERIFYPEER(3)\fP.
 Note \fICURLOPT_SSL_CTX_FUNCTION(3)\fP is inherited.
 .SH DEFAULT
-NULL - there is no default DOH URL. If this option isn't set, libcurl will use
+NULL - there is no default DoH URL. If this option isn't set, libcurl will use
 the default name resolver.
 .SH PROTOCOLS
 All
@@ -71,7 +71,7 @@ Returns CURLE_OK on success or CURLE_OUT_OF_MEMORY if there was insufficient
 heap space.
 
 Note that \fIcurl_easy_setopt(3)\fP won't actually parse the given string so
-given a bad DOH URL, curl will not detect a problem until it tries to resolve
+given a bad DoH URL, curl will not detect a problem until it tries to resolve
 a name with it.
 .SH "SEE ALSO"
 .BR CURLOPT_VERBOSE "(3), " CURLOPT_RESOLVE "(3), "

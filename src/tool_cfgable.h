@@ -174,7 +174,7 @@ struct OperationConfig {
   bool use_httpget;
   bool insecure_ok;         /* set TRUE to allow insecure SSL connects */
   bool doh_insecure_ok;     /* set TRUE to allow insecure SSL connects
-                               for DOH */
+                               for DoH */
   bool proxy_insecure_ok;   /* set TRUE to allow insecure SSL connects
                                for proxy */
   bool terminal_binary_ok;

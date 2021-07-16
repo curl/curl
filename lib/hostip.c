@@ -1190,7 +1190,7 @@ int Curl_resolv_getsock(struct Curl_easy *data,
 {
 #ifdef CURLRES_ASYNCH
   if(data->conn->bits.doh)
-    /* nothing to wait for during DOH resolve, those handles have their own
+    /* nothing to wait for during DoH resolve, those handles have their own
        sockets */
     return GETSOCK_BLANK;
   return Curl_resolver_getsock(data, socks);
