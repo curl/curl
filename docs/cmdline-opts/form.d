@@ -59,11 +59,11 @@ filename=, like this:
 
 If filename/path contains ',' or ';', it must be quoted by double-quotes like:
 
- curl -F "file=@\\"localfile\\";filename=\\"nameinpost\\"" example.com
+ curl -F "file=@\\"local,file\\";filename=\\"name;in;post\\"" example.com
 
 or
 
- curl -F 'file=@"localfile";filename="nameinpost"' example.com
+ curl -F 'file=@"local,file";filename="name;in;post"' example.com
 
 Note that if a filename/path is quoted by double-quotes, any double-quote
 or backslash within the filename must be escaped by backslash.
