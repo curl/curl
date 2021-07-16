@@ -62,13 +62,13 @@ A JSON object with all available keys.
 .TP
 .B local_ip
 The IP address of the local end of the most recently done connection - can be
-either IPv4 or IPv6 (Added in 7.29.0)
+either IPv4 or IPv6. (Added in 7.29.0)
 .TP
 .B local_port
-The local port number of the most recently done connection (Added in 7.29.0)
+The local port number of the most recently done connection. (Added in 7.29.0)
 .TP
 .B method
-The http method used in the most recent HTTP request (Added in 7.72.0)
+The http method used in the most recent HTTP request. (Added in 7.72.0)
 .TP
 .B num_connects
 Number of new connects made in the recent transfer. (Added in 7.12.3)
@@ -98,17 +98,17 @@ The Referer: header, if there was any. (Added in 7.76.0)
 .TP
 .B remote_ip
 The remote IP address of the most recently done connection - can be either
-IPv4 or IPv6 (Added in 7.29.0)
+IPv4 or IPv6. (Added in 7.29.0)
 .TP
 .B remote_port
-The remote port number of the most recently done connection (Added in 7.29.0)
+The remote port number of the most recently done connection. (Added in 7.29.0)
 .TP
 .B response_code
 The numerical response code that was found in the last transfer (formerly
 known as "http_code"). (Added in 7.18.2)
 .TP
 .B scheme
-The URL scheme (sometimes called protocol) that was effectively used (Added in 7.52.0)
+The URL scheme (sometimes called protocol) that was effectively used. (Added in 7.52.0)
 .TP
 .B size_download
 The total amount of bytes that were downloaded.
