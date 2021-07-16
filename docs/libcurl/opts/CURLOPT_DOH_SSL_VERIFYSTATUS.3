@@ -22,7 +22,7 @@
 .\"
 .TH CURLOPT_DOH_SSL_VERIFYSTATUS 3 "11 Feb 2021" "libcurl 7.76.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_DOH_SSL_VERIFYSTATUS \- verify the DOH SSL certificate's status
+CURLOPT_DOH_SSL_VERIFYSTATUS \- verify the DoH SSL certificate's status
 .SH SYNOPSIS
 #include <curl/curl.h>
 
@@ -30,19 +30,19 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_SSL_VERIFYSTATUS, long verif
 .SH DESCRIPTION
 Pass a long as parameter set to 1 to enable or 0 to disable.
 
-This option determines whether libcurl verifies the status of the DOH
+This option determines whether libcurl verifies the status of the DoH
 (DNS-over-HTTPS) server cert using the "Certificate Status Request" TLS
 extension (aka. OCSP stapling).
 
-This option is the DOH equivalent of \fICURLOPT_SSL_VERIFYSTATUS(3)\fP and
-only affects requests to the DOH server.
+This option is the DoH equivalent of \fICURLOPT_SSL_VERIFYSTATUS(3)\fP and
+only affects requests to the DoH server.
 
 Note that if this option is enabled but the server does not support the TLS
 extension, the verification will fail.
 .SH DEFAULT
 0
 .SH PROTOCOLS
-DOH
+DoH
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -51,7 +51,7 @@ if(curl) {
 
   curl_easy_setopt(curl, CURLOPT_DOH_URL, "https://cloudflare-dns.com/dns-query");
 
-  /* Ask for OCSP stapling when verifying the DOH server */
+  /* Ask for OCSP stapling when verifying the DoH server */
   curl_easy_setopt(curl, CURLOPT_DOH_SSL_VERIFYSTATUS, 1L);
 
   curl_easy_perform(curl);

@@ -186,19 +186,19 @@ doh_write_cb(const void *contents, size_t size, size_t nmemb, void *userp)
   return realsize;
 }
 
-/* called from multi.c when this DOH transfer is complete */
+/* called from multi.c when this DoH transfer is complete */
 static int doh_done(struct Curl_easy *doh, CURLcode result)
 {
   struct Curl_easy *data = doh->set.dohfor;
   struct dohdata *dohp = data->req.doh;
-  /* so one of the DOH request done for the 'data' transfer is now complete! */
+  /* so one of the DoH request done for the 'data' transfer is now complete! */
   dohp->pending--;
-  infof(data, "a DOH request is completed, %u to go", dohp->pending);
+  infof(data, "a DoH request is completed, %u to go", dohp->pending);
   if(result)
-    infof(data, "DOH request %s", curl_easy_strerror(result));
+    infof(data, "DoH request %s", curl_easy_strerror(result));
 
   if(!dohp->pending) {
-    /* DOH completed */
+    /* DoH completed */
     curl_slist_free_all(dohp->headers);
     dohp->headers = NULL;
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
@@ -228,7 +228,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
   DOHcode d = doh_encode(host, dnstype, p->dohbuffer, sizeof(p->dohbuffer),
                          &p->dohlen);
   if(d) {
-    failf(data, "Failed to encode DOH packet [%d]", d);
+    failf(data, "Failed to encode DoH packet [%d]", d);
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -302,7 +302,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
     /* Inherit *some* SSL options from the user's transfer. This is a
        best-guess as to which options are needed for compatibility. #3661
 
-       Note DOH does not inherit the user's proxy server so proxy SSL settings
+       Note DoH does not inherit the user's proxy server so proxy SSL settings
        have no effect and are not inherited. If that changes then two new
        options should be added to check doh proxy insecure separately,
        CURLOPT_DOH_PROXY_SSL_VERIFYHOST and CURLOPT_DOH_PROXY_SSL_VERIFYPEER.
@@ -366,8 +366,8 @@ static CURLcode dohprobe(struct Curl_easy *data,
     doh->set.dohfor = data; /* identify for which transfer this is done */
     p->easy = doh;
 
-    /* DOH private_data must be null because the user must have a way to
-       distinguish their transfer's handle from DOH handles in user
+    /* DoH private_data must be null because the user must have a way to
+       distinguish their transfer's handle from DoH handles in user
        callbacks (ie SSL CTX callback). */
     DEBUGASSERT(!doh->set.private_data);
 
@@ -386,7 +386,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
 }
 
 /*
- * Curl_doh() resolves a name using DOH. It resolves a name and returns a
+ * Curl_doh() resolves a name using DoH. It resolves a name and returns a
  * 'Curl_addrinfo *' with the address information.
  */
 
@@ -420,7 +420,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   if(!dohp->headers)
     goto error;
 
-  /* create IPv4 DOH request */
+  /* create IPv4 DoH request */
   result = dohprobe(data, &dohp->probe[DOH_PROBE_SLOT_IPADDR_V4],
                     DNS_TYPE_A, hostname, data->set.str[STRING_DOH],
                     data->multi, dohp->headers);
@@ -429,7 +429,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   dohp->pending++;
 
   if(Curl_ipv6works(data)) {
-    /* create IPv6 DOH request */
+    /* create IPv6 DoH request */
     result = dohprobe(data, &dohp->probe[DOH_PROBE_SLOT_IPADDR_V6],
                       DNS_TYPE_AAAA, hostname, data->set.str[STRING_DOH],
                       data->multi, dohp->headers);
@@ -768,7 +768,7 @@ static void showdoh(struct Curl_easy *data,
   for(i = 0; i < d->numaddr; i++) {
     const struct dohaddr *a = &d->addr[i];
     if(a->type == DNS_TYPE_A) {
-      infof(data, "DOH A: %u.%u.%u.%u",
+      infof(data, "DoH A: %u.%u.%u.%u",
             a->ip.v4[0], a->ip.v4[1],
             a->ip.v4[2], a->ip.v4[3]);
     }
@@ -777,7 +777,7 @@ static void showdoh(struct Curl_easy *data,
       char buffer[128];
       char *ptr;
       size_t len;
-      msnprintf(buffer, 128, "DOH AAAA: ");
+      msnprintf(buffer, 128, "DoH AAAA: ");
       ptr = &buffer[10];
       len = 118;
       for(j = 0; j < 16; j += 2) {
@@ -803,7 +803,7 @@ static void showdoh(struct Curl_easy *data,
  * doh2ai()
  *
  * This function returns a pointer to the first element of a newly allocated
- * Curl_addrinfo struct linked list filled with the data from a set of DOH
+ * Curl_addrinfo struct linked list filled with the data from a set of DoH
  * lookups.  Curl_addrinfo is meant to work like the addrinfo struct does for
  * a IPv6 stack, but usable also for IPv4, all hosts and environments.
  *
@@ -931,7 +931,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 
   if(!dohp->probe[DOH_PROBE_SLOT_IPADDR_V4].easy &&
      !dohp->probe[DOH_PROBE_SLOT_IPADDR_V6].easy) {
-    failf(data, "Could not DOH-resolve: %s", data->state.async.hostname);
+    failf(data, "Could not DoH-resolve: %s", data->state.async.hostname);
     return data->conn->bits.proxy?CURLE_COULDNT_RESOLVE_PROXY:
       CURLE_COULDNT_RESOLVE_HOST;
   }
@@ -941,7 +941,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
     };
     struct dohentry de;
     int slot;
-    /* remove DOH handles from multi handle and close them */
+    /* remove DoH handles from multi handle and close them */
     for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {
       curl_multi_remove_handle(data->multi, dohp->probe[slot].easy);
       Curl_close(&dohp->probe[slot].easy);
@@ -958,7 +958,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                             &de);
       Curl_dyn_free(&p->serverdoh);
       if(rc[slot]) {
-        infof(data, "DOH: %s type %s for %s", doh_strerror(rc[slot]),
+        infof(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
               type2name(p->dnstype), dohp->host);
       }
     } /* next slot */
@@ -969,7 +969,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       struct Curl_dns_entry *dns;
       struct Curl_addrinfo *ai;
 
-      infof(data, "DOH Host name: %s", dohp->host);
+      infof(data, "DoH Host name: %s", dohp->host);
       showdoh(data, &de);
 
       ai = doh2ai(&de, dohp->host, dohp->port);
@@ -1007,7 +1007,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 
   } /* !dohp->pending */
 
-  /* else wait for pending DOH transactions to complete */
+  /* else wait for pending DoH transactions to complete */
   return CURLE_OK;
 }
 

@@ -11,7 +11,7 @@ DOH
 # Server-side
 <reply>
 
-# This is the DOH response for foo.example.com A 127.0.0.1. This requires that
+# This is the DoH response for foo.example.com A 127.0.0.1. This requires that
 # the test server is accessible at that address!
 
 <data1 base64="yes">
@@ -43,7 +43,7 @@ Funny-head: yesyes
 http
 </server>
 
-# requires debug so that it can use the DOH server without https
+# requires debug so that it can use the DoH server without https
 # requires IPv6 so that we can assume and compare both DoH requests
 
 <features>
@@ -52,7 +52,7 @@ DoH
 ipv6
 </features>
  <name>
-HTTP GET using DOH
+HTTP GET using DoH
  </name>
  <command>
 http://foo.example.com:%HTTPPORT/%TESTNUMBER --doh-url http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001

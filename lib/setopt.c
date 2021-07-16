@@ -1872,7 +1872,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_DOH_SSL_VERIFYPEER:
     /*
-     * Enable peer SSL verifying for DOH.
+     * Enable peer SSL verifying for DoH.
      */
     data->set.doh_verifypeer = (0 != va_arg(param, long)) ?
       TRUE : FALSE;
@@ -1911,7 +1911,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_DOH_SSL_VERIFYHOST:
     /*
-     * Enable verification of the host name in the peer certificate for DOH
+     * Enable verification of the host name in the peer certificate for DoH
      */
     arg = va_arg(param, long);
 
@@ -1955,7 +1955,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_DOH_SSL_VERIFYSTATUS:
     /*
-     * Enable certificate status verifying for DOH.
+     * Enable certificate status verifying for DoH.
      */
     if(!Curl_ssl_cert_status_request()) {
       result = CURLE_NOT_BUILT_IN;

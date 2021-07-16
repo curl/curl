@@ -101,7 +101,7 @@ void de_init(struct dohentry *d);
 void de_cleanup(struct dohentry *d);
 #endif
 
-#else /* if DOH is disabled */
+#else /* if DoH is disabled */
 #define Curl_doh(a,b,c,d) NULL
 #define Curl_doh_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
 #endif
