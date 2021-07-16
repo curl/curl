@@ -101,9 +101,9 @@
     curl http://www.example.org:1234/
 
  The port number you specify in the URL is the number that the server uses to
- offer its services. Sometimes you may use a local proxy, and then you may
- need to specify that proxy's port number separately for what curl needs to
- connect to locally. Like when using a HTTP proxy on port 4321:
+ offer its services. Sometimes you may use a proxy, and then you may
+ need to specify that proxy's port number separately from what curl needs to
+ connect to the server. Like when using a HTTP proxy on port 4321:
 
     curl --proxy http://proxy.example.org:4321 http://remote.example.org/
 
@@ -273,11 +273,11 @@
     curl --data "birthyear=1905&press=%20OK%20" http://www.example.com/when.cgi
 
  This kind of POST will use the Content-Type
- `application/x-www-form-urlencoded' and is the most widely used POST kind.
+ `application/x-www-form-urlencoded` and is the most widely used POST kind.
 
  The data you send to the server MUST already be properly encoded, curl will
  not do that for you. For example, if you want the data to contain a space,
- you need to replace that space with %20 etc. Failing to comply with this will
+ you need to replace that space with `%20`, etc. Failing to comply with this will
  most likely cause your data to be received wrongly and messed up.
 
  Recent curl versions can in fact url-encode POST data for you, like this:
