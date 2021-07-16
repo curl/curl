@@ -101,9 +101,9 @@
     curl http://www.example.org:1234/
 
  The port number you specify in the URL is the number that the server uses to
- offer its services. Sometimes you may use a local proxy, and then you may
- need to specify that proxy's port number separately for what curl needs to
- connect to locally. Like when using a HTTP proxy on port 4321:
+ offer its services. Sometimes you may use a proxy, and then you may
+ need to specify that proxy's port number separately from what curl needs to
+ connect to the server. Like when using a HTTP proxy on port 4321:
 
     curl --proxy http://proxy.example.org:4321 http://remote.example.org/
 
