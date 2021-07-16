@@ -390,7 +390,7 @@ static char *get_param_word(struct OperationConfig *config, char **str,
           ++ptr;
         }
         if(trailing_data)
-          warnf(config->global, "Trailing data after quoted file parameter\n");
+          warnf(config->global, "Trailing data after quoted form parameter\n");
         *str = ptr;
         return word_begin + 1;
       }
