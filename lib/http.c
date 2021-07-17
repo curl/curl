@@ -850,7 +850,9 @@ Curl_http_output_auth(struct Curl_easy *data,
   /* To prevent the user+password to get sent to other than the original
      host due to a location-follow, we do some weirdo checks here */
   if(!data->state.this_is_a_follow ||
+#ifndef CURL_DISABLE_NETRC
      conn->bits.netrc ||
+#endif
      !data->state.first_host ||
      data->set.allow_auth_to_other_hosts ||
      strcasecompare(data->state.first_host, conn->host.name)) {
