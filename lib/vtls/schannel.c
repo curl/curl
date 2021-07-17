@@ -1364,7 +1364,7 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CERT_CONTEXT *ccert_context = NULL;
   bool isproxy = SSL_IS_PROXY();
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   const char * const hostname = SSL_HOST_NAME();
 #endif
 #ifdef HAS_ALPN

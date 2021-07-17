@@ -99,24 +99,24 @@ int Curl_blockread_all(struct Curl_easy *data,   /* transfer */
 }
 #endif
 
-#ifndef DEBUGBUILD
-#define sxstate(x,y) socksstate(x,y)
-#else
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#define DEBUG_AND_VERBOSE
 #define sxstate(x,y) socksstate(x,y, __LINE__)
+#else
+#define sxstate(x,y) socksstate(x,y)
 #endif
-
 
 /* always use this function to change state, to make debugging easier */
 static void socksstate(struct Curl_easy *data,
                        enum connect_t state
-#ifdef DEBUGBUILD
+#ifdef DEBUG_AND_VERBOSE
                        , int lineno
 #endif
 )
 {
   struct connectdata *conn = data->conn;
   enum connect_t oldstate = conn->cnnct.state;
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef DEBUG_AND_VERBOSE
   /* synced with the state list in urldata.h */
   static const char * const statename[] = {
     "INIT",
@@ -146,7 +146,7 @@ static void socksstate(struct Curl_easy *data,
 
   conn->cnnct.state = state;
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef DEBUG_AND_VERBOSE
   infof(data,
         "SXSTATE: %s => %s conn %p; line %d",
         statename[oldstate], statename[conn->cnnct.state], conn,
