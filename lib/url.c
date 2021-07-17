@@ -2887,11 +2887,13 @@ static CURLcode override_login(struct Curl_easy *data,
   char **passwdp = &conn->passwd;
   char **optionsp = &conn->options;
 
+#ifndef CURL_DISABLE_NETRC
   if(data->set.use_netrc == CURL_NETRC_REQUIRED && conn->bits.user_passwd) {
     Curl_safefree(*userp);
     Curl_safefree(*passwdp);
     conn->bits.user_passwd = FALSE; /* disable user+password */
   }
+#endif
 
   if(data->set.str[STRING_OPTIONS]) {
     free(*optionsp);
@@ -2900,6 +2902,7 @@ static CURLcode override_login(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
   }
 
+#ifndef CURL_DISABLE_NETRC
   conn->bits.netrc = FALSE;
   if(data->set.use_netrc && !data->set.str[STRING_USERNAME]) {
     bool netrc_user_changed = FALSE;
@@ -2925,6 +2928,7 @@ static CURLcode override_login(struct Curl_easy *data,
       conn->bits.user_passwd = TRUE; /* enable user+password */
     }
   }
+#endif
 
   /* for updated strings, we update them in the URL */
   if(*userp) {

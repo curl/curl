@@ -508,7 +508,9 @@ struct ConnectBits {
   BIT(ftp_use_data_ssl); /* Enabled SSL for the data connection */
   BIT(ftp_use_control_ssl); /* Enabled SSL for the control connection */
 #endif
+#ifndef CURL_DISABLE_NETRC
   BIT(netrc);         /* name+password provided by netrc */
+#endif
   BIT(bound); /* set true if bind() has already been done on this socket/
                  connection */
   BIT(multiplex); /* connection is multiplexed */
@@ -1727,8 +1729,10 @@ struct UserDefined {
                                */
   curl_sshkeycallback ssh_keyfunc; /* key matching callback */
   void *ssh_keyfunc_userp;         /* custom pointer to callback */
+#ifndef CURL_DISABLE_NETRC
   enum CURL_NETRC_OPTION
        use_netrc;        /* defined in include/curl.h */
+#endif
   curl_usessl use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                             IMAP or POP3 or others! */
   long new_file_perms;    /* Permissions to use when creating remote files */
