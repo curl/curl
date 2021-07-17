@@ -25,12 +25,16 @@
 
 #if defined(WIN32)
 
+curl_off_t curlx_utf8_strict_codepoint_count(const char *str);
+#define curlx_is_str_utf8(str) (curlx_utf8_strict_codepoint_count(str) >= 0)
+
  /*
   * MultiByte conversions using Windows kernel32 library.
   */
 
 wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8);
 char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
+
 #endif /* WIN32 */
 
 /*
