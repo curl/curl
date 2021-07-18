@@ -151,7 +151,7 @@ changes merged.
 
 We strongly prefer pull requests to mailed patches, as it makes it a proper
 git commit that is easy to merge and they are easy to track and not that easy
-to loose in the flood of many emails, like they sometimes do on the mailing
+to lose in the flood of many emails, like they sometimes do on the mailing
 lists.
 
 Every pull request submitted will automatically be tested in several different

@@ -56,7 +56,7 @@ CURLcode Curl_bufref_memdup(struct bufref *br, const void *data, size_t length);
 ```
 
 Releases the previously referenced buffer, then duplicates the `length`-byte
-`data` into a buffer allocated via `malloc()` and references the later
+`data` into a buffer allocated via `malloc()` and references the latter
 associated with destructor `curl_free()`.
 
 An additional trailing byte is allocated and set to zero as a possible
