@@ -279,7 +279,7 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
      *
      * - Stat gives a size but this is UNRELIABLE in VMS As a f.e. a
      * fixed file with implied CC needs to have a byte added for every
-     * record processed, this can by derived from Filesize & recordsize
+     * record processed, this can be derived from Filesize & recordsize
      * for VARiable record files the records need to be counted!  for
      * every record add 1 for linefeed and subtract 2 for the record
      * header for VARIABLE header files only the bare record data needs
@@ -530,7 +530,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       }
       if(outs->bytes && outs->filename && outs->stream) {
         int rc;
-        /* We have written data to a output file, we truncate file
+        /* We have written data to an output file, we truncate file
          */
         if(!global->mute)
           fprintf(global->errors, "Throwing away %"
@@ -1181,7 +1181,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         input->config = config;
         /* Note that if CURLOPT_READFUNCTION is fread (the default), then
          * lib/telnet.c will Curl_poll() on the input file descriptor
-         * rather then calling the READFUNCTION at regular intervals.
+         * rather than calling the READFUNCTION at regular intervals.
          * The circumstances in which it is preferable to enable this
          * behavior, by omitting to set the READFUNCTION & READDATA options,
          * have not been determined.
@@ -1483,7 +1483,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
           /* In debug build of curl tool, using
            *    --cert loadmem=<filename>:<password> --cert-type p12
-           *  must do the same thing than classic:
+           *  must do the same thing as classic:
            *    --cert <filename>:<password> --cert-type p12
            *  but is designed to test blob */
 #if defined(CURLDEBUG) || defined(DEBUGBUILD)
@@ -2048,7 +2048,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       }
       else {
         /* Free this URL node data without destroying the
-           the node itself nor modifying next pointer. */
+           node itself nor modifying next pointer. */
         Curl_safefree(urlnode->outfile);
         Curl_safefree(urlnode->infile);
         urlnode->flags = 0;

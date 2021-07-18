@@ -19,7 +19,7 @@ alerts.
 ## How to provide feedback to author
 
 Be nice. Ask questions. Provide examples or suggestions of improvements.
-Assume best intentions. Remember language barriers.
+Assume the best intentions. Remember language barriers.
 
 All first-time contributors can become regulars. Let's help them go there.
 
@@ -43,7 +43,7 @@ intact as far as possible.
 ## Code style
 
 Most code style nits are detected by checksrc but not all. Only leave remarks
-on style deviation once checksrc doesn't find any more.
+on style deviation once checksrc doesn't find anymore.
 
 Minor nits from fresh submitters can also be handled by the maintainer when
 merging, in case it seems like the submitter isn't clear on what to do. We
@@ -100,7 +100,7 @@ test individual functions.
 
 ## Documentation
 
-New features or changes to existing functionality **must** be accompanied with
+New features or changes to existing functionality **must** be accompanied by
 updated documentation. Submitting that in a separate follow-up pull request is
 not OK. A code review must also verify that the submitted documentation update
 matches the code submission.

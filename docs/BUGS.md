@@ -34,7 +34,7 @@
  HackerOne](https://hackerone.com/curl).
 
  This ensures that the report reaches the curl security team so that they
- first can be deal with the report away from the public to minimize the harm
+ first can deal with the report away from the public to minimize the harm
  and impact it will have on existing users out there who might be using the
  vulnerable versions.
 
@@ -67,7 +67,7 @@
 
  If curl crashed, causing a core dump (in unix), there is hardly any use to
  send that huge file to anyone of us. Unless we have an exact same system
- setup as you, we can't do much with it. Instead we ask you to get a stack
+ setup as you, we can't do much with it. Instead, we ask you to get a stack
  trace and send that (much smaller) output to us instead!
 
  The address and how to subscribe to the mailing lists are detailed in the
@@ -168,7 +168,7 @@
  experiencing.
 
  Security wise, it is almost always a bad idea to lag behind the current curl
- versions by a lot. We keeping discovering and reporting security problems
+ versions by a lot. We keep discovering and reporting security problems
  over time see you can see in [this
  table](https://curl.se/docs/vulnerabilities.html)
 
