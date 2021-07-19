@@ -1,9 +1,7 @@
 base:
-  language: c++
-  engine: libFuzzer
+  language: c
+  engine: sfz
   steps:
-    - run: apt-get update
-    - run: apt-get -y install dh-autoreconf clang-11 libclang-11-dev
     - run: autoreconf -fi && ./configure --without-ssl
   sanitizers:
     address: {}
