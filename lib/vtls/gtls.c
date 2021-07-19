@@ -1054,7 +1054,7 @@ gtls_connect_step3(struct Curl_easy *data,
       return CURLE_SSL_ISSUER_ERROR;
     }
     infof(data, "  server certificate issuer check OK (Issuer Cert: %s)",
-          SSL_SET_OPTION(issuercert)?SSL_CONN_CONFIG(issuercert):"none");
+          SSL_CONN_CONFIG(issuercert)?SSL_CONN_CONFIG(issuercert):"none");
   }
 
   size = sizeof(certname);
