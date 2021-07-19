@@ -3,7 +3,7 @@ base:
   engine: libFuzzer
   steps:
     - run: apt-get update
-    - run: apt-get -y install dh-autoreconf clang libclang-dev
+    - run: apt-get -y install dh-autoreconf clang-11 libclang-11-dev
     - run: autoreconf -fi && ./configure --without-ssl
   sanitizers:
     address: {}
