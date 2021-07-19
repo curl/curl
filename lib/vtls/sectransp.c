@@ -32,6 +32,7 @@
 #include "curl_base64.h"
 #include "strtok.h"
 #include "multiif.h"
+#include "strcase.h"
 
 #ifdef USE_SECTRANSP
 
