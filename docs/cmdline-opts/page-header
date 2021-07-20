@@ -32,7 +32,7 @@ curl \- transfer a URL
 is a tool to transfer data from or to a server, using one of the supported
 protocols (DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP,
 LDAPS, MQTT, POP3, POP3S, RTMP, RTMPS, RTSP, SCP, SFTP, SMB, SMBS, SMTP,
-SMTPS, TELNET and TFTP). The command is designed to work without user
+SMTPS, TELNET or TFTP). The command is designed to work without user
 interaction.
 
 curl offers a busload of useful tricks like proxy support, user
@@ -64,7 +64,7 @@ other:
 
   "http://example.com/archive[1996-1999]/vol[1-4]/part{a,b,c}.html"
 
-You can specify any amount of URLs on the command line. They will be fetched
+You can specify any number of URLs on the command line. They will be fetched
 in a sequential manner in the specified order. You can specify command line
 options and URLs mixed and in any order on the command line.
 
@@ -98,7 +98,7 @@ curl will attempt to re-use connections for multiple file transfers, so that
 getting many files from the same server will not do multiple connects /
 handshakes. This improves speed. Of course this is only done on files
 specified on a single command line and cannot be used between separate curl
-invokes.
+invocations.
 .SH OUTPUT
 If not told otherwise, curl writes the received data to stdout. It can be
 instructed to instead save that data into a local file, using the --output or
@@ -106,7 +106,7 @@ instructed to instead save that data into a local file, using the --output or
 command line, it similarly needs multiple options for where to save them.
 
 curl does not parse or otherwise "understand" the content it gets or writes as
-output. It does no encoding or decoding, unless explicitly asked so with
+output. It does no encoding or decoding, unless explicitly asked to with
 dedicated command line options.
 .SH PROTOCOLS
 curl supports numerous protocols, or put in URL terms: schemes. Your
@@ -128,7 +128,7 @@ version 0.9, 1.0, 1.1, 2 and 3 depending on build options and the correct
 command line options.
 .IP IMAP(S)
 Using the mail reading protocol, curl can "download" emails for you. With or
-without using TLS.
+without TLS.
 .IP LDAP(S)
 curl can do directory lookups for you, with or without TLS.
 .IP MQTT
@@ -136,8 +136,7 @@ curl supports MQTT version 3. Downloading over MQTT equals "subscribe" to a
 topic while uploading/posting equals "publish" on a topic. MQTT support is
 experimental and TLS based MQTT is not supported (yet).
 .IP POP3(S)
-Downloading from a pop3 server means getting a mail. With or without using
-TLS.
+Downloading from a pop3 server means getting a mail. With or without TLS.
 .IP RTMP(S)
 The Realtime Messaging Protocol is primarily used to server streaming media
 and curl can download it.
@@ -173,8 +172,8 @@ If you want a progress meter for HTTP POST or PUT requests, you need to
 redirect the response output to a file, using shell redirect (>), --output or
 similar.
 
-It is not the same case for FTP upload as that operation does not spit out
-any response data to the terminal.
+This does not apply to FTP upload as that operation does not spit out any
+response data to the terminal.
 
 If you prefer a progress "bar" instead of the regular meter, --progress-bar is
 your friend. You can also disable the progress meter completely with the
@@ -189,12 +188,12 @@ separator. The long "double-dash" form, --data for example, requires a space
 between it and its value.
 
 Short version options that don't need any additional values can be used
-immediately next to each other, like for example you can specify all the
+immediately next to each other, like, for example, you can specify all the
 options -O, -L and -v at once as -OLv.
 
 In general, all boolean options are enabled with --**option** and yet again
 disabled with --**no-**option. That is, you use the exact same option name
 but prefix it with "no-". However, in this list we mostly only list and show
 the --option version of them. (This concept with --no options was added in
-7.19.0. Previously most options were toggled on/off on repeated use of the
-same command line option.)
+7.19.0. Previously most options were toggled on/off through repeated use of
+the same command line option.)
