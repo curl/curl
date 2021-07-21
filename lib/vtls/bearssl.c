@@ -68,6 +68,14 @@ struct cafile_parser {
   size_t dn_len;
 };
 
+#define CAFILE_SOURCE_PATH 1
+#define CAFILE_SOURCE_BLOB 2
+struct cafile_source {
+  const int type;
+  const char * const data;
+  const size_t len;
+};
+
 static void append_dn(void *ctx, const void *buf, size_t len)
 {
   struct cafile_parser *ca = ctx;
@@ -90,7 +98,8 @@ static void x509_push(void *ctx, const void *buf, size_t len)
     br_x509_decoder_push(&ca->xc, buf, len);
 }
 
-static CURLcode load_cafile(const char *path, br_x509_trust_anchor **anchors,
+static CURLcode load_cafile(struct cafile_source *source,
+                            br_x509_trust_anchor **anchors,
                             size_t *anchors_len)
 {
   struct cafile_parser ca;
@@ -100,13 +109,22 @@ static CURLcode load_cafile(const char *path, br_x509_trust_anchor **anchors,
   br_x509_trust_anchor *new_anchors;
   size_t new_anchors_len;
   br_x509_pkey *pkey;
-  FILE *fp;
-  unsigned char buf[BUFSIZ], *p;
+  FILE *fp = 0;
+  unsigned char buf[BUFSIZ];
+  const unsigned char *p;
   const char *name;
   size_t n, i, pushed;
 
-  fp = fopen(path, "rb");
-  if(!fp)
+  DEBUGASSERT(source->type == CAFILE_SOURCE_PATH
+              || source->type == CAFILE_SOURCE_BLOB);
+
+  if(source->type == CAFILE_SOURCE_PATH) {
+    fp = fopen(source->data, "rb");
+    if(!fp)
+      return CURLE_SSL_CACERT_BADFILE;
+  }
+
+  if(source->type == CAFILE_SOURCE_BLOB && source->len > (size_t)INT_MAX)
     return CURLE_SSL_CACERT_BADFILE;
 
   ca.err = CURLE_OK;
@@ -115,11 +133,17 @@ static CURLcode load_cafile(const char *path, br_x509_trust_anchor **anchors,
   ca.anchors_len = 0;
   br_pem_decoder_init(&pc);
   br_pem_decoder_setdest(&pc, x509_push, &ca);
-  for(;;) {
-    n = fread(buf, 1, sizeof(buf), fp);
-    if(n == 0)
-      break;
-    p = buf;
+  do {
+    if(source->type == CAFILE_SOURCE_PATH) {
+      n = fread(buf, 1, sizeof(buf), fp);
+      if(n == 0)
+        break;
+      p = buf;
+    }
+    else if(source->type == CAFILE_SOURCE_BLOB) {
+      n = source->len;
+      p = (unsigned char *) source->data;
+    }
     while(n) {
       pushed = br_pem_decoder_push(&pc, p, n);
       if(ca.err)
@@ -211,12 +235,13 @@ static CURLcode load_cafile(const char *path, br_x509_trust_anchor **anchors,
         goto fail;
       }
     }
-  }
-  if(ferror(fp))
+  } while(source->type != CAFILE_SOURCE_BLOB);
+  if(fp && ferror(fp))
     ca.err = CURLE_READ_ERROR;
 
 fail:
-  fclose(fp);
+  if(fp)
+    fclose(fp);
   if(ca.err == CURLE_OK) {
     *anchors = ca.anchors;
     *anchors_len = ca.anchors_len;
@@ -299,7 +324,10 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
-  const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
+  const struct curl_blob *ca_info_blob = SSL_CONN_CONFIG(ca_info_blob);
+  const char * const ssl_cafile =
+    /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
+    (ca_info_blob ? NULL : SSL_CONN_CONFIG(CAfile));
   const char *hostname = SSL_HOST_NAME();
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const bool verifyhost = SSL_CONN_CONFIG(verifyhost);
@@ -340,8 +368,30 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
+  if(ca_info_blob) {
+    struct cafile_source source = {
+      CAFILE_SOURCE_BLOB,
+      ca_info_blob->data,
+      ca_info_blob->len,
+    };
+    ret = load_cafile(&source, &backend->anchors, &backend->anchors_len);
+    if(ret != CURLE_OK) {
+      if(verifypeer) {
+        failf(data, "error importing CA certificate blob");
+        return ret;
+      }
+      /* Only warn if no certificate verification is required. */
+      infof(data, "error importing CA certificate blob, continuing anyway");
+    }
+  }
+
   if(ssl_cafile) {
-    ret = load_cafile(ssl_cafile, &backend->anchors, &backend->anchors_len);
+    struct cafile_source source = {
+      CAFILE_SOURCE_PATH,
+      ssl_cafile,
+      0,
+    };
+    ret = load_cafile(&source, &backend->anchors, &backend->anchors_len);
     if(ret != CURLE_OK) {
       if(verifypeer) {
         failf(data, "error setting certificate verify locations."
@@ -841,7 +891,7 @@ static CURLcode bearssl_sha256sum(const unsigned char *input,
 
 const struct Curl_ssl Curl_ssl_bearssl = {
   { CURLSSLBACKEND_BEARSSL, "bearssl" }, /* info */
-  0,
+  SSLSUPP_CAINFO_BLOB,
   sizeof(struct ssl_backend_data),
 
   Curl_none_init,                  /* init */
