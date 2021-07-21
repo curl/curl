@@ -40,7 +40,7 @@ Certain features, such as timeouts and retries, require you to call libcurl
 even when there is no activity on the file descriptors.
 
 Your callback function \fBtimer_callback\fP should install a non-repeating
-timer with an interval of \fBtimeout_ms\fP. When time that timer fires, call
+timer with an interval of \fBtimeout_ms\fP. When that timer fires, call
 either \fIcurl_multi_socket_action(3)\fP or \fIcurl_multi_perform(3)\fP,
 depending on which interface you use.
 
