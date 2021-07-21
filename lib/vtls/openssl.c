@@ -1316,6 +1316,7 @@ static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine)
     const char *e_id = ENGINE_get_id(e);
     if(!strcmp(engine, e_id))
       break;
+    ENGINE_free(e);
   }
 #endif
 
@@ -1326,7 +1327,6 @@ static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine)
 
   if(data->state.engine) {
     ENGINE_finish(data->state.engine);
-    ENGINE_free(data->state.engine);
     data->state.engine = NULL;
   }
   if(!ENGINE_init(e)) {
@@ -1551,7 +1551,6 @@ static void ossl_close_all(struct Curl_easy *data)
 #ifdef USE_OPENSSL_ENGINE
   if(data->state.engine) {
     ENGINE_finish(data->state.engine);
-    ENGINE_free(data->state.engine);
     data->state.engine = NULL;
   }
 #else
