@@ -33,15 +33,15 @@ Pass a long as parameter. This allows you to specify the maximum \fIsize\fP
 this value, the transfer will not start and \fICURLE_FILESIZE_EXCEEDED\fP will
 be returned.
 
-The file size is not always known prior to download, and for such files this
-option has no effect even if the file transfer ends up being larger than this
-given limit. This concerns both FTP and HTTP transfers.
+For protocols where the size is not known in advance (including FTP and HTTP)
+this option has no effect even if the file transfer ends up being larger than
+the given limit.
 
 If you want a limit above 2GB, use \fICURLOPT_MAXFILESIZE_LARGE(3)\fP.
 .SH DEFAULT
 None
 .SH PROTOCOLS
-FTP and HTTP
+FTP, HTTP and MQTT
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
