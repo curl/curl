@@ -2019,6 +2019,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     case MSTATE_DO:
+      /* At this point this connection is definitely connected, so trigger
+         the progress callback if it's been configured. */
+      Curl_set_in_callback(data, true);
+      if(data->set.fxferinfo != NULL) {
+        data->set.fxferinfo(data->set.progress_client, 0, 0, 0, 0);
+      }
+      Curl_set_in_callback(data, false);
+
       if(data->set.connect_only) {
         /* keep connection open for application to use the socket */
         connkeep(data->conn, "CONNECT_ONLY");
