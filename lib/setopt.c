@@ -3013,6 +3013,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return result;
     break;
 #endif
+  case CURLOPT_PREREQFUNCTION:
+    data->set.fprereq = va_arg(param, curl_prereq_callback);
+    break;
+  case CURLOPT_PREREQDATA:
+    data->set.prereq_userp = va_arg(param, void *);
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

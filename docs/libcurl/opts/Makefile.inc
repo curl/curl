@@ -254,6 +254,8 @@ man_MANS =                                      \
   CURLOPT_POSTQUOTE.3                           \
   CURLOPT_POSTREDIR.3                           \
   CURLOPT_PREQUOTE.3                            \
+  CURLOPT_PREREQDATA.3                          \
+  CURLOPT_PREREQFUNCTION.3                      \
   CURLOPT_PRE_PROXY.3                           \
   CURLOPT_PRIVATE.3                             \
   CURLOPT_PROGRESSDATA.3                        \

@@ -1652,6 +1652,8 @@ struct UserDefined {
   curl_closesocket_callback fclosesocket; /* function for closing the
                                              socket */
   void *closesocket_client;
+  curl_prereq_callback fprereq; /* pre-initial request callback */
+  void *prereq_userp; /* pre-initial request user data */
 
   void *seek_client;    /* pointer to pass to the seek callback */
   /* the 3 curl_conv_callback functions below are used on non-ASCII hosts */

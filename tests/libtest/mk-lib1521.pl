@@ -136,6 +136,7 @@ static curl_xferinfo_callback xferinfocb;
 static curl_hstsread_callback hstsreadcb;
 static curl_hstswrite_callback hstswritecb;
 static curl_resolver_start_callback resolver_start_cb;
+static curl_prereq_callback prereqcb;
 
 int test(char *URL)
 {
