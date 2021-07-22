@@ -2028,6 +2028,28 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     case MSTATE_DO:
+      if(data->set.fprereq) {
+        int prereq_rc;
+
+        /* call the prerequest callback function */
+        Curl_set_in_callback(data, true);
+        prereq_rc = data->set.fprereq(data->set.prereq_userp,
+                                      data->info.conn_primary_ip,
+                                      data->info.conn_local_ip,
+                                      data->info.conn_primary_port,
+                                      data->info.conn_local_port);
+        Curl_set_in_callback(data, false);
+        if(prereq_rc != CURL_PREREQFUNC_OK) {
+          failf(data, "operation aborted by pre-request callback");
+          /* failure in pre-request callback - don't do any other processing */
+          result = CURLE_ABORTED_BY_CALLBACK;
+          Curl_posttransfer(data);
+          multi_done(data, result, FALSE);
+          stream_error = TRUE;
+          break;
+        }
+      }
+
       if(data->set.connect_only) {
         /* keep connection open for application to use the socket */
         connkeep(data->conn, "CONNECT_ONLY");

@@ -229,7 +229,7 @@ test2064 test2065 test2066 test2067 test2068 test2069 \
 test2064 test2065 test2066 test2067 test2068 test2069 test2070 \
          test2071 test2072 test2073 test2074 test2075 test2076 test2077 \
 test2078 \
-test2080 test2081 \
+test2080 test2081 test2082 test2083 test2084 test2085 test2086 \
 \
 test2100 \
 \
