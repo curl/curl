@@ -66,6 +66,9 @@ else
 curl_LDADD = $(top_builddir)/lib/libcurl.la @NSS_LIBS@ @SSL_LIBS@ @ZLIB_LIBS@ @CURL_NETWORK_AND_TIME_LIBS@
 endif
 
+curl_LDFLAGS = $(curl_LDFLAGS)
+curl_CPPFLAGS = $(AM_CPPFLAGS)
+
 # if unit tests are enabled, build a static library to link them with
 if BUILD_UNITTESTS
 noinst_LTLIBRARIES = libcurltool.la
