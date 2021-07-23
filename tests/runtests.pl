@@ -1691,7 +1691,6 @@ sub runhttpsserver {
     }
 
     my $pid2;
-    my $pid3;
     my $httpspid;
     my $port = 24512; # start attempt
     for (1 .. 10) {
@@ -1862,7 +1861,6 @@ sub runpingpongserver {
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
-
     $pid2 = $pid3;
 
     logmsg "RUN: $srvrname server is PID $ftppid port $port\n" if($verbose);
@@ -1957,10 +1955,9 @@ sub runftpsserver {
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
     $flags .= "--connect $FTPPORT";
 
-    my $port = 26713;
-    my $pid2;
-    my $pid3;
     my $ftpspid;
+    my $pid2;
+    my $port = 26713;
     for (1 .. 10) {
         $port += int(rand(700));
         my $options = "$flags --accept $port";
@@ -5158,7 +5155,7 @@ sub startservers {
                 }
                 logmsg sprintf ("* pid SMB => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'dict'}="$pid $pid2";
+                $run{'smb'}="$pid $pid2";
             }
         }
         elsif($what eq "telnet") {
@@ -5170,7 +5167,7 @@ sub startservers {
                 }
                 logmsg sprintf ("* pid neg TELNET => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'dict'}="$pid $pid2";
+                $run{'telnet'}="$pid $pid2";
             }
         }
         elsif($what eq "none") {
