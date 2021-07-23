@@ -1065,8 +1065,8 @@ static int validate_access(struct testcase *test,
 
   if(!strncmp("verifiedserver", filename, 14)) {
     char weare[128];
-    size_t count = msnprintf(weare, sizeof(weare),
-                             "WE ROOLZ: %ld\r\n", (long)getpid());
+    size_t count = msnprintf(weare, sizeof(weare), "WE ROOLZ: %"
+                             CURL_FORMAT_CURL_OFF_T "\r\n", our_getpid());
 
     logmsg("Are-we-friendly question received");
     test->buffer = strdup(weare);
