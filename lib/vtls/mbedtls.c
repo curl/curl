@@ -1113,7 +1113,9 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   Curl_none_false_start,            /* false_start */
   mbedtls_sha256sum,                /* sha256sum */
   NULL,                             /* associate_connection */
-  NULL                              /* disassociate_connection */
+  NULL,                             /* disassociate_connection */
+  NULL,                             /* dump_sessionid */
+  NULL                              /* load_sessionid */
 };
 
 #endif /* USE_MBEDTLS */
