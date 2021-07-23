@@ -994,7 +994,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     case DOCNUMBER_WERULEZ:
       /* we got a "friends?" question, reply back that we sure are */
       logmsg("Identifying ourselves as friends");
-      msnprintf(msgbuf, sizeof(msgbuf), "WE ROOLZ: %ld\r\n", (long)getpid());
+      msnprintf(msgbuf, sizeof(msgbuf), "WE ROOLZ: %"
+                CURL_FORMAT_CURL_OFF_T "\r\n", our_getpid());
       msglen = strlen(msgbuf);
       if(use_gopher)
         msnprintf(weare, sizeof(weare), "%s", msgbuf);
