@@ -78,6 +78,12 @@
         if((_curl_opt) == CURLOPT_SSL_CTX_FUNCTION)                     \
           if(!curlcheck_ssl_ctx_cb(value))                              \
             _curl_easy_setopt_err_ssl_ctx_cb();                         \
+        if((_curl_opt) == CURLOPT_SSL_CACHE_FUNCTION)                   \
+          if(!curlcheck_ssl_cache_cb(value))                            \
+            _curl_easy_setopt_err_ssl_cache_cb();                       \
+        if((_curl_opt) == CURLOPT_SSL_SESS_FUNCTION)                    \
+          if(!curlcheck_ssl_sess_cb(value))                             \
+            _curl_easy_setopt_err_ssl_sess_cb();                        \
         if(curlcheck_conv_cb_option(_curl_opt))                         \
           if(!curlcheck_conv_cb(value))                                 \
             _curl_easy_setopt_err_conv_cb();                            \
@@ -191,6 +197,11 @@ CURLWARNING(_curl_easy_setopt_err_debug_cb,
   "curl_easy_setopt expects a curl_debug_callback argument for this option")
 CURLWARNING(_curl_easy_setopt_err_ssl_ctx_cb,
   "curl_easy_setopt expects a curl_ssl_ctx_callback argument for this option")
+CURLWARNING(_curl_easy_setopt_err_ssl_cache_cb,
+              "curl_easy_setopt expects a curl_ssl_cache_callback "
+              "argument for this option")
+CURLWARNING(_curl_easy_setopt_err_ssl_sess_cb,
+  "curl_easy_setopt expects a curl_ssl_sess_callback argument for this option")
 CURLWARNING(_curl_easy_setopt_err_conv_cb,
   "curl_easy_setopt expects a curl_conv_callback argument for this option")
 CURLWARNING(_curl_easy_setopt_err_seek_cb,
@@ -369,6 +380,8 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_SOCKOPTDATA ||                                         \
    (option) == CURLOPT_SSH_KEYDATA ||                                         \
    (option) == CURLOPT_SSL_CTX_DATA ||                                        \
+   (option) == CURLOPT_SSL_CACHE_DATA ||                                      \
+   (option) == CURLOPT_SSL_SESS_DATA ||                                       \
    (option) == CURLOPT_WRITEDATA ||                                           \
    (option) == CURLOPT_RESOLVER_START_DATA ||                                 \
    (option) == CURLOPT_TRAILERDATA ||                                         \
@@ -678,6 +691,116 @@ typedef _curl_ssl_ctx_callback1 _curl_ssl_ctx_callback6;
 typedef _curl_ssl_ctx_callback1 _curl_ssl_ctx_callback7;
 typedef _curl_ssl_ctx_callback1 _curl_ssl_ctx_callback8;
 #endif
+
+/* evaluates to true if expr is of type curl_ssl_sess_callback or "similar" */
+#define curlcheck_ssl_sess_cb(expr)                                     \
+  (curlcheck_NULL(expr) ||                                              \
+   curlcheck_cb_compatible((expr), curl_ssl_sess_callback) ||           \
+   curlcheck_cb_compatible((expr), _curl_ssl_sess_callback1) ||         \
+   curlcheck_cb_compatible((expr), _curl_ssl_sess_callback2) ||         \
+   curlcheck_cb_compatible((expr), _curl_ssl_sess_callback3) ||         \
+   curlcheck_cb_compatible((expr), _curl_ssl_sess_callback4))
+typedef CURLcode (*_curl_ssl_sess_callback1)(CURL *, struct ssl_session_dump *,
+                                             void *);
+typedef CURLcode (*_curl_ssl_sess_callback2)(CURL *, struct ssl_session_dump *,
+                                             const void *);
+typedef CURLcode (*_curl_ssl_sess_callback3)(CURL *,
+                                             const struct ssl_session_dump *,
+                                             void *);
+typedef CURLcode (*_curl_ssl_sess_callback4)(CURL *,
+                                             const struct ssl_session_dump *,
+                                             const void *);
+
+/* evaluates to true if expr is of type curl_ssl_cache_callback or "similar" */
+#define curlcheck_ssl_cache_cb(expr)                                    \
+  (curlcheck_NULL(expr) ||                                              \
+   curlcheck_cb_compatible((expr), curl_ssl_cache_callback) ||          \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback1) ||        \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback2) ||        \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback3) ||        \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback4) ||        \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback5) ||        \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback6) ||        \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback7) ||        \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback8) ||        \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback9) ||        \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback10) ||       \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback11) ||       \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback12) ||       \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback13) ||       \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback14) ||       \
+   curlcheck_cb_compatible((expr), _curl_ssl_cache_callback15))
+typedef CURLcode (*_curl_ssl_cache_callback1)(CURL *,
+                                              struct ssl_session_dump **,
+                                              size_t *, curl_free_callback *,
+                                              void *);
+typedef CURLcode (*_curl_ssl_cache_callback2)(CURL *,
+                                              struct ssl_session_dump **,
+                                              size_t *, curl_free_callback *,
+                                              const void *);
+typedef CURLcode (*_curl_ssl_cache_callback3)(CURL *,
+                                              struct ssl_session_dump **,
+                                              size_t *,
+                                              const curl_free_callback *,
+                                              void *);
+typedef CURLcode (*_curl_ssl_cache_callback4)(CURL *,
+                                              struct ssl_session_dump **,
+                                              const size_t *,
+                                              curl_free_callback *, void *);
+typedef CURLcode (*_curl_ssl_cache_callback5)(CURL *,
+                                              const struct ssl_session_dump **,
+                                              size_t *, curl_free_callback *,
+                                              void *);
+typedef CURLcode (*_curl_ssl_cache_callback6)(CURL *,
+                                              struct ssl_session_dump **,
+                                              size_t *,
+                                              const curl_free_callback *,
+                                              const void *);
+typedef CURLcode (*_curl_ssl_cache_callback7)(CURL *,
+                                              struct ssl_session_dump **,
+                                              const size_t *,
+                                              curl_free_callback *,
+                                              const void *);
+typedef CURLcode (*_curl_ssl_cache_callback8)(CURL *,
+                                              const struct ssl_session_dump **,
+                                              size_t *,
+                                              curl_free_callback *,
+                                              const void *);
+typedef CURLcode (*_curl_ssl_cache_callback9)(CURL *,
+                                              struct ssl_session_dump **,
+                                              const size_t *,
+                                              const curl_free_callback *,
+                                              void *);
+typedef CURLcode (*_curl_ssl_cache_callback10)(CURL *,
+                                              const struct ssl_session_dump **,
+                                              size_t *,
+                                              const curl_free_callback *,
+                                              void *);
+typedef CURLcode (*_curl_ssl_cache_callback11)(CURL *,
+                                              struct ssl_session_dump **,
+                                              const size_t *,
+                                              const curl_free_callback *,
+                                              const void *);
+typedef CURLcode (*_curl_ssl_cache_callback12)(CURL *,
+                                              const struct ssl_session_dump **,
+                                              size_t *,
+                                              const curl_free_callback *,
+                                              const void *);
+typedef CURLcode (*_curl_ssl_cache_callback13)(CURL *,
+                                              const struct ssl_session_dump **,
+                                              const size_t *,
+                                              curl_free_callback *,
+                                              const void *);
+typedef CURLcode (*_curl_ssl_cache_callback14)(CURL *,
+                                              const struct ssl_session_dump **,
+                                              const size_t *,
+                                              const curl_free_callback *,
+                                              void *);
+typedef CURLcode (*_curl_ssl_cache_callback15)(CURL *,
+                                              const struct ssl_session_dump **,
+                                              const size_t *,
+                                              const curl_free_callback *,
+                                              const void *);
 
 /* evaluates to true if expr is of type curl_conv_callback or "similar" */
 #define curlcheck_conv_cb(expr)                                         \

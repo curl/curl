@@ -123,6 +123,8 @@ static curl_write_callback headercb;
 static curl_debug_callback debugcb;
 static curl_trailer_callback trailercb;
 static curl_ssl_ctx_callback ssl_ctx_cb;
+static curl_ssl_cache_callback ssl_cache_cb;
+static curl_ssl_sess_callback ssl_sess_cb;
 static curl_ioctl_callback ioctlcb;
 static curl_sockopt_callback sockoptcb;
 static curl_opensocket_callback opensocketcb;

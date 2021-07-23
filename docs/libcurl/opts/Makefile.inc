@@ -340,6 +340,8 @@ man_MANS =                                      \
   CURLOPT_SSLKEY_BLOB.3                         \
   CURLOPT_SSLKEYTYPE.3                          \
   CURLOPT_SSLVERSION.3                          \
+  CURLOPT_SSL_CACHE_DATA.3                      \
+  CURLOPT_SSL_CACHE_FUNCTION.3                  \
   CURLOPT_SSL_CIPHER_LIST.3                     \
   CURLOPT_SSL_CTX_DATA.3                        \
   CURLOPT_SSL_CTX_FUNCTION.3                    \
@@ -349,6 +351,8 @@ man_MANS =                                      \
   CURLOPT_SSL_FALSESTART.3                      \
   CURLOPT_SSL_OPTIONS.3                         \
   CURLOPT_SSL_SESSIONID_CACHE.3                 \
+  CURLOPT_SSL_SESS_DATA.3                       \
+  CURLOPT_SSL_SESS_FUNCTION.3                   \
   CURLOPT_SSL_VERIFYHOST.3                      \
   CURLOPT_SSL_VERIFYPEER.3                      \
   CURLOPT_SSL_VERIFYSTATUS.3                    \

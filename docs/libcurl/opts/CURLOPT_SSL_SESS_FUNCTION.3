@@ -1,0 +1,67 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SSL_SESS_FUNCTION 3 "22 Jul 2021" "libcurl 7.79.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SSL_SESS_FUNCTION \- SSL new session callback for OpenSSL
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode ssl_sess_callback(CURL *curl, const struct ssl_session_dump *dump,
+                           void *userptr);
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_SESS_FUNCTION,
+                          ssl_sess_callback);
+.SH DESCRIPTION
+This option only works for libcurl powered by OpenSSL. If libcurl was built
+against another SSL library this functionality is absent.
+
+Pass a pointer to your callback function, which should match the prototype
+shown above.
+
+This callback function gets called by libcurl after a new SSL session has been
+established. The \fIdump\fP parameter is actually a pointer to a structure
+that contains the details of the new session, that can be stored (persistently)
+and later loaded using \fICURLOPT_SSL_CACHE_FUNCTION(3)\fP option. If an error
+is returned from the callback it will be logged, but libcurl will continue
+execution. Set the \fIuserptr\fP argument with the
+\fICURLOPT_SSL_SESS_DATA(3)\fP option.
+
+This function will get called on all new SSL sessions established with a
+server.
+
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
+.SH AVAILABILITY
+Added in 7.79.0 for OpenSSL. Other SSL backends are not supported.
+.SH RETURN VALUE
+CURLE_OK if supported; or an error such as:
+
+CURLE_NOT_BUILT_IN - Not supported by the SSL backend
+
+CURLE_UNKNOWN_OPTION
+.SH "SEE ALSO"
+.BR CURLOPT_SSL_SESS_DATA "(3), " CURLOPT_SSL_CACHE_FUNCTION "(3), "
+ CURLOPT_SSL_VERIFYPEER "(3), "

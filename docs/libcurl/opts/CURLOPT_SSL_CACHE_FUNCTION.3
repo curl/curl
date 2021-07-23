@@ -1,0 +1,77 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SSL_CACHE_FUNCTION 3 "22 Jul 2021" "libcurl 7.79.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SSL_CACHE_FUNCTION \- SSL cache callback for OpenSSL
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode ssl_cache_callback(CURL *curl, struct ssl_session_dump **dump,
+                            size_t *size, curl_free_callback *free_cb,
+                            void *userptr);
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CACHE_FUNCTION,
+                          ssl_cache_callback);
+.SH DESCRIPTION
+This option only works for libcurl powered by OpenSSL. If libcurl was built
+against another SSL library this functionality is absent.
+
+Pass a pointer to your callback function, which should match the prototype
+shown above.
+
+This callback function gets called by libcurl just before the first SSL
+connection, when the session cache is guaranteed to have been initialized.
+Its purpose is to offer the chance of loading sessionid data stored
+(peristently), obtained by using \fICURLOPT_SSL_SESS_FUNCTION(3)\fP.
+The \fIdump\fP parameter needs to be allocated (and also its members) in the
+callback, to accomodate all instances that need to be loaded. The allocated
+number of instances will be passed to \fIsize\fP parameter. libcurl will
+release the allocated memory. It will use \fIfree_cb\fP for that if set in
+user code (typically "*free_cb = free;") or fallback to the callback set in
+\fIcurl_global_init_mem(3)\fP. If an error is returned from the callback it
+will be logged, but libcurl will still attempt to load any provided sessionid-s
+and continue. Set the \fIuserptr\fP argument with the
+\fICURLOPT_SSL_CACHE_DATA(3)\fP option.
+
+This function will get called for each newly created SSL cache.
+
+To use this properly, care must be taken with the non-obvious memory handling.
+For the memory allocated in user code but released by libcurl, the release
+callback must be provided. Relying on the one that was available when libcurl
+was built can often lead to crashes that will be difficult to identify.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
+.SH AVAILABILITY
+Added in 7.79.0 for OpenSSL. Other SSL backends are not supported.
+.SH RETURN VALUE
+CURLE_OK if supported; or an error such as:
+
+CURLE_NOT_BUILT_IN - Not supported by the SSL backend
+
+CURLE_UNKNOWN_OPTION
+.SH "SEE ALSO"
+.BR CURLOPT_SSL_CACHE_DATA "(3), " CURLOPT_SSL_SESS_FUNCTION "(3), "
+ CURLOPT_SSL_VERIFYPEER "(3), "
