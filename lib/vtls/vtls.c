@@ -460,6 +460,47 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
     }
   }
 
+  if(no_match && data->set.ssl.fsslcache && Curl_ssl->load_sessionid) {
+    /*
+     * Search again, this time for a less complete entry, as loaded
+     * from storage.
+     */
+    for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
+      check = &data->state.session[i];
+      if(!check->sessionid)
+        /* not session ID means blank entry */
+        continue;
+      if(strcasecompare(name, check->name) &&
+         !check->conn_to_host &&
+         (check->conn_to_port == -1) &&
+         (port == check->remote_port) &&
+         strcasecompare(conn->handler->scheme, check->scheme) &&
+         !check->ssl_config.version) {
+        /* yes, we have a session ID! */
+        (*general_age)++;          /* increase general age */
+        check->age = *general_age; /* set this as used in this age */
+        *ssl_sessionid = check->sessionid;
+        if(idsize)
+          *idsize = check->idsize;
+        no_match = FALSE;
+
+        /* fill in the missing pieces for this id loaded from a dump */
+        if(conn->bits.conn_to_host) {
+          check->conn_to_host = strdup(conn->conn_to_host.name);
+          if(!check->conn_to_host)
+            return CURLE_OUT_OF_MEMORY; /* bail out */
+        }
+        if(!Curl_clone_primary_ssl_config(ssl_config, &check->ssl_config)) {
+          Curl_free_primary_ssl_config(&check->ssl_config);
+          free(check->conn_to_host);
+          return CURLE_OUT_OF_MEMORY;
+        }
+
+        break;
+      }
+    }
+  }
+
   DEBUGF(infof(data, "%s Session ID in cache for %s %s://%s:%d",
                no_match? "Didn't find": "Found",
                isProxy ? "proxy" : "host",
@@ -713,6 +754,108 @@ struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data)
 }
 
 /*
+ * Load the given session ID to cache.
+ */
+static CURLcode ssl_cache_load_sessionid(CURL *data, long age,
+                                         const struct ssl_session_dump *dump)
+{
+  struct Curl_ssl_session *slot = NULL;
+  size_t i;
+
+  /*
+     Load a dumped session only if
+     - current SSL backend supports it;
+     - it was created for the same backend;
+     - no other new session has been found for the same protocol + host + port;
+     - cache is not already full (already existing sessions are likely newer).
+  */
+  if(!Curl_ssl->load_sessionid ||
+     dump->backend != Curl_ssl_backend() ||
+     !dump->scheme || !dump->scheme[0] ||
+     !dump->hostname || !dump->hostname[0] ||
+     !dump->port || !dump->sessionblob || !dump->blobsize)
+    return CURLE_GOT_NOTHING;
+
+  for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
+    struct Curl_ssl_session *sess = &data->state.session[i];
+    /* remember the first available position for loading this */
+    if(!sess->sessionid) {
+      if(!slot)
+        slot = sess;
+    }
+    /*
+       if there was a cache entry for this host, do not replace it with a dump
+       which is likely older
+    */
+    else if(strcasecompare(dump->hostname, sess->name) &&
+            strcasecompare(dump->scheme, sess->scheme) &&
+            dump->port == sess->remote_port) {
+      slot = NULL;
+      break;
+    }
+  }
+
+  if(slot &&
+     Curl_ssl->load_sessionid(dump->sessionblob, dump->blobsize,
+                              &slot->sessionid, &slot->idsize)) {
+    slot->scheme = strdup(dump->scheme);
+    slot->name = strdup(dump->hostname);
+    slot->remote_port = dump->port;
+    slot->age = age;
+    slot->conn_to_host = NULL;
+    slot->conn_to_port = -1;
+  }
+
+  return slot && slot->sessionid ? CURLE_OK : CURLE_GOT_NOTHING;
+}
+
+static void ssl_cache_load_all(struct Curl_easy *data, long age)
+{
+  /*
+   * This can fail, but it should not be fatal. Don't return an error
+   * for it.
+   */
+
+  CURLcode result;
+  size_t i;
+  struct ssl_session_dump *dump = NULL;
+  size_t size = 0;
+  curl_free_callback free_cb = Curl_cfree;
+
+  Curl_set_in_callback(data, true);
+  result = (*data->set.ssl.fsslcache)(data, &dump, &size, &free_cb,
+                                      data->set.ssl.fsslcachep);
+  Curl_set_in_callback(data, false);
+
+  if(result) {
+    failf(data, "error (%d) signaled by ssl cache callback", result);
+  }
+
+  if(dump) {
+    /* add session ids to cache */
+    for(i = 0; i < size; ++i) {
+      struct ssl_session_dump *d = &(dump[i]); /* for debug */
+      result = ssl_cache_load_sessionid(data, age, d);
+      if(result) {
+        /* Continue even if it failed for a particular dump */
+        failf(data, "error (%d) signaled by ssl cache loading function",
+              result);
+      }
+      /* cleanup */
+      if(free_cb) {
+        free_cb((void *)dump[i].scheme);
+        free_cb((void *)dump[i].hostname);
+        free_cb(dump[i].sessionblob);
+      }
+    }
+
+    /* cleanup */
+    if(free_cb)
+      free_cb(dump);
+  }
+}
+
+/*
  * This sets up a session ID cache to the specified size. Make sure this code
  * is agnostic to what underlying SSL technology we use.
  */
@@ -720,9 +863,24 @@ CURLcode Curl_ssl_initsessions(struct Curl_easy *data, size_t amount)
 {
   struct Curl_ssl_session *session;
 
-  if(data->state.session)
+  if(data->state.session) {
+    /*
+     * Session cache could have been initialized already as a shared component.
+     * Load user sessions only if the cache is empty.
+     */
+    if(data->set.ssl.fsslcache && data->share &&
+       data->state.session == data->share->sslsession) {
+      Curl_ssl_sessionid_lock(data);
+      if(!data->share->sessionage) {
+        data->share->sessionage++;
+        ssl_cache_load_all(data, data->share->sessionage);
+      }
+      Curl_ssl_sessionid_unlock(data);
+    }
+
     /* this is just a precaution to prevent multiple inits */
     return CURLE_OK;
+  }
 
   session = calloc(amount, sizeof(struct Curl_ssl_session));
   if(!session)
@@ -732,6 +890,11 @@ CURLcode Curl_ssl_initsessions(struct Curl_easy *data, size_t amount)
   data->set.general_ssl.max_ssl_sessions = amount;
   data->state.session = session;
   data->state.sessionage = 1; /* this is brand new */
+
+  /* Let application know SSL cache is ready for loading sessions. */
+  if(data->set.ssl.fsslcache)
+    ssl_cache_load_all(data, data->state.sessionage);
+
   return CURLE_OK;
 }
 
@@ -1264,7 +1427,8 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_none_false_start,             /* false_start */
   NULL,                              /* sha256sum */
   NULL,                              /* associate_connection */
-  NULL                               /* disassociate_connection */
+  NULL,                              /* disassociate_connection */
+  NULL                               /* load_sessionid */
 };
 
 const struct Curl_ssl *Curl_ssl =

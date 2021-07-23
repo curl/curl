@@ -748,6 +748,31 @@ typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
                                                           mbedtls_ssl_config */
                                           void *userptr);
 
+struct ssl_session_dump {
+  int backend;             /* curl_sslbackend enum value */
+  const char *scheme;      /* protocol scheme used */
+  const char *hostname;    /* host name for which this ID was used */
+  int port;                /* remote port */
+  unsigned char *sessionblob; /* serialized session data */
+  size_t blobsize;         /* session data size */
+};
+
+typedef CURLcode (*curl_ssl_cache_callback)(CURL *curl,
+                                          /* user code must allocate all mem
+                                             for *dump and its members, while
+                                             curl will release it */
+                                          struct ssl_session_dump **dump,
+                                          size_t *size,
+                                          /* set the release call for memory
+                                             allocated in user code, and
+                                             guaranteed to apply to the same
+                                             heap (typically *free_cb = free,
+                                             when malloc() was used); if not
+                                             set, Curl_cfree() will be used
+                                             instead. */
+                                          curl_free_callback *free_cb,
+                                          void *userptr);
+
 typedef enum {
   CURLPROXY_HTTP = 0,   /* added in 7.10, new in 7.19.4 default is to use
                            CONNECT HTTP/1.1 */
@@ -2104,6 +2129,12 @@ typedef enum {
   /* The CA certificates as "blob" used to validate the proxy certificate
      this option is used only if PROXY_SSL_VERIFYPEER is true */
   CURLOPT(CURLOPT_PROXY_CAINFO_BLOB, CURLOPTTYPE_BLOB, 310),
+
+  /* SSL session cache callback. After the cache has been initialized,
+     allow user code to load SSL sesisonid-s to cache, only for OpenSSL.
+     The function must match the curl_ssl_cache_callback prototype. */
+  CURLOPT(CURLOPT_SSL_CACHE_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 311),
+  CURLOPT(CURLOPT_SSL_CACHE_DATA, CURLOPTTYPE_CBPOINT, 312),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

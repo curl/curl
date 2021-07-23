@@ -1998,6 +1998,28 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
     data->set.ssl.falsestart = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
+  case CURLOPT_SSL_CACHE_FUNCTION:
+    /*
+     * Set a SSL_CACHE callback
+     */
+#ifdef USE_SSL
+    if(Curl_ssl->supports & SSLSUPP_SSL_CTX)
+      data->set.ssl.fsslcache = va_arg(param, curl_ssl_cache_callback);
+    else
+#endif
+      result = CURLE_NOT_BUILT_IN;
+    break;
+  case CURLOPT_SSL_CACHE_DATA:
+    /*
+     * Set a SSL_CACHE callback parameter pointer
+     */
+#ifdef USE_SSL
+    if(Curl_ssl->supports & SSLSUPP_SSL_CTX)
+      data->set.ssl.fsslcachep = va_arg(param, void *);
+    else
+#endif
+      result = CURLE_NOT_BUILT_IN;
+    break;
   case CURLOPT_CERTINFO:
 #ifdef USE_SSL
     if(Curl_ssl->supports & SSLSUPP_CERTINFO)

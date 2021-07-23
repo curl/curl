@@ -89,6 +89,9 @@ struct Curl_ssl {
                                struct connectdata *conn,
                                int sockindex);
   void (*disassociate_connection)(struct Curl_easy *data, int sockindex);
+
+  bool (*load_sessionid)(const unsigned char *input, size_t inputlen,
+                         void **sessionid, size_t *idsize);
 };
 
 #ifdef USE_SSL

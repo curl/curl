@@ -1542,6 +1542,16 @@ static void ossl_session_free(void *ptr)
   SSL_SESSION_free(ptr);
 }
 
+/* Load sessionid from string */
+static bool ossl_load_sessionid(const unsigned char *input, size_t inputlen,
+                                void **sessionid, size_t *idsize)
+{
+  SSL_SESSION *s = d2i_SSL_SESSION((SSL_SESSION**)sessionid, &input,
+                                   (long)inputlen);
+  *idsize = 0;
+  return s != NULL;
+}
+
 /*
  * This function is called when the 'data' struct is going away. Close
  * down everything and free all resources!
@@ -4597,7 +4607,8 @@ const struct Curl_ssl Curl_ssl_openssl = {
   NULL,                     /* sha256sum */
 #endif
   ossl_associate_connection, /* associate_connection */
-  ossl_disassociate_connection /* disassociate_connection */
+  ossl_disassociate_connection, /* disassociate_connection */
+  ossl_load_sessionid       /* load_sessionid */
 };
 
 #endif /* USE_OPENSSL */
