@@ -1053,7 +1053,6 @@ int main(int argc, char *argv[])
   int rc;
   int error;
   int arg = 1;
-  long pid;
 
   memset(&req, 0, sizeof(req));
 
@@ -1135,8 +1134,6 @@ int main(int argc, char *argv[])
 #endif
 
   install_signal_handlers(false);
-
-  pid = (long)getpid();
 
 #ifdef ENABLE_IPV6
   if(!use_ipv6)
@@ -1377,7 +1374,7 @@ server_cleanup:
 
   if(got_exit_signal) {
     logmsg("========> %s rtspd (port: %d pid: %ld) exits with signal (%d)",
-           ipv_inuse, (int)port, pid, exit_signal);
+           ipv_inuse, (int)port, (long)getpid(), exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we

@@ -1881,7 +1881,6 @@ int main(int argc, char *argv[])
   int rc = 0;
   int error;
   int arg = 1;
-  long pid;
   const char *connecthost = "127.0.0.1";
   const char *socket_type = "IPv4";
   char port_str[11];
@@ -2019,8 +2018,6 @@ int main(int argc, char *argv[])
 #endif
 
   install_signal_handlers(false);
-
-  pid = (long)getpid();
 
   sock = socket(socket_domain, SOCK_STREAM, 0);
 
@@ -2366,7 +2363,7 @@ sws_cleanup:
 
   if(got_exit_signal) {
     logmsg("========> %s sws (%s pid: %ld) exits with signal (%d)",
-           socket_type, location_str, pid, exit_signal);
+           socket_type, location_str, (long)getpid(), exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we
