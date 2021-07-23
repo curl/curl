@@ -90,6 +90,9 @@ struct Curl_ssl {
                                int sockindex);
   void (*disassociate_connection)(struct Curl_easy *data, int sockindex);
 
+  bool (*dump_sessionid)(const void *sessionid, size_t idsize,
+                         unsigned char **output, size_t *outputlen);
+
   bool (*load_sessionid)(const unsigned char *input, size_t inputlen,
                          void **sessionid, size_t *idsize);
 };

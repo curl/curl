@@ -2020,6 +2020,28 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
       result = CURLE_NOT_BUILT_IN;
     break;
+  case CURLOPT_SSL_SESS_FUNCTION:
+    /*
+     * Set a SSL_SESS callback
+     */
+#ifdef USE_SSL
+    if(Curl_ssl->supports & SSLSUPP_SSL_CTX)
+      data->set.ssl.fsslsess = va_arg(param, curl_ssl_sess_callback);
+    else
+#endif
+      result = CURLE_NOT_BUILT_IN;
+    break;
+  case CURLOPT_SSL_SESS_DATA:
+    /*
+     * Set a SSL_SESS callback parameter pointer
+     */
+#ifdef USE_SSL
+    if(Curl_ssl->supports & SSLSUPP_SSL_CTX)
+      data->set.ssl.fsslsessp = va_arg(param, void *);
+    else
+#endif
+      result = CURLE_NOT_BUILT_IN;
+    break;
   case CURLOPT_CERTINFO:
 #ifdef USE_SSL
     if(Curl_ssl->supports & SSLSUPP_CERTINFO)

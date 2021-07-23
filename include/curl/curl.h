@@ -757,6 +757,11 @@ struct ssl_session_dump {
   size_t blobsize;         /* session data size */
 };
 
+typedef CURLcode (*curl_ssl_sess_callback)(CURL *curl,
+                                           /* curl owns all memory used by
+                                              *dump and its members */
+                                           const struct ssl_session_dump *dump,
+                                           void *userptr);
 typedef CURLcode (*curl_ssl_cache_callback)(CURL *curl,
                                           /* user code must allocate all mem
                                              for *dump and its members, while
@@ -2135,6 +2140,12 @@ typedef enum {
      The function must match the curl_ssl_cache_callback prototype. */
   CURLOPT(CURLOPT_SSL_CACHE_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 311),
   CURLOPT(CURLOPT_SSL_CACHE_DATA, CURLOPTTYPE_CBPOINT, 312),
+
+  /* SSL new session callback. When a new SSL session has been established,
+     allow user code to store its data, only for OpenSSL. The function must
+     match the curl_ssl_sess_callback prototype. */
+  CURLOPT(CURLOPT_SSL_SESS_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 313),
+  CURLOPT(CURLOPT_SSL_SESS_DATA, CURLOPTTYPE_CBPOINT, 314),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

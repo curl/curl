@@ -566,6 +566,7 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
   char *clone_conn_to_host;
   int conn_to_port;
   long *general_age;
+  CURLcode result;
 #ifndef CURL_DISABLE_PROXY
   struct ssl_primary_config * const ssl_config = isProxy ?
     &conn->proxy_ssl_config :
@@ -653,6 +654,30 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
   DEBUGF(infof(data, "Added Session ID to cache for %s://%s:%d [%s]",
                store->scheme, store->name, store->remote_port,
                isProxy ? "PROXY" : "server"));
+
+  /* give application a chance to store new SSL session. */
+  if(data->set.ssl.fsslsess && Curl_ssl->dump_sessionid) {
+    /* get minimal session info */
+    struct ssl_session_dump dump;
+    dump.backend = Curl_ssl_backend();
+    dump.scheme = store->scheme;
+    dump.hostname = store->name;
+    dump.port = store->remote_port;
+    dump.sessionblob = NULL;
+    if(Curl_ssl->dump_sessionid(ssl_sessionid, idsize,
+                                &dump.sessionblob, &dump.blobsize)) {
+      /* run new-session user callback */
+      Curl_set_in_callback(data, true);
+      result = (*data->set.ssl.fsslsess)(data, &dump, data->set.ssl.fsslsessp);
+      Curl_set_in_callback(data, false);
+      free(dump.sessionblob);
+      if(result) {
+        /* not fatal, just log it */
+        failf(data, "error (%d) signaled by ssl sess callback", result);
+      }
+    }
+  }
+
   return CURLE_OK;
 }
 
@@ -1428,6 +1453,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
   NULL,                              /* sha256sum */
   NULL,                              /* associate_connection */
   NULL,                              /* disassociate_connection */
+  NULL,                              /* dump_sessionid */
   NULL                               /* load_sessionid */
 };
 

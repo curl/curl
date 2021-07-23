@@ -1542,6 +1542,23 @@ static void ossl_session_free(void *ptr)
   SSL_SESSION_free(ptr);
 }
 
+/* Dump sessionid to string */
+static bool ossl_dump_sessionid(const void *sessionid,
+                                size_t idsize UNUSED_PARAM,
+                                unsigned char **output, size_t *outputlen)
+{
+  unsigned char *temp;
+  (void)idsize;
+  *outputlen = i2d_SSL_SESSION((SSL_SESSION*)sessionid, NULL);
+  if(*outputlen) {
+    *output = temp = malloc(*outputlen); /* free() *output! */
+    if(!temp)
+      return false;
+    i2d_SSL_SESSION((SSL_SESSION*)sessionid, &temp); /* advances temp */
+  }
+  return true;
+}
+
 /* Load sessionid from string */
 static bool ossl_load_sessionid(const unsigned char *input, size_t inputlen,
                                 void **sessionid, size_t *idsize)
@@ -4608,6 +4625,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
 #endif
   ossl_associate_connection, /* associate_connection */
   ossl_disassociate_connection, /* disassociate_connection */
+  ossl_dump_sessionid,      /* dump_sessionid */
   ossl_load_sessionid       /* load_sessionid */
 };
 

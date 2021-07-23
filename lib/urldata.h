@@ -271,6 +271,8 @@ struct ssl_config_data {
   void *fsslctxp;        /* parameter for call back */
   curl_ssl_cache_callback fsslcache; /* function for ssl sess cache */
   void *fsslcachep;      /* parameter for call back */
+  curl_ssl_sess_callback fsslsess; /* function for new ssl sess */
+  void *fsslsessp;       /* parameter for call back */
   char *cert_type; /* format for certificate (default: PEM)*/
   char *key; /* private key file name */
   struct curl_blob *key_blob;
