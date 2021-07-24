@@ -93,9 +93,9 @@ main(void)
 #define snprintf _snprintf
 #endif
     /* Netscape format cookie */
-    snprintf(nline, sizeof(nline), "%s\t%s\t%s\t%s\t%lu\t%s\t%s",
+    snprintf(nline, sizeof(nline), "%s\t%s\t%s\t%s\t%.0lf\t%s\t%s",
              ".example.com", "TRUE", "/", "FALSE",
-             (unsigned long)time(NULL) + 31337UL,
+             difftime(time(NULL) + 31337, (time_t)0),
              "PREF", "hello example, i like you very much!");
     res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
     if(res != CURLE_OK) {
