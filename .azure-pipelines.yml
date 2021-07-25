@@ -85,6 +85,8 @@ stages:
 
     - script: make V=1 && cd tests && make V=1
       displayName: 'compile'
+      env:
+        MAKEFLAGS: "-j 2"
 
     - script: make test-nonflaky
       displayName: 'test'
@@ -191,6 +193,8 @@ stages:
 
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 && cd tests && make V=1"
       displayName: 'compile'
+      env:
+        MAKEFLAGS: "-j 2"
 
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
       displayName: 'install'
