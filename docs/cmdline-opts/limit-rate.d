@@ -10,7 +10,8 @@ otherwise would be.
 
 The given speed is measured in bytes/second, unless a suffix is appended.
 Appending 'k' or 'K' will count the number as kilobytes, 'm' or 'M' makes it
-megabytes, while 'g' or 'G' makes it gigabytes. Examples: 200K, 3m and 1G.
+megabytes, while 'g' or 'G' makes it gigabytes. The suffixes (k, M, G, T, P)
+are 1024 based. For example 1k is 1024. Examples: 200K, 3m and 1G.
 
 If you also use the --speed-limit option, that option will take precedence and
 might cripple the rate-limiting slightly, to help keeping the speed-limit
