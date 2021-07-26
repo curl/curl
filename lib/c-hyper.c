@@ -341,8 +341,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     hyper_task_free(task);
 
     if(t == HYPER_TASK_ERROR) {
-      hyper_code errnum = hyper_error_code(hypererr);
-      if(errnum == HYPERE_ABORTED_BY_CALLBACK) {
+      if(data->state.hresult) {
         /* override Hyper's view, might not even be an error */
         result = data->state.hresult;
         infof(data, "hyperstream is done (by early callback)");
