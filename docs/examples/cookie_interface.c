@@ -69,7 +69,7 @@ main(void)
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(curl) {
-    char nline[256];
+    char nline[512];
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
