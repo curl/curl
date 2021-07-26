@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -93,7 +93,7 @@ main(void)
 #define snprintf _snprintf
 #endif
     /* Netscape format cookie */
-    snprintf(nline, sizeof(nline), "%s\t%s\t%s\t%s\t%.0lf\t%s\t%s",
+    snprintf(nline, sizeof(nline), "%s\t%s\t%s\t%s\t%.0f\t%s\t%s",
              ".example.com", "TRUE", "/", "FALSE",
              difftime(time(NULL) + 31337, (time_t)0),
              "PREF", "hello example, i like you very much!");
