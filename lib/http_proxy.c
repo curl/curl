@@ -721,10 +721,8 @@ static CURLcode CONNECT(struct Curl_easy *data,
   hyper_headers *headers = NULL;
   hyper_clientconn_options *options = NULL;
   hyper_task *handshake = NULL;
-  hyper_task *task = NULL; /* for the handshake */
   hyper_task *sendtask = NULL; /* for the send */
   hyper_clientconn *client = NULL;
-  hyper_error *hypererr = NULL;
   char *hostheader = NULL; /* for CONNECT */
   char *host = NULL; /* Host: */
 
@@ -737,6 +735,9 @@ static CURLcode CONNECT(struct Curl_easy *data,
     switch(s->tunnel_state) {
     case TUNNEL_INIT:
       /* BEGIN CONNECT PHASE */
+      h->connect_handshake_status = CURL_HYPER_TASK_NOT_DONE;
+      h->connect_response_status = CURL_HYPER_TASK_NOT_DONE;
+      h->connect_body_foreach_status = CURL_HYPER_TASK_NOT_DONE;
       io = hyper_io_new();
       if(!io) {
         failf(data, "Couldn't create hyper IO");
@@ -776,6 +777,8 @@ static CURLcode CONNECT(struct Curl_easy *data,
       }
       io = NULL;
       options = NULL;
+      hyper_task_set_userdata(handshake,
+                              (void *)CURL_HYPER_TASKUD_CONNECT_HANDSHAKE);
 
       if(HYPERE_OK != hyper_executor_push(h->exec, handshake)) {
         failf(data, "Couldn't hyper_executor_push the handshake");
@@ -783,14 +786,19 @@ static CURLcode CONNECT(struct Curl_easy *data,
       }
       handshake = NULL; /* ownership passed on */
 
-      task = hyper_executor_poll(h->exec);
-      if(!task) {
-        failf(data, "Couldn't hyper_executor_poll the handshake");
+      while(h->connect_handshake_status == CURL_HYPER_TASK_NOT_DONE) {
+        Curl_hyper_poll_executor(h);
+      }
+      if(h->connect_handshake_status == CURL_HYPER_TASK_ERROR) {
+        failf(data, "Error from hyper_clientconn_handshake");
+        hyper_error_free(h->connect_handshake_result.error);
+        h->connect_handshake_result.error = NULL;
+        result = CURLE_WRITE_ERROR;
         goto error;
       }
 
-      client = hyper_task_value(task);
-      hyper_task_free(task);
+      client = h->connect_handshake_result.output;
+      h->connect_handshake_result.output = NULL;
       req = hyper_request_new();
       if(!req) {
         failf(data, "Couldn't hyper_request_new");
@@ -810,7 +818,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
       if(hyper_request_set_uri(req, (uint8_t *)hostheader,
                                strlen(hostheader))) {
         failf(data, "error setting path");
-        result = CURLE_OUT_OF_MEMORY;
+        goto error;
       }
       /* Setup the proxy-authorization header, if any */
       result = Curl_http_output_auth(data, conn, "CONNECT", HTTPREQ_GET,
@@ -824,6 +832,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
          (HYPERE_OK != hyper_request_set_version(req,
                                                  HYPER_HTTP_VERSION_1_0))) {
         failf(data, "error setting HTTP version");
+        result = CURLE_BAD_FUNCTION_ARGUMENT;
         goto error;
       }
 
@@ -857,6 +866,8 @@ static CURLcode CONNECT(struct Curl_easy *data,
         failf(data, "hyper_clientconn_send");
         goto error;
       }
+      hyper_task_set_userdata(sendtask,
+                              (void *)CURL_HYPER_TASKUD_CONNECT_RESPONSE);
 
       if(HYPERE_OK != hyper_executor_push(h->exec, sendtask)) {
         failf(data, "Couldn't hyper_executor_push the send");
@@ -865,17 +876,6 @@ static CURLcode CONNECT(struct Curl_easy *data,
 
       hyper_clientconn_free(client);
 
-      do {
-        task = hyper_executor_poll(h->exec);
-        if(task) {
-          bool error = hyper_task_type(task) == HYPER_TASK_ERROR;
-          if(error)
-            hypererr = hyper_task_value(task);
-          hyper_task_free(task);
-          if(error)
-            goto error;
-        }
-      } while(task);
       s->tunnel_state = TUNNEL_CONNECT;
       /* FALLTHROUGH */
     case TUNNEL_CONNECT: {
@@ -947,11 +947,13 @@ static CURLcode CONNECT(struct Curl_easy *data,
   if(handshake)
     hyper_task_free(handshake);
 
-  if(hypererr) {
+  if(h->connect_response_status == CURL_HYPER_TASK_ERROR) {
     uint8_t errbuf[256];
-    size_t errlen = hyper_error_print(hypererr, errbuf, sizeof(errbuf));
+    size_t errlen = hyper_error_print(h->connect_response_result.error,
+                                      errbuf, sizeof(errbuf));
     failf(data, "Hyper: %.*s", (int)errlen, errbuf);
-    hyper_error_free(hypererr);
+    hyper_error_free(h->connect_response_result.error);
+    h->connect_response_result.error = NULL;
   }
   return result;
 }

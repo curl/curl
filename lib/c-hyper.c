@@ -303,6 +303,129 @@ static CURLcode empty_header(struct Curl_easy *data)
     CURLE_WRITE_ERROR : CURLE_OK;
 }
 
+/*
+ * Poll the hyper executor, and store results or errors. Returns true if
+ * a task was processsed, or false if no tasks were ready.
+ */
+bool Curl_hyper_poll_executor(struct hyptransfer *h)
+{
+  hyper_task *task;
+  void *ud_ptr;
+  hyptaskud ud;
+  hyper_task_return_type t;
+
+  task = hyper_executor_poll(h->exec);
+  if(task) {
+    ud_ptr = hyper_task_userdata(task);
+    ud = (hyptaskud)ud_ptr;
+    t = hyper_task_type(task);
+    switch(ud) {
+    case CURL_HYPER_TASKUD_HANDSHAKE:
+      switch(t) {
+      case HYPER_TASK_ERROR:
+        h->handshake_status = CURL_HYPER_TASK_ERROR;
+        h->handshake_result.error = hyper_task_value(task);
+        break;
+      case HYPER_TASK_CLIENTCONN:
+        h->handshake_status = CURL_HYPER_TASK_COMPLETE;
+        h->handshake_result.output = hyper_task_value(task);
+        break;
+      default:
+        assert(false);
+        break;
+      }
+      break;
+    case CURL_HYPER_TASKUD_RESPONSE:
+      switch(t) {
+      case HYPER_TASK_ERROR:
+        h->response_status = CURL_HYPER_TASK_ERROR;
+        h->response_result.error = hyper_task_value(task);
+        break;
+      case HYPER_TASK_RESPONSE:
+        h->response_status = CURL_HYPER_TASK_COMPLETE;
+        h->response_result.output = hyper_task_value(task);
+        break;
+      default:
+        assert(false);
+        break;
+      }
+      break;
+    case CURL_HYPER_TASKUD_BODY_FOREACH:
+      switch(t) {
+      case HYPER_TASK_ERROR:
+        h->body_foreach_status = CURL_HYPER_TASK_ERROR;
+        h->body_foreach_error = hyper_task_value(task);
+        break;
+      case HYPER_TASK_EMPTY:
+        h->body_foreach_status = CURL_HYPER_TASK_COMPLETE;
+        break;
+      default:
+        assert(false);
+        break;
+      }
+      break;
+    case CURL_HYPER_TASKUD_CONNECT_HANDSHAKE:
+      switch(t) {
+      case HYPER_TASK_ERROR:
+        h->connect_handshake_status = CURL_HYPER_TASK_ERROR;
+        h->connect_handshake_result.error = hyper_task_value(task);
+        break;
+      case HYPER_TASK_CLIENTCONN:
+        h->connect_handshake_status = CURL_HYPER_TASK_COMPLETE;
+        h->connect_handshake_result.output = hyper_task_value(task);
+        break;
+      default:
+        assert(false);
+        break;
+      }
+      break;
+    case CURL_HYPER_TASKUD_CONNECT_RESPONSE:
+      switch(t) {
+      case HYPER_TASK_ERROR:
+        h->connect_response_status = CURL_HYPER_TASK_ERROR;
+        h->connect_response_result.error = hyper_task_value(task);
+        break;
+      case HYPER_TASK_RESPONSE:
+        h->connect_response_status = CURL_HYPER_TASK_COMPLETE;
+        h->connect_response_result.output = hyper_task_value(task);
+        break;
+      default:
+        assert(false);
+        break;
+      }
+      break;
+    case CURL_HYPER_TASKUD_CONNECT_BODY_FOREACH:
+      switch(t) {
+      case HYPER_TASK_ERROR:
+        h->connect_body_foreach_status = CURL_HYPER_TASK_ERROR;
+        h->connect_body_foreach_error = hyper_task_value(task);
+        break;
+      case HYPER_TASK_EMPTY:
+        h->connect_body_foreach_status = CURL_HYPER_TASK_COMPLETE;
+        break;
+      default:
+        assert(false);
+        break;
+      }
+      break;
+    default:
+      /* a hyper-internal task was returned, ignore it */
+      break;
+    }
+    hyper_task_free(task);
+    return true;
+  }
+  return false;
+}
+
+static void print_error(struct Curl_easy *data, hyper_error *e)
+{
+  uint8_t errbuf[256];
+  size_t errlen = hyper_error_print(e, errbuf, sizeof(errbuf));
+  hyper_code code = hyper_error_code(e);
+  failf(data, "Hyper: [%d] %.*s", (int)code, (int)errlen, errbuf);
+}
+
 CURLcode Curl_hyper_stream(struct Curl_easy *data,
                            struct connectdata *conn,
                            int *didwhat,
@@ -315,9 +438,9 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
   hyper_headers *headers = NULL;
   hyper_body *resp_body = NULL;
   struct hyptransfer *h = &data->hyp;
-  hyper_task *task;
   hyper_task *foreach;
   hyper_error *hypererr = NULL;
+  hyptaskud body_ud;
   const uint8_t *reasonp;
   size_t reason_len;
   CURLcode result = CURLE_OK;
@@ -353,36 +476,37 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
 
   *done = FALSE;
   do {
-    hyper_task_return_type t;
-    task = hyper_executor_poll(h->exec);
-    if(!task) {
+    if(!Curl_hyper_poll_executor(h)) {
       *didwhat = KEEP_RECV;
       break;
     }
-    t = hyper_task_type(task);
-    switch(t) {
-    case HYPER_TASK_ERROR:
-      hypererr = hyper_task_value(task);
-      break;
-    case HYPER_TASK_RESPONSE:
-      resp = hyper_task_value(task);
-      break;
-    default:
-      break;
-    }
-    hyper_task_free(task);
 
-    if(t == HYPER_TASK_ERROR) {
+    if(h->response_status == CURL_HYPER_TASK_ERROR) {
+      hypererr = h->response_result.error;
+      h->response_result.error = NULL;
+    }
+    if(h->body_foreach_status == CURL_HYPER_TASK_ERROR) {
+      hypererr = h->body_foreach_error;
+      h->body_foreach_error = NULL;
+    }
+    if(h->connect_response_status == CURL_HYPER_TASK_ERROR) {
+      hypererr = h->connect_response_result.error;
+      h->connect_response_result.error = NULL;
+    }
+    if(h->connect_body_foreach_status == CURL_HYPER_TASK_ERROR) {
+      hypererr = h->connect_body_foreach_error;
+      h->connect_body_foreach_error = NULL;
+    }
+    if(hypererr) {
       if(data->state.hresult) {
         /* override Hyper's view, might not even be an error */
         result = data->state.hresult;
         infof(data, "hyperstream is done (by early callback)");
       }
       else {
-        uint8_t errbuf[256];
-        size_t errlen = hyper_error_print(hypererr, errbuf, sizeof(errbuf));
-        hyper_code code = hyper_error_code(hypererr);
-        failf(data, "Hyper: [%d] %.*s", (int)code, (int)errlen, errbuf);
+        hyper_code code;
+        print_error(data, hypererr);
+        code = hyper_error_code(hypererr);
         if(code == HYPERE_ABORTED_BY_CALLBACK)
           result = CURLE_OK;
         else if((code == HYPERE_UNEXPECTED_EOF) && !data->req.bytecount)
@@ -396,7 +520,8 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       hyper_error_free(hypererr);
       break;
     }
-    else if(h->endtask == task) {
+    else if(h->body_foreach_status == CURL_HYPER_TASK_COMPLETE ||
+            h->connect_body_foreach_status == CURL_HYPER_TASK_COMPLETE) {
       /* end of transfer */
       *done = TRUE;
       infof(data, "hyperstream is done!");
@@ -407,11 +532,23 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       }
       break;
     }
-    else if(t != HYPER_TASK_RESPONSE) {
+    else if(h->response_status == CURL_HYPER_TASK_COMPLETE &&
+            h->response_result.output) {
+      resp = h->response_result.output;
+      h->response_result.output = NULL;
+      body_ud = CURL_HYPER_TASKUD_BODY_FOREACH;
+    }
+    else if(h->connect_response_status == CURL_HYPER_TASK_COMPLETE &&
+            h->connect_response_result.output) {
+      resp = h->connect_response_result.output;
+      h->connect_response_result.output = NULL;
+      body_ud = CURL_HYPER_TASKUD_CONNECT_BODY_FOREACH;
+    }
+    else {
       *didwhat = KEEP_RECV;
       break;
     }
-    /* HYPER_TASK_RESPONSE */
+    /* a response task is complete */
 
     *didwhat = KEEP_RECV;
     if(!resp) {
@@ -469,12 +606,12 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       break;
     }
     DEBUGASSERT(hyper_task_type(foreach) == HYPER_TASK_EMPTY);
+    hyper_task_set_userdata(foreach, (void *)body_ud);
     if(HYPERE_OK != hyper_executor_push(h->exec, foreach)) {
       failf(data, "Couldn't hyper_executor_push the body-foreach");
       result = CURLE_OUT_OF_MEMORY;
       break;
     }
-    h->endtask = foreach;
 
     hyper_response_free(resp);
     resp = NULL;
@@ -792,7 +929,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   struct hyptransfer *h = &data->hyp;
   hyper_io *io = NULL;
   hyper_clientconn_options *options = NULL;
-  hyper_task *task = NULL; /* for the handshake */
   hyper_task *sendtask = NULL; /* for the send */
   hyper_clientconn *client = NULL;
   hyper_request *req = NULL;
@@ -886,6 +1022,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
   io = NULL;
   options = NULL;
+  hyper_task_set_userdata(handshake, (void *)CURL_HYPER_TASKUD_HANDSHAKE);
 
   if(HYPERE_OK != hyper_executor_push(h->exec, handshake)) {
     failf(data, "Couldn't hyper_executor_push the handshake");
@@ -893,14 +1030,18 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
   handshake = NULL; /* ownership passed on */
 
-  task = hyper_executor_poll(h->exec);
-  if(!task) {
-    failf(data, "Couldn't hyper_executor_poll the handshake");
+  while(h->handshake_status == CURL_HYPER_TASK_NOT_DONE) {
+    Curl_hyper_poll_executor(h);
+  }
+  if(h->handshake_status == CURL_HYPER_TASK_ERROR) {
+    failf(data, "Error from hyper_clientconn_handshake");
+    hyper_error_free(h->handshake_result.error);
+    h->handshake_result.error = NULL;
     goto error;
   }
 
-  client = hyper_task_value(task);
-  hyper_task_free(task);
+  client = h->handshake_result.output;
+  h->handshake_result.output = NULL;
 
   req = hyper_request_new();
   if(!req) {
@@ -1032,6 +1173,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     failf(data, "hyper_clientconn_send");
     goto error;
   }
+  hyper_task_set_userdata(sendtask, (void *)CURL_HYPER_TASKUD_RESPONSE);
 
   if(HYPERE_OK != hyper_executor_push(h->exec, sendtask)) {
     failf(data, "Couldn't hyper_executor_push the send");
