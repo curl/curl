@@ -699,6 +699,7 @@ const struct Curl_ssl Curl_ssl_unitytls = {
   Curl_none_cert_status_request,    /* cert_status_request */
   Curl_unitytls_connect,            /* connect */
   Curl_unitytls_connect_nonblocking,/* connect_nonblocking */
+  Curl_ssl_getsock,                 /* getsock */
   Curl_unitytls_get_internals,      /* get_internals */
   Curl_unitytls_close,              /* close_one */
   Curl_none_close_all,              /* close_all */
@@ -707,7 +708,9 @@ const struct Curl_ssl Curl_ssl_unitytls = {
   Curl_none_set_engine_default,     /* set_engine_default */
   Curl_none_engines_list,           /* engines_list */
   Curl_none_false_start,            /* false_start */
-  NULL                              /* sha256sum */
+  NULL,                             /* sha256sum */
+  NULL,                             /* associate_connection */
+  NULL                              /* disassociate_connection */
 };
 
 #endif /* USE_UNITYTLS */
