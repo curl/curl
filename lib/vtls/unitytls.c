@@ -351,9 +351,8 @@ static ssize_t unitytls_recv(struct Curl_easy *data, int sockindex,
 }
 
 
-static CURLcode unitytls_connect_step1(struct connectdata* conn, int sockindex)
+static CURLcode unitytls_connect_step1(struct Curl_easy* data, struct connectdata* conn, int sockindex)
 {
-  struct Curl_easy* data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   const char* const ssl_cafile = SSL_CONN_CONFIG(CAfile);
@@ -572,7 +571,7 @@ static CURLcode unitytls_connect_common(struct Curl_easy *data,
       failf(data, "SSL connection timeout");
       return CURLE_OPERATION_TIMEDOUT;
     }
-    retcode = unitytls_connect_step1(conn, sockindex);
+    retcode = unitytls_connect_step1(data, conn, sockindex);
     if(retcode)
       return retcode;
   }
