@@ -31,7 +31,7 @@ struct ssl_backend_data {
   unitytls_x509list* clicert;
   unitytls_key* pk;
   unitytls_tlsctx* ctx;
-  struct connectdata* conn;
+  struct Curl_easy* data;
   curl_socket_t sockfd;
 };
 
@@ -226,12 +226,7 @@ static size_t on_write(void* userData, const UInt8* data, size_t bufferLen, unit
   CURLcode result;
   ssize_t written = 0;
 
-  if (backend->conn->data == NULL) {
-    unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WRITE_FAILED);
-    return 0;
-  }
-
-  result = Curl_write_plain(backend->conn->data, backend->sockfd, data, bufferLen, &written);
+  result = Curl_write_plain(backend->data, backend->sockfd, data, bufferLen, &written);
   if(result == CURLE_AGAIN) {
     unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WOULD_BLOCK);
     return 0;
@@ -261,7 +256,7 @@ static void on_certificate_request(void* userData, unitytls_tlsctx* ctx,
 static unitytls_x509verify_result on_verify(void* userData, unitytls_x509list_ref chain, unitytls_errorstate* errorState)
 {
   struct ssl_backend_data* backend = ((struct ssl_connect_data*)userData)->backend;
-  struct connectdata* conn = backend->conn;
+  struct connectdata* conn = backend->data->conn;
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const bool verifyhost = SSL_CONN_CONFIG(verifyhost);
   const char* const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name : conn->host.name;
@@ -450,7 +445,7 @@ static CURLcode unitytls_connect_step1(struct Curl_easy* data, struct connectdat
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  backend->conn = conn;
+  backend->data = data;
   backend->sockfd = conn->sock[sockindex];
   connssl->connecting_state = ssl_connect_2;
 
@@ -642,15 +637,8 @@ static void Curl_unitytls_close(struct Curl_easy *data, struct connectdata *conn
     return;
 
   if (backend->ctx) {
-
-    // During close both data->conn and conn->data are already NULL (but the objects are still valid)
-    // Our write function uses Curl_write_plain for convenience (instead of doing sendto on the socket directly like most TLS backends do)
-    // which assumes that these pointers are still in order. So we patch it up temporarily.
-    // Note that schannel.c also uses Curl_write_plain, but doesn't close off the TLS context like we do.
-    backend->conn->data = data;
     err = unitytls->unitytls_errorstate_create();
     unitytls->unitytls_tlsctx_notify_close(backend->ctx, &err);
-    backend->conn->data = NULL;
 
     unitytls->unitytls_tlsctx_free(backend->ctx);
     backend->ctx = NULL;
