@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -213,12 +213,10 @@ static void logprotocol(mqttdir dir,
   ssize_t i;
   unsigned char *ptr = buffer;
   char *optr = data;
-  ssize_t width = 0;
   int left = sizeof(data);
 
   for(i = 0; i<len && (left >= 0); i++) {
     msnprintf(optr, left, "%02x", ptr[i]);
-    width += 2;
     optr += 2;
     left -= 2;
   }

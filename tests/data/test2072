@@ -24,12 +24,12 @@ file
 file:// with unix path resolution behavior for the case of extra slashes
 </name>
 <command option="no-include">
-file:////%PWD/log/test2072.txt
+file:////%PWD/log/test%TESTNUMBER.txt
 </command>
 <precheck>
 perl -e "print 'Test requires a unix system' if ( $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'dos' || $^O eq 'msys');"
 </precheck>
-<file name="log/test2072.txt">
+<file name="log/test%TESTNUMBER.txt">
 foo
    bar
 bar

@@ -21,7 +21,7 @@ http
 multi interface get with non-existing host name
 </name>
 <tool>
-lib507
+lib%TESTNUMBER
 </tool>
 <command>
 http://non-existing-host.haxx.se/

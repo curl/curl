@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -94,13 +94,13 @@ Curl_llist_remove(struct Curl_llist *list, struct Curl_llist_element *e,
                   void *user)
 {
   void *ptr;
-  if(e == NULL || list->size == 0)
+  if(!e || list->size == 0)
     return;
 
   if(e == list->head) {
     list->head = e->next;
 
-    if(list->head == NULL)
+    if(!list->head)
       list->tail = NULL;
     else
       e->next->prev = NULL;

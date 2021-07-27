@@ -11,7 +11,7 @@ HTTP GET
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
@@ -33,7 +33,7 @@ http
 HTTP GET with 100K (too long) response header
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1154
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -41,7 +41,7 @@ http://%HOSTIP:%HTTPPORT/1154
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1154 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

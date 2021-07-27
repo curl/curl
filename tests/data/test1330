@@ -32,8 +32,8 @@ nothing
 # Verify data after the test has been "shot"
 <verify>
 <file name="log/memdump">
-MEM unit1330.c: malloc()
-MEM unit1330.c: free()
+MEM unit%TESTNUMBER.c: malloc()
+MEM unit%TESTNUMBER.c: free()
 </file>
 <stripfile>
 s/ =.*//

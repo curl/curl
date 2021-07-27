@@ -58,7 +58,7 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
 CURLcode Curl_buffer_send(struct dynbuf *in,
                           struct Curl_easy *data,
                           curl_off_t *bytes_written,
-                          size_t included_body_bytes,
+                          curl_off_t included_body_bytes,
                           int socketindex);
 #else
 #define Curl_buffer_send(a,b,c,d,e) CURLE_OK
@@ -184,8 +184,7 @@ struct HTTP {
   enum {
     HTTPSEND_NADA,    /* init */
     HTTPSEND_REQUEST, /* sending a request */
-    HTTPSEND_BODY,    /* sending body */
-    HTTPSEND_LAST     /* never use this */
+    HTTPSEND_BODY     /* sending body */
   } sending;
 
 #ifndef CURL_DISABLE_HTTP
@@ -211,6 +210,7 @@ struct HTTP {
   char **push_headers;       /* allocated array */
   size_t push_headers_used;  /* number of entries filled in */
   size_t push_headers_alloc; /* number of entries allocated */
+  uint32_t error; /* HTTP/2 stream error code */
 #endif
 #if defined(USE_NGHTTP2) || defined(USE_NGHTTP3)
   bool closed; /* TRUE on HTTP2 stream close */
@@ -251,9 +251,16 @@ struct h2settings {
 struct http_conn {
 #ifdef USE_NGHTTP2
 #define H2_BINSETTINGS_LEN 80
-  nghttp2_session *h2;
   uint8_t binsettings[H2_BINSETTINGS_LEN];
   size_t  binlen; /* length of the binsettings data */
+
+  /* We associate the connnectdata struct with the connection, but we need to
+     make sure we can identify the current "driving" transfer. This is a
+     work-around for the lack of nghttp2_session_set_user_data() in older
+     nghttp2 versions that we want to support. (Added in 1.31.0) */
+  struct Curl_easy *trnsfr;
+
+  nghttp2_session *h2;
   Curl_send *send_underlying; /* underlying send Curl_send callback */
   Curl_recv *recv_underlying; /* underlying recv Curl_recv callback */
   char *inbuf; /* buffer to receive data from underlying socket */
@@ -274,7 +281,6 @@ struct http_conn {
   /* list of settings that will be sent */
   nghttp2_settings_entry local_settings[3];
   size_t local_settings_num;
-  uint32_t error_code; /* HTTP/2 error code */
 #else
   int unused; /* prevent a compiler warning */
 #endif

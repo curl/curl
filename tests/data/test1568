@@ -61,25 +61,25 @@ crypto
 HTTP with Digest authorization on custom CURLOPT_PORT
 </name>
 <tool>
-lib1568
+lib%TESTNUMBER
 </tool>
 <command>
-http://%HOSTIP/1568 %HTTPPORT
+http://%HOSTIP/%TESTNUMBER %HTTPPORT
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1568 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: lib1568
+User-Agent: lib%TESTNUMBER
 Accept: */*
 
-GET /1568 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/1568", response="9cbbd857a37e45f2bcad5c7d088191df"
-User-Agent: lib1568
+Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/%TESTNUMBER", response="9cbbd857a37e45f2bcad5c7d088191df"
+User-Agent: lib%TESTNUMBER
 Accept: */*
 
 </protocol>

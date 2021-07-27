@@ -37,10 +37,12 @@ struct connectdata;
 #define SASL_MECH_NTLM              (1 << 6)
 #define SASL_MECH_XOAUTH2           (1 << 7)
 #define SASL_MECH_OAUTHBEARER       (1 << 8)
+#define SASL_MECH_SCRAM_SHA_1       (1 << 9)
+#define SASL_MECH_SCRAM_SHA_256     (1 << 10)
 
 /* Authentication mechanism values */
 #define SASL_AUTH_NONE          0
-#define SASL_AUTH_ANY           ~0U
+#define SASL_AUTH_ANY           0xffff
 #define SASL_AUTH_DEFAULT       (SASL_AUTH_ANY & ~SASL_MECH_EXTERNAL)
 
 /* Authentication mechanism strings */
@@ -53,6 +55,8 @@ struct connectdata;
 #define SASL_MECH_STRING_NTLM         "NTLM"
 #define SASL_MECH_STRING_XOAUTH2      "XOAUTH2"
 #define SASL_MECH_STRING_OAUTHBEARER  "OAUTHBEARER"
+#define SASL_MECH_STRING_SCRAM_SHA_1  "SCRAM-SHA-1"
+#define SASL_MECH_STRING_SCRAM_SHA_256 "SCRAM-SHA-256"
 
 /* SASL machine states */
 typedef enum {
@@ -71,6 +75,7 @@ typedef enum {
   SASL_GSSAPI_NO_DATA,
   SASL_OAUTH2,
   SASL_OAUTH2_RESP,
+  SASL_GSASL,
   SASL_CANCEL,
   SASL_FINAL
 } saslstate;
@@ -103,9 +108,9 @@ struct SASLproto {
 struct SASL {
   const struct SASLproto *params; /* Protocol dependent parameters */
   saslstate state;         /* Current machine state */
-  unsigned int authmechs;  /* Accepted authentication mechanisms */
-  unsigned int prefmech;   /* Preferred authentication mechanism */
-  unsigned int authused;   /* Auth mechanism used for the connection */
+  unsigned short authmechs;  /* Accepted authentication mechanisms */
+  unsigned short prefmech;   /* Preferred authentication mechanism */
+  unsigned short authused;   /* Auth mechanism used for the connection */
   bool resetprefs;         /* For URL auth option parsing. */
   bool mutual_auth;        /* Mutual authentication enabled (GSSAPI only) */
   bool force_ir;           /* Protocol always supports initial response */
@@ -121,8 +126,8 @@ struct SASL {
 void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused);
 
 /* Convert a mechanism name to a token */
-unsigned int Curl_sasl_decode_mech(const char *ptr,
-                                   size_t maxlen, size_t *len);
+unsigned short Curl_sasl_decode_mech(const char *ptr,
+                                     size_t maxlen, size_t *len);
 
 /* Parse the URL login options */
 CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,

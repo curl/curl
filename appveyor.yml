@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -232,17 +232,17 @@ environment:
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 ~1056 !1233"
-        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy"
+        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy --with-schannel"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 !504 !704 !705 ~1056 !1233"
-        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver"
+        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --with-schannel"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 !504 !704 !705 ~1056 !1233"
-        CONFIG_ARGS: "--enable-warnings --enable-werror"
+        CONFIG_ARGS: "--enable-warnings --enable-werror --with-schannel"
 
 install:
     - set "PATH=C:\msys64\usr\bin;%PATH%"

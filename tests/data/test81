@@ -73,7 +73,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/81 --proxy-user testuser:testpass -x http://%HOSTIP:%HTTPPORT --proxy-ntlm
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --proxy-user testuser:testpass -x http://%HOSTIP:%HTTPPORT --proxy-ntlm
 </command>
 <precheck>
 chkhostname curlhost
@@ -83,16 +83,16 @@ chkhostname curlhost
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET http://%HOSTIP:%HTTPPORT/81 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://%HOSTIP:%HTTPPORT/81 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBADQzMjE1MzIxAAAAAAAAAAAAAAAAAAAAADj3hs3u3j0kgJqCrLM+74BmaoNHDfIJjHRlc3R1c2VyY3VybGhvc3Q=
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyY3VybGhvc3Q=
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

@@ -11,7 +11,7 @@ HTTP PUT
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -35,9 +35,9 @@ http
 Two globbed HTTP PUTs, the second upload file is missing
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/491 -T '{log/in491,log/bad491}'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T '{log/in%TESTNUMBER,log/bad%TESTNUMBER}'
 </command>
-<file name="log/in491">
+<file name="log/in%TESTNUMBER">
 surprise!
 </file>
 </client>
@@ -46,7 +46,7 @@ surprise!
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-PUT /491 HTTP/1.1
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

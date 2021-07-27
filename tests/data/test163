@@ -10,7 +10,7 @@ HTTP POST
 <reply>
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 10
 
@@ -27,10 +27,10 @@ http
 HTTP multipart formpost with contents from a file
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/163 -F "name=<log/field163" -F tool=curl
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=<log/field%TESTNUMBER" -F tool=curl
 </command>
 # We create this file before the command is invoked!
-<file name="log/field163">
+<file name="log/field%TESTNUMBER">
 contents
 from
 a
@@ -49,7 +49,7 @@ yes please
 ^(Content-Type: multipart/form-data;|------------).*
 </strip>
 <protocol>
-POST /we/want/163 HTTP/1.1
+POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

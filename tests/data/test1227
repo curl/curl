@@ -27,7 +27,7 @@ ftp
 FTP fetch a file from the root directory with nocwd
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT//1227 --ftp-method nocwd
+ftp://%HOSTIP:%FTPPORT//%TESTNUMBER --ftp-method nocwd
 </command>
 
 </client>
@@ -40,8 +40,8 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE /1227
-RETR /1227
+SIZE /%TESTNUMBER
+RETR /%TESTNUMBER
 QUIT
 </protocol>
 </verify>

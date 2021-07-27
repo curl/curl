@@ -28,7 +28,7 @@ ipv6
 URL API
  </name>
 <tool>
-lib1560
+lib%TESTNUMBER
 </tool>
 </client>
 

@@ -38,7 +38,7 @@ SMTP DIGEST-MD5 authentication
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/907 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>
 
@@ -46,7 +46,7 @@ smtp://%HOSTIP:%SMTPPORT/907 --mail-rcpt recipient@example.com --mail-from sende
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 907
+EHLO %TESTNUMBER
 AUTH DIGEST-MD5
 dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJzbXRwL2N1cmwiLHJlc3BvbnNlPTk0M2YxNjk1OWYxY2M2ZjA3ZTZmMDk0ZjVkYmQ0NzNlLHFvcD1hdXRo
 

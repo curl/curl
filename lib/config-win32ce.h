@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -205,9 +205,6 @@
 /* Define if you have the stricmp function. */
 /* #define HAVE_STRICMP 1 */
 
-/* Define if you have the strncasecmp function. */
-/* #define HAVE_STRNCASECMP 1 */
-
 /* Define if you have the strnicmp function. */
 /* #define HAVE_STRNICMP 1 */
 
@@ -219,32 +216,8 @@
 #define HAVE_STRTOLL 1
 #endif
 
-/* Define if you have the tcgetattr function.  */
-/* #define HAVE_TCGETATTR 1 */
-
-/* Define if you have the tcsetattr function.  */
-/* #define HAVE_TCSETATTR 1 */
-
 /* Define if you have the utime function */
 #define HAVE_UTIME 1
-
-/* Define if you have the getnameinfo function. */
-#define HAVE_GETNAMEINFO 1
-
-/* Define to the type qualifier of arg 1 for getnameinfo. */
-#define GETNAMEINFO_QUAL_ARG1 const
-
-/* Define to the type of arg 1 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-
-/* Define to the type of arg 2 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG2 socklen_t
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG46 DWORD
-
-/* Define to the type of arg 7 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG7 int
 
 /* Define if you have the recv function. */
 #define HAVE_RECV 1
@@ -315,9 +288,6 @@
 
 /* Define this if in_addr_t is not an available 'typedefed' type */
 #define in_addr_t unsigned long
-
-/* Define as the return type of signal handlers (int or void).  */
-#define RETSIGTYPE void
 
 /* Define ssize_t if it is not an available 'typedefed' type */
 #if (defined(__WATCOMC__) && (__WATCOMC__ >= 1240)) || defined(__POCC__)

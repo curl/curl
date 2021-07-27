@@ -29,7 +29,6 @@ struct Curl_sec_client_mech {
   int (*auth)(void *, struct Curl_easy *data, struct connectdata *);
   void (*end)(void *);
   int (*check_prot)(void *, int);
-  int (*overhead)(void *, int, int);
   int (*encode)(void *, const void *, int, int, void **);
   int (*decode)(void *, void *, int, int, struct connectdata *);
 };

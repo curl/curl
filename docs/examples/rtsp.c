@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2020, Jim Hollinger
+ * Copyright (c) 2011 - 2021, Jim Hollinger
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,7 @@ static void rtsp_describe(CURL *curl, const char *uri,
   CURLcode res = CURLE_OK;
   FILE *sdp_fp = fopen(sdp_filename, "wb");
   printf("\nRTSP: DESCRIBE %s\n", uri);
-  if(sdp_fp == NULL) {
+  if(!sdp_fp) {
     fprintf(stderr, "Could not open '%s' for writing\n", sdp_filename);
     sdp_fp = stdout;
   }
@@ -202,10 +202,10 @@ int main(int argc, char * const argv[])
   /* check command line */
   if((argc != 2) && (argc != 3)) {
     base_name = strrchr(argv[0], '/');
-    if(base_name == NULL) {
+    if(!base_name) {
       base_name = strrchr(argv[0], '\\');
     }
-    if(base_name == NULL) {
+    if(!base_name) {
       base_name = argv[0];
     }
     else {

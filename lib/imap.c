@@ -136,6 +136,7 @@ const struct Curl_handler Curl_handler_imap = {
   imap_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
   ZERO_NULL,                        /* connection_check */
+  ZERO_NULL,                        /* attach connection */
   PORT_IMAP,                        /* defport */
   CURLPROTO_IMAP,                   /* protocol */
   CURLPROTO_IMAP,                   /* family */
@@ -164,6 +165,7 @@ const struct Curl_handler Curl_handler_imaps = {
   imap_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
   ZERO_NULL,                        /* connection_check */
+  ZERO_NULL,                        /* attach connection */
   PORT_IMAPS,                       /* defport */
   CURLPROTO_IMAPS,                  /* protocol */
   CURLPROTO_IMAP,                   /* family */
@@ -919,7 +921,7 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
       /* Do we have a SASL based authentication mechanism? */
       else if(wordlen > 5 && !memcmp(line, "AUTH=", 5)) {
         size_t llen;
-        unsigned int mechbit;
+        unsigned short mechbit;
 
         line += 5;
         wordlen -= 5;
@@ -1519,7 +1521,7 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
   Curl_safefree(imap->custom_params);
 
   /* Clear the transfer mode for the next request */
-  imap->transfer = FTPTRANSFER_BODY;
+  imap->transfer = PPTRANSFER_BODY;
 
   return result;
 }
@@ -1545,7 +1547,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
 
   if(data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    imap->transfer = FTPTRANSFER_INFO;
+    imap->transfer = PPTRANSFER_INFO;
   }
 
   *dophase_done = FALSE; /* not done yet */
@@ -1667,7 +1669,7 @@ static CURLcode imap_dophase_done(struct Curl_easy *data, bool connected)
 
   (void)connected;
 
-  if(imap->transfer != FTPTRANSFER_BODY)
+  if(imap->transfer != PPTRANSFER_BODY)
     /* no data to transfer */
     Curl_setup_transfer(data, -1, -1, FALSE, -1);
 

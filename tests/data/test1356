@@ -8,15 +8,15 @@ RETR
 
 # Server-side
 <reply>
-# file1356 contents...
+# file%TESTNUMBER contents...
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1356; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 MOOOO
 </data>
@@ -39,10 +39,10 @@ FTP download, file with Content-Disposition inside, using -O
 CURL_TESTDIR=%PWD/log
 </setenv>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file1356 -O
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/name1356
+perl %SRCDIR/libtest/notexists.pl log/name%TESTNUMBER
 </postcheck>
 </client>
 
@@ -55,24 +55,24 @@ PWD
 CWD path
 EPSV
 TYPE I
-SIZE file1356
-RETR file1356
+SIZE file%TESTNUMBER
+RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/file1356">
+<file1 name="log/file%TESTNUMBER">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1356; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 MOOOO
 </file1>
 
-<file2 name="log/stdout1356">
+<file2 name="log/stdout%TESTNUMBER">
 </file2>
 
 </verify>

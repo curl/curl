@@ -39,7 +39,7 @@ imap
 IMAP OAuth 2.0 (OAUTHBEARER) authentication with initial response
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/843/;MAILINDEX=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
 </client>
 
@@ -49,7 +49,7 @@ IMAP OAuth 2.0 (OAUTHBEARER) authentication with initial response
 <protocol>
 A001 CAPABILITY
 A002 AUTHENTICATE OAUTHBEARER %b64[n,a=user,%01host=127.0.0.1%01port=%IMAPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
-A003 SELECT 843
+A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>

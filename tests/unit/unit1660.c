@@ -36,7 +36,7 @@ unit_stop(void)
   curl_global_cleanup();
 }
 
-#if defined(CURL_DISABLE_HTTP) || !defined(USE_HSTS)
+#if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_HSTS)
 UNITTEST_START
 {
   return 0; /* nothing to do when HTTP or HSTS are disabled */

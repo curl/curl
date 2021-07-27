@@ -33,7 +33,7 @@ mqtt
 MQTT SUBSCRIBE with PUBLISH befoire SUBACK
 </name>
 <command option="binary-trace">
-mqtt://%HOSTIP:%MQTTPORT/1194
+mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER
 </command>
 </client>
 

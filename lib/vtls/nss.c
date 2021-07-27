@@ -139,9 +139,15 @@ static const struct cipher_s cipherlist[] = {
   {"fortezza",                   SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA},
   {"fortezza_rc4_128_sha",       SSL_FORTEZZA_DMS_WITH_RC4_128_SHA},
   {"fortezza_null",              SSL_FORTEZZA_DMS_WITH_NULL_SHA},
+  {"dhe_rsa_3des_sha",           SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA},
+  {"dhe_dss_3des_sha",           SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA},
+  {"dhe_rsa_des_sha",            SSL_DHE_RSA_WITH_DES_CBC_SHA},
+  {"dhe_dss_des_sha",            SSL_DHE_DSS_WITH_DES_CBC_SHA},
   /* TLS 1.0: Exportable 56-bit Cipher Suites. */
   {"rsa_des_56_sha",             TLS_RSA_EXPORT1024_WITH_DES_CBC_SHA},
   {"rsa_rc4_56_sha",             TLS_RSA_EXPORT1024_WITH_RC4_56_SHA},
+  /* Ephemeral DH with RC4 bulk encryption */
+  {"dhe_dss_rc4_128_sha",    TLS_DHE_DSS_WITH_RC4_128_SHA},
   /* AES ciphers. */
   {"dhe_dss_aes_128_cbc_sha",    TLS_DHE_DSS_WITH_AES_128_CBC_SHA},
   {"dhe_dss_aes_256_cbc_sha",    TLS_DHE_DSS_WITH_AES_256_CBC_SHA},
@@ -218,6 +224,25 @@ static const struct cipher_s cipherlist[] = {
  {"aes_128_gcm_sha_256",              TLS_AES_128_GCM_SHA256},
  {"aes_256_gcm_sha_384",              TLS_AES_256_GCM_SHA384},
  {"chacha20_poly1305_sha_256",        TLS_CHACHA20_POLY1305_SHA256},
+#endif
+#ifdef TLS_DHE_DSS_WITH_AES_128_CBC_SHA256
+  /* AES CBC cipher suites in RFC 5246. Introduced in NSS release 3.20 */
+  {"dhe_dss_aes_128_sha_256",         TLS_DHE_DSS_WITH_AES_128_CBC_SHA256},
+  {"dhe_dss_aes_256_sha_256",         TLS_DHE_DSS_WITH_AES_256_CBC_SHA256},
+#endif
+#ifdef TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA
+  /* Camellia cipher suites in RFC 4132/5932.
+     Introduced in NSS release 3.12 */
+  {"dhe_rsa_camellia_128_sha",        TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA},
+  {"dhe_dss_camellia_128_sha",        TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA},
+  {"dhe_rsa_camellia_256_sha",        TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA},
+  {"dhe_dss_camellia_256_sha",        TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA},
+  {"rsa_camellia_128_sha",            TLS_RSA_WITH_CAMELLIA_128_CBC_SHA},
+  {"rsa_camellia_256_sha",            TLS_RSA_WITH_CAMELLIA_256_CBC_SHA},
+#endif
+#ifdef TLS_RSA_WITH_SEED_CBC_SHA
+  /* SEED cipher suite in RFC 4162. Introduced in NSS release 3.12.3 */
+  {"rsa_seed_sha",                    TLS_RSA_WITH_SEED_CBC_SHA},
 #endif
 };
 
@@ -312,7 +337,7 @@ static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc * model,
     while((*cipher) && (ISSPACE(*cipher)))
       ++cipher;
 
-    cipher_list = strchr(cipher, ',');
+    cipher_list = strpbrk(cipher, ":, ");
     if(cipher_list) {
       *cipher_list++ = '\0';
     }
@@ -380,7 +405,7 @@ static int is_file(const char *filename)
 {
   struct_stat st;
 
-  if(filename == NULL)
+  if(!filename)
     return 0;
 
   if(stat(filename, &st) == 0)
@@ -542,7 +567,6 @@ static CURLcode nss_load_cert(struct ssl_connect_data *ssl,
 
   if(!result && !cacert) {
     /* we have successfully loaded a client certificate */
-    CERTCertificate *cert;
     char *nickname = NULL;
     char *n = strrchr(filename, '/');
     if(n)
@@ -554,7 +578,7 @@ static CURLcode nss_load_cert(struct ssl_connect_data *ssl,
      * <https://bugzilla.redhat.com/733685>. */
     nickname = aprintf("PEM Token #1:%s", n);
     if(nickname) {
-      cert = PK11_FindCertFromNickname(nickname, NULL);
+      CERTCertificate *cert = PK11_FindCertFromNickname(nickname, NULL);
       if(cert)
         CERT_DestroyCertificate(cert);
 
@@ -846,8 +870,8 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
     }
 
 #ifdef USE_NGHTTP2
-    if(buflen == NGHTTP2_PROTO_VERSION_ID_LEN &&
-       !memcmp(NGHTTP2_PROTO_VERSION_ID, buf, NGHTTP2_PROTO_VERSION_ID_LEN)) {
+    if(buflen == ALPN_H2_LENGTH &&
+       !memcmp(ALPN_H2, buf, ALPN_H2_LENGTH)) {
       conn->negnpn = CURL_HTTP_VERSION_2;
     }
     else
@@ -957,7 +981,6 @@ static CURLcode display_conn_info(struct Curl_easy *data, PRFileDesc *sock)
   CERTCertificate *cert2;
   CERTCertificate *cert3;
   PRTime now;
-  int i;
 
   if(SSL_GetChannelInfo(sock, &channel, sizeof(channel)) ==
      SECSuccess && channel.length == sizeof(channel) &&
@@ -978,8 +1001,8 @@ static CURLcode display_conn_info(struct Curl_easy *data, PRFileDesc *sock)
     }
     else {
       /* Count certificates in chain. */
+      int i = 1;
       now = PR_Now();
-      i = 1;
       if(!cert->isRoot) {
         cert2 = CERT_FindCertIssuer(cert, now, certUsageSSLCA);
         while(cert2) {
@@ -1425,7 +1448,7 @@ static CURLcode nss_setup(struct Curl_easy *data)
 static int nss_init(void)
 {
   /* curl_global_init() is not thread-safe so this test is ok */
-  if(nss_initlock == NULL) {
+  if(!nss_initlock) {
     PR_Init(PR_USER_THREAD, PR_PRIORITY_NORMAL, 0);
     nss_initlock = PR_NewLock();
     nss_crllock = PR_NewLock();
@@ -1701,8 +1724,7 @@ static CURLcode nss_sslver_from_curl(PRUint16 *nssver, long version)
     return CURLE_OK;
 
   case CURL_SSLVERSION_SSLv3:
-    *nssver = SSL_LIBRARY_VERSION_3_0;
-    return CURLE_OK;
+    return CURLE_NOT_BUILT_IN;
 
   case CURL_SSLVERSION_TLSv1_0:
     *nssver = SSL_LIBRARY_VERSION_TLS_1_0;
@@ -1782,12 +1804,11 @@ static CURLcode nss_fail_connect(struct ssl_connect_data *connssl,
                                  struct Curl_easy *data,
                                  CURLcode curlerr)
 {
-  PRErrorCode err = 0;
   struct ssl_backend_data *backend = connssl->backend;
 
   if(is_nss_error(curlerr)) {
     /* read NSPR error code */
-    err = PR_GetError();
+    PRErrorCode err = PR_GetError();
     if(is_cc_error(err))
       curlerr = CURLE_SSL_CERTPROBLEM;
 
@@ -1809,7 +1830,7 @@ static CURLcode nss_set_blocking(struct ssl_connect_data *connssl,
                                  struct Curl_easy *data,
                                  bool blocking)
 {
-  static PRSocketOptionData sock_opt;
+  PRSocketOptionData sock_opt;
   struct ssl_backend_data *backend = connssl->backend;
   sock_opt.option = PR_SockOpt_Nonblocking;
   sock_opt.value.non_blocking = !blocking;
@@ -2082,16 +2103,15 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
     int cur = 0;
     unsigned char protocols[128];
 
-#ifdef USE_NGHTTP2
-    if(data->set.httpversion >= CURL_HTTP_VERSION_2
+#ifdef USE_HTTP2
+    if(data->state.httpwant >= CURL_HTTP_VERSION_2
 #ifndef CURL_DISABLE_PROXY
       && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
 #endif
       ) {
-      protocols[cur++] = NGHTTP2_PROTO_VERSION_ID_LEN;
-      memcpy(&protocols[cur], NGHTTP2_PROTO_VERSION_ID,
-          NGHTTP2_PROTO_VERSION_ID_LEN);
-      cur += NGHTTP2_PROTO_VERSION_ID_LEN;
+      protocols[cur++] = ALPN_H2_LENGTH;
+      memcpy(&protocols[cur], ALPN_H2, ALPN_H2_LENGTH);
+      cur += ALPN_H2_LENGTH;
     }
 #endif
     protocols[cur++] = ALPN_HTTP_1_1_LENGTH;
@@ -2435,6 +2455,7 @@ const struct Curl_ssl Curl_ssl_nss = {
   nss_cert_status_request,      /* cert_status_request */
   nss_connect,                  /* connect */
   nss_connect_nonblocking,      /* connect_nonblocking */
+  Curl_ssl_getsock,             /* getsock */
   nss_get_internals,            /* get_internals */
   nss_close,                    /* close_one */
   Curl_none_close_all,          /* close_all */
@@ -2444,7 +2465,9 @@ const struct Curl_ssl Curl_ssl_nss = {
   Curl_none_set_engine_default, /* set_engine_default */
   Curl_none_engines_list,       /* engines_list */
   nss_false_start,              /* false_start */
-  nss_sha256sum                 /* sha256sum */
+  nss_sha256sum,                /* sha256sum */
+  NULL,                         /* associate_connection */
+  NULL                          /* disassociate_connection */
 };
 
 #endif /* USE_NSS */

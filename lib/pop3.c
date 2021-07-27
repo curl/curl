@@ -131,6 +131,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   pop3_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
   ZERO_NULL,                        /* connection_check */
+  ZERO_NULL,                        /* attach connection */
   PORT_POP3,                        /* defport */
   CURLPROTO_POP3,                   /* protocol */
   CURLPROTO_POP3,                   /* family */
@@ -159,6 +160,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   pop3_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
   ZERO_NULL,                        /* connection_check */
+  ZERO_NULL,                        /* attach connection */
   PORT_POP3S,                       /* defport */
   CURLPROTO_POP3S,                  /* protocol */
   CURLPROTO_POP3,                   /* family */
@@ -571,12 +573,12 @@ static CURLcode pop3_perform_command(struct Curl_easy *data)
   const char *command = NULL;
 
   /* Calculate the default command */
-  if(pop3->id[0] == '\0' || data->set.ftp_list_only) {
+  if(pop3->id[0] == '\0' || data->set.list_only) {
     command = "LIST";
 
     if(pop3->id[0] != '\0')
       /* Message specific LIST so skip the BODY transfer */
-      pop3->transfer = FTPTRANSFER_INFO;
+      pop3->transfer = PPTRANSFER_INFO;
   }
   else
     command = "RETR";
@@ -709,7 +711,7 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
       for(;;) {
         size_t llen;
         size_t wordlen;
-        unsigned int mechbit;
+        unsigned short mechbit;
 
         while(len &&
               (*line == ' ' || *line == '\t' ||
@@ -916,7 +918,7 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
      the strip counter here so that these bytes won't be delivered. */
   pop3c->strip = 2;
 
-  if(pop3->transfer == FTPTRANSFER_BODY) {
+  if(pop3->transfer == PPTRANSFER_BODY) {
     /* POP3 download */
     Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
 
@@ -1150,7 +1152,7 @@ static CURLcode pop3_done(struct Curl_easy *data, CURLcode status,
   Curl_safefree(pop3->custom);
 
   /* Clear the transfer mode for the next request */
-  pop3->transfer = FTPTRANSFER_BODY;
+  pop3->transfer = PPTRANSFER_BODY;
 
   return result;
 }
@@ -1174,7 +1176,7 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
 
   if(data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    pop3->transfer = FTPTRANSFER_INFO;
+    pop3->transfer = PPTRANSFER_INFO;
   }
 
   *dophase_done = FALSE; /* not done yet */
@@ -1515,8 +1517,17 @@ CURLcode Curl_pop3_write(struct Curl_easy *data, char *str, size_t nread)
       if(prev) {
         /* If the partial match was the CRLF and dot then only write the CRLF
            as the server would have inserted the dot */
-        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)POP3_EOB,
-                                   strip_dot ? prev - 1 : prev);
+        if(strip_dot && prev - 1 > 0) {
+          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)POP3_EOB,
+                                     prev - 1);
+        }
+        else if(!strip_dot) {
+          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)POP3_EOB,
+                                     prev);
+        }
+        else {
+          result = CURLE_OK;
+        }
 
         if(result)
           return result;

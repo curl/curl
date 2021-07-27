@@ -28,16 +28,16 @@ http
 HTTP Retry-After header parsing using a date
 </name>
 <tool>
-lib1596
+lib%TESTNUMBER
 </tool>
 <command>
-http://%HOSTIP:%HTTPPORT/1596
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 <verify>
 <protocol>
-GET /1596 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

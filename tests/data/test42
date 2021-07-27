@@ -11,15 +11,15 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 302 OK swsclose
-Location: ../m o o.html/420002    
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Location: ../m o o.html/%TESTNUMBER0002    
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 </data>
 <data2>
 HTTP/1.1 200 OK swsclose
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 body
@@ -27,16 +27,16 @@ body
 <datacheck>
 HTTP/1.1 302 OK swsclose
 %if !hyper
-Location: ../m o o.html/420002    
+Location: ../m o o.html/%TESTNUMBER0002    
 %else
-Location: ../m o o.html/420002
+Location: ../m o o.html/%TESTNUMBER0002
 %endif
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 HTTP/1.1 200 OK swsclose
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 body
@@ -53,7 +53,7 @@ http
 HTTP redirect with whitespace in path (and conversion)
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/are/all/twits/42 -L
+http://%HOSTIP:%HTTPPORT/we/are/all/twits/%TESTNUMBER -L
 </command>
 </client>
 
@@ -61,12 +61,12 @@ http://%HOSTIP:%HTTPPORT/we/are/all/twits/42 -L
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /we/are/all/twits/42 HTTP/1.1
+GET /we/are/all/twits/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /we/are/all/m%20o%20o.html/420002 HTTP/1.1
+GET /we/are/all/m%20o%20o.html/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

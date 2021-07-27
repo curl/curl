@@ -48,14 +48,14 @@ http
 HTTP resume transfer with the whole file already downloaded
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/92 -C 87
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C 87
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /want/92 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=87-
 User-Agent: curl/%VERSION

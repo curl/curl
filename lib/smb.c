@@ -24,7 +24,7 @@
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) &&  \
-  (CURL_SIZEOF_CURL_OFF_T > 4)
+  (SIZEOF_CURL_OFF_T > 4)
 
 #define BUILDING_CURL_SMB_C
 
@@ -88,6 +88,7 @@ const struct Curl_handler Curl_handler_smb = {
   smb_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_SMB,                             /* defport */
   CURLPROTO_SMB,                        /* protocol */
   CURLPROTO_SMB,                        /* family */
@@ -114,6 +115,7 @@ const struct Curl_handler Curl_handler_smbs = {
   smb_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_SMBS,                            /* defport */
   CURLPROTO_SMBS,                       /* protocol */
   CURLPROTO_SMB,                        /* family */
@@ -627,9 +629,8 @@ static CURLcode smb_send_and_recv(struct Curl_easy *data, void **msg)
 
   /* Check if there is data in the transfer buffer */
   if(!smbc->send_size && smbc->upload_size) {
-    size_t nread = smbc->upload_size > data->set.upload_buffer_size ?
-      data->set.upload_buffer_size :
-      smbc->upload_size;
+    size_t nread = smbc->upload_size > (size_t)data->set.upload_buffer_size ?
+      (size_t)data->set.upload_buffer_size : smbc->upload_size;
     data->req.upload_fromhere = data->state.ulbuf;
     result = Curl_fillreadbuffer(data, nread, &nread);
     if(result && result != CURLE_AGAIN)
@@ -1022,4 +1023,4 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
 }
 
 #endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE &&
-          CURL_SIZEOF_CURL_OFF_T > 4 */
+          SIZEOF_CURL_OFF_T > 4 */

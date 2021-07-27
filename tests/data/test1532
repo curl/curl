@@ -23,13 +23,13 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib1532
+lib%TESTNUMBER
 </tool>
 <name>
 Test CURLINFO_RESPONSE_CODE
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/1532
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -37,7 +37,7 @@ http://%HOSTIP:%HTTPPORT/1532
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1532 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

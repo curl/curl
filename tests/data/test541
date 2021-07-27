@@ -16,16 +16,16 @@ ftp
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib541
+lib%TESTNUMBER
 </tool>
 
  <name>
 FTP upload and upload same file again without rewind
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/541 log/upload541
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER log/upload%TESTNUMBER
 </command>
-<file name="log/upload541">
+<file name="log/upload%TESTNUMBER">
 Contents
 of
 a file
@@ -48,9 +48,9 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-STOR 541
+STOR %TESTNUMBER
 EPSV
-STOR 541
+STOR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

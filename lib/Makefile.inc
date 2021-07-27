@@ -25,6 +25,7 @@ LIB_VAUTH_CFILES =      \
   vauth/cram.c          \
   vauth/digest.c        \
   vauth/digest_sspi.c   \
+  vauth/gsasl.c         \
   vauth/krb5_gssapi.c   \
   vauth/krb5_sspi.c     \
   vauth/ntlm.c          \
@@ -49,6 +50,7 @@ LIB_VTLS_CFILES =           \
   vtls/mesalink.c           \
   vtls/nss.c                \
   vtls/openssl.c            \
+  vtls/rustls.c             \
   vtls/schannel.c           \
   vtls/schannel_verify.c    \
   vtls/sectransp.c          \
@@ -65,6 +67,7 @@ LIB_VTLS_HFILES =           \
   vtls/mesalink.h           \
   vtls/nssg.h               \
   vtls/openssl.h            \
+  vtls/rustls.h             \
   vtls/schannel.h           \
   vtls/sectransp.h          \
   vtls/vtls.h               \
@@ -94,6 +97,7 @@ LIB_CFILES =         \
   asyn-ares.c        \
   asyn-thread.c      \
   base64.c           \
+  bufref.c           \
   c-hyper.c          \
   conncache.c        \
   connect.c          \
@@ -214,6 +218,7 @@ LIB_HFILES =         \
   amigaos.h          \
   arpa_telnet.h      \
   asyn.h             \
+  bufref.h           \
   c-hyper.h          \
   conncache.h        \
   connect.h          \

@@ -27,7 +27,7 @@ lib504
 FTP multi-interface download, failed login: PASS not valid
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/538
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 

@@ -11,6 +11,10 @@
 836
 882
 938
+# test 1182 kills the test servers as a side effect
+# of running runtests.pl as a child of itself sharing
+# some of the directories.
+1182
 1209
 1211
 # fnmatch differences are just too common to make testing them sensible

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2016 - 2020, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2016 - 2021, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,7 +22,6 @@
 
 #include "curl_setup.h"
 
-#if defined(WINAPI_FAMILY_PARTITION)
 #if defined(WIN32)
 
 #include <curl/curl.h>
@@ -59,7 +58,7 @@ CURLcode Curl_win32_init(long flags)
     wVersionRequested = MAKEWORD(2, 2);
     res = WSAStartup(wVersionRequested, &wsaData);
 
-    if(res != 0)
+    if(res)
       /* Tell the user that we couldn't find a usable */
       /* winsock.dll.     */
       return CURLE_FAILED_INIT;
@@ -235,5 +234,4 @@ HMODULE Curl_load_library(LPCTSTR filename)
 #endif
 }
 
-#endif
-#endif // WINAPI_FAMILY_PARTITION
+#endif /* WIN32 */

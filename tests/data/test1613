@@ -35,7 +35,7 @@ Send "OPTIONS *" with --request-target to a proxy
 proxy
 </features>
 <command>
---request-target '*' -X OPTIONS --proxy http://%HOSTIP:%HTTPPORT/ -H "Testno: 1613" http://www.example.org/
+--request-target '*' -X OPTIONS --proxy http://%HOSTIP:%HTTPPORT/ -H "Testno: %TESTNUMBER" http://www.example.org/
 </command>
 </client>
 
@@ -46,7 +46,7 @@ Host: www.example.org
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
-Testno: 1613
+Testno: %TESTNUMBER
 
 </protocol>
 </verify>

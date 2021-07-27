@@ -11,7 +11,7 @@ HTTP proxy
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
@@ -29,7 +29,7 @@ http
 HTTP over proxy
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/that/page/5#5 -x %HOSTIP:%HTTPPORT
+http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER#5 -x %HOSTIP:%HTTPPORT
 </command>
 <features>
 proxy
@@ -40,7 +40,7 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET http://%HOSTIP:%HTTPPORT/we/want/that/page/5 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

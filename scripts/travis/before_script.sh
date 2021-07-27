@@ -43,7 +43,7 @@ if [ "$NGTCP2" = yes ]; then
     make install
   else
     cd $HOME
-    git clone --depth 1 -b OpenSSL_1_1_1g-quic-draft-29 https://github.com/tatsuhiro-t/openssl possl
+    git clone --depth 1 -b OpenSSL_1_1_1j+quic https://github.com/quictls/openssl possl
     cd possl
     ./config enable-tls1_3 --prefix=$HOME/ngbuild
     make
@@ -126,24 +126,38 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
 fi
 
-# Install common libraries.
-# The library build directories are set to be cached by .travis.yml. If you are
-# changing a build directory name below (eg a version change) then you must
-# change it in .travis.yml `cache: directories:` as well.
-if [ $TRAVIS_OS_NAME = linux ]; then
-  if [ ! -e $HOME/wolfssl-4.4.0-stable/Makefile ]; then
+if [ "$TRAVIS_OS_NAME" = linux -a "$RUSTLS_VERSION" ]; then
+  cd $HOME
+  git clone --depth=1 --recursive https://github.com/abetterinternet/crustls.git -b "$RUSTLS_VERSION"
+  curl https://sh.rustup.rs -sSf | sh -s -- -y
+  source $HOME/.cargo/env
+  cargo install cbindgen
+  cd $HOME/crustls
+  make
+  make DESTDIR=$HOME/crust install
+fi
+
+if [ $TRAVIS_OS_NAME = linux -a "$WOLFSSL" ]; then
+  if [ ! -e $HOME/wolfssl-4.7.0-stable/Makefile ]; then
     cd $HOME
-    curl -LO https://github.com/wolfSSL/wolfssl/archive/v4.4.0-stable.tar.gz
-    tar -xzf v4.4.0-stable.tar.gz
-    cd wolfssl-4.4.0-stable
+    curl -LO https://github.com/wolfSSL/wolfssl/archive/v4.7.0-stable.tar.gz
+    tar -xzf v4.7.0-stable.tar.gz
+    cd wolfssl-4.7.0-stable
     ./autogen.sh
     ./configure --enable-tls13 --enable-all
     touch wolfssl/wolfcrypt/fips.h
     make
   fi
 
-  cd $HOME/wolfssl-4.4.0-stable
+  cd $HOME/wolfssl-4.7.0-stable
   sudo make install
+fi
+
+# Install common libraries.
+# The library build directories are set to be cached by .travis.yml. If you are
+# changing a build directory name below (eg a version change) then you must
+# change it in .travis.yml `cache: directories:` as well.
+if [ $TRAVIS_OS_NAME = linux ]; then
 
   if [ "$MESALINK" = "yes" ]; then
     if [ ! -e $HOME/mesalink-1.0.0/Makefile ]; then
@@ -161,16 +175,4 @@ if [ $TRAVIS_OS_NAME = linux ]; then
     sudo make install
 
   fi
-
-  if [ ! -e $HOME/nghttp2-1.39.2/Makefile ]; then
-    cd $HOME
-    curl -LO https://github.com/nghttp2/nghttp2/releases/download/v1.39.2/nghttp2-1.39.2.tar.gz
-    tar -xzf nghttp2-1.39.2.tar.gz
-    cd nghttp2-1.39.2
-    CXX="g++-8" CC="gcc-8" CFLAGS="" LDFLAGS="" LIBS="" ./configure --disable-threads --enable-app
-    make
-  fi
-
-  cd $HOME/nghttp2-1.39.2
-  sudo make install
 fi

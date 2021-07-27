@@ -30,7 +30,7 @@ mqtt
 MQTT PUBLISH with no POSTFIELDSIZE set
 </name>
 <tool>
-lib1916
+lib%TESTNUMBER
 </tool>
 <command option="binary-trace">
 "mqtt://%HOSTIP:%MQTTPORT/ "

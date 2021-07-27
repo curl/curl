@@ -61,7 +61,7 @@ http
 FTP LIST tunneled through HTTP proxy
  </name>
  <command>
-ftp://ftp.1316:%FTPPORT/ -p -x %HOSTIP:%PROXYPORT
+ftp://ftp.%TESTNUMBER:%FTPPORT/ -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>
 

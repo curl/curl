@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -103,7 +103,6 @@
 #define PACKAGE_VERSION "-"
 #define CURL_CA_BUNDLE "s:curl-ca-bundle.crt"
 
-#define RETSIGTYPE void
 #define SELECT_TYPE_ARG1 int
 #define SELECT_TYPE_ARG234 (fd_set *)
 #define SELECT_TYPE_ARG5 (struct timeval *)
@@ -128,13 +127,6 @@
 #ifndef LONG_MIN
 #  define LONG_MIN (-0x7fffffffL-1)
 #endif
-
-#define HAVE_GETNAMEINFO 1
-#define GETNAMEINFO_QUAL_ARG1 const
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-#define GETNAMEINFO_TYPE_ARG2 int
-#define GETNAMEINFO_TYPE_ARG46 size_t
-#define GETNAMEINFO_TYPE_ARG7 int
 
 #define HAVE_RECV 1
 #define RECV_TYPE_ARG1 long

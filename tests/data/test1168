@@ -10,9 +10,9 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 301 This is a weirdo text message swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: /data/11680002.txt
+Location: /data/%TESTNUMBER0002.txt
 Connection: close
 
 This server reply is for testing a simple Location: following
@@ -20,7 +20,7 @@ This server reply is for testing a simple Location: following
 </data>
 <data2>
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -29,13 +29,13 @@ If this is received, the location following worked
 </data2>
 <datacheck>
 HTTP/1.1 301 This is a weirdo text message swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
-Location: /data/11680002.txt
+Location: /data/%TESTNUMBER0002.txt
 Connection: close
 
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -53,20 +53,20 @@ http
 HTTP redirect with credentials using # in user and password
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/1168 -L -u "catmai#d:#DZaRJYrixKE*gFY"
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -u "catmai#d:#DZaRJYrixKE*gFY"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /want/1168 HTTP/1.1
+GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic Y2F0bWFpI2Q6I0RaYVJKWXJpeEtFKmdGWQ==
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /data/11680002.txt HTTP/1.1
+GET /data/%TESTNUMBER0002.txt HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic Y2F0bWFpI2Q6I0RaYVJKWXJpeEtFKmdGWQ==
 User-Agent: curl/%VERSION

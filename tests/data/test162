@@ -38,14 +38,14 @@ http
 HTTP GET asking for --proxy-ntlm when some other authentication is required
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/162 --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-ntlm --fail
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-ntlm --fail
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET http://%HOSTIP:%HTTPPORT/162 HTTP/1.1
+GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/%VERSION

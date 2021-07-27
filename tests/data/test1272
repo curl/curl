@@ -26,7 +26,7 @@ gophers
 Gophers index
  </name>
  <command>
--k gophers://%HOSTIP:%GOPHERSPORT/1/1272
+-k gophers://%HOSTIP:%GOPHERSPORT/1/%TESTNUMBER
 </command>
 </client>
 
@@ -34,7 +34,7 @@ Gophers index
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-/1272
+/%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

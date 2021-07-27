@@ -11,7 +11,7 @@ HTTP GET
 <reply>
 <data>
 HTTP/1.1 304 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -33,11 +33,11 @@ http
 <name>
 Check if --etag-compare set correct etag in header
 </name>
-<file name="log/etag342">
+<file name="log/etag%TESTNUMBER">
 "21025-dc7-39462498"
 </file>
 <command>
-http://%HOSTIP:%HTTPPORT/342 --etag-compare log/etag342
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare log/etag%TESTNUMBER
 </command>
 </client>
 
@@ -45,7 +45,7 @@ http://%HOSTIP:%HTTPPORT/342 --etag-compare log/etag342
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /342 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

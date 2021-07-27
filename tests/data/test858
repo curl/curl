@@ -23,7 +23,7 @@ pop3
 POP3 DELE message (CUSTOMREQUEST)
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/858 -u user:secret -X DELE -I
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret -X DELE -I
 </command>
 </client>
 
@@ -34,7 +34,7 @@ pop3://%HOSTIP:%POP3PORT/858 -u user:secret -X DELE -I
 CAPA
 USER user
 PASS secret
-DELE 858
+DELE %TESTNUMBER
 QUIT
 </protocol>
 </verify>

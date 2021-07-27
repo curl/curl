@@ -27,13 +27,13 @@ file contents should appear once for each file
 ftp
 </server>
 <tool>
-lib527
+lib%TESTNUMBER
 </tool>
  <name>
 FTP RETR same file using different handles but same connection
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/path/527
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
 </command>
 </client>
 
@@ -46,17 +46,17 @@ PWD
 CWD path
 EPSV
 TYPE I
-SIZE 527
-RETR 527
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 EPSV
-SIZE 527
-RETR 527
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 EPSV
-SIZE 527
-RETR 527
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 EPSV
-SIZE 527
-RETR 527
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

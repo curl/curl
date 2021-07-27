@@ -15,10 +15,10 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 301 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 0
-Location: ftp://%HOSTIP:%FTPPORT/1245
+Location: ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 Connection: close
 
 </data>
@@ -35,7 +35,7 @@ ftp
 --proto deny must override --proto-redir allow
 </name>
 <command>
---location --proto +all,-ftp --proto-redir -all,+ftp http://%HOSTIP:%HTTPPORT/1245
+--location --proto +all,-ftp --proto-redir -all,+ftp http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -43,7 +43,7 @@ ftp
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /1245 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

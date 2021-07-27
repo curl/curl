@@ -12,6 +12,7 @@
   - OpenSSH or SunSSH (for SCP, SFTP and SOCKS4/5 tests)
   - nghttpx (for HTTP/2 tests)
   - nroff (for --manual tests)
+  - An available `en_US.UTF-8` locale
 
 ### Installation of python-impacket
 

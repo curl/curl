@@ -19,7 +19,7 @@ TLS-SRP
 TLS-SRP with server cert checking
  </name>
 <command> # no --insecure
---tlsauthtype SRP --tlsuser jsmith --tlspassword abc https://%HOSTIP:%HTTPTLSPORT/want/323
+--tlsauthtype SRP --tlsuser jsmith --tlspassword abc https://%HOSTIP:%HTTPTLSPORT/want/fails
 </command>
 </client>
 

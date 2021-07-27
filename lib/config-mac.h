@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -81,18 +81,9 @@
 #define HAVE_IOCTL              1
 #define HAVE_IOCTL_FIONBIO      1
 
-#define RETSIGTYPE void
-
 #define SIZEOF_INT              4
 #define SIZEOF_SHORT            2
 #define SIZEOF_SIZE_T           4
-
-#define HAVE_GETNAMEINFO 1
-#define GETNAMEINFO_QUAL_ARG1 const
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-#define GETNAMEINFO_TYPE_ARG2 socklen_t
-#define GETNAMEINFO_TYPE_ARG46 size_t
-#define GETNAMEINFO_TYPE_ARG7 int
 
 #define HAVE_RECV 1
 #define RECV_TYPE_ARG1 int

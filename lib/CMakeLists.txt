@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -20,6 +20,7 @@
 #
 ###########################################################################
 set(LIB_NAME libcurl)
+set(LIBCURL_OUTPUT_NAME libcurl CACHE STRING "Basename of the curl library")
 
 if(BUILD_SHARED_LIBS)
   set(CURL_STATICLIB NO)
@@ -98,7 +99,10 @@ if(WIN32)
   add_definitions(-D_USRDLL)
 endif()
 
-set_target_properties(${LIB_NAME} PROPERTIES COMPILE_DEFINITIONS BUILDING_LIBCURL)
+set_target_properties(${LIB_NAME} PROPERTIES
+  COMPILE_DEFINITIONS BUILDING_LIBCURL
+  OUTPUT_NAME ${LIBCURL_OUTPUT_NAME}
+  )
 
 if(HIDES_CURL_PRIVATE_SYMBOLS)
   set_property(TARGET ${LIB_NAME} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
@@ -117,13 +121,16 @@ endif()
 
 if(WIN32)
   if(BUILD_SHARED_LIBS)
-    # Add "_imp" as a suffix before the extension to avoid conflicting with the statically linked "libcurl.lib"
-    set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
+    if(MSVC)
+      # Add "_imp" as a suffix before the extension to avoid conflicting with
+      # the statically linked "libcurl.lib"
+      set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
+    endif()
   endif()
 endif()
 
 target_include_directories(${LIB_NAME} INTERFACE
-  $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   $<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>)
 
 install(TARGETS ${LIB_NAME}

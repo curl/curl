@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,9 +56,6 @@
 /* to disable LDAPS */
 #define CURL_DISABLE_LDAPS 1
 
-/* to disable NTLM authentication */
-#define CURL_DISABLE_NTLM 1
-
 /* to disable proxies */
 /* #undef CURL_DISABLE_PROXY */
 
@@ -82,21 +79,6 @@
 
 /* Define if you want to enable IPv6 support */
 #define ENABLE_IPV6 1
-
-/* Define to the type qualifier of arg 1 for getnameinfo. */
-#define GETNAMEINFO_QUAL_ARG1 const
-
-/* Define to the type of arg 1 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-
-/* Define to the type of arg 2 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG2 socklen_t
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG46 size_t
-
-/* Define to the type of arg 7 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG7 unsigned int
 
 /* Specifies the number of arguments to getservbyport_r */
 #define GETSERVBYPORT_R_ARGS 6
@@ -209,9 +191,6 @@
 /* Define to 1 if you have a working getifaddrs function. */
 /* #undef HAVE_GETIFADDRS */
 
-/* Define to 1 if you have the getnameinfo function. */
-#define HAVE_GETNAMEINFO 1
-
 /* Define to 1 if you have the `getpass_r' function. */
 /* #undef HAVE_GETPASS_R */
 
@@ -274,15 +253,6 @@
 
 /* Define to 1 if you have the `inet_addr' function. */
 #define HAVE_INET_ADDR 1
-
-/* Define to 1 if you have the inet_ntoa_r function. */
-/* #undef HAVE_INET_NTOA_R */
-
-/* inet_ntoa_r() takes 2 args */
-/* #undef HAVE_INET_NTOA_R_2 */
-
-/* inet_ntoa_r() takes 3 args */
-/* #undef HAVE_INET_NTOA_R_3 */
 
 /* Define to 1 if you have a IPv6 capable working inet_ntop function. */
 /* #undef HAVE_INET_NTOP */
@@ -565,12 +535,6 @@
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
 
-/* Define to 1 if you have the `strlcpy' function. */
-/* #undef HAVE_STRLCPY */
-
-/* Define to 1 if you have the strncasecmp function. */
-#define HAVE_STRNCASECMP 1
-
 /* Define to 1 if you have the strncmpi function. */
 /* #undef HAVE_STRNCMPI */
 
@@ -775,9 +739,6 @@
 /* Define to the function return type for recv. */
 #define RECV_TYPE_RETV int
 
-/* Define as the return type of signal handlers (`int' or `void'). */
-#define RETSIGTYPE void
-
 /* Define to the type qualifier of arg 5 for select. */
 #define SELECT_QUAL_ARG5
 
@@ -840,9 +801,6 @@
 
 /* Define if you want to enable c-ares support */
 /* #undef USE_ARES */
-
-/* Define to disable non-blocking sockets. */
-/* #undef USE_BLOCKING_SOCKETS */
 
 /* if GnuTLS is enabled */
 /* #undef USE_GNUTLS */

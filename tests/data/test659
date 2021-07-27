@@ -10,7 +10,7 @@ proxy
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -28,7 +28,7 @@ Funny-head: yesyes
 http
 </server>
 <tool>
-lib659
+lib%TESTNUMBER
 </tool>
 <name>
 CURLOPT_CURLU without the path set - over proxy
@@ -43,7 +43,7 @@ proxy
 
 <verify>
 <protocol>
-GET http://www.example.com:80/ HTTP/1.1
+GET http://www.example.com/ HTTP/1.1
 Host: www.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive

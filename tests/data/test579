@@ -61,21 +61,21 @@ crypto
 </features>
 # tool is what to use instead of 'curl'
 <tool>
-lib579
+lib%TESTNUMBER
 </tool>
 
  <name>
 small chunked HTTP POSTs with digest auth. and progress callback
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/579 log/ip579
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER log/ip%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/ip579">
+<file name="log/ip%TESTNUMBER">
 Progress callback called with UL 0 out of 0
 Progress callback called with UL 8 out of 0
 Progress callback called with UL 16 out of 0

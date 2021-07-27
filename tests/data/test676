@@ -1,0 +1,83 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP set cookie
+cookies
+CURLOPT_REFERER
+curl_easy_reset
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+</data>
+
+# since the request runs twice
+<datacheck>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<file name="log/cookies676">
+%HOSTIP	TRUE	/we/want/	FALSE	2118138987	proven	yes
+</file>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib%TESTNUMBER
+</tool>
+
+ <name>
+verify setting CURLOPT_COOKIEFILE to NULL again
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: the-moo agent next generation
+Accept: */*
+Cookie: proven=yes
+
+GET /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: the-moo agent next generation
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

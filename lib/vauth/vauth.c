@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2020, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2014 - 2021, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -72,6 +72,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
 {
   char *utf8_spn = NULL;
   TCHAR *tchar_spn = NULL;
+  TCHAR *dupe_tchar_spn = NULL;
 
   (void) realm;
 
@@ -84,23 +85,19 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
 
   /* Generate our UTF8 based SPN */
   utf8_spn = aprintf("%s/%s", service, host);
-  if(!utf8_spn) {
+  if(!utf8_spn)
     return NULL;
-  }
 
-  /* Allocate our TCHAR based SPN */
+  /* Allocate and return a TCHAR based SPN. Since curlx_convert_UTF8_to_tchar
+     must be freed by curlx_unicodefree we'll dupe the result so that the
+     pointer this function returns can be normally free'd. */
   tchar_spn = curlx_convert_UTF8_to_tchar(utf8_spn);
-  if(!tchar_spn) {
-    free(utf8_spn);
-
+  free(utf8_spn);
+  if(!tchar_spn)
     return NULL;
-  }
-
-  /* Release the UTF8 variant when operating with Unicode */
-  curlx_unicodefree(utf8_spn);
-
-  /* Return our newly allocated SPN */
-  return tchar_spn;
+  dupe_tchar_spn = _tcsdup(tchar_spn);
+  curlx_unicodefree(tchar_spn);
+  return dupe_tchar_spn;
 }
 #endif /* USE_WINDOWS_SSPI */
 

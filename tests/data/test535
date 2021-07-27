@@ -10,7 +10,7 @@ multi
 <reply>
 <data>
 HTTP/1.1 404 Badness
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 ETag: "21025-dc7-39462498"
 Content-Length: 6
 Content-Type: text/html
@@ -20,7 +20,7 @@ hejsan
 </data>
 <data1>
 HTTP/1.1 200 Fine
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 13
 Connection: close
 Content-Type: text/html
@@ -48,7 +48,7 @@ lib533
 HTTP GET multi two files with FAILONERROR
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/535 http://%HOSTIP:%HTTPPORT/5350001
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
 </client>
 
@@ -56,11 +56,11 @@ http://%HOSTIP:%HTTPPORT/535 http://%HOSTIP:%HTTPPORT/5350001
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /535 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /5350001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

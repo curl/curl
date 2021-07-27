@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -66,6 +66,14 @@
 #include <zstd.h>
 #endif
 
+#ifdef USE_GSASL
+#include <gsasl.h>
+#endif
+
+#ifdef USE_OPENLDAP
+#include <ldap.h>
+#endif
+
 #ifdef HAVE_BROTLI
 static size_t brotli_version(char *buf, size_t bufsz)
 {
@@ -100,7 +108,7 @@ static size_t zstd_version(char *buf, size_t bufsz)
  * zeros in the data.
  */
 
-#define VERSION_PARTS 15 /* number of substrings we can concatenate */
+#define VERSION_PARTS 17 /* number of substrings we can concatenate */
 
 char *curl_version(void)
 {
@@ -146,6 +154,12 @@ char *curl_version(void)
 #endif
 #ifdef USE_HYPER
   char hyper_buf[30];
+#endif
+#ifdef USE_GSASL
+  char gsasl_buf[30];
+#endif
+#ifdef USE_OPENLDAP
+  char ldap_buf[30];
 #endif
   int i = 0;
   int j;
@@ -234,6 +248,29 @@ char *curl_version(void)
 #ifdef USE_HYPER
   msnprintf(hyper_buf, sizeof(hyper_buf), "Hyper/%s", hyper_version());
   src[i++] = hyper_buf;
+#endif
+#ifdef USE_GSASL
+  msnprintf(gsasl_buf, sizeof(gsasl_buf), "libgsasl/%s",
+            gsasl_check_version(NULL));
+  src[i++] = gsasl_buf;
+#endif
+#ifdef USE_OPENLDAP
+  {
+    LDAPAPIInfo api;
+    api.ldapai_info_version = LDAP_API_INFO_VERSION;
+
+    if(ldap_get_option(NULL, LDAP_OPT_API_INFO, &api) == LDAP_OPT_SUCCESS) {
+      unsigned int patch = api.ldapai_vendor_version % 100;
+      unsigned int major = api.ldapai_vendor_version / 10000;
+      unsigned int minor =
+        ((api.ldapai_vendor_version - major * 10000) - patch) / 100;
+      msnprintf(ldap_buf, sizeof(ldap_buf), "%s/%u.%u.%u",
+                api.ldapai_vendor_name, major, minor, patch);
+      src[i++] = ldap_buf;
+      ldap_memfree(api.ldapai_vendor_name);
+      ber_memvfree((void **)api.ldapai_extensions);
+    }
+  }
 #endif
 
   DEBUGASSERT(i <= VERSION_PARTS);
@@ -326,7 +363,7 @@ static const char * const protocols[] = {
   "sftp",
 #endif
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
-   (CURL_SIZEOF_CURL_OFF_T > 4)
+   (SIZEOF_CURL_OFF_T > 4)
   "smb",
 #  ifdef USE_SSL
   "smbs",
@@ -391,7 +428,7 @@ static curl_version_info_data version_info = {
 #ifdef CURLRES_ASYNCH
   | CURL_VERSION_ASYNCHDNS
 #endif
-#if (CURL_SIZEOF_CURL_OFF_T > 4) && \
+#if (SIZEOF_CURL_OFF_T > 4) && \
     ( (SIZEOF_OFF_T > 4) || defined(USE_WIN32_LARGE_FILES) )
   | CURL_VERSION_LARGEFILE
 #endif
@@ -428,8 +465,11 @@ static curl_version_info_data version_info = {
 #ifndef CURL_DISABLE_ALTSVC
   | CURL_VERSION_ALTSVC
 #endif
-#if defined(USE_HSTS)
+#ifndef CURL_DISABLE_HSTS
   | CURL_VERSION_HSTS
+#endif
+#if defined(USE_GSASL)
+  | CURL_VERSION_GSASL
 #endif
   ,
   NULL, /* ssl_version */
@@ -458,7 +498,8 @@ static curl_version_info_data version_info = {
 #endif
   0,    /* zstd_ver_num */
   NULL, /* zstd version */
-  NULL  /* Hyper version */
+  NULL, /* Hyper version */
+  NULL  /* gsasl version */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
@@ -559,6 +600,12 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
     static char hyper_buffer[30];
     msnprintf(hyper_buffer, sizeof(hyper_buffer), "Hyper/%s", hyper_version());
     version_info.hyper_version = hyper_buffer;
+  }
+#endif
+
+#ifdef USE_GSASL
+  {
+    version_info.gsasl_version = gsasl_check_version(NULL);
   }
 #endif
 

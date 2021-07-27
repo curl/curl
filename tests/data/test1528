@@ -18,7 +18,7 @@ We-are: good
 </connect>
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -35,13 +35,13 @@ http
 http-proxy
 </server>
 <tool>
-lib1528
+lib%TESTNUMBER
 </tool>
  <name>
 Separately specified proxy/server headers sent in a proxy GET
  </name>
  <command>
- http://the.old.moo:%HTTPPORT/1528 %HOSTIP:%PROXYPORT
+ http://the.old.moo:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 </command>
 <features>
 proxy
@@ -51,7 +51,7 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <proxy>
-GET http://the.old.moo:%HTTPPORT/1528 HTTP/1.1
+GET http://the.old.moo:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: the.old.moo:%HTTPPORT
 Accept: */*
 Proxy-Connection: Keep-Alive

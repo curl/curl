@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,8 +40,6 @@
 #define RANDOM_FILE "/dev/random"
 #define VERSION "0.0.0" /* TODO */
 
-#define RETSIGTYPE void
-
 #define STDC_HEADERS 1
 
 #ifdef _BITS64
@@ -55,13 +53,6 @@
 #define SIZEOF_SIZE_T 4
 #define SIZEOF_TIME_T 4
 #endif
-
-#define HAVE_GETNAMEINFO 1
-#define GETNAMEINFO_QUAL_ARG1 const
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-#define GETNAMEINFO_TYPE_ARG2 int
-#define GETNAMEINFO_TYPE_ARG46 long
-#define GETNAMEINFO_TYPE_ARG7 int
 
 #define HAVE_RECV 1
 #define RECV_TYPE_ARG1 int
@@ -173,7 +164,6 @@
 #define HAVE_STRCASECMP 1
 #define HAVE_STRDUP 1
 #define HAVE_STRING_H 1
-#define HAVE_STRNCASECMP 1
 #define HAVE_STRSTR 1
 #define HAVE_STRTOK_R 1
 #define HAVE_STRTOLL 1
@@ -202,7 +192,6 @@
 #define STRERROR_R_TYPE_ARG3 int
 
 #define TIME_WITH_SYS_TIME 1
-#define USE_BLOCKING_SOCKETS 1
 #define USE_MANUAL 1
 
 #define __attribute__(x)

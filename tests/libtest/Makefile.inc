@@ -48,7 +48,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  lib599 \
  lib643 lib644 lib645 lib650 lib651 lib652 lib653 lib654 lib655 lib658   \
  lib659 lib661 lib666 lib667 lib668 \
- lib670 lib671 lib672 lib673 lib674 \
+ lib670 lib671 lib672 lib673 lib674 lib676 lib678 \
  lib1156 \
  lib1500 lib1501 lib1502 lib1503 lib1504 lib1505 lib1506 lib1507 lib1508 \
  lib1509 lib1510 lib1511 lib1512 lib1513 lib1514 lib1515         lib1517 \
@@ -57,7 +57,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  lib1534 lib1535 lib1536 lib1537 lib1538 lib1539 \
  lib1540         \
  lib1550 lib1551 lib1552 lib1553 lib1554 lib1555 lib1556 lib1557 \
- lib1558 lib1559 lib1560 lib1564 lib1565 lib1567 lib1568 \
+ lib1558 lib1559 lib1560 lib1564 lib1565 lib1567 lib1568 lib1569 \
  lib1591 lib1592 lib1593 lib1594 lib1596 \
          lib1905 lib1906 lib1907 lib1908 lib1910 lib1911 lib1912 lib1913 \
          lib1915 lib1916 lib1917 lib1918 lib1933 lib1934 lib1935 lib1936 \
@@ -405,6 +405,14 @@ lib674_SOURCES = lib674.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib674_LDADD = $(TESTUTIL_LIBS)
 lib674_CPPFLAGS = $(AM_CPPFLAGS)
 
+lib676_SOURCES = lib676.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib676_LDADD = $(TESTUTIL_LIBS)
+lib676_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib678_SOURCES = lib678.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS) $(MULTIBYTE)
+lib678_LDADD = $(TESTUTIL_LIBS)
+lib678_CPPFLAGS = $(AM_CPPFLAGS)
+
 lib1500_SOURCES = lib1500.c $(SUPPORTFILES) $(TESTUTIL)
 lib1500_LDADD = $(TESTUTIL_LIBS)
 lib1500_CPPFLAGS = $(AM_CPPFLAGS)
@@ -607,6 +615,9 @@ lib1567_CPPFLAGS = $(AM_CPPFLAGS)
 
 lib1568_SOURCES = lib1568.c $(SUPPORTFILES)
 lib1568_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib1569_SOURCES = lib1569.c $(SUPPORTFILES)
+lib1569_CPPFLAGS = $(AM_CPPFLAGS)
 
 lib1591_SOURCES = lib1591.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1591_LDADD = $(TESTUTIL_LIBS)

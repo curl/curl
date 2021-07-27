@@ -1145,10 +1145,8 @@ CURLcode Curl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
   int matched = -1;
   size_t addrlen = (size_t) -1;
   ssize_t len;
-  const char *const hostname = SSL_IS_PROXY()?
-    conn->http_proxy.host.name : conn->host.name;
-  const char *const dispname = SSL_IS_PROXY()?
-    conn->http_proxy.host.dispname : conn->host.dispname;
+  const char * const hostname = SSL_HOST_NAME();
+  const char * const dispname = SSL_HOST_DISPNAME();
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else

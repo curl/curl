@@ -17,10 +17,10 @@ to individuals.
 Before posting to one of the curl mailing lists, please read up on the
 [mailing list etiquette](https://curl.se/mail/etiquette.html).
 
-We also hang out on IRC in #curl on irc.freenode.net
+We also hang out on IRC in #curl on libera.chat
 
 If you're at all interested in the code side of things, consider clicking
-'watch' on the [curl repo on github](https://github.com/curl/curl) to be
+'watch' on the [curl repo on GitHub](https://github.com/curl/curl) to be
 notified of pull requests and new issues posted there.
 
 ### License and copyright
@@ -129,7 +129,7 @@ verified your changes.
 ### How to get your changes into the main sources
 
 Ideally you file a [pull request on
-github](https://github.com/curl/curl/pulls), but you can also send your plain
+GitHub](https://github.com/curl/curl/pulls), but you can also send your plain
 patch to [the curl-library mailing
 list](https://curl.se/mail/list.cgi?list=curl-library).
 
@@ -304,4 +304,4 @@ For Windows:
  - [https://gnuwin32.sourceforge.io/packages/diffutils.htm](https://gnuwin32.sourceforge.io/packages/diffutils.htm)
 
 ### Useful resources
-* [Webinar on getting code into cURL](https://www.youtube.com/watch?v=QmZ3W1d6LQI)
+ - [Webinar on getting code into cURL](https://www.youtube.com/watch?v=QmZ3W1d6LQI)

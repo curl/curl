@@ -36,7 +36,7 @@ imap
 IMAP multiple connection authentication
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/836/;MAILINDEX=1' -u user.one:secret -: 'imap://%HOSTIP:%IMAPPORT/836/;UID=2' -u user.two:secret
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user.one:secret -: 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;UID=2' -u user.two:secret
 </command>
 </client>
 
@@ -46,12 +46,12 @@ IMAP multiple connection authentication
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user.one secret
-A003 SELECT 836
+A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 B001 CAPABILITY
 B002 LOGIN user.two secret
-B003 SELECT 836
+B003 SELECT %TESTNUMBER
 B004 FETCH 2 BODY[]
 B005 LOGOUT
 </protocol>

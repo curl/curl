@@ -191,6 +191,9 @@ mark_as_advanced(CURL_DISABLE_GOPHER)
 option(CURL_DISABLE_MQTT "to disable MQTT" OFF)
 mark_as_advanced(CURL_DISABLE_MQTT)
 
+option(CURL_ENABLE_EXPORT_TARGET "to enable cmake export target" ON)
+mark_as_advanced(CURL_ENABLE_EXPORT_TARGET)
+
 if(HTTP_ONLY)
   set(CURL_DISABLE_DICT ON)
   set(CURL_DISABLE_FILE ON)
@@ -210,6 +213,8 @@ endif()
 
 option(CURL_DISABLE_ALTSVC "to disable alt-svc support" OFF)
 mark_as_advanced(CURL_DISABLE_ALTSVC)
+option(CURL_DISABLE_HSTS "to disable HSTS support" OFF)
+mark_as_advanced(CURL_DISABLE_HSTS)
 option(CURL_DISABLE_COOKIES "to disable cookies support" OFF)
 mark_as_advanced(CURL_DISABLE_COOKIES)
 option(CURL_DISABLE_CRYPTO_AUTH "to disable cryptographic authentication" OFF)
@@ -310,7 +315,6 @@ check_function_exists(gethostname HAVE_GETHOSTNAME)
 if(WIN32)
   check_library_exists_concat("ws2_32" getch        HAVE_LIBWS2_32)
   check_library_exists_concat("winmm"  getch        HAVE_LIBWINMM)
-  list(APPEND CURL_LIBS "advapi32")
 endif()
 
 # check SSL libraries
@@ -356,7 +360,6 @@ if(CMAKE_USE_SCHANNEL)
   set(SSL_ENABLED ON)
   set(USE_SCHANNEL ON) # Windows native SSL/TLS support
   set(USE_WINDOWS_SSPI ON) # CMAKE_USE_SCHANNEL implies CURL_WINDOWS_SSPI
-  list(APPEND CURL_LIBS "crypt32")
 endif()
 if(CURL_WINDOWS_SSPI)
   set(USE_WINDOWS_SSPI ON)
@@ -381,6 +384,14 @@ if(CMAKE_USE_SECTRANSP)
   set(SSL_ENABLED ON)
   set(USE_SECTRANSP ON)
   list(APPEND CURL_LIBS "${COREFOUNDATION_FRAMEWORK}" "${SECURITY_FRAMEWORK}")
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  find_library(SYSTEMCONFIGURATION_FRAMEWORK "SystemConfiguration")
+  if(NOT SYSTEMCONFIGURATION_FRAMEWORK)
+     message(FATAL_ERROR "SystemConfiguration framework not found")
+  endif()
+  list(APPEND CURL_LIBS "${SYSTEMCONFIGURATION_FRAMEWORK}")
 endif()
 
 if(CMAKE_USE_OPENSSL)
@@ -505,10 +516,6 @@ if(USE_QUICHE)
   cmake_pop_check_state()
 endif()
 
-if(WIN32)
-  set(USE_WIN32_CRYPTO ON)
-endif()
-
 if(NOT CURL_DISABLE_LDAP)
   if(WIN32)
     option(USE_WIN32_LDAP "Use Windows LDAP implementation" ON)
@@ -623,6 +630,14 @@ option(USE_LIBIDN2 "Use libidn2 for IDN support" ON)
 set(HAVE_LIBIDN2 OFF)
 if(USE_LIBIDN2)
   check_library_exists_concat("idn2" idn2_lookup_ul HAVE_LIBIDN2)
+endif()
+
+if(WIN32)
+  option(USE_WIN32_IDN "Use WinIDN for IDN support" OFF)
+  if(USE_WIN32_IDN)
+    list(APPEND CURL_LIBS "Normaliz")
+    set(WANT_IDN_PROTOTYPES ON)
+  endif()
 endif()
 
 # Check for symbol dlopen (same as HAVE_LIBDL)
@@ -847,7 +862,8 @@ elseif(CURL_CA_PATH_AUTODETECT OR CURL_CA_BUNDLE_AUTODETECT)
     foreach(SEARCH_CA_BUNDLE_PATH ${SEARCH_CA_BUNDLE_PATHS})
       if(EXISTS "${SEARCH_CA_BUNDLE_PATH}")
         message(STATUS "Found CA bundle: ${SEARCH_CA_BUNDLE_PATH}")
-        set(CURL_CA_BUNDLE "${SEARCH_CA_BUNDLE_PATH}")
+        set(CURL_CA_BUNDLE "${SEARCH_CA_BUNDLE_PATH}" CACHE STRING
+            "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
         set(CURL_CA_BUNDLE_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
         break()
       endif()
@@ -856,7 +872,8 @@ elseif(CURL_CA_PATH_AUTODETECT OR CURL_CA_BUNDLE_AUTODETECT)
 
   if(CURL_CA_PATH_AUTODETECT AND (NOT CURL_CA_PATH_SET))
     if(EXISTS "/etc/ssl/certs")
-      set(CURL_CA_PATH "/etc/ssl/certs")
+      set(CURL_CA_PATH "/etc/ssl/certs" CACHE STRING
+          "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
       set(CURL_CA_PATH_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
     endif()
   endif()
@@ -874,9 +891,7 @@ if(NOT UNIX)
   check_include_file_concat("winsock.h"      HAVE_WINSOCK_H)
   check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)
   check_include_file_concat("winsock2.h"     HAVE_WINSOCK2_H)
-  if(NOT CURL_WINDOWS_SSPI AND USE_OPENSSL)
-    set(CURL_LIBS ${CURL_LIBS} "crypt32")
-  endif()
+  check_include_file_concat("wincrypt.h"     HAVE_WINCRYPT_H)
 endif()
 
 check_include_file_concat("stdio.h"          HAVE_STDIO_H)
@@ -999,20 +1014,18 @@ check_symbol_exists(alarm         "${CURL_INCLUDES}" HAVE_ALARM)
 if(NOT HAVE_STRNCMPI)
   set(HAVE_STRCMPI)
 endif()
+check_symbol_exists(getppid       "${CURL_INCLUDES}" HAVE_GETPPID)
+check_symbol_exists(utimes        "${CURL_INCLUDES}" HAVE_UTIMES)
+
 check_symbol_exists(gethostbyaddr "${CURL_INCLUDES}" HAVE_GETHOSTBYADDR)
 check_symbol_exists(gethostbyaddr_r "${CURL_INCLUDES}" HAVE_GETHOSTBYADDR_R)
 check_symbol_exists(gettimeofday  "${CURL_INCLUDES}" HAVE_GETTIMEOFDAY)
 check_symbol_exists(inet_addr     "${CURL_INCLUDES}" HAVE_INET_ADDR)
 check_symbol_exists(inet_ntoa     "${CURL_INCLUDES}" HAVE_INET_NTOA)
 check_symbol_exists(inet_ntoa_r   "${CURL_INCLUDES}" HAVE_INET_NTOA_R)
-check_symbol_exists(tcsetattr     "${CURL_INCLUDES}" HAVE_TCSETATTR)
-check_symbol_exists(tcgetattr     "${CURL_INCLUDES}" HAVE_TCGETATTR)
-check_symbol_exists(perror        "${CURL_INCLUDES}" HAVE_PERROR)
 check_symbol_exists(closesocket   "${CURL_INCLUDES}" HAVE_CLOSESOCKET)
-check_symbol_exists(setvbuf       "${CURL_INCLUDES}" HAVE_SETVBUF)
 check_symbol_exists(sigsetjmp     "${CURL_INCLUDES}" HAVE_SIGSETJMP)
 check_symbol_exists(getpass_r     "${CURL_INCLUDES}" HAVE_GETPASS_R)
-check_symbol_exists(strlcat       "${CURL_INCLUDES}" HAVE_STRLCAT)
 check_symbol_exists(getpwuid      "${CURL_INCLUDES}" HAVE_GETPWUID)
 check_symbol_exists(getpwuid_r    "${CURL_INCLUDES}" HAVE_GETPWUID_R)
 check_symbol_exists(geteuid       "${CURL_INCLUDES}" HAVE_GETEUID)
@@ -1062,6 +1075,16 @@ if(HAVE_FSETXATTR)
   endforeach()
 endif()
 
+set(CMAKE_EXTRA_INCLUDE_FILES   "sys/socket.h")
+check_type_size("sa_family_t"   SIZEOF_SA_FAMILY_T)
+set(HAVE_SA_FAMILY_T            ${HAVE_SIZEOF_SA_FAMILY_T})
+set(CMAKE_EXTRA_INCLUDE_FILES   "")
+
+set(CMAKE_EXTRA_INCLUDE_FILES   "ws2def.h")
+check_type_size("ADDRESS_FAMILY"    SIZEOF_ADDRESS_FAMILY)
+set(HAVE_ADDRESS_FAMILY         ${HAVE_SIZEOF_ADDRESS_FAMILY})
+set(CMAKE_EXTRA_INCLUDE_FILES   "")
+
 # sigaction and sigsetjmp are special. Use special mechanism for
 # detecting those, but only if previous attempt failed.
 if(HAVE_SIGNAL_H)
@@ -1110,7 +1133,6 @@ foreach(CURL_TEST
     HAVE_IN_ADDR_T
     HAVE_BOOL_T
     STDC_HEADERS
-    RETSIGTYPE_TEST
     HAVE_INET_NTOA_R_DECL
     HAVE_INET_NTOA_R_DECL_REENTRANT
     HAVE_GETADDRINFO
@@ -1211,12 +1233,6 @@ if(HAVE_FIONBIO OR
   set(HAVE_DISABLED_NONBLOCKING)
 endif()
 
-if(RETSIGTYPE_TEST)
-  set(RETSIGTYPE void)
-else()
-  set(RETSIGTYPE int)
-endif()
-
 if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
   include(CheckCCompilerFlag)
   check_c_compiler_flag(-Wno-long-double HAVE_C_FLAG_Wno_long_double)
@@ -1254,6 +1270,19 @@ if(WIN32)
 
   # Use the manifest embedded in the Windows Resource
   set(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} -DCURL_EMBED_MANIFEST")
+
+  # Check if crypto functions in wincrypt.h are actually available
+  if(HAVE_WINCRYPT_H)
+    check_symbol_exists(CryptAcquireContext "${CURL_INCLUDES}" USE_WINCRYPT)
+  endif()
+  if(USE_WINCRYPT)
+    set(USE_WIN32_CRYPTO ON)
+  endif()
+
+  # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
+  if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
+    list(APPEND CURL_LIBS "advapi32" "crypt32")
+  endif()
 endif()
 
 if(MSVC)
@@ -1265,6 +1294,11 @@ if(MSVC)
     string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
   else()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
+  endif()
+
+  # Use multithreaded compilation on VS 2008+
+  if(MSVC_VERSION GREATER_EQUAL 1500)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
   endif()
 endif()
 
@@ -1335,14 +1369,6 @@ if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
-# NTLM support requires crypto function adaptions from various SSL libs
-# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_DARWINSSL OR USE_MBEDTLS OR USE_WIN32_CRYPTO))
-  set(use_ntlm ON)
-else()
-  set(use_ntlm OFF)
-endif()
-
 # Helper to populate a list (_items) with a label when conditions (the remaining
 # args) are satisfied
 macro(_add_if label)
@@ -1351,6 +1377,13 @@ macro(_add_if label)
     set(_items ${_items} "${label}")
   endif()
 endmacro()
+
+# NTLM support requires crypto function adaptions from various SSL libs
+# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
+if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_MBEDTLS OR
+                                     USE_DARWINSSL OR USE_WIN32_CRYPTO))
+  set(use_curl_ntlm_core ON)
+endif()
 
 # Clear list and try to detect available features
 set(_items)
@@ -1361,13 +1394,14 @@ _add_if("libz"          HAVE_LIBZ)
 _add_if("brotli"        HAVE_BROTLI)
 _add_if("zstd"          HAVE_ZSTD)
 _add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
-_add_if("IDN"           HAVE_LIBIDN2)
-_add_if("Largefile"     (CURL_SIZEOF_CURL_OFF_T GREATER 4) AND
+_add_if("IDN"           HAVE_LIBIDN2 OR USE_WIN32_IDN)
+_add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
                         ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
 # TODO SSP1 (Schannel) check is missing
 _add_if("SSPI"          USE_WINDOWS_SSPI)
 _add_if("GSS-API"       HAVE_GSSAPI)
 _add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
+_add_if("HSTS"          NOT CURL_DISABLE_HSTS)
 # TODO SSP1 missing for SPNEGO
 _add_if("SPNEGO"        NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
@@ -1375,9 +1409,12 @@ _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-_add_if("NTLM"        use_ntlm OR USE_WINDOWS_SSPI)
+_add_if("NTLM"          NOT CURL_DISABLE_CRYPTO_AUTH AND
+                        (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
 # TODO missing option (autoconf: --enable-ntlm-wb)
-_add_if("NTLM_WB"     use_ntlm AND NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
+_add_if("NTLM_WB"       NOT CURL_DISABLE_CRYPTO_AUTH AND
+                        (use_curl_ntlm_core OR USE_WINDOWS_SSPI) AND
+                        NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
 # TODO missing option (--enable-tls-srp), depends on GNUTLS_SRP/OPENSSL_SRP
 _add_if("TLS-SRP"       USE_TLS_SRP)
 # TODO option --with-nghttp2 tests for nghttp2 lib and nghttp2/nghttp2.h header
@@ -1411,8 +1448,10 @@ _add_if("POP3"          NOT CURL_DISABLE_POP3)
 _add_if("POP3S"         NOT CURL_DISABLE_POP3 AND SSL_ENABLED)
 _add_if("IMAP"          NOT CURL_DISABLE_IMAP)
 _add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND SSL_ENABLED)
-_add_if("SMB"           NOT CURL_DISABLE_SMB AND use_ntlm)
-_add_if("SMBS"          NOT CURL_DISABLE_SMB AND SSL_ENABLED AND use_ntlm)
+_add_if("SMB"           NOT CURL_DISABLE_SMB AND
+                        use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+_add_if("SMBS"          NOT CURL_DISABLE_SMB AND SSL_ENABLED AND
+                        use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
 _add_if("SMTP"          NOT CURL_DISABLE_SMTP)
 _add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND SSL_ENABLED)
 _add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH)
@@ -1428,7 +1467,7 @@ message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS}")
 
 # Clear list and collect SSL backends
 set(_items)
-_add_if("Schannel"         SSL_ENABLED AND USE_WINDOWS_SSPI)
+_add_if("Schannel"         SSL_ENABLED AND USE_SCHANNEL)
 _add_if("OpenSSL"          SSL_ENABLED AND USE_OPENSSL)
 _add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
 _add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)
@@ -1533,11 +1572,13 @@ configure_package_config_file(CMake/curl-config.cmake.in
         INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
 )
 
-install(
-        EXPORT "${TARGETS_EXPORT_NAME}"
-        NAMESPACE "${PROJECT_NAME}::"
-        DESTINATION ${CURL_INSTALL_CMAKE_DIR}
-)
+if(CURL_ENABLE_EXPORT_TARGET)
+  install(
+          EXPORT "${TARGETS_EXPORT_NAME}"
+          NAMESPACE "${PROJECT_NAME}::"
+          DESTINATION ${CURL_INSTALL_CMAKE_DIR}
+  )
+endif()
 
 install(
         FILES ${version_config} ${project_config}

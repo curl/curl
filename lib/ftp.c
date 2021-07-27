@@ -175,6 +175,7 @@ const struct Curl_handler Curl_handler_ftp = {
   ftp_disconnect,                  /* disconnect */
   ZERO_NULL,                       /* readwrite */
   ZERO_NULL,                       /* connection_check */
+  ZERO_NULL,                       /* attach connection */
   PORT_FTP,                        /* defport */
   CURLPROTO_FTP,                   /* protocol */
   CURLPROTO_FTP,                   /* family */
@@ -205,6 +206,7 @@ const struct Curl_handler Curl_handler_ftps = {
   ftp_disconnect,                  /* disconnect */
   ZERO_NULL,                       /* readwrite */
   ZERO_NULL,                       /* connection_check */
+  ZERO_NULL,                       /* attach connection */
   PORT_FTPS,                       /* defport */
   CURLPROTO_FTPS,                  /* protocol */
   CURLPROTO_FTP,                   /* family */
@@ -1090,7 +1092,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   else
     res = NULL; /* failure! */
 
-  if(res == NULL) {
+  if(!res) {
     failf(data, "failed to resolve the address provided to PORT: %s", host);
     free(addr);
     return CURLE_FTP_PORT_FAILED;
@@ -1357,7 +1359,7 @@ static CURLcode ftp_state_prepare_transfer(struct Curl_easy *data)
   struct FTP *ftp = data->req.p.ftp;
   struct connectdata *conn = data->conn;
 
-  if(ftp->transfer != FTPTRANSFER_BODY) {
+  if(ftp->transfer != PPTRANSFER_BODY) {
     /* doesn't transfer any data */
 
     /* still possibly do PRE QUOTE jobs */
@@ -1378,7 +1380,7 @@ static CURLcode ftp_state_prepare_transfer(struct Curl_easy *data)
         result = Curl_pp_sendf(data, &ftpc->pp, "PRET %s",
                                data->set.str[STRING_CUSTOMREQUEST]?
                                data->set.str[STRING_CUSTOMREQUEST]:
-                               (data->set.ftp_list_only?"NLST":"LIST"));
+                               (data->state.list_only?"NLST":"LIST"));
       else if(data->set.upload)
         result = Curl_pp_sendf(data, &ftpc->pp, "PRET STOR %s",
                                conn->proto.ftpc.file);
@@ -1401,7 +1403,7 @@ static CURLcode ftp_state_rest(struct Curl_easy *data,
   struct FTP *ftp = data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
-  if((ftp->transfer != FTPTRANSFER_BODY) && ftpc->file) {
+  if((ftp->transfer != PPTRANSFER_BODY) && ftpc->file) {
     /* if a "head"-like request is being made (on a file) */
 
     /* Determine if server can respond to REST command and therefore
@@ -1423,7 +1425,7 @@ static CURLcode ftp_state_size(struct Curl_easy *data,
   struct FTP *ftp = data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
-  if((ftp->transfer == FTPTRANSFER_INFO) && ftpc->file) {
+  if((ftp->transfer == PPTRANSFER_INFO) && ftpc->file) {
     /* if a "head"-like request is being made (on a file) */
 
     /* we know ftpc->file is a valid pointer to a file name */
@@ -1485,7 +1487,7 @@ static CURLcode ftp_state_list(struct Curl_easy *data)
   cmd = aprintf("%s%s%s",
                 data->set.str[STRING_CUSTOMREQUEST]?
                 data->set.str[STRING_CUSTOMREQUEST]:
-                (data->set.ftp_list_only?"NLST":"LIST"),
+                (data->state.list_only?"NLST":"LIST"),
                 lstArg? " ": "",
                 lstArg? lstArg: "");
   free(lstArg);
@@ -1525,17 +1527,17 @@ static CURLcode ftp_state_type(struct Curl_easy *data)
      information. Which in FTP can't be much more than the file size and
      date. */
   if(data->set.opt_no_body && ftpc->file &&
-     ftp_need_type(conn, data->set.prefer_ascii)) {
+     ftp_need_type(conn, data->state.prefer_ascii)) {
     /* The SIZE command is _not_ RFC 959 specified, and therefore many servers
        may not support it! It is however the only way we have to get a file's
        size! */
 
-    ftp->transfer = FTPTRANSFER_INFO;
+    ftp->transfer = PPTRANSFER_INFO;
     /* this means no actual transfer will be made */
 
     /* Some servers return different sizes for different modes, and thus we
        must set the proper type before we check the size */
-    result = ftp_nb_type(data, conn, data->set.prefer_ascii, FTP_TYPE);
+    result = ftp_nb_type(data, conn, data->state.prefer_ascii, FTP_TYPE);
     if(result)
       return result;
   }
@@ -1578,6 +1580,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   struct FTP *ftp = data->req.p.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
+  bool append = data->set.remote_append;
 
   if((data->state.resume_from && !sizechecked) ||
      ((data->state.resume_from > 0) && sizechecked)) {
@@ -1604,7 +1607,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
     }
 
     /* enable append */
-    data->set.ftp_append = TRUE;
+    append = TRUE;
 
     /* Let's read off the proper amount of bytes from the input. */
     if(conn->seek_func) {
@@ -1652,7 +1655,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
 
         /* Set ->transfer so that we won't get any error in
          * ftp_done() because we didn't transfer anything! */
-        ftp->transfer = FTPTRANSFER_NONE;
+        ftp->transfer = PPTRANSFER_NONE;
 
         state(data, FTP_STOP);
         return CURLE_OK;
@@ -1661,8 +1664,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
     /* we've passed, proceed as normal */
   } /* resume_from */
 
-  result = Curl_pp_sendf(data, &ftpc->pp,
-                         data->set.ftp_append?"APPE %s":"STOR %s",
+  result = Curl_pp_sendf(data, &ftpc->pp, append?"APPE %s":"STOR %s",
                          ftpc->file);
   if(!result)
     state(data, FTP_STOR);
@@ -1739,7 +1741,7 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
       result = ftp_state_cwd(data, conn);
       break;
     case FTP_RETR_PREQUOTE:
-      if(ftp->transfer != FTPTRANSFER_BODY)
+      if(ftp->transfer != PPTRANSFER_BODY)
         state(data, FTP_STOP);
       else {
         if(ftpc->known_filesize != -1) {
@@ -1747,13 +1749,19 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
           result = ftp_state_retr(data, ftpc->known_filesize);
         }
         else {
-          if(data->set.ignorecl) {
-            /* This code is to support download of growing files.  It prevents
-               the state machine from requesting the file size from the
-               server.  With an unknown file size the download continues until
-               the server terminates it, otherwise the client stops if the
-               received byte count exceeds the reported file size.  Set option
-               CURLOPT_IGNORE_CONTENT_LENGTH to 1 to enable this behavior.*/
+          if(data->set.ignorecl || data->state.prefer_ascii) {
+            /* 'ignorecl' is used to support download of growing files.  It
+               prevents the state machine from requesting the file size from
+               the server.  With an unknown file size the download continues
+               until the server terminates it, otherwise the client stops if
+               the received byte count exceeds the reported file size.  Set
+               option CURLOPT_IGNORE_CONTENT_LENGTH to 1 to enable this
+               behavior.
+
+               In addition: asking for the size for 'TYPE A' transfers is not
+               constructive since servers don't report the converted size. So
+               skip it.
+            */
             result = Curl_pp_sendf(data, &ftpc->pp, "RETR %s", ftpc->file);
             if(!result)
               state(data, FTP_RETR);
@@ -2092,6 +2100,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
          data->set.get_filetime &&
          (data->info.filetime >= 0) ) {
         char headerbuf[128];
+        int headerbuflen;
         time_t filetime = data->info.filetime;
         struct tm buffer;
         const struct tm *tm = &buffer;
@@ -2101,7 +2110,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
           return result;
 
         /* format: "Tue, 15 Nov 1994 12:45:26" */
-        msnprintf(headerbuf, sizeof(headerbuf),
+        headerbuflen = msnprintf(headerbuf, sizeof(headerbuf),
                   "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
                   Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
                   tm->tm_mday,
@@ -2110,7 +2119,8 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
                   tm->tm_hour,
                   tm->tm_min,
                   tm->tm_sec);
-        result = Curl_client_write(data, CLIENTWRITE_BOTH, headerbuf, 0);
+        result = Curl_client_write(data, CLIENTWRITE_BOTH, headerbuf,
+                                   headerbuflen);
         if(result)
           return result;
       } /* end of a ridiculous amount of conditionals */
@@ -2133,7 +2143,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
       default:
         if(data->info.filetime <= data->set.timevalue) {
           infof(data, "The requested document is not new enough\n");
-          ftp->transfer = FTPTRANSFER_NONE; /* mark to not transfer data */
+          ftp->transfer = PPTRANSFER_NONE; /* mark to not transfer data */
           data->info.timecond = TRUE;
           state(data, FTP_STOP);
           return CURLE_OK;
@@ -2142,7 +2152,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
       case CURL_TIMECOND_IFUNMODSINCE:
         if(data->info.filetime > data->set.timevalue) {
           infof(data, "The requested document is not old enough\n");
-          ftp->transfer = FTPTRANSFER_NONE; /* mark to not transfer data */
+          ftp->transfer = PPTRANSFER_NONE; /* mark to not transfer data */
           data->info.timecond = TRUE;
           state(data, FTP_STOP);
           return CURLE_OK;
@@ -2250,7 +2260,7 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
 
       /* Set ->transfer so that we won't get any error in ftp_done()
        * because we didn't transfer the any file */
-      ftp->transfer = FTPTRANSFER_NONE;
+      ftp->transfer = PPTRANSFER_NONE;
       state(data, FTP_STOP);
       return CURLE_OK;
     }
@@ -2303,17 +2313,21 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
 
   }
   else if(ftpcode == 550) { /* "No such file or directory" */
-    failf(data, "The file does not exist");
-    return CURLE_REMOTE_FILE_NOT_FOUND;
+    /* allow a SIZE failure for (resumed) uploads, when probing what command
+       to use */
+    if(instate != FTP_STOR_SIZE) {
+      failf(data, "The file does not exist");
+      return CURLE_REMOTE_FILE_NOT_FOUND;
+    }
   }
 
   if(instate == FTP_SIZE) {
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(-1 != filesize) {
       char clbuf[128];
-      msnprintf(clbuf, sizeof(clbuf),
+      int clbuflen = msnprintf(clbuf, sizeof(clbuf),
                 "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", filesize);
-      result = Curl_client_write(data, CLIENTWRITE_BOTH, clbuf, 0);
+      result = Curl_client_write(data, CLIENTWRITE_BOTH, clbuf, clbuflen);
       if(result)
         return result;
     }
@@ -2347,7 +2361,8 @@ static CURLcode ftp_state_rest_resp(struct Curl_easy *data,
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(ftpcode == 350) {
       char buffer[24]= { "Accept-ranges: bytes\r\n" };
-      result = Curl_client_write(data, CLIENTWRITE_BOTH, buffer, 0);
+      result = Curl_client_write(data, CLIENTWRITE_BOTH, buffer,
+                                 strlen(buffer));
       if(result)
         return result;
     }
@@ -2448,7 +2463,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
      */
 
     if((instate != FTP_LIST) &&
-       !data->set.prefer_ascii &&
+       !data->state.prefer_ascii &&
        (ftp->downloadsize < 1)) {
       /*
        * It seems directory listings either don't show the size or very
@@ -2476,7 +2491,8 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
           bytes--;
         }
         /* if we have nothing but digits: */
-        if(bytes++) {
+        if(bytes) {
+          ++bytes;
           /* get the number! */
           (void)curlx_strtoofft(bytes, NULL, 0, &size);
         }
@@ -2487,7 +2503,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
 
     if(size > data->req.maxdownload && data->req.maxdownload > 0)
       size = data->req.size = data->req.maxdownload;
-    else if((instate != FTP_LIST) && (data->set.prefer_ascii))
+    else if((instate != FTP_LIST) && (data->state.prefer_ascii))
       size = -1; /* kludge for servers that understate ASCII mode file size */
 
     infof(data, "Maxdownload = %" CURL_FORMAT_CURL_OFF_T "\n",
@@ -2521,7 +2537,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
   else {
     if((instate == FTP_LIST) && (ftpcode == 450)) {
       /* simply no matching files in the dir listing */
-      ftp->transfer = FTPTRANSFER_NONE; /* don't download anything */
+      ftp->transfer = PPTRANSFER_NONE; /* don't download anything */
       state(data, FTP_STOP); /* this phase is over */
     }
     else {
@@ -3291,7 +3307,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     close_secondarysocket(data, conn);
   }
 
-  if(!result && (ftp->transfer == FTPTRANSFER_BODY) && ftpc->ctl_valid &&
+  if(!result && (ftp->transfer == PPTRANSFER_BODY) && ftpc->ctl_valid &&
      pp->pending_resp && !premature) {
     /*
      * Let's see what the server says about the transfer we just performed,
@@ -3314,8 +3330,10 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
       connclose(conn, "Timeout or similar in FTP DONE operation"); /* close */
     }
 
-    if(result)
+    if(result) {
+      Curl_safefree(ftp->pathalloc);
       return result;
+    }
 
     if(ftpc->dont_check && data->req.maxdownload > 0) {
       /* we have just sent ABOR and there is no reliable way to check if it was
@@ -3351,7 +3369,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     if((-1 != data->state.infilesize) &&
        (data->state.infilesize != data->req.writebytecount) &&
        !data->set.crlf &&
-       (ftp->transfer == FTPTRANSFER_BODY)) {
+       (ftp->transfer == PPTRANSFER_BODY)) {
       failf(data, "Uploaded unaligned file size (%" CURL_FORMAT_CURL_OFF_T
             " out of %" CURL_FORMAT_CURL_OFF_T " bytes)",
             data->req.bytecount, data->state.infilesize);
@@ -3383,7 +3401,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
   }
 
   /* clear these for next connection */
-  ftp->transfer = FTPTRANSFER_BODY;
+  ftp->transfer = PPTRANSFER_BODY;
   ftpc->dont_check = FALSE;
 
   /* Send any post-transfer QUOTE strings? */
@@ -3594,7 +3612,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
     *completep = 0;
   }
 
-  if(ftp->transfer <= FTPTRANSFER_INFO) {
+  if(ftp->transfer <= PPTRANSFER_INFO) {
     /* a transfer is about to take place, or if not a file name was given
        so we'll do a SIZE on it later and then we need the right TYPE first */
 
@@ -3620,7 +3638,8 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
       }
     }
     else if(data->set.upload) {
-      result = ftp_nb_type(data, conn, data->set.prefer_ascii, FTP_STOR_TYPE);
+      result = ftp_nb_type(data, conn, data->state.prefer_ascii,
+                           FTP_STOR_TYPE);
       if(result)
         return result;
 
@@ -3641,13 +3660,13 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
 
       if(result)
         ;
-      else if(data->set.ftp_list_only || !ftpc->file) {
+      else if(data->state.list_only || !ftpc->file) {
         /* The specified path ends with a slash, and therefore we think this
            is a directory that is requested, use LIST. But before that we
            need to set ASCII transfer mode. */
 
         /* But only if a body transfer was requested. */
-        if(ftp->transfer == FTPTRANSFER_BODY) {
+        if(ftp->transfer == PPTRANSFER_BODY) {
           result = ftp_nb_type(data, conn, TRUE, FTP_LIST_TYPE);
           if(result)
             return result;
@@ -3655,7 +3674,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
         /* otherwise just fall through */
       }
       else {
-        result = ftp_nb_type(data, conn, data->set.prefer_ascii,
+        result = ftp_nb_type(data, conn, data->state.prefer_ascii,
                              FTP_RETR_TYPE);
         if(result)
           return result;
@@ -3703,7 +3722,7 @@ CURLcode ftp_perform(struct Curl_easy *data,
   if(data->set.opt_no_body) {
     /* requested no body means no transfer... */
     struct FTP *ftp = data->req.p.ftp;
-    ftp->transfer = FTPTRANSFER_INFO;
+    ftp->transfer = PPTRANSFER_INFO;
   }
 
   *dophase_done = FALSE; /* not done yet */
@@ -4193,7 +4212,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
     ftpc->file = NULL; /* instead of point to a zero byte,
                             we make it a NULL pointer */
 
-  if(data->set.upload && !ftpc->file && (ftp->transfer == FTPTRANSFER_BODY)) {
+  if(data->set.upload && !ftpc->file && (ftp->transfer == PPTRANSFER_BODY)) {
     /* We need a file name when uploading. Return error! */
     failf(data, "Uploading to a URL without a file name!");
     free(rawPath);
@@ -4241,7 +4260,7 @@ static CURLcode ftp_dophase_done(struct Curl_easy *data, bool connected)
     }
   }
 
-  if(ftp->transfer != FTPTRANSFER_BODY)
+  if(ftp->transfer != PPTRANSFER_BODY)
     /* no data to transfer */
     Curl_setup_transfer(data, -1, -1, FALSE, -1);
   else if(!connected)
@@ -4345,23 +4364,23 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
 
     switch(command) {
     case 'A': /* ASCII mode */
-      data->set.prefer_ascii = TRUE;
+      data->state.prefer_ascii = TRUE;
       break;
 
     case 'D': /* directory mode */
-      data->set.ftp_list_only = TRUE;
+      data->state.list_only = TRUE;
       break;
 
     case 'I': /* binary mode */
     default:
       /* switch off ASCII */
-      data->set.prefer_ascii = FALSE;
+      data->state.prefer_ascii = FALSE;
       break;
     }
   }
 
   /* get some initial data into the ftp struct */
-  ftp->transfer = FTPTRANSFER_BODY;
+  ftp->transfer = PPTRANSFER_BODY;
   ftp->downloadsize = 0;
   conn->proto.ftpc.known_filesize = -1; /* unknown size for now */
 

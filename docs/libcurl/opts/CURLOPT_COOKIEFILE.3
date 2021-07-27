@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -44,19 +44,19 @@ libcurl will instead read from stdin.
 This option only \fBreads\fP cookies. To make libcurl write cookies to file,
 see \fICURLOPT_COOKIEJAR(3)\fP.
 
-Exercise caution if you are using this option and multiple transfers may occur.
-If you use the Set-Cookie format and don't specify a domain then the cookie is
-sent for any domain (even after redirects are followed) and cannot be modified
-by a server-set cookie. If a server sets a cookie of the same name then both
-will be sent on a future transfer to that server, likely not what you intended.
-To address these issues set a domain in Set-Cookie (doing that will include
-sub-domains) or use the Netscape format.
+If you use the Set-Cookie file format and don't specify a domain then the
+cookie is not sent since the domain will never match. To address this, set a
+domain in Set-Cookie line (doing that will include sub-domains) or preferably:
+use the Netscape format.
 
 If you use this option multiple times, you just add more files to read.
 Subsequent files will add more cookies.
 
 The application does not have to keep the string around after setting this
 option.
+
+Setting this option to NULL will (since 7.77.0) explicitly disable the cookie
+engine and clear the list of files to read cookies from.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

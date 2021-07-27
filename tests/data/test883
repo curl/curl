@@ -39,7 +39,7 @@ pop3
 POP3 external authentication
  </name>
  <command>
-'pop3://user;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/883'
+'pop3://user;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/%TESTNUMBER'
 </command>
 </client>
 
@@ -50,7 +50,7 @@ POP3 external authentication
 CAPA
 AUTH EXTERNAL
 dXNlcg==
-RETR 883
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

@@ -156,7 +156,8 @@ typedef enum {
   CURLSSLBACKEND_MBEDTLS = 11,
   CURLSSLBACKEND_MESALINK = 12,
   CURLSSLBACKEND_BEARSSL = 13,
-  CURLSSLBACKEND_UNITYTLS = 14
+  CURLSSLBACKEND_RUSTLS = 14,
+  CURLSSLBACKEND_UNITYTLS = 15
 } curl_sslbackend;
 
 /* aliases for library clones and renames */
@@ -612,6 +613,7 @@ typedef enum {
   CURLE_HTTP3,                   /* 95 - An HTTP/3 layer problem */
   CURLE_QUIC_CONNECT_ERROR,      /* 96 - QUIC connection error */
   CURLE_PROXY,                   /* 97 - proxy handshake error */
+  CURLE_SSL_CLIENTCERT,          /* 98 - client-side certificate required */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -887,6 +889,10 @@ typedef enum {
 /* - CURLSSLOPT_NATIVE_CA tells libcurl to use standard certificate store of
    operating system. Currently implemented under MS-Windows. */
 #define CURLSSLOPT_NATIVE_CA (1<<4)
+
+/* - CURLSSLOPT_AUTO_CLIENT_CERT tells libcurl to automatically locate and use
+   a client certificate for authentication. (Schannel) */
+#define CURLSSLOPT_AUTO_CLIENT_CERT (1<<5)
 
 /* The default connection attempt delay in milliseconds for happy eyeballs.
    CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3 and happy-eyeballs-timeout-ms.d document
@@ -1461,8 +1467,8 @@ typedef enum {
 #define CURLOPT_SERVER_RESPONSE_TIMEOUT CURLOPT_FTP_RESPONSE_TIMEOUT
 
   /* Set this option to one of the CURL_IPRESOLVE_* defines (see below) to
-     tell libcurl to resolve names to those IP versions only. This only has
-     affect on systems with support for more than one, i.e IPv4 _and_ IPv6. */
+     tell libcurl to use those IP versions only. This only has effect on
+     systems with support for more than one, i.e IPv4 _and_ IPv6. */
   CURLOPT(CURLOPT_IPRESOLVE, CURLOPTTYPE_VALUES, 113),
 
   /* Set this option to limit the size of a file that will be downloaded from
@@ -2079,6 +2085,23 @@ typedef enum {
   /* Parameters for V4 signature */
   CURLOPT(CURLOPT_AWS_SIGV4, CURLOPTTYPE_STRINGPOINT, 305),
 
+  /* Same as CURLOPT_SSL_VERIFYPEER but for DOH (DNS-over-HTTPS) servers. */
+  CURLOPT(CURLOPT_DOH_SSL_VERIFYPEER, CURLOPTTYPE_LONG, 306),
+
+  /* Same as CURLOPT_SSL_VERIFYHOST but for DOH (DNS-over-HTTPS) servers. */
+  CURLOPT(CURLOPT_DOH_SSL_VERIFYHOST, CURLOPTTYPE_LONG, 307),
+
+  /* Same as CURLOPT_SSL_VERIFYSTATUS but for DOH (DNS-over-HTTPS) servers. */
+  CURLOPT(CURLOPT_DOH_SSL_VERIFYSTATUS, CURLOPTTYPE_LONG, 308),
+
+  /* The CA certificates as "blob" used to validate the peer certificate
+     this option is used only if SSL_VERIFYPEER is true */
+  CURLOPT(CURLOPT_CAINFO_BLOB, CURLOPTTYPE_BLOB, 309),
+
+  /* The CA certificates as "blob" used to validate the proxy certificate
+     this option is used only if PROXY_SSL_VERIFYPEER is true */
+  CURLOPT(CURLOPT_PROXY_CAINFO_BLOB, CURLOPTTYPE_BLOB, 310),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2113,10 +2136,10 @@ typedef enum {
   /* Below here follows defines for the CURLOPT_IPRESOLVE option. If a host
      name resolves addresses using more than one IP protocol version, this
      option might be handy to force libcurl to use a specific IP version. */
-#define CURL_IPRESOLVE_WHATEVER 0 /* default, resolves addresses to all IP
+#define CURL_IPRESOLVE_WHATEVER 0 /* default, uses addresses to all IP
                                      versions that your system allows */
-#define CURL_IPRESOLVE_V4       1 /* resolve to IPv4 addresses */
-#define CURL_IPRESOLVE_V6       2 /* resolve to IPv6 addresses */
+#define CURL_IPRESOLVE_V4       1 /* uses only IPv4 addresses/connections */
+#define CURL_IPRESOLVE_V6       2 /* uses only IPv6 addresses/connections */
 
   /* three convenient "aliases" that follow the name scheme better */
 #define CURLOPT_RTSPHEADER CURLOPT_HTTPHEADER
@@ -2752,8 +2775,9 @@ typedef enum {
   CURLINFO_RETRY_AFTER      = CURLINFO_OFF_T + 57,
   CURLINFO_EFFECTIVE_METHOD = CURLINFO_STRING + 58,
   CURLINFO_PROXY_ERROR      = CURLINFO_LONG + 59,
+  CURLINFO_REFERER          = CURLINFO_STRING + 60,
 
-  CURLINFO_LASTONE          = 59
+  CURLINFO_LASTONE          = 60
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
@@ -2856,6 +2880,7 @@ typedef enum {
   CURLVERSION_SEVENTH,
   CURLVERSION_EIGHTH,
   CURLVERSION_NINTH,
+  CURLVERSION_TENTH,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -2864,7 +2889,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_NINTH
+#define CURLVERSION_NOW CURLVERSION_TENTH
 
 struct curl_version_info_data {
   CURLversion age;          /* age of the returned struct */
@@ -2917,6 +2942,9 @@ struct curl_version_info_data {
 
   /* These fields were added in CURLVERSION_NINTH */
   const char *hyper_version; /* human readable string. */
+
+  /* These fields were added in CURLVERSION_TENTH */
+  const char *gsasl_version; /* human readable string. */
 };
 typedef struct curl_version_info_data curl_version_info_data;
 
@@ -2954,6 +2982,7 @@ typedef struct curl_version_info_data curl_version_info_data;
 #define CURL_VERSION_ZSTD         (1<<26) /* zstd features are present */
 #define CURL_VERSION_UNICODE      (1<<27) /* Unicode support on Windows */
 #define CURL_VERSION_HSTS         (1<<28) /* HSTS is supported */
+#define CURL_VERSION_GSASL        (1<<29) /* libgsasl is supported */
 
  /*
  * NAME curl_version_info()

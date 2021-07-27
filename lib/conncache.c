@@ -466,7 +466,6 @@ Curl_conncache_extract_bundle(struct Curl_easy *data,
     data->state.conn_cache->num_conn--;
     DEBUGF(infof(data, "The cache now contains %zu members\n",
                  data->state.conn_cache->num_conn));
-    conn_candidate->data = data; /* associate! */
   }
 
   return conn_candidate;
@@ -529,7 +528,6 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
     connc->num_conn--;
     DEBUGF(infof(data, "The cache now contains %zu members\n",
                  connc->num_conn));
-    conn_candidate->data = data; /* associate! */
   }
   CONNCACHE_UNLOCK(data);
 

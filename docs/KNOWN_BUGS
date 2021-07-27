@@ -19,7 +19,6 @@ problems may have been fixed or changed somewhat since this was written!
  1.6 Unnecessary close when 401 received waiting for 100
  1.7 Deflate error after all content was received
  1.8 DoH isn't used for all name resolves when enabled
- 1.9 HTTP/2 frames while in the connection pool kill reuse
  1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
 
  2. TLS
@@ -47,7 +46,6 @@ problems may have been fixed or changed somewhat since this was written!
  4.1 -J and -O with %-encoded file names
  4.2 -J with -C - fails
  4.3 --retry and transfer timeouts
- 4.4 Improve --data-urlencode space encoding
 
  5. Build and portability issues
  5.1 OS400 port requires deprecated IBM library
@@ -113,6 +111,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.12 'no_proxy' string-matches IPv6 numerical addresses
  11.13 wakeup socket disconnect causes havoc
  11.14 Multi perform hangs waiting for threaded resolver
+ 11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
 
  12. LDAP
  12.1 OpenLDAP hangs after returning results
@@ -138,9 +137,21 @@ problems may have been fixed or changed somewhat since this was written!
  15.9 cert paths autodetected when cross-compiling
  15.10 libspsl is not supported
  15.11 ExternalProject_Add does not set CURL_CA_PATH
+ 15.12 cannot enable LDAPS on Windows
 
  16. Applications
  16.1 pulseUI VPN client
+
+ 17. HTTP/2
+ 17.1 Excessive HTTP/2 packets with TCP_NODELAY
+ 17.2 HTTP/2 frames while in the connection pool kill reuse
+ 17.3 ENHANCE_YOUR_CALM causes infinite retries
+ 17.4 Connection failures with parallel HTTP/2
+
+ 18. HTTP/3
+ 18.1 If the HTTP/3 server closes connection during upload curl hangs
+ 18.2 Uploading HTTP/3 files gets interrupted at certain file sizes
+ 18.3 HTTP/3 download is 5x times slower than HTTP/2
 
 ==============================================================================
 
@@ -202,16 +213,6 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/pull/3857 and
  https://github.com/curl/curl/pull/3850
-
-1.9 HTTP/2 frames while in the connection pool kill reuse
-
- If the server sends HTTP/2 frames (like for example an HTTP/2 PING frame) to
- curl while the connection is held in curl's connection pool, the socket will
- be found readable when considered for reuse and that makes curl think it is
- dead and then it will be closed and a new connection gets created instead.
-
- This is *best* fixed by adding monitoring to connections while they are kept
- in the pool so that pings can be responded to appropriately.
 
 1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
 
@@ -397,13 +398,6 @@ problems may have been fixed or changed somewhat since this was written!
  original position where it was at before the previous failed attempt. See
  https://curl.se/mail/lib-2008-01/0080.html and Mandriva bug report
  https://qa.mandriva.com/show_bug.cgi?id=22565
-
-4.4 Improve --data-urlencode space encoding
-
- ASCII space characters in --data-urlencode are currently encoded as %20
- rather than +, which RFC 1866 says should be used.
-
- See https://github.com/curl/curl/issues/3229
 
 5. Build and portability issues
 
@@ -813,7 +807,17 @@ problems may have been fixed or changed somewhat since this was written!
 
 11.9 DoH doesn't inherit all transfer options
 
- https://github.com/curl/curl/issues/4578
+ Some options are not inherited because they are not relevant for the DoH SSL
+ connections, or inheriting the option may result in unexpected behavior. For
+ example the user's debug function callback is not inherited because it would
+ be unexpected for internal handles (ie DoH handles) to be passed to that
+ callback.
+
+ If an option is not inherited then it is not possible to set it separately for
+ DoH without a DoH-specific option. For example: CURLOPT_DOH_SSL_VERIFYHOST,
+ CURLOPT_DOH_SSL_VERIFYPEER and CURLOPT_DOH_SSL_VERIFYSTATUS.
+
+ See https://github.com/curl/curl/issues/6605
 
 11.10 Blocking socket operations in non-blocking API
 
@@ -854,6 +858,15 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/2975 and
  https://github.com/curl/curl/issues/4852
+
+11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
+
+ When libcurl creates sockets with socketpair(), those are not "exposed" in
+ CURLOPT_OPENSOCKETFUNCTION and therefore might surprise and be unknown to
+ applications that expects and wants all sockets known beforehand. One way to
+ address this issue is to introduce a CURLOPT_OPENSOCKETPAIRFUNCTION callback.
+
+ https://github.com/curl/curl/issues/5747
 
 12. LDAP
 
@@ -974,6 +987,10 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/6313
 
+15.12 cannot enable LDAPS on Windows
+
+ See https://github.com/curl/curl/issues/6284
+
 16. Applications
 
 16.1 pulseUI VPN client
@@ -988,3 +1005,51 @@ problems may have been fixed or changed somewhat since this was written!
  See
  https://community.pulsesecure.net/t5/Pulse-Desktop-Clients/Linux-Pulse-Client-does-not-work-with-curl-7-74/m-p/44378
  and https://github.com/curl/curl/issues/6306
+
+17. HTTP/2
+
+17.1 Excessive HTTP/2 packets with TCP_NODELAY
+
+ Because of how curl sets TCP_NODELAY by default, HTTP/2 requests are issued
+ using more separate TCP packets than it would otherwise need to use. This
+ means spending more bytes than it has to. Just disabling TCP_NODELAY for
+ HTTP/2 is also not the correct fix because that then makes the outgoing
+ packets to get delayed.
+
+ See https://github.com/curl/curl/issues/6363
+
+17.2 HTTP/2 frames while in the connection pool kill reuse
+
+ If the server sends HTTP/2 frames (like for example an HTTP/2 PING frame) to
+ curl while the connection is held in curl's connection pool, the socket will
+ be found readable when considered for reuse and that makes curl think it is
+ dead and then it will be closed and a new connection gets created instead.
+
+ This is *best* fixed by adding monitoring to connections while they are kept
+ in the pool so that pings can be responded to appropriately.
+
+17.3 ENHANCE_YOUR_CALM causes infinite retries
+
+ Infinite retries with 2 parallel requests on one connection receiving GOAWAY
+ with ENHANCE_YOUR_CALM error code.
+
+ See https://github.com/curl/curl/issues/5119
+
+17.4 Connection failures with parallel HTTP/2
+
+ See https://github.com/curl/curl/issues/5611
+
+
+18. HTTP/3
+
+18.1 If the HTTP/3 server closes connection during upload curl hangs
+
+ See https://github.com/curl/curl/issues/6606
+
+18.2 Uploading HTTP/3 files gets interrupted at certain file sizes
+
+ See https://github.com/curl/curl/issues/6510
+
+18.3 HTTP/3 download is 5x times slower than HTTP/2
+
+ See https://github.com/curl/curl/issues/6494

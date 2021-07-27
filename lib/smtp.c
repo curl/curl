@@ -136,6 +136,7 @@ const struct Curl_handler Curl_handler_smtp = {
   smtp_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
   ZERO_NULL,                        /* connection_check */
+  ZERO_NULL,                        /* attach connection */
   PORT_SMTP,                        /* defport */
   CURLPROTO_SMTP,                   /* protocol */
   CURLPROTO_SMTP,                   /* family */
@@ -164,6 +165,7 @@ const struct Curl_handler Curl_handler_smtps = {
   smtp_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
   ZERO_NULL,                        /* connection_check */
+  ZERO_NULL,                        /* attach connection */
   PORT_SMTPS,                       /* defport */
   CURLPROTO_SMTPS,                  /* protocol */
   CURLPROTO_SMTP,                   /* family */
@@ -894,7 +896,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
       for(;;) {
         size_t llen;
         size_t wordlen;
-        unsigned int mechbit;
+        unsigned short mechbit;
 
         while(len &&
               (*line == ' ' || *line == '\t' ||
@@ -1433,7 +1435,7 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
   }
 
   /* Clear the transfer mode for the next request */
-  smtp->transfer = FTPTRANSFER_BODY;
+  smtp->transfer = PPTRANSFER_BODY;
 
   return result;
 }
@@ -1457,7 +1459,7 @@ static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
 
   if(data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    smtp->transfer = FTPTRANSFER_INFO;
+    smtp->transfer = PPTRANSFER_INFO;
   }
 
   *dophase_done = FALSE; /* not done yet */
@@ -1564,7 +1566,7 @@ static CURLcode smtp_dophase_done(struct Curl_easy *data, bool connected)
 
   (void)connected;
 
-  if(smtp->transfer != FTPTRANSFER_BODY)
+  if(smtp->transfer != PPTRANSFER_BODY)
     /* no data to transfer */
     Curl_setup_transfer(data, -1, -1, FALSE, -1);
 
@@ -1821,7 +1823,7 @@ CURLcode Curl_smtp_escape_eob(struct Curl_easy *data, const ssize_t nread)
       return CURLE_OUT_OF_MEMORY;
     }
   }
-  DEBUGASSERT(data->set.upload_buffer_size >= (size_t)nread);
+  DEBUGASSERT((size_t)data->set.upload_buffer_size >= (size_t)nread);
 
   /* Have we already sent part of the EOB? */
   eob_sent = smtp->eob;

@@ -18,7 +18,7 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib513
+lib%TESTNUMBER
 </tool>
 
  <name>
@@ -26,7 +26,7 @@ send HTTP POST using read callback that returns CURL_READFUNC_ABORT
  </name>
 # the 1s post-command delay helps to prevent a spurious failure on s390
  <command delay="1">
-http://%HOSTIP:%HTTPPORT/513
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -34,7 +34,7 @@ http://%HOSTIP:%HTTPPORT/513
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-POST /513 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 1

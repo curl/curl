@@ -85,7 +85,7 @@ static char *max5data(curl_off_t bytes, char *max5)
               CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE,
               (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/CURL_OFF_T_C(10)) );
 
-#if (CURL_SIZEOF_CURL_OFF_T > 4)
+#if (SIZEOF_CURL_OFF_T > 4)
 
   else if(bytes < CURL_OFF_T_C(10000) * ONE_MEGABYTE)
     /* 'XXXXM' is good until we're at 10000MB or above */
@@ -241,6 +241,8 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
   data->progress.is_t_startransfer_set = false;
   data->progress.ul_limit_start = data->progress.start;
   data->progress.dl_limit_start = data->progress.start;
+  data->progress.ul_limit_size = 0;
+  data->progress.dl_limit_size = 0;
   data->progress.downloaded = 0;
   data->progress.uploaded = 0;
   /* clear all bits except HIDE and HEADERS_OUT */
@@ -321,14 +323,14 @@ void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 void Curl_ratelimit(struct Curl_easy *data, struct curltime now)
 {
   /* don't set a new stamp unless the time since last update is long enough */
-  if(data->set.max_recv_speed > 0) {
+  if(data->set.max_recv_speed) {
     if(Curl_timediff(now, data->progress.dl_limit_start) >=
        MIN_RATE_LIMIT_PERIOD) {
       data->progress.dl_limit_start = now;
       data->progress.dl_limit_size = data->progress.downloaded;
     }
   }
-  if(data->set.max_send_speed > 0) {
+  if(data->set.max_send_speed) {
     if(Curl_timediff(now, data->progress.ul_limit_start) >=
        MIN_RATE_LIMIT_PERIOD) {
       data->progress.ul_limit_start = now;
@@ -369,94 +371,82 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
   }
 }
 
+/* returns the average speed in bytes / second */
+static curl_off_t trspeed(curl_off_t size, /* number of bytes */
+                          curl_off_t us)   /* microseconds */
+{
+  if(us < 1)
+    return size * 1000000;
+  return (curl_off_t)((long double)size/us * 1000000);
+}
+
 /* returns TRUE if it's time to show the progress meter */
 static bool progress_calc(struct Curl_easy *data, struct curltime now)
 {
-  curl_off_t timespent;
-  curl_off_t timespent_ms; /* milliseconds */
-  curl_off_t dl = data->progress.downloaded;
-  curl_off_t ul = data->progress.uploaded;
   bool timetoshow = FALSE;
+  struct Progress * const p = &data->progress;
 
-  /* The time spent so far (from the start) */
-  data->progress.timespent = Curl_timediff_us(now, data->progress.start);
-  timespent = (curl_off_t)data->progress.timespent/1000000; /* seconds */
-  timespent_ms = (curl_off_t)data->progress.timespent/1000; /* ms */
-
-  /* The average download speed this far */
-  if(dl < CURL_OFF_T_MAX/1000)
-    data->progress.dlspeed = (dl * 1000 / (timespent_ms>0?timespent_ms:1));
-  else
-    data->progress.dlspeed = (dl / (timespent>0?timespent:1));
-
-  /* The average upload speed this far */
-  if(ul < CURL_OFF_T_MAX/1000)
-    data->progress.ulspeed = (ul * 1000 / (timespent_ms>0?timespent_ms:1));
-  else
-    data->progress.ulspeed = (ul / (timespent>0?timespent:1));
+  /* The time spent so far (from the start) in microseconds */
+  p->timespent = Curl_timediff_us(now, p->start);
+  p->dlspeed = trspeed(p->downloaded, p->timespent);
+  p->ulspeed = trspeed(p->uploaded, p->timespent);
 
   /* Calculations done at most once a second, unless end is reached */
-  if(data->progress.lastshow != now.tv_sec) {
+  if(p->lastshow != now.tv_sec) {
     int countindex; /* amount of seconds stored in the speeder array */
-    int nowindex = data->progress.speeder_c% CURR_TIME;
-    data->progress.lastshow = now.tv_sec;
+    int nowindex = p->speeder_c% CURR_TIME;
+    p->lastshow = now.tv_sec;
     timetoshow = TRUE;
 
     /* Let's do the "current speed" thing, with the dl + ul speeds
        combined. Store the speed at entry 'nowindex'. */
-    data->progress.speeder[ nowindex ] =
-      data->progress.downloaded + data->progress.uploaded;
+    p->speeder[ nowindex ] = p->downloaded + p->uploaded;
 
     /* remember the exact time for this moment */
-    data->progress.speeder_time [ nowindex ] = now;
+    p->speeder_time [ nowindex ] = now;
 
     /* advance our speeder_c counter, which is increased every time we get
        here and we expect it to never wrap as 2^32 is a lot of seconds! */
-    data->progress.speeder_c++;
+    p->speeder_c++;
 
     /* figure out how many index entries of data we have stored in our speeder
        array. With N_ENTRIES filled in, we have about N_ENTRIES-1 seconds of
        transfer. Imagine, after one second we have filled in two entries,
        after two seconds we've filled in three entries etc. */
-    countindex = ((data->progress.speeder_c >= CURR_TIME)?
-                  CURR_TIME:data->progress.speeder_c) - 1;
+    countindex = ((p->speeder_c >= CURR_TIME)? CURR_TIME:p->speeder_c) - 1;
 
     /* first of all, we don't do this if there's no counted seconds yet */
     if(countindex) {
       int checkindex;
       timediff_t span_ms;
+      curl_off_t amount;
 
       /* Get the index position to compare with the 'nowindex' position.
          Get the oldest entry possible. While we have less than CURR_TIME
          entries, the first entry will remain the oldest. */
-      checkindex = (data->progress.speeder_c >= CURR_TIME)?
-        data->progress.speeder_c%CURR_TIME:0;
+      checkindex = (p->speeder_c >= CURR_TIME)? p->speeder_c%CURR_TIME:0;
 
       /* Figure out the exact time for the time span */
-      span_ms = Curl_timediff(now, data->progress.speeder_time[checkindex]);
+      span_ms = Curl_timediff(now, p->speeder_time[checkindex]);
       if(0 == span_ms)
         span_ms = 1; /* at least one millisecond MUST have passed */
 
       /* Calculate the average speed the last 'span_ms' milliseconds */
-      {
-        curl_off_t amount = data->progress.speeder[nowindex]-
-          data->progress.speeder[checkindex];
+      amount = p->speeder[nowindex]- p->speeder[checkindex];
 
-        if(amount > CURL_OFF_T_C(4294967) /* 0xffffffff/1000 */)
-          /* the 'amount' value is bigger than would fit in 32 bits if
-             multiplied with 1000, so we use the double math for this */
-          data->progress.current_speed = (curl_off_t)
-            ((double)amount/((double)span_ms/1000.0));
-        else
-          /* the 'amount' value is small enough to fit within 32 bits even
-             when multiplied with 1000 */
-          data->progress.current_speed = amount*CURL_OFF_T_C(1000)/span_ms;
-      }
+      if(amount > CURL_OFF_T_C(4294967) /* 0xffffffff/1000 */)
+        /* the 'amount' value is bigger than would fit in 32 bits if
+           multiplied with 1000, so we use the double math for this */
+        p->current_speed = (curl_off_t)
+          ((double)amount/((double)span_ms/1000.0));
+      else
+        /* the 'amount' value is small enough to fit within 32 bits even
+           when multiplied with 1000 */
+        p->current_speed = amount*CURL_OFF_T_C(1000)/span_ms;
     }
     else
       /* the first second we use the average */
-      data->progress.current_speed =
-        data->progress.ulspeed + data->progress.dlspeed;
+      p->current_speed = p->ulspeed + p->dlspeed;
 
   } /* Calculations end */
   return timetoshow;

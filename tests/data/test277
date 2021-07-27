@@ -9,7 +9,7 @@ HTTP FORMPOST
 <reply>
 <data>
 HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 11
 
@@ -27,7 +27,7 @@ http
 HTTP RFC1867-type formposting with custom Content-Type
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/277 -F name=daniel -H "Content-Type: text/info"
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -F name=daniel -H "Content-Type: text/info"
 </command>
 </client>
 
@@ -38,7 +38,7 @@ s/^--------------------------[a-z0-9]*/--------------------------/
 s/boundary=------------------------[a-z0-9]*/boundary=------------------------/
 </strippart>
 <protocol>
-POST /want/277 HTTP/1.1
+POST /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

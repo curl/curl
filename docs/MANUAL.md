@@ -968,7 +968,7 @@ Example to use a remote Metalink file:
 To use a Metalink file in the local file system, use FILE protocol
 (`file://`):
 
-    curl --metalink file://example.metalink
+    curl --metalink file:///example.metalink
 
 Please note that if FILE protocol is disabled, there is no way to use a local
 Metalink file at the time of this writing. Also note that if `--metalink` and

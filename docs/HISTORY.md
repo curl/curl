@@ -126,15 +126,17 @@ also introduced libcurl's ability to do persistent connections. 24000 lines of
 code. The libcurl major SONAME number was bumped to 2 due to this overhaul.
 The first experimental ftps:// support was added.
 
-August: curl is bundled in Mac OS X, 10.1. It was already becoming more and
-more of a standard utility of Linux distributions and a regular in the BSD
-ports collections. The curl website gets 8000 visits weekly. Curl Corporation
-contacted Daniel to discuss "the name issue". After Daniel's reply, they have
-never since got back in touch again.
+August: The curl website gets 8000 visits weekly. Curl Corporation contacted
+Daniel to discuss "the name issue". After Daniel's reply, they have never
+since got back in touch again.
 
 September: libcurl 7.9 introduces cookie jar and curl_formadd(). During the
 forthcoming 7.9.x releases, we introduced the multi interface slowly and
 without many whistles.
+
+September 25: curl (7.7.2) is bundled in Mac OS X (10.1) for the first time. It was
+already becoming more and more of a standard utility of Linux distributions
+and a regular in the BSD ports collections.
 
 2002
 ----
@@ -255,7 +257,7 @@ January: Added support for RTSP
 
 February: security vulnerability: libcurl data callback excessive length
 
-March: The project switched over to use git (hosted by github) instead of CVS
+March: The project switched over to use git (hosted by GitHub) instead of CVS
 for source code control
 
 May: Added support for RTMP
@@ -402,5 +404,11 @@ April: added the cyassl backend (later renamed to WolfSSL)
 
  August: zstd support
 
- November: the website moves to www.curl.se. The website serves 10TB data
- monthly.
+ November: the website moves to curl.se. The website serves 10TB data monthly.
+
+2021
+----
+
+ February 3: curl 7.75.0 ships with support for Hyper is a HTTP backend
+
+ March 31: curl 7.76.0 ships with support for rustls

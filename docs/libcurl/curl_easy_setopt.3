@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -494,7 +494,7 @@ Timeout for the connection phase. See \fICURLOPT_CONNECTTIMEOUT(3)\fP
 .IP CURLOPT_CONNECTTIMEOUT_MS
 Millisecond timeout for the connection phase. See \fICURLOPT_CONNECTTIMEOUT_MS(3)\fP
 .IP CURLOPT_IPRESOLVE
-IP version to resolve to. See \fICURLOPT_IPRESOLVE(3)\fP
+IP version to use. See \fICURLOPT_IPRESOLVE(3)\fP
 .IP CURLOPT_CONNECT_ONLY
 Only connect, nothing else. See \fICURLOPT_CONNECT_ONLY(3)\fP
 .IP CURLOPT_USE_SSL
@@ -565,18 +565,31 @@ SSL version to use. See \fICURLOPT_SSLVERSION(3)\fP
 Proxy SSL version to use. See \fICURLOPT_PROXY_SSLVERSION(3)\fP
 .IP CURLOPT_SSL_VERIFYHOST
 Verify the host name in the SSL certificate. See \fICURLOPT_SSL_VERIFYHOST(3)\fP
+.IP CURLOPT_DOH_SSL_VERIFYHOST
+Verify the host name in the DOH (DNS-over-HTTPS) SSL certificate. See
+\fICURLOPT_DOH_SSL_VERIFYHOST(3)\fP
 .IP CURLOPT_PROXY_SSL_VERIFYHOST
 Verify the host name in the proxy SSL certificate. See \fICURLOPT_PROXY_SSL_VERIFYHOST(3)\fP
 .IP CURLOPT_SSL_VERIFYPEER
 Verify the SSL certificate. See \fICURLOPT_SSL_VERIFYPEER(3)\fP
+.IP CURLOPT_DOH_SSL_VERIFYPEER
+Verify the DOH (DNS-over-HTTPS) SSL certificate. See
+\fICURLOPT_DOH_SSL_VERIFYPEER(3)\fP
 .IP CURLOPT_PROXY_SSL_VERIFYPEER
 Verify the proxy SSL certificate. See \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP
 .IP CURLOPT_SSL_VERIFYSTATUS
 Verify the SSL certificate's status. See \fICURLOPT_SSL_VERIFYSTATUS(3)\fP
+.IP CURLOPT_DOH_SSL_VERIFYSTATUS
+Verify the DOH (DNS-over-HTTPS) SSL certificate's status. See
+\fICURLOPT_DOH_SSL_VERIFYSTATUS(3)\fP
 .IP CURLOPT_CAINFO
 CA cert bundle. See \fICURLOPT_CAINFO(3)\fP
+.IP CURLOPT_CAINFO_BLOB
+CA cert bundle memory buffer. See \fICURLOPT_CAINFO_BLOB(3)\fP
 .IP CURLOPT_PROXY_CAINFO
 Proxy CA cert bundle. See \fICURLOPT_PROXY_CAINFO(3)\fP
+.IP CURLOPT_PROXY_CAINFO_BLOB
+Proxy CA cert bundle memory buffer. See \fICURLOPT_PROXY_CAINFO_BLOB(3)\fP
 .IP CURLOPT_ISSUERCERT
 Issuer certificate. See \fICURLOPT_ISSUERCERT(3)\fP
 .IP CURLOPT_ISSUERCERT_BLOB
@@ -661,7 +674,7 @@ Strings passed on to libcurl must be shorter than 8000000 bytes, otherwise
 7.65.0).
 
 \fBCURLE_BAD_FUNCTION_ARGUMENT\fP is returned when the argument to an option
-is invalid, like perhaps out of range.a
+is invalid, like perhaps out of range.
 
 If you try to set an option that libcurl doesn't know about, perhaps because
 the library is too old to support it or the option was removed in a recent
@@ -681,3 +694,5 @@ if(curl) {
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), " curl_easy_cleanup "(3), " curl_easy_reset "(3), "
 .BR curl_easy_getinfo "(3), " curl_multi_setopt "(3), "
+.BR curl_easy_option_next "(3), " curl_easy_option_by_name "(3), "
+.BR curl_easy_option_by_id "(3), "

@@ -27,7 +27,7 @@ RFC821-only SMTP with username and password
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/939 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>
 
@@ -35,8 +35,8 @@ smtp://%HOSTIP:%SMTPPORT/939 --mail-rcpt recipient@example.com --mail-from sende
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 939
-HELO 939
+EHLO %TESTNUMBER
+HELO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA

@@ -26,7 +26,7 @@ ftp
 FTP PORT and 425 on download
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1211 -P -
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P -
 </command>
 
 </client>
@@ -43,8 +43,8 @@ PASS ftp@example.com
 PWD
 EPRT |1|
 TYPE I
-SIZE 1211
-RETR 1211
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 </protocol>
 <errorcode>
 28

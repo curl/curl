@@ -29,7 +29,7 @@ ipv6
 Get two FTP files with no remote EPRT support
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/a/path/212 ftp://%HOSTIP:%FTPPORT/a/path/212 -P -
+ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER -P -
 </command>
 <stdout>
 data blobb
@@ -53,11 +53,11 @@ CWD path
 EPRT |1|
 PORT 
 TYPE I
-SIZE 212
-RETR 212
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 PORT 
-SIZE 212
-RETR 212
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

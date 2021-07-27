@@ -1916,7 +1916,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libcrypto.lib;libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win32\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win32\VC10\LIB Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -1948,7 +1948,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libcrypto.lib;libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win64\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win64\VC10\LIB Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -1979,7 +1979,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libcrypto.lib;libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win32\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win32\VC10\LIB Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
@@ -2009,7 +2009,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libcrypto.lib;libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win64\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win64\VC10\LIB Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
@@ -2038,7 +2038,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libeay32.lib;ssleay32.lib;libssh2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libcrypto.lib;libssl.lib;libssh2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win32\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win32\VC10\LIB Debug;..\..\..\..\..\libssh2\build\Win32\VC10\LIB Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -2070,7 +2070,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libeay32.lib;ssleay32.lib;libssh2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libcrypto.lib;libssl.lib;libssh2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win64\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win64\VC10\LIB Debug;..\..\..\..\..\libssh2\build\Win64\VC10\LIB Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -2101,7 +2101,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libeay32.lib;ssleay32.lib;libssh2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libcrypto.lib;libssl.lib;libssh2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win32\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win32\VC10\LIB Release;..\..\..\..\..\libssh2\build\Win32\VC10\LIB Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
@@ -2131,7 +2131,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libeay32.lib;ssleay32.lib;libssh2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libcrypto.lib;libssl.lib;libssh2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win64\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win64\VC10\LIB Release;..\..\..\..\..\libssh2\build\Win64\VC10\LIB Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
@@ -2160,7 +2160,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libcrypto.lib;libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win32\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win32\VC10\DLL Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -2192,7 +2192,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libcrypto.lib;libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win64\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win64\VC10\DLL Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -2223,7 +2223,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libcrypto.lib;libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win32\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win32\VC10\DLL Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
@@ -2253,7 +2253,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libcrypto.lib;libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win64\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win64\VC10\DLL Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
@@ -2282,7 +2282,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libeay32.lib;ssleay32.lib;libssh2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libcrypto.lib;libssl.lib;libssh2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win32\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win32\VC10\DLL Debug;..\..\..\..\..\libssh2\build\Win32\VC10\DLL Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -2314,7 +2314,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libeay32.lib;ssleay32.lib;libssh2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurld.lib;libcrypto.lib;libssl.lib;libssh2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win64\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win64\VC10\DLL Debug;..\..\..\..\..\libssh2\build\Win64\VC10\DLL Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -2345,7 +2345,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libeay32.lib;ssleay32.lib;libssh2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libcrypto.lib;libssl.lib;libssh2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win32\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win32\VC10\DLL Release;..\..\..\..\..\libssh2\build\Win32\VC10\DLL Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
@@ -2375,7 +2375,7 @@
       <AdditionalIncludeDirectories>..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libssh2.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ws2_32.lib;wldap32.lib;libcurl.lib;libssh2.lib;libcrypto.lib;libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\build\Win64\VC10\$(Configuration);..\..\..\..\..\openssl\build\Win64\VC10\DLL Release;..\..\..\..\..\libssh2\build\Win64\VC10\DLL Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>

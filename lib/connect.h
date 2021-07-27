@@ -54,7 +54,7 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp);
 
 bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
-                      char *addr, long *port);
+                      char *addr, int *port);
 
 /*
  * Check if a connection seems to be alive.
@@ -81,9 +81,9 @@ void Curl_updateconninfo(struct Curl_easy *data, struct connectdata *conn,
 void Curl_conninfo_remote(struct Curl_easy *data, struct connectdata *conn,
                           curl_socket_t sockfd);
 void Curl_conninfo_local(struct Curl_easy *data, curl_socket_t sockfd,
-                         char *local_ip, long *local_port);
+                         char *local_ip, int *local_port);
 void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
-                          char *local_ip, long local_port);
+                          char *local_ip, int local_port);
 int Curl_closesocket(struct Curl_easy *data, struct connectdata *conn,
                      curl_socket_t sock);
 

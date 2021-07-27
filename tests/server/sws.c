@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -81,8 +81,7 @@ static bool use_gopher = FALSE;
 static int serverlogslocked = 0;
 static bool is_proxy = FALSE;
 
-#define REQBUFSIZ 150000
-#define REQBUFSIZ_TXT "149999"
+#define REQBUFSIZ (2*1024*1024)
 
 static long prevtestno = -1;    /* previous test number we served */
 static long prevpartno = -1;    /* previous part number we served */
@@ -238,10 +237,10 @@ static bool socket_domain_is_ip(void)
 /* parse the file on disk that might have a test number for us */
 static int parse_cmdfile(struct httprequest *req)
 {
-  int testnum = DOCNUMBER_NOTHING;
-  char buf[256];
   FILE *f = fopen(cmdfile, FOPEN_READTEXT);
   if(f) {
+    int testnum = DOCNUMBER_NOTHING;
+    char buf[256];
     while(fgets(buf, sizeof(buf), f)) {
       if(1 == sscanf(buf, "Testnum %d", &testnum)) {
         logmsg("[%s] cmdfile says testnum %d", cmdfile, testnum);
@@ -748,7 +747,6 @@ static int ProcessRequest(struct httprequest *req)
 
   if(req->open &&
      req->prot_version >= 11 &&
-     end &&
      req->reqbuf + req->offset > end + strlen(end_of_headers) &&
      !req->cl &&
      (!strncmp(req->reqbuf, "GET", strlen("GET")) ||
@@ -793,15 +791,15 @@ static void storerequest(const char *reqbuf, size_t totalsize)
   FILE *dump;
   const char *dumpfile = is_proxy?REQUEST_PROXY_DUMP:REQUEST_DUMP;
 
-  if(reqbuf == NULL)
+  if(!reqbuf)
     return;
   if(totalsize == 0)
     return;
 
   do {
     dump = fopen(dumpfile, "ab");
-  } while((dump == NULL) && ((error = errno) == EINTR));
-  if(dump == NULL) {
+  } while(!dump && ((error = errno) == EINTR));
+  if(!dump) {
     logmsg("[2] Error opening file %s error: %d %s",
            dumpfile, error, strerror(error));
     logmsg("Failed to write request input ");
@@ -2093,11 +2091,13 @@ int main(int argc, char *argv[])
                unix_socket, errno, strerror(errno));
         goto sws_cleanup;
       }
+#ifdef S_IFSOCK
       if((statbuf.st_mode & S_IFSOCK) != S_IFSOCK) {
         logmsg("Error binding socket, failed to stat %s: (%d) %s",
                unix_socket, error, strerror(error));
         goto sws_cleanup;
       }
+#endif
       /* dead socket, cleanup and retry bind */
       rc = unlink(unix_socket);
       if(0 != rc) {
@@ -2312,7 +2312,7 @@ int main(int argc, char *argv[])
           }
 
           /* Reset the request, unless we're still in the middle of reading */
-          if(rc != 0)
+          if(rc)
             init_httprequest(&req);
         } while(rc > 0);
       }

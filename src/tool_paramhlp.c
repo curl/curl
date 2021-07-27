@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,10 +40,11 @@
 
 struct getout *new_getout(struct OperationConfig *config)
 {
-  static int outnum = 0;
   struct getout *node = calloc(1, sizeof(struct getout));
   struct getout *last = config->url_last;
   if(node) {
+    static int outnum = 0;
+
     /* append this new node last in the list */
     if(last)
       last->next = node;
