@@ -155,6 +155,9 @@ problems may have been fixed or changed somewhat since this was written!
  18.1 If the HTTP/3 server closes connection during upload curl hangs
  18.2 Uploading HTTP/3 files gets interrupted at certain file sizes
  18.3 HTTP/3 download is 5x times slower than HTTP/2
+ 18.4 Downloading with HTTP/3 produces broken files
+ 18.5 HTTP/3 download with quiche halts after a while
+ 18.6 HTTP/3 multipart POST with quiche fails
 
 ==============================================================================
 
@@ -1084,3 +1087,15 @@ problems may have been fixed or changed somewhat since this was written!
 18.3 HTTP/3 download is 5x times slower than HTTP/2
 
  See https://github.com/curl/curl/issues/6494
+
+18.4 Downloading with HTTP/3 produces broken files
+
+ See https://github.com/curl/curl/issues/7351
+
+18.5 HTTP/3 download with quiche halts after a while
+
+ See https://github.com/curl/curl/issues/7339
+
+18.6 HTTP/3 multipart POST with quiche fails
+
+ https://github.com/curl/curl/issues/7125
