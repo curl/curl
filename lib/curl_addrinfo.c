@@ -51,7 +51,7 @@
 #endif
 
 #if defined(USE_UNIX_SOCKETS) && defined(WINAPI_FAMILY) && \
-    (WINAPI_FAMILY == WINAPI_FAMILY_APP)
+    ((WINAPI_FAMILY == WINAPI_FAMILY_APP) || (WINAPI_FAMILY == WINAPI_FAMILY_GAMES) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP))
    /* Required for sockaddr_un type */
 #  include <afunix.h>
 #endif
