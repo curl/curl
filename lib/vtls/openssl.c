@@ -3819,6 +3819,36 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
   return result;
 }
 
+static CURLcode cert_chain_pinning(struct Curl_easy* data, struct ssl_connect_data* connssl, 
+                                   const char* pinnedpubkey) {
+  CURLcode result;
+  STACK_OF(X509) *sk;
+  numcert_t numcerts;
+  struct ssl_backend_data *backend = connssl->backend;
+
+  sk = SSL_get_peer_cert_chain(backend->handle);
+  if(!sk) {
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  numcerts = sk_X509_num(sk);
+
+  result = Curl_ssl_init_certinfo(data, (int)numcerts);
+  if(result) {
+    return result;
+  }
+
+  int i = 0;
+  for (i = 0; i < (int)numcerts; i++) {
+    X509* cert = sk_X509_value(sk, i);
+    result = pkp_pin_peer_pubkey(data, cert, pinnedpubkey);
+    if (result == 0) {
+      break;
+    }
+  }
+  return result;
+}
+
 /*
  * Get the server cert, verify it and show it etc, only call failf() if the
  * 'strict' argument is TRUE as otherwise all this is for informational
@@ -3998,7 +4028,7 @@ static CURLcode servercert(struct Curl_easy *data,
 
   ptr = SSL_PINNED_PUB_KEY();
   if(!result && ptr) {
-    result = pkp_pin_peer_pubkey(data, backend->server_cert, ptr);
+    result = cert_chain_pinning(data, connssl, ptr);
     if(result)
       failf(data, "SSL: public key does not match pinned public key!");
   }
