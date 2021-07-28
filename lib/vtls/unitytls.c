@@ -31,7 +31,7 @@ struct ssl_backend_data {
   unitytls_x509list* clicert;
   unitytls_key* pk;
   unitytls_tlsctx* ctx;
-  struct Curl_easy* data;
+  struct connectdata* conn;
   curl_socket_t sockfd;
 };
 
@@ -223,10 +223,13 @@ static size_t on_read(void* userData, UInt8* buffer, size_t bufferLen, unitytls_
 static size_t on_write(void* userData, const UInt8* data, size_t bufferLen, unitytls_errorstate* errorState)
 {
   struct ssl_backend_data* backend = ((struct ssl_connect_data*)userData)->backend;
+  struct connectdata* conn = backend->conn;
+  struct Curl_llist_element *e = conn->easyq.head;
+  struct Curl_easy *entry = e->ptr;
   CURLcode result;
   ssize_t written = 0;
 
-  result = Curl_write_plain(backend->data, backend->sockfd, data, bufferLen, &written);
+  result = Curl_write_plain(entry, backend->sockfd, data, bufferLen, &written);
   if(result == CURLE_AGAIN) {
     unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WOULD_BLOCK);
     return 0;
@@ -256,7 +259,7 @@ static void on_certificate_request(void* userData, unitytls_tlsctx* ctx,
 static unitytls_x509verify_result on_verify(void* userData, unitytls_x509list_ref chain, unitytls_errorstate* errorState)
 {
   struct ssl_backend_data* backend = ((struct ssl_connect_data*)userData)->backend;
-  struct connectdata* conn = backend->data->conn;
+  struct connectdata* conn = backend->conn;
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const bool verifyhost = SSL_CONN_CONFIG(verifyhost);
   const char* const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name : conn->host.name;
@@ -445,7 +448,7 @@ static CURLcode unitytls_connect_step1(struct Curl_easy* data, struct connectdat
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  backend->data = data;
+  backend->conn = conn;
   backend->sockfd = conn->sock[sockindex];
   connssl->connecting_state = ssl_connect_2;
 
