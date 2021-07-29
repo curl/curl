@@ -1,22 +1,32 @@
-curl and libcurl 7.78.1
+curl and libcurl 7.79.0
 
  Public curl releases:         202
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2459
+ Contributors:                 2461
 
 This release includes the following changes:
 
- o
+ o bearssl: support CURLOPT_CAINFO_BLOB [3]
 
 This release includes the following bugfixes:
 
+ o c-hyper: remove the hyper_executor_poll() loop from Curl_http [13]
  o configure: tweak nghttp2 library name fix [2]
+ o curl-openssl.m4: check lib64 for the pkg-config file [14]
+ o curl.1: mention "global" flags [7]
  o CURLMOPT_TIMERFUNCTION.3: remove misplaced "time" [5]
+ o CURLOPT_DOH_URL.3: CURLOPT_OPENSOCKETFUNCTION is not inherited [8]
+ o CURLOPT_SSL_CTX_*.3: tidy up the example [15]
  o docs/MQTT: update state of username/password support [4]
+ o example/cookie_interface: fix scan-build printf warning [16]
+ o examples/cookie_interface: avoid printfing time_t directly [18]
  o Get rid of the unused HAVE_SIG_ATOMIC_T et. al.
  o http_proxy: clear 'sending' when the outgoing request is sent [6]
+ o limit-rate.d: clarify base unit [17]
+ o tests/*server.py: remove pidfile on server termination [1]
+ o tests/runtests.pl: cleanup copy&paste mistakes and unused code
 
 This release includes the following known bugs:
 
@@ -25,13 +35,25 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Bastian Krause, Christian Weisgerber, Dan Fandrich, Daniel Stenberg,
-  Josh Soref, Oleg Pudeyev, Ray Satiro, zloi-user on github,
-  (8 contributors)
+  Aleksandr Krotov, Bastian Krause, Carlo Marcelo Arenas Belón,
+  Christian Weisgerber, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  Daniel Woelfel, David Cook, Emil Engler, Josh Soref, Marc Hörsken,
+  Oleg Pudeyev, Ray Satiro, Viktor Szakats, zloi-user on github,
+  (16 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/bug/?i=7506
  [2] = https://curl.se/bug/?i=7485
+ [3] = https://curl.se/bug/?i=7468
  [4] = https://curl.se/bug/?i=7474
  [5] = https://curl.se/bug/?i=7470
  [6] = https://curl.se/bug/?i=7155
+ [7] = https://curl.se/bug/?i=7457
+ [8] = https://curl.se/bug/?i=7441
+ [13] = https://curl.se/bug/?i=7499
+ [14] = https://curl.se/bug/?i=7503
+ [15] = https://curl.se/bug/?i=7500
+ [16] = https://curl.se/bug/?i=7497
+ [17] = https://curl.se/bug/?i=7439
+ [18] = https://curl.se/bug/?i=7490
