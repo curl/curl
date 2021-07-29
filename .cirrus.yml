@@ -116,6 +116,7 @@ windows_task:
   env:
     CIRRUS_CLONE_DEPTH: 10
     MSYS2_PATH_TYPE: inherit
+    MAKEFLAGS: -j 2
 
   prepare_script: |
     %container_cmd% -l -c "cd $(echo '%cd%') && %prepare%"
