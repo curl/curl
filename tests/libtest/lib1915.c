@@ -49,7 +49,8 @@ static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
   if(host && (strlen(host) < e->namelen)) {
     strcpy(e->name, host);
     e->includeSubDomains = FALSE;
-    strcpy(e->expire, "20300320 01:02:03"); /* curl turns 32 that day */
+    strcpy(e->expire, "20370320 01:02:03"); /* curl turns 39 that day
+                                   just before 31-bit time_t overflow */
     fprintf(stderr, "add '%s'\n", host);
   }
   else
