@@ -33,7 +33,8 @@
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
 
-#if(MBEDTLS_VERSION_NUMBER >= 0x02070000)
+#if(MBEDTLS_VERSION_NUMBER >= 0x02070000) && \
+   (MBEDTLS_VERSION_NUMBER < 0x03000000)
   #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
 #endif
 #endif /* USE_MBEDTLS */
@@ -85,7 +86,7 @@ typedef mbedtls_md5_context MD5_CTX;
 static void MD5_Init(MD5_CTX *ctx)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  mbedtls_md5_starts(ctx);
+  (void) mbedtls_md5_starts(ctx);
 #else
   (void) mbedtls_md5_starts_ret(ctx);
 #endif
@@ -96,7 +97,7 @@ static void MD5_Update(MD5_CTX *ctx,
                        unsigned int length)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  mbedtls_md5_update(ctx, data, length);
+  (void) mbedtls_md5_update(ctx, data, length);
 #else
   (void) mbedtls_md5_update_ret(ctx, data, length);
 #endif
@@ -105,7 +106,7 @@ static void MD5_Update(MD5_CTX *ctx,
 static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  mbedtls_md5_finish(ctx, digest);
+  (void) mbedtls_md5_finish(ctx, digest);
 #else
   (void) mbedtls_md5_finish_ret(ctx, digest);
 #endif
