@@ -41,7 +41,9 @@
 #include <mbedtls/net.h>
 #endif
 #include <mbedtls/ssl.h>
+#if MBEDTLS_VERSION_NUMBER < 0x03000000
 #include <mbedtls/certs.h>
+#endif
 #include <mbedtls/x509.h>
 
 #include <mbedtls/error.h>
@@ -183,6 +185,17 @@ static Curl_send mbed_send;
 
 static CURLcode mbedtls_version_from_curl(int *mbedver, long version)
 {
+#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+  switch(version) {
+    case CURL_SSLVERSION_TLSv1_0:
+    case CURL_SSLVERSION_TLSv1_1:
+    case CURL_SSLVERSION_TLSv1_2:
+      *mbedver = MBEDTLS_SSL_MINOR_VERSION_3;
+      return CURLE_OK;
+    case CURL_SSLVERSION_TLSv1_3:
+      break;
+  }
+#else
   switch(version) {
     case CURL_SSLVERSION_TLSv1_0:
       *mbedver = MBEDTLS_SSL_MINOR_VERSION_1;
@@ -196,6 +209,8 @@ static CURLcode mbedtls_version_from_curl(int *mbedver, long version)
     case CURL_SSLVERSION_TLSv1_3:
       break;
   }
+#endif
+
   return CURLE_SSL_CONNECT_ERROR;
 }
 
@@ -205,8 +220,13 @@ set_ssl_version_min_max(struct Curl_easy *data, struct connectdata *conn,
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
+#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+  int mbedtls_ver_min = MBEDTLS_SSL_MINOR_VERSION_3;
+  int mbedtls_ver_max = MBEDTLS_SSL_MINOR_VERSION_3;
+#else
   int mbedtls_ver_min = MBEDTLS_SSL_MINOR_VERSION_1;
   int mbedtls_ver_max = MBEDTLS_SSL_MINOR_VERSION_1;
+#endif
   long ssl_version = SSL_CONN_CONFIG(version);
   long ssl_version_max = SSL_CONN_CONFIG(version_max);
   CURLcode result = CURLE_OK;
@@ -354,8 +374,15 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
   if(SSL_SET_OPTION(key) || SSL_SET_OPTION(key_blob)) {
     if(SSL_SET_OPTION(key)) {
+#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+      ret = mbedtls_pk_parse_keyfile(&backend->pk, SSL_SET_OPTION(key),
+                                     SSL_SET_OPTION(key_passwd),
+                                     mbedtls_ctr_drbg_random,
+                                     &backend->ctr_drbg);
+#else
       ret = mbedtls_pk_parse_keyfile(&backend->pk, SSL_SET_OPTION(key),
                                      SSL_SET_OPTION(key_passwd));
+#endif
 
       if(ret) {
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
@@ -369,9 +396,17 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
       const unsigned char *key_data =
         (const unsigned char *)ssl_key_blob->data;
       const char *passwd = SSL_SET_OPTION(key_passwd);
+#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+      ret = mbedtls_pk_parse_key(&backend->pk, key_data, ssl_key_blob->len,
+                                 (const unsigned char *)passwd,
+                                 passwd ? strlen(passwd) : 0,
+                                 mbedtls_ctr_drbg_random,
+                                 &backend->ctr_drbg);
+#else
       ret = mbedtls_pk_parse_key(&backend->pk, key_data, ssl_key_blob->len,
                                  (const unsigned char *)passwd,
                                  passwd ? strlen(passwd) : 0);
+#endif
 
       if(ret) {
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
@@ -426,10 +461,12 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   switch(SSL_CONN_CONFIG(version)) {
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
+#if MBEDTLS_VERSION_NUMBER < 0x03000000
     mbedtls_ssl_conf_min_version(&backend->config, MBEDTLS_SSL_MAJOR_VERSION_3,
                                  MBEDTLS_SSL_MINOR_VERSION_1);
     infof(data, "mbedTLS: Set min SSL version to TLS 1.0");
     break;
+#endif
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:
   case CURL_SSLVERSION_TLSv1_2:
@@ -632,7 +669,12 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     mbedtls_x509_crt *p;
     unsigned char pubkey[PUB_DER_MAX_BYTES];
 
+#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+    if(!peercert || !peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(p) ||
+       !peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(len)) {
+#else
     if(!peercert || !peercert->raw.p || !peercert->raw.len) {
+#endif
       failf(data, "Failed due to missing peer certificate");
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
     }
@@ -647,14 +689,25 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     /* Make a copy of our const peercert because mbedtls_pk_write_pubkey_der
        needs a non-const key, for now.
        https://github.com/ARMmbed/mbedtls/issues/396 */
+#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+    if(mbedtls_x509_crt_parse_der(p,
+                        peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(p),
+                        peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(len))) {
+#else
     if(mbedtls_x509_crt_parse_der(p, peercert->raw.p, peercert->raw.len)) {
+#endif
       failf(data, "Failed copying peer certificate");
       mbedtls_x509_crt_free(p);
       free(p);
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
     }
 
+#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+    size = mbedtls_pk_write_pubkey_der(&p->MBEDTLS_PRIVATE(pk), pubkey,
+                                       PUB_DER_MAX_BYTES);
+#else
     size = mbedtls_pk_write_pubkey_der(&p->pk, pubkey, PUB_DER_MAX_BYTES);
+#endif
 
     if(size <= 0) {
       failf(data, "Failed copying public key from peer certificate");
@@ -1064,12 +1117,17 @@ static CURLcode mbedtls_sha256sum(const unsigned char *input,
                                   unsigned char *sha256sum,
                                   size_t sha256len UNUSED_PARAM)
 {
+  /* TODO: explain this for different mbedtls 2.x vs 3 version */
   (void)sha256len;
 #if MBEDTLS_VERSION_NUMBER < 0x02070000
   mbedtls_sha256(input, inputlen, sha256sum, 0);
 #else
   /* returns 0 on success, otherwise failure */
+#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+  if(mbedtls_sha256(input, inputlen, sha256sum, 0) != 0)
+#else
   if(mbedtls_sha256_ret(input, inputlen, sha256sum, 0) != 0)
+#endif
     return CURLE_BAD_FUNCTION_ARGUMENT;
 #endif
   return CURLE_OK;
