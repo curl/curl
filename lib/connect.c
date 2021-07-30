@@ -589,12 +589,10 @@ static CURLcode trynextip(struct Curl_easy *data,
     struct Curl_addrinfo *ai = conn->tempaddr[tempindex];
 
     while(ai) {
-      if(ai) {
-        result = singleipconnect(data, conn, ai, tempindex);
-        if(result == CURLE_COULDNT_CONNECT) {
-          ai = ainext(conn, tempindex, TRUE);
-          continue;
-        }
+      result = singleipconnect(data, conn, ai, tempindex);
+      if(result == CURLE_COULDNT_CONNECT) {
+        ai = ainext(conn, tempindex, TRUE);
+        continue;
       }
       break;
     }
