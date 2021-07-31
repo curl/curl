@@ -17,7 +17,7 @@ page](https://curl.se/docs/manpage.html) or [the MANUAL
 document](https://curl.se/docs/manual.html). Find out how to install Curl
 by reading [the INSTALL document](https://curl.se/docs/install.html).
 
-libcurl is the library curl is using to do its job. It is readily available to
+libcurl is the library Curl is using to do its job. It is readily available to
 be used by your software. Read [the libcurl.3 man
 page](https://curl.se/libcurl/c/libcurl.html) to learn how!
 
