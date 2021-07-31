@@ -286,6 +286,16 @@ curl_off_t our_getpid(void)
   return pid;
 }
 
+static const char *cur_pidfilename = NULL;
+static void cleanup_pidfile(void)
+{
+  if(cur_pidfilename) {
+    logmsg("Removing pidfile %s", cur_pidfilename);
+    unlink(cur_pidfilename);
+    cur_pidfilename = NULL;
+  }
+}
+
 int write_pidfile(const char *filename)
 {
   FILE *pidfile;
@@ -300,6 +310,13 @@ int write_pidfile(const char *filename)
   fprintf(pidfile, "%" CURL_FORMAT_CURL_OFF_T "\n", pid);
   fclose(pidfile);
   logmsg("Wrote pid %" CURL_FORMAT_CURL_OFF_T " to %s", pid, filename);
+  if(cur_pidfilename) {
+    cleanup_pidfile();
+  }
+  else {
+    atexit(cleanup_pidfile);
+  }
+  cur_pidfilename = filename;
   return 1; /* success */
 }
 
