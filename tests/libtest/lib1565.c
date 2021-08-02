@@ -33,6 +33,10 @@
 #define CONN_NUM 3
 #define TIME_BETWEEN_START_SECS 2
 
+#ifdef _WIN32
+#define sleep(sec) Sleep((sec)*1000)
+#endif
+
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static CURL *pending_handles[CONN_NUM];
 static int pending_num = 0;
@@ -96,7 +100,8 @@ int test(char *URL)
   CURL *started_handles[CONN_NUM];
   int started_num = 0;
   int finished_num = 0;
-  pthread_t tid = 0;
+  pthread_t tid;
+  bool tid_is_valid = false;
   struct CURLMsg *message;
 
   start_test_timing();
@@ -108,7 +113,9 @@ int test(char *URL)
   url = URL;
 
   res = pthread_create(&tid, NULL, run_thread, NULL);
-  if(0 != res) {
+  if(!res)
+    tid_is_valid = true;
+  else {
     fprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
             __FILE__, __LINE__, res);
     goto test_cleanup;
@@ -182,7 +189,7 @@ test_cleanup:
     test_failure = res;
   pthread_mutex_unlock(&lock);
 
-  if(0 != tid)
+  if(tid_is_valid)
     pthread_join(tid, NULL);
 
   curl_multi_cleanup(multi);
