@@ -3,3 +3,4 @@ base:
   engine: sfz
   steps:
     - run: autoreconf -fi && ./configure --without-ssl
+    - run: make
