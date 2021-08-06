@@ -72,11 +72,11 @@ wchar_t *Curl_wcsdup(const wchar_t *src)
   size_t lengthnul;
   size_t lengthbytes;
 
-  if (SIZE_MAX - length < 1)
+  if(SIZE_MAX - length < 1)
     return (wchar_t *)NULL; /* overflow */
   lengthnul = length + 1;
 
-  if ((SIZE_MAX / sizeof(wchar_t)) < lengthnul)
+  if((SIZE_MAX / sizeof(wchar_t)) < lengthnul)
     return (wchar_t *)NULL; /* overflow */
   lengthbytes = lengthnul * sizeof(wchar_t);
 
