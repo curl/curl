@@ -208,11 +208,8 @@ static const char *octet2str(const char *beg, const char *end)
   size_t n = end - beg;
   char *buf = NULL;
 
-  if(!n)
-    return NULL;
-
   if(n <= (SIZE_T_MAX - 1) / 3) {
-    buf = malloc(3 * n + 1);
+    buf = calloc(3 * n + 1, 1);
     if(buf)
       for(n = 0; beg < end; n += 3)
         msnprintf(buf + n, 4, "%02x:", *(const unsigned char *) beg++);
