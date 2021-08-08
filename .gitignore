@@ -17,6 +17,7 @@
 .libs
 .project
 .settings
+.vscode
 /.vs
 /build/
 /builds/
