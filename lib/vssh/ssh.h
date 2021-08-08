@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if defined(HAVE_LIBSSH2_H)
+#ifdef HAVE_LIBSSH2_H
 #include <libssh2.h>
 #include <libssh2_sftp.h>
 #elif defined(HAVE_LIBSSH_LIBSSH_H)
@@ -154,7 +154,7 @@ struct ssh_conn {
   int orig_waitfor;             /* default READ/WRITE bits wait for */
   char *slash_pos;              /* used by the SFTP_CREATE_DIRS state */
 
-#if defined(USE_LIBSSH)
+#ifdef USE_LIBSSH
   char *readdir_linkPath;
   size_t readdir_len, readdir_totalLen, readdir_currLen;
 /* our variables */
@@ -209,7 +209,7 @@ struct ssh_conn {
 #endif /* USE_LIBSSH */
 };
 
-#if defined(USE_LIBSSH)
+#ifdef USE_LIBSSH
 
 #define CURL_LIBSSH_VERSION ssh_version(0)
 

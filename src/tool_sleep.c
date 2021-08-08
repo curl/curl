@@ -43,7 +43,7 @@
 
 void tool_go_sleep(long ms)
 {
-#if defined(MSDOS)
+#ifdef MSDOS
   delay(ms);
 #elif defined(WIN32)
   Sleep(ms);

@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(WIN32)
+#ifdef WIN32
 
  /*
   * MultiByte conversions using Windows kernel32 library.

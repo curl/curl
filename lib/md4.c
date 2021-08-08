@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+#ifndef CURL_DISABLE_CRYPTO_AUTH
 
 #include "curl_md4.h"
 #include "warnless.h"
@@ -48,7 +48,7 @@
 #endif
 #endif /* USE_MBEDTLS */
 
-#if defined(USE_GNUTLS)
+#ifdef USE_GNUTLS
 
 #include <nettle/md4.h>
 
@@ -190,7 +190,7 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
   if(ctx->data != NULL) {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
     mbedtls_md4(ctx->data, ctx->size, result);
 #else
     (void) mbedtls_md4_ret(ctx->data, ctx->size, result);

@@ -270,7 +270,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   SECURITY_STATUS status;
   char *user_name;
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void) data;
 #endif
 

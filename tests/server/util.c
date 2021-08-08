@@ -238,7 +238,7 @@ int wait_ms(int timeout_ms)
     errno = EINVAL;
     return -1;
   }
-#if defined(MSDOS)
+#ifdef MSDOS
   delay(timeout_ms);
 #elif defined(USE_WINSOCK)
   Sleep(timeout_ms);
@@ -247,7 +247,7 @@ int wait_ms(int timeout_ms)
   initial_tv = tvnow();
   do {
     int error;
-#if defined(HAVE_POLL_FINE)
+#ifdef HAVE_POLL_FINE
     r = poll(NULL, 0, pending_ms);
 #else
     pending_tv.tv_sec = pending_ms / 1000;
@@ -364,7 +364,7 @@ void clear_advisor_read_lock(const char *filename)
    its behavior is altered by the current locale. */
 static char raw_toupper(char in)
 {
-#if !defined(CURL_DOES_CONVERSIONS)
+#ifndef CURL_DOES_CONVERSIONS
   if(in >= 'a' && in <= 'z')
     return (char)('A' + in - 'a');
 #else

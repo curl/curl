@@ -100,7 +100,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #define DONE
 #endif /* __VMS */
 
-#if defined(WIN32)
+#ifdef WIN32
 
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {

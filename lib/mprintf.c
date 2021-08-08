@@ -193,7 +193,7 @@ static long dprintf_DollarString(char *input, char **end)
 
 static bool dprintf_IsQualifierNoDollar(const char *fmt)
 {
-#if defined(MP_HAVE_INT_EXTENSIONS)
+#ifdef MP_HAVE_INT_EXTENSIONS
   if(!strncmp(fmt, "I32", 3) || !strncmp(fmt, "I64", 3)) {
     return TRUE;
   }
@@ -205,7 +205,7 @@ static bool dprintf_IsQualifierNoDollar(const char *fmt)
   case '5': case '6': case '7': case '8': case '9':
   case 'h': case 'l': case 'L': case 'z': case 'q':
   case '*': case 'O':
-#if defined(MP_HAVE_INT_EXTENSIONS)
+#ifdef MP_HAVE_INT_EXTENSIONS
   case 'I':
 #endif
     return TRUE;
@@ -270,7 +270,7 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
       /* Handle the flags */
 
       while(dprintf_IsQualifierNoDollar(fmt)) {
-#if defined(MP_HAVE_INT_EXTENSIONS)
+#ifdef MP_HAVE_INT_EXTENSIONS
         if(!strncmp(fmt, "I32", 3)) {
           flags |= FLAGS_LONG;
           fmt += 3;
@@ -321,7 +321,7 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
         case 'h':
           flags |= FLAGS_SHORT;
           break;
-#if defined(MP_HAVE_INT_EXTENSIONS)
+#ifdef MP_HAVE_INT_EXTENSIONS
         case 'I':
 #if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
           flags |= FLAGS_LONGLONG;

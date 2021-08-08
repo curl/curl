@@ -1105,7 +1105,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
 
 #endif /* USE_GSKIT or USE_NSS or USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL */
 
-#if defined(USE_GSKIT)
+#ifdef USE_GSKIT
 
 static const char *checkOID(const char *beg, const char *end,
                             const char *oid)

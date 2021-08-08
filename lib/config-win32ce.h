@@ -299,7 +299,7 @@
 #define SIZEOF_LONG 4
 
 /* The size of `size_t', as computed by sizeof. */
-#if defined(_WIN64)
+#ifdef _WIN64
 #  define SIZEOF_SIZE_T 8
 #else
 #  define SIZEOF_SIZE_T 4

@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#if defined(NETWARE)
+#ifdef NETWARE
 void tool_pressanykey(void);
 #else
 #define tool_pressanykey() Curl_nop_stmt

@@ -87,21 +87,21 @@ static const struct {
  */
 void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
 {
-#if defined(USE_KERBEROS5)
+#ifdef USE_KERBEROS5
   /* Cleanup the gssapi structure */
   if(authused == SASL_MECH_GSSAPI) {
     Curl_auth_cleanup_gssapi(&conn->krb5);
   }
 #endif
 
-#if defined(USE_GSASL)
+#ifdef USE_GSASL
   /* Cleanup the GSASL structure */
   if(authused & (SASL_MECH_SCRAM_SHA_1 | SASL_MECH_SCRAM_SHA_256)) {
     Curl_auth_gsasl_cleanup(&conn->gsasl);
   }
 #endif
 
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
   /* Cleanup the NTLM structure */
   if(authused == SASL_MECH_NTLM) {
     Curl_auth_cleanup_ntlm(&conn->ntlm);
@@ -347,7 +347,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
       result = Curl_auth_create_external_message(conn->user, &resp);
   }
   else if(conn->bits.user_passwd) {
-#if defined(USE_KERBEROS5)
+#ifdef USE_KERBEROS5
     if((enabledmechs & SASL_MECH_GSSAPI) && Curl_auth_is_gssapi_supported() &&
        Curl_auth_user_contains_domain(conn->user)) {
       sasl->mutual_auth = FALSE;
@@ -603,7 +603,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     break;
 #endif
 
-#if defined(USE_KERBEROS5)
+#ifdef USE_KERBEROS5
   case SASL_GSSAPI:
     result = Curl_auth_create_gssapi_user_message(data, conn->user,
                                                   conn->passwd,

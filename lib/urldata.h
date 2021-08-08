@@ -232,7 +232,7 @@ struct ssl_backend_data;
 struct ssl_connect_data {
   ssl_connection_state state;
   ssl_connect_state connecting_state;
-#if defined(USE_SSL)
+#ifdef USE_SSL
   struct ssl_backend_data *backend;
 #endif
   /* Use ssl encrypted communications TRUE/FALSE. The library is not
@@ -314,7 +314,7 @@ struct Curl_ssl_session {
 
 /* Struct used for Digest challenge-response authentication */
 struct digestdata {
-#if defined(USE_WINDOWS_SSPI)
+#ifdef USE_WINDOWS_SSPI
   BYTE *input_token;
   size_t input_token_len;
   CtxtHandle *http_context;
@@ -357,9 +357,9 @@ typedef enum {
 #endif
 
 /* Struct used for GSSAPI (Kerberos V5) authentication */
-#if defined(USE_KERBEROS5)
+#ifdef USE_KERBEROS5
 struct kerberos5data {
-#if defined(USE_WINDOWS_SSPI)
+#ifdef USE_WINDOWS_SSPI
   CredHandle *credentials;
   CtxtHandle *context;
   TCHAR *spn;
@@ -384,7 +384,7 @@ struct gsasldata {
 #endif
 
 /* Struct used for NTLM challenge-response authentication */
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
 struct ntlmdata {
 #ifdef USE_WINDOWS_SSPI
 /* The sslContext is used for the Schannel bindings. The
@@ -408,7 +408,7 @@ struct ntlmdata {
   unsigned int target_info_len;
   void *target_info; /* TargetInfo received in the ntlm type-2 message */
 
-#if defined(NTLM_WB_ENABLED)
+#ifdef NTLM_WB_ENABLED
   /* used for communication with Samba's winbind daemon helper ntlm_auth */
   curl_socket_t ntlm_auth_hlpr_socket;
   pid_t ntlm_auth_hlpr_pid;
@@ -1062,7 +1062,7 @@ struct connectdata {
   struct gsasldata gsasl;
 #endif
 
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
   curlntlm http_ntlm_state;
   curlntlm proxy_ntlm_state;
 
@@ -1351,7 +1351,7 @@ struct UrlState {
   struct Curl_async async;  /* asynchronous name resolver data */
 #endif
 
-#if defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
   /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
   void *engine;
 #endif /* USE_OPENSSL */

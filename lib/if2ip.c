@@ -94,7 +94,7 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 }
 
 
-#if defined(HAVE_GETIFADDRS)
+#ifdef HAVE_GETIFADDRS
 
 if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
                           unsigned int local_scope_id, const char *interf,

@@ -32,7 +32,7 @@
 #include <limits.h>
 
 /* Wincrypt must be included before anything that could include OpenSSL. */
-#if defined(USE_WIN32_CRYPTO)
+#ifdef USE_WIN32_CRYPTO
 #include <wincrypt.h>
 /* Undefine wincrypt conflicting symbols for BoringSSL. */
 #undef X509_NAME
@@ -200,7 +200,7 @@
 #define HAVE_SSL_CTX_SET_EC_CURVES
 #endif
 
-#if defined(LIBRESSL_VERSION_NUMBER)
+#ifdef LIBRESSL_VERSION_NUMBER
 #define OSSL_PACKAGE "LibreSSL"
 #elif defined(OPENSSL_IS_BORINGSSL)
 #define OSSL_PACKAGE "BoringSSL"
@@ -324,15 +324,15 @@ static const char *SSL_ERROR_to_str(int err)
     return "SSL_ERROR_WANT_CONNECT";
   case SSL_ERROR_WANT_ACCEPT:
     return "SSL_ERROR_WANT_ACCEPT";
-#if defined(SSL_ERROR_WANT_ASYNC)
+#ifdef SSL_ERROR_WANT_ASYNC
   case SSL_ERROR_WANT_ASYNC:
     return "SSL_ERROR_WANT_ASYNC";
 #endif
-#if defined(SSL_ERROR_WANT_ASYNC_JOB)
+#ifdef SSL_ERROR_WANT_ASYNC_JOB
   case SSL_ERROR_WANT_ASYNC_JOB:
     return "SSL_ERROR_WANT_ASYNC_JOB";
 #endif
-#if defined(SSL_ERROR_WANT_EARLY)
+#ifdef SSL_ERROR_WANT_EARLY
   case SSL_ERROR_WANT_EARLY:
     return "SSL_ERROR_WANT_EARLY";
 #endif
@@ -464,7 +464,7 @@ static CURLcode ossl_seed(struct Curl_easy *data)
       return CURLE_OK;
   }
 
-#if defined(HAVE_RAND_EGD)
+#ifdef HAVE_RAND_EGD
   /* only available in OpenSSL 0.9.5 and later */
   /* EGD_SOCKET is set at configure time or not at all */
 #ifndef EGD_SOCKET
@@ -2891,7 +2891,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 #endif
 
 
-#if defined(USE_WIN32_CRYPTO)
+#ifdef USE_WIN32_CRYPTO
   /* Import certificates from the Windows root certificate store if requested.
      https://stackoverflow.com/questions/9507184/
      https://github.com/d3x0r/SACK/blob/master/src/netlib/ssl_layer.c#L1037
@@ -3138,7 +3138,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
        determine that in a reliable manner.
        https://rt.openssl.org/Ticket/Display.html?id=3621&user=guest&pass=guest
     */
-#if defined(X509_V_FLAG_TRUSTED_FIRST)
+#ifdef X509_V_FLAG_TRUSTED_FIRST
     X509_STORE_set_flags(SSL_CTX_get_cert_store(backend->ctx),
                          X509_V_FLAG_TRUSTED_FIRST);
 #endif

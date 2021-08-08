@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_PROXY)
+#ifndef CURL_DISABLE_PROXY
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>

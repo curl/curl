@@ -99,7 +99,7 @@ bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
   return TRUE;
 }
 
-#if defined(CURLRES_SYNCH)
+#ifdef CURLRES_SYNCH
 
 #ifdef DEBUG_ADDRINFO
 static void dump_addrinfo(struct connectdata *conn,

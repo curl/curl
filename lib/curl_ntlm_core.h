@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_CURL_NTLM_CORE)
+#ifdef USE_CURL_NTLM_CORE
 
 /* If NSS is the first available SSL backend (see order in curl_ntlm_core.c)
    then it must be initialized to be used by NTLM. */
@@ -48,13 +48,13 @@
 
 /* Define USE_NTLM2SESSION in order to make the type-3 message include the
    NTLM2Session response message, requires USE_NTRESPONSES defined to 1 */
-#if defined(USE_NTRESPONSES)
+#ifdef USE_NTRESPONSES
 #define USE_NTLM2SESSION
 #endif
 
 /* Define USE_NTLM_V2 in order to allow the type-3 message to include the
    LMv2 and NTLMv2 response messages, requires USE_NTRESPONSES defined to 1 */
-#if defined(USE_NTRESPONSES)
+#ifdef USE_NTRESPONSES
 #define USE_NTLM_V2
 #endif
 

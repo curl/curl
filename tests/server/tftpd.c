@@ -509,7 +509,7 @@ static ssize_t write_behind(struct testcase *test, int convert)
 static int synchnet(curl_socket_t f /* socket to flush */)
 {
 
-#if defined(HAVE_IOCTLSOCKET)
+#ifdef HAVE_IOCTLSOCKET
   unsigned long i;
 #else
   int i;
@@ -520,7 +520,7 @@ static int synchnet(curl_socket_t f /* socket to flush */)
   curl_socklen_t fromaddrlen;
 
   for(;;) {
-#if defined(HAVE_IOCTLSOCKET)
+#ifdef HAVE_IOCTLSOCKET
     (void) ioctlsocket(f, FIONREAD, &i);
 #else
     (void) ioctl(f, FIONREAD, &i);

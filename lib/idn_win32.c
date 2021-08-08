@@ -36,7 +36,7 @@
 #include "memdebug.h"
 
 #ifdef WANT_IDN_PROTOTYPES
-#  if defined(_SAL_VERSION)
+#  ifdef _SAL_VERSION
 WINNORMALIZEAPI int WINAPI
 IdnToAscii(_In_                           DWORD    dwFlags,
            _In_reads_(cchUnicodeChar)     LPCWSTR  lpUnicodeCharStr,

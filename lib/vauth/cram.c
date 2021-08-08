@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+#ifndef CURL_DISABLE_CRYPTO_AUTH
 
 #include <curl/curl.h>
 #include "urldata.h"

@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_CURL_NTLM_CORE)
+#ifdef USE_CURL_NTLM_CORE
 
 /*
  * NTLM details:

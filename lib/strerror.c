@@ -732,7 +732,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   *buf = '\0';
 
 #if defined(WIN32) || defined(_WIN32_WCE)
-#if defined(WIN32)
+#ifdef WIN32
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
   if(err >= 0 && err < sys_nerr)
     strncpy(buf, strerror(err), max);

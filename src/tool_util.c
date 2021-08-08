@@ -44,12 +44,12 @@ struct timeval tvnow(void)
   }
   else {
     /* Disable /analyze warning that GetTickCount64 is preferred  */
-#if defined(_MSC_VER)
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable:28159)
 #endif
     DWORD milliseconds = GetTickCount();
-#if defined(_MSC_VER)
+#ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 

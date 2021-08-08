@@ -42,7 +42,7 @@
 #include <inet.h>
 #endif
 
-#if defined(USE_THREADS_POSIX)
+#ifdef USE_THREADS_POSIX
 #  ifdef HAVE_PTHREAD_H
 #    include <pthread.h>
 #  endif

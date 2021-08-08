@@ -32,7 +32,7 @@ static char raw_tolower(char in);
    its behavior is altered by the current locale. */
 char Curl_raw_toupper(char in)
 {
-#if !defined(CURL_DOES_CONVERSIONS)
+#ifndef CURL_DOES_CONVERSIONS
   if(in >= 'a' && in <= 'z')
     return (char)('A' + in - 'a');
 #else
@@ -100,7 +100,7 @@ char Curl_raw_toupper(char in)
    its behavior is altered by the current locale. */
 static char raw_tolower(char in)
 {
-#if !defined(CURL_DOES_CONVERSIONS)
+#ifndef CURL_DOES_CONVERSIONS
   if(in >= 'A' && in <= 'Z')
     return (char)('a' + in - 'A');
 #else

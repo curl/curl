@@ -27,7 +27,7 @@
 /*       lib/config-dos.h - Hand crafted config file for DOS        */
 /* ================================================================ */
 
-#if defined(DJGPP)
+#ifdef DJGPP
   #define OS  "MSDOS/djgpp"
 #elif defined(__HIGHC__)
   #define OS  "MSDOS/HighC"
@@ -145,7 +145,7 @@
 
 /* Target HAVE_x section */
 
-#if defined(DJGPP)
+#ifdef DJGPP
   #define HAVE_BASENAME   1
   #define HAVE_STRCASECMP 1
   #define HAVE_SIGACTION  1

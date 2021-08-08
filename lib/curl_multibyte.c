@@ -30,7 +30,7 @@
 
 #include "curl_setup.h"
 
-#if defined(WIN32)
+#ifdef WIN32
 
 #include "curl_multibyte.h"
 
@@ -138,7 +138,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   int result = -1;
   wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
   if(path_w) {
-#if defined(USE_WIN32_SMALL_FILES)
+#ifdef USE_WIN32_SMALL_FILES
     result = _wstat(path_w, buffer);
 #else
     result = _wstati64(path_w, buffer);
@@ -149,7 +149,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
     errno = EINVAL;
   return result;
 #else
-#if defined(USE_WIN32_SMALL_FILES)
+#ifdef USE_WIN32_SMALL_FILES
   return _stat(path, buffer);
 #else
   return _stati64(path, buffer);
@@ -159,7 +159,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
 
 int curlx_win32_access(const char *path, int mode)
 {
-#if defined(_UNICODE)
+#ifdef _UNICODE
   int result = -1;
   wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
   if(path_w) {

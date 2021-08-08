@@ -1014,7 +1014,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       struct Curl_addrinfo *head = NULL, *tail = NULL;
       size_t entry_len;
       char address[64];
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
       char *addresses = NULL;
 #endif
       char *addr_begin;
@@ -1046,7 +1046,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         goto err;
 
       port = (int)tmp_port;
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
       addresses = end_ptr + 1;
 #endif
 

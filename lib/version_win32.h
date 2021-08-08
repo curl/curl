@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if defined(WIN32)
+#ifdef WIN32
 
 /* Version condition */
 typedef enum {

@@ -45,7 +45,7 @@
 
 /* SSL backend-specific #if branches in this file must be kept in the order
    documented in curl_ntlm_core. */
-#if defined(USE_WINDOWS_SSPI)
+#ifdef USE_WINDOWS_SSPI
 #include "curl_sspi.h"
 #endif
 
@@ -266,7 +266,7 @@ void Curl_http_auth_cleanup_ntlm(struct connectdata *conn)
   Curl_auth_cleanup_ntlm(&conn->ntlm);
   Curl_auth_cleanup_ntlm(&conn->proxyntlm);
 
-#if defined(NTLM_WB_ENABLED)
+#ifdef NTLM_WB_ENABLED
   Curl_http_auth_cleanup_ntlm_wb(conn);
 #endif
 }

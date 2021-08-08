@@ -81,7 +81,7 @@ int Curl_wait_ms(timediff_t timeout_ms)
     SET_SOCKERRNO(EINVAL);
     return -1;
   }
-#if defined(MSDOS)
+#ifdef MSDOS
   delay(timeout_ms);
 #elif defined(WIN32)
   /* prevent overflow, timeout_ms is typecast to ULONG/DWORD. */
@@ -92,7 +92,7 @@ int Curl_wait_ms(timediff_t timeout_ms)
 #endif
   Sleep((ULONG)timeout_ms);
 #else
-#if defined(HAVE_POLL_FINE)
+#ifdef HAVE_POLL_FINE
   /* prevent overflow, timeout_ms is typecast to int. */
 #if TIMEDIFF_T_MAX > INT_MAX
   if(timeout_ms > INT_MAX)

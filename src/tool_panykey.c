@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#if defined(NETWARE)
+#ifdef NETWARE
 
 #ifdef NETWARE
 #  ifdef __NOVELL_LIBC__
@@ -37,7 +37,7 @@
 
 void tool_pressanykey(void)
 {
-#if defined(NETWARE)
+#ifdef NETWARE
   pressanykey();
 #endif
 }

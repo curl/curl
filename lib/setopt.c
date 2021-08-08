@@ -725,7 +725,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.http200aliases = va_arg(param, struct curl_slist *);
     break;
 
-#if !defined(CURL_DISABLE_COOKIES)
+#ifndef CURL_DISABLE_COOKIES
   case CURLOPT_COOKIE:
     /*
      * Cookie string to send to the remote server in the request.

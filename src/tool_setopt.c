@@ -848,7 +848,7 @@ bool tool_setopt_skip(CURLoption tag)
     break;
   }
 #endif
-#if defined(CURL_DISABLE_TELNET)
+#ifdef CURL_DISABLE_TELNET
 #define USED_TAG
   switch(tag) {
   case CURLOPT_TELNETOPTIONS:

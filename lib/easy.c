@@ -95,7 +95,7 @@ static long          init_flags;
  * ways, but at this point it must be defined as the system-supplied strdup
  * so the callback pointer is initialized correctly.
  */
-#if defined(_WIN32_WCE)
+#ifdef _WIN32_WCE
 #define system_strdup _strdup
 #elif !defined(HAVE_STRDUP)
 #define system_strdup curlx_strdup
@@ -179,7 +179,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     goto fail;
   }
 
-#if defined(USE_SSH)
+#ifdef USE_SSH
   if(Curl_ssh_init()) {
     goto fail;
   }
@@ -399,7 +399,7 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
   struct socketmonitor *m;
   struct socketmonitor *prev = NULL;
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void) easy;
 #endif
   (void)socketp;

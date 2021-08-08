@@ -400,11 +400,11 @@
 
 #ifndef SIZEOF_OFF_T
 #  if defined(__VMS) && !defined(__VAX)
-#    if defined(_LARGEFILE)
+#    ifdef _LARGEFILE
 #      define SIZEOF_OFF_T 8
 #    endif
 #  elif defined(__OS400__) && defined(__ILEC400__)
-#    if defined(_LARGE_FILES)
+#    ifdef _LARGE_FILES
 #      define SIZEOF_OFF_T 8
 #    endif
 #  elif defined(__MVS__) && defined(__IBMC__)
@@ -604,7 +604,7 @@
 
 #if defined(_MSC_VER) && !defined(__POCC__)
 #  if !defined(HAVE_WINDOWS_H) || ((_MSC_VER < 1300) && !defined(_FILETIME_))
-#    if !defined(ALLOW_MSVC6_WITHOUT_PSDK)
+#    ifndef ALLOW_MSVC6_WITHOUT_PSDK
 #      error MSVC 6.0 requires "February 2003 Platform SDK" a.k.a. \
              "Windows Server 2003 PSDK"
 #    else
@@ -772,7 +772,7 @@ endings either CRLF or LF so 't' is appropriate.
  * wrappers for WinSock sockets. https://github.com/curl/curl/issues/657
  * Define DONT_USE_RECV_BEFORE_SEND_WORKAROUND to force disable workaround.
  */
-#if !defined(DONT_USE_RECV_BEFORE_SEND_WORKAROUND)
+#ifndef DONT_USE_RECV_BEFORE_SEND_WORKAROUND
 #  if defined(WIN32) || defined(__CYGWIN__)
 #    define USE_RECV_BEFORE_SEND_WORKAROUND
 #  endif
@@ -784,7 +784,7 @@ endings either CRLF or LF so 't' is appropriate.
 
 /* for systems that don't detect this in configure */
 #ifndef CURL_SA_FAMILY_T
-#  if defined(HAVE_SA_FAMILY_T)
+#  ifdef HAVE_SA_FAMILY_T
 #    define CURL_SA_FAMILY_T sa_family_t
 #  elif defined(HAVE_ADDRESS_FAMILY)
 #    define CURL_SA_FAMILY_T ADDRESS_FAMILY
@@ -824,7 +824,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #  if defined(__MINGW32__) && !defined(LUP_SECURE)
      typedef u_short ADDRESS_FAMILY; /* Classic mingw, 11y+ old mingw-w64 */
 #  endif
-#  if !defined(UNIX_PATH_MAX)
+#  ifndef UNIX_PATH_MAX
      /* Replicating logic present in afunix.h
         (distributed with newer Windows 10 SDK versions only) */
 #    define UNIX_PATH_MAX 108

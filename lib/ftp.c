@@ -762,9 +762,9 @@ static void _state(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
-#if defined(DEBUGBUILD)
+#ifdef DEBUGBUILD
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void) lineno;
 #else
   if(ftpc->state != newstate)

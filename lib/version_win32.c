@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(WIN32)
+#ifdef WIN32
 
 #include <curl/curl.h>
 #include "version_win32.h"
@@ -55,7 +55,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
 {
   bool matched = FALSE;
 
-#if defined(CURL_WINDOWS_APP)
+#ifdef CURL_WINDOWS_APP
   /* We have no way to determine the Windows version from Windows apps,
      so let's assume we're running on the target Windows version. */
   const WORD fullVersion = MAKEWORD(minorVersion, majorVersion);

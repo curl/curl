@@ -129,7 +129,7 @@ char *curl_version(void)
 #ifdef USE_ARES
   char cares_version[40];
 #endif
-#if defined(USE_LIBIDN2)
+#ifdef USE_LIBIDN2
   char idn_version[40];
 #endif
 #ifdef USE_LIBPSL
@@ -433,31 +433,31 @@ static curl_version_info_data version_info = {
 #if defined(WIN32) && defined(UNICODE) && defined(_UNICODE)
   | CURL_VERSION_UNICODE
 #endif
-#if defined(CURL_DOES_CONVERSIONS)
+#ifdef CURL_DOES_CONVERSIONS
   | CURL_VERSION_CONV
 #endif
-#if defined(USE_TLS_SRP)
+#ifdef USE_TLS_SRP
   | CURL_VERSION_TLSAUTH_SRP
 #endif
 #if defined(USE_NGHTTP2) || defined(USE_HYPER)
   | CURL_VERSION_HTTP2
 #endif
-#if defined(ENABLE_QUIC)
+#ifdef ENABLE_QUIC
   | CURL_VERSION_HTTP3
 #endif
-#if defined(USE_UNIX_SOCKETS)
+#ifdef USE_UNIX_SOCKETS
   | CURL_VERSION_UNIX_SOCKETS
 #endif
-#if defined(USE_LIBPSL)
+#ifdef USE_LIBPSL
   | CURL_VERSION_PSL
 #endif
-#if defined(CURL_WITH_MULTI_SSL)
+#ifdef CURL_WITH_MULTI_SSL
   | CURL_VERSION_MULTI_SSL
 #endif
-#if defined(HAVE_BROTLI)
+#ifdef HAVE_BROTLI
   | CURL_VERSION_BROTLI
 #endif
-#if defined(HAVE_ZSTD)
+#ifdef HAVE_ZSTD
   | CURL_VERSION_ZSTD
 #endif
 #ifndef CURL_DISABLE_ALTSVC
@@ -466,7 +466,7 @@ static curl_version_info_data version_info = {
 #ifndef CURL_DISABLE_HSTS
   | CURL_VERSION_HSTS
 #endif
-#if defined(USE_GSASL)
+#ifdef USE_GSASL
   | CURL_VERSION_GSASL
 #endif
   ,
@@ -502,7 +502,7 @@ static curl_version_info_data version_info = {
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
 {
-#if defined(USE_SSH)
+#ifdef USE_SSH
   static char ssh_buffer[80];
 #endif
 #ifdef USE_SSL
@@ -560,7 +560,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #endif /* _LIBICONV_VERSION */
 #endif
 
-#if defined(USE_SSH)
+#ifdef USE_SSH
   Curl_ssh_version(ssh_buffer, sizeof(ssh_buffer));
   version_info.libssh_version = ssh_buffer;
 #endif

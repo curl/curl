@@ -64,7 +64,7 @@ END
 
 /* Manifest */
 
-#if defined(CURL_EMBED_MANIFEST)
+#ifdef CURL_EMBED_MANIFEST
 
 /* String escaping rules:
      https://msdn.microsoft.com/library/aa381050

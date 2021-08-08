@@ -1165,7 +1165,7 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
   return nread;
 }
 
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static int error_callback(nghttp2_session *session,
                           const char *msg,
                           size_t len,

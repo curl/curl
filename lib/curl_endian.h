@@ -33,7 +33,7 @@ unsigned short Curl_read16_be(const unsigned char *buf);
 
 #if (SIZEOF_CURL_OFF_T > 4)
 /* Converts a 64-bit integer to little endian */
-#if defined(HAVE_LONGLONG)
+#ifdef HAVE_LONGLONG
 void Curl_write64_le(const long long value, unsigned char *buffer);
 #else
 void Curl_write64_le(const __int64 value, unsigned char *buffer);

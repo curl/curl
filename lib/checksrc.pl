@@ -87,7 +87,8 @@ my %warnings = (
     'EXCLAMATIONSPACE' => 'Whitespace after exclamation mark in expression',
     'EMPTYLINEBRACE'   => 'Empty line before the open brace',
     'EQUALSNULL'       => 'if/while comparison with == NULL',
-    'NOTEQUALSZERO'    => 'if/while comparison with != 0'
+    'NOTEQUALSZERO'    => 'if/while comparison with != 0',
+    'USEIFDEF'         => '#if defined instead of #ifdef',
     );
 
 sub readskiplist {
@@ -479,6 +480,12 @@ sub scanfile {
             checkwarn("EQUALSNULL", $line,
                       length($1) + length($2) + length($3),
                       $file, $l, "we prefer !variable instead of \"== NULL\" comparisons");
+        }
+        # check for '#if [!]defined(FOO)' but not '#if [!]defined(FOO) ...'
+        if ($nostr =~ /^(\s*#\s*if(?:\s*\!|\s+)defined)\([^)]+\)$/) {
+            checkwarn("USEIFDEF", $line,
+                      length($1),
+                      $file, $l, "we prefer #if[n]def instead of #if [!]defined()");
         }
 
         # check for '!= 0' in if/while conditions but not if the thing on

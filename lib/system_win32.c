@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(WIN32)
+#ifdef WIN32
 
 #include <curl/curl.h>
 #include "system_win32.h"
@@ -133,11 +133,11 @@ void Curl_win32_cleanup(long init_flags)
   }
 }
 
-#if !defined(LOAD_WITH_ALTERED_SEARCH_PATH)
+#ifndef LOAD_WITH_ALTERED_SEARCH_PATH
 #define LOAD_WITH_ALTERED_SEARCH_PATH  0x00000008
 #endif
 
-#if !defined(LOAD_LIBRARY_SEARCH_SYSTEM32)
+#ifndef LOAD_LIBRARY_SEARCH_SYSTEM32
 #define LOAD_LIBRARY_SEARCH_SYSTEM32   0x00000800
 #endif
 

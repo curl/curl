@@ -489,7 +489,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
   conn->bits.rewindaftersend = FALSE; /* default */
 
   if((expectsend == -1) || (expectsend > bytessent)) {
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM) ||
@@ -519,7 +519,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
             (curl_off_t)(expectsend - bytessent));
     }
 #endif
-#if defined(USE_SPNEGO)
+#ifdef USE_SPNEGO
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NEGOTIATE) ||
        (data->state.authhost.picked == CURLAUTH_NEGOTIATE)) {
@@ -2094,7 +2094,7 @@ CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn)
   ptr = Curl_checkheaders(data, "Host");
   if(ptr && (!data->state.this_is_a_follow ||
              strcasecompare(data->state.first_host, conn->host.name))) {
-#if !defined(CURL_DISABLE_COOKIES)
+#ifndef CURL_DISABLE_COOKIES
     /* If we have a given custom Host: header, we extract the host name in
        order to possibly use it for cookie reasons later on. We only allow the
        custom Host: header if this is NOT a redirect, as setting Host: in the
@@ -2696,7 +2696,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
   return result;
 }
 
-#if !defined(CURL_DISABLE_COOKIES)
+#ifndef CURL_DISABLE_COOKIES
 CURLcode Curl_http_cookies(struct Curl_easy *data,
                            struct connectdata *conn,
                            struct dynbuf *r)
@@ -3561,7 +3561,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
     else
       data->state.resume_from = 0; /* get everything */
   }
-#if !defined(CURL_DISABLE_COOKIES)
+#ifndef CURL_DISABLE_COOKIES
   else if(data->cookies && data->state.cookie_engine &&
           checkprefix("Set-Cookie:", headp)) {
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
@@ -3967,7 +3967,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
       /* At this point we have some idea about the fate of the connection.
          If we are closing the connection it may result auth failure. */
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
       if(conn->bits.close &&
          (((data->req.httpcode == 401) &&
            (conn->http_ntlm_state == NTLMSTATE_TYPE2)) ||
@@ -3977,7 +3977,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         data->state.authproblem = TRUE;
       }
 #endif
-#if defined(USE_SPNEGO)
+#ifdef USE_SPNEGO
       if(conn->bits.close &&
         (((data->req.httpcode == 401) &&
           (conn->http_negotiate_state == GSS_AUTHRECV)) ||
@@ -4153,7 +4153,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
            stream.  In order to do this, we keep reading until we
            close the stream. */
         if(0 == k->maxdownload
-#if defined(USE_NGHTTP2)
+#ifdef USE_NGHTTP2
            && !((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
                 conn->httpversion == 20)
 #endif
@@ -4238,7 +4238,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 #if defined(USE_NGHTTP2) || defined(USE_HYPER)
           case 20:
 #endif
-#if defined(ENABLE_QUIC)
+#ifdef ENABLE_QUIC
           case 30:
 #endif
             conn->httpversion = (unsigned char)httpversion;

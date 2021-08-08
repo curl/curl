@@ -140,7 +140,7 @@ int test(char *URL)
 
 test_cleanup:
 
-#if defined(LIB526)
+#ifdef LIB526
 
   /* test 526 and 528 */
   /* proper cleanup sequence - type PB */

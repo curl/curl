@@ -180,7 +180,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
 
   if(0 == k->bodywrites++) {
     bool done = FALSE;
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
     struct connectdata *conn = data->conn;
     if(conn->bits.close &&
        (((data->req.httpcode == 401) &&

@@ -647,11 +647,11 @@ static CURLcode multi_done(struct Curl_easy *data,
   */
 
   if((data->set.reuse_forbid
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
       && !(conn->http_ntlm_state == NTLMSTATE_TYPE2 ||
            conn->proxy_ntlm_state == NTLMSTATE_TYPE2)
 #endif
-#if defined(USE_SPNEGO)
+#ifdef USE_SPNEGO
       && !(conn->http_negotiate_state == GSS_AUTHRECV ||
            conn->proxy_negotiate_state == GSS_AUTHRECV)
 #endif

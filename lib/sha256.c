@@ -29,7 +29,7 @@
 #include "curl_sha256.h"
 #include "curl_hmac.h"
 
-#if defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
 
 #include <openssl/opensslv.h>
 
@@ -60,7 +60,7 @@
  * file even if multiple backends are enabled at the same time.
  */
 
-#if defined(USE_OPENSSL_SHA256)
+#ifdef USE_OPENSSL_SHA256
 
 /* When OpenSSL is available we use the SHA256-function from OpenSSL */
 #include <openssl/sha.h>
@@ -106,7 +106,7 @@ typedef mbedtls_sha256_context SHA256_CTX;
 
 static void SHA256_Init(SHA256_CTX *ctx)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+#ifndef HAS_RESULT_CODE_BASED_FUNCTIONS
   (void) mbedtls_sha256_starts(ctx, 0);
 #else
   (void) mbedtls_sha256_starts_ret(ctx, 0);
@@ -117,7 +117,7 @@ static void SHA256_Update(SHA256_CTX *ctx,
                           const unsigned char *data,
                           unsigned int length)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+#ifndef HAS_RESULT_CODE_BASED_FUNCTIONS
   (void) mbedtls_sha256_update(ctx, data, length);
 #else
   (void) mbedtls_sha256_update_ret(ctx, data, length);
@@ -126,7 +126,7 @@ static void SHA256_Update(SHA256_CTX *ctx,
 
 static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+#ifndef HAS_RESULT_CODE_BASED_FUNCTIONS
   (void) mbedtls_sha256_finish(ctx, digest);
 #else
   (void) mbedtls_sha256_finish_ret(ctx, digest);
@@ -174,7 +174,7 @@ struct sha256_ctx {
 };
 typedef struct sha256_ctx SHA256_CTX;
 
-#if !defined(CALG_SHA_256)
+#ifndef CALG_SHA_256
 #define CALG_SHA_256 0x0000800c
 #endif
 

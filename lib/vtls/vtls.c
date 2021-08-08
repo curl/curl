@@ -242,7 +242,7 @@ int Curl_ssl_init(void)
   return Curl_ssl->init();
 }
 
-#if defined(CURL_WITH_MULTI_SSL)
+#ifdef CURL_WITH_MULTI_SSL
 static const struct Curl_ssl Curl_ssl_multi;
 #endif
 
@@ -252,7 +252,7 @@ void Curl_ssl_cleanup(void)
   if(init_ssl) {
     /* only cleanup if we did a previous init */
     Curl_ssl->cleanup();
-#if defined(CURL_WITH_MULTI_SSL)
+#ifdef CURL_WITH_MULTI_SSL
     Curl_ssl = &Curl_ssl_multi;
 #endif
     init_ssl = FALSE;
@@ -1268,7 +1268,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
 };
 
 const struct Curl_ssl *Curl_ssl =
-#if defined(CURL_WITH_MULTI_SSL)
+#ifdef CURL_WITH_MULTI_SSL
   &Curl_ssl_multi;
 #elif defined(USE_WOLFSSL)
   &Curl_ssl_wolfssl;
@@ -1297,37 +1297,37 @@ const struct Curl_ssl *Curl_ssl =
 #endif
 
 static const struct Curl_ssl *available_backends[] = {
-#if defined(USE_WOLFSSL)
+#ifdef USE_WOLFSSL
   &Curl_ssl_wolfssl,
 #endif
-#if defined(USE_SECTRANSP)
+#ifdef USE_SECTRANSP
   &Curl_ssl_sectransp,
 #endif
-#if defined(USE_GNUTLS)
+#ifdef USE_GNUTLS
   &Curl_ssl_gnutls,
 #endif
-#if defined(USE_GSKIT)
+#ifdef USE_GSKIT
   &Curl_ssl_gskit,
 #endif
-#if defined(USE_MBEDTLS)
+#ifdef USE_MBEDTLS
   &Curl_ssl_mbedtls,
 #endif
-#if defined(USE_NSS)
+#ifdef USE_NSS
   &Curl_ssl_nss,
 #endif
-#if defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
   &Curl_ssl_openssl,
 #endif
-#if defined(USE_SCHANNEL)
+#ifdef USE_SCHANNEL
   &Curl_ssl_schannel,
 #endif
-#if defined(USE_MESALINK)
+#ifdef USE_MESALINK
   &Curl_ssl_mesalink,
 #endif
-#if defined(USE_BEARSSL)
+#ifdef USE_BEARSSL
   &Curl_ssl_bearssl,
 #endif
-#if defined(USE_RUSTLS)
+#ifdef USE_RUSTLS
   &Curl_ssl_rustls,
 #endif
   NULL
@@ -1427,7 +1427,7 @@ CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
     return id == Curl_ssl->info.id ||
            (name && strcasecompare(name, Curl_ssl->info.name)) ?
            CURLSSLSET_OK :
-#if defined(CURL_WITH_MULTI_SSL)
+#ifdef CURL_WITH_MULTI_SSL
            CURLSSLSET_TOO_LATE;
 #else
            CURLSSLSET_UNKNOWN_BACKEND;

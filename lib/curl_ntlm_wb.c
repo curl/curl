@@ -68,7 +68,7 @@
 
 /* Portable 'sclose_nolog' used only in child process instead of 'sclose'
    to avoid fooling the socket leak detector */
-#if defined(HAVE_CLOSESOCKET)
+#ifdef HAVE_CLOSESOCKET
 #  define sclose_nolog(x)  closesocket((x))
 #elif defined(HAVE_CLOSESOCKET_CAMEL)
 #  define sclose_nolog(x)  CloseSocket((x))
@@ -127,7 +127,7 @@ static CURLcode ntlm_wb_init(struct Curl_easy *data, struct ntlmdata *ntlm,
 #endif
   char buffer[STRERROR_LEN];
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void) data;
 #endif
 

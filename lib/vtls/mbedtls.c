@@ -95,7 +95,7 @@ struct ssl_backend_data {
 #define mbedtls_strerror(a,b,c) b[0] = 0
 #endif
 
-#if defined(THREADING_SUPPORT)
+#ifdef THREADING_SUPPORT
 static mbedtls_entropy_context ts_entropy;
 
 static int entropy_init_initialized = 0;
@@ -494,12 +494,12 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   mbedtls_ssl_conf_ciphersuites(&backend->config,
                                 mbedtls_ssl_list_ciphersuites());
 
-#if defined(MBEDTLS_SSL_RENEGOTIATION)
+#ifdef MBEDTLS_SSL_RENEGOTIATION
   mbedtls_ssl_conf_renegotiation(&backend->config,
                                  MBEDTLS_SSL_RENEGOTIATION_ENABLED);
 #endif
 
-#if defined(MBEDTLS_SSL_SESSION_TICKETS)
+#ifdef MBEDTLS_SSL_SESSION_TICKETS
   mbedtls_ssl_conf_session_tickets(&backend->config,
                                    MBEDTLS_SSL_SESSION_TICKETS_DISABLED);
 #endif
@@ -913,7 +913,7 @@ static size_t mbedtls_version(char *buffer, size_t size)
 static CURLcode mbedtls_random(struct Curl_easy *data,
                                unsigned char *entropy, size_t length)
 {
-#if defined(MBEDTLS_CTR_DRBG_C)
+#ifdef MBEDTLS_CTR_DRBG_C
   int ret = -1;
   char errorbuf[128];
   mbedtls_entropy_context ctr_entropy;

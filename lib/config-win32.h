@@ -363,7 +363,7 @@
 #define SIZEOF_LONG 4
 
 /* Define to the size of `size_t', as computed by sizeof. */
-#if defined(_WIN64)
+#ifdef _WIN64
 #  define SIZEOF_SIZE_T 8
 #else
 #  define SIZEOF_SIZE_T 4
@@ -473,7 +473,7 @@
 #endif
 
 /* Define some minimum and default build targets for Visual Studio */
-#if defined(_MSC_VER)
+#ifdef _MSC_VER
    /* Officially, Microsoft's Windows SDK versions 6.X does not support Windows
       2000 as a supported build target. VS2008 default installations provides
       an embedded Windows SDK v6.0A along with the claim that Windows 2000 is a
@@ -484,7 +484,7 @@
 
    /* The minimum build target for VS2012 is Vista unless Update 1 is installed
       and the v110_xp toolset is chosen. */
-#  if defined(_USING_V110_SDK71_)
+#  ifdef _USING_V110_SDK71_
 #    define VS2012_MIN_TARGET 0x0501
 #  else
 #    define VS2012_MIN_TARGET 0x0600
@@ -496,7 +496,7 @@
 
    /* VS2012 default build target is Windows Vista unless Update 1 is installed
       and the v110_xp toolset is chosen. */
-#  if defined(_USING_V110_SDK71_)
+#  ifdef _USING_V110_SDK71_
 #    define VS2012_DEF_TARGET 0x0501
 #  else
 #    define VS2012_DEF_TARGET 0x0600
@@ -525,7 +525,7 @@
 #    define WINVER VS2012_DEF_TARGET
 #  endif
 #  if (_WIN32_WINNT < VS2012_MIN_TARGET) || (WINVER < VS2012_MIN_TARGET)
-#    if defined(_USING_V110_SDK71_)
+#    ifdef _USING_V110_SDK71_
 #      error VS2012 does not support Windows build targets prior to Windows XP
 #    else
 #      error VS2012 does not support Windows build targets prior to Windows \
@@ -548,8 +548,8 @@ Vista
 /* Availability of freeaddrinfo, getaddrinfo, and if_nametoindex
    functions is quite convoluted, compiler dependent and even build target
    dependent. */
-#if defined(HAVE_WS2TCPIP_H)
-#  if defined(__POCC__)
+#ifdef HAVE_WS2TCPIP_H
+#  ifdef __POCC__
 #    define HAVE_FREEADDRINFO           1
 #    define HAVE_GETADDRINFO            1
 #    define HAVE_GETADDRINFO_THREADSAFE 1
@@ -564,7 +564,7 @@ Vista
 #  endif
 #endif
 
-#if defined(__POCC__)
+#ifdef __POCC__
 #  ifndef _MSC_VER
 #    error Microsoft extensions /Ze compiler option is required
 #  endif
@@ -613,7 +613,7 @@ Vista
 #  define USE_WIN32_LARGE_FILES
 #endif
 
-#if defined(__POCC__)
+#ifdef __POCC__
 #  undef USE_WIN32_LARGE_FILES
 #endif
 
@@ -671,7 +671,7 @@ Vista
 #endif
 
 /* Define to use the Windows crypto library. */
-#if !defined(CURL_WINDOWS_APP)
+#ifndef CURL_WINDOWS_APP
 #define USE_WIN32_CRYPTO
 #endif
 
