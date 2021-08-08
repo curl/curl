@@ -4,7 +4,7 @@ curl and libcurl 7.79.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2461
+ Contributors:                 2464
 
 This release includes the following changes:
 
@@ -13,7 +13,11 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o c-hyper: remove the hyper_executor_poll() loop from Curl_http [13]
+ o CI/cirrus: reduce compile time with increased parallism [19]
+ o compressed.d: it's a request, not an order [21]
+ o configure.ac: revert bad nghttp2 library detection improvements [9]
  o configure: tweak nghttp2 library name fix [2]
+ o connect: remove superfluous conditional [23]
  o curl-openssl.m4: check lib64 for the pkg-config file [14]
  o curl.1: mention "global" flags [7]
  o CURLMOPT_TIMERFUNCTION.3: remove misplaced "time" [5]
@@ -23,10 +27,15 @@ This release includes the following bugfixes:
  o example/cookie_interface: fix scan-build printf warning [16]
  o examples/cookie_interface: avoid printfing time_t directly [18]
  o Get rid of the unused HAVE_SIG_ATOMIC_T et. al.
+ o happy-eyeballs-timeout-ms.d: polish the wording [10]
  o http_proxy: clear 'sending' when the outgoing request is sent [6]
  o limit-rate.d: clarify base unit [17]
+ o mbedtls_threadlock: fix unused variable warning [11]
+ o ngtcp2: compile with the latest ngtcp2 and nghttp3 [12]
  o tests/*server.py: remove pidfile on server termination [1]
  o tests/runtests.pl: cleanup copy&paste mistakes and unused code
+ o tests: make three tests pass until 2037 [22]
+ o tool/tests: fix potential year 2038 issues [20]
 
 This release includes the following known bugs:
 
@@ -35,11 +44,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aleksandr Krotov, Bastian Krause, Carlo Marcelo Arenas Belón,
-  Christian Weisgerber, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Daniel Woelfel, David Cook, Emil Engler, Josh Soref, Marc Hörsken,
-  Oleg Pudeyev, Ray Satiro, Viktor Szakats, zloi-user on github,
-  (16 contributors)
+  Aleksandr Krotov, Alex Crichton, Bastian Krause, Bernhard M. Wiedemann,
+  Bin Lan, Carlo Marcelo Arenas Belón, Christian Weisgerber, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, Daniel Woelfel, Dan Jacobson, David Cook,
+  Emil Engler, Josh Soref, Marc Hörsken, modbw on github, Oleg Pudeyev,
+  Ray Satiro, Rui Pinheiro, Tatsuhiro Tsujikawa, Viktor Szakats,
+  zloi-user on github,
+  (23 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -51,9 +62,18 @@ References to bug reports and discussions on issues:
  [6] = https://curl.se/bug/?i=7155
  [7] = https://curl.se/bug/?i=7457
  [8] = https://curl.se/bug/?i=7441
+ [9] = https://curl.se/bug/?i=7514
+ [10] = https://curl.se/bug/?i=7433
+ [11] = https://curl.se/bug/?i=7393
+ [12] = https://curl.se/bug/?i=7541
  [13] = https://curl.se/bug/?i=7499
  [14] = https://curl.se/bug/?i=7503
  [15] = https://curl.se/bug/?i=7500
  [16] = https://curl.se/bug/?i=7497
  [17] = https://curl.se/bug/?i=7439
  [18] = https://curl.se/bug/?i=7490
+ [19] = https://curl.se/bug/?i=7505
+ [20] = https://curl.se/bug/?i=7466
+ [21] = https://curl.se/bug/?i=7516
+ [22] = https://curl.se/bug/?i=7512
+ [23] = https://curl.se/bug/?i=7511
