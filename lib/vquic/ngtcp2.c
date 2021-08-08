@@ -661,6 +661,24 @@ static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
   return 0;
 }
 
+static int cb_stream_stop_sending(ngtcp2_conn *tconn, int64_t stream_id,
+                                  uint64_t app_error_code, void *user_data,
+                                  void *stream_user_data)
+{
+  struct quicsocket *qs = (struct quicsocket *)user_data;
+  int rv;
+  (void)tconn;
+  (void)app_error_code;
+  (void)stream_user_data;
+
+  rv = nghttp3_conn_stop_sending(qs->h3conn, stream_id);
+  if(rv) {
+    return NGTCP2_ERR_CALLBACK_FAILURE;
+  }
+
+  return 0;
+}
+
 static int cb_extend_max_local_streams_bidi(ngtcp2_conn *tconn,
                                             uint64_t max_streams,
                                             void *user_data)
@@ -745,7 +763,9 @@ static ngtcp2_callbacks ng_callbacks = {
   ngtcp2_crypto_delete_crypto_cipher_ctx_cb,
   NULL, /* recv_datagram */
   NULL, /* ack_datagram */
-  NULL  /* lost_datagram */
+  NULL, /* lost_datagram */
+  NULL, /* get_path_challenge_data */
+  cb_stream_stop_sending
 };
 
 /*
@@ -1143,14 +1163,10 @@ static nghttp3_callbacks ngh3_callbacks = {
   NULL, /* begin_trailers */
   cb_h3_recv_header,
   NULL, /* end_trailers */
-  NULL, /* http_begin_push_promise */
-  NULL, /* http_recv_push_promise */
-  NULL, /* http_end_push_promise */
-  NULL, /* http_cancel_push */
   cb_h3_send_stop_sending,
-  NULL, /* push_stream */
   NULL, /* end_stream */
   NULL, /* reset_stream */
+  NULL /* shutdown */
 };
 
 static int init_ngh3_conn(struct quicsocket *qs)
