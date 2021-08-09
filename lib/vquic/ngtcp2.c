@@ -653,7 +653,7 @@ static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
   (void)app_error_code;
   (void)stream_user_data;
 
-  rv = nghttp3_conn_reset_stream(qs->h3conn, stream_id);
+  rv = nghttp3_conn_shutdown_stream_read(qs->h3conn, stream_id);
   if(rv) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -671,7 +671,7 @@ static int cb_stream_stop_sending(ngtcp2_conn *tconn, int64_t stream_id,
   (void)app_error_code;
   (void)stream_user_data;
 
-  rv = nghttp3_conn_stop_sending(qs->h3conn, stream_id);
+  rv = nghttp3_conn_shutdown_stream_read(qs->h3conn, stream_id);
   if(rv) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
