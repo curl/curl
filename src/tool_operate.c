@@ -2152,6 +2152,8 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
   bool added_transfers;
   /* wrapitup is set TRUE after a critical error occurs to end all transfers */
   bool wrapitup = FALSE;
+  /* wrapitup_processed is set TRUE after the per transfer abort flag is set */
+  bool wrapitup_processed = FALSE;
   time_t tick = time(NULL);
 
   multi = curl_multi_init();
@@ -2169,12 +2171,15 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
     /* If stopping prematurely (eg due to a --fail-early condition) then signal
        that any transfers in the multi should abort (via progress callback). */
     if(wrapitup) {
-      struct per_transfer *per;
       if(!still_running)
         break;
-      for(per = transfers; per; per = per->next) {
-        if(per->added)
-          per->abort = TRUE;
+      if(!wrapitup_processed) {
+        struct per_transfer *per;
+        for(per = transfers; per; per = per->next) {
+          if(per->added)
+            per->abort = TRUE;
+        }
+        wrapitup_processed = TRUE;
       }
     }
 
