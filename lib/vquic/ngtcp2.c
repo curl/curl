@@ -1834,8 +1834,8 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
       break;
     }
     if(outlen < 0) {
-      if(outlen == NGTCP2_ERR_STREAM_DATA_BLOCKED ||
-         outlen == NGTCP2_ERR_STREAM_SHUT_WR) {
+      switch(outlen) {
+      case NGTCP2_ERR_STREAM_DATA_BLOCKED:
         assert(ndatalen == -1);
         rv = nghttp3_conn_block_stream(qs->h3conn, stream_id);
         if(rv) {
@@ -1844,8 +1844,17 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
           return CURLE_SEND_ERROR;
         }
         continue;
-      }
-      else if(outlen == NGTCP2_ERR_WRITE_MORE) {
+      case NGTCP2_ERR_STREAM_SHUT_WR:
+        assert(ndatalen == -1);
+        rv = nghttp3_conn_shutdown_stream_write(qs->h3conn, stream_id);
+        if(rv) {
+          failf(data,
+                "nghttp3_conn_shutdown_stream_write returned error: %s\n",
+                nghttp3_strerror(rv));
+          return CURLE_SEND_ERROR;
+        }
+        continue;
+      case NGTCP2_ERR_WRITE_MORE:
         assert(ndatalen >= 0);
         rv = nghttp3_conn_add_write_offset(qs->h3conn, stream_id, ndatalen);
         if(rv) {
@@ -1854,8 +1863,7 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
           return CURLE_SEND_ERROR;
         }
         continue;
-      }
-      else {
+      default:
         assert(ndatalen == -1);
         failf(data, "ngtcp2_conn_writev_stream returned error: %s",
               ngtcp2_strerror((int)outlen));
