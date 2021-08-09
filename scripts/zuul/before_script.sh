@@ -101,7 +101,7 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$MBEDTLS3" ]; then
   git clone --depth=1 -b v3.0.0 https://github.com/ARMmbed/mbedtls
   cd mbedtls
   make
-  make DESTDIR=$HOME/mbedtls3
+  make DESTDIR=$HOME/mbedtls3 install
 fi
 
 if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
