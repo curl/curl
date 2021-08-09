@@ -98,7 +98,7 @@ fi
 
 if [ "$TRAVIS_OS_NAME" = linux -a "$MBEDTLS3" ]; then
   cd $HOME
-  git clone --depth=1 -b v3.0.0 https://github.com:ARMmbed/mbedtls
+  git clone --depth=1 -b v3.0.0 https://github.com/ARMmbed/mbedtls
   cd mbedtls
   make
   make DESTDIR=$HOME/mbedtls3
