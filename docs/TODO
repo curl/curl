@@ -46,6 +46,7 @@
  1.28 FD_CLOEXEC
  1.29 Upgrade to websockets
  1.30 config file parsing
+ 1.31 erase secrets from heap/stack after use
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -432,6 +433,15 @@
  get the same ability to read curl options from files.
 
  See https://github.com/curl/curl/issues/3698
+
+1.31 erase secrets from heap/stack after use
+
+ Introducing a concept and system to erase secrets from memory after use, it
+ could help mitigate and lessen the impact of (future) security problems etc.
+ However: most secrets are passed to libcurl as clear text from the
+ application and then clearing them within the library adds nothing...
+
+ https://github.com/curl/curl/issues/7268
 
 2. libcurl - multi interface
 
