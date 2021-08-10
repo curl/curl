@@ -1661,7 +1661,7 @@ static ssize_t ngh3_stream_send(struct Curl_easy *data,
   }
 
   /* Reset post upload buffer after resumed. */
-  if(data->set.postfields) {
+  if(stream->upload_mem) {
     stream->upload_mem = NULL;
     stream->upload_len = 0;
   }
