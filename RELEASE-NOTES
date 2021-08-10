@@ -4,18 +4,21 @@ curl and libcurl 7.79.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2464
+ Contributors:                 2467
 
 This release includes the following changes:
 
  o bearssl: support CURLOPT_CAINFO_BLOB [3]
+ o http: consider cookies over localhost to be secure [24]
 
 This release includes the following bugfixes:
 
  o c-hyper: remove the hyper_executor_poll() loop from Curl_http [13]
  o CI/cirrus: reduce compile time with increased parallism [19]
  o compressed.d: it's a request, not an order [21]
+ o config: get rid of the unused HAVE_SIG_ATOMIC_T et. al.
  o configure.ac: revert bad nghttp2 library detection improvements [9]
+ o configure: error out if both ngtcp2 and quiche are specified [30]
  o configure: tweak nghttp2 library name fix [2]
  o connect: remove superfluous conditional [23]
  o curl-openssl.m4: check lib64 for the pkg-config file [14]
@@ -24,18 +27,24 @@ This release includes the following bugfixes:
  o CURLOPT_DOH_URL.3: CURLOPT_OPENSOCKETFUNCTION is not inherited [8]
  o CURLOPT_SSL_CTX_*.3: tidy up the example [15]
  o docs/MQTT: update state of username/password support [4]
+ o easy: use a custom implementation of wcsdup on Windows [31]
  o example/cookie_interface: fix scan-build printf warning [16]
  o examples/cookie_interface: avoid printfing time_t directly [18]
- o Get rid of the unused HAVE_SIG_ATOMIC_T et. al.
  o happy-eyeballs-timeout-ms.d: polish the wording [10]
+ o hostip: Make Curl_ipv6works function independent of getaddrinfo [26]
  o http_proxy: clear 'sending' when the outgoing request is sent [6]
  o limit-rate.d: clarify base unit [17]
+ o mbedTLS: initial 3.0.0 support [33]
  o mbedtls_threadlock: fix unused variable warning [11]
  o ngtcp2: compile with the latest ngtcp2 and nghttp3 [12]
+ o ngtcp2: replace deprecated functions with nghttp3_conn_shutdown_stream_read [28]
+ o ngtcp2: rework the return value handling of ngtcp2_conn_writev_stream [29]
+ o test1565: fix windows build errors [27]
  o tests/*server.py: remove pidfile on server termination [1]
  o tests/runtests.pl: cleanup copy&paste mistakes and unused code
  o tests: make three tests pass until 2037 [22]
  o tool/tests: fix potential year 2038 issues [20]
+ o winbuild/README.md: clarify GEN_PDB option
 
 This release includes the following known bugs:
 
@@ -44,13 +53,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aleksandr Krotov, Alex Crichton, Bastian Krause, Bernhard M. Wiedemann,
-  Bin Lan, Carlo Marcelo Arenas Belón, Christian Weisgerber, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, Daniel Woelfel, Dan Jacobson, David Cook,
-  Emil Engler, Josh Soref, Marc Hörsken, modbw on github, Oleg Pudeyev,
+  Aleksandr Krotov, Alex Crichton, Bastian Krause, Benau on github,
+  Bernhard M. Wiedemann, Bin Lan, Carlo Marcelo Arenas Belón,
+  Christian Weisgerber, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  Daniel Woelfel, Dan Jacobson, David Cook, Emil Engler, Jeff Mears,
+  Jeremy Falcon, Josh Soref, Marc Hörsken, modbw on github, Oleg Pudeyev,
   Ray Satiro, Rui Pinheiro, Tatsuhiro Tsujikawa, Viktor Szakats,
-  zloi-user on github,
-  (23 contributors)
+  Vincent Grande, zloi-user on github,
+  (27 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -77,3 +87,11 @@ References to bug reports and discussions on issues:
  [21] = https://curl.se/bug/?i=7516
  [22] = https://curl.se/bug/?i=7512
  [23] = https://curl.se/bug/?i=7511
+ [24] = https://curl.se/bug/?i=6733
+ [26] = https://curl.se/bug/?i=7529
+ [27] = https://curl.se/bug/?i=7527
+ [28] = https://curl.se/bug/?i=7546
+ [29] = https://curl.se/bug/?i=7546
+ [30] = https://curl.se/bug/?i=7545
+ [31] = https://curl.se/bug/?i=7540
+ [33] = https://curl.se/bug/?i=7428
