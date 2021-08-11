@@ -80,6 +80,26 @@
 #define HAVE_CARES_CALLBACK_TIMEOUTS 1
 #endif
 
+#if ARES_VERSION >= 0x010601
+/* IPv6 supported since 1.6.1 */
+#define HAVE_CARES_IPV6 1
+#endif
+
+#if ARES_VERSION >= 0x010704
+#define HAVE_CARES_SERVERS_CSV 1
+#define HAVE_CARES_LOCAL_DEV 1
+#define HAVE_CARES_SET_LOCAL 1
+#endif
+
+#if ARES_VERSION >= 0x010b00
+#define HAVE_CARES_PORTS_CSV 1
+#endif
+
+#if ARES_VERSION >= 0x011000
+/* 1.16.0 or later has ares_getaddrinfo */
+#define HAVE_CARES_GETADDRINFO 1
+#endif
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -490,7 +510,7 @@ CURLcode Curl_resolver_wait_resolv(struct Curl_easy *data,
   return result;
 }
 
-#if ARES_VERSION < 0x011000 /* before 1.16.0 */
+#ifndef HAVE_CARES_GETADDRINFO
 
 /* Connects results to the list */
 static void compound_results(struct thread_data *res,
@@ -750,7 +770,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
     /* initial status - failed */
     res->last_status = ARES_ENOTFOUND;
 
-#if ARES_VERSION >= 0x010601
+#ifdef HAVE_CARES_GETADDRINFO
     {
       struct ares_addrinfo_hints hints;
       char service[12];
@@ -771,8 +791,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
     }
 #else
 
-#if ARES_VERSION >= 0x010601
-    /* IPv6 supported by c-ares since 1.6.1 */
+#ifdef HAVE_CARES_IPV6
     if(Curl_ipv6works(data)) {
       /* The stack seems to be IPv6-enabled */
       res->num_pending = 2;
@@ -784,7 +803,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
                           PF_INET6, query_completed_cb, data);
     }
     else
-#endif /* ARES_VERSION >= 0x010601 */
+#endif
     {
       res->num_pending = 1;
 
@@ -814,8 +833,8 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
   if(!(servers && servers[0]))
     return CURLE_OK;
 
-#if (ARES_VERSION >= 0x010704)
-#if (ARES_VERSION >= 0x010b00)
+#ifdef HAVE_CARES_SERVERS_CSV
+#ifdef HAVE_CARES_PORTS_CSV
   ares_result = ares_set_servers_ports_csv(data->state.async.resolver,
                                            servers);
 #else
@@ -845,7 +864,7 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
 CURLcode Curl_set_dns_interface(struct Curl_easy *data,
                                 const char *interf)
 {
-#if (ARES_VERSION >= 0x010704)
+#ifdef HAVE_CARES_LOCAL_DEV
   if(!interf)
     interf = "";
 
@@ -862,7 +881,7 @@ CURLcode Curl_set_dns_interface(struct Curl_easy *data,
 CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
                                 const char *local_ip4)
 {
-#if (ARES_VERSION >= 0x010704)
+#ifdef HAVE_CARES_SET_LOCAL
   struct in_addr a4;
 
   if((!local_ip4) || (local_ip4[0] == 0)) {
@@ -888,7 +907,7 @@ CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
 CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
                                 const char *local_ip6)
 {
-#if (ARES_VERSION >= 0x010704) && defined(ENABLE_IPV6)
+#if defined(HAVE_CARES_SET_LOCAL) && defined(ENABLE_IPV6)
   unsigned char a6[INET6_ADDRSTRLEN];
 
   if((!local_ip6) || (local_ip6[0] == 0)) {
