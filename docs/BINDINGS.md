@@ -12,9 +12,9 @@ libcurl bindings
 
 [Ada95](https://web.archive.org/web/20070403105909/www.almroth.com/adacurl/index.html) Written by Andreas Almroth
 
-[Basic](http://scriptbasic.com/) ScriptBasic bindings written by Peter Verhas
+[Basic](https://scriptbasic.com/) ScriptBasic bindings written by Peter Verhas
 
-C++: [curlpp](http://curlpp.org/) Written by Jean-Philippe Barrette-LaPierre,
+C++: [curlpp](https://curlpp.org/) Written by Jean-Philippe Barrette-LaPierre,
 [curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and [C++
 Requests](https://github.com/whoshuu/cpr) by Huu Nguyen
 
@@ -45,7 +45,7 @@ Clojure: [clj-curl](https://github.com/lsevero/clj-curl) by Lucas Severo
 
 Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
-[Guile](http://www.lonelycactus.com/guile-curl.html) Written by Michael L. Gran
+[Guile](https://www.lonelycactus.com/guile-curl.html) Written by Michael L. Gran
 
 [Harbour](https://github.com/vszakats/harbour-core/tree/master/contrib/hbcurl) Written by Viktor Szakáts
 
@@ -106,7 +106,7 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford
 
 [S-Lang](https://www.jedsoft.org/slang/modules/curl.html) by John E Davis
 
-[Smalltalk](http://www.squeaksource.com/CurlPlugin/) Written by Danil Osipchuk
+[Smalltalk](https://www.squeaksource.com/CurlPlugin/) Written by Danil Osipchuk
 
 [SP-Forth](https://sourceforge.net/p/spf/spf/ci/master/tree/devel/~ac/lib/lin/curl/) Written by Andrey Cherezov
 
