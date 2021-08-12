@@ -213,7 +213,7 @@ static const char *octet2str(const char *beg, const char *end)
   result = Curl_dyn_addn(&buf, "", 0);
 
   while(!result && beg < end)
-    result = Curl_dyn_addf(&buf, "%02x:", *beg++);
+    result = Curl_dyn_addf(&buf, "%02x:", (unsigned char) *beg++);
 
   return Curl_dyn_ptr(&buf);
 }
