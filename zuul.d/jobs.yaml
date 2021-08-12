@@ -246,6 +246,24 @@
         TFLAGS: https ftps
 
 - job:
+    name: curl-debug-mbedtls3
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: debug
+        MBEDTLS3: "yes"
+        C: >-
+          --with-mbedtls={{ ansible_user_dir }}/mbedtls3
+        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/mbedtls3/lib:/usr/local/lib"
+        TFLAGS: https ftps
+
+- job:
     name: curl-debug-mesalink
     parent: curl-base
     vars:
@@ -545,6 +563,7 @@
       - curl-novalgrind-ngtcp2-gnutls
       - curl-debug-wolfssl
       - curl-debug-openssl3
+      - curl-debug-mbedtls3
       - curl-debug-mesalink
       - curl-debug-clang-with-openssl
       - curl-debug-clang-disable-alt-svc-with-openssl

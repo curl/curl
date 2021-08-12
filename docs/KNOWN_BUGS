@@ -101,7 +101,6 @@ problems may have been fixed or changed somewhat since this was written!
  11. Internals
  11.1 Curl leaks .onion hostnames in DNS
  11.2 error buffer not set if connection to multiple addresses fails
- 11.3 c-ares deviates from stock resolver on http://1346569778
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
  11.6 slow connect to localhost on Windows
@@ -772,18 +771,6 @@ problems may have been fixed or changed somewhat since this was written!
  only. But you only have IPv4 connectivity. libcurl will correctly fail with
  CURLE_COULDNT_CONNECT. But the error buffer set by CURLOPT_ERRORBUFFER
  remains empty. Issue: https://github.com/curl/curl/issues/544
-
-11.3 c-ares deviates from stock resolver on http://1346569778
-
- When using the socket resolvers, that URL becomes:
-
-     * Rebuilt URL to: http://1346569778/
-     *   Trying 80.67.6.50...
-
- but with c-ares it instead says "Could not resolve: 1346569778 (Domain name
- not found)"
-
- See https://github.com/curl/curl/issues/893
 
 11.4 HTTP test server 'connection-monitor' problems
 

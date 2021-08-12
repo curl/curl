@@ -2711,14 +2711,16 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
     int count = 0;
 
     if(data->cookies && data->state.cookie_engine) {
+      const char *host = data->state.aptr.cookiehost ?
+        data->state.aptr.cookiehost : conn->host.name;
+      const bool secure_context =
+        conn->handler->protocol&CURLPROTO_HTTPS ||
+        strcasecompare("localhost", host) ||
+        !strcmp(host, "127.0.0.1") ||
+        !strcmp(host, "[::1]") ? TRUE : FALSE;
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-      co = Curl_cookie_getlist(data->cookies,
-                               data->state.aptr.cookiehost?
-                               data->state.aptr.cookiehost:
-                               conn->host.name,
-                               data->state.up.path,
-                               (conn->handler->protocol&CURLPROTO_HTTPS)?
-                               TRUE:FALSE);
+      co = Curl_cookie_getlist(data->cookies, host, data->state.up.path,
+                               secure_context);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
     if(co) {
@@ -3564,18 +3566,21 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
 #if !defined(CURL_DISABLE_COOKIES)
   else if(data->cookies && data->state.cookie_engine &&
           checkprefix("Set-Cookie:", headp)) {
+    /* If there is a custom-set Host: name, use it here, or else use real peer
+       host name. */
+    const char *host = data->state.aptr.cookiehost?
+      data->state.aptr.cookiehost:conn->host.name;
+    const bool secure_context =
+      conn->handler->protocol&CURLPROTO_HTTPS ||
+      strcasecompare("localhost", host) ||
+      !strcmp(host, "127.0.0.1") ||
+      !strcmp(host, "[::1]") ? TRUE : FALSE;
+
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
                     CURL_LOCK_ACCESS_SINGLE);
-    Curl_cookie_add(data,
-                    data->cookies, TRUE, FALSE,
-                    headp + strlen("Set-Cookie:"),
-                    /* If there is a custom-set Host: name, use it
-                       here, or else use real peer host name. */
-                    data->state.aptr.cookiehost?
-                    data->state.aptr.cookiehost:conn->host.name,
-                    data->state.up.path,
-                    (conn->handler->protocol&CURLPROTO_HTTPS)?
-                    TRUE:FALSE);
+    Curl_cookie_add(data, data->cookies, TRUE, FALSE,
+                    headp + strlen("Set-Cookie:"), host,
+                    data->state.up.path, secure_context);
     Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
   }
 #endif

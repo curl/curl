@@ -28,6 +28,9 @@
 #include <nghttp3/nghttp3.h>
 #ifdef USE_OPENSSL
 #include <openssl/err.h>
+#include <ngtcp2/ngtcp2_crypto_openssl.h>
+#elif defined(USE_GNUTLS)
+#include <ngtcp2/ngtcp2_crypto_gnutls.h>
 #endif
 #include "urldata.h"
 #include "sendf.h"
@@ -114,42 +117,6 @@ static void quic_printf(void *user_data, const char *fmt, ...)
   vfprintf(stderr, fmt, ap);
   va_end(ap);
   fprintf(stderr, "\n");
-}
-#endif
-
-#ifdef USE_OPENSSL
-static ngtcp2_crypto_level
-quic_from_ossl_level(OSSL_ENCRYPTION_LEVEL ossl_level)
-{
-  switch(ossl_level) {
-  case ssl_encryption_initial:
-    return NGTCP2_CRYPTO_LEVEL_INITIAL;
-  case ssl_encryption_early_data:
-    return NGTCP2_CRYPTO_LEVEL_EARLY;
-  case ssl_encryption_handshake:
-    return NGTCP2_CRYPTO_LEVEL_HANDSHAKE;
-  case ssl_encryption_application:
-    return NGTCP2_CRYPTO_LEVEL_APPLICATION;
-  default:
-    assert(0);
-  }
-}
-#elif defined(USE_GNUTLS)
-static ngtcp2_crypto_level
-quic_from_gtls_level(gnutls_record_encryption_level_t gtls_level)
-{
-  switch(gtls_level) {
-  case GNUTLS_ENCRYPTION_LEVEL_INITIAL:
-    return NGTCP2_CRYPTO_LEVEL_INITIAL;
-  case GNUTLS_ENCRYPTION_LEVEL_EARLY:
-    return NGTCP2_CRYPTO_LEVEL_EARLY;
-  case GNUTLS_ENCRYPTION_LEVEL_HANDSHAKE:
-    return NGTCP2_CRYPTO_LEVEL_HANDSHAKE;
-  case GNUTLS_ENCRYPTION_LEVEL_APPLICATION:
-    return NGTCP2_CRYPTO_LEVEL_APPLICATION;
-  default:
-    assert(0);
-  }
 }
 #endif
 
@@ -260,7 +227,7 @@ static int quic_set_encryption_secrets(SSL *ssl,
                                        size_t secretlen)
 {
   struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
-  int level = quic_from_ossl_level(ossl_level);
+  int level = ngtcp2_crypto_openssl_from_ossl_encryption_level(ossl_level);
 
   if(ngtcp2_crypto_derive_and_install_rx_key(
        qs->qconn, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
@@ -282,7 +249,8 @@ static int quic_add_handshake_data(SSL *ssl, OSSL_ENCRYPTION_LEVEL ossl_level,
                                    const uint8_t *data, size_t len)
 {
   struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
-  ngtcp2_crypto_level level = quic_from_ossl_level(ossl_level);
+  ngtcp2_crypto_level level =
+      ngtcp2_crypto_openssl_from_ossl_encryption_level(ossl_level);
 
   return write_client_handshake(qs, level, data, len);
 }
@@ -370,7 +338,8 @@ static int secret_func(gnutls_session_t ssl,
                        const void *tx_secret, size_t secretlen)
 {
   struct quicsocket *qs = gnutls_session_get_ptr(ssl);
-  int level = quic_from_gtls_level(gtls_level);
+  int level =
+      ngtcp2_crypto_gnutls_from_gnutls_record_encryption_level(gtls_level);
 
   if(level != NGTCP2_CRYPTO_LEVEL_EARLY &&
      ngtcp2_crypto_derive_and_install_rx_key(
@@ -395,7 +364,8 @@ static int read_func(gnutls_session_t ssl,
                      size_t len)
 {
   struct quicsocket *qs = gnutls_session_get_ptr(ssl);
-  ngtcp2_crypto_level level = quic_from_gtls_level(gtls_level);
+  ngtcp2_crypto_level level =
+      ngtcp2_crypto_gnutls_from_gnutls_record_encryption_level(gtls_level);
   int rv;
 
   if(htype == GNUTLS_HANDSHAKE_CHANGE_CIPHER_SPEC)
@@ -543,22 +513,6 @@ static int quic_init_ssl(struct quicsocket *qs)
 }
 #endif
 
-static int
-cb_recv_crypto_data(ngtcp2_conn *tconn, ngtcp2_crypto_level crypto_level,
-                    uint64_t offset,
-                    const uint8_t *data, size_t datalen,
-                    void *user_data)
-{
-  (void)offset;
-  (void)user_data;
-
-  if(ngtcp2_crypto_read_write_crypto_data(tconn, crypto_level, data,
-                                          datalen) != 0)
-    return NGTCP2_ERR_CRYPTO;
-
-  return 0;
-}
-
 static int cb_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 {
   (void)user_data;
@@ -653,7 +607,25 @@ static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
   (void)app_error_code;
   (void)stream_user_data;
 
-  rv = nghttp3_conn_reset_stream(qs->h3conn, stream_id);
+  rv = nghttp3_conn_shutdown_stream_read(qs->h3conn, stream_id);
+  if(rv) {
+    return NGTCP2_ERR_CALLBACK_FAILURE;
+  }
+
+  return 0;
+}
+
+static int cb_stream_stop_sending(ngtcp2_conn *tconn, int64_t stream_id,
+                                  uint64_t app_error_code, void *user_data,
+                                  void *stream_user_data)
+{
+  struct quicsocket *qs = (struct quicsocket *)user_data;
+  int rv;
+  (void)tconn;
+  (void)app_error_code;
+  (void)stream_user_data;
+
+  rv = nghttp3_conn_shutdown_stream_read(qs->h3conn, stream_id);
   if(rv) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -713,7 +685,7 @@ static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
 static ngtcp2_callbacks ng_callbacks = {
   ngtcp2_crypto_client_initial_cb,
   NULL, /* recv_client_initial */
-  cb_recv_crypto_data,
+  ngtcp2_crypto_recv_crypto_data_cb,
   cb_handshake_completed,
   NULL, /* recv_version_negotiation */
   ngtcp2_crypto_encrypt_cb,
@@ -745,7 +717,9 @@ static ngtcp2_callbacks ng_callbacks = {
   ngtcp2_crypto_delete_crypto_cipher_ctx_cb,
   NULL, /* recv_datagram */
   NULL, /* ack_datagram */
-  NULL  /* lost_datagram */
+  NULL, /* lost_datagram */
+  NULL, /* get_path_challenge_data */
+  cb_stream_stop_sending
 };
 
 /*
@@ -1143,14 +1117,10 @@ static nghttp3_callbacks ngh3_callbacks = {
   NULL, /* begin_trailers */
   cb_h3_recv_header,
   NULL, /* end_trailers */
-  NULL, /* http_begin_push_promise */
-  NULL, /* http_recv_push_promise */
-  NULL, /* http_end_push_promise */
-  NULL, /* http_cancel_push */
   cb_h3_send_stop_sending,
-  NULL, /* push_stream */
   NULL, /* end_stream */
   NULL, /* reset_stream */
+  NULL /* shutdown */
 };
 
 static int init_ngh3_conn(struct quicsocket *qs)
@@ -1660,6 +1630,12 @@ static ssize_t ngh3_stream_send(struct Curl_easy *data,
     return -1;
   }
 
+  /* Reset post upload buffer after resumed. */
+  if(stream->upload_mem) {
+    stream->upload_mem = NULL;
+    stream->upload_len = 0;
+  }
+
   *curlcode = CURLE_OK;
   return sent;
 }
@@ -1818,8 +1794,8 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
       break;
     }
     if(outlen < 0) {
-      if(outlen == NGTCP2_ERR_STREAM_DATA_BLOCKED ||
-         outlen == NGTCP2_ERR_STREAM_SHUT_WR) {
+      switch(outlen) {
+      case NGTCP2_ERR_STREAM_DATA_BLOCKED:
         assert(ndatalen == -1);
         rv = nghttp3_conn_block_stream(qs->h3conn, stream_id);
         if(rv) {
@@ -1828,8 +1804,17 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
           return CURLE_SEND_ERROR;
         }
         continue;
-      }
-      else if(outlen == NGTCP2_ERR_WRITE_MORE) {
+      case NGTCP2_ERR_STREAM_SHUT_WR:
+        assert(ndatalen == -1);
+        rv = nghttp3_conn_shutdown_stream_write(qs->h3conn, stream_id);
+        if(rv) {
+          failf(data,
+                "nghttp3_conn_shutdown_stream_write returned error: %s\n",
+                nghttp3_strerror(rv));
+          return CURLE_SEND_ERROR;
+        }
+        continue;
+      case NGTCP2_ERR_WRITE_MORE:
         assert(ndatalen >= 0);
         rv = nghttp3_conn_add_write_offset(qs->h3conn, stream_id, ndatalen);
         if(rv) {
@@ -1838,8 +1823,7 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
           return CURLE_SEND_ERROR;
         }
         continue;
-      }
-      else {
+      default:
         assert(ndatalen == -1);
         failf(data, "ngtcp2_conn_writev_stream returned error: %s",
               ngtcp2_strerror((int)outlen));

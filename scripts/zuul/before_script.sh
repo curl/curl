@@ -96,6 +96,14 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$OPENSSL3" ]; then
   make install_sw
 fi
 
+if [ "$TRAVIS_OS_NAME" = linux -a "$MBEDTLS3" ]; then
+  cd $HOME
+  git clone --depth=1 -b v3.0.0 https://github.com/ARMmbed/mbedtls
+  cd mbedtls
+  make
+  make DESTDIR=$HOME/mbedtls3 install
+fi
+
 if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
   cd $HOME
   git clone --depth=1 -b v3.1.4 https://github.com/libressl-portable/portable.git libressl-git

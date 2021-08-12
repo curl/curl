@@ -50,7 +50,7 @@ static void *run_thread(void *ptr)
   (void)ptr;
 
   for(i = 0; i < CONN_NUM; i++) {
-    sleep(TIME_BETWEEN_START_SECS);
+    wait_ms(TIME_BETWEEN_START_SECS * 1000);
 
     easy_init(easy);
 
@@ -96,7 +96,8 @@ int test(char *URL)
   CURL *started_handles[CONN_NUM];
   int started_num = 0;
   int finished_num = 0;
-  pthread_t tid = 0;
+  pthread_t tid;
+  bool tid_valid = false;
   struct CURLMsg *message;
 
   start_test_timing();
@@ -108,7 +109,9 @@ int test(char *URL)
   url = URL;
 
   res = pthread_create(&tid, NULL, run_thread, NULL);
-  if(0 != res) {
+  if(!res)
+    tid_valid = true;
+  else {
     fprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
             __FILE__, __LINE__, res);
     goto test_cleanup;
@@ -182,7 +185,7 @@ test_cleanup:
     test_failure = res;
   pthread_mutex_unlock(&lock);
 
-  if(0 != tid)
+  if(tid_valid)
     pthread_join(tid, NULL);
 
   curl_multi_cleanup(multi);
