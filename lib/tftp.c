@@ -720,7 +720,7 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
          /* There's a bug in tftpd-hpa that causes it to send us an ack for
           * 65535 when the block number wraps to 0. So when we're expecting
           * 0, also accept 65535. See
-          * http://syslinux.zytor.com/archives/2010-September/015253.html
+          * https://www.syslinux.org/archives/2010-September/015612.html
           * */
          !(state->block == 0 && rblock == 65535)) {
         /* This isn't the expected block.  Log it and up the retry counter */
