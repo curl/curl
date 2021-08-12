@@ -34,8 +34,8 @@ output to be done to stdout.
 
 To suppress response bodies, you can redirect output to /dev/null:
 
-  curl -o example.com -o /dev/null
+  curl example.com -o /dev/null
 
 Or for Windows use nul:
 
-  curl -o example.com -o nul
+  curl example.com -o nul
