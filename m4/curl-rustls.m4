@@ -63,14 +63,11 @@ if test "x$OPT_RUSTLS" != xno; then
       rustlslib=$OPT_RUSTLS/lib$libsuff
 
       LDFLAGS="$LDFLAGS $addld"
-      if (test -d "/System/Library/Frameworks/Security.framework" && test "x$cross_compiling" != "xyes"); then
-        LDFLAGS="$LDFLAGS -framework CoreFoundation -framework Security"
-      fi
       if test "$addcflags" != "-I/usr/include"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-      AC_CHECK_LIB(crustls, rustls_client_session_read,
+      AC_CHECK_LIB(crustls, rustls_connection_read,
        [
        AC_DEFINE(USE_RUSTLS, 1, [if rustls is enabled])
        AC_SUBST(USE_RUSTLS, [1])

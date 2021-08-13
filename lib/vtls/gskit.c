@@ -1011,7 +1011,7 @@ static CURLcode gskit_connect_step3(struct Curl_easy *data,
      CURLE_OK) {
     int i;
 
-    infof(data, "Server certificate:\n");
+    infof(data, "Server certificate:");
     p = cdev;
     for(i = 0; i++ < cdec; p++)
       switch(p->cert_data_id) {
@@ -1020,16 +1020,16 @@ static CURLcode gskit_connect_step3(struct Curl_easy *data,
         certend = cert + cdev->cert_data_l;
         break;
       case CERT_DN_PRINTABLE:
-        infof(data, "\t subject: %.*s\n", p->cert_data_l, p->cert_data_p);
+        infof(data, "\t subject: %.*s", p->cert_data_l, p->cert_data_p);
         break;
       case CERT_ISSUER_DN_PRINTABLE:
-        infof(data, "\t issuer: %.*s\n", p->cert_data_l, p->cert_data_p);
+        infof(data, "\t issuer: %.*s", p->cert_data_l, p->cert_data_p);
         break;
       case CERT_VALID_FROM:
-        infof(data, "\t start date: %.*s\n", p->cert_data_l, p->cert_data_p);
+        infof(data, "\t start date: %.*s", p->cert_data_l, p->cert_data_p);
         break;
       case CERT_VALID_TO:
-        infof(data, "\t expire date: %.*s\n", p->cert_data_l, p->cert_data_p);
+        infof(data, "\t expire date: %.*s", p->cert_data_l, p->cert_data_p);
         break;
     }
   }
@@ -1192,6 +1192,7 @@ static int gskit_shutdown(struct Curl_easy *data,
   int what;
   int rc;
   char buf[120];
+  int loop = 10; /* don't get stuck */
 
   if(!BACKEND->handle)
     return 0;
@@ -1206,7 +1207,7 @@ static int gskit_shutdown(struct Curl_easy *data,
   what = SOCKET_READABLE(conn->sock[sockindex],
                          SSL_SHUTDOWN_TIMEOUT);
 
-  for(;;) {
+  while(loop--) {
     ssize_t nread;
 
     if(what < 0) {
@@ -1304,7 +1305,9 @@ const struct Curl_ssl Curl_ssl_gskit = {
   Curl_none_set_engine_default,   /* set_engine_default */
   Curl_none_engines_list,         /* engines_list */
   Curl_none_false_start,          /* false_start */
-  NULL                            /* sha256sum */
+  NULL,                           /* sha256sum */
+  NULL,                           /* associate_connection */
+  NULL                            /* disassociate_connection */
 };
 
 #endif /* USE_GSKIT */

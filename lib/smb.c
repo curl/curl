@@ -88,6 +88,7 @@ const struct Curl_handler Curl_handler_smb = {
   smb_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_SMB,                             /* defport */
   CURLPROTO_SMB,                        /* protocol */
   CURLPROTO_SMB,                        /* family */
@@ -114,6 +115,7 @@ const struct Curl_handler Curl_handler_smbs = {
   smb_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_SMBS,                            /* defport */
   CURLPROTO_SMBS,                       /* protocol */
   CURLPROTO_SMB,                        /* family */
@@ -202,7 +204,7 @@ static void conn_state(struct Curl_easy *data, enum smb_conn_state newstate)
   };
 
   if(smbc->state != newstate)
-    infof(data, "SMB conn %p state change from %s to %s\n",
+    infof(data, "SMB conn %p state change from %s to %s",
           (void *)smbc, names[smbc->state], names[newstate]);
 #endif
 
@@ -228,7 +230,7 @@ static void request_state(struct Curl_easy *data,
   };
 
   if(req->state != newstate)
-    infof(data, "SMB request %p state change from %s to %s\n",
+    infof(data, "SMB request %p state change from %s to %s",
           (void *)req, names[req->state], names[newstate]);
 #endif
 
@@ -627,9 +629,8 @@ static CURLcode smb_send_and_recv(struct Curl_easy *data, void **msg)
 
   /* Check if there is data in the transfer buffer */
   if(!smbc->send_size && smbc->upload_size) {
-    size_t nread = smbc->upload_size > data->set.upload_buffer_size ?
-      data->set.upload_buffer_size :
-      smbc->upload_size;
+    size_t nread = smbc->upload_size > (size_t)data->set.upload_buffer_size ?
+      (size_t)data->set.upload_buffer_size : smbc->upload_size;
     data->req.upload_fromhere = data->state.ulbuf;
     result = Curl_fillreadbuffer(data, nread, &nread);
     if(result && result != CURLE_AGAIN)
@@ -669,7 +670,7 @@ static CURLcode smb_connection_state(struct Curl_easy *data, bool *done)
 #ifdef USE_SSL
     if((conn->handler->flags & PROTOPT_SSL)) {
       bool ssl_done = FALSE;
-      result = Curl_ssl_connect_nonblocking(data, conn,
+      result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
                                             FIRSTSOCKET, &ssl_done);
       if(result && result != CURLE_AGAIN)
         return result;

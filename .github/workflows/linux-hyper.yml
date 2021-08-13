@@ -1,0 +1,48 @@
+name: Linux
+
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+    - master
+    - '*/ci'
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: hyper
+          install:
+          configure: --with-openssl --with-hyper=$HOME/hyper
+
+    steps:
+    - run: sudo apt-get install libtool autoconf automake pkg-config
+      name: install prereqs
+
+    - run: (cd $HOME;
+        git clone --depth=1 https://github.com/hyperium/hyper.git;
+        curl https://sh.rustup.rs -sSf | sh -s -- -y;
+        source $HOME/.cargo/env;
+        cd $HOME/hyper;
+        RUSTFLAGS="--cfg hyper_unstable_ffi" cargo build --features client,http1,http2,ffi)
+      name: 'install hyper'
+
+    - uses: actions/checkout@v2
+
+    - run: ./buildconf && LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} && make
+      name: 'configure and build'
+
+    - run: make test-nonflaky
+      name: 'test'
+      env:
+        LD_LIBRARY_PATH: $HOME/hyper/target/debug:/usr/local/lib
+        TFLAGS: "${{ matrix.build.tflags }}"

@@ -70,29 +70,31 @@
 #include <gsasl.h>
 #endif
 
+#ifdef USE_OPENLDAP
+#include <ldap.h>
+#endif
+
 #ifdef HAVE_BROTLI
-static size_t brotli_version(char *buf, size_t bufsz)
+static void brotli_version(char *buf, size_t bufsz)
 {
   uint32_t brotli_version = BrotliDecoderVersion();
   unsigned int major = brotli_version >> 24;
   unsigned int minor = (brotli_version & 0x00FFFFFF) >> 12;
   unsigned int patch = brotli_version & 0x00000FFF;
-
-  return msnprintf(buf, bufsz, "%u.%u.%u", major, minor, patch);
+  (void)msnprintf(buf, bufsz, "%u.%u.%u", major, minor, patch);
 }
 #endif
 
 #ifdef HAVE_ZSTD
-static size_t zstd_version(char *buf, size_t bufsz)
+static void zstd_version(char *buf, size_t bufsz)
 {
   unsigned long zstd_version = (unsigned long)ZSTD_versionNumber();
   unsigned int major = (unsigned int)(zstd_version / (100 * 100));
   unsigned int minor = (unsigned int)((zstd_version -
-                         (major * 100 * 100)) / 100);
+                                       (major * 100 * 100)) / 100);
   unsigned int patch = (unsigned int)(zstd_version -
-                         (major * 100 * 100) - (minor * 100));
-
-  return msnprintf(buf, bufsz, "%u.%u.%u", major, minor, patch);
+                                      (major * 100 * 100) - (minor * 100));
+  (void)msnprintf(buf, bufsz, "%u.%u.%u", major, minor, patch);
 }
 #endif
 
@@ -104,7 +106,7 @@ static size_t zstd_version(char *buf, size_t bufsz)
  * zeros in the data.
  */
 
-#define VERSION_PARTS 16 /* number of substrings we can concatenate */
+#define VERSION_PARTS 17 /* number of substrings we can concatenate */
 
 char *curl_version(void)
 {
@@ -153,6 +155,9 @@ char *curl_version(void)
 #endif
 #ifdef USE_GSASL
   char gsasl_buf[30];
+#endif
+#ifdef USE_OPENLDAP
+  char ldap_buf[30];
 #endif
   int i = 0;
   int j;
@@ -246,6 +251,24 @@ char *curl_version(void)
   msnprintf(gsasl_buf, sizeof(gsasl_buf), "libgsasl/%s",
             gsasl_check_version(NULL));
   src[i++] = gsasl_buf;
+#endif
+#ifdef USE_OPENLDAP
+  {
+    LDAPAPIInfo api;
+    api.ldapai_info_version = LDAP_API_INFO_VERSION;
+
+    if(ldap_get_option(NULL, LDAP_OPT_API_INFO, &api) == LDAP_OPT_SUCCESS) {
+      unsigned int patch = api.ldapai_vendor_version % 100;
+      unsigned int major = api.ldapai_vendor_version / 10000;
+      unsigned int minor =
+        ((api.ldapai_vendor_version - major * 10000) - patch) / 100;
+      msnprintf(ldap_buf, sizeof(ldap_buf), "%s/%u.%u.%u",
+                api.ldapai_vendor_name, major, minor, patch);
+      src[i++] = ldap_buf;
+      ldap_memfree(api.ldapai_vendor_name);
+      ber_memvfree((void **)api.ldapai_extensions);
+    }
+  }
 #endif
 
   DEBUGASSERT(i <= VERSION_PARTS);

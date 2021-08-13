@@ -555,7 +555,6 @@ int main(int argc, char **argv)
   int flag;
   int rc;
   int error;
-  long pid;
   struct testcase test;
   int result = 0;
 
@@ -636,8 +635,6 @@ int main(int argc, char **argv)
 #endif
 
   install_signal_handlers(true);
-
-  pid = (long)getpid();
 
 #ifdef ENABLE_IPV6
   if(!use_ipv6)
@@ -861,7 +858,7 @@ tftpd_cleanup:
 
   if(got_exit_signal) {
     logmsg("========> %s tftpd (port: %d pid: %ld) exits with signal (%d)",
-           ipv_inuse, (int)port, pid, exit_signal);
+           ipv_inuse, (int)port, (long)getpid(), exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we
@@ -1065,8 +1062,8 @@ static int validate_access(struct testcase *test,
 
   if(!strncmp("verifiedserver", filename, 14)) {
     char weare[128];
-    size_t count = msnprintf(weare, sizeof(weare),
-                             "WE ROOLZ: %ld\r\n", (long)getpid());
+    size_t count = msnprintf(weare, sizeof(weare), "WE ROOLZ: %"
+                             CURL_FORMAT_CURL_OFF_T "\r\n", our_getpid());
 
     logmsg("Are-we-friendly question received");
     test->buffer = strdup(weare);

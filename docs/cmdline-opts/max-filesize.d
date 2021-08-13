@@ -1,6 +1,7 @@
 Long: max-filesize
 Arg: <bytes>
 Help: Maximum file size to download
+Protocols: FTP HTTP MQTT
 See-also: limit-rate
 Category: connection
 ---
@@ -14,4 +15,4 @@ gigabytes. Examples: 200K, 3m and 1G. (Added in 7.58.0)
 
 **NOTE**: The file size is not always known prior to download, and for such
 files this option has no effect even if the file transfer ends up being larger
-than this given limit. This concerns both FTP and HTTP transfers.
+than this given limit.

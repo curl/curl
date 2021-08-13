@@ -157,6 +157,7 @@ static const struct Curl_handler Curl_handler_http3 = {
   quiche_disconnect,                    /* disconnect */
   ZERO_NULL,                            /* readwrite */
   quiche_conncheck,                     /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
   CURLPROTO_HTTP,                       /* family */
@@ -225,7 +226,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
     quiche_config_log_keys(qs->cfg);
 
   qs->conn = quiche_connect(conn->host.name, (const uint8_t *) qs->scid,
-                            sizeof(qs->scid), qs->cfg);
+                            sizeof(qs->scid), addr, addrlen, qs->cfg);
   if(!qs->conn) {
     failf(data, "can't create quiche connection");
     return CURLE_OUT_OF_MEMORY;
@@ -257,7 +258,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
-  infof(data, "Connect socket %d over QUIC to %s:%ld\n",
+  infof(data, "Connect socket %d over QUIC to %s:%ld",
         sockfd, ipbuf, port);
 
   Curl_persistconninfo(data, conn, NULL, -1);
@@ -276,7 +277,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
       offset += 1 + alpn_len;
     }
 
-    infof(data, "Sent QUIC client Initial, ALPN: %s\n",
+    infof(data, "Sent QUIC client Initial, ALPN: %s",
           alpn_protocols + 1);
   }
 
@@ -344,7 +345,7 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
   if(quiche_conn_is_established(qs->conn)) {
     *done = TRUE;
     result = quiche_has_connected(conn, 0, sockindex);
-    DEBUGF(infof(data, "quiche established connection!\n"));
+    DEBUGF(infof(data, "quiche established connection!"));
   }
 
   return result;
@@ -359,6 +360,9 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
   ssize_t recvd;
   uint8_t *buf = (uint8_t *)data->state.buffer;
   size_t bufsize = data->set.buffer_size;
+  struct sockaddr_storage from;
+  socklen_t from_len;
+  quiche_recv_info recv_info;
 
   DEBUGASSERT(qs->conn);
 
@@ -366,17 +370,24 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
   quiche_conn_on_timeout(qs->conn);
 
   do {
-    recvd = recv(sockfd, buf, bufsize, 0);
+    from_len = sizeof(from);
+
+    recvd = recvfrom(sockfd, buf, bufsize, 0,
+                     (struct sockaddr *)&from, &from_len);
+
     if((recvd < 0) && ((SOCKERRNO == EAGAIN) || (SOCKERRNO == EWOULDBLOCK)))
       break;
 
     if(recvd < 0) {
-      failf(data, "quiche: recv() unexpectedly returned %zd "
+      failf(data, "quiche: recvfrom() unexpectedly returned %zd "
             "(errno: %d, socket %d)", recvd, SOCKERRNO, sockfd);
       return CURLE_RECV_ERROR;
     }
 
-    recvd = quiche_conn_recv(qs->conn, buf, recvd);
+    recv_info.from = (struct sockaddr *) &from;
+    recv_info.from_len = from_len;
+
+    recvd = quiche_conn_recv(qs->conn, buf, recvd, &recv_info);
     if(recvd == QUICHE_ERR_DONE)
       break;
 
@@ -399,9 +410,10 @@ static CURLcode flush_egress(struct Curl_easy *data, int sockfd,
   ssize_t sent;
   uint8_t out[1200];
   int64_t timeout_ns;
+  quiche_send_info send_info;
 
   do {
-    sent = quiche_conn_send(qs->conn, out, sizeof(out));
+    sent = quiche_conn_send(qs->conn, out, sizeof(out), &send_info);
     if(sent == QUICHE_ERR_DONE)
       break;
 
@@ -479,7 +491,7 @@ static ssize_t h3_stream_recv(struct Curl_easy *data,
   headers.nlen = 0;
 
   if(process_ingress(data, sockfd, qs)) {
-    infof(data, "h3_stream_recv returns on ingress\n");
+    infof(data, "h3_stream_recv returns on ingress");
     *curlcode = CURLE_RECV_ERROR;
     return -1;
   }
@@ -492,7 +504,7 @@ static ssize_t h3_stream_recv(struct Curl_easy *data,
 
     if(s != stream->stream3_id) {
       /* another transfer, ignore for now */
-      infof(data, "Got h3 for stream %u, expects %u\n",
+      infof(data, "Got h3 for stream %u, expects %u",
             s, stream->stream3_id);
       continue;
     }
@@ -573,7 +585,7 @@ static ssize_t h3_stream_send(struct Curl_easy *data,
     sent = len;
   }
   else {
-    H3BUGF(infof(data, "Pass on %zd body bytes to quiche\n", len));
+    H3BUGF(infof(data, "Pass on %zd body bytes to quiche", len));
     sent = quiche_h3_send_body(qs->h3c, qs->conn, stream->stream3_id,
                                (uint8_t *)mem, len, FALSE);
     if(sent < 0) {
@@ -592,12 +604,11 @@ static ssize_t h3_stream_send(struct Curl_easy *data,
 }
 
 /*
- * Store quiche version info in this buffer, Prefix with a space.  Return total
- * length written.
+ * Store quiche version info in this buffer.
  */
-int Curl_quic_ver(char *p, size_t len)
+void Curl_quic_ver(char *p, size_t len)
 {
-  return msnprintf(p, len, "quiche/%s", quiche_version());
+  (void)msnprintf(p, len, "quiche/%s", quiche_version());
 }
 
 /* Index where :authority header field will appear in request header
@@ -767,7 +778,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
     for(i = 0; i < nheader; ++i) {
       acc += nva[i].name_len + nva[i].value_len;
 
-      H3BUGF(infof(data, "h3 [%.*s: %.*s]\n",
+      H3BUGF(infof(data, "h3 [%.*s: %.*s]",
                    nva[i].name_len, nva[i].name,
                    nva[i].value_len, nva[i].value));
     }
@@ -775,7 +786,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
     if(acc > MAX_ACC) {
       infof(data, "http_request: Warning: The cumulative length of all "
             "headers exceeds %d bytes and that could cause the "
-            "stream to be rejected.\n", MAX_ACC);
+            "stream to be rejected.", MAX_ACC);
     }
   }
 
@@ -812,13 +823,13 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   Curl_safefree(nva);
 
   if(stream3_id < 0) {
-    H3BUGF(infof(data, "quiche_h3_send_request returned %d\n",
+    H3BUGF(infof(data, "quiche_h3_send_request returned %d",
                  stream3_id));
     result = CURLE_SEND_ERROR;
     goto fail;
   }
 
-  infof(data, "Using HTTP/3 Stream ID: %x (easy handle %p)\n",
+  infof(data, "Using HTTP/3 Stream ID: %x (easy handle %p)",
         stream3_id, (void *)data);
   stream->stream3_id = stream3_id;
 

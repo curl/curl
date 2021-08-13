@@ -35,10 +35,9 @@
 #define DEFAULT_STREAM_WINDOW_SIZE (32 * 1024 * 1024) /* 32 MB */
 
 /*
- * Store nghttp2 version info in this buffer, Prefix with a space.  Return
- * total length written.
+ * Store nghttp2 version info in this buffer.
  */
-int Curl_http2_ver(char *p, size_t len);
+void Curl_http2_ver(char *p, size_t len);
 
 const char *Curl_http2_strerror(uint32_t err);
 

@@ -41,10 +41,10 @@ http://%HOSTIP:%NOLISTENPORT/not-there/%TESTNUMBER
 7
 </errorcode>
 <stdout>
-[0/4] 1.example.com 20300320 01:02:03
-[1/4] 2.example.com 20300320 01:02:03
-[2/4] 3.example.com 20300320 01:02:03
-[3/4] 4.example.com 20300320 01:02:03
+[0/4] 1.example.com 20370320 01:02:03
+[1/4] 2.example.com 20370320 01:02:03
+[2/4] 3.example.com 20370320 01:02:03
+[3/4] 4.example.com 20370320 01:02:03
 </stdout>
 </verify>
 </testcase>

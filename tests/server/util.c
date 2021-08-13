@@ -269,17 +269,11 @@ int wait_ms(int timeout_ms)
   return r;
 }
 
-int write_pidfile(const char *filename)
+curl_off_t our_getpid(void)
 {
-  FILE *pidfile;
   curl_off_t pid;
 
   pid = (curl_off_t)getpid();
-  pidfile = fopen(filename, "wb");
-  if(!pidfile) {
-    logmsg("Couldn't write pid file: %s %s", filename, strerror(errno));
-    return 0; /* fail */
-  }
 #if defined(WIN32) || defined(_WIN32)
   /* store pid + 65536 to avoid conflict with Cygwin/msys PIDs, see also:
    * - https://cygwin.com/git/?p=newlib-cygwin.git;a=commit; ↵
@@ -289,6 +283,20 @@ int write_pidfile(const char *filename)
    */
   pid += 65536;
 #endif
+  return pid;
+}
+
+int write_pidfile(const char *filename)
+{
+  FILE *pidfile;
+  curl_off_t pid;
+
+  pid = our_getpid();
+  pidfile = fopen(filename, "wb");
+  if(!pidfile) {
+    logmsg("Couldn't write pid file: %s %s", filename, strerror(errno));
+    return 0; /* fail */
+  }
   fprintf(pidfile, "%" CURL_FORMAT_CURL_OFF_T "\n", pid);
   fclose(pidfile);
   logmsg("Wrote pid %" CURL_FORMAT_CURL_OFF_T " to %s", pid, filename);
@@ -488,7 +496,7 @@ static struct timeval tvnow(void)
     (void)gettimeofday(&now, NULL);
 #else
   else {
-    now.tv_sec = (long)time(NULL);
+    now.tv_sec = time(NULL);
     now.tv_usec = 0;
   }
 #endif
@@ -517,7 +525,7 @@ static struct timeval tvnow(void)
   ** time() returns the value of time in seconds since the Epoch.
   */
   struct timeval now;
-  now.tv_sec = (long)time(NULL);
+  now.tv_sec = time(NULL);
   now.tv_usec = 0;
   return now;
 }

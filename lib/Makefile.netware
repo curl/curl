@@ -560,9 +560,7 @@ endif
 	@echo $(DL)#define HAVE_ARPA_INET_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_ASSERT_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_ERRNO_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_ERR_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_FCNTL_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_GETHOSTBYADDR 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GETHOSTBYNAME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GETPROTOBYNAME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GMTIME_R 1$(DL) >> $@
@@ -582,7 +580,6 @@ endif
 	@echo $(DL)#define HAVE_SETLOCALE 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SIGNAL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SIGNAL_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_SIG_ATOMIC_T 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SOCKET 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STDLIB_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRDUP 1$(DL) >> $@

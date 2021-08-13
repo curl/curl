@@ -125,6 +125,16 @@ static bool blobcmp(struct curl_blob *first, struct curl_blob *second)
   return !memcmp(first->data, second->data, first->len); /* same data */
 }
 
+static bool safecmp(char *a, char *b)
+{
+  if(a && b)
+    return !strcmp(a, b);
+  else if(!a && !b)
+    return TRUE; /* match */
+  return FALSE; /* no match */
+}
+
+
 bool
 Curl_ssl_config_matches(struct ssl_primary_config *data,
                         struct ssl_primary_config *needle)
@@ -135,11 +145,14 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      (data->verifyhost == needle->verifyhost) &&
      (data->verifystatus == needle->verifystatus) &&
      blobcmp(data->cert_blob, needle->cert_blob) &&
-     Curl_safe_strcasecompare(data->CApath, needle->CApath) &&
-     Curl_safe_strcasecompare(data->CAfile, needle->CAfile) &&
-     Curl_safe_strcasecompare(data->clientcert, needle->clientcert) &&
-     Curl_safe_strcasecompare(data->random_file, needle->random_file) &&
-     Curl_safe_strcasecompare(data->egdsocket, needle->egdsocket) &&
+     blobcmp(data->ca_info_blob, needle->ca_info_blob) &&
+     blobcmp(data->issuercert_blob, needle->issuercert_blob) &&
+     safecmp(data->CApath, needle->CApath) &&
+     safecmp(data->CAfile, needle->CAfile) &&
+     safecmp(data->issuercert, needle->issuercert) &&
+     safecmp(data->clientcert, needle->clientcert) &&
+     safecmp(data->random_file, needle->random_file) &&
+     safecmp(data->egdsocket, needle->egdsocket) &&
      Curl_safe_strcasecompare(data->cipher_list, needle->cipher_list) &&
      Curl_safe_strcasecompare(data->cipher_list13, needle->cipher_list13) &&
      Curl_safe_strcasecompare(data->curves, needle->curves) &&
@@ -161,8 +174,11 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   dest->sessionid = source->sessionid;
 
   CLONE_BLOB(cert_blob);
+  CLONE_BLOB(ca_info_blob);
+  CLONE_BLOB(issuercert_blob);
   CLONE_STRING(CApath);
   CLONE_STRING(CAfile);
+  CLONE_STRING(issuercert);
   CLONE_STRING(clientcert);
   CLONE_STRING(random_file);
   CLONE_STRING(egdsocket);
@@ -178,6 +194,7 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
 {
   Curl_safefree(sslc->CApath);
   Curl_safefree(sslc->CAfile);
+  Curl_safefree(sslc->issuercert);
   Curl_safefree(sslc->clientcert);
   Curl_safefree(sslc->random_file);
   Curl_safefree(sslc->egdsocket);
@@ -185,6 +202,8 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
   Curl_safefree(sslc->cipher_list13);
   Curl_safefree(sslc->pinned_key);
   Curl_safefree(sslc->cert_blob);
+  Curl_safefree(sslc->ca_info_blob);
+  Curl_safefree(sslc->issuercert_blob);
   Curl_safefree(sslc->curves);
 }
 
@@ -323,7 +342,7 @@ Curl_ssl_connect(struct Curl_easy *data, struct connectdata *conn,
 
 CURLcode
 Curl_ssl_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
-                             int sockindex, bool *done)
+                             bool isproxy, int sockindex, bool *done)
 {
   CURLcode result;
 
@@ -342,7 +361,7 @@ Curl_ssl_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
   result = Curl_ssl->connect_nonblocking(data, conn, sockindex, done);
   if(result)
     conn->ssl[sockindex].use = FALSE;
-  else if(*done)
+  else if(*done && !isproxy)
     Curl_pgrsTime(data, TIMER_APPCONNECT); /* SSL is connected */
   return result;
 }
@@ -404,8 +423,9 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
 
   DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
-  if(!SSL_SET_OPTION(primary.sessionid))
-    /* session ID re-use is disabled */
+  if(!SSL_SET_OPTION(primary.sessionid) || !data->state.session)
+    /* session ID re-use is disabled or the session cache has not been
+       setup */
     return TRUE;
 
   /* Lock if shared */
@@ -440,6 +460,10 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
     }
   }
 
+  DEBUGF(infof(data, "%s Session ID in cache for %s %s://%s:%d",
+               no_match? "Didn't find": "Found",
+               isProxy ? "proxy" : "host",
+               conn->handler->scheme, name, port));
   return no_match;
 }
 
@@ -489,14 +513,14 @@ void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid)
  */
 CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
                                struct connectdata *conn,
-                               bool isProxy,
+                               const bool isProxy,
                                void *ssl_sessionid,
                                size_t idsize,
                                int sockindex)
 {
   size_t i;
-  struct Curl_ssl_session *store = &data->state.session[0];
-  long oldest_age = data->state.session[0].age; /* zero if unused */
+  struct Curl_ssl_session *store;
+  long oldest_age;
   char *clone_host;
   char *clone_conn_to_host;
   int conn_to_port;
@@ -512,6 +536,11 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
   const char *hostname = conn->host.name;
 #endif
   (void)sockindex;
+  if(!data->state.session)
+    return CURLE_OK;
+
+  store = &data->state.session[0];
+  oldest_age = data->state.session[0].age; /* zero if unused */
   DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
   clone_host = strdup(hostname);
@@ -580,9 +609,31 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
+  DEBUGF(infof(data, "Added Session ID to cache for %s://%s:%d [%s]",
+               store->scheme, store->name, store->remote_port,
+               isProxy ? "PROXY" : "server"));
   return CURLE_OK;
 }
 
+void Curl_ssl_associate_conn(struct Curl_easy *data,
+                             struct connectdata *conn)
+{
+  if(Curl_ssl->associate_connection) {
+    Curl_ssl->associate_connection(data, conn, FIRSTSOCKET);
+    if(conn->sock[SECONDARYSOCKET] && conn->bits.sock_accepted)
+      Curl_ssl->associate_connection(data, conn, SECONDARYSOCKET);
+  }
+}
+
+void Curl_ssl_detach_conn(struct Curl_easy *data,
+                          struct connectdata *conn)
+{
+  if(Curl_ssl->disassociate_connection) {
+    Curl_ssl->disassociate_connection(data, FIRSTSOCKET);
+    if(conn->sock[SECONDARYSOCKET] && conn->bits.sock_accepted)
+      Curl_ssl->disassociate_connection(data, SECONDARYSOCKET);
+  }
+}
 
 void Curl_ssl_close_all(struct Curl_easy *data)
 {
@@ -686,12 +737,12 @@ CURLcode Curl_ssl_initsessions(struct Curl_easy *data, size_t amount)
 
 static size_t multissl_version(char *buffer, size_t size);
 
-size_t Curl_ssl_version(char *buffer, size_t size)
+void Curl_ssl_version(char *buffer, size_t size)
 {
 #ifdef CURL_WITH_MULTI_SSL
-  return multissl_version(buffer, size);
+  (void)multissl_version(buffer, size);
 #else
-  return Curl_ssl->version(buffer, size);
+  (void)Curl_ssl->version(buffer, size);
 #endif
 }
 
@@ -918,7 +969,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     if(encode)
       return encode;
 
-    infof(data, "\t public key hash: sha256//%s\n", encoded);
+    infof(data, " public key hash: sha256//%s", encoded);
 
     /* it starts with sha256//, copy so we can modify it */
     pinkeylen = strlen(pinnedpubkey) + 1;
@@ -1211,7 +1262,9 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_none_set_engine_default,      /* set_engine_default */
   Curl_none_engines_list,            /* engines_list */
   Curl_none_false_start,             /* false_start */
-  NULL                               /* sha256sum */
+  NULL,                              /* sha256sum */
+  NULL,                              /* associate_connection */
+  NULL                               /* disassociate_connection */
 };
 
 const struct Curl_ssl *Curl_ssl =
@@ -1350,7 +1403,7 @@ static int multissl_setup(const struct Curl_ssl *backend)
     for(i = 0; available_backends[i]; i++) {
       if(strcasecompare(env, available_backends[i]->info.name)) {
         Curl_ssl = available_backends[i];
-        curl_free(env_tmp);
+        free(env_tmp);
         return 0;
       }
     }
@@ -1358,7 +1411,7 @@ static int multissl_setup(const struct Curl_ssl *backend)
 
   /* Fall back to first available backend */
   Curl_ssl = available_backends[0];
-  curl_free(env_tmp);
+  free(env_tmp);
   return 0;
 }
 

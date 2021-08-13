@@ -116,6 +116,7 @@ man_MANS =                                      \
   CURLOPT_AUTOREFERER.3                         \
   CURLOPT_BUFFERSIZE.3                          \
   CURLOPT_CAINFO.3                              \
+  CURLOPT_CAINFO_BLOB.3                         \
   CURLOPT_CAPATH.3                              \
   CURLOPT_CERTINFO.3                            \
   CURLOPT_CHUNK_BGN_FUNCTION.3                  \
@@ -268,6 +269,7 @@ man_MANS =                                      \
   CURLOPT_PROXYUSERNAME.3                       \
   CURLOPT_PROXYUSERPWD.3                        \
   CURLOPT_PROXY_CAINFO.3                        \
+  CURLOPT_PROXY_CAINFO_BLOB.3                   \
   CURLOPT_PROXY_CAPATH.3                        \
   CURLOPT_PROXY_CRLFILE.3                       \
   CURLOPT_PROXY_KEYPASSWD.3                     \

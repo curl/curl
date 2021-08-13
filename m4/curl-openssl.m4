@@ -330,8 +330,21 @@ if test "x$OPT_OPENSSL" != xno; then
     if test -f "$OPENSSL_PCDIR/openssl.pc"; then
       AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
       PKGTEST="yes"
-    elif test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
-      AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-openssl prefix!])
+    fi
+
+    if test "$PKGTEST" != "yes"; then
+      # try lib64 instead
+      OPENSSL_PCDIR="$OPT_OPENSSL/lib64/pkgconfig"
+      if test -f "$OPENSSL_PCDIR/openssl.pc"; then
+        AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
+        PKGTEST="yes"
+      fi
+    fi
+
+    if test "$PKGTEST" != "yes"; then
+      if test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
+        AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-openssl prefix!])
+      fi
     fi
 
     dnl in case pkg-config comes up empty, use what we got

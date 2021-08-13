@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -87,7 +87,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 
   if(!seeded) {
     struct curltime now = Curl_now();
-    infof(data, "WARNING: Using weak random seed\n");
+    infof(data, "WARNING: Using weak random seed");
     randseed += (unsigned int)now.tv_usec + (unsigned int)now.tv_sec;
     randseed = randseed * 1103515245 + 12345;
     randseed = randseed * 1103515245 + 12345;

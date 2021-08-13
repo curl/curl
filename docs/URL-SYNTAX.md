@@ -168,15 +168,28 @@ brackets). For example:
 
     http://[2001:1890:1112:1::20]/
 
+### "localhost"
+
+Starting in curl 7.77.0, curl will use loopback IP addresses for the name
+`localhost`: `127.0.0.1` and `::1`. It will not try to resolve the name using
+the resolver functions.
+
+This is done to make sure the host accessed is truly the localhost - the local
+machine.
+
 ### IDNA
 
 If curl was built with International Domain Name (IDN) support, it can also
 handle host names using non-ASCII characters.
 
-curl supports IDN host names using the IDNA 2008 standard. This differs from
-browsers that follow the WHATWG URL spec, which dictates IDNA 2003 to be used.
-The two standards have a huge overlap but differ slightly, perhaps most
-famously in how they deal with the German "double s" (`ß`).
+When built with libidn2, curl uses the IDNA 2008 standard. This is equivalent
+to the WHATWG URL spec, but differs from certain browsers that use IDNA 2003
+Transitional Processing. The two standards have a huge overlap but differ
+slightly, perhaps most famously in how they deal with the German "double s"
+(`ß`).
+
+When winidn is used, curl uses IDNA 2003 Transitional Processing, like the rest
+of Windows.
 
 ## Port number
 

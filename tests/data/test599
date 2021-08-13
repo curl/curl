@@ -80,7 +80,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER log/ip%TESTNUMBER
 # Verify data after the test has been "shot"
 <verify>
 <file name="log/ip%TESTNUMBER">
-CL: -1
+CL -1
 </file>
 </verify>
 </testcase>

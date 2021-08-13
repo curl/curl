@@ -810,8 +810,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     case DOCNUMBER_WERULEZ:
       /* we got a "friends?" question, reply back that we sure are */
       logmsg("Identifying ourselves as friends");
-      msnprintf(msgbuf, sizeof(msgbuf), "RTSP_SERVER WE ROOLZ: %ld\r\n",
-                (long)getpid());
+      msnprintf(msgbuf, sizeof(msgbuf), "RTSP_SERVER WE ROOLZ: %"
+                CURL_FORMAT_CURL_OFF_T "\r\n", our_getpid());
       msglen = strlen(msgbuf);
       msnprintf(weare, sizeof(weare),
                 "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\n\r\n%s",
@@ -1053,7 +1053,6 @@ int main(int argc, char *argv[])
   int rc;
   int error;
   int arg = 1;
-  long pid;
 
   memset(&req, 0, sizeof(req));
 
@@ -1135,8 +1134,6 @@ int main(int argc, char *argv[])
 #endif
 
   install_signal_handlers(false);
-
-  pid = (long)getpid();
 
 #ifdef ENABLE_IPV6
   if(!use_ipv6)
@@ -1377,7 +1374,7 @@ server_cleanup:
 
   if(got_exit_signal) {
     logmsg("========> %s rtspd (port: %d pid: %ld) exits with signal (%d)",
-           ipv_inuse, (int)port, pid, exit_signal);
+           ipv_inuse, (int)port, (long)getpid(), exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we

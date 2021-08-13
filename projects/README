@@ -145,7 +145,7 @@ Notes
    find bugs in the project files that need correcting, and would like to
    submit updated files back then please note that, whilst the solution files
    can be edited directly, the templates for the project files (which are
-   stored in the git repositoty) will need to be modified rather than the
+   stored in the git repository) will need to be modified rather than the
    generated project files that Visual Studio uses.
 
 Legacy Windows and SSL

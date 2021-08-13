@@ -1,0 +1,73 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
+
+# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+commands:
+  configure:
+    steps:
+      - run:
+          command: |
+            ./buildconf
+            ./configure --enable-warnings --enable-werror --with-openssl
+
+  build:
+    steps:
+      - run: make
+
+  test:
+    steps:
+      - run: make test-nonflaky
+
+executors:
+  ubuntu:
+    machine:
+      image: ubuntu-2004:202010-01
+
+jobs:
+  basic:
+    executor: ubuntu
+    steps:
+      - checkout
+      - configure
+      - build
+      - test
+
+  arm:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
+    steps:
+      - checkout
+      - configure
+      - build
+      - test
+
+workflows:
+  x86-openssl:
+    jobs:
+      - basic
+
+  arm-openssl:
+    jobs:
+      - arm

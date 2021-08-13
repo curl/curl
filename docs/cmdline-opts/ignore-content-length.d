@@ -9,3 +9,5 @@ files larger than 2 gigabytes.
 
 For FTP (since 7.46.0), skip the RETR command to figure out the size before
 downloading a file.
+
+This option doesn't work if libcurl was built to use hyper for HTTP.

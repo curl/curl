@@ -100,17 +100,17 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
     }
     else {
       if(*state == NTLMSTATE_LAST) {
-        infof(data, "NTLM auth restarted\n");
+        infof(data, "NTLM auth restarted");
         Curl_http_auth_cleanup_ntlm(conn);
       }
       else if(*state == NTLMSTATE_TYPE3) {
-        infof(data, "NTLM handshake rejected\n");
+        infof(data, "NTLM handshake rejected");
         Curl_http_auth_cleanup_ntlm(conn);
         *state = NTLMSTATE_NONE;
         return CURLE_REMOTE_ACCESS_DENIED;
       }
       else if(*state >= NTLMSTATE_TYPE1) {
-        infof(data, "NTLM handshake failure (internal error)\n");
+        infof(data, "NTLM handshake failure (internal error)");
         return CURLE_REMOTE_ACCESS_DENIED;
       }
 

@@ -17,7 +17,7 @@ Sets the proxy server to use for HTTPS.
 .IP "[url-protocol]_PROXY [protocol://]<host>[:port]"
 Sets the proxy server to use for [url-protocol], where the protocol is a
 protocol that curl supports and as specified in a URL. FTP, FTPS, POP3, IMAP,
-SMTP, LDAP etc.
+SMTP, LDAP, etc.
 .IP "ALL_PROXY [protocol://]<host>[:port]"
 Sets the proxy server to use if no protocol-specific proxy is set.
 .IP "NO_PROXY <comma-separated list of hosts/domains>"
@@ -82,7 +82,7 @@ Makes it the equivalent of --socks5
 Makes it the equivalent of --socks5-hostname
 .SH EXIT CODES
 There are a bunch of different error codes and their corresponding error
-messages that may appear during bad conditions. At the time of this writing,
+messages that may appear under error conditions. At the time of this writing,
 the exit codes are:
 .IP 1
 Unsupported protocol. This build of curl has no support for this protocol.
@@ -97,7 +97,7 @@ this, you probably need another build of libcurl!
 .IP 5
 Couldn't resolve proxy. The given proxy host could not be resolved.
 .IP 6
-Couldn't resolve host. The given remote host was not resolved.
+Couldn't resolve host. The given remote host could not be resolved.
 .IP 7
 Failed to connect to host.
 .IP 8
@@ -237,7 +237,7 @@ Character conversion failed.
 .IP 76
 Character conversion functions required.
 .IP 77
-Problem with reading the SSL CA cert (path? access rights?).
+Problem reading the SSL CA cert (path? access rights?).
 .IP 78
 The resource referenced in the URL does not exist.
 .IP 79
@@ -249,19 +249,19 @@ Could not load CRL file, missing or wrong format (added in 7.19.0).
 .IP 83
 Issuer check failed (added in 7.19.0).
 .IP 84
-The FTP PRET command failed
+The FTP PRET command failed.
 .IP 85
-RTSP: mismatch of CSeq numbers
+Mismatch of RTSP CSeq numbers.
 .IP 86
-RTSP: mismatch of Session Identifiers
+Mismatch of RTSP Session Identifiers.
 .IP 87
-unable to parse FTP file list
+Unable to parse FTP file list.
 .IP 88
-FTP chunk callback reported error
+FTP chunk callback reported error.
 .IP 89
-No connection available, the session will be queued
+No connection available, the session will be queued.
 .IP 90
-SSL public key does not matched pinned public key
+SSL public key does not matched pinned public key.
 .IP 91
 Invalid SSL certificate status.
 .IP 92

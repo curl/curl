@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,10 +36,6 @@ struct per_transfer {
   long retry_sleep_default;
   long retry_sleep;
   struct timeval retrystart;
-  bool metalink; /* nonzero for metalink download. */
-  bool metalink_next_res;
-  struct metalinkfile *mlfile;
-  struct metalink_resource *mlres;
   char *this_url;
   unsigned int urlnum; /* the index of the given URL */
   char *outfile;

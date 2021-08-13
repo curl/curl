@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2010 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2010 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 ###########################################################################
 #
 # This script grew out of help from Przemyslaw Iskra and Balint Szilakszi
-# a late evening in the #curl IRC channel on freenode.
+# a late evening in the #curl IRC channel.
 #
 
 use strict;

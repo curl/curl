@@ -391,5 +391,8 @@ if __name__ == '__main__':
         log.exception(e)
         rc = ScriptRC.EXCEPTION
 
+    if options.pidfile and os.path.isfile(options.pidfile):
+        os.unlink(options.pidfile)
+
     log.info("[SMB] Returning %d", rc)
     sys.exit(rc)

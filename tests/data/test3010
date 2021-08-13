@@ -50,8 +50,8 @@ lib%TESTNUMBER
 # Verify data after the test has been "shot"
 <verify>
 <stdout>
-Retry-After: 2
-Retry-After: 0
+Retry-After 2
+Retry-After 0
 </stdout>
 </verify>
 </testcase>

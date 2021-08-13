@@ -41,15 +41,6 @@
 /* Define if you want the built-in manual */
 #define USE_MANUAL
 
-/* Define if you have the gethostbyaddr_r() function with 5 arguments */
-#undef HAVE_GETHOSTBYADDR_R_5
-
-/* Define if you have the gethostbyaddr_r() function with 7 arguments */
-#undef HAVE_GETHOSTBYADDR_R_7
-
-/* Define if you have the gethostbyaddr_r() function with 8 arguments */
-#undef HAVE_GETHOSTBYADDR_R_8
-
 /* Define if you have the gethostbyname_r() function with 3 arguments */
 #undef HAVE_GETHOSTBYNAME_R_3
 
@@ -95,14 +86,8 @@
 /* Define if you have the `closesocket' function. */
 #undef HAVE_CLOSESOCKET
 
-/* Define if you have the <crypto.h> header file. */
-#undef HAVE_CRYPTO_H
-
 /* Define if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H
-
-/* Define if you have the <err.h> header file. */
-#undef HAVE_ERR_H
 
 /* Define if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H
@@ -115,12 +100,6 @@
 
 /* Define if you have the `geteuid' function. */
 #undef HAVE_GETEUID
-
-/* Define if you have the `gethostbyaddr' function. */
-#define HAVE_GETHOSTBYADDR
-
-/* Define if you have the `gethostbyaddr_r' function. */
-#undef HAVE_GETHOSTBYADDR_R
 
 /* Define if you have the `gethostbyname_r' function. */
 #undef HAVE_GETHOSTBYNAME_R
@@ -221,9 +200,6 @@
 /* Define if you have the <pem.h> header file. */
 #undef HAVE_PEM_H
 
-/* Define if you have the `perror' function. */
-#undef HAVE_PERROR
-
 /* Define if you have the <pwd.h> header file. */
 #undef HAVE_PWD_H
 
@@ -236,17 +212,11 @@
 /* Define if you have the `RAND_status' function. */
 #undef HAVE_RAND_STATUS
 
-/* Define if you have the <rsa.h> header file. */
-#undef HAVE_RSA_H
-
 /* Define if you have the `select' function. */
 #define HAVE_SELECT
 
 /* Define if you have the `setvbuf' function. */
 #undef HAVE_SETVBUF
-
-/* Define if you have the <sgtty.h> header file. */
-#define HAVE_SGTTY_H
 
 /* Define if you have the `sigaction' function. */
 #undef HAVE_SIGACTION
@@ -256,12 +226,6 @@
 
 /* Define if you have the <signal.h> header file. */
 #define HAVE_SIGNAL_H
-
-/* Define if sig_atomic_t is an available typedef. */
-#define HAVE_SIG_ATOMIC_T
-
-/* Define if sig_atomic_t is already defined as volatile. */
-#undef HAVE_SIG_ATOMIC_T_VOLATILE
 
 /* Define if you have the `socket' function. */
 #define HAVE_SOCKET
@@ -404,24 +368,6 @@
 
 /* to disable LDAP */
 #define CURL_DISABLE_LDAP
-
-/* Define if you have the getnameinfo function. */
-#define HAVE_GETNAMEINFO 1
-
-/* Define to the type qualifier of arg 1 for getnameinfo. */
-#define GETNAMEINFO_QUAL_ARG1 const
-
-/* Define to the type of arg 1 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-
-/* Define to the type of arg 2 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG2 socklen_t
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG46 size_t
-
-/* Define to the type of arg 7 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG7 int
 
 /* Define if you have the recv function. */
 #define HAVE_RECV 1

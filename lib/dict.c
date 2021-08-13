@@ -89,6 +89,7 @@ const struct Curl_handler Curl_handler_dict = {
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_DICT,                            /* defport */
   CURLPROTO_DICT,                       /* protocol */
   CURLPROTO_DICT,                       /* family */
@@ -215,7 +216,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
     }
 
     if(!word || (*word == (char)0)) {
-      infof(data, "lookup word is missing\n");
+      infof(data, "lookup word is missing");
       word = (char *)"default";
     }
     if(!database || (*database == (char)0)) {
@@ -266,7 +267,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
     }
 
     if(!word || (*word == (char)0)) {
-      infof(data, "lookup word is missing\n");
+      infof(data, "lookup word is missing");
       word = (char *)"default";
     }
     if(!database || (*database == (char)0)) {

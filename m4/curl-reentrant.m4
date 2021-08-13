@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -214,76 +214,6 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRTOK_R], [
 ])
 
 
-dnl CURL_CHECK_NEED_REENTRANT_INET_NTOA_R
-dnl -------------------------------------------------
-dnl Checks if the preprocessor _REENTRANT definition
-dnl makes function inet_ntoa_r compiler visible.
-
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_INET_NTOA_R], [
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([inet_ntoa_r])
-  ],[
-    tmp_inet_ntoa_r="yes"
-  ],[
-    tmp_inet_ntoa_r="no"
-  ])
-  if test "$tmp_inet_ntoa_r" = "yes"; then
-    AC_EGREP_CPP([inet_ntoa_r],[
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-    ],[
-      tmp_inet_ntoa_r="proto_declared"
-    ],[
-      AC_EGREP_CPP([inet_ntoa_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-      ],[
-        tmp_inet_ntoa_r="proto_needs_reentrant"
-        tmp_need_reentrant="yes"
-      ])
-    ])
-  fi
-])
-
-
-dnl CURL_CHECK_NEED_REENTRANT_GETHOSTBYADDR_R
-dnl -------------------------------------------------
-dnl Checks if the preprocessor _REENTRANT definition
-dnl makes function gethostbyaddr_r compiler visible.
-
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETHOSTBYADDR_R], [
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([gethostbyaddr_r])
-  ],[
-    tmp_gethostbyaddr_r="yes"
-  ],[
-    tmp_gethostbyaddr_r="no"
-  ])
-  if test "$tmp_gethostbyaddr_r" = "yes"; then
-    AC_EGREP_CPP([gethostbyaddr_r],[
-#include <sys/types.h>
-#include <netdb.h>
-    ],[
-      tmp_gethostbyaddr_r="proto_declared"
-    ],[
-      AC_EGREP_CPP([gethostbyaddr_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <netdb.h>
-      ],[
-        tmp_gethostbyaddr_r="proto_needs_reentrant"
-        tmp_need_reentrant="yes"
-      ])
-    ])
-  fi
-])
-
-
 dnl CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
@@ -350,39 +280,6 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETPROTOBYNAME_R], [
 ])
 
 
-dnl CURL_CHECK_NEED_REENTRANT_GETSERVBYPORT_R
-dnl -------------------------------------------------
-dnl Checks if the preprocessor _REENTRANT definition
-dnl makes function getservbyport_r compiler visible.
-
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETSERVBYPORT_R], [
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([getservbyport_r])
-  ],[
-    tmp_getservbyport_r="yes"
-  ],[
-    tmp_getservbyport_r="no"
-  ])
-  if test "$tmp_getservbyport_r" = "yes"; then
-    AC_EGREP_CPP([getservbyport_r],[
-#include <sys/types.h>
-#include <netdb.h>
-    ],[
-      tmp_getservbyport_r="proto_declared"
-    ],[
-      AC_EGREP_CPP([getservbyport_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <netdb.h>
-      ],[
-        tmp_getservbyport_r="proto_needs_reentrant"
-        tmp_need_reentrant="yes"
-      ])
-    ])
-  fi
-])
-
-
 dnl CURL_CHECK_NEED_REENTRANT_FUNCTIONS_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
@@ -403,19 +300,10 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_FUNCTIONS_R], [
     CURL_CHECK_NEED_REENTRANT_STRTOK_R
   fi
   if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_INET_NTOA_R
-  fi
-  if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_GETHOSTBYADDR_R
-  fi
-  if test "$tmp_need_reentrant" = "no"; then
     CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R
   fi
   if test "$tmp_need_reentrant" = "no"; then
     CURL_CHECK_NEED_REENTRANT_GETPROTOBYNAME_R
-  fi
-  if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_GETSERVBYPORT_R
   fi
 ])
 

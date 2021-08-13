@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -39,41 +39,42 @@
 #define TO      "<addressee@example.net>"
 #define CC      "<info@example.org>"
 
-static const char *payload_text[] = {
-  "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n",
-  "To: " TO "\r\n",
-  "From: " FROM "(Example User)\r\n",
-  "Cc: " CC "(Another example User)\r\n",
+static const char *payload_text =
+  "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
+  "To: " TO "\r\n"
+  "From: " FROM "(Example User)\r\n"
+  "Cc: " CC "(Another example User)\r\n"
   "Message-ID: "
-  "<dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n",
-  "Subject: IMAP example message\r\n",
-  "\r\n", /* empty line to divide headers from body, see RFC5322 */
-  "The body of the message starts here.\r\n",
-  "\r\n",
-  "It could be a lot of lines, could be MIME encoded, whatever.\r\n",
-  "Check RFC5322.\r\n",
-  NULL
-};
+  "<dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n"
+  "Subject: IMAP example message\r\n"
+  "\r\n" /* empty line to divide headers from body, see RFC5322 */
+  "The body of the message starts here.\r\n"
+  "\r\n"
+  "It could be a lot of lines, could be MIME encoded, whatever.\r\n"
+  "Check RFC5322.\r\n";
 
 struct upload_status {
-  int lines_read;
+  size_t bytes_read;
 };
 
 static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
+  size_t room = size * nmemb;
 
   if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
     return 0;
   }
 
-  data = payload_text[upload_ctx->lines_read];
+  data = &payload_text[upload_ctx->bytes_read];
 
   if(data) {
     size_t len = strlen(data);
+    if(room < len)
+      len = room;
     memcpy(ptr, data, len);
-    upload_ctx->lines_read++;
+    upload_ctx->bytes_read += len;
 
     return len;
   }
@@ -88,11 +89,8 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    const char **p;
     long infilesize;
-    struct upload_status upload_ctx;
-
-    upload_ctx.lines_read = 0;
+    struct upload_status upload_ctx = { 0 };
 
     /* Set username and password */
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
@@ -110,10 +108,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
-    infilesize = 0;
-    for(p = payload_text; *p; ++p) {
-      infilesize += (long)strlen(*p);
-    }
+    infilesize = strlen(payload_text);
     curl_easy_setopt(curl, CURLOPT_INFILESIZE, infilesize);
 
     /* Perform the append */

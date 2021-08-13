@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -50,9 +50,7 @@ int main(void)
 {
   CURL *http_handle;
   CURLM *multi_handle;
-
-  int still_running = 0; /* keep number of running handles */
-  int repeats = 0;
+  int still_running = 1; /* keep number of running handles */
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
 
@@ -67,37 +65,19 @@ int main(void)
   /* add the individual transfers */
   curl_multi_add_handle(multi_handle, http_handle);
 
-  /* we start some action by calling perform right away */
-  curl_multi_perform(multi_handle, &still_running);
+  do {
+    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
 
-  while(still_running) {
-    CURLMcode mc; /* curl_multi_wait() return code */
-    int numfds;
+    if(!mc)
+      /* wait for activity, timeout or "nothing" */
+      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
-    /* wait for activity, timeout or "nothing" */
-    mc = curl_multi_wait(multi_handle, NULL, 0, 1000, &numfds);
-
-    if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi_wait() failed, code %d.\n", mc);
+    if(mc) {
+      fprintf(stderr, "curl_multi_poll() failed, code %d.\n", (int)mc);
       break;
     }
 
-    /* 'numfds' being zero means either a timeout or no file descriptors to
-       wait for. Try timeout on first occurrence, then assume no file
-       descriptors and no file descriptors to wait for means wait for 100
-       milliseconds. */
-
-    if(!numfds) {
-      repeats++; /* count number of repeated zero numfds */
-      if(repeats > 1) {
-        WAITMS(100); /* sleep 100 milliseconds */
-      }
-    }
-    else
-      repeats = 0;
-
-    curl_multi_perform(multi_handle, &still_running);
-  }
+  } while(still_running);
 
   curl_multi_remove_handle(multi_handle, http_handle);
 

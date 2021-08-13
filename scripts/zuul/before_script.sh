@@ -96,6 +96,14 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$OPENSSL3" ]; then
   make install_sw
 fi
 
+if [ "$TRAVIS_OS_NAME" = linux -a "$MBEDTLS3" ]; then
+  cd $HOME
+  git clone --depth=1 -b v3.0.0 https://github.com/ARMmbed/mbedtls
+  cd mbedtls
+  make
+  make DESTDIR=$HOME/mbedtls3 install
+fi
+
 if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
   cd $HOME
   git clone --depth=1 -b v3.1.4 https://github.com/libressl-portable/portable.git libressl-git
@@ -104,15 +112,6 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
   ./configure --prefix=$HOME/libressl
   make
   make install
-fi
-
-if [ "$TRAVIS_OS_NAME" = linux -a "$HYPER" ]; then
-  cd $HOME
-  git clone --depth=1 https://github.com/hyperium/hyper.git
-  curl https://sh.rustup.rs -sSf | sh -s -- -y
-  source $HOME/.cargo/env
-  cd $HOME/hyper
-  RUSTFLAGS="--cfg hyper_unstable_ffi" cargo build --features client,http1,http2,ffi
 fi
 
 if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
@@ -128,11 +127,11 @@ fi
 
 if [ "$TRAVIS_OS_NAME" = linux -a "$RUSTLS_VERSION" ]; then
   cd $HOME
-  git clone --depth=1 --recursive https://github.com/abetterinternet/crustls.git -b "$RUSTLS_VERSION"
+  git clone --depth=1 --recursive https://github.com/rustls/rustls-ffi.git -b "$RUSTLS_VERSION"
   curl https://sh.rustup.rs -sSf | sh -s -- -y
   source $HOME/.cargo/env
   cargo install cbindgen
-  cd $HOME/crustls
+  cd $HOME/rustls-ffi
   make
   make DESTDIR=$HOME/crust install
 fi
@@ -154,9 +153,6 @@ if [ $TRAVIS_OS_NAME = linux -a "$WOLFSSL" ]; then
 fi
 
 # Install common libraries.
-# The library build directories are set to be cached by .travis.yml. If you are
-# changing a build directory name below (eg a version change) then you must
-# change it in .travis.yml `cache: directories:` as well.
 if [ $TRAVIS_OS_NAME = linux ]; then
 
   if [ "$MESALINK" = "yes" ]; then
@@ -175,4 +171,18 @@ if [ $TRAVIS_OS_NAME = linux ]; then
     sudo make install
 
   fi
+
+  if [ "$BEARSSL" = "yes" ]; then
+    if [ ! -e $HOME/bearssl-0.6/Makefile ]; then
+      cd $HOME
+      curl -LO https://bearssl.org/bearssl-0.6.tar.gz
+      tar -xzf bearssl-0.6.tar.gz
+      cd bearssl-0.6
+      make
+    fi
+    cd $HOME/bearssl-0.6
+    sudo cp inc/*.h /usr/local/include
+    sudo cp build/libbearssl.* /usr/local/lib
+  fi
+
 fi

@@ -1579,6 +1579,10 @@
      d                 c                   00307
      d  CURLOPT_DOH_SSL_VERIFYSTATUS...
      d                 c                   00308
+     d  CURLOPT_CAINFO_BLOB...
+     d                 c                   40309
+     d  CURLOPT_PROXY_CAINFO_BLOB...
+     d                 c                   40310
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001

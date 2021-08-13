@@ -1,14 +1,14 @@
 Long: doh-url
 Arg: <URL>
-Help: Resolve host names over DOH
+Help: Resolve host names over DoH
 Protocols: all
 Added: 7.62.0
 Category: dns
 ---
-Specifies which DNS-over-HTTPS (DOH) server to use to resolve hostnames,
+Specifies which DNS-over-HTTPS (DoH) server to use to resolve hostnames,
 instead of using the default name resolver mechanism. The URL must be HTTPS.
 
-Some SSL options that you set for your transfer will apply to DOH since the
+Some SSL options that you set for your transfer will apply to DoH since the
 name lookups take place over SSL. However, the certificate verification
 settings are not inherited and can be controlled separately via
 --doh-insecure and --doh-cert-status.

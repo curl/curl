@@ -121,6 +121,7 @@ static int ssh_getsock(struct Curl_easy *data, struct connectdata *conn,
                        curl_socket_t *sock);
 static CURLcode ssh_setup_connection(struct Curl_easy *data,
                                      struct connectdata *conn);
+static void ssh_attach(struct Curl_easy *data, struct connectdata *conn);
 
 /*
  * SCP protocol handler.
@@ -142,6 +143,7 @@ const struct Curl_handler Curl_handler_scp = {
   scp_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ssh_attach,
   PORT_SSH,                             /* defport */
   CURLPROTO_SCP,                        /* protocol */
   CURLPROTO_SCP,                        /* family */
@@ -170,6 +172,7 @@ const struct Curl_handler Curl_handler_sftp = {
   sftp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ssh_attach,
   PORT_SSH,                             /* defport */
   CURLPROTO_SFTP,                       /* protocol */
   CURLPROTO_SFTP,                       /* family */
@@ -375,7 +378,7 @@ static void state(struct Curl_easy *data, sshstate nowstate)
   DEBUGASSERT(sizeof(names)/sizeof(names[0]) == SSH_LAST);
 
   if(sshc->state != nowstate) {
-    infof(data, "SFTP %p state change from %s to %s\n",
+    infof(data, "SFTP %p state change from %s to %s",
           (void *)sshc, names[sshc->state], names[nowstate]);
   }
 #endif
@@ -488,7 +491,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
         break;
 #endif
       default:
-        infof(data, "unsupported key type, can't check knownhosts!\n");
+        infof(data, "unsupported key type, can't check knownhosts!");
         keybit = 0;
         break;
       }
@@ -516,7 +519,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
                                            &host);
 #endif
 
-        infof(data, "SSH host check: %d, key: %s\n", keycheck,
+        infof(data, "SSH host check: %d, key: %s", keycheck,
               (keycheck <= LIBSSH2_KNOWNHOST_CHECK_MISMATCH)?
               host->key:"<none>");
 
@@ -583,7 +586,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
                                           LIBSSH2_KNOWNHOST_KEYENC_RAW|
                                           keybit, NULL);
         if(addrc)
-          infof(data, "Warning adding the known host %s failed!\n",
+          infof(data, "Warning adding the known host %s failed!",
                 conn->host.name);
         else if(rc == CURLKHSTAT_FINE_ADD_TO_FILE ||
                 rc == CURLKHSTAT_FINE_REPLACE) {
@@ -594,7 +597,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
                                         data->set.str[STRING_SSH_KNOWNHOSTS],
                                         LIBSSH2_KNOWNHOST_FILE_OPENSSH);
           if(wrc) {
-            infof(data, "Warning, writing %s failed!\n",
+            infof(data, "Warning, writing %s failed!",
                   data->set.str[STRING_SSH_KNOWNHOSTS]);
           }
         }
@@ -623,7 +626,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
     int i;
     for(i = 0; i < 16; i++)
       msnprintf(&md5buffer[i*2], 3, "%02x", (unsigned char) fingerprint[i]);
-    infof(data, "SSH MD5 fingerprint: %s\n", md5buffer);
+    infof(data, "SSH MD5 fingerprint: %s", md5buffer);
   }
 
   /* Before we authenticate we check the hostkey's MD5 fingerprint
@@ -642,7 +645,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
       sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
       return sshc->actualcode;
     }
-    infof(data, "MD5 checksum match!\n");
+    infof(data, "MD5 checksum match!");
     /* as we already matched, we skip the check for known hosts */
     return CURLE_OK;
   }
@@ -699,7 +702,7 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
           if(store->name[0] == '[') {
             kh_name_end = strstr(store->name, "]:");
             if(!kh_name_end) {
-              infof(data, "Invalid host pattern %s in %s\n",
+              infof(data, "Invalid host pattern %s in %s",
                     store->name, data->set.str[STRING_SSH_KNOWNHOSTS]);
               continue;
             }
@@ -726,7 +729,7 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
     }
 
     if(found) {
-      infof(data, "Found host %s in %s\n",
+      infof(data, "Found host %s in %s",
             conn->host.name, data->set.str[STRING_SSH_KNOWNHOSTS]);
 
       switch(store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK) {
@@ -765,13 +768,13 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
         return CURLE_SSH;
       }
 
-      infof(data, "Set \"%s\" as SSH hostkey type\n", hostkey_method);
+      infof(data, "Set \"%s\" as SSH hostkey type", hostkey_method);
       result = libssh2_session_error_to_CURLE(
         libssh2_session_method_pref(
           sshc->ssh_session, LIBSSH2_METHOD_HOSTKEY, hostkey_method));
     }
     else {
-      infof(data, "Did not find host %s in %s\n",
+      infof(data, "Did not find host %s in %s",
             conn->host.name, data->set.str[STRING_SSH_KNOWNHOSTS]);
     }
   }
@@ -871,7 +874,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       if(!sshc->authlist) {
         if(libssh2_userauth_authenticated(sshc->ssh_session)) {
           sshc->authed = TRUE;
-          infof(data, "SSH user accepted with no authentication\n");
+          infof(data, "SSH user accepted with no authentication");
           state(data, SSH_AUTH_DONE);
           break;
         }
@@ -884,7 +887,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         }
         break;
       }
-      infof(data, "SSH authentication methods available: %s\n",
+      infof(data, "SSH authentication methods available: %s",
             sshc->authlist);
 
       state(data, SSH_AUTH_PKEY_INIT);
@@ -969,8 +972,8 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           sshc->passphrase = "";
 
         if(sshc->rsa_pub)
-          infof(data, "Using SSH public key file '%s'\n", sshc->rsa_pub);
-        infof(data, "Using SSH private key file '%s'\n", sshc->rsa);
+          infof(data, "Using SSH public key file '%s'", sshc->rsa_pub);
+        infof(data, "Using SSH private key file '%s'", sshc->rsa);
 
         state(data, SSH_AUTH_PKEY);
       }
@@ -997,14 +1000,14 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
 
       if(rc == 0) {
         sshc->authed = TRUE;
-        infof(data, "Initialized SSH public key authentication\n");
+        infof(data, "Initialized SSH public key authentication");
         state(data, SSH_AUTH_DONE);
       }
       else {
         char *err_msg = NULL;
         (void)libssh2_session_last_error(sshc->ssh_session,
                                          &err_msg, NULL, 0);
-        infof(data, "SSH public key authentication failed: %s\n", err_msg);
+        infof(data, "SSH public key authentication failed: %s", err_msg);
         state(data, SSH_AUTH_PASS_INIT);
         rc = 0; /* clear rc and continue */
       }
@@ -1032,7 +1035,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       }
       if(rc == 0) {
         sshc->authed = TRUE;
-        infof(data, "Initialized password authentication\n");
+        infof(data, "Initialized password authentication");
         state(data, SSH_AUTH_DONE);
       }
       else {
@@ -1066,7 +1069,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         if(!sshc->ssh_agent) {
           sshc->ssh_agent = libssh2_agent_init(sshc->ssh_session);
           if(!sshc->ssh_agent) {
-            infof(data, "Could not create agent object\n");
+            infof(data, "Could not create agent object");
 
             state(data, SSH_AUTH_KEY_INIT);
             break;
@@ -1077,7 +1080,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         if(rc == LIBSSH2_ERROR_EAGAIN)
           break;
         if(rc < 0) {
-          infof(data, "Failure connecting to agent\n");
+          infof(data, "Failure connecting to agent");
           state(data, SSH_AUTH_KEY_INIT);
           rc = 0; /* clear rc and continue */
         }
@@ -1097,7 +1100,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       if(rc == LIBSSH2_ERROR_EAGAIN)
         break;
       if(rc < 0) {
-        infof(data, "Failure requesting identities to agent\n");
+        infof(data, "Failure requesting identities to agent");
         state(data, SSH_AUTH_KEY_INIT);
         rc = 0; /* clear rc and continue */
       }
@@ -1133,13 +1136,13 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       if(rc < 0)
-        infof(data, "Failure requesting identities to agent\n");
+        infof(data, "Failure requesting identities to agent");
       else if(rc == 1)
-        infof(data, "No identity would match\n");
+        infof(data, "No identity would match");
 
       if(rc == LIBSSH2_ERROR_NONE) {
         sshc->authed = TRUE;
-        infof(data, "Agent based authentication successful\n");
+        infof(data, "Agent based authentication successful");
         state(data, SSH_AUTH_DONE);
       }
       else {
@@ -1171,7 +1174,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       }
       if(rc == 0) {
         sshc->authed = TRUE;
-        infof(data, "Initialized keyboard interactive authentication\n");
+        infof(data, "Initialized keyboard interactive authentication");
       }
       state(data, SSH_AUTH_DONE);
       break;
@@ -1187,7 +1190,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       /*
        * At this point we have an authenticated ssh session.
        */
-      infof(data, "Authentication complete\n");
+      infof(data, "Authentication complete");
 
       Curl_pgrsTime(data, TIMER_APPCONNECT); /* SSH is connected */
 
@@ -1198,7 +1201,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         state(data, SSH_SFTP_INIT);
         break;
       }
-      infof(data, "SSH CONNECT phase done\n");
+      infof(data, "SSH CONNECT phase done");
       state(data, SSH_STOP);
       break;
 
@@ -1258,7 +1261,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
              a time-out or similar */
           result = CURLE_SSH;
         sshc->actualcode = result;
-        DEBUGF(infof(data, "error = %lu makes libcurl = %d\n",
+        DEBUGF(infof(data, "error = %lu makes libcurl = %d",
                      sftperr, (int)result));
         state(data, SSH_STOP);
         break;
@@ -1268,7 +1271,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
        we get the homedir here, we get the "workingpath" in the DO action
        since the homedir will remain the same between request but the
        working path will not. */
-    DEBUGF(infof(data, "SSH CONNECT phase done\n"));
+    DEBUGF(infof(data, "SSH CONNECT phase done"));
     state(data, SSH_STOP);
     break;
 
@@ -1282,7 +1285,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       if(data->set.quote) {
-        infof(data, "Sending quote commands\n");
+        infof(data, "Sending quote commands");
         sshc->quote_item = data->set.quote;
         state(data, SSH_SFTP_QUOTE);
       }
@@ -1293,7 +1296,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
 
     case SSH_SFTP_POSTQUOTE_INIT:
       if(data->set.postquote) {
-        infof(data, "Sending quote commands\n");
+        infof(data, "Sending quote commands");
         sshc->quote_item = data->set.postquote;
         state(data, SSH_SFTP_QUOTE);
       }
@@ -2045,7 +2048,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       if(sshc->slash_pos) {
         *sshc->slash_pos = 0;
 
-        infof(data, "Creating directory '%s'\n", sshp->path);
+        infof(data, "Creating directory '%s'", sshp->path);
         state(data, SSH_SFTP_CREATE_DIRS_MKDIR);
         break;
       }
@@ -2408,7 +2411,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
     if(data->req.size == 0) {
       /* no data to transfer */
       Curl_setup_transfer(data, -1, -1, FALSE, -1);
-      infof(data, "File already completely downloaded\n");
+      infof(data, "File already completely downloaded");
       state(data, SSH_STOP);
       break;
     }
@@ -2443,14 +2446,14 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           char *err_msg = NULL;
           (void)libssh2_session_last_error(sshc->ssh_session,
                                            &err_msg, NULL, 0);
-          infof(data, "Failed to close libssh2 file: %d %s\n", rc, err_msg);
+          infof(data, "Failed to close libssh2 file: %d %s", rc, err_msg);
         }
         sshc->sftp_handle = NULL;
       }
 
       Curl_safefree(sshp->path);
 
-      DEBUGF(infof(data, "SFTP DONE done\n"));
+      DEBUGF(infof(data, "SFTP DONE done"));
 
       /* Check if nextstate is set and move .nextstate could be POSTQUOTE_INIT
          After nextstate is executed, the control should come back to
@@ -2480,7 +2483,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           char *err_msg = NULL;
           (void)libssh2_session_last_error(sshc->ssh_session, &err_msg,
                                            NULL, 0);
-          infof(data, "Failed to close libssh2 file: %d %s\n", rc, err_msg);
+          infof(data, "Failed to close libssh2 file: %d %s", rc, err_msg);
         }
         sshc->sftp_handle = NULL;
       }
@@ -2490,7 +2493,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           break;
         }
         if(rc < 0) {
-          infof(data, "Failed to stop libssh2 sftp subsystem\n");
+          infof(data, "Failed to stop libssh2 sftp subsystem");
         }
         sshc->sftp_session = NULL;
       }
@@ -2665,7 +2668,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           char *err_msg = NULL;
           (void)libssh2_session_last_error(sshc->ssh_session,
                                            &err_msg, NULL, 0);
-          infof(data, "Failed to send libssh2 channel EOF: %d %s\n",
+          infof(data, "Failed to send libssh2 channel EOF: %d %s",
                 rc, err_msg);
         }
       }
@@ -2682,7 +2685,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           char *err_msg = NULL;
           (void)libssh2_session_last_error(sshc->ssh_session,
                                            &err_msg, NULL, 0);
-          infof(data, "Failed to get channel EOF: %d %s\n", rc, err_msg);
+          infof(data, "Failed to get channel EOF: %d %s", rc, err_msg);
         }
       }
       state(data, SSH_SCP_WAIT_CLOSE);
@@ -2698,7 +2701,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           char *err_msg = NULL;
           (void)libssh2_session_last_error(sshc->ssh_session,
                                            &err_msg, NULL, 0);
-          infof(data, "Channel failed to close: %d %s\n", rc, err_msg);
+          infof(data, "Channel failed to close: %d %s", rc, err_msg);
         }
       }
       state(data, SSH_SCP_CHANNEL_FREE);
@@ -2714,12 +2717,12 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           char *err_msg = NULL;
           (void)libssh2_session_last_error(sshc->ssh_session,
                                            &err_msg, NULL, 0);
-          infof(data, "Failed to free libssh2 scp subsystem: %d %s\n",
+          infof(data, "Failed to free libssh2 scp subsystem: %d %s",
                 rc, err_msg);
         }
         sshc->ssh_channel = NULL;
       }
-      DEBUGF(infof(data, "SCP DONE phase complete\n"));
+      DEBUGF(infof(data, "SCP DONE phase complete"));
 #if 0 /* PREV */
       state(data, SSH_SESSION_DISCONNECT);
 #endif
@@ -2740,7 +2743,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           char *err_msg = NULL;
           (void)libssh2_session_last_error(sshc->ssh_session,
                                            &err_msg, NULL, 0);
-          infof(data, "Failed to free libssh2 scp subsystem: %d %s\n",
+          infof(data, "Failed to free libssh2 scp subsystem: %d %s",
                 rc, err_msg);
         }
         sshc->ssh_channel = NULL;
@@ -2755,7 +2758,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           char *err_msg = NULL;
           (void)libssh2_session_last_error(sshc->ssh_session,
                                            &err_msg, NULL, 0);
-          infof(data, "Failed to disconnect libssh2 session: %d %s\n",
+          infof(data, "Failed to disconnect libssh2 session: %d %s",
                 rc, err_msg);
         }
       }
@@ -2784,7 +2787,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           char *err_msg = NULL;
           (void)libssh2_session_last_error(sshc->ssh_session,
                                            &err_msg, NULL, 0);
-          infof(data, "Failed to disconnect from libssh2 agent: %d %s\n",
+          infof(data, "Failed to disconnect from libssh2 agent: %d %s",
                 rc, err_msg);
         }
         libssh2_agent_free(sshc->ssh_agent);
@@ -2806,7 +2809,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           char *err_msg = NULL;
           (void)libssh2_session_last_error(sshc->ssh_session,
                                            &err_msg, NULL, 0);
-          infof(data, "Failed to free libssh2 session: %d %s\n", rc, err_msg);
+          infof(data, "Failed to free libssh2 session: %d %s", rc, err_msg);
         }
         sshc->ssh_session = NULL;
       }
@@ -2935,6 +2938,7 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
   CURLcode result = CURLE_OK;
+  struct curltime dis = Curl_now();
 
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
@@ -2958,6 +2962,12 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
         failf(data, "Operation timed out");
         return CURLE_OPERATION_TIMEDOUT;
       }
+    }
+    else if(Curl_timediff(now, dis) > 1000) {
+      /* disconnect timeout */
+      failf(data, "Disconnect timed out");
+      result = CURLE_OK;
+      break;
     }
 
     if(block) {
@@ -3075,10 +3085,10 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
 
 #ifdef CURL_LIBSSH2_DEBUG
   if(conn->user) {
-    infof(data, "User: %s\n", conn->user);
+    infof(data, "User: %s", conn->user);
   }
   if(conn->passwd) {
-    infof(data, "Password: %s\n", conn->passwd);
+    infof(data, "Password: %s", conn->passwd);
   }
   sock = conn->sock[FIRSTSOCKET];
 #endif /* CURL_LIBSSH2_DEBUG */
@@ -3112,7 +3122,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     sshrecv.recvptr = ssh_tls_recv;
     sshsend.sendptr = ssh_tls_send;
 
-    infof(data, "Uses HTTPS proxy!\n");
+    infof(data, "Uses HTTPS proxy!");
     /*
       Setup libssh2 callbacks to make it read/write TLS from the socket.
 
@@ -3150,7 +3160,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
 #if LIBSSH2_VERSION_NUM >= 0x010208
     if(libssh2_session_flag(sshc->ssh_session, LIBSSH2_FLAG_COMPRESS, 1) < 0)
 #endif
-      infof(data, "Failed to enable compression for ssh session\n");
+      infof(data, "Failed to enable compression for ssh session");
   }
 
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
@@ -3168,14 +3178,14 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
                                     data->set.str[STRING_SSH_KNOWNHOSTS],
                                     LIBSSH2_KNOWNHOST_FILE_OPENSSH);
     if(rc < 0)
-      infof(data, "Failed to read known hosts from %s\n",
+      infof(data, "Failed to read known hosts from %s",
             data->set.str[STRING_SSH_KNOWNHOSTS]);
   }
 #endif /* HAVE_LIBSSH2_KNOWNHOST_API */
 
 #ifdef CURL_LIBSSH2_DEBUG
   libssh2_trace(sshc->ssh_session, ~0);
-  infof(data, "SSH socket: %d\n", (int)sock);
+  infof(data, "SSH socket: %d", (int)sock);
 #endif /* CURL_LIBSSH2_DEBUG */
 
   state(data, SSH_INIT);
@@ -3202,7 +3212,7 @@ CURLcode scp_perform(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
 
-  DEBUGF(infof(data, "DO phase starts\n"));
+  DEBUGF(infof(data, "DO phase starts"));
 
   *dophase_done = FALSE; /* not done yet */
 
@@ -3215,7 +3225,7 @@ CURLcode scp_perform(struct Curl_easy *data,
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done) {
-    DEBUGF(infof(data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete"));
   }
 
   return result;
@@ -3229,7 +3239,7 @@ static CURLcode scp_doing(struct Curl_easy *data,
   result = ssh_multi_statemach(data, dophase_done);
 
   if(*dophase_done) {
-    DEBUGF(infof(data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete"));
   }
   return result;
 }
@@ -3391,7 +3401,7 @@ CURLcode sftp_perform(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  DEBUGF(infof(data, "DO phase starts\n"));
+  DEBUGF(infof(data, "DO phase starts"));
 
   *dophase_done = FALSE; /* not done yet */
 
@@ -3404,7 +3414,7 @@ CURLcode sftp_perform(struct Curl_easy *data,
   *connected = data->conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done) {
-    DEBUGF(infof(data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete"));
   }
 
   return result;
@@ -3417,7 +3427,7 @@ static CURLcode sftp_doing(struct Curl_easy *data,
   CURLcode result = ssh_multi_statemach(data, dophase_done);
 
   if(*dophase_done) {
-    DEBUGF(infof(data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete"));
   }
   return result;
 }
@@ -3432,7 +3442,7 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
   struct ssh_conn *sshc = &conn->proto.sshc;
   (void) dead_connection;
 
-  DEBUGF(infof(data, "SSH DISCONNECT starts now\n"));
+  DEBUGF(infof(data, "SSH DISCONNECT starts now"));
 
   if(sshc->ssh_session) {
     /* only if there's a session still around to use! */
@@ -3440,7 +3450,7 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
     result = ssh_block_statemach(data, conn, TRUE);
   }
 
-  DEBUGF(infof(data, "SSH DISCONNECT is done\n"));
+  DEBUGF(infof(data, "SSH DISCONNECT is done"));
 
   return result;
 
@@ -3599,9 +3609,26 @@ void Curl_ssh_cleanup(void)
 #endif
 }
 
-size_t Curl_ssh_version(char *buffer, size_t buflen)
+void Curl_ssh_version(char *buffer, size_t buflen)
 {
-  return msnprintf(buffer, buflen, "libssh2/%s", LIBSSH2_VERSION);
+  (void)msnprintf(buffer, buflen, "libssh2/%s", LIBSSH2_VERSION);
 }
 
+/* The SSH session is associated with the *CONNECTION* but the callback user
+ * pointer is an easy handle pointer. This function allows us to reassign the
+ * user pointer to the *CURRENT* (new) easy handle.
+ */
+static void ssh_attach(struct Curl_easy *data, struct connectdata *conn)
+{
+  DEBUGASSERT(data);
+  DEBUGASSERT(conn);
+  if(conn->handler->protocol & PROTO_FAMILY_SSH) {
+    struct ssh_conn *sshc = &conn->proto.sshc;
+    if(sshc->ssh_session) {
+      /* only re-attach if the session already exists */
+      void **abstract = libssh2_session_abstract(sshc->ssh_session);
+      *abstract = data;
+    }
+  }
+}
 #endif /* USE_LIBSSH2 */

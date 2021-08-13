@@ -71,21 +71,15 @@ main ()
 }
 #endif
 
-/* tests for gethostbyaddr_r or gethostbyname_r */
-#if defined(HAVE_GETHOSTBYADDR_R_5_REENTRANT) || \
-    defined(HAVE_GETHOSTBYADDR_R_7_REENTRANT) || \
-    defined(HAVE_GETHOSTBYADDR_R_8_REENTRANT) || \
-    defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT) || \
+/* tests for gethostbyname_r */
+#if defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT) || \
     defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT) || \
     defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
 #   define _REENTRANT
     /* no idea whether _REENTRANT is always set, just invent a new flag */
 #   define TEST_GETHOSTBYFOO_REENTRANT
 #endif
-#if defined(HAVE_GETHOSTBYADDR_R_5) || \
-    defined(HAVE_GETHOSTBYADDR_R_7) || \
-    defined(HAVE_GETHOSTBYADDR_R_8) || \
-    defined(HAVE_GETHOSTBYNAME_R_3) || \
+#if defined(HAVE_GETHOSTBYNAME_R_3) || \
     defined(HAVE_GETHOSTBYNAME_R_5) || \
     defined(HAVE_GETHOSTBYNAME_R_6) || \
     defined(TEST_GETHOSTBYFOO_REENTRANT)
@@ -98,42 +92,16 @@ int main(void)
   int type = 0;
   struct hostent h;
   int rc = 0;
-#if defined(HAVE_GETHOSTBYADDR_R_5) || \
-    defined(HAVE_GETHOSTBYADDR_R_5_REENTRANT) || \
-    \
-    defined(HAVE_GETHOSTBYNAME_R_3) || \
+#if defined(HAVE_GETHOSTBYNAME_R_3) || \
     defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT)
   struct hostent_data hdata;
-#elif defined(HAVE_GETHOSTBYADDR_R_7) || \
-      defined(HAVE_GETHOSTBYADDR_R_7_REENTRANT) || \
-      defined(HAVE_GETHOSTBYADDR_R_8) || \
-      defined(HAVE_GETHOSTBYADDR_R_8_REENTRANT) || \
-      \
-      defined(HAVE_GETHOSTBYNAME_R_5) || \
+#elif defined(HAVE_GETHOSTBYNAME_R_5) || \
       defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT) || \
       defined(HAVE_GETHOSTBYNAME_R_6) || \
       defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
   char buffer[8192];
   int h_errnop;
   struct hostent *hp;
-#endif
-
-#ifndef gethostbyaddr_r
-  (void)gethostbyaddr_r;
-#endif
-
-#if   defined(HAVE_GETHOSTBYADDR_R_5) || \
-      defined(HAVE_GETHOSTBYADDR_R_5_REENTRANT)
-  rc = gethostbyaddr_r(address, length, type, &h, &hdata);
-  (void)rc;
-#elif defined(HAVE_GETHOSTBYADDR_R_7) || \
-      defined(HAVE_GETHOSTBYADDR_R_7_REENTRANT)
-  hp = gethostbyaddr_r(address, length, type, &h, buffer, 8192, &h_errnop);
-  (void)hp;
-#elif defined(HAVE_GETHOSTBYADDR_R_8) || \
-      defined(HAVE_GETHOSTBYADDR_R_8_REENTRANT)
-  rc = gethostbyaddr_r(address, length, type, &h, buffer, 8192, &hp, &h_errnop);
-  (void)rc;
 #endif
 
 #if   defined(HAVE_GETHOSTBYNAME_R_3) || \
@@ -213,37 +181,6 @@ if (sizeof (bool *) )
 #include <string.h>
 #include <float.h>
 int main() { return 0; }
-#endif
-#ifdef HAVE_INET_NTOA_R_DECL
-#include <arpa/inet.h>
-
-typedef void (*func_type)();
-
-int main()
-{
-#ifndef inet_ntoa_r
-  func_type func;
-  func = (func_type)inet_ntoa_r;
-  (void)func;
-#endif
-  return 0;
-}
-#endif
-#ifdef HAVE_INET_NTOA_R_DECL_REENTRANT
-#define _REENTRANT
-#include <arpa/inet.h>
-
-typedef void (*func_type)();
-
-int main()
-{
-#ifndef inet_ntoa_r
-  func_type func;
-  func = (func_type)&inet_ntoa_r;
-  (void)func;
-#endif
-  return 0;
-}
 #endif
 #ifdef HAVE_GETADDRINFO
 #include <netdb.h>
@@ -361,7 +298,7 @@ main ()
 
 /* IoctlSocket source code */
         long flags = 0;
-        if(0 != ioctlsocket(0, FIONBIO, &flags))
+        if(0 != IoctlSocket(0, FIONBIO, &flags))
           return 1;
   ;
   return 0;

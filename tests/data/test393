@@ -18,7 +18,11 @@ Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 Accept-Ranges: bytes
+%if hyper
+Content-Length: 3689348814741910323
+%else
 Content-Length: 36893488147419103232
+%endif
 Connection: close
 Content-Type: text/html
 Funny-head: yesyes

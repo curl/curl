@@ -1,0 +1,583 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
+---
+- job:
+    name: curl-base
+    abstract: true
+    pre-run: zuul.d/playbooks/pre.yaml
+    run: zuul.d/playbooks/run.yaml
+    post-run: zuul.d/playbooks/post.yaml
+    nodeset: ubuntu-bionic
+    timeout: 3600
+    vars:
+      curl_env:
+        LD_LIBRARY_PATH: /usr/local/lib
+        # NOTE(mnaser): Workaround to keep existing Travis scripts compatible
+        TRAVIS_OS_NAME: linux
+
+- job:
+    name: curl-normal-with-openssl-gssapi-libssh2-checksrc
+    parent: curl-base
+    vars:
+      curl_env:
+        T: normal
+        C: --with-openssl --with-gssapi --with-libssh2
+        CHECKSRC: 1
+      curl_apt_packages:
+        - krb5-user
+        - libssh2-1-dev
+        - libbrotli-dev
+        - libzstd-dev
+
+- job:
+    name: curl-normal-with-openssl-enable-ares
+    parent: curl-base
+    vars:
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: normal
+        C: >-
+          --with-openssl
+          --enable-ares
+
+- job:
+    name: curl-normal-with-openssl-disable-proxy
+    parent: curl-base
+    vars:
+      curl_env:
+        T: normal
+        C: >-
+          --with-openssl
+          --disable-proxy
+
+- job:
+    name: curl-normal-with-openssl-disable-verbose-notests
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: normal
+        C: >-
+          --with-openssl
+          --disable-verbose
+        CPPFLAGS: -Wno-variadic-macros
+        NOTESTS: 1
+
+- job:
+    name: curl-novalgrind-boringssl-with-openssl
+    parent: curl-base
+    vars:
+      gimme_stable: true
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: novalgrind
+        BORINGSSL: "yes"
+        C: >-
+          --with-openssl={{ ansible_user_dir }}/boringssl
+        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/boringssl/lib:/usr/local/lib"
+
+- job:
+    name: curl-novalgrind-boringssl-with-openssl-quiche
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: novalgrind
+        QUICHE: "yes"
+        C: >-
+          --with-openssl={{ ansible_user_dir }}/quiche/deps/boringssl/src
+          --with-quiche={{ ansible_user_dir }}/quiche/target/release
+        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/quiche/target/release:/usr/local/lib"
+
+- job:
+    name: curl-debug-rustls
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        T: debug-rustls
+        RUSTLS_VERSION: v0.7.1
+        C: >-
+          --with-rustls={{ ansible_user_dir }}/crust
+
+- job:
+    name: curl-debug-bearssl
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        T: debug-bearssl
+        BEARSSL: "yes"
+        C: >-
+          --with-bearssl
+
+- job:
+    name: curl-novalgrind-libressl
+    parent: curl-base
+    vars:
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: novalgrind
+        LIBRESSL: "yes"
+        C: >-
+          --with-openssl={{ ansible_user_dir }}/libressl
+        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/libressl/lib:/usr/local/lib"
+
+- job:
+    name: curl-novalgrind-ngtcp2-with-openssl
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: novalgrind
+        NGTCP2: "yes"
+        C: >-
+          --with-openssl={{ ansible_user_dir }}/ngbuild
+          --with-ngtcp2={{ ansible_user_dir }}/ngbuild
+          --with-nghttp3={{ ansible_user_dir }}/ngbuild
+        NOTESTS:
+
+- job:
+    name: curl-novalgrind-ngtcp2-gnutls
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - autogen
+        - automake
+        - autopoint
+        - bison
+        - gperf
+        - libgmp-dev
+        - libopts25-dev
+        - libp11-kit-dev
+        - libtasn1-6-dev
+        - nettle-dev
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: novalgrind
+        NGTCP2: "yes"
+        GNUTLS: "yes"
+        C: >-
+          PKG_CONFIG_PATH={{ ansible_user_dir }}/ngbuild 
+          --with-gnutls={{ ansible_user_dir }}/ngbuild
+          --with-ngtcp2={{ ansible_user_dir }}/ngbuild
+          --with-nghttp3={{ ansible_user_dir }}/ngbuild
+        NOTESTS:
+
+- job:
+    name: curl-debug-wolfssl
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: debug-wolfssl
+        WOLFSSL: "yes"
+        C: >-
+          --with-wolfssl
+
+- job:
+    name: curl-debug-openssl3
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: debug
+        OPENSSL3: "yes"
+        C: >-
+          --with-openssl={{ ansible_user_dir }}/openssl3
+        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/openssl3/lib64:/usr/local/lib"
+        TFLAGS: https ftps
+
+- job:
+    name: curl-debug-mbedtls3
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: debug
+        MBEDTLS3: "yes"
+        C: >-
+          --with-mbedtls={{ ansible_user_dir }}/mbedtls3
+        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/mbedtls3/lib:/usr/local/lib"
+        TFLAGS: https ftps
+
+- job:
+    name: curl-debug-mesalink
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: debug-mesalink
+        MESALINK: "yes"
+        C: >-
+          --with-mesalink
+
+- job:
+    name: curl-debug-clang-with-openssl
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: clang-9
+        CXX: clang++-9
+        T: debug
+        C: >-
+          --with-openssl
+
+- job:
+    name: curl-debug-clang-disable-alt-svc-with-openssl
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: clang-9
+        CXX: clang++-9
+        T: debug
+        C: >-
+          --with-openssl
+          --disable-alt-svc
+
+- job:
+    name: curl-debug-clang-with-mbedtls
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libmbedtls-dev
+      curl_env:
+        CC: clang-9
+        CXX: clang++-9
+        T: debug
+        C: >-
+          --with-mbedtls
+
+- job:
+    name: curl-debug-clang-with-gnutls
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libgnutls28-dev
+      curl_env:
+        CC: clang-9
+        CXX: clang++-9
+        T: debug
+        C: >-
+          --with-gnutls
+
+- job:
+    name: curl-debug-clang-with-nss
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libnss3-dev
+      curl_env:
+        CC: clang-9
+        CXX: clang++-9
+        T: debug
+        C: >-
+          --with-nss
+        CPPFLAGS: -isystem /usr/include/nss
+        NOTESTS: 1
+
+- job:
+    name: curl-iconv-with-openssl
+    parent: curl-base
+    vars:
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: iconv
+        C: >-
+          --with-openssl
+
+- job:
+    name: curl-cmake-boringssl-quiche
+    parent: curl-base
+    vars:
+      gimme_stable: true
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        BORINGSSL: "yes"
+        QUICHE: "yes"
+        CC: gcc-8
+        CXX: g++-8
+        T: cmake
+        C: >-
+          -GNinja
+          -DUSE_QUICHE=1
+          -DOPENSSL_ROOT_DIR={{ ansible_user_dir }}/boringssl
+          -DCURL_BROTLI=1
+          -DCURL_ZSTD=1
+        TFLAGS: https ftps
+        PKG_CONFIG_PATH: "{{ ansible_user_dir }}/quiche/target/release"
+
+- job:
+    name: curl-cmake-ngtcp2
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libnss3-dev
+      curl_env:
+        NGTCP2: "yes"
+        CC: clang-9
+        CXX: clang++-9
+        T: cmake
+        C: >-
+          -GNinja
+          -DUSE_NGTCP2=ON
+          -DCURL_BROTLI=1
+          -DCURL_ZSTD=1
+        PKG_CONFIG_PATH: "{{ ansible_user_dir }}/ngbuild/lib/pkgconfig"
+
+- job:
+    name: curl-torture
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - lcov
+        - libpsl-dev
+        - libssl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libssh2-1-dev
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: torture
+
+- job:
+    name: curl-events
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - lcov
+        - libpsl-dev
+        - libssl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - libssh2-1-dev
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: events
+
+- job:
+    name: curl-distcheck
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: distcheck
+
+- job:
+    name: curl-fuzzer
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang
+        - clang-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: clang-9
+        CXX: clang++-9
+        T: fuzzer
+
+- job:
+    name: curl-tidy
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang
+        - clang-tidy
+        - clang-9
+        - clang-tidy-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: clang-9
+        CXX: clang++-9
+        T: tidy
+        C: --with-openssl
+
+- job:
+    name: curl-scan-build
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang-tools-10
+        - clang-9
+        - libssl-dev
+        - libssh2-1-dev
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: clang-9
+        CXX: clang++-9
+        T: scan-build
+        C: >-
+          --with-openssl
+          --with-libssh2
+
+- job:
+    name: curl-debug-clang-with-openssl-dl-ubsan
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - clang-9
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+      curl_env:
+        CC: clang-9
+        CXX: clang++-9
+        T: debug
+        CFLAGS: >-
+          -fsanitize=address,undefined,signed-integer-overflow
+          -fno-sanitize-recover=undefined,integer
+          -Wformat
+          -Werror=format-security
+          -Werror=array-bounds
+          -g
+        LDFLAGS: >-
+          -fsanitize=address,undefined
+          -fno-sanitize-recover=undefined,integer
+        LIBS: -ldl -lubsan
+        TFLAGS: -n
+        C: --with-openssl
+
+- project:
+    check:
+      jobs:
+      - curl-normal-with-openssl-gssapi-libssh2-checksrc
+      - curl-normal-with-openssl-enable-ares
+      - curl-normal-with-openssl-disable-proxy
+      - curl-normal-with-openssl-disable-verbose-notests
+      - curl-novalgrind-boringssl-with-openssl
+      - curl-novalgrind-boringssl-with-openssl-quiche
+      - curl-debug-rustls
+      - curl-debug-bearssl
+      - curl-novalgrind-libressl
+      - curl-novalgrind-ngtcp2-with-openssl
+      - curl-novalgrind-ngtcp2-gnutls
+      - curl-debug-wolfssl
+      - curl-debug-openssl3
+      - curl-debug-mbedtls3
+      - curl-debug-mesalink
+      - curl-debug-clang-with-openssl
+      - curl-debug-clang-disable-alt-svc-with-openssl
+      - curl-debug-clang-with-mbedtls
+      - curl-debug-clang-with-gnutls
+      - curl-debug-clang-with-nss
+      - curl-iconv-with-openssl
+      - curl-cmake-boringssl-quiche
+      - curl-cmake-ngtcp2
+      - curl-torture
+      - curl-events
+      - curl-distcheck
+      - curl-fuzzer
+      - curl-tidy
+      - curl-scan-build
+      - curl-debug-clang-with-openssl-dl-ubsan
+...

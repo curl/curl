@@ -188,7 +188,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
     /* at this point we already verified that the callback exists
        so we compile and store the trailers buffer, then proceed */
     infof(data,
-          "Moving trailers state machine from initialized to sending.\n");
+          "Moving trailers state machine from initialized to sending.");
     data->state.trailers_state = TRAILERS_SENDING;
     Curl_dyn_init(&data->state.trailers_buf, DYN_TRAILERS);
 
@@ -211,7 +211,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
       curl_slist_free_all(trailers);
       return result;
     }
-    infof(data, "Successfully compiled trailers.\r\n");
+    infof(data, "Successfully compiled trailers.");
     curl_slist_free_all(trailers);
   }
 #endif
@@ -376,7 +376,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
       data->set.trailer_callback = NULL;
       /* mark the transfer as done */
       data->req.upload_done = TRUE;
-      infof(data, "Signaling end of chunked upload after trailers.\n");
+      infof(data, "Signaling end of chunked upload after trailers.");
     }
     else
 #endif
@@ -385,7 +385,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
         /* mark this as done once this chunk is transferred */
         data->req.upload_done = TRUE;
         infof(data,
-              "Signaling end of chunked upload via terminating chunk.\n");
+              "Signaling end of chunked upload via terminating chunk.");
       }
 
     if(added_crlf)
@@ -463,7 +463,7 @@ CURLcode Curl_readrewind(struct Curl_easy *data)
       err = (data->set.ioctl_func)(data, CURLIOCMD_RESTARTREAD,
                                    data->set.ioctl_client);
       Curl_set_in_callback(data, false);
-      infof(data, "the ioctl callback returned %d\n", (int)err);
+      infof(data, "the ioctl callback returned %d", (int)err);
 
       if(err) {
         failf(data, "ioctl callback returned error %d", (int)err);
@@ -497,11 +497,13 @@ static int data_pending(const struct Curl_easy *data)
     return Curl_quic_data_pending(data);
 #endif
 
+  if(conn->handler->protocol&PROTO_FAMILY_FTP)
+    return Curl_ssl_data_pending(conn, SECONDARYSOCKET);
+
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
   return conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP) ||
 #if defined(USE_NGHTTP2)
-    Curl_ssl_data_pending(conn, FIRSTSOCKET) ||
     /* For HTTP/2, we may read up everything including response body
        with header fields in Curl_http_readwrite_headers. If no
        content-length is provided, curl waits for the connection
@@ -509,10 +511,9 @@ static int data_pending(const struct Curl_easy *data)
        TRUE. The thing is if we read everything, then http2_recv won't
        be called and we cannot signal the HTTP/2 stream has closed. As
        a workaround, we return nonzero here to call http2_recv. */
-    ((conn->handler->protocol&PROTO_FAMILY_HTTP) && conn->httpversion >= 20);
-#else
-    Curl_ssl_data_pending(conn, FIRSTSOCKET);
+    ((conn->handler->protocol&PROTO_FAMILY_HTTP) && conn->httpversion >= 20) ||
 #endif
+    Curl_ssl_data_pending(conn, FIRSTSOCKET);
 }
 
 /*
@@ -529,7 +530,7 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
   default:
     if(timeofdoc <= data->set.timevalue) {
       infof(data,
-            "The requested document is not new enough\n");
+            "The requested document is not new enough");
       data->info.timecond = TRUE;
       return FALSE;
     }
@@ -537,7 +538,7 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
   case CURL_TIMECOND_IFUNMODSINCE:
     if(timeofdoc >= data->set.timevalue) {
       infof(data,
-            "The requested document is not old enough\n");
+            "The requested document is not old enough");
       data->info.timecond = TRUE;
       return FALSE;
     }
@@ -614,7 +615,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     else {
       /* read nothing but since we wanted nothing we consider this an OK
          situation to proceed from */
-      DEBUGF(infof(data, "readwrite_data: we're done!\n"));
+      DEBUGF(infof(data, "readwrite_data: we're done!"));
       nread = 0;
     }
 
@@ -637,10 +638,10 @@ static CURLcode readwrite_data(struct Curl_easy *data,
          server closed the connection and we bail out from this! */
 #ifdef USE_NGHTTP2
       if(is_http2 && !nread)
-        DEBUGF(infof(data, "nread == 0, stream closed, bailing\n"));
+        DEBUGF(infof(data, "nread == 0, stream closed, bailing"));
       else
 #endif
-        DEBUGF(infof(data, "nread <= 0, server closed connection, bailing\n"));
+        DEBUGF(infof(data, "nread <= 0, server closed connection, bailing"));
       k->keepon &= ~KEEP_RECV;
       break;
     }
@@ -683,7 +684,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
           infof(data,
                 "Excess found:"
                 " excess = %zd"
-                " url = %s (zero-length body)\n",
+                " url = %s (zero-length body)",
                 nread, data->state.up.path);
         }
 
@@ -763,7 +764,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
              written to the client. */
           if(conn->chunk.datasize) {
             infof(data, "Leftovers after chunking: % "
-                  CURL_FORMAT_CURL_OFF_T "u bytes\n",
+                  CURL_FORMAT_CURL_OFF_T "u bytes",
                   conn->chunk.datasize);
           }
         }
@@ -774,7 +775,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       /* Account for body content stored in the header buffer */
       if((k->badheader == HEADER_PARTHEADER) && !k->ignorebody) {
         size_t headlen = Curl_dyn_len(&data->state.headerb);
-        DEBUGF(infof(data, "Increasing bytecount by %zu\n", headlen));
+        DEBUGF(infof(data, "Increasing bytecount by %zu", headlen));
         k->bytecount += headlen;
       }
 
@@ -788,7 +789,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                 " excess = %zu"
                 ", size = %" CURL_FORMAT_CURL_OFF_T
                 ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
-                ", bytecount = %" CURL_FORMAT_CURL_OFF_T "\n",
+                ", bytecount = %" CURL_FORMAT_CURL_OFF_T,
                 excess, k->size, k->maxdownload, k->bytecount);
           connclose(conn, "excess found in a read");
         }
@@ -897,7 +898,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     /* When we've read the entire thing and the close bit is set, the server
        may now close the connection. If there's now any kind of sending going
        on from our side, we need to stop that immediately. */
-    infof(data, "we are done reading and this is set to close, stop send\n");
+    infof(data, "we are done reading and this is set to close, stop send");
     k->keepon &= ~KEEP_SEND; /* no writing anymore either */
   }
 
@@ -922,7 +923,7 @@ CURLcode Curl_done_sending(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#if defined(WIN32) && !defined(USE_LWIPSOCK)
+#if defined(WIN32) && defined(USE_WINSOCK)
 #ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
 #define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
 #endif
@@ -1127,7 +1128,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
        (k->writebytecount == data->state.infilesize)) {
       /* we have sent all data we were supposed to */
       k->upload_done = TRUE;
-      infof(data, "We are completely uploaded and fine\n");
+      infof(data, "We are completely uploaded and fine");
     }
 
     if(k->upload_present != bytes_written) {
@@ -1198,7 +1199,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   if(data->state.drain) {
     select_res |= CURL_CSELECT_IN;
-    DEBUGF(infof(data, "Curl_readwrite: forcibly told to drain data\n"));
+    DEBUGF(infof(data, "Curl_readwrite: forcibly told to drain data"));
   }
 
   if(!select_res) /* Call for select()/poll() only, if read/write/error
@@ -1211,8 +1212,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   }
 
 #ifdef USE_HYPER
-  if(conn->datastream)
-    return conn->datastream(data, conn, &didwhat, done, select_res);
+  if(conn->datastream) {
+    result = conn->datastream(data, conn, &didwhat, done, select_res);
+    if(result || *done)
+      return result;
+  }
+  else {
 #endif
   /* We go ahead and do a read if we have a readable socket or if
      the stream was rewound (in which case we have data in a
@@ -1231,6 +1236,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     if(result)
       return result;
   }
+#ifdef USE_HYPER
+  }
+#endif
 
   k->now = Curl_now();
   if(!didwhat) {
@@ -1255,7 +1263,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         k->exp100 = EXP100_SEND_DATA;
         k->keepon |= KEEP_SEND;
         Curl_expire_done(data, EXPIRE_100_TIMEOUT);
-        infof(data, "Done waiting for 100-continue\n");
+        infof(data, "Done waiting for 100-continue");
       }
     }
   }
@@ -1631,7 +1639,8 @@ CURLcode Curl_follow(struct Curl_easy *data,
   DEBUGASSERT(data->state.uh);
   uc = curl_url_set(data->state.uh, CURLUPART_URL, newurl,
                     (type == FOLLOW_FAKE) ? CURLU_NON_SUPPORT_SCHEME :
-                    ((type == FOLLOW_REDIR) ? CURLU_URLENCODE : 0) );
+                    ((type == FOLLOW_REDIR) ? CURLU_URLENCODE : 0) |
+                    CURLU_ALLOW_SPACE);
   if(uc) {
     if(type != FOLLOW_FAKE)
       return Curl_uc_to_curlcode(uc);
@@ -1670,7 +1679,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
   data->state.url = newurl;
   data->state.url_alloc = TRUE;
 
-  infof(data, "Issue another request to this URL: '%s'\n", data->state.url);
+  infof(data, "Issue another request to this URL: '%s'", data->state.url);
 
   /*
    * We get here when the HTTP code is 300-399 (and 401). We need to perform
@@ -1713,7 +1722,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
         || data->state.httpreq == HTTPREQ_POST_FORM
         || data->state.httpreq == HTTPREQ_POST_MIME)
        && !(data->set.keep_post & CURL_REDIR_POST_301)) {
-      infof(data, "Switch from POST to GET\n");
+      infof(data, "Switch from POST to GET");
       data->state.httpreq = HTTPREQ_GET;
     }
     break;
@@ -1738,7 +1747,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
         || data->state.httpreq == HTTPREQ_POST_FORM
         || data->state.httpreq == HTTPREQ_POST_MIME)
        && !(data->set.keep_post & CURL_REDIR_POST_302)) {
-      infof(data, "Switch from POST to GET\n");
+      infof(data, "Switch from POST to GET");
       data->state.httpreq = HTTPREQ_GET;
     }
     break;
@@ -1756,7 +1765,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
         !(data->set.keep_post & CURL_REDIR_POST_303))) {
       data->state.httpreq = HTTPREQ_GET;
       data->set.upload = false;
-      infof(data, "Switch to %s\n",
+      infof(data, "Switch to %s",
             data->set.opt_no_body?"HEAD":"GET");
     }
     break;
@@ -1817,7 +1826,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
        to issue again, but the nghttp2 API can deliver the message to other
        streams as well, which is why this adds the check the data counters
        too. */
-    infof(data, "REFUSED_STREAM, retrying a fresh connect\n");
+    infof(data, "REFUSED_STREAM, retrying a fresh connect");
     data->state.refused_stream = FALSE; /* clear again */
     retry = TRUE;
   }
@@ -1829,8 +1838,8 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
       data->state.retrycount = 0;
       return CURLE_SEND_ERROR;
     }
-    infof(data, "Connection died, retrying a fresh connect\
-(retry count: %d)\n", data->state.retrycount);
+    infof(data, "Connection died, retrying a fresh connect (retry count: %d)",
+          data->state.retrycount);
     *url = strdup(data->state.url);
     if(!*url)
       return CURLE_OUT_OF_MEMORY;

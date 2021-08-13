@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -39,6 +39,9 @@ actually get the given size.
 This buffer size is by default \fICURL_MAX_WRITE_SIZE\fP (16kB). The maximum
 buffer size allowed to be set is \fICURL_MAX_READ_SIZE\fP (512kB). The minimum
 buffer size allowed to be set is 1024.
+
+DO NOT set this option on a handle that is currently used for an active
+transfer as that may lead to unintended consequences.
 .SH DEFAULT
 CURL_MAX_WRITE_SIZE (16kB)
 .SH PROTOCOLS

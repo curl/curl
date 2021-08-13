@@ -131,6 +131,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   pop3_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
   ZERO_NULL,                        /* connection_check */
+  ZERO_NULL,                        /* attach connection */
   PORT_POP3,                        /* defport */
   CURLPROTO_POP3,                   /* protocol */
   CURLPROTO_POP3,                   /* family */
@@ -159,6 +160,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   pop3_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
   ZERO_NULL,                        /* connection_check */
+  ZERO_NULL,                        /* attach connection */
   PORT_POP3S,                       /* defport */
   CURLPROTO_POP3S,                  /* protocol */
   CURLPROTO_POP3,                   /* family */
@@ -306,7 +308,7 @@ static void state(struct Curl_easy *data, pop3state newstate)
   };
 
   if(pop3c->state != newstate)
-    infof(data, "POP3 %p state change from %s to %s\n",
+    infof(data, "POP3 %p state change from %s to %s",
           (void *)pop3c, names[pop3c->state], names[newstate]);
 #endif
 
@@ -368,8 +370,9 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
 {
   /* Start the SSL connection */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  CURLcode result = Curl_ssl_connect_nonblocking(data, conn, FIRSTSOCKET,
-                                                 &pop3c->ssldone);
+  CURLcode result =
+    Curl_ssl_connect_nonblocking(data, conn, FALSE, FIRSTSOCKET,
+                                 &pop3c->ssldone);
 
   if(!result) {
     if(pop3c->state != POP3_UPGRADETLS)
@@ -549,7 +552,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
       result = pop3_perform_user(data, conn);
     else {
       /* Other mechanisms not supported */
-      infof(data, "No known authentication mechanisms supported!\n");
+      infof(data, "No known authentication mechanisms supported!");
       result = CURLE_LOGIN_DENIED;
     }
   }
@@ -709,7 +712,7 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
       for(;;) {
         size_t llen;
         size_t wordlen;
-        unsigned int mechbit;
+        unsigned short mechbit;
 
         while(len &&
               (*line == ' ' || *line == '\t' ||
@@ -1029,7 +1032,7 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   if((conn->handler->flags & PROTOPT_SSL) && !pop3c->ssldone) {
-    result = Curl_ssl_connect_nonblocking(data, conn,
+    result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
                                           FIRSTSOCKET, &pop3c->ssldone);
     if(result || !pop3c->ssldone)
       return result;
@@ -1170,7 +1173,7 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
   struct connectdata *conn = data->conn;
   struct POP3 *pop3 = data->req.p.pop3;
 
-  DEBUGF(infof(data, "DO phase starts\n"));
+  DEBUGF(infof(data, "DO phase starts"));
 
   if(data->set.opt_no_body) {
     /* Requested no body means no transfer */
@@ -1189,7 +1192,7 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done)
-    DEBUGF(infof(data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete"));
 
   return result;
 }
@@ -1272,11 +1275,11 @@ static CURLcode pop3_doing(struct Curl_easy *data, bool *dophase_done)
   CURLcode result = pop3_multi_statemach(data, dophase_done);
 
   if(result)
-    DEBUGF(infof(data, "DO phase failed\n"));
+    DEBUGF(infof(data, "DO phase failed"));
   else if(*dophase_done) {
     result = pop3_dophase_done(data, FALSE /* not connected */);
 
-    DEBUGF(infof(data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete"));
   }
 
   return result;

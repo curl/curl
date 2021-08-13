@@ -76,16 +76,16 @@ extern int ldap_init_fd(ber_socket_t fd, int proto, const char *url,
                         LDAP **ld);
 #endif
 
-static CURLcode ldap_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn);
-static CURLcode ldap_do(struct Curl_easy *data, bool *done);
-static CURLcode ldap_done(struct Curl_easy *data, CURLcode, bool);
-static CURLcode ldap_connect(struct Curl_easy *data, bool *done);
-static CURLcode ldap_connecting(struct Curl_easy *data, bool *done);
-static CURLcode ldap_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn, bool dead);
+static CURLcode oldap_setup_connection(struct Curl_easy *data,
+                                       struct connectdata *conn);
+static CURLcode oldap_do(struct Curl_easy *data, bool *done);
+static CURLcode oldap_done(struct Curl_easy *data, CURLcode, bool);
+static CURLcode oldap_connect(struct Curl_easy *data, bool *done);
+static CURLcode oldap_connecting(struct Curl_easy *data, bool *done);
+static CURLcode oldap_disconnect(struct Curl_easy *data,
+                                 struct connectdata *conn, bool dead);
 
-static Curl_recv ldap_recv;
+static Curl_recv oldap_recv;
 
 /*
  * LDAP protocol handler.
@@ -93,20 +93,21 @@ static Curl_recv ldap_recv;
 
 const struct Curl_handler Curl_handler_ldap = {
   "LDAP",                               /* scheme */
-  ldap_setup_connection,                /* setup_connection */
-  ldap_do,                              /* do_it */
-  ldap_done,                            /* done */
+  oldap_setup_connection,               /* setup_connection */
+  oldap_do,                             /* do_it */
+  oldap_done,                           /* done */
   ZERO_NULL,                            /* do_more */
-  ldap_connect,                         /* connect_it */
-  ldap_connecting,                      /* connecting */
+  oldap_connect,                        /* connect_it */
+  oldap_connecting,                     /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  ldap_disconnect,                      /* disconnect */
+  oldap_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_LDAP,                            /* defport */
   CURLPROTO_LDAP,                       /* protocol */
   CURLPROTO_LDAP,                       /* family */
@@ -120,20 +121,21 @@ const struct Curl_handler Curl_handler_ldap = {
 
 const struct Curl_handler Curl_handler_ldaps = {
   "LDAPS",                              /* scheme */
-  ldap_setup_connection,                /* setup_connection */
-  ldap_do,                              /* do_it */
-  ldap_done,                            /* done */
+  oldap_setup_connection,               /* setup_connection */
+  oldap_do,                             /* do_it */
+  oldap_done,                           /* done */
   ZERO_NULL,                            /* do_more */
-  ldap_connect,                         /* connect_it */
-  ldap_connecting,                      /* connecting */
+  oldap_connect,                        /* connect_it */
+  oldap_connecting,                     /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  ldap_disconnect,                      /* disconnect */
+  oldap_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_LDAPS,                           /* defport */
   CURLPROTO_LDAPS,                      /* protocol */
   CURLPROTO_LDAP,                       /* family */
@@ -171,8 +173,8 @@ struct ldapreqinfo {
   int nument;
 };
 
-static CURLcode ldap_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn)
+static CURLcode oldap_setup_connection(struct Curl_easy *data,
+                                       struct connectdata *conn)
 {
   struct ldapconninfo *li;
   LDAPURLDesc *lud;
@@ -207,7 +209,7 @@ static CURLcode ldap_setup_connection(struct Curl_easy *data,
 static Sockbuf_IO ldapsb_tls;
 #endif
 
-static CURLcode ldap_connect(struct Curl_easy *data, bool *done)
+static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = conn->proto.ldapc;
@@ -245,7 +247,7 @@ static CURLcode ldap_connect(struct Curl_easy *data, bool *done)
 #ifdef USE_SSL
   if(conn->handler->flags & PROTOPT_SSL) {
     CURLcode result;
-    result = Curl_ssl_connect_nonblocking(data, conn,
+    result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
                                           FIRSTSOCKET, &li->ssldone);
     if(result)
       return result;
@@ -255,7 +257,7 @@ static CURLcode ldap_connect(struct Curl_easy *data, bool *done)
   return CURLE_OK;
 }
 
-static CURLcode ldap_connecting(struct Curl_easy *data, bool *done)
+static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = conn->proto.ldapc;
@@ -268,7 +270,8 @@ static CURLcode ldap_connecting(struct Curl_easy *data, bool *done)
   if(conn->handler->flags & PROTOPT_SSL) {
     /* Is the SSL handshake complete yet? */
     if(!li->ssldone) {
-      CURLcode result = Curl_ssl_connect_nonblocking(data, conn, FIRSTSOCKET,
+      CURLcode result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
+                                                     FIRSTSOCKET,
                                                      &li->ssldone);
       if(result || !li->ssldone)
         return result;
@@ -354,14 +357,15 @@ static CURLcode ldap_connecting(struct Curl_easy *data, bool *done)
 
   if(info)
     ldap_memfree(info);
-  conn->recv[FIRSTSOCKET] = ldap_recv;
+  conn->recv[FIRSTSOCKET] = oldap_recv;
   *done = TRUE;
 
   return CURLE_OK;
 }
 
-static CURLcode ldap_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn, bool dead_connection)
+static CURLcode oldap_disconnect(struct Curl_easy *data,
+                                 struct connectdata *conn,
+                                 bool dead_connection)
 {
   struct ldapconninfo *li = conn->proto.ldapc;
   (void) dead_connection;
@@ -384,7 +388,7 @@ static CURLcode ldap_disconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode ldap_do(struct Curl_easy *data, bool *done)
+static CURLcode oldap_do(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = conn->proto.ldapc;
@@ -396,7 +400,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
   connkeep(conn, "OpenLDAP do");
 
-  infof(data, "LDAP local: %s\n", data->state.url);
+  infof(data, "LDAP local: %s", data->state.url);
 
   rc = ldap_url_parse(data->state.url, &ludp);
   if(rc != LDAP_URL_SUCCESS) {
@@ -429,8 +433,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   return CURLE_OK;
 }
 
-static CURLcode ldap_done(struct Curl_easy *data, CURLcode res,
-                          bool premature)
+static CURLcode oldap_done(struct Curl_easy *data, CURLcode res,
+                           bool premature)
 {
   struct connectdata *conn = data->conn;
   struct ldapreqinfo *lr = data->req.p.ldap;
@@ -452,8 +456,8 @@ static CURLcode ldap_done(struct Curl_easy *data, CURLcode res,
   return CURLE_OK;
 }
 
-static ssize_t ldap_recv(struct Curl_easy *data, int sockindex, char *buf,
-                         size_t len, CURLcode *err)
+static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
+                          size_t len, CURLcode *err)
 {
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = conn->proto.ldapc;
@@ -506,7 +510,7 @@ static ssize_t ldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       else {
         /* successful */
         if(code == LDAP_SIZELIMIT_EXCEEDED)
-          infof(data, "There are more than %d entries\n", lr->nument);
+          infof(data, "There are more than %d entries", lr->nument);
         data->req.size = data->req.bytecount;
         *err = CURLE_OK;
         ret = 0;

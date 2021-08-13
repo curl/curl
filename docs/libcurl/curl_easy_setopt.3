@@ -201,7 +201,7 @@ Timeout for DNS cache. See \fICURLOPT_DNS_CACHE_TIMEOUT(3)\fP
 .IP CURLOPT_DNS_USE_GLOBAL_CACHE
 OBSOLETE Enable global DNS cache. See \fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP
 .IP CURLOPT_DOH_URL
-Use this DOH server for name resolves. See \fICURLOPT_DOH_URL(3)\fP
+Use this DoH server for name resolves. See \fICURLOPT_DOH_URL(3)\fP
 .IP CURLOPT_BUFFERSIZE
 Ask for alternate buffer size. See \fICURLOPT_BUFFERSIZE(3)\fP
 .IP CURLOPT_PORT
@@ -496,7 +496,7 @@ Timeout for the connection phase. See \fICURLOPT_CONNECTTIMEOUT(3)\fP
 .IP CURLOPT_CONNECTTIMEOUT_MS
 Millisecond timeout for the connection phase. See \fICURLOPT_CONNECTTIMEOUT_MS(3)\fP
 .IP CURLOPT_IPRESOLVE
-IP version to resolve to. See \fICURLOPT_IPRESOLVE(3)\fP
+IP version to use. See \fICURLOPT_IPRESOLVE(3)\fP
 .IP CURLOPT_CONNECT_ONLY
 Only connect, nothing else. See \fICURLOPT_CONNECT_ONLY(3)\fP
 .IP CURLOPT_USE_SSL
@@ -568,26 +568,30 @@ Proxy SSL version to use. See \fICURLOPT_PROXY_SSLVERSION(3)\fP
 .IP CURLOPT_SSL_VERIFYHOST
 Verify the host name in the SSL certificate. See \fICURLOPT_SSL_VERIFYHOST(3)\fP
 .IP CURLOPT_DOH_SSL_VERIFYHOST
-Verify the host name in the DOH (DNS-over-HTTPS) SSL certificate. See
+Verify the host name in the DoH (DNS-over-HTTPS) SSL certificate. See
 \fICURLOPT_DOH_SSL_VERIFYHOST(3)\fP
 .IP CURLOPT_PROXY_SSL_VERIFYHOST
 Verify the host name in the proxy SSL certificate. See \fICURLOPT_PROXY_SSL_VERIFYHOST(3)\fP
 .IP CURLOPT_SSL_VERIFYPEER
 Verify the SSL certificate. See \fICURLOPT_SSL_VERIFYPEER(3)\fP
 .IP CURLOPT_DOH_SSL_VERIFYPEER
-Verify the DOH (DNS-over-HTTPS) SSL certificate. See
+Verify the DoH (DNS-over-HTTPS) SSL certificate. See
 \fICURLOPT_DOH_SSL_VERIFYPEER(3)\fP
 .IP CURLOPT_PROXY_SSL_VERIFYPEER
 Verify the proxy SSL certificate. See \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP
 .IP CURLOPT_SSL_VERIFYSTATUS
 Verify the SSL certificate's status. See \fICURLOPT_SSL_VERIFYSTATUS(3)\fP
 .IP CURLOPT_DOH_SSL_VERIFYSTATUS
-Verify the DOH (DNS-over-HTTPS) SSL certificate's status. See
+Verify the DoH (DNS-over-HTTPS) SSL certificate's status. See
 \fICURLOPT_DOH_SSL_VERIFYSTATUS(3)\fP
 .IP CURLOPT_CAINFO
 CA cert bundle. See \fICURLOPT_CAINFO(3)\fP
+.IP CURLOPT_CAINFO_BLOB
+CA cert bundle memory buffer. See \fICURLOPT_CAINFO_BLOB(3)\fP
 .IP CURLOPT_PROXY_CAINFO
 Proxy CA cert bundle. See \fICURLOPT_PROXY_CAINFO(3)\fP
+.IP CURLOPT_PROXY_CAINFO_BLOB
+Proxy CA cert bundle memory buffer. See \fICURLOPT_PROXY_CAINFO_BLOB(3)\fP
 .IP CURLOPT_ISSUERCERT
 Issuer certificate. See \fICURLOPT_ISSUERCERT(3)\fP
 .IP CURLOPT_ISSUERCERT_BLOB

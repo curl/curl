@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2020 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -37,7 +37,7 @@
 # 3. Run the cleanup script and let it sort the entries and remove unused
 # references from lines you removed in step (2):
 #
-# $ ./script/release-notes.pl cleanup
+# $ ./scripts/release-notes.pl cleanup
 #
 # 4. Reload RELEASE-NOTES and verify that things look okay. The cleanup
 # procedure can and should be re-run when lines are removed or rephrased.
@@ -110,8 +110,8 @@ for my $l (@gitlog) {
         if($line =~ /^Fixes(:|) .*[^0-9](\d+)/i) {
             push @fixes, $2;
         }
-        elsif($line =~ /^Closes(:|) .*[^0-9](\d+)/i) {
-            push @closes, $2;
+        elsif($line =~ /^Clo(s|)es(:|) .*[^0-9](\d+)/i) {
+            push @closes, $3;
         }
         elsif($line =~ /^Bug: (.*)/i) {
             push @bug, $1;

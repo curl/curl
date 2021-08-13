@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -61,7 +61,7 @@ freeing.
 The read callback function gets called by libcurl as soon as it needs to
 read data in order to send it to the peer - like if you ask it to upload or
 post data to the server. The data area pointed at by the pointer \fIbuffer\fP
-should be filled up with at most \fIsize\fP multiplied with \fInmemb\fP number
+should be filled up with at most \fIsize\fP multiplied with \fInitems\fP number
 of bytes by your function.
 
 Your read function must then return the actual number of bytes that it stored

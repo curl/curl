@@ -31,3 +31,11 @@ written as
 See also the --create-dirs option to create the local directories
 dynamically. Specifying the output as '-' (a single dash) will force the
 output to be done to stdout.
+
+To suppress response bodies, you can redirect output to /dev/null:
+
+  curl example.com -o /dev/null
+
+Or for Windows use nul:
+
+  curl example.com -o nul

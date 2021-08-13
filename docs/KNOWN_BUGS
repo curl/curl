@@ -58,6 +58,7 @@ problems may have been fixed or changed somewhat since this was written!
  5.9 Utilize Requires.private directives in libcurl.pc
  5.10 SMB tests fail with Python 2
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
+ 5.12 flaky Windows CI builds
 
  6. Authentication
  6.1 NTLM authentication and unicode
@@ -70,6 +71,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.8 RTSP authentication breaks without redirect support
  6.9 SHA-256 digest not supported in Windows SSPI builds
  6.10 curl never completes Negotiate over HTTP
+ 6.11 Negotiate on Windows fails
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -99,7 +101,6 @@ problems may have been fixed or changed somewhat since this was written!
  11. Internals
  11.1 Curl leaks .onion hostnames in DNS
  11.2 error buffer not set if connection to multiple addresses fails
- 11.3 c-ares deviates from stock resolver on http://1346569778
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
  11.6 slow connect to localhost on Windows
@@ -112,6 +113,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.13 wakeup socket disconnect causes havoc
  11.14 Multi perform hangs waiting for threaded resolver
  11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
+ 11.16 libcurl uses renames instead of locking for atomic operations
 
  12. LDAP
  12.1 OpenLDAP hangs after returning results
@@ -152,6 +154,9 @@ problems may have been fixed or changed somewhat since this was written!
  18.1 If the HTTP/3 server closes connection during upload curl hangs
  18.2 Uploading HTTP/3 files gets interrupted at certain file sizes
  18.3 HTTP/3 download is 5x times slower than HTTP/2
+ 18.4 Downloading with HTTP/3 produces broken files
+ 18.5 HTTP/3 download with quiche halts after a while
+ 18.6 HTTP/3 multipart POST with quiche fails
 
 ==============================================================================
 
@@ -501,6 +506,16 @@ problems may have been fixed or changed somewhat since this was written!
 
  https://github.com/curl/curl/issues/3841
 
+5.12 flaky Windows CI builds
+
+ We run many CI builds for each commit and PR on github, and especially a
+ number of the Windows builds are very flaky. This means that we rarely get
+ all CI builds go green and complete without errors. This is very unfortunate
+ as it makes us sometimes miss actual build problems and it is surprising to
+ newcomers to the project who (rightfully) don't expect this.
+
+ See https://github.com/curl/curl/issues/6972
+
 6. Authentication
 
 6.1 NTLM authentication and unicode
@@ -582,6 +597,15 @@ problems may have been fixed or changed somewhat since this was written!
  Apparently it isn't working correctly...?
 
  See https://github.com/curl/curl/issues/5235
+
+6.11 Negotiate on Windows fails
+
+ When using --negotiate (or NTLM) with curl on Windows, SSL/TSL handshake
+ fails despite having a valid kerberos ticket cached. Works without any issue
+ in Unix/Linux.
+
+ https://github.com/curl/curl/issues/5881
+
 
 7. FTP
 
@@ -748,18 +772,6 @@ problems may have been fixed or changed somewhat since this was written!
  CURLE_COULDNT_CONNECT. But the error buffer set by CURLOPT_ERRORBUFFER
  remains empty. Issue: https://github.com/curl/curl/issues/544
 
-11.3 c-ares deviates from stock resolver on http://1346569778
-
- When using the socket resolvers, that URL becomes:
-
-     * Rebuilt URL to: http://1346569778/
-     *   Trying 80.67.6.50...
-
- but with c-ares it instead says "Could not resolve: 1346569778 (Domain name
- not found)"
-
- See https://github.com/curl/curl/issues/893
-
 11.4 HTTP test server 'connection-monitor' problems
 
  The 'connection-monitor' feature of the sws HTTP test server doesn't work
@@ -867,6 +879,15 @@ problems may have been fixed or changed somewhat since this was written!
  address this issue is to introduce a CURLOPT_OPENSOCKETPAIRFUNCTION callback.
 
  https://github.com/curl/curl/issues/5747
+
+11.16 libcurl uses renames instead of locking for atomic operations
+
+ For saving cookies, alt-svc and hsts files. This is bad when for example the
+ file is stored in a directory where the application has no write permission
+ but it has permission for the file.
+
+ https://github.com/curl/curl/issues/6882
+ https://github.com/curl/curl/pull/6884
 
 12. LDAP
 
@@ -1053,3 +1074,15 @@ problems may have been fixed or changed somewhat since this was written!
 18.3 HTTP/3 download is 5x times slower than HTTP/2
 
  See https://github.com/curl/curl/issues/6494
+
+18.4 Downloading with HTTP/3 produces broken files
+
+ See https://github.com/curl/curl/issues/7351
+
+18.5 HTTP/3 download with quiche halts after a while
+
+ See https://github.com/curl/curl/issues/7339
+
+18.6 HTTP/3 multipart POST with quiche fails
+
+ https://github.com/curl/curl/issues/7125

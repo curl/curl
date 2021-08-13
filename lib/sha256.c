@@ -42,8 +42,9 @@
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
 
-#if(MBEDTLS_VERSION_NUMBER >= 0x02070000)
-  #define HAS_RESULT_CODE_BASED_FUNCTIONS
+#if(MBEDTLS_VERSION_NUMBER >= 0x02070000) && \
+   (MBEDTLS_VERSION_NUMBER < 0x03000000)
+  #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
 #endif
 #endif /* USE_MBEDTLS */
 
@@ -105,8 +106,8 @@ typedef mbedtls_sha256_context SHA256_CTX;
 
 static void SHA256_Init(SHA256_CTX *ctx)
 {
-#if !defined(HAS_RESULT_CODE_BASED_FUNCTIONS)
-  mbedtls_sha256_starts(ctx, 0);
+#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+  (void) mbedtls_sha256_starts(ctx, 0);
 #else
   (void) mbedtls_sha256_starts_ret(ctx, 0);
 #endif
@@ -116,8 +117,8 @@ static void SHA256_Update(SHA256_CTX *ctx,
                           const unsigned char *data,
                           unsigned int length)
 {
-#if !defined(HAS_RESULT_CODE_BASED_FUNCTIONS)
-  mbedtls_sha256_update(ctx, data, length);
+#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+  (void) mbedtls_sha256_update(ctx, data, length);
 #else
   (void) mbedtls_sha256_update_ret(ctx, data, length);
 #endif
@@ -125,8 +126,8 @@ static void SHA256_Update(SHA256_CTX *ctx,
 
 static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
 {
-#if !defined(HAS_RESULT_CODE_BASED_FUNCTIONS)
-  mbedtls_sha256_finish(ctx, digest);
+#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+  (void) mbedtls_sha256_finish(ctx, digest);
 #else
   (void) mbedtls_sha256_finish_ret(ctx, digest);
 #endif

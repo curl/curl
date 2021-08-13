@@ -22,7 +22,7 @@
 .\"
 .TH CURLOPT_DOH_SSL_VERIFYPEER 3 "11 Feb 2021" "libcurl 7.76.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_DOH_SSL_VERIFYPEER \- verify the DOH SSL certificate
+CURLOPT_DOH_SSL_VERIFYPEER \- verify the DoH SSL certificate
 .SH SYNOPSIS
 #include <curl/curl.h>
 
@@ -30,12 +30,12 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_SSL_VERIFYPEER, long verify)
 .SH DESCRIPTION
 Pass a long as parameter set to 1L to enable or 0L to disable.
 
-This option tells curl to verify the authenticity of the DOH (DNS-over-HTTPS)
+This option tells curl to verify the authenticity of the DoH (DNS-over-HTTPS)
 server's certificate. A value of 1 means curl verifies; 0 (zero) means it
 doesn't.
 
-This option is the DOH equivalent of \fICURLOPT_SSL_VERIFYPEER(3)\fP and
-only affects requests to the DOH server.
+This option is the DoH equivalent of \fICURLOPT_SSL_VERIFYPEER(3)\fP and
+only affects requests to the DoH server.
 
 When negotiating a TLS or SSL connection, the server sends a certificate
 indicating its identity. Curl verifies whether the certificate is authentic,
@@ -65,7 +65,7 @@ the correct end-point.
 .SH DEFAULT
 1
 .SH PROTOCOLS
-DOH
+DoH
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -74,7 +74,7 @@ if(curl) {
 
   curl_easy_setopt(curl, CURLOPT_DOH_URL, "https://cloudflare-dns.com/dns-query");
 
-  /* Disable certificate verification of the DOH server */
+  /* Disable certificate verification of the DoH server */
   curl_easy_setopt(curl, CURLOPT_DOH_SSL_VERIFYPEER, 0L);
 
   curl_easy_perform(curl);

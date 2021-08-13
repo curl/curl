@@ -177,12 +177,14 @@ that will be checked/used if specified.
 
 ### `<keywords>`
 A newline-separated list of keywords describing what this test case uses and
-tests. Try to use an already used keyword.  These keywords will be used for
-statistical/informational purposes and for choosing or skipping classes
-of tests.  "Keywords" must begin with an alphabetic character, "-", "["
-or "{" and may actually consist of multiple words separated by spaces
-which are treated together as a single identifier.
+tests. Try to use already used keywords.  These keywords will be used for
+statistical/informational purposes and for choosing or skipping classes of
+tests.  "Keywords" must begin with an alphabetic character, "-", "[" or "{"
+and may actually consist of multiple words separated by spaces which are
+treated together as a single identifier.
 
+When using curl built with Hyper, the keywords must include HTTP or HTTPS for
+'hyper mode' to kick in and make line ending checks work for tests.
 ## `<reply>`
 
 ### `<data [nocheck="yes"] [sendzero="yes"] [base64="yes"] [hex="yes"]>`
@@ -386,7 +388,6 @@ Features testable here are:
 - `ld_preload`
 - `libz`
 - `manual`
-- `Metalink`
 - `Mime`
 - `netrc`
 - `NSS`

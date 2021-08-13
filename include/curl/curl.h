@@ -74,8 +74,9 @@
 #if defined(_AIX) || defined(__NOVELL_LIBC__) || defined(__NetBSD__) || \
     defined(__minix) || defined(__SYMBIAN32__) || defined(__INTEGRITY) || \
     defined(ANDROID) || defined(__ANDROID__) || defined(__OpenBSD__) || \
-    defined(__CYGWIN__) || defined(AMIGA) || \
-   (defined(__FreeBSD_version) && (__FreeBSD_version < 800000))
+    defined(__CYGWIN__) || defined(AMIGA) || defined(__NuttX__) || \
+   (defined(__FreeBSD_version) && (__FreeBSD_version < 800000)) || \
+    defined(__VXWORKS__)
 #include <sys/select.h>
 #endif
 
@@ -541,7 +542,7 @@ typedef enum {
   CURLE_OBSOLETE46,              /* 46 - NOT USED */
   CURLE_TOO_MANY_REDIRECTS,      /* 47 - catch endless re-direct loops */
   CURLE_UNKNOWN_OPTION,          /* 48 - User specified an unknown option */
-  CURLE_TELNET_OPTION_SYNTAX,    /* 49 - Malformed telnet option */
+  CURLE_SETOPT_OPTION_SYNTAX,    /* 49 - Malformed setopt option */
   CURLE_OBSOLETE50,              /* 50 - NOT USED */
   CURLE_OBSOLETE51,              /* 51 - NOT USED */
   CURLE_GOT_NOTHING,             /* 52 - when this is a specific error */
@@ -635,6 +636,9 @@ typedef enum {
 
 /* The following were added in 7.21.5, April 2011 */
 #define CURLE_UNKNOWN_TELNET_OPTION CURLE_UNKNOWN_OPTION
+
+/* Added for 7.78.0 */
+#define CURLE_TELNET_OPTION_SYNTAX CURLE_SETOPT_OPTION_SYNTAX
 
 /* The following were added in 7.17.1 */
 /* These are scheduled to disappear by 2009 */
@@ -1466,8 +1470,8 @@ typedef enum {
 #define CURLOPT_SERVER_RESPONSE_TIMEOUT CURLOPT_FTP_RESPONSE_TIMEOUT
 
   /* Set this option to one of the CURL_IPRESOLVE_* defines (see below) to
-     tell libcurl to resolve names to those IP versions only. This only has
-     affect on systems with support for more than one, i.e IPv4 _and_ IPv6. */
+     tell libcurl to use those IP versions only. This only has effect on
+     systems with support for more than one, i.e IPv4 _and_ IPv6. */
   CURLOPT(CURLOPT_IPRESOLVE, CURLOPTTYPE_VALUES, 113),
 
   /* Set this option to limit the size of a file that will be downloaded from
@@ -2084,17 +2088,25 @@ typedef enum {
   /* Parameters for V4 signature */
   CURLOPT(CURLOPT_AWS_SIGV4, CURLOPTTYPE_STRINGPOINT, 305),
 
-  /* Same as CURLOPT_SSL_VERIFYPEER but for DOH (DNS-over-HTTPS) servers. */
+  /* Same as CURLOPT_SSL_VERIFYPEER but for DoH (DNS-over-HTTPS) servers. */
   CURLOPT(CURLOPT_DOH_SSL_VERIFYPEER, CURLOPTTYPE_LONG, 306),
 
-  /* Same as CURLOPT_SSL_VERIFYHOST but for DOH (DNS-over-HTTPS) servers. */
+  /* Same as CURLOPT_SSL_VERIFYHOST but for DoH (DNS-over-HTTPS) servers. */
   CURLOPT(CURLOPT_DOH_SSL_VERIFYHOST, CURLOPTTYPE_LONG, 307),
 
-  /* Same as CURLOPT_SSL_VERIFYSTATUS but for DOH (DNS-over-HTTPS) servers. */
+  /* Same as CURLOPT_SSL_VERIFYSTATUS but for DoH (DNS-over-HTTPS) servers. */
   CURLOPT(CURLOPT_DOH_SSL_VERIFYSTATUS, CURLOPTTYPE_LONG, 308),
 
+  /* The CA certificates as "blob" used to validate the peer certificate
+     this option is used only if SSL_VERIFYPEER is true */
+  CURLOPT(CURLOPT_CAINFO_BLOB, CURLOPTTYPE_BLOB, 309),
+
+  /* The CA certificates as "blob" used to validate the proxy certificate
+     this option is used only if PROXY_SSL_VERIFYPEER is true */
+  CURLOPT(CURLOPT_PROXY_CAINFO_BLOB, CURLOPTTYPE_BLOB, 310),
+
   /* Stream window size */
-  CURLOPT(CURLOPT_STREAM_WINDOW_SIZE, CURLOPTTYPE_LONG, 309),
+  CURLOPT(CURLOPT_STREAM_WINDOW_SIZE, CURLOPTTYPE_LONG, 311),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
@@ -2130,10 +2142,10 @@ typedef enum {
   /* Below here follows defines for the CURLOPT_IPRESOLVE option. If a host
      name resolves addresses using more than one IP protocol version, this
      option might be handy to force libcurl to use a specific IP version. */
-#define CURL_IPRESOLVE_WHATEVER 0 /* default, resolves addresses to all IP
+#define CURL_IPRESOLVE_WHATEVER 0 /* default, uses addresses to all IP
                                      versions that your system allows */
-#define CURL_IPRESOLVE_V4       1 /* resolve to IPv4 addresses */
-#define CURL_IPRESOLVE_V6       2 /* resolve to IPv6 addresses */
+#define CURL_IPRESOLVE_V4       1 /* uses only IPv4 addresses/connections */
+#define CURL_IPRESOLVE_V6       2 /* uses only IPv6 addresses/connections */
 
   /* three convenient "aliases" that follow the name scheme better */
 #define CURLOPT_RTSPHEADER CURLOPT_HTTPHEADER

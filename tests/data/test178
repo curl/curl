@@ -19,8 +19,11 @@ Funny-head: yesyes
 moooooooooooo
 </data>
 <datacheck>
+%if hyper
+%else
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
+%endif
 </datacheck>
 </reply>
 
@@ -48,8 +51,15 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
+
+# Hyper curl returns unsupported protocol
+# bullt-in curl returns weird_server_reply
 <errorcode>
+%if hyper
+1
+%else
 8
+%endif
 </errorcode>
 </verify>
 </testcase>

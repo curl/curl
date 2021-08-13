@@ -23,6 +23,9 @@
 #if defined(HAVE_STRCASECMP) && defined(HAVE_STRINGS_H)
 #include <strings.h>
 #endif
+#define ENABLE_CURLX_PRINTF
+/* use our own printf() functions */
+#include "curlx.h"
 
 #include "tool_panykey.h"
 #include "tool_help.h"
@@ -242,13 +245,13 @@ static const struct helptxt helptext[] = {
    "DNS server addrs to use",
    CURLHELP_DNS},
   {"    --doh-cert-status",
-   "Verify the status of the DOH server cert via OCSP-staple",
+   "Verify the status of the DoH server cert via OCSP-staple",
    CURLHELP_DNS | CURLHELP_TLS},
   {"    --doh-insecure",
-   "Allow insecure DOH server connections",
+   "Allow insecure DoH server connections",
    CURLHELP_DNS | CURLHELP_TLS},
   {"    --doh-url <URL>",
-   "Resolve host names over DOH",
+   "Resolve host names over DoH",
    CURLHELP_DNS},
   {"-D, --dump-header <filename>",
    "Write the received headers to <filename>",
@@ -502,7 +505,7 @@ static const struct helptxt helptext[] = {
   {"    --parallel-immediate",
    "Do not wait for multiplexing (with --parallel)",
    CURLHELP_CONNECTION | CURLHELP_CURL},
-  {"    --parallel-max",
+  {"    --parallel-max <num>",
    "Maximum concurrency for parallel transfers",
    CURLHELP_CONNECTION | CURLHELP_CURL},
   {"    --pass <phrase>",
@@ -628,7 +631,7 @@ static const struct helptxt helptext[] = {
   {"    --pubkey <key>",
    "SSH Public key file name",
    CURLHELP_SFTP | CURLHELP_SCP | CURLHELP_AUTH},
-  {"-Q, --quote",
+  {"-Q, --quote <command>",
    "Send command(s) to server before transfer",
    CURLHELP_FTP | CURLHELP_SFTP},
   {"    --random-file <file>",
@@ -658,7 +661,7 @@ static const struct helptxt helptext[] = {
   {"-X, --request <command>",
    "Specify request command to use",
    CURLHELP_CONNECTION},
-  {"    --request-target",
+  {"    --request-target <path>",
    "Specify the target for this request",
    CURLHELP_HTTP},
   {"    --resolve <[+]host:port:addr[,addr]...>",
@@ -784,7 +787,7 @@ static const struct helptxt helptext[] = {
   {"    --tlsauthtype <type>",
    "TLS authentication type",
    CURLHELP_TLS | CURLHELP_AUTH},
-  {"    --tlspassword",
+  {"    --tlspassword <string>",
    "TLS password",
    CURLHELP_TLS | CURLHELP_AUTH},
   {"    --tlsuser <name>",
@@ -849,10 +852,6 @@ static const struct helptxt helptext[] = {
    CURLHELP_MISC},
   { NULL, NULL, CURLHELP_HIDDEN }
 };
-
-#ifdef NETWARE
-#  define PRINT_LINES_PAUSE 23
-#endif
 
 struct feat {
   const char *name;
@@ -990,9 +989,6 @@ void tool_version_info(void)
       if(curlinfo->features & feats[i].bitmask)
         featp[numfeat++] = (char *)feats[i].name;
     }
-#ifdef USE_METALINK
-    featp[numfeat++] = (char *)"Metalink";
-#endif
     qsort(&featp[0], numfeat, sizeof(char *), featcomp);
     for(i = 0; i< numfeat; i++)
       printf(" %s", featp[i]);

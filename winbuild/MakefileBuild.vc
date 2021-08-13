@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -157,7 +157,11 @@ NGHTTP2_CFLAGS   = /DUSE_NGHTTP2 /I"$(NGHTTP2_INC_DIR)"
 NGHTTP2_LIBS     = nghttp2.lib
 !ELSEIF "$(WITH_NGHTTP2)"=="static"
 NGHTTP2_CFLAGS   = /DUSE_NGHTTP2 /DNGHTTP2_STATICLIB /I"$(NGHTTP2_INC_DIR)"
+!IF EXISTS("$(NGHTTP2_LIB_DIR)\nghttp2_static.lib")
 NGHTTP2_LIBS     = nghttp2_static.lib
+!ELSE
+NGHTTP2_LIBS     = nghttp2.lib
+!ENDIF
 !ENDIF
 
 

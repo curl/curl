@@ -11,7 +11,7 @@ ABI - Application Binary Interface
 
  A libcurl upgrade does not break the ABI or change established and documented
  behavior. Your application can remain using libcurl just as before, only with
- less bugs and possibly with added new features.
+ fewer bugs and possibly with added new features.
 
 ## Version Numbers
 

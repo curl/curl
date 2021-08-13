@@ -11,3 +11,5 @@ protocols, this option allows the user to set which 'mode' to set on the file
 at creation time, instead of the default 0644.
 
 This option takes an octal number as argument.
+
+If this option is used several times, the last one will be used.

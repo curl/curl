@@ -5,7 +5,7 @@ See-also: proto-redir proto-default
 Added: 7.20.2
 Category: connection curl
 ---
-Tells curl to limit what protocols it may use in the transfer. Protocols are
+Tells curl to limit what protocols it may use for transfers. Protocols are
 evaluated left to right, are comma separated, and are each a protocol name or
 \&'all', optionally prefixed by zero or more modifiers. Available modifiers are:
 .RS
@@ -35,7 +35,7 @@ only enables http and https
 .B --proto =http,https
 also only enables http and https
 .RE
-
+.IP
 Unknown protocols produce a warning. This allows scripts to safely rely on
 being able to disable potentially dangerous protocols, without relying upon
 support for that protocol being built into curl to avoid an error.

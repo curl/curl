@@ -246,6 +246,7 @@ struct ssl_primary_config {
   long version_max;      /* max supported version the client wants to use*/
   char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* certificate to verify peer against */
+  char *issuercert;      /* optional issuer certificate filename */
   char *clientcert;
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
@@ -253,6 +254,8 @@ struct ssl_primary_config {
   char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
   char *pinned_key;
   struct curl_blob *cert_blob;
+  struct curl_blob *ca_info_blob;
+  struct curl_blob *issuercert_blob;
   char *curves;          /* list of curves to use */
   BIT(verifypeer);       /* set TRUE if this is desired */
   BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
@@ -264,8 +267,6 @@ struct ssl_config_data {
   struct ssl_primary_config primary;
   long certverifyresult; /* result from the certificate verification */
   char *CRLfile;   /* CRL to check certificate revocation */
-  char *issuercert;/* optional issuer certificate filename */
-  struct curl_blob *issuercert_blob;
   curl_ssl_ctx_callback fsslctx; /* function to initialize ssl ctx */
   void *fsslctxp;        /* parameter for call back */
   char *cert_type; /* format for certificate (default: PEM)*/
@@ -507,7 +508,9 @@ struct ConnectBits {
   BIT(ftp_use_data_ssl); /* Enabled SSL for the data connection */
   BIT(ftp_use_control_ssl); /* Enabled SSL for the control connection */
 #endif
+#ifndef CURL_DISABLE_NETRC
   BIT(netrc);         /* name+password provided by netrc */
+#endif
   BIT(bound); /* set true if bind() has already been done on this socket/
                  connection */
   BIT(multiplex); /* connection is multiplexed */
@@ -793,12 +796,16 @@ struct Curl_handler {
                                    struct connectdata *conn,
                                    unsigned int checks_to_perform);
 
+  /* attach() attaches this transfer to this connection */
+  void (*attach)(struct Curl_easy *data, struct connectdata *conn);
+
   int defport;            /* Default port. */
   unsigned int protocol;  /* See CURLPROTO_* - this needs to be the single
                              specific protocol bit */
   unsigned int family;    /* single bit for protocol family; basically the
                              non-TLS name of the protocol this is */
   unsigned int flags;     /* Extra particular characteristics, see PROTOPT_* */
+
 };
 
 #define PROTOPT_NONE 0             /* nothing extra */
@@ -857,25 +864,8 @@ struct proxy_info {
   char *passwd;  /* proxy password string, allocated */
 };
 
-/* struct for HTTP CONNECT state data */
-struct http_connect_state {
-  struct dynbuf rcvbuf;
-  enum keeponval {
-    KEEPON_DONE,
-    KEEPON_CONNECT,
-    KEEPON_IGNORE
-  } keepon;
-  curl_off_t cl; /* size of content to read and ignore */
-  enum {
-    TUNNEL_INIT,    /* init/default/no tunnel state */
-    TUNNEL_CONNECT, /* CONNECT has been sent off */
-    TUNNEL_COMPLETE /* CONNECT response received completely */
-  } tunnel_state;
-  BIT(chunked_encoding);
-  BIT(close_connection);
-};
-
 struct ldapconninfo;
+struct http_connect_state;
 
 /* for the (SOCKS) connect state machine */
 enum connect_t {
@@ -1423,6 +1413,7 @@ struct UrlState {
   trailers_state trailers_state; /* whether we are sending trailers
                                        and what stage are we at */
 #ifdef USE_HYPER
+  bool hconnect;  /* set if a CONNECT request */
   CURLcode hresult; /* used to pass return codes back from hyper callbacks */
 #endif
 
@@ -1604,6 +1595,8 @@ enum dupblob {
   BLOB_KEY_PROXY,
   BLOB_SSL_ISSUERCERT,
   BLOB_SSL_ISSUERCERT_PROXY,
+  BLOB_CAINFO,
+  BLOB_CAINFO_PROXY,
   BLOB_LAST
 };
 
@@ -1719,8 +1712,8 @@ struct UserDefined {
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
   long dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
-  size_t upload_buffer_size; /* size of upload buffer to use,
-                                keep it >= CURL_MAX_WRITE_SIZE */
+  unsigned int upload_buffer_size; /* size of upload buffer to use,
+                                      keep it >= CURL_MAX_WRITE_SIZE */
   void *private_data; /* application-private data */
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
   unsigned char ipver; /* the CURL_IPRESOLVE_* defines in the public header
@@ -1736,8 +1729,10 @@ struct UserDefined {
                                */
   curl_sshkeycallback ssh_keyfunc; /* key matching callback */
   void *ssh_keyfunc_userp;         /* custom pointer to callback */
+#ifndef CURL_DISABLE_NETRC
   enum CURL_NETRC_OPTION
        use_netrc;        /* defined in include/curl.h */
+#endif
   curl_usessl use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                             IMAP or POP3 or others! */
   long new_file_perms;    /* Permissions to use when creating remote files */
@@ -1858,9 +1853,9 @@ struct UserDefined {
   BIT(disallow_username_in_url); /* disallow username in url */
   BIT(doh); /* DNS-over-HTTPS enabled */
   BIT(doh_get); /* use GET for DoH requests, instead of POST */
-  BIT(doh_verifypeer);     /* DOH certificate peer verification */
-  BIT(doh_verifyhost);     /* DOH certificate hostname verification */
-  BIT(doh_verifystatus);   /* DOH certificate status verification */
+  BIT(doh_verifypeer);     /* DoH certificate peer verification */
+  BIT(doh_verifyhost);     /* DoH certificate hostname verification */
+  BIT(doh_verifystatus);   /* DoH certificate status verification */
   BIT(http09_allowed); /* allow HTTP/0.9 responses */
   BIT(mail_rcpt_allowfails); /* allow RCPT TO command to fail for some
                                 recipients */

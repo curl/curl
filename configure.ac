@@ -163,7 +163,6 @@ curl_verbose_msg="enabled (--disable-verbose)"
   curl_ldaps_msg="no      (--enable-ldaps)"
    curl_rtsp_msg="no      (--enable-rtsp)"
    curl_rtmp_msg="no      (--with-librtmp)"
-  curl_mtlnk_msg="no      (--with-libmetalink)"
     curl_psl_msg="no      (--with-libpsl)"
  curl_altsvc_msg="enabled (--disable-alt-svc)"
    curl_hsts_msg="enabled (--disable-hsts)"
@@ -283,6 +282,9 @@ Select from these:
 ])
   fi
 fi
+
+AC_ARG_WITH(darwinssl,,
+  AC_MSG_ERROR([--with-darwin-ssl no longer works!]))
 
 dnl
 dnl Detect the canonical host and target build environment
@@ -479,6 +481,7 @@ CURL_CHECK_WIN32_LARGEFILE
 CURL_CHECK_WIN32_CRYPTO
 
 CURL_DARWIN_CFLAGS
+CURL_DARWIN_SYSTEMCONFIGURATION
 CURL_SUPPORTS_BUILTIN_AVAILABLE
 
 
@@ -552,6 +555,10 @@ AS_HELP_STRING([--disable-ldap],[Disable LDAP support]),
        AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
        AC_SUBST(CURL_DISABLE_LDAP, [1])
        ;;
+  yes)
+       ldap_askedfor="yes"
+       AC_MSG_RESULT(yes)
+       ;;
   *)
        AC_MSG_RESULT(yes)
        ;;
@@ -590,31 +597,127 @@ AS_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
        fi ]
 )
 
-AC_MSG_CHECKING([whether to support rtsp])
-AC_ARG_ENABLE(rtsp,
-AS_HELP_STRING([--enable-rtsp],[Enable RTSP support])
-AS_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
-[ case "$enableval" in
+dnl **********************************************************************
+dnl Check for Hyper
+dnl **********************************************************************
+
+OPT_HYPER="no"
+
+AC_ARG_WITH(hyper,
+AS_HELP_STRING([--with-hyper=PATH],[Enable hyper usage])
+AS_HELP_STRING([--without-hyper],[Disable hyper usage]),
+  [OPT_HYPER=$withval])
+case "$OPT_HYPER" in
   no)
+    dnl --without-hyper option used
+    want_hyper="no"
+    ;;
+  yes)
+    dnl --with-hyper option used without path
+    want_hyper="default"
+    want_hyper_path=""
+    ;;
+  *)
+    dnl --with-hyper option used with path
+    want_hyper="yes"
+    want_hyper_path="$withval"
+    ;;
+esac
+
+if test X"$want_hyper" != Xno; then
+  if test "x$disable_http" = "xyes"; then
+    AC_MSG_ERROR([--with-hyper is not compatible with --disable-http])
+  fi
+
+  dnl backup the pre-hyper variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  CURL_CHECK_PKGCONFIG(hyper, $want_hyper_path)
+
+  if test "$PKGCONFIG" != "no" ; then
+    LIB_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path])
+      $PKGCONFIG --libs-only-l hyper`
+    CPP_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path]) dnl
+      $PKGCONFIG --cflags-only-I hyper`
+    LD_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path])
+      $PKGCONFIG --libs-only-L hyper`
+  else
+    dnl no hyper pkg-config found
+    LIB_HYPER="-lhyper -ldl -lpthread -lm"
+    if test X"$want_hyper" != Xdefault; then
+      CPP_HYPER=-I"$want_hyper_path/capi/include"
+      LD_HYPER="-L$want_hyper_path/target/debug"
+    fi
+  fi
+  if test -n "$LIB_HYPER"; then
+    AC_MSG_NOTICE([-l is $LIB_HYPER])
+    AC_MSG_NOTICE([-I is $CPP_HYPER])
+    AC_MSG_NOTICE([-L is $LD_HYPER])
+
+    LDFLAGS="$LDFLAGS $LD_HYPER"
+    CPPFLAGS="$CPPFLAGS $CPP_HYPER"
+    LIBS="$LIB_HYPER $LIBS"
+
+    if test "x$cross_compiling" != "xyes"; then
+      DIR_HYPER=`echo $LD_HYPER | $SED -e 's/^-L//'`
+    fi
+
+    AC_CHECK_LIB(hyper, hyper_io_new,
+      [
+       AC_CHECK_HEADERS(hyper.h,
+          experimental="$experimental Hyper"
+          AC_MSG_NOTICE([Hyper support is experimental])
+          curl_h1_msg="enabled (Hyper)"
+          curl_h2_msg=$curl_h1_msg
+          HYPER_ENABLED=1
+          AC_DEFINE(USE_HYPER, 1, [if hyper is in use])
+          AC_SUBST(USE_HYPER, [1])
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_HYPER"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_HYPER to CURL_LIBRARY_PATH]),
+       )
+      ],
+      AC_MSG_ERROR([--with-hyper but hyper was not found. See docs/HYPER.md.])
+    )
+  fi
+fi
+
+if test X"$want_hyper" != Xno; then
+  AC_MSG_NOTICE([Disable RTSP support with hyper])
+  AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
+  AC_SUBST(CURL_DISABLE_RTSP, [1])
+
+else
+
+  AC_MSG_CHECKING([whether to support rtsp])
+  AC_ARG_ENABLE(rtsp,
+  AS_HELP_STRING([--enable-rtsp],[Enable RTSP support])
+  AS_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
+  [ case "$enableval" in
+    no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
        AC_SUBST(CURL_DISABLE_RTSP, [1])
        ;;
-  *)   if test x$CURL_DISABLE_HTTP = x1 ; then
-          AC_MSG_ERROR(HTTP support needs to be enabled in order to enable RTSP support!)
+    *)
+       if test x$CURL_DISABLE_HTTP = x1 ; then
+         AC_MSG_ERROR(HTTP support needs to be enabled in order to enable RTSP support!)
        else
-          AC_MSG_RESULT(yes)
-          curl_rtsp_msg="enabled"
+         AC_MSG_RESULT(yes)
+         curl_rtsp_msg="enabled"
        fi
        ;;
-  esac ],
+    esac ],
        if test "x$CURL_DISABLE_HTTP" != "x1"; then
           AC_MSG_RESULT(yes)
           curl_rtsp_msg="enabled"
        else
           AC_MSG_RESULT(no)
        fi
-)
+  )
+fi
 
 AC_MSG_CHECKING([whether to support proxies])
 AC_ARG_ENABLE(proxy,
@@ -1356,6 +1459,9 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
 
   if test "$LDAPLIBNAME" ; then
     AC_CHECK_LIB("$LDAPLIBNAME", ldap_init,, [
+      if test -n "$ldap_askedfor"; then
+        AC_MSG_ERROR([couldn't detect the LDAP libraries])
+      fi
       AC_MSG_WARN(["$LDAPLIBNAME" is not an LDAP library: LDAP disabled])
       AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
       AC_SUBST(CURL_DISABLE_LDAP, [1])
@@ -1366,6 +1472,9 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
     CURL_CHECK_LIBS_LDAP
     case X-"$curl_cv_ldap_LIBS" in
       X-unknown)
+        if test -n "$ldap_askedfor"; then
+          AC_MSG_ERROR([couldn't detect the LDAP libraries])
+        fi
         AC_MSG_WARN([Cannot find libraries for LDAP support: LDAP disabled])
         AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
         AC_SUBST(CURL_DISABLE_LDAP, [1])
@@ -1839,99 +1948,8 @@ if test $with_libgsasl != "no"; then
 fi
 AM_CONDITIONAL([USE_GSASL], [test "$curl_gsasl_msg" = "enabled"])
 
-dnl **********************************************************************
-dnl Check for libmetalink
-dnl **********************************************************************
-
-OPT_LIBMETALINK=no
-
-AC_ARG_WITH(libmetalink,dnl
-AS_HELP_STRING([--with-libmetalink=PATH],[where to look for libmetalink, PATH points to the installation root])
-AS_HELP_STRING([--without-libmetalink], [disable libmetalink detection]),
-  OPT_LIBMETALINK=$withval)
-
-if test X"$OPT_LIBMETALINK" != Xno; then
-
-  addld=""
-  addlib=""
-  addcflags=""
-  version=""
-  libmetalinklib=""
-
-  PKGTEST="no"
-  if test "x$OPT_LIBMETALINK" = "xyes"; then
-    dnl this is with no partiular path given
-    PKGTEST="yes"
-    CURL_CHECK_PKGCONFIG(libmetalink)
-  else
-    dnl When particular path is given, set PKG_CONFIG_LIBDIR using the path.
-    LIBMETALINK_PCDIR="$OPT_LIBMETALINK/lib/pkgconfig"
-    AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$LIBMETALINK_PCDIR"])
-    if test -f "$LIBMETALINK_PCDIR/libmetalink.pc"; then
-      PKGTEST="yes"
-    fi
-    if test "$PKGTEST" = "yes"; then
-      CURL_CHECK_PKGCONFIG(libmetalink, [$LIBMETALINK_PCDIR])
-    fi
-  fi
-  if test "$PKGTEST" = "yes" && test "$PKGCONFIG" != "no"; then
-    addlib=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
-      $PKGCONFIG --libs-only-l libmetalink`
-    addld=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
-      $PKGCONFIG --libs-only-L libmetalink`
-    addcflags=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
-      $PKGCONFIG --cflags-only-I libmetalink`
-    version=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
-      $PKGCONFIG --modversion libmetalink`
-    libmetalinklib=`echo $addld | $SED -e 's/^-L//'`
-  fi
-  if test -n "$addlib"; then
-
-    clean_CPPFLAGS="$CPPFLAGS"
-    clean_LDFLAGS="$LDFLAGS"
-    clean_LIBS="$LIBS"
-    CPPFLAGS="$clean_CPPFLAGS $addcflags"
-    LDFLAGS="$clean_LDFLAGS $addld"
-    LIBS="$addlib $clean_LIBS"
-    AC_MSG_CHECKING([if libmetalink is recent enough])
-    AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-#       include <metalink/metalink.h>
-      ]],[[
-        if(0 != metalink_strerror(0)) /* added in 0.1.0 */
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes ($version)])
-      want_metalink="yes"
-    ],[
-      AC_MSG_RESULT([no ($version)])
-      AC_MSG_NOTICE([libmetalink library defective or too old])
-      want_metalink="no"
-    ])
-    if test "x$OPENSSL_ENABLED" != "x1" -a "x$USE_WINDOWS_SSPI" != "x1" \
-        -a "x$GNUTLS_ENABLED" != "x1" -a "x$NSS_ENABLED" != "x1" \
-        -a "x$SECURETRANSPORT_ENABLED" != "x1"; then
-      AC_MSG_WARN([metalink support requires a compatible SSL/TLS backend])
-      want_metalink="no"
-    fi
-    CPPFLAGS="$clean_CPPFLAGS"
-    LDFLAGS="$clean_LDFLAGS"
-    LIBS="$clean_LIBS"
-    if test "$want_metalink" = "yes"; then
-      dnl finally libmetalink will be used
-      AC_DEFINE(USE_METALINK, 1, [Define to enable metalink support])
-      LIBMETALINK_LIBS=$addlib
-      LIBMETALINK_LDFLAGS=$addld
-      LIBMETALINK_CPPFLAGS=$addcflags
-      AC_SUBST([LIBMETALINK_LIBS])
-      AC_SUBST([LIBMETALINK_LDFLAGS])
-      AC_SUBST([LIBMETALINK_CPPFLAGS])
-      curl_mtlnk_msg="enabled"
-    fi
-
-  fi
-fi
+AC_ARG_WITH(libmetalink,,
+  AC_MSG_ERROR([--with-libmetalink no longer works!]))
 
 dnl **********************************************************************
 dnl Check for the presence of LIBSSH2 libraries and headers
@@ -2875,6 +2893,11 @@ case "$OPT_QUICHE" in
 esac
 
 if test X"$want_quiche" != Xno; then
+
+  if test "$NGHTTP3_ENABLED" = 1; then
+    AC_MSG_ERROR([--with-quiche and --with-ngtcp2 are mutually exclusive])
+  fi
+
   dnl backup the pre-quiche variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
@@ -2915,6 +2938,11 @@ if test X"$want_quiche" != Xno; then
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_QUICHE"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_QUICHE to CURL_LIBRARY_PATH]),
+          [],
+          [
+AC_INCLUDES_DEFAULT
+#include <sys/socket.h>
+          ]
        )
       ],
         dnl not found, revert back to clean variables
@@ -2929,94 +2957,6 @@ if test X"$want_quiche" != Xno; then
     fi
   fi
 fi
-
-dnl **********************************************************************
-dnl Check for Hyper
-dnl **********************************************************************
-
-OPT_HYPER="no"
-
-AC_ARG_WITH(hyper,
-AS_HELP_STRING([--with-hyper=PATH],[Enable hyper usage])
-AS_HELP_STRING([--without-hyper],[Disable hyper usage]),
-  [OPT_HYPER=$withval])
-case "$OPT_HYPER" in
-  no)
-    dnl --without-hyper option used
-    want_hyper="no"
-    ;;
-  yes)
-    dnl --with-hyper option used without path
-    want_hyper="default"
-    want_hyper_path=""
-    ;;
-  *)
-    dnl --with-hyper option used with path
-    want_hyper="yes"
-    want_hyper_path="$withval"
-    ;;
-esac
-
-if test X"$want_hyper" != Xno; then
-  if test "x$disable_http" = "xyes"; then
-    AC_MSG_ERROR([--with-hyper is not compatible with --disable-http])
-  fi
-
-  dnl backup the pre-hyper variables
-  CLEANLDFLAGS="$LDFLAGS"
-  CLEANCPPFLAGS="$CPPFLAGS"
-  CLEANLIBS="$LIBS"
-
-  CURL_CHECK_PKGCONFIG(hyper, $want_hyper_path)
-
-  if test "$PKGCONFIG" != "no" ; then
-    LIB_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path])
-      $PKGCONFIG --libs-only-l hyper`
-    CPP_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path]) dnl
-      $PKGCONFIG --cflags-only-I hyper`
-    LD_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path])
-      $PKGCONFIG --libs-only-L hyper`
-  else
-    dnl no hyper pkg-config found
-    LIB_HYPER="-lhyper -ldl -lpthread -lm"
-    if test X"$want_hyper" != Xdefault; then
-      CPP_HYPER=-I"$want_hyper_path/capi/include"
-      LD_HYPER="-L$want_hyper_path/target/debug"
-    fi
-  fi
-  if test -n "$LIB_HYPER"; then
-    AC_MSG_NOTICE([-l is $LIB_HYPER])
-    AC_MSG_NOTICE([-I is $CPP_HYPER])
-    AC_MSG_NOTICE([-L is $LD_HYPER])
-
-    LDFLAGS="$LDFLAGS $LD_HYPER"
-    CPPFLAGS="$CPPFLAGS $CPP_HYPER"
-    LIBS="$LIB_HYPER $LIBS"
-
-    if test "x$cross_compiling" != "xyes"; then
-      DIR_HYPER=`echo $LD_HYPER | $SED -e 's/^-L//'`
-    fi
-
-    AC_CHECK_LIB(hyper, hyper_io_new,
-      [
-       AC_CHECK_HEADERS(hyper.h,
-          experimental="$experimental Hyper"
-          AC_MSG_NOTICE([Hyper support is experimental])
-          curl_h1_msg="enabled (Hyper)"
-          curl_h2_msg=$curl_h1_msg
-          HYPER_ENABLED=1
-          AC_DEFINE(USE_HYPER, 1, [if hyper is in use])
-          AC_SUBST(USE_HYPER, [1])
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_HYPER"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_HYPER to CURL_LIBRARY_PATH]),
-       )
-      ],
-      AC_MSG_ERROR([--with-hyper but hyper was not found. See docs/HYPER.md.])
-    )
-  fi
-fi
-
 
 dnl **********************************************************************
 dnl Check for zsh completion path
@@ -3101,7 +3041,6 @@ AC_CHECK_HEADERS(
         sys/param.h \
         termios.h \
         termio.h \
-        sgtty.h \
         fcntl.h \
         alloca.h \
         io.h \
@@ -3270,8 +3209,6 @@ TYPE_IN_ADDR_T
 
 TYPE_SOCKADDR_STORAGE
 
-TYPE_SIG_ATOMIC_T
-
 CURL_CHECK_FUNC_SELECT
 
 CURL_CHECK_FUNC_RECV
@@ -3285,13 +3222,9 @@ CURL_CHECK_FUNC_CLOSESOCKET_CAMEL
 CURL_CHECK_FUNC_CONNECT
 CURL_CHECK_FUNC_FCNTL
 CURL_CHECK_FUNC_FREEADDRINFO
-CURL_CHECK_FUNC_FREEIFADDRS
 CURL_CHECK_FUNC_FSETXATTR
 CURL_CHECK_FUNC_FTRUNCATE
 CURL_CHECK_FUNC_GETADDRINFO
-CURL_CHECK_FUNC_GAI_STRERROR
-CURL_CHECK_FUNC_GETHOSTBYADDR
-CURL_CHECK_FUNC_GETHOSTBYADDR_R
 CURL_CHECK_FUNC_GETHOSTBYNAME
 CURL_CHECK_FUNC_GETHOSTBYNAME_R
 CURL_CHECK_FUNC_GETHOSTNAME
@@ -3299,9 +3232,7 @@ CURL_CHECK_FUNC_GETPEERNAME
 CURL_CHECK_FUNC_GETSOCKNAME
 CURL_CHECK_FUNC_IF_NAMETOINDEX
 CURL_CHECK_FUNC_GETIFADDRS
-CURL_CHECK_FUNC_GETSERVBYPORT_R
 CURL_CHECK_FUNC_GMTIME_R
-CURL_CHECK_FUNC_INET_NTOA_R
 CURL_CHECK_FUNC_INET_NTOP
 CURL_CHECK_FUNC_INET_PTON
 CURL_CHECK_FUNC_IOCTL
@@ -3629,6 +3560,25 @@ AS_HELP_STRING([--disable-crypto-auth],[Disable cryptographic authentication]),
        AC_MSG_RESULT(yes)
 )
 
+dnl ************************************************************
+dnl disable NTLM support
+dnl
+AC_MSG_CHECKING([whether to support NTLM])
+AC_ARG_ENABLE(ntlm,
+AS_HELP_STRING([--enable-ntlm],[Enable NTLM support])
+AS_HELP_STRING([--disable-ntlm],[Disable NTLM support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_NTLM, 1, [to disable NTLM support])
+       CURL_DISABLE_NTLM=1
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
 CURL_CHECK_OPTION_NTLM_WB
 
 CURL_CHECK_NTLM_WB
@@ -3858,7 +3808,7 @@ dnl ************************************************************
 dnl disable the curl_easy_options API
 dnl
 AC_MSG_CHECKING([whether to support curl_easy_option*])
-AC_ARG_ENABLE(get-easy-option,
+AC_ARG_ENABLE(get-easy-options,
 AS_HELP_STRING([--enable-get-easy-options],[Enable curl_easy_options])
 AS_HELP_STRING([--disable-get-easy-options],[Disable curl_easy_options]),
 [ case "$enableval" in
@@ -4058,7 +4008,8 @@ fi
 
 use_curl_ntlm_core=no
 
-if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
+if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
+    "x$CURL_DISABLE_NTLM" != "x1"; then
   if test "x$OPENSSL_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
       -o "x$SECURETRANSPORT_ENABLED" = "x1" \
@@ -4303,7 +4254,6 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   LDAPS:            ${curl_ldaps_msg}
   RTSP:             ${curl_rtsp_msg}
   RTMP:             ${curl_rtmp_msg}
-  Metalink:         ${curl_mtlnk_msg}
   PSL:              ${curl_psl_msg}
   Alt-svc:          ${curl_altsvc_msg}
   HSTS:             ${curl_hsts_msg}

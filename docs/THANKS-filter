@@ -125,3 +125,4 @@ s/wangp on github/Peter Wang/
 s# *autobuild https://.*##
 s/William A Rowe Jr/William A. Rowe Jr/
 s/jonrumsey on github/Jon Rumsey/
+s/Travis Burtrum on github//

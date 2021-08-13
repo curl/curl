@@ -104,7 +104,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 
   ai = Curl_ipv4_resolve_r(hostname, port);
   if(!ai)
-    infof(data, "Curl_ipv4_resolve_r failed for %s\n", hostname);
+    infof(data, "Curl_ipv4_resolve_r failed for %s", hostname);
 
   return ai;
 }

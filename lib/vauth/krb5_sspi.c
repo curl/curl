@@ -173,7 +173,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
 
   if(chlg) {
     if(!Curl_bufref_len(chlg)) {
-      infof(data, "GSSAPI handshake failure (empty challenge message)\n");
+      infof(data, "GSSAPI handshake failure (empty challenge message)");
       return CURLE_BAD_CONTENT_ENCODING;
     }
 
@@ -270,9 +270,13 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   SECURITY_STATUS status;
   char *user_name;
 
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void) data;
+#endif
+
   /* Ensure we have a valid challenge message */
   if(!Curl_bufref_len(chlg)) {
-    infof(data, "GSSAPI handshake failure (empty security message)\n");
+    infof(data, "GSSAPI handshake failure (empty security message)");
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
@@ -312,13 +316,13 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   /* Decrypt the inbound challenge and obtain the qop */
   status = s_pSecFn->DecryptMessage(krb5->context, &input_desc, 0, &qop);
   if(status != SEC_E_OK) {
-    infof(data, "GSSAPI handshake failure (empty security message)\n");
+    infof(data, "GSSAPI handshake failure (empty security message)");
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
   /* Not 4 octets long so fail as per RFC4752 Section 3.1 */
   if(input_buf[1].cbBuffer != 4) {
-    infof(data, "GSSAPI handshake failure (invalid security data)\n");
+    infof(data, "GSSAPI handshake failure (invalid security data)");
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
@@ -329,7 +333,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   /* Extract the security layer */
   sec_layer = indata & 0x000000FF;
   if(!(sec_layer & KERB_WRAP_NO_ENCRYPT)) {
-    infof(data, "GSSAPI handshake failure (invalid security layer)\n");
+    infof(data, "GSSAPI handshake failure (invalid security layer)");
     return CURLE_BAD_CONTENT_ENCODING;
   }
 

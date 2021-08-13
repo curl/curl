@@ -12,9 +12,9 @@ libcurl bindings
 
 [Ada95](https://web.archive.org/web/20070403105909/www.almroth.com/adacurl/index.html) Written by Andreas Almroth
 
-[Basic](http://scriptbasic.com/) ScriptBasic bindings written by Peter Verhas
+[Basic](https://scriptbasic.com/) ScriptBasic bindings written by Peter Verhas
 
-C++: [curlpp](http://curlpp.org/) Written by Jean-Philippe Barrette-LaPierre,
+C++: [curlpp](https://curlpp.org/) Written by Jean-Philippe Barrette-LaPierre,
 [curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and [C++
 Requests](https://github.com/whoshuu/cpr) by Huu Nguyen
 
@@ -45,7 +45,7 @@ Clojure: [clj-curl](https://github.com/lsevero/clj-curl) by Lucas Severo
 
 Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
-[Guile](http://www.lonelycactus.com/guile-curl.html) Written by Michael L. Gran
+[Guile](https://www.lonelycactus.com/guile-curl.html) Written by Michael L. Gran
 
 [Harbour](https://github.com/vszakats/harbour-core/tree/master/contrib/hbcurl) Written by Viktor Szakáts
 
@@ -59,7 +59,7 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 [Lisp](https://common-lisp.net/project/cl-curl/) Written by Liam Healy
 
-Lua: [luacurl](http://luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](https://github.com/Lua-cURL) by Jürgen Hötzel
+Lua: [luacurl](https://web.archive.org/web/20201205052437/luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](https://github.com/Lua-cURL) by Jürgen Hötzel
 
 [Mono](https://forge.novell.com/modules/xfmod/project/?libcurl-mono) Written by Jeffrey Phillips
 
@@ -100,13 +100,13 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford
 
 [Rust](https://github.com/carllerche/curl-rust) curl-rust - by Carl Lerche
 
-[Scheme](https://www.metapaper.net/lisovsky/web/curl/) Bigloo binding by Kirill Lisovsky
+[Scheme](http://www.metapaper.net/lisovsky/web/curl/) Bigloo binding by Kirill Lisovsky
 
 [Scilab](https://help.scilab.org/docs/current/fr_FR/getURL.html) binding by Sylvestre Ledru
 
 [S-Lang](https://www.jedsoft.org/slang/modules/curl.html) by John E Davis
 
-[Smalltalk](http://www.squeaksource.com/CurlPlugin/) Written by Danil Osipchuk
+[Smalltalk](https://www.squeaksource.com/CurlPlugin/) Written by Danil Osipchuk
 
 [SP-Forth](https://sourceforge.net/p/spf/spf/ci/master/tree/devel/~ac/lib/lin/curl/) Written by Andrey Cherezov
 

@@ -86,7 +86,6 @@
 #elif defined(USE_MBEDTLS)
 
 #  include <mbedtls/des.h>
-#  include "curl_md4.h"
 
 #elif defined(USE_SECTRANSP)
 
@@ -498,17 +497,14 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
    * network encoding not the host encoding.
    */
   result = Curl_convert_to_network(data, (char *)pw, len * 2);
-  if(result)
-    return result;
-
-  /* Create NT hashed password. */
-  Curl_md4it(ntbuffer, pw, 2 * len);
-
-  memset(ntbuffer + 16, 0, 21 - 16);
-
+  if(!result) {
+    /* Create NT hashed password. */
+    Curl_md4it(ntbuffer, pw, 2 * len);
+    memset(ntbuffer + 16, 0, 21 - 16);
+  }
   free(pw);
 
-  return CURLE_OK;
+  return result;
 }
 
 #if defined(USE_NTLM_V2) && !defined(USE_WINDOWS_SSPI)

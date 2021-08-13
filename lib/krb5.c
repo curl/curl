@@ -263,7 +263,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
     }
     /* We pass NULL as |output_name_type| to avoid a leak. */
     gss_display_name(&min, gssname, &output_buffer, NULL);
-    Curl_infof(data, "Trying against %s\n", output_buffer.value);
+    infof(data, "Trying against %s", output_buffer.value);
     gssresp = GSS_C_NO_BUFFER;
     *context = GSS_C_NO_CONTEXT;
 
@@ -290,7 +290,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
       }
 
       if(GSS_ERROR(maj)) {
-        Curl_infof(data, "Error creating security context\n");
+        infof(data, "Error creating security context");
         ret = AUTH_ERROR;
         break;
       }
@@ -301,8 +301,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
         result = Curl_base64_encode(data, (char *)output_buffer.value,
                                     output_buffer.length, &p, &base64_sz);
         if(result) {
-          Curl_infof(data, "base64-encoding: %s\n",
-                     curl_easy_strerror(result));
+          infof(data, "base64-encoding: %s", curl_easy_strerror(result));
           ret = AUTH_ERROR;
           break;
         }
@@ -327,7 +326,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
         }
 
         if(data->state.buffer[0] != '2' && data->state.buffer[0] != '3') {
-          Curl_infof(data, "Server didn't accept auth data\n");
+          infof(data, "Server didn't accept auth data");
           ret = AUTH_ERROR;
           break;
         }
@@ -629,7 +628,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
 
       socket_write(data, fd, cmd_buffer, cmd_size);
       socket_write(data, fd, "\r\n", 2);
-      infof(data, "Send: %s%s\n", prot_level == PROT_PRIVATE?enc:mic,
+      infof(data, "Send: %s%s", prot_level == PROT_PRIVATE?enc:mic,
             cmd_buffer);
       free(cmd_buffer);
     }
@@ -738,7 +737,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
 
   if(!conn->sec_complete) {
     infof(data, "Trying to change the protection level after the"
-                " completion of the data exchange.\n");
+                " completion of the data exchange.");
     return -1;
   }
 
@@ -815,13 +814,13 @@ static CURLcode choose_mech(struct Curl_easy *data, struct connectdata *conn)
   if(mech->init) {
     ret = mech->init(conn->app_data);
     if(ret) {
-      infof(data, "Failed initialization for %s. Skipping it.\n",
+      infof(data, "Failed initialization for %s. Skipping it.",
             mech->name);
       return CURLE_FAILED_INIT;
     }
   }
 
-  infof(data, "Trying mechanism %s...\n", mech->name);
+  infof(data, "Trying mechanism %s...", mech->name);
   ret = ftp_send_command(data, "AUTH %s", mech->name);
   if(ret < 0)
     return CURLE_COULDNT_CONNECT;
@@ -830,15 +829,15 @@ static CURLcode choose_mech(struct Curl_easy *data, struct connectdata *conn)
     switch(ret) {
     case 504:
       infof(data, "Mechanism %s is not supported by the server (server "
-            "returned ftp code: 504).\n", mech->name);
+            "returned ftp code: 504).", mech->name);
       break;
     case 534:
       infof(data, "Mechanism %s was rejected by the server (server returned "
-            "ftp code: 534).\n", mech->name);
+            "ftp code: 534).", mech->name);
       break;
     default:
       if(ret/100 == 5) {
-        infof(data, "server does not support the security extensions\n");
+        infof(data, "server does not support the security extensions");
         return CURLE_USE_SSL_FAILED;
       }
       break;

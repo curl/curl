@@ -17,7 +17,7 @@ to individuals.
 Before posting to one of the curl mailing lists, please read up on the
 [mailing list etiquette](https://curl.se/mail/etiquette.html).
 
-We also hang out on IRC in #curl on irc.freenode.net
+We also hang out on IRC in #curl on libera.chat
 
 If you're at all interested in the code side of things, consider clicking
 'watch' on the [curl repo on GitHub](https://github.com/curl/curl) to be
@@ -151,7 +151,7 @@ changes merged.
 
 We strongly prefer pull requests to mailed patches, as it makes it a proper
 git commit that is easy to merge and they are easy to track and not that easy
-to loose in the flood of many emails, like they sometimes do on the mailing
+to lose in the flood of many emails, like they sometimes do on the mailing
 lists.
 
 Every pull request submitted will automatically be tested in several different
@@ -185,7 +185,6 @@ Consider the following table while looking at pull request failures:
  | LGTM analysis:  C/C++               | stable | new findings               |
  | buildbot/curl_winssl_ ...           | stable | all errors and failures    |
  | continuous-integration/appveyor/pr  | stable | all errors and failures    |
- | continuous-integration/travis-ci/pr | stable | all errors and failures    |
  | curl.curl (linux ...)               | stable | all errors and failures    |
  | curl.curl (windows ...)             | flaky  | repetitive errors/failures |
  | deepcode-ci-bot                     | stable | new findings               |
@@ -304,4 +303,4 @@ For Windows:
  - [https://gnuwin32.sourceforge.io/packages/diffutils.htm](https://gnuwin32.sourceforge.io/packages/diffutils.htm)
 
 ### Useful resources
-* [Webinar on getting code into cURL](https://www.youtube.com/watch?v=QmZ3W1d6LQI)
+ - [Webinar on getting code into cURL](https://www.youtube.com/watch?v=QmZ3W1d6LQI)

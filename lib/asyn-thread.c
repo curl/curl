@@ -701,24 +701,9 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
   *waitp = 0; /* default to synchronous response */
 
 #ifdef CURLRES_IPV6
-  /*
-   * Check if a limited name resolve has been requested.
-   */
-  switch(data->set.ipver) {
-  case CURL_IPRESOLVE_V4:
-    pf = PF_INET;
-    break;
-  case CURL_IPRESOLVE_V6:
-    pf = PF_INET6;
-    break;
-  default:
+  if(Curl_ipv6works(data))
+    /* The stack seems to be IPv6-enabled */
     pf = PF_UNSPEC;
-    break;
-  }
-
-  if((pf != PF_INET) && !Curl_ipv6works(data))
-    /* The stack seems to be a non-IPv6 one */
-    pf = PF_INET;
 #endif /* CURLRES_IPV6 */
 
   memset(&hints, 0, sizeof(hints));

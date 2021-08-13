@@ -10,7 +10,7 @@ For HTTP protocol family, this lets curl emulate a filled-in form in which a
 user has pressed the submit button. This causes curl to POST data using the
 Content-Type multipart/form-data according to RFC 2388.
 
-For SMTP and IMAP protocols, this is the mean to compose a multipart mail
+For SMTP and IMAP protocols, this is the means to compose a multipart mail
 message to transmit.
 
 This enables uploading of binary files etc. To force the 'content' part to be
@@ -59,11 +59,11 @@ filename=, like this:
 
 If filename/path contains ',' or ';', it must be quoted by double-quotes like:
 
- curl -F "file=@\\"localfile\\";filename=\\"nameinpost\\"" example.com
+ curl -F "file=@\\"local,file\\";filename=\\"name;in;post\\"" example.com
 
 or
 
- curl -F 'file=@"localfile";filename="nameinpost"' example.com
+ curl -F 'file=@"local,file";filename="name;in;post"' example.com
 
 Note that if a filename/path is quoted by double-quotes, any double-quote
 or backslash within the filename must be escaped by backslash.

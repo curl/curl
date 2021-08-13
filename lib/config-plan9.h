@@ -54,13 +54,6 @@
 #define SIZEOF_TIME_T 4
 #endif
 
-#define HAVE_GETNAMEINFO 1
-#define GETNAMEINFO_QUAL_ARG1 const
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-#define GETNAMEINFO_TYPE_ARG2 int
-#define GETNAMEINFO_TYPE_ARG46 long
-#define GETNAMEINFO_TYPE_ARG7 int
-
 #define HAVE_RECV 1
 #define RECV_TYPE_ARG1 int
 #define RECV_TYPE_ARG2 void *
@@ -103,13 +96,10 @@
 #define HAVE_ERRNO_H 1
 #define HAVE_FCNTL 1
 #define HAVE_FCNTL_H 1
-#define HAVE_FDOPEN 1
-#define HAVE_FORK 1
 #define HAVE_FREEADDRINFO 1
 #define HAVE_FTRUNCATE 1
 #define HAVE_GETADDRINFO 1
 #define HAVE_GETEUID 1
-#define HAVE_GETHOSTBYADDR 1
 #define HAVE_GETHOSTBYNAME 1
 #define HAVE_GETHOSTNAME 1
 #define HAVE_GETPPID 1
@@ -143,7 +133,6 @@
 #define HAVE_OPENSSL_SSL_H 1
 #define HAVE_OPENSSL_X509_H 1
 
-#define HAVE_PERROR 1
 #define HAVE_PIPE 1
 #define HAVE_POLL 1
 #define HAVE_POLL_FINE 1
@@ -160,7 +149,6 @@
 #define HAVE_SIGNAL 1
 #define HAVE_SIGNAL_H 1
 #define HAVE_SIGSETJMP 1
-#define HAVE_SIG_ATOMIC_T 1
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
 #define HAVE_SOCKET 1
 #define HAVE_SSL_GET_SHUTDOWN 1

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -472,7 +472,7 @@ CURLcode glob_url(struct URLGlob **glob, char *url, unsigned long *urlnum,
       if(glob_expand->pos) {
         msnprintf(text, sizeof(text), "%s in URL position %zu:\n%s\n%*s^",
                   glob_expand->error,
-                  glob_expand->pos, url, glob_expand->pos - 1, " ");
+                  glob_expand->pos, url, (int)glob_expand->pos - 1, " ");
         t = text;
       }
       else

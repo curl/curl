@@ -36,14 +36,8 @@
 /* Define if you have the <assert.h> header file.  */
 /* #define HAVE_ASSERT_H 1 */
 
-/* Define if you have the <crypto.h> header file.  */
-/* #define HAVE_CRYPTO_H 1 */
-
 /* Define if you have the <errno.h> header file.  */
 /* #define HAVE_ERRNO_H 1 */
-
-/* Define if you have the <err.h> header file.  */
-/* #define HAVE_ERR_H 1 */
 
 /* Define if you have the <fcntl.h> header file.  */
 #define HAVE_FCNTL_H 1
@@ -54,7 +48,7 @@
 /* Define if you have the <io.h> header file.  */
 #define HAVE_IO_H 1
 
-/* Define if you need the malloc.h header header file even with stdlib.h  */
+/* Define if you need the malloc.h header file even with stdlib.h  */
 #define NEED_MALLOC_H 1
 
 /* Define if you have the <netdb.h> header file.  */
@@ -65,9 +59,6 @@
 
 /* Define if you have the <signal.h> header file. */
 #define HAVE_SIGNAL_H 1
-
-/* Define if you have the <sgtty.h> header file.  */
-/* #define HAVE_SGTTY_H 1 */
 
 /* Define if you have the <ssl.h> header file.  */
 /* #define HAVE_SSL_H 1 */
@@ -132,9 +123,6 @@
 /*                        OTHER HEADER INFO                         */
 /* ---------------------------------------------------------------- */
 
-/* Define if sig_atomic_t is an available typedef. */
-#define HAVE_SIG_ATOMIC_T 1
-
 /* Define if you have the ANSI C header files.  */
 #define STDC_HEADERS 1
 
@@ -150,9 +138,6 @@
 
 /* Define if you don't have vprintf but do have _doprnt.  */
 /* #define HAVE_DOPRNT 1 */
-
-/* Define if you have the gethostbyaddr function.  */
-#define HAVE_GETHOSTBYADDR 1
 
 /* Define if you have the gethostname function.  */
 #define HAVE_GETHOSTNAME 1
@@ -174,9 +159,6 @@
 
 /* Define if you have a working ioctlsocket FIONBIO function. */
 #define HAVE_IOCTLSOCKET_FIONBIO 1
-
-/* Define if you have the perror function.  */
-#define HAVE_PERROR 1
 
 /* Define if you have the RAND_screen function when using SSL  */
 #define HAVE_RAND_SCREEN 1
@@ -218,24 +200,6 @@
 
 /* Define if you have the utime function */
 #define HAVE_UTIME 1
-
-/* Define if you have the getnameinfo function. */
-#define HAVE_GETNAMEINFO 1
-
-/* Define to the type qualifier of arg 1 for getnameinfo. */
-#define GETNAMEINFO_QUAL_ARG1 const
-
-/* Define to the type of arg 1 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG1 struct sockaddr *
-
-/* Define to the type of arg 2 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG2 socklen_t
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG46 DWORD
-
-/* Define to the type of arg 7 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG7 int
 
 /* Define if you have the recv function. */
 #define HAVE_RECV 1

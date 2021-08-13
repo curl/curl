@@ -643,6 +643,7 @@ sub protocolsetup {
             'STATUS'     => \&STATUS_imap,
             'STORE'      => \&STORE_imap,
             'UID'        => \&UID_imap,
+            'IDLE'       => \&IDLE_imap,
         );
         %displaytext = (
             'welcome' => join("",
@@ -1584,6 +1585,13 @@ sub COPY_imap {
         sendcontrol "$cmdid OK COPY completed\r\n";
     }
 
+    return 0;
+}
+
+sub IDLE_imap {
+    logmsg "IDLE received\n";
+
+    sendcontrol "+ entering idle mode\r\n";
     return 0;
 }
 

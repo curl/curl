@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -64,27 +64,27 @@ fail_unless(!strcmp(output, "012"), "wrong output");
 
 /* negative width */
 rc = curl_msnprintf(output, 8, "%-8s", str);
-fail_unless(rc == 8, "return code should be 8");
+fail_unless(rc == 7, "return code should be 7");
 fail_unless(!strcmp(output, "bug    "), "wrong output");
 
 /* larger width that string length */
 rc = curl_msnprintf(output, 8, "%8s", str);
-fail_unless(rc == 8, "return code should be 8");
+fail_unless(rc == 7, "return code should be 7");
 fail_unless(!strcmp(output, "     bu"), "wrong output");
 
 /* output a number in a limited output */
 rc = curl_msnprintf(output, 4, "%d", 10240);
-fail_unless(rc == 4, "return code should be 4");
+fail_unless(rc == 3, "return code should be 3");
 fail_unless(!strcmp(output, "102"), "wrong output");
 
 /* padded strings */
 rc = curl_msnprintf(output, 16, "%8s%8s", str, str);
-fail_unless(rc == 16, "return code should be 16");
+fail_unless(rc == 15, "return code should be 15");
 fail_unless(!strcmp(output, "     bug     bu"), "wrong output");
 
 /* padded numbers */
 rc = curl_msnprintf(output, 16, "%8d%8d", 1234, 5678);
-fail_unless(rc == 16, "return code should be 16");
+fail_unless(rc == 15, "return code should be 15");
 fail_unless(!strcmp(output, "    1234    567"), "wrong output");
 
 UNITTEST_STOP
