@@ -524,7 +524,7 @@ CURLcode Curl_hyper_header(struct Curl_easy *data, hyper_headers *headers,
         free(ptr);
       }
       else
-        Curl_debug(data, CURLINFO_HEADER_OUT, (char *)line, linelen);
+        Curl_debug(data, CURLINFO_HEADER_OUT, (char *)n, linelen);
     }
     numh++;
     n += linelen;
