@@ -36,7 +36,6 @@
 # hyper support remains EXPERIMENTAL as long as there's a test number
 # listed below
 %if hyper
-154
 155
 158
 206
