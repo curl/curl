@@ -103,7 +103,7 @@ man_MANS =                                      \
   CURLMOPT_PUSHFUNCTION.3                       \
   CURLMOPT_SOCKETDATA.3                         \
   CURLMOPT_SOCKETFUNCTION.3                     \
-  CURLMOPT_STREAM_WINDOW_SIZE                   \
+  CURLMOPT_STREAM_WINDOW_SIZE.3                 \
   CURLMOPT_TIMERDATA.3                          \
   CURLMOPT_TIMERFUNCTION.3                      \
   CURLOPT_ABSTRACT_UNIX_SOCKET.3                \
