@@ -84,7 +84,16 @@ If the host name is a numeric IPv6 address, this field might also be set.
 .IP CURLUPART_PORT
 Port cannot be URL decoded on get.
 .IP CURLUPART_PATH
+\fIpart\fP will be '/' even if no path is supplied in the URL.
 .IP CURLUPART_QUERY
+The initial question mark that denotes the beginning of the query part is
+a delimiter only.
+It is not part of the query contents.
+
+
+A not-present query will lead \fIpart\fP to be set to NULL.
+A zero-length query will lead \fIpart\fP to be set to a zero-length string.
+
 The query part will also get pluses converted to space when asked to URL
 decode on get with the CURLU_URLDECODE bit.
 .IP CURLUPART_FRAGMENT
