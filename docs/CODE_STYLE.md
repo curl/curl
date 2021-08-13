@@ -47,7 +47,7 @@ if(something_is_true) {
 ## Comments
 
 Since we write C89 code, **//** comments are not allowed. They weren't
-introduced in the C standard until C99. We use only **/* comments */**.
+introduced in the C standard until C99. We use only __/* comments */__.
 
 ```c
 /* this is a comment */
