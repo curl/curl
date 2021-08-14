@@ -27,6 +27,9 @@ document](https://curl.se/docs/faq.html).
 Study [the COPYING file](https://curl.se/docs/copyright.html) for
 distribution terms.
 
+You can visualize the [code diagram](docs/CODE_VISUALIZATION.md) to explore 
+how the code hierarchy looks like.
+
 ## Contact
 
 If you have problems, questions, ideas or suggestions, please contact us by

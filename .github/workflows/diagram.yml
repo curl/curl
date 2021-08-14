@@ -1,0 +1,22 @@
+name: Create code diagram
+on:
+  workflow_dispatch: {}
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+      - master
+      - '*/ci'
+  pull_request:
+    branches:
+      - master
+jobs:
+  get_data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+      - name: Update diagram
+        uses: githubocto/repo-visualizer@main
+        with:
+          output_file: "docs/code_diagram.svg"
