@@ -1869,6 +1869,7 @@ int main(int argc, char *argv[])
   srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
+  int wroteportfile = 0;
   int flag;
   unsigned short port = DEFAULT_PORT;
 #ifdef USE_UNIX_SOCKETS
@@ -2200,8 +2201,8 @@ int main(int argc, char *argv[])
   if(!wrotepidfile)
     goto sws_cleanup;
 
-  wrotepidfile = write_portfile(portname, port);
-  if(!wrotepidfile)
+  wroteportfile = write_portfile(portname, port);
+  if(!wroteportfile)
     goto sws_cleanup;
 
   /* initialization of httprequest struct is done before get_request(), but
@@ -2353,6 +2354,8 @@ sws_cleanup:
 
   if(wrotepidfile)
     unlink(pidname);
+  if(wroteportfile)
+    unlink(portname);
 
   if(serverlogslocked) {
     serverlogslocked = 0;

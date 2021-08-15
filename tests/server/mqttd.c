@@ -997,6 +997,7 @@ int main(int argc, char *argv[])
            " --version\n"
            " --logfile [file]\n"
            " --pidfile [file]\n"
+           " --portfile [file]\n"
            " --ipv4\n"
            " --ipv6\n"
            " --port [port]\n");
@@ -1048,7 +1049,7 @@ int main(int argc, char *argv[])
     goto mqttd_cleanup;
   }
 
-  wroteportfile = write_portfile(portname, (int)port);
+  wroteportfile = write_portfile(portname, port);
   if(!wroteportfile) {
     goto mqttd_cleanup;
   }
@@ -1067,6 +1068,8 @@ mqttd_cleanup:
 
   if(wrotepidfile)
     unlink(pidname);
+  if(wroteportfile)
+    unlink(portname);
 
   restore_signal_handlers(FALSE);
 

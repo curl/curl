@@ -1045,10 +1045,11 @@ int main(int argc, char *argv[])
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
+  int wroteportfile = 0;
   int flag;
   unsigned short port = DEFAULT_PORT;
   const char *pidname = ".rtsp.pid";
-  const char *portfile = NULL;
+  const char *portname = NULL; /* none by default */
   struct httprequest req;
   int rc;
   int error;
@@ -1077,7 +1078,7 @@ int main(int argc, char *argv[])
     else if(!strcmp("--portfile", argv[arg])) {
       arg++;
       if(argc>arg)
-        portfile = argv[arg++];
+        portname = argv[arg++];
     }
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
@@ -1248,9 +1249,9 @@ int main(int argc, char *argv[])
   if(!wrotepidfile)
     goto server_cleanup;
 
-  if(portfile) {
-    wrotepidfile = write_portfile(portfile, port);
-    if(!wrotepidfile)
+  if(portname) {
+    wroteportfile = write_portfile(portname, port);
+    if(!wroteportfile)
       goto server_cleanup;
   }
 
@@ -1364,6 +1365,8 @@ server_cleanup:
 
   if(wrotepidfile)
     unlink(pidname);
+  if(wroteportfile)
+    unlink(portname);
 
   if(serverlogslocked) {
     serverlogslocked = 0;
