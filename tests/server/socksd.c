@@ -882,8 +882,9 @@ int main(int argc, char *argv[])
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
+  int wroteportfile = 0;
   const char *pidname = ".socksd.pid";
-  const char *portfile = NULL;
+  const char *portname = NULL; /* none by default */
   bool juggle_again;
   int error;
   int arg = 1;
@@ -907,7 +908,7 @@ int main(int argc, char *argv[])
     else if(!strcmp("--portfile", argv[arg])) {
       arg++;
       if(argc>arg)
-        portfile = argv[arg++];
+        portname = argv[arg++];
     }
     else if(!strcmp("--config", argv[arg])) {
       arg++;
@@ -1014,9 +1015,9 @@ int main(int argc, char *argv[])
     goto socks5_cleanup;
   }
 
-  if(portfile) {
-    wrotepidfile = write_portfile(portfile, port);
-    if(!wrotepidfile) {
+  if(portname) {
+    wroteportfile = write_portfile(portname, port);
+    if(!wroteportfile) {
       goto socks5_cleanup;
     }
   }
@@ -1035,6 +1036,8 @@ socks5_cleanup:
 
   if(wrotepidfile)
     unlink(pidname);
+  if(wroteportfile)
+    unlink(portname);
 
   restore_signal_handlers(false);
 

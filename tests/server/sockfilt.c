@@ -1320,8 +1320,9 @@ int main(int argc, char *argv[])
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
+  int wroteportfile = 0;
   const char *pidname = ".sockfilt.pid";
-  const char *portfile = NULL; /* none by default */
+  const char *portname = NULL; /* none by default */
   bool juggle_again;
   int rc;
   int error;
@@ -1352,7 +1353,7 @@ int main(int argc, char *argv[])
     else if(!strcmp("--portfile", argv[arg])) {
       arg++;
       if(argc > arg)
-        portfile = argv[arg++];
+        portname = argv[arg++];
     }
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
@@ -1418,6 +1419,7 @@ int main(int argc, char *argv[])
            " --verbose\n"
            " --logfile [file]\n"
            " --pidfile [file]\n"
+           " --portfile [file]\n"
            " --ipv4\n"
            " --ipv6\n"
            " --bindonly\n"
@@ -1518,9 +1520,9 @@ int main(int argc, char *argv[])
     write_stdout("FAIL\n", 5);
     goto sockfilt_cleanup;
   }
-  if(portfile) {
-    wrotepidfile = write_portfile(portfile, port);
-    if(!wrotepidfile) {
+  if(portname) {
+    wroteportfile = write_portfile(portname, port);
+    if(!wroteportfile) {
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
     }
@@ -1540,6 +1542,8 @@ sockfilt_cleanup:
 
   if(wrotepidfile)
     unlink(pidname);
+  if(wroteportfile)
+    unlink(portname);
 
   restore_signal_handlers(false);
 
