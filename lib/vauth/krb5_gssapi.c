@@ -170,6 +170,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
  * Parameters:
  *
  * data    [in]     - The session handle.
+ * authzid [in]     - The authorization identity if some.
  * chlg    [in]     - Optional challenge message.
  * krb5    [in/out] - The Kerberos 5 data struct being used and modified.
  * out     [out]    - The result storage.
@@ -177,6 +178,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
+                                                  const char *authzid,
                                                   const struct bufref *chlg,
                                                   struct kerberos5data *krb5,
                                                   struct bufref *out)
@@ -193,32 +195,11 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   gss_qop_t qop = GSS_C_QOP_DEFAULT;
   unsigned int sec_layer = 0;
   unsigned int max_size = 0;
-  gss_name_t username = GSS_C_NO_NAME;
-  gss_buffer_desc username_token;
 
   /* Ensure we have a valid challenge message */
   if(!Curl_bufref_len(chlg)) {
     infof(data, "GSSAPI handshake failure (empty security message)");
     return CURLE_BAD_CONTENT_ENCODING;
-  }
-
-  /* Get the fully qualified username back from the context */
-  major_status = gss_inquire_context(&minor_status, krb5->context,
-                                     &username, NULL, NULL, NULL, NULL,
-                                     NULL, NULL);
-  if(GSS_ERROR(major_status)) {
-    Curl_gss_log_error(data, "gss_inquire_context() failed: ",
-                       major_status, minor_status);
-    return CURLE_AUTH_ERROR;
-  }
-
-  /* Convert the username from internal format to a displayable token */
-  major_status = gss_display_name(&minor_status, username,
-                                  &username_token, NULL);
-  if(GSS_ERROR(major_status)) {
-    Curl_gss_log_error(data, "gss_display_name() failed: ",
-                       major_status, minor_status);
-    return CURLE_AUTH_ERROR;
   }
 
   /* Setup the challenge "input" security buffer */
@@ -231,14 +212,12 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   if(GSS_ERROR(major_status)) {
     Curl_gss_log_error(data, "gss_unwrap() failed: ",
                        major_status, minor_status);
-    gss_release_buffer(&unused_status, &username_token);
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
   /* Not 4 octets long so fail as per RFC4752 Section 3.1 */
   if(output_token.length != 4) {
     infof(data, "GSSAPI handshake failure (invalid security data)");
-    gss_release_buffer(&unused_status, &username_token);
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
@@ -254,7 +233,6 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   if(!(sec_layer & GSSAUTH_P_NONE)) {
     infof(data, "GSSAPI handshake failure (invalid security layer)");
 
-    gss_release_buffer(&unused_status, &username_token);
     return CURLE_BAD_CONTENT_ENCODING;
   }
   sec_layer &= GSSAUTH_P_NONE;  /* We do not support a security layer */
@@ -268,27 +246,27 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   }
 
   /* Allocate our message */
-  messagelen = 4 + username_token.length + 1;
+  messagelen = 4;
+  if(authzid && *authzid)
+    messagelen += strlen(authzid) + 1;
   message = malloc(messagelen);
-  if(!message) {
-    gss_release_buffer(&unused_status, &username_token);
+  if(!message)
     return CURLE_OUT_OF_MEMORY;
-  }
 
-  /* Populate the message with the security layer, client supported receive
-     message size and authorization identity including the 0x00 based
-     terminator. Note: Despite RFC4752 Section 3.1 stating "The authorization
-     identity is not terminated with the zero-valued (%x00) octet." it seems
-     necessary to include it. */
+  /* Populate the message with the security layer and client supported receive
+     message size. */
   message[0] = sec_layer & 0xFF;
   message[1] = (max_size >> 16) & 0xFF;
   message[2] = (max_size >> 8) & 0xFF;
   message[3] = max_size & 0xFF;
-  memcpy(message + 4, username_token.value, username_token.length);
-  message[messagelen - 1] = '\0';
 
-  /* Free the username token as it is not required anymore */
-  gss_release_buffer(&unused_status, &username_token);
+  /* If given, append the authorization identity including the 0x00 based
+     terminator. Note: Despite RFC4752 Section 3.1 stating "The authorization
+     identity is not terminated with the zero-valued (%x00) octet." it seems
+     necessary to include it. */
+
+  if(authzid && *authzid)
+    strcpy((char *) message + 4, authzid);
 
   /* Setup the "authentication data" security buffer */
   input_token.value = message;

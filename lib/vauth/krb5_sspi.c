@@ -238,13 +238,15 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
  * Parameters:
  *
  * data    [in]     - The session handle.
- * chlg     [in]     - The optional challenge message.
+ * authzid [in]     - The authorization identity if some.
+ * chlg    [in]     - The optional challenge message.
  * krb5    [in/out] - The Kerberos 5 data struct being used and modified.
  * out     [out]    - The result storage.
  *
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
+                                                  const char *authzid,
                                                   const struct bufref *chlg,
                                                   struct kerberos5data *krb5,
                                                   struct bufref *out)
@@ -265,9 +267,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   unsigned long sec_layer = 0;
   unsigned long max_size = 0;
   SecPkgContext_Sizes sizes;
-  SecPkgCredentials_Names names;
   SECURITY_STATUS status;
-  char *user_name;
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void) data;
@@ -283,17 +283,6 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   status = s_pSecFn->QueryContextAttributes(krb5->context,
                                             SECPKG_ATTR_SIZES,
                                             &sizes);
-
-  if(status == SEC_E_INSUFFICIENT_MEMORY)
-    return CURLE_OUT_OF_MEMORY;
-
-  if(status != SEC_E_OK)
-    return CURLE_AUTH_ERROR;
-
-  /* Get the fully qualified username back from the context */
-  status = s_pSecFn->QueryCredentialsAttributes(krb5->credentials,
-                                                SECPKG_CRED_ATTR_NAMES,
-                                                &names);
 
   if(status == SEC_E_INSUFFICIENT_MEMORY)
     return CURLE_OUT_OF_MEMORY;
@@ -353,35 +342,31 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   if(!trailer)
     return CURLE_OUT_OF_MEMORY;
 
-  /* Convert the user name to UTF8 when operating with Unicode */
-  user_name = curlx_convert_tchar_to_UTF8(names.sUserName);
-  if(!user_name) {
-    free(trailer);
-
-    return CURLE_OUT_OF_MEMORY;
-  }
-
   /* Allocate our message */
-  messagelen = 4 + strlen(user_name) + 1;
+  messagelen = 4;
+  if(authzid && *authzid)
+    messagelen += strlen(authzid) + 1;
   message = malloc(messagelen);
   if(!message) {
     free(trailer);
-    curlx_unicodefree(user_name);
 
     return CURLE_OUT_OF_MEMORY;
   }
 
-  /* Populate the message with the security layer, client supported receive
-     message size and authorization identity including the 0x00 based
-     terminator. Note: Despite RFC4752 Section 3.1 stating "The authorization
-     identity is not terminated with the zero-valued (%x00) octet." it seems
-     necessary to include it. */
+  /* Populate the message with the security layer and client supported receive
+     message size. */
   message[0] = sec_layer & 0xFF;
   message[1] = (max_size >> 16) & 0xFF;
   message[2] = (max_size >> 8) & 0xFF;
   message[3] = max_size & 0xFF;
-  strcpy((char *) message + 4, user_name);
-  curlx_unicodefree(user_name);
+
+  /* If given, append the authorization identity including the 0x00 based
+     terminator. Note: Despite RFC4752 Section 3.1 stating "The authorization
+     identity is not terminated with the zero-valued (%x00) octet." it seems
+     necessary to include it. */
+
+  if(authzid && *authzid)
+    strcpy((char *) message + 4, authzid);
 
   /* Allocate the padding */
   padding = malloc(sizes.cbBlockSize);
