@@ -189,8 +189,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   OM_uint32 unused_status;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
-  unsigned int indata = 0;
-  unsigned int outdata = 0;
+  unsigned char *indata;
   gss_qop_t qop = GSS_C_QOP_DEFAULT;
   unsigned int sec_layer = 0;
   unsigned int max_size = 0;
@@ -243,12 +242,15 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
-  /* Copy the data out and free the challenge as it is not required anymore */
-  memcpy(&indata, output_token.value, 4);
+  /* Extract the security layer and the maximum message size */
+  indata = output_token.value;
+  sec_layer = indata[0];
+  max_size = (indata[1] << 16) | (indata[2] << 8) | indata[3];
+
+  /* Free the challenge as it is not required anymore */
   gss_release_buffer(&unused_status, &output_token);
 
-  /* Extract the security layer */
-  sec_layer = indata & 0x000000FF;
+  /* Process the security layer */
   if(!(sec_layer & GSSAUTH_P_NONE)) {
     infof(data, "GSSAPI handshake failure (invalid security layer)");
 
@@ -256,8 +258,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
-  /* Extract the maximum message size the server can receive */
-  max_size = ntohl(indata & 0xFFFFFF00);
+  /* Process the maximum message size the server can receive */
   if(max_size > 0) {
     /* The server has told us it supports a maximum receive buffer, however, as
        we don't require one unless we are encrypting data, we tell the server
@@ -266,7 +267,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   }
 
   /* Allocate our message */
-  messagelen = sizeof(outdata) + username_token.length + 1;
+  messagelen = 4 + username_token.length + 1;
   message = malloc(messagelen);
   if(!message) {
     gss_release_buffer(&unused_status, &username_token);
@@ -278,10 +279,11 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
      terminator. Note: Despite RFC4752 Section 3.1 stating "The authorization
      identity is not terminated with the zero-valued (%x00) octet." it seems
      necessary to include it. */
-  outdata = htonl(max_size) | sec_layer;
-  memcpy(message, &outdata, sizeof(outdata));
-  memcpy(message + sizeof(outdata), username_token.value,
-         username_token.length);
+  message[0] = sec_layer & 0xFF;
+  message[1] = (max_size >> 16) & 0xFF;
+  message[2] = (max_size >> 8) & 0xFF;
+  message[3] = max_size & 0xFF;
+  memcpy(message + 4, username_token.value, username_token.length);
   message[messagelen - 1] = '\0';
 
   /* Free the username token as it is not required anymore */
