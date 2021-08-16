@@ -141,6 +141,7 @@ problems may have been fixed or changed somewhat since this was written!
  15.10 libspsl is not supported
  15.11 ExternalProject_Add does not set CURL_CA_PATH
  15.12 cannot enable LDAPS on Windows
+ 15.13 CMake build with MIT Kerberos does not work
 
  16. Applications
  16.1 pulseUI VPN client
@@ -1030,6 +1031,17 @@ problems may have been fixed or changed somewhat since this was written!
 15.12 cannot enable LDAPS on Windows
 
  See https://github.com/curl/curl/issues/6284
+
+15.13 CMake build with MIT Kerberos does not work
+
+ Minimum CMake version was bumped in curl 7.71.0 (#5358) Since CMake 3.2
+ try_compile started respecting the CMAKE_EXE_FLAGS.  The code dealing with
+ MIT Kerberos detection sets few variables to potentially weird mix of space,
+ and ;-separated flags. It had to blow up at some point. All the CMake checks
+ that involve compilation are doomed from that point, the configured tree
+ cannot be built.
+
+ https://github.com/curl/curl/issues/6904
 
 16. Applications
 
