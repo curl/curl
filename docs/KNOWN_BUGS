@@ -159,6 +159,7 @@ problems may have been fixed or changed somewhat since this was written!
  18.4 Downloading with HTTP/3 produces broken files
  18.5 HTTP/3 download with quiche halts after a while
  18.6 HTTP/3 multipart POST with quiche fails
+ 18.7 HTTP/3 quiche upload large file fails
 
 ==============================================================================
 
@@ -1117,3 +1118,7 @@ problems may have been fixed or changed somewhat since this was written!
 18.6 HTTP/3 multipart POST with quiche fails
 
  https://github.com/curl/curl/issues/7125
+
+18.7 HTTP/3 quiche upload large file fails
+
+ https://github.com/curl/curl/issues/7532
