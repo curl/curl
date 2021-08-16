@@ -47,6 +47,7 @@
  1.29 Upgrade to websockets
  1.30 config file parsing
  1.31 erase secrets from heap/stack after use
+ 1.32 add asynch getaddrinfo support
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -442,6 +443,15 @@
  application and then clearing them within the library adds nothing...
 
  https://github.com/curl/curl/issues/7268
+
+1.32 add asynch getaddrinfo support
+
+ Use getaddrinfo_a() to provide an asynch name resolver backend to libcurl
+ that doesn't use threads and doesn't depend on c-ares. The getaddrinfo_a
+ function is (probably?) glibc specific but that's a widely used libc among
+ our users.
+
+ https://github.com/curl/curl/pull/6746
 
 2. libcurl - multi interface
 
