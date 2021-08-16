@@ -4,7 +4,7 @@ curl and libcurl 7.79.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2467
+ Contributors:                 2472
 
 This release includes the following changes:
 
@@ -13,6 +13,16 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o ares: use ares_getaddrinfo() [51]
+ o asyn-ares.c: move all version number checks to the top
+ o auth: do not append zero-terminator to authorisation id in kerberos [32]
+ o auth: properly handle byte order in kerberos security message [36]
+ o auth: use sasl authzid option in kerberos [34]
+ o auth: we do not support a security layer after kerberos authentication [35]
+ o BINDINGS.md: update links to use https where available [50]
+ o build: fix compiler warnings [39]
+ o c-hyper: fix header value passed to debug callback [46]
+ o c-hyper: initial step for 100-continue support [43]
  o c-hyper: remove the hyper_executor_poll() loop from Curl_http [13]
  o CI/cirrus: reduce compile time with increased parallism [19]
  o compressed.d: it's a request, not an order [21]
@@ -23,28 +33,37 @@ This release includes the following bugfixes:
  o connect: remove superfluous conditional [23]
  o curl-openssl.m4: check lib64 for the pkg-config file [14]
  o curl.1: mention "global" flags [7]
+ o curl_url_get.3: clarify about path and query [45]
  o CURLMOPT_TIMERFUNCTION.3: remove misplaced "time" [5]
  o CURLOPT_DOH_URL.3: CURLOPT_OPENSOCKETFUNCTION is not inherited [8]
  o CURLOPT_SSL_CTX_*.3: tidy up the example [15]
  o docs/MQTT: update state of username/password support [4]
  o easy: use a custom implementation of wcsdup on Windows [31]
- o example/cookie_interface: fix scan-build printf warning [16]
  o examples/cookie_interface: avoid printfing time_t directly [18]
+ o examples/cookie_interface: fix scan-build printf warning [16]
+ o examples/ephiperfifo.c: simplify signal handler [42]
  o happy-eyeballs-timeout-ms.d: polish the wording [10]
  o hostip: Make Curl_ipv6works function independent of getaddrinfo [26]
+ o http2: revert call the handle-closed function correctly on closed stream [25]
  o http_proxy: clear 'sending' when the outgoing request is sent [6]
  o limit-rate.d: clarify base unit [17]
  o mbedTLS: initial 3.0.0 support [33]
  o mbedtls_threadlock: fix unused variable warning [11]
  o ngtcp2: compile with the latest ngtcp2 and nghttp3 [12]
  o ngtcp2: replace deprecated functions with nghttp3_conn_shutdown_stream_read [28]
+ o ngtcp2: reset the oustanding send buffer again when drained [53]
  o ngtcp2: rework the return value handling of ngtcp2_conn_writev_stream [29]
+ o ngtcp2: utilize crypto API functions to simplify [52]
+ o output.d: add method to suppress response bodies [49]
+ o progress: fix a compile warning on some systems [54]
  o test1565: fix windows build errors [27]
  o tests/*server.py: remove pidfile on server termination [1]
  o tests/runtests.pl: cleanup copy&paste mistakes and unused code
  o tests: make three tests pass until 2037 [22]
  o tool/tests: fix potential year 2038 issues [20]
+ o vtls: fix typo in schannel_verify.c [44]
  o winbuild/README.md: clarify GEN_PDB option
+ o x509asn1: fix heap over-read when parsing x509 certificates [37]
 
 This release includes the following known bugs:
 
@@ -53,14 +72,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aleksandr Krotov, Alex Crichton, Bastian Krause, Benau on github,
-  Bernhard M. Wiedemann, Bin Lan, Carlo Marcelo Arenas Belón,
-  Christian Weisgerber, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Daniel Woelfel, Dan Jacobson, David Cook, Emil Engler, Jeff Mears,
-  Jeremy Falcon, Josh Soref, Marc Hörsken, modbw on github, Oleg Pudeyev,
-  Ray Satiro, Rui Pinheiro, Tatsuhiro Tsujikawa, Viktor Szakats,
-  Vincent Grande, zloi-user on github,
-  (27 contributors)
+  Aleksandr Krotov, Alex Crichton, April King, Artur Sinila, Barry Pollard,
+  Bastian Krause, Benau on github, Bernhard M. Wiedemann, Bin Lan,
+  Carlo Marcelo Arenas Belón, Christian Weisgerber, Colin O'Dell, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, Daniel Woelfel, Dan Jacobson, David Cook,
+  Emil Engler, Gambit Communications, Gergely Nagy, Ikko Ashimine,
+  i-ky on github, Jeff Mears, Jeremy Falcon, Josh Soref, Marc Hörsken,
+  Michael Kaufmann, Michał Antoniak, modbw on github, Oleg Pudeyev,
+  Patrick Monnerat, Ray Satiro, Rui Pinheiro, Tatsuhiro Tsujikawa,
+  Viktor Szakats, Vincent Grande, z2-2z on github, zloi-user on github,
+  (39 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -88,10 +109,28 @@ References to bug reports and discussions on issues:
  [22] = https://curl.se/bug/?i=7512
  [23] = https://curl.se/bug/?i=7511
  [24] = https://curl.se/bug/?i=6733
+ [25] = https://curl.se/bug/?i=7400
  [26] = https://curl.se/bug/?i=7529
  [27] = https://curl.se/bug/?i=7527
  [28] = https://curl.se/bug/?i=7546
  [29] = https://curl.se/bug/?i=7546
  [30] = https://curl.se/bug/?i=7545
  [31] = https://curl.se/bug/?i=7540
+ [32] = https://curl.se/bug/?i=7008
  [33] = https://curl.se/bug/?i=7428
+ [34] = https://curl.se/bug/?i=7008
+ [35] = https://curl.se/bug/?i=7008
+ [36] = https://curl.se/bug/?i=7008
+ [37] = https://curl.se/bug/?i=7536
+ [39] = https://curl.se/bug/?i=7528
+ [42] = https://curl.se/bug/?i=7310
+ [43] = https://curl.se/bug/?i=7568
+ [44] = https://curl.se/bug/?i=7566
+ [45] = https://curl.se/bug/?i=7563
+ [46] = https://curl.se/bug/?i=7567
+ [49] = https://curl.se/bug/?i=7560
+ [50] = https://curl.se/bug/?i=7558
+ [51] = https://curl.se/bug/?i=7364
+ [52] = https://curl.se/bug/?i=7551
+ [53] = https://curl.se/bug/?i=7538
+ [54] = https://curl.se/bug/?i=7549
