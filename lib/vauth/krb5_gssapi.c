@@ -257,6 +257,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
     gss_release_buffer(&unused_status, &username_token);
     return CURLE_BAD_CONTENT_ENCODING;
   }
+  sec_layer &= GSSAUTH_P_NONE;  /* We do not support a security layer */
 
   /* Process the maximum message size the server can receive */
   if(max_size > 0) {
