@@ -692,7 +692,6 @@ static ngtcp2_callbacks ng_callbacks = {
   ngtcp2_crypto_decrypt_cb,
   ngtcp2_crypto_hp_mask_cb,
   cb_recv_stream_data,
-  NULL, /* acked_crypto_offset */
   cb_acked_stream_data_offset,
   NULL, /* stream_open */
   cb_stream_close,
