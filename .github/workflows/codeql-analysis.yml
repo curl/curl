@@ -13,6 +13,9 @@ on:
   schedule:
     - cron: '0 0 * * 4'
 
+permissions:
+  security-events: write
+
 jobs:
   codeql:
     runs-on: ubuntu-latest
