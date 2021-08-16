@@ -234,30 +234,11 @@ static CURLcode oldap_map_error(int rc, CURLcode result)
 static CURLcode oldap_setup_connection(struct Curl_easy *data,
                                        struct connectdata *conn)
 {
-  struct ldapconninfo *li;
-  LDAPURLDesc *lud;
-  int rc, proto;
-  CURLcode status;
+  struct ldapconninfo *li = calloc(1, sizeof(struct ldapconninfo));
 
-  rc = ldap_url_parse(data->state.url, &lud);
-  if(rc != LDAP_URL_SUCCESS) {
-    const char *msg = "url parsing problem";
-    status = CURLE_URL_MALFORMAT;
-    if(rc > LDAP_URL_SUCCESS && rc <= LDAP_URL_ERR_BADEXTS) {
-      if(rc == LDAP_URL_ERR_MEM)
-        status = CURLE_OUT_OF_MEMORY;
-      msg = url_errs[rc];
-    }
-    failf(data, "LDAP local: %s", msg);
-    return status;
-  }
-  proto = ldap_pvt_url_scheme2proto(lud->lud_scheme);
-  ldap_free_urldesc(lud);
-
-  li = calloc(1, sizeof(struct ldapconninfo));
   if(!li)
     return CURLE_OUT_OF_MEMORY;
-  li->proto = proto;
+  li->proto = ldap_pvt_url_scheme2proto(data->state.up.scheme);
   conn->proto.ldapc = li;
   connkeep(conn, "OpenLDAP default");
 
@@ -349,18 +330,27 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = conn->proto.ldapc;
-  int rc, proto = LDAP_VERSION3;
-  char hosturl[1024];
-  char *ptr;
+  static const int version = LDAP_VERSION3;
+  int rc;
+  char *hosturl;
 
   (void)done;
 
-  strcpy(hosturl, "ldap");
-  ptr = hosturl + 4;
-  if(conn->handler->flags & PROTOPT_SSL)
-    *ptr++ = 's';
-  msnprintf(ptr, sizeof(hosturl)-(ptr-hosturl), "://%s:%d",
-            conn->host.name, conn->remote_port);
+  hosturl = aprintf("ldap%s://%s:%d",
+                    conn->handler->flags & PROTOPT_SSL? "s": "",
+                    conn->host.name, conn->remote_port);
+  if(!hosturl)
+    return CURLE_OUT_OF_MEMORY;
+
+  rc = ldap_init_fd(conn->sock[FIRSTSOCKET], li->proto, hosturl, &li->ld);
+  if(rc) {
+    failf(data, "LDAP local: Cannot connect to %s, %s",
+          hosturl, ldap_err2string(rc));
+    free(hosturl);
+    return CURLE_COULDNT_CONNECT;
+  }
+
+  free(hosturl);
 
 #ifdef CURL_OPENLDAP_DEBUG
   static int do_trace = 0;
@@ -370,14 +360,11 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
     ldap_set_option(li->ld, LDAP_OPT_DEBUG_LEVEL, &do_trace);
 #endif
 
-  rc = ldap_init_fd(conn->sock[FIRSTSOCKET], li->proto, hosturl, &li->ld);
-  if(rc) {
-    failf(data, "LDAP local: Cannot connect to %s, %s",
-          hosturl, ldap_err2string(rc));
-    return CURLE_COULDNT_CONNECT;
-  }
+  /* Try version 3 first. */
+  ldap_set_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &version);
 
-  ldap_set_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &proto);
+  /* Do not chase referrals. */
+  ldap_set_option(li->ld, LDAP_OPT_REFERRALS, LDAP_OPT_OFF);
 
 #ifdef USE_SSL
   if(conn->handler->flags & PROTOPT_SSL)
@@ -447,6 +434,10 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
     rc = ldap_parse_result(li->ld, msg, &code, NULL, NULL, NULL, NULL, 0);
     if(rc)
       code = rc;
+    else {
+      /* store the latest code for later retrieval */
+      data->info.httpcode = code;
+    }
 
     /* If protocol version 3 is not supported, fallback to version 2. */
     if(code == LDAP_PROTOCOL_ERROR && li->state != OLDAP_BINDV2
@@ -678,6 +669,9 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       result = CURLE_LDAP_SEARCH_FAILED;
       break;
     }
+
+    /* store the latest code for later retrieval */
+    data->info.httpcode = code;
 
     switch(code) {
     case LDAP_SIZELIMIT_EXCEEDED:
