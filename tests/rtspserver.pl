@@ -119,4 +119,5 @@ $flags .= "--pidfile \"$pidfile\" ".
     "--logfile \"$logfile\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
-exec("server/rtspd".exe_ext('SRV')." $flags");
+$| = 1;
+exec("exec server/rtspd".exe_ext('SRV')." $flags");
