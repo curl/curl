@@ -5800,6 +5800,10 @@ mkdir($LOGDIR, 0777);
 get_disttests();
 init_serverpidfile_hash();
 
+if(pathhelp::os_is_win()) {
+    $defpostcommanddelay = 0.1;
+}
+
 #######################################################################
 # Output curl version and host info being tested
 #
