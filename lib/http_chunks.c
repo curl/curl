@@ -108,7 +108,7 @@ void Curl_httpchunk_init(struct Curl_easy *data)
  * For example, 0x0d and 0x0a are used instead of '\r' and '\n'.
  */
 CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
-                              char *datap,
+                              const char *datap,
                               ssize_t datalen,
                               ssize_t *wrotep,
                               CURLcode *extrap)
@@ -228,7 +228,7 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
 
     case CHUNK_TRAILER:
       if((*datap == 0x0d) || (*datap == 0x0a)) {
-        char *tr = Curl_dyn_ptr(&conn->trailer);
+        const char *tr = Curl_dyn_ptr(&conn->trailer);
         /* this is the end of a trailer, but if the trailer was zero bytes
            there was no trailer and we move on */
 

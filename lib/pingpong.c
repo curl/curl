@@ -169,7 +169,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 {
   ssize_t bytes_written = 0;
   size_t write_len;
-  char *s;
+  const char *s;
   CURLcode result;
   struct connectdata *conn = data->conn;
 

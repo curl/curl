@@ -765,7 +765,7 @@ CURLcode rtp_client_write(struct Curl_easy *data, char *ptr, size_t len)
   return CURLE_OK;
 }
 
-CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
+CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
 {
   long CSeq = 0;
 
@@ -783,8 +783,8 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
     }
   }
   else if(checkprefix("Session:", header)) {
-    char *start;
-    char *end;
+    const char *start;
+    const char *end;
     size_t idlen;
 
     /* Find the first non-space letter */

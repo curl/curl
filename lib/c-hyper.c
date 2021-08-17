@@ -122,7 +122,7 @@ static int hyper_each_header(void *userdata,
 {
   struct Curl_easy *data = (struct Curl_easy *)userdata;
   size_t len;
-  char *headp;
+  const char *headp;
   CURLcode result;
   int writetype;
 

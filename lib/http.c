@@ -1244,7 +1244,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
   /* The looping below is required since we use non-blocking sockets, but due
      to the circumstances we will just loop and try again and again etc */
 
-  ptr = Curl_dyn_ptr(in);
+  ptr = (char *)Curl_dyn_ptr(in);
   size = Curl_dyn_len(in);
 
   headersize = size - (size_t)included_body_bytes; /* the initial part that
@@ -1362,13 +1362,15 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
       Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
 
       if((size_t)amount != size) {
+        const char *keep;
+
         /* The whole request could not be sent in one system call. We must
            queue it up and send it later when we get the chance. We must not
            loop here and wait until it might work again. */
 
         size -= amount;
 
-        ptr = Curl_dyn_ptr(in) + amount;
+        keep = Curl_dyn_ptr(in) + amount;
 
         /* backup the currently set pointers */
         http->backup.fread_func = data->state.fread_func;
@@ -1379,7 +1381,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
         /* set the new pointers for the request-sending */
         data->state.fread_func = (curl_read_callback)readmoredata;
         data->state.in = (void *)data;
-        http->postdata = ptr;
+        http->postdata = keep;
         http->postsize = (curl_off_t)size;
 
         /* this much data is remaining header: */
@@ -3391,7 +3393,7 @@ checkprotoprefix(struct Curl_easy *data, struct connectdata *conn,
  * Curl_http_header() parses a single response header.
  */
 CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
-                          char *headp)
+                          const char *headp)
 {
   CURLcode result;
   struct SingleRequest *k = &data->req;
@@ -3546,7 +3548,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
        The forth means the requested range was unsatisfied.
     */
 
-    char *ptr = headp + strlen("Content-Range:");
+    const char *ptr = headp + strlen("Content-Range:");
 
     /* Move forward until first digit or asterisk */
     while(*ptr && !ISDIGIT(*ptr) && *ptr != '*')
@@ -3879,7 +3881,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
     /* headers are in network encoding so use 0x0a and 0x0d instead of '\n'
        and '\r' */
-    headp = Curl_dyn_ptr(&data->state.headerb);
+    headp = (char *)Curl_dyn_ptr(&data->state.headerb);
     if((0x0a == *headp) || (0x0d == *headp)) {
       size_t headerlen;
       /* Zero-length header line means end of headers! */

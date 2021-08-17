@@ -521,13 +521,13 @@ static CURLcode pausewrite(struct Curl_easy *data,
  */
 static CURLcode chop_write(struct Curl_easy *data,
                            int type,
-                           char *optr,
+                           const char *optr,
                            size_t olen)
 {
   struct connectdata *conn = data->conn;
   curl_write_callback writeheader = NULL;
   curl_write_callback writebody = NULL;
-  char *ptr = optr;
+  const char *ptr = optr;
   size_t len = olen;
 
   if(!len)
@@ -558,7 +558,7 @@ static CURLcode chop_write(struct Curl_easy *data,
     if(writebody) {
       size_t wrote;
       Curl_set_in_callback(data, true);
-      wrote = writebody(ptr, 1, chunklen, data->set.out);
+      wrote = writebody((char *)ptr, 1, chunklen, data->set.out);
       Curl_set_in_callback(data, false);
 
       if(CURL_WRITEFUNC_PAUSE == wrote) {
@@ -586,7 +586,7 @@ static CURLcode chop_write(struct Curl_easy *data,
     ptr = optr;
     len = olen;
     Curl_set_in_callback(data, true);
-    wrote = writeheader(ptr, 1, len, data->set.writeheader);
+    wrote = writeheader((char *)ptr, 1, len, data->set.writeheader);
     Curl_set_in_callback(data, false);
 
     if(CURL_WRITEFUNC_PAUSE == wrote)
@@ -609,38 +609,53 @@ static CURLcode chop_write(struct Curl_easy *data,
 
    The bit pattern defines to what "streams" to write to. Body and/or header.
    The defines are in sendf.h of course. "len" is not allowed to be 0.
-
-   If CURL_DO_LINEEND_CONV is enabled, data is converted IN PLACE to the
-   local character encoding.  This is a problem and should be changed in
-   the future to leave the original data alone.
- */
+*/
 CURLcode Curl_client_write(struct Curl_easy *data,
                            int type,
-                           char *ptr,
+                           const char *ptr,
                            size_t len)
 {
   struct connectdata *conn = data->conn;
+  char *datadup = NULL;
+  CURLcode result;
 
   DEBUGASSERT(len);
   DEBUGASSERT(type <= 3);
 
+#ifdef CURL_DO_LINEEND_CONV
+#define FTP_CONVERT 1
+#else
+#define FTP_CONVERT 0
+#endif
+
   /* FTP data may need conversion. */
   if((type & CLIENTWRITE_BODY) &&
     (conn->handler->protocol & PROTO_FAMILY_FTP) &&
-    conn->proto.ftpc.transfertype == 'A') {
+     (conn->proto.ftpc.transfertype == 'A') &&
+     (FTP_CONVERT || data->set.convfromnetwork)) {
+    datadup = Curl_memdup(ptr, len);
+    if(!datadup)
+      return CURLE_OUT_OF_MEMORY;
+
     /* convert from the network encoding */
-    CURLcode result = Curl_convert_from_network(data, ptr, len);
+    result = Curl_convert_from_network(data, datadup, len);
     /* Curl_convert_from_network calls failf if unsuccessful */
-    if(result)
+    if(result) {
+      free(datadup);
       return result;
+    }
 
 #ifdef CURL_DO_LINEEND_CONV
     /* convert end-of-line markers */
-    len = convert_lineends(data, ptr, len);
+    len = convert_lineends(data, datadup, len);
 #endif /* CURL_DO_LINEEND_CONV */
-    }
+    ptr = datadup;
+  }
 
-  return chop_write(data, type, ptr, len);
+  result = chop_write(data, type, ptr, len);
+  if(datadup)
+    free(datadup);
+  return result;
 }
 
 CURLcode Curl_read_plain(curl_socket_t sockfd,
@@ -708,7 +723,7 @@ CURLcode Curl_read(struct Curl_easy *data,   /* transfer */
 
 /* return 0 on success */
 int Curl_debug(struct Curl_easy *data, curl_infotype type,
-               char *ptr, size_t size)
+               const char *ptr, size_t size)
 {
   int rc = 0;
   if(data->set.verbose) {
@@ -754,7 +769,8 @@ int Curl_debug(struct Curl_easy *data, curl_infotype type,
 
     if(data->set.fdebug) {
       Curl_set_in_callback(data, true);
-      rc = (*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
+      rc = (*data->set.fdebug)(data, type, (char *)ptr, size,
+                               data->set.debugdata);
       Curl_set_in_callback(data, false);
     }
     else {

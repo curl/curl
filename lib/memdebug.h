@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -172,6 +172,6 @@ CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
  */
 
 #define Curl_safefree(ptr) \
-  do { free((ptr)); (ptr) = NULL;} while(0)
+  do { free((char *)(ptr)); (ptr) = NULL;} while(0)
 
 #endif /* HEADER_CURL_MEMDEBUG_H */

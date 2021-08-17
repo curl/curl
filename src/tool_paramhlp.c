@@ -62,7 +62,7 @@ struct getout *new_getout(struct OperationConfig *config)
 
 #define MAX_FILE2STRING (256*1024*1024) /* big enough ? */
 
-ParameterError file2string(char **bufp, FILE *file)
+ParameterError file2string(const char **bufp, FILE *file)
 {
   struct curlx_dynbuf dyn;
   curlx_dyn_init(&dyn, MAX_FILE2STRING);
@@ -80,13 +80,13 @@ ParameterError file2string(char **bufp, FILE *file)
         return PARAM_NO_MEM;
     }
   }
-  *bufp = curlx_dyn_ptr(&dyn);
+  *bufp = (char *)curlx_dyn_ptr(&dyn);
   return PARAM_OK;
 }
 
 #define MAX_FILE2MEMORY (1024*1024*1024) /* big enough ? */
 
-ParameterError file2memory(char **bufp, size_t *size, FILE *file)
+ParameterError file2memory(const char **bufp, size_t *size, FILE *file)
 {
   if(file) {
     size_t nread;
@@ -437,7 +437,7 @@ ParameterError str2offset(curl_off_t *val, const char *str)
 static CURLcode checkpasswd(const char *kind, /* for what purpose */
                             const size_t i,   /* operation index */
                             const bool last,  /* TRUE if last operation */
-                            char **userpwd)   /* pointer to allocated string */
+                            const char **userpwd) /* ptr to allocated string */
 {
   char *psep;
   char *osep;
@@ -480,7 +480,7 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
       return CURLE_OUT_OF_MEMORY;
 
     /* return the new string */
-    free(*userpwd);
+    free((char *)*userpwd);
     *userpwd = curlx_dyn_ptr(&dyn);
   }
 

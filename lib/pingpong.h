@@ -53,8 +53,8 @@ struct pingpong {
   bool pending_resp;  /* set TRUE when a server response is pending or in
                          progress, and is cleared once the last response is
                          read */
-  char *sendthis; /* allocated pointer to a buffer that is to be sent to the
-                     server */
+  const char *sendthis; /* allocated pointer to a buffer that is to be sent to
+                           the server */
   size_t sendleft; /* number of bytes left to send from the sendthis buffer */
   size_t sendsize; /* total size of the sendthis buffer */
   struct curltime response; /* set to Curl_now() when a command has been sent

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2020, 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -153,6 +153,31 @@ CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
 }
 #endif
 
+#ifdef NTLM_WB_ENABLED
+/*
+ * Truncate the string at the given size.
+ */
+CURLcode Curl_dyn_trunc(struct dynbuf *s, size_t newlen)
+{
+  DEBUGASSERT(s);
+  DEBUGASSERT(s->init == DYNINIT);
+  DEBUGASSERT(!s->leng || s->bufr);
+  if(newlen > s->leng)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  else if(newlen == s->leng)
+    return CURLE_OK;
+  else if(!newlen) {
+    Curl_dyn_reset(s);
+  }
+  else {
+    s->leng = newlen;
+    s->bufr[s->leng] = 0;
+  }
+  return CURLE_OK;
+
+}
+#endif
+
 /*
  * Appends a buffer with length.
  */
@@ -224,7 +249,7 @@ CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
 /*
  * Returns a pointer to the buffer.
  */
-char *Curl_dyn_ptr(const struct dynbuf *s)
+const char *Curl_dyn_ptr(const struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -235,7 +260,7 @@ char *Curl_dyn_ptr(const struct dynbuf *s)
 /*
  * Returns an unsigned pointer to the buffer.
  */
-unsigned char *Curl_dyn_uptr(const struct dynbuf *s)
+const unsigned char *Curl_dyn_uptr(const struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);

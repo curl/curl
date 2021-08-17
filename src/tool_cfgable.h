@@ -94,7 +94,7 @@ struct OperationConfig {
   char *dns_interface; /* interface name */
   char *dns_ipv4_addr; /* dot notation */
   char *dns_ipv6_addr; /* dot notation */
-  char *userpwd;
+  const char *userpwd;
   char *login_options;
   char *tls_username;
   char *tls_password;
@@ -102,7 +102,7 @@ struct OperationConfig {
   char *proxy_tls_username;
   char *proxy_tls_password;
   char *proxy_tls_authtype;
-  char *proxyuserpwd;
+  const char *proxyuserpwd;
   char *proxy;
   int proxyver;             /* set to CURLPROXY_HTTP* define */
   char *noproxy;
@@ -188,7 +188,7 @@ struct OperationConfig {
   bool proxydigest;
   bool proxybasic;
   bool proxyanyauth;
-  char *writeout;           /* %-styled format string to output */
+  const char *writeout;           /* %-styled format string to output */
   struct curl_slist *quote;
   struct curl_slist *postquote;
   struct curl_slist *prequote;

@@ -105,7 +105,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
   }
   else {        /* Standard input. */
     int fd = fileno(stdin);
-    char *data = NULL;
+    const char *data = NULL;
     curl_off_t size;
     curl_off_t origin;
     struct_stat sbuf;

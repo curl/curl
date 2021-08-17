@@ -263,7 +263,7 @@ static CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
 {
   size_t len_in = strlen(input), len_out = 0;
   struct dynbuf b;
-  char *ptr = NULL;
+  const char *ptr = NULL;
   unsigned char *buf = (unsigned char *)data->state.buffer;
   Curl_dyn_init(&b, MAX_NTLM_WB_RESPONSE);
 
@@ -297,7 +297,7 @@ static CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
     len_out = Curl_dyn_len(&b);
     ptr = Curl_dyn_ptr(&b);
     if(len_out && ptr[len_out - 1] == '\n') {
-      ptr[len_out - 1] = '\0';
+      Curl_dyn_trunc(&b, --len_out);
       break; /* done! */
     }
     /* loop */
@@ -309,7 +309,7 @@ static CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
      ptr[0] == 'P' && ptr[1] == 'W')
     goto done;
   /* invalid response */
-  if(len_out < 4)
+  if(len_out < 3)
     goto done;
   if(state == NTLMSTATE_TYPE1 &&
      (ptr[0]!='Y' || ptr[1]!='R' || ptr[2]!=' '))

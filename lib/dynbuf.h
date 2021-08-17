@@ -36,6 +36,7 @@
 #define Curl_dyn_len(a) curlx_dyn_len(a)
 #define Curl_dyn_reset(a) curlx_dyn_reset(a)
 #define Curl_dyn_tail(a,b) curlx_dyn_tail(a,b)
+#define Curl_dyn_trunc(a,b) curlx_dyn_trunc(a,b)
 #define curlx_dynbuf dynbuf /* for the struct name */
 #endif
 
@@ -61,8 +62,9 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
   WARN_UNUSED_RESULT;
 void Curl_dyn_reset(struct dynbuf *s);
 CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail);
-char *Curl_dyn_ptr(const struct dynbuf *s);
-unsigned char *Curl_dyn_uptr(const struct dynbuf *s);
+CURLcode Curl_dyn_trunc(struct dynbuf *s, size_t newlen);
+const char *Curl_dyn_ptr(const struct dynbuf *s);
+const unsigned char *Curl_dyn_uptr(const struct dynbuf *s);
 size_t Curl_dyn_len(const struct dynbuf *s);
 
 /* returns 0 on success, -1 on error */

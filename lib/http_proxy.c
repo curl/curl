@@ -259,7 +259,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
   curl_socket_t tunnelsocket = conn->sock[sockindex];
   struct http_connect_state *s = conn->connect_state;
   struct HTTP *http = data->req.p.http;
-  char *linep;
+  const char *linep;
   size_t perline;
 
 #define SELECT_OK      0

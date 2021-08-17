@@ -1522,7 +1522,7 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
   }
 
   if(Curl_dyn_len(&stream->trailer_recvbuf)) {
-    char *trailp = Curl_dyn_ptr(&stream->trailer_recvbuf);
+    const char *trailp = Curl_dyn_ptr(&stream->trailer_recvbuf);
     char *lf;
 
     do {

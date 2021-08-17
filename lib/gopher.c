@@ -227,7 +227,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     failf(data, "Failed sending Gopher request");
     return result;
   }
-  result = Curl_client_write(data, CLIENTWRITE_HEADER, (char *)"\r\n", 2);
+  result = Curl_client_write(data, CLIENTWRITE_HEADER, "\r\n", 2);
   if(result)
     return result;
 

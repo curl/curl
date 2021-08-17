@@ -619,7 +619,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   free(per->this_url);
   free(per->separator_err);
   free(per->separator);
-  free(per->outfile);
+  free((char *)per->outfile);
   free(per->uploadfile);
 
   return result;
@@ -846,7 +846,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         /* --etag-compare */
         if(config->etag_compare_file) {
-          char *etag_from_file = NULL;
+          const char *etag_from_file = NULL;
           char *header = NULL;
 
           /* open file for reading: */
@@ -961,7 +961,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           else if(state->urls) {
             /* fill '#1' ... '#9' terms from URL pattern */
             char *storefile = per->outfile;
-            result = glob_match_url(&per->outfile, storefile, state->urls);
+            const char *getit = NULL;
+            result = glob_match_url(&getit, storefile, state->urls);
+            per->outfile = (char *)getit;
             Curl_safefree(storefile);
             if(result) {
               /* bad globbing */

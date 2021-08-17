@@ -902,7 +902,7 @@ static CURLcode client_unencode_write(struct Curl_easy *data,
   if(!nbytes || k->ignorebody)
     return CURLE_OK;
 
-  return Curl_client_write(data, CLIENTWRITE_BODY, (char *) buf, nbytes);
+  return Curl_client_write(data, CLIENTWRITE_BODY, buf, nbytes);
 }
 
 static void client_close_writer(struct Curl_easy *data,

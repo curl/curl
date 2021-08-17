@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -138,7 +138,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 
   if(file) {
     char *line;
-    char *option;
+    const char *option;
     char *param;
     int lineno = 0;
     bool dashed_option;
@@ -150,7 +150,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       int res;
       bool alloced_param = FALSE;
       lineno++;
-      line = curlx_dyn_ptr(&buf);
+      line = (char *)curlx_dyn_ptr(&buf);
       if(!line) {
         rc = 1; /* out of memory */
         break;

@@ -610,7 +610,8 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
 
 #define MAX_OUTPUT_GLOB_LENGTH (10*1024)
 
-CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
+CURLcode glob_match_url(const char **result, char *filename,
+                        struct URLGlob *glob)
 {
   char numbuf[18];
   char *appendthis = (char *)"";

@@ -78,25 +78,34 @@ Keep `length` bytes of the buffer tail (the last `length` bytes of the
 buffer). The rest of the buffer is dropped. The specified `length` must not be
 larger than the buffer length.
 
+## trunc
+
+```c
+CURLcode Curl_dyn_trunc(struct dynbuf *s, size_t length);
+```
+
+Keep the first `length` bytes of the buffer. The rest of the buffer is
+dropped. The specified `length` must not be larger than the buffer length.
+
 ## ptr
 
 ```c
-char *Curl_dyn_ptr(const struct dynbuf *s);
+const char *Curl_dyn_ptr(const struct dynbuf *s);
 ```
 
-Returns a `char *` to the buffer if it has a length, otherwise a NULL. Since
-the buffer may be reallocated, this pointer should not be trusted or used
-anymore after the next buffer manipulation call.
+Returns a `const char *` to the buffer if it has a length, otherwise a
+NULL. Since the buffer may be reallocated, this pointer should not be trusted
+or used anymore after the next buffer manipulation call.
 
 ## uptr
 
 ```c
-unsigned char *Curl_dyn_uptr(const struct dynbuf *s);
+const unsigned char *Curl_dyn_uptr(const struct dynbuf *s);
 ```
 
-Returns an `unsigned char *` to the buffer if it has a length, otherwise a
-NULL. Since the buffer may be reallocated, this pointer should not be trusted
-or used anymore after the next buffer manipulation call.
+Returns an `const unsigned char *` to the buffer if it has a length, otherwise
+a NULL. Since the buffer may be reallocated, this pointer should not be
+trusted or used anymore after the next buffer manipulation call.
 
 ## len
 

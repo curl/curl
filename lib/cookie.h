@@ -93,7 +93,7 @@ struct Curl_easy;
 
 struct Cookie *Curl_cookie_add(struct Curl_easy *data,
                                struct CookieInfo *c, bool header,
-                               bool noexpiry, char *lineptr,
+                               bool noexpiry, const char *lineptr,
                                const char *domain, const char *path,
                                bool secure);
 

@@ -49,7 +49,7 @@
 
 #define GetStr(str,val) do { \
   if(*(str)) { \
-    free(*(str)); \
+    free((char *)*(str));                       \
     *(str) = NULL; \
   } \
   if((val)) {              \
@@ -1364,7 +1364,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case 'd':
       /* postfield data */
     {
-      char *postdata = NULL;
+      const char *postdata = NULL;
       FILE *file;
       size_t size = 0;
       bool raw_mode = (subletter == 'r');
@@ -1513,7 +1513,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if(config->postfields) {
         /* we already have a string, we append this one with a separating
            &-letter */
-        char *oldpost = config->postfields;
+        const char *oldpost = config->postfields;
         curl_off_t oldlen = config->postfieldsize;
         curl_off_t newlen = oldlen + curlx_uztoso(size) + 2;
         config->postfields = malloc((size_t)newlen);
@@ -1532,7 +1532,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->postfieldsize += size + 1;
       }
       else {
-        config->postfields = postdata;
+        config->postfields = (char *)postdata;
         config->postfieldsize = curlx_uztoso(size);
       }
     }
@@ -1851,6 +1851,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* A custom header to append to a list */
       if(nextarg[0] == '@') {
         /* read many headers from a file or stdin */
+        const char *getit;
         char *string;
         size_t len;
         bool use_stdin = !strcmp(&nextarg[1], "-");
@@ -1858,11 +1859,13 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         if(!file)
           warnf(global, "Failed to open %s!\n", &nextarg[1]);
         else {
-          err = file2memory(&string, &len, file);
-          if(!err && string) {
+          err = file2memory(&getit, &len, file);
+          if(!err && getit) {
+            char *h;
+            string = (char *)getit;
             /* Allow strtok() here since this isn't used threaded */
             /* !checksrc! disable BANNEDFUNC 2 */
-            char *h = strtok(string, "\r\n");
+            h = strtok(string, "\r\n");
             while(h) {
               if(subletter == 'p') /* --proxy-header */
                 err = add2list(&config->proxyheaders, h);
