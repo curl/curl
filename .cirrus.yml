@@ -82,14 +82,14 @@ windows_task:
   matrix:
     - name: Windows 32-bit shared/release Schannel/SSPI/WinIDN/libssh2
       env:
-        container_img: mback2k/curl-docker-winbuildenv-msys2-mingw32:ltsc2019
+        container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2
         configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
         tests: ~165 ~310 ~571 ~612 ~1056 ~1299 ~1448 ~2034 ~2037 ~2041 ~2046 ~2047 ~3000 ~3001 !SCP
     - name: Windows 32-bit static/release Schannel/SSPI/WinIDN/libssh2
       env:
-        container_img: mback2k/curl-docker-winbuildenv-msys2-mingw32:ltsc2019
+        container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2
         configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static
@@ -98,14 +98,14 @@ windows_task:
         PKG_CONFIG: pkg-config --static
     - name: Windows 64-bit shared/release Schannel/SSPI/WinIDN/libssh2
       env:
-        container_img: mback2k/curl-docker-winbuildenv-msys2-mingw64:ltsc2019
+        container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
         configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
         tests: ~165 ~310 ~571 ~612 ~1056 ~1299 ~1448 ~2034 ~2037 ~2041 ~2046 ~2047 ~3000 ~3001 !SCP
     - name: Windows 64-bit static/release Schannel/SSPI/WinIDN/libssh2
       env:
-        container_img: mback2k/curl-docker-winbuildenv-msys2-mingw64:ltsc2019
+        container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
         configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static
