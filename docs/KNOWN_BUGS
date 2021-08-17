@@ -72,6 +72,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.9 SHA-256 digest not supported in Windows SSPI builds
  6.10 curl never completes Negotiate over HTTP
  6.11 Negotiate on Windows fails
+ 6.12 Can't use Secure Transport with Crypto Token Kit
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -609,6 +610,9 @@ problems may have been fixed or changed somewhat since this was written!
 
  https://github.com/curl/curl/issues/5881
 
+6.12 Can't use Secure Transport with Crypto Token Kit
+
+ https://github.com/curl/curl/issues/7048
 
 7. FTP
 
