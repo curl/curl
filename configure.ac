@@ -446,6 +446,32 @@ else
 fi
 AM_CONDITIONAL(BUILD_UNITTESTS, test x$want_unittests = xyes)
 
+# For original MinGW (ie not MinGW-w64) define the Windows minimum supported OS
+# version to Windows XP (0x501) if it hasn't already been defined by the user.
+# Without this override original MinGW defaults the version to Windows NT 4.0.
+# Note original MinGW sets _WIN32_WINNT if not defined to whatever WINVER is.
+case $host in
+  *-*-mingw32*)
+    AC_MSG_CHECKING([if MinGW minimum supported OS should be set to XP])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <_mingw.h>
+      ]],[[
+#if defined(__MINGW64_VERSION_MAJOR) || \
+    defined(WINVER) || \
+    defined(_WIN32_WINNT)
+#error
+#endif
+      ]])
+    ],[
+      CPPFLAGS="$CPPFLAGS -DWINVER=0x501"
+      AC_MSG_RESULT([yes])
+    ],[
+      AC_MSG_RESULT([no])
+    ])
+    ;;
+esac
+
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
 dnl **********************************************************************
@@ -2309,11 +2335,12 @@ esac
 
 if test "$want_winidn" = "yes"; then
   dnl winidn library support has been requested
+  clean_CFLAGS="$CFLAGS"
   clean_CPPFLAGS="$CPPFLAGS"
   clean_LDFLAGS="$LDFLAGS"
   clean_LIBS="$LIBS"
   WINIDN_LIBS="-lnormaliz"
-  WINIDN_CPPFLAGS="-DWINVER=0x0600"
+  WINIDN_CPPFLAGS=""
   #
   if test "$want_winidn_path" != "default"; then
     dnl path has been specified
@@ -2322,6 +2349,24 @@ if test "$want_winidn" = "yes"; then
     WINIDN_CPPFLAGS="-I$want_winidn_path/include"
     WINIDN_DIR="$want_winidn_path/lib$libsuff"
   fi
+  #
+  dnl WinIDN requires a minimum supported OS version of at least Vista (0x0600)
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      #include <windows.h>
+    ]],[[
+      #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
+      #error
+      #endif
+    ]])
+  ],[
+  ],[
+     CFLAGS=`echo $CFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
+     CFLAGS=`echo $CFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
+     CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
+     CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
+     WINIDN_CPPFLAGS="$WINIDN_CPPFLAGS -DWINVER=0x0600"
+  ])
   #
   CPPFLAGS="$CPPFLAGS $WINIDN_CPPFLAGS"
   LDFLAGS="$LDFLAGS $WINIDN_LDFLAGS"
@@ -2349,6 +2394,7 @@ if test "$want_winidn" = "yes"; then
     curl_idn_msg="enabled (Windows-native)"
   else
     AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
+    CFLAGS="$clean_CFLAGS"
     CPPFLAGS="$clean_CPPFLAGS"
     LDFLAGS="$clean_LDFLAGS"
     LIBS="$clean_LIBS"
