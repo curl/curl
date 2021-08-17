@@ -141,6 +141,12 @@
 #  define CALG_SHA_256 0x0000800c
 #endif
 
+/* Work around typo in classic MinGW's w32api up to version 5.0,
+   see https://osdn.net/projects/mingw/ticket/38391 */
+#if !defined(ALG_CLASS_DHASH) && defined(ALG_CLASS_HASH)
+#define ALG_CLASS_DHASH ALG_CLASS_HASH
+#endif
+
 #define BACKEND connssl->backend
 
 static Curl_recv schannel_recv;
@@ -279,13 +285,7 @@ get_alg_id_by_name(char *name)
 #ifdef CALG_HMAC
   CIPHEROPTION(CALG_HMAC);
 #endif
-#if !defined(__W32API_MAJOR_VERSION) ||                                 \
-  !defined(__W32API_MINOR_VERSION) ||                                   \
-  defined(__MINGW64_VERSION_MAJOR) ||                                   \
-  (__W32API_MAJOR_VERSION > 5)     ||                                   \
-  ((__W32API_MAJOR_VERSION == 5) && (__W32API_MINOR_VERSION > 0))
-  /* CALG_TLS1PRF has a syntax error in MinGW's w32api up to version 5.0,
-     see https://osdn.net/projects/mingw/ticket/38391 */
+#ifdef CALG_TLS1PRF
   CIPHEROPTION(CALG_TLS1PRF);
 #endif
 #ifdef CALG_HASH_REPLACE_OWF
