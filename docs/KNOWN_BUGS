@@ -782,17 +782,17 @@ problems may have been fixed or changed somewhat since this was written!
 11.3 Disconnects don't do verbose
 
  Due to how libcurl keeps connections alive in the "connection pool" after use
- to potentially trascend the life-time of the initial easy handle that was
+ to potentially transcend the life-time of the initial easy handle that was
  used to drive the transfer over that connection, it uses a *separate* and
- internal easy handle when it shutd down the connection. That separate
+ internal easy handle when it shuts down the connection. That separate
  connection might not have the exact same settings as the original easy
  handle, and in particular it is often note-worthy that it doesn't have the
- same VERBOSE and debug callbcaks setup so that an application will not get
+ same VERBOSE and debug callbacks setup so that an application will not get
  the protocol data for the disconnect phase of a transfer the same way it got
  all the other data.
 
- This is because the orginal easy handle might have already been freed at that
- point and the applicaiton might not at all be prepared that the callback
+ This is because the original easy handle might have already been freed at that
+ point and the application might not at all be prepared that the callback
  would get called again long after the handle was freed.
 
  See for example https://github.com/curl/curl/issues/6995
