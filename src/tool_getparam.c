@@ -1006,8 +1006,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->ftp_filemethod = ftpfilemethod(config, nextarg);
         break;
       case 's': { /* --local-port */
-        char lrange[7];  /* 16bit base 10 is 5 digits, but we allow 6 so that
-                            this catches overflows, not just truncates */
+        /* 16bit base 10 is 5 digits, but we allow 6 so that this catches
+           overflows, not just truncates */
+        char lrange[7]="";
         char *p = nextarg;
         while(ISDIGIT(*p))
           p++;
