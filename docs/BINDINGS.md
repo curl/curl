@@ -47,7 +47,7 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 [Guile](https://www.lonelycactus.com/guile-curl.html) Written by Michael L. Gran
 
-[Harbour](https://github.com/vszakats/harbour-core/tree/master/contrib/hbcurl) Written by Viktor Szakáts
+[Harbour](https://github.com/vszakats/hb/tree/master/contrib/hbcurl) Written by Viktor Szakats
 
 [Haskell](https://hackage.haskell.org/cgi-bin/hackage-scripts/package/curl) Written by Galois, Inc
 
