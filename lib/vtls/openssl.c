@@ -2658,8 +2658,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  if(backend->ctx)
-    SSL_CTX_free(backend->ctx);
+  DEBUGASSERT(!backend->ctx);
   backend->ctx = SSL_CTX_new(req_method);
 
   if(!backend->ctx) {
