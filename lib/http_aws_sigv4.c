@@ -43,6 +43,7 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+#include "warnless.h"
 
 #define HMAC_SHA256(k, kl, d, dl, o)        \
   do {                                      \
@@ -64,6 +65,88 @@ static void sha256_to_hex(char *dst, unsigned char *sha, size_t dst_l)
   for(i = 0; i < 32; ++i) {
     curl_msnprintf(dst + (i * 2), dst_l - (i * 2), "%02x", sha[i]);
   }
+}
+
+/*
+ * Decide in an encoding-independent manner whether a character in an
+ * URL must be escaped. The same criterion must be used in strlen_uri()
+ * and strcpy_uri().
+ */
+static bool urlchar_needs_escaping(int c, bool in_query)
+{
+  return !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+           (c >= '0' && c <= '9') || c == '-' || c == '.' || c == '_'
+           || c == '~' ||
+           (!in_query && c == '/') ||
+           (in_query && c == '&'));
+}
+
+/*
+ * strlen_uri() returns the length of the given URI
+ * this fucntion is a modified version of strlen_url in urlapi.c
+ */
+static size_t encode_query_len(const char *url, bool in_query)
+{
+  const unsigned char *ptr;
+  size_t newlen = 0;
+  int count_equal = 0;
+
+  for(ptr = (unsigned char *)url; *ptr; ptr++) {
+    switch (*ptr) {
+    case '=':
+      if(!in_query || count_equal++)
+        newlen += 2;
+      newlen++;
+      break;
+    case '&':
+      count_equal = 0;
+      /* FALLTHROUGH */
+    default:
+      if(urlchar_needs_escaping(*ptr, in_query))
+        newlen += 2;
+      newlen++;
+    }
+  }
+  return newlen;
+}
+
+/* encode_query_cpy() copies a url to a output buffer and URL-encodes
+ * the URI acordingly
+ * this fucntion is a modified version of strcpy_url in urlapi.c
+ */
+static void encode_query_cpy(char *optr, const char *iptr, bool in_query)
+{
+  /* we must add this with whitespace-replacing */
+  int count_equal = 0;
+
+  for(;
+      *iptr;         /* until zero byte */
+      iptr++) {
+
+    switch(*iptr) {
+    case '=':
+      if(!in_query || count_equal++) {
+        msnprintf(optr, 4, "%%%02X", *iptr);
+        optr += 3;
+      }
+      else
+        *optr++=*iptr;
+      break;
+    case '&':
+      count_equal = 0;
+      /* FALLTHROUGH */
+    default:
+      if(urlchar_needs_escaping(*iptr, in_query)) {
+        msnprintf(optr, 4, "%%%02X", *iptr);
+        optr += 3;
+      }
+      else
+        *optr++=*iptr;
+      break;
+    }
+  }
+  *optr = 0; /* null-terminate output buffer */
+
 }
 
 CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
@@ -106,6 +189,9 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   unsigned char tmp_sign0[32] = {0};
   unsigned char tmp_sign1[32] = {0};
   char *auth_headers = NULL;
+  char *canonical_path = NULL;
+  size_t canonical_len;
+  char *canonical_query_str = NULL;
 
   DEBUGASSERT(!proxy);
   (void)proxy;
@@ -257,7 +343,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       goto fail;
     }
     content_type++;
-    /* Skip whitespace now */
+    /* Skip whitespace */
     while(*content_type == ' ' || *content_type == '\t')
       ++content_type;
 
@@ -295,6 +381,20 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   Curl_http_method(data, conn, &method, &httpreq);
 
+  canonical_len = encode_query_len(data->state.up.path, FALSE);
+  canonical_path = malloc(canonical_len + 1);
+  if(!canonical_path)
+    goto fail;
+  encode_query_cpy(canonical_path, data->state.up.path, FALSE);
+
+  if(data->state.up.query) {
+    canonical_len = encode_query_len(data->state.up.query, TRUE);
+    canonical_query_str = malloc(canonical_len + 1);
+    if(!canonical_query_str)
+      goto fail;
+    encode_query_cpy(canonical_query_str, data->state.up.query, TRUE);
+  }
+
   canonical_request =
     curl_maprintf("%s\n" /* HTTPRequestMethod */
                   "%s\n" /* CanonicalURI */
@@ -303,11 +403,12 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                   "%s\n" /* SignedHeaders */
                   "%s",  /* HashedRequestPayload in hex */
                   method,
-                  data->state.up.path,
-                  data->state.up.query ? data->state.up.query : "",
+                  canonical_path,
+                  data->state.up.query ? canonical_query_str : "",
                   canonical_headers,
                   signed_headers,
                   sha_hex);
+
   if(!canonical_request) {
     goto fail;
   }
@@ -399,6 +500,8 @@ fail:
   free(credential_scope);
   free(str_to_sign);
   free(secret);
+  free(canonical_path);
+  free(canonical_query_str);
   return ret;
 }
 
