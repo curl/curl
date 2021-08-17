@@ -668,8 +668,8 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   if(pinnedpubkey) {
     int size;
     CURLcode result;
-    mbedtls_x509_crt *p;
-    unsigned char pubkey[PUB_DER_MAX_BYTES];
+    mbedtls_x509_crt *p = NULL;
+    unsigned char *pubkey = NULL;
 
 #if MBEDTLS_VERSION_NUMBER >= 0x03000000
     if(!peercert || !peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(p) ||
@@ -686,6 +686,13 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     if(!p)
       return CURLE_OUT_OF_MEMORY;
 
+    pubkey = malloc(PUB_DER_MAX_BYTES);
+
+    if(!pubkey) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto pinnedpubkey_error;
+    }
+
     mbedtls_x509_crt_init(p);
 
     /* Make a copy of our const peercert because mbedtls_pk_write_pubkey_der
@@ -699,9 +706,8 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     if(mbedtls_x509_crt_parse_der(p, peercert->raw.p, peercert->raw.len)) {
 #endif
       failf(data, "Failed copying peer certificate");
-      mbedtls_x509_crt_free(p);
-      free(p);
-      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+      result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+      goto pinnedpubkey_error;
     }
 
 #if MBEDTLS_VERSION_NUMBER >= 0x03000000
@@ -713,23 +719,21 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
 
     if(size <= 0) {
       failf(data, "Failed copying public key from peer certificate");
-      mbedtls_x509_crt_free(p);
-      free(p);
-      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+      result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+      goto pinnedpubkey_error;
     }
 
     /* mbedtls_pk_write_pubkey_der writes data at the end of the buffer. */
     result = Curl_pin_peer_pubkey(data,
                                   pinnedpubkey,
                                   &pubkey[PUB_DER_MAX_BYTES - size], size);
-    if(result) {
-      mbedtls_x509_crt_free(p);
-      free(p);
-      return result;
-    }
-
+    pinnedpubkey_error:
     mbedtls_x509_crt_free(p);
     free(p);
+    free(pubkey);
+    if(result) {
+      return result;
+    }
   }
 
 #ifdef HAS_ALPN
