@@ -152,4 +152,5 @@ if($verbose) {
     print STDERR "RUN: server/sws".exe_ext('SRV')." $flags\n";
 }
 
-exec("server/sws".exe_ext('SRV')." $flags");
+$| = 1;
+exec("exec server/sws".exe_ext('SRV')." $flags");

@@ -341,6 +341,9 @@ if($tstunnel_windows) {
         close(OUT);
     }
 
+    # Flush output.
+    $| = 1;
+
     # Put an "exec" in front of the command so that the child process
     # keeps this child's process ID by being tied to the spawned shell.
     exec("exec $cmd") || die "Can't exec() $cmd: $!";

@@ -120,4 +120,5 @@ $flags .= "--pidfile \"$pidfile\" ".
     "--logfile \"$logfile\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
-exec("server/tftpd".exe_ext('SRV')." $flags");
+$| = 1;
+exec("exec server/tftpd".exe_ext('SRV')." $flags");

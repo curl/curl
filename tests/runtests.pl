@@ -496,6 +496,9 @@ sub startnew {
     if(0 == $child) {
         # Here we are the child. Run the given command.
 
+        # Flush output.
+        $| = 1;
+
         # Put an "exec" in front of the command so that the child process
         # keeps this child's process ID.
         exec("exec $cmd") || die "Can't exec() $cmd: $!";
@@ -4107,6 +4110,9 @@ sub singletest {
         print GDBCMD "source $gdbinit\n" if -e $gdbinit;
         close(GDBCMD);
     }
+
+    # Flush output.
+    $| = 1;
 
     # timestamp starting of test command
     $timetoolini{$testnum} = Time::HiRes::time();
