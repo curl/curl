@@ -74,7 +74,7 @@ Open a Visual Studio Command prompt:
 where `<options>` is one or many of:
 
  - `VC=<num>`                    - VC version. 6 or later.
- - `RTLIBCFG=<dll/static>`       - Runtime library configuration, defaults to dll
+ - `RTLIBCFG=<dll/static>`       - **Usage of this option is discouraged!** Runtime library configuration, defaults to dll
  - `MODE=<dll/static>`           - Build static or dll
  - `WITH_DEVEL=<path>`           - Paths for the development files (SSL, zlib, etc.)
                                    Defaults to sibbling directory deps: ../deps
