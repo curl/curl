@@ -35,6 +35,7 @@ problems may have been fixed or changed somewhat since this was written!
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.12 FTPS with Schannel times out file list operation
  2.14 Secure Transport disabling hostname validation also disables SNI
+ 2.15 Renegotiate from server may cause hang for OpenSSL backend
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -344,6 +345,17 @@ problems may have been fixed or changed somewhat since this was written!
  In this case the error may also have been caused by lack of SNI.
 
  https://github.com/curl/curl/issues/6347
+
+2.15 Renegotiate from server may cause hang for OpenSSL backend
+
+ A race condition has been observed when, immediately after the initial
+ handshake, curl has sent an HTTP request to the server and at the same time
+ the server has sent a TLS hello request (renegotiate) to curl. Both are
+ waiting for the other to respond. OpenSSL is supposed to send a handshake
+ response but doesn't.
+
+ https://github.com/curl/curl/issues/6785
+ https://github.com/openssl/openssl/issues/14722
 
 3. Email protocols
 
