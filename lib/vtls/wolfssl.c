@@ -525,6 +525,8 @@ wolfssl_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   const char * const dispname = SSL_HOST_DISPNAME();
   const char * const pinnedpubkey = SSL_PINNED_PUB_KEY();
 
+  ERR_clear_error();
+
   conn->recv[sockindex] = wolfssl_recv;
   conn->send[sockindex] = wolfssl_send;
 
@@ -775,7 +777,11 @@ static ssize_t wolfssl_send(struct Curl_easy *data,
   struct ssl_backend_data *backend = connssl->backend;
   char error_buffer[WOLFSSL_MAX_ERROR_SZ];
   int memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
-  int rc = SSL_write(backend->handle, mem, memlen);
+  int rc;
+
+  ERR_clear_error();
+
+  rc = SSL_write(backend->handle, mem, memlen);
 
   if(rc <= 0) {
     int err = SSL_get_error(backend->handle, rc);
@@ -831,7 +837,11 @@ static ssize_t wolfssl_recv(struct Curl_easy *data,
   struct ssl_backend_data *backend = connssl->backend;
   char error_buffer[WOLFSSL_MAX_ERROR_SZ];
   int buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
-  int nread = SSL_read(backend->handle, buf, buffsize);
+  int nread;
+
+  ERR_clear_error();
+
+  nread = SSL_read(backend->handle, buf, buffsize);
 
   if(nread < 0) {
     int err = SSL_get_error(backend->handle, nread);
@@ -916,6 +926,7 @@ static int wolfssl_shutdown(struct Curl_easy *data, struct connectdata *conn,
   (void) data;
 
   if(backend->handle) {
+    ERR_clear_error();
     SSL_free(backend->handle);
     backend->handle = NULL;
   }
