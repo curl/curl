@@ -26,8 +26,9 @@ freebsd_task:
   name: FreeBSD
 
   matrix:
-      # A stable 13.0 image likely won't be available before early 2021
-      # image_family: freebsd-13-0-snap
+    - name: FreeBSD 13.0
+      freebsd_instance:
+        image_family: freebsd-13-0
     - name: FreeBSD 12.2
       freebsd_instance:
         image_family: freebsd-12-2
@@ -49,13 +50,14 @@ freebsd_task:
     - easy_install "impacket"
   configure_script:
     - ./buildconf
-    - case `uname -r` in
-        12.1*)
-        export CC=clang;
-        export CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
-        export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
-        export LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" ;;
-      esac
+    # Building with the address sanitizer is causing unexplainable test issues due to timeouts
+    #- case `uname -r` in
+    #    12.2*)
+    #    export CC=clang;
+    #    export CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
+    #    export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
+    #    export LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" ;;
+    #  esac
     - ./configure --prefix="${HOME}"/install --enable-debug --with-openssl --with-libssh2 --with-brotli --with-gssapi --with-libidn2 --enable-manual --enable-ldap --enable-ldaps --with-librtmp --with-libpsl --with-nghttp2 || { tail -300 config.log; false; }
   compile_script:
     - make V=1 && cd tests && make V=1
