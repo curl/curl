@@ -840,14 +840,16 @@ static CURLcode CONNECT(struct Curl_easy *data,
          Curl_hyper_header(data, headers, data->state.aptr.proxyuserpwd))
         goto error;
 
-      if(data->set.str[STRING_USERAGENT] &&
-         *data->set.str[STRING_USERAGENT] &&
-         data->state.aptr.uagent &&
+      if(!Curl_checkProxyheaders(data, conn, "User-Agent") &&
+         data->set.str[STRING_USERAGENT] &&
          Curl_hyper_header(data, headers, data->state.aptr.uagent))
         goto error;
 
       if(!Curl_checkProxyheaders(data, conn, "Proxy-Connection") &&
          Curl_hyper_header(data, headers, "Proxy-Connection: Keep-Alive"))
+        goto error;
+
+      if(Curl_add_custom_headers(data, TRUE, headers))
         goto error;
 
       sendtask = hyper_clientconn_send(client, req);
