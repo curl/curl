@@ -129,6 +129,76 @@
 #define SECBUFFER_ALERT                 17
 #endif
 
+#ifndef SCH_CREDENTIALS_VERSION
+#define SCH_CREDENTIALS_VERSION  0x00000005
+#endif
+
+/* https://docs.microsoft.com/en-us/windows/win32/api/subauth/ns-subauth-unicode_string */
+#ifndef UNICODE_STRING
+typedef struct _UNICODE_STRING {
+    USHORT Length;
+    USHORT MaximumLength;
+    PWSTR  Buffer;
+} UNICODE_STRING, * PUNICODE_STRING;
+#endif
+
+/* https://github.com/microsoft/msquic/blob/main/src/platform/tls_schannel.c */
+/* https://www.mail-archive.com/mingw-w64-public@lists.sourceforge.net/msg17234.html */
+#ifndef eTlsAlgorithmUsage
+typedef enum _eTlsAlgorithmUsage
+{
+    TlsParametersCngAlgUsageKeyExchange,          // Key exchange algorithm. RSA, ECHDE, DHE, etc.
+    TlsParametersCngAlgUsageSignature,            // Signature algorithm. RSA, DSA, ECDSA, etc.
+    TlsParametersCngAlgUsageCipher,               // Encryption algorithm. AES, DES, RC4, etc.
+    TlsParametersCngAlgUsageDigest,               // Digest of cipher suite. SHA1, SHA256, SHA384, etc.
+    TlsParametersCngAlgUsageCertSig               // Signature and/or hash used to sign certificate. RSA, DSA, ECDSA, SHA1, SHA256, etc.
+} eTlsAlgorithmUsage;
+#endif
+
+#ifndef CRYPTO_SETTINGS
+typedef struct _CRYPTO_SETTINGS
+{
+    eTlsAlgorithmUsage  eAlgorithmUsage;         // How this algorithm is being used.
+    UNICODE_STRING      strCngAlgId;             // CNG algorithm identifier.
+    DWORD               cChainingModes;          // Set to 0 if CNG algorithm does not have a chaining mode.
+    PUNICODE_STRING     rgstrChainingModes;      // Set to NULL if CNG algorithm does not have a chaining mode.
+    DWORD               dwMinBitLength;          // Blacklist key sizes less than this. Set to 0 if not defined or CNG algorithm implies bit length.
+    DWORD               dwMaxBitLength;          // Blacklist key sizes greater than this. Set to 0 if not defined or CNG algorithm implies bit length.
+} CRYPTO_SETTINGS, * PCRYPTO_SETTINGS;
+#endif
+
+#ifndef TLS_PARAMETERS
+typedef struct _TLS_PARAMETERS
+{
+    DWORD               cAlpnIds;                // Valid for server applications only. Must be zero otherwise. Number of ALPN IDs in rgstrAlpnIds; set to 0 if applies to all.
+    PUNICODE_STRING     rgstrAlpnIds;            // Valid for server applications only. Must be NULL otherwise. Array of ALPN IDs that the following settings apply to; set to NULL if applies to all.
+    DWORD               grbitDisabledProtocols;  // List protocols you DO NOT want negotiated.
+    DWORD               cDisabledCrypto;         // Number of CRYPTO_SETTINGS structures; set to 0 if there are none.
+    PCRYPTO_SETTINGS    pDisabledCrypto;         // Array of CRYPTO_SETTINGS structures; set to NULL if there are none;
+    DWORD               dwFlags;                 // Optional flags to pass; set to 0 if there are none.
+} TLS_PARAMETERS, * PTLS_PARAMETERS;
+#endif
+
+/* https://docs.microsoft.com/en-us/windows/win32/api/schannel/ns-schannel-sch_credentials */
+#ifndef SCH_CREDENTIALS
+typedef struct _SCH_CREDENTIALS
+{
+    DWORD               dwVersion;               // Always SCH_CREDENTIALS_VERSION.
+    DWORD               dwCredFormat;
+    DWORD               cCreds;
+    PCCERT_CONTEXT*     paCred;
+    HCERTSTORE          hRootStore;
+
+    DWORD               cMappers;
+    struct _HMAPPER**   aphMappers;
+
+    DWORD               dwSessionLifespan;
+    DWORD               dwFlags;
+    DWORD               cTlsParameters;
+    PTLS_PARAMETERS     pTlsParameters;
+} SCH_CREDENTIALS, * PSCH_CREDENTIALS;
+#endif
+
 /* Both schannel buffer sizes must be > 0 */
 #define CURL_SCHANNEL_BUFFER_INIT_SIZE   4096
 #define CURL_SCHANNEL_BUFFER_FREE_SIZE   1024
