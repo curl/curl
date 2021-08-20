@@ -194,6 +194,7 @@ mark_as_advanced(CURL_DISABLE_MQTT)
 option(CURL_ENABLE_EXPORT_TARGET "to enable cmake export target" ON)
 mark_as_advanced(CURL_ENABLE_EXPORT_TARGET)
 
+# Corresponds to HTTP_ONLY in lib/curl_setup.h
 if(HTTP_ONLY)
   set(CURL_DISABLE_DICT ON)
   set(CURL_DISABLE_FILE ON)
