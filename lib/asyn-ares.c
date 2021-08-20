@@ -728,6 +728,7 @@ static void addrinfo_cb(void *arg, int status, int timeouts,
   if(ARES_SUCCESS == status) {
     res->temp_ai = ares2addr(result->nodes);
     res->last_status = CURL_ASYNC_SUCCESS;
+    ares_freeaddrinfo(result);
   }
   res->num_pending--;
 }
