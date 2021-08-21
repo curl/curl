@@ -29,7 +29,7 @@
 #
 # Also note:
 # 10.5 is the *ONLY* SDK that support PPC64 :( -- 10.6 do not have ppc64 support
-#If you need to have PPC64 support then change below to 1
+# If you need to have PPC64 support then change below to 1
 PPC64_NEEDED=0
 # Apple does not support building for PPC anymore in Xcode 4 and later.
 # If you're using Xcode 3 or earlier and need PPC support, then change
@@ -37,70 +37,67 @@ PPC64_NEEDED=0
 PPC_NEEDED=0
 
 # For me the default is to develop for the platform I am on, and if you
-#desire compatibility with older versions then change USE_OLD to 1 :)
+# desire compatibility with older versions then change USE_OLD to 1 :)
 USE_OLD=0
 
-VERSION=`/usr/bin/sed -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' include/curl/curlver.h`
+VERSION=$(/usr/bin/sed -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' include/curl/curlver.h)
 FRAMEWORK_VERSION=Versions/Release-$VERSION
 
-#I also wanted to "copy over" the system, and thus the reason I added the
+# I also wanted to "copy over" the system, and thus the reason I added the
 # version to Versions/Release-7.20.1 etc.
 # now a simple rsync -vaP libcurl.framework /Library/Frameworks will install it
 # and setup the right paths to this version, leaving the system version
 # "intact", so you can "fix" it later with the links to Versions/A/...
 
-DEVELOPER_PATH=`xcode-select --print-path`
+DEVELOPER_PATH=$(xcode-select --print-path)
 # Around Xcode 4.3, SDKs were moved from the Developer folder into the
 # MacOSX.platform folder
 if test -d "$DEVELOPER_PATH/Platforms/MacOSX.platform/Developer/SDKs"; then
- SDK_PATH="$DEVELOPER_PATH/Platforms/MacOSX.platform/Developer/SDKs"
+  SDK_PATH="$DEVELOPER_PATH/Platforms/MacOSX.platform/Developer/SDKs"
 else
- SDK_PATH="$DEVELOPER_PATH/SDKs";
+  SDK_PATH="$DEVELOPER_PATH/SDKs"
 fi
-OLD_SDK=`ls  $SDK_PATH|head -1`
-NEW_SDK=`ls -r $SDK_PATH|head -1`
+OLD_SDK=$(ls "$SDK_PATH" | head -1)
+NEW_SDK=$(ls -r "$SDK_PATH" | head -1)
 
-if test "0"$USE_OLD -gt 0
-then
- SDK32=$OLD_SDK
+if test "0"$USE_OLD -gt 0; then
+  SDK32=$OLD_SDK
 else
- SDK32=$NEW_SDK
+  SDK32=$NEW_SDK
 fi
 
-MACVER=`echo $SDK32|sed -e s/[a-zA-Z]//g -e s/.\$//`
+MACVER=$(echo "$SDK32" | sed -e s/[a-zA-Z]//g -e s/.\$//)
 
 SDK32_DIR=$SDK_PATH/$SDK32
 MINVER32='-mmacosx-version-min='$MACVER
 if test $PPC_NEEDED -gt 0; then
- ARCHES32='-arch i386 -arch ppc'
+  ARCHES32='-arch i386 -arch ppc'
 else
- ARCHES32='-arch i386'
+  ARCHES32='-arch i386'
 fi
 
-if test $PPC64_NEEDED -gt 0
-then
+if test $PPC64_NEEDED -gt 0; then
   SDK64=10.5
   ARCHES64='-arch x86_64 -arch ppc64'
-  SDK64=`ls  $SDK_PATH|grep 10.5|head -1`
+  SDK64=$(ls "$SDK_PATH" | grep 10.5 | head -1)
 else
- ARCHES64='-arch x86_64'
- #We "know" that 10.4 and earlier do not support 64bit
- OLD_SDK64=`ls  $SDK_PATH|egrep -v "10.[0-4]"|head -1`
- NEW_SDK64=`ls -r $SDK_PATH|egrep -v "10.[0-4][^0-9]" | head -1`
- if test $USE_OLD -gt 0
-  then
-   SDK64=$OLD_SDK64
+  ARCHES64='-arch x86_64'
+  # We "know" that 10.4 and earlier do not support 64bit
+  OLD_SDK64=$(ls "$SDK_PATH" | grep -E -v "10.[0-4]" | head -1)
+  NEW_SDK64=$(ls -r "$SDK_PATH" | grep -E -v "10.[0-4][^0-9]" | head -1)
+  if test $USE_OLD -gt 0; then
+    SDK64=$OLD_SDK64
   else
-   SDK64=$NEW_SDK64
+    SDK64=$NEW_SDK64
   fi
 fi
 
 SDK64_DIR=$SDK_PATH/$SDK64
-MACVER64=`echo $SDK64|sed -e s/[a-zA-Z]//g -e s/.\$//`
+MACVER64=$(echo $SDK64 | sed -e s/[a-zA-Z]//g -e s/.\$//)
 
 MINVER64='-mmacosx-version-min='$MACVER64
 
-if test ! -z $SDK32; then
+if test ! -z "$SDK32"; then
   echo "----Configuring libcurl for 32 bit universal framework..."
   make clean
   ./configure --disable-dependency-tracking --disable-static --with-gssapi --with-secure-transport \
@@ -109,7 +106,7 @@ if test ! -z $SDK32; then
     CC=$CC
 
   echo "----Building 32 bit libcurl..."
-  make -j `sysctl -n hw.logicalcpu_max`
+  make -j $(sysctl -n hw.logicalcpu_max)
 
   echo "----Creating 32 bit framework..."
   rm -r libcurl.framework
@@ -126,9 +123,9 @@ if test ! -z $SDK32; then
   cd Versions
   ln -fs $(basename "${FRAMEWORK_VERSION}") Current
 
-  echo Testing for SDK64
-  if test -d $SDK64_DIR; then
-  echo entering...
+  echo "Testing for SDK64"
+  if test -d "$SDK64_DIR"; then
+  echo "entering..."
     popd
     make clean
     echo "----Configuring libcurl for 64 bit universal framework..."
@@ -138,7 +135,7 @@ if test ! -z $SDK32; then
       CC=$CC
 
     echo "----Building 64 bit libcurl..."
-    make -j `sysctl -n hw.logicalcpu_max`
+    make -j $(sysctl -n hw.logicalcpu_max)
 
     echo "----Appending 64 bit framework to 32 bit framework..."
     cp lib/.libs/libcurl.dylib libcurl.framework/${FRAMEWORK_VERSION}/libcurl64
