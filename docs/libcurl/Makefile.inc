@@ -95,6 +95,7 @@ man_MANS = \
  curl_url_dup.3 \
  curl_url_get.3 \
  curl_url_set.3 \
+ curl_url_strerror.3 \
  curl_version.3 \
  curl_version_info.3 \
  libcurl-easy.3 \

@@ -48,7 +48,8 @@ int test(char *URL)
 
   uc = curl_url_set(urlp, CURLUPART_URL, URL, 0);
   if(uc) {
-    fprintf(stderr, "problem setting CURLUPART_URL.");
+    fprintf(stderr, "problem setting CURLUPART_URL: %s.",
+            curl_url_strerror(uc));
     goto test_cleanup;
   }
 

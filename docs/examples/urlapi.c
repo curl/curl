@@ -26,8 +26,8 @@
 #include <stdio.h>
 #include <curl/curl.h>
 
-#if !CURL_AT_LEAST_VERSION(7, 62, 0)
-#error "this example requires curl 7.62.0 or later"
+#if !CURL_AT_LEAST_VERSION(7, 79, 0)
+#error "this example requires curl 7.79.0 or later"
 #endif
 
 int main(void)
@@ -47,7 +47,7 @@ int main(void)
                     "http://example.com/path/index.html", 0);
 
   if(uc) {
-    fprintf(stderr, "curl_url_set() failed: %in", uc);
+    fprintf(stderr, "curl_url_set() failed: %s", curl_url_strerror(uc));
     goto cleanup;
   }
 

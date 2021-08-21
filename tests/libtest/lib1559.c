@@ -54,14 +54,14 @@ int test(char *URL)
   u = curl_url();
   if(u) {
     CURLUcode uc = curl_url_set(u, CURLUPART_URL, longurl, 0);
-    printf("CURLUPART_URL %d bytes URL == %d\n",
-           EXCESSIVE, (int)uc);
+    printf("CURLUPART_URL %d bytes URL == %d (%s)\n",
+           EXCESSIVE, (int)uc, curl_url_strerror(uc));
     uc = curl_url_set(u, CURLUPART_SCHEME, longurl, CURLU_NON_SUPPORT_SCHEME);
-    printf("CURLUPART_SCHEME %d bytes scheme == %d\n",
-           EXCESSIVE, (int)uc);
+    printf("CURLUPART_SCHEME %d bytes scheme == %d (%s)\n",
+           EXCESSIVE, (int)uc, curl_url_strerror(uc));
     uc = curl_url_set(u, CURLUPART_USER, longurl, 0);
-    printf("CURLUPART_USER %d bytes user == %d\n",
-           EXCESSIVE, (int)uc);
+    printf("CURLUPART_USER %d bytes user == %d (%s)\n",
+           EXCESSIVE, (int)uc, curl_url_strerror(uc));
     curl_url_cleanup(u);
   }
 

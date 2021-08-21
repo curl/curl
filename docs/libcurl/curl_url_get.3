@@ -99,7 +99,8 @@ decode on get with the CURLU_URLDECODE bit.
 .IP CURLUPART_FRAGMENT
 .SH RETURN VALUE
 Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
-fine.
+fine.  See the \fIlibcurl-errors(3)\fP man page for the full list with
+descriptions.
 
 If this function returns an error, no URL part is returned.
 .SH EXAMPLE
@@ -121,4 +122,4 @@ If this function returns an error, no URL part is returned.
 Added in curl 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
 .SH "SEE ALSO"
 .BR curl_url_cleanup "(3), " curl_url "(3), " curl_url_set "(3), "
-.BR curl_url_dup "(3), " CURLOPT_CURLU "(3), "
+.BR curl_url_dup "(3), " curl_url_strerror "(3), " CURLOPT_CURLU "(3)"
