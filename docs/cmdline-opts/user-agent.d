@@ -5,7 +5,6 @@ Help: Send User-Agent <name> to server
 Protocols: HTTP
 Category: important http
 ---
-
 Specify the User-Agent string to send to the HTTP server. To encode blanks in
 the string, surround the string with single quote marks. This header can also
 be set with the --header or the --proxy-header options.

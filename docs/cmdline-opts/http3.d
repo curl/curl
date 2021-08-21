@@ -8,7 +8,6 @@ Help: Use HTTP v3
 See-also: http1.1 http2
 Category: http
 ---
-
 WARNING: this option is experimental. Do not use in production.
 
 Tells curl to use HTTP version 3 directly to the host and port number used in
