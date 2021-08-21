@@ -46,6 +46,9 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_HEADERS], [
 #     include <crypto.h>
 #   endif
     ], [silent])
+  CURL_CHECK_DEF([OPENSSL_VERSION_STR], [
+#     include <openssl/crypto.h>
+    ], [silent])
   if test "$curl_cv_have_def_OPENSSL_VERSION_NUMBER" = "yes"; then
     tst_verlen=`expr "$curl_cv_def_OPENSSL_VERSION_NUMBER" : '.*'`
     case "x$tst_verlen" in
@@ -62,7 +65,16 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_HEADERS], [
         tst_api=0x$tst_vermaj$tst_vermin$tst_verfix
         ;;
       *)
-        tst_api="unknown"
+        if test "$curl_cv_have_def_OPENSSL_VERSION_STR" = "yes"; then
+          ver=`echo $curl_cv_def_OPENSSL_VERSION_STR | sed s/\"//g`;
+          tst_vermaj=`echo $ver | cut -d. -f1`
+          tst_vermin=`echo $ver | cut -d. -f2`
+          tst_verfix=`echo $ver | cut -d. -f3`
+          tst_show="$ver"
+          tst_api=0x$tst_vermaj$tst_vermin$tst_verfix
+        else
+          tst_api="unknown"
+        fi
         ;;
     esac
     case $tst_api in
@@ -80,9 +92,13 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_HEADERS], [
       0x093) tst_show="0.9.3" ;;
       0x092) tst_show="0.9.2" ;;
       0x091) tst_show="0.9.1" ;;
-      *)     tst_show="unknown" ;;
+      *)
+      if test -z "$tst_show"; then
+        tst_show="unknown"
+      fi
+      ;;
     esac
-    tst_show="$tst_show - $curl_cv_def_OPENSSL_VERSION_NUMBER"
+    tst_show="$tst_show - $tst_api"
   else
     tst_show="unknown"
   fi
@@ -122,6 +138,13 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_LIBRARY], [
   tst_api="unknown"
   #
   AC_MSG_CHECKING([for OpenSSL library version])
+  if test "$tst_api" = "unknown"; then
+    AC_LINK_IFELSE([
+      AC_LANG_FUNC_LINK_TRY([SSL_CTX_load_verify_dir])
+    ],[
+      tst_api="0x300"
+    ])
+  fi
   if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
       AC_LANG_FUNC_LINK_TRY([ERR_clear_last_mark])
@@ -225,6 +248,7 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_LIBRARY], [
     ])
   fi
   case $tst_api in
+    0x300) tst_show="3.0.0" ;;
     0x111) tst_show="1.1.1" ;;
     0x110) tst_show="1.1.0" ;;
     0x102) tst_show="1.0.2" ;;
