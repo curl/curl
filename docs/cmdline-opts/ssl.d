@@ -4,7 +4,6 @@ Protocols: FTP IMAP POP3 SMTP
 Added: 7.20.0
 Category: tls
 ---
-
 Try to use SSL/TLS for the connection.  Reverts to a non-secure connection if
 the server doesn't support SSL/TLS.  See also --ftp-ssl-control and --ssl-reqd
 for different levels of encryption required.

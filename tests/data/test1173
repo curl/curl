@@ -23,4 +23,10 @@ Basic man page syntax check
 </command>
 </client>
 
+<verify>
+<stderr>
+ok
+</stderr>
+</verify>
+
 </testcase>
