@@ -31,21 +31,21 @@ if [ -z "$version" ]; then
   exit
 fi
 
-if [ "xonly" = "x$2" ]; then
+if [ "x$2" = "xonly" ]; then
   echo "Setup version number only!"
   only=1
 fi
 
-libversion="$version"
+libversion=$version
 
 # we make curl the same version as libcurl
 curlversion=$libversion
 
-major=`echo $libversion | cut -d. -f1 | sed -e "s/[^0-9]//g"`
-minor=`echo $libversion | cut -d. -f2 | sed -e "s/[^0-9]//g"`
-patch=`echo $libversion | cut -d. -f3 | cut -d- -f1 | sed -e "s/[^0-9]//g"`
+major=$(echo "$libversion" | cut -d. -f1 | sed -e "s/[^0-9]//g")
+minor=$(echo "$libversion" | cut -d. -f2 | sed -e "s/[^0-9]//g")
+patch=$(echo "$libversion" | cut -d. -f3 | cut -d- -f1 | sed -e "s/[^0-9]//g")
 
-if test -z "$patch"; then
+if [ -z "$patch" ]; then
   echo "invalid version number? needs to be z.y.z"
   exit
 fi
@@ -57,17 +57,17 @@ fi
 echo "removing all old *.dist files"
 find . -name "*.dist" -a ! -name Makefile.dist -exec rm {} \;
 
-numeric=`perl -e 'printf("%02x%02x%02x\n", '"$major, $minor, $patch);"`
+numeric=$(perl -e 'printf("%02x%02x%02x\n", '"$major, $minor, $patch);")
 
 HEADER=include/curl/curlver.h
 CHEADER=src/tool_version.h
 PLIST=lib/libcurl.plist
 
-if test -z "$only"; then
+if [ -z "$only" ]; then
   ext=".dist"
   # when not setting up version numbers locally
   for a in $HEADER $CHEADER $PLIST; do
-    cp $a "$a$ext"
+    cp -- "$a" "$a$ext"
   done
   HEADER="$HEADER$ext"
   CHEADER="$CHEADER$ext"
@@ -75,7 +75,7 @@ if test -z "$only"; then
 fi
 
 # requires a date command that knows + for format
-datestamp=`date +"%F"`
+datestamp=$(date +"%F")
 
 # Replace version number in header file:
 sed -i.bak \
@@ -96,7 +96,7 @@ rm -f "$CHEADER.bak"
 sed -i.bak "s/7\.12\.3/$libversion/g" $PLIST
 rm -f "$PLIST.bak"
 
-if test -n "$only"; then
+if [ -n "$only" ]; then
   # done!
   exit;
 fi
@@ -107,8 +107,8 @@ echo "libcurl numerical $numeric"
 echo "datestamp $datestamp"
 
 findprog() {
-  file="$1"
-  for part in `echo $PATH| tr ':' ' '`; do
+  file=$1
+  for part in $(echo "$PATH" | tr ':' ' '); do
     path="$part/$file"
     if [ -x "$path" ]; then
       # there it is!
@@ -177,7 +177,7 @@ make -sj dist VERSION=$version
 
 bzip2="curl-$version.tar.bz2"
 echo "Generating $bzip2"
-gzip -dc $targz | bzip2 --best > $bzip2
+gzip -dc "$targz" | bzip2 --best > "$bzip2"
 
 ############################################################################
 #
@@ -186,21 +186,21 @@ gzip -dc $targz | bzip2 --best > $bzip2
 
 xz="curl-$version.tar.xz"
 echo "Generating $xz"
-gzip -dc $targz | xz -6e - > $xz
+gzip -dc "$targz" | xz -6e - > "$xz"
 
 ############################################################################
 #
 # Now make a zip archive from the tar.gz original
 #
 makezip() {
-  rm -rf $tempdir
-  mkdir $tempdir
-  cd $tempdir
+  rm -rf "$tempdir"
+  mkdir "$tempdir"
+  cd -- "$tempdir"
   gzip -dc ../$targz | tar -xf -
-  find . | zip $zip -@ >/dev/null
-  mv $zip ../
+  find . | zip "$zip" -@ >/dev/null
+  mv "$zip" ../
   cd ..
-  rm -rf $tempdir
+  rm -rf "$tempdir"
 }
 
 zip="curl-$version.zip"
@@ -211,7 +211,7 @@ makezip
 echo "------------------"
 echo "maketgz report:"
 echo ""
-ls -l $targz $bzip2 $zip $xz
+ls -l "$targz" "$bzip2" "$zip" "$xz"
 
 echo "Run this:"
 echo "gpg -b -a $targz && gpg -b -a $bzip2 && gpg -b -a $zip && gpg -b -a $xz"
