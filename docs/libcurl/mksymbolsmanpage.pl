@@ -86,7 +86,7 @@ while(<STDIN>) {
           print "Deprecated since $dep\n";
         }
         if($rem) {
-          print "Last used in $dep\n";
+          print "Last used in $rem\n";
         }
     }
 
