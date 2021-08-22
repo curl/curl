@@ -10,7 +10,7 @@
  for a few symbols the last version that featured it. The names appear in
  alphabetical order.
 
- Name                           Introduced  Deprecated  Removed
+ Name                           Introduced  Deprecated  Last
 
 CURLALTSVC_H1                   7.64.1
 CURLALTSVC_H2                   7.64.1
@@ -815,7 +815,7 @@ CURLSSLBACKEND_NSS              7.34.0
 CURLSSLBACKEND_OPENSSL          7.34.0
 CURLSSLBACKEND_POLARSSL         7.34.0       7.69.0
 CURLSSLBACKEND_RUSTLS           7.76.0
-CURLSSLBACKEND_QSOSSL           7.34.0        -           7.38.1
+CURLSSLBACKEND_QSOSSL           7.34.0        -           7.38.0
 CURLSSLBACKEND_SCHANNEL         7.34.0
 CURLSSLBACKEND_SECURETRANSPORT  7.64.1
 CURLSSLBACKEND_WOLFSSL          7.49.0
