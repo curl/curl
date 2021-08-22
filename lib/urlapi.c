@@ -770,8 +770,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   size_t schemelen = 0;
   size_t urllen;
 
-  if(!url)
-    return CURLUE_MALFORMED_INPUT;
+  DEBUGASSERT(url);
 
   /*************************************************************
    * Parse the URL.
