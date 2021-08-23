@@ -237,6 +237,9 @@ endif()
 unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+  if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  # only try this on non-macOS
+
   # if not cross-compilation...
   include(CheckCSourceRuns)
   set(CMAKE_REQUIRED_FLAGS "")
@@ -279,5 +282,6 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
         }
         return 0;
     }" HAVE_POLL_FINE)
+  endif()
 endif()
 
