@@ -2370,12 +2370,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
   case CURLOPT_IGNORE_CONTENT_LENGTH:
-#ifndef USE_HYPER
     data->set.ignorecl = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
-#else
-    return CURLE_NOT_BUILT_IN;
-#endif
 
   case CURLOPT_CONNECT_ONLY:
     /*
