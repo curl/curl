@@ -99,6 +99,8 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
                         const char **teep);
 CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
                             struct dynbuf *r, Curl_HttpReq httpreq);
+bool Curl_use_http_1_1plus(const struct Curl_easy *data,
+                           const struct connectdata *conn);
 #ifndef CURL_DISABLE_COOKIES
 CURLcode Curl_http_cookies(struct Curl_easy *data,
                            struct connectdata *conn,

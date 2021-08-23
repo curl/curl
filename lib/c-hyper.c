@@ -259,6 +259,9 @@ static CURLcode status_line(struct Curl_easy *data,
   conn->httpversion =
     http_version == HYPER_HTTP_VERSION_1_1 ? 11 :
     (http_version == HYPER_HTTP_VERSION_2 ? 20 : 10);
+  if(http_version == HYPER_HTTP_VERSION_1_0)
+    data->state.httpwant = CURL_HTTP_VERSION_1_0;
+
   data->req.httpcode = http_status;
 
   result = Curl_http_statusline(data, conn);
@@ -892,7 +895,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     goto error;
   }
 
-  if(data->state.httpwant == CURL_HTTP_VERSION_1_0) {
+  if(!Curl_use_http_1_1plus(data, conn)) {
     if(HYPERE_OK != hyper_request_set_version(req,
                                               HYPER_HTTP_VERSION_1_0)) {
       failf(data, "error setting HTTP version");
