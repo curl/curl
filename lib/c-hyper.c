@@ -203,11 +203,9 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
       }
       else { /* >= 4xx */
         k->exp100 = EXP100_FAILED;
-        done = TRUE;
       }
     }
-    if(data->state.hconnect &&
-       (data->req.httpcode/100 != 2)) {
+    if(data->state.hconnect && (data->req.httpcode/100 != 2)) {
       done = TRUE;
       result = CURLE_OK;
     }
@@ -596,6 +594,16 @@ static int uploadpostfields(void *userdata, hyper_context *ctx,
 {
   struct Curl_easy *data = (struct Curl_easy *)userdata;
   (void)ctx;
+  if(data->req.exp100 > EXP100_SEND_DATA) {
+    if(data->req.exp100 == EXP100_FAILED)
+      return HYPER_POLL_ERROR;
+
+    /* still waiting confirmation */
+    if(data->hyp.exp100_waker)
+      hyper_waker_free(data->hyp.exp100_waker);
+    data->hyp.exp100_waker = hyper_context_waker(ctx);
+    return HYPER_POLL_PENDING;
+  }
   if(data->req.upload_done)
     *chunk = NULL; /* nothing more to deliver */
   else {
