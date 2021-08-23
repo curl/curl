@@ -1669,8 +1669,8 @@ CURLcode Curl_http_done(struct Curl_easy *data,
  * - if any server previously contacted to handle this request only supports
  * 1.0.
  */
-static bool use_http_1_1plus(const struct Curl_easy *data,
-                             const struct connectdata *conn)
+bool Curl_use_http_1_1plus(const struct Curl_easy *data,
+                           const struct connectdata *conn)
 {
   if((data->state.httpversion == 10) || (conn->httpversion == 10))
     return FALSE;
@@ -1696,7 +1696,7 @@ static const char *get_http_string(const struct Curl_easy *data,
     return "2";
 #endif
 
-  if(use_http_1_1plus(data, conn))
+  if(Curl_use_http_1_1plus(data, conn))
     return "1.1";
 
   return "1.0";
@@ -1711,7 +1711,7 @@ static CURLcode expect100(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   data->state.expect100header = FALSE; /* default to false unless it is set
                                           to TRUE below */
-  if(!data->state.disableexpect && use_http_1_1plus(data, conn) &&
+  if(!data->state.disableexpect && Curl_use_http_1_1plus(data, conn) &&
      (conn->httpversion < 20)) {
     /* if not doing HTTP 1.0 or version 2, or disabled explicitly, we add an
        Expect: 100-continue to the headers which actually speeds up post
@@ -2348,7 +2348,7 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
       if(conn->bits.authneg)
         /* don't enable chunked during auth neg */
         ;
-      else if(use_http_1_1plus(data, conn)) {
+      else if(Curl_use_http_1_1plus(data, conn)) {
         if(conn->httpversion < 20)
           /* HTTP, upload, unknown file size and not HTTP 1.0 */
           data->req.upload_chunky = TRUE;
