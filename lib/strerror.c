@@ -462,11 +462,10 @@ curl_url_strerror(CURLUcode error)
     return "No error";
 
   case CURLUE_BAD_HANDLE:
-    return "An argument that should be a CURLU pointer was passed in as a "
-           "NULL";
+    return "An invalid CURLU pointer was passed as argument";
 
   case CURLUE_BAD_PARTPOINTER:
-    return "A NULL pointer was passed to the 'part' argument of curl_url_get";
+    return "An invalid 'part' argument was passed as argument";
 
   case CURLUE_MALFORMED_INPUT:
     return "A malformed input was passed to a URL API function";
