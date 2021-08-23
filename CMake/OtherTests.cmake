@@ -237,9 +237,8 @@ endif()
 unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    # nothing
-  else()
+  if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  # only try this on non-macOS
 
   # if not cross-compilation...
   include(CheckCSourceRuns)
