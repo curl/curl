@@ -128,6 +128,10 @@ static CURLcode mqtt_send(struct Curl_easy *data,
     mq->sendleftovers = sendleftovers;
     mq->nsend = nsend;
   }
+  else {
+    mq->sendleftovers = NULL;
+    mq->nsend = 0;
+  }
   return result;
 }
 
