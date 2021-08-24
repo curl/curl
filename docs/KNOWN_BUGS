@@ -86,6 +86,7 @@ problems may have been fixed or changed somewhat since this was written!
  7.8 Premature transfer end but healthy control channel
  7.9 Passive transfer tries only one IP address
  7.10 FTPS needs session reuse
+ 7.11 FTPS upload data loss with TLS 1.3
 
  8. TELNET
  8.1 TELNET and time limitations don't work
@@ -722,6 +723,23 @@ problems may have been fixed or changed somewhat since this was written!
  second transfer.
 
  https://github.com/curl/curl/issues/4654
+
+7.11 FTPS upload data loss with TLS 1.3
+
+ During FTPS upload curl does not attempt to read TLS handshake messages sent
+ after the initial handshake. OpenSSL servers running TLS 1.3 may send such a
+ message. When curl closes the upload connection if unread data has been
+ received (such as a TLS handshake message) then the TCP protocol sends an
+ RST to the server, which may cause the server to discard or truncate the
+ upload if it hasn't read all sent data yet, and then return an error to curl
+ on the control channel connection.
+
+ Since 7.78.0 this is mostly fixed. curl will do a single read before closing
+ TLS connections (which causes the TLS library to read handshake messages),
+ however there is still possibility of an RST if more messages need to be read
+ or a message arrives after the read but before close (network race condition).
+
+ https://github.com/curl/curl/issues/6149
 
 8. TELNET
 
