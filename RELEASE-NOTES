@@ -4,7 +4,7 @@ curl and libcurl 7.79.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2473
+ Contributors:                 2474
 
 This release includes the following changes:
 
@@ -21,22 +21,30 @@ This release includes the following bugfixes:
  o auth: we do not support a security layer after kerberos authentication [35]
  o BINDINGS.md: update links to use https where available [50]
  o build: fix compiler warnings [39]
+ o c-hyper: deal with Expect: 100-continue combined with POSTFIELDS [66]
  o c-hyper: fix header value passed to debug callback [46]
+ o c-hyper: handle HTTP/1.1 => HTTP/1.0 downgrade on reused connection [65]
  o c-hyper: initial step for 100-continue support [43]
  o c-hyper: initial support for "dumping" 1xx HTTP responses [40]
  o c-hyper: remove the hyper_executor_poll() loop from Curl_http [13]
  o CI/cirrus: reduce compile time with increased parallism [19]
  o CI: use GitHub Container Registry instead of Docker Hub [47]
+ o cmake: avoid poll() on macOS [59]
+ o cmake: sync CURL_DISABLE options [55]
  o codeql: fix error "Resource not accessible by integration" [61]
  o compressed.d: it's a request, not an order [21]
+ o config.d: escape the backslash properly [81]
  o config: get rid of the unused HAVE_SIG_ATOMIC_T et. al.
  o configure.ac: revert bad nghttp2 library detection improvements [9]
  o configure: error out if both ngtcp2 and quiche are specified [30]
+ o configure: set classic mingw minimum OS version to XP [83]
  o configure: tweak nghttp2 library name fix [2]
  o connect: remove superfluous conditional [23]
  o curl-openssl.m4: check lib64 for the pkg-config file [14]
+ o curl-openssl.m4: show correct output for OpenSSL v3 [75]
  o curl.1: mention "global" flags [7]
  o curl: add warning for ignored data after quoted form parameter [60]
+ o curl_setup.h: sync values for HTTP_ONLY [82]
  o curl_url_get.3: clarify about path and query [45]
  o CURLMOPT_TIMERFUNCTION.3: remove misplaced "time" [5]
  o CURLOPT_DOH_URL.3: CURLOPT_OPENSOCKETFUNCTION is not inherited [8]
@@ -52,9 +60,12 @@ This release includes the following bugfixes:
  o http2: revert call the handle-closed function correctly on closed stream [25]
  o http_proxy: clear 'sending' when the outgoing request is sent [6]
  o http_proxy: fix user-agent and custom headers for CONNECT with hyper [38]
+ o libcurl-errors.3: clarify two CURLUcode errors [72]
  o limit-rate.d: clarify base unit [17]
  o mbedTLS: initial 3.0.0 support [33]
  o mbedtls_threadlock: fix unused variable warning [11]
+ o mksymbolsmanpage.pl: Fix showing symbol's last used version [76]
+ o mksymbolsmanpage.pl: match symbols case insenitively [77]
  o ngtcp2: compile with the latest ngtcp2 and nghttp3 [12]
  o ngtcp2: remove the acked_crypto_offset struct field init [64]
  o ngtcp2: replace deprecated functions with nghttp3_conn_shutdown_stream_read [28]
@@ -64,17 +75,25 @@ This release includes the following bugfixes:
  o openssl: when creating a new context, there cannot be an old one [48]
  o output.d: add method to suppress response bodies [49]
  o progress: fix a compile warning on some systems [54]
+ o schannel: Work around typo in classic mingw macro [84]
+ o scripts: invoke interpreters through /usr/bin/env [68]
  o sectransp: support CURLINFO_CERTINFO [63]
+ o setopt: enable CURLOPT_IGNORE_CONTENT_LENGTH for hyper [70]
+ o symbols-in-versions: fix CURLSSLBACKEND_QSOSSL last used version [73]
+ o test1138: remove trailing space to make work with hyper [71]
  o test1565: fix windows build errors [27]
  o tests/*server.pl: flush output before executing subprocess [41]
  o tests/*server.py: remove pidfile on server termination [1]
  o tests/runtests.pl: cleanup copy&paste mistakes and unused code
  o tests/server/*.c: align handling of portfile argument and file [56]
+ o tests: be explicit about using 'python3' instead of 'python' [67]
  o tests: make three tests pass until 2037 [22]
  o tool/tests: fix potential year 2038 issues [20]
  o tool_operate: Fix --fail-early with parallel transfers [62]
+ o urlapi.c:seturl: assert URL instead of using if-check [74]
  o vtls: fix typo in schannel_verify.c [44]
  o winbuild/README.md: clarify GEN_PDB option
+ o wolfssl: clean up wolfcrypt error queue [79]
  o x509asn1: fix heap over-read when parsing x509 certificates [37]
 
 This release includes the following known bugs:
@@ -84,17 +103,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aleksandr Krotov, Alex Crichton, April King, Artur Sinila, Barry Pollard,
-  Bastian Krause, Benau on github, Bernhard M. Wiedemann, Bin Lan,
-  Brian Carpenter, Carlo Marcelo Arenas Belón, Christian Weisgerber,
-  Colin O'Dell, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Daniel Woelfel, Dan Jacobson, David Cook, Emil Engler, Gambit Communications,
-  Gergely Nagy, Ikko Ashimine, Gleb Ivanovsky, Jan Verbeek, Jeff Mears,
+  a1346054 on github, Aleksandr Krotov, Alex Crichton, April King,
+  Artur Sinila, Barry Pollard, Bastian Krause, Benau on github,
+  Bernhard M. Wiedemann, Bin Lan, Brian Carpenter, Bylon2 on github,
+  Carlo Marcelo Arenas Belón, Christian Weisgerber, Colin O'Dell, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, Daniel Woelfel, Dan Jacobson, David Cook,
+  Don J Olmstead, Ehren Bendler, Emil Engler, Gambit Communications,
+  Gergely Nagy, Gleb Ivanovsky, Ikko Ashimine, Jan Verbeek, Jeff Mears,
   Jeremy Falcon, Josh Soref, Marc Hörsken, Michael Kaufmann, Michał Antoniak,
-  modbw on github, Oleg Pudeyev, Patrick Monnerat, Ray Satiro, Rui Pinheiro,
-  Sergey Markelov, Tatsuhiro Tsujikawa, Viktor Szakats, Vincent Grande,
-  z2-2z on github, zloi-user on github,
-  (42 contributors)
+  modbw on github, Oleg Pudeyev, Patrick Monnerat, Randall S. Becker,
+  Ray Satiro, Rui Pinheiro, Sergey Markelov, Tatsuhiro Tsujikawa,
+  Viktor Szakats, Vincent Grande, z2-2z on github, zloi-user on github,
+  (47 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -152,10 +172,29 @@ References to bug reports and discussions on issues:
  [52] = https://curl.se/bug/?i=7551
  [53] = https://curl.se/bug/?i=7538
  [54] = https://curl.se/bug/?i=7549
+ [55] = https://curl.se/bug/?i=7624
  [56] = https://curl.se/bug/?i=7574
  [58] = https://curl.se/bug/?i=7582
+ [59] = https://curl.se/bug/?i=7595
  [60] = https://curl.se/bug/?i=7394
  [61] = https://curl.se/bug/?i=7575
  [62] = https://curl.se/bug/?i=6939
  [63] = https://curl.se/bug/?i=4130
  [64] = https://curl.se/bug/?i=7578
+ [65] = https://curl.se/bug/?i=7617
+ [66] = https://curl.se/bug/?i=7616
+ [67] = https://curl.se/bug/?i=7602
+ [68] = https://curl.se/bug/?i=7602
+ [70] = https://curl.se/bug/?i=7614
+ [71] = https://curl.se/bug/?i=7613
+ [72] = https://curl.se/bug/?i=7611
+ [73] = https://curl.se/bug/?i=7609
+ [74] = https://curl.se/bug/?i=7610
+ [75] = https://curl.se/bug/?i=7606
+ [76] = https://github.com/curl/curl/commit/4e53b94#commitcomment-55239509
+ [77] = https://github.com/curl/curl/commit/4e53b9430c7504de8984796e2a2091ec16f27136#commitcomment-55239253
+ [79] = https://curl.se/bug/?i=7594
+ [81] = https://curl.se/bug/?i=7603
+ [82] = https://curl.se/bug/?i=7601
+ [83] = https://curl.se/bug/?i=7581
+ [84] = https://curl.se/bug/?i=7580
