@@ -1322,6 +1322,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     bigsize = va_arg(param, curl_off_t);
     if(bigsize < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
+    if(bigsize) {
+      if(!data->set.max_send_speed || bigsize < data->set.max_send_speed / 2) {
+        /* if the new speed limit is down, reset the limit counters for
+           applying the new speed limit as soon as possible */
+        data->progress.ul_limit_start = Curl_now();
+        data->progress.ul_limit_size = data->progress.uploaded;
+      }
+    }
     data->set.max_send_speed = bigsize;
     break;
   case CURLOPT_MAX_RECV_SPEED_LARGE:
@@ -1332,6 +1340,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     bigsize = va_arg(param, curl_off_t);
     if(bigsize < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
+    if(bigsize) {
+      if(!data->set.max_recv_speed || bigsize < data->set.max_recv_speed / 2) {
+        /* if the new speed limit is down, reset the limit counters for
+           applying the new speed limit as soon as possible */
+        data->progress.dl_limit_start = Curl_now();
+        data->progress.dl_limit_size = data->progress.downloaded;
+      }
+    }
     data->set.max_recv_speed = bigsize;
     break;
   case CURLOPT_LOW_SPEED_TIME:
