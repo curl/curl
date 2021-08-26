@@ -190,27 +190,9 @@ static int write_client_handshake(struct quicsocket *qs,
                                   ngtcp2_crypto_level level,
                                   const uint8_t *data, size_t len)
 {
-  struct quic_handshake *crypto_data;
   int rv;
 
-  crypto_data = &qs->crypto_data[level];
-  if(!crypto_data->buf) {
-    crypto_data->buf = malloc(4096);
-    if(!crypto_data->buf)
-      return 0;
-    crypto_data->alloclen = 4096;
-  }
-
-  /* TODO Just pretend that handshake does not grow more than 4KiB for
-     now */
-  assert(crypto_data->len + len <= crypto_data->alloclen);
-
-  memcpy(&crypto_data->buf[crypto_data->len], data, len);
-  crypto_data->len += len;
-
-  rv = ngtcp2_conn_submit_crypto_data(
-    qs->qconn, level, (uint8_t *)(&crypto_data->buf[crypto_data->len] - len),
-    len);
+  rv = ngtcp2_conn_submit_crypto_data(qs->qconn, level, data, len);
   if(rv) {
     H3BUGF(fprintf(stderr, "write_client_handshake failed\n"));
   }
@@ -832,7 +814,6 @@ static int ng_getsock(struct Curl_easy *data, struct connectdata *conn,
 
 static void qs_disconnect(struct quicsocket *qs)
 {
-  int i;
   if(!qs->conn) /* already closed */
     return;
   qs->conn = NULL;
@@ -853,8 +834,6 @@ static void qs_disconnect(struct quicsocket *qs)
     qs->cred = NULL;
   }
 #endif
-  for(i = 0; i < 3; i++)
-    Curl_safefree(qs->crypto_data[i].buf);
   nghttp3_conn_del(qs->h3conn);
   ngtcp2_conn_del(qs->qconn);
 #ifdef USE_OPENSSL
