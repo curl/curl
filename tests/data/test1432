@@ -48,5 +48,8 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
+<errorcode>
+1
+</errorcode>
 </verify>
 </testcase>

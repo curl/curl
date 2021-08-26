@@ -4215,24 +4215,34 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
          * https://tools.ietf.org/html/rfc7230#section-3.1.2
          *
          * The response code is always a three-digit number in HTTP as the spec
-         * says. We try to allow any number here, but we cannot make
+         * says. We allow any three-digit number here, but we cannot make
          * guarantees on future behaviors since it isn't within the protocol.
          */
         char separator;
         char twoorthree[2];
         int httpversion = 0;
+        int digit4 = -1; /* should remain untouched to be good */
         nc = sscanf(HEADER1,
-                    " HTTP/%1d.%1d%c%3d",
+                    " HTTP/%1d.%1d%c%3d%1d",
                     &httpversion_major,
                     &httpversion,
                     &separator,
-                    &k->httpcode);
+                    &k->httpcode,
+                    &digit4);
 
         if(nc == 1 && httpversion_major >= 2 &&
            2 == sscanf(HEADER1, " HTTP/%1[23] %d", twoorthree, &k->httpcode)) {
           conn->httpversion = 0;
           nc = 4;
           separator = ' ';
+        }
+
+        /* There can only be a 4th response code digit stored in 'digit4' if
+           all the other fields were parsed and stored first, so nc is 5 when
+           digit4 is not -1 */
+        else if(digit4 != -1) {
+          failf(data, "Unsupported response code in HTTP response");
+          return CURLE_UNSUPPORTED_PROTOCOL;
         }
 
         if((nc == 4) && (' ' == separator)) {
