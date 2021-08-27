@@ -148,7 +148,7 @@ int Curl_connect_getsock(struct connectdata *conn)
   DEBUGASSERT(conn->connect_state);
   http = &conn->connect_state->http_proxy;
 
-  if(http->sending)
+  if(http->sending == HTTPSEND_REQUEST)
     return GETSOCK_WRITESOCK(0);
 
   return GETSOCK_READSOCK(0);
