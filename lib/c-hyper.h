@@ -31,27 +31,27 @@
  * them */
 typedef enum hyptaskud {
   /* from hyper_clientconn_handshake(), outputs a hyper_clientconn* */
-  CURL_HYPER_TASKUD_HANDSHAKE = 1,
+  HYPERUD_HANDSHAKE = 1,
   /* from hyper_clientconn_send(), outputs a hyper_response* */
-  CURL_HYPER_TASKUD_RESPONSE,
+  HYPERUD_RESPONSE,
   /* from hyper_body_foreach(), no output */
-  CURL_HYPER_TASKUD_BODY_FOREACH,
+  HYPERUD_BODY_FOREACH,
   /* for proxy CONNECT, from hyper_clientconn_handshake(),
    * outputs a hyper_clientconn* */
-  CURL_HYPER_TASKUD_CONNECT_HANDSHAKE,
+  HYPERUD_CONNECT_HANDSHAKE,
   /* for proxy CONNECT, from hyper_clientconn_send(),
    * outputs a hyper_response* */
-  CURL_HYPER_TASKUD_CONNECT_RESPONSE,
+  HYPERUD_CONNECT_RESPONSE,
   /* for proxy CONNECT, from hyper_body_foreach(), no output */
-  CURL_HYPER_TASKUD_CONNECT_BODY_FOREACH,
+  HYPERUD_CONNECT_BODY_FOREACH,
 } hyptaskud;
 
 /* whether a task has completed yet, and whether it returned its output or an
  * error */
 typedef enum hyptaskstatus {
-  CURL_HYPER_TASK_NOT_DONE = 0,
-  CURL_HYPER_TASK_COMPLETE,
-  CURL_HYPER_TASK_ERROR,
+  HYPERTASK_NOT_DONE = 0,
+  HYPERTASK_COMPLETE,
+  HYPERTASK_ERROR,
 } hyptaskstatus;
 
 /* per-transfer data for the Hyper backend */
@@ -62,33 +62,33 @@ struct hyptransfer {
 
   hyptaskstatus handshake_status;
   union {
-    hyper_clientconn* output;
-    hyper_error* error;
+    hyper_clientconn *conn;
+    hyper_error *error;
   } handshake_result;
 
   hyptaskstatus response_status;
   union {
-    hyper_response* output;
-    hyper_error* error;
+    hyper_response *response;
+    hyper_error *error;
   } response_result;
 
   hyptaskstatus body_foreach_status;
-  hyper_error* body_foreach_error;
+  hyper_error *body_foreach_error;
 
-  hyptaskstatus connect_handshake_status;
+  hyptaskstatus proxy_handshake_status;
   union {
-    hyper_clientconn* output;
-    hyper_error* error;
-  } connect_handshake_result;
+    hyper_clientconn *conn;
+    hyper_error *error;
+  } proxy_handshake_result;
 
-  hyptaskstatus connect_response_status;
+  hyptaskstatus proxy_response_status;
   union {
-    hyper_response* output;
-    hyper_error* error;
-  } connect_response_result;
+    hyper_response *response;
+    hyper_error *error;
+  } proxy_response_result;
 
-  hyptaskstatus connect_body_foreach_status;
-  hyper_error* connect_body_foreach_error;
+  hyptaskstatus proxy_body_foreach_status;
+  hyper_error *proxy_body_foreach_error;
 
   hyper_waker *exp100_waker;
 };
@@ -106,7 +106,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
 CURLcode Curl_hyper_header(struct Curl_easy *data, hyper_headers *headers,
                            const char *line);
 void Curl_hyper_done(struct Curl_easy *);
-bool Curl_hyper_poll_executor(struct hyptransfer *h);
+bool Curl_hyper_poll(struct hyptransfer *h);
 
 #else
 #define Curl_hyper_done(x)

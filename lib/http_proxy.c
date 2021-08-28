@@ -735,9 +735,9 @@ static CURLcode CONNECT(struct Curl_easy *data,
     switch(s->tunnel_state) {
     case TUNNEL_INIT:
       /* BEGIN CONNECT PHASE */
-      h->connect_handshake_status = CURL_HYPER_TASK_NOT_DONE;
-      h->connect_response_status = CURL_HYPER_TASK_NOT_DONE;
-      h->connect_body_foreach_status = CURL_HYPER_TASK_NOT_DONE;
+      h->proxy_handshake_status = HYPERTASK_NOT_DONE;
+      h->proxy_response_status = HYPERTASK_NOT_DONE;
+      h->proxy_body_foreach_status = HYPERTASK_NOT_DONE;
       io = hyper_io_new();
       if(!io) {
         failf(data, "Couldn't create hyper IO");
@@ -778,7 +778,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
       io = NULL;
       options = NULL;
       hyper_task_set_userdata(handshake,
-                              (void *)CURL_HYPER_TASKUD_CONNECT_HANDSHAKE);
+                              (void *)HYPERUD_CONNECT_HANDSHAKE);
 
       if(HYPERE_OK != hyper_executor_push(h->exec, handshake)) {
         failf(data, "Couldn't hyper_executor_push the handshake");
@@ -786,19 +786,19 @@ static CURLcode CONNECT(struct Curl_easy *data,
       }
       handshake = NULL; /* ownership passed on */
 
-      while(h->connect_handshake_status == CURL_HYPER_TASK_NOT_DONE) {
-        Curl_hyper_poll_executor(h);
+      while(h->proxy_handshake_status == HYPERTASK_NOT_DONE) {
+        Curl_hyper_poll(h);
       }
-      if(h->connect_handshake_status == CURL_HYPER_TASK_ERROR) {
+      if(h->proxy_handshake_status == HYPERTASK_ERROR) {
         failf(data, "Error from hyper_clientconn_handshake");
-        hyper_error_free(h->connect_handshake_result.error);
-        h->connect_handshake_result.error = NULL;
+        hyper_error_free(h->proxy_handshake_result.error);
+        h->proxy_handshake_result.error = NULL;
         result = CURLE_WRITE_ERROR;
         goto error;
       }
 
-      client = h->connect_handshake_result.output;
-      h->connect_handshake_result.output = NULL;
+      client = h->proxy_handshake_result.conn;
+      h->proxy_handshake_result.conn = NULL;
       req = hyper_request_new();
       if(!req) {
         failf(data, "Couldn't hyper_request_new");
@@ -867,7 +867,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
         goto error;
       }
       hyper_task_set_userdata(sendtask,
-                              (void *)CURL_HYPER_TASKUD_CONNECT_RESPONSE);
+                              (void *)HYPERUD_CONNECT_RESPONSE);
 
       if(HYPERE_OK != hyper_executor_push(h->exec, sendtask)) {
         failf(data, "Couldn't hyper_executor_push the send");
@@ -947,13 +947,13 @@ static CURLcode CONNECT(struct Curl_easy *data,
   if(handshake)
     hyper_task_free(handshake);
 
-  if(h->connect_response_status == CURL_HYPER_TASK_ERROR) {
+  if(h->proxy_response_status == HYPERTASK_ERROR) {
     uint8_t errbuf[256];
-    size_t errlen = hyper_error_print(h->connect_response_result.error,
+    size_t errlen = hyper_error_print(h->proxy_response_result.error,
                                       errbuf, sizeof(errbuf));
     failf(data, "Hyper: %.*s", (int)errlen, errbuf);
-    hyper_error_free(h->connect_response_result.error);
-    h->connect_response_result.error = NULL;
+    hyper_error_free(h->proxy_response_result.error);
+    h->proxy_response_result.error = NULL;
   }
   return result;
 }
