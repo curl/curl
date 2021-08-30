@@ -400,6 +400,11 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       /* end of transfer */
       *done = TRUE;
       infof(data, "hyperstream is done!");
+      if(!k->bodywrites) {
+        /* hyper doesn't always call the body write callback */
+        bool stilldone;
+        result = Curl_http_firstwrite(data, data->conn, &stilldone);
+      }
       break;
     }
     else if(t != HYPER_TASK_RESPONSE) {
