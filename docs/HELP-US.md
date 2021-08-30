@@ -5,7 +5,7 @@ looking for ways to contribute and help out, this document aims to give a few
 good starting points.
 
 A good idea is to start by subscribing to the [curl-library mailing
-list](https://cool.haxx.se/mailman/listinfo/curl-library) to keep track of the
+list](https://lists.haxx.se/listinfo/curl-library) to keep track of the
 current discussion topics.
 
 ## Scratch your own itch

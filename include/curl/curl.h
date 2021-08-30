@@ -25,9 +25,6 @@
 /*
  * If you have libcurl problems, all docs and details are found here:
  *   https://curl.se/libcurl/
- *
- * curl-library mailing list subscription and unsubscription web interface:
- *   https://cool.haxx.se/mailman/listinfo/curl-library/
  */
 
 #ifdef CURL_NO_OLDIES
