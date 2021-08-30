@@ -2903,6 +2903,20 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
 {
   struct SingleRequest *k = &data->req;
   DEBUGASSERT(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP));
+  if(data->req.ignore_cl) {
+    k->size = k->maxdownload = -1;
+  }
+  else if(k->size != -1) {
+    /* We wait until after all headers have been received to set this so that
+       we know for sure Content-Length is valid. */
+    if(data->set.max_filesize &&
+       k->size > data->set.max_filesize) {
+      failf(data, "Maximum file size exceeded");
+      return CURLE_FILESIZE_EXCEEDED;
+    }
+    Curl_pgrsSetDownloadSize(data, k->size);
+  }
+
   if(data->req.newurl) {
     if(conn->bits.close) {
       /* Abort after the headers if "follow Location" is set
@@ -3403,17 +3417,8 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
                                     NULL, 10, &contentlength);
 
     if(offt == CURL_OFFT_OK) {
-      if(data->set.max_filesize &&
-         contentlength > data->set.max_filesize) {
-        failf(data, "Maximum file size exceeded");
-        return CURLE_FILESIZE_EXCEEDED;
-      }
       k->size = contentlength;
       k->maxdownload = k->size;
-      /* we set the progress download size already at this point
-         just to make it easier for apps/callbacks to extract this
-         info as soon as possible */
-      Curl_pgrsSetDownloadSize(data, k->size);
     }
     else if(offt == CURL_OFFT_FLOW) {
       /* out of range */
@@ -3504,6 +3509,12 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
                                          TRUE);
     if(result)
       return result;
+    if(!k->chunk) {
+      /* if this isn't chunked, only close can signal the end of this transfer
+         as Content-Length is said not to be trusted for transfer-encoding! */
+      connclose(conn, "HTTP/1.1 transfer-encoding without chunks");
+      k->ignore_cl = TRUE;
+    }
   }
   else if(!k->http_bodyless && checkprefix("Content-Encoding:", headp) &&
           data->set.str[STRING_ENCODING]) {

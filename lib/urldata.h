@@ -704,14 +704,15 @@ struct SingleRequest {
 #ifndef CURL_DISABLE_DOH
   struct dohdata *doh; /* DoH specific data for this request */
 #endif
-  BIT(header);       /* incoming data has HTTP header */
+  BIT(header);        /* incoming data has HTTP header */
   BIT(content_range); /* set TRUE if Content-Range: was found */
-  BIT(upload_done);  /* set to TRUE when doing chunked transfer-encoding
-                        upload and we're uploading the last chunk */
-  BIT(ignorebody);   /* we read a response-body but we ignore it! */
+  BIT(upload_done);   /* set to TRUE when doing chunked transfer-encoding
+                         upload and we're uploading the last chunk */
+  BIT(ignorebody);    /* we read a response-body but we ignore it! */
   BIT(http_bodyless); /* HTTP response status code is between 100 and 199,
                          204 or 304 */
-  BIT(chunk); /* if set, this is a chunked transfer-encoding */
+  BIT(chunk);         /* if set, this is a chunked transfer-encoding */
+  BIT(ignore_cl);     /* ignore content-length */
   BIT(upload_chunky); /* set TRUE if we are doing chunked transfer-encoding
                          on upload */
   BIT(getheader);    /* TRUE if header parsing is wanted */

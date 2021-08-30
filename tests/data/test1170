@@ -15,8 +15,8 @@ SFRUUC8xLjEgMjAwIE9LDQpEYXRlOiBNb24sIDI5IE5vdiAyMDA0IDIxOjU2OjUzIEdNVA0KU2Vy
 dmVyOiBBcGFjaGUvMS4zLjMxIChEZWJpYW4gR05VL0xpbnV4KSBtb2RfZ3ppcC8xLjMuMjYuMWEg
 UEhQLzQuMy45LTEgbW9kX3NzbC8yLjguMjAgT3BlblNTTC8wLjkuN2QgbW9kX3BlcmwvMS4yOQ0K
 VmFyeTogQWNjZXB0LUVuY29kaW5nDQpDb250ZW50LVR5cGU6IHRleHQvaHRtbDsgY2hhcnNldD1J
-U08tODg1OS0xDQpUcmFuc2Zlci1FbmNvZGluZzogZ3ppcA0KQ29udGVudC1MZW5ndGg6IDQ0DQoN
-Ch+LCAh5nqtBAANsYWxhbGEAy8nMS1Uw5FLIAdFGXAoQhjEXAAoCcWAYAAAA
+U08tODg1OS0xDQpUcmFuc2Zlci1FbmNvZGluZzogZ3ppcCwgY2h1bmtlZA0KDQoyYw0KH4sICHme
+q0EAA2xhbGFsYQDLycxLVTDkUsgB0UZcChCGMRcACgJxYBgAAAANCjANCg0K
 </data>
 
 <datacheck>
@@ -25,8 +25,7 @@ Date: Mon, 29 Nov 2004 21:56:53 GMT
 Server: Apache/1.3.31 (Debian GNU/Linux) mod_gzip/1.3.26.1a PHP/4.3.9-1 mod_ssl/2.8.20 OpenSSL/0.9.7d mod_perl/1.29
 Vary: Accept-Encoding
 Content-Type: text/html; charset=ISO-8859-1
-Transfer-Encoding: gzip
-Content-Length: 44
+Transfer-Encoding: gzip, chunked
 
 line 1
  line 2
