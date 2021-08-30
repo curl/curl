@@ -163,6 +163,7 @@ problems may have been fixed or changed somewhat since this was written!
  18.5 HTTP/3 download with quiche halts after a while
  18.6 HTTP/3 multipart POST with quiche fails
  18.7 HTTP/3 quiche upload large file fails
+ 18.8 HTTP/3 doesn't support client certs
 
 ==============================================================================
 
@@ -1156,3 +1157,9 @@ problems may have been fixed or changed somewhat since this was written!
 18.7 HTTP/3 quiche upload large file fails
 
  https://github.com/curl/curl/issues/7532
+
+18.8 HTTP/3 doesn't support client certs
+
+ aka "mutual authentication".
+
+ https://github.com/curl/curl/issues/7625
