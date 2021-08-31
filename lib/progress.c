@@ -377,7 +377,12 @@ static curl_off_t trspeed(curl_off_t size, /* number of bytes */
 {
   if(us < 1)
     return size * 1000000;
-  return (curl_off_t)((long double)size/(long double)us * 1000000);
+  else if(size < CURL_OFF_T_MAX/1000000)
+    return (size * 1000000) / us;
+  else if(us >= 1000000)
+    return size / (us / 1000000);
+  else
+    return CURL_OFF_T_MAX;
 }
 
 /* returns TRUE if it's time to show the progress meter */
