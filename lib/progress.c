@@ -379,8 +379,6 @@ static curl_off_t trspeed(curl_off_t size, /* number of bytes */
     return size * 1000000;
   else if(size < CURL_OFF_T_MAX/1000000)
     return (size * 1000000) / us;
-  else if(size < CURL_OFF_T_MAX/1000)
-    return (size * 1000) / (us / 1000);
   else
     return size / (us / 1000000);
 }
