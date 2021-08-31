@@ -4,6 +4,7 @@ Protocols: IMAP POP3 SMTP
 Help: Server login options
 Added: 7.34.0
 Category: imap pop3 smtp auth
+Example: --login-options 'AUTH=*' imap://example.com
 ---
 Specify the login options to use during server authentication.
 

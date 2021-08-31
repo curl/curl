@@ -3,6 +3,8 @@ Arg: <hashes>
 Help: FILE/HASHES Public key to verify peer against
 Protocols: TLS
 Category: tls
+Example: --pinnedpubkey keyfile $URL
+Example: --pinnedpubkey 'sha256//ce118b51897f4452dc' $URL
 ---
 Tells curl to use the specified public key file (or hashes) to verify the
 peer. This can be a path to a file which contains a single public key in PEM

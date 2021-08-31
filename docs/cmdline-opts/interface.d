@@ -3,6 +3,7 @@ Arg: <name>
 Help: Use network INTERFACE (or address)
 See-also: dns-interface
 Category: connection
+Example: --interface eth0 $URL
 ---
 
 Perform an operation using a specified interface. You can enter interface

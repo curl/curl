@@ -1,9 +1,11 @@
 Long: max-time
 Short: m
-Arg: <seconds>
-Help: Maximum time allowed for the transfer
+Arg: <fractional seconds>
+Help: Maximum time allowed for transfer
 See-also: connect-timeout
 Category: connection
+Example: --max-time 10 $URL
+Example: --max-time 2.92 $URL
 ---
 Maximum time in seconds that you allow the whole operation to take.  This is
 useful for preventing your batch jobs from hanging for hours due to slow

@@ -5,6 +5,7 @@ Help: Specify multipart MIME data
 Protocols: HTTP SMTP IMAP
 Mutexed: data head upload-file
 Category: http upload
+Example: --form "name=curl" --form "file=@loadthis" $URL
 ---
 For HTTP protocol family, this lets curl emulate a filled-in form in which a
 user has pressed the submit button. This causes curl to POST data using the

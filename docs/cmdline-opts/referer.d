@@ -5,6 +5,9 @@ Protocols: HTTP
 Help: Referrer URL
 See-also: user-agent header
 Category: http
+Example: --referer "https://fake.example" $URL
+Example: --referer "https://fake.example;auto" -L $URL
+Example: --referer ";auto" -L $URL
 ---
 Sends the "Referrer Page" information to the HTTP server. This can also be set
 with the --header flag of course.  When used with --location you can append

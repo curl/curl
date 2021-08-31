@@ -2,6 +2,7 @@ Long: version
 Short: V
 Help: Show version number and quit
 Category: important curl
+Example: --version
 ---
 Displays information about curl and the libcurl version it uses.
 

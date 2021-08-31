@@ -5,6 +5,10 @@ Protocols: HTTP
 See-also: data data-raw
 Added: 7.18.0
 Category: http post upload
+Example: --data-urlencode name=val $URL
+Example: --data-urlencode =encodethis $URL
+Example: --data-urlencode name@file $URL
+Example: --data-urlencode @fileonly $URL
 ---
 This posts data, similar to the other --data options with the exception
 that this performs URL-encoding.

@@ -28,6 +28,7 @@ Each file has a set of meta-data and a body of text.
     Requires: (space separated list of features this requires, no dashes)
     See-also: (space separated list of related options, no dashes)
     Help: (short text for the --help output for this option)
+    Example: (example command line, without "curl" and can use `$URL`)
     --- (end of meta-data)
 
 ### Body

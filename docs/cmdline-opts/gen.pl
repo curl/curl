@@ -138,8 +138,11 @@ sub single {
     my $requires;
     my $category;
     my $seealso;
+    my @examples; # there can be more than one
     my $magic; # cmdline special option
+    my $line;
     while(<F>) {
+        $line++;
         if(/^Short: *(.)/i) {
             $short=$1;
         }
@@ -173,6 +176,9 @@ sub single {
         elsif(/^Category: *(.*)/i) {
             $category=$1;
         }
+        elsif(/^Example: *(.*)/i) {
+            push @examples, $1;
+        }
         elsif(/^Help: *(.*)/i) {
             ;
         }
@@ -183,6 +189,10 @@ sub single {
             }
             if(!$category) {
                 print STDERR "ERROR: no 'Category:' in $f\n";
+                exit 2;
+            }
+            if(!$examples[0]) {
+                print STDERR "$f:$line:1:ERROR: no 'Example:' present\n";
                 exit 2;
             }
             last;
@@ -275,6 +285,16 @@ sub single {
             $mstr .= sprintf "%s$l", $mstr?" and ":"";
         }
         push @foot, overrides($standalone, "This option overrides $mstr. ");
+    }
+    if($examples[0]) {
+        my $s ="";
+        $s="s" if($examples[1]);
+        print "\nExample$s:\n.nf\n";
+        foreach my $e (@examples) {
+            $e =~ s!\$URL!https://example.com!g;
+            print " curl $e\n";
+        }
+        print ".fi\n";
     }
     if($added) {
         push @foot, added($standalone, $added);

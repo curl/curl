@@ -5,6 +5,7 @@ Protocols: HTTP
 Added: 7.47.0
 See-also: connect-timeout
 Category: http
+Example: --expect100-timeout 2.5 -T file $URL
 ---
 Maximum time in seconds that you allow curl to wait for a 100-continue
 response when curl emits an Expects: 100-continue header in its request. By

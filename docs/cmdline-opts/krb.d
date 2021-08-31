@@ -4,6 +4,7 @@ Help: Enable Kerberos with security <level>
 Protocols: FTP
 Requires: Kerberos
 Category: ftp
+Example: --krb clear ftp://example.com/
 ---
 Enable Kerberos authentication and use. The level must be entered and should
 be one of 'clear', 'safe', 'confidential', or 'private'. Should you use a

@@ -2,6 +2,7 @@ Long: fail-early
 Help: Fail on first transfer error, do not continue
 Added: 7.52.0
 Category: curl
+Example: --fail-early $URL https://two.example
 ---
 Fail and exit on the first detected transfer error.
 

@@ -3,6 +3,7 @@ Short: y
 Arg: <seconds>
 Help: Trigger 'speed-limit' abort after this time
 Category: connection
+Example: --speed-limit 300 --speed-time 10 $URL
 ---
 If a download is slower than speed-limit bytes per second during a speed-time
 period, the download gets aborted. If speed-time is used, the default

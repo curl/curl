@@ -4,6 +4,7 @@ Help: DNS server addrs to use
 Requires: c-ares
 Added: 7.33.0
 Category: dns
+Example: --dns-servers 192.168.0.1,192.168.0.2 $URL
 ---
 Set the list of DNS servers to be used instead of the system default.
 The list of IP addresses should be separated with commas. Port numbers

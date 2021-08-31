@@ -3,6 +3,7 @@ Arg: <data>
 Help: HTTP POST binary data
 Protocols: HTTP
 Category: http post upload
+Example: --data-binary @filename $URL
 ---
 This posts data exactly as specified with no extra processing whatsoever.
 

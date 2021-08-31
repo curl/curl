@@ -4,6 +4,7 @@ Protocols: FTP
 Added: 7.11.0
 See-also: disable-epsv
 Category: ftp
+Example: --ftp-pasv ftp://example.com/
 ---
 Use passive mode for the data connection. Passive is the internal default
 behavior, but using this option can be used to override a previous --ftp-port

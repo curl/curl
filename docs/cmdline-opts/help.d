@@ -3,6 +3,7 @@ Arg: <category>
 Short: h
 Help: Get help for commands
 Category: important curl
+Example: --help all
 ---
 Usage help. This lists all commands of the <category>.
 If no arg was provided, curl will display the most important

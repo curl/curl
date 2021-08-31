@@ -2,6 +2,7 @@ Long: disable-eprt
 Help: Inhibit using EPRT or LPRT
 Protocols: FTP
 Category: ftp
+Example: --disable-eprt ftp://example.com/
 ---
 Tell curl to disable the use of the EPRT and LPRT commands when doing active
 FTP transfers. Curl will normally always first attempt to use EPRT, then LPRT

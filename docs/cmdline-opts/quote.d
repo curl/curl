@@ -4,6 +4,7 @@ Short: Q
 Help: Send command(s) to server before transfer
 Protocols: FTP SFTP
 Category: ftp sftp
+Example: --quote "DELE file" ftp://example.com/foo
 ---
 Send an arbitrary command to the remote FTP or SFTP server. Quote commands are
 sent BEFORE the transfer takes place (just after the initial PWD command in an

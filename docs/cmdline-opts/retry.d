@@ -3,6 +3,7 @@ Arg: <num>
 Added: 7.12.3
 Help: Retry request if transient problems occur
 Category: curl
+Example: --retry 7 $URL
 ---
 If a transient error is returned when curl tries to perform a transfer, it
 will retry this number of times before giving up. Setting the number to 0

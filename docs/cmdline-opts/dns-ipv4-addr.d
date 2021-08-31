@@ -6,6 +6,7 @@ See-also: dns-interface dns-ipv6-addr
 Added: 7.33.0
 Requires: c-ares
 Category: dns
+Example: --dns-ipv4-addr 10.1.2.3 $URL
 ---
 Tell curl to bind to <ip-address> when making IPv4 DNS requests, so that
 the DNS requests originate from this address. The argument should be a

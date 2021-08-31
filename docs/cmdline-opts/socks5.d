@@ -3,6 +3,7 @@ Arg: <host[:port]>
 Help: SOCKS5 proxy on given host + port
 Added: 7.18.0
 Category: proxy
+Example: --socks5 proxy.example:7000 $URL
 ---
 Use the specified SOCKS5 proxy - but resolve the host name locally. If the
 port number is not specified, it is assumed at port 1080.

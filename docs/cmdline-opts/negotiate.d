@@ -3,6 +3,7 @@ Help: Use HTTP Negotiate (SPNEGO) authentication
 Protocols: HTTP
 See-also: basic ntlm anyauth proxy-negotiate
 Category: auth http
+Example: --negotiate -u : $URL
 ---
 Enables Negotiate (SPNEGO) authentication.
 

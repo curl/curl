@@ -4,6 +4,9 @@ Help: Control CWD usage
 Protocols: FTP
 Added: 7.15.1
 Category: ftp
+Example: --ftp-method multicwd ftp://example.com/dir1/dir2/file
+Example: --ftp-method nocwd ftp://example.com/dir1/dir2/file
+Example: --ftp-method singlecwd ftp://example.com/dir1/dir2/file
 ---
 Control what method curl should use to reach a file on an FTP(S)
 server. The method argument should be one of the following alternatives:
