@@ -2063,7 +2063,7 @@ static const char *ssl_msg_type(int ssl_ver, int msg)
 #ifdef SSL3_MT_SUPPLEMENTAL_DATA
       case SSL3_MT_SUPPLEMENTAL_DATA:
         return "Supplemental data";
-#endif      
+#endif
 #ifdef SSL3_MT_END_OF_EARLY_DATA
       case SSL3_MT_END_OF_EARLY_DATA:
         return "End of early data";
