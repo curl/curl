@@ -4,6 +4,7 @@ Arg: <filename>
 Added: 7.21.5
 Mutexed: netrc
 Category: curl
+Example: --netrc-file netrc $URL
 ---
 This option is similar to --netrc, except that you provide the path (absolute
 or relative) to the netrc file that curl should use.  You can only specify one

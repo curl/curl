@@ -4,6 +4,7 @@ Help: Directory to save files in
 Added: 7.73.0
 See-also: remote-name remote-header-name
 Category: curl
+Example: --output-dir "tmp" -O $URL
 ---
 
 This option specifies the directory in which files should be stored, when

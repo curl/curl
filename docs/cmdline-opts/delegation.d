@@ -3,6 +3,7 @@ Arg: <LEVEL>
 Help: GSS-API delegation permission
 Protocols: GSS/kerberos
 Category: auth
+Example: --delegation "none" $URL
 ---
 Set LEVEL to tell the server what it is allowed to delegate when it
 comes to user credentials.

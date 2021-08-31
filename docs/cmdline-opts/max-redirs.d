@@ -3,6 +3,7 @@ Arg: <num>
 Help: Maximum number of redirects allowed
 Protocols: HTTP
 Category: http
+Example: --max-redirs 3 --location $URL
 ---
 Set maximum number of redirections to follow. When --location is used, to
 prevent curl from following too many redirects, by default, the limit is

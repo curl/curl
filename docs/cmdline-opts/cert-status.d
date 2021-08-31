@@ -3,6 +3,7 @@ Protocols: TLS
 Added: 7.41.0
 Help: Verify the status of the server cert via OCSP-staple
 Category: tls
+Example: --cert-status $URL
 ---
 Tells curl to verify the status of the server certificate by using the
 Certificate Status Request (aka. OCSP stapling) TLS extension.

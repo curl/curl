@@ -4,9 +4,8 @@ Protocols: HTTPS
 Help: Enable alt-svc with this cache file
 Added: 7.64.1
 Category: http
+Example: --alt-svc svc.txt $URL
 ---
-WARNING: this option is experimental. Do not use in production.
-
 This option enables the alt-svc parser in curl. If the file name points to an
 existing alt-svc cache file, that will be used. After a completed transfer,
 the cache will be saved to the file name again if it has been modified.

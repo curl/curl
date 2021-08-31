@@ -2,6 +2,7 @@ Long: get
 Short: G
 Help: Put the post data in the URL and use GET
 Category: http upload
+Example: --get $URL
 ---
 When used, this option will make all data specified with --data, --data-binary
 or --data-urlencode to be used in an HTTP GET request instead of the POST

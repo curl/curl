@@ -3,6 +3,7 @@ Arg: <seconds>
 Help: Interval time for keepalive probes
 Added: 7.18.0
 Category: connection
+Example: --keepalive-time 20 $URL
 ---
 This option sets the time a connection needs to remain idle before sending
 keepalive probes and the time between individual keepalive probes. It is

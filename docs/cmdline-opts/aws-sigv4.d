@@ -3,6 +3,7 @@ Arg: <provider1[:provider2[:region[:service]]]>
 Help: Use AWS V4 signature authentication
 Category: auth http
 Added: 7.75.0
+Example: --aws-sigv4 "aws:amz:east-2:es" --user "key:secret" $URL
 ---
 Use AWS V4 signature authentication in the transfer.
 

@@ -3,6 +3,7 @@ Arg: <host[:port]>
 Help: SOCKS4 proxy on given host + port
 Added: 7.15.2
 Category: proxy
+Example: --socks4 hostname:4096 $URL
 ---
 Use the specified SOCKS4 proxy. If the port number is not specified, it is
 assumed at port 1080. Using this socket type make curl resolve the host name

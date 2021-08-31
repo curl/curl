@@ -4,6 +4,7 @@ Help: Parse ETag from a request and save it to a file
 Protocols: HTTP
 Added: 7.68.0
 Category: http
+Example: --etag-save storetag.txt $URL
 ---
 This option saves an HTTP ETag to the specified file. An ETag is a
 caching related header, usually returned in a response.

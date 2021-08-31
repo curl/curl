@@ -6,6 +6,9 @@ Protocols: HTTP MQTT
 See-also: data-binary data-urlencode data-raw
 Mutexed: form head upload-file
 Category: important http post upload
+Example: -d "name=curl" $URL
+Example: -d "name=curl" -d "tool=cmdline" $URL
+Example: -d @filename $URL
 ---
 Sends the specified data in a POST request to the HTTP server, in the same way
 that a browser does when a user has filled in an HTML form and presses the

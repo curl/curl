@@ -3,6 +3,7 @@ Arg: <file>
 Help: Read config from a file
 Short: K
 Category: curl
+Example: --config file.txt $URL
 ---
 
 Specify a text file to read curl arguments from. The command line arguments

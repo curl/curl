@@ -2,6 +2,7 @@ Long: socks5-gssapi-nec
 Help: Compatibility with NEC SOCKS5 server
 Added: 7.19.4
 Category: proxy auth
+Example: --socks5-gssapi-nec --socks5 hostname:4096 $URL
 ---
 As part of the GSS-API negotiation a protection mode is negotiated. RFC 1961
 says in section 4.3/4.4 it should be protected, but the NEC reference

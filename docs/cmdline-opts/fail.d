@@ -4,6 +4,7 @@ Protocols: HTTP
 Help: Fail silently (no output at all) on HTTP errors
 See-also: fail-with-body
 Category: important http
+Example: --fail $URL
 ---
 Fail silently (no output at all) on server errors. This is mostly done to
 enable scripts etc to better deal with failed attempts. In normal cases

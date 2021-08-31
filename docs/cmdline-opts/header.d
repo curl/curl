@@ -5,6 +5,9 @@ Help: Pass custom header(s) to server
 Protocols: HTTP
 Category: http
 See-also: user-agent referer
+Example: -H "X-First-Name: Joe" $URL
+Example: -H "User-Agent: yes-please/2000" $URL
+Example: -H "Host:" $URL
 ---
 Extra header to include in the request when sending HTTP to a server. You may
 specify any number of extra headers. Note that if you should add a custom
@@ -31,10 +34,6 @@ proxy. Added in 7.37.0.
 
 Passing on a "Transfer-Encoding: chunked" header when doing a HTTP request
 with a request body, will make curl send the data using chunked encoding.
-
-Example:
-
- curl -H "X-First-Name: Joe" http://example.com/
 
 **WARNING**: headers set with this option will be set in all requests - even
 after redirects are followed, like when told with --location. This can lead to

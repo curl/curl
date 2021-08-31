@@ -5,6 +5,7 @@ See-also: proxy-ntlm
 Protocols: HTTP
 Requires: TLS
 Category: auth http
+Example: --ntlm -u user:password $URL
 ---
 Enables NTLM authentication. The NTLM authentication method was designed by
 Microsoft and is used by IIS web servers. It is a proprietary protocol,

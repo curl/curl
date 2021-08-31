@@ -2,6 +2,7 @@ Long: remote-name
 Short: O
 Help: Write output to a file named as the remote file
 Category: important output
+Example: -O https://example.com/filename
 ---
 Write output to a local file named like the remote file we get. (Only the file
 part of the remote file is used, the path is cut off.)

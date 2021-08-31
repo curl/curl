@@ -194,7 +194,7 @@ static const struct helptxt helptext[] = {
    "Convert LF to CRLF in upload",
    CURLHELP_FTP | CURLHELP_SMTP},
   {"    --crlfile <file>",
-   "Get a CRL list in PEM format from the given file",
+   "Use this CRL list",
    CURLHELP_TLS},
   {"    --curves <algorithm list>",
    "(EC) TLS key exchange algorithm(s) to request",
