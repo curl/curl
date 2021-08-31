@@ -4,7 +4,7 @@ curl and libcurl 7.79.0
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
- Contributors:                 2474
+ Contributors:                 2477
 
 This release includes the following changes:
 
@@ -44,6 +44,8 @@ This release includes the following bugfixes:
  o curl-openssl.m4: show correct output for OpenSSL v3 [75]
  o curl.1: mention "global" flags [7]
  o curl: add warning for ignored data after quoted form parameter [60]
+ o curl: better error message when -O fails to get a good name [88]
+ o curl_easy_setopt.3: improve the string copy wording [89]
  o curl_setup.h: sync values for HTTP_ONLY [82]
  o curl_url_get.3: clarify about path and query [45]
  o CURLMOPT_TIMERFUNCTION.3: remove misplaced "time" [5]
@@ -57,11 +59,15 @@ This release includes the following bugfixes:
  o getparameter: fix the --local-port number parser [58]
  o happy-eyeballs-timeout-ms.d: polish the wording [10]
  o hostip: Make Curl_ipv6works function independent of getaddrinfo [26]
+ o http2: revert a change that broke upgrade to h2c [57]
  o http2: revert call the handle-closed function correctly on closed stream [25]
+ o http: disallow >3-digit response codes [80]
  o http_proxy: clear 'sending' when the outgoing request is sent [6]
  o http_proxy: fix user-agent and custom headers for CONNECT with hyper [38]
+ o http_proxy: only wait for writable socket while sending request [78]
  o libcurl-errors.3: clarify two CURLUcode errors [72]
  o limit-rate.d: clarify base unit [17]
+ o mailing lists: move from cool.haxx.se to lists.haxx.se
  o mbedTLS: initial 3.0.0 support [33]
  o mbedtls_threadlock: fix unused variable warning [11]
  o mksymbolsmanpage.pl: Fix showing symbol's last used version [76]
@@ -71,6 +77,7 @@ This release includes the following bugfixes:
  o ngtcp2: replace deprecated functions with nghttp3_conn_shutdown_stream_read [28]
  o ngtcp2: reset the oustanding send buffer again when drained [53]
  o ngtcp2: rework the return value handling of ngtcp2_conn_writev_stream [29]
+ o ngtcp2: stop buffering crypto data [85]
  o ngtcp2: utilize crypto API functions to simplify [52]
  o openssl: when creating a new context, there cannot be an old one [48]
  o output.d: add method to suppress response bodies [49]
@@ -81,12 +88,14 @@ This release includes the following bugfixes:
  o setopt: enable CURLOPT_IGNORE_CONTENT_LENGTH for hyper [70]
  o symbols-in-versions: fix CURLSSLBACKEND_QSOSSL last used version [73]
  o test1138: remove trailing space to make work with hyper [71]
+ o test1280: CRLFify the response to please hyper [86]
  o test1565: fix windows build errors [27]
  o tests/*server.pl: flush output before executing subprocess [41]
  o tests/*server.py: remove pidfile on server termination [1]
  o tests/runtests.pl: cleanup copy&paste mistakes and unused code
  o tests/server/*.c: align handling of portfile argument and file [56]
  o tests: be explicit about using 'python3' instead of 'python' [67]
+ o tests: enable test 1129 for hyper builds [87]
  o tests: make three tests pass until 2037 [22]
  o tool/tests: fix potential year 2038 issues [20]
  o tool_operate: Fix --fail-early with parallel transfers [62]
@@ -109,12 +118,13 @@ advice from friends like these:
   Carlo Marcelo Arenas Belón, Christian Weisgerber, Colin O'Dell, Dan Fandrich,
   Daniel Gustafsson, Daniel Stenberg, Daniel Woelfel, Dan Jacobson, David Cook,
   Don J Olmstead, Ehren Bendler, Emil Engler, Gambit Communications,
-  Gergely Nagy, Gleb Ivanovsky, Ikko Ashimine, Jan Verbeek, Jeff Mears,
-  Jeremy Falcon, Josh Soref, Marc Hörsken, Michael Kaufmann, Michał Antoniak,
-  modbw on github, Oleg Pudeyev, Patrick Monnerat, Randall S. Becker,
-  Ray Satiro, Rui Pinheiro, Sergey Markelov, Tatsuhiro Tsujikawa,
-  Viktor Szakats, Vincent Grande, z2-2z on github, zloi-user on github,
-  (47 contributors)
+  Gergely Nagy, Gleb Ivanovsky, Ikko Ashimine, Jan Schaumann, Jan Verbeek,
+  Jeff Mears, Jeremy Falcon, Josh Soref, Marc Hörsken, Michael Kaufmann,
+  Michał Antoniak, modbw on github, Oleg Pudeyev, Oleguer Llopart,
+  Patrick Monnerat, Randall S. Becker, Ray Satiro, Rui Pinheiro,
+  Sergey Markelov, Tatsuhiro Tsujikawa, Tk Xiong, Viktor Szakats,
+  Vincent Grande, Yaobin Wen, z2-2z on github, zloi-user on github,
+  (51 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -174,6 +184,7 @@ References to bug reports and discussions on issues:
  [54] = https://curl.se/bug/?i=7549
  [55] = https://curl.se/bug/?i=7624
  [56] = https://curl.se/bug/?i=7574
+ [57] = https://curl.se/bug/?i=7633
  [58] = https://curl.se/bug/?i=7582
  [59] = https://curl.se/bug/?i=7595
  [60] = https://curl.se/bug/?i=7394
@@ -193,8 +204,15 @@ References to bug reports and discussions on issues:
  [75] = https://curl.se/bug/?i=7606
  [76] = https://github.com/curl/curl/commit/4e53b94#commitcomment-55239509
  [77] = https://github.com/curl/curl/commit/4e53b9430c7504de8984796e2a2091ec16f27136#commitcomment-55239253
+ [78] = https://curl.se/bug/?i=7589
  [79] = https://curl.se/bug/?i=7594
+ [80] = https://curl.se/bug/?i=7641
  [81] = https://curl.se/bug/?i=7603
  [82] = https://curl.se/bug/?i=7601
  [83] = https://curl.se/bug/?i=7581
  [84] = https://curl.se/bug/?i=7580
+ [85] = https://curl.se/bug/?i=7637
+ [86] = https://curl.se/bug/?i=7639
+ [87] = https://curl.se/bug/?i=7638
+ [88] = https://curl.se/bug/?i=7628
+ [89] = https://curl.se/bug/?i=7632
