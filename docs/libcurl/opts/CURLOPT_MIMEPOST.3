@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -40,13 +40,13 @@ This option is the preferred way of posting an HTTP form, replacing and
 extending the deprecated \fICURLOPT_HTTPPOST(3)\fP option.
 .SH PROTOCOLS
 HTTP, SMTP, IMAP.
-.SH AVAILABILITY
-Since 7.56.0.
-.SH RETURN VALUE
-This will return CURLE_OK.
 .SH EXAMPLE
 Using this option implies the use of several mime structure building
 functions: see https://curl.se/libcurl/c/smtp-mime.html for a complete
 example.
+.SH AVAILABILITY
+Since 7.56.0.
+.SH RETURN VALUE
+This will return CURLE_OK.
 .SH "SEE ALSO"
 .BR curl_mime_init "(3)"
