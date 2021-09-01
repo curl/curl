@@ -317,6 +317,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_SERVICE_NAME ||                                        \
    (option) == CURLOPT_SOCKS5_GSSAPI_SERVICE ||                               \
    (option) == CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 ||                             \
+   (option) == CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256 ||                          \
    (option) == CURLOPT_SSH_KNOWNHOSTS ||                                      \
    (option) == CURLOPT_SSH_PRIVATE_KEYFILE ||                                 \
    (option) == CURLOPT_SSH_PUBLIC_KEYFILE ||                                  \

@@ -7,6 +7,7 @@ curl_client_knownhosts
 curl_host_rsa_key
 curl_host_rsa_key.pub
 curl_host_rsa_key.pub_md5
+curl_host_rsa_key.pub_sha256
 curl_sftp_cmds
 curl_sftp_config
 curl_ssh_config

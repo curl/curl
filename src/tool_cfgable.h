@@ -158,6 +158,7 @@ struct OperationConfig {
   char *proxy_key_passwd;
   char *pubkey;
   char *hostpubmd5;
+  char *hostpubsha256;
   char *engine;
   char *etag_save_file;
   char *etag_compare_file;

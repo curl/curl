@@ -96,6 +96,7 @@ DPAGES = \
   header.d \
   help.d \
   hostpubmd5.d \
+  hostpubsha256.d \
   hsts.d \
   http0.9.d \
   http1.0.d \
