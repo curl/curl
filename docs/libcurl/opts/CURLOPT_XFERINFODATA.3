@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -37,7 +37,32 @@ The default value of this parameter is NULL.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-https://curl.se/libcurl/c/progressfunc.html
+.nf
+ struct progress {
+   char *private;
+   size_t size;
+ };
+
+ static size_t progress_callback(void *clientp,
+                                 curl_off_t dltotal,
+                                 curl_off_t dlnow,
+                                 curl_off_t ultotal,
+                                 curl_off_t ulnow)
+ {
+   struct memory *progress = (struct progress *)userp;
+
+   /* use the values */
+
+   return 0; /* all is good */
+ }
+
+ struct progress data;
+
+ /* pass struct to callback  */
+ curl_easy_setopt(curl_handle, CURLOPT_XFERINFODATA, &data);
+
+ curl_easy_setopt(curl_handle, CURLOPT_XFERINFOFUNCTION, progress_callback);
+.fi
 .SH AVAILABILITY
 Added in 7.32.0
 .SH RETURN VALUE

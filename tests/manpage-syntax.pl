@@ -34,11 +34,28 @@ my $errors = 0;
 
 sub scanmanpage {
     my ($file) = @_;
+    my $reqex = 0;
+    my $inex = 0;
+    my $exsize = 0;
 
     print "Check $file\n";
     open(M, "<$file") || die "no such file: $file";
+    if($file =~ /\/CURL[^\/]*.3/) {
+        # This is the man page for an libcurl option. It requires an example!
+        $reqex = 1;
+    }
     my $line = 1;
     while(<M>) {
+        if($_ =~ /^.SH EXAMPLE/) {
+            $inex = 1;
+        }
+        elsif($_ =~ /^.SH/) {
+            $inex = 0;
+        }
+        elsif($inex)  {
+            $exsize++;
+        }
+
         if($_ =~ /^\'/) {
             print STDERR "$file:$line line starts with single quote!\n";
             $errors++;
@@ -57,6 +74,11 @@ sub scanmanpage {
         $line++;
     }
     close(M);
+
+    if($reqex && ($exsize < 2)) {
+        print STDERR "$file:$line missing EXAMPLE section\n";
+        $errors++;
+    }
 }
 
 
