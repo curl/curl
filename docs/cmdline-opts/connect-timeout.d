@@ -1,5 +1,5 @@
 Long: connect-timeout
-Arg: <seconds>
+Arg: <fractional seconds>
 Help: Maximum time allowed for connection
 See-also: max-time
 Category: connection

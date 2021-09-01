@@ -1,7 +1,7 @@
 Long: max-time
 Short: m
-Arg: <seconds>
-Help: Maximum time allowed for the transfer
+Arg: <fractional seconds>
+Help: Maximum time allowed for transfer
 See-also: connect-timeout
 Category: connection
 Example: --max-time 10 $URL
