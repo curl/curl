@@ -28,12 +28,12 @@ tftp://%HOSTIP:%TFTPPORT//invalid-file --tftp-blksize 1024
 69
 </errorcode>
 <protocol>
-opcode: 1
-mode: octet
-tsize: 0
-blksize: 1024
-timeout: 6
-filename: /invalid-file
+opcode = 1
+mode = octet
+tsize = 0
+blksize = 1024
+timeout = 6
+filename = /invalid-file
 </protocol>
 </verify>
 </testcase>

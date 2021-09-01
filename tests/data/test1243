@@ -36,9 +36,9 @@ sent
  to server
 </upload>
 <protocol>
-opcode: 2
-mode: octet
-filename: /test%TESTNUMBER.txt
+opcode = 2
+mode = octet
+filename = /test%TESTNUMBER.txt
 </protocol>
 </verify>
 </testcase>

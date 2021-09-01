@@ -31,18 +31,18 @@ tftp://%HOSTIP:%TFTPPORT/an/invalid-file tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER
 # Verify pseudo protocol after the test has been "shot"
 <verify>
 <protocol>
-opcode: 1
-mode: octet
-tsize: 0
-blksize: 512
-timeout: 6
-filename: an/invalid-file
-opcode: 1
-mode: octet
-tsize: 0
-blksize: 512
-timeout: 6
-filename: /%TESTNUMBER
+opcode = 1
+mode = octet
+tsize = 0
+blksize = 512
+timeout = 6
+filename = an/invalid-file
+opcode = 1
+mode = octet
+tsize = 0
+blksize = 512
+timeout = 6
+filename = /%TESTNUMBER
 </protocol>
 <stdout>
 data for %TESTNUMBER

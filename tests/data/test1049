@@ -36,12 +36,12 @@ tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --interface %CLIENTIP
 # Verify pseudo protocol after the test has been "shot"
 <verify>
 <protocol>
-opcode: 1
-mode: octet
-tsize: 0
-blksize: 512
-timeout: 6
-filename: /%TESTNUMBER
+opcode = 1
+mode = octet
+tsize = 0
+blksize = 512
+timeout = 6
+filename = /%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

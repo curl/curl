@@ -35,9 +35,9 @@ tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --tftp-no-options
 # Verify pseudo protocol after the test has been "shot"
 <verify>
 <protocol>
-opcode: 1
-mode: octet
-filename: /%TESTNUMBER
+opcode = 1
+mode = octet
+filename = /%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

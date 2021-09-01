@@ -31,12 +31,12 @@ This data will not be sent
 69
 </errorcode>
 <protocol>
-opcode: 2
-mode: octet
-tsize: 27
-blksize: 512
-timeout: 6
-filename: /invalid-file
+opcode = 2
+mode = octet
+tsize = 27
+blksize = 512
+timeout = 6
+filename = /invalid-file
 </protocol>
 </verify>
 </testcase>
