@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -67,8 +67,6 @@ could be a privacy violation and unexpected.
 0
 .SH PROTOCOLS
 All TLS-based protocols
-.SH AVAILABLE
-Added in 7.52.0
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -82,6 +80,8 @@ if(curl) {
   curl_easy_cleanup(curl);
 }
 .fi
+.SH AVAILABILITY
+Added in 7.52.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
