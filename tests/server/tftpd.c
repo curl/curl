@@ -902,7 +902,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   }
 
   /* store input protocol */
-  fprintf(server, "opcode: %x\n", tp->th_opcode);
+  fprintf(server, "opcode = %x\n", tp->th_opcode);
 
   cp = (char *)&tp->th_stuff;
   filename = cp;
@@ -930,7 +930,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
       }
       if(toggle)
         /* name/value pair: */
-        fprintf(server, "%s: %s\n", option, cp);
+        fprintf(server, "%s = %s\n", option, cp);
       else {
         /* store the name pointer */
         option = cp;
@@ -949,7 +949,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   }
 
   /* store input protocol */
-  fprintf(server, "filename: %s\n", filename);
+  fprintf(server, "filename = %s\n", filename);
 
   for(cp = mode; cp && *cp; cp++)
     if(ISUPPER(*cp))
