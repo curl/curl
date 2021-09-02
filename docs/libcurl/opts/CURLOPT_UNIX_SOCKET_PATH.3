@@ -50,14 +50,14 @@ option.
 .SH DEFAULT
 Default is NULL, meaning that no Unix domain sockets are used.
 .SH PROTOCOLS
-All protocols except for file:// and FTP are supported in theory. HTTP, IMAP,
+All protocols except for FILE and FTP are supported in theory. HTTP, IMAP,
 POP3 and SMTP should in particular work (including their SSL/TLS variants).
 .SH EXAMPLE
-Given that you have an nginx server running, listening on /tmp/nginx.sock, you
+Given that you have an HTTP server running listening on /tmp/httpd.sock, you
 can request an HTTP resource with:
 
 .nf
-  curl_easy_setopt(curl_handle, CURLOPT_UNIX_SOCKET_PATH, "/tmp/nginx.sock");
+  curl_easy_setopt(curl_handle, CURLOPT_UNIX_SOCKET_PATH, "/tmp/httpd.sock");
   curl_easy_setopt(curl_handle, CURLOPT_URL, "http://localhost/");
 .fi
 
@@ -67,7 +67,7 @@ you could use the proc filesystem to bypass the limitation:
 .nf
   int dirfd = open(long_directory_path_to_socket, O_DIRECTORY | O_RDONLY);
   char path[108];
-  snprintf(path, sizeof(path), "/proc/self/fd/%d/nginx.sock", dirfd);
+  snprintf(path, sizeof(path), "/proc/self/fd/%d/httpd.sock", dirfd);
   curl_easy_setopt(curl_handle, CURLOPT_UNIX_SOCKET_PATH, path);
   /* Be sure to keep dirfd valid until you discard the handle */
 .fi
@@ -76,4 +76,5 @@ Since 7.40.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
+.BR CURLOPT_ABSTRACT_UNIX_SOCKET "(3), "
 .BR CURLOPT_OPENSOCKETFUNCTION "(3), " unix "(7), "
