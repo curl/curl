@@ -751,10 +751,9 @@ void Curl_updateconninfo(struct Curl_easy *data, struct connectdata *conn,
   int local_port = -1;
 
   if(conn->transport == TRNSPRT_TCP) {
-    if(!conn->bits.reuse && !conn->bits.tcp_fastopen) {
+    if(!conn->bits.reuse && !conn->bits.tcp_fastopen)
       Curl_conninfo_remote(data, conn, sockfd);
-      Curl_conninfo_local(data, sockfd, local_ip, &local_port);
-    }
+    Curl_conninfo_local(data, sockfd, local_ip, &local_port);
   } /* end of TCP-only section */
 
   /* persist connection info in session handle */

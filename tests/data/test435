@@ -1,0 +1,71 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 0
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+verify -w local/remote port+ip after connecton re-use
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w 'local port == %{local_port}\nlocal ip == %{local_ip}\nremote_ip == %{remote_ip}\nremote_port == %{remote_port}\n'
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+# replace the number with a fixed string since the port number is not
+# known to the test script but it should always be a decimal number
+<stripfile>
+s/local port == (\d+)/local port == [digits]/
+</stripfile>
+<stdout>
+HTTP/1.1 200 OK
+Content-Length: 0
+
+local port == [digits]
+local ip == 127.0.0.1
+remote_ip == %HOSTIP
+remote_port == %HTTPPORT
+HTTP/1.1 200 OK
+Content-Length: 0
+
+local port == [digits]
+local ip == 127.0.0.1
+remote_ip == %HOSTIP
+remote_port == %HTTPPORT
+</stdout>
+</verify>
+</testcase>
