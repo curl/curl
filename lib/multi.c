@@ -1100,6 +1100,9 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   WSANETWORKEVENTS wsa_events;
   DEBUGASSERT(multi->wsa_event != WSA_INVALID_EVENT);
 #endif
+#ifndef ENABLE_WAKEUP
+  (void)use_wakeup;
+#endif
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
