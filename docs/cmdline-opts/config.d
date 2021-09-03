@@ -36,8 +36,8 @@ line. So, it could look similar to this:
 url = "https://curl.se/docs/"
 
 When curl is invoked, it (unless --disable is used) checks for a default
-config file and uses it if found. The default config file is checked for in
-the following places in this order:
+config file and uses it if found, even when this option is used. The default
+config file is checked for in the following places in this order:
 
 1) Use the CURL_HOME environment variable if set
 
