@@ -237,6 +237,7 @@ static const struct LongShort aliases[]= {
   {"Ec", "key",                      ARG_FILENAME},
   {"Ed", "key-type",                 ARG_STRING},
   {"Ee", "pass",                     ARG_STRING},
+  {"EF", "pass-file",                ARG_FILENAME},
   {"Ef", "engine",                   ARG_STRING},
   {"Eg", "capath",                   ARG_FILENAME},
   {"Eh", "pubkey",                   ARG_STRING},
@@ -264,6 +265,7 @@ static const struct LongShort aliases[]= {
   {"Ez", "proxy-key",                ARG_FILENAME},
   {"E0", "proxy-key-type",           ARG_STRING},
   {"E1", "proxy-pass",               ARG_STRING},
+  {"EG", "proxy-pass-file",          ARG_FILENAME},
   {"E2", "proxy-ciphers",            ARG_STRING},
   {"E3", "proxy-crlfile",            ARG_FILENAME},
   {"E4", "proxy-ssl-allow-beast",    ARG_BOOL},
@@ -1586,6 +1588,36 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         GetStr(&config->key_passwd, nextarg);
         cleanarg(nextarg);
         break;
+      case 'F': /* pass-file */
+      {
+        FILE *file = fopen(nextarg, "rb");
+        if(!file)
+          warnf(global,
+                "Couldn't read password from file \"%s\"\n", nextarg);
+
+        err = file2string(&config->key_passwd, file);
+
+        if(file && (file != stdin))
+          fclose(file);
+        if(err)
+          return err;
+      }
+      break;
+      case 'G': /* proxy-pass-file */
+      {
+        FILE *file = fopen(nextarg, "rb");
+        if(!file)
+          warnf(global,
+                "Couldn't read password from file \"%s\"\n", nextarg);
+
+        err = file2string(&config->proxy_key_passwd, file);
+
+        if(file && (file != stdin))
+          fclose(file);
+        if(err)
+          return err;
+      }
+      break;
       case 'f': /* crypto engine */
         GetStr(&config->engine, nextarg);
         if(config->engine && curl_strequal(config->engine, "list"))

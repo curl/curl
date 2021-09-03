@@ -139,6 +139,7 @@
 --parallel-immediate                 7.68.0
 --parallel-max                       7.66.0
 --pass                               7.9.3
+--pass-file                          7.79.0
 --path-as-is                         7.42.0
 --pinnedpubkey                       7.39.0
 --post301                            7.17.1
@@ -166,6 +167,7 @@
 --proxy-negotiate                    7.17.1
 --proxy-ntlm                         7.10.7
 --proxy-pass                         7.52.0
+--proxy-pass-file                    7.79.0
 --proxy-pinnedpubkey                 7.59.0
 --proxy-service-name                 7.43.0
 --proxy-ssl-allow-beast              7.52.0

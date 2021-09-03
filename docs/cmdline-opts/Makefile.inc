@@ -150,6 +150,7 @@ DPAGES = \
   parallel-immediate.d \
   parallel-max.d \
   parallel.d \
+  pass-file.d \
   pass.d \
   path-as-is.d \
   pinnedpubkey.d \
@@ -176,6 +177,7 @@ DPAGES = \
   proxy-key.d \
   proxy-negotiate.d \
   proxy-ntlm.d \
+  proxy-pass-file.d \
   proxy-pass.d \
   proxy-pinnedpubkey.d \
   proxy-service-name.d \
