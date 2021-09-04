@@ -172,7 +172,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
      curl_h3_msg="no      (--with-ngtcp2, --with-quiche)"
 
 enable_altsvc="yes"
-enable_hsts="yes"
+hsts="yes"
 
 dnl
 dnl Save some initial values the user might have provided
@@ -534,7 +534,7 @@ AS_HELP_STRING([--disable-http],[Disable HTTP support]),
        curl_altsvc_msg="no";
        curl_hsts_msg="no      (--enable-hsts)";
        enable_altsvc="no"
-       enable_hsts="no"
+       hsts="no"
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -3901,19 +3901,19 @@ if test -n "$SSL_ENABLED"; then
   [ case "$enableval" in
     no)
        AC_MSG_RESULT(no)
-       enable_hsts="no"
+       hsts="no"
        ;;
     *) AC_MSG_RESULT(yes)
        ;;
     esac ],
-       AC_MSG_RESULT(no)
+       AC_MSG_RESULT($hsts)
   )
 else
   AC_MSG_NOTICE([disables HSTS due to lack of SSL])
-  enable_hsts="no"
+  hsts="no"
 fi
 
-if test "x$enable_hsts" != "xyes"; then
+if test "x$hsts" != "xyes"; then
   curl_hsts_msg="no      (--enable-hsts)";
   AC_DEFINE(CURL_DISABLE_HSTS, 1, [disable alt-svc])
 fi
@@ -4038,7 +4038,7 @@ fi
 if test "x$enable_altsvc" = "xyes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES alt-svc"
 fi
-if test "x$enable_hsts" = "xyes"; then
+if test "x$hsts" = "xyes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HSTS"
 fi
 
