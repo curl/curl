@@ -51,6 +51,7 @@ man_MANS =                                      \
   CURLINFO_NAMELOOKUP_TIME_T.3                  \
   CURLINFO_NUM_CONNECTS.3                       \
   CURLINFO_OS_ERRNO.3                           \
+  CURLINFO_PAUSE_STATE.3                        \
   CURLINFO_PRETRANSFER_TIME.3                   \
   CURLINFO_PRETRANSFER_TIME_T.3                 \
   CURLINFO_PRIMARY_IP.3                         \

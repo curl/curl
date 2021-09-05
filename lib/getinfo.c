@@ -316,6 +316,10 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_PROTOCOL:
     *param_longp = data->info.conn_protocol;
     break;
+  case CURLINFO_PAUSE_STATE:
+    *param_longp = ((data->req.keepon&KEEP_RECV_PAUSE)?CURLPAUSE_RECV:0) |
+                  ((data->req.keepon&KEEP_SEND_PAUSE)?CURLPAUSE_SEND:0);
+    break;
   default:
     return CURLE_UNKNOWN_OPTION;
   }

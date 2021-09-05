@@ -38,7 +38,6 @@
  1.19 provide timing info for each redirect
  1.20 SRV and URI DNS records
  1.21 netrc caching and sharing
- 1.22 CURLINFO_PAUSE_STATE
  1.23 Offer API to flush the connection pool
  1.24 TCP Fast Open for windows
  1.25 Expose tried IP addresses that failed
@@ -374,11 +373,6 @@
  means that if a transfer needs multiple connections for authentication or
  redirects, the file might be reread (and parsed) multiple times. This makes
  it impossible to provide the file as a pipe.
-
-1.22 CURLINFO_PAUSE_STATE
-
- Return information about the transfer's current pause state, in both
- directions. https://github.com/curl/curl/issues/2588
 
 1.23 Offer API to flush the connection pool
 
