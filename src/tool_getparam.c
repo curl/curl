@@ -1356,6 +1356,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->resume_from_current = FALSE;
       }
       else {
+        if(config->content_disposition) {
+          warnf(global, "--continue-at - and --remote-header-name "
+                        "cannot be combined.\n");
+          return PARAM_BAD_USE;
+        }
         config->resume_from_current = TRUE;
         config->resume_from = 0;
       }
@@ -1913,6 +1918,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if(config->show_headers) {
         warnf(global,
               "--include and --remote-header-name cannot be combined.\n");
+        return PARAM_BAD_USE;
+      }
+      if(config->resume_from_current) {
+        warnf(global, "--continue-at - and --remote-header-name "
+                      "cannot be combined.\n");
         return PARAM_BAD_USE;
       }
       config->content_disposition = toggle;
