@@ -52,18 +52,21 @@ struct hyptransfer {
   hyper_waker *read_waker;
   const hyper_executor *exec;
 
+  hyptaskud handshake_task_id;
   hyptaskstatus handshake_status;
   union {
     hyper_clientconn *conn;
     hyper_error *error;
   } handshake_result;
 
+  hyptaskud response_task_id;
   hyptaskstatus response_status;
   union {
     hyper_response *response;
     hyper_error *error;
   } response_result;
 
+  hyptaskud body_foreach_task_id;
   hyptaskstatus body_foreach_status;
   hyper_error *body_foreach_error;
 

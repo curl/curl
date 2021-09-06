@@ -738,6 +738,9 @@ static CURLcode CONNECT(struct Curl_easy *data,
       h->handshake_status = HYPERTASK_NOT_DONE;
       h->response_status = HYPERTASK_NOT_DONE;
       h->body_foreach_status = HYPERTASK_NOT_DONE;
+      h->handshake_task_id = HYPERUD_HANDSHAKE;
+      h->response_task_id = HYPERUD_RESPONSE;
+      h->body_foreach_task_id = HYPERUD_BODY_FOREACH;
       io = hyper_io_new();
       if(!io) {
         failf(data, "Couldn't create hyper IO");
@@ -777,8 +780,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
       }
       io = NULL;
       options = NULL;
-      hyper_task_set_userdata(handshake,
-                              (void *)HYPERUD_HANDSHAKE);
+      hyper_task_set_userdata(handshake, &h->handshake_task_id);
 
       if(HYPERE_OK != hyper_executor_push(h->exec, handshake)) {
         failf(data, "Couldn't hyper_executor_push the handshake");
@@ -866,8 +868,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
         failf(data, "hyper_clientconn_send");
         goto error;
       }
-      hyper_task_set_userdata(sendtask,
-                              (void *)HYPERUD_RESPONSE);
+      hyper_task_set_userdata(sendtask, &h->response_task_id);
 
       if(HYPERE_OK != hyper_executor_push(h->exec, sendtask)) {
         failf(data, "Couldn't hyper_executor_push the send");

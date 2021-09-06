@@ -310,16 +310,21 @@ static CURLcode empty_header(struct Curl_easy *data)
 bool Curl_hyper_poll(struct hyptransfer *h)
 {
   hyper_task *task;
-  void *ud_ptr;
-  hyptaskud ud;
+  hyptaskud *ud_ptr;
+  hyptaskud task_id;
   hyper_task_return_type t;
 
   task = hyper_executor_poll(h->exec);
   if(task) {
-    ud_ptr = hyper_task_userdata(task);
-    ud = (hyptaskud)ud_ptr;
+    ud_ptr = (hyptaskud *)hyper_task_userdata(task);
+    if(!ud_ptr) {
+      /* a hyper-internal task was returned, ignore it */
+      hyper_task_free(task);
+      return true;
+    }
+    task_id = *ud_ptr;
     t = hyper_task_type(task);
-    switch(ud) {
+    switch(task_id) {
     case HYPERUD_HANDSHAKE:
       switch(t) {
       case HYPER_TASK_ERROR:
@@ -365,7 +370,6 @@ bool Curl_hyper_poll(struct hyptransfer *h)
       }
       break;
     default:
-      /* a hyper-internal task was returned, ignore it */
       break;
     }
     hyper_task_free(task);
@@ -396,7 +400,6 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
   struct hyptransfer *h = &data->hyp;
   hyper_task *foreach;
   hyper_error *hypererr = NULL;
-  hyptaskud body_ud;
   const uint8_t *reasonp;
   size_t reason_len;
   CURLcode result = CURLE_OK;
@@ -483,7 +486,6 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
             h->response_result.response) {
       resp = h->response_result.response;
       h->response_result.response = NULL;
-      body_ud = HYPERUD_BODY_FOREACH;
     }
     else {
       *didwhat = KEEP_RECV;
@@ -547,7 +549,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       break;
     }
     DEBUGASSERT(hyper_task_type(foreach) == HYPER_TASK_EMPTY);
-    hyper_task_set_userdata(foreach, (void *)body_ud);
+    hyper_task_set_userdata(foreach, &h->body_foreach_task_id);
     if(HYPERE_OK != hyper_executor_push(h->exec, foreach)) {
       failf(data, "Couldn't hyper_executor_push the body-foreach");
       result = CURLE_OUT_OF_MEMORY;
@@ -924,6 +926,9 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if(result)
     return result;
 
+  h->handshake_task_id = HYPERUD_HANDSHAKE;
+  h->response_task_id = HYPERUD_RESPONSE;
+  h->body_foreach_task_id = HYPERUD_BODY_FOREACH;
   io = hyper_io_new();
   if(!io) {
     failf(data, "Couldn't create hyper IO");
@@ -963,7 +968,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
   io = NULL;
   options = NULL;
-  hyper_task_set_userdata(handshake, (void *)HYPERUD_HANDSHAKE);
+  hyper_task_set_userdata(handshake, &h->handshake_task_id);
 
   if(HYPERE_OK != hyper_executor_push(h->exec, handshake)) {
     failf(data, "Couldn't hyper_executor_push the handshake");
@@ -1114,7 +1119,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     failf(data, "hyper_clientconn_send");
     goto error;
   }
-  hyper_task_set_userdata(sendtask, (void *)HYPERUD_RESPONSE);
+  hyper_task_set_userdata(sendtask, &h->response_task_id);
 
   if(HYPERE_OK != hyper_executor_push(h->exec, sendtask)) {
     failf(data, "Couldn't hyper_executor_push the send");
