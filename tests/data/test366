@@ -1,0 +1,49 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+retry
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 503 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 21
+Retry-After: 200
+
+server not available
+</data>
+
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP --retry-max-time with too long Retry-After
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 2 --retry-max-time 10
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+</verify>
+</testcase>
