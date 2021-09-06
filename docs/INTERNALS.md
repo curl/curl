@@ -88,7 +88,7 @@ Dependencies
  - GnuTLS       3.1.10
  - zlib         1.1.4
  - libssh2      1.0
- - c-ares       1.6.0
+ - c-ares       1.16.0
  - libidn2      2.0.0
  - wolfSSL      2.0.0
  - openldap     2.0
