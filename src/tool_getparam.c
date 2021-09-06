@@ -1356,11 +1356,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->resume_from_current = FALSE;
       }
       else {
-        if(config->content_disposition) {
-          warnf(global, "--continue-at - and --remote-header-name "
-                        "cannot be combined.\n");
-          return PARAM_BAD_USE;
-        }
         config->resume_from_current = TRUE;
         config->resume_from = 0;
       }
@@ -1895,11 +1890,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case 'i':
-      if(config->content_disposition) {
-        warnf(global,
-              "--include and --remote-header-name cannot be combined.\n");
-        return PARAM_BAD_USE;
-      }
       config->show_headers = toggle; /* show the headers as well in the
                                         general output stream */
       break;
@@ -1915,16 +1905,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         return PARAM_BAD_USE;
       break;
     case 'J': /* --remote-header-name */
-      if(config->show_headers) {
-        warnf(global,
-              "--include and --remote-header-name cannot be combined.\n");
-        return PARAM_BAD_USE;
-      }
-      if(config->resume_from_current) {
-        warnf(global, "--continue-at - and --remote-header-name "
-                      "cannot be combined.\n");
-        return PARAM_BAD_USE;
-      }
       config->content_disposition = toggle;
       break;
     case 'k': /* allow insecure SSL connects */
@@ -2402,6 +2382,16 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
 
     if(!result)
       curlx_unicodefree(orig_opt);
+  }
+
+  if(config->content_disposition && config->show_headers) {
+    warnf(global, "--include and --remote-header-name cannot be combined.\n");
+    return PARAM_BAD_USE;
+  }
+  if(config->content_disposition && config->resume_from_current) {
+    warnf(global, "--continue-at - and --remote-header-name "
+                  "cannot be combined.\n");
+    return PARAM_BAD_USE;
   }
 
   if(result && result != PARAM_HELP_REQUESTED &&
