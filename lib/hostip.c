@@ -609,7 +609,11 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
   enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
   struct connectdata *conn = data->conn;
   *entry = NULL;
+#ifndef CURL_DISABLE_DOH
   conn->bits.doh = FALSE; /* default is not */
+#else
+  (void)allowDOH;
+#endif
 
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
@@ -630,11 +634,15 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
 
     struct Curl_addrinfo *addr = NULL;
     int respwait = 0;
+#if !defined(CURL_DISABLE_DOH) || !defined(USE_RESOLVE_ON_IPS)
     struct in_addr in;
+#endif
+#ifndef CURL_DISABLE_DOH
 #ifndef USE_RESOLVE_ON_IPS
     const
 #endif
       bool ipnum = FALSE;
+#endif
 
     /* notify the resolver start callback */
     if(data->set.resolver_start) {
@@ -686,6 +694,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
 #endif /* ENABLE_IPV6 */
 
 #else /* if USE_RESOLVE_ON_IPS */
+#ifndef CURL_DISABLE_DOH
     /* First check if this is an IPv4 address string */
     if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
       /* This is a dotted IP address 123.123.123.123-style */
@@ -699,6 +708,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
         ipnum = TRUE;
     }
 #endif /* ENABLE_IPV6 */
+#endif /* CURL_DISABLE_DOH */
 
 #endif /* !USE_RESOLVE_ON_IPS */
 
@@ -708,8 +718,10 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
 
       if(strcasecompare(hostname, "localhost"))
         addr = get_localhost(port);
+#ifndef CURL_DISABLE_DOH
       else if(allowDOH && data->set.doh && !ipnum)
         addr = Curl_doh(data, hostname, port, &respwait);
+#endif
       else {
         /* Check what IP specifics the app has requested and if we can provide
          * it. If not, bail out. */
@@ -1210,9 +1222,10 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
 #if defined(CURL_DISABLE_DOH) && !defined(CURLRES_ASYNCH)
   (void)dns;
 #endif
-
+#ifndef CURL_DISABLE_DOH
   if(data->conn->bits.doh)
     return Curl_doh_is_resolved(data, dns);
+#endif
   return Curl_resolver_is_resolved(data, dns);
 }
 
@@ -1220,10 +1233,12 @@ int Curl_resolv_getsock(struct Curl_easy *data,
                         curl_socket_t *socks)
 {
 #ifdef CURLRES_ASYNCH
+#ifndef CURL_DISABLE_DOH
   if(data->conn->bits.doh)
     /* nothing to wait for during DoH resolve, those handles have their own
        sockets */
     return GETSOCK_BLANK;
+#endif
   return Curl_resolver_getsock(data, socks);
 #else
   (void)data;
