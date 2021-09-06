@@ -515,6 +515,21 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
             sleeptime = LONG_MAX;
           else
             sleeptime = (long)retry_after * 1000; /* milliseconds */
+
+          /* if adding retry_after seconds to the process would exceed the
+             maximum time allowed for retrying, then exit the retries right
+             away */
+          if(config->retry_maxtime) {
+            curl_off_t seconds = tvdiff(tvnow(), per->retrystart)/1000;
+
+            if((CURL_OFF_T_MAX - retry_after < seconds) ||
+               (seconds + retry_after > config->retry_maxtime)) {
+              warnf(config->global, "The Retry-After: time would "
+                    "make this command line exceed the maximum allowed time "
+                    "for retries.");
+              goto noretry;
+            }
+          }
         }
       }
       warnf(config->global, "Problem %s. "
@@ -570,6 +585,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       return CURLE_OK;
     }
   } /* if retry_numretries */
+  noretry:
 
   if((global->progressmode == CURL_PROGRESS_BAR) &&
      per->progressbar.calls)
