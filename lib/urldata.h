@@ -518,7 +518,9 @@ struct ConnectBits {
   BIT(tls_enable_npn);  /* TLS NPN extension? */
   BIT(tls_enable_alpn); /* TLS ALPN extension? */
   BIT(connect_only);
+#ifndef CURL_DISABLE_DOH
   BIT(doh);
+#endif
 #ifdef USE_UNIX_SOCKETS
   BIT(abstract_unix_socket);
 #endif
@@ -1858,10 +1860,12 @@ struct UserDefined {
                            header */
   BIT(abstract_unix_socket);
   BIT(disallow_username_in_url); /* disallow username in url */
+#ifndef CURL_DISABLE_DOH
   BIT(doh); /* DNS-over-HTTPS enabled */
   BIT(doh_verifypeer);     /* DoH certificate peer verification */
   BIT(doh_verifyhost);     /* DoH certificate hostname verification */
   BIT(doh_verifystatus);   /* DoH certificate status verification */
+#endif
   BIT(http09_allowed); /* allow HTTP/0.9 responses */
   BIT(mail_rcpt_allowfails); /* allow RCPT TO command to fail for some
                                 recipients */
