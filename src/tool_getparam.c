@@ -2385,12 +2385,13 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   }
 
   if(config->content_disposition && config->show_headers) {
-    warnf(global, "--include and --remote-header-name cannot be combined.\n");
+    helpf(global->errors, "--include and --remote-header-name "
+                          "cannot be combined.\n");
     return PARAM_BAD_USE;
   }
   if(config->content_disposition && config->resume_from_current) {
-    warnf(global, "--continue-at - and --remote-header-name "
-                  "cannot be combined.\n");
+    helpf(global->errors, "--continue-at - and --remote-header-name "
+                          "cannot be combined.\n");
     return PARAM_BAD_USE;
   }
 
