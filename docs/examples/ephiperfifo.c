@@ -292,7 +292,7 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
 /* Initialize a new SockInfo structure */
 static void addsock(curl_socket_t s, CURL *easy, int action, GlobalInfo *g)
 {
-  SockInfo *fdp = (SockInfo*)calloc(sizeof(SockInfo), 1);
+  SockInfo *fdp = (SockInfo*)calloc(1, sizeof(SockInfo));
 
   fdp->global = g;
   setsock(fdp, s, easy, action, g);
