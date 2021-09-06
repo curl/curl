@@ -36,14 +36,6 @@ typedef enum hyptaskud {
   HYPERUD_RESPONSE,
   /* from hyper_body_foreach(), no output */
   HYPERUD_BODY_FOREACH,
-  /* for proxy CONNECT, from hyper_clientconn_handshake(),
-   * outputs a hyper_clientconn* */
-  HYPERUD_CONNECT_HANDSHAKE,
-  /* for proxy CONNECT, from hyper_clientconn_send(),
-   * outputs a hyper_response* */
-  HYPERUD_CONNECT_RESPONSE,
-  /* for proxy CONNECT, from hyper_body_foreach(), no output */
-  HYPERUD_CONNECT_BODY_FOREACH,
 } hyptaskud;
 
 /* whether a task has completed yet, and whether it returned its output or an
@@ -74,21 +66,6 @@ struct hyptransfer {
 
   hyptaskstatus body_foreach_status;
   hyper_error *body_foreach_error;
-
-  hyptaskstatus proxy_handshake_status;
-  union {
-    hyper_clientconn *conn;
-    hyper_error *error;
-  } proxy_handshake_result;
-
-  hyptaskstatus proxy_response_status;
-  union {
-    hyper_response *response;
-    hyper_error *error;
-  } proxy_response_result;
-
-  hyptaskstatus proxy_body_foreach_status;
-  hyper_error *proxy_body_foreach_error;
 
   hyper_waker *exp100_waker;
 };

@@ -364,50 +364,6 @@ bool Curl_hyper_poll(struct hyptransfer *h)
         break;
       }
       break;
-    case HYPERUD_CONNECT_HANDSHAKE:
-      switch(t) {
-      case HYPER_TASK_ERROR:
-        h->proxy_handshake_status = HYPERTASK_ERROR;
-        h->proxy_handshake_result.error = hyper_task_value(task);
-        break;
-      case HYPER_TASK_CLIENTCONN:
-        h->proxy_handshake_status = HYPERTASK_COMPLETE;
-        h->proxy_handshake_result.conn = hyper_task_value(task);
-        break;
-      default:
-        assert(false);
-        break;
-      }
-      break;
-    case HYPERUD_CONNECT_RESPONSE:
-      switch(t) {
-      case HYPER_TASK_ERROR:
-        h->proxy_response_status = HYPERTASK_ERROR;
-        h->proxy_response_result.error = hyper_task_value(task);
-        break;
-      case HYPER_TASK_RESPONSE:
-        h->proxy_response_status = HYPERTASK_COMPLETE;
-        h->proxy_response_result.response = hyper_task_value(task);
-        break;
-      default:
-        assert(false);
-        break;
-      }
-      break;
-    case HYPERUD_CONNECT_BODY_FOREACH:
-      switch(t) {
-      case HYPER_TASK_ERROR:
-        h->proxy_body_foreach_status = HYPERTASK_ERROR;
-        h->proxy_body_foreach_error = hyper_task_value(task);
-        break;
-      case HYPER_TASK_EMPTY:
-        h->proxy_body_foreach_status = HYPERTASK_COMPLETE;
-        break;
-      default:
-        assert(false);
-        break;
-      }
-      break;
     default:
       /* a hyper-internal task was returned, ignore it */
       break;
@@ -489,14 +445,6 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       hypererr = h->body_foreach_error;
       h->body_foreach_error = NULL;
     }
-    if(h->proxy_response_status == HYPERTASK_ERROR) {
-      hypererr = h->proxy_response_result.error;
-      h->proxy_response_result.error = NULL;
-    }
-    if(h->proxy_body_foreach_status == HYPERTASK_ERROR) {
-      hypererr = h->proxy_body_foreach_error;
-      h->proxy_body_foreach_error = NULL;
-    }
     if(hypererr) {
       if(data->state.hresult) {
         /* override Hyper's view, might not even be an error */
@@ -520,8 +468,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       hyper_error_free(hypererr);
       break;
     }
-    else if(h->body_foreach_status == HYPERTASK_COMPLETE ||
-            h->proxy_body_foreach_status == HYPERTASK_COMPLETE) {
+    else if(h->body_foreach_status == HYPERTASK_COMPLETE) {
       /* end of transfer */
       *done = TRUE;
       infof(data, "hyperstream is done!");
@@ -538,17 +485,11 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       h->response_result.response = NULL;
       body_ud = HYPERUD_BODY_FOREACH;
     }
-    else if(h->proxy_response_status == HYPERTASK_COMPLETE &&
-            h->proxy_response_result.response) {
-      resp = h->proxy_response_result.response;
-      h->proxy_response_result.response = NULL;
-      body_ud = HYPERUD_CONNECT_BODY_FOREACH;
-    }
     else {
       *didwhat = KEEP_RECV;
       break;
     }
-    /* a response task is complete */
+    /* the response task is complete */
 
     *didwhat = KEEP_RECV;
     if(!resp) {
