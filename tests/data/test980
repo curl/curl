@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+STARTTLS
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+CAPA STARTTLS
+AUTH PLAIN
+REPLY STARTTLS 454 currently unavailable\r\n235 Authenticated\r\n250 2.1.0 Sender ok\r\n250 2.1.5 Recipient ok\r\n354 Enter mail\r\n250 2.0.0 Accepted
+REPLY AUTH 535 5.7.8 Authentication credentials invalid
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+smtp
+</server>
+ <name>
+SMTP STARTTLS pipelined server response
+ </name>
+<stdin>
+mail body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret --ssl --sasl-ir -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 8 is CURLE_WEIRD_SERVER_REPLY
+<errorcode>
+8
+</errorcode>
+<protocol>
+EHLO %TESTNUMBER
+STARTTLS
+</protocol>
+</verify>
+</testcase>
