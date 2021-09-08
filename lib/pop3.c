@@ -740,28 +740,23 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
       }
     }
   }
-  else if(pop3code == '+') {
-    if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
-      /* We don't have a SSL/TLS connection yet, but SSL is requested */
-      if(pop3c->tls_supported)
-        /* Switch to TLS connection now */
-        result = pop3_perform_starttls(data, conn);
-      else if(data->set.use_ssl == CURLUSESSL_TRY)
-        /* Fallback and carry on with authentication */
-        result = pop3_perform_authentication(data, conn);
-      else {
-        failf(data, "STLS not supported.");
-        result = CURLE_USE_SSL_FAILED;
-      }
-    }
-    else
-      result = pop3_perform_authentication(data, conn);
-  }
   else {
     /* Clear text is supported when CAPA isn't recognised */
-    pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
+    if(pop3code != '+')
+      pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
 
-    result = pop3_perform_authentication(data, conn);
+    if(!data->set.use_ssl || conn->ssl[FIRSTSOCKET].use)
+      result = pop3_perform_authentication(data, conn);
+    else if(pop3code == '+' && pop3c->tls_supported)
+      /* Switch to TLS connection now */
+      result = pop3_perform_starttls(data, conn);
+    else if(data->set.use_ssl <= CURLUSESSL_TRY)
+      /* Fallback and carry on with authentication */
+      result = pop3_perform_authentication(data, conn);
+    else {
+      failf(data, "STLS not supported.");
+      result = CURLE_USE_SSL_FAILED;
+    }
   }
 
   return result;
