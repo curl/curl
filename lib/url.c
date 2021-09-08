@@ -1892,9 +1892,11 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
 #else
       scopeidx = if_nametoindex(zoneid);
 #endif
-      if(!scopeidx)
+      if(!scopeidx) {
+        char buffer[STRERROR_LEN];
         infof(data, "Invalid zoneid: %s; %s", zoneid,
-              strerror(errno));
+              Curl_strerror(errno, buffer, sizeof(buffer)));
+      }
       else
         conn->scope_id = scopeidx;
     }

@@ -47,6 +47,7 @@ my @ignore_line;
 
 my %warnings_extended = (
     'COPYRIGHTYEAR'    => 'copyright year incorrect',
+    'STRERROR',        => 'strerror() detected',
     );
 
 my %warnings = (
@@ -87,7 +88,7 @@ my %warnings = (
     'EXCLAMATIONSPACE' => 'Whitespace after exclamation mark in expression',
     'EMPTYLINEBRACE'   => 'Empty line before the open brace',
     'EQUALSNULL'       => 'if/while comparison with == NULL',
-    'NOTEQUALSZERO'    => 'if/while comparison with != 0'
+    'NOTEQUALSZERO',   => 'if/while comparison with != 0',
     );
 
 sub readskiplist {
@@ -238,9 +239,17 @@ if(!$file) {
     print "  -i<n>     Indent spaces. Default: 2\n";
     print "  -m<n>     Maximum line length. Default: 79\n";
     print "\nDetects and warns for these problems:\n";
-    for(sort keys %warnings) {
-        printf (" %-18s: %s\n", $_, $warnings{$_});
+    my @allw = keys %warnings;
+    push @allw, keys %warnings_extended;
+    for my $w (sort @allw) {
+        if($warnings{$w}) {
+            printf (" %-18s: %s\n", $w, $warnings{$w});
+        }
+        else {
+            printf (" %-18s: %s[*]\n", $w, $warnings_extended{$w});
+        }
     }
+    print " [*] = disabled by default\n";
     exit;
 }
 
@@ -638,7 +647,18 @@ sub scanfile {
                       $line, length($1), $file, $ol,
                       "use of $2 is banned");
         }
-
+        if($warnings{"STRERROR"}) {
+            # scan for use of banned strerror. This is not a BANNEDFUNC to
+            # allow for individual enable/disable of this warning.
+            if($l =~ /^(.*\W)(strerror)\s*\(/x) {
+                if($1 !~ /^ *\#/) {
+                    # skip preprocessor lines
+                    checkwarn("STRERROR",
+                              $line, length($1), $file, $ol,
+                              "use of $2 is banned");
+                }
+            }
+        }
         # scan for use of snprintf for curl-internals reasons
         if($l =~ /^(.*\W)(v?snprintf)\s*\(/x) {
             checkwarn("SNPRINTF",

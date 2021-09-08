@@ -731,6 +731,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   max = buflen - 1;
   *buf = '\0';
 
+  /* !checksrc! disable STRERROR 2 */
 #if defined(WIN32) || defined(_WIN32_WCE)
 #if defined(WIN32)
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
