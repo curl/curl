@@ -34,9 +34,11 @@ This release includes the following bugfixes:
  o codeql: fix error "Resource not accessible by integration" [61]
  o compressed.d: it's a request, not an order [21]
  o config.d: escape the backslash properly [81]
+ o config.d: note that curlrc is used even when --config [107]
  o config: get rid of the unused HAVE_SIG_ATOMIC_T et. al.
  o configure.ac: revert bad nghttp2 library detection improvements [9]
  o configure: error out if both ngtcp2 and quiche are specified [30]
+ o configure: make --disable-hsts work [106]
  o configure: set classic mingw minimum OS version to XP [83]
  o configure: tweak nghttp2 library name fix [2]
  o connect: get local port + ip also when reusing connections [95]
@@ -46,7 +48,9 @@ This release includes the following bugfixes:
  o curl.1: mention "global" flags [7]
  o curl.1: provide examples for each option [99]
  o curl: add warning for ignored data after quoted form parameter [60]
+ o curl: add warning for incompatible parameters usage [102]
  o curl: better error message when -O fails to get a good name [88]
+ o curl: stop retry if Retry-After: is longer than allowed [104]
  o curl_easy_setopt.3: improve the string copy wording [89]
  o curl_setup.h: sync values for HTTP_ONLY [82]
  o curl_url_get.3: clarify about path and query [45]
@@ -55,7 +59,9 @@ This release includes the following bugfixes:
  o CURLOPT_SSL_CTX_*.3: tidy up the example [15]
  o CURLOPT_UNIX_SOCKET_PATH.3: remove nginx reference, add see also [90]
  o docs/MQTT: update state of username/password support [4]
+ o docs: remove experimental mentions from HSTS and MQTT [93]
  o easy: use a custom implementation of wcsdup on Windows [31]
+ o examples/*hiperfifo.c: fix calloc arguments to match function proto [103]
  o examples/cookie_interface: avoid printfing time_t directly [18]
  o examples/cookie_interface: fix scan-build printf warning [16]
  o examples/ephiperfifo.c: simplify signal handler [42]
@@ -69,9 +75,12 @@ This release includes the following bugfixes:
  o http_proxy: clear 'sending' when the outgoing request is sent [6]
  o http_proxy: fix user-agent and custom headers for CONNECT with hyper [38]
  o http_proxy: only wait for writable socket while sending request [78]
+ o INTERNALS: bump c-ares requirement to 1.16.0
+ o INTERNALS: c-ares has a new home: c-ares.org
  o libcurl-errors.3: clarify two CURLUcode errors [72]
  o limit-rate.d: clarify base unit [17]
  o mailing lists: move from cool.haxx.se to lists.haxx.se
+ o mbedtls: avoid using a large buffer on the stack [105]
  o mbedTLS: initial 3.0.0 support [33]
  o mbedtls_threadlock: fix unused variable warning [11]
  o mksymbolsmanpage.pl: Fix showing symbol's last used version [76]
@@ -128,17 +137,18 @@ advice from friends like these:
   a1346054 on github, Aleksandr Krotov, Alex Crichton, April King,
   Artur Sinila, Barry Pollard, Bastian Krause, Benau on github,
   Bernhard M. Wiedemann, Bin Lan, Brian Carpenter, Bylon2 on github,
-  Carlo Marcelo Arenas Belón, Christian Weisgerber, Colin O'Dell, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, Daniel Woelfel, Dan Jacobson, David Cook,
-  Don J Olmstead, Ehren Bendler, Emil Engler, Gambit Communications,
-  Gergely Nagy, Gisle Vanem, Gleb Ivanovsky, Ikko Ashimine, Jan Schaumann,
-  Jan Verbeek, Jeff Mears, Jeremy Falcon, Josh Soref, Marcel Raad,
-  Marc Hörsken, Max Dymond, Michael Kaufmann, Michał Antoniak, modbw on github,
-  Oleg Pudeyev, Oleguer Llopart, Patrick Monnerat, Randall S. Becker,
-  Ray Satiro, Rui Pinheiro, Sergey Markelov, Tatsuhiro Tsujikawa, Tk Xiong,
-  Viktor Szakats, Vincent Grande, Yaobin Wen, z2-2z on github,
-  zloi-user on github,
-  (54 contributors)
+  Cao ZhenXiang, Carlo Marcelo Arenas Belón, Christian Weisgerber,
+  Colin O'Dell, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  Daniel Woelfel, Dan Jacobson, David Cook, Don J Olmstead, Ehren Bendler,
+  Emil Engler, Gambit Communications, Gergely Nagy, Gisle Vanem,
+  git-bruh on github, Gleb Ivanovsky, Ikko Ashimine, Jan Schaumann,
+  Jan Verbeek, Jeff Mears, Jeremy Falcon, Jonathan Cardoso Machado, Josh Soref,
+  Kari Pahula, Marcel Raad, Marc Hörsken, Max Dymond, Michael Kaufmann,
+  Michał Antoniak, modbw on github, Oleg Pudeyev, Oleguer Llopart,
+  Patrick Monnerat, Randall S. Becker, Ray Satiro, Rui Pinheiro,
+  Sergey Markelov, Tatsuhiro Tsujikawa, Tk Xiong, Viktor Szakats,
+  Vincent Grande, Yaobin Wen, z2-2z on github, zloi-user on github,
+  (58 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -234,6 +244,7 @@ References to bug reports and discussions on issues:
  [90] = https://curl.se/bug/?i=7656
  [91] = https://curl.se/bug/?i=7656
  [92] = https://curl.se/bug/?i=7656
+ [93] = https://github.com/curl/curl/pull/6700#issuecomment-913792863
  [94] = https://curl.se/bug/?i=7665
  [95] = https://curl.se/bug/?i=7660
  [96] = https://curl.se/bug/?i=7661
@@ -242,3 +253,9 @@ References to bug reports and discussions on issues:
  [99] = https://curl.se/bug/?i=7654
  [100] = https://curl.se/bug/?i=7645
  [101] = https://curl.se/bug/?i=7643
+ [102] = https://curl.se/bug/?i=7674
+ [103] = https://curl.se/bug/?i=7678
+ [104] = https://curl.se/bug/?i=7675
+ [105] = https://curl.se/bug/?i=7586
+ [106] = https://curl.se/bug/?i=7669
+ [107] = https://github.com/curl/curl/pull/7666#issuecomment-912214751
