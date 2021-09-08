@@ -34,6 +34,7 @@
 #include "multiif.h"
 #include "strcase.h"
 #include "x509asn1.h"
+#include "strerror.h"
 
 #ifdef USE_SECTRANSP
 
@@ -3222,7 +3223,9 @@ static int sectransp_shutdown(struct Curl_easy *data,
     nread = read(conn->sock[sockindex], buf, sizeof(buf));
 
     if(nread < 0) {
-      failf(data, "read: %s", strerror(errno));
+      char buffer[STRERROR_LEN];
+      failf(data, "read: %s",
+            Curl_strerror(errno, buffer, sizeof(buffer)));
       rc = -1;
     }
 

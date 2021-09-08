@@ -132,7 +132,9 @@ cr_recv(struct Curl_easy *data, int sockindex,
     infof(data, "sread: EAGAIN or EWOULDBLOCK");
   }
   else if(io_error) {
-    failf(data, "reading from socket: %s", strerror(io_error));
+    char buffer[STRERROR_LEN];
+    failf(data, "reading from socket: %s",
+          Curl_strerror(io_error, buffer, sizeof(buffer)));
     *err = CURLE_READ_ERROR;
     return -1;
   }
@@ -244,7 +246,9 @@ cr_send(struct Curl_easy *data, int sockindex,
       return -1;
     }
     else if(io_error) {
-      failf(data, "writing to socket: %s", strerror(io_error));
+      char buffer[STRERROR_LEN];
+      failf(data, "writing to socket: %s",
+            Curl_strerror(io_error, buffer, sizeof(buffer)));
       *err = CURLE_WRITE_ERROR;
       return -1;
     }
