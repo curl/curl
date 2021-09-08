@@ -50,7 +50,6 @@
 #include "hostip.h"
 #include "hash.h"
 #include "share.h"
-#include "strerror.h"
 #include "url.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"

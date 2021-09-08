@@ -56,7 +56,6 @@
 #include "hash.h"
 #include "rand.h"
 #include "share.h"
-#include "strerror.h"
 #include "url.h"
 #include "inet_ntop.h"
 #include "inet_pton.h"
