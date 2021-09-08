@@ -34,6 +34,7 @@
 #include "multiif.h"
 #include "strcase.h"
 #include "x509asn1.h"
+#include "strerror.h"
 
 #ifdef USE_SECTRANSP
 
