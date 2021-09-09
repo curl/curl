@@ -288,10 +288,14 @@ FAQ
   from having to repeat ourselves even more. Thanks for respecting this.
 
   If you have found or simply suspect a security problem in curl or libcurl,
-  mail curl-security at haxx.se (closed list of receivers, mails are not
-  disclosed) and tell. Then we can produce a fix in a timely manner before the
-  flaw is announced to the world, thus lessen the impact the problem will have
-  on existing users.
+  submit all the details at https://hackerone.one/curl. On there we keep the
+  issue private while we investigate, confirm it, work and validate a fix and
+  agree on a time schedule for publication etc. That way we produce a fix in a
+  timely manner before the flaw is announced to the world, reducing the impact
+  the problem risk having on existing users.
+
+  Security issues can also be taking to the curl security team by emailing
+  security at curl.se (closed list of receivers, mails are not disclosed).
 
   1.9 Where do I buy commercial support for curl?
 

@@ -91,7 +91,7 @@ announcement.
 - The security web page on the website should get the new vulnerability
   mentioned.
 
-curl-security (at haxx dot se)
+security (at curl dot se)
 ------------------------------
 
 This is a private mailing list for discussions on and about curl security
