@@ -31,6 +31,7 @@
 #include "sendf.h"
 #include "urldata.h"
 #include "multiif.h"
+#include "strerror.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -197,10 +198,10 @@ CURLcode Curl_convert_from_network(struct Curl_easy *data,
     if(!data)
       iconv_close(tmpcd);
     if((rc == ICONV_ERROR) || (in_bytes)) {
-      char buffer[STRERROR_LEN];
+      char ebuffer[STRERROR_LEN];
       failf(data,
             "Curl_convert_from_network iconv call failed with errno %i: %s",
-            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+            errno, Curl_strerror(errno, ebuffer, sizeof(ebuffer)));
       return CURLE_CONV_FAILED;
     }
 #else
