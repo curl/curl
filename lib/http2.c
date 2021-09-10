@@ -763,6 +763,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
            ncopy);
     stream->nread_header_recvbuf += ncopy;
 
+    DEBUGASSERT(stream->mem);
     H2BUGF(infof(data_s, "Store %zu bytes headers from stream %u at %p",
                  ncopy, stream_id, stream->mem));
 
@@ -2214,6 +2215,22 @@ CURLcode Curl_http2_setup(struct Curl_easy *data,
   Curl_dyn_init(&stream->header_recvbuf, DYN_H2_HEADERS);
   Curl_dyn_init(&stream->trailer_recvbuf, DYN_H2_TRAILERS);
 
+  stream->upload_left = 0;
+  stream->upload_mem = NULL;
+  stream->upload_len = 0;
+  stream->mem = data->state.buffer;
+  stream->len = data->set.buffer_size;
+
+  httpc->inbuflen = 0;
+  httpc->nread_inbuf = 0;
+
+  httpc->pause_stream_id = 0;
+  httpc->drain_total = 0;
+
+  multi_connchanged(data->multi);
+  /* below this point only connection related inits are done, which only needs
+     to be done once per connection */
+
   if((conn->handler == &Curl_handler_http2_ssl) ||
      (conn->handler == &Curl_handler_http2))
     return CURLE_OK; /* already done */
@@ -2230,24 +2247,12 @@ CURLcode Curl_http2_setup(struct Curl_easy *data,
   }
 
   infof(data, "Using HTTP2, server supports multiplexing");
-  stream->upload_left = 0;
-  stream->upload_mem = NULL;
-  stream->upload_len = 0;
-  stream->mem = data->state.buffer;
-  stream->len = data->set.buffer_size;
-
-  httpc->inbuflen = 0;
-  httpc->nread_inbuf = 0;
-
-  httpc->pause_stream_id = 0;
-  httpc->drain_total = 0;
 
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->httpversion = 20;
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
 
   infof(data, "Connection state changed (HTTP/2 confirmed)");
-  multi_connchanged(data->multi);
 
   return CURLE_OK;
 }
