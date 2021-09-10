@@ -34,7 +34,7 @@
 #include "sendf.h"
 #include "vtls.h"
 #include "select.h"
-
+#include "strerror.h"
 #include "multiif.h"
 
 struct ssl_backend_data
