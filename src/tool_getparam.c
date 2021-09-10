@@ -2384,17 +2384,11 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       curlx_unicodefree(orig_opt);
   }
 
-  if(config->content_disposition) {
-    if(config->show_headers) {
-      helpf(global->errors, "--include and --remote-header-name "
-            "cannot be combined.\n");
-      return PARAM_BAD_USE;
-    }
-    if(config->resume_from_current) {
-      helpf(global->errors, "--continue-at - and --remote-header-name "
-            "cannot be combined.\n");
-      return PARAM_BAD_USE;
-    }
+  if(!result && config->content_disposition) {
+    if(config->show_headers)
+      result = PARAM_CONTDISP_SHOW_HEADER;
+    else if(config->resume_from_current)
+      result = PARAM_CONTDISP_RESUME_FROM;
   }
 
   if(result && result != PARAM_HELP_REQUESTED &&
