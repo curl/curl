@@ -300,32 +300,27 @@ static CURLcode CONNECT(struct Curl_easy *data,
                                      hostheader, TRUE);
 
       if(!result) {
-        const char *proxyconn = "";
-        const char *useragent = "";
         const char *httpv =
           (conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ? "1.0" : "1.1";
-
-        if(!Curl_checkProxyheaders(data, conn, "Proxy-Connection"))
-          proxyconn = "Proxy-Connection: Keep-Alive\r\n";
-
-        if(!Curl_checkProxyheaders(data, conn, "User-Agent") &&
-           data->set.str[STRING_USERAGENT])
-          useragent = data->state.aptr.uagent;
 
         result =
           Curl_dyn_addf(req,
                         "CONNECT %s HTTP/%s\r\n"
                         "%s"  /* Host: */
-                        "%s"  /* Proxy-Authorization */
-                        "%s"  /* User-Agent */
-                        "%s", /* Proxy-Connection */
+                        "%s", /* Proxy-Authorization */
                         hostheader,
                         httpv,
                         host?host:"",
                         data->state.aptr.proxyuserpwd?
-                        data->state.aptr.proxyuserpwd:"",
-                        useragent,
-                        proxyconn);
+                        data->state.aptr.proxyuserpwd:"");
+
+        if(!result && !Curl_checkProxyheaders(data, conn, "User-Agent") &&
+           data->set.str[STRING_USERAGENT])
+          result = Curl_dyn_addf(req, "User-Agent: %s\r\n",
+                                 data->set.str[STRING_USERAGENT]);
+
+        if(!result && !Curl_checkProxyheaders(data, conn, "Proxy-Connection"))
+          result = Curl_dyn_add(req, "Proxy-Connection: Keep-Alive\r\n");
 
         if(!result)
           result = Curl_add_custom_headers(data, TRUE, req);
@@ -841,9 +836,17 @@ static CURLcode CONNECT(struct Curl_easy *data,
         goto error;
 
       if(!Curl_checkProxyheaders(data, conn, "User-Agent") &&
-         data->set.str[STRING_USERAGENT] &&
-         Curl_hyper_header(data, headers, data->state.aptr.uagent))
-        goto error;
+         data->set.str[STRING_USERAGENT]) {
+        struct dynbuf ua;
+        Curl_dyn_init(&ua, DYN_HTTP_REQUEST);
+        result = Curl_dyn_addf(&ua, "User-Agent: %s\r\n",
+                               data->set.str[STRING_USERAGENT]);
+        if(result)
+          goto error;
+        if(Curl_hyper_header(data, headers, Curl_dyn_ptr(&ua)))
+          goto error;
+        Curl_dyn_free(&ua);
+      }
 
       if(!Curl_checkProxyheaders(data, conn, "Proxy-Connection") &&
          Curl_hyper_header(data, headers, "Proxy-Connection: Keep-Alive"))
