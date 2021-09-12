@@ -559,8 +559,8 @@ cb_acked_stream_data_offset(ngtcp2_conn *tconn, int64_t stream_id,
   return 0;
 }
 
-static int cb_stream_close(ngtcp2_conn *tconn, int64_t stream_id,
-                           uint64_t app_error_code,
+static int cb_stream_close(ngtcp2_conn *tconn, uint32_t flags,
+                           int64_t stream_id, uint64_t app_error_code,
                            void *user_data, void *stream_user_data)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
@@ -568,6 +568,10 @@ static int cb_stream_close(ngtcp2_conn *tconn, int64_t stream_id,
   (void)tconn;
   (void)stream_user_data;
   /* stream is closed... */
+
+  if(!(flags & NGTCP2_STREAM_CLOSE_FLAG_APP_ERROR_CODE_SET)) {
+    app_error_code = NGHTTP3_H3_NO_ERROR;
+  }
 
   rv = nghttp3_conn_close_stream(qs->h3conn, stream_id,
                                  app_error_code);
