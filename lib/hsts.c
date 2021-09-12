@@ -526,7 +526,9 @@ CURLcode Curl_hsts_loadfile(struct Curl_easy *data,
  */
 CURLcode Curl_hsts_loadcb(struct Curl_easy *data, struct hsts *h)
 {
-  return hsts_pull(data, h);
+  if(h)
+    return hsts_pull(data, h);
+  return CURLE_OK;
 }
 
 #endif /* CURL_DISABLE_HTTP || CURL_DISABLE_HSTS */
