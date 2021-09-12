@@ -314,6 +314,7 @@ static const struct LongShort aliases[]= {
   {"O",  "remote-name",              ARG_NONE},
   {"Oa", "remote-name-all",          ARG_BOOL},
   {"Ob", "output-dir",               ARG_STRING},
+  {"Oc", "clobber",                  ARG_BOOL},
   {"p",  "proxytunnel",              ARG_BOOL},
   {"P",  "ftp-port",                 ARG_STRING},
   {"q",  "disable",                  ARG_BOOL},
@@ -1999,10 +2000,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case 'N':
       /* disable the output I/O buffering. note that the option is called
          --buffer but is mostly used in the negative form: --no-buffer */
-      if(longopt)
-        config->nobuffer = (!toggle)?TRUE:FALSE;
-      else
-        config->nobuffer = toggle;
+      config->nobuffer = longopt ? !toggle : TRUE;
       break;
     case 'O': /* --remote-name */
       if(subletter == 'a') { /* --remote-name-all */
@@ -2011,6 +2009,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       else if(subletter == 'b') { /* --output-dir */
         GetStr(&config->output_dir, nextarg);
+        break;
+      }
+      else if(subletter == 'c') { /* --clobber / --no-clobber */
+        config->file_clobber_mode = toggle ? CLOBBER_ALWAYS : CLOBBER_NEVER;
         break;
       }
       /* FALLTHROUGH */

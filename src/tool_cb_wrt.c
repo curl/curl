@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,50 +48,86 @@
 #define OPENMODE S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
 #endif
 
-/* create a local file for writing, return TRUE on success */
+/* create/open a local file for writing, return TRUE on success */
 bool tool_create_output_file(struct OutStruct *outs,
                              struct OperationConfig *config)
 {
   struct GlobalConfig *global;
   FILE *file = NULL;
+  char *fname = outs->filename;
+  char *aname = NULL;
   DEBUGASSERT(outs);
   DEBUGASSERT(config);
   global = config->global;
-  if(!outs->filename || !*outs->filename) {
+  if(!fname || !*fname) {
     warnf(global, "Remote filename has no length!\n");
     return FALSE;
   }
 
-  if(outs->is_cd_filename) {
-    /* don't overwrite existing files */
+  if(config->output_dir && outs->is_cd_filename) {
+    aname = aprintf("%s/%s", config->output_dir, fname);
+    if(!aname) {
+      errorf(global, "out of memory\n");
+      return FALSE;
+    }
+    fname = aname;
+  }
+
+  if(config->file_clobber_mode == CLOBBER_ALWAYS ||
+     (config->file_clobber_mode == CLOBBER_DEFAULT &&
+      !outs->is_cd_filename)) {
+    /* open file for writing */
+    file = fopen(fname, "wb");
+  }
+  else {
     int fd;
-    char *name = outs->filename;
-    char *aname = NULL;
-    if(config->output_dir) {
-      aname = aprintf("%s/%s", config->output_dir, name);
-      if(!aname) {
+    do {
+      fd = open(fname, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
+      /* Keep retrying in the hope that it isn't interrupted sometime */
+    } while(fd == -1 && errno == EINTR);
+    if(config->file_clobber_mode == CLOBBER_NEVER && fd == -1) {
+      int next_num = 1;
+      size_t len = strlen(fname);
+      char *newname = malloc(len + 13); /* nul + 1-11 digits + dot */
+      if(!newname) {
         errorf(global, "out of memory\n");
         return FALSE;
       }
-      name = aname;
+      memcpy(newname, fname, len);
+      newname[len] = '.';
+      while(fd == -1 && /* haven't sucessfully opened a file */
+            (errno == EEXIST || errno == EISDIR) &&
+            /* because we keep having files that already exist */
+            next_num < 100 /* and we haven't reached the retry limit */ ) {
+        curlx_msnprintf(newname + len + 1, 12, "%d", next_num);
+        next_num++;
+        do {
+          fd = open(newname, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
+          /* Keep retrying in the hope that it isn't interrupted sometime */
+        } while(fd == -1 && errno == EINTR);
+      }
+      outs->filename = newname; /* remember the new one */
+      outs->alloc_filename = TRUE;
     }
-    fd = open(name, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
+    /* An else statement to not overwrite existing files and not retry with
+       new numbered names (which would cover
+       config->file_clobber_mode == CLOBBER_DEFAULT && outs->is_cd_filename)
+       is not needed because we would have failed earlier, in the while loop
+       and `fd` would now be -1 */
     if(fd != -1) {
       file = fdopen(fd, "wb");
       if(!file)
         close(fd);
     }
-    free(aname);
   }
-  else
-    /* open file for writing */
-    file = fopen(outs->filename, "wb");
 
   if(!file) {
-    warnf(global, "Failed to create the file %s: %s\n", outs->filename,
+    warnf(global, "Failed to open the file %s: %s\n", fname,
           strerror(errno));
+    free(aname);
     return FALSE;
   }
+  free(aname);
   outs->s_isreg = TRUE;
   outs->fopened = TRUE;
   outs->stream = file;
