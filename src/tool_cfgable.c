@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -45,6 +45,7 @@ void config_init(struct OperationConfig *config)
   config->happy_eyeballs_timeout_ms = CURL_HET_DEFAULT;
   config->http09_allowed = FALSE;
   config->ftp_skip_ip = TRUE;
+  config->file_clobber_mode = CLOBBER_DEFAULT;
 }
 
 static void free_config_fields(struct OperationConfig *config)

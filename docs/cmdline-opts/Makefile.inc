@@ -140,6 +140,7 @@ DPAGES = \
   next.d \
   no-alpn.d \
   no-buffer.d \
+  no-clobber.d \
   no-keepalive.d \
   no-npn.d \
   no-progress-meter.d \

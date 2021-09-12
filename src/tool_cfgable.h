@@ -290,6 +290,15 @@ struct OperationConfig {
   bool haproxy_protocol;          /* whether to send HAProxy protocol v1 */
   bool disallow_username_in_url;  /* disallow usernames in URLs */
   char *aws_sigv4;
+  enum {
+    CLOBBER_DEFAULT, /* Provides compatability with previous versions of curl,
+                        by using the default behavior for -o, -O, and -J.
+                        If those options would have overwritten files, like
+                        -o and -O would, then overwrite them. In the case of
+                        -J, this will not overwrite any files. */
+    CLOBBER_NEVER, /* If the file exists, always fail */
+    CLOBBER_ALWAYS /* If the file exists, always overwrite it */
+  } file_clobber_mode;
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */

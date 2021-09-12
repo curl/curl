@@ -128,6 +128,7 @@
 --next (-:)                          7.36.0
 --no-alpn                            7.36.0
 --no-buffer (-N)                     6.5
+--no-clobber                         7.80.0
 --no-keepalive                       7.18.0
 --no-npn                             7.36.0
 --no-progress-meter                  7.67.0
