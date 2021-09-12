@@ -2677,7 +2677,7 @@ if test X"$want_tcp2" != Xno; then
     if test "x$cross_compiling" != "xyes"; then
       DIR_TCP2=`echo $LD_TCP2 | $SED -e 's/^-L//'`
     fi
-    AC_CHECK_LIB(ngtcp2, ngtcp2_conn_client_new,
+    AC_CHECK_LIB(ngtcp2, ngtcp2_conn_client_new_versioned,
       [
        AC_CHECK_HEADERS(ngtcp2/ngtcp2.h,
           NGTCP2_ENABLED=1
@@ -2876,7 +2876,7 @@ if test X"$want_nghttp3" != Xno; then
     if test "x$cross_compiling" != "xyes"; then
       DIR_NGHTTP3=`echo $LD_NGHTTP3 | $SED -e 's/^-L//'`
     fi
-    AC_CHECK_LIB(nghttp3, nghttp3_conn_client_new,
+    AC_CHECK_LIB(nghttp3, nghttp3_conn_client_new_versioned,
       [
        AC_CHECK_HEADERS(nghttp3/nghttp3.h,
           curl_h3_msg="enabled (ngtcp2 + nghttp3)"
