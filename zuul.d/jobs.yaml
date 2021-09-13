@@ -131,7 +131,7 @@
       curl_env:
         T: debug-rustls
         RUSTLS_VERSION: v0.7.2
-        LDFLAGS: -lm
+        LIBS: -lm
         C: >-
           --with-rustls={{ ansible_user_dir }}/crust
 
