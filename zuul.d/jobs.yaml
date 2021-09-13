@@ -66,6 +66,7 @@
     vars:
       curl_env:
         T: normal
+        TFLAGS: "!2034 !2037 !2041"
         C: >-
           --with-openssl
           --disable-proxy
