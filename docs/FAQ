@@ -1533,7 +1533,7 @@ FAQ
  Some the most important properties in curl are maintaining the API and ABI
  for libcurl and keeping the behavior for the command line tool. As long as we
  can do that, everything else is up for discussion. To maintain the ABI, we
- probably have to maintain a certain amout of code in C, and to remain rock
+ probably have to maintain a certain amount of code in C, and to remain rock
  stable, we will never risk anything by rewriting a lot of things in one go.
  That said, we can certainly offer more and more optional backends written in
  other languages, as long as those backends can be plugged in at build-time.
