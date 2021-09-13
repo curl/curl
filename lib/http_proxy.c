@@ -836,9 +836,17 @@ static CURLcode CONNECT(struct Curl_easy *data,
         goto error;
 
       if(!Curl_checkProxyheaders(data, conn, "User-Agent") &&
-         data->set.str[STRING_USERAGENT] &&
-         Curl_hyper_header(data, headers, data->state.aptr.uagent))
-        goto error;
+         data->set.str[STRING_USERAGENT]) {
+        struct dynbuf ua;
+        Curl_dyn_init(&ua, DYN_HTTP_REQUEST);
+        result = Curl_dyn_addf(&ua, "User-Agent: %s\r\n",
+                               data->set.str[STRING_USERAGENT]);
+        if(result)
+          goto error;
+        if(Curl_hyper_header(data, headers, Curl_dyn_ptr(&ua)))
+          goto error;
+        Curl_dyn_free(&ua);
+      }
 
       if(!Curl_checkProxyheaders(data, conn, "Proxy-Connection") &&
          Curl_hyper_header(data, headers, "Proxy-Connection: Keep-Alive"))
