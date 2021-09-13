@@ -1517,7 +1517,7 @@ FAQ
  platforms such as Windows. Today, we don't really know how many users that
  still require the use of a C89 compiler.
 
- We will remain using C89 for as long as nobody brings up a strong enough
+ We will continue to use C89 for as long as nobody brings up a strong enough
  reason for us to change our minds. The core developers of the project don't
  feel restricted by this and we are not convinced that going C99 will offer us
  enough of a benefit to warrant the risk of cutting off a share of users.
