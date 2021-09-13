@@ -114,6 +114,10 @@ FAQ
   7.3 Can I perform multiple requests using the same handle?
   7.4 Does PHP/CURL have dependencies?
 
+ 8. Development
+  8.1 Why does curl use C89?
+  8.2 Will curl be rewritten?
+
 ==============================================================================
 
 1. Philosophy
@@ -1498,3 +1502,40 @@ FAQ
   PHP/CURL is a module that comes with the regular PHP package. It depends on
   and uses libcurl, so you need to have libcurl installed properly before
   PHP/CURL can be used.
+
+8. Development
+
+ 8.1 Why does curl use C89?
+
+ As with everything in curl, there's a history and we keep using what we've
+ used before until someone brings up the subject and argues for and works on
+ changing it.
+
+ We started out using C89 in the 1990s because that was the only way to write
+ a truly portable C program and have it run as widely as possible. C89 was for
+ a long time even necessary to make things work on otherwise considered modern
+ platforms such as Windows. Today, we don't really know how many users that
+ still require the use of a C89 compiler.
+
+ We will continue to use C89 for as long as nobody brings up a strong enough
+ reason for us to change our minds. The core developers of the project don't
+ feel restricted by this and we are not convinced that going C99 will offer us
+ enough of a benefit to warrant the risk of cutting off a share of users.
+
+ 8.2 Will curl be rewritten?
+
+ In one go: no. Little by little over time? Maybe.
+
+ Over the years, new languages and clever operating environments come and go.
+ Every now and then the urge apparently arises to request that we rewrite curl
+ in another language.
+
+ Some the most important properties in curl are maintaining the API and ABI
+ for libcurl and keeping the behavior for the command line tool. As long as we
+ can do that, everything else is up for discussion. To maintain the ABI, we
+ probably have to maintain a certain amount of code in C, and to remain rock
+ stable, we will never risk anything by rewriting a lot of things in one go.
+ That said, we can certainly offer more and more optional backends written in
+ other languages, as long as those backends can be plugged in at build-time.
+ Back-ends can be written in any language, but should probably provide APIs
+ usable from C to ease integration and transition.
