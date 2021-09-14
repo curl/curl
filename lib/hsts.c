@@ -49,6 +49,7 @@
 #define MAX_HSTS_HOSTLENSTR "256"
 #define MAX_HSTS_DATELEN 64
 #define MAX_HSTS_DATELENSTR "64"
+#define UNLIMITED "unlimited"
 
 #ifdef DEBUGBUILD
 /* to play well with debug builds, we can *set* a fixed time this will
@@ -283,13 +284,17 @@ static CURLcode hsts_push(struct Curl_easy *data,
   e.namelen = strlen(sts->host);
   e.includeSubDomains = sts->includeSubDomains;
 
-  result = Curl_gmtime((time_t)sts->expires, &stamp);
-  if(result)
-    return result;
+  if(sts->expires != TIME_T_MAX) {
+    result = Curl_gmtime((time_t)sts->expires, &stamp);
+    if(result)
+      return result;
 
-  msnprintf(e.expire, sizeof(e.expire), "%d%02d%02d %02d:%02d:%02d",
-            stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
-            stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
+    msnprintf(e.expire, sizeof(e.expire), "%d%02d%02d %02d:%02d:%02d",
+              stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
+              stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
+  }
+  else
+    strcpy(e.expire, UNLIMITED);
 
   sc = data->set.hsts_write(data, &e, i,
                             data->set.hsts_write_userp);
@@ -303,14 +308,18 @@ static CURLcode hsts_push(struct Curl_easy *data,
 static CURLcode hsts_out(struct stsentry *sts, FILE *fp)
 {
   struct tm stamp;
-  CURLcode result = Curl_gmtime((time_t)sts->expires, &stamp);
-  if(result)
-    return result;
-
-  fprintf(fp, "%s%s \"%d%02d%02d %02d:%02d:%02d\"\n",
-          sts->includeSubDomains ? ".": "", sts->host,
-          stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
-          stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
+  if(sts->expires != TIME_T_MAX) {
+    CURLcode result = Curl_gmtime((time_t)sts->expires, &stamp);
+    if(result)
+      return result;
+    fprintf(fp, "%s%s \"%d%02d%02d %02d:%02d:%02d\"\n",
+            sts->includeSubDomains ? ".": "", sts->host,
+            stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
+            stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
+  }
+  else
+    fprintf(fp, "%s%s \"%s\"\n",
+            sts->includeSubDomains ? ".": "", sts->host, UNLIMITED);
   return CURLE_OK;
 }
 
@@ -403,7 +412,8 @@ static CURLcode hsts_add(struct hsts *h, char *line)
               "%" MAX_HSTS_HOSTLENSTR "s \"%" MAX_HSTS_DATELENSTR "[^\"]\"",
               host, date);
   if(2 == rc) {
-    time_t expires = Curl_getdate_capped(date);
+    time_t expires = strcmp(date, UNLIMITED) ? Curl_getdate_capped(date) :
+      TIME_T_MAX;
     CURLcode result;
     char *p = host;
     bool subdomain = FALSE;
