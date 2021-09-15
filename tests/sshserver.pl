@@ -428,9 +428,7 @@ if ($sshdid =~ /OpenSSH-Windows/) {
 #  ssh daemon configuration file options we might use and version support
 #
 #  AFSTokenPassing                  : OpenSSH 1.2.1 and later [1]
-#  AcceptEnv                        : OpenSSH 3.9.0 and later
 #  AddressFamily                    : OpenSSH 4.0.0 and later
-#  AllowGroups                      : OpenSSH 1.2.1 and later
 #  AllowTcpForwarding               : OpenSSH 2.3.0 and later
 #  AllowUsers                       : OpenSSH 1.2.1 and later
 #  AuthorizedKeysFile               : OpenSSH 2.9.9 and later
@@ -441,7 +439,6 @@ if ($sshdid =~ /OpenSSH-Windows/) {
 #  ClientAliveCountMax              : OpenSSH 2.9.0 and later
 #  ClientAliveInterval              : OpenSSH 2.9.0 and later
 #  Compression                      : OpenSSH 3.3.0 and later
-#  DenyGroups                       : OpenSSH 1.2.1 and later
 #  DenyUsers                        : OpenSSH 1.2.1 and later
 #  ForceCommand                     : OpenSSH 4.4.0 and later [3]
 #  GatewayPorts                     : OpenSSH 2.1.0 and later
@@ -534,9 +531,6 @@ if ($sshdid =~ /OpenSSH-Windows/) {
     push @cfgarr, "AllowUsers $username";
 }
 
-push @cfgarr, 'DenyGroups';
-push @cfgarr, 'AllowGroups';
-push @cfgarr, '#';
 push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
 push @cfgarr, "AuthorizedKeysFile2 $clipubkeyf_config";
 push @cfgarr, "HostKey $hstprvkeyf_config";
@@ -684,9 +678,6 @@ push @cfgarr, '#';
 #***************************************************************************
 # Options that might be supported or not in sshd OpenSSH 2.9.9 and later
 #
-if(sshd_supports_opt('AcceptEnv','')) {
-    push @cfgarr, 'AcceptEnv';
-}
 if(sshd_supports_opt('AddressFamily','any')) {
     # Address family must be specified before ListenAddress
     splice @cfgarr, 14, 0, 'AddressFamily any';
@@ -873,7 +864,6 @@ if ($sshdid =~ /OpenSSH-Windows/) {
 #  RemoteForward                     : OpenSSH 1.2.1 and later [3]
 #  RhostsRSAAuthentication           : OpenSSH 1.2.1 and later
 #  RSAAuthentication                 : OpenSSH 1.2.1 and later
-#  SendEnv                           : OpenSSH 3.9.0 and later
 #  ServerAliveCountMax               : OpenSSH 3.8.0 and later
 #  ServerAliveInterval               : OpenSSH 3.8.0 and later
 #  SmartcardDevice                   : OpenSSH 2.9.9 and later [1][3]
@@ -1026,10 +1016,6 @@ if(($sshid =~ /OpenSSH/) && ($sshvernum >= 430)) {
 if((($sshid =~ /OpenSSH/) && ($sshvernum >= 370)) ||
    (($sshid =~ /SunSSH/) && ($sshvernum >= 120))) {
     push @cfgarr, 'RekeyLimit 1G';
-}
-
-if(($sshid =~ /OpenSSH/) && ($sshvernum >= 390)) {
-    push @cfgarr, 'SendEnv';
 }
 
 if((($sshid =~ /OpenSSH/) && ($sshvernum >= 380)) ||
