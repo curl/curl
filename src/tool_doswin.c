@@ -766,7 +766,7 @@ bool tool_isVistaOrGreater;
 
 CURLcode win32_init(void)
 {
-  if(curlx_verify_windows_version(6, 0, PLATFORM_WINNT,
+  if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
                                   VERSION_GREATER_THAN_EQUAL))
     tool_isVistaOrGreater = true;
   else
