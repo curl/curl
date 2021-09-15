@@ -134,7 +134,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
       if(osver.dwMajorVersion < majorVersion ||
         (osver.dwMajorVersion == majorVersion &&
          osver.dwMinorVersion < minorVersion) ||
-        (buildVersion == 0 ||
+        (buildVersion != 0 &&
          (osver.dwMajorVersion == majorVersion &&
           osver.dwMinorVersion == minorVersion &&
           osver.dwBuildNumber < buildVersion)))
@@ -145,7 +145,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
       if(osver.dwMajorVersion < majorVersion ||
         (osver.dwMajorVersion == majorVersion &&
          osver.dwMinorVersion <= minorVersion) ||
-        (buildVersion == 0 ||
+        (buildVersion != 0 &&
          (osver.dwMajorVersion == majorVersion &&
           osver.dwMinorVersion == minorVersion &&
           osver.dwBuildNumber <= buildVersion)))
@@ -164,7 +164,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
       if(osver.dwMajorVersion > majorVersion ||
         (osver.dwMajorVersion == majorVersion &&
          osver.dwMinorVersion >= minorVersion) ||
-        (buildVersion == 0 ||
+        (buildVersion != 0 &&
          (osver.dwMajorVersion == majorVersion &&
           osver.dwMinorVersion == minorVersion &&
           osver.dwBuildNumber >= buildVersion)))
@@ -175,7 +175,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
       if(osver.dwMajorVersion > majorVersion ||
         (osver.dwMajorVersion == majorVersion &&
          osver.dwMinorVersion > minorVersion) ||
-        (buildVersion == 0 ||
+        (buildVersion != 0 &&
          (osver.dwMajorVersion == majorVersion &&
           osver.dwMinorVersion == minorVersion &&
           osver.dwBuildNumber > buildVersion)))
