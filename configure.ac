@@ -1033,7 +1033,7 @@ then
       esac
     fi
     if test "$curl_cv_header_winsock2_h" = "yes"; then
-      winsock_LIB="-lws2_32"
+      winsock_LIB="-lws2_32 -lntdll"
     fi
     if test ! -z "$winsock_LIB"; then
       my_ac_save_LIBS=$LIBS
