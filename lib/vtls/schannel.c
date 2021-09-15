@@ -776,13 +776,15 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                "schannel: SSL/TLS connection with %s port %hu (step 1/3)",
                hostname, conn->remote_port));
 
-  if(curlx_verify_windows_version(5, 1, PLATFORM_WINNT,
+#if defined(_WIN32_WINNT) && (_WIN32_WINNT <= 0x0501)
+  if(curlx_verify_windows_version(5, 1, 0, PLATFORM_WINNT,
                                   VERSION_LESS_THAN_EQUAL)) {
     /* Schannel in Windows XP (OS version 5.1) uses legacy handshakes and
        algorithms that may not be supported by all servers. */
     infof(data, "schannel: Windows version is old and may not be able to "
           "connect to some servers due to lack of SNI, algorithms, etc.");
   }
+#endif
 
 #ifdef HAS_ALPN
   /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
@@ -790,7 +792,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   BACKEND->use_alpn = conn->bits.tls_enable_alpn &&
     !GetProcAddress(GetModuleHandle(TEXT("ntdll")),
                     "wine_get_version") &&
-    curlx_verify_windows_version(6, 3, PLATFORM_WINNT,
+    curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
                                  VERSION_GREATER_THAN_EQUAL);
 #else
   BACKEND->use_alpn = false;
@@ -807,7 +809,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 #else
 #ifdef HAS_MANUAL_VERIFY_API
   if(SSL_CONN_CONFIG(CAfile) || SSL_CONN_CONFIG(ca_info_blob)) {
-    if(curlx_verify_windows_version(6, 1, PLATFORM_WINNT,
+    if(curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
       BACKEND->use_manual_cred_validation = true;
     }
@@ -2048,15 +2050,20 @@ schannel_recv(struct Curl_easy *data, int sockindex,
   */
   if(len && !BACKEND->decdata_offset && BACKEND->recv_connection_closed &&
      !BACKEND->recv_sspi_close_notify) {
-    bool isWin2k = curlx_verify_windows_version(5, 0, PLATFORM_WINNT,
+
+#if defined(_WIN32_WINNT) && _WIN32_WINNT <= 0x0500
+    bool isWin2k = curlx_verify_windows_version(5, 0, 0, PLATFORM_WINNT,
                                                 VERSION_EQUAL);
 
     if(isWin2k && sspi_status == SEC_E_OK)
       BACKEND->recv_sspi_close_notify = true;
     else {
+#endif
       *err = CURLE_RECV_ERROR;
       infof(data, "schannel: server closed abruptly (missing close_notify)");
+#if defined(_WIN32_WINNT) && _WIN32_WINNT <= 0x0500
     }
+#endif
   }
 
   /* Any error other than CURLE_AGAIN is an unrecoverable error. */

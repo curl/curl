@@ -1101,7 +1101,7 @@ static void nosigpipe(struct Curl_easy *data,
 #define nosigpipe(x,y) Curl_nop_stmt
 #endif
 
-#ifdef USE_WINSOCK
+#if defined(USE_WINSOCK) && defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0600
 /* When you run a program that uses the Windows Sockets API, you may
    experience slow performance when you copy data to a TCP server.
 
@@ -1127,7 +1127,7 @@ void Curl_sndbufset(curl_socket_t sockfd)
   static int detectOsState = DETECT_OS_NONE;
 
   if(detectOsState == DETECT_OS_NONE) {
-    if(curlx_verify_windows_version(6, 0, PLATFORM_WINNT,
+    if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL))
       detectOsState = DETECT_OS_VISTA_OR_LATER;
     else

@@ -63,6 +63,9 @@ CURLcode Curl_win32_init(long flags)
       /* winsock.dll.     */
       return CURLE_FAILED_INIT;
 
+    /* Windows 2000 and newer have Winsock 2.2 so this is dead
+    code if you're targeting modern Windows. */
+#if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0500
     /* Confirm that the Windows Sockets DLL supports what we need.*/
     /* Note that if the DLL supports versions greater */
     /* than wVersionRequested, it will still return */
@@ -77,6 +80,7 @@ CURLcode Curl_win32_init(long flags)
       WSACleanup();
       return CURLE_FAILED_INIT;
     }
+#endif
     /* The Windows Sockets DLL is acceptable. Proceed. */
 #elif defined(USE_LWIPSOCK)
     lwip_init();
@@ -102,12 +106,16 @@ CURLcode Curl_win32_init(long flags)
       Curl_if_nametoindex = pIfNameToIndex;
   }
 
-  if(curlx_verify_windows_version(6, 0, PLATFORM_WINNT,
+#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x0600
+  Curl_isVistaOrGreater = TRUE;
+#else
+  if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
                                   VERSION_GREATER_THAN_EQUAL)) {
     Curl_isVistaOrGreater = TRUE;
   }
   else
     Curl_isVistaOrGreater = FALSE;
+#endif
 
   QueryPerformanceFrequency(&Curl_freq);
   return CURLE_OK;

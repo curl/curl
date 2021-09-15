@@ -61,9 +61,10 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
  */
 bool Curl_connalive(struct connectdata *conn);
 
-#ifdef USE_WINSOCK
-/* When you run a program that uses the Windows Sockets API, you may
-   experience slow performance when you copy data to a TCP server.
+#if defined(USE_WINSOCK) && defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0600
+/* When you run a program that uses the Windows Sockets API on Windows
+   prior to Vista, you may experience slow performance when you copy
+   data to a TCP server.
 
    https://support.microsoft.com/kb/823764
 
