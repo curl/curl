@@ -210,11 +210,14 @@ static CURLcode
 wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                      int sockindex)
 {
-  char *ciphers;
+  char *ciphers, *curves;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   SSL_METHOD* req_method = NULL;
   curl_socket_t sockfd = conn->sock[sockindex];
+#ifdef HAVE_LIBOQS
+  word16 oqsAlg = 0;
+#endif
 #ifdef HAVE_SNI
   bool sni = FALSE;
 #define use_sni(x)  sni = (x)
@@ -327,6 +330,120 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     infof(data, "Cipher selection: %s", ciphers);
   }
 
+  curves = SSL_CONN_CONFIG(curves);
+  if(curves) {
+#ifdef HAVE_LIBOQS
+    if (XSTRNCMP(curves, "KYBER512", XSTRLEN("KYBER512")) == 0) {
+      oqsAlg = WOLFSSL_KYBER512;
+    }
+    else if (XSTRNCMP(curves, "KYBER768",
+                        XSTRLEN("KYBER768")) == 0) {
+      oqsAlg = WOLFSSL_KYBER768;
+    }
+    else if (XSTRNCMP(curves, "KYBER1024",
+                        XSTRLEN("KYBER1024")) == 0) {
+      oqsAlg = WOLFSSL_KYBER1024;
+    }
+    else if (XSTRNCMP(curves, "NTRU_HPS2048509",
+                        XSTRLEN("NTRU_HPS2048509")) == 0) {
+      oqsAlg = WOLFSSL_NTRU_HPS2048509;
+    }
+    else if (XSTRNCMP(curves, "NTRU_HPS2048677",
+                        XSTRLEN("NTRU_HPS2048677")) == 0) {
+      oqsAlg = WOLFSSL_NTRU_HPS2048677;
+    }
+    else if (XSTRNCMP(curves, "NTRU_HPS4096821",
+                        XSTRLEN("NTRU_HPS4096821")) == 0) {
+      oqsAlg = WOLFSSL_NTRU_HPS4096821;
+    }
+    else if (XSTRNCMP(curves, "NTRU_HRSS701",
+                        XSTRLEN("NTRU_HRSS701")) == 0) {
+      oqsAlg = WOLFSSL_NTRU_HRSS701;
+    }
+    else if (XSTRNCMP(curves, "LIGHTSABER",
+                        XSTRLEN("LIGHTSABER")) == 0) {
+      oqsAlg = WOLFSSL_LIGHTSABER;
+    }
+    else if (XSTRNCMP(curves, "SABER",
+                        XSTRLEN("SABER")) == 0) {
+      oqsAlg = WOLFSSL_SABER;
+    }
+    else if (XSTRNCMP(curves, "FIRESABER",
+                        XSTRLEN("FIRESABER")) == 0) {
+      oqsAlg = WOLFSSL_FIRESABER;
+    }
+    else if (XSTRNCMP(curves, "KYBER90S512",
+                        XSTRLEN("KYBER90S512")) == 0) {
+      oqsAlg = WOLFSSL_KYBER90S512;
+    }
+    else if (XSTRNCMP(curves, "KYBER90S768",
+                        XSTRLEN("KYBER90S768")) == 0) {
+      oqsAlg = WOLFSSL_KYBER90S768;
+    }
+    else if (XSTRNCMP(curves, "KYBER90S1024",
+                        XSTRLEN("KYBER90S1024")) == 0) {
+      oqsAlg = WOLFSSL_KYBER90S1024;
+    }
+    else if (XSTRNCMP(curves, "P256_NTRUHPS2048509",
+                        XSTRLEN("P256_NTRUHPS2048509")) == 0) {
+      oqsAlg = WOLFSSL_P256_NTRU_HPS2048509;
+    }
+    else if (XSTRNCMP(curves, "P384_NTRUHPS2048677",
+                        XSTRLEN("P384_NTRUHPS2048677")) == 0) {
+      oqsAlg = WOLFSSL_P384_NTRU_HPS2048677;
+    }
+    else if (XSTRNCMP(curves, "P521_NTRUHPS4096821",
+                        XSTRLEN("P521_NTRUHPS4096821")) == 0) {
+      oqsAlg = WOLFSSL_P521_NTRU_HPS4096821;
+    }
+    else if (XSTRNCMP(curves, "P384_NTRUHRSS701",
+                        XSTRLEN("P384_NTRUHRSS701")) == 0) {
+      oqsAlg = WOLFSSL_P384_NTRU_HRSS701;
+    }
+    else if (XSTRNCMP(curves, "P256_LIGHTSABER",
+                        XSTRLEN("P256_LIGHTSABER")) == 0) {
+      oqsAlg = WOLFSSL_P256_LIGHTSABER;
+    }
+    else if (XSTRNCMP(curves, "P384_SABER",
+                        XSTRLEN("P384_SABER")) == 0) {
+      oqsAlg = WOLFSSL_P384_SABER;
+    }
+    else if (XSTRNCMP(curves, "P521_FIRESABER",
+                        XSTRLEN("P521_FIRESABER")) == 0) {
+      oqsAlg = WOLFSSL_P521_FIRESABER;
+    }
+    else if (XSTRNCMP(curves, "P256_KYBER512",
+                        XSTRLEN("P256_KYBER512")) == 0) {
+      oqsAlg = WOLFSSL_P256_KYBER512;
+    }
+    else if (XSTRNCMP(curves, "P384_KYBER768",
+                        XSTRLEN("P384_KYBER768")) == 0) {
+      oqsAlg = WOLFSSL_P384_KYBER768;
+    }
+    else if (XSTRNCMP(curves, "P521_KYBER1024",
+                        XSTRLEN("P521_KYBER1024")) == 0) {
+      oqsAlg = WOLFSSL_P521_KYBER1024;
+    }
+    else if (XSTRNCMP(curves, "P256_KYBER90S512",
+                        XSTRLEN("P256_KYBER90S512")) == 0) {
+      oqsAlg = WOLFSSL_P256_KYBER90S512;
+    }
+    else if (XSTRNCMP(curves, "P384_KYBER90S768",
+                        XSTRLEN("P384_KYBER90S768")) == 0) {
+      oqsAlg = WOLFSSL_P384_KYBER90S768;
+    }
+    else if (XSTRNCMP(curves, "P521_KYBER90S1024",
+                        XSTRLEN("P521_KYBER90S1024")) == 0) {
+      oqsAlg = WOLFSSL_P521_KYBER90S1024;
+    } else
+#endif
+    {
+      if(!SSL_CTX_set1_curves_list(backend->ctx, curves)) {
+        failf(data, "failed setting curves list: '%s'", curves);
+        return CURLE_SSL_CIPHER;
+      }
+    }
+  }
 #ifndef NO_FILESYSTEM
   /* load trusted cacert */
   if(SSL_CONN_CONFIG(CAfile)) {
@@ -438,6 +555,14 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     failf(data, "SSL: couldn't create a context (handle)!");
     return CURLE_OUT_OF_MEMORY;
   }
+
+#ifdef HAVE_LIBOQS
+    if (oqsAlg != 0) {
+      if (wolfSSL_UseKeyShare(backend->handle, oqsAlg) != WOLFSSL_SUCCESS) {
+        failf(data, "unable to use oqs KEM");
+      }
+    }
+#endif
 
 #ifdef HAVE_ALPN
   if(conn->bits.tls_enable_alpn) {
@@ -1113,6 +1238,7 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
 #ifdef KEEP_PEER_CERT
   SSLSUPP_PINNEDPUBKEY |
 #endif
+  SSLSUPP_TLS13_CIPHERSUITES |
   SSLSUPP_SSL_CTX,
 
   sizeof(struct ssl_backend_data),
