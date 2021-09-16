@@ -2221,12 +2221,6 @@ CURLcode Curl_http2_setup(struct Curl_easy *data,
   stream->mem = data->state.buffer;
   stream->len = data->set.buffer_size;
 
-  httpc->inbuflen = 0;
-  httpc->nread_inbuf = 0;
-
-  httpc->pause_stream_id = 0;
-  httpc->drain_total = 0;
-
   multi_connchanged(data->multi);
   /* below this point only connection related inits are done, which only needs
      to be done once per connection */
@@ -2251,6 +2245,12 @@ CURLcode Curl_http2_setup(struct Curl_easy *data,
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->httpversion = 20;
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+
+  httpc->inbuflen = 0;
+  httpc->nread_inbuf = 0;
+
+  httpc->pause_stream_id = 0;
+  httpc->drain_total = 0;
 
   infof(data, "Connection state changed (HTTP/2 confirmed)");
 
