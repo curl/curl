@@ -1009,6 +1009,7 @@ mark_as_advanced(RANDOM_FILE)
 # Check for some functions that are used
 if(HAVE_LIBWS2_32)
   set(CMAKE_REQUIRED_LIBRARIES ws2_32)
+  set(CMAKE_REQUIRED_LIBRARIES ntdll)
 elseif(HAVE_LIBSOCKET)
   set(CMAKE_REQUIRED_LIBRARIES socket)
 endif()
