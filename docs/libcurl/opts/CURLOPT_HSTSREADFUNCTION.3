@@ -46,7 +46,9 @@ might cause the name to not get accepted)
 
 The callback should return \fICURLSTS_OK\fP if it returns a name and is
 prepared to be called again (for another host) or \fICURLSTS_DONE\fP if it has
-no entry to return. It can also return \fICURLSTS_FAIL\fP to signal error.
+no entry to return. It can also return \fICURLSTS_FAIL\fP to signal
+error. Returning \fICURLSTS_FAIL\fP will stop the transfer from being
+performed and make \fICURLE_ABORTED_BY_CALLBACK\fP get returned.
 
 This option doesn't enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
 do that.
