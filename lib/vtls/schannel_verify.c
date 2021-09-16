@@ -597,7 +597,8 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
      * trusted certificates. This is only supported on Windows 7+.
      */
 
-    if(curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT, VERSION_LESS_THAN)) {
+    if(curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
+	                                VERSION_LESS_THAN)) {
       failf(data, "schannel: this version of Windows is too old to support "
             "certificate verification via CA bundle file.");
       result = CURLE_SSL_CACERT_BADFILE;

@@ -47,7 +47,6 @@
 typedef LONG NTSTATUS, * PNTSTATUS;
 #define STATUS_SUCCESS (0x00000000)
 
-// Windows 2000 and newer
 NTSYSAPI NTSTATUS NTAPI RtlGetVersion(PRTL_OSVERSIONINFOEXW lpVersionInformation);
 #endif
 
@@ -117,14 +116,14 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   osver.dwOSVersionInfoSize = sizeof(osver);
 
   /* Find out Windows version once, cache the result */
-  if (osver.dwMajorVersion == 0 && RtlGetVersion(&osver) != STATUS_SUCCESS)
+  if(osver.dwMajorVersion == 0 && RtlGetVersion(&osver) != STATUS_SUCCESS)
       return false;
 #else
   static OSVERSIONINFO osver = { 0 };
   osver.dwOSVersionInfoSize = sizeof(osver);
 
   /* Find out Windows version once, cache the result */
-  if (osver.dwMajorVersion == 0 && !GetVersionEx(&osver))
+  if(osver.dwMajorVersion == 0 && !GetVersionEx(&osver))
       return false;
 #endif
 
