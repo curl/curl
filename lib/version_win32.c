@@ -47,7 +47,8 @@
 typedef LONG NTSTATUS, * PNTSTATUS;
 #define STATUS_SUCCESS (0x00000000)
 
-NTSYSAPI NTSTATUS NTAPI RtlGetVersion(PRTL_OSVERSIONINFOEXW lpVersionInformation);
+NTSYSAPI NTSTATUS NTAPI RtlGetVersion(PRTL_OSVERSIONINFOEXW
+                                      lpVersionInformation);
 #endif
 
 /*
