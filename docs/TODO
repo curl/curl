@@ -60,6 +60,7 @@
  2.8 dynamically decide to use socketpair
 
  3. Documentation
+ 3.1 Improve documentation about fork safety
  3.2 Provide cmake config-file
 
  4. FTP
@@ -532,6 +533,10 @@
  See https://github.com/curl/curl/issues/4829
 
 3. Documentation
+
+3.1 Improve documentation about fork safety
+
+ See https://github.com/curl/curl/issues/6968
 
 3.2 Provide cmake config-file
 
