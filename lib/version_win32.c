@@ -42,7 +42,10 @@
    the Windows Driver Development Kit.
 */
 #if !OLDER_THAN_WIN2K
+
+#ifdef _MSC_VER
 #pragma comment(lib, "ntdll.lib")
+#endif
 
 typedef LONG NTSTATUS, * PNTSTATUS;
 #define STATUS_SUCCESS (0x00000000)
