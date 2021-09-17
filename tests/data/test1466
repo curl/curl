@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 405 405
+Content-Length: 6
+Connection: close
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+
+<name>
+HTTP GET with 3-digit response and only digits in reason
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
