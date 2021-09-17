@@ -42,7 +42,7 @@
    the Windows Driver Development Kit.
 */
 #if !OLDER_THAN_WIN2K
-
+#include <winnt.h>
 #ifdef _MSC_VER
 #pragma comment(lib, "ntdll.lib")
 #endif
