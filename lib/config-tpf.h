@@ -483,9 +483,6 @@
 /* Define to 1 if you have the <winsock2.h> header file. */
 /* #undef HAVE_WINSOCK2_H */
 
-/* Define to 1 if you have the <winsock.h> header file. */
-/* #undef HAVE_WINSOCK_H */
-
 /* Define this symbol if your OS supports changing the contents of argv */
 /* #undef HAVE_WRITABLE_ARGV */
 

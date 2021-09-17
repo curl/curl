@@ -710,9 +710,6 @@
 /* Define to 1 if you have the winsock2.h header file. */
 #cmakedefine HAVE_WINSOCK2_H 1
 
-/* Define to 1 if you have the winsock.h header file. */
-#cmakedefine HAVE_WINSOCK_H 1
-
 /* Define this symbol if your OS supports changing the contents of argv */
 #cmakedefine HAVE_WRITABLE_ARGV 1
 
