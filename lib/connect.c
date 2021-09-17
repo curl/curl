@@ -85,7 +85,7 @@
 
 static bool verifyconnect(curl_socket_t sockfd, int *error);
 
-#if defined(__DragonFly__) || defined(HAVE_WINSOCK_H)
+#if defined(__DragonFly__) || defined(HAVE_WINSOCK2_H)
 /* DragonFlyBSD and Windows use millisecond units */
 #define KEEPALIVE_FACTOR(x) (x *= 1000)
 #else

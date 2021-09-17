@@ -132,9 +132,6 @@
 /* Define if you have the <windows.h> header file. */
 #define HAVE_WINDOWS_H 1
 
-/* Define if you have the <winsock.h> header file. */
-#define HAVE_WINSOCK_H 1
-
 /* Define if you have the <winsock2.h> header file. */
 #ifndef __SALFORDC__
 #define HAVE_WINSOCK2_H 1
@@ -381,7 +378,6 @@
 
 #ifdef USE_LWIPSOCK
 #  undef USE_WINSOCK
-#  undef HAVE_WINSOCK_H
 #  undef HAVE_WINSOCK2_H
 #  undef HAVE_WS2TCPIP_H
 #  undef HAVE_ERRNO_H
@@ -412,7 +408,6 @@
   #undef byte
   #undef word
   #undef USE_WINSOCK
-  #undef HAVE_WINSOCK_H
   #undef HAVE_WINSOCK2_H
   #undef HAVE_WS2TCPIP_H
   #define HAVE_GETADDRINFO
