@@ -2938,6 +2938,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.maxage_conn = arg;
     break;
+  case CURLOPT_MAXLIFETIME_CONN:
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.maxlifetime_conn = arg;
+    break;
   case CURLOPT_TRAILERFUNCTION:
 #ifndef CURL_DISABLE_HTTP
     data->set.trailer_callback = va_arg(param, curl_trailer_callback);

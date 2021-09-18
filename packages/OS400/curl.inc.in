@@ -1583,6 +1583,8 @@
      d                 c                   40309
      d  CURLOPT_PROXY_CAINFO_BLOB...
      d                 c                   40310
+     d  CURLOPT_MAXLIFETIME_CONN...
+     d                 c                   00314
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001

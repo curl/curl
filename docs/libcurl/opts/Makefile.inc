@@ -228,6 +228,7 @@ man_MANS =                                      \
   CURLOPT_MAXCONNECTS.3                         \
   CURLOPT_MAXFILESIZE.3                         \
   CURLOPT_MAXFILESIZE_LARGE.3                   \
+  CURLOPT_MAXLIFETIME_CONN.3                    \
   CURLOPT_MAXREDIRS.3                           \
   CURLOPT_MAX_RECV_SPEED_LARGE.3                \
   CURLOPT_MAX_SEND_SPEED_LARGE.3                \
