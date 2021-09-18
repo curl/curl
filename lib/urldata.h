@@ -1678,6 +1678,8 @@ struct UserDefined {
   long server_response_timeout; /* in milliseconds, 0 means no timeout */
   long maxage_conn;     /* in seconds, max idle time to allow a connection that
                            is to be reused */
+  long maxlifetime_conn; /* in seconds, max time since creation to allow a
+                            connection that is to be reused */
   long tftp_blksize;    /* in bytes, 0 means use default */
   curl_off_t filesize;  /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */

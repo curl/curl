@@ -622,6 +622,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->upkeep_interval_ms = CURL_UPKEEP_INTERVAL_DEFAULT;
   set->maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
   set->maxage_conn = 118;
+  set->maxlifetime_conn = 0;
   set->http09_allowed = FALSE;
   set->httpwant =
 #ifdef USE_NGHTTP2
@@ -962,21 +963,36 @@ socks_proxy_info_matches(const struct proxy_info *data,
 #define socks_proxy_info_matches(x,y) FALSE
 #endif
 
-/* A connection has to have been idle for a shorter time than 'maxage_conn' to
-   be subject for reuse. The success rate is just too low after this. */
+/* A connection has to have been idle for a shorter time than 'maxage_conn'
+   (the success rate is just too low after this), or created less than
+   'maxlifetime_conn' ago, to be subject for reuse. */
 
 static bool conn_maxage(struct Curl_easy *data,
                         struct connectdata *conn,
                         struct curltime now)
 {
-  timediff_t idletime = Curl_timediff(now, conn->lastused);
+  timediff_t idletime, lifetime;
+
+  idletime = Curl_timediff(now, conn->lastused);
   idletime /= 1000; /* integer seconds is fine */
 
   if(idletime > data->set.maxage_conn) {
-    infof(data, "Too old connection (%ld seconds), disconnect it",
+    infof(data, "Too old connection (%ld seconds idle), disconnect it",
           idletime);
     return TRUE;
   }
+
+  lifetime = Curl_timediff(now, conn->created);
+  lifetime /= 1000; /* integer seconds is fine */
+
+  if(data->set.maxlifetime_conn && lifetime > data->set.maxlifetime_conn) {
+    infof(data,
+          "Too old connection (%ld seconds since creation), disconnect it",
+          lifetime);
+    return TRUE;
+  }
+
+
   return FALSE;
 }
 

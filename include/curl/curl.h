@@ -2058,7 +2058,8 @@ typedef enum {
   /* alt-svc cache file name to possibly read from/write to */
   CURLOPT(CURLOPT_ALTSVC, CURLOPTTYPE_STRINGPOINT, 287),
 
-  /* maximum age of a connection to consider it for reuse (in seconds) */
+  /* maximum age (idle time) of a connection to consider it for reuse
+   * (in seconds) */
   CURLOPT(CURLOPT_MAXAGE_CONN, CURLOPTTYPE_LONG, 288),
 
   /* SASL authorisation identity */
@@ -2126,6 +2127,10 @@ typedef enum {
 
   /* Data passed to the CURLOPT_PREREQFUNCTION callback */
   CURLOPT(CURLOPT_PREREQDATA, CURLOPTTYPE_CBPOINT, 313),
+
+  /* maximum age (since creation) of a connection to consider it for reuse
+   * (in seconds) */
+  CURLOPT(CURLOPT_MAXLIFETIME_CONN, CURLOPTTYPE_LONG, 314),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
