@@ -1018,7 +1018,7 @@ problems may have been fixed or changed somewhat since this was written!
 
 15.4 build docs/curl.1
 
- The cmake build doesn't create the docs/curl.1 file and therefor must rely on
+ The cmake build doesn't create the docs/curl.1 file and therefore must rely on
  it being there already. This makes the --manual option not work and test
  cases like 1139 can't function.
 

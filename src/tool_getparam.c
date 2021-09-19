@@ -1430,7 +1430,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           char *enc = curl_easy_escape(NULL, postdata, (int)size);
           Curl_safefree(postdata); /* no matter if it worked or not */
           if(enc) {
-            /* replace (in-place) '%20' by '+' acording to RFC1866 */
+            /* replace (in-place) '%20' by '+' according to RFC1866 */
             size_t enclen = replace_url_encoded_space_by_plus(enc);
             /* now make a string with the name from above and append the
                encoded string */
