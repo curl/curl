@@ -55,7 +55,7 @@ DEVELOPER_PATH=`xcode-select --print-path`
 if test -d "$DEVELOPER_PATH/Platforms/MacOSX.platform/Developer/SDKs"; then
  SDK_PATH="$DEVELOPER_PATH/Platforms/MacOSX.platform/Developer/SDKs"
 else
- SDK_PATH="$DEVELOPER_PATH/SDKs";
+ SDK_PATH="$DEVELOPER_PATH/SDKs"
 fi
 OLD_SDK=`ls  $SDK_PATH|head -1`
 NEW_SDK=`ls -r $SDK_PATH|head -1`
