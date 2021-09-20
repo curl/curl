@@ -373,10 +373,10 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
 #ifdef HAVE_LIBOQS
     for(idx = 0; gnm[idx].name != NULL; idx++) {
-        if(strncmp(curves, gnm[idx].name, strlen(gnm[idx].name)) == 0) {
-            oqsAlg = gnm[idx].group;
-            break;
-        }
+      if(strncmp(curves, gnm[idx].name, strlen(gnm[idx].name)) == 0) {
+        oqsAlg = gnm[idx].group;
+        break;
+      }
     }
 
     if(oqsAlg == 0)
@@ -501,7 +501,7 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   }
 
 #ifdef HAVE_LIBOQS
-  if(oqsAlg != 0) {
+  if(oqsAlg) {
     if(wolfSSL_UseKeyShare(backend->handle, oqsAlg) != WOLFSSL_SUCCESS) {
       failf(data, "unable to use oqs KEM");
     }
