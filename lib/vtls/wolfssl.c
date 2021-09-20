@@ -205,7 +205,7 @@ static int do_file_type(const char *type)
 #ifdef HAVE_LIBOQS
 struct group_name_map {
   const word16 group;
-  const char *name;
+  const char   *name;
 };
 
 static const struct group_name_map gnm[] = {
@@ -372,14 +372,14 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   if(curves) {
 
 #ifdef HAVE_LIBOQS
-    for (idx = 0; gnm[idx].name != NULL; idx++) {
-        if (strncmp(curves, gnm[idx].name, strlen(gnm[idx].name)) == 0) {
+    for(idx = 0; gnm[idx].name != NULL; idx++) {
+        if(strncmp(curves, gnm[idx].name, strlen(gnm[idx].name)) == 0) {
             oqsAlg = gnm[idx].group;
             break;
         }
     }
 
-    if (oqsAlg == 0)
+    if(oqsAlg == 0)
 #endif
     {
       if(!SSL_CTX_set1_curves_list(backend->ctx, curves)) {
@@ -501,8 +501,8 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   }
 
 #ifdef HAVE_LIBOQS
-  if (oqsAlg != 0) {
-    if (wolfSSL_UseKeyShare(backend->handle, oqsAlg) != WOLFSSL_SUCCESS) {
+  if(oqsAlg != 0) {
+    if(wolfSSL_UseKeyShare(backend->handle, oqsAlg) != WOLFSSL_SUCCESS) {
       failf(data, "unable to use oqs KEM");
     }
   }
