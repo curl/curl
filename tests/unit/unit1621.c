@@ -52,7 +52,7 @@ struct checkthis {
   const char *output;
 };
 
-static struct checkthis tests[] = {
+static const struct checkthis tests[] = {
   { "ninja://foo@example.com", "ninja://foo@example.com" },
   { "https://foo@example.com", "https://example.com/" },
   { "https://localhost:45", "https://localhost:45/" },

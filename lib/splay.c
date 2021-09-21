@@ -154,7 +154,7 @@ struct Curl_tree *Curl_splaygetbest(struct curltime i,
                                     struct Curl_tree *t,
                                     struct Curl_tree **removed)
 {
-  static struct curltime tv_zero = {0, 0};
+  static const struct curltime tv_zero = {0, 0};
   struct Curl_tree *x;
 
   if(!t) {

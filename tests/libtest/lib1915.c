@@ -30,7 +30,7 @@ struct entry {
   const char *exp;
 };
 
-static struct entry preload_hosts[] = {
+static const struct entry preload_hosts[] = {
   /* curl turns 39 that day just before 31-bit time_t overflow */
   { "1.example.com", "20370320 01:02:03" },
   { "2.example.com", "20370320 03:02:01" },
