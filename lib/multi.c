@@ -3180,7 +3180,7 @@ CURLMcode curl_multi_socket_all(struct Curl_multi *multi, int *running_handles)
 static CURLMcode multi_timeout(struct Curl_multi *multi,
                                long *timeout_ms)
 {
-  static struct curltime tv_zero = {0, 0};
+  static const struct curltime tv_zero = {0, 0};
 
   if(multi->timetree) {
     /* we have a tree of expire times */

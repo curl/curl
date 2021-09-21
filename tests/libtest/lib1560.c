@@ -128,7 +128,7 @@ struct querycase {
   CURLUcode ucode;
 };
 
-static struct testcase get_parts_list[] ={
+static const struct testcase get_parts_list[] ={
   {"https://user:password@example.net/get?this=and what", "",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_MALFORMED_INPUT},
   {"https://user:password@example.net/ge t?this=and-what", "",
@@ -351,7 +351,7 @@ static struct testcase get_parts_list[] ={
   {NULL, NULL, 0, 0, CURLUE_OK},
 };
 
-static struct urltestcase get_url_list[] = {
+static const struct urltestcase get_url_list[] = {
   /* IPv4 trickeries */
   {"https://16843009", "https://1.1.1.1/", 0, 0, CURLUE_OK},
   {"https://0x7f.1", "https://127.0.0.1/", 0, 0, CURLUE_OK},
@@ -522,7 +522,7 @@ static int checkurl(const char *url, const char *out)
 }
 
 /* !checksrc! disable SPACEBEFORECOMMA 1 */
-static struct setcase set_parts_list[] = {
+static const struct setcase set_parts_list[] = {
   {"https://example.com/",
    "query=Al2cO3tDkcDZ3EWE5Lh+LX8TPHs,", /* contains '+' */
    "https://example.com/?Al2cO3tDkcDZ3EWE5Lh%2bLX8TPHs",
@@ -737,7 +737,7 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
   return CURLUE_OK;
 }
 
-static struct redircase set_url_list[] = {
+static const struct redircase set_url_list[] = {
   {"http://example.org/static/favicon/wikipedia.ico",
    "//fake.example.com/licenses/by-sa/3.0/",
    "http://fake.example.com/licenses/by-sa/3.0/",
@@ -935,7 +935,7 @@ static int get_parts(void)
   return error;
 }
 
-static struct querycase append_list[] = {
+static const struct querycase append_list[] = {
   {"HTTP://test/?s", "name=joe\x02", "http://test/?s&name=joe%02",
    0, CURLU_URLENCODE, CURLUE_OK},
   {"HTTP://test/?size=2#f", "name=joe=", "http://test/?size=2&name=joe%3d#f",

@@ -179,7 +179,7 @@ static struct errmsg errmsgs[] = {
   { -1,           0 }
 };
 
-static struct formats formata[] = {
+static const struct formats formata[] = {
   { "netascii",   1 },
   { "octet",      0 },
   { NULL,         0 }
@@ -245,9 +245,9 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size);
 
 static int validate_access(struct testcase *test, const char *fname, int mode);
 
-static void sendtftp(struct testcase *test, struct formats *pf);
+static void sendtftp(struct testcase *test, const struct formats *pf);
 
-static void recvtftp(struct testcase *test, struct formats *pf);
+static void recvtftp(struct testcase *test, const struct formats *pf);
 
 static void nak(int error);
 
@@ -884,7 +884,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
 {
   char *cp;
   int first = 1, ecode;
-  struct formats *pf;
+  const struct formats *pf;
   char *filename, *mode = NULL;
 #ifdef USE_WINSOCK
   DWORD recvtimeout, recvtimeoutbak;
@@ -1151,7 +1151,7 @@ static int validate_access(struct testcase *test,
 /*
  * Send the requested file.
  */
-static void sendtftp(struct testcase *test, struct formats *pf)
+static void sendtftp(struct testcase *test, const struct formats *pf)
 {
   int size;
   ssize_t n;
@@ -1232,7 +1232,7 @@ static void sendtftp(struct testcase *test, struct formats *pf)
 /*
  * Receive a file.
  */
-static void recvtftp(struct testcase *test, struct formats *pf)
+static void recvtftp(struct testcase *test, const struct formats *pf)
 {
   ssize_t n, size;
   /* These are volatile to live through a siglongjmp */
