@@ -1503,7 +1503,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     }
 #endif
     Curl_http2_init_state(&data->state);
-    Curl_hsts_loadcb(data, data->hsts);
+    result = Curl_hsts_loadcb(data, data->hsts);
   }
 
   /*

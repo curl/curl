@@ -1,0 +1,70 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+FETCH
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+body
+
+--
+  yours sincerely
+</data>
+<servercmd>
+POSTFETCH extra stuff sent in the envelope after the body
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP and envelope meta data after body transfer
+ </name>
+ <command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=123/;SECTION=1' -u user:secret -D log/head-%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 SELECT %TESTNUMBER
+A004 FETCH 123 BODY[1]
+A005 LOGOUT
+</protocol>
+<file name="log/head-%TESTNUMBER">
+        _   _ ____  _     
+    ___| | | |  _ \| |    
+   / __| | | | |_) | |    
+  | (__| |_| |  _ {| |___ 
+   \___|\___/|_| \_\_____|
+* OK curl IMAP server ready to serve
+A001 BAD Command
+A002 OK LOGIN completed
+* 172 EXISTS
+* 1 RECENT
+* OK [UNSEEN 12] Message 12 is first unseen
+* OK [UIDVALIDITY 3857529045] UIDs valid
+* OK [UIDNEXT 4392] Predicted next UID
+* FLAGS (\Answered \Flagged \Deleted \Seen \Draft)
+* OK [PERMANENTFLAGS (\Deleted \Seen \*)] Limited
+A003 OK [READ-WRITE] SELECT completed
+* 123 FETCH (BODY[1] {31}
+extra stuff sent in the envelope after the body)
+A004 OK FETCH completed
+</file>
+</verify>
+</testcase>

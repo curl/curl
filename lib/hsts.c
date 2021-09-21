@@ -466,7 +466,7 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
           return result;
       }
       else if(sc == CURLSTS_FAIL)
-        return CURLE_BAD_FUNCTION_ARGUMENT;
+        return CURLE_ABORTED_BY_CALLBACK;
     } while(sc == CURLSTS_OK);
   }
   return CURLE_OK;

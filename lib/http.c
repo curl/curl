@@ -4232,9 +4232,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         char separator;
         char twoorthree[2];
         int httpversion = 0;
-        int digit4 = -1; /* should remain untouched to be good */
+        char digit4 = 0;
         nc = sscanf(HEADER1,
-                    " HTTP/%1d.%1d%c%3d%1d",
+                    " HTTP/%1d.%1d%c%3d%c",
                     &httpversion_major,
                     &httpversion,
                     &separator,
@@ -4250,13 +4250,13 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
         /* There can only be a 4th response code digit stored in 'digit4' if
            all the other fields were parsed and stored first, so nc is 5 when
-           digit4 is not -1 */
-        else if(digit4 != -1) {
+           digit4 a digit */
+        else if(ISDIGIT(digit4)) {
           failf(data, "Unsupported response code in HTTP response");
           return CURLE_UNSUPPORTED_PROTOCOL;
         }
 
-        if((nc == 4) && (' ' == separator)) {
+        if((nc >= 4) && (' ' == separator)) {
           httpversion += 10 * httpversion_major;
           switch(httpversion) {
           case 10:

@@ -65,6 +65,16 @@ static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
   return CURLSTS_OK;
 }
 
+/* verify error from callback */
+static CURLSTScode hstsreadfail(CURL *easy, struct curl_hstsentry *e,
+                                void *userp)
+{
+  (void)easy;
+  (void)e;
+  (void)userp;
+  return CURLSTS_FAIL;
+}
+
 /* check that we get the hosts back in the save */
 static CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *e,
                              struct curl_index *i, void *userp)
@@ -97,6 +107,19 @@ int test(char *URL)
     curl_easy_setopt(hnd, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
     ret = curl_easy_perform(hnd);
     curl_easy_cleanup(hnd);
+    printf("First request returned %d\n", (int)ret);
+  }
+  hnd = curl_easy_init();
+  if(hnd) {
+    curl_easy_setopt(hnd, CURLOPT_URL, URL);
+    curl_easy_setopt(hnd, CURLOPT_HSTSREADFUNCTION, hstsreadfail);
+    curl_easy_setopt(hnd, CURLOPT_HSTSREADDATA, &st);
+    curl_easy_setopt(hnd, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
+    curl_easy_setopt(hnd, CURLOPT_HSTSWRITEDATA, &st);
+    curl_easy_setopt(hnd, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
+    ret = curl_easy_perform(hnd);
+    curl_easy_cleanup(hnd);
+    printf("Second request returned %d\n", (int)ret);
   }
   curl_global_cleanup();
   return (int)ret;

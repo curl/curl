@@ -146,6 +146,7 @@ my $nodataconn425; # set if ftp srvr doesn't establish data ch and replies 425
 my $nodataconn421; # set if ftp srvr doesn't establish data ch and replies 421
 my $nodataconn150; # set if ftp srvr doesn't establish data ch and replies 150
 my $storeresp;
+my $postfetch;
 my @capabilities;  # set if server supports capability commands
 my @auth_mechs;    # set if server supports authentication commands
 my %fulltextreply; #
@@ -1232,7 +1233,8 @@ sub FETCH_imap {
             sendcontrol $d;
         }
 
-        sendcontrol ")\r\n";
+        # Set the custom extra header content with POSTFETCH
+        sendcontrol "$postfetch)\r\n";
         sendcontrol "$cmdid OK FETCH completed\r\n";
     }
 
@@ -2798,6 +2800,7 @@ sub customize {
     $nodataconn421 = 0; # default is to not send 421 without data channel
     $nodataconn150 = 0; # default is to not send 150 without data channel
     $storeresp = "";    # send as ultimate STOR response
+    $postfetch = "";    # send as header after a FETCH response
     @capabilities = (); # default is to not support capability commands
     @auth_mechs = ();   # default is to not support authentication commands
     %fulltextreply = ();#
@@ -2839,6 +2842,10 @@ sub customize {
         elsif($_ =~ /DELAY ([A-Z]+) (\d*)/) {
             $delayreply{$1}=$2;
             logmsg "FTPD: delay reply for $1 with $2 seconds\n";
+        }
+        elsif($_ =~ /POSTFETCH (.*)/) {
+            logmsg "FTPD: read POSTFETCH header data\n";
+            $postfetch = $1;
         }
         elsif($_ =~ /SLOWDOWN/) {
             $ctrldelay=1;

@@ -15,6 +15,8 @@
 # of running runtests.pl as a child of itself sharing
 # some of the directories.
 1182
+# test 1184 causes flakiness in CI builds, mostly visible on macOS
+1184
 1209
 1211
 # fnmatch differences are just too common to make testing them sensible
