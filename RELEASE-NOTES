@@ -6,10 +6,6 @@ curl and libcurl 7.79.1
  Public functions in libcurl:  85
  Contributors:                 2489
 
-This release includes the following changes:
-
- o
-
 This release includes the following bugfixes:
 
  o Curl_http2_setup: don't change connection data on repeat invokes [10]
