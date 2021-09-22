@@ -784,6 +784,7 @@ mbed_connect_step3(struct Curl_easy *data, struct connectdata *conn,
     mbedtls_ssl_session *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;
     bool isproxy = SSL_IS_PROXY() ? TRUE : FALSE;
+    bool added = FALSE;
 
     our_ssl_sessionid = malloc(sizeof(mbedtls_ssl_session));
     if(!our_ssl_sessionid)
@@ -807,11 +808,13 @@ mbed_connect_step3(struct Curl_easy *data, struct connectdata *conn,
       Curl_ssl_delsessionid(data, old_ssl_sessionid);
 
     retcode = Curl_ssl_addsessionid(data, conn, isproxy, our_ssl_sessionid,
-                                    0, sockindex);
+                                    0, sockindex, &added);
     Curl_ssl_sessionid_unlock(data);
-    if(retcode) {
+    if(!added) {
       mbedtls_ssl_session_free(our_ssl_sessionid);
       free(our_ssl_sessionid);
+    }
+    if(retcode) {
       failf(data, "failed to store ssl session");
       return retcode;
     }

@@ -2109,7 +2109,7 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
       }
 
       result = Curl_ssl_addsessionid(data, conn, isproxy, ssl_sessionid,
-                                     ssl_sessionid_len, sockindex);
+                                     ssl_sessionid_len, sockindex, NULL);
       Curl_ssl_sessionid_unlock(data);
       if(result) {
         failf(data, "failed to store ssl session");
