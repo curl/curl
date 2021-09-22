@@ -2493,6 +2493,7 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
 
   if(SSL_SET_OPTION(primary.sessionid)) {
     bool incache;
+    bool added = FALSE;
     void *old_ssl_sessionid = NULL;
 
     Curl_ssl_sessionid_lock(data);
@@ -2511,9 +2512,11 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
 
     if(!incache) {
       if(!Curl_ssl_addsessionid(data, conn, isproxy, ssl_sessionid,
-                                0 /* unknown size */, sockindex)) {
-        /* the session has been put into the session cache */
-        res = 1;
+                                0 /* unknown size */, sockindex, &added)) {
+        if(added) {
+          /* the session has been put into the session cache */
+          res = 1;
+        }
       }
       else
         failf(data, "failed to store ssl session");

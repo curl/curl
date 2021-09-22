@@ -516,7 +516,8 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
                                const bool isProxy,
                                void *ssl_sessionid,
                                size_t idsize,
-                               int sockindex)
+                               int sockindex,
+                               bool *added)
 {
   size_t i;
   struct Curl_ssl_session *store;
@@ -536,6 +537,10 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
   const char *hostname = conn->host.name;
 #endif
   (void)sockindex;
+
+  if(added)
+    *added = FALSE;
+
   if(!data->state.session)
     return CURLE_OK;
 
@@ -608,6 +613,9 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
     free(clone_conn_to_host);
     return CURLE_OUT_OF_MEMORY;
   }
+
+  if(added)
+    *added = TRUE;
 
   DEBUGF(infof(data, "Added Session ID to cache for %s://%s:%d [%s]",
                store->scheme, store->name, store->remote_port,

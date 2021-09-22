@@ -365,7 +365,7 @@ mesalink_connect_step3(struct connectdata *conn, int sockindex)
     if(!incache) {
       result =
         Curl_ssl_addsessionid(data, conn, isproxy, our_ssl_sessionid, 0,
-                              sockindex);
+                              sockindex, NULL);
       if(result) {
         Curl_ssl_sessionid_unlock(data);
         failf(data, "failed to store ssl session");

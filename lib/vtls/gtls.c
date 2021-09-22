@@ -1287,6 +1287,7 @@ gtls_connect_step3(struct Curl_easy *data,
 
     if(connect_sessionid) {
       bool incache;
+      bool added = FALSE;
       void *ssl_sessionid;
 
       /* extract session ID to the allocated buffer */
@@ -1306,10 +1307,11 @@ gtls_connect_step3(struct Curl_easy *data,
       result = Curl_ssl_addsessionid(data, conn,
                                      SSL_IS_PROXY() ? TRUE : FALSE,
                                      connect_sessionid, connect_idsize,
-                                     sockindex);
+                                     sockindex, &added);
       Curl_ssl_sessionid_unlock(data);
-      if(result) {
+      if(!added)
         free(connect_sessionid);
+      if(result) {
         result = CURLE_OUT_OF_MEMORY;
       }
     }
