@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 #include <winver.h>
-#include "../include/curl/curlver.h"
+#include <curl/curlver.h>
 
 LANGUAGE  0, 0
 
