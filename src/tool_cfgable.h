@@ -133,6 +133,9 @@ struct OperationConfig {
   struct getout *url_get;   /* point to the node to fill in URL */
   struct getout *url_out;   /* point to the node to fill in outfile */
   struct getout *url_ul;    /* point to the node to fill in upload */
+#if defined(HAVE_SETSOCKOPT_SOL_IP)
+  long ip_tos;               /* the ip tos */
+#endif
   char *doh_url;
   char *cipher_list;
   char *proxy_cipher_list;

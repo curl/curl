@@ -536,6 +536,9 @@
 /* Define to 1 if you have a working setsockopt SO_NONBLOCK function. */
 #cmakedefine HAVE_SETSOCKOPT_SO_NONBLOCK 1
 
+/* Define to 1 if you have a working setsockopt SOL_IP function. */
+#cmakedefine HAVE_SETSOCKOPT_SOL_IP ${HAVE_SETSOCKOPT_SOL_IP}
+
 /* Define to 1 if you have the sigaction function. */
 #cmakedefine HAVE_SIGACTION 1
 

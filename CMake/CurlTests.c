@@ -427,6 +427,44 @@ main ()
   return 0;
 }
 #endif
+
+#ifdef HAVE_SETSOCKOPT_SOL_IP
+/* includes start */
+#ifdef HAVE_WINDOWS_H
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  include <windows.h>
+#  ifdef HAVE_WINSOCK2_H
+#    include <winsock2.h>
+#  else
+#    ifdef HAVE_WINSOCK_H
+#      include <winsock.h>
+#    endif
+#  endif
+#endif
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#  include <sys/socket.h>
+#endif
+
+#include <netinet/in.h>
+#include <netinet/ip.h>
+/* includes end */
+
+int
+main ()
+{
+        if(0 != setsockopt(0, SOL_IP, IP_TOS, 0, 0))
+          return 1;
+  ;
+  return 0;
+}
+#endif
+
 #ifdef HAVE_GLIBC_STRERROR_R
 #include <string.h>
 #include <errno.h>

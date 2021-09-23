@@ -43,6 +43,10 @@
 #  include <proto/dos.h>
 #endif
 
+#if defined(HAVE_SETSOCKOPT_SOL_IP)
+#  include <netinet/ip.h>
+#endif
+
 #include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
@@ -661,6 +665,17 @@ static void single_transfer_cleanup(struct OperationConfig *config)
   }
 }
 
+#if defined(HAVE_SETSOCKOPT_SOL_IP)
+static int socktos_callback(void *clientp, curl_socket_t curlfd, curlsocktype purpose) {
+  if(purpose == CURLSOCKTYPE_IPCXN) {
+    long val = (long)clientp;
+    setsockopt(curlfd, SOL_IP, IP_TOS, (const char *)&val, sizeof(val));
+    fprintf(stderr, "set socket options ip-tos to %d", val);
+  }
+  return CURL_SOCKOPT_OK;
+}
+#endif
+
 /* create the next (singular) transfer */
 
 static CURLcode single_transfer(struct GlobalConfig *global,
@@ -1182,7 +1197,15 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         result = curl_easy_setopt(curl, CURLOPT_SHARE, share);
         if(result)
           break;
-
+        notef(global, "will set socket option!-1");
+#if defined(HAVE_SETSOCKOPT_SOL_IP)
+        notef(global, "will set socket option!");
+        if (config->ip_tos) {
+          // TODO
+          my_setopt(curl ,CURLOPT_SOCKOPTDATA, (void*)config->ip_tos);
+          my_setopt(curl ,CURLOPT_SOCKOPTFUNCTION, socktos_callback);
+        }
+#endif
         if(!config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 0L);
 

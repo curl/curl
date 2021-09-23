@@ -47,6 +47,11 @@
 #  define USE_WATT32
 #endif
 
+
+#if defined(HAVE_SETSOCKOPT_SOL_IP)
+#  include <netinet/ip.h>
+#endif
+
 #define GetStr(str,val) do { \
   if(*(str)) { \
     free(*(str)); \
@@ -229,6 +234,9 @@ static const struct LongShort aliases[]= {
   {"da", "data-ascii",               ARG_STRING},
   {"db", "data-binary",              ARG_STRING},
   {"de", "data-urlencode",           ARG_STRING},
+#if defined(HAVE_SETSOCKOPT_SOL_IP)
+  {"dd", "tos",                      ARG_STRING},
+#endif
   {"D",  "dump-header",              ARG_FILENAME},
   {"e",  "referer",                  ARG_STRING},
   {"E",  "cert",                     ARG_FILENAME},
@@ -1363,142 +1371,197 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case 'd':
       /* postfield data */
-    {
-      char *postdata = NULL;
-      FILE *file;
-      size_t size = 0;
-      bool raw_mode = (subletter == 'r');
 
-      if(subletter == 'e') { /* --data-urlencode*/
-        /* [name]=[content], we encode the content part only
-         * [name]@[file name]
-         *
-         * Case 2: we first load the file using that name and then encode
-         * the content.
-         */
-        const char *p = strchr(nextarg, '=');
-        size_t nlen;
-        char is_file;
-        if(!p)
-          /* there was no '=' letter, check for a '@' instead */
-          p = strchr(nextarg, '@');
-        if(p) {
-          nlen = p - nextarg; /* length of the name part */
-          is_file = *p++; /* pass the separator */
-        }
-        else {
-          /* neither @ nor =, so no name and it isn't a file */
-          nlen = is_file = 0;
-          p = nextarg;
-        }
-        if('@' == is_file) {
-          /* a '@' letter, it means that a file name or - (stdin) follows */
-          if(!strcmp("-", p)) {
-            file = stdin;
-            set_binmode(stdin);
+#if defined(HAVE_SETSOCKOPT_SOL_IP)
+      if (subletter == 'd') {
+        // TODO
+        if (nextarg) {
+          // check nextarg
+          // CS0,LE,CS1,AF11,AF12,AF13,CS2,AF21,AF22,AF23,CS3,AF31,AF32,AF33,CS4,AF41,AF42,AF43,CS5,EF,CS6,CS7
+          if (strcmp(nextarg, "CS0") == 0) {
+            config->ip_tos = IPTOS_CLASS_CS0;
+          } else if (strcmp(nextarg, "CS1") == 0) {
+            config->ip_tos = IPTOS_CLASS_CS1;
+          } else if (strcmp(nextarg, "CS2") == 0) {
+            config->ip_tos = IPTOS_CLASS_CS2;
+          } else if (strcmp(nextarg, "CS3") == 0) {
+            config->ip_tos = IPTOS_CLASS_CS3;
+          } else if (strcmp(nextarg, "CS4") == 0) {
+            config->ip_tos = IPTOS_CLASS_CS4;
+          } else if (strcmp(nextarg, "CS5") == 0) {
+            config->ip_tos = IPTOS_CLASS_CS5;
+          } else if (strcmp(nextarg, "CS6") == 0) {
+            config->ip_tos = IPTOS_CLASS_CS6;
+          } else if (strcmp(nextarg, "CS7") == 0) {
+            config->ip_tos = IPTOS_CLASS_CS7;
+          } else if (strcmp(nextarg, "LE") == 0) {
+            config->ip_tos = IPTOS_LOWDELAY;
+          } else if (strcmp(nextarg, "AF11") == 0) {
+            config->ip_tos = IPTOS_DSCP_AF11;
+          } else if (strcmp(nextarg, "AF12") == 0) {
+            config->ip_tos = IPTOS_DSCP_AF12;
+          } else if (strcmp(nextarg, "AF13") == 0) {
+            config->ip_tos = IPTOS_DSCP_AF13;
+          } else if (strcmp(nextarg, "AF21") == 0) {
+            config->ip_tos = IPTOS_DSCP_AF21;
+          } else if (strcmp(nextarg, "AF22") == 0) {
+            config->ip_tos = IPTOS_DSCP_AF22;
+          } else if (strcmp(nextarg, "AF23") == 0) {
+            config->ip_tos = IPTOS_DSCP_AF23;
+          } else if (strcmp(nextarg, "AF31") == 0) {
+            config->ip_tos = IPTOS_DSCP_AF31;
+          } else if (strcmp(nextarg, "AF32") == 0) {
+            config->ip_tos = IPTOS_DSCP_AF32;
+          } else if (strcmp(nextarg, "AF33") == 0) {
+            config->ip_tos = IPTOS_DSCP_AF33;
+          } else if (strcmp(nextarg, "AF41") == 0) {
+            config->ip_tos = IPTOS_DSCP_AF41;
+          } else if (strcmp(nextarg, "AF42") == 0) {
+            config->ip_tos = IPTOS_DSCP_AF42;
+          } else if (strcmp(nextarg, "AF43") == 0) {
+            config->ip_tos = IPTOS_DSCP_AF43;
+          } else if (strcmp(nextarg, "EF") == 0) {
+            config->ip_tos = IPTOS_DSCP_EF;
+          } else if (strcmp(nextarg, "ECT1") == 0) {
+            config->ip_tos = IPTOS_ECN_ECT1;
+          } else if (strcmp(nextarg, "ECT0") == 0) {
+            config->ip_tos = IPTOS_ECN_ECT0;
+          } else if (strcmp(nextarg, "CE") == 0) {
+            config->ip_tos = IPTOS_ECN_CE;
+          } else if (strcmp(nextarg, "LOWDELAY") == 0) {
+            config->ip_tos = IPTOS_LOWDELAY;
+          } else if (strcmp(nextarg, "THROUGHPUT") == 0) {
+            config->ip_tos = IPTOS_THROUGHPUT;
+          } else if (strcmp(nextarg, "RELIABILITY") == 0) {
+            config->ip_tos = IPTOS_RELIABILITY;
+          } else if (strcmp(nextarg, "LOWCOST") == 0) {
+            config->ip_tos = IPTOS_LOWCOST;
+          } else if (PARAM_OK != str2unummax(&config->ip_tos, nextarg, 0xFF)) {
+            // user defined tos value
+            config->ip_tos = 0;
           }
-          else {
-            file = fopen(p, "rb");
-            if(!file)
+        }
+      } else
+#endif
+      {
+        char *postdata = NULL;
+        FILE *file;
+        size_t size = 0;
+        bool raw_mode = (subletter == 'r');
+
+        if (subletter == 'e') { /* --data-urlencode*/
+          /* [name]=[content], we encode the content part only
+           * [name]@[file name]
+           *
+           * Case 2: we first load the file using that name and then encode
+           * the content.
+           */
+          const char *p = strchr(nextarg, '=');
+          size_t nlen;
+          char is_file;
+          if (!p) /* there was no '=' letter, check for a '@' instead */
+            p = strchr(nextarg, '@');
+          if (p) {
+            nlen = p - nextarg; /* length of the name part */
+            is_file = *p++;     /* pass the separator */
+          } else {
+            /* neither @ nor =, so no name and it isn't a file */
+            nlen = is_file = 0;
+            p = nextarg;
+          }
+          if ('@' == is_file) {
+            /* a '@' letter, it means that a file name or - (stdin) follows */
+            if (!strcmp("-", p)) {
+              file = stdin;
+              set_binmode(stdin);
+            } else {
+              file = fopen(p, "rb");
+              if (!file)
+                warnf(global,
+                      "Couldn't read data from file \"%s\", this makes "
+                      "an empty POST.\n",
+                      nextarg);
+            }
+
+            err = file2memory(&postdata, &size, file);
+
+            if (file && (file != stdin)) fclose(file);
+            if (err) return err;
+          } else {
+            GetStr(&postdata, p);
+            if (postdata) size = strlen(postdata);
+          }
+
+          if (!postdata) {
+            /* no data from the file, point to a zero byte string to make this
+               get sent as a POST anyway */
+            postdata = strdup("");
+            if (!postdata) return PARAM_NO_MEM;
+            size = 0;
+          } else {
+            char *enc = curl_easy_escape(NULL, postdata, (int)size);
+            Curl_safefree(postdata); /* no matter if it worked or not */
+            if (enc) {
+              /* replace (in-place) '%20' by '+' acording to RFC1866 */
+              size_t enclen = replace_url_encoded_space_by_plus(enc);
+              /* now make a string with the name from above and append the
+                 encoded string */
+              size_t outlen = nlen + enclen + 2;
+              char *n = malloc(outlen);
+              if (!n) {
+                curl_free(enc);
+                return PARAM_NO_MEM;
+              }
+              if (nlen > 0) { /* only append '=' if we have a name */
+                msnprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
+                size = outlen - 1;
+              } else {
+                strcpy(n, enc);
+                size = outlen - 2; /* since no '=' was inserted */
+              }
+              curl_free(enc);
+              postdata = n;
+            } else
+              return PARAM_NO_MEM;
+          }
+        } else if ('@' == *nextarg && !raw_mode) {
+          /* the data begins with a '@' letter, it means that a file name
+             or - (stdin) follows */
+          nextarg++; /* pass the @ */
+
+          if (!strcmp("-", nextarg)) {
+            file = stdin;
+            if (subletter == 'b') /* forced data-binary */
+              set_binmode(stdin);
+          } else {
+            file = fopen(nextarg, "rb");
+            if (!file)
               warnf(global,
                     "Couldn't read data from file \"%s\", this makes "
-                    "an empty POST.\n", nextarg);
+                    "an empty POST.\n",
+                    nextarg);
           }
 
-          err = file2memory(&postdata, &size, file);
-
-          if(file && (file != stdin))
-            fclose(file);
-          if(err)
-            return err;
-        }
-        else {
-          GetStr(&postdata, p);
-          if(postdata)
-            size = strlen(postdata);
-        }
-
-        if(!postdata) {
-          /* no data from the file, point to a zero byte string to make this
-             get sent as a POST anyway */
-          postdata = strdup("");
-          if(!postdata)
-            return PARAM_NO_MEM;
-          size = 0;
-        }
-        else {
-          char *enc = curl_easy_escape(NULL, postdata, (int)size);
-          Curl_safefree(postdata); /* no matter if it worked or not */
-          if(enc) {
-            /* replace (in-place) '%20' by '+' acording to RFC1866 */
-            size_t enclen = replace_url_encoded_space_by_plus(enc);
-            /* now make a string with the name from above and append the
-               encoded string */
-            size_t outlen = nlen + enclen + 2;
-            char *n = malloc(outlen);
-            if(!n) {
-              curl_free(enc);
-              return PARAM_NO_MEM;
-            }
-            if(nlen > 0) { /* only append '=' if we have a name */
-              msnprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
-              size = outlen-1;
-            }
-            else {
-              strcpy(n, enc);
-              size = outlen-2; /* since no '=' was inserted */
-            }
-            curl_free(enc);
-            postdata = n;
+          if (subletter == 'b') /* forced binary */
+            err = file2memory(&postdata, &size, file);
+          else {
+            err = file2string(&postdata, file);
+            if (postdata) size = strlen(postdata);
           }
-          else
-            return PARAM_NO_MEM;
-        }
-      }
-      else if('@' == *nextarg && !raw_mode) {
-        /* the data begins with a '@' letter, it means that a file name
-           or - (stdin) follows */
-        nextarg++; /* pass the @ */
 
-        if(!strcmp("-", nextarg)) {
-          file = stdin;
-          if(subletter == 'b') /* forced data-binary */
-            set_binmode(stdin);
-        }
-        else {
-          file = fopen(nextarg, "rb");
-          if(!file)
-            warnf(global, "Couldn't read data from file \"%s\", this makes "
-                  "an empty POST.\n", nextarg);
-        }
+          if (file && (file != stdin)) fclose(file);
+          if (err) return err;
 
-        if(subletter == 'b')
-          /* forced binary */
-          err = file2memory(&postdata, &size, file);
-        else {
-          err = file2string(&postdata, file);
-          if(postdata)
-            size = strlen(postdata);
+          if (!postdata) {
+            /* no data from the file, point to a zero byte string to make this
+               get sent as a POST anyway */
+            postdata = strdup("");
+            if (!postdata) return PARAM_NO_MEM;
+          }
+        } else {
+          GetStr(&postdata, nextarg);
+          if (postdata) size = strlen(postdata);
         }
-
-        if(file && (file != stdin))
-          fclose(file);
-        if(err)
-          return err;
-
-        if(!postdata) {
-          /* no data from the file, point to a zero byte string to make this
-             get sent as a POST anyway */
-          postdata = strdup("");
-          if(!postdata)
-            return PARAM_NO_MEM;
-        }
-      }
-      else {
-        GetStr(&postdata, nextarg);
-        if(postdata)
-          size = strlen(postdata);
-      }
 
 #ifdef CURL_DOES_CONVERSIONS
       if(subletter != 'b') {
@@ -1535,7 +1598,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->postfields = postdata;
         config->postfieldsize = curlx_uztoso(size);
       }
-    }
+      }
     /*
       We can't set the request type here, as this data might be used in
       a simple GET if -G is used. Already or soon.

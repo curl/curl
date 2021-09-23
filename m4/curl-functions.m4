@@ -54,6 +54,29 @@ curl_includes_arpa_inet="\
     [], [], [$curl_includes_arpa_inet])
 ])
 
+dnl CURL_INCLUDES_NETINET_IP
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when netinet/ip.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_NETINET_IP], [
+curl_includes_netinet_ip="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#  include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IP_H
+#  include <netinet/ip.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h sys/socket.h netinet/ip.h,
+    [], [], [$curl_includes_netinet_ip])
+])
+
 
 dnl CURL_INCLUDES_FCNTL
 dnl -------------------------------------------------
@@ -4656,12 +4679,70 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT], [
       [Define to 1 if you have the setsockopt function.])
     curl_cv_func_setsockopt="yes"
     CURL_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK
+    CURL_CHECK_FUNC_SETSOCKOPT_SOL_IP
   else
     AC_MSG_RESULT([no])
     curl_cv_func_setsockopt="no"
   fi
 ])
 
+
+dnl CURL_CHECK_FUNC_SETSOCKOPT_SOL_IP
+dnl -------------------------------------------------
+dnl Verify if setsockopt with the SOL_IP command is
+dnl available, can be compiled, and seems to work. If
+dnl all of these are true, then HAVE_SETSOCKOPT_SOL_IP
+dnl will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT_SOL_IP], [
+  AC_REQUIRE([CURL_INCLUDES_NETINET_IP])dnl
+  #
+  tst_compi_setsockopt_sol_ip="unknown"
+  tst_allow_setsockopt_sol_ip="unknown"
+  #
+  if test "$ac_cv_func_setsockopt" = "yes"; then
+    AC_MSG_CHECKING([if setsockopt SOL_IP is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_winsock2
+        $curl_includes_sys_socket
+        $curl_includes_netinet_ip
+      ]],[[
+        if(0 != setsockopt(0, SOL_IP, IP_TOS, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_setsockopt_sol_ip="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_setsockopt_sol_ip="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_setsockopt_sol_ip" = "yes"; then
+    AC_MSG_CHECKING([if setsockopt SOL_IP usage allowed])
+    if test "x$curl_disallow_setsockopt_sol_ip" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_setsockopt_sol_ip="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_setsockopt_sol_ip="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if setsockopt SOL_IP might be used])
+  if test "$tst_compi_setsockopt_sol_ip" = "yes" &&
+     test "$tst_allow_setsockopt_sol_ip" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_SETSOCKOPT_SOL_IP, 1,
+      [Define to 1 if you have a working setsockopt SOL_IP function.])
+    ac_cv_func_setsockopt_sol_ip="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_setsockopt_sol_ip="no"
+  fi
+])
 
 dnl CURL_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK
 dnl -------------------------------------------------
