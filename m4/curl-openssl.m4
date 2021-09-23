@@ -66,7 +66,7 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_HEADERS], [
         ;;
       *)
         if test "$curl_cv_have_def_OPENSSL_VERSION_STR" = "yes"; then
-          ver=`echo $curl_cv_def_OPENSSL_VERSION_STR | sed s/\"//g`;
+          ver=`echo $curl_cv_def_OPENSSL_VERSION_STR | sed 's/"//g'`;
           tst_vermaj=`echo $ver | cut -d. -f1`
           tst_vermin=`echo $ver | cut -d. -f2`
           tst_verfix=`echo $ver | cut -d. -f3`
