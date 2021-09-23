@@ -446,7 +446,7 @@ if(CMAKE_USE_OPENSSL)
   check_symbol_exists(RAND_screen "${CURL_INCLUDES}" HAVE_RAND_SCREEN)
   check_symbol_exists(RAND_egd    "${CURL_INCLUDES}" HAVE_RAND_EGD)
 
-  set(CMAKE_REQUIRED_FLAGS "-DOPENSSL_SUPPRESS_DEPRECATED")
+  add_definitions(-DOPENSSL_SUPPRESS_DEPRECATED)
 endif()
 
 if(CMAKE_USE_MBEDTLS)
