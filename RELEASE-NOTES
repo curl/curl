@@ -1,23 +1,20 @@
-curl and libcurl 7.79.1
+curl and libcurl 7.80.0
 
- Public curl releases:         203
+ Public curl releases:         204
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
  Contributors:                 2489
 
+This release includes the following changes:
+
+ o
+
 This release includes the following bugfixes:
 
- o Curl_http2_setup: don't change connection data on repeat invokes [10]
- o curl_multi_fdset: make FD_SET() not operate on sockets out of range [4]
- o dist: provide lib/.checksrc in the tarball [6]
- o FAQ: add GOPHERS + curl works on data, not files
- o hsts: CURLSTS_FAIL from hsts read callback should fail transfer [8]
- o hsts: handle unlimited expiry [3]
- o http: fix the broken >3 digit response code detection [1]
- o strerror: use sys_errlist instead of strerror on Windows [5]
- o test1184: disable [9]
- o tests/sshserver.pl: make it work with openssh-8.7p1 [2]
+ o ci: update Lift config to match requirements of curl build [1]
+ o cleanup: constify unmodified static structs [2]
+ o misc: fix typos in docs and comments [3]
 
 This release includes the following known bugs:
 
@@ -26,19 +23,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  0xee on github, Daniel Stenberg, Evangelos Foutras, Glenn de boer,
-  Jonathan Cardoso Machado, Kamil Dudka, Marcel Raad, Ray Satiro,
-  RiderALT on github, tawmoto on github, Viktor Szakats,
-  (11 contributors)
+  a1346054 on github, Daniel Stenberg, Rikard Falkeborn, Thomas M. DuBuisson,
+  (4 contributors)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.se/bug/?i=7738
- [2] = https://curl.se/bug/?i=7724
- [3] = https://curl.se/bug/?i=7720
- [4] = https://curl.se/bug/?i=7718
- [5] = https://curl.se/bug/?i=7735
- [6] = https://curl.se/bug/?i=7733
- [8] = https://curl.se/bug/?i=7726
- [9] = https://curl.se/bug/?i=7725
- [10] = https://curl.se/bug/?i=7730
+ [1] = https://curl.se/bug/?i=7761
+ [2] = https://curl.se/bug/?i=7759
+ [3] = https://curl.se/bug/?i=7747
