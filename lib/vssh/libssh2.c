@@ -3610,7 +3610,7 @@ void Curl_ssh_cleanup(void)
 
 void Curl_ssh_version(char *buffer, size_t buflen)
 {
-  (void)msnprintf(buffer, buflen, "libssh2/%s", LIBSSH2_VERSION);
+  (void)msnprintf(buffer, buflen, "libssh2/%s", CURL_LIBSSH2_VERSION);
 }
 
 /* The SSH session is associated with the *CONNECTION* but the callback user
