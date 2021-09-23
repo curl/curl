@@ -1970,12 +1970,12 @@ schannel_recv(struct Curl_easy *data, int sockindex,
       if(sspi_status == SEC_I_RENEGOTIATE) {
         infof(data, "schannel: remote party requests renegotiation");
         if(*err && *err != CURLE_AGAIN) {
-          infof(data, "schannel: can't renogotiate, an error is pending");
+          infof(data, "schannel: can't renegotiate, an error is pending");
           goto cleanup;
         }
         if(BACKEND->encdata_offset) {
           *err = CURLE_RECV_ERROR;
-          infof(data, "schannel: can't renogotiate, "
+          infof(data, "schannel: can't renegotiate, "
                 "encrypted data available");
           goto cleanup;
         }
