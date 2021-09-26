@@ -241,6 +241,7 @@ static const struct LongShort aliases[]= {
   {"Eg", "capath",                   ARG_FILENAME},
   {"Eh", "pubkey",                   ARG_STRING},
   {"Ei", "hostpubmd5",               ARG_STRING},
+  {"EF", "hostpubsha256",            ARG_STRING},
   {"Ej", "crlfile",                  ARG_FILENAME},
   {"Ek", "tlsuser",                  ARG_STRING},
   {"El", "tlspassword",              ARG_STRING},
@@ -1601,6 +1602,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         GetStr(&config->hostpubmd5, nextarg);
         if(!config->hostpubmd5 || strlen(config->hostpubmd5) != 32)
           return PARAM_BAD_USE;
+        break;
+      case 'F': /* --hostpubsha256 sha256 of the host public key */
+        GetStr(&config->hostpubsha256, nextarg);
         break;
       case 'j': /* CRL file */
         GetStr(&config->crlfile, nextarg);
