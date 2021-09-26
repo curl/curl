@@ -39,6 +39,20 @@
 #endif
 #endif /* USE_MBEDTLS */
 
+#if defined(USE_OPENSSL) && !defined(USE_AMISSL)
+  #include <openssl/opensslconf.h>
+  #if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
+    #define USE_OPENSSL_MD5
+  #endif
+#endif
+
+#ifdef USE_WOLFSSL
+  #include <wolfssl/options.h>
+  #ifndef NO_MD5
+    #define USE_WOLFSSL_MD5
+  #endif
+#endif
+
 #if defined(USE_GNUTLS)
 
 #include <nettle/md5.h>
@@ -65,19 +79,13 @@ static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
   md5_digest(ctx, 16, digest);
 }
 
-#elif (defined(USE_OPENSSL) && !defined(USE_AMISSL)) || defined(USE_WOLFSSL)
+#elif defined(USE_OPENSSL_MD5) || defined(USE_WOLFSSL_MD5)
 
-#ifdef USE_WOLFSSL
-#include <wolfssl/options.h>
-#endif
-
-#if defined(USE_OPENSSL) || (defined(USE_WOLFSSL) && !defined(NO_MD5))
 /* When OpenSSL or wolfSSL is available, we use their MD5 functions. */
 #include <openssl/md5.h>
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
-#endif
 
 #elif defined(USE_MBEDTLS)
 
