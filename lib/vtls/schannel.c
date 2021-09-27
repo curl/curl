@@ -743,10 +743,10 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
   if(curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
       VERSION_GREATER_THAN_EQUAL)) {
 
-    SCH_CREDENTIALS Credentials = { 0 };
-    TLS_PARAMETERS TlsParameters = { 0 };
-    CRYPTO_SETTINGS CryptoSettings[4] = { 0 };
-    UNICODE_STRING BlockedChainingModes[1] = { 0 };
+    SCH_CREDENTIALS credentials = { 0 };
+    TLS_PARAMETERS tls_parameters = { 0 };
+    CRYPTO_SETTINGS crypto_settings[4] = { 0 };
+    UNICODE_STRING blocked_chaining_modes[1] = { 0 };
 
     /*
      RTM Windows 2022 / Windows 11 does not support ChaCha20-Poly1305
@@ -760,31 +760,31 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     /*
       Disallow ChaCha20-Poly1305 until full support is possible.
     */
-    int CryptoSettingsIdx = 0;
-    CryptoSettings[CryptoSettingsIdx].eAlgorithmUsage = TlsParametersCngAlgUsageCipher;
-    CryptoSettings[CryptoSettingsIdx].strCngAlgId = (UNICODE_STRING){
+    int crypto_settings_idx = 0;
+    crypto_settings[crypto_settings_idx].eAlgorithmUsage = TlsParametersCngAlgUsageCipher;
+    crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING){
         sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM),
         sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM),
         BCRYPT_CHACHA20_POLY1305_ALGORITHM };
-    CryptoSettingsIdx++;
+    crypto_settings_idx++;
 
     /*
       Disallow AES_CCM algorithm, since there's no support for it yet.
       and also disallows AES_CCM_8, which is undefined per QUIC spec.
     */
-    BlockedChainingModes[0] = (UNICODE_STRING){
+    blocked_chaining_modes[0] = (UNICODE_STRING){
         sizeof(BCRYPT_CHAIN_MODE_CCM),
         sizeof(BCRYPT_CHAIN_MODE_CCM),
         BCRYPT_CHAIN_MODE_CCM };
 
-    CryptoSettings[CryptoSettingsIdx].eAlgorithmUsage = TlsParametersCngAlgUsageCipher;
-    CryptoSettings[CryptoSettingsIdx].rgstrChainingModes = BlockedChainingModes;
-    CryptoSettings[CryptoSettingsIdx].cChainingModes = ARRAYSIZE(BlockedChainingModes);
-    CryptoSettings[CryptoSettingsIdx].strCngAlgId = (UNICODE_STRING){
+    crypto_settings[crypto_settings_idx].eAlgorithmUsage = TlsParametersCngAlgUsageCipher;
+    crypto_settings[crypto_settings_idx].rgstrChainingModes = blocked_chaining_modes;
+    crypto_settings[crypto_settings_idx].cChainingModes = ARRAYSIZE(blocked_chaining_modes);
+    crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING){
         sizeof(BCRYPT_AES_ALGORITHM),
         sizeof(BCRYPT_AES_ALGORITHM),
         BCRYPT_AES_ALGORITHM };
-    CryptoSettingsIdx++;
+    crypto_settings_idx++;
 
 
     /*TODO: implement "set_ssl_ciphers" for SCH_CREDENTIALS 
@@ -795,25 +795,25 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     This will require a bit of thinking.
     */
 
-    TlsParameters.pDisabledCrypto = CryptoSettings;
+    tls_parameters.pDisabledCrypto = crypto_settings;
 
     /* The number of blocked suites -- if we unblock them in the future
     then this will need to be adjusted (likely at runtime to maintain
     compatibility with Windows 11 & Windows 2022 RTM builds.
     */
-    TlsParameters.cDisabledCrypto = 2;
-    Credentials.pTlsParameters = &TlsParameters;
-    Credentials.cTlsParameters = 1;
+    tls_parameters.cDisabledCrypto = 2;
+    credentials.pTlsParameters = &tls_parameters;
+    credentials.cTlsParameters = 1;
 
-    Credentials.dwVersion = SCH_CREDENTIALS_VERSION;
-    Credentials.dwFlags = flags | SCH_USE_STRONG_CRYPTO;
+    credentials.dwVersion = SCH_CREDENTIALS_VERSION;
+    credentials.dwFlags = flags | SCH_USE_STRONG_CRYPTO;
     
-    Credentials.pTlsParameters->grbitDisabledProtocols = (DWORD)~grbitEnabledProtocols;
+    credentials.pTlsParameters->grbitDisabledProtocols = (DWORD)~grbitEnabledProtocols;
 
 #ifdef HAS_CLIENT_CERT_PATH
     if(client_certs[0]) {
-      Credentials.cCreds = 1;
-      Credentials.paCred = client_certs;
+      credentials.cCreds = 1;
+      credentials.paCred = client_certs;
     }
 #endif
 
@@ -822,7 +822,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     sspi_status =
         s_pSecFn->AcquireCredentialsHandleW(NULL, (TCHAR*)UNISP_NAME,
             SECPKG_CRED_OUTBOUND, NULL,
-            &Credentials, NULL, NULL,
+            &credentials, NULL, NULL,
             &BACKEND->cred->cred_handle,
             &BACKEND->cred->time_stamp);
   }
