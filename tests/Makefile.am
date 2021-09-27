@@ -71,6 +71,9 @@ TEST_E = -a -e
 
 # !flaky means that it'll skip all tests using the flaky keyword
 TEST_NF = -a -p !flaky
+
+# special CI target derived from nonflaky with CI-specific flags
+TEST_CI = $(TEST_NF) -r -rm -u
 endif
 
 # make sure that PERL is pointing to an executable
@@ -85,6 +88,9 @@ quiet-test: perlcheck all
 
 am-test: perlcheck all
 	$(TEST) $(TEST_AM) $(TFLAGS)
+
+ci-test: perlcheck all
+	$(TEST) $(TEST_CI) $(TFLAGS)
 
 full-test: perlcheck all
 	$(TEST) $(TEST_F) $(TFLAGS)

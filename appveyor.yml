@@ -299,11 +299,11 @@ build_script:
 test_script:
     - if %TESTING%==ON (
         if %BUILD_SYSTEM%==CMake (
-          set TFLAGS=-r -rm -u %DISABLED_TESTS% &&
-          cmake --build . --config %PRJ_CFG% --target test-nonflaky
+          set TFLAGS=%DISABLED_TESTS% &&
+          cmake --build . --config %PRJ_CFG% --target test-ci
         ) else (
         if %BUILD_SYSTEM%==autotools (
-          bash.exe -e -l -c "cd /c/projects/curl && make V=1 TFLAGS='-r -rm -u %DISABLED_TESTS%' test-nonflaky"
+          bash.exe -e -l -c "cd /c/projects/curl && make V=1 TFLAGS='%DISABLED_TESTS%' test-ci"
         ) else (
           bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -p !flaky -r -rm -u %DISABLED_TESTS%"
         ))

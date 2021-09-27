@@ -129,4 +129,4 @@ windows_task:
   install_script: |
     %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
   test_script: |
-    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 TFLAGS='-r -rm -u !SCP %tests%' test-nonflaky"
+    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 TFLAGS='!SCP %tests%' test-ci"

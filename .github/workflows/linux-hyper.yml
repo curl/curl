@@ -41,7 +41,7 @@ jobs:
     - run: ./buildconf && LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} && make
       name: 'configure and build'
 
-    - run: make test-nonflaky
+    - run: make test-ci
       name: 'test'
       env:
         LD_LIBRARY_PATH: $HOME/hyper/target/debug:/usr/local/lib
