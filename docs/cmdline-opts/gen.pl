@@ -45,6 +45,19 @@ my %redirlong;
 my %protolong;
 my %catlong;
 
+use POSIX qw(strftime);
+my $date = strftime "%b %e %Y", localtime;
+my $version = "unknown";
+
+open(INC, "<../../include/curl/curlver.h");
+while(<INC>) {
+    if($_ =~ /^#define LIBCURL_VERSION \"([0-9.]*)/) {
+        $version = $1;
+        last;
+    }
+}
+close(INC);
+
 # get the long name version, return the man page string
 sub manpageify {
     my ($k)=@_;
@@ -365,6 +378,8 @@ sub header {
     open(F, "<:crlf", "$f");
     my @d;
     while(<F>) {
+        s/%DATE/$date/g;
+        s/%VERSION/$version/g;
         push @d, $_;
     }
     close(F);
