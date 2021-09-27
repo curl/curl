@@ -827,10 +827,8 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
             &BACKEND->cred->time_stamp);
   }
   else {
-    /* Supported on Windows 2K and newer */
+    /* Pre-Windows 10 1809 */
     SCHANNEL_CRED schannel_cred = { 0 };
-
-    /* Pre-Windows 10 1809, use older  */
     schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
     schannel_cred.dwFlags = flags;
     schannel_cred.grbitEnabledProtocols = grbitEnabledProtocols;
