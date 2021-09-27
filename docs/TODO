@@ -173,6 +173,7 @@
  19.2 Enable PIE and RELRO by default
  19.3 Don't use GNU libtool on OpenBSD
  19.4 Package curl for Windows in a signed installer
+ 19.5 make configure use --cache-file more and better
 
  20. Test suite
  20.1 SSL tunnel
@@ -1218,6 +1219,13 @@
 19.4 Package curl for Windows in a signed installer
 
  See https://github.com/curl/curl/issues/5424
+
+19.5 make configure use --cache-file more and better
+
+ The configure script can be improved to cache more values so that repeated
+ invokes run much faster.
+
+ See https://github.com/curl/curl/issues/7753
 
 20. Test suite
 
