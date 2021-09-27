@@ -145,6 +145,7 @@ my %api = (
     'curl_url_dup' => 'API',
     'curl_url_get' => 'API',
     'curl_url_set' => 'API',
+    'curl_url_strerror' => 'API',
     'curl_version' => 'API',
     'curl_version_info' => 'API',
 

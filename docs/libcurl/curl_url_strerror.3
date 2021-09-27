@@ -19,23 +19,21 @@
 .\" * KIND, either express or implied.
 .\" *
 .\" **************************************************************************
-.TH curl_easy_strerror 3 "26 Apr 2004" "libcurl 7.12" "libcurl Manual"
+.TH curl_url_strerror 3 "21 Aug 2021" "libcurl 7.80.0" "libcurl Manual"
 .SH NAME
-curl_easy_strerror - return string describing error code
+curl_url_strerror - return string describing error code
 .SH SYNOPSIS
-#include <curl/curl.h>
-
-const char *curl_easy_strerror(CURLcode errornum);
+.nf
+.B #include <curl/curl.h>
+.BI "const char *curl_url_strerror(CURLUcode " errornum ");"
 .SH DESCRIPTION
-The \fIcurl_easy_strerror(3)\fP function returns a string describing the
-CURLcode error code passed in the argument \fIerrornum\fP.
-
-Typically applications also appreciate \fICURLOPT_ERRORBUFFER(3)\fP for more
-specific error descriptions generated at run-time.
+The curl_url_strerror() function returns a string describing the CURLUcode
+error code passed in the argument \fIerrornum\fP.
 .SH AVAILABILITY
-This function was added in libcurl 7.12.0
+This function was added in libcurl 7.80.0
 .SH RETURN VALUE
 A pointer to a null-terminated string.
 .SH "SEE ALSO"
-.BR libcurl-errors "(3), " curl_multi_strerror "(3), "
-.BR curl_share_strerror "(3), " curl_url_strerror "(3)"
+.BR libcurl-errors "(3), " curl_url_get "(3), " curl_url_set "(3), "
+.BR curl_easy_strerror "(3), " curl_multi_strerror "(3), "
+.BR curl_share_strerror "(3)"

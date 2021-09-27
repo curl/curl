@@ -1954,7 +1954,8 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
                      CURLU_DISALLOW_USER : 0) |
                     (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
     if(uc) {
-      DEBUGF(infof(data, "curl_url_set rejected %s", data->state.url));
+      DEBUGF(infof(data, "curl_url_set rejected %s: %s", data->state.url,
+                   curl_url_strerror(uc)));
       return Curl_uc_to_curlcode(uc);
     }
 
