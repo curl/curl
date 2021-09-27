@@ -199,8 +199,8 @@ stages:
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
       displayName: 'install'
 
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 test-nonflaky"
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 test-ci"
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "-r -rm -u !SCP $(tests)"
+        TFLAGS: "!SCP $(tests)"

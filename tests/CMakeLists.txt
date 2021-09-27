@@ -46,5 +46,6 @@ add_runtests(test-am        "-a -am")
 add_runtests(test-full      "-a -p -r")
 # !flaky means that it'll skip all tests using the flaky keyword
 add_runtests(test-nonflaky  "-a -p !flaky")
+add_runtests(test-ci        "-a -p !flaky -r -rm -u")
 add_runtests(test-torture   "-a -t")
 add_runtests(test-event     "-a -e")

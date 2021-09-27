@@ -248,6 +248,9 @@ test-event:
 test-am:
 	@(cd tests; $(MAKE) all am-test)
 
+test-ci:
+	@(cd tests; $(MAKE) all ci-test)
+
 endif
 
 examples:

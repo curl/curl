@@ -84,7 +84,7 @@ jobs:
     - run: make
       name: 'make'
 
-    - run: make test-nonflaky
+    - run: make test-ci
       name: 'test'
       env:
         TFLAGS: "${{ matrix.build.tflags }} ~1452"
