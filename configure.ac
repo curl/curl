@@ -25,6 +25,8 @@ AC_PREREQ(2.59)
 
 dnl We don't know the version number "statically" so we use a dash here
 AC_INIT([curl], [-], [a suitable curl mailing list: https://curl.se/mail/])
+config_flags="$*"
+AC_DEFINE_UNQUOTED([CONFIG_FLAGS],["$config_flags"],[Flags passed to configure])
 
 XC_OVR_ZZ50
 XC_OVR_ZZ60

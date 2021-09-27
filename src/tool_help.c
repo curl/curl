@@ -965,7 +965,7 @@ featcomp(const void *p1, const void *p2)
 #endif
 }
 
-void tool_version_info(void)
+void tool_version_info(int verbose)
 {
   const char *const *proto;
 
@@ -1000,6 +1000,9 @@ void tool_version_info(void)
   if(strcmp(CURL_VERSION, curlinfo->version)) {
     printf("WARNING: curl and libcurl versions do not match. "
            "Functionality may be affected.\n");
+  }
+  if(verbose) {
+    printf("Configure flags: %s\n", CONFIG_FLAGS);
   }
 }
 

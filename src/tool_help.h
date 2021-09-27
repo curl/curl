@@ -25,6 +25,6 @@
 
 void tool_help(char *category);
 void tool_list_engines(void);
-void tool_version_info(void);
+void tool_version_info(int);
 
 #endif /* HEADER_CURL_TOOL_HELP_H */

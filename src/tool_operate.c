@@ -2563,7 +2563,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
         hugehelp();
       /* Check if we were asked for the version information */
       else if(res == PARAM_VERSION_INFO_REQUESTED)
-        tool_version_info();
+        tool_version_info(global->tracetype != TRACE_NONE);
       /* Check if we were asked to list the SSL engines */
       else if(res == PARAM_ENGINES_REQUESTED)
         tool_list_engines();
