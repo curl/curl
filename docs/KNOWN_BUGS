@@ -154,6 +154,7 @@ problems may have been fixed or changed somewhat since this was written!
  17.2 HTTP/2 frames while in the connection pool kill reuse
  17.3 ENHANCE_YOUR_CALM causes infinite retries
  17.4 Connection failures with parallel HTTP/2
+ 17.5 HTTP/2 connections through HTTPS proxy frequently stall
 
  18. HTTP/3
  18.1 If the HTTP/3 server closes connection during upload curl hangs
@@ -1128,6 +1129,9 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/5611
 
+17.5 HTTP/2 connections through HTTPS proxy frequently stall
+
+ See https://github.com/curl/curl/issues/6936
 
 18. HTTP/3
 
