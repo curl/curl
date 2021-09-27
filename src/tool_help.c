@@ -1001,9 +1001,13 @@ void tool_version_info(int verbose)
     printf("WARNING: curl and libcurl versions do not match. "
            "Functionality may be affected.\n");
   }
+#ifdef CONFIG_FLAGS
   if(verbose) {
     printf("Configure flags: %s\n", CONFIG_FLAGS);
   }
+#else
+  (void)verbose;
+#endif
 }
 
 void tool_list_engines(void)
