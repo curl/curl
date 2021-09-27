@@ -81,7 +81,11 @@
 #endif
 #endif
 
-#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX)
+#ifndef BCRYPT_CHACHA20_POLY1305_ALGORITHM
+#define BCRYPT_CHACHA20_POLY1305_ALGORITHM L"CHACHA20_POLY1305"
+#endif
+
+#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX) && !defined(DISABLE_SCHANNEL_CLIENT_CERT)
 #define HAS_CLIENT_CERT_PATH
 #endif
 
@@ -115,6 +119,10 @@
 
 #ifndef SP_PROT_TLS1_2_CLIENT
 #define SP_PROT_TLS1_2_CLIENT           0x00000800
+#endif
+
+#ifndef SP_PROT_TLS1_3_CLIENT
+#define SP_PROT_TLS1_3_CLIENT           0x00002000
 #endif
 
 #ifndef SCH_USE_STRONG_CRYPTO
@@ -173,7 +181,7 @@ static void InitSecBufferDesc(SecBufferDesc *desc, SecBuffer *BufArr,
 }
 
 static CURLcode
-set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct Curl_easy *data,
+set_ssl_version_min_max(DWORD *grbitEnabledProtocols, struct Curl_easy *data,
                         struct connectdata *conn)
 {
   long ssl_version = SSL_CONN_CONFIG(version);
@@ -183,23 +191,48 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct Curl_easy *data,
   switch(ssl_version_max) {
   case CURL_SSLVERSION_MAX_NONE:
   case CURL_SSLVERSION_MAX_DEFAULT:
-    ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+
+    /* Windows Server 2022 and newer (including Windows 11)
+    support TLS 1.3 built-in. Previous builds of Windows 10
+    had broken TLS 1.3 implementations that could be enabled
+    via registry.
+    */
+    if (curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
+        VERSION_GREATER_THAN_EQUAL))
+    {
+      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
+    }
+    else /* Windows 10 and older */
+      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+
     break;
   }
+
   for(; i <= (ssl_version_max >> 16); ++i) {
     switch(i) {
     case CURL_SSLVERSION_TLSv1_0:
-      schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;
+      (*grbitEnabledProtocols) |= SP_PROT_TLS1_0_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_1:
-      schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_1_CLIENT;
+      (*grbitEnabledProtocols) |= SP_PROT_TLS1_1_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_2:
-      schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_2_CLIENT;
+      (*grbitEnabledProtocols) |= SP_PROT_TLS1_2_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_3:
-      failf(data, "schannel: TLS 1.3 is not yet supported");
-      return CURLE_SSL_CONNECT_ERROR;
+
+      /* Windows Server 2022 and newer */
+      if (curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
+          VERSION_GREATER_THAN_EQUAL))
+      {
+        (*grbitEnabledProtocols) |= SP_PROT_TLS1_3_CLIENT;
+        break;
+      }
+      else /* Windows 10 and older */
+      {
+        failf(data, "schannel: TLS 1.3 is not supported on this OS version");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
     }
   }
   return CURLE_OK;
@@ -419,45 +452,48 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
                                    int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  SCHANNEL_CRED schannel_cred;
+
+#ifdef HAS_CLIENT_CERT_PATH
   PCCERT_CONTEXT client_certs[1] = { NULL };
+#endif
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
 
   /* setup Schannel API options */
-  memset(&schannel_cred, 0, sizeof(schannel_cred));
-  schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
+  DWORD flags = 0;
+  DWORD grbitEnabledProtocols = 0;
+
 
   if(conn->ssl_config.verifypeer) {
 #ifdef HAS_MANUAL_VERIFY_API
     if(BACKEND->use_manual_cred_validation)
-      schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION;
+      flags = SCH_CRED_MANUAL_CRED_VALIDATION;
     else
 #endif
-      schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION;
+      flags = SCH_CRED_AUTO_CRED_VALIDATION;
 
     if(SSL_SET_OPTION(no_revoke)) {
-      schannel_cred.dwFlags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
+      flags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
         SCH_CRED_IGNORE_REVOCATION_OFFLINE;
 
       DEBUGF(infof(data, "schannel: disabled server certificate revocation "
                    "checks"));
     }
     else if(SSL_SET_OPTION(revoke_best_effort)) {
-      schannel_cred.dwFlags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
+      flags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
         SCH_CRED_IGNORE_REVOCATION_OFFLINE | SCH_CRED_REVOCATION_CHECK_CHAIN;
 
       DEBUGF(infof(data, "schannel: ignore revocation offline errors"));
     }
     else {
-      schannel_cred.dwFlags |= SCH_CRED_REVOCATION_CHECK_CHAIN;
+      flags |= SCH_CRED_REVOCATION_CHECK_CHAIN;
 
       DEBUGF(infof(data,
                    "schannel: checking server certificate revocation"));
     }
   }
   else {
-    schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION |
+    flags = SCH_CRED_MANUAL_CRED_VALIDATION |
       SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
       SCH_CRED_IGNORE_REVOCATION_OFFLINE;
     DEBUGF(infof(data,
@@ -465,15 +501,15 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
   }
 
   if(!conn->ssl_config.verifyhost) {
-    schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
+    flags |= SCH_CRED_NO_SERVERNAME_CHECK;
     DEBUGF(infof(data, "schannel: verifyhost setting prevents Schannel from "
                  "comparing the supplied target name with the subject "
                  "names in server certificates."));
   }
 
   if(!SSL_SET_OPTION(auto_client_cert)) {
-    schannel_cred.dwFlags &= ~SCH_CRED_USE_DEFAULT_CREDS;
-    schannel_cred.dwFlags |= SCH_CRED_NO_DEFAULT_CREDS;
+    flags &= ~SCH_CRED_USE_DEFAULT_CREDS;
+    flags |= SCH_CRED_NO_DEFAULT_CREDS;
     infof(data, "schannel: disabled automatic use of client certificate");
   }
   else
@@ -487,7 +523,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
   case CURL_SSLVERSION_TLSv1_2:
   case CURL_SSLVERSION_TLSv1_3:
   {
-    result = set_ssl_version_min_max(&schannel_cred, data, conn);
+    result = set_ssl_version_min_max(&grbitEnabledProtocols, data, conn);
     if(result != CURLE_OK)
       return result;
     break;
@@ -499,15 +535,6 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
   default:
     failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;
-  }
-
-  if(SSL_CONN_CONFIG(cipher_list)) {
-    result = set_ssl_ciphers(&schannel_cred, SSL_CONN_CONFIG(cipher_list),
-                             BACKEND->algIds);
-    if(CURLE_OK != result) {
-      failf(data, "Unable to set ciphers to passed via SSL_CONN_CONFIG");
-      return result;
-    }
   }
 
 
@@ -644,9 +671,6 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
         CertCloseStore(cert_store, 0);
         return CURLE_SSL_CERTPROBLEM;
       }
-
-      schannel_cred.cCreds = 1;
-      schannel_cred.paCred = client_certs;
     }
     else {
       cert_store =
@@ -684,11 +708,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 
       curlx_unicodefree(cert_path);
 
-      if(client_certs[0]) {
-        schannel_cred.cCreds = 1;
-        schannel_cred.paCred = client_certs;
-      }
-      else {
+      if(!client_certs[0]) {
         /* CRYPT_E_NOT_FOUND / E_INVALIDARG */
         CertCloseStore(cert_store, 0);
         return CURLE_SSL_CERTPROBLEM;
@@ -706,27 +726,145 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
   /* allocate memory for the re-usable credential handle */
   BACKEND->cred = (struct Curl_schannel_cred *)
     calloc(1, sizeof(struct Curl_schannel_cred));
+
   if(!BACKEND->cred) {
     failf(data, "schannel: unable to allocate memory");
 
+#ifdef HAS_CLIENT_CERT_PATH
     if(client_certs[0])
       CertFreeCertificateContext(client_certs[0]);
+#endif
 
     return CURLE_OUT_OF_MEMORY;
   }
   BACKEND->cred->refcount = 1;
 
-  /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx
-   */
-  sspi_status =
-    s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR *)UNISP_NAME,
-                                       SECPKG_CRED_OUTBOUND, NULL,
-                                       &schannel_cred, NULL, NULL,
-                                       &BACKEND->cred->cred_handle,
-                                       &BACKEND->cred->time_stamp);
+  /* Windows 10, 1809 (a.k.a. Windows 10 build 17763) */
+  if(curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
+      VERSION_GREATER_THAN_EQUAL)) {
 
+    SCH_CREDENTIALS Credentials = { 0 };
+    TLS_PARAMETERS TlsParameters = { 0 };
+    CRYPTO_SETTINGS CryptoSettings[4] = { 0 };
+    UNICODE_STRING BlockedChainingModes[1] = { 0 };
+
+    /*
+     RTM Windows 2022 / Windows 11 does not support ChaCha20-Poly1305
+     or AES_CCM. So disable both those options explictly (TLS 1.3
+     includes those as 2 built-in Cipher-Suites).
+
+     Add conditional curlx_verify_windows_version() calls when
+     support has been added.
+    */
+
+    /*
+      Disallow ChaCha20-Poly1305 until full support is possible.
+    */
+    int CryptoSettingsIdx = 0;
+    CryptoSettings[CryptoSettingsIdx].eAlgorithmUsage = TlsParametersCngAlgUsageCipher;
+    CryptoSettings[CryptoSettingsIdx].strCngAlgId = (UNICODE_STRING){
+        sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM),
+        sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM),
+        BCRYPT_CHACHA20_POLY1305_ALGORITHM };
+    CryptoSettingsIdx++;
+
+    /*
+      Disallow AES_CCM algorithm, since there's no support for it yet.
+      and also disallows AES_CCM_8, which is undefined per QUIC spec.
+    */
+    BlockedChainingModes[0] = (UNICODE_STRING){
+        sizeof(BCRYPT_CHAIN_MODE_CCM),
+        sizeof(BCRYPT_CHAIN_MODE_CCM),
+        BCRYPT_CHAIN_MODE_CCM };
+
+    CryptoSettings[CryptoSettingsIdx].eAlgorithmUsage = TlsParametersCngAlgUsageCipher;
+    CryptoSettings[CryptoSettingsIdx].rgstrChainingModes = BlockedChainingModes;
+    CryptoSettings[CryptoSettingsIdx].cChainingModes = ARRAYSIZE(BlockedChainingModes);
+    CryptoSettings[CryptoSettingsIdx].strCngAlgId = (UNICODE_STRING){
+        sizeof(BCRYPT_AES_ALGORITHM),
+        sizeof(BCRYPT_AES_ALGORITHM),
+        BCRYPT_AES_ALGORITHM };
+    CryptoSettingsIdx++;
+
+
+    /*TODO: implement "set_ssl_ciphers" for SCH_CREDENTIALS 
+    this is in the inverse of the SCHANNEL_CRED behavior.
+
+    Namely, we're disabling ciphers rather than enabling them.
+
+    This will require a bit of thinking.
+    */
+
+    TlsParameters.pDisabledCrypto = CryptoSettings;
+
+    /* The number of blocked suites -- if we unblock them in the future
+    then this will need to be adjusted (likely at runtime to maintain
+    compatibility with Windows 11 & Windows 2022 RTM builds.
+    */
+    TlsParameters.cDisabledCrypto = 2;
+    Credentials.pTlsParameters = &TlsParameters;
+    Credentials.cTlsParameters = 1;
+
+    Credentials.dwVersion = SCH_CREDENTIALS_VERSION;
+    Credentials.dwFlags = flags | SCH_USE_STRONG_CRYPTO;
+    
+    Credentials.pTlsParameters->grbitDisabledProtocols = (DWORD)~grbitEnabledProtocols;
+
+#ifdef HAS_CLIENT_CERT_PATH
+    if(client_certs[0]) {
+      Credentials.cCreds = 1;
+      Credentials.paCred = client_certs;
+    }
+#endif
+
+    /* https://docs.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-acquirecredentialshandlew
+    */
+    sspi_status =
+        s_pSecFn->AcquireCredentialsHandleW(NULL, (TCHAR*)UNISP_NAME,
+            SECPKG_CRED_OUTBOUND, NULL,
+            &Credentials, NULL, NULL,
+            &BACKEND->cred->cred_handle,
+            &BACKEND->cred->time_stamp);
+  }
+  else {
+    /* Supported on Windows 2K and newer */
+    SCHANNEL_CRED schannel_cred = { 0 };
+
+    /* Pre-Windows 10 1809, use older  */
+    schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
+    schannel_cred.dwFlags = flags;
+    schannel_cred.grbitEnabledProtocols = grbitEnabledProtocols;
+
+    if (SSL_CONN_CONFIG(cipher_list)) {
+      result = set_ssl_ciphers(&schannel_cred, SSL_CONN_CONFIG(cipher_list),
+                               BACKEND->algIds);
+      if (CURLE_OK != result) {
+        failf(data, "Unable to set ciphers to passed via SSL_CONN_CONFIG");
+        return result;
+      }
+    }
+
+#ifdef HAS_CLIENT_CERT_PATH
+    if(client_certs[0]) {
+      schannel_cred.cCreds = 1;
+      schannel_cred.paCred = client_certs;
+    }
+#endif
+
+    /* https://docs.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-acquirecredentialshandlew
+     */
+    sspi_status =
+        s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
+            SECPKG_CRED_OUTBOUND, NULL,
+            &schannel_cred, NULL, NULL,
+            &BACKEND->cred->cred_handle,
+            &BACKEND->cred->time_stamp);
+  }
+
+#ifdef HAS_CLIENT_CERT_PATH
   if(client_certs[0])
     CertFreeCertificateContext(client_certs[0]);
+#endif
 
   if(sspi_status != SEC_E_OK) {
     char buffer[STRERROR_LEN];
@@ -1892,7 +2030,7 @@ schannel_recv(struct Curl_easy *data, int sockindex,
     InitSecBuffer(&inbuf[3], SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&inbuf_desc, inbuf, 4);
 
-    /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375348.aspx
+    /* https://docs.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-decryptmessage
      */
     sspi_status = s_pSecFn->DecryptMessage(&BACKEND->ctxt->ctxt_handle,
                                            &inbuf_desc, 0, NULL);
@@ -1976,7 +2114,7 @@ schannel_recv(struct Curl_easy *data, int sockindex,
           infof(data, "schannel: can't renegotiate, an error is pending");
           goto cleanup;
         }
-        if(BACKEND->encdata_offset) {
+        if(BACKEND->encdata_offset && inbuf[1].cbBuffer) {
           *err = CURLE_RECV_ERROR;
           infof(data, "schannel: can't renegotiate, "
                 "encrypted data available");

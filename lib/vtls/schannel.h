@@ -26,6 +26,16 @@
 
 #ifdef USE_SCHANNEL
 
+#define SCHANNEL_USE_BLACKLISTS 1
+
+#ifndef _UNICODE_STRING
+typedef struct _UNICODE_STRING {
+    USHORT Length;
+    USHORT MaximumLength;
+    PWSTR Buffer;
+} UNICODE_STRING, * PUNICODE_STRING;
+#endif
+
 #include <schnlsp.h>
 #include <schannel.h>
 #include "curl_sspi.h"
@@ -61,14 +71,77 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
 
 #ifdef __MINGW32__
 #include <_mingw.h>
-#ifdef __MINGW64_VERSION_MAJOR
+#if defined(__MINGW64_VERSION_MAJOR) && !defined(DISABLE_SCHANNEL_MANUAL_VERIFY)
 #define HAS_MANUAL_VERIFY_API
 #endif
 #else
 #include <wincrypt.h>
-#ifdef CERT_CHAIN_REVOCATION_CHECK_CHAIN
+#if defined(CERT_CHAIN_REVOCATION_CHECK_CHAIN) && !defined(DISABLE_SCHANNEL_MANUAL_VERIFY)
 #define HAS_MANUAL_VERIFY_API
 #endif
+#endif
+
+#ifndef SCH_CREDENTIALS_VERSION
+
+#define SCH_CREDENTIALS_VERSION  0x00000005
+
+typedef enum _eTlsAlgorithmUsage
+{
+    TlsParametersCngAlgUsageKeyExchange,          // Key exchange algorithm. RSA, ECHDE, DHE, etc.
+    TlsParametersCngAlgUsageSignature,            // Signature algorithm. RSA, DSA, ECDSA, etc.
+    TlsParametersCngAlgUsageCipher,               // Encryption algorithm. AES, DES, RC4, etc.
+    TlsParametersCngAlgUsageDigest,               // Digest of cipher suite. SHA1, SHA256, SHA384, etc.
+    TlsParametersCngAlgUsageCertSig               // Signature and/or hash used to sign certificate. RSA, DSA, ECDSA, SHA1, SHA256, etc.
+} eTlsAlgorithmUsage;
+
+//
+// SCH_CREDENTIALS structures
+//
+typedef struct _CRYPTO_SETTINGS
+{
+    eTlsAlgorithmUsage  eAlgorithmUsage;         // How this algorithm is being used.
+    UNICODE_STRING      strCngAlgId;             // CNG algorithm identifier.
+    DWORD               cChainingModes;          // Set to 0 if CNG algorithm does not have a chaining mode.
+    PUNICODE_STRING     rgstrChainingModes;      // Set to NULL if CNG algorithm does not have a chaining mode.
+    DWORD               dwMinBitLength;          // Blacklist key sizes less than this. Set to 0 if not defined or CNG algorithm implies bit length.
+    DWORD               dwMaxBitLength;          // Blacklist key sizes greater than this. Set to 0 if not defined or CNG algorithm implies bit length.
+} CRYPTO_SETTINGS, * PCRYPTO_SETTINGS;
+
+typedef struct _TLS_PARAMETERS
+{
+    DWORD               cAlpnIds;                // Valid for server applications only. Must be zero otherwise. Number of ALPN IDs in rgstrAlpnIds; set to 0 if applies to all.
+    PUNICODE_STRING     rgstrAlpnIds;            // Valid for server applications only. Must be NULL otherwise. Array of ALPN IDs that the following settings apply to; set to NULL if applies to all.
+    DWORD               grbitDisabledProtocols;  // List protocols you DO NOT want negotiated.
+    DWORD               cDisabledCrypto;         // Number of CRYPTO_SETTINGS structures; set to 0 if there are none.
+    PCRYPTO_SETTINGS    pDisabledCrypto;         // Array of CRYPTO_SETTINGS structures; set to NULL if there are none;
+    DWORD               dwFlags;                 // Optional flags to pass; set to 0 if there are none.
+} TLS_PARAMETERS, * PTLS_PARAMETERS;
+
+#define TLS_PARAMS_OPTIONAL 0x00000001           // Valid for server applications only. Must be zero otherwise.
+// TLS_PARAMETERS that will only be honored if they do not cause this server to terminate the handshake.
+
+typedef struct _SCH_CREDENTIALS
+{
+    DWORD               dwVersion;               // Always SCH_CREDENTIALS_VERSION.
+    DWORD               dwCredFormat;
+    DWORD               cCreds;
+    PCCERT_CONTEXT* paCred;
+    HCERTSTORE          hRootStore;
+
+    DWORD               cMappers;
+    struct _HMAPPER** aphMappers;
+
+    DWORD               dwSessionLifespan;
+    DWORD               dwFlags;
+    DWORD               cTlsParameters;
+    PTLS_PARAMETERS     pTlsParameters;
+} SCH_CREDENTIALS, * PSCH_CREDENTIALS;
+
+#define SCH_CRED_MAX_SUPPORTED_PARAMETERS 16
+#define SCH_CRED_MAX_SUPPORTED_ALPN_IDS 16
+#define SCH_CRED_MAX_SUPPORTED_CRYPTO_SETTINGS 16
+#define SCH_CRED_MAX_SUPPORTED_CHAINING_MODES 16
+
 #endif
 
 #define NUMOF_CIPHERS 45 /* There are 45 listed in the MS headers */
