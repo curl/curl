@@ -47,7 +47,8 @@ typedef enum {
   CURLUE_NO_HOST,             /* 14 */
   CURLUE_NO_PORT,             /* 15 */
   CURLUE_NO_QUERY,            /* 16 */
-  CURLUE_NO_FRAGMENT          /* 17 */
+  CURLUE_NO_FRAGMENT,         /* 17 */
+  CURLUE_LAST
 } CURLUcode;
 
 typedef enum {
@@ -118,6 +119,12 @@ CURL_EXTERN CURLUcode curl_url_get(CURLU *handle, CURLUPart what,
 CURL_EXTERN CURLUcode curl_url_set(CURLU *handle, CURLUPart what,
                                    const char *part, unsigned int flags);
 
+/*
+ * curl_url_strerror() turns a CURLUcode value into the equivalent human
+ * readable error string.  This is useful for printing meaningful error
+ * messages.
+ */
+CURL_EXTERN const char *curl_url_strerror(CURLUcode);
 
 #ifdef __cplusplus
 } /* end of extern "C" */

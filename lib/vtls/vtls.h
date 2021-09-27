@@ -261,7 +261,8 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
                                const bool isProxy,
                                void *ssl_sessionid,
                                size_t idsize,
-                               int sockindex);
+                               int sockindex,
+                               bool *added);
 /* Kill a single session ID entry in the cache
  * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
  * This will call engine-specific curlssl_session_free function, which must

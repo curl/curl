@@ -272,7 +272,7 @@ static CURLcode build_message(struct Curl_easy *data, struct bufref *msg)
   char *base64;
   size_t base64len;
 
-  if(!Curl_bufref_ptr(msg))             /* Empty mesage. */
+  if(!Curl_bufref_ptr(msg))             /* Empty message. */
     Curl_bufref_set(msg, "", 0, NULL);
   else if(!Curl_bufref_len(msg))        /* Explicit empty response. */
     Curl_bufref_set(msg, "=", 1, NULL);

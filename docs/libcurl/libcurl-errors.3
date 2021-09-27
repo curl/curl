@@ -325,6 +325,8 @@ Not enough memory was available.
 The requested sharing could not be done because the library you use don't have
 that particular feature enabled. (Added in 7.23.0)
 .SH "CURLUcode"
+The URL interface will return a CURLUcode to indicate when an error has
+occurred.  Also consider \fIcurl_url_strerror(3)\fP.
 .IP "CURLUE_BAD_HANDLE (1)"
 An invalid CURLU pointer was passed as argument.
 .IP "CURLUE_BAD_PARTPOINTER (2)"
@@ -361,5 +363,6 @@ There is no query part in the URL.
 There is no fragment part in the URL.
 .SH "SEE ALSO"
 .BR curl_easy_strerror "(3), " curl_multi_strerror "(3), "
-.BR curl_share_strerror "(3), " CURLOPT_ERRORBUFFER "(3), "
-.BR CURLOPT_VERBOSE "(3), " CURLOPT_DEBUGFUNCTION "(3) "
+.BR curl_share_strerror "(3), " curl_url_strerror "(3), "
+.BR CURLOPT_ERRORBUFFER "(3), " CURLOPT_VERBOSE "(3), "
+.BR CURLOPT_DEBUGFUNCTION "(3)"

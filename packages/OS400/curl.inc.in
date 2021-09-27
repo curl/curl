@@ -2913,6 +2913,10 @@
      d  part                           *   value options(*string)
      d  flags                        10u 0 value
       *
+     d curl_url_strerror...
+     d                 pr              *   extproc('curl_url_strerror')         const char *
+     d  code                               value like(CURLUcode)
+      *
      d curl_easy_option_by_name...
      d                 pr              *   extproc('curl_easy_option_by_name')  curl_easyoption *
      d  name                           *   value option(*string)

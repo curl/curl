@@ -69,7 +69,7 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 
   data = &payload_text[upload_ctx->bytes_read];
 
-  if(data) {
+  if(*data) {
     size_t len = strlen(data);
     if(room < len)
       len = room;

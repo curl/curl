@@ -36,7 +36,7 @@ SUPPORTFILES = first.c test.h
 
 # These are all libcurl test programs
 noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
- chkdecimalpoint                                                         \
+ chkdecimalpoint libprereq                                               \
  lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 lib508 lib509   \
  lib510 lib511 lib512 lib513 lib514 lib515 lib516 lib517 lib518 lib519   \
  lib520 lib521 lib523 lib524 lib525 lib526 lib527 lib529        lib532   \
@@ -80,6 +80,10 @@ libntlmconnect_CPPFLAGS = $(AM_CPPFLAGS)
 
 libauthretry_SOURCES = libauthretry.c $(SUPPORTFILES)
 libauthretry_CPPFLAGS = $(AM_CPPFLAGS)
+
+libprereq_SOURCES = libprereq.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+libprereq_LDADD = $(TESTUTIL_LIBS)
+libprereq_CPPFLAGS = $(AM_CPPFLAGS)
 
 lib500_SOURCES = lib500.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE) $(MULTIBYTE)
 lib500_LDADD = $(TESTUTIL_LIBS)
@@ -494,7 +498,7 @@ lib1520_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1520
 nodist_lib1521_SOURCES = lib1521.c $(SUPPORTFILES)
 lib1521_CPPFLAGS = $(AM_CPPFLAGS) -I$(srcdir)
 
-lib1522_SOURCES = lib1522.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE) 
+lib1522_SOURCES = lib1522.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE)
 lib1522_LDADD = $(TESTUTIL_LIBS)
 lib1522_CPPFLAGS = $(AM_CPPFLAGS)
 

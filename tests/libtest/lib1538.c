@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,14 +29,17 @@ int test(char *URL)
   CURLcode easyret;
   CURLMcode multiret;
   CURLSHcode shareret;
+  CURLUcode urlret;
   (void)URL;
 
   curl_easy_strerror((CURLcode)INT_MAX);
   curl_multi_strerror((CURLMcode)INT_MAX);
   curl_share_strerror((CURLSHcode)INT_MAX);
+  curl_url_strerror((CURLUcode)INT_MAX);
   curl_easy_strerror((CURLcode)-INT_MAX);
   curl_multi_strerror((CURLMcode)-INT_MAX);
   curl_share_strerror((CURLSHcode)-INT_MAX);
+  curl_url_strerror((CURLUcode)-INT_MAX);
   for(easyret = CURLE_OK; easyret <= CURL_LAST; easyret++) {
     printf("e%d: %s\n", (int)easyret, curl_easy_strerror(easyret));
   }
@@ -46,6 +49,9 @@ int test(char *URL)
   }
   for(shareret = CURLSHE_OK; shareret <= CURLSHE_LAST; shareret++) {
     printf("s%d: %s\n", (int)shareret, curl_share_strerror(shareret));
+  }
+  for(urlret = CURLUE_OK; urlret <= CURLUE_LAST; urlret++) {
+    printf("u%d: %s\n", (int)urlret, curl_url_strerror(urlret));
   }
 
   return (int)res;

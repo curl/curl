@@ -168,6 +168,7 @@ my $proxy_address;
 my %custom_skip_reasons;
 
 my $SSHSRVMD5 = "[uninitialized]"; # MD5 of ssh server public key
+my $SSHSRVSHA256 = "[uninitialized]"; # SHA256 of ssh server public key
 my $VERSION="";          # curl's reported version number
 
 my $srcdir = $ENV{'srcdir'} || '.';
@@ -2287,6 +2288,17 @@ sub runsshserver {
         die $msg;
     }
 
+    my $hstpubsha256f = "curl_host_rsa_key.pub_sha256";
+    if(!open(PUBSHA256FILE, "<", $hstpubsha256f) ||
+       (read(PUBSHA256FILE, $SSHSRVSHA256, 48) == 0) ||
+       !close(PUBSHA256FILE))
+    {
+        my $msg = "Fatal: $srvrname pubkey sha256 missing : \"$hstpubsha256f\" : $!";
+        logmsg "$msg\n";
+        stopservers($verbose);
+        die $msg;
+    }
+
     logmsg "RUN: $srvrname on PID $pid2 port $wport\n" if($verbose);
 
     return ($pid2, $sshpid, $wport);
@@ -3374,6 +3386,7 @@ sub subVariables {
     $$thing =~ s/${prefix}USER/$USER/g;
 
     $$thing =~ s/${prefix}SSHSRVMD5/$SSHSRVMD5/g;
+    $$thing =~ s/${prefix}SSHSRVSHA256/$SSHSRVSHA256/g;
 
     # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
     # used for time-out tests and that would work on most hosts as these

@@ -303,6 +303,7 @@ static int quic_init_ssl(struct quicsocket *qs)
 
   SSL_set_app_data(qs->ssl, qs);
   SSL_set_connect_state(qs->ssl);
+  SSL_set_quic_use_legacy_codepoint(qs->ssl, 1);
 
   alpn = (const uint8_t *)H3_ALPN_H3_29;
   alpnlen = sizeof(H3_ALPN_H3_29) - 1;
@@ -439,12 +440,10 @@ static int quic_init_ssl(struct quicsocket *qs)
   gnutls_alert_set_read_function(qs->ssl, alert_read_func);
 
   rc = gnutls_session_ext_register(qs->ssl, "QUIC Transport Parameters",
-                                   0xffa5, GNUTLS_EXT_TLS,
-                                   tp_recv_func, tp_send_func,
-                                   NULL, NULL, NULL,
-                                   GNUTLS_EXT_FLAG_TLS |
-                                   GNUTLS_EXT_FLAG_CLIENT_HELLO |
-                                   GNUTLS_EXT_FLAG_EE);
+         NGTCP2_TLSEXT_QUIC_TRANSPORT_PARAMETERS_DRAFT, GNUTLS_EXT_TLS,
+         tp_recv_func, tp_send_func, NULL, NULL, NULL,
+         GNUTLS_EXT_FLAG_TLS | GNUTLS_EXT_FLAG_CLIENT_HELLO |
+         GNUTLS_EXT_FLAG_EE);
   if(rc < 0) {
     H3BUGF(fprintf(stderr, "gnutls_session_ext_register failed: %s\n",
                    gnutls_strerror(rc)));

@@ -608,6 +608,7 @@ static CURLcode bearssl_connect_step3(struct Curl_easy *data,
 
   if(SSL_SET_OPTION(primary.sessionid)) {
     bool incache;
+    bool added = FALSE;
     void *oldsession;
     br_ssl_session_parameters *session;
 
@@ -623,10 +624,11 @@ static CURLcode bearssl_connect_step3(struct Curl_easy *data,
       Curl_ssl_delsessionid(data, oldsession);
     ret = Curl_ssl_addsessionid(data, conn,
                                 SSL_IS_PROXY() ? TRUE : FALSE,
-                                session, 0, sockindex);
+                                session, 0, sockindex, &added);
     Curl_ssl_sessionid_unlock(data);
-    if(ret) {
+    if(!added)
       free(session);
+    if(ret) {
       return CURLE_OUT_OF_MEMORY;
     }
   }

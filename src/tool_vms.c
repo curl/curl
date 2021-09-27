@@ -128,7 +128,7 @@ struct decc_feat_t {
 };
 
 /* Array of DECC$* feature names and their desired values. */
-static struct decc_feat_t decc_feat_array[] = {
+static const struct decc_feat_t decc_feat_array[] = {
   /* Preserve command-line case with SET PROCESS/PARSE_STYLE=EXTENDED */
   { "DECC$ARGV_PARSE_STYLE", 1 },
   /* Preserve case for file names on ODS5 disks. */

@@ -148,6 +148,7 @@ Available substitute variables include:
 - `%SRCDIR` - Full path to the source dir
 - `%SSHPORT` - Port number of the SCP/SFTP server
 - `%SSHSRVMD5` - MD5 of SSH server's public key
+- `%SSHSRVSHA256` - SHA256 of SSH server's public key
 - `%SSH_PWD` - Current directory friendly for the SSH server
 - `%TESTNUMBER` - Number of the test case
 - `%TFTP6PORT` - IPv6 port number of the TFTP server

@@ -48,7 +48,7 @@
   The cookie file format is text based and stores one cookie per line. Lines
   that start with `#` are treated as comments.
 
-  Each line that each specifies a single cookie consists of seven text fields
+  Each line that specifies a single cookie consists of seven text fields
   separated with TAB characters. A valid line must end with a newline
   character.
 

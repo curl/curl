@@ -229,7 +229,7 @@ test2064 test2065 test2066 test2067 test2068 test2069 \
 test2064 test2065 test2066 test2067 test2068 test2069 test2070 \
          test2071 test2072 test2073 test2074 test2075 test2076 test2077 \
 test2078 \
-test2080 test2081 \
+test2080 test2081 test2082 test2083 test2084 test2085 test2086 \
 \
 test2100 \
 \
@@ -237,4 +237,4 @@ test2200 test2201 test2202 test2203 test2204 test2205 \
 \
 test3000 test3001 test3002 test3003 test3004 test3005 test3006 test3007 \
 test3008 test3009 test3010 test3011 test3012 test3013 test3014 test3015 \
-test3016 test3017 test3018 test3019 test3020
+test3016 test3017 test3018 test3019 test3020 test3021 test3022

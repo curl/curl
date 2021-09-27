@@ -1,6 +1,6 @@
-curl and libcurl 7.79.1
+curl and libcurl 7.80.0
 
- Public curl releases:         203
+ Public curl releases:         204
  Command line options:         242
  curl_easy_setopt() options:   290
  Public functions in libcurl:  85
@@ -8,20 +8,21 @@ curl and libcurl 7.79.1
 
 This release includes the following changes:
 
- o
+ o libssh2: add SHA256 fingerprint support [4]
 
 This release includes the following bugfixes:
 
- o Curl_http2_setup: don't change connection data on repeat invokes [10]
- o curl_multi_fdset: make FD_SET() not operate on sockets out of range [4]
- o dist: provide lib/.checksrc in the tarball [6]
- o FAQ: add GOPHERS + curl works on data, not files
- o hsts: CURLSTS_FAIL from hsts read callback should fail transfer [8]
- o hsts: handle unlimited expiry [3]
- o http: fix the broken >3 digit response code detection [1]
- o strerror: use sys_errlist instead of strerror on Windows [5]
- o test1184: disable [9]
- o tests/sshserver.pl: make it work with openssh-8.7p1 [2]
+ o ci: update Lift config to match requirements of curl build [1]
+ o cleanup: constify unmodified static structs [2]
+ o cmake: with OpenSSL, define OPENSSL_SUPPRESS_DEPRECATED [14]
+ o curl-openssl: pass argument to sed single-quoted [15]
+ o examples/imap-append: fix end-of-data check [7]
+ o libcurl.rc: switch out the copyright symbol for plain ASCII [5]
+ o libssh2: Get the version at runtime if possible [12]
+ o llist: remove redundant code, branch will not be executed [10]
+ o misc: fix typos in docs and comments [3]
+ o ngtcp2: fix QUIC transport parameter version [6]
+ o vtls: Fix a memory leak if an SSL session cannot be added to the cache [8]
 
 This release includes the following known bugs:
 
@@ -30,19 +31,24 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  0xee on github, Daniel Stenberg, Evangelos Foutras, Glenn de boer,
-  Jonathan Cardoso Machado, Kamil Dudka, Marcel Raad, Ray Satiro,
-  RiderALT on github, tawmoto on github, Viktor Szakats,
-  (11 contributors)
+  a1346054 on github, Alexander Chuykov, Daniel Stenberg, h1zzz on github,
+  Jakub Zakrzewski, Joel Depooter, Jun-ya Kato, Mats Lindestam,
+  Michael Kaufmann, Momoka Yamamoto, Randall S. Becker, Ray Satiro,
+  Rikard Falkeborn, Thomas M. DuBuisson, tlahn on github, Viktor Szakats,
+  Vitaly Varyvdin,
+  (17 contributors)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.se/bug/?i=7738
- [2] = https://curl.se/bug/?i=7724
- [3] = https://curl.se/bug/?i=7720
- [4] = https://curl.se/bug/?i=7718
- [5] = https://curl.se/bug/?i=7735
- [6] = https://curl.se/bug/?i=7733
- [8] = https://curl.se/bug/?i=7726
- [9] = https://curl.se/bug/?i=7725
- [10] = https://curl.se/bug/?i=7730
+ [1] = https://curl.se/bug/?i=7761
+ [2] = https://curl.se/bug/?i=7759
+ [3] = https://curl.se/bug/?i=7747
+ [4] = https://curl.se/bug/?i=7646
+ [5] = https://curl.se/bug/?i=7765
+ [6] = https://curl.se/bug/?i=7771
+ [7] = https://curl.se/bug/?i=7774
+ [8] = https://curl.se/bug/?i=7683
+ [10] = https://curl.se/bug/?i=7770
+ [12] = https://curl.se/bug/?i=7768
+ [14] = https://curl.se/bug/?i=7767
+ [15] = https://curl.se/bug/?i=7758

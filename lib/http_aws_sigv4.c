@@ -321,7 +321,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   /*
    * Google allow to use rsa key instead of HMAC, so this code might change
-   * In the furure, but for now we support only HMAC version
+   * In the future, but for now we support only HMAC version
    */
   str_to_sign = curl_maprintf("%s4-HMAC-SHA256\n" /* Algorithm */
                               "%s\n" /* RequestDateTime */

@@ -29,6 +29,8 @@
 # test 1801 causes problems on Mac OS X and github
 # https://github.com/curl/curl/issues/380
 1801
+# test 2086 causes issues on Windows only
+2086
 #
 #
 # Tests that are disabled here for Hyper are SUPPOSED to work but

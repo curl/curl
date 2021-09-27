@@ -749,7 +749,7 @@ wolfssl_connect_step3(struct Curl_easy *data, struct connectdata *conn,
 
       if(!incache) {
         result = Curl_ssl_addsessionid(data, conn, isproxy, our_ssl_sessionid,
-                                       0, sockindex);
+                                       0, sockindex, NULL);
         if(result) {
           Curl_ssl_sessionid_unlock(data);
           failf(data, "failed to store ssl session");
