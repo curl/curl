@@ -1408,6 +1408,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_SSH_HOST_PUBLIC_KEY_MD5,
                         config->hostpubmd5);
 
+          /* new in libcurl 7.80.0: SSH host key sha256 checking allows us
+             to fail if we are not talking to who we think we should */
+          my_setopt_str(curl, CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256,
+              config->hostpubsha256);
+
           /* new in libcurl 7.56.0 */
           if(config->ssh_compression)
             my_setopt(curl, CURLOPT_SSH_COMPRESSION, 1L);

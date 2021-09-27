@@ -152,6 +152,25 @@ s3: Invalid share handle
 s4: Out of memory
 s5: Feature not enabled in this library
 s6: CURLSHcode unknown
+u0: No error
+u1: An invalid CURLU pointer was passed as argument
+u2: An invalid 'part' argument was passed as argument
+u3: A malformed input was passed to a URL API function
+u4: The port number was not a decimal number between 0 and 65535
+u5: This libcurl build doesn't support the given URL scheme
+u6: URL decode error, most likely because of rubbish in the input
+u7: A memory function failed
+u8: Credentials was passed in the URL when prohibited
+u9: An unknown part ID was passed to a URL API function
+u10: There is no scheme part in the URL
+u11: There is no user part in the URL
+u12: There is no password part in the URL
+u13: There is no options part in the URL
+u14: There is no host part in the URL
+u15: There is no port part in the URL
+u16: There is no query part in the URL
+u17: There is no fragment part in the URL
+u18: CURLUcode unknown
 </stdout>
 </verify>
 

@@ -144,6 +144,10 @@ Suppress proxy CONNECT response headers from user callbacks. See \fICURLOPT_SUPP
 Callback to be called before a new resolve request is started. See \fICURLOPT_RESOLVER_START_FUNCTION(3)\fP
 .IP CURLOPT_RESOLVER_START_DATA
 Data pointer to pass to resolver start callback. See \fICURLOPT_RESOLVER_START_DATA(3)\fP
+.IP CURLOPT_PREREQFUNCTION
+Callback to be called after a connection is established but before a request is made on that connection. See \fICURLOPT_PREREQFUNCTION(3)\fP
+.IP CURLOPT_PREREQDATA
+Data pointer to pass to the CURLOPT_PREREQFUNCTION callback. See \fICURLOPT_PREREQDATA(3)\fP
 .SH ERROR OPTIONS
 .IP CURLOPT_ERRORBUFFER
 Error message buffer. See \fICURLOPT_ERRORBUFFER(3)\fP
@@ -642,6 +646,8 @@ SSH authentication types. See \fICURLOPT_SSH_AUTH_TYPES(3)\fP
 Enable SSH compression. See \fICURLOPT_SSH_COMPRESSION(3)\fP
 .IP CURLOPT_SSH_HOST_PUBLIC_KEY_MD5
 MD5 of host's public key. See \fICURLOPT_SSH_HOST_PUBLIC_KEY_MD5(3)\fP
+.IP CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256
+SHA256 of host's public key. See \fICURLOPT_SSH_HOST_PUBLIC_KEY_SHA256(3)\fP
 .IP CURLOPT_SSH_PUBLIC_KEYFILE
 File name of public key. See \fICURLOPT_SSH_PUBLIC_KEYFILE(3)\fP
 .IP CURLOPT_SSH_PRIVATE_KEYFILE

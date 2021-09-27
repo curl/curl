@@ -374,7 +374,7 @@ static void krb5_end(void *app_data)
     }
 }
 
-static struct Curl_sec_client_mech Curl_krb5_client_mech = {
+static const struct Curl_sec_client_mech Curl_krb5_client_mech = {
   "GSSAPI",
   sizeof(gss_ctx_id_t),
   krb5_init,

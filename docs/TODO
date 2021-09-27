@@ -138,7 +138,6 @@
  17. SSH protocols
  17.1 Multiplexing
  17.2 Handle growing SFTP files
- 17.3 Support better than MD5 hostkey hash
  17.4 Support CURLOPT_PREQUOTE
  17.5 SSH over HTTPS proxy with more backends
 
@@ -174,6 +173,7 @@
  19.2 Enable PIE and RELRO by default
  19.3 Don't use GNU libtool on OpenBSD
  19.4 Package curl for Windows in a signed installer
+ 19.5 make configure use --cache-file more and better
 
  20. Test suite
  20.1 SSL tunnel
@@ -930,15 +930,6 @@
 
  https://github.com/curl/curl/issues/4344
 
-17.3 Support better than MD5 hostkey hash
-
- libcurl offers the CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 option for verifying the
- server's key. MD5 is generally being deprecated so we should implement
- support for stronger hashing algorithms. libssh2 itself is what provides this
- underlying functionality and it supports at least SHA-1 as an alternative.
- SHA-1 is also being deprecated these days so we should consider working with
- libssh2 to instead offer support for SHA-256 or similar.
-
 17.4 Support CURLOPT_PREQUOTE
 
  The two other QUOTE options are supported for SFTP, but this was left out for
@@ -1228,6 +1219,13 @@
 19.4 Package curl for Windows in a signed installer
 
  See https://github.com/curl/curl/issues/5424
+
+19.5 make configure use --cache-file more and better
+
+ The configure script can be improved to cache more values so that repeated
+ invokes run much faster.
+
+ See https://github.com/curl/curl/issues/7753
 
 20. Test suite
 

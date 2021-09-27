@@ -64,7 +64,7 @@ Build curl
      % cd ..
      % git clone https://github.com/curl/curl
      % cd curl
-     % ./buildconf
+     % autoreconf -fi
      % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
 
@@ -104,7 +104,7 @@ Build curl
      % cd ..
      % git clone https://github.com/curl/curl
      % cd curl
-     % ./buildconf
+     % autoreconf -fi
      % ./configure --without-openssl --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
 
@@ -125,7 +125,7 @@ Build curl:
      % cd ..
      % git clone https://github.com/curl/curl
      % cd curl
-     % ./buildconf
+     % autoreconf -fi
      % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-openssl=$PWD/../quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
      % make
 

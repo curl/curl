@@ -1438,6 +1438,7 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
   /* save the current session data for possible re-use */
   if(SSL_SET_OPTION(primary.sessionid)) {
     bool incache;
+    bool added = FALSE;
     struct Curl_schannel_cred *old_cred = NULL;
 
     Curl_ssl_sessionid_lock(data);
@@ -1455,13 +1456,13 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
     if(!incache) {
       result = Curl_ssl_addsessionid(data, conn, isproxy, BACKEND->cred,
                                      sizeof(struct Curl_schannel_cred),
-                                     sockindex);
+                                     sockindex, &added);
       if(result) {
         Curl_ssl_sessionid_unlock(data);
         failf(data, "schannel: failed to store credential handle");
         return result;
       }
-      else {
+      else if(added) {
         /* this cred session is now also referenced by sessionid cache */
         BACKEND->cred->refcount++;
         DEBUGF(infof(data,
@@ -1972,12 +1973,12 @@ schannel_recv(struct Curl_easy *data, int sockindex,
       if(sspi_status == SEC_I_RENEGOTIATE) {
         infof(data, "schannel: remote party requests renegotiation");
         if(*err && *err != CURLE_AGAIN) {
-          infof(data, "schannel: can't renogotiate, an error is pending");
+          infof(data, "schannel: can't renegotiate, an error is pending");
           goto cleanup;
         }
         if(BACKEND->encdata_offset) {
           *err = CURLE_RECV_ERROR;
-          infof(data, "schannel: can't renogotiate, "
+          infof(data, "schannel: can't renegotiate, "
                 "encrypted data available");
           goto cleanup;
         }

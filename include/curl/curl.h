@@ -470,6 +470,20 @@ typedef int (*curl_debug_callback)
         size_t size,       /* size of the data pointed to */
         void *userptr);    /* whatever the user please */
 
+/* This is the CURLOPT_PREREQFUNCTION callback prototype. */
+typedef int (*curl_prereq_callback)(void *clientp,
+                                    char *conn_primary_ip,
+                                    char *conn_local_ip,
+                                    int conn_primary_port,
+                                    int conn_local_port);
+
+/* Return code for when the pre-request callback has terminated without
+   any errors */
+#define CURL_PREREQFUNC_OK 0
+/* Return code for when the pre-request callback wants to abort the
+   request */
+#define CURL_PREREQFUNC_ABORT 1
+
 /* All possible error codes from all sorts of curl functions. Future versions
    may return other values, stay prepared.
 
@@ -2101,6 +2115,16 @@ typedef enum {
   /* The CA certificates as "blob" used to validate the proxy certificate
      this option is used only if PROXY_SSL_VERIFYPEER is true */
   CURLOPT(CURLOPT_PROXY_CAINFO_BLOB, CURLOPTTYPE_BLOB, 310),
+
+  /* used by scp/sftp to verify the host's public key */
+  CURLOPT(CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256, CURLOPTTYPE_STRINGPOINT, 311),
+
+  /* Function that will be called immediately before the initial request
+     is made on a connection (after any protocol negotiation step).  */
+  CURLOPT(CURLOPT_PREREQFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 312),
+
+  /* Data passed to the CURLOPT_PREREQFUNCTION callback */
+  CURLOPT(CURLOPT_PREREQDATA, CURLOPTTYPE_CBPOINT, 313),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

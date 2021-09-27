@@ -254,6 +254,8 @@ man_MANS =                                      \
   CURLOPT_POSTQUOTE.3                           \
   CURLOPT_POSTREDIR.3                           \
   CURLOPT_PREQUOTE.3                            \
+  CURLOPT_PREREQDATA.3                          \
+  CURLOPT_PREREQFUNCTION.3                      \
   CURLOPT_PRE_PROXY.3                           \
   CURLOPT_PRIVATE.3                             \
   CURLOPT_PROGRESSDATA.3                        \
@@ -326,6 +328,7 @@ man_MANS =                                      \
   CURLOPT_SSH_AUTH_TYPES.3                      \
   CURLOPT_SSH_COMPRESSION.3                     \
   CURLOPT_SSH_HOST_PUBLIC_KEY_MD5.3             \
+  CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256.3          \
   CURLOPT_SSH_KEYDATA.3                         \
   CURLOPT_SSH_KEYFUNCTION.3                     \
   CURLOPT_SSH_KNOWNHOSTS.3                      \

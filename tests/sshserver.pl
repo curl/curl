@@ -30,6 +30,8 @@ use Cwd;
 use Cwd 'abs_path';
 use Digest::MD5;
 use Digest::MD5 'md5_hex';
+use Digest::SHA;
+use Digest::SHA 'sha256_base64';
 use MIME::Base64;
 
 #***************************************************************************
@@ -52,6 +54,7 @@ use sshhelp qw(
     $hstprvkeyf
     $hstpubkeyf
     $hstpubmd5f
+    $hstpubsha256f
     $cliprvkeyf
     $clipubkeyf
     display_sshdconfig
@@ -362,10 +365,12 @@ if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
 if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
    (! -e $hstpubkeyf) || (! -s $hstpubkeyf) ||
    (! -e $hstpubmd5f) || (! -s $hstpubmd5f) ||
+   (! -e $hstpubsha256f) || (! -s $hstpubsha256f) ||
    (! -e $cliprvkeyf) || (! -s $cliprvkeyf) ||
    (! -e $clipubkeyf) || (! -s $clipubkeyf)) {
     # Make sure all files are gone so ssh-keygen doesn't complain
-    unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f, $cliprvkeyf, $clipubkeyf);
+    unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f, $hstpubsha256f,
+           $cliprvkeyf, $clipubkeyf);
     logmsg 'generating host keys...' if($verbose);
     if(system "\"$sshkeygen\" -q -t rsa -f $hstprvkeyf -C 'curl test server' -N ''") {
         logmsg 'Could not generate host key';
@@ -379,7 +384,7 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
     # Make sure that permissions are restricted so openssh doesn't complain
     system "chmod 600 $hstprvkeyf";
     system "chmod 600 $cliprvkeyf";
-    # Save md5 hash of public host key
+    # Save md5 and sha256 hashes of public host key
     open(RSAKEYFILE, "<$hstpubkeyf");
     my @rsahostkey = do { local $/ = ' '; <RSAKEYFILE> };
     close(RSAKEYFILE);
@@ -392,6 +397,13 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
     close(PUBMD5FILE);
     if((! -e $hstpubmd5f) || (! -s $hstpubmd5f)) {
         logmsg 'Failed writing md5 hash of RSA host key';
+        exit 1;
+    }
+    open(PUBSHA256FILE, ">$hstpubsha256f");
+    print PUBSHA256FILE sha256_base64(decode_base64($rsahostkey[1]));
+    close(PUBSHA256FILE);
+    if((! -e $hstpubsha256f) || (! -s $hstpubsha256f)) {
+        logmsg 'Failed writing sha256 hash of RSA host key';
         exit 1;
     }
 }
@@ -1141,7 +1153,7 @@ elsif($verbose && ($rc >> 8)) {
 #***************************************************************************
 # Clean up once the server has stopped
 #
-unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f,
+unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f, $hstpubsha256f,
        $cliprvkeyf, $clipubkeyf, $knownhosts,
        $sshdconfig, $sshconfig, $sftpconfig);
 

@@ -106,9 +106,7 @@ Curl_llist_remove(struct Curl_llist *list, struct Curl_llist_element *e,
       e->next->prev = NULL;
   }
   else {
-    if(!e->prev)
-      list->head = e->next;
-    else
+    if(e->prev)
       e->prev->next = e->next;
 
     if(!e->next)
