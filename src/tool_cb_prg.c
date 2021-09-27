@@ -125,9 +125,6 @@ int tool_progress_cb(void *clientp,
                      curl_off_t dltotal, curl_off_t dlnow,
                      curl_off_t ultotal, curl_off_t ulnow)
 {
-  /* The original progress-bar source code was written for curl by Lars Aas,
-     and this new edition inherits some of his concepts. */
-
   struct timeval now = tvnow();
   struct per_transfer *per = clientp;
   struct OperationConfig *config = per->config;
@@ -135,19 +132,28 @@ int tool_progress_cb(void *clientp,
   curl_off_t total;
   curl_off_t point;
 
-  /* Calculate expected transfer size. initial_size can be less than zero
-     when indicating that we are expecting to get the filesize from the
-     remote */
-  if(bar->initial_size < 0 ||
-     ((CURL_OFF_T_MAX - bar->initial_size) < (dltotal + ultotal)))
+  /* Calculate expected transfer size. initial_size can be less than zero when
+     indicating that we are expecting to get the filesize from the remote */
+  if(bar->initial_size < 0) {
+    if(dltotal || ultotal)
+      total = dltotal + ultotal;
+    else
+      total = CURL_OFF_T_MAX;
+  }
+  else if((CURL_OFF_T_MAX - bar->initial_size) < (dltotal + ultotal))
     total = CURL_OFF_T_MAX;
   else
     total = dltotal + ultotal + bar->initial_size;
 
   /* Calculate the current progress. initial_size can be less than zero when
      indicating that we are expecting to get the filesize from the remote */
-  if(bar->initial_size < 0 ||
-     ((CURL_OFF_T_MAX - bar->initial_size) < (dlnow + ulnow)))
+  if(bar->initial_size < 0) {
+    if(dltotal || ultotal)
+      point = dlnow + ulnow;
+    else
+      point = CURL_OFF_T_MAX;
+  }
+  else if((CURL_OFF_T_MAX - bar->initial_size) < (dlnow + ulnow))
     point = CURL_OFF_T_MAX;
   else
     point = dlnow + ulnow + bar->initial_size;
@@ -215,9 +221,8 @@ void progressbarinit(struct ProgressData *bar,
   char *colp;
   memset(bar, 0, sizeof(struct ProgressData));
 
-  /* pass this through to progress function so
-   * it can display progress towards total file
-   * not just the part that's left. (21-may-03, dbyron) */
+  /* pass the resume from value through to the progress function so it can
+   * display progress towards total file not just the part that's left. */
   if(config->use_resume)
     bar->initial_size = config->resume_from;
 
