@@ -85,7 +85,8 @@
 #define BCRYPT_CHACHA20_POLY1305_ALGORITHM L"CHACHA20_POLY1305"
 #endif
 
-#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX) && !defined(DISABLE_SCHANNEL_CLIENT_CERT)
+#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX) 
+    && !defined(DISABLE_SCHANNEL_CLIENT_CERT)
 #define HAS_CLIENT_CERT_PATH
 #endif
 
@@ -197,9 +198,8 @@ set_ssl_version_min_max(DWORD *grbitEnabledProtocols, struct Curl_easy *data,
     had broken TLS 1.3 implementations that could be enabled
     via registry.
     */
-    if (curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
-        VERSION_GREATER_THAN_EQUAL))
-    {
+    if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
+        VERSION_GREATER_THAN_EQUAL)) {
       ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
     }
     else /* Windows 10 and older */
@@ -222,9 +222,8 @@ set_ssl_version_min_max(DWORD *grbitEnabledProtocols, struct Curl_easy *data,
     case CURL_SSLVERSION_TLSv1_3:
 
       /* Windows Server 2022 and newer */
-      if (curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
-          VERSION_GREATER_THAN_EQUAL))
-      {
+      if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
+          VERSION_GREATER_THAN_EQUAL)) {
         (*grbitEnabledProtocols) |= SP_PROT_TLS1_3_CLIENT;
         break;
       }
@@ -761,8 +760,9 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
       Disallow ChaCha20-Poly1305 until full support is possible.
     */
     int crypto_settings_idx = 0;
-    crypto_settings[crypto_settings_idx].eAlgorithmUsage = TlsParametersCngAlgUsageCipher;
-    crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING){
+    crypto_settings[crypto_settings_idx].eAlgorithmUsage =
+                                             TlsParametersCngAlgUsageCipher;
+    crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING) {
         sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM),
         sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM),
         BCRYPT_CHACHA20_POLY1305_ALGORITHM };
@@ -772,22 +772,25 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
       Disallow AES_CCM algorithm, since there's no support for it yet.
       and also disallows AES_CCM_8, which is undefined per QUIC spec.
     */
-    blocked_chaining_modes[0] = (UNICODE_STRING){
+    blocked_chaining_modes[0] = (UNICODE_STRING) {
         sizeof(BCRYPT_CHAIN_MODE_CCM),
         sizeof(BCRYPT_CHAIN_MODE_CCM),
         BCRYPT_CHAIN_MODE_CCM };
 
-    crypto_settings[crypto_settings_idx].eAlgorithmUsage = TlsParametersCngAlgUsageCipher;
-    crypto_settings[crypto_settings_idx].rgstrChainingModes = blocked_chaining_modes;
-    crypto_settings[crypto_settings_idx].cChainingModes = ARRAYSIZE(blocked_chaining_modes);
-    crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING){
+    crypto_settings[crypto_settings_idx].eAlgorithmUsage =
+                                             TlsParametersCngAlgUsageCipher;
+    crypto_settings[crypto_settings_idx].rgstrChainingModes =
+                                             blocked_chaining_modes;
+    crypto_settings[crypto_settings_idx].cChainingModes =
+                                             ARRAYSIZE(blocked_chaining_modes);
+    crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING) {
         sizeof(BCRYPT_AES_ALGORITHM),
         sizeof(BCRYPT_AES_ALGORITHM),
         BCRYPT_AES_ALGORITHM };
     crypto_settings_idx++;
 
 
-    /*TODO: implement "set_ssl_ciphers" for SCH_CREDENTIALS 
+    /*TODO: implement "set_ssl_ciphers" for SCH_CREDENTIALS
     this is in the inverse of the SCHANNEL_CRED behavior.
 
     Namely, we're disabling ciphers rather than enabling them.
@@ -808,7 +811,8 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     credentials.dwVersion = SCH_CREDENTIALS_VERSION;
     credentials.dwFlags = flags | SCH_USE_STRONG_CRYPTO;
     
-    credentials.pTlsParameters->grbitDisabledProtocols = (DWORD)~grbitEnabledProtocols;
+    credentials.pTlsParameters->grbitDisabledProtocols =
+                                                (DWORD)~grbitEnabledProtocols;
 
 #ifdef HAS_CLIENT_CERT_PATH
     if(client_certs[0]) {
@@ -817,8 +821,6 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     }
 #endif
 
-    /* https://docs.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-acquirecredentialshandlew
-    */
     sspi_status =
         s_pSecFn->AcquireCredentialsHandleW(NULL, (TCHAR*)UNISP_NAME,
             SECPKG_CRED_OUTBOUND, NULL,
@@ -833,10 +835,10 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     schannel_cred.dwFlags = flags;
     schannel_cred.grbitEnabledProtocols = grbitEnabledProtocols;
 
-    if (SSL_CONN_CONFIG(cipher_list)) {
+    if(SSL_CONN_CONFIG(cipher_list)) {
       result = set_ssl_ciphers(&schannel_cred, SSL_CONN_CONFIG(cipher_list),
                                BACKEND->algIds);
-      if (CURLE_OK != result) {
+      if(CURLE_OK != result) {
         failf(data, "Unable to set ciphers to passed via SSL_CONN_CONFIG");
         return result;
       }
@@ -849,8 +851,6 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     }
 #endif
 
-    /* https://docs.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-acquirecredentialshandlew
-     */
     sspi_status =
         s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
             SECPKG_CRED_OUTBOUND, NULL,
@@ -2028,8 +2028,6 @@ schannel_recv(struct Curl_easy *data, int sockindex,
     InitSecBuffer(&inbuf[3], SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&inbuf_desc, inbuf, 4);
 
-    /* https://docs.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-decryptmessage
-     */
     sspi_status = s_pSecFn->DecryptMessage(&BACKEND->ctxt->ctxt_handle,
                                            &inbuf_desc, 0, NULL);
 
