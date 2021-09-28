@@ -79,7 +79,7 @@ sub printdesc {
         if($d =~ /\(Added in ([0-9.]+)\)/i) {
             my $ver = $1;
             if(too_old($ver)) {
-                $d =~ s/\(Added in $ver\)//gi;
+                $d =~ s/ *\(Added in $ver\)//gi;
             }
         }
         if($d !~ /^.\\"/) {
