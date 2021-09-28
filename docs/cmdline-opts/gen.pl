@@ -135,13 +135,17 @@ sub protocols {
 
 sub too_old {
     my ($version)=@_;
+    my $a = 999999;
     if($version =~ /^(\d+)\.(\d+)\.(\d+)/) {
-        my $a = $1 * 1000 + $2 * 10 + $3;
-        if($a < 7300) {
-            # we consider everything before 7.30.0 to be too old to mention
-            # specific changes for
-            return 1;
-        }
+        $a = $1 * 1000 + $2 * 10 + $3;
+    }
+    elsif($version =~ /^(\d+)\.(\d+)/) {
+        $a = $1 * 1000 + $2 * 10;
+    }
+    if($a < 7300) {
+        # we consider everything before 7.30.0 to be too old to mention
+        # specific changes for
+        return 1;
     }
     return 0;
 }
@@ -229,6 +233,10 @@ sub single {
             }
             if(!$examples[0]) {
                 print STDERR "$f:$line:1:ERROR: no 'Example:' present\n";
+                exit 2;
+            }
+            if(!$added) {
+                print STDERR "$f:$line:1:ERROR: no 'Added:' version present\n";
                 exit 2;
             }
             last;

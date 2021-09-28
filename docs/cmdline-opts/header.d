@@ -8,6 +8,7 @@ See-also: user-agent referer
 Example: -H "X-First-Name: Joe" $URL
 Example: -H "User-Agent: yes-please/2000" $URL
 Example: -H "Host:" $URL
+Added: 5.0
 ---
 Extra header to include in the request when sending HTTP to a server. You may
 specify any number of extra headers. Note that if you should add a custom

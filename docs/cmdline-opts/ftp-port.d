@@ -8,6 +8,7 @@ Category: ftp
 Example: -P - ftp:/example.com
 Example: -P eth0 ftp:/example.com
 Example: -P 192.168.0.2 ftp:/example.com
+Added: 4.0
 ---
 Reverses the default initiator/listener roles when connecting with FTP. This
 option makes curl use active mode. curl then tells the server to connect back

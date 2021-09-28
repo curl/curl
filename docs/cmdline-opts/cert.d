@@ -6,6 +6,7 @@ Protocols: TLS
 See-also: cert-type key key-type
 Category: tls
 Example: --cert certfile --key keyfile $URL
+Added: 5.0
 ---
 Tells curl to use the specified client certificate file when getting a file
 with HTTPS, FTPS or another SSL-based protocol. The certificate must be in

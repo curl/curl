@@ -4,6 +4,7 @@ Arg: [protocol://]host[:port]
 Help: Use this proxy
 Category: proxy
 Example: --proxy http://proxy.example $URL
+Added: 4.0
 ---
 Use the specified proxy.
 

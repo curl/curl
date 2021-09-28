@@ -4,6 +4,7 @@ Protocols: HTTP
 Help: Use the header-provided filename
 Category: output
 Example: -OJ https://example.com/file
+Added: 7.20.0
 ---
 This option tells the --remote-name option to use the server-specified
 Content-Disposition filename instead of extracting a filename from the URL.

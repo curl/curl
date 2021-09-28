@@ -1,10 +1,10 @@
 Long: http0.9
 Tags: Versions
 Protocols: HTTP
-Added:
 Help: Allow HTTP 0.9 responses
 Category: http
 Example: --http0.9 $URL
+Added: 7.64.0
 ---
 Tells curl to be fine with HTTP version 0.9 response.
 
