@@ -822,7 +822,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 #endif
 
     sspi_status =
-        s_pSecFn->AcquireCredentialsHandleW(NULL, (TCHAR*)UNISP_NAME,
+        s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
             SECPKG_CRED_OUTBOUND, NULL,
             &credentials, NULL, NULL,
             &BACKEND->cred->cred_handle,
