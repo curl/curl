@@ -28,14 +28,7 @@
 
 #define SCHANNEL_USE_BLACKLISTS 1
 
-#ifndef _UNICODE_STRING
-typedef struct _UNICODE_STRING
-{
-    USHORT Length;
-    USHORT MaximumLength;
-    PWSTR Buffer;
-} UNICODE_STRING, * PUNICODE_STRING;
-#endif
+#include <Winternl.h>
 
 #include <schnlsp.h>
 #include <schannel.h>
