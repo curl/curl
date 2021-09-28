@@ -28,7 +28,13 @@
 
 #define SCHANNEL_USE_BLACKLISTS 1
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4201)
+#endif
 #include <Winternl.h>
+#ifdef _MSC_VER
+#pragma warning(default: 4201)
+#endif
 
 #include <schnlsp.h>
 #include <schannel.h>
