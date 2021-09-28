@@ -50,8 +50,8 @@
 typedef LONG NTSTATUS, * PNTSTATUS;
 #define STATUS_SUCCESS (0x00000000)
 
-NTSYSAPI NTSTATUS NTAPI RtlGetVersion(PRTL_OSVERSIONINFOEXW
-                                      lpVersionInformation);
+DECLSPEC_IMPORT NTSTATUS WINAPI RtlGetVersion(POSVERSIONINFOEXW
+                                              lpVersionInformation);
 #endif
 
 /*
@@ -116,7 +116,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
 #else
 
 #if !OLDER_THAN_WIN2K
-  static RTL_OSVERSIONINFOEXW osver = { 0 };
+  static OSVERSIONINFOEXW osver = { 0 };
   osver.dwOSVersionInfoSize = sizeof(osver);
 
   /* Find out Windows version once, cache the result */
