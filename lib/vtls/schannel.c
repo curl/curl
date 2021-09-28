@@ -85,7 +85,7 @@
 #define BCRYPT_CHACHA20_POLY1305_ALGORITHM L"CHACHA20_POLY1305"
 #endif
 
-#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX) 
+#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX) \
     && !defined(DISABLE_SCHANNEL_CLIENT_CERT)
 #define HAS_CLIENT_CERT_PATH
 #endif
