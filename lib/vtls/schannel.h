@@ -29,7 +29,8 @@
 #define SCHANNEL_USE_BLACKLISTS 1
 
 #ifndef _UNICODE_STRING
-typedef struct _UNICODE_STRING {
+typedef struct _UNICODE_STRING
+{
     USHORT Length;
     USHORT MaximumLength;
     PWSTR Buffer;
@@ -96,9 +97,6 @@ typedef enum _eTlsAlgorithmUsage
     TlsParametersCngAlgUsageCertSig
 } eTlsAlgorithmUsage;
 
-//
-// SCH_CREDENTIALS structures
-//
 typedef struct _CRYPTO_SETTINGS
 {
     eTlsAlgorithmUsage  eAlgorithmUsage;

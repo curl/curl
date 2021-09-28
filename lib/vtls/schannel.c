@@ -810,7 +810,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 
     credentials.dwVersion = SCH_CREDENTIALS_VERSION;
     credentials.dwFlags = flags | SCH_USE_STRONG_CRYPTO;
-    
+
     credentials.pTlsParameters->grbitDisabledProtocols =
                                                 (DWORD)~grbitEnabledProtocols;
 
