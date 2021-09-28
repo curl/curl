@@ -65,14 +65,12 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
 
 #ifdef __MINGW32__
 #include <_mingw.h>
-#if defined(__MINGW64_VERSION_MAJOR) \
-                    && !defined(DISABLE_SCHANNEL_MANUAL_VERIFY)
+#if defined(__MINGW64_VERSION_MAJOR) && defined(_WIN32_WCE)
 #define HAS_MANUAL_VERIFY_API
 #endif
 #else
 #include <wincrypt.h>
-#if defined(CERT_CHAIN_REVOCATION_CHECK_CHAIN) \
-                    && !defined(DISABLE_SCHANNEL_MANUAL_VERIFY)
+#if defined(CERT_CHAIN_REVOCATION_CHECK_CHAIN) && defined(_WIN32_WCE)
 #define HAS_MANUAL_VERIFY_API
 #endif
 #endif
