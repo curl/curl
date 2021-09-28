@@ -76,6 +76,12 @@ sub manpageify {
 sub printdesc {
     my @desc = @_;
     for my $d (@desc) {
+        if($d =~ /\(Added in ([0-9.]+)\)/i) {
+            my $ver = $1;
+            if(too_old($ver)) {
+                $d =~ s/ *\(Added in $ver\)//gi;
+            }
+        }
         if($d !~ /^.\\"/) {
             # **bold**
             $d =~ s/\*\*([^ ]*)\*\*/\\fB$1\\fP/g;
@@ -127,8 +133,25 @@ sub protocols {
     }
 }
 
+sub too_old {
+    my ($version)=@_;
+    if($version =~ /^(\d+)\.(\d+)\.(\d+)/) {
+        my $a = $1 * 1000 + $2 * 10 + $3;
+        if($a < 7300) {
+            # we consider everything before 7.30.0 to be too old to mention
+            # specific changes for
+            return 1;
+        }
+    }
+    return 0;
+}
+
 sub added {
     my ($standalone, $data)=@_;
+    if(too_old($data)) {
+        # don't mention ancient additions
+        return "";
+    }
     if($standalone) {
         return ".SH \"ADDED\"\nAdded in curl version $data\n";
     }
