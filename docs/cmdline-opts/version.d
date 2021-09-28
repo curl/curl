@@ -3,6 +3,7 @@ Short: V
 Help: Show version number and quit
 Category: important curl
 Example: --version
+Added: 4.0
 ---
 Displays information about curl and the libcurl version it uses.
 

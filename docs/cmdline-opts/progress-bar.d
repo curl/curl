@@ -3,6 +3,7 @@ Long: progress-bar
 Help: Display transfer progress as a bar
 Category: verbose
 Example: -# -O $URL
+Added: 5.10
 ---
 Make curl display transfer progress as a simple progress bar instead of the
 standard, more informational, meter.

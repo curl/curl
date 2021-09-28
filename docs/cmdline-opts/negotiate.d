@@ -4,6 +4,7 @@ Protocols: HTTP
 See-also: basic ntlm anyauth proxy-negotiate
 Category: auth http
 Example: --negotiate -u : $URL
+Added: 7.10.6
 ---
 Enables Negotiate (SPNEGO) authentication.
 

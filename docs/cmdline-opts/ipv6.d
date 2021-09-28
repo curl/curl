@@ -2,7 +2,7 @@ Short: 6
 Long: ipv6
 Tags: Versions
 Protocols:
-Added:
+Added: 7.10.8
 Mutexed: ipv4
 Requires:
 See-also: http1.1 http2

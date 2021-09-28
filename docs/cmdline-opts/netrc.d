@@ -3,6 +3,7 @@ Short: n
 Help: Must read .netrc for user name and password
 Category: curl
 Example: --netrc $URL
+Added: 4.6
 ---
 Makes curl scan the *.netrc* (*_netrc* on Windows) file in the user's home
 directory for login name and password. This is typically used for FTP on

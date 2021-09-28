@@ -5,6 +5,7 @@ Protocols: FTP HTTP MQTT
 See-also: limit-rate
 Category: connection
 Example: --max-filesize 100K $URL
+Added: 7.10.8
 ---
 Specify the maximum size (in bytes) of a file to download. If the file
 requested is larger than this value, the transfer will not start and curl will

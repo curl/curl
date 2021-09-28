@@ -4,6 +4,7 @@ Help: SSL ciphers to use
 Protocols: TLS
 Category: tls
 Example: --ciphers ECDHE-ECDSA-AES256-CCM8 $URL
+Added: 7.9
 ---
 Specifies which ciphers to use in the connection. The list of ciphers must
 specify valid ciphers. Read up on SSL cipher list details on this URL:

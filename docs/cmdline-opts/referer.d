@@ -8,6 +8,7 @@ Category: http
 Example: --referer "https://fake.example" $URL
 Example: --referer "https://fake.example;auto" -L $URL
 Example: --referer ";auto" -L $URL
+Added: 4.0
 ---
 Sends the "Referrer Page" information to the HTTP server. This can also be set
 with the --header flag of course.  When used with --location you can append
