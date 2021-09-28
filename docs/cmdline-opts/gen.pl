@@ -47,6 +47,7 @@ my %catlong;
 
 use POSIX qw(strftime);
 my $date = strftime "%B %d %Y", localtime;
+my $year = strftime "%Y", localtime;
 my $version = "unknown";
 
 open(INC, "<../../include/curl/curlver.h");
@@ -418,6 +419,42 @@ sub header {
 }
 
 sub listhelp {
+    print <<HEAD
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \\| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \\___|\\___/|_| \\_\\_____|
+ *
+ * Copyright (C) 1998 - $year, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ ***************************************************************************/
+#include "tool_setup.h"
+#include "tool_help.h"
+
+/*
+ * DO NOT edit tool_listhelp.c manually.
+ * This source file is generated with the following command:
+
+  cd \$srcroot/docs/cmdline-opts
+  ./gen.pl listhelp *.d > \$srcroot/src/tool_listhelp.c
+ */
+
+const struct helptxt helptext[] = {
+HEAD
+        ;
     foreach my $f (sort keys %helplong) {
         my $long = $f;
         my $short = $optlong{$long};
@@ -455,6 +492,11 @@ sub listhelp {
         }
         print $line;
     }
+    print <<FOOT
+  { NULL, NULL, CURLHELP_HIDDEN }
+};
+FOOT
+        ;
 }
 
 sub listcats {
