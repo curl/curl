@@ -404,6 +404,7 @@ gtls_connect_step1(struct Curl_easy *data,
   const char * const hostname = SSL_HOST_NAME();
   long * const certverifyresult = &SSL_SET_OPTION_LVALUE(certverifyresult);
   const char *tls13support;
+  CURLcode result;
 
   if(connssl->state == ssl_connection_complete)
     /* to make us tolerant against being called more than once for the
@@ -557,30 +558,24 @@ gtls_connect_step1(struct Curl_easy *data,
   /* Ensure +SRP comes at the *end* of all relevant strings so that it can be
    * removed if a run-time error indicates that SRP is not supported by this
    * GnuTLS version */
-  switch(SSL_CONN_CONFIG(version)) {
-    case CURL_SSLVERSION_TLSv1_3:
-      if(!tls13support) {
-        failf(data, "This GnuTLS installation does not support TLS 1.3");
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-      /* FALLTHROUGH */
-    case CURL_SSLVERSION_DEFAULT:
-    case CURL_SSLVERSION_TLSv1:
-    case CURL_SSLVERSION_TLSv1_0:
-    case CURL_SSLVERSION_TLSv1_1:
-    case CURL_SSLVERSION_TLSv1_2: {
-      CURLcode result = set_ssl_version_min_max(data, &prioritylist,
-                                                tls13support);
-      if(result)
-        return result;
-      break;
-    }
-    case CURL_SSLVERSION_SSLv2:
-    case CURL_SSLVERSION_SSLv3:
-    default:
-      failf(data, "GnuTLS does not support SSLv2 or SSLv3");
-      return CURLE_SSL_CONNECT_ERROR;
+
+  if(SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv2 ||
+     SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv3) {
+    failf(data, "GnuTLS does not support SSLv2 or SSLv3");
+    return CURLE_SSL_CONNECT_ERROR;
   }
+
+  if(SSL_CONN_CONFIG(version) == CURL_SSLVERSION_TLSv1_3) {
+    if(!tls13support) {
+      failf(data, "This GnuTLS installation does not support TLS 1.3");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+
+  /* At this point we know we have a supported TLS version, so set it */
+  result = set_ssl_version_min_max(data, &prioritylist, tls13support);
+  if(result)
+    return result;
 
 #ifdef HAVE_GNUTLS_SRP
   /* Only add SRP to the cipher list if SRP is requested. Otherwise

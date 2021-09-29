@@ -1011,7 +1011,9 @@ static CURLcode pop3_statemachine(struct Curl_easy *data,
       break;
 
     case POP3_QUIT:
-      /* fallthrough, just stop! */
+      state(data, POP3_STOP);
+      break;
+
     default:
       /* internal error */
       state(data, POP3_STOP);
