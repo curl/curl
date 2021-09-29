@@ -46,7 +46,7 @@ my %protolong;
 my %catlong;
 
 use POSIX qw(strftime);
-my $date = strftime "%b %e %Y", localtime;
+my $date = strftime "%B %d %Y", localtime;
 my $version = "unknown";
 
 open(INC, "<../../include/curl/curlver.h");
