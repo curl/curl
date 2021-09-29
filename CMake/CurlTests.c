@@ -229,6 +229,10 @@ int main () { ; return 0; }
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
+#  else
+#    ifdef HAVE_WINSOCK_H
+#      include <winsock.h>
+#    endif
 #  endif
 #endif
 
@@ -254,6 +258,10 @@ main ()
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
+#  else
+#    ifdef HAVE_WINSOCK_H
+#      include <winsock.h>
+#    endif
 #  endif
 #endif
 
@@ -277,6 +285,10 @@ main ()
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
+#  else
+#    ifdef HAVE_WINSOCK_H
+#      include <winsock.h>
+#    endif
 #  endif
 #endif
 
@@ -301,6 +313,10 @@ main ()
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
+#  else
+#    ifdef HAVE_WINSOCK_H
+#      include <winsock.h>
+#    endif
 #  endif
 #endif
 
@@ -387,6 +403,10 @@ main ()
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
+#  else
+#    ifdef HAVE_WINSOCK_H
+#      include <winsock.h>
+#    endif
 #  endif
 #endif
 /* includes start */

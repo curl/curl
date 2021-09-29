@@ -235,6 +235,43 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
 ])
 
 
+dnl CURL_CHECK_HEADER_WINSOCK
+dnl -------------------------------------------------
+dnl Check for compilable and valid winsock.h header
+
+AC_DEFUN([CURL_CHECK_HEADER_WINSOCK], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_CACHE_CHECK([for winsock.h], [curl_cv_header_winsock_h], [
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#undef inline
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <winsock.h>
+      ]],[[
+#if defined(__CYGWIN__) || defined(__CEGCC__)
+        HAVE_WINSOCK_H shall not be defined.
+#else
+        int dummy=WSACleanup();
+#endif
+      ]])
+    ],[
+      curl_cv_header_winsock_h="yes"
+    ],[
+      curl_cv_header_winsock_h="no"
+    ])
+  ])
+  case "$curl_cv_header_winsock_h" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_WINSOCK_H, 1,
+        [Define to 1 if you have the winsock.h header file.])
+      ;;
+  esac
+])
+
+
 dnl CURL_CHECK_HEADER_WINSOCK2
 dnl -------------------------------------------------
 dnl Check for compilable and valid winsock2.h header
@@ -1021,6 +1058,10 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #endif
 #else
 #ifdef HAVE_PROTO_BSDSOCKET_H
@@ -1065,6 +1106,10 @@ struct Library *SocketBase = NULL;
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #endif
 #define RECVCALLCONV PASCAL
 #else
@@ -1142,6 +1187,7 @@ dnl return value in SEND_TYPE_RETV, and also defining the
 dnl type qualifier of second argument in SEND_QUAL_ARG2.
 
 AC_DEFUN([CURL_CHECK_FUNC_SEND], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   #
@@ -1156,6 +1202,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #endif
 #else
 #ifdef HAVE_PROTO_BSDSOCKET_H
@@ -1200,6 +1250,10 @@ struct Library *SocketBase = NULL;
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #endif
 #define SENDCALLCONV PASCAL
 #else
@@ -1314,6 +1368,10 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #endif
 #else
 #ifdef HAVE_PROTO_BSDSOCKET_H
@@ -1350,6 +1408,7 @@ dnl -------------------------------------------------
 dnl Check for timeval struct
 
 AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
+  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
   AC_CHECK_HEADERS(sys/types.h sys/time.h sys/socket.h)
   AC_CACHE_CHECK([for struct timeval], [curl_cv_struct_timeval], [
@@ -1363,6 +1422,10 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -1418,6 +1481,9 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 #endif
 #else
@@ -1461,6 +1527,10 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #endif
 #else
 #ifdef HAVE_SYS_TYPES_H
@@ -1753,6 +1823,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -1807,6 +1881,10 @@ struct Library *SocketBase = NULL;
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #endif
 #define SELECTCALLCONV PASCAL
 #endif
