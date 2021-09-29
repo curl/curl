@@ -477,7 +477,7 @@ dnl Compilation based checks should not be done before this point.
 dnl **********************************************************************
 
 dnl **********************************************************************
-dnl Make sure that our checks for headers windows.h winsock.h winsock2.h
+dnl Make sure that our checks for headers windows.h winsock2.h
 dnl and ws2tcpip.h take precedence over any other further checks which
 dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
 dnl this specific header files. And do them before its results are used.
@@ -487,7 +487,6 @@ CURL_CHECK_HEADER_WINDOWS
 CURL_CHECK_NATIVE_WINDOWS
 case X-"$curl_cv_native_windows" in
   X-yes)
-    CURL_CHECK_HEADER_WINSOCK
     CURL_CHECK_HEADER_WINSOCK2
     CURL_CHECK_HEADER_WS2TCPIP
     CURL_CHECK_HEADER_WINCRYPT
@@ -495,7 +494,6 @@ case X-"$curl_cv_native_windows" in
     CURL_CHECK_HEADER_WINBER
     ;;
   *)
-    curl_cv_header_winsock_h="no"
     curl_cv_header_winsock2_h="no"
     curl_cv_header_ws2tcpip_h="no"
     curl_cv_header_wincrypt_h="no"
@@ -1022,16 +1020,6 @@ if test "$HAVE_GETHOSTBYNAME" != "1"
 then
   dnl This is for winsock systems
   if test "$curl_cv_header_windows_h" = "yes"; then
-    if test "$curl_cv_header_winsock_h" = "yes"; then
-      case $host in
-        *-*-mingw32ce*)
-          winsock_LIB="-lwinsock"
-          ;;
-        *)
-          winsock_LIB="-lwsock32"
-          ;;
-      esac
-    fi
     if test "$curl_cv_header_winsock2_h" = "yes"; then
       winsock_LIB="-lws2_32"
     fi
@@ -1048,10 +1036,6 @@ then
 #include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#else
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #endif
 #endif
         ]],[[
