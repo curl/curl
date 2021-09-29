@@ -115,9 +115,26 @@ static const struct feat feats[] = {
 static void print_category(curlhelp_t category)
 {
   unsigned int i;
+  size_t longopt = 5;
+  size_t longdesc = 5;
+
+  for(i = 0; helptext[i].opt; ++i) {
+    size_t len;
+    if(!(helptext[i].categories & category))
+      continue;
+    len = strlen(helptext[i].opt);
+    if(len > longopt)
+      longopt = len;
+    len = strlen(helptext[i].desc);
+    if(len > longdesc)
+      longdesc = len;
+  }
+  if(longopt + longdesc > 80)
+    longopt = 80 - longdesc;
+
   for(i = 0; helptext[i].opt; ++i)
     if(helptext[i].categories & category) {
-      printf(" %-18s  %s\n", helptext[i].opt, helptext[i].desc);
+      printf(" %-*s %s\n", longopt, helptext[i].opt, helptext[i].desc);
     }
 }
 
