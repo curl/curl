@@ -507,9 +507,6 @@ static struct Curl_addrinfo *get_localhost(int port)
   struct sockaddr_in sa;
   unsigned int ipv4;
   unsigned short port16 = (unsigned short)(port & 0xffff);
-  ca = calloc(sizeof(struct Curl_addrinfo) + ss_size + hostlen + 1, 1);
-  if(!ca)
-    return NULL;
 
   /* memset to clear the sa.sin_zero field */
   memset(&sa, 0, sizeof(sa));
@@ -519,6 +516,9 @@ static struct Curl_addrinfo *get_localhost(int port)
     return NULL;
   memcpy(&sa.sin_addr, &ipv4, sizeof(ipv4));
 
+  ca = calloc(sizeof(struct Curl_addrinfo) + ss_size + hostlen + 1, 1);
+  if(!ca)
+    return NULL;
   ca->ai_flags     = 0;
   ca->ai_family    = AF_INET;
   ca->ai_socktype  = SOCK_STREAM;
