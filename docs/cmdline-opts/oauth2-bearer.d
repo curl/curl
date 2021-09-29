@@ -4,6 +4,7 @@ Arg: <token>
 Protocols: IMAP POP3 SMTP HTTP
 Category: auth
 Example: --oauth2-bearer "mF_9.B5f-4.1JqM" $URL
+Added: 7.33.0
 ---
 Specify the Bearer Token for OAUTH 2.0 server authentication. The Bearer Token
 is used in conjunction with the user name which can be specified as part of

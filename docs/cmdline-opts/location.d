@@ -4,6 +4,7 @@ Help: Follow redirects
 Protocols: HTTP
 Category: http
 Example: -L $URL
+Added: 4.9
 ---
 If the server reports that the requested page has moved to a different
 location (indicated with a Location: header and a 3XX response code), this

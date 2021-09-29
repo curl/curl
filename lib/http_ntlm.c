@@ -198,6 +198,12 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 #endif
 
   Curl_bufref_init(&ntlmmsg);
+
+  /* connection is already authenticated, don't send a header in future
+   * requests so go directly to NTLMSTATE_LAST */
+  if(*state == NTLMSTATE_TYPE3)
+    *state = NTLMSTATE_LAST;
+
   switch(*state) {
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
@@ -246,11 +252,6 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     }
     break;
 
-  case NTLMSTATE_TYPE3:
-    /* connection is already authenticated,
-     * don't send a header in future requests */
-    *state = NTLMSTATE_LAST;
-    /* FALLTHROUGH */
   case NTLMSTATE_LAST:
     Curl_safefree(*allocuserpwd);
     authp->done = TRUE;

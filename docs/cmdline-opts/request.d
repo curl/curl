@@ -5,6 +5,7 @@ Help: Specify request command to use
 Category: connection
 Example: -X "DELETE" $URL
 Example: -X NLST ftp://example.com/
+Added: 6.0
 ---
 (HTTP) Specifies a custom request method to use when communicating with the
 HTTP server.  The specified request method will be used instead of the method
@@ -30,8 +31,8 @@ Specifies a custom FTP command to use instead of LIST when doing file lists
 with FTP.
 
 (POP3)
-Specifies a custom POP3 command to use instead of LIST or RETR. (Added in
-7.26.0)
+Specifies a custom POP3 command to use instead of LIST or RETR.
+(Added in 7.26.0)
 
 (IMAP)
 Specifies a custom IMAP command to use instead of LIST. (Added in 7.30.0)

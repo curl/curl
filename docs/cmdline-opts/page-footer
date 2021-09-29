@@ -61,8 +61,8 @@ analyze the TLS traffic in real time using network analyzing tools such as
 Wireshark. This works with the following TLS backends: OpenSSL, libressl,
 BoringSSL, GnuTLS, NSS and wolfSSL.
 .SH "PROXY PROTOCOL PREFIXES"
-Since curl version 7.21.7, the proxy string may be specified with a
-protocol:// prefix to specify alternative proxy protocols.
+The proxy string may be specified with a protocol:// prefix to specify
+alternative proxy protocols. (Added in 7.21.7)
 
 If no protocol is specified in the proxy string or if the string doesn't match
 a supported one, the proxy will be treated as an HTTP proxy.

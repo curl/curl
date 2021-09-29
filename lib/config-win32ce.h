@@ -114,10 +114,10 @@
 #define HAVE_WINSOCK_H 1
 
 /* Define if you have the <winsock2.h> header file.  */
-/* #define HAVE_WINSOCK2_H 1 */
+#define HAVE_WINSOCK2_H 1
 
 /* Define if you have the <ws2tcpip.h> header file.  */
-/* #define HAVE_WS2TCPIP_H 1 */
+#define HAVE_WS2TCPIP_H 1
 
 /* ---------------------------------------------------------------- */
 /*                        OTHER HEADER INFO                         */

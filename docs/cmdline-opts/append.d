@@ -4,6 +4,7 @@ Help: Append to target file when uploading
 Protocols: FTP SFTP
 Category: ftp sftp
 Example: --upload-file local --append ftp://example.com/
+Added: 4.8
 ---
 When used in an upload, this makes curl append to the target file instead of
 overwriting it. If the remote file doesn't exist, it will be created.  Note

@@ -4,6 +4,7 @@ Help: CA certificate to verify peer against
 Protocols: TLS
 Category: tls
 Example: --cacert CA-file.txt $URL
+Added: 7.5
 ---
 Tells curl to use the specified certificate file to verify the peer. The file
 may contain multiple CA certificates. The certificate(s) must be in PEM
