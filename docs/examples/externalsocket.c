@@ -97,7 +97,7 @@ int main(void)
 
 #ifdef WIN32
   WSADATA wsaData;
-  int initwsa = WSAStartup(MAKEWORD(2, 0), &wsaData);
+  int initwsa = WSAStartup(MAKEWORD(2, 2), &wsaData);
   if(initwsa) {
     printf("WSAStartup failed: %d\n", initwsa);
     return 1;

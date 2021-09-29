@@ -157,23 +157,23 @@ static size_t strlen_url(const char *url, bool relative)
       continue;
     }
 
-    switch(*ptr) {
-    case '?':
-      left = FALSE;
-      /* FALLTHROUGH */
-    default:
-      if(urlchar_needs_escaping(*ptr))
-        newlen += 2;
-      newlen++;
-      break;
-    case ' ':
+    if(*ptr == ' ') {
       if(left)
         newlen += 3;
       else
         newlen++;
-      break;
+      continue;
     }
+
+    if (*ptr == '?')
+      left = FALSE;
+
+    if(urlchar_needs_escaping(*ptr))
+      newlen += 2;
+
+    newlen++;
   }
+
   return newlen;
 }
 
@@ -202,19 +202,7 @@ static void strcpy_url(char *output, const char *url, bool relative)
       continue;
     }
 
-    switch(*iptr) {
-    case '?':
-      left = FALSE;
-      /* FALLTHROUGH */
-    default:
-      if(urlchar_needs_escaping(*iptr)) {
-        msnprintf(optr, 4, "%%%02x", *iptr);
-        optr += 3;
-      }
-      else
-        *optr++=*iptr;
-      break;
-    case ' ':
+    if(*iptr == ' ') {
       if(left) {
         *optr++='%'; /* add a '%' */
         *optr++='2'; /* add a '2' */
@@ -222,8 +210,18 @@ static void strcpy_url(char *output, const char *url, bool relative)
       }
       else
         *optr++='+'; /* add a '+' here */
-      break;
+      continue;
     }
+
+    if(*iptr == '?')
+      left = FALSE;
+
+    if(urlchar_needs_escaping(*iptr)) {
+      msnprintf(optr, 4, "%%%02x", *iptr);
+      optr += 3;
+    }
+    else
+      *optr++ = *iptr;
   }
   *optr = 0; /* null-terminate output buffer */
 

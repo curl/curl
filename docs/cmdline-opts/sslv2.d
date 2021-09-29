@@ -2,7 +2,7 @@ Short: 2
 Long: sslv2
 Tags: Versions
 Protocols: SSL
-Added:
+Added: 5.9
 Mutexed: sslv3 tlsv1 tlsv1.1 tlsv1.2
 Requires: TLS
 See-also: http1.1 http2

@@ -4,6 +4,7 @@ Arg: <format>
 Help: Use output FORMAT after completion
 Category: verbose
 Example: -w '%{http_code}\\n' $URL
+Added: 6.5
 ---
 Make curl display information on stdout after a completed transfer. The format
 is a string that may contain plain text mixed with any number of
@@ -48,8 +49,7 @@ server. (Added in 7.15.4)
 .TP
 .B http_code
 The numerical response code that was found in the last retrieved HTTP(S) or
-FTP(s) transfer. In 7.18.2 the alias **response_code** was added to show the
-same info.
+FTP(s) transfer.
 .TP
 .B http_connect
 The numerical code that was found in the last response (from a proxy) to a

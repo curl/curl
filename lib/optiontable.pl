@@ -111,7 +111,7 @@ print <<FOOT
  */
 int Curl_easyopts_check(void)
 {
-  return (CURLOPT_LASTENTRY != ($lastnum + 1));
+  return ((CURLOPT_LASTENTRY%10000) != ($lastnum + 1));
 }
 #endif
 FOOT

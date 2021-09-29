@@ -2250,10 +2250,11 @@ static CURLcode nss_connect_common(struct Curl_easy *data,
   case CURLE_OK:
     break;
   case CURLE_AGAIN:
+    /* CURLE_AGAIN in non-blocking mode is not an error */
     if(!blocking)
-      /* CURLE_AGAIN in non-blocking mode is not an error */
       return CURLE_OK;
-    /* FALLTHROUGH */
+    else
+      return result;
   default:
     return result;
   }

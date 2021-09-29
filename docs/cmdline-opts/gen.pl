@@ -45,6 +45,19 @@ my %redirlong;
 my %protolong;
 my %catlong;
 
+use POSIX qw(strftime);
+my $date = strftime "%b %e %Y", localtime;
+my $version = "unknown";
+
+open(INC, "<../../include/curl/curlver.h");
+while(<INC>) {
+    if($_ =~ /^#define LIBCURL_VERSION \"([0-9.]*)/) {
+        $version = $1;
+        last;
+    }
+}
+close(INC);
+
 # get the long name version, return the man page string
 sub manpageify {
     my ($k)=@_;
@@ -63,6 +76,12 @@ sub manpageify {
 sub printdesc {
     my @desc = @_;
     for my $d (@desc) {
+        if($d =~ /\(Added in ([0-9.]+)\)/i) {
+            my $ver = $1;
+            if(too_old($ver)) {
+                $d =~ s/ *\(Added in $ver\)//gi;
+            }
+        }
         if($d !~ /^.\\"/) {
             # **bold**
             $d =~ s/\*\*([^ ]*)\*\*/\\fB$1\\fP/g;
@@ -114,8 +133,29 @@ sub protocols {
     }
 }
 
+sub too_old {
+    my ($version)=@_;
+    my $a = 999999;
+    if($version =~ /^(\d+)\.(\d+)\.(\d+)/) {
+        $a = $1 * 1000 + $2 * 10 + $3;
+    }
+    elsif($version =~ /^(\d+)\.(\d+)/) {
+        $a = $1 * 1000 + $2 * 10;
+    }
+    if($a < 7300) {
+        # we consider everything before 7.30.0 to be too old to mention
+        # specific changes for
+        return 1;
+    }
+    return 0;
+}
+
 sub added {
     my ($standalone, $data)=@_;
+    if(too_old($data)) {
+        # don't mention ancient additions
+        return "";
+    }
     if($standalone) {
         return ".SH \"ADDED\"\nAdded in curl version $data\n";
     }
@@ -193,6 +233,10 @@ sub single {
             }
             if(!$examples[0]) {
                 print STDERR "$f:$line:1:ERROR: no 'Example:' present\n";
+                exit 2;
+            }
+            if(!$added) {
+                print STDERR "$f:$line:1:ERROR: no 'Added:' version present\n";
                 exit 2;
             }
             last;
@@ -365,6 +409,8 @@ sub header {
     open(F, "<:crlf", "$f");
     my @d;
     while(<F>) {
+        s/%DATE/$date/g;
+        s/%VERSION/$version/g;
         push @d, $_;
     }
     close(F);

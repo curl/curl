@@ -150,7 +150,7 @@ static void setup_des_key(const unsigned char *key_56,
   DES_set_odd_parity(&key);
 
   /* Set the key */
-  DES_set_key(&key, ks);
+  DES_set_key_unchecked(&key, ks);
 }
 
 #elif defined(USE_GNUTLS)

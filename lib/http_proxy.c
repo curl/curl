@@ -904,7 +904,8 @@ static CURLcode CONNECT(struct Curl_easy *data,
         h->write_waker = NULL;
       }
     }
-      /* FALLTHROUGH */
+    break;
+
     default:
       break;
     }

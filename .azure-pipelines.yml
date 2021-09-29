@@ -121,14 +121,14 @@ stages:
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2
           configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --with-libssh2 --with-openssl
-          tests: ~571 ~612 ~1056 ~1299 !SCP
+          tests: ~571 ~612 ~1056 ~1299
         msys2_mingw64_debug_openssl:
           name: 64-bit OpenSSL/libssh2
           container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
           configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --with-libssh2 --with-openssl
-          tests: ~571 ~612 ~1056 ~1299 !SCP
+          tests: ~571 ~612 ~1056 ~1299
         msys1_mingw_debug:
           name: 32-bit (legacy)
           container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys1-mingw:ltsc2019
@@ -153,14 +153,14 @@ stages:
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2
           configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
-          tests: ~165 ~310 ~571 ~612 ~1056 ~1299 ~1448 ~2034 ~2037 ~2041 ~2046 ~2047 ~3000 ~3001 !SCP
+          tests: ~165 ~310 ~571 ~612 ~1056 ~1299 ~1448 ~2034 ~2037 ~2041 ~2046 ~2047 ~3000 ~3001
         msys2_mingw64_debug_schannel:
           name: 64-bit Schannel/SSPI/WinIDN/libssh2
           container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
           configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
-          tests: ~165 ~310 ~571 ~612 ~1056 ~1299 ~1448 ~2034 ~2037 ~2041 ~2046 ~2047 ~3000 ~3001 !SCP
+          tests: ~165 ~310 ~571 ~612 ~1056 ~1299 ~1448 ~2034 ~2037 ~2041 ~2046 ~2047 ~3000 ~3001
         msys1_mingw_debug_schannel:
           name: 32-bit Schannel/SSPI/WinIDN (legacy)
           container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys1-mingw:ltsc2019
@@ -203,4 +203,4 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "-u -vc /usr/bin/curl.exe -r -rm $(tests)"
+        TFLAGS: "-r -rm -u !SCP $(tests)"

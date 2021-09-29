@@ -6,6 +6,7 @@ See-also: range
 Category: connection
 Example: -C - $URL
 Example: -C 400 $URL
+Added: 4.8
 ---
 Continue/Resume a previous file transfer at the given offset. The given offset
 is the exact number of bytes that will be skipped, counting from the beginning

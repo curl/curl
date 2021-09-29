@@ -5,6 +5,7 @@ Protocols: TLS
 See-also: proxy-insecure cacert
 Category: tls
 Example: --insecure $URL
+Added: 7.10
 ---
 By default, every SSL connection curl makes is verified to be secure. This
 option allows curl to proceed and operate even for server connections

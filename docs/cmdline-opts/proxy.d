@@ -4,13 +4,14 @@ Arg: [protocol://]host[:port]
 Help: Use this proxy
 Category: proxy
 Example: --proxy http://proxy.example $URL
+Added: 4.0
 ---
 Use the specified proxy.
 
 The proxy string can be specified with a protocol:// prefix. No protocol
 specified or http:// will be treated as HTTP proxy. Use socks4://, socks4a://,
 socks5:// or socks5h:// to request a specific SOCKS version to be used.
-(The protocol support was added in curl 7.21.7)
+(Added in 7.21.7)
 
 HTTPS proxy support via https:// protocol prefix was added in 7.52.0 for
 OpenSSL, GnuTLS and NSS.

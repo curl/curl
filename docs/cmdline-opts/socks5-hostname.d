@@ -11,8 +11,8 @@ the port number is not specified, it is assumed at port 1080.
 This option overrides any previous use of --proxy, as they are mutually
 exclusive.
 
-Since 7.21.7, this option is superfluous since you can specify a socks5
-hostname proxy with --proxy using a socks5h:// protocol prefix.
+This option is superfluous since you can specify a socks5 hostname proxy with
+--proxy using a socks5h:// protocol prefix. (Added in 7.21.7)
 
 Since 7.52.0, --preproxy can be used to specify a SOCKS proxy at the same time
 --proxy is used with an HTTP/HTTPS proxy. In such a case curl first connects to
