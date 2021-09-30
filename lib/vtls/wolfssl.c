@@ -1182,7 +1182,6 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
 #ifdef KEEP_PEER_CERT
   SSLSUPP_PINNEDPUBKEY |
 #endif
-  SSLSUPP_TLS13_CIPHERSUITES |
   SSLSUPP_SSL_CTX,
 
   sizeof(struct ssl_backend_data),
