@@ -493,6 +493,7 @@ HEAD
         print $line;
     }
     print <<FOOT
+  { NULL, NULL, CURLHELP_HIDDEN }
 };
 FOOT
         ;

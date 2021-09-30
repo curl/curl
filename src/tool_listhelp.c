@@ -760,4 +760,5 @@ const struct helptxt helptext[] = {
   {"    --xattr",
    "Store metadata in extended file attributes",
    CURLHELP_MISC},
+  { NULL, NULL, CURLHELP_HIDDEN }
 };
