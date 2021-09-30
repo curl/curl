@@ -436,9 +436,25 @@ while (<TXT>) {
       last if (/\*\*\*\*\* END LICENSE BLOCK \*\*\*\*\*/);
     }
   }
-  elsif(/^# (Issuer|Serial Number|Subject|Not Valid Before|Not Valid After |Fingerprint \(MD5\)|Fingerprint \(SHA1\)):/) {
+# Not Valid After : Thu Sep 30 14:01:15 2021
+  elsif(/^# Not Valid After : (.*)/) {
+      my $stamp = $1;
+      use Time::Piece;
+      my $t = Time::Piece->strptime
+          ($stamp, "%a %b %d %H:%M:%S %Y");
+      my $delta = ($t->epoch - time()); # negative means no longer valid
+      if($delta < 0) {
+          $skipnum++;
+          report "Skipping: $caname is not valid anymore" if ($opt_v);
+          $valid = 0;
+      }
+      else {
+          $valid = 1;
+      }
+      next;
+  }
+  elsif(/^# (Issuer|Serial Number|Subject|Not Valid Before|Fingerprint \(MD5\)|Fingerprint \(SHA1\)):/) {
       push @precert, $_;
-      $valid = 1;
       next;
   }
   elsif(/^#|^\s*$/) {
