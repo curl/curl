@@ -33,7 +33,6 @@ set(signature_call_conv)
 if(HAVE_WINDOWS_H)
   add_header_include(HAVE_WINSOCK2_H "winsock2.h")
   add_header_include(HAVE_WINDOWS_H "windows.h")
-  add_header_include(HAVE_WINSOCK_H "winsock.h")
   set(_source_epilogue
       "${_source_epilogue}\n#ifndef WIN32_LEAN_AND_MEAN\n#define WIN32_LEAN_AND_MEAN\n#endif")
   set(signature_call_conv "PASCAL")

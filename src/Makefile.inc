@@ -73,6 +73,7 @@ CURL_CFILES = \
   tool_homedir.c \
   tool_hugehelp.c \
   tool_libinfo.c \
+  tool_listhelp.c \
   tool_main.c \
   tool_msgs.c \
   tool_operate.c \

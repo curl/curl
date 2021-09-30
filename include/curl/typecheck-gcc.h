@@ -364,6 +364,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_INTERLEAVEDATA ||                                      \
    (option) == CURLOPT_IOCTLDATA ||                                           \
    (option) == CURLOPT_OPENSOCKETDATA ||                                      \
+   (option) == CURLOPT_PREREQDATA ||                                          \
    (option) == CURLOPT_PROGRESSDATA ||                                        \
    (option) == CURLOPT_READDATA ||                                            \
    (option) == CURLOPT_SEEKDATA ||                                            \

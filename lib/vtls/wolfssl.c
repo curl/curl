@@ -202,6 +202,43 @@ static int do_file_type(const char *type)
   return -1;
 }
 
+#ifdef HAVE_LIBOQS
+struct group_name_map {
+  const word16 group;
+  const char   *name;
+};
+
+static const struct group_name_map gnm[] = {
+  { WOLFSSL_KYBER_LEVEL1, "KYBER_LEVEL1" },
+  { WOLFSSL_KYBER_LEVEL3, "KYBER_LEVEL3" },
+  { WOLFSSL_KYBER_LEVEL5, "KYBER_LEVEL5" },
+  { WOLFSSL_NTRU_HPS_LEVEL1, "NTRU_HPS_LEVEL1" },
+  { WOLFSSL_NTRU_HPS_LEVEL3, "NTRU_HPS_LEVEL3" },
+  { WOLFSSL_NTRU_HPS_LEVEL5, "NTRU_HPS_LEVEL5" },
+  { WOLFSSL_NTRU_HRSS_LEVEL3, "NTRU_HRSS_LEVEL3" },
+  { WOLFSSL_SABER_LEVEL1, "SABER_LEVEL1" },
+  { WOLFSSL_SABER_LEVEL3, "SABER_LEVEL3" },
+  { WOLFSSL_SABER_LEVEL5, "SABER_LEVEL5" },
+  { WOLFSSL_KYBER_90S_LEVEL1, "KYBER_90S_LEVEL1" },
+  { WOLFSSL_KYBER_90S_LEVEL3, "KYBER_90S_LEVEL3" },
+  { WOLFSSL_KYBER_90S_LEVEL5, "KYBER_90S_LEVEL5" },
+  { WOLFSSL_P256_NTRU_HPS_LEVEL1, "P256_NTRU_HPS_LEVEL1" },
+  { WOLFSSL_P384_NTRU_HPS_LEVEL3, "P384_NTRU_HPS_LEVEL3" },
+  { WOLFSSL_P521_NTRU_HPS_LEVEL5, "P521_NTRU_HPS_LEVEL5" },
+  { WOLFSSL_P384_NTRU_HRSS_LEVEL3, "P384_NTRU_HRSS_LEVEL3" },
+  { WOLFSSL_P256_SABER_LEVEL1, "P256_SABER_LEVEL1" },
+  { WOLFSSL_P384_SABER_LEVEL3, "P384_SABER_LEVEL3" },
+  { WOLFSSL_P521_SABER_LEVEL5, "P521_SABER_LEVEL5" },
+  { WOLFSSL_P256_KYBER_LEVEL1, "P256_KYBER_LEVEL1" },
+  { WOLFSSL_P384_KYBER_LEVEL3, "P384_KYBER_LEVEL3" },
+  { WOLFSSL_P521_KYBER_LEVEL5, "P521_KYBER_LEVEL5" },
+  { WOLFSSL_P256_KYBER_90S_LEVEL1, "P256_KYBER_90S_LEVEL1" },
+  { WOLFSSL_P384_KYBER_90S_LEVEL3, "P384_KYBER_90S_LEVEL3" },
+  { WOLFSSL_P521_KYBER_90S_LEVEL5, "P521_KYBER_90S_LEVEL5" },
+  { 0, NULL }
+};
+#endif
+
 /*
  * This function loads all the client/CA certificates and CRLs. Setup the TLS
  * layer and do all necessary magic.
@@ -210,11 +247,15 @@ static CURLcode
 wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                      int sockindex)
 {
-  char *ciphers;
+  char *ciphers, *curves;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   SSL_METHOD* req_method = NULL;
   curl_socket_t sockfd = conn->sock[sockindex];
+#ifdef HAVE_LIBOQS
+  word16 oqsAlg = 0;
+  size_t idx = 0;
+#endif
 #ifdef HAVE_SNI
   bool sni = FALSE;
 #define use_sni(x)  sni = (x)
@@ -327,6 +368,26 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     infof(data, "Cipher selection: %s", ciphers);
   }
 
+  curves = SSL_CONN_CONFIG(curves);
+  if(curves) {
+
+#ifdef HAVE_LIBOQS
+    for(idx = 0; gnm[idx].name != NULL; idx++) {
+      if(strncmp(curves, gnm[idx].name, strlen(gnm[idx].name)) == 0) {
+        oqsAlg = gnm[idx].group;
+        break;
+      }
+    }
+
+    if(oqsAlg == 0)
+#endif
+    {
+      if(!SSL_CTX_set1_curves_list(backend->ctx, curves)) {
+        failf(data, "failed setting curves list: '%s'", curves);
+        return CURLE_SSL_CIPHER;
+      }
+    }
+  }
 #ifndef NO_FILESYSTEM
   /* load trusted cacert */
   if(SSL_CONN_CONFIG(CAfile)) {
@@ -438,6 +499,14 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     failf(data, "SSL: couldn't create a context (handle)!");
     return CURLE_OUT_OF_MEMORY;
   }
+
+#ifdef HAVE_LIBOQS
+  if(oqsAlg) {
+    if(wolfSSL_UseKeyShare(backend->handle, oqsAlg) != WOLFSSL_SUCCESS) {
+      failf(data, "unable to use oqs KEM");
+    }
+  }
+#endif
 
 #ifdef HAVE_ALPN
   if(conn->bits.tls_enable_alpn) {
