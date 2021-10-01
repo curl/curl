@@ -62,8 +62,8 @@ $bsetopts=`git show $start:include/curl/curl.h | grep '^  CURLOPT(' | grep -cv O
 $nsetopts = $asetopts - $bsetopts;
 
 # Number of command line options:
-$aoptions=`grep -c '{"....--' src/tool_help.c`;
-$boptions=`git show $start:src/tool_help.c | grep -c '{"....--'`;
+$aoptions=`grep -c '{"....--' src/tool_listhelp.c`;
+$boptions=`git show $start:src/tool_listhelp.c | grep -c '{"....--'`;
 $noptions=$aoptions - $boptions;
 
 # Number of files in git
