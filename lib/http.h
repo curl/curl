@@ -289,6 +289,8 @@ struct http_conn {
 #endif
 };
 
+CURLcode Curl_http_size(struct Curl_easy *data);
+
 CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                                      struct connectdata *conn,
                                      ssize_t *nread,
