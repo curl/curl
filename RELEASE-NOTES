@@ -12,15 +12,23 @@ This release includes the following changes:
  o libssh2: add SHA256 fingerprint support [4]
  o urlapi: add curl_url_strerror() [21]
  o urlapi: support UNC paths in file: URLs on Windows [20]
+ o wolfssl: allow setting of groups/curves [22]
 
 This release includes the following bugfixes:
 
+ o build: remove checks for WinSock 1 [36]
  o ci: update Lift config to match requirements of curl build [1]
  o cleanup: constify unmodified static structs [2]
  o cmake: with OpenSSL, define OPENSSL_SUPPRESS_DEPRECATED [14]
+ o cmdline-opts: made the 'Added:' field mandatory [37]
+ o connnect: use sysaddr_un from sys/un.h or custom-defined for windows [23]
  o curl-openssl: pass argument to sed single-quoted [15]
+ o curl.1: remove mentions of really old version changes [38]
+ o curl: print help descriptions in an aligned right column [16]
  o examples/imap-append: fix end-of-data check [7]
  o gen.pl: insert the current date and version in generated man page [11]
+ o lib/mk-ca-bundle.pl: skip certs passed Not Valid After date [18]
+ o lib: avoid fallthrough cases in switch statements [33]
  o libcurl.rc: switch out the copyright symbol for plain ASCII [5]
  o libssh2: Get the version at runtime if possible [12]
  o llist: remove redundant code, branch will not be executed [10]
@@ -28,6 +36,7 @@ This release includes the following bugfixes:
  o ngtcp2: fix QUIC transport parameter version [6]
  o NTLM: use DES_set_key_unchecked with OpenSSL [13]
  o tool_cb_prg: make resumed upload progress bar show better [9]
+ o tool_listhelp: easier generated with gen.pl [19]
  o vtls: Fix a memory leak if an SSL session cannot be added to the cache [8]
 
 This release includes the following known bugs:
@@ -37,13 +46,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  a1346054 on github, Alexander Chuykov, beslick5 on github, Daniel Stenberg,
-  Gisle Vanem, Gleb Ivanovsky, h1zzz on github, Harry Sintonen,
-  Jakub Zakrzewski, Joel Depooter, Jun-ya Kato, Marc Hörsken, Mats Lindestam,
-  Max Dymond, Michael Kaufmann, Momoka Yamamoto, Randall S. Becker, Ray Satiro,
+  a1346054 on github, Alexander Chuykov, Anthony Hu, beslick5 on github,
+  Daniel Gustafsson, Daniel Stenberg, Gisle Vanem, Gleb Ivanovsky,
+  h1zzz on github, Harry Sintonen, Jakub Zakrzewski, Jan Mazur, Joel Depooter,
+  Jun-ya Kato, Marcel Raad, Marc Hörsken, Mats Lindestam, Max Dymond,
+  Michael Kaufmann, Momoka Yamamoto, Randall S. Becker, Ray Satiro,
   Rikard Falkeborn, Sergey Markelov, Thomas M. DuBuisson, tlahn on github,
   Viktor Szakats, Vitaly Varyvdin,
-  (24 contributors)
+  (28 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -62,6 +72,15 @@ References to bug reports and discussions on issues:
  [13] = https://curl.se/bug/?i=7779
  [14] = https://curl.se/bug/?i=7767
  [15] = https://curl.se/bug/?i=7758
+ [16] = https://curl.se/bug/?i=7792
  [17] = https://curl.se/bug/?i=7477
+ [18] = https://curl.se/bug/?i=7801
+ [19] = https://curl.se/bug/?i=7787
  [20] = https://curl.se/bug/?i=7366
  [21] = https://curl.se/bug/?i=7605
+ [22] = https://curl.se/bug/?i=7728
+ [23] = https://curl.se/bug/?i=7737
+ [33] = https://curl.se/bug/?i=7322
+ [36] = https://curl.se/bug/?i=7778
+ [37] = https://curl.se/bug/?i=7786
+ [38] = https://curl.se/bug/?i=7786
