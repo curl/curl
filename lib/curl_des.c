@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM) && !defined(USE_OPENSSL)
+#if defined(USE_NTLM) && !defined(USE_OPENSSL) && !defined(USE_WOLFSSL)
 
 #include "curl_des.h"
 

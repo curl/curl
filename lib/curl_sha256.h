@@ -28,7 +28,14 @@
 
 extern const struct HMAC_params Curl_HMAC_SHA256[1];
 
+#ifdef USE_WOLFSSL
+/* SHA256_DIGEST_LENGTH is an enum value in wolfSSL. Need to import it from
+ * sha.h*/
+#include <wolfssl/options.h>
+#include <openssl/sha.h>
+#else
 #define SHA256_DIGEST_LENGTH 32
+#endif
 
 void Curl_sha256it(unsigned char *outbuffer, const unsigned char *input,
                    const size_t len);
