@@ -29,6 +29,13 @@
 #include "curl_sha256.h"
 #include "curl_hmac.h"
 
+#ifdef USE_WOLFSSL
+#include <wolfssl/options.h>
+#ifndef NO_SHA256
+#define USE_OPENSSL_SHA256
+#endif
+#endif
+
 #if defined(USE_OPENSSL)
 
 #include <openssl/opensslv.h>

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2015 - 2020, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2015 - 2021, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM) && !defined(USE_OPENSSL)
+#if defined(USE_NTLM) && !defined(USE_OPENSSL) && !defined(USE_WOLFSSL)
 
 #include "curl_des.h"
 
