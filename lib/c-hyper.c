@@ -299,8 +299,14 @@ static CURLcode status_line(struct Curl_easy *data,
  */
 static CURLcode empty_header(struct Curl_easy *data)
 {
-  return hyper_each_header(data, NULL, 0, NULL, 0) ?
-    CURLE_WRITE_ERROR : CURLE_OK;
+  CURLcode result = Curl_http_size(data);
+  if(!result) {
+    result = hyper_each_header(data, NULL, 0, NULL, 0) ?
+      CURLE_WRITE_ERROR : CURLE_OK;
+    if(result)
+      failf(data, "hyperstream: couldn't pass blank header");
+  }
+  return result;
 }
 
 CURLcode Curl_hyper_stream(struct Curl_easy *data,
@@ -443,11 +449,9 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       break;
     }
 
-    if(empty_header(data)) {
-      failf(data, "hyperstream: couldn't pass blank header");
-      result = CURLE_OUT_OF_MEMORY;
+    result = empty_header(data);
+    if(result)
       break;
-    }
 
     /* Curl_http_auth_act() checks what authentication methods that are
      * available and decides which one (if any) to use. It will set 'newurl'

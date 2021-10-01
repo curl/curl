@@ -2903,20 +2903,6 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
 {
   struct SingleRequest *k = &data->req;
   DEBUGASSERT(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP));
-  if(data->req.ignore_cl) {
-    k->size = k->maxdownload = -1;
-  }
-  else if(k->size != -1) {
-    /* We wait until after all headers have been received to set this so that
-       we know for sure Content-Length is valid. */
-    if(data->set.max_filesize &&
-       k->size > data->set.max_filesize) {
-      failf(data, "Maximum file size exceeded");
-      return CURLE_FILESIZE_EXCEEDED;
-    }
-    Curl_pgrsSetDownloadSize(data, k->size);
-  }
-
   if(data->req.newurl) {
     if(conn->bits.close) {
       /* Abort after the headers if "follow Location" is set
@@ -3787,6 +3773,29 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+/* Content-Length must be ignored if any Transfer-Encoding is present in the
+   response. Refer to RFC 7230 section 3.3.3 and RFC2616 section 4.4.  This is
+   figured out here after all headers have been received but before the final
+   call to the user's header callback, so that a valid content length can be
+   retrieved by the user in the final call. */
+CURLcode Curl_http_size(struct Curl_easy *data)
+{
+  struct SingleRequest *k = &data->req;
+  if(data->req.ignore_cl || k->chunk) {
+    k->size = k->maxdownload = -1;
+  }
+  else if(k->size != -1) {
+    if(data->set.max_filesize &&
+       k->size > data->set.max_filesize) {
+      failf(data, "Maximum file size exceeded");
+      return CURLE_FILESIZE_EXCEEDED;
+    }
+    Curl_pgrsSetDownloadSize(data, k->size);
+    k->maxdownload = k->size;
+  }
+  return CURLE_OK;
+}
+
 /*
  * Read any HTTP header lines from the server and pass them to the client app.
  */
@@ -3981,6 +3990,12 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         }
       }
 
+      if(!k->header) {
+        result = Curl_http_size(data);
+        if(result)
+          return result;
+      }
+
       /* At this point we have some idea about the fate of the connection.
          If we are closing the connection it may result auth failure. */
 #if defined(USE_NTLM)
@@ -4137,31 +4152,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
              reason */
           *stop_reading = TRUE;
 #endif
-        else {
-          /* If we know the expected size of this document, we set the
-             maximum download size to the size of the expected
-             document or else, we won't know when to stop reading!
-
-             Note that we set the download maximum even if we read a
-             "Connection: close" header, to make sure that
-             "Content-Length: 0" still prevents us from attempting to
-             read the (missing) response-body.
-          */
-          /* According to RFC2616 section 4.4, we MUST ignore
-             Content-Length: headers if we are now receiving data
-             using chunked Transfer-Encoding.
-          */
-          if(k->chunk)
-            k->maxdownload = k->size = -1;
-        }
-        if(-1 != k->size) {
-          /* We do this operation even if no_body is true, since this
-             data might be retrieved later with curl_easy_getinfo()
-             and its CURLINFO_CONTENT_LENGTH_DOWNLOAD option. */
-
-          Curl_pgrsSetDownloadSize(data, k->size);
-          k->maxdownload = k->size;
-        }
 
         /* If max download size is *zero* (nothing) we already have
            nothing and can safely return ok now!  But for HTTP/2, we'd
