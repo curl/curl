@@ -63,7 +63,7 @@ static const char *const srchead[]={
 /* easysrc_code statements come here */
 static const char *const srchard[]={
   "/* Here is a list of options the curl code used that cannot get generated",
-  "   as source easily. You may select to either not use them or implement",
+  "   as source easily. You may choose to either not use them or implement",
   "   them yourself.",
   "",
   NULL
