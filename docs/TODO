@@ -133,7 +133,6 @@
  16. SASL
  16.1 Other authentication mechanisms
  16.2 Add QOP support to GSSAPI authentication
- 16.3 Support binary messages (i.e.: non-base64)
 
  17. SSH protocols
  17.1 Multiplexing
@@ -901,10 +900,6 @@
  (Authentication), whilst Kerberos V5 supports both auth-int (Authentication
  with integrity protection) and auth-conf (Authentication with integrity and
  privacy protection).
-
-16.3 Support binary messages (i.e.: non-base64)
-
-  Mandatory to support LDAP SASL authentication.
 
 
 17. SSH protocols

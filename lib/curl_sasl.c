@@ -56,8 +56,8 @@
 
 /* Supported mechanisms */
 static const struct {
-  const char   *name;  /* Name */
-  size_t        len;   /* Name length */
+  const char    *name;  /* Name */
+  size_t         len;   /* Name length */
   unsigned short bit;   /* Flag bit */
 } mechtable[] = {
   { "LOGIN",        5,  SASL_MECH_LOGIN },
@@ -85,8 +85,11 @@ static const struct {
  * conn     [in]     - The connection data.
  * authused [in]     - The authentication mechanism used.
  */
-void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
+void Curl_sasl_cleanup(struct connectdata *conn, unsigned short authused)
 {
+  (void)conn;
+  (void)authused;
+
 #if defined(USE_KERBEROS5)
   /* Cleanup the gssapi structure */
   if(authused == SASL_MECH_GSSAPI) {
@@ -106,12 +109,6 @@ void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
   if(authused == SASL_MECH_NTLM) {
     Curl_auth_cleanup_ntlm(&conn->ntlm);
   }
-#endif
-
-#if !defined(USE_KERBEROS5) && !defined(USE_NTLM)
-  /* Reserved for future use */
-  (void)conn;
-  (void)authused;
 #endif
 }
 
@@ -189,16 +186,35 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
  *
  * Initializes the SASL structure.
  */
-void Curl_sasl_init(struct SASL *sasl, const struct SASLproto *params)
+void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
+                    const struct SASLproto *params)
 {
+  unsigned long auth = data->set.httpauth;
+
   sasl->params = params;           /* Set protocol dependent parameters */
   sasl->state = SASL_STOP;         /* Not yet running */
+  sasl->curmech = NULL;            /* No mechanism yet. */
   sasl->authmechs = SASL_AUTH_NONE; /* No known authentication mechanism yet */
-  sasl->prefmech = SASL_AUTH_DEFAULT; /* Prefer all mechanisms */
-  sasl->authused = SASL_AUTH_NONE; /* No the authentication mechanism used */
+  sasl->prefmech = params->defmechs; /* Default preferred mechanisms */
+  sasl->authused = SASL_AUTH_NONE; /* The authentication mechanism used */
   sasl->resetprefs = TRUE;         /* Reset prefmech upon AUTH parsing. */
   sasl->mutual_auth = FALSE;       /* No mutual authentication (GSSAPI only) */
   sasl->force_ir = FALSE;          /* Respect external option */
+
+  if(auth != CURLAUTH_BASIC) {
+    sasl->resetprefs = FALSE;
+    sasl->prefmech = SASL_AUTH_NONE;
+    if(auth & CURLAUTH_BASIC)
+      sasl->prefmech |= SASL_MECH_PLAIN | SASL_MECH_LOGIN;
+    if(auth & CURLAUTH_DIGEST)
+      sasl->prefmech |= SASL_MECH_DIGEST_MD5;
+    if(auth & CURLAUTH_NTLM)
+      sasl->prefmech |= SASL_MECH_NTLM;
+    if(auth & CURLAUTH_BEARER)
+      sasl->prefmech |= SASL_MECH_OAUTHBEARER | SASL_MECH_XOAUTH2;
+    if(auth & CURLAUTH_GSSAPI)
+      sasl->prefmech |= SASL_MECH_GSSAPI;
+  }
 }
 
 /*
@@ -247,40 +263,45 @@ static void state(struct SASL *sasl, struct Curl_easy *data,
 static CURLcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
                                    struct bufref *out)
 {
-  unsigned char *msg;
-  size_t msglen;
-  char *serverdata = NULL;
   CURLcode result = CURLE_OK;
 
-  sasl->params->getmessage(data->state.buffer, &serverdata);
-  if(!serverdata)
-    result = CURLE_BAD_CONTENT_ENCODING;
-  else if(!*serverdata || *serverdata == '=')
-    Curl_bufref_set(out, NULL, 0, NULL);
-  else {
-    result = Curl_base64_decode(serverdata, &msg, &msglen);
-    if(!result)
-      Curl_bufref_set(out, msg, msglen, curl_free);
+  result = sasl->params->getmessage(data, out);
+  if(!result && (sasl->params->flags & SASL_FLAG_BASE64)) {
+    unsigned char *msg;
+    size_t msglen;
+    const char *serverdata = (const char *) Curl_bufref_ptr(out);
+
+    if(!*serverdata || *serverdata == '=')
+      Curl_bufref_set(out, NULL, 0, NULL);
+    else {
+      result = Curl_base64_decode(serverdata, &msg, &msglen);
+      if(!result)
+        Curl_bufref_set(out, msg, msglen, curl_free);
+    }
   }
   return result;
 }
 
 /* Encode the outgoing SASL message. */
-static CURLcode build_message(struct Curl_easy *data, struct bufref *msg)
+static CURLcode build_message(struct SASL *sasl, struct Curl_easy *data,
+                              struct bufref *msg)
 {
   CURLcode result = CURLE_OK;
-  char *base64;
-  size_t base64len;
 
-  if(!Curl_bufref_ptr(msg))             /* Empty message. */
-    Curl_bufref_set(msg, "", 0, NULL);
-  else if(!Curl_bufref_len(msg))        /* Explicit empty response. */
-    Curl_bufref_set(msg, "=", 1, NULL);
-  else {
-    result = Curl_base64_encode(data, (const char *) Curl_bufref_ptr(msg),
-                                Curl_bufref_len(msg), &base64, &base64len);
-    if(!result)
-      Curl_bufref_set(msg, base64, base64len, curl_free);
+  if(sasl->params->flags & SASL_FLAG_BASE64) {
+    if(!Curl_bufref_ptr(msg))                   /* Empty message. */
+      Curl_bufref_set(msg, "", 0, NULL);
+    else if(!Curl_bufref_len(msg))              /* Explicit empty response. */
+      Curl_bufref_set(msg, "=", 1, NULL);
+    else {
+      char *base64;
+      size_t base64len;
+
+      result = Curl_base64_encode(data, (const char *) Curl_bufref_ptr(msg),
+                                  Curl_bufref_len(msg), &base64, &base64len);
+      if(!result)
+        Curl_bufref_set(msg, base64, base64len, curl_free);
+    }
   }
 
   return result;
@@ -310,11 +331,11 @@ bool Curl_sasl_can_authenticate(struct SASL *sasl, struct connectdata *conn)
  * Calculate the required login details for SASL authentication.
  */
 CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
-                         struct connectdata *conn,
                          bool force_ir, saslprogress *progress)
 {
   CURLcode result = CURLE_OK;
-  unsigned int enabledmechs;
+  struct connectdata *conn = data->conn;
+  unsigned short enabledmechs;
   const char *mech = NULL;
   struct bufref resp;
   saslstate state1 = SASL_STOP;
@@ -471,16 +492,16 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
   }
 
   if(!result && mech) {
+    sasl->curmech = mech;
     if(Curl_bufref_ptr(&resp))
-      result = build_message(data, &resp);
+      result = build_message(sasl, data, &resp);
 
     if(sasl->params->maxirlen &&
        strlen(mech) + Curl_bufref_len(&resp) > sasl->params->maxirlen)
       Curl_bufref_free(&resp);
 
     if(!result)
-      result = sasl->params->sendauth(data, conn, mech,
-                                      (const char *) Curl_bufref_ptr(&resp));
+      result = sasl->params->sendauth(data, mech, &resp);
 
     if(!result) {
       *progress = SASL_INPROGRESS;
@@ -498,10 +519,10 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
  * Continue the authentication.
  */
 CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
-                            struct connectdata *conn,
                             int code, saslprogress *progress)
 {
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
   saslstate newstate = SASL_FINAL;
   struct bufref resp;
   const char * const hostname = SSL_HOST_NAME();
@@ -574,7 +595,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
       result = Curl_auth_create_digest_md5_message(data, &serverdata,
                                                    conn->user, conn->passwd,
                                                    service, &resp);
-    newstate = SASL_DIGESTMD5_RESP;
+    if(!result && (sasl->params->flags & SASL_FLAG_BASE64))
+      newstate = SASL_DIGESTMD5_RESP;
     break;
   case SASL_DIGESTMD5_RESP:
     /* Keep response NULL to output an empty line. */
@@ -691,7 +713,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     sasl->authmechs ^= sasl->authused;
 
     /* Start an alternative SASL authentication */
-    return Curl_sasl_start(sasl, data, conn, sasl->force_ir, progress);
+    return Curl_sasl_start(sasl, data, sasl->force_ir, progress);
   default:
     failf(data, "Unsupported SASL authentication mechanism");
     result = CURLE_UNSUPPORTED_PROTOCOL;  /* Should not happen */
@@ -703,14 +725,13 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   switch(result) {
   case CURLE_BAD_CONTENT_ENCODING:
     /* Cancel dialog */
-    result = sasl->params->sendcont(data, conn, "*");
+    result = sasl->params->cancelauth(data, sasl->curmech);
     newstate = SASL_CANCEL;
     break;
   case CURLE_OK:
-    result = build_message(data, &resp);
+    result = build_message(sasl, data, &resp);
     if(!result)
-      result = sasl->params->sendcont(data, conn,
-                                      (const char *) Curl_bufref_ptr(&resp));
+      result = sasl->params->contauth(data, sasl->curmech, &resp);
     break;
   default:
     newstate = SASL_STOP;    /* Stop on error */
