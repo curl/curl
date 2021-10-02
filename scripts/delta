@@ -63,7 +63,7 @@ $nsetopts = $asetopts - $bsetopts;
 
 # Number of command line options:
 $aoptions=`grep -c '{"....--' src/tool_listhelp.c`;
-$boptions=`git show $start:src/tool_listhelp.c | grep -c '{"....--'`;
+$boptions=`git show $start:src/tool_listhelp.c 2>/dev/null | grep -c '{"....--'`;
 $noptions=$aoptions - $boptions;
 
 # Number of files in git
