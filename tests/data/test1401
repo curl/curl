@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
                                            (long)CURLPROTO_HTTP);
 
   /* Here is a list of options the curl code used that cannot get generated
-     as source easily. You may select to either not use them or implement
+     as source easily. You may choose to either not use them or implement
      them yourself.
 
   CURLOPT_WRITEDATA set to a objectpointer
