@@ -49,7 +49,14 @@
      in NTLM type-3 messages.
  */
 
-#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
+#if defined(USE_OPENSSL)
+  #include <openssl/opensslconf.h>
+  #if !defined(OPENSSL_NO_DES) && !defined(OPENSSL_NO_DEPRECATED_3_0)
+    #define USE_OPENSSL_DES
+  #endif
+#endif
+
+#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
 
 #ifdef USE_WOLFSSL
 #include <wolfssl/options.h>
@@ -97,7 +104,7 @@
 #elif defined(USE_WIN32_CRYPTO)
 #  include <wincrypt.h>
 #else
-#  error "Can't compile NTLM support without a crypto library."
+#  error "Can't compile NTLM support without a crypto library with DES."
 #endif
 
 #include "urldata.h"
@@ -133,7 +140,7 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
   key[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
 }
 
-#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
+#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
 /*
  * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.  The
  * key schedule ks is also set.
@@ -362,7 +369,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results)
 {
-#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
+#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
   DES_key_schedule ks;
 
   setup_des_key(keys, DESKEY(ks));
@@ -420,7 +427,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(struct Curl_easy *data,
   {
     /* Create LanManager hashed password. */
 
-#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
+#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
     DES_key_schedule ks;
 
     setup_des_key(pw, DESKEY(ks));
