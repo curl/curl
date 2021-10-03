@@ -236,6 +236,8 @@ struct OperationConfig {
   long retry_delay;         /* delay between retries (in seconds) */
   long retry_maxtime;       /* maximum time to keep retrying */
 
+  long tcp_maxseg;          /* TCP maximum segment size (MSS) */
+
   char *ftp_account;        /* for ACCT */
   char *ftp_alternative_to_user;  /* send command if USER/PASS fails */
   int ftp_filemethod;

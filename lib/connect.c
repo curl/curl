@@ -1203,6 +1203,16 @@ static CURLcode singleipconnect(struct Curl_easy *data,
 
   Curl_sndbufset(sockfd);
 
+#ifdef TCP_MAXSEG
+  if(is_tcp && data->set.tcp_maxseg >= 0) {
+    int optval = data->set.tcp_maxseg;
+    if(setsockopt(sockfd, IPPROTO_TCP, TCP_MAXSEG,
+          (void *)&optval, sizeof(optval)) < 0) {
+      infof(data, "Failed to set TCP_MAXSEG on fd %d", sockfd);
+    }
+  }
+#endif
+
   if(is_tcp && data->set.tcp_keepalive)
     tcpkeepalive(data, sockfd);
 

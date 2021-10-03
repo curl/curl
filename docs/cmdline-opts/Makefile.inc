@@ -236,6 +236,7 @@ DPAGES = \
   styled-output.d \
   suppress-connect-headers.d \
   tcp-fastopen.d \
+  tcp-maxseg.d \
   tcp-nodelay.d \
   telnet-option.d \
   tftp-blksize.d \

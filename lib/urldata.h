@@ -1765,6 +1765,8 @@ struct UserDefined {
   long tcp_keepidle;     /* seconds in idle before sending keepalive probe */
   long tcp_keepintvl;    /* seconds between TCP keepalive probes */
 
+  long tcp_maxseg;       /* MSS for outgoing packets */
+
   size_t maxconnects;    /* Max idle connections in the connection cache */
 
   long expect_100_timeout; /* in milliseconds */

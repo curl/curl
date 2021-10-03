@@ -2126,6 +2126,9 @@ typedef enum {
   /* Data passed to the CURLOPT_PREREQFUNCTION callback */
   CURLOPT(CURLOPT_PREREQDATA, CURLOPTTYPE_CBPOINT, 313),
 
+  /* TCP maximum segment size (MSS) as set through TCP_MAXSEG */
+  CURLOPT(CURLOPT_TCP_MAXSEG, CURLOPTTYPE_LONG, 314),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

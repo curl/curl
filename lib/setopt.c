@@ -2840,6 +2840,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.tcp_keepintvl = arg;
     break;
+  case CURLOPT_TCP_MAXSEG:
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.tcp_maxseg = arg;
+    break;
   case CURLOPT_TCP_FASTOPEN:
 #if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN) || \
    defined(TCP_FASTOPEN_CONNECT)

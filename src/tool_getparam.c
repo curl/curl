@@ -138,6 +138,7 @@ static const struct LongShort aliases[]= {
   {"$h", "retry-delay",              ARG_STRING},
   {"$i", "retry-max-time",           ARG_STRING},
   {"$k", "proxy-negotiate",          ARG_BOOL},
+  {"$l", "tcp-maxseg",               ARG_STRING},
   {"$m", "ftp-account",              ARG_STRING},
   {"$n", "proxy-anyauth",            ARG_BOOL},
   {"$o", "trace-time",               ARG_BOOL},
@@ -988,6 +989,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
 
+      case 'l': /* --tcp-maxseg */
+        err = str2unummax(&config->tcp_maxseg, nextarg, 65535);
+        if(err)
+          return err;
+        break;
       case 'm': /* --ftp-account */
         GetStr(&config->ftp_account, nextarg);
         break;

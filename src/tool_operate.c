@@ -1914,6 +1914,10 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         else
           my_setopt(curl, CURLOPT_TCP_KEEPALIVE, 0L);
 
+        /* XXX */
+        if(config->tcp_maxseg >= 0)
+          my_setopt(curl, CURLOPT_TCP_MAXSEG, config->tcp_maxseg);
+
         /* curl 7.20.0 */
         if(config->tftp_blksize)
           my_setopt(curl, CURLOPT_TFTP_BLKSIZE, config->tftp_blksize);
