@@ -343,28 +343,29 @@ endif()
 
 # check SSL libraries
 # TODO support GnuTLS
+option(CURL_ENABLE_SSL "Enable SSL support" ON)
 if(CMAKE_USE_WINSSL)
   message(FATAL_ERROR "The cmake option CMAKE_USE_WINSSL was renamed to CMAKE_USE_SCHANNEL.")
 endif()
 
 if(APPLE)
-  option(CMAKE_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF)
+  cmake_dependent_option(CMAKE_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 endif()
 if(WIN32)
-  option(CMAKE_USE_SCHANNEL "enable Windows native SSL/TLS" OFF)
+  cmake_dependent_option(CMAKE_USE_SCHANNEL "enable Windows native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
   cmake_dependent_option(CURL_WINDOWS_SSPI "Use windows libraries to allow NTLM authentication without openssl" ON
     CMAKE_USE_SCHANNEL OFF)
 endif()
-option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF)
-option(CMAKE_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF)
-option(CMAKE_USE_NSS "Enable NSS for SSL/TLS" OFF)
-option(CMAKE_USE_WOLFSSL "enable wolfSSL for SSL/TLS" OFF)
+cmake_dependent_option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CMAKE_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CMAKE_USE_NSS "Enable NSS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CMAKE_USE_WOLFSSL "enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 
 set(openssl_default ON)
 if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_SCHANNEL OR CMAKE_USE_MBEDTLS OR CMAKE_USE_NSS OR CMAKE_USE_WOLFSSL)
   set(openssl_default OFF)
 endif()
-option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default})
+cmake_dependent_option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default} CURL_ENABLE_SSL OFF)
 option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
 
 count_true(enabled_ssl_options_count
