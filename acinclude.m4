@@ -2027,8 +2027,8 @@ dnl regarding the paths this will scan:
 dnl /etc/ssl/certs/ca-certificates.crt Debian systems
 dnl /etc/pki/tls/certs/ca-bundle.crt Redhat and Mandriva
 dnl /usr/share/ssl/certs/ca-bundle.crt old(er) Redhat
-dnl /usr/local/share/certs/ca-root-nss.crt FreeBSD
-dnl /etc/ssl/cert.pem OpenBSD, FreeBSD (symlink)
+dnl /usr/local/share/certs/ca-root-nss.crt FreeBSD, MidnightBSD
+dnl /etc/ssl/cert.pem OpenBSD, FreeBSD, MidnightBSD (symlink)
 dnl /etc/ssl/certs/ (ca path) SUSE
 
 AC_DEFUN([CURL_CHECK_CA_BUNDLE], [

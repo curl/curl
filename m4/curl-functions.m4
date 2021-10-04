@@ -2050,6 +2050,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         dnl hpux 11.11 and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
+      midnightbsd*)
+        dnl all MidnightBSD versions
+        tst_tsafe_getaddrinfo="yes"
+        ;;
       netbsd[[123]].*)
         dnl netbsd 3.X and older
         tst_tsafe_getaddrinfo="no"
