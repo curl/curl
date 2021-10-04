@@ -46,8 +46,8 @@
 #include <stdio.h>
 #include <limits.h>
 
-#if defined(__FreeBSD__) && (__FreeBSD__ >= 2)
-/* Needed for __FreeBSD_version symbol definition */
+#if (defined(__FreeBSD__) && (__FreeBSD__ >= 2)) || defined(__MidnightBSD__)
+/* Needed for __FreeBSD_version or __MidnightBSD_version symbol definition */
 #include <osreldate.h>
 #endif
 
@@ -73,6 +73,7 @@
     defined(ANDROID) || defined(__ANDROID__) || defined(__OpenBSD__) || \
     defined(__CYGWIN__) || defined(AMIGA) || defined(__NuttX__) || \
    (defined(__FreeBSD_version) && (__FreeBSD_version < 800000)) || \
+   (defined(__MidnightBSD_version) && (__MidnightBSD_version < 100000)) || \
     defined(__VXWORKS__)
 #include <sys/select.h>
 #endif
