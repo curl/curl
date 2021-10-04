@@ -26,10 +26,27 @@
 
 #include <curl/curl.h>
 #include "version_win32.h"
+#include "warnless.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
+
+/* This Unicode version struct works for VerifyVersionInfoW (OSVERSIONINFOEXW)
+   and RtlVerifyVersionInfo (RTLOSVERSIONINFOEXW) */
+struct OUR_OSVERSIONINFOEXW {
+  ULONG  dwOSVersionInfoSize;
+  ULONG  dwMajorVersion;
+  ULONG  dwMinorVersion;
+  ULONG  dwBuildNumber;
+  ULONG  dwPlatformId;
+  WCHAR  szCSDVersion[128];
+  USHORT wServicePackMajor;
+  USHORT wServicePackMinor;
+  USHORT wSuiteMask;
+  UCHAR  wProductType;
+  UCHAR  wReserved;
+};
 
 /*
  * curlx_verify_windows_version()
@@ -152,11 +169,22 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   }
 #else
   ULONGLONG cm = 0;
-  OSVERSIONINFOEX osver;
+  struct OUR_OSVERSIONINFOEXW osver;
   BYTE majorCondition;
   BYTE minorCondition;
   BYTE spMajorCondition;
   BYTE spMinorCondition;
+
+  typedef LONG (APIENTRY *RTLVERIFYVERSIONINFO_FN)
+    (struct OUR_OSVERSIONINFOEXW *, ULONG, ULONGLONG);
+  static RTLVERIFYVERSIONINFO_FN pRtlVerifyVersionInfo;
+  static bool onetime = true; /* safe because first call is during init */
+
+  if(onetime) {
+    pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
+      (GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo")));
+    onetime = false;
+  }
 
   switch(condition) {
   case VERSION_LESS_THAN:
@@ -214,10 +242,23 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   if(platform != PLATFORM_DONT_CARE)
     cm = VerSetConditionMask(cm, VER_PLATFORMID, VER_EQUAL);
 
-  if(VerifyVersionInfo(&osver, (VER_MAJORVERSION | VER_MINORVERSION |
-                                VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
-                       cm))
-    matched = TRUE;
+  /* Later versions of Windows have version functions that may not return the
+     real version of Windows unless the application is so manifested. We prefer
+     the real version always, so we use the Rtl variant of the function when
+     possible. Note though the function signatures have underlying fundamental
+     types that are the same, the return values are different. */
+  if(pRtlVerifyVersionInfo) {
+    matched = !pRtlVerifyVersionInfo(&osver,
+      (VER_MAJORVERSION | VER_MINORVERSION |
+       VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
+      cm);
+  }
+  else {
+    matched = !!VerifyVersionInfoW((OSVERSIONINFOEXW *)&osver,
+      (VER_MAJORVERSION | VER_MINORVERSION |
+       VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
+      cm);
+  }
 #endif
 
   return matched;
