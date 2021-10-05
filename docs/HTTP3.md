@@ -2,7 +2,7 @@
 
 ## Resources
 
-[HTTP/3 Explained](https://daniel.haxx.se/http3-explained/) - the online free
+[HTTP/3 Explained](https://http3-explained.haxx.se/en/) - the online free
 book describing the protocols involved.
 
 [QUIC implementation](https://github.com/curl/curl/wiki/QUIC-implementation) -
