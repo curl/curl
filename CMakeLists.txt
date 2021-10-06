@@ -352,7 +352,7 @@ if(APPLE)
   cmake_dependent_option(CMAKE_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF ENABLE_SSL OFF)
 endif()
 if(WIN32)
-  cmake_dependent_option_option(CMAKE_USE_SCHANNEL "enable Windows native SSL/TLS" OFF ENABLE_SSL OFF)
+  cmake_dependent_option(CMAKE_USE_SCHANNEL "enable Windows native SSL/TLS" OFF ENABLE_SSL OFF)
   cmake_dependent_option(CURL_WINDOWS_SSPI "Use windows libraries to allow NTLM authentication without openssl" ON
     CMAKE_USE_SCHANNEL OFF)
 endif()
