@@ -2,12 +2,13 @@ curl and libcurl 7.80.0
 
  Public curl releases:         204
  Command line options:         243
- curl_easy_setopt() options:   293
+ curl_easy_setopt() options:   294
  Public functions in libcurl:  86
- Contributors:                 2496
+ Contributors:                 2505
 
 This release includes the following changes:
 
+ o CURLOPT_MAXLIFETIME_CONN: maximum allowed lifetime for conn reuse [25]
  o CURLOPT_PREREQFUNCTION: add new callback [17]
  o libssh2: add SHA256 fingerprint support [4]
  o urlapi: add curl_url_strerror() [21]
@@ -16,6 +17,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o BINDINGS: URL updates [30]
  o build: remove checks for WinSock 1 [36]
  o ci: update Lift config to match requirements of curl build [1]
  o cleanup: constify unmodified static structs [2]
@@ -27,17 +29,24 @@ This release includes the following bugfixes:
  o curl: print help descriptions in an aligned right column [16]
  o examples/imap-append: fix end-of-data check [7]
  o gen.pl: insert the current date and version in generated man page [11]
+ o HTTP3: fix the HTTP/3 Explained book link [27]
+ o http: fix Basic auth with empty name field in URL [24]
  o lib/mk-ca-bundle.pl: skip certs passed Not Valid After date [18]
  o lib: avoid fallthrough cases in switch statements [33]
  o libcurl.rc: switch out the copyright symbol for plain ASCII [5]
  o libssh2: Get the version at runtime if possible [12]
  o llist: remove redundant code, branch will not be executed [10]
+ o misc: fix a few issues on MidnightBSD [28]
  o misc: fix typos in docs and comments [3]
  o ngtcp2: fix QUIC transport parameter version [6]
  o NTLM: use DES_set_key_unchecked with OpenSSL [13]
+ o sasl: binary messages [31]
+ o scripts/delta: count command line options in the new file
  o tool_cb_prg: make resumed upload progress bar show better [9]
  o tool_listhelp: easier generated with gen.pl [19]
+ o tool_main: fix typo in comment [29]
  o vtls: Fix a memory leak if an SSL session cannot be added to the cache [8]
+ o wolfssl: use for SHA256, MD4, MD5, and setting DES odd parity [32]
 
 This release includes the following known bugs:
 
@@ -46,14 +55,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  a1346054 on github, Alexander Chuykov, Anthony Hu, beslick5 on github,
-  Daniel Gustafsson, Daniel Stenberg, Gisle Vanem, Gleb Ivanovsky,
-  h1zzz on github, Harry Sintonen, Jakub Zakrzewski, Jan Mazur, Joel Depooter,
-  Jun-ya Kato, Marcel Raad, Marc Hörsken, Mats Lindestam, Max Dymond,
-  Michael Kaufmann, Momoka Yamamoto, Randall S. Becker, Ray Satiro,
-  Rikard Falkeborn, Sergey Markelov, Thomas M. DuBuisson, tlahn on github,
-  Viktor Szakats, Vitaly Varyvdin,
-  (28 contributors)
+  8U61ife on github, a1346054 on github, Alexander Chuykov, Anthony Hu,
+  beslick5 on github, Daniel Gustafsson, Daniel Stenberg, Gisle Vanem,
+  Gleb Ivanovsky, h1zzz on github, Harry Sintonen, Hayden Roche,
+  Jakub Zakrzewski, Jan Mazur, Jeffrey Tolar, Joel Depooter, Josip Medved,
+  Jun-ya Kato, Lucas Holt, Marcel Raad, Marc Hörsken, Mats Lindestam,
+  Max Dymond, Michael Kaufmann, Momoka Yamamoto, Patrick Monnerat,
+  Randall S. Becker, Ray Satiro, Rick Lane, Rikard Falkeborn, Ryan Mast,
+  Sergey Markelov, Thomas M. DuBuisson, tlahn on github, Viktor Szakats,
+  Vitaly Varyvdin,
+  (36 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -80,6 +91,14 @@ References to bug reports and discussions on issues:
  [21] = https://curl.se/bug/?i=7605
  [22] = https://curl.se/bug/?i=7728
  [23] = https://curl.se/bug/?i=7737
+ [24] = https://curl.se/bug/?i=7819
+ [25] = https://curl.se/mail/lib-2021-09/0058.html
+ [27] = https://curl.se/bug/?i=7813
+ [28] = https://curl.se/bug/?i=7812
+ [29] = https://curl.se/bug/?i=7811
+ [30] = https://curl.se/bug/?i=7809
+ [31] = https://curl.se/bug/?i=6930
+ [32] = https://curl.se/bug/?i=7806
  [33] = https://curl.se/bug/?i=7322
  [36] = https://curl.se/bug/?i=7778
  [37] = https://curl.se/bug/?i=7786
