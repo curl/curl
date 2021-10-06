@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Basic
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Content-Length: 6
+Connection: close
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Empty user name provided in URL
+</name>
+<command>
+http://:example@%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic OmV4YW1wbGU=
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
