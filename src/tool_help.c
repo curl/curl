@@ -134,7 +134,7 @@ static void print_category(curlhelp_t category)
 
   for(i = 0; helptext[i].opt; ++i)
     if(helptext[i].categories & category) {
-      printf(" %-*s %s\n", longopt, helptext[i].opt, helptext[i].desc);
+      printf(" %-*s %s\n", (int)longopt, helptext[i].opt, helptext[i].desc);
     }
 }
 
