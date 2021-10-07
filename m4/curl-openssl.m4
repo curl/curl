@@ -437,7 +437,7 @@ if test "x$OPT_OPENSSL" != xno; then
 
        dnl still no, but what about with -ldl?
        AC_MSG_CHECKING([OpenSSL linking with -ldl])
-       LIBS="$CLEANLIBS -lcrypto -ldl"
+       LIBS="-lcrypto $CLEANLIBS -ldl"
        AC_LINK_IFELSE([ AC_LANG_PROGRAM([[
          #include <openssl/err.h>
        ]], [[
@@ -453,7 +453,7 @@ if test "x$OPT_OPENSSL" != xno; then
          dnl This may be necessary for static libraries.
 
          AC_MSG_CHECKING([OpenSSL linking with -ldl and -lpthread])
-         LIBS="$CLEANLIBS -lcrypto -ldl -lpthread"
+         LIBS="-lcrypto $CLEANLIBS -ldl -lpthread"
          AC_LINK_IFELSE([
            AC_LANG_PROGRAM([[
            #include <openssl/err.h>
