@@ -270,7 +270,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   if(platform != PLATFORM_DONT_CARE)
     cm = VerSetConditionMask(cm, VER_PLATFORMID, VER_EQUAL);
 
-  if(buildVersion != 0)
+  if(buildVersion)
     cm = VerSetConditionMask(cm, VER_BUILDNUMBER, buildCondition);
 
   /* Later versions of Windows have version functions that may not return the
