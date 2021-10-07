@@ -83,7 +83,7 @@ CURLcode Curl_sspi_global_init(void)
      * have both these DLLs (security.dll forwards calls to secur32.dll) */
 
     /* Load SSPI dll into the address space of the calling process */
-    if(curlx_verify_windows_version(4, 0, PLATFORM_WINNT, VERSION_EQUAL))
+    if(curlx_verify_windows_version(4, 0, 0, PLATFORM_WINNT, VERSION_EQUAL))
       s_hSecDll = Curl_load_library(TEXT("security.dll"));
     else
       s_hSecDll = Curl_load_library(TEXT("secur32.dll"));

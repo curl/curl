@@ -57,6 +57,8 @@ struct OUR_OSVERSIONINFOEXW {
  *
  * majorVersion [in] - The major version number.
  * minorVersion [in] - The minor version number.
+ * buildVersion [in] - The build version number. If 0, this parameter is
+ *                     ignored.
  * platform     [in] - The optional platform identifier.
  * condition    [in] - The test condition used to specifier whether we are
  *                     checking a version less then, equal to or greater than
@@ -67,6 +69,7 @@ struct OUR_OSVERSIONINFOEXW {
  */
 bool curlx_verify_windows_version(const unsigned int majorVersion,
                                   const unsigned int minorVersion,
+                                  const unsigned int buildVersion,
                                   const PlatformIdentifier platform,
                                   const VersionCondition condition)
 {
@@ -118,34 +121,52 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
     case VERSION_LESS_THAN:
       if(osver.dwMajorVersion < majorVersion ||
         (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion < minorVersion))
+         osver.dwMinorVersion < minorVersion) ||
+        (buildVersion != 0 &&
+         (osver.dwMajorVersion == majorVersion &&
+          osver.dwMinorVersion == minorVersion &&
+          osver.dwBuildNumber < buildVersion)))
         matched = TRUE;
       break;
 
     case VERSION_LESS_THAN_EQUAL:
       if(osver.dwMajorVersion < majorVersion ||
         (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion <= minorVersion))
+         osver.dwMinorVersion < minorVersion) ||
+        (osver.dwMajorVersion == majorVersion &&
+         osver.dwMinorVersion == minorVersion &&
+         (buildVersion == 0 ||
+          osver.dwBuildNumber <= buildVersion)))
         matched = TRUE;
       break;
 
     case VERSION_EQUAL:
       if(osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion == minorVersion)
+         osver.dwMinorVersion == minorVersion &&
+        (buildVersion == 0 ||
+         osver.dwBuildNumber == buildVersion))
         matched = TRUE;
       break;
 
     case VERSION_GREATER_THAN_EQUAL:
       if(osver.dwMajorVersion > majorVersion ||
         (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion >= minorVersion))
+         osver.dwMinorVersion > minorVersion) ||
+        (osver.dwMajorVersion == majorVersion &&
+         osver.dwMinorVersion == minorVersion &&
+         (buildVersion == 0 ||
+          osver.dwBuildNumber >= buildVersion)))
         matched = TRUE;
       break;
 
     case VERSION_GREATER_THAN:
       if(osver.dwMajorVersion > majorVersion ||
         (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion > minorVersion))
+         osver.dwMinorVersion > minorVersion) ||
+        (buildVersion != 0 &&
+         (osver.dwMajorVersion == majorVersion &&
+          osver.dwMinorVersion == minorVersion &&
+          osver.dwBuildNumber > buildVersion)))
         matched = TRUE;
       break;
     }
@@ -161,6 +182,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
       case PLATFORM_WINNT:
         if(osver.dwPlatformId != VER_PLATFORM_WIN32_NT)
           matched = FALSE;
+        break;
 
       default: /* like platform == PLATFORM_DONT_CARE */
         break;
@@ -172,8 +194,11 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   struct OUR_OSVERSIONINFOEXW osver;
   BYTE majorCondition;
   BYTE minorCondition;
+  BYTE buildCondition;
   BYTE spMajorCondition;
   BYTE spMinorCondition;
+  DWORD dwTypeMask = VER_MAJORVERSION | VER_MINORVERSION |
+                     VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR;
 
   typedef LONG (APIENTRY *RTLVERIFYVERSIONINFO_FN)
     (struct OUR_OSVERSIONINFOEXW *, ULONG, ULONGLONG);
@@ -190,6 +215,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   case VERSION_LESS_THAN:
     majorCondition = VER_LESS;
     minorCondition = VER_LESS;
+    buildCondition = VER_LESS;
     spMajorCondition = VER_LESS_EQUAL;
     spMinorCondition = VER_LESS_EQUAL;
     break;
@@ -197,6 +223,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   case VERSION_LESS_THAN_EQUAL:
     majorCondition = VER_LESS_EQUAL;
     minorCondition = VER_LESS_EQUAL;
+    buildCondition = VER_LESS_EQUAL;
     spMajorCondition = VER_LESS_EQUAL;
     spMinorCondition = VER_LESS_EQUAL;
     break;
@@ -204,6 +231,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   case VERSION_EQUAL:
     majorCondition = VER_EQUAL;
     minorCondition = VER_EQUAL;
+    buildCondition = VER_EQUAL;
     spMajorCondition = VER_GREATER_EQUAL;
     spMinorCondition = VER_GREATER_EQUAL;
     break;
@@ -211,6 +239,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   case VERSION_GREATER_THAN_EQUAL:
     majorCondition = VER_GREATER_EQUAL;
     minorCondition = VER_GREATER_EQUAL;
+    buildCondition = VER_GREATER_EQUAL;
     spMajorCondition = VER_GREATER_EQUAL;
     spMinorCondition = VER_GREATER_EQUAL;
     break;
@@ -218,6 +247,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   case VERSION_GREATER_THAN:
     majorCondition = VER_GREATER;
     minorCondition = VER_GREATER;
+    buildCondition = VER_GREATER;
     spMajorCondition = VER_GREATER_EQUAL;
     spMinorCondition = VER_GREATER_EQUAL;
     break;
@@ -230,6 +260,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   osver.dwOSVersionInfoSize = sizeof(osver);
   osver.dwMajorVersion = majorVersion;
   osver.dwMinorVersion = minorVersion;
+  osver.dwBuildNumber = buildVersion;
   if(platform == PLATFORM_WINDOWS)
     osver.dwPlatformId = VER_PLATFORM_WIN32_WINDOWS;
   else if(platform == PLATFORM_WINNT)
@@ -239,26 +270,43 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   cm = VerSetConditionMask(cm, VER_MINORVERSION, minorCondition);
   cm = VerSetConditionMask(cm, VER_SERVICEPACKMAJOR, spMajorCondition);
   cm = VerSetConditionMask(cm, VER_SERVICEPACKMINOR, spMinorCondition);
-  if(platform != PLATFORM_DONT_CARE)
+
+  if(platform != PLATFORM_DONT_CARE) {
     cm = VerSetConditionMask(cm, VER_PLATFORMID, VER_EQUAL);
+    dwTypeMask |= VER_PLATFORMID;
+  }
 
   /* Later versions of Windows have version functions that may not return the
      real version of Windows unless the application is so manifested. We prefer
      the real version always, so we use the Rtl variant of the function when
      possible. Note though the function signatures have underlying fundamental
      types that are the same, the return values are different. */
-  if(pRtlVerifyVersionInfo) {
-    matched = !pRtlVerifyVersionInfo(&osver,
-      (VER_MAJORVERSION | VER_MINORVERSION |
-       VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
-      cm);
+  if(pRtlVerifyVersionInfo)
+    matched = !pRtlVerifyVersionInfo(&osver, dwTypeMask, cm);
+  else
+    matched = !!VerifyVersionInfoW((OSVERSIONINFOEXW *)&osver, dwTypeMask, cm);
+
+  /* Compare the build number separately. VerifyVersionInfo normally compares
+     major.minor in hierarchical order (eg 1.9 is less than 2.0) but does not
+     do the same for build (eg 1.9 build 222 is not less than 2.0 build 111).
+     Build comparison is only needed when build numbers are equal (eg 1.9 is
+     always less than 2.0 so build comparison is not needed). */
+  if(matched && buildVersion &&
+     (condition == VERSION_EQUAL ||
+      ((condition == VERSION_GREATER_THAN_EQUAL ||
+        condition == VERSION_LESS_THAN_EQUAL) &&
+        curlx_verify_windows_version(majorVersion, minorVersion, 0,
+                                     platform, VERSION_EQUAL)))) {
+
+    cm = VerSetConditionMask(0, VER_BUILDNUMBER, buildCondition);
+    dwTypeMask = VER_BUILDNUMBER;
+    if(pRtlVerifyVersionInfo)
+      matched = !pRtlVerifyVersionInfo(&osver, dwTypeMask, cm);
+    else
+      matched = !!VerifyVersionInfoW((OSVERSIONINFOEXW *)&osver,
+                                      dwTypeMask, cm);
   }
-  else {
-    matched = !!VerifyVersionInfoW((OSVERSIONINFOEXW *)&osver,
-      (VER_MAJORVERSION | VER_MINORVERSION |
-       VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
-      cm);
-  }
+
 #endif
 
   return matched;
