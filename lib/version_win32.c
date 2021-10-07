@@ -271,7 +271,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
     cm = VerSetConditionMask(cm, VER_PLATFORMID, VER_EQUAL);
 
   if(buildVersion != 0)
-  	cm = VerSetConditionMask(cm, VER_BUILDNUMBER, buildCondition);
+    cm = VerSetConditionMask(cm, VER_BUILDNUMBER, buildCondition);
 
   /* Later versions of Windows have version functions that may not return the
      real version of Windows unless the application is so manifested. We prefer
