@@ -196,6 +196,8 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   BYTE buildCondition;
   BYTE spMajorCondition;
   BYTE spMinorCondition;
+  DWORD dwTypeMask = VER_MAJORVERSION | VER_MINORVERSION |
+                     VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR;
 
   typedef LONG (APIENTRY *RTLVERIFYVERSIONINFO_FN)
     (struct OUR_OSVERSIONINFOEXW *, ULONG, ULONGLONG);
@@ -267,29 +269,27 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   cm = VerSetConditionMask(cm, VER_MINORVERSION, minorCondition);
   cm = VerSetConditionMask(cm, VER_SERVICEPACKMAJOR, spMajorCondition);
   cm = VerSetConditionMask(cm, VER_SERVICEPACKMINOR, spMinorCondition);
-  if(platform != PLATFORM_DONT_CARE)
-    cm = VerSetConditionMask(cm, VER_PLATFORMID, VER_EQUAL);
 
-  if(buildVersion)
+  if(platform != PLATFORM_DONT_CARE) {
+    cm = VerSetConditionMask(cm, VER_PLATFORMID, VER_EQUAL);
+    dwTypeMask |= VER_PLATFORMID;
+  }
+
+  if(buildVersion) {
     cm = VerSetConditionMask(cm, VER_BUILDNUMBER, buildCondition);
+    dwTypeMask |= VER_BUILDNUMBER;
+  }
 
   /* Later versions of Windows have version functions that may not return the
      real version of Windows unless the application is so manifested. We prefer
      the real version always, so we use the Rtl variant of the function when
      possible. Note though the function signatures have underlying fundamental
      types that are the same, the return values are different. */
-  if(pRtlVerifyVersionInfo) {
-    matched = !pRtlVerifyVersionInfo(&osver,
-      (VER_MAJORVERSION | VER_MINORVERSION |
-       VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
-      cm);
-  }
-  else {
-    matched = !!VerifyVersionInfoW((OSVERSIONINFOEXW *)&osver,
-      (VER_MAJORVERSION | VER_MINORVERSION |
-       VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
-      cm);
-  }
+  if(pRtlVerifyVersionInfo)
+    matched = !pRtlVerifyVersionInfo(&osver, dwTypeMask, cm);
+  else
+    matched = !!VerifyVersionInfoW((OSVERSIONINFOEXW *)&osver, dwTypeMask, cm);
+
 #endif
 
   return matched;
