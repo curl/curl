@@ -81,10 +81,10 @@ jobs:
         # -Wvla is caused by brotli
         CFLAGS: "-Wno-vla -mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
 
-    - run: make
+    - run: make V=1
       name: 'make'
 
-    - run: make test-ci
+    - run: make V=1 test-ci
       name: 'test'
       env:
         TFLAGS: "${{ matrix.build.tflags }} ~1452"

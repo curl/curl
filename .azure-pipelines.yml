@@ -88,7 +88,7 @@ stages:
       env:
         MAKEFLAGS: "-j 2"
 
-    - script: make test-nonflaky
+    - script: make V=1 test-ci
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"

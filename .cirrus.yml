@@ -68,7 +68,7 @@ freebsd_task:
     - find . -type d -exec chmod 777 {} \;
     # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
     # therefore the SFTP and SCP tests are disabled right away from the beginning.
-    - sudo -u nobody make V=1 TFLAGS="-n -r -u !SFTP !SCP" test-nonflaky
+    - sudo -u nobody make V=1 TFLAGS="-n !SFTP !SCP" test-ci
   install_script:
     - make V=1 install
 
