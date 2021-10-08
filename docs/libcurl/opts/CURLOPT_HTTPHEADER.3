@@ -68,6 +68,16 @@ The most commonly replaced headers have "shortcuts" in the options
 There's an alternative option that sets or replaces headers only for requests
 that are sent with CONNECT to a proxy: \fICURLOPT_PROXYHEADER(3)\fP. Use
 \fICURLOPT_HEADEROPT(3)\fP to control the behavior.
+.SH SPECIFIC HEADERS
+Setting some specific headers will cause libcurl to act differently.
+.IP "Host:"
+The specified host name will be used for cookie matching if the cookie engine
+is also enabled for this transfer. If the request is done over HTTP/2 or
+HTTP/3, the custom host name will instead be used in the ":authority" header
+field and Host: will not be sent at all over the wire.
+.IP "Transfer-Encoding: chunked"
+Tells libcurl the upload is to be done using this chunked encoding instead of
+providing the Content-Length: field in the request.
 .SH SECURITY CONCERNS
 By default, this option makes libcurl send the given headers in all HTTP
 requests done by this handle. You should therefore use this option with
