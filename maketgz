@@ -9,7 +9,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -147,7 +147,7 @@ fi
 #
 
 echo "update man pages"
-./scripts/updatemanpages.pl $version
+./scripts/updatemanpages.pl $version >/dev/null
 
 # make the generated file newer than the man page
 touch src/tool_hugehelp.c
