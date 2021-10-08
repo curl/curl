@@ -243,14 +243,14 @@ static const struct testcase get_parts_list[] ={
   {"https://127.0.0.1:443",
    "https | [11] | [12] | [13] | 127.0.0.1 | [15] | / | [16] | [17]",
    0, CURLU_NO_DEFAULT_PORT, CURLUE_OK},
-  {"http://%3a:%3a@ex%0ample/%3f+?+%3f+%23#+%23%3f%g7",
-   "http | : | : | [13] | [6] | [15] | /?+ |  ? # | +#?%g7",
+  {"http://%3a:%3a@ex4mple/%3f+?+%3f+%23#+%23%3f%g7",
+   "http | : | : | [13] | ex4mple | [15] | /?+ |  ? # | +#?%g7",
    0, CURLU_URLDECODE, CURLUE_OK},
-  {"http://%3a:%3a@ex%0ample/%3f?%3f%35#%35%3f%g7",
-   "http | %3a | %3a | [13] | ex%0ample | [15] | /%3f | %3f%35 | %35%3f%g7",
+  {"http://%3a:%3a@ex4mple/%3f?%3f%35#%35%3f%g7",
+   "http | %3a | %3a | [13] | ex4mple | [15] | /%3f | %3f%35 | %35%3f%g7",
    0, 0, CURLUE_OK},
   {"http://HO0_-st%41/",
-   "http | [11] | [12] | [13] | HO0_-st%41 | [15] | / | [16] | [17]",
+   "http | [11] | [12] | [13] | HO0_-stA | [15] | / | [16] | [17]",
    0, 0, CURLUE_OK},
   {"file://hello.html",
    "",
@@ -356,6 +356,17 @@ static const struct testcase get_parts_list[] ={
 };
 
 static const struct urltestcase get_url_list[] = {
+  /* percent encoded host names */
+  {"https://%this", "https://%25this/", 0, 0, CURLUE_OK},
+  {"https://h%c", "https://h%25c/", 0, 0, CURLUE_OK},
+  {"https://%%%%%%", "https://%25%25%25%25%25%25/", 0, 0, CURLUE_OK},
+  {"https://%41", "https://A/", 0, 0, CURLUE_OK},
+  {"https://%20", "", 0, 0, CURLUE_MALFORMED_INPUT},
+  {"https://%41%0d", "", 0, 0, CURLUE_MALFORMED_INPUT},
+  {"https://%25", "https://%25/", 0, 0, CURLUE_OK},
+  {"https://_%c0_", "https://_\xC0_/", 0, 0, CURLUE_OK},
+  {"https://_%c0_", "https://_%C0_/", 0, CURLU_URLENCODE, CURLUE_OK},
+
   /* IPv4 trickeries */
   {"https://16843009", "https://1.1.1.1/", 0, 0, CURLUE_OK},
   {"https://0x7f.1", "https://127.0.0.1/", 0, 0, CURLUE_OK},
@@ -365,6 +376,8 @@ static const struct urltestcase get_url_list[] = {
   {"https://1.0xffffff", "https://1.255.255.255/", 0, 0, CURLUE_OK},
   /* IPv4 numerical overflows or syntax errors will not normalize */
   {"https://+127.0.0.1", "https://+127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://+127.0.0.1", "https://%2B127.0.0.1/", 0, CURLU_URLENCODE,
+   CURLUE_OK},
   {"https://127.-0.0.1", "https://127.-0.0.1/", 0, 0, CURLUE_OK},
   {"https://127.0. 1", "https://127.0.0.1/", 0, 0, CURLUE_MALFORMED_INPUT},
   {"https://1.0x1000000", "https://1.0x1000000/", 0, 0, CURLUE_OK},
@@ -528,6 +541,14 @@ static int checkurl(const char *url, const char *out)
 /* !checksrc! disable SPACEBEFORECOMMA 1 */
 static const struct setcase set_parts_list[] = {
   {"https://example.com/",
+   "host=++,", /* '++' there's no automatic URL decode when settin this
+                  part */
+   "https://++/",
+   0, /* get */
+   0, /* set */
+   CURLUE_OK, CURLUE_OK},
+
+  {"https://example.com/",
    "query=Al2cO3tDkcDZ3EWE5Lh+LX8TPHs,", /* contains '+' */
    "https://example.com/?Al2cO3tDkcDZ3EWE5Lh%2bLX8TPHs",
    CURLU_URLDECODE, /* decode on get */
@@ -588,10 +609,11 @@ static const struct setcase set_parts_list[] = {
    "scheme=https,user=   @:,host=foobar,",
    "https://%20%20%20%40%3a@foobar/",
    0, CURLU_URLENCODE, CURLUE_OK, CURLUE_OK},
+  /* Setting a host name with spaces is not OK: */
   {NULL,
    "scheme=https,host=  ,path= ,user= ,password= ,query= ,fragment= ,",
-   "https://%20:%20@%20%20/%20?+#%20",
-   0, CURLU_URLENCODE, CURLUE_OK, CURLUE_OK},
+   "[nothing]",
+   0, CURLU_URLENCODE, CURLUE_OK, CURLUE_MALFORMED_INPUT},
   {NULL,
    "scheme=https,host=foobar,path=/this /path /is /here,",
    "https://foobar/this%20/path%20/is%20/here",
@@ -719,7 +741,7 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
         CURLUPart what = part2id(part);
 #if 0
         /* for debugging this */
-        fprintf(stderr, "%s = %s [%d]\n", part, value, (int)what);
+        fprintf(stderr, "%s = \"%s\" [%d]\n", part, value, (int)what);
 #endif
         if(what > CURLUPART_ZONEID)
           fprintf(stderr, "UNKNOWN part '%s'\n", part);
@@ -847,16 +869,18 @@ static int set_parts(void)
                 set_parts_list[i].set, (int)uc, set_parts_list[i].pcode);
         error++;
       }
+      if(!uc) {
+        /* only do this if it worked */
+        rc = curl_url_get(urlp, CURLUPART_URL, &url, 0);
 
-      rc = curl_url_get(urlp, CURLUPART_URL, &url, 0);
-
-      if(rc) {
-        fprintf(stderr, "%s:%d Get URL returned %d (%s)\n",
-                __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
-        error++;
-      }
-      else if(checkurl(url, set_parts_list[i].out)) {
-        error++;
+        if(rc) {
+          fprintf(stderr, "%s:%d Get URL returned %d (%s)\n",
+                  __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
+          error++;
+        }
+        else if(checkurl(url, set_parts_list[i].out)) {
+          error++;
+        }
       }
       curl_free(url);
     }
@@ -888,8 +912,9 @@ static int get_url(void)
       rc = curl_url_get(urlp, CURLUPART_URL, &url, get_url_list[i].getflags);
 
       if(rc) {
-        fprintf(stderr, "%s:%d returned %d (%s)\n",
-                __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
+        fprintf(stderr, "%s:%d returned %d (%s). URL: '%s'\n",
+                __FILE__, __LINE__, (int)rc, curl_url_strerror(rc),
+                get_url_list[i].in);
         error++;
       }
       else {
