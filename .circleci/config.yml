@@ -33,11 +33,11 @@ commands:
 
   build:
     steps:
-      - run: make
+      - run: make V=1
 
   test:
     steps:
-      - run: make test-ci
+      - run: make V=1 test-ci
 
 executors:
   ubuntu:
