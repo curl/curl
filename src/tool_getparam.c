@@ -2095,7 +2095,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           }
           tmp_range++;
         }
-        /* byte range requested */
         GetStr(&config->range, nextarg);
       }
       break;
