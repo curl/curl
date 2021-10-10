@@ -171,6 +171,10 @@
 #define OPENSSL_load_builtin_modules(x)
 #endif
 
+#if (OPENSSL_VERSION_NUMBER < 0x30000000L)
+#define SSL_get1_peer_certificate SSL_get_peer_certificate
+#endif
+
 /*
  * Whether SSL_CTX_set_keylog_callback is available.
  * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
@@ -1937,7 +1941,7 @@ static CURLcode verifystatus(struct Curl_easy *data,
   }
 
   /* Compute the certificate's ID */
-  cert = SSL_get_peer_certificate(backend->handle);
+  cert = SSL_get1_peer_certificate(backend->handle);
   if(!cert) {
     failf(data, "Error getting peer certificate");
     result = CURLE_SSL_INVALIDCERTSTATUS;
@@ -3840,7 +3844,7 @@ static CURLcode servercert(struct Curl_easy *data,
     /* we've been asked to gather certificate info! */
     (void)get_cert_chain(data, connssl);
 
-  backend->server_cert = SSL_get_peer_certificate(backend->handle);
+  backend->server_cert = SSL_get1_peer_certificate(backend->handle);
   if(!backend->server_cert) {
     BIO_free(mem);
     if(!strict)
