@@ -100,6 +100,7 @@ static int http2_getsock(struct Curl_easy *data,
   const struct http_conn *c = &conn->proto.httpc;
   struct SingleRequest *k = &data->req;
   int bitmap = GETSOCK_BLANK;
+  struct HTTP *stream = data->req.p.http;
 
   sock[0] = conn->sock[FIRSTSOCKET];
 
@@ -108,9 +109,13 @@ static int http2_getsock(struct Curl_easy *data,
        frame so we should always be ready for one */
     bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
 
-  /* we're still uploading or the HTTP/2 layer wants to send data */
-  if(((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND) ||
-     nghttp2_session_want_write(c->h2))
+  /* we're (still uploading OR the HTTP/2 layer wants to send data) AND
+     there's a window to send data in */
+  if((((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND) ||
+      nghttp2_session_want_write(c->h2)) &&
+     (nghttp2_session_get_remote_window_size(c->h2) &&
+      nghttp2_session_get_stream_remote_window_size(c->h2,
+                                                    stream->stream_id)))
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
 
   return bitmap;
@@ -1953,8 +1958,19 @@ static ssize_t http2_send(struct Curl_easy *data, int sockindex,
       nghttp2_session_resume_data(h2, stream->stream_id);
     }
 
-    H2BUGF(infof(data, "http2_send returns %zu for stream %u", len,
-                 stream->stream_id));
+#ifdef DEBUG_HTTP2
+    if(!len) {
+      infof(data, "http2_send: easy %p (stream %u) win %u/%u",
+            data, stream->stream_id,
+            nghttp2_session_get_remote_window_size(httpc->h2),
+            nghttp2_session_get_stream_remote_window_size(httpc->h2,
+                                                          stream->stream_id)
+        );
+
+    }
+    infof(data, "http2_send returns %zu for stream %u", len,
+          stream->stream_id);
+#endif
     return len;
   }
 
