@@ -4,7 +4,7 @@ curl and libcurl 7.80.0
  Command line options:         243
  curl_easy_setopt() options:   294
  Public functions in libcurl:  86
- Contributors:                 2505
+ Contributors:                 2511
 
 This release includes the following changes:
 
@@ -19,14 +19,19 @@ This release includes the following bugfixes:
 
  o BINDINGS: URL updates [30]
  o build: remove checks for WinSock 1 [36]
+ o c-hyper: use hyper_request_set_uri_parts to make h2 better [39]
+ o CI/makefiles: introduce dedicated test target [34]
  o ci: update Lift config to match requirements of curl build [1]
  o cleanup: constify unmodified static structs [2]
  o cmake: with OpenSSL, define OPENSSL_SUPPRESS_DEPRECATED [14]
  o cmdline-opts: made the 'Added:' field mandatory [37]
  o connnect: use sysaddr_un from sys/un.h or custom-defined for windows [23]
+ o curl-openssl.m4: modify library order for openssl linking [40]
  o curl-openssl: pass argument to sed single-quoted [15]
  o curl.1: remove mentions of really old version changes [38]
  o curl: print help descriptions in an aligned right column [16]
+ o curl_ntlm_core: use OpenSSL only if DES is available [42]
+ o CURLOPT_HTTPHEADER.3: add descripion for specific headers [35]
  o examples/imap-append: fix end-of-data check [7]
  o gen.pl: insert the current date and version in generated man page [11]
  o HTTP3: fix the HTTP/3 Explained book link [27]
@@ -36,15 +41,20 @@ This release includes the following bugfixes:
  o libcurl.rc: switch out the copyright symbol for plain ASCII [5]
  o libssh2: Get the version at runtime if possible [12]
  o llist: remove redundant code, branch will not be executed [10]
+ o maketgz: redirect updatemanpages.pl output to /dev/null
+ o md5: fix compilation with OpenSSL 3.0 API [43]
  o misc: fix a few issues on MidnightBSD [28]
  o misc: fix typos in docs and comments [3]
  o ngtcp2: fix QUIC transport parameter version [6]
  o NTLM: use DES_set_key_unchecked with OpenSSL [13]
  o sasl: binary messages [31]
  o scripts/delta: count command line options in the new file
+ o sha256: use high-level EVP interface for OpenSSL [41]
  o tool_cb_prg: make resumed upload progress bar show better [9]
  o tool_listhelp: easier generated with gen.pl [19]
  o tool_main: fix typo in comment [29]
+ o urlapi: URL decode percent-encoded host names [26]
+ o version_win32: use actual version instead of manifested version [45]
  o vtls: Fix a memory leak if an SSL session cannot be added to the cache [8]
  o wolfssl: use for SHA256, MD4, MD5, and setting DES odd parity [32]
 
@@ -56,15 +66,16 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   8U61ife on github, a1346054 on github, Alexander Chuykov, Anthony Hu,
-  beslick5 on github, Daniel Gustafsson, Daniel Stenberg, Gisle Vanem,
-  Gleb Ivanovsky, h1zzz on github, Harry Sintonen, Hayden Roche,
+  beslick5 on github, Daniel Gustafsson, Daniel Stenberg, David Cook,
+  Gisle Vanem, Gleb Ivanovsky, h1zzz on github, Harry Sintonen, Hayden Roche,
   Jakub Zakrzewski, Jan Mazur, Jeffrey Tolar, Joel Depooter, Josip Medved,
-  Jun-ya Kato, Lucas Holt, Marcel Raad, Marc Hörsken, Mats Lindestam,
-  Max Dymond, Michael Kaufmann, Momoka Yamamoto, Patrick Monnerat,
-  Randall S. Becker, Ray Satiro, Rick Lane, Rikard Falkeborn, Ryan Mast,
-  Sergey Markelov, Thomas M. DuBuisson, tlahn on github, Viktor Szakats,
-  Vitaly Varyvdin,
-  (36 contributors)
+  Jun-ya Kato, Kirill Efimov, Lucas Holt, Marcel Raad, Marc Hörsken,
+  Mats Lindestam, Max Dymond, Michael Afanasiev, Michael Kaufmann,
+  Momoka Yamamoto, Noam Moshe, Patrick Monnerat, Randall S. Becker,
+  Raul Onitza-Klugman, Ray Satiro, Rick Lane, Rikard Falkeborn, Ryan Mast,
+  Sean Molenaar, Sergey Markelov, Sharon Brizinov, Thomas M. DuBuisson,
+  tlahn on github, Viktor Szakats, Vitaly Varyvdin, Wyatt O'Day,
+  (44 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -93,6 +104,7 @@ References to bug reports and discussions on issues:
  [23] = https://curl.se/bug/?i=7737
  [24] = https://curl.se/bug/?i=7819
  [25] = https://curl.se/mail/lib-2021-09/0058.html
+ [26] = https://curl.se/bug/?i=7830
  [27] = https://curl.se/bug/?i=7813
  [28] = https://curl.se/bug/?i=7812
  [29] = https://curl.se/bug/?i=7811
@@ -100,6 +112,14 @@ References to bug reports and discussions on issues:
  [31] = https://curl.se/bug/?i=6930
  [32] = https://curl.se/bug/?i=7806
  [33] = https://curl.se/bug/?i=7322
+ [34] = https://curl.se/bug/?i=7785
+ [35] = https://curl.se/bug/?i=7829
  [36] = https://curl.se/bug/?i=7778
  [37] = https://curl.se/bug/?i=7786
  [38] = https://curl.se/bug/?i=7786
+ [39] = https://curl.se/bug/?i=7679
+ [40] = https://curl.se/bug/?i=7826
+ [41] = https://curl.se/bug/?i=7808
+ [42] = https://curl.se/bug/?i=7808
+ [43] = https://curl.se/bug/?i=7808
+ [45] = https://curl.se/bug/?i=7742
