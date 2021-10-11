@@ -6029,6 +6029,7 @@ if(azure_check_environment()) {
 #
 
 my $failed;
+my $failedign;
 my $testnum;
 my $ok=0;
 my $ign=0;
@@ -6064,8 +6065,8 @@ foreach $testnum (@at) {
 
     if($error>0) {
         if($error==2) {
-            # ignored test failures are wrapped in ()
-            $failed.= "($testnum) ";
+            # ignored test failures
+            $failedign .= "$testnum ";
         }
         else {
             $failed.= "$testnum ";
@@ -6151,6 +6152,9 @@ if($skipped && !$short) {
 }
 
 if($total) {
+    if($failedign) {
+        logmsg "IGNORED: failed tests: $failedign\n";
+    }
     logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
                    $ok/$total*100);
 
@@ -6169,6 +6173,6 @@ else {
     }
 }
 
-if(($total && (($ok+$ign) != $total)) || !$total || $unexpected) {
+if(($total && (($ok+$ign) != $total)) || !$total) {
     exit 1;
 }
