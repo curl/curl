@@ -3471,10 +3471,7 @@ static void pubkey_show(struct Curl_easy *data,
                         int num,
                         const char *type,
                         const char *name,
-#ifdef HAVE_OPAQUE_RSA_DSA_DH
-                        const
-#endif
-                        BIGNUM *bn)
+                        const BIGNUM *bn)
 {
   char *ptr;
   char namebuf[32];
@@ -3659,23 +3656,20 @@ static CURLcode get_cert_chain(struct Curl_easy *data,
         rsa = pubkey->pkey.rsa;
 #endif
 
-#ifdef HAVE_OPAQUE_RSA_DSA_DH
         {
+#ifdef HAVE_OPAQUE_RSA_DSA_DH
           const BIGNUM *n;
           const BIGNUM *e;
 
           RSA_get0_key(rsa, &n, &e, NULL);
           BIO_printf(mem, "%d", BN_num_bits(n));
+#else
+          BIO_printf(mem, "%d", BN_num_bits(rsa->n));
+#endif
           push_certinfo("RSA Public Key", i);
           print_pubkey_BN(rsa, n, i);
           print_pubkey_BN(rsa, e, i);
         }
-#else
-        BIO_printf(mem, "%d", BN_num_bits(rsa->n));
-        push_certinfo("RSA Public Key", i);
-        print_pubkey_BN(rsa, n, i);
-        print_pubkey_BN(rsa, e, i);
-#endif
 
         break;
       }
@@ -3688,8 +3682,8 @@ static CURLcode get_cert_chain(struct Curl_easy *data,
 #else
         dsa = pubkey->pkey.dsa;
 #endif
-#ifdef HAVE_OPAQUE_RSA_DSA_DH
         {
+#ifdef HAVE_OPAQUE_RSA_DSA_DH
           const BIGNUM *p;
           const BIGNUM *q;
           const BIGNUM *g;
@@ -3697,18 +3691,12 @@ static CURLcode get_cert_chain(struct Curl_easy *data,
 
           DSA_get0_pqg(dsa, &p, &q, &g);
           DSA_get0_key(dsa, &pub_key, NULL);
-
+#endif
           print_pubkey_BN(dsa, p, i);
           print_pubkey_BN(dsa, q, i);
           print_pubkey_BN(dsa, g, i);
           print_pubkey_BN(dsa, pub_key, i);
         }
-#else
-        print_pubkey_BN(dsa, p, i);
-        print_pubkey_BN(dsa, q, i);
-        print_pubkey_BN(dsa, g, i);
-        print_pubkey_BN(dsa, pub_key, i);
-#endif
 #endif /* !OPENSSL_NO_DSA */
         break;
       }
@@ -3720,8 +3708,8 @@ static CURLcode get_cert_chain(struct Curl_easy *data,
 #else
         dh = pubkey->pkey.dh;
 #endif
-#ifdef HAVE_OPAQUE_RSA_DSA_DH
         {
+#ifdef HAVE_OPAQUE_RSA_DSA_DH
           const BIGNUM *p;
           const BIGNUM *q;
           const BIGNUM *g;
@@ -3731,13 +3719,12 @@ static CURLcode get_cert_chain(struct Curl_easy *data,
           print_pubkey_BN(dh, p, i);
           print_pubkey_BN(dh, q, i);
           print_pubkey_BN(dh, g, i);
+#else
+          print_pubkey_BN(dh, p, i);
+          print_pubkey_BN(dh, g, i);
+#endif
           print_pubkey_BN(dh, pub_key, i);
        }
-#else
-        print_pubkey_BN(dh, p, i);
-        print_pubkey_BN(dh, g, i);
-        print_pubkey_BN(dh, pub_key, i);
-#endif
         break;
       }
       }
