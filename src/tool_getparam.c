@@ -2077,7 +2077,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
               "A specified range MUST include at least one dash (-). "
               "Appending one for you!\n");
         msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-", off);
-        GetStr(&config->range, buffer);
+        Curl_safefree(config->range);
+        config->range = strdup(buffer);
+        if(!config->range)
+          return PARAM_NO_MEM;
       }
       else {
         /* byte range requested */
