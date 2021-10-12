@@ -966,6 +966,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
     }
   }
   error:
+  DEBUGASSERT(result);
   free(host);
   free(hostheader);
   if(io)
