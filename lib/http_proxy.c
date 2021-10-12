@@ -813,6 +813,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
                                strlen(hostheader))) {
         failf(data, "error setting path");
         result = CURLE_OUT_OF_MEMORY;
+        goto error;
       }
       /* Setup the proxy-authorization header, if any */
       result = Curl_http_output_auth(data, conn, "CONNECT", HTTPREQ_GET,
