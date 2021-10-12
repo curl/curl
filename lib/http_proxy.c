@@ -750,6 +750,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
         h->exec = hyper_executor_new();
         if(!h->exec) {
           failf(data, "Couldn't create hyper executor");
+          result = CURLE_OUT_OF_MEMORY;
           goto error;
         }
       }
@@ -757,6 +758,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
       options = hyper_clientconn_options_new();
       if(!options) {
         failf(data, "Couldn't create hyper client options");
+        result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
 
@@ -767,6 +769,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
       handshake = hyper_clientconn_handshake(io, options);
       if(!handshake) {
         failf(data, "Couldn't create hyper client handshake");
+        result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
       io = NULL;
@@ -774,6 +777,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
 
       if(HYPERE_OK != hyper_executor_push(h->exec, handshake)) {
         failf(data, "Couldn't hyper_executor_push the handshake");
+        result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
       handshake = NULL; /* ownership passed on */
@@ -781,6 +785,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
       task = hyper_executor_poll(h->exec);
       if(!task) {
         failf(data, "Couldn't hyper_executor_poll the handshake");
+        result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
 
@@ -789,11 +794,13 @@ static CURLcode CONNECT(struct Curl_easy *data,
       req = hyper_request_new();
       if(!req) {
         failf(data, "Couldn't hyper_request_new");
+        result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
       if(hyper_request_set_method(req, (uint8_t *)"CONNECT",
                                   strlen("CONNECT"))) {
         failf(data, "error setting method");
+        result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
 
@@ -806,6 +813,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
                                strlen(hostheader))) {
         failf(data, "error setting path");
         result = CURLE_OUT_OF_MEMORY;
+        goto error;
       }
       /* Setup the proxy-authorization header, if any */
       result = Curl_http_output_auth(data, conn, "CONNECT", HTTPREQ_GET,
@@ -819,21 +827,29 @@ static CURLcode CONNECT(struct Curl_easy *data,
          (HYPERE_OK != hyper_request_set_version(req,
                                                  HYPER_HTTP_VERSION_1_0))) {
         failf(data, "error setting HTTP version");
+        result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
 
       headers = hyper_request_headers(req);
       if(!headers) {
         failf(data, "hyper_request_headers");
+        result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
-      if(host && Curl_hyper_header(data, headers, host))
-        goto error;
-      Curl_safefree(host);
+      if(host) {
+        result = Curl_hyper_header(data, headers, host);
+        if(result)
+          goto error;
+        Curl_safefree(host);
+      }
 
-      if(data->state.aptr.proxyuserpwd &&
-         Curl_hyper_header(data, headers, data->state.aptr.proxyuserpwd))
-        goto error;
+      if(data->state.aptr.proxyuserpwd) {
+        result = Curl_hyper_header(data, headers,
+                                   data->state.aptr.proxyuserpwd);
+        if(result)
+          goto error;
+      }
 
       if(!Curl_checkProxyheaders(data, conn, "User-Agent") &&
          data->set.str[STRING_USERAGENT]) {
@@ -843,26 +859,33 @@ static CURLcode CONNECT(struct Curl_easy *data,
                                data->set.str[STRING_USERAGENT]);
         if(result)
           goto error;
-        if(Curl_hyper_header(data, headers, Curl_dyn_ptr(&ua)))
+        result = Curl_hyper_header(data, headers, Curl_dyn_ptr(&ua));
+        if(result)
           goto error;
         Curl_dyn_free(&ua);
       }
 
-      if(!Curl_checkProxyheaders(data, conn, "Proxy-Connection") &&
-         Curl_hyper_header(data, headers, "Proxy-Connection: Keep-Alive"))
-        goto error;
+      if(!Curl_checkProxyheaders(data, conn, "Proxy-Connection")) {
+        result = Curl_hyper_header(data, headers,
+                                   "Proxy-Connection: Keep-Alive");
+        if(result)
+          goto error;
+      }
 
-      if(Curl_add_custom_headers(data, TRUE, headers))
+      result = Curl_add_custom_headers(data, TRUE, headers);
+      if(result)
         goto error;
 
       sendtask = hyper_clientconn_send(client, req);
       if(!sendtask) {
         failf(data, "hyper_clientconn_send");
+        result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
 
       if(HYPERE_OK != hyper_executor_push(h->exec, sendtask)) {
         failf(data, "Couldn't hyper_executor_push the send");
+        result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
 
@@ -875,8 +898,11 @@ static CURLcode CONNECT(struct Curl_easy *data,
           if(error)
             hypererr = hyper_task_value(task);
           hyper_task_free(task);
-          if(error)
+          if(error) {
+            /* this could probably use a better error code? */
+            result = CURLE_OUT_OF_MEMORY;
             goto error;
+          }
         }
       } while(task);
       s->tunnel_state = TUNNEL_CONNECT;
@@ -940,6 +966,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
     }
   }
   error:
+  DEBUGASSERT(result);
   free(host);
   free(hostheader);
   if(io)
