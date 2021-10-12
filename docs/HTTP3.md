@@ -33,18 +33,18 @@ in the master branch using pull-requests, just like ordinary changes.
 
 Build (patched) OpenSSL
 
-     % git clone --depth 1 -b OpenSSL_1_1_1k+quic https://github.com/quictls/openssl
+     % git clone --depth 1 -b openssl-3.0.0+quic https://github.com/quictls/openssl
      % cd openssl
      % ./config enable-tls1_3 --prefix=<somewhere1>
      % make
-     % make install_sw
+     % make install
 
 Build nghttp3
 
      % cd ..
      % git clone https://github.com/ngtcp2/nghttp3
      % cd nghttp3
-     % autoreconf -i
+     % autoreconf -fi
      % ./configure --prefix=<somewhere2> --enable-lib-only
      % make
      % make install
@@ -54,7 +54,7 @@ Build ngtcp2
      % cd ..
      % git clone https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
-     % autoreconf -i
+     % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
      % make
      % make install
@@ -67,6 +67,9 @@ Build curl
      % autoreconf -fi
      % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
+     % make install
+
+For OpenSSL 3.0.0 or later builds on Linux for x86_64 architecture, substitute all occurances of "/lib" with "/lib64"
 
 ## Build with GnuTLS
 
@@ -75,7 +78,7 @@ Build GnuTLS
      % git clone --depth 1 https://gitlab.com/gnutls/gnutls.git
      % cd gnutls
      % ./bootstrap
-     % ./configure --disable-doc --prefix=<somewhere1>
+     % ./configure --prefix=<somewhere1>
      % make
      % make install
 
@@ -84,7 +87,7 @@ Build nghttp3
      % cd ..
      % git clone https://github.com/ngtcp2/nghttp3
      % cd nghttp3
-     % autoreconf -i
+     % autoreconf -fi
      % ./configure --prefix=<somewhere2> --enable-lib-only
      % make
      % make install
@@ -94,7 +97,7 @@ Build ngtcp2
      % cd ..
      % git clone https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
-     % autoreconf -i
+     % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-gnutls
      % make
      % make install
@@ -107,6 +110,7 @@ Build curl
      % autoreconf -fi
      % ./configure --without-openssl --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
+     % make install
 
 # quiche version
 
@@ -128,6 +132,9 @@ Build curl:
      % autoreconf -fi
      % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-openssl=$PWD/../quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
      % make
+     % make install
+
+ If `make install` results in `Permission denied` error, you will need to prepend it with `sudo`.
 
 ## Run
 
