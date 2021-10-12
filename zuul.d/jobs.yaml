@@ -549,6 +549,13 @@
         TFLAGS: -n
         C: --with-openssl
 
+- pipeline:
+    name: check
+    manager: independent
+    start:
+      github:
+        check: in_progress
+
 - project:
     check:
       jobs:
