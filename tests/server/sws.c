@@ -1878,7 +1878,7 @@ int main(int argc, char *argv[])
 #endif
   const char *pidname = ".http.pid";
   const char *portname = ".http.port";
-  struct httprequest *req;
+  struct httprequest *req = NULL;
   int rc = 0;
   int error;
   int arg = 1;
@@ -1889,10 +1889,6 @@ int main(int argc, char *argv[])
 
   /* a default CONNECT port is basically pointless but still ... */
   size_t socket_idx;
-
-  req = calloc(1, sizeof(*req));
-  if(!req)
-    return 0;
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
@@ -2019,6 +2015,10 @@ int main(int argc, char *argv[])
 #endif
 
   install_signal_handlers(false);
+
+  req = calloc(1, sizeof(*req));
+  if(!req)
+    goto sws_cleanup;
 
   sock = socket(socket_domain, SOCK_STREAM, 0);
 
@@ -2348,6 +2348,8 @@ sws_cleanup:
     logmsg("unlink(%s) = %d (%s)", unix_socket, rc, strerror(rc));
   }
 #endif
+
+  free(req);
 
   if(got_exit_signal)
     logmsg("signalled to die");
