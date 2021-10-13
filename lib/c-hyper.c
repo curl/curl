@@ -967,7 +967,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if(!h2) {
     if(data->state.aptr.host) {
       result = Curl_hyper_header(data, headers, data->state.aptr.host);
-      goto error;
+      if(result)
+        goto error;
     }
   }
   else {
