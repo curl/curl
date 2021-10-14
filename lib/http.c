@@ -2902,7 +2902,7 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
                               bool *done)
 {
   struct SingleRequest *k = &data->req;
-  DEBUGASSERT(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP));
+
   if(data->req.ignore_cl) {
     k->size = k->maxdownload = -1;
   }
