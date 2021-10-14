@@ -227,6 +227,10 @@
 #endif
 #endif
 
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+#define HAVE_RANDOM_INIT_BY_DEFAULT 1
+#endif
+
 struct ssl_backend_data {
   struct Curl_easy *logger; /* transfer handle to pass trace logs to, only
                                using sockindex 0 */
@@ -435,18 +439,21 @@ static bool rand_enough(void)
 
 static CURLcode ossl_seed(struct Curl_easy *data)
 {
-  char fname[256];
-
   /* This might get called before it has been added to a multi handle */
   if(data->multi && data->multi->ssl_seeded)
     return CURLE_OK;
 
   if(rand_enough()) {
-    /* OpenSSL 1.1.0+ will return here */
+    /* OpenSSL 1.1.0+ should return here */
     if(data->multi)
       data->multi->ssl_seeded = TRUE;
     return CURLE_OK;
   }
+#ifdef HAVE_RANDOM_INIT_BY_DEFAULT
+  /* with OpenSSL 1.1.0+, a failed RAND_status is a showstopper */
+  failf(data, "Insufficient randomness");
+  return CURLE_SSL_CONNECT_ERROR;
+#else
 
 #ifndef RANDOM_FILE
   /* if RANDOM_FILE isn't defined, we only perform this if an option tells
@@ -507,19 +514,23 @@ static CURLcode ossl_seed(struct Curl_easy *data)
     RAND_add(randb, (int)len, (double)len/2);
   } while(!rand_enough());
 
-  /* generates a default path for the random seed file */
-  fname[0] = 0; /* blank it first */
-  RAND_file_name(fname, sizeof(fname));
-  if(fname[0]) {
-    /* we got a file name to try */
-    RAND_load_file(fname, RAND_LOAD_LENGTH);
-    if(rand_enough())
-      return CURLE_OK;
+  {
+    /* generates a default path for the random seed file */
+    char fname[256];
+    fname[0] = 0; /* blank it first */
+    RAND_file_name(fname, sizeof(fname));
+    if(fname[0]) {
+      /* we got a file name to try */
+      RAND_load_file(fname, RAND_LOAD_LENGTH);
+      if(rand_enough())
+        return CURLE_OK;
+    }
   }
 
   infof(data, "libcurl is now using a weak random seed!");
   return (rand_enough() ? CURLE_OK :
-    CURLE_SSL_CONNECT_ERROR /* confusing error code */);
+          CURLE_SSL_CONNECT_ERROR /* confusing error code */);
+#endif
 }
 
 #ifndef SSL_FILETYPE_ENGINE
