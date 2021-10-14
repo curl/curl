@@ -4,7 +4,7 @@ curl and libcurl 7.80.0
  Command line options:         243
  curl_easy_setopt() options:   294
  Public functions in libcurl:  86
- Contributors:                 2511
+ Contributors:                 2512
 
 This release includes the following changes:
 
@@ -19,23 +19,31 @@ This release includes the following bugfixes:
 
  o BINDINGS: URL updates [30]
  o build: remove checks for WinSock 1 [36]
+ o c-hyper: make Curl_http propagate errors better [50]
  o c-hyper: use hyper_request_set_uri_parts to make h2 better [39]
  o CI/makefiles: introduce dedicated test target [34]
  o ci: update Lift config to match requirements of curl build [1]
  o cleanup: constify unmodified static structs [2]
+ o cmake: add CURL_ENABLE_SSL option [46]
  o cmake: with OpenSSL, define OPENSSL_SUPPRESS_DEPRECATED [14]
  o cmdline-opts: made the 'Added:' field mandatory [37]
  o connnect: use sysaddr_un from sys/un.h or custom-defined for windows [23]
  o curl-openssl.m4: modify library order for openssl linking [40]
  o curl-openssl: pass argument to sed single-quoted [15]
  o curl.1: remove mentions of really old version changes [38]
+ o curl: actually append "-" to --range without number only [57]
+ o curl: correct grammar in generated libcurl code [53]
  o curl: print help descriptions in an aligned right column [16]
  o curl_ntlm_core: use OpenSSL only if DES is available [42]
  o CURLOPT_HTTPHEADER.3: add descripion for specific headers [35]
+ o docs/Makefile.am: repair 'make html' [52]
  o examples/imap-append: fix end-of-data check [7]
  o gen.pl: insert the current date and version in generated man page [11]
+ o http2: make getsock not wait for write if there's no remote window [56]
  o HTTP3: fix the HTTP/3 Explained book link [27]
  o http: fix Basic auth with empty name field in URL [24]
+ o http: remove assert that breaks hyper [47]
+ o http_proxy: make hyper CONNECT() return the correct error code [51]
  o lib/mk-ca-bundle.pl: skip certs passed Not Valid After date [18]
  o lib: avoid fallthrough cases in switch statements [33]
  o libcurl.rc: switch out the copyright symbol for plain ASCII [5]
@@ -47,9 +55,12 @@ This release includes the following bugfixes:
  o misc: fix typos in docs and comments [3]
  o ngtcp2: fix QUIC transport parameter version [6]
  o NTLM: use DES_set_key_unchecked with OpenSSL [13]
+ o openssl: with OpenSSL 1.1.0+ a failed RAND_status means goaway [44]
  o sasl: binary messages [31]
  o scripts/delta: count command line options in the new file
  o sha256: use high-level EVP interface for OpenSSL [41]
+ o sws: fix memory leak on exit [49]
+ o tests: disable test 2043 [54]
  o tool_cb_prg: make resumed upload progress bar show better [9]
  o tool_listhelp: easier generated with gen.pl [19]
  o tool_main: fix typo in comment [29]
@@ -70,12 +81,13 @@ advice from friends like these:
   Gisle Vanem, Gleb Ivanovsky, h1zzz on github, Harry Sintonen, Hayden Roche,
   Jakub Zakrzewski, Jan Mazur, Jeffrey Tolar, Joel Depooter, Josip Medved,
   Jun-ya Kato, Kirill Efimov, Lucas Holt, Marcel Raad, Marc Hörsken,
-  Mats Lindestam, Max Dymond, Michael Afanasiev, Michael Kaufmann,
-  Momoka Yamamoto, Noam Moshe, Patrick Monnerat, Randall S. Becker,
-  Raul Onitza-Klugman, Ray Satiro, Rick Lane, Rikard Falkeborn, Ryan Mast,
-  Sean Molenaar, Sergey Markelov, Sharon Brizinov, Thomas M. DuBuisson,
-  tlahn on github, Viktor Szakats, Vitaly Varyvdin, Wyatt O'Day,
-  (44 contributors)
+  Mats Lindestam, Max Dymond, Michael Afanasiev, Michael Baentsch,
+  Michael Kaufmann, Momoka Yamamoto, Noam Moshe, Patrick Monnerat,
+  Rafał Mikrut, Randall S. Becker, Raul Onitza-Klugman, Ray Satiro, Rick Lane,
+  Rikard Falkeborn, Ryan Mast, Sean Molenaar, Sergey Markelov, Sharon Brizinov,
+  Steini2000 on github, Thomas M. DuBuisson, tlahn on github, Viktor Szakats,
+  Vitaly Varyvdin, Wyatt O'Day, Борис Верховский,
+  (48 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -122,4 +134,15 @@ References to bug reports and discussions on issues:
  [41] = https://curl.se/bug/?i=7808
  [42] = https://curl.se/bug/?i=7808
  [43] = https://curl.se/bug/?i=7808
+ [44] = https://curl.se/bug/?i=7840
  [45] = https://curl.se/bug/?i=7742
+ [46] = https://curl.se/bug/?i=7822
+ [47] = https://curl.se/bug/?i=7852
+ [49] = https://curl.se/bug/?i=7849
+ [50] = https://curl.se/bug/?i=7851
+ [51] = https://curl.se/bug/?i=7825
+ [52] = https://curl.se/bug/?i=7853
+ [53] = https://curl.se/bug/?i=7802
+ [54] = https://curl.se/bug/?i=7845
+ [56] = https://curl.se/bug/?i=7821
+ [57] = https://curl.se/bug/?i=7837
