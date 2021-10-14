@@ -735,6 +735,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
       io = hyper_io_new();
       if(!io) {
         failf(data, "Couldn't create hyper IO");
+        result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
       /* tell Hyper how to read/write network data */
@@ -966,7 +967,6 @@ static CURLcode CONNECT(struct Curl_easy *data,
     }
   }
   error:
-  DEBUGASSERT(result);
   free(host);
   free(hostheader);
   if(io)
