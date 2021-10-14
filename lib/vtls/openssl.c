@@ -451,6 +451,7 @@ static CURLcode ossl_seed(struct Curl_easy *data)
   }
 #ifdef HAVE_RANDOM_INIT_BY_DEFAULT
   /* with OpenSSL 1.1.0+, a failed RAND_status is a showstopper */
+  failf(data, "Insufficient randomness");
   return CURLE_SSL_CONNECT_ERROR;
 #else
 
