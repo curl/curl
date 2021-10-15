@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,8 +28,8 @@
  */
 
 #include <stdio.h>
-#include <tidy.h>
-#include <tidybuffio.h>
+#include <tidy/tidy.h>
+#include <tidy/tidybuffio.h>
 #include <curl/curl.h>
 
 /* curl write callback, to fill tidy's input buffer...  */
@@ -53,7 +53,7 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
       printf("%*.*s%s ", indent, indent, "<", name);
       /* walk the attribute list */
       for(attr = tidyAttrFirst(child); attr; attr = tidyAttrNext(attr) ) {
-        printf(tidyAttrName(attr));
+        printf("%s", tidyAttrName(attr));
         tidyAttrValue(attr)?printf("=\"%s\" ",
                                    tidyAttrValue(attr)):printf(" ");
       }
