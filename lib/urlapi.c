@@ -1295,8 +1295,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
         }
       }
       else if(urlencode) {
-        int hostlen = (int)strlen(u->host);
-        allochost = curl_easy_escape(NULL, u->host, hostlen);
+        allochost = curl_easy_escape(NULL, u->host, 0);
         if(!allochost)
           return CURLUE_OUT_OF_MEMORY;
       }
