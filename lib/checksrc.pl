@@ -370,7 +370,10 @@ sub scanfile {
 
     my $line = 1;
     my $prevl="";
-    my $l;
+    my $prevpl="";
+    my $l = "";
+    my $prep = 0;
+    my $prevp = 0;
     open(R, "<$file") || die "failed to open $file";
 
     my $incomment=0;
@@ -452,11 +455,26 @@ sub scanfile {
         # comments
         # ------------------------------------------------------------
 
+        # prev line was a preprocessor **and** ended with a backslash
+        if($prep && ($prevpl =~ /\\ *\z/)) {
+            # this is still a preprocessor line
+            $prep = 1;
+            goto preproc;
+        }
+        $prep = 0;
+
         # crude attempt to detect // comments without too many false
         # positives
         if($l =~ /^(([^"\*]*)[^:"]|)\/\//) {
             checkwarn("CPPCOMMENTS",
                       $line, length($1), $file, $l, "\/\/ comment");
+        }
+
+        # detect and strip preprocessor directives
+        if($l =~ /^[ \t]*\#/) {
+            # preprocessor line
+            $prep = 1;
+            goto preproc;
         }
 
         my $nostr = nostrings($l);
@@ -676,10 +694,9 @@ sub scanfile {
             }
         }
 
-        # check for open brace first on line but not first column
-        # only alert if previous line ended with a close paren and wasn't a cpp
-        # line
-        if((($prevl =~ /\)\z/) && ($prevl !~ /^ *#/)) && ($l =~ /^( +)\{/)) {
+        # check for open brace first on line but not first column only alert
+        # if previous line ended with a close paren and it wasn't a cpp line
+        if(($prevl =~ /\)\z/) && ($l =~ /^( +)\{/) && !$prevp) {
             checkwarn("BRACEPOS",
                       $line, length($1), $file, $ol, "badly placed open brace");
         }
@@ -687,11 +704,11 @@ sub scanfile {
         # if the previous line starts with if/while/for AND ends with an open
         # brace, or an else statement, check that this line is indented $indent
         # more steps, if not a cpp line
-        if($prevl =~ /^( *)((if|while|for)\(.*\{|else)\z/) {
+        if(!$prevp && ($prevl =~ /^( *)((if|while|for)\(.*\{|else)\z/)) {
             my $first = length($1);
 
             # this line has some character besides spaces
-            if(($l !~ /^ *#/) && ($l =~ /^( *)[^ ]/)) {
+            if($l =~ /^( *)[^ ]/) {
                 my $second = length($1);
                 my $expect = $first+$indent;
                 if($expect != $second) {
@@ -786,9 +803,11 @@ sub scanfile {
             print STDERR "L: $l\n";
             print STDERR "nostr: $nostr\n";
         }
-
+      preproc:
         $line++;
-        $prevl = $ol;
+        $prevp = $prep;
+        $prevl = $ol if(!$prep);
+        $prevpl = $ol if($prep);
     }
 
     if(!scalar(@copyright)) {
