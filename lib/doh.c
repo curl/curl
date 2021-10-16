@@ -235,25 +235,6 @@ static CURLcode dohprobe(struct Curl_easy *data,
   p->dnstype = dnstype;
   Curl_dyn_init(&p->serverdoh, DYN_DOH_RESPONSE);
 
-  /* Note: this is code for sending the DoH request with GET but there's still
-     no logic that actually enables this. We should either add that ability or
-     yank out the GET code. Discuss! */
-  if(data->set.doh_get) {
-    char *b64;
-    size_t b64len;
-    result = Curl_base64url_encode(data, (char *)p->dohbuffer, p->dohlen,
-                                   &b64, &b64len);
-    if(result)
-      goto error;
-    nurl = aprintf("%s?dns=%s", url, b64);
-    free(b64);
-    if(!nurl) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto error;
-    }
-    url = nurl;
-  }
-
   timeout_ms = Curl_timeleft(data, NULL, TRUE);
   if(timeout_ms <= 0) {
     result = CURLE_OPERATION_TIMEDOUT;
@@ -268,10 +249,8 @@ static CURLcode dohprobe(struct Curl_easy *data,
     ERROR_CHECK_SETOPT(CURLOPT_URL, url);
     ERROR_CHECK_SETOPT(CURLOPT_WRITEFUNCTION, doh_write_cb);
     ERROR_CHECK_SETOPT(CURLOPT_WRITEDATA, resp);
-    if(!data->set.doh_get) {
-      ERROR_CHECK_SETOPT(CURLOPT_POSTFIELDS, p->dohbuffer);
-      ERROR_CHECK_SETOPT(CURLOPT_POSTFIELDSIZE, (long)p->dohlen);
-    }
+    ERROR_CHECK_SETOPT(CURLOPT_POSTFIELDS, p->dohbuffer);
+    ERROR_CHECK_SETOPT(CURLOPT_POSTFIELDSIZE, (long)p->dohlen);
     ERROR_CHECK_SETOPT(CURLOPT_HTTPHEADER, headers);
 #ifdef USE_NGHTTP2
     ERROR_CHECK_SETOPT(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
