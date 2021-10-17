@@ -1,0 +1,184 @@
+<testcase>
+<info>
+<keywords>
+checksrc
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<name>
+checksrc
+</name>
+
+<command type="perl">
+%SRCDIR/../lib/checksrc.pl log/code%TESTNUMBER.c
+</command>
+<file name="log/code%TESTNUMBER.c">
+/* test source code
+ * Violate each rule at least once.
+ **/
+int hello; /*------------------------------------------------------------------*/
+int	tab;
+int trailing_space;
+int a = func ();
+int b = func( b);
+int b = func(b );
+func(a, b , c);
+
+int hello()
+{
+  return(2);
+}
+func(a, b,c);
+
+if(a == 2) {
+  ;
+} else {
+  moo = 2;
+}
+
+if(a == 2){ /* followed by comment */
+  ;
+}
+
+func() ;
+
+a = sprintf(buffer, "%s", moo);
+
+FILE *f = fopen("filename", "r");
+
+void startfunc(int a, int b) {
+  func();
+}
+
+ for(;;) {
+     func(1);
+ } while(1);
+
+ char * name = "hello";
+ char* name = "hello";
+
+ int foo=bar;
+ int foo= bar;
+ int foo = bar;
+ int foo = bar;foo++;
+ for(;;)  {
+ }
+
+ int a = sizeof int;
+ int a = snprintf(buffer, sizeof(buffer), "%d", 99);
+
+ if(a) b++;
+
+ // CPP comment?
+
+ /* comment doesn't end
+
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+./log/code1185.c:4:82: warning: Longer than 79 columns (LONGLINE)
+ int hello; /*------------------------------------------------------------------*/
+./log/code1185.c:5:4: error: Contains TAB character (TABS)
+ int	tab;
+    ^
+./log/code1185.c:7:13: warning:  func with space (SPACEBEFOREPAREN)
+ int a = func ();
+             ^
+./log/code1185.c:8:14: warning: space after open parenthesis (SPACEAFTERPAREN)
+ int b = func( b);
+              ^
+./log/code1185.c:9:16: warning: space before close parenthesis (SPACEBEFORECLOSE)
+ int b = func(b );
+                ^
+./log/code1185.c:10:11: warning: space before comma (SPACEBEFORECOMMA)
+ func(a, b , c);
+           ^
+./log/code1185.c:14:9: warning: return without space before paren (RETURNNOSPACE)
+   return(2);
+         ^
+./log/code1185.c:16:11: warning: comma without following space (COMMANOSPACE)
+ func(a, b,c);
+           ^
+./log/code1185.c:18:12: warning: wrongly placed open brace (BRACEPOS)
+ if(a == 2) {
+            ^
+./log/code1185.c:20:1: warning: else after closing brace on same line (BRACEELSE)
+ } else {
+ ^
+./log/code1185.c:24:11: warning: missing space after close paren (PARENBRACE)
+ if(a == 2){  
+           ^
+./log/code1185.c:28:7: warning: no space before semicolon (SPACESEMICOLON)
+ func() ;
+       ^
+./log/code1185.c:30:5: warning: use of sprintf is banned (BANNEDFUNC)
+ a = sprintf(buffer, "%s", moo);
+     ^
+./log/code1185.c:32:11: warning: use of non-binary fopen without FOPEN_* macro: r (FOPENMODE)
+ FILE *f = fopen("filename", "r");
+           ^
+./log/code1185.c:34:30: warning: wrongly placed open brace (BRACEPOS)
+ void startfunc(int a, int b) {
+                              ^
+./log/code1185.c:39:6: warning: not indented 2 steps (uses 4) (INDENTATION)
+      func(1);
+      ^
+./log/code1185.c:42:8: warning: space after declarative asterisk (ASTERISKSPACE)
+  char * name = "hello";
+        ^
+./log/code1185.c:43:7: warning: space after declarative asterisk (ASTERISKSPACE)
+  char* name = "hello";
+       ^
+./log/code1185.c:43:6: warning: no space before asterisk (ASTERISKNOSPACE)
+  char* name = "hello";
+      ^
+./log/code1185.c:45:10: warning: no space after equals sign (EQUALSNOSPACE)
+  int foo=bar;
+          ^
+./log/code1185.c:46:9: warning: no space before equals sign (NOSPACEEQUALS)
+  int foo= bar;
+         ^
+./log/code1185.c:48:16: warning: no space after semicolon (SEMINOSPACE)
+  int foo = bar;foo++;
+                ^
+./log/code1185.c:49:10: warning: multiple spaces (MULTISPACE)
+  for(;;)  {
+          ^
+./log/code1185.c:50:2: warning: not indented 2 steps (uses 0) (INDENTATION)
+  }
+  ^
+./log/code1185.c:52:16: warning: sizeof without parenthesis (SIZEOFNOPAREN)
+  int a = sizeof int;
+                ^
+./log/code1185.c:53:10: warning: use of snprintf is banned (SNPRINTF)
+  int a = snprintf(buffer, sizeof(buffer), "%d", 99);
+          ^
+./log/code1185.c:55:7: warning: conditional block on the same line (ONELINECONDITION)
+  if(a) b++;
+       ^
+./log/code1185.c:57:2: warning: // comment (CPPCOMMENTS)
+  // CPP comment?
+  ^
+./log/code1185.c:1:1: error: Missing copyright statement (COPYRIGHT)
+ 
+ ^
+./log/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
+ 
+ ^
+checksrc: 0 errors and 30 warnings
+</stdout>
+<errorcode>
+5
+</errorcode>
+</verify>
+</testcase>
