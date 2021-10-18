@@ -32,10 +32,12 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-static char spnego_oid_bytes[] = "\x2b\x06\x01\x05\x05\x02";
-gss_OID_desc Curl_spnego_mech_oid = { 6, &spnego_oid_bytes };
-static char krb5_oid_bytes[] = "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02";
-gss_OID_desc Curl_krb5_mech_oid = { 9, &krb5_oid_bytes };
+gss_OID_desc Curl_spnego_mech_oid = {
+  6, "\x2b\x06\x01\x05\x05\x02"
+};
+gss_OID_desc Curl_krb5_mech_oid = {
+  9, "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02"
+};
 
 OM_uint32 Curl_gss_init_sec_context(
     struct Curl_easy *data,
