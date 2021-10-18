@@ -648,7 +648,7 @@ sub scanfile {
         # check for space before the semicolon last in a line
         if($l =~ /^(.*[^ ].*) ;$/) {
             checkwarn("SPACESEMICOLON",
-                      $line, length($1), $file, $ol, "space before last semicolon");
+                      $line, length($1), $file, $ol, "no space before semicolon");
         }
 
         # scan for use of banned functions
@@ -706,11 +706,13 @@ sub scanfile {
         # more steps, if not a cpp line
         if(!$prevp && ($prevl =~ /^( *)((if|while|for)\(.*\{|else)\z/)) {
             my $first = length($1);
+            print STDERR "HERE: $first $1 prevl $prevl\n";
 
             # this line has some character besides spaces
             if($l =~ /^( *)[^ ]/) {
                 my $second = length($1);
                 my $expect = $first+$indent;
+                print STDERR "THER expect $expect second $second\n";
                 if($expect != $second) {
                     my $diff = $second - $first;
                     checkwarn("INDENTATION", $line, length($1), $file, $ol,
@@ -799,7 +801,7 @@ sub scanfile {
            $nostr =~ /^(.*(\S)) + [{?]/i) {
             checkwarn("MULTISPACE",
                       $line, length($1)+1, $file, $ol,
-                      "multiple space");
+                      "multiple spaces");
             print STDERR "L: $l\n";
             print STDERR "nostr: $nostr\n";
         }
