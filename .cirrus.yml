@@ -32,9 +32,6 @@ freebsd_task:
     - name: FreeBSD 12.2
       freebsd_instance:
         image_family: freebsd-12-2
-    - name: FreeBSD 11.4
-      freebsd_instance:
-        image_family: freebsd-11-4
 
   env:
     CIRRUS_CLONE_DEPTH: 10
