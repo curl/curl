@@ -547,7 +547,6 @@ sub scanfile {
             }
             elsif($even && $postparen &&
                ($postparen !~ /^ *$/) && ($postparen !~ /^ *[,{&|\\]+/)) {
-                print STDERR "5: '$postparen'\n";
                 checkwarn("ONELINECONDITION",
                           $line, length($l)-length($postparen), $file, $l,
                           "conditional block on the same line");
@@ -648,7 +647,7 @@ sub scanfile {
         # check for space before the semicolon last in a line
         if($l =~ /^(.*[^ ].*) ;$/) {
             checkwarn("SPACESEMICOLON",
-                      $line, length($1), $file, $ol, "space before last semicolon");
+                      $line, length($1), $file, $ol, "no space before semicolon");
         }
 
         # scan for use of banned functions
@@ -706,7 +705,6 @@ sub scanfile {
         # more steps, if not a cpp line
         if(!$prevp && ($prevl =~ /^( *)((if|while|for)\(.*\{|else)\z/)) {
             my $first = length($1);
-
             # this line has some character besides spaces
             if($l =~ /^( *)[^ ]/) {
                 my $second = length($1);
@@ -799,9 +797,7 @@ sub scanfile {
            $nostr =~ /^(.*(\S)) + [{?]/i) {
             checkwarn("MULTISPACE",
                       $line, length($1)+1, $file, $ol,
-                      "multiple space");
-            print STDERR "L: $l\n";
-            print STDERR "nostr: $nostr\n";
+                      "multiple spaces");
         }
       preproc:
         $line++;
