@@ -152,6 +152,9 @@
 static Curl_recv schannel_recv;
 static Curl_send schannel_send;
 
+static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
+                             int sockindex);
+
 static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
                                     struct connectdata *conn, int sockindex,
                                     const char *pinnedpubkey);
@@ -1141,7 +1144,7 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
 
-    /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx
+    /* https://docs.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-initializesecuritycontexta
      */
     sspi_status = s_pSecFn->InitializeSecurityContext(
       &BACKEND->cred->cred_handle, &BACKEND->ctxt->ctxt_handle,
@@ -2128,9 +2131,11 @@ static bool schannel_data_pending(const struct connectdata *conn,
 static void schannel_close(struct Curl_easy *data, struct connectdata *conn,
                            int sockindex)
 {
-  if(conn->ssl[sockindex].use)
+  if(conn->ssl[sockindex].use) {
     /* if the SSL/TLS channel hasn't been shut down yet, do that now. */
     Curl_ssl_shutdown(data, conn, sockindex);
+  }
+  schannel_shutdown(data, conn, sockindex);
 }
 
 static void schannel_session_free(void *ptr)
