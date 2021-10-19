@@ -564,7 +564,7 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
       /* we got a session id, use it! */
       if(!SSL_set_session(backend->handle, ssl_sessionid)) {
         Curl_ssl_delsessionid(data, ssl_sessionid);
-        infof(data, "Can't use session ID, going on without\n");
+        infof(data, "Can't use session ID, going on without");
       }
       else
         infof(data, "SSL re-using session ID");
