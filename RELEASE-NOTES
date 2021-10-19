@@ -4,7 +4,7 @@ curl and libcurl 7.80.0
  Command line options:         243
  curl_easy_setopt() options:   294
  Public functions in libcurl:  86
- Contributors:                 2512
+ Contributors:                 2515
 
 This release includes the following changes:
 
@@ -17,12 +17,16 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o aws-sigv4: make signature work when post data is binary [68]
  o BINDINGS: URL updates [30]
  o build: remove checks for WinSock 1 [36]
  o c-hyper: make Curl_http propagate errors better [50]
  o c-hyper: use hyper_request_set_uri_parts to make h2 better [39]
+ o checksrc: ignore preprocessor lines [64]
  o CI/makefiles: introduce dedicated test target [34]
  o ci: update Lift config to match requirements of curl build [1]
+ o cirrus: remove FreeBSD 11.4 from the matrix [62]
+ o cirrus: switch to openldap24-client [63]
  o cleanup: constify unmodified static structs [2]
  o cmake: add CURL_ENABLE_SSL option [46]
  o cmake: with OpenSSL, define OPENSSL_SUPPRESS_DEPRECATED [14]
@@ -34,15 +38,19 @@ This release includes the following bugfixes:
  o curl: actually append "-" to --range without number only [57]
  o curl: correct grammar in generated libcurl code [53]
  o curl: print help descriptions in an aligned right column [16]
+ o curl_gssapi: fix link error on macOS Monterey [55]
  o curl_ntlm_core: use OpenSSL only if DES is available [42]
  o CURLOPT_HTTPHEADER.3: add descripion for specific headers [35]
  o docs/Makefile.am: repair 'make html' [52]
+ o doh: remove experimental code for DoH with GET [61]
+ o examples/htmltidy: correct wrong printf() use [66]
  o examples/imap-append: fix end-of-data check [7]
  o gen.pl: insert the current date and version in generated man page [11]
  o http2: make getsock not wait for write if there's no remote window [56]
  o HTTP3: fix the HTTP/3 Explained book link [27]
  o http: fix Basic auth with empty name field in URL [24]
  o http: remove assert that breaks hyper [47]
+ o http: set content length earlier [67]
  o http_proxy: make hyper CONNECT() return the correct error code [51]
  o lib/mk-ca-bundle.pl: skip certs passed Not Valid After date [18]
  o lib: avoid fallthrough cases in switch statements [33]
@@ -60,10 +68,13 @@ This release includes the following bugfixes:
  o scripts/delta: count command line options in the new file
  o sha256: use high-level EVP interface for OpenSSL [41]
  o sws: fix memory leak on exit [49]
+ o test1185: verify checksrc [58]
  o tests: disable test 2043 [54]
  o tool_cb_prg: make resumed upload progress bar show better [9]
  o tool_listhelp: easier generated with gen.pl [19]
  o tool_main: fix typo in comment [29]
+ o url: set "k->size" -1 at start of request [60]
+ o urlapi: skip a strlen(), pass in zero [65]
  o urlapi: URL decode percent-encoded host names [26]
  o version_win32: use actual version instead of manifested version [45]
  o vtls: Fix a memory leak if an SSL session cannot be added to the cache [8]
@@ -76,18 +87,19 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  8U61ife on github, a1346054 on github, Alexander Chuykov, Anthony Hu,
-  beslick5 on github, Daniel Gustafsson, Daniel Stenberg, David Cook,
-  Gisle Vanem, Gleb Ivanovsky, h1zzz on github, Harry Sintonen, Hayden Roche,
-  Jakub Zakrzewski, Jan Mazur, Jeffrey Tolar, Joel Depooter, Josip Medved,
-  Jun-ya Kato, Kirill Efimov, Lucas Holt, Marcel Raad, Marc Hörsken,
-  Mats Lindestam, Max Dymond, Michael Afanasiev, Michael Baentsch,
-  Michael Kaufmann, Momoka Yamamoto, Noam Moshe, Patrick Monnerat,
-  Rafał Mikrut, Randall S. Becker, Raul Onitza-Klugman, Ray Satiro, Rick Lane,
-  Rikard Falkeborn, Ryan Mast, Sean Molenaar, Sergey Markelov, Sharon Brizinov,
+  8U61ife on github, a1346054 on github, Abhinav Singh, Alexander Chuykov,
+  Anthony Hu, beslick5 on github, Bo Anderson, Daniel Gustafsson,
+  Daniel Stenberg, David Cook, Gisle Vanem, Gleb Ivanovsky, h1zzz on github,
+  Harry Sintonen, Hayden Roche, Jakub Zakrzewski, Jan Mazur, Jeffrey Tolar,
+  Joel Depooter, Josip Medved, Jun-ya Kato, Kirill Efimov, Lucas Holt,
+  Marcel Raad, Marc Hörsken, Mats Lindestam, Max Dymond, Michael Afanasiev,
+  Michael Baentsch, Michael Kaufmann, Momoka Yamamoto, Noam Moshe,
+  Patrick Monnerat, Rafał Mikrut, Randall S. Becker, Raul Onitza-Klugman,
+  Ray Satiro, Rick Lane, Rikard Falkeborn, Ryan Mast, Sean Molenaar,
+  Sergey Markelov, sergio-nsk on github, Sharon Brizinov, Stathis Kapnidis,
   Steini2000 on github, Thomas M. DuBuisson, tlahn on github, Viktor Szakats,
   Vitaly Varyvdin, Wyatt O'Day, Борис Верховский,
-  (48 contributors)
+  (52 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -144,5 +156,16 @@ References to bug reports and discussions on issues:
  [52] = https://curl.se/bug/?i=7853
  [53] = https://curl.se/bug/?i=7802
  [54] = https://curl.se/bug/?i=7845
+ [55] = https://curl.se/bug/?i=7657
  [56] = https://curl.se/bug/?i=7821
  [57] = https://curl.se/bug/?i=7837
+ [58] = https://curl.se/bug/?i=7866
+ [60] = https://curl.se/bug/?i=7871
+ [61] = https://curl.se/bug/?i=7870
+ [62] = https://curl.se/bug/?i=7869
+ [63] = https://curl.se/bug/?i=7868
+ [64] = https://curl.se/bug/?i=7863
+ [65] = https://curl.se/bug/?i=7862
+ [66] = https://curl.se/bug/?i=7860
+ [67] = https://github.com/curl/curl/commit/8a16e54#r57374914
+ [68] = https://curl.se/bug/?i=7844
