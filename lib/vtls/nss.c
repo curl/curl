@@ -955,7 +955,7 @@ static void display_cert_info(struct Curl_easy *data,
   subject = CERT_NameToAscii(&cert->subject);
   issuer = CERT_NameToAscii(&cert->issuer);
   common_name = CERT_GetCommonName(&cert->subject);
-  infof(data, "subject: %s\n", subject);
+  infof(data, "subject: %s", subject);
 
   CERT_GetCertTimes(cert, &notBefore, &notAfter);
   PR_ExplodeTime(notBefore, PR_GMTParameters, &printableTime);
