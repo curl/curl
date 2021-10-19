@@ -719,8 +719,6 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
   }
   BACKEND->cred->refcount = 1;
 
-  /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx
-   */
   sspi_status =
     s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR *)UNISP_NAME,
                                        SECPKG_CRED_OUTBOUND, NULL,
