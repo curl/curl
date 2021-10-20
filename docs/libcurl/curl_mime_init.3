@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -23,10 +23,11 @@
 .SH NAME
 curl_mime_init - create a mime handle
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "curl_mime * curl_mime_init(CURL * " easy_handle ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+curl_mime *curl_mime_init(CURL *easy_handle);
+.fi
 .SH DESCRIPTION
 \fIcurl_mime_init(3)\fP creates a handle to a new empty mime structure
 intended to be used with \fIeasy_handle\fP. This mime structure can be
