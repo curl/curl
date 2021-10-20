@@ -78,7 +78,7 @@ individual transfers may have occurred even when this function returns
 \fICURLM_OK\fP. Use \fIcurl_multi_info_read(3)\fP to figure out how individual
 transfers did.
 .SH "TYPICAL USAGE"
-Most applications will use \fIcurl_multi_poll(3)\fP to to wait for libcurl
+Most applications will use \fIcurl_multi_poll(3)\fP to make libcurl wait for
 activity on any of the ongoing transfers. As soon as one or more file
 descriptor has activity or the function times out, the application calls
 \fIcurl_multi_perform(3)\fP.
