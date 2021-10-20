@@ -78,11 +78,10 @@ individual transfers may have occurred even when this function returns
 \fICURLM_OK\fP. Use \fIcurl_multi_info_read(3)\fP to figure out how individual
 transfers did.
 .SH "TYPICAL USAGE"
-Most applications will use \fIcurl_multi_fdset(3)\fP to get the multi_handle's
-file descriptors, and \fIcurl_multi_timeout(3)\fP to get a suitable timeout
-period, then it'll wait for action on the file descriptors using
-\fBselect(3)\fP. As soon as one or more file descriptor is ready,
-\fIcurl_multi_perform(3)\fP gets called.
+Most applications will use \fIcurl_multi_poll(3)\fP to to wait for libcurl
+activity on any of the ongoing transfers. As soon as one or more file
+descriptor has activity or the function times out, the application calls
+\fIcurl_multi_perform(3)\fP.
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
 .BR curl_multi_wait "(3), " curl_multi_add_handle "(3), "
