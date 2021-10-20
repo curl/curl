@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -29,12 +29,12 @@ curl_easy_perform - perform a blocking file transfer
 .ad
 .SH DESCRIPTION
 Invoke this function after \fIcurl_easy_init(3)\fP and all the
-\fIcurl_easy_setopt(3)\fP calls are made, and will perform the transfer as
+\fIcurl_easy_setopt(3)\fP calls are made, and it performs the transfer as
 described in the options. It must be called with the same \fBeasy_handle\fP as
 input as the \fIcurl_easy_init(3)\fP call returned.
 
 \fIcurl_easy_perform(3)\fP performs the entire request in a blocking manner
-and returns when done, or if it failed. For non-blocking behavior, see
+and returns when done, or earlier if it fails. For non-blocking behavior, see
 \fIcurl_multi_perform(3)\fP.
 
 You can do any amount of calls to \fIcurl_easy_perform(3)\fP while using the
