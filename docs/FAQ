@@ -172,8 +172,8 @@ FAQ
 
   1.2 What is libcurl?
 
-  libcurl is a reliable and portable library which provides you with an easy
-  interface to a range of common Internet protocols.
+  libcurl is a reliable and portable library for doing Internet data transfers
+  using one or more of its supported Internet protocols.
 
   You can use libcurl for free in your application, be it open source,
   commercial or closed-source.
