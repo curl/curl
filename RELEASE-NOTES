@@ -31,7 +31,7 @@ This release includes the following bugfixes:
  o cmake: add CURL_ENABLE_SSL option [46]
  o cmake: with OpenSSL, define OPENSSL_SUPPRESS_DEPRECATED [14]
  o cmdline-opts: made the 'Added:' field mandatory [37]
- o connnect: use sysaddr_un from sys/un.h or custom-defined for windows [23]
+ o connect: use sysaddr_un from sys/un.h or custom-defined for windows [23]
  o curl-openssl.m4: modify library order for openssl linking [40]
  o curl-openssl: pass argument to sed single-quoted [15]
  o curl.1: remove mentions of really old version changes [38]
