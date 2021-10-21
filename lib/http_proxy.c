@@ -210,6 +210,8 @@ static void connect_done(struct Curl_easy *data)
     /* restore the protocol pointer */
     data->req.p.http = s->prot_save;
     s->prot_save = NULL;
+    data->info.httpcode = 0; /* clear it as it might've been used for the
+                                proxy */
     infof(data, "CONNECT phase completed!");
   }
 }
@@ -964,7 +966,6 @@ static CURLcode CONNECT(struct Curl_easy *data,
 
   result = CURLE_OK;
   if(s->tunnel_state == TUNNEL_COMPLETE) {
-    data->info.httpproxycode = data->req.httpcode;
     if(data->info.httpproxycode/100 != 2) {
       if(conn->bits.close && data->req.newurl) {
         conn->bits.proxy_connect_closed = TRUE;

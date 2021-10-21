@@ -260,6 +260,12 @@ static CURLcode status_line(struct Curl_easy *data,
   if(http_version == HYPER_HTTP_VERSION_1_0)
     data->state.httpwant = CURL_HTTP_VERSION_1_0;
 
+  if(data->state.hconnect)
+    /* CONNECT */
+    data->info.httpproxycode = http_status;
+
+  /* We need to set 'httpcodeq' for functions that check the response code in
+     a single place. */
   data->req.httpcode = http_status;
 
   result = Curl_http_statusline(data, conn);
