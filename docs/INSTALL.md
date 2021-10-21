@@ -472,7 +472,7 @@ use, here are some other flags that can reduce the size of the library:
  - `--disable-unix-sockets` (disables support for UNIX sockets)
  - `--disable-verbose` (eliminates debugging strings and error code strings)
  - `--disable-versioned-symbols` (disables support for versioned symbols)
- - `--enable-hidden-symbols` (eliminates unneeded symbols in the shared library)
+ - `--enable-symbol-hiding` (eliminates unneeded symbols in the shared library)
  - `--without-libidn` (disables support for the libidn DNS library)
  - `--without-librtmp` (disables support for RTMP)
  - `--without-openssl` (disables support for SSL/TLS)
