@@ -58,8 +58,13 @@ Accept: */*
 
 # curl: (18) transfer closed with outstanding read data remaining
 # 18 == CURLE_PARTIAL_FILE
+# 56 == CURLE_RECV_ERROR
 <errorcode>
+%if hyper
+56
+%else
 18
+%endif
 </errorcode>
 </verify>
 </testcase>
