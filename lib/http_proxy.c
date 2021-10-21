@@ -816,6 +816,15 @@ static CURLcode CONNECT(struct Curl_easy *data,
         result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
+      if(data->set.verbose) {
+        char *se = aprintf("CONNECT %s HTTP/1.1\r\n", hostheader);
+        if(!se) {
+          result = CURLE_OUT_OF_MEMORY;
+          goto error;
+        }
+        Curl_debug(data, CURLINFO_HEADER_OUT, se, strlen(se));
+        free(se);
+      }
       /* Setup the proxy-authorization header, if any */
       result = Curl_http_output_auth(data, conn, "CONNECT", HTTPREQ_GET,
                                      hostheader, TRUE);
