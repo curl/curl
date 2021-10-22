@@ -3066,60 +3066,36 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
     }
   }
 
+  if(verifypeer && !imported_native_ca && (ssl_cafile || ssl_capath)) {
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
   /* OpenSSL 3.0.0 has deprecated SSL_CTX_load_verify_locations */
-  {
-    if(ssl_cafile) {
-      if(!SSL_CTX_load_verify_file(backend->ctx, ssl_cafile)) {
-        if(verifypeer && !imported_native_ca) {
-          /* Fail if we insist on successfully verifying the server. */
-          failf(data, "error setting certificate file: %s", ssl_cafile);
-          return CURLE_SSL_CACERT_BADFILE;
-        }
-        /* Continue with warning if certificate verification isn't required. */
-        infof(data, "error setting certificate file, continuing anyway");
-      }
-      infof(data, " CAfile: %s", ssl_cafile);
+    if(ssl_cafile &&
+       !SSL_CTX_load_verify_file(backend->ctx, ssl_cafile)) {
+      /* Fail if we insist on successfully verifying the server. */
+      failf(data, "error setting certificate file: %s", ssl_cafile);
+      return CURLE_SSL_CACERT_BADFILE;
     }
-    if(ssl_capath) {
-      if(!SSL_CTX_load_verify_dir(backend->ctx, ssl_capath)) {
-        if(verifypeer && !imported_native_ca) {
-          /* Fail if we insist on successfully verifying the server. */
-          failf(data, "error setting certificate path: %s", ssl_capath);
-          return CURLE_SSL_CACERT_BADFILE;
-        }
-        /* Continue with warning if certificate verification isn't required. */
-        infof(data, "error setting certificate path, continuing anyway");
-      }
-      infof(data, " CApath: %s", ssl_capath);
+    if(ssl_capath &&
+       !SSL_CTX_load_verify_dir(backend->ctx, ssl_capath)) {
+      /* Fail if we insist on successfully verifying the server. */
+      failf(data, "error setting certificate path: %s", ssl_capath);
+      return CURLE_SSL_CACERT_BADFILE;
     }
-  }
 #else
-  if(ssl_cafile || ssl_capath) {
-    /* tell SSL where to find CA certificates that are used to verify
-       the server's certificate. */
+    /* tell OpenSSL where to find CA certificates that are used to verify the
+       server's certificate. */
     if(!SSL_CTX_load_verify_locations(backend->ctx, ssl_cafile, ssl_capath)) {
-      if(verifypeer && !imported_native_ca) {
-        /* Fail if we insist on successfully verifying the server. */
-        failf(data, "error setting certificate verify locations:"
-              "  CAfile: %s CApath: %s",
-              ssl_cafile ? ssl_cafile : "none",
-              ssl_capath ? ssl_capath : "none");
-        return CURLE_SSL_CACERT_BADFILE;
-      }
-      /* Just continue with a warning if no strict certificate verification
-         is required. */
-      infof(data, "error setting certificate verify locations,"
-            " continuing anyway:");
+      /* Fail if we insist on successfully verifying the server. */
+      failf(data, "error setting certificate verify locations:"
+            "  CAfile: %s CApath: %s",
+            ssl_cafile ? ssl_cafile : "none",
+            ssl_capath ? ssl_capath : "none");
+      return CURLE_SSL_CACERT_BADFILE;
     }
-    else {
-      /* Everything is fine. */
-      infof(data, "successfully set certificate verify locations:");
-    }
+#endif
     infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
     infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
   }
-#endif
 
 #ifdef CURL_CA_FALLBACK
   if(verifypeer &&
