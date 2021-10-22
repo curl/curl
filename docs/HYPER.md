@@ -49,6 +49,7 @@ over the wire with Hyper.
 The hyper backend doesn't support
 
 - `CURLOPT_IGNORE_CONTENT_LENGTH`
+- `--raw` and disabling `CURLOPT_HTTP_TRANSFER_DECODING`
 - RTSP
 
 ## Remaining issues

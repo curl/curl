@@ -2516,8 +2516,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * disable libcurl transfer encoding is used
      */
+#ifndef USE_HYPER
     data->set.http_te_skip = (0 == va_arg(param, long)) ? TRUE : FALSE;
     break;
+#else
+    return CURLE_NOT_BUILT_IN; /* hyper doesn't support */
+#endif
 
   case CURLOPT_HTTP_CONTENT_DECODING:
     /*
