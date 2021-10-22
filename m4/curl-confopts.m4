@@ -242,10 +242,6 @@ AC_DEFUN([CURL_CHECK_OPTION_SYMBOL_HIDING], [
 AS_HELP_STRING([--enable-symbol-hiding],[Enable hiding of library internal symbols])
 AS_HELP_STRING([--disable-symbol-hiding],[Disable hiding of library internal symbols]),
   OPT_SYMBOL_HIDING=$enableval)
-  AC_ARG_ENABLE(hidden-symbols,
-AS_HELP_STRING([--enable-hidden-symbols],[To be deprecated, use --enable-symbol-hiding])
-AS_HELP_STRING([--disable-hidden-symbols],[To be deprecated, use --disable-symbol-hiding]),
-  OPT_SYMBOL_HIDING=$enableval)
   case "$OPT_SYMBOL_HIDING" in
     no)
       dnl --disable-symbol-hiding option used.
