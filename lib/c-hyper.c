@@ -205,7 +205,8 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
         k->exp100 = EXP100_FAILED;
       }
     }
-    if(data->state.hconnect && (data->req.httpcode/100 != 2)) {
+    if(data->state.hconnect && (data->req.httpcode/100 != 2) &&
+       data->state.authproxy.done) {
       done = TRUE;
       result = CURLE_OK;
     }
