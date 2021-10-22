@@ -64,7 +64,7 @@
  * Waiting indefinitely with this function is not allowed, a
  * zero or negative timeout value will return immediately.
  * Timeout resolution, accuracy, as well as maximum supported
- * value is system dependent, neither factor is a citical issue
+ * value is system dependent, neither factor is a critical issue
  * for the intended use of this function in the library.
  *
  * Return values:

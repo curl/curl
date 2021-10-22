@@ -330,7 +330,7 @@ struct digestdata {
   char *opaque;
   char *qop;
   char *algorithm;
-  int nc; /* nounce count */
+  int nc; /* nonce count */
   BIT(stale); /* set true for re-negotiation */
   BIT(userhash);
 #endif

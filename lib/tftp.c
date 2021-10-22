@@ -1304,9 +1304,9 @@ static CURLcode tftp_doing(struct Curl_easy *data, bool *dophase_done)
 
 /**********************************************************
  *
- * tftp_peform
+ * tftp_perform
  *
- * Entry point for transfer from tftp_do, sarts state mach
+ * Entry point for transfer from tftp_do, starts state mach
  *
  **********************************************************/
 static CURLcode tftp_perform(struct Curl_easy *data, bool *dophase_done)

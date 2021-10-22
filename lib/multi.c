@@ -2633,7 +2633,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
 
     multi->magic = 0; /* not good anymore */
 
-    /* Firsrt remove all remaining easy handles */
+    /* First remove all remaining easy handles */
     data = multi->easyp;
     while(data) {
       nextdata = data->next;
