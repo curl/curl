@@ -684,7 +684,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
   (void) data;
 
   if(!conn->mech)
-    /* not inititalized, return error */
+    /* not initialized, return error */
     return -1;
 
   DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
@@ -768,7 +768,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
     }
   }
 
-  /* Now try to negiociate the protection level. */
+  /* Now try to negotiate the protection level. */
   code = ftp_send_command(data, "PROT %c", level_to_char(level));
 
   if(code < 0)

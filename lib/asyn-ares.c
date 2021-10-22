@@ -341,7 +341,7 @@ static int waitperform(struct Curl_easy *data, timediff_t timeout_ms)
     nfds = 0;
 
   if(!nfds)
-    /* Call ares_process() unconditonally here, even if we simply timed out
+    /* Call ares_process() unconditionally here, even if we simply timed out
        above, as otherwise the ares name resolve won't timeout! */
     ares_process_fd((ares_channel)data->state.async.resolver, ARES_SOCKET_BAD,
                     ARES_SOCKET_BAD);

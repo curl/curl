@@ -2780,7 +2780,7 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
   size_t plen;
   size_t olen;
 
-  /* the input length check is because this is called directcly from setopt
+  /* the input length check is because this is called directly from setopt
      and isn't going through the regular string length check */
   size_t llen = strlen(login);
   if(llen > CURL_MAX_INPUT_LENGTH)

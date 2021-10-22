@@ -490,7 +490,7 @@ static CURLcode smtp_perform_authentication(struct Curl_easy *data)
   saslprogress progress;
 
   /* Check we have enough data to authenticate with, and the
-     server supports authentiation, and end the connect phase if not */
+     server supports authentication, and end the connect phase if not */
   if(!smtpc->auth_supported ||
      !Curl_sasl_can_authenticate(&smtpc->sasl, conn)) {
     state(data, SMTP_STOP);
@@ -527,7 +527,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data)
 
   if(smtp->rcpt) {
     /* We notify the server we are sending UTF-8 data if a) it supports the
-       SMTPUTF8 extension and b) The mailbox contains UTF-8 charaacters, in
+       SMTPUTF8 extension and b) The mailbox contains UTF-8 characters, in
        either the local address or host name parts. This is regardless of
        whether the host name is encoded using IDN ACE */
     bool utf8 = FALSE;
@@ -600,7 +600,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
   struct connectdata *conn = data->conn;
 
   /* We notify the server we are sending UTF-8 data if a) it supports the
-     SMTPUTF8 extension and b) The mailbox contains UTF-8 charaacters, in
+     SMTPUTF8 extension and b) The mailbox contains UTF-8 characters, in
      either the local address or host name parts. This is regardless of
      whether the host name is encoded using IDN ACE */
   bool utf8 = FALSE;
