@@ -44,6 +44,8 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#include "slist.h"
+
 #define HMAC_SHA256(k, kl, d, dl, o)        \
   do {                                      \
     ret = Curl_hmacit(Curl_HMAC_SHA256,     \
@@ -56,6 +58,8 @@
     }                                       \
   } while(0)
 
+#define TIMESTAMP_SIZE 17
+
 static void sha256_to_hex(char *dst, unsigned char *sha, size_t dst_l)
 {
   int i;
@@ -64,6 +68,188 @@ static void sha256_to_hex(char *dst, unsigned char *sha, size_t dst_l)
   for(i = 0; i < 32; ++i) {
     curl_msnprintf(dst + (i * 2), dst_l - (i * 2), "%02x", sha[i]);
   }
+}
+
+static char *find_date_hdr(struct Curl_easy *data, const char *sig_hdr)
+{
+  char *tmp = Curl_checkheaders(data, sig_hdr, strlen(sig_hdr));
+
+  if(tmp)
+    return tmp;
+  return Curl_checkheaders(data, STRCONST("Date"));
+}
+
+static CURLcode make_headers(struct Curl_easy *data,
+                             const char *hostname,
+                             char *timestamp,
+                             const char *provider1_low,
+                             const char *provider1_mid,
+                             char **date_header,
+                             struct dynbuf *canonical_headers,
+                             struct dynbuf *signed_headers)
+{
+  char *date_hdr_key =  curl_maprintf("X-%s-Date", provider1_mid);
+  char *date_full_hdr = curl_maprintf("x-%s-date:%s",
+                                      provider1_low, timestamp);
+  struct curl_slist *head = NULL;
+  struct curl_slist *tmp_head = NULL;
+  CURLcode ret = CURLE_OUT_OF_MEMORY;
+  struct curl_slist *l;
+  int again = 1;
+  char *full_host = NULL;
+
+  if(!date_hdr_key || !date_full_hdr)
+    goto fail;
+
+  if(Curl_checkheaders(data, STRCONST("Host"))) {
+    head = NULL;
+  }
+  else {
+    if(data->state.aptr.host) {
+      size_t pos;
+
+      full_host = strdup(data->state.aptr.host);
+      if(!full_host)
+        goto fail;
+      /* remove /r/n as the separator for canonical request must be '\n'
+       * and are readd after */
+      pos = strlen(full_host);
+      if(pos > 1 && full_host[pos - 1] == '\n') {
+        full_host[pos - 1] = 0;
+        if(pos > 2 && full_host[pos - 2] == '\r')
+          full_host[pos - 2] = 0;
+      }
+    }
+    else {
+      full_host = curl_maprintf("host:%s", hostname);
+    }
+
+    if(!full_host)
+      goto fail;
+    head = curl_slist_append(NULL, full_host);
+    if(!head)
+      goto fail;
+  }
+
+
+  if(!date_hdr_key || !date_full_hdr)
+    goto fail;
+
+  for(l = data->set.headers; l; l = l->next) {
+    tmp_head = curl_slist_append(head, l->data);
+    if(!tmp_head)
+      goto fail;
+    head = tmp_head;
+  }
+
+  /* remove whitespace, and lowercase each headers */
+  for(l = head; l; l = l->next) {
+    char *tmp = l->data, *tmp2;
+    size_t pos;
+
+    for(pos = 0; tmp[pos] && tmp[pos] != ':'; ++pos);
+    Curl_strntolower(l->data, l->data, pos);
+
+    tmp += pos;
+    if(!*tmp)
+      continue;
+    ++tmp;
+    tmp2 = tmp;
+    while(*tmp2 == ' ' || *tmp2 == '\t') {
+      ++tmp2;
+    }
+    if(tmp != tmp2)
+      memmove(tmp, tmp2, strlen(tmp2) + 1);
+
+    while(*tmp) {
+      tmp2 = tmp;
+      while(*tmp2 == ' ' || *tmp2 == '\t') {
+        ++tmp2;
+      }
+
+      if(tmp != tmp2) {
+        if(*tmp2 == 0)
+          /* remove spaces at the end */
+          *tmp = 0;
+        else {
+          *tmp++ = ' '; /* if tab convert to space */
+          if(*tmp == ' ' || *tmp == '\t')
+            memmove(tmp, tmp2, strlen(tmp2));
+        }
+        tmp = tmp2;
+      }
+      else {
+        ++tmp;
+      }
+    }
+  }
+
+  *date_header = find_date_hdr(data, date_hdr_key);
+  if(!*date_header) {
+    tmp_head = curl_slist_append(head, date_full_hdr);
+    if(!tmp_head)
+      goto fail;
+    head = tmp_head;
+    *date_header = curl_maprintf("%s: %s", date_hdr_key, timestamp);
+  }
+  else {
+    char *tmp;
+
+    *date_header = strdup(*date_header);
+    tmp = strchr(*date_header, ':');
+    if(!tmp)
+      goto fail;
+    ++tmp;
+    while(*tmp == ' ' || *tmp == '\t')
+      ++tmp;
+    strncpy(timestamp, tmp, TIMESTAMP_SIZE - 1);
+    timestamp[TIMESTAMP_SIZE - 1] = 0;
+  }
+
+  /* alpha-sort in a case sensitive manner */
+  for(again = 1; again;) {
+    again = 0;
+    for(l = head; l; l = l->next) {
+      struct curl_slist *next = l->next;
+
+      if(next && strcmp(l->data, next->data) > 0) {
+        char *tmp = l->data;
+
+        l->data = next->data;
+        next->data = tmp;
+        again = 1;
+      }
+    }
+  }
+
+  for(l = head; l; l = l->next) {
+    char *tmp;
+
+    if(Curl_dyn_add(canonical_headers, l->data))
+      goto fail;
+    if(Curl_dyn_add(canonical_headers, "\n"))
+      goto fail;
+
+    tmp = strchr(l->data, ':');
+    if(tmp)
+      *tmp = 0;
+
+    if(l != head) {
+      if(Curl_dyn_add(signed_headers, ";"))
+        goto fail;
+    }
+    if(Curl_dyn_add(signed_headers, l->data))
+      goto fail;
+  }
+
+  ret = CURLE_OK;
+fail:
+  free(full_host);
+  free(date_full_hdr);
+  free(date_hdr_key);
+  curl_slist_free_all(head);
+
+  return ret;
 }
 
 CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
@@ -85,11 +271,11 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 #endif
   time_t clock;
   struct tm tm;
-  char timestamp[17];
+  char timestamp[TIMESTAMP_SIZE];
   char date[9];
-  const char *content_type = Curl_checkheaders(data, STRCONST("Content-Type"));
-  char *canonical_headers = NULL;
-  char *signed_headers = NULL;
+  struct dynbuf canonical_headers;
+  struct dynbuf signed_headers;
+  char *date_header = NULL;
   Curl_HttpReq httpreq;
   const char *method;
   size_t post_data_len;
@@ -114,6 +300,11 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     /* Authorization already present, Bailing out */
     return CURLE_OK;
   }
+
+
+  /* we init thoses buffers here, so goto fail will free initialized dynbuf */
+  Curl_dyn_init(&canonical_headers, CURL_MAX_HTTP_HEADER);
+  Curl_dyn_init(&signed_headers, CURL_MAX_HTTP_HEADER);
 
   /*
    * Parameters parsing
@@ -244,43 +435,21 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   if(ret != CURLE_OK) {
     goto fail;
   }
+  ret = CURLE_OUT_OF_MEMORY;
   if(!strftime(timestamp, sizeof(timestamp), "%Y%m%dT%H%M%SZ", &tm)) {
     goto fail;
   }
+
+  if((ret = make_headers(data, hostname, timestamp,
+                         provider1_low, provider1_mid,
+                         &date_header,
+                         &canonical_headers,
+                         &signed_headers)) != CURLE_OK)
+    goto fail;
+  ret = CURLE_OUT_OF_MEMORY;
+
   memcpy(date, timestamp, sizeof(date));
   date[sizeof(date) - 1] = 0;
-
-  if(content_type) {
-    content_type = strchr(content_type, ':');
-    if(!content_type) {
-      ret = CURLE_FAILED_INIT;
-      goto fail;
-    }
-    content_type++;
-    /* Skip whitespace now */
-    while(*content_type == ' ' || *content_type == '\t')
-      ++content_type;
-
-    canonical_headers = curl_maprintf("content-type:%s\n"
-                                      "host:%s\n"
-                                      "x-%s-date:%s\n",
-                                      content_type,
-                                      hostname,
-                                      provider1_low, timestamp);
-    signed_headers = curl_maprintf("content-type;host;x-%s-date",
-                                   provider1_low);
-  }
-  else {
-    canonical_headers = curl_maprintf("host:%s\n"
-                                      "x-%s-date:%s\n",
-                                      hostname,
-                                      provider1_low, timestamp);
-    signed_headers = curl_maprintf("host;x-%s-date", provider1_low);
-  }
-
-  if(!canonical_headers || !signed_headers) {
-    goto fail;
-  }
 
   if(data->set.postfieldsize < 0)
     post_data_len = strlen(post_data);
@@ -305,8 +474,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                   method,
                   data->state.up.path,
                   data->state.up.query ? data->state.up.query : "",
-                  canonical_headers,
-                  signed_headers,
+                  Curl_dyn_ptr(&canonical_headers),
+                  Curl_dyn_ptr(&signed_headers),
                   sha_hex);
   if(!canonical_request) {
     goto fail;
@@ -368,14 +537,13 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                                "Credential=%s/%s, "
                                "SignedHeaders=%s, "
                                "Signature=%s\r\n"
-                               "X-%s-Date: %s\r\n",
+                               "%s\r\n",
                                provider0_up,
                                user,
                                credential_scope,
-                               signed_headers,
+                               Curl_dyn_ptr(&signed_headers),
                                sha_hex,
-                               provider1_mid,
-                               timestamp);
+                               date_header);
   if(!auth_headers) {
     goto fail;
   }
@@ -392,13 +560,14 @@ fail:
   free(provider1_mid);
   free(region);
   free(service);
-  free(canonical_headers);
-  free(signed_headers);
+  Curl_dyn_free(&canonical_headers);
+  Curl_dyn_free(&signed_headers);
   free(canonical_request);
   free(request_type);
   free(credential_scope);
   free(str_to_sign);
   free(secret);
+  free(date_header);
   return ret;
 }
 
