@@ -31,7 +31,7 @@ Funny-head: yesyes
 http
 </server>
  <name>
-HTTP GET
+--output using #0
  </name>
  <command option="no-output">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o 'log/base-#0'
