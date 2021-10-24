@@ -4,7 +4,7 @@ curl and libcurl 7.80.0
  Command line options:         243
  curl_easy_setopt() options:   294
  Public functions in libcurl:  86
- Contributors:                 2515
+ Contributors:                 2521
 
 This release includes the following changes:
 
@@ -20,7 +20,9 @@ This release includes the following bugfixes:
  o aws-sigv4: make signature work when post data is binary [68]
  o BINDINGS: URL updates [30]
  o build: remove checks for WinSock 1 [36]
+ o c-hyper: don't abort CONNECT responses early when auth-in-progress [71]
  o c-hyper: make Curl_http propagate errors better [50]
+ o c-hyper: make test 217 run [74]
  o c-hyper: use hyper_request_set_uri_parts to make h2 better [39]
  o checksrc: ignore preprocessor lines [64]
  o CI/makefiles: introduce dedicated test target [34]
@@ -32,6 +34,7 @@ This release includes the following bugfixes:
  o cmake: with OpenSSL, define OPENSSL_SUPPRESS_DEPRECATED [14]
  o cmdline-opts: made the 'Added:' field mandatory [37]
  o connect: use sysaddr_un from sys/un.h or custom-defined for windows [23]
+ o curl-confopts.m4:  remove --enable/disable-hidden-symbols [70]
  o curl-openssl.m4: modify library order for openssl linking [40]
  o curl-openssl: pass argument to sed single-quoted [15]
  o curl.1: remove mentions of really old version changes [38]
@@ -52,27 +55,38 @@ This release includes the following bugfixes:
  o http: remove assert that breaks hyper [47]
  o http: set content length earlier [67]
  o http_proxy: make hyper CONNECT() return the correct error code [51]
+ o http_proxy: multiple CONNECT with hyper done better [78]
+ o hyper: does not support disabling CURLOPT_HTTP_TRANSFER_DECODING [72]
+ o hyper: pass the CONNECT line to the debug callback [79]
+ o INSTALL: update symbol hiding option [77]
  o lib/mk-ca-bundle.pl: skip certs passed Not Valid After date [18]
  o lib: avoid fallthrough cases in switch statements [33]
  o libcurl.rc: switch out the copyright symbol for plain ASCII [5]
  o libssh2: Get the version at runtime if possible [12]
  o llist: remove redundant code, branch will not be executed [10]
  o maketgz: redirect updatemanpages.pl output to /dev/null
+ o manpage: adjust the asterisk in some SYNOPSIS sections [82]
  o md5: fix compilation with OpenSSL 3.0 API [43]
  o misc: fix a few issues on MidnightBSD [28]
  o misc: fix typos in docs and comments [3]
  o ngtcp2: fix QUIC transport parameter version [6]
  o NTLM: use DES_set_key_unchecked with OpenSSL [13]
+ o openssl: if verifypeer is not requested, skip the CA loading [69]
  o openssl: with OpenSSL 1.1.0+ a failed RAND_status means goaway [44]
  o sasl: binary messages [31]
  o scripts/delta: count command line options in the new file
  o sha256: use high-level EVP interface for OpenSSL [41]
  o sws: fix memory leak on exit [49]
  o test1185: verify checksrc [58]
+ o test207: accept a different error code for hyper [76]
+ o test262: don't attempt with hyper [73]
  o tests: disable test 2043 [54]
+ o tests: use python3 in test 1451 [48]
+ o tls: remove newline from three infof() calls [85]
  o tool_cb_prg: make resumed upload progress bar show better [9]
  o tool_listhelp: easier generated with gen.pl [19]
  o tool_main: fix typo in comment [29]
+ o URL-SYNTAX: add IMAP UID SEARCH example [81]
  o url: set "k->size" -1 at start of request [60]
  o urlapi: skip a strlen(), pass in zero [65]
  o urlapi: URL decode percent-encoded host names [26]
@@ -88,18 +102,20 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   8U61ife on github, a1346054 on github, Abhinav Singh, Alexander Chuykov,
-  Anthony Hu, beslick5 on github, Bo Anderson, Daniel Gustafsson,
-  Daniel Stenberg, David Cook, Gisle Vanem, Gleb Ivanovsky, h1zzz on github,
+  Anthony Hu, beslick5 on github, billionai on github, Bo Anderson,
+  Daniel Gustafsson, Daniel Stenberg, David Cook, Eddie Lumpkin,
+  Érico Nogueira, Erik Stenlund, Gisle Vanem, Gleb Ivanovsky, h1zzz on github,
   Harry Sintonen, Hayden Roche, Jakub Zakrzewski, Jan Mazur, Jeffrey Tolar,
   Joel Depooter, Josip Medved, Jun-ya Kato, Kirill Efimov, Lucas Holt,
-  Marcel Raad, Marc Hörsken, Mats Lindestam, Max Dymond, Michael Afanasiev,
-  Michael Baentsch, Michael Kaufmann, Momoka Yamamoto, Noam Moshe,
-  Patrick Monnerat, Rafał Mikrut, Randall S. Becker, Raul Onitza-Klugman,
-  Ray Satiro, Rick Lane, Rikard Falkeborn, Ryan Mast, Sean Molenaar,
-  Sergey Markelov, sergio-nsk on github, Sharon Brizinov, Stathis Kapnidis,
+  Malik Idrees Hasan Khan, Marcel Raad, Marc Hörsken, Mats Lindestam,
+  Max Dymond, Michael Afanasiev, Michael Baentsch, Michael Kaufmann,
+  Momoka Yamamoto, Noam Moshe, orycho on github, Patrick Monnerat,
+  Rafał Mikrut, Randall S. Becker, Raul Onitza-Klugman, Ray Satiro, Rick Lane,
+  Rikard Falkeborn, Ryan Mast, Samuel Henrique, Sean Molenaar, Sergey Markelov,
+  sergio-nsk on github, Sharon Brizinov, Stathis Kapnidis,
   Steini2000 on github, Thomas M. DuBuisson, tlahn on github, Viktor Szakats,
   Vitaly Varyvdin, Wyatt O'Day, Борис Верховский,
-  (52 contributors)
+  (59 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -150,6 +166,7 @@ References to bug reports and discussions on issues:
  [45] = https://curl.se/bug/?i=7742
  [46] = https://curl.se/bug/?i=7822
  [47] = https://curl.se/bug/?i=7852
+ [48] = https://curl.se/bug/?i=7899
  [49] = https://curl.se/bug/?i=7849
  [50] = https://curl.se/bug/?i=7851
  [51] = https://curl.se/bug/?i=7825
@@ -169,3 +186,16 @@ References to bug reports and discussions on issues:
  [66] = https://curl.se/bug/?i=7860
  [67] = https://github.com/curl/curl/commit/8a16e54#r57374914
  [68] = https://curl.se/bug/?i=7844
+ [69] = https://curl.se/bug/?i=7892
+ [70] = https://curl.se/bug/?i=7891
+ [71] = https://curl.se/bug/?i=7889
+ [72] = https://curl.se/bug/?i=7889
+ [73] = https://curl.se/bug/?i=7889
+ [74] = https://curl.se/bug/?i=7889
+ [76] = https://curl.se/bug/?i=7889
+ [77] = https://curl.se/bug/?i=7890
+ [78] = https://curl.se/bug/?i=7888
+ [79] = https://curl.se/bug/?i=7887
+ [81] = https://github.com/curl/curl/issues/7626
+ [82] = https://curl.se/bug/?i=7884
+ [85] = https://curl.se/bug/?i=7879
