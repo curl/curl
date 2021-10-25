@@ -1325,6 +1325,10 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(result)
           break;
 
+        /* new in libcurl 7.81.0 */
+        if(config->mime_options)
+          my_setopt(curl, CURLOPT_MIME_OPTIONS, config->mime_options);
+
         /* new in libcurl 7.10.6 (default is Basic) */
         if(config->authtype)
           my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, (long)config->authtype);

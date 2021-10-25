@@ -75,6 +75,7 @@ DPAGES = \
   fail-with-body.d \
   fail.d \
   false-start.d \
+  form-escape.d \
   form-string.d \
   form.d \
   ftp-account.d \

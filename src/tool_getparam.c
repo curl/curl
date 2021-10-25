@@ -138,6 +138,7 @@ static const struct LongShort aliases[]= {
   {"$h", "retry-delay",              ARG_STRING},
   {"$i", "retry-max-time",           ARG_STRING},
   {"$k", "proxy-negotiate",          ARG_BOOL},
+  {"$l", "form-escape",              ARG_BOOL},
   {"$m", "ftp-account",              ARG_STRING},
   {"$n", "proxy-anyauth",            ARG_BOOL},
   {"$o", "trace-time",               ARG_BOOL},
@@ -986,6 +987,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           config->proxynegotiate = toggle;
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
+        break;
+
+      case 'l': /* --form-escape */
+        config->mime_options &= ~CURLMIMEOPT_FORMESCAPE;
+        if(toggle)
+          config->mime_options |= CURLMIMEOPT_FORMESCAPE;
         break;
 
       case 'm': /* --ftp-account */

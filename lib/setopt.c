@@ -2609,6 +2609,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 #endif
 
+#if (!defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_MIME)) || \
+  !defined(CURL_DISABLE_SMTP) || !defined(CURL_DISABLE_IMAP)
+  case CURLOPT_MIME_OPTIONS:
+    data->set.mime_options = va_arg(param, long);
+    break;
+#endif
+
   case CURLOPT_SASL_AUTHZID:
     /* Authorisation identity (identity to act as) */
     result = Curl_setstropt(&data->set.str[STRING_SASL_AUTHZID],

@@ -1749,6 +1749,7 @@ struct UserDefined {
   unsigned int scope_id;  /* Scope id for IPv6 */
   long allowed_protocols;
   long redir_protocols;
+  long mime_options;      /* Mime option flags. */
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
   /* Common RTSP header options */
   Curl_RtspReq rtspreq; /* RTSP request type */
