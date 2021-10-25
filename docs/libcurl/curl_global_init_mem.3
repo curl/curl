@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -59,6 +59,9 @@ to that man page for documentation.
 .SH "CAUTION"
 Manipulating these gives considerable powers to the application to severely
 screw things up for libcurl. Take care!
+.SH RETURN VALUE
+CURLE_OK (0) means everything was ok, non-zero means an error occurred as
+\fI<curl/curl.h>\fP defines - see \fIlibcurl-errors(3)\fP.
 .SH AVAILABILITY
 Added in 7.12.0
 .SH "SEE ALSO"
