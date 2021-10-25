@@ -19,6 +19,10 @@ swsclose
 #
 # Client-side
 <client>
+# hyper doesn't grok HTTP/0.9
+<features>
+!hyper
+</features>
 <server>
 http
 </server>
