@@ -178,12 +178,10 @@ ARES = 1
 endif
 ifeq ($(findstring -rtmp,$(CFG)),-rtmp)
 RTMP = 1
-SSL = 1
 ZLIB = 1
 endif
 ifeq ($(findstring -ssh2,$(CFG)),-ssh2)
 SSH2 = 1
-SSL = 1
 ZLIB = 1
 endif
 ifeq ($(findstring -ssl,$(CFG)),-ssl)
@@ -228,6 +226,13 @@ NGHTTP3 = 1
 endif
 ifeq ($(findstring -ngtcp2,$(CFG)),-ngtcp2)
 NGTCP2 = 1
+endif
+
+# SSH2 and RTMP require an SSL library; assume OpenSSL if none specified
+ifneq ($(SSH2)$(RTMP),)
+  ifeq ($(SSL)$(WINSSL),)
+    SSL = 1
+  endif
 endif
 
 INCLUDES = -I. -I$(PROOT) -I$(PROOT)/include -I$(PROOT)/lib
@@ -284,7 +289,7 @@ ifdef SSL
     endif
   endif
   ifneq "$(wildcard $(OPENSSL_INCLUDE)/openssl/opensslv.h)" "$(OPENSSL_INCLUDE)/openssl/opensslv.h"
-  $(error Invalid path to OpenSSL package: $(OPENSSL_PATH))
+    $(error Invalid path to OpenSSL package: $(OPENSSL_PATH))
   endif
   ifndef OPENSSL_LIBPATH
     OPENSSL_LIBS = -lssl -lcrypto
