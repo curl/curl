@@ -28,8 +28,10 @@ Funny-head: yesyes
 #
 # Client-side
 <client>
+# hyper doesn't support the added crazy header
 <features>
 debug
+!hyper
 </features>
 <server>
 http
