@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -88,7 +88,7 @@ The callback denies the stream and no data for this will reach the
 application, the easy handle will be destroyed by libcurl.
 .IP "CURL_PUSH_ERROROUT (2)"
 Returning this will reject the pushed stream and return an error back on the
-parent stream making it get closed with an error. (Added in curl 7.72.0)
+parent stream making it get closed with an error. (Added in 7.72.0)
 .IP *
 All other return codes are reserved for future use.
 .SH DEFAULT
