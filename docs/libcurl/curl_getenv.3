@@ -33,6 +33,14 @@ emulate its behavior and provide an identical interface for all operating
 systems libcurl builds on (including win32).
 
 You must \fIcurl_free(3)\fP the returned string when you're done with it.
+.SH EXAMPLE
+.nf
+  char *width = curl_getenv("COLUMNS");
+  if(width) {
+    /* it was set! */
+    curl_free(width);
+  }
+.fi
 .SH AVAILABILITY
 This function will be removed from the public libcurl API in a near future. It
 will instead be made "available" by source code access only, and then as

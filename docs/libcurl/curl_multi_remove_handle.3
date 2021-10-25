@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -40,6 +40,20 @@ other easy handles and transfers will remain unaffected.
 
 It is fine to remove a handle at any time during a transfer, just not from
 within any libcurl callback function.
+.SH EXAMPLE
+.nf
+/* when an easy handle has completed, remove it */
+msg = curl_multi_info_read(multi_handle, &queued);
+if(msg) {
+  if(msg->msg == CURLMSG_DONE) {
+    /* a transfer ended */
+    fprintf(stderr, "Transfer completed\n");
+    curl_multi_remove_handle(multi_handle, msg->easy_handle);
+  }
+}
+.fi
+.SH AVAILABILITY
+Added in 7.9.6
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code.
 .SH "SEE ALSO"

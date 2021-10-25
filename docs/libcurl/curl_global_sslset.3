@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -82,7 +82,19 @@ attempt to change it will result in a \fBCURLSSLSET_TOO_LATE\fP.
 \fBThis function is not thread safe.\fP You must not call it when any other
 thread in the program (i.e. a thread sharing the same memory) is running.
 This doesn't just mean no other thread that is using libcurl.
+.SH EXAMPLE
+.nf
+  /* choose a specific backend */
+  curl_global_sslset(CURLSSLBACKEND_WOLFSSL, NULL, NULL);
 
+  /* list the available ones */
+  const curl_ssl_backend **list;
+  curl_global_sslset((curl_sslbackend)-1, NULL, &list);
+
+  for(i = 0; list[i]; i++)
+    printf("SSL backend #%d: '%s' (ID: %d)\n",
+           i, list[i]->name, list[i]->id);
+.fi
 .SH AVAILABILITY
 This function was added in libcurl 7.56.0. Before this version, there was no
 support for choosing SSL backends at runtime.
@@ -90,7 +102,8 @@ support for choosing SSL backends at runtime.
 If this function returns CURLSSLSET_OK, the backend was successfully selected.
 
 If the chosen backend is unknown (or support for the chosen backend has not
-been compiled into libcurl), the function returns \fICURLSSLSET_UNKNOWN_BACKEND\fP.
+been compiled into libcurl), the function returns
+\fICURLSSLSET_UNKNOWN_BACKEND\fP.
 
 If the backend had been configured previously, or if \fIcurl_global_init(3)\fP
 has already been called, the function returns \fICURLSSLSET_TOO_LATE\fP.

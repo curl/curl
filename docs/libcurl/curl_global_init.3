@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -92,6 +92,16 @@ This bit has no point since 7.69.0 but its behavior is instead the default.
 Before 7.69.0: when this flag is set, curl will acknowledge EINTR condition
 when connecting or when waiting for data.  Otherwise, curl waits until full
 timeout elapses. (Added in 7.30.0)
+.SH EXAMPLE
+.nf
+ curl_global_init(CURL_GLOBAL_DEFAULT);
+
+ /* use libcurl, then before exiting... */
+
+ curl_global_cleanup();
+.fi
+.SH AVAILABILITY
+Added in 7.8
 .SH RETURN VALUE
 If this function returns non-zero, something went wrong and you cannot use the
 other curl functions.

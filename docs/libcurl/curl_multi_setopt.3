@@ -69,12 +69,17 @@ See \fICURLMOPT_TIMERFUNCTION(3)\fP
 See \fICURLMOPT_TIMERDATA(3)\fP
 .IP CURLMOPT_MAX_CONCURRENT_STREAMS
 See \fICURLMOPT_MAX_CONCURRENT_STREAMS(3)\fP
+.SH EXAMPLE
+.fi
+  /* Limit the amount of simultaneous connections curl should allow: */
+  curl_multi_setopt(handle, CURLMOPT_MAXCONNECTS, (long)MAX_PARALLEL);
+.nf
+.SH AVAILABILITY
+Added in libcurl 7.15.4.
 .SH RETURN VALUE
 The standard CURLMcode for multi interface error codes. Note that it returns a
 CURLM_UNKNOWN_OPTION if you try setting an option that this version of libcurl
 doesn't know of.
-.SH AVAILABILITY
-This function was added in libcurl 7.15.4.
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
 .BR curl_multi_socket "(3), " curl_multi_info_read "(3)"

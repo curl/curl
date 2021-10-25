@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -32,6 +32,17 @@ This function returns a CURLM handle to be used as input to all the other
 multi-functions, sometimes referred to as a multi handle in some places in the
 documentation. This init call MUST have a corresponding call to
 \fIcurl_multi_cleanup(3)\fP when the operation is complete.
+.SH EXAMPLE
+.fi
+  /* init a multi stack */
+  multi_handle = curl_multi_init();
+
+  /* add individual transfers */
+  curl_multi_add_handle(multi_handle, http_handle);
+  curl_multi_add_handle(multi_handle, http_handle2);
+.nf
+.SH AVAILABILITY
+Added in 7.9.6
 .SH RETURN VALUE
 If this function returns NULL, something went wrong and you cannot use the
 other curl functions.

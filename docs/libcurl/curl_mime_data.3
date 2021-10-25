@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -44,10 +44,6 @@ is retained. It is possible to unassign part's contents by setting
 
 Setting very large data is memory consuming: one might consider using
 \fIcurl_mime_data_cb(3)\fP in such a case.
-.SH AVAILABILITY
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
-.SH RETURN VALUE
-CURLE_OK or a CURL error code upon failure.
 .SH EXAMPLE
 .nf
  curl_mime *mime;
@@ -62,6 +58,10 @@ CURLE_OK or a CURL error code upon failure.
  /* add data to the part  */
  curl_mime_data(part, "raw contents to send", CURL_ZERO_TERMINATED);
 .fi
+.SH AVAILABILITY
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+.SH RETURN VALUE
+CURLE_OK or a CURL error code upon failure.
 .SH "SEE ALSO"
 .BR curl_mime_addpart "(3),"
 .BR curl_mime_data_cb "(3),"

@@ -96,11 +96,6 @@ duplicated: the \fIarg\fP pointer argument is also duplicated, resulting in
 the pointed item to be shared between the original and the copied handle.
 In particular, special attention should be given to the \fIfreefunc\fP
 procedure code since it will be called twice with the same argument.
-
-.SH AVAILABILITY
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
-.SH RETURN VALUE
-CURLE_OK or a CURL error code upon failure.
 .SH EXAMPLE
 Sending a huge data string will cause the same amount of memory to be
 allocated: to avoid overhead resources consumption, one might want to use a
@@ -160,6 +155,10 @@ int seek_callback(void *arg, curl_off_t offset, int origin)
  curl_mime_data_cb(part, hugectl.size, read_callback, seek_callback, NULL,
                    &hugectl);
 
+.SH AVAILABILITY
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+.SH RETURN VALUE
+CURLE_OK or a CURL error code upon failure.
 .SH "SEE ALSO"
 .BR curl_mime_addpart "(3),"
 .BR curl_mime_data "(3),"

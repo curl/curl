@@ -66,17 +66,14 @@ equivalent to \fIcurl_multi_socket_action(3)\fP with \fBev_bitmask\fP set to
 Force libcurl to (re-)check all its internal sockets and transfers instead of
 just a single one by calling \fIcurl_multi_socket_all(3)\fP. Note that there
 should not be any reason to use this function!
-.SH "CALLBACK DETAILS"
-
+.SH CALLBACK
 The socket \fBcallback\fP function uses a prototype like this
 .nf
-
   int curl_socket_callback(CURL *easy,      /* easy handle */
                            curl_socket_t s, /* socket */
                            int action,      /* see values below */
                            void *userp,    /* private callback pointer */
                            void *socketp); /* private socket pointer */
-
 .fi
 The callback MUST return 0.
 
@@ -109,22 +106,6 @@ strictly associated to the given socket.
 
 The \fIuserp\fP argument is a private pointer you have previously set with
 \fIcurl_multi_setopt(3)\fP and the \fICURLMOPT_SOCKETDATA(3)\fP option.
-.SH "RETURN VALUE"
-CURLMcode type, general libcurl multi interface error code.
-
-Legacy: If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this basically means
-that you should call \fIcurl_multi_socket(3)\fP again, before you wait for
-more actions on libcurl's sockets. You don't have to do it immediately, but
-the return code means that libcurl may have more data available to return or
-that there may be more data to send off before it is "satisfied".
-
-In modern libcurls, \fICURLM_CALL_MULTI_PERFORM\fP or
-\fICURLM_CALL_MULTI_SOCKET\fP should not be returned and no application needs
-to care about them.
-
-NOTE that the return code is for the whole multi stack. Problems still might have
-occurred on individual transfers even when one of these functions
-return OK.
 .SH "TYPICAL USAGE"
 1. Create a multi handle
 
@@ -147,12 +128,24 @@ socket(s) that got action. If no activity is detected and the timeout expires,
 call \fIcurl_multi_socket_action(3)\fP with \fICURL_SOCKET_TIMEOUT\fP
 
 8. Go back to step 6.
+.SH EXAMPLE
+.nf
+/* the event-library gets told when there activity on the socket 'fd',
+   which we translate to a call to curl_multi_socket_action() */
+int running;
+rc = curl_multi_socket(multi_handle, fd, &running);
+.fi
 .SH AVAILABILITY
 This function was added in libcurl 7.15.4, and is deemed stable since
 7.16.0.
 
 \fIcurl_multi_socket(3)\fP is deprecated, use
 \fIcurl_multi_socket_action(3)\fP instead!
+.SH "RETURN VALUE"
+CURLMcode type, general libcurl multi interface error code.
+
+The return code is for the whole multi stack. Problems still might have
+occurred on individual transfers even when one of these functions return OK.
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
 .BR curl_multi_fdset "(3), " curl_multi_info_read "(3), "

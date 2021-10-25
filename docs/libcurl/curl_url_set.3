@@ -134,16 +134,6 @@ When space is used and allowed in a URL, it will be stored as-is unless
 space before stored. This affects how the URL will be constructed when
 \fIcurl_url_get(3)\fP is subsequently used to extract the full URL or
 individual parts.
-.SH RETURN VALUE
-Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
-fine.  See the \fIlibcurl-errors(3)\fP man page for the full list with
-descriptions.
-
-A URL string passed on to \fIcurl_url_set(3)\fP for the \fBCURLUPART_URL\fP
-part, must be shorter than 8000000 bytes otherwise it returns
-\fBCURLUE_MALFORMED_INPUT\fP (added in 7.65.0).
-
-If this function returns an error, no URL part is set.
 .SH EXAMPLE
 .nf
   CURLUcode rc;
@@ -158,6 +148,16 @@ If this function returns an error, no URL part is set.
 .fi
 .SH AVAILABILITY
 Added in curl 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
+.SH RETURN VALUE
+Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
+fine.  See the \fIlibcurl-errors(3)\fP man page for the full list with
+descriptions.
+
+A URL string passed on to \fIcurl_url_set(3)\fP for the \fBCURLUPART_URL\fP
+part, must be shorter than 8000000 bytes otherwise it returns
+\fBCURLUE_MALFORMED_INPUT\fP (added in 7.65.0).
+
+If this function returns an error, no URL part is set.
 .SH "SEE ALSO"
 .BR curl_url_cleanup "(3), " curl_url "(3), " curl_url_get "(3), "
 .BR curl_url_dup "(3), " curl_url_strerror "(3), " CURLOPT_CURLU "(3)"

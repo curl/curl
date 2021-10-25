@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -64,6 +64,17 @@ first the easy handle and then the multi handle:
 2 - \fIcurl_easy_cleanup(3)\fP
 
 3 - \fIcurl_multi_cleanup(3)\fP
+.SH EXAMPLE
+.nf
+  /* init a multi stack */
+  multi_handle = curl_multi_init();
+
+  /* add individual transfers */
+  curl_multi_add_handle(multi_handle, http_handle);
+  curl_multi_add_handle(multi_handle, http_handle2);
+.fi
+.SH AVAILABILITY
+ADded in 7.9.6
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code.
 .SH "SEE ALSO"
