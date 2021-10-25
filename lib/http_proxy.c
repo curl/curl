@@ -213,6 +213,9 @@ static void connect_done(struct Curl_easy *data)
     data->info.httpcode = 0; /* clear it as it might've been used for the
                                 proxy */
     data->req.ignorebody = FALSE;
+#ifdef USE_HYPER
+    data->state.hconnect = FALSE;
+#endif
     infof(data, "CONNECT phase completed!");
   }
 }
