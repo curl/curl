@@ -1142,8 +1142,6 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
 
-    /* https://docs.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-initializesecuritycontexta
-     */
     sspi_status = s_pSecFn->InitializeSecurityContext(
       &BACKEND->cred->cred_handle, &BACKEND->ctxt->ctxt_handle,
       host_name, BACKEND->req_flags, 0, 0, &inbuf_desc, 0, NULL,
@@ -2133,7 +2131,12 @@ static void schannel_close(struct Curl_easy *data, struct connectdata *conn,
     /* if the SSL/TLS channel hasn't been shut down yet, do that now. */
     Curl_ssl_shutdown(data, conn, sockindex);
   }
-  schannel_shutdown(data, conn, sockindex);
+  else {
+    if (sockindex == 0)
+       infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu",
+             SSL_HOST_NAME(), conn->remote_port);
+    schannel_shutdown(data, conn, sockindex);
+  }
 }
 
 static void schannel_session_free(void *ptr)
@@ -2158,9 +2161,6 @@ static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
   char * const hostname = SSL_HOST_NAME();
 
   DEBUGASSERT(data);
-
-  infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu",
-        hostname, conn->remote_port);
 
   if(BACKEND->cred && BACKEND->ctxt) {
     SecBufferDesc BuffDesc;
