@@ -29,6 +29,14 @@ curl_multi_strerror - return string describing error code
 .SH DESCRIPTION
 The curl_multi_strerror() function returns a string describing the CURLMcode
 error code passed in the argument \fIerrornum\fP.
+.SH EXAMPLE
+.nf
+int still_running;
+
+CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+if(mc)
+  printf("error: %s\n", curl_multi_strerror(mc));
+.fi
 .SH AVAILABILITY
 This function was added in libcurl 7.12.0
 .SH RETURN VALUE

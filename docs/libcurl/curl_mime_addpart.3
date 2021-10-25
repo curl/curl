@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -34,10 +34,6 @@ subsequently be populated using functions from the mime API.
 
 \fImime\fP is the handle of the mime structure in which the new part must be
 appended.
-.SH AVAILABILITY
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
-.SH RETURN VALUE
-A mime part structure handle, or NULL upon failure.
 .SH EXAMPLE
 .nf
  curl_mime *mime;
@@ -53,6 +49,10 @@ A mime part structure handle, or NULL upon failure.
  curl_mime_data(part, "This is the field data", CURL_ZERO_TERMINATED);
  curl_mime_name(part, "data");
 .fi
+.SH AVAILABILITY
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+.SH RETURN VALUE
+A mime part structure handle, or NULL upon failure.
 .SH "SEE ALSO"
 .BR curl_mime_init "(3),"
 .BR curl_mime_name "(3),"

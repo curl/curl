@@ -32,6 +32,15 @@ CURLcode error code passed in the argument \fIerrornum\fP.
 
 Typically applications also appreciate \fICURLOPT_ERRORBUFFER(3)\fP for more
 specific error descriptions generated at run-time.
+.SH EXAMPLE
+.nf
+  /* Perform the request, res will get the return code */
+  res = curl_easy_perform(curl);
+  /* Check for errors */
+  if(res != CURLE_OK)
+    fprintf(stderr, "curl_easy_perform() failed: %s\n",
+            curl_easy_strerror(res));
+.fi
 .SH AVAILABILITY
 This function was added in libcurl 7.12.0
 .SH RETURN VALUE

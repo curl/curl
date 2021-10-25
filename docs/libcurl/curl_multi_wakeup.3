@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -41,10 +41,6 @@ possible that multiple calls to this function will wake up the same waiting
 operation.
 
 This function has no effect on \fIcurl_multi_wait(3)\fP calls.
-.SH RETURN VALUE
-CURLMcode type, general libcurl multi interface error code.
-.SH AVAILABILITY
-Added in 7.68.0
 .SH EXAMPLE
 .nf
 CURL *easy_handle;
@@ -82,5 +78,9 @@ if(something makes us decide to stop thread 1) {
 }
 
 .fi
+.SH AVAILABILITY
+Added in 7.68.0
+.SH RETURN VALUE
+CURLMcode type, general libcurl multi interface error code.
 .SH "SEE ALSO"
 .BR curl_multi_poll "(3), " curl_multi_wait "(3)"

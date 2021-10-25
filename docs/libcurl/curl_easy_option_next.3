@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -64,6 +64,16 @@ information about what argument type they want.
 
 If the \fBCURLOT_FLAG_ALIAS\fP bit is set in the flags field, it means the
 name is provided for backwards compatibility as an alias.
+.SH EXAMPLE
+.nf
+/* iterate over all available options */
+const struct curl_easyoption *opt;
+opt = curl_easy_option_by_next(NULL);
+while(opt) {
+  printf("Name: %s\n", opt->name);
+  opt = curl_easy_option_by_next(opt);
+}
+.fi
 .SH AVAILABILITY
 This function was added in libcurl 7.73.0
 .SH RETURN VALUE

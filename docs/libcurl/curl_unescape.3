@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -39,6 +39,20 @@ If the 'length' argument is set to 0, curl_unescape() will use strlen() on the
 input 'url' string to find out the size.
 
 You must \fIcurl_free(3)\fP the returned string when you're done with it.
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  int decodelen;
+  char *decoded = curl_unescape("%63%75%72%6c", 12, &decodelen);
+  if(decoded) {
+    /* don't assume printf() works on the decoded data! */
+    printf("Decoded: ");
+    /* ... */
+    curl_free(decoded);
+  }
+}
+.fi
 .SH AVAILABILITY
 Since 7.15.4, \fIcurl_easy_unescape(3)\fP should be used. This function will
 be removed in a future release.

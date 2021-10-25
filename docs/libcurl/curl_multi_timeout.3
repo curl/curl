@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -65,14 +65,14 @@ timeout.tv_usec = (timeo % 1000) * 1000;
 /* wait for activities no longer than the set timeout */
 select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
 .fi
-.SH "RETURN VALUE"
-The standard CURLMcode for multi interface error codes.
-.SH "TYPICAL USAGE"
+.SH TYPICAL USAGE
 Call \fIcurl_multi_timeout(3)\fP, then wait for action on the sockets. You
 figure out which sockets to wait for by calling \fIcurl_multi_fdset(3)\fP or
 by a previous call to \fIcurl_multi_socket(3)\fP.
 .SH AVAILABILITY
 This function was added in libcurl 7.15.4.
+.SH RETURN VALUE
+The standard CURLMcode for multi interface error codes.
 .SH "SEE ALSO"
 .BR curl_multi_fdset "(3), " curl_multi_info_read "(3), "
 .BR curl_multi_socket "(3), " curl_multi_setopt "(3) "

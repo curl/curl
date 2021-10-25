@@ -34,6 +34,16 @@ differences in memory management between your application and libcurl.
 
 Passing in a NULL pointer in \fIptr\fP will make this function return
 immediately with no action.
+.SH EXAMPLE
+.nf
+  char *width = curl_getenv("COLUMNS");
+  if(width) {
+    /* it was set! */
+    curl_free(width);
+  }
+.fi
+.SH AVAILABILITY
+Always
 .SH RETURN VALUE
 None
 .SH "SEE ALSO"

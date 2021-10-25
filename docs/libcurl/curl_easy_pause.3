@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -68,10 +68,6 @@ function is called again without this bit set. Thus, the read callback
 Convenience define that pauses both directions.
 .IP CURLPAUSE_CONT
 Convenience define that unpauses both directions.
-.SH RETURN VALUE
-CURLE_OK (zero) means that the option was set properly, and a non-zero return
-code means something wrong occurred after the new state was set.  See the
-\fIlibcurl-errors(3)\fP man page for the full list with descriptions.
 .SH LIMITATIONS
 The pausing of transfers does not work with protocols that work without
 network connectivity, like FILE://. Trying to pause such a transfer, in any
@@ -88,8 +84,11 @@ buffering 32 megabyte of data for a paused stream.
 
 When such a paused stream is unpaused again, any buffered data will be
 delivered first.
-.SH AVAILABILITY
-Added in libcurl 7.18.0.
+.SH EXAMPLE
+.nf
+/* pause a transfer in both directions */
+curl_easy_pause(curl, CURL_READFUNC_PAUSE | CURL_WRITEFUNC_PAUSE);
+.fi
 .SH "MEMORY USE"
 When pausing a read by returning the magic return code from a write callback,
 the read data is already in libcurl's internal buffers so it'll have to keep
@@ -103,5 +102,11 @@ effect that if you download something that is compressed a lot, it can result
 in a very large data amount needing to be allocated to save the data during
 the pause. This said, you should probably consider not using paused receiving
 if you allow libcurl to uncompress data automatically.
+.SH AVAILABILITY
+Added in libcurl 7.18.0.
+.SH RETURN VALUE
+CURLE_OK (zero) means that the option was set properly, and a non-zero return
+code means something wrong occurred after the new state was set.  See the
+\fIlibcurl-errors(3)\fP man page for the full list with descriptions.
 .SH "SEE ALSO"
 .BR curl_easy_cleanup "(3), " curl_easy_reset "(3)"

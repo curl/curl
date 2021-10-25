@@ -37,14 +37,8 @@ call.
 
 Using a mime handle is the recommended way to post an HTTP form, format and
 send a multi-part e-mail with SMTP or upload such an e-mail to an IMAP server.
-
-.SH AVAILABILITY
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
-.SH RETURN VALUE
-A mime struct handle, or NULL upon failure.
 .SH EXAMPLE
 .nf
-
  CURL *easy = curl_easy_init();
  curl_mime *mime;
  curl_mimepart *part;
@@ -63,7 +57,10 @@ A mime struct handle, or NULL upon failure.
  /* Clean-up. */
  curl_easy_cleanup(easy);
  curl_mime_free(mime);
-
+.SH AVAILABILITY
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+.SH RETURN VALUE
+A mime struct handle, or NULL upon failure.
 .SH "SEE ALSO"
 .BR curl_mime_addpart "(3),"
 .BR curl_mime_free "(3),"

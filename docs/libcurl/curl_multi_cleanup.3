@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -43,6 +43,15 @@ removed
 
 Passing in a NULL pointer in \fImulti_handle\fP will make this function return
 CURLM_BAD_HANDLE immediately with no other action.
+.SH EXAMPLE
+.nf
+ /* when the multi transfer is done ... */
+
+ /* remove all easy handles, then: */
+ curl_multi_cleanup(multi_handle);
+.fi
+.SH AVAILABILITY
+Added in 7.9.6
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code. On success,
 CURLM_OK is returned.

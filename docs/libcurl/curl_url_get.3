@@ -105,12 +105,6 @@ A zero-length query will lead \fIpart\fP to be set to a zero-length string.
 The query part will also get pluses converted to space when asked to URL
 decode on get with the CURLU_URLDECODE bit.
 .IP CURLUPART_FRAGMENT
-.SH RETURN VALUE
-Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
-fine.  See the \fIlibcurl-errors(3)\fP man page for the full list with
-descriptions.
-
-If this function returns an error, no URL part is returned.
 .SH EXAMPLE
 .nf
   CURLUcode rc;
@@ -128,6 +122,12 @@ If this function returns an error, no URL part is returned.
 .fi
 .SH AVAILABILITY
 Added in curl 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
+.SH RETURN VALUE
+Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
+fine.  See the \fIlibcurl-errors(3)\fP man page for the full list with
+descriptions.
+
+If this function returns an error, no URL part is returned.
 .SH "SEE ALSO"
 .BR curl_url_cleanup "(3), " curl_url "(3), " curl_url_set "(3), "
 .BR curl_url_dup "(3), " curl_url_strerror "(3), " CURLOPT_CURLU "(3)"

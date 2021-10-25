@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -106,6 +106,16 @@ the same as those for \fICURLSHOPT_SHARE\fP.
 .IP CURLSHOPT_USERDATA
 The \fIparameter\fP allows you to specify a pointer to data that will be passed
 to the lock_function and unlock_function each time it is called.
+.SH EXAMPLE
+.nf
+  CURLSHcode sh
+  share = curl_share_init();
+  sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+  if(sh)
+    printf("Error: %s\n", curl_share_strerror(sh));
+.fi
+.SH AVAILABILITY
+Added in libcurl 7.10
 .SH RETURN VALUE
 CURLSHE_OK (zero) means that the option was set properly, non-zero means an
 error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors.3\fP

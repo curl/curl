@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -46,9 +46,16 @@ The idea here being that this association (socket to private pointer) is
 something that just about every application that uses this API will need and
 then libcurl can just as well do it since it already has an internal hash
 table lookup for this.
-.SH "RETURN VALUE"
+.SH EXAMPLE
+.nf
+ /* make our struct pointer associated with socket fd */
+ mc = curl_multi_assign(multi_handle, fd, ourstructp);
+.fi
+.SH AVAILABILITY
+Added in 7.15.5
+.SH RETURN VALUE
 The standard CURLMcode for multi interface error codes.
-.SH "TYPICAL USAGE"
+.SH TYPICAL USAGE
 In a typical application you allocate a struct or at least use some kind of
 semi-dynamic data for each socket that we must wait for action on when using
 the \fIcurl_multi_socket_action(3)\fP approach.
@@ -57,7 +64,5 @@ When our socket-callback gets called by libcurl and we get to know about yet
 another socket to wait for, we can use \fIcurl_multi_assign(3)\fP to point out
 the particular data so that when we get updates about this same socket again,
 we don't have to find the struct associated with this socket by ourselves.
-.SH AVAILABILITY
-This function was added in libcurl 7.15.5.
 .SH "SEE ALSO"
 .BR curl_multi_setopt "(3), " curl_multi_socket_action "(3) "

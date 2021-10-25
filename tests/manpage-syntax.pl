@@ -35,13 +35,23 @@ my $symbolsinversions=shift @ARGV;
 my @manpages=@ARGV;
 my $errors = 0;
 
-my %blessed;
-my @order = (
+my %optblessed;
+my %funcblessed;
+my @optorder = (
     'NAME',
     'SYNOPSIS',
     'DESCRIPTION',
      #'DEFAULT', # CURLINFO_ has no default
     'PROTOCOLS',
+    'EXAMPLE',
+    'AVAILABILITY',
+    'RETURN VALUE',
+    'SEE ALSO'
+    );
+my @funcorder = (
+    'NAME',
+    'SYNOPSIS',
+    'DESCRIPTION',
     'EXAMPLE',
     'AVAILABILITY',
     'RETURN VALUE',
@@ -67,16 +77,25 @@ sub scanmanpage {
     my $inex = 0;
     my $exsize = 0;
     my $shc = 0;
+    my $optpage = 0; # option or function
     my @sh;
 
     open(M, "<$file") || die "no such file: $file";
-    if($file =~ /[\/\\]CURL[^\/\\]*.3/) {
+    if($file =~ /[\/\\](CURL|curl_)[^\/\\]*.3/) {
         # This is the man page for an libcurl option. It requires an example!
         $reqex = 1;
+        if($1 eq "CURL") {
+            $optpage = 1;
+        }
     }
     my $line = 1;
     while(<M>) {
         chomp;
+        if($_ =~ /^.so /) {
+            # this man page is just a referral
+            close(M);
+            return;
+        }
         if($_ =~ /^\.SH EXAMPLE/i) {
             $inex = 1;
         }
@@ -142,12 +161,15 @@ sub scanmanpage {
         my $i = 0;
         my $shused = 1;
         my @shorig = @sh;
+        my @order = $optpage ? @optorder : @funcorder;
+        my $blessed = $optpage ? \%optblessed : \%funcblessed;
+
         while($got) {
             my $finesh;
             $got = shift(@sh);
             if($got) {
-                if($blessed{$got}) {
-                    $i = $blessed{$got};
+                if($$blessed{$got}) {
+                    $i = $$blessed{$got};
                     $finesh = $got; # a mandatory one
                 }
             }
@@ -189,8 +211,12 @@ if(!$symbol{'CURLALTSVC_H1'}) {
 }
 
 my $ind = 1;
-for my $s (@order) {
-    $blessed{$s} = $ind++
+for my $s (@optorder) {
+    $optblessed{$s} = $ind++
+}
+$ind = 1;
+for my $s (@funcorder) {
+    $funcblessed{$s} = $ind++
 }
 
 for my $m (@manpages) {

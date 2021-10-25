@@ -56,14 +56,20 @@ To replace calloc()
 .RE
 This function is otherwise the same as \fIcurl_global_init(3)\fP, please refer
 to that man page for documentation.
-.SH "CAUTION"
+.SH CAUTION
 Manipulating these gives considerable powers to the application to severely
 screw things up for libcurl. Take care!
+.SH EXAMPLE
+.nf
+ curl_global_init_mem(CURL_GLOBAL_DEFAULT, curl_malloc_cb,
+                      curl_free_cb, curl_realloc_cb,
+                      curl_strdup_cb, curl_calloc_cb);
+.fi
+.SH AVAILABILITY
+Added in 7.12.0
 .SH RETURN VALUE
 CURLE_OK (0) means everything was ok, non-zero means an error occurred as
 \fI<curl/curl.h>\fP defines - see \fIlibcurl-errors(3)\fP.
-.SH AVAILABILITY
-Added in 7.12.0
 .SH "SEE ALSO"
 .BR curl_global_init "(3), "
 .BR curl_global_cleanup "(3), "
