@@ -64,6 +64,7 @@
 --fail-with-body                     7.76.0
 --false-start                        7.42.0
 --form (-F)                          5.0
+--form-escape                        7.81.0
 --form-string                        7.13.2
 --ftp-account                        7.13.0
 --ftp-alternative-to-user            7.15.5

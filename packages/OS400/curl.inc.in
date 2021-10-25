@@ -1585,6 +1585,8 @@
      d                 c                   40310
      d  CURLOPT_MAXLIFETIME_CONN...
      d                 c                   00314
+     d  CURLOPT_MIME_OPTIONS...
+     d                 c                   00315
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -1675,6 +1677,9 @@
      d                 c                   19
      d  CURLFORM_CONTENTLEN...
      d                 c                   20
+      *
+     d CURLMIMEOPT_FORMESCAPE...
+     d                                     X'0000000'
       *
      d CURLINFO        s             10i 0 based(######ptr######)               Enum
      d  CURLINFO_EFFECTIVE_URL...                                               CURLINFO_STRING + 1
