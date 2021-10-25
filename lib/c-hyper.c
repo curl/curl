@@ -156,13 +156,15 @@ static int hyper_each_header(void *userdata,
 
   Curl_debug(data, CURLINFO_HEADER_IN, headp, len);
 
-  writetype = CLIENTWRITE_HEADER;
-  if(data->set.include_header)
-    writetype |= CLIENTWRITE_BODY;
-  result = Curl_client_write(data, writetype, headp, len);
-  if(result) {
-    data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
-    return HYPER_ITER_BREAK;
+  if(!data->state.hconnect || !data->set.suppress_connect_headers) {
+    writetype = CLIENTWRITE_HEADER;
+    if(data->set.include_header)
+      writetype |= CLIENTWRITE_BODY;
+    result = Curl_client_write(data, writetype, headp, len);
+    if(result) {
+      data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
+      return HYPER_ITER_BREAK;
+    }
   }
 
   data->info.header_size += (long)len;
@@ -284,16 +286,18 @@ static CURLcode status_line(struct Curl_easy *data,
   len = Curl_dyn_len(&data->state.headerb);
   Curl_debug(data, CURLINFO_HEADER_IN, Curl_dyn_ptr(&data->state.headerb),
              len);
-  writetype = CLIENTWRITE_HEADER;
-  if(data->set.include_header)
-    writetype |= CLIENTWRITE_BODY;
-  result = Curl_client_write(data, writetype,
-                             Curl_dyn_ptr(&data->state.headerb), len);
-  if(result) {
-    data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
-    return HYPER_ITER_BREAK;
-  }
 
+  if(!data->state.hconnect || !data->set.suppress_connect_headers) {
+    writetype = CLIENTWRITE_HEADER;
+    if(data->set.include_header)
+      writetype |= CLIENTWRITE_BODY;
+    result = Curl_client_write(data, writetype,
+                               Curl_dyn_ptr(&data->state.headerb), len);
+    if(result) {
+      data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
+      return HYPER_ITER_BREAK;
+    }
+  }
   data->info.header_size += (long)len;
   data->req.headerbytecount += (long)len;
   data->req.httpcode = http_status;
