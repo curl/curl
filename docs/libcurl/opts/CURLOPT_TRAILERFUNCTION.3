@@ -66,7 +66,7 @@ HTTP
 static int trailer_cb(struct curl_slist **tr, void *data)
 {
   /* libcurl will free the list */
-  tr = curl_slist_append(*tr, "My-super-awesome-trailer: trailer-stuff");
+  *tr = curl_slist_append(*tr, "My-super-awesome-trailer: trailer-stuff");
   return CURL_TRAILERFUNC_OK;
 }
 
