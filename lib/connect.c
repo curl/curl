@@ -569,6 +569,18 @@ static struct Curl_addrinfo *ainext(struct connectdata *conn,
   return ai;
 }
 
+/* count of entries that have same tempfamily[tempindex] */
+static int aicount(struct connectdata *conn, int tempindex)
+{
+  int n = 0;
+  struct Curl_addrinfo *ai = conn->tempaddr[tempindex];
+  for(; ai; ai = ai->ai_next) {
+    if(ai->ai_family == conn->tempfamily[tempindex])
+      ++n;
+  }
+  return n;
+}
+
 /* Used within the multi interface. Try next IP address, returns error if no
    more address exists or error */
 static CURLcode trynextip(struct Curl_easy *data,
@@ -1365,24 +1377,14 @@ CURLcode Curl_connecthost(struct Curl_easy *data,
     return CURLE_OPERATION_TIMEDOUT;
   }
 
-  conn->num_addr = Curl_num_addresses(remotehost->addr);
-  conn->tempaddr[0] = conn->tempaddr[1] = remotehost->addr;
-  conn->tempsock[0] = conn->tempsock[1] = CURL_SOCKET_BAD;
-
-  /* Max time for the next connection attempt */
-  conn->timeoutms_per_addr[0] =
-    conn->tempaddr[0]->ai_next == NULL ? timeout_ms : timeout_ms / 2;
-  conn->timeoutms_per_addr[1] =
-    conn->tempaddr[1]->ai_next == NULL ? timeout_ms : timeout_ms / 2;
-
   if(conn->ip_version == CURL_IPRESOLVE_WHATEVER) {
     /* any IP version is allowed */
-    conn->tempfamily[0] = conn->tempaddr[0]?
-      conn->tempaddr[0]->ai_family:0;
 #ifdef ENABLE_IPV6
-    conn->tempfamily[1] = conn->tempfamily[0] == AF_INET6 ?
-      AF_INET : AF_INET6;
+    /* prefer IPv6 first for happy eyeballs */
+    conn->tempfamily[0] = AF_INET6;
+    conn->tempfamily[1] = AF_INET;
 #else
+    conn->tempfamily[0] = AF_INET;
     conn->tempfamily[1] = AF_UNSPEC;
 #endif
   }
@@ -1396,15 +1398,35 @@ CURLcode Curl_connecthost(struct Curl_easy *data,
       AF_UNSPEC;
 #endif
     conn->tempfamily[1] = AF_UNSPEC;
-
-    ainext(conn, 0, FALSE); /* find first address of the right type */
   }
 
-  ainext(conn, 1, FALSE); /* assigns conn->tempaddr[1] accordingly */
+  for(i = 0; i < 2; ++i) {
+    conn->tempsock[i] = CURL_SOCKET_BAD;
+    conn->tempaddr[i] = remotehost->addr;
+    /* assign conn->tempaddr[i] to first address of right type */
+    ainext(conn, i, FALSE);
+    /* set max time for the next connection attempt */
+    if(conn->tempaddr[i] && conn->tempaddr[i]->ai_next)
+      conn->timeoutms_per_addr[i] = timeout_ms / 2;
+    else
+      conn->timeoutms_per_addr[i] = timeout_ms;
+  }
 
-  DEBUGF(infof(data, "family0 == %s, family1 == %s",
-               conn->tempfamily[0] == AF_INET ? "v4" : "v6",
-               conn->tempfamily[1] == AF_INET ? "v4" : "v6"));
+  conn->num_addr = aicount(conn, 0) + aicount(conn, 1);
+
+#ifdef DEBUGBUILD
+  {
+    const char *familyname[2];
+    for(i = 0; i < 2; ++i) {
+      familyname[i] = conn->tempfamily[i] == AF_INET ? "v4" :
+#ifdef ENABLE_IPV6
+                      conn->tempfamily[i] == AF_INET6 ? "v6" :
+#endif
+                      "none";
+    }
+    infof(data, "family0 == %s, family1 == %s", familyname[0], familyname[1]);
+  }
+#endif
 
   /* get through the list in family order in case of quick failures */
   for(i = 0; (i < 2) && result; i++) {
