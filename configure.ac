@@ -2509,20 +2509,14 @@ if test "$want_idn" = "yes"; then
   fi
 fi
 
-
-dnl Let's hope this split URL remains working:
-dnl https://www15.software.ibm.com/doc_link/en_US/a_doc_lib/aixprggd/ \
-dnl genprogc/thread_quick_ref.htm
-
-
 dnl **********************************************************************
 dnl Check for nghttp2
 dnl **********************************************************************
 
 OPT_H2="yes"
 
-if test "x$disable_http" = "xyes"; then
-  # without HTTP, nghttp2 is no use
+if test "x$disable_http" = "xyes" -o X"$want_hyper" != Xno; then
+  # without HTTP or with Hyper, nghttp2 is no use
   OPT_H2="no"
 fi
 
@@ -2533,38 +2527,38 @@ AS_HELP_STRING([--without-nghttp2],[Disable nghttp2 usage]),
 case "$OPT_H2" in
   no)
     dnl --without-nghttp2 option used
-    want_h2="no"
+    want_nghttp2="no"
     ;;
   yes)
     dnl --with-nghttp2 option used without path
-    want_h2="default"
-    want_h2_path=""
+    want_nghttp2="default"
+    want_nghttp2_path=""
     ;;
   *)
     dnl --with-nghttp2 option used with path
-    want_h2="yes"
-    want_h2_path="$withval/lib/pkgconfig"
+    want_nghttp2="yes"
+    want_nghttp2_path="$withval/lib/pkgconfig"
     ;;
 esac
 
-if test X"$want_h2" != Xno; then
+if test X"$want_nghttp2" != Xno; then
   dnl backup the pre-nghttp2 variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(libnghttp2, $want_h2_path)
+  CURL_CHECK_PKGCONFIG(libnghttp2, $want_nghttp2_path)
 
   if test "$PKGCONFIG" != "no" ; then
-    LIB_H2=`CURL_EXPORT_PCDIR([$want_h2_path])
+    LIB_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_path])
       $PKGCONFIG --libs-only-l libnghttp2`
     AC_MSG_NOTICE([-l is $LIB_H2])
 
-    CPP_H2=`CURL_EXPORT_PCDIR([$want_h2_path]) dnl
+    CPP_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_path]) dnl
       $PKGCONFIG --cflags-only-I libnghttp2`
     AC_MSG_NOTICE([-I is $CPP_H2])
 
-    LD_H2=`CURL_EXPORT_PCDIR([$want_h2_path])
+    LD_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_path])
       $PKGCONFIG --libs-only-L libnghttp2`
     AC_MSG_NOTICE([-L is $LD_H2])
 
@@ -2591,7 +2585,7 @@ if test X"$want_h2" != Xno; then
 
   else
     dnl no nghttp2 pkg-config found, deal with it
-    if test X"$want_h2" != Xdefault; then
+    if test X"$want_nghttp2" != Xdefault; then
       dnl To avoid link errors, we do not allow --with-nghttp2 without
       dnl a pkgconfig file
       AC_MSG_ERROR([--with-nghttp2 was specified but could not find libnghttp2 pkg-config file.])
