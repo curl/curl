@@ -4240,8 +4240,12 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
         /* There can only be a 4th response code digit stored in 'digit4' if
            all the other fields were parsed and stored first, so nc is 5 when
-           digit4 a digit */
-        else if(ISDIGIT(digit4)) {
+           digit4 a digit.
+
+           The sscanf() line above will also allow zero-prefixed and negative
+           numbers, so we check for that too here.
+        */
+        else if(ISDIGIT(digit4) || (k->httpcode < 100)) {
           failf(data, "Unsupported response code in HTTP response");
           return CURLE_UNSUPPORTED_PROTOCOL;
         }
