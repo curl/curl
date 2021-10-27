@@ -7,7 +7,7 @@ HTTP GET
 </info>
 
 <reply>
-<data>
+<data nocheck="yes">
 HTTP/1.1 2 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -47,5 +47,8 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
+<errorcode>
+1
+</errorcode>
 </verify>
 </testcase>
