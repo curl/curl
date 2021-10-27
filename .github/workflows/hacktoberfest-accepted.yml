@@ -6,6 +6,9 @@ on:
     branches:
       - master
 
+permissions:
+  pull-requests: write
+
 jobs:
   # add hacktoberfest-accepted label to PRs opened starting from September 30th
   # till November 1st which are closed via commit reference from master branch.
