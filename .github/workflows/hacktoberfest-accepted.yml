@@ -6,7 +6,9 @@ on:
     branches:
       - master
 
-permissions:
+permissions: 
+  # requires issues AND pull-requests write permissions to edit labels on PRs!
+  issues: write
   pull-requests: write
 
 jobs:
