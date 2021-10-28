@@ -2397,6 +2397,11 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   char *scheme = NULL;
 
+  if(!uhp) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto error;
+  }
+
   /* When parsing the proxy, allowing non-supported schemes since we have
      these made up ones for proxies. Guess scheme for URLs without it. */
   uc = curl_url_set(uhp, CURLUPART_URL, proxy,
