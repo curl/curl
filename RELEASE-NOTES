@@ -4,7 +4,7 @@ curl and libcurl 7.80.0
  Command line options:         243
  curl_easy_setopt() options:   294
  Public functions in libcurl:  86
- Contributors:                 2521
+ Contributors:                 2527
 
 This release includes the following changes:
 
@@ -22,6 +22,7 @@ This release includes the following bugfixes:
  o build: remove checks for WinSock 1 [36]
  o c-hyper: don't abort CONNECT responses early when auth-in-progress [71]
  o c-hyper: make Curl_http propagate errors better [50]
+ o c-hyper: make CURLOPT_SUPPRESS_CONNECT_HEADERS work [97]
  o c-hyper: make test 217 run [74]
  o c-hyper: use hyper_request_set_uri_parts to make h2 better [39]
  o checksrc: ignore preprocessor lines [64]
@@ -31,8 +32,12 @@ This release includes the following bugfixes:
  o cirrus: switch to openldap24-client [63]
  o cleanup: constify unmodified static structs [2]
  o cmake: add CURL_ENABLE_SSL option [46]
+ o cmake: fix error getting LOCATION property on non-imported target [59]
+ o CMake: restore support for SecureTransport on iOS [103]
  o cmake: with OpenSSL, define OPENSSL_SUPPRESS_DEPRECATED [14]
  o cmdline-opts: made the 'Added:' field mandatory [37]
+ o configure.ac: replace krb5-config with pkg-config [80]
+ o configure: when hyper is selected, deselect nghttp2 [94]
  o connect: use sysaddr_un from sys/un.h or custom-defined for windows [23]
  o curl-confopts.m4:  remove --enable/disable-hidden-symbols [70]
  o curl-openssl.m4: modify library order for openssl linking [40]
@@ -42,9 +47,13 @@ This release includes the following bugfixes:
  o curl: correct grammar in generated libcurl code [53]
  o curl: print help descriptions in an aligned right column [16]
  o curl_gssapi: fix link error on macOS Monterey [55]
+ o curl_multi_socket_action.3: add a "RETURN VALUE" section [106]
  o curl_ntlm_core: use OpenSSL only if DES is available [42]
  o CURLOPT_HTTPHEADER.3: add descripion for specific headers [35]
+ o docs/HTTP3: improve build instructions [102]
  o docs/Makefile.am: repair 'make html' [52]
+ o docs: fix typo in CURLOPT_TRAILERFUNCTION example [93]
+ o docs: provide "RETURN VALUE" section for more func manpages [105]
  o doh: remove experimental code for DoH with GET [61]
  o examples/htmltidy: correct wrong printf() use [66]
  o examples/imap-append: fix end-of-data check [7]
@@ -52,10 +61,12 @@ This release includes the following bugfixes:
  o http2: make getsock not wait for write if there's no remote window [56]
  o HTTP3: fix the HTTP/3 Explained book link [27]
  o http: fix Basic auth with empty name field in URL [24]
+ o http: reject HTTP response codes < 100 [92]
  o http: remove assert that breaks hyper [47]
  o http: set content length earlier [67]
  o http_proxy: make hyper CONNECT() return the correct error code [51]
  o http_proxy: multiple CONNECT with hyper done better [78]
+ o hyper: disable test 1294 since hyper doesn't allow such crazy headers [96]
  o hyper: does not support disabling CURLOPT_HTTP_TRANSFER_DECODING [72]
  o hyper: pass the CONNECT line to the debug callback [79]
  o INSTALL: update symbol hiding option [77]
@@ -64,7 +75,9 @@ This release includes the following bugfixes:
  o libcurl.rc: switch out the copyright symbol for plain ASCII [5]
  o libssh2: Get the version at runtime if possible [12]
  o llist: remove redundant code, branch will not be executed [10]
+ o Makefile.m32: fix to not require OpenSSL with -libssh2 or -rtmp options [100]
  o maketgz: redirect updatemanpages.pl output to /dev/null
+ o man pages: require all to use the same section header order [101]
  o manpage: adjust the asterisk in some SYNOPSIS sections [82]
  o md5: fix compilation with OpenSSL 3.0 API [43]
  o misc: fix a few issues on MidnightBSD [28]
@@ -75,11 +88,17 @@ This release includes the following bugfixes:
  o openssl: with OpenSSL 1.1.0+ a failed RAND_status means goaway [44]
  o sasl: binary messages [31]
  o scripts/delta: count command line options in the new file
+ o sendf: accept zero-length data in Curl_client_write() [95]
  o sha256: use high-level EVP interface for OpenSSL [41]
  o sws: fix memory leak on exit [49]
+ o test1160: edited to work with hyper [83]
  o test1185: verify checksrc [58]
+ o test1266/1267: disabled on hyper: no HTTP/0.9 support [99]
+ o test1287: make work on hyper [98]
  o test207: accept a different error code for hyper [76]
  o test262: don't attempt with hyper [73]
+ o test552: updated to work with hyper [87]
+ o test559: add 'HTTP' in keywords [86]
  o tests: disable test 2043 [54]
  o tests: use python3 in test 1451 [48]
  o tls: remove newline from three infof() calls [85]
@@ -87,6 +106,7 @@ This release includes the following bugfixes:
  o tool_listhelp: easier generated with gen.pl [19]
  o tool_main: fix typo in comment [29]
  o URL-SYNTAX: add IMAP UID SEARCH example [81]
+ o url: check the return value of curl_url() [75]
  o url: set "k->size" -1 at start of request [60]
  o urlapi: skip a strlen(), pass in zero [65]
  o urlapi: URL decode percent-encoded host names [26]
@@ -102,20 +122,21 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   8U61ife on github, a1346054 on github, Abhinav Singh, Alexander Chuykov,
-  Anthony Hu, beslick5 on github, billionai on github, Bo Anderson,
-  Daniel Gustafsson, Daniel Stenberg, David Cook, Eddie Lumpkin,
-  Érico Nogueira, Erik Stenlund, Gisle Vanem, Gleb Ivanovsky, h1zzz on github,
-  Harry Sintonen, Hayden Roche, Jakub Zakrzewski, Jan Mazur, Jeffrey Tolar,
-  Joel Depooter, Josip Medved, Jun-ya Kato, Kirill Efimov, Lucas Holt,
-  Malik Idrees Hasan Khan, Marcel Raad, Marc Hörsken, Mats Lindestam,
-  Max Dymond, Michael Afanasiev, Michael Baentsch, Michael Kaufmann,
-  Momoka Yamamoto, Noam Moshe, orycho on github, Patrick Monnerat,
-  Rafał Mikrut, Randall S. Becker, Raul Onitza-Klugman, Ray Satiro, Rick Lane,
-  Rikard Falkeborn, Ryan Mast, Samuel Henrique, Sean Molenaar, Sergey Markelov,
-  sergio-nsk on github, Sharon Brizinov, Stathis Kapnidis,
+  Alexander Kanavin, Anthony Hu, beslick5 on github, billionai on github,
+  Bo Anderson, Boris Rasin, Daniel Gustafsson, Daniel Stenberg, David Cook,
+  David Hu, Eddie Lumpkin, Érico Nogueira, Erik Stenlund, Gisle Vanem,
+  Gleb Ivanovsky, h1zzz on github, Harry Sintonen, Hayden Roche,
+  Jakub Zakrzewski, Jan Mazur, Jeffrey Tolar, Joel Depooter, Josip Medved,
+  Jun-ya Kato, Kerem Kat, Kirill Efimov, Lucas Holt, Malik Idrees Hasan Khan,
+  Marcel Raad, Marc Hörsken, Mats Lindestam, Max Dymond, Michael Afanasiev,
+  Michael Baentsch, Michael Kaufmann, Momoka Yamamoto, Noam Moshe,
+  orycho on github, Patrick Monnerat, Rafał Mikrut, Randall S. Becker,
+  Raul Onitza-Klugman, Ray Satiro, Ricardo Martins, Rick Lane,
+  Rikard Falkeborn, Roy Li, Ryan Mast, Samuel Henrique, Sean Molenaar,
+  Sergey Markelov, sergio-nsk on github, Sharon Brizinov, Stathis Kapnidis,
   Steini2000 on github, Thomas M. DuBuisson, tlahn on github, Viktor Szakats,
-  Vitaly Varyvdin, Wyatt O'Day, Борис Верховский,
-  (59 contributors)
+  Vitaly Varyvdin, Wyatt O'Day, x2018 on github, Борис Верховский,
+  (66 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -177,6 +198,7 @@ References to bug reports and discussions on issues:
  [56] = https://curl.se/bug/?i=7821
  [57] = https://curl.se/bug/?i=7837
  [58] = https://curl.se/bug/?i=7866
+ [59] = https://curl.se/bug/?i=7885
  [60] = https://curl.se/bug/?i=7871
  [61] = https://curl.se/bug/?i=7870
  [62] = https://curl.se/bug/?i=7869
@@ -192,10 +214,29 @@ References to bug reports and discussions on issues:
  [72] = https://curl.se/bug/?i=7889
  [73] = https://curl.se/bug/?i=7889
  [74] = https://curl.se/bug/?i=7889
+ [75] = https://curl.se/bug/?i=7917
  [76] = https://curl.se/bug/?i=7889
  [77] = https://curl.se/bug/?i=7890
  [78] = https://curl.se/bug/?i=7888
  [79] = https://curl.se/bug/?i=7887
+ [80] = https://curl.se/bug/?i=7916
  [81] = https://github.com/curl/curl/issues/7626
  [82] = https://curl.se/bug/?i=7884
+ [83] = https://curl.se/bug/?i=7912
  [85] = https://curl.se/bug/?i=7879
+ [86] = https://curl.se/bug/?i=7911
+ [87] = https://curl.se/bug/?i=7911
+ [92] = https://curl.se/bug/?i=7909
+ [93] = https://curl.se/bug/?i=7910
+ [94] = https://curl.se/bug/?i=7908
+ [95] = https://curl.se/bug/?i=7898
+ [96] = https://curl.se/bug/?i=7905
+ [97] = https://curl.se/bug/?i=7905
+ [98] = https://curl.se/bug/?i=7905
+ [99] = https://curl.se/bug/?i=7905
+ [100] = https://curl.se/bug/?i=7895
+ [101] = https://curl.se/bug/?i=7904
+ [102] = https://curl.se/bug/?i=7842
+ [103] = https://curl.se/bug/?i=7501
+ [105] = https://curl.se/bug/?i=7902
+ [106] = https://curl.se/bug/?i=7901
