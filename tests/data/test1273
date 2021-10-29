@@ -44,6 +44,9 @@ Content-Length: 0
 <server>
 http
 </server>
+<killserver>
+http
+</killserver>
  <name>
 -f and resume transfer of an entirely-downloaded file
  </name>
