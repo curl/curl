@@ -35,7 +35,7 @@ socket and a private pointer of the application. This is designed for
 When set, the \fIsockptr\fP pointer will be passed to all future socket
 callbacks for the specific \fIsockfd\fP socket.
 
-If the given \fIsockfd\fP isn't already in use by libcurl, this function will
+If the given \fIsockfd\fP is not already in use by libcurl, this function will
 return an error.
 
 libcurl only keeps one single pointer associated with a socket, so calling
@@ -63,6 +63,6 @@ the \fIcurl_multi_socket_action(3)\fP approach.
 When our socket-callback gets called by libcurl and we get to know about yet
 another socket to wait for, we can use \fIcurl_multi_assign(3)\fP to point out
 the particular data so that when we get updates about this same socket again,
-we don't have to find the struct associated with this socket by ourselves.
+we do not have to find the struct associated with this socket by ourselves.
 .SH "SEE ALSO"
 .BR curl_multi_setopt "(3), " curl_multi_socket_action "(3) "

@@ -31,7 +31,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_VERIFYPEER, long verify);
 Pass a long as parameter to enable or disable.
 
 This option determines whether curl verifies the authenticity of the peer's
-certificate. A value of 1 means curl verifies; 0 (zero) means it doesn't.
+certificate. A value of 1 means curl verifies; 0 (zero) means it does not.
 
 When negotiating a TLS or SSL connection, the server sends a certificate
 indicating its identity.  Curl verifies whether the certificate is authentic,
@@ -49,7 +49,7 @@ option is zero, the peer certificate verification succeeds regardless.
 Authenticating the certificate is not enough to be sure about the server. You
 typically also want to ensure that the server is the server you mean to be
 talking to.  Use \fICURLOPT_SSL_VERIFYHOST(3)\fP for that. The check that the
-host name in the certificate is valid for the host name you're connecting to
+host name in the certificate is valid for the host name you are connecting to
 is done independently of the \fICURLOPT_SSL_VERIFYPEER(3)\fP option.
 
 WARNING: disabling verification of the certificate allows bad guys to

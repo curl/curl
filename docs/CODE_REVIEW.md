@@ -43,10 +43,10 @@ as possible.
 ## Code style
 
 Most code style nits are detected by checksrc but not all. Only leave remarks
-on style deviation once checksrc doesn't find anymore.
+on style deviation once checksrc does not find anymore.
 
 Minor nits from fresh submitters can also be handled by the maintainer when
-merging, in case it seems like the submitter isn't clear on what to do. We
+merging, in case it seems like the submitter is not clear on what to do. We
 want to make the process fun and exciting for new contributors.
 
 ## Encourage consistency
@@ -105,15 +105,15 @@ updated documentation. Submitting that in a separate follow-up pull request is
 not OK. A code review must also verify that the submitted documentation update
 matches the code submission.
 
-English isn't everyone's first language, be mindful of this and help the
+English is not everyone's first language, be mindful of this and help the
 submitter improve the text if it needs a rewrite to read better.
 
-## Code shouldn't be hard to understand
+## Code should not be hard to understand
 
 Source code should be written to maximize readability and be easy to
 understand.
 
-## Functions shouldn't be large
+## Functions should not be large
 
 A single function should never be large as that makes it hard to follow and
 understand all the exit points and state changes. Some existing functions in

@@ -30,7 +30,7 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CONTENT_LENGTH_UPLOAD,
                            double *content_length);
 .SH DESCRIPTION
 Pass a pointer to a double to receive the specified size of the upload.  Since
-7.19.4, this returns -1 if the size isn't known.
+7.19.4, this returns -1 if the size is not known.
 
 \fICURLINFO_CONTENT_LENGTH_UPLOAD_T(3)\fP is a newer replacement that returns a
 more sensible variable type.

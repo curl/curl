@@ -34,7 +34,7 @@ same \fIhandle\fP as input that a \fIcurl_easy_init(3)\fP call returned.
 
 This might close all connections this handle has used and possibly has kept
 open until now - unless it was attached to a multi handle while doing the
-transfers. Don't call this function if you intend to transfer more files,
+transfers. Do not call this function if you intend to transfer more files,
 re-using handles is a key to good performance with libcurl.
 
 Occasionally you may get your progress callback or header callback called from

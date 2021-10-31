@@ -33,7 +33,7 @@ This function is deprecated. Do not use! See \fIcurl_mime_init(3)\fP instead!
 
 curl_formadd() is used to append sections when building a multipart/formdata
 HTTP POST (sometimes referred to as RFC2388-style posts). Append one section
-at a time until you've added all the sections you want included and then you
+at a time until you have added all the sections you want included and then you
 pass the \fIfirstitem\fP pointer as parameter to \fICURLOPT_HTTPPOST(3)\fP.
 \fIlastitem\fP is set after each \fIcurl_formadd(3)\fP call and on repeated
 invokes it should be left as set to allow repeated invokes to find the end of
@@ -52,7 +52,7 @@ You can disable this header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
 First, there are some basics you need to understand about multipart/formdata
 posts. Each part consists of at least a NAME and a CONTENTS part. If the part
 is made for file upload, there are also a stored CONTENT-TYPE and a FILENAME.
-Below, we'll discuss what options you use to set these properties in the
+Below, we will discuss what options you use to set these properties in the
 parts you want to add to your post.
 
 The options listed first are for making normal parts. The options from
@@ -61,28 +61,28 @@ parts.
 .SH OPTIONS
 .IP CURLFORM_COPYNAME
 followed by a string which provides the \fIname\fP of this part. libcurl
-copies the string so your application doesn't need to keep it around after
-this function call. If the name isn't NUL-terminated, you must set its length
+copies the string so your application does not need to keep it around after
+this function call. If the name is not NUL-terminated, you must set its length
 with \fBCURLFORM_NAMELENGTH\fP. The \fIname\fP is not allowed to contain
 zero-valued bytes. The copied data will be freed by \fIcurl_formfree(3)\fP.
 .IP CURLFORM_PTRNAME
 followed by a string which provides the \fIname\fP of this part. libcurl
 will use the pointer and refer to the data in your application, so you
 must make sure it remains until curl no longer needs it. If the name
-isn't NUL-terminated, you must set its length with \fBCURLFORM_NAMELENGTH\fP.
+is not NUL-terminated, you must set its length with \fBCURLFORM_NAMELENGTH\fP.
 The \fIname\fP is not allowed to contain zero-valued bytes.
 .IP CURLFORM_COPYCONTENTS
 followed by a pointer to the contents of this part, the actual data
-to send away. libcurl copies the provided data, so your application doesn't
-need to keep it around after this function call. If the data isn't null
-terminated, or if you'd like it to contain zero bytes, you must
+to send away. libcurl copies the provided data, so your application does not
+need to keep it around after this function call. If the data is not null
+terminated, or if you would like it to contain zero bytes, you must
 set the length of the name with \fBCURLFORM_CONTENTSLENGTH\fP. The copied
 data will be freed by \fIcurl_formfree(3)\fP.
 .IP CURLFORM_PTRCONTENTS
 followed by a pointer to the contents of this part, the actual data
 to send away. libcurl will use the pointer and refer to the data in your
 application, so you must make sure it remains until curl no longer needs it.
-If the data isn't NUL-terminated, or if you'd like it to contain zero bytes,
+If the data is not NUL-terminated, or if you would like it to contain zero bytes,
 you must set its length  with \fBCURLFORM_CONTENTSLENGTH\fP.
 .IP CURLFORM_CONTENTLEN
 followed by a curl_off_t value giving the length of the contents. Note that
@@ -165,9 +165,9 @@ of headers to those libcurl automatically generates. The list must exist while
 the POST occurs, if you free it before the post completes you may experience
 problems.
 
-When you've passed the HttpPost pointer to \fIcurl_easy_setopt(3)\fP (using
+When you have passed the HttpPost pointer to \fIcurl_easy_setopt(3)\fP (using
 the \fICURLOPT_HTTPPOST(3)\fP option), you must not free the list until after
-you've called \fIcurl_easy_cleanup(3)\fP for the curl handle.
+you have called \fIcurl_easy_cleanup(3)\fP for the curl handle.
 
 See example below.
 .SH EXAMPLE

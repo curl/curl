@@ -99,10 +99,10 @@ This is a private mailing list for discussions on and about curl security
 issues.
 
 Who is on this list? There are a couple of criteria you must meet, and then we
-might ask you to join the list or you can ask to join it. It really isn't a
+might ask you to join the list or you can ask to join it. It really is not a
 formal process. We basically only require that you have a long-term presence
 in the curl project and you have shown an understanding for the project and
-its way of working. You must've been around for a good while and you should
+its way of working. You must have been around for a good while and you should
 have no plans in vanishing in the near future.
 
 We do not make the list of participants public mostly because it tends to vary

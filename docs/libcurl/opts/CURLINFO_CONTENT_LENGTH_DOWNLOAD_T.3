@@ -31,7 +31,7 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
 .SH DESCRIPTION
 Pass a pointer to a \fIcurl_off_t\fP to receive the content-length of the
 download. This is the value read from the Content-Length: field. Stores -1 if
-the size isn't known.
+the size is not known.
 .SH PROTOCOLS
 HTTP(S)
 .SH EXAMPLE

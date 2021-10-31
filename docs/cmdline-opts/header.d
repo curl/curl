@@ -15,7 +15,7 @@ specify any number of extra headers. Note that if you should add a custom
 header that has the same name as one of the internal ones curl would use, your
 externally set header will be used instead of the internal one. This allows
 you to make even trickier stuff than curl would normally do. You should not
-replace internally set headers without knowing perfectly well what you're
+replace internally set headers without knowing perfectly well what you are
 doing. Remove an internal header by giving a replacement without content on
 the right side of the colon, as in: -H \&"Host:". If you send the custom
 header with no-value then its header must be terminated with a semicolon, such

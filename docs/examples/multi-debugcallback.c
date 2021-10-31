@@ -135,7 +135,7 @@ int main(void)
 
   http_handle = curl_easy_init();
 
-  /* set the options (I left out a few, you'll get the point anyway) */
+  /* set the options (I left out a few, you will get the point anyway) */
   curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
 
   curl_easy_setopt(http_handle, CURLOPT_DEBUGFUNCTION, my_trace);

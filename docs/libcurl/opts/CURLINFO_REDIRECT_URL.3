@@ -30,7 +30,7 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_REDIRECT_URL, char **urlp);
 .SH DESCRIPTION
 Pass a pointer to a char pointer to receive the URL a redirect \fIwould\fP
 take you to if you would enable \fICURLOPT_FOLLOWLOCATION(3)\fP. This can come
-handy if you think using the built-in libcurl redirect logic isn't good enough
+handy if you think using the built-in libcurl redirect logic is not good enough
 for you but you would still prefer to avoid implementing all the magic of
 figuring out the new URL.
 

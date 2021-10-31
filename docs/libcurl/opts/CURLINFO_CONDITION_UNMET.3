@@ -29,9 +29,9 @@ CURLINFO_CONDITION_UNMET \- get info on unmet time conditional or 304 HTTP respo
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CONDITION_UNMET, long *unmet);
 .SH DESCRIPTION
 Pass a pointer to a long to receive the number 1 if the condition provided in
-the previous request didn't match (see \fICURLOPT_TIMECONDITION(3)\fP). Alas,
-if this returns a 1 you know that the reason you didn't get data in return is
-because it didn't fulfill the condition. The long this argument points to will
+the previous request did not match (see \fICURLOPT_TIMECONDITION(3)\fP). Alas,
+if this returns a 1 you know that the reason you did not get data in return is
+because it did not fulfill the condition. The long this argument points to will
 get a zero stored if the condition instead was met. This can also return 1 if
 the server responded with a 304 HTTP status code, for example after sending a
 custom "If-Match-*" header.

@@ -29,10 +29,10 @@ CURLOPT_HSTSREADDATA \- pointer passed to the HSTS read callback
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTSREADDATA, void *pointer);
 .SH DESCRIPTION
 Data \fIpointer\fP to pass to the HSTS read function. If you use the
-\fICURLOPT_HSTSREADFUNCTION(3)\fP option, this is the pointer you'll get as
+\fICURLOPT_HSTSREADFUNCTION(3)\fP option, this is the pointer you will get as
 input in the 3rd argument to the callback.
 
-This option doesn't enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
+This option does not enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
 do that.
 .SH DEFAULT
 NULL

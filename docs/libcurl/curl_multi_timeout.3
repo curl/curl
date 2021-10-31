@@ -34,7 +34,7 @@ actions \- at most \- before proceeding.
 
 Proceeding means either doing the socket-style timeout action: call the
 \fIcurl_multi_socket_action(3)\fP function with the \fBsockfd\fP argument set
-to CURL_SOCKET_TIMEOUT, or call \fIcurl_multi_perform(3)\fP if you're using
+to CURL_SOCKET_TIMEOUT, or call \fIcurl_multi_perform(3)\fP if you are using
 the simpler and older multi interface approach.
 
 The timeout value returned in the long \fBtimeout\fP points to, is in number

@@ -38,7 +38,7 @@ converted to their plain text versions.
 If the 'length' argument is set to 0, curl_unescape() will use strlen() on the
 input 'url' string to find out the size.
 
-You must \fIcurl_free(3)\fP the returned string when you're done with it.
+You must \fIcurl_free(3)\fP the returned string when you are done with it.
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -46,7 +46,7 @@ if(curl) {
   int decodelen;
   char *decoded = curl_unescape("%63%75%72%6c", 12, &decodelen);
   if(decoded) {
-    /* don't assume printf() works on the decoded data! */
+    /* do not assume printf() works on the decoded data! */
     printf("Decoded: ");
     /* ... */
     curl_free(decoded);

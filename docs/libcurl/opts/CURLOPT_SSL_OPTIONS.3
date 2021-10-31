@@ -32,7 +32,7 @@ Pass a long with a bitmask to tell libcurl about specific SSL
 behaviors. Available bits:
 .IP CURLSSLOPT_ALLOW_BEAST
 Tells libcurl to not attempt to use any workarounds for a security flaw in the
-SSL3 and TLS1.0 protocols.  If this option isn't used or this bit is set to 0,
+SSL3 and TLS1.0 protocols.  If this option is not used or this bit is set to 0,
 the SSL layer libcurl uses may use a work-around for this flaw although it
 might cause interoperability problems with some (older) SSL
 implementations. WARNING: avoiding this work-around lessens the security, and
@@ -42,7 +42,7 @@ supported for Secure Transport, NSS and OpenSSL.
 Tells libcurl to disable certificate revocation checks for those SSL backends
 where such behavior is present. This option is only supported for Schannel
 (the native Windows SSL library), with an exception in the case of Windows'
-Untrusted Publishers block list which it seems can't be bypassed. (Added in
+Untrusted Publishers block list which it seems cannot be bypassed. (Added in
 7.44.0)
 .IP CURLSSLOPT_NO_PARTIALCHAIN
 Tells libcurl to not accept "partial" certificate chains, which it otherwise

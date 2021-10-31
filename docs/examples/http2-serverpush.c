@@ -35,7 +35,7 @@
 #include <curl/curl.h>
 
 #ifndef CURLPIPE_MULTIPLEX
-#error "too old libcurl, can't do HTTP/2 server push!"
+#error "too old libcurl, cannot do HTTP/2 server push!"
 #endif
 
 static
@@ -180,7 +180,7 @@ static int server_push_callback(CURL *parent,
   /* here's a new stream, save it in a new file for each new push */
   out = fopen(filename, "wb");
   if(!out) {
-    /* if we can't save it, deny it */
+    /* if we cannot save it, deny it */
     fprintf(stderr, "Failed to create output file for push\n");
     return CURL_PUSH_DENY;
   }

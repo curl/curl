@@ -30,7 +30,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DNS_LOCAL_IP4, char *address);
 .SH DESCRIPTION
 Set the local IPv4 \fIaddress\fP that the resolver should bind to. The
 argument should be of type char * and contain a single numerical IPv4 address
-as a string.  Set this option to NULL to use the default setting (don't bind
+as a string.  Set this option to NULL to use the default setting (do not bind
 to a specific IP address).
 
 The application does not have to keep the string around after setting this

@@ -1,7 +1,7 @@
 Version Numbers and Releases
 ============================
 
- Curl is not only curl. Curl is also libcurl. They're actually individually
+ Curl is not only curl. Curl is also libcurl. they are actually individually
  versioned, but they usually follow each other closely.
 
  The version numbering is always built up using the same system:

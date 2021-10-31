@@ -27,7 +27,7 @@ this:
 
   curl -o aa example.com -o bb example.net
 
-and the order of the -o options and the URLs doesn't matter, just that the
+and the order of the -o options and the URLs does not matter, just that the
 first -o is for the first URL and so on, so the above command line can also be
 written as
 

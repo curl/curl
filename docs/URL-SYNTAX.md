@@ -150,7 +150,7 @@ since it often means passing around the password in plain text and is thus a
 security risk.
 
 URLs for IMAP, POP3 and SMTP also support *login options* as part of the
-userinfo field. They're provided as a semicolon after the password and then
+userinfo field. they are provided as a semicolon after the password and then
 the options.
 
 ## Hostname
@@ -232,7 +232,7 @@ Anything else will make curl fail to parse the URL.
 
 ### Windows-specific FILE details
 
-curl accepts that the FILE URL's path starts with a "drive letter". That's a
+curl accepts that the FILE URL's path starts with a "drive letter". That is a
 single letter `a` to `z` followed by a colon or a pipe character (`|`).
 
 The Windows operating system itself will convert some file accesses to perform
@@ -296,7 +296,7 @@ MAILINDEX numbers returned then you could search via URL:
 
     imap://user:password@mail.example.com/INBOX?TEXT%20%22foo%20bar%22
 
-.. but if you wanted matching UID numbers you'd have to use a custom request:
+.. but if you wanted matching UID numbers you would have to use a custom request:
 
     imap://user:password@mail.example.com/INBOX -X "UID SEARCH TEXT \"foo bar\""
 

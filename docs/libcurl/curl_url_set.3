@@ -80,7 +80,7 @@ The query part will also get spaces converted to pluses when asked to URL
 encode on set with the CURLU_URLENCODE bit.
 
 If used together with the \fICURLU_APPENDQUERY\fP bit, the provided part will
-be appended on the end of the existing query - and if the previous part didn't
+be appended on the end of the existing query - and if the previous part did not
 end with an ampersand (&), an ampersand will be inserted before the new
 appended part.
 
@@ -122,7 +122,7 @@ cannot know whether this is permitted for custom schemes. Specifying the flag
 permits empty authority sections, similar to how file scheme is handled.
 .IP CURLU_PATH_AS_IS
 When set for \fBCURLUPART_URL\fP, this makes libcurl skip the normalization of
-the path. That's the procedure where curl otherwise removes sequences of
+the path. That is the procedure where curl otherwise removes sequences of
 dot-slash and dot-dot etc. The same option used for transfers is called
 \fICURLOPT_PATH_AS_IS(3)\fP.
 .IP CURLU_ALLOW_SPACE

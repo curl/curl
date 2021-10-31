@@ -62,7 +62,7 @@ sent was for internal SSL processing, and no other data could be sent.
 
  if(res == CURLE_OK) {
    /* Extract the socket from the curl handle -
-      we'll need it for waiting. */
+      we will need it for waiting. */
    res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
 
    /* send data */

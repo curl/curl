@@ -40,8 +40,8 @@ the server's response will be unspecified, depending on the server's
 configuration.
 
 You should also be aware that many HTTP/1.1 servers do not have this feature
-enabled, so that when you attempt to get a range, you'll instead get the whole
-document.
+enabled, so that when you attempt to get a range, you will instead get the
+whole document.
 
 FTP and SFTP range downloads only support the simple 'start-stop' syntax
 (optionally with one of the numbers omitted). FTP use depends on the extended

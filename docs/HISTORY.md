@@ -60,7 +60,7 @@ SSL support was added, powered by the SSLeay library.
 August: first announcement of curl on freshmeat.net.
 
 October: with the curl 4.9 release and the introduction of cookie support,
-curl was no longer released under the GPL license. Now we're at 4000 lines of
+curl was no longer released under the GPL license. Now we are at 4000 lines of
 code, we switched over to the MPL license to restrict the effects of
 "copyleft".
 

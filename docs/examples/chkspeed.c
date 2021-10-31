@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
   /* send all data to this function  */
   curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteCallback);
 
-  /* some servers don't like requests that are made without a user-agent
+  /* some servers do not like requests that are made without a user-agent
      field, so we provide one */
   curl_easy_setopt(curl_handle, CURLOPT_USERAGENT,
                    "libcurl-speedchecker/" CHKSPEED_VERSION);
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
   /* cleanup curl stuff */
   curl_easy_cleanup(curl_handle);
 
-  /* we're done with libcurl, so clean it up */
+  /* we are done with libcurl, so clean it up */
   curl_global_cleanup();
 
   return 0;
