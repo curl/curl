@@ -647,6 +647,20 @@ static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
   return 0;
 }
 
+static void cb_rand(uint8_t *dest, size_t destlen,
+                    const ngtcp2_rand_ctx *rand_ctx)
+{
+  CURLcode result;
+  (void)rand_ctx;
+
+  result = Curl_rand(NULL, dest, destlen);
+  if(result) {
+    /* cb_rand is only used for non-cryptographic context.  If Curl_rand
+       failed, just fill 0 and call it *random*. */
+    memset(dest, 0, destlen);
+  }
+}
+
 static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
                                     uint8_t *token, size_t cidlen,
                                     void *user_data)
@@ -684,7 +698,7 @@ static ngtcp2_callbacks ng_callbacks = {
   ngtcp2_crypto_recv_retry_cb,
   cb_extend_max_local_streams_bidi,
   NULL, /* extend_max_local_streams_uni */
-  NULL, /* rand  */
+  cb_rand,
   cb_get_new_connection_id,
   NULL, /* remove_connection_id */
   ngtcp2_crypto_update_key_cb, /* update_key */
@@ -702,7 +716,7 @@ static ngtcp2_callbacks ng_callbacks = {
   NULL, /* recv_datagram */
   NULL, /* ack_datagram */
   NULL, /* lost_datagram */
-  NULL, /* get_path_challenge_data */
+  ngtcp2_crypto_get_path_challenge_data_cb,
   cb_stream_stop_sending
 };
 
