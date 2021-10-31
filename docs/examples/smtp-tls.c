@@ -103,14 +103,14 @@ int main(void)
      * matches your server configuration. */
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mainserver.example.net:587");
 
-    /* In this example, we'll start with a plain text connection, and upgrade
+    /* In this example, we will start with a plain text connection, and upgrade
      * to Transport Layer Security (TLS) using the STARTTLS command. Be careful
      * of using CURLUSESSL_TRY here, because if TLS upgrade fails, the transfer
      * will continue anyway - see the security discussion in the libcurl
      * tutorial for more details. */
     curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
 
-    /* If your server doesn't have a valid certificate, then you can disable
+    /* If your server does not have a valid certificate, then you can disable
      * part of the Transport Layer Security protection by setting the
      * CURLOPT_SSL_VERIFYPEER and CURLOPT_SSL_VERIFYHOST options to 0 (false).
      *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -123,7 +123,7 @@ int main(void)
      * for more information. */
     curl_easy_setopt(curl, CURLOPT_CAINFO, "/path/to/certificate.pem");
 
-    /* Note that this option isn't strictly required, omitting it will result
+    /* Note that this option is not strictly required, omitting it will result
      * in libcurl sending the MAIL FROM command with empty sender data. All
      * autoresponses should have an empty reverse-path, and should be directed
      * to the address in the reverse-path which triggered them. Otherwise,
@@ -139,7 +139,7 @@ int main(void)
     recipients = curl_slist_append(recipients, CC_MAIL);
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
-    /* We're using a callback function to specify the payload (the headers and
+    /* We are using a callback function to specify the payload (the headers and
      * body of the message). You could just use the CURLOPT_READDATA option to
      * specify a FILE pointer to read from. */
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -45,7 +45,7 @@ int main(void)
     chunk = curl_slist_append(chunk, "Host: example.com");
 
     /* Add a header with "blank" contents to the right of the colon. Note that
-       we're then using a semicolon in the string we pass to curl! */
+       we are then using a semicolon in the string we pass to curl! */
     chunk = curl_slist_append(chunk, "X-silly-header;");
 
     /* set our custom set of headers */

@@ -14,7 +14,7 @@ details and explanations. Common additional HTTP requests include PUT and
 DELETE, but related technologies like WebDAV offers PROPFIND, COPY, MOVE and
 more.
 
-Normally you don't need this option. All sorts of GET, HEAD, POST and PUT
+Normally you do not need this option. All sorts of GET, HEAD, POST and PUT
 requests are rather invoked by using dedicated command line options.
 
 This option only changes the actual word used in the HTTP request, it does not
@@ -23,7 +23,7 @@ request, using -X HEAD will not suffice. You need to use the --head option.
 
 The method string you set with --request will be used for all requests, which
 if you for example use --location may cause unintended side-effects when curl
-doesn't change request method according to the HTTP 30x response codes - and
+does not change request method according to the HTTP 30x response codes - and
 similar.
 
 (FTP)

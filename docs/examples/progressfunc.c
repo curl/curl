@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -112,7 +112,7 @@ int main(void)
 
 #if LIBCURL_VERSION_NUM >= 0x072000
     /* xferinfo was introduced in 7.32.0, no earlier libcurl versions will
-       compile as they won't have the symbols around.
+       compile as they will not have the symbols around.
 
        If built with a newer libcurl, but running with an older libcurl:
        curl_easy_setopt() will fail in run-time trying to set the new

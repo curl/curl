@@ -50,7 +50,7 @@ The callback should return \fICURLSTS_OK\fP if it succeeded and is prepared to
 be called again (for another host) or \fICURLSTS_DONE\fP if there's nothing
 more to do. It can also return \fICURLSTS_FAIL\fP to signal error.
 
-This option doesn't enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
+This option does not enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
 do that.
 .SH DEFAULT
 NULL - no callback.

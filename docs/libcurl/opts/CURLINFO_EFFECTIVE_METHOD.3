@@ -34,7 +34,7 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_EFFECTIVE_METHOD,
 Pass in a pointer to a char pointer and get the last used effective HTTP
 method.
 
-In cases when you've asked libcurl to follow redirects, the method may not be
+In cases when you have asked libcurl to follow redirects, the method may not be
 the same method the first request would use.
 
 The \fBmethodp\fP pointer will be NULL or pointing to private memory you MUST

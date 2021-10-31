@@ -8,7 +8,7 @@
 
   Cookies are either "session cookies" which typically are forgotten when the
   session is over which is often translated to equal when browser quits, or
-  the cookies aren't session cookies they have expiration dates after which
+  the cookies are not session cookies they have expiration dates after which
   the client will throw them away.
 
   Cookies are set to the client with the Set-Cookie: header and are sent to
@@ -74,7 +74,7 @@
   `-b, --cookie`
 
   tell curl a file to read cookies from and start the cookie engine, or if it
-  isn't a file it will pass on the given string. -b name=var works and so does
+  is not a file it will pass on the given string. -b name=var works and so does
   -b cookiefile.
 
   `-j, --junk-session-cookies`

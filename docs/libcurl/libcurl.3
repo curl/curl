@@ -96,11 +96,11 @@ curl-config is added to make it easier for applications to link with libcurl
 and developers to learn about libcurl and how to use it.
 
 Run 'curl-config --libs' to get the (additional) linker options you need to
-link with the particular version of libcurl you've installed. See the
+link with the particular version of libcurl you have installed. See the
 \fIcurl-config(1)\fP man page for further details.
 
 Unix-like operating system that ship libcurl as part of their distributions
-often don't provide the curl-config tool, but simply install the library and
+often do not provide the curl-config tool, but simply install the library and
 headers in the common path for this purpose.
 
 Many Linux and similar systems use pkg-config to provide build and link
@@ -127,7 +127,7 @@ several transfers, if the conditions are right.
 libcurl will \fBalways\fP attempt to use persistent connections. Whenever you
 use \fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP etc, libcurl
 will attempt to use an existing connection to do the transfer, and if none
-exists it'll open a new one that will be subject for re-use on a possible
+exists it will open a new one that will be subject for re-use on a possible
 following call to \fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP.
 
 To allow libcurl to take full advantage of persistent connections, you should
@@ -136,7 +136,7 @@ do as many of your file transfers as possible using the same handle.
 If you use the easy interface, and you call \fIcurl_easy_cleanup(3)\fP, all
 the possibly open connections held by libcurl will be closed and forgotten.
 
-When you've created a multi handle and are using the multi interface, the
+When you have created a multi handle and are using the multi interface, the
 connection pool is instead kept in the multi handle so closing and creating
 new easy handles to do transfers will not affect them. Instead all added easy
 handles can take advantage of the single shared pool.
@@ -163,31 +163,31 @@ use of libcurl.
 You can call both of these multiple times, as long as all calls meet
 these requirements and the number of calls to each is the same.
 
-It isn't actually required that the functions be called at the beginning
-and end of the program -- that's just usually the easiest way to do it.
+It is not actually required that the functions be called at the beginning
+and end of the program -- that is just usually the easiest way to do it.
 It \fIis\fP required that the functions be called when no other thread
 in the program is running.
 
 These global constant functions are \fInot thread safe\fP, so you must
 not call them when any other thread in the program is running.  It
-isn't good enough that no other thread is using libcurl at the time,
+is not good enough that no other thread is using libcurl at the time,
 because these functions internally call similar functions of other
-libraries, and those functions are similarly thread-unsafe.  You can't
+libraries, and those functions are similarly thread-unsafe.  You cannot
 generally know what these libraries are, or whether other threads are
 using them.
 
 The global constant situation merits special consideration when the
 code you are writing to use libcurl is not the main program, but rather
 a modular piece of a program, e.g. another library.  As a module,
-your code doesn't know about other parts of the program -- it doesn't
-know whether they use libcurl or not.  And its code doesn't necessarily
+your code does not know about other parts of the program -- it does not
+know whether they use libcurl or not.  And its code does not necessarily
 run at the start and end of the whole program.
 
 A module like this must have global constant functions of its own, just like
 \fIcurl_global_init(3)\fP and \fIcurl_global_cleanup(3)\fP.  The module thus
 has control at the beginning and end of the program and has a place to call
 the libcurl functions.  Note that if multiple modules in the program use
-libcurl, they all will separately call the libcurl functions, and that's OK
+libcurl, they all will separately call the libcurl functions, and that is OK
 because only the first \fIcurl_global_init(3)\fP and the last
 \fIcurl_global_cleanup(3)\fP in a program change anything.  (libcurl uses a
 reference count in static memory).
@@ -219,11 +219,11 @@ have to agree on one allocator.
 
 There is a failsafe in libcurl that makes it usable in simple situations
 without you having to worry about the global constant environment at all:
-\fIcurl_easy_init(3)\fP sets up the environment itself if it hasn't been done
+\fIcurl_easy_init(3)\fP sets up the environment itself if it has not been done
 yet.  The resources it acquires to do so get released by the operating system
 automatically when the program exits.
 
 This failsafe feature exists mainly for backward compatibility because
-there was a time when the global functions didn't exist.  Because it
+there was a time when the global functions did not exist.  Because it
 is sufficient only in the simplest of programs, it is not recommended
 for any program to rely on it.

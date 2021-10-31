@@ -39,7 +39,7 @@ If \fIlength\fP is set to 0 (zero), \fIcurl_easy_escape(3)\fP uses strlen() on
 the input \fIstring\fP to find out the size. This function does not accept
 input strings longer than \fBCURL_MAX_INPUT_LENGTH\fP (8 MB).
 
-You must \fIcurl_free(3)\fP the returned string when you're done with it.
+You must \fIcurl_free(3)\fP the returned string when you are done with it.
 .SH ENCODING
 libcurl is typically not aware of, nor does it care about, character
 encodings. \fIcurl_easy_escape(3)\fP encodes the data byte-by-byte into the

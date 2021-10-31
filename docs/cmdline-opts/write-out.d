@@ -185,7 +185,7 @@ The URL index number of this transfer, 0-indexed. De-globbed URLs share the
 same index number as the origin globbed URL. (Added in 7.75.0)
 .TP
 .B url_effective
-The URL that was fetched last. This is most meaningful if you've told curl
+The URL that was fetched last. This is most meaningful if you have told curl
 to follow location: headers.
 .RE
 .IP

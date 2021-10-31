@@ -48,7 +48,7 @@ you are up for a tough argument.
 ### URL
 
 There should be a documented URL format. If there is an RFC for it there is no
-question about it but the syntax doesn't have to be a published RFC. It could
+question about it but the syntax does not have to be a published RFC. It could
 be enough if it is already in use by other implementations.
 
 If you make up the syntax just in order to be able to propose it to curl, then
@@ -80,7 +80,7 @@ As much of the protocol implementation as possible needs to be verified by
 curl test cases. We must have the implementation get tested by CI jobs,
 torture tests and more.
 
-We've experienced many times in the past how new implementations were brought
+We have experienced many times in the past how new implementations were brought
 to curl and immediately once the code had been merged, the originator vanished
 from the face of the earth. That is fine, but we need to take the necessary
 precautions so when it happens we are still fine.
@@ -100,11 +100,11 @@ little easier!
 The protocol specification itself should be freely available without requiring
 any NDA or similar.
 
-## Don't compare
+## Do not compare
 
 We are constantly raising the bar and we are constantly improving the
 project. A lot of things we did in the past would not be acceptable if done
 today.  Therefore, you might be tempted to use shortcuts or "hacks" you can
 spot other - existing - protocol implementations have used, but there is
-nothing to gain from that. The bar has been raised. Former "cheats" won't be
+nothing to gain from that. The bar has been raised. Former "cheats" will not be
 tolerated anymore.

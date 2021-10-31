@@ -30,8 +30,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CONTENT_TYPE, char **ct);
 .SH DESCRIPTION
 Pass a pointer to a char pointer to receive the content-type of the downloaded
 object. This is the value read from the Content-Type: field. If you get NULL,
-it means that the server didn't send a valid Content-Type header or that the
-protocol used doesn't support this.
+it means that the server did not send a valid Content-Type header or that the
+protocol used does not support this.
 
 The \fBct\fP pointer will be NULL or pointing to private memory you MUST NOT
 free it - it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the

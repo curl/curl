@@ -9,7 +9,7 @@ Example: --list-only ftp://example.com/dir/
 (FTP)
 When listing an FTP directory, this switch forces a name-only view. This is
 especially useful if the user wants to machine-parse the contents of an FTP
-directory since the normal directory view doesn't use a standard look or
+directory since the normal directory view does not use a standard look or
 format. When used like this, the option causes an NLST command to be sent to
 the server instead of LIST.
 

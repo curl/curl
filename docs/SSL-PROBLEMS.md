@@ -24,12 +24,12 @@
 
   When using said CA bundle to verify a server cert, you will experience
   problems if your CA store does not contain the certificates for the
-  intermediates if the server doesn't provide them.
+  intermediates if the server does not provide them.
 
   The TLS protocol mandates that the intermediate certificates are sent in the
   handshake, but as browsers have ways to survive or work around such
   omissions, missing intermediates in TLS handshakes still happen that
-  browser-users won't notice.
+  browser-users will not notice.
 
   Browsers work around this problem in two ways: they cache intermediate
   certificates from previous transfers and some implement the TLS "AIA"
@@ -51,7 +51,7 @@
 
 ## Ciphers
 
-  Clients give servers a list of ciphers to select from. If the list doesn't
+  Clients give servers a list of ciphers to select from. If the list does not
   include any ciphers the server wants/can use, the connection handshake
   fails.
 
@@ -76,7 +76,7 @@
 
   BEAST is the name of a TLS 1.0 attack that surfaced 2011. When adding means
   to mitigate this attack, it turned out that some broken servers out there in
-  the wild didn't work properly with the BEAST mitigation in place.
+  the wild did not work properly with the BEAST mitigation in place.
 
   To make such broken servers work, the --ssl-allow-beast option was
   introduced. Exactly as it sounds, it re-introduces the BEAST vulnerability
@@ -89,7 +89,7 @@
   depending on the OS or build configuration. The --ssl-no-revoke option was
   introduced in 7.44.0 to disable revocation checking but currently is only
   supported for Schannel (the native Windows SSL library), with an exception
-  in the case of Windows' Untrusted Publishers block list which it seems can't
+  in the case of Windows' Untrusted Publishers block list which it seems cannot
   be bypassed. This option may have broader support to accommodate other SSL
   backends in the future.
 

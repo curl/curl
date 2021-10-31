@@ -81,7 +81,7 @@ int main(void)
   /* we pass our 'chunk' struct to the callback function */
   curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
 
-  /* some servers don't like requests that are made without a user-agent
+  /* some servers do not like requests that are made without a user-agent
      field, so we provide one */
   curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 
@@ -109,7 +109,7 @@ int main(void)
 
   free(chunk.memory);
 
-  /* we're done with libcurl, so clean it up */
+  /* we are done with libcurl, so clean it up */
   curl_global_cleanup();
 
   return 0;

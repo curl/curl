@@ -23,7 +23,7 @@ file instead or similar and never used in clear text in a command line.
 
 When using Kerberos V5 with a Windows based server you should include the
 Windows domain name in the user name, in order for the server to successfully
-obtain a Kerberos Ticket. If you don't then the initial authentication
+obtain a Kerberos Ticket. If you do not, then the initial authentication
 handshake may fail.
 
 When using NTLM, the user name can be specified simply as the user name,

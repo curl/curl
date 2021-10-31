@@ -15,7 +15,7 @@ without using the dedicated dynbuf API.
 void Curl_dyn_init(struct dynbuf *s, size_t toobig);
 ```
 
-This inits a struct to use for dynbuf and it can't fail. The `toobig` value
+This inits a struct to use for dynbuf and it cannot fail. The `toobig` value
 **must** be set to the maximum size we allow this buffer instance to grow to.
 The functions below will return `CURLE_OUT_OF_MEMORY` when hitting this limit.
 

@@ -17,7 +17,7 @@ FAQ
   1.8 I have a problem who do I mail?
   1.9 Where do I buy commercial support for curl?
   1.10 How many are using curl?
-  1.11 Why don't you update ca-bundle.crt
+  1.11 Why do you not update ca-bundle.crt
   1.12 I have a problem who can I chat with?
   1.13 curl's ECCN number?
   1.14 How do I submit my patch?
@@ -31,7 +31,7 @@ FAQ
  3. Usage Problems
   3.1 curl: (1) SSL is disabled, https: not supported
   3.2 How do I tell curl to resume a transfer?
-  3.3 Why doesn't my posting using -F work?
+  3.3 Why does my posting using -F not work?
   3.4 How do I tell curl to run custom FTP commands?
   3.5 How can I disable the Accept: */* header?
   3.6 Does curl support ASP, XML, XHTML or HTML version Y?
@@ -55,7 +55,7 @@ FAQ
  4. Running Problems
   4.2 Why do I get problems when I use & or % in the URL?
   4.3 How can I use {, }, [ or ] to specify multiple URLs?
-  4.4 Why do I get downloaded data even though the web page doesn't exist?
+  4.4 Why do I get downloaded data even though the web page does not exist?
   4.5 Why do I get return code XXX from a HTTP server?
    4.5.1 "400 Bad Request"
    4.5.2 "401 Unauthorized"
@@ -66,18 +66,18 @@ FAQ
   4.6 Can you tell me what error code 142 means?
   4.7 How do I keep user names and passwords secret in curl command lines?
   4.8 I found a bug!
-  4.9 curl can't authenticate to the server that requires NTLM?
-  4.10 My HTTP request using HEAD, PUT or DELETE doesn't work!
+  4.9 curl cannot authenticate to the server that requires NTLM?
+  4.10 My HTTP request using HEAD, PUT or DELETE does not work!
   4.11 Why do my HTTP range requests return the full document?
   4.12 Why do I get "certificate verify failed" ?
   4.13 Why is curl -R on Windows one hour off?
   4.14 Redirects work in browser but not with curl!
-  4.15 FTPS doesn't work
+  4.15 FTPS does not work
   4.16 My HTTP POST or PUT requests are slow!
   4.17 Non-functional connect timeouts on Windows
   4.18 file:// URLs containing drive letters (Windows, NetWare)
-  4.19 Why doesn't curl return an error when the network cable is unplugged?
-  4.20 curl doesn't return error for HTTP non-200 responses!
+  4.19 Why does not curl return an error when the network cable is unplugged?
+  4.20 curl does not return error for HTTP non-200 responses!
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -248,7 +248,7 @@ FAQ
 
   Project cURL is entirely free and open. We do this voluntarily, mostly in
   our spare time.  Companies may pay individual developers to work on curl,
-  but that's up to each company and developer. This is not controlled by nor
+  but that is up to each company and developer. This is not controlled by nor
   supervised in any way by the curl project.
 
   We get help from companies. Haxx provides website, bandwidth, mailing lists
@@ -313,22 +313,22 @@ FAQ
 
   It is impossible to tell.
 
-  We don't know how many users that knowingly have installed and use curl.
+  We do not know how many users that knowingly have installed and use curl.
 
-  We don't know how many users that use curl without knowing that they are in
+  We do not know how many users that use curl without knowing that they are in
   fact using it.
 
-  We don't know how many users that downloaded or installed curl and then
+  We do not know how many users that downloaded or installed curl and then
   never use it.
 
   In 2020, we estimate that curl runs in roughly ten billion installations
   world wide.
 
-  1.11 Why don't you update ca-bundle.crt
+  1.11 Why do you not update ca-bundle.crt
 
-  In the cURL project we've decided not to attempt to keep this file updated
+  In the cURL project we have decided not to attempt to keep this file updated
   (or even present) since deciding what to add to a ca cert bundle is an
-  undertaking we've not been ready to accept, and the one we can get from
+  undertaking we have not been ready to accept, and the one we can get from
   Mozilla is perfectly fine so there's no need to duplicate that work.
 
   Today, with many services performed over HTTPS, every operating system
@@ -344,7 +344,7 @@ FAQ
   1.12 I have a problem who can I chat with?
 
   There's a bunch of friendly people hanging out in the #curl channel on the
-  IRC network libera.chat. If you're polite and nice, chances are good that
+  IRC network libera.chat. If you are polite and nice, chances are good that
   you can get -- or provide -- help instantly.
 
   1.13 curl's ECCN number?
@@ -372,10 +372,10 @@ FAQ
   1.14 How do I submit my patch?
 
   We strongly encourage you to submit changes and improvements directly as
-  "pull requests" on github: https://github.com/curl/curl/pulls
+  "pull requests" on GitHub: https://github.com/curl/curl/pulls
 
-  If you for any reason can't or won't deal with github, send your patch to
-  the curl-library mailing list. We're many subscribers there and there are
+  If you for any reason cannot or will not deal with GitHub, send your patch to
+  the curl-library mailing list. We are many subscribers there and there are
   lots of people who can review patches, comment on them and "receive" them
   properly.
 
@@ -405,7 +405,7 @@ FAQ
   configure checks for.
 
   The reason why static libraries is much harder to deal with is that for them
-  we don't get any help but the script itself must know or check what more
+  we do not get any help but the script itself must know or check what more
   libraries that are needed (with shared libraries, that dependency "chain" is
   handled automatically). This is a error-prone process and one that also
   tends to vary over time depending on the release versions of the involved
@@ -437,20 +437,20 @@ FAQ
   3.1 curl: (1) SSL is disabled, https: not supported
 
   If you get this output when trying to get anything from a https:// server,
-  it means that the instance of curl/libcurl that you're using was built
+  it means that the instance of curl/libcurl that you are using was built
   without support for this protocol.
 
-  This could've happened if the configure script that was run at build time
-  couldn't find all libs and include files curl requires for SSL to work. If
+  This could have happened if the configure script that was run at build time
+  could not find all libs and include files curl requires for SSL to work. If
   the configure script fails to find them, curl is simply built without SSL
   support.
 
   To get the https:// support into a curl that was previously built but that
   reports that https:// is not supported, you should dig through the document
-  and logs and check out why the configure script doesn't find the SSL libs
+  and logs and check out why the configure script does not find the SSL libs
   and/or include files.
 
-  Also, check out the other paragraph in this FAQ labeled "configure doesn't
+  Also, check out the other paragraph in this FAQ labeled "configure does not
   find OpenSSL even when it is installed".
 
   3.2 How do I tell curl to resume a transfer?
@@ -458,19 +458,19 @@ FAQ
   curl supports resumed transfers both ways on both FTP and HTTP.
   Try the -C option.
 
-  3.3 Why doesn't my posting using -F work?
+  3.3 Why does my posting using -F not work?
 
-  You can't arbitrarily use -F or -d, the choice between -F or -d depends on
+  You cannot arbitrarily use -F or -d, the choice between -F or -d depends on
   the HTTP operation you need curl to do and what the web server that will
   receive your post expects.
 
-  If the form you're trying to submit uses the type 'multipart/form-data',
+  If the form you are trying to submit uses the type 'multipart/form-data',
   then and only then you must use the -F type. In all the most common cases,
   you should use -d which then causes a posting with the type
   'application/x-www-form-urlencoded'.
 
   This is described in some detail in the MANUAL and TheArtOfHttpScripting
-  documents, and if you don't understand it the first time, read it again
+  documents, and if you do not understand it the first time, read it again
   before you post questions about this to the mailing list. Also, try reading
   through the mailing list archives for old postings and questions regarding
   this.
@@ -480,7 +480,7 @@ FAQ
   You can tell curl to perform optional commands both before and/or after a
   file transfer. Study the -Q/--quote option.
 
-  Since curl is used for file transfers, you don't normally use curl to
+  Since curl is used for file transfers, you do not normally use curl to
   perform FTP commands without transferring anything. Therefore you must
   always specify a URL to transfer to/from even when doing custom FTP
   commands, or use -I which implies the "no body" option sent to libcurl.
@@ -493,9 +493,9 @@ FAQ
 
   3.6 Does curl support ASP, XML, XHTML or HTML version Y?
 
-  To curl, all contents are alike. It doesn't matter how the page was
+  To curl, all contents are alike. It does not matter how the page was
   generated. It may be ASP, PHP, Perl, shell-script, SSI or plain HTML
-  files. There's no difference to curl and it doesn't even know what kind of
+  files. There's no difference to curl and it does not even know what kind of
   language that generated the page.
 
   See also item 3.14 regarding javascript.
@@ -515,7 +515,7 @@ FAQ
   3.8 How do I tell curl to follow HTTP redirects?
 
   curl does not follow so-called redirects by default. The Location: header
-  that informs the client about this is only interpreted if you're using the
+  that informs the client about this is only interpreted if you are using the
   -L/--location option. As in:
 
      curl -L http://redirector.com
@@ -534,7 +534,7 @@ FAQ
 
   All the various bindings to libcurl are made by other projects and people,
   outside of the cURL project. The cURL project itself only produces libcurl
-  with its plain C API. If you don't find anywhere else to ask you can ask
+  with its plain C API. If you do not find anywhere else to ask you can ask
   about bindings on the curl-library list too, but be prepared that people on
   that list may not know anything about bindings.
 
@@ -554,7 +554,7 @@ FAQ
   XML-RPC are all such ones. You can use -X to set custom requests and -H to
   set custom headers (or replace internally generated ones).
 
-  Using libcurl is of course just as good and you'd just use the proper
+  Using libcurl is of course just as good and you would just use the proper
   library options to do the same.
 
   3.11 How do I POST with a different Content-Type?
@@ -568,7 +568,7 @@ FAQ
 
   Because when you use a HTTP proxy, the protocol spoken on the network will
   be HTTP, even if you specify a FTP URL. This effectively means that you
-  normally can't use FTP-specific features such as FTP upload and FTP quote
+  normally cannot use FTP-specific features such as FTP upload and FTP quote
   etc.
 
   There is one exception to this rule, and that is if you can "tunnel through"
@@ -590,7 +590,7 @@ FAQ
   Exactly what kind of quotes and how to do this is entirely up to the shell
   or command line interpreter that you are using. For most unix shells, you
   can more or less pick either single (') or double (") quotes. For
-  Windows/DOS prompts I believe you're forced to use double (") quotes.
+  Windows/DOS prompts I believe you are forced to use double (") quotes.
 
   Please study the documentation for your particular environment. Examples in
   the curl docs will use a mix of both of these as shown above. You must
@@ -608,8 +608,8 @@ FAQ
   .pac files are a netscape invention and are sometimes used by organizations
   to allow them to differentiate which proxies to use. The .pac contents is
   just a Javascript program that gets invoked by the browser and that returns
-  the name of the proxy to connect to. Since curl doesn't support Javascript,
-  it can't support .pac proxy configuration either.
+  the name of the proxy to connect to. Since curl does not support Javascript,
+  it cannot support .pac proxy configuration either.
 
   Some workarounds usually suggested to overcome this Javascript dependency:
 
@@ -641,7 +641,7 @@ FAQ
 
   The server you communicate with may require that you can provide this in
   order to prove that you actually are who you claim to be.  If the server
-  doesn't require this, you don't need a client certificate.
+  does not require this, you do not need a client certificate.
 
   A client certificate is always used together with a private key, and the
   private key has a pass phrase that protects it.
@@ -690,7 +690,7 @@ FAQ
 
   3.19 How do I get HTTP from a host using a specific IP address?
 
-  For example, you may be trying out a website installation that isn't yet in
+  For example, you may be trying out a website installation that is not yet in
   the DNS. Or you have a site using multiple IP addresses for a given host
   name and you want to address a specific one out of the set.
 
@@ -708,7 +708,7 @@ FAQ
   3.20 How to SFTP from my user's home directory?
 
   Contrary to how FTP works, SFTP and SCP URLs specify the exact directory to
-  work with. It means that if you don't specify that you want the user's home
+  work with. It means that if you do not specify that you want the user's home
   directory, you get the actual root directory.
 
   To specify a file in your user's home directory, you need to use the correct
@@ -724,7 +724,7 @@ FAQ
 
   When passing on a URL to curl to use, it may respond that the particular
   protocol is not supported or disabled. The particular way this error message
-  is phrased is because curl doesn't make a distinction internally of whether
+  is phrased is because curl does not make a distinction internally of whether
   a particular protocol is not supported (i.e. never got any code added that
   knows how to speak that protocol) or if it was explicitly disabled. curl can
   be built to only support a given set of protocols, and the rest would then
@@ -743,7 +743,7 @@ FAQ
   "curl http://example.com" it will use GET. If you use -d or -F curl will use
   POST, -I will cause a HEAD and -T will make it a PUT.
 
-  If for whatever reason you're not happy with these default choices that curl
+  If for whatever reason you are not happy with these default choices that curl
   does for you, you can override those request methods by specifying -X
   [WHATEVER]. This way you can for example send a DELETE by doing "curl -X
   DELETE [URL]".
@@ -754,7 +754,7 @@ FAQ
   request-body in a GET request with something like "curl -X GET -d data
   [URL]"
 
-  Note that -X doesn't actually change curl's behavior as it only modifies the
+  Note that -X does not actually change curl's behavior as it only modifies the
   actual string sent in the request, but that may of course trigger a
   different set of events.
 
@@ -799,15 +799,15 @@ FAQ
 
     curl -g 'www.site.com/weirdname[].html'
 
-  4.4 Why do I get downloaded data even though the web page doesn't exist?
+  4.4 Why do I get downloaded data even though the web page does not exist?
 
-  curl asks remote servers for the page you specify. If the page doesn't exist
+  curl asks remote servers for the page you specify. If the page does not exist
   at the server, the HTTP protocol defines how the server should respond and
-  that means that headers and a "page" will be returned. That's simply how
+  that means that headers and a "page" will be returned. That is simply how
   HTTP works.
 
   By using the --fail option you can tell curl explicitly to not get any data
-  if the HTTP return code doesn't say success.
+  if the HTTP return code does not say success.
 
   4.5 Why do I get return code XXX from a HTTP server?
 
@@ -865,11 +865,11 @@ FAQ
   This problem has two sides:
 
   The first part is to avoid having clear-text passwords in the command line
-  so that they don't appear in 'ps' outputs and similar. That is easily
+  so that they do not appear in 'ps' outputs and similar. That is easily
   avoided by using the "-K" option to tell curl to read parameters from a file
   or stdin to which you can pass the secret info. curl itself will also
   attempt to "hide" the given password by blanking out the option - this
-  doesn't work on all platforms.
+  does not work on all platforms.
 
   To keep the passwords in your account secret from the rest of the world is
   not a task that curl addresses. You could of course encrypt them somehow to
@@ -887,14 +887,14 @@ FAQ
   It is not a bug if the behavior is documented. Read the docs first.
   Especially check out the KNOWN_BUGS file, it may be a documented bug!
 
-  If it is a problem with a binary you've downloaded or a package for your
+  If it is a problem with a binary you have downloaded or a package for your
   particular platform, try contacting the person who built the package/archive
   you have.
 
   If there is a bug, read the BUGS document first. Then report it as described
   in there.
 
-  4.9 curl can't authenticate to the server that requires NTLM?
+  4.9 curl cannot authenticate to the server that requires NTLM?
 
   NTLM support requires OpenSSL, GnuTLS, mbedTLS, NSS, Secure Transport, or
   Microsoft Windows libraries at build-time to provide this functionality.
@@ -902,7 +902,7 @@ FAQ
   NTLM is a Microsoft proprietary protocol. Proprietary formats are evil. You
   should not use such ones.
 
-  4.10 My HTTP request using HEAD, PUT or DELETE doesn't work!
+  4.10 My HTTP request using HEAD, PUT or DELETE does not work!
 
   Many web servers allow or demand that the administrator configures the
   server properly for these requests to work on the web server.
@@ -910,7 +910,7 @@ FAQ
   Some servers seem to support HEAD only on certain kinds of URLs.
 
   To fully grasp this, try the documentation for the particular server
-  software you're trying to interact with. This is not anything curl can do
+  software you are trying to interact with. This is not anything curl can do
   anything about.
 
   4.11 Why do my HTTP range requests return the full document?
@@ -921,7 +921,7 @@ FAQ
   4.12 Why do I get "certificate verify failed" ?
 
   When you invoke curl and get an error 60 error back it means that curl
-  couldn't verify that the server's certificate was good. curl verifies the
+  could not verify that the server's certificate was good. curl verifies the
   certificate using the CA cert bundle and verifying for which names the
   certificate has been granted.
 
@@ -938,7 +938,7 @@ FAQ
   At times, you find that the verification works in your favorite browser but
   fails in curl. When this happens, the reason is usually that the server
   sends an incomplete cert chain. The server is mandated to send all
-  "intermediate certificates" but doesn't. This typically works with browsers
+  "intermediate certificates" but does not. This typically works with browsers
   anyway since they A) cache such certs and B) supports AIA which downloads
   such missing certificates on demand. This is a server misconfiguration. A
   good way to figure out if this is the case it to use the SSL Labs server
@@ -971,7 +971,7 @@ FAQ
   manually figure out what the page is set to do, or write a script that parses
   the results and fetches the new URL.
 
-  4.15 FTPS doesn't work
+  4.15 FTPS does not work
 
   curl supports FTPS (sometimes known as FTP-SSL) both implicit and explicit
   mode.
@@ -993,8 +993,8 @@ FAQ
   before having to send any data. This is useful in authentication
   cases and others.
 
-  However, many servers don't implement the Expect: stuff properly and if the
-  server doesn't respond (positively) within 1 second libcurl will continue
+  However, many servers do not implement the Expect: stuff properly and if the
+  server does not respond (positively) within 1 second libcurl will continue
   and send off the data anyway.
 
   You can disable libcurl's use of the Expect: header the same way you disable
@@ -1014,7 +1014,7 @@ FAQ
   Also, even on non-Windows systems there may run a firewall or anti-virus
   software or similar that accepts the connection but does not actually do
   anything else. This will make (lib)curl to consider the connection connected
-  and thus the connect timeout won't trigger.
+  and thus the connect timeout will not trigger.
 
   4.18 file:// URLs containing drive letters (Windows, NetWare)
 
@@ -1023,7 +1023,7 @@ FAQ
 
   file://D:/blah.txt
 
-  You'll find that even if D:\blah.txt does exist, curl returns a 'file
+  you will find that even if D:\blah.txt does exist, curl returns a 'file
   not found' error.
 
   According to RFC 1738 (https://www.ietf.org/rfc/rfc1738.txt),
@@ -1031,7 +1031,7 @@ FAQ
   most implementations. In the above example, 'D:' is treated as the
   host component, and is taken away. Thus, curl tries to open '/blah.txt'.
   If your system is installed to drive C:, that will resolve to 'C:\blah.txt',
-  and if that doesn't exist you will get the not found error.
+  and if that does not exist you will get the not found error.
 
   To fix this problem, use file:// URLs with *three* leading slashes:
 
@@ -1044,11 +1044,11 @@ FAQ
 
   In either case, curl should now be looking for the correct file.
 
-  4.19 Why doesn't curl return an error when the network cable is unplugged?
+  4.19 Why does not curl return an error when the network cable is unplugged?
 
   Unplugging a cable is not an error situation. The TCP/IP protocol stack
   was designed to be fault tolerant, so even though there may be a physical
-  break somewhere the connection shouldn't be affected, just possibly
+  break somewhere the connection should not be affected, just possibly
   delayed.  Eventually, the physical break will be fixed or the data will be
   re-routed around the physical problem through another path.
 
@@ -1061,9 +1061,9 @@ FAQ
   connection to make sure it is still available to send data. That should
   reliably detect any TCP/IP network failure.
 
-  But even that won't detect the network going down before the TCP/IP
+  But even that will not detect the network going down before the TCP/IP
   connection is established (e.g. during a DNS lookup) or using protocols that
-  don't use TCP.  To handle those situations, curl offers a number of timeouts
+  do not use TCP.  To handle those situations, curl offers a number of timeouts
   on its own. --speed-limit/--speed-time will abort if the data transfer rate
   falls too low, and --connect-timeout and --max-time can be used to put an
   overall timeout on the connection phase or the entire transfer.
@@ -1074,11 +1074,11 @@ FAQ
   by having the application monitor the network connection on its own using an
   OS-specific mechanism, then signaling libcurl to abort (see also item 5.13).
 
-  4.20 curl doesn't return error for HTTP non-200 responses!
+  4.20 curl does not return error for HTTP non-200 responses!
 
   Correct. Unless you use -f (--fail).
 
-  When doing HTTP transfers, curl will perform exactly what you're asking it
+  When doing HTTP transfers, curl will perform exactly what you are asking it
   to do and if successful it will not return an error. You can use curl to
   test your web server's "file not found" page (that gets 404 back), you can
   use it to check your authentication protected web pages (that gets a 401
@@ -1087,7 +1087,7 @@ FAQ
   The specific HTTP response code does not constitute a problem or error for
   curl. It simply sends and delivers HTTP as you asked and if that worked,
   everything is fine and dandy. The response code is generally providing more
-  higher level error information that curl doesn't care about. The error was
+  higher level error information that curl does not care about. The error was
   not in the HTTP transfer.
 
   If you want your command line to treat error codes in the 400 and up range
@@ -1153,7 +1153,7 @@ FAQ
   libcurl has excellent support for transferring multiple files. You should
   just repeatedly set new URLs with curl_easy_setopt() and then transfer it
   with curl_easy_perform(). The handle you get from curl_easy_init() is not
-  only reusable, but you're even encouraged to reuse it if you can, as that
+  only reusable, but you are even encouraged to reuse it if you can, as that
   will enable libcurl to use persistent connections.
 
   5.4 Does libcurl do Winsock initialization on win32 systems?
@@ -1195,12 +1195,12 @@ FAQ
 
   When building an application that uses the static libcurl library, you must
   add -DCURL_STATICLIB to your CFLAGS. Otherwise the linker will look for
-  dynamic import symbols. If you're using Visual Studio, you need to instead
+  dynamic import symbols. If you are using Visual Studio, you need to instead
   add CURL_STATICLIB in the "Preprocessor Definitions" section.
 
   If you get linker error like "unknown symbol __imp__curl_easy_init ..." you
   have linked against the wrong (static) library.  If you want to use the
-  libcurl.dll and import lib, you don't need any extra CFLAGS, but use one of
+  libcurl.dll and import lib, you do not need any extra CFLAGS, but use one of
   the import libraries below. These are the libraries produced by the various
   lib/Makefile.* files:
 
@@ -1214,7 +1214,7 @@ FAQ
   5.8 libcurl.so.X: open failed: No such file or directory
 
   This is an error message you might get when you try to run a program linked
-  with a shared version of libcurl and your run-time linker (ld.so) couldn't
+  with a shared version of libcurl and your run-time linker (ld.so) could not
   find the shared library named libcurl.so.X. (Where X is the number of the
   current libcurl ABI, typically 3 or 4).
 
@@ -1228,7 +1228,7 @@ FAQ
   * Set an environment variable (LD_LIBRARY_PATH for example) where ld.so
     should check for libs
 
-  * Adjust the system's config to check for libs in the directory where you've
+  * Adjust the system's config to check for libs in the directory where you have
     put the dir (like Linux's /etc/ld.so.conf)
 
   'man ld.so' and 'man ld' will tell you more details
@@ -1297,13 +1297,13 @@ FAQ
   can do this with include the progress callback, the read callback and the
   write callback.
 
-  If you're using the multi interface, you can also stop a transfer by
+  If you are using the multi interface, you can also stop a transfer by
   removing the particular easy handle from the multi stack at any moment you
   think the transfer is done or when you wish to abort the transfer.
 
   5.14 Using C++ non-static functions for callbacks?
 
-  libcurl is a C library, it doesn't know anything about C++ member functions.
+  libcurl is a C library, it does not know anything about C++ member functions.
 
   You can overcome this "limitation" with relative ease using a static
   member function that is passed a pointer to the class:
@@ -1331,9 +1331,9 @@ FAQ
   a symlink etc. If the FTP server supports the MLSD command then it will
   return data in a machine-readable format that can be parsed for type. The
   types are specified by RFC3659 section 7.5.1. If MLSD is not supported then
-  you have to work with what you're given. The LIST output format is entirely
-  at the server's own liking and the NLST output doesn't reveal any types and
-  in many cases doesn't even include all the directory entries. Also, both LIST
+  you have to work with what you are given. The LIST output format is entirely
+  at the server's own liking and the NLST output does not reveal any types and
+  in many cases does not even include all the directory entries. Also, both LIST
   and NLST tend to hide unix-style hidden files (those that start with a dot)
   by default so you need to do "LIST -a" or similar to see them.
 
@@ -1386,7 +1386,7 @@ FAQ
   but still in the same single thread.
 
   libcurl will potentially internally use threads for name resolving, if it
-  was built to work like that, but in those cases it'll create the child
+  was built to work like that, but in those cases it will create the child
   threads by itself and they will only be used and then killed internally by
   libcurl and never exposed to the outside.
 
@@ -1426,7 +1426,7 @@ FAQ
 
   Yes!
 
-  The LGPL license doesn't clash with other licenses.
+  The LGPL license does not clash with other licenses.
 
   6.5 Can I modify curl/libcurl for my program and keep the changes secret?
 
@@ -1507,18 +1507,18 @@ FAQ
 
  8.1 Why does curl use C89?
 
- As with everything in curl, there's a history and we keep using what we've
+ As with everything in curl, there's a history and we keep using what we have
  used before until someone brings up the subject and argues for and works on
  changing it.
 
  We started out using C89 in the 1990s because that was the only way to write
  a truly portable C program and have it run as widely as possible. C89 was for
  a long time even necessary to make things work on otherwise considered modern
- platforms such as Windows. Today, we don't really know how many users that
+ platforms such as Windows. Today, we do not really know how many users that
  still require the use of a C89 compiler.
 
  We will continue to use C89 for as long as nobody brings up a strong enough
- reason for us to change our minds. The core developers of the project don't
+ reason for us to change our minds. The core developers of the project do not
  feel restricted by this and we are not convinced that going C99 will offer us
  enough of a benefit to warrant the risk of cutting off a share of users.
 

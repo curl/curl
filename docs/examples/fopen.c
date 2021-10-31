@@ -135,7 +135,7 @@ static int fill_buffer(URL_FILE *file, size_t want)
   CURLMcode mc; /* curl_multi_fdset() return code */
 
   /* only attempt to fill buffer if transactions still running and buffer
-   * doesn't exceed required size already
+   * does not exceed required size already
    */
   if((!file->still_running) || (file->buffer_pos > want))
     return 0;

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,7 +42,7 @@ static size_t my_fwrite(void *buffer, size_t size, size_t nmemb,
     /* open file for writing */
     out->stream = fopen(out->filename, "wb");
     if(!out->stream)
-      return -1; /* failure, can't open file to write */
+      return -1; /* failure, cannot open file to write */
   }
   return fwrite(buffer, size, nmemb, out->stream);
 }

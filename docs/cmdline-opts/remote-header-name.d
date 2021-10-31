@@ -11,7 +11,7 @@ Content-Disposition filename instead of extracting a filename from the URL.
 
 If the server specifies a file name and a file with that name already exists
 in the current working directory it will not be overwritten and an error will
-occur. If the server doesn't specify a file name then this option has no
+occur. If the server does not specify a file name then this option has no
 effect.
 
 There's no attempt to decode %-sequences (yet) in the provided file name, so

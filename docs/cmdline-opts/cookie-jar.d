@@ -19,10 +19,10 @@ This command line option will activate the cookie engine that makes curl
 record and use cookies. Another way to activate it is to use the --cookie
 option.
 
-If the cookie jar can't be created or written to, the whole curl operation
-won't fail or even report an error clearly. Using --verbose will get a warning
-displayed, but that is the only visible feedback you get about this possibly
-lethal situation.
+If the cookie jar cannot be created or written to, the whole curl operation
+will not fail or even report an error clearly. Using --verbose will get a
+warning displayed, but that is the only visible feedback you get about this
+possibly lethal situation.
 
 If this option is used several times, the last specified file name will be
 used.

@@ -122,7 +122,7 @@ void *create_thread(void *progress_bar)
   pthread_t tid[NUMT];
   int i;
 
-  /* Make sure I don't create more threads than urls. */
+  /* Make sure I do not create more threads than urls. */
   for(i = 0; i < NUMT && i < num_urls ; i++) {
     int error = pthread_create(&tid[i],
                                NULL, /* default attributes please */
@@ -206,7 +206,7 @@ int main(int argc, char **argv)
                    G_CALLBACK(cb_delete), NULL);
 
   if(!g_thread_create(&create_thread, progress_bar, FALSE, NULL) != 0)
-    g_warning("can't create the thread");
+    g_warning("cannot create the thread");
 
   gtk_main();
   gdk_threads_leave();

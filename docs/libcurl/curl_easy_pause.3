@@ -35,7 +35,7 @@ paused, and you can unpause a connection that was previously paused.
 A connection can be paused by using this function or by letting the read or
 the write callbacks return the proper magic return code
 (\fICURL_READFUNC_PAUSE\fP and \fICURL_WRITEFUNC_PAUSE\fP). A write callback
-that returns pause signals to the library that it couldn't take care of any
+that returns pause signals to the library that it could not take care of any
 data at all, and that data will then be delivered again to the callback when
 the transfer is unpaused.
 
@@ -59,11 +59,11 @@ connection. The following bits can be used:
 .IP CURLPAUSE_RECV
 Pause receiving data. There will be no data received on this connection until
 this function is called again without this bit set. Thus, the write callback
-(\fICURLOPT_WRITEFUNCTION(3)\fP) won't be called.
+(\fICURLOPT_WRITEFUNCTION(3)\fP) will not be called.
 .IP CURLPAUSE_SEND
 Pause sending data. There will be no data sent on this connection until this
 function is called again without this bit set. Thus, the read callback
-(\fICURLOPT_READFUNCTION(3)\fP) won't be called.
+(\fICURLOPT_READFUNCTION(3)\fP) will not be called.
 .IP CURLPAUSE_ALL
 Convenience define that pauses both directions.
 .IP CURLPAUSE_CONT
@@ -91,7 +91,7 @@ curl_easy_pause(curl, CURL_READFUNC_PAUSE | CURL_WRITEFUNC_PAUSE);
 .fi
 .SH "MEMORY USE"
 When pausing a read by returning the magic return code from a write callback,
-the read data is already in libcurl's internal buffers so it'll have to keep
+the read data is already in libcurl's internal buffers so it will have to keep
 it in an allocated buffer until the receiving is again unpaused using this
 function.
 

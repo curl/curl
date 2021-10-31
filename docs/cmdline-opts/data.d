@@ -30,5 +30,5 @@ If you start the data with the letter @, the rest should be a file name to
 read the data from, or - if you want curl to read the data from stdin. Posting
 data from a file named \&'foobar' would thus be done with --data @foobar. When
 --data is told to read from a file like that, carriage returns and newlines
-will be stripped out. If you don't want the @ character to have a special
+will be stripped out. If you do not want the @ character to have a special
 interpretation use --data-raw instead.

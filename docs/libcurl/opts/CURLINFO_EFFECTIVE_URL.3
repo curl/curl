@@ -30,7 +30,7 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_EFFECTIVE_URL, char **urlp);
 .SH DESCRIPTION
 Pass in a pointer to a char pointer and get the last used effective URL.
 
-In cases when you've asked libcurl to follow redirects, it may not be the same
+In cases when you have asked libcurl to follow redirects, it may not be the same
 value you set with \fICURLOPT_URL(3)\fP.
 
 The \fBurlp\fP pointer will be NULL or pointing to private memory you MUST NOT

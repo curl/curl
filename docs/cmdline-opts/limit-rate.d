@@ -8,7 +8,7 @@ Example: --limit-rate 10M $URL
 Added: 7.10
 ---
 Specify the maximum transfer rate you want curl to use - for both downloads
-and uploads. This feature is useful if you have a limited pipe and you'd like
+and uploads. This feature is useful if you have a limited pipe and you would like
 your transfer not to use your entire bandwidth. To make it slower than it
 otherwise would be.
 

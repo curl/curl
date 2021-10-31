@@ -29,10 +29,10 @@ CURLOPT_SEEKDATA \- custom pointer passed to the seek callback
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SEEKDATA, void *pointer);
 .SH DESCRIPTION
 Data \fIpointer\fP to pass to the seek callback function. If you use the
-\fICURLOPT_SEEKFUNCTION(3)\fP option, this is the pointer you'll get as
+\fICURLOPT_SEEKFUNCTION(3)\fP option, this is the pointer you will get as
 input.
 .SH DEFAULT
-If you don't set this, NULL is passed to the callback.
+If you do not set this, NULL is passed to the callback.
 .SH PROTOCOLS
 HTTP, FTP, SFTP
 .SH EXAMPLE

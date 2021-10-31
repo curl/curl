@@ -23,9 +23,9 @@ will cause warnings will not be accepted as-is.
 ## Naming
 
 Try using a non-confusing naming scheme for your new functions and variable
-names. It doesn't necessarily have to mean that you should use the same as in
+names. It does not necessarily have to mean that you should use the same as in
 other places of the code, just that the names should be logical,
-understandable and be named according to what they're used for. File-local
+understandable and be named according to what they are used for. File-local
 functions should be made static. We like lower case names.
 
 See the [INTERNALS](https://curl.se/dev/internals.html#symbols) document on
@@ -46,7 +46,7 @@ if(something_is_true) {
 
 ## Comments
 
-Since we write C89 code, **//** comments are not allowed. They weren't
+Since we write C89 code, **//** comments are not allowed. They were not
 introduced in the C standard until C99. We use only __/* comments */__.
 
 ```c
@@ -230,7 +230,7 @@ if(Curl_pipeline_wanted(handle->multi, CURLPIPE_HTTP1) &&
    (handle->set.httpversion != CURL_HTTP_VERSION_1_0) &&
    (handle->set.httpreq == HTTPREQ_GET ||
     handle->set.httpreq == HTTPREQ_HEAD))
-  /* didn't ask for HTTP/1.0 and a GET or HEAD */
+  /* did not ask for HTTP/1.0 and a GET or HEAD */
   return TRUE;
 ```
 

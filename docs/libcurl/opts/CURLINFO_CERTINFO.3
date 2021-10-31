@@ -29,7 +29,7 @@ CURLINFO_CERTINFO \- get the TLS certificate chain
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CERTINFO,
                            struct curl_certinfo **chainp);
 .SH DESCRIPTION
-Pass a pointer to a 'struct curl_certinfo *' and you'll get it set to point to
+Pass a pointer to a 'struct curl_certinfo *' and you will get it set to point to
 a struct that holds a number of linked lists with info about the certificate
 chain, assuming you had \fICURLOPT_CERTINFO(3)\fP enabled when the request was
 made. The struct reports how many certs it found and then you can extract info

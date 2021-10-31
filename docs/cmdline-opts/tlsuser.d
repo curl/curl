@@ -8,4 +8,4 @@ Example: --tlspassword pwd --tlsuser user $URL
 Set username for use with the TLS authentication method specified with
 --tlsauthtype. Requires that --tlspassword also is set.
 
-This doesn't work with TLS 1.3.
+This option does not work with TLS 1.3.

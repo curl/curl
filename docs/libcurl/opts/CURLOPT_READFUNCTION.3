@@ -46,9 +46,9 @@ area pointed at by the pointer \fIbuffer\fP. Returning 0 will signal
 end-of-file to the library and cause it to stop the current transfer.
 
 If you stop the current transfer by returning 0 "pre-maturely" (i.e before the
-server expected it, like when you've said you will upload N bytes and you
+server expected it, like when you have said you will upload N bytes and you
 upload less than N bytes), you may experience that the server "hangs" waiting
-for the rest of the data that won't come.
+for the rest of the data that will not come.
 
 The read callback may return \fICURL_READFUNC_ABORT\fP to stop the current
 operation immediately, resulting in a \fICURLE_ABORTED_BY_CALLBACK\fP error
@@ -61,7 +61,7 @@ connection to pause. See \fIcurl_easy_pause(3)\fP for further details.
 that the callback wants, or it will be considered the final packet by the
 server end and the transfer will end there.
 
-If you set this callback pointer to NULL, or don't set it at all, the default
+If you set this callback pointer to NULL, or do not set it at all, the default
 internal read function will be used. It is doing an fread() on the FILE *
 userdata set with \fICURLOPT_READDATA(3)\fP.
 

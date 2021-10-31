@@ -31,7 +31,7 @@ enum curl_khstat {
   CURLKHSTAT_FINE_ADD_TO_FILE,
   CURLKHSTAT_FINE,
   CURLKHSTAT_REJECT, /* reject the connection, return an error */
-  CURLKHSTAT_DEFER,  /* do not accept it, but we can't answer right
+  CURLKHSTAT_DEFER,  /* do not accept it, but we cannot answer right
                         now so this causes a CURLE_DEFER error but
                         otherwise the connection will be left intact
                         etc */
@@ -76,19 +76,19 @@ codes to tell libcurl how to act:
 .IP CURLKHSTAT_FINE_REPLACE
 The new host+key is accepted and libcurl will replace the old host+key into
 the known_hosts file before continuing with the connection.  This will also
-add the new host+key combo to the known_host pool kept in memory if it wasn't
+add the new host+key combo to the known_host pool kept in memory if it was not
 already present there. The adding of data to the file is done by completely
 replacing the file with a new copy, so the permissions of the file must allow
 this. (Added in 7.73.0)
 .IP CURLKHSTAT_FINE_ADD_TO_FILE
 The host+key is accepted and libcurl will append it to the known_hosts file
 before continuing with the connection. This will also add the host+key combo
-to the known_host pool kept in memory if it wasn't already present there. The
+to the known_host pool kept in memory if it was not already present there. The
 adding of data to the file is done by completely replacing the file with a new
 copy, so the permissions of the file must allow this.
 .IP CURLKHSTAT_FINE
 The host+key is accepted libcurl will continue with the connection. This will
-also add the host+key combo to the known_host pool kept in memory if it wasn't
+also add the host+key combo to the known_host pool kept in memory if it was not
 already present there.
 .IP CURLKHSTAT_REJECT
 The host+key is rejected. libcurl will deny the connection to continue and it

@@ -12,7 +12,7 @@
 
 ## Where to report
 
- If you can't fix a bug yourself and submit a fix for it, try to report an as
+ If you cannot fix a bug yourself and submit a fix for it, try to report an as
  detailed report as possible to a curl mailing list to allow one of us to have
  a go at a solution. You can optionally also submit your problem in [curl's
  bug tracking system](https://github.com/curl/curl/issues).
@@ -49,7 +49,7 @@
 
  - your operating system's name and version number
 
- - what version of curl you're using (`curl -V` is fine)
+ - what version of curl you are using (`curl -V` is fine)
 
  - versions of the used libraries that libcurl is built to use
 
@@ -67,7 +67,7 @@
 
  If curl crashed, causing a core dump (in unix), there is hardly any use to
  send that huge file to anyone of us. Unless we have an exact same system
- setup as you, we can't do much with it. Instead, we ask you to get a stack
+ setup as you, we cannot do much with it. Instead, we ask you to get a stack
  trace and send that (much smaller) output to us instead!
 
  The address and how to subscribe to the mailing lists are detailed in the
@@ -75,12 +75,12 @@
 
 ## libcurl problems
 
- When you've written your own application with libcurl to perform transfers,
+ When you have written your own application with libcurl to perform transfers,
  it is even more important to be specific and detailed when reporting bugs.
 
  Tell us the libcurl version and your operating system. Tell us the name and
  version of all relevant sub-components like for example the SSL library
- you're using and what name resolving your libcurl uses. If you use SFTP or
+ you are using and what name resolving your libcurl uses. If you use SFTP or
  SCP, the libssh2 version is relevant etc.
 
  Showing us a real source code example repeating your problem is the best way
@@ -104,7 +104,7 @@
 
  But please do not assume that you can just lump over something to us and it
  will then magically be fixed after some given time. Most often we need
- feedback and help to understand what you've experienced and how to repeat a
+ feedback and help to understand what you have experienced and how to repeat a
  problem. Then we may only be able to assist YOU to debug the problem and to
  track down the proper fix.
 
@@ -114,7 +114,7 @@
 ## How to get a stack trace
 
  First, you must make sure that you compile all sources with `-g` and that you
- don't 'strip' the final executable. Try to avoid optimizing the code as well,
+ do not 'strip' the final executable. Try to avoid optimizing the code as well,
  remove `-O`, `-O2` etc from the compiler options.
 
  Run the program until it cores.
@@ -128,7 +128,7 @@
 
  The list that is presented is the stack trace. If everything worked, it is
  supposed to contain the chain of functions that were called when curl
- crashed. Include the stack trace with your detailed bug report. It'll help a
+ crashed. Include the stack trace with your detailed bug report. it will help a
  lot.
 
 ## Bugs in libcurl bindings
@@ -148,12 +148,12 @@
 
  The developers in the curl project do not have bandwidth or energy enough to
  maintain several branches or to spend much time on hunting down problems in
- old versions when chances are we already fixed them or at least that they've
+ old versions when chances are we already fixed them or at least that they have
  changed nature and appearance in later versions.
 
  When you experience a problem and want to report it, you really SHOULD
- include the version number of the curl you're using when you experience the
- issue. If that version number shows us that you're using an out-of-date curl,
+ include the version number of the curl you are using when you experience the
+ issue. If that version number shows us that you are using an out-of-date curl,
  you should also try out a modern curl version to see if the problem persists
  or how/if it has changed in appearance.
 
@@ -162,9 +162,9 @@
  experimental build or similar, to get this confirmed or not.
 
  At times people insist that they cannot upgrade to a modern curl version, but
- instead they "just want the bug fixed". That's fine, just don't count on us
- spending many cycles on trying to identify which single commit, if that's
- even possible, that at some point in the past fixed the problem you're now
+ instead they "just want the bug fixed". That is fine, just do not count on us
+ spending many cycles on trying to identify which single commit, if that is
+ even possible, that at some point in the past fixed the problem you are now
  experiencing.
 
  Security wise, it is almost always a bad idea to lag behind the current curl
@@ -178,7 +178,7 @@
 
  When a new issue is posted in the issue tracker or on the mailing list, the
  team of developers first need to see the report. Maybe they took the day off,
- maybe they're off in the woods hunting. Have patience. Allow at least a few
+ maybe they are off in the woods hunting. Have patience. Allow at least a few
  days before expecting someone to have responded.
 
  In the issue tracker you can expect that some labels will be set on the issue
@@ -186,7 +186,7 @@
 
 ## First response
 
- If your issue/bug report wasn't perfect at once (and few are), chances are
+ If your issue/bug report was not perfect at once (and few are), chances are
  that someone will ask follow-up questions. Which version did you use? Which
  options did you use? How often does the problem occur? How can we reproduce
  this problem? Which protocols does it involve? Or perhaps much more specific
@@ -199,19 +199,19 @@
 
 ## Not reproducible
 
- For problems that we can't reproduce and can't understand even after having
+ For problems that we cannot reproduce and cannot understand even after having
  gotten all the info we need and having studied the source code over again,
  are really hard to solve so then we may require further work from you who
  actually see or experience the problem.
 
 ## Unresponsive
 
- If the problem haven't been understood or reproduced, and there's nobody
+ If the problem have not been understood or reproduced, and there's nobody
  responding to follow-up questions or questions asking for clarifications or
  for discussing possible ways to move forward with the task, we take that as a
  strong suggestion that the bug is not important.
 
- Unimportant issues will be closed as inactive sooner or later as they can't
+ Unimportant issues will be closed as inactive sooner or later as they cannot
  be fixed. The inactivity period (waiting for responses) should not be shorter
  than two weeks but may extend months.
 
@@ -219,7 +219,7 @@
 
  Bugs that are filed and are understood can unfortunately end up in the
  "nobody cares enough about it to work on it" category. Such bugs are
- perfectly valid problems that *should* get fixed but apparently aren't. We
+ perfectly valid problems that *should* get fixed but apparently are not. We
  try to mark such bugs as `KNOWN_BUGS material` after a time of inactivity and
  if no activity is noticed after yet some time those bugs are added to the
  `KNOWN_BUGS` document and are closed in the issue tracker.
@@ -227,7 +227,7 @@
 ## `KNOWN_BUGS`
 
  This is a list of known bugs. Bugs we know exist and that have been pointed
- out but that haven't yet been fixed. The reasons for why they haven't been
+ out but that have not yet been fixed. The reasons for why they have not been
  fixed can involve anything really, but the primary reason is that nobody has
  considered these problems to be important enough to spend the necessary time
  and effort to have them fixed.
@@ -239,14 +239,14 @@
 
 ## `TODO`
 
- Issues that are filed or reported that aren't really bugs but more missing
+ Issues that are filed or reported that are not really bugs but more missing
  features or ideas for future improvements and so on are marked as
  'enhancement' or 'feature-request' and will be added to the `TODO` document
- and the issues are closed. We don't keep TODO items open in the issue
+ and the issues are closed. We do not keep TODO items open in the issue
  tracker.
 
  The `TODO` document is full of ideas and suggestions of what we can add or
- fix one day. You're always encouraged and free to grab one of those items and
+ fix one day. you are always encouraged and free to grab one of those items and
  take up a discussion with the curl development team on how that could be
  implemented or provided in the project so that you can work on ticking it odd
  that document.
@@ -258,7 +258,7 @@
 
  The [issue and pull request trackers](https://github.com/curl/curl) only
  holds "active" entries open (using a non-precise definition of what active
- actually is, but they're at least not completely dead). Those that are
+ actually is, but they are at least not completely dead). Those that are
  abandoned or in other ways dormant will be closed and sometimes added to
  `TODO` and `KNOWN_BUGS` instead.
 
