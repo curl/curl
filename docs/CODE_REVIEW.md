@@ -36,9 +36,9 @@ Changing the API and the ABI may be fine in a change but it needs to be done
 deliberately and carefully. If not, a reviewer must help the author to realize
 the mistake.
 
-curl and libcurl are similarly very strict on not modifying existing
-behavior. API and ABI stability is not enough, the behavior should also remain
-intact as far as possible.
+curl and libcurl are similarly strict on not modifying existing behavior. API
+and ABI stability is not enough, the behavior should also remain intact as far
+as possible.
 
 ## Code style
 

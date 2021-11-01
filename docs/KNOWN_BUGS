@@ -288,7 +288,7 @@ problems may have been fixed or changed somewhat since this was written!
     get "good" random) so applications trying to avoid the init for
     performance reasons would do wrong anyway
 
- D) never very carefully documented so all this mostly just happened to work
+ D) not documented carefully so all this mostly just happened to work
     for some users
 
  However, in spite of the problems with the feature, there were some users who
@@ -529,10 +529,10 @@ problems may have been fixed or changed somewhat since this was written!
 5.12 flaky Windows CI builds
 
  We run many CI builds for each commit and PR on github, and especially a
- number of the Windows builds are very flaky. This means that we rarely get
- all CI builds go green and complete without errors. This is very unfortunate
- as it makes us sometimes miss actual build problems and it is surprising to
- newcomers to the project who (rightfully) don't expect this.
+ number of the Windows builds are flaky. This means that we rarely get all CI
+ builds go green and complete without errors. This is unfortunate as it makes
+ us sometimes miss actual build problems and it is surprising to newcomers to
+ the project who (rightfully) don't expect this.
 
  See https://github.com/curl/curl/issues/6972
 

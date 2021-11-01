@@ -99,9 +99,9 @@ If the downloaded data is compressed and is asked to get uncompressed
 automatically on download, libcurl will continue to uncompress the entire
 downloaded chunk and it will cache the data uncompressed. This has the side-
 effect that if you download something that is compressed a lot, it can result
-in a very large data amount needing to be allocated to save the data during
-the pause. This said, you should probably consider not using paused receiving
-if you allow libcurl to uncompress data automatically.
+in a large data amount needing to be allocated to save the data during the
+pause. This said, you should probably consider not using paused receiving if
+you allow libcurl to uncompress data automatically.
 .SH AVAILABILITY
 Added in 7.18.0.
 .SH RETURN VALUE

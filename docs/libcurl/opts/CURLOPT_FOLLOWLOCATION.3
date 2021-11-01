@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -51,7 +51,7 @@ dictates which request method it will use in the subsequent request: For 301,
 will make libcurl send the same method again.
 
 For users who think the existing location following is too naive, too simple
-or just lacks features, it is very easy to instead implement your own redirect
+or just lacks features, it is easy to instead implement your own redirect
 follow logic with the use of \fIcurl_easy_getinfo(3)\fP's
 \fICURLINFO_REDIRECT_URL(3)\fP option instead of using
 \fICURLOPT_FOLLOWLOCATION(3)\fP.

@@ -21,7 +21,7 @@
 
 ## The HTTP Protocol
 
- HTTP is the protocol used to fetch data from web servers. It is a very simple
+ HTTP is the protocol used to fetch data from web servers. It is a simple
  protocol that is built upon TCP/IP. The protocol also allows information to
  get sent to the server from the client using a few different methods, as will
  be shown here.
@@ -252,13 +252,13 @@
  your browser. That's generally a good thing when you want to be able to
  bookmark that page with your given data, but it is an obvious disadvantage if
  you entered secret information in one of the fields or if there are a large
- amount of fields creating a very long and unreadable URL.
+ amount of fields creating a long and unreadable URL.
 
  The HTTP protocol then offers the POST method. This way the client sends the
  data separated from the URL and thus you won't see any of it in the URL
  address field.
 
- The form would look very similar to the previous one:
+ The form would look similar to the previous one:
 
 ```html
 <form method="POST" action="junk.cgi">
@@ -313,10 +313,10 @@
 
 ## Hidden Fields
 
- A very common way for HTML based applications to pass state information
- between pages is to add hidden fields to the forms. Hidden fields are already
- filled in, they aren't displayed to the user and they get passed along just
- as all the other fields.
+ A common way for HTML based applications to pass state information between
+ pages is to add hidden fields to the forms. Hidden fields are already filled
+ in, they aren't displayed to the user and they get passed along just as all
+ the other fields.
 
  A similar example form with one visible field, one hidden field and one
  submit button could look like:
@@ -337,8 +337,8 @@
 ## Figure Out What A POST Looks Like
 
  When you're about fill in a form and send to a server by using curl instead
- of a browser, you're of course very interested in sending a POST exactly the
- way your browser does.
+ of a browser, you're of course interested in sending a POST exactly the way
+ your browser does.
 
  An easy way to get to see this, is to save the HTML page with the form on
  your local disk, modify the 'method' to a GET, and press the submit button
@@ -408,9 +408,9 @@
  able to watch your passwords if you pass them as plain command line
  options. There are ways to circumvent this.
 
- It is worth noting that while this is how HTTP Authentication works, very
- many websites will not use this concept when they provide logins etc. See the
- Web Login chapter further below for more details on that.
+ It is worth noting that while this is how HTTP Authentication works, many
+ websites will not use this concept when they provide logins etc. See the Web
+ Login chapter further below for more details on that.
 
 # More HTTP Headers
 
@@ -430,7 +430,7 @@
 
 ## User Agent
 
- Very similar to the referer field, all HTTP requests may set the User-Agent
+ Similar to the referer field, all HTTP requests may set the User-Agent
  field. It names what user agent (client) that is being used. Many
  applications use this information to decide how to display pages. Silly web
  programmers try to make different pages for users of different browsers to
@@ -690,9 +690,9 @@
 
 ## Check what the browsers do
 
- A very good helper to make sure you do this right, is the web browsers'
- developers tools that let you view all headers you send and receive (even
- when using HTTPS).
+ A good helper to make sure you do this right, is the web browsers' developers
+ tools that let you view all headers you send and receive (even when using
+ HTTPS).
 
  A more raw approach is to capture the HTTP traffic on the network with tools
  such as Wireshark or tcpdump and check what headers that were sent and

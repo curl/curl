@@ -96,9 +96,9 @@ and regression in the future.
 ### Patch Against Recent Sources
 
 Please try to get the latest available sources to make your patches against.
-It makes the lives of the developers so much easier. The very best is if you
-get the most up-to-date sources from the git repository, but the latest
-release archive is quite OK as well!
+It makes the lives of the developers so much easier. The best is if you get
+the most up-to-date sources from the git repository, but the latest release
+archive is quite OK as well!
 
 ### Documentation
 
@@ -120,8 +120,8 @@ in the test suite. Every feature that is added should get at least one valid
 test case that verifies that it works as documented. If every submitter also
 posts a few test cases, it won't end up as a heavy burden on a single person!
 
-If you don't have test cases or perhaps you have done something that is very
-hard to write tests for, do explain exactly how you have otherwise tested and
+If you don't have test cases or perhaps you have done something that is hard
+to write tests for, do explain exactly how you have otherwise tested and
 verified your changes.
 
 ## Sharing Your Changes
@@ -139,9 +139,9 @@ risks stalling and eventually just getting deleted without action. As a
 submitter of a change, you are the owner of that change until it has been merged.
 
 Respond on the list or on github about the change and answer questions and/or
-fix nits/flaws. This is very important. We will take lack of replies as a
-sign that you're not very anxious to get your patch accepted and we tend to
-simply drop such changes.
+fix nits/flaws. This is important. We will take lack of replies as a sign that
+you're not anxious to get your patch accepted and we tend to simply drop such
+changes.
 
 ### About pull requests
 
@@ -242,9 +242,9 @@ you commit
 
 ### Write Access to git Repository
 
-If you are a very frequent contributor, you may be given push access to the
-git repository and then you'll be able to push your changes straight into the
-git repo instead of sending changes as pull requests or by mail as patches.
+If you are a frequent contributor, you may be given push access to the git
+repository and then you'll be able to push your changes straight into the git
+repo instead of sending changes as pull requests or by mail as patches.
 
 Just ask if this is what you'd want. You will be required to have posted
 several high quality patches first, before you can be granted push access.

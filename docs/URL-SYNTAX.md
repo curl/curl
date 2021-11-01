@@ -20,7 +20,7 @@ changes over time.
 URL parsers as implemented in browsers, libraries and tools usually opt to
 support one of the mentioned specifications. Bugs, differences in
 interpretations and the moving nature of the WHATWG spec does however make it
-very unlikely that multiple parsers treat URLs the exact same way!
+unlikely that multiple parsers treat URLs the exact same way!
 
 ## Security
 
@@ -43,7 +43,7 @@ security concerns:
 1. If you have an application that runs as or in a server application, getting
    an unfiltered URL can trick your application to access a local resource
    instead of a remote resource. Protecting yourself against localhost accesses
-   is very hard when accepting user provided URLs.
+   is hard when accepting user provided URLs.
 
 2. Such custom URLs can access other ports than you planned as port numbers
    are part of the regular URL format. The combination of a local host and a

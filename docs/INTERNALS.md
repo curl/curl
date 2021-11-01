@@ -467,7 +467,7 @@ Return Codes and Informationals
 
  I've made things simple. Almost every function in libcurl returns a CURLcode,
  that must be `CURLE_OK` if everything is OK or otherwise a suitable error
- code as the `curl/curl.h` include file defines. The very spot that detects an
+ code as the `curl/curl.h` include file defines. The place that detects an
  error must use the `Curl_failf()` function to set the human-readable error
  description.
 
@@ -797,7 +797,7 @@ Track Down Memory Leaks
     tests/memanalyze.pl dump
 
   This now outputs a report on what resources that were allocated but never
-  freed etc. This report is very fine for posting to the list!
+  freed etc. This report is fine for posting to the list!
 
   If this doesn't produce any output, no leak was detected in libcurl. Then
   the leak is mostly likely to be in your code.
@@ -812,8 +812,7 @@ Track Down Memory Leaks
 
  1. The application can use whatever event system it likes as it gets info
     from libcurl about what file descriptors libcurl waits for what action
-    on. (The previous API returns `fd_sets` which is very
-    `select()`-centric).
+    on. (The previous API returns `fd_sets` which is `select()`-centric).
 
  2. When the application discovers action on a single socket, it calls
     libcurl and informs that there was action on this particular socket and

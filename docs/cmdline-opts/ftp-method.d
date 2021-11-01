@@ -13,7 +13,7 @@ server. The method argument should be one of the following alternatives:
 .RS
 .IP multicwd
 curl does a single CWD operation for each path part in the given URL. For deep
-hierarchies this means very many commands. This is how RFC 1738 says it should
+hierarchies this means many commands. This is how RFC 1738 says it should
 be done. This is the default but the slowest behavior.
 .IP nocwd
 curl does no CWD at all. curl will do SIZE, RETR, STOR etc and give a full
