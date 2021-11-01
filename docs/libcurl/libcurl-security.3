@@ -315,8 +315,8 @@ The fact that FTP uses two connections makes it vulnerable in a way that is
 hard to avoid.
 .SH "Denial of Service"
 A malicious server could cause libcurl to effectively hang by sending data
-very slowly, or even no data at all but just keeping the TCP connection open.
-This could effectively result in a denial-of-service attack. The
+slowly, or even no data at all but just keeping the TCP connection open.  This
+could effectively result in a denial-of-service attack. The
 \fICURLOPT_TIMEOUT(3)\fP and/or \fICURLOPT_LOW_SPEED_LIMIT(3)\fP options can
 be used to mitigate against this.
 
