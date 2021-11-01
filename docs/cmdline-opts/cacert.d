@@ -16,7 +16,7 @@ set, and uses the given path as a path to a CA cert bundle. This option
 overrides that variable.
 
 The windows version of curl will automatically look for a CA certs file named
-\'curl-ca-bundle.crt\', either in the same directory as curl.exe, or in the
+'curl-ca-bundle.crt', either in the same directory as curl.exe, or in the
 Current Working Directory, or in any folder along your PATH.
 
 If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module

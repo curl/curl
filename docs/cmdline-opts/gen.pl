@@ -99,6 +99,8 @@ sub printdesc {
         # quote "bare" minuses in the output
         $d =~ s/( |\\fI|^)--/$1\\-\\-/g;
         $d =~ s/([ -]|\\fI|^)-/$1\\-/g;
+        # handle single quotes first on the line
+        $d =~ s/(\s*)\'/$1\\(aq/;
         print $d;
     }
 }
