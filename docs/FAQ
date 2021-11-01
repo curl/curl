@@ -215,15 +215,15 @@ FAQ
   another tool that uses libcurl.
 
   We do not add things to curl that other small and available tools already do
-  very well at the side. curl's output can be piped into another program or
+  well at the side. curl's output can be piped into another program or
   redirected to another file for the next program to interpret.
 
   We focus on protocol related issues and improvements. If you want to do more
-  magic with the supported protocols than curl currently does, chances are good
-  we will agree. If you want to add more protocols, we may very well agree.
+  magic with the supported protocols than curl currently does, chances are
+  good we will agree. If you want to add more protocols, we may agree.
 
   If you want someone else to do all the work while you wait for us to
-  implement it for you, that is not a very friendly attitude. We spend a
+  implement it for you, that is not a friendly attitude. We spend a
   considerable time already on maintaining and developing curl. In order to
   get more out of us, you should consider trading in some of your time and
   effort in return. Simply go to the GitHub repo which resides at
@@ -407,14 +407,14 @@ FAQ
   The reason why static libraries is much harder to deal with is that for them
   we don't get any help but the script itself must know or check what more
   libraries that are needed (with shared libraries, that dependency "chain" is
-  handled automatically). This is a very error-prone process and one that also
+  handled automatically). This is a error-prone process and one that also
   tends to vary over time depending on the release versions of the involved
   components and may also differ between operating systems.
 
-  For that reason, configure does very little attempts to actually figure this
-  out and you are instead encouraged to set LIBS and LDFLAGS accordingly when
-  you invoke configure, and point out the needed libraries and set the
-  necessary flags yourself.
+  For that reason, configure does few attempts to actually figure this out and
+  you are instead encouraged to set LIBS and LDFLAGS accordingly when you
+  invoke configure, and point out the needed libraries and set the necessary
+  flags yourself.
 
   2.2 Does curl work with other SSL libraries?
 
@@ -878,7 +878,7 @@ FAQ
 
   Also note that regular HTTP (using Basic authentication) and FTP passwords
   are sent as cleartext across the network. All it takes for anyone to fetch
-  them is to listen on the network. Eavesdropping is very easy. Use more secure
+  them is to listen on the network. Eavesdropping is easy. Use more secure
   authentication methods (like Digest, Negotiate or even NTLM) or consider the
   SSL-based alternatives HTTPS and FTPS.
 
@@ -988,7 +988,7 @@ FAQ
   4.16 My HTTP POST or PUT requests are slow!
 
   libcurl makes all POST and PUT requests (except for POST requests with a
-  very tiny request body) use the "Expect: 100-continue" header. This header
+  tiny request body) use the "Expect: 100-continue" header. This header
   allows the server to deny the operation early so that libcurl can bail out
   before having to send any data. This is useful in authentication
   cases and others.
@@ -1392,10 +1392,10 @@ FAQ
 
 6. License Issues
 
-  curl and libcurl are released under a MIT/X derivative license. The license is
-  very liberal and should not impose a problem for your project. This section
-  is just a brief summary for the cases we get the most questions. (Parts of
-  this section was much enhanced by Bjorn Reese.)
+  curl and libcurl are released under a MIT/X derivative license. The license
+  is liberal and should not impose a problem for your project. This section is
+  just a brief summary for the cases we get the most questions. (Parts of this
+  section was much enhanced by Bjorn Reese.)
 
   We are not lawyers and this is not legal advice. You should probably consult
   one if you want true and accurate legal insights without our prejudice. Note

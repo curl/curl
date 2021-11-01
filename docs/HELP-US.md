@@ -19,7 +19,7 @@ down and report the bug. Or make your first pull request with a fix for that.
 
 Some projects mark small issues as "beginner friendly", "bite-sized" or
 similar. We don't do that in curl since such issues never linger around long
-enough. Simple issues get handled very fast.
+enough. Simple issues get handled fast.
 
 If you're looking for a smaller or simpler task in the project to help out
 with as an entry-point into the project, perhaps because you are a newcomer or

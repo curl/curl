@@ -13,8 +13,8 @@ complain if that file doesn't have the right permissions (it should be
 neither world- nor group-readable). The environment variable "HOME" is used
 to find the home directory.
 
-A quick and very simple example of how to setup a *.netrc* to allow curl
-to FTP to the machine host.domain.com with user name \&'myself' and password
-\&'secret' should look similar to:
+A quick and simple example of how to setup a *.netrc* to allow curl to FTP to
+the machine host.domain.com with user name \&'myself' and password \&'secret'
+should look similar to:
 
 .B "machine host.domain.com login myself password secret"

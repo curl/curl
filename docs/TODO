@@ -832,7 +832,7 @@
  CURLOPT_PINNEDPUBLICKEY does not consider the hashes of intermediate & root
  certificates when comparing the pinned keys. Therefore it is not compatible
  with "HTTP Public Key Pinning" as there also intermediate and root
- certificates can be pinned. This is very useful as it prevents webadmins from
+ certificates can be pinned. This is useful as it prevents webadmins from
  "locking themselves out of their servers".
 
  Adding this feature would make curls pinning 100% compatible to HPKP and
@@ -981,8 +981,8 @@
 18.6 Option to make -Z merge lined based outputs on stdout
 
  When a user requests multiple lined based files using -Z and sends them to
- stdout, curl will not "merge" and send complete lines fine but may very well
- send partial lines from several sources.
+ stdout, curl will not "merge" and send complete lines fine but may send
+ partial lines from several sources.
 
  https://github.com/curl/curl/issues/5175
 

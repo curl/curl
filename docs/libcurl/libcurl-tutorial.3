@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -86,9 +86,9 @@ The people behind libcurl have put a considerable effort to make libcurl work
 on a large amount of different operating systems and environments.
 
 You program libcurl the same way on all platforms that libcurl runs on. There
-are only very few minor considerations that differ. If you just make sure to
-write your code portable enough, you may very well create yourself a very
-portable program. libcurl shouldn't stop you from that.
+are only a few minor details that differ. If you just make sure to write your
+code portable enough, you can create a portable program. libcurl shouldn't
+stop you from that.
 
 .SH "Global Preparation"
 The program must initialize some of the libcurl functionality globally. That
@@ -120,7 +120,7 @@ libcurl has a default protection mechanism that detects if
 \fIcurl_global_init(3)\fP hasn't been called by the time
 \fIcurl_easy_perform(3)\fP is called and if that is the case, libcurl runs the
 function itself with a guessed bit pattern. Please note that depending solely
-on this is not considered nice nor very good.
+on this is not considered nice nor good.
 
 When the program no longer uses libcurl, it should call
 \fIcurl_global_cleanup(3)\fP, which is the opposite of the init call. It will
@@ -284,14 +284,13 @@ If \fICURLOPT_VERBOSE(3)\fP is not enough, you increase the level of debug
 data your application receive by using the \fICURLOPT_DEBUGFUNCTION(3)\fP.
 
 Getting some in-depth knowledge about the protocols involved is never wrong,
-and if you're trying to do funny things, you might very well understand
-libcurl and how to use it better if you study the appropriate RFC documents
-at least briefly.
+and if you're trying to do funny things, you might understand libcurl and how
+to use it better if you study the appropriate RFC documents at least briefly.
 
 .SH "Upload Data to a Remote Site"
 libcurl tries to keep a protocol independent approach to most transfers, thus
-uploading to a remote FTP site is very similar to uploading data to an HTTP
-server with a PUT request.
+uploading to a remote FTP site is similar to uploading data to an HTTP server
+with a PUT request.
 
 Of course, first you either create an easy handle or you re-use one existing
 one. Then you set the URL to operate on just like before. This is the remote
@@ -373,7 +372,7 @@ curl use this file, use the \fICURLOPT_NETRC(3)\fP option:
 
  curl_easy_setopt(easyhandle, CURLOPT_NETRC, 1L);
 
-And a very basic example of how such a .netrc file may look like:
+And a basic example of how such a .netrc file may look like:
 
 .nf
  machine myhost.mydomain.com
@@ -795,10 +794,9 @@ For HTTP proxies: the fact that the proxy is an HTTP proxy puts certain
 restrictions on what can actually happen. A requested URL that might not be a
 HTTP URL will be still be passed to the HTTP proxy to deliver back to
 libcurl. This happens transparently, and an application may not need to
-know. I say "may", because at times it is very important to understand that
-all operations over an HTTP proxy use the HTTP protocol. For example, you
-can't invoke your own custom FTP commands or even proper FTP directory
-listings.
+know. I say "may", because at times it is important to understand that all
+operations over an HTTP proxy use the HTTP protocol. For example, you can't
+invoke your own custom FTP commands or even proper FTP directory listings.
 
 .IP "Proxy Options"
 
@@ -863,7 +861,7 @@ remote host").
 
 Because of the nature of this operation, where the proxy has no idea what kind
 of data that is passed in and out through this tunnel, this breaks some of the
-very few advantages that come from using a proxy, such as caching.  Many
+few advantages that come from using a proxy, such as caching.  Many
 organizations prevent this kind of tunneling to other destination port numbers
 than 443 (which is the default HTTPS port number).
 
@@ -942,9 +940,9 @@ may also be added in the future.
 
 Each easy handle will attempt to keep the last few connections alive for a
 while in case they are to be used again. You can set the size of this "cache"
-with the \fICURLOPT_MAXCONNECTS(3)\fP option. Default is 5. There is very
-seldom any point in changing this value, and if you think of changing this it
-is often just a matter of thinking again.
+with the \fICURLOPT_MAXCONNECTS(3)\fP option. Default is 5. There is rarely
+any point in changing this value, and if you think of changing this it is
+often just a matter of thinking again.
 
 To force your upcoming request to not use an already existing connection (it
 will even close one first if there happens to be one alive to the same host
@@ -986,7 +984,7 @@ libcurl is your friend here too.
 .IP CUSTOMREQUEST
 If just changing the actual HTTP request keyword is what you want, like when
 GET, HEAD or POST is not good enough for you, \fICURLOPT_CUSTOMREQUEST(3)\fP
-is there for you. It is very simple to use:
+is there for you. It is simple to use:
 
  curl_easy_setopt(easyhandle, CURLOPT_CUSTOMREQUEST, "MYOWNREQUEST");
 
@@ -1045,9 +1043,9 @@ data size is unknown.
 .IP "HTTP Version"
 
 All HTTP requests includes the version number to tell the server which version
-we support. libcurl speaks HTTP 1.1 by default. Some very old servers don't
-like getting 1.1-requests and when dealing with stubborn old things like that,
-you can tell libcurl to use 1.0 instead by doing something like this:
+we support. libcurl speaks HTTP 1.1 by default. Some old servers don't like
+getting 1.1-requests and when dealing with stubborn old things like that, you
+can tell libcurl to use 1.0 instead by doing something like this:
 
  curl_easy_setopt(easyhandle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
 
@@ -1057,14 +1055,14 @@ Not all protocols are HTTP-like, and thus the above may not help you when
 you want to make, for example, your FTP transfers to behave differently.
 
 Sending custom commands to an FTP server means that you need to send the
-commands exactly as the FTP server expects them (RFC959 is a good guide
-here), and you can only use commands that work on the control-connection
-alone. All kinds of commands that require data interchange and thus need
-a data-connection must be left to libcurl's own judgement. Also be aware
-that libcurl will do its very best to change directory to the target
-directory before doing any transfer, so if you change directory (with CWD
-or similar) you might confuse libcurl and then it might not attempt to
-transfer the file in the correct remote directory.
+commands exactly as the FTP server expects them (RFC959 is a good guide here),
+and you can only use commands that work on the control-connection alone. All
+kinds of commands that require data interchange and thus need a
+data-connection must be left to libcurl's own judgement. Also be aware that
+libcurl will do its best to change directory to the target directory before
+doing any transfer, so if you change directory (with CWD or similar) you might
+confuse libcurl and then it might not attempt to transfer the file in the
+correct remote directory.
 
 A little example that deletes a given file before an operation:
 
@@ -1336,9 +1334,9 @@ with the particular file descriptors libcurl uses for the moment.
 When you then call select(), it'll return when one of the file handles signal
 action and you then call \fIcurl_multi_perform(3)\fP to allow libcurl to do
 what it wants to do. Take note that libcurl does also feature some time-out
-code so we advise you to never use very long timeouts on select() before you
-call \fIcurl_multi_perform(3)\fP again. \fIcurl_multi_timeout(3)\fP is
-provided to help you get a suitable timeout period.
+code so we advise you to never use long timeouts on select() before you call
+\fIcurl_multi_perform(3)\fP again. \fIcurl_multi_timeout(3)\fP is provided to
+help you get a suitable timeout period.
 
 Another precaution you should use: always call \fIcurl_multi_fdset(3)\fP
 immediately before the select() call since the current set of file descriptors

@@ -42,9 +42,9 @@ many of these and similar types of weaknesses of which application writers
 should be aware.
 .SH "Command Lines"
 If you use a command line tool (such as curl) that uses libcurl, and you give
-options to the tool on the command line those options can very likely get read
-by other users of your system when they use 'ps' or other tools to list
-currently running processes.
+options to the tool on the command line those options can get read by other
+users of your system when they use 'ps' or other tools to list currently
+running processes.
 
 To avoid these problems, never feed sensitive things to programs using command
 line options. Write them to a protected file and use the \-K option to avoid
@@ -64,11 +64,11 @@ To avoid these problems, don't use .netrc files and never store passwords in
 plain text anywhere.
 .SH "Clear Text Passwords"
 Many of the protocols libcurl supports send name and password unencrypted as
-clear text (HTTP Basic authentication, FTP, TELNET etc). It is very easy for
-anyone on your network or a network nearby yours to just fire up a network
-analyzer tool and eavesdrop on your passwords. Don't let the fact that HTTP
-Basic uses base64 encoded passwords fool you. They may not look readable at a
-first glance, but they very easily "deciphered" by anyone within seconds.
+clear text (HTTP Basic authentication, FTP, TELNET etc). It is easy for anyone
+on your network or a network nearby yours to just fire up a network analyzer
+tool and eavesdrop on your passwords. Don't let the fact that HTTP Basic uses
+base64 encoded passwords fool you. They may not look readable at a first
+glance, but they are easily "deciphered" by anyone within seconds.
 
 To avoid this problem, use an authentication mechanism or other protocol that
 doesn't let snoopers see your password: Digest, CRAM-MD5, Kerberos, SPNEGO or
@@ -315,8 +315,8 @@ The fact that FTP uses two connections makes it vulnerable in a way that is
 hard to avoid.
 .SH "Denial of Service"
 A malicious server could cause libcurl to effectively hang by sending data
-very slowly, or even no data at all but just keeping the TCP connection open.
-This could effectively result in a denial-of-service attack. The
+slowly, or even no data at all but just keeping the TCP connection open.  This
+could effectively result in a denial-of-service attack. The
 \fICURLOPT_TIMEOUT(3)\fP and/or \fICURLOPT_LOW_SPEED_LIMIT(3)\fP options can
 be used to mitigate against this.
 
@@ -370,7 +370,7 @@ information with faked data.
 .SH "Setuid applications using libcurl"
 libcurl-using applications that set the 'setuid' bit to run with elevated or
 modified rights also implicitly give that extra power to libcurl and this
-should only be done after very careful considerations.
+should only be done after careful considerations.
 
 Giving setuid powers to the application means that libcurl can save files using
 those new rights (if for example the `SSLKEYLOGFILE` environment variable is

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -35,9 +35,9 @@ is available etc. \fIcurl_easy_setopt(3)\fP is used for all this.
 
 \fICURLOPT_URL(3)\fP is only option you really must set, as otherwise there
 can be no transfer. Another commonly used option is \fICURLOPT_VERBOSE(3)\fP
-that will help you see what libcurl is doing under the hood, very useful when
-debugging for example. The \fIcurl_easy_setopt(3)\fP man page has a full index
-of the over 200 available options.
+that will help you see what libcurl is doing under the hood, which is useful
+when debugging for example. The \fIcurl_easy_setopt(3)\fP man page has a full
+index of the over 200 available options.
 
 If you at any point would like to blank all previously set options for a
 single easy handle, you can call \fIcurl_easy_reset(3)\fP and you can also

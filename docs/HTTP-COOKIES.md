@@ -14,7 +14,7 @@
   Cookies are set to the client with the Set-Cookie: header and are sent to
   servers with the Cookie: header.
 
-  For a very long time, the only spec explaining how to use cookies was the
+  For a long time, the only spec explaining how to use cookies was the
   original [Netscape spec from 1994](https://curl.se/rfc/cookie_spec.html).
 
   In 2011, [RFC6265](https://www.ietf.org/rfc/rfc6265.txt) was finally

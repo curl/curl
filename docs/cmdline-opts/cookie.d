@@ -32,6 +32,6 @@ use the Netscape format.
 
 This option can be used multiple times.
 
-Users very often want to both read cookies from a file and write updated
-cookies back to a file, so using both --cookie and --cookie-jar in the same
-command line is common.
+Users often want to both read cookies from a file and write updated cookies
+back to a file, so using both --cookie and --cookie-jar in the same command
+line is common.

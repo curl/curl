@@ -275,8 +275,8 @@ Store the HTTP headers in a separate file (headers.txt in the example):
 
       curl --dump-header headers.txt curl.se
 
-Note that headers stored in a separate file can be very useful at a later time
-if you want curl to use cookies sent by the server. More about that in the
+Note that headers stored in a separate file can be useful at a later time if
+you want curl to use cookies sent by the server. More about that in the
 cookies section.
 
 ## POST (HTTP)
@@ -509,8 +509,8 @@ second for 1 minute, run:
 
     curl -Y 3000 -y 60 www.far-away-site.com
 
-This can very well be used in combination with the overall time limit, so
-that the above operation must be completed in whole within 30 minutes:
+This can be used in combination with the overall time limit, so that the above
+operation must be completed in whole within 30 minutes:
 
     curl -m 1800 -Y 3000 -y 60 www.far-away-site.com
 
@@ -583,9 +583,9 @@ tables etc:
 
 ## Extra Headers
 
-When using curl in your own very special programs, you may end up needing
-to pass on your own custom headers when getting a web page. You can do
-this by using the `-H` flag.
+When using curl in your own programs, you may end up needing to pass on your
+own custom headers when getting a web page. You can do this by using the `-H`
+flag.
 
 Example, send the header `X-you-and-me: yes` to the server when getting a
 page:
@@ -608,8 +608,8 @@ directory at your ftp site, do:
 
     curl ftp://user:passwd@my.site.com/README
 
-But if you want the README file from the root directory of that very same
-site, you need to specify the absolute file name:
+But if you want the README file from the root directory of that same site, you
+need to specify the absolute file name:
 
     curl ftp://user:passwd@my.site.com//README
 
@@ -839,7 +839,7 @@ Curl supports `.netrc` files if told to (using the `-n`/`--netrc` and
 `--netrc-optional` options). This is not restricted to just FTP, so curl can
 use it for all protocols where authentication is used.
 
-A very simple `.netrc` file could look something like:
+A simple `.netrc` file could look something like:
 
     machine curl.se login iamdaniel password mysecret
 
@@ -869,9 +869,9 @@ curl ask for one and you already entered the real password to kinit/kauth.
 
 ## TELNET
 
-The curl telnet support is basic and very easy to use. Curl passes all data
-passed to it on stdin to the remote server. Connect to a remote telnet server
-using a command line similar to:
+The curl telnet support is basic and easy to use. Curl passes all data passed
+to it on stdin to the remote server. Connect to a remote telnet server using a
+command line similar to:
 
     curl telnet://remote.server.com
 
