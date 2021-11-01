@@ -113,7 +113,7 @@ The URL scheme (sometimes called protocol) that was effectively used. (Added in 
 .TP
 .B size_download
 The total amount of bytes that were downloaded. This is the size of the
-body/data that was transfered, excluding headers.
+body/data that was transferred, excluding headers.
 .TP
 .B size_header
 The total amount of bytes of the downloaded headers.
@@ -123,7 +123,7 @@ The total amount of bytes that were sent in the HTTP request.
 .TP
 .B size_upload
 The total amount of bytes that were uploaded. This is the size of the
-body/data that was transfered, excluding headers.
+body/data that was transferred, excluding headers.
 .TP
 .B speed_download
 The average download speed that curl measured for the complete download. Bytes
