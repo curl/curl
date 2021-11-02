@@ -800,65 +800,13 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         struct OutStruct *heads;
         struct OutStruct *etag_save;
         struct HdrCbData *hdrcbdata = NULL;
-        CURL *curl = curl_easy_init();
-        result = add_per_transfer(&per);
-        if(result || !curl) {
-          curl_easy_cleanup(curl);
-          result = CURLE_OUT_OF_MEMORY;
-          break;
-        }
-        if(state->uploadfile) {
-          per->uploadfile = strdup(state->uploadfile);
-          if(!per->uploadfile) {
-            curl_easy_cleanup(curl);
-            result = CURLE_OUT_OF_MEMORY;
-            break;
-          }
-        }
-        *added = TRUE;
-        per->config = config;
-        per->curl = curl;
-        per->urlnum = urlnode->num;
+        struct OutStruct etag_first;
+        CURL *curl;
 
-        /* default headers output stream is stdout */
-        heads = &per->heads;
-        heads->stream = stdout;
-
-        /* Single header file for all URLs */
-        if(config->headerfile) {
-          /* open file for output: */
-          if(strcmp(config->headerfile, "-")) {
-            FILE *newfile;
-            newfile = fopen(config->headerfile, per->prev == NULL?"wb":"ab");
-            if(!newfile) {
-              warnf(global, "Failed to open %s\n", config->headerfile);
-              result = CURLE_WRITE_ERROR;
-              break;
-            }
-            else {
-              heads->filename = config->headerfile;
-              heads->s_isreg = TRUE;
-              heads->fopened = TRUE;
-              heads->stream = newfile;
-            }
-          }
-          else {
-            /* always use binary mode for protocol header output */
-            set_binmode(heads->stream);
-          }
-        }
-
-        hdrcbdata = &per->hdrcbdata;
-
-        outs = &per->outs;
-        input = &per->input;
-
-        per->outfile = NULL;
-        per->infdopen = FALSE;
-        per->infd = STDIN_FILENO;
-
-        /* default output stream is stdout */
-        outs->stream = stdout;
+        /* --etag-save */
+        memset(&etag_first, 0, sizeof(etag_first));
+        etag_save = &etag_first;
+        etag_save->stream = stdout;
 
         /* --etag-compare */
         if(config->etag_compare_file) {
@@ -901,21 +849,16 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           }
         }
 
-        /* --etag-save */
-        etag_save = &per->etag_save;
-        etag_save->stream = stdout;
-
         if(config->etag_save_file) {
           /* open file for output: */
           if(strcmp(config->etag_save_file, "-")) {
             FILE *newfile = fopen(config->etag_save_file, "wb");
             if(!newfile) {
-              warnf(
-                global,
-                "Failed to open %s\n", config->etag_save_file);
-
-              result = CURLE_WRITE_ERROR;
-              break;
+              warnf(global, "Failed creating file for saving etags: \"%s\". "
+                    "Skip this transfer\n", config->etag_save_file);
+              Curl_safefree(state->outfiles);
+              glob_cleanup(state->urls);
+              return CURLE_OK;
             }
             else {
               etag_save->filename = config->etag_save_file;
@@ -929,6 +872,67 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             set_binmode(etag_save->stream);
           }
         }
+
+        curl = curl_easy_init();
+        result = add_per_transfer(&per);
+        if(result || !curl) {
+          curl_easy_cleanup(curl);
+          result = CURLE_OUT_OF_MEMORY;
+          break;
+        }
+        if(state->uploadfile) {
+          per->uploadfile = strdup(state->uploadfile);
+          if(!per->uploadfile) {
+            curl_easy_cleanup(curl);
+            result = CURLE_OUT_OF_MEMORY;
+            break;
+          }
+        }
+        *added = TRUE;
+        per->config = config;
+        per->curl = curl;
+        per->urlnum = urlnode->num;
+        per->etag_save = etag_first; /* copy the whole struct */
+
+        /* default headers output stream is stdout */
+        heads = &per->heads;
+        heads->stream = stdout;
+
+        /* Single header file for all URLs */
+        if(config->headerfile) {
+          /* open file for output: */
+          if(strcmp(config->headerfile, "-")) {
+            FILE *newfile;
+            newfile = fopen(config->headerfile, per->prev == NULL?"wb":"ab");
+            if(!newfile) {
+              warnf(global, "Failed to open %s\n", config->headerfile);
+              result = CURLE_WRITE_ERROR;
+              break;
+            }
+            else {
+              heads->filename = config->headerfile;
+              heads->s_isreg = TRUE;
+              heads->fopened = TRUE;
+              heads->stream = newfile;
+            }
+          }
+          else {
+            /* always use binary mode for protocol header output */
+            set_binmode(heads->stream);
+          }
+        }
+
+        hdrcbdata = &per->hdrcbdata;
+
+        outs = &per->outs;
+        input = &per->input;
+
+        per->outfile = NULL;
+        per->infdopen = FALSE;
+        per->infd = STDIN_FILENO;
+
+        /* default output stream is stdout */
+        outs->stream = stdout;
 
         if(state->urls) {
           result = glob_next_url(&per->this_url, state->urls);
@@ -2305,8 +2309,12 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
   bool added = FALSE;
 
   result = create_transfer(global, share, &added);
-  if(result || !added)
+  if(result)
     return result;
+  if(!added) {
+    errorf(global, "no transfer performed\n");
+    return CURLE_READ_ERROR;
+  }
   for(per = transfers; per;) {
     bool retry;
     long delay;
