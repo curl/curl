@@ -910,9 +910,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           if(strcmp(config->etag_save_file, "-")) {
             FILE *newfile = fopen(config->etag_save_file, "wb");
             if(!newfile) {
-              warnf(
-                global,
-                "Failed to open %s\n", config->etag_save_file);
+              warnf(global, "Failed creating file for saving etags: %s\n",
+                    config->etag_save_file);
 
               result = CURLE_WRITE_ERROR;
               break;
