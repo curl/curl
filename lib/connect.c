@@ -744,17 +744,15 @@ void Curl_conninfo_local(struct Curl_easy *data, curl_socket_t sockfd,
 void Curl_updateconninfo(struct Curl_easy *data, struct connectdata *conn,
                          curl_socket_t sockfd)
 {
-  /* 'local_ip' and 'local_port' get filled with local's numerical
-     ip address and port number whenever an outgoing connection is
-     **established** from the primary socket to a remote address. */
+  /* 'local_ip' and 'local_port' get filled with local's numerical ip address
+     and port number whenever an outgoing connection is **established** from
+     the primary socket to a remote address. */
   char local_ip[MAX_IPADR_LEN] = "";
   int local_port = -1;
 
-  if(conn->transport == TRNSPRT_TCP) {
-    if(!conn->bits.reuse && !conn->bits.tcp_fastopen)
-      Curl_conninfo_remote(data, conn, sockfd);
-    Curl_conninfo_local(data, sockfd, local_ip, &local_port);
-  } /* end of TCP-only section */
+  if(!conn->bits.reuse && !conn->bits.tcp_fastopen)
+    Curl_conninfo_remote(data, conn, sockfd);
+  Curl_conninfo_local(data, sockfd, local_ip, &local_port);
 
   /* persist connection info in session handle */
   Curl_persistconninfo(data, conn, local_ip, local_port);
