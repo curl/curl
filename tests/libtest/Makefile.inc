@@ -64,7 +64,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
          lib1905 lib1906 lib1907 lib1908 lib1910 lib1911 lib1912 lib1913 \
          lib1915 lib1916 lib1917 lib1918 lib1919 \
  lib1933 lib1934 lib1935 lib1936 lib1937 lib1938 lib1939 lib1940 \
- lib1945 lib1946 lib1947 lib1948 \
+ lib1945 lib1946 lib1947 lib1948 lib1955 \
  lib2301 lib2302 \
  lib3010 lib3025 lib3026 lib3027
 
@@ -756,6 +756,10 @@ lib1947_CPPFLAGS = $(AM_CPPFLAGS)
 lib1948_SOURCES = lib1948.c $(SUPPORTFILES)
 lib1948_LDADD = $(TESTUTIL_LIBS)
 lib1948_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib1955_SOURCES = lib1955.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib1955_LDADD = $(TESTUTIL_LIBS)
+lib1955_CPPFLAGS = $(AM_CPPFLAGS)
 
 lib2301_SOURCES = lib2301.c $(SUPPORTFILES)
 lib2301_LDADD = $(TESTUTIL_LIBS)
