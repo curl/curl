@@ -716,8 +716,6 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
   }
   BACKEND->cred->refcount = 1;
 
-  /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx
-   */
   sspi_status =
     s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR *)UNISP_NAME,
                                        SECPKG_CRED_OUTBOUND, NULL,
@@ -1141,8 +1139,6 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
 
-    /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx
-     */
     sspi_status = s_pSecFn->InitializeSecurityContext(
       &BACKEND->cred->cred_handle, &BACKEND->ctxt->ctxt_handle,
       host_name, BACKEND->req_flags, 0, 0, &inbuf_desc, 0, NULL,
@@ -2125,26 +2121,23 @@ static bool schannel_data_pending(const struct connectdata *conn,
     return FALSE;
 }
 
-static void schannel_close(struct Curl_easy *data, struct connectdata *conn,
-                           int sockindex)
-{
-  if(conn->ssl[sockindex].use)
-    /* if the SSL/TLS channel hasn't been shut down yet, do that now. */
-    Curl_ssl_shutdown(data, conn, sockindex);
-}
-
 static void schannel_session_free(void *ptr)
 {
   /* this is expected to be called under sessionid lock */
   struct Curl_schannel_cred *cred = ptr;
 
-  cred->refcount--;
-  if(cred->refcount == 0) {
-    s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
-    Curl_safefree(cred);
+  if(cred) {
+    cred->refcount--;
+    if(cred->refcount == 0) {
+      s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
+      Curl_safefree(cred);
+    }
   }
 }
 
+/* shut down the SSL connection and clean up related memory.
+   this function can be called multiple times on the same connection including
+   if the SSL connection failed (eg connection made but failed handshake). */
 static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
                              int sockindex)
 {
@@ -2156,10 +2149,12 @@ static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
 
   DEBUGASSERT(data);
 
-  infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu",
-        hostname, conn->remote_port);
+  if(connssl->use) {
+    infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu",
+          hostname, conn->remote_port);
+  }
 
-  if(BACKEND->cred && BACKEND->ctxt) {
+  if(connssl->use && BACKEND->cred && BACKEND->ctxt) {
     SecBufferDesc BuffDesc;
     SecBuffer Buffer;
     SECURITY_STATUS sspi_status;
@@ -2250,6 +2245,16 @@ static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
   }
 
   return CURLE_OK;
+}
+
+static void schannel_close(struct Curl_easy *data, struct connectdata *conn,
+                           int sockindex)
+{
+  if(conn->ssl[sockindex].use)
+    /* Curl_ssl_shutdown resets the socket state and calls schannel_shutdown */
+    Curl_ssl_shutdown(data, conn, sockindex);
+  else
+    schannel_shutdown(data, conn, sockindex);
 }
 
 static int schannel_init(void)
