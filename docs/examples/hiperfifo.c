@@ -452,8 +452,8 @@ int main(int argc, char **argv)
 
   event_base_dispatch(g.evbase);
 
-  /* this, of course, will not get called since only way to stop this program is
-     via ctrl-C, but it is here to show how cleanup /would/ be done. */
+  /* this, of course, will not get called since only way to stop this program
+     is via ctrl-C, but it is here to show how cleanup /would/ be done. */
   clean_fifo(&g);
   event_del(&g.timer_event);
   event_base_free(g.evbase);
