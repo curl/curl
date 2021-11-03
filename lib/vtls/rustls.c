@@ -27,7 +27,7 @@
 #include "curl_printf.h"
 
 #include <errno.h>
-#include <crustls.h>
+#include <rustls.h>
 
 #include "inet_pton.h"
 #include "urldata.h"
@@ -309,10 +309,10 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
   config_builder = rustls_client_config_builder_new();
 #ifdef USE_HTTP2
   infof(data, "offering ALPN for HTTP/1.1 and HTTP/2");
-  rustls_client_config_builder_set_protocols(config_builder, alpn, 2);
+  rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 2);
 #else
   infof(data, "offering ALPN for HTTP/1.1 only");
-  rustls_client_config_builder_set_protocols(config_builder, alpn, 1);
+  rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 1);
 #endif
   if(!verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
