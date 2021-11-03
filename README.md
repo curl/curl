@@ -51,7 +51,7 @@ To download the very latest source from the Git server do this:
 
     git clone https://github.com/curl/curl.git
 
-(you'll get a directory named curl created, filled with the source code)
+(you will get a directory named curl created, filled with the source code)
 
 ## Security problems
 
