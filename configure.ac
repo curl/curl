@@ -672,7 +672,7 @@ if test X"$want_hyper" != Xno; then
     LIB_HYPER="-lhyper -ldl -lpthread -lm"
     if test X"$want_hyper" != Xdefault; then
       CPP_HYPER=-I"$want_hyper_path/capi/include"
-      LD_HYPER="-L$want_hyper_path/target/debug"
+      LD_HYPER="-L$want_hyper_path/target/release -L$want_hyper_path/target/debug"
     fi
   fi
   if test -n "$LIB_HYPER"; then

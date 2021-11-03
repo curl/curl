@@ -39,8 +39,8 @@ if test "x$OPT_RUSTLS" != xno; then
     if test -z "$OPT_RUSTLS" ; then
       dnl check for lib first without setting any new path
 
-      AC_CHECK_LIB(crustls, rustls_client_session_read,
-      dnl libcrustls found, set the variable
+      AC_CHECK_LIB(rustls, rustls_client_session_read,
+      dnl librustls found, set the variable
        [
          AC_DEFINE(USE_RUSTLS, 1, [if rustls is enabled])
          AC_SUBST(USE_RUSTLS, [1])
@@ -67,7 +67,7 @@ if test "x$OPT_RUSTLS" != xno; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-      AC_CHECK_LIB(crustls, rustls_connection_read,
+      AC_CHECK_LIB(rustls, rustls_connection_read,
        [
        AC_DEFINE(USE_RUSTLS, 1, [if rustls is enabled])
        AC_SUBST(USE_RUSTLS, [1])
@@ -84,7 +84,7 @@ if test "x$OPT_RUSTLS" != xno; then
       AC_MSG_NOTICE([detected rustls])
       check_for_ca_bundle=1
 
-      LIBS="-lcrustls -lpthread -ldl $LIBS"
+      LIBS="-lrustls -lpthread -ldl $LIBS"
 
       if test -n "$rustlslib"; then
         dnl when shared libs were found in a path that the run-time
