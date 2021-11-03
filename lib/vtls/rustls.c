@@ -165,12 +165,13 @@ cr_recv(struct Curl_easy *data, int sockindex,
       *err = CURLE_OK;
       return 0;
     }
-    else if(rresult != RUSTLS_RESULT_OK) {
+    else if(rresult != RUSTLS_RESULT_OK &&
+            rresult != RUSTLS_RESULT_PLAINTEXT_EMPTY) {
       failf(data, "error in rustls_connection_read");
       *err = CURLE_READ_ERROR;
       return -1;
     }
-    else if(n == 0) {
+    else if(n == 0 || rresult == RUSTLS_RESULT_PLAINTEXT_EMPTY) {
       /* rustls returns 0 from connection_read to mean "all currently
         available data has been read." If we bring in more ciphertext with
         read_tls, more plaintext will become available. So don't tell curl
