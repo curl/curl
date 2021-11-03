@@ -107,6 +107,7 @@
     name: curl-novalgrind-boringssl-with-openssl-quiche
     parent: curl-base
     vars:
+      gimme_stable: true
       curl_apt_packages:
         - libpsl-dev
         - libbrotli-dev
