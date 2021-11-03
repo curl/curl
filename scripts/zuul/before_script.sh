@@ -120,9 +120,7 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   curl https://sh.rustup.rs -sSf | sh -s -- -y
   source $HOME/.cargo/env
   cd $HOME/quiche
-  cargo build -v --release --features ffi,pkg-config-meta,qlog
-  mkdir -v deps/boringssl/src/lib
-  ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
+  QUICHE_BSSL_PATH=$HOME/boringssl cargo build -v --release --features ffi,pkg-config-meta,qlog
 fi
 
 if [ "$TRAVIS_OS_NAME" = linux -a "$RUSTLS_VERSION" ]; then

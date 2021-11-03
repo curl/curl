@@ -115,9 +115,10 @@
         CC: gcc-8
         CXX: g++-8
         T: novalgrind
+        BORINGSSL: "yes"
         QUICHE: "yes"
         C: >-
-          --with-openssl={{ ansible_user_dir }}/quiche/deps/boringssl/src
+          --with-openssl={{ ansible_user_dir }}/boringssl
           --with-quiche={{ ansible_user_dir }}/quiche/target/release
         LD_LIBRARY_PATH: "{{ ansible_user_dir }}/quiche/target/release:/usr/local/lib"
 
