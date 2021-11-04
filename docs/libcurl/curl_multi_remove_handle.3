@@ -47,7 +47,7 @@ msg = curl_multi_info_read(multi_handle, &queued);
 if(msg) {
   if(msg->msg == CURLMSG_DONE) {
     /* a transfer ended */
-    fprintf(stderr, "Transfer completed\n");
+    fprintf(stderr, "Transfer completed\\n");
     curl_multi_remove_handle(multi_handle, msg->easy_handle);
   }
 }

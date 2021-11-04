@@ -92,7 +92,7 @@ This doesn't just mean no other thread that is using libcurl.
   curl_global_sslset((curl_sslbackend)-1, NULL, &list);
 
   for(i = 0; list[i]; i++)
-    printf("SSL backend #%d: '%s' (ID: %d)\n",
+    printf("SSL backend #%d: '%s' (ID: %d)\\n",
            i, list[i]->name, list[i]->id);
 .fi
 .SH AVAILABILITY

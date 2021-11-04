@@ -35,7 +35,7 @@ error code passed in the argument \fIerrornum\fP.
   share = curl_share_init();
   sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
   if(sh)
-    printf("Error: %s\n", curl_share_strerror(sh));
+    printf("Error: %s\\n", curl_share_strerror(sh));
 .fi
 .SH AVAILABILITY
 This function was added in libcurl 7.12.0

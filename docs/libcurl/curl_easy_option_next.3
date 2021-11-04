@@ -70,7 +70,7 @@ name is provided for backwards compatibility as an alias.
 const struct curl_easyoption *opt;
 opt = curl_easy_option_by_next(NULL);
 while(opt) {
-  printf("Name: %s\n", opt->name);
+  printf("Name: %s\\n", opt->name);
   opt = curl_easy_option_by_next(opt);
 }
 .fi
