@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             ___|___/|_| ______|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -279,6 +279,8 @@ struct curl_easyoption Curl_easyopts[] = {
    CURLOT_STRING, 0},
   {"SSH_KEYDATA", CURLOPT_SSH_KEYDATA, CURLOT_CBPTR, 0},
   {"SSH_KEYFUNCTION", CURLOPT_SSH_KEYFUNCTION, CURLOT_FUNCTION, 0},
+  {"SSH_HOSTKEYDATA", CURLOPT_SSH_HOSTKEYDATA, CURLOT_CBPTR, 0},
+  {"SSH_HOSTKEYFUNCTION", CURLOPT_SSH_HOSTKEYFUNCTION, CURLOT_FUNCTION, 0},
   {"SSH_KNOWNHOSTS", CURLOPT_SSH_KNOWNHOSTS, CURLOT_STRING, 0},
   {"SSH_PRIVATE_KEYFILE", CURLOPT_SSH_PRIVATE_KEYFILE, CURLOT_STRING, 0},
   {"SSH_PUBLIC_KEYFILE", CURLOPT_SSH_PUBLIC_KEYFILE, CURLOT_STRING, 0},
@@ -360,6 +362,6 @@ struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return ((CURLOPT_LASTENTRY%10000) != (315 + 1));
+  return ((CURLOPT_LASTENTRY%10000) != (317 + 1));
 }
 #endif
