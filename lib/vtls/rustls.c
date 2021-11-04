@@ -161,20 +161,20 @@ cr_recv(struct Curl_easy *data, int sockindex,
       (uint8_t *)plainbuf + plain_bytes_copied,
       plainlen - plain_bytes_copied,
       &n);
-    if(n == 0) {
-      *err = CURLE_OK;
-      return 0;
-    }
-    else if(rresult != RUSTLS_RESULT_OK &&
-            rresult != RUSTLS_RESULT_PLAINTEXT_EMPTY) {
-      failf(data, "error in rustls_connection_read");
-      *err = CURLE_READ_ERROR;
-      return -1;
-    }
-    else if(rresult == RUSTLS_RESULT_PLAINTEXT_EMPTY) {
+    if(rresult == RUSTLS_RESULT_PLAINTEXT_EMPTY) {
       infof(data, "cr_recv got 0 bytes of plaintext");
       backend->data_pending = FALSE;
       break;
+    }
+    else if(rresult != RUSTLS_RESULT_OK) {
+      /* n always equals 0 in this case, don't need to check it */
+      failf(data, "error in rustls_connection_read: %d", rresult);
+      *err = CURLE_READ_ERROR;
+      return -1;
+    }
+    else if(n == 0) {
+      *err = CURLE_OK;
+      return 0;
     }
     else {
       infof(data, "cr_recv copied out %ld bytes of plaintext", n);
@@ -540,6 +540,12 @@ cr_close(struct Curl_easy *data, struct connectdata *conn,
   }
 }
 
+static size_t cr_version(char *buffer, size_t size)
+{
+  struct rustls_str ver = rustls_version();
+  return msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
+}
+
 const struct Curl_ssl Curl_ssl_rustls = {
   { CURLSSLBACKEND_RUSTLS, "rustls" },
   SSLSUPP_TLS13_CIPHERSUITES,      /* supports */
@@ -547,7 +553,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
 
   Curl_none_init,                  /* init */
   Curl_none_cleanup,               /* cleanup */
-  rustls_version,                  /* version */
+  cr_version,                      /* version */
   Curl_none_check_cxn,             /* check_cxn */
   Curl_none_shutdown,              /* shutdown */
   cr_data_pending,                 /* data_pending */
