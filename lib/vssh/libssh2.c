@@ -438,17 +438,33 @@ static int sshkeycallback(struct Curl_easy *easy,
 
 static CURLcode ssh_knownhost(struct Curl_easy *data)
 {
+  int keytype = 0;
+  size_t keylen = 0;
   CURLcode result = CURLE_OK;
 
+  if(data->set.ssh_hostkeycheck_func) {
+    /* we handle the process to the callback*/
+    const char *remotekey = libssh2_session_hostkey(sshc->ssh_session,
+                                                    &keylen, &keytype);
+
+    if(remotekey) {
+      Curl_set_in_callback(data, true);
+      int rc = data->set.ssh_hostkeycheck_func(data->set.ssh_keyfunc_userp,
+                                             keytype, remotekey, keylen);
+      Curl_set_in_callback(data, false);
+      if(rc!= CURLE_OK) {
+        state(data, SSH_SESSION_FREE);
+      }
+    }
+
+  }
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
-  if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
+    else if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
     /* we're asked to verify the host against a file */
     struct connectdata *conn = data->conn;
     struct ssh_conn *sshc = &conn->proto.sshc;
     struct libssh2_knownhost *host = NULL;
     int rc;
-    int keytype;
-    size_t keylen;
     const char *remotekey = libssh2_session_hostkey(sshc->ssh_session,
                                                     &keylen, &keytype);
     int keycheck = LIBSSH2_KNOWNHOST_CHECK_FAILURE;

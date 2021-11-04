@@ -2494,6 +2494,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
                             va_arg(param, char *));
     break;
 
+  case CURLOPT_SSH_HOSTKEYCHECK_FUNCTION:
+    /* setting to NULL is fine since the ssh2.c functions themselves will
+       then revert to use the internal default */
+    data->set.ssh_hostkeycheck_func = va_arg(param, curl_ssh_hostkeycheck_callback);
+    break;
+
   case CURLOPT_SSH_KEYFUNCTION:
     /* setting to NULL is fine since the ssh.c functions themselves will
        then revert to use the internal default */

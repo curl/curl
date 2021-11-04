@@ -1733,6 +1733,9 @@ struct UserDefined {
   int ftp_create_missing_dirs; /* 1 - create directories that don't exist
                                   2 - the same but also allow MKD to fail once
                                */
+  curl_ssh_hostkeycheck_callback ssh_hostkeycheck_func;
+  /* hostkey check callback */
+
   curl_sshkeycallback ssh_keyfunc; /* key matching callback */
   void *ssh_keyfunc_userp;         /* custom pointer to callback */
 #ifndef CURL_DISABLE_NETRC
