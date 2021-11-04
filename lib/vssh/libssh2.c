@@ -443,6 +443,8 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
   CURLcode result = CURLE_OK;
 
   if(data->set.ssh_hostkeycheck_func) {
+    struct connectdata *conn = data->conn;
+    struct ssh_conn *sshc = &conn->proto.sshc;
     /* we handle the process to the callback*/
     const char *remotekey = libssh2_session_hostkey(sshc->ssh_session,
                                                     &keylen, &keytype);
