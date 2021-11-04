@@ -226,7 +226,7 @@ entry.
 .SH EXAMPLE
 .nf
 curl_version_info_data *ver = curl_version_info(CURLVERSION_NOW);
-printf("libcurl version %u.%u.%u\n",
+printf("libcurl version %u.%u.%u\\n",
        (ver->version_num >> 16) & 0xff,
        (ver->version_num >> 8) & 0xff,
        ver->version_num & 0xff,

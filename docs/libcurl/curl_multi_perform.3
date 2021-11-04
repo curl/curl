@@ -63,7 +63,7 @@ do {
     mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
   if(mc) {
-    fprintf(stderr, "curl_multi_poll() failed, code %d.\n", (int)mc);
+    fprintf(stderr, "curl_multi_poll() failed, code %d.\\n", (int)mc);
     break;
   }
 

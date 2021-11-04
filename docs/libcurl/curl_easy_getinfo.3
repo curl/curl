@@ -295,7 +295,7 @@ transaction was started. So, this is zero if no redirection took place.
       res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
 
       if((CURLE_OK == res) && ct)
-        printf("We received Content-Type: %s\n", ct);
+        printf("We received Content-Type: %s\\n", ct);
     }
 
     /* always cleanup */

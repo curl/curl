@@ -38,7 +38,7 @@ specific error descriptions generated at run-time.
   res = curl_easy_perform(curl);
   /* Check for errors */
   if(res != CURLE_OK)
-    fprintf(stderr, "curl_easy_perform() failed: %s\n",
+    fprintf(stderr, "curl_easy_perform() failed: %s\\n",
             curl_easy_strerror(res));
 .fi
 .SH AVAILABILITY

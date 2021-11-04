@@ -41,7 +41,7 @@ If libcurl has no option with the given id, this function returns NULL.
 .nf
 const struct curl_easyoption *opt = curl_easy_option_by_id(CURLOPT_URL);
 if(opt) {
-  printf("This option wants type %x\n", opt->type);
+  printf("This option wants type %x\\n", opt->type);
 }
 .fi
 .SH AVAILABILITY

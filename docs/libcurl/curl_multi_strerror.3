@@ -35,7 +35,7 @@ int still_running;
 
 CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
 if(mc)
-  printf("error: %s\n", curl_multi_strerror(mc));
+  printf("error: %s\\n", curl_multi_strerror(mc));
 .fi
 .SH AVAILABILITY
 This function was added in libcurl 7.12.0

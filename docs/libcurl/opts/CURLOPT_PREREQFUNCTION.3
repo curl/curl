@@ -86,7 +86,7 @@ static int prereq_callback(void *clientp,
                            int conn_primary_port,
                            int conn_local_port)
 {
-  printf("Connection made to %s:%s\n", conn_primary_ip, conn_primary_port);
+  printf("Connection made to %s:%s\\n", conn_primary_ip, conn_primary_port);
   return CURL_PREREQFUNC_OK;
 }
 
