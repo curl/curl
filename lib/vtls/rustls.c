@@ -543,6 +543,13 @@ cr_close(struct Curl_easy *data, struct connectdata *conn,
   }
 }
 
+static size_t cr_version(char *buffer, size_t size)
+{
+  struct rustls_str ver = rustls_version();
+  /* the provided string isn't NUL-terminated */
+  return msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
+}
+
 const struct Curl_ssl Curl_ssl_rustls = {
   { CURLSSLBACKEND_RUSTLS, "rustls" },
   SSLSUPP_TLS13_CIPHERSUITES,      /* supports */
@@ -550,7 +557,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
 
   Curl_none_init,                  /* init */
   Curl_none_cleanup,               /* cleanup */
-  rustls_version,                  /* version */
+  cr_version,                      /* version */
   Curl_none_check_cxn,             /* check_cxn */
   Curl_none_shutdown,              /* shutdown */
   cr_data_pending,                 /* data_pending */
