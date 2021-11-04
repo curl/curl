@@ -440,6 +440,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
 {
   int keytype = 0;
   size_t keylen = 0;
+  int rc = 0;
   CURLcode result = CURLE_OK;
 
   if(data->set.ssh_hostkeycheck_func) {
@@ -451,7 +452,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
 
     if(remotekey) {
       Curl_set_in_callback(data, true);
-      int rc = data->set.ssh_hostkeycheck_func(data->set.ssh_keyfunc_userp,
+      rc = data->set.ssh_hostkeycheck_func(data->set.ssh_keyfunc_userp,
                                              keytype, remotekey, keylen);
       Curl_set_in_callback(data, false);
       if(rc!= CURLE_OK) {
@@ -466,7 +467,6 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
     struct connectdata *conn = data->conn;
     struct ssh_conn *sshc = &conn->proto.sshc;
     struct libssh2_knownhost *host = NULL;
-    int rc;
     const char *remotekey = libssh2_session_hostkey(sshc->ssh_session,
                                                     &keylen, &keytype);
     int keycheck = LIBSSH2_KNOWNHOST_CHECK_FAILURE;
