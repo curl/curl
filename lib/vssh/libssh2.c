@@ -435,22 +435,55 @@ static int sshkeycallback(struct Curl_easy *easy,
 #ifdef HAVE_LIBSSH2_SESSION_HANDSHAKE
 #define libssh2_session_startup(x,y) libssh2_session_handshake(x,y)
 #endif
+static int convert_ssh2_keytype(int sshkeytype)
+{
+  int keytype = CURLKHTYPE_UNKNOWN;
+  switch(sshkeytype) {
+  case LIBSSH2_HOSTKEY_TYPE_RSA:
+    keytype = CURLKHTYPE_RSA;
+    break;
+  case LIBSSH2_HOSTKEY_TYPE_DSS:
+    keytype = CURLKHTYPE_DSS;
+    break;
+#ifdef LIBSSH2_HOSTKEY_TYPE_ECDSA_256
+  case LIBSSH2_HOSTKEY_TYPE_ECDSA_256:
+    keytype = CURLKHTYPE_ECDSA;
+    break;
+#endif
+#ifdef LIBSSH2_HOSTKEY_TYPE_ECDSA_384
+  case LIBSSH2_HOSTKEY_TYPE_ECDSA_384:
+    keytype = CURLKHTYPE_ECDSA;
+    break;
+#endif
+#ifdef LIBSSH2_HOSTKEY_TYPE_ECDSA_521
+  case LIBSSH2_HOSTKEY_TYPE_ECDSA_521:
+    keytype = CURLKHTYPE_ECDSA;
+    break;
+#endif
+#ifdef LIBSSH2_HOSTKEY_TYPE_ED25519
+  case LIBSSH2_HOSTKEY_TYPE_ED25519:
+    keytype = CURLKHTYPE_ED25519;
+    break;
+#endif
+  }
+  return keytype;
+}
 
 static CURLcode ssh_knownhost(struct Curl_easy *data)
 {
+  int sshkeytype = 0;
+  size_t keylen = 0;
+  int rc = 0;
   CURLcode result = CURLE_OK;
 
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
-  if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
+    if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
     /* we're asked to verify the host against a file */
     struct connectdata *conn = data->conn;
     struct ssh_conn *sshc = &conn->proto.sshc;
     struct libssh2_knownhost *host = NULL;
-    int rc;
-    int keytype;
-    size_t keylen;
     const char *remotekey = libssh2_session_hostkey(sshc->ssh_session,
-                                                    &keylen, &keytype);
+                                                    &keylen, &sshkeytype);
     int keycheck = LIBSSH2_KNOWNHOST_CHECK_FAILURE;
     int keybit = 0;
 
@@ -467,7 +500,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
       struct curl_khkey *knownkeyp = NULL;
       struct curl_khkey foundkey;
 
-      switch(keytype) {
+      switch(sshkeytype) {
       case LIBSSH2_HOSTKEY_TYPE_RSA:
         keybit = LIBSSH2_KNOWNHOST_KEY_SSHRSA;
         break;
@@ -531,16 +564,14 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
         if(keycheck <= LIBSSH2_KNOWNHOST_CHECK_MISMATCH) {
           knownkey.key = host->key;
           knownkey.len = 0;
-          knownkey.keytype = (keytype == LIBSSH2_HOSTKEY_TYPE_RSA)?
-            CURLKHTYPE_RSA : CURLKHTYPE_DSS;
+          knownkey.keytype = convert_ssh2_keytype(sshkeytype);
           knownkeyp = &knownkey;
         }
 
         /* setup 'foundkey' */
         foundkey.key = remotekey;
         foundkey.len = keylen;
-        foundkey.keytype = (keytype == LIBSSH2_HOSTKEY_TYPE_RSA)?
-          CURLKHTYPE_RSA : CURLKHTYPE_DSS;
+        foundkey.keytype = convert_ssh2_keytype(sshkeytype);
 
         /*
          * if any of the LIBSSH2_KNOWNHOST_CHECK_* defines and the
@@ -749,7 +780,31 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
   }
 
   if(!pubkey_md5 && !pubkey_sha256) {
-    return ssh_knownhost(data);
+    if(data->set.ssh_hostkeyfunc) {
+      size_t keylen = 0;
+      int sshkeytype = 0;
+      int rc = 0;
+      /* we handle the process to the callback*/
+      const char *remotekey = libssh2_session_hostkey(sshc->ssh_session,
+                                                    &keylen, &sshkeytype);
+      if(remotekey) {
+        int keytype = convert_ssh2_keytype(sshkeytype);
+        Curl_set_in_callback(data, true);
+        rc = data->set.ssh_hostkeyfunc(data->set.ssh_hostkeyfunc_userp,
+                                             keytype, remotekey, keylen);
+        Curl_set_in_callback(data, false);
+        if(rc!= CURLKHMATCH_OK) {
+          state(data, SSH_SESSION_FREE);
+        }
+      }
+      else {
+        state(data, SSH_SESSION_FREE);
+      }
+      return CURLE_OK;
+    }
+    else {
+      return ssh_knownhost(data);
+    }
   }
   else {
     /* as we already matched, we skip the check for known hosts */

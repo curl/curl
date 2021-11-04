@@ -128,6 +128,7 @@ static curl_sockopt_callback sockoptcb;
 static curl_opensocket_callback opensocketcb;
 static curl_seek_callback seekcb;
 static curl_sshkeycallback ssh_keycb;
+static curl_sshhostkeycallback ssh_hostkeycb;
 static curl_chunk_bgn_callback chunk_bgn_cb;
 static curl_chunk_end_callback chunk_end_cb;
 static curl_fnmatch_callback fnmatch_cb;

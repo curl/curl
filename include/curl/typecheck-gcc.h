@@ -374,6 +374,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_WRITEDATA ||                                           \
    (option) == CURLOPT_RESOLVER_START_DATA ||                                 \
    (option) == CURLOPT_TRAILERDATA ||                                         \
+   (option) == CURLOPT_SSH_HOSTKEYDATA ||                                     \
    0)
 
 /* evaluates to true if option takes a POST data argument (void* or char*) */
