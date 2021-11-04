@@ -303,7 +303,7 @@ static int quic_init_ssl(struct quicsocket *qs)
 
   SSL_set_app_data(qs->ssl, qs);
   SSL_set_connect_state(qs->ssl);
-  SSL_set_quic_use_legacy_codepoint(qs->ssl, 1);
+  SSL_set_quic_use_legacy_codepoint(qs->ssl, 0);
 
   alpn = (const uint8_t *)H3_ALPN_H3_29;
   alpnlen = sizeof(H3_ALPN_H3_29) - 1;
