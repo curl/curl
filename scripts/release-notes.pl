@@ -82,6 +82,27 @@ sub getref {
     return $#refs + 1;
 }
 
+# '#num'
+# 'num'
+# 'https://github.com/curl/curl/issues/6939'
+# 'https://github.com/curl/curl-www/issues/69'
+
+sub extract {
+    my ($ref)=@_;
+    if($ref =~ /^(\#|)(\d+)/) {
+        # return the plain number
+        return $2;
+    }
+    elsif($ref =~ /^https:\/\/github.com\/curl\/curl\/.*\/(\d+)/) {
+        # return the plain number
+        return $2;
+    }
+    else {
+        # return the URL
+        return $ref;
+    }
+}
+
 my $short;
 my $first;
 for my $l (@gitlog) {
@@ -107,14 +128,14 @@ for my $l (@gitlog) {
         # not the first
         my $line = $1;
 
-        if($line =~ /^Fixes(:|) .*[^0-9](\d+)/i) {
-            push @fixes, $2;
+        if($line =~ /^Fixes(:|) *(.*)/i) {
+            push @fixes, extract($2);
         }
-        elsif($line =~ /^Clo(s|)es(:|) .*[^0-9](\d+)/i) {
-            push @closes, $3;
+        elsif($line =~ /^Clo(s|)es(:|) *(.*)/i) {
+            push @closes, extract($3);
         }
         elsif($line =~ /^Bug: (.*)/i) {
-            push @bug, $1;
+            push @bug, extract($1);
         }
     }
 }
