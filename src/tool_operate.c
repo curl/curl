@@ -812,6 +812,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->etag_compare_file) {
           char *etag_from_file = NULL;
           char *header = NULL;
+          ParameterError pe;
 
           /* open file for reading: */
           FILE *file = fopen(config->etag_compare_file, FOPEN_READTEXT);
@@ -840,12 +841,14 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           }
 
           /* add Etag from file to list of custom headers */
-          add2list(&config->headers, header);
-
+          pe = add2list(&config->headers, header);
           Curl_safefree(header);
 
-          if(file) {
+          if(file)
             fclose(file);
+          if(pe != PARAM_OK) {
+            result = CURLE_OUT_OF_MEMORY;
+            break;
           }
         }
 
@@ -874,12 +877,16 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         }
 
         curl = curl_easy_init();
-        result = add_per_transfer(&per);
+        if(curl)
+          result = add_per_transfer(&per);
         if(result || !curl) {
           curl_easy_cleanup(curl);
+          if(etag_save->stream)
+            fclose(etag_save->stream);
           result = CURLE_OUT_OF_MEMORY;
           break;
         }
+        per->etag_save = etag_first; /* copy the whole struct */
         if(state->uploadfile) {
           per->uploadfile = strdup(state->uploadfile);
           if(!per->uploadfile) {
@@ -892,7 +899,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         per->config = config;
         per->curl = curl;
         per->urlnum = urlnode->num;
-        per->etag_save = etag_first; /* copy the whole struct */
 
         /* default headers output stream is stdout */
         heads = &per->heads;
