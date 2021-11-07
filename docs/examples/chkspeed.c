@@ -40,6 +40,11 @@
 
 #include <curl/curl.h>
 
+#if defined(__GNUC__) && defined(__MINGW32__)
+/* GCC 10 on mingw has issues with this, disable */
+#pragma GCC diagnostic ignored "-Wformat"
+#endif
+
 #define URL_BASE "http://speedtest.your.domain/"
 #define URL_1M   URL_BASE "file_1M.bin"
 #define URL_2M   URL_BASE "file_2M.bin"

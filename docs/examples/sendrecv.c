@@ -28,6 +28,11 @@
 #include <string.h>
 #include <curl/curl.h>
 
+#if defined(__GNUC__) && defined(__MINGW32__)
+/* GCC 10 on mingw has issues with this, disable */
+#pragma GCC diagnostic ignored "-Wformat"
+#endif
+
 /* Auxiliary function that waits on the socket. */
 static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
 {

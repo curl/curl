@@ -28,6 +28,11 @@
 #include <sys/stat.h>
 #include <curl/curl.h>
 
+#if defined(__GNUC__) && defined(__MINGW32__)
+/* GCC 10 on mingw has issues with this, disable */
+#pragma GCC diagnostic ignored "-Wformat"
+#endif
+
 /*
  * This example shows a HTTP PUT operation. PUTs a file given as a command
  * line argument to the URL also given on the command line.

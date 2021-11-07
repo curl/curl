@@ -83,7 +83,7 @@ stages:
     - script: ./buildconf && ./configure --enable-warnings --enable-werror $(configure)
       displayName: 'configure $(name)'
 
-    - script: make V=1 && cd tests && make V=1
+    - script: make V=1 && make V=1 examples && cd tests && make V=1
       displayName: 'compile'
       env:
         MAKEFLAGS: "-j 2"
@@ -191,7 +191,7 @@ stages:
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && ./buildconf && ./configure $(configure)"
       displayName: 'configure $(name)'
 
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 && cd tests && make V=1"
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 && make V=1 examples && cd tests && make V=1"
       displayName: 'compile'
       env:
         MAKEFLAGS: "-j 2"

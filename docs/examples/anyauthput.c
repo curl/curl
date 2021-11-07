@@ -31,6 +31,11 @@
 
 #include <curl/curl.h>
 
+#if defined(__GNUC__) && defined(__MINGW32__)
+/* GCC 10 on mingw has issues with this, disable */
+#pragma GCC diagnostic ignored "-Wformat"
+#endif
+
 #ifdef WIN32
 #  include <io.h>
 #  define READ_3RD_ARG unsigned int

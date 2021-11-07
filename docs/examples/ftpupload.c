@@ -33,6 +33,11 @@
 #include <unistd.h>
 #endif
 
+#if defined(__GNUC__) && defined(__MINGW32__)
+/* GCC 10 on mingw has issues with this, disable */
+#pragma GCC diagnostic ignored "-Wformat"
+#endif
+
 /* <DESC>
  * Performs an FTP upload and renames the file just after a successful
  * transfer.

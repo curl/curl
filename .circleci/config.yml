@@ -36,6 +36,7 @@ commands:
   build:
     steps:
       - run: make V=1
+      - run: make V=1 examples
 
   test:
     steps:

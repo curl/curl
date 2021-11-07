@@ -28,6 +28,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#if defined(__GNUC__) && defined(__MINGW32__)
+/* GCC 10 on mingw has issues with this, disable */
+#pragma GCC diagnostic ignored "-Wformat"
+#endif
+
 int main(void)
 {
   CURL *curl;
