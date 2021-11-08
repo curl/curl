@@ -33,11 +33,12 @@ without a specified URL as you may have figured out yourself). You might want
 to set some callbacks as well that will be called from the library when data
 is available etc. \fIcurl_easy_setopt(3)\fP is used for all this.
 
-\fICURLOPT_URL(3)\fP is only option you really must set, as otherwise there
-can be no transfer. Another commonly used option is \fICURLOPT_VERBOSE(3)\fP
-that will help you see what libcurl is doing under the hood, which is useful
-when debugging for example. The \fIcurl_easy_setopt(3)\fP man page has a full
-index of the over 200 available options.
+\fICURLOPT_URL(3)\fP is the only option you really must set, as otherwise
+there can be no transfer. Another commonly used option is
+\fICURLOPT_VERBOSE(3)\fP that will help you see what libcurl is doing under
+the hood, which is useful when debugging for example. The
+\fIcurl_easy_setopt(3)\fP man page has a full index of the almost 300
+available options.
 
 If you at any point would like to blank all previously set options for a
 single easy handle, you can call \fIcurl_easy_reset(3)\fP and you can also
