@@ -881,7 +881,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           result = add_per_transfer(&per);
         if(result || !curl) {
           curl_easy_cleanup(curl);
-          if(etag_save->stream)
+          if(etag_save->fopened)
             fclose(etag_save->stream);
           result = CURLE_OUT_OF_MEMORY;
           break;
