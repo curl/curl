@@ -887,6 +887,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             fclose(etag_save->stream);
           break;
         }
+        DEBUGASSERT(per); /* to show the compiler per can't be NULL here */
         per->etag_save = etag_first; /* copy the whole struct */
         if(state->uploadfile) {
           per->uploadfile = strdup(state->uploadfile);
