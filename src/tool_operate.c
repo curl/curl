@@ -794,7 +794,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                     !strcmp(state->outfiles, "-")) && urlnum > 1);
 
       if(state->up < state->infilenum) {
-        struct per_transfer *per;
+        struct per_transfer *per = NULL;
         struct OutStruct *outs;
         struct InStruct *input;
         struct OutStruct *heads;
@@ -879,11 +879,12 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         curl = curl_easy_init();
         if(curl)
           result = add_per_transfer(&per);
-        if(result || !curl) {
+        else
+          result = CURLE_OUT_OF_MEMORY;
+        if(result) {
           curl_easy_cleanup(curl);
           if(etag_save->fopened)
             fclose(etag_save->stream);
-          result = CURLE_OUT_OF_MEMORY;
           break;
         }
         per->etag_save = etag_first; /* copy the whole struct */
