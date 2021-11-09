@@ -440,7 +440,7 @@ static int quic_init_ssl(struct quicsocket *qs)
   gnutls_alert_set_read_function(qs->ssl, alert_read_func);
 
   rc = gnutls_session_ext_register(qs->ssl, "QUIC Transport Parameters",
-         NGTCP2_TLSEXT_QUIC_TRANSPORT_PARAMETERS_DRAFT, GNUTLS_EXT_TLS,
+         NGTCP2_TLSEXT_QUIC_TRANSPORT_PARAMETERS_V1, GNUTLS_EXT_TLS,
          tp_recv_func, tp_send_func, NULL, NULL, NULL,
          GNUTLS_EXT_FLAG_TLS | GNUTLS_EXT_FLAG_CLIENT_HELLO |
          GNUTLS_EXT_FLAG_EE);
@@ -789,7 +789,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   ngtcp2_addr_init(&path.remote, addr, addrlen);
 
   rc = ngtcp2_conn_client_new(&qs->qconn, &qs->dcid, &qs->scid, &path,
-                              NGTCP2_PROTO_VER_MIN, &ng_callbacks,
+                              NGTCP2_PROTO_VER_V1, &ng_callbacks,
                               &qs->settings, &qs->transport_params, NULL, qs);
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
