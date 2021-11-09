@@ -161,7 +161,7 @@ cr_recv(struct Curl_easy *data, int sockindex,
       (uint8_t *)plainbuf + plain_bytes_copied,
       plainlen - plain_bytes_copied,
       &n);
-    if(rresult == RUSTLS_RESULT_ALERT_CLOSE_NOTIFY) {
+    if(n == 0) {
       *err = CURLE_OK;
       return 0;
     }
@@ -171,11 +171,7 @@ cr_recv(struct Curl_easy *data, int sockindex,
       *err = CURLE_READ_ERROR;
       return -1;
     }
-    else if(n == 0 || rresult == RUSTLS_RESULT_PLAINTEXT_EMPTY) {
-      /* rustls returns 0 from connection_read to mean "all currently
-        available data has been read." If we bring in more ciphertext with
-        read_tls, more plaintext will become available. So don't tell curl
-        this is an EOF. Instead, say "come back later." */
+    else if(rresult == RUSTLS_RESULT_PLAINTEXT_EMPTY) {
       infof(data, "cr_recv got 0 bytes of plaintext");
       backend->data_pending = FALSE;
       break;
