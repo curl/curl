@@ -319,6 +319,7 @@ static const struct LongShort aliases[]= {
   {"r",  "range",                    ARG_STRING},
   {"R",  "remote-time",              ARG_BOOL},
   {"s",  "silent",                   ARG_BOOL},
+  {"so", "output-separators",        ARG_BOOL},
   {"S",  "show-error",               ARG_BOOL},
   {"t",  "telnet-option",            ARG_STRING},
   {"T",  "upload-file",              ARG_FILENAME},
@@ -2103,6 +2104,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->remote_time = toggle;
       break;
     case 's':
+      if (subletter == 'o') { /* --no-output-separators */
+        global->no_output_separators = (!toggle)?TRUE:FALSE;
+        break;
+      }
       /* don't show progress meter, don't show errors : */
       if(toggle)
         global->mute = global->noprogress = TRUE;

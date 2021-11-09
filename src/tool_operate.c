@@ -790,7 +790,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         urlnum = state->urlnum;
 
       /* if multiple files extracted to stdout, insert separators! */
-      separator = ((!state->outfiles ||
+      separator = !global->no_output_separators && ((!state->outfiles ||
                     !strcmp(state->outfiles, "-")) && urlnum > 1);
 
       if(state->up < state->infilenum) {

@@ -1,0 +1,85 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+globbing
+{} list
+</keywords>
+</info>
+# Server-side
+<reply>
+<data1>
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 15
+
+the number one
+</data1>
+<data2>
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 16
+
+two is nice too
+</data2>
+<data3>
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 23
+
+third time's the charm
+</data3>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+multiple requests using {}{} in the URL
+ </name>
+ <command>
+--no-output-separators "%HOSTIP:%HTTPPORT/%TESTNUMBER[0001-0003]"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0003 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stdout>
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 15
+
+the number one
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 16
+
+two is nice too
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 23
+
+third time's the charm
+</stdout>
+</verify>
+</testcase>

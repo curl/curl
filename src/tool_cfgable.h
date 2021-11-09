@@ -300,6 +300,8 @@ struct GlobalConfig {
                                       1 => -S has been used to show errors */
   bool mute;                      /* don't show messages, --silent given */
   bool noprogress;                /* don't show progress bar --silent given */
+  bool no_output_separators;      /* don't insert any separators when
+                                     writing multiple files to stdout */
   bool isatty;                    /* Updated internally if output is a tty */
   FILE *errors;                   /* Error stream, defaults to stderr */
   bool errors_fopened;            /* Whether error stream isn't stderr */
