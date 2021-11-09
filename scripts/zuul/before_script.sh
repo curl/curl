@@ -138,7 +138,7 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$RUSTLS_VERSION" ]; then
   cargo install cbindgen
   cd $HOME/rustls-ffi
   make
-  make DESTDIR=$HOME/crust install
+  make DESTDIR=$HOME/rustls install
 fi
 
 if [ $TRAVIS_OS_NAME = linux -a "$WOLFSSL" ]; then
