@@ -61,6 +61,7 @@
 #endif
 
 #define H3_ALPN_H3_29 "\x5h3-29"
+#define H3_ALPN_H3 "\x2h3"
 
 /*
  * This holds outgoing HTTP/3 stream data that is used by nghttp3 until acked.
@@ -305,8 +306,8 @@ static int quic_init_ssl(struct quicsocket *qs)
   SSL_set_connect_state(qs->ssl);
   SSL_set_quic_use_legacy_codepoint(qs->ssl, 0);
 
-  alpn = (const uint8_t *)H3_ALPN_H3_29;
-  alpnlen = sizeof(H3_ALPN_H3_29) - 1;
+  alpn = (const uint8_t *)H3_ALPN_H3_29 H3_ALPN_H3;
+  alpnlen = sizeof(H3_ALPN_H3_29) - 1 + sizeof(H3_ALPN_H3) - 1;
   if(alpn)
     SSL_set_alpn_protos(qs->ssl, alpn, (int)alpnlen);
 
@@ -418,7 +419,7 @@ static int tp_send_func(gnutls_session_t ssl, gnutls_buffer_t extdata)
 
 static int quic_init_ssl(struct quicsocket *qs)
 {
-  gnutls_datum_t alpn = {NULL, 0};
+  gnutls_datum_t alpn[2];
   /* this will need some attention when HTTPS proxy over QUIC get fixed */
   const char * const hostname = qs->conn->host.name;
   int rc;
@@ -483,10 +484,12 @@ static int quic_init_ssl(struct quicsocket *qs)
   }
 
   /* strip the first byte (the length) from NGHTTP3_ALPN_H3 */
-  alpn.data = (unsigned char *)H3_ALPN_H3_29 + 1;
-  alpn.size = sizeof(H3_ALPN_H3_29) - 2;
-  if(alpn.data)
-    gnutls_alpn_set_protocols(qs->ssl, &alpn, 1, 0);
+  alpn[0].data = (unsigned char *)H3_ALPN_H3_29 + 1;
+  alpn[0].size = sizeof(H3_ALPN_H3_29) - 2;
+  alpn[1].data = (unsigned char *)H3_ALPN_H3 + 1;
+  alpn[1].size = sizeof(H3_ALPN_H3) - 2;
+
+  gnutls_alpn_set_protocols(qs->ssl, alpn, 2, GNUTLS_ALPN_MANDATORY);
 
   /* set SNI */
   gnutls_server_name_set(qs->ssl, GNUTLS_NAME_DNS, hostname, strlen(hostname));
