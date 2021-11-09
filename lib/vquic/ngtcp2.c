@@ -805,7 +805,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
 void Curl_quic_ver(char *p, size_t len)
 {
   const ngtcp2_info *ng2 = ngtcp2_version(0);
-  nghttp3_info *ht3 = nghttp3_version(0);
+  const nghttp3_info *ht3 = nghttp3_version(0);
   (void)msnprintf(p, len, "ngtcp2/%s nghttp3/%s",
                   ng2->version_str, ht3->version_str);
 }
