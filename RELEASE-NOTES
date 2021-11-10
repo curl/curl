@@ -4,7 +4,7 @@ curl and libcurl 7.80.0
  Command line options:         243
  curl_easy_setopt() options:   294
  Public functions in libcurl:  86
- Contributors:                 2531
+ Contributors:                 2533
 
 This release includes the following changes:
 
@@ -17,6 +17,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o .github: retry macos "brew install" command on failure [125]
  o aws-sigv4: make signature work when post data is binary [68]
  o BINDINGS: URL updates [30]
  o build: remove checks for WinSock 1 [36]
@@ -50,6 +51,7 @@ This release includes the following bugfixes:
  o curl_multi_socket_action.3: add a "RETURN VALUE" section [106]
  o curl_ntlm_core: use OpenSSL only if DES is available [42]
  o Curl_updateconninfo: store addresses for QUIC connections too [90]
+ o CURLOPT_ALTSVC_CTRL.3: mention conn reuse is preferred [126]
  o CURLOPT_HSTSWRITEFUNCTION.3: using CURLOPT_HSTS_CTRL is required [114]
  o CURLOPT_HTTPHEADER.3: add descripion for specific headers [35]
  o docs/HTTP3: improve build instructions [102]
@@ -60,6 +62,7 @@ This release includes the following bugfixes:
  o doh: remove experimental code for DoH with GET [61]
  o examples/htmltidy: correct wrong printf() use [66]
  o examples/imap-append: fix end-of-data check [7]
+ o ftp: make the MKD retry to retry once per directory [113]
  o gen.pl: insert the current date and version in generated man page [11]
  o gen.pl: replace leading single quotes with \(aq [110]
  o http2: make getsock not wait for write if there's no remote window [56]
@@ -79,6 +82,7 @@ This release includes the following bugfixes:
  o lib: avoid fallthrough cases in switch statements [33]
  o libcurl.rc: switch out the copyright symbol for plain ASCII [5]
  o libssh2: Get the version at runtime if possible [12]
+ o limit-rate.d: this is average over several seconds [119]
  o llist: remove redundant code, branch will not be executed [10]
  o Makefile.m32: fix to not require OpenSSL with -libssh2 or -rtmp options [100]
  o maketgz: redirect updatemanpages.pl output to /dev/null
@@ -87,8 +91,10 @@ This release includes the following bugfixes:
  o md5: fix compilation with OpenSSL 3.0 API [43]
  o misc: fix a few issues on MidnightBSD [28]
  o misc: fix typos in docs and comments [3]
- o ngtcp2: fix QUIC transport parameter version [6]
+ o ngtcp2: advertise h3 as well as h3-29 [109]
+ o ngtcp2: compile with the latest nghttp3 [117]
  o ngtcp2: specify the missing required callback functions [108]
+ o ngtcp2: use latest QUIC TLS RFC9001 [122]
  o NTLM: use DES_set_key_unchecked with OpenSSL [13]
  o openssl: if verifypeer is not requested, skip the CA loading [69]
  o openssl: with OpenSSL 1.1.0+ a failed RAND_status means goaway [44]
@@ -101,6 +107,7 @@ This release includes the following bugfixes:
  o smooth-gtk-thread.c: enhance the mutex lock use [112]
  o sws: fix memory leak on exit [49]
  o test1160: edited to work with hyper [83]
+ o test1173: make manpage-syntax.pl spot \n errors in examples
  o test1185: verify checksrc [58]
  o test1266/1267: disabled on hyper: no HTTP/0.9 support [99]
  o test1287: make work on hyper [98]
@@ -109,6 +116,7 @@ This release includes the following bugfixes:
  o test552: updated to work with hyper [87]
  o test559: add 'HTTP' in keywords [86]
  o tests/smbserver.py: fix compatibility with impacket 0.9.23+ [104]
+ o tests: add Schannel-specific tests and disable unsupported ones [91]
  o tests: disable test 2043 [54]
  o tests: kill some test servers afterwards to avoid locked logfiles [111]
  o tests: use python3 in test 1451 [48]
@@ -116,6 +124,7 @@ This release includes the following bugfixes:
  o tool_cb_prg: make resumed upload progress bar show better [9]
  o tool_listhelp: easier generated with gen.pl [19]
  o tool_main: fix typo in comment [29]
+ o tool_operate: a failed etag save now only fails that transfer [124]
  o URL-SYNTAX: add IMAP UID SEARCH example [81]
  o url: check the return value of curl_url() [75]
  o url: set "k->size" -1 at start of request [60]
@@ -134,23 +143,25 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   8U61ife on github, a1346054 on github, Abhinav Singh, Alexander Chuykov,
-  Alexander Kanavin, Anthony Hu, Axel Morawietz, beslick5 on github,
-  billionai on github, Bo Anderson, Boris Rasin, Daniel Gustafsson,
-  Daniel Stenberg, David Cook, David Hu, Eddie Lumpkin, Érico Nogueira,
-  Erik Stenlund, Gisle Vanem, Gleb Ivanovsky, h1zzz on github, Harry Sintonen,
+  Alexander Kanavin, Amaury Denoyelle, Anthony Hu, Axel Morawietz,
+  beslick5 on github, billionai on github, Bo Anderson, Boris Rasin,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, David Cook, David Hu,
+  Earnestly on github, Eddie Lumpkin, Érico Nogueira, Erik Stenlund,
+  Gisle Vanem, Gleb Ivanovsky, Godwin Stewart, h1zzz on github, Harry Sintonen,
   Hayden Roche, Jakub Zakrzewski, Jan Mazur, Jeffrey Tolar, Jerome Mao,
   Joel Depooter, Jonathan Cardoso Machado, Josip Medved, Jun-ya Kato,
-  Kerem Kat, Kirill Efimov, Lucas Holt, Malik Idrees Hasan Khan, Marcel Raad,
-  Marc Hörsken, Mats Lindestam, Max Dymond, Michael Afanasiev,
+  Kerem Kat, Kevin Burke, Kirill Efimov, Lucas Holt, Malik Idrees Hasan Khan,
+  Marcel Raad, Marc Hörsken, Mats Lindestam, Max Dymond, Michael Afanasiev,
   Michael Baentsch, Michael Kaufmann, Momoka Yamamoto, Noam Moshe,
   orycho on github, Patrick Monnerat, Rafał Mikrut, Randall S. Becker,
   Raul Onitza-Klugman, Ray Satiro, Ricardo Martins, Rick Lane,
-  Rikard Falkeborn, Roy Li, ryancaicse on github, Ryan Mast, Samuel Henrique,
-  Sean Molenaar, Sergey Markelov, Sergio Durigan Junior, sergio-nsk on github,
-  Sharon Brizinov, Stathis Kapnidis, Steini2000 on github, Tatsuhiro Tsujikawa,
-  Thomas M. DuBuisson, tlahn on github, Viktor Szakats, Vitaly Varyvdin,
-  Wyatt O'Day, x2018 on github, Борис Верховский,
-  (72 contributors)
+  Rikard Falkeborn, Roger Young, Roy Li, ryancaicse on github, Ryan Mast,
+  Samuel Henrique, Sean Molenaar, Sergey Markelov, Sergio Durigan Junior,
+  sergio-nsk on github, Sharon Brizinov, Stathis Kapnidis,
+  Steini2000 on github, Tatsuhiro Tsujikawa, Thomas M. DuBuisson,
+  tlahn on github, Viktor Szakats, Vitaly Varyvdin, Wyatt O'Day,
+  x2018 on github, Борис Верховский,
+  (78 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -159,7 +170,6 @@ References to bug reports and discussions on issues:
  [3] = https://curl.se/bug/?i=7747
  [4] = https://curl.se/bug/?i=7646
  [5] = https://curl.se/bug/?i=7765
- [6] = https://curl.se/bug/?i=7771
  [7] = https://curl.se/bug/?i=7774
  [8] = https://curl.se/bug/?i=7683
  [9] = https://curl.se/bug/?i=7760
@@ -244,6 +254,7 @@ References to bug reports and discussions on issues:
  [88] = https://curl.se/bug/?i=7941
  [89] = https://curl.se/bug/?i=7877
  [90] = https://curl.se/bug/?i=7939
+ [91] = https://curl.se/bug/?i=7968
  [92] = https://curl.se/bug/?i=7909
  [93] = https://curl.se/bug/?i=7910
  [94] = https://curl.se/bug/?i=7908
@@ -261,8 +272,16 @@ References to bug reports and discussions on issues:
  [106] = https://curl.se/bug/?i=7901
  [107] = https://curl.se/bug/?i=7936
  [108] = https://curl.se/bug/?i=7929
+ [109] = https://curl.se/bug/?i=7979
  [110] = https://curl.se/bug/?i=7933
  [111] = https://curl.se/bug/?i=7925
  [112] = https://curl.se/bug/?i=7926
+ [113] = https://curl.se/bug/?i=7967
  [114] = https://curl.se/bug/?i=7923
  [115] = https://curl.se/bug/?i=6973
+ [117] = https://curl.se/bug/?i=7978
+ [119] = https://curl.se/bug/?i=7970
+ [122] = https://curl.se/bug/?i=7960
+ [124] = https://curl.se/bug/?i=7945
+ [125] = https://curl.se/bug/?i=7955
+ [126] = https://curl.se/bug/?i=7957
