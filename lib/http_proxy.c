@@ -974,7 +974,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
       if(conn->bits.close && data->req.newurl) {
         conn->bits.proxy_connect_closed = TRUE;
         infof(data, "Connect me again please");
-        connect_done(data);
+        Curl_connect_done(data);
       }
       else {
         free(data->req.newurl);
