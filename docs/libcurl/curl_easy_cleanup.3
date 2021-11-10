@@ -47,6 +47,10 @@ Any use of the \fBhandle\fP after this function has been called and have
 returned, is illegal. \fIcurl_easy_cleanup(3)\fP kills the handle and all
 memory associated with it!
 
+To close an easy handle that has been used with the multi interface, make sure
+to call \fIcurl_multi_remove_handle(3)\fP first to remove it from the multi
+handle before it is closed.
+
 Passing in a NULL pointer in \fIhandle\fP will make this function return
 immediately with no action.
 .SH EXAMPLE
