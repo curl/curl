@@ -216,7 +216,7 @@ test1800 test1801 \
 test1908 test1909 test1910 test1911 test1912 test1913 test1914 test1915 \
 test1916 test1917 test1918 \
 \
-test1933 test1934 test1935 test1936 test1937 test1938 \
+test1933 test1934 test1935 test1936 test1937 test1938 test1939 \
 \
 test2000 test2001 test2002 test2003 test2004 \
 \

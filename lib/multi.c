@@ -878,6 +878,7 @@ void Curl_detach_connnection(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   if(conn) {
+    Curl_connect_done(data); /* if mid-CONNECT, shut it down */
     Curl_llist_remove(&conn->easyq, &data->conn_queue, NULL);
     Curl_ssl_detach_conn(data, conn);
   }
