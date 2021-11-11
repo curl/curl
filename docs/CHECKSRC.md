@@ -130,10 +130,12 @@ the directory where they should be activated with commands to enable the
 warnings you are interested in. The format of the file is to enable one
 warning per line like so: `enable <EXTENDEDWARNING>`
 
-Currently there is one extended warning which can be enabled:
+Currently these are the extended warnings which can be enabled:
 
 - `COPYRIGHTYEAR`: the current changeset has not updated the copyright year in
    the source file
+
+- `STRERROR`: use of banned function strerror()
 
 ## Ignore certain warnings
 
