@@ -211,54 +211,72 @@ AS_HELP_STRING([--with-ssl=PATH],[old version of --with-openssl])
 AS_HELP_STRING([--without-ssl], [build without any TLS library]),
   OPT_SSL=$withval
   OPT_OPENSSL=$withval
-  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL")
+  if test X"$withval" != Xno; then
+    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL")
+  fi
 
 AC_ARG_WITH(openssl,dnl
 AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points to the SSL installation (default: /usr/local/ssl); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option]),
   OPT_OPENSSL=$withval
-  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL")
+  if test X"$withval" != Xno; then
+    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL")
+  fi
 
 OPT_GNUTLS=no
 AC_ARG_WITH(gnutls,dnl
 AS_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to the installation root]),
   OPT_GNUTLS=$withval
-  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }GnuTLS")
+  if test X"$withval" != Xno; then
+    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }GnuTLS")
+  fi
 
 OPT_MBEDTLS=no
 AC_ARG_WITH(mbedtls,dnl
 AS_HELP_STRING([--with-mbedtls=PATH],[where to look for mbedTLS, PATH points to the installation root]),
   OPT_MBEDTLS=$withval
-  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }mbedTLS")
+  if test X"$withval" != Xno; then
+    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }mbedTLS")
+  fi
 
 OPT_WOLFSSL=no
 AC_ARG_WITH(wolfssl,dnl
 AS_HELP_STRING([--with-wolfssl=PATH],[where to look for WolfSSL, PATH points to the installation root (default: system lib default)]),
   OPT_WOLFSSL=$withval
-  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }wolfSSL")
+  if test X"$withval" != Xno; then
+    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }wolfSSL")
+  fi
 
 OPT_MESALINK=no
 AC_ARG_WITH(mesalink,dnl
 AS_HELP_STRING([--with-mesalink=PATH],[where to look for MesaLink, PATH points to the installation root]),
   OPT_MESALINK=$withval
-  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }MesaLink")
+  if test X"$withval" != Xno; then
+    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }MesaLink")
+  fi
 
 OPT_BEARSSL=no
 AC_ARG_WITH(bearssl,dnl
 AS_HELP_STRING([--with-bearssl=PATH],[where to look for BearSSL, PATH points to the installation root]),
   OPT_BEARSSL=$withval
-  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }BearSSL")
+  if test X"$withval" != Xno; then
+    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }BearSSL")
+  fi
 
 OPT_RUSTLS=no
 AC_ARG_WITH(rustls,dnl
 AS_HELP_STRING([--with-rustls=PATH],[where to look for rustls, PATH points to the installation root]),
   OPT_RUSTLS=$withval
-  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }rustls")
+  if test X"$withval" != Xno; then
+    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }rustls")
+  fi
 
 OPT_NSS=no
 AC_ARG_WITH(nss,dnl
 AS_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the installation root]),
   OPT_NSS=$withval
-  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }NSS")
+  if test X"$withval" != Xno; then
+    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }NSS")
+  fi
 
 dnl If no TLS choice has been made, check if it was explicitly disabled or
 dnl error out to force the user to decide.
