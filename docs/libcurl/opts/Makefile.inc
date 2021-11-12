@@ -399,4 +399,9 @@ man_MANS =                                      \
   CURLOPT_WRITEFUNCTION.3                       \
   CURLOPT_XFERINFODATA.3                        \
   CURLOPT_XFERINFOFUNCTION.3                    \
-  CURLOPT_XOAUTH2_BEARER.3
+  CURLOPT_XOAUTH2_BEARER.3                      \
+  CURLSHOPT_LOCKFUNC.3                          \
+  CURLSHOPT_SHARE.3                             \
+  CURLSHOPT_UNLOCKFUNC.3                        \
+  CURLSHOPT_UNSHARE.3                           \
+  CURLSHOPT_USERDATA.3

@@ -19,33 +19,27 @@
 .\" * KIND, either express or implied.
 .\" *
 .\" **************************************************************************
-.TH curl_share_setopt 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
+.TH CURLSHOPT_USERDATA 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
 .SH NAME
-curl_share_setopt - Set options for a shared object
+CURLSHOPT_USERDATA - pointer passed to the (un)lock mutex callbacks
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option, parameter);
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_USERDATA, void *ptr);
+.fi
 .SH DESCRIPTION
-Set the \fIoption\fP to \fIparameter\fP for the given \fIshare\fP.
-.SH OPTIONS
-.IP CURLSHOPT_LOCKFUNC
-See \fICURLSHOPT_LOCKFUNC(3)\fP.
-.IP CURLSHOPT_UNLOCKFUNC
-See \fICURLSHOPT_UNLOCKFUNC(3)\fP.
-.IP CURLSHOPT_SHARE
-See \fICURLSHOPT_SHARE(3)\fP.
-.IP CURLSHOPT_UNSHARE
-See \fICURLSHOPT_UNSHARE(3)\fP.
-.IP CURLSHOPT_USERDATA
-The \fIparameter\fP allows you to specify a pointer to data that will be passed
-to the lock_function and unlock_function each time it is called.
+The \fIptr\fP parameter is held verbatim by libcurl and is passed on as the
+\fIuserptr\fP argument to the callbacks set with \fICURLSHOPT_LOCKFUNC(3)\fP
+and \fICURLSHOPT_LOCKFUNC(3)\fP.
+.SH PROTOCOLS
+All
 .SH EXAMPLE
 .nf
   CURLSHcode sh
+  struct secrets private_stuff;
   share = curl_share_init();
-  sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+  sh = curl_share_setopt(share, CURLSHOPT_USERDATA, &private_stuff);
   if(sh)
     printf("Error: %s\\n", curl_share_strerror(sh));
 .fi
@@ -53,7 +47,8 @@ to the lock_function and unlock_function each time it is called.
 Added in 7.10
 .SH RETURN VALUE
 CURLSHE_OK (zero) means that the option was set properly, non-zero means an
-error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors.3\fP
-man page for the full list with descriptions.
+error occurred. See \fIlibcurl-errors(3)\fP for the full list with
+descriptions.
 .SH "SEE ALSO"
-.BR curl_share_cleanup "(3), " curl_share_init "(3)"
+.BR CURLSHOPT_LOCKFUNC "(3), "
+.BR curl_share_setopt "(3), " curl_share_cleanup "(3), " curl_share_init "(3)"
