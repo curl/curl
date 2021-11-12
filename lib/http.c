@@ -3634,7 +3634,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
     else {
       data->req.location = location;
 
-      if(data->set.http_follow_location) {
+      if(data->set.http_follow_location || data->set.http_redirect_step) {
         DEBUGASSERT(!data->req.newurl);
         data->req.newurl = strdup(data->req.location); /* clone */
         if(!data->req.newurl)

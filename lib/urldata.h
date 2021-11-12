@@ -1814,6 +1814,7 @@ struct UserDefined {
   BIT(http_fail_on_error);  /* fail on HTTP error codes >= 400 */
   BIT(http_keep_sending_on_error); /* for HTTP status codes >= 300 */
   BIT(http_follow_location); /* follow HTTP redirects */
+  BIT(http_redirect_step); /* split redirect chain into multiple transfers */
   BIT(http_transfer_encoding); /* request compressed HTTP transfer-encoding */
   BIT(allow_auth_to_other_hosts);
   BIT(include_header); /* include received protocol headers in data output */

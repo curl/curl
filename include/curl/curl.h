@@ -2132,6 +2132,9 @@ typedef enum {
    * (in seconds) */
   CURLOPT(CURLOPT_MAXLIFETIME_CONN, CURLOPTTYPE_LONG, 314),
 
+  /* Let subsequent requests continue the redirect chain. */
+  CURLOPT(CURLOPT_REDIRECT_STEP, CURLOPTTYPE_LONG, 315),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

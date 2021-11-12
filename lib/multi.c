@@ -2388,12 +2388,27 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           }
           else
             follow = FOLLOW_RETRY;
-          (void)multi_done(data, CURLE_OK, FALSE);
-          /* multi_done() might return CURLE_GOT_NOTHING */
-          result = Curl_follow(data, newurl, follow);
-          if(!result) {
-            multistate(data, MSTATE_CONNECT);
-            rc = CURLM_CALL_MULTI_PERFORM;
+          if(data->set.http_redirect_step) {
+            /* update the redirect state and go DONE */
+            result = Curl_follow(data, newurl, follow);
+            if(result) {
+              data->state.this_is_a_follow = FALSE;
+              stream_error = TRUE;
+              result = multi_done(data, result, TRUE);
+            }
+            if(!result) {
+              multistate(data, MSTATE_DONE);
+              rc = CURLM_CALL_MULTI_PERFORM;
+            }
+          }
+          else {
+            (void)multi_done(data, CURLE_OK, FALSE);
+            /* multi_done() might return CURLE_GOT_NOTHING */
+            result = Curl_follow(data, newurl, follow);
+            if(!result) {
+              multistate(data, MSTATE_CONNECT);
+              rc = CURLM_CALL_MULTI_PERFORM;
+            }
           }
           free(newurl);
         }
@@ -2413,6 +2428,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
               result = multi_done(data, result, TRUE);
             }
           }
+          /* reset the redirect state in case of CURLOPT_REDIRECT_STEP */
+          data->state.this_is_a_follow = FALSE;
 
           if(!result) {
             multistate(data, MSTATE_DONE);

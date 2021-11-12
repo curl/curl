@@ -1,0 +1,87 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_REDIRECT_STEP 3 "12 Nov 2021" "libcurl 7.81.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_REDIRECT_STEP \- perform each redirect step individually
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_REDIRECT_STEP, long enable);
+.fi
+.SH DESCRIPTION
+A long parameter set to 1 tells the library to do its redirect magic as with
+\fICURLOPT_FOLLOWLOCATION(3)\fP, but has you perform each redirect step as a
+separate transfer so that you can do or change other things between redirects.
+
+On each subsequent transfer libcurl will issue a request for the URL in the
+Location: header of the previous response, until no more such headers are
+returned. The redirect chain can be interrupted by setting
+\fICURLOPT_REDIRECT_STEP(3)\fP to any value with another call to
+\fIcurl_easy_setopt(3)\fP. After the end of the redirect chain has been reached
+or was otherwise interrupted the next transfer will start from the beginning.
+\fICURLINFO_REDIRECT_URL(3)\fP can be used to see if the redirect chain has
+reached its end.
+
+The redirect follow logic is the same as with \fICURLOPT_FOLLOWLOCATION(3)\fP
+enabled and can likewise be configured with the same options, such as
+\fICURLOPT_MAXREDIRS(3)\fP, \fICURLOPT_REDIR_PROTOCOLS(3)\fP and
+\fICURLOPT_POSTREDIR(3)\fP.
+
+Note that using \fIcurl_easy_setopt(3)\fP to change the URL, port number or
+HTTP method will only take effect after the redirect chain has reached its end
+or was otherwise interrupted. Everything else will take effect immediately.
+Multi handles and share objects can also be switched and reconfigured between
+redirects.
+
+.SH DEFAULT
+0, disabled
+.SH PROTOCOLS
+HTTP(S)
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+CURLCode res;
+char *url;
+
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  curl_easy_setopt(curl, CURLOPT_REDIRECT_STEP, 1L);
+
+  do {
+    res = curl_easy_perform(curl);
+
+    /* we look at the next URL to see if there are any redirects left */
+    curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &url);
+
+  } while(res == CURLE_OK && url != NULL);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.81.0
+.SH RETURN VALUE
+Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_FOLLOWLOCATION "(3), " CURLOPT_MAXREDIRS "(3), "
+.BR CURLOPT_REDIR_PROTOCOLS "(3), " CURLOPT_POSTREDIR "(3), "
+.BR CURLINFO_REDIRECT_URL "(3), "

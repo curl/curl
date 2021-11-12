@@ -1402,6 +1402,9 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 {
   CURLcode result;
 
+  if(!data->set.http_redirect_step)
+    data->state.this_is_a_follow = FALSE;
+
   if(!data->state.url && !data->set.uh) {
     /* we can't do anything without URL */
     failf(data, "No URL set!");
@@ -1409,7 +1412,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   }
 
   /* since the URL may have been redirected in a previous use of this handle */
-  if(data->state.url_alloc) {
+  if(!data->state.this_is_a_follow && data->state.url_alloc) {
     /* the already set URL is allocated, free it first! */
     Curl_safefree(data->state.url);
     data->state.url_alloc = FALSE;
@@ -1428,8 +1431,10 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
   data->state.prefer_ascii = data->set.prefer_ascii;
   data->state.list_only = data->set.list_only;
-  data->state.httpreq = data->set.method;
-  data->state.url = data->set.str[STRING_SET_URL];
+  if(!data->state.this_is_a_follow) {
+    data->state.httpreq = data->set.method;
+    data->state.url = data->set.str[STRING_SET_URL];
+  }
 
   /* Init the SSL session ID cache here. We do it here since we want to do it
      after the *_setopt() calls (that could specify the size of the cache) but
@@ -1439,8 +1444,8 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     return result;
 
   data->state.wildcardmatch = data->set.wildcard_enabled;
-  data->state.followlocation = 0; /* reset the location-follow counter */
-  data->state.this_is_a_follow = FALSE; /* reset this */
+  if(!data->state.this_is_a_follow)
+    data->state.followlocation = 0; /* reset the location-follow counter */
   data->state.errorbuf = FALSE; /* no error has occurred */
   data->state.httpwant = data->set.httpwant;
   data->state.httpversion = 0;
@@ -1469,10 +1474,23 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     result = Curl_loadhostpairs(data);
 
   if(!result) {
-    /* Allow data->set.use_port to set which port to use. This needs to be
-     * disabled for example when we follow Location: headers to URLs using
-     * different ports! */
-    data->state.allow_port = TRUE;
+    if(data->state.this_is_a_follow) {
+      free(data->info.contenttype);
+      data->info.contenttype = NULL;
+#ifdef USE_SSL
+      Curl_ssl_free_certinfo(data);
+#endif
+    }
+    else {
+      /* Allow data->set.use_port to set which port to use. This needs to be
+       * disabled for example when we follow Location: headers to URLs using
+       * different ports! */
+      data->state.allow_port = TRUE;
+      /* reset session-specific information "variables" */
+      Curl_initinfo(data);
+      Curl_pgrsResetTransferSizes(data);
+      Curl_pgrsStartNow(data);
+    }
 
 #if defined(HAVE_SIGNAL) && defined(SIGPIPE) && !defined(HAVE_MSG_NOSIGNAL)
     /*************************************************************
@@ -1481,10 +1499,6 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     if(!data->set.no_signal)
       data->state.prev_signal = signal(SIGPIPE, SIG_IGN);
 #endif
-
-    Curl_initinfo(data); /* reset session-specific information "variables" */
-    Curl_pgrsResetTransferSizes(data);
-    Curl_pgrsStartNow(data);
 
     /* In case the handle is re-used and an authentication method was picked
        in the session we need to make sure we only use the one(s) we now
@@ -1669,6 +1683,8 @@ CURLcode Curl_follow(struct Curl_easy *data,
     }
     return CURLE_OK;
   }
+  else if(data->set.http_redirect_step)
+    data->info.wouldredirect = strdup(newurl);
 
   if(disallowport)
     data->state.allow_port = FALSE;

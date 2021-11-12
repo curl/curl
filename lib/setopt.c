@@ -582,6 +582,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.http_follow_location = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
 
+  case CURLOPT_REDIRECT_STEP:
+    /*
+     * Perform each redirect step individually.
+     */
+    data->set.http_redirect_step = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    data->state.this_is_a_follow = FALSE;
+    break;
+
   case CURLOPT_UNRESTRICTED_AUTH:
     /*
      * Send authentication (user+password) when following locations, even when
