@@ -33,41 +33,38 @@ int test(char *URL)
   curl_global_init(CURL_GLOBAL_DEFAULT);
 
   multi = curl_multi_init();
-  if(!multi)
-    return 1;
+  if(multi) {
+    easy = curl_easy_init();
+    if(easy) {
+      CURLcode c;
+      CURLMcode m;
 
-  easy = curl_easy_init();
-  if(easy) {
-    CURLcode c;
-    CURLMcode m;
+      /* Crash only happens when using HTTPS */
+      c = curl_easy_setopt(easy, CURLOPT_URL, URL);
+      if(!c)
+        /* Any old HTTP tunneling proxy will do here */
+        c = curl_easy_setopt(easy, CURLOPT_PROXY, libtest_arg2);
 
-    /* Crash only happens when using HTTPS */
-    c = curl_easy_setopt(easy, CURLOPT_URL, URL);
-    if(!c)
-      /* Any old HTTP tunneling proxy will do here */
-      c = curl_easy_setopt(easy, CURLOPT_PROXY, libtest_arg2);
+      if(!c) {
 
-    if(c)
-      return 2;
+        /* We're going to drive the transfer using multi interface here,
+           because we want to stop during the middle. */
+        m = curl_multi_add_handle(multi, easy);
 
-    /* We're going to drive the transfer using multi interface here, because we
-       want to stop during the middle. */
-    m = curl_multi_add_handle(multi, easy);
+        if(!m)
+          /* Run the multi handle once, just enough to start establishing an
+             HTTPS connection. */
+          m = curl_multi_perform(multi, &running_handles);
 
-    if(!m)
-      /* Run the multi handle once, just enough to start establishing an HTTPS
-         connection. */
-      m = curl_multi_perform(multi, &running_handles);
-
-    if(m)
-      return 3;
-
-    /* Close the easy handle *before* the multi handle. Doing it the other way
-       around avoids the issue. */
-    curl_easy_cleanup(easy);
+        if(m)
+          fprintf(stderr, "curl_multi_perform failed\n");
+      }
+      /* Close the easy handle *before* the multi handle. Doing it the other
+         way around avoids the issue. */
+      curl_easy_cleanup(easy);
+    }
+    curl_multi_cleanup(multi); /* double-free happens here */
   }
-  curl_multi_cleanup(multi); /* double-free happens here */
-
   curl_global_cleanup();
   return CURLE_OK;
 }
