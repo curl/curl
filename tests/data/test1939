@@ -29,6 +29,9 @@ Content-Length: 0
 
 # Client-side
 <client>
+<features>
+proxy
+</features>
 <server>
 https
 http-proxy
