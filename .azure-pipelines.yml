@@ -64,7 +64,7 @@ stages:
           configure: --disable-ipv6 --with-openssl
         disable_http_smtp_imap:
           name: w/o HTTP/SMTP/IMAP
-          configure: --disable-http --disable-smtp --disable-imap --without-openssl
+          configure: --disable-http --disable-smtp --disable-imap --without-ssl
         disable_thredres:
           name: sync resolver
           configure: --disable-threaded-resolver --with-openssl
