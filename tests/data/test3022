@@ -17,6 +17,10 @@ test
 #
 # Client-side
 <client>
+# so far only the libssh2 backend supports SHA256
+<features>
+libssh2
+</features>
 <server>
 scp
 </server>
