@@ -138,11 +138,6 @@ cr_recv(struct Curl_easy *data, int sockindex,
     *err = CURLE_READ_ERROR;
     return -1;
   }
-  else if(tls_bytes_read == 0) {
-    failf(data, "connection closed without TLS close_notify alert");
-    *err = CURLE_READ_ERROR;
-    return -1;
-  }
 
   infof(data, "cr_recv read %ld bytes from the network", tls_bytes_read);
 
