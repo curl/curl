@@ -157,7 +157,7 @@ cr_recv(struct Curl_easy *data, int sockindex,
       plainlen - plain_bytes_copied,
       &n);
     if(rresult == RUSTLS_RESULT_PLAINTEXT_EMPTY) {
-      infof(data, "cr_recv got 0 bytes of plaintext");
+      infof(data, "cr_recv got PLAINTEXT_EMPTY. will try again later.");
       backend->data_pending = FALSE;
       break;
     }
@@ -168,8 +168,10 @@ cr_recv(struct Curl_easy *data, int sockindex,
       return -1;
     }
     else if(n == 0) {
-      *err = CURLE_OK;
-      return 0;
+      /* n == 0 indicates clean EOF, but we may have read some other
+         plaintext bytes before we reached this. Break out of the loop
+         so we can figure out whether to return success or EOF. */
+      break;
     }
     else {
       infof(data, "cr_recv copied out %ld bytes of plaintext", n);
@@ -177,15 +179,23 @@ cr_recv(struct Curl_easy *data, int sockindex,
     }
   }
 
-  /* If we wrote out 0 plaintext bytes, it might just mean we haven't yet
-     read a full TLS record. Return CURLE_AGAIN so curl doesn't treat this
-     as EOF. */
-  if(plain_bytes_copied == 0) {
+  if(plain_bytes_copied) {
+    *err = CURLE_OK;
+    return plain_bytes_copied;
+  }
+
+  /* If we wrote out 0 plaintext bytes, that means either we hit a clean EOF,
+     OR we got a RUSTLS_RESULT_PLAINTEXT_EMPTY.
+     If the latter, return CURLE_AGAIN so curl doesn't treat this as EOF. */
+  if(!backend->data_pending) {
     *err = CURLE_AGAIN;
     return -1;
   }
 
-  return plain_bytes_copied;
+  /* Zero bytes read, and no RUSTLS_RESULT_PLAINTEXT_EMPTY, means the TCP
+     connection was cleanly closed (with a close_notify alert). */
+  *err = CURLE_OK;
+  return 0;
 }
 
 /*
