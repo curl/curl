@@ -703,7 +703,8 @@ if test X"$want_hyper" != Xno; then
     LIBS="$LIB_HYPER $LIBS"
 
     if test "x$cross_compiling" != "xyes"; then
-      DIR_HYPER=`echo $LD_HYPER | $SED -e 's/^-L//'`
+      dnl remove -L, separate with colon if more than one
+      DIR_HYPER=`echo $LD_HYPER | $SED -e 's/^-L//' -e 's/ -L/:/g'`
     fi
 
     AC_CHECK_LIB(hyper, hyper_io_new,
@@ -721,6 +722,11 @@ if test X"$want_hyper" != Xno; then
           AC_MSG_NOTICE([Added $DIR_HYPER to CURL_LIBRARY_PATH]),
        )
       ],
+      for d in `echo $DIR_HYPER | sed -e 's/:/ /'`; do
+        if test -f "$d/libhyper.a"; then
+          AC_MSG_ERROR([hyper was found in $d but was probably built with wrong flags. See docs/HYPER.md.])
+        fi
+      done
       AC_MSG_ERROR([--with-hyper but hyper was not found. See docs/HYPER.md.])
     )
   fi
