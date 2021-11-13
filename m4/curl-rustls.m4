@@ -48,13 +48,8 @@ if test "x$OPT_RUSTLS" != xno; then
          USE_RUSTLS="yes"
          ssl_msg="rustls"
 	 test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-        ], [], -lpthread -ldl)
+        ], [], -lpthread -ldl -lm)
     fi
-
-    addld=""
-    addlib="-lpthread"
-    addcflags=""
-    bearssllib=""
 
     if test "x$USE_RUSTLS" != "xyes"; then
       dnl add the path and test again
@@ -77,14 +72,14 @@ if test "x$OPT_RUSTLS" != xno; then
        test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
        AC_MSG_ERROR([--with-rustls was specified but could not find rustls.]),
-       -lpthread -ldl)
+       -lpthread -ldl -lm)
     fi
 
     if test "x$USE_RUSTLS" = "xyes"; then
       AC_MSG_NOTICE([detected rustls])
       check_for_ca_bundle=1
 
-      LIBS="-lrustls -lpthread -ldl $LIBS"
+      LIBS="-lrustls -lpthread -ldl -lm $LIBS"
 
       if test -n "$rustlslib"; then
         dnl when shared libs were found in a path that the run-time
