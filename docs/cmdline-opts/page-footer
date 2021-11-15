@@ -279,6 +279,9 @@ is the protocol used for HTTP/3 transfers.
 .IP XX
 More error codes will appear here in future releases. The existing ones
 are meant to never change.
+.SH BUGS
+If you experience any problems with curl, submit an issue in the project's bug
+tracker on GitHub: https://github.com/curl/curl/issues
 .SH AUTHORS / CONTRIBUTORS
 Daniel Stenberg is the main author, but the whole list of contributors is
 found in the separate THANKS file.
