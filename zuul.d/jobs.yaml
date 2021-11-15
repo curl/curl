@@ -132,7 +132,7 @@
       curl_env:
         T: debug-rustls
         # Keep this in sync with the version in docs/RUSTLS.md
-        RUSTLS_VERSION: v0.8.0
+        RUSTLS_VERSION: v0.8.2
         LIBS: -lm
         C: >-
           --with-rustls={{ ansible_user_dir }}/rustls
