@@ -1,20 +1,32 @@
-curl and libcurl 7.80.1
+curl and libcurl 7.81.0
 
  Public curl releases:         205
- Command line options:         243
- curl_easy_setopt() options:   294
+ Command line options:         244
+ curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2533
+ Contributors:                 2536
 
 This release includes the following changes:
 
- o
+ o mime: use percent-escaping for multipart form field and file names [1]
 
 This release includes the following bugfixes:
 
+ o azure: make the "w/o HTTP/SMTP/IMAP" build disable SSL proper [12]
+ o configure: add -lm to configure for rustls build. [13]
+ o configure: better diagnostics if hyper is built wrong [6]
+ o configure: don't enable TLS when --without-* flags are used [17]
  o curl_easy_cleanup.3: remove from multi handle first [3]
+ o curl_share_setopt.3: split out options into their own manpages [14]
+ o docs/checksrc: Add documentation for STRERROR [18]
  o multi: shut down CONNECT in Curl_detach_connnection [2]
+ o runtests: make the SSH library a testable feature
+ o rustls: read of zero bytes might be okay [9]
+ o rustls: remove incorrect EOF check [10]
+ o test302[12]: run only with the libssh2 backend [8]
  o url.c: fix the SIGPIPE comment for Curl_close [4]
+ o vtls/rustls: adapt to the updated rustls_version proto [19]
+ o zuul.d: update rustls-ffi to version 0.8.2 [5]
 
 This release includes the following known bugs:
 
@@ -23,11 +35,25 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Stephen M. Coakley,
-  (2 contributors)
+  Dan Fandrich, Daniel Stenberg, Jacob Hoffman-Andrews, Kevin Burke,
+  Patrick Monnerat, Paul Howarth, Rikard Falkeborn, Ryan Sleevi, Stan Hu,
+  Stephen M. Coakley, Viktor Szakats, Vincent Grande,
+  (12 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/bug/?i=7789
  [2] = https://curl.se/bug/?i=7982
  [3] = https://curl.se/bug/?i=7983
  [4] = https://curl.se/bug/?i=7984
+ [5] = https://curl.se/bug/?i=8013
+ [6] = https://curl.se/bug/?i=8001
+ [8] = https://curl.se/bug/?i=8009
+ [9] = https://curl.se/bug/?i=8003
+ [10] = https://curl.se/bug/?i=8003
+ [12] = https://curl.se/bug/?i=8006
+ [13] = https://curl.se/bug/?i=8002
+ [14] = https://curl.se/bug/?i=7998
+ [17] = https://curl.se/bug/?i=7994
+ [18] = https://curl.se/bug/?i=7991
+ [19] = https://curl.se/bug/?i=7956
