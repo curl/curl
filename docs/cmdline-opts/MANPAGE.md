@@ -40,6 +40,9 @@ correct markup that shows both short and long version.
 Text written within `*asterisks*` will get shown using italics. Text within
 two `**asterisks**` will get shown using bold.
 
+Text that is prefixed with a space will be treated like an "example" and will
+be output in monospace.
+
 ## Header and footer
 
 `page-header` is the file that will be output before the generated options

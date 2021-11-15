@@ -76,6 +76,7 @@ sub manpageify {
 
 sub printdesc {
     my @desc = @_;
+    my $exam = 0;
     for my $d (@desc) {
         if($d =~ /\(Added in ([0-9.]+)\)/i) {
             my $ver = $1;
@@ -88,6 +89,16 @@ sub printdesc {
             $d =~ s/\*\*([^ ]*)\*\*/\\fB$1\\fP/g;
             # *italics*
             $d =~ s/\*([^ ]*)\*/\\fI$1\\fP/g;
+        }
+        if(!$exam && ($d =~ /^ /)) {
+            # start of example
+            $exam = 1;
+            print ".nf\n"; # no-fill
+        }
+        elsif($exam && ($d !~ /^ /)) {
+            # end of example
+            $exam = 0;
+            print ".fi\n"; # fill-in
         }
         # skip lines starting with space (examples)
         if($d =~ /^[^ ]/) {
