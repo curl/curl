@@ -4,6 +4,7 @@ Protocols: TLS
 Added: 7.52.0
 Category: tls
 Example: --tlsv1.3 $URL
+See-also: tlsv1.2
 ---
 Forces curl to use TLS version 1.3 or later when connecting to a remote TLS
 server.

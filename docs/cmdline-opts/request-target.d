@@ -5,6 +5,7 @@ Protocols: HTTP
 Added: 7.55.0
 Category: http
 Example: --request-target "*" -X OPTIONS $URL
+See-also: request
 ---
 Tells curl to use an alternative "target" (path) instead of using the path as
 provided in the URL. Particularly useful when wanting to issue HTTP requests

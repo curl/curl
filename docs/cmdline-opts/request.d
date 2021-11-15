@@ -6,6 +6,7 @@ Category: connection
 Example: -X "DELETE" $URL
 Example: -X NLST ftp://example.com/
 Added: 6.0
+See-also: request-target
 ---
 (HTTP) Specifies a custom request method to use when communicating with the
 HTTP server.  The specified request method will be used instead of the method

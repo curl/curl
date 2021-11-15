@@ -8,6 +8,7 @@ Example: -z "Wed 01 Sep 2021 12:18:00" $URL
 Example: -z "-Wed 01 Sep 2021 12:18:00" $URL
 Example: -z file $URL
 Added: 5.8
+See-also: etag-compare remote-time
 ---
 Request a file that has been modified later than the given time and date, or
 one that has been modified before that time. The <date expression> can be all

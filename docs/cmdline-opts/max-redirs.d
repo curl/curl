@@ -5,6 +5,7 @@ Protocols: HTTP
 Category: http
 Example: --max-redirs 3 --location $URL
 Added: 7.5
+See-also: location
 ---
 Set maximum number of redirections to follow. When --location is used, to
 prevent curl from following too many redirects, by default, the limit is

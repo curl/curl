@@ -5,6 +5,7 @@ Protocols: TLS
 Category: proxy tls
 Example: --proxy-tls13-ciphers TLS_AES_128_GCM_SHA256 -x proxy $URL
 Added: 7.61.0
+See-also: tls13-ciphers curves
 ---
 Specifies which cipher suites to use in the connection to your HTTPS proxy
 when it negotiates TLS 1.3. The list of ciphers suites must specify valid

@@ -7,6 +7,7 @@ Category: http
 Example: -c store-here.txt $URL
 Example: -c store-here.txt -b read-these $URL
 Added: 7.9
+See-also: cookie
 ---
 Specify to which file you want curl to write all cookies after a completed
 operation. Curl writes all cookies from its in-memory cookie storage to the

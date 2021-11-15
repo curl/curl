@@ -3,6 +3,7 @@ Help: Retry all errors (use with --retry)
 Added: 7.71.0
 Category: curl
 Example: --retry-all-errors $URL
+See-also: retry
 ---
 Retry on any error. This option is used together with --retry.
 

@@ -6,6 +6,7 @@ Protocols: HTTP
 Category: important http
 Example: -A "Agent 007" $URL
 Added: 4.5.1
+See-also: header proxy-header
 ---
 Specify the User-Agent string to send to the HTTP server. To encode blanks in
 the string, surround the string with single quote marks. This header can also

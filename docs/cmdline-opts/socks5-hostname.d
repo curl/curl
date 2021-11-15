@@ -4,6 +4,7 @@ Help: SOCKS5 proxy, pass host name to proxy
 Added: 7.18.0
 Category: proxy
 Example: --socks5-hostname proxy.example:7000 $URL
+See-also: socks5 socks4a
 ---
 Use the specified SOCKS5 proxy (and let the proxy resolve the host name). If
 the port number is not specified, it is assumed at port 1080.

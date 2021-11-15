@@ -5,6 +5,7 @@ Protocols: TLS
 Added: 7.73.0
 Category: tls
 Example: --curves X25519 $URL
+See-also: ciphers
 ---
 Tells curl to request specific curves to use during SSL session establishment
 according to RFC 8422, 5.1.  Multiple algorithms can be provided by separating

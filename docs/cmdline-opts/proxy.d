@@ -5,6 +5,7 @@ Help: Use this proxy
 Category: proxy
 Example: --proxy http://proxy.example $URL
 Added: 4.0
+See-also: socks5 proxy-basic
 ---
 Use the specified proxy.
 

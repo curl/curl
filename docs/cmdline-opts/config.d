@@ -5,6 +5,7 @@ Short: K
 Category: curl
 Example: --config file.txt $URL
 Added: 4.10
+See-also: disable
 ---
 Specify a text file to read curl arguments from. The command line arguments
 found in the text file will be used as if they were provided on the command
