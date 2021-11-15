@@ -3,6 +3,7 @@ Long: append
 Help: Append to target file when uploading
 Protocols: FTP SFTP
 Category: ftp sftp
+See-also: range continue-at
 Example: --upload-file local --append ftp://example.com/
 Added: 4.8
 ---

@@ -5,6 +5,7 @@ Protocols: SMTP
 Added: 7.20.0
 Category: smtp
 Example: --mail-rcpt user@example.net smtp://example.com
+See-also: mail-rcpt-allowfails
 ---
 Specify a single e-mail address, user name or mailing list name. Repeat this
 option several times to send to multiple recipients.

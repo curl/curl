@@ -6,6 +6,7 @@ Category: tls
 Example: --pinnedpubkey keyfile $URL
 Example: --pinnedpubkey 'sha256//ce118b51897f4452dc' $URL
 Added: 7.39.0
+See-also: hostpubsha256
 ---
 Tells curl to use the specified public key file (or hashes) to verify the
 peer. This can be a path to a file which contains a single public key in PEM

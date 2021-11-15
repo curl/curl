@@ -7,6 +7,7 @@ Requires: HTTP/2
 Help: Use HTTP 2 without HTTP/1.1 Upgrade
 Category: http
 Example: --http2-prior-knowledge $URL
+See-also: http2 http3
 ---
 Tells curl to issue its non-TLS HTTP requests using HTTP/2 without HTTP/1.1
 Upgrade. It requires prior knowledge that the server supports HTTP/2 straight

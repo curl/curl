@@ -4,6 +4,7 @@ Protocols: FTP
 Added: 7.16.0
 Category: ftp tls
 Example: --ftp-ssl-control ftp://example.com
+See-also: ssl
 ---
 Require SSL/TLS for the FTP login, clear for transfer.  Allows secure
 authentication, but non-encrypted data transfers for efficiency.  Fails the

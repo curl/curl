@@ -6,6 +6,7 @@ Help: Send cookies from string/file
 Category: http
 Example: -b cookiefile $URL
 Example: -b cookiefile -c cookiefile $URL
+See-also: cookie-jar junk-session-cookies
 Added: 4.9
 ---
 Pass the data to the HTTP server in the Cookie header. It is supposedly

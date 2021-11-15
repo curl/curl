@@ -5,6 +5,7 @@ Help: Use output FORMAT after completion
 Category: verbose
 Example: -w '%{http_code}\\n' $URL
 Added: 6.5
+See-also: verbose head
 ---
 Make curl display information on stdout after a completed transfer. The format
 is a string that may contain plain text mixed with any number of

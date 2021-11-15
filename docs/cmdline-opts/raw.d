@@ -4,6 +4,7 @@ Added: 7.16.2
 Protocols: HTTP
 Category: http
 Example: --raw $URL
+See-also: tr-encoding
 ---
 When used, it disables all internal HTTP decoding of content or transfer
 encodings and instead makes them passed on unaltered, raw.

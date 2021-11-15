@@ -3,6 +3,7 @@ Help: Fail on first transfer error, do not continue
 Added: 7.52.0
 Category: curl
 Example: --fail-early $URL https://two.example
+See-also: fail fail-with-body
 ---
 Fail and exit on the first detected transfer error.
 

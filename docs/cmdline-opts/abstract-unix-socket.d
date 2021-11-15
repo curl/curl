@@ -4,6 +4,7 @@ Help: Connect via abstract Unix domain socket
 Added: 7.53.0
 Protocols: HTTP
 Category: connection
+See-also: unix-socket
 Example: --abstract-unix-socket socketpath $URL
 ---
 Connect through an abstract Unix domain socket, instead of using the network.

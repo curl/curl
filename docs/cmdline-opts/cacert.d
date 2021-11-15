@@ -3,6 +3,7 @@ Arg: <file>
 Help: CA certificate to verify peer against
 Protocols: TLS
 Category: tls
+See-also: capath insecure
 Example: --cacert CA-file.txt $URL
 Added: 7.5
 ---

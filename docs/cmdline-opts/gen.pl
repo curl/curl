@@ -239,19 +239,23 @@ sub single {
         elsif(/^---/) {
             if(!$long) {
                 print STDERR "ERROR: no 'Long:' in $f\n";
-                exit 1;
+                return 1;
             }
             if(!$category) {
                 print STDERR "ERROR: no 'Category:' in $f\n";
-                exit 2;
+                return 2;
             }
             if(!$examples[0]) {
                 print STDERR "$f:$line:1:ERROR: no 'Example:' present\n";
-                exit 2;
+                return 2;
             }
             if(!$added) {
                 print STDERR "$f:$line:1:ERROR: no 'Added:' version present\n";
-                exit 2;
+                return 2;
+            }
+            if(!$seealso) {
+                print STDERR "$f:$line:1:ERROR: no 'See-also:' field present\n";
+                return 2;
             }
             last;
         }
@@ -315,7 +319,7 @@ sub single {
         my $i = 0;
         for my $k (@m) {
             if(!$helplong{$k}) {
-                print STDERR "WARN: $f see-alsos a non-existing option: $k\n";
+                print STDERR "$f:$line:1:WARN: see-also a non-existing option: $k\n";
             }
             my $l = manpageify($k);
             my $sep = " and";
@@ -533,17 +537,17 @@ sub listcats {
 
 sub mainpage {
     my (@files) = @_;
+    my $ret;
     # show the page header
     header("page-header");
 
     # output docs for all options
     foreach my $f (sort @files) {
-        if(single($f, 0)) {
-            print STDERR "Can't read $f?\n";
-        }
+        $ret += single($f, 0);
     }
 
     header("page-footer");
+    exit $ret if($ret);
 }
 
 sub showonly {
