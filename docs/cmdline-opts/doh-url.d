@@ -1,7 +1,6 @@
 Long: doh-url
 Arg: <URL>
 Help: Resolve host names over DoH
-Protocols: all
 Added: 7.62.0
 Category: dns
 Example: --doh-url https://doh.example $URL
