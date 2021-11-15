@@ -158,6 +158,10 @@ static CURLcode connect_init(struct Curl_easy *data, bool reinit)
 {
   struct http_connect_state *s;
   struct connectdata *conn = data->conn;
+  if(conn->handler->flags & PROTOPT_NOTCPPROXY) {
+    failf(data, "%s cannot be done over CONNECT", conn->handler->scheme);
+    return CURLE_UNSUPPORTED_PROTOCOL;
+  }
   if(!reinit) {
     CURLcode result;
     DEBUGASSERT(!conn->connect_state);
