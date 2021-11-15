@@ -186,7 +186,7 @@ const struct Curl_handler Curl_handler_tftp = {
   PORT_TFTP,                            /* defport */
   CURLPROTO_TFTP,                       /* protocol */
   CURLPROTO_TFTP,                       /* family */
-  PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
+  PROTOPT_NOTCPPROXY | PROTOPT_NOURLQUERY /* flags */
 };
 
 /**********************************************************
