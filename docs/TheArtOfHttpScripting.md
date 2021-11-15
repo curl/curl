@@ -695,6 +695,6 @@
  HTTPS).
 
  A more raw approach is to capture the HTTP traffic on the network with tools
- such as Wireshark or tcpdump and check what headers that were sent and
+ such as Wireshark or tcpdump and check what headers have been sent and
  received by the browser. (HTTPS forces you to use `SSLKEYLOGFILE` to do
  that.)
