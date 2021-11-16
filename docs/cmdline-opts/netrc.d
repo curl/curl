@@ -16,6 +16,8 @@ to find the home directory.
 
 A quick and simple example of how to setup a *.netrc* to allow curl to FTP to
 the machine host.domain.com with user name \&'myself' and password \&'secret'
-should look similar to:
+could look similar to:
 
-.B "machine host.domain.com login myself password secret"
+ machine host.domain.com
+ login myself
+ password secret"
