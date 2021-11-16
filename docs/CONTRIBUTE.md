@@ -154,41 +154,9 @@ git commit that is easy to merge and they are easy to track and not that easy
 to lose in the flood of many emails, like they sometimes do on the mailing
 lists.
 
-Every pull request submitted will automatically be tested in several different
-ways. Every pull request is verified for each of the following:
-
- - ... it still builds, warning-free, on Linux and macOS, with both
-   clang and gcc
- - ... it still builds fine on Windows with several MSVC versions
- - ... it still builds with cmake on Linux, with gcc and clang
- - ... it follows rudimentary code style rules
- - ... the test suite still runs 100% fine
- - ... the release tarball (the "dist") still works
- - ... it builds fine in-tree as well as out-of-tree
- - ... code coverage does not shrink drastically
-
-If the pull-request fails one of these tests, it will show up as a red X and
-you are expected to fix the problem. If you do not understand when the issue is
-or have other problems to fix the complaint, just ask and other project
-members will likely be able to help out.
-
-Consider the following table while looking at pull request failures:
-
- | CI platform as shown in PR          | State  | What to look at next       |
- | ----------------------------------- | ------ | -------------------------- |
- | CI / codeql                         | stable | quality check results      |
- | CI / fuzzing                        | stable | fuzzing results            |
- | CI / macos ...                      | stable | all errors and failures    |
- | Code scanning results / CodeQL      | stable | quality check results      |
- | FreeBSD FreeBSD: ...                | stable | all errors and failures    |
- | LGTM analysis: Python               | stable | new findings               |
- | LGTM analysis:  C/C++               | stable | new findings               |
- | buildbot/curl_winssl_ ...           | stable | all errors and failures    |
- | continuous-integration/appveyor/pr  | stable | all errors and failures    |
- | curl.curl (linux ...)               | stable | all errors and failures    |
- | curl.curl (windows ...)             | flaky  | repetitive errors/failures |
- | deepcode-ci-bot                     | stable | new findings               |
- | musedev                             | stable | new findings               |
+Every pull request submitted will automatically be
+tested in several different ways. [See CI.md for more
+information](https://github.com/curl/curl/blob/master/tests/CI.md).
 
 Sometimes the tests fail due to a dependency service temporarily being offline
 or otherwise unavailable, eg. package downloads. In this case you can just
