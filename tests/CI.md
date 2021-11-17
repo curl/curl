@@ -69,16 +69,18 @@ The following tests are run in Microsoft Azure CI environment:
 
 These are all configured in `.azure-pipelines.yml`.
 
-As of November 2021 Daniel Stenberg is the only person with administrator access
-to the Azure CI environment.
+As of November 2021 @bagder and @mback2k are the only people with administrator
+access to the Azure CI environment. Additional admins/group members can be added
+on request.
 
 ### Appveyor
 
 Appveyor runs a variety of different Windows builds, with different compilation
 options.
 
-As of November 2021 Daniel Stenberg is the only person with administrator access
-to the Appveyor CI environment.
+As of November 2021 @bagder, @mback2k, @jay, @vszakats, @dfandrich and
+@danielgustafsson have administrator access to the Appveyor CI environment.
+Additional admins/group members can be added on request.
 
 The tests are configured in appveyor.yml.
 
@@ -101,3 +103,25 @@ As of November 2021 Daniel Stenberg is the only person with administrator access
 to the Zuul CI environment.
 
 These are configured in `zuul.d` and have test runners in `scripts/zuul`.
+
+### CircleCI
+
+CircleCI runs a basic Linux test suite on Ubuntu for both x86 and ARM
+processors. This is configured in `.circleci/config.yml`.
+
+You can [view the full list of CI jobs on CircleCI's
+website](https://app.circleci.com/pipelines/github/curl/curl).
+
+@bagder has access to edit the "Project Settings" on that page.
+Additional admins/group members can be added on request.
+
+### Cirrus CI
+
+Cirrus CI runs a basic test suite on FreeBSD and Windows. This is configured in
+`.cirrus.yml`.
+
+You can [view the full list of CI jobs on Cirrus CI's
+website](https://cirrus-ci.com/github/curl/curl).
+
+@bagder has access to edit the "Project Settings" on that page.
+Additional admins/group members can be added on request.
