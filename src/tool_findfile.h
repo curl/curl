@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,6 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-char *homedir(const char *fname);
+char *findfile(const char *fname, bool dotscore);
 
 #endif /* HEADER_CURL_TOOL_HOMEDIR_H */

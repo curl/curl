@@ -30,7 +30,6 @@
 #include "tool_cfgable.h"
 #include "tool_getparam.h"
 #include "tool_getpass.h"
-#include "tool_homedir.h"
 #include "tool_msgs.h"
 #include "tool_paramhlp.h"
 #include "tool_version.h"

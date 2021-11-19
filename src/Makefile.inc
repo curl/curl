@@ -65,12 +65,12 @@ CURL_CFILES = \
   tool_doswin.c \
   tool_easysrc.c \
   tool_filetime.c \
+  tool_findfile.c \
   tool_formparse.c \
   tool_getparam.c \
   tool_getpass.c \
   tool_help.c \
   tool_helpers.c \
-  tool_homedir.c \
   tool_hugehelp.c \
   tool_libinfo.c \
   tool_listhelp.c \
@@ -108,12 +108,12 @@ CURL_HFILES = \
   tool_doswin.h \
   tool_easysrc.h \
   tool_filetime.h \
+  tool_findfile.h \
   tool_formparse.h \
   tool_getparam.h \
   tool_getpass.h \
   tool_help.h \
   tool_helpers.h \
-  tool_homedir.h \
   tool_hugehelp.h \
   tool_libinfo.h \
   tool_main.h \
