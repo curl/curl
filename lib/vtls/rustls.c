@@ -416,9 +416,6 @@ cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
     /*
     * Connection has been established according to rustls. Set send/recv
     * handlers, and update the state machine.
-    * This check has to come last because is_handshaking starts out false,
-    * then becomes true when we first write data, then becomes false again
-    * once the handshake is done.
     */
     if(!rustls_connection_is_handshaking(rconn)) {
       infof(data, "Done handshaking");
