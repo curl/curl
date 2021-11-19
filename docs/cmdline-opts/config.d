@@ -36,38 +36,37 @@ line. So, it could look similar to this:
 
 url = "https://curl.se/docs/"
 
+ # --- Example file ---
+ # this is a comment
+ url = "example.com"
+ output = "curlhere.html"
+ user-agent = "superagent/1.0"
+
+ # and fetch another URL too
+ url = "example.com/docs/manpage.html"
+ -O
+ referer = "http://nowhereatall.example.com/"
+ # --- End of example file ---
+
 When curl is invoked, it (unless --disable is used) checks for a default
-config file and uses it if found, even when this option is used. The default
+config file and uses it if found, even when --config is used. The default
 config file is checked for in the following places in this order:
 
-1) Use the CURL_HOME environment variable if set
+1) "$CURL_HOME/.curlrc"
 
-2) Use the XDG_CONFIG_HOME environment variable if set (Added in 7.73.0)
+2) "$XDG_CONFIG_HOME/.curlrc" (Added in 7.73.0)
 
-3) Use the HOME environment variable if set
+3) "$HOME/.curlrc"
 
-4) Non-windows: use getpwuid to find the home directory
+4) Windows: "%USERPROFILE%\\.curlrc"
 
-5) Windows: use APPDATA if set
+5) Windows: "%APPDATA%\\.curlrc"
 
-6) Windows: use "USERPROFILE\\Application Data" if set
+6) Windows: "%USERPROFILE%\\Application Data\\.curlrc"
 
-7) On windows, if there is no .curlrc file in the home dir, it checks for one
-in the same dir the curl executable is placed. On Unix-like systems, it will
-simply try to load .curlrc from the determined home dir.
+7) Non-windows: use getpwuid to find the home directory
 
-.nf
-# --- Example file ---
-# this is a comment
-url = "example.com"
-output = "curlhere.html"
-user-agent = "superagent/1.0"
-
-# and fetch another URL too
-url = "example.com/docs/manpage.html"
--O
-referer = "http://nowhereatall.example.com/"
-# --- End of example file ---
-.fi
+8) On windows, if it finds no .curlrc file in the sequence described above, it
+checks for one in the same dir the curl executable is placed.
 
 This option can be used multiple times to load multiple config files.
