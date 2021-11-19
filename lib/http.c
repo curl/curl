@@ -2372,6 +2372,9 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
 #ifndef USE_HYPER
   /* Hyper always handles the body separately */
   curl_off_t included_body = 0;
+#else
+  /* from this point down, this function should not be used */
+#define Curl_buffer_send(a,b,c,d,e) CURLE_OK
 #endif
   CURLcode result = CURLE_OK;
   struct HTTP *http = data->req.p.http;
@@ -2663,13 +2666,9 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
           http->postdata = (char *)&http->postdata;
       }
     }
-#ifdef USE_HYPER
-    result = CURLE_OK;
-#else
     /* issue the request */
     result = Curl_buffer_send(r, data, &data->info.request_size, included_body,
                               FIRSTSOCKET);
-#endif
 
     if(result)
       failf(data, "Failed sending HTTP POST request");
@@ -2683,14 +2682,9 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     if(result)
       return result;
 
-#ifdef USE_HYPER
-    result = CURLE_OK;
-#else
     /* issue the request */
     result = Curl_buffer_send(r, data, &data->info.request_size, 0,
                               FIRSTSOCKET);
-#endif
-
     if(result)
       failf(data, "Failed sending HTTP request");
     else
