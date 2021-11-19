@@ -1153,7 +1153,6 @@ static bool http_should_fail(struct Curl_easy *data)
   return data->state.authproblem;
 }
 
-#ifndef USE_HYPER
 /*
  * readmoredata() is a "fread() emulation" to provide POST and/or request
  * data. It is used when a huge POST is to be made and the entire chunk wasn't
@@ -1411,8 +1410,6 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
   data->req.pendingheader = 0;
   return result;
 }
-
-#endif
 
 /* end of the add_buffer functions */
 /* ------------------------------------------------------------------------- */
@@ -2666,9 +2663,13 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
           http->postdata = (char *)&http->postdata;
       }
     }
+#ifdef USE_HYPER
+    result = CURLE_OK;
+#else
     /* issue the request */
     result = Curl_buffer_send(r, data, &data->info.request_size, included_body,
                               FIRSTSOCKET);
+#endif
 
     if(result)
       failf(data, "Failed sending HTTP POST request");
@@ -2682,9 +2683,13 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     if(result)
       return result;
 
+#ifdef USE_HYPER
+    result = CURLE_OK;
+#else
     /* issue the request */
     result = Curl_buffer_send(r, data, &data->info.request_size, 0,
                               FIRSTSOCKET);
+#endif
 
     if(result)
       failf(data, "Failed sending HTTP request");
