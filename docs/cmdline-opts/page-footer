@@ -72,7 +72,7 @@ names named after the destination connection id (in hex). Do note that these
 files can become rather large. Works with both QUIC backends.
 .IP SHELL
 Used on VMS when trying to detect if using a DCL or a "unix" shell.
-.IP "SSL_CERT_DIR <dir">
+.IP "SSL_CERT_DIR <dir>"
 If set, will be used as the \fI--capath\fP value.
 .IP "SSL_CERT_FILE <path>"
 If set, will be used as the \fI--cacert\fP value.
