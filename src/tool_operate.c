@@ -1227,8 +1227,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         }
 #endif
 
-        my_setopt_str(curl, CURLOPT_URL, per->this_url);
-
         if(!config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 0L);
 
@@ -1267,6 +1265,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         else
           my_setopt(curl, CURLOPT_BUFFERSIZE, (long)BUFFER_SIZE);
 
+        my_setopt_str(curl, CURLOPT_URL, per->this_url);
         my_setopt(curl, CURLOPT_NOPROGRESS, global->noprogress?1L:0L);
         if(config->no_body)
           my_setopt(curl, CURLOPT_NOBODY, 1L);
