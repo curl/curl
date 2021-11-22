@@ -1,6 +1,7 @@
 Long: no-output-separators
 Help: Do not insert separators between files on stdout
 Category: curl
+See-also: silent write-out
 Example: --no-output-separators $URL/split-file.part[001-099] > original-file
 Added: 7.80.0
 ---

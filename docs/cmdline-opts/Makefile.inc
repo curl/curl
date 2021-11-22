@@ -141,6 +141,7 @@ DPAGES = \
   no-buffer.d \
   no-keepalive.d \
   no-npn.d \
+  no-output-separators.d \
   no-progress-meter.d \
   no-sessionid.d \
   noproxy.d \
