@@ -251,13 +251,15 @@ bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
       */
     }
     else {
-        break;
+      break;
     }
   }
   if(i && (url[i] == ':') && (url[i + 1] == '/')) {
     if(buf) {
-      memcpy(buf, url, i);
       buf[i] = 0;
+      while(i--) {
+        buf[i] = TOLOWER(url[i]);
+      }
     }
     return TRUE;
   }
@@ -822,7 +824,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   }
 
   /* handle the file: scheme */
-  if(url_has_scheme && strcasecompare(schemebuf, "file")) {
+  if(url_has_scheme && !strcmp(schemebuf, "file")) {
     /* path has been allocated large enough to hold this */
     strcpy(path, &url[5]);
 
