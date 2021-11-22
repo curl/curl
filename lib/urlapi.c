@@ -818,7 +818,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   hostname = &path[urllen + 1];
   hostname[0] = 0;
 
-  if(Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf))) {
+  if(Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf) - 1)) {
     url_has_scheme = TRUE;
     schemelen = strlen(schemebuf);
   }
@@ -1527,7 +1527,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     char *redired_url;
     CURLU *handle2;
 
-    if(Curl_is_absolute_url(part, NULL, MAX_SCHEME_LEN + 1)) {
+    if(Curl_is_absolute_url(part, NULL, MAX_SCHEME_LEN)) {
       handle2 = curl_url();
       if(!handle2)
         return CURLUE_OUT_OF_MEMORY;
