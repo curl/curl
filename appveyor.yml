@@ -254,8 +254,8 @@ build_script:
         cmake .
         -G"%PRJ_GEN%"
         %TARGET%
-        -DCMAKE_USE_OPENSSL=%OPENSSL%
-        -DCMAKE_USE_SCHANNEL=%SCHANNEL%
+        -DCURL_USE_OPENSSL=%OPENSSL%
+        -DCURL_USE_SCHANNEL=%SCHANNEL%
         -DHTTP_ONLY=%HTTP_ONLY%
         -DBUILD_SHARED_LIBS=%SHARED%
         -DBUILD_TESTING=%TESTING%

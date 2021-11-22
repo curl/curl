@@ -355,58 +355,54 @@ endif()
 # check SSL libraries
 # TODO support GnuTLS
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
-if(CMAKE_USE_WINSSL)
-  message(FATAL_ERROR "The cmake option CMAKE_USE_WINSSL was renamed to CMAKE_USE_SCHANNEL.")
+if(CURL_USE_SCHANNEL)
+  message(FATAL_ERROR "The cmake option CURL_USE_SCHANNEL was renamed to CURL_USE_SCHANNEL.")
 endif()
 
 if(APPLE)
-  cmake_dependent_option(CMAKE_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+  cmake_dependent_option(CURL_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 endif()
 if(WIN32)
-  cmake_dependent_option(CMAKE_USE_SCHANNEL "enable Windows native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+  cmake_dependent_option(CURL_USE_SCHANNEL "enable Windows native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
   cmake_dependent_option(CURL_WINDOWS_SSPI "Use windows libraries to allow NTLM authentication without openssl" ON
-    CMAKE_USE_SCHANNEL OFF)
+    CURL_USE_SCHANNEL OFF)
 endif()
-cmake_dependent_option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CMAKE_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CMAKE_USE_NSS "Enable NSS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CMAKE_USE_WOLFSSL "enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_NSS "Enable NSS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_WOLFSSL "enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 
 set(openssl_default ON)
-if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_SCHANNEL OR CMAKE_USE_MBEDTLS OR CMAKE_USE_NSS OR CMAKE_USE_WOLFSSL)
+if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_USE_NSS OR CURL_USE_WOLFSSL)
   set(openssl_default OFF)
 endif()
-cmake_dependent_option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default} CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default} CURL_ENABLE_SSL OFF)
 option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
 
 count_true(enabled_ssl_options_count
-  CMAKE_USE_SCHANNEL
-  CMAKE_USE_SECTRANSP
-  CMAKE_USE_OPENSSL
-  CMAKE_USE_MBEDTLS
-  CMAKE_USE_BEARSSL
-  CMAKE_USE_NSS
-  CMAKE_USE_WOLFSSL
+  CURL_USE_SCHANNEL
+  CURL_USE_SECTRANSP
+  CURL_USE_OPENSSL
+  CURL_USE_MBEDTLS
+  CURL_USE_BEARSSL
+  CURL_USE_NSS
+  CURL_USE_WOLFSSL
 )
 if(enabled_ssl_options_count GREATER "1")
   set(CURL_WITH_MULTI_SSL ON)
 endif()
 
-if(CMAKE_USE_SCHANNEL)
+if(CURL_USE_SCHANNEL)
   set(SSL_ENABLED ON)
   set(USE_SCHANNEL ON) # Windows native SSL/TLS support
-  set(USE_WINDOWS_SSPI ON) # CMAKE_USE_SCHANNEL implies CURL_WINDOWS_SSPI
+  set(USE_WINDOWS_SSPI ON) # CURL_USE_SCHANNEL implies CURL_WINDOWS_SSPI
 endif()
 if(CURL_WINDOWS_SSPI)
   set(USE_WINDOWS_SSPI ON)
   set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DSECURITY_WIN32")
 endif()
 
-if(CMAKE_USE_DARWINSSL)
-  message(FATAL_ERROR "The cmake option CMAKE_USE_DARWINSSL was renamed to CMAKE_USE_SECTRANSP.")
-endif()
-
-if(CMAKE_USE_SECTRANSP)
+if(CURL_USE_SECTRANSP)
   set(use_core_foundation ON)
 
   find_library(SECURITY_FRAMEWORK "Security")
@@ -428,7 +424,7 @@ if(use_core_foundation)
   list(APPEND CURL_LIBS "-framework CoreFoundation")
 endif()
 
-if(CMAKE_USE_OPENSSL)
+if(CURL_USE_OPENSSL)
   find_package(OpenSSL REQUIRED)
   set(SSL_ENABLED ON)
   set(USE_OPENSSL ON)
@@ -458,7 +454,7 @@ if(CMAKE_USE_OPENSSL)
   add_definitions(-DOPENSSL_SUPPRESS_DEPRECATED)
 endif()
 
-if(CMAKE_USE_MBEDTLS)
+if(CURL_USE_MBEDTLS)
   find_package(MbedTLS REQUIRED)
   set(SSL_ENABLED ON)
   set(USE_MBEDTLS ON)
@@ -466,7 +462,7 @@ if(CMAKE_USE_MBEDTLS)
   include_directories(${MBEDTLS_INCLUDE_DIRS})
 endif()
 
-if(CMAKE_USE_BEARSSL)
+if(CURL_USE_BEARSSL)
   find_package(BearSSL REQUIRED)
   set(SSL_ENABLED ON)
   set(USE_BEARSSL ON)
@@ -474,7 +470,7 @@ if(CMAKE_USE_BEARSSL)
   include_directories(${BEARSSL_INCLUDE_DIRS})
 endif()
 
-if(CMAKE_USE_WOLFSSL)
+if(CURL_USE_WOLFSSL)
   find_package(WolfSSL REQUIRED)
   set(SSL_ENABLED ON)
   set(USE_WOLFSSL ON)
@@ -482,7 +478,7 @@ if(CMAKE_USE_WOLFSSL)
   include_directories(${WolfSSL_INCLUDE_DIRS})
 endif()
 
-if(CMAKE_USE_NSS)
+if(CURL_USE_NSS)
   find_package(NSS REQUIRED)
   include_directories(${NSS_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${NSS_LIBRARIES})
@@ -563,13 +559,13 @@ if(NOT CURL_DISABLE_LDAP)
     endif()
   endif()
 
-  option(CMAKE_USE_OPENLDAP "Use OpenLDAP code." OFF)
-  mark_as_advanced(CMAKE_USE_OPENLDAP)
+  option(CURL_USE_OPENLDAP "Use OpenLDAP code." OFF)
+  mark_as_advanced(CURL_USE_OPENLDAP)
   set(CMAKE_LDAP_LIB "ldap" CACHE STRING "Name or full path to ldap library")
   set(CMAKE_LBER_LIB "lber" CACHE STRING "Name or full path to lber library")
 
-  if(CMAKE_USE_OPENLDAP AND USE_WIN32_LDAP)
-    message(FATAL_ERROR "Cannot use USE_WIN32_LDAP and CMAKE_USE_OPENLDAP at the same time")
+  if(CURL_USE_OPENLDAP AND USE_WIN32_LDAP)
+    message(FATAL_ERROR "Cannot use USE_WIN32_LDAP and CURL_USE_OPENLDAP at the same time")
   endif()
 
   # Now that we know, we're not using windows LDAP...
@@ -599,7 +595,7 @@ if(NOT CURL_DISABLE_LDAP)
       set(CURL_DISABLE_LDAP ON CACHE BOOL "" FORCE)
       set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_BAK}) #LDAP includes won't be used
     else()
-      if(CMAKE_USE_OPENLDAP)
+      if(CURL_USE_OPENLDAP)
         set(USE_OPENLDAP ON)
       endif()
       if(CMAKE_LDAP_INCLUDE_DIR)
@@ -729,13 +725,13 @@ if(CURL_ZSTD)
 endif()
 
 #libSSH2
-option(CMAKE_USE_LIBSSH2 "Use libSSH2" ON)
-mark_as_advanced(CMAKE_USE_LIBSSH2)
+option(CURL_USE_LIBSSH2 "Use libSSH2" ON)
+mark_as_advanced(CURL_USE_LIBSSH2)
 set(USE_LIBSSH2 OFF)
 set(HAVE_LIBSSH2 OFF)
 set(HAVE_LIBSSH2_H OFF)
 
-if(CMAKE_USE_LIBSSH2)
+if(CURL_USE_LIBSSH2)
   find_package(LibSSH2)
   if(LIBSSH2_FOUND)
     list(APPEND CURL_LIBS ${LIBSSH2_LIBRARY})
@@ -754,9 +750,9 @@ if(CMAKE_USE_LIBSSH2)
 endif()
 
 # libssh
-option(CMAKE_USE_LIBSSH "Use libSSH" OFF)
-mark_as_advanced(CMAKE_USE_LIBSSH)
-if(NOT HAVE_LIBSSH2 AND CMAKE_USE_LIBSSH)
+option(CURL_USE_LIBSSH "Use libSSH" OFF)
+mark_as_advanced(CURL_USE_LIBSSH)
+if(NOT HAVE_LIBSSH2 AND CURL_USE_LIBSSH)
   find_package(libssh CONFIG)
   if(libssh_FOUND)
     message(STATUS "Found libssh ${libssh_VERSION}")
@@ -767,10 +763,10 @@ if(NOT HAVE_LIBSSH2 AND CMAKE_USE_LIBSSH)
   endif()
 endif()
 
-option(CMAKE_USE_GSSAPI "Use GSSAPI implementation (right now only Heimdal is supported with CMake build)" OFF)
-mark_as_advanced(CMAKE_USE_GSSAPI)
+option(CURL_USE_GSSAPI "Use GSSAPI implementation (right now only Heimdal is supported with CMake build)" OFF)
+mark_as_advanced(CURL_USE_GSSAPI)
 
-if(CMAKE_USE_GSSAPI)
+if(CURL_USE_GSSAPI)
   find_package(GSS)
 
   set(HAVE_GSSAPI ${GSS_FOUND})
