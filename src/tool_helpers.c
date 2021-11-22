@@ -69,7 +69,7 @@ const char *param2text(int res)
   case PARAM_NO_NOT_BOOLEAN:
     return "used '--no-' for option that isn't a boolean";
   case PARAM_CONTDISP_SHOW_HEADER:
-    return "--include and --remote-header-name cannot be combined";
+    return "showing headers and --remote-header-name cannot be combined";
   case PARAM_CONTDISP_RESUME_FROM:
     return "--continue-at and --remote-header-name cannot be combined";
   default:
