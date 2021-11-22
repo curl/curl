@@ -13,17 +13,33 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o azure: make the "w/o HTTP/SMTP/IMAP" build disable SSL proper [12]
+ o cmake: don't set _USRDLL on a static Windows build [22]
  o configure: add -lm to configure for rustls build. [13]
  o configure: better diagnostics if hyper is built wrong [6]
  o configure: don't enable TLS when --without-* flags are used [17]
+ o configure: fix runtime-lib detection on macOS [21]
+ o curl.1: require "see also" for every documented option [27]
  o curl_easy_cleanup.3: remove from multi handle first [3]
  o curl_share_setopt.3: split out options into their own manpages [14]
  o docs/checksrc: Add documentation for STRERROR [18]
+ o docs/cmdline-opts: do not say "protocols: all" [26]
+ o gen.pl: improve example output format [29]
+ o http: enable haproxy support for hyper backend [20]
+ o insecure.d: expand and clarify [28]
  o multi: shut down CONNECT in Curl_detach_connnection [2]
+ o netrc.d: edit the .netrc example to look nicer [24]
+ o openssl: remove `RSA_METHOD_FLAG_NO_CHECK` handling if unavailable
+ o openssl: remove usage of deprecated `SSL_get_peer_certificate`
+ o openssl: use non-deprecated API to read key parameters
+ o page-footer: add a mention of how to report bugs to the man page
+ o page-footer: document more environment variables [23]
  o runtests: make the SSH library a testable feature
  o rustls: read of zero bytes might be okay [9]
+ o rustls: remove comment about checking handshaking [15]
  o rustls: remove incorrect EOF check [10]
  o test302[12]: run only with the libssh2 backend [8]
+ o tftp: mark protocol as not possible to do over CONNECT [25]
+ o tool_operate: only set SSH related libcurl options for SSH URLs [11]
  o url.c: fix the SIGPIPE comment for Curl_close [4]
  o vtls/rustls: adapt to the updated rustls_version proto [19]
  o zuul.d: update rustls-ffi to version 0.8.2 [5]
@@ -35,10 +51,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Dan Fandrich, Daniel Stenberg, Jacob Hoffman-Andrews, Kevin Burke,
+  Bernhard Walle, Dan Fandrich, Daniel Stenberg, Don J Olmstead, Even Rouault,
+  Jacob Hoffman-Andrews, Jeff Luszcz, Kevin Burke, Marcel Raad,
   Patrick Monnerat, Paul Howarth, Rikard Falkeborn, Ryan Sleevi, Stan Hu,
-  Stephen M. Coakley, Viktor Szakats, Vincent Grande,
-  (12 contributors)
+  Stefan Eissing, Stephen M. Coakley, Viktor Szakats, Vincent Grande,
+  (18 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -51,9 +68,21 @@ References to bug reports and discussions on issues:
  [8] = https://curl.se/bug/?i=8009
  [9] = https://curl.se/bug/?i=8003
  [10] = https://curl.se/bug/?i=8003
+ [11] = https://curl.se/bug/?i=8040
  [12] = https://curl.se/bug/?i=8006
  [13] = https://curl.se/bug/?i=8002
  [14] = https://curl.se/bug/?i=7998
+ [15] = https://curl.se/bug/?i=8038
  [17] = https://curl.se/bug/?i=7994
  [18] = https://curl.se/bug/?i=7991
  [19] = https://curl.se/bug/?i=7956
+ [20] = https://curl.se/bug/?i=8034
+ [21] = https://curl.se/bug/?i=8028
+ [22] = https://curl.se/bug/?i=8030
+ [23] = https://curl.se/bug/?i=8027
+ [24] = https://curl.se/bug/?i=8025
+ [25] = https://curl.se/bug/?i=8018
+ [26] = https://curl.se/bug/?i=8021
+ [27] = https://curl.se/bug/?i=8019
+ [28] = https://curl.se/bug/?i=8017
+ [29] = https://curl.se/bug/?i=8016
