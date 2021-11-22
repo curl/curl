@@ -237,15 +237,15 @@ bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
   size_t i;
   char s;
 
-  if (buf && buflen)
+  if(buf && buflen)
     buf[0] = 0; /* always leave a defined value in buf */
 #ifdef WIN32
   if(STARTS_WITH_DRIVE_PREFIX(url))
     return FALSE;
 #endif
   for(i = 0; i < buflen; ++i) {
-    if((s = url[i]) &&
-      (ISALNUM(s) || (s == '+') || (s == '-') || (s == '.') )) {
+    s = url[i];
+    if(s && (ISALNUM(s) || (s == '+') || (s == '-') || (s == '.') )) {
       /* RFC 3986 3.1 explains:
         scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
       */
@@ -255,7 +255,7 @@ bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
     }
   }
   if(i && (url[i] == ':') && (url[i + 1] == '/')) {
-    if (buf) {
+    if(buf) {
       memcpy(buf, url, i);
       buf[i] = 0;
     }
