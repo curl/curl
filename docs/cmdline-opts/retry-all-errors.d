@@ -3,6 +3,7 @@ Help: Retry all errors (use with --retry)
 Added: 7.71.0
 Category: curl
 Example: --retry-all-errors $URL
+See-also: retry
 ---
 Retry on any error. This option is used together with --retry.
 
@@ -17,9 +18,9 @@ transfers as close as possible to how they were started, but this is not
 possible with redirected input or output. For example, before retrying it
 removes output data from a failed partial transfer that was written to an
 output file. However this is not true of data redirected to a | pipe or >
-file, which are not reset. We strongly suggest don't parse or record output
-via redirect in combination with this option, since you may receive duplicate
-data.
+file, which are not reset. We strongly suggest you do not parse or record
+output via redirect in combination with this option, since you may receive
+duplicate data.
 
 By default curl will not error on an HTTP response code that indicates an HTTP
 error, if the transfer was successful. For example, if a server replies 404

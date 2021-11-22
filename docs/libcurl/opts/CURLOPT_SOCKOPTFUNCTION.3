@@ -54,7 +54,7 @@ exact purpose for this particular socket:
 
 \fICURLSOCKTYPE_IPCXN\fP for actively created connections or since 7.28.0
 \fICURLSOCKTYPE_ACCEPT\fP for FTP when the connection was setup with PORT/EPSV
-(in earlier versions these sockets weren't passed to this callback).
+(in earlier versions these sockets were not passed to this callback).
 
 Future versions of libcurl may support more purposes. libcurl passes the newly
 created socket descriptor to the callback in the \fIcurlfd\fP parameter so

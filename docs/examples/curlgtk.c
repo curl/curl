@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (c) 2000 - 2020 David Odin (aka DindinX) for MandrakeSoft
+ * Copyright (c) 2000 - 2021 David Odin (aka DindinX) for MandrakeSoft
  */
 /* <DESC>
  * use the libcurl in a gtk-threaded application
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
   gtk_widget_show_all(Window);
 
   if(!g_thread_create(&my_thread, argv[1], FALSE, NULL) != 0)
-    g_warning("can't create the thread");
+    g_warning("cannot create the thread");
 
   gdk_threads_enter();
   gtk_main();

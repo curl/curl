@@ -57,7 +57,7 @@ The data passed to this function will not be null-terminated!
 Set the \fIuserdata\fP argument with the \fICURLOPT_WRITEDATA(3)\fP option.
 
 Your callback should return the number of bytes actually taken care of. If
-that amount differs from the amount passed to your callback function, it'll
+that amount differs from the amount passed to your callback function, it will
 signal an error condition to the library. This will cause the transfer to get
 aborted and the libcurl function used will return \fICURLE_WRITE_ERROR\fP.
 
@@ -68,7 +68,7 @@ Set this option to NULL to get the internal default function used instead of
 your callback. The internal default function will write the data to the FILE *
 given with \fICURLOPT_WRITEDATA(3)\fP.
 
-This option doesn't enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
+This option does not enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
 do that.
 .SH DEFAULT
 libcurl will use 'fwrite' as a callback by default.

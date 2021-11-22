@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -67,7 +67,7 @@ int main(int argc, char **argv)
     headers = curl_slist_append(headers, "Content-Type: literature/classic");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-    /* pass on content in request body. When CURLOPT_POSTFIELDSIZE isn't used,
+    /* pass on content in request body. When CURLOPT_POSTFIELDSIZE is not used,
        curl does strlen to get the size. */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, olivertwist);
 
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
        name, not only a directory */
     curl_easy_setopt(curl, CURLOPT_URL, url);
 
-    /* Now run off and do what you've been told! */
+    /* Now run off and do what you have been told! */
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)

@@ -8,13 +8,13 @@
 
   Cookies are either "session cookies" which typically are forgotten when the
   session is over which is often translated to equal when browser quits, or
-  the cookies aren't session cookies they have expiration dates after which
+  the cookies are not session cookies they have expiration dates after which
   the client will throw them away.
 
   Cookies are set to the client with the Set-Cookie: header and are sent to
   servers with the Cookie: header.
 
-  For a very long time, the only spec explaining how to use cookies was the
+  For a long time, the only spec explaining how to use cookies was the
   original [Netscape spec from 1994](https://curl.se/rfc/cookie_spec.html).
 
   In 2011, [RFC6265](https://www.ietf.org/rfc/rfc6265.txt) was finally
@@ -74,7 +74,7 @@
   `-b, --cookie`
 
   tell curl a file to read cookies from and start the cookie engine, or if it
-  isn't a file it will pass on the given string. -b name=var works and so does
+  is not a file it will pass on the given string. -b name=var works and so does
   -b cookiefile.
 
   `-j, --junk-session-cookies`

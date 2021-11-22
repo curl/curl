@@ -5,6 +5,7 @@ Protocols: HTTP
 Category: http post upload
 Example: --data-binary @filename $URL
 Added: 7.2
+See-also: data-ascii
 ---
 This posts data exactly as specified with no extra processing whatsoever.
 

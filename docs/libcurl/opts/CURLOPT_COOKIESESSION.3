@@ -47,7 +47,7 @@ CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
 
-  /* new "session", don't load session cookies */
+  /* new "session", do not load session cookies */
   curl_easy_setopt(curl, CURLOPT_COOKIESESSION, 1L);
 
   /* get the (non session) cookies from this file */

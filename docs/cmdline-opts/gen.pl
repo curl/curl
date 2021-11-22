@@ -76,6 +76,7 @@ sub manpageify {
 
 sub printdesc {
     my @desc = @_;
+    my $exam = 0;
     for my $d (@desc) {
         if($d =~ /\(Added in ([0-9.]+)\)/i) {
             my $ver = $1;
@@ -89,6 +90,16 @@ sub printdesc {
             # *italics*
             $d =~ s/\*([^ ]*)\*/\\fI$1\\fP/g;
         }
+        if(!$exam && ($d =~ /^ /)) {
+            # start of example
+            $exam = 1;
+            print ".nf\n"; # no-fill
+        }
+        elsif($exam && ($d !~ /^ /)) {
+            # end of example
+            $exam = 0;
+            print ".fi\n"; # fill-in
+        }
         # skip lines starting with space (examples)
         if($d =~ /^[^ ]/) {
             for my $k (keys %optlong) {
@@ -99,6 +110,8 @@ sub printdesc {
         # quote "bare" minuses in the output
         $d =~ s/( |\\fI|^)--/$1\\-\\-/g;
         $d =~ s/([ -]|\\fI|^)-/$1\\-/g;
+        # handle single quotes first on the line
+        $d =~ s/(\s*)\'/$1\\(aq/;
         print $d;
     }
 }
@@ -226,19 +239,23 @@ sub single {
         elsif(/^---/) {
             if(!$long) {
                 print STDERR "ERROR: no 'Long:' in $f\n";
-                exit 1;
+                return 1;
             }
             if(!$category) {
                 print STDERR "ERROR: no 'Category:' in $f\n";
-                exit 2;
+                return 2;
             }
             if(!$examples[0]) {
                 print STDERR "$f:$line:1:ERROR: no 'Example:' present\n";
-                exit 2;
+                return 2;
             }
             if(!$added) {
                 print STDERR "$f:$line:1:ERROR: no 'Added:' version present\n";
-                exit 2;
+                return 2;
+            }
+            if(!$seealso) {
+                print STDERR "$f:$line:1:ERROR: no 'See-also:' field present\n";
+                return 2;
             }
             last;
         }
@@ -302,7 +319,7 @@ sub single {
         my $i = 0;
         for my $k (@m) {
             if(!$helplong{$k}) {
-                print STDERR "WARN: $f see-alsos a non-existing option: $k\n";
+                print STDERR "$f:$line:1:WARN: see-also a non-existing option: $k\n";
             }
             my $l = manpageify($k);
             my $sep = " and";
@@ -520,17 +537,17 @@ sub listcats {
 
 sub mainpage {
     my (@files) = @_;
+    my $ret;
     # show the page header
     header("page-header");
 
     # output docs for all options
     foreach my $f (sort @files) {
-        if(single($f, 0)) {
-            print STDERR "Can't read $f?\n";
-        }
+        $ret += single($f, 0);
     }
 
     header("page-footer");
+    exit $ret if($ret);
 }
 
 sub showonly {

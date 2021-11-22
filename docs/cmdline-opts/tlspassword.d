@@ -4,8 +4,9 @@ Help: TLS password
 Added: 7.21.4
 Category: tls auth
 Example: --tlspassword pwd --tlsuser user $URL
+See-also: tlsuser
 ---
 Set password for use with the TLS authentication method specified with
 --tlsauthtype. Requires that --tlsuser also be set.
 
-This doesn't work with TLS 1.3.
+This option does not work with TLS 1.3.

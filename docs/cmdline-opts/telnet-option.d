@@ -5,6 +5,7 @@ Help: Set telnet option
 Category: telnet
 Example: -t TTYPE=vt100 telnet://example.com/
 Added: 7.7
+See-also: config
 ---
 Pass options to the telnet protocol. Supported options are:
 

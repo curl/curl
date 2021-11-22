@@ -50,6 +50,12 @@ same \fBeasy_handle\fP. Let the function return first before invoking it
 another time. If you want parallel transfers, you must use several curl
 easy_handles.
 
+A network transfer moves data to a peer or from a peer. An application tells
+libcurl how to receive data by setting the \fICURLOPT_WRITEFUNCTION(3)\fP and
+\fICURLOPT_WRITEDATA(3)\fP options. To tell libcurl what data to send, there
+are a few more alternatives but two common ones are
+\fICURLOPT_READFUNCTION(3)\fP and \fICURLOPT_POSTFIELDS(3)\fP.
+
 While the \fBeasy_handle\fP is added to a multi handle, it cannot be used by
 \fIcurl_easy_perform(3)\fP.
 .SH EXAMPLE

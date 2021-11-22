@@ -447,13 +447,13 @@ int main(int argc, char **argv)
   curl_multi_setopt(g.multi, CURLMOPT_TIMERFUNCTION, multi_timer_cb);
   curl_multi_setopt(g.multi, CURLMOPT_TIMERDATA, &g);
 
-  /* we don't call any curl_multi_socket*() function yet as we have no handles
+  /* we do not call any curl_multi_socket*() function yet as we have no handles
      added! */
 
   event_base_dispatch(g.evbase);
 
-  /* this, of course, won't get called since only way to stop this program is
-     via ctrl-C, but it is here to show how cleanup /would/ be done. */
+  /* this, of course, will not get called since only way to stop this program
+     is via ctrl-C, but it is here to show how cleanup /would/ be done. */
   clean_fifo(&g);
   event_del(&g.timer_event);
   event_base_free(g.evbase);

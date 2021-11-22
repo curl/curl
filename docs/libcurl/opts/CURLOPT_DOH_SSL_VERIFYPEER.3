@@ -32,7 +32,7 @@ Pass a long as parameter set to 1L to enable or 0L to disable.
 
 This option tells curl to verify the authenticity of the DoH (DNS-over-HTTPS)
 server's certificate. A value of 1 means curl verifies; 0 (zero) means it
-doesn't.
+does not.
 
 This option is the DoH equivalent of \fICURLOPT_SSL_VERIFYPEER(3)\fP and
 only affects requests to the DoH server.
@@ -53,7 +53,7 @@ the option is zero, the peer certificate verification succeeds regardless.
 Authenticating the certificate is not enough to be sure about the server. You
 typically also want to ensure that the server is the server you mean to be
 talking to.  Use \fICURLOPT_DOH_SSL_VERIFYHOST(3)\fP for that. The check
-that the host name in the certificate is valid for the host name you're
+that the host name in the certificate is valid for the host name you are
 connecting to is done independently of the
 \fICURLOPT_DOH_SSL_VERIFYPEER(3)\fP option.
 

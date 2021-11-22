@@ -48,10 +48,10 @@ is emptied.
 calling \fIcurl_multi_cleanup(3)\fP, \fIcurl_multi_remove_handle(3)\fP or
 \fIcurl_easy_cleanup(3)\fP.
 
-The 'CURLMsg' struct is very simple and only contains very basic information.
-If more involved information is wanted, the particular "easy handle" is
-present in that struct and can be used in subsequent regular
-\fIcurl_easy_getinfo(3)\fP calls (or similar):
+The 'CURLMsg' struct is simple and only contains basic information. If more
+involved information is wanted, the particular "easy handle" is present in
+that struct and can be used in subsequent regular \fIcurl_easy_getinfo(3)\fP
+calls (or similar):
 
 .nf
  struct CURLMsg {

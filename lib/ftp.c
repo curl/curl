@@ -876,11 +876,6 @@ static CURLcode ftp_state_cwd(struct Curl_easy *data,
 
     ftpc->count2 = 0; /* count2 counts failed CWDs */
 
-    /* count3 is set to allow a MKD to fail once. In the case when first CWD
-       fails and then MKD fails (due to another session raced it to create the
-       dir) this then allows for a second try to CWD to it */
-    ftpc->count3 = (data->set.ftp_create_missing_dirs == 2)?1:0;
-
     if(conn->bits.reuse && ftpc->entrypath &&
        /* no need to go to entrypath when we have an absolute path */
        !(ftpc->dirdepth && ftpc->dirs[0][0] == '/')) {
@@ -3002,6 +2997,12 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
            ftpc->cwdcount && !ftpc->count2) {
           /* try making it */
           ftpc->count2++; /* counter to prevent CWD-MKD loops */
+
+          /* count3 is set to allow MKD to fail once per dir. In the case when
+          CWD fails and then MKD fails (due to another session raced it to
+          create the dir) this then allows for a second try to CWD to it. */
+          ftpc->count3 = (data->set.ftp_create_missing_dirs == 2) ? 1 : 0;
+
           result = Curl_pp_sendf(data, &ftpc->pp, "MKD %s",
                                  ftpc->dirs[ftpc->cwdcount - 1]);
           if(!result)

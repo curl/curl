@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -30,8 +30,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_EFFECTIVE_URL, char **urlp);
 .SH DESCRIPTION
 Pass in a pointer to a char pointer and get the last used effective URL.
 
-In cases when you've asked libcurl to follow redirects, it may very well not
-be the same value you set with \fICURLOPT_URL(3)\fP.
+In cases when you have asked libcurl to follow redirects, it may not be the same
+value you set with \fICURLOPT_URL(3)\fP.
 
 The \fBurlp\fP pointer will be NULL or pointing to private memory you MUST NOT
 free - it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the

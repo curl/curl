@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2015 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 2015 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -84,9 +84,9 @@ threaded situation as there will be race where libcurl risks restoring the
 former signal handler while another thread should still ignore it.
 .IP "Name resolving"
 \fBgethostby* functions and other system calls.\fP These functions, provided
-by your operating system, must be thread safe. It is very important that
-libcurl can find and use thread safe versions of these and other system calls,
-as otherwise it can't function fully thread safe. Some operating systems are
+by your operating system, must be thread safe. It is important that libcurl
+can find and use thread safe versions of these and other system calls, as
+otherwise it cannot function fully thread safe. Some operating systems are
 known to have faulty thread implementations. We have previously received
 problem reports on *BSD (at least in the past, they may be working fine these
 days).  Some operating systems that are known to have solid and working thread

@@ -28,7 +28,7 @@ curl \- transfer a URL
 .SH SYNOPSIS
 .B curl [options / URLs]
 .SH DESCRIPTION
-**curl** is a tool for transfering data from or to a server. It supports these
+**curl** is a tool for transferring data from or to a server. It supports these
 protocols: DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS, IMAP, IMAPS,
 LDAP, LDAPS, MQTT, POP3, POP3S, RTMP, RTMPS, RTSP, SCP, SFTP, SMB, SMBS, SMTP,
 SMTPS, TELNET or TFTP. The command is designed to work without user
@@ -42,7 +42,7 @@ head spin!
 curl is powered by libcurl for all transfer-related features. See
 *libcurl(3)* for details.
 .SH URL
-The URL syntax is protocol-dependent. You'll find a detailed description in
+The URL syntax is protocol-dependent. You find a detailed description in
 RFC 3986.
 
 You can specify multiple URLs or parts of URLs by writing part sets within
@@ -187,7 +187,7 @@ or without a space between it and its value, although a space is a recommended
 separator. The long "double-dash" form, --data for example, requires a space
 between it and its value.
 
-Short version options that don't need any additional values can be used
+Short version options that do not need any additional values can be used
 immediately next to each other, like for example you can specify all the
 options -O, -L and -v at once as -OLv.
 

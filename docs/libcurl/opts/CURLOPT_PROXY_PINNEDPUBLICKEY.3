@@ -63,14 +63,14 @@ if(curl) {
 If you do not have the https proxy server's public key file you can extract it
 from the https proxy server's certificate.
 .nf
-# retrieve the server's certificate if you don't already have it
+# retrieve the server's certificate if you do not already have it
 #
 # be sure to examine the certificate to see if it is what you expected
 #
 # Windows-specific:
 # - Use NUL instead of /dev/null.
 # - OpenSSL may wait for input instead of disconnecting. Hit enter.
-# - If you don't have sed, then just copy the certificate into a file:
+# - If you do not have sed, then just copy the certificate into a file:
 #   Lines from -----BEGIN CERTIFICATE----- to -----END CERTIFICATE-----.
 #
 openssl s_client -servername www.example.com -connect www.example.com:443 < /dev/null | sed -n "/-----BEGIN/,/-----END/p" > www.example.com.pem

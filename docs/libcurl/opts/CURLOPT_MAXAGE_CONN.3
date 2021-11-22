@@ -34,8 +34,8 @@ reuse for this request.
 
 The "connection cache" that holds previously used connections. When a new
 request is to be done, it will consider any connection that matches for
-reuse. The \fICURLOPT_MAXAGE_CONN(3)\fP limit prevents libcurl from trying
-very old connections for reuse, since old connections have a high risk of not
+reuse. The \fICURLOPT_MAXAGE_CONN(3)\fP limit prevents libcurl from trying too
+old connections for reuse, since old connections have a high risk of not
 working and thus trying them is a performance loss and sometimes service loss
 due to the difficulties to figure out the situation. If a connection is found
 in the cache that is older than this set \fImaxage\fP, it will instead be

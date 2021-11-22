@@ -69,7 +69,7 @@ read was for internal SSL processing, and no other data is available.
 
  if(res == CURLE_OK) {
    /* Extract the socket from the curl handle -
-      we'll need it for waiting. */
+      we will need it for waiting. */
    res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
 
    /* read data */

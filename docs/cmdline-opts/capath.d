@@ -3,6 +3,7 @@ Arg: <dir>
 Help: CA directory to verify peer against
 Protocols: TLS
 Category: tls
+See-also: cacert insecure
 Example: --capath /local/directory $URL
 Added: 7.9.8
 ---

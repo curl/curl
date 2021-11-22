@@ -17,7 +17,7 @@ ABI - Application Binary Interface
 
  In libcurl land, you cannot tell by the libcurl version number if that
  libcurl is binary compatible or not with another libcurl version. As a rule,
- we don't break the ABI so you can *always* upgrade to a later version without
+ we do not break the ABI so you can *always* upgrade to a later version without
  any loss or change in functionality.
 
 ## Soname Bumps
@@ -38,11 +38,11 @@ ABI - Application Binary Interface
 
 ## Downgrades
 
- Going to an older libcurl version from one you're currently using can be a
+ Going to an older libcurl version from one you are currently using can be a
  tricky thing. Mostly we add features and options to newer libcurls as that
- won't break ABI or hamper existing applications. This has the implication
+ will not break ABI or hamper existing applications. This has the implication
  that going backwards may get you in a situation where you pick a libcurl that
- doesn't support the options your application needs. Or possibly you even
+ does not support the options your application needs. Or possibly you even
  downgrade so far so you cross an ABI break border and thus a different
  soname, and then your application may need to adapt to the modified ABI.
 

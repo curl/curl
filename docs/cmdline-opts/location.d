@@ -5,13 +5,14 @@ Protocols: HTTP
 Category: http
 Example: -L $URL
 Added: 4.9
+See-also: resolve alt-svc
 ---
 If the server reports that the requested page has moved to a different
 location (indicated with a Location: header and a 3XX response code), this
 option will make curl redo the request on the new place. If used together with
 --include or --head, headers from all requested pages will be shown. When
 authentication is used, curl only sends its credentials to the initial
-host. If a redirect takes curl to a different host, it won't be able to
+host. If a redirect takes curl to a different host, it will not be able to
 intercept the user+password. See also --location-trusted on how to change
 this. You can limit the amount of redirects to follow by using the
 --max-redirs option.

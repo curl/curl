@@ -36,6 +36,39 @@
 curl_version_info_data *curlinfo = NULL;
 long built_in_protos = 0;
 
+static struct proto_name_pattern {
+  const char *proto_name;
+  long        proto_pattern;
+} const possibly_built_in[] = {
+  { "dict",   CURLPROTO_DICT   },
+  { "file",   CURLPROTO_FILE   },
+  { "ftp",    CURLPROTO_FTP    },
+  { "ftps",   CURLPROTO_FTPS   },
+  { "gopher", CURLPROTO_GOPHER },
+  { "gophers",CURLPROTO_GOPHERS},
+  { "http",   CURLPROTO_HTTP   },
+  { "https",  CURLPROTO_HTTPS  },
+  { "imap",   CURLPROTO_IMAP   },
+  { "imaps",  CURLPROTO_IMAPS  },
+  { "ldap",   CURLPROTO_LDAP   },
+  { "ldaps",  CURLPROTO_LDAPS  },
+  { "mqtt",   CURLPROTO_MQTT   },
+  { "pop3",   CURLPROTO_POP3   },
+  { "pop3s",  CURLPROTO_POP3S  },
+  { "rtmp",   CURLPROTO_RTMP   },
+  { "rtmps",  CURLPROTO_RTMPS  },
+  { "rtsp",   CURLPROTO_RTSP   },
+  { "scp",    CURLPROTO_SCP    },
+  { "sftp",   CURLPROTO_SFTP   },
+  { "smb",    CURLPROTO_SMB    },
+  { "smbs",   CURLPROTO_SMBS   },
+  { "smtp",   CURLPROTO_SMTP   },
+  { "smtps",  CURLPROTO_SMTPS  },
+  { "telnet", CURLPROTO_TELNET },
+  { "tftp",   CURLPROTO_TFTP   },
+  {  NULL,    0                }
+};
+
 /*
  * libcurl_info_init: retrieves run-time information about libcurl,
  * setting a global pointer 'curlinfo' to libcurl's run-time info
@@ -46,39 +79,6 @@ long built_in_protos = 0;
 
 CURLcode get_libcurl_info(void)
 {
-  static struct proto_name_pattern {
-    const char *proto_name;
-    long        proto_pattern;
-  } const possibly_built_in[] = {
-    { "dict",   CURLPROTO_DICT   },
-    { "file",   CURLPROTO_FILE   },
-    { "ftp",    CURLPROTO_FTP    },
-    { "ftps",   CURLPROTO_FTPS   },
-    { "gopher", CURLPROTO_GOPHER },
-    { "gophers",CURLPROTO_GOPHERS},
-    { "http",   CURLPROTO_HTTP   },
-    { "https",  CURLPROTO_HTTPS  },
-    { "imap",   CURLPROTO_IMAP   },
-    { "imaps",  CURLPROTO_IMAPS  },
-    { "ldap",   CURLPROTO_LDAP   },
-    { "ldaps",  CURLPROTO_LDAPS  },
-    { "mqtt",   CURLPROTO_MQTT   },
-    { "pop3",   CURLPROTO_POP3   },
-    { "pop3s",  CURLPROTO_POP3S  },
-    { "rtmp",   CURLPROTO_RTMP   },
-    { "rtmps",  CURLPROTO_RTMPS  },
-    { "rtsp",   CURLPROTO_RTSP   },
-    { "scp",    CURLPROTO_SCP    },
-    { "sftp",   CURLPROTO_SFTP   },
-    { "smb",    CURLPROTO_SMB    },
-    { "smbs",   CURLPROTO_SMBS   },
-    { "smtp",   CURLPROTO_SMTP   },
-    { "smtps",  CURLPROTO_SMTPS  },
-    { "telnet", CURLPROTO_TELNET },
-    { "tftp",   CURLPROTO_TFTP   },
-    {  NULL,    0                }
-  };
-
   const char *const *proto;
 
   /* Pointer to libcurl's run-time version information */
@@ -101,4 +101,17 @@ CURLcode get_libcurl_info(void)
   }
 
   return CURLE_OK;
+}
+
+/*
+ * scheme2protocol() returns the protocol bit for the specified URL scheme
+ */
+long scheme2protocol(const char *scheme)
+{
+  struct proto_name_pattern const *p;
+  for(p = possibly_built_in; p->proto_name; p++) {
+    if(curl_strequal(scheme, p->proto_name))
+      return p->proto_pattern;
+  }
+  return 0;
 }

@@ -42,7 +42,7 @@ allowed to be set is 2 megabytes. The minimum buffer size allowed to be set is
 16 kilobytes.
 
 Since curl 7.61.1 the upload buffer is allocated on-demand - so if the handle
-isn't used for upload, this buffer will not be allocated at all.
+is not used for upload, this buffer will not be allocated at all.
 
 DO NOT set this option on a handle that is currently used for an active
 transfer as that may lead to unintended consequences.

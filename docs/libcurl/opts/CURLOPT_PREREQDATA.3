@@ -22,7 +22,7 @@
 .\"
 .TH CURLOPT_PREREQDATA 3 "2 Aug 2021" "libcurl 7.80.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_PREREQDATA \- custom pointer passed to the pre-request callback
+CURLOPT_PREREQDATA \- pointer passed to the pre-request callback
 .SH SYNOPSIS
 #include <curl/curl.h>
 
@@ -43,7 +43,7 @@ static int prereq_callback(void *clientp,
                            int conn_primary_port,
                            int conn_local_port)
 {
-  printf("Connection made to %s:%s\n", conn_primary_ip, conn_primary_port);
+  printf("Connection made to %s:%s\\n", conn_primary_ip, conn_primary_port);
   return CURL_PREREQFUNC_OK;
 }
 

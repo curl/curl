@@ -19,7 +19,7 @@ curl using one of the following syntaxes:
 .RS
 .IP "content"
 This will make curl URL-encode the content and pass that on. Just be careful
-so that the content doesn't contain any = or @ symbols, as that will then make
+so that the content does not contain any = or @ symbols, as that will then make
 the syntax match one of the other cases below!
 .IP "=content"
 This will make curl URL-encode the content and pass that on. The preceding =

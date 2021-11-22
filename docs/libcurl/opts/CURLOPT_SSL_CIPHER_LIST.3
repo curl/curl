@@ -34,21 +34,21 @@ it consists of one or more cipher strings separated by colons. Commas or
 spaces are also acceptable separators but colons are normally used, \&!, \&-
 and \&+ can be used as operators.
 
-For OpenSSL and GnuTLS valid examples of cipher lists include 'RC4-SHA',
-\'SHA1+DES\', 'TLSv1' and 'DEFAULT'. The default list is normally set when you
-compile OpenSSL.
+For OpenSSL and GnuTLS valid examples of cipher lists include \fBRC4-SHA\fP,
+\fBSHA1+DES\fP, \fBTLSv1\fP and \fBDEFAULT\fP. The default list is normally
+set when you compile OpenSSL.
 
-You'll find more details about cipher lists on this URL:
-
- https://curl.se/docs/ssl-ciphers.html
-
-For NSS, valid examples of cipher lists include 'rsa_rc4_128_md5',
-\'rsa_aes_128_sha\', etc. With NSS you don't add/remove ciphers. If one uses
+For NSS, valid examples of cipher lists include \fBrsa_rc4_128_md5\fP,
+\fBrsa_aes_128_sha\fP, etc. With NSS you do not add/remove ciphers. If one uses
 this option then all known ciphers are disabled and only those passed in are
 enabled.
 
-For WolfSSL, valid examples of cipher lists include
-\'ECDHE-RSA-RC4-SHA\', 'AES256-SHA:AES256-SHA256', etc.
+For WolfSSL, valid examples of cipher lists include \fBECDHE-RSA-RC4-SHA\fP,
+\fBAES256-SHA:AES256-SHA256\fP, etc.
+
+you will find more details about cipher lists on this URL:
+
+ https://curl.se/docs/ssl-ciphers.html
 
 The application does not have to keep the string around after setting this
 option.

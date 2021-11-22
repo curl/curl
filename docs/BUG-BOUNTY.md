@@ -35,7 +35,7 @@ Check out the current award amounts at [https://hackerone.com/curl](https://hack
 # Who is eligible for a reward?
 
 Everyone and anyone who reports a security problem in a released curl version
-that hasn't already been reported can ask for a bounty.
+that has not already been reported can ask for a bounty.
 
 Vulnerabilities in features that are off by default and documented as
 experimental are not eligible for a reward.

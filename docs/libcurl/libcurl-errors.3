@@ -39,13 +39,13 @@ CURLcode is one of the following:
 All fine. Proceed as usual.
 .IP "CURLE_UNSUPPORTED_PROTOCOL (1)"
 The URL you passed to libcurl used a protocol that this libcurl does not
-support. The support might be a compile-time option that you didn't use, it
+support. The support might be a compile-time option that you did not use, it
 can be a misspelled protocol string or just a protocol libcurl has no code
 for.
 .IP "CURLE_FAILED_INIT (2)"
-Very early initialization code failed. This is likely to be an internal error
-or problem, or a resource problem where something fundamental couldn't get
-done at init time.
+Early initialization code failed. This is likely to be an internal error or
+problem, or a resource problem where something fundamental could not get done
+at init time.
 .IP "CURLE_URL_MALFORMAT (3)"
 The URL was not properly formatted.
 .IP "CURLE_NOT_BUILT_IN (4)"
@@ -60,7 +60,7 @@ Couldn't resolve host. The given remote host was not resolved.
 .IP "CURLE_COULDNT_CONNECT (7)"
 Failed to connect() to host or proxy.
 .IP "CURLE_WEIRD_SERVER_REPLY (8)"
-The server sent data libcurl couldn't parse. This error code was known as as
+The server sent data libcurl could not parse. This error code was known as as
 \fICURLE_FTP_WEIRD_SERVER_REPLY\fP before 7.51.0.
 .IP "CURLE_REMOTE_ACCESS_DENIED (9)"
 We were denied access to the resource given in the URL.  For FTP, this occurs
@@ -90,7 +90,7 @@ Received an error when trying to set the transfer mode to binary or ASCII.
 .IP "CURLE_PARTIAL_FILE (18)"
 A file transfer was shorter or larger than expected. This happens when the
 server first reports an expected transfer size, and then delivers data that
-doesn't match the previously given size.
+does not match the previously given size.
 .IP "CURLE_FTP_COULDNT_RETR_FILE (19)"
 This was either a weird reply to a 'RETR' command or a zero byte transfer
 complete.
@@ -117,7 +117,7 @@ things are severely screwed up if this ever occurs.
 Operation timeout. The specified time-out period was reached according to the
 conditions.
 .IP "CURLE_FTP_PORT_FAILED (30)"
-The FTP PORT command returned error. This mostly happens when you haven't
+The FTP PORT command returned error. This mostly happens when you have not
 specified a good enough address for libcurl to use. See
 \fICURLOPT_FTPPORT(3)\fP.
 .IP "CURLE_FTP_COULDNT_USE_REST (31)"
@@ -136,8 +136,8 @@ others.
 The download could not be resumed because the specified offset was out of the
 file boundary.
 .IP "CURLE_FILE_COULDNT_READ_FILE (37)"
-A file given with FILE:// couldn't be opened. Most likely because the file
-path doesn't identify an existing file. Did you check file permissions?
+A file given with FILE:// could not be opened. Most likely because the file
+path does not identify an existing file. Did you check file permissions?
 .IP "CURLE_LDAP_CANNOT_BIND (38)"
 LDAP cannot bind. LDAP bind operation failed.
 .IP "CURLE_LDAP_SEARCH_FAILED (39)"
@@ -167,7 +167,7 @@ details about what option.
 Nothing was returned from the server, and under the circumstances, getting
 nothing is considered an error.
 .IP "CURLE_SSL_ENGINE_NOTFOUND (53)"
-The specified crypto engine wasn't found.
+The specified crypto engine was not found.
 .IP "CURLE_SSL_ENGINE_SETFAILED (54)"
 Failed setting the selected SSL crypto engine as default!
 .IP "CURLE_SEND_ERROR (55)"
@@ -285,7 +285,7 @@ Things are fine.
 .IP "CURLM_BAD_HANDLE (1)"
 The passed-in handle is not a valid CURLM handle.
 .IP "CURLM_BAD_EASY_HANDLE (2)"
-An easy handle was not good/valid. It could mean that it isn't an easy handle
+An easy handle was not good/valid. It could mean that it is not an easy handle
 at all, or possibly that the handle already is in use by this or another multi
 handle.
 .IP "CURLM_OUT_OF_MEMORY (3)"
@@ -322,7 +322,7 @@ An invalid share object was passed to the function.
 Not enough memory was available.
 (Added in 7.12.0)
 .IP "CURLSHE_NOT_BUILT_IN (5)"
-The requested sharing could not be done because the library you use don't have
+The requested sharing could not be done because the library you use do not have
 that particular feature enabled. (Added in 7.23.0)
 .SH "CURLUcode"
 The URL interface will return a CURLUcode to indicate when an error has
@@ -336,7 +336,7 @@ A malformed input was passed to a URL API function.
 .IP "CURLUE_BAD_PORT_NUMBER (4)"
 The port number was not a decimal number between 0 and 65535.
 .IP "CURLUE_UNSUPPORTED_SCHEME (5)"
-This libcurl build doesn't support the given URL scheme.
+This libcurl build does not support the given URL scheme.
 .IP "CURLUE_URLDECODE (6)"
 URL decode error, most likely because of rubbish in the input.
 .IP "CURLUE_OUT_OF_MEMORY (7)"

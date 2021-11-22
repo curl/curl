@@ -1,0 +1,98 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP FORMPOST
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 10
+
+blablabla
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Multipart formposting with backslash-escaping filename containing '"'
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --form-escape -F "file=@\"log/test%TESTNUMBER\\\".txt\";type=mo/foo;filename=\"test%TESTNUMBER\\\".txt\"" -F 'file2=@"log/test%TESTNUMBER\".txt"' -F 'file3=@"log/test%TESTNUMBER\".txt";type=m/f,"log/test%TESTNUMBER\".txt"'
+</command>
+<precheck>
+perl -e "print 'Test requires a system supporting double quotes in file names' if ($^O eq 'msys');"
+</precheck>
+# We create this file before the command is invoked!
+<file name=log/test%TESTNUMBER".txt>
+foo bar
+This is a bar foo
+bar
+foo
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^(Content-Type: multipart/form-data;|Content-Type: multipart/mixed; boundary=|-------).*
+</strip>
+<protocol>
+POST /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 954
+Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
+
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER\".txt"
+Content-Type: mo/foo
+
+foo bar
+This is a bar foo
+bar
+foo
+
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER\".txt"
+Content-Type: text/plain
+
+foo bar
+This is a bar foo
+bar
+foo
+
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="file3"
+Content-Type: multipart/mixed; boundary=----------------------------7f0e85a48b0b
+
+Content-Disposition: attachment; filename="test%TESTNUMBER\".txt"
+Content-Type: m/f
+
+foo bar
+This is a bar foo
+bar
+foo
+
+Content-Disposition: attachment; filename="test%TESTNUMBER\".txt"
+Content-Type: text/plain
+
+foo bar
+This is a bar foo
+bar
+foo
+
+
+------------------------------24e78000bd32--
+</protocol>
+</verify>
+</testcase>

@@ -104,6 +104,9 @@ sub scanmanpage {
         }
         elsif($inex)  {
             $exsize++;
+            if($_ =~ /[^\\]\\n/) {
+                print STDERR "$file:$line '\\n' need to be '\\\\n'!\n";
+            }
         }
         if($_ =~ /^\.SH ([^\r\n]*)/i) {
             my $n = $1;

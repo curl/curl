@@ -27,7 +27,7 @@
 #include "curl_printf.h"
 
 #include <errno.h>
-#include <crustls.h>
+#include <rustls.h>
 
 #include "inet_pton.h"
 #include "urldata.h"
@@ -138,11 +138,6 @@ cr_recv(struct Curl_easy *data, int sockindex,
     *err = CURLE_READ_ERROR;
     return -1;
   }
-  else if(tls_bytes_read == 0) {
-    failf(data, "connection closed without TLS close_notify alert");
-    *err = CURLE_READ_ERROR;
-    return -1;
-  }
 
   infof(data, "cr_recv read %ld bytes from the network", tls_bytes_read);
 
@@ -161,22 +156,21 @@ cr_recv(struct Curl_easy *data, int sockindex,
       (uint8_t *)plainbuf + plain_bytes_copied,
       plainlen - plain_bytes_copied,
       &n);
-    if(rresult == RUSTLS_RESULT_ALERT_CLOSE_NOTIFY) {
-      *err = CURLE_OK;
-      return 0;
+    if(rresult == RUSTLS_RESULT_PLAINTEXT_EMPTY) {
+      infof(data, "cr_recv got PLAINTEXT_EMPTY. will try again later.");
+      backend->data_pending = FALSE;
+      break;
     }
     else if(rresult != RUSTLS_RESULT_OK) {
-      failf(data, "error in rustls_connection_read");
+      /* n always equals 0 in this case, don't need to check it */
+      failf(data, "error in rustls_connection_read: %d", rresult);
       *err = CURLE_READ_ERROR;
       return -1;
     }
     else if(n == 0) {
-      /* rustls returns 0 from connection_read to mean "all currently
-        available data has been read." If we bring in more ciphertext with
-        read_tls, more plaintext will become available. So don't tell curl
-        this is an EOF. Instead, say "come back later." */
-      infof(data, "cr_recv got 0 bytes of plaintext");
-      backend->data_pending = FALSE;
+      /* n == 0 indicates clean EOF, but we may have read some other
+         plaintext bytes before we reached this. Break out of the loop
+         so we can figure out whether to return success or EOF. */
       break;
     }
     else {
@@ -185,15 +179,23 @@ cr_recv(struct Curl_easy *data, int sockindex,
     }
   }
 
-  /* If we wrote out 0 plaintext bytes, it might just mean we haven't yet
-     read a full TLS record. Return CURLE_AGAIN so curl doesn't treat this
-     as EOF. */
-  if(plain_bytes_copied == 0) {
+  if(plain_bytes_copied) {
+    *err = CURLE_OK;
+    return plain_bytes_copied;
+  }
+
+  /* If we wrote out 0 plaintext bytes, that means either we hit a clean EOF,
+     OR we got a RUSTLS_RESULT_PLAINTEXT_EMPTY.
+     If the latter, return CURLE_AGAIN so curl doesn't treat this as EOF. */
+  if(!backend->data_pending) {
     *err = CURLE_AGAIN;
     return -1;
   }
 
-  return plain_bytes_copied;
+  /* Zero bytes read, and no RUSTLS_RESULT_PLAINTEXT_EMPTY, means the TCP
+     connection was cleanly closed (with a close_notify alert). */
+  *err = CURLE_OK;
+  return 0;
 }
 
 /*
@@ -309,10 +311,10 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
   config_builder = rustls_client_config_builder_new();
 #ifdef USE_HTTP2
   infof(data, "offering ALPN for HTTP/1.1 and HTTP/2");
-  rustls_client_config_builder_set_protocols(config_builder, alpn, 2);
+  rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 2);
 #else
   infof(data, "offering ALPN for HTTP/1.1 only");
-  rustls_client_config_builder_set_protocols(config_builder, alpn, 1);
+  rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 1);
 #endif
   if(!verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
@@ -414,9 +416,6 @@ cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
     /*
     * Connection has been established according to rustls. Set send/recv
     * handlers, and update the state machine.
-    * This check has to come last because is_handshaking starts out false,
-    * then becomes true when we first write data, then becomes false again
-    * once the handshake is done.
     */
     if(!rustls_connection_is_handshaking(rconn)) {
       infof(data, "Done handshaking");
@@ -543,6 +542,12 @@ cr_close(struct Curl_easy *data, struct connectdata *conn,
   }
 }
 
+static size_t cr_version(char *buffer, size_t size)
+{
+  struct rustls_str ver = rustls_version();
+  return msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
+}
+
 const struct Curl_ssl Curl_ssl_rustls = {
   { CURLSSLBACKEND_RUSTLS, "rustls" },
   SSLSUPP_TLS13_CIPHERSUITES,      /* supports */
@@ -550,7 +555,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
 
   Curl_none_init,                  /* init */
   Curl_none_cleanup,               /* cleanup */
-  rustls_version,                  /* version */
+  cr_version,                      /* version */
   Curl_none_check_cxn,             /* check_cxn */
   Curl_none_shutdown,              /* shutdown */
   cr_data_pending,                 /* data_pending */

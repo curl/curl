@@ -47,7 +47,7 @@ handles will not affect the pool of connections or the ability to do
 connection re-use.
 
 If you have \fICURLMOPT_TIMERFUNCTION(3)\fP set in the multi handle (and you
-really should if you're working event-based with
+really should if you are working event-based with
 \fIcurl_multi_socket_action(3)\fP and friends), that callback will be called
 from within this function to ask for an updated timer so that your main event
 loop will get the activity on this handle to get started.

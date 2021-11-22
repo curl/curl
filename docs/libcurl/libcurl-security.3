@@ -42,9 +42,9 @@ many of these and similar types of weaknesses of which application writers
 should be aware.
 .SH "Command Lines"
 If you use a command line tool (such as curl) that uses libcurl, and you give
-options to the tool on the command line those options can very likely get read
-by other users of your system when they use 'ps' or other tools to list
-currently running processes.
+options to the tool on the command line those options can get read by other
+users of your system when they use 'ps' or other tools to list currently
+running processes.
 
 To avoid these problems, never feed sensitive things to programs using command
 line options. Write them to a protected file and use the \-K option to avoid
@@ -60,22 +60,22 @@ every time anyone reads that file!
 For applications that enable .netrc use, a user who manage to set the right
 URL might then be possible to pass on passwords.
 
-To avoid these problems, don't use .netrc files and never store passwords in
+To avoid these problems, do not use .netrc files and never store passwords in
 plain text anywhere.
 .SH "Clear Text Passwords"
 Many of the protocols libcurl supports send name and password unencrypted as
-clear text (HTTP Basic authentication, FTP, TELNET etc). It is very easy for
-anyone on your network or a network nearby yours to just fire up a network
-analyzer tool and eavesdrop on your passwords. Don't let the fact that HTTP
-Basic uses base64 encoded passwords fool you. They may not look readable at a
-first glance, but they very easily "deciphered" by anyone within seconds.
+clear text (HTTP Basic authentication, FTP, TELNET etc). It is easy for anyone
+on your network or a network nearby yours to just fire up a network analyzer
+tool and eavesdrop on your passwords. do not let the fact that HTTP Basic uses
+base64 encoded passwords fool you. They may not look readable at a first
+glance, but they are easily "deciphered" by anyone within seconds.
 
 To avoid this problem, use an authentication mechanism or other protocol that
-doesn't let snoopers see your password: Digest, CRAM-MD5, Kerberos, SPNEGO or
+does not let snoopers see your password: Digest, CRAM-MD5, Kerberos, SPNEGO or
 NTLM authentication. Or even better: use authenticated protocols that protect
 the entire connection and everything sent over it.
 .SH "Un-authenticated Connections"
-Protocols that don't have any form of cryptographic authentication cannot
+Protocols that do not have any form of cryptographic authentication cannot
 with any certainty know that they communicate with the right remote server.
 
 If your application is using a fixed scheme or fixed host name, it is not safe
@@ -171,11 +171,11 @@ or a mix of decimal, octal or hexadecimal encoding.
 .SH "IPv6 Addresses"
 libcurl will normally handle IPv6 addresses transparently and just as easily
 as IPv4 addresses. That means that a sanitizing function that filters out
-addresses like 127.0.0.1 isn't sufficient--the equivalent IPv6 addresses ::1,
+addresses like 127.0.0.1 is not sufficient--the equivalent IPv6 addresses ::1,
 ::, 0:00::0:1, ::127.0.0.1 and ::ffff:7f00:1 supplied somehow by an attacker
 would all bypass a naive filter and could allow access to undesired local
 resources.  IPv6 also has special address blocks like link-local and
-site-local that generally shouldn't be accessed by a server-side libcurl-using
+site-local that generally should not be accessed by a server-side libcurl-using
 application.  A poorly-configured firewall installed in a data center,
 organization or server may also be configured to limit IPv4 connections but
 leave IPv6 connections wide open.  In some cases, setting
@@ -234,14 +234,14 @@ When first realizing this, the curl team tried to filter out such attempts in
 order to protect applications for inadvertent probes of for example internal
 networks etc. This resulted in CVE-2019-15601 and the associated security fix.
 
-However, we've since been made aware of the fact that the previous fix was far
+However, we have since been made aware of the fact that the previous fix was far
 from adequate as there are several other ways to accomplish more or less the
 same thing: accessing a remote host over the network instead of the local file
 system.
 
 The conclusion we have come to is that this is a weakness or feature in the
 Windows operating system itself, that we as an application cannot safely
-protect users against. It would just be a whack-a-mole race we don't want to
+protect users against. It would just be a whack-a-mole race we do not want to
 participate in. There are too many ways to do it and there's no knob we can
 use to turn off the practice.
 
@@ -251,7 +251,7 @@ will potentially make your system try to access other hosts on your
 network. curl cannot protect you against this.
 .SH "What if the user can set the URL"
 Applications may find it tempting to let users set the URL that it can work
-on. That's probably fine, but opens up for mischief and trickery that you as
+on. That is probably fine, but opens up for mischief and trickery that you as
 an application author may want to address or take precautions against.
 
 If your curl-using script allow a custom URL do you also, perhaps
@@ -259,7 +259,7 @@ unintentionally, allow the user to pass other options to the curl command line
 if creative use of special characters are applied?
 
 If the user can set the URL, the user can also specify the scheme part to
-other protocols that you didn't intend for users to use and perhaps didn't
+other protocols that you did not intend for users to use and perhaps did not
 consider. curl supports over 20 different URL schemes. "http://" might be what
 you thought, "ftp://" or "imap://" might be what the user gives your
 application. Also, cross-protocol operations might be done by using a
@@ -315,8 +315,8 @@ The fact that FTP uses two connections makes it vulnerable in a way that is
 hard to avoid.
 .SH "Denial of Service"
 A malicious server could cause libcurl to effectively hang by sending data
-very slowly, or even no data at all but just keeping the TCP connection open.
-This could effectively result in a denial-of-service attack. The
+slowly, or even no data at all but just keeping the TCP connection open.  This
+could effectively result in a denial-of-service attack. The
 \fICURLOPT_TIMEOUT(3)\fP and/or \fICURLOPT_LOW_SPEED_LIMIT(3)\fP options can
 be used to mitigate against this.
 
@@ -370,7 +370,7 @@ information with faked data.
 .SH "Setuid applications using libcurl"
 libcurl-using applications that set the 'setuid' bit to run with elevated or
 modified rights also implicitly give that extra power to libcurl and this
-should only be done after very careful considerations.
+should only be done after careful considerations.
 
 Giving setuid powers to the application means that libcurl can save files using
 those new rights (if for example the `SSLKEYLOGFILE` environment variable is

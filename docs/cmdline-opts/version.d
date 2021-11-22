@@ -4,6 +4,7 @@ Help: Show version number and quit
 Category: important curl
 Example: --version
 Added: 4.0
+See-also: help manual
 ---
 Displays information about curl and the libcurl version it uses.
 

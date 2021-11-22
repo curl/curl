@@ -268,7 +268,7 @@ Enable SASL initial response. See \fICURLOPT_SASL_IR(3)\fP
 .IP CURLOPT_XOAUTH2_BEARER
 OAuth2 bearer token. See \fICURLOPT_XOAUTH2_BEARER(3)\fP
 .IP CURLOPT_DISALLOW_USERNAME_IN_URL
-Don't allow username in URL. See \fICURLOPT_DISALLOW_USERNAME_IN_URL(3)\fP
+Do not allow username in URL. See \fICURLOPT_DISALLOW_USERNAME_IN_URL(3)\fP
 .SH HTTP OPTIONS
 .IP CURLOPT_AUTOREFERER
 Automatically set Referer: header. See \fICURLOPT_AUTOREFERER(3)\fP
@@ -462,6 +462,8 @@ Upload data. See \fICURLOPT_UPLOAD(3)\fP
 Set upload buffer size. See \fICURLOPT_UPLOAD_BUFFERSIZE(3)\fP
 .IP CURLOPT_MIMEPOST
 Post/send MIME data. See \fICURLOPT_MIMEPOST(3)\fP
+.IP CURLOPT_MIME_OPTIONS
+Set MIME option flags. See \fICURLOPT_MIME_OPTIONS(3)\fP
 .IP CURLOPT_MAXFILESIZE
 Maximum file size to get. See \fICURLOPT_MAXFILESIZE(3)\fP
 .IP CURLOPT_MAXFILESIZE_LARGE
@@ -696,7 +698,7 @@ Strings passed on to libcurl must be shorter than 8000000 bytes, otherwise
 \fBCURLE_BAD_FUNCTION_ARGUMENT\fP is returned when the argument to an option
 is invalid, like perhaps out of range.
 
-If you try to set an option that libcurl doesn't know about, perhaps because
+If you try to set an option that libcurl does not know about, perhaps because
 the library is too old to support it or the option was removed in a recent
 version, this function will return \fICURLE_UNKNOWN_OPTION\fP. If support for
 the option was disabled at compile-time, it will return

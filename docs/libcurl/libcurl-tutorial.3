@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -86,9 +86,9 @@ The people behind libcurl have put a considerable effort to make libcurl work
 on a large amount of different operating systems and environments.
 
 You program libcurl the same way on all platforms that libcurl runs on. There
-are only very few minor considerations that differ. If you just make sure to
-write your code portable enough, you may very well create yourself a very
-portable program. libcurl shouldn't stop you from that.
+are only a few minor details that differ. If you just make sure to write your
+code portable enough, you can create a portable program. libcurl should not
+stop you from that.
 
 .SH "Global Preparation"
 The program must initialize some of the libcurl functionality globally. That
@@ -104,7 +104,7 @@ that are specified are:
 .RS
 .IP "CURL_GLOBAL_WIN32"
 which only does anything on Windows machines. When used on
-a Windows machine, it'll make libcurl initialize the win32 socket
+a Windows machine, it will make libcurl initialize the win32 socket
 stuff. Without having that initialized properly, your program cannot use
 sockets properly. You should only do this once for each application, so if
 your program already does this or of another library in use does it, you
@@ -117,10 +117,10 @@ program or another library already does this, this bit should not be needed.
 .RE
 
 libcurl has a default protection mechanism that detects if
-\fIcurl_global_init(3)\fP hasn't been called by the time
+\fIcurl_global_init(3)\fP has not been called by the time
 \fIcurl_easy_perform(3)\fP is called and if that is the case, libcurl runs the
 function itself with a guessed bit pattern. Please note that depending solely
-on this is not considered nice nor very good.
+on this is not considered nice nor good.
 
 When the program no longer uses libcurl, it should call
 \fIcurl_global_cleanup(3)\fP, which is the opposite of the init call. It will
@@ -174,7 +174,7 @@ make a clone of an easy handle (with all its set options) using
 
 Many of the options you set in libcurl are "strings", pointers to data
 terminated with a zero byte. When you set strings with
-\fIcurl_easy_setopt(3)\fP, libcurl makes its own copy so that they don't need
+\fIcurl_easy_setopt(3)\fP, libcurl makes its own copy so that they do not need
 to be kept around in your application after being set[4].
 
 One of the most basic properties to set in the handle is the URL. You set your
@@ -203,18 +203,18 @@ by setting another property:
  curl_easy_setopt(easyhandle, CURLOPT_WRITEDATA, &internal_struct);
 
 Using that property, you can easily pass local data between your application
-and the function that gets invoked by libcurl. libcurl itself won't touch the
+and the function that gets invoked by libcurl. libcurl itself will not touch the
 data you pass with \fICURLOPT_WRITEDATA(3)\fP.
 
 libcurl offers its own default internal callback that will take care of the
-data if you don't set the callback with \fICURLOPT_WRITEFUNCTION(3)\fP. It
+data if you do not set the callback with \fICURLOPT_WRITEFUNCTION(3)\fP. It
 will then simply output the received data to stdout. You can have the default
 callback write the data to a different file handle by passing a 'FILE *' to a
 file opened for writing with the \fICURLOPT_WRITEDATA(3)\fP option.
 
 Now, we need to take a step back and have a deep breath. Here's one of those
 rare platform-dependent nitpicks. Did you spot it? On some platforms[2],
-libcurl won't be able to operate on files opened by the program. Thus, if you
+libcurl will not be able to operate on files opened by the program. Thus, if you
 use the default callback and pass in an open file with
 \fICURLOPT_WRITEDATA(3)\fP, it will crash. You should therefore avoid this to
 make your program run fine virtually everywhere.
@@ -222,11 +222,11 @@ make your program run fine virtually everywhere.
 (\fICURLOPT_WRITEDATA(3)\fP was formerly known as \fICURLOPT_FILE\fP. Both
 names still work and do the same thing).
 
-If you're using libcurl as a win32 DLL, you MUST use the
+If you are using libcurl as a win32 DLL, you MUST use the
 \fICURLOPT_WRITEFUNCTION(3)\fP if you set \fICURLOPT_WRITEDATA(3)\fP - or you
 will experience crashes.
 
-There are of course many more options you can set, and we'll get back to a few
+There are of course many more options you can set, and we will get back to a few
 of them later. Let's instead continue to the actual transfer:
 
  success = curl_easy_perform(easyhandle);
@@ -240,9 +240,9 @@ often as possible. Your callback function should return the number of bytes it
 passed to it, libcurl will abort the operation and return with an error code.
 
 When the transfer is complete, the function returns a return code that informs
-you if it succeeded in its mission or not. If a return code isn't enough for
+you if it succeeded in its mission or not. If a return code is not enough for
 you, you can use the \fICURLOPT_ERRORBUFFER(3)\fP to point libcurl to a buffer
-of yours where it'll store a human readable error message as well.
+of yours where it will store a human readable error message as well.
 
 If you then want to transfer another file, the handle is ready to be used
 again. Mind you, it is even preferred that you re-use an existing handle if
@@ -259,22 +259,22 @@ of all the details needed to get the file moved from one machine to another.
 libcurl is thread safe but there are a few exceptions. Refer to
 \fIlibcurl-thread(3)\fP for more information.
 
-.SH "When It Doesn't Work"
+.SH "When It does not Work"
 There will always be times when the transfer fails for some reason. You might
 have set the wrong libcurl option or misunderstood what the libcurl option
 actually does, or the remote server might return non-standard replies that
 confuse the library which then confuses your program.
 
 There's one golden rule when these things occur: set the
-\fICURLOPT_VERBOSE(3)\fP option to 1. It'll cause the library to spew out the
+\fICURLOPT_VERBOSE(3)\fP option to 1. it will cause the library to spew out the
 entire protocol details it sends, some internal info and some received
-protocol data as well (especially when using FTP). If you're using HTTP,
+protocol data as well (especially when using FTP). If you are using HTTP,
 adding the headers in the received output to study is also a clever way to get
 a better understanding why the server behaves the way it does. Include headers
 in the normal body output with \fICURLOPT_HEADER(3)\fP set 1.
 
 Of course, there are bugs left. We need to know about them to be able to fix
-them, so we're quite dependent on your bug reports! When you do report
+them, so we are quite dependent on your bug reports! When you do report
 suspected bugs in libcurl, please include as many details as you possibly can:
 a protocol dump that \fICURLOPT_VERBOSE(3)\fP produces, library version, as
 much as possible of your code that uses libcurl, operating system name and
@@ -284,14 +284,13 @@ If \fICURLOPT_VERBOSE(3)\fP is not enough, you increase the level of debug
 data your application receive by using the \fICURLOPT_DEBUGFUNCTION(3)\fP.
 
 Getting some in-depth knowledge about the protocols involved is never wrong,
-and if you're trying to do funny things, you might very well understand
-libcurl and how to use it better if you study the appropriate RFC documents
-at least briefly.
+and if you are trying to do funny things, you might understand libcurl and how
+to use it better if you study the appropriate RFC documents at least briefly.
 
 .SH "Upload Data to a Remote Site"
 libcurl tries to keep a protocol independent approach to most transfers, thus
-uploading to a remote FTP site is very similar to uploading data to an HTTP
-server with a PUT request.
+uploading to a remote FTP site is similar to uploading data to an HTTP server
+with a PUT request.
 
 Of course, first you either create an easy handle or you re-use one existing
 one. Then you set the URL to operate on just like before. This is the remote
@@ -318,7 +317,7 @@ Tell libcurl that we want to upload:
 
  curl_easy_setopt(easyhandle, CURLOPT_UPLOAD, 1L);
 
-A few protocols won't behave properly when uploads are done without any prior
+A few protocols will not behave properly when uploads are done without any prior
 knowledge of the expected file size. So, set the upload file size using the
 \fICURLOPT_INFILESIZE_LARGE(3)\fP for all known file sizes like this[1]:
 
@@ -327,8 +326,8 @@ knowledge of the expected file size. So, set the upload file size using the
  curl_easy_setopt(easyhandle, CURLOPT_INFILESIZE_LARGE, file_size);
 .fi
 
-When you call \fIcurl_easy_perform(3)\fP this time, it'll perform all the
-necessary operations and when it has invoked the upload it'll call your
+When you call \fIcurl_easy_perform(3)\fP this time, it will perform all the
+necessary operations and when it has invoked the upload it will call your
 supplied callback to get the data to upload. The program should return as much
 data as possible in every invoke, as that is likely to make the upload perform
 as fast as possible. The callback should return the number of bytes it wrote
@@ -373,7 +372,7 @@ curl use this file, use the \fICURLOPT_NETRC(3)\fP option:
 
  curl_easy_setopt(easyhandle, CURLOPT_NETRC, 1L);
 
-And a very basic example of how such a .netrc file may look like:
+And a basic example of how such a .netrc file may look like:
 
 .nf
  machine myhost.mydomain.com
@@ -383,8 +382,8 @@ And a very basic example of how such a .netrc file may look like:
 
 All these examples have been cases where the password has been optional, or
 at least you could leave it out and have libcurl attempt to do its job
-without it. There are times when the password isn't optional, like when
-you're using an SSL private key for secure transfers.
+without it. There are times when the password is not optional, like when
+you are using an SSL private key for secure transfers.
 
 To pass the known private key password to libcurl:
 
@@ -470,10 +469,10 @@ then passing that list to libcurl.
 .fi
 
 While the simple examples above cover the majority of all cases where HTTP
-POST operations are required, they don't do multi-part formposts. Multi-part
+POST operations are required, they do not do multi-part formposts. Multi-part
 formposts were introduced as a better way to post (possibly large) binary data
-and were first documented in the RFC1867 (updated in RFC2388). They're called
-multi-part because they're built by a chain of parts, each part being a single
+and were first documented in the RFC1867 (updated in RFC2388). they are called
+multi-part because they are built by a chain of parts, each part being a single
 unit of data. Each part has its own name and contents. You can in fact create
 and post a multi-part formpost with the regular libcurl POST support described
 above, but that would require that you build a formpost yourself and provide
@@ -532,7 +531,7 @@ It should however not be used anymore for new designs and programs using it
 ought to be converted to the MIME API. It is however described here as an
 aid to conversion.
 
-Using \fIcurl_formadd\fP, you add parts to the form. When you're done adding
+Using \fIcurl_formadd\fP, you add parts to the form. When you are done adding
 parts, you post the whole form.
 
 The MIME API example above is expressed as follows using this function:
@@ -752,7 +751,7 @@ a pointer to a function that matches this prototype:
 
 If any of the input arguments is unknown, a 0 will be passed. The first
 argument, the 'clientp' is the pointer you pass to libcurl with
-\fICURLOPT_PROGRESSDATA(3)\fP. libcurl won't touch it.
+\fICURLOPT_PROGRESSDATA(3)\fP. libcurl will not touch it.
 
 .SH "libcurl with C++"
 
@@ -788,17 +787,16 @@ libcurl supports SOCKS and HTTP proxies. When a given URL is wanted, libcurl
 will ask the proxy for it instead of trying to connect to the actual host
 identified in the URL.
 
-If you're using a SOCKS proxy, you may find that libcurl doesn't quite support
+If you are using a SOCKS proxy, you may find that libcurl does not quite support
 all operations through it.
 
 For HTTP proxies: the fact that the proxy is an HTTP proxy puts certain
 restrictions on what can actually happen. A requested URL that might not be a
 HTTP URL will be still be passed to the HTTP proxy to deliver back to
 libcurl. This happens transparently, and an application may not need to
-know. I say "may", because at times it is very important to understand that
-all operations over an HTTP proxy use the HTTP protocol. For example, you
-can't invoke your own custom FTP commands or even proper FTP directory
-listings.
+know. I say "may", because at times it is important to understand that all
+operations over an HTTP proxy use the HTTP protocol. For example, you cannot
+invoke your own custom FTP commands or even proper FTP directory listings.
 
 .IP "Proxy Options"
 
@@ -839,7 +837,7 @@ on the host. If not specified, the internal default port number will be used
 and that is most likely *not* the one you would like it to be.
 
 There are two special environment variables. 'all_proxy' is what sets proxy
-for any URL in case the protocol specific variable wasn't set, and
+for any URL in case the protocol specific variable was not set, and
 \&'no_proxy' defines a list of hosts that should not use a proxy even though a
 variable may say so. If 'no_proxy' is a plain asterisk ("*") it matches all
 hosts.
@@ -863,7 +861,7 @@ remote host").
 
 Because of the nature of this operation, where the proxy has no idea what kind
 of data that is passed in and out through this tunnel, this breaks some of the
-very few advantages that come from using a proxy, such as caching.  Many
+few advantages that come from using a proxy, such as caching.  Many
 organizations prevent this kind of tunneling to other destination port numbers
 than 443 (which is the default HTTPS port number).
 
@@ -901,7 +899,7 @@ should be used), "PROXY host:port" (to tell the browser where the proxy for
 this particular URL is) or "SOCKS host:port" (to direct the browser to a SOCKS
 proxy).
 
-libcurl has no means to interpret or evaluate Javascript and thus it doesn't
+libcurl has no means to interpret or evaluate Javascript and thus it does not
 support this. If you get yourself in a position where you face this nasty
 invention, the following advice have been mentioned and used in the past:
 
@@ -930,7 +928,7 @@ host again, will benefit from libcurl's session ID cache that drastically
 reduces re-connection time.
 
 FTP connections that are kept alive save a lot of time, as the command-
-response round-trips are skipped, and also you don't risk getting blocked
+response round-trips are skipped, and also you do not risk getting blocked
 without permission to login again like on many FTP servers only allowing N
 persons to be logged in at the same time.
 
@@ -942,19 +940,19 @@ may also be added in the future.
 
 Each easy handle will attempt to keep the last few connections alive for a
 while in case they are to be used again. You can set the size of this "cache"
-with the \fICURLOPT_MAXCONNECTS(3)\fP option. Default is 5. There is very
-seldom any point in changing this value, and if you think of changing this it
-is often just a matter of thinking again.
+with the \fICURLOPT_MAXCONNECTS(3)\fP option. Default is 5. There is rarely
+any point in changing this value, and if you think of changing this it is
+often just a matter of thinking again.
 
 To force your upcoming request to not use an already existing connection (it
 will even close one first if there happens to be one alive to the same host
-you're about to operate on), you can do that by setting
+you are about to operate on), you can do that by setting
 \fICURLOPT_FRESH_CONNECT(3)\fP to 1. In a similar spirit, you can also forbid
 the upcoming request to be "lying" around and possibly get re-used after the
 request by setting \fICURLOPT_FORBID_REUSE(3)\fP to 1.
 
 .SH "HTTP Headers Used by libcurl"
-When you use libcurl to do HTTP requests, it'll pass along a series of headers
+When you use libcurl to do HTTP requests, it will pass along a series of headers
 automatically. It might be good for you to know and understand these. You
 can replace or remove them by using the \fICURLOPT_HTTPHEADER(3)\fP option.
 
@@ -986,18 +984,18 @@ libcurl is your friend here too.
 .IP CUSTOMREQUEST
 If just changing the actual HTTP request keyword is what you want, like when
 GET, HEAD or POST is not good enough for you, \fICURLOPT_CUSTOMREQUEST(3)\fP
-is there for you. It is very simple to use:
+is there for you. It is simple to use:
 
  curl_easy_setopt(easyhandle, CURLOPT_CUSTOMREQUEST, "MYOWNREQUEST");
 
 When using the custom request, you change the request keyword of the actual
 request you are performing. Thus, by default you make a GET request but you can
 also make a POST operation (as described before) and then replace the POST
-keyword if you want to. You're the boss.
+keyword if you want to. you are the boss.
 
 .IP "Modify Headers"
 HTTP-like protocols pass a series of headers to the server when doing the
-request, and you're free to pass any amount of extra headers that you
+request, and you are free to pass any amount of extra headers that you
 think fit. Adding headers is this easy:
 
 .nf
@@ -1015,7 +1013,7 @@ think fit. Adding headers is this easy:
 .fi
 
 \&... and if you think some of the internally generated headers, such as
-Accept: or Host: don't contain the data you want them to contain, you can
+Accept: or Host: do not contain the data you want them to contain, you can
 replace them by simply setting them too:
 
 .nf
@@ -1045,9 +1043,9 @@ data size is unknown.
 .IP "HTTP Version"
 
 All HTTP requests includes the version number to tell the server which version
-we support. libcurl speaks HTTP 1.1 by default. Some very old servers don't
-like getting 1.1-requests and when dealing with stubborn old things like that,
-you can tell libcurl to use 1.0 instead by doing something like this:
+we support. libcurl speaks HTTP 1.1 by default. Some old servers do not like
+getting 1.1-requests and when dealing with stubborn old things like that, you
+can tell libcurl to use 1.0 instead by doing something like this:
 
  curl_easy_setopt(easyhandle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
 
@@ -1057,14 +1055,14 @@ Not all protocols are HTTP-like, and thus the above may not help you when
 you want to make, for example, your FTP transfers to behave differently.
 
 Sending custom commands to an FTP server means that you need to send the
-commands exactly as the FTP server expects them (RFC959 is a good guide
-here), and you can only use commands that work on the control-connection
-alone. All kinds of commands that require data interchange and thus need
-a data-connection must be left to libcurl's own judgement. Also be aware
-that libcurl will do its very best to change directory to the target
-directory before doing any transfer, so if you change directory (with CWD
-or similar) you might confuse libcurl and then it might not attempt to
-transfer the file in the correct remote directory.
+commands exactly as the FTP server expects them (RFC959 is a good guide here),
+and you can only use commands that work on the control-connection alone. All
+kinds of commands that require data interchange and thus need a
+data-connection must be left to libcurl's own judgement. Also be aware that
+libcurl will do its best to change directory to the target directory before
+doing any transfer, so if you change directory (with CWD or similar) you might
+confuse libcurl and then it might not attempt to transfer the file in the
+correct remote directory.
 
 A little example that deletes a given file before an operation:
 
@@ -1102,7 +1100,7 @@ content transfer will be performed.
 .IP "FTP Custom CUSTOMREQUEST"
 If you do want to list the contents of an FTP directory using your own defined
 FTP command, \fICURLOPT_CUSTOMREQUEST(3)\fP will do just that. "NLST" is the
-default one for listing directories but you're free to pass in your idea of a
+default one for listing directories but you are free to pass in your idea of a
 good alternative.
 
 .SH "Cookies Without Chocolate Chips"
@@ -1110,13 +1108,13 @@ In the HTTP sense, a cookie is a name with an associated value. A server sends
 the name and value to the client, and expects it to get sent back on every
 subsequent request to the server that matches the particular conditions
 set. The conditions include that the domain name and path match and that the
-cookie hasn't become too old.
+cookie has not become too old.
 
 In real-world cases, servers send new cookies to replace existing ones to
 update them. Server use cookies to "track" users and to keep "sessions".
 
 Cookies are sent from server to clients with the header Set-Cookie: and
-they're sent from clients to servers with the Cookie: header.
+they are sent from clients to servers with the Cookie: header.
 
 To just send whatever cookie you want to a server, you can use
 \fICURLOPT_COOKIE(3)\fP to set a cookie string like this:
@@ -1139,11 +1137,11 @@ the parser is enabled the cookies will be understood and the cookies will be
 kept in memory and used properly in subsequent requests when the same handle
 is used. Many times this is enough, and you may not have to save the cookies
 to disk at all. Note that the file you specify to \fICURLOPT_COOKIEFILE(3)\fP
-doesn't have to exist to enable the parser, so a common way to just enable the
-parser and not read any cookies is to use the name of a file you know doesn't
+does not have to exist to enable the parser, so a common way to just enable the
+parser and not read any cookies is to use the name of a file you know does not
 exist.
 
-If you would rather use existing cookies that you've previously received with
+If you would rather use existing cookies that you have previously received with
 your Netscape or Mozilla browsers, you can make libcurl use that cookie file
 as input. The \fICURLOPT_COOKIEFILE(3)\fP is used for that too, as libcurl
 will automatically find out what kind of file it is and act accordingly.
@@ -1167,7 +1165,7 @@ libcurl can either connect to the server a second time or tell the server to
 connect back to it. The first option is the default and it is also what works
 best for all the people behind firewalls, NATs or IP-masquerading setups.
 libcurl then tells the server to open up a new port and wait for a second
-connection. This is by default attempted with EPSV first, and if that doesn't
+connection. This is by default attempted with EPSV first, and if that does not
 work it tries PASV instead. (EPSV is an extension to the original FTP spec
 and does not exist nor work on all FTP servers.)
 
@@ -1282,14 +1280,14 @@ The headers are passed to the callback function one by one, and you can
 depend on that fact. It makes it easier for you to add custom header parsers
 etc.
 
-\&"Headers" for FTP transfers equal all the FTP server responses. They aren't
+\&"Headers" for FTP transfers equal all the FTP server responses. They are not
 actually true headers, but in this case we pretend they are! ;-)
 
 .SH "Post Transfer Information"
 See \fIcurl_easy_getinfo(3)\fP.
 .SH "The multi Interface"
 The easy interface as described in detail in this document is a synchronous
-interface that transfers one file at a time and doesn't return until it is
+interface that transfers one file at a time and does not return until it is
 done.
 
 The multi interface, on the other hand, allows your program to transfer
@@ -1317,7 +1315,7 @@ you set all the options just like you learned above, and then you create a
 multi handle with \fIcurl_multi_init(3)\fP and add all those easy handles to
 that multi handle with \fIcurl_multi_add_handle(3)\fP.
 
-When you've added the handles you have for the moment (you can still add new
+When you have added the handles you have for the moment (you can still add new
 ones at any time), you start the transfers by calling
 \fIcurl_multi_perform(3)\fP.
 
@@ -1333,12 +1331,12 @@ sockets/handles. You figure out what to select() for by using
 \fIcurl_multi_fdset(3)\fP, that fills in a set of fd_set variables for you
 with the particular file descriptors libcurl uses for the moment.
 
-When you then call select(), it'll return when one of the file handles signal
+When you then call select(), it will return when one of the file handles signal
 action and you then call \fIcurl_multi_perform(3)\fP to allow libcurl to do
 what it wants to do. Take note that libcurl does also feature some time-out
-code so we advise you to never use very long timeouts on select() before you
-call \fIcurl_multi_perform(3)\fP again. \fIcurl_multi_timeout(3)\fP is
-provided to help you get a suitable timeout period.
+code so we advise you to never use long timeouts on select() before you call
+\fIcurl_multi_perform(3)\fP again. \fIcurl_multi_timeout(3)\fP is provided to
+help you get a suitable timeout period.
 
 Another precaution you should use: always call \fIcurl_multi_fdset(3)\fP
 immediately before the select() call since the current set of file descriptors
@@ -1371,7 +1369,7 @@ per-easy handle basis when the easy interface is used.
 The DNS cache is shared between handles within a multi handle, making
 subsequent name resolving faster, and the connection pool that is kept to
 better allow persistent connections and connection re-use is also shared. If
-you're using the easy interface, you can still share these between specific
+you are using the easy interface, you can still share these between specific
 easy handles by using the share interface, see \fIlibcurl-share(3)\fP.
 
 Some things are never shared automatically, not within multi handles, like for

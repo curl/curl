@@ -7,6 +7,7 @@ Mutexed: data head upload-file
 Category: http upload
 Example: --form "name=curl" --form "file=@loadthis" $URL
 Added: 5.0
+See-also: data form-string form-escape
 ---
 For HTTP protocol family, this lets curl emulate a filled-in form in which a
 user has pressed the submit button. This causes curl to POST data using the
@@ -91,15 +92,11 @@ carriage-returns and trailing spaces are stripped.
 Here is an example of a header file contents:
 
   # This file contain two headers.
-.br
   X-header-1: this is a header
 
   # The following header is folded.
-.br
   X-header-2: this is
-.br
    another header
-
 
 To support sending multipart mail messages, the syntax is extended as follows:
 .br
@@ -115,11 +112,8 @@ inline part in two alternative formats: plain text and HTML. It attaches a
 text file:
 
  curl -F '=(;type=multipart/alternative' \\
-.br
-         -F '=plain text message' \\
-.br
-         -F '= <body>HTML message</body>;type=text/html' \\
-.br
+      -F '=plain text message' \\
+      -F '= <body>HTML message</body>;type=text/html' \\
       -F '=)' -F '=@textfile.txt' ...  smtp://example.com
 
 Data can be encoded for transfer using encoder=. Available encodings are
@@ -133,7 +127,6 @@ Example: send multipart mail with a quoted-printable text message and a
 base64 attached file:
 
  curl -F '=text message;encoder=quoted-printable' \\
-.br
       -F '=@localfile;encoder=base64' ... smtp://example.com
 
 See further examples and details in the MANUAL.

@@ -60,7 +60,7 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
       printf(">\n");
     }
     else {
-      /* if it doesn't have a name, then it's probably text, cdata, etc... */
+      /* if it does not have a name, then it's probably text, cdata, etc... */
       TidyBuffer buf;
       tidyBufInit(&buf);
       tidyNodeGetText(doc, child, &buf);

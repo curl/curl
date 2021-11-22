@@ -27,7 +27,7 @@ proceed.
 
 # Unix
 
-A normal Unix installation is made in three or four steps (after you've
+A normal Unix installation is made in three or four steps (after you have
 unpacked the source archive):
 
     ./configure --with-openssl [--with-gnutls --with-wolfssl]
@@ -58,7 +58,7 @@ your own home directory:
 
 The configure script always tries to find a working SSL library unless
 explicitly told not to. If you have OpenSSL installed in the default search
-path for your compiler/linker, you don't need to do anything special. If you
+path for your compiler/linker, you do not need to do anything special. If you
 have OpenSSL installed in `/usr/local/ssl`, you can run configure like:
 
     ./configure --with-openssl
@@ -85,7 +85,7 @@ work:
     CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" ./configure
 
 If you have shared SSL libs installed in a directory where your run-time
-linker doesn't find them (which usually causes configure failures), you can
+linker does not find them (which usually causes configure failures), you can
 provide this option to gcc to set a hard-coded path to the run-time linker:
 
     LDFLAGS=-Wl,-R/usr/local/ssl/lib ./configure --with-openssl
@@ -102,7 +102,7 @@ an option like:
 
     ./configure --disable-thread
 
-If you're a curl developer and use gcc, you might want to enable more debug
+If you are a curl developer and use gcc, you might want to enable more debug
 options with the `--enable-debug` option.
 
 curl can be built to use a whole range of libraries to provide various useful
@@ -197,7 +197,7 @@ If you want to enable LDAPS support then set LDAPS=1.
 
 Almost identical to the unix installation. Run the configure script in the
 curl source tree root with `sh configure`. Make sure you have the `sh`
-executable in `/bin/` or you'll see the configure fail toward the end.
+executable in `/bin/` or you will see the configure fail toward the end.
 
 Run `make`
 
@@ -355,7 +355,7 @@ to adjust those variables accordingly. After that you can build curl like this:
 
     ./configure --host aarch64-linux-android --with-pic --disable-shared
 
-Note that this won't give you SSL/TLS support. If you need SSL/TLS, you have
+Note that this will not give you SSL/TLS support. If you need SSL/TLS, you have
 to build curl against a SSL/TLS layer, e.g. OpenSSL, because it's impossible for
 curl to access Android's native SSL/TLS layer. To build curl for Android using
 OpenSSL, follow the OpenSSL build instructions and then install `libssl.a` and
@@ -366,7 +366,7 @@ OpenSSL like this:
     ./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
 
 Note, however, that you must target at least Android M (API level 23) or `configure`
-won't be able to detect OpenSSL since `stderr` (and the like) weren't defined
+will not be able to detect OpenSSL since `stderr` (and the like) were not defined
 before Android M.
 
 # IBM i
@@ -387,16 +387,16 @@ they affect both environments.
 
 ## Multithreading notes
 
-By default, jobs in IBM i won't start with threading enabled. (Exceptions
+By default, jobs in IBM i will not start with threading enabled. (Exceptions
 include interactive PASE sessions started by `QP2TERM` or SSH.) If you use
 curl in an environment without threading when options like async DNS were
-enabled, you'll messages like:
+enabled, you will messages like:
 
 ```
 getaddrinfo() thread failed to start
 ```
 
-Don't panic! curl and your program aren't broken. You can fix this by:
+Do not panic! curl and your program are not broken. You can fix this by:
 
 - Set the environment variable `QIBM_MULTI_THREADED` to `Y` before starting
   your program. This can be done at whatever scope you feel is appropriate.
@@ -514,7 +514,7 @@ line.  Following is a list of appropriate key words:
 
 This is a probably incomplete list of known CPU architectures and operating
 systems that curl has been compiled for. If you know a system curl compiles
-and runs on, that isn't listed, please let us know!
+and runs on, that is not listed, please let us know!
 
 ## 85 Operating Systems
 

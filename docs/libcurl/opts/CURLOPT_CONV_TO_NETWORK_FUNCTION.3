@@ -49,7 +49,7 @@ should be returned if an error was encountered.
 network encoding.  It is used when commands or ASCII data are sent over the
 network.
 
-If you set a callback pointer to NULL, or don't set it at all, the built-in
+If you set a callback pointer to NULL, or do not set it at all, the built-in
 libcurl iconv functions will be used.  If HAVE_ICONV was not defined when
 libcurl was built, and no callback has been established, conversion will
 return the CURLE_CONV_REQD error code.

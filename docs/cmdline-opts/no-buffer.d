@@ -4,6 +4,7 @@ Help: Disable buffering of the output stream
 Category: curl
 Example: --no-buffer $URL
 Added: 6.5
+See-also: progress-bar
 ---
 Disables the buffering of the output stream. In normal work situations, curl
 will use a standard buffered output stream that will have the effect that it

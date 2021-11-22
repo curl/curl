@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\"
 .TH CURLOPT_NETRC 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_NETRC \- request that .netrc is used
+CURLOPT_NETRC \- enable use of .netrc
 .SH SYNOPSIS
 #include <curl/curl.h>
 
@@ -39,7 +39,7 @@ libcurl uses a user name (and supplied or prompted password) supplied with
 the options controlled by this parameter.
 
 Only machine name, user name and password are taken into account (init macros
-and similar things aren't supported).
+and similar things are not supported).
 
 libcurl does not verify that the file has the correct properties set (as the
 standard Unix ftp client does). It should only be readable by user.

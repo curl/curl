@@ -2,7 +2,7 @@
 
 Source code that has a common style is easier to read than code that uses
 different styles in different places. It helps making the code feel like one
-single code base. Easy-to-read is a very important property of code and helps
+single code base. Easy-to-read is an important property of code and helps
 making it easier to review when new things are added and it helps debugging
 code when developers are trying to figure out why things go wrong. A unified
 style is more important than individual contributors having their own personal
@@ -23,9 +23,9 @@ will cause warnings will not be accepted as-is.
 ## Naming
 
 Try using a non-confusing naming scheme for your new functions and variable
-names. It doesn't necessarily have to mean that you should use the same as in
+names. It does not necessarily have to mean that you should use the same as in
 other places of the code, just that the names should be logical,
-understandable and be named according to what they're used for. File-local
+understandable and be named according to what they are used for. File-local
 functions should be made static. We like lower case names.
 
 See the [INTERNALS](https://curl.se/dev/internals.html#symbols) document on
@@ -46,7 +46,7 @@ if(something_is_true) {
 
 ## Comments
 
-Since we write C89 code, **//** comments are not allowed. They weren't
+Since we write C89 code, **//** comments are not allowed. They were not
 introduced in the C standard until C99. We use only __/* comments */__.
 
 ```c
@@ -56,10 +56,10 @@ introduced in the C standard until C99. We use only __/* comments */__.
 ## Long lines
 
 Source code in curl may never be wider than 79 columns and there are two
-reasons for maintaining this even in the modern era of very large and high
+reasons for maintaining this even in the modern era of large and high
 resolution screens:
 
-1. Narrower columns are easier to read than very wide ones. There's a reason
+1. Narrower columns are easier to read than wide ones. There's a reason
    newspapers have used columns for decades or centuries.
 
 2. Narrower columns allow developers to easier show multiple pieces of code
@@ -154,8 +154,8 @@ if(!ptr)
 
 ## New block on a new line
 
-We never write multiple statements on the same source line, even for very
-short if() conditions.
+We never write multiple statements on the same source line, even for short
+if() conditions.
 
 ```c
 if(a)
@@ -230,7 +230,7 @@ if(Curl_pipeline_wanted(handle->multi, CURLPIPE_HTTP1) &&
    (handle->set.httpversion != CURL_HTTP_VERSION_1_0) &&
    (handle->set.httpreq == HTTPREQ_GET ||
     handle->set.httpreq == HTTPREQ_HEAD))
-  /* didn't ask for HTTP/1.0 and a GET or HEAD */
+  /* did not ask for HTTP/1.0 and a GET or HEAD */
   return TRUE;
 ```
 

@@ -58,7 +58,7 @@ warnings are:
 
 - `COPYRIGHT`: the file is missing a copyright statement!
 
-- `CPPCOMMENTS`: `//` comment detected, that's not C89 compliant
+- `CPPCOMMENTS`: `//` comment detected, that is not C89 compliant
 
 - `DOBRACE`: only use one space after do before open brace
 
@@ -120,7 +120,7 @@ warnings are:
 - `TYPEDEFSTRUCT`: we frown upon (most) typedefed structs
 
 - `UNUSEDIGNORE`: a checksrc inlined warning ignore was asked for but not used,
-   that's an ignore that should be removed or changed to get used.
+   that is an ignore that should be removed or changed to get used.
 
 ### Extended warnings
 
@@ -130,10 +130,12 @@ the directory where they should be activated with commands to enable the
 warnings you are interested in. The format of the file is to enable one
 warning per line like so: `enable <EXTENDEDWARNING>`
 
-Currently there is one extended warning which can be enabled:
+Currently these are the extended warnings which can be enabled:
 
-- `COPYRIGHTYEAR`: the current changeset hasn't updated the copyright year in
+- `COPYRIGHTYEAR`: the current changeset has not updated the copyright year in
    the source file
+
+- `STRERROR`: use of banned function strerror()
 
 ## Ignore certain warnings
 
@@ -159,11 +161,11 @@ This will ignore the warning for overly long lines until it is re-enabled with:
 
     /* !checksrc! enable LONGLINE */
 
-If the enabling isn't performed before the end of the file, it will be enabled
+If the enabling is not performed before the end of the file, it will be enabled
 automatically for the next file.
 
 You can also opt to ignore just N violations so that if you have a single long
-line you just can't shorten and is agreed to be fine anyway:
+line you just cannot shorten and is agreed to be fine anyway:
 
     /* !checksrc! disable LONGLINE 1 */
 
@@ -174,7 +176,7 @@ instances are ignored and nothing extra.
 
 ### Directory wide ignore patterns
 
-This is a method we've transitioned away from. Use inline ignores as far as
+This is a method we have transitioned away from. Use inline ignores as far as
 possible.
 
 Make a `checksrc.skip` file in the directory of the source code with the

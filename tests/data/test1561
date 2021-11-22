@@ -65,6 +65,9 @@ SSL
 http
 https
 </server>
+<killserver>
+https
+</killserver>
 <name>
 Cookies set over HTTP can't override secure ones
 </name>

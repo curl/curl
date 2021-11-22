@@ -131,10 +131,11 @@
         - libzstd-dev
       curl_env:
         T: debug-rustls
-        RUSTLS_VERSION: v0.7.2
+        # Keep this in sync with the version in docs/RUSTLS.md
+        RUSTLS_VERSION: v0.8.2
         LIBS: -lm
         C: >-
-          --with-rustls={{ ansible_user_dir }}/crust
+          --with-rustls={{ ansible_user_dir }}/rustls
 
 - job:
     name: curl-debug-bearssl

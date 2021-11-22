@@ -120,6 +120,11 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   curl https://sh.rustup.rs -sSf | sh -s -- -y
   source $HOME/.cargo/env
   cd $HOME/quiche
+
+  #### Work-around https://github.com/curl/curl/issues/7927 #######
+  #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
+  sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' Cargo.toml
+
   cargo build -v --release --features ffi,pkg-config-meta,qlog
   mkdir -v deps/boringssl/src/lib
   ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
@@ -133,7 +138,7 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$RUSTLS_VERSION" ]; then
   cargo install cbindgen
   cd $HOME/rustls-ffi
   make
-  make DESTDIR=$HOME/crust install
+  make DESTDIR=$HOME/rustls install
 fi
 
 if [ $TRAVIS_OS_NAME = linux -a "$WOLFSSL" ]; then

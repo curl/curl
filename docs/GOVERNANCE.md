@@ -98,7 +98,7 @@ on maintaining curl is considered a hero, for all time hereafter.
 
 ## Security team members
 
-We have a security team. That's the team of people who are subscribed to the
+We have a security team. That is the team of people who are subscribed to the
 curl-security mailing list; the receivers of security reports from users and
 developers. This list of people will vary over time but should be skilled
 developers familiar with the curl project.
@@ -123,7 +123,7 @@ primary curl contact with Fastly.
 
 ## BDFL
 
-That's Daniel.
+That is Daniel.
 
 # Maintainers
 
@@ -152,10 +152,10 @@ within the area of personal expertise and experience.
 
 ### Merge advice
 
-When you're merging patches/PRs...
+When you are merging patches/PRs...
 
 - make sure the commit messages follow our template
-- squash patch sets into a few logical commits even if the PR didn't, if
+- squash patch sets into a few logical commits even if the PR did not, if
   necessary
 - avoid the "merge" button on GitHub, do it "manually" instead to get full
   control and full audit trail (github leaves out you as "Committer:")

@@ -26,6 +26,7 @@ MooMoo
 <features>
 SSL
 SSLpinning
+!Schannel
 </features>
 <server>
 https Server-localhost-sv.pem

@@ -61,7 +61,7 @@ which kind of proxy the string identifies.
 When you tell the library to use an HTTP proxy, libcurl will transparently
 convert operations to HTTP even if you specify an FTP URL etc. This may have
 an impact on what other features of the library you can use, such as
-\fICURLOPT_QUOTE(3)\fP and similar FTP specifics that don't work unless you
+\fICURLOPT_QUOTE(3)\fP and similar FTP specifics that do not work unless you
 tunnel through the HTTP proxy. Such tunneling is activated with
 \fICURLOPT_HTTPPROXYTUNNEL(3)\fP.
 
@@ -90,7 +90,7 @@ Default is NULL, meaning no proxy is used.
 When you set a host name to use, do not assume that there's any particular
 single port number used widely for proxies. Specify it!
 .SH PROTOCOLS
-All except file://. Note that some protocols don't do very well over proxy.
+All except file://. Note that some protocols do not work well over proxy.
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();

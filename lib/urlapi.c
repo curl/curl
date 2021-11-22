@@ -235,26 +235,32 @@ static void strcpy_url(char *output, const char *url, bool relative)
 bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
 {
   size_t i;
+
+  if(buf && buflen)
+    buf[0] = 0; /* always leave a defined value in buf */
 #ifdef WIN32
   if(STARTS_WITH_DRIVE_PREFIX(url))
     return FALSE;
 #endif
-  for(i = 0; i < buflen && url[i]; ++i) {
+  for(i = 0; i < buflen; ++i) {
     char s = url[i];
-    if((s == ':') && (url[i + 1] == '/')) {
-      if(buf)
-        buf[i] = 0;
-      return TRUE;
+    if(s && (ISALNUM(s) || (s == '+') || (s == '-') || (s == '.') )) {
+      /* RFC 3986 3.1 explains:
+        scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+      */
     }
-    /* RFC 3986 3.1 explains:
-      scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
-    */
-    else if(ISALNUM(s) || (s == '+') || (s == '-') || (s == '.') ) {
-      if(buf)
-        buf[i] = (char)TOLOWER(s);
-    }
-    else
+    else {
       break;
+    }
+  }
+  if(i && (url[i] == ':') && (url[i + 1] == '/')) {
+    if(buf) {
+      buf[i] = 0;
+      while(i--) {
+        buf[i] = (char)TOLOWER(url[i]);
+      }
+    }
+    return TRUE;
   }
   return FALSE;
 }
@@ -811,13 +817,13 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   hostname = &path[urllen + 1];
   hostname[0] = 0;
 
-  if(Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf))) {
+  if(Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf) - 1)) {
     url_has_scheme = TRUE;
     schemelen = strlen(schemebuf);
   }
 
   /* handle the file: scheme */
-  if(url_has_scheme && strcasecompare(schemebuf, "file")) {
+  if(url_has_scheme && !strcmp(schemebuf, "file")) {
     /* path has been allocated large enough to hold this */
     strcpy(path, &url[5]);
 
@@ -1520,7 +1526,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     char *redired_url;
     CURLU *handle2;
 
-    if(Curl_is_absolute_url(part, NULL, MAX_SCHEME_LEN + 1)) {
+    if(Curl_is_absolute_url(part, NULL, MAX_SCHEME_LEN)) {
       handle2 = curl_url();
       if(!handle2)
         return CURLUE_OUT_OF_MEMORY;

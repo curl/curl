@@ -6514,11 +6514,17 @@ dnl CURL_LIBRARY_PATH variable. It keeps the LD_LIBRARY_PATH
 dnl changes contained within this macro.
 
 AC_DEFUN([CURL_RUN_IFELSE], [
-   old=$LD_LIBRARY_PATH
-   LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
-   export LD_LIBRARY_PATH
+   case $host_os in
+     darwin*) library_path_var=DYLD_LIBRARY_PATH ;;
+     *)       library_path_var=LD_LIBRARY_PATH ;;
+   esac
+
+   eval "old=$$library_path_var"
+   eval "$library_path_var=\$CURL_LIBRARY_PATH:\$old"
+
+   eval "export $library_path_var"
    AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
-   LD_LIBRARY_PATH=$old # restore
+   eval "$library_path_var=\$old" # restore
 ])
 
 dnl CURL_COVERAGE

@@ -233,6 +233,7 @@ man_MANS =                                      \
   CURLOPT_MAX_RECV_SPEED_LARGE.3                \
   CURLOPT_MAX_SEND_SPEED_LARGE.3                \
   CURLOPT_MIMEPOST.3                            \
+  CURLOPT_MIME_OPTIONS.3                        \
   CURLOPT_NETRC.3                               \
   CURLOPT_NETRC_FILE.3                          \
   CURLOPT_NEW_DIRECTORY_PERMS.3                 \
@@ -399,4 +400,9 @@ man_MANS =                                      \
   CURLOPT_WRITEFUNCTION.3                       \
   CURLOPT_XFERINFODATA.3                        \
   CURLOPT_XFERINFOFUNCTION.3                    \
-  CURLOPT_XOAUTH2_BEARER.3
+  CURLOPT_XOAUTH2_BEARER.3                      \
+  CURLSHOPT_LOCKFUNC.3                          \
+  CURLSHOPT_SHARE.3                             \
+  CURLSHOPT_UNLOCKFUNC.3                        \
+  CURLSHOPT_UNSHARE.3                           \
+  CURLSHOPT_USERDATA.3

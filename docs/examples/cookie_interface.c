@@ -104,7 +104,7 @@ main(void)
       return 1;
     }
 
-    /* HTTP-header style cookie. If you use the Set-Cookie format and don't
+    /* HTTP-header style cookie. If you use the Set-Cookie format and do not
     specify a domain then the cookie is sent for any domain and will not be
     modified, likely not what you intended. Starting in 7.43.0 any-domain
     cookies will not be exported either. For more information refer to the

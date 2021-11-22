@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -75,13 +75,13 @@ int main(void)
     /* we pass our 'chunk' struct to the callback function */
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
-    /* some servers don't like requests that are made without a user-agent
+    /* some servers do not like requests that are made without a user-agent
        field, so we provide one */
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postthis);
 
-    /* if we don't provide POSTFIELDSIZE, libcurl will strlen() by
+    /* if we do not provide POSTFIELDSIZE, libcurl will strlen() by
        itself */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(postthis));
 

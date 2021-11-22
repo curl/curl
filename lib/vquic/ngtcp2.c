@@ -61,6 +61,7 @@
 #endif
 
 #define H3_ALPN_H3_29 "\x5h3-29"
+#define H3_ALPN_H3 "\x2h3"
 
 /*
  * This holds outgoing HTTP/3 stream data that is used by nghttp3 until acked.
@@ -303,10 +304,10 @@ static int quic_init_ssl(struct quicsocket *qs)
 
   SSL_set_app_data(qs->ssl, qs);
   SSL_set_connect_state(qs->ssl);
-  SSL_set_quic_use_legacy_codepoint(qs->ssl, 1);
+  SSL_set_quic_use_legacy_codepoint(qs->ssl, 0);
 
-  alpn = (const uint8_t *)H3_ALPN_H3_29;
-  alpnlen = sizeof(H3_ALPN_H3_29) - 1;
+  alpn = (const uint8_t *)H3_ALPN_H3_29 H3_ALPN_H3;
+  alpnlen = sizeof(H3_ALPN_H3_29) - 1 + sizeof(H3_ALPN_H3) - 1;
   if(alpn)
     SSL_set_alpn_protos(qs->ssl, alpn, (int)alpnlen);
 
@@ -418,7 +419,7 @@ static int tp_send_func(gnutls_session_t ssl, gnutls_buffer_t extdata)
 
 static int quic_init_ssl(struct quicsocket *qs)
 {
-  gnutls_datum_t alpn = {NULL, 0};
+  gnutls_datum_t alpn[2];
   /* this will need some attention when HTTPS proxy over QUIC get fixed */
   const char * const hostname = qs->conn->host.name;
   int rc;
@@ -440,7 +441,7 @@ static int quic_init_ssl(struct quicsocket *qs)
   gnutls_alert_set_read_function(qs->ssl, alert_read_func);
 
   rc = gnutls_session_ext_register(qs->ssl, "QUIC Transport Parameters",
-         NGTCP2_TLSEXT_QUIC_TRANSPORT_PARAMETERS_DRAFT, GNUTLS_EXT_TLS,
+         NGTCP2_TLSEXT_QUIC_TRANSPORT_PARAMETERS_V1, GNUTLS_EXT_TLS,
          tp_recv_func, tp_send_func, NULL, NULL, NULL,
          GNUTLS_EXT_FLAG_TLS | GNUTLS_EXT_FLAG_CLIENT_HELLO |
          GNUTLS_EXT_FLAG_EE);
@@ -483,10 +484,12 @@ static int quic_init_ssl(struct quicsocket *qs)
   }
 
   /* strip the first byte (the length) from NGHTTP3_ALPN_H3 */
-  alpn.data = (unsigned char *)H3_ALPN_H3_29 + 1;
-  alpn.size = sizeof(H3_ALPN_H3_29) - 2;
-  if(alpn.data)
-    gnutls_alpn_set_protocols(qs->ssl, &alpn, 1, 0);
+  alpn[0].data = (unsigned char *)H3_ALPN_H3_29 + 1;
+  alpn[0].size = sizeof(H3_ALPN_H3_29) - 2;
+  alpn[1].data = (unsigned char *)H3_ALPN_H3 + 1;
+  alpn[1].size = sizeof(H3_ALPN_H3) - 2;
+
+  gnutls_alpn_set_protocols(qs->ssl, alpn, 2, GNUTLS_ALPN_MANDATORY);
 
   /* set SNI */
   gnutls_server_name_set(qs->ssl, GNUTLS_NAME_DNS, hostname, strlen(hostname));
@@ -647,6 +650,20 @@ static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
   return 0;
 }
 
+static void cb_rand(uint8_t *dest, size_t destlen,
+                    const ngtcp2_rand_ctx *rand_ctx)
+{
+  CURLcode result;
+  (void)rand_ctx;
+
+  result = Curl_rand(NULL, dest, destlen);
+  if(result) {
+    /* cb_rand is only used for non-cryptographic context.  If Curl_rand
+       failed, just fill 0 and call it *random*. */
+    memset(dest, 0, destlen);
+  }
+}
+
 static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
                                     uint8_t *token, size_t cidlen,
                                     void *user_data)
@@ -684,7 +701,7 @@ static ngtcp2_callbacks ng_callbacks = {
   ngtcp2_crypto_recv_retry_cb,
   cb_extend_max_local_streams_bidi,
   NULL, /* extend_max_local_streams_uni */
-  NULL, /* rand  */
+  cb_rand,
   cb_get_new_connection_id,
   NULL, /* remove_connection_id */
   ngtcp2_crypto_update_key_cb, /* update_key */
@@ -702,7 +719,7 @@ static ngtcp2_callbacks ng_callbacks = {
   NULL, /* recv_datagram */
   NULL, /* ack_datagram */
   NULL, /* lost_datagram */
-  NULL, /* get_path_challenge_data */
+  ngtcp2_crypto_get_path_challenge_data_cb,
   cb_stream_stop_sending
 };
 
@@ -775,7 +792,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   ngtcp2_addr_init(&path.remote, addr, addrlen);
 
   rc = ngtcp2_conn_client_new(&qs->qconn, &qs->dcid, &qs->scid, &path,
-                              NGTCP2_PROTO_VER_MIN, &ng_callbacks,
+                              NGTCP2_PROTO_VER_V1, &ng_callbacks,
                               &qs->settings, &qs->transport_params, NULL, qs);
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
@@ -791,7 +808,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
 void Curl_quic_ver(char *p, size_t len)
 {
   const ngtcp2_info *ng2 = ngtcp2_version(0);
-  nghttp3_info *ht3 = nghttp3_version(0);
+  const nghttp3_info *ht3 = nghttp3_version(0);
   (void)msnprintf(p, len, "ngtcp2/%s nghttp3/%s",
                   ng2->version_str, ht3->version_str);
 }

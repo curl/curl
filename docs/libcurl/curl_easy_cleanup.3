@@ -34,7 +34,7 @@ same \fIhandle\fP as input that a \fIcurl_easy_init(3)\fP call returned.
 
 This might close all connections this handle has used and possibly has kept
 open until now - unless it was attached to a multi handle while doing the
-transfers. Don't call this function if you intend to transfer more files,
+transfers. Do not call this function if you intend to transfer more files,
 re-using handles is a key to good performance with libcurl.
 
 Occasionally you may get your progress callback or header callback called from
@@ -46,6 +46,10 @@ sequence before disconnect. Examples of such protocols are FTP, POP3 and IMAP.
 Any use of the \fBhandle\fP after this function has been called and have
 returned, is illegal. \fIcurl_easy_cleanup(3)\fP kills the handle and all
 memory associated with it!
+
+To close an easy handle that has been used with the multi interface, make sure
+to call \fIcurl_multi_remove_handle(3)\fP first to remove it from the multi
+handle before it is closed.
 
 Passing in a NULL pointer in \fIhandle\fP will make this function return
 immediately with no action.

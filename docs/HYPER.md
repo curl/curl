@@ -46,7 +46,7 @@ over the wire with Hyper.
 
 ## Limitations
 
-The hyper backend doesn't support
+The hyper backend does not support
 
 - `CURLOPT_IGNORE_CONTENT_LENGTH`
 - `--raw` and disabling `CURLOPT_HTTP_TRANSFER_DECODING`

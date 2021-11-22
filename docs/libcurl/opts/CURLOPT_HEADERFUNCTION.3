@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -38,16 +38,16 @@ shown above.
 
 This function gets called by libcurl as soon as it has received header
 data. The header callback will be called once for each header and only
-complete header lines are passed on to the callback. Parsing headers is very
-easy using this. \fIbuffer\fP points to the delivered data, and the size of
-that data is \fInitems\fP; \fIsize\fP is always 1. Do not assume that the
-header line is null-terminated!
+complete header lines are passed on to the callback. Parsing headers is easy
+to do using this callback. \fIbuffer\fP points to the delivered data, and the
+size of that data is \fInitems\fP; \fIsize\fP is always 1. Do not assume that
+the header line is null-terminated!
 
 The pointer named \fIuserdata\fP is the one you set with the
 \fICURLOPT_HEADERDATA(3)\fP option.
 
 This callback function must return the number of bytes actually taken care of.
-If that amount differs from the amount passed in to your function, it'll signal
+If that amount differs from the amount passed in to your function, it will signal
 an error to the library. This will cause the transfer to get aborted and the
 libcurl function in progress will return \fICURLE_WRITE_ERROR\fP.
 
