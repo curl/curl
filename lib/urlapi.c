@@ -258,7 +258,7 @@ bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
     if(buf) {
       buf[i] = 0;
       while(i--) {
-        buf[i] = TOLOWER(url[i]);
+        buf[i] = (char)TOLOWER(url[i]);
       }
     }
     return TRUE;
