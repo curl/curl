@@ -256,8 +256,8 @@ bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
   }
   if(i && (url[i] == ':') && (url[i + 1] == '/')) {
     if (buf) {
-        memcpy(buf, url, i);
-        buf[i] = 0;
+      memcpy(buf, url, i);
+      buf[i] = 0;
     }
     return TRUE;
   }
