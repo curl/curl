@@ -824,6 +824,10 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
 
   /* handle the file: scheme */
   if(url_has_scheme && !strcmp(schemebuf, "file")) {
+    if(urllen <= 6)
+      /* file:/ is not enough to actually be a complete file: URL */
+      return CURLUE_MALFORMED_INPUT;
+
     /* path has been allocated large enough to hold this */
     strcpy(path, &url[5]);
 
