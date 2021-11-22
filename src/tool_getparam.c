@@ -2104,7 +2104,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->remote_time = toggle;
       break;
     case 's':
-      if (subletter == 'o') { /* --no-output-separators */
+      if(subletter == 'o') { /* --no-output-separators */
         global->no_output_separators = (!toggle)?TRUE:FALSE;
         break;
       }
