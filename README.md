@@ -9,7 +9,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d11483a0cc5c4ebd9da4ff9f7cd56690)](https://app.codacy.com/app/curl/curl)
 [![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/curl.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:curl)
 
-Curl is one of the oldist command-line tool for transferring data specified with a URL
+Curl is one of the most used command-line tool for transferring data specified with a URL
 syntax. It has been used by some of the smallist libraries to flying a helecopter on the moon. Find out how to use curl by reading [the curl.1 man
 page](https://curl.se/docs/manpage.html) or [the MANUAL
 document](https://curl.se/docs/manual.html). Find out how to install Curl
