@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH libcurl-errors 3 "1 Jan 2010" "libcurl 7.20.0" "libcurl errors"
+.TH libcurl-errors 3 "23 Nov 2021" "libcurl 7.81.0" "libcurl errors"
 .SH NAME
 libcurl-errors \- error codes in libcurl
 .SH DESCRIPTION
@@ -361,6 +361,30 @@ There is no port part in the URL.
 There is no query part in the URL.
 .IP "CURLUE_NO_FRAGMENT (17)"
 There is no fragment part in the URL.
+.IP "CURLUE_NO_ZONEID (18)"
+There is no zoneid set in the URL.
+.IP "CURLUE_BAD_FILE_URL (19)"
+The file:// URL is invalid.
+.IP "CURLUE_BAD_FRAGMENT (20)"
+The fragment part of the URL contained bad or invalid characters.
+.IP "CURLUE_BAD_HOSTNAME (21)"
+The hostname contained bad or invalid characters.
+.IP "CURLUE_BAD_IPV6 (22)"
+The IPv6 address hostname contained bad or invalid characters.
+.IP "CURLUE_BAD_LOGIN (23)"
+The login part of the URL contained bad or invalid characters.
+.IP "CURLUE_BAD_PASSWORD (24)"
+The password part of the URL contained bad or invalid characters.
+.IP "CURLUE_BAD_PATH (25)"
+The path part of the URL contained bad or invalid characters.
+.IP "CURLUE_BAD_QUERY (26)"
+The query part of the URL contained bad or invalid characters.
+.IP "CURLUE_BAD_SCHEME (27)"
+The scheme part of the URL contained bad or invalid characters.
+.IP "CURLUE_BAD_SLASHES (28)"
+The URL contained an invalid number of slashes.
+.IP "CURLUE_BAD_USER (29)"
+The user part of the URL contained bad or invalid characters.
 .SH "SEE ALSO"
 .BR curl_easy_strerror "(3), " curl_multi_strerror "(3), "
 .BR curl_share_strerror "(3), " curl_url_strerror "(3), "

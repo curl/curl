@@ -48,6 +48,18 @@ typedef enum {
   CURLUE_NO_PORT,             /* 15 */
   CURLUE_NO_QUERY,            /* 16 */
   CURLUE_NO_FRAGMENT,         /* 17 */
+  CURLUE_NO_ZONEID,           /* 18 */
+  CURLUE_BAD_FILE_URL,        /* 19 */
+  CURLUE_BAD_FRAGMENT,        /* 20 */
+  CURLUE_BAD_HOSTNAME,        /* 21 */
+  CURLUE_BAD_IPV6,            /* 22 */
+  CURLUE_BAD_LOGIN,           /* 23 */
+  CURLUE_BAD_PASSWORD,        /* 24 */
+  CURLUE_BAD_PATH,            /* 25 */
+  CURLUE_BAD_QUERY,           /* 26 */
+  CURLUE_BAD_SCHEME,          /* 27 */
+  CURLUE_BAD_SLASHES,         /* 28 */
+  CURLUE_BAD_USER,            /* 29 */
   CURLUE_LAST
 } CURLUcode;
 

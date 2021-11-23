@@ -468,10 +468,10 @@ curl_url_strerror(CURLUcode error)
     return "An invalid 'part' argument was passed as argument";
 
   case CURLUE_MALFORMED_INPUT:
-    return "A malformed input was passed to a URL API function";
+    return "Malformed input to a URL function";
 
   case CURLUE_BAD_PORT_NUMBER:
-    return "The port number was not a decimal number between 0 and 65535";
+    return "Port number was not a decimal number between 0 and 65535";
 
   case CURLUE_UNSUPPORTED_SCHEME:
     return "This libcurl build doesn't support the given URL scheme";
@@ -489,28 +489,64 @@ curl_url_strerror(CURLUcode error)
     return "An unknown part ID was passed to a URL API function";
 
   case CURLUE_NO_SCHEME:
-    return "There is no scheme part in the URL";
+    return "No scheme part in the URL";
 
   case CURLUE_NO_USER:
-    return "There is no user part in the URL";
+    return "No user part in the URL";
 
   case CURLUE_NO_PASSWORD:
-    return "There is no password part in the URL";
+    return "No password part in the URL";
 
   case CURLUE_NO_OPTIONS:
-    return "There is no options part in the URL";
+    return "No options part in the URL";
 
   case CURLUE_NO_HOST:
-    return "There is no host part in the URL";
+    return "No host part in the URL";
 
   case CURLUE_NO_PORT:
-    return "There is no port part in the URL";
+    return "No port part in the URL";
 
   case CURLUE_NO_QUERY:
-    return "There is no query part in the URL";
+    return "No query part in the URL";
 
   case CURLUE_NO_FRAGMENT:
-    return "There is no fragment part in the URL";
+    return "No fragment part in the URL";
+
+  case CURLUE_NO_ZONEID:
+    return "No zoneid part in the URL";
+
+  case CURLUE_BAD_LOGIN:
+    return "Bad login part";
+
+  case CURLUE_BAD_IPV6:
+    return "Bad IPv6 address";
+
+  case CURLUE_BAD_HOSTNAME:
+    return "Bad hostname";
+
+  case CURLUE_BAD_FILE_URL:
+    return "Bad file:// URL";
+
+  case CURLUE_BAD_SLASHES:
+    return "Unsupported number of slashes";
+
+  case CURLUE_BAD_SCHEME:
+    return "Bad scheme";
+
+  case CURLUE_BAD_PATH:
+    return "Bad path";
+
+  case CURLUE_BAD_FRAGMENT:
+    return "Bad fragment";
+
+  case CURLUE_BAD_QUERY:
+    return "Bad query";
+
+  case CURLUE_BAD_PASSWORD:
+    return "Bad password";
+
+  case CURLUE_BAD_USER:
+    return "Bad user";
 
   case CURLUE_LAST:
     break;
