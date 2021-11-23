@@ -50,6 +50,9 @@
    ((str)[1] == ':' || (str)[1] == '|') && \
    ((str)[2] == '/' || (str)[2] == '\\' || (str)[2] == 0))
 
+/* scheme is not URL encoded, the longest libcurl supported ones are... */
+#define MAX_SCHEME_LEN 40
+
 /* Internal representation of CURLU. Point to URL-encoded strings. */
 struct Curl_URL {
   char *scheme;
@@ -228,21 +231,22 @@ static void strcpy_url(char *output, const char *url, bool relative)
 }
 
 /*
- * Returns true if the given URL is absolute (as opposed to relative) within
- * the buffer size. Returns the scheme in the buffer if TRUE and 'buf' is
- * non-NULL.
+ * Returns true if the given URL is absolute (as opposed to relative). Returns
+ * the scheme in the buffer if TRUE and 'buf' is non-NULL. The buflen must
+ * be larger than MAX_SCHEME_LEN if buf is set.
  */
 bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
 {
   size_t i;
-
-  if(buf && buflen)
+  DEBUGASSERT(!buf || (buflen > MAX_SCHEME_LEN));
+  (void)buflen; /* only used in debug-builds */
+  if(buf)
     buf[0] = 0; /* always leave a defined value in buf */
 #ifdef WIN32
   if(STARTS_WITH_DRIVE_PREFIX(url))
     return FALSE;
 #endif
-  for(i = 0; i < buflen; ++i) {
+  for(i = 0; i < MAX_SCHEME_LEN; ++i) {
     char s = url[i];
     if(s && (ISALNUM(s) || (s == '+') || (s == '-') || (s == '.') )) {
       /* RFC 3986 3.1 explains:
@@ -817,7 +821,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   hostname = &path[urllen + 1];
   hostname[0] = 0;
 
-  if(Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf) - 1)) {
+  if(Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf))) {
     url_has_scheme = TRUE;
     schemelen = strlen(schemebuf);
   }
@@ -1530,7 +1534,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     char *redired_url;
     CURLU *handle2;
 
-    if(Curl_is_absolute_url(part, NULL, MAX_SCHEME_LEN)) {
+    if(Curl_is_absolute_url(part, NULL, 0)) {
       handle2 = curl_url();
       if(!handle2)
         return CURLUE_OUT_OF_MEMORY;

@@ -58,7 +58,8 @@ Pass a pointer to a null-terminated string to the \fIurl\fP parameter. The
 string must point to a correctly formatted "RFC 3986+" URL or be a NULL
 pointer.
 .IP CURLUPART_SCHEME
-Scheme cannot be URL decoded on set.
+Scheme cannot be URL decoded on set. libcurl only accepts setting schemes up
+to 40 bytes long.
 .IP CURLUPART_USER
 .IP CURLUPART_PASSWORD
 .IP CURLUPART_OPTIONS

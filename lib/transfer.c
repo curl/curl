@@ -1631,7 +1631,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
 
   if((type != FOLLOW_RETRY) &&
      (data->req.httpcode != 401) && (data->req.httpcode != 407) &&
-     Curl_is_absolute_url(newurl, NULL, MAX_SCHEME_LEN))
+     Curl_is_absolute_url(newurl, NULL, 0))
     /* If this is not redirect due to a 401 or 407 response and an absolute
        URL: don't allow a custom port number */
     disallowport = TRUE;
