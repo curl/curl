@@ -238,8 +238,8 @@ static void strcpy_url(char *output, const char *url, bool relative)
 bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
 {
   size_t i;
-
   DEBUGASSERT(!buf || (buflen > MAX_SCHEME_LEN));
+  (void)buflen; /* only used in debug-builds */
   if(buf)
     buf[0] = 0; /* always leave a defined value in buf */
 #ifdef WIN32
