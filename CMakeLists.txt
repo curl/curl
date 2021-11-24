@@ -352,6 +352,16 @@ if(WIN32)
   check_library_exists_concat("winmm"  getch        HAVE_LIBWINMM)
 endif()
 
+foreach(_LIB GSSAPI OPENLDAP LIBSSH LIBSSH2 BEARSSL MBEDTLS NSS OPENSSL
+        SCHANNEL SECTRANSP WOLFSSL)
+  if(CMAKE_USE_${_LIB})
+    message(FATAL_ERROR "The option CMAKE_USE_${_LIB} is now CURL_USE_${_LIB}.")
+  endif()
+endforeach()
+if(CMAKE_USE_WINSSL)
+  message(FATAL_ERROR "The option CMAKE_USE_WINSSL was renamed to CURL_USE_SCHANNEL.")
+endif()
+
 # check SSL libraries
 # TODO support GnuTLS
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
