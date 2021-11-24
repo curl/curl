@@ -355,9 +355,6 @@ endif()
 # check SSL libraries
 # TODO support GnuTLS
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
-if(CURL_USE_SCHANNEL)
-  message(FATAL_ERROR "The cmake option CURL_USE_SCHANNEL was renamed to CURL_USE_SCHANNEL.")
-endif()
 
 if(APPLE)
   cmake_dependent_option(CURL_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
