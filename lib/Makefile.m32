@@ -219,7 +219,7 @@ ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
 IPV6 = 1
 endif
 ifeq ($(findstring -winssl,$(CFG)),-winssl)
-WINSSL = 1
+SCHANNEL = 1
 SSPI = 1
 endif
 ifeq ($(findstring -nghttp2,$(CFG)),-nghttp2)
@@ -237,7 +237,7 @@ endif
 
 # SSH2 and RTMP require an SSL library; assume OpenSSL if none specified
 ifneq ($(SSH2)$(RTMP),)
-  ifeq ($(SSL)$(WINSSL),)
+  ifeq ($(SSL)$(SCHANNEL),)
     SSL = 1
   endif
 endif
@@ -245,7 +245,7 @@ endif
 INCLUDES = -I. -I../include
 CFLAGS += -DBUILDING_LIBCURL
 ifdef SSL
-  ifdef WINSSL
+  ifdef SCHANNEL
     CFLAGS += -DCURL_WITH_MULTI_SSL
   endif
 endif
@@ -277,7 +277,7 @@ ifdef SSH2
   INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
   DLL_LIBS += -L"$(LIBSSH2_PATH)/win32" -lssh2
-  ifdef WINSSL
+  ifdef SCHANNEL
     ifndef DYN
       DLL_LIBS += -lbcrypt -lcrypt32
     endif
@@ -329,7 +329,7 @@ ifdef SSL
     endif
   endif
 endif
-ifdef WINSSL
+ifdef SCHANNEL
   CFLAGS += -DUSE_SCHANNEL
   DLL_LIBS += -lcrypt32
 endif
