@@ -168,76 +168,76 @@ endif
 ########################################################
 ## Nothing more to do below this line!
 
-ifeq ($(findstring -dyn,$(CFG)),-dyn)
+ifneq ($(findstring -dyn,$(CFG)),)
 DYN = 1
 endif
-ifeq ($(findstring -ares,$(CFG)),-ares)
+ifneq ($(findstring -ares,$(CFG)),)
 ARES = 1
 endif
-ifeq ($(findstring -sync,$(CFG)),-sync)
+ifneq ($(findstring -sync,$(CFG)),)
 SYNC = 1
 endif
-ifeq ($(findstring -rtmp,$(CFG)),-rtmp)
+ifneq ($(findstring -rtmp,$(CFG)),)
 RTMP = 1
 ZLIB = 1
 endif
-ifeq ($(findstring -ssh2,$(CFG)),-ssh2)
+ifneq ($(findstring -ssh2,$(CFG)),)
 SSH2 = 1
 ZLIB = 1
 endif
-ifeq ($(findstring -ssl,$(CFG)),-ssl)
+ifneq ($(findstring -ssl,$(CFG)),)
 SSL = 1
 endif
-ifeq ($(findstring -srp,$(CFG)),-srp)
+ifneq ($(findstring -srp,$(CFG)),)
 SRP = 1
 endif
-ifeq ($(findstring -zlib,$(CFG)),-zlib)
+ifneq ($(findstring -zlib,$(CFG)),)
 ZLIB = 1
 endif
-ifeq ($(findstring -zstd,$(CFG)),-zstd)
+ifneq ($(findstring -zstd,$(CFG)),)
 ZSTD = 1
 endif
-ifeq ($(findstring -brotli,$(CFG)),-brotli)
+ifneq ($(findstring -brotli,$(CFG)),)
 BROTLI = 1
 endif
-ifeq ($(findstring -gsasl,$(CFG)),-gsasl)
+ifneq ($(findstring -gsasl,$(CFG)),)
 GSASL = 1
 endif
-ifeq ($(findstring -idn2,$(CFG)),-idn2)
+ifneq ($(findstring -idn2,$(CFG)),)
 IDN2 = 1
 endif
-ifeq ($(findstring -winidn,$(CFG)),-winidn)
+ifneq ($(findstring -winidn,$(CFG)),)
 WINIDN = 1
 endif
-ifeq ($(findstring -sspi,$(CFG)),-sspi)
+ifneq ($(findstring -sspi,$(CFG)),)
 SSPI = 1
 endif
-ifeq ($(findstring -ldaps,$(CFG)),-ldaps)
+ifneq ($(findstring -ldaps,$(CFG)),)
 LDAPS = 1
 endif
-ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
+ifneq ($(findstring -ipv6,$(CFG)),)
 IPV6 = 1
 endif
-ifeq ($(findstring -winssl,$(CFG)),-winssl)
-WINSSL = 1
+ifneq ($(findstring -schannel,$(CFG))$(findstring -winssl,$(CFG)),)
+SCHANNEL = 1
 SSPI = 1
 endif
-ifeq ($(findstring -nghttp2,$(CFG)),-nghttp2)
+ifneq ($(findstring -nghttp2,$(CFG)),)
 NGHTTP2 = 1
 endif
-ifeq ($(findstring -nghttp3,$(CFG)),-nghttp3)
+ifneq ($(findstring -nghttp3,$(CFG)),)
 NGHTTP3 = 1
 endif
-ifeq ($(findstring -ngtcp2,$(CFG)),-ngtcp2)
+ifneq ($(findstring -ngtcp2,$(CFG)),)
 NGTCP2 = 1
 endif
-ifeq ($(findstring -unicode,$(CFG)),-unicode)
+ifneq ($(findstring -unicode,$(CFG)),)
 UNICODE = 1
 endif
 
 # SSH2 and RTMP require an SSL library; assume OpenSSL if none specified
 ifneq ($(SSH2)$(RTMP),)
-  ifeq ($(SSL)$(WINSSL),)
+  ifeq ($(SSL)$(SCHANNEL),)
     SSL = 1
   endif
 endif
@@ -245,7 +245,7 @@ endif
 INCLUDES = -I. -I../include
 CFLAGS += -DBUILDING_LIBCURL
 ifdef SSL
-  ifdef WINSSL
+  ifdef SCHANNEL
     CFLAGS += -DCURL_WITH_MULTI_SSL
   endif
 endif
@@ -277,7 +277,7 @@ ifdef SSH2
   INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
   DLL_LIBS += -L"$(LIBSSH2_PATH)/win32" -lssh2
-  ifdef WINSSL
+  ifdef SCHANNEL
     ifndef DYN
       DLL_LIBS += -lbcrypt -lcrypt32
     endif
@@ -329,7 +329,7 @@ ifdef SSL
     endif
   endif
 endif
-ifdef WINSSL
+ifdef SCHANNEL
   CFLAGS += -DUSE_SCHANNEL
   DLL_LIBS += -lcrypt32
 endif
