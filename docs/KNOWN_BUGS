@@ -54,6 +54,7 @@ problems may have been fixed or changed somewhat since this was written!
  5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
  5.4 Build with statically built dependency
  5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
+ 5.6 make distclean loops forever
  5.7 Visual Studio project gaps
  5.8 configure finding libs in wrong directory
  5.9 Utilize Requires.private directives in libcurl.pc
@@ -478,6 +479,13 @@ problems may have been fixed or changed somewhat since this was written!
   https://curl.se/bug/?i=345
   https://curl.se/bug/?i=731
   https://curl.se/bug/?i=3747
+
+5.6 make distclean loops forever
+
+ Due to an issue (probably) in automake, "make distclean" can end up in a
+ never-ending loop.
+
+ See https://github.com/curl/curl/issues/7716
 
 5.7 Visual Studio project gaps
 
