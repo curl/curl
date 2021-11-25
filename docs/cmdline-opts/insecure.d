@@ -1,22 +1,25 @@
 Long: insecure
 Short: k
-Help: Allow insecure server connections when using SSL
-Protocols: TLS
+Help: Allow insecure server connections
+Protocols: TLS SFTP SCP
 See-also: proxy-insecure cacert capath
-Category: tls
+Category: tls sftp scp
 Example: --insecure $URL
 Added: 7.10
 ---
-By default, every SSL/TLS connection curl makes is verified to be secure
-before the transfer takes place. This option makes curl skip the verification
-step and proceed without checking.
+By default, every secure connection curl makes is verified to be secure before
+the transfer takes place. This option makes curl skip the verification step
+and proceed without checking.
 
-When this option is not used, curl verifies the server's TLS certificate
-before it continues: that the certificate contains the right name which
-matches the host name used in the URL and that the certificate has been signed
-by a CA certificate present in the cert store.
-
+When this option is not used for protocols using TLS, curl verifies the
+server's TLS certificate before it continues: that the certificate contains
+the right name which matches the host name used in the URL and that the
+certificate has been signed by a CA certificate present in the cert store.
 See this online resource for further details:
  https://curl.se/docs/sslcerts.html
+
+For SFTP and SCP, this option makes curl skip the *known_hosts* verification.
+*known_hosts* is a file normally stored in the user's home directory in the
+\&.ssh subdirectory, which contains host names and their public keys.
 
 **WARNING**: using this option makes the transfer insecure.
