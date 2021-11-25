@@ -57,7 +57,7 @@ problems may have been fixed or changed somewhat since this was written!
  5.7 Visual Studio project gaps
  5.8 configure finding libs in wrong directory
  5.9 Utilize Requires.private directives in libcurl.pc
- 5.10 SMB tests fail with Python 2
+ 5.10 curl hangs on SMB upload over stdin
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
  5.12 flaky Windows CI builds
 
@@ -514,11 +514,9 @@ problems may have been fixed or changed somewhat since this was written!
 
  https://github.com/curl/curl/issues/864
 
-5.10 SMB tests fail with Python 2
+5.10 curl hangs on SMB upload over stdin
 
- The error message says "TreeConnectAndX not found".
-
- See https://github.com/curl/curl/issues/5983
+ See https://github.com/curl/curl/issues/7896
 
 5.11 configure --with-gssapi with Heimdal is ignored on macOS
 
