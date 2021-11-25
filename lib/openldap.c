@@ -70,6 +70,15 @@
  */
 /* #define CURL_OPENLDAP_DEBUG */
 
+/* Machine states. */
+typedef enum {
+  OLDAP_STOP,           /* Do nothing state, stops the state machine */
+  OLDAP_SSL,            /* Performing SSL handshake. */
+  OLDAP_BIND,           /* Simple bind reply. */
+  OLDAP_BINDV2,         /* Simple bind reply in protocol version 2. */
+  OLDAP_LAST            /* Never used */
+} ldapstate;
+
 #ifndef _LDAP_PVT_H
 extern int ldap_pvt_url_scheme2proto(const char *);
 extern int ldap_init_fd(ber_socket_t fd, int proto, const char *url,
@@ -158,20 +167,65 @@ static const char *url_errs[] = {
 };
 
 struct ldapconninfo {
-  LDAP *ld;
-  Curl_recv *recv;  /* for stacking SSL handler */
+  LDAP *ld;                  /* Openldap connection handle. */
+  Curl_recv *recv;           /* For stacking SSL handler */
   Curl_send *send;
-  int proto;
-  int msgid;
-  bool ssldone;
-  bool sslinst;
-  bool didbind;
+  ldapstate state;           /* Current machine state. */
+  int proto;                 /* LDAP_PROTO_TCP/LDAP_PROTO_UDP/LDAP_PROTO_IPC */
+  int msgid;                 /* Current message id. */
 };
 
 struct ldapreqinfo {
   int msgid;
   int nument;
 };
+
+/*
+ * state()
+ *
+ * This is the ONLY way to change LDAP state!
+ */
+static void state(struct Curl_easy *data, ldapstate newstate)
+{
+  struct ldapconninfo *ldapc = data->conn->proto.ldapc;
+
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  /* for debug purposes */
+  static const char * const names[] = {
+    "STOP",
+    "SSL",
+    "BIND",
+    "BINDV2",
+    /* LAST */
+  };
+
+  if(ldapc->state != newstate)
+    infof(data, "LDAP %p state change from %s to %s",
+          (void *)ldapc, names[ldapc->state], names[newstate]);
+#endif
+
+  ldapc->state = newstate;
+}
+
+/* Map some particular LDAP error codes to CURLcode values. */
+static CURLcode oldap_map_error(int rc, CURLcode result)
+{
+  switch(rc) {
+  case LDAP_NO_MEMORY:
+    result = CURLE_OUT_OF_MEMORY;
+    break;
+  case LDAP_INVALID_CREDENTIALS:
+    result = CURLE_LOGIN_DENIED;
+    break;
+  case LDAP_PROTOCOL_ERROR:
+    result = CURLE_UNSUPPORTED_PROTOCOL;
+    break;
+  case LDAP_INSUFFICIENT_ACCESS:
+    result = CURLE_REMOTE_ACCESS_DENIED;
+    break;
+  }
+  return result;
+}
 
 static CURLcode oldap_setup_connection(struct Curl_easy *data,
                                        struct connectdata *conn)
@@ -205,8 +259,69 @@ static CURLcode oldap_setup_connection(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+/* Starts LDAP simple bind. */
+static CURLcode oldap_perform_bind(struct Curl_easy *data, ldapstate newstate)
+{
+  CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
+  struct ldapconninfo *li = conn->proto.ldapc;
+  char *binddn = NULL;
+  struct berval passwd;
+  int rc;
+
+  passwd.bv_val = NULL;
+  passwd.bv_len = 0;
+
+  if(conn->bits.user_passwd) {
+    binddn = conn->user;
+    passwd.bv_val = conn->passwd;
+    passwd.bv_len = strlen(passwd.bv_val);
+  }
+
+  rc = ldap_sasl_bind(li->ld, binddn, LDAP_SASL_SIMPLE, &passwd,
+                      NULL, NULL, &li->msgid);
+  if(rc == LDAP_SUCCESS)
+    state(data, newstate);
+  else
+    result = oldap_map_error(rc,
+                             conn->bits.user_passwd?
+                             CURLE_LOGIN_DENIED: CURLE_LDAP_CANNOT_BIND);
+  return result;
+}
+
 #ifdef USE_SSL
 static Sockbuf_IO ldapsb_tls;
+
+static bool ssl_installed(struct connectdata *conn)
+{
+  return conn->proto.ldapc->recv != NULL;
+}
+
+static CURLcode oldap_ssl_connect(struct Curl_easy *data)
+{
+  CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
+  struct ldapconninfo *li = conn->proto.ldapc;
+  bool ssldone = 0;
+
+  result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
+                                        FIRSTSOCKET, &ssldone);
+  if(!result) {
+    state(data, OLDAP_SSL);
+
+    if(ssldone) {
+      Sockbuf *sb;
+
+      /* Install the libcurl SSL handlers into the sockbuf. */
+      ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
+      ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
+      li->recv = conn->recv[FIRSTSOCKET];
+      li->send = conn->send[FIRSTSOCKET];
+    }
+  }
+
+  return result;
+}
 #endif
 
 static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
@@ -216,6 +331,9 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   int rc, proto = LDAP_VERSION3;
   char hosturl[1024];
   char *ptr;
+#ifdef CURL_OPENLDAP_DEBUG
+  static int do_trace = -1;
+#endif
 
   (void)done;
 
@@ -226,15 +344,6 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   msnprintf(ptr, sizeof(hosturl)-(ptr-hosturl), "://%s:%d",
             conn->host.name, conn->remote_port);
 
-#ifdef CURL_OPENLDAP_DEBUG
-  static int do_trace = 0;
-  const char *env = getenv("CURL_OPENLDAP_TRACE");
-  do_trace = (env && strtol(env, NULL, 10) > 0);
-  if(do_trace) {
-    ldap_set_option(li->ld, LDAP_OPT_DEBUG_LEVEL, &do_trace);
-  }
-#endif
-
   rc = ldap_init_fd(conn->sock[FIRSTSOCKET], li->proto, hosturl, &li->ld);
   if(rc) {
     failf(data, "LDAP local: Cannot connect to %s, %s",
@@ -242,125 +351,118 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
     return CURLE_COULDNT_CONNECT;
   }
 
+#ifdef CURL_OPENLDAP_DEBUG
+  if(do_trace < 0) {
+    const char *env = getenv("CURL_OPENLDAP_TRACE");
+    do_trace = (env && strtol(env, NULL, 10) > 0);
+  }
+  if(do_trace)
+    ldap_set_option(li->ld, LDAP_OPT_DEBUG_LEVEL, &do_trace);
+#endif
+
   ldap_set_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &proto);
 
 #ifdef USE_SSL
-  if(conn->handler->flags & PROTOPT_SSL) {
-    CURLcode result;
-    result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
-                                          FIRSTSOCKET, &li->ssldone);
-    if(result)
-      return result;
-  }
+  if(conn->handler->flags & PROTOPT_SSL)
+    return oldap_ssl_connect(data);
 #endif
 
-  return CURLE_OK;
+  /* Force bind even if anonymous bind is not needed in protocol version 3
+     to detect missing version 3 support. */
+  return oldap_perform_bind(data, OLDAP_BIND);
+}
+
+/* Handle a simple bind response. */
+static CURLcode oldap_state_bind_resp(struct Curl_easy *data, LDAPMessage *msg,
+                                      int code)
+{
+  struct connectdata *conn = data->conn;
+  struct ldapconninfo *li = conn->proto.ldapc;
+  CURLcode result = CURLE_OK;
+  struct berval *bv = NULL;
+  int rc;
+
+  if(code != LDAP_SUCCESS)
+    return oldap_map_error(code, CURLE_LDAP_CANNOT_BIND);
+
+  rc = ldap_parse_sasl_bind_result(li->ld, msg, &bv, 0);
+  if(rc != LDAP_SUCCESS) {
+    failf(data, "LDAP local: bind ldap_parse_sasl_bind_result %s",
+          ldap_err2string(rc));
+    result = oldap_map_error(rc, CURLE_LDAP_CANNOT_BIND);
+  }
+  else
+    state(data, OLDAP_STOP);
+
+  if(bv)
+    ber_bvfree(bv);
+  return result;
 }
 
 static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
 {
+  CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = conn->proto.ldapc;
   LDAPMessage *msg = NULL;
-  struct timeval tv = {0, 1}, *tvp;
-  int rc, err;
-  char *info = NULL;
+  struct timeval tv = {0, 0};
+  int code = LDAP_SUCCESS;
+  int rc;
+
+  if(li->state != OLDAP_SSL) {
+    /* Get response to last command. */
+    rc = ldap_result(li->ld, li->msgid, LDAP_MSG_ONE, &tv, &msg);
+    if(!rc)
+      return CURLE_OK;                    /* Timed out. */
+    if(rc < 0) {
+      failf(data, "LDAP local: connecting ldap_result %s",
+            ldap_err2string(rc));
+      return oldap_map_error(rc, CURLE_COULDNT_CONNECT);
+    }
+
+    /* Get error code from message. */
+    rc = ldap_parse_result(li->ld, msg, &code, NULL, NULL, NULL, NULL, 0);
+    if(rc)
+      code = rc;
+
+    /* If protocol version 3 is not supported, fallback to version 2. */
+    if(code == LDAP_PROTOCOL_ERROR && li->state != OLDAP_BINDV2) {
+      static const int version = LDAP_VERSION2;
+
+      ldap_set_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &version);
+      ldap_msgfree(msg);
+      return oldap_perform_bind(data, OLDAP_BINDV2);
+    }
+  }
+
+  /* Handle response message according to current state. */
+  switch(li->state) {
 
 #ifdef USE_SSL
-  if(conn->handler->flags & PROTOPT_SSL) {
-    /* Is the SSL handshake complete yet? */
-    if(!li->ssldone) {
-      CURLcode result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
-                                                     FIRSTSOCKET,
-                                                     &li->ssldone);
-      if(result || !li->ssldone)
-        return result;
-    }
-
-    /* Have we installed the libcurl SSL handlers into the sockbuf yet? */
-    if(!li->sslinst) {
-      Sockbuf *sb;
-      ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
-      ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
-      li->sslinst = TRUE;
-      li->recv = conn->recv[FIRSTSOCKET];
-      li->send = conn->send[FIRSTSOCKET];
-    }
-  }
+  case OLDAP_SSL:
+    result = oldap_ssl_connect(data);
+    if(!result && ssl_installed(conn))
+      result = oldap_perform_bind(data, OLDAP_BIND);
+    break;
 #endif
 
-  tvp = &tv;
-
-  retry:
-  if(!li->didbind) {
-    char *binddn;
-    struct berval passwd;
-
-    if(conn->bits.user_passwd) {
-      binddn = conn->user;
-      passwd.bv_val = conn->passwd;
-      passwd.bv_len = strlen(passwd.bv_val);
-    }
-    else {
-      binddn = NULL;
-      passwd.bv_val = NULL;
-      passwd.bv_len = 0;
-    }
-    rc = ldap_sasl_bind(li->ld, binddn, LDAP_SASL_SIMPLE, &passwd,
-                        NULL, NULL, &li->msgid);
-    if(rc)
-      return CURLE_LDAP_CANNOT_BIND;
-    li->didbind = TRUE;
-    if(tvp)
-      return CURLE_OK;
+  case OLDAP_BIND:
+  case OLDAP_BINDV2:
+    result = oldap_state_bind_resp(data, msg, code);
+    break;
+  default:
+    /* internal error */
+    result = CURLE_COULDNT_CONNECT;
+    break;
   }
 
-  rc = ldap_result(li->ld, li->msgid, LDAP_MSG_ONE, tvp, &msg);
-  if(rc < 0) {
-    failf(data, "LDAP local: bind ldap_result %s", ldap_err2string(rc));
-    return CURLE_LDAP_CANNOT_BIND;
-  }
-  if(rc == 0) {
-    /* timed out */
-    return CURLE_OK;
-  }
+  ldap_msgfree(msg);
 
-  rc = ldap_parse_result(li->ld, msg, &err, NULL, &info, NULL, NULL, 1);
-  if(rc) {
-    failf(data, "LDAP local: bind ldap_parse_result %s", ldap_err2string(rc));
-    return CURLE_LDAP_CANNOT_BIND;
-  }
+  *done = li->state == OLDAP_STOP;
+  if(*done)
+    conn->recv[FIRSTSOCKET] = oldap_recv;
 
-  /* Try to fallback to LDAPv2? */
-  if(err == LDAP_PROTOCOL_ERROR) {
-    int proto;
-    ldap_get_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &proto);
-    if(proto == LDAP_VERSION3) {
-      if(info) {
-        ldap_memfree(info);
-        info = NULL;
-      }
-      proto = LDAP_VERSION2;
-      ldap_set_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &proto);
-      li->didbind = FALSE;
-      goto retry;
-    }
-  }
-
-  if(err) {
-    failf(data, "LDAP remote: bind failed %s %s", ldap_err2string(rc),
-          info ? info : "");
-    if(info)
-      ldap_memfree(info);
-    return CURLE_LOGIN_DENIED;
-  }
-
-  if(info)
-    ldap_memfree(info);
-  conn->recv[FIRSTSOCKET] = oldap_recv;
-  *done = TRUE;
-
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode oldap_disconnect(struct Curl_easy *data,
@@ -373,7 +475,7 @@ static CURLcode oldap_disconnect(struct Curl_easy *data,
   if(li) {
     if(li->ld) {
 #ifdef USE_SSL
-      if(conn->ssl[FIRSTSOCKET].use) {
+      if(ssl_installed(conn)) {
         Sockbuf *sb;
         ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
         ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
