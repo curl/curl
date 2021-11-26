@@ -36,7 +36,7 @@ User and password that might be provided in the proxy string are URL decoded
 by curl. This allows you to pass in special characters such as @ by using %40
 or pass in a colon with %3a.
 
-The proxy host can be specified the exact same way as the proxy environment
+The proxy host can be specified the same way as the proxy environment
 variables, including the protocol prefix (http://) and the embedded user +
 password.
 
