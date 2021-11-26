@@ -34,7 +34,7 @@ companies and recent years several such CAs have been found untrustworthy.
 Certificate Verification
 ------------------------
 
-libcurl performs peer SSL certificate verification by default.  This is done
+libcurl performs peer SSL certificate verification by default. This is done
 by using a CA certificate store that the SSL library can use to make sure the
 peer's server certificate is valid.
 

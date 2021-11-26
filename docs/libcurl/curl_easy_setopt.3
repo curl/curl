@@ -29,16 +29,16 @@ curl_easy_setopt \- set options for a curl easy handle
 CURLcode curl_easy_setopt(CURL *handle, CURLoption option, parameter);
 .SH DESCRIPTION
 \fIcurl_easy_setopt(3)\fP is used to tell libcurl how to behave. By setting
-the appropriate options, the application can change libcurl's behavior.  All
+the appropriate options, the application can change libcurl's behavior. All
 options are set with an \fIoption\fP followed by a \fIparameter\fP. That
 parameter can be a \fBlong\fP, a \fBfunction pointer\fP, an \fBobject
 pointer\fP or a \fBcurl_off_t\fP, depending on what the specific option
 expects. Read this manual carefully as bad input values may cause libcurl to
-behave badly!  You can only set one option in each function call. A typical
+behave badly! You can only set one option in each function call. A typical
 application uses many \fIcurl_easy_setopt(3)\fP calls in the setup phase.
 
 Options set with this function call are valid for all forthcoming transfers
-performed using this \fIhandle\fP.  The options are not in any way reset
+performed using this \fIhandle\fP. The options are not in any way reset
 between transfers, so if you want subsequent transfers with different options,
 you must change them between the transfers. You can optionally reset all
 options back to internal default with \fIcurl_easy_reset(3)\fP.
@@ -536,9 +536,9 @@ Proxy client cert. See \fICURLOPT_PROXY_SSLCERT(3)\fP
 .IP CURLOPT_PROXY_SSLCERT_BLOB
 Proxy client cert memory buffer. See \fICURLOPT_PROXY_SSLCERT_BLOB(3)\fP
 .IP CURLOPT_SSLCERTTYPE
-Client cert type.  See \fICURLOPT_SSLCERTTYPE(3)\fP
+Client cert type. See \fICURLOPT_SSLCERTTYPE(3)\fP
 .IP CURLOPT_PROXY_SSLCERTTYPE
-Proxy client cert type.  See \fICURLOPT_PROXY_SSLCERTTYPE(3)\fP
+Proxy client cert type. See \fICURLOPT_PROXY_SSLCERTTYPE(3)\fP
 .IP CURLOPT_SSLKEY
 Client key. See \fICURLOPT_SSLKEY(3)\fP
 .IP CURLOPT_SSLKEY_BLOB

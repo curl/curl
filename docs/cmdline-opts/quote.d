@@ -11,7 +11,7 @@ See-also: request
 Send an arbitrary command to the remote FTP or SFTP server. Quote commands are
 sent BEFORE the transfer takes place (just after the initial PWD command in an
 FTP transfer, to be exact). To make commands take place after a successful
-transfer, prefix them with a dash '-'.  To make commands be sent after curl
+transfer, prefix them with a dash '-'. To make commands be sent after curl
 has changed the working directory, just before the transfer command(s), prefix
 the command with a '+' (this is only supported for FTP). You may specify any
 number of commands.
@@ -27,8 +27,8 @@ servers, or one of the commands listed below to SFTP servers.
 This option can be used multiple times.
 
 SFTP is a binary protocol. Unlike for FTP, curl interprets SFTP quote commands
-itself before sending them to the server.  File names may be quoted
-shell-style to embed spaces or special characters.  Following is the list of
+itself before sending them to the server. File names may be quoted
+shell-style to embed spaces or special characters. Following is the list of
 all supported SFTP quote commands:
 .RS
 .IP "atime date file"

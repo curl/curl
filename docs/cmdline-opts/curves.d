@@ -13,7 +13,7 @@ them with ":" (e.g.  "X25519:P-521").  The parameter is available identically
 in the "openssl s_client/s_server" utilities.
 
 --curves allows a OpenSSL powered curl to make SSL-connections with exactly
-the (EC) curve requested by the client, avoiding intransparent client/server
+the (EC) curve requested by the client, avoiding nontransparent client/server
 negotiations.
 
 If this option is set, the default curves list built into openssl will be

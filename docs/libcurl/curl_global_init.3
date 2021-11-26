@@ -28,24 +28,24 @@ curl_global_init - Global libcurl initialisation
 .BI "CURLcode curl_global_init(long " flags ");"
 .ad
 .SH DESCRIPTION
-This function sets up the program environment that libcurl needs.  Think of it
+This function sets up the program environment that libcurl needs. Think of it
 as an extension of the library loader.
 
 This function must be called at least once within a program (a program is all
 the code that shares a memory space) before the program calls any other
-function in libcurl.  The environment it sets up is constant for the life of
+function in libcurl. The environment it sets up is constant for the life of
 the program and is the same for every program, so multiple calls have the same
 effect as one call.
 
 The flags option is a bit pattern that tells libcurl exactly what features to
 init, as described below. Set the desired bits by ORing the values together.
-In normal operation, you must specify CURL_GLOBAL_ALL.  Do not use any other
+In normal operation, you must specify CURL_GLOBAL_ALL. Do not use any other
 value unless you are familiar with it and mean to control internal operations
 of libcurl.
 
 \fBThis function is not thread safe.\fP You must not call it when any other
 thread in the program (i.e. a thread sharing the same memory) is running.
-This does not just mean no other thread that is using libcurl.  Because
+This does not just mean no other thread that is using libcurl. Because
 \fIcurl_global_init(3)\fP calls functions of other libraries that are
 similarly thread unsafe, it could conflict with any other thread that uses
 these other libraries.
@@ -90,7 +90,7 @@ the functionality of the \fBCURL_GLOBAL_ALL\fP mask.
 This bit has no point since 7.69.0 but its behavior is instead the default.
 
 Before 7.69.0: when this flag is set, curl will acknowledge EINTR condition
-when connecting or when waiting for data.  Otherwise, curl waits until full
+when connecting or when waiting for data. Otherwise, curl waits until full
 timeout elapses. (Added in 7.30.0)
 .SH EXAMPLE
 .nf

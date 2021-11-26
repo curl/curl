@@ -1,7 +1,7 @@
 # dynbuf
 
 This is the internal module for creating and handling "dynamic buffers". This
-means buffers that can be appended to, dynamically and grow in size to adapt.
+means buffers that can be appended to, dynamically and grow to adapt.
 
 There will always be a terminating zero put at the end of the dynamic buffer.
 

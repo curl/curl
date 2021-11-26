@@ -23,7 +23,7 @@ that supporting this protocol is a grand idea.
 curl is not here for your protocol. Your protocol is not here for curl. The
 best cooperation and end result occur when all involved parties mutually see
 and agree that supporting this protocol in curl would be good for everyone.
-Heck, for the world!
+Heck, for the world.
 
 Consider "selling us" the idea that we need an implementation merged in curl,
 to be fairly important. *Why* do we want curl to support this new protocol?
@@ -90,8 +90,8 @@ protocol - but it might require a bit of an effort to make it happen.
 
 ## Documentation
 
-We cannot assume that users are particularly familiar with specific details
-and peculiarities of the protocol. It needs documentation.
+We cannot assume that users are particularly familiar with details and
+peculiarities of the protocol. It needs documentation.
 
 Maybe it even needs some internal documentation so that the developers who
 will try to debug something five years from now can figure out functionality a
@@ -104,7 +104,7 @@ any NDA or similar.
 
 We are constantly raising the bar and we are constantly improving the
 project. A lot of things we did in the past would not be acceptable if done
-today.  Therefore, you might be tempted to use shortcuts or "hacks" you can
+today. Therefore, you might be tempted to use shortcuts or "hacks" you can
 spot other - existing - protocol implementations have used, but there is
 nothing to gain from that. The bar has been raised. Former "cheats" will not be
 tolerated anymore.

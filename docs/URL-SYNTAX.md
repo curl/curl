@@ -20,7 +20,7 @@ changes over time.
 URL parsers as implemented in browsers, libraries and tools usually opt to
 support one of the mentioned specifications. Bugs, differences in
 interpretations and the moving nature of the WHATWG spec does however make it
-unlikely that multiple parsers treat URLs the exact same way!
+unlikely that multiple parsers treat URLs the same way.
 
 ## Security
 

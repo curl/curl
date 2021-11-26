@@ -14,7 +14,7 @@ response code.
 
 When curl is about to retry a transfer, it will first wait one second and then
 for all forthcoming retries it will double the waiting time until it reaches
-10 minutes which then will be the delay between the rest of the retries.  By
+10 minutes which then will be the delay between the rest of the retries. By
 using --retry-delay you disable this exponential backoff algorithm. See also
 --retry-max-time to limit the total time allowed for retries.
 

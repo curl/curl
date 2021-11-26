@@ -54,7 +54,7 @@ there are slight differences in behavior.
 We discourage users from using any of these functions in new applications.
 
 Functions in the curl_mprintf() family produce output according to a format as
-described below.  The functions \fBcurl_mprintf()\fP and \fBcurl_mvprintf()\fP
+described below. The functions \fBcurl_mprintf()\fP and \fBcurl_mvprintf()\fP
 write output to stdout, the standard output stream; \fBcurl_mfprintf()\fP and
 \fBcurl_mvfprintf()\fP write output to the given output stream;
 \fBcurl_msprintf()\fP, \fBcurl_msnprintf()\fP, \fBcurl_mvsprintf()\fP, and
@@ -68,8 +68,8 @@ The functions \fBcurl_mvprintf()\fP, \fBcurl_mvfprintf()\fP,
 \fBcurl_mvsprintf()\fP, \fBcurl_mvsnprintf()\fP are equivalent to the
 functions \fBcurl_mprintf()\fP, \fBcurl_mfprintf()\fP, \fBcurl_msprintf()\fP,
 \fBcurl_msnprintf()\fP, respectively, except that they are called with a
-va_list instead of a variable number of arguments.  These functions do not
-call the va_end macro.  Because they invoke the va_arg macro, the value of ap
+va_list instead of a variable number of arguments. These functions do not
+call the va_end macro. Because they invoke the va_arg macro, the value of ap
 is undefined after the call.
 
 The functions \fBcurl_maprintf()\fP and \fBcurl_mvaprintf()\fP return the
@@ -92,11 +92,11 @@ or more \fIflags\fP, an optional minimum \fIfield width\fP, an optional
 The arguments must correspond properly with the conversion specifier. By
 default, the arguments are used in the order given, where each '*' (see Field
 width and Precision below) and each conversion specifier asks for the next
-argument (and it is an error if insufficiently many arguments are given).  One
+argument (and it is an error if insufficiently many arguments are given). One
 can also specify explicitly which argument is taken, at each place where an
 argument is required, by writing "%m$" instead of '%' and "*m$" instead
 of '*', where the decimal integer m denotes the position in the argument list
-of the desired argument, indexed starting from 1.  Thus,
+of the desired argument, indexed starting from 1. Thus,
 
     curl_mprintf("%*d", width, num);
 
@@ -109,7 +109,7 @@ argument.
 
 If the style using '$' is used, it must be used throughout for all conversions
 taking an argument and all width and precision arguments, but it may be mixed
-with "%%" formats, which do not consume an argument.  There may be no gaps in
+with "%%" formats, which do not consume an argument. There may be no gaps in
 the numbers of argu‐ ments specified using '$'; for example, if arguments 1
 and 3 are specified, argument 2 must also be specified somewhere in the format
 string.
@@ -135,7 +135,7 @@ produced by a signed conversion.
 .TP
 .B +
 A sign (+ or -) should always be placed before a number produced by a signed
-conversion. By default, a sign is used only for negative numbers.  A '+'
+conversion. By default, a sign is used only for negative numbers. A '+'
 overrides a space if both are used.
 .SH "Field width"
 An optional decimal digit string (with nonzero first digit) specifying a
@@ -144,8 +144,8 @@ field width, it will be padded with spaces on the left (or right, if the
 left-adjustment flag has been given). Instead of a decimal digit string one
 may write "*" or "*m$" (for some decimal integer m) to specify that the field
 width is given in the next argument, or in the m-th argument, respec‐ tively,
-which must be of type int.  A negative field width is taken as a '-' flag
-followed by a positive field width.  In no case does a nonexistent or small
+which must be of type int. A negative field width is taken as a '-' flag
+followed by a positive field width. In no case does a nonexistent or small
 field width cause truncation of a field; if the result of a conversion is
 wider than the field width, the field is expanded to contain the conversion
 result.
@@ -174,7 +174,7 @@ short\fP argument.
 pointer to a long argument
 .TP
 .B ll
-(ell-ell).  A following integer conversion corresponds to a \fIlong long\fP or
+(ell-ell). A following integer conversion corresponds to a \fIlong long\fP or
 \fIunsigned long long\fP argument, or a following n conversion corresponds to
 a pointer to a long long argument.
 .TP
@@ -193,7 +193,7 @@ A character that specifies the type of conversion to be applied. The
 conversion specifiers and their meanings are:
 .TP
 .B d, i
-The int argument is converted to signed decimal notation.  The precision, if
+The int argument is converted to signed decimal notation. The precision, if
 any, gives the minimum number of digits that must appear; if the converted
 value requires fewer digits, it is padded on the left with zeros. The default
 precision is 1. When 0 is printed with an explicit precision 0, the output is
@@ -201,11 +201,11 @@ empty.
 .TP
 .B o, u, x, X
 The unsigned int argument is converted to unsigned octal (o), unsigned decimal
-(u), or unsigned hexadecimal (\fBx\fP and \fBX\fP) notation.  The letters
+(u), or unsigned hexadecimal (\fBx\fP and \fBX\fP) notation. The letters
 abcdef are used for \fBx\fP conversions; the letters ABCDEF are used for
 \fBX\fP conversions. The precision, if any, gives the minimum number of digits
 that must appear; if the converted value requires fewer digits, it is padded
-on the left with zeros.  The default precision is 1.  When 0 is printed with
+on the left with zeros. The default precision is 1. When 0 is printed with
 an explicit precision 0, the output is empty.
 .TP
 .B e, E

@@ -33,10 +33,9 @@ There are many bindings available that bring libcurl access to your favourite
 language. Look elsewhere for documentation on those.
 
 libcurl has a global constant environment that you must set up and maintain
-while using libcurl.  This essentially means you call
-\fIcurl_global_init(3)\fP at the start of your program and
-\fIcurl_global_cleanup(3)\fP at the end.  See \fBGLOBAL CONSTANTS\fP below for
-details.
+while using libcurl. This essentially means you call \fIcurl_global_init(3)\fP
+at the start of your program and \fIcurl_global_cleanup(3)\fP at the end. See
+\fBGLOBAL CONSTANTS\fP below for details.
 
 If libcurl was compiled with support for multiple SSL backends, the function
 \fIcurl_global_sslset(3)\fP can be called before \fIcurl_global_init(3)\fP
@@ -143,20 +142,20 @@ handles can take advantage of the single shared pool.
 .SH "GLOBAL CONSTANTS"
 There are a variety of constants that libcurl uses, mainly through its
 internal use of other libraries, which are too complicated for the
-library loader to set up.  Therefore, a program must call a library
+library loader to set up. Therefore, a program must call a library
 function after the program is loaded and running to finish setting up
-the library code.  For example, when libcurl is built for SSL
+the library code. For example, when libcurl is built for SSL
 capability via the GNU TLS library, there is an elaborate tree inside
 that library that describes the SSL protocol.
 
-\fIcurl_global_init(3)\fP is the function that you must call.  This may
+\fIcurl_global_init(3)\fP is the function that you must call. This may
 allocate resources (e.g. the memory for the GNU TLS tree mentioned above), so
 the companion function \fIcurl_global_cleanup(3)\fP releases them.
 
 The basic rule for constructing a program that uses libcurl is this: Call
 \fIcurl_global_init(3)\fP, with a \fICURL_GLOBAL_ALL\fP argument, immediately
 after the program starts, while it is still only one thread and before it uses
-libcurl at all.  Call \fIcurl_global_cleanup(3)\fP immediately before the
+libcurl at all. Call \fIcurl_global_cleanup(3)\fP immediately before the
 program exits, when the program is again only one thread and after its last
 use of libcurl.
 
@@ -169,34 +168,34 @@ It \fIis\fP required that the functions be called when no other thread
 in the program is running.
 
 These global constant functions are \fInot thread safe\fP, so you must
-not call them when any other thread in the program is running.  It
+not call them when any other thread in the program is running. It
 is not good enough that no other thread is using libcurl at the time,
 because these functions internally call similar functions of other
-libraries, and those functions are similarly thread-unsafe.  You cannot
+libraries, and those functions are similarly thread-unsafe. You cannot
 generally know what these libraries are, or whether other threads are
 using them.
 
 The global constant situation merits special consideration when the
 code you are writing to use libcurl is not the main program, but rather
-a modular piece of a program, e.g. another library.  As a module,
+a modular piece of a program, e.g. another library. As a module,
 your code does not know about other parts of the program -- it does not
-know whether they use libcurl or not.  And its code does not necessarily
+know whether they use libcurl or not. And its code does not necessarily
 run at the start and end of the whole program.
 
 A module like this must have global constant functions of its own, just like
-\fIcurl_global_init(3)\fP and \fIcurl_global_cleanup(3)\fP.  The module thus
+\fIcurl_global_init(3)\fP and \fIcurl_global_cleanup(3)\fP. The module thus
 has control at the beginning and end of the program and has a place to call
-the libcurl functions.  Note that if multiple modules in the program use
-libcurl, they all will separately call the libcurl functions, and that is OK
-because only the first \fIcurl_global_init(3)\fP and the last
-\fIcurl_global_cleanup(3)\fP in a program change anything.  (libcurl uses a
-reference count in static memory).
+the libcurl functions. If multiple modules in the program use libcurl, they
+all will separately call the libcurl functions, and that is OK because only
+the first \fIcurl_global_init(3)\fP and the last \fIcurl_global_cleanup(3)\fP
+in a program change anything. (libcurl uses a reference count in static
+memory).
 
 In a C++ module, it is common to deal with the global constant situation by
 defining a special class that represents the global constant environment of
-the module.  A program always has exactly one object of the class, in static
-storage.  That way, the program automatically calls the constructor of the
-object as the program starts up and the destructor as it terminates.  As the
+the module. A program always has exactly one object of the class, in static
+storage. That way, the program automatically calls the constructor of the
+object as the program starts up and the destructor as it terminates. As the
 author of this libcurl-using module, you can make the constructor call
 \fIcurl_global_init(3)\fP and the destructor call \fIcurl_global_cleanup(3)\fP
 and satisfy libcurl's requirements without your user having to think about it.
@@ -205,25 +204,25 @@ initialize it from DllMain or a static initializer because Windows holds the
 loader lock during that time and it could cause a deadlock.)
 
 \fIcurl_global_init(3)\fP has an argument that tells what particular parts of
-the global constant environment to set up.  In order to successfully use any
+the global constant environment to set up. In order to successfully use any
 value except \fICURL_GLOBAL_ALL\fP (which says to set up the whole thing), you
 must have specific knowledge of internal workings of libcurl and all other
 parts of the program of which it is part.
 
 A special part of the global constant environment is the identity of the
-memory allocator.  \fIcurl_global_init(3)\fP selects the system default memory
+memory allocator. \fIcurl_global_init(3)\fP selects the system default memory
 allocator, but you can use \fIcurl_global_init_mem(3)\fP to supply one of your
-own.  However, there is no way to use \fIcurl_global_init_mem(3)\fP in a
+own. However, there is no way to use \fIcurl_global_init_mem(3)\fP in a
 modular program -- all modules in the program that might use libcurl would
 have to agree on one allocator.
 
 There is a failsafe in libcurl that makes it usable in simple situations
 without you having to worry about the global constant environment at all:
 \fIcurl_easy_init(3)\fP sets up the environment itself if it has not been done
-yet.  The resources it acquires to do so get released by the operating system
+yet. The resources it acquires to do so get released by the operating system
 automatically when the program exits.
 
-This failsafe feature exists mainly for backward compatibility because
-there was a time when the global functions did not exist.  Because it
-is sufficient only in the simplest of programs, it is not recommended
-for any program to rely on it.
+This failsafe feature exists mainly for backward compatibility because there
+was a time when the global functions did not exist. Because it is sufficient
+only in the simplest of programs, it is not recommended for any program to
+rely on it.

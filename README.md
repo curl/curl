@@ -19,7 +19,7 @@ by reading [the INSTALL document](https://curl.se/docs/install.html).
 
 libcurl is the library curl is using to do its job. It is readily available to
 be used by your software. Read [the libcurl.3 man
-page](https://curl.se/libcurl/c/libcurl.html) to learn how!
+page](https://curl.se/libcurl/c/libcurl.html) to learn how.
 
 You can find answers to the most frequent questions we get in [the FAQ
 document](https://curl.se/docs/faq.html).
@@ -47,7 +47,7 @@ downloads.
 
 ## Git
 
-To download the very latest source from the Git server do this:
+To download the latest source from the Git server do this:
 
     git clone https://github.com/curl/curl.git
 

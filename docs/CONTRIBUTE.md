@@ -9,8 +9,8 @@ flaws or bugs.
 ### Join the Community
 
 Skip over to [https://curl.se/mail/](https://curl.se/mail/) and join
-the appropriate mailing list(s).  Read up on details before you post
-questions. Read this file before you start sending patches! We prefer
+the appropriate mailing list(s). Read up on details before you post
+questions. Read this file before you start sending patches. We prefer
 questions sent to and discussions being held on the mailing list(s), not sent
 to individuals.
 
@@ -44,7 +44,7 @@ By submitting a patch to the curl project, you are assumed to have the right
 to the code and to be allowed by your employer or whatever to hand over that
 patch/code to us. We will credit you for your changes as far as possible, to
 give credit but also to keep a trace back to who made what changes. Please
-always provide us with your full real name when contributing!
+always provide us with your full real name when contributing,
 
 ### What To Read
 
@@ -98,7 +98,7 @@ and regression in the future.
 Please try to get the latest available sources to make your patches against.
 It makes the lives of the developers so much easier. The best is if you get
 the most up-to-date sources from the git repository, but the latest release
-archive is quite OK as well!
+archive is quite OK as well.
 
 ### Documentation
 
