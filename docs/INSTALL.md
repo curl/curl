@@ -390,7 +390,7 @@ they affect both environments.
 By default, jobs in IBM i will not start with threading enabled. (Exceptions
 include interactive PASE sessions started by `QP2TERM` or SSH.) If you use
 curl in an environment without threading when options like async DNS were
-enabled, you will messages like:
+enabled, you will get messages like:
 
 ```
 getaddrinfo() thread failed to start
