@@ -17,11 +17,11 @@ page](https://curl.se/docs/manpage.html) or [the MANUAL
 document](https://curl.se/docs/manual.html). Find out how to install Curl
 by reading [the INSTALL document](https://curl.se/docs/install.html).
 
-libcurl is the library curl is using to do its job. It is readily available to
+Curl is using a library named libcurl to do its job. It is readily available to
 be used by your software. Read [the libcurl.3 man
-page](https://curl.se/libcurl/c/libcurl.html) to learn how.
+page](https://curl.se/libcurl/c/libcurl.html) to learn how to do that with step-by-step instructions.
 
-You can find answers to the most frequent questions we get in [the FAQ
+You can find answers to the most frequent questions (FAQ) we get in [the FAQ
 document](https://curl.se/docs/faq.html).
 
 Study [the COPYING file](https://curl.se/docs/copyright.html) for
@@ -30,7 +30,7 @@ distribution terms.
 ## Contact
 
 If you have problems, questions, ideas or suggestions, please contact us by
-posting to a suitable [mailing list](https://curl.se/mail/).
+posting that to a suitable [mailing list](https://curl.se/mail/).
 
 All contributors to the project are listed in [the THANKS
 document](https://curl.se/docs/thanks.html).
@@ -51,7 +51,7 @@ To download the latest source from the Git server do this:
 
     git clone https://github.com/curl/curl.git
 
-(you will get a directory named curl created, filled with the source code)
+(you will get a directory named `curl` created, filled with the source code)
 
 ## Security problems
 
@@ -60,7 +60,7 @@ page](https://hackerone.com/curl) and not in public!
 
 ## Notice
 
-Curl contains pieces of source code that is Copyright (c) 1998, 1999 Kungliga
+Curl contains pieces of source code that is within Copyright (c) 1998, 1999 Kungliga
 Tekniska Högskolan. This notice is included here to comply with the
 distribution terms.
 
