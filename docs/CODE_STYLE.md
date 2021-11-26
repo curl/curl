@@ -173,7 +173,7 @@ else if(b) return FALSE;
 
 ## Space around operators
 
-Please use spaces on both sides of operators in C expressions.  Postfix **(),
+Please use spaces on both sides of operators in C expressions. Postfix **(),
 [], ->, ., ++, --** and Unary **+, -, !, ~, &** operators excluded they should
 have no space.
 

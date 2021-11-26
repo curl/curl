@@ -373,7 +373,7 @@ allow a user to trick curl into uploading a file.
 ## Referrer
 
 An HTTP request has the option to include information about which address
-referred it to the actual page.  Curl allows you to specify the referrer to be
+referred it to the actual page. curl allows you to specify the referrer to be
 used on the command line. It is especially useful to fool or trick stupid
 servers or CGI scripts that rely on that information being available or
 contain certain data.
@@ -459,9 +459,9 @@ non-existing file to trigger the cookie awareness like:
 
 The file to read cookies from must be formatted using plain HTTP headers OR as
 netscape's cookie file. Curl will determine what kind it is based on the file
-contents.  In the above command, curl will parse the header and store the
-cookies received from www.example.com.  curl will send to the server the
-stored cookies which match the request as it follows the location.  The file
+contents. In the above command, curl will parse the header and store the
+cookies received from www.example.com. curl will send to the server the
+stored cookies which match the request as it follows the location. The file
 "empty.txt" may be a nonexistent file.
 
 To read and write cookies from a netscape cookie file, you can set both `-b`
@@ -608,7 +608,7 @@ directory at your ftp site, do:
 
     curl ftp://user:passwd@my.site.com/README
 
-But if you want the README file from the root directory of that same site, you
+If you want the README file from the root directory of that same site, you
 need to specify the absolute file name:
 
     curl ftp://user:passwd@my.site.com//README
@@ -767,7 +767,7 @@ Authentication support is still missing
 ## LDAP
 
 If you have installed the OpenLDAP library, curl can take advantage of it and
-offer `ldap://` support.  On Windows, curl will use WinLDAP from Platform SDK
+offer `ldap://` support. On Windows, curl will use WinLDAP from Platform SDK
 by default.
 
 Default protocol version used by curl is LDAPv3. LDAPv2 will be used as
@@ -941,7 +941,7 @@ syntax:
     http://[2001:1890:1112:1::20]/overview.html
 
 When this style is used, the `-g` option must be given to stop curl from
-interpreting the square brackets as special globbing characters.  Link local
+interpreting the square brackets as special globbing characters. Link local
 and site local addresses including a scope identifier, such as `fe80::1234%1`,
 may also be used, but the scope portion must be numeric or match an existing
 network interface on Linux and the percent character must be URL escaped. The

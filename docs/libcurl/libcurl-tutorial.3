@@ -236,8 +236,8 @@ commands and receive the transfer. Whenever it receives data, it calls the
 callback function we previously set. The function may get one byte at a time,
 or it may get many kilobytes at once. libcurl delivers as much as possible as
 often as possible. Your callback function should return the number of bytes it
-\&"took care of". If that is not the exact same amount of bytes that was
-passed to it, libcurl will abort the operation and return with an error code.
+\&"took care of". If that is not the same amount of bytes that was passed to
+it, libcurl will abort the operation and return with an error code.
 
 When the transfer is complete, the function returns a return code that informs
 you if it succeeded in its mission or not. If a return code is not enough for
@@ -274,7 +274,7 @@ a better understanding why the server behaves the way it does. Include headers
 in the normal body output with \fICURLOPT_HEADER(3)\fP set 1.
 
 Of course, there are bugs left. We need to know about them to be able to fix
-them, so we are quite dependent on your bug reports! When you do report
+them, so we are quite dependent on your bug reports. When you do report
 suspected bugs in libcurl, please include as many details as you possibly can:
 a protocol dump that \fICURLOPT_VERBOSE(3)\fP produces, library version, as
 much as possible of your code that uses libcurl, operating system name and
@@ -861,7 +861,7 @@ remote host").
 
 Because of the nature of this operation, where the proxy has no idea what kind
 of data that is passed in and out through this tunnel, this breaks some of the
-few advantages that come from using a proxy, such as caching.  Many
+few advantages that come from using a proxy, such as caching. Many
 organizations prevent this kind of tunneling to other destination port numbers
 than 443 (which is the default HTTPS port number).
 
@@ -1292,10 +1292,10 @@ done.
 
 The multi interface, on the other hand, allows your program to transfer
 multiple files in both directions at the same time, without forcing you to use
-multiple threads.  The name might make it seem that the multi interface is for
-multi-threaded programs, but the truth is almost the reverse.  The multi
+multiple threads. The name might make it seem that the multi interface is for
+multi-threaded programs, but the truth is almost the reverse. The multi
 interface allows a single-threaded application to perform the same kinds of
-multiple, simultaneous transfers that multi-threaded programs can perform.  It
+multiple, simultaneous transfers that multi-threaded programs can perform. It
 allows many of the benefits of multi-threaded transfers without the complexity
 of managing and synchronizing many threads.
 
@@ -1320,7 +1320,7 @@ ones at any time), you start the transfers by calling
 \fIcurl_multi_perform(3)\fP.
 
 \fIcurl_multi_perform(3)\fP is asynchronous. It will only perform what can be
-done now and then return back control to your program. It is designed to never
+done now and then return control to your program. It is designed to never
 block. You need to keep calling the function until all transfers are
 completed.
 

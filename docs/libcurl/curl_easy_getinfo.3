@@ -29,11 +29,11 @@ curl_easy_getinfo - extract information from a curl handle
 .B "CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ... );"
 
 .SH DESCRIPTION
-Request internal information from the curl session with this function.  The
+Request internal information from the curl session with this function. The
 third argument \fBMUST\fP be a pointer to a long, a pointer to a char *, a
 pointer to a struct curl_slist * or a pointer to a double (as this
-documentation describes further down).  The data pointed-to will be filled in
-accordingly and can be relied upon only if the function returns CURLE_OK.  Use
+documentation describes further down). The data pointed-to will be filled in
+accordingly and can be relied upon only if the function returns CURLE_OK. Use
 this function AFTER a performed transfer if you want to get transfer related
 data.
 
@@ -162,7 +162,7 @@ See \fICURLINFO_CONTENT_LENGTH_DOWNLOAD_T(3)\fP
 .IP CURLINFO_CONTENT_LENGTH_UPLOAD
 (Deprecated) Upload size. See \fICURLINFO_CONTENT_LENGTH_UPLOAD(3)\fP
 .IP CURLINFO_CONTENT_LENGTH_UPLOAD_T
-Upload size.  See \fICURLINFO_CONTENT_LENGTH_UPLOAD_T(3)\fP
+Upload size. See \fICURLINFO_CONTENT_LENGTH_UPLOAD_T(3)\fP
 .IP CURLINFO_CONTENT_TYPE
 Content type from the Content-Type header.
 See \fICURLINFO_CONTENT_TYPE(3)\fP
@@ -215,7 +215,7 @@ See \fICURLINFO_CERTINFO(3)\fP
 TLS session info that can be used for further processing.
 See \fICURLINFO_TLS_SSL_PTR(3)\fP
 .IP CURLINFO_TLS_SESSION
-TLS session info that can be used for further processing.  See
+TLS session info that can be used for further processing. See
 \fICURLINFO_TLS_SESSION(3)\fP. Deprecated option, use
 \fICURLINFO_TLS_SSL_PTR(3)\fP instead!
 .IP CURLINFO_CONDITION_UNMET

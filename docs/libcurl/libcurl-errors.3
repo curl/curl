@@ -63,7 +63,7 @@ Failed to connect() to host or proxy.
 The server sent data libcurl could not parse. This error code was known as as
 \fICURLE_FTP_WEIRD_SERVER_REPLY\fP before 7.51.0.
 .IP "CURLE_REMOTE_ACCESS_DENIED (9)"
-We were denied access to the resource given in the URL.  For FTP, this occurs
+We were denied access to the resource given in the URL. For FTP, this occurs
 while trying to change to the remote directory.
 .IP "CURLE_FTP_ACCEPT_FAILED (10)"
 While waiting for the server to connect back when an active FTP session is
@@ -169,7 +169,7 @@ nothing is considered an error.
 .IP "CURLE_SSL_ENGINE_NOTFOUND (53)"
 The specified crypto engine was not found.
 .IP "CURLE_SSL_ENGINE_SETFAILED (54)"
-Failed setting the selected SSL crypto engine as default!
+Failed setting the selected SSL crypto engine as default.
 .IP "CURLE_SEND_ERROR (55)"
 Failed sending network data.
 .IP "CURLE_RECV_ERROR (56)"
@@ -309,7 +309,7 @@ Wakeup is unavailable or failed.
 A function was called with a bad parameter.
 .SH "CURLSHcode"
 The "share" interface will return a CURLSHcode to indicate when an error has
-occurred.  Also consider \fIcurl_share_strerror(3)\fP.
+occurred. Also consider \fIcurl_share_strerror(3)\fP.
 .IP "CURLSHE_OK (0)"
 All fine. Proceed as usual.
 .IP "CURLSHE_BAD_OPTION (1)"
@@ -326,7 +326,7 @@ The requested sharing could not be done because the library you use do not have
 that particular feature enabled. (Added in 7.23.0)
 .SH "CURLUcode"
 The URL interface will return a CURLUcode to indicate when an error has
-occurred.  Also consider \fIcurl_url_strerror(3)\fP.
+occurred. Also consider \fIcurl_url_strerror(3)\fP.
 .IP "CURLUE_BAD_HANDLE (1)"
 An invalid CURLU pointer was passed as argument.
 .IP "CURLUE_BAD_PARTPOINTER (2)"

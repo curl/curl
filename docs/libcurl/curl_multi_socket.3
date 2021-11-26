@@ -32,8 +32,8 @@ CURLMcode curl_multi_socket_all(CURLM *multi_handle,
                                 int *running_handles);
 .fi
 .SH DESCRIPTION
-These functions are deprecated. Do not use! See
-\fIcurl_multi_socket_action(3)\fP instead!
+These functions are deprecated. Do not use. See
+\fIcurl_multi_socket_action(3)\fP instead.
 
 At return, the integer \fBrunning_handles\fP points to will contain the number
 of still running easy handles within the multi handle. When this number
@@ -65,7 +65,7 @@ equivalent to \fIcurl_multi_socket_action(3)\fP with \fBev_bitmask\fP set to
 
 Force libcurl to (re-)check all its internal sockets and transfers instead of
 just a single one by calling \fIcurl_multi_socket_all(3)\fP. Note that there
-should not be any reason to use this function!
+should not be any reason to use this function.
 .SH CALLBACK
 The socket \fBcallback\fP function uses a prototype like this
 .nf

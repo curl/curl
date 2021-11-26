@@ -38,7 +38,7 @@ using the share interface but you must provide your own locking and set
 .SH TLS
 If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
 then of course using the underlying SSL library multi-threaded and those libs
-might have their own requirements on this issue.  You may need to provide one
+might have their own requirements on this issue. You may need to provide one
 or two functions to allow it to function properly:
 .IP OpenSSL
 OpenSSL 1.1.0+ "can be safely used in multi-threaded applications provided that
@@ -89,7 +89,7 @@ can find and use thread safe versions of these and other system calls, as
 otherwise it cannot function fully thread safe. Some operating systems are
 known to have faulty thread implementations. We have previously received
 problem reports on *BSD (at least in the past, they may be working fine these
-days).  Some operating systems that are known to have solid and working thread
+days). Some operating systems that are known to have solid and working thread
 support are Linux, Solaris and Windows.
 .IP "curl_global_* functions"
 These functions are not thread safe. If you are using libcurl with multiple

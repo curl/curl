@@ -73,7 +73,7 @@ git
 Portability
 ===========
 
- We write curl and libcurl to compile with C89 compilers.  On 32-bit and up
+ We write curl and libcurl to compile with C89 compilers. On 32-bit and up
  machines. Most of libcurl assumes more or less POSIX compliance but that is
  not a requirement.
 
@@ -165,10 +165,10 @@ Windows vs Unix
  `#ifdef HAVE_THAT_WEIRD_FUNCTION`. Since Windows cannot run configure scripts,
  we maintain a `curl_config-win32.h` file in lib directory that is supposed to
  look exactly like a `curl_config.h` file would have looked like on a Windows
- machine!
+ machine.
 
  Generally speaking: always remember that this will be compiled on dozens of
- operating systems. Do not walk on the edge!
+ operating systems. Do not walk on the edge.
 
 <a name="Library"></a>
 Library
@@ -192,7 +192,7 @@ Library
  makes sure we stay absolutely platform independent.
 
  [ `curl_easy_init()`][2] allocates an internal struct and makes some
- initializations.  The returned handle does not reveal internals. This is the
+ initializations. The returned handle does not reveal internals. This is the
  `Curl_easy` struct which works as an "anchor" struct for all `curl_easy`
  functions. All connections performed will get connect-specific data allocated
  that should be used for things related to particular connections/requests.
@@ -203,7 +203,7 @@ Library
  the `Curl_easy` struct.
 
  `curl_easy_perform()` is just a wrapper function that makes use of the multi
- API.  It basically calls `curl_multi_init()`, `curl_multi_add_handle()`,
+ API. It basically calls `curl_multi_init()`, `curl_multi_add_handle()`,
  `curl_multi_wait()`, and `curl_multi_perform()` until the transfer is done
  and then returns.
 
@@ -431,7 +431,7 @@ multi interface/non-blocking
  The FTP and the SFTP/SCP protocols are examples of how we adapt and adjust
  the code to allow non-blocking operations even on multi-stage command-
  response protocols. They are built around state machines that return when
- they would otherwise block waiting for data.  The DICT, LDAP and TELNET
+ they would otherwise block waiting for data. The DICT, LDAP and TELNET
  protocols are crappy examples and they are subject for rewrite in the future
  to better fit the libcurl protocol family.
 
@@ -674,7 +674,7 @@ Content Encoding
 ## Supported content encodings
 
  The `deflate`, `gzip` and `br` content encodings are supported by libcurl.
- Both regular and chunked transfers work fine.  The zlib library is required
+ Both regular and chunked transfers work fine. The zlib library is required
  for the `deflate` and `gzip` encodings, while the brotli decoding library is
  for the `br` encoding.
 
@@ -692,12 +692,12 @@ Content Encoding
  that will work (besides `identity`, which does nothing) are `deflate`,
  `gzip` and `br`. If a response is encoded using the `compress` or methods,
  libcurl will return an error indicating that the response could
- not be decoded.  If `<string>` is NULL no `Accept-Encoding` header is
+ not be decoded. If `<string>` is NULL no `Accept-Encoding` header is
  generated. If `<string>` is a zero-length string, then an `Accept-Encoding`
  header containing all supported encodings will be generated.
 
  The [`CURLOPT_ACCEPT_ENCODING`][5] must be set to any non-NULL value for
- content to be automatically decoded.  If it is not set and the server still
+ content to be automatically decoded. If it is not set and the server still
  sends encoded content (despite not having been asked), the data is returned
  in its raw form and the `Content-Encoding` type is not checked.
 
@@ -797,7 +797,7 @@ Track Down Memory Leaks
     tests/memanalyze.pl dump
 
   This now outputs a report on what resources that were allocated but never
-  freed etc. This report is fine for posting to the list!
+  freed etc. This report is fine for posting to the list.
 
   If this does not produce any output, no leak was detected in libcurl. Then
   the leak is mostly likely to be in your code.
@@ -837,7 +837,7 @@ Track Down Memory Leaks
 
  We created an internal "socket to easy handles" hash table that given
  a socket (file descriptor) returns the easy handle that waits for action on
- that socket.  This hash is made using the already existing hash code
+ that socket. This hash is made using the already existing hash code
  (previously only used for the DNS cache).
 
  To make libcurl able to report plain sockets in the socket callback, we had

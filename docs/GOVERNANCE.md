@@ -159,7 +159,7 @@ When you are merging patches/PRs...
   necessary
 - avoid the "merge" button on GitHub, do it "manually" instead to get full
   control and full audit trail (github leaves out you as "Committer:")
-- remember to credit the reporter and the helpers!
+- remember to credit the reporter and the helpers.
 
 ## Who are maintainers?
 

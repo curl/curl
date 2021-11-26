@@ -79,7 +79,7 @@ have OpenSSL installed in your system, you can run configure like this:
 
 If you have OpenSSL installed, but with the libraries in one place and the
 header files somewhere else, you have to set the `LDFLAGS` and `CPPFLAGS`
-environment variables prior to running configure.  Something like this should
+environment variables prior to running configure. Something like this should
 work:
 
     CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" ./configure
@@ -255,7 +255,7 @@ might yet need some additional adjustment, caveat emptor.
 ## Important static libcurl usage note
 
 When building an application that uses the static libcurl library on Windows,
-you must add `-DCURL_STATICLIB` to your `CFLAGS`.  Otherwise the linker will
+you must add `-DCURL_STATICLIB` to your `CFLAGS`. Otherwise the linker will
 look for dynamic import symbols.
 
 ## Legacy Windows and SSL
@@ -396,7 +396,7 @@ enabled, you will get messages like:
 getaddrinfo() thread failed to start
 ```
 
-Do not panic! curl and your program are not broken. You can fix this by:
+Do not panic. curl and your program are not broken. You can fix this by:
 
 - Set the environment variable `QIBM_MULTI_THREADED` to `Y` before starting
   your program. This can be done at whatever scope you feel is appropriate.
@@ -409,8 +409,8 @@ Download and unpack the curl package.
 `cd` to the new directory. (e.g. `cd curl-7.12.3`)
 
 Set environment variables to point to the cross-compile toolchain and call
-configure with any options you need.  Be sure and specify the `--host` and
-`--build` parameters at configuration time.  The following script is an
+configure with any options you need. Be sure and specify the `--host` and
+`--build` parameters at configuration time. The following script is an
 example of cross-compiling for the IBM 405GP PowerPC processor using the
 toolchain from MonteVista for Hardhat Linux.
 
@@ -435,8 +435,8 @@ export NM=ppc_405-nm
 
 You may also need to provide a parameter like `--with-random=/dev/urandom` to
 configure as it cannot detect the presence of a random number generating
-device for a target system.  The `--prefix` parameter specifies where curl
-will be installed.  If `configure` completes successfully, do `make` and `make
+device for a target system. The `--prefix` parameter specifies where curl
+will be installed. If `configure` completes successfully, do `make` and `make
 install` as usual.
 
 In some cases, you may be able to simplify the above commands to as little as:
@@ -448,7 +448,7 @@ In some cases, you may be able to simplify the above commands to as little as:
 There are a number of configure options that can be used to reduce the size of
 libcurl for embedded applications where binary size is an important factor.
 First, be sure to set the `CFLAGS` variable when configuring with any relevant
-compiler optimization flags to reduce the size of the binary.  For gcc, this
+compiler optimization flags to reduce the size of the binary. For gcc, this
 would mean at minimum the -Os option, and potentially the `-march=X`,
 `-mdynamic-no-pic` and `-flto` options as well, e.g.
 
@@ -459,7 +459,7 @@ due to improved optimization.
 
 Be sure to specify as many `--disable-` and `--without-` flags on the
 configure command-line as you can to disable all the libcurl features that you
-know your application is not going to need.  Besides specifying the
+know your application is not going to need. Besides specifying the
 `--disable-PROTOCOL` flags for all the types of URLs your application will not
 use, here are some other flags that can reduce the size of the library:
 
@@ -488,7 +488,7 @@ the configure command-line, e.g.
     LDFLAGS="-Wl,-s -Wl,-Bsymbolic -Wl,--gc-sections"
 
 Be sure also to strip debugging symbols from your binaries after compiling
-using 'strip' (or the appropriate variant if cross-compiling).  If space is
+using 'strip' (or the appropriate variant if cross-compiling). If space is
 really tight, you may be able to remove some unneeded sections of the shared
 library using the -R option to objcopy (e.g. the .comment section).
 
@@ -502,9 +502,9 @@ in a lower total size than dynamically linking.
 
 Note that the curl test harness can detect the use of some, but not all, of
 the `--disable` statements suggested above. Use will cause tests relying on
-those features to fail.  The test harness can be manually forced to skip the
+those features to fail. The test harness can be manually forced to skip the
 relevant tests by specifying certain key words on the `runtests.pl` command
-line.  Following is a list of appropriate key words:
+line. Following is a list of appropriate key words:
 
  - `--disable-cookies`          !cookies
  - `--disable-manual`           !--manual

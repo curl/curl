@@ -24,7 +24,7 @@
 .SH NAME
 libcurl-security \- security considerations when using libcurl
 .SH "Security"
-The libcurl project takes security seriously.  The library is written with
+The libcurl project takes security seriously. The library is written with
 caution and precautions are taken to mitigate many kinds of risks encountered
 while operating with potentially malicious servers on the Internet. It is a
 powerful library, however, which allows application writers to make trade-offs
@@ -33,10 +33,10 @@ the right way, you can use libcurl to transfer data pretty safely.
 
 Many applications are used in closed networks where users and servers can
 (possibly) be trusted, but many others are used on arbitrary servers and are
-fed input from potentially untrusted users.  Following is a discussion about
+fed input from potentially untrusted users. Following is a discussion about
 some risks in the ways in which applications commonly use libcurl and
-potential mitigations of those risks. It is by no means comprehensive, but
-shows classes of attacks that robust applications should consider. The Common
+potential mitigations of those risks. It is not comprehensive, but shows
+classes of attacks that robust applications should consider. The Common
 Weakness Enumeration project at https://cwe.mitre.org/ is a good reference for
 many of these and similar types of weaknesses of which application writers
 should be aware.
@@ -55,7 +55,7 @@ automatically to frequently visited sites. The file contains passwords in
 clear text and is a real security risk. In some cases, your .netrc is also
 stored in a home directory that is NFS mounted or used on another network
 based file system, so the clear text password will fly through your network
-every time anyone reads that file!
+every time anyone reads that file.
 
 For applications that enable .netrc use, a user who manage to set the right
 URL might then be possible to pass on passwords.
@@ -95,22 +95,21 @@ Ie use authenticated protocols protected with HTTPS or SSH.
 Never ever switch off certificate verification.
 .SH "Redirects"
 The \fICURLOPT_FOLLOWLOCATION(3)\fP option automatically follows HTTP
-redirects sent by a remote server.  These redirects can refer to any kind of
+redirects sent by a remote server. These redirects can refer to any kind of
 URL, not just HTTP. libcurl restricts the protocols allowed to be used in
 redirects for security reasons: only HTTP, HTTPS, FTP and FTPS are
 enabled by default. Applications may opt to restrict that set further.
 
 A redirect to a file: URL would cause the libcurl to read (or write) arbitrary
-files from the local filesystem.  If the application returns the data back to
+files from the local filesystem. If the application returns the data back to
 the user (as would happen in some kinds of CGI scripts), an attacker could
 leverage this to read otherwise forbidden data (e.g.
 file://localhost/etc/passwd).
 
-If authentication credentials are stored in the ~/.netrc file, or Kerberos
-is in use, any other URL type (not just file:) that requires
-authentication is also at risk.  A redirect such as
-ftp://some-internal-server/private-file would then return data even when
-the server is password protected.
+If authentication credentials are stored in the ~/.netrc file, or Kerberos is
+in use, any other URL type (not just file:) that requires authentication is
+also at risk. A redirect such as ftp://some-internal-server/private-file would
+then return data even when the server is password protected.
 
 In the same way, if an unencrypted SSH private key has been configured for the
 user running the libcurl application, SCP: or SFTP: URLs could access password
@@ -136,7 +135,7 @@ A user who can control the DNS server of a domain being passed in within a URL
 can change the address of the host to a local, private address which a
 server-side libcurl-using application could then use. e.g. the innocuous URL
 http://fuzzybunnies.example.com/ could actually resolve to the IP address of a
-server behind a firewall, such as 127.0.0.1 or 10.1.2.3.  Applications can
+server behind a firewall, such as 127.0.0.1 or 10.1.2.3. Applications can
 mitigate against this by setting a \fICURLOPT_OPENSOCKETFUNCTION(3)\fP and
 checking the address before a connection.
 
@@ -144,13 +143,13 @@ All the malicious scenarios regarding redirected URLs apply just as well to
 non-redirected URLs, if the user is allowed to specify an arbitrary URL that
 could point to a private resource. For example, a web app providing a
 translation service might happily translate file://localhost/etc/passwd and
-display the result.  Applications can mitigate against this with the
+display the result. Applications can mitigate against this with the
 \fICURLOPT_PROTOCOLS(3)\fP option as well as by similar mitigation techniques
 for redirections.
 
 A malicious FTP server could in response to the PASV command return an IP
 address and port number for a server local to the app running libcurl but
-behind a firewall.  Applications can mitigate against this by using the
+behind a firewall. Applications can mitigate against this by using the
 \fICURLOPT_FTP_SKIP_PASV_IP(3)\fP option or \fICURLOPT_FTPPORT(3)\fP.
 
 Local servers sometimes assume local access comes from friends and trusted
@@ -174,32 +173,32 @@ as IPv4 addresses. That means that a sanitizing function that filters out
 addresses like 127.0.0.1 is not sufficient--the equivalent IPv6 addresses ::1,
 ::, 0:00::0:1, ::127.0.0.1 and ::ffff:7f00:1 supplied somehow by an attacker
 would all bypass a naive filter and could allow access to undesired local
-resources.  IPv6 also has special address blocks like link-local and
-site-local that generally should not be accessed by a server-side libcurl-using
-application.  A poorly-configured firewall installed in a data center,
+resources. IPv6 also has special address blocks like link-local and site-local
+that generally should not be accessed by a server-side libcurl-using
+application. A poorly configured firewall installed in a data center,
 organization or server may also be configured to limit IPv4 connections but
-leave IPv6 connections wide open.  In some cases, setting
+leave IPv6 connections wide open. In some cases, setting
 \fICURLOPT_IPRESOLVE(3)\fP to CURL_IPRESOLVE_V4 can be used to limit resolved
 addresses to IPv4 only and bypass these issues.
 .SH Uploads
 When uploading, a redirect can cause a local (or remote) file to be
 overwritten. Applications must not allow any unsanitized URL to be passed in
 for uploads. Also, \fICURLOPT_FOLLOWLOCATION(3)\fP should not be used on
-uploads.  Instead, the applications should consider handling redirects itself,
+uploads. Instead, the applications should consider handling redirects itself,
 sanitizing each URL first.
 .SH Authentication
 Use of \fICURLOPT_UNRESTRICTED_AUTH(3)\fP could cause authentication
-information to be sent to an unknown second server.  Applications can mitigate
+information to be sent to an unknown second server. Applications can mitigate
 against this by disabling \fICURLOPT_FOLLOWLOCATION(3)\fP and handling
 redirects itself, sanitizing where necessary.
 
 Use of the CURLAUTH_ANY option to \fICURLOPT_HTTPAUTH(3)\fP could result in
-user name and password being sent in clear text to an HTTP server.  Instead,
+user name and password being sent in clear text to an HTTP server. Instead,
 use CURLAUTH_ANYSAFE which ensures that the password is encrypted over the
 network, or else fail the request.
 
 Use of the CURLUSESSL_TRY option to \fICURLOPT_USE_SSL(3)\fP could result in
-user name and password being sent in clear text to an FTP server.  Instead,
+user name and password being sent in clear text to an FTP server. Instead,
 use CURLUSESSL_CONTROL to ensure that an encrypted connection is used or else
 fail the request.
 .SH Cookies
@@ -301,7 +300,7 @@ right one.
 A malicious FTP server can respond to PASV commands with the IP+PORT of a
 totally different machine. Perhaps even a third party host, and when there are
 many clients trying to connect to that third party, it could create a
-Distributed Denial-Of-Service attack out of it! If the client makes an upload
+Distributed Denial-Of-Service attack out of it. If the client makes an upload
 operation, it can make the client send the data to another site. If the
 attacker can affect what data the client uploads, it can be made to work as a
 HTTP request and then the client could be made to issue HTTP requests to third
@@ -315,7 +314,7 @@ The fact that FTP uses two connections makes it vulnerable in a way that is
 hard to avoid.
 .SH "Denial of Service"
 A malicious server could cause libcurl to effectively hang by sending data
-slowly, or even no data at all but just keeping the TCP connection open.  This
+slowly, or even no data at all but just keeping the TCP connection open. This
 could effectively result in a denial-of-service attack. The
 \fICURLOPT_TIMEOUT(3)\fP and/or \fICURLOPT_LOW_SPEED_LIMIT(3)\fP options can
 be used to mitigate against this.
@@ -323,7 +322,7 @@ be used to mitigate against this.
 A malicious server could cause libcurl to download an infinite amount of data,
 potentially causing all of memory or disk to be filled. Setting the
 \fICURLOPT_MAXFILESIZE_LARGE(3)\fP option is not sufficient to guard against
-this.  Instead, applications should monitor the amount of data received within
+this. Instead, applications should monitor the amount of data received within
 the write or progress callback and abort once the limit is reached.
 
 A malicious HTTP server could cause an infinite redirection loop, causing a
@@ -340,7 +339,7 @@ transactions.
 A server can supply data which the application may, in some cases, use as a
 file name. The curl command-line tool does this with
 \fI--remote-header-name\fP, using the Content-disposition: header to generate
-a file name.  An application could also use \fICURLINFO_EFFECTIVE_URL(3)\fP to
+a file name. An application could also use \fICURLINFO_EFFECTIVE_URL(3)\fP to
 generate a file name from a server-supplied redirect URL. Special care must be
 taken to sanitize such names to avoid the possibility of a malicious server
 supplying one like "/etc/passwd", "\\autoexec.bat", "prn:" or even ".bashrc".
@@ -360,7 +359,7 @@ may in fact be used by intruders to gain additional information of a potential
 target.
 
 Be sure to limit access to application logs if they could hold private or
-security-related data.  Besides the obvious candidates like user names and
+security-related data. Besides the obvious candidates like user names and
 passwords, things like URLs, cookies or even file names could also hold
 sensitive data.
 

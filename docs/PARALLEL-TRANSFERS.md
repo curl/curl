@@ -49,7 +49,7 @@ share API as well, as a context per origin + path (realm?) basically.
 
 Visible in test 153, 1412 and more.
 
-## Feedback!
+## Feedback
 
 This is early days for parallel transfer support. Keep your eyes open for
 unintended side effects or downright bugs.

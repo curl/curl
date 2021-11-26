@@ -17,7 +17,7 @@
  a go at a solution. You can optionally also submit your problem in [curl's
  bug tracking system](https://github.com/curl/curl/issues).
 
- Please read the rest of this document below first before doing that!
+ Please read the rest of this document below first before doing that.
 
  If you feel you need to ask around first, find a suitable [mailing list](
  https://curl.se/mail/) and post your questions there.
@@ -66,9 +66,9 @@
  `--trace` options.
 
  If curl crashed, causing a core dump (in unix), there is hardly any use to
- send that huge file to anyone of us. Unless we have an exact same system
- setup as you, we cannot do much with it. Instead, we ask you to get a stack
- trace and send that (much smaller) output to us instead!
+ send that huge file to anyone of us. Unless we have the same system setup as
+ you, we cannot do much with it. Instead, we ask you to get a stack trace and
+ send that (much smaller) output to us instead.
 
  The address and how to subscribe to the mailing lists are detailed in the
  `MANUAL.md` file.
@@ -102,9 +102,9 @@
  it out of an ambition to keep curl and libcurl excellent products and out of
  pride.
 
- But please do not assume that you can just lump over something to us and it
- will then magically be fixed after some given time. Most often we need
- feedback and help to understand what you have experienced and how to repeat a
+ Please do not assume that you can just lump over something to us and it will
+ then magically be fixed after some given time. Most often we need feedback
+ and help to understand what you have experienced and how to repeat a
  problem. Then we may only be able to assist YOU to debug the problem and to
  track down the proper fix.
 
@@ -209,7 +209,7 @@
  If the problem have not been understood or reproduced, and there's nobody
  responding to follow-up questions or questions asking for clarifications or
  for discussing possible ways to move forward with the task, we take that as a
- strong suggestion that the bug is not important.
+ strong suggestion that the bug is unimportant.
 
  Unimportant issues will be closed as inactive sooner or later as they cannot
  be fixed. The inactivity period (waiting for responses) should not be shorter
