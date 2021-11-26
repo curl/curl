@@ -930,7 +930,7 @@ FAQ
   We strongly advice against doing this for more than experiments.
 
   If you get this failure with a CA cert bundle installed and used, the
-  server's certificate might not be signed by one of the CA's in yout CA
+  server's certificate might not be signed by one of the CA's in your CA
   store. It might for example be self-signed. You then correct this problem by
   obtaining a valid CA cert for the server. Or again, decrease the security by
   disabling this check.
