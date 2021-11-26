@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_CAPATH \- directory holding CA certificates
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CAPATH, char *capath);
+.fi
 .SH DESCRIPTION
 Pass a char * to a null-terminated string naming a directory holding multiple
 CA certificates to verify the peer with. If libcurl is built against OpenSSL,

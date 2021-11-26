@@ -25,27 +25,21 @@ curl_maprintf, curl_mfprintf, curl_mprintf, curl_msnprintf, curl_msprintf
 curl_mvaprintf, curl_mvfprintf, curl_mvprintf, curl_mvsnprintf,
 curl_mvsprintf - formatted output conversion
 .SH SYNOPSIS
-.B #include <curl/mprintf.h>
-.sp
-.BI "int curl_mprintf(const char *" format ", ...);"
-.br
-.BI "int curl_mfprintf(FILE *" fd ", const char *" format ", ...);"
-.br
-.BI "int curl_msprintf(char *" buffer ", const char *" format ", ...);"
-.br
-.BI "int curl_msnprintf(char *" buffer ", size_t " maxlength ", const char *" format ", ...);"
-.br
-.BI "int curl_mvprintf(const char *" format ", va_list " args ");"
-.br
-.BI "int curl_mvfprintf(FILE *" fd ", const char *" format ", va_list " args ");"
-.br
-.BI "int curl_mvsprintf(char *" buffer ", const char *" format ", va_list " args ");"
-.br
-.BI "int curl_mvsnprintf(char *" buffer ", size_t " maxlength ", const char *" format ", va_list " args ");"
-.br
-.BI "char *curl_maprintf(const char *" format ", ...);"
-.br
-.BI "char *curl_mvaprintf(const char *" format ", va_list " args ");"
+.nf
+#include <curl/mprintf.h>
+
+int curl_mprintf(const char *format, ...);
+int curl_mfprintf(FILE *fd, const char *format, ...);
+int curl_msprintf(char *buffer, const char *format, ...);
+int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...);
+int curl_mvprintf(const char *format, va_list args);
+int curl_mvfprintf(FILE *fd, const char *format, va_list args);
+int curl_mvsprintf(char *buffer, const char *format, va_list args);
+int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
+                    va_list args);
+char *curl_maprintf(const char *format , ...);
+char *curl_mvaprintf(const char *format, va_list args);
+.fi
 .SH DESCRIPTION
 These functions produce output according to the format string and given
 arguments. They are mostly clones of the well-known C-style functions but

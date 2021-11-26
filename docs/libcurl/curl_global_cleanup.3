@@ -23,10 +23,11 @@
 .SH NAME
 curl_global_cleanup - global libcurl cleanup
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "void curl_global_cleanup(void);"
-.ad
+.nf
+#include <curl/curl.h>
+
+void curl_global_cleanup(void);
+.fi
 .SH DESCRIPTION
 This function releases resources acquired by \fIcurl_global_init(3)\fP.
 

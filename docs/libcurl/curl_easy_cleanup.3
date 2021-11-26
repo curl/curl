@@ -24,9 +24,11 @@
 .SH NAME
 curl_easy_cleanup - End a libcurl easy handle
 .SH SYNOPSIS
-.B #include <curl/curl.h>
+.nf
+#include <curl/curl.h>
 
-.BI "void curl_easy_cleanup(CURL *" handle ");"
+void curl_easy_cleanup(CURL *handle);
+.fi
 .SH DESCRIPTION
 This function must be the last function to call for an easy session. It is the
 opposite of the \fIcurl_easy_init(3)\fP function and must be called with the

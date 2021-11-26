@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_HTTP_VERSION \- HTTP protocol version to use
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTP_VERSION, long version);
+.fi
 .SH DESCRIPTION
 Pass \fIversion\fP a long, set to one of the values described below. They ask
 libcurl to use the specific HTTP versions.

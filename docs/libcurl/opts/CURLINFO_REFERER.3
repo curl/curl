@@ -24,9 +24,11 @@
 .SH NAME
 CURLINFO_REFERER \- get the referrer header
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_REFERER, char **hdrp);
+.fi
 .SH DESCRIPTION
 Pass in a pointer to a char pointer and get the referrer header.
 

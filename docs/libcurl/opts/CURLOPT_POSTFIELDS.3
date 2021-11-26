@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_POSTFIELDS \- data to POST to server
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POSTFIELDS, char *postdata);
+.fi
 .SH DESCRIPTION
 Pass a char * as parameter, pointing to the full data to send in an HTTP POST
 operation. You must make sure that the data is formatted the way you want the

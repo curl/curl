@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_SSL_ENABLE_ALPN \- Application Layer Protocol Negotiation
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_ENABLE_ALPN, long npn);
+.fi
 .SH DESCRIPTION
 Pass a long as parameter, 0 or 1 where 1 is for enable and 0 for disable. This
 option enables/disables ALPN in the SSL handshake (if the SSL backend libcurl

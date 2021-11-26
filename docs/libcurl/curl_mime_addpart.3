@@ -23,10 +23,11 @@
 .SH NAME
 curl_mime_addpart - append a new empty part to a mime structure
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "curl_mimepart * curl_mime_addpart(curl_mime * " mime ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+curl_mimepart *curl_mime_addpart(curl_mime *mime);
+.fi
 .SH DESCRIPTION
 \fIcurl_mime_addpart(3)\fP creates and appends a new empty part to the given
 mime structure and returns a handle to it. The returned part handle can

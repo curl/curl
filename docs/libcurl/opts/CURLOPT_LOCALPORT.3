@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_LOCALPORT \- local port number to use for socket
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_LOCALPORT, long port);
+.fi
 .SH DESCRIPTION
 Pass a long. This sets the local port number of the socket used for the
 connection. This can be used in combination with \fICURLOPT_INTERFACE(3)\fP

@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_DNS_INTERFACE \- interface to speak DNS over
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DNS_INTERFACE, char *ifname);
+.fi
 .SH DESCRIPTION
 Pass a char * as parameter. Set the name of the network interface that the DNS
 resolver should bind to. This must be an interface name (not an address). Set

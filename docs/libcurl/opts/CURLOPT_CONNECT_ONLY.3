@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_CONNECT_ONLY \- stop when connected to target server
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONNECT_ONLY, long only);
+.fi
 .SH DESCRIPTION
 Pass a long. If the parameter equals 1, it tells the library to perform all
 the required proxy authentication and connection setup, but no data transfer,

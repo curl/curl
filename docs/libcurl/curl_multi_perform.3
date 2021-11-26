@@ -23,10 +23,11 @@
 .SH NAME
 curl_multi_perform - reads/writes available data from each easy handle
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles);
-.ad
+.fi
 .SH DESCRIPTION
 This function performs transfers on all the added handles that need attention
 in an non-blocking fashion. The easy handles have previously been added to the

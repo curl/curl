@@ -24,9 +24,12 @@
 .SH NAME
 CURLINFO_PRETRANSFER_TIME \- get the time until the file transfer start
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PRETRANSFER_TIME, double *timep);
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PRETRANSFER_TIME,
+                           double *timep);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a double to receive the time, in seconds, it took from the
 start until the file transfer is just about to begin.

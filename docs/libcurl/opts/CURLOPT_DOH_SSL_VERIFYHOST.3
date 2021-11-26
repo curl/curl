@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_DOH_SSL_VERIFYHOST \- verify the host name in the DoH SSL certificate
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_SSL_VERIFYHOST, long verify);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_SSL_VERIFYHOST,
+                          long verify);
+.fi
 .SH DESCRIPTION
 Pass a long set to 2L as asking curl to \fIverify\fP the DoH (DNS-over-HTTPS)
 server's certificate name fields against the host name.

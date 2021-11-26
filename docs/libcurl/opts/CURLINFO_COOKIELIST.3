@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -24,10 +24,12 @@
 .SH NAME
 CURLINFO_COOKIELIST \- get all known cookies
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_COOKIELIST,
                            struct curl_slist **cookies);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a 'struct curl_slist *' to receive a linked-list of all
 cookies curl knows (expired ones, too). do not forget to call

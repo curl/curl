@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_SSLKEY \- private keyfile for TLS and SSL client cert
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLKEY, char *keyfile);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. The string should be
 the file name of your private key. The default format is "PEM" and can be

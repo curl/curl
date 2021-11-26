@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_FOLLOWLOCATION \- follow HTTP 3xx redirects
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FOLLOWLOCATION, long enable);
+.fi
 .SH DESCRIPTION
 A long parameter set to 1 tells the library to follow any Location: header
 that the server sends as part of an HTTP header in a 3xx response. The

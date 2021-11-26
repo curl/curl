@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_CRLFILE \- Certificate Revocation List file
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CRLFILE, char *file);
+.fi
 .SH DESCRIPTION
 Pass a char * to a null-terminated string naming a \fIfile\fP with the
 concatenation of CRL (in PEM format) to use in the certificate validation that

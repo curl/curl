@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_READDATA \- pointer passed to the read callback
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_READDATA, void *pointer);
+.fi
 .SH DESCRIPTION
 Data \fIpointer\fP to pass to the file read function. If you use the
 \fICURLOPT_READFUNCTION(3)\fP option, this is the pointer you will get as

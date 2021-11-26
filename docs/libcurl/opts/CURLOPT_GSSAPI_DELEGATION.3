@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_GSSAPI_DELEGATION \- allowed GSS-API delegation
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_GSSAPI_DELEGATION, long level);
+.fi
 .SH DESCRIPTION
 Set the long parameter \fIlevel\fP to \fBCURLGSSAPI_DELEGATION_FLAG\fP to
 allow unconditional GSSAPI credential delegation. The delegation is disabled

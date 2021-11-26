@@ -24,10 +24,11 @@
 .SH NAME
 curl_version_info - returns run-time libcurl version info
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "curl_version_info_data *curl_version_info( CURLversion "age ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+curl_version_info_data *curl_version_info( CURLversion age);
+.fi
 .SH DESCRIPTION
 Returns a pointer to a filled in static struct with information about various
 features in the running version of libcurl. \fIage\fP should be set to the
@@ -36,9 +37,9 @@ libcurl will always return a proper struct that your program understands,
 while programs in the future might get a different
 struct. \fBCURLVERSION_NOW\fP will be the most recent one for the library you
 have installed:
-
-        data = curl_version_info(CURLVERSION_NOW);
-
+.nf
+  data = curl_version_info(CURLVERSION_NOW);
+.fi
 Applications should use this information to judge if things are possible to do
 or not, instead of using compile-time checks, as dynamic/DLL libraries can be
 changed independent of applications.
@@ -56,7 +57,7 @@ typedef struct {
   char *ssl_version;        /* human readable string */
   long ssl_version_num;     /* not used, always zero */
   const char *libz_version; /* human readable string */
-  const char * const *protocols; /* protocols */
+  const char *const *protocols; /* protocols */
 
   /* when 'age' is CURLVERSION_SECOND or higher, the members below exist */
   const char *ares;         /* human readable string */

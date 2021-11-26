@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_UPLOAD \- data upload
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UPLOAD, long upload);
+.fi
 .SH DESCRIPTION
 The long parameter \fIupload\fP set to 1 tells the library to prepare for and
 perform an upload. The \fICURLOPT_READDATA(3)\fP and

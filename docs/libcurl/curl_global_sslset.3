@@ -23,8 +23,8 @@
 .SH NAME
 curl_global_sslset - Select SSL backend to use with libcurl
 .SH SYNOPSIS
-.B #include <curl/curl.h>
 .nf
+#include <curl/curl.h>
 
 typedef struct {
   curl_sslbackend id;
@@ -47,9 +47,9 @@ typedef enum {
   CURLSSLBACKEND_BEARSSL = 13
 } curl_sslbackend;
 
-.B "CURLsslset curl_global_sslset(curl_sslbackend " id,
-.B "                              const char *" name,
-.B "                              curl_ssl_backend ***" avail ");"
+CURLsslset curl_global_sslset(curl_sslbackend id,
+                              const char *name,
+                              curl_ssl_backend ***avail);
 .fi
 .SH DESCRIPTION
 This function configures at runtime which SSL backend to use with

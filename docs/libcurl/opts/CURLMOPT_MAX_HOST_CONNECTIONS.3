@@ -24,9 +24,12 @@
 .SH NAME
 CURLMOPT_MAX_HOST_CONNECTIONS \- max number of connections to a single host
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_HOST_CONNECTIONS, long max);
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_HOST_CONNECTIONS,
+                            long max);
+.fi
 .SH DESCRIPTION
 Pass a long to indicate \fBmax\fP. The set number will be used as the maximum
 amount of simultaneously open connections to a single host (a host being the

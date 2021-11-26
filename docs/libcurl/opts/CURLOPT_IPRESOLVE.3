@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_IPRESOLVE \- IP protocol version to use
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_IPRESOLVE, long resolve);
+.fi
 .SH DESCRIPTION
 Allows an application to select what kind of IP addresses to use when
 establishing a connection or choosing one from the connection pool. This is

@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_INTERLEAVEDATA \- pointer passed to RTSP interleave callback
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_INTERLEAVEDATA, void *pointer);
+.fi
 .SH DESCRIPTION
 This is the userdata \fIpointer\fP that will be passed to
 \fICURLOPT_INTERLEAVEFUNCTION(3)\fP when interleaved RTP data is received. If

@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_LOW_SPEED_LIMIT \- low speed limit in bytes per second
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_LOW_SPEED_LIMIT, long speedlimit);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_LOW_SPEED_LIMIT,
+                          long speedlimit);
+.fi
 .SH DESCRIPTION
 Pass a long as parameter. It contains the average transfer speed in bytes per
 second that the transfer should be below during

@@ -23,10 +23,11 @@
 .SH NAME
 curl_escape - URL encodes the given string
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "char *curl_escape( const char *" url ", int "length " );"
-.ad
+.nf
+#include <curl/curl.h>
+
+char *curl_escape(const char *url, int length);
+.fi
 .SH DESCRIPTION
 Obsolete function. Use \fIcurl_easy_escape(3)\fP instead!
 

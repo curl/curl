@@ -23,10 +23,12 @@
 .SH NAME
 curl_multi_assign \- set data to associate with an internal socket
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLMcode curl_multi_assign(CURLM *multi_handle, curl_socket_t sockfd,
                             void *sockptr);
+.fi
 .SH DESCRIPTION
 This function creates an association in the multi handle between the given
 socket and a private pointer of the application. This is designed for

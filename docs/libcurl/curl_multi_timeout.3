@@ -23,9 +23,11 @@
 .SH NAME
 curl_multi_timeout \- how long to wait for action before proceeding
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLMcode curl_multi_timeout(CURLM *multi_handle, long *timeout);
+.fi
 .SH DESCRIPTION
 
 An application using the libcurl multi interface should call

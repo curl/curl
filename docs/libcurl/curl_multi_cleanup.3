@@ -23,10 +23,11 @@
 .SH NAME
 curl_multi_cleanup - close down a multi session
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLMcode curl_multi_cleanup( CURLM *multi_handle );"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLMcode curl_multi_cleanup(CURLM *multi_handle);
+.fi
 .SH DESCRIPTION
 Cleans up and removes a whole multi stack. It does not free or touch any
 individual easy handles in any way - they still need to be closed

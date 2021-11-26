@@ -23,9 +23,11 @@
 .SH NAME
 curl_easy_init - Start a libcurl easy session
 .SH SYNOPSIS
-.B #include <curl/curl.h>
+.nf
+#include <curl/curl.h>
 
-.BI "CURL *curl_easy_init( );"
+CURL *curl_easy_init();
+.fi
 .SH DESCRIPTION
 This function must be the first function to call, and it returns a CURL easy
 handle that you must use as input to other functions in the easy

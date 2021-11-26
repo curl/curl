@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS \- head start for ipv6 for happy eyeballs
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, long timeout);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
+                          long timeout);
+.fi
 .SH DESCRIPTION
 Happy eyeballs is an algorithm that attempts to connect to both IPv4 and IPv6
 addresses for dual-stack hosts, preferring IPv6 first for \fItimeout\fP

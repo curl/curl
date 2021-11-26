@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_REDIR_PROTOCOLS \- protocols allowed to redirect to
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_REDIR_PROTOCOLS, long bitmask);
+.fi
 .SH DESCRIPTION
 Pass a long that holds a bitmask of CURLPROTO_* defines. If used, this bitmask
 limits what protocols libcurl may use in a transfer that it follows to in a

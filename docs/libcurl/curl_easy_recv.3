@@ -24,11 +24,11 @@
 .SH NAME
 curl_easy_recv - receives raw data on an "easy" connection
 .SH SYNOPSIS
-.B #include <curl/easy.h>
-.sp
-.BI "CURLcode curl_easy_recv( CURL *" curl ", void *" buffer ","
-.BI "size_t " buflen ", size_t *" n ");"
-.ad
+.nf
+#include <curl/easy.h>
+
+CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen, size_t *n);
+.fi
 .SH DESCRIPTION
 This function receives raw data from the established connection. You may use
 it together with \fIcurl_easy_send(3)\fP to implement custom protocols using

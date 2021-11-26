@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_USERAGENT \- HTTP user-agent header
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USERAGENT, char *ua);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. It will be used to
 set the User-Agent: header in the HTTP request sent to the remote server. This

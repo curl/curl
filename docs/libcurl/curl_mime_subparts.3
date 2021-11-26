@@ -23,11 +23,11 @@
 .SH NAME
 curl_mime_subparts - set subparts of a multipart mime part
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLcode curl_mime_subparts(curl_mimepart * " part ,
-.BI "curl_mime * " subparts ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_mime_subparts(curl_mimepart *part, curl_mime *subparts);
+.fi
 .SH DESCRIPTION
 \fIcurl_mime_subparts(3)\fP sets a multipart mime part's content from a mime
 structure.

@@ -23,10 +23,11 @@
 .SH NAME
 curl_getdate - Convert a date string to number of seconds
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "time_t curl_getdate(char *" datestring ", time_t *"now " );"
-.ad
+.nf
+#include <curl/curl.h>
+
+time_t curl_getdate(char *datestring, time_t *now);
+.fi
 .SH DESCRIPTION
 \fIcurl_getdate(3)\fP returns the number of seconds since the Epoch, January
 1st 1970 00:00:00 in the UTC time zone, for the date and time that the

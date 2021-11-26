@@ -23,10 +23,11 @@
 .SH NAME
 curl_multi_init - create a multi handle
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLM *curl_multi_init( );"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLM *curl_multi_init();
+.fi
 .SH DESCRIPTION
 This function returns a CURLM handle to be used as input to all the other
 multi-functions, sometimes referred to as a multi handle in some places in the

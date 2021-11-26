@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_DNS_LOCAL_IP6 \- IPv6 address to bind DNS resolves to
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DNS_LOCAL_IP6, char *address);
+.fi
 .SH DESCRIPTION
 Set the local IPv6 \fIaddress\fP that the resolver should bind to. The
 argument should be of type char * and contain a single IPv6 address as a

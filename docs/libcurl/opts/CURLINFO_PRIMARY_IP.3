@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -24,9 +24,11 @@
 .SH NAME
 CURLINFO_PRIMARY_IP \- get IP address of last connection
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PRIMARY_IP, char **ip);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a char pointer to receive the pointer to a null-terminated
 string holding the IP address of the most recent connection done with this

@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_SSLCERT_BLOB \- SSL client certificate from memory blob
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLCERT_BLOB, struct curl_blob *stblob);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLCERT_BLOB,
+                          struct curl_blob *stblob);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a curl_blob structure, which contains (pointer and size) a
 client certificate. The format must be "P12" on Secure Transport or

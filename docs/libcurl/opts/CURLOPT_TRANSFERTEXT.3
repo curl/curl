@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_TRANSFERTEXT \- request a text based transfer for FTP
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TRANSFERTEXT, long text);
+.fi
 .SH DESCRIPTION
 A parameter set to 1 tells the library to use ASCII mode for FTP transfers,
 instead of the default binary transfer. For win32 systems it does not set the

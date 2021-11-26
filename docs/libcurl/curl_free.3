@@ -23,10 +23,11 @@
 .SH NAME
 curl_free - reclaim memory that has been obtained through a libcurl call
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "void curl_free( char *" ptr " );"
-.ad
+.nf
+#include <curl/curl.h>
+
+void curl_free(char *ptr);
+.fi
 .SH DESCRIPTION
 curl_free reclaims memory that has been obtained through a libcurl call. Use
 \fIcurl_free(3)\fP instead of free() to avoid anomalies that can result from

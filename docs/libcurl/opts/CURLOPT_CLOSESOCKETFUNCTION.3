@@ -24,11 +24,14 @@
 .SH NAME
 CURLOPT_CLOSESOCKETFUNCTION \- callback to socket close replacement
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 int closesocket_callback(void *clientp, curl_socket_t item);
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CLOSESOCKETFUNCTION, closesocket_callback);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CLOSESOCKETFUNCTION,
+                          closesocket_callback);
+.fi
 .SH DESCRIPTION
 Pass a pointer to your callback function, which should match the prototype
 shown above.

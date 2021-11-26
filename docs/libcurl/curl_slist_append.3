@@ -23,11 +23,12 @@
 .SH NAME
 curl_slist_append - add a string to an slist
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "struct curl_slist *curl_slist_append(struct curl_slist *" list,
-.BI "const char * "string ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+struct curl_slist *curl_slist_append(struct curl_slist *list,
+                                     const char *string);
+.fi
 .SH DESCRIPTION
 \fIcurl_slist_append(3)\fP appends a string to a linked list of strings. The
 existing \fBlist\fP should be passed as the first argument and the new list is

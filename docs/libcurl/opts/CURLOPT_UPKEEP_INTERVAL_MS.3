@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_UPKEEP_INTERVAL_MS \- connection upkeep interval
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UPKEEP_INTERVAL_MS, long upkeep_interval_ms);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UPKEEP_INTERVAL_MS,
+                          long upkeep_interval_ms);
+.fi
 .SH DESCRIPTION
 Some protocols have "connection upkeep" mechanisms. These mechanisms usually
 send some traffic on existing connections in order to keep them alive; this

@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_TIMEVALUE_LARGE \- time value for conditional
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMEVALUE_LARGE, curl_off_t val);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMEVALUE_LARGE,
+                          curl_off_t val);
+.fi
 .SH DESCRIPTION
 Pass a curl_off_t \fIval\fP as parameter. This should be the time counted as
 seconds since 1 Jan 1970, and the time will be used in a condition as

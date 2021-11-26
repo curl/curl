@@ -23,10 +23,11 @@
 .SH NAME
 curl_global_init - Global libcurl initialisation
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLcode curl_global_init(long " flags ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_global_init(long flags);
+.fi
 .SH DESCRIPTION
 This function sets up the program environment that libcurl needs. Think of it
 as an extension of the library loader.

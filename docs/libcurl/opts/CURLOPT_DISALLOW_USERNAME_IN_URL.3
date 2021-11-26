@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_DISALLOW_USERNAME_IN_URL \- disallow specifying username in the url
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DISALLOW_USERNAME_IN_URL, long disallow);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DISALLOW_USERNAME_IN_URL,
+                          long disallow);
+.fi
 .SH DESCRIPTION
 A long parameter set to 1 tells the library to not allow URLs that include a
 username.
