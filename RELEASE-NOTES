@@ -4,7 +4,7 @@ curl and libcurl 7.81.0
  Command line options:         244
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2536
+ Contributors:                 2540
 
 This release includes the following changes:
 
@@ -14,18 +14,25 @@ This release includes the following bugfixes:
 
  o azure: make the "w/o HTTP/SMTP/IMAP" build disable SSL proper [12]
  o cmake: don't set _USRDLL on a static Windows build [22]
+ o cmake: private identifiers use CURL_ instead of CMAKE_ prefix [40]
  o configure: add -lm to configure for rustls build. [13]
  o configure: better diagnostics if hyper is built wrong [6]
  o configure: don't enable TLS when --without-* flags are used [17]
  o configure: fix runtime-lib detection on macOS [21]
  o curl.1: require "see also" for every documented option [27]
+ o curl: improve error message for --head with -J [42]
  o curl_easy_cleanup.3: remove from multi handle first [3]
  o curl_share_setopt.3: split out options into their own manpages [14]
  o docs/checksrc: Add documentation for STRERROR [18]
  o docs/cmdline-opts: do not say "protocols: all" [26]
+ o docs/INSTALL.md: typo fix : added missing "get" verb [31]
+ o docs: address proselint nits [16]
+ o FAQ: typo fix : "yout" ➤ "your" [30]
  o gen.pl: improve example output format [29]
  o http: enable haproxy support for hyper backend [20]
+ o insecure.d: detail its use for SFTP and SCP as well [32]
  o insecure.d: expand and clarify [28]
+ o Makefile.m32: rename -winssl option to -schannel and tidy up [33]
  o multi: shut down CONNECT in Curl_detach_connnection [2]
  o netrc.d: edit the .netrc example to look nicer [24]
  o openssl: remove `RSA_METHOD_FLAG_NO_CHECK` handling if unavailable
@@ -38,9 +45,12 @@ This release includes the following bugfixes:
  o rustls: remove comment about checking handshaking [15]
  o rustls: remove incorrect EOF check [10]
  o test302[12]: run only with the libssh2 backend [8]
+ o tests/CI.md: add more information on CI environments [39]
  o tftp: mark protocol as not possible to do over CONNECT [25]
  o tool_operate: only set SSH related libcurl options for SSH URLs [11]
  o url.c: fix the SIGPIPE comment for Curl_close [4]
+ o urlapi: provide more detailed return codes [36]
+ o urlapi: reject short file URLs [41]
  o vtls/rustls: adapt to the updated rustls_version proto [19]
  o zuul.d: update rustls-ffi to version 0.8.2 [5]
 
@@ -51,11 +61,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Bernhard Walle, Dan Fandrich, Daniel Stenberg, Don J Olmstead, Even Rouault,
-  Jacob Hoffman-Andrews, Jeff Luszcz, Kevin Burke, Marcel Raad,
-  Patrick Monnerat, Paul Howarth, Rikard Falkeborn, Ryan Sleevi, Stan Hu,
+  Bernhard Walle, Boris Rasin, Bruno Baguette, Dan Fandrich, Daniel Stenberg,
+  David Bohman, Don J Olmstead, Even Rouault, Jacob Hoffman-Andrews,
+  Jeff Luszcz, Kevin Burke, Marcel Raad, nimaje on github, Patrick Monnerat,
+  Paul Howarth, Ray Satiro, Rikard Falkeborn, Ryan Sleevi, Stan Hu,
   Stefan Eissing, Stephen M. Coakley, Viktor Szakats, Vincent Grande,
-  (18 contributors)
+  (23 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -73,6 +84,7 @@ References to bug reports and discussions on issues:
  [13] = https://curl.se/bug/?i=8002
  [14] = https://curl.se/bug/?i=7998
  [15] = https://curl.se/bug/?i=8038
+ [16] = https://curl.se/bug/?i=8060
  [17] = https://curl.se/bug/?i=7994
  [18] = https://curl.se/bug/?i=7991
  [19] = https://curl.se/bug/?i=7956
@@ -86,3 +98,12 @@ References to bug reports and discussions on issues:
  [27] = https://curl.se/bug/?i=8019
  [28] = https://curl.se/bug/?i=8017
  [29] = https://curl.se/bug/?i=8016
+ [30] = https://curl.se/bug/?i=8059
+ [31] = https://curl.se/bug/?i=8058
+ [32] = https://curl.se/bug/?i=8056
+ [33] = https://curl.se/bug/?i=8053
+ [36] = https://curl.se/bug/?i=8049
+ [39] = https://curl.se/bug/?i=8012
+ [40] = https://curl.se/bug/?i=7988
+ [41] = https://curl.se/bug/?i=8042
+ [42] = https://curl.se/bug/?i=7987
