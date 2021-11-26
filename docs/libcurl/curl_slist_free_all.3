@@ -23,10 +23,11 @@
 .SH NAME
 curl_slist_free_all - free an entire curl_slist list
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "void curl_slist_free_all(struct curl_slist *" list);
-.ad
+.nf
+#include <curl/curl.h>
+
+void curl_slist_free_all(struct curl_slist *list);
+.fi
 .SH DESCRIPTION
 curl_slist_free_all() removes all traces of a previously built curl_slist
 linked list.

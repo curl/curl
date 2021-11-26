@@ -24,11 +24,11 @@
 .SH NAME
 curl_easy_escape - URL encodes the given string
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "char *curl_easy_escape( CURL *" curl ", const char *" string
-.BI ", int "length " );"
-.ad
+.nf
+#include <curl/curl.h>
+
+char *curl_easy_escape(CURL *curl, const char *string, int length);
+.fi
 .SH DESCRIPTION
 This function converts the given input \fIstring\fP to a URL encoded string
 and returns that as a new allocated string. All input characters that are not

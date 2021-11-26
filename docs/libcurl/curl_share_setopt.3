@@ -23,10 +23,11 @@
 .SH NAME
 curl_share_setopt - Set options for a shared object
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
+.nf
+#include <curl/curl.h>
+
 CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option, parameter);
-.ad
+.fi
 .SH DESCRIPTION
 Set the \fIoption\fP to \fIparameter\fP for the given \fIshare\fP.
 .SH OPTIONS

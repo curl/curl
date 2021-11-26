@@ -24,10 +24,12 @@
 .SH NAME
 CURLOPT_TELNETOPTIONS \- set of telnet options
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TELNETOPTIONS,
                           struct curl_slist *cmds);
+.fi
 .SH DESCRIPTION
 Provide a pointer to a curl_slist with variables to pass to the telnet
 negotiations. The variables should be in the format <option=value>. libcurl

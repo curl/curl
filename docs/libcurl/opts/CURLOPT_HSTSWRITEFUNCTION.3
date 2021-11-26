@@ -24,12 +24,14 @@
 .SH NAME
 CURLOPT_HSTSWRITEFUNCTION \- write callback for HSTS hosts
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *sts,
                       struct curl_index *count, void *userp);
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
+.fi
 .SH DESCRIPTION
 Pass a pointer to your callback function, as the prototype shows above.
 

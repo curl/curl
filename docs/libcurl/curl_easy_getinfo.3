@@ -24,10 +24,11 @@
 .SH NAME
 curl_easy_getinfo - extract information from a curl handle
 .SH SYNOPSIS
-.B #include <curl/curl.h>
+.nf
+#include <curl/curl.h>
 
-.B "CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ... );"
-
+CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ... );
+.fi
 .SH DESCRIPTION
 Request internal information from the curl session with this function.  The
 third argument \fBMUST\fP be a pointer to a long, a pointer to a char *, a

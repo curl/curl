@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_SSLENGINE \- SSL engine identifier
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLENGINE, char *id);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. It will be used as
 the identifier for the crypto engine you want to use for your private key.

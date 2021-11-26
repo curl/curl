@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_XOAUTH2_BEARER \- OAuth 2.0 access token
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_XOAUTH2_BEARER, char *token);
+.fi
 .SH DESCRIPTION
 Pass a char * as parameter, which should point to the null-terminated OAuth
 2.0 Bearer Access Token for use with HTTP, IMAP, POP3 and SMTP servers

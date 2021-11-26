@@ -23,11 +23,12 @@
 .SH NAME
 curl_mime_filedata - set a mime part's body data from a file contents
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLcode curl_mime_filedata(curl_mimepart * " part ,
-.BI " const char * " filename ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_mime_filedata(curl_mimepart *part,
+                            const char *filename);
+.fi
 .SH DESCRIPTION
 \fIcurl_mime_filedata(3)\fP sets a mime part's body content from the named
 file's contents. This is an alternative to \fIcurl_mime_data(3)\fP for setting

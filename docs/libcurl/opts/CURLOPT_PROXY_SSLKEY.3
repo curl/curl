@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_PROXY_SSLKEY \- private keyfile for HTTPS proxy client cert
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLKEY, char *keyfile);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. The string should be
 the file name of your private key used for connecting to the HTTPS proxy. The

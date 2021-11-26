@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_SSLVERSION \- preferred TLS/SSL version
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLVERSION, long version);
+.fi
 .SH DESCRIPTION
 Pass a long as parameter to control which version range of SSL/TLS versions to
 use.

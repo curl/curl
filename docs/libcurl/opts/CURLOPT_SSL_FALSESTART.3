@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_SSL_FALSESTART \- TLS false start
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_FALSESTART, long enable);
+.fi
 .SH DESCRIPTION
 Pass a long as parameter set to 1L to enable or 0 to disable.
 

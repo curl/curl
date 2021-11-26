@@ -23,10 +23,11 @@
 .SH NAME
 curl_easy_reset - reset all options of a libcurl session handle
 .SH SYNOPSIS
-.B #include <curl/curl.h>
+.nf
+#include <curl/curl.h>
 
-.BI "void curl_easy_reset(CURL *"handle ");"
-
+void curl_easy_reset(CURL *handle);
+.fi
 .SH DESCRIPTION
 Re-initializes all options previously set on a specified CURL handle to the
 default values. This puts back the handle to the same state as it was in when

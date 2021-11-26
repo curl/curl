@@ -24,9 +24,12 @@
 .SH NAME
 CURLINFO_APPCONNECT_TIME \- get the time until the SSL/SSH handshake is completed
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_APPCONNECT_TIME, double *timep);
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_APPCONNECT_TIME,
+                           double *timep);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a double to receive the time, in seconds, it took from the
 start until the SSL/SSH connect/handshake to the remote host was completed.

@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_LOW_SPEED_TIME \- low speed limit time period
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_LOW_SPEED_TIME, long speedtime);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_LOW_SPEED_TIME,
+                          long speedtime);
+.fi
 .SH DESCRIPTION
 Pass a long as parameter. It contains the time in number seconds that the
 transfer speed should be below the \fICURLOPT_LOW_SPEED_LIMIT(3)\fP for the

@@ -23,10 +23,11 @@
 .SH NAME
 curl_mime_name - set a mime part's name
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLcode curl_mime_name(curl_mimepart * " part ", const char * " name ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_mime_name(curl_mimepart *part, const char *name);
+.fi
 .SH DESCRIPTION
 \fIcurl_mime_name(3)\fP sets a mime part's name. This is the way HTTP form
 fields are named.

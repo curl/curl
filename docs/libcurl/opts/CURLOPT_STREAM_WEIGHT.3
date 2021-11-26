@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_STREAM_WEIGHT \- numerical stream weight
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_STREAM_WEIGHT, long weight);
+.fi
 .SH DESCRIPTION
 Set the long \fIweight\fP to a number between 1 and 256.
 

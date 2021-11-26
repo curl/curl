@@ -24,6 +24,7 @@
 .SH NAME
 CURLOPT_XFERINFOFUNCTION \- progress meter callback
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 int progress_callback(void *clientp,
@@ -32,7 +33,9 @@ int progress_callback(void *clientp,
                       curl_off_t ultotal,
                       curl_off_t ulnow);
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_XFERINFOFUNCTION, progress_callback);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_XFERINFOFUNCTION,
+                          progress_callback);
+.fi
 .SH DESCRIPTION
 Pass a pointer to your callback function, which should match the prototype
 shown above.

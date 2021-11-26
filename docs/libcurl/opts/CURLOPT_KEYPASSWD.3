@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_KEYPASSWD \- passphrase to private key
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_KEYPASSWD, char *pwd);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. It will be used as
 the password required to use the \fICURLOPT_SSLKEY(3)\fP or

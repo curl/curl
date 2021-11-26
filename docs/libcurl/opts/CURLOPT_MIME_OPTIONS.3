@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_MIME_OPTIONS \- set MIME option flags
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MIME_OPTIONS, long options);
+.fi
 .SH DESCRIPTION
 Pass a long that holds a bitmask of CURLMIMEOPT_* defines. Each bit is a
 Boolean flag used while encoding a MIME tree or multipart form data.

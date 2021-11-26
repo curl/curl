@@ -23,10 +23,11 @@
 .SH NAME
 curl_share_init - Create a shared object
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLSH *curl_share_init( );"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLSH *curl_share_init();
+.fi
 .SH DESCRIPTION
 This function returns a CURLSH handle to be used as input to all the other
 share-functions, sometimes referred to as a share handle in some places in the

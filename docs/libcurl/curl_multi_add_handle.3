@@ -23,10 +23,11 @@
 .SH NAME
 curl_multi_add_handle - add an easy handle to a multi session
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLMcode curl_multi_add_handle(CURLM *multi_handle, CURL *easy_handle);
-.ad
+.fi
 .SH DESCRIPTION
 Adds a standard easy handle to the multi stack. This function call will make
 this \fImulti_handle\fP control the specified \fIeasy_handle\fP.

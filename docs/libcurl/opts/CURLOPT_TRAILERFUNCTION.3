@@ -24,11 +24,14 @@
 .SH NAME
 CURLOPT_TRAILERFUNCTION \- callback for sending trailing headers
 .SH SYNOPSIS
+.nf
 #include <curl.h>
 
 int curl_trailer_callback(struct curl_slist ** list, void *userdata);
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TRAILERFUNCTION, curl_trailer_callback *func);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TRAILERFUNCTION,
+                          curl_trailer_callback *func);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a callback function.
 

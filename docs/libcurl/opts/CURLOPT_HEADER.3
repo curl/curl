@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_HEADER \- pass headers to the data stream
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HEADER, long onoff);
+.fi
 .SH DESCRIPTION
 Pass the long value \fIonoff\fP set to 1 to ask libcurl to include the headers
 in the write callback (\fICURLOPT_WRITEFUNCTION(3)\fP). This option is

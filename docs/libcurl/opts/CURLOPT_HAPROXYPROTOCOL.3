@@ -24,10 +24,12 @@
 .SH NAME
 CURLOPT_HAPROXYPROTOCOL \- send HAProxy PROXY protocol v1 header
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPROXYPROTOCOL,
                           long haproxy_protocol);
+.fi
 .SH DESCRIPTION
 A long parameter set to 1 tells the library to send an HAProxy PROXY
 protocol v1 header at beginning of the connection. The default action is not to

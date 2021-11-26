@@ -24,9 +24,12 @@
 .SH NAME
 CURLMOPT_MAX_TOTAL_CONNECTIONS \- max simultaneously open connections
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_TOTAL_CONNECTIONS, long amount);
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_TOTAL_CONNECTIONS,
+                            long amount);
+.fi
 .SH DESCRIPTION
 Pass a long for the \fBamount\fP. The set number will be used as the maximum
 number of simultaneously open connections in total using this multi

@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_RTSP_STREAM_URI \- RTSP stream URI
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RTSP_STREAM_URI, char *URI);
+.fi
 .SH DESCRIPTION
 Set the stream \fIURI\fP to operate on by passing a char * . For example, a
 single session may be controlling \fIrtsp://foo/twister/audio\fP and

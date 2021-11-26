@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_DOH_SSL_VERIFYPEER \- verify the DoH SSL certificate
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_SSL_VERIFYPEER, long verify);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_SSL_VERIFYPEER,
+                          long verify);
+.fi
 .SH DESCRIPTION
 Pass a long as parameter set to 1L to enable or 0L to disable.
 

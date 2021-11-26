@@ -23,10 +23,11 @@
 .SH NAME
 curl_easy_perform - perform a blocking file transfer
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLcode curl_easy_perform(CURL *" easy_handle ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_perform(CURL *easy_handle);
+.fi
 .SH DESCRIPTION
 Invoke this function after \fIcurl_easy_init(3)\fP and all the
 \fIcurl_easy_setopt(3)\fP calls are made, and it performs the transfer as

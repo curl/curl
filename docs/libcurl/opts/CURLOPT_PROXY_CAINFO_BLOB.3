@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_PROXY_CAINFO_BLOB \- proxy Certificate Authority (CA) bundle in PEM format
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_CAINFO_BLOB, struct curl_blob *stblob);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_CAINFO_BLOB,
+                          struct curl_blob *stblob);
+.fi
 .SH DESCRIPTION
 This option is for connecting to an HTTPS proxy, not an HTTPS server.
 

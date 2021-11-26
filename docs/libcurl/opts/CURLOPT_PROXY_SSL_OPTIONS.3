@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_PROXY_SSL_OPTIONS \- HTTPS proxy SSL behavior options
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSL_OPTIONS, long bitmask);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSL_OPTIONS,
+                          long bitmask);
+.fi
 .SH DESCRIPTION
 Pass a long with a bitmask to tell libcurl about specific SSL
 behaviors. Available bits:

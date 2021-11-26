@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_PROXY_CRLFILE \- HTTPS proxy Certificate Revocation List file
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_CRLFILE, char *file);
+.fi
 .SH DESCRIPTION
 This option is for connecting to an HTTPS proxy, not an HTTPS server.
 

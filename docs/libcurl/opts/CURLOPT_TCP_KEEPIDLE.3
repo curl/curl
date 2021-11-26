@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_TCP_KEEPIDLE \- TCP keep-alive idle time wait
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TCP_KEEPIDLE, long delay);
+.fi
 .SH DESCRIPTION
 Pass a long. Sets the \fIdelay\fP, in seconds, that the operating system will
 wait while the connection is idle before sending keepalive probes. Not all

@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_RTSP_CLIENT_CSEQ \- RTSP client CSEQ number
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RTSP_CLIENT_CSEQ, long cseq);
+.fi
 .SH DESCRIPTION
 Pass a long to set the CSEQ number to issue for the next RTSP
 request. Useful if the application is resuming a previously broken

@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_STREAM_DEPENDS_E \- stream this transfer depends on exclusively
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_STREAM_DEPENDS_E, CURL *dephandle);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_STREAM_DEPENDS_E,
+                          CURL *dephandle);
+.fi
 .SH DESCRIPTION
 Pass a CURL * pointer in \fIdephandle\fP to identify the stream within the
 same connection that this stream is depending upon exclusively. That means it

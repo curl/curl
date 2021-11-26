@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_PROXY_SSLVERSION \- preferred HTTPS proxy TLS version
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLVERSION, long version);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLVERSION,
+                          long version);
+.fi
 .SH DESCRIPTION
 Pass a long as parameter to control which version of SSL/TLS to attempt to use
 when connecting to an HTTPS proxy.

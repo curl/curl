@@ -23,10 +23,11 @@
 .SH NAME
 curl_multi_wakeup - wakes up a sleeping curl_multi_poll call
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLMcode curl_multi_wakeup(CURLM *multi_handle);
-.ad
+.fi
 .SH DESCRIPTION
 This function can be called from any thread and it wakes up a
 sleeping \fIcurl_multi_poll(3)\fP call that is currently (or will be)

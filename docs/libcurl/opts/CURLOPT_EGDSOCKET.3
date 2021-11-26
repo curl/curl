@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_EGDSOCKET \- EGD socket path
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_EGDSOCKET, char *path);
+.fi
 .SH DESCRIPTION
 Pass a char * to the null-terminated path name to the Entropy Gathering Daemon
 socket. It will be used to seed the random engine for TLS.

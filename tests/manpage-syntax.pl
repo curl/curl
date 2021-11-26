@@ -75,14 +75,16 @@ sub scanmanpage {
     my ($file) = @_;
     my $reqex = 0;
     my $inex = 0;
+    my $insynop = 0;
     my $exsize = 0;
+    my $synopsize = 0;
     my $shc = 0;
     my $optpage = 0; # option or function
     my @sh;
 
     open(M, "<$file") || die "no such file: $file";
     if($file =~ /[\/\\](CURL|curl_)[^\/\\]*.3/) {
-        # This is the man page for an libcurl option. It requires an example!
+        # This is a man page for libcurl. It requires an example!
         $reqex = 1;
         if($1 eq "CURL") {
             $optpage = 1;
@@ -96,16 +98,29 @@ sub scanmanpage {
             close(M);
             return;
         }
-        if($_ =~ /^\.SH EXAMPLE/i) {
+        if(($_ =~ /^\.SH SYNOPSIS/i) && ($reqex)) {
+            # this is for libcurl man page SYNOPSIS checks
+            $insynop = 1;
+            $inex = 0;
+        }
+        elsif($_ =~ /^\.SH EXAMPLE/i) {
+            $insynop = 0;
             $inex = 1;
         }
         elsif($_ =~ /^\.SH/i) {
+            $insynop = 0;
             $inex = 0;
         }
         elsif($inex)  {
             $exsize++;
             if($_ =~ /[^\\]\\n/) {
                 print STDERR "$file:$line '\\n' need to be '\\\\n'!\n";
+            }
+        }
+        elsif($insynop)  {
+            $synopsize++;
+            if(($synopsize == 1) && ($_ !~ /\.nf/)) {
+                print STDERR "$file:$line:1:ERROR: be .nf for proper formatting\n";
             }
         }
         if($_ =~ /^\.SH ([^\r\n]*)/i) {

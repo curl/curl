@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_CRLF \- CRLF conversion
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CRLF, long conv);
+.fi
 .SH DESCRIPTION
 Pass a long. If the value is set to 1 (one), libcurl converts Unix newlines to
 CRLF newlines on transfers. Disable this option again by setting the value to

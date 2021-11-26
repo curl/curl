@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_RANDOM_FILE \- file to read random data from
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RANDOM_FILE, char *path);
+.fi
 .SH DESCRIPTION
 Pass a char * to a null-terminated file name. The file might be used to read
 from to seed the random engine for SSL and more.

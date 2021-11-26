@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_INFILESIZE \- size of the input file to send off
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_INFILESIZE, long filesize);
+.fi
 .SH DESCRIPTION
 When uploading a file to a remote site, \fIfilesize\fP should be used to tell
 libcurl what the expected size of the input file is. This value must be passed

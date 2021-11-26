@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_PROXY_SSL_CIPHER_LIST \- ciphers to use for HTTPS proxy
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSL_CIPHER_LIST, char *list);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSL_CIPHER_LIST,
+                          char *list);
+.fi
 .SH DESCRIPTION
 Pass a char *, pointing to a null-terminated string holding the list of
 ciphers to use for the connection to the HTTPS proxy. The list must be

@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_REQUEST_TARGET \- alternative target for this request
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_REQUEST_TARGET, string);
+.fi
 .SH DESCRIPTION
 Pass a char * to string which libcurl uses in the upcoming request instead of
 the path as extracted from the URL.

@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_SSL_CTX_DATA \- pointer passed to ssl_ctx callback
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CTX_DATA, void *pointer);
+.fi
 .SH DESCRIPTION
 Data \fIpointer\fP to pass to the ssl context callback set by the option
 \fICURLOPT_SSL_CTX_FUNCTION(3)\fP, this is the pointer you will get as third

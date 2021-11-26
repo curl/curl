@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_RTSP_SESSION_ID \- RTSP session ID
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RTSP_SESSION_ID, char *id);
+.fi
 .SH DESCRIPTION
 Pass a char * as a parameter to set the value of the current RTSP Session ID
 for the handle. Useful for resuming an in-progress session. Once this value is

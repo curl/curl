@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_PROXY_SSLCERTTYPE \- type of the proxy client SSL certificate
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLCERTTYPE, char *type);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. The string should be
 the format of your client certificate used when connecting to an HTTPS proxy.

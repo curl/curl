@@ -23,11 +23,11 @@
 .SH NAME
 curl_multi_info_read - read multi stack informationals
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLMsg *curl_multi_info_read( CURLM *multi_handle,
-                               int *msgs_in_queue);
-.ad
+CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue);
+.fi
 .SH DESCRIPTION
 Ask the multi handle if there are any messages/informationals from the
 individual transfers. Messages may include informationals such as an error

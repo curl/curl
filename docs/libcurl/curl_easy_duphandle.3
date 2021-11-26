@@ -23,10 +23,11 @@
 .SH NAME
 curl_easy_duphandle - Clone a libcurl session handle
 .SH SYNOPSIS
-.B #include <curl/curl.h>
+.nf
+#include <curl/curl.h>
 
-.BI "CURL *curl_easy_duphandle(CURL *"handle ");"
-
+CURL *curl_easy_duphandle(CURL *handle);
+.fi
 .SH DESCRIPTION
 This function will return a new curl handle, a duplicate, using all the
 options previously set in the input curl \fIhandle\fP. Both handles can

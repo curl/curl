@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_POST \- make an HTTP POST
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POST, long post);
+.fi
 .SH DESCRIPTION
 A parameter set to 1 tells libcurl to do a regular HTTP post. This will also
 make the library use a "Content-Type: application/x-www-form-urlencoded"

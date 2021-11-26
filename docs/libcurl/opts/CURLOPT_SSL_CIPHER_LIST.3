@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_SSL_CIPHER_LIST \- ciphers to use for TLS
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CIPHER_LIST, char *list);
+.fi
 .SH DESCRIPTION
 Pass a char *, pointing to a null-terminated string holding the list of
 ciphers to use for the SSL connection. The list must be syntactically correct,

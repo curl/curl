@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_ACCEPT_ENCODING \- automatic decompression of HTTP downloads
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ACCEPT_ENCODING, char *enc);
+.fi
 .SH DESCRIPTION
 Pass a char * argument specifying what encoding you would like.
 

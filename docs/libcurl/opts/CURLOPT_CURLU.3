@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_CURLU \- URL in CURLU * format
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CURLU, void *pointer);
+.fi
 .SH DESCRIPTION
 Pass in a pointer to the \fIURL\fP to work with. The parameter should be a
 CURLU *. Setting \fICURLOPT_CURLU(3)\fP will explicitly override

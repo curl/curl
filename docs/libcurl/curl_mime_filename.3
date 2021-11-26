@@ -23,11 +23,12 @@
 .SH NAME
 curl_mime_filename - set a mime part's remote file name
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLcode curl_mime_filename(curl_mimepart * " part ,
-.BI "const char * " filename ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_mime_filename(curl_mimepart *part,
+                            const char *filename);
+.fi
 .SH DESCRIPTION
 \fIcurl_mime_filename(3)\fP sets a mime part's remote file name. When remote
 file name is set, content data is processed as a file, whatever is the part's

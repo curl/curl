@@ -23,10 +23,11 @@
 .SH NAME
 curl_getenv - return value for environment name
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "char *curl_getenv(const char *" name ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+char *curl_getenv(const char *name);
+.fi
 .SH DESCRIPTION
 curl_getenv() is a portable wrapper for the getenv() function, meant to
 emulate its behavior and provide an identical interface for all operating

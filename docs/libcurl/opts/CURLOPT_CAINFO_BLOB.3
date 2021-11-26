@@ -24,9 +24,12 @@
 .SH NAME
 CURLOPT_CAINFO_BLOB \- Certificate Authority (CA) bundle in PEM format
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CAINFO_BLOB, struct curl_blob *stblob);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CAINFO_BLOB,
+                          struct curl_blob *stblob);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a curl_blob structure, which contains information (pointer
 and size) about a memory block with binary data of PEM encoded content holding

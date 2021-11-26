@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_PORT \- remote port number to connect to
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PORT, long number);
+.fi
 .SH DESCRIPTION
 This option sets \fInumber\fP to be the remote port number to connect to,
 instead of the one specified in the URL or the default port for the used

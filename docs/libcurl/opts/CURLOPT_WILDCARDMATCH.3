@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_WILDCARDMATCH \- directory wildcard transfers
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_WILDCARDMATCH, long onoff);
+.fi
 .SH DESCRIPTION
 Set \fIonoff\fP to 1 if you want to transfer multiple files according to a
 file name pattern. The pattern can be specified as part of the

@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_REFERER \- the HTTP referer header
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_REFERER, char *where);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. It will be used to
 set the Referer: header in the http request sent to the remote server. This

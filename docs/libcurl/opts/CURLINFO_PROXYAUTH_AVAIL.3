@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -24,9 +24,12 @@
 .SH NAME
 CURLINFO_PROXYAUTH_AVAIL \- get available HTTP proxy authentication methods
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PROXYAUTH_AVAIL, long *authp);
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PROXYAUTH_AVAIL,
+                           long *authp);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a long to receive a bitmask indicating the authentication
 method(s) available according to the previous response. The meaning of the

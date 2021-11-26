@@ -24,9 +24,11 @@
 .SH NAME
 curl_easy_upkeep - Perform any connection upkeep checks.
 .SH SYNOPSIS
-.B #include <curl/curl.h>
+.nf
+#include <curl/curl.h>
 
-.BI "CURLcode curl_easy_upkeep(CURL *" handle ");"
+CURLcode curl_easy_upkeep(CURL *handle);
+.fi
 .SH DESCRIPTION
 
 Some protocols have "connection upkeep" mechanisms. These mechanisms usually

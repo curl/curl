@@ -23,11 +23,11 @@
 .SH NAME
 curl_mime_encoder - set a mime part's encoder and content transfer encoding
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLcode curl_mime_encoder(curl_mimepart * " part ,
-.BI "const char * " encoding ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_mime_encoder(curl_mimepart *part, const char *encoding);
+.fi
 .SH DESCRIPTION
 curl_mime_encoder() requests a mime part's content to be encoded before being
 transmitted.

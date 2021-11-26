@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_APPEND \- append to the remote file
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_APPEND, long append);
+.fi
 .SH DESCRIPTION
 A long parameter set to 1 tells the library to append to the remote file
 instead of overwrite it. This is only useful when uploading to an FTP site.

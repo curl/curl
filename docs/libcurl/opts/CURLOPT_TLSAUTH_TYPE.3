@@ -24,9 +24,11 @@
 .SH NAME
 CURLOPT_TLSAUTH_TYPE \- TLS authentication methods
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TLSAUTH_TYPE, char *type);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. The string should be
 the method of the TLS authentication. Supported method is "SRP".
