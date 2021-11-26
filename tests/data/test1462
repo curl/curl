@@ -32,7 +32,7 @@ curl invalid category --help
 </errorcode>
 <stdout mode="text">
 Usage: curl [options...] <url>
-Invalid category provided, here is a list of all categories:
+Invalid category provided. Here is a list of all categories:
 
  auth        Different types of authentication methods
  connection  Low level networking operations

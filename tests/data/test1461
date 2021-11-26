@@ -45,7 +45,7 @@ Usage: curl [options...] <url>
  -v, --verbose              Make the operation more talkative
  -V, --version              Show version number and quit
 
-This is not the full help, this menu is stripped into categories.
+This is not the full help; this menu is stripped into categories.
 Use "--help category" to get an overview of all categories.
 For all options use the manual or "--help all".
 </stdout>

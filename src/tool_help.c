@@ -165,7 +165,7 @@ void tool_help(char *category)
   puts("Usage: curl [options...] <url>");
   /* If no category was provided */
   if(!category) {
-    const char *category_note = "\nThis is not the full help, this "
+    const char *category_note = "\nThis is not the full help; this "
       "menu is stripped into categories.\nUse \"--help category\" to get "
       "an overview of all categories.\nFor all options use the manual"
       " or \"--help all\".";
@@ -181,7 +181,7 @@ void tool_help(char *category)
     get_categories();
   /* Otherwise print category and handle the case if the cat was not found */
   else if(get_category_content(category)) {
-    puts("Invalid category provided, here is a list of all categories:\n");
+    puts("Invalid category provided. Here is a list of all categories:\n");
     get_categories();
   }
   free(category);
