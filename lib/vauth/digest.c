@@ -722,8 +722,7 @@ static CURLcode auth_create_digest_http_message(
            unq(nonce-value) ":" unq(cnonce-value)
   */
 
-  hashthis = aprintf("%s:%s:%s", digest->userhash ? userh : userp,
-                                 digest->realm, passwdp);
+  hashthis = aprintf("%s:%s:%s", userp, digest->realm, passwdp);
   if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
