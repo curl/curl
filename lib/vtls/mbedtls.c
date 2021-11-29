@@ -319,17 +319,17 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   /* Load the trusted CA */
   mbedtls_x509_crt_init(&backend->cacert);
 
-  if (ca_info_blob) {
+  if(ca_info_blob) {
     const unsigned char *blob_data = (const unsigned char *)ca_info_blob->data;
     ret = mbedtls_x509_crt_parse(&backend->cacert, blob_data,
                                  ca_info_blob->len);
 
-    if (ret<0) {
+    if(ret<0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error importing ca cert blob %s - mbedTLS: (-0x%04X) %s",
             ca_info_blob, -ret, errorbuf);
 
-      if (verifypeer)
+      if(verifypeer)
         return ret;
     }
   }
