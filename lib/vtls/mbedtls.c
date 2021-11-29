@@ -270,7 +270,10 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
-  const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
+  const struct curl_blob *ca_info_blob = SSL_CONN_CONFIG(ca_info_blob);
+  const char * const ssl_cafile =
+    /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
+    (ca_info_blob ? NULL : SSL_CONN_CONFIG(CAfile));
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
   char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
@@ -315,6 +318,21 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
   /* Load the trusted CA */
   mbedtls_x509_crt_init(&backend->cacert);
+
+  if(ca_info_blob) {
+    const unsigned char *blob_data = (const unsigned char *)ca_info_blob->data;
+    ret = mbedtls_x509_crt_parse(&backend->cacert, blob_data,
+                                 ca_info_blob->len);
+
+    if(ret<0) {
+      mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
+      failf(data, "Error importing ca cert blob %s - mbedTLS: (-0x%04X) %s",
+            ca_info_blob, -ret, errorbuf);
+
+      if(verifypeer)
+        return ret;
+    }
+  }
 
   if(ssl_cafile) {
     ret = mbedtls_x509_crt_parse_file(&backend->cacert, ssl_cafile);
@@ -1154,6 +1172,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   { CURLSSLBACKEND_MBEDTLS, "mbedtls" }, /* info */
 
   SSLSUPP_CA_PATH |
+  SSLSUPP_CAINFO_BLOB |
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_SSL_CTX,
 
