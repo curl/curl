@@ -125,9 +125,9 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
   sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' Cargo.toml
 
-  cargo build -v --release --features ffi,pkg-config-meta,qlog
-  mkdir -v deps/boringssl/src/lib
-  ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
+  cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog
+  mkdir -v quiche/deps/boringssl/src/lib
+  ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
 fi
 
 if [ "$TRAVIS_OS_NAME" = linux -a "$RUSTLS_VERSION" ]; then

@@ -120,9 +120,9 @@ Build quiche and BoringSSL:
 
      % git clone --recursive https://github.com/cloudflare/quiche
      % cd quiche
-     % cargo build --release --features ffi,pkg-config-meta,qlog
-     % mkdir deps/boringssl/src/lib
-     % ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
+     % cargo build --package quiche --release --features ffi,pkg-config-meta,qlog
+     % mkdir quiche/deps/boringssl/src/lib
+     % ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
 
 Build curl:
 
@@ -130,7 +130,7 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-openssl=$PWD/../quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
+     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
      % make
      % make install
 
