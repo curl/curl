@@ -122,7 +122,7 @@
         T: novalgrind
         QUICHE: "yes"
         C: >-
-          --with-openssl={{ ansible_user_dir }}/quiche/deps/boringssl/src
+          --with-openssl={{ ansible_user_dir }}/quiche/quiche/deps/boringssl/src
           --with-quiche={{ ansible_user_dir }}/quiche/target/release
         LD_LIBRARY_PATH: "{{ ansible_user_dir }}/quiche/target/release:/usr/local/lib"
 
