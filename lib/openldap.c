@@ -74,6 +74,8 @@
 typedef enum {
   OLDAP_STOP,           /* Do nothing state, stops the state machine */
   OLDAP_SSL,            /* Performing SSL handshake. */
+  OLDAP_STARTTLS,       /* STARTTLS request sent. */
+  OLDAP_TLS,            /* Performing TLS handshake. */
   OLDAP_BIND,           /* Simple bind reply. */
   OLDAP_BINDV2,         /* Simple bind reply in protocol version 2. */
   OLDAP_LAST            /* Never used */
@@ -194,6 +196,8 @@ static void state(struct Curl_easy *data, ldapstate newstate)
   static const char * const names[] = {
     "STOP",
     "SSL",
+    "STARTTLS",
+    "TLS",
     "BIND",
     "BINDV2",
     /* LAST */
@@ -256,6 +260,10 @@ static CURLcode oldap_setup_connection(struct Curl_easy *data,
   li->proto = proto;
   conn->proto.ldapc = li;
   connkeep(conn, "OpenLDAP default");
+
+  /* Clear the TLS upgraded flag */
+  conn->bits.tls_upgraded = FALSE;
+
   return CURLE_OK;
 }
 
@@ -297,7 +305,7 @@ static bool ssl_installed(struct connectdata *conn)
   return conn->proto.ldapc->recv != NULL;
 }
 
-static CURLcode oldap_ssl_connect(struct Curl_easy *data)
+static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
 {
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
@@ -307,7 +315,7 @@ static CURLcode oldap_ssl_connect(struct Curl_easy *data)
   result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
                                         FIRSTSOCKET, &ssldone);
   if(!result) {
-    state(data, OLDAP_SSL);
+    state(data, newstate);
 
     if(ssldone) {
       Sockbuf *sb;
@@ -320,6 +328,20 @@ static CURLcode oldap_ssl_connect(struct Curl_easy *data)
     }
   }
 
+  return result;
+}
+
+/* Send the STARTTLS request */
+static CURLcode oldap_perform_starttls(struct Curl_easy *data)
+{
+  CURLcode result = CURLE_OK;
+  struct ldapconninfo *li = data->conn->proto.ldapc;
+  int rc = ldap_start_tls(li->ld, NULL, NULL, &li->msgid);
+
+  if(rc == LDAP_SUCCESS)
+    state(data, OLDAP_STARTTLS);
+  else
+    result = oldap_map_error(rc, CURLE_USE_SSL_FAILED);
   return result;
 }
 #endif
@@ -364,7 +386,14 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 
 #ifdef USE_SSL
   if(conn->handler->flags & PROTOPT_SSL)
-    return oldap_ssl_connect(data);
+    return oldap_ssl_connect(data, OLDAP_SSL);
+
+  if(data->set.use_ssl) {
+    CURLcode result = oldap_perform_starttls(data);
+
+    if(!result || data->set.use_ssl != CURLUSESSL_TRY)
+      return result;
+  }
 #endif
 
   /* Force bind even if anonymous bind is not needed in protocol version 3
@@ -409,7 +438,7 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
   int code = LDAP_SUCCESS;
   int rc;
 
-  if(li->state != OLDAP_SSL) {
+  if(li->state != OLDAP_SSL && li->state != OLDAP_TLS) {
     /* Get response to last command. */
     rc = ldap_result(li->ld, li->msgid, LDAP_MSG_ONE, &tv, &msg);
     if(!rc)
@@ -426,7 +455,11 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
       code = rc;
 
     /* If protocol version 3 is not supported, fallback to version 2. */
-    if(code == LDAP_PROTOCOL_ERROR && li->state != OLDAP_BINDV2) {
+    if(code == LDAP_PROTOCOL_ERROR && li->state != OLDAP_BINDV2
+#ifdef USE_SSL
+       && (ssl_installed(conn) || data->set.use_ssl <= CURLUSESSL_TRY)
+#endif
+       ) {
       static const int version = LDAP_VERSION2;
 
       ldap_set_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &version);
@@ -440,9 +473,32 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
 
 #ifdef USE_SSL
   case OLDAP_SSL:
-    result = oldap_ssl_connect(data);
+    result = oldap_ssl_connect(data, OLDAP_SSL);
     if(!result && ssl_installed(conn))
       result = oldap_perform_bind(data, OLDAP_BIND);
+    break;
+  case OLDAP_STARTTLS:
+    if(code != LDAP_SUCCESS) {
+      if(data->set.use_ssl != CURLUSESSL_TRY)
+        result = oldap_map_error(code, CURLE_USE_SSL_FAILED);
+      else
+        result = oldap_perform_bind(data, OLDAP_BIND);
+      break;
+    }
+    /* FALLTHROUGH */
+  case OLDAP_TLS:
+    result = oldap_ssl_connect(data, OLDAP_TLS);
+    if(result && data->set.use_ssl != CURLUSESSL_TRY)
+      result = oldap_map_error(code, CURLE_USE_SSL_FAILED);
+    else if(ssl_installed(conn)) {
+      conn->bits.tls_upgraded = TRUE;
+      if(conn->bits.user_passwd)
+        result = oldap_perform_bind(data, OLDAP_BIND);
+      else {
+        state(data, OLDAP_STOP); /* Version 3 supported: no bind required */
+        result = CURLE_OK;
+      }
+    }
     break;
 #endif
 
