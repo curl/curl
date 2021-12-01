@@ -461,22 +461,43 @@ Be sure to specify as many `--disable-` and `--without-` flags on the
 configure command-line as you can to disable all the libcurl features that you
 know your application is not going to need. Besides specifying the
 `--disable-PROTOCOL` flags for all the types of URLs your application will not
-use, here are some other flags that can reduce the size of the library:
+use, here are some other flags that can reduce the size of the library by
+disabling support for some feature:
 
- - `--disable-ares` (disables support for the C-ARES DNS library)
- - `--disable-cookies` (disables support for HTTP cookies)
- - `--disable-crypto-auth` (disables HTTP cryptographic authentication)
- - `--disable-ipv6` (disables support for IPv6)
- - `--disable-manual` (disables support for the built-in documentation)
- - `--disable-proxy` (disables support for HTTP and SOCKS proxies)
- - `--disable-unix-sockets` (disables support for UNIX sockets)
+ - `--disable-alt-svc` (HTTP Alt-Srv)
+ - `--disable-ares` (the C-ARES DNS library)
+ - `--disable-cookies` (HTTP cookies)
+ - `--disable-crypto-auth` (cryptographic authentication)
+ - `--disable-dateparse` (date parsing for time conditionals)
+ - `--disable-dnsshuffle` (internal server load spreading)
+ - `--disable-doh` (DNS-over-HTTP)
+ - `--disable-get-easy-options` (lookup easy options at runtime)
+ - `--disable-hsts` (HTTP Strict Transport Security)
+ - `--disable-http-auth` (all HTTP authentication)
+ - `--disable-ipv6` (IPv6)
+ - `--disable-libcurl-option` (--libcurl C code generation support)
+ - `--disable-manual` (built-in documentation)
+ - `--disable-netrc`  (.netrc file)
+ - `--disable-ntlm-wb` (NTLM WinBind)
+ - `--disable-progress-meter` (graphical progress meter in library)
+ - `--disable-proxy` (HTTP and SOCKS proxies)
+ - `--disable-pthreads` (multithreading)
+ - `--disable-socketpair` (socketpair for async name resolving)
+ - `--disable-threaded-resolver`  (threaded name resolver)
+ - `--disable-tls-srp` (Secure Remote Password authentication for TLS)
+ - `--disable-unix-sockets` (UNIX sockets)
  - `--disable-verbose` (eliminates debugging strings and error code strings)
- - `--disable-versioned-symbols` (disables support for versioned symbols)
+ - `--disable-versioned-symbols` (versioned symbols)
  - `--enable-symbol-hiding` (eliminates unneeded symbols in the shared library)
- - `--without-libidn` (disables support for the libidn DNS library)
- - `--without-librtmp` (disables support for RTMP)
- - `--without-openssl` (disables support for SSL/TLS)
- - `--without-zlib` (disables support for on-the-fly decompression)
+ - `--without-brotli` (Brotli on-the-fly decompression)
+ - `--without-libpsl` (Public Suffix List in cookies)
+ - `--without-nghttp2` (HTTP/2 using nghttp2)
+ - `--without-ngtcp2` (HTTP/2 using ngtcp2)
+ - `--without-zstd` (Zstd on-the-fly decompression)
+ - `--without-libidn2` (internationalized domain names)
+ - `--without-librtmp` (RTMP)
+ - `--without-ssl` (SSL/TLS)
+ - `--without-zlib` (on-the-fly decompression)
 
 The GNU compiler and linker have a number of options that can reduce the
 size of the libcurl dynamic libraries on some platforms even further.
@@ -492,10 +513,9 @@ using 'strip' (or the appropriate variant if cross-compiling). If space is
 really tight, you may be able to remove some unneeded sections of the shared
 library using the -R option to objcopy (e.g. the .comment section).
 
-Using these techniques it is possible to create a basic HTTP-only shared
-libcurl library for i386 Linux platforms that is only 113 KiB in size, and an
-FTP-only library that is 113 KiB in size (as of libcurl version 7.50.3, using
-gcc 5.4.0).
+Using these techniques it is possible to create a basic HTTP-only libcurl
+shared library for i386 Linux platforms that is only 133 KiB in size
+(as of libcurl version 7.80.0, using gcc 11.2.0).
 
 You may find that statically linking libcurl to your application will result
 in a lower total size than dynamically linking.
@@ -504,11 +524,13 @@ Note that the curl test harness can detect the use of some, but not all, of
 the `--disable` statements suggested above. Use will cause tests relying on
 those features to fail. The test harness can be manually forced to skip the
 relevant tests by specifying certain key words on the `runtests.pl` command
-line. Following is a list of appropriate key words:
+line. Following is a list of appropriate key words for those configure options
+that aren't automatically detected:
 
  - `--disable-cookies`          !cookies
- - `--disable-manual`           !--manual
- - `--disable-proxy`            !HTTP\ proxy !proxytunnel !SOCKS4 !SOCKS5
+ - `--disable-dateparse`        !RETRY-AFTER !CURLOPT_TIMECONDITION !CURLINFO_FILETIME !If-Modified-Since !getdate !-z
+ - `--disable-libcurl-option`   !--libcurl
+ - `--disable-verbose`          !verbose\ logs
 
 # PORTS
 
