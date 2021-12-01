@@ -320,9 +320,13 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   mbedtls_x509_crt_init(&backend->cacert);
 
   if(ca_info_blob) {
-    const unsigned char *blob_data = (const unsigned char *)ca_info_blob->data;
+    unsigned char *blob_data = (unsigned char *)ca_info_blob->data;
+
+    /* mbedTLS expects the terminating NULL byte to be included in the length */
+    size_t blob_data_len = ca_info_blob->len + 1;
+
     ret = mbedtls_x509_crt_parse(&backend->cacert, blob_data,
-                                 ca_info_blob->len);
+                                 blob_data_len);
 
     if(ret<0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
