@@ -5,6 +5,7 @@ HTTP
 connection re-use
 persistent connection
 CURLOPT_MAXLIFETIME_CONN
+verbose logs
 </keywords>
 </info>
 
