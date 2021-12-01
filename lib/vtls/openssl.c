@@ -3570,6 +3570,9 @@ static CURLcode get_cert_chain(struct Curl_easy *data,
   }
 
   mem = BIO_new(BIO_s_mem());
+  if(!mem) {
+    return CURLE_OUT_OF_MEMORY;
+  }
 
   for(i = 0; i < (int)numcerts; i++) {
     ASN1_INTEGER *num;
@@ -3865,6 +3868,15 @@ static CURLcode servercert(struct Curl_easy *data,
   const char *ptr;
   BIO *mem = BIO_new(BIO_s_mem());
   struct ssl_backend_data *backend = connssl->backend;
+
+  if(!mem) {
+    failf(data,
+          "BIO_new return NULL, " OSSL_PACKAGE
+          " error %s",
+          ossl_strerror(ERR_get_error(), error_buffer,
+                        sizeof(error_buffer)) );
+    return CURLE_OUT_OF_MEMORY;
+  }
 
   if(data->set.ssl.certinfo)
     /* we've been asked to gather certificate info! */
