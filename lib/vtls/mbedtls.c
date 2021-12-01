@@ -322,7 +322,8 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   if(ca_info_blob) {
     unsigned char *blob_data = (unsigned char *)ca_info_blob->data;
 
-    /* mbedTLS expects the terminating NULL byte to be included in the length */
+    /* mbedTLS expects the terminating NULL byte to be included in the length
+       of the data */
     size_t blob_data_len = ca_info_blob->len + 1;
 
     ret = mbedtls_x509_crt_parse(&backend->cacert, blob_data,
