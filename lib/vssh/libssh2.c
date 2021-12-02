@@ -698,7 +698,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
 
       failf(data,
           "Denied establishing ssh session: mismatch sha256 fingerprint. "
-          "Remote %s is not equal to %s", fingerprint, pubkey_sha256);
+          "Remote %s is not equal to %s", fingerprint_b64, pubkey_sha256);
       state(data, SSH_SESSION_FREE);
       sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
       return sshc->actualcode;
