@@ -357,15 +357,17 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     }
   }
 
-  if(select_res & CURL_CSELECT_IN) {
-    if(h->read_waker)
-      hyper_waker_wake(h->read_waker);
-    h->read_waker = NULL;
-  }
-  if(select_res & CURL_CSELECT_OUT) {
-    if(h->write_waker)
-      hyper_waker_wake(h->write_waker);
-    h->write_waker = NULL;
+  if (select_res) {
+      if (CURL_CSELECT_IN) {
+          if (h->read_waker)
+              hyper_waker_wake(h->read_waker);
+          h->read_waker = NULL;
+      }
+      if (CURL_CSELECT_OUT) {
+          if (h->write_waker)
+              hyper_waker_wake(h->write_waker);
+          h->write_waker = NULL;
+      }
   }
 
   *done = FALSE;
@@ -464,9 +466,9 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     if(result)
       break;
 
-    /* Curl_http_auth_act() checks what authentication methods that are
-     * available and decides which one (if any) to use. It will set 'newurl'
-     * if an auth method was picked. */
+    /* Curl_http_auth_act() checks what authentication methods are available
+     * and decides which one (if any) to use. It will set 'newurl' if an
+     * authentication method was picked. */
     result = Curl_http_auth_act(data);
     if(result)
       break;
@@ -634,7 +636,7 @@ static int uploadpostfields(void *userdata, hyper_context *ctx,
     if(data->req.exp100 == EXP100_FAILED)
       return HYPER_POLL_ERROR;
 
-    /* still waiting confirmation */
+    /* still waiting for confirmation */
     if(data->hyp.exp100_waker)
       hyper_waker_free(data->hyp.exp100_waker);
     data->hyp.exp100_waker = hyper_context_waker(ctx);
@@ -673,7 +675,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
     if(data->req.exp100 == EXP100_FAILED)
       return HYPER_POLL_ERROR;
 
-    /* still waiting confirmation */
+    /* still waiting for confirmation */
     if(data->hyp.exp100_waker)
       hyper_waker_free(data->hyp.exp100_waker);
     data->hyp.exp100_waker = hyper_context_waker(ctx);
@@ -835,7 +837,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   hyper_code rc;
 
   /* Always consider the DO phase done after this function call, even if there
-     may be parts of the request that is not yet sent, since we can deal with
+     may be parts of the request that are not yet sent, since we can deal with
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
 
