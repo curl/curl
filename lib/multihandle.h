@@ -156,6 +156,8 @@ struct Curl_multi {
 #ifdef USE_OPENSSL
   bool ssl_seeded;
 #endif
+  bool dead; /* a callback returned error, everything needs to crash and
+                burn */
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */

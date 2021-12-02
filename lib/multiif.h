@@ -26,11 +26,11 @@
  * Prototypes for library-wide functions provided by multi.c
  */
 
-void Curl_updatesocket(struct Curl_easy *data);
+CURLcode Curl_updatesocket(struct Curl_easy *data);
 void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id);
 void Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
-void Curl_update_timer(struct Curl_multi *multi);
+CURLMcode Curl_update_timer(struct Curl_multi *multi) WARN_UNUSED_RESULT;
 void Curl_attach_connnection(struct Curl_easy *data,
                              struct connectdata *conn);
 void Curl_detach_connnection(struct Curl_easy *data);

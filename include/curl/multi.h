@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -73,7 +73,8 @@ typedef enum {
   CURLM_RECURSIVE_API_CALL, /* an api function was called from inside a
                                callback */
   CURLM_WAKEUP_FAILURE,  /* wakeup is unavailable or failed */
-  CURLM_BAD_FUNCTION_ARGUMENT,  /* function called with a bad parameter */
+  CURLM_BAD_FUNCTION_ARGUMENT, /* function called with a bad parameter */
+  CURLM_ABORTED_BY_CALLBACK,
   CURLM_LAST
 } CURLMcode;
 
