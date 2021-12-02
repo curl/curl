@@ -404,6 +404,9 @@ curl_multi_strerror(CURLMcode error)
   case CURLM_BAD_FUNCTION_ARGUMENT:
     return "A libcurl function was given a bad argument";
 
+  case CURLM_ABORTED_BY_CALLBACK:
+    return "Operation was aborted by an application callback";
+
   case CURLM_LAST:
     break;
   }

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -52,6 +52,10 @@ called.
 what activity on this socket the application is supposed to
 monitor. Subsequent calls to this callback might update the \fBwhat\fP bits
 for a socket that is already monitored.
+
+The socket callback should return 0 on success, and -1 on error. If this
+callback returns error, \fBall\fP transfers currently in progress in this
+multi handle will be aborted and fail.
 
 \fBuserp\fP is set with \fICURLMOPT_SOCKETDATA(3)\fP.
 

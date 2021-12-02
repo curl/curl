@@ -144,7 +144,8 @@ m7: The easy handle is already added to a multi handle
 m8: API function called from within callback
 m9: Wakeup is unavailable or failed
 m10: A libcurl function was given a bad argument
-m11: Unknown error
+m11: Operation was aborted by an application callback
+m12: Unknown error
 s0: No error
 s1: Unknown share option
 s2: Share currently in use
