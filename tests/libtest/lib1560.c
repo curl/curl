@@ -308,9 +308,13 @@ static const struct testcase get_parts_list[] ={
   {"https://example.com:65536",
    "",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_BAD_PORT_NUMBER},
-  {"https://example.com:0#moo",
+  {"https://example.com:-1#moo",
    "",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_BAD_PORT_NUMBER},
+  {"https://example.com:0#moo",
+   "https | [11] | [12] | [13] | example.com | 0 | / | "
+   "[16] | moo",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   {"https://example.com:01#moo",
    "https | [11] | [12] | [13] | example.com | 1 | / | "
    "[16] | moo",
