@@ -93,7 +93,7 @@ static size_t decodeQuantum(unsigned char *dest, const char *src)
 /*
  * Curl_base64_decode()
  *
- * Given a base64 NUL-terminated string at src, decode it and return a
+ * Given a base64 NULL-terminated string at src, decode it and return a
  * pointer in *outptr to a newly allocated memory area holding decoded
  * data. Size of decoded data is returned in variable pointed by outlen.
  *
@@ -286,7 +286,7 @@ static CURLcode base64_encode(const char *table64,
  * encoded data. Size of encoded data is returned in variable pointed by
  * outlen.
  *
- * Input length of 0 indicates input buffer holds a NUL-terminated string.
+ * Input length of 0 indicates input buffer holds a NULL-terminated string.
  *
  * Returns CURLE_OK on success, otherwise specific error code. Function
  * output shall not be considered valid unless CURLE_OK is returned.
@@ -310,7 +310,7 @@ CURLcode Curl_base64_encode(struct Curl_easy *data,
  * encoded data. Size of encoded data is returned in variable pointed by
  * outlen.
  *
- * Input length of 0 indicates input buffer holds a NUL-terminated string.
+ * Input length of 0 indicates input buffer holds a NULL-terminated string.
  *
  * Returns CURLE_OK on success, otherwise specific error code. Function
  * output shall not be considered valid unless CURLE_OK is returned.
