@@ -45,12 +45,18 @@ static int writeOffset(FILE *stream, const struct writeoutvar *wovar,
                        struct per_transfer *per, CURLcode per_result,
                        bool use_json);
 
-static const char *http_version[] = {
-  "0",   /* CURL_HTTP_VERSION_NONE */
-  "1",   /* CURL_HTTP_VERSION_1_0 */
-  "1.1", /* CURL_HTTP_VERSION_1_1 */
-  "2",   /* CURL_HTTP_VERSION_2 */
-  "3"    /* CURL_HTTP_VERSION_3 */
+struct httpmap {
+  const char *str;
+  int num;
+};
+
+static const struct httpmap http_version[] = {
+  { "0",   CURL_HTTP_VERSION_NONE},
+  { "1",   CURL_HTTP_VERSION_1_0},
+  { "1.1", CURL_HTTP_VERSION_1_1},
+  { "2",   CURL_HTTP_VERSION_2},
+  { "3",   CURL_HTTP_VERSION_3},
+  { NULL, 0} /* end of list */
 };
 
 /* The designated write function should be the same as the CURLINFO return type
@@ -165,11 +171,16 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
   if(wovar->ci) {
     if(wovar->ci == CURLINFO_HTTP_VERSION) {
       long version = 0;
-      if(!curl_easy_getinfo(per->curl, CURLINFO_HTTP_VERSION, &version) &&
-         (version >= 0) &&
-         (version < (long)(sizeof(http_version)/sizeof(http_version[0])))) {
-        strinfo = http_version[version];
-        valid = true;
+      if(!curl_easy_getinfo(per->curl, CURLINFO_HTTP_VERSION, &version)) {
+        const struct httpmap *m = &http_version[0];
+        while(m->str) {
+          if(m->num == version) {
+            strinfo = m->str;
+            valid = true;
+            break;
+          }
+          m++;
+        }
       }
     }
     else {
