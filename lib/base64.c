@@ -45,7 +45,7 @@
 static const char base64[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-/* The Base 64 encoding with an URL and filename safe alphabet, RFC 4648
+/* The Base 64 encoding with a URL and filename safe alphabet, RFC 4648
    section 5 */
 static const char base64url[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
@@ -93,12 +93,12 @@ static size_t decodeQuantum(unsigned char *dest, const char *src)
 /*
  * Curl_base64_decode()
  *
- * Given a base64 NUL-terminated string at src, decode it and return a
- * pointer in *outptr to a newly allocated memory area holding decoded
- * data. Size of decoded data is returned in variable pointed by outlen.
+ * Given a base64 0-terminated string at src, decode it and return a
+ * pointer in *outptr to a newly allocated memory area holding decoded data.
+ * Size of the decoded data is returned in a variable pointed to by *outlen.
  *
- * Returns CURLE_OK on success, otherwise specific error code. Function
- * output shall not be considered valid unless CURLE_OK is returned.
+ * Returns CURLE_OK on success, otherwise a specific error code. Function
+ * output should not be considered valid unless CURLE_OK is returned.
  *
  * When decoded data length is 0, returns NULL in *outptr.
  *
@@ -120,7 +120,7 @@ CURLcode Curl_base64_decode(const char *src,
   *outlen = 0;
   srclen = strlen(src);
 
-  /* Check the length of the input string is valid */
+  /* Check if the length of the input string is valid */
   if(!srclen || srclen % 4)
     return CURLE_BAD_CONTENT_ENCODING;
 
@@ -208,8 +208,8 @@ static CURLcode base64_encode(const char *table64,
 
   /*
    * The base64 data needs to be created using the network encoding
-   * not the host encoding.  And we can't change the actual input
-   * so we copy it to a buffer, translate it, and use that instead.
+   * not the host encoding. Since we can't change the actual input
+   * we copy it to a buffer, translate it, and use that instead.
    */
   result = Curl_convert_clone(data, indata, insize, &convbuf);
   if(result) {
@@ -283,13 +283,13 @@ static CURLcode base64_encode(const char *table64,
  *
  * Given a pointer to an input buffer and an input size, encode it and
  * return a pointer in *outptr to a newly allocated memory area holding
- * encoded data. Size of encoded data is returned in variable pointed by
- * outlen.
+ * encoded data. Size of the encoded data is returned in a variable pointed
+ * to by *outlen.
  *
- * Input length of 0 indicates input buffer holds a NUL-terminated string.
+ * Input length of 0 indicates input buffer holds a 0-terminated string.
  *
- * Returns CURLE_OK on success, otherwise specific error code. Function
- * output shall not be considered valid unless CURLE_OK is returned.
+ * Returns CURLE_OK on success, otherwise a specific error code. Function
+ * output should not be considered valid unless CURLE_OK is returned.
  *
  * When encoded data length is 0, returns NULL in *outptr.
  *
@@ -307,13 +307,13 @@ CURLcode Curl_base64_encode(struct Curl_easy *data,
  *
  * Given a pointer to an input buffer and an input size, encode it and
  * return a pointer in *outptr to a newly allocated memory area holding
- * encoded data. Size of encoded data is returned in variable pointed by
- * outlen.
+ * encoded data. Size of the encoded data is returned in a variable pointed
+ * to by *outlen.
  *
- * Input length of 0 indicates input buffer holds a NUL-terminated string.
+ * Input length of 0 indicates input buffer holds a 0-terminated string.
  *
- * Returns CURLE_OK on success, otherwise specific error code. Function
- * output shall not be considered valid unless CURLE_OK is returned.
+ * Returns CURLE_OK on success, otherwise a specific error code. Function
+ * output should not be considered valid unless CURLE_OK is returned.
  *
  * When encoded data length is 0, returns NULL in *outptr.
  *
