@@ -72,8 +72,7 @@ Curl_hash_init(struct Curl_hash *h,
 
   h->table = malloc(slots * sizeof(struct Curl_llist));
   if(h->table) {
-    int i;
-    for(i = 0; i < slots; ++i)
+    for(int i = 0; i < slots; ++i)
       Curl_llist_init(&h->table[i], (Curl_llist_dtor) hash_element_dtor);
     return 0; /* fine */
   }
@@ -181,9 +180,8 @@ Curl_hash_apply(Curl_hash *h, void *user,
                 void (*cb)(void *user, void *ptr))
 {
   struct Curl_llist_element  *le;
-  int                  i;
 
-  for(i = 0; i < h->slots; ++i) {
+  for(int i = 0; i < h->slots; ++i) {
     for(le = (h->table[i])->head;
         le;
         le = le->next) {
@@ -204,9 +202,7 @@ Curl_hash_apply(Curl_hash *h, void *user,
 void
 Curl_hash_destroy(struct Curl_hash *h)
 {
-  int i;
-
-  for(i = 0; i < h->slots; ++i) {
+  for(int i = 0; i < h->slots; ++i) {
     Curl_llist_destroy(&h->table[i], (void *) h);
   }
 
@@ -233,12 +229,11 @@ Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
   struct Curl_llist_element *le;
   struct Curl_llist_element *lnext;
   struct Curl_llist *list;
-  int i;
 
   if(!h)
     return;
 
-  for(i = 0; i < h->slots; ++i) {
+  for(int i = 0; i < h->slots; ++i) {
     list = &h->table[i];
     le = list->head; /* get first list entry */
     while(le) {
@@ -296,8 +291,7 @@ Curl_hash_next_element(struct Curl_hash_iterator *iter)
 
   /* If we have reached the end of the list, find the next one */
   if(!iter->current_element) {
-    int i;
-    for(i = iter->slot_index; i < h->slots; i++) {
+    for(int i = iter->slot_index; i < h->slots; i++) {
       if(h->table[i].head) {
         iter->current_element = h->table[i].head;
         iter->slot_index = i + 1;
