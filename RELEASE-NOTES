@@ -4,7 +4,7 @@ curl and libcurl 7.81.0
  Command line options:         244
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2540
+ Contributors:                 2545
 
 This release includes the following changes:
 
@@ -15,6 +15,7 @@ This release includes the following bugfixes:
  o azure: make the "w/o HTTP/SMTP/IMAP" build disable SSL proper [12]
  o cmake: don't set _USRDLL on a static Windows build [22]
  o cmake: private identifiers use CURL_ instead of CMAKE_ prefix [40]
+ o config.d: update documentation to match the path search
  o configure: add -lm to configure for rustls build. [13]
  o configure: better diagnostics if hyper is built wrong [6]
  o configure: don't enable TLS when --without-* flags are used [17]
@@ -23,18 +24,27 @@ This release includes the following bugfixes:
  o curl: improve error message for --head with -J [42]
  o curl_easy_cleanup.3: remove from multi handle first [3]
  o curl_share_setopt.3: split out options into their own manpages [14]
+ o digest: compute user:realm:pass digest w/o userhash [45]
  o docs/checksrc: Add documentation for STRERROR [18]
  o docs/cmdline-opts: do not say "protocols: all" [26]
  o docs/INSTALL.md: typo fix : added missing "get" verb [31]
  o docs: address proselint nits [16]
+ o docs: consistent manpage SYNOPSIS [47]
+ o docs: Update the Reducing Size section
  o FAQ: typo fix : "yout" ➤ "your" [30]
  o gen.pl: improve example output format [29]
+ o HTTP3: update quiche build instructions [37]
  o http: enable haproxy support for hyper backend [20]
  o insecure.d: detail its use for SFTP and SCP as well [32]
  o insecure.d: expand and clarify [28]
+ o libssh2: fix error message for sha256 mismatch
+ o lift: ignore is a deprecated config option, use ignoreRules [35]
  o Makefile.m32: rename -winssl option to -schannel and tidy up [33]
+ o mbedTLS: add support for CURLOPT_CAINFO_BLOB [44]
+ o mbedTLS: include NULL byte in blob data length for CURLOPT_CAINFO_BLOB [38]
  o multi: shut down CONNECT in Curl_detach_connnection [2]
  o netrc.d: edit the .netrc example to look nicer [24]
+ o openssl: check the return value of BIO_new() [43]
  o openssl: remove `RSA_METHOD_FLAG_NO_CHECK` handling if unavailable
  o openssl: remove usage of deprecated `SSL_get_peer_certificate`
  o openssl: use non-deprecated API to read key parameters
@@ -47,11 +57,15 @@ This release includes the following bugfixes:
  o test302[12]: run only with the libssh2 backend [8]
  o tests/CI.md: add more information on CI environments [39]
  o tftp: mark protocol as not possible to do over CONNECT [25]
+ o tool_findfile: updated search for a file in the homedir [46]
  o tool_operate: only set SSH related libcurl options for SSH URLs [11]
  o url.c: fix the SIGPIPE comment for Curl_close [4]
+ o urlapi: accept port number zero [34]
  o urlapi: provide more detailed return codes [36]
  o urlapi: reject short file URLs [41]
+ o version_win32: Check build number and platform id
  o vtls/rustls: adapt to the updated rustls_version proto [19]
+ o writeout: fix %{http_version} for HTTP/3 [7]
  o zuul.d: update rustls-ffi to version 0.8.2 [5]
 
 This release includes the following known bugs:
@@ -61,12 +75,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Bernhard Walle, Boris Rasin, Bruno Baguette, Dan Fandrich, Daniel Stenberg,
-  David Bohman, Don J Olmstead, Even Rouault, Jacob Hoffman-Andrews,
-  Jeff Luszcz, Kevin Burke, Marcel Raad, nimaje on github, Patrick Monnerat,
-  Paul Howarth, Ray Satiro, Rikard Falkeborn, Ryan Sleevi, Stan Hu,
-  Stefan Eissing, Stephen M. Coakley, Viktor Szakats, Vincent Grande,
-  (23 contributors)
+  Alessandro Ghedini, Bernat Mut, Bernhard Walle, Boris Rasin,
+  Brad Fitzpatrick, Bruno Baguette, Dan Fandrich, Daniel Stenberg,
+  David Bohman, Don J Olmstead, Even Rouault, Florian Van Heghe, Glenn Strauss,
+  Jacob Hoffman-Andrews, Jeff Luszcz, jeffrson on github, Kevin Burke,
+  Marcel Raad, Mark Dodgson, nimaje on github, Patrick Monnerat, Paul Howarth,
+  Ray Satiro, Rikard Falkeborn, Ryan Sleevi, Stan Hu, Stefan Eissing,
+  Stephen M. Coakley, Viktor Szakats, Vincent Grande, Wyatt O'Day,
+  (31 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -76,6 +92,7 @@ References to bug reports and discussions on issues:
  [4] = https://curl.se/bug/?i=7984
  [5] = https://curl.se/bug/?i=8013
  [6] = https://curl.se/bug/?i=8001
+ [7] = https://curl.se/bug/?i=8072
  [8] = https://curl.se/bug/?i=8009
  [9] = https://curl.se/bug/?i=8003
  [10] = https://curl.se/bug/?i=8003
@@ -102,8 +119,17 @@ References to bug reports and discussions on issues:
  [31] = https://curl.se/bug/?i=8058
  [32] = https://curl.se/bug/?i=8056
  [33] = https://curl.se/bug/?i=8053
+ [34] = https://curl.se/bug/?i=8090
+ [35] = https://curl.se/bug/?i=8082
  [36] = https://curl.se/bug/?i=8049
+ [37] = https://curl.se/bug/?i=8076
+ [38] = https://curl.se/bug/?i=8079
  [39] = https://curl.se/bug/?i=8012
  [40] = https://curl.se/bug/?i=7988
  [41] = https://curl.se/bug/?i=8042
  [42] = https://curl.se/bug/?i=7987
+ [43] = https://curl.se/bug/?i=8078
+ [44] = https://curl.se/bug/?i=8071
+ [45] = https://curl.se/bug/?i=8066
+ [46] = https://curl.se/bug/?i=8033
+ [47] = https://curl.se/bug/?i=8062
