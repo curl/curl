@@ -605,9 +605,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname,
 
     port = strtol(portptr + 1, &rest, 10);  /* Port number must be decimal */
 
-    if((port <= 0) || (port > 0xffff))
-      /* Single unix standard says port numbers are 16 bits long, but we don't
-         treat port zero as OK. */
+    if(port > 0xffff)
       return CURLUE_BAD_PORT_NUMBER;
 
     if(rest[0])
