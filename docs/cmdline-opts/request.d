@@ -1,7 +1,7 @@
 Long: request
 Short: X
-Arg: <command>
-Help: Specify request command to use
+Arg: <method>
+Help: Specify request method to use
 Category: connection
 Example: -X "DELETE" $URL
 Example: -X NLST ftp://example.com/
