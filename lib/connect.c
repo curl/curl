@@ -1028,9 +1028,8 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
       hostname = conn->socks_proxy.host.name;
     else if(conn->bits.httpproxy)
       hostname = conn->http_proxy.host.name;
-    else
 #endif
-      if(conn->bits.conn_to_host)
+    else if(conn->bits.conn_to_host)
         hostname = conn->conn_to_host.name;
     else
       hostname = conn->host.name;
