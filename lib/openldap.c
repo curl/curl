@@ -620,95 +620,85 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = conn->proto.ldapc;
   struct ldapreqinfo *lr = data->req.p.ldap;
-  int rc, ret;
+  int rc;
   LDAPMessage *msg = NULL;
-  LDAPMessage *ent;
   BerElement *ber = NULL;
   struct timeval tv = {0, 1};
+  struct berval bv, *bvals;
+  int binary = 0;
+  CURLcode result = CURLE_AGAIN;
+  int code;
+  char *info = NULL;
 
   (void)len;
   (void)buf;
   (void)sockindex;
 
-  rc = ldap_result(li->ld, lr->msgid, LDAP_MSG_RECEIVED, &tv, &msg);
+  rc = ldap_result(li->ld, lr->msgid, LDAP_MSG_ONE, &tv, &msg);
   if(rc < 0) {
     failf(data, "LDAP local: search ldap_result %s", ldap_err2string(rc));
-    *err = CURLE_RECV_ERROR;
-    return -1;
+    result = CURLE_RECV_ERROR;
   }
 
-  *err = CURLE_AGAIN;
-  ret = -1;
+  *err = result;
 
-  /* timed out */
+  /* error or timed out */
   if(!msg)
-    return ret;
+    return -1;
 
-  for(ent = ldap_first_message(li->ld, msg); ent;
-      ent = ldap_next_message(li->ld, ent)) {
-    struct berval bv, *bvals;
-    int binary = 0, msgtype;
-    CURLcode writeerr;
+  result = CURLE_OK;
 
-    msgtype = ldap_msgtype(ent);
-    if(msgtype == LDAP_RES_SEARCH_RESULT) {
-      int code;
-      char *info = NULL;
-      rc = ldap_parse_result(li->ld, ent, &code, NULL, &info, NULL, NULL, 0);
-      if(rc) {
-        failf(data, "LDAP local: search ldap_parse_result %s",
-              ldap_err2string(rc));
-        *err = CURLE_LDAP_SEARCH_FAILED;
-      }
-      else if(code && code != LDAP_SIZELIMIT_EXCEEDED) {
-        failf(data, "LDAP remote: search failed %s %s", ldap_err2string(rc),
-              info ? info : "");
-        *err = CURLE_LDAP_SEARCH_FAILED;
-      }
-      else {
-        /* successful */
-        if(code == LDAP_SIZELIMIT_EXCEEDED)
-          infof(data, "There are more than %d entries", lr->nument);
-        data->req.size = data->req.bytecount;
-        *err = CURLE_OK;
-        ret = 0;
-      }
-      lr->msgid = 0;
-      ldap_memfree(info);
+  switch(ldap_msgtype(msg)) {
+  case LDAP_RES_SEARCH_RESULT:
+    lr->msgid = 0;
+    rc = ldap_parse_result(li->ld, msg, &code, NULL, &info, NULL, NULL, 0);
+    if(rc) {
+      failf(data, "LDAP local: search ldap_parse_result %s",
+            ldap_err2string(rc));
+      result = CURLE_LDAP_SEARCH_FAILED;
       break;
     }
-    else if(msgtype != LDAP_RES_SEARCH_ENTRY)
-      continue;
 
+    switch(code) {
+    case LDAP_SIZELIMIT_EXCEEDED:
+      infof(data, "There are more than %d entries", lr->nument);
+      /* FALLTHROUGH */
+    case LDAP_SUCCESS:
+      data->req.size = data->req.bytecount;
+      break;
+    default:
+      failf(data, "LDAP remote: search failed %s %s", ldap_err2string(code),
+            info ? info : "");
+      result = CURLE_LDAP_SEARCH_FAILED;
+      break;
+    }
+    if(info)
+      ldap_memfree(info);
+    break;
+  case LDAP_RES_SEARCH_ENTRY:
     lr->nument++;
-    rc = ldap_get_dn_ber(li->ld, ent, &ber, &bv);
+    rc = ldap_get_dn_ber(li->ld, msg, &ber, &bv);
     if(rc < 0) {
-      *err = CURLE_RECV_ERROR;
-      return -1;
+      result = CURLE_RECV_ERROR;
+      break;
     }
-    writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"DN: ", 4);
-    if(writeerr) {
-      *err = writeerr;
-      return -1;
-    }
+    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"DN: ", 4);
+    if(result)
+      break;
 
-    writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)bv.bv_val,
-                                 bv.bv_len);
-    if(writeerr) {
-      *err = writeerr;
-      return -1;
-    }
+    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)bv.bv_val,
+                               bv.bv_len);
+    if(result)
+      break;
 
-    writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
-    if(writeerr) {
-      *err = writeerr;
-      return -1;
-    }
+    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+    if(result)
+      break;
     data->req.bytecount += bv.bv_len + 5;
 
-    for(rc = ldap_get_attribute_ber(li->ld, ent, ber, &bv, &bvals);
+    for(rc = ldap_get_attribute_ber(li->ld, msg, ber, &bv, &bvals);
         rc == LDAP_SUCCESS;
-        rc = ldap_get_attribute_ber(li->ld, ent, ber, &bv, &bvals)) {
+        rc = ldap_get_attribute_ber(li->ld, msg, ber, &bv, &bvals)) {
       int i;
 
       if(!bv.bv_val)
@@ -720,57 +710,45 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
         binary = 0;
 
       if(!bvals) {
-        writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
-        if(writeerr) {
-          *err = writeerr;
-          return -1;
-        }
-        writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)bv.bv_val,
-                                     bv.bv_len);
-        if(writeerr) {
-          *err = writeerr;
-          return -1;
-        }
-        writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)":\n", 2);
-        if(writeerr) {
-          *err = writeerr;
-          return -1;
-        }
+        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
+        if(result)
+          break;
+        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)bv.bv_val,
+                                   bv.bv_len);
+        if(result)
+          break;
+        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)":\n", 2);
+        if(result)
+          break;
         data->req.bytecount += bv.bv_len + 3;
         continue;
       }
 
       for(i = 0; bvals[i].bv_val != NULL; i++) {
         int binval = 0;
-        writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
-        if(writeerr) {
-          *err = writeerr;
-          return -1;
-        }
+        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
+        if(result)
+          break;
 
-        writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)bv.bv_val,
-                                     bv.bv_len);
-        if(writeerr) {
-          *err = writeerr;
-          return -1;
-        }
+        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)bv.bv_val,
+                                   bv.bv_len);
+        if(result)
+          break;
 
-        writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)":", 1);
-        if(writeerr) {
-          *err = writeerr;
-          return -1;
-        }
+        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)":", 1);
+        if(result)
+          break;
         data->req.bytecount += bv.bv_len + 2;
 
         if(!binary) {
           /* check for leading or trailing whitespace */
           if(ISSPACE(bvals[i].bv_val[0]) ||
-             ISSPACE(bvals[i].bv_val[bvals[i].bv_len-1]))
+             ISSPACE(bvals[i].bv_val[bvals[i].bv_len - 1]))
             binval = 1;
           else {
             /* check for unprintable characters */
             unsigned int j;
-            for(j = 0; j<bvals[i].bv_len; j++)
+            for(j = 0; j < bvals[i].bv_len; j++)
               if(!ISPRINT(bvals[i].bv_val[j])) {
                 binval = 1;
                 break;
@@ -780,80 +758,59 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
         if(binary || binval) {
           char *val_b64 = NULL;
           size_t val_b64_sz = 0;
-          /* Binary value, encode to base64. */
-          CURLcode error = Curl_base64_encode(data,
-                                              bvals[i].bv_val,
-                                              bvals[i].bv_len,
-                                              &val_b64,
-                                              &val_b64_sz);
-          if(error) {
-            ber_memfree(bvals);
-            ber_free(ber, 0);
-            ldap_msgfree(msg);
-            *err = error;
-            return -1;
-          }
-          writeerr = Curl_client_write(data, CLIENTWRITE_BODY,
-                                       (char *)": ", 2);
-          if(writeerr) {
-            *err = writeerr;
-            return -1;
-          }
 
-          data->req.bytecount += 2;
-          if(val_b64_sz > 0) {
-            writeerr = Curl_client_write(data, CLIENTWRITE_BODY, val_b64,
-                                         val_b64_sz);
-            if(writeerr) {
-              *err = writeerr;
-              return -1;
-            }
-            free(val_b64);
-            data->req.bytecount += val_b64_sz;
-          }
+          /* Binary value, encode to base64. */
+          result = Curl_base64_encode(data, bvals[i].bv_val, bvals[i].bv_len,
+                                      &val_b64, &val_b64_sz);
+          if(!result)
+            result = Curl_client_write(data, CLIENTWRITE_BODY,
+                                       (char *)": ", 2);
+          if(!result && val_b64_sz > 0)
+            result = Curl_client_write(data, CLIENTWRITE_BODY, val_b64,
+                                       val_b64_sz);
+          free(val_b64);
+          data->req.bytecount += val_b64_sz + 2;
         }
         else {
-          writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)" ", 1);
-          if(writeerr) {
-            *err = writeerr;
-            return -1;
-          }
+          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)" ", 1);
+          if(result)
+            break;
 
-          writeerr = Curl_client_write(data, CLIENTWRITE_BODY, bvals[i].bv_val,
-                                       bvals[i].bv_len);
-          if(writeerr) {
-            *err = writeerr;
-            return -1;
-          }
+          result = Curl_client_write(data, CLIENTWRITE_BODY, bvals[i].bv_val,
+                                     bvals[i].bv_len);
+          if(result)
+            break;
 
           data->req.bytecount += bvals[i].bv_len + 1;
         }
-        writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
-        if(writeerr) {
-          *err = writeerr;
-          return -1;
-        }
+        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+        if(result)
+          break;
 
         data->req.bytecount++;
       }
+
       ber_memfree(bvals);
-      writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
-      if(writeerr) {
-        *err = writeerr;
-        return -1;
-      }
+
+      if(!result)
+        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+      if(result)
+        break;
       data->req.bytecount++;
     }
-    writeerr = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
-    if(writeerr) {
-      *err = writeerr;
-      return -1;
-    }
-    data->req.bytecount++;
+
     ber_free(ber, 0);
+
+    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+    if(!result)
+      result = CURLE_AGAIN;
+    data->req.bytecount++;
+    break;
   }
+
   ldap_msgfree(msg);
-  return ret;
+  *err = result;
+  return result? -1: 0;
 }
 
 #ifdef USE_SSL
