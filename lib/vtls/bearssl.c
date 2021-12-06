@@ -39,8 +39,10 @@
 struct x509_context {
   const br_x509_class *vtable;
   br_x509_minimal_context minimal;
+  br_x509_decoder_context decoder;
   bool verifyhost;
   bool verifypeer;
+  int cert_num;
 };
 
 struct ssl_backend_data {
@@ -260,6 +262,11 @@ static void x509_start_chain(const br_x509_class **ctx,
 {
   struct x509_context *x509 = (struct x509_context *)ctx;
 
+  if(!x509->verifypeer) {
+    x509->cert_num = 0;
+    return;
+  }
+
   if(!x509->verifyhost)
     server_name = NULL;
   x509->minimal.vtable->start_chain(&x509->minimal.vtable, server_name);
@@ -269,6 +276,13 @@ static void x509_start_cert(const br_x509_class **ctx, uint32_t length)
 {
   struct x509_context *x509 = (struct x509_context *)ctx;
 
+  if(!x509->verifypeer) {
+    /* Only decode the first cert in the chain to obtain the public key */
+    if(x509->cert_num == 0)
+      br_x509_decoder_init(&x509->decoder, NULL, NULL);
+    return;
+  }
+
   x509->minimal.vtable->start_cert(&x509->minimal.vtable, length);
 }
 
@@ -277,6 +291,12 @@ static void x509_append(const br_x509_class **ctx, const unsigned char *buf,
 {
   struct x509_context *x509 = (struct x509_context *)ctx;
 
+  if(!x509->verifypeer) {
+    if(x509->cert_num == 0)
+      br_x509_decoder_push(&x509->decoder, buf, len);
+    return;
+  }
+
   x509->minimal.vtable->append(&x509->minimal.vtable, buf, len);
 }
 
@@ -284,27 +304,38 @@ static void x509_end_cert(const br_x509_class **ctx)
 {
   struct x509_context *x509 = (struct x509_context *)ctx;
 
+  if(!x509->verifypeer) {
+    x509->cert_num++;
+    return;
+  }
+
   x509->minimal.vtable->end_cert(&x509->minimal.vtable);
 }
 
 static unsigned x509_end_chain(const br_x509_class **ctx)
 {
   struct x509_context *x509 = (struct x509_context *)ctx;
-  unsigned err;
 
-  err = x509->minimal.vtable->end_chain(&x509->minimal.vtable);
-  if(err && !x509->verifypeer) {
-    /* ignore any X.509 errors */
-    err = BR_ERR_OK;
+  if(!x509->verifypeer) {
+    return br_x509_decoder_last_error(&x509->decoder);
   }
 
-  return err;
+  return x509->minimal.vtable->end_chain(&x509->minimal.vtable);
 }
 
 static const br_x509_pkey *x509_get_pkey(const br_x509_class *const *ctx,
                                          unsigned *usages)
 {
   struct x509_context *x509 = (struct x509_context *)ctx;
+
+  if(!x509->verifypeer) {
+    /* Nothing in the chain is verified, just return the public key of the
+       first certificate and allow its usage for both TLS_RSA_* and
+       TLS_ECDHE_* */
+    if(usages)
+      *usages = BR_KEYTYPE_KEYX | BR_KEYTYPE_SIGN;
+    return br_x509_decoder_get_pkey(&x509->decoder);
+  }
 
   return x509->minimal.vtable->get_pkey(&x509->minimal.vtable, usages);
 }
