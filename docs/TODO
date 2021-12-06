@@ -79,6 +79,7 @@
  5.4 Allow SAN names in HTTP/2 server push
  5.5 auth= in URLs
  5.6 alt-svc should fallback if alt-svc does not work
+ 5.7 Require HTTP version X or higher
 
  6. TELNET
  6.1 ditch stdin
@@ -643,6 +644,14 @@
  next etc and if all alternatives fail go back to the original.
 
  See https://github.com/curl/curl/issues/4908
+
+5.7 Require HTTP version X or higher
+
+ curl and libcurl provide options for trying higher HTTP versions (for example
+ HTTP/2) but then still allows the server to pick version 1.1. We could
+ consider adding a way to require a minimum version.
+
+ See https://github.com/curl/curl/issues/7980
 
 6. TELNET
 
