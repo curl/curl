@@ -161,6 +161,18 @@ static CURLcode load_cafile(struct cafile_source *source,
         if(strcmp(name, "CERTIFICATE") && strcmp(name, "X509 CERTIFICATE"))
           break;
         br_x509_decoder_init(&ca.xc, append_dn, &ca);
+        ca.in_cert = TRUE;
+        ca.dn_len = 0;
+        break;
+      case BR_PEM_END_OBJ:
+        if(!ca.in_cert)
+          break;
+        ca.in_cert = FALSE;
+        if(br_x509_decoder_last_error(&ca.xc)) {
+          ca.err = CURLE_SSL_CACERT_BADFILE;
+          goto fail;
+        }
+        /* add trust anchor */
         if(ca.anchors_len == SIZE_MAX / sizeof(ca.anchors[0])) {
           ca.err = CURLE_OUT_OF_MEMORY;
           goto fail;
@@ -174,19 +186,8 @@ static CURLcode load_cafile(struct cafile_source *source,
         }
         ca.anchors = new_anchors;
         ca.anchors_len = new_anchors_len;
-        ca.in_cert = TRUE;
-        ca.dn_len = 0;
         ta = &ca.anchors[ca.anchors_len - 1];
         ta->dn.data = NULL;
-        break;
-      case BR_PEM_END_OBJ:
-        if(!ca.in_cert)
-          break;
-        ca.in_cert = FALSE;
-        if(br_x509_decoder_last_error(&ca.xc)) {
-          ca.err = CURLE_SSL_CACERT_BADFILE;
-          goto fail;
-        }
         ta->flags = 0;
         if(br_x509_decoder_isCA(&ca.xc))
           ta->flags |= BR_X509_TA_CA;
@@ -240,6 +241,8 @@ static CURLcode load_cafile(struct cafile_source *source,
   } while(source->type != CAFILE_SOURCE_BLOB);
   if(fp && ferror(fp))
     ca.err = CURLE_READ_ERROR;
+  else if(ca.in_cert)
+    ca.err = CURLE_SSL_CACERT_BADFILE;
 
 fail:
   if(fp)
