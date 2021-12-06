@@ -49,6 +49,13 @@ enabled.
 For WolfSSL, valid examples of cipher lists include \fBECDHE-RSA-RC4-SHA\fP,
 \fBAES256-SHA:AES256-SHA256\fP, etc.
 
+For BearSSL, valid examples of cipher lists include
+\fBECDHE-RSA-CHACHA20-POLY1305:ECDHE-RSA-AES128-GCM-SHA256\fP, or when using IANA names
+\fBTLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256\fP,
+etc.
+With BearSSL you do not add/remove ciphers. If one uses this option then all
+known ciphers are disabled and only those passed in are enabled.
+
 you will find more details about cipher lists on this URL:
 
  https://curl.se/docs/ssl-ciphers.html
@@ -71,7 +78,7 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.52.0
+Added in 7.52.0, in 7.83.0 for BearSSL
 
 If built TLS enabled.
 .SH RETURN VALUE
