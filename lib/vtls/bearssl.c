@@ -466,7 +466,7 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
     hostname = NULL;
   }
 
-  if(!br_ssl_client_reset(&backend->ctx, hostname, 0))
+  if(!br_ssl_client_reset(&backend->ctx, hostname, 1))
     return CURLE_FAILED_INIT;
   backend->active = TRUE;
 
