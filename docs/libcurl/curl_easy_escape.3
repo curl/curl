@@ -58,6 +58,7 @@ if(curl) {
     printf("Encoded: %s\\n", output);
     curl_free(output);
   }
+  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY
