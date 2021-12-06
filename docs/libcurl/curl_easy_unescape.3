@@ -59,6 +59,7 @@ if(curl) {
     /* ... */
     curl_free(decoded);
   }
+  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY
