@@ -96,7 +96,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     if(curlrc) {
       file = fopen(curlrc, FOPEN_READTEXT);
       if(!file) {
-        curl_free(curlrc);
+        free(curlrc);
         return 1;
       }
       filename = pathalloc = curlrc;
@@ -285,7 +285,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   else
     rc = 1; /* couldn't open the file */
 
-  curl_free(pathalloc);
+  free(pathalloc);
   return rc;
 }
 
