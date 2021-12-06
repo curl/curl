@@ -505,10 +505,13 @@ static int set_transfer_url(struct Curl_easy *data,
                             struct curl_pushheaders *hp)
 {
   const char *v;
-  CURLU *u = curl_url();
   CURLUcode uc;
   char *url = NULL;
   int rc = 0;
+  CURLU *u = curl_url();
+
+  if(!u)
+    return 5;
 
   v = curl_pushheader_byname(hp, ":scheme");
   if(v) {
