@@ -4,7 +4,7 @@ curl and libcurl 7.81.0
  Command line options:         244
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2545
+ Contributors:                 2548
 
 This release includes the following changes:
 
@@ -23,7 +23,10 @@ This release includes the following bugfixes:
  o curl.1: require "see also" for every documented option [27]
  o curl: improve error message for --head with -J [42]
  o curl_easy_cleanup.3: remove from multi handle first [3]
+ o curl_easy_escape.3: call curl_easy_cleanup in example [58]
+ o curl_easy_unescape.3: call curl_easy_cleanup in example [57]
  o curl_share_setopt.3: split out options into their own manpages [14]
+ o CURLOPT_STDERR.3: does not work with libcurl as a win32 DLL [51]
  o digest: compute user:realm:pass digest w/o userhash [45]
  o docs/checksrc: Add documentation for STRERROR [18]
  o docs/cmdline-opts: do not say "protocols: all" [26]
@@ -33,6 +36,7 @@ This release includes the following bugfixes:
  o docs: Update the Reducing Size section
  o FAQ: typo fix : "yout" ➤ "your" [30]
  o gen.pl: improve example output format [29]
+ o http2:set_transfer_url() return early on OOM [53]
  o HTTP3: update quiche build instructions [37]
  o http: enable haproxy support for hyper backend [20]
  o insecure.d: detail its use for SFTP and SCP as well [32]
@@ -42,18 +46,24 @@ This release includes the following bugfixes:
  o Makefile.m32: rename -winssl option to -schannel and tidy up [33]
  o mbedTLS: add support for CURLOPT_CAINFO_BLOB [44]
  o mbedTLS: include NULL byte in blob data length for CURLOPT_CAINFO_BLOB [38]
+ o multi: handle errors returned from socket/timer callbacks [52]
  o multi: shut down CONNECT in Curl_detach_connnection [2]
  o netrc.d: edit the .netrc example to look nicer [24]
+ o openldap: implement STARTTLS [56]
  o openssl: check the return value of BIO_new() [43]
  o openssl: remove `RSA_METHOD_FLAG_NO_CHECK` handling if unavailable
  o openssl: remove usage of deprecated `SSL_get_peer_certificate`
  o openssl: use non-deprecated API to read key parameters
  o page-footer: add a mention of how to report bugs to the man page
  o page-footer: document more environment variables [23]
+ o request.d: refer to 'method' rather than 'command' [59]
+ o retry-all-errors.d: make the example complete
  o runtests: make the SSH library a testable feature
  o rustls: read of zero bytes might be okay [9]
  o rustls: remove comment about checking handshaking [15]
  o rustls: remove incorrect EOF check [10]
+ o test1554: adjust for hyper [49]
+ o test1556: adjust for hyper [48]
  o test302[12]: run only with the libssh2 backend [8]
  o tests/CI.md: add more information on CI environments [39]
  o tftp: mark protocol as not possible to do over CONNECT [25]
@@ -76,13 +86,14 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Bernat Mut, Bernhard Walle, Boris Rasin,
-  Brad Fitzpatrick, Bruno Baguette, Dan Fandrich, Daniel Stenberg,
-  David Bohman, Don J Olmstead, Even Rouault, Florian Van Heghe, Glenn Strauss,
-  Jacob Hoffman-Andrews, Jeff Luszcz, jeffrson on github, Kevin Burke,
-  Marcel Raad, Mark Dodgson, nimaje on github, Patrick Monnerat, Paul Howarth,
-  Ray Satiro, Rikard Falkeborn, Ryan Sleevi, Stan Hu, Stefan Eissing,
+  Brad Fitzpatrick, Bruno Baguette, Damien Walsh, Dan Fandrich,
+  Daniel Stenberg, David Bohman, Don J Olmstead, Even Rouault,
+  Florian Van Heghe, Glenn Strauss, Jacob Hoffman-Andrews, Jeff Luszcz,
+  jeffrson on github, Jun Tseng, Kevin Burke, Marcelo Juchem, Marcel Raad,
+  Mark Dodgson, nimaje on github, Patrick Monnerat, Paul Howarth, Ray Satiro,
+  Rikard Falkeborn, Ryan Sleevi, Stan Hu, Stefan Eissing, Stephane Pellegrino,
   Stephen M. Coakley, Viktor Szakats, Vincent Grande, Wyatt O'Day,
-  (31 contributors)
+  (35 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -133,3 +144,12 @@ References to bug reports and discussions on issues:
  [45] = https://curl.se/bug/?i=8066
  [46] = https://curl.se/bug/?i=8033
  [47] = https://curl.se/bug/?i=8062
+ [48] = https://curl.se/bug/?i=8105
+ [49] = https://curl.se/bug/?i=8104
+ [51] = https://curl.se/bug/?i=8103
+ [52] = https://curl.se/bug/?i=8083
+ [53] = https://curl.se/bug/?i=8100
+ [56] = https://curl.se/bug/?i=8065
+ [57] = https://curl.se/bug/?i=8097
+ [58] = https://curl.se/bug/?i=8097
+ [59] = https://curl.se/bug/?i=8094
