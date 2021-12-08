@@ -110,7 +110,9 @@ Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
 {
   struct Curl_hash_element  *he;
   struct Curl_llist_element *le;
-  struct Curl_llist *l = FETCH_LIST(h, key, key_len);
+  struct Curl_llist *l;
+  DEBUGASSERT(h->slots);
+  l = FETCH_LIST(h, key, key_len);
 
   for(le = l->head; le; le = le->next) {
     he = (struct Curl_hash_element *) le->ptr;
@@ -139,7 +141,9 @@ Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
 int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
 {
   struct Curl_llist_element *le;
-  struct Curl_llist *l = FETCH_LIST(h, key, key_len);
+  struct Curl_llist *l;
+  DEBUGASSERT(h->slots);
+  l = FETCH_LIST(h, key, key_len);
 
   for(le = l->head; le; le = le->next) {
     struct Curl_hash_element *he = le->ptr;
@@ -163,6 +167,7 @@ Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
   struct Curl_llist *l;
 
   if(h) {
+    DEBUGASSERT(h->slots);
     l = FETCH_LIST(h, key, key_len);
     for(le = l->head; le; le = le->next) {
       struct Curl_hash_element *he = le->ptr;
