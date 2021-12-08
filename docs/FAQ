@@ -126,7 +126,7 @@ FAQ
 
   cURL is the name of the project. The name is a play on 'Client for URLs',
   originally with URL spelled in uppercase to make it obvious it deals with
-  URLs. The fact it can also be pronounced 'see URL' also helped, it works as
+  URLs. The fact it can also be read as 'see URL' also helped, it works as
   an abbreviation for "Client URL Request Library" or why not the recursive
   version: "curl URL Request Library".
 
