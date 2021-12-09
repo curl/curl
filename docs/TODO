@@ -7,14 +7,14 @@
                 Things that could be nice to do in the future
 
  Things to do in project curl. Please tell us what you think, contribute and
- send us patches that improve things!
+ send us patches that improve things.
 
  Be aware that these are things that we could do, or have once been considered
  things we could do. If you want to work on any of these areas, please
  consider bringing it up for discussions first on the mailing list so that we
- all agree it is still a good idea for the project!
+ all agree it is still a good idea for the project.
 
- All bugs documented in the KNOWN_BUGS document are subject for fixing!
+ All bugs documented in the KNOWN_BUGS document are subject for fixing.
 
  1. libcurl
  1.1 TFO support on Windows
@@ -274,7 +274,7 @@
  We can create a system with loadable modules/plug-ins, where these modules
  would be the ones that link to 3rd party libs. That would allow us to avoid
  having to load ALL dependencies since only the necessary ones for this
- app/invoke/used protocols would be necessary to load.  See
+ app/invoke/used protocols would be necessary to load. See
  https://github.com/curl/curl/issues/349
 
 1.12 updated DNS server while running
@@ -367,7 +367,7 @@
 1.20 SRV and URI DNS records
 
  Offer support for resolving SRV and URI DNS records for libcurl to know which
- server to connect to for various protocols (including HTTP!).
+ server to connect to for various protocols (including HTTP).
 
 1.21 netrc caching and sharing
 
@@ -800,7 +800,7 @@
 
  OpenSSL supports a callback for customised verification of the peer
  certificate, but this does not seem to be exposed in the libcurl APIs. Could
- it be? There's so much that could be done if it were!
+ it be? There's so much that could be done if it were.
 
 13.8 Support DANE
 
@@ -937,7 +937,7 @@
 17.4 Support CURLOPT_PREQUOTE
 
  The two other QUOTE options are supported for SFTP, but this was left out for
- unknown reasons!
+ unknown reasons.
 
 17.5 SSH over HTTPS proxy with more backends
 
@@ -1304,4 +1304,4 @@
 21.1 Support rate-limiting
 
  The rate-limiting logic is done in the PERFORMING state in multi.c but MQTT
- is not (yet) implemented to use that!
+ is not (yet) implemented to use that.

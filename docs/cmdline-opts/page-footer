@@ -122,7 +122,7 @@ URL malformed. The syntax was not correct.
 .IP 4
 A feature or option that was needed to perform the desired request was not
 enabled or was explicitly disabled at build-time. To make curl able to do
-this, you probably need another build of libcurl!
+this, you probably need another build of libcurl.
 .IP 5
 Could not resolve proxy. The given proxy host could not be resolved.
 .IP 6

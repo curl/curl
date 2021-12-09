@@ -103,7 +103,7 @@ archive is quite OK as well.
 ### Documentation
 
 Writing docs is dead boring and one of the big problems with many open source
-projects. But someone's gotta do it! It makes things a lot easier if you
+projects. But someone's gotta do it. It makes things a lot easier if you
 submit a small description of your fix or your new features with every
 contribution so that it can be swiftly added to the package documentation.
 

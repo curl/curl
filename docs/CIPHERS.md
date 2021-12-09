@@ -278,9 +278,9 @@ When specifying multiple cipher names, separate them with colon (`:`).
 
 ## GSKit
 
-Ciphers are internally defined as
-[numeric codes](https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_73/apis/gsk_attribute_set_buffer.htm),
-but libcurl maps them to the following case-insensitive names.
+Ciphers are internally defined as [numeric
+codes](https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_73/apis/gsk_attribute_set_buffer.htm). libcurl
+maps them to the following case-insensitive names.
 
 ### SSL2 cipher suites (insecure: disabled by default)
 
