@@ -6,7 +6,7 @@ Category: tls
 Example: --ssl-reqd ftp://example.com
 See-also: ssl insecure
 ---
-Require SSL/TLS for the connection.  Terminates the connection if the server
+Require SSL/TLS for the connection. Terminates the connection if the server
 does not support SSL/TLS.
 
 This option is handled in LDAP since version 7.81.0. It is fully supported

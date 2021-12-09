@@ -7,9 +7,9 @@
                                   Known Bugs
 
 These are problems and bugs known to exist at the time of this release. Feel
-free to join in and help us correct one or more of these! Also be sure to
+free to join in and help us correct one or more of these. Also be sure to
 check the changelog of the current development status, as one or more of these
-problems may have been fixed or changed somewhat since this was written!
+problems may have been fixed or changed somewhat since this was written.
 
  1. HTTP
  1.2 Multiple methods in a single WWW-Authenticate: header
@@ -200,7 +200,7 @@ problems may have been fixed or changed somewhat since this was written!
 1.5 Expect-100 meets 417
 
  If an upload using Expect: 100-continue receives an HTTP 417 response, it
- ought to be automatically resent without the Expect:.  A workaround is for
+ ought to be automatically resent without the Expect:. A workaround is for
  the client application to redo the transfer after disabling Expect:.
  https://curl.se/mail/archive-2008-02/0043.html
 
@@ -411,9 +411,9 @@ problems may have been fixed or changed somewhat since this was written!
 4.2 -J with -C - fails
 
  When using -J (with -O), automatically resumed downloading together with "-C
- -" fails. Without -J the same command line works! This happens because the
+ -" fails. Without -J the same command line works. This happens because the
  resume logic is worked out before the target file name (and thus its
- pre-transfer size) has been figured out!
+ pre-transfer size) has been figured out.
  https://curl.se/bug/view.cgi?id=1169
 
 4.3 --retry and transfer timeouts
@@ -511,7 +511,7 @@ problems may have been fixed or changed somewhat since this was written!
 
  This can make subsequent checks for libraries wrongly detect another
  installation in a directory that was previously added to LDFLAGS by another
- library check!
+ library check.
 
  A possibly better way to do these checks would be to keep the pristine LDFLAGS
  even after successful checks and instead add those verified paths to a
@@ -676,7 +676,7 @@ problems may have been fixed or changed somewhat since this was written!
 
     The sender converts the data from an internal character representation to
     the standard 8-bit NVT-ASCII representation (see the Telnet
-    specification).  The receiver will convert the data from the standard
+    specification). The receiver will convert the data from the standard
     form to his own internal form.
 
  Since 7.15.4 at least line endings are converted.
@@ -684,19 +684,19 @@ problems may have been fixed or changed somewhat since this was written!
 7.6 FTP with NULs in URL parts
 
  FTP URLs passed to curl may contain NUL (0x00) in the RFC 1738 <user>,
- <password>, and <fpath> components, encoded as "%00".  The problem is that
+ <password>, and <fpath> components, encoded as "%00". The problem is that
  curl_unescape does not detect this, but instead returns a shortened C string.
  From a strict FTP protocol standpoint, NUL is a valid character within RFC
  959 <string>, so the way to handle this correctly in curl would be to use a
  data structure other than a plain C string, one that can handle embedded NUL
- characters.  From a practical standpoint, most FTP servers would not
+ characters. From a practical standpoint, most FTP servers would not
  meaningfully support NUL characters within RFC 959 <string>, anyway (e.g.,
  Unix pathnames may not contain NUL).
 
 7.7 FTP and empty path parts in the URL
 
  libcurl ignores empty path parts in FTP URLs, whereas RFC1738 states that
- such parts should be sent to the server as 'CWD ' (without an argument).  The
+ such parts should be sent to the server as 'CWD ' (without an argument). The
  only exception to this rule, is that we knowingly break this if the empty
  part is first in the path, as then we use the double slashes to indicate that
  the user wants to reach the root dir (this exception SHALL remain even when
@@ -824,11 +824,11 @@ problems may have been fixed or changed somewhat since this was written!
  to potentially transcend the life-time of the initial easy handle that was
  used to drive the transfer over that connection, it uses a *separate* and
  internal easy handle when it shuts down the connection. That separate
- connection might not have the exact same settings as the original easy
- handle, and in particular it is often note-worthy that it does not have the
- same VERBOSE and debug callbacks setup so that an application will not get
- the protocol data for the disconnect phase of a transfer the same way it got
- all the other data.
+ connection might not have the same settings as the original easy handle, and
+ in particular it is often note-worthy that it does not have the same VERBOSE
+ and debug callbacks setup so that an application will not get the protocol
+ data for the disconnect phase of a transfer the same way it got all the other
+ data.
 
  This is because the original easy handle might have already been freed at that
  point and the application might not at all be prepared that the callback
@@ -1079,7 +1079,7 @@ problems may have been fixed or changed somewhat since this was written!
 15.13 CMake build with MIT Kerberos does not work
 
  Minimum CMake version was bumped in curl 7.71.0 (#5358) Since CMake 3.2
- try_compile started respecting the CMAKE_EXE_FLAGS.  The code dealing with
+ try_compile started respecting the CMAKE_EXE_FLAGS. The code dealing with
  MIT Kerberos detection sets few variables to potentially weird mix of space,
  and ;-separated flags. It had to blow up at some point. All the CMake checks
  that involve compilation are doomed from that point, the configured tree
