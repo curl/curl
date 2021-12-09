@@ -84,6 +84,8 @@ Bailiff and Bálint Szilakszi,
 
 [PostgreSQL](https://github.com/pramsey/pgsql-http) - HTTP client for PostgreSQL
 
+[PostgreSQL](https://github.com/RekGRpth/pg_curl) - cURL client for PostgreSQL
+
 [PureBasic](https://www.purebasic.com/documentation/http/index.html) uses libcurl in its "native" HTTP subsystem
 
 [Python](http://pycurl.io/) PycURL by Kjetil Jacobsen
