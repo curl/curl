@@ -70,8 +70,9 @@ static void removeFd(struct Sockets *sockets, curl_socket_t fd, int mention)
 
 /**
  * Add a file descriptor to a sockets array.
+ * Return 0 on success, 1 on error.
  */
-static void addFd(struct Sockets *sockets, curl_socket_t fd, const char *what)
+static int addFd(struct Sockets *sockets, curl_socket_t fd, const char *what)
 {
   /**
    * To ensure we only have each file descriptor once, we remove it then add
@@ -85,7 +86,7 @@ static void addFd(struct Sockets *sockets, curl_socket_t fd, const char *what)
   if(!sockets->sockets) {
     sockets->sockets = malloc(sizeof(curl_socket_t) * 20U);
     if(!sockets->sockets)
-      return;
+      return 1;
     sockets->max_count = 20;
   }
   else if(sockets->count + 1 > sockets->max_count) {
@@ -95,7 +96,7 @@ static void addFd(struct Sockets *sockets, curl_socket_t fd, const char *what)
     if(!sockets->sockets) {
       /* cleanup in test_cleanup */
       sockets->sockets = oldptr;
-      return;
+      return 1;
     }
     sockets->max_count += 20;
   }
@@ -104,6 +105,7 @@ static void addFd(struct Sockets *sockets, curl_socket_t fd, const char *what)
    */
   sockets->sockets[sockets->count] = fd;
   ++sockets->count;
+  return 0;
 }
 
 static int max_socket_calls;
@@ -127,10 +129,12 @@ static int curlSocketCallback(CURL *easy, curl_socket_t s, int action,
   }
 
   if(action == CURL_POLL_IN || action == CURL_POLL_INOUT)
-    addFd(&sockets->read, s, "read");
+    if(addFd(&sockets->read, s, "read"))
+      return -1; /* bail out */
 
   if(action == CURL_POLL_OUT || action == CURL_POLL_INOUT)
-    addFd(&sockets->write, s, "write");
+    if(addFd(&sockets->write, s, "write"))
+      return -1;
 
   if(action == CURL_POLL_REMOVE) {
     removeFd(&sockets->read, s, 1);
@@ -221,8 +225,8 @@ static void updateFdSet(struct Sockets *sockets, fd_set* fdset,
   }
 }
 
-static void notifyCurl(CURLM *curl, curl_socket_t s, int evBitmask,
-                       const char *info)
+static int socket_action(CURLM *curl, curl_socket_t s, int evBitmask,
+                               const char *info)
 {
   int numhandles = 0;
   CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
@@ -230,20 +234,26 @@ static void notifyCurl(CURLM *curl, curl_socket_t s, int evBitmask,
     fprintf(stderr, "Curl error on %s: %i (%s)\n",
             info, result, curl_multi_strerror(result));
   }
+  return (int)result;
 }
 
 /**
  * Invoke curl when a file descriptor is set.
  */
-static void checkFdSet(CURLM *curl, struct Sockets *sockets, fd_set *fdset,
-                       int evBitmask, const char *name)
+static int checkFdSet(CURLM *curl,
+                      struct Sockets *sockets, fd_set *fdset,
+                      int evBitmask, const char *name)
 {
   int i;
+  CURLMcode result = CURLM_OK;
   for(i = 0; i < sockets->count; ++i) {
     if(FD_ISSET(sockets->sockets[i], fdset)) {
-      notifyCurl(curl, sockets->sockets[i], evBitmask, name);
+      result = socket_action(curl, sockets->sockets[i], evBitmask, name);
+      if(result)
+        break;
     }
   }
+  return (int)result;
 }
 
 static int testone(char *URL, int timercb, int socketcb)
@@ -285,7 +295,9 @@ static int testone(char *URL, int timercb, int socketcb)
 
   multi_add_handle(m, curl);
 
-  notifyCurl(m, CURL_SOCKET_TIMEOUT, 0, "timeout");
+  res = socket_action(m, CURL_SOCKET_TIMEOUT, 0, "timeout");
+  if(res)
+    goto test_cleanup;
 
   while(!checkForCompletion(m, &success)) {
     fd_set readSet, writeSet;
@@ -307,15 +319,22 @@ static int testone(char *URL, int timercb, int socketcb)
       tv.tv_usec = 100000;
     }
 
+    assert(maxFd);
     select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
-    checkFdSet(m, &sockets.read, &readSet, CURL_CSELECT_IN, "read");
-    checkFdSet(m, &sockets.write, &writeSet, CURL_CSELECT_OUT, "write");
+    res = checkFdSet(m, &sockets.read, &readSet, CURL_CSELECT_IN, "read");
+    if(res)
+      goto test_cleanup;
+    res = checkFdSet(m, &sockets.write, &writeSet, CURL_CSELECT_OUT, "write");
+    if(res)
+      goto test_cleanup;
 
     if(timeout.tv_sec != -1 && getMicroSecondTimeout(&timeout) == 0) {
       /* Curl's timer has elapsed. */
-      notifyCurl(m, CURL_SOCKET_TIMEOUT, 0, "timeout");
+      res = socket_action(m, CURL_SOCKET_TIMEOUT, 0, "timeout");
+      if(res)
+        goto test_cleanup;
     }
 
     abort_on_test_timeout();
