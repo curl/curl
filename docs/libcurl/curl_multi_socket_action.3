@@ -67,7 +67,7 @@ for an event-based system using the callback is far better than relying on
 polling the timeout value.
 
 When this function returns error, the state of all transfers are uncertain and
-they cannot be continued. \fBcurl_multi_socket_action(3)\fP should not be
+they cannot be continued. \fIcurl_multi_socket_action(3)\fP should not be
 called again on the same multi handle after an error has been returned, unless
 first removing all the handles and adding new ones.
 .SH "TYPICAL USAGE"
