@@ -63,10 +63,13 @@ inter-operate better with URLs that appear in the wild.
 
 ### spaces
 
-In particular `Location:` headers that indicate to the client where a resource
-has been redirected to, sometimes contain spaces. This is a violation of RFC
-3986 but is fine in the WHATWG spec. curl handles these by re-encoding them to
-`%20`.
+A URL provided to curl cannot contain spaces. They need to be provided URL
+encoded to be accepted in a URL by curl.
+
+An exception to this rule: `Location:` response headers that indicate to a
+client where a resource has been redirected to, sometimes contain spaces. This
+is a violation of RFC 3986 but is fine in the WHATWG spec. curl handles these
+by re-encoding them to `%20`.
 
 ### non-ASCII
 
@@ -171,9 +174,9 @@ brackets). For example:
 
 ### "localhost"
 
-Starting in curl 7.77.0, curl will use loopback IP addresses for the name
-`localhost`: `127.0.0.1` and `::1`. It will not try to resolve the name using
-the resolver functions.
+Starting in curl 7.77.0, curl uses loopback IP addresses for the name
+`localhost`: `127.0.0.1` and `::1`. It does not resolve the name using the
+resolver functions.
 
 This is done to make sure the host accessed is truly the localhost - the local
 machine.
