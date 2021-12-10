@@ -286,8 +286,11 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     post_data_len = strlen(post_data);
   else
     post_data_len = (size_t)data->set.postfieldsize;
-  Curl_sha256it(sha_hash,
-                (const unsigned char *) post_data, post_data_len);
+  if(Curl_sha256it(sha_hash, (const unsigned char *) post_data,
+                   post_data_len)) {
+    goto fail;
+  }
+
   sha256_to_hex(sha_hex, sha_hash, sizeof(sha_hex));
 
   Curl_http_method(data, conn, &method, &httpreq);
@@ -320,8 +323,11 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     goto fail;
   }
 
-  Curl_sha256it(sha_hash, (unsigned char *) canonical_request,
-                strlen(canonical_request));
+  if(Curl_sha256it(sha_hash, (unsigned char *) canonical_request,
+                   strlen(canonical_request))) {
+    goto fail;
+  }
+
   sha256_to_hex(sha_hex, sha_hash, sizeof(sha_hex));
 
   /*

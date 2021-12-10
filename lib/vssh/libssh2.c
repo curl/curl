@@ -645,8 +645,8 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
 
     hostkey = libssh2_session_hostkey(sshc->ssh_session, &len, NULL);
     if(hostkey) {
-      Curl_sha256it(hash, (const unsigned char *) hostkey, len);
-      fingerprint = (char *) hash;
+      if(!Curl_sha256it(hash, (const unsigned char *) hostkey, len))
+        fingerprint = (char *) hash;
     }
 #endif
 
@@ -661,16 +661,15 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
 
     /* The length of fingerprint is 32 bytes for SHA256.
      * See libssh2_hostkey_hash documentation. */
-    if(Curl_base64_encode (data, fingerprint, 32, &fingerprint_b64,
-        &fingerprint_b64_len) != CURLE_OK) {
+    if(Curl_base64_encode(data, fingerprint, 32, &fingerprint_b64,
+                          &fingerprint_b64_len) != CURLE_OK) {
       state(data, SSH_SESSION_FREE);
       sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
       return sshc->actualcode;
     }
 
     if(!fingerprint_b64) {
-      failf(data,
-          "sha256 fingerprint could not be encoded");
+      failf(data, "sha256 fingerprint could not be encoded");
       state(data, SSH_SESSION_FREE);
       sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
       return sshc->actualcode;

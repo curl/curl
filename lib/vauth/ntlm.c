@@ -603,7 +603,9 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     memcpy(tmp, &ntlm->nonce[0], 8);
     memcpy(tmp + 8, entropy, 8);
 
-    Curl_md5it(md5sum, tmp, 16);
+    result = Curl_md5it(md5sum, tmp, 16);
+    if(result)
+      return result;
 
     /* We shall only use the first 8 bytes of md5sum, but the des code in
        Curl_ntlm_core_lm_resp only encrypt the first 8 bytes */
