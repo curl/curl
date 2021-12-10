@@ -281,11 +281,8 @@ static struct Curl_sh_entry *sh_addentry(struct Curl_hash *sh,
   if(!check)
     return NULL; /* major failure */
 
-  if(Curl_hash_init(&check->transfers, TRHASH_SIZE, trhash,
-                    trhash_compare, trhash_dtor)) {
-    free(check);
-    return NULL;
-  }
+  Curl_hash_init(&check->transfers, TRHASH_SIZE, trhash, trhash_compare,
+                 trhash_dtor);
 
   /* make/add new hash entry */
   if(!Curl_hash_add(sh, (char *)&s, sizeof(curl_socket_t), check)) {
@@ -352,10 +349,10 @@ static size_t hash_fd(void *key, size_t key_length, size_t slots_num)
  * per call."
  *
  */
-static int sh_init(struct Curl_hash *hash, int hashsize)
+static void sh_init(struct Curl_hash *hash, int hashsize)
 {
-  return Curl_hash_init(hash, hashsize, hash_fd, fd_key_compare,
-                        sh_freeentry);
+  Curl_hash_init(hash, hashsize, hash_fd, fd_key_compare,
+                 sh_freeentry);
 }
 
 /*
@@ -382,11 +379,9 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 
   multi->magic = CURL_MULTI_HANDLE;
 
-  if(Curl_mk_dnscache(&multi->hostcache))
-    goto error;
+  Curl_init_dnscache(&multi->hostcache);
 
-  if(sh_init(&multi->sockhash, hashsize))
-    goto error;
+  sh_init(&multi->sockhash, hashsize);
 
   if(Curl_conncache_init(&multi->conn_cache, chashsize))
     goto error;

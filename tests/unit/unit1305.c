@@ -46,19 +46,13 @@ static struct Curl_dns_entry *data_node;
 
 static CURLcode unit_setup(void)
 {
-  int rc;
   data = curl_easy_init();
   if(!data) {
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
 
-  rc = Curl_mk_dnscache(&hp);
-  if(rc) {
-    curl_easy_cleanup(data);
-    curl_global_cleanup();
-    return CURLE_OUT_OF_MEMORY;
-  }
+  Curl_init_dnscache(&hp);
   return CURLE_OK;
 }
 

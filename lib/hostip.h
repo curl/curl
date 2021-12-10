@@ -129,8 +129,8 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 void Curl_resolv_unlock(struct Curl_easy *data,
                         struct Curl_dns_entry *dns);
 
-/* init a new dns cache and return success */
-int Curl_mk_dnscache(struct Curl_hash *hash);
+/* init a new dns cache */
+void Curl_init_dnscache(struct Curl_hash *hash);
 
 /* prune old entries from the DNS cache */
 void Curl_hostcache_prune(struct Curl_easy *data);
