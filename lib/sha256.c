@@ -85,6 +85,8 @@ typedef struct sha256_ctx my_sha256_ctx;
 static void my_sha256_init(my_sha256_ctx *ctx)
 {
   ctx->openssl_ctx = EVP_MD_CTX_create();
+  if(!ctx->openssl_ctx)
+    return;
   EVP_DigestInit_ex(ctx->openssl_ctx, EVP_sha256(), NULL);
 }
 
