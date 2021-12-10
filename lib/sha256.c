@@ -94,13 +94,16 @@ static void my_sha256_update(my_sha256_ctx *ctx,
                              const unsigned char *data,
                              unsigned int length)
 {
-  EVP_DigestUpdate(ctx->openssl_ctx, data, length);
+  if(ctx->openssl_ctx)
+    EVP_DigestUpdate(ctx->openssl_ctx, data, length);
 }
 
 static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
 {
-  EVP_DigestFinal_ex(ctx->openssl_ctx, digest, NULL);
-  EVP_MD_CTX_destroy(ctx->openssl_ctx);
+  if(ctx->openssl_ctx) {
+    EVP_DigestFinal_ex(ctx->openssl_ctx, digest, NULL);
+    EVP_MD_CTX_destroy(ctx->openssl_ctx);
+  }
 }
 
 #elif defined(USE_GNUTLS)
