@@ -28,11 +28,6 @@
 #include <string.h>
 #include <curl/curl.h>
 
-#if defined(__GNUC__) && defined(__MINGW32__)
-/* GCC 10 on mingw has issues with this, disable */
-#pragma GCC diagnostic ignored "-Wformat"
-#endif
-
 /* Auxiliary function that waits on the socket. */
 static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
 {
@@ -125,8 +120,7 @@ int main(void)
         return 1;
       }
 
-      printf("Sent %" CURL_FORMAT_CURL_OFF_T " bytes.\n",
-        (curl_off_t)nsent);
+      printf("Sent %lu bytes.\n", (unsigned long)nsent);
 
     } while(nsent_total < request_len);
 
@@ -156,8 +150,7 @@ int main(void)
         break;
       }
 
-      printf("Received %" CURL_FORMAT_CURL_OFF_T " bytes.\n",
-        (curl_off_t)nread);
+      printf("Received %lu bytes.\n", (unsigned long)nread);
     }
 
     /* always cleanup */

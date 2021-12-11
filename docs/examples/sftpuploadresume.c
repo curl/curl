@@ -28,11 +28,6 @@
 #include <stdio.h>
 #include <curl/curl.h>
 
-#if defined(__GNUC__) && defined(__MINGW32__)
-/* GCC 10 on mingw has issues with this, disable */
-#pragma GCC diagnostic ignored "-Wformat"
-#endif
-
 /* read data to upload */
 static size_t readfunc(char *ptr, size_t size, size_t nmemb, void *stream)
 {
@@ -71,7 +66,7 @@ static curl_off_t sftpGetRemoteFileSize(const char *i_remoteFile)
                                &remoteFileSizeByte);
     if(result)
       return -1;
-    printf("filesize: %" CURL_FORMAT_CURL_OFF_T "\n", remoteFileSizeByte);
+    printf("filesize: %lu\n", (unsigned long)remoteFileSizeByte);
   }
   curl_easy_cleanup(curlHandlePtr);
 
