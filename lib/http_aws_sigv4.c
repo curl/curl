@@ -288,7 +288,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     post_data_len = (size_t)data->set.postfieldsize;
   Curl_sha256it(sha_hash,
                 (const unsigned char *) post_data, post_data_len);
-  if(!(char *) sha_hash) {
+  if(!sha_hash[0]) {
     goto fail;
   }
 
@@ -326,7 +326,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   Curl_sha256it(sha_hash, (unsigned char *) canonical_request,
                 strlen(canonical_request));
-  if(!(char *) sha_hash) {
+  if(!sha_hash[0]) {
     goto fail;
   }
 
