@@ -666,7 +666,7 @@ static CURLcode auth_create_digest_http_message(
                   struct digestdata *digest,
                   char **outptr, size_t *outlen,
                   void (*convert_to_ascii)(unsigned char *, unsigned char *),
-                  void (*hash)(unsigned char *, const unsigned char *,
+                  CURLcode (*hash)(unsigned char *, const unsigned char *,
                                const size_t))
 {
   CURLcode result;
