@@ -614,6 +614,36 @@ static CURLcode oldap_done(struct Curl_easy *data, CURLcode res,
   return CURLE_OK;
 }
 
+static CURLcode client_write(struct Curl_easy *data, const char *prefix,
+                             const char *value, size_t len, const char *suffix)
+{
+  CURLcode result = CURLE_OK;
+  size_t l;
+
+  if(prefix) {
+    l = strlen(prefix);
+    /* If we have a zero-length value and the prefix ends with a space
+       separator, drop the latter. */
+    if(!len && l && prefix[l - 1] == ' ')
+      l--;
+    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) prefix, l);
+    if(!result)
+      data->req.bytecount += l;
+  }
+  if(!result && value) {
+    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) value, len);
+    if(!result)
+      data->req.bytecount += len;
+  }
+  if(!result && suffix) {
+    l = strlen(suffix);
+    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) suffix, l);
+    if(!result)
+      data->req.bytecount += l;
+  }
+  return result;
+}
+
 static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
                           size_t len, CURLcode *err)
 {
@@ -682,19 +712,10 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       result = CURLE_RECV_ERROR;
       break;
     }
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"DN: ", 4);
-    if(result)
-      break;
 
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)bv.bv_val,
-                               bv.bv_len);
+    result = client_write(data, "DN: ", bv.bv_val, bv.bv_len, "\n");
     if(result)
       break;
-
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
-    if(result)
-      break;
-    data->req.bytecount += bv.bv_len + 5;
 
     for(rc = ldap_get_attribute_ber(li->ld, msg, ber, &bv, &bvals);
         rc == LDAP_SUCCESS;
@@ -704,41 +725,22 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       if(!bv.bv_val)
         break;
 
-      if(bv.bv_len > 7 && !strncmp(bv.bv_val + bv.bv_len - 7, ";binary", 7))
-        binary = 1;
-      else
-        binary = 0;
-
       if(!bvals) {
-        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
+        result = client_write(data, "\t", bv.bv_val, bv.bv_len, ":\n");
         if(result)
           break;
-        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)bv.bv_val,
-                                   bv.bv_len);
-        if(result)
-          break;
-        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)":\n", 2);
-        if(result)
-          break;
-        data->req.bytecount += bv.bv_len + 3;
         continue;
       }
 
+      binary = bv.bv_len > 7 &&
+               !strncmp(bv.bv_val + bv.bv_len - 7, ";binary", 7);
+
       for(i = 0; bvals[i].bv_val != NULL; i++) {
         int binval = 0;
-        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
-        if(result)
-          break;
 
-        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)bv.bv_val,
-                                   bv.bv_len);
+        result = client_write(data, "\t", bv.bv_val, bv.bv_len, ":");
         if(result)
           break;
-
-        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)":", 1);
-        if(result)
-          break;
-        data->req.bytecount += bv.bv_len + 2;
 
         if(!binary) {
           /* check for leading or trailing whitespace */
@@ -760,51 +762,34 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
           size_t val_b64_sz = 0;
 
           /* Binary value, encode to base64. */
-          result = Curl_base64_encode(data, bvals[i].bv_val, bvals[i].bv_len,
-                                      &val_b64, &val_b64_sz);
+          if(bvals[i].bv_len)
+            result = Curl_base64_encode(data, bvals[i].bv_val, bvals[i].bv_len,
+                                        &val_b64, &val_b64_sz);
           if(!result)
-            result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                       (char *)": ", 2);
-          if(!result && val_b64_sz > 0)
-            result = Curl_client_write(data, CLIENTWRITE_BODY, val_b64,
-                                       val_b64_sz);
+            result = client_write(data, ": ", val_b64, val_b64_sz, "\n");
           free(val_b64);
-          data->req.bytecount += val_b64_sz + 2;
         }
-        else {
-          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)" ", 1);
-          if(result)
-            break;
-
-          result = Curl_client_write(data, CLIENTWRITE_BODY, bvals[i].bv_val,
-                                     bvals[i].bv_len);
-          if(result)
-            break;
-
-          data->req.bytecount += bvals[i].bv_len + 1;
-        }
-        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+        else
+          result = client_write(data, " ",
+                                bvals[i].bv_val, bvals[i].bv_len, "\n");
         if(result)
           break;
-
-        data->req.bytecount++;
       }
 
       ber_memfree(bvals);
-
+      bvals = NULL;
       if(!result)
-        result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+        result = client_write(data, "\n", NULL, 0, NULL);
       if(result)
         break;
-      data->req.bytecount++;
     }
 
     ber_free(ber, 0);
 
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+    if(!result)
+      result = client_write(data, "\n", NULL, 0, NULL);
     if(!result)
       result = CURLE_AGAIN;
-    data->req.bytecount++;
     break;
   }
 
