@@ -555,7 +555,7 @@ const struct MD5_params Curl_DIGEST_MD5[] = {
 
 /*
  * @unittest: 1601
-* Returns CURLE_OK on success.
+ * Returns CURLE_OK on success.
  */
 CURLcode Curl_md5it(unsigned char *outbuffer, const unsigned char *input,
                 const size_t len)
