@@ -502,7 +502,7 @@ static int my_sha256_final(unsigned char *out,
  * output [in/out] - The output buffer.
  * input  [in]     - The input data.
  * length [in]     - The input length.
- * 
+ *
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
