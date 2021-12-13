@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/bin/sh
 # -*- coding: utf-8 -*-
 #
 #  Project                     ___| | | |  _ \| |
@@ -19,11 +19,17 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-"""Server for testing SMB"""
-
+#
+# The following 3 lines implement a fallback from the interpreter named python3
+# to the interpreter named python. This way we prefer Python 3 over Python 2.
+# It works by executing the 2nd line using a shell which then executes Python.
+""":"
+exec "$(command -v python3 || command -v python)" "$0" "$@"
+":"""
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+"""Server for testing SMB"""
 import argparse
 import logging
 import os

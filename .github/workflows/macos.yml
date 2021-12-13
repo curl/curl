@@ -80,6 +80,9 @@ jobs:
     - run: brew update && for i in 1 2 3; do brew bundle install --no-lock --file /tmp/Brewfile && break || sleep 1; done
       name: 'brew install'
 
+    - run: python3 -m pip install impacket
+      name: 'pip3 install'
+
     - uses: actions/checkout@v2
 
     - run: ./buildconf && ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
@@ -126,6 +129,9 @@ jobs:
 
     - run: brew update && brew bundle install --no-lock --file /tmp/Brewfile
       name: 'brew install'
+
+    - run: python3 -m pip install impacket
+      name: 'pip3 install'
 
     - uses: actions/checkout@v2
 

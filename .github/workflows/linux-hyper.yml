@@ -28,6 +28,9 @@ jobs:
     - run: sudo apt-get install libtool autoconf automake pkg-config
       name: install prereqs
 
+    - run: python3 -m pip install impacket
+      name: 'pip3 install'
+
     - run: (cd $HOME;
         git clone --depth=1 https://github.com/hyperium/hyper.git;
         curl https://sh.rustup.rs -sSf | sh -s -- -y;
