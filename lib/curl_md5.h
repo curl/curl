@@ -27,7 +27,7 @@
 
 #define MD5_DIGEST_LEN  16
 
-typedef void (* Curl_MD5_init_func)(void *context);
+typedef CURLcode (* Curl_MD5_init_func)(void *context);
 typedef void (* Curl_MD5_update_func)(void *context,
                                       const unsigned char *data,
                                       unsigned int len);

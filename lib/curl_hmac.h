@@ -26,7 +26,7 @@
 
 #define HMAC_MD5_LENGTH 16
 
-typedef void    (* HMAC_hinit_func)(void *context);
+typedef CURLcode    (* HMAC_hinit_func)(void *context);
 typedef void    (* HMAC_hupdate_func)(void *context,
                                       const unsigned char *data,
                                       unsigned int len);

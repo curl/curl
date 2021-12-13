@@ -62,9 +62,10 @@
 
 typedef struct md5_ctx MD5_CTX;
 
-static void MD5_Init(MD5_CTX *ctx)
+static CURLcode MD5_Init(MD5_CTX *ctx)
 {
   md5_init(ctx);
+  return CURLE_OK;
 }
 
 static void MD5_Update(MD5_CTX *ctx,
@@ -98,13 +99,14 @@ static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 
 typedef mbedtls_md5_context MD5_CTX;
 
-static void MD5_Init(MD5_CTX *ctx)
+static CURLcode MD5_Init(MD5_CTX *ctx)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
   (void) mbedtls_md5_starts(ctx);
 #else
   (void) mbedtls_md5_starts_ret(ctx);
 #endif
+  return CURLE_OK;
 }
 
 static void MD5_Update(MD5_CTX *ctx,
@@ -146,9 +148,10 @@ static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 /* The last #include file should be: */
 #include "memdebug.h"
 
-static void MD5_Init(MD5_CTX *ctx)
+static CURLcode MD5_Init(MD5_CTX *ctx)
 {
   CC_MD5_Init(ctx);
+  return CURLE_OK;
 }
 
 static void MD5_Update(MD5_CTX *ctx,
@@ -176,12 +179,13 @@ struct md5_ctx {
 };
 typedef struct md5_ctx MD5_CTX;
 
-static void MD5_Init(MD5_CTX *ctx)
+static CURLcode MD5_Init(MD5_CTX *ctx)
 {
   if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
     CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash);
   }
+  return CURLE_OK;
 }
 
 static void MD5_Update(MD5_CTX *ctx,
@@ -261,7 +265,7 @@ struct md5_ctx {
 };
 typedef struct md5_ctx MD5_CTX;
 
-static void MD5_Init(MD5_CTX *ctx);
+static CURLcode MD5_Init(MD5_CTX *ctx);
 static void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size);
 static void MD5_Final(unsigned char *result, MD5_CTX *ctx);
 
@@ -422,7 +426,7 @@ static const void *body(MD5_CTX *ctx, const void *data, unsigned long size)
   return ptr;
 }
 
-static void MD5_Init(MD5_CTX *ctx)
+static CURLcode MD5_Init(MD5_CTX *ctx)
 {
   ctx->a = 0x67452301;
   ctx->b = 0xefcdab89;
@@ -431,6 +435,8 @@ static void MD5_Init(MD5_CTX *ctx)
 
   ctx->lo = 0;
   ctx->hi = 0;
+
+  return CURLE_OK;
 }
 
 static void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
