@@ -25,8 +25,10 @@ jobs:
           configure: --with-openssl --with-hyper=$HOME/hyper
 
     steps:
-    - run: sudo apt-get install libtool autoconf automake pkg-config
-      name: install prereqs
+    - run: |
+        sudo apt-get install libtool autoconf automake pkg-config
+        sudo python3 -m pip install impacket
+      name: install prereqs and impacket
 
     - run: (cd $HOME;
         git clone --depth=1 https://github.com/hyperium/hyper.git;

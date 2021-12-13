@@ -31,8 +31,8 @@ jobs:
 
     steps:
     - run: |
-        sudo apt-get install libtool autoconf automake pkg-config stunnel4 python3-pip
-        sudo pip3 install impacket
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4
+        sudo python3 -m pip install impacket
       name: install prereqs and impacket
 
     - run: |
