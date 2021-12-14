@@ -30,15 +30,14 @@ CURLINFO_RESPONSE_CODE \- get the last response code
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_RESPONSE_CODE, long *codep);
 .fi
 .SH DESCRIPTION
-Pass a pointer to a long to receive the last received HTTP, FTP or SMTP
-response code. This option was previously known as CURLINFO_HTTP_CODE in
-libcurl 7.10.7 and earlier. The stored value will be zero if no server
-response code has been received. Note that a proxy's CONNECT response should
+Pass a pointer to a long to receive the last received HTTP, FTP, SMTP or
+LDAP (openldap only) response code. This option was previously known as
+CURLINFO_HTTP_CODE in libcurl 7.10.7 and earlier.
+The stored value will be zero if no server response code has been received.
+Note that a proxy's CONNECT response should
 be read with \fICURLINFO_HTTP_CONNECTCODE(3)\fP and not this.
-
-Support for SMTP responses added in 7.25.0.
 .SH PROTOCOLS
-HTTP, FTP and SMTP
+HTTP, FTP, SMTP and LDAP
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -55,6 +54,7 @@ if(curl) {
 .fi
 .SH AVAILABILITY
 Added in 7.10.8. CURLINFO_HTTP_CODE was added in 7.4.1.
+Support for SMTP responses added in 7.25.0, for OpenLDAP in 7.81.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
