@@ -348,27 +348,35 @@ UNITTEST_START
   CURLcode result;
   const char *beg = (const char *)&cert[0];
   const char *end = (const char *)&cert[sizeof(cert)];
-  struct Curl_easy *data = curl_easy_init();
+  struct Curl_easy *data;
   int i;
   int byte;
-  if(!data)
-    return 2;
 
-  result = Curl_extract_certinfo(data, 0, beg, end);
-
-  fail_unless(result == CURLE_OK, "Curl_extract_certinfo returned error");
-
-  /* a poor man's fuzzing of some initial data to make sure nothing bad
-     happens */
-  for(byte = 1 ; byte < 255; byte += 17) {
-    for(i = 0; i < 45; i++) {
-      char backup = cert[i];
-      cert[i] = (unsigned char) (byte & 0xff);
-      (void) Curl_extract_certinfo(data, 0, beg, end);
-      cert[i] = backup;
-    }
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
   }
-  curl_easy_cleanup(data);
+
+  data = curl_easy_init();
+  if(data) {
+    result = Curl_extract_certinfo(data, 0, beg, end);
+
+    fail_unless(result == CURLE_OK, "Curl_extract_certinfo returned error");
+
+    /* a poor man's fuzzing of some initial data to make sure nothing bad
+       happens */
+    for(byte = 1 ; byte < 255; byte += 17) {
+      for(i = 0; i < 45; i++) {
+        char backup = cert[i];
+        cert[i] = (unsigned char) (byte & 0xff);
+        (void) Curl_extract_certinfo(data, 0, beg, end);
+        cert[i] = backup;
+      }
+    }
+
+    curl_easy_cleanup(data);
+  }
+  curl_global_cleanup();
 }
 UNITTEST_STOP
 

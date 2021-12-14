@@ -608,7 +608,10 @@ static const char *ASN1tostr(struct Curl_asn1Element *elem, int type)
 
 /*
  * ASCII encode distinguished name at `dn' into the `buflen'-sized buffer at
- * `buf'.  Return the total string length, even if larger than `buflen'.
+ * `buf'.
+ *
+ * Returns the total string length, even if larger than `buflen' or -1 on
+ * error.
  */
 static ssize_t encodeDN(char *buf, size_t buflen, struct Curl_asn1Element *dn)
 {
@@ -692,7 +695,10 @@ static const char *DNtostr(struct Curl_asn1Element *dn)
   if(buflen >= 0) {
     buf = malloc(buflen + 1);
     if(buf) {
-      encodeDN(buf, buflen + 1, dn);
+      if(encodeDN(buf, buflen + 1, dn) == -1) {
+        free(buf);
+        return NULL;
+      }
       buf[buflen] = '\0';
     }
   }
@@ -855,26 +861,30 @@ static const char *dumpAlgo(struct Curl_asn1Element *param,
   return OID2str(oid.beg, oid.end, TRUE);
 }
 
-static void do_pubkey_field(struct Curl_easy *data, int certnum,
-                            const char *label, struct Curl_asn1Element *elem)
+/* return 0 on success, 1 on error */
+static int do_pubkey_field(struct Curl_easy *data, int certnum,
+                           const char *label, struct Curl_asn1Element *elem)
 {
   const char *output;
+  CURLcode result = CURLE_OK;
 
   /* Generate a certificate information record for the public key. */
 
   output = ASN1tostr(elem, 0);
   if(output) {
     if(data->set.ssl.certinfo)
-      Curl_ssl_push_certinfo(data, certnum, label, output);
-    if(!certnum)
+      result = Curl_ssl_push_certinfo(data, certnum, label, output);
+    if(!certnum && !result)
       infof(data, "   %s: %s", label, output);
     free((char *) output);
   }
+  return result ? 1 : 0;
 }
 
-static void do_pubkey(struct Curl_easy *data, int certnum,
-                      const char *algo, struct Curl_asn1Element *param,
-                      struct Curl_asn1Element *pubkey)
+/* return 0 on success, 1 on error */
+static int do_pubkey(struct Curl_easy *data, int certnum,
+                     const char *algo, struct Curl_asn1Element *param,
+                     struct Curl_asn1Element *pubkey)
 {
   struct Curl_asn1Element elem;
   struct Curl_asn1Element pk;
@@ -884,7 +894,7 @@ static void do_pubkey(struct Curl_easy *data, int certnum,
 
   /* Get the public key (single element). */
   if(!getASN1Element(&pk, pubkey->beg + 1, pubkey->end))
-    return;
+    return 1;
 
   if(strcasecompare(algo, "rsaEncryption")) {
     const char *q;
@@ -892,7 +902,7 @@ static void do_pubkey(struct Curl_easy *data, int certnum,
 
     p = getASN1Element(&elem, pk.beg, pk.end);
     if(!p)
-      return;
+      return 1;
 
     /* Compute key length. */
     for(q = elem.beg; !*q && q < elem.end; q++)
@@ -910,26 +920,35 @@ static void do_pubkey(struct Curl_easy *data, int certnum,
     if(data->set.ssl.certinfo) {
       q = curl_maprintf("%lu", len);
       if(q) {
-        Curl_ssl_push_certinfo(data, certnum, "RSA Public Key", q);
+        CURLcode result =
+          Curl_ssl_push_certinfo(data, certnum, "RSA Public Key", q);
         free((char *) q);
+        if(result)
+          return 1;
       }
     }
     /* Generate coefficients. */
-    do_pubkey_field(data, certnum, "rsa(n)", &elem);
+    if(do_pubkey_field(data, certnum, "rsa(n)", &elem))
+      return 1;
     if(!getASN1Element(&elem, p, pk.end))
-      return;
-    do_pubkey_field(data, certnum, "rsa(e)", &elem);
+      return 1;
+    if(do_pubkey_field(data, certnum, "rsa(e)", &elem))
+      return 1;
   }
   else if(strcasecompare(algo, "dsa")) {
     p = getASN1Element(&elem, param->beg, param->end);
     if(p) {
-      do_pubkey_field(data, certnum, "dsa(p)", &elem);
+      if(do_pubkey_field(data, certnum, "dsa(p)", &elem))
+        return 1;
       p = getASN1Element(&elem, p, param->end);
       if(p) {
-        do_pubkey_field(data, certnum, "dsa(q)", &elem);
+        if(do_pubkey_field(data, certnum, "dsa(q)", &elem))
+          return 1;
         if(getASN1Element(&elem, p, param->end)) {
-          do_pubkey_field(data, certnum, "dsa(g)", &elem);
-          do_pubkey_field(data, certnum, "dsa(pub_key)", &pk);
+          if(do_pubkey_field(data, certnum, "dsa(g)", &elem))
+            return 1;
+          if(do_pubkey_field(data, certnum, "dsa(pub_key)", &pk))
+            return 1;
         }
       }
     }
@@ -937,13 +956,17 @@ static void do_pubkey(struct Curl_easy *data, int certnum,
   else if(strcasecompare(algo, "dhpublicnumber")) {
     p = getASN1Element(&elem, param->beg, param->end);
     if(p) {
-      do_pubkey_field(data, certnum, "dh(p)", &elem);
+      if(do_pubkey_field(data, certnum, "dh(p)", &elem))
+        return 1;
       if(getASN1Element(&elem, param->beg, param->end)) {
-        do_pubkey_field(data, certnum, "dh(g)", &elem);
-        do_pubkey_field(data, certnum, "dh(pub_key)", &pk);
+        if(do_pubkey_field(data, certnum, "dh(g)", &elem))
+          return 1;
+        if(do_pubkey_field(data, certnum, "dh(pub_key)", &pk))
+          return 1;
       }
     }
   }
+  return 0;
 }
 
 CURLcode Curl_extract_certinfo(struct Curl_easy *data,
@@ -957,7 +980,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   char *cp1;
   size_t cl1;
   char *cp2;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   unsigned long version;
   size_t i;
   size_t j;
@@ -976,8 +999,11 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   ccp = DNtostr(&cert.subject);
   if(!ccp)
     return CURLE_OUT_OF_MEMORY;
-  if(data->set.ssl.certinfo)
-    Curl_ssl_push_certinfo(data, certnum, "Subject", ccp);
+  if(data->set.ssl.certinfo) {
+    result = Curl_ssl_push_certinfo(data, certnum, "Subject", ccp);
+    if(result)
+      return result;
+  }
   if(!certnum)
     infof(data, "%2d Subject: %s", certnum, ccp);
   free((char *) ccp);
@@ -986,11 +1012,14 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   ccp = DNtostr(&cert.issuer);
   if(!ccp)
     return CURLE_OUT_OF_MEMORY;
-  if(data->set.ssl.certinfo)
-    Curl_ssl_push_certinfo(data, certnum, "Issuer", ccp);
+  if(data->set.ssl.certinfo) {
+    result = Curl_ssl_push_certinfo(data, certnum, "Issuer", ccp);
+  }
   if(!certnum)
     infof(data, "   Issuer: %s", ccp);
   free((char *) ccp);
+  if(result)
+    return result;
 
   /* Version (always fits in less than 32 bits). */
   version = 0;
@@ -1000,8 +1029,10 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
     ccp = curl_maprintf("%lx", version);
     if(!ccp)
       return CURLE_OUT_OF_MEMORY;
-    Curl_ssl_push_certinfo(data, certnum, "Version", ccp);
+    result = Curl_ssl_push_certinfo(data, certnum, "Version", ccp);
     free((char *) ccp);
+    if(result)
+      return result;
   }
   if(!certnum)
     infof(data, "   Version: %lu (0x%lx)", version + 1, version);
@@ -1011,10 +1042,12 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   if(!ccp)
     return CURLE_OUT_OF_MEMORY;
   if(data->set.ssl.certinfo)
-    Curl_ssl_push_certinfo(data, certnum, "Serial Number", ccp);
+    result = Curl_ssl_push_certinfo(data, certnum, "Serial Number", ccp);
   if(!certnum)
     infof(data, "   Serial Number: %s", ccp);
   free((char *) ccp);
+  if(result)
+    return result;
 
   /* Signature algorithm .*/
   ccp = dumpAlgo(&param, cert.signatureAlgorithm.beg,
@@ -1022,30 +1055,36 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   if(!ccp)
     return CURLE_OUT_OF_MEMORY;
   if(data->set.ssl.certinfo)
-    Curl_ssl_push_certinfo(data, certnum, "Signature Algorithm", ccp);
+    result = Curl_ssl_push_certinfo(data, certnum, "Signature Algorithm", ccp);
   if(!certnum)
     infof(data, "   Signature Algorithm: %s", ccp);
   free((char *) ccp);
+  if(result)
+    return result;
 
   /* Start Date. */
   ccp = ASN1tostr(&cert.notBefore, 0);
   if(!ccp)
     return CURLE_OUT_OF_MEMORY;
   if(data->set.ssl.certinfo)
-    Curl_ssl_push_certinfo(data, certnum, "Start Date", ccp);
+    result = Curl_ssl_push_certinfo(data, certnum, "Start Date", ccp);
   if(!certnum)
     infof(data, "   Start Date: %s", ccp);
   free((char *) ccp);
+  if(result)
+    return result;
 
   /* Expire Date. */
   ccp = ASN1tostr(&cert.notAfter, 0);
   if(!ccp)
     return CURLE_OUT_OF_MEMORY;
   if(data->set.ssl.certinfo)
-    Curl_ssl_push_certinfo(data, certnum, "Expire Date", ccp);
+    result = Curl_ssl_push_certinfo(data, certnum, "Expire Date", ccp);
   if(!certnum)
     infof(data, "   Expire Date: %s", ccp);
   free((char *) ccp);
+  if(result)
+    return result;
 
   /* Public Key Algorithm. */
   ccp = dumpAlgo(&param, cert.subjectPublicKeyAlgorithm.beg,
@@ -1053,21 +1092,31 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   if(!ccp)
     return CURLE_OUT_OF_MEMORY;
   if(data->set.ssl.certinfo)
-    Curl_ssl_push_certinfo(data, certnum, "Public Key Algorithm", ccp);
-  if(!certnum)
-    infof(data, "   Public Key Algorithm: %s", ccp);
-  do_pubkey(data, certnum, ccp, &param, &cert.subjectPublicKey);
+    result = Curl_ssl_push_certinfo(data, certnum, "Public Key Algorithm",
+                                    ccp);
+  if(!result) {
+    int ret;
+    if(!certnum)
+      infof(data, "   Public Key Algorithm: %s", ccp);
+    ret = do_pubkey(data, certnum, ccp, &param, &cert.subjectPublicKey);
+    if(ret)
+      result = CURLE_OUT_OF_MEMORY; /* the most likely error */
+  }
   free((char *) ccp);
+  if(result)
+    return result;
 
   /* Signature. */
   ccp = ASN1tostr(&cert.signature, 0);
   if(!ccp)
     return CURLE_OUT_OF_MEMORY;
   if(data->set.ssl.certinfo)
-    Curl_ssl_push_certinfo(data, certnum, "Signature", ccp);
+    result = Curl_ssl_push_certinfo(data, certnum, "Signature", ccp);
   if(!certnum)
     infof(data, "   Signature: %s", ccp);
   free((char *) ccp);
+  if(result)
+    return result;
 
   /* Generate PEM certificate. */
   result = Curl_base64_encode(data, cert.certificate.beg,
@@ -1097,11 +1146,11 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   cp2[i] = '\0';
   free(cp1);
   if(data->set.ssl.certinfo)
-    Curl_ssl_push_certinfo(data, certnum, "Cert", cp2);
+    result = Curl_ssl_push_certinfo(data, certnum, "Cert", cp2);
   if(!certnum)
     infof(data, "%s", cp2);
   free(cp2);
-  return CURLE_OK;
+  return result;
 }
 
 #endif /* USE_GSKIT or USE_NSS or USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL
