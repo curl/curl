@@ -57,7 +57,7 @@ freebsd_task:
     #  esac
     - ./configure --prefix="${HOME}"/install --enable-debug --with-openssl --with-libssh2 --with-brotli --with-gssapi --with-libidn2 --enable-manual --enable-ldap --enable-ldaps --with-librtmp --with-libpsl --with-nghttp2 || { tail -300 config.log; false; }
   compile_script:
-    - make V=1 && cd tests && make V=1
+    - make V=1 && make V=1 examples && cd tests && make V=1
   test_script:
     # blackhole?
     - sysctl net.inet.tcp.blackhole
@@ -122,7 +122,7 @@ windows_task:
   configure_script: |
     %container_cmd% -l -c "cd $(echo '%cd%') && ./buildconf && ./configure %configure%"
   compile_script: |
-    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 && cd tests && make V=1"
+    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 && make V=1 examples && cd tests && make V=1"
   install_script: |
     %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
   test_script: |
