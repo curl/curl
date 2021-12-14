@@ -319,36 +319,34 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   /* Load the trusted CA */
   mbedtls_x509_crt_init(&backend->cacert);
 
-  if(ca_info_blob) {
-    unsigned char *blob_data = (unsigned char *)ca_info_blob->data;
-
-    /* mbedTLS expects the terminating NULL byte to be included in the length
-       of the data */
-    size_t blob_data_len = ca_info_blob->len + 1;
-
-    ret = mbedtls_x509_crt_parse(&backend->cacert, blob_data,
-                                 blob_data_len);
-
+  if(ca_info_blob && verifypeer) {
+    /* Unfortunately, mbedtls_x509_crt_parse() requires the data to be null
+       terminated even when provided the exact length, forcing us to waste
+       extra memory here. */
+    unsigned char *newblob = malloc(ca_info_blob->len + 1);
+    if(!newblob)
+      return CURLE_OUT_OF_MEMORY;
+    memcpy(newblob, ca_info_blob->data, ca_info_blob->len);
+    newblob[ca_info_blob->len] = 0; /* null terminate */
+    ret = mbedtls_x509_crt_parse(&backend->cacert, newblob,
+                                 ca_info_blob->len + 1);
+    free(newblob);
     if(ret<0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "Error importing ca cert blob %s - mbedTLS: (-0x%04X) %s",
-            ca_info_blob, -ret, errorbuf);
-
-      if(verifypeer)
-        return ret;
+      failf(data, "Error importing ca cert blob - mbedTLS: (-0x%04X) %s",
+            -ret, errorbuf);
+      return ret;
     }
   }
 
-  if(ssl_cafile) {
+  if(ssl_cafile && verifypeer) {
     ret = mbedtls_x509_crt_parse_file(&backend->cacert, ssl_cafile);
 
     if(ret<0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error reading ca cert file %s - mbedTLS: (-0x%04X) %s",
             ssl_cafile, -ret, errorbuf);
-
-      if(verifypeer)
-        return CURLE_SSL_CACERT_BADFILE;
+      return CURLE_SSL_CACERT_BADFILE;
     }
   }
 
