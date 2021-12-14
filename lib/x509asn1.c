@@ -980,7 +980,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   char *cp1;
   size_t cl1;
   char *cp2;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   unsigned long version;
   size_t i;
   size_t j;
