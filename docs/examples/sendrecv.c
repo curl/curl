@@ -120,8 +120,7 @@ int main(void)
         return 1;
       }
 
-      printf("Sent %" CURL_FORMAT_CURL_OFF_T " bytes.\n",
-        (curl_off_t)nsent);
+      printf("Sent %lu bytes.\n", (unsigned long)nsent);
 
     } while(nsent_total < request_len);
 
@@ -151,8 +150,7 @@ int main(void)
         break;
       }
 
-      printf("Received %" CURL_FORMAT_CURL_OFF_T " bytes.\n",
-        (curl_off_t)nread);
+      printf("Received %lu bytes.\n", (unsigned long)nread);
     }
 
     /* always cleanup */

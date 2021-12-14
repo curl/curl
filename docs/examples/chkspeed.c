@@ -170,32 +170,32 @@ int main(int argc, char *argv[])
     /* check for bytes downloaded */
     res = curl_easy_getinfo(curl_handle, CURLINFO_SIZE_DOWNLOAD_T, &val);
     if((CURLE_OK == res) && (val>0))
-      printf("Data downloaded: %" CURL_FORMAT_CURL_OFF_T " bytes.\n", val);
+      printf("Data downloaded: %lu bytes.\n", (unsigned long)val);
 
     /* check for total download time */
     res = curl_easy_getinfo(curl_handle, CURLINFO_TOTAL_TIME_T, &val);
     if((CURLE_OK == res) && (val>0))
-      printf("Total download time: %" CURL_FORMAT_CURL_OFF_T ".%06ld sec.\n",
-             (val / 1000000), (long)(val % 1000000));
+      printf("Total download time: %lu.%06lu sec.\n",
+             (unsigned long)(val / 1000000), (unsigned long)(val % 1000000));
 
     /* check for average download speed */
     res = curl_easy_getinfo(curl_handle, CURLINFO_SPEED_DOWNLOAD_T, &val);
     if((CURLE_OK == res) && (val>0))
-      printf("Average download speed: %" CURL_FORMAT_CURL_OFF_T
-             " kbyte/sec.\n", val / 1024);
+      printf("Average download speed: %lu kbyte/sec.\n",
+             (unsigned long)(val / 1024));
 
     if(prtall) {
       /* check for name resolution time */
       res = curl_easy_getinfo(curl_handle, CURLINFO_NAMELOOKUP_TIME_T, &val);
       if((CURLE_OK == res) && (val>0))
-        printf("Name lookup time: %" CURL_FORMAT_CURL_OFF_T ".%06ld sec.\n",
-               (val / 1000000), (long)(val % 1000000));
+        printf("Name lookup time: %lu.%06lu sec.\n",
+               (unsigned long)(val / 1000000), (unsigned long)(val % 1000000));
 
       /* check for connect time */
       res = curl_easy_getinfo(curl_handle, CURLINFO_CONNECT_TIME_T, &val);
       if((CURLE_OK == res) && (val>0))
-        printf("Connect time: %" CURL_FORMAT_CURL_OFF_T ".%06ld sec.\n",
-               (val / 1000000), (long)(val % 1000000));
+        printf("Connect time: %lu.%06lu sec.\n",
+               (unsigned long)(val / 1000000), (unsigned long)(val % 1000000));
     }
   }
   else {

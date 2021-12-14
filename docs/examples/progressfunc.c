@@ -51,14 +51,14 @@ static int xferinfo(void *p,
      be used */
   if((curtime - myp->lastruntime) >= MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL) {
     myp->lastruntime = curtime;
-    fprintf(stderr, "TOTAL TIME: %" CURL_FORMAT_CURL_OFF_T ".%06ld\r\n",
-            (curtime / 1000000), (long)(curtime % 1000000));
+    fprintf(stderr, "TOTAL TIME: %lu.%06lu\r\n",
+            (unsigned long)(curtime / 1000000),
+            (unsigned long)(curtime % 1000000));
   }
 
-  fprintf(stderr, "UP: %" CURL_FORMAT_CURL_OFF_T " of %" CURL_FORMAT_CURL_OFF_T
-          "  DOWN: %" CURL_FORMAT_CURL_OFF_T " of %" CURL_FORMAT_CURL_OFF_T
-          "\r\n",
-          ulnow, ultotal, dlnow, dltotal);
+  fprintf(stderr, "UP: %lu of %lu  DOWN: %lu of %lu\r\n",
+          (unsigned long)ulnow, (unsigned long)ultotal,
+          (unsigned long)dlnow, (unsigned long)dltotal);
 
   if(dlnow > STOP_DOWNLOAD_AFTER_THIS_MANY_BYTES)
     return 1;
