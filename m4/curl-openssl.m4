@@ -535,11 +535,8 @@ if test "x$OPT_OPENSSL" != xno; then
 
   if test X"$OPENSSL_ENABLED" = X"1"; then
     dnl These can only exist if OpenSSL exists
-    dnl OpenSSL_version is introduced in 3.0.0
 
-    AC_CHECK_FUNCS( RAND_egd \
-                    SSLv2_client_method \
-                    OpenSSL_version )
+    AC_CHECK_FUNCS( RAND_egd )
 
     AC_MSG_CHECKING([for BoringSSL])
     AC_COMPILE_IFELSE([

@@ -246,6 +246,13 @@
 #define HAVE_RANDOM_INIT_BY_DEFAULT 1
 #endif
 
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
+    !(defined(LIBRESSL_VERSION_NUMBER) && \
+      LIBRESSL_VERSION_NUMBER < 0x2070100fL) && \
+    !defined(OPENSSL_IS_BORINGSSL)
+#define HAVE_OPENSSL_VERSION
+#endif
+
 struct ssl_backend_data {
   struct Curl_easy *logger; /* transfer handle to pass trace logs to, only
                                using sockindex 0 */
@@ -4396,13 +4403,7 @@ static ssize_t ossl_recv(struct Curl_easy *data,   /* transfer */
 static size_t ossl_version(char *buffer, size_t size)
 {
 #ifdef LIBRESSL_VERSION_NUMBER
-#if LIBRESSL_VERSION_NUMBER < 0x2070100fL
-  return msnprintf(buffer, size, "%s/%lx.%lx.%lx",
-                   OSSL_PACKAGE,
-                   (LIBRESSL_VERSION_NUMBER>>28)&0xf,
-                   (LIBRESSL_VERSION_NUMBER>>20)&0xff,
-                   (LIBRESSL_VERSION_NUMBER>>12)&0xff);
-#else /* OpenSSL_version() first appeared in LibreSSL 2.7.1 */
+#ifdef HAVE_OPENSSL_VERSION
   char *p;
   int count;
   const char *ver = OpenSSL_version(OPENSSL_VERSION);
@@ -4416,6 +4417,12 @@ static size_t ossl_version(char *buffer, size_t size)
       *p = '_';
   }
   return count;
+#else
+  return msnprintf(buffer, size, "%s/%lx.%lx.%lx",
+                   OSSL_PACKAGE,
+                   (LIBRESSL_VERSION_NUMBER>>28)&0xf,
+                   (LIBRESSL_VERSION_NUMBER>>20)&0xff,
+                   (LIBRESSL_VERSION_NUMBER>>12)&0xff);
 #endif
 #elif defined(OPENSSL_IS_BORINGSSL)
   return msnprintf(buffer, size, OSSL_PACKAGE);
