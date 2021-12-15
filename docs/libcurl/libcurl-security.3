@@ -128,16 +128,17 @@ Applications can mitigate against this by disabling
 \fICURLOPT_FOLLOWLOCATION(3)\fP and handling redirects itself, sanitizing URLs
 as necessary. Alternately, an app could leave \fICURLOPT_FOLLOWLOCATION(3)\fP
 enabled but set \fICURLOPT_REDIR_PROTOCOLS(3)\fP and install a
-\fICURLOPT_OPENSOCKETFUNCTION(3)\fP callback function in which addresses are
-sanitized before use.
+\fICURLOPT_OPENSOCKETFUNCTION(3)\fP or \fICURLOPT_PREREQFUNCTION(3)\fP callback
+function in which addresses are sanitized before use.
 .SH "Local Resources"
 A user who can control the DNS server of a domain being passed in within a URL
 can change the address of the host to a local, private address which a
 server-side libcurl-using application could then use. e.g. the innocuous URL
 http://fuzzybunnies.example.com/ could actually resolve to the IP address of a
 server behind a firewall, such as 127.0.0.1 or 10.1.2.3. Applications can
-mitigate against this by setting a \fICURLOPT_OPENSOCKETFUNCTION(3)\fP and
-checking the address before a connection.
+mitigate against this by setting a \fICURLOPT_OPENSOCKETFUNCTION(3)\fP
+or \fICURLOPT_PREREQFUNCTION(3)\fP and checking the address before a
+connection.
 
 All the malicious scenarios regarding redirected URLs apply just as well to
 non-redirected URLs, if the user is allowed to specify an arbitrary URL that
@@ -280,9 +281,14 @@ has done so since the beginning.
 Web browsers mostly adhere to the WHATWG URL Specification.
 
 This deviance makes some URLs copied between browsers (or returned over HTTP
-for redirection) and curl not work the same way. This can mislead users into
-getting the wrong thing, connecting to the wrong host or otherwise not work
-identically.
+for redirection) and curl not work the same way. It can also cause problems if
+an application parses URLs differently from libcurl and makes different
+assumptions about a link. This can mislead users into getting the wrong thing,
+connecting to the wrong host or otherwise not working identically.
+
+Within an application, this can be mitigated by always using the
+\fIcurl_url(3)\fP API to parse URLs, ensuring that they are parsed the same way
+as within libcurl itself.
 .SH "FTP uses two connections"
 When performing an FTP transfer, two TCP connections are used: one for setting
 up the transfer and one for the actual data.
