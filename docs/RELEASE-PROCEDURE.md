@@ -95,9 +95,7 @@ Coming dates
 Based on the description above, here are some planned release dates (at the
 time of this writing):
 
-- September 15, 2021 (7.79.0)
-- November 10, 2021
-- January 5, 2022
+- January 5, 2022 (7.81.0)
 - March 2, 2022
 - April 27, 2022
 - June 22, 2022
@@ -106,7 +104,3 @@ time of this writing):
 - December 7, 2022
 - February 1, 2023
 - March 20, 2023 (8.0.0)
-
-The above (and more) curl-related dates are published in
-[iCalendar format](https://calendar.google.com/calendar/ical/c9u5d64odop9js55oltfarjk6g%40group.calendar.google.com/public/basic.ics)
-as well.
