@@ -57,7 +57,6 @@ EXTRA_DIST =                                    \
  CURL-DISABLE.md                                \
  DEPRECATE.md                                   \
  DYNBUF.md                                      \
- ECH.md                                         \
  EXPERIMENTAL.md                                \
  FAQ                                            \
  FEATURES.md                                    \
