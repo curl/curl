@@ -147,3 +147,7 @@ Upgrade via Alt-Svc:
     curl --alt-svc altsvc.cache https://quic.aiortc.org/
 
 See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
+
+## Known Bugs
+
+Check out the [list of known HTTP3 bugs](https://curl.se/docs/knownbugs.html#HTTP3).
