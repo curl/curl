@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -136,6 +136,15 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+/* Count of the backend ssl objects to allocate */
+#ifdef USE_SSL
+#  ifndef CURL_DISABLE_PROXY
+#    define SSL_BACKEND_CNT 4
+#  else
+#    define SSL_BACKEND_CNT 2
+#  endif
+#endif
 
 static void conn_free(struct connectdata *conn);
 
@@ -1682,7 +1691,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
      data becomes proxy backend data). */
   {
     size_t sslsize = Curl_ssl->sizeof_ssl_backend_data;
-    char *ssl = calloc(4, sslsize);
+    char *ssl = calloc(SSL_BACKEND_CNT, sslsize);
     if(!ssl) {
       free(conn);
       return NULL;
