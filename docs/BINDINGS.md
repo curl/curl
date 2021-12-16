@@ -14,7 +14,7 @@ libcurl bindings
 
 [Basic](https://scriptbasic.com/) ScriptBasic bindings written by Peter Verhas
 
-C++: [curlpp](https://curlpp.org/) Written by Jean-Philippe Barrette-LaPierre,
+C++: [curlpp](https://github.com/jpbarrette/curlpp/) Written by Jean-Philippe Barrette-LaPierre,
 [curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and [C++
 Requests](https://github.com/libcpr/cpr) by Huu Nguyen
 
@@ -35,7 +35,7 @@ Clojure: [clj-curl](https://github.com/lsevero/clj-curl) by Lucas Severo
 
 [Euphoria](https://web.archive.org/web/20050204080544/rays-web.com/eulibcurl.htm) Written by Ray Smith
 
-[Falcon](http://www.falconpl.org/index.ftd?page_id=prjs&prj_id=curl)
+[Falcon](http://www.falconpl.org/project_docs/curl/)
 
 [Ferite](https://web.archive.org/web/20150102192018/ferite.org/) Written by Paul Querna
 
@@ -45,7 +45,7 @@ Clojure: [clj-curl](https://github.com/lsevero/clj-curl) by Lucas Severo
 
 Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
-[Guile](https://www.lonelycactus.com/guile-curl.html) Written by Michael L. Gran
+[Guile](https://github.com/spk121/guile-curl) Written by Michael L. Gran
 
 [Harbour](https://github.com/vszakats/hb/tree/main/contrib/hbcurl) Written by Viktor Szakats
 
@@ -115,7 +115,7 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford,
 
 [SP-Forth](https://sourceforge.net/p/spf/spf/ci/master/tree/devel/~ac/lib/lin/curl/) Written by Andrey Cherezov
 
-[SPL](http://www.clifford.at/spl/) Written by Clifford Wolf
+[SPL](https://web.archive.org/web/20210203022158/http://www.clifford.at/spl/spldoc/curl.html) Written by Clifford Wolf
 
 [Tcl](https://web.archive.org/web/20160826011806/mirror.yellow5.com/tclcurl/) Tclcurl by Andrés García
 
