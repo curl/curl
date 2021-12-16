@@ -53,7 +53,7 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 [Java](https://github.com/pjlegato/curl-java)
 
-[Julia](https://github.com/forio/Curl.jl) Written by Paul Howe
+[Julia](https://github.com/JuliaWeb/LibCURL.jl) Written by Amit Murthy
 
 [Kapito](https://github.com/puzza007/katipo) is an Erlang HTTP library around libcurl.
 
@@ -90,6 +90,8 @@ Bailiff and Bálint Szilakszi,
 
 [Python](http://pycurl.io/) PycURL by Kjetil Jacobsen
 
+[Q](https://q-lang.sourceforge.io/) The libcurl module is part of the default install
+
 [R](https://cran.r-project.org/package=curl)
 
 [Rexx](https://rexxcurl.sourceforge.io/) Written Mark Hessling
@@ -98,7 +100,8 @@ Bailiff and Bálint Szilakszi,
 
 RPG, support for ILE/RPG on OS/400 is included in source distribution
 
-Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford
+Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford,
+[ruby-curl-multi](https://github.com/kball/curl_multi.rb) by Kristjan Petursson and Keith Rarick
 
 [Rust](https://github.com/alexcrichton/curl-rust) curl-rust - by Carl Lerche
 
@@ -119,8 +122,6 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford
 [Visual Basic](https://sourceforge.net/projects/libcurl-vb/) libcurl-vb by Jeffrey Phillips
 
 [Visual Foxpro](https://web.archive.org/web/20130730181523/www.ctl32.com.ar/libcurl.asp) by Carlos Alloatti
-
-[Q](https://q-lang.sourceforge.io/) The libcurl module is part of the default install
 
 [wxWidgets](https://wxcode.sourceforge.io/components/wxcurl/) Written by Casey O'Donnell
 
