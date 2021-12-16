@@ -10,6 +10,8 @@ libcurl bindings
  The bindings listed below are not part of the curl/libcurl distribution
  archives, but must be downloaded and installed separately.
 
+<!-- markdown-link-check-disable -->
+
 [Ada95](https://web.archive.org/web/20070403105909/www.almroth.com/adacurl/index.html) Written by Andreas Almroth
 
 [Basic](https://scriptbasic.com/) ScriptBasic bindings written by Peter Verhas
