@@ -1368,10 +1368,14 @@ static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
     infof(data, "Unable to initialize NSS database: %d (%s)", err, err_name);
   }
 
+  /*
+   * NSS sets NSS_INIT_NOROOTINIT when creating the context regardless of
+   * flags passed in.
+   */
   infof(data, "Initializing NSS with certpath: none");
   nss_context = NSS_InitContext("", "", "", "", &initparams, NSS_INIT_READONLY
-         | NSS_INIT_NOCERTDB   | NSS_INIT_NOMODDB       | NSS_INIT_FORCEOPEN
-         | NSS_INIT_NOROOTINIT | NSS_INIT_OPTIMIZESPACE | NSS_INIT_PK11RELOAD);
+         | NSS_INIT_NOCERTDB      | NSS_INIT_NOMODDB      | NSS_INIT_FORCEOPEN
+         | NSS_INIT_OPTIMIZESPACE | NSS_INIT_PK11RELOAD);
   if(nss_context != NULL)
     return CURLE_OK;
 
