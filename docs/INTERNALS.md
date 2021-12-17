@@ -357,7 +357,7 @@ LDAP
 E-mail
 ======
 
- The e-mail related source code is in `lib/imap.c`, `lib/pop3.c` and
+ The email related source code is in `lib/imap.c`, `lib/pop3.c` and
  `lib/smtp.c`.
 
 <a name="general"></a>

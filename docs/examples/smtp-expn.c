@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * SMTP example showing how to expand an e-mail mailing list
+ * SMTP example showing how to expand an email mailing list
  * </DESC>
  */
 
@@ -29,7 +29,7 @@
 #include <string.h>
 #include <curl/curl.h>
 
-/* This is a simple example showing how to expand an e-mail mailing list.
+/* This is a simple example showing how to expand an email mailing list.
  *
  * Notes:
  *

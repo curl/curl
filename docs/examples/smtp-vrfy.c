@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * SMTP example showing how to verify an e-mail address
+ * SMTP example showing how to verify an email address
  * </DESC>
  */
 
@@ -29,7 +29,7 @@
 #include <string.h>
 #include <curl/curl.h>
 
-/* This is a simple example showing how to verify an e-mail address from an
+/* This is a simple example showing how to verify an email address from an
  * SMTP server.
  *
  * Notes:

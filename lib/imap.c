@@ -329,7 +329,7 @@ static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
   /* Do we have a continuation response? This should be a + symbol followed by
      a space and optionally some text as per RFC-3501 for the AUTHENTICATE and
      APPEND commands and as outlined in Section 4. Examples of RFC-4959 but
-     some e-mail servers ignore this and only send a single + instead. */
+     some email servers ignore this and only send a single + instead. */
   if(imap && !imap->custom && ((len == 3 && line[0] == '+') ||
      (len >= 2 && !memcmp("+ ", line, 2)))) {
     switch(imapc->state) {

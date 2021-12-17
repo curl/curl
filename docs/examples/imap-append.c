@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to send e-mails
+ * IMAP example showing how to send emails
  * </DESC>
  */
 
