@@ -304,13 +304,14 @@ static char *nss_sslver_to_name(PRUint16 nssver)
   }
 }
 
-static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc * model,
-                             char *cipher_list)
+/* the longest cipher name this supports */
+#define MAX_CIPHER_LENGTH 128
+
+static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc *model,
+                             const char *cipher_list)
 {
   unsigned int i;
-  PRBool cipher_state[NUM_OF_CIPHERS];
-  PRBool found;
-  char *cipher;
+  const char *cipher;
 
   /* use accessors to avoid dynamic linking issues after an update of NSS */
   const PRUint16 num_implemented_ciphers = SSL_GetNumImplementedCiphers();
@@ -326,51 +327,52 @@ static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc * model,
     SSL_CipherPrefSet(model, implemented_ciphers[i], PR_FALSE);
   }
 
-  /* Set every entry in our list to false */
-  for(i = 0; i < NUM_OF_CIPHERS; i++) {
-    cipher_state[i] = PR_FALSE;
-  }
-
   cipher = cipher_list;
 
-  while(cipher_list && (cipher_list[0])) {
+  while(cipher && cipher[0]) {
+    const char *end;
+    char name[MAX_CIPHER_LENGTH + 1];
+    size_t len;
+    bool found = FALSE;
     while((*cipher) && (ISSPACE(*cipher)))
       ++cipher;
 
-    cipher_list = strpbrk(cipher, ":, ");
-    if(cipher_list) {
-      *cipher_list++ = '\0';
+    end = strpbrk(cipher, ":, ");
+    if(end)
+      len = end - cipher;
+    else
+      len = strlen(cipher);
+
+    if(len > MAX_CIPHER_LENGTH) {
+      failf(data, "Bad cipher list");
+      return SECFailure;
     }
+    else if(len) {
+      memcpy(name, cipher, len);
+      name[len] = 0;
 
-    found = PR_FALSE;
-
-    for(i = 0; i<NUM_OF_CIPHERS; i++) {
-      if(strcasecompare(cipher, cipherlist[i].name)) {
-        cipher_state[i] = PR_TRUE;
-        found = PR_TRUE;
-        break;
+      for(i = 0; i<NUM_OF_CIPHERS; i++) {
+        if(strcasecompare(name, cipherlist[i].name)) {
+          /* Enable the selected cipher */
+          if(SSL_CipherPrefSet(model, cipherlist[i].num, PR_TRUE) !=
+             SECSuccess) {
+            failf(data, "cipher-suite not supported by NSS: %s", name);
+            return SECFailure;
+          }
+          found = TRUE;
+          break;
+        }
       }
     }
 
-    if(found == PR_FALSE) {
-      failf(data, "Unknown cipher in list: %s", cipher);
+    if(!found && len) {
+      failf(data, "Unknown cipher: %s", name);
       return SECFailure;
     }
-
-    if(cipher_list) {
-      cipher = cipher_list;
-    }
-  }
-
-  /* Finally actually enable the selected ciphers */
-  for(i = 0; i<NUM_OF_CIPHERS; i++) {
-    if(!cipher_state[i])
-      continue;
-
-    if(SSL_CipherPrefSet(model, cipherlist[i].num, PR_TRUE) != SECSuccess) {
-      failf(data, "cipher-suite not supported by NSS: %s", cipherlist[i].name);
-      return SECFailure;
-    }
+    if(end)
+      cipher = ++end;
+    else
+      break;
   }
 
   return SECSuccess;
