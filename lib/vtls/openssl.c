@@ -4571,6 +4571,75 @@ static void ossl_disassociate_connection(struct Curl_easy *data,
   }
 }
 
+static CURLcode ossl_get_tls_server_end_point(struct Curl_easy *data,
+                                              int sockindex, char **binding,
+                                              size_t *len)
+{
+  /* required for X509_get_signature_nid support */
+#if OPENSSL_VERSION_NUMBER > 0x10100000L
+  struct connectdata *conn = data->conn;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct ssl_backend_data *backend = connssl->backend;
+  const char prefix[] = "tls-server-end-point:";
+
+  X509 *cert;
+  int algo_nid;
+  const EVP_MD *algo_type;
+  const char *algo_name;
+  unsigned int length;
+  u_char buf[EVP_MAX_MD_SIZE];
+
+  cert = SSL_get_peer_certificate(backend->handle);
+  if(!cert) {
+    /* No server certificate, don't do channel binding */
+    *binding = NULL;
+    *len = 0;
+    return CURLE_OK;
+  }
+
+  if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &algo_nid, NULL)) {
+    failf(data,
+          "Unable to find digest NID for certificate signature algorithm");
+    return CURLE_SSL_INVALIDCERTSTATUS;
+  }
+
+  /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
+  if(algo_nid == NID_md5 || algo_nid == NID_sha1) {
+    algo_type = EVP_sha256();
+  }
+  else {
+    algo_type = EVP_get_digestbynid(algo_nid);
+    if(!algo_type) {
+      algo_name = OBJ_nid2sn(algo_nid);
+      failf(data, "Could not find digest algorithm %s (NID %d)",
+            algo_name ? algo_name : "(null)", algo_nid);
+      return CURLE_SSL_INVALIDCERTSTATUS;
+    }
+  }
+
+  if(!X509_digest(cert, algo_type, buf, &length)) {
+    failf(data, "X509_digest() failed");
+    return CURLE_SSL_INVALIDCERTSTATUS;
+  }
+
+  *binding = malloc(sizeof(prefix) - 1 + length);
+  if(!*binding)
+    return CURLE_OUT_OF_MEMORY;
+  memcpy(*binding, prefix, sizeof(prefix) - 1);
+  memcpy(*binding + sizeof(prefix) - 1, buf, length);
+  *len = sizeof(prefix) - 1 + length;
+
+  return CURLE_OK;
+#else
+  /* No X509_get_signature_nid support */
+  (void)data; /* unused */
+  (void)sockindex; /* unused */
+  *binding = NULL;
+  *len = 0;
+  return CURLE_OK;
+#endif
+}
+
 const struct Curl_ssl Curl_ssl_openssl = {
   { CURLSSLBACKEND_OPENSSL, "openssl" }, /* info */
 
@@ -4611,7 +4680,8 @@ const struct Curl_ssl Curl_ssl_openssl = {
   NULL,                     /* sha256sum */
 #endif
   ossl_associate_connection, /* associate_connection */
-  ossl_disassociate_connection /* disassociate_connection */
+  ossl_disassociate_connection, /* disassociate_connection */
+  ossl_get_tls_server_end_point /* get_tls_server_end_point */
 };
 
 #endif /* USE_OPENSSL */

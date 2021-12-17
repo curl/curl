@@ -655,6 +655,17 @@ void Curl_ssl_detach_conn(struct Curl_easy *data,
   }
 }
 
+CURLcode Curl_ssl_get_tls_server_end_point(struct Curl_easy *data,
+                                           int sockindex, char **binding,
+                                           size_t *len)
+{
+  if(Curl_ssl->get_tls_server_end_point)
+    return Curl_ssl->get_tls_server_end_point(data, sockindex, binding, len);
+  *binding = NULL;
+  *len = 0;
+  return CURLE_OK;
+}
+
 void Curl_ssl_close_all(struct Curl_easy *data)
 {
   /* kill the session ID cache if not shared */
@@ -1310,7 +1321,8 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_none_false_start,             /* false_start */
   NULL,                              /* sha256sum */
   NULL,                              /* associate_connection */
-  NULL                               /* disassociate_connection */
+  NULL,                              /* disassociate_connection */
+  NULL                               /* get_tls_server_end_point */
 };
 
 const struct Curl_ssl *Curl_ssl =

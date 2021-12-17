@@ -3532,7 +3532,8 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   sectransp_false_start,              /* false_start */
   sectransp_sha256sum,                /* sha256sum */
   NULL,                               /* associate_connection */
-  NULL                                /* disassociate_connection */
+  NULL,                               /* disassociate_connection */
+  NULL                                /* get_tls_server_end_point */
 };
 
 #ifdef __clang__

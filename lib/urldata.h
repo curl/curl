@@ -443,6 +443,8 @@ struct negotiatedata {
   gss_ctx_id_t context;
   gss_name_t spn;
   gss_buffer_desc output_token;
+  char *channel_binding_data;
+  size_t channel_binding_data_len;
 #else
 #ifdef USE_WINDOWS_SSPI
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS

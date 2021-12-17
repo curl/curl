@@ -102,6 +102,9 @@ struct Curl_ssl {
                                struct connectdata *conn,
                                int sockindex);
   void (*disassociate_connection)(struct Curl_easy *data, int sockindex);
+
+  CURLcode (*get_tls_server_end_point)(struct Curl_easy *data, int sockindex,
+                                       char **binding, size_t *len);
 };
 
 #ifdef USE_SSL
@@ -310,6 +313,17 @@ void Curl_ssl_associate_conn(struct Curl_easy *data,
                              struct connectdata *conn);
 void Curl_ssl_detach_conn(struct Curl_easy *data,
                           struct connectdata *conn);
+
+/* Return the tls-server-end-point channel binding, including the
+ * 'tls-server-end-point:' prefix.
+ * If successful, a pointer to the data is stored in *binding and the length of
+ * the data is stored in *len. The caller must free the data with free().
+ * If getting the channel binding is not supported, *binding will be set to
+ * NULL.
+ */
+CURLcode Curl_ssl_get_tls_server_end_point(struct Curl_easy *data,
+                                           int sockindex, char **binding,
+                                           size_t *len);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
