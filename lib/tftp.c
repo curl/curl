@@ -136,6 +136,7 @@ struct tftp_state_data {
   int             rbytes;
   int             sbytes;
   int             blksize;
+  int             option_timeout;
   int             requested_blksize;
   unsigned short  block;
   struct tftp_packet rpacket;
@@ -221,6 +222,9 @@ static CURLcode tftp_set_timeouts(struct tftp_state_data *state)
 
   /* Set per-block timeout to total */
   timeout = maxtime;
+
+  if(start)
+    state->option_timeout = (timeout > 255) ? 255 : (int)timeout;
 
   /* Average reposting an ACK after 5 seconds */
   state->retry_max = (int)timeout/5;
@@ -507,7 +511,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
                                  (char *)state->spacket.data + sbytes, buf);
 
       /* add timeout option */
-      msnprintf(buf, sizeof(buf), "%d", state->retry_time);
+      msnprintf(buf, sizeof(buf), "%d", state->option_timeout);
       if(result == CURLE_OK)
         result = tftp_option_add(state, &sbytes,
                                  (char *)state->spacket.data + sbytes,
