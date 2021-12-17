@@ -44,6 +44,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 #include "warnless.h"
+#include "slist.h"
 
 #define HMAC_SHA256(k, kl, d, dl, o)        \
   do {                                      \
@@ -88,34 +89,40 @@ static bool urlchar_needs_escaping(int c, bool in_query)
  */
 static size_t encode_query_len(const char *url, bool in_query)
 {
-  const unsigned char *ptr;
+  const unsigned char *ptr = (unsigned char *)url;
   size_t newlen = 0;
   int count_equal = 0;
 
-  for(ptr = (unsigned char *)url; *ptr; ptr++) {
+  if(!*ptr)
+    return 0;
+
+  for(; *ptr; ptr++) {
     switch (*ptr) {
     case '=':
       if(!in_query || count_equal++)
         newlen += 2;
       newlen++;
       break;
-    case '&':
-      count_equal = 0;
-      /* FALLTHROUGH */
     default:
       if(urlchar_needs_escaping(*ptr, in_query))
         newlen += 2;
       newlen++;
     }
   }
+  if(in_query && !count_equal)
+    newlen += 1;
   return newlen;
 }
 
-static void decode_query_cpy(char *optr, const char *iptr)
+static char *decode_query_cpy(char *optr, char *iptr, bool in_query)
 {
   for(;
        *iptr;
        iptr++) {
+    if(in_query && *iptr == '&') {
+      ++iptr;
+      goto out;
+    }
     if(*iptr == '%' && iptr[1] && iptr[2]) {
       char num_str[3] = {iptr[1], iptr[2], 0};
       long ascii_code;
@@ -130,7 +137,9 @@ static void decode_query_cpy(char *optr, const char *iptr)
     }
     *optr++=*iptr;
   }
+out:
   *optr = 0;
+  return iptr;
 }
 
 /* encode_query_cpy() copies a url to a output buffer and URL-encodes
@@ -155,9 +164,6 @@ static void encode_query_cpy(char *optr, const char *iptr, bool in_query)
       else
         *optr++=*iptr;
       break;
-    case '&':
-      count_equal = 0;
-      /* FALLTHROUGH */
     default:
       if(urlchar_needs_escaping(*iptr, in_query)) {
         msnprintf(optr, 4, "%%%02X", (const unsigned char)*iptr);
@@ -168,26 +174,77 @@ static void encode_query_cpy(char *optr, const char *iptr, bool in_query)
       break;
     }
   }
+  if(in_query && !count_equal)
+    *optr++= '=';
   *optr = 0; /* null-terminate output buffer */
-
 }
 
-static char *new_encoded_url(const char *src, bool in_query)
+static char *new_encoded_url(char **src, bool in_query)
 {
   char *ret = NULL;
   char *decoded_tmp = NULL;
-  size_t canonical_len = encode_query_len(src, in_query);
+  size_t canonical_len = encode_query_len(*src, in_query);
+  char *tmp;
 
+  if(!canonical_len)
+    return NULL;
   /* the size is not exact, but at worst, bigger of a few bytes */
   decoded_tmp = malloc(canonical_len + 1);
   if(!decoded_tmp)
     return NULL;
-  decode_query_cpy(decoded_tmp, src);
+  tmp = decode_query_cpy(decoded_tmp, *src, in_query);
+  if(in_query && tmp)
+    *src = tmp;
 
   ret = malloc(canonical_len + 1);
   if(ret)
     encode_query_cpy(ret, decoded_tmp, in_query);
   free(decoded_tmp);
+  return ret;
+}
+
+static char *new_encoded_query_url(char *src)
+{
+  struct curl_slist *query_list = NULL;
+  char *reenc = NULL;
+  char *ret = NULL;
+  struct curl_slist *l;
+  int again;
+
+  while((reenc = new_encoded_url(&src, TRUE))) {
+    l = Curl_slist_append_nodup(query_list, reenc);
+    if(!l) {
+      free(reenc);
+      goto out;
+    }
+    query_list = l;
+  }
+
+  /* reorder */
+  for(again = 1; again;) {
+    again = 0;
+    for(l = query_list; l; l = l->next) {
+      struct curl_slist *next = l->next;
+
+      if(next && strcmp(l->data, next->data) > 0) {
+        char *tmp = l->data;
+
+        l->data = next->data;
+        next->data = tmp;
+        again = 1;
+      }
+    }
+  }
+
+  for(l = query_list; l; l = l->next) {
+    char *tmp = ret;
+
+    ret = curl_maprintf("%s%s%s", ret ? ret : "", ret ? "&": "", l->data);
+    free(tmp);
+  }
+
+out:
+  curl_slist_free_all(query_list);
   return ret;
 }
 
@@ -422,12 +479,12 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   Curl_http_method(data, conn, &method, &httpreq);
 
-  canonical_path = new_encoded_url(data->state.up.path, FALSE);
+  canonical_path = new_encoded_url(&data->state.up.path, FALSE);
   if(!canonical_path)
     goto fail;
 
   if(data->state.up.query) {
-    canonical_query_str = new_encoded_url(data->state.up.query, TRUE);
+    canonical_query_str = new_encoded_query_url(data->state.up.query);
     if(!canonical_query_str)
       goto fail;
   }
