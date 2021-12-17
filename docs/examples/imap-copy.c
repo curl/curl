@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to copy an e-mail from one folder to another
+ * IMAP example showing how to copy an email from one folder to another
  * </DESC>
  */
 

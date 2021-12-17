@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to retreieve e-mails from a shared mailed box
+ * IMAP example showing how to retreieve emails from a shared mailed box
  * </DESC>
  */
 

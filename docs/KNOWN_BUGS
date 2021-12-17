@@ -570,7 +570,7 @@ problems may have been fixed or changed somewhat since this was written.
 6.4 Negotiate and Kerberos V5 need a fake user name
 
  In order to get Negotiate (SPNEGO) authentication to work in HTTP or Kerberos
- V5 in the e-mail protocols, you need to  provide a (fake) user name (this
+ V5 in the email protocols, you need to  provide a (fake) user name (this
  concerns both curl and the lib) because the code wrongly only considers
  authentication if there's a user name provided by setting
  conn->bits.user_passwd in url.c  https://curl.se/bug/view.cgi?id=440 How?

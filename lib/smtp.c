@@ -222,7 +222,7 @@ static bool smtp_endofresp(struct Curl_easy *data, struct connectdata *conn,
 
   /* Do we have a command response? This should be the response code followed
      by a space and optionally some text as per RFC-5321 and as outlined in
-     Section 4. Examples of RFC-4954 but some e-mail servers ignore this and
+     Section 4. Examples of RFC-4954 but some email servers ignore this and
      only send the response code instead as per Section 4.2. */
   if(line[3] == ' ' || len == 5) {
     char tmpline[6];

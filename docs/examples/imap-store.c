@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to modify the properties of an e-mail
+ * IMAP example showing how to modify the properties of an email
  * </DESC>
  */
 

@@ -1188,12 +1188,12 @@ this behavior by setting \fICURLOPT_FTP_USE_EPRT(3)\fP to zero.
 
 .SH "MIME API revisited for SMTP and IMAP"
 In addition to support HTTP multi-part form fields, the MIME API can be used
-to build structured e-mail messages and send them via SMTP or append such
+to build structured email messages and send them via SMTP or append such
 messages to IMAP directories.
 
-A structured e-mail message may contain several parts: some are displayed
+A structured email message may contain several parts: some are displayed
 inline by the MUA, some are attachments. Parts can also be structured as
-multi-part, for example to include another e-mail message or to offer several
+multi-part, for example to include another email message or to offer several
 text formats alternatives. This can be nested to any level.
 
 To build such a message, you prepare the nth-level multi-part and then include
@@ -1202,19 +1202,19 @@ it as a source to the parent multi-part using function
 bound to its parent multi-part, a nth-level multi-part belongs to it and
 should not be freed explicitly.
 
-E-mail messages data is not supposed to be non-ascii and line length is
-limited: fortunately, some transfer encodings are defined by the standards
-to support the transmission of such incompatible data. Function
+Email messages data is not supposed to be non-ascii and line length is
+limited: fortunately, some transfer encodings are defined by the standards to
+support the transmission of such incompatible data. Function
 \fIcurl_mime_encoder(3)\fP tells a part that its source data must be encoded
 before being sent. It also generates the corresponding header for that part.
-If the part data you want to send is already encoded in such a scheme,
-do not use this function (this would over-encode it), but explicitly set the
+If the part data you want to send is already encoded in such a scheme, do not
+use this function (this would over-encode it), but explicitly set the
 corresponding part header.
 
 Upon sending such a message, libcurl prepends it with the header list
 set with \fICURLOPT_HTTPHEADER(3)\fP, as 0th-level mime part headers.
 
-Here is an example building an e-mail message with an inline plain/html text
+Here is an example building an email message with an inline plain/html text
 alternative and a file attachment encoded in base64:
 
 .nf

@@ -107,7 +107,7 @@ followed by a content type specification.
 .br
 - a multipart can be terminated with a '=)' argument.
 
-Example: the following command sends an SMTP mime e-mail consisting in an
+Example: the following command sends an SMTP mime email consisting in an
 inline part in two alternative formats: plain text and HTML. It attaches a
 text file:
 

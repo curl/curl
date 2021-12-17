@@ -147,7 +147,7 @@
 
  - authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (9), Kerberos 5
    (4) and External.
- - send e-mails
+ - send emails
  - mail from support
  - mail size support
  - mail auth support for trusted server-to-server relaying
@@ -165,8 +165,8 @@
  - authentication: Clear Text, APOP and SASL
  - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (9),
    Kerberos 5 (4) and External.
- - list e-mails
- - retrieve e-mails
+ - list emails
+ - retrieve emails
  - enhanced command support for: CAPA, DELE, TOP, STAT, UIDL and NOOP via
    custom requests
  - via http-proxy
@@ -184,8 +184,8 @@
    Kerberos 5 (4) and External.
  - list the folders of a mailbox
  - select a mailbox with support for verifying the UIDVALIDITY
- - fetch e-mails with support for specifying the UID and SECTION
- - upload e-mails via the append command
+ - fetch emails with support for specifying the UID and SECTION
+ - upload emails via the append command
  - enhanced command support for: EXAMINE, CREATE, DELETE, RENAME, STATUS,
    STORE, COPY and UID via custom requests
  - via http-proxy
