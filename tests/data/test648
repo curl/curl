@@ -60,8 +60,8 @@ To: another
 Content-Transfer-Encoding: quoted-printable
 Content-disposition: "inline"
 
-This is the email inline text with a very long line containing the special=
- character =3D and that should be split by encoder.
+This is the email inline text with a very long line containing the special =
+character =3D and that should be split by encoder.
 ------------------------------
 Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
 Content-Transfer-Encoding: base64
