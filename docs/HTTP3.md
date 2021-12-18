@@ -69,7 +69,7 @@ Build curl
      % make
      % make install
 
-For OpenSSL 3.0.0 or later builds on Linux for x86_64 architecture, substitute all occurances of "/lib" with "/lib64"
+For OpenSSL 3.0.0 or later builds on Linux for x86_64 architecture, substitute all occurrences of "/lib" with "/lib64"
 
 ## Build with GnuTLS
 
