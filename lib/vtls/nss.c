@@ -343,7 +343,11 @@ static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc *model,
     else
       len = strlen(cipher);
 
-    if(len && (len < MAX_CIPHER_LENGTH)) {
+    if(len > MAX_CIPHER_LENGTH) {
+      failf(data, "Bad cipher list");
+      return SECFailure;
+    }
+    else if(len) {
       memcpy(name, cipher, len);
       name[len] = 0;
 
