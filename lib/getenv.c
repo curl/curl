@@ -29,7 +29,7 @@
 
 static char *GetEnv(const char *variable)
 {
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_APP)
+#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_APP) || defined(CURL_DISABLE_ENV_VARS)
   (void)variable;
   return NULL;
 #elif defined(WIN32)
