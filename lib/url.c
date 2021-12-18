@@ -144,7 +144,7 @@ static void conn_free(struct connectdata *conn);
  * bad things will happen.
  */
 #if READBUFFER_SIZE < READBUFFER_MIN
-# error READBUFFER_SIZE is too small
+#error READBUFFER_SIZE is too small
 #endif
 
 /*
