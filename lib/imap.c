@@ -721,22 +721,30 @@ static CURLcode imap_perform_fetch(struct Curl_easy *data)
 
     /* Send the FETCH command */
     if(imap->partial)
-      result = imap_sendf(data, "UID FETCH %s BODY[%s]<%s>",
-                          imap->uid, imap->section ? imap->section : "",
+      result = imap_sendf(data, "UID FETCH %s BODY%s[%s]<%s>",
+                          imap->uid,
+                          imap->peek ? ".PEEK" : "",
+                          imap->section ? imap->section : "",
                           imap->partial);
     else
-      result = imap_sendf(data, "UID FETCH %s BODY[%s]",
-                          imap->uid, imap->section ? imap->section : "");
+      result = imap_sendf(data, "UID FETCH %s BODY%s[%s]",
+                          imap->uid,
+                          imap->peek ? ".PEEK" : "",
+                          imap->section ? imap->section : "");
   }
   else if(imap->mindex) {
     /* Send the FETCH command */
     if(imap->partial)
-      result = imap_sendf(data, "FETCH %s BODY[%s]<%s>",
-                          imap->mindex, imap->section ? imap->section : "",
+      result = imap_sendf(data, "FETCH %s BODY%s[%s]<%s>",
+                          imap->mindex,
+                          imap->peek ? ".PEEK" : "",
+                          imap->section ? imap->section : "",
                           imap->partial);
     else
-      result = imap_sendf(data, "FETCH %s BODY[%s]",
-                          imap->mindex, imap->section ? imap->section : "");
+      result = imap_sendf(data, "FETCH %s BODY%s[%s]",
+                          imap->mindex,
+                          imap->peek ? ".PEEK" : "",
+                          imap->section ? imap->section : "");
   }
   else {
     failf(data, "Cannot FETCH without a UID.");
@@ -2060,6 +2068,10 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data)
 
       imap->section = value;
       value = NULL;
+    }
+    else if(strcasecompare(name, "PEEK")) {
+      if(valuelen > 0)
+        imap->peek = value[0] == '1';
     }
     else if(strcasecompare(name, "PARTIAL") && !imap->partial) {
       if(valuelen > 0 && value[valuelen - 1] == '/')
