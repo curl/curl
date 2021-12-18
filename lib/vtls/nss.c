@@ -333,6 +333,7 @@ static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc *model,
     const char *end;
     char name[MAX_CIPHER_LENGTH + 1];
     size_t len;
+    bool found = FALSE;
     while((*cipher) && (ISSPACE(*cipher)))
       ++cipher;
 
@@ -343,7 +344,6 @@ static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc *model,
       len = strlen(cipher);
 
     if(len && (len < MAX_CIPHER_LENGTH)) {
-      bool found = FALSE;
       memcpy(name, cipher, len);
       name[len] = 0;
 
@@ -359,11 +359,11 @@ static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc *model,
           break;
         }
       }
+    }
 
-      if(!found) {
-        failf(data, "Unknown cipher in list: %s", name);
-        return SECFailure;
-      }
+    if(!found && len) {
+      failf(data, "Unknown cipher: %s", name);
+      return SECFailure;
     }
     if(end)
       cipher = ++end;
