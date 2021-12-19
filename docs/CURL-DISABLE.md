@@ -134,3 +134,7 @@ Disable the TFTP protocol
 ## CURL_DISABLE_VERBOSE_STRINGS
 
 Disable verbose strings and error messages.
+
+## CURL_DISABLE_ENV_VARS
+
+Disable CURL environment variables.
