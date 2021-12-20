@@ -4,7 +4,7 @@ curl and libcurl 7.81.0
  Command line options:         244
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2549
+ Contributors:                 2552
 
 This release includes the following changes:
 
@@ -14,7 +14,8 @@ This release includes the following bugfixes:
 
  o asyn-ares: ares_getaddrinfo needs no happy eyeballs timer [73]
  o azure: make the "w/o HTTP/SMTP/IMAP" build disable SSL proper [12]
- o BINDINGS.md: add cURL client for PostgreSQL [68]
+ o BINDINGS: add cURL client for PostgreSQL [68]
+ o BINDINGS: add one from Everything curl and update a link
  o CI: build examples for additional code verification [75]
  o cmake: don't set _USRDLL on a static Windows build [22]
  o cmake: private identifiers use CURL_ instead of CMAKE_ prefix [40]
@@ -37,8 +38,11 @@ This release includes the following bugfixes:
  o docs/examples: workaround broken -Wno-pedantic-ms-format
  o docs/INSTALL.md: typo fix : added missing "get" verb [31]
  o docs/URL-SYNTAX.md: space is not fine in a given URL
+ o docs: add known bugs list to HTTP3.md [83]
  o docs: address proselint nits [16]
  o docs: consistent manpage SYNOPSIS [47]
+ o docs: fix dead links, remove ECH.md
+ o docs: fix typo in OpenSSL 3 build instructions [80]
  o docs: Update the Reducing Size section
  o example/progressfunc: remove code for old libcurls [78]
  o FAQ: typo fix : "yout" ➤ "your" [30]
@@ -49,21 +53,26 @@ This release includes the following bugfixes:
  o http: enable haproxy support for hyper backend [20]
  o insecure.d: detail its use for SFTP and SCP as well [32]
  o insecure.d: expand and clarify [28]
+ o libcurl-security.3: mention address and URL mitigations
  o libssh2: fix error message for sha256 mismatch
  o lift: ignore is a deprecated config option, use ignoreRules [35]
+ o linkcheck.yml: add CI job that checks markdown links [82]
  o Makefile.m32: rename -winssl option to -schannel and tidy up [33]
  o mbedTLS: add support for CURLOPT_CAINFO_BLOB [44]
  o mbedtls: fix CURLOPT_SSLCERT_BLOB [72]
  o misc: remove unused doh flags when CURL_DISABLE_DOH is defined [71]
+ o misc: s/e-mail/email [74]
  o multi: cleanup the socket hash when destroying it [55]
  o multi: handle errors returned from socket/timer callbacks [52]
  o multi: shut down CONNECT in Curl_detach_connnection [2]
  o netrc.d: edit the .netrc example to look nicer [24]
+ o nss:set_cipher don't clobber the cipher list [38]
  o openldap: implement STARTTLS [56]
  o openldap: process search query response messages one by one [50]
  o openldap: several minor improvements [69]
  o openldap: simplify ldif generation code [77]
  o openssl: check the return value of BIO_new() [43]
+ o openssl: define HAVE_OPENSSL_VERSION for OpenSSL 1.1.0+
  o openssl: remove `RSA_METHOD_FLAG_NO_CHECK` handling if unavailable
  o openssl: remove usage of deprecated `SSL_get_peer_certificate`
  o openssl: use non-deprecated API to read key parameters
@@ -111,15 +120,15 @@ advice from friends like these:
 
   Alessandro Ghedini, Bernat Mut, Bernhard Walle, Boris Rasin,
   Brad Fitzpatrick, Bruno Baguette, Damien Walsh, Dan Fandrich,
-  Daniel Stenberg, David Bohman, Don J Olmstead, Even Rouault,
-  Florian Van Heghe, Glenn Strauss, Jacob Hoffman-Andrews, Jeff Luszcz,
-  jeffrson on github, Jun Tseng, Kevin Burke, Marcelo Juchem, Marcel Raad,
-  Marc Hörsken, Mark Dodgson, Michał Antoniak, nimaje on github,
-  Patrick Monnerat, Paul Howarth, Ray Satiro, RekGRpth on github,
-  Rikard Falkeborn, Ryan Sleevi, Stan Hu, Stefan Eissing, Stephane Pellegrino,
-  Stephen M. Coakley, Viktor Szakats, Vincent Grande, Wyatt O'Day,
-  x2018 on github, Yongkang Huang,
-  (40 contributors)
+  Daniel Stenberg, David Bohman, Don J Olmstead, Eric Musser, Even Rouault,
+  Florian Van Heghe, Glenn Strauss, Jacob Hoffman-Andrews, James Fuller,
+  Jeff Luszcz, jeffrson on github, Jun Tseng, Kevin Burke, lllaffer on github,
+  Marcelo Juchem, Marcel Raad, Marc Hörsken, Mark Dodgson, Michał Antoniak,
+  nimaje on github, Patrick Monnerat, Paul Howarth, Ray Satiro,
+  RekGRpth on github, Rikard Falkeborn, Ryan Sleevi, Stan Hu, Stefan Eissing,
+  Stephane Pellegrino, Stephen M. Coakley, Tobias Nießen, Viktor Szakats,
+  Vincent Grande, Wyatt O'Day, x2018 on github, Yongkang Huang,
+  (44 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -160,6 +169,7 @@ References to bug reports and discussions on issues:
  [35] = https://curl.se/bug/?i=8082
  [36] = https://curl.se/bug/?i=8049
  [37] = https://curl.se/bug/?i=8076
+ [38] = https://curl.se/bug/?i=8160
  [39] = https://curl.se/bug/?i=8012
  [40] = https://curl.se/bug/?i=7988
  [41] = https://curl.se/bug/?i=8042
@@ -195,9 +205,13 @@ References to bug reports and discussions on issues:
  [71] = https://curl.se/bug/?i=8148
  [72] = https://curl.se/bug/?i=8146
  [73] = https://curl.se/bug/?i=8142
+ [74] = https://curl.se/bug/?i=8159
  [75] = https://curl.se/bug/?i=7922
  [76] = https://curl.se/bug/?i=8084
  [77] = https://curl.se/bug/?i=8136
  [78] = https://curl.se/bug/?i=8137
  [79] = https://curl.se/bug/?i=8133
+ [80] = https://curl.se/bug/?i=8162
  [81] = https://curl.se/bug/?i=8141
+ [82] = https://curl.se/bug/?i=8158
+ [83] = https://curl.se/bug/?i=8156
