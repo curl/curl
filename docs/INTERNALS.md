@@ -18,7 +18,7 @@ curl internals
  - [FILE](#file)
  - [SMB](#smb)
  - [LDAP](#ldap)
- - [E-mail](#email)
+ - [Email](#email)
  - [General](#general)
  - [Persistent Connections](#persistent)
  - [multi interface/non-blocking](#multi)
@@ -354,7 +354,7 @@ LDAP
  Everything LDAP is in `lib/ldap.c` and `lib/openldap.c`.
 
 <a name="email"></a>
-E-mail
+Email
 ======
 
  The email related source code is in `lib/imap.c`, `lib/pop3.c` and
