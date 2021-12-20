@@ -4244,7 +4244,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
            The sscanf() line above will also allow zero-prefixed and negative
            numbers, so we check for that too here.
         */
-        else if(ISDIGIT(digit4) || (k->httpcode < 100)) {
+        else if(ISDIGIT(digit4) || (nc >= 4 && k->httpcode < 100)) {
           failf(data, "Unsupported response code in HTTP response");
           return CURLE_UNSUPPORTED_PROTOCOL;
         }
