@@ -19,7 +19,7 @@ QUIC libraries we are experimenting with:
 
 [quiche](https://github.com/cloudflare/quiche)
 
-## Experimental!
+## Experimental
 
 HTTP/3 and QUIC support in curl is considered **EXPERIMENTAL** until further
 notice. It needs to be enabled at build-time.
@@ -136,7 +136,7 @@ Build curl:
 
  If `make install` results in `Permission denied` error, you will need to prepend it with `sudo`.
 
-## Run
+# `--http3`
 
 Use HTTP/3 directly:
 
@@ -151,3 +151,73 @@ See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
 ## Known Bugs
 
 Check out the [list of known HTTP3 bugs](https://curl.se/docs/knownbugs.html#HTTP3).
+
+# HTTP/3 Test server
+
+This is not advice on how to run anything in production. This is for
+development and experimenting.
+
+## Preqreqs
+
+An existing local HTTP/1.1 server that hosts files. Preferably also a few huge
+ones.  You can easily create huge local files like `truncate -s=8G 8GB` - they
+are huge but do not occupy that much space on disk since they're just a big
+hole.
+
+In my Debian setup I just installed **apache2**. It runs on port 80 and has a
+document root in `/var/www/html`. I can get the 8GB file from it with `curl
+localhost/8GB -o dev/null`
+
+In this description we setup and run a HTTP/3 reverse-proxy in front of the
+HTTP/1 server.
+
+## Setup
+
+You can select either or both of these server solutions.
+
+### nghttpx
+
+Get, build and install **quictls**, **nghttp3** and **ngtcp2** as described
+above.
+
+Get, build and install **nghttp2**:
+
+    git clone https://github.com/nghttp2/nghttp2.git
+    cd nghttp2
+    autoreconf -fi
+    PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/daniel/build-quictls/lib/pkgconfig:/home/daniel/build-nghttp3/lib/pkgconfig:/home/daniel/build-ngtcp2/lib/pkgconfig  LDFLAGS=-L/home/daniel/build-quictls/lib CFLAGS=-I/home/daniel/build-quictls/include ./configure --enable-maintainer-mode --prefix=/home/daniel/build-nghttp2 --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd
+    make && make install
+
+Run the local h3 server on port 9443, make it proxy all traffic through to
+HTTP/1 on localhost port 80. For local toying, we can just use the test cert
+that exists in curl's test dir.
+
+    CERT=$CURLSRC/tests/stunnel.pem
+    $HOME/bin/nghttpx $CERT $CERT --backend=localhost,80 \
+      --frontend="localhost,9443;quic"
+
+### Caddy
+
+[Install caddy](https://caddyserver.com/docs/install), you can even put the
+single binary in a separate directory if you prefer.
+
+In the same directory you put caddy, create a `Caddyfile` with the following
+content to run a HTTP/3 reverse-proxy on port 7443:
+~~~
+{
+    auto_https disable_redirects
+	servers :7443 {
+		protocol {
+			experimental_http3
+		}
+	}
+}
+
+localhost:7443 {
+	reverse_proxy localhost:80
+}
+~~~
+
+Then run caddy:
+
+    ./caddy start
