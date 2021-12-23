@@ -894,6 +894,8 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
         connkeep(conn, "HTTP/3 default");
         return CURLE_OK;
       }
+      /* When a QUIC connect attempt fails, the better error explanation is in
+         'result' and not in errno */
       if(result) {
         conn->tempsock[i] = CURL_SOCKET_BAD;
         error = SOCKERRNO;
@@ -977,6 +979,13 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
         char buffer[STRERROR_LEN];
         Curl_printable_address(conn->tempaddr[i], ipaddress,
                                sizeof(ipaddress));
+#ifdef ENABLE_QUIC
+        if(conn->transport == TRNSPRT_QUIC) {
+          infof(data, "connect to %s port %u failed: %s",
+                ipaddress, conn->port, curl_easy_strerror(result));
+        }
+        else
+#endif
         infof(data, "connect to %s port %u failed: %s",
               ipaddress, conn->port,
               Curl_strerror(error, buffer, sizeof(buffer)));
@@ -988,9 +997,11 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
         ainext(conn, i, TRUE);
         status = trynextip(data, conn, sockindex, i);
         if((status != CURLE_COULDNT_CONNECT) ||
-           conn->tempsock[other] == CURL_SOCKET_BAD)
+           conn->tempsock[other] == CURL_SOCKET_BAD) {
           /* the last attempt failed and no other sockets remain open */
-          result = status;
+          if(!result)
+            result = status;
+        }
       }
     }
   }
@@ -1016,12 +1027,15 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
     /* no more addresses to try */
     const char *hostname;
     char buffer[STRERROR_LEN];
+    CURLcode failreason = result;
 
     /* if the first address family runs out of addresses to try before the
        happy eyeball timeout, go ahead and try the next family now */
     result = trynextip(data, conn, sockindex, 1);
     if(!result)
       return result;
+
+    result = failreason;
 
 #ifndef CURL_DISABLE_PROXY
     if(conn->bits.socksproxy)
@@ -1036,10 +1050,14 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
       hostname = conn->host.name;
 
     failf(data, "Failed to connect to %s port %u after "
-                "%" CURL_FORMAT_TIMEDIFF_T " ms: %s",
-        hostname, conn->port,
-        Curl_timediff(now, data->progress.t_startsingle),
-        Curl_strerror(error, buffer, sizeof(buffer)));
+          "%" CURL_FORMAT_TIMEDIFF_T " ms: %s",
+          hostname, conn->port,
+          Curl_timediff(now, data->progress.t_startsingle),
+#ifdef ENABLE_QUIC
+          (conn->transport == TRNSPRT_QUIC) ?
+          curl_easy_strerror(result) :
+#endif
+          Curl_strerror(error, buffer, sizeof(buffer)));
 
     Curl_quic_disconnect(data, conn, 0);
     Curl_quic_disconnect(data, conn, 1);

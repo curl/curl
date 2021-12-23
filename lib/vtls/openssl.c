@@ -1673,9 +1673,10 @@ static bool subj_alt_hostcheck(struct Curl_easy *data,
    hostname. In this case, the iPAddress subjectAltName must be present
    in the certificate and must exactly match the IP in the URI.
 
+   This function is now used from ngtcp2 (QUIC) as well.
 */
-static CURLcode verifyhost(struct Curl_easy *data, struct connectdata *conn,
-                           X509 *server_cert)
+CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
+                              X509 *server_cert)
 {
   bool matched = FALSE;
   int target = GEN_DNS; /* target type, GEN_DNS or GEN_IPADD */
@@ -3923,7 +3924,7 @@ static CURLcode servercert(struct Curl_easy *data,
   BIO_free(mem);
 
   if(SSL_CONN_CONFIG(verifyhost)) {
-    result = verifyhost(data, conn, backend->server_cert);
+    result = Curl_ossl_verifyhost(data, conn, backend->server_cert);
     if(result) {
       X509_free(backend->server_cert);
       backend->server_cert = NULL;
