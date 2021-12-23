@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,11 +26,15 @@
 
 #ifdef USE_OPENSSL
 /*
- * This header should only be needed to get included by vtls.c and openssl.c
+ * This header should only be needed to get included by vtls.c, openssl.c
+ * and ngtcp2.c
  */
 
+#include <openssl/x509v3.h>
 #include "urldata.h"
 
+CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
+                              X509 *server_cert);
 extern const struct Curl_ssl Curl_ssl_openssl;
 
 #endif /* USE_OPENSSL */
