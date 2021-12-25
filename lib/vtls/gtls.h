@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,10 @@
 
 #include "urldata.h"
 
+CURLcode
+Curl_gtls_verifyserver(struct Curl_easy *data, struct connectdata *conn,
+                       gnutls_session_t session,
+                       int sockindex);
 extern const struct Curl_ssl Curl_ssl_gnutls;
 
 #endif /* USE_GNUTLS */
