@@ -497,6 +497,7 @@ gtls_connect_step1(struct Curl_easy *data,
   /* use system ca certificate store as fallback */
   if(SSL_CONN_CONFIG(verifypeer) &&
      !(SSL_CONN_CONFIG(CAfile) || SSL_CONN_CONFIG(CApath))) {
+    /* this ignores errors on purpose */
     gnutls_certificate_set_x509_system_trust(backend->cred);
   }
 #endif
@@ -631,7 +632,10 @@ gtls_connect_step1(struct Curl_easy *data,
     cur++;
     infof(data, "ALPN, offering %s", ALPN_HTTP_1_1);
 
-    gnutls_alpn_set_protocols(session, protocols, cur, 0);
+    if(gnutls_alpn_set_protocols(session, protocols, cur, 0)) {
+      failf(data, "failed setting ALPN");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
   }
 
   if(SSL_SET_OPTION(primary.clientcert)) {
