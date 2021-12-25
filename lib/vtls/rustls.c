@@ -360,7 +360,7 @@ cr_set_negotiated_alpn(struct Curl_easy *data, struct connectdata *conn,
   size_t len = 0;
 
   rustls_connection_get_alpn_protocol(rconn, &protocol, &len);
-  if(NULL == protocol) {
+  if(!protocol) {
     infof(data, "ALPN, server did not agree to a protocol");
     return;
   }

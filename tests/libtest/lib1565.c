@@ -122,7 +122,7 @@ int test(char *URL)
 
     abort_on_test_timeout();
 
-    while((message = curl_multi_info_read(multi, &num)) != NULL) {
+    while((message = curl_multi_info_read(multi, &num))) {
       if(message->msg == CURLMSG_DONE) {
         res = message->data.result;
         if(res)

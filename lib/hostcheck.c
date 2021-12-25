@@ -89,7 +89,7 @@ static int hostmatch(char *hostname, char *pattern)
      match. */
   wildcard_enabled = 1;
   pattern_label_end = strchr(pattern, '.');
-  if(!pattern_label_end || strchr(pattern_label_end + 1, '.') == NULL ||
+  if(!pattern_label_end || !strchr(pattern_label_end + 1, '.') ||
      pattern_wildcard > pattern_label_end ||
      strncasecompare(pattern, "xn--", 4)) {
     wildcard_enabled = 0;

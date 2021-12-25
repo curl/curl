@@ -880,7 +880,7 @@ Curl_sec_login(struct Curl_easy *data, struct connectdata *conn)
 void
 Curl_sec_end(struct connectdata *conn)
 {
-  if(conn->mech != NULL && conn->mech->end)
+  if(conn->mech && conn->mech->end)
     conn->mech->end(conn->app_data);
   free(conn->app_data);
   conn->app_data = NULL;

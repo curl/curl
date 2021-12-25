@@ -230,7 +230,7 @@ static CURLcode auth_digest_get_qop_values(const char *options, int *value)
     return CURLE_OUT_OF_MEMORY;
 
   token = strtok_r(tmp, ",", &tok_buf);
-  while(token != NULL) {
+  while(token) {
     if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH))
       *value |= DIGEST_QOP_VALUE_AUTH;
     else if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH_INT))
@@ -556,7 +556,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
           return CURLE_OUT_OF_MEMORY;
 
         token = strtok_r(tmp, ",", &tok_buf);
-        while(token != NULL) {
+        while(token) {
           if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH)) {
             foundAuth = TRUE;
           }
