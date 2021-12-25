@@ -68,8 +68,6 @@ struct ssl_backend_data
   SSL *handle;
 };
 
-#define BACKEND connssl->backend
-
 static Curl_recv mesalink_recv;
 static Curl_send mesalink_send;
 
@@ -100,9 +98,9 @@ mesalink_connect_step1(struct Curl_easy *data,
 #endif
   const char * const hostname = SSL_HOST_NAME();
   size_t hostname_len = strlen(hostname);
-
   SSL_METHOD *req_method = NULL;
   curl_socket_t sockfd = conn->sock[sockindex];
+  struct ssl_backend_data *backend = connssl->backend;
 
   if(connssl->state == ssl_connection_complete)
     return CURLE_OK;
@@ -139,22 +137,22 @@ mesalink_connect_step1(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(BACKEND->ctx)
-    SSL_CTX_free(BACKEND->ctx);
-  BACKEND->ctx = SSL_CTX_new(req_method);
+  if(backend->ctx)
+    SSL_CTX_free(backend->ctx);
+  backend->ctx = SSL_CTX_new(req_method);
 
-  if(!BACKEND->ctx) {
+  if(!backend->ctx) {
     failf(data, "SSL: couldn't create a context!");
     return CURLE_OUT_OF_MEMORY;
   }
 
   SSL_CTX_set_verify(
-    BACKEND->ctx, SSL_CONN_CONFIG(verifypeer) ?
+    backend->ctx, SSL_CONN_CONFIG(verifypeer) ?
       SSL_VERIFY_PEER : SSL_VERIFY_NONE, NULL);
 
   if(SSL_CONN_CONFIG(CAfile) || SSL_CONN_CONFIG(CApath)) {
-    if(!SSL_CTX_load_verify_locations(BACKEND->ctx, SSL_CONN_CONFIG(CAfile),
-                                                    SSL_CONN_CONFIG(CApath))) {
+    if(!SSL_CTX_load_verify_locations(backend->ctx, SSL_CONN_CONFIG(CAfile),
+                                      SSL_CONN_CONFIG(CApath))) {
       if(SSL_CONN_CONFIG(verifypeer)) {
         failf(data,
               "error setting certificate verify locations: "
@@ -181,7 +179,7 @@ mesalink_connect_step1(struct Curl_easy *data,
   if(SSL_SET_OPTION(primary.clientcert) && SSL_SET_OPTION(key)) {
     int file_type = do_file_type(SSL_SET_OPTION(cert_type));
 
-    if(SSL_CTX_use_certificate_chain_file(BACKEND->ctx,
+    if(SSL_CTX_use_certificate_chain_file(backend->ctx,
                                           SSL_SET_OPTION(primary.clientcert),
                                           file_type) != 1) {
       failf(data, "unable to use client certificate (no key or wrong pass"
@@ -190,8 +188,8 @@ mesalink_connect_step1(struct Curl_easy *data,
     }
 
     file_type = do_file_type(SSL_SET_OPTION(key_type));
-    if(SSL_CTX_use_PrivateKey_file(BACKEND->ctx, SSL_SET_OPTION(key),
-                                    file_type) != 1) {
+    if(SSL_CTX_use_PrivateKey_file(backend->ctx, SSL_SET_OPTION(key),
+                                   file_type) != 1) {
       failf(data, "unable to set private key");
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -204,7 +202,7 @@ mesalink_connect_step1(struct Curl_easy *data,
   ciphers = SSL_CONN_CONFIG(cipher_list);
   if(ciphers) {
 #ifdef MESALINK_HAVE_CIPHER
-    if(!SSL_CTX_set_cipher_list(BACKEND->ctx, ciphers)) {
+    if(!SSL_CTX_set_cipher_list(backend->ctx, ciphers)) {
       failf(data, "failed setting cipher list: %s", ciphers);
       return CURLE_SSL_CIPHER;
     }
@@ -212,10 +210,10 @@ mesalink_connect_step1(struct Curl_easy *data,
     infof(data, "Cipher selection: %s", ciphers);
   }
 
-  if(BACKEND->handle)
-    SSL_free(BACKEND->handle);
-  BACKEND->handle = SSL_new(BACKEND->ctx);
-  if(!BACKEND->handle) {
+  if(backend->handle)
+    SSL_free(backend->handle);
+  backend->handle = SSL_new(backend->ctx);
+  if(!backend->handle) {
     failf(data, "SSL: couldn't create a context (handle)!");
     return CURLE_OUT_OF_MEMORY;
   }
@@ -227,7 +225,7 @@ mesalink_connect_step1(struct Curl_easy *data,
 #endif
   ) {
     /* hostname is not a valid IP address */
-    if(SSL_set_tlsext_host_name(BACKEND->handle, hostname) != SSL_SUCCESS) {
+    if(SSL_set_tlsext_host_name(backend->handle, hostname) != SSL_SUCCESS) {
       failf(data,
             "WARNING: failed to configure server name indication (SNI) "
             "TLS extension\n");
@@ -244,7 +242,7 @@ mesalink_connect_step1(struct Curl_easy *data,
        || strncmp(hostname, "[::1]", 5) == 0
 #endif
     ) {
-      SSL_set_tlsext_host_name(BACKEND->handle, "localhost");
+      SSL_set_tlsext_host_name(backend->handle, "localhost");
     }
     else
 #endif
@@ -264,12 +262,12 @@ mesalink_connect_step1(struct Curl_easy *data,
                               SSL_IS_PROXY() ? TRUE : FALSE,
                               &ssl_sessionid, NULL, sockindex)) {
       /* we got a session id, use it! */
-      if(!SSL_set_session(BACKEND->handle, ssl_sessionid)) {
+      if(!SSL_set_session(backend->handle, ssl_sessionid)) {
         Curl_ssl_sessionid_unlock(data);
         failf(
           data,
           "SSL: SSL_set_session failed: %s",
-          ERR_error_string(SSL_get_error(BACKEND->handle, 0), error_buffer));
+          ERR_error_string(SSL_get_error(backend->handle, 0), error_buffer));
         return CURLE_SSL_CONNECT_ERROR;
       }
       /* Informational message */
@@ -279,7 +277,7 @@ mesalink_connect_step1(struct Curl_easy *data,
   }
 #endif /* MESALINK_HAVE_SESSION */
 
-  if(SSL_set_fd(BACKEND->handle, (int)sockfd) != SSL_SUCCESS) {
+  if(SSL_set_fd(backend->handle, (int)sockfd) != SSL_SUCCESS) {
     failf(data, "SSL: SSL_set_fd failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
@@ -294,13 +292,14 @@ mesalink_connect_step2(struct Curl_easy *data,
 {
   int ret = -1;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct ssl_backend_data *backend = connssl->backend;
 
   conn->recv[sockindex] = mesalink_recv;
   conn->send[sockindex] = mesalink_send;
 
-  ret = SSL_connect(BACKEND->handle);
+  ret = SSL_connect(backend->handle);
   if(ret != SSL_SUCCESS) {
-    int detail = SSL_get_error(BACKEND->handle, ret);
+    int detail = SSL_get_error(backend->handle, ret);
 
     if(SSL_ERROR_WANT_CONNECT == detail || SSL_ERROR_WANT_READ == detail) {
       connssl->connecting_state = ssl_connect_2_reading;
@@ -327,8 +326,8 @@ mesalink_connect_step2(struct Curl_easy *data,
   connssl->connecting_state = ssl_connect_3;
   infof(data,
         "SSL connection using %s / %s",
-        SSL_get_version(BACKEND->handle),
-        SSL_get_cipher_name(BACKEND->handle));
+        SSL_get_version(backend->handle),
+        SSL_get_cipher_name(backend->handle));
 
   return CURLE_OK;
 }
@@ -347,8 +346,9 @@ mesalink_connect_step3(struct connectdata *conn, int sockindex)
     SSL_SESSION *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;
     bool isproxy = SSL_IS_PROXY() ? TRUE : FALSE;
+    struct ssl_backend_data *backend = connssl->backend;
 
-    our_ssl_sessionid = SSL_get_session(BACKEND->handle);
+    our_ssl_sessionid = SSL_get_session(backend->handle);
 
     Curl_ssl_sessionid_lock(data);
     incache =
@@ -387,12 +387,13 @@ mesalink_send(struct Curl_easy *data, int sockindex, const void *mem,
 {
   struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct ssl_backend_data *backend = connssl->backend;
   char error_buffer[MESALINK_MAX_ERROR_SZ];
   int memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
-  int rc = SSL_write(BACKEND->handle, mem, memlen);
+  int rc = SSL_write(backend->handle, mem, memlen);
 
   if(rc < 0) {
-    int err = SSL_get_error(BACKEND->handle, rc);
+    int err = SSL_get_error(backend->handle, rc);
     switch(err) {
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
@@ -415,17 +416,18 @@ static void
 mesalink_close(struct Curl_easy *data, struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct ssl_backend_data *backend = connssl->backend;
 
   (void) data;
 
-  if(BACKEND->handle) {
-    (void)SSL_shutdown(BACKEND->handle);
-    SSL_free(BACKEND->handle);
-    BACKEND->handle = NULL;
+  if(backend->handle) {
+    (void)SSL_shutdown(backend->handle);
+    SSL_free(backend->handle);
+    backend->handle = NULL;
   }
-  if(BACKEND->ctx) {
-    SSL_CTX_free(BACKEND->ctx);
-    BACKEND->ctx = NULL;
+  if(backend->ctx) {
+    SSL_CTX_free(backend->ctx);
+    backend->ctx = NULL;
   }
 }
 
@@ -435,12 +437,13 @@ mesalink_recv(struct Curl_easy *data, int num, char *buf, size_t buffersize,
 {
   struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[num];
+  struct ssl_backend_data *backend = connssl->backend;
   char error_buffer[MESALINK_MAX_ERROR_SZ];
   int buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
-  int nread = SSL_read(BACKEND->handle, buf, buffsize);
+  int nread = SSL_read(backend->handle, buf, buffsize);
 
   if(nread <= 0) {
-    int err = SSL_get_error(BACKEND->handle, nread);
+    int err = SSL_get_error(backend->handle, nread);
 
     switch(err) {
     case SSL_ERROR_ZERO_RETURN: /* no more data */
@@ -485,12 +488,13 @@ mesalink_shutdown(struct Curl_easy *data,
 {
   int retval = 0;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct ssl_backend_data *backend = connssl->backend;
 
   (void) data;
 
-  if(BACKEND->handle) {
-    SSL_free(BACKEND->handle);
-    BACKEND->handle = NULL;
+  if(backend->handle) {
+    SSL_free(backend->handle);
+    backend->handle = NULL;
   }
   return retval;
 }
@@ -636,8 +640,9 @@ static void *
 mesalink_get_internals(struct ssl_connect_data *connssl,
                        CURLINFO info UNUSED_PARAM)
 {
+  struct ssl_backend_data *backend = connssl->backend;
   (void)info;
-  return BACKEND->handle;
+  return backend->handle;
 }
 
 const struct Curl_ssl Curl_ssl_mesalink = {
