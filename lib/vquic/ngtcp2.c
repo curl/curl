@@ -32,6 +32,7 @@
 #include "vtls/openssl.h"
 #elif defined(USE_GNUTLS)
 #include <ngtcp2/ngtcp2_crypto_gnutls.h>
+#include "vtls/gtls.h"
 #endif
 #include "urldata.h"
 #include "sendf.h"
@@ -1663,6 +1664,7 @@ static ssize_t ngh3_stream_send(struct Curl_easy *data,
 static CURLcode ng_has_connected(struct Curl_easy *data,
                                  struct connectdata *conn, int tempindex)
 {
+  CURLcode result = CURLE_OK;
   conn->recv[FIRSTSOCKET] = ngh3_stream_recv;
   conn->send[FIRSTSOCKET] = ngh3_stream_send;
   conn->handler = &Curl_handler_http3;
@@ -1671,8 +1673,8 @@ static CURLcode ng_has_connected(struct Curl_easy *data,
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
   conn->quic = &conn->hequic[tempindex];
 
-#ifdef USE_OPENSSL
   if(conn->ssl_config.verifyhost) {
+#ifdef USE_OPENSSL
     X509 *server_cert;
     CURLcode result;
     server_cert = SSL_get_peer_certificate(conn->quic->ssl);
@@ -1684,13 +1686,13 @@ static CURLcode ng_has_connected(struct Curl_easy *data,
     if(result)
       return result;
     infof(data, "Verified certificate just fine");
+#else
+    result = Curl_gtls_verifyserver(data, conn, conn->quic->ssl, FIRSTSOCKET);
+#endif
   }
   else
     infof(data, "Skipped certificate verification");
-#else
-  (void)data;
-#endif
-  return CURLE_OK;
+  return result;
 }
 
 /*
@@ -1714,8 +1716,9 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
     goto error;
 
   if(ngtcp2_conn_get_handshake_completed(qs->qconn)) {
-    *done = TRUE;
     result = ng_has_connected(data, conn, sockindex);
+    if(!result)
+      *done = TRUE;
   }
 
   return result;

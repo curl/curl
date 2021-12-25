@@ -808,10 +808,11 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
 static Curl_recv gtls_recv;
 static Curl_send gtls_send;
 
-static CURLcode
-gtls_connect_step3(struct Curl_easy *data,
-                   struct connectdata *conn,
-                   int sockindex)
+CURLcode
+Curl_gtls_verifyserver(struct Curl_easy *data,
+                       struct connectdata *conn,
+                       gnutls_session_t session,
+                       int sockindex)
 {
   unsigned int cert_list_size;
   const gnutls_datum_t *chainp;
@@ -823,9 +824,6 @@ gtls_connect_step3(struct Curl_easy *data,
   size_t size;
   time_t certclock;
   const char *ptr;
-  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  struct ssl_backend_data *backend = connssl->backend;
-  gnutls_session_t session = backend->session;
   int rc;
   gnutls_datum_t proto;
   CURLcode result = CURLE_OK;
@@ -1269,8 +1267,6 @@ gtls_connect_step3(struct Curl_easy *data,
   }
 
   conn->ssl[sockindex].state = ssl_connection_complete;
-  conn->recv[sockindex] = gtls_recv;
-  conn->send[sockindex] = gtls_send;
 
   if(SSL_SET_OPTION(primary.sessionid)) {
     /* we always unconditionally get the session id here, as even if we
@@ -1355,9 +1351,13 @@ gtls_connect_common(struct Curl_easy *data,
 
   /* Finish connecting once the handshake is done */
   if(ssl_connect_1 == connssl->connecting_state) {
-    rc = gtls_connect_step3(data, conn, sockindex);
+    struct ssl_backend_data *backend = connssl->backend;
+    gnutls_session_t session = backend->session;
+    rc = Curl_gtls_verifyserver(data, conn, session, sockindex);
     if(rc)
       return rc;
+    conn->recv[sockindex] = gtls_recv;
+    conn->send[sockindex] = gtls_send;
   }
 
   *done = ssl_connect_1 == connssl->connecting_state;
