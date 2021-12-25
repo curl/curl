@@ -37,7 +37,7 @@ document](https://curl.se/docs/thanks.html).
 ## Commercial support
 
 For commercial support, maybe private and dedicated help with your problems or
-applications using (lib)curl: https://curl.se/support.html
+applications using (lib)curl visit [the support page](https://curl.se/support.html).
 
 ## Website
 
