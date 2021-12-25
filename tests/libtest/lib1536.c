@@ -44,7 +44,7 @@ int test(char *URL)
             __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
-  if(scheme != NULL) {
+  if(scheme) {
     fprintf(stderr, "%s:%d scheme init failed; expected NULL\n",
             __FILE__, __LINE__);
     res = CURLE_FAILED_INIT;

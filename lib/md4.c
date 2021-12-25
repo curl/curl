@@ -189,7 +189,7 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
   if(!ctx->data) {
     ctx->data = malloc(size);
-    if(ctx->data != NULL) {
+    if(ctx->data) {
       memcpy(ctx->data, data, size);
       ctx->size = size;
     }
@@ -198,7 +198,7 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
-  if(ctx->data != NULL) {
+  if(ctx->data) {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
     mbedtls_md4(ctx->data, ctx->size, result);
 #else

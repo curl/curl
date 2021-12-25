@@ -1004,7 +1004,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
       }
 
     /* parse the port */
-    if(ip_end != NULL) {
+    if(ip_end) {
       port_start = strchr(ip_end, ':');
       if(port_start) {
         port_min = curlx_ultous(strtoul(port_start + 1, NULL, 10));
@@ -4190,7 +4190,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
         }
 
         /* parse the URL path into separate path components */
-        while((slashPos = strchr(curPos, '/')) != NULL) {
+        while((slashPos = strchr(curPos, '/'))) {
           size_t compLen = slashPos - curPos;
 
           /* path starts with a slash: add that as a directory */
@@ -4357,7 +4357,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   struct FTP *ftp;
 
   data->req.p.ftp = ftp = calloc(sizeof(struct FTP), 1);
-  if(NULL == ftp)
+  if(!ftp)
     return CURLE_OUT_OF_MEMORY;
 
   ftp->path = &data->state.up.path[1]; /* don't include the initial slash */

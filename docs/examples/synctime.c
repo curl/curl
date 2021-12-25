@@ -218,7 +218,7 @@ int SyncTime_CURL_Fetch(CURL *curl, char *URL_Str, char *OutFileName,
 
   curl_easy_setopt(curl, CURLOPT_URL, URL_Str);
   res = curl_easy_perform(curl);
-  if(outfile != NULL)
+  if(outfile)
     fclose(outfile);
   return res;  /* (CURLE_OK) */
 }

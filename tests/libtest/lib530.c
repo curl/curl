@@ -179,7 +179,7 @@ static int checkForCompletion(CURLM *curl, int *success)
   CURLMsg *message;
   int result = 0;
   *success = 0;
-  while((message = curl_multi_info_read(curl, &numMessages)) != NULL) {
+  while((message = curl_multi_info_read(curl, &numMessages))) {
     if(message->msg == CURLMSG_DONE) {
       result = 1;
       if(message->data.result == CURLE_OK)

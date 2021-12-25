@@ -154,7 +154,7 @@ static void get_sdp_filename(const char *url, char *sdp_filename,
 {
   const char *s = strrchr(url, '/');
   strcpy(sdp_filename, "video.sdp");
-  if(s != NULL) {
+  if(s) {
     s++;
     if(s[0] != '\0') {
       snprintf(sdp_filename, namelen, "%s.sdp", s);
@@ -171,8 +171,8 @@ static void get_media_control_attribute(const char *sdp_filename,
   char *s = malloc(max_len);
   FILE *sdp_fp = fopen(sdp_filename, "rb");
   control[0] = '\0';
-  if(sdp_fp != NULL) {
-    while(fgets(s, max_len - 2, sdp_fp) != NULL) {
+  if(sdp_fp) {
+    while(fgets(s, max_len - 2, sdp_fp)) {
       sscanf(s, " a = control: %32s", control);
     }
     fclose(sdp_fp);
@@ -239,7 +239,7 @@ int main(int argc, char * const argv[])
 
       /* initialize this curl session */
       curl = curl_easy_init();
-      if(curl != NULL) {
+      if(curl) {
         my_curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
         my_curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
         my_curl_easy_setopt(curl, CURLOPT_HEADERDATA, stdout);

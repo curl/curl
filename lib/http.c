@@ -3311,7 +3311,7 @@ checkhttpprefix(struct Curl_easy *data,
 #ifdef CURL_DOES_CONVERSIONS
   /* convert from the network encoding using a scratch area */
   char *scratch = strdup(s);
-  if(NULL == scratch) {
+  if(!scratch) {
     failf(data, "Failed to allocate memory for conversion!");
     return FALSE; /* can't return CURLE_OUT_OF_MEMORY so return FALSE */
   }
@@ -3351,7 +3351,7 @@ checkrtspprefix(struct Curl_easy *data,
 #ifdef CURL_DOES_CONVERSIONS
   /* convert from the network encoding using a scratch area */
   char *scratch = strdup(s);
-  if(NULL == scratch) {
+  if(!scratch) {
     failf(data, "Failed to allocate memory for conversion!");
     return FALSE; /* can't return CURLE_OUT_OF_MEMORY so return FALSE */
   }

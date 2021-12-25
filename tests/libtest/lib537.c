@@ -92,7 +92,7 @@ static int fopen_works(void)
     }
   }
   for(i = 0; i < 3; i++) {
-    if(fpa[i] != NULL)
+    if(fpa[i])
       fclose(fpa[i]);
   }
   return ret;

@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
   }
 
 #ifdef __NOVELL_LIBC__
-  if(getenv("_IN_NETWARE_BASH_") == NULL)
+  if(!getenv("_IN_NETWARE_BASH_"))
     tool_pressanykey();
 #endif
 

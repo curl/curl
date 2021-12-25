@@ -1164,7 +1164,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
   bool fromfile = TRUE;
   char *line = NULL;
 
-  if(NULL == inc) {
+  if(!inc) {
     /* we didn't get a struct, create one */
     c = calloc(1, sizeof(struct CookieInfo));
     if(!c)

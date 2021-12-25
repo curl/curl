@@ -100,7 +100,7 @@ int fwrite_xattr(CURL *curl, int fd)
   int err = 0;
 
   /* loop through all xattr-curlinfo pairs and abort on a set error */
-  while(err == 0 && mappings[i].attr != NULL) {
+  while(err == 0 && mappings[i].attr) {
     char *value = NULL;
     CURLcode result = curl_easy_getinfo(curl, mappings[i].info, &value);
     if(!result && value) {

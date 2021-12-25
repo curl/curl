@@ -129,7 +129,7 @@ UNITTEST_START
     printf("Removing nodes not larger than %d\n", i);
     tv_now.tv_usec = i;
     root = Curl_splaygetbest(tv_now, root, &removed);
-    while(removed != NULL) {
+    while(removed) {
       printf("removed payload %zu[%zu]\n",
              (*(size_t *)removed->payload) / 10,
              (*(size_t *)removed->payload) % 10);

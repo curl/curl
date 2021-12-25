@@ -784,7 +784,7 @@ static char *nss_get_password(PK11SlotInfo *slot, PRBool retry, void *arg)
 {
   (void)slot; /* unused */
 
-  if(retry || NULL == arg)
+  if(retry || !arg)
     return NULL;
   else
     return (char *)PORT_Strdup((char *)arg);
@@ -1170,7 +1170,7 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
     struct SECKEYPrivateKeyStr *key;
 
     PK11SlotInfo *slot = nss_find_slot_by_name(pem_slotname);
-    if(NULL == slot) {
+    if(!slot) {
       failf(data, "NSS: PK11 slot not found: %s", pem_slotname);
       return SECFailure;
     }
@@ -1184,7 +1184,7 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
 
     cert = PK11_FindCertFromDERCertItem(slot, &cert_der, proto_win);
     SECITEM_FreeItem(&cert_der, PR_FALSE);
-    if(NULL == cert) {
+    if(!cert) {
       failf(data, "NSS: client certificate from file not found");
       PK11_FreeSlot(slot);
       return SECFailure;
@@ -1192,7 +1192,7 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
 
     key = PK11_FindPrivateKeyFromCert(slot, cert, NULL);
     PK11_FreeSlot(slot);
-    if(NULL == key) {
+    if(!key) {
       failf(data, "NSS: private key from file not found");
       CERT_DestroyCertificate(cert);
       return SECFailure;
@@ -1209,9 +1209,9 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
   /* use the default NSS hook */
   if(SECSuccess != NSS_GetClientAuthData((void *)nickname, sock, caNames,
                                           pRetCert, pRetKey)
-      || NULL == *pRetCert) {
+     || !*pRetCert) {
 
-    if(NULL == nickname)
+    if(!nickname)
       failf(data, "NSS: client certificate not found (nickname not "
             "specified)");
     else
@@ -1222,7 +1222,7 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
 
   /* get certificate nickname if any */
   nickname = (*pRetCert)->nickname;
-  if(NULL == nickname)
+  if(!nickname)
     nickname = "[unknown]";
 
   if(!strncmp(nickname, pem_slotname, sizeof(pem_slotname) - 1U)) {
@@ -1231,7 +1231,7 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
     return SECFailure;
   }
 
-  if(NULL == *pRetKey) {
+  if(!*pRetKey) {
     failf(data, "NSS: private key not found for certificate: %s", nickname);
     return SECFailure;
   }
@@ -1346,7 +1346,7 @@ static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
   PRErrorCode err;
   const char *err_name;
 
-  if(nss_context != NULL)
+  if(nss_context)
     return CURLE_OK;
 
   memset((void *) &initparams, '\0', sizeof(initparams));
@@ -1362,7 +1362,7 @@ static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
                                   NSS_INIT_READONLY | NSS_INIT_PK11RELOAD);
     free(certpath);
 
-    if(nss_context != NULL)
+    if(nss_context)
       return CURLE_OK;
 
     err = PR_GetError();
@@ -1374,7 +1374,7 @@ static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
   nss_context = NSS_InitContext("", "", "", "", &initparams, NSS_INIT_READONLY
          | NSS_INIT_NOCERTDB   | NSS_INIT_NOMODDB       | NSS_INIT_FORCEOPEN
          | NSS_INIT_NOROOTINIT | NSS_INIT_OPTIMIZESPACE | NSS_INIT_PK11RELOAD);
-  if(nss_context != NULL)
+  if(nss_context)
     return CURLE_OK;
 
   err = PR_GetError();

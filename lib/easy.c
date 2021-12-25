@@ -822,7 +822,7 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
 {
   struct Curl_easy *outcurl = calloc(1, sizeof(struct Curl_easy));
-  if(NULL == outcurl)
+  if(!outcurl)
     goto fail;
 
   /*
