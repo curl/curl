@@ -337,7 +337,6 @@ mesalink_connect_step3(struct connectdata *conn, int sockindex)
 {
   CURLcode result = CURLE_OK;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  struct ssl_backend_data *backend = connssl->backend;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
@@ -347,6 +346,7 @@ mesalink_connect_step3(struct connectdata *conn, int sockindex)
     SSL_SESSION *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;
     bool isproxy = SSL_IS_PROXY() ? TRUE : FALSE;
+    struct ssl_backend_data *backend = connssl->backend;
 
     our_ssl_sessionid = SSL_get_session(backend->handle);
 
