@@ -123,7 +123,7 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
 
   #### Work-around https://github.com/curl/curl/issues/7927 #######
   #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
-  sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' Cargo.toml
+  sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' quiche/Cargo.toml
 
   cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog
   mkdir -v quiche/deps/boringssl/src/lib
