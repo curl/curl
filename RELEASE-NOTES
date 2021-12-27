@@ -4,7 +4,7 @@ curl and libcurl 7.81.0
  Command line options:         244
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2552
+ Contributors:                 2554
 
 This release includes the following changes:
 
@@ -36,6 +36,7 @@ This release includes the following bugfixes:
  o docs/checksrc: Add documentation for STRERROR [18]
  o docs/cmdline-opts: do not say "protocols: all" [26]
  o docs/examples: workaround broken -Wno-pedantic-ms-format
+ o docs/HTTP3: describe how to setup a h3 reverse-proxy for testing [88]
  o docs/INSTALL.md: typo fix : added missing "get" verb [31]
  o docs/URL-SYNTAX.md: space is not fine in a given URL
  o docs: add known bugs list to HTTP3.md [83]
@@ -47,12 +48,15 @@ This release includes the following bugfixes:
  o example/progressfunc: remove code for old libcurls [78]
  o FAQ: typo fix : "yout" ➤ "your" [30]
  o gen.pl: improve example output format [29]
+ o gtls: check return code for gnutls_alpn_set_protocols [86]
  o hash: lazy-alloc the table in Curl_hash_add() [54]
  o http2:set_transfer_url() return early on OOM [53]
  o HTTP3: update quiche build instructions [37]
  o http: enable haproxy support for hyper backend [20]
+ o http: Fix CURLOPT_HTTP200ALIASES [89]
  o insecure.d: detail its use for SFTP and SCP as well [32]
  o insecure.d: expand and clarify [28]
+ o libcurl-multi.3: "SOCKS proxy handshakes" are not blocking
  o libcurl-security.3: mention address and URL mitigations
  o libssh2: fix error message for sha256 mismatch
  o lift: ignore is a deprecated config option, use ignoreRules [35]
@@ -123,12 +127,13 @@ advice from friends like these:
   Daniel Stenberg, David Bohman, Don J Olmstead, Eric Musser, Even Rouault,
   Florian Van Heghe, Glenn Strauss, Jacob Hoffman-Andrews, James Fuller,
   Jeff Luszcz, jeffrson on github, Jun Tseng, Kevin Burke, lllaffer on github,
-  Marcelo Juchem, Marcel Raad, Marc Hörsken, Mark Dodgson, Michał Antoniak,
-  nimaje on github, Patrick Monnerat, Paul Howarth, Ray Satiro,
-  RekGRpth on github, Rikard Falkeborn, Ryan Sleevi, Stan Hu, Stefan Eissing,
-  Stephane Pellegrino, Stephen M. Coakley, Tobias Nießen, Viktor Szakats,
-  Vincent Grande, Wyatt O'Day, x2018 on github, Yongkang Huang,
-  (44 contributors)
+  Marcelo Juchem, Marcel Raad, Marc Hörsken, Mark Dodgson, Matt Holt,
+  Michał Antoniak, nimaje on github, Patrick Monnerat, Paul Howarth,
+  Ray Satiro, RekGRpth on github, Rikard Falkeborn, Ryan Sleevi, Stan Hu,
+  Stefan Eissing, Stefan Huber, Stephane Pellegrino, Stephen M. Coakley,
+  Tobias Nießen, Viktor Szakats, Vincent Grande, Vladimir Panteleev,
+  Wyatt O'Day, x2018 on github, Yongkang Huang,
+  (47 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -215,3 +220,6 @@ References to bug reports and discussions on issues:
  [81] = https://curl.se/bug/?i=8141
  [82] = https://curl.se/bug/?i=8158
  [83] = https://curl.se/bug/?i=8156
+ [86] = https://curl.se/bug/?i=8181
+ [88] = https://curl.se/bug/?i=8177
+ [89] = https://curl.se/bug/?i=8171
