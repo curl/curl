@@ -674,8 +674,13 @@ static CURLcode CONNECT(struct Curl_easy *data,
       data->req.newurl = NULL;
       /* failure, close this connection to avoid re-use */
       streamclose(conn, "proxy CONNECT failure");
-      Curl_closesocket(data, conn, conn->sock[sockindex]);
-      conn->sock[sockindex] = CURL_SOCKET_BAD;
+      /* When connecting to a remote HTTPS server via established HTTPS proxy
+       * tunnel don't close the socket here, SSL have to send shutdown alert
+       * before closing it */
+      if (conn->http_proxy.proxytype != CURLPROXY_HTTPS) {
+        Curl_closesocket(data, conn, conn->sock[sockindex]);
+        conn->sock[sockindex] = CURL_SOCKET_BAD;
+      }
     }
 
     /* to back to init state */
