@@ -1435,6 +1435,12 @@ static void ossl_closeone(struct Curl_easy *data,
   if(backend->handle) {
     char buf[32];
     set_logger(conn, data);
+    /*
+     * The conn->sock[0] socket is passed to openssl with SSL_set_fd().  Make
+     * sure the socket is not closed before calling OpenSSL functions that
+     * will use it.
+     */
+    DEBUGASSERT(conn->sock[FIRSTSOCKET] != CURL_SOCKET_BAD);
 
     /* Maybe the server has already sent a close notify alert.
        Read it to avoid an RST on the TCP connection. */
