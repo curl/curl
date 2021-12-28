@@ -1,0 +1,49 @@
+name: Linux
+
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+    - master
+    - '*/ci'
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: wolfssl
+          install:
+          configure: --with-wolfssl=$HOME/wssl --enable-debug --enable-werror
+
+    steps:
+    - run: sudo apt-get install libtool autoconf automake pkg-config
+      name: install prereqs
+
+    - run: |
+       curl -LO https://github.com/wolfSSL/wolfssl/archive/v5.0.0-stable.tar.gz
+       tar -xzf v5.0.0-stable.tar.gz
+       cd wolfssl-5.0.0-stable
+       ./autogen.sh
+       ./configure --enable-tls13 --enable-all --enable-harden --prefix=$HOME/wssl
+       make && make install
+
+      name: 'install wolfssl'
+
+    - uses: actions/checkout@v2
+
+    - run: ./buildconf && LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} && make V=1
+      name: 'configure and build'
+
+    - run: make V=1 test-ci
+      name: 'test'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"
