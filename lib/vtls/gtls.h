@@ -27,7 +27,7 @@
 #ifdef USE_GNUTLS
 
 #include "urldata.h"
-
+#include <gnutls/gnutls.h>
 CURLcode
 Curl_gtls_verifyserver(struct Curl_easy *data, struct connectdata *conn,
                        gnutls_session_t session,
