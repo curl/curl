@@ -79,7 +79,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char *provider1_mid = NULL;
   char *region = NULL;
   char *service = NULL;
-  const char *hostname = conn->host.name;
+  char *host = NULL;
 #ifdef DEBUGBUILD
   char *force_timestamp;
 #endif
@@ -114,6 +114,19 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     /* Authorization already present, Bailing out */
     return CURLE_OK;
   }
+
+  if(!data->state.aptr.host) {
+    return CURLE_FAILED_INIT;
+  }
+
+  tmp0 = data->state.aptr.host + 5; /* "Host:" */
+  while(*tmp0 == ' ')
+    ++tmp0;
+  host = strdup(tmp0);
+  if(!host) {
+    return CURLE_FAILED_INIT;
+  }
+  host[strlen(host)-2] = '\0'; /* "\r\n" */
 
   /*
    * Parameters parsing
@@ -200,7 +213,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   }
 
   if(!service) {
-    tmp0 = hostname;
+    tmp0 = host;
     tmp1 = strchr(tmp0, '.');
     len = tmp1 - tmp0;
     if(!tmp1 || len < 1) {
@@ -265,7 +278,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                                       "host:%s\n"
                                       "x-%s-date:%s\n",
                                       content_type,
-                                      hostname,
+                                      host,
                                       provider1_low, timestamp);
     signed_headers = curl_maprintf("content-type;host;x-%s-date",
                                    provider1_low);
@@ -273,7 +286,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   else {
     canonical_headers = curl_maprintf("host:%s\n"
                                       "x-%s-date:%s\n",
-                                      hostname,
+                                      host,
                                       provider1_low, timestamp);
     signed_headers = curl_maprintf("host;x-%s-date", provider1_low);
   }
@@ -386,6 +399,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   ret = CURLE_OK;
 
 fail:
+  free(host);
   free(provider0_low);
   free(provider0_up);
   free(provider1_low);

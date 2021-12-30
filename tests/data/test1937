@@ -48,7 +48,7 @@ lib%TESTNUMBER
 </tool>
 
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER/testapi/test
+http://127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -61,8 +61,8 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER/testapi/test
 </strip>
 <protocol nonewline="yes">
 POST /%TESTNUMBER/testapi/test HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Authorization: PROVIDER14-HMAC-SHA256 Credential=keyId/19700101/region/service/provider14_request, SignedHeaders=content-type;host;x-provider2-date, Signature=391e410177d0e9ee80728082446ef69d6b29157fe71f8b4805fce7c186fd956d
+Host: 127.0.0.1:9000
+Authorization: PROVIDER14-HMAC-SHA256 Credential=keyId/19700101/region/service/provider14_request, SignedHeaders=content-type;host;x-provider2-date, Signature=4928ccf97a9e71fe27f91db5a3b3c943b6080d25e6f4df8593d4c38e7d1e849b
 X-Provider2-Date: 19700101T000000Z
 Content-Length: 8
 
