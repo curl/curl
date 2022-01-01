@@ -1,13 +1,13 @@
-Long: haproxy-protocol
-Help: Send HAProxy PROXY protocol v1 header
+Long: haproxy-protocol-v2
+Help: Send HAProxy PROXY protocol v2 header
 Protocols: HTTP
-Added: 7.60.0
+Added: 7.82.0
 Category: http proxy
-Example: --haproxy-protocol $URL
+Example: --haproxy-protocol-v2 $URL
 See-also: proxy
-Mutexed: haproxy-protocol-v2
+Mutexed: haproxy-protocol
 ---
-Send a HAProxy PROXY protocol v1 header at the beginning of the
+Send a HAProxy PROXY protocol v2 header at the beginning of the
 connection. This is used by some load balancers and reverse proxies to
 indicate the client's true IP address and port.
 

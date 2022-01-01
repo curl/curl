@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -243,6 +243,9 @@ const struct helptxt helptext[] = {
    CURLHELP_CONNECTION},
   {"    --haproxy-protocol",
    "Send HAProxy PROXY protocol v1 header",
+   CURLHELP_HTTP | CURLHELP_PROXY},
+  {"    --haproxy-protocol-v2",
+   "Send HAProxy PROXY protocol v2 header",
    CURLHELP_HTTP | CURLHELP_PROXY},
   {"-I, --head",
    "Show document info only",

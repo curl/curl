@@ -118,6 +118,7 @@ static const struct LongShort aliases[]= {
   {"*x", "krb4",                     ARG_STRING},
          /* 'krb4' is the previous name */
   {"*X", "haproxy-protocol",         ARG_BOOL},
+  {"*Y", "haproxy-protocol-v2",      ARG_BOOL},
   {"*y", "max-filesize",             ARG_STRING},
   {"*z", "disable-eprt",             ARG_BOOL},
   {"*Z", "eprt",                     ARG_BOOL},
@@ -870,7 +871,16 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
       case 'X': /* --haproxy-protocol */
-        config->haproxy_protocol = toggle;
+        if(config->haproxy_protocol == 2)
+          warnf(global, "HAProxy protocol version 2 was already set "
+                "with --haproxy-protocol-v2");
+        config->haproxy_protocol = 1L;
+        break;
+      case 'Y': /* --haproxy-protocol-v2 */
+        if(config->haproxy_protocol == 1)
+          warnf(global, "HAProxy protocol version 1 was already set "
+                "with --haproxy-protocol");
+        config->haproxy_protocol = 2L;
         break;
       case 'y': /* --max-filesize */
         {

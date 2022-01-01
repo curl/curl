@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -286,7 +286,7 @@ struct OperationConfig {
   bool ssh_compression;           /* enable/disable SSH compression */
   long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
                                      0 is valid. default: CURL_HET_DEFAULT. */
-  bool haproxy_protocol;          /* whether to send HAProxy protocol v1 */
+  int haproxy_protocol;           /* whether to send HAProxy protocol */
   bool disallow_username_in_url;  /* disallow usernames in URLs */
   char *aws_sigv4;
   struct GlobalConfig *global;

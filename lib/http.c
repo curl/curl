@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1540,28 +1540,45 @@ static CURLcode add_haproxy_protocol_header(struct Curl_easy *data)
   struct dynbuf req;
   CURLcode result;
   const char *tcp_version;
+  static const char binaryheader[] = {
+    /* signature */
+    0x0D, 0x0A, 0x0D, 0x0A, 0x00, 0x0D, 0x0A, 0x51, 0x55, 0x49, 0x54, 0x0A,
+    /* command is LOCAL and address family is AF_UNSPEC */
+    0x20,
+    /* protocol is UNSPEC */
+    0x00,
+    /* there is no additionnal data */
+    0x00, 0x00
+  };
   DEBUGASSERT(data->conn);
   Curl_dyn_init(&req, DYN_HAXPROXY);
 
+  if(data->set.haproxyprotocol == 1) {
+    /* sending HAProxy PROXY protocol v1 header */
 #ifdef USE_UNIX_SOCKETS
-  if(data->conn->unix_domain_socket)
-    /* the buffer is large enough to hold this! */
-    result = Curl_dyn_add(&req, "PROXY UNKNOWN\r\n");
-  else {
+    if(data->conn->unix_domain_socket)
+      /* the buffer is large enough to hold this! */
+      result = Curl_dyn_add(&req, "PROXY UNKNOWN\r\n");
+    else {
 #endif
-  /* Emit the correct prefix for IPv6 */
-  tcp_version = data->conn->bits.ipv6 ? "TCP6" : "TCP4";
+    /* Emit the correct prefix for IPv6 */
+    tcp_version = data->conn->bits.ipv6 ? "TCP6" : "TCP4";
 
-  result = Curl_dyn_addf(&req, "PROXY %s %s %s %i %i\r\n",
-                         tcp_version,
-                         data->info.conn_local_ip,
-                         data->info.conn_primary_ip,
-                         data->info.conn_local_port,
-                         data->info.conn_primary_port);
+    result = Curl_dyn_addf(&req, "PROXY %s %s %s %i %i\r\n",
+                          tcp_version,
+                          data->info.conn_local_ip,
+                          data->info.conn_primary_ip,
+                          data->info.conn_local_port,
+                          data->info.conn_primary_port);
 
 #ifdef USE_UNIX_SOCKETS
+    }
+#endif
   }
-#endif
+  else {
+    /* sending HAProxy PROXY protocol v2 header */
+    result = Curl_dyn_addn(&req, binaryheader, sizeof(binaryheader));
+  }
 
   if(!result)
     result = Curl_buffer_send(&req, data, &data->info.request_size,

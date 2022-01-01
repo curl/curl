@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1787,6 +1787,7 @@ struct UserDefined {
   CURLU *uh; /* URL handle for the current parsed URL */
   void *trailer_data; /* pointer to pass to trailer data callback */
   curl_trailer_callback trailer_callback; /* trailing data callback */
+  int haproxyprotocol; /* whether to send HAProxy PROXY protocol header */
   BIT(is_fread_set); /* has read callback been set to non-NULL? */
   BIT(is_fwrite_set); /* has write callback been set to non-NULL? */
   BIT(free_referer); /* set TRUE if 'referer' points to a string we
@@ -1856,8 +1857,6 @@ struct UserDefined {
                                     from user callbacks */
   BIT(dns_shuffle_addresses); /* whether to shuffle addresses before use */
   BIT(stream_depends_e); /* set or don't set the Exclusive bit */
-  BIT(haproxyprotocol); /* whether to send HAProxy PROXY protocol v1
-                           header */
   BIT(abstract_unix_socket);
   BIT(disallow_username_in_url); /* disallow username in url */
 #ifndef CURL_DISABLE_DOH

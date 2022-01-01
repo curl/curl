@@ -22,7 +22,7 @@
 .\"
 .TH CURLOPT_HAPROXYPROTOCOL 3 "5 Feb 2018" "libcurl 7.60.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_HAPROXYPROTOCOL \- send HAProxy PROXY protocol v1 header
+CURLOPT_HAPROXYPROTOCOL \- send HAProxy PROXY protocol header
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -31,9 +31,11 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPROXYPROTOCOL,
                           long haproxy_protocol);
 .fi
 .SH DESCRIPTION
-A long parameter set to 1 tells the library to send an HAProxy PROXY
-protocol v1 header at beginning of the connection. The default action is not to
-send this header.
+A long parameter set to 1 tells the library to send an HAProxy PROXY protocol
+v1 header at beginning of the connection.
+A long parameter set to 2 tells the library to send an HAProxy PROXY protocol
+v2 header at beginning of the connection.
+The default action is not to send this header.
 
 This option is primarily useful when sending test requests to a service that
 expects this header.
@@ -54,7 +56,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Along with HTTP. Added in 7.60.0.
+Along with HTTP. Added in 7.60.0. Support for HAProxy protocol v2 added in
+7.82.0.
 .SH RETURN VALUE
 Returns CURLE_OK if HTTP is enabled, and CURLE_UNKNOWN_OPTION if not.
 .SH SEE ALSO

@@ -2093,7 +2093,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         /* new in 7.60.0 */
         if(config->haproxy_protocol)
-          my_setopt(curl, CURLOPT_HAPROXYPROTOCOL, 1L);
+          my_setopt(curl, CURLOPT_HAPROXYPROTOCOL,
+                    (long)config->haproxy_protocol);
 
         if(config->disallow_username_in_url)
           my_setopt(curl, CURLOPT_DISALLOW_USERNAME_IN_URL, 1L);
