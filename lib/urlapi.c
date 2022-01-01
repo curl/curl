@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,6 +30,7 @@
 #include "escape.h"
 #include "curl_ctype.h"
 #include "inet_pton.h"
+#include "inet_ntop.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -630,9 +631,6 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname)
   size_t hlen = strlen(hostname);
 
   if(hostname[0] == '[') {
-#ifdef ENABLE_IPV6
-    char dest[16]; /* fits a binary IPv6 address */
-#endif
     const char *l = "0123456789abcdefABCDEF:.";
     if(hlen < 4) /* '[::]' is the shortest possible valid string */
       return CURLUE_BAD_IPV6;
@@ -671,10 +669,22 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname)
       /* hostname is fine */
     }
 #ifdef ENABLE_IPV6
-    hostname[hlen] = 0; /* end the address there */
-    if(1 != Curl_inet_pton(AF_INET6, hostname, dest))
-      return CURLUE_BAD_IPV6;
-    hostname[hlen] = ']'; /* restore ending bracket */
+    {
+      char dest[16]; /* fits a binary IPv6 address */
+      char norm[MAX_IPADR_LEN];
+      hostname[hlen] = 0; /* end the address there */
+      if(1 != Curl_inet_pton(AF_INET6, hostname, dest))
+        return CURLUE_BAD_IPV6;
+
+      /* check if it can be done shorter */
+      if(Curl_inet_ntop(AF_INET6, dest, norm, sizeof(norm)) &&
+         (strlen(norm) < hlen)) {
+        strcpy(hostname, norm);
+        hlen = strlen(norm);
+        hostname[hlen + 1] = 0;
+      }
+      hostname[hlen] = ']'; /* restore ending bracket */
+    }
 #endif
   }
   else {

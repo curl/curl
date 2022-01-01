@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -164,6 +164,9 @@ static const struct testcase get_parts_list[] ={
    "https | user | password | [13] | example.net | [15] | /ge%20t | "
    "this=and-what | [17]",
    CURLU_ALLOW_SPACE | CURLU_URLENCODE, 0, CURLUE_OK},
+  {"[0:0:0:0:0:0:0:1]",
+   "http | [11] | [12] | [13] | [::1] | [15] | / | [16] | [17]",
+   CURLU_GUESS_SCHEME, 0, CURLUE_OK },
   {"[::1]",
    "http | [11] | [12] | [13] | [::1] | [15] | / | [16] | [17]",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK },
