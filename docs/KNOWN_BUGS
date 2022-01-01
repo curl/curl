@@ -128,6 +128,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  13. TCP/IP
  13.1 --interface for ipv6 binds to unusable IP address
+ 13.2 Trying local ports fails on Windows
 
  14. DICT
  14.1 DICT responses show the underlying protocol
@@ -998,6 +999,14 @@ problems may have been fixed or changed somewhat since this was written.
  locally scoped address as that is bound to fail.
 
  https://github.com/curl/curl/issues/686
+
+13.2 Trying local ports fails on Windows
+
+ This makes '--local-port [range]' to not work since curl can't properly
+ detect if a port is already in use, so it'll try the first port, use that and
+ then subsequently fail anyway if that was actually in use.
+
+ https://github.com/curl/curl/issues/8112
 
 14. DICT
 
