@@ -3974,6 +3974,20 @@ sub singletest {
                 return -1;
             }
             my $fileContent = join('', @inputfile);
+
+            # make directories if needed
+            my $path = $filename;
+            # cut off the file name part
+            $path =~ s/^(.*)\/[^\/]*/$1/;
+            my @parts = split(/\//, $path);
+            if($parts[0] eq "log") {
+                # the file is in log/
+                my $d = shift @parts;
+                for(@parts) {
+                    $d .= "/$_";
+                    mkdir $d; # 0777
+                }
+            }
             open(OUTFILE, ">$filename");
             binmode OUTFILE; # for crapage systems, use binary
             if($fileattr{'nonewline'}) {
