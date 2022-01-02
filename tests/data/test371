@@ -49,7 +49,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stderr >
+<stderr mode="text">
 Warning: Got more output options than URLs
 </stderr>
 </verify>
