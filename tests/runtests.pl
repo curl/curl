@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -4364,6 +4364,12 @@ sub singletest {
 
         # get the mode attribute
         my $filemode=$hash{'mode'};
+        if($filemode && ($filemode eq "text") && $has_hyper) {
+            # text mode check in hyper-mode. Sometimes necessary if the stderr
+            # data *looks* like HTTP and thus has gotten CRLF newlines
+            # mistakenly
+            map s/\r\n/\n/g, @validstderr;
+        }
         if($filemode && ($filemode eq "text") && $has_textaware) {
             # text mode when running on windows: fix line endings
             map s/\r\n/\n/g, @validstderr;

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -735,6 +735,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
   }
 
   while(config->state.urlnode) {
+    static bool warn_more_options = FALSE;
     char *infiles; /* might be a glob pattern */
     struct URLGlob *inglob = state->inglob;
     urlnode = config->state.urlnode;
@@ -749,6 +750,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       urlnode->flags = 0;
       config->state.urlnode = urlnode->next;
       state->up = 0;
+      if(!warn_more_options) {
+        /* only show this once */
+        warnf(config->global, "Got more output options than URLs\n");
+        warn_more_options = TRUE;
+      }
       continue; /* next URL please */
     }
 
