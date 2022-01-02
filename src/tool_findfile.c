@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,18 +42,25 @@
 struct finder {
   const char *env;
   const char *append;
+  bool withoutdot;
 };
 
+/* The order of the variables below is important, as the index number is used
+   in the findfile() function */
 static const struct finder list[] = {
-  { "CURL_HOME", NULL },
-  { "XDG_CONFIG_HOME", NULL },
-  { "HOME", NULL },
+  { "CURL_HOME", NULL, FALSE },
+  { "XDG_CONFIG_HOME", NULL, FALSE }, /* index == 1, used in the code */
+  { "HOME", NULL, FALSE },
 #ifdef WIN32
-  { "USERPROFILE", NULL },
-  { "APPDATA", NULL },
-  { "USERPROFILE", "\\Application Data"},
+  { "USERPROFILE", NULL, FALSE },
+  { "APPDATA", NULL, FALSE },
+  { "USERPROFILE", "\\Application Data", FALSE},
 #endif
-  { NULL, NULL }
+  /* these are for .curlrc if XDG_CONFIG_HOME is not defined */
+  { "CURL_HOME", "/.config", TRUE },
+  { "HOME", "/.config", TRUE },
+
+  { NULL, NULL, FALSE }
 };
 
 static char *checkhome(const char *home, const char *fname, bool dotscore)
@@ -90,11 +97,12 @@ static char *checkhome(const char *home, const char *fname, bool dotscore)
  *    the given file to be accessed there, then it is a match.
  * 2. Non-windows: try getpwuid
  */
-char *findfile(const char *fname, bool dotscore)
+char *findfile(const char *fname, int dotscore)
 {
   int i;
+  bool xdg = FALSE;
   DEBUGASSERT(fname && fname[0]);
-  DEBUGASSERT(!dotscore || (fname[0] == '.'));
+  DEBUGASSERT((dotscore != 1) || (fname[0] == '.'));
 
   if(!fname[0])
     return NULL;
@@ -103,6 +111,9 @@ char *findfile(const char *fname, bool dotscore)
     char *home = curl_getenv(list[i].env);
     if(home) {
       char *path;
+      const char *filename = fname;
+      if(i == 1 /* XDG_CONFIG_HOME */)
+        xdg = TRUE;
       if(!home[0]) {
         curl_free(home);
         continue;
@@ -114,7 +125,14 @@ char *findfile(const char *fname, bool dotscore)
           return NULL;
         home = c;
       }
-      path = checkhome(home, fname, dotscore);
+      if(list[i].withoutdot) {
+        if(!dotscore || xdg)
+          /* this is not looking for .curlrc, or the XDG_CONFIG_HOME was
+             defined so we skip the extended check */
+          continue;
+        filename++; /* move past the leading dot */
+      }
+      path = checkhome(home, filename, dotscore ? dotscore - 1 : 0);
       curl_free(home);
       if(path)
         return path;
