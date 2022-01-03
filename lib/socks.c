@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,6 +38,7 @@
 #include "timeval.h"
 #include "socks.h"
 #include "multiif.h" /* for getsock macros */
+#include "inet_pton.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -856,10 +857,32 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
     socksreq[len++] = 0; /* must be zero */
 
     if(!socks5_resolve_local) {
-      socksreq[len++] = 3; /* ATYP: domain name = 3 */
-      socksreq[len++] = (char) hostname_len; /* one byte address length */
-      memcpy(&socksreq[len], hostname, hostname_len); /* address w/o NULL */
-      len += hostname_len;
+      /* ATYP: domain name = 3,
+         IPv6 == 4,
+         IPv4 == 1 */
+      unsigned char ip4[4];
+#ifdef ENABLE_IPV6
+      if(conn->bits.ipv6_ip) {
+        char ip6[16];
+        if(1 != Curl_inet_pton(AF_INET6, hostname, ip6))
+          return CURLPX_BAD_ADDRESS_TYPE;
+        socksreq[len++] = 4;
+        memcpy(&socksreq[len], ip6, sizeof(ip6));
+        len += sizeof(ip6);
+      }
+      else
+#endif
+      if(1 == Curl_inet_pton(AF_INET, hostname, ip4)) {
+        socksreq[len++] = 1;
+        memcpy(&socksreq[len], ip4, sizeof(ip4));
+        len += sizeof(ip4);
+      }
+      else {
+        socksreq[len++] = 3;
+        socksreq[len++] = (char) hostname_len; /* one byte address length */
+        memcpy(&socksreq[len], hostname, hostname_len); /* address w/o NULL */
+        len += hostname_len;
+      }
       infof(data, "SOCKS5 connect to %s:%d (remotely resolved)",
             hostname, remote_port);
     }
