@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -94,14 +94,6 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$OPENSSL3" ]; then
   ./config enable-tls1_3 --prefix=$HOME/openssl3
   make
   make install_sw
-fi
-
-if [ "$TRAVIS_OS_NAME" = linux -a "$MBEDTLS3" ]; then
-  cd $HOME
-  git clone --depth=1 -b v3.0.0 https://github.com/ARMmbed/mbedtls
-  cd mbedtls
-  make
-  make DESTDIR=$HOME/mbedtls3 install
 fi
 
 if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
