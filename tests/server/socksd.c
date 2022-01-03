@@ -101,6 +101,10 @@
 #define DEFAULT_LOGFILE "log/socksd.log"
 #endif
 
+#ifndef DEFAULT_REQFILE
+#define DEFAULT_REQFILE "log/socksd-request.log"
+#endif
+
 #ifndef DEFAULT_CONFIG
 #define DEFAULT_CONFIG "socksd.config"
 #endif
@@ -136,6 +140,7 @@ struct configurable {
 static struct configurable config;
 
 const char *serverlogfile = DEFAULT_LOGFILE;
+const char *reqlogfile = DEFAULT_REQFILE;
 static const char *configfile = DEFAULT_CONFIG;
 
 #ifdef ENABLE_IPV6
@@ -514,6 +519,35 @@ static curl_socket_t sockit(curl_socket_t fd)
     return CURL_SOCKET_BAD;
   }
   logmsg("Received ATYP %d", type);
+
+  {
+    FILE *dump;
+    dump = fopen(reqlogfile, "ab");
+    if(dump) {
+      int i;
+      fprintf(dump, "atyp %u =>", type);
+      switch(type) {
+      case 1:
+        /* 4 bytes IPv4 address */
+        fprintf(dump, " %u.%u.%u.%u\n",
+                address[0], address[1], address[2], address[3]);
+        break;
+      case 3:
+        /* The first octet of the address field contains the number of octets
+           of name that follow */
+        fprintf(dump, " %.*s\n", len-1, &address[1]);
+        break;
+      case 4:
+        /* 16 bytes IPv6 address */
+        for(i = 0; i < 16; i++) {
+          fprintf(dump, " %02x", address[i]);
+        }
+        fprintf(dump, "\n");
+        break;
+      }
+      fclose(dump);
+    }
+  }
 
   if(!config.port) {
     unsigned char *portp = &buffer[SOCKS5_DSTADDR + len];
@@ -931,6 +965,11 @@ int main(int argc, char *argv[])
       if(argc>arg)
         serverlogfile = argv[arg++];
     }
+    else if(!strcmp("--reqfile", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        reqlogfile = argv[arg++];
+    }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef ENABLE_IPV6
       ipv_inuse = "IPv6";
@@ -964,6 +1003,7 @@ int main(int argc, char *argv[])
            " --logfile [file]\n"
            " --pidfile [file]\n"
            " --portfile [file]\n"
+           " --reqfile [file]\n"
            " --ipv4\n"
            " --ipv6\n"
            " --bindonly\n"
