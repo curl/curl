@@ -1,0 +1,50 @@
+name: Linux
+
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+    - master
+    - '*/ci'
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: mbedtls
+          install:
+          configure: --with-mbedtls=$HOME/mbed --enable-debug --enable-werror
+        - name: clang-mbedtls
+          install:
+          configure: CC=clang --with-mbedtls=$HOME/mbed --enable-debug --enable-werror
+
+    steps:
+    - run: sudo apt-get install libtool autoconf automake pkg-config clang
+      name: install prereqs
+
+    - run: |
+       git clone --depth=1 -b v3.0.0 https://github.com/ARMmbed/mbedtls
+       cd mbedtls
+       make
+       make DESTDIR=$HOME/mbed install
+
+      name: 'install mbedtls'
+
+    - uses: actions/checkout@v2
+
+    - run: ./buildconf && LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} && make V=1
+      name: 'configure and build'
+
+    - run: make V=1 test-ci
+      name: 'test'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"
