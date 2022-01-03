@@ -32,7 +32,7 @@ jobs:
       name: install prereqs
 
     - run: |
-       git clone --depth=1 -b v3.0.0 https://github.com/ARMmbed/mbedtls
+       git clone --depth=1 -b v3.1.0 https://github.com/ARMmbed/mbedtls
        cd mbedtls
        make
        make DESTDIR=$HOME/mbed install
