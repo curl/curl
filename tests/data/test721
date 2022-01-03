@@ -35,10 +35,10 @@ http
 socks5
 </server>
  <name>
-HTTP GET with IPv4 numerical via SOCKS5h
+HTTP GET with host name using SOCKS5h
  </name>
  <command>
-http://12.34.56.78:%HTTPPORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT 
+http://this.is.a.host.name:%HTTPPORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT
 </command>
 </client>
 
@@ -47,13 +47,13 @@ http://12.34.56.78:%HTTPPORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT
 <verify>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
-Host: 12.34.56.78:%HTTPPORT
+Host: this.is.a.host.name:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
 <socks>
-atyp 1 => 12.34.56.78
+atyp 3 => this.is.a.host.name
 </socks>
 </verify>
 </testcase>

@@ -31,14 +31,14 @@ Funny-head: yesyes
 # Client-side
 <client>
 <server>
-http-ipv6
+http
 socks5
 </server>
  <name>
-HTTP GET with IPv6 numerical via SOCKS5h set with --proxy
+HTTP GET with IPv6 numerical via SOCKS5h
  </name>
  <command>
-http://%HOST6IP:%HTTP6PORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT 
+http://[2200::33]:%HTTPPORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT 
 </command>
 </client>
 
@@ -47,10 +47,13 @@ http://%HOST6IP:%HTTP6PORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT
 <verify>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
-Host: %HOST6IP:%HTTP6PORT
+Host: [2200::33]:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
+<socks>
+atyp 4 => 22 00 00 00 00 00 00 00 00 00 00 00 00 00 00 33
+</socks>
 </verify>
 </testcase>
