@@ -4102,6 +4102,11 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#ifdef _MSC_VER
+/* warning C4706: assignment within conditional expression */
+#pragma warning(disable:4706)
+#endif
+
 /***********************************************************************
  *
  * ftp_parse_url_path()
@@ -4189,10 +4194,6 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
           return CURLE_OUT_OF_MEMORY;
         }
 
-#ifdef _MSC_VER
-/* warning C4706: assignment within conditional expression */
-#pragma warning(disable:4706)
-#endif
         /* parse the URL path into separate path components */
         while((slashPos = strchr(curPos, '/'))) {
           size_t compLen = slashPos - curPos;
