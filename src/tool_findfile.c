@@ -131,6 +131,7 @@ char *findfile(const char *fname, int dotscore)
              defined so we skip the extended check */
           continue;
         filename++; /* move past the leading dot */
+        dotscore = 0; /* disable it for this check */
       }
       path = checkhome(home, filename, dotscore ? dotscore - 1 : 0);
       curl_free(home);
