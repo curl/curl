@@ -4,7 +4,7 @@ curl and libcurl 7.81.0
  Command line options:         244
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2554
+ Contributors:                 2558
 
 This release includes the following changes:
 
@@ -16,8 +16,11 @@ This release includes the following bugfixes:
  o azure: make the "w/o HTTP/SMTP/IMAP" build disable SSL proper [12]
  o BINDINGS: add cURL client for PostgreSQL [68]
  o BINDINGS: add one from Everything curl and update a link
+ o checksrc: detect more kinds of NULL comparisons we avoid [105]
  o CI: build examples for additional code verification [75]
+ o CI: bump job to use mbedtls 3.1.0 [90]
  o cmake: don't set _USRDLL on a static Windows build [22]
+ o cmake: prevent dev warning due to mismatched arg [94]
  o cmake: private identifiers use CURL_ instead of CMAKE_ prefix [40]
  o config.d: update documentation to match the path search
  o configure: add -lm to configure for rustls build. [13]
@@ -46,30 +49,40 @@ This release includes the following bugfixes:
  o docs: fix typo in OpenSSL 3 build instructions [80]
  o docs: Update the Reducing Size section
  o example/progressfunc: remove code for old libcurls [78]
+ o examples/multi-single.c: remove WAITMS() [98]
  o FAQ: typo fix : "yout" ➤ "your" [30]
+ o ftp: disable warning 4706 in MSVC [85]
  o gen.pl: improve example output format [29]
+ o github workflow: add wolfssl (removed from zuul) [103]
+ o github/workflows: add mbedtls and mbedtls-clang (removed from zuul) [92]
  o gtls: check return code for gnutls_alpn_set_protocols [86]
  o hash: lazy-alloc the table in Curl_hash_add() [54]
  o http2:set_transfer_url() return early on OOM [53]
  o HTTP3: update quiche build instructions [37]
  o http: enable haproxy support for hyper backend [20]
  o http: Fix CURLOPT_HTTP200ALIASES [89]
+ o http_proxy: don't close the socket (too early) [100]
  o insecure.d: detail its use for SFTP and SCP as well [32]
  o insecure.d: expand and clarify [28]
  o libcurl-multi.3: "SOCKS proxy handshakes" are not blocking
  o libcurl-security.3: mention address and URL mitigations
  o libssh2: fix error message for sha256 mismatch
+ o libtest: avoid "assignment within conditional expression" [84]
  o lift: ignore is a deprecated config option, use ignoreRules [35]
  o linkcheck.yml: add CI job that checks markdown links [82]
+ o m4/curl-compilers: tell clang -Wno-pointer-bool-conversion [99]
  o Makefile.m32: rename -winssl option to -schannel and tidy up [33]
  o mbedTLS: add support for CURLOPT_CAINFO_BLOB [44]
  o mbedtls: fix CURLOPT_SSLCERT_BLOB [72]
+ o mbedtls: fix private member designations for v3.1.0 [93]
  o misc: remove unused doh flags when CURL_DISABLE_DOH is defined [71]
  o misc: s/e-mail/email [74]
  o multi: cleanup the socket hash when destroying it [55]
  o multi: handle errors returned from socket/timer callbacks [52]
  o multi: shut down CONNECT in Curl_detach_connnection [2]
  o netrc.d: edit the .netrc example to look nicer [24]
+ o ngtcp2: verify the server cert on connect (quictls) [102]
+ o ngtcp2: verify the server certificate for the gnutls case [101]
  o nss:set_cipher don't clobber the cipher list [38]
  o openldap: implement STARTTLS [56]
  o openldap: process search query response messages one by one [50]
@@ -104,9 +117,12 @@ This release includes the following bugfixes:
  o tftp: mark protocol as not possible to do over CONNECT [25]
  o tool_findfile: updated search for a file in the homedir [46]
  o tool_operate: only set SSH related libcurl options for SSH URLs [11]
+ o tool_operate: warn if too many output arguments were found [87]
  o url.c: fix the SIGPIPE comment for Curl_close [4]
  o url: check ssl_config when re-use proxy connection [81]
+ o url: reduce ssl backend count for CURL_DISABLE_PROXY builds [96]
  o urlapi: accept port number zero [34]
+ o urlapi: if possible, shorten given numerical IPv6 addresses [95]
  o urlapi: provide more detailed return codes [36]
  o urlapi: reject short file URLs [41]
  o version_win32: Check build number and platform id
@@ -114,6 +130,7 @@ This release includes the following bugfixes:
  o writeout: fix %{http_version} for HTTP/3 [7]
  o x509asn1: return early on errors [67]
  o zuul.d: update rustls-ffi to version 0.8.2 [5]
+ o zuul: fix quiche build pointing to wrong Cargo [104]
 
 This release includes the following known bugs:
 
@@ -125,15 +142,16 @@ advice from friends like these:
   Alessandro Ghedini, Bernat Mut, Bernhard Walle, Boris Rasin,
   Brad Fitzpatrick, Bruno Baguette, Damien Walsh, Dan Fandrich,
   Daniel Stenberg, David Bohman, Don J Olmstead, Eric Musser, Even Rouault,
-  Florian Van Heghe, Glenn Strauss, Jacob Hoffman-Andrews, James Fuller,
-  Jeff Luszcz, jeffrson on github, Jun Tseng, Kevin Burke, lllaffer on github,
-  Marcelo Juchem, Marcel Raad, Marc Hörsken, Mark Dodgson, Matt Holt,
-  Michał Antoniak, nimaje on github, Patrick Monnerat, Paul Howarth,
+  Florian Van Heghe, gclinch on github, Glenn Strauss, Jacob Hoffman-Andrews,
+  James Fuller, Jeff Luszcz, jeffrson on github, Jun Tseng, Kevin Burke,
+  Leszek Kubik, lllaffer on github, Marcelo Juchem, Marcel Raad, Marc Hörsken,
+  Mark Dodgson, Matt Holt, Melroy van den Berg, Michał Antoniak,
+  Nicolas Sterchele, nimaje on github, Patrick Monnerat, Paul Howarth,
   Ray Satiro, RekGRpth on github, Rikard Falkeborn, Ryan Sleevi, Stan Hu,
   Stefan Eissing, Stefan Huber, Stephane Pellegrino, Stephen M. Coakley,
-  Tobias Nießen, Viktor Szakats, Vincent Grande, Vladimir Panteleev,
-  Wyatt O'Day, x2018 on github, Yongkang Huang,
-  (47 contributors)
+  Tobias Nießen, Valentin Richter, Viktor Szakats, Vincent Grande,
+  Vladimir Panteleev, Wyatt O'Day, x2018 on github, Yongkang Huang,
+  (52 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -220,6 +238,23 @@ References to bug reports and discussions on issues:
  [81] = https://curl.se/bug/?i=8141
  [82] = https://curl.se/bug/?i=8158
  [83] = https://curl.se/bug/?i=8156
+ [84] = https://curl.se/bug/?i=8218
+ [85] = https://curl.se/bug/?i=8218
  [86] = https://curl.se/bug/?i=8181
+ [87] = https://curl.se/bug/?i=8210
  [88] = https://curl.se/bug/?i=8177
  [89] = https://curl.se/bug/?i=8171
+ [90] = https://curl.se/bug/?i=8215
+ [92] = https://curl.se/bug/?i=8215
+ [93] = https://curl.se/bug/?i=8214
+ [94] = https://curl.se/bug/?i=8207
+ [95] = https://curl.se/bug/?i=8206
+ [96] = https://curl.se/bug/?i=8212
+ [98] = https://curl.se/bug/?i=8200
+ [99] = https://curl.se/bug/?i=8197
+ [100] = https://curl.se/bug/?i=8193
+ [101] = https://curl.se/bug/?i=8178
+ [102] = https://curl.se/bug/?i=8178
+ [103] = https://curl.se/bug/?i=8196
+ [104] = https://curl.se/bug/?i=8184
+ [105] = https://curl.se/bug/?i=8180
