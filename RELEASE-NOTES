@@ -32,6 +32,7 @@ This release includes the following bugfixes:
  o curl_easy_cleanup.3: remove from multi handle first [3]
  o curl_easy_escape.3: call curl_easy_cleanup in example [58]
  o curl_easy_unescape.3: call curl_easy_cleanup in example [57]
+ o curl_multi_init.3: fix EXAMPLE formatting
  o curl_multi_perform/socket_action.3: clarify what errors mean [70]
  o curl_share_setopt.3: split out options into their own manpages [14]
  o CURLOPT_STDERR.3: does not work with libcurl as a win32 DLL [51]
@@ -102,6 +103,7 @@ This release includes the following bugfixes:
  o rustls: remove comment about checking handshaking [15]
  o rustls: remove incorrect EOF check [10]
  o sha256/md5: return errors when init fails [79]
+ o socks5: use appropriate ATYP for numerical IP address host names [91]
  o test1156: enable for hyper [65]
  o test1156: fixup the stdout check for Windows [60]
  o test1525: tweaked for hyper [64]
@@ -147,11 +149,12 @@ advice from friends like these:
   Leszek Kubik, lllaffer on github, Marcelo Juchem, Marcel Raad, Marc Hörsken,
   Mark Dodgson, Matt Holt, Melroy van den Berg, Michał Antoniak,
   Nicolas Sterchele, nimaje on github, Patrick Monnerat, Paul Howarth,
-  Ray Satiro, RekGRpth on github, Rikard Falkeborn, Ryan Sleevi, Stan Hu,
-  Stefan Eissing, Stefan Huber, Stephane Pellegrino, Stephen M. Coakley,
-  Tobias Nießen, Valentin Richter, Viktor Szakats, Vincent Grande,
-  Vladimir Panteleev, Wyatt O'Day, x2018 on github, Yongkang Huang,
-  (52 contributors)
+  Peter Piekarski, Ray Satiro, RekGRpth on github, Rikard Falkeborn,
+  Ryan Sleevi, Stan Hu, Stefan Eissing, Stefan Huber, Stephane Pellegrino,
+  Stephen M. Coakley, Tobias Nießen, Valentin Richter, Viktor Szakats,
+  Vincent Grande, Vladimir Panteleev, Wyatt O'Day, x2018 on github,
+  Yongkang Huang,
+  (53 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -245,6 +248,7 @@ References to bug reports and discussions on issues:
  [88] = https://curl.se/bug/?i=8177
  [89] = https://curl.se/bug/?i=8171
  [90] = https://curl.se/bug/?i=8215
+ [91] = https://curl.se/bug/?i=8216
  [92] = https://curl.se/bug/?i=8215
  [93] = https://curl.se/bug/?i=8214
  [94] = https://curl.se/bug/?i=8207
