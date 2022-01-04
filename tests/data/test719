@@ -32,6 +32,7 @@ Funny-head: yesyes
 <client>
 <features>
 ipv6
+proxy
 </features>
 <server>
 http
