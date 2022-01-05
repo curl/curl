@@ -21,6 +21,4 @@ options include --verbose, --trace, --trace-ascii and --fail-early.
 
 For example, you can do both a GET and a POST in a single command line:
 
-.nf
  curl www1.example.com --next -d postthis www2.example.com
-.fi
