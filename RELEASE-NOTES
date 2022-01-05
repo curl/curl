@@ -1,138 +1,21 @@
-curl and libcurl 7.81.0
+curl and libcurl 7.81.1
 
- Public curl releases:         205
+ Public curl releases:         206
  Command line options:         244
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2558
+ Contributors:                 2559
 
 This release includes the following changes:
 
- o mime: use percent-escaping for multipart form field and file names [1]
+ o
 
 This release includes the following bugfixes:
 
- o asyn-ares: ares_getaddrinfo needs no happy eyeballs timer [73]
- o azure: make the "w/o HTTP/SMTP/IMAP" build disable SSL proper [12]
- o BINDINGS: add cURL client for PostgreSQL [68]
- o BINDINGS: add one from Everything curl and update a link
- o checksrc: detect more kinds of NULL comparisons we avoid [105]
- o CI: build examples for additional code verification [75]
- o CI: bump job to use mbedtls 3.1.0 [90]
- o cmake: don't set _USRDLL on a static Windows build [22]
- o cmake: prevent dev warning due to mismatched arg [94]
- o cmake: private identifiers use CURL_ instead of CMAKE_ prefix [40]
- o config.d: update documentation to match the path search
- o configure: add -lm to configure for rustls build. [13]
- o configure: better diagnostics if hyper is built wrong [6]
- o configure: don't enable TLS when --without-* flags are used [17]
- o configure: fix runtime-lib detection on macOS [21]
- o curl.1: require "see also" for every documented option [27]
- o curl: improve error message for --head with -J [42]
- o curl_easy_cleanup.3: remove from multi handle first [3]
- o curl_easy_escape.3: call curl_easy_cleanup in example [58]
- o curl_easy_unescape.3: call curl_easy_cleanup in example [57]
- o curl_multi_init.3: fix EXAMPLE formatting
- o curl_multi_perform/socket_action.3: clarify what errors mean [70]
- o curl_share_setopt.3: split out options into their own manpages [14]
- o CURLOPT_STDERR.3: does not work with libcurl as a win32 DLL [51]
- o digest: compute user:realm:pass digest w/o userhash [45]
- o docs/checksrc: Add documentation for STRERROR [18]
- o docs/cmdline-opts: do not say "protocols: all" [26]
- o docs/examples: workaround broken -Wno-pedantic-ms-format
- o docs/HTTP3: describe how to setup a h3 reverse-proxy for testing [88]
- o docs/INSTALL.md: typo fix : added missing "get" verb [31]
- o docs/URL-SYNTAX.md: space is not fine in a given URL
- o docs: add known bugs list to HTTP3.md [83]
- o docs: address proselint nits [16]
- o docs: consistent manpage SYNOPSIS [47]
- o docs: fix dead links, remove ECH.md
- o docs: fix typo in OpenSSL 3 build instructions [80]
- o docs: Update the Reducing Size section
- o example/progressfunc: remove code for old libcurls [78]
- o examples/multi-single.c: remove WAITMS() [98]
- o FAQ: typo fix : "yout" ➤ "your" [30]
- o ftp: disable warning 4706 in MSVC [85]
- o gen.pl: improve example output format [29]
- o github workflow: add wolfssl (removed from zuul) [103]
- o github/workflows: add mbedtls and mbedtls-clang (removed from zuul) [92]
- o gtls: check return code for gnutls_alpn_set_protocols [86]
- o hash: lazy-alloc the table in Curl_hash_add() [54]
- o http2:set_transfer_url() return early on OOM [53]
- o HTTP3: update quiche build instructions [37]
- o http: enable haproxy support for hyper backend [20]
- o http: Fix CURLOPT_HTTP200ALIASES [89]
- o http_proxy: don't close the socket (too early) [100]
- o insecure.d: detail its use for SFTP and SCP as well [32]
- o insecure.d: expand and clarify [28]
- o libcurl-multi.3: "SOCKS proxy handshakes" are not blocking
- o libcurl-security.3: mention address and URL mitigations
- o libssh2: fix error message for sha256 mismatch
- o libtest: avoid "assignment within conditional expression" [84]
- o lift: ignore is a deprecated config option, use ignoreRules [35]
- o linkcheck.yml: add CI job that checks markdown links [82]
- o m4/curl-compilers: tell clang -Wno-pointer-bool-conversion [99]
- o Makefile.m32: rename -winssl option to -schannel and tidy up [33]
- o mbedTLS: add support for CURLOPT_CAINFO_BLOB [44]
- o mbedtls: fix CURLOPT_SSLCERT_BLOB [72]
- o mbedtls: fix private member designations for v3.1.0 [93]
- o misc: remove unused doh flags when CURL_DISABLE_DOH is defined [71]
- o misc: s/e-mail/email [74]
- o multi: cleanup the socket hash when destroying it [55]
- o multi: handle errors returned from socket/timer callbacks [52]
- o multi: shut down CONNECT in Curl_detach_connnection [2]
- o netrc.d: edit the .netrc example to look nicer [24]
- o ngtcp2: verify the server cert on connect (quictls) [102]
- o ngtcp2: verify the server certificate for the gnutls case [101]
- o nss:set_cipher don't clobber the cipher list [38]
- o openldap: implement STARTTLS [56]
- o openldap: process search query response messages one by one [50]
- o openldap: several minor improvements [69]
- o openldap: simplify ldif generation code [77]
- o openssl: check the return value of BIO_new() [43]
- o openssl: define HAVE_OPENSSL_VERSION for OpenSSL 1.1.0+
- o openssl: remove `RSA_METHOD_FLAG_NO_CHECK` handling if unavailable
- o openssl: remove usage of deprecated `SSL_get_peer_certificate`
- o openssl: use non-deprecated API to read key parameters
- o page-footer: add a mention of how to report bugs to the man page
- o page-footer: document more environment variables [23]
- o request.d: refer to 'method' rather than 'command' [59]
- o retry-all-errors.d: make the example complete
- o runtests: make the SSH library a testable feature
- o rustls: read of zero bytes might be okay [9]
- o rustls: remove comment about checking handshaking [15]
- o rustls: remove incorrect EOF check [10]
- o sha256/md5: return errors when init fails [79]
- o socks5: use appropriate ATYP for numerical IP address host names [91]
- o test1156: enable for hyper [65]
- o test1156: fixup the stdout check for Windows [60]
- o test1525: tweaked for hyper [64]
- o test1526: enable for hyper [63]
- o test1527: enable for hyper [62]
- o test1528: enable for hyper [61]
- o test1554: adjust for hyper [49]
- o test1556: adjust for hyper [48]
- o test302[12]: run only with the libssh2 backend [8]
- o test661: enable for hyper [66]
- o tests/CI.md: add more information on CI environments [39]
- o tests/data/test302[12]: fix MSYS2 path conversion of hostpubsha256 [76]
- o tftp: mark protocol as not possible to do over CONNECT [25]
- o tool_findfile: updated search for a file in the homedir [46]
- o tool_operate: only set SSH related libcurl options for SSH URLs [11]
- o tool_operate: warn if too many output arguments were found [87]
- o url.c: fix the SIGPIPE comment for Curl_close [4]
- o url: check ssl_config when re-use proxy connection [81]
- o url: reduce ssl backend count for CURL_DISABLE_PROXY builds [96]
- o urlapi: accept port number zero [34]
- o urlapi: if possible, shorten given numerical IPv6 addresses [95]
- o urlapi: provide more detailed return codes [36]
- o urlapi: reject short file URLs [41]
- o version_win32: Check build number and platform id
- o vtls/rustls: adapt to the updated rustls_version proto [19]
- o writeout: fix %{http_version} for HTTP/3 [7]
- o x509asn1: return early on errors [67]
- o zuul.d: update rustls-ffi to version 0.8.2 [5]
- o zuul: fix quiche build pointing to wrong Cargo [104]
+ o docs: fix mandoc -T lint formatting complaints [2]
+ o next.d. remove .fi/.nf as they are handled by gen.pl [3]
+ o gen.pl: terminate "example" sections better [4]
+ o curl-functions.m4: fix LIBRARY_PATH adjustment to avoid eval [5]
 
 This release includes the following known bugs:
 
@@ -141,124 +24,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Bernat Mut, Bernhard Walle, Boris Rasin,
-  Brad Fitzpatrick, Bruno Baguette, Damien Walsh, Dan Fandrich,
-  Daniel Stenberg, David Bohman, Don J Olmstead, Eric Musser, Even Rouault,
-  Florian Van Heghe, gclinch on github, Glenn Strauss, Jacob Hoffman-Andrews,
-  James Fuller, Jeff Luszcz, jeffrson on github, Jun Tseng, Kevin Burke,
-  Leszek Kubik, lllaffer on github, Marcelo Juchem, Marcel Raad, Marc Hörsken,
-  Mark Dodgson, Matt Holt, Melroy van den Berg, Michał Antoniak,
-  Nicolas Sterchele, nimaje on github, Patrick Monnerat, Paul Howarth,
-  Peter Piekarski, Ray Satiro, RekGRpth on github, Rikard Falkeborn,
-  Ryan Sleevi, Stan Hu, Stefan Eissing, Stefan Huber, Stephane Pellegrino,
-  Stephen M. Coakley, Tobias Nießen, Valentin Richter, Viktor Szakats,
-  Vincent Grande, Vladimir Panteleev, Wyatt O'Day, x2018 on github,
-  Yongkang Huang,
-  (53 contributors)
+  Daniel Stenberg, Ryan Schmidt, Satadru Pramanik,
+  (3 contributors)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.se/bug/?i=7789
- [2] = https://curl.se/bug/?i=7982
- [3] = https://curl.se/bug/?i=7983
- [4] = https://curl.se/bug/?i=7984
- [5] = https://curl.se/bug/?i=8013
- [6] = https://curl.se/bug/?i=8001
- [7] = https://curl.se/bug/?i=8072
- [8] = https://curl.se/bug/?i=8009
- [9] = https://curl.se/bug/?i=8003
- [10] = https://curl.se/bug/?i=8003
- [11] = https://curl.se/bug/?i=8040
- [12] = https://curl.se/bug/?i=8006
- [13] = https://curl.se/bug/?i=8002
- [14] = https://curl.se/bug/?i=7998
- [15] = https://curl.se/bug/?i=8038
- [16] = https://curl.se/bug/?i=8060
- [17] = https://curl.se/bug/?i=7994
- [18] = https://curl.se/bug/?i=7991
- [19] = https://curl.se/bug/?i=7956
- [20] = https://curl.se/bug/?i=8034
- [21] = https://curl.se/bug/?i=8028
- [22] = https://curl.se/bug/?i=8030
- [23] = https://curl.se/bug/?i=8027
- [24] = https://curl.se/bug/?i=8025
- [25] = https://curl.se/bug/?i=8018
- [26] = https://curl.se/bug/?i=8021
- [27] = https://curl.se/bug/?i=8019
- [28] = https://curl.se/bug/?i=8017
- [29] = https://curl.se/bug/?i=8016
- [30] = https://curl.se/bug/?i=8059
- [31] = https://curl.se/bug/?i=8058
- [32] = https://curl.se/bug/?i=8056
- [33] = https://curl.se/bug/?i=8053
- [34] = https://curl.se/bug/?i=8090
- [35] = https://curl.se/bug/?i=8082
- [36] = https://curl.se/bug/?i=8049
- [37] = https://curl.se/bug/?i=8076
- [38] = https://curl.se/bug/?i=8160
- [39] = https://curl.se/bug/?i=8012
- [40] = https://curl.se/bug/?i=7988
- [41] = https://curl.se/bug/?i=8042
- [42] = https://curl.se/bug/?i=7987
- [43] = https://curl.se/bug/?i=8078
- [44] = https://curl.se/bug/?i=8071
- [45] = https://curl.se/bug/?i=8066
- [46] = https://curl.se/bug/?i=8033
- [47] = https://curl.se/bug/?i=8062
- [48] = https://curl.se/bug/?i=8105
- [49] = https://curl.se/bug/?i=8104
- [50] = https://curl.se/bug/?i=8101
- [51] = https://curl.se/bug/?i=8103
- [52] = https://curl.se/bug/?i=8083
- [53] = https://curl.se/bug/?i=8100
- [54] = https://curl.se/bug/?i=8132
- [55] = https://curl.se/bug/?i=8129
- [56] = https://curl.se/bug/?i=8065
- [57] = https://curl.se/bug/?i=8097
- [58] = https://curl.se/bug/?i=8097
- [59] = https://curl.se/bug/?i=8094
- [60] = https://curl.se/bug/?i=8134
- [61] = https://curl.se/bug/?i=8128
- [62] = https://curl.se/bug/?i=8128
- [63] = https://curl.se/bug/?i=8128
- [64] = https://curl.se/bug/?i=8128
- [65] = https://curl.se/bug/?i=8127
- [66] = https://curl.se/bug/?i=8126
- [67] = https://curl.se/bug/?i=8147
- [68] = https://curl.se/bug/?i=8125
- [69] = https://curl.se/bug/?i=8140
- [70] = https://curl.se/bug/?i=8120
- [71] = https://curl.se/bug/?i=8148
- [72] = https://curl.se/bug/?i=8146
- [73] = https://curl.se/bug/?i=8142
- [74] = https://curl.se/bug/?i=8159
- [75] = https://curl.se/bug/?i=7922
- [76] = https://curl.se/bug/?i=8084
- [77] = https://curl.se/bug/?i=8136
- [78] = https://curl.se/bug/?i=8137
- [79] = https://curl.se/bug/?i=8133
- [80] = https://curl.se/bug/?i=8162
- [81] = https://curl.se/bug/?i=8141
- [82] = https://curl.se/bug/?i=8158
- [83] = https://curl.se/bug/?i=8156
- [84] = https://curl.se/bug/?i=8218
- [85] = https://curl.se/bug/?i=8218
- [86] = https://curl.se/bug/?i=8181
- [87] = https://curl.se/bug/?i=8210
- [88] = https://curl.se/bug/?i=8177
- [89] = https://curl.se/bug/?i=8171
- [90] = https://curl.se/bug/?i=8215
- [91] = https://curl.se/bug/?i=8216
- [92] = https://curl.se/bug/?i=8215
- [93] = https://curl.se/bug/?i=8214
- [94] = https://curl.se/bug/?i=8207
- [95] = https://curl.se/bug/?i=8206
- [96] = https://curl.se/bug/?i=8212
- [98] = https://curl.se/bug/?i=8200
- [99] = https://curl.se/bug/?i=8197
- [100] = https://curl.se/bug/?i=8193
- [101] = https://curl.se/bug/?i=8178
- [102] = https://curl.se/bug/?i=8178
- [103] = https://curl.se/bug/?i=8196
- [104] = https://curl.se/bug/?i=8184
- [105] = https://curl.se/bug/?i=8180
+ [2] = https://curl.se/bug/?i=8228
+ [3] = https://curl.se/bug/?i=8228
+ [4] = https://curl.se/bug/?i=8228
+ [5] = https://curl.se/bug/?i=8229
