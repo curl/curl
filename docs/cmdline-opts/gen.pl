@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -113,6 +113,9 @@ sub printdesc {
         # handle single quotes first on the line
         $d =~ s/(\s*)\'/$1\\(aq/;
         print $d;
+    }
+    if($exam) {
+        print ".fi\n"; # fill-in
     }
 }
 
