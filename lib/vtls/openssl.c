@@ -3897,9 +3897,20 @@ static CURLcode servercert(struct Curl_easy *data,
 
     /* e.g. match issuer name with provided issuer certificate */
     if(SSL_CONN_CONFIG(issuercert) || SSL_CONN_CONFIG(issuercert_blob)) {
-      if(SSL_CONN_CONFIG(issuercert_blob))
+      if(SSL_CONN_CONFIG(issuercert_blob)) {
         fp = BIO_new_mem_buf(SSL_CONN_CONFIG(issuercert_blob)->data,
                              (int)SSL_CONN_CONFIG(issuercert_blob)->len);
+        if(!fp) {
+          failf(data,
+                "BIO_new_mem_buf NULL, " OSSL_PACKAGE
+                " error %s",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)) );
+          X509_free(backend->server_cert);
+          backend->server_cert = NULL;
+          return CURLE_OUT_OF_MEMORY;
+        }
+      }
       else {
         fp = BIO_new(BIO_s_file());
         if(!fp) {
