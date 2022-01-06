@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -104,11 +104,13 @@ int main(void)
     }
   }
 
-  curl_multi_cleanup(multi_handle);
-
-  /* Free the CURL handles */
-  for(i = 0; i<HANDLECOUNT; i++)
+  /* remove the transfers and cleanup the handles */
+  for(i = 0; i<HANDLECOUNT; i++) {
+    curl_multi_remove_handle(multi_handle, handles[i]);
     curl_easy_cleanup(handles[i]);
+  }
+
+  curl_multi_cleanup(multi_handle);
 
   return 0;
 }
