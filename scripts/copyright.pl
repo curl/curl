@@ -160,7 +160,7 @@ if($ARGV[0] eq "-v") {
     shift @ARGV;
 }
 if($ARGV[0]) {
-    push @all, $ARGV[0];
+    push @all, @ARGV;
 }
 else {
     @all = `git ls-files`;
