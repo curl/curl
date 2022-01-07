@@ -1,0 +1,49 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+gif data
+</keywords>
+</info>
+
+<reply>
+<data nonewline="yes">
+HTTP/1.1 200 OK
+Date: Thu, 22 Jul 2010 11:22:33 GMT
+Connection: close
+Content-Type: image/gif
+X-Control: swsclose
+
+%hex[%47%49%46%38%39%61%14%00%14%00%a1%04%00%fe%00%00%ff%00%00%1e%42%ee%1f%42%ef%21%ff%0b%4e%45%54%53%43%41%50%45%32%2e%30%03%01%00%00%00%21%fe%24%43%72%65%61%74%65%64%20%62%79%20%46%61%62%69%61%6e%20%4b%65%69%6c%20%77%69%74%68%20%54%68%65%20%47%49%4d%50%00%21%f9%04%00%0a%00%ff%00%2c%00%00%00%00%14%00%14%00%00%02%11%8c%8f%a9%cb%ed%0f%a3%9c%b4%da%8b%b3%de%bc%fb%af%15%00%21%f9%04%01%0a%00%02%00%2c%00%00%00%00%14%00%14%00%00%02%11%9c%8f%a9%cb%ed%0f%a3%9c%b4%da%8b%b3%de%bc%fb%af%15%00%21%f9%04%00%0a%00%ff%00%2c%00%00%00%00%14%00%14%00%00%02%11%94%8f%a9%cb%ed%0f%a3%9c%b4%da%8b%b3%de%bc%fb%af%15%00%21%f9%04%00%0a%00%ff%00%2c%00%00%00%00%14%00%14%00%00%02%11%84%8f%a9%cb%ed%0f%a3%9c%b4%da%8b%b3%de%bc%fb%af%15%00%3b]hex%
+</data>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+Valid gif with two frames. No new line in data section.
+</name>
+<features>
+proxy
+</features>
+<command>
+http://%HOSTIP:%HTTPPORT/gif/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol>
+GET /gif/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>
