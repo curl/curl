@@ -126,10 +126,12 @@ char *findfile(const char *fname, int dotscore)
         home = c;
       }
       if(list[i].withoutdot) {
-        if(!dotscore || xdg)
+        if(!dotscore || xdg) {
           /* this is not looking for .curlrc, or the XDG_CONFIG_HOME was
              defined so we skip the extended check */
+          curl_free(home);
           continue;
+        }
         filename++; /* move past the leading dot */
         dotscore = 0; /* disable it for this check */
       }
