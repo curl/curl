@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -135,7 +135,7 @@ When space is used and allowed in a URL, it will be stored as-is unless
 \fICURLU_URLENCODE\fP is also set, which then makes libcurl URL-encode the
 space before stored. This affects how the URL will be constructed when
 \fIcurl_url_get(3)\fP is subsequently used to extract the full URL or
-individual parts.
+individual parts. (Added in 7.78.0)
 .SH EXAMPLE
 .nf
   CURLUcode rc;
