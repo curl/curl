@@ -2942,6 +2942,13 @@ static CURLcode override_login(struct Curl_easy *data,
     bool netrc_user_changed = FALSE;
     bool netrc_passwd_changed = FALSE;
     int ret;
+    bool url_provided = FALSE;
+
+    if(data->state.up.user) {
+      /* there was a user name in the URL */
+      userp = &data->state.up.user;
+      url_provided = TRUE;
+    }
 
     ret = Curl_parsenetrc(conn->host.name,
                           userp, passwdp,
@@ -2961,27 +2968,36 @@ static CURLcode override_login(struct Curl_easy *data,
       conn->bits.netrc = TRUE;
       conn->bits.user_passwd = TRUE; /* enable user+password */
     }
+    if(url_provided) {
+      Curl_safefree(conn->user);
+      conn->user = strdup(*userp);
+      if(!conn->user)
+        return CURLE_OUT_OF_MEMORY;
+      /* don't update the user name below */
+      userp = NULL;
+    }
   }
 #endif
 
   /* for updated strings, we update them in the URL */
-  if(*userp) {
-    CURLcode result = Curl_setstropt(&data->state.aptr.user, *userp);
-    if(result)
-      return result;
-  }
-  if(data->state.aptr.user) {
-    uc = curl_url_set(data->state.uh, CURLUPART_USER, data->state.aptr.user,
-                      CURLU_URLENCODE);
-    if(uc)
-      return Curl_uc_to_curlcode(uc);
-    if(!*userp) {
-      *userp = strdup(data->state.aptr.user);
-      if(!*userp)
-        return CURLE_OUT_OF_MEMORY;
+  if(userp) {
+    if(*userp) {
+      CURLcode result = Curl_setstropt(&data->state.aptr.user, *userp);
+      if(result)
+        return result;
+    }
+    if(data->state.aptr.user) {
+      uc = curl_url_set(data->state.uh, CURLUPART_USER, data->state.aptr.user,
+                        CURLU_URLENCODE);
+      if(uc)
+        return Curl_uc_to_curlcode(uc);
+      if(!*userp) {
+        *userp = strdup(data->state.aptr.user);
+        if(!*userp)
+          return CURLE_OUT_OF_MEMORY;
+      }
     }
   }
-
   if(*passwdp) {
     CURLcode result = Curl_setstropt(&data->state.aptr.passwd, *passwdp);
     if(result)

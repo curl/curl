@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -46,24 +46,20 @@ and similar things are not supported).
 libcurl does not verify that the file has the correct properties set (as the
 standard Unix ftp client does). It should only be readable by user.
 
-\fIlevel\fP should be set to one of the values described below.
-
-.IP CURL_NETRC_OPTIONAL
-The use of the \fI~/.netrc\fP file is optional, and information in the URL is
-to be preferred.  The file will be scanned for the host and user name (to find
+\fIlevel\fP is a long that should be set to one of the values described below.
+.IP "CURL_NETRC_IGNORED (0)"
+The library will ignore the \fI.netrc\fP file. This is the default.
+.IP "CURL_NETRC_OPTIONAL (1)"
+The use of the \fI.netrc\fP file is optional, and information in the URL is to
+be preferred.  The file will be scanned for the host and user name (to find
 the password only) or for the host only, to find the first user name and
 password after that \fImachine\fP, which ever information is not specified.
-
-Undefined values of the option will have this effect.
-.IP CURL_NETRC_IGNORED
-The library will ignore the \fI~/.netrc\fP file.
-
-This is the default.
-.IP CURL_NETRC_REQUIRED
-The use of the \fI~/.netrc\fP file is required, and information in the URL is
-to be ignored.  The file will be scanned for the host and user name (to find
-the password only) or for the host only, to find the first user name and
-password after that \fImachine\fP, which ever information is not specified.
+.IP "CURL_NETRC_REQUIRED (2)"
+The use of the \fI.netrc\fP file is required, and any credential information
+present in the URL is ignored.  The file will be scanned for the host and user
+name (to find the password only) or for the host only, to find the first user
+name and password after that \fImachine\fP, which ever information is not
+specified.
 .SH DEFAULT
 CURL_NETRC_IGNORED
 .SH PROTOCOLS
