@@ -469,18 +469,18 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   infof(data, "mbedTLS: Connecting to %s:%ld", hostname, port);
 
   mbedtls_ssl_config_init(&backend->config);
-
-  mbedtls_ssl_init(&backend->ssl);
-  if(mbedtls_ssl_setup(&backend->ssl, &backend->config)) {
-    failf(data, "mbedTLS: ssl_init failed");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
   ret = mbedtls_ssl_config_defaults(&backend->config,
                                     MBEDTLS_SSL_IS_CLIENT,
                                     MBEDTLS_SSL_TRANSPORT_STREAM,
                                     MBEDTLS_SSL_PRESET_DEFAULT);
   if(ret) {
     failf(data, "mbedTLS: ssl_config failed");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  mbedtls_ssl_init(&backend->ssl);
+  if(mbedtls_ssl_setup(&backend->ssl, &backend->config)) {
+    failf(data, "mbedTLS: ssl_init failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
 
