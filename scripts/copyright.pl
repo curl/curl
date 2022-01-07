@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -154,6 +154,11 @@ sub checkfile {
 }
 
 my @all;
+my $verbose;
+if($ARGV[0] eq "-v") {
+    $verbose = 1;
+    shift @ARGV;
+}
 if($ARGV[0]) {
     push @all, $ARGV[0];
 }
@@ -179,8 +184,10 @@ for my $f (@all) {
     }
 }
 
-print STDERR "$missing files have no copyright\n" if($missing);
-print STDERR "$wrong files have wrong copyright year\n" if ($wrong);
-print STDERR "$skiplisted files are skipped\n" if ($skiplisted);
+if($verbose) {
+    print STDERR "$missing files have no copyright\n" if($missing);
+    print STDERR "$wrong files have wrong copyright year\n" if ($wrong);
+    print STDERR "$skiplisted files are skipped\n" if ($skiplisted);
+}
 
 exit 1 if($missing || $wrong);
