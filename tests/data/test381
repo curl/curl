@@ -33,16 +33,21 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 <server>
 ftp
 </server>
- <name>
-FTP compulsory .netrc; ignore passwd in URL
- </name>
- <command>
--n --netrc-file log/netrc%TESTNUMBER ftp://mary:mark@%HOSTIP:%FTPPORT/
+
+# When CURL_NETRC_REQUIRED is set, the password in the URL is ignored and
+# using the netrc is mandatory.
+#
+<name>
+netrc-optional lets URL creds override netrc
+</name>
+
+<command>
+--netrc-optional --netrc-file log/netrc%TESTNUMBER ftp://mary:drfrank@%HOSTIP:%FTPPORT/
 </command>
 <file name="log/netrc%TESTNUMBER" >
 # the following two lines were created while testing curl
-machine %HOSTIP login user1 password passwd1
-machine %HOSTIP login mary password drfrank
+machine %HOSTIP login frankenstein password wrongone
+machine %HOSTIP login mary password yram
 </file>
 </client>
 
