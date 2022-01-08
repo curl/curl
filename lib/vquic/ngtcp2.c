@@ -1676,7 +1676,6 @@ static CURLcode ng_has_connected(struct Curl_easy *data,
   if(conn->ssl_config.verifyhost) {
 #ifdef USE_OPENSSL
     X509 *server_cert;
-    CURLcode result;
     server_cert = SSL_get_peer_certificate(conn->quic->ssl);
     if(!server_cert) {
       return CURLE_PEER_FAILED_VERIFICATION;
