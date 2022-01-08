@@ -237,7 +237,7 @@ unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
   if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "iOS")
-  # only try this on non-macOS
+  # only try this on non-apple platforms
 
   # if not cross-compilation...
   include(CheckCSourceRuns)
