@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,11 +30,17 @@
  * and ngtcp2.c
  */
 
-#include <openssl/x509v3.h>
 #include "urldata.h"
 
+/*
+ * In an effort to avoid using 'X509 *' here, we instead use the struct
+ * x509_st version of the type so that we can forward-declare it here without
+ * having to include <openssl/x509v3.h>. Including that header causes name
+ * conflicts when libcurl is built with both Schannel and OpenSSL support.
+ */
+struct x509_st;
 CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
-                              X509 *server_cert);
+                              struct x509_st *server_cert);
 extern const struct Curl_ssl Curl_ssl_openssl;
 
 #endif /* USE_OPENSSL */
