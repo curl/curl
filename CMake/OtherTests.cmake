@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -236,8 +236,8 @@ endif()
 unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-  if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  # only try this on non-macOS
+  if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "iOS")
+  # only try this on non-apple platforms
 
   # if not cross-compilation...
   include(CheckCSourceRuns)
