@@ -28,7 +28,7 @@ jobs:
           configure: CC=clang --with-mbedtls=$HOME/mbed --enable-debug --enable-werror
 
     steps:
-    - run: sudo apt-get install libtool autoconf automake pkg-config clang
+    - run: sudo apt-get install libtool autoconf automake pkg-config clang stunnel4
       name: install prereqs
 
     - run: |
