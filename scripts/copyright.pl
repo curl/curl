@@ -88,8 +88,7 @@ sub scanfile {
     my ($f) = @_;
     my $line=1;
     my $found = 0;
-    open(F, "<$f") ||
-        print ERROR "can't open $f\n";
+    open(F, "<$f") || return -1;
     while (<F>) {
         chomp;
         my $l = $_;
@@ -120,9 +119,14 @@ sub checkfile {
     @copyright=();
     my $found = scanfile($file);
 
-    if(!$found) {
-        print "$file:1: missing copyright range\n";
-        return 2;
+    if($found < 1) {
+        if(!$found) {
+            print "$file:1: missing copyright range\n";
+            return 2;
+        }
+        # this means the file couldn't open - it might not exist, consider
+        # that fine
+        return 0;
     }
 
     my $commityear = undef;
