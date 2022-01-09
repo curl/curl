@@ -60,7 +60,7 @@ invoked. Setting a name that is not a built-in alternative will make curl
 stay with the default.
 
 SSL backend names (case-insensitive): bearssl, gnutls, gskit, mbedtls,
-mesalink, nss, openssl, rustls, schannel, secure-transport, wolfssl
+nss, openssl, rustls, schannel, secure-transport, wolfssl
 .IP "HOME <dir>"
 If set, this is used to find the home directory when that is needed. Like when
 looking for the default .curlrc. \fBCURL_HOME\fP and \fBXDG_CONFIG_HOME\fP
