@@ -402,6 +402,7 @@ Features testable here are:
 - `parsedate`
 - `proxy`
 - `PSL`
+- `rustls`
 - `Schannel`
 - `sectransp`
 - `shuffle-dns`
