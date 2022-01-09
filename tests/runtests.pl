@@ -277,6 +277,7 @@ my $has_unicode;    # set if libcurl is built with Unicode support
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
 
+my $has_rustls;     # built with rustls
 my $has_openssl;    # built with a lib using an OpenSSL-like API
 my $has_gnutls;     # built with GnuTLS
 my $has_nss;        # built with NSS
@@ -2880,6 +2881,7 @@ sub setupfeatures {
     $feature{"libz"} = $has_libz;
     $feature{"libssh2"} = $has_libssh2;
     $feature{"libssh"} = $has_libssh;
+    $feature{"rustls"} = $has_rustls;
     $feature{"wolfssh"} = $has_wolfssh;
     $feature{"manual"} = $has_manual;
     $feature{"MinGW"} = $has_mingw;
@@ -2998,6 +3000,9 @@ sub checksystem {
            elsif ($libcurl =~ /gnutls/i) {
                $has_gnutls=1;
                $has_sslpinning=1;
+           }
+           elsif ($libcurl =~ /rustls-ffi/i) {
+               $has_rustls=1;
            }
            elsif ($libcurl =~ /nss/i) {
                $has_nss=1;
