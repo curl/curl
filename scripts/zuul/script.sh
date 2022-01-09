@@ -58,12 +58,6 @@ if [ "$T" = "debug" ]; then
   fi
 fi
 
-if [ "$T" = "debug-mesalink" ]; then
-  ./configure --enable-debug --enable-werror $C
-  make
-  make "TFLAGS=-n !313 !410 !3001" test-nonflaky
-fi
-
 if [ "$T" = "debug-bearssl" ]; then
   ./configure --enable-debug --enable-werror $C
   make

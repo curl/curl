@@ -125,23 +125,6 @@ fi
 # Install common libraries.
 if [ $TRAVIS_OS_NAME = linux ]; then
 
-  if [ "$MESALINK" = "yes" ]; then
-    if [ ! -e $HOME/mesalink-1.0.0/Makefile ]; then
-      cd $HOME
-      curl https://sh.rustup.rs -sSf | sh -s -- -y
-      source $HOME/.cargo/env
-      curl -LO https://github.com/mesalock-linux/mesalink/archive/v1.0.0.tar.gz
-      tar -xzf v1.0.0.tar.gz
-      cd mesalink-1.0.0
-      ./autogen.sh
-      ./configure --enable-tls13
-      make
-    fi
-    cd $HOME/mesalink-1.0.0
-    sudo make install
-
-  fi
-
   if [ "$BEARSSL" = "yes" ]; then
     if [ ! -e $HOME/bearssl-0.6/Makefile ]; then
       cd $HOME

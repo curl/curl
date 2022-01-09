@@ -117,7 +117,6 @@ These options are provided to select TLS backend to use.
  - BearSSL: `--with-bearssl`
  - GnuTLS: `--with-gnutls`.
  - mbedTLS: `--with-mbedtls`
- - MesaLink: `--with-mesalink`
  - NSS: `--with-nss`
  - OpenSSL: `--with-openssl` (also for BoringSSL and libressl)
  - rustls: `--with-rustls`

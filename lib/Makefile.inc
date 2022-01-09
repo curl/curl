@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -47,7 +47,6 @@ LIB_VTLS_CFILES =           \
   vtls/keylog.c             \
   vtls/mbedtls.c            \
   vtls/mbedtls_threadlock.c \
-  vtls/mesalink.c           \
   vtls/nss.c                \
   vtls/openssl.c            \
   vtls/rustls.c             \
@@ -64,7 +63,6 @@ LIB_VTLS_HFILES =           \
   vtls/keylog.h             \
   vtls/mbedtls.h            \
   vtls/mbedtls_threadlock.h \
-  vtls/mesalink.h           \
   vtls/nssg.h               \
   vtls/openssl.h            \
   vtls/rustls.h             \
