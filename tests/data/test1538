@@ -94,7 +94,7 @@ e58: Problem with the local SSL certificate
 e59: Couldn't use specified SSL cipher
 e60: SSL peer certificate or SSH remote key was not OK
 e61: Unrecognized or bad HTTP Content or Transfer-Encoding
-e62: Invalid LDAP URL
+e62: Unknown error
 e63: Maximum file size exceeded
 e64: Requested SSL level failed
 e65: Send failed since rewinding of the data stream failed

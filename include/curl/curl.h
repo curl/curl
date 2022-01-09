@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -569,7 +569,7 @@ typedef enum {
   CURLE_PEER_FAILED_VERIFICATION, /* 60 - peer's certificate or fingerprint
                                      wasn't verified fine */
   CURLE_BAD_CONTENT_ENCODING,    /* 61 - Unrecognized/bad encoding */
-  CURLE_LDAP_INVALID_URL,        /* 62 - Invalid LDAP URL */
+  CURLE_OBSOLETE62,              /* 62 - NOT IN USE since 7.82.0 */
   CURLE_FILESIZE_EXCEEDED,       /* 63 - Maximum file size exceeded */
   CURLE_USE_SSL_FAILED,          /* 64 - Requested FTP SSL level failed */
   CURLE_SEND_FAIL_REWIND,        /* 65 - Sending the data requires a rewind
@@ -683,13 +683,12 @@ typedef enum {
 /* The following were added earlier */
 
 #define CURLE_OPERATION_TIMEOUTED CURLE_OPERATION_TIMEDOUT
-
 #define CURLE_HTTP_NOT_FOUND CURLE_HTTP_RETURNED_ERROR
 #define CURLE_HTTP_PORT_FAILED CURLE_INTERFACE_FAILED
 #define CURLE_FTP_COULDNT_STOR_FILE CURLE_UPLOAD_FAILED
-
 #define CURLE_FTP_PARTIAL_FILE CURLE_PARTIAL_FILE
 #define CURLE_FTP_BAD_DOWNLOAD_RESUME CURLE_BAD_DOWNLOAD_RESUME
+#define CURLE_LDAP_INVALID_URL CURLE_OBSOLETE62
 
 /* This was the error code 50 in 7.7.3 and a few earlier versions, this
    is no longer used by libcurl but is instead #defined here only to not
