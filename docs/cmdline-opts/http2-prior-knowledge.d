@@ -2,7 +2,7 @@ Long: http2-prior-knowledge
 Tags: Versions
 Protocols: HTTP
 Added: 7.49.0
-Mutexed: http1.1 http1.0 http2
+Mutexed: http1.1 http1.0 http2 http3
 Requires: HTTP/2
 Help: Use HTTP 2 without HTTP/1.1 Upgrade
 Category: http
