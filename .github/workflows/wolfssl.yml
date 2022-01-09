@@ -25,7 +25,7 @@ jobs:
           configure: --with-wolfssl=$HOME/wssl --enable-debug --enable-werror
 
     steps:
-    - run: sudo apt-get install libtool autoconf automake pkg-config
+    - run: sudo apt-get install libtool autoconf automake pkg-config stunnel4
       name: install prereqs
 
     - run: |
