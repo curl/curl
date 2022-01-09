@@ -297,7 +297,11 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
 {
   struct rustls_connection *rconn = backend->conn;
   struct rustls_client_config_builder *config_builder = NULL;
-  const char *const ssl_cafile = SSL_CONN_CONFIG(CAfile);
+  struct rustls_root_cert_store *roots = NULL;
+  const struct curl_blob *ca_info_blob = SSL_CONN_CONFIG(ca_info_blob);
+  const char * const ssl_cafile =
+    /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
+    (ca_info_blob ? NULL : SSL_CONN_CONFIG(CAfile));
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char *hostname = conn->host.name;
   char errorbuf[256];
@@ -326,6 +330,29 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
     if(cr_hostname_is_ip(hostname)) {
       rustls_client_config_builder_set_enable_sni(config_builder, false);
       hostname = "example.invalid";
+    }
+  }
+  else if(ca_info_blob) {
+    roots = rustls_root_cert_store_new();
+
+    /* Enable strict parsing only if verification isn't disabled. */
+    result = rustls_root_cert_store_add_pem(roots, ca_info_blob->data,
+                                            ca_info_blob->len, verifypeer);
+    if(result != RUSTLS_RESULT_OK) {
+      failf(data, "failed to parse trusted certificates from blob");
+      rustls_root_cert_store_free(roots);
+      rustls_client_config_free(
+        rustls_client_config_builder_build(config_builder));
+      return CURLE_SSL_CACERT_BADFILE;
+    }
+
+    result = rustls_client_config_builder_use_roots(config_builder, roots);
+    rustls_root_cert_store_free(roots);
+    if(result != RUSTLS_RESULT_OK) {
+      failf(data, "failed to load trusted certificates");
+      rustls_client_config_free(
+        rustls_client_config_builder_build(config_builder));
+      return CURLE_SSL_CACERT_BADFILE;
     }
   }
   else if(ssl_cafile) {
@@ -550,7 +577,8 @@ static size_t cr_version(char *buffer, size_t size)
 
 const struct Curl_ssl Curl_ssl_rustls = {
   { CURLSSLBACKEND_RUSTLS, "rustls" },
-  SSLSUPP_TLS13_CIPHERSUITES,      /* supports */
+  SSLSUPP_CAINFO_BLOB |            /* supports */
+  SSLSUPP_TLS13_CIPHERSUITES,
   sizeof(struct ssl_backend_data),
 
   Curl_none_init,                  /* init */
