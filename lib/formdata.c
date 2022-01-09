@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -77,10 +77,15 @@ AddHttpPost(char *name, size_t namelength,
             struct curl_httppost **last_post)
 {
   struct curl_httppost *post;
+  if(!namelength && name)
+    namelength = strlen(name);
+  if((bufferlength > LONG_MAX) || (namelength > LONG_MAX))
+    /* avoid overflow in typecasts below */
+    return NULL;
   post = calloc(1, sizeof(struct curl_httppost));
   if(post) {
     post->name = name;
-    post->namelength = (long)(name?(namelength?namelength:strlen(name)):0);
+    post->namelength = (long)namelength;
     post->contents = value;
     post->contentlen = contentslength;
     post->buffer = buffer;
