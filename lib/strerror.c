@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -224,9 +224,6 @@ curl_easy_strerror(CURLcode error)
   case CURLE_BAD_CONTENT_ENCODING:
     return "Unrecognized or bad HTTP Content or Transfer-Encoding";
 
-  case CURLE_LDAP_INVALID_URL:
-    return "Invalid LDAP URL";
-
   case CURLE_FILESIZE_EXCEEDED:
     return "Maximum file size exceeded";
 
@@ -337,6 +334,7 @@ curl_easy_strerror(CURLcode error)
   case CURLE_OBSOLETE50:
   case CURLE_OBSOLETE51:
   case CURLE_OBSOLETE57:
+  case CURLE_OBSOLETE62:
   case CURL_LAST:
     break;
   }
