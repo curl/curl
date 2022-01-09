@@ -1,0 +1,49 @@
+name: Linux
+
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+    - master
+    - '*/ci'
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: rustls
+          install:
+          configure: --with-rustls=$HOME/rustls --enable-debug --enable-werror
+
+    steps:
+    - run: sudo apt-get install libtool autoconf automake pkg-config libpsl-dev libbrotli-dev libzstd-dev stunnel4
+      name: install prereqs
+
+    - run: |
+       git clone --depth=1 --recursive https://github.com/rustls/rustls-ffi.git -b v0.8.2
+       curl https://sh.rustup.rs -sSf | sh -s -- -y
+       source $HOME/.cargo/env
+       cd rustls-ffi
+       make
+       make DESTDIR=$HOME/rustls install
+
+      name: 'install rustls'
+
+    - uses: actions/checkout@v2
+
+    - run: ./buildconf && ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} && make V=1
+      name: 'configure and build'
+
+    - run: make V=1 test-ci
+      name: 'test'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"

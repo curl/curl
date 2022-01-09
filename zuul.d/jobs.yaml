@@ -127,22 +127,6 @@
         LD_LIBRARY_PATH: "{{ ansible_user_dir }}/quiche/target/release:/usr/local/lib"
 
 - job:
-    name: curl-debug-rustls
-    parent: curl-base
-    vars:
-      curl_apt_packages:
-        - libpsl-dev
-        - libbrotli-dev
-        - libzstd-dev
-      curl_env:
-        T: debug-rustls
-        # Keep this in sync with the version in docs/RUSTLS.md
-        RUSTLS_VERSION: v0.8.2
-        LIBS: -lm
-        C: >-
-          --with-rustls={{ ansible_user_dir }}/rustls
-
-- job:
     name: curl-debug-bearssl
     parent: curl-base
     vars:
@@ -513,7 +497,6 @@
       - curl-normal-with-openssl-disable-verbose-notests
       - curl-novalgrind-boringssl-with-openssl
       - curl-novalgrind-boringssl-with-openssl-quiche
-      - curl-debug-rustls
       - curl-debug-bearssl
       - curl-novalgrind-libressl
       - curl-novalgrind-ngtcp2-with-openssl

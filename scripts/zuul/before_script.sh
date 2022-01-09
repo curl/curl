@@ -122,17 +122,6 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
 fi
 
-if [ "$TRAVIS_OS_NAME" = linux -a "$RUSTLS_VERSION" ]; then
-  cd $HOME
-  git clone --depth=1 --recursive https://github.com/rustls/rustls-ffi.git -b "$RUSTLS_VERSION"
-  curl https://sh.rustup.rs -sSf | sh -s -- -y
-  source $HOME/.cargo/env
-  cargo install cbindgen
-  cd $HOME/rustls-ffi
-  make
-  make DESTDIR=$HOME/rustls install
-fi
-
 # Install common libraries.
 if [ $TRAVIS_OS_NAME = linux ]; then
 

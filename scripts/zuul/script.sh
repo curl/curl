@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -62,12 +62,6 @@ if [ "$T" = "debug-mesalink" ]; then
   ./configure --enable-debug --enable-werror $C
   make
   make "TFLAGS=-n !313 !410 !3001" test-nonflaky
-fi
-
-if [ "$T" = "debug-rustls" ]; then
-  ./configure --enable-debug --enable-werror $C
-  make
-  make "TFLAGS=HTTPS !313" test-nonflaky
 fi
 
 if [ "$T" = "debug-bearssl" ]; then
