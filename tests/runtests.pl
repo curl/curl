@@ -2883,6 +2883,7 @@ sub setupfeatures {
     $feature{"libssh"} = $has_libssh;
     $feature{"rustls"} = $has_rustls;
     $feature{"wolfssh"} = $has_wolfssh;
+    $feature{"wolfssl"} = $has_wolfssl;
     $feature{"manual"} = $has_manual;
     $feature{"MinGW"} = $has_mingw;
     $feature{"MultiSSL"} = $has_multissl;
