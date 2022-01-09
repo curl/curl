@@ -4,7 +4,7 @@ curl and libcurl 7.81.1
  Command line options:         244
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2559
+ Contributors:                 2563
 
 This release includes the following changes:
 
@@ -12,10 +12,26 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o docs: fix mandoc -T lint formatting complaints [2]
- o next.d. remove .fi/.nf as they are handled by gen.pl [3]
- o gen.pl: terminate "example" sections better [4]
+ o CI: move the rustls CI job to GHA from Zuul [8]
+ o cmake: fix iOS CMake project generation error [13]
  o curl-functions.m4: fix LIBRARY_PATH adjustment to avoid eval [5]
+ o curl_url_set.3: mention when CURLU_ALLOW_SPACE was added
+ o docs: fix mandoc -T lint formatting complaints [2]
+ o examples/multi-app.c: call curl_multi_remove_handle as well [19]
+ o gen.pl: terminate "example" sections better [4]
+ o mbedtls: Fix ssl_init error with mbedTLS 3.1.0+ [12]
+ o next.d. remove .fi/.nf as they are handled by gen.pl [3]
+ o ngtcp2: fix declaration of ‘result’ shadows a previous local [14]
+ o openssl.h: avoid including OpenSSL headers here [15]
+ o openssl: check the return value of BIO_new_mem_buf() [18]
+ o remote-header-name.d: clarify [10]
+ o runtests.pl: properly print the test if it contains binary zeros
+ o runtests: allow client/file to specify multiple directories
+ o runtests: make 'rustls' a testable feature
+ o runtests: make 'wolfssl' a testable feature [6]
+ o scripts/copyright.pl: support many provided file names on the cmdline
+ o tool_findfile: check ~/.config/curlrc too [17]
+ o url: given a user in the URL, find pwd for that user in netrc [11]
 
 This release includes the following known bugs:
 
@@ -24,8 +40,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Ryan Schmidt, Satadru Pramanik,
-  (3 contributors)
+  Daniel Stenberg, Fabian Keil, Filip Lundgren, Jan Ehrhardt, Manfred Schwarb,
+  Melroy van den Berg, Niels Martignène, Ryan Schmidt, Sandro Jaeckel,
+  Satadru Pramanik, Viktor Szakats, Xiaoke Wang,
+  (12 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -33,3 +51,14 @@ References to bug reports and discussions on issues:
  [3] = https://curl.se/bug/?i=8228
  [4] = https://curl.se/bug/?i=8228
  [5] = https://curl.se/bug/?i=8229
+ [6] = https://curl.se/bug/?i=8252
+ [8] = https://curl.se/bug/?i=8251
+ [10] = https://curl.se/bug/?i=8249
+ [11] = https://curl.se/bug/?i=8241
+ [12] = https://curl.se/bug/?i=8238
+ [13] = https://curl.se/bug/?i=8244
+ [14] = https://curl.se/bug/?i=8245
+ [15] = https://curl.se/bug/?i=8240
+ [17] = https://curl.se/bug/?i=8208
+ [18] = https://curl.se/bug/?i=8233
+ [19] = https://curl.se/bug/?i=8234
