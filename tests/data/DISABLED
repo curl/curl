@@ -69,4 +69,15 @@
 # Tests that are disabled here for rustls are SUPPOSED to work
 %if rustls
 312
+313
+400
+401
+403
+404
+406
+407
+408
+409
+1112
+1272
 %endif
