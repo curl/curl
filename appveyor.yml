@@ -37,9 +37,9 @@ environment:
         SHARED: ON
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 16 2019"
+        PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A x64"
         PRJ_CFG: Release
         OPENSSL: ON
@@ -50,9 +50,9 @@ environment:
         SHARED: ON
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 16 2019"
+        PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A ARM64"
         PRJ_CFG: Release
         OPENSSL: OFF
@@ -76,9 +76,9 @@ environment:
         SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
         COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 16 2019"
+        PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A x64"
         PRJ_CFG: Debug
         OPENSSL: OFF
@@ -89,9 +89,9 @@ environment:
         SHARED: OFF
         DISABLED_TESTS: "~571 !1139 !1501 "
         COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 16 2019"
+        PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A x64"
         PRJ_CFG: Debug
         OPENSSL: OFF
@@ -102,9 +102,9 @@ environment:
         SHARED: OFF
         DISABLED_TESTS: "~571 !1139 !1501"
         COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 16 2019"
+        PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A x64"
         PRJ_CFG: Debug
         OPENSSL: OFF
@@ -158,7 +158,7 @@ environment:
         COMPILER_PATH: "C:\\mingw-w64\\i686-6.3.0-posix-dwarf-rt_v5-rev1\\mingw32\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
