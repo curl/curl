@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -669,6 +669,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'B': /* OAuth 2.0 bearer token */
         GetStr(&config->oauth_bearer, nextarg);
+        cleanarg(nextarg);
         config->authtype |= CURLAUTH_BEARER;
         break;
       case 'c': /* connect-timeout */
@@ -1617,16 +1618,20 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         GetStr(&config->crlfile, nextarg);
         break;
       case 'k': /* TLS username */
-        if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)
-          GetStr(&config->tls_username, nextarg);
-        else
+        if(!(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)) {
+          cleanarg(nextarg);
           return PARAM_LIBCURL_DOESNT_SUPPORT;
+        }
+        GetStr(&config->tls_username, nextarg);
+        cleanarg(nextarg);
         break;
       case 'l': /* TLS password */
-        if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)
-          GetStr(&config->tls_password, nextarg);
-        else
+        if(!(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)) {
+          cleanarg(nextarg);
           return PARAM_LIBCURL_DOESNT_SUPPORT;
+        }
+        GetStr(&config->tls_password, nextarg);
+        cleanarg(nextarg);
         break;
       case 'm': /* TLS authentication type */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
@@ -1687,17 +1692,21 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
 
       case 'u': /* TLS username for proxy */
-        if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)
-          GetStr(&config->proxy_tls_username, nextarg);
-        else
+        if(!(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)) {
+          cleanarg(nextarg);
           return PARAM_LIBCURL_DOESNT_SUPPORT;
+        }
+        GetStr(&config->proxy_tls_username, nextarg);
+        cleanarg(nextarg);
         break;
 
       case 'v': /* TLS password for proxy */
-        if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)
-          GetStr(&config->proxy_tls_password, nextarg);
-        else
+        if(!(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)) {
+          cleanarg(nextarg);
           return PARAM_LIBCURL_DOESNT_SUPPORT;
+        }
+        GetStr(&config->proxy_tls_password, nextarg);
+        cleanarg(nextarg);
         break;
 
       case 'w': /* TLS authentication type for proxy */
