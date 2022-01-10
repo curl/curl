@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2011 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010, Howard Chu, <hyc@openldap.org>
  *
  * This software is licensed as described in the file COPYING, which
@@ -46,6 +46,8 @@
 #include "curl_ldap.h"
 #include "curl_base64.h"
 #include "connect.h"
+#include "curl_sasl.h"
+#include "strcase.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -76,6 +78,8 @@ typedef enum {
   OLDAP_SSL,            /* Performing SSL handshake. */
   OLDAP_STARTTLS,       /* STARTTLS request sent. */
   OLDAP_TLS,            /* Performing TLS handshake. */
+  OLDAP_MECHS,          /* Get SASL authentication mechanisms. */
+  OLDAP_SASL,           /* SASL binding reply. */
   OLDAP_BIND,           /* Simple bind reply. */
   OLDAP_BINDV2,         /* Simple bind reply in protocol version 2. */
   OLDAP_LAST            /* Never used */
@@ -95,6 +99,13 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done);
 static CURLcode oldap_connecting(struct Curl_easy *data, bool *done);
 static CURLcode oldap_disconnect(struct Curl_easy *data,
                                  struct connectdata *conn, bool dead);
+
+static CURLcode oldap_perform_auth(struct Curl_easy *data, const char *mech,
+                                   const struct bufref *initresp);
+static CURLcode oldap_continue_auth(struct Curl_easy *data, const char *mech,
+                                    const struct bufref *resp);
+static CURLcode oldap_cancel_auth(struct Curl_easy *data, const char *mech);
+static CURLcode oldap_get_message(struct Curl_easy *data, struct bufref *out);
 
 static Curl_recv oldap_recv;
 
@@ -154,10 +165,26 @@ const struct Curl_handler Curl_handler_ldaps = {
 };
 #endif
 
+/* SASL parameters for the ldap protocol */
+static const struct SASLproto saslldap = {
+  "ldap",                     /* The service name */
+  oldap_perform_auth,         /* Send authentication command */
+  oldap_continue_auth,        /* Send authentication continuation */
+  oldap_cancel_auth,          /* Send authentication cancellation */
+  oldap_get_message,          /* Get SASL response message */
+  0,                          /* Maximum initial response length (no max) */
+  LDAP_SASL_BIND_IN_PROGRESS, /* Code received when continuation is expected */
+  LDAP_SUCCESS,               /* Code to receive upon authentication success */
+  SASL_AUTH_NONE,             /* Default mechanisms */
+  0                           /* Configuration flags */
+};
+
 struct ldapconninfo {
+  struct SASL sasl;          /* SASL-related parameters */
   LDAP *ld;                  /* Openldap connection handle. */
   Curl_recv *recv;           /* For stacking SSL handler */
   Curl_send *send;
+  struct berval *servercred; /* SASL data from server. */
   ldapstate state;           /* Current machine state. */
   int proto;                 /* LDAP_PROTO_TCP/LDAP_PROTO_UDP/LDAP_PROTO_IPC */
   int msgid;                 /* Current message id. */
@@ -184,6 +211,8 @@ static void state(struct Curl_easy *data, ldapstate newstate)
     "SSL",
     "STARTTLS",
     "TLS",
+    "MECHS",
+    "SASL",
     "BIND",
     "BINDV2",
     /* LAST */
@@ -251,6 +280,37 @@ static CURLcode oldap_url_parse(struct Curl_easy *data, LDAPURLDesc **ludp)
   return result;
 }
 
+/* Parse the login options. */
+static CURLcode oldap_parse_login_options(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct ldapconninfo *li = conn->proto.ldapc;
+  const char *ptr = conn->options;
+
+  while(!result && ptr && *ptr) {
+    const char *key = ptr;
+    const char *value;
+
+    while(*ptr && *ptr != '=')
+        ptr++;
+
+    value = ptr + 1;
+
+    while(*ptr && *ptr != ';')
+      ptr++;
+
+    if(checkprefix("AUTH=", key))
+      result = Curl_sasl_parse_url_auth_option(&li->sasl, value, ptr - value);
+    else
+      result = CURLE_SETOPT_OPTION_SYNTAX;
+
+    if(*ptr == ';')
+      ptr++;
+  }
+
+  return result == CURLE_URL_MALFORMAT? CURLE_SETOPT_OPTION_SYNTAX: result;
+}
+
 static CURLcode oldap_setup_connection(struct Curl_easy *data,
                                        struct connectdata *conn)
 {
@@ -271,11 +331,91 @@ static CURLcode oldap_setup_connection(struct Curl_easy *data,
       conn->proto.ldapc = li;
       connkeep(conn, "OpenLDAP default");
 
+      /* Initialize the SASL storage */
+      Curl_sasl_init(&li->sasl, data, &saslldap);
+
       /* Clear the TLS upgraded flag */
       conn->bits.tls_upgraded = FALSE;
+
+      result = oldap_parse_login_options(conn);
     }
   }
 
+  return result;
+}
+
+/*
+ * Get the SASL authentication challenge from the server credential buffer.
+ */
+static CURLcode oldap_get_message(struct Curl_easy *data, struct bufref *out)
+{
+  struct berval *servercred = data->conn->proto.ldapc->servercred;
+
+  if(!servercred || !servercred->bv_val)
+    return CURLE_WEIRD_SERVER_REPLY;
+  Curl_bufref_set(out, servercred->bv_val, servercred->bv_len, NULL);
+  return CURLE_OK;
+}
+
+/*
+ * Sends an initial SASL bind request to the server.
+ */
+static CURLcode oldap_perform_auth(struct Curl_easy *data, const char *mech,
+                                   const struct bufref *initresp)
+{
+  struct connectdata *conn = data->conn;
+  struct ldapconninfo *li = conn->proto.ldapc;
+  CURLcode result = CURLE_OK;
+  struct berval cred;
+  struct berval *pcred = &cred;
+  int rc;
+
+  cred.bv_val = (char *) Curl_bufref_ptr(initresp);
+  cred.bv_len = Curl_bufref_len(initresp);
+  if(!cred.bv_val)
+    pcred = NULL;
+  rc = ldap_sasl_bind(li->ld, NULL, mech, pcred, NULL, NULL, &li->msgid);
+  if(rc != LDAP_SUCCESS)
+    result = oldap_map_error(rc, CURLE_LDAP_CANNOT_BIND);
+  return result;
+}
+
+/*
+ * Sends SASL continuation.
+ */
+static CURLcode oldap_continue_auth(struct Curl_easy *data, const char *mech,
+                                    const struct bufref *resp)
+{
+  struct connectdata *conn = data->conn;
+  struct ldapconninfo *li = conn->proto.ldapc;
+  CURLcode result = CURLE_OK;
+  struct berval cred;
+  struct berval *pcred = &cred;
+  int rc;
+
+  cred.bv_val = (char *) Curl_bufref_ptr(resp);
+  cred.bv_len = Curl_bufref_len(resp);
+  if(!cred.bv_val)
+    pcred = NULL;
+  rc = ldap_sasl_bind(li->ld, NULL, mech, pcred, NULL, NULL, &li->msgid);
+  if(rc != LDAP_SUCCESS)
+    result = oldap_map_error(rc, CURLE_LDAP_CANNOT_BIND);
+  return result;
+}
+
+/*
+ * Sends SASL bind cancellation.
+ */
+static CURLcode oldap_cancel_auth(struct Curl_easy *data, const char *mech)
+{
+  struct ldapconninfo *li = data->conn->proto.ldapc;
+  CURLcode result = CURLE_OK;
+  int rc = ldap_sasl_bind(li->ld, NULL, LDAP_SASL_NULL, NULL, NULL, NULL,
+                          &li->msgid);
+
+  (void)mech;
+  if(rc != LDAP_SUCCESS)
+    result = oldap_map_error(rc, CURLE_LDAP_CANNOT_BIND);
   return result;
 }
 
@@ -306,6 +446,40 @@ static CURLcode oldap_perform_bind(struct Curl_easy *data, ldapstate newstate)
     result = oldap_map_error(rc,
                              conn->bits.user_passwd?
                              CURLE_LOGIN_DENIED: CURLE_LDAP_CANNOT_BIND);
+  return result;
+}
+
+/* Query the supported SASL authentication mechanisms. */
+static CURLcode oldap_perform_mechs(struct Curl_easy *data)
+{
+  CURLcode result = CURLE_OK;
+  struct ldapconninfo *li = data->conn->proto.ldapc;
+  int rc;
+  static const char * const supportedSASLMechanisms[] = {
+    "supportedSASLMechanisms",
+    NULL
+  };
+
+  rc = ldap_search_ext(li->ld, "", LDAP_SCOPE_BASE, "(objectclass=*)",
+                       (char **) supportedSASLMechanisms, 0,
+                       NULL, NULL, NULL, 0, &li->msgid);
+  if(rc == LDAP_SUCCESS)
+    state(data, OLDAP_MECHS);
+  else
+    result = oldap_map_error(rc, CURLE_LOGIN_DENIED);
+  return result;
+}
+
+/* Starts SASL bind. */
+static CURLcode oldap_perform_sasl(struct Curl_easy *data)
+{
+  saslprogress progress = SASL_IDLE;
+  struct ldapconninfo *li = data->conn->proto.ldapc;
+  CURLcode result = Curl_sasl_start(&li->sasl, data, TRUE, &progress);
+
+  state(data, OLDAP_SASL);
+  if(!result && progress != SASL_INPROGRESS)
+    result = CURLE_LOGIN_DENIED;
   return result;
 }
 
@@ -414,9 +588,104 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   }
 #endif
 
+  if(li->sasl.prefmech != SASL_AUTH_NONE)
+    return oldap_perform_mechs(data);
+
   /* Force bind even if anonymous bind is not needed in protocol version 3
      to detect missing version 3 support. */
   return oldap_perform_bind(data, OLDAP_BIND);
+}
+
+/* Handle the supported SASL mechanisms query response */
+static CURLcode oldap_state_mechs_resp(struct Curl_easy *data,
+                                       LDAPMessage *msg, int code)
+{
+  struct connectdata *conn = data->conn;
+  struct ldapconninfo *li = conn->proto.ldapc;
+  int rc;
+  BerElement *ber = NULL;
+  CURLcode result = CURLE_OK;
+  struct berval bv, *bvals;
+
+  switch(ldap_msgtype(msg)) {
+  case LDAP_RES_SEARCH_ENTRY:
+    /* Got a list of supported SASL mechanisms. */
+    if(code != LDAP_SUCCESS && code != LDAP_NO_RESULTS_RETURNED)
+      return CURLE_LOGIN_DENIED;
+
+    rc = ldap_get_dn_ber(li->ld, msg, &ber, &bv);
+    if(rc < 0)
+      return oldap_map_error(rc, CURLE_BAD_CONTENT_ENCODING);
+    for(rc = ldap_get_attribute_ber(li->ld, msg, ber, &bv, &bvals);
+        rc == LDAP_SUCCESS;
+        rc = ldap_get_attribute_ber(li->ld, msg, ber, &bv, &bvals)) {
+      int i;
+
+      if(!bv.bv_val)
+        break;
+
+      if(bvals) {
+        for(i = 0; bvals[i].bv_val; i++) {
+          size_t llen;
+          unsigned short mech = Curl_sasl_decode_mech((char *) bvals[i].bv_val,
+                                                      bvals[i].bv_len, &llen);
+          if(bvals[i].bv_len == llen)
+            li->sasl.authmechs |= mech;
+        }
+        ber_memfree(bvals);
+      }
+    }
+    ber_free(ber, 0);
+    break;
+
+  case LDAP_RES_SEARCH_RESULT:
+    switch(code) {
+    case LDAP_SIZELIMIT_EXCEEDED:
+      infof(data, "Too many authentication mechanisms\n");
+      /* FALLTHROUGH */
+    case LDAP_SUCCESS:
+    case LDAP_NO_RESULTS_RETURNED:
+      if(Curl_sasl_can_authenticate(&li->sasl, conn))
+        result = oldap_perform_sasl(data);
+      else
+        result = CURLE_LOGIN_DENIED;
+      break;
+    default:
+      result = oldap_map_error(code, CURLE_LOGIN_DENIED);
+      break;
+    }
+    break;
+  default:
+    break;
+  }
+  return result;
+}
+
+/* Handle a SASL bind response. */
+static CURLcode oldap_state_sasl_resp(struct Curl_easy *data,
+                                      LDAPMessage *msg, int code)
+{
+  struct connectdata *conn = data->conn;
+  struct ldapconninfo *li = conn->proto.ldapc;
+  CURLcode result = CURLE_OK;
+  saslprogress progress;
+  int rc;
+
+  li->servercred = NULL;
+  rc = ldap_parse_sasl_bind_result(li->ld, msg, &li->servercred, 0);
+  if(rc != LDAP_SUCCESS) {
+    failf(data, "LDAP local: sasl ldap_parse_result %s", ldap_err2string(rc));
+    result = oldap_map_error(rc, CURLE_LOGIN_DENIED);
+  }
+  else {
+    result = Curl_sasl_continue(&li->sasl, data, code, &progress);
+    if(!result && progress != SASL_INPROGRESS)
+      state(data, OLDAP_STOP);
+  }
+
+  if(li->servercred)
+    ber_bvfree(li->servercred);
+  return result;
 }
 
 /* Handle a simple bind response. */
@@ -459,12 +728,20 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
   if(li->state != OLDAP_SSL && li->state != OLDAP_TLS) {
     /* Get response to last command. */
     rc = ldap_result(li->ld, li->msgid, LDAP_MSG_ONE, &tv, &msg);
-    if(!rc)
-      return CURLE_OK;                    /* Timed out. */
-    if(rc < 0) {
-      failf(data, "LDAP local: connecting ldap_result %s",
-            ldap_err2string(rc));
-      return oldap_map_error(rc, CURLE_COULDNT_CONNECT);
+    switch(rc) {
+    case 0:                               /* Timed out. */
+      return CURLE_OK;
+    case LDAP_RES_SEARCH_ENTRY:
+    case LDAP_RES_SEARCH_REFERENCE:
+      break;
+    default:
+      li->msgid = 0;                      /* Nothing to abandon upon error. */
+      if(rc < 0) {
+        failf(data, "LDAP local: connecting ldap_result %s",
+              ldap_err2string(rc));
+        return oldap_map_error(rc, CURLE_COULDNT_CONNECT);
+      }
+      break;
     }
 
     /* Get error code from message. */
@@ -477,11 +754,11 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
     }
 
     /* If protocol version 3 is not supported, fallback to version 2. */
-    if(code == LDAP_PROTOCOL_ERROR && li->state != OLDAP_BINDV2
+    if(code == LDAP_PROTOCOL_ERROR && li->state != OLDAP_BINDV2 &&
 #ifdef USE_SSL
-       && (ssl_installed(conn) || data->set.use_ssl <= CURLUSESSL_TRY)
+       (ssl_installed(conn) || data->set.use_ssl <= CURLUSESSL_TRY) &&
 #endif
-       ) {
+       li->sasl.prefmech == SASL_AUTH_NONE) {
       static const int version = LDAP_VERSION2;
 
       ldap_set_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &version);
@@ -496,13 +773,19 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
 #ifdef USE_SSL
   case OLDAP_SSL:
     result = oldap_ssl_connect(data, OLDAP_SSL);
-    if(!result && ssl_installed(conn))
-      result = oldap_perform_bind(data, OLDAP_BIND);
+    if(!result && ssl_installed(conn)) {
+      if(li->sasl.prefmech != SASL_AUTH_NONE)
+        result = oldap_perform_mechs(data);
+      else
+        result = oldap_perform_bind(data, OLDAP_BIND);
+    }
     break;
   case OLDAP_STARTTLS:
     if(code != LDAP_SUCCESS) {
       if(data->set.use_ssl != CURLUSESSL_TRY)
         result = oldap_map_error(code, CURLE_USE_SSL_FAILED);
+      else if(li->sasl.prefmech != SASL_AUTH_NONE)
+        result = oldap_perform_mechs(data);
       else
         result = oldap_perform_bind(data, OLDAP_BIND);
       break;
@@ -514,7 +797,9 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
       result = oldap_map_error(code, CURLE_USE_SSL_FAILED);
     else if(ssl_installed(conn)) {
       conn->bits.tls_upgraded = TRUE;
-      if(conn->bits.user_passwd)
+      if(li->sasl.prefmech != SASL_AUTH_NONE)
+        result = oldap_perform_mechs(data);
+      else if(conn->bits.user_passwd)
         result = oldap_perform_bind(data, OLDAP_BIND);
       else {
         state(data, OLDAP_STOP); /* Version 3 supported: no bind required */
@@ -524,6 +809,12 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
     break;
 #endif
 
+  case OLDAP_MECHS:
+    result = oldap_state_mechs_resp(data, msg, code);
+    break;
+  case OLDAP_SASL:
+    result = oldap_state_sasl_resp(data, msg, code);
+    break;
   case OLDAP_BIND:
   case OLDAP_BINDV2:
     result = oldap_state_bind_resp(data, msg, code);
@@ -540,6 +831,10 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
   if(*done)
     conn->recv[FIRSTSOCKET] = oldap_recv;
 
+  if(result && li->msgid) {
+    ldap_abandon_ext(li->ld, li->msgid, NULL, NULL);
+    li->msgid = 0;
+  }
   return result;
 }
 
@@ -562,6 +857,7 @@ static CURLcode oldap_disconnect(struct Curl_easy *data,
       ldap_unbind_ext(li->ld, NULL, NULL);
       li->ld = NULL;
     }
+    Curl_sasl_cleanup(conn, li->sasl.authused);
     conn->proto.ldapc = NULL;
     free(li);
   }
