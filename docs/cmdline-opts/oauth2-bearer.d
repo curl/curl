@@ -1,7 +1,7 @@
 Long: oauth2-bearer
 Help: OAuth 2 Bearer Token
 Arg: <token>
-Protocols: IMAP POP3 SMTP HTTP
+Protocols: IMAP LDAP POP3 SMTP HTTP
 Category: auth
 Example: --oauth2-bearer "mF_9.B5f-4.1JqM" $URL
 Added: 7.33.0
