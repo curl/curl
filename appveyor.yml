@@ -228,17 +228,17 @@ environment:
         TESTING: OFF
         VC_VERSION: VC15
       # autotools-based builds (NOT mingw cross-compiling, but msys2 native)
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 ~1056 !1233"
         CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy --with-schannel"
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 !504 !704 !705 ~1056 !1233"
         CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --with-schannel"
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 !504 !704 !705 ~1056 !1233"
