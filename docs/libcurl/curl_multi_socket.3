@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -66,68 +66,6 @@ equivalent to \fIcurl_multi_socket_action(3)\fP with \fBev_bitmask\fP set to
 Force libcurl to (re-)check all its internal sockets and transfers instead of
 just a single one by calling \fIcurl_multi_socket_all(3)\fP. Note that there
 should not be any reason to use this function.
-.SH CALLBACK
-The socket \fBcallback\fP function uses a prototype like this
-.nf
-  int curl_socket_callback(CURL *easy,      /* easy handle */
-                           curl_socket_t s, /* socket */
-                           int action,      /* see values below */
-                           void *userp,    /* private callback pointer */
-                           void *socketp); /* private socket pointer */
-.fi
-The callback MUST return 0.
-
-The \fIeasy\fP argument is a pointer to the easy handle that deals with this
-particular socket. Note that a single handle may work with several sockets
-simultaneously.
-
-The \fIs\fP argument is the actual socket value as you use it within your
-system.
-
-The \fIaction\fP argument to the callback has one of five values:
-.RS
-.IP "CURL_POLL_NONE (0)"
-register, not interested in readiness (yet)
-.IP "CURL_POLL_IN (1)"
-register, interested in read readiness
-.IP "CURL_POLL_OUT (2)"
-register, interested in write readiness
-.IP "CURL_POLL_INOUT (3)"
-register, interested in both read and write readiness
-.IP "CURL_POLL_REMOVE (4)"
-unregister
-.RE
-
-The \fIsocketp\fP argument is a private pointer you have previously set with
-\fIcurl_multi_assign(3)\fP to be associated with the \fIs\fP socket. If no
-pointer has been set, socketp will be NULL. This argument is of course a
-service to applications that want to keep certain data or structs that are
-strictly associated to the given socket.
-
-The \fIuserp\fP argument is a private pointer you have previously set with
-\fIcurl_multi_setopt(3)\fP and the \fICURLMOPT_SOCKETDATA(3)\fP option.
-.SH "TYPICAL USAGE"
-1. Create a multi handle
-
-2. Set the socket callback with \fICURLMOPT_SOCKETFUNCTION(3)\fP
-
-3. Set the timeout callback with \fICURLMOPT_TIMERFUNCTION(3)\fP, to get to
-know what timeout value to use when waiting for socket activities.
-
-4. Add easy handles with curl_multi_add_handle()
-
-5. Provide some means to manage the sockets libcurl is using, so you can check
-them for activity. This can be done through your application code, or by way
-of an external library such as libevent or glib.
-
-6. Wait for activity on any of libcurl's sockets, use the timeout value your
-callback has been told
-
-7, When activity is detected, call curl_multi_socket_action() for the
-socket(s) that got action. If no activity is detected and the timeout expires,
-call \fIcurl_multi_socket_action(3)\fP with \fICURL_SOCKET_TIMEOUT\fP
-
-8. Go back to step 6.
 .SH EXAMPLE
 .nf
 /* the event-library gets told when there activity on the socket 'fd',
