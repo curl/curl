@@ -388,7 +388,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     memcpy(newblob, ssl_cert_blob->data, ssl_cert_blob->len);
     newblob[ssl_cert_blob->len] = 0; /* null terminate */
     ret = mbedtls_x509_crt_parse(&backend->clicert, newblob,
-                                 ssl_cert_blob->len);
+                                 ssl_cert_blob->len + 1);
     free(newblob);
 
     if(ret) {
