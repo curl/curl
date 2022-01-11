@@ -335,7 +335,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error importing ca cert blob - mbedTLS: (-0x%04X) %s",
             -ret, errorbuf);
-      return ret;
+      return CURLE_SSL_CERTPROBLEM;
     }
   }
 
