@@ -79,7 +79,7 @@ All
 .nf
 CURL *curl;
 struct curl_slist *host = NULL;
-host = curl_slist_append(NULL, "example.com:80:127.0.0.1");
+host = curl_slist_append(NULL, "example.com:443:127.0.0.1");
 
 curl = curl_easy_init();
 if(curl) {
