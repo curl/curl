@@ -2491,13 +2491,12 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
     return 0;
 
   conn = (struct connectdata*) SSL_get_ex_data(ssl, connectdata_idx);
-  if(!conn)
-    return 0;
-
   data = (struct Curl_easy *) SSL_get_ex_data(ssl, data_idx);
-
   /* The sockindex has been stored as a pointer to an array element */
   sockindex_ptr = (curl_socket_t*) SSL_get_ex_data(ssl, sockindex_idx);
+  if(!conn || !data || !sockindex_ptr)
+    return 0;
+
   sockindex = (int)(sockindex_ptr - conn->sock);
 
   isproxy = SSL_get_ex_data(ssl, proxy_idx) ? TRUE : FALSE;
