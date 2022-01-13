@@ -470,6 +470,20 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
       break;
 
     if(recvd < 0) {
+      if(QUICHE_ERR_TLS_FAIL == recvd) {
+        bool is_app;
+        uint64_t error_code;
+        const uint8_t *reason;
+        size_t reason_len;
+
+        quiche_conn_local_error(qs->conn, &is_app, &error_code,
+                                &reason, &reason_len);
+        if(error_code > 0x100) {
+          infof(data, "QUIC-TLS error: %s",
+                SSL_alert_desc_string_long((int)error_code - 0x100L));
+          return CURLE_PEER_FAILED_VERIFICATION;
+        }
+      }
       failf(data, "quiche_conn_recv() == %zd", recvd);
       return CURLE_RECV_ERROR;
     }
