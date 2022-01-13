@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,6 +25,7 @@
 #ifdef USE_QUICHE
 #include <quiche.h>
 #include <openssl/err.h>
+#include <openssl/ssl.h>
 #include "urldata.h"
 #include "sendf.h"
 #include "strdup.h"
@@ -35,6 +36,8 @@
 #include "connect.h"
 #include "strerror.h"
 #include "vquic.h"
+#include "vtls/openssl.h"
+#include "vtls/keylog.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -172,6 +175,68 @@ static void quiche_debug_log(const char *line, void *argp)
 }
 #endif
 
+static void keylog_callback(const SSL *ssl, const char *line)
+{
+  (void)ssl;
+  Curl_tls_keylog_write_line(line);
+}
+
+static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
+{
+  SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
+
+  SSL_CTX_set_alpn_protos(ssl_ctx,
+                          (const uint8_t *)QUICHE_H3_APPLICATION_PROTOCOL,
+                          sizeof(QUICHE_H3_APPLICATION_PROTOCOL) - 1);
+
+  SSL_CTX_set_default_verify_paths(ssl_ctx);
+
+  /* Open the file if a TLS or QUIC backend has not done this before. */
+  Curl_tls_keylog_open();
+  if(Curl_tls_keylog_enabled()) {
+    SSL_CTX_set_keylog_callback(ssl_ctx, keylog_callback);
+  }
+
+  {
+    struct connectdata *conn = data->conn;
+    const char * const ssl_cafile = conn->ssl_config.CAfile;
+    const char * const ssl_capath = conn->ssl_config.CApath;
+
+    if(conn->ssl_config.verifypeer) {
+      SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, NULL);
+      /* tell OpenSSL where to find CA certificates that are used to verify
+         the server's certificate. */
+      if(!SSL_CTX_load_verify_locations(ssl_ctx, ssl_cafile, ssl_capath)) {
+        /* Fail if we insist on successfully verifying the server. */
+        failf(data, "error setting certificate verify locations:"
+              "  CAfile: %s CApath: %s",
+              ssl_cafile ? ssl_cafile : "none",
+              ssl_capath ? ssl_capath : "none");
+        return NULL;
+      }
+      infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
+      infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
+    }
+  }
+  return ssl_ctx;
+}
+
+static int quic_init_ssl(struct quicsocket *qs, struct connectdata *conn)
+{
+  /* this will need some attention when HTTPS proxy over QUIC get fixed */
+  const char * const hostname = conn->host.name;
+
+  DEBUGASSERT(!qs->ssl);
+  qs->ssl = SSL_new(qs->sslctx);
+
+  SSL_set_app_data(qs->ssl, qs);
+
+  /* set SNI */
+  SSL_set_tlsext_host_name(qs->ssl, hostname);
+  return 0;
+}
+
+
 CURLcode Curl_quic_connect(struct Curl_easy *data,
                            struct connectdata *conn, curl_socket_t sockfd,
                            int sockindex,
@@ -179,7 +244,6 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
 {
   CURLcode result;
   struct quicsocket *qs = &conn->hequic[sockindex];
-  char *keylog_file = NULL;
   char ipbuf[40];
   int port;
 
@@ -216,24 +280,24 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
                                        sizeof(QUICHE_H3_APPLICATION_PROTOCOL)
                                        - 1);
 
+  qs->sslctx = quic_ssl_ctx(data);
+  if(!qs->sslctx)
+    return CURLE_QUIC_CONNECT_ERROR;
+
+  if(quic_init_ssl(qs, conn))
+    return CURLE_QUIC_CONNECT_ERROR;
+
   result = Curl_rand(data, qs->scid, sizeof(qs->scid));
   if(result)
     return result;
 
-  keylog_file = getenv("SSLKEYLOGFILE");
-
-  if(keylog_file)
-    quiche_config_log_keys(qs->cfg);
-
-  qs->conn = quiche_connect(conn->host.name, (const uint8_t *) qs->scid,
-                            sizeof(qs->scid), addr, addrlen, qs->cfg);
+  qs->conn = quiche_conn_new_with_tls((const uint8_t *) qs->scid,
+                                      sizeof(qs->scid), NULL, 0, addr, addrlen,
+                                      qs->cfg, qs->ssl, false);
   if(!qs->conn) {
     failf(data, "can't create quiche connection");
     return CURLE_OUT_OF_MEMORY;
   }
-
-  if(keylog_file)
-    quiche_conn_set_keylog_path(qs->conn, keylog_file);
 
   /* Known to not work on Windows */
 #if !defined(WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
@@ -284,7 +348,8 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode quiche_has_connected(struct connectdata *conn,
+static CURLcode quiche_has_connected(struct Curl_easy *data,
+                                     struct connectdata *conn,
                                      int sockindex,
                                      int tempindex)
 {
@@ -297,6 +362,21 @@ static CURLcode quiche_has_connected(struct connectdata *conn,
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->httpversion = 30;
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+
+  if(conn->ssl_config.verifyhost) {
+    X509 *server_cert;
+    server_cert = SSL_get_peer_certificate(qs->ssl);
+    if(!server_cert) {
+      return CURLE_PEER_FAILED_VERIFICATION;
+    }
+    result = Curl_ossl_verifyhost(data, conn, server_cert);
+    X509_free(server_cert);
+    if(result)
+      return result;
+    infof(data, "Verified certificate just fine");
+  }
+  else
+    infof(data, "Skipped certificate verification");
 
   qs->h3config = quiche_h3_config_new();
   if(!qs->h3config)
@@ -344,7 +424,7 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
 
   if(quiche_conn_is_established(qs->conn)) {
     *done = TRUE;
-    result = quiche_has_connected(conn, 0, sockindex);
+    result = quiche_has_connected(data, conn, 0, sockindex);
     DEBUGF(infof(data, "quiche established connection!"));
   }
 
@@ -392,7 +472,18 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
       break;
 
     if(recvd < 0) {
+      if(QUICHE_ERR_TLS_FAIL == recvd) {
+        long verify_ok = SSL_get_verify_result(qs->ssl);
+        if(verify_ok != X509_V_OK) {
+          failf(data, "SSL certificate problem: %s",
+                X509_verify_cert_error_string(verify_ok));
+
+          return CURLE_PEER_FAILED_VERIFICATION;
+        }
+      }
+
       failf(data, "quiche_conn_recv() == %zd", recvd);
+
       return CURLE_RECV_ERROR;
     }
   } while(1);
