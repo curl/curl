@@ -478,9 +478,13 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
 
         quiche_conn_local_error(qs->conn, &is_app, &error_code,
                                 &reason, &reason_len);
-        if(error_code > 0x100) {
+        if((error_code > 0x100) && (error_code <= INT_MAX)) {
+          /* error_code is 64 bit but SSL_alert_desc_string_long()
+             only takes an 'int' argument...
+          */
+          int err = (int)error_code;
           infof(data, "QUIC-TLS error: %s",
-                SSL_alert_desc_string_long((int)error_code - 0x100L));
+                SSL_alert_desc_string_long(err - 0x100));
           return CURLE_PEER_FAILED_VERIFICATION;
         }
       }
