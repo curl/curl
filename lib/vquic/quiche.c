@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,6 +25,7 @@
 #ifdef USE_QUICHE
 #include <quiche.h>
 #include <openssl/err.h>
+#include <openssl/x509.h>
 #include "urldata.h"
 #include "sendf.h"
 #include "strdup.h"
@@ -35,6 +36,7 @@
 #include "connect.h"
 #include "strerror.h"
 #include "vquic.h"
+#include "vtls/openssl.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -284,11 +286,12 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode quiche_has_connected(struct connectdata *conn,
+static CURLcode quiche_has_connected(struct Curl_easy *data,
+                                     struct connectdata *conn,
                                      int sockindex,
                                      int tempindex)
 {
-  CURLcode result;
+  CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
   struct quicsocket *qs = conn->quic = &conn->hequic[tempindex];
 
   conn->recv[sockindex] = h3_stream_recv;
@@ -297,6 +300,21 @@ static CURLcode quiche_has_connected(struct connectdata *conn,
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->httpversion = 30;
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+
+  if(conn->ssl_config.verifyhost) {
+    const uint8_t *cert;
+    size_t certlen;
+
+    /* Get the peer's leaf certificate (if any) as a DER-encoded buffer. */
+    quiche_conn_peer_cert(qs->conn, &cert, &certlen);
+    if(certlen) {
+      X509 *x = d2i_X509(NULL, &cert, certlen); /* convert it */
+      if(x)
+        result = Curl_ossl_verifyhost(data, conn, x);
+    }
+    if(result)
+      return result;
+  }
 
   qs->h3config = quiche_h3_config_new();
   if(!qs->h3config)
@@ -344,7 +362,7 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
 
   if(quiche_conn_is_established(qs->conn)) {
     *done = TRUE;
-    result = quiche_has_connected(conn, 0, sockindex);
+    result = quiche_has_connected(data, conn, 0, sockindex);
     DEBUGF(infof(data, "quiche established connection!"));
   }
 
