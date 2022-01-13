@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -185,7 +185,8 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 {
   SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
 
-  SSL_CTX_set_alpn_protos(ssl_ctx, QUICHE_H3_APPLICATION_PROTOCOL,
+  SSL_CTX_set_alpn_protos(ssl_ctx,
+                          (const uint8_t *)QUICHE_H3_APPLICATION_PROTOCOL,
                           sizeof(QUICHE_H3_APPLICATION_PROTOCOL) - 1);
 
   SSL_CTX_set_default_verify_paths(ssl_ctx);
@@ -362,7 +363,6 @@ static CURLcode quiche_has_connected(struct Curl_easy *data,
 
   if(conn->ssl_config.verifyhost) {
     X509 *server_cert;
-    CURLcode result;
     server_cert = SSL_get_peer_certificate(qs->ssl);
     if(!server_cert) {
       return CURLE_PEER_FAILED_VERIFICATION;
