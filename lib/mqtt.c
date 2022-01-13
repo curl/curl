@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2020 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2019, Björn Stenberg, <bjorn@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
@@ -60,6 +60,8 @@
  */
 
 static CURLcode mqtt_do(struct Curl_easy *data, bool *done);
+static CURLcode mqtt_done(struct Curl_easy *data,
+                          CURLcode status, bool premature);
 static CURLcode mqtt_doing(struct Curl_easy *data, bool *done);
 static int mqtt_getsock(struct Curl_easy *data, struct connectdata *conn,
                         curl_socket_t *sock);
@@ -74,7 +76,7 @@ const struct Curl_handler Curl_handler_mqtt = {
   "MQTT",                             /* scheme */
   mqtt_setup_conn,                    /* setup_connection */
   mqtt_do,                            /* do_it */
-  ZERO_NULL,                          /* done */
+  mqtt_done,                          /* done */
   ZERO_NULL,                          /* do_more */
   ZERO_NULL,                          /* connect_it */
   ZERO_NULL,                          /* connecting */
@@ -689,6 +691,16 @@ static CURLcode mqtt_do(struct Curl_easy *data, bool *done)
     return result;
   }
   mqstate(data, MQTT_FIRST, MQTT_CONNACK);
+  return CURLE_OK;
+}
+
+static CURLcode mqtt_done(struct Curl_easy *data,
+                          CURLcode status, bool premature)
+{
+  struct MQTT *mq = data->req.p.mqtt;
+  (void)status;
+  (void)premature;
+  Curl_safefree(mq->sendleftovers);
   return CURLE_OK;
 }
 
