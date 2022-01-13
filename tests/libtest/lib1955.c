@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "test.h"
 
 #include "memdebug.h"
@@ -30,8 +29,8 @@ int test(char *URL)
 {
   CURL *curl;
   CURLcode res = TEST_ERR_MAJOR_BAD;
-  struct curl_slist *connect_to = NULL;
   struct curl_slist *list = NULL;
+  struct curl_slist *connect_to = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -46,18 +45,23 @@ int test(char *URL)
   }
 
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_POST, 1L);
-  test_setopt(curl, CURLOPT_AWS_SIGV4, "provider1:provider2:region:service");
-  test_setopt(curl, CURLOPT_USERPWD, "keyId:SecretKey");
+  test_setopt(curl, CURLOPT_AWS_SIGV4, "xxx");
+  test_setopt(curl, CURLOPT_USERPWD, "xxx");
   test_setopt(curl, CURLOPT_HEADER, 0L);
   test_setopt(curl, CURLOPT_URL, URL);
+  list = curl_slist_append(list, "test2: 1234");
+  if(!list)
+    goto test_cleanup;
   if(libtest_arg2) {
     connect_to = curl_slist_append(connect_to, libtest_arg2);
   }
   test_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
-  list = curl_slist_append(list, "Content-Type: application/json");
+  curl_slist_append(list, "Content-Type: application/json");
+  curl_slist_append(list, "test1:");
+  curl_slist_append(list, "test0");
+  curl_slist_append(list, "test_space: t\ts  m\t   end    ");
+  curl_slist_append(list, "tesMixCase: MixCase");
   test_setopt(curl, CURLOPT_HTTPHEADER, list);
-  test_setopt(curl, CURLOPT_POSTFIELDS, "postData");
 
   res = curl_easy_perform(curl);
 

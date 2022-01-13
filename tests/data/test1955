@@ -10,7 +10,7 @@ CURLOPT_AWS_SIGV4
 <reply>
 <data nocheck="yes">
 HTTP/1.1 302 OK
-Date: Tue, 09 Nov 2010 14:49:00 GMT
+Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Content-Length: 0
@@ -19,7 +19,7 @@ Location: /%TESTNUMBER0002
 </data>
 <data2>
 HTTP/1.1 200 OK
-Date: Tue, 09 Nov 2010 14:49:00 GMT
+Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Content-Length: 0
@@ -38,16 +38,19 @@ SSL
 debug
 crypto
 </features>
+<setenv>
+CURL_FORCEHOST=1
+</setenv>
 
 <name>
-HTTP AWS_SIGV4 with one provider and auth cred via URL
+HTTP AWS_SIGV4 with X-Xxx-Content-Sha256
 </name>
 <tool>
 lib%TESTNUMBER
 </tool>
 
 <command>
-http://xxx:yyy@127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT
+http://exam.ple.com:9000/%TESTNUMBER/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -60,9 +63,12 @@ http://xxx:yyy@127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%H
 </strip>
 <protocol>
 GET /%TESTNUMBER/testapi/test HTTP/1.1
-Host: 127.0.0.1:9000
-Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/0/127/xxx4_request, SignedHeaders=content-type;host;x-xxx-date, Signature=3d8e00a02e437211a596143dcd590fcc805b731365c68f7f48951ea6eda39c4f
+Host: exam.ple.com:9000
+Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/ple/exam/xxx4_request, SignedHeaders=content-type;host;tesmixcase;test0;test1;test2;test_space;x-xxx-date, Signature=819251feec8de52dfaa992320241f23d27cefa979c93e039ae7df03ac486ed16
 X-Xxx-Date: 19700101T000000Z
+test2: 1234
+test_space: t	s  m	   end    
+tesMixCase: MixCase
 
 </protocol>
 </verify>
