@@ -90,8 +90,6 @@
 CURLcode curl_easy_perform_ev(CURL *easy);
 #endif
 
-#define CURLseparator  "--_curl_--"
-
 #ifndef O_BINARY
 /* since O_BINARY as used in bitmasks, setting it to zero makes it usable in
    source code but yet it doesn't ruin anything */
@@ -264,11 +262,6 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
   curl_off_t uploadfilesize = -1;
   struct_stat fileinfo;
   CURLcode result = CURLE_OK;
-
-  if(per->separator_err)
-    fprintf(global->errors, "%s\n", per->separator_err);
-  if(per->separator)
-    printf("%s\n", per->separator);
 
   if(per->uploadfile && !stdin_upload(per->uploadfile)) {
     /* VMS Note:
@@ -633,8 +626,6 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   if(outs->alloc_filename)
     free(outs->filename);
   free(per->this_url);
-  free(per->separator_err);
-  free(per->separator);
   free(per->outfile);
   free(per->uploadfile);
 
@@ -780,7 +771,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
     }
 
     {
-      int separator;
       unsigned long urlnum;
 
       if(!state->up && !infiles)
@@ -819,10 +809,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       }
       else
         urlnum = state->urlnum;
-
-      /* if multiple files extracted to stdout, insert separators! */
-      separator = ((!state->outfiles ||
-                    !strcmp(state->outfiles, "-")) && urlnum > 1);
 
       if(state->up < state->infilenum) {
         struct per_transfer *per = NULL;
@@ -1159,14 +1145,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           global->isatty = orig_isatty;
         }
 
-        if(urlnum > 1 && !global->mute) {
-          per->separator_err =
-            aprintf("\n[%lu/%lu]: %s --> %s",
-                    state->li + 1, urlnum, per->this_url,
-                    per->outfile ? per->outfile : "<stdout>");
-          if(separator)
-            per->separator = aprintf("%s%s", CURLseparator, per->this_url);
-        }
         if(httpgetfields) {
           char *urlbuffer;
           /* Find out whether the url contains a file name */
