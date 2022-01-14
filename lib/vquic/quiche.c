@@ -181,17 +181,6 @@ static void keylog_callback(const SSL *ssl, const char *line)
   Curl_tls_keylog_write_line(line);
 }
 
-static int verify_callback(int ok, X509_STORE_CTX *store_ctx)
-{
-  SSL *ssl = X509_STORE_CTX_get_ex_data(store_ctx,
-                                        SSL_get_ex_data_X509_STORE_CTX_idx());
-
-  struct quicsocket *qs = SSL_get_app_data(ssl);
-
-  qs->peer_verify_failed = !ok;
-  return ok;
-}
-
 static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 {
   SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
@@ -214,7 +203,7 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
     const char * const ssl_capath = conn->ssl_config.CApath;
 
     if(conn->ssl_config.verifypeer) {
-      SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, verify_callback);
+      SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, NULL);
       /* tell OpenSSL where to find CA certificates that are used to verify
          the server's certificate. */
       if(!SSL_CTX_load_verify_locations(ssl_ctx, ssl_cafile, ssl_capath)) {
@@ -483,10 +472,17 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
       break;
 
     if(recvd < 0) {
-      failf(data, "quiche_conn_recv() == %zd", recvd);
+      if(QUICHE_ERR_TLS_FAIL == recvd) {
+        long verify_ok = SSL_get_verify_result(qs->ssl);
+        if(verify_ok != X509_V_OK) {
+          failf(data, "SSL certificate problem: %s",
+                X509_verify_cert_error_string(verify_ok));
 
-      if(qs->peer_verify_failed)
-        return CURLE_PEER_FAILED_VERIFICATION;
+          return CURLE_PEER_FAILED_VERIFICATION;
+        }
+      }
+
+      failf(data, "quiche_conn_recv() == %zd", recvd);
 
       return CURLE_RECV_ERROR;
     }
