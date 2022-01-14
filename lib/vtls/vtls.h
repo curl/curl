@@ -85,7 +85,7 @@ struct Curl_ssl {
   CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
 
-  void (*associate_connection)(struct Curl_easy *data,
+  bool (*associate_connection)(struct Curl_easy *data,
                                struct connectdata *conn,
                                int sockindex);
   void (*disassociate_connection)(struct Curl_easy *data, int sockindex);
