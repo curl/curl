@@ -244,7 +244,7 @@ struct ssl_backend_data {
 #endif
 };
 
-static void ossl_associate_connection(struct Curl_easy *data,
+static bool ossl_associate_connection(struct Curl_easy *data,
                                       struct connectdata *conn,
                                       int sockindex);
 
@@ -3228,7 +3228,13 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
   }
 #endif
 
-  ossl_associate_connection(data, conn, sockindex);
+  if(!ossl_associate_connection(data, conn, sockindex)) {
+    /* Maybe the internal errors of SSL_get_ex_new_index or SSL_set_ex_data */
+    failf(data, "SSL: ossl_associate_connection failed: %s",
+          ossl_strerror(ERR_get_error(), error_buffer,
+                        sizeof(error_buffer)));
+    return CURLE_SSL_CONNECT_ERROR;
+  }
 
   Curl_ssl_sessionid_lock(data);
   if(!Curl_ssl_getsessionid(data, conn, SSL_IS_PROXY() ? TRUE : FALSE,
@@ -4478,7 +4484,7 @@ static void *ossl_get_internals(struct ssl_connect_data *connssl,
          (void *)backend->ctx : (void *)backend->handle;
 }
 
-static void ossl_associate_connection(struct Curl_easy *data,
+static bool ossl_associate_connection(struct Curl_easy *data,
                                       struct connectdata *conn,
                                       int sockindex)
 {
@@ -4487,7 +4493,7 @@ static void ossl_associate_connection(struct Curl_easy *data,
 
   /* If we don't have SSL context, do nothing. */
   if(!backend->handle)
-    return;
+    return FALSE;
 
   if(SSL_SET_OPTION(primary.sessionid)) {
     int data_idx = ossl_get_ssl_data_index();
@@ -4497,19 +4503,26 @@ static void ossl_associate_connection(struct Curl_easy *data,
 
     if(data_idx >= 0 && connectdata_idx >= 0 && sockindex_idx >= 0 &&
        proxy_idx >= 0) {
+      int data_status, conn_status, sockindex_status, proxy_status;
+
       /* Store the data needed for the "new session" callback.
        * The sockindex is stored as a pointer to an array element. */
-      SSL_set_ex_data(backend->handle, data_idx, data);
-      SSL_set_ex_data(backend->handle, connectdata_idx, conn);
-      SSL_set_ex_data(backend->handle, sockindex_idx, conn->sock + sockindex);
+      data_status = SSL_set_ex_data(backend->handle, data_idx, data);
+      conn_status = SSL_set_ex_data(backend->handle, connectdata_idx, conn);
+      sockindex_status = SSL_set_ex_data(backend->handle, sockindex_idx,
+                                         conn->sock + sockindex);
 #ifndef CURL_DISABLE_PROXY
-      SSL_set_ex_data(backend->handle, proxy_idx, SSL_IS_PROXY() ? (void *) 1:
-                      NULL);
+      proxy_status = SSL_set_ex_data(backend->handle, proxy_idx,
+                                     SSL_IS_PROXY() ? (void *) 1 : NULL);
 #else
-      SSL_set_ex_data(backend->handle, proxy_idx, NULL);
+      proxy_status = SSL_set_ex_data(backend->handle, proxy_idx, NULL);
 #endif
+      if(data_status && conn_status && sockindex_status && proxy_status)
+        return TRUE;
     }
+    return FALSE;
   }
+  return TRUE;
 }
 
 /*
