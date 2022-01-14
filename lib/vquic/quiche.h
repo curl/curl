@@ -46,6 +46,7 @@ struct quicsocket {
   uint32_t version;
   SSL_CTX *sslctx;
   SSL *ssl;
+  int peer_verify_failed;
 };
 
 #endif

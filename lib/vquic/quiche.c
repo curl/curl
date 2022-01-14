@@ -181,6 +181,17 @@ static void keylog_callback(const SSL *ssl, const char *line)
   Curl_tls_keylog_write_line(line);
 }
 
+static int verify_callback(int ok, X509_STORE_CTX *store_ctx)
+{
+  SSL *ssl = X509_STORE_CTX_get_ex_data(store_ctx,
+                                        SSL_get_ex_data_X509_STORE_CTX_idx());
+
+  struct quicsocket *qs = SSL_get_app_data(ssl);
+
+  qs->peer_verify_failed = !ok;
+  return ok;
+}
+
 static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 {
   SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
@@ -203,7 +214,7 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
     const char * const ssl_capath = conn->ssl_config.CApath;
 
     if(conn->ssl_config.verifypeer) {
-      SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, NULL);
+      SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, verify_callback);
       /* tell OpenSSL where to find CA certificates that are used to verify
          the server's certificate. */
       if(!SSL_CTX_load_verify_locations(ssl_ctx, ssl_cafile, ssl_capath)) {
@@ -228,6 +239,8 @@ static int quic_init_ssl(struct quicsocket *qs, struct connectdata *conn)
 
   DEBUGASSERT(!qs->ssl);
   qs->ssl = SSL_new(qs->sslctx);
+
+  SSL_set_app_data(qs->ssl, qs);
 
   /* set SNI */
   SSL_set_tlsext_host_name(qs->ssl, hostname);
@@ -470,25 +483,11 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
       break;
 
     if(recvd < 0) {
-      if(QUICHE_ERR_TLS_FAIL == recvd) {
-        bool is_app;
-        uint64_t error_code;
-        const uint8_t *reason;
-        size_t reason_len;
-
-        quiche_conn_local_error(qs->conn, &is_app, &error_code,
-                                &reason, &reason_len);
-        if((error_code > 0x100) && (error_code <= INT_MAX)) {
-          /* error_code is 64 bit but SSL_alert_desc_string_long()
-             only takes an 'int' argument...
-          */
-          int err = (int)error_code;
-          infof(data, "QUIC-TLS error: %s",
-                SSL_alert_desc_string_long(err - 0x100));
-          return CURLE_PEER_FAILED_VERIFICATION;
-        }
-      }
       failf(data, "quiche_conn_recv() == %zd", recvd);
+
+      if(qs->peer_verify_failed)
+        return CURLE_PEER_FAILED_VERIFICATION;
+
       return CURLE_RECV_ERROR;
     }
   } while(1);
