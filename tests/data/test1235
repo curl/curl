@@ -63,25 +63,21 @@ Accept: */*
 
 </protocol>
 <stdout>
---_curl_--%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 15
 
 the number one
---_curl_--%HOSTIP:%HTTPPORT/%TESTNUMBER0002
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 16
 
 two is nice too
---_curl_--%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 15
 
 the number one
---_curl_--%HOSTIP:%HTTPPORT/%TESTNUMBER0002
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 16
