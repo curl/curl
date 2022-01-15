@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -546,6 +546,18 @@ static int ProcessRequest(struct httprequest *req)
       parse_servercmd(req);
   }
   else if((req->offset >= 3) && (req->testno == DOCNUMBER_NOTHING)) {
+    static const char hav2sig[] = {
+      0x0D, 0x0A, 0x0D, 0x0A, 0x00, 0x0D, 0x0A, 0x51, 0x55, 0x49, 0x54, 0x0A
+    };
+    if(req->offset > 10) {
+      if(!memcmp(line, hav2sig, 10)) {
+        logmsg("HAproxy v2 incoming");
+        storerequest(req->reqbuf, req->offset);
+        /* reset the offset to get the rest of the request "as normal" */
+        req->offset = 0;
+        return 0;
+      }
+    }
     logmsg("** Unusual request. Starts with %02x %02x %02x (%c%c%c)",
            line[0], line[1], line[2], line[0], line[1], line[2]);
   }
