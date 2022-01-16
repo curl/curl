@@ -86,10 +86,6 @@
 #include <sys/time.h>
 #endif
 
-#ifdef __BEOS__
-#include <support/SupportDefs.h>
-#endif
-
 /* Compatibility for non-Clang compilers */
 #ifndef __has_declspec_attribute
 #  define __has_declspec_attribute(x) 0

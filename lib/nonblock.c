@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -72,12 +72,6 @@ int curlx_nonblock(curl_socket_t sockfd,    /* operate on this */
   /* Amiga */
   long flags = nonblock ? 1L : 0L;
   return IoctlSocket(sockfd, FIONBIO, (char *)&flags);
-
-#elif defined(HAVE_SETSOCKOPT_SO_NONBLOCK)
-
-  /* BeOS */
-  long b = nonblock ? 1L : 0L;
-  return setsockopt(sockfd, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
 
 #else
 #  error "no non-blocking method was found/used/set"

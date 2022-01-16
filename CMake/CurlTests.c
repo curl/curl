@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,7 +56,7 @@ return 0;
 # define PLATFORM_AIX_V3
 #endif
 /* */
-#if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3) || defined(__BEOS__)
+#if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3)
 #error "O_NONBLOCK does not work on this platform"
 #endif
 
