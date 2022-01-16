@@ -654,10 +654,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case '*': /* options without a short option */
       switch(subletter) {
       case '4': /* --dns-ipv4-addr */
+        if(!curlinfo->ares_num) /* c-ares is needed for this */
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
         /* addr in dot notation */
         GetStr(&config->dns_ipv4_addr, nextarg);
         break;
       case '6': /* --dns-ipv6-addr */
+        if(!curlinfo->ares_num) /* c-ares is needed for this */
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
         /* addr in dot notation */
         GetStr(&config->dns_ipv6_addr, nextarg);
         break;
@@ -685,6 +689,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         GetStr(&config->cipher_list, nextarg);
         break;
       case 'D': /* --dns-interface */
+        if(!curlinfo->ares_num) /* c-ares is needed for this */
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
         /* interface name */
         GetStr(&config->dns_interface, nextarg);
         break;
@@ -698,6 +704,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->disable_epsv = (!toggle)?TRUE:FALSE;
         break;
       case 'F': /* --dns-servers */
+        if(!curlinfo->ares_num) /* c-ares is needed for this */
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
         /* IP addrs of DNS servers */
         GetStr(&config->dns_servers, nextarg);
         break;
