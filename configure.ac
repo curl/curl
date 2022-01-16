@@ -1137,16 +1137,6 @@ then
                ])
 fi
 
-if test "$HAVE_GETHOSTBYNAME" != "1"
-then
-  dnl gethostbyname in the net lib - for BeOS
-  AC_CHECK_LIB(net, gethostbyname,
-               [HAVE_GETHOSTBYNAME="1"
-               LIBS="-lnet $LIBS"
-               ])
-fi
-
-
 if test "$HAVE_GETHOSTBYNAME" != "1"; then
   AC_MSG_ERROR([couldn't find libraries for gethostbyname()])
 fi

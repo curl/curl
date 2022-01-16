@@ -1149,7 +1149,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL_O_NONBLOCK], [
   tst_allow_fcntl_o_nonblock="unknown"
   #
   case $host_os in
-    sunos4* | aix3* | beos*)
+    sunos4* | aix3*)
       dnl O_NONBLOCK does not work on these platforms
       curl_disallow_fcntl_o_nonblock="yes"
       ;;
