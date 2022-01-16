@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1759,6 +1759,10 @@ CURLcode Curl_preconnect(struct Curl_easy *data)
   return CURLE_OK;
 }
 
+static void set_in_callback(struct Curl_multi *multi, bool value)
+{
+  multi->in_callback = value;
+}
 
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct curltime *nowp,
@@ -2872,8 +2876,10 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
       continue;
 
     if(multi->socket_cb) {
+      set_in_callback(multi, TRUE);
       rc = multi->socket_cb(data, s, comboaction, multi->socket_userp,
                             entry->socketp);
+      set_in_callback(multi, FALSE);
       if(rc == -1) {
         multi->dead = TRUE;
         return CURLM_ABORTED_BY_CALLBACK;
@@ -2914,8 +2920,10 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
         entry->readers--;
       if(!entry->users) {
         if(multi->socket_cb) {
+          set_in_callback(multi, TRUE);
           rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
                                 multi->socket_userp, entry->socketp);
+          set_in_callback(multi, FALSE);
           if(rc == -1) {
             multi->dead = TRUE;
             return CURLM_ABORTED_BY_CALLBACK;
@@ -2969,9 +2977,12 @@ void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s)
 
       if(entry) {
         int rc = 0;
-        if(multi->socket_cb)
+        if(multi->socket_cb) {
+          set_in_callback(multi, TRUE);
           rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
                                 multi->socket_userp, entry->socketp);
+          set_in_callback(multi, FALSE);
+        }
 
         /* now remove it from the socket hash */
         sh_delentry(entry, &multi->sockhash, s);
@@ -3343,7 +3354,9 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
       multi->timer_lastcall = none;
       /* there's no timeout now but there was one previously, tell the app to
          disable it */
+      set_in_callback(multi, TRUE);
       rc = multi->timer_cb(multi, -1, multi->timer_userp);
+      set_in_callback(multi, FALSE);
       if(rc == -1) {
         multi->dead = TRUE;
         return CURLM_ABORTED_BY_CALLBACK;
@@ -3362,7 +3375,9 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
 
   multi->timer_lastcall = multi->timetree->key;
 
+  set_in_callback(multi, TRUE);
   rc = multi->timer_cb(multi, timeout_ms, multi->timer_userp);
+  set_in_callback(multi, FALSE);
   if(rc == -1) {
     multi->dead = TRUE;
     return CURLM_ABORTED_BY_CALLBACK;
