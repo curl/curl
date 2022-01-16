@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -51,7 +51,6 @@ AC_DEFUN([CURL_CHECK_COMPILER], [
   CURL_CHECK_COMPILER_SGI_MIPS_C
   CURL_CHECK_COMPILER_SUNPRO_C
   CURL_CHECK_COMPILER_TINY_C
-  CURL_CHECK_COMPILER_WATCOM_C
   #
   if test "$compiler_id" = "unknown"; then
   cat <<_EOF 1>&2
@@ -360,36 +359,6 @@ AC_DEFUN([CURL_CHECK_COMPILER_TINY_C], [
   fi
 ])
 
-
-dnl CURL_CHECK_COMPILER_WATCOM_C
-dnl -------------------------------------------------
-dnl Verify if compiler being used is Watcom C.
-
-AC_DEFUN([CURL_CHECK_COMPILER_WATCOM_C], [
-  AC_MSG_CHECKING([if compiler is Watcom C])
-  CURL_CHECK_DEF([__WATCOMC__], [], [silent])
-  if test "$curl_cv_have_def___WATCOMC__" = "yes"; then
-    AC_MSG_RESULT([yes])
-    CURL_CHECK_DEF([__UNIX__], [], [silent])
-    if test "$curl_cv_have_def___UNIX__" = "yes"; then
-      compiler_id="WATCOM_UNIX_C"
-      flags_dbg_yes="-g2"
-      flags_opt_all="-O0 -O1 -O2 -O3"
-      flags_opt_yes="-O2"
-      flags_opt_off="-O0"
-    else
-      compiler_id="WATCOM_WINDOWS_C"
-      flags_dbg_yes=""
-      flags_opt_all=""
-      flags_opt_yes=""
-      flags_opt_off=""
-    fi
-  else
-    AC_MSG_RESULT([no])
-  fi
-])
-
-
 dnl CURL_CONVERT_INCLUDE_TO_ISYSTEM
 dnl -------------------------------------------------
 dnl Changes standard include paths present in CFLAGS
@@ -635,18 +604,6 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         ;;
         #
       TINY_C)
-        #
-        dnl Placeholder
-        tmp_CFLAGS="$tmp_CFLAGS"
-        ;;
-        #
-      WATCOM_UNIX_C)
-        #
-        dnl Placeholder
-        tmp_CFLAGS="$tmp_CFLAGS"
-        ;;
-        #
-      WATCOM_WINDOWS_C)
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
@@ -1174,20 +1131,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Warn use of unsupported GCC features ignored by TCC
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unsupported])
         fi
-        ;;
-        #
-      WATCOM_UNIX_C)
-        #
-        if test "$want_warnings" = "yes"; then
-          dnl Issue all warnings
-          tmp_CFLAGS="$tmp_CFLAGS -Wall -Wextra"
-        fi
-        ;;
-        #
-      WATCOM_WINDOWS_C)
-        #
-        dnl Placeholder
-        tmp_CFLAGS="$tmp_CFLAGS"
         ;;
         #
     esac

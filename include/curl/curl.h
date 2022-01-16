@@ -82,7 +82,7 @@
 #include <sys/socket.h>
 #endif
 
-#if !defined(CURL_WIN32) && !defined(__WATCOMC__) && !defined(__VXWORKS__)
+#if !defined(CURL_WIN32) && !defined(__VXWORKS__)
 #include <sys/time.h>
 #endif
 
