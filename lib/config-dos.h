@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,8 +31,6 @@
   #define OS  "MSDOS/djgpp"
 #elif defined(__HIGHC__)
   #define OS  "MSDOS/HighC"
-#elif defined(__WATCOMC__)
-  #define OS  "MSDOS/Watcom"
 #else
   #define OS  "MSDOS/?"
 #endif
@@ -153,9 +151,6 @@
   #define HAVE_SYS_TIME_H 1
   #define HAVE_TERMIOS_H  1
   #define HAVE_VARIADIC_MACROS_GCC 1
-
-#elif defined(__WATCOMC__)
-  #define HAVE_STRCASECMP 1
 
 #elif defined(__HIGHC__)
   #define HAVE_SYS_TIME_H 1

@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -151,7 +151,7 @@ if ($^O eq 'MSWin32' || $targetos) {
     # If no target defined on Win32 lets assume vc
     $targetos = 'vc';
   }
-  if ($targetos =~ /vc/ || $targetos =~ /borland/ || $targetos =~ /watcom/) {
+  if ($targetos =~ /vc/ || $targetos =~ /borland/) {
     $binext = '.exe';
     $libext = '.lib';
   }
@@ -175,7 +175,7 @@ if ($^O eq 'MSWin32' || $targetos) {
 
 if (($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') &&
     ($targetos =~ /vc/ || $targetos =~ /mingw32/ ||
-     $targetos =~ /borland/ || $targetos =~ /watcom/)) {
+     $targetos =~ /borland/)) {
 
   # Set these things only when building ON Windows and for Win32 platform.
   # FOR Windows since we might be cross-compiling on another system. Non-
@@ -546,8 +546,6 @@ if(!$make) {
 }
 # force to 'nmake' for VC builds
 $make = "nmake" if ($targetos =~ /vc/);
-# force to 'wmake' for Watcom builds
-$make = "wmake" if ($targetos =~ /watcom/);
 logit "going with $make as make";
 
 # change to build dir

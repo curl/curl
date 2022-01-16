@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1999 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1999 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -65,7 +65,6 @@
  */
 
 #if (defined(__BORLANDC__) && (__BORLANDC__ >= 0x520)) || \
-    (defined(__WATCOMC__) && defined(__386__)) || \
     (defined(__POCC__) && defined(_MSC_VER)) || \
     (defined(_WIN32_WCE)) || \
     (defined(__MINGW32__)) || \
