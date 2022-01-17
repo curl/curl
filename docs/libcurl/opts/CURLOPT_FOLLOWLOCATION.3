@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -30,9 +30,15 @@ CURLOPT_FOLLOWLOCATION \- follow HTTP 3xx redirects
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FOLLOWLOCATION, long enable);
 .fi
 .SH DESCRIPTION
-A long parameter set to 1 tells the library to follow any Location: header
-that the server sends as part of an HTTP header in a 3xx response. The
-Location: header can specify a relative or an absolute URL to follow.
+The long parameter \fIenable\fP set to 1 tells the library to follow any
+Location: header that the server sends as part of an HTTP header in a 3xx
+response. The Location: header can specify a relative or an absolute URL to
+follow.
+
+\fIenable\fP is a bitmask. If you set the \fICURLFOLLOW_NO_CUSTOMMETHOD\fP
+bit, it will tell libcurl that the method set with
+\fICURLOPT_CUSTOMREQUEST(3)\fP will not be used after a redirect if the HTTP
+response says so.
 
 libcurl will issue another request for the new URL and follow new Location:
 headers all the way until no more such headers are returned.
@@ -75,6 +81,8 @@ if(curl) {
 .fi
 .SH AVAILABILITY
 Along with HTTP
+
+CURLFOLLOW_NO_CUSTOMMETHOD was added in 7.82.0
 .SH RETURN VALUE
 Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

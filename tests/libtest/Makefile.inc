@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -58,6 +58,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  lib1540         lib1542 \
  lib1550 lib1551 lib1552 lib1553 lib1554 lib1555 lib1556 lib1557 \
  lib1558 lib1559 lib1560 lib1564 lib1565 lib1567 lib1568 lib1569 \
+ lib1589 \
  lib1591 lib1592 lib1593 lib1594 lib1596 \
          lib1905 lib1906 lib1907 lib1908 lib1910 lib1911 lib1912 lib1913 \
          lib1915 lib1916 lib1917 lib1918 lib1933 lib1934 lib1935 lib1936 \
@@ -632,6 +633,9 @@ lib1568_CPPFLAGS = $(AM_CPPFLAGS)
 
 lib1569_SOURCES = lib1569.c $(SUPPORTFILES)
 lib1569_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib1589_SOURCES = lib1589.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib1589_LDADD = $(TESTUTIL_LIBS)
 
 lib1591_SOURCES = lib1591.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1591_LDADD = $(TESTUTIL_LIBS)

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -579,8 +579,15 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * Follow Location: header hints on a HTTP-server.
      */
-    data->set.http_follow_location = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    break;
+  {
+    bool clear;
+    uarg = va_arg(param, unsigned long);
+    data->set.http_follow_location =
+      (uarg & (CURLFOLLOW_ENABLE|CURLFOLLOW_NO_CUSTOMMETHOD)) ? TRUE : FALSE;
+    clear = (uarg & CURLFOLLOW_NO_CUSTOMMETHOD) ? TRUE : FALSE;
+    data->set.redirect_clears_method = clear;
+  }
+  break;
 
   case CURLOPT_UNRESTRICTED_AUTH:
     /*

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -59,6 +59,11 @@ possibly confuse the remote server badly. Use \fICURLOPT_POST(3)\fP and
 \fICURLOPT_POSTFIELDS(3)\fP to set POST data. Use \fICURLOPT_HTTPHEADER(3)\fP
 to replace or extend the set of headers sent by libcurl. Use
 \fICURLOPT_HTTP_VERSION(3)\fP to change HTTP version.
+
+If this option used together with \fICURLOPT_FOLLOWLOCATION(3)\fP, the custom
+set method will override the method libcurl could otherwise change to. You can
+fine-tune that decision by using the \fICURLFOLLOW_NO_CUSTOMMETHOD\fP bit to
+\fICURLOPT_FOLLOWLOCATION(3)\fP to make redirects ignore the custom method.
 
 .IP FTP
 Instead of LIST and NLST when performing FTP directory listings.
