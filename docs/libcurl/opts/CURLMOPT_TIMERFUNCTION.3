@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -59,10 +59,10 @@ multi handle will be aborted and fail.
 This callback can be used instead of, or in addition to,
 \fIcurl_multi_timeout(3)\fP.
 
-\fBWARNING:\fP even if it feels tempting, avoid calling libcurl directly from
-within the callback itself when the \fBtimeout_ms\fP value is zero, since it
-risks triggering an unpleasant recursive behavior that immediately calls
-another call to the callback with a zero timeout...
+\fBWARNING:\fP do not call libcurl directly from within the callback itself
+when the \fBtimeout_ms\fP value is zero, since it risks triggering an
+unpleasant recursive behavior that immediately calls another call to the
+callback with a zero timeout...
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
@@ -97,7 +97,7 @@ static int timerfunc(CURLM *multi, long timeout_ms, void *userp)
       id = g_new(guint, 1);
     *id = g_timeout_add(timeout_ms, timeout_cb, id);
   }
-  curl_multi_setopt(multi, CURLMOPT_TIMERDATA, id);
+  current_timer = id;
   return 0;
 }
 
