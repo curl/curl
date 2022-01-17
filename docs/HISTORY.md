@@ -406,9 +406,13 @@ April: added the cyassl backend (later renamed to WolfSSL)
 
  November: the website moves to curl.se. The website serves 10TB data monthly.
 
+ December: alt-svc support
+
 2021
 ----
 
  February 3: curl 7.75.0 ships with support for Hyper is a HTTP backend
 
  March 31: curl 7.76.0 ships with support for rustls
+
+ July: HSTS is supported
