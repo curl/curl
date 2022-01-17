@@ -4,7 +4,7 @@ curl and libcurl 7.82.0
  Command line options:         244
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2565
+ Contributors:                 2568
 
 This release includes the following changes:
 
@@ -16,26 +16,37 @@ This release includes the following bugfixes:
  o appveyor: use VS 2017 image for the autotools builds
  o build: enable -Warith-conversion
  o build: fix -Wenum-conversion handling
+ o checksrc: fix typo in comment [34]
  o CI: move the rustls CI job to GHA from Zuul [8]
  o cmake: fix iOS CMake project generation error [13]
  o curl tool: erase some more sensitive command line arguments [22]
  o curl-functions.m4: fix LIBRARY_PATH adjustment to avoid eval [5]
  o curl-functions.m4: revert DYLD_LIBRARY_PATH tricks in CURL_RUN_IFELSE [9]
+ o curl-openssl: remove the OpenSSL headers and library versions check [35]
+ o curl: remove "separators" (when using globbed URLs) [32]
  o curl_multi_socket.3: remove callback and typical usage descriptions [7]
  o curl_url_set.3: mention when CURLU_ALLOW_SPACE was added
+ o CURLMOPT_TIMERFUNCTION/DATA.3: fix the examples [27]
  o CURLOPT_RESOLVE.3: change example port to 443
  o docs/cmdline-opts: add "mutexed" options for more http versions [25]
  o docs: fix mandoc -T lint formatting complaints [2]
  o examples/multi-app.c: call curl_multi_remove_handle as well [19]
+ o formdata: avoid size_t => long typecast overflows [37]
  o gen.pl: terminate "example" sections better [4]
  o ldap: return CURLE_URL_MALFORMAT for bad URL [24]
+ o mbedtls: fix CURLOPT_SSLCERT_BLOB (again)
  o mbedtls: Fix ssl_init error with mbedTLS 3.1.0+ [12]
  o mbedtls: return CURLcode result instead of a mbedtls error code [1]
+ o misc: remove BeOS code and references [30]
+ o misc: remove the final watcom references [29]
+ o mqtt: free any send leftover data when done [36]
+ o multi: set in_callback for multi interface callbacks [28]
  o next.d. remove .fi/.nf as they are handled by gen.pl [3]
  o ngtcp2: fix declaration of ‘result’ shadows a previous local [14]
  o openldap: implement SASL authentication [16]
  o openssl.h: avoid including OpenSSL headers here [15]
  o openssl: check the return value of BIO_new_mem_buf() [18]
+ o quiche: verify the server cert on connect [33]
  o remote-header-name.d: clarify [10]
  o runtests.pl: properly print the test if it contains binary zeros
  o runtests.pl: support the nonewline attribute for the data part [21]
@@ -46,6 +57,7 @@ This release includes the following bugfixes:
  o scripts/copyright.pl: support many provided file names on the cmdline
  o test374: gif data without new line at the end [20]
  o tool_findfile: check ~/.config/curlrc too [17]
+ o tool_getparam: DNS options that need c-ares now fail without it [31]
  o url: given a user in the URL, find pwd for that user in netrc [11]
 
 This release includes the following known bugs:
@@ -55,12 +67,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Cameron Will, Daniel Stenberg, Fabian Keil, Filip Lundgren, Jan Ehrhardt,
-  Manfred Schwarb, Marcel Raad, Melroy van den Berg, Michał Antoniak,
-  Niels Martignène, Patrick Monnerat, Ray Satiro, Ryan Schmidt, Sandro Jaeckel,
-  Satadru Pramanik, Stephen Boost, Stephen M. Coakley, Viktor Szakats,
-  Xiaoke Wang,
-  (19 contributors)
+  Alessandro Ghedini, Cameron Will, Daniel Stenberg, Fabian Keil,
+  Fabian Yamaguchi, Filip Lundgren, Ikko Ashimine, Jan Ehrhardt,
+  jonny112 on github, Manfred Schwarb, Marcel Raad, Melroy van den Berg,
+  Michał Antoniak, Niels Martignène, Patrick Monnerat, Ray Satiro,
+  Ryan Schmidt, Sandro Jaeckel, Satadru Pramanik, Stephen Boost,
+  Stephen M. Coakley, updatede on github, Viktor Szakats, Xiaoke Wang,
+  (24 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -90,3 +103,14 @@ References to bug reports and discussions on issues:
  [24] = https://curl.se/bug/?i=8170
  [25] = https://curl.se/bug/?i=8254
  [26] = https://curl.se/bug/?i=8255
+ [27] = https://curl.se/bug/?i=8286
+ [28] = https://curl.se/bug/?i=8282
+ [29] = https://curl.se/bug/?i=8287
+ [30] = https://curl.se/bug/?i=8288
+ [31] = https://curl.se/bug/?i=8285
+ [32] = https://curl.se/bug/?i=8278
+ [33] = https://curl.se/bug/?i=8173
+ [34] = https://curl.se/bug/?i=8281
+ [35] = https://curl.se/bug/?i=8279
+ [36] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=43515
+ [37] = https://hackerone.com/reports/1444539
