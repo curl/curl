@@ -117,6 +117,7 @@
  13.4 Cache/share OpenSSL contexts
  13.5 Export session ids
  13.6 Provide callback for cert verification
+ 13.7 Less memory massaging with Schannel
  13.8 Support DANE
  13.9 TLS record padding
  13.10 Support Authority Information Access certificate extension (AIA)
@@ -810,6 +811,13 @@
  OpenSSL supports a callback for customised verification of the peer
  certificate, but this does not seem to be exposed in the libcurl APIs. Could
  it be? There's so much that could be done if it were.
+
+13.7 Less memory massaging with Schannel
+
+ The Schannel backend does a lot of custom memory management we would rather
+ avoid: the repeated alloc + free in sends and the custom memory + realloc
+ system for encrypted and decrypted data. That should be avoided and reduced
+ for 1) efficiency and 2) safety.
 
 13.8 Support DANE
 
