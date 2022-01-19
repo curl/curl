@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -47,6 +47,10 @@ Enforce HTTP 1.1 requests.
 .IP CURL_HTTP_VERSION_2_0
 Attempt HTTP 2 requests. libcurl will fall back to HTTP 1.1 if HTTP 2 cannot be
 negotiated with the server. (Added in 7.33.0)
+
+When libcurl uses HTTP/2 over HTTPS, it does not itself insist on TLS 1.2 or
+higher even though that is required by the specification. A user can add this
+version requirement with \fICURLOPT_SSLVERSION(3)\fP.
 
 The alias \fICURL_HTTP_VERSION_2\fP was added in 7.43.0 to better reflect the
 actual protocol name.
