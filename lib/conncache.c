@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2016, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -410,7 +410,7 @@ bool Curl_conncache_return_conn(struct Curl_easy *data,
     conn_candidate = Curl_conncache_extract_oldest(data);
     if(conn_candidate) {
       /* the winner gets the honour of being disconnected */
-      (void)Curl_disconnect(data, conn_candidate, /* dead_connection */ FALSE);
+      Curl_disconnect(data, conn_candidate, /* dead_connection */ FALSE);
     }
   }
 
@@ -547,7 +547,7 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
     /* This will remove the connection from the cache */
     connclose(conn, "kill all");
     Curl_conncache_remove_conn(connc->closure_handle, conn, TRUE);
-    (void)Curl_disconnect(connc->closure_handle, conn, FALSE);
+    Curl_disconnect(connc->closure_handle, conn, FALSE);
     sigpipe_restore(&pipe_st);
 
     conn = conncache_find_first_connection(connc);

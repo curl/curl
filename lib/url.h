@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,8 +35,8 @@ void Curl_freeset(struct Curl_easy *data);
 CURLcode Curl_uc_to_curlcode(CURLUcode uc);
 CURLcode Curl_close(struct Curl_easy **datap); /* opposite of curl_open() */
 CURLcode Curl_connect(struct Curl_easy *, bool *async, bool *protocol_connect);
-CURLcode Curl_disconnect(struct Curl_easy *data,
-                         struct connectdata *, bool dead_connection);
+void Curl_disconnect(struct Curl_easy *data,
+                     struct connectdata *, bool dead_connection);
 CURLcode Curl_setup_conn(struct Curl_easy *data,
                          bool *protocol_done);
 void Curl_free_request_state(struct Curl_easy *data);
