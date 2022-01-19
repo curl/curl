@@ -31,9 +31,7 @@ rem ***************************************************************************
   set SUCCESSFUL_BUILDS=
   set VC_VER=
   set BUILD_PLATFORM=
-
-  rem Ensure we have the required arguments
-  if /i "%~1" == "" goto syntax
+  set DEFAULT_START_DIR=..\..\wolfssl
 
   rem Calculate the program files directory
   if defined PROGRAMFILES (
@@ -44,6 +42,9 @@ rem ***************************************************************************
     set "PF=%PROGRAMFILES(x86)%"
     set OS_PLATFORM=x64
   )
+
+  rem Ensure we have the required arguments
+  if /i "%~1" == "" goto syntax
 
 :parseArgs
   if "%~1" == "" goto prerequisites
@@ -125,7 +126,7 @@ rem ***************************************************************************
   if not defined VC_VER goto syntax
 
   rem Default the start directory if one isn't specified
-  if not defined START_DIR set START_DIR=..\..\wolfssl
+  if not defined START_DIR set "START_DIR=%DEFAULT_START_DIR%"
 
   rem Check we have a program files directory
   if not defined PF goto nopf
@@ -318,6 +319,7 @@ rem ***************************************************************************
   echo.
   echo Usage: build-wolfssl ^<compiler^> [platform] [configuration] [directory]
   echo.
+  echo.
   echo Compiler:
   echo.
   echo vc10      - Use Visual Studio 2010
@@ -327,19 +329,29 @@ rem ***************************************************************************
   echo vc14.1    - Use Visual Studio 2017
   echo vc14.2    - Use Visual Studio 2019
   echo.
+  echo.
   echo Platform:
   echo.
   echo x86       - Perform a 32-bit build
   echo x64       - Perform a 64-bit build
+  echo.
+  echo If this parameter is unset the OS platform is used ^(%OS_PLATFORM%^).
+  echo.
   echo.
   echo Configuration:
   echo.
   echo debug     - Perform a debug build
   echo release   - Perform a release build
   echo.
+  echo If this parameter is unset both configurations are built.
+  echo.
+  echo.
   echo Other:
   echo.
   echo directory - Specifies the wolfSSL source directory
+  echo.
+  echo If this parameter is unset the directory used is "%DEFAULT_START_DIR%".
+  echo.
   goto error
 
 :unknown
