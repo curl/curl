@@ -687,16 +687,10 @@ static CURLcode multi_done(struct Curl_easy *data,
 #endif
      ) || conn->bits.close
        || (premature && !(conn->handler->flags & PROTOPT_STREAM))) {
-    CURLcode res2;
     connclose(conn, "disconnecting");
     Curl_conncache_remove_conn(data, conn, FALSE);
     CONNCACHE_UNLOCK(data);
-    res2 = Curl_disconnect(data, conn, premature);
-
-    /* If we had an error already, make sure we return that one. But
-       if we got a new error, return that. */
-    if(!result && res2)
-      result = res2;
+    Curl_disconnect(data, conn, premature);
   }
   else {
     char buffer[256];
