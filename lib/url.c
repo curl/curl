@@ -851,6 +851,7 @@ void Curl_disconnect(struct Curl_easy *data,
    */
   if(CONN_INUSE(conn) && !dead_connection) {
     DEBUGF(infof(data, "Curl_disconnect when inuse: %zu", CONN_INUSE(conn)));
+    return;
   }
 
   if(conn->dns_entry) {
