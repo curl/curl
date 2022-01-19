@@ -17,3 +17,7 @@ handshake. curl does this by default.
 
 For HTTP, this means curl will attempt to upgrade the request to HTTP/2 using
 the Upgrade: request header.
+
+When curl uses HTTP/2 over HTTPS, it does not itself insist on TLS 1.2 or
+higher even though that is required by the specification. A user can add this
+version requirement with --tlsv1.2.
