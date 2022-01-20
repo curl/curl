@@ -2363,10 +2363,12 @@ set_ssl_version_min_max(SSL_CTX *ctx, struct connectdata *conn)
     case CURL_SSLVERSION_TLSv1_2:
       ossl_ssl_version_min = TLS1_2_VERSION;
       break;
-#ifdef TLS1_3_VERSION
     case CURL_SSLVERSION_TLSv1_3:
+#ifdef TLS1_3_VERSION
       ossl_ssl_version_min = TLS1_3_VERSION;
       break;
+#else
+      return CURLE_NOT_BUILT_IN;
 #endif
   }
 
