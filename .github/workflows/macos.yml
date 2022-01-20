@@ -122,6 +122,9 @@ jobs:
 
     - run: brew update && brew bundle install --no-lock --file /tmp/Brewfile
       name: 'brew install'
+      
+    - run: sudo pip install impacket
+      name: 'install impacket'
 
     - uses: actions/checkout@v2
 
