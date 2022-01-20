@@ -25,8 +25,10 @@ jobs:
           configure: --with-wolfssl=$HOME/wssl --enable-debug --enable-werror
 
     steps:
-    - run: sudo apt-get install libtool autoconf automake pkg-config stunnel4
-      name: install prereqs
+    - run: |
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 python3-pip
+        sudo pip3 install impacket
+      name: install prereqs and impacket
 
     - run: |
        curl -LO https://github.com/wolfSSL/wolfssl/archive/v5.0.0-stable.tar.gz
