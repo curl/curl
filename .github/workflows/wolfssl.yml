@@ -43,11 +43,8 @@ jobs:
     - run: ./buildconf && LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} && make V=1
       name: 'configure and build'
       
-    - run: |
-       sudo apt-get install python-pip
-       sudo pip install impacket
-       
-      name: 'install impacket'
+    - run: sudo pip install impacket
+      name: install impacket
       
     - run: make V=1 test-ci
       name: 'test'
