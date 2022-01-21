@@ -69,7 +69,9 @@
 
 #if defined(USE_OPENSSL_SHA256)
 
-/* When OpenSSL or wolfSSL is available is available we use their SHA256-function */
+/* When OpenSSL or wolfSSL is available is available we use their
+ * SHA256-functions.
+ */
 #if defined(USE_OPENSSL)
 #include <openssl/evp.h>
 #elif defined(USE_WOLFSSL)
