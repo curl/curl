@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -548,10 +548,44 @@ static char *my_useragent(void)
   return strdup(CURL_NAME "/" CURL_VERSION);
 }
 
+#define isheadersep(x) ((((x)==':') || ((x)==';')))
+
+/*
+ * inlist() returns true if the given 'checkfor' header is present in the
+ * header list.
+ */
+static bool inlist(const struct curl_slist *head,
+                   const char *checkfor)
+{
+  size_t thislen = strlen(checkfor);
+  DEBUGASSERT(thislen);
+  DEBUGASSERT(checkfor[thislen-1] != ':');
+
+  for(; head; head = head->next) {
+    if(curl_strnequal(head->data, checkfor, thislen) &&
+       isheadersep(head->data[thislen]) )
+      return TRUE;
+  }
+
+  return FALSE;
+}
+
 CURLcode get_args(struct OperationConfig *config, const size_t i)
 {
   CURLcode result = CURLE_OK;
   bool last = (config->next ? FALSE : TRUE);
+
+  if(config->jsoned) {
+    ParameterError err = PARAM_OK;
+    /* --json also implies json Content-Type: and Accept: headers - if
+       they are not set with -H */
+    if(!inlist(config->headers, "Content-Type"))
+      err = add2list(&config->headers, "Content-Type: application/json");
+    if(!err && !inlist(config->headers, "Accept"))
+      err = add2list(&config->headers, "Accept: application/json");
+    if(err)
+      return CURLE_OUT_OF_MEMORY;
+  }
 
   /* Check we have a password for the given host user */
   if(config->userpwd && !config->oauth_bearer) {
