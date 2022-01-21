@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -298,6 +298,9 @@ const struct helptxt helptext[] = {
   {"-6, --ipv6",
    "Resolve names to IPv6 addresses",
    CURLHELP_CONNECTION | CURLHELP_DNS},
+  {"    --json <data>",
+   "HTTP POST JSON",
+   CURLHELP_HTTP | CURLHELP_POST | CURLHELP_UPLOAD},
   {"-j, --junk-session-cookies",
    "Ignore session cookies read from file",
    CURLHELP_HTTP},

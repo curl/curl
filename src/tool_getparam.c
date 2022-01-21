@@ -230,6 +230,7 @@ static const struct LongShort aliases[]= {
   {"da", "data-ascii",               ARG_STRING},
   {"db", "data-binary",              ARG_STRING},
   {"de", "data-urlencode",           ARG_STRING},
+  {"df", "json",                     ARG_STRING},
   {"D",  "dump-header",              ARG_FILENAME},
   {"e",  "referer",                  ARG_STRING},
   {"E",  "cert",                     ARG_FILENAME},
@@ -1386,7 +1387,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       size_t size = 0;
       bool raw_mode = (subletter == 'r');
 
-      if(subletter == 'e') { /* --data-urlencode*/
+      if(subletter == 'e') { /* --data-urlencode */
         /* [name]=[content], we encode the content part only
          * [name]@[file name]
          *
@@ -1489,7 +1490,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
                   "an empty POST.\n", nextarg);
         }
 
-        if(subletter == 'b')
+        if((subletter == 'b') || /* --data-binary */
+           (subletter == 'f') /* --json */)
           /* forced binary */
           err = file2memory(&postdata, &size, file);
         else {
@@ -1516,6 +1518,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         if(postdata)
           size = strlen(postdata);
       }
+      if(subletter == 'f')
+        config->jsoned = TRUE;
 
 #ifdef CURL_DOES_CONVERSIONS
       if(subletter != 'b') {
@@ -1540,13 +1544,21 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           return PARAM_NO_MEM;
         }
         memcpy(config->postfields, oldpost, (size_t)oldlen);
-        /* use byte value 0x26 for '&' to accommodate non-ASCII platforms */
-        config->postfields[oldlen] = '\x26';
-        memcpy(&config->postfields[oldlen + 1], postdata, size);
-        config->postfields[oldlen + 1 + size] = '\0';
+        if(subletter != 'f') {
+          /* skip this treatment for --json */
+          /* use byte value 0x26 for '&' to accommodate non-ASCII platforms */
+          config->postfields[oldlen] = '\x26';
+          memcpy(&config->postfields[oldlen + 1], postdata, size);
+          config->postfields[oldlen + 1 + size] = '\0';
+          config->postfieldsize += size + 1;
+        }
+        else {
+          memcpy(&config->postfields[oldlen], postdata, size);
+          config->postfields[oldlen + size] = '\0';
+          config->postfieldsize += size;
+        }
         Curl_safefree(oldpost);
         Curl_safefree(postdata);
-        config->postfieldsize += size + 1;
       }
       else {
         config->postfields = postdata;
@@ -2367,6 +2379,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
           : NULL;
 
         result = getparameter(orig_opt, nextarg, &passarg, global, config);
+
         curlx_unicodefree(nextarg);
         config = global->last;
         if(result == PARAM_NEXT_OPERATION) {
