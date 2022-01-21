@@ -28,8 +28,9 @@ jobs:
           configure: CC=clang --with-mbedtls=$HOME/mbed --enable-debug --enable-werror
 
     steps:
-    - run: sudo apt-get install libtool autoconf automake pkg-config clang stunnel4
-      name: install prereqs
+    - run: sudo apt-get install libtool autoconf automake pkg-config clang stunnel4 python3-pip
+           sudo pip3 install impacket
+      name: install prereqs and impacket
 
     - run: |
        git clone --depth=1 -b v3.1.0 https://github.com/ARMmbed/mbedtls
