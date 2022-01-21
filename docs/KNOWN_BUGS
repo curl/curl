@@ -196,7 +196,7 @@ problems may have been fixed or changed somewhat since this was written.
  something beyond ascii but currently libcurl will only pass in the verbatim
  string the app provides. There are several browsers that already do this
  encoding. The key seems to be the updated draft to RFC2231:
- https://tools.ietf.org/html/draft-reschke-rfc2231-in-http-02
+ https://datatracker.ietf.org/doc/html/draft-reschke-rfc2231-in-http-02
 
 1.5 Expect-100 meets 417
 
@@ -808,7 +808,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  Curl sends DNS requests for hostnames with a .onion TLD. This leaks
  information about what the user is attempting to access, and violates this
- requirement of RFC7686: https://tools.ietf.org/html/rfc7686
+ requirement of RFC7686: https://datatracker.ietf.org/doc/html/rfc7686
 
  Issue: https://github.com/curl/curl/issues/543
 

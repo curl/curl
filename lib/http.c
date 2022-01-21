@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -4212,7 +4212,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
       if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
         /*
-         * https://tools.ietf.org/html/rfc7230#section-3.1.2
+         * https://datatracker.ietf.org/doc/html/rfc7230#section-3.1.2
          *
          * The response code is always a three-digit number in HTTP as the spec
          * says. We allow any three-digit number here, but we cannot make

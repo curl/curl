@@ -10,7 +10,7 @@ curl features support for the Alt-Svc: HTTP header.
 
 ## Standard
 
-[RFC 7838](https://tools.ietf.org/html/rfc7838)
+[RFC 7838](https://datatracker.ietf.org/doc/html/rfc7838)
 
 # Alt-Svc cache file format
 

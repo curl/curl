@@ -14,7 +14,7 @@ eventually remove the "experimental" label from this functionality.
 
 As a DNS version of alt-svc and also a pre-requisite for ECH (see below).
 
-See: https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-02
+See: https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-svcb-https-02
 
 ## ECH (Encrypted Client Hello - formerly known as ESNI)
 

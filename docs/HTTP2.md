@@ -118,4 +118,4 @@ can use that hint to create a new connection asynchronously. For libcurl, we
 may introduce a way to bring such clues to the application and/or let a
 subsequent request use the alternate route automatically.
 
-[Detailed in RFC 7838](https://tools.ietf.org/html/rfc7838)
+[Detailed in RFC 7838](https://datatracker.ietf.org/doc/html/rfc7838)

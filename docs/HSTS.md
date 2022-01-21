@@ -5,7 +5,7 @@ HTTP Strict-Transport-Security. Added as experimental in curl
 
 ## Standard
 
-[HTTP Strict Transport Security](https://tools.ietf.org/html/rfc6797)
+[HTTP Strict Transport Security](https://datatracker.ietf.org/doc/html/rfc6797)
 
 ## Behavior
 

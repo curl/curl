@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -39,7 +39,7 @@
 
 /* Portable character check (remember EBCDIC). Do not use isalnum() because
    its behavior is altered by the current locale.
-   See https://tools.ietf.org/html/rfc3986#section-2.3
+   See https://datatracker.ietf.org/doc/html/rfc3986#section-2.3
 */
 bool Curl_isunreserved(unsigned char in)
 {

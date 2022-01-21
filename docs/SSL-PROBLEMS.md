@@ -70,7 +70,7 @@
 
   References:
 
-  https://tools.ietf.org/html/draft-popov-tls-prohibiting-rc4-01
+  https://datatracker.ietf.org/doc/html/draft-popov-tls-prohibiting-rc4-01
 
 ## Allow BEAST
 

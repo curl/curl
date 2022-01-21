@@ -20,12 +20,12 @@
   In 2011, [RFC6265](https://www.ietf.org/rfc/rfc6265.txt) was finally
   published and details how cookies work within HTTP. In 2016, an update which
   added support for prefixes was
-  [proposed](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-prefixes-00),
+  [proposed](https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-cookie-prefixes-00),
   and in 2017, another update was
-  [drafted](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-01)
+  [drafted](https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-cookie-alone-01)
   to deprecate modification of 'secure' cookies from non-secure origins. Both
   of these drafts have been incorporated into a proposal to
-  [replace](https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-02)
+  [replace](https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-02)
   RFC6265. Cookie prefixes and secure cookie modification protection has been
   implemented by curl.
 

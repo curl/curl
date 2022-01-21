@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,7 +32,7 @@
 
 /*
  * "Remove Dot Segments"
- * https://tools.ietf.org/html/rfc3986#section-5.2.4
+ * https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.4
  */
 
 /*

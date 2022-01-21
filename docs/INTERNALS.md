@@ -1092,7 +1092,7 @@ for older and later versions as things do not change drastically that often.
 [1]: https://curl.se/libcurl/c/curl_easy_setopt.html
 [2]: https://curl.se/libcurl/c/curl_easy_init.html
 [3]: https://c-ares.org/
-[4]: https://tools.ietf.org/html/rfc7230 "RFC 7230"
+[4]: https://datatracker.ietf.org/doc/html/rfc7230 "RFC 7230"
 [5]: https://curl.se/libcurl/c/CURLOPT_ACCEPT_ENCODING.html
 [6]: https://curl.se/docs/manpage.html#--compressed
 [7]: https://curl.se/libcurl/c/curl_multi_socket_action.html
@@ -1103,4 +1103,4 @@ for older and later versions as things do not change drastically that often.
 [12]: https://curl.se/libcurl/c/curl_multi_fdset.html
 [13]: https://curl.se/libcurl/c/curl_multi_add_handle.html
 [14]: https://curl.se/libcurl/c/curl_multi_info_read.html
-[15]: https://tools.ietf.org/html/rfc7231#section-3.1.2.2
+[15]: https://datatracker.ietf.org/doc/html/rfc7231#section-3.1.2.2

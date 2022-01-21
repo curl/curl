@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2020 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
  ***************************************************************************/
 /*
  * The Strict-Transport-Security header is defined in RFC 6797:
- * https://tools.ietf.org/html/rfc6797
+ * https://datatracker.ietf.org/doc/html/rfc6797
  */
 #include "curl_setup.h"
 
