@@ -28,8 +28,9 @@ jobs:
           configure: CC=clang --with-mbedtls=$HOME/mbed --enable-debug --enable-werror
 
     steps:
-    - run: sudo apt-get install libtool autoconf automake pkg-config clang stunnel4 python3-pip
-           sudo pip3 install impacket
+    - run: |
+        sudo apt-get install libtool autoconf automake pkg-config clang stunnel4 python3-pip
+        sudo pip3 install impacket
       name: install prereqs and impacket
 
     - run: |
