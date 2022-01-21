@@ -69,8 +69,12 @@
 
 #if defined(USE_OPENSSL_SHA256)
 
-/* When OpenSSL is available we use the SHA256-function from OpenSSL */
+/* When OpenSSL or wolfSSL is available is available we use their SHA256-function */
+#if defined(USE_OPENSSL)
 #include <openssl/evp.h>
+#elif defined(USE_WOLFSSL)
+#include <wolfssl/openssl/evp.h>
+#endif
 
 #include "curl_memory.h"
 

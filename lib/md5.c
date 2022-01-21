@@ -83,7 +83,12 @@ static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 #elif defined(USE_OPENSSL_MD5) || defined(USE_WOLFSSL_MD5)
 
 /* When OpenSSL or wolfSSL is available, we use their MD5 functions. */
+#if defined(USE_OPENSSL_MD5)
 #include <openssl/md5.h>
+#elif defined(USE_WOLFSSL_MD5)
+#include <wolfssl/openssl/md5.h>
+#endif
+
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
