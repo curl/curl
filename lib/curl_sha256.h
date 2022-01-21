@@ -8,7 +8,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2017, Florin Petriuc, <petriuc.florin@gmail.com>
- * Copyright (C) 2018 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,7 +32,7 @@ extern const struct HMAC_params Curl_HMAC_SHA256[1];
 /* SHA256_DIGEST_LENGTH is an enum value in wolfSSL. Need to import it from
  * sha.h*/
 #include <wolfssl/options.h>
-#include <openssl/sha.h>
+#include <wolfssl/openssl/sha.h>
 #else
 #define SHA256_DIGEST_LENGTH 32
 #endif

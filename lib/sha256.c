@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2017, Florin Petriuc, <petriuc.florin@gmail.com>
- * Copyright (C) 2018 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -69,8 +69,14 @@
 
 #if defined(USE_OPENSSL_SHA256)
 
-/* When OpenSSL is available we use the SHA256-function from OpenSSL */
+/* When OpenSSL or wolfSSL is available is available we use their
+ * SHA256-functions.
+ */
+#if defined(USE_OPENSSL)
 #include <openssl/evp.h>
+#elif defined(USE_WOLFSSL)
+#include <wolfssl/openssl/evp.h>
+#endif
 
 #include "curl_memory.h"
 
