@@ -62,20 +62,20 @@
 
 typedef struct md5_ctx MD5_CTX;
 
-static CURLcode MD5_Init(MD5_CTX *ctx)
+static CURLcode my_md5_init(MD5_CTX *ctx)
 {
   md5_init(ctx);
   return CURLE_OK;
 }
 
-static void MD5_Update(MD5_CTX *ctx,
-                       const unsigned char *input,
-                       unsigned int inputLen)
+static void my_md5_update(MD5_CTX *ctx,
+                          const unsigned char *input,
+                          unsigned int inputLen)
 {
   md5_update(ctx, inputLen, input);
 }
 
-static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
+static void my_md5_final(unsigned char *digest, MD5_CTX *ctx)
 {
   md5_digest(ctx, 16, digest);
 }
@@ -88,6 +88,24 @@ static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 /* The last #include file should be: */
 #include "memdebug.h"
 
+static CURLcode my_md5_init(MD5_CTX *ctx)
+{
+  (void)MD5_Init(ctx);
+  return CURLE_OK;
+}
+
+static void my_md5_update(MD5_CTX *ctx,
+                          const unsigned char *input,
+                          unsigned int len)
+{
+  (void)MD5_Update(ctx, input, len);
+}
+
+static void my_md5_final(unsigned char *digest, MD5_CTX *ctx)
+{
+  (void)MD5_Final(digest, ctx);
+}
+
 #elif defined(USE_MBEDTLS)
 
 #include <mbedtls/md5.h>
@@ -99,7 +117,7 @@ static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 
 typedef mbedtls_md5_context MD5_CTX;
 
-static CURLcode MD5_Init(MD5_CTX *ctx)
+static CURLcode my_md5_init(MD5_CTX *ctx)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
   (void) mbedtls_md5_starts(ctx);
@@ -109,9 +127,9 @@ static CURLcode MD5_Init(MD5_CTX *ctx)
   return CURLE_OK;
 }
 
-static void MD5_Update(MD5_CTX *ctx,
-                       const unsigned char *data,
-                       unsigned int length)
+static void my_md5_update(MD5_CTX *ctx,
+                          const unsigned char *data,
+                          unsigned int length)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
   (void) mbedtls_md5_update(ctx, data, length);
@@ -120,7 +138,7 @@ static void MD5_Update(MD5_CTX *ctx,
 #endif
 }
 
-static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
+static void my_md5_final(unsigned char *digest, MD5_CTX *ctx)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
   (void) mbedtls_md5_finish(ctx, digest);
@@ -148,20 +166,20 @@ static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 /* The last #include file should be: */
 #include "memdebug.h"
 
-static CURLcode MD5_Init(MD5_CTX *ctx)
+static CURLcode my_md5_init(MD5_CTX *ctx)
 {
   CC_MD5_Init(ctx);
   return CURLE_OK;
 }
 
-static void MD5_Update(MD5_CTX *ctx,
-                       const unsigned char *input,
-                       unsigned int inputLen)
+static void my_md5_update(MD5_CTX *ctx,
+                          const unsigned char *input,
+                          unsigned int inputLen)
 {
   CC_MD5_Update(ctx, input, inputLen);
 }
 
-static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
+static void my_md5_final(unsigned char *digest, MD5_CTX *ctx)
 {
   CC_MD5_Final(digest, ctx);
 }
@@ -179,7 +197,7 @@ struct md5_ctx {
 };
 typedef struct md5_ctx MD5_CTX;
 
-static CURLcode MD5_Init(MD5_CTX *ctx)
+static CURLcode my_md5_init(MD5_CTX *ctx)
 {
   if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
@@ -188,14 +206,14 @@ static CURLcode MD5_Init(MD5_CTX *ctx)
   return CURLE_OK;
 }
 
-static void MD5_Update(MD5_CTX *ctx,
-                       const unsigned char *input,
-                       unsigned int inputLen)
+static void my_md5_update(MD5_CTX *ctx,
+                          const unsigned char *input,
+                          unsigned int inputLen)
 {
   CryptHashData(ctx->hHash, (unsigned char *)input, inputLen, 0);
 }
 
-static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
+static void my_md5_final(unsigned char *digest, MD5_CTX *ctx)
 {
   unsigned long length = 0;
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
@@ -265,9 +283,9 @@ struct md5_ctx {
 };
 typedef struct md5_ctx MD5_CTX;
 
-static CURLcode MD5_Init(MD5_CTX *ctx);
-static void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size);
-static void MD5_Final(unsigned char *result, MD5_CTX *ctx);
+static CURLcode my_md5_init(MD5_CTX *ctx);
+static void my_md5_update(MD5_CTX *ctx, const void *data, unsigned long size);
+static void my_md5_final(unsigned char *result, MD5_CTX *ctx);
 
 /*
  * The basic MD5 functions.
@@ -426,7 +444,7 @@ static const void *body(MD5_CTX *ctx, const void *data, unsigned long size)
   return ptr;
 }
 
-static CURLcode MD5_Init(MD5_CTX *ctx)
+static CURLcode my_md5_init(MD5_CTX *ctx)
 {
   ctx->a = 0x67452301;
   ctx->b = 0xefcdab89;
@@ -439,7 +457,7 @@ static CURLcode MD5_Init(MD5_CTX *ctx)
   return CURLE_OK;
 }
 
-static void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
+static void my_md5_update(MD5_CTX *ctx, const void *data, unsigned long size)
 {
   MD5_u32plus saved_lo;
   unsigned long used;
@@ -474,7 +492,7 @@ static void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
   memcpy(ctx->buffer, data, size);
 }
 
-static void MD5_Final(unsigned char *result, MD5_CTX *ctx)
+static void my_md5_final(unsigned char *result, MD5_CTX *ctx)
 {
   unsigned long used, available;
 
@@ -530,11 +548,11 @@ static void MD5_Final(unsigned char *result, MD5_CTX *ctx)
 const struct HMAC_params Curl_HMAC_MD5[] = {
   {
     /* Hash initialization function. */
-    CURLX_FUNCTION_CAST(HMAC_hinit_func, MD5_Init),
+    CURLX_FUNCTION_CAST(HMAC_hinit_func, my_md5_init),
     /* Hash update function. */
-    CURLX_FUNCTION_CAST(HMAC_hupdate_func, MD5_Update),
+    CURLX_FUNCTION_CAST(HMAC_hupdate_func, my_md5_update),
     /* Hash computation end function. */
-    CURLX_FUNCTION_CAST(HMAC_hfinal_func, MD5_Final),
+    CURLX_FUNCTION_CAST(HMAC_hfinal_func, my_md5_final),
     /* Size of hash context structure. */
     sizeof(MD5_CTX),
     /* Maximum key length. */
@@ -547,11 +565,11 @@ const struct HMAC_params Curl_HMAC_MD5[] = {
 const struct MD5_params Curl_DIGEST_MD5[] = {
   {
     /* Digest initialization function */
-    CURLX_FUNCTION_CAST(Curl_MD5_init_func, MD5_Init),
+    CURLX_FUNCTION_CAST(Curl_MD5_init_func, my_md5_init),
     /* Digest update function */
-    CURLX_FUNCTION_CAST(Curl_MD5_update_func, MD5_Update),
+    CURLX_FUNCTION_CAST(Curl_MD5_update_func, my_md5_update),
     /* Digest computation end function */
-    CURLX_FUNCTION_CAST(Curl_MD5_final_func, MD5_Final),
+    CURLX_FUNCTION_CAST(Curl_MD5_final_func, my_md5_final),
     /* Size of digest context struct */
     sizeof(MD5_CTX),
     /* Result size */
@@ -568,9 +586,9 @@ CURLcode Curl_md5it(unsigned char *outbuffer, const unsigned char *input,
 {
   MD5_CTX ctx;
 
-  MD5_Init(&ctx);
-  MD5_Update(&ctx, input, curlx_uztoui(len));
-  MD5_Final(outbuffer, &ctx);
+  my_md5_init(&ctx);
+  my_md5_update(&ctx, input, curlx_uztoui(len));
+  my_md5_final(outbuffer, &ctx);
 
   return CURLE_OK;
 }
