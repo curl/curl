@@ -20,9 +20,14 @@ jobs:
       fail-fast: false
       matrix:
         build:
-        - name: wolfssl
+        - name: wolfssl (configured with --enable-all)
           install:
-          configure: --with-wolfssl=$HOME/wssl --enable-debug --enable-werror
+          wolfssl-configure: --enable-all
+          curl-configure: --with-wolfssl=$HOME/wssl --enable-debug --enable-werror
+        - name: wolfssl (configured with --enable-opensslextra)
+          install:
+          wolfssl-configure: --enable-opensslextra
+          curl-configure: --with-wolfssl=$HOME/wssl --enable-debug --enable-werror
 
     steps:
     - run: |
@@ -35,14 +40,14 @@ jobs:
        tar -xzf v5.0.0-stable.tar.gz
        cd wolfssl-5.0.0-stable
        ./autogen.sh
-       ./configure --enable-tls13 --enable-all --enable-harden --prefix=$HOME/wssl
+       ./configure --enable-tls13 ${{ matrix.build.wolfssl-configure }} --enable-harden --prefix=$HOME/wssl
        make && make install
 
       name: 'install wolfssl'
 
     - uses: actions/checkout@v2
 
-    - run: ./buildconf && LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} && make V=1
+    - run: ./buildconf && LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" ./configure --enable-warnings --enable-werror ${{ matrix.build.curl-configure }} && make V=1
       name: 'configure and build'
 
     - run: make V=1 test-ci
