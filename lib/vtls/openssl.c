@@ -2738,8 +2738,8 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
      implementations is desired."
 
      The "-no_ticket" option was introduced in OpenSSL 0.9.8j. It's a flag to
-     disable "rfc4507bis session ticket support".  rfc4507bis was later turned
-     into the proper RFC5077 it seems: https://datatracker.ietf.org/doc/html/rfc5077
+     disable "rfc4507bis session ticket support". rfc4507bis was later turned
+     into the proper RFC5077: https://datatracker.ietf.org/doc/html/rfc5077
 
      The enabled extension concerns the session management. I wonder how often
      libcurl stops a connection and then resumes a TLS session. Also, sending
