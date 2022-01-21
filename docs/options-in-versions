@@ -99,6 +99,7 @@
 --interface                          7.3
 --ipv4 (-4)                          7.10.8
 --ipv6 (-6)                          7.10.8
+--json                               7.82.0
 --junk-session-cookies (-j)          7.9.7
 --keepalive-time                     7.18.0
 --key                                7.9.3
