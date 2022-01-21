@@ -948,7 +948,7 @@ socks_proxy_info_matches(const struct proxy_info *data,
 
   /* the user information is case-sensitive
      or at least it is not defined as case-insensitive
-     see https://tools.ietf.org/html/rfc3986#section-3.2.1 */
+     see https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.1 */
   if(!data->user != !needle->user)
     return FALSE;
   /* curl_strequal does a case insentive comparison, so do not use it here! */

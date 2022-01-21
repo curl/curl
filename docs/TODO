@@ -413,7 +413,7 @@
 
  https://bugzilla.mozilla.org/show_bug.cgi?id=1220810
 
- https://tools.ietf.org/html/draft-ietf-dnsop-let-localhost-be-localhost-02
+ https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-let-localhost-be-localhost-02
 
 1.28 FD_CLOEXEC
 
@@ -554,7 +554,7 @@
  HOST is a command for a client to tell which host name to use, to offer FTP
  servers named-based virtual hosting:
 
- https://tools.ietf.org/html/rfc7151
+ https://datatracker.ietf.org/doc/html/rfc7151
 
 4.2 Alter passive/active on failure and retry
 
@@ -887,7 +887,7 @@
  that previously (in older TLS version) were not set. The clienthello
  extension adds padding to avoid that size range.
 
- https://tools.ietf.org/html/rfc7685
+ https://datatracker.ietf.org/doc/html/rfc7685
  https://github.com/curl/curl/issues/2299
 
 14. GnuTLS

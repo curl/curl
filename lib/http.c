@@ -4212,7 +4212,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
       if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
         /*
-         * https://tools.ietf.org/html/rfc7230#section-3.1.2
+         * https://datatracker.ietf.org/doc/html/rfc7230#section-3.1.2
          *
          * The response code is always a three-digit number in HTTP as the spec
          * says. We allow any three-digit number here, but we cannot make

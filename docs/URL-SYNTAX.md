@@ -5,7 +5,7 @@
 The official "URL syntax" is primarily defined in these two different
 specifications:
 
- - [RFC 3986](https://tools.ietf.org/html/rfc3986) (although URL is called
+ - [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986) (although URL is called
    "URI" in there)
  - [The WHATWG URL Specification](https://url.spec.whatwg.org/)
 
@@ -331,7 +331,7 @@ Search for an empty DN and request information about the
     ldap://ldap.example.com/?rootDomainNamingContext
 
 For more information about the individual components of a LDAP URL please
-see [RFC 4516](https://tools.ietf.org/html/rfc4516).
+see [RFC 4516](https://datatracker.ietf.org/doc/html/rfc4516).
 
 ## POP3
 

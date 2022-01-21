@@ -21,7 +21,7 @@
  ***************************************************************************/
 /*
  * The Strict-Transport-Security header is defined in RFC 6797:
- * https://tools.ietf.org/html/rfc6797
+ * https://datatracker.ietf.org/doc/html/rfc6797
  */
 #include "curl_setup.h"
 

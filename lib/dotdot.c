@@ -32,7 +32,7 @@
 
 /*
  * "Remove Dot Segments"
- * https://tools.ietf.org/html/rfc3986#section-5.2.4
+ * https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.4
  */
 
 /*

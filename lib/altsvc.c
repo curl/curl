@@ -21,7 +21,7 @@
  ***************************************************************************/
 /*
  * The Alt-Svc: header is defined in RFC 7838:
- * https://tools.ietf.org/html/rfc7838
+ * https://datatracker.ietf.org/doc/html/rfc7838
  */
 #include "curl_setup.h"
 
