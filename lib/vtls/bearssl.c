@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2021, Michael Forney, <mforney@mforney.org>
+ * Copyright (C) 2019 - 2022, Michael Forney, <mforney@mforney.org>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -464,6 +464,14 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
       return CURLE_PEER_FAILED_VERIFICATION;
     }
     hostname = NULL;
+  }
+  else {
+    char *snihost = Curl_ssl_snihost(data, hostname, NULL);
+    if(!snihost) {
+      failf(data, "Failed to set SNI");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    hostname = snihost;
   }
 
   if(!br_ssl_client_reset(&backend->ctx, hostname, 0))

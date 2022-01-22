@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1865,7 +1865,6 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
   CURLcode result;
   bool second_layer = FALSE;
   SSLVersionRange sslver_supported;
-
   SSLVersionRange sslver = {
     SSL_LIBRARY_VERSION_TLS_1_0,  /* min */
 #ifdef SSL_LIBRARY_VERSION_TLS_1_3
@@ -1878,6 +1877,11 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
     SSL_LIBRARY_VERSION_TLS_1_0
 #endif
   };
+  char *snihost = Curl_ssl_snihost(data, SSL_HOST_NAME(), NULL);
+  if(!snihost) {
+    failf(data, "Failed to set SNI");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
 
   backend->data = data;
 
@@ -2140,11 +2144,11 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
     goto error;
 
   /* propagate hostname to the TLS layer */
-  if(SSL_SetURL(backend->handle, SSL_HOST_NAME()) != SECSuccess)
+  if(SSL_SetURL(backend->handle, snihost) != SECSuccess)
     goto error;
 
   /* prevent NSS from re-using the session for a different hostname */
-  if(SSL_SetSockPeerID(backend->handle, SSL_HOST_NAME()) != SECSuccess)
+  if(SSL_SetSockPeerID(backend->handle, snihost) != SECSuccess)
     goto error;
 
   return CURLE_OK;

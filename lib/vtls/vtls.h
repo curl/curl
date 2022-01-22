@@ -172,6 +172,7 @@ bool Curl_ssl_tls13_ciphersuites(void);
   data->set.str[STRING_SSL_PINNEDPUBLICKEY]
 #endif
 
+char *Curl_ssl_snihost(struct Curl_easy *data, const char *host, size_t *olen);
 bool Curl_ssl_config_matches(struct ssl_primary_config *data,
                              struct ssl_primary_config *needle);
 bool Curl_clone_primary_ssl_config(struct ssl_primary_config *source,

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
  *
@@ -765,7 +765,6 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 #ifdef ENABLE_IPV6
   struct in6_addr addr6;
 #endif
-  TCHAR *host_name;
   CURLcode result;
   char * const hostname = SSL_HOST_NAME();
   struct ssl_backend_data *backend = connssl->backend;
@@ -846,10 +845,21 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   }
 
   if(!backend->cred) {
+    char *snihost;
     result = schannel_acquire_credential_handle(data, conn, sockindex);
     if(result != CURLE_OK) {
       return result;
     }
+    /* A hostname associated with the credential is needed by
+       InitializeSecurityContext for SNI and other reasons. */
+    snihost = Curl_ssl_snihost(data, SSL_HOST_NAME(), NULL);
+    if(!snihost) {
+      failf(data, "Failed to set SNI");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    backend->cred->sni_hostname = curlx_convert_UTF8_to_tchar(snihost);
+    if(!backend->cred->sni_hostname)
+      return CURLE_OUT_OF_MEMORY;
   }
 
   /* Warn if SNI is disabled due to use of an IP address */
@@ -936,10 +946,6 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  host_name = curlx_convert_UTF8_to_tchar(hostname);
-  if(!host_name)
-    return CURLE_OUT_OF_MEMORY;
-
   /* Schannel InitializeSecurityContext:
      https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx
 
@@ -948,12 +954,11 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
      us problems with inbuf regardless. https://github.com/curl/curl/issues/983
   */
   sspi_status = s_pSecFn->InitializeSecurityContext(
-    &backend->cred->cred_handle, NULL, host_name, backend->req_flags, 0, 0,
+    &backend->cred->cred_handle, NULL, backend->cred->sni_hostname,
+    backend->req_flags, 0, 0,
     (backend->use_alpn ? &inbuf_desc : NULL),
     0, &backend->ctxt->ctxt_handle,
     &outbuf_desc, &backend->ret_flags, &backend->ctxt->time_stamp);
-
-  curlx_unicodefree(host_name);
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
     char buffer[STRERROR_LEN];
@@ -1027,15 +1032,10 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
   bool doread;
-  char * const hostname = SSL_HOST_NAME();
   const char *pubkey_ptr;
   struct ssl_backend_data *backend = connssl->backend;
 
   doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
-
-  DEBUGF(infof(data,
-               "schannel: SSL/TLS connection with %s port %hu (step 2/3)",
-               hostname, conn->remote_port));
 
   if(!backend->cred || !backend->ctxt)
     return CURLE_SSL_CONNECT_ERROR;
@@ -1083,7 +1083,6 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   }
 
   for(;;) {
-    TCHAR *host_name;
     if(doread) {
       /* read encrypted handshake data from socket */
       result = Curl_read_plain(conn->sock[sockindex],
@@ -1136,16 +1135,11 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     memcpy(inbuf[0].pvBuffer, backend->encdata_buffer,
            backend->encdata_offset);
 
-    host_name = curlx_convert_UTF8_to_tchar(hostname);
-    if(!host_name)
-      return CURLE_OUT_OF_MEMORY;
-
     sspi_status = s_pSecFn->InitializeSecurityContext(
       &backend->cred->cred_handle, &backend->ctxt->ctxt_handle,
-      host_name, backend->req_flags, 0, 0, &inbuf_desc, 0, NULL,
+      backend->cred->sni_hostname, backend->req_flags,
+      0, 0, &inbuf_desc, 0, NULL,
       &outbuf_desc, &backend->ret_flags, &backend->ctxt->time_stamp);
-
-    curlx_unicodefree(host_name);
 
     /* free buffer for received handshake data */
     Curl_safefree(inbuf[0].pvBuffer);
@@ -2138,6 +2132,7 @@ static void schannel_session_free(void *ptr)
     cred->refcount--;
     if(cred->refcount == 0) {
       s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
+      curlx_unicodefree(cred->sni_hostname);
       Curl_safefree(cred);
     }
   }
@@ -2170,7 +2165,6 @@ static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
     SecBuffer outbuf;
     SecBufferDesc outbuf_desc;
     CURLcode result;
-    TCHAR *host_name;
     DWORD dwshut = SCHANNEL_SHUTDOWN;
 
     InitSecBuffer(&Buffer, SECBUFFER_TOKEN, &dwshut, sizeof(dwshut));
@@ -2185,10 +2179,6 @@ static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
     }
 
-    host_name = curlx_convert_UTF8_to_tchar(hostname);
-    if(!host_name)
-      return CURLE_OUT_OF_MEMORY;
-
     /* setup output buffer */
     InitSecBuffer(&outbuf, SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&outbuf_desc, &outbuf, 1);
@@ -2196,7 +2186,7 @@ static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
     sspi_status = s_pSecFn->InitializeSecurityContext(
       &backend->cred->cred_handle,
       &backend->ctxt->ctxt_handle,
-      host_name,
+      backend->cred->sni_hostname,
       backend->req_flags,
       0,
       0,
@@ -2206,8 +2196,6 @@ static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
       &outbuf_desc,
       &backend->ret_flags,
       &backend->ctxt->time_stamp);
-
-    curlx_unicodefree(host_name);
 
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
       /* send close message which is in output buffer */

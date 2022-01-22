@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2012 - 2017, Nick Zitzmann, <nickzman@gmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
@@ -2028,8 +2028,13 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
    * Both hostname check and SNI require SSLSetPeerDomainName().
    * Also: the verifyhost setting influences SNI usage */
   if(conn->ssl_config.verifyhost) {
-    err = SSLSetPeerDomainName(backend->ssl_ctx, hostname,
-    strlen(hostname));
+    size_t snilen;
+    char *snihost = Curl_ssl_snihost(data, hostname, &snilen);
+    if(!snihost) {
+      failf(data, "Failed to set SNI");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    err = SSLSetPeerDomainName(backend->ssl_ctx, snihost, snilen);
 
     if(err != noErr) {
       infof(data, "WARNING: SSL: SSLSetPeerDomainName() failed: OSStatus %d",
