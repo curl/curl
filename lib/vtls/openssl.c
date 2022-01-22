@@ -3254,6 +3254,8 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
        out there that don't work unless the name is lowercased */
     Curl_strntolower(data->state.buffer, hostname, nlen);
     data->state.buffer[nlen] = 0;
+    DEBUGASSERT(nlen);
+    DEBUGASSERT(data->state.buffer[nlen-1] != '.');
     if(!SSL_set_tlsext_host_name(backend->handle, data->state.buffer))
       infof(data, "WARNING: failed to configure server name indication (SNI) "
             "TLS extension");
