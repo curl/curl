@@ -97,7 +97,9 @@ typedef MD5_CTX my_md5_ctx;
 
 static CURLcode my_md5_init(my_md5_ctx *ctx)
 {
-  (void)MD5_Init(ctx);
+  if(!MD5_Init(ctx))
+    return CURLE_OUT_OF_MEMORY;
+
   return CURLE_OK;
 }
 
@@ -126,10 +128,14 @@ typedef mbedtls_md5_context my_md5_ctx;
 
 static CURLcode my_md5_init(my_md5_ctx *ctx)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  (void) mbedtls_md5_starts(ctx);
+#if (MBEDTLS_VERSION_NUMBER >= 0x03000000)
+  if(mbedtls_md5_starts(ctx))
+    return CURLE_OUT_OF_MEMORY;
+#elif defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+  if(mbedtls_md5_starts_ret(ctx))
+    return CURLE_OUT_OF_MEMORY;
 #else
-  (void) mbedtls_md5_starts_ret(ctx);
+  (void)mbedtls_md5_starts(ctx);
 #endif
   return CURLE_OK;
 }
@@ -175,7 +181,9 @@ static void my_md5_final(unsigned char *digest, my_md5_ctx *ctx)
 
 static CURLcode my_md5_init(my_md5_ctx *ctx)
 {
-  CC_MD5_Init(ctx);
+  if(!CC_MD5_Init(ctx))
+    return CURLE_OUT_OF_MEMORY;
+
   return CURLE_OK;
 }
 
@@ -206,10 +214,15 @@ typedef struct md5_ctx my_md5_ctx;
 
 static CURLcode my_md5_init(my_md5_ctx *ctx)
 {
-  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
-                         CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
-    CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash);
+  if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
+                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+    return CURLE_OUT_OF_MEMORY;
+
+  if(!CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash)) {
+    CryptReleaseContext(ctx->hCryptProv, 0);
+    return CURLE_OUT_OF_MEMORY;
   }
+
   return CURLE_OK;
 }
 
@@ -593,13 +606,15 @@ const struct MD5_params Curl_DIGEST_MD5[] = {
 CURLcode Curl_md5it(unsigned char *outbuffer, const unsigned char *input,
                     const size_t len)
 {
+  CURLcode result;
   my_md5_ctx ctx;
 
-  my_md5_init(&ctx);
-  my_md5_update(&ctx, input, curlx_uztoui(len));
-  my_md5_final(outbuffer, &ctx);
-
-  return CURLE_OK;
+  result = my_md5_init(&ctx);
+  if(!result) {
+    my_md5_update(&ctx, input, curlx_uztoui(len));
+    my_md5_final(outbuffer, &ctx);
+  }
+  return result;
 }
 
 struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params)
@@ -621,7 +636,11 @@ struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params)
 
   ctxt->md5_hash = md5params;
 
-  (*md5params->md5_init_func)(ctxt->md5_hashctx);
+  if((*md5params->md5_init_func)(ctxt->md5_hashctx)) {
+    free(ctxt->md5_hashctx);
+    free(ctxt);
+    return NULL;
+  }
 
   return ctxt;
 }
