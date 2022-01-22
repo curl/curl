@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
  *
@@ -936,9 +936,16 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  host_name = curlx_convert_UTF8_to_tchar(hostname);
-  if(!host_name)
-    return CURLE_OUT_OF_MEMORY;
+  {
+    char *snihost = Curl_ssl_snihost(data, hostname, NULL);
+    if(!snihost) {
+      failf(data, "Failed to set SNI");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    host_name = curlx_convert_UTF8_to_tchar(snihost);
+    if(!host_name)
+      return CURLE_OUT_OF_MEMORY;
+  }
 
   /* Schannel InitializeSecurityContext:
      https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx
@@ -1136,9 +1143,16 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     memcpy(inbuf[0].pvBuffer, backend->encdata_buffer,
            backend->encdata_offset);
 
-    host_name = curlx_convert_UTF8_to_tchar(hostname);
-    if(!host_name)
-      return CURLE_OUT_OF_MEMORY;
+    {
+      char *snihost = Curl_ssl_snihost(data, hostname, NULL);
+      if(!snihost) {
+        failf(data, "Failed to set SNI");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+      host_name = curlx_convert_UTF8_to_tchar(snihost);
+      if(!host_name)
+        return CURLE_OUT_OF_MEMORY;
+    }
 
     sspi_status = s_pSecFn->InitializeSecurityContext(
       &backend->cred->cred_handle, &backend->ctxt->ctxt_handle,
@@ -2185,9 +2199,16 @@ static int schannel_shutdown(struct Curl_easy *data, struct connectdata *conn,
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
     }
 
-    host_name = curlx_convert_UTF8_to_tchar(hostname);
-    if(!host_name)
-      return CURLE_OUT_OF_MEMORY;
+    {
+      char *snihost = Curl_ssl_snihost(data, hostname, NULL);
+      if(!snihost) {
+        failf(data, "Failed to set SNI");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+      host_name = curlx_convert_UTF8_to_tchar(snihost);
+      if(!host_name)
+        return CURLE_OUT_OF_MEMORY;
+    }
 
     /* setup output buffer */
     InitSecBuffer(&outbuf, SECBUFFER_EMPTY, NULL, 0);

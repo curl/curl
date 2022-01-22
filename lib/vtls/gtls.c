@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -542,11 +542,15 @@ gtls_connect_step1(struct Curl_easy *data,
 #ifdef ENABLE_IPV6
      (0 == Curl_inet_pton(AF_INET6, hostname, &addr)) &&
 #endif
-     sni &&
-     (gnutls_server_name_set(session, GNUTLS_NAME_DNS, hostname,
-                             strlen(hostname)) < 0))
-    infof(data, "WARNING: failed to configure server name indication (SNI) "
-          "TLS extension");
+     sni) {
+    size_t snilen;
+    char *snihost = Curl_ssl_snihost(data, hostname, &snilen);
+    if(!snihost || gnutls_server_name_set(session, GNUTLS_NAME_DNS, snihost,
+                                          snilen) < 0) {
+      failf(data, "Failed to set SNI");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
 
   /* Use default priorities */
   rc = gnutls_set_default_priority(session);

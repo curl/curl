@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -830,8 +830,13 @@ static CURLcode gskit_connect_step1(struct Curl_easy *data,
 
   /* Process SNI. Ignore if not supported (on OS400 < V7R1). */
   if(sni) {
+    char *snihost = Curl_ssl_snihost(data, sni, NULL);
+    if(!snihost) {
+      failf(data, "Failed to set SNI");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
     result = set_buffer(data, BACKEND->handle,
-                        GSK_SSL_EXTN_SERVERNAME_REQUEST, sni, TRUE);
+                        GSK_SSL_EXTN_SERVERNAME_REQUEST, snihost, TRUE);
     if(result == CURLE_UNSUPPORTED_PROTOCOL)
       result = CURLE_OK;
   }
