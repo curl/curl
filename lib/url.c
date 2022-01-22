@@ -1574,20 +1574,6 @@ bool Curl_is_ASCII_name(const char *hostname)
 }
 
 /*
- * Strip single trailing dot in the hostname,
- * primarily for SNI and http host header.
- */
-static void strip_trailing_dot(struct hostname *host)
-{
-  size_t len;
-  if(!host || !host->name)
-    return;
-  len = strlen(host->name);
-  if(len && (host->name[len-1] == '.'))
-    host->name[len-1] = 0;
-}
-
-/*
  * Perform any necessary IDN conversion of hostname
  */
 CURLcode Curl_idnconvert_hostname(struct Curl_easy *data,
@@ -4052,17 +4038,6 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Resolve the address of the server or proxy
    *************************************************************/
   result = resolve_server(data, conn, async);
-
-  /* Strip trailing dots. resolve_server copied the name. */
-  strip_trailing_dot(&conn->host);
-#ifndef CURL_DISABLE_PROXY
-  if(conn->bits.httpproxy)
-    strip_trailing_dot(&conn->http_proxy.host);
-  if(conn->bits.socksproxy)
-    strip_trailing_dot(&conn->socks_proxy.host);
-#endif
-  if(conn->bits.conn_to_host)
-    strip_trailing_dot(&conn->conn_to_host);
 
 out:
   return result;
