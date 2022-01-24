@@ -76,10 +76,10 @@ jobs:
     - run: brew update && for i in 1 2 3; do brew bundle install --no-lock --file /tmp/Brewfile && break || sleep 1; done
       name: 'brew install'
       
+    - uses: actions/checkout@v2
+
     - run: sudo pip install impacket
       name: 'install impacket'
-
-    - uses: actions/checkout@v2
 
     - run: ./buildconf && ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
       name: 'configure'
