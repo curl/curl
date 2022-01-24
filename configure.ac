@@ -3472,14 +3472,23 @@ if test "$want_pthreads" != "no"; then
          dnl it doesn't actually work without -lpthread
          USE_THREADS_POSIX=""
          ;;
+      *-ibm-aix*)
+         dnl Check if compiler is xlC
+         COMPILER_VERSION=`"$CC" -qversion 2>/dev/null`
+         if test x"$COMPILER_VERSION" = "x"; then
+           CFLAGS="$CFLAGS -pthread"
+         else
+           CFLAGS="$CFLAGS -qthreaded"
+         fi
+         ;;
       *)
+         CFLAGS="$CFLAGS -pthread"
          ;;
       esac
 
       dnl if it wasn't found without lib, search for it in pthread lib
       if test "$USE_THREADS_POSIX" != "1"
       then
-        CFLAGS="$CFLAGS -pthread"
         # assign PTHREAD for pkg-config use
         PTHREAD=" -pthread"
         AC_CHECK_LIB(pthread, pthread_create,
