@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,8 +24,7 @@
 
 #include <curl/curl.h>
 
-#define CURL_HOST_NOMATCH 0
-#define CURL_HOST_MATCH   1
-int Curl_cert_hostcheck(const char *match_pattern, const char *hostname);
+/* returns TRUE if there's a match */
+bool Curl_cert_hostcheck(const char *match_pattern, const char *hostname);
 
 #endif /* HEADER_CURL_HOSTCHECK_H */
