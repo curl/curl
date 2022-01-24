@@ -252,6 +252,8 @@ archive extraction. Do not ask questions about these subjects if you're not
 familiar with.
 
 _ As a prerequisite, QADRT development environment must be installed.
+  For more information on downloading and installing the QADRT development kit,
+  please see https://www.ibm.com/support/pages/node/6258183
 _ If data compression has to be supported, ZLIB development environment must
   be installed.
 _ Likewise, if SCP and SFTP protocols have to be compiled in, LIBSSH2
