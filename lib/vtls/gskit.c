@@ -1314,6 +1314,7 @@ const struct Curl_ssl Curl_ssl_gskit = {
   Curl_none_cert_status_request,  /* cert_status_request */
   gskit_connect,                  /* connect */
   gskit_connect_nonblocking,      /* connect_nonblocking */
+  Curl_ssl_getsock,               /* getsock */
   gskit_get_internals,            /* get_internals */
   gskit_close,                    /* close_one */
   Curl_none_close_all,            /* close_all */
