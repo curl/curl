@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1043,7 +1043,7 @@ static int decode_status_code(const uint8_t *value, size_t len)
 }
 
 static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
-                             void *user_data, void *stream_user_data)
+                             int fin, void *user_data, void *stream_user_data)
 {
   struct Curl_easy *data = stream_user_data;
   struct HTTP *stream = data->req.p.http;
@@ -1051,6 +1051,7 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
   (void)conn;
   (void)stream_id;
   (void)user_data;
+  (void)fin;
 
   /* add a CRLF only if we've received some headers */
   if(stream->firstheader) {
