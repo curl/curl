@@ -531,8 +531,7 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
 #ifndef CURL_DISABLE_PROXY
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_connect_data *connproxyssl = &conn->proxy_ssl[sockindex];
-  fd_set fds_read;
-  fd_set fds_write;
+  struct pollfd fds[2];
   int n;
   int m;
   int i;
@@ -542,25 +541,23 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
   if(!connssl->use || !connproxyssl->use)
     return 0;   /* No SSL over SSL: OK. */
 
-  FD_ZERO(&fds_read);
-  FD_ZERO(&fds_write);
-  n = -1;
+  n = 1;
+  fds[0].fd = BACKEND->remotefd;
+  fds[1].fd = conn->sock[sockindex];
+
   if(directions & SOS_READ) {
-    FD_SET(BACKEND->remotefd, &fds_write);
-    n = BACKEND->remotefd;
+    fds[0].events |= POLLOUT;
   }
   if(directions & SOS_WRITE) {
-    FD_SET(BACKEND->remotefd, &fds_read);
-    n = BACKEND->remotefd;
-    FD_SET(conn->sock[sockindex], &fds_write);
-    if(n < conn->sock[sockindex])
-      n = conn->sock[sockindex];
+    n = 2;
+    fds[0].events |= POLLIN;
+    fds[1].events |= POLLOUT;
   }
-  i = Curl_select(n + 1, &fds_read, &fds_write, NULL, 0);
+  i = Curl_poll(fds, n, 0);
   if(i < 0)
     return -1;  /* Select error. */
 
-  if(FD_ISSET(BACKEND->remotefd, &fds_write)) {
+  if(fds[0].revents & POLLOUT) {
     /* Try getting data from HTTPS proxy and pipe it upstream. */
     n = 0;
     i = gsk_secure_soc_read(connproxyssl->backend->handle,
@@ -582,8 +579,7 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
     }
   }
 
-  if(FD_ISSET(BACKEND->remotefd, &fds_read) &&
-     FD_ISSET(conn->sock[sockindex], &fds_write)) {
+  if((fds[0].revents & POLLIN) && (fds[1].revents & POLLOUT)) {
     /* Pipe data to HTTPS proxy. */
     n = read(BACKEND->remotefd, buf, sizeof(buf));
     if(n < 0)
@@ -1076,9 +1072,10 @@ static CURLcode gskit_connect_step3(struct Curl_easy *data,
   /* Check pinned public key. */
   ptr = SSL_PINNED_PUB_KEY();
   if(!result && ptr) {
-    curl_X509certificate x509;
-    curl_asn1Element *p;
+    struct Curl_X509certificate x509;
+    struct Curl_asn1Element *p;
 
+    memset(&x509, 0, sizeof(x509));
     if(Curl_parseX509(&x509, cert, certend))
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
     p = &x509.subjectPublicKeyInfo;
