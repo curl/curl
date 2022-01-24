@@ -28,6 +28,7 @@
 #include <qsoasync.h>
 #undef HAVE_SOCKETPAIR /* because the native one isn't good enough */
 #include "socketpair.h"
+#include "strerror.h"
 
 /* Some symbols are undefined/unsupported on OS400 versions < V7R1. */
 #ifndef GSK_SSL_EXTN_SERVERNAME_REQUEST
@@ -247,10 +248,10 @@ static CURLcode set_enum(struct Curl_easy *data, gsk_handle h,
 
 
 static CURLcode set_buffer(struct Curl_easy *data, gsk_handle h,
-                        GSK_BUF_ID id, const char *buffer, bool unsupported_ok)
+                        GSK_BUF_ID id, const char *buf, bool unsupported_ok)
 {
   char buffer[STRERROR_LEN];
-  int rc = gsk_attribute_set_buffer(h, id, buffer, 0);
+  int rc = gsk_attribute_set_buffer(h, id, buf, 0);
 
   switch(rc) {
   case GSK_OK:
