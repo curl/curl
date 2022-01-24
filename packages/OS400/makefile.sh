@@ -59,6 +59,8 @@ do      MEMBER="`basename \"${TEXT}\" .OS400`"
         MEMBER="`basename \"${MEMBER}\" .md`"
         MEMBER="${LIBIFSNAME}/DOCS.FILE/`db2_name \"${MEMBER}\"`.MBR"
 
+        [ -e "${TEXT}" ] || continue
+
         if action_needed "${MEMBER}" "${TEXT}"
         then    CMD="CPY OBJ('${TEXT}') TOOBJ('${MEMBER}') TOCCSID(${TGTCCSID})"
                 CMD="${CMD} DTAFMT(*TEXT) REPLACE(*YES)"
