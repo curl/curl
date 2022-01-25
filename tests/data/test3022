@@ -33,7 +33,7 @@ SCP correct sha256 host key
 <setenv>
 # Needed for MSYS2 to not treat the argument as a POSIX path list
 # that has to be converted to Windows paths
-MSYS2_ARG_CONV_EXCL=/
+MSYS2_ARG_CONV_EXCL=*
 </setenv>
 <file name="log/file%TESTNUMBER.txt">
 test
