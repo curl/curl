@@ -76,6 +76,7 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
 struct Curl_schannel_cred {
   CredHandle cred_handle;
   TimeStamp time_stamp;
+  TCHAR *sni_hostname;
   int refcount;
 };
 
