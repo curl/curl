@@ -380,19 +380,6 @@
         T: events
 
 - job:
-    name: curl-distcheck
-    parent: curl-base
-    vars:
-      curl_apt_packages:
-        - libpsl-dev
-        - libbrotli-dev
-        - libzstd-dev
-      curl_env:
-        CC: gcc-8
-        CXX: g++-8
-        T: distcheck
-
-- job:
     name: curl-fuzzer
     parent: curl-base
     vars:
@@ -495,7 +482,6 @@
       - curl-cmake-ngtcp2
       - curl-torture
       - curl-events
-      - curl-distcheck
       - curl-fuzzer
       - curl-tidy
       - curl-scan-build
