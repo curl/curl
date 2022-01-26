@@ -2424,6 +2424,8 @@ set_ssl_version_min_max(SSL_CTX *ctx, struct connectdata *conn)
 
 #ifdef OPENSSL_IS_BORINGSSL
 typedef uint32_t ctx_option_t;
+#elif OPENSSL_VERSION_NUMBER >= 0x30000000L
+typedef uint64_t ctx_option_t;
 #else
 typedef long ctx_option_t;
 #endif
