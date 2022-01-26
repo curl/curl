@@ -1032,15 +1032,10 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
   bool doread;
-  char * const hostname = SSL_HOST_NAME();
   const char *pubkey_ptr;
   struct ssl_backend_data *backend = connssl->backend;
 
   doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
-
-  DEBUGF(infof(data,
-               "schannel: SSL/TLS connection with %s port %hu (step 2/3)",
-               hostname, conn->remote_port));
 
   if(!backend->cred || !backend->ctxt)
     return CURLE_SSL_CONNECT_ERROR;
