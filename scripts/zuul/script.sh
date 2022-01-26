@@ -108,43 +108,6 @@ if [ "$T" = "cmake" ]; then
   env TFLAGS="!1139 $TFLAGS" cmake --build build --target test-nonflaky
 fi
 
-if [ "$T" = "distcheck" ]; then
-  # find BOM markers and exit if we do
-  ! git grep `printf '\xef\xbb\xbf'`
-  ./configure --without-ssl
-  make
-  ./maketgz 99.98.97
-  # verify in-tree build - and install it
-  tar xf curl-99.98.97.tar.gz
-  cd curl-99.98.97
-  ./configure --prefix=$HOME/temp --without-ssl
-  make
-  make TFLAGS=1 test
-  make install
-  # basic check of the installed files
-  cd ..
-  bash scripts/installcheck.sh $HOME/temp
-  rm -rf curl-99.98.97
-  # verify out-of-tree build
-  tar xf curl-99.98.97.tar.gz
-  touch curl-99.98.97/docs/{cmdline-opts,libcurl}/Makefile.inc
-  mkdir build
-  cd build
-  ../curl-99.98.97/configure --without-ssl
-  make
-  make TFLAGS='-p 1 1139' test
-  # verify cmake build
-  cd ..
-  rm -rf curl-99.98.97
-  tar xf curl-99.98.97.tar.gz
-  cd curl-99.98.97
-  mkdir build
-  cd build
-  cmake ..
-  make
-  cd ../..
-fi
-
 if [ "$T" = "fuzzer" ]; then
   # Download the fuzzer to a temporary folder
   ./tests/fuzz/download_fuzzer.sh /tmp/curl_fuzzer
