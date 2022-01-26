@@ -59,7 +59,7 @@
  want to know the amount of milliseconds between two points in a transfer. For
  those, and other similar situations, the
  [`--trace-time`](https://curl.se/docs/manpage.html#--trace-time) option
- is what you need. it will prepend the time to each trace output line:
+ is what you need. It will prepend the time to each trace output line:
 
     curl --trace-ascii d.txt --trace-time http://example.com/
 
@@ -166,7 +166,7 @@
 
  A single curl command line may involve one or many URLs. The most common case
  is probably to just use one, but you can specify any amount of URLs. Yes
- any. No limits. you will then get requests repeated over and over for all the
+ any. No limits. You will then get requests repeated over and over for all the
  given URLs.
 
  Example, send two GETs:
@@ -471,7 +471,7 @@
  If you use curl to POST to a site that immediately redirects you to another
  page, you can safely use
  [`--location`](https://curl.se/docs/manpage.html#-L) (`-L`) and
- `--data`/`--form` together. curl will only use POST in the first request, and
+ `--data`/`--form` together. Curl will only use POST in the first request, and
  then revert to GET in the following operations.
 
 ## Other redirects
