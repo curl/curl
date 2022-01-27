@@ -1,3 +1,4 @@
+#!/bin/sh
 # File: gnv_curl_configure.sh
 #
 # $Id$
