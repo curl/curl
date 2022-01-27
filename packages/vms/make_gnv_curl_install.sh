@@ -1,3 +1,4 @@
+#!/bin/sh
 # File: make_gnv_curl_install.sh
 #
 # $Id$
