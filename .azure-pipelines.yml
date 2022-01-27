@@ -152,7 +152,7 @@ stages:
 
       displayName: 'verify out-of-tree cmake build'
 
-- stage: scan-build
+- stage: scanbuild
   dependsOn: []
   jobs:
   - job: ubuntu
