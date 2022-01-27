@@ -163,9 +163,9 @@ Windows vs Unix
  Inside the source code, We make an effort to avoid `#ifdef [Your OS]`. All
  conditionals that deal with features *should* instead be in the format
  `#ifdef HAVE_THAT_WEIRD_FUNCTION`. Since Windows cannot run configure scripts,
- we maintain a `curl_config-win32.h` file in lib directory that is supposed to
- look exactly like a `curl_config.h` file would have looked like on a Windows
- machine.
+ we maintain a `curl_config-win32.h` file in the lib directory that is supposed
+ to look exactly like a `curl_config.h` file would have looked like on a
+ Windows machine.
 
  Generally speaking: always remember that this will be compiled on dozens of
  operating systems. Do not walk on the edge.
@@ -239,7 +239,7 @@ multi_do()
    The protocol-specific functions of course deal with protocol-specific
    negotiations and setup. When they are ready to start the actual file
    transfer they call the `Curl_setup_transfer()` function (in
-   `lib/transfer.c`) to setup the transfer and returns.
+   `lib/transfer.c`) to setup the transfer and return.
 
    If this DO function fails and the connection is being re-used, libcurl will
    then close this connection, setup a new connection and re-issue the DO
@@ -525,7 +525,7 @@ Memory Debugging
  allocated but never freed and other kinds of errors related to resource
  management.
 
- Internally, definition of preprocessor symbol `DEBUGBUILD` restricts code
+ Internally, definition of the preprocessor symbol `DEBUGBUILD` restricts code
  which is only compiled for debug enabled builds. And symbol `CURLDEBUG` is
  used to differentiate code which is _only_ used for memory
  tracking/debugging.
@@ -620,8 +620,9 @@ curlx
    A macro that converts a string containing a number to a `curl_off_t` number.
    This might use the `curlx_strtoll()` function which is provided as source
    code in strtoofft.c. Note that the function is only provided if no
-   `strtoll()` (or equivalent) function exist on your platform. If `curl_off_t`
-   is only a 32-bit number on your platform, this macro uses `strtol()`.
+   `strtoll()` (or equivalent) function exists on your platform. If
+   `curl_off_t` is only a 32-bit number on your platform, this macro uses
+   `strtol()`.
 
 Future
 ------
@@ -778,7 +779,7 @@ Track Down Memory Leaks
   curl_dbg_memdebug("dump");
 ```
 
-  This will make the malloc debug system output a full trace of all resource
+  This will make the malloc debug system output a full trace of all resources
   using functions to the given file name. Make sure you rebuild your program
   and that you link with the same libcurl you built for this purpose as
   described above.
@@ -895,8 +896,8 @@ for older and later versions as things do not change drastically that often.
 
   A general idea in libcurl is to keep connections around in a connection
   "cache" after they have been used in case they will be used again and then
-  re-use an existing one instead of creating a new as it creates a significant
-  performance boost.
+  re-use an existing one instead of creating a new one as it creates a
+  significant performance boost.
 
   Each `connectdata` identifies a single physical connection to a server. If
   the connection cannot be kept alive, the connection will be closed after use
@@ -922,7 +923,7 @@ for older and later versions as things do not change drastically that often.
   this single struct and thus can be considered a single connection for most
   internal concerns.
 
-  The libcurl source code generally use the name `conn` for the variable that
+  The libcurl source code generally uses the name `conn` for the variable that
   points to the connectdata.
 
 <a name="Curl_multi"></a>
@@ -943,7 +944,7 @@ for older and later versions as things do not change drastically that often.
   list when an individual `Curl_easy`'s transfer has completed.
 
   `->hostcache` points to the name cache. It is a hash table for looking up
-  name to IP. The nodes have a limited life time in there and this cache is
+  name to IP. The nodes have a limited lifetime in there and this cache is
   meant to reduce the time for when the same name is wanted within a short
   period of time.
 
@@ -960,7 +961,7 @@ for older and later versions as things do not change drastically that often.
 
   `->closure_handle` is described in the `connectdata` section.
 
-  The libcurl source code generally use the name `multi` for the variable that
+  The libcurl source code generally uses the name `multi` for the variable that
   points to the `Curl_multi` struct.
 
 <a name="Curl_handler"></a>
@@ -1001,8 +1002,8 @@ for older and later versions as things do not change drastically that often.
   the DO action internally. If the DO is not enough and things need to be kept
   getting done for the entire DO sequence to complete, `->doing` is then
   usually also provided. Each protocol that needs to do multiple commands or
-  similar for do/doing need to implement their own state machines (see SCP,
-  SFTP, FTP). Some protocols (only FTP and only due to historical reasons) has
+  similar for do/doing needs to implement their own state machines (see SCP,
+  SFTP, FTP). Some protocols (only FTP and only due to historical reasons) have
   a separate piece of the DO state called `DO_MORE`.
 
   `->doing` keeps getting called while issuing the transfer request command(s)
@@ -1048,7 +1049,8 @@ for older and later versions as things do not change drastically that often.
     limit which "direction" of socket actions that the main engine will
     concern itself with.
 
-  - `PROTOPT_NONETWORK` - a protocol that does not use network (read `file:`)
+  - `PROTOPT_NONETWORK` - a protocol that does not use the network (read
+    `file:`)
 
   - `PROTOPT_NEEDSPWD` - this protocol needs a password and will use a default
     one unless one is provided

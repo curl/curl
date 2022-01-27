@@ -25,7 +25,7 @@ HTTP/3 and QUIC support in curl is considered **EXPERIMENTAL** until further
 notice. It needs to be enabled at build-time.
 
 Further development and tweaking of the HTTP/3 support in curl will happen in
-in the master branch using pull-requests, just like ordinary changes.
+the master branch using pull-requests, just like ordinary changes.
 
 # ngtcp2 version
 
@@ -157,7 +157,7 @@ Check out the [list of known HTTP3 bugs](https://curl.se/docs/knownbugs.html#HTT
 This is not advice on how to run anything in production. This is for
 development and experimenting.
 
-## Preqreqs
+## Prereqs
 
 An existing local HTTP/1.1 server that hosts files. Preferably also a few huge
 ones.  You can easily create huge local files like `truncate -s=8G 8GB` - they

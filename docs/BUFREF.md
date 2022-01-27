@@ -6,7 +6,7 @@ when the reference is invalidated. Once referenced, a buffer cannot be
 reallocated.
 
 A data length is stored within the reference for binary data handling
-purpose; it is not used by the bufref API.
+purposes; it is not used by the bufref API.
 
 The `struct bufref` is used to hold data referencing a buffer. The members of
 that structure **MUST NOT** be accessed or modified without using the dedicated
@@ -43,7 +43,7 @@ void Curl_bufref_set(struct bufref *br, const void *buffer, size_t length,
 ```
 
 Releases the previously referenced buffer, then assigns the new `buffer` to
-the structure, associated with its `destructor` function. The later can be
+the structure, associated with its `destructor` function. The latter can be
 specified as `NULL`: this will be the case when the referenced buffer is
 static.
 

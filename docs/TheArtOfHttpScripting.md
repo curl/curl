@@ -336,9 +336,9 @@
 
 ## Figure Out What A POST Looks Like
 
- When you are about fill in a form and send to a server by using curl instead
- of a browser, you are of course interested in sending a POST exactly the way
- your browser does.
+ When you are about to fill in a form and send it to a server by using curl
+ instead of a browser, you are of course interested in sending a POST exactly
+ the way your browser does.
 
  An easy way to get to see this, is to save the HTML page with the form on
  your local disk, modify the 'method' to a GET, and press the submit button
@@ -476,7 +476,7 @@
 
 ## Other redirects
 
- Browser typically support at least two other ways of redirects that curl
+ Browsers typically support at least two other ways of redirects that curl
  does not: first the html may contain a meta refresh tag that asks the browser
  to load a specific URL after a set number of seconds, or it may use
  javascript to do it.
