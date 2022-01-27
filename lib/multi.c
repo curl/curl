@@ -703,14 +703,15 @@ static CURLcode multi_done(struct Curl_easy *data,
       conn->bits.conn_to_host ? conn->conn_to_host.dispname :
       conn->host.dispname;
     /* create string before returning the connection */
+    long connection_id = conn->connection_id;
     msnprintf(buffer, sizeof(buffer),
               "Connection #%ld to host %s left intact",
-              conn->connection_id, host);
+              connection_id, host);
     /* the connection is no longer in use by this transfer */
     CONNCACHE_UNLOCK(data);
     if(Curl_conncache_return_conn(data, conn)) {
       /* remember the most recently used connection */
-      data->state.lastconnect_id = conn->connection_id;
+      data->state.lastconnect_id = connection_id;
       infof(data, "%s", buffer);
     }
     else
