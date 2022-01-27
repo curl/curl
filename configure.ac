@@ -2577,6 +2577,11 @@ if test X"$want_nghttp2" != Xno; then
           NGHTTP2_ENABLED=1
           AC_DEFINE(USE_NGHTTP2, 1, [if nghttp2 is in use])
           AC_SUBST(USE_NGHTTP2, [1])
+
+          DIR_H2=`echo $LD_H2 | $SED -e 's/^-L//'`
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_H2"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_H2 to CURL_LIBRARY_PATH])
        )
       ],
         dnl not found, revert back to clean variables
