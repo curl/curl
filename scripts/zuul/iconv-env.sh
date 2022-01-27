@@ -1,3 +1,4 @@
+#!/bin/sh
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -19,5 +20,4 @@
 # KIND, either express or implied.
 #
 ###########################################################################
-#!/bin/sh
 export CPPFLAGS="-DCURL_DOES_CONVERSIONS -DHAVE_ICONV -DCURL_ICONV_CODESET_OF_HOST='\"ISO8859-1\"'"
