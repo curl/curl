@@ -119,9 +119,3 @@ if [ "$T" = "fuzzer" ]; then
   ./mainline.sh ${CURLSRC}
   popd
 fi
-
-if [ "$T" = "scan-build" ]; then
-  scan-build ./configure --enable-debug --enable-werror $C
-  scan-build --status-bugs make
-  scan-build --status-bugs make examples
-fi
