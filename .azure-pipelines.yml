@@ -98,7 +98,7 @@ stages:
   dependsOn: []
   jobs:
   - job: ubuntu
-    timeoutInMinutes: 10
+    timeoutInMinutes: 20
     pool:
       vmImage: 'ubuntu-latest'
     strategy:
