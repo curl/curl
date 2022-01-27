@@ -163,9 +163,12 @@ stages:
       matrix:
         default:
           name: default
-          install: clang-tools-10 clang-9 libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
+          install:
 
     steps:
+    - script: sudo apt-get update && sudo apt-get install -y clang-tools-10 clang-9 libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
+      displayName: 'apt install'
+
     - script: scan-build ./configure --enable-debug --enable-werror --with-openssl --with-libssh2
       displayName: 'configure'
       env:
