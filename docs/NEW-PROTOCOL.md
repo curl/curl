@@ -5,7 +5,7 @@ another protocol to curl. After all, curl already supports 25 something
 protocols and it is the Internet transfer machine for the world.
 
 In the curl project we love protocols and we love supporting many protocols
-and do it well.
+and doing it well.
 
 So how do you proceed to add a new protocol and what are the requirements?
 

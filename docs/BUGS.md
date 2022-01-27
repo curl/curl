@@ -177,7 +177,7 @@
 ## What happens on first filing
 
  When a new issue is posted in the issue tracker or on the mailing list, the
- team of developers first need to see the report. Maybe they took the day off,
+ team of developers first needs to see the report. Maybe they took the day off,
  maybe they are off in the woods hunting. Have patience. Allow at least a few
  days before expecting someone to have responded.
 
@@ -257,7 +257,7 @@
 ## Closing off stalled bugs
 
  The [issue and pull request trackers](https://github.com/curl/curl) only
- holds "active" entries open (using a non-precise definition of what active
+ hold "active" entries open (using a non-precise definition of what active
  actually is, but they are at least not completely dead). Those that are
  abandoned or in other ways dormant will be closed and sometimes added to
  `TODO` and `KNOWN_BUGS` instead.

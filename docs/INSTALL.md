@@ -111,7 +111,7 @@ want to alter it, you can select how to deal with each individual library.
 
 ## Select TLS backend
 
-These options are provided to select TLS backend to use.
+These options are provided to select the TLS backend to use.
 
  - AmiSSL: `--with-amissl`
  - BearSSL: `--with-bearssl`
@@ -224,9 +224,9 @@ versions.
 ## Using BSD-style lwIP instead of Winsock TCP/IP stack in Win32 builds
 
 In order to compile libcurl and curl using BSD-style lwIP TCP/IP stack it is
-necessary to make definition of preprocessor symbol `USE_LWIPSOCK` visible to
-libcurl and curl compilation processes. To set this definition you have the
-following alternatives:
+necessary to make the definition of the preprocessor symbol `USE_LWIPSOCK`
+visible to libcurl and curl compilation processes. To set this definition you
+have the following alternatives:
 
  - Modify `lib/config-win32.h` and `src/config-win32.h`
  - Modify `winbuild/Makefile.vc`
@@ -323,7 +323,8 @@ make -j8
 make install
 ```
 
-In all above, the built libraries and executables can be found in `artifacts` folder.
+In all above, the built libraries and executables can be found in the
+`artifacts` folder.
 
 # Android
 

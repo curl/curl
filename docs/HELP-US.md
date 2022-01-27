@@ -84,4 +84,4 @@ the specific implementation. Either way is fine.
 We offer [guidelines](https://curl.se/dev/contribute.html) that are
 suitable to be familiar with before you decide to contribute to curl. If
 you are used to open source development, you will probably not find many
-surprises in there.
+surprises there.

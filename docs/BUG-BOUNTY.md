@@ -16,7 +16,7 @@ this program.
 See all details at [https://hackerone.com/curl](https://hackerone.com/curl)
 
 This bounty is relying on funds from sponsors. If you use curl professionally,
-consider help funding this! See
+consider helping fund this! See
 [https://opencollective.com/curl](https://opencollective.com/curl) for
 details.
 
@@ -71,7 +71,7 @@ can raise the amounts depending on the particular issue.
 # What happens if the bounty fund is drained?
 
 The bounty fund depends on sponsors. If we pay out more bounties than we add,
-the fund will eventually drain. If that end up happening, we will simply not
+the fund will eventually drain. If that ends up happening, we will simply not
 be able to pay out as high bounties as we would like and hope that we can
 convince new sponsors to help us top up the fund again.
 

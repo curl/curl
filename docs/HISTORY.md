@@ -145,7 +145,7 @@ June: the curl website gets 13000 visits weekly. curl and libcurl is
 35000 lines of code. Reported successful compiles on more than 40 combinations
 of CPUs and operating systems.
 
-To estimate number of users of the curl tool or libcurl library is next to
+To estimate the number of users of the curl tool or libcurl library is next to
 impossible. Around 5000 downloaded packages each week from the main site gives
 a hint, but the packages are mirrored extensively, bundled with numerous OS
 distributions and otherwise retrieved as part of other software.

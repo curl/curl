@@ -603,7 +603,7 @@ header from being used:
 ## FTP and Path Names
 
 Do note that when getting files with a `ftp://` URL, the given path is
-relative the directory you enter. To get the file `README` from your home
+relative to the directory you enter. To get the file `README` from your home
 directory at your ftp site, do:
 
     curl ftp://user:passwd@my.site.com/README
@@ -770,8 +770,8 @@ If you have installed the OpenLDAP library, curl can take advantage of it and
 offer `ldap://` support. On Windows, curl will use WinLDAP from Platform SDK
 by default.
 
-Default protocol version used by curl is LDAPv3. LDAPv2 will be used as
-fallback mechanism in case if LDAPv3 will fail to connect.
+Default protocol version used by curl is LDAPv3. LDAPv2 will be used as a
+fallback mechanism in case LDAPv3 fails to connect.
 
 LDAP is a complex thing and writing an LDAP query is not an easy task. I do
 advise you to dig up the syntax description for that elsewhere. One such place
@@ -791,7 +791,7 @@ You also can use authentication when accessing LDAP catalog:
     curl -u user:passwd "ldap://ldap.frontec.se/o=frontec??sub?mail=*"
     curl "ldap://user:passwd@ldap.frontec.se/o=frontec??sub?mail=*"
 
-By default, if user and password provided, OpenLDAP/WinLDAP will use basic
+By default, if user and password are provided, OpenLDAP/WinLDAP will use basic
 authentication. On Windows you can control this behavior by providing one of
 `--basic`, `--ntlm` or `--digest` option in curl command line
 

@@ -153,7 +153,7 @@ since it often means passing around the password in plain text and is thus a
 security risk.
 
 URLs for IMAP, POP3 and SMTP also support *login options* as part of the
-userinfo field. they are provided as a semicolon after the password and then
+userinfo field. They are provided as a semicolon after the password and then
 the options.
 
 ## Hostname
@@ -220,7 +220,7 @@ directory listing for the root / home directory will be returned.
 
 FTP servers typically put the user in its "home directory" after login, which
 then differs between users. To explicitly specify the root directory of an FTP
-server start the path with double slash `//` or `/%2f` (2F is the hexadecimal
+server, start the path with double slash `//` or `/%2f` (2F is the hexadecimal
 value of the ascii code for the slash).
 
 ## FILE
