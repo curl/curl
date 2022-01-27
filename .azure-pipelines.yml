@@ -152,6 +152,31 @@ stages:
 
       displayName: 'verify out-of-tree cmake build'
 
+- stage: scan-build
+  dependsOn: []
+  jobs:
+  - job: ubuntu
+    timeoutInMinutes: 20
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      matrix:
+        default:
+          name: default
+          install: clang-tools-10 clang-9 libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
+
+    steps:
+    - script: scan-build ./configure --enable-debug --enable-werror --with-openssl --with-libssh2
+      displayName: 'configure'
+      env:
+        CC: "clang-9"
+        CCX: "clang++-9"
+
+    - script: scan-build --status-bugs make
+      displayName: 'make'
+
+    - script: scan-build --status-bugs make examples
+      displayName: 'make examples'
 
 ##########################################
 ### Windows jobs below

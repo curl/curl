@@ -413,26 +413,6 @@
         C: --with-openssl
 
 - job:
-    name: curl-scan-build
-    parent: curl-base
-    vars:
-      curl_apt_packages:
-        - clang-tools-10
-        - clang-9
-        - libssl-dev
-        - libssh2-1-dev
-        - libpsl-dev
-        - libbrotli-dev
-        - libzstd-dev
-      curl_env:
-        CC: clang-9
-        CXX: clang++-9
-        T: scan-build
-        C: >-
-          --with-openssl
-          --with-libssh2
-
-- job:
     name: curl-debug-clang-with-openssl-dl-ubsan
     parent: curl-base
     vars:
@@ -484,6 +464,5 @@
       - curl-events
       - curl-fuzzer
       - curl-tidy
-      - curl-scan-build
       - curl-debug-clang-with-openssl-dl-ubsan
 ...
