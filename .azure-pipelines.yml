@@ -172,16 +172,16 @@ stages:
     - script: ./buildconf
       displayName: 'buildconf'
 
-    - script: scan-build ./configure --enable-debug --enable-werror --with-openssl --with-libssh2
+    - script: scan-build-10 ./configure --enable-debug --enable-werror --with-openssl --with-libssh2
       displayName: 'configure'
       env:
         CC: "clang-9"
         CCX: "clang++-9"
 
-    - script: scan-build --status-bugs make
+    - script: scan-build-10 --status-bugs make
       displayName: 'make'
 
-    - script: scan-build --status-bugs make examples
+    - script: scan-build-10 --status-bugs make examples
       displayName: 'make examples'
 
 ##########################################
