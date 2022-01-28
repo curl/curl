@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -450,6 +450,11 @@ struct negotiatedata {
 };
 #endif
 
+#ifdef CURL_DISABLE_PROXY
+#define CONN_IS_PROXIED(x) 0
+#else
+#define CONN_IS_PROXIED(x) x->bits.proxy
+#endif
 
 /*
  * Boolean values that concerns this connection.
@@ -470,6 +475,7 @@ struct ConnectBits {
   BIT(proxy_connect_closed); /* TRUE if a proxy disconnected the connection
                                 in a CONNECT request with auth, so that
                                 libcurl should reconnect and continue. */
+  BIT(proxy); /* if set, this transfer is done through a proxy - any type */
 #endif
   /* always modify bits.close with the connclose() and connkeep() macros! */
   BIT(close); /* if set, we close the connection after this request */
@@ -479,7 +485,6 @@ struct ConnectBits {
                         that overrides the host in the URL */
   BIT(conn_to_port); /* if set, this connection has a "connect to port"
                         that overrides the port in the URL (remote port) */
-  BIT(proxy); /* if set, this transfer is done through a proxy - any type */
   BIT(user_passwd); /* do we use user+password for this connection? */
   BIT(ipv6_ip); /* we communicate with a remote site specified with pure IPv6
                    IP address */

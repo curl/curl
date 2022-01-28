@@ -3390,7 +3390,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
     else
 #endif
 
-    if(!conn->bits.proxy) {
+    if(!CONN_IS_PROXIED(conn)) {
       struct hostname *connhost;
       if(conn->bits.conn_to_host)
         connhost = &conn->conn_to_host;
