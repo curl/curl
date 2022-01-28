@@ -339,6 +339,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   }
 
   if(ssl_cafile && verifypeer) {
+#ifdef MBEDTLS_FS_IO
     ret = mbedtls_x509_crt_parse_file(&backend->cacert, ssl_cafile);
 
     if(ret<0) {
@@ -347,9 +348,14 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
             ssl_cafile, -ret, errorbuf);
       return CURLE_SSL_CACERT_BADFILE;
     }
+#else
+    failf(data, "mbedtls: functions that use the filesystem not built in");
+    return CURLE_NOT_BUILT_IN;
+#endif
   }
 
   if(ssl_capath) {
+#ifdef MBEDTLS_FS_IO
     ret = mbedtls_x509_crt_parse_path(&backend->cacert, ssl_capath);
 
     if(ret<0) {
@@ -360,12 +366,17 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
       if(verifypeer)
         return CURLE_SSL_CACERT_BADFILE;
     }
+#else
+    failf(data, "mbedtls: functions that use the filesystem not built in");
+    return CURLE_NOT_BUILT_IN;
+#endif
   }
 
   /* Load the client certificate */
   mbedtls_x509_crt_init(&backend->clicert);
 
   if(ssl_cert) {
+#ifdef MBEDTLS_FS_IO
     ret = mbedtls_x509_crt_parse_file(&backend->clicert, ssl_cert);
 
     if(ret) {
@@ -375,6 +386,10 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
       return CURLE_SSL_CERTPROBLEM;
     }
+#else
+    failf(data, "mbedtls: functions that use the filesystem not built in");
+    return CURLE_NOT_BUILT_IN;
+#endif
   }
 
   if(ssl_cert_blob) {
@@ -403,6 +418,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
   if(SSL_SET_OPTION(key) || SSL_SET_OPTION(key_blob)) {
     if(SSL_SET_OPTION(key)) {
+#ifdef MBEDTLS_FS_IO
 #if MBEDTLS_VERSION_NUMBER >= 0x03000000
       ret = mbedtls_pk_parse_keyfile(&backend->pk, SSL_SET_OPTION(key),
                                      SSL_SET_OPTION(key_passwd),
@@ -419,6 +435,10 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
               SSL_SET_OPTION(key), -ret, errorbuf);
         return CURLE_SSL_CERTPROBLEM;
       }
+#else
+      failf(data, "mbedtls: functions that use the filesystem not built in");
+      return CURLE_NOT_BUILT_IN;
+#endif
     }
     else {
       const struct curl_blob *ssl_key_blob = SSL_SET_OPTION(key_blob);
@@ -455,6 +475,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   mbedtls_x509_crl_init(&backend->crl);
 
   if(ssl_crlfile) {
+#ifdef MBEDTLS_FS_IO
     ret = mbedtls_x509_crl_parse_file(&backend->crl, ssl_crlfile);
 
     if(ret) {
@@ -464,6 +485,10 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
       return CURLE_SSL_CRL_BADFILE;
     }
+#else
+    failf(data, "mbedtls: functions that use the filesystem not built in");
+    return CURLE_NOT_BUILT_IN;
+#endif
   }
 #else
   if(ssl_crlfile) {
