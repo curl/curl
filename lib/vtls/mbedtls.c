@@ -41,9 +41,6 @@
 #include <mbedtls/net.h>
 #endif
 #include <mbedtls/ssl.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03000000
-#include <mbedtls/certs.h>
-#endif
 #include <mbedtls/x509.h>
 
 #include <mbedtls/error.h>
