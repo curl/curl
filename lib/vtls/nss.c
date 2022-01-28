@@ -882,8 +882,14 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
        !memcmp(ALPN_HTTP_1_1, buf, ALPN_HTTP_1_1_LENGTH)) {
       conn->negnpn = CURL_HTTP_VERSION_1_1;
     }
-    Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
-                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+
+    /* This callback might get called when PR_Recv() is used within
+     * close_one() during a connection shutdown. At that point there might not
+     * be any "bundle" associated with the connection anymore.
+     */
+    if(conn->bundle)
+      Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                          BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 }
 
