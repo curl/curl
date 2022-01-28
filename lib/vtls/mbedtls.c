@@ -80,7 +80,9 @@ struct ssl_backend_data {
   int server_fd;
   mbedtls_x509_crt cacert;
   mbedtls_x509_crt clicert;
+#ifdef MBEDTLS_X509_CRL_PARSE_C
   mbedtls_x509_crl crl;
+#endif
   mbedtls_pk_context pk;
   mbedtls_ssl_config config;
   const char *protocols[3];
@@ -452,6 +454,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   }
 
   /* Load the CRL */
+#ifdef MBEDTLS_X509_CRL_PARSE_C
   mbedtls_x509_crl_init(&backend->crl);
 
   if(ssl_crlfile) {
@@ -465,6 +468,12 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
       return CURLE_SSL_CRL_BADFILE;
     }
   }
+#else
+  if(ssl_crlfile) {
+    failf(data, "mbedtls: crl support not built in");
+    return CURLE_NOT_BUILT_IN;
+  }
+#endif
 
   infof(data, "mbedTLS: Connecting to %s:%ld", hostname, port);
 
@@ -555,7 +564,11 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
   mbedtls_ssl_conf_ca_chain(&backend->config,
                             &backend->cacert,
+#ifdef MBEDTLS_X509_CRL_PARSE_C
                             &backend->crl);
+#else
+                            NULL);
+#endif
 
   if(SSL_SET_OPTION(key) || SSL_SET_OPTION(key_blob)) {
     mbedtls_ssl_conf_own_cert(&backend->config,
@@ -896,7 +909,9 @@ static void mbedtls_close(struct Curl_easy *data,
   mbedtls_pk_free(&backend->pk);
   mbedtls_x509_crt_free(&backend->clicert);
   mbedtls_x509_crt_free(&backend->cacert);
+#ifdef MBEDTLS_X509_CRL_PARSE_C
   mbedtls_x509_crl_free(&backend->crl);
+#endif
   mbedtls_ssl_config_free(&backend->config);
   mbedtls_ssl_free(&backend->ssl);
   mbedtls_ctr_drbg_free(&backend->ctr_drbg);
