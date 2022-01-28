@@ -2535,11 +2535,13 @@ case "$OPT_H2" in
     dnl --with-nghttp2 option used without path
     want_nghttp2="default"
     want_nghttp2_path=""
+    want_nghttp2_pkg_config_path=""
     ;;
   *)
     dnl --with-nghttp2 option used with path
     want_nghttp2="yes"
-    want_nghttp2_path="$withval/lib/pkgconfig"
+    want_nghttp2_path="$withval"
+    want_nghttp2_pkg_config_path="$withval/lib/pkgconfig"
     ;;
 esac
 
@@ -2549,56 +2551,57 @@ if test X"$want_nghttp2" != Xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(libnghttp2, $want_nghttp2_path)
+  CURL_CHECK_PKGCONFIG(libnghttp2, $want_nghttp2_pkg_config_path)
 
   if test "$PKGCONFIG" != "no" ; then
-    LIB_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_path])
+    LIB_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_pkg_config_path])
       $PKGCONFIG --libs-only-l libnghttp2`
     AC_MSG_NOTICE([-l is $LIB_H2])
 
-    CPP_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_path]) dnl
+    CPP_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_pkg_config_path]) dnl
       $PKGCONFIG --cflags-only-I libnghttp2`
     AC_MSG_NOTICE([-I is $CPP_H2])
 
-    LD_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_path])
+    LD_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_pkg_config_path])
       $PKGCONFIG --libs-only-L libnghttp2`
     AC_MSG_NOTICE([-L is $LD_H2])
 
-    LDFLAGS="$LDFLAGS $LD_H2"
-    CPPFLAGS="$CPPFLAGS $CPP_H2"
-    LIBS="$LIB_H2 $LIBS"
-
-    # use nghttp2_session_set_local_window_size to require nghttp2
-    # >= 1.12.0
-    AC_CHECK_LIB(nghttp2, nghttp2_session_set_local_window_size,
-      [
-       AC_CHECK_HEADERS(nghttp2/nghttp2.h,
-          curl_h2_msg="enabled (nghttp2)"
-          NGHTTP2_ENABLED=1
-          AC_DEFINE(USE_NGHTTP2, 1, [if nghttp2 is in use])
-          AC_SUBST(USE_NGHTTP2, [1])
-
-          DIR_H2=`echo $LD_H2 | $SED -e 's/^-L//'`
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_H2"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_H2 to CURL_LIBRARY_PATH])
-       )
-      ],
-        dnl not found, revert back to clean variables
-        LDFLAGS=$CLEANLDFLAGS
-        CPPFLAGS=$CLEANCPPFLAGS
-        LIBS=$CLEANLIBS
-    )
-
-  else
-    dnl no nghttp2 pkg-config found, deal with it
-    if test X"$want_nghttp2" != Xdefault; then
-      dnl To avoid link errors, we do not allow --with-nghttp2 without
-      dnl a pkgconfig file
-      AC_MSG_ERROR([--with-nghttp2 was specified but could not find libnghttp2 pkg-config file.])
-    fi
+    DIR_H2=`echo $LD_H2 | $SED -e 's/^-L//'`
+  elif test x"$want_nghttp2_path" != x; then
+    LIB_H2="-lnghttp2"
+    LD_H2=-L${want_nghttp2_path}/lib$libsuff
+    CPP_H2=-I${want_nghttp2_path}/include
+    DIR_H2=${want_nghttp2_path}/lib$libsuff
+  elif test X"$want_nghttp2" != Xdefault; then
+    dnl no nghttp2 pkg-config found and no custom directory specified,
+    dnl deal with it
+    AC_MSG_ERROR([--with-nghttp2 was specified but could not find libnghttp2 pkg-config file.])
   fi
 
+  LDFLAGS="$LDFLAGS $LD_H2"
+  CPPFLAGS="$CPPFLAGS $CPP_H2"
+  LIBS="$LIB_H2 $LIBS"
+
+  # use nghttp2_session_set_local_window_size to require nghttp2
+  # >= 1.12.0
+  AC_CHECK_LIB(nghttp2, nghttp2_session_set_local_window_size,
+    [
+     AC_CHECK_HEADERS(nghttp2/nghttp2.h,
+        curl_h2_msg="enabled (nghttp2)"
+        NGHTTP2_ENABLED=1
+        AC_DEFINE(USE_NGHTTP2, 1, [if nghttp2 is in use])
+        AC_SUBST(USE_NGHTTP2, [1])
+     )
+
+     CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_H2"
+     export CURL_LIBRARY_PATH
+     AC_MSG_NOTICE([Added $DIR_H2 to CURL_LIBRARY_PATH])
+    ],
+      dnl not found, revert back to clean variables
+      LDFLAGS=$CLEANLDFLAGS
+      CPPFLAGS=$CLEANCPPFLAGS
+      LIBS=$CLEANLIBS
+  )
 fi
 
 dnl **********************************************************************
