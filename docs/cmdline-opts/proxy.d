@@ -15,7 +15,7 @@ socks5:// or socks5h:// to request a specific SOCKS version to be used.
 (Added in 7.21.7)
 
 HTTPS proxy support via https:// protocol prefix was added in 7.52.0 for
-OpenSSL, GnuTLS and NSS.
+OpenSSL and GnuTLS.
 
 Unrecognized and unsupported proxy protocols cause an error since 7.52.0.
 Prior versions may ignore the protocol and use http:// instead.

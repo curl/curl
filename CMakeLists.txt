@@ -348,7 +348,7 @@ endif()
 # This check below for use of deprecated symbols is only temporary and is to
 # be removed again after a year's service. Remove after November 25, 2022.
 set(CURL_RECONFIG_REQUIRED 0)
-foreach(_LIB GSSAPI OPENLDAP LIBSSH LIBSSH2 BEARSSL MBEDTLS NSS OPENSSL
+foreach(_LIB GSSAPI OPENLDAP LIBSSH LIBSSH2 BEARSSL MBEDTLS OPENSSL
         SCHANNEL SECTRANSP WOLFSSL)
   if(CMAKE_USE_${_LIB})
     set(CURL_RECONFIG_REQUIRED 1)
@@ -377,7 +377,6 @@ if(WIN32)
 endif()
 cmake_dependent_option(CURL_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CURL_USE_NSS "Enable NSS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_WOLFSSL "enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 
 set(openssl_default ON)
@@ -393,7 +392,6 @@ count_true(enabled_ssl_options_count
   CURL_USE_OPENSSL
   CURL_USE_MBEDTLS
   CURL_USE_BEARSSL
-  CURL_USE_NSS
   CURL_USE_WOLFSSL
 )
 if(enabled_ssl_options_count GREATER "1")
@@ -484,19 +482,6 @@ if(CURL_USE_WOLFSSL)
   set(USE_WOLFSSL ON)
   list(APPEND CURL_LIBS ${WolfSSL_LIBRARIES})
   include_directories(${WolfSSL_INCLUDE_DIRS})
-endif()
-
-if(CURL_USE_NSS)
-  find_package(NSS REQUIRED)
-  include_directories(${NSS_INCLUDE_DIRS})
-  list(APPEND CURL_LIBS ${NSS_LIBRARIES})
-  set(SSL_ENABLED ON)
-  set(USE_NSS ON)
-  cmake_push_check_state()
-  set(CMAKE_REQUIRED_INCLUDES ${NSS_INCLUDE_DIRS})
-  set(CMAKE_REQUIRED_LIBRARIES ${NSS_LIBRARIES})
-  check_symbol_exists(PK11_CreateManagedGenericObject "pk11pub.h" HAVE_PK11_CREATEMANAGEDGENERICOBJECT)
-  cmake_pop_check_state()
 endif()
 
 option(USE_NGHTTP2 "Use Nghttp2 library" OFF)
@@ -872,8 +857,7 @@ elseif("${CURL_CA_PATH}" STREQUAL "none")
   unset(CURL_CA_PATH CACHE)
 elseif("${CURL_CA_PATH}" STREQUAL "auto")
   unset(CURL_CA_PATH CACHE)
-  if(NOT USE_NSS)
-    set(CURL_CA_PATH_AUTODETECT TRUE)
+  set(CURL_CA_PATH_AUTODETECT TRUE)
   endif()
 else()
   set(CURL_CA_PATH_SET TRUE)
@@ -891,7 +875,6 @@ elseif(CURL_CA_PATH_AUTODETECT OR CURL_CA_BUNDLE_AUTODETECT)
         /etc/ssl/certs/ca-certificates.crt
         /etc/pki/tls/certs/ca-bundle.crt
         /usr/share/ssl/certs/ca-bundle.crt
-        /usr/local/share/certs/ca-root-nss.crt
         /etc/ssl/cert.pem)
 
     foreach(SEARCH_CA_BUNDLE_PATH ${SEARCH_CA_BUNDLE_PATHS})
@@ -1382,7 +1365,7 @@ macro(_add_if label)
 endmacro()
 
 # NTLM support requires crypto function adaptions from various SSL libs
-# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
+# TODO alternative SSL libs tests for SSP1, GNUTLS
 if(NOT (CURL_DISABLE_CRYPTO_AUTH OR CURL_DISABLE_NTLM) AND
     (USE_OPENSSL OR USE_MBEDTLS OR USE_DARWINSSL OR USE_WIN32_CRYPTO))
   set(use_curl_ntlm_core ON)
@@ -1411,7 +1394,7 @@ _add_if("SPNEGO"        NOT CURL_DISABLE_CRYPTO_AUTH AND
 _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
-# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
+# TODO alternative SSL libs tests for SSP1, GNUTLS
 _add_if("NTLM"          NOT (CURL_DISABLE_CRYPTO_AUTH OR CURL_DISABLE_NTLM) AND
                         (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
 # TODO missing option (autoconf: --enable-ntlm-wb)
@@ -1424,7 +1407,7 @@ _add_if("TLS-SRP"       USE_TLS_SRP)
 _add_if("HTTP2"         USE_NGHTTP2)
 _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
 _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
-_add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS OR USE_NSS))
+_add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS))
 _add_if("unicode"       ENABLE_UNICODE)
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
@@ -1475,7 +1458,6 @@ _add_if("OpenSSL"          SSL_ENABLED AND USE_OPENSSL)
 _add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
 _add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)
 _add_if("BearSSL"          SSL_ENABLED AND USE_BEARSSL)
-_add_if("NSS"              SSL_ENABLED AND USE_NSS)
 _add_if("wolfSSL"          SSL_ENABLED AND USE_WOLFSSL)
 if(_items)
   list(SORT _items)

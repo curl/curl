@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,11 +29,6 @@
 
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
-
-#ifdef USE_NSS
-#include <nspr.h>
-#include <plarenas.h>
 #endif
 
 #define ENABLE_CURLX_PRINTF
@@ -212,14 +207,6 @@ static void main_free(struct GlobalConfig *config)
   /* Main cleanup */
   curl_global_cleanup();
   convert_cleanup();
-#ifdef USE_NSS
-  if(PR_Initialized()) {
-    /* prevent valgrind from reporting still reachable mem from NSPR arenas */
-    PL_ArenaFinish();
-    /* prevent valgrind from reporting possibly lost memory (fd cache, ...) */
-    PR_Cleanup();
-  }
-#endif
   free_globalconfig(config);
 
   /* Free the config structures */

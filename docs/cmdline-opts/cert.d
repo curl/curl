@@ -16,16 +16,6 @@ the terminal. Note that this option assumes a \&"certificate" file that is the
 private key and the client certificate concatenated! See --cert and --key to
 specify them independently.
 
-If curl is built against the NSS SSL library then this option can tell
-curl the nickname of the certificate to use within the NSS database defined
-by the environment variable SSL_DIR (or by default /etc/pki/nssdb). If the
-NSS PEM PKCS#11 module (libnsspem.so) is available then PEM files may be
-loaded. If you want to use a file from the current directory, please precede
-it with "./" prefix, in order to avoid confusion with a nickname. If the
-nickname contains ":", it needs to be preceded by "\\" so that it is not
-recognized as password delimiter. If the nickname contains "\\", it needs to
-be escaped as "\\\\" so that it is not recognized as an escape character.
-
 If curl is built against OpenSSL library, and the engine pkcs11 is available,
 then a PKCS#11 URI (RFC 7512) can be used to specify a certificate located in
 a PKCS#11 device. A string beginning with "pkcs11:" will be interpreted as a

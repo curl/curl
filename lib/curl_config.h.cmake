@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -917,9 +917,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* If you want to build curl with the built-in manual */
 #cmakedefine USE_MANUAL 1
-
-/* if NSS is enabled */
-#cmakedefine USE_NSS 1
 
 /* if you have the PK11_CreateManagedGenericObject function */
 #cmakedefine HAVE_PK11_CREATEMANAGEDGENERICOBJECT 1

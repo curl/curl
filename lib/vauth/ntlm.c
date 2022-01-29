@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -43,12 +43,6 @@
 #include "warnless.h"
 #include "rand.h"
 #include "vtls/vtls.h"
-
-/* SSL backend-specific #if branches in this file must be kept in the order
-   documented in curl_ntlm_core. */
-#if defined(NTLM_NEEDS_NSS_INIT)
-#include "vtls/nssg.h" /* for Curl_nss_force_init() */
-#endif
 
 #define BUILDING_CURL_NTLM_MSGS_C
 #include "vauth/vauth.h"
@@ -271,12 +265,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   const unsigned char *type2 = Curl_bufref_ptr(type2ref);
   size_t type2len = Curl_bufref_len(type2ref);
 
-#if defined(NTLM_NEEDS_NSS_INIT)
-  /* Make sure the crypto backend is initialized */
-  result = Curl_nss_force_init(data);
-  if(result)
-    return result;
-#elif defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void)data;
 #endif
 
