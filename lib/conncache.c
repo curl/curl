@@ -199,7 +199,7 @@ static bool conncache_add_bundle(struct conncache *connc,
 {
   void *p = Curl_hash_add(&connc->hash, key, strlen(key), bundle);
 
-  return p?TRUE:FALSE;
+  return p;
 }
 
 static void conncache_remove_bundle(struct conncache *connc,
