@@ -193,13 +193,11 @@ Curl_conncache_find_bundle(struct Curl_easy *data,
   return bundle;
 }
 
-static bool conncache_add_bundle(struct conncache *connc,
-                                 char *key,
-                                 struct connectbundle *bundle)
+static void *conncache_add_bundle(struct conncache *connc,
+                                  char *key,
+                                  struct connectbundle *bundle)
 {
-  void *p = Curl_hash_add(&connc->hash, key, strlen(key), bundle);
-
-  return p?TRUE:FALSE;
+  return Curl_hash_add(&connc->hash, key, strlen(key), bundle);
 }
 
 static void conncache_remove_bundle(struct conncache *connc,
@@ -238,7 +236,6 @@ CURLcode Curl_conncache_add_conn(struct Curl_easy *data)
   bundle = Curl_conncache_find_bundle(data, conn, data->state.conn_cache,
                                       NULL);
   if(!bundle) {
-    int rc;
     char key[HASHKEY_SIZE];
 
     result = bundle_create(&bundle);
@@ -247,9 +244,8 @@ CURLcode Curl_conncache_add_conn(struct Curl_easy *data)
     }
 
     hashkey(conn, key, sizeof(key), NULL);
-    rc = conncache_add_bundle(data->state.conn_cache, key, bundle);
 
-    if(!rc) {
+    if(!conncache_add_bundle(data->state.conn_cache, key, bundle)) {
       bundle_destroy(bundle);
       result = CURLE_OUT_OF_MEMORY;
       goto unlock;
