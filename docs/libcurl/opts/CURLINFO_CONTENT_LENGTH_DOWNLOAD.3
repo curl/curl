@@ -35,6 +35,11 @@ Pass a pointer to a double to receive the content-length of the download. This
 is the value read from the Content-Length: field. Since 7.19.4, this returns
 -1 if the size is not known.
 
+Some transfers do not have a Content-Length: and instead the server signals
+when the download is complete by using a termination marker (eg HTTP/2
+end-of-stream). In such a case the received content size is the content-length.
+(Added in 7.82.0)
+
 \fICURLINFO_CONTENT_LENGTH_DOWNLOAD_T(3)\fP is a newer replacement that returns a more
 sensible variable type.
 .SH PROTOCOLS

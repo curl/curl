@@ -158,7 +158,7 @@ int tool_progress_cb(void *clientp,
   else
     point = dlnow + ulnow + bar->initial_size;
 
-  if(bar->calls) {
+  if(bar->calls && total == bar->prevtotal) {
     /* after first call... */
     if(total) {
       /* we know the total data to get... */
@@ -181,7 +181,7 @@ int tool_progress_cb(void *clientp,
   /* simply count invokes */
   bar->calls++;
 
-  if((total > 0) && (point != bar->prev)) {
+  if((total > 0) && ((point != bar->prev) || (total != bar->prevtotal))) {
     char line[MAX_BARLENGTH + 1];
     char format[40];
     double frac;
@@ -190,9 +190,10 @@ int tool_progress_cb(void *clientp,
     int num;
     if(point > total)
       /* we have got more than the expected total! */
-      total = point;
+      frac = 1;
+    else
+      frac = (double)point / (double)total;
 
-    frac = (double)point / (double)total;
     percent = frac * 100.0;
     barwidth = bar->width - 7;
     num = (int) (((double)barwidth) * frac);
@@ -206,6 +207,7 @@ int tool_progress_cb(void *clientp,
   fflush(bar->out);
   bar->prev = point;
   bar->prevtime = now;
+  bar->prevtotal = total;
 
   if(config->readbusy) {
     config->readbusy = FALSE;

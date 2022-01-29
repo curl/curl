@@ -1,0 +1,82 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+chunked Transfer-Encoding
+progressbar
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Server: fakeit/0.9 fakeitbad/1.0
+Transfer-Encoding: chunked
+Connection: mooo
+
+6
+chunk1
+7
+chunk2
+
+0
+
+</data>
+<datacheck>
+HTTP/1.1 200 OK
+Server: fakeit/0.9 fakeitbad/1.0
+Transfer-Encoding: chunked
+Connection: mooo
+
+chunk1chunk2
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP GET with progress bar and chunked transfer
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -# --stderr log/stderrlog%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<file name="log/stderrlog%TESTNUMBER" mode="text">
+correct
+</file>
+#
+# Check that the final progress bar is 100.0%
+#
+# Chunked transfer download content size is unknown until last-chunk (0).
+# curl's progress callback receives the known download total and changes format
+# from spaceship (size unknown) to bar (size known).
+# It looks sort of like this (condensed for example):
+# -=O=-          #     #    #     #
+# \r############################ 100.0%
+#
+# Since this example is very fast it is highly likely the size is known
+# instantly and therefore the spaceship is never shown.
+#
+<stripfile>
+s/.*\r#+ 100.0%/correct/
+</stripfile>
+</verify>
+
+</testcase>

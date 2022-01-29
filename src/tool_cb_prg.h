@@ -30,6 +30,7 @@ struct ProgressData {
   int         calls;
   curl_off_t  prev;
   struct timeval prevtime;
+  curl_off_t  prevtotal;
   int         width;
   FILE       *out;  /* where to write everything to */
   curl_off_t  initial_size;

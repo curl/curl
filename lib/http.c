@@ -1654,6 +1654,19 @@ CURLcode Curl_http_done(struct Curl_easy *data,
     return CURLE_GOT_NOTHING;
   }
 
+  /* Set the total download size for when it is not known until end of transfer
+     (eg successful finish of chunked encoding or HTTP/2 stream). */
+  if(status == CURLE_OK && data->req.size == -1 &&
+     !(data->progress.flags & PGRS_DL_SIZE_KNOWN) &&
+     !premature && !conn->bits.retry && !data->set.connect_only &&
+     (
+#ifdef USE_NGHTTP2
+      (conn->httpversion == 20 && http->close_handled) ||
+#endif
+      data->req.chunk)) {
+    Curl_pgrsSetDownloadSize(data, data->req.bytecount);
+  }
+
   return CURLE_OK;
 }
 
