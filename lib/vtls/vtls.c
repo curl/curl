@@ -628,18 +628,25 @@ void Curl_ssl_associate_conn(struct Curl_easy *data,
 {
   if(Curl_ssl->associate_connection) {
     Curl_ssl->associate_connection(data, conn, FIRSTSOCKET);
+#ifndef CURL_DISABLE_FTP
     if(conn->sock[SECONDARYSOCKET] && conn->bits.sock_accepted)
       Curl_ssl->associate_connection(data, conn, SECONDARYSOCKET);
+#endif
   }
 }
 
 void Curl_ssl_detach_conn(struct Curl_easy *data,
                           struct connectdata *conn)
 {
+#ifdef CURL_DISABLE_FTP
+  (void)conn;
+#endif
   if(Curl_ssl->disassociate_connection) {
     Curl_ssl->disassociate_connection(data, FIRSTSOCKET);
+#ifndef CURL_DISABLE_FTP
     if(conn->sock[SECONDARYSOCKET] && conn->bits.sock_accepted)
       Curl_ssl->disassociate_connection(data, SECONDARYSOCKET);
+#endif
   }
 }
 

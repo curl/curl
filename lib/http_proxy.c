@@ -101,14 +101,19 @@ CURLcode Curl_proxy_connect(struct Curl_easy *data, int sockindex)
 
     if(conn->bits.conn_to_host)
       hostname = conn->conn_to_host.name;
+#ifndef CURL_DISABLE_FTP
     else if(sockindex == SECONDARYSOCKET)
       hostname = conn->secondaryhostname;
+#endif
     else
       hostname = conn->host.name;
 
+#ifndef CURL_DISABLE_FTP
     if(sockindex == SECONDARYSOCKET)
       remote_port = conn->secondary_port;
-    else if(conn->bits.conn_to_port)
+    else
+#endif
+    if(conn->bits.conn_to_port)
       remote_port = conn->conn_to_port;
     else
       remote_port = conn->remote_port;

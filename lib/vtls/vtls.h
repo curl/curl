@@ -140,11 +140,17 @@ bool Curl_ssl_tls13_ciphersuites(void);
 /* set of helper macros for the backends to access the correct fields. For the
    proxy or for the remote host - to properly support HTTPS proxy */
 #ifndef CURL_DISABLE_PROXY
+#ifndef CURL_DISABLE_FTP
 #define SSL_IS_PROXY()                                                  \
   (CURLPROXY_HTTPS == conn->http_proxy.proxytype &&                     \
    ssl_connection_complete !=                                           \
    conn->proxy_ssl[conn->sock[SECONDARYSOCKET] ==                       \
                    CURL_SOCKET_BAD ? FIRSTSOCKET : SECONDARYSOCKET].state)
+#else
+#define SSL_IS_PROXY()                                                  \
+  (CURLPROXY_HTTPS == conn->http_proxy.proxytype &&                     \
+   ssl_connection_complete != conn->proxy_ssl[FIRSTSOCKET].state)
+#endif
 #define SSL_SET_OPTION(var)                                             \
   (SSL_IS_PROXY() ? data->set.proxy_ssl.var : data->set.ssl.var)
 #define SSL_SET_OPTION_LVALUE(var)                                      \

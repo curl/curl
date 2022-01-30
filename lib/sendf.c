@@ -291,6 +291,9 @@ CURLcode Curl_write(struct Curl_easy *data,
                     size_t len,
                     ssize_t *written)
 {
+#ifdef CURL_DISABLE_FTP
+  (void)sockfd;
+#endif
   ssize_t bytes_written;
   CURLcode result = CURLE_OK;
   struct connectdata *conn;
@@ -298,7 +301,11 @@ CURLcode Curl_write(struct Curl_easy *data,
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
   conn = data->conn;
+#ifndef CURL_DISABLE_FTP
   num = (sockfd == conn->sock[SECONDARYSOCKET]);
+#else
+  num = 0;
+#endif
 
 #ifdef CURLDEBUG
   {
@@ -408,11 +415,18 @@ CURLcode Curl_write_plain(struct Curl_easy *data,
                           size_t len,
                           ssize_t *written)
 {
+#ifdef CURL_DISABLE_FTP
+  (void)sockfd;
+#endif
   CURLcode result;
   struct connectdata *conn = data->conn;
   int num;
   DEBUGASSERT(conn);
+#ifndef CURL_DISABLE_FTP
   num = (sockfd == conn->sock[SECONDARYSOCKET]);
+#else
+  num = 0;
+#endif
 
   *written = Curl_send_plain(data, num, mem, len, &result);
 
@@ -677,6 +691,9 @@ CURLcode Curl_read(struct Curl_easy *data,   /* transfer */
                    size_t sizerequested,     /* max amount to read */
                    ssize_t *n)               /* amount bytes read */
 {
+#ifdef CURL_DISABLE_FTP
+  (void)sockfd;
+#endif
   CURLcode result = CURLE_RECV_ERROR;
   ssize_t nread = 0;
   size_t bytesfromsocket = 0;
@@ -686,7 +703,11 @@ CURLcode Curl_read(struct Curl_easy *data,   /* transfer */
   /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
      If it is the second socket, we set num to 1. Otherwise to 0. This lets
      us use the correct ssl handle. */
+#ifndef CURL_DISABLE_FTP
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
+#else
+  int num = 0;
+#endif
 
   *n = 0; /* reset amount to zero */
 

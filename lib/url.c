@@ -138,8 +138,10 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 
 /* Count of the backend ssl objects to allocate */
 #ifdef USE_SSL
-#  ifndef CURL_DISABLE_PROXY
+#  if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_FTP)
 #    define SSL_BACKEND_CNT 4
+#  elif defined(CURL_DISABLE_PROXY) && defined(CURL_DISABLE_FTP)
+#    define SSL_BACKEND_CNT 1
 #  else
 #    define SSL_BACKEND_CNT 2
 #  endif
@@ -752,11 +754,15 @@ static void conn_shutdown(struct Curl_easy *data, struct connectdata *conn)
   /* close the SSL stuff before we close any sockets since they will/may
      write to the sockets */
   Curl_ssl_close(data, conn, FIRSTSOCKET);
+#ifndef CURL_DISABLE_FTP
   Curl_ssl_close(data, conn, SECONDARYSOCKET);
+#endif
 
   /* close possibly still open sockets */
+#ifndef CURL_DISABLE_FTP
   if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET])
     Curl_closesocket(data, conn, conn->sock[SECONDARYSOCKET]);
+#endif
   if(CURL_SOCKET_BAD != conn->sock[FIRSTSOCKET])
     Curl_closesocket(data, conn, conn->sock[FIRSTSOCKET]);
   if(CURL_SOCKET_BAD != conn->tempsock[0])
@@ -790,7 +796,9 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->host.rawalloc); /* host name buffer */
   Curl_safefree(conn->conn_to_host.rawalloc); /* host name buffer */
   Curl_safefree(conn->hostname_resolve);
+#ifndef CURL_DISABLE_FTP
   Curl_safefree(conn->secondaryhostname);
+#endif
   Curl_safefree(conn->connect_state);
 
   conn_reset_all_postponed_data(conn);
@@ -1674,11 +1682,17 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
       return NULL;
     }
     conn->ssl_extra = ssl;
-    conn->ssl[0].backend = (void *)ssl;
-    conn->ssl[1].backend = (void *)(ssl + sslsize);
-#ifndef CURL_DISABLE_PROXY
-    conn->proxy_ssl[0].backend = (void *)(ssl + 2 * sslsize);
-    conn->proxy_ssl[1].backend = (void *)(ssl + 3 * sslsize);
+    conn->ssl[FIRSTSOCKET].backend = (void *)ssl;
+#if !defined(CURL_DISABLE_PROXY)
+#  if !defined(CURL_DISABLE_FTP)
+    conn->ssl[SECONDARYSOCKET].backend = (void *)(ssl + sslsize);
+    conn->proxy_ssl[FIRSTSOCKET].backend = (void *)(ssl + 2 * sslsize);
+    conn->proxy_ssl[SECONDARYSOCKET].backend = (void *)(ssl + 3 * sslsize);
+#  else
+    conn->proxy_ssl[FIRSTSOCKET].backend = (void *)(ssl + sslsize);
+#endif
+#elif !defined(CURL_DISABLE_FTP)
+    conn->ssl[SECONDARYSOCKET].backend = (void *)(ssl + sslsize);
 #endif
   }
 #endif
@@ -1690,15 +1704,19 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   /* and we setup a few fields in case we end up actually using this struct */
 
   conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;     /* no file descriptor */
+#ifndef CURL_DISABLE_FTP
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD; /* no file descriptor */
+#endif
   conn->tempsock[0] = CURL_SOCKET_BAD; /* no file descriptor */
   conn->tempsock[1] = CURL_SOCKET_BAD; /* no file descriptor */
   conn->connection_id = -1;    /* no ID */
   conn->port = -1; /* unknown at this point */
   conn->remote_port = -1; /* unknown at this point */
 #if defined(USE_RECV_BEFORE_SEND_WORKAROUND) && defined(DEBUGBUILD)
-  conn->postponed[0].bindsock = CURL_SOCKET_BAD; /* no file descriptor */
-  conn->postponed[1].bindsock = CURL_SOCKET_BAD; /* no file descriptor */
+  conn->postponed[FIRSTSOCKET].bindsock = CURL_SOCKET_BAD;
+#ifndef CURL_DISABLE_FTP
+  conn->postponed[SECONDARYSOCKET].bindsock = CURL_SOCKET_BAD;
+#endif
 #endif /* USE_RECV_BEFORE_SEND_WORKAROUND && DEBUGBUILD */
 
   /* Default protocol-independent behavior doesn't support persistent
@@ -3737,8 +3755,10 @@ static CURLcode create_conn(struct Curl_easy *data,
 
   conn->recv[FIRSTSOCKET] = Curl_recv_plain;
   conn->send[FIRSTSOCKET] = Curl_send_plain;
+#ifndef CURL_DISABLE_FTP
   conn->recv[SECONDARYSOCKET] = Curl_recv_plain;
   conn->send[SECONDARYSOCKET] = Curl_send_plain;
+#endif
 
   conn->bits.tcp_fastopen = data->set.tcp_fastopen;
 

@@ -73,9 +73,11 @@ void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn);
   (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
   !conn->bits.proxy_ssl_connected[FIRSTSOCKET])
 
+#ifndef CURL_DISABLE_FTP
 #define CONNECT_SECONDARYSOCKET_PROXY_SSL()\
   (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
   !conn->bits.proxy_ssl_connected[SECONDARYSOCKET])
+#endif
 #endif /* !CURL_DISABLE_PROXY */
 
 #endif /* HEADER_CURL_URL_H */

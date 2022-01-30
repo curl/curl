@@ -789,11 +789,17 @@ static CURLcode connect_SOCKS(struct Curl_easy *data, int sockindex,
       conn->http_proxy.host.name :
       conn->bits.conn_to_host ?
       conn->conn_to_host.name :
+#ifndef CURL_DISABLE_FTP
       sockindex == SECONDARYSOCKET ?
-      conn->secondaryhostname : conn->host.name;
+      conn->secondaryhostname :
+#endif
+      conn->host.name;
+
     const int port =
       conn->bits.httpproxy ? (int)conn->http_proxy.port :
+#ifndef CURL_DISABLE_FTP
       sockindex == SECONDARYSOCKET ? conn->secondary_port :
+#endif
       conn->bits.conn_to_port ? conn->conn_to_port :
       conn->remote_port;
     switch(conn->socks_proxy.proxytype) {
@@ -863,7 +869,7 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
   int rc = 0;
   unsigned int i;
 
-  DEBUGASSERT(sockindex >= FIRSTSOCKET && sockindex <= SECONDARYSOCKET);
+  DEBUGASSERT(sockindex >= FIRSTSOCKET && sockindex < SOCKET_CNT);
 
   *connected = FALSE; /* a very negative world view is best */
 
@@ -1541,19 +1547,23 @@ int Curl_closesocket(struct Curl_easy *data, struct connectdata *conn,
                      curl_socket_t sock)
 {
   if(conn && conn->fclosesocket) {
+#ifndef CURL_DISABLE_FTP
     if((sock == conn->sock[SECONDARYSOCKET]) && conn->bits.sock_accepted)
       /* if this socket matches the second socket, and that was created with
          accept, then we MUST NOT call the callback but clear the accepted
          status */
       conn->bits.sock_accepted = FALSE;
     else {
+#endif
       int rc;
       Curl_multi_closed(data, sock);
       Curl_set_in_callback(data, true);
       rc = conn->fclosesocket(conn->closesocket_client, sock);
       Curl_set_in_callback(data, false);
       return rc;
+#ifndef CURL_DISABLE_FTP
     }
+#endif
   }
 
   if(conn)

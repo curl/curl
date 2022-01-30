@@ -526,8 +526,10 @@ struct ConnectBits {
   BIT(abstract_unix_socket);
 #endif
   BIT(tls_upgraded);
+#ifndef CURL_DISABLE_FTP
   BIT(sock_accepted); /* TRUE if the SECONDARYSOCKET was created with
                          accept() */
+#endif
   BIT(parallel_connect); /* set TRUE when a parallel connect attempt has
                             started (happy eyeballs) */
 };
@@ -572,7 +574,12 @@ struct Curl_async {
 #endif
 
 #define FIRSTSOCKET     0
+#ifdef CURL_DISABLE_FTP
+#define SOCKET_CNT      1
+#else
+#define SOCKET_CNT      2
 #define SECONDARYSOCKET 1
+#endif
 
 enum expect100 {
   EXP100_SEND_DATA,           /* enough waiting, just send the body now */
@@ -957,7 +964,9 @@ struct connectdata {
 
   struct hostname host;
   char *hostname_resolve; /* host name to resolve to address, allocated */
+#ifndef CURL_DISABLE_FTP
   char *secondaryhostname; /* secondary socket host name (ftp) */
+#endif
   struct hostname conn_to_host; /* the host to connect to. valid only if
                                    bits.conn_to_host is set */
 #ifndef CURL_DISABLE_PROXY
@@ -968,8 +977,10 @@ struct connectdata {
   int remote_port; /* the remote port, not the proxy port! */
   int conn_to_port; /* the remote port to connect to. valid only if
                        bits.conn_to_port is set */
+#ifndef CURL_DISABLE_FTP
   unsigned short secondary_port; /* secondary socket remote port to connect to
                                     (ftp) */
+#endif
 
   /* 'primary_ip' and 'primary_port' get filled with peer's numerical
      ip address and port number whenever an outgoing connection is
@@ -989,19 +1000,20 @@ struct connectdata {
   struct curltime now;     /* "current" time */
   struct curltime created; /* creation time */
   struct curltime lastused; /* when returned to the connection cache */
-  curl_socket_t sock[2]; /* two sockets, the second is used for the data
-                            transfer when doing FTP */
+  curl_socket_t sock[SOCKET_CNT]; /* two sockets, the second is used for
+                                     the data transfer when doing FTP */
   curl_socket_t tempsock[2]; /* temporary sockets for happy eyeballs */
   int tempfamily[2]; /* family used for the temp sockets */
-  Curl_recv *recv[2];
-  Curl_send *send[2];
+  Curl_recv *recv[SOCKET_CNT];
+  Curl_send *send[SOCKET_CNT];
 
 #ifdef USE_RECV_BEFORE_SEND_WORKAROUND
-  struct postponed_data postponed[2]; /* two buffers for two sockets */
+  struct postponed_data postponed[SOCKET_CNT]; /* two buffers for
+                                                  two sockets */
 #endif /* USE_RECV_BEFORE_SEND_WORKAROUND */
-  struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
+  struct ssl_connect_data ssl[SOCKET_CNT]; /* ssl-stuff */
 #ifndef CURL_DISABLE_PROXY
-  struct ssl_connect_data proxy_ssl[2]; /* this is for proxy ssl-stuff */
+  struct ssl_connect_data proxy_ssl[SOCKET_CNT]; /* proxy ssl-stuff */
 #endif
 #ifdef USE_SSL
   void *ssl_extra; /* separately allocated backend-specific data */

@@ -452,9 +452,10 @@ static int data_pending(const struct Curl_easy *data)
   if(conn->transport == TRNSPRT_QUIC)
     return Curl_quic_data_pending(data);
 #endif
-
+#ifndef CURL_DISABLE_FTP
   if(conn->handler->protocol&PROTO_FAMILY_FTP)
     return Curl_ssl_data_pending(conn, SECONDARYSOCKET);
+#endif
 
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */

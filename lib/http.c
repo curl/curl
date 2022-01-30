@@ -1235,7 +1235,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
   curl_socket_t sockfd;
   size_t headersize;
 
-  DEBUGASSERT(socketindex <= SECONDARYSOCKET);
+  DEBUGASSERT(socketindex < SOCKET_CNT);
 
   sockfd = conn->sock[socketindex];
 
