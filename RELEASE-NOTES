@@ -4,7 +4,7 @@ curl and libcurl 7.82.0
  Command line options:         244
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2571
+ Contributors:                 2575
 
 This release includes the following changes:
 
@@ -17,11 +17,14 @@ This release includes the following bugfixes:
  o build: enable -Warith-conversion
  o build: fix -Wenum-conversion handling
  o checksrc: fix typo in comment [34]
+ o CI: move 'distcheck' job from zuul to azure pipelines [60]
+ o CI: move scan-build job from Zuul to Azure Pipelines [59]
  o CI: move the rustls CI job to GHA from Zuul [8]
  o CI: test building wolfssl with --enable-opensslextra [42]
  o CI: workflows/wolfssl: install impacket [47]
  o cmake: fix iOS CMake project generation error [13]
  o cmdline-opts/gen.pl: fix option matching to improve references [50]
+ o configure: set CURL_LIBRARY_PATH for nghttp2 [58]
  o curl tool: erase some more sensitive command line arguments [22]
  o curl-functions.m4: fix LIBRARY_PATH adjustment to avoid eval [5]
  o curl-functions.m4: revert DYLD_LIBRARY_PATH tricks in CURL_RUN_IFELSE [9]
@@ -40,8 +43,10 @@ This release includes the following bugfixes:
  o gen.pl: terminate "example" sections better [4]
  o hostcheck: fixed to not touch used input strings [38]
  o ldap: return CURLE_URL_MALFORMAT for bad URL [24]
+ o mbedtls: enable use of mbedtls without CRL support [57]
  o mbedtls: fix CURLOPT_SSLCERT_BLOB (again)
  o mbedtls: fix ssl_init error with mbedTLS 3.1.0+ [12]
+ o mbedtls: remove #include <mbedtls/certs.h> [56]
  o mbedtls: return CURLcode result instead of a mbedtls error code [1]
  o md5: check md5_init_func return value
  o misc: allow curl to build with wolfssl --enable-opensslextra [43]
@@ -52,10 +57,12 @@ This release includes the following bugfixes:
  o next.d. remove .fi/.nf as they are handled by gen.pl [3]
  o ngtcp2: adapt to changed end of headers callback proto [39]
  o ngtcp2: fix declaration of ‘result’ shadows a previous local [14]
+ o nss: handshake callback during shutdown has no conn->bundle [55]
  o openldap: implement SASL authentication [16]
  o openssl.h: avoid including OpenSSL headers here [15]
  o openssl: check SSL_get_ex_data to prevent potential NULL dereference [40]
  o openssl: check the return value of BIO_new_mem_buf() [18]
+ o openssl: fix `ctx_option_t` for OpenSSL v3+
  o openssl: return error if TLS 1.3 is requested when not supported [45]
  o projects: fix Visual Studio wolfSSL configurations
  o quiche: change qlog file extension to `.sqlog` [44]
@@ -69,11 +76,16 @@ This release includes the following bugfixes:
  o runtests: make 'wolfssl' a testable feature [6]
  o rustls: add CURLOPT_CAINFO_BLOB support [26]
  o scripts/copyright.pl: support many provided file names on the cmdline
+ o setopt: fix the TLSAUTH #ifdefs for proxy-disabled builds [53]
+ o test3021: disable all msys2 path transformation
  o test374: gif data without new line at the end [20]
  o tool_findfile: check ~/.config/curlrc too [17]
  o tool_getparam: DNS options that need c-ares now fail without it [31]
  o url: given a user in the URL, find pwd for that user in netrc [11]
+ o url: keep trailing dot in host name [62]
  o url: make Curl_disconnect return void [48]
+ o urldata: CONN_IS_PROXIED replaces bits.close when proxy can be disabled [52]
+ o vtls: pass on the right SNI name [61]
 
 This release includes the following known bugs:
 
@@ -82,14 +94,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Cameron Will, Daniel Stenberg, Fabian Keil,
-  Fabian Yamaguchi, Filip Lundgren, Harry Sarson, Ikko Ashimine, Jan Ehrhardt,
-  jhoyla on github, jonny112 on github, Lucas Pardue, Manfred Schwarb,
-  Marcel Raad, Melroy van den Berg, Michał Antoniak, Niels Martignène,
+  Alessandro Ghedini, Antoine Pietri, Bernhard Walle, Cameron Will,
+  Charles Cazabon, Daniel Stenberg, Eric Musser, Fabian Keil, Fabian Yamaguchi,
+  Filip Lundgren, Harry Sarson, Ikko Ashimine, Jan Ehrhardt, jhoyla on github,
+  jonny112 on github, Kushal Das, Lucas Pardue, Manfred Schwarb, Marcel Raad,
+  Melroy van den Berg, Michał Antoniak, neutric on github, Niels Martignène,
   Patrick Monnerat, pheiduck on github, Ray Satiro, Ryan Schmidt,
   Sandro Jaeckel, Satadru Pramanik, Stefan Eissing, Stephen Boost,
   Stephen M. Coakley, updatede on github, Viktor Szakats, Xiaoke Wang,
-  (29 contributors)
+  (35 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -143,3 +156,13 @@ References to bug reports and discussions on issues:
  [49] = https://curl.se/bug/?i=8235
  [50] = https://curl.se/bug/?i=8299
  [51] = https://curl.se/bug/?i=8291
+ [52] = https://curl.se/bug/?i=8350
+ [53] = https://curl.se/bug/?i=8350
+ [55] = https://curl.se/bug/?i=8341
+ [56] = https://curl.se/bug/?i=8343
+ [57] = https://curl.se/bug/?i=8344
+ [58] = https://curl.se/bug/?i=8340
+ [59] = https://curl.se/bug/?i=8338
+ [60] = https://curl.se/bug/?i=8334
+ [61] = https://curl.se/bug/?i=8320
+ [62] = https://curl.se/bug/?i=8290
