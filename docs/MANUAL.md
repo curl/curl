@@ -445,7 +445,7 @@ cookies from the 'headers' file like:
 
 While saving headers to a file is a working way to store cookies, it is
 however error-prone and not the preferred way to do this. Instead, make curl
-save the incoming cookies using the well-known netscape cookie format like
+save the incoming cookies using the well-known Netscape cookie format like
 this:
 
     curl -c cookies.txt www.example.com
@@ -458,13 +458,13 @@ non-existing file to trigger the cookie awareness like:
     curl -L -b empty.txt www.example.com
 
 The file to read cookies from must be formatted using plain HTTP headers OR as
-netscape's cookie file. Curl will determine what kind it is based on the file
+Netscape's cookie file. Curl will determine what kind it is based on the file
 contents. In the above command, curl will parse the header and store the
 cookies received from www.example.com. curl will send to the server the
 stored cookies which match the request as it follows the location. The file
 "empty.txt" may be a nonexistent file.
 
-To read and write cookies from a netscape cookie file, you can set both `-b`
+To read and write cookies from a Netscape cookie file, you can set both `-b`
 and `-c` to use the same file:
 
     curl -b cookies.txt -c cookies.txt www.example.com
