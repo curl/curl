@@ -603,7 +603,7 @@ FAQ
   have no built-in support for that, so it will be treated just like any other
   contents.
 
-  .pac files are a netscape invention and are sometimes used by organizations
+  .pac files are a Netscape invention and are sometimes used by organizations
   to allow them to differentiate which proxies to use. The .pac contents is
   just a Javascript program that gets invoked by the browser and that returns
   the name of the proxy to connect to. Since curl does not support Javascript,

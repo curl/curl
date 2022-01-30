@@ -36,7 +36,7 @@
   sharing the cookies with browsers, only to see browsers move away from that
   format. Modern browsers no longer use it, while curl still does.
 
-  The netscape cookie file format stores one cookie per physical line in the
+  The Netscape cookie file format stores one cookie per physical line in the
   file with a bunch of associated meta data, each field separated with
   TAB. That file is called the cookiejar in curl terminology.
 
@@ -112,7 +112,7 @@
 
   Provide detailed information about a single cookie to add to the internal
   storage of cookies. Pass in the cookie as a HTTP header with all the details
-  set, or pass in a line from a netscape cookie file. This option can also be
+  set, or pass in a line from a Netscape cookie file. This option can also be
   used to flush the cookies etc.
 
   `CURLINFO_COOKIELIST`

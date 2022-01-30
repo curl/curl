@@ -51,7 +51,7 @@
  - maximum amount of redirects to follow
  - custom HTTP request
  - cookie get/send fully parsed
- - reads/writes the netscape cookie file format
+ - reads/writes the Netscape cookie file format
  - custom headers (replace/remove internally generated headers)
  - custom user-agent string
  - custom referrer string
