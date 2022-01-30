@@ -280,7 +280,6 @@ my $h2cver = "h2c";
 my $has_rustls;     # built with rustls
 my $has_openssl;    # built with a lib using an OpenSSL-like API
 my $has_gnutls;     # built with GnuTLS
-my $has_nss;        # built with NSS
 my $has_wolfssl;    # built with wolfSSL
 my $has_schannel;   # built with Schannel
 my $has_sectransp;  # built with Secure Transport
@@ -2887,7 +2886,6 @@ sub setupfeatures {
     $feature{"manual"} = $has_manual;
     $feature{"MinGW"} = $has_mingw;
     $feature{"MultiSSL"} = $has_multissl;
-    $feature{"NSS"} = $has_nss;
     $feature{"NTLM"} = $has_ntlm;
     $feature{"NTLM_WB"} = $has_ntlm_wb;
     $feature{"OpenSSL"} = $has_openssl || $has_libressl || $has_boringssl;
@@ -3004,10 +3002,6 @@ sub checksystem {
            }
            elsif ($libcurl =~ /rustls-ffi/i) {
                $has_rustls=1;
-           }
-           elsif ($libcurl =~ /nss/i) {
-               $has_nss=1;
-               $has_sslpinning=1;
            }
            elsif ($libcurl =~ /wolfssl/i) {
                $has_wolfssl=1;
