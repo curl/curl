@@ -399,7 +399,6 @@ Features testable here are:
 - `manual`
 - `Mime`
 - `netrc`
-- `NSS`
 - `NTLM`
 - `OpenSSL`
 - `parsedate`
