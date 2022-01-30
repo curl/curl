@@ -270,7 +270,7 @@
  And to use curl to post this form with the same data filled in as before, we
  could do it like:
 
-    curl --data "birthyear=1905&press=%20OK%20" http://www.example.com/when.cgi
+    curl --data "birthyear=1905&press=%20OK%20" http://www.example.com/when/junk.cgi
 
  This kind of POST will use the Content-Type
  `application/x-www-form-urlencoded` and is the most widely used POST kind.
