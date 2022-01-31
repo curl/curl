@@ -34,7 +34,7 @@ CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_LOCKFUNC, lockcb);
 .SH DESCRIPTION
 Set a mutex lock callback for the share object, to allow it to get used by
 multiple threads concurrently. There's a corresponding
-\fICURLSHOPT_UNLOCKFUNC(3)\fP callback called when the mutex is again relased.
+\fICURLSHOPT_UNLOCKFUNC(3)\fP callback called when the mutex is again released.
 
 The \fIlockcb\fP argument must be a pointer to a function matching the
 prototype shown above. The arguments to the callback are:
