@@ -54,18 +54,6 @@
         - libzstd-dev
 
 - job:
-    name: curl-normal-with-openssl-enable-ares
-    parent: curl-base
-    vars:
-      curl_env:
-        CC: gcc-8
-        CXX: g++-8
-        T: normal
-        C: >-
-          --with-openssl
-          --enable-ares
-
-- job:
     name: curl-normal-with-openssl-disable-proxy
     parent: curl-base
     vars:
@@ -443,7 +431,6 @@
     check:
       jobs:
       - curl-normal-with-openssl-gssapi-libssh2-checksrc
-      - curl-normal-with-openssl-enable-ares
       - curl-normal-with-openssl-disable-proxy
       - curl-normal-with-openssl-disable-verbose-notests
       - curl-novalgrind-boringssl-with-openssl
