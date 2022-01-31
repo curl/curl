@@ -619,14 +619,6 @@
 #  endif
 #endif
 
-#ifdef NETWARE
-int netware_init(void);
-#ifndef __NOVELL_LIBC__
-#include <sys/bsdskt.h>
-#include <sys/timeval.h>
-#endif
-#endif
-
 #if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H) && !defined(USE_WIN32_IDN)
 /* The lib and header are present */
 #define USE_LIBIDN2

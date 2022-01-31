@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -165,12 +165,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   if(!Curl_amiga_init()) {
     DEBUGF(fprintf(stderr, "Error: Curl_amiga_init failed\n"));
     goto fail;
-  }
-#endif
-
-#ifdef NETWARE
-  if(netware_init()) {
-    DEBUGF(fprintf(stderr, "Warning: LONG namespace not available\n"));
   }
 #endif
 
