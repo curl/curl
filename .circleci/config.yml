@@ -33,6 +33,12 @@ commands:
             ./buildconf
             ./configure --enable-warnings --enable-werror --with-openssl
 
+  install-cares:
+    steps:
+      - run:
+          command: |
+            sudo apt-get update && sudo apt-get install -y libc-ares-dev
+
   configure-cares:
     steps:
       - run:
@@ -67,6 +73,7 @@ jobs:
     executor: ubuntu
     steps:
       - checkout
+      - install-cares
       - configure-cares
       - build
       - test
@@ -85,6 +92,10 @@ workflows:
   x86-openssl:
     jobs:
       - basic
+      - cares
+
+  openssl-c-ares:
+    jobs:
       - cares
 
   arm-openssl:
