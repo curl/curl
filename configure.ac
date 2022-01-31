@@ -263,8 +263,8 @@ AS_HELP_STRING([--with-rustls=PATH],[where to look for rustls, PATH points to th
   fi
 
 OPT_NSS=no
-AC_ARG_WITH(nss,dnl
-AS_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the installation root]),
+AC_ARG_WITH(nss-maybe-last-release,dnl
+AS_HELP_STRING([--with-nss-maybe-last-release=PATH],[where to look for NSS, PATH points to the installation root]),
   OPT_NSS=$withval
   if test X"$withval" != Xno; then
     test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }NSS")
@@ -282,7 +282,7 @@ Select from these:
   --with-bearssl
   --with-gnutls
   --with-mbedtls
-  --with-nss
+  --with-nss-maybe-last-release
   --with-openssl (also works for BoringSSL and libressl)
   --with-rustls
   --with-schannel
@@ -1873,7 +1873,7 @@ case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABL
 in
 x)
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl or --with-rustls to address this.])
+  AC_MSG_WARN([Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss-maybe-last-release, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl or --with-rustls to address this.])
   ;;
 x1)
   # one SSL backend is enabled

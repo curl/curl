@@ -245,7 +245,7 @@
         CXX: clang++-9
         T: debug
         C: >-
-          --with-nss
+          --with-nss-maybe-last-release
         CPPFLAGS: -isystem /usr/include/nss
         NOTESTS: 1
 

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -23,6 +23,8 @@
 AC_DEFUN([CURL_WITH_NSS], [
 if test "x$OPT_NSS" != xno; then
   ssl_msg=
+
+  AC_MSG_WARN([the curl project considers dropping NSS support, if this is a problem for you, please speak up on the curl-library mailing list or in https://github.com/curl/curl/pull/8351 ASAP!])
 
   if test X"$OPT_NSS" != Xno; then
 
