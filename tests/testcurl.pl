@@ -161,16 +161,6 @@ if ($^O eq 'MSWin32' || $targetos) {
       $libext = '.a';
     }
   }
-  elsif ($targetos =~ /netware/) {
-    $configurebuild = 0;
-    $binext = '.nlm';
-    if ($^O eq 'MSWin32') {
-      $libext = '.lib';
-    }
-    else {
-      $libext = '.a';
-    }
-  }
 }
 
 if (($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') &&
@@ -562,18 +552,9 @@ if ($configurebuild) {
   }
 } else {
   logit "copying files to build dir ...";
-  if (($^O eq 'MSWin32') && ($targetos !~ /netware/)) {
+  if ($^O eq 'MSWin32') {
     system("xcopy /s /q \"$CURLDIR\" .");
     system("buildconf.bat");
-  }
-  elsif ($targetos =~ /netware/) {
-    system("cp -afr $CURLDIR/* .");
-    system("cp -af $CURLDIR/Makefile.dist Makefile");
-    system("$make -i -C lib -f Makefile.netware prebuild");
-    system("$make -i -C src -f Makefile.netware prebuild");
-    if (-d "$CURLDIR/ares") {
-      system("$make -i -C ares -f Makefile.netware prebuild");
-    }
   }
   elsif ($^O eq 'linux') {
     system("cp -afr $CURLDIR/* .");

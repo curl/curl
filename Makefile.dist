@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -72,31 +72,6 @@ cygwin-ssl:
 amiga:
 	cd ./lib && make -f makefile.amiga
 	cd ./src && make -f makefile.amiga
-
-netware:
-	$(MAKE) -C lib -f Makefile.netware
-	$(MAKE) -C src -f Makefile.netware
-
-netware-clean:
-	$(MAKE) -C lib -f Makefile.netware clean
-	$(MAKE) -C src -f Makefile.netware clean
-	$(MAKE) -C docs/examples -f Makefile.netware clean
-
-netware-vclean netware-distclean:
-	$(MAKE) -C lib -f Makefile.netware vclean
-	$(MAKE) -C src -f Makefile.netware vclean
-	$(MAKE) -C docs/examples -f Makefile.netware vclean
-
-netware-install:
-	$(MAKE) -C lib -f Makefile.netware install
-	$(MAKE) -C src -f Makefile.netware install
-
-netware-examples-%:
-	$(MAKE) -C docs/examples -f Makefile.netware CFG=$@
-
-netware-%:
-	$(MAKE) -C lib -f Makefile.netware CFG=$@
-	$(MAKE) -C src -f Makefile.netware CFG=$@
 
 unix: all
 
