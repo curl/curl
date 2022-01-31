@@ -44,7 +44,7 @@ commands:
       - run:
           command: |
             ./buildconf
-            ./configure --enable-warnings --enable-werror --with-openssl --enable-cares
+            ./configure --enable-warnings --enable-werror --with-openssl --enable-ares
 
   build:
     steps:
