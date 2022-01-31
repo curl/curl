@@ -102,11 +102,20 @@ sub parse_main_opts {
             $option .= '}' if defined $short;
             $option .= '\'[' . trim($desc) . ']\'' if defined $desc;
 
-            $option .= ":'$arg'" if defined $arg;
-
-            $option .= ':_files'
-                if defined $arg and ($arg eq '<file>' || $arg eq '<filename>'
-                    || $arg eq '<dir>');
+            if (defined $arg) {
+                $option .= ":'$arg'";
+                if ($arg =~ /<file ?(name)?>|<path>/) {
+                    $option .= ':_files';
+                } elsif ($arg =~ /<dir>/) {
+                    $option .= ":'_path_files -/'";
+                } elsif ($arg =~ /<url>/i) {
+                    $option .= ':_urls';
+                } elsif ($long =~ /ftp/ && $arg =~ /<method>/) {
+                    $option .= ":'(multicwd nocwd singlecwd)'";
+                } elsif ($arg =~ /<method>/) {
+                    $option .= ":'(DELETE GET HEAD POST PUT)'";
+                }
+            }
         }
 
         push @list, $option;
