@@ -24,12 +24,9 @@
 
 #ifdef HAVE_STRERROR_R
 #  if (!defined(HAVE_POSIX_STRERROR_R) && \
-       !defined(HAVE_GLIBC_STRERROR_R) && \
-       !defined(HAVE_VXWORKS_STRERROR_R)) || \
-      (defined(HAVE_POSIX_STRERROR_R) && defined(HAVE_VXWORKS_STRERROR_R)) || \
-      (defined(HAVE_GLIBC_STRERROR_R) && defined(HAVE_VXWORKS_STRERROR_R)) || \
+       !defined(HAVE_GLIBC_STRERROR_R)) || \
       (defined(HAVE_POSIX_STRERROR_R) && defined(HAVE_GLIBC_STRERROR_R))
-#    error "strerror_r MUST be either POSIX, glibc or vxworks-style"
+#    error "strerror_r MUST be either POSIX, glibc style"
 #  endif
 #endif
 
@@ -878,18 +875,6 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
     char *msg = strerror_r(err, buffer, sizeof(buffer));
     if(msg)
       strncpy(buf, msg, max);
-    else
-      msnprintf(buf, max, "Unknown error %d", err);
-  }
-#elif defined(HAVE_STRERROR_R) && defined(HAVE_VXWORKS_STRERROR_R)
- /*
-  * The vxworks-style strerror_r() does use the buffer we pass to the function.
-  * The buffer size should be at least NAME_MAX (256)
-  */
-  {
-    char buffer[256];
-    if(OK == strerror_r(err, buffer))
-      strncpy(buf, buffer, max);
     else
       msnprintf(buf, max, "Unknown error %d", err);
   }
