@@ -54,35 +54,6 @@
         - libzstd-dev
 
 - job:
-    name: curl-normal-with-openssl-disable-proxy
-    parent: curl-base
-    vars:
-      curl_env:
-        T: normal
-        TFLAGS: "!2034 !2037 !2041"
-        C: >-
-          --with-openssl
-          --disable-proxy
-
-- job:
-    name: curl-normal-with-openssl-disable-verbose-notests
-    parent: curl-base
-    vars:
-      curl_apt_packages:
-        - libpsl-dev
-        - libbrotli-dev
-        - libzstd-dev
-      curl_env:
-        CC: gcc-8
-        CXX: g++-8
-        T: normal
-        C: >-
-          --with-openssl
-          --disable-verbose
-        CPPFLAGS: -Wno-variadic-macros
-        NOTESTS: 1
-
-- job:
     name: curl-novalgrind-boringssl-with-openssl
     parent: curl-base
     vars:
@@ -431,8 +402,6 @@
     check:
       jobs:
       - curl-normal-with-openssl-gssapi-libssh2-checksrc
-      - curl-normal-with-openssl-disable-proxy
-      - curl-normal-with-openssl-disable-verbose-notests
       - curl-novalgrind-boringssl-with-openssl
       - curl-novalgrind-boringssl-with-openssl-quiche
       - curl-debug-bearssl
