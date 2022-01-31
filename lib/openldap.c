@@ -844,6 +844,9 @@ static CURLcode oldap_disconnect(struct Curl_easy *data,
 {
   struct ldapconninfo *li = conn->proto.ldapc;
   (void) dead_connection;
+#ifndef USE_SSL
+  (void)data;
+#endif
 
   if(li) {
     if(li->ld) {
