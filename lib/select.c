@@ -38,10 +38,6 @@
 #include <dos.h>  /* delay() */
 #endif
 
-#ifdef __VXWORKS__
-#include <strings.h>  /* bzero() in FD_SET */
-#endif
-
 #include <curl/curl.h>
 
 #include "urldata.h"

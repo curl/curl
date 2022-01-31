@@ -73,8 +73,7 @@
     defined(ANDROID) || defined(__ANDROID__) || defined(__OpenBSD__) || \
     defined(__CYGWIN__) || defined(AMIGA) || defined(__NuttX__) || \
    (defined(__FreeBSD_version) && (__FreeBSD_version < 800000)) || \
-   (defined(__MidnightBSD_version) && (__MidnightBSD_version < 100000)) || \
-    defined(__VXWORKS__)
+   (defined(__MidnightBSD_version) && (__MidnightBSD_version < 100000))
 #include <sys/select.h>
 #endif
 
@@ -82,7 +81,7 @@
 #include <sys/socket.h>
 #endif
 
-#if !defined(CURL_WIN32) && !defined(__VXWORKS__)
+#if !defined(CURL_WIN32)
 #include <sys/time.h>
 #endif
 
