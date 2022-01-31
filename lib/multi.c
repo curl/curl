@@ -2168,7 +2168,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           Curl_posttransfer(data);
           drc = multi_done(data, result, FALSE);
 
-          /* When set to retry the connection, we must to go back to
+          /* When set to retry the connection, we must go back to
            * the CONNECT state */
           if(newurl) {
             if(!drc || (drc == CURLE_SEND_ERROR)) {
