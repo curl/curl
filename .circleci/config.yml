@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2021, 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -33,6 +33,19 @@ commands:
             ./buildconf
             ./configure --enable-warnings --enable-werror --with-openssl
 
+  install-cares:
+    steps:
+      - run:
+          command: |
+            sudo apt-get update && sudo apt-get install -y libc-ares-dev
+
+  configure-cares:
+    steps:
+      - run:
+          command: |
+            ./buildconf
+            ./configure --enable-warnings --enable-werror --with-openssl --enable-ares
+
   build:
     steps:
       - run: make V=1
@@ -56,6 +69,15 @@ jobs:
       - build
       - test
 
+  cares:
+    executor: ubuntu
+    steps:
+      - checkout
+      - install-cares
+      - configure-cares
+      - build
+      - test
+
   arm:
     machine:
       image: ubuntu-2004:202101-01
@@ -70,6 +92,11 @@ workflows:
   x86-openssl:
     jobs:
       - basic
+      - cares
+
+  openssl-c-ares:
+    jobs:
+      - cares
 
   arm-openssl:
     jobs:
