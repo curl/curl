@@ -33,11 +33,31 @@ commands:
             ./buildconf
             ./configure --enable-warnings --enable-werror --with-openssl
 
+  configure-openssl-no-verbose:
+    steps:
+      - run:
+          command: |
+            ./buildconf
+            ./configure --disable-verbose --enable-werror --with-openssl
+
+  configure-no-proxy:
+    steps:
+      - run:
+          command: |
+            ./buildconf
+            ./configure --disable-proxy --enable-werror --with-openssl
+
   install-cares:
     steps:
       - run:
           command: |
             sudo apt-get update && sudo apt-get install -y libc-ares-dev
+
+  install-deps:
+    steps:
+      - run:
+          command: |
+            sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
 
   configure-cares:
     steps:
@@ -73,6 +93,23 @@ jobs:
     steps:
       - checkout
       - configure
+      - build
+      - test
+
+  no-verbose:
+    executor: ubuntu
+    steps:
+      - checkout
+      - install-deps
+      - configure-openssl-no-verbose
+      - build
+
+  no-proxy:
+    executor: ubuntu
+    steps:
+      - checkout
+      - install-deps
+      - configure-no-proxy
       - build
       - test
 
@@ -114,6 +151,14 @@ workflows:
   openssl-c-ares:
     jobs:
       - cares
+
+  openssl-no-proxy:
+    jobs:
+      - no-proxy
+
+  openssl-no-verbose:
+    jobs:
+      - no-verbose
 
   arm-openssl:
     jobs:
