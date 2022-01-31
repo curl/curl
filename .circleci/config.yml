@@ -46,6 +46,13 @@ commands:
             ./buildconf
             ./configure --enable-warnings --enable-werror --with-openssl --enable-ares
 
+  configure-cares-debug:
+    steps:
+      - run:
+          command: |
+            ./buildconf
+            ./configure --enable-debug --enable-werror --with-openssl --enable-ares
+
   build:
     steps:
       - run: make V=1
@@ -88,11 +95,21 @@ jobs:
       - build
       - test
 
+  arm-cares:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
+    steps:
+      - checkout
+      - install-cares
+      - configure-cares-debug
+      - build
+      - test
+
 workflows:
   x86-openssl:
     jobs:
       - basic
-      - cares
 
   openssl-c-ares:
     jobs:
@@ -101,3 +118,7 @@ workflows:
   arm-openssl:
     jobs:
       - arm
+
+  arm-openssl-c-ares:
+    jobs:
+      - arm-cares
