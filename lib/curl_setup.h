@@ -105,10 +105,6 @@
 #  include "config-tpf.h"
 #endif
 
-#ifdef __VXWORKS__
-#  include "config-vxworks.h"
-#endif
-
 #ifdef __PLAN9__
 #  include "config-plan9.h"
 #endif
@@ -283,11 +279,6 @@
 #  include <tpf/sysapi.h> /* for tpf_process_signals */
    /* change which select is used for libcurl */
 #  define select(a,b,c,d,e) tpf_select_libcurl(a,b,c,d,e)
-#endif
-
-#ifdef __VXWORKS__
-#  include <sockLib.h>    /* for generic BSD socket functions */
-#  include <ioLib.h>      /* for basic I/O interface functions */
 #endif
 
 #ifdef __AMIGA__

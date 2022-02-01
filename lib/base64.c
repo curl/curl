@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -273,7 +273,7 @@ static CURLcode base64_encode(const char *table64,
   free(convbuf);
 
   /* Return the length of the new data */
-  *outlen = strlen(base64data);
+  *outlen = output - base64data;
 
   return CURLE_OK;
 }
