@@ -126,7 +126,7 @@ sub checkfile {
         }
         # this means the file couldn't open - it might not exist, consider
         # that fine
-        return 0;
+        return 1;
     }
 
     my $commityear = undef;
