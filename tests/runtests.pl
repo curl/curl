@@ -586,9 +586,11 @@ sub checkcmd {
 #######################################################################
 # Get the list of tests that the tests/data/Makefile.am knows about!
 #
-my $disttests;
+my $disttests = "";
 sub get_disttests {
-    open(D, "<$TESTDIR/Makefile.inc");
+    # If a non-default $TESTDIR is being used there may not be any
+    # Makefile.inc in which case there's nothing to do.
+    open(D, "<$TESTDIR/Makefile.inc") or return;
     while(<D>) {
         chomp $_;
         if(($_ =~ /^#/) ||($_ !~ /test/)) {
