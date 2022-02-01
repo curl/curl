@@ -1005,9 +1005,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
         return CURLUE_NO_HOST;
     }
 
-    len = strlen(p);
-    memcpy(path, p, len);
-    path[len] = 0;
+    strcpy (path, p);
 
     if(schemep) {
       u->scheme = strdup(schemep);
