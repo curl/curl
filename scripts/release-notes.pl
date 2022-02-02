@@ -133,7 +133,6 @@ for my $l (@gitlog) {
         }
         elsif($line =~ /^Clo(s|)es(:|) *(.*)/i) {
             push @closes, extract($3);
-            printf STDERR "CLOSES $3: %s\n", extract($3);
         }
         elsif($line =~ /^Bug: (.*)/i) {
             push @bug, extract($1);
