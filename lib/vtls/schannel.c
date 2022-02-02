@@ -2110,12 +2110,7 @@ schannel_recv(struct Curl_easy *data, int sockindex,
           infof(data, "schannel: can't renegotiate, an error is pending");
           goto cleanup;
         }
-        if(BACKEND->encdata_offset && inbuf[1].cbBuffer) {
-          *err = CURLE_RECV_ERROR;
-          infof(data, "schannel: can't renegotiate, "
-                "encrypted data available");
-          goto cleanup;
-        }
+
         /* begin renegotiation */
         infof(data, "schannel: renegotiating SSL/TLS connection");
         connssl->state = ssl_connection_negotiating;
