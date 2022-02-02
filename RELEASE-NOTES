@@ -1,40 +1,50 @@
 curl and libcurl 7.82.0
 
  Public curl releases:         206
- Command line options:         244
+ Command line options:         245
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2575
+ Contributors:                 2581
 
 This release includes the following changes:
 
+ o curl: add --json [67]
  o mesalink: remove support [23]
 
 This release includes the following bugfixes:
 
  o appveyor: update images from VS 2019 to 2022
  o appveyor: use VS 2017 image for the autotools builds
+ o base64: remove an unnecessary call to strlen [66]
  o build: enable -Warith-conversion
  o build: fix -Wenum-conversion handling
+ o build: fix ngtcp2 crypto library detection [63]
  o checksrc: fix typo in comment [34]
  o CI: move 'distcheck' job from zuul to azure pipelines [60]
  o CI: move scan-build job from Zuul to Azure Pipelines [59]
+ o ci: move the OpenSSL + c-ares job from Zuul to Circle CI [75]
  o CI: move the rustls CI job to GHA from Zuul [8]
+ o CI: move two jobs from Zuul to Circle CI [73]
  o CI: test building wolfssl with --enable-opensslextra [42]
  o CI: workflows/wolfssl: install impacket [47]
+ o cirlceci: also run a c-ares job on arm with debug enabled [74]
  o cmake: fix iOS CMake project generation error [13]
  o cmdline-opts/gen.pl: fix option matching to improve references [50]
  o configure: set CURL_LIBRARY_PATH for nghttp2 [58]
+ o configure: use correct CFLAGS for threaded resolver with xlC on AIX [54]
  o curl tool: erase some more sensitive command line arguments [22]
  o curl-functions.m4: fix LIBRARY_PATH adjustment to avoid eval [5]
  o curl-functions.m4: revert DYLD_LIBRARY_PATH tricks in CURL_RUN_IFELSE [9]
  o curl-openssl: remove the OpenSSL headers and library versions check [35]
  o curl: remove "separators" (when using globbed URLs) [32]
+ o curl_getdate.3: remove pointless .PP line [68]
  o curl_multi_socket.3: remove callback and typical usage descriptions [7]
  o curl_url_set.3: mention when CURLU_ALLOW_SPACE was added
  o CURLMOPT_TIMERFUNCTION/DATA.3: fix the examples [27]
  o CURLOPT_RESOLVE.3: change example port to 443
+ o CURLSHOPT_LOCKFUNC.3: fix typo "relased" -> "released" [71]
  o docs/cmdline-opts: add "mutexed" options for more http versions [25]
+ o docs: capitalize the name 'Netscape' [77]
  o docs: document HTTP/2 not insisting on TLS 1.2 [49]
  o docs: fix mandoc -T lint formatting complaints [2]
  o docs: update IETF links to use datatracker [41]
@@ -53,11 +63,15 @@ This release includes the following bugfixes:
  o misc: remove BeOS code and references [30]
  o misc: remove the final watcom references [29]
  o mqtt: free any send leftover data when done [36]
+ o multi: grammar fix in comment [69]
+ o multi: remember connection_id before returning connection to pool [76]
  o multi: set in_callback for multi interface callbacks [28]
+ o netware: remove support [72]
  o next.d. remove .fi/.nf as they are handled by gen.pl [3]
  o ngtcp2: adapt to changed end of headers callback proto [39]
  o ngtcp2: fix declaration of ‘result’ shadows a previous local [14]
  o nss: handshake callback during shutdown has no conn->bundle [55]
+ o openldap: fix compiler warning when built without SSL support [70]
  o openldap: implement SASL authentication [16]
  o openssl.h: avoid including OpenSSL headers here [15]
  o openssl: check SSL_get_ex_data to prevent potential NULL dereference [40]
@@ -75,6 +89,7 @@ This release includes the following bugfixes:
  o runtests: make 'rustls' a testable feature
  o runtests: make 'wolfssl' a testable feature [6]
  o rustls: add CURLOPT_CAINFO_BLOB support [26]
+ o scripts/completion.pl: improve zsh completion [46]
  o scripts/copyright.pl: support many provided file names on the cmdline
  o setopt: fix the TLSAUTH #ifdefs for proxy-disabled builds [53]
  o test3021: disable all msys2 path transformation
@@ -84,8 +99,11 @@ This release includes the following bugfixes:
  o url: given a user in the URL, find pwd for that user in netrc [11]
  o url: keep trailing dot in host name [62]
  o url: make Curl_disconnect return void [48]
+ o urlapi: remove an unnecessary call to strlen [64]
  o urldata: CONN_IS_PROXIED replaces bits.close when proxy can be disabled [52]
  o vtls: pass on the right SNI name [61]
+ o vxworks: drop support [65]
+ o write-out.d: Fix num_headers formatting
 
 This release includes the following known bugs:
 
@@ -94,15 +112,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Antoine Pietri, Bernhard Walle, Cameron Will,
-  Charles Cazabon, Daniel Stenberg, Eric Musser, Fabian Keil, Fabian Yamaguchi,
-  Filip Lundgren, Harry Sarson, Ikko Ashimine, Jan Ehrhardt, jhoyla on github,
-  jonny112 on github, Kushal Das, Lucas Pardue, Manfred Schwarb, Marcel Raad,
-  Melroy van den Berg, Michał Antoniak, neutric on github, Niels Martignène,
-  Patrick Monnerat, pheiduck on github, Ray Satiro, Ryan Schmidt,
-  Sandro Jaeckel, Satadru Pramanik, Stefan Eissing, Stephen Boost,
-  Stephen M. Coakley, updatede on github, Viktor Szakats, Xiaoke Wang,
-  (35 contributors)
+  Alessandro Ghedini, Antoine Pietri, Bernhard Walle, Bjarni Ingi Gislason,
+  Cameron Will, Charles Cazabon, Daniel Stenberg, Davide Cassioli, Eric Musser,
+  Fabian Keil, Fabian Yamaguchi, Filip Lundgren, Harry Sarson, Henrik Holst,
+  Ikko Ashimine, Jan Ehrhardt, Jan-Piet Mens, jhoyla on github,
+  jonny112 on github, Kushal Das, Leah Neukirchen, Lucas Pardue,
+  luminixinc on github, Manfred Schwarb, Marcel Raad, Melroy van den Berg,
+  Michał Antoniak, neutric on github, Niels Martignène, Patrick Monnerat,
+  pheiduck on github, Ray Satiro, Ryan Schmidt, Samuel Henrique,
+  Sandro Jaeckel, Satadru Pramanik, Sebastian Sterk, Stefan Eissing,
+  Stephen Boost, Stephen M. Coakley, updatede on github, Viktor Szakats,
+  Xiaoke Wang,
+  (43 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -151,6 +172,7 @@ References to bug reports and discussions on issues:
  [43] = https://curl.se/bug/?i=8292
  [44] = https://curl.se/bug/?i=8316
  [45] = https://curl.se/bug/?i=8309
+ [46] = https://curl.se/bug/?i=8363
  [47] = https://curl.se/bug/?i=8307
  [48] = https://curl.se/bug/?i=8303
  [49] = https://curl.se/bug/?i=8235
@@ -158,6 +180,7 @@ References to bug reports and discussions on issues:
  [51] = https://curl.se/bug/?i=8291
  [52] = https://curl.se/bug/?i=8350
  [53] = https://curl.se/bug/?i=8350
+ [54] = https://curl.se/bug/?i=8276
  [55] = https://curl.se/bug/?i=8341
  [56] = https://curl.se/bug/?i=8343
  [57] = https://curl.se/bug/?i=8344
@@ -166,3 +189,18 @@ References to bug reports and discussions on issues:
  [60] = https://curl.se/bug/?i=8334
  [61] = https://curl.se/bug/?i=8320
  [62] = https://curl.se/bug/?i=8290
+ [63] = https://curl.se/bug/?i=8372
+ [64] = https://curl.se/bug/?i=8370
+ [65] = https://curl.se/bug/?i=8362
+ [66] = https://curl.se/bug/?i=8369
+ [67] = https://curl.se/bug/?i=8314
+ [68] = https://curl.se/bug/?i=8365
+ [69] = https://curl.se/bug/?i=8368
+ [70] = https://curl.se/bug/?i=8367
+ [71] = https://curl.se/bug/?i=8364
+ [72] = https://curl.se/bug/?i=8358
+ [73] = https://curl.se/bug/?i=8359
+ [74] = https://curl.se/bug/?i=8357
+ [75] = https://curl.se/bug/?i=8357
+ [76] = https://hackerone.com/reports/1463013
+ [77] = https://curl.se/bug/?i=8354
