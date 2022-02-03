@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -108,7 +108,6 @@
 #endif
 
 #include "urldata.h"
-#include "non-ascii.h"
 #include "strcase.h"
 #include "curl_ntlm_core.h"
 #include "curl_md5.h"
@@ -402,11 +401,9 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
 /*
  * Set up lanmanager hashed password
  */
-CURLcode Curl_ntlm_core_mk_lm_hash(struct Curl_easy *data,
-                                   const char *password,
+CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
                                    unsigned char *lmbuffer /* 21 bytes */)
 {
-  CURLcode result;
   unsigned char pw[14];
   static const unsigned char magic[] = {
     0x4B, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25 /* i.e. KGS!@#$% */
@@ -415,14 +412,6 @@ CURLcode Curl_ntlm_core_mk_lm_hash(struct Curl_easy *data,
 
   Curl_strntoupper((char *)pw, password, len);
   memset(&pw[len], 0, 14 - len);
-
-  /*
-   * The LanManager hashed password needs to be created using the
-   * password in the network encoding not the host encoding.
-   */
-  result = Curl_convert_to_network(data, (char *)pw, 14);
-  if(result)
-    return result;
 
   {
     /* Create LanManager hashed password. */
@@ -484,13 +473,11 @@ static void ascii_uppercase_to_unicode_le(unsigned char *dest,
  * Set up nt hashed passwords
  * @unittest: 1600
  */
-CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
-                                   const char *password,
+CURLcode Curl_ntlm_core_mk_nt_hash(const char *password,
                                    unsigned char *ntbuffer /* 21 bytes */)
 {
   size_t len = strlen(password);
   unsigned char *pw;
-  CURLcode result;
   if(len > SIZE_T_MAX/2) /* avoid integer overflow */
     return CURLE_OUT_OF_MEMORY;
   pw = len ? malloc(len * 2) : (unsigned char *)strdup("");
@@ -499,19 +486,13 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
 
   ascii_to_unicode_le(pw, password, len);
 
-  /*
-   * The NT hashed password needs to be created using the password in the
-   * network encoding not the host encoding.
-   */
-  result = Curl_convert_to_network(data, (char *)pw, len * 2);
-  if(!result) {
-    /* Create NT hashed password. */
-    Curl_md4it(ntbuffer, pw, 2 * len);
-    memset(ntbuffer + 16, 0, 21 - 16);
-  }
+  /* Create NT hashed password. */
+  Curl_md4it(ntbuffer, pw, 2 * len);
+  memset(ntbuffer + 16, 0, 21 - 16);
+
   free(pw);
 
-  return result;
+  return CURLE_OK;
 }
 
 #if defined(USE_NTLM_V2) && !defined(USE_WINDOWS_SSPI)

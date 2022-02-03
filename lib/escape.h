@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,8 +32,7 @@ enum urlreject {
   REJECT_ZERO
 };
 
-CURLcode Curl_urldecode(struct Curl_easy *data,
-                        const char *string, size_t length,
+CURLcode Curl_urldecode(const char *string, size_t length,
                         char **ostring, size_t *olen,
                         enum urlreject ctrl);
 

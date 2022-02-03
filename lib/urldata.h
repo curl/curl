@@ -352,10 +352,6 @@ typedef enum {
   GSS_AUTHSUCC
 } curlnegotiate;
 
-#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
-#include <iconv.h>
-#endif
-
 /* Struct used for GSSAPI (Kerberos V5) authentication */
 #if defined(USE_KERBEROS5)
 struct kerberos5data {
@@ -1664,13 +1660,6 @@ struct UserDefined {
   void *prereq_userp; /* pre-initial request user data */
 
   void *seek_client;    /* pointer to pass to the seek callback */
-  /* the 3 curl_conv_callback functions below are used on non-ASCII hosts */
-  /* function to convert from the network encoding: */
-  curl_conv_callback convfromnetwork;
-  /* function to convert to the network encoding: */
-  curl_conv_callback convtonetwork;
-  /* function to convert from UTF-8 encoding: */
-  curl_conv_callback convfromutf8;
 #ifndef CURL_DISABLE_HSTS
   curl_hstsread_callback hsts_read;
   void *hsts_read_userp;
@@ -1954,11 +1943,6 @@ struct Curl_easy {
   struct PureInfo info;        /* stats, reports and info data */
   struct curl_tlssessioninfo tsi; /* Information about the TLS session, only
                                      valid after a client has asked for it */
-#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
-  iconv_t outbound_cd;         /* for translating to the network encoding */
-  iconv_t inbound_cd;          /* for translating from the network encoding */
-  iconv_t utf8_cd;             /* for translating to UTF8 */
-#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
 #ifdef USE_HYPER
   struct hyptransfer hyp;
 #endif

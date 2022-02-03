@@ -266,9 +266,6 @@ curl_easy_strerror(CURLcode error)
   case CURLE_CONV_FAILED:
     return "Conversion failed";
 
-  case CURLE_CONV_REQD:
-    return "Caller must register CURLOPT_CONV_ callback options";
-
   case CURLE_REMOTE_FILE_NOT_FOUND:
     return "Remote file not found";
 
@@ -332,6 +329,7 @@ curl_easy_strerror(CURLcode error)
   case CURLE_OBSOLETE51:
   case CURLE_OBSOLETE57:
   case CURLE_OBSOLETE62:
+  case CURLE_OBSOLETE76:
   case CURL_LAST:
     break;
   }

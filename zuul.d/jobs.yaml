@@ -250,17 +250,6 @@
         NOTESTS: 1
 
 - job:
-    name: curl-iconv-with-openssl
-    parent: curl-base
-    vars:
-      curl_env:
-        CC: gcc-8
-        CXX: g++-8
-        T: iconv
-        C: >-
-          --with-openssl
-
-- job:
     name: curl-cmake-boringssl-quiche
     parent: curl-base
     vars:
@@ -413,7 +402,6 @@
       - curl-debug-clang-disable-alt-svc-with-openssl
       - curl-debug-clang-with-gnutls
       - curl-debug-clang-with-nss
-      - curl-iconv-with-openssl
       - curl-cmake-boringssl-quiche
       - curl-cmake-ngtcp2
       - curl-torture

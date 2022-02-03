@@ -30,7 +30,6 @@
 #include "tool_binmode.h"
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
-#include "tool_convert.h"
 #include "tool_filetime.h"
 #include "tool_formparse.h"
 #include "tool_getparam.h"
@@ -1520,16 +1519,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       if(subletter == 'f')
         config->jsoned = TRUE;
-
-#ifdef CURL_DOES_CONVERSIONS
-      if(subletter != 'b') {
-        /* NOT forced binary, convert to ASCII */
-        if(convert_to_network(postdata, strlen(postdata))) {
-          Curl_safefree(postdata);
-          return PARAM_NO_MEM;
-        }
-      }
-#endif
 
       if(config->postfields) {
         /* we already have a string, we append this one with a separating

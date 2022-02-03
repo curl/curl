@@ -33,7 +33,6 @@
 
 #include "urldata.h" /* for struct Curl_easy */
 #include "mime.h"
-#include "non-ascii.h"
 #include "vtls/vtls.h"
 #include "strcase.h"
 #include "sendf.h"
@@ -274,14 +273,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
        * Set the Name property.
        */
     case CURLFORM_PTRNAME:
-#ifdef CURL_DOES_CONVERSIONS
-      /* Treat CURLFORM_PTR like CURLFORM_COPYNAME so that libcurl will copy
-       * the data in all cases so that we'll have safe memory for the eventual
-       * conversion.
-       */
-#else
       current_form->flags |= HTTPPOST_PTRNAME; /* fall through */
-#endif
+
       /* FALLTHROUGH */
     case CURLFORM_COPYNAME:
       if(current_form->name)
@@ -906,11 +899,6 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
           else
             uclen = (size_t)clen;
           result = curl_mime_data(part, post->contents, uclen);
-#ifdef CURL_DOES_CONVERSIONS
-          /* Convert textual contents now. */
-          if(!result && data && part->datasize)
-            result = Curl_convert_to_network(data, part->data, part->datasize);
-#endif
         }
       }
 

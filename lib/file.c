@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -147,7 +147,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
 #endif
   size_t real_path_len;
 
-  CURLcode result = Curl_urldecode(data, data->state.up.path, 0, &real_path,
+  CURLcode result = Curl_urldecode(data->state.up.path, 0, &real_path,
                                    &real_path_len, REJECT_ZERO);
   if(result)
     return result;

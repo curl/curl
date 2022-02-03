@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,7 +30,6 @@
 #include "tool_cfgable.h"
 #include "tool_easysrc.h"
 #include "tool_setopt.h"
-#include "tool_convert.h"
 #include "tool_msgs.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -474,25 +473,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
     break;
 
   case TOOLMIME_DATA:
-#ifdef CURL_DOES_CONVERSIONS
-    /* Data will be set in ASCII, thus issue a comment with clear text. */
-    escaped = c_escape(part->data, ZERO_TERMINATED);
-    NULL_CHECK(escaped);
-    CODE1("/* \"%s\" */", escaped);
-
-    /* Our data is always textual: convert it to ASCII. */
-    {
-      size_t size = strlen(part->data);
-      char *cp = malloc(size + 1);
-
-      NULL_CHECK(cp);
-      memcpy(cp, part->data, size + 1);
-      ret = convert_to_network(cp, size);
-      data = cp;
-    }
-#else
     data = part->data;
-#endif
     if(!ret) {
       Curl_safefree(escaped);
       escaped = c_escape(data, ZERO_TERMINATED);
@@ -566,11 +547,6 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
   }
 
 nomem:
-#ifdef CURL_DOES_CONVERSIONS
-  if(data)
-    free((char *) data);
-#endif
-
   Curl_safefree(escaped);
   return ret;
 }

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,141 +28,24 @@
 
 static char raw_tolower(char in);
 
-/* Portable, consistent toupper (remember EBCDIC). Do not use toupper() because
-   its behavior is altered by the current locale. */
+/* Portable, consistent toupper. Do not use toupper() because its behavior is
+   altered by the current locale. */
 char Curl_raw_toupper(char in)
 {
-#if !defined(CURL_DOES_CONVERSIONS)
   if(in >= 'a' && in <= 'z')
     return (char)('A' + in - 'a');
-#else
-  switch(in) {
-  case 'a':
-    return 'A';
-  case 'b':
-    return 'B';
-  case 'c':
-    return 'C';
-  case 'd':
-    return 'D';
-  case 'e':
-    return 'E';
-  case 'f':
-    return 'F';
-  case 'g':
-    return 'G';
-  case 'h':
-    return 'H';
-  case 'i':
-    return 'I';
-  case 'j':
-    return 'J';
-  case 'k':
-    return 'K';
-  case 'l':
-    return 'L';
-  case 'm':
-    return 'M';
-  case 'n':
-    return 'N';
-  case 'o':
-    return 'O';
-  case 'p':
-    return 'P';
-  case 'q':
-    return 'Q';
-  case 'r':
-    return 'R';
-  case 's':
-    return 'S';
-  case 't':
-    return 'T';
-  case 'u':
-    return 'U';
-  case 'v':
-    return 'V';
-  case 'w':
-    return 'W';
-  case 'x':
-    return 'X';
-  case 'y':
-    return 'Y';
-  case 'z':
-    return 'Z';
-  }
-#endif
-
   return in;
 }
 
 
-/* Portable, consistent tolower (remember EBCDIC). Do not use tolower() because
-   its behavior is altered by the current locale. */
+/* Portable, consistent tolower. Do not use tolower() because its behavior is
+   altered by the current locale. */
 static char raw_tolower(char in)
 {
-#if !defined(CURL_DOES_CONVERSIONS)
   if(in >= 'A' && in <= 'Z')
     return (char)('a' + in - 'A');
-#else
-  switch(in) {
-  case 'A':
-    return 'a';
-  case 'B':
-    return 'b';
-  case 'C':
-    return 'c';
-  case 'D':
-    return 'd';
-  case 'E':
-    return 'e';
-  case 'F':
-    return 'f';
-  case 'G':
-    return 'g';
-  case 'H':
-    return 'h';
-  case 'I':
-    return 'i';
-  case 'J':
-    return 'j';
-  case 'K':
-    return 'k';
-  case 'L':
-    return 'l';
-  case 'M':
-    return 'm';
-  case 'N':
-    return 'n';
-  case 'O':
-    return 'o';
-  case 'P':
-    return 'p';
-  case 'Q':
-    return 'q';
-  case 'R':
-    return 'r';
-  case 'S':
-    return 's';
-  case 'T':
-    return 't';
-  case 'U':
-    return 'u';
-  case 'V':
-    return 'v';
-  case 'W':
-    return 'w';
-  case 'X':
-    return 'x';
-  case 'Y':
-    return 'y';
-  case 'Z':
-    return 'z';
-  }
-#endif
-
   return in;
 }
-
 
 /*
  * Curl_strcasecompare() is for doing "raw" case insensitive strings. This is
@@ -170,9 +53,6 @@ static char raw_tolower(char in)
  * for this.  See
  * https://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for some
  * further explanation to why this function is necessary.
- *
- * The function is capable of comparing a-z case insensitively even for
- * non-ascii.
  *
  * @unittest: 1301
  */

@@ -29,7 +29,6 @@
 
 #include "urldata.h"
 #include "warnless.h"
-#include "non-ascii.h"
 #include "escape.h"
 #include "strdup.h"
 /* The last 3 #include files should be in this order */
@@ -80,8 +79,8 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
                        int inlength)
 {
   size_t length;
-  CURLcode result;
   struct dynbuf d;
+  (void)data;
 
   if(inlength < 0)
     return NULL;
@@ -102,16 +101,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
     }
     else {
       /* encode it */
-      char encoded[4];
-      result = Curl_convert_to_network(data, (char *)&in, 1);
-      if(result) {
-        /* Curl_convert_to_network calls failf if unsuccessful */
-        Curl_dyn_free(&d);
-        return NULL;
-      }
-
-      msnprintf(encoded, sizeof(encoded), "%%%02X", in);
-      if(Curl_dyn_add(&d, encoded))
+      if(Curl_dyn_addf(&d, "%%%02X", in))
         return NULL;
     }
     string++;
@@ -126,8 +116,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
  * Returns a pointer to a malloced string in *ostring with length given in
  * *olen. If length == 0, the length is assumed to be strlen(string).
  *
- * 'data' can be set to NULL but then this function can't convert network
- * data to host for non-ascii.
+ * 'data' can be set to NULL
  *
  * ctrl options:
  * - REJECT_NADA: accept everything
@@ -139,8 +128,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
  * invokes that used TRUE/FALSE (0 and 1).
  */
 
-CURLcode Curl_urldecode(struct Curl_easy *data,
-                        const char *string, size_t length,
+CURLcode Curl_urldecode(const char *string, size_t length,
                         char **ostring, size_t *olen,
                         enum urlreject ctrl)
 {
@@ -148,7 +136,6 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
   char *ns;
   size_t strindex = 0;
   unsigned long hex;
-  CURLcode result = CURLE_OK;
 
   DEBUGASSERT(string);
   DEBUGASSERT(ctrl >= REJECT_NADA); /* crash on TRUE/FALSE */
@@ -173,15 +160,6 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
       hex = strtoul(hexstr, &ptr, 16);
 
       in = curlx_ultouc(hex); /* this long is never bigger than 255 anyway */
-
-      if(data) {
-        result = Curl_convert_from_network(data, (char *)&in, 1);
-        if(result) {
-          /* Curl_convert_from_network calls failf if unsuccessful */
-          free(ns);
-          return result;
-        }
-      }
 
       string += 2;
       alloc -= 2;
@@ -218,10 +196,11 @@ char *curl_easy_unescape(struct Curl_easy *data, const char *string,
                          int length, int *olen)
 {
   char *str = NULL;
+  (void)data;
   if(length >= 0) {
     size_t inputlen = length;
     size_t outputlen;
-    CURLcode res = Curl_urldecode(data, string, inputlen, &str, &outputlen,
+    CURLcode res = Curl_urldecode(string, inputlen, &str, &outputlen,
                                   REJECT_NADA);
     if(res)
       return NULL;

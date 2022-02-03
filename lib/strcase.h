@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,8 +28,7 @@
  * Only "raw" case insensitive strings. This is meant to be locale independent
  * and only compare strings we know are safe for this.
  *
- * The function is capable of comparing a-z case insensitively even for
- * non-ascii.
+ * The function is capable of comparing a-z case insensitively.
  */
 
 #define strcasecompare(a,b) Curl_strcasecompare(a,b)

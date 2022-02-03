@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,7 +29,6 @@
 #include "dynbuf.h"
 #include "content_encoding.h"
 #include "http.h"
-#include "non-ascii.h" /* for Curl_convert_to_network prototype */
 #include "strtoofft.h"
 #include "warnless.h"
 
@@ -74,18 +73,7 @@
 
  */
 
-#ifdef CURL_DOES_CONVERSIONS
-/* Check for an ASCII hex digit.
-   We avoid the use of ISXDIGIT to accommodate non-ASCII hosts. */
-static bool isxdigit_ascii(char digit)
-{
-  return (digit >= 0x30 && digit <= 0x39) /* 0-9 */
-    || (digit >= 0x41 && digit <= 0x46) /* A-F */
-    || (digit >= 0x61 && digit <= 0x66); /* a-f */
-}
-#else
 #define isxdigit_ascii(x) Curl_isxdigit(x)
-#endif
 
 void Curl_httpchunk_init(struct Curl_easy *data)
 {
@@ -156,14 +144,6 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
 
         /* length and datap are unmodified */
         ch->hexbuffer[ch->hexindex] = 0;
-
-        /* convert to host encoding before calling strtoul */
-        result = Curl_convert_from_network(data, ch->hexbuffer, ch->hexindex);
-        if(result) {
-          /* Curl_convert_from_network calls failf if unsuccessful */
-          /* Treat it as a bad hex character */
-          return CHUNKE_ILLEGAL_HEX;
-        }
 
         if(curlx_strtoofft(ch->hexbuffer, &endptr, 16, &ch->datasize))
           return CHUNKE_ILLEGAL_HEX;
@@ -240,13 +220,6 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
 
           tr = Curl_dyn_ptr(&conn->trailer);
           trlen = Curl_dyn_len(&conn->trailer);
-          /* Convert to host encoding before calling Curl_client_write */
-          result = Curl_convert_from_network(data, tr, trlen);
-          if(result)
-            /* Curl_convert_from_network calls failf if unsuccessful */
-            /* Treat it as a bad chunk */
-            return CHUNKE_BAD_CHUNK;
-
           if(!data->set.http_te_skip) {
             result = Curl_client_write(data, CLIENTWRITE_HEADER, tr, trlen);
             if(result) {

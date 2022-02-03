@@ -91,7 +91,6 @@
 #endif
 
 #include "warnless.h"
-#include "non-ascii.h" /* for Curl_convert_from_utf8 prototype */
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -1610,40 +1609,11 @@ static void ossl_close_all(struct Curl_easy *data)
 /* ====================================================== */
 
 /*
- * Match subjectAltName against the host name. This requires a conversion
- * in CURL_DOES_CONVERSIONS builds.
+ * Match subjectAltName against the host name.
  */
 static bool subj_alt_hostcheck(struct Curl_easy *data,
                                const char *match_pattern, const char *hostname,
                                const char *dispname)
-#ifdef CURL_DOES_CONVERSIONS
-{
-  bool res = FALSE;
-
-  /* Curl_cert_hostcheck uses host encoding, but we get ASCII from
-     OpenSSl.
-   */
-  char *match_pattern2 = strdup(match_pattern);
-
-  if(match_pattern2) {
-    if(Curl_convert_from_network(data, match_pattern2,
-                                strlen(match_pattern2)) == CURLE_OK) {
-      if(Curl_cert_hostcheck(match_pattern2, hostname)) {
-        res = TRUE;
-        infof(data,
-                " subjectAltName: host \"%s\" matched cert's \"%s\"",
-                dispname, match_pattern2);
-      }
-    }
-    free(match_pattern2);
-  }
-  else {
-    failf(data,
-        "SSL: out of memory when allocating temporary for subjectAltName");
-  }
-  return res;
-}
-#else
 {
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)dispname;
@@ -1656,8 +1626,6 @@ static bool subj_alt_hostcheck(struct Curl_easy *data,
   }
   return FALSE;
 }
-#endif
-
 
 /* Quote from RFC2818 section 3.1 "Server Identity"
 
@@ -1845,16 +1813,6 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
 
     if(peer_CN == nulstr)
        peer_CN = NULL;
-    else {
-      /* convert peer_CN from UTF8 */
-      CURLcode rc = Curl_convert_from_utf8(data, (char *)peer_CN,
-                                           strlen((char *)peer_CN));
-      /* Curl_convert_from_utf8 calls failf if unsuccessful */
-      if(rc) {
-        OPENSSL_free(peer_CN);
-        return rc;
-      }
-    }
 
     if(result)
       /* error already detected, pass through */

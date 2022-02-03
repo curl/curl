@@ -99,7 +99,6 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "easyif.h"
 #include "speedcheck.h"
 #include "warnless.h"
-#include "non-ascii.h"
 #include "getinfo.h"
 #include "urlapi-int.h"
 #include "system_win32.h"
@@ -445,7 +444,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_resolver_cleanup(data->state.async.resolver);
 
   Curl_http2_cleanup_dependencies(data);
-  Curl_convert_close(data);
 
   /* No longer a dirty share, if it exists */
   if(data->share) {
@@ -508,11 +506,6 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 
   set->seek_func = ZERO_NULL;
   set->seek_client = ZERO_NULL;
-
-  /* conversion callbacks for non-ASCII hosts */
-  set->convfromnetwork = ZERO_NULL;
-  set->convtonetwork   = ZERO_NULL;
-  set->convfromutf8    = ZERO_NULL;
 
   set->filesize = -1;        /* we don't know the size */
   set->postfieldsize = -1;   /* unknown size */
@@ -677,7 +670,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
   result = Curl_init_userdefined(data);
   if(!result) {
     Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
-    Curl_convert_init(data);
     Curl_initinfo(data);
 
     /* most recent connection is not yet defined */
@@ -2030,7 +2022,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     uc = curl_url_get(uh, CURLUPART_USER, &data->state.up.user, 0);
     if(!uc) {
       char *decoded;
-      result = Curl_urldecode(NULL, data->state.up.user, 0, &decoded, NULL,
+      result = Curl_urldecode(data->state.up.user, 0, &decoded, NULL,
                               conn->handler->flags&PROTOPT_USERPWDCTRL ?
                               REJECT_ZERO : REJECT_CTRL);
       if(result)
@@ -2049,7 +2041,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     uc = curl_url_get(uh, CURLUPART_PASSWORD, &data->state.up.password, 0);
     if(!uc) {
       char *decoded;
-      result = Curl_urldecode(NULL, data->state.up.password, 0, &decoded, NULL,
+      result = Curl_urldecode(data->state.up.password, 0, &decoded, NULL,
                               conn->handler->flags&PROTOPT_USERPWDCTRL ?
                               REJECT_ZERO : REJECT_CTRL);
       if(result)
@@ -2545,14 +2537,14 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   if(proxyuser) {
-    result = Curl_urldecode(data, proxyuser, 0, &conn->http_proxy.user, NULL,
+    result = Curl_urldecode(proxyuser, 0, &conn->http_proxy.user, NULL,
                             REJECT_ZERO);
     if(!result)
       result = Curl_setstropt(&data->state.aptr.proxyuser,
                               conn->http_proxy.user);
   }
   if(!result && proxypasswd) {
-    result = Curl_urldecode(data, proxypasswd, 0, &conn->http_proxy.passwd,
+    result = Curl_urldecode(proxypasswd, 0, &conn->http_proxy.passwd,
                             NULL, REJECT_ZERO);
     if(!result)
       result = Curl_setstropt(&data->state.aptr.proxypasswd,
