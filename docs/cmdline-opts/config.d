@@ -69,4 +69,7 @@ config file is checked for in the following places in this order:
 8) On windows, if it finds no .curlrc file in the sequence described above, it
 checks for one in the same dir the curl executable is placed.
 
+On windows two filenames are checked per location: .curlrc and _curlrc,
+preferring the former. Older versions on windows checked for _curlrc only.
+
 This option can be used multiple times to load multiple config files.
