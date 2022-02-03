@@ -436,6 +436,9 @@ curl_share_strerror(CURLSHcode error)
   case CURLSHE_NOT_BUILT_IN:
     return "Feature not enabled in this library";
 
+  case CURLSHE_BAD_FUNCTION_ARGUMENT:
+    return "A libcurl function was given a bad argument";
+
   case CURLSHE_LAST:
     break;
   }

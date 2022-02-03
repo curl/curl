@@ -2122,6 +2122,9 @@ typedef enum {
   /* Set MIME option flags. */
   CURLOPT(CURLOPT_MIME_OPTIONS, CURLOPTTYPE_LONG, 315),
 
+  /* SSL session ID cache size */
+  CURLOPT(CURLOPT_SSL_SESSIONID_CACHE_SIZE, CURLOPTTYPE_LONG, 316),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2872,6 +2875,7 @@ typedef enum {
   CURLSHE_INVALID,    /* 3 */
   CURLSHE_NOMEM,      /* 4 out of memory */
   CURLSHE_NOT_BUILT_IN, /* 5 feature not present in lib */
+  CURLSHE_BAD_FUNCTION_ARGUMENT,  /* 6 */
   CURLSHE_LAST        /* never use */
 } CURLSHcode;
 
@@ -2883,6 +2887,8 @@ typedef enum {
   CURLSHOPT_UNLOCKFUNC, /* pass in a 'curl_unlock_function' pointer */
   CURLSHOPT_USERDATA,   /* pass in a user data pointer used in the lock/unlock
                            callback functions */
+  CURLSHOPT_SSL_SESSIONID_CACHE_SIZE, /* desired size of the SSL session ID
+                                         cache */
   CURLSHOPT_LAST  /* never use */
 } CURLSHoption;
 

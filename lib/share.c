@@ -39,6 +39,7 @@ curl_share_init(void)
   if(share) {
     share->magic = CURL_GOOD_SHARE;
     share->specifier |= (1<<CURL_LOCK_DATA_SHARE);
+    share->max_ssl_sessions = 8;
     Curl_init_dnscache(&share->hostcache);
   }
 
@@ -55,6 +56,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
   curl_unlock_function unlockfunc;
   void *ptr;
   CURLSHcode res = CURLSHE_OK;
+  long arg;
 
   if(!GOOD_SHARE_HANDLE(share))
     return CURLSHE_INVALID;
@@ -90,8 +92,8 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
     case CURL_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
       if(!share->sslsession) {
-        share->max_ssl_sessions = 8;
-        share->sslsession = calloc(share->max_ssl_sessions,
+        share->sslsession_size = share->max_ssl_sessions;
+        share->sslsession = calloc(share->sslsession_size,
                                    sizeof(struct Curl_ssl_session));
         share->sessionage = 0;
         if(!share->sslsession)
@@ -142,6 +144,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
     case CURL_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
       Curl_safefree(share->sslsession);
+      share->sslsession_size = 0;
 #else
       res = CURLSHE_NOT_BUILT_IN;
 #endif
@@ -169,6 +172,13 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
   case CURLSHOPT_USERDATA:
     ptr = va_arg(param, void *);
     share->clientdata = ptr;
+    break;
+
+  case CURLSHOPT_SSL_SESSIONID_CACHE_SIZE:
+    arg = va_arg(param, long);
+    if(arg <= 0)
+      return CURLSHE_BAD_FUNCTION_ARGUMENT;
+    share->max_ssl_sessions = arg;
     break;
 
   default:
@@ -208,7 +218,7 @@ curl_share_cleanup(struct Curl_share *share)
 #ifdef USE_SSL
   if(share->sslsession) {
     size_t i;
-    for(i = 0; i < share->max_ssl_sessions; i++)
+    for(i = 0; i < share->sslsession_size; i++)
       Curl_ssl_kill_session(&(share->sslsession[i]));
     free(share->sslsession);
   }

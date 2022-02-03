@@ -19,43 +19,43 @@
 .\" * KIND, either express or implied.
 .\" *
 .\" **************************************************************************
-.TH curl_share_setopt 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
+.TH CURLSHOPT_SSL_SESSIONID_CACHE_SIZE.3 3 "03 Feb 2022" "libcurl 7.83.0" "libcurl Manual"
 .SH NAME
-curl_share_setopt - Set options for a shared object
+CURLSHOPT_SSL_SESSIONID_CACHE_SIZE - set the size of the SSL session-ID cache
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option, parameter);
+CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_SSL_SESSIONID_CACHE_SIZE,
+                             long size);
+
 .fi
 .SH DESCRIPTION
-Set the \fIoption\fP to \fIparameter\fP for the given \fIshare\fP.
-.SH OPTIONS
-.IP CURLSHOPT_LOCKFUNC
-See \fICURLSHOPT_LOCKFUNC(3)\fP.
-.IP CURLSHOPT_UNLOCKFUNC
-See \fICURLSHOPT_UNLOCKFUNC(3)\fP.
-.IP CURLSHOPT_SHARE
-See \fICURLSHOPT_SHARE(3)\fP.
-.IP CURLSHOPT_UNSHARE
-See \fICURLSHOPT_UNSHARE(3)\fP.
-.IP CURLSHOPT_USERDATA
-See \fICURLSHOPT_USERDATA(3)\fP.
-.IP CURLSHOPT_SSL_SESSIONID_CACHE_SIZE
-See \fICURLSHOPT_SSL_SESSIONID_CACHE_SIZE(3)\fP.
+Set the size of the SSL session-ID cache. The size can only be set before the
+SSL session-ID cache of a share handle is enabled by calling
+curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION).
+.SH DEFAULT
+8
+.SH PROTOCOLS
+All
 .SH EXAMPLE
 .nf
   CURLSHcode sh;
+  struct secrets private_stuff;
   share = curl_share_init();
-  sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+  sh = curl_share_setopt(share, CURLSHOPT_SSL_SESSIONID_CACHE_SIZE, 100);
+  if(sh)
+    printf("Error: %s\\n", curl_share_strerror(sh));
+  sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
   if(sh)
     printf("Error: %s\\n", curl_share_strerror(sh));
 .fi
 .SH AVAILABILITY
-Added in 7.10
+Added in 7.82.0
 .SH RETURN VALUE
 CURLSHE_OK (zero) means that the option was set properly, non-zero means an
-error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors.3\fP
-man page for the full list with descriptions.
+error occurred. See \fIlibcurl-errors(3)\fP for the full list with
+descriptions.
 .SH "SEE ALSO"
-.BR curl_share_cleanup "(3), " curl_share_init "(3)"
+.BR CURLSHOPT_LOCKFUNC "(3), "
+.BR curl_share_setopt "(3), " CURLOPT_SSL_SESSIONID_CACHE "(3), "

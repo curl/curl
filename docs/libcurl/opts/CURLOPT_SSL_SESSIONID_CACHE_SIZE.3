@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -20,23 +20,21 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_SSL_SESSIONID_CACHE 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_SSL_SESSIONID_CACHE_SIZE 3 "03 Feb 2022" "libcurl 7.83.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SSL_SESSIONID_CACHE \- use the SSL session-ID cache
+CURLOPT_SSL_SESSIONID_CACHE_SIZE \- set the size of the SSL session-ID cache
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_SESSIONID_CACHE,
-                         long enabled);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_SESSIONID_CACHE_SIZE,
+                          long size);
 .SH DESCRIPTION
-Pass a long set to 0 to disable libcurl's use of SSL session-ID caching. Set
-this to 1 to enable it. By default all transfers are done using the cache
-enabled. While nothing ever should get hurt by attempting to reuse SSL
-session-IDs, there seem to be or have been broken SSL implementations in the
-wild that may require you to disable this in order for you to succeed.
+Set the size of the SSL session-ID cache. The size can only be set before the
+first transfer of an easy handle is started. Afterwards, changing the size
+has no effect.
 .SH DEFAULT
-1
+5
 .SH PROTOCOLS
 All TLS-based
 .SH EXAMPLE
@@ -44,15 +42,14 @@ All TLS-based
 CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  /* switch off session-id use! */
-  curl_easy_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE_SIZE, 100L);
   ret = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY
-Added in 7.16.0
+Added in 7.82.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR CURLOPT_SSL_SESSIONID_CACHE_SIZE "(3), " CURLOPT_DNS_CACHE_TIMEOUT "(3), " CURLOPT_SSLVERSION "(3), "
+.BR CURLOPT_SSL_SESSIONID_CACHE "(3), " CURLOPT_DNS_CACHE_TIMEOUT "(3), " CURLOPT_SSLVERSION "(3), "

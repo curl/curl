@@ -436,13 +436,12 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
        setup */
     return TRUE;
 
-  /* Lock if shared */
   if(SSLSESSION_SHARED(data))
     general_age = &data->share->sessionage;
   else
     general_age = &data->state.sessionage;
 
-  for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
+  for(i = 0; i < data->state.session_size; i++) {
     check = &data->state.session[i];
     if(!check->sessionid)
       /* not session ID means blank entry */
@@ -503,7 +502,7 @@ void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid)
 {
   size_t i;
 
-  for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
+  for(i = 0; i < data->state.session_size; i++) {
     struct Curl_ssl_session *check = &data->state.session[i];
 
     if(check->sessionid == ssl_sessionid) {
@@ -587,14 +586,14 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
   }
 
   /* find an empty slot for us, or find the oldest */
-  for(i = 1; (i < data->set.general_ssl.max_ssl_sessions) &&
+  for(i = 1; (i < data->state.session_size) &&
         data->state.session[i].sessionid; i++) {
     if(data->state.session[i].age < oldest_age) {
       oldest_age = data->state.session[i].age;
       store = &data->state.session[i];
     }
   }
-  if(i == data->set.general_ssl.max_ssl_sessions)
+  if(i == data->state.session_size)
     /* cache is full, we must "kill" the oldest entry! */
     Curl_ssl_kill_session(store);
   else
@@ -658,12 +657,13 @@ void Curl_ssl_close_all(struct Curl_easy *data)
   /* kill the session ID cache if not shared */
   if(data->state.session && !SSLSESSION_SHARED(data)) {
     size_t i;
-    for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++)
+    for(i = 0; i < data->state.session_size; i++)
       /* the single-killer function handles empty table slots */
       Curl_ssl_kill_session(&data->state.session[i]);
 
     /* free the cache data */
     Curl_safefree(data->state.session);
+    data->state.session_size = 0;
   }
 
   Curl_ssl->close_all(data);
@@ -747,9 +747,9 @@ CURLcode Curl_ssl_initsessions(struct Curl_easy *data, size_t amount)
     return CURLE_OUT_OF_MEMORY;
 
   /* store the info in the SSL section */
-  data->set.general_ssl.max_ssl_sessions = amount;
+  data->state.session_size = amount;
   data->state.session = session;
-  data->state.sessionage = 1; /* this is brand new */
+  data->state.sessionage = 0; /* this is brand new */
   return CURLE_OK;
 }
 

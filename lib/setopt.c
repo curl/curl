@@ -2201,8 +2201,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         data->cookies = NULL;
 #endif
 
-      if(data->share->sslsession == data->state.session)
+      if(data->share->sslsession == data->state.session) {
         data->state.session = NULL;
+        data->state.session_size = 0;
+      }
 
 #ifdef USE_LIBPSL
       if(data->psl == &data->share->psl)
@@ -2238,8 +2240,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       }
 #endif   /* CURL_DISABLE_HTTP */
       if(data->share->sslsession) {
-        data->set.general_ssl.max_ssl_sessions = data->share->max_ssl_sessions;
         data->state.session = data->share->sslsession;
+        data->state.session_size = data->share->sslsession_size;
       }
 #ifdef USE_LIBPSL
       if(data->share->specifier & (1 << CURL_LOCK_DATA_PSL))
@@ -2419,6 +2421,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #ifndef CURL_DISABLE_PROXY
     data->set.proxy_ssl.primary.sessionid = data->set.ssl.primary.sessionid;
 #endif
+    break;
+
+  case CURLOPT_SSL_SESSIONID_CACHE_SIZE:
+    arg = va_arg(param, long);
+    if(arg <= 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.general_ssl.max_ssl_sessions = arg;
     break;
 
 #ifdef USE_SSH
