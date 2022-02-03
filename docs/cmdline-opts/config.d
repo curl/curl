@@ -64,9 +64,12 @@ config file is checked for in the following places in this order:
 
 6) Windows: "%USERPROFILE%\\Application Data\\.curlrc"
 
-7) Non-windows: use getpwuid to find the home directory
+7) Non-Windows: use getpwuid to find the home directory
 
-8) On windows, if it finds no .curlrc file in the sequence described above, it
+8) On Windows, if it finds no .curlrc file in the sequence described above, it
 checks for one in the same dir the curl executable is placed.
+
+On Windows two filenames are checked per location: .curlrc and _curlrc,
+preferring the former. Older versions on Windows checked for _curlrc only.
 
 This option can be used multiple times to load multiple config files.
