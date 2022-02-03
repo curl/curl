@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -83,22 +83,11 @@ int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
 int Curl_wait_ms(timediff_t timeout_ms);
 
-#ifdef TPF
-int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
-                       fd_set* excepts, struct timeval *tv);
-#endif
-
-/* TPF sockets are not in range [0..FD_SETSIZE-1], which
-   unfortunately makes it impossible for us to easily check if they're valid
-
+/*
    With Winsock the valid range is [0..INVALID_SOCKET-1] according to
    https://docs.microsoft.com/en-us/windows/win32/winsock/socket-data-type-2
 */
-#if defined(TPF)
-#define VALID_SOCK(x) 1
-#define VERIFY_SOCK(x) Curl_nop_stmt
-#define FDSET_SOCK(x) 1
-#elif defined(USE_WINSOCK)
+#ifdef USE_WINSOCK
 #define VALID_SOCK(s) ((s) < INVALID_SOCKET)
 #define FDSET_SOCK(x) 1
 #define VERIFY_SOCK(x) do { \

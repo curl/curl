@@ -441,23 +441,3 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
 
   return r;
 }
-
-#ifdef TPF
-/*
- * This is a replacement for select() on the TPF platform.
- * It is used whenever libcurl calls select().
- * The call below to tpf_process_signals() is required because
- * TPF's select calls are not signal interruptible.
- *
- * Return values are the same as select's.
- */
-int tpf_select_libcurl(int maxfds, fd_set *reads, fd_set *writes,
-                       fd_set *excepts, struct timeval *tv)
-{
-   int rc;
-
-   rc = tpf_select_bsd(maxfds, reads, writes, excepts, tv);
-   tpf_process_signals();
-   return rc;
-}
-#endif /* TPF */
