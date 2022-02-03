@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1119,7 +1119,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
     return result;
 
   /* Generate PEM certificate. */
-  result = Curl_base64_encode(data, cert.certificate.beg,
+  result = Curl_base64_encode(cert.certificate.beg,
                               cert.certificate.end - cert.certificate.beg,
                               &cp1, &cl1);
   if(result)

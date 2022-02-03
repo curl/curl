@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1423,7 +1423,7 @@ static CURLcode pop3_parse_url_path(struct Curl_easy *data)
   const char *path = &data->state.up.path[1]; /* skip leading path */
 
   /* URL decode the path for the message ID */
-  return Curl_urldecode(data, path, 0, &pop3->id, NULL, REJECT_CTRL);
+  return Curl_urldecode(path, 0, &pop3->id, NULL, REJECT_CTRL);
 }
 
 /***********************************************************************
@@ -1440,7 +1440,7 @@ static CURLcode pop3_parse_custom_request(struct Curl_easy *data)
 
   /* URL decode the custom request */
   if(custom)
-    result = Curl_urldecode(data, custom, 0, &pop3->custom, NULL, REJECT_CTRL);
+    result = Curl_urldecode(custom, 0, &pop3->custom, NULL, REJECT_CTRL);
 
   return result;
 }

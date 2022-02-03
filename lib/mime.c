@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,7 +25,6 @@
 #include <curl/curl.h>
 
 #include "mime.h"
-#include "non-ascii.h"
 #include "warnless.h"
 #include "urldata.h"
 #include "sendf.h"
@@ -506,15 +505,6 @@ static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
     }
   }
 
-#ifdef CURL_DOES_CONVERSIONS
-  /* This is now textual data, Convert character codes. */
-  if(part->easy && cursize) {
-    CURLcode result = Curl_convert_to_network(part->easy, buffer, cursize);
-    if(result)
-      return READ_ERROR;
-  }
-#endif
-
   return cursize;
 }
 
@@ -925,9 +915,6 @@ static size_t readback_part(curl_mimepart *part,
                             char *buffer, size_t bufsize, bool *hasread)
 {
   size_t cursize = 0;
-#ifdef CURL_DOES_CONVERSIONS
-  char *convbuf = buffer;
-#endif
 
   /* Readback from part. */
 
@@ -967,15 +954,6 @@ static size_t readback_part(curl_mimepart *part,
         mimesetstate(&part->state, MIMESTATE_BODY, NULL);
       break;
     case MIMESTATE_BODY:
-#ifdef CURL_DOES_CONVERSIONS
-      if(part->easy && convbuf < buffer) {
-        CURLcode result = Curl_convert_to_network(part->easy, convbuf,
-                                                  buffer - convbuf);
-        if(result)
-          return READ_ERROR;
-        convbuf = buffer;
-      }
-#endif
       cleanup_encoder_state(&part->encstate);
       mimesetstate(&part->state, MIMESTATE_CONTENT, NULL);
       break;
@@ -1012,16 +990,6 @@ static size_t readback_part(curl_mimepart *part,
     bufsize -= sz;
   }
 
-#ifdef CURL_DOES_CONVERSIONS
-      if(part->easy && convbuf < buffer &&
-         part->state.state < MIMESTATE_BODY) {
-        CURLcode result = Curl_convert_to_network(part->easy, convbuf,
-                                                  buffer - convbuf);
-        if(result)
-          return READ_ERROR;
-      }
-#endif
-
   return cursize;
 }
 
@@ -1031,10 +999,6 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
 {
   curl_mime *mime = (curl_mime *) instream;
   size_t cursize = 0;
-#ifdef CURL_DOES_CONVERSIONS
-  char *convbuf = buffer;
-#endif
-
   (void) size;   /* Always 1. */
 
   while(nitems) {
@@ -1043,9 +1007,6 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
     switch(mime->state.state) {
     case MIMESTATE_BEGIN:
     case MIMESTATE_BODY:
-#ifdef CURL_DOES_CONVERSIONS
-      convbuf = buffer;
-#endif
       mimesetstate(&mime->state, MIMESTATE_BOUNDARY1, mime->firstpart);
       /* The first boundary always follows the header termination empty line,
          so is always preceded by a CRLF. We can then spare 2 characters
@@ -1061,15 +1022,6 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
       sz = readback_bytes(&mime->state, buffer, nitems, mime->boundary,
                           strlen(mime->boundary), part? "\r\n": "--\r\n");
       if(!sz) {
-#ifdef CURL_DOES_CONVERSIONS
-        if(mime->easy && convbuf < buffer) {
-          CURLcode result = Curl_convert_to_network(mime->easy, convbuf,
-                                                    buffer - convbuf);
-          if(result)
-            return READ_ERROR;
-          convbuf = buffer;
-        }
-#endif
         mimesetstate(&mime->state, MIMESTATE_CONTENT, part);
       }
       break;
@@ -1086,9 +1038,6 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
       case STOP_FILLING:
         return cursize? cursize: sz;
       case 0:
-#ifdef CURL_DOES_CONVERSIONS
-        convbuf = buffer;
-#endif
         mimesetstate(&mime->state, MIMESTATE_BOUNDARY1, part->nextpart);
         break;
       }
@@ -1104,16 +1053,6 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
     buffer += sz;
     nitems -= sz;
   }
-
-#ifdef CURL_DOES_CONVERSIONS
-      if(mime->easy && convbuf < buffer &&
-         mime->state.state <= MIMESTATE_CONTENT) {
-        CURLcode result = Curl_convert_to_network(mime->easy, convbuf,
-                                                  buffer - convbuf);
-        if(result)
-          return READ_ERROR;
-      }
-#endif
 
   return cursize;
 }

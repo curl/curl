@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,7 +34,6 @@
 #define DEBUG_ME 0
 
 #include "urldata.h"
-#include "non-ascii.h"
 #include "sendf.h"
 #include "curl_ntlm_core.h"
 #include "curl_gethostname.h"
@@ -558,7 +557,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     if(result)
       return result;
 
-    result = Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer);
+    result = Curl_ntlm_core_mk_nt_hash(passwdp, ntbuffer);
     if(result)
       return result;
 
@@ -633,14 +632,14 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     /* NTLM version 1 */
 
 #ifdef USE_NTRESPONSES
-    result = Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer);
+    result = Curl_ntlm_core_mk_nt_hash(passwdp, ntbuffer);
     if(result)
       return result;
 
     Curl_ntlm_core_lm_resp(ntbuffer, &ntlm->nonce[0], ntresp);
 #endif
 
-    result = Curl_ntlm_core_mk_lm_hash(data, passwdp, lmbuffer);
+    result = Curl_ntlm_core_mk_lm_hash(passwdp, lmbuffer);
     if(result)
       return result;
 
@@ -822,12 +821,6 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     memcpy(&ntlmbuf[size], host, hostlen);
 
   size += hostlen;
-
-  /* Convert domain, user, and host to ASCII but leave the rest as-is */
-  result = Curl_convert_to_network(data, (char *)&ntlmbuf[domoff],
-                                   size - domoff);
-  if(result)
-    return CURLE_CONV_FAILED;
 
   /* Return the binary blob. */
   result = Curl_bufref_memdup(out, ntlmbuf, size);

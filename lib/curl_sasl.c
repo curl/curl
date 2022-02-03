@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,7 +48,6 @@
 #include "warnless.h"
 #include "strtok.h"
 #include "sendf.h"
-#include "non-ascii.h" /* included for Curl_convert_... prototypes */
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -283,8 +282,7 @@ static CURLcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
 }
 
 /* Encode the outgoing SASL message. */
-static CURLcode build_message(struct SASL *sasl, struct Curl_easy *data,
-                              struct bufref *msg)
+static CURLcode build_message(struct SASL *sasl, struct bufref *msg)
 {
   CURLcode result = CURLE_OK;
 
@@ -297,7 +295,7 @@ static CURLcode build_message(struct SASL *sasl, struct Curl_easy *data,
       char *base64;
       size_t base64len;
 
-      result = Curl_base64_encode(data, (const char *) Curl_bufref_ptr(msg),
+      result = Curl_base64_encode((const char *) Curl_bufref_ptr(msg),
                                   Curl_bufref_len(msg), &base64, &base64len);
       if(!result)
         Curl_bufref_set(msg, base64, base64len, curl_free);
@@ -494,7 +492,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
   if(!result && mech) {
     sasl->curmech = mech;
     if(Curl_bufref_ptr(&resp))
-      result = build_message(sasl, data, &resp);
+      result = build_message(sasl, &resp);
 
     if(sasl->params->maxirlen &&
        strlen(mech) + Curl_bufref_len(&resp) > sasl->params->maxirlen)
@@ -729,7 +727,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     newstate = SASL_CANCEL;
     break;
   case CURLE_OK:
-    result = build_message(sasl, data, &resp);
+    result = build_message(sasl, &resp);
     if(!result)
       result = sasl->params->contauth(data, sasl->curmech, &resp);
     break;

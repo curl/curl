@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -73,7 +73,6 @@
 #include "select.h"
 #include "multiif.h"
 #include "connect.h"
-#include "non-ascii.h"
 #include "http2.h"
 #include "mime.h"
 #include "strcase.h"
@@ -164,20 +163,6 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
 
   curl_read_callback readfunc = NULL;
   void *extra_data = NULL;
-
-#ifdef CURL_DOES_CONVERSIONS
-  bool sending_http_headers = FALSE;
-  struct connectdata *conn = data->conn;
-
-  if(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)) {
-    const struct HTTP *http = data->req.p.http;
-
-    if(http->sending == HTTPSEND_REQUEST)
-      /* We're sending the HTTP request headers, not the data.
-         Remember that so we don't re-translate them into garbage. */
-      sending_http_headers = TRUE;
-  }
-#endif
 
 #ifndef CURL_DISABLE_HTTP
   if(data->state.trailers_state == TRAILERS_INITIALIZED) {
@@ -347,26 +332,6 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
       }
     }
 
-#ifdef CURL_DOES_CONVERSIONS
-    {
-      CURLcode result;
-      size_t length;
-      if(data->state.prefer_ascii)
-        /* translate the protocol and data */
-        length = nread;
-      else
-        /* just translate the protocol portion */
-        length = hexlen;
-      if(length) {
-        result = Curl_convert_to_network(data, data->req.upload_fromhere,
-                                         length);
-        /* Curl_convert_to_network calls failf if unsuccessful */
-        if(result)
-          return result;
-      }
-    }
-#endif /* CURL_DOES_CONVERSIONS */
-
 #ifndef CURL_DISABLE_HTTP
     if(data->state.trailers_state == TRAILERS_SENDING &&
        !trailers_left(data)) {
@@ -391,15 +356,6 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
     if(added_crlf)
       nread += strlen(endofline_network); /* for the added end of line */
   }
-#ifdef CURL_DOES_CONVERSIONS
-  else if((data->state.prefer_ascii) && (!sending_http_headers)) {
-    CURLcode result;
-    result = Curl_convert_to_network(data, data->req.upload_fromhere, nread);
-    /* Curl_convert_to_network calls failf if unsuccessful */
-    if(result)
-      return result;
-  }
-#endif /* CURL_DOES_CONVERSIONS */
 
   *nreadp = nread;
 

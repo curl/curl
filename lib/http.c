@@ -77,7 +77,6 @@
 #include "content_encoding.h"
 #include "http_proxy.h"
 #include "warnless.h"
-#include "non-ascii.h"
 #include "http2.h"
 #include "connect.h"
 #include "strdup.h"
@@ -327,7 +326,7 @@ static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
   if(!out)
     return CURLE_OUT_OF_MEMORY;
 
-  result = Curl_base64_encode(data, out, strlen(out), &authorization, &size);
+  result = Curl_base64_encode(out, strlen(out), &authorization, &size);
   if(result)
     goto fail;
 
@@ -1250,14 +1249,6 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
                                                       isn't body is header */
 
   DEBUGASSERT(size > (size_t)included_body_bytes);
-
-  result = Curl_convert_to_network(data, ptr, headersize);
-  /* Curl_convert_to_network calls failf if unsuccessful */
-  if(result) {
-    /* conversion failed, free memory and return to the caller */
-    Curl_dyn_free(in);
-    return result;
-  }
 
   if((conn->handler->flags & PROTOPT_SSL
 #ifndef CURL_DISABLE_PROXY
@@ -3308,20 +3299,6 @@ checkhttpprefix(struct Curl_easy *data,
   struct curl_slist *head = data->set.http200aliases;
   statusline rc = STATUS_BAD;
   statusline onmatch = len >= 5? STATUS_DONE : STATUS_UNKNOWN;
-#ifdef CURL_DOES_CONVERSIONS
-  /* convert from the network encoding using a scratch area */
-  char *scratch = strdup(s);
-  if(!scratch) {
-    failf(data, "Failed to allocate memory for conversion!");
-    return FALSE; /* can't return CURLE_OUT_OF_MEMORY so return FALSE */
-  }
-  if(CURLE_OK != Curl_convert_from_network(data, scratch, strlen(s) + 1)) {
-    /* Curl_convert_from_network calls failf if unsuccessful */
-    free(scratch);
-    return FALSE; /* can't return CURLE_foobar so return FALSE */
-  }
-  s = scratch;
-#endif /* CURL_DOES_CONVERSIONS */
 
   while(head) {
     if(checkprefixmax(head->data, s, len)) {
@@ -3334,9 +3311,6 @@ checkhttpprefix(struct Curl_easy *data,
   if((rc != STATUS_DONE) && (checkprefixmax("HTTP/", s, len)))
     rc = onmatch;
 
-#ifdef CURL_DOES_CONVERSIONS
-  free(scratch);
-#endif /* CURL_DOES_CONVERSIONS */
   return rc;
 }
 
@@ -3347,26 +3321,9 @@ checkrtspprefix(struct Curl_easy *data,
 {
   statusline result = STATUS_BAD;
   statusline onmatch = len >= 5? STATUS_DONE : STATUS_UNKNOWN;
-
-#ifdef CURL_DOES_CONVERSIONS
-  /* convert from the network encoding using a scratch area */
-  char *scratch = strdup(s);
-  if(!scratch) {
-    failf(data, "Failed to allocate memory for conversion!");
-    return FALSE; /* can't return CURLE_OUT_OF_MEMORY so return FALSE */
-  }
-  if(CURLE_OK != Curl_convert_from_network(data, scratch, strlen(s) + 1)) {
-    /* Curl_convert_from_network calls failf if unsuccessful */
-    result = FALSE; /* can't return CURLE_foobar so return FALSE */
-  }
-  else if(checkprefixmax("RTSP/", scratch, len))
-    result = onmatch;
-  free(scratch);
-#else
   (void)data; /* unused */
   if(checkprefixmax("RTSP/", s, len))
     result = onmatch;
-#endif /* CURL_DOES_CONVERSIONS */
 
   return result;
 }
@@ -3903,21 +3860,10 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       size_t headerlen;
       /* Zero-length header line means end of headers! */
 
-#ifdef CURL_DOES_CONVERSIONS
-      if(0x0d == *headp) {
-        *headp = '\r'; /* replace with CR in host encoding */
-        headp++;       /* pass the CR byte */
-      }
-      if(0x0a == *headp) {
-        *headp = '\n'; /* replace with LF in host encoding */
-        headp++;       /* pass the LF byte */
-      }
-#else
       if('\r' == *headp)
         headp++; /* pass the \r byte */
       if('\n' == *headp)
         headp++; /* pass the \n byte */
-#endif /* CURL_DOES_CONVERSIONS */
 
       if(100 <= k->httpcode && 199 >= k->httpcode) {
         /* "A user agent MAY ignore unexpected 1xx status responses." */
@@ -4189,26 +4135,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       int httpversion_major;
       int rtspversion_major;
       int nc = 0;
-#ifdef CURL_DOES_CONVERSIONS
-#define HEADER1 scratch
-#define SCRATCHSIZE 21
-      CURLcode res;
-      char scratch[SCRATCHSIZE + 1]; /* "HTTP/major.minor 123" */
-      /* We can't really convert this yet because we don't know if it's the
-         1st header line or the body.  So we do a partial conversion into a
-         scratch area, leaving the data at 'headp' as-is.
-      */
-      strncpy(&scratch[0], headp, SCRATCHSIZE);
-      scratch[SCRATCHSIZE] = 0; /* null terminate */
-      res = Curl_convert_from_network(data,
-                                      &scratch[0],
-                                      SCRATCHSIZE);
-      if(res)
-        /* Curl_convert_from_network calls failf if unsuccessful */
-        return res;
-#else
 #define HEADER1 headp /* no conversion needed, just use headp */
-#endif /* CURL_DOES_CONVERSIONS */
 
       if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
         /*
@@ -4332,11 +4259,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         break;
       }
     }
-
-    result = Curl_convert_from_network(data, headp, strlen(headp));
-    /* Curl_convert_from_network calls failf if unsuccessful */
-    if(result)
-      return result;
 
     result = Curl_http_header(data, conn, headp);
     if(result)

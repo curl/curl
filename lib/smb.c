@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2016 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2016 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2014, Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
  *
  * This software is licensed as described in the file COPYING, which
@@ -459,10 +459,10 @@ static CURLcode smb_send_setup(struct Curl_easy *data)
   if(byte_count > sizeof(msg.bytes))
     return CURLE_FILESIZE_EXCEEDED;
 
-  Curl_ntlm_core_mk_lm_hash(data, conn->passwd, lm_hash);
+  Curl_ntlm_core_mk_lm_hash(conn->passwd, lm_hash);
   Curl_ntlm_core_lm_resp(lm_hash, smbc->challenge, lm);
 #ifdef USE_NTRESPONSES
-  Curl_ntlm_core_mk_nt_hash(data, conn->passwd, nt_hash);
+  Curl_ntlm_core_mk_nt_hash(conn->passwd, nt_hash);
   Curl_ntlm_core_lm_resp(nt_hash, smbc->challenge, nt);
 #else
   memset(nt, 0, sizeof(nt));
@@ -989,7 +989,7 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
   char *slash;
 
   /* URL decode the path */
-  CURLcode result = Curl_urldecode(data, data->state.up.path, 0, &path, NULL,
+  CURLcode result = Curl_urldecode(data->state.up.path, 0, &path, NULL,
                                    REJECT_CTRL);
   if(result)
     return result;

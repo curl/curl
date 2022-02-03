@@ -2,7 +2,7 @@
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2021 Daniel Stenberg
+ * Copyright (c) 2004 - 2022 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,6 @@
 #include "sendf.h"
 #include "curl_krb5.h"
 #include "warnless.h"
-#include "non-ascii.h"
 #include "strcase.h"
 #include "strdup.h"
 
@@ -80,11 +79,6 @@ static CURLcode ftpsend(struct Curl_easy *data, struct connectdata *conn,
   strcpy(&s[write_len], "\r\n"); /* append a trailing CRLF */
   write_len += 2;
   bytes_written = 0;
-
-  result = Curl_convert_to_network(data, s, write_len);
-  /* Curl_convert_to_network calls failf if unsuccessful */
-  if(result)
-    return result;
 
   for(;;) {
 #ifdef HAVE_GSSAPI
@@ -298,7 +292,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
       if(output_buffer.length) {
         char *cmd;
 
-        result = Curl_base64_encode(data, (char *)output_buffer.value,
+        result = Curl_base64_encode((char *)output_buffer.value,
                                     output_buffer.length, &p, &base64_sz);
         if(result) {
           infof(data, "base64-encoding: %s", curl_easy_strerror(result));
@@ -612,7 +606,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
     return; /* error */
 
   if(iscmd) {
-    error = Curl_base64_encode(data, buffer, curlx_sitouz(bytes),
+    error = Curl_base64_encode(buffer, curlx_sitouz(bytes),
                                &cmd_buffer, &cmd_size);
     if(error) {
       free(buffer);

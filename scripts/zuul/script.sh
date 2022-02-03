@@ -94,14 +94,6 @@ if [ "$T" = "tidy" ]; then
   make tidy
 fi
 
-if [ "$T" = "iconv" ]; then
-  source scripts/zuul/iconv-env.sh
-  ./configure --enable-debug --enable-werror $C
-  make
-  make examples
-  make test-nonflaky
-fi
-
 if [ "$T" = "cmake" ]; then
   cmake -H. -Bbuild -DCURL_WERROR=ON $C
   cmake --build build

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -301,27 +301,19 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
-                                         struct negotiatedata *nego,
+CURLcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
                                          char **outptr, size_t *outlen)
 {
-  CURLcode result;
-
   /* Base64 encode the already generated response */
-  result = Curl_base64_encode(data,
-                              (const char *) nego->output_token,
-                              nego->output_token_length,
-                              outptr, outlen);
-
-  if(result)
-    return result;
-
-  if(!*outptr || !*outlen) {
+  CURLcode result = Curl_base64_encode((const char *) nego->output_token,
+                                       nego->output_token_length, outptr,
+                                       outlen);
+  if(!result && (!*outptr || !*outlen)) {
     free(*outptr);
-    return CURLE_REMOTE_ACCESS_DENIED;
+    result = CURLE_REMOTE_ACCESS_DENIED;
   }
 
-  return CURLE_OK;
+  return result;
 }
 
 /*

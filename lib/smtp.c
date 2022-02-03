@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1724,8 +1724,7 @@ static CURLcode smtp_parse_url_path(struct Curl_easy *data)
   }
 
   /* URL decode the path and use it as the domain in our EHLO */
-  return Curl_urldecode(data, path, 0, &smtpc->domain, NULL,
-                        REJECT_CTRL);
+  return Curl_urldecode(path, 0, &smtpc->domain, NULL, REJECT_CTRL);
 }
 
 /***********************************************************************
@@ -1742,7 +1741,7 @@ static CURLcode smtp_parse_custom_request(struct Curl_easy *data)
 
   /* URL decode the custom request */
   if(custom)
-    result = Curl_urldecode(data, custom, 0, &smtp->custom, NULL, REJECT_CTRL);
+    result = Curl_urldecode(custom, 0, &smtp->custom, NULL, REJECT_CTRL);
 
   return result;
 }

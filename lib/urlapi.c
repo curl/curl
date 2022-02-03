@@ -804,8 +804,7 @@ static CURLUcode decode_host(char *hostname, char **outp)
   else {
     /* might be encoded */
     size_t dlen;
-    CURLcode result = Curl_urldecode(NULL, hostname, 0,
-                                     outp, &dlen, REJECT_CTRL);
+    CURLcode result = Curl_urldecode(hostname, 0, outp, &dlen, REJECT_CTRL);
     if(result)
       return CURLUE_BAD_HOSTNAME;
   }
@@ -1420,8 +1419,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       size_t dlen;
       /* this unconditional rejection of control bytes is documented
          API behavior */
-      CURLcode res = Curl_urldecode(NULL, *part, 0, &decoded, &dlen,
-                                    REJECT_CTRL);
+      CURLcode res = Curl_urldecode(*part, 0, &decoded, &dlen, REJECT_CTRL);
       free(*part);
       if(res) {
         *part = NULL;

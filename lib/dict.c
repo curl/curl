@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -96,13 +96,13 @@ const struct Curl_handler Curl_handler_dict = {
   PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
 };
 
-static char *unescape_word(struct Curl_easy *data, const char *inputbuff)
+static char *unescape_word(const char *inputbuff)
 {
   char *newp = NULL;
   char *dictp;
   size_t len;
 
-  CURLcode result = Curl_urldecode(data, inputbuff, 0, &newp, &len,
+  CURLcode result = Curl_urldecode(inputbuff, 0, &newp, &len,
                                    REJECT_NADA);
   if(!newp || result)
     return NULL;
@@ -226,7 +226,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       strategy = (char *)".";
     }
 
-    eword = unescape_word(data, word);
+    eword = unescape_word(word);
     if(!eword)
       return CURLE_OUT_OF_MEMORY;
 
@@ -274,7 +274,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       database = (char *)"!";
     }
 
-    eword = unescape_word(data, word);
+    eword = unescape_word(word);
     if(!eword)
       return CURLE_OUT_OF_MEMORY;
 

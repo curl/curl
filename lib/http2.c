@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1337,7 +1337,7 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
   }
   conn->proto.httpc.binlen = binlen;
 
-  result = Curl_base64url_encode(data, (const char *)binsettings, binlen,
+  result = Curl_base64url_encode((const char *)binsettings, binlen,
                                  &base64, &blen);
   if(result) {
     Curl_dyn_free(req);

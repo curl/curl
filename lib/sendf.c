@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,7 +41,6 @@
 #include "vssh/ssh.h"
 #include "easyif.h"
 #include "multiif.h"
-#include "non-ascii.h"
 #include "strerror.h"
 #include "select.h"
 #include "strdup.h"
@@ -628,19 +627,14 @@ CURLcode Curl_client_write(struct Curl_easy *data,
 
   /* FTP data may need conversion. */
   if((type & CLIENTWRITE_BODY) &&
-    (conn->handler->protocol & PROTO_FAMILY_FTP) &&
-    conn->proto.ftpc.transfertype == 'A') {
-    /* convert from the network encoding */
-    CURLcode result = Curl_convert_from_network(data, ptr, len);
-    /* Curl_convert_from_network calls failf if unsuccessful */
-    if(result)
-      return result;
+     (conn->handler->protocol & PROTO_FAMILY_FTP) &&
+     conn->proto.ftpc.transfertype == 'A') {
 
 #ifdef CURL_DO_LINEEND_CONV
     /* convert end-of-line markers */
     len = convert_lineends(data, ptr, len);
 #endif /* CURL_DO_LINEEND_CONV */
-    }
+  }
 
   return chop_write(data, type, ptr, len);
 }
@@ -716,44 +710,6 @@ int Curl_debug(struct Curl_easy *data, curl_infotype type,
   if(data->set.verbose) {
     static const char s_infotype[CURLINFO_END][3] = {
       "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
-
-#ifdef CURL_DOES_CONVERSIONS
-    char *buf = NULL;
-    size_t conv_size = 0;
-
-    switch(type) {
-    case CURLINFO_HEADER_OUT:
-      buf = Curl_memdup(ptr, size);
-      if(!buf)
-        return 1;
-      conv_size = size;
-
-      /* Special processing is needed for this block if it
-       * contains both headers and data (separated by CRLFCRLF).
-       * We want to convert just the headers, leaving the data as-is.
-       */
-      if(size > 4) {
-        size_t i;
-        for(i = 0; i < size-4; i++) {
-          if(memcmp(&buf[i], "\x0d\x0a\x0d\x0a", 4) == 0) {
-            /* convert everything through this CRLFCRLF but no further */
-            conv_size = i + 4;
-            break;
-          }
-        }
-      }
-
-      Curl_convert_from_network(data, buf, conv_size);
-      /* Curl_convert_from_network calls failf if unsuccessful */
-      /* we might as well continue even if it fails...   */
-      ptr = buf; /* switch pointer to use my buffer instead */
-      break;
-    default:
-      /* leave everything else as-is */
-      break;
-    }
-#endif /* CURL_DOES_CONVERSIONS */
-
     if(data->set.fdebug) {
       Curl_set_in_callback(data, true);
       rc = (*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
@@ -766,20 +722,11 @@ int Curl_debug(struct Curl_easy *data, curl_infotype type,
       case CURLINFO_HEADER_IN:
         fwrite(s_infotype[type], 2, 1, data->set.err);
         fwrite(ptr, size, 1, data->set.err);
-#ifdef CURL_DOES_CONVERSIONS
-        if(size != conv_size) {
-          /* we had untranslated data so we need an explicit newline */
-          fwrite("\n", 1, 1, data->set.err);
-        }
-#endif
         break;
       default: /* nada */
         break;
       }
     }
-#ifdef CURL_DOES_CONVERSIONS
-    free(buf);
-#endif
   }
   return rc;
 }

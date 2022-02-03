@@ -636,11 +636,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
           if((attr_len > 7) &&
              (strcmp(";binary", (char *) attr + (attr_len - 7)) == 0)) {
             /* Binary attribute, encode to base64. */
-            result = Curl_base64_encode(data,
-                                        vals[i]->bv_val,
-                                        vals[i]->bv_len,
-                                        &val_b64,
-                                        &val_b64_sz);
+            result = Curl_base64_encode(vals[i]->bv_val, vals[i]->bv_len,
+                                        &val_b64, &val_b64_sz);
             if(result) {
               ldap_value_free_len(vals);
               FREE_ON_WINLDAP(attr);
@@ -870,7 +867,7 @@ static int _ldap_url_parse2(struct Curl_easy *data,
     LDAP_TRACE(("DN '%s'\n", dn));
 
     /* Unescape the DN */
-    result = Curl_urldecode(data, dn, 0, &unescaped, NULL, REJECT_ZERO);
+    result = Curl_urldecode(dn, 0, &unescaped, NULL, REJECT_ZERO);
     if(result) {
       rc = LDAP_NO_MEMORY;
 
@@ -935,7 +932,7 @@ static int _ldap_url_parse2(struct Curl_easy *data,
       LDAP_TRACE(("attr[%zu] '%s'\n", i, attributes[i]));
 
       /* Unescape the attribute */
-      result = Curl_urldecode(data, attributes[i], 0, &unescaped, NULL,
+      result = Curl_urldecode(attributes[i], 0, &unescaped, NULL,
                               REJECT_ZERO);
       if(result) {
         free(attributes);
@@ -1005,7 +1002,7 @@ static int _ldap_url_parse2(struct Curl_easy *data,
     LDAP_TRACE(("filter '%s'\n", filter));
 
     /* Unescape the filter */
-    result = Curl_urldecode(data, filter, 0, &unescaped, NULL, REJECT_ZERO);
+    result = Curl_urldecode(filter, 0, &unescaped, NULL, REJECT_ZERO);
     if(result) {
       rc = LDAP_NO_MEMORY;
 

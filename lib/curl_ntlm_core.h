@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -67,13 +67,11 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results);
 
-CURLcode Curl_ntlm_core_mk_lm_hash(struct Curl_easy *data,
-                                   const char *password,
+CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
                                    unsigned char *lmbuffer /* 21 bytes */);
 
 #ifdef USE_NTRESPONSES
-CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
-                                   const char *password,
+CURLcode Curl_ntlm_core_mk_nt_hash(const char *password,
                                    unsigned char *ntbuffer /* 21 bytes */);
 
 #if defined(USE_NTLM_V2) && !defined(USE_WINDOWS_SSPI)

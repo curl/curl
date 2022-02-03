@@ -76,7 +76,6 @@
 #include "speedcheck.h"
 #include "warnless.h"
 #include "http_proxy.h"
-#include "non-ascii.h"
 #include "socks.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1460,7 +1459,7 @@ static CURLcode ftp_state_list(struct Curl_easy *data)
     /* url-decode before evaluation: e.g. paths starting/ending with %2f */
     const char *slashPos = NULL;
     char *rawPath = NULL;
-    result = Curl_urldecode(data, ftp->path, 0, &rawPath, NULL, REJECT_CTRL);
+    result = Curl_urldecode(ftp->path, 0, &rawPath, NULL, REJECT_CTRL);
     if(result)
       return result;
 
@@ -3247,7 +3246,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
 
   if(!result)
     /* get the url-decoded "raw" path */
-    result = Curl_urldecode(data, ftp->path, 0, &rawPath, &pathLen,
+    result = Curl_urldecode(ftp->path, 0, &rawPath, &pathLen,
                             REJECT_CTRL);
   if(result) {
     /* We can limp along anyway (and should try to since we may already be in
@@ -4131,7 +4130,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
   ftpc->cwdfail = FALSE;
 
   /* url-decode ftp path before further evaluation */
-  result = Curl_urldecode(data, ftp->path, 0, &rawPath, &pathLen, REJECT_CTRL);
+  result = Curl_urldecode(ftp->path, 0, &rawPath, &pathLen, REJECT_CTRL);
   if(result)
     return result;
 

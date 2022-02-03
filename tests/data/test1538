@@ -108,7 +108,7 @@ e72: TFTP: Unknown transfer ID
 e73: Remote file already exists
 e74: TFTP: No such user
 e75: Conversion failed
-e76: Caller must register CURLOPT_CONV_ callback options
+e76: Unknown error
 e77: Problem with the SSL CA cert (path? access rights?)
 e78: Remote file not found
 e79: Error in the SSH layer

@@ -386,8 +386,7 @@ static CURLcode mqtt_get_topic(struct Curl_easy *data,
 {
   char *path = data->state.up.path;
   if(strlen(path) > 1)
-    return Curl_urldecode(data, path + 1, 0, topic, topiclen,
-                          REJECT_NADA);
+    return Curl_urldecode(path + 1, 0, topic, topiclen, REJECT_NADA);
   failf(data, "No MQTT topic found. Forgot to URL encode it?");
   return CURLE_URL_MALFORMAT;
 }

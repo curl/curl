@@ -1083,7 +1083,7 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
 
           /* Binary value, encode to base64. */
           if(bvals[i].bv_len)
-            result = Curl_base64_encode(data, bvals[i].bv_val, bvals[i].bv_len,
+            result = Curl_base64_encode(bvals[i].bv_val, bvals[i].bv_len,
                                         &val_b64, &val_b64_sz);
           if(!result)
             result = client_write(data, ": ", val_b64, val_b64_sz, "\n");
