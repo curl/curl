@@ -589,7 +589,8 @@ static CURLcode CONNECT(struct Curl_easy *data,
                                   strlen("Content-Length:"), NULL, 10, &s->cl);
           }
         }
-        else if(Curl_compareheader(linep, "Connection:", "close"))
+        else if(Curl_compareheader(linep,
+                                   CONSTLEN("Connection:"), CONSTLEN("close")))
           s->close_connection = TRUE;
         else if(checkprefix("Transfer-Encoding:", linep)) {
           if(k->httpcode/100 == 2) {
@@ -600,14 +601,17 @@ static CURLcode CONNECT(struct Curl_easy *data,
                   "CONNECT %03d response", k->httpcode);
           }
           else if(Curl_compareheader(linep,
-                                     "Transfer-Encoding:", "chunked")) {
+                                     CONSTLEN("Transfer-Encoding:"),
+                                     CONSTLEN("chunked"))) {
             infof(data, "CONNECT responded chunked");
             s->chunked_encoding = TRUE;
             /* init our chunky engine */
             Curl_httpchunk_init(data);
           }
         }
-        else if(Curl_compareheader(linep, "Proxy-Connection:", "close"))
+        else if(Curl_compareheader(linep,
+                                   CONSTLEN("Proxy-Connection:"),
+                                   CONSTLEN("close")))
           s->close_connection = TRUE;
         else if(2 == sscanf(linep, "HTTP/1.%d %d",
                             &subversion,
