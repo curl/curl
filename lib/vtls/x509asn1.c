@@ -32,10 +32,12 @@
 #if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) ||    \
   defined(USE_SCHANNEL) || defined(USE_SECTRANSP)
 #define WANT_EXTRACT_CERTINFO /* uses Curl_extract_certinfo() */
+#define WANT_PARSEX509 /* ... uses Curl_parseX509() */
 #endif
 
 #if defined(USE_GSKIT)
 #define WANT_VERIFYHOST /* uses Curl_verifyhost () */
+#define WANT_PARSEX509 /* ... uses Curl_parseX509() */
 #endif
 
 #include <curl/curl.h>
