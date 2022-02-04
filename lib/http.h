@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,7 +47,9 @@ extern const struct Curl_handler Curl_handler_https;
 /* Header specific functions */
 bool Curl_compareheader(const char *headerline,  /* line to check */
                         const char *header,   /* header keyword _with_ colon */
-                        const char *content); /* content string to find */
+                        const size_t hlen,   /* len of the keyword in bytes */
+                        const char *content, /* content string to find */
+                        const size_t clen);   /* len of the content in bytes */
 
 char *Curl_copy_header_value(const char *header);
 

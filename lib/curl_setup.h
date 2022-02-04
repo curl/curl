@@ -772,6 +772,11 @@ endings either CRLF or LF so 't' is appropriate.
 #define CURLMAX(x,y) ((x)>(y)?(x):(y))
 #define CURLMIN(x,y) ((x)<(y)?(x):(y))
 
+/* A convenience macro to provide both the string literal and the length of
+   the string literal in one go, useful for functions that take "string,len"
+   as their argument */
+#define STRCONST(x) x,sizeof(x)-1
+
 /* Some versions of the Android SDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && defined(HAVE_DECL_GETPWUID_R_MISSING)
 struct passwd;
