@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2010 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2010 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -63,7 +63,7 @@ sub scan_file {
     my ($source)=@_;
     open F, "<$source";
     while(<F>) {
-        if(/(CURL_DISABLE_[A-Z_]+)/g) {
+        while(s/(CURL_DISABLE_[A-Z_]+)//) {
             my ($sym)=($1);
             $file{$sym} = $source;
         }
