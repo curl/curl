@@ -542,7 +542,7 @@ static int cb_each_header(uint8_t *name, size_t name_len,
   struct h3h1header *headers = (struct h3h1header *)argp;
   size_t olen = 0;
 
-  if((name_len == 7) && !strncmp(":status", (char *)name, 7)) {
+  if((name_len == 7) && !strncmp(H3_PSEUDO_STATUS, (char *)name, 7)) {
     msnprintf(headers->dest,
               headers->destlen, "HTTP/3 %.*s\n",
               (int) value_len, value);
@@ -759,8 +759,8 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   end = memchr(hdbuf, ' ', line_end - hdbuf);
   if(!end || end == hdbuf)
     goto fail;
-  nva[0].name = (unsigned char *)":method";
-  nva[0].name_len = strlen((char *)nva[0].name);
+  nva[0].name = (unsigned char *)H3_PSEUDO_METHOD;
+  nva[0].name_len = sizeof(H3_PSEUDO_METHOD) - 1;
   nva[0].value = (unsigned char *)hdbuf;
   nva[0].value_len = (size_t)(end - hdbuf);
 
@@ -776,13 +776,13 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   }
   if(!end || end == hdbuf)
     goto fail;
-  nva[1].name = (unsigned char *)":path";
-  nva[1].name_len = strlen((char *)nva[1].name);
+  nva[1].name = (unsigned char *)H3_PSEUDO_PATH;
+  nva[1].name_len = sizeof(H3_PSEUDO_PATH) - 1;
   nva[1].value = (unsigned char *)hdbuf;
   nva[1].value_len = (size_t)(end - hdbuf);
 
-  nva[2].name = (unsigned char *)":scheme";
-  nva[2].name_len = strlen((char *)nva[2].name);
+  nva[2].name = (unsigned char *)H3_PSEUDO_SCHEME;
+  nva[2].name_len = sizeof(H3_PSEUDO_SCHEME) - 1;
   if(conn->handler->flags & PROTOPT_SSL)
     nva[2].value = (unsigned char *)"https";
   else
@@ -815,8 +815,8 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
 
     if(hlen == 4 && strncasecompare("host", hdbuf, 4)) {
       authority_idx = i;
-      nva[i].name = (unsigned char *)":authority";
-      nva[i].name_len = strlen((char *)nva[i].name);
+      nva[i].name = (unsigned char *)H3_PSEUDO_AUTHORITY;
+      nva[i].name_len = sizeof(H3_PSEUDO_AUTHORITY) - 1;
     }
     else {
       nva[i].name_len = (size_t)(end - hdbuf);

@@ -64,6 +64,11 @@
 #define H2BUGF(x) do { } while(0)
 #endif
 
+#define H2_PSEUDO_METHOD ":method"
+#define H2_PSEUDO_SCHEME ":scheme"
+#define H2_PSEUDO_AUTHORITY ":authority"
+#define H2_PSEUDO_PATH ":path"
+#define H2_PSEUDO_STATUS ":status"
 
 static ssize_t http2_recv(struct Curl_easy *data, int sockindex,
                           char *mem, size_t len, CURLcode *err);
@@ -513,7 +518,7 @@ static int set_transfer_url(struct Curl_easy *data,
   if(!u)
     return 5;
 
-  v = curl_pushheader_byname(hp, ":scheme");
+  v = curl_pushheader_byname(hp, H2_PSEUDO_SCHEME);
   if(v) {
     uc = curl_url_set(u, CURLUPART_SCHEME, v, 0);
     if(uc) {
@@ -522,7 +527,7 @@ static int set_transfer_url(struct Curl_easy *data,
     }
   }
 
-  v = curl_pushheader_byname(hp, ":authority");
+  v = curl_pushheader_byname(hp, H2_PSEUDO_AUTHORITY);
   if(v) {
     uc = curl_url_set(u, CURLUPART_HOST, v, 0);
     if(uc) {
@@ -531,7 +536,7 @@ static int set_transfer_url(struct Curl_easy *data,
     }
   }
 
-  v = curl_pushheader_byname(hp, ":path");
+  v = curl_pushheader_byname(hp, H2_PSEUDO_PATH);
   if(v) {
     uc = curl_url_set(u, CURLUPART_PATH, v, 0);
     if(uc) {
@@ -1009,7 +1014,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   if(frame->hd.type == NGHTTP2_PUSH_PROMISE) {
     char *h;
 
-    if(!strcmp(":authority", (const char *)name)) {
+    if(!strcmp(H2_PSEUDO_AUTHORITY, (const char *)name)) {
       /* pseudo headers are lower case */
       int rc = 0;
       char *check = aprintf("%s:%d", conn->host.name, conn->remote_port);
@@ -1072,8 +1077,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     return 0;
   }
 
-  if(namelen == sizeof(":status") - 1 &&
-     memcmp(":status", name, namelen) == 0) {
+  if(namelen == sizeof(H2_PSEUDO_STATUS) - 1 &&
+     memcmp(H2_PSEUDO_STATUS, name, namelen) == 0) {
     /* nghttp2 guarantees :status is received first and only once, and
        value is 3 digits status code, and decode_status_code always
        succeeds. */
@@ -2010,8 +2015,8 @@ static ssize_t http2_send(struct Curl_easy *data, int sockindex,
   end = memchr(hdbuf, ' ', line_end - hdbuf);
   if(!end || end == hdbuf)
     goto fail;
-  nva[0].name = (unsigned char *)":method";
-  nva[0].namelen = strlen((char *)nva[0].name);
+  nva[0].name = (unsigned char *)H2_PSEUDO_METHOD;
+  nva[0].namelen = sizeof(H2_PSEUDO_METHOD) - 1;
   nva[0].value = (unsigned char *)hdbuf;
   nva[0].valuelen = (size_t)(end - hdbuf);
   nva[0].flags = NGHTTP2_NV_FLAG_NONE;
@@ -2032,8 +2037,8 @@ static ssize_t http2_send(struct Curl_easy *data, int sockindex,
   }
   if(!end || end == hdbuf)
     goto fail;
-  nva[1].name = (unsigned char *)":path";
-  nva[1].namelen = strlen((char *)nva[1].name);
+  nva[1].name = (unsigned char *)H2_PSEUDO_PATH;
+  nva[1].namelen = sizeof(H2_PSEUDO_PATH) - 1;
   nva[1].value = (unsigned char *)hdbuf;
   nva[1].valuelen = (size_t)(end - hdbuf);
   nva[1].flags = NGHTTP2_NV_FLAG_NONE;
@@ -2042,8 +2047,8 @@ static ssize_t http2_send(struct Curl_easy *data, int sockindex,
     goto fail;
   }
 
-  nva[2].name = (unsigned char *)":scheme";
-  nva[2].namelen = strlen((char *)nva[2].name);
+  nva[2].name = (unsigned char *) H2_PSEUDO_SCHEME;
+  nva[2].namelen = sizeof(H2_PSEUDO_SCHEME) - 1;
   if(conn->handler->flags & PROTOPT_SSL)
     nva[2].value = (unsigned char *)"https";
   else
@@ -2080,8 +2085,8 @@ static ssize_t http2_send(struct Curl_easy *data, int sockindex,
 
     if(hlen == 4 && strncasecompare("host", hdbuf, 4)) {
       authority_idx = i;
-      nva[i].name = (unsigned char *)":authority";
-      nva[i].namelen = strlen((char *)nva[i].name);
+      nva[i].name = (unsigned char *)H2_PSEUDO_AUTHORITY;
+      nva[i].namelen = sizeof(H2_PSEUDO_AUTHORITY) - 1;
     }
     else {
       nva[i].namelen = (size_t)(end - hdbuf);

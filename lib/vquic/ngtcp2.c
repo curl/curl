@@ -1079,8 +1079,8 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
   (void)flags;
   (void)user_data;
 
-  if(h3name.len == sizeof(":status") - 1 &&
-     !memcmp(":status", h3name.base, h3name.len)) {
+  if(h3name.len == sizeof(H3_PSEUDO_STATUS) - 1 &&
+     !memcmp(H3_PSEUDO_STATUS, h3name.base, h3name.len)) {
     char line[14]; /* status line is always 13 characters long */
     size_t ncopy;
     int status = decode_status_code(h3val.base, h3val.len);
@@ -1440,8 +1440,8 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   end = memchr(hdbuf, ' ', line_end - hdbuf);
   if(!end || end == hdbuf)
     goto fail;
-  nva[0].name = (unsigned char *)":method";
-  nva[0].namelen = strlen((char *)nva[0].name);
+  nva[0].name = (unsigned char *)H3_PSEUDO_METHOD;
+  nva[0].namelen = sizeof(H3_PSEUDO_METHOD) - 1;
   nva[0].value = (unsigned char *)hdbuf;
   nva[0].valuelen = (size_t)(end - hdbuf);
   nva[0].flags = NGHTTP3_NV_FLAG_NONE;
@@ -1458,14 +1458,14 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   }
   if(!end || end == hdbuf)
     goto fail;
-  nva[1].name = (unsigned char *)":path";
-  nva[1].namelen = strlen((char *)nva[1].name);
+  nva[1].name = (unsigned char *)H3_PSEUDO_PATH;
+  nva[1].namelen = sizeof(H3_PSEUDO_PATH) - 1;
   nva[1].value = (unsigned char *)hdbuf;
   nva[1].valuelen = (size_t)(end - hdbuf);
   nva[1].flags = NGHTTP3_NV_FLAG_NONE;
 
-  nva[2].name = (unsigned char *)":scheme";
-  nva[2].namelen = strlen((char *)nva[2].name);
+  nva[2].name = (unsigned char *)H3_PSEUDO_SCHEME;
+  nva[2].namelen = sizeof(H3_PSEUDO_SCHEME) - 1;
   if(conn->handler->flags & PROTOPT_SSL)
     nva[2].value = (unsigned char *)"https";
   else
@@ -1499,8 +1499,8 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
 
     if(hlen == 4 && strncasecompare("host", hdbuf, 4)) {
       authority_idx = i;
-      nva[i].name = (unsigned char *)":authority";
-      nva[i].namelen = strlen((char *)nva[i].name);
+      nva[i].name = (unsigned char *)H3_PSEUDO_AUTHORITY;
+      nva[i].namelen = sizeof(H3_PSEUDO_AUTHORITY) - 1;
     }
     else {
       nva[i].namelen = (size_t)(end - hdbuf);
