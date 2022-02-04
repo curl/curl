@@ -44,6 +44,7 @@ LIB_VTLS_CFILES =           \
   vtls/bearssl.c            \
   vtls/gskit.c              \
   vtls/gtls.c               \
+  vtls/hostcheck.c          \
   vtls/keylog.c             \
   vtls/mbedtls.c            \
   vtls/mbedtls_threadlock.c \
@@ -54,12 +55,14 @@ LIB_VTLS_CFILES =           \
   vtls/schannel_verify.c    \
   vtls/sectransp.c          \
   vtls/vtls.c               \
-  vtls/wolfssl.c
+  vtls/wolfssl.c            \
+  vtls/x509asn1.c
 
 LIB_VTLS_HFILES =           \
   vtls/bearssl.h            \
   vtls/gskit.h              \
   vtls/gtls.h               \
+  vtls/hostcheck.h          \
   vtls/keylog.h             \
   vtls/mbedtls.h            \
   vtls/mbedtls_threadlock.h \
@@ -69,7 +72,8 @@ LIB_VTLS_HFILES =           \
   vtls/schannel.h           \
   vtls/sectransp.h          \
   vtls/vtls.h               \
-  vtls/wolfssl.h
+  vtls/wolfssl.h            \
+  vtls/x509asn1.h
 
 LIB_VQUIC_CFILES = \
   vquic/ngtcp2.c   \
@@ -138,7 +142,6 @@ LIB_CFILES =         \
   hash.c             \
   hmac.c             \
   hostasyn.c         \
-  hostcheck.c        \
   hostip.c           \
   hostip4.c          \
   hostip6.c          \
@@ -207,8 +210,7 @@ LIB_CFILES =         \
   version.c          \
   version_win32.c    \
   warnless.c         \
-  wildcard.c         \
-  x509asn1.c
+  wildcard.c
 
 LIB_HFILES =         \
   altsvc.h           \
@@ -266,7 +268,6 @@ LIB_HFILES =         \
   getinfo.h          \
   gopher.h           \
   hash.h             \
-  hostcheck.h        \
   hostip.h           \
   hsts.h             \
   http.h             \
@@ -327,8 +328,7 @@ LIB_HFILES =         \
   urldata.h          \
   version_win32.h    \
   warnless.h         \
-  wildcard.h         \
-  x509asn1.h
+  wildcard.h
 
 LIB_RCFILES = libcurl.rc
 
