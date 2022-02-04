@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "x509asn1.h"
+#include "vtls/x509asn1.h"
 
 static CURLcode unit_setup(void)
 {
@@ -32,8 +32,8 @@ static void unit_stop(void)
 {
 
 }
-#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
-    defined(USE_WOLFSSL) || defined(USE_SCHANNEL)
+#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) ||    \
+  defined(USE_SCHANNEL) || defined(USE_SECTRANSP)
 
 /* cert captured from gdb when connecting to curl.se on October 26
    2018 */
