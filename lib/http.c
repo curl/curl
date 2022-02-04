@@ -1416,15 +1416,15 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
 bool
 Curl_compareheader(const char *headerline, /* line to check */
                    const char *header,  /* header keyword _with_ colon */
-                   const char *content) /* content string to find */
+                   const size_t hlen,   /* len of the keyword in bytes */
+                   const char *content, /* content string to find */
+                   const size_t clen)   /* len of the content in bytes */
 {
   /* RFC2616, section 4.2 says: "Each header field consists of a name followed
    * by a colon (":") and the field value. Field names are case-insensitive.
    * The field value MAY be preceded by any amount of LWS, though a single SP
    * is preferred." */
 
-  size_t hlen = strlen(header);
-  size_t clen;
   size_t len;
   const char *start;
   const char *end;
@@ -1451,7 +1451,6 @@ Curl_compareheader(const char *headerline, /* line to check */
   }
 
   len = end-start; /* length of the content part of the input line */
-  clen = strlen(content); /* length of the word to find */
 
   /* find the content string in the rest of the line */
   for(; len >= clen; len--, start++) {
@@ -1707,7 +1706,7 @@ static CURLcode expect100(struct Curl_easy *data,
     const char *ptr = Curl_checkheaders(data, "Expect");
     if(ptr) {
       data->state.expect100header =
-        Curl_compareheader(ptr, "Expect:", "100-continue");
+        Curl_compareheader(ptr, CONSTLEN("Expect:"), CONSTLEN("100-continue"));
     }
     else {
       result = Curl_dyn_add(req, "Expect: 100-continue\r\n");
@@ -2325,7 +2324,8 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
   if(ptr) {
     /* Some kind of TE is requested, check if 'chunked' is chosen */
     data->req.upload_chunky =
-      Curl_compareheader(ptr, "Transfer-Encoding:", "chunked");
+      Curl_compareheader(ptr,
+                         CONSTLEN("Transfer-Encoding:"), CONSTLEN("chunked"));
   }
   else {
     if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
@@ -2475,7 +2475,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     ptr = Curl_checkheaders(data, "Expect");
     if(ptr) {
       data->state.expect100header =
-        Curl_compareheader(ptr, "Expect:", "100-continue");
+        Curl_compareheader(ptr, CONSTLEN("Expect:"), CONSTLEN("100-continue"));
     }
     else if(http->postsize > EXPECT_100_THRESHOLD || http->postsize < 0) {
       result = expect100(data, conn, r);
@@ -2548,7 +2548,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     ptr = Curl_checkheaders(data, "Expect");
     if(ptr) {
       data->state.expect100header =
-        Curl_compareheader(ptr, "Expect:", "100-continue");
+        Curl_compareheader(ptr, CONSTLEN("Expect:"), CONSTLEN("100-continue"));
     }
     else if(http->postsize > EXPECT_100_THRESHOLD || http->postsize < 0) {
       result = expect100(data, conn, r);
@@ -3393,7 +3393,9 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
 #ifndef CURL_DISABLE_PROXY
   else if((conn->httpversion == 10) &&
           conn->bits.httpproxy &&
-          Curl_compareheader(headp, "Proxy-Connection:", "keep-alive")) {
+          Curl_compareheader(headp,
+                             CONSTLEN("Proxy-Connection:"),
+                             CONSTLEN("keep-alive"))) {
     /*
      * When a HTTP/1.0 reply comes when using a proxy, the
      * 'Proxy-Connection: keep-alive' line tells us the
@@ -3405,7 +3407,9 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
   }
   else if((conn->httpversion == 11) &&
           conn->bits.httpproxy &&
-          Curl_compareheader(headp, "Proxy-Connection:", "close")) {
+          Curl_compareheader(headp,
+                             CONSTLEN("Proxy-Connection:"),
+                             CONSTLEN("close"))) {
     /*
      * We get a HTTP/1.1 response from a proxy and it says it'll
      * close down after this transfer.
@@ -3415,7 +3419,9 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
   }
 #endif
   else if((conn->httpversion == 10) &&
-          Curl_compareheader(headp, "Connection:", "keep-alive")) {
+          Curl_compareheader(headp,
+                             CONSTLEN("Connection:"),
+                             CONSTLEN("keep-alive"))) {
     /*
      * A HTTP/1.0 reply with the 'Connection: keep-alive' line
      * tells us the connection will be kept alive for our
@@ -3425,7 +3431,8 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
     connkeep(conn, "Connection keep-alive");
     infof(data, "HTTP/1.0 connection set to keep alive!");
   }
-  else if(Curl_compareheader(headp, "Connection:", "close")) {
+  else if(Curl_compareheader(headp,
+                             CONSTLEN("Connection:"), CONSTLEN("close"))) {
     /*
      * [RFC 2616, section 8.1.2.1]
      * "Connection: close" is HTTP/1.1 language and means that
