@@ -1858,7 +1858,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
           ptr = optr;
         }
       }
-      if(ptr) {
+      if(ptr && (ptr != headers->data)) {
         /* we require a colon for this to be a true header */
 
         ptr++; /* pass the colon */

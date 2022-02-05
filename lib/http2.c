@@ -36,6 +36,7 @@
 #include "connect.h"
 #include "strtoofft.h"
 #include "strdup.h"
+#include "transfer.h"
 #include "dynbuf.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1917,6 +1918,7 @@ static ssize_t http2_send(struct Curl_easy *data, int sockindex,
   int32_t stream_id;
   nghttp2_session *h2 = httpc->h2;
   nghttp2_priority_spec pri_spec;
+  char *vptr;
 
   (void)sockindex;
 
@@ -2049,10 +2051,21 @@ static ssize_t http2_send(struct Curl_easy *data, int sockindex,
 
   nva[2].name = (unsigned char *) H2_PSEUDO_SCHEME;
   nva[2].namelen = sizeof(H2_PSEUDO_SCHEME) - 1;
-  if(conn->handler->flags & PROTOPT_SSL)
-    nva[2].value = (unsigned char *)"https";
-  else
-    nva[2].value = (unsigned char *)"http";
+
+  vptr = Curl_checkheaders(data, H2_PSEUDO_SCHEME);
+  if(vptr) {
+    vptr += sizeof(H2_PSEUDO_SCHEME);
+    while(*vptr && ISSPACE(*vptr))
+      vptr++;
+    nva[2].value = (unsigned char *)vptr;
+    infof(data, "set pseduo header %s to %s", H2_PSEUDO_SCHEME, vptr);
+  }
+  else {
+    if(conn->handler->flags & PROTOPT_SSL)
+      nva[2].value = (unsigned char *)"https";
+    else
+      nva[2].value = (unsigned char *)"http";
+  }
   nva[2].valuelen = strlen((char *)nva[2].value);
   nva[2].flags = NGHTTP2_NV_FLAG_NONE;
   if(HEADER_OVERFLOW(nva[2])) {
