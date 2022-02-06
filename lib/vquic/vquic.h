@@ -24,12 +24,6 @@
 
 #include "curl_setup.h"
 
-#define H3_PSEUDO_METHOD ":method"
-#define H3_PSEUDO_SCHEME ":scheme"
-#define H3_PSEUDO_AUTHORITY ":authority"
-#define H3_PSEUDO_PATH ":path"
-#define H3_PSEUDO_STATUS ":status"
-
 #ifdef ENABLE_QUIC
 CURLcode Curl_qlogdir(struct Curl_easy *data,
                       unsigned char *scid,
