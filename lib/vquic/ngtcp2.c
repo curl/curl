@@ -45,6 +45,7 @@
 #include "strerror.h"
 #include "dynbuf.h"
 #include "vquic.h"
+#include "transfer.h"
 #include "vtls/keylog.h"
 
 /* The last 3 #include files should be in this order */
@@ -1394,6 +1395,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   int64_t stream3_id;
   int rc;
   struct h3out *h3out = NULL;
+  char *vptr;
 
   rc = ngtcp2_conn_open_bidi_stream(qs->qconn, &stream3_id, NULL);
   if(rc) {
@@ -1466,10 +1468,21 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
 
   nva[2].name = (unsigned char *)H3_PSEUDO_SCHEME;
   nva[2].namelen = sizeof(H3_PSEUDO_SCHEME) - 1;
-  if(conn->handler->flags & PROTOPT_SSL)
-    nva[2].value = (unsigned char *)"https";
-  else
-    nva[2].value = (unsigned char *)"http";
+
+  vptr = Curl_checkheaders(data, H3_PSEUDO_SCHEME);
+  if(vptr) {
+    vptr += sizeof(H3_PSEUDO_SCHEME);
+    while(*vptr && ISSPACE(*vptr))
+      vptr++;
+    nva[2].value = (unsigned char *)vptr;
+    infof(data, "set pseduo header %s to %s", H3_PSEUDO_SCHEME, vptr);
+  }
+  else {
+    if(conn->handler->flags & PROTOPT_SSL)
+      nva[2].value = (unsigned char *)"https";
+    else
+      nva[2].value = (unsigned char *)"http";
+  }
   nva[2].valuelen = strlen((char *)nva[2].value);
   nva[2].flags = NGHTTP3_NV_FLAG_NONE;
 
