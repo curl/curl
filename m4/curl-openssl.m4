@@ -384,11 +384,21 @@ dnl ---
 dnl We require OpenSSL with SRP support.
 dnl ---
 if test "$OPENSSL_ENABLED" = "1"; then
-  AC_CHECK_LIB(crypto, SRP_Calc_client_key,
-   [
-     AC_DEFINE(HAVE_OPENSSL_SRP, 1, [if you have the function SRP_Calc_client_key])
-     AC_SUBST(HAVE_OPENSSL_SRP, [1])
-   ])
+  AC_MSG_CHECKING([for SRP support in OpenSSL])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+#include <openssl/ssl.h>
+    ]],[[
+      SSL_CTX_set_srp_username(NULL, "");
+      SSL_CTX_set_srp_password(NULL, "");
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_OPENSSL_SRP, 1, [if you have the functions SSL_CTX_set_srp_username and SSL_CTX_set_srp_password])
+    AC_SUBST(HAVE_OPENSSL_SRP, [1])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
 fi
 
 dnl ---
