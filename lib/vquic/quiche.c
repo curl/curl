@@ -36,6 +36,7 @@
 #include "connect.h"
 #include "strerror.h"
 #include "vquic.h"
+#include "transfer.h"
 #include "vtls/openssl.h"
 #include "vtls/keylog.h"
 
@@ -709,8 +710,6 @@ void Curl_quic_ver(char *p, size_t len)
 static CURLcode http_request(struct Curl_easy *data, const void *mem,
                              size_t len)
 {
-  /*
-   */
   struct connectdata *conn = data->conn;
   struct HTTP *stream = data->req.p.http;
   size_t nheader;
@@ -722,6 +721,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   quiche_h3_header *nva = NULL;
   struct quicsocket *qs = conn->quic;
   CURLcode result = CURLE_OK;
+  char *vptr;
 
   stream->h3req = TRUE; /* senf off! */
 
@@ -783,12 +783,21 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
 
   nva[2].name = (unsigned char *)H3_PSEUDO_SCHEME;
   nva[2].name_len = sizeof(H3_PSEUDO_SCHEME) - 1;
-  if(conn->handler->flags & PROTOPT_SSL)
-    nva[2].value = (unsigned char *)"https";
-  else
-    nva[2].value = (unsigned char *)"http";
+  vptr = Curl_checkheaders(data, H3_PSEUDO_SCHEME);
+  if(vptr) {
+    vptr += sizeof(H3_PSEUDO_SCHEME);
+    while(*vptr && ISSPACE(*vptr))
+      vptr++;
+    nva[2].value = (unsigned char *)vptr;
+    infof(data, "set pseduo header %s to %s", H3_PSEUDO_SCHEME, vptr);
+  }
+  else {
+    if(conn->handler->flags & PROTOPT_SSL)
+      nva[2].value = (unsigned char *)"https";
+    else
+      nva[2].value = (unsigned char *)"http";
+  }
   nva[2].value_len = strlen((char *)nva[2].value);
-
 
   authority_idx = 0;
   i = 3;
