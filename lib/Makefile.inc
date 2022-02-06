@@ -139,6 +139,7 @@ LIB_CFILES =         \
   getenv.c           \
   getinfo.c          \
   gopher.c           \
+  h2h3.c             \
   hash.c             \
   hmac.c             \
   hostasyn.c         \
@@ -267,6 +268,7 @@ LIB_HFILES =         \
   ftplistparser.h    \
   getinfo.h          \
   gopher.h           \
+  h2h3.h             \
   hash.h             \
   hostip.h           \
   hsts.h             \
