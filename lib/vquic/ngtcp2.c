@@ -45,7 +45,7 @@
 #include "strerror.h"
 #include "dynbuf.h"
 #include "vquic.h"
-#include "transfer.h"
+#include "h2h3.h"
 #include "vtls/keylog.h"
 
 /* The last 3 #include files should be in this order */
@@ -1080,8 +1080,8 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
   (void)flags;
   (void)user_data;
 
-  if(h3name.len == sizeof(H3_PSEUDO_STATUS) - 1 &&
-     !memcmp(H3_PSEUDO_STATUS, h3name.base, h3name.len)) {
+  if(h3name.len == sizeof(H2H3_PSEUDO_STATUS) - 1 &&
+     !memcmp(H2H3_PSEUDO_STATUS, h3name.base, h3name.len)) {
     char line[14]; /* status line is always 13 characters long */
     size_t ncopy;
     int status = decode_status_code(h3val.base, h3val.len);
@@ -1385,17 +1385,13 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   struct connectdata *conn = data->conn;
   struct HTTP *stream = data->req.p.http;
   size_t nheader;
-  size_t i;
-  size_t authority_idx;
-  char *hdbuf = (char *)mem;
-  char *end, *line_end;
   struct quicsocket *qs = conn->quic;
   CURLcode result = CURLE_OK;
   nghttp3_nv *nva = NULL;
   int64_t stream3_id;
   int rc;
   struct h3out *h3out = NULL;
-  char *vptr;
+  struct h2h3req *hreq = NULL;
 
   rc = ngtcp2_conn_open_bidi_stream(qs->qconn, &stream3_id, NULL);
   if(rc) {
@@ -1408,169 +1404,23 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   stream->h3req = TRUE; /* senf off! */
   Curl_dyn_init(&stream->overflow, CURL_MAX_READ_SIZE);
 
-  /* Calculate number of headers contained in [mem, mem + len). Assumes a
-     correctly generated HTTP header field block. */
-  nheader = 0;
-  for(i = 1; i < len; ++i) {
-    if(hdbuf[i] == '\n' && hdbuf[i - 1] == '\r') {
-      ++nheader;
-      ++i;
-    }
-  }
-  if(nheader < 2)
+  result = Curl_pseudo_headers(data, mem, len, &hreq);
+  if(result)
     goto fail;
+  nheader = hreq->entries;
 
-  /* We counted additional 2 \r\n in the first and last line. We need 3
-     new headers: :method, :path and :scheme. Therefore we need one
-     more space. */
-  nheader += 1;
   nva = malloc(sizeof(nghttp3_nv) * nheader);
   if(!nva) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
   }
-
-  /* Extract :method, :path from request line
-     We do line endings with CRLF so checking for CR is enough */
-  line_end = memchr(hdbuf, '\r', len);
-  if(!line_end) {
-    result = CURLE_BAD_FUNCTION_ARGUMENT; /* internal error */
-    goto fail;
-  }
-
-  /* Method does not contain spaces */
-  end = memchr(hdbuf, ' ', line_end - hdbuf);
-  if(!end || end == hdbuf)
-    goto fail;
-  nva[0].name = (unsigned char *)H3_PSEUDO_METHOD;
-  nva[0].namelen = sizeof(H3_PSEUDO_METHOD) - 1;
-  nva[0].value = (unsigned char *)hdbuf;
-  nva[0].valuelen = (size_t)(end - hdbuf);
-  nva[0].flags = NGHTTP3_NV_FLAG_NONE;
-
-  hdbuf = end + 1;
-
-  /* Path may contain spaces so scan backwards */
-  end = NULL;
-  for(i = (size_t)(line_end - hdbuf); i; --i) {
-    if(hdbuf[i - 1] == ' ') {
-      end = &hdbuf[i - 1];
-      break;
-    }
-  }
-  if(!end || end == hdbuf)
-    goto fail;
-  nva[1].name = (unsigned char *)H3_PSEUDO_PATH;
-  nva[1].namelen = sizeof(H3_PSEUDO_PATH) - 1;
-  nva[1].value = (unsigned char *)hdbuf;
-  nva[1].valuelen = (size_t)(end - hdbuf);
-  nva[1].flags = NGHTTP3_NV_FLAG_NONE;
-
-  nva[2].name = (unsigned char *)H3_PSEUDO_SCHEME;
-  nva[2].namelen = sizeof(H3_PSEUDO_SCHEME) - 1;
-
-  vptr = Curl_checkheaders(data, H3_PSEUDO_SCHEME);
-  if(vptr) {
-    vptr += sizeof(H3_PSEUDO_SCHEME);
-    while(*vptr && ISSPACE(*vptr))
-      vptr++;
-    nva[2].value = (unsigned char *)vptr;
-    infof(data, "set pseduo header %s to %s", H3_PSEUDO_SCHEME, vptr);
-  }
   else {
-    if(conn->handler->flags & PROTOPT_SSL)
-      nva[2].value = (unsigned char *)"https";
-    else
-      nva[2].value = (unsigned char *)"http";
-  }
-  nva[2].valuelen = strlen((char *)nva[2].value);
-  nva[2].flags = NGHTTP3_NV_FLAG_NONE;
-
-
-  authority_idx = 0;
-  i = 3;
-  while(i < nheader) {
-    size_t hlen;
-
-    hdbuf = line_end + 2;
-
-    /* check for next CR, but only within the piece of data left in the given
-       buffer */
-    line_end = memchr(hdbuf, '\r', len - (hdbuf - (char *)mem));
-    if(!line_end || (line_end == hdbuf))
-      goto fail;
-
-    /* header continuation lines are not supported */
-    if(*hdbuf == ' ' || *hdbuf == '\t')
-      goto fail;
-
-    for(end = hdbuf; end < line_end && *end != ':'; ++end)
-      ;
-    if(end == hdbuf || end == line_end)
-      goto fail;
-    hlen = end - hdbuf;
-
-    if(hlen == 4 && strncasecompare("host", hdbuf, 4)) {
-      authority_idx = i;
-      nva[i].name = (unsigned char *)H3_PSEUDO_AUTHORITY;
-      nva[i].namelen = sizeof(H3_PSEUDO_AUTHORITY) - 1;
-    }
-    else {
-      nva[i].namelen = (size_t)(end - hdbuf);
-      /* Lower case the header name for HTTP/3 */
-      Curl_strntolower((char *)hdbuf, hdbuf, nva[i].namelen);
-      nva[i].name = (unsigned char *)hdbuf;
-    }
-    nva[i].flags = NGHTTP3_NV_FLAG_NONE;
-    hdbuf = end + 1;
-    while(*hdbuf == ' ' || *hdbuf == '\t')
-      ++hdbuf;
-    end = line_end;
-
-#if 0 /* This should probably go in more or less like this */
-    switch(inspect_header((const char *)nva[i].name, nva[i].namelen, hdbuf,
-                          end - hdbuf)) {
-    case HEADERINST_IGNORE:
-      /* skip header fields prohibited by HTTP/2 specification. */
-      --nheader;
-      continue;
-    case HEADERINST_TE_TRAILERS:
-      nva[i].value = (uint8_t*)"trailers";
-      nva[i].value_len = sizeof("trailers") - 1;
-      break;
-    default:
-      nva[i].value = (unsigned char *)hdbuf;
-      nva[i].value_len = (size_t)(end - hdbuf);
-    }
-#endif
-    nva[i].value = (unsigned char *)hdbuf;
-    nva[i].valuelen = (size_t)(end - hdbuf);
-    nva[i].flags = NGHTTP3_NV_FLAG_NONE;
-
-    ++i;
-  }
-
-  /* :authority must come before non-pseudo header fields */
-  if(authority_idx && authority_idx != AUTHORITY_DST_IDX) {
-    nghttp3_nv authority = nva[authority_idx];
-    for(i = authority_idx; i > AUTHORITY_DST_IDX; --i) {
-      nva[i] = nva[i - 1];
-    }
-    nva[i] = authority;
-  }
-
-  /* Warn stream may be rejected if cumulative length of headers is too
-     large. */
-#define MAX_ACC 60000  /* <64KB to account for some overhead */
-  {
-    size_t acc = 0;
-    for(i = 0; i < nheader; ++i)
-      acc += nva[i].namelen + nva[i].valuelen;
-
-    if(acc > MAX_ACC) {
-      infof(data, "http_request: Warning: The cumulative length of all "
-            "headers exceeds %d bytes and that could cause the "
-            "stream to be rejected.", MAX_ACC);
+    unsigned int i;
+    for(i = 0; i < nheader; i++) {
+      nva[i].name = (unsigned char *)hreq->header[i].name;
+      nva[i].namelen = hreq->header[i].namelen;
+      nva[i].value = (unsigned char *)hreq->header[i].value;
+      nva[i].valuelen = hreq->header[i].valuelen;
     }
   }
 
@@ -1619,10 +1469,12 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   infof(data, "Using HTTP/3 Stream ID: %x (easy handle %p)",
         stream3_id, (void *)data);
 
+  Curl_pseudo_free(hreq);
   return CURLE_OK;
 
 fail:
   free(nva);
+  Curl_pseudo_free(hreq);
   return result;
 }
 static ssize_t ngh3_stream_send(struct Curl_easy *data,
