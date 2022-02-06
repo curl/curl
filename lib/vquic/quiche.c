@@ -37,6 +37,7 @@
 #include "strerror.h"
 #include "vquic.h"
 #include "transfer.h"
+#include "h2h3.h"
 #include "vtls/openssl.h"
 #include "vtls/keylog.h"
 
@@ -543,7 +544,7 @@ static int cb_each_header(uint8_t *name, size_t name_len,
   struct h3h1header *headers = (struct h3h1header *)argp;
   size_t olen = 0;
 
-  if((name_len == 7) && !strncmp(H3_PSEUDO_STATUS, (char *)name, 7)) {
+  if((name_len == 7) && !strncmp(H2H3_PSEUDO_STATUS, (char *)name, 7)) {
     msnprintf(headers->dest,
               headers->destlen, "HTTP/3 %.*s\n",
               (int) value_len, value);
@@ -713,180 +714,31 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   struct connectdata *conn = data->conn;
   struct HTTP *stream = data->req.p.http;
   size_t nheader;
-  size_t i;
-  size_t authority_idx;
-  char *hdbuf = (char *)mem;
-  char *end, *line_end;
   int64_t stream3_id;
   quiche_h3_header *nva = NULL;
   struct quicsocket *qs = conn->quic;
   CURLcode result = CURLE_OK;
-  char *vptr;
+  struct h2h3req *hreq = NULL;
 
   stream->h3req = TRUE; /* senf off! */
 
-  /* Calculate number of headers contained in [mem, mem + len). Assumes a
-     correctly generated HTTP header field block. */
-  nheader = 0;
-  for(i = 1; i < len; ++i) {
-    if(hdbuf[i] == '\n' && hdbuf[i - 1] == '\r') {
-      ++nheader;
-      ++i;
-    }
-  }
-  if(nheader < 2)
+  result = Curl_pseudo_headers(data, mem, len, &hreq);
+  if(result)
     goto fail;
+  nheader = hreq->entries;
 
-  /* We counted additional 2 \r\n in the first and last line. We need 3
-     new headers: :method, :path and :scheme. Therefore we need one
-     more space. */
-  nheader += 1;
   nva = malloc(sizeof(quiche_h3_header) * nheader);
   if(!nva) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
   }
-
-  /* Extract :method, :path from request line
-     We do line endings with CRLF so checking for CR is enough */
-  line_end = memchr(hdbuf, '\r', len);
-  if(!line_end) {
-    result = CURLE_BAD_FUNCTION_ARGUMENT; /* internal error */
-    goto fail;
-  }
-
-  /* Method does not contain spaces */
-  end = memchr(hdbuf, ' ', line_end - hdbuf);
-  if(!end || end == hdbuf)
-    goto fail;
-  nva[0].name = (unsigned char *)H3_PSEUDO_METHOD;
-  nva[0].name_len = sizeof(H3_PSEUDO_METHOD) - 1;
-  nva[0].value = (unsigned char *)hdbuf;
-  nva[0].value_len = (size_t)(end - hdbuf);
-
-  hdbuf = end + 1;
-
-  /* Path may contain spaces so scan backwards */
-  end = NULL;
-  for(i = (size_t)(line_end - hdbuf); i; --i) {
-    if(hdbuf[i - 1] == ' ') {
-      end = &hdbuf[i - 1];
-      break;
-    }
-  }
-  if(!end || end == hdbuf)
-    goto fail;
-  nva[1].name = (unsigned char *)H3_PSEUDO_PATH;
-  nva[1].name_len = sizeof(H3_PSEUDO_PATH) - 1;
-  nva[1].value = (unsigned char *)hdbuf;
-  nva[1].value_len = (size_t)(end - hdbuf);
-
-  nva[2].name = (unsigned char *)H3_PSEUDO_SCHEME;
-  nva[2].name_len = sizeof(H3_PSEUDO_SCHEME) - 1;
-  vptr = Curl_checkheaders(data, H3_PSEUDO_SCHEME);
-  if(vptr) {
-    vptr += sizeof(H3_PSEUDO_SCHEME);
-    while(*vptr && ISSPACE(*vptr))
-      vptr++;
-    nva[2].value = (unsigned char *)vptr;
-    infof(data, "set pseduo header %s to %s", H3_PSEUDO_SCHEME, vptr);
-  }
   else {
-    if(conn->handler->flags & PROTOPT_SSL)
-      nva[2].value = (unsigned char *)"https";
-    else
-      nva[2].value = (unsigned char *)"http";
-  }
-  nva[2].value_len = strlen((char *)nva[2].value);
-
-  authority_idx = 0;
-  i = 3;
-  while(i < nheader) {
-    size_t hlen;
-
-    hdbuf = line_end + 2;
-
-    /* check for next CR, but only within the piece of data left in the given
-       buffer */
-    line_end = memchr(hdbuf, '\r', len - (hdbuf - (char *)mem));
-    if(!line_end || (line_end == hdbuf))
-      goto fail;
-
-    /* header continuation lines are not supported */
-    if(*hdbuf == ' ' || *hdbuf == '\t')
-      goto fail;
-
-    for(end = hdbuf; end < line_end && *end != ':'; ++end)
-      ;
-    if(end == hdbuf || end == line_end)
-      goto fail;
-    hlen = end - hdbuf;
-
-    if(hlen == 4 && strncasecompare("host", hdbuf, 4)) {
-      authority_idx = i;
-      nva[i].name = (unsigned char *)H3_PSEUDO_AUTHORITY;
-      nva[i].name_len = sizeof(H3_PSEUDO_AUTHORITY) - 1;
-    }
-    else {
-      nva[i].name_len = (size_t)(end - hdbuf);
-      /* Lower case the header name for HTTP/3 */
-      Curl_strntolower((char *)hdbuf, hdbuf, nva[i].name_len);
-      nva[i].name = (unsigned char *)hdbuf;
-    }
-    hdbuf = end + 1;
-    while(*hdbuf == ' ' || *hdbuf == '\t')
-      ++hdbuf;
-    end = line_end;
-
-#if 0 /* This should probably go in more or less like this */
-    switch(inspect_header((const char *)nva[i].name, nva[i].namelen, hdbuf,
-                          end - hdbuf)) {
-    case HEADERINST_IGNORE:
-      /* skip header fields prohibited by HTTP/2 specification. */
-      --nheader;
-      continue;
-    case HEADERINST_TE_TRAILERS:
-      nva[i].value = (uint8_t*)"trailers";
-      nva[i].value_len = sizeof("trailers") - 1;
-      break;
-    default:
-      nva[i].value = (unsigned char *)hdbuf;
-      nva[i].value_len = (size_t)(end - hdbuf);
-    }
-#endif
-    nva[i].value = (unsigned char *)hdbuf;
-    nva[i].value_len = (size_t)(end - hdbuf);
-
-    ++i;
-  }
-
-  /* :authority must come before non-pseudo header fields */
-  if(authority_idx && authority_idx != AUTHORITY_DST_IDX) {
-    quiche_h3_header authority = nva[authority_idx];
-    for(i = authority_idx; i > AUTHORITY_DST_IDX; --i) {
-      nva[i] = nva[i - 1];
-    }
-    nva[i] = authority;
-  }
-
-  /* Warn stream may be rejected if cumulative length of headers is too
-     large. */
-#define MAX_ACC 60000  /* <64KB to account for some overhead */
-  {
-    size_t acc = 0;
-
-    for(i = 0; i < nheader; ++i) {
-      acc += nva[i].name_len + nva[i].value_len;
-
-      H3BUGF(infof(data, "h3 [%.*s: %.*s]",
-                   nva[i].name_len, nva[i].name,
-                   nva[i].value_len, nva[i].value));
-    }
-
-    if(acc > MAX_ACC) {
-      infof(data, "http_request: Warning: The cumulative length of all "
-            "headers exceeds %d bytes and that could cause the "
-            "stream to be rejected.", MAX_ACC);
+    unsigned int i;
+    for(i = 0; i < nheader; i++) {
+      nva[i].name = (unsigned char *)hreq->header[i].name;
+      nva[i].name_len = hreq->header[i].namelen;
+      nva[i].value = (unsigned char *)hreq->header[i].value;
+      nva[i].value_len = hreq->header[i].valuelen;
     }
   }
 
@@ -933,10 +785,12 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
         stream3_id, (void *)data);
   stream->stream3_id = stream3_id;
 
+  Curl_pseudo_free(hreq);
   return CURLE_OK;
 
 fail:
   free(nva);
+  Curl_pseudo_free(hreq);
   return result;
 }
 
