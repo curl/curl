@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -487,9 +487,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
     clean_CPPFLAGS="$CPPFLAGS"
     clean_LDFLAGS="$LDFLAGS"
     clean_LIBS="$LIBS"
-    embedded_ares="unknown"
     configure_runpath=`pwd`
-    embedded_ares_builddir="$configure_runpath/ares"
     if test -n "$want_ares_path"; then
       dnl c-ares library path has been specified
       ARES_PCDIR="$want_ares_path/lib/pkgconfig"
@@ -511,31 +509,19 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
         ares_LIBS="-lcares"
       fi
     else
-      dnl c-ares library path has not been given
-      if test -d "$srcdir/ares"; then
-        dnl c-ares sources embedded in curl tree
-        embedded_ares="yes"
-        AC_CONFIG_SUBDIRS(ares)
-        dnl c-ares has installable configured header files, path
-        dnl inclusion fully done in makefiles for in-tree builds.
-        ares_CPPFLAGS=""
-        ares_LDFLAGS="-L$embedded_ares_builddir"
-        ares_LIBS="-lcares"
+      dnl c-ares path not specified, use defaults
+      CURL_CHECK_PKGCONFIG(libcares)
+      if test "$PKGCONFIG" != "no" ; then
+        ares_LIBS=`$PKGCONFIG --libs-only-l libcares`
+        ares_LDFLAGS=`$PKGCONFIG --libs-only-L libcares`
+        ares_CPPFLAGS=`$PKGCONFIG --cflags-only-I libcares`
+        AC_MSG_NOTICE([pkg-config: ares_LIBS: "$ares_LIBS"])
+        AC_MSG_NOTICE([pkg-config: ares_LDFLAGS: "$ares_LDFLAGS"])
+        AC_MSG_NOTICE([pkg-config: ares_CPPFLAGS: "$ares_CPPFLAGS"])
       else
-        dnl c-ares path not specified, use defaults
-        CURL_CHECK_PKGCONFIG(libcares)
-        if test "$PKGCONFIG" != "no" ; then
-          ares_LIBS=`$PKGCONFIG --libs-only-l libcares`
-          ares_LDFLAGS=`$PKGCONFIG --libs-only-L libcares`
-          ares_CPPFLAGS=`$PKGCONFIG --cflags-only-I libcares`
-          AC_MSG_NOTICE([pkg-config: ares_LIBS: "$ares_LIBS"])
-          AC_MSG_NOTICE([pkg-config: ares_LDFLAGS: "$ares_LDFLAGS"])
-          AC_MSG_NOTICE([pkg-config: ares_CPPFLAGS: "$ares_CPPFLAGS"])
-        else
-          ares_CPPFLAGS=""
-          ares_LDFLAGS=""
-          ares_LIBS="-lcares"
-        fi
+        ares_CPPFLAGS=""
+        ares_LDFLAGS=""
+        ares_LIBS="-lcares"
       fi
     fi
     #
@@ -543,38 +529,37 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
     LDFLAGS="$clean_LDFLAGS $ares_LDFLAGS"
     LIBS="$ares_LIBS $clean_LIBS"
     #
-    if test "$embedded_ares" != "yes"; then
-      dnl check if c-ares new enough when not using an embedded
-      dnl source tree one which normally has not been built yet.
-      AC_MSG_CHECKING([that c-ares is good and recent enough])
-      AC_LINK_IFELSE([
-        AC_LANG_PROGRAM([[
+
+    dnl check if c-ares new enough
+    AC_MSG_CHECKING([that c-ares is good and recent enough])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
 #include <ares.h>
-          /* set of dummy functions in case c-ares was built with debug */
-          void curl_dofree() { }
-          void curl_sclose() { }
-          void curl_domalloc() { }
-          void curl_docalloc() { }
-          void curl_socket() { }
-        ]],[[
-          ares_channel channel;
-          ares_cancel(channel); /* added in 1.2.0 */
-          ares_process_fd(channel, 0, 0); /* added in 1.4.0 */
-          ares_dup(&channel, channel); /* added in 1.6.0 */
-        ]])
-      ],[
-        AC_MSG_RESULT([yes])
-      ],[
-        AC_MSG_RESULT([no])
-        AC_MSG_ERROR([c-ares library defective or too old])
-        dnl restore initial settings
-        CPPFLAGS="$clean_CPPFLAGS"
-        LDFLAGS="$clean_LDFLAGS"
-        LIBS="$clean_LIBS"
-        # prevent usage
-        want_ares="no"
-      ])
-    fi
+        /* set of dummy functions in case c-ares was built with debug */
+        void curl_dofree() { }
+        void curl_sclose() { }
+        void curl_domalloc() { }
+        void curl_docalloc() { }
+        void curl_socket() { }
+      ]],[[
+        ares_channel channel;
+        ares_cancel(channel); /* added in 1.2.0 */
+        ares_process_fd(channel, 0, 0); /* added in 1.4.0 */
+        ares_dup(&channel, channel); /* added in 1.6.0 */
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+    ],[
+      AC_MSG_RESULT([no])
+      AC_MSG_ERROR([c-ares library defective or too old])
+      dnl restore initial settings
+      CPPFLAGS="$clean_CPPFLAGS"
+      LDFLAGS="$clean_LDFLAGS"
+      LIBS="$clean_LIBS"
+      # prevent usage
+      want_ares="no"
+    ])
+
     if test "$want_ares" = "yes"; then
       dnl finally c-ares will be used
       AC_DEFINE(USE_ARES, 1, [Define to enable c-ares support])
