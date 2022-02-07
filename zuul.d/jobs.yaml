@@ -231,25 +231,6 @@
           --with-gnutls
 
 - job:
-    name: curl-debug-clang-with-nss
-    parent: curl-base
-    vars:
-      curl_apt_packages:
-        - clang-9
-        - libpsl-dev
-        - libbrotli-dev
-        - libzstd-dev
-        - libnss3-dev
-      curl_env:
-        CC: clang-9
-        CXX: clang++-9
-        T: debug
-        C: >-
-          --with-nss
-        CPPFLAGS: -isystem /usr/include/nss
-        NOTESTS: 1
-
-- job:
     name: curl-cmake-boringssl-quiche
     parent: curl-base
     vars:
@@ -401,7 +382,6 @@
       - curl-debug-clang-with-openssl
       - curl-debug-clang-disable-alt-svc-with-openssl
       - curl-debug-clang-with-gnutls
-      - curl-debug-clang-with-nss
       - curl-cmake-boringssl-quiche
       - curl-cmake-ngtcp2
       - curl-torture
