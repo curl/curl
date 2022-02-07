@@ -535,8 +535,9 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
       if(rtspreq == RTSPREQ_SET_PARAMETER ||
          rtspreq == RTSPREQ_GET_PARAMETER) {
         if(!Curl_checkheaders(data, "Content-Type")) {
-          result = Curl_dyn_addf(&req_buffer,
-                                 "Content-Type: text/parameters\r\n");
+          result = Curl_dyn_addn(&req_buffer,
+                                 STRCONST("Content-Type: "
+                                          "text/parameters\r\n"));
           if(result)
             return result;
         }
@@ -544,8 +545,9 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
       if(rtspreq == RTSPREQ_ANNOUNCE) {
         if(!Curl_checkheaders(data, "Content-Type")) {
-          result = Curl_dyn_addf(&req_buffer,
-                                 "Content-Type: application/sdp\r\n");
+          result = Curl_dyn_addn(&req_buffer,
+                                 STRCONST("Content-Type: "
+                                          "application/sdp\r\n"));
           if(result)
             return result;
         }
@@ -563,7 +565,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   /* RTSP never allows chunked transfer */
   data->req.forbidchunk = TRUE;
   /* Finish the request buffer */
-  result = Curl_dyn_add(&req_buffer, "\r\n");
+  result = Curl_dyn_addn(&req_buffer, STRCONST("\r\n"));
   if(result)
     return result;
 
