@@ -142,7 +142,7 @@ static int hyper_each_header(void *userdata,
       return HYPER_ITER_BREAK;
   }
   else {
-    if(Curl_dyn_add(&data->state.headerb, "\r\n"))
+    if(Curl_dyn_addn(&data->state.headerb, STRCONST("\r\n")))
       return HYPER_ITER_BREAK;
   }
   len = Curl_dyn_len(&data->state.headerb);
