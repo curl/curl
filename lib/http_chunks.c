@@ -214,7 +214,7 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
 
         if(tr) {
           size_t trlen;
-          result = Curl_dyn_add(&conn->trailer, (char *)"\x0d\x0a");
+          result = Curl_dyn_addn(&conn->trailer, (char *)STRCONST("\x0d\x0a"));
           if(result)
             return CHUNKE_OUT_OF_MEMORY;
 
