@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -142,7 +142,7 @@ static int hyper_each_header(void *userdata,
       return HYPER_ITER_BREAK;
   }
   else {
-    if(Curl_dyn_add(&data->state.headerb, "\r\n"))
+    if(Curl_dyn_addn(&data->state.headerb, STRCONST("\r\n")))
       return HYPER_ITER_BREAK;
   }
   len = Curl_dyn_len(&data->state.headerb);
