@@ -329,14 +329,15 @@ static CURLcode CONNECT(struct Curl_easy *data,
                                  data->set.str[STRING_USERAGENT]);
 
         if(!result && !Curl_checkProxyheaders(data, conn, "Proxy-Connection"))
-          result = Curl_dyn_add(req, "Proxy-Connection: Keep-Alive\r\n");
+          result = Curl_dyn_addn(req,
+                                 STRCONST("Proxy-Connection: Keep-Alive\r\n"));
 
         if(!result)
           result = Curl_add_custom_headers(data, TRUE, req);
 
         if(!result)
           /* CRLF terminate the request */
-          result = Curl_dyn_add(req, "\r\n");
+          result = Curl_dyn_addn(req, STRCONST("\r\n"));
 
         if(!result) {
           /* Send the connect request to the proxy */
