@@ -92,19 +92,19 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 
 #if defined(HAVE_GETIFADDRS)
 
-if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
-                          unsigned int local_scope_id, const char *interf,
+if2ip_result_t Curl_if2ip(int af,
+#ifdef ENABLE_IPV6
+                          unsigned int remote_scope,
+                          unsigned int local_scope_id,
+#endif
+                          const char *interf,
                           char *buf, int buf_size)
 {
   struct ifaddrs *iface, *head;
   if2ip_result_t res = IF2IP_NOT_FOUND;
 
-#ifndef ENABLE_IPV6
-  (void) remote_scope;
-#endif
-
-#if !defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID) || \
-    !defined(ENABLE_IPV6)
+#if defined(ENABLE_IPV6) && \
+    !defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   (void) local_scope_id;
 #endif
 
@@ -177,8 +177,12 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
 
 #elif defined(HAVE_IOCTL_SIOCGIFADDR)
 
-if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
-                          unsigned int local_scope_id, const char *interf,
+if2ip_result_t Curl_if2ip(int af,
+#ifdef ENABLE_IPV6
+                          unsigned int remote_scope,
+                          unsigned int local_scope_id,
+#endif
+                          const char *interf,
                           char *buf, int buf_size)
 {
   struct ifreq req;
@@ -188,8 +192,10 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
   size_t len;
   const char *r;
 
+#ifdef ENABLE_IPV6
   (void)remote_scope;
   (void)local_scope_id;
+#endif
 
   if(!interf || (af != AF_INET))
     return IF2IP_NOT_FOUND;
@@ -226,13 +232,19 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
 
 #else
 
-if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
-                          unsigned int local_scope_id, const char *interf,
+if2ip_result_t Curl_if2ip(int af,
+#ifdef ENABLE_IPV6
+                          unsigned int remote_scope,
+                          unsigned int local_scope_id,
+#endif
+                          const char *interf,
                           char *buf, int buf_size)
 {
     (void) af;
+#ifdef ENABLE_IPV6
     (void) remote_scope;
     (void) local_scope_id;
+#endif
     (void) interf;
     (void) buf;
     (void) buf_size;

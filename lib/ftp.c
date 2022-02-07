@@ -1029,8 +1029,11 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     if(*addr != '\0') {
       /* attempt to get the address of the given interface name */
       switch(Curl_if2ip(conn->ip_addr->ai_family,
+#ifdef ENABLE_IPV6
                         Curl_ipv6_scope(conn->ip_addr->ai_addr),
-                        conn->scope_id, addr, hbuf, sizeof(hbuf))) {
+                        conn->scope_id,
+#endif
+                        addr, hbuf, sizeof(hbuf))) {
         case IF2IP_NOT_FOUND:
           /* not an interface, use the given string as host name instead */
           host = addr;

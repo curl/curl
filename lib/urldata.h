@@ -940,8 +940,9 @@ struct connectdata {
      cache entry remains locked. It gets unlocked in multi_done() */
   struct Curl_addrinfo *ip_addr;
   struct Curl_addrinfo *tempaddr[2]; /* for happy eyeballs */
-
+#ifdef ENABLE_IPV6
   unsigned int scope_id;  /* Scope id for IPv6 */
+#endif
 
   enum {
     TRNSPRT_TCP = 3,
@@ -1743,7 +1744,9 @@ struct UserDefined {
   long ssh_auth_types;   /* allowed SSH auth types */
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
   struct curl_blob *blobs[BLOB_LAST];
+#ifdef ENABLE_IPV6
   unsigned int scope_id;  /* Scope id for IPv6 */
+#endif
   long allowed_protocols;
   long redir_protocols;
   long mime_options;      /* Mime option flags. */

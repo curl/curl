@@ -257,6 +257,9 @@ static CURLcode bindlocal(struct Curl_easy *data,
 #ifdef IP_BIND_ADDRESS_NO_PORT
   int on = 1;
 #endif
+#ifndef ENABLE_IPV6
+  (void)scope;
+#endif
 
   /*************************************************************
    * Select device to bind socket to
@@ -314,8 +317,11 @@ static CURLcode bindlocal(struct Curl_easy *data,
       }
 #endif
 
-      switch(Curl_if2ip(af, scope, conn->scope_id, dev,
-                        myhost, sizeof(myhost))) {
+      switch(Curl_if2ip(af,
+#ifdef ENABLE_IPV6
+                        scope, conn->scope_id,
+#endif
+                        dev, myhost, sizeof(myhost))) {
         case IF2IP_NOT_FOUND:
           if(is_interface) {
             /* Do not fall back to treating it as a host name */

@@ -42,8 +42,12 @@ typedef enum {
   IF2IP_FOUND = 2 /* The address has been stored in "buf" */
 } if2ip_result_t;
 
-if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
-                          unsigned int local_scope_id, const char *interf,
+if2ip_result_t Curl_if2ip(int af,
+#ifdef ENABLE_IPV6
+                          unsigned int remote_scope,
+                          unsigned int local_scope_id,
+#endif
+                          const char *interf,
                           char *buf, int buf_size);
 
 #ifdef __INTERIX
