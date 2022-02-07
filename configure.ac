@@ -262,13 +262,27 @@ AS_HELP_STRING([--with-rustls=PATH],[where to look for rustls, PATH points to th
     test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }rustls")
   fi
 
+OPT_NSS_AWARE=no
+AC_ARG_WITH(nss-aware,dnl
+AS_HELP_STRING([--with-nss-deprecated],[confirm you realize NSS is going away]),
+  if test X"$withval" != Xno; then
+    OPT_NSS_AWARE=$withval
+  fi
+)
+
 OPT_NSS=no
 AC_ARG_WITH(nss,dnl
 AS_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the installation root]),
   OPT_NSS=$withval
   if test X"$withval" != Xno; then
-    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }NSS")
+
+    if test X"$OPT_NSS_AWARE" = "Xno" ; then
+      AC_MSG_ERROR([NSS use must be confirmed using --with-nss-deprecated. NSS support will be dropped from curl in August 2022. See docs/DEPRECATE.md])
+    fi
+
+    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }NSS"
   fi
+)
 
 dnl If no TLS choice has been made, check if it was explicitly disabled or
 dnl error out to force the user to decide.
