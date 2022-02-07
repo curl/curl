@@ -6,7 +6,20 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## Past removals
+## NSS
+
+We remove support for building curl with the NSS TLS library in August 2022.
+
+- There are very few users left who use curl+NSS
+- NSS has very few users outside of curl as well (primarily Firefox)
+- NSS is harder than ever to find documentation for
+- NSS was always "best" used with Red Hat Linux when they provided additional
+  features on top of the regular NSS that isn't shipped by the vanilla library
+
+Starting in 7.82.0, building curl to use NSS configure requires the additional
+flag --with-nss-deprecated in an attempt to highlight these plans.
+
+## past removals
 
  - Pipelining
  - axTLS
