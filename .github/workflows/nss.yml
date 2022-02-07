@@ -35,7 +35,7 @@ jobs:
     - run: ./buildconf
       name: 'buildconf'
 
-    - run: CC=clang-9 CPPFLAGS="-isystem /usr/include/nss" ./configure ${{ matrix.build.wolfssl-configure }}
+    - run: CC=clang-9 CPPFLAGS="-isystem /usr/include/nss" ./configure ${{ matrix.build.configure }}
       name: 'configure with clang'
 
     - run: make V=1
