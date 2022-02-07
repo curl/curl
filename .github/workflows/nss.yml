@@ -26,7 +26,7 @@ jobs:
 
     steps:
     - run: |
-        sudo apt-get install libtool autoconf automake pkg-config stunnel4 python3-pip libnss3-dev clang-9 libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 python3-pip libnss3-dev clang-9 libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev nss-plugin-pem
         sudo pip3 install impacket
       name: install prereqs and impacket
 
