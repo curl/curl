@@ -29,13 +29,12 @@ jobs:
       name: install prereqs
 
     - run: |
-       git clone --depth=1 --recursive https://github.com/rustls/rustls-ffi.git -b v0.8.2
-       curl https://sh.rustup.rs -sSf | sh -s -- -y
-       source $HOME/.cargo/env
-       cd rustls-ffi
-       make
-       make DESTDIR=$HOME/rustls install
-
+        git clone --depth=1 --recursive https://github.com/rustls/rustls-ffi.git -b v0.8.2
+        curl https://sh.rustup.rs -sSf | sh -s -- -y
+        source $HOME/.cargo/env
+        cd rustls-ffi
+        make
+        make DESTDIR=$HOME/rustls install
       name: 'install rustls'
 
     - uses: actions/checkout@v2
