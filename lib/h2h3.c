@@ -281,8 +281,8 @@ CURLcode Curl_pseudo_headers(struct Curl_easy *data,
       acc += nva[i].namelen + nva[i].valuelen;
 
       infof(data, "h2h3 [%.*s: %.*s]",
-            nva[i].namelen, nva[i].name,
-            nva[i].valuelen, nva[i].value);
+            (int)nva[i].namelen, nva[i].name,
+            (int)nva[i].valuelen, nva[i].value);
     }
 
     if(acc > MAX_ACC) {
