@@ -931,21 +931,21 @@ static CURLcode oldap_done(struct Curl_easy *data, CURLcode res,
   return CURLE_OK;
 }
 
-static CURLcode client_write(struct Curl_easy *data, const char *prefix,
-                             const char *value, size_t len, const char *suffix)
+static CURLcode client_write(struct Curl_easy *data,
+                             const char *prefix, size_t plen,
+                             const char *value, size_t len,
+                             const char *suffix, size_t slen)
 {
   CURLcode result = CURLE_OK;
-  size_t l;
 
   if(prefix) {
-    l = strlen(prefix);
     /* If we have a zero-length value and the prefix ends with a space
        separator, drop the latter. */
-    if(!len && l && prefix[l - 1] == ' ')
-      l--;
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) prefix, l);
+    if(!len && plen && prefix[plen - 1] == ' ')
+      plen--;
+    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) prefix, plen);
     if(!result)
-      data->req.bytecount += l;
+      data->req.bytecount += plen;
   }
   if(!result && value) {
     result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) value, len);
@@ -953,10 +953,9 @@ static CURLcode client_write(struct Curl_easy *data, const char *prefix,
       data->req.bytecount += len;
   }
   if(!result && suffix) {
-    l = strlen(suffix);
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) suffix, l);
+    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) suffix, slen);
     if(!result)
-      data->req.bytecount += l;
+      data->req.bytecount += slen;
   }
   return result;
 }
@@ -1033,7 +1032,8 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       break;
     }
 
-    result = client_write(data, "DN: ", bv.bv_val, bv.bv_len, "\n");
+    result = client_write(data, STRCONST("DN: "), bv.bv_val, bv.bv_len,
+                          STRCONST("\n"));
     if(result)
       break;
 
@@ -1046,7 +1046,8 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
         break;
 
       if(!bvals) {
-        result = client_write(data, "\t", bv.bv_val, bv.bv_len, ":\n");
+        result = client_write(data, STRCONST("\t"), bv.bv_val, bv.bv_len,
+                              STRCONST(":\n"));
         if(result)
           break;
         continue;
@@ -1058,7 +1059,8 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       for(i = 0; bvals[i].bv_val != NULL; i++) {
         int binval = 0;
 
-        result = client_write(data, "\t", bv.bv_val, bv.bv_len, ":");
+        result = client_write(data, STRCONST("\t"), bv.bv_val, bv.bv_len,
+                              STRCONST(":"));
         if(result)
           break;
 
@@ -1086,12 +1088,14 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
             result = Curl_base64_encode(bvals[i].bv_val, bvals[i].bv_len,
                                         &val_b64, &val_b64_sz);
           if(!result)
-            result = client_write(data, ": ", val_b64, val_b64_sz, "\n");
+            result = client_write(data, STRCONST(": "), val_b64, val_b64_sz,
+                                  STRCONST("\n"));
           free(val_b64);
         }
         else
-          result = client_write(data, " ",
-                                bvals[i].bv_val, bvals[i].bv_len, "\n");
+          result = client_write(data, STRCONST(" "),
+                                bvals[i].bv_val, bvals[i].bv_len,
+                                STRCONST("\n"));
         if(result)
           break;
       }
@@ -1099,7 +1103,7 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       ber_memfree(bvals);
       bvals = NULL;
       if(!result)
-        result = client_write(data, "\n", NULL, 0, NULL);
+        result = client_write(data, STRCONST("\n"), NULL, 0, NULL, 0);
       if(result)
         break;
     }
@@ -1107,7 +1111,7 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
     ber_free(ber, 0);
 
     if(!result)
-      result = client_write(data, "\n", NULL, 0, NULL);
+      result = client_write(data, STRCONST("\n"), NULL, 0, NULL, 0);
     if(!result)
       result = CURLE_AGAIN;
     break;
