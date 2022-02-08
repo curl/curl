@@ -186,7 +186,7 @@ CURLcode Curl_pseudo_headers(struct Curl_easy *data,
 
   nva[2].name = H2H3_PSEUDO_SCHEME;
   nva[2].namelen = sizeof(H2H3_PSEUDO_SCHEME) - 1;
-  vptr = Curl_checkheaders(data, H2H3_PSEUDO_SCHEME);
+  vptr = Curl_checkheaders(data, STRCONST(H2H3_PSEUDO_SCHEME));
   if(vptr) {
     vptr += sizeof(H2H3_PSEUDO_SCHEME);
     while(*vptr && ISSPACE(*vptr))
