@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -87,7 +87,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   struct tm tm;
   char timestamp[17];
   char date[9];
-  const char *content_type = Curl_checkheaders(data, "Content-Type");
+  const char *content_type = Curl_checkheaders(data, STRCONST("Content-Type"));
   char *canonical_headers = NULL;
   char *signed_headers = NULL;
   Curl_HttpReq httpreq;
@@ -110,7 +110,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   DEBUGASSERT(!proxy);
   (void)proxy;
 
-  if(Curl_checkheaders(data, "Authorization")) {
+  if(Curl_checkheaders(data, STRCONST("Authorization"))) {
     /* Authorization already present, Bailing out */
     return CURLE_OK;
   }

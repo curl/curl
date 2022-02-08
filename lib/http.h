@@ -55,7 +55,8 @@ char *Curl_copy_header_value(const char *header);
 
 char *Curl_checkProxyheaders(struct Curl_easy *data,
                              const struct connectdata *conn,
-                             const char *thisheader);
+                             const char *thisheader,
+                             const size_t thislen);
 CURLcode Curl_buffer_send(struct dynbuf *in,
                           struct Curl_easy *data,
                           curl_off_t *bytes_written,
