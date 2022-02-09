@@ -161,7 +161,6 @@ problems may have been fixed or changed somewhat since this was written.
  18.2 Uploading HTTP/3 files gets interrupted at certain file sizes
  18.4 Downloading with HTTP/3 produces broken files
  18.6 HTTP/3 multipart POST with quiche fails
- 18.7 HTTP/3 quiche upload large file fails
  18.8 HTTP/3 does not support client certs
  18.9 connection migration does not work
 
@@ -1134,10 +1133,6 @@ problems may have been fixed or changed somewhat since this was written.
 18.6 HTTP/3 multipart POST with quiche fails
 
  https://github.com/curl/curl/issues/7125
-
-18.7 HTTP/3 quiche upload large file fails
-
- https://github.com/curl/curl/issues/7532
 
 18.8 HTTP/3 does not support client certs
 
