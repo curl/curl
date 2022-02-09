@@ -1922,6 +1922,7 @@ static ssize_t http2_send(struct Curl_easy *data, int sockindex,
       nva[i].namelen = hreq->header[i].namelen;
       nva[i].value = (unsigned char *)hreq->header[i].value;
       nva[i].valuelen = hreq->header[i].valuelen;
+      nva[i].flags = NGHTTP2_NV_FLAG_NONE;
     }
     Curl_pseudo_free(hreq);
   }
