@@ -520,7 +520,8 @@ static CURLcode verify_host(struct Curl_easy *data,
       result = CURLE_OUT_OF_MEMORY;
     }
     else {
-      if(Curl_cert_hostcheck(cert_hostname, conn_hostname)) {
+      if(Curl_cert_hostcheck(cert_hostname, strlen(cert_hostname),
+                             conn_hostname)) {
         infof(data,
               "schannel: connection hostname (%s) validated "
               "against certificate name (%s)",

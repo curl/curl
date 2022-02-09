@@ -1612,14 +1612,16 @@ static void ossl_close_all(struct Curl_easy *data)
  * Match subjectAltName against the host name.
  */
 static bool subj_alt_hostcheck(struct Curl_easy *data,
-                               const char *match_pattern, const char *hostname,
+                               const char *match_pattern,
+                               size_t matchlen,
+                               const char *hostname,
                                const char *dispname)
 {
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)dispname;
   (void)data;
 #endif
-  if(Curl_cert_hostcheck(match_pattern, hostname)) {
+  if(Curl_cert_hostcheck(match_pattern, matchlen, hostname)) {
     infof(data, " subjectAltName: host \"%s\" matched cert's \"%s\"",
                   dispname, match_pattern);
     return TRUE;
@@ -1728,7 +1730,7 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
           if((altlen == strlen(altptr)) &&
              /* if this isn't true, there was an embedded zero in the name
                 string and we cannot match it. */
-             subj_alt_hostcheck(data, altptr, hostname, dispname)) {
+             subj_alt_hostcheck(data, altptr, altlen, hostname, dispname)) {
             dnsmatched = TRUE;
           }
           break;
@@ -1764,17 +1766,17 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
   else {
     /* we have to look to the last occurrence of a commonName in the
        distinguished one to get the most significant one. */
-    int j, i = -1;
+    int i = -1;
+    unsigned char *peer_CN = NULL;
+    int peerlen = 0;
 
     /* The following is done because of a bug in 0.9.6b */
-
-    unsigned char *nulstr = (unsigned char *)"";
-    unsigned char *peer_CN = nulstr;
-
     X509_NAME *name = X509_get_subject_name(server_cert);
-    if(name)
+    if(name) {
+      int j;
       while((j = X509_NAME_get_index_by_NID(name, NID_commonName, i)) >= 0)
         i = j;
+    }
 
     /* we have the name entry and we will now convert this to a string
        that we can use for comparison. Doing this we support BMPstring,
@@ -1790,19 +1792,20 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
          conditional in the future when OpenSSL has been fixed. */
       if(tmp) {
         if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
-          j = ASN1_STRING_length(tmp);
-          if(j >= 0) {
-            peer_CN = OPENSSL_malloc(j + 1);
+          peerlen = ASN1_STRING_length(tmp);
+          if(peerlen >= 0) {
+            peer_CN = OPENSSL_malloc(peerlen + 1);
             if(peer_CN) {
-              memcpy(peer_CN, ASN1_STRING_get0_data(tmp), j);
-              peer_CN[j] = '\0';
+              memcpy(peer_CN, ASN1_STRING_get0_data(tmp), peerlen);
+              peer_CN[peerlen] = '\0';
             }
+            result = CURLE_OUT_OF_MEMORY;
           }
         }
         else /* not a UTF8 name */
-          j = ASN1_STRING_to_UTF8(&peer_CN, tmp);
+          peerlen = ASN1_STRING_to_UTF8(&peer_CN, tmp);
 
-        if(peer_CN && (curlx_uztosi(strlen((char *)peer_CN)) != j)) {
+        if(peer_CN && (curlx_uztosi(strlen((char *)peer_CN)) != peerlen)) {
           /* there was a terminating zero before the end of string, this
              cannot match and we return failure! */
           failf(data, "SSL: illegal cert name field");
@@ -1810,9 +1813,6 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
         }
       }
     }
-
-    if(peer_CN == nulstr)
-       peer_CN = NULL;
 
     if(result)
       /* error already detected, pass through */
@@ -1822,7 +1822,7 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
             "SSL: unable to obtain common name from peer certificate");
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
-    else if(!Curl_cert_hostcheck((const char *)peer_CN, hostname)) {
+    else if(!Curl_cert_hostcheck((const char *)peer_CN, peerlen, hostname)) {
       failf(data, "SSL: certificate subject name '%s' does not match "
             "target host name '%s'", peer_CN, dispname);
       result = CURLE_PEER_FAILED_VERIFICATION;
