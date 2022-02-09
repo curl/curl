@@ -72,17 +72,17 @@ static bool pmatch(const char *hostname, size_t hostlen,
  * Return TRUE on a match. FALSE if not.
  */
 
-static bool hostmatch(const char *hostname, const char *pattern)
+static bool hostmatch(const char *hostname, const char *pattern,
+                      size_t patternlen)
 {
   const char *pattern_label_end, *wildcard, *hostname_label_end;
   size_t prefixlen, suffixlen;
 
   /* normalize pattern and hostname by stripping off trailing dots */
-  size_t patternlen;
   size_t hostlen = strlen(hostname);
+  DEBUGASSERT(patternlen);
   if(hostname[hostlen-1]=='.')
     hostlen--;
-  patternlen = strlen(pattern);
   if(pattern[patternlen-1]=='.')
     patternlen--;
 
@@ -128,10 +128,11 @@ static bool hostmatch(const char *hostname, const char *pattern)
 /*
  * Curl_cert_hostcheck() returns TRUE if a match and FALSE if not.
  */
-bool Curl_cert_hostcheck(const char *match, const char *hostname)
+bool Curl_cert_hostcheck(const char *match, size_t matchlen,
+                         const char *hostname)
 {
   if(match && *match && hostname && *hostname)
-    return hostmatch(hostname, match);
+    return hostmatch(hostname, match, matchlen);
   return FALSE;
 }
 

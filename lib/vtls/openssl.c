@@ -1612,14 +1612,16 @@ static void ossl_close_all(struct Curl_easy *data)
  * Match subjectAltName against the host name.
  */
 static bool subj_alt_hostcheck(struct Curl_easy *data,
-                               const char *match_pattern, const char *hostname,
+                               const char *match_pattern,
+                               size_t matchlen,
+                               const char *hostname,
                                const char *dispname)
 {
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)dispname;
   (void)data;
 #endif
-  if(Curl_cert_hostcheck(match_pattern, hostname)) {
+  if(Curl_cert_hostcheck(match_pattern, matchlen, hostname)) {
     infof(data, " subjectAltName: host \"%s\" matched cert's \"%s\"",
                   dispname, match_pattern);
     return TRUE;
@@ -1728,7 +1730,7 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
           if((altlen == strlen(altptr)) &&
              /* if this isn't true, there was an embedded zero in the name
                 string and we cannot match it. */
-             subj_alt_hostcheck(data, altptr, hostname, dispname)) {
+             subj_alt_hostcheck(data, altptr, altlen, hostname, dispname)) {
             dnsmatched = TRUE;
           }
           break;
@@ -1822,7 +1824,7 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
             "SSL: unable to obtain common name from peer certificate");
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
-    else if(!Curl_cert_hostcheck((const char *)peer_CN, hostname)) {
+    else if(!Curl_cert_hostcheck((const char *)peer_CN, j, hostname)) {
       failf(data, "SSL: certificate subject name '%s' does not match "
             "target host name '%s'", peer_CN, dispname);
       result = CURLE_PEER_FAILED_VERIFICATION;
