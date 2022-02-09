@@ -26,7 +26,7 @@ CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 EXTRA_DIST = Makefile.m32 config-win32.h config-win32ce.h config-plan9.h    \
  config-riscos.h config-mac.h curl_config.h.in makefile.dj config-dos.h     \
  libcurl.plist libcurl.rc config-amigaos.h makefile.amiga config-win32ce.h  \
- config-os400.h setup-os400.h mk-ca-bundle.pl mk-ca-bundle.vbs \
+ config-os400.h setup-os400.h mk-ca-bundle.pl \
  $(CMAKE_DIST) firefox-db2pem.sh checksrc.pl setup-win32.h .checksrc
 
 lib_LTLIBRARIES = libcurl.la
