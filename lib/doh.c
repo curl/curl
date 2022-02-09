@@ -530,7 +530,7 @@ static DOHcode store_cname(const unsigned char *doh,
 
     if(length) {
       if(Curl_dyn_len(c)) {
-        if(Curl_dyn_add(c, "."))
+        if(Curl_dyn_addn(c, STRCONST(".")))
           return DOH_OUT_OF_MEM;
       }
       if((index + length) > dohlen)

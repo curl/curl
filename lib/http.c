@@ -1540,7 +1540,7 @@ static CURLcode add_haproxy_protocol_header(struct Curl_easy *data)
 #ifdef USE_UNIX_SOCKETS
   if(data->conn->unix_domain_socket)
     /* the buffer is large enough to hold this! */
-    result = Curl_dyn_add(&req, "PROXY UNKNOWN\r\n");
+    result = Curl_dyn_addn(&req, STRCONST("PROXY UNKNOWN\r\n"));
   else {
 #endif
   /* Emit the correct prefix for IPv6 */
@@ -1713,7 +1713,7 @@ static CURLcode expect100(struct Curl_easy *data,
         Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
     }
     else {
-      result = Curl_dyn_add(req, "Expect: 100-continue\r\n");
+      result = Curl_dyn_addn(req, STRCONST("Expect: 100-continue\r\n"));
       if(!result)
         data->state.expect100header = TRUE;
     }
@@ -2409,7 +2409,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     }
 
     /* end of headers */
-    result = Curl_dyn_add(r, "\r\n");
+    result = Curl_dyn_addn(r, STRCONST("\r\n"));
     if(result)
       return result;
 
@@ -2434,7 +2434,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     /* This is form posting using mime data. */
     if(conn->bits.authneg) {
       /* nothing to post! */
-      result = Curl_dyn_add(r, "Content-Length: 0\r\n\r\n");
+      result = Curl_dyn_addn(r, STRCONST("Content-Length: 0\r\n\r\n"));
       if(result)
         return result;
 
@@ -2496,7 +2496,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       data->state.expect100header = FALSE;
 
     /* make the request end in a true CRLF */
-    result = Curl_dyn_add(r, "\r\n");
+    result = Curl_dyn_addn(r, STRCONST("\r\n"));
     if(result)
       return result;
 
@@ -2546,8 +2546,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     }
 
     if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
-      result = Curl_dyn_add(r, "Content-Type: application/"
-                            "x-www-form-urlencoded\r\n");
+      result = Curl_dyn_add(r, STRCONST("Content-Type: application/"
+                            "x-www-form-urlencoded\r\n"));
       if(result)
         return result;
     }
@@ -2586,7 +2586,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
            get the data duplicated with malloc() and family. */
 
         /* end of headers! */
-        result = Curl_dyn_add(r, "\r\n");
+        result = Curl_dyn_addn(r, STRCONST("\r\n"));
         if(result)
           return result;
 
@@ -2608,12 +2608,12 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
               result = Curl_dyn_addn(r, data->set.postfields,
                                      (size_t)http->postsize);
               if(!result)
-                result = Curl_dyn_add(r, "\r\n");
+                result = Curl_dyn_addn(r, STRCONST("\r\n"));
               included_body += 2;
             }
           }
           if(!result) {
-            result = Curl_dyn_add(r, "\x30\x0d\x0a\x0d\x0a");
+            result = Curl_dyn_addn(r, STRCONST("\x30\x0d\x0a\x0d\x0a"));
             /* 0  CR  LF  CR  LF */
             included_body += 5;
           }
@@ -2636,7 +2636,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
         Curl_pgrsSetUploadSize(data, http->postsize);
 
         /* end of headers! */
-        result = Curl_dyn_add(r, "\r\n");
+        result = Curl_dyn_addn(r, STRCONST("\r\n"));
         if(result)
           return result;
       }
@@ -2645,14 +2645,14 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
 #endif
     {
        /* end of headers! */
-      result = Curl_dyn_add(r, "\r\n");
+      result = Curl_dyn_addn(r, STRCONST("\r\n"));
       if(result)
         return result;
 
       if(data->req.upload_chunky && conn->bits.authneg) {
         /* Chunky upload is selected and we're negotiating auth still, send
            end-of-data only */
-        result = Curl_dyn_add(r, (char *)"\x30\x0d\x0a\x0d\x0a");
+        result = Curl_dyn_addn(r, (char *)STRCONST("\x30\x0d\x0a\x0d\x0a"));
         /* 0  CR  LF  CR  LF */
         if(result)
           return result;
@@ -2680,7 +2680,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     break;
 
   default:
-    result = Curl_dyn_add(r, "\r\n");
+    result = Curl_dyn_addn(r, STRCONST("\r\n"));
     if(result)
       return result;
 
@@ -2731,7 +2731,7 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
       while(co) {
         if(co->value) {
           if(0 == count) {
-            result = Curl_dyn_add(r, "Cookie: ");
+            result = Curl_dyn_addn(r, STRCONST("Cookie: "));
             if(result)
               break;
           }
@@ -2747,14 +2747,14 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
     }
     if(addcookies && !result) {
       if(!count)
-        result = Curl_dyn_add(r, "Cookie: ");
+        result = Curl_dyn_addn(r, STRCONST("Cookie: "));
       if(!result) {
         result = Curl_dyn_addf(r, "%s%s", count?"; ":"", addcookies);
         count++;
       }
     }
     if(count && !result)
-      result = Curl_dyn_add(r, "\r\n");
+      result = Curl_dyn_addn(r, STRCONST("\r\n"));
 
     if(result)
       return result;

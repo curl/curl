@@ -758,7 +758,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       stream->status_code = -1;
     }
 
-    result = Curl_dyn_add(&stream->header_recvbuf, "\r\n");
+    result = Curl_dyn_addn(&stream->header_recvbuf, STRCONST("\r\n"));
     if(result)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
 
@@ -1081,14 +1081,14 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     stream->status_code = decode_status_code(value, valuelen);
     DEBUGASSERT(stream->status_code != -1);
 
-    result = Curl_dyn_add(&stream->header_recvbuf, "HTTP/2 ");
+    result = Curl_dyn_addn(&stream->header_recvbuf, STRCONST("HTTP/2 "));
     if(result)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     result = Curl_dyn_addn(&stream->header_recvbuf, value, valuelen);
     if(result)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     /* the space character after the status code is mandatory */
-    result = Curl_dyn_add(&stream->header_recvbuf, " \r\n");
+    result = Curl_dyn_addn(&stream->header_recvbuf, STRCONST(" \r\n"));
     if(result)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     /* if we receive data for another handle, wake that up */
@@ -1106,13 +1106,13 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   result = Curl_dyn_addn(&stream->header_recvbuf, name, namelen);
   if(result)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
-  result = Curl_dyn_add(&stream->header_recvbuf, ": ");
+  result = Curl_dyn_addn(&stream->header_recvbuf, STRCONST(": "));
   if(result)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   result = Curl_dyn_addn(&stream->header_recvbuf, value, valuelen);
   if(result)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
-  result = Curl_dyn_add(&stream->header_recvbuf, "\r\n");
+  result = Curl_dyn_addn(&stream->header_recvbuf, STRCONST("\r\n"));
   if(result)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   /* if we receive data for another handle, wake that up */
@@ -1922,6 +1922,7 @@ static ssize_t http2_send(struct Curl_easy *data, int sockindex,
       nva[i].namelen = hreq->header[i].namelen;
       nva[i].value = (unsigned char *)hreq->header[i].value;
       nva[i].valuelen = hreq->header[i].valuelen;
+      nva[i].flags = NGHTTP2_NV_FLAG_NONE;
     }
     Curl_pseudo_free(hreq);
   }
