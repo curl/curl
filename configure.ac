@@ -263,7 +263,7 @@ AS_HELP_STRING([--with-rustls=PATH],[where to look for rustls, PATH points to th
   fi
 
 OPT_NSS_AWARE=no
-AC_ARG_WITH(nss-aware,dnl
+AC_ARG_WITH(nss-deprecated,dnl
 AS_HELP_STRING([--with-nss-deprecated],[confirm you realize NSS is going away]),
   if test X"$withval" != Xno; then
     OPT_NSS_AWARE=$withval
