@@ -2546,7 +2546,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     }
 
     if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
-      result = Curl_dyn_add(r, STRCONST("Content-Type: application/"
+      result = Curl_dyn_addn(r, STRCONST("Content-Type: application/"
                             "x-www-form-urlencoded\r\n"));
       if(result)
         return result;
