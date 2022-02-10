@@ -465,6 +465,7 @@ static CURLcode verify_host(struct Curl_easy *data,
   CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
   TCHAR *cert_hostname_buff = NULL;
   size_t cert_hostname_buff_index = 0;
+  size_t hostlen = strlen(conn_hostname);
   DWORD len = 0;
   DWORD actual_len = 0;
 
@@ -521,7 +522,7 @@ static CURLcode verify_host(struct Curl_easy *data,
     }
     else {
       if(Curl_cert_hostcheck(cert_hostname, strlen(cert_hostname),
-                             conn_hostname)) {
+                             conn_hostname, hostlen)) {
         infof(data,
               "schannel: connection hostname (%s) validated "
               "against certificate name (%s)",
