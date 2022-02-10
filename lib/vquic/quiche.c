@@ -684,7 +684,7 @@ static ssize_t h3_stream_send(struct Curl_easy *data,
     if(sent == QUICHE_H3_ERR_DONE) {
       sent = 0;
     }
-    if(sent < 0) {
+    else if(sent < 0) {
       *curlcode = CURLE_SEND_ERROR;
       return -1;
     }
