@@ -26,6 +26,6 @@
 
 /* returns TRUE if there's a match */
 bool Curl_cert_hostcheck(const char *match_pattern, size_t matchlen,
-                         const char *hostname);
+                         const char *hostname, size_t hostlen);
 
 #endif /* HEADER_CURL_HOSTCHECK_H */
