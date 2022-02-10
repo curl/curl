@@ -1275,6 +1275,7 @@ CURLcode Curl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
   ssize_t len;
   const char * const hostname = SSL_HOST_NAME();
   const char * const dispname = SSL_HOST_DISPNAME();
+  size_t hostlen = strlen(hostname);
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
@@ -1330,7 +1331,8 @@ CURLcode Curl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
           len = utf8asn1str(&dnsname, CURL_ASN1_IA5_STRING,
                             name.beg, name.end);
           if(len > 0 && (size_t)len == strlen(dnsname))
-            matched = Curl_cert_hostcheck(dnsname, (size_t)len, hostname);
+            matched = Curl_cert_hostcheck(dnsname,
+                                          (size_t)len, hostname, hostlen);
           else
             matched = 0;
           free(dnsname);
@@ -1389,7 +1391,8 @@ CURLcode Curl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
     }
     if(strlen(dnsname) != (size_t) len)         /* Nul byte in string ? */
       failf(data, "SSL: illegal cert name field");
-    else if(Curl_cert_hostcheck((const char *) dnsname, hostname)) {
+    else if(Curl_cert_hostcheck((const char *) dnsname,
+                                len, hostname, hostlen)) {
       infof(data, "  common name: %s (matched)", dnsname);
       free(dnsname);
       return CURLE_OK;
