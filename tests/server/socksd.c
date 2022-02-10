@@ -140,7 +140,7 @@ struct configurable {
 static struct configurable config;
 
 const char *serverlogfile = DEFAULT_LOGFILE;
-const char *reqlogfile = DEFAULT_REQFILE;
+static const char *reqlogfile = DEFAULT_REQFILE;
 static const char *configfile = DEFAULT_CONFIG;
 
 static const char *socket_type = "IPv4";
