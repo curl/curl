@@ -1615,13 +1615,14 @@ static bool subj_alt_hostcheck(struct Curl_easy *data,
                                const char *match_pattern,
                                size_t matchlen,
                                const char *hostname,
+                               size_t hostlen,
                                const char *dispname)
 {
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)dispname;
   (void)data;
 #endif
-  if(Curl_cert_hostcheck(match_pattern, matchlen, hostname)) {
+  if(Curl_cert_hostcheck(match_pattern, matchlen, hostname, hostlen)) {
     infof(data, " subjectAltName: host \"%s\" matched cert's \"%s\"",
                   dispname, match_pattern);
     return TRUE;
@@ -1668,6 +1669,7 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
   bool iPAddress = FALSE; /* if a iPAddress field exists in the cert */
   const char * const hostname = SSL_HOST_NAME();
   const char * const dispname = SSL_HOST_DISPNAME();
+  size_t hostlen = strlen(hostname);
 
 #ifdef ENABLE_IPV6
   if(conn->bits.ipv6_ip &&
@@ -1730,7 +1732,9 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
           if((altlen == strlen(altptr)) &&
              /* if this isn't true, there was an embedded zero in the name
                 string and we cannot match it. */
-             subj_alt_hostcheck(data, altptr, altlen, hostname, dispname)) {
+             subj_alt_hostcheck(data,
+                                altptr,
+                                altlen, hostname, hostlen, dispname)) {
             dnsmatched = TRUE;
           }
           break;
@@ -1822,7 +1826,8 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
             "SSL: unable to obtain common name from peer certificate");
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
-    else if(!Curl_cert_hostcheck((const char *)peer_CN, peerlen, hostname)) {
+    else if(!Curl_cert_hostcheck((const char *)peer_CN,
+                                 peerlen, hostname, hostlen)) {
       failf(data, "SSL: certificate subject name '%s' does not match "
             "target host name '%s'", peer_CN, dispname);
       result = CURLE_PEER_FAILED_VERIFICATION;
