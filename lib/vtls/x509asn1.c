@@ -1391,7 +1391,8 @@ CURLcode Curl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
     }
     if(strlen(dnsname) != (size_t) len)         /* Nul byte in string ? */
       failf(data, "SSL: illegal cert name field");
-    else if(Curl_cert_hostcheck((const char *) dnsname, hostname, hostlen)) {
+    else if(Curl_cert_hostcheck((const char *) dnsname,
+                                len, hostname, hostlen)) {
       infof(data, "  common name: %s (matched)", dnsname);
       free(dnsname);
       return CURLE_OK;
