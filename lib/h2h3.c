@@ -37,7 +37,7 @@
  * used in a HTTP/2 or HTTP/3 request.
  */
 
-#if defined(USE_NGHTTP2) || defined(USE_HTTP3)
+#if defined(USE_NGHTTP2) || defined(ENABLE_QUIC)
 
 /* Index where :authority header field will appear in request header
    field list. */
