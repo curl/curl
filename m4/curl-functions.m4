@@ -6562,7 +6562,7 @@ AC_DEFUN([CURL_COVERAGE],[
     fi
 
     CPPFLAGS="$CPPFLAGS -DNDEBUG"
-    CFLAGS="$CLAGS -O0 -g -fprofile-arcs -ftest-coverage"
+    CFLAGS="$CFLAGS -O0 -g -fprofile-arcs -ftest-coverage"
     LIBS="$LIBS -lgcov"
   fi
 ])
