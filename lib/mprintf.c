@@ -829,6 +829,8 @@ static int dprintf_formatf(
         }
         else if(prec != -1)
           len = (size_t)prec;
+        else if(*str == '\0')
+          len = 0;
         else
           len = strlen(str);
 
