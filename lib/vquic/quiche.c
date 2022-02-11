@@ -596,66 +596,67 @@ static ssize_t h3_stream_recv(struct Curl_easy *data,
     if(rcode <= 0) {
       recvd = -1;
       qs->h3_recving = FALSE;
+      /* fall through into the while loop below */
     }
     else
       recvd = rcode;
   }
-  else {
-    while(recvd < 0) {
-      int64_t s = quiche_h3_conn_poll(qs->h3c, qs->conn, &ev);
-      if(s < 0)
-        /* nothing more to do */
-        break;
 
-      if(s != stream->stream3_id) {
-        /* another transfer, ignore for now */
-        infof(data, "Got h3 for stream %u, expects %u",
-              s, stream->stream3_id);
-        continue;
-      }
+  while(recvd < 0) {
+    int64_t s = quiche_h3_conn_poll(qs->h3c, qs->conn, &ev);
+    infof(data, "quiche_h3_conn_poll: %ld", s);
+    if(s < 0)
+      /* nothing more to do */
+      break;
 
-      switch(quiche_h3_event_type(ev)) {
-      case QUICHE_H3_EVENT_HEADERS:
-        rc = quiche_h3_event_for_each_header(ev, cb_each_header, &headers);
-        if(rc) {
-          *curlcode = rc;
-          failf(data, "Error in HTTP/3 response header");
-          break;
-        }
-        recvd = headers.nlen;
-        break;
-      case QUICHE_H3_EVENT_DATA:
-        if(!stream->firstbody) {
-          /* add a header-body separator CRLF */
-          buf[0] = '\r';
-          buf[1] = '\n';
-          buf += 2;
-          buffersize -= 2;
-          stream->firstbody = TRUE;
-          recvd = 2; /* two bytes already */
-        }
-        else
-          recvd = 0;
-        rcode = quiche_h3_recv_body(qs->h3c, qs->conn, s, (unsigned char *)buf,
-                                    buffersize);
-        if(rcode <= 0) {
-          recvd = -1;
-          break;
-        }
-        qs->h3_recving = TRUE;
-        recvd += rcode;
-        break;
-
-      case QUICHE_H3_EVENT_FINISHED:
-        streamclose(conn, "End of stream");
-        recvd = 0; /* end of stream */
-        break;
-      default:
-        break;
-      }
-
-      quiche_h3_event_free(ev);
+    if(s != stream->stream3_id) {
+      /* another transfer, ignore for now */
+      infof(data, "Got h3 for stream %u, expects %u",
+            s, stream->stream3_id);
+      continue;
     }
+
+    switch(quiche_h3_event_type(ev)) {
+    case QUICHE_H3_EVENT_HEADERS:
+      rc = quiche_h3_event_for_each_header(ev, cb_each_header, &headers);
+      if(rc) {
+        *curlcode = rc;
+        failf(data, "Error in HTTP/3 response header");
+        break;
+      }
+      recvd = headers.nlen;
+      break;
+    case QUICHE_H3_EVENT_DATA:
+      if(!stream->firstbody) {
+        /* add a header-body separator CRLF */
+        buf[0] = '\r';
+        buf[1] = '\n';
+        buf += 2;
+        buffersize -= 2;
+        stream->firstbody = TRUE;
+        recvd = 2; /* two bytes already */
+      }
+      else
+        recvd = 0;
+      rcode = quiche_h3_recv_body(qs->h3c, qs->conn, s, (unsigned char *)buf,
+                                  buffersize);
+      if(rcode <= 0) {
+        recvd = -1;
+        break;
+      }
+      qs->h3_recving = TRUE;
+      recvd += rcode;
+      break;
+
+    case QUICHE_H3_EVENT_FINISHED:
+      streamclose(conn, "End of stream");
+      recvd = 0; /* end of stream */
+      break;
+    default:
+      break;
+    }
+
+    quiche_h3_event_free(ev);
   }
   if(flush_egress(data, sockfd, qs)) {
     *curlcode = CURLE_SEND_ERROR;
