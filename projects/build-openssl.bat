@@ -44,7 +44,12 @@ rem ***************************************************************************
     set OS_PLATFORM=x86
   )
   if defined PROGRAMFILES(x86) (
-    set "PF=%PROGRAMFILES(x86)%"
+    rem Visual Studio was x86-only prior to 14.3
+    if /i "%~1" == "vc14.3" (
+      set "PF=%PROGRAMFILES%"
+    ) else (
+      set "PF=%PROGRAMFILES(x86)%"
+    )
     set OS_PLATFORM=x64
   )
 
@@ -111,6 +116,19 @@ rem ***************************************************************************
         set "VC_PATH=Microsoft Visual Studio\2019\Professional\VC"
       ) else (
         set "VC_PATH=Microsoft Visual Studio\2019\Community\VC"
+      )
+    ) else if /i "%~1" == "vc14.3" (
+      set VC_VER=14.3
+      set VC_DESC=VC14.3
+
+      rem Determine the VC14.3 path based on the installed edition in descending
+      rem order (Enterprise, then Professional and finally Community)
+      if exist "%PF%\Microsoft Visual Studio\2022\Enterprise\VC" (
+        set "VC_PATH=Microsoft Visual Studio\2022\Enterprise\VC"
+      ) else if exist "%PF%\Microsoft Visual Studio\2022\Professional\VC" (
+        set "VC_PATH=Microsoft Visual Studio\2022\Professional\VC"
+      ) else (
+        set "VC_PATH=Microsoft Visual Studio\2022\Community\VC"
       )
     ) else if /i "%~1%" == "x86" (
       set BUILD_PLATFORM=x86
@@ -220,6 +238,7 @@ rem ***************************************************************************
     if "%VC_VER%" == "14.0" set VCVARS_PLATFORM=amd64
     if "%VC_VER%" == "14.1" set VCVARS_PLATFORM=amd64
     if "%VC_VER%" == "14.2" set VCVARS_PLATFORM=amd64
+    if "%VC_VER%" == "14.3" set VCVARS_PLATFORM=amd64
   )
 
   if exist "%START_DIR%\ms\do_ms.bat" (
@@ -241,6 +260,8 @@ rem ***************************************************************************
   ) else if "%VC_VER%" == "14.1" (
     call "%ABS_VC_PATH%\Auxiliary\Build\vcvarsall" %VCVARS_PLATFORM%
   ) else if "%VC_VER%" == "14.2" (
+    call "%ABS_VC_PATH%\Auxiliary\Build\vcvarsall" %VCVARS_PLATFORM%
+  ) else if "%VC_VER%" == "14.3" (
     call "%ABS_VC_PATH%\Auxiliary\Build\vcvarsall" %VCVARS_PLATFORM%
   ) else (
     call "%ABS_VC_PATH%\vcvarsall" %VCVARS_PLATFORM%
@@ -667,6 +688,7 @@ rem
   echo vc14      - Use Visual Studio 2015
   echo vc14.1    - Use Visual Studio 2017
   echo vc14.2    - Use Visual Studio 2019
+  echo vc14.3    - Use Visual Studio 2022
   echo.
   echo Platform:
   echo.
