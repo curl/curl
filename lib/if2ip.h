@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,7 +30,11 @@
 #define IPV6_SCOPE_UNIQUELOCAL  3       /* Unique local */
 #define IPV6_SCOPE_NODELOCAL    4       /* Loopback. */
 
+#ifdef ENABLE_IPV6
 unsigned int Curl_ipv6_scope(const struct sockaddr *sa);
+#else
+#define Curl_ipv6_scope(x) 0
+#endif
 
 typedef enum {
   IF2IP_NOT_FOUND = 0, /* Interface not found */
