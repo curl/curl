@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -60,12 +60,10 @@
 
 /* ------------------------------------------------------------------ */
 
+#ifdef ENABLE_IPV6
 /* Return the scope of the given address. */
 unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 {
-#ifndef ENABLE_IPV6
-  (void) sa;
-#else
   if(sa->sa_family == AF_INET6) {
     const struct sockaddr_in6 * sa6 = (const struct sockaddr_in6 *)(void *) sa;
     const unsigned char *b = sa6->sin6_addr.s6_addr;
@@ -88,11 +86,9 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
       break;
     }
   }
-#endif
-
   return IPV6_SCOPE_GLOBAL;
 }
-
+#endif
 
 #if defined(HAVE_GETIFADDRS)
 
