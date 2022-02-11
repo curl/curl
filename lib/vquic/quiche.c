@@ -648,6 +648,11 @@ static ssize_t h3_stream_recv(struct Curl_easy *data,
       recvd += rcode;
       break;
 
+    case QUICHE_H3_EVENT_RESET:
+      streamclose(conn, "Stream reset");
+      *curlcode = CURLE_PARTIAL_FILE;
+      return -1;
+
     case QUICHE_H3_EVENT_FINISHED:
       streamclose(conn, "End of stream");
       recvd = 0; /* end of stream */
