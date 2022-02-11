@@ -923,7 +923,10 @@ static ssize_t wolfssl_recv(struct Curl_easy *data,
     switch(err) {
     case SSL_ERROR_ZERO_RETURN: /* no more data */
       break;
+    case SSL_ERROR_NONE:
+      /* FALLTHROUGH */
     case SSL_ERROR_WANT_READ:
+      /* FALLTHROUGH */
     case SSL_ERROR_WANT_WRITE:
       /* there's data pending, re-invoke SSL_read() */
       *curlcode = CURLE_AGAIN;
