@@ -597,6 +597,8 @@ static ssize_t h3_stream_recv(struct Curl_easy *data,
       recvd = -1;
       qs->h3_recving = FALSE;
     }
+    else
+      recvd = rcode;
   }
   else {
     while(recvd < 0) {
