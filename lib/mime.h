@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,6 +24,7 @@
 
 #include "curl_setup.h"
 
+#define MIME_BOUNDARY_DASHES            24  /* leading boundary dashes */
 #define MIME_RAND_BOUNDARY_CHARS        16  /* Nb. of random boundary chars. */
 #define MAX_ENCODED_LINE_LENGTH         76  /* Maximum encoded line length. */
 #define ENCODING_BUFFER_SIZE            256 /* Encoding temp buffers size. */
@@ -92,7 +93,7 @@ struct mime_state {
 };
 
 /* minimum buffer size for the boundary string */
-#define MIME_BOUNDARY_LEN (24 + MIME_RAND_BOUNDARY_CHARS + 1)
+#define MIME_BOUNDARY_LEN (MIME_BOUNDARY_DASHES + MIME_RAND_BOUNDARY_CHARS + 1)
 
 /* A mime multipart. */
 struct curl_mime {
