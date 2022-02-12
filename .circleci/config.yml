@@ -53,11 +53,24 @@ commands:
           command: |
             sudo apt-get update && sudo apt-get install -y libc-ares-dev
 
+  install-libssh:
+    steps:
+      - run:
+          command: |
+            sudo apt-get update && sudo apt-get install -y libssh-dev
+
   install-deps:
     steps:
       - run:
           command: |
             sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+
+  configure-libssh:
+    steps:
+      - run:
+          command: |
+            ./buildconf
+            ./configure --enable-warnings --enable-werror --with-openssl --with-libssh
 
   configure-cares:
     steps:
@@ -119,6 +132,15 @@ jobs:
       - checkout
       - install-cares
       - configure-cares
+      - build
+      - test
+
+  libssh:
+    executor: ubuntu
+    steps:
+      - checkout
+      - install-libssh
+      - configure-libssh
       - build
       - test
 
