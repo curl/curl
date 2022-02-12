@@ -402,6 +402,7 @@ sub zuul {
     my $c = 0;
     my %job;
     my $line=0;
+    my $type;
     $job{'file'} = "zuul.d/jobs.yaml";
     $job{'service'} = "zuul";
     while(<G>) {
@@ -409,6 +410,7 @@ sub zuul {
         #print "L: ($jobmode / $env) $_";
         if($_ =~ /^- job:/) {
             $jobmode = 1; # start a new
+            $type="configure";
         }
         if($jobmode) {
             if($apt) {
@@ -433,10 +435,14 @@ sub zuul {
                     my ($var, $value) = ($1, $2);
 
                     if($var eq "C") {
-                        $var = "configure";
+                        $var = $type;
                     }
                     elsif($var eq "T") {
                         $var = "tests";
+                        if($value eq "cmake") {
+                            # otherwise it remains configure
+                            $type = "cmake";
+                        }
                     }
                     elsif($var eq "CC") {
                         $var = "compiler";
