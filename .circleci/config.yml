@@ -72,12 +72,41 @@ commands:
             ./buildconf
             ./configure --enable-warnings --enable-werror --with-openssl --with-libssh
 
+  install-wolfssl:
+    steps:
+      - run:
+          command: |
+            curl -LO https://github.com/wolfSSL/wolfssl/archive/v5.1.1-stable.tar.gz
+            tar -xzf v5.1.1-stable.tar.gz
+            cd wolfssl-5.1.1-stable
+            ./autogen.sh
+            ./configure --enable-tls13 --enable-all --enable-harden --prefix=$HOME/wssl
+            make && make install
+
+  install-wolfssh:
+    steps:
+      - run:
+          command: |
+            curl -LO https://github.com/wolfSSL/wolfssh/archive/v1.4.8-stable.tar.gz
+            tar -xzf v1.4.8-stable.tar.gz
+            cd wolfssh-1.4.8-stable
+            ./autogen.sh
+            ./configure --with-wolfssl=$HOME/wssl --prefix=$HOME/wssh --enable-scp --enable-sftp --disable-examples
+            make && make install
+
   configure-cares:
     steps:
       - run:
           command: |
             ./buildconf
             ./configure --enable-warnings --enable-werror --with-openssl --enable-ares
+
+  configure-wolfssh:
+    steps:
+      - run:
+          command: |
+            ./buildconf
+            LDFLAGS="-Wl,-rpath,$HOME/wssh/lib" ./configure --enable-warnings --enable-werror --with-wolfssl=$HOME/wssl --with-wolfssh=$HOME/wssh
 
   configure-cares-debug:
     steps:
@@ -115,6 +144,16 @@ jobs:
       - checkout
       - install-deps
       - configure-openssl-no-verbose
+      - build
+
+  wolfssh:
+    executor: ubuntu
+    steps:
+      - checkout
+      - install-deps
+      - install-wolfssl
+      - install-wolfssh
+      - configure-wolfssh
       - build
 
   no-proxy:
@@ -185,6 +224,10 @@ workflows:
   openssl-no-verbose:
     jobs:
       - no-verbose
+
+  wolfssl-wolfssh:
+    jobs:
+      - wolfssh
 
   arm-openssl:
     jobs:
