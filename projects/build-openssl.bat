@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2012 - 2021, Steve Holme, <steve_holme@hotmail.com>.
+rem * Copyright (C) 2012 - 2022, Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
@@ -55,27 +55,7 @@ rem ***************************************************************************
 
 :parseArgs
   if not "%~1" == "" (
-    if /i "%~1" == "vc6" (
-      set VC_VER=6.0
-      set VC_DESC=VC6
-      set "VC_PATH=Microsoft Visual Studio\VC98"
-    ) else if /i "%~1" == "vc7" (
-      set VC_VER=7.0
-      set VC_DESC=VC7
-      set "VC_PATH=Microsoft Visual Studio .NET\Vc7"
-    ) else if /i "%~1" == "vc7.1" (
-      set VC_VER=7.1
-      set VC_DESC=VC7.1
-      set "VC_PATH=Microsoft Visual Studio .NET 2003\Vc7"
-    ) else if /i "%~1" == "vc8" (
-      set VC_VER=8.0
-      set VC_DESC=VC8
-      set "VC_PATH=Microsoft Visual Studio 8\VC"
-    ) else if /i "%~1" == "vc9" (
-      set VC_VER=9.0
-      set VC_DESC=VC9
-      set "VC_PATH=Microsoft Visual Studio 9.0\VC"
-    ) else if /i "%~1" == "vc10" (
+    if /i "%~1" == "vc10" (
       set VC_VER=10.0
       set VC_DESC=VC10
       set "VC_PATH=Microsoft Visual Studio 10.0\VC"
@@ -227,11 +207,6 @@ rem ***************************************************************************
   if "%BUILD_PLATFORM%" == "x86" (
     set VCVARS_PLATFORM=x86
   ) else if "%BUILD_PLATFORM%" == "x64" (
-    if "%VC_VER%" == "6.0" goto nox64
-    if "%VC_VER%" == "7.0" goto nox64
-    if "%VC_VER%" == "7.1" goto nox64
-    if "%VC_VER%" == "8.0" set VCVARS_PLATFORM=x86_amd64
-    if "%VC_VER%" == "9.0" set VCVARS_PLATFORM=%BUILD_PLATFORM%
     if "%VC_VER%" == "10.0" set VCVARS_PLATFORM=%BUILD_PLATFORM%
     if "%VC_VER%" == "11.0" set VCVARS_PLATFORM=amd64
     if "%VC_VER%" == "12.0" set VCVARS_PLATFORM=amd64
@@ -251,13 +226,7 @@ rem ***************************************************************************
   echo.
   set "SAVED_PATH=%CD%"
 
-  if "%VC_VER%" == "6.0" (
-    call "%ABS_VC_PATH%\bin\vcvars32"
-  ) else if "%VC_VER%" == "7.0" (
-    call "%ABS_VC_PATH%\bin\vcvars32"
-  ) else if "%VC_VER%" == "7.1" (
-    call "%ABS_VC_PATH%\bin\vcvars32"
-  ) else if "%VC_VER%" == "14.1" (
+  if "%VC_VER%" == "14.1" (
     call "%ABS_VC_PATH%\Auxiliary\Build\vcvarsall" %VCVARS_PLATFORM%
   ) else if "%VC_VER%" == "14.2" (
     call "%ABS_VC_PATH%\Auxiliary\Build\vcvarsall" %VCVARS_PLATFORM%
@@ -677,11 +646,6 @@ rem
   echo.
   echo Compiler:
   echo.
-  echo vc6       - Use Visual Studio 6
-  echo vc7       - Use Visual Studio .NET
-  echo vc7.1     - Use Visual Studio .NET 2003
-  echo vc8       - Use Visual Studio 2005
-  echo vc9       - Use Visual Studio 2008
   echo vc10      - Use Visual Studio 2010
   echo vc11      - Use Visual Studio 2012
   echo vc12      - Use Visual Studio 2013

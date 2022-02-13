@@ -217,9 +217,8 @@ If you want to set any of these defines you have the following options:
  - Modify the "Preprocessor Definitions" in the libcurl project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
-under "Project -> Settings -> C/C++ -> General" in VC6 and "Project ->
-Properties -> Configuration Properties -> C/C++ -> Preprocessor" in later
-versions.
+under "Project -> Properties -> Configuration Properties -> C/C++ ->
+Preprocessor".
 
 ## Using BSD-style lwIP instead of Winsock TCP/IP stack in Win32 builds
 
@@ -233,9 +232,8 @@ have the following alternatives:
  - Modify the "Preprocessor Definitions" in the libcurl project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
-under "Project -> Settings -> C/C++ -> General" in VC6 and "Project ->
-Properties -> Configuration Properties -> C/C++ -> Preprocessor" in later
-versions.
+under "Project -> Properties -> Configuration Properties -> C/C++ ->
+Preprocessor".
 
 Once that libcurl has been built with BSD-style lwIP TCP/IP stack support, in
 order to use it with your program it is mandatory that your program includes
