@@ -4,7 +4,7 @@ Building via IDE Project Files
    This document describes how to compile, build and install curl and libcurl
    from sources using an IDE based development tool such as Visual Studio.
 
-   Project files are currently available for Visual C++ v6.0 to v15.0. The
+   Project files are available for several different Visual C++ versions. The
    following directory structure has been used to cater for this:
 
    somedirectory\
@@ -16,9 +16,9 @@ Building via IDE Project Files
             |_src
 
    This structure allows for side-by-side compilation of curl on the same
-   machine using different versions of a given compiler (for example VC8, VC9
-   and VC10) and allows for your own application or product to be compiled
-   against those variants of libcurl for example.
+   machine using different versions of a given compiler (for example VC10 and
+   VC12) and allows for your own application or product to be compiled against
+   those variants of libcurl for example.
 
    Note: Typically this side-by-side compilation is generally only required
    when a library is being compiled against dynamic runtime libraries.
@@ -27,8 +27,9 @@ Dependencies
 ============
 
    The projects files also support build configurations that require third
-   party dependencies such as OpenSSL, wolfSSL and SSH2. If you wish to support
-   these, you will also need to download and compile those libraries as well.
+   party dependencies such as OpenSSL, wolfSSL and libssh2. If you wish to
+   support these, you will also need to download and compile those libraries
+   as well.
 
    To support compilation of these libraries using different versions of
    compilers, the following directory structure has been used for both the
@@ -65,11 +66,6 @@ Building with Visual C++
 
    To build with VC++, you will of course have to first install VC++ which is
    part of Visual Studio.
-
-   If you are building with VC6 then you will also need the February 2003
-   Edition of the Windows Platform SDK which can be downloaded from:
-
-    https://www.microsoft.com/en-us/download/details.aspx?id=12261
 
    If you require support for Internationalized Domain Names via Windows IDN
    then you will need either:
@@ -132,7 +128,7 @@ Notes
    The following keywords have been used in the directory hierarchy:
 
    <platform>      - The platform (For example: Windows)
-   <ide>           - The IDE (For example: VC6, VC10, BCC5)
+   <ide>           - The IDE (For example: VC10)
    <architecture>  - The platform architecture (For example: Win32, Win64)
    <configuration> - The target configuration (For example: DLL Debug,
                      LIB Release - LIB OpenSSL)

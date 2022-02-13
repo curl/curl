@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2014 - 2020, Steve Holme, <steve_holme@hotmail.com>.
+rem * Copyright (C) 2014 - 2022, Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
@@ -44,16 +44,6 @@ rem ***************************************************************************
 
   if /i "%~1" == "pre" (
     set VERSION=PRE
-  ) else if /i "%~1" == "vc6" (
-    set VERSION=VC6
-  ) else if /i "%~1" == "vc7" (
-    set VERSION=VC7
-  ) else if /i "%~1" == "vc7.1" (
-    set VERSION=VC7.1
-  ) else if /i "%~1" == "vc8" (
-    set VERSION=VC8
-  ) else if /i "%~1" == "vc9" (
-    set VERSION=VC9
   ) else if /i "%~1" == "vc10" (
     set VERSION=VC10
   ) else if /i "%~1" == "vc11" (
@@ -89,91 +79,11 @@ rem ***************************************************************************
     )
   )
   if "%VERSION%" == "PRE" goto success
-  if "%VERSION%" == "VC6" goto vc6
-  if "%VERSION%" == "VC7" goto vc7
-  if "%VERSION%" == "VC7.1" goto vc71
-  if "%VERSION%" == "VC8" goto vc8
-  if "%VERSION%" == "VC9" goto vc9
   if "%VERSION%" == "VC10" goto vc10
   if "%VERSION%" == "VC11" goto vc11
   if "%VERSION%" == "VC12" goto vc12
   if "%VERSION%" == "VC14" goto vc14
   if "%VERSION%" == "VC15" goto vc15
-
-:vc6
-  echo.
-
-  if "%MODE%" == "GENERATE" (
-    echo Generating VC6 project files
-    call :generate dsp Windows\VC6\src\curl.tmpl Windows\VC6\src\curl.dsp
-    call :generate dsp Windows\VC6\lib\libcurl.tmpl Windows\VC6\lib\libcurl.dsp
-  ) else (
-    echo Removing VC6 project files
-    call :clean Windows\VC6\src\curl.dsp
-    call :clean Windows\VC6\lib\libcurl.dsp
-  )
-
-  if not "%VERSION%" == "ALL" goto success
-
-:vc7
-  echo.
-
-  if "%MODE%" == "GENERATE" (
-    echo Generating VC7 project files
-    call :generate vcproj1 Windows\VC7\src\curl.tmpl Windows\VC7\src\curl.vcproj
-    call :generate vcproj1 Windows\VC7\lib\libcurl.tmpl Windows\VC7\lib\libcurl.vcproj
-  ) else (
-    echo Removing VC7 project files
-    call :clean Windows\VC7\src\curl.vcproj
-    call :clean Windows\VC7\lib\libcurl.vcproj
-  )
-
-  if not "%VERSION%" == "ALL" goto success
-
-:vc71
-  echo.
-
-  if "%MODE%" == "GENERATE" (
-    echo Generating VC7.1 project files
-    call :generate vcproj1 Windows\VC7.1\src\curl.tmpl Windows\VC7.1\src\curl.vcproj
-    call :generate vcproj1 Windows\VC7.1\lib\libcurl.tmpl Windows\VC7.1\lib\libcurl.vcproj
-  ) else (
-    echo Removing VC7.1 project files
-    call :clean Windows\VC7.1\src\curl.vcproj
-    call :clean Windows\VC7.1\lib\libcurl.vcproj
-  )
-
-  if not "%VERSION%" == "ALL" goto success
-
-:vc8
-  echo.
-
-  if "%MODE%" == "GENERATE" (
-    echo Generating VC8 project files
-    call :generate vcproj2 Windows\VC8\src\curl.tmpl Windows\VC8\src\curl.vcproj
-    call :generate vcproj2 Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
-  ) else (
-    echo Removing VC8 project files
-    call :clean Windows\VC8\src\curl.vcproj
-    call :clean Windows\VC8\lib\libcurl.vcproj
-  )
-
-  if not "%VERSION%" == "ALL" goto success
-
-:vc9
-  echo.
-
-  if "%MODE%" == "GENERATE" (
-    echo Generating VC9 project files
-    call :generate vcproj2 Windows\VC9\src\curl.tmpl Windows\VC9\src\curl.vcproj
-    call :generate vcproj2 Windows\VC9\lib\libcurl.tmpl Windows\VC9\lib\libcurl.vcproj
-  ) else (
-    echo Removing VC9 project files
-    call :clean Windows\VC9\src\curl.vcproj
-    call :clean Windows\VC9\lib\libcurl.vcproj
-  )
-
-  if not "%VERSION%" == "ALL" goto success
 
 :vc10
   echo.
@@ -252,8 +162,7 @@ rem ***************************************************************************
 
 rem Main generate function.
 rem
-rem %1 - Project Type (dsp for VC6, vcproj1 for VC7 and VC7.1, vcproj2 for VC8 and VC9
-rem      or vcxproj for VC10, VC11, VC12, VC14 and VC15)
+rem %1 - Project Type (vcxproj for VC10, VC11, VC12, VC14 and VC15)
 rem %2 - Input template file
 rem %3 - Output project file
 rem
@@ -331,8 +240,7 @@ rem
 
 rem Generates a single file xml element.
 rem
-rem %1 - Project Type (dsp for VC6, vcproj1 for VC7 and VC7.1, vcproj2 for VC8 and VC9
-rem      or vcxproj for VC10, VC11, VC12, VC14 and VC15)
+rem %1 - Project Type (vcxproj for VC10, VC11, VC12, VC14 and VC15)
 rem %2 - Directory (src, lib, lib\vauth, lib\vquic, lib\vssh, lib\vtls)
 rem %3 - Source filename
 rem %4 - Output project file
@@ -423,11 +331,6 @@ rem
   echo What to generate:
   echo.
   echo pre       - Prerequisites only
-  echo vc6       - Use Visual Studio 6
-  echo vc7       - Use Visual Studio .NET
-  echo vc7.1     - Use Visual Studio .NET 2003
-  echo vc8       - Use Visual Studio 2005
-  echo vc9       - Use Visual Studio 2008
   echo vc10      - Use Visual Studio 2010
   echo vc11      - Use Visual Studio 2012
   echo vc12      - Use Visual Studio 2013
