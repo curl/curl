@@ -395,6 +395,7 @@ Features testable here are:
 - `ld_preload`
 - `libssh2`
 - `libssh`
+- `oldlibssh` (versions before 0.9.6)
 - `libz`
 - `manual`
 - `Mime`

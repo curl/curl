@@ -35,8 +35,13 @@ CURL_HOME=%PWD/log/test%TESTNUMBER.dir
 
 # Verify data after the test has been "shot"
 <verify>
+# old libssh installs return the wrong thing
 <errorcode>
+%if oldlibssh
+67
+%else
 60
+%endif
 </errorcode>
 <valgrind>
 disable

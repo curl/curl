@@ -271,6 +271,7 @@ my $has_mingw;      # set if built with MinGW (as opposed to MinGW-w64)
 my $has_hyper = 0;  # set if built with Hyper
 my $has_libssh2;    # set if built with libssh2
 my $has_libssh;     # set if built with libssh
+my $has_oldlibssh;  # set if built with libssh < 0.9.6
 my $has_wolfssh;    # set if built with wolfssh
 my $has_unicode;    # set if libcurl is built with Unicode support
 
@@ -2883,6 +2884,7 @@ sub setupfeatures {
     $feature{"libz"} = $has_libz;
     $feature{"libssh2"} = $has_libssh2;
     $feature{"libssh"} = $has_libssh;
+    $feature{"oldlibssh"} = $has_oldlibssh;
     $feature{"rustls"} = $has_rustls;
     $feature{"wolfssh"} = $has_wolfssh;
     $feature{"wolfssl"} = $has_wolfssl;
@@ -3041,8 +3043,15 @@ sub checksystem {
             if ($libcurl =~ /libssh2/i) {
                 $has_libssh2=1;
             }
-            if ($libcurl =~ /libssh\//i) {
+            if ($libcurl =~ /libssh\/([0-9.]*)\//i) {
                 $has_libssh=1;
+                if($1 =~ /(\d+)\.(\d+).(\d+)/) {
+                    my $v = $1 * 100 + $2 * 10 + $3;
+                    if($v < 96) {
+                        # before 0.9.6
+                        $has_oldlibssh = 1;
+                    }
+                }
             }
             if ($libcurl =~ /wolfssh/i) {
                 $has_wolfssh=1;
