@@ -76,11 +76,24 @@ Building with Visual C++
     * Microsoft Visual Studio 2010 or above
 
    Once you have VC++ installed you should launch the application and open one
-   of the solution or workspace files.
+   of the solution or workspace files. The VC directory names are based on the
+   version of Visual C++ that you will be using. Each version of Visual Studio
+   has a default version of Visual C++. We offer these versions:
 
-   Whilst files are provided for both libcurl and the curl command line tool as
-   well as a configuration that includes both, it is recommend that you use the
-   all-in-one configuration.
+   - VC10      (Visual Studio 2010 Version 10.0)
+   - VC11      (Visual Studio 2012 Version 11.0)
+   - VC12      (Visual Studio 2013 Version 12.0)
+   - VC14      (Visual Studio 2015 Version 14.0)
+   - VC14.10    (Visual Studio 2017 Version 15.0)
+   - VC14.30   (Visual Studio 2022 Version 17.0)
+
+   Separate solutions are provided for both libcurl and the curl command line
+   tool as well as a solution that includes both projects. libcurl.sln,
+   curl.sln and curl-all.sln, respectively. We recommend using curl-all.sln to
+   build both projects.
+
+   For example, if you are using Visual Studio 2022 then you should be able to
+   use VC14.30\curl-all.sln to build curl and libcurl.
 
 Running DLL based configurations
 ================================

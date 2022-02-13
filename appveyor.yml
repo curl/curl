@@ -226,7 +226,7 @@ environment:
         BUILD_SYSTEM: VisualStudioSolution
         PRJ_CFG: "DLL Debug - DLL Windows SSPI - DLL WinIDN"
         TESTING: OFF
-        VC_VERSION: VC15
+        VC_VERSION: VC14.10
       # autotools-based builds (NOT mingw cross-compiling, but msys2 native)
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: autotools
@@ -285,8 +285,8 @@ build_script:
         call buildconf.bat &&
         cd winbuild &&
         call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat" &&
-        nmake /f Makefile.vc mode=dll VC=15 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% ENABLE_UNICODE=%ENABLE_UNICODE% &&
-        ..\builds\libcurl-vc15-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
+        nmake /f Makefile.vc mode=dll VC=14.10 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% ENABLE_UNICODE=%ENABLE_UNICODE% &&
+        ..\builds\libcurl-vc14.10-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
       ) else (
       if %BUILD_SYSTEM%==autotools (
         bash.exe -e -l -c "cd /c/projects/curl && ./buildconf && ./configure %CONFIG_ARGS% && make V=1 && make V=1 examples && cd tests && make V=1"
