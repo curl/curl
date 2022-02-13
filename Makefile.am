@@ -84,6 +84,13 @@ VC15_SRCTMPL = projects/Windows/VC15/src/curl.tmpl
 VC15_SRCVCXPROJ = projects/Windows/VC15/src/curl.vcxproj.dist
 VC15_SRCVCXPROJ_DEPS = $(VC15_SRCTMPL) Makefile.am src/Makefile.inc
 
+VC17_LIBTMPL = projects/Windows/VC17/lib/libcurl.tmpl
+VC17_LIBVCXPROJ = projects/Windows/VC17/lib/libcurl.vcxproj.dist
+VC17_LIBVCXPROJ_DEPS = $(VC17_LIBTMPL) Makefile.am lib/Makefile.inc
+VC17_SRCTMPL = projects/Windows/VC17/src/curl.tmpl
+VC17_SRCVCXPROJ = projects/Windows/VC17/src/curl.vcxproj.dist
+VC17_SRCVCXPROJ_DEPS = $(VC17_SRCTMPL) Makefile.am src/Makefile.inc
+
 VC_DIST = projects/README                           \
  projects/build-openssl.bat                         \
  projects/build-wolfssl.bat                         \
@@ -113,6 +120,11 @@ VC_DIST = projects/README                           \
  projects/Windows/VC15/lib/libcurl.vcxproj.filters  \
  projects/Windows/VC15/src/curl.sln                 \
  projects/Windows/VC15/src/curl.vcxproj.filters     \
+ projects/Windows/VC17/curl-all.sln                 \
+ projects/Windows/VC17/lib/libcurl.sln              \
+ projects/Windows/VC17/lib/libcurl.vcxproj.filters  \
+ projects/Windows/VC17/src/curl.sln                 \
+ projects/Windows/VC17/src/curl.vcxproj.filters     \
  projects/generate.bat                              \
  projects/wolfssl_options.h                         \
  projects/wolfssl_override.props
@@ -138,7 +150,8 @@ EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in \
 
 CLEANFILES = $(VC10_LIBVCXPROJ) $(VC10_SRCVCXPROJ) $(VC11_LIBVCXPROJ)        \
  $(VC11_SRCVCXPROJ) $(VC12_LIBVCXPROJ) $(VC12_SRCVCXPROJ) $(VC14_LIBVCXPROJ) \
- $(VC14_SRCVCXPROJ) $(VC15_LIBVCXPROJ) $(VC15_SRCVCXPROJ)
+ $(VC14_SRCVCXPROJ) $(VC15_LIBVCXPROJ) $(VC15_SRCVCXPROJ) $(VC17_LIBVCXPROJ) \
+ $(VC17_SRCVCXPROJ)
 
 bin_SCRIPTS = curl-config
 
@@ -287,7 +300,8 @@ checksrc:
 vc-ide: $(VC10_LIBVCXPROJ_DEPS) $(VC10_SRCVCXPROJ_DEPS)                  \
  $(VC11_LIBVCXPROJ_DEPS) $(VC11_SRCVCXPROJ_DEPS) $(VC12_LIBVCXPROJ_DEPS) \
  $(VC12_SRCVCXPROJ_DEPS) $(VC14_LIBVCXPROJ_DEPS) $(VC14_SRCVCXPROJ_DEPS) \
- $(VC15_LIBVCXPROJ_DEPS) $(VC15_SRCVCXPROJ_DEPS)
+ $(VC15_LIBVCXPROJ_DEPS) $(VC15_SRCVCXPROJ_DEPS) $(VC17_LIBVCXPROJ_DEPS) \
+ $(VC17_SRCVCXPROJ_DEPS)
 	@(win32_lib_srcs='$(LIB_CFILES)'; \
 	win32_lib_hdrs='$(LIB_HFILES) config-win32.h'; \
 	win32_lib_rc='$(LIB_RCFILES)'; \
@@ -566,7 +580,31 @@ function gen_element(type, dir, file)\
 		-v src_rc="$$win32_src_rc" \
 		-v src_x_srcs="$$sorted_src_x_srcs" \
 		-v src_x_hdrs="$$sorted_src_x_hdrs" \
-		"$$awk_code" $(srcdir)/$(VC15_SRCTMPL) > $(VC15_SRCVCXPROJ) || { exit 1; };)
+		"$$awk_code" $(srcdir)/$(VC15_SRCTMPL) > $(VC15_SRCVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC17_LIBVCXPROJ)'"; \
+	awk -v proj_type=vcxproj \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
+		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC17_LIBTMPL) > $(VC17_LIBVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC17_SRCVCXPROJ)'"; \
+	awk -v proj_type=vcxproj \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		-v src_x_srcs="$$sorted_src_x_srcs" \
+		-v src_x_hdrs="$$sorted_src_x_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC17_SRCTMPL) > $(VC17_SRCVCXPROJ) || { exit 1; };)
 
 tidy:
 	(cd src && $(MAKE) tidy)
