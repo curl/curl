@@ -4,7 +4,7 @@ curl and libcurl 7.82.0
  Command line options:         245
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2582
+ Contributors:                 2584
 
 This release includes the following changes:
 
@@ -15,7 +15,6 @@ This release includes the following bugfixes:
 
  o appveyor: update images from VS 2019 to 2022
  o appveyor: use VS 2017 image for the autotools builds
- o base64: remove an unnecessary call to strlen [66]
  o build: enable -Warith-conversion
  o build: fix -Wenum-conversion handling
  o build: fix ngtcp2 crypto library detection [63]
@@ -32,7 +31,9 @@ This release includes the following bugfixes:
  o cmake: fix iOS CMake project generation error [13]
  o cmdline-opts/gen.pl: fix option matching to improve references [50]
  o config.d: Clarify _curlrc filename is still valid on Windows [95]
+ o configure: fix '--enable-code-coverage' typo [110]
  o configure: remove support for "embedded ares" [82]
+ o configure: requires --with-nss-deprecated to build with NSS [114]
  o configure: set CURL_LIBRARY_PATH for nghttp2 [58]
  o configure: support specification of a nghttp2 library path [101]
  o configure: use correct CFLAGS for threaded resolver with xlC on AIX [54]
@@ -58,7 +59,9 @@ This release includes the following bugfixes:
  o gen.pl: terminate "example" sections better [4]
  o h2/h3: allow CURLOPT_HTTPHEADER change ":scheme" [88]
  o hostcheck: fixed to not touch used input strings [38]
+ o hostcheck: reduce strlen calls on chained certificates [92]
  o http: make Curl_compareheader() take string length arguments too [87]
+ o if2ip: make Curl_ipv6_scope a blank macro when IPv6-disabled [104]
  o ldap: return CURLE_URL_MALFORMAT for bad URL [24]
  o lib: remove support for CURL_DOES_CONVERSIONS [96]
  o maketgz: return error if 'make dist' fails [79]
@@ -69,9 +72,12 @@ This release includes the following bugfixes:
  o mbedtls: remove #include <mbedtls/certs.h> [56]
  o mbedtls: return CURLcode result instead of a mbedtls error code [1]
  o md5: check md5_init_func return value
+ o mime: use a define instead of the magic number 24 [89]
  o misc: allow curl to build with wolfssl --enable-opensslextra [43]
  o misc: remove BeOS code and references [30]
  o misc: remove the final watcom references [29]
+ o misc: remove unused data when IPv6 is not supported [80]
+ o mqtt: free 'sendleftovers' in disconnect [115]
  o mqtt: free any send leftover data when done [36]
  o multi: grammar fix in comment [69]
  o multi: remember connection_id before returning connection to pool [76]
@@ -83,14 +89,18 @@ This release includes the following bugfixes:
  o nss: handshake callback during shutdown has no conn->bundle [55]
  o openldap: fix compiler warning when built without SSL support [70]
  o openldap: implement SASL authentication [16]
+ o openldap: pass string length arguments to client_write() [116]
  o openssl.h: avoid including OpenSSL headers here [15]
  o openssl: check SSL_get_ex_data to prevent potential NULL dereference [40]
  o openssl: check the return value of BIO_new_mem_buf() [18]
  o openssl: fix `ctx_option_t` for OpenSSL v3+
  o openssl: return error if TLS 1.3 is requested when not supported [45]
  o projects: fix Visual Studio wolfSSL configurations
+ o quiche: after leaving h3_recving state, poll again [108]
  o quiche: change qlog file extension to `.sqlog` [44]
+ o quiche: handle stream reset [83]
  o quiche: verify the server cert on connect [33]
+ o quiche: when *recv_body() returns data, drain it before polling again [109]
  o remote-header-name.d: clarify [10]
  o runtests.pl: disable debuginfod [51]
  o runtests.pl: properly print the test if it contains binary zeros
@@ -114,14 +124,16 @@ This release includes the following bugfixes:
  o tool_findfile: check ~/.config/curlrc too [17]
  o tool_getparam: DNS options that need c-ares now fail without it [31]
  o TPF: drop support [97]
+ o url: exclude zonefrom_url when no ipv6 is available [103]
  o url: given a user in the URL, find pwd for that user in netrc [11]
  o url: keep trailing dot in host name [62]
  o url: make Curl_disconnect return void [48]
- o urlapi: remove an unnecessary call to strlen [64]
  o urldata: CONN_IS_PROXIED replaces bits.close when proxy can be disabled [52]
  o version_win32: fix warning for `CURL_WINDOWS_APP` [93]
  o vtls: pass on the right SNI name [61]
  o vxworks: drop support [65]
+ o wolfssl: return CURLE_AGAIN for the SSL_ERROR_NONE case [106]
+ o wolfssl: when SSL_read() returns zero, check the error [107]
  o write-out.d: Fix num_headers formatting
  o x509asn1: toggle off functions not needed for diff tls backends [91]
 
@@ -133,17 +145,18 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Antoine Pietri, Bernhard Walle, Bjarni Ingi Gislason,
-  Cameron Will, Charles Cazabon, Daniel Stenberg, Davide Cassioli, Eric Musser,
-  Fabian Keil, Fabian Yamaguchi, Filip Lundgren, Harry Sarson, Henrik Holst,
-  Ikko Ashimine, Jan Ehrhardt, Jan-Piet Mens, jhoyla on github,
-  jonny112 on github, Kushal Das, Leah Neukirchen, Lucas Pardue,
-  luminixinc on github, Manfred Schwarb, Marcel Raad, Melroy van den Berg,
-  Michał Antoniak, neutric on github, Niels Martignène, Patrick Monnerat,
+  Cameron Will, Charles Cazabon, Dan Fandrich, Daniel Stenberg,
+  Davide Cassioli, Eric Musser, Fabian Keil, Fabian Yamaguchi, Filip Lundgren,
+  gaoxingwang on github, Harry Sarson, Henrik Holst, Ikko Ashimine,
+  Jan Ehrhardt, Jan-Piet Mens, jhoyla on github, jonny112 on github,
+  Kushal Das, Leah Neukirchen, Lucas Pardue, luminixinc on github,
+  Manfred Schwarb, Marcel Raad, Melroy van den Berg, Michał Antoniak,
+  Neal McBurnett, neutric on github, Niels Martignène, Patrick Monnerat,
   pheiduck on github, Ray Satiro, Ryan Schmidt, Samuel Henrique,
   Sandro Jaeckel, Satadru Pramanik, Sebastian Sterk,
   siddharthchhabrap on github, Stefan Eissing, Stephen Boost,
   Stephen M. Coakley, updatede on github, Viktor Szakats, Xiaoke Wang,
-  (44 contributors)
+  (47 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -210,9 +223,7 @@ References to bug reports and discussions on issues:
  [61] = https://curl.se/bug/?i=8320
  [62] = https://curl.se/bug/?i=8290
  [63] = https://curl.se/bug/?i=8372
- [64] = https://curl.se/bug/?i=8370
  [65] = https://curl.se/bug/?i=8362
- [66] = https://curl.se/bug/?i=8369
  [67] = https://curl.se/bug/?i=8314
  [68] = https://curl.se/bug/?i=8365
  [69] = https://curl.se/bug/?i=8368
@@ -226,14 +237,18 @@ References to bug reports and discussions on issues:
  [77] = https://curl.se/bug/?i=8354
  [78] = https://curl.se/bug/?i=8408
  [79] = https://curl.se/mail/lib-2022-02/0070.html
+ [80] = https://curl.se/bug/?i=8430
  [82] = https://curl.se/bug/?i=8397
+ [83] = https://curl.se/bug/?i=8437
  [84] = https://curl.se/bug/?i=8396
  [85] = https://curl.se/bug/?i=8396
  [86] = https://curl.se/bug/?i=8394
  [87] = https://curl.se/bug/?i=8391
  [88] = https://curl.se/bug/?i=8381
+ [89] = https://curl.se/bug/?i=8441
  [90] = https://curl.se/bug/?i=8383
  [91] = https://curl.se/bug/?i=8386
+ [92] = https://curl.se/bug/?i=8428
  [93] = https://curl.se/bug/?i=8385
  [94] = https://curl.se/bug/?i=8384
  [95] = https://curl.se/bug/?i=8382
@@ -243,3 +258,13 @@ References to bug reports and discussions on issues:
  [99] = https://curl.se/bug/?i=8377
  [100] = https://curl.se/bug/?i=8376
  [101] = https://curl.se/bug/?i=8375
+ [103] = https://curl.se/bug/?i=8439
+ [104] = https://curl.se/bug/?i=8439
+ [106] = https://curl.se/bug/?i=8431
+ [107] = https://curl.se/bug/?i=8431
+ [108] = https://curl.se/bug/?i=8436
+ [109] = https://curl.se/bug/?i=8429
+ [110] = https://curl.se/bug/?i=8425
+ [114] = https://curl.se/bug/?i=8395
+ [115] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=43646
+ [116] = https://curl.se/bug/?i=8404
