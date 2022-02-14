@@ -90,16 +90,6 @@ static void free_urlhandle(struct Curl_URL *u)
   free(u->temppath);
 }
 
-/* move the full contents of one handle onto another and
-   free the original */
-static void mv_urlhandle(struct Curl_URL *from,
-                         struct Curl_URL *to)
-{
-  free_urlhandle(to);
-  *to = *from;
-  free(from);
-}
-
 /*
  * Find the separator at the end of the host name, or the '?' in cases like
  * http://www.url.com?id=2380
@@ -1156,7 +1146,8 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 /*
  * Parse the URL and, if successful, replace everyting in the Curl_URL struct.
  */
-static CURLUcode parseurl_and_replace(const char *url, CURLU *u, unsigned int flags)
+static CURLUcode parseurl_and_replace(const char *url, CURLU *u,
+                                      unsigned int flags)
 {
   CURLUcode result;
   CURLU tmpurl;
