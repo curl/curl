@@ -310,10 +310,10 @@ static CURLcode build_message(struct SASL *sasl, struct bufref *msg)
  *
  * Check if we have enough auth data and capabilities to authenticate.
  */
-bool Curl_sasl_can_authenticate(struct SASL *sasl, struct connectdata *conn)
+bool Curl_sasl_can_authenticate(struct SASL *sasl, struct Curl_easy *data)
 {
   /* Have credentials been provided? */
-  if(conn->bits.user_passwd)
+  if(data->state.aptr.user)
     return TRUE;
 
   /* EXTERNAL can authenticate without a user name and/or password */
@@ -365,7 +365,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
     if(force_ir || data->set.sasl_ir)
       result = Curl_auth_create_external_message(conn->user, &resp);
   }
-  else if(conn->bits.user_passwd) {
+  else if(data->state.aptr.user) {
 #if defined(USE_KERBEROS5)
     if((enabledmechs & SASL_MECH_GSSAPI) && Curl_auth_is_gssapi_supported() &&
        Curl_auth_user_contains_domain(conn->user)) {

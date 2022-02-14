@@ -401,7 +401,7 @@ static CURLcode pop3_perform_user(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
-  if(!conn->bits.user_passwd) {
+  if(!data->state.aptr.user) {
     state(data, POP3_STOP);
 
     return result;
@@ -435,7 +435,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
-  if(!conn->bits.user_passwd) {
+  if(!data->state.aptr.user) {
     state(data, POP3_STOP);
 
     return result;
@@ -545,7 +545,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
 
   /* Check we have enough data to authenticate with and end the
      connect phase if we don't */
-  if(!Curl_sasl_can_authenticate(&pop3c->sasl, conn)) {
+  if(!Curl_sasl_can_authenticate(&pop3c->sasl, data)) {
     state(data, POP3_STOP);
     return result;
   }

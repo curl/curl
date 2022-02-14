@@ -1738,7 +1738,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
 #endif /* CURL_DISABLE_PROXY */
 
-  conn->bits.user_passwd = (data->state.aptr.user) ? TRUE : FALSE;
 #ifndef CURL_DISABLE_FTP
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
@@ -2019,6 +2018,24 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
    * User name and password set with their own options override the
    * credentials possibly set in the URL.
    */
+  if(!data->state.aptr.passwd) {
+    uc = curl_url_get(uh, CURLUPART_PASSWORD, &data->state.up.password, 0);
+    if(!uc) {
+      char *decoded;
+      result = Curl_urldecode(data->state.up.password, 0, &decoded, NULL,
+                              conn->handler->flags&PROTOPT_USERPWDCTRL ?
+                              REJECT_ZERO : REJECT_CTRL);
+      if(result)
+        return result;
+      conn->passwd = decoded;
+      result = Curl_setstropt(&data->state.aptr.passwd, decoded);
+      if(result)
+        return result;
+    }
+    else if(uc != CURLUE_NO_PASSWORD)
+      return Curl_uc_to_curlcode(uc);
+  }
+
   if(!data->state.aptr.user) {
     /* we don't use the URL API's URL decoder option here since it rejects
        control codes and we want to allow them for some schemes in the user
@@ -2032,32 +2049,16 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       if(result)
         return result;
       conn->user = decoded;
-      conn->bits.user_passwd = TRUE;
       result = Curl_setstropt(&data->state.aptr.user, decoded);
-      if(result)
-        return result;
     }
     else if(uc != CURLUE_NO_USER)
       return Curl_uc_to_curlcode(uc);
-  }
-
-  if(!data->state.aptr.passwd) {
-    uc = curl_url_get(uh, CURLUPART_PASSWORD, &data->state.up.password, 0);
-    if(!uc) {
-      char *decoded;
-      result = Curl_urldecode(data->state.up.password, 0, &decoded, NULL,
-                              conn->handler->flags&PROTOPT_USERPWDCTRL ?
-                              REJECT_ZERO : REJECT_CTRL);
-      if(result)
-        return result;
-      conn->passwd = decoded;
-      conn->bits.user_passwd = TRUE;
-      result = Curl_setstropt(&data->state.aptr.passwd, decoded);
-      if(result)
-        return result;
+    else if(data->state.aptr.passwd) {
+      /* no user was set but a password, set a blank user */
+      result = Curl_setstropt(&data->state.aptr.user, "");
     }
-    else if(uc != CURLUE_NO_PASSWORD)
-      return Curl_uc_to_curlcode(uc);
+    if(result)
+      return result;
   }
 
   uc = curl_url_get(uh, CURLUPART_OPTIONS, &data->state.up.options,
@@ -2905,10 +2906,10 @@ static CURLcode override_login(struct Curl_easy *data,
   char **optionsp = &conn->options;
 
 #ifndef CURL_DISABLE_NETRC
-  if(data->set.use_netrc == CURL_NETRC_REQUIRED && conn->bits.user_passwd) {
+  if(data->set.use_netrc == CURL_NETRC_REQUIRED && data->state.aptr.user) {
     Curl_safefree(*userp);
     Curl_safefree(*passwdp);
-    conn->bits.user_passwd = FALSE; /* disable user+password */
+    Curl_safefree(data->state.aptr.user); /* disable user+password */
   }
 #endif
 
@@ -2949,7 +2950,6 @@ static CURLcode override_login(struct Curl_easy *data,
          file, so that it is safe to use even if we followed a Location: to a
          different host or similar. */
       conn->bits.netrc = TRUE;
-      conn->bits.user_passwd = TRUE; /* enable user+password */
     }
     if(url_provided) {
       Curl_safefree(conn->user);
@@ -3004,14 +3004,15 @@ static CURLcode override_login(struct Curl_easy *data,
 /*
  * Set the login details so they're available in the connection
  */
-static CURLcode set_login(struct connectdata *conn)
+static CURLcode set_login(struct Curl_easy *data,
+                          struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   const char *setuser = CURL_DEFAULT_USER;
   const char *setpasswd = CURL_DEFAULT_PASSWORD;
 
   /* If our protocol needs a password and we have none, use the defaults */
-  if((conn->handler->flags & PROTOPT_NEEDSPWD) && !conn->bits.user_passwd)
+  if((conn->handler->flags & PROTOPT_NEEDSPWD) && !data->state.aptr.user)
     ;
   else {
     setuser = "";
@@ -3485,8 +3486,7 @@ static void reuse_conn(struct Curl_easy *data,
 
   /* get the user+password information from the old_conn struct since it may
    * be new for this request even when we re-use an existing connection */
-  conn->bits.user_passwd = old_conn->bits.user_passwd;
-  if(conn->bits.user_passwd) {
+  if(old_conn->user) {
     /* use the new user name and password though */
     Curl_safefree(conn->user);
     Curl_safefree(conn->passwd);
@@ -3664,7 +3664,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   if(result)
     goto out;
 
-  result = set_login(conn); /* default credentials */
+  result = set_login(data, conn); /* default credentials */
   if(result)
     goto out;
 

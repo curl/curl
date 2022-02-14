@@ -507,7 +507,7 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
-  if(!conn->bits.user_passwd) {
+  if(!data->state.aptr.user) {
     state(data, IMAP_STOP);
 
     return result;
@@ -608,7 +608,7 @@ static CURLcode imap_perform_authentication(struct Curl_easy *data,
   /* Check if already authenticated OR if there is enough data to authenticate
      with and end the connect phase if we don't */
   if(imapc->preauth ||
-     !Curl_sasl_can_authenticate(&imapc->sasl, conn)) {
+     !Curl_sasl_can_authenticate(&imapc->sasl, data)) {
     state(data, IMAP_STOP);
     return result;
   }

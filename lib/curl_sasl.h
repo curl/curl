@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -150,7 +150,7 @@ void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
                     const struct SASLproto *params);
 
 /* Check if we have enough auth data and capabilities to authenticate */
-bool Curl_sasl_can_authenticate(struct SASL *sasl, struct connectdata *conn);
+bool Curl_sasl_can_authenticate(struct SASL *sasl, struct Curl_easy *data);
 
 /* Calculate the required login details for SASL authentication  */
 CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
