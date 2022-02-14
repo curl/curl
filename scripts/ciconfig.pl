@@ -174,3 +174,11 @@ for my $w (sort keys %avail) {
         printf "  %s\n", $w;
     }
 }
+
+
+print "ENABLED configure options that aren't available\n";
+for my $w (sort keys %with) {
+    if(!$avail{$w}) {
+        printf "  %s\n", $w;
+    }
+}
