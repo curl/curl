@@ -328,7 +328,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   host = conn->host.name;
 #endif
 
-  if(conn->bits.user_passwd) {
+  if(data->state.aptr.user) {
     user = conn->user;
     passwd = conn->passwd;
   }
