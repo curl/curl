@@ -1154,6 +1154,24 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 }
 
 /*
+ * Parse the URL and, if successful, replace everyting in the Curl_URL struct.
+ */
+static CURLUcode parseurl_and_replace(const char *url, CURLU *u, unsigned int flags)
+{
+  CURLUcode result;
+  CURLU tmpurl;
+  memset(&tmpurl, 0, sizeof(tmpurl));
+  result = parseurl(url, &tmpurl, flags);
+  if(!result) {
+    free_urlhandle(u);
+    *u = tmpurl;
+  }
+  else
+    free_urlhandle(&tmpurl);
+  return result;
+}
+
+/*
  */
 CURLU *curl_url(void)
 {
@@ -1560,52 +1578,24 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     CURLUcode result;
     char *oldurl;
     char *redired_url;
-    CURLU *handle2;
 
-    if(Curl_is_absolute_url(part, NULL, 0)) {
-      handle2 = curl_url();
-      if(!handle2)
-        return CURLUE_OUT_OF_MEMORY;
-      result = parseurl(part, handle2, flags);
-      if(!result)
-        mv_urlhandle(handle2, u);
-      else
-        curl_url_cleanup(handle2);
-      return result;
-    }
-    /* extract the full "old" URL to do the redirect on */
-    result = curl_url_get(u, CURLUPART_URL, &oldurl, flags);
-    if(result) {
-      /* couldn't get the old URL, just use the new! */
-      handle2 = curl_url();
-      if(!handle2)
-        return CURLUE_OUT_OF_MEMORY;
-      result = parseurl(part, handle2, flags);
-      if(!result)
-        mv_urlhandle(handle2, u);
-      else
-        curl_url_cleanup(handle2);
-      return result;
+    /* if the new thing is absolute or the old one is not
+     * (we could not get an absolute url in 'oldurl'),
+     * then replace the existing with the new. */
+    if(Curl_is_absolute_url(part, NULL, 0)
+       || curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
+      return parseurl_and_replace(part, u, flags);
     }
 
-    /* apply the relative part to create a new URL */
+    /* apply the relative part to create a new URL
+     * and replace the existing one with it. */
     redired_url = concat_url(oldurl, part);
     free(oldurl);
     if(!redired_url)
       return CURLUE_OUT_OF_MEMORY;
 
-    /* now parse the new URL */
-    handle2 = curl_url();
-    if(!handle2) {
-      free(redired_url);
-      return CURLUE_OUT_OF_MEMORY;
-    }
-    result = parseurl(redired_url, handle2, flags);
+    result = parseurl_and_replace(redired_url, u, flags);
     free(redired_url);
-    if(!result)
-      mv_urlhandle(handle2, u);
-    else
-      curl_url_cleanup(handle2);
     return result;
   }
   default:
