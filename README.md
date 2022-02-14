@@ -1,4 +1,4 @@
-![curl logo](https://curl.se/logo/curl-logo.svg)
+# ![curl logo](https://curl.se/logo/curl-logo.svg)
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/63/badge)](https://bestpractices.coreinfrastructure.org/projects/63)
 [![Coverity passed](https://scan.coverity.com/projects/curl/badge.svg)](https://scan.coverity.com/projects/curl)
@@ -67,21 +67,20 @@ distribution terms.
 
 Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/curl#backer)]
 
-<a href="https://opencollective.com/curl#backers" target="_blank"><img src="https://opencollective.com/curl/backers.svg?width=890"></a>
+[![Open Collective Backers](https://opencollective.com/curl/backers.svg?width=890)](https://opencollective.com/curl#backers)
 
 ## Sponsors
 
 Support this project by becoming a sponsor. Your logo will show up here with a
-link to your website. [[Become a
-sponsor](https://opencollective.com/curl#sponsor)]
+link to your website. [[Become a sponsor](https://opencollective.com/curl#sponsor)]
 
-<a href="https://opencollective.com/curl/sponsor/0/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/0/avatar.svg"></a>
-<a href="https://opencollective.com/curl/sponsor/1/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/1/avatar.svg"></a>
-<a href="https://opencollective.com/curl/sponsor/2/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/2/avatar.svg"></a>
-<a href="https://opencollective.com/curl/sponsor/3/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/3/avatar.svg"></a>
-<a href="https://opencollective.com/curl/sponsor/4/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/4/avatar.svg"></a>
-<a href="https://opencollective.com/curl/sponsor/5/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/5/avatar.svg"></a>
-<a href="https://opencollective.com/curl/sponsor/6/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/6/avatar.svg"></a>
-<a href="https://opencollective.com/curl/sponsor/7/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/7/avatar.svg"></a>
-<a href="https://opencollective.com/curl/sponsor/8/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/8/avatar.svg"></a>
-<a href="https://opencollective.com/curl/sponsor/9/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/9/avatar.svg"></a>
+[![Open Collective Sponsor 0](https://opencollective.com/curl/sponsor/0/avatar.svg)](https://opencollective.com/curl/sponsor/0/website)
+[![Open Collective Sponsor 1](https://opencollective.com/curl/sponsor/1/avatar.svg)](https://opencollective.com/curl/sponsor/1/website)
+[![Open Collective Sponsor 2](https://opencollective.com/curl/sponsor/2/avatar.svg)](https://opencollective.com/curl/sponsor/2/website)
+[![Open Collective Sponsor 3](https://opencollective.com/curl/sponsor/3/avatar.svg)](https://opencollective.com/curl/sponsor/3/website)
+[![Open Collective Sponsor 4](https://opencollective.com/curl/sponsor/4/avatar.svg)](https://opencollective.com/curl/sponsor/4/website)
+[![Open Collective Sponsor 5](https://opencollective.com/curl/sponsor/5/avatar.svg)](https://opencollective.com/curl/sponsor/5/website)
+[![Open Collective Sponsor 6](https://opencollective.com/curl/sponsor/6/avatar.svg)](https://opencollective.com/curl/sponsor/6/website)
+[![Open Collective Sponsor 7](https://opencollective.com/curl/sponsor/7/avatar.svg)](https://opencollective.com/curl/sponsor/7/website)
+[![Open Collective Sponsor 8](https://opencollective.com/curl/sponsor/8/avatar.svg)](https://opencollective.com/curl/sponsor/8/website)
+[![Open Collective Sponsor 9](https://opencollective.com/curl/sponsor/9/avatar.svg)](https://opencollective.com/curl/sponsor/9/website)
