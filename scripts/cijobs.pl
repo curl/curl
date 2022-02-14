@@ -348,7 +348,7 @@ sub circle {
             if($_ =~ /^  ([^ ]*):/) {
                 $cmdname = $1;
             }
-            elsif($_ =~ /^            .\/configure (.*)/) {
+            elsif($_ =~ /^            .*.\/configure (.*)/) {
                 $cmd{$cmdname}=$1;
             }
         }
