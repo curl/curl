@@ -587,7 +587,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   if(data->state.authproblem)
     return data->set.http_fail_on_error?CURLE_HTTP_RETURNED_ERROR:CURLE_OK;
 
-  if((conn->bits.user_passwd || data->set.str[STRING_BEARER]) &&
+  if((data->state.aptr.user || data->set.str[STRING_BEARER]) &&
      ((data->req.httpcode == 401) ||
       (conn->bits.authneg && data->req.httpcode < 300))) {
     pickhost = pickoneauth(&data->state.authhost, authmask);
@@ -726,7 +726,7 @@ output_auth_headers(struct Curl_easy *data,
       (proxy && conn->bits.proxy_user_passwd &&
        !Curl_checkProxyheaders(data, conn, STRCONST("Proxy-authorization"))) ||
 #endif
-      (!proxy && conn->bits.user_passwd &&
+      (!proxy && data->state.aptr.user &&
        !Curl_checkheaders(data, STRCONST("Authorization")))) {
       auth = "Basic";
       result = http_output_basic(data, proxy);
@@ -810,7 +810,7 @@ Curl_http_output_auth(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
     (conn->bits.httpproxy && conn->bits.proxy_user_passwd) ||
 #endif
-     conn->bits.user_passwd || data->set.str[STRING_BEARER])
+     data->state.aptr.user || data->set.str[STRING_BEARER])
     /* continue please */;
   else {
     authhost->done = TRUE;
@@ -1142,7 +1142,7 @@ static bool http_should_fail(struct Curl_easy *data)
   ** Either we're not authenticating, or we're supposed to
   ** be authenticating something else.  This is an error.
   */
-  if((httpcode == 401) && !data->conn->bits.user_passwd)
+  if((httpcode == 401) && !data->state.aptr.user)
     return TRUE;
 #ifndef CURL_DISABLE_PROXY
   if((httpcode == 407) && !data->conn->bits.proxy_user_passwd)

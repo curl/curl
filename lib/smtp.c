@@ -492,7 +492,7 @@ static CURLcode smtp_perform_authentication(struct Curl_easy *data)
   /* Check we have enough data to authenticate with, and the
      server supports authentication, and end the connect phase if not */
   if(!smtpc->auth_supported ||
-     !Curl_sasl_can_authenticate(&smtpc->sasl, conn)) {
+     !Curl_sasl_can_authenticate(&smtpc->sasl, data)) {
     state(data, SMTP_STOP);
     return result;
   }

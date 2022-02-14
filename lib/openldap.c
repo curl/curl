@@ -432,7 +432,7 @@ static CURLcode oldap_perform_bind(struct Curl_easy *data, ldapstate newstate)
   passwd.bv_val = NULL;
   passwd.bv_len = 0;
 
-  if(conn->bits.user_passwd) {
+  if(data->state.aptr.user) {
     binddn = conn->user;
     passwd.bv_val = conn->passwd;
     passwd.bv_len = strlen(passwd.bv_val);
@@ -444,7 +444,7 @@ static CURLcode oldap_perform_bind(struct Curl_easy *data, ldapstate newstate)
     state(data, newstate);
   else
     result = oldap_map_error(rc,
-                             conn->bits.user_passwd?
+                             data->state.aptr.user?
                              CURLE_LOGIN_DENIED: CURLE_LDAP_CANNOT_BIND);
   return result;
 }
@@ -645,7 +645,7 @@ static CURLcode oldap_state_mechs_resp(struct Curl_easy *data,
       /* FALLTHROUGH */
     case LDAP_SUCCESS:
     case LDAP_NO_RESULTS_RETURNED:
-      if(Curl_sasl_can_authenticate(&li->sasl, conn))
+      if(Curl_sasl_can_authenticate(&li->sasl, data))
         result = oldap_perform_sasl(data);
       else
         result = CURLE_LOGIN_DENIED;
@@ -799,7 +799,7 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
       conn->bits.tls_upgraded = TRUE;
       if(li->sasl.prefmech != SASL_AUTH_NONE)
         result = oldap_perform_mechs(data);
-      else if(conn->bits.user_passwd)
+      else if(data->state.aptr.user)
         result = oldap_perform_bind(data, OLDAP_BIND);
       else {
         state(data, OLDAP_STOP); /* Version 3 supported: no bind required */

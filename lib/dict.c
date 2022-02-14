@@ -190,10 +190,6 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
 
   *done = TRUE; /* unconditionally */
 
-  if(conn->bits.user_passwd) {
-    /* AUTH is missing */
-  }
-
   if(strncasecompare(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
      strncasecompare(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
      strncasecompare(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
