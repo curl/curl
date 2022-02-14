@@ -48,7 +48,7 @@ struct h2h3req {
  */
 CURLcode Curl_pseudo_headers(struct Curl_easy *data,
                              const char *request,
-                             size_t len,
+                             const size_t len,
                              struct h2h3req **hp);
 
 /*
