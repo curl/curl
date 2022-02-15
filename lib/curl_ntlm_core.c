@@ -444,7 +444,6 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
   return CURLE_OK;
 }
 
-#ifdef USE_NTRESPONSES
 static void ascii_to_unicode_le(unsigned char *dest, const char *src,
                                 size_t srclen)
 {
@@ -455,7 +454,7 @@ static void ascii_to_unicode_le(unsigned char *dest, const char *src,
   }
 }
 
-#if defined(USE_NTLM_V2) && !defined(USE_WINDOWS_SSPI)
+#if !defined(USE_WINDOWS_SSPI)
 
 static void ascii_uppercase_to_unicode_le(unsigned char *dest,
                                           const char *src, size_t srclen)
@@ -467,7 +466,7 @@ static void ascii_uppercase_to_unicode_le(unsigned char *dest,
   }
 }
 
-#endif /* USE_NTLM_V2 && !USE_WINDOWS_SSPI */
+#endif /* !USE_WINDOWS_SSPI */
 
 /*
  * Set up nt hashed passwords
@@ -495,7 +494,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(const char *password,
   return CURLE_OK;
 }
 
-#if defined(USE_NTLM_V2) && !defined(USE_WINDOWS_SSPI)
+#if !defined(USE_WINDOWS_SSPI)
 
 /* Timestamp in tenths of a microsecond since January 1, 1601 00:00:00 UTC. */
 struct ms_filetime {
@@ -711,8 +710,6 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
   return result;
 }
 
-#endif /* USE_NTLM_V2 && !USE_WINDOWS_SSPI */
-
-#endif /* USE_NTRESPONSES */
+#endif /* !USE_WINDOWS_SSPI */
 
 #endif /* USE_CURL_NTLM_CORE */
