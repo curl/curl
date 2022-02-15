@@ -1133,38 +1133,13 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   struct SingleRequest *k = &data->req;
   CURLcode result;
   int didwhat = 0;
-
-  curl_socket_t fd_read;
-  curl_socket_t fd_write;
   int select_res = conn->cselect_bits;
 
   conn->cselect_bits = 0;
 
-  /* only use the proper socket if the *_HOLD bit is not set simultaneously as
-     then we are in rate limiting state in that transfer direction */
-
-  if((k->keepon & KEEP_RECVBITS) == KEEP_RECV)
-    fd_read = conn->sockfd;
-  else
-    fd_read = CURL_SOCKET_BAD;
-
-  if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
-    fd_write = conn->writesockfd;
-  else
-    fd_write = CURL_SOCKET_BAD;
-
   if(data->state.drain) {
     select_res |= CURL_CSELECT_IN;
     DEBUGF(infof(data, "Curl_readwrite: forcibly told to drain data"));
-  }
-
-  if(!select_res) /* Call for select()/poll() only, if read/write/error
-                     status is not known. */
-    select_res = Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write, 0);
-
-  if(select_res == CURL_CSELECT_ERR) {
-    failf(data, "select/poll returned error");
-    return CURLE_SEND_ERROR;
   }
 
 #ifdef USE_HYPER
