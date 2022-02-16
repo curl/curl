@@ -4134,8 +4134,10 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
 
   /* url-decode ftp path before further evaluation */
   result = Curl_urldecode(ftp->path, 0, &rawPath, &pathLen, REJECT_CTRL);
-  if(result)
+  if(result) {
+    failf(data, "path contains control characters");
     return result;
+  }
 
   switch(data->set.ftp_filemethod) {
     case FTPFILE_NOCWD: /* fastest, but less standard-compliant */
