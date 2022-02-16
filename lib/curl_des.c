@@ -22,7 +22,12 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM) && !defined(USE_OPENSSL) && !defined(USE_WOLFSSL)
+#if defined(USE_CURL_NTLM_CORE) && !defined(USE_WOLFSSL) && \
+    (defined(USE_GNUTLS) || \
+     defined(USE_NSS) || \
+     defined(USE_SECTRANSP) || \
+     defined(USE_OS400CRYPTO) || \
+     defined(USE_WIN32_CRYPTO))
 
 #include "curl_des.h"
 
@@ -60,4 +65,4 @@ void Curl_des_set_odd_parity(unsigned char *bytes, size_t len)
   }
 }
 
-#endif /* USE_NTLM && !USE_OPENSSL */
+#endif
