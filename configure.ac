@@ -1701,7 +1701,11 @@ AC_MSG_CHECKING([if GSS-API support is requested])
 if test x"$want_gss" = xyes; then
   AC_MSG_RESULT(yes)
 
-  CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
+  if test $GSSAPI_ROOT != "/usr"; then
+    CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
+  else
+    CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
+  fi
   if test -z "$GSSAPI_INCS"; then
      if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --cflags gssapi`
@@ -1791,7 +1795,11 @@ if test x"$want_gss" = xyes; then
         LIBS="-lgssapi_krb5 -lresolv $LIBS"
         ;;
      *)
-        CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
+        if test $GSSAPI_ROOT != "/usr"; then
+          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
+        else
+          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
+        fi
         if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
            dnl krb5-config doesn't have --libs-only-L or similar, put everything
            dnl into LIBS
