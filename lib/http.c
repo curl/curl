@@ -666,6 +666,7 @@ output_auth_headers(struct Curl_easy *data,
 {
   const char *auth = NULL;
   CURLcode result = CURLE_OK;
+  (void)conn;
 
 #ifdef CURL_DISABLE_CRYPTO_AUTH
   (void)request;
