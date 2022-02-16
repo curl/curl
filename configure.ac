@@ -1851,6 +1851,18 @@ else
   CPPFLAGS="$save_CPPFLAGS"
 fi
 
+if test x"$want_gss" = xyes; then
+  AC_MSG_CHECKING([if we can link against GSS-API library])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([gss_init_sec_context])
+  ],[
+    AC_MSG_RESULT([yes])
+  ],[
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([--with-gssapi was specified, but a GSS-API library was not found.])
+  ])
+fi
+
 build_libstubgss=no
 if test x"$want_gss" = "xyes"; then
   build_libstubgss=yes
