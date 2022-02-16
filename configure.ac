@@ -1696,17 +1696,25 @@ AC_ARG_WITH(gssapi,
   fi
 ])
 
+: ${KRB5CONFIG:="$GSSAPI_ROOT/bin/krb5-config"}
+
 save_CPPFLAGS="$CPPFLAGS"
 AC_MSG_CHECKING([if GSS-API support is requested])
 if test x"$want_gss" = xyes; then
   AC_MSG_RESULT(yes)
 
-  CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
+  if test $GSSAPI_ROOT != "/usr"; then
+    CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
+  else
+    CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
+  fi
   if test -z "$GSSAPI_INCS"; then
      if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --cflags gssapi`
      elif test "$PKGCONFIG" != "no" ; then
         GSSAPI_INCS=`$PKGCONFIG --cflags mit-krb5-gssapi`
+     elif test -f "$KRB5CONFIG"; then
+        GSSAPI_INCS=`$KRB5CONFIG --cflags gssapi`
      elif test "$GSSAPI_ROOT" != "yes"; then
         GSSAPI_INCS="-I$GSSAPI_ROOT/include"
      fi
@@ -1791,7 +1799,11 @@ if test x"$want_gss" = xyes; then
         LIBS="-lgssapi_krb5 -lresolv $LIBS"
         ;;
      *)
-        CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
+        if test $GSSAPI_ROOT != "/usr"; then
+          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
+        else
+          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
+        fi
         if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
            dnl krb5-config doesn't have --libs-only-L or similar, put everything
            dnl into LIBS
@@ -1799,6 +1811,11 @@ if test x"$want_gss" = xyes; then
            LIBS="$gss_libs $LIBS"
         elif test "$PKGCONFIG" != "no" ; then
            gss_libs=`$PKGCONFIG --libs mit-krb5-gssapi`
+           LIBS="$gss_libs $LIBS"
+        elif test -f "$KRB5CONFIG"; then
+           dnl krb5-config doesn't have --libs-only-L or similar, put everything
+           dnl into LIBS
+           gss_libs=`$KRB5CONFIG --libs gssapi`
            LIBS="$gss_libs $LIBS"
         else
            case $host in
@@ -1832,6 +1849,18 @@ if test x"$want_gss" = xyes; then
   fi
 else
   CPPFLAGS="$save_CPPFLAGS"
+fi
+
+if test x"$want_gss" = xyes; then
+  AC_MSG_CHECKING([if we can link against GSS-API library])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([gss_init_sec_context])
+  ],[
+    AC_MSG_RESULT([yes])
+  ],[
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([--with-gssapi was specified, but a GSS-API library was not found.])
+  ])
 fi
 
 build_libstubgss=no
