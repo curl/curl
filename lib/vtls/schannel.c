@@ -325,13 +325,15 @@ get_alg_id_by_name(char *name)
   return 0;
 }
 
+#define NUM_CIPHERS 47 /* There are 47 options listed above */
+
 static CURLcode
 set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
                 ALG_ID *algIds)
 {
   char *startCur = ciphers;
   int algCount = 0;
-  while(startCur && (0 != *startCur) && (algCount < NUMOF_CIPHERS)) {
+  while(startCur && (0 != *startCur) && (algCount < NUM_CIPHERS)) {
     long alg = strtol(startCur, 0, 0);
     if(!alg)
       alg = get_alg_id_by_name(startCur);
@@ -418,6 +420,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   SCHANNEL_CRED schannel_cred;
+  ALG_ID algIds[NUM_CIPHERS];
   PCCERT_CONTEXT client_certs[1] = { NULL };
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
@@ -502,7 +505,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 
   if(SSL_CONN_CONFIG(cipher_list)) {
     result = set_ssl_ciphers(&schannel_cred, SSL_CONN_CONFIG(cipher_list),
-                             backend->algIds);
+                             algIds);
     if(CURLE_OK != result) {
       failf(data, "Unable to set ciphers to passed via SSL_CONN_CONFIG");
       return result;
