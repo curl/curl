@@ -996,9 +996,21 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             /* extract the file name from the URL */
             result = get_url_file_name(&per->outfile, per->this_url);
             if(result) {
-              errorf(global, "Failed to extract a sensible file name"
-                     " from the URL to use for storage!\n");
-              break;
+              /* If filename extraction failed but the user has allowed the
+                 server to set the filename then use an empty filename as a
+                 placeholder. */
+              if(config->content_disposition) {
+                per->outfile = strdup("");
+                if(!per->outfile) {
+                  result = CURLE_OUT_OF_MEMORY;
+                  break;
+                }
+              }
+              else {
+                errorf(global, "Failed to extract a sensible file name"
+                       " from the URL to use for storage!\n");
+                break;
+              }
             }
             if(!*per->outfile && !config->content_disposition) {
               errorf(global, "Remote file name has no length!\n");
