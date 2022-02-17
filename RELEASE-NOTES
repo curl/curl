@@ -4,7 +4,7 @@ curl and libcurl 7.82.0
  Command line options:         245
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2584
+ Contributors:                 2588
 
 This release includes the following changes:
 
@@ -27,6 +27,7 @@ This release includes the following bugfixes:
  o CI: move two jobs from Zuul to Circle CI [73]
  o CI: test building wolfssl with --enable-opensslextra [42]
  o CI: workflows/wolfssl: install impacket [47]
+ o circleci: add a job using libssh [121]
  o cirlceci: also run a c-ares job on arm with debug enabled [74]
  o cmake: fix iOS CMake project generation error [13]
  o cmdline-opts/gen.pl: fix option matching to improve references [50]
@@ -50,20 +51,27 @@ This release includes the following bugfixes:
  o CURLOPT_RESOLVE.3: change example port to 443
  o CURLSHOPT_LOCKFUNC.3: fix typo "relased" -> "released" [71]
  o docs/cmdline-opts: add "mutexed" options for more http versions [25]
+ o docs/DEPRECATE: remove NPN support in August 2022 [64]
  o docs: capitalize the name 'Netscape' [77]
  o docs: document HTTP/2 not insisting on TLS 1.2 [49]
  o docs: fix mandoc -T lint formatting complaints [2]
  o docs: update IETF links to use datatracker [41]
  o examples/multi-app.c: call curl_multi_remove_handle as well [19]
  o formdata: avoid size_t => long typecast overflows [37]
+ o ftp: provide error message for control bytes in path [66]
  o gen.pl: terminate "example" sections better [4]
+ o gskit: Convert to using Curl_poll [111]
+ o gskit: Fix errors from Curl_strerror refactor [113]
+ o gskit: Fix initialization of Curl_ssl_gskit struct [112]
  o h2/h3: allow CURLOPT_HTTPHEADER change ":scheme" [88]
  o hostcheck: fixed to not touch used input strings [38]
  o hostcheck: reduce strlen calls on chained certificates [92]
  o http: make Curl_compareheader() take string length arguments too [87]
  o if2ip: make Curl_ipv6_scope a blank macro when IPv6-disabled [104]
+ o KNOWN_BUGS: fix typo "libpsl"
  o ldap: return CURLE_URL_MALFORMAT for bad URL [24]
  o lib: remove support for CURL_DOES_CONVERSIONS [96]
+ o Makefile.am: Generate VS 2022 projects
  o maketgz: return error if 'make dist' fails [79]
  o mbedtls: enable use of mbedtls without CRL support [57]
  o mbedtls: enable use of mbedtls without filesystem functions support [100]
@@ -87,6 +95,7 @@ This release includes the following bugfixes:
  o ngtcp2: adapt to changed end of headers callback proto [39]
  o ngtcp2: fix declaration of ‘result’ shadows a previous local [14]
  o nss: handshake callback during shutdown has no conn->bundle [55]
+ o ntlm: remove unused feature defines [117]
  o openldap: fix compiler warning when built without SSL support [70]
  o openldap: implement SASL authentication [16]
  o openldap: pass string length arguments to client_write() [116]
@@ -95,12 +104,15 @@ This release includes the following bugfixes:
  o openssl: check the return value of BIO_new_mem_buf() [18]
  o openssl: fix `ctx_option_t` for OpenSSL v3+
  o openssl: return error if TLS 1.3 is requested when not supported [45]
+ o projects: add support for Visual Studio 17 (2022) [124]
  o projects: fix Visual Studio wolfSSL configurations
+ o projects: remove support for MSVC before VC10 (Visual Studio 2010) [123]
  o quiche: after leaving h3_recving state, poll again [108]
  o quiche: change qlog file extension to `.sqlog` [44]
  o quiche: handle stream reset [83]
  o quiche: verify the server cert on connect [33]
  o quiche: when *recv_body() returns data, drain it before polling again [109]
+ o README.md: fix links [118]
  o remote-header-name.d: clarify [10]
  o runtests.pl: disable debuginfod [51]
  o runtests.pl: properly print the test if it contains binary zeros
@@ -109,6 +121,7 @@ This release includes the following bugfixes:
  o runtests: allow client/file to specify multiple directories
  o runtests: make 'rustls' a testable feature
  o runtests: make 'wolfssl' a testable feature [6]
+ o runtests: set 'oldlibssh' for libssh versions before 0.9.6 [122]
  o rustls: add CURLOPT_CAINFO_BLOB support [26]
  o scripts/cijobs.pl: output data about all currect CI jobs [78]
  o scripts/completion.pl: improve zsh completion [46]
@@ -116,6 +129,7 @@ This release includes the following bugfixes:
  o scripts/delta: check the file delta for current branch
  o setopt: do bounds-check before strdup [99]
  o setopt: fix the TLSAUTH #ifdefs for proxy-disabled builds [53]
+ o sha256: Fix minimum OpenSSL version [102]
  o smb: passing a socket for writing and reading data instead of FIRSTSOCKET [90]
  o test3021: disable all msys2 path transformation
  o test374: gif data without new line at the end [20]
@@ -128,7 +142,9 @@ This release includes the following bugfixes:
  o url: given a user in the URL, find pwd for that user in netrc [11]
  o url: keep trailing dot in host name [62]
  o url: make Curl_disconnect return void [48]
+ o urlapi: handle "redirects" smarter [119]
  o urldata: CONN_IS_PROXIED replaces bits.close when proxy can be disabled [52]
+ o urldata: remove conn->bits.user_passwd [105]
  o version_win32: fix warning for `CURL_WINDOWS_APP` [93]
  o vtls: pass on the right SNI name [61]
  o vxworks: drop support [65]
@@ -144,19 +160,20 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Antoine Pietri, Bernhard Walle, Bjarni Ingi Gislason,
-  Cameron Will, Charles Cazabon, Dan Fandrich, Daniel Stenberg,
-  Davide Cassioli, Eric Musser, Fabian Keil, Fabian Yamaguchi, Filip Lundgren,
-  gaoxingwang on github, Harry Sarson, Henrik Holst, Ikko Ashimine,
-  Jan Ehrhardt, Jan-Piet Mens, jhoyla on github, jonny112 on github,
-  Kushal Das, Leah Neukirchen, Lucas Pardue, luminixinc on github,
-  Manfred Schwarb, Marcel Raad, Melroy van den Berg, Michał Antoniak,
-  Neal McBurnett, neutric on github, Niels Martignène, Patrick Monnerat,
-  pheiduck on github, Ray Satiro, Ryan Schmidt, Samuel Henrique,
-  Sandro Jaeckel, Satadru Pramanik, Sebastian Sterk,
-  siddharthchhabrap on github, Stefan Eissing, Stephen Boost,
-  Stephen M. Coakley, updatede on github, Viktor Szakats, Xiaoke Wang,
-  (47 contributors)
+  Alejandro R. Sedeño, Alessandro Ghedini, Antoine Pietri, Bernhard Walle,
+  Bjarni Ingi Gislason, Cameron Will, Charles Cazabon, Dan Fandrich,
+  Daniel Stenberg, Davide Cassioli, Eric Musser, Fabian Keil, Fabian Yamaguchi,
+  Filip Lundgren, gaoxingwang on github, Harry Sarson, Henrik Holst,
+  Ikko Ashimine, Jan Ehrhardt, Jan-Piet Mens, jhoyla on github, John H. Ayad,
+  jonny112 on github, Kantanat Wannapaka, Kevin Adler, Kushal Das,
+  Leah Neukirchen, Lucas Pardue, luminixinc on github, Manfred Schwarb,
+  Marcel Raad, Melroy van den Berg, Michał Antoniak, Neal McBurnett,
+  neutric on github, Niels Martignène, Patrick Monnerat, pheiduck on github,
+  Ray Satiro, Ryan Schmidt, Samuel Henrique, Sandro Jaeckel, Satadru Pramanik,
+  Sebastian Sterk, siddharthchhabrap on github, Stav Nir, Stefan Eissing,
+  Stephen Boost, Stephen M. Coakley, updatede on github, Viktor Szakats,
+  Xiaoke Wang,
+  (52 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -223,7 +240,9 @@ References to bug reports and discussions on issues:
  [61] = https://curl.se/bug/?i=8320
  [62] = https://curl.se/bug/?i=8290
  [63] = https://curl.se/bug/?i=8372
+ [64] = https://curl.se/bug/?i=8458
  [65] = https://curl.se/bug/?i=8362
+ [66] = https://curl.se/bug/?i=8460
  [67] = https://curl.se/bug/?i=8314
  [68] = https://curl.se/bug/?i=8365
  [69] = https://curl.se/bug/?i=8368
@@ -258,13 +277,25 @@ References to bug reports and discussions on issues:
  [99] = https://curl.se/bug/?i=8377
  [100] = https://curl.se/bug/?i=8376
  [101] = https://curl.se/bug/?i=8375
+ [102] = https://curl.se/bug/?i=8464
  [103] = https://curl.se/bug/?i=8439
  [104] = https://curl.se/bug/?i=8439
+ [105] = https://curl.se/bug/?i=8449
  [106] = https://curl.se/bug/?i=8431
  [107] = https://curl.se/bug/?i=8431
  [108] = https://curl.se/bug/?i=8436
  [109] = https://curl.se/bug/?i=8429
  [110] = https://curl.se/bug/?i=8425
+ [111] = https://curl.se/bug/?i=8454
+ [112] = https://curl.se/bug/?i=8454
+ [113] = https://curl.se/bug/?i=8454
  [114] = https://curl.se/bug/?i=8395
  [115] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=43646
  [116] = https://curl.se/bug/?i=8404
+ [117] = https://curl.se/bug/?i=8453
+ [118] = https://curl.se/bug/?i=8448
+ [119] = https://curl.se/bug/?i=8450
+ [121] = https://curl.se/bug/?i=8444
+ [122] = https://curl.se/bug/?i=8444
+ [123] = https://curl.se/bug/?i=8442
+ [124] = https://curl.se/bug/?i=8438
