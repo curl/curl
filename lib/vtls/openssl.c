@@ -2409,6 +2409,7 @@ set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
 #ifdef TLS1_3_VERSION
     {
       struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+      struct ssl_backend_data *backend = connssl->backend;
       SSL_CTX_set_max_proto_version(backend->ctx, TLS1_3_VERSION);
       *ctx_options |= SSL_OP_NO_TLSv1_2;
     }
