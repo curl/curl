@@ -230,6 +230,8 @@ set_ssl_version_min_max(struct Curl_easy *data, struct connectdata *conn,
   long ssl_version_max = SSL_CONN_CONFIG(version_max);
   CURLcode result = CURLE_OK;
 
+  DEBUGASSERT(backend);
+
   switch(ssl_version) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
@@ -284,6 +286,8 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 #endif
   int ret = -1;
   char errorbuf[128];
+
+  DEBUGASSERT(backend);
 
   if((SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv2) ||
      (SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv3)) {
@@ -665,6 +669,8 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   const mbedtls_x509_crt *peercert;
   const char * const pinnedpubkey = SSL_PINNED_PUB_KEY();
 
+  DEBUGASSERT(backend);
+
   conn->recv[sockindex] = mbed_recv;
   conn->send[sockindex] = mbed_send;
 
@@ -844,6 +850,7 @@ mbed_connect_step3(struct Curl_easy *data, struct connectdata *conn,
   struct ssl_backend_data *backend = connssl->backend;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
+  DEBUGASSERT(backend);
 
   if(SSL_SET_OPTION(primary.sessionid)) {
     int ret;
@@ -900,6 +907,8 @@ static ssize_t mbed_send(struct Curl_easy *data, int sockindex,
   struct ssl_backend_data *backend = connssl->backend;
   int ret = -1;
 
+  DEBUGASSERT(backend);
+
   ret = mbedtls_ssl_write(&backend->ssl, (unsigned char *)mem, len);
 
   if(ret < 0) {
@@ -923,6 +932,8 @@ static void mbedtls_close(struct Curl_easy *data,
   struct ssl_backend_data *backend = connssl->backend;
   char buf[32];
   (void) data;
+
+  DEBUGASSERT(backend);
 
   /* Maybe the server has already sent a close notify alert.
      Read it to avoid an RST on the TCP connection. */
@@ -951,6 +962,8 @@ static ssize_t mbed_recv(struct Curl_easy *data, int num,
   struct ssl_backend_data *backend = connssl->backend;
   int ret = -1;
   ssize_t len = -1;
+
+  DEBUGASSERT(backend);
 
   ret = mbedtls_ssl_read(&backend->ssl, (unsigned char *)buf,
                          buffersize);
@@ -1186,6 +1199,7 @@ static bool mbedtls_data_pending(const struct connectdata *conn,
 {
   const struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
+  DEBUGASSERT(backend);
   return mbedtls_ssl_get_bytes_avail(&backend->ssl) != 0;
 }
 
@@ -1215,6 +1229,7 @@ static void *mbedtls_get_internals(struct ssl_connect_data *connssl,
 {
   struct ssl_backend_data *backend = connssl->backend;
   (void)info;
+  DEBUGASSERT(backend);
   return &backend->ssl;
 }
 

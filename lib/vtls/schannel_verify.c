@@ -576,6 +576,8 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
   HCERTSTORE trust_store = NULL;
   const char * const conn_hostname = SSL_HOST_NAME();
 
+  DEBUGASSERT(BACKEND);
+
   sspi_status =
     s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
                                      SECPKG_ATTR_REMOTE_CERT_CONTEXT,

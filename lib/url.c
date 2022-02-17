@@ -136,15 +136,6 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/* Count of the backend ssl objects to allocate */
-#ifdef USE_SSL
-#  ifndef CURL_DISABLE_PROXY
-#    define SSL_BACKEND_CNT 4
-#  else
-#    define SSL_BACKEND_CNT 2
-#  endif
-#endif
-
 static void conn_free(struct connectdata *conn);
 
 /* Some parts of the code (e.g. chunked encoding) assume this buffer has at
@@ -752,7 +743,9 @@ static void conn_shutdown(struct Curl_easy *data, struct connectdata *conn)
   /* close the SSL stuff before we close any sockets since they will/may
      write to the sockets */
   Curl_ssl_close(data, conn, FIRSTSOCKET);
+#ifndef CURL_DISABLE_FTP
   Curl_ssl_close(data, conn, SECONDARYSOCKET);
+#endif
 
   /* close possibly still open sockets */
   if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET])
@@ -1667,18 +1660,35 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
      Note that these backend pointers can be swapped by vtls (eg ssl backend
      data becomes proxy backend data). */
   {
-    size_t sslsize = Curl_ssl->sizeof_ssl_backend_data;
-    char *ssl = calloc(SSL_BACKEND_CNT, sslsize);
+    size_t onesize = Curl_ssl->sizeof_ssl_backend_data;
+    size_t totalsize = onesize;
+    char *ssl;
+
+#ifndef CURL_DISABLE_FTP
+    totalsize *= 2;
+#endif
+#ifndef CURL_DISABLE_PROXY
+    totalsize *= 2;
+#endif
+
+    ssl = calloc(1, totalsize);
     if(!ssl) {
       free(conn);
       return NULL;
     }
     conn->ssl_extra = ssl;
-    conn->ssl[0].backend = (void *)ssl;
-    conn->ssl[1].backend = (void *)(ssl + sslsize);
+    conn->ssl[FIRSTSOCKET].backend = (void *)ssl;
+#ifndef CURL_DISABLE_FTP
+    ssl += onesize;
+    conn->ssl[SECONDARYSOCKET].backend = (void *)ssl;
+#endif
 #ifndef CURL_DISABLE_PROXY
-    conn->proxy_ssl[0].backend = (void *)(ssl + 2 * sslsize);
-    conn->proxy_ssl[1].backend = (void *)(ssl + 3 * sslsize);
+    ssl += onesize;
+    conn->proxy_ssl[FIRSTSOCKET].backend = (void *)ssl;
+#ifndef CURL_DISABLE_FTP
+    ssl += onesize;
+    conn->proxy_ssl[SECONDARYSOCKET].backend = (void *)ssl;
+#endif
 #endif
   }
 #endif

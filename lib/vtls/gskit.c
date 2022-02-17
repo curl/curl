@@ -514,6 +514,8 @@ static void cancel_async_handshake(struct connectdata *conn, int sockindex)
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   Qso_OverlappedIO_t cstat;
 
+  DEBUGASSERT(BACKEND);
+
   if(QsoCancelOperation(conn->sock[sockindex], 0) > 0)
     QsoWaitForIOCompletion(BACKEND->iocport, &cstat, (struct timeval *) NULL);
 }
@@ -521,6 +523,7 @@ static void cancel_async_handshake(struct connectdata *conn, int sockindex)
 
 static void close_async_handshake(struct ssl_connect_data *connssl)
 {
+  DEBUGASSERT(BACKEND);
   QsoDestroyIOCompletionPort(BACKEND->iocport);
   BACKEND->iocport = -1;
 }
@@ -537,6 +540,9 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
   int i;
   int ret = 0;
   char buf[CURL_MAX_WRITE_SIZE];
+
+  DEBUGASSERT(BACKEND);
+  DEBUGASSERT(connproxyssl->backend);
 
   if(!connssl->use || !connproxyssl->use)
     return 0;   /* No SSL over SSL: OK. */
@@ -602,6 +608,7 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
 static void close_one(struct ssl_connect_data *connssl, struct Curl_easy *data,
                       struct connectdata *conn, int sockindex)
 {
+  DEBUGASSERT(BACKEND);
   if(BACKEND->handle) {
     gskit_status(data, gsk_secure_soc_close(&BACKEND->handle),
               "gsk_secure_soc_close()", 0);
@@ -633,6 +640,8 @@ static ssize_t gskit_send(struct Curl_easy *data, int sockindex,
   CURLcode cc = CURLE_SEND_ERROR;
   int written;
 
+  DEBUGASSERT(BACKEND);
+
   if(pipe_ssloverssl(conn, sockindex, SOS_WRITE) >= 0) {
     cc = gskit_status(data,
                       gsk_secure_soc_write(BACKEND->handle,
@@ -657,6 +666,8 @@ static ssize_t gskit_recv(struct Curl_easy *data, int num, char *buf,
   struct ssl_connect_data *connssl = &conn->ssl[num];
   int nread;
   CURLcode cc = CURLE_RECV_ERROR;
+
+  DEBUGASSERT(BACKEND);
 
   if(pipe_ssloverssl(conn, num, SOS_READ) >= 0) {
     int buffsize = buffersize > (size_t) INT_MAX? INT_MAX: (int) buffersize;
@@ -731,6 +742,7 @@ static CURLcode gskit_connect_step1(struct Curl_easy *data,
 #endif
 
   /* Create SSL environment, start (preferably asynchronous) handshake. */
+  DEBUGASSERT(BACKEND);
 
   BACKEND->handle = (gsk_handle) NULL;
   BACKEND->iocport = -1;
@@ -960,6 +972,7 @@ static CURLcode gskit_connect_step2(struct Curl_easy *data,
   CURLcode result;
 
   /* Poll or wait for end of SSL asynchronous handshake. */
+  DEBUGASSERT(BACKEND);
 
   for(;;) {
     timediff_t timeout_ms = nonblocking? 0: Curl_timeleft(data, NULL, TRUE);
@@ -1016,6 +1029,7 @@ static CURLcode gskit_connect_step3(struct Curl_easy *data,
   CURLcode result;
 
   /* SSL handshake done: gather certificate info and verify host. */
+  DEBUGASSERT(BACKEND);
 
   if(gskit_status(data, gsk_attribute_get_cert_info(BACKEND->handle,
                                                     GSK_PARTNER_CERT_INFO,
@@ -1208,6 +1222,8 @@ static int gskit_shutdown(struct Curl_easy *data,
   char buf[120];
   int loop = 10; /* don't get stuck */
 
+  DEBUGASSERT(BACKEND);
+
   if(!BACKEND->handle)
     return 0;
 
@@ -1271,6 +1287,7 @@ static int gskit_check_cxn(struct connectdata *cxn)
   int errlen;
 
   /* The only thing that can be tested here is at the socket level. */
+  DEBUGASSERT(BACKEND);
 
   if(!BACKEND->handle)
     return 0; /* connection has been closed */
@@ -1290,6 +1307,7 @@ static void *gskit_get_internals(struct ssl_connect_data *connssl,
                                  CURLINFO info UNUSED_PARAM)
 {
   (void)info;
+  DEBUGASSERT(BACKEND);
   return BACKEND->handle;
 }
 
