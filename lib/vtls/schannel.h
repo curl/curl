@@ -71,8 +71,6 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
 #endif
 #endif
 
-#define NUMOF_CIPHERS 45 /* There are 45 listed in the MS headers */
-
 struct Curl_schannel_cred {
   CredHandle cred_handle;
   TimeStamp time_stamp;
@@ -105,7 +103,6 @@ struct ssl_backend_data {
 #ifdef HAS_MANUAL_VERIFY_API
   bool use_manual_cred_validation; /* true if manual cred validation is used */
 #endif
-  ALG_ID algIds[NUMOF_CIPHERS];
 };
 #endif /* EXPOSE_SCHANNEL_INTERNAL_STRUCTS */
 
