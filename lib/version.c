@@ -316,6 +316,9 @@ static const char * const protocols[] = {
 #if defined(USE_SSL) && !defined(CURL_DISABLE_IMAP)
   "imaps",
 #endif
+#ifndef CURL_DISABLE_IPFS
+  "ipfs",
+#endif
 #ifndef CURL_DISABLE_LDAP
   "ldap",
 #if !defined(CURL_DISABLE_LDAPS) && \

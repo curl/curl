@@ -196,6 +196,10 @@
  - explicit "STARTTLS" usage to "upgrade" plain `imap://` connections to use SSL
  - via http-proxy
 
+## IPFS
+
+ - Retrieve content from the IPFS network via a public HTTPS gateway.
+
 ## MQTT
 
  - Subscribe to and publish topics using url scheme `mqtt://broker/topic`

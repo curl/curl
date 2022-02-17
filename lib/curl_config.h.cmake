@@ -63,6 +63,9 @@
 /* disables HTTP */
 #cmakedefine CURL_DISABLE_HTTP 1
 
+/* disables IPFS */
+#cmakedefine CURL_DISABLE_IPFS 1
+
 /* disables IMAP */
 #cmakedefine CURL_DISABLE_IMAP 1
 

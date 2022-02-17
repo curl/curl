@@ -851,6 +851,21 @@ AS_HELP_STRING([--disable-pop3],[Disable POP3 support]),
        AC_MSG_RESULT(yes)
 )
 
+AC_MSG_CHECKING([whether to support ipfs])
+AC_ARG_ENABLE(ipfs,
+AS_HELP_STRING([--enable-ipfs],[Enable IPFS support])
+AS_HELP_STRING([--disable-ipfs],[Disable IPFS support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_IPFS, 1, [to disable IPFS])
+       AC_SUBST(CURL_DISABLE_IPFS, [1])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+)
 
 AC_MSG_CHECKING([whether to support imap])
 AC_ARG_ENABLE(imap,
@@ -4173,6 +4188,11 @@ if test "x$CURL_DISABLE_POP3" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS POP3"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS POP3S"
+  fi
+fi
+if test "x$CURL_DISABLE_IPFS" != "x1"; then
+  if test "x$SSL_ENABLED" = "x1"; then
+    SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IPFS"
   fi
 fi
 if test "x$CURL_DISABLE_IMAP" != "x1"; then

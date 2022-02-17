@@ -115,6 +115,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "curl_ldap.h"
 #include "vssh/ssh.h"
 #include "imap.h"
+#include "ipfs.h"
 #include "url.h"
 #include "connect.h"
 #include "inet_ntop.h"
@@ -215,6 +216,10 @@ static const struct Curl_handler * const protocols[] = {
 #ifdef USE_SSL
   &Curl_handler_smtps,
 #endif
+#endif
+
+#ifndef CURL_DISABLE_IPFS
+  &Curl_handler_ipfs,
 #endif
 
 #ifndef CURL_DISABLE_LDAP

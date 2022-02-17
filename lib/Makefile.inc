@@ -161,6 +161,7 @@ LIB_CFILES =         \
   imap.c             \
   inet_ntop.c        \
   inet_pton.c        \
+  ipfs.c             \
   krb5.c             \
   ldap.c             \
   llist.c            \
@@ -284,6 +285,7 @@ LIB_HFILES =         \
   imap.h             \
   inet_ntop.h        \
   inet_pton.h        \
+  ipfs.h             \
   llist.h            \
   memdebug.h         \
   mime.h             \

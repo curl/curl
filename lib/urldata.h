@@ -137,6 +137,7 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 #include "rtsp.h"
 #include "smb.h"
 #include "mqtt.h"
+#include "ipfs.h"
 #include "wildcard.h"
 #include "multihandle.h"
 #include "quic.h"
@@ -693,6 +694,7 @@ struct SingleRequest {
     struct FILEPROTO *file;
     struct FTP *ftp;
     struct HTTP *http;
+    struct IPFS *ipfs;
     struct IMAP *imap;
     struct ldapreqinfo *ldap;
     struct MQTT *mqtt;
