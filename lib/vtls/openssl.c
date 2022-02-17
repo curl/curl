@@ -1431,6 +1431,9 @@ static void ossl_closeone(struct Curl_easy *data,
                           struct ssl_connect_data *connssl)
 {
   struct ssl_backend_data *backend = connssl->backend;
+
+  DEBUGASSERT(backend);
+
   if(backend->handle) {
     char buf[32];
     set_logger(conn, data);
@@ -1487,6 +1490,8 @@ static int ossl_shutdown(struct Curl_easy *data,
   bool done = FALSE;
   struct ssl_backend_data *backend = connssl->backend;
   int loop = 10;
+
+  DEBUGASSERT(backend);
 
 #ifndef CURL_DISABLE_FTP
   /* This has only been tested on the proftpd server, and the mod_tls code
@@ -1861,8 +1866,11 @@ static CURLcode verifystatus(struct Curl_easy *data,
   int cert_status, crl_reason;
   ASN1_GENERALIZEDTIME *rev, *thisupd, *nextupd;
   int ret;
+  long len;
 
-  long len = SSL_get_tlsext_status_ocsp_resp(backend->handle, &status);
+  DEBUGASSERT(backend);
+
+  len = SSL_get_tlsext_status_ocsp_resp(backend->handle, &status);
 
   if(!status) {
     failf(data, "No OCSP response received");
@@ -2121,7 +2129,10 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
   struct connectdata *conn = userp;
   struct ssl_connect_data *connssl = &conn->ssl[0];
   struct ssl_backend_data *backend = connssl->backend;
-  struct Curl_easy *data = backend->logger;
+  struct Curl_easy *data = NULL;
+
+  DEBUGASSERT(backend);
+  data = backend->logger;
 
   if(!conn || !data || !data->set.fdebug ||
      (direction != 0 && direction != 1))
@@ -2410,6 +2421,7 @@ set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
     {
       struct ssl_connect_data *connssl = &conn->ssl[sockindex];
       struct ssl_backend_data *backend = connssl->backend;
+      DEBUGASSERT(backend);
       SSL_CTX_set_max_proto_version(backend->ctx, TLS1_3_VERSION);
       *ctx_options |= SSL_OP_NO_TLSv1_2;
     }
@@ -2637,6 +2649,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
   bool imported_native_ca = false;
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
+  DEBUGASSERT(backend);
 
   /* Make funny stuff to get random input */
   result = ossl_seed(data);
@@ -3245,7 +3258,11 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
   if(conn->proxy_ssl[sockindex].use) {
     BIO *const bio = BIO_new(BIO_f_ssl());
-    SSL *handle = conn->proxy_ssl[sockindex].backend->handle;
+    struct ssl_backend_data *proxy_backend;
+    SSL* handle = NULL;
+    proxy_backend = conn->proxy_ssl[sockindex].backend;
+    DEBUGASSERT(proxy_backend);
+    handle = proxy_backend->handle;
     DEBUGASSERT(ssl_connection_complete == conn->proxy_ssl[sockindex].state);
     DEBUGASSERT(handle != NULL);
     DEBUGASSERT(bio != NULL);
@@ -3275,6 +3292,7 @@ static CURLcode ossl_connect_step2(struct Curl_easy *data,
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
               || ssl_connect_2_reading == connssl->connecting_state
               || ssl_connect_2_writing == connssl->connecting_state);
+  DEBUGASSERT(backend);
 
   ERR_clear_error();
 
@@ -3535,6 +3553,8 @@ static CURLcode get_cert_chain(struct Curl_easy *data,
   numcert_t numcerts;
   BIO *mem;
   struct ssl_backend_data *backend = connssl->backend;
+
+  DEBUGASSERT(backend);
 
   sk = SSL_get_peer_cert_chain(backend->handle);
   if(!sk) {
@@ -3847,6 +3867,8 @@ static CURLcode servercert(struct Curl_easy *data,
   const char *ptr;
   BIO *mem = BIO_new(BIO_s_mem());
   struct ssl_backend_data *backend = connssl->backend;
+
+  DEBUGASSERT(backend);
 
   if(!mem) {
     failf(data,
@@ -4198,11 +4220,13 @@ static bool ossl_data_pending(const struct connectdata *conn,
                               int connindex)
 {
   const struct ssl_connect_data *connssl = &conn->ssl[connindex];
+  DEBUGASSERT(connssl->backend);
   if(connssl->backend->handle && SSL_pending(connssl->backend->handle))
     return TRUE;
 #ifndef CURL_DISABLE_PROXY
   {
     const struct ssl_connect_data *proxyssl = &conn->proxy_ssl[connindex];
+    DEBUGASSERT(proxyssl->backend);
     if(proxyssl->backend->handle && SSL_pending(proxyssl->backend->handle))
       return TRUE;
   }
@@ -4228,6 +4252,8 @@ static ssize_t ossl_send(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
+
+  DEBUGASSERT(backend);
 
   ERR_clear_error();
 
@@ -4307,6 +4333,8 @@ static ssize_t ossl_recv(struct Curl_easy *data,   /* transfer */
   struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[num];
   struct ssl_backend_data *backend = connssl->backend;
+
+  DEBUGASSERT(backend);
 
   ERR_clear_error();
 
@@ -4507,6 +4535,7 @@ static void *ossl_get_internals(struct ssl_connect_data *connssl,
 {
   /* Legacy: CURLINFO_TLS_SESSION must return an SSL_CTX pointer. */
   struct ssl_backend_data *backend = connssl->backend;
+  DEBUGASSERT(backend);
   return info == CURLINFO_TLS_SESSION ?
          (void *)backend->ctx : (void *)backend->handle;
 }
@@ -4517,6 +4546,7 @@ static bool ossl_associate_connection(struct Curl_easy *data,
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
+  DEBUGASSERT(backend);
 
   /* If we don't have SSL context, do nothing. */
   if(!backend->handle)
@@ -4566,6 +4596,7 @@ static void ossl_disassociate_connection(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
+  DEBUGASSERT(backend);
 
   /* If we don't have SSL context, do nothing. */
   if(!backend->handle)

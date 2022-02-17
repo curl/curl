@@ -263,6 +263,8 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 #define use_sni(x)  Curl_nop_stmt
 #endif
 
+  DEBUGASSERT(backend);
+
   if(connssl->state == ssl_connection_complete)
     return CURLE_OK;
 
@@ -598,6 +600,8 @@ wolfssl_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   const char * const dispname = SSL_HOST_DISPNAME();
   const char * const pinnedpubkey = SSL_PINNED_PUB_KEY();
 
+  DEBUGASSERT(backend);
+
   ERR_clear_error();
 
   conn->recv[sockindex] = wolfssl_recv;
@@ -802,6 +806,7 @@ wolfssl_connect_step3(struct Curl_easy *data, struct connectdata *conn,
   struct ssl_backend_data *backend = connssl->backend;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
+  DEBUGASSERT(backend);
 
   if(SSL_SET_OPTION(primary.sessionid)) {
     bool incache;
@@ -853,6 +858,8 @@ static ssize_t wolfssl_send(struct Curl_easy *data,
   int memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
   int rc;
 
+  DEBUGASSERT(backend);
+
   ERR_clear_error();
 
   rc = SSL_write(backend->handle, mem, memlen);
@@ -885,6 +892,8 @@ static void wolfssl_close(struct Curl_easy *data, struct connectdata *conn,
 
   (void) data;
 
+  DEBUGASSERT(backend);
+
   if(backend->handle) {
     char buf[32];
     /* Maybe the server has already sent a close notify alert.
@@ -912,6 +921,8 @@ static ssize_t wolfssl_recv(struct Curl_easy *data,
   char error_buffer[WOLFSSL_MAX_ERROR_SZ];
   int buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
   int nread;
+
+  DEBUGASSERT(backend);
 
   ERR_clear_error();
 
@@ -982,6 +993,7 @@ static bool wolfssl_data_pending(const struct connectdata *conn,
 {
   const struct ssl_connect_data *connssl = &conn->ssl[connindex];
   struct ssl_backend_data *backend = connssl->backend;
+  DEBUGASSERT(backend);
   if(backend->handle)   /* SSL is in use */
     return (0 != SSL_pending(backend->handle)) ? TRUE : FALSE;
   else
@@ -1001,6 +1013,8 @@ static int wolfssl_shutdown(struct Curl_easy *data, struct connectdata *conn,
   struct ssl_backend_data *backend = connssl->backend;
 
   (void) data;
+
+  DEBUGASSERT(backend);
 
   if(backend->handle) {
     ERR_clear_error();
@@ -1181,6 +1195,7 @@ static void *wolfssl_get_internals(struct ssl_connect_data *connssl,
 {
   struct ssl_backend_data *backend = connssl->backend;
   (void)info;
+  DEBUGASSERT(backend);
   return backend->handle;
 }
 

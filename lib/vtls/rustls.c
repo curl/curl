@@ -65,6 +65,7 @@ cr_data_pending(const struct connectdata *conn, int sockindex)
 {
   const struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
+  DEBUGASSERT(backend);
   return backend->data_pending;
 }
 
@@ -118,13 +119,17 @@ cr_recv(struct Curl_easy *data, int sockindex,
   struct connectdata *conn = data->conn;
   struct ssl_connect_data *const connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *const backend = connssl->backend;
-  struct rustls_connection *const rconn = backend->conn;
+  struct rustls_connection *rconn = NULL;
+
   size_t n = 0;
   size_t tls_bytes_read = 0;
   size_t plain_bytes_copied = 0;
   rustls_result rresult = 0;
   char errorbuf[255];
   rustls_io_result io_error;
+
+  DEBUGASSERT(backend);
+  rconn = backend->conn;
 
   io_error = rustls_connection_read_tls(rconn, read_cb,
     &conn->sock[sockindex], &tls_bytes_read);
@@ -215,12 +220,15 @@ cr_send(struct Curl_easy *data, int sockindex,
   struct connectdata *conn = data->conn;
   struct ssl_connect_data *const connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *const backend = connssl->backend;
-  struct rustls_connection *const rconn = backend->conn;
+  struct rustls_connection *rconn = NULL;
   size_t plainwritten = 0;
   size_t tlswritten = 0;
   size_t tlswritten_total = 0;
   rustls_result rresult;
   rustls_io_result io_error;
+
+  DEBUGASSERT(backend);
+  rconn = backend->conn;
 
   infof(data, "cr_send %ld bytes of plaintext", plainlen);
 
@@ -295,7 +303,7 @@ static CURLcode
 cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
                 struct ssl_backend_data *const backend)
 {
-  struct rustls_connection *rconn = backend->conn;
+  struct rustls_connection *rconn = NULL;
   struct rustls_client_config_builder *config_builder = NULL;
   struct rustls_root_cert_store *roots = NULL;
   const struct curl_blob *ca_info_blob = SSL_CONN_CONFIG(ca_info_blob);
@@ -311,6 +319,9 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
     { (const uint8_t *)ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH },
     { (const uint8_t *)ALPN_H2, ALPN_H2_LENGTH },
   };
+
+  DEBUGASSERT(backend);
+  rconn = backend->conn;
 
   config_builder = rustls_client_config_builder_new();
 #ifdef USE_HTTP2
@@ -435,6 +446,8 @@ cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
   curl_socket_t writefd;
   curl_socket_t readfd;
 
+  DEBUGASSERT(backend);
+
   if(ssl_connection_none == connssl->state) {
     result = cr_init_backend(data, conn, connssl->backend);
     if(result != CURLE_OK) {
@@ -529,7 +542,10 @@ cr_getsock(struct connectdata *conn, curl_socket_t *socks)
   struct ssl_connect_data *const connssl = &conn->ssl[FIRSTSOCKET];
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   struct ssl_backend_data *const backend = connssl->backend;
-  struct rustls_connection *rconn = backend->conn;
+  struct rustls_connection *rconn = NULL;
+
+  DEBUGASSERT(backend);
+  rconn = backend->conn;
 
   if(rustls_connection_wants_write(rconn)) {
     socks[0] = sockfd;
@@ -548,6 +564,7 @@ cr_get_internals(struct ssl_connect_data *connssl,
                  CURLINFO info UNUSED_PARAM)
 {
   struct ssl_backend_data *backend = connssl->backend;
+  DEBUGASSERT(backend);
   return &backend->conn;
 }
 
@@ -559,6 +576,8 @@ cr_close(struct Curl_easy *data, struct connectdata *conn,
   struct ssl_backend_data *backend = connssl->backend;
   CURLcode tmperr = CURLE_OK;
   ssize_t n = 0;
+
+  DEBUGASSERT(backend);
 
   if(backend->conn) {
     rustls_connection_send_close_notify(backend->conn);

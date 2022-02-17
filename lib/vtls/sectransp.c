@@ -837,12 +837,14 @@ static OSStatus SocketRead(SSLConnectionRef connection,
   /*int sock = *(int *)connection;*/
   struct ssl_connect_data *connssl = (struct ssl_connect_data *)connection;
   struct ssl_backend_data *backend = connssl->backend;
-  int sock = backend->ssl_sockfd;
+  int sock;
   OSStatus rtn = noErr;
   size_t bytesRead;
   ssize_t rrtn;
   int theErr;
 
+  DEBUGASSERT(backend);
+  sock = backend->ssl_sockfd;
   *dataLength = 0;
 
   for(;;) {
@@ -898,13 +900,15 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
   /*int sock = *(int *)connection;*/
   struct ssl_connect_data *connssl = (struct ssl_connect_data *)connection;
   struct ssl_backend_data *backend = connssl->backend;
-  int sock = backend->ssl_sockfd;
+  int sock;
   ssize_t length;
   size_t dataLen = *dataLength;
   const UInt8 *dataPtr = (UInt8 *)data;
   OSStatus ortn;
   int theErr;
 
+  DEBUGASSERT(backend);
+  sock = backend->ssl_sockfd;
   *dataLength = 0;
 
   do {
@@ -1376,6 +1380,8 @@ set_ssl_version_min_max(struct Curl_easy *data, struct connectdata *conn,
   long ssl_version_max = SSL_CONN_CONFIG(version_max);
   long max_supported_version_by_os;
 
+  DEBUGASSERT(backend);
+
   /* macOS 10.5-10.7 supported TLS 1.0 only.
      macOS 10.8 and later, and iOS 5 and later, added TLS 1.1 and 1.2.
      macOS 10.13 and later, and iOS 11 and later, added TLS 1.3. */
@@ -1683,6 +1689,8 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
   OSStatus err = noErr;
 #if CURL_BUILD_MAC
   int darwinver_maj = 0, darwinver_min = 0;
+
+  DEBUGASSERT(backend);
 
   GetDarwinVersionNumber(&darwinver_maj, &darwinver_min);
 #endif /* CURL_BUILD_MAC */
@@ -2547,6 +2555,7 @@ sectransp_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
               || ssl_connect_2_reading == connssl->connecting_state
               || ssl_connect_2_writing == connssl->connecting_state);
+  DEBUGASSERT(backend);
 
   /* Here goes nothing: */
   err = SSLHandshake(backend->ssl_ctx);
@@ -2923,6 +2932,8 @@ collect_server_cert(struct Curl_easy *data,
   CFIndex i, count;
   SecTrustRef trust = NULL;
 
+  DEBUGASSERT(backend);
+
   if(!show_verbose_server_cert && !data->set.ssl.certinfo)
     return CURLE_OK;
 
@@ -3167,6 +3178,8 @@ static void sectransp_close(struct Curl_easy *data, struct connectdata *conn,
 
   (void) data;
 
+  DEBUGASSERT(backend);
+
   if(backend->ssl_ctx) {
     (void)SSLClose(backend->ssl_ctx);
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
@@ -3194,6 +3207,8 @@ static int sectransp_shutdown(struct Curl_easy *data,
   int rc;
   char buf[120];
   int loop = 10; /* avoid getting stuck */
+
+  DEBUGASSERT(backend);
 
   if(!backend->ssl_ctx)
     return 0;
@@ -3274,6 +3289,8 @@ static int sectransp_check_cxn(struct connectdata *conn)
   OSStatus err;
   SSLSessionState state;
 
+  DEBUGASSERT(backend);
+
   if(backend->ssl_ctx) {
     err = SSLGetSessionState(backend->ssl_ctx, &state);
     if(err == noErr)
@@ -3290,6 +3307,8 @@ static bool sectransp_data_pending(const struct connectdata *conn,
   struct ssl_backend_data *backend = connssl->backend;
   OSStatus err;
   size_t buffer;
+
+  DEBUGASSERT(backend);
 
   if(backend->ssl_ctx) {  /* SSL is in use */
     err = SSLGetBufferedReadSize(backend->ssl_ctx, &buffer);
@@ -3351,6 +3370,8 @@ static ssize_t sectransp_send(struct Curl_easy *data,
   struct ssl_backend_data *backend = connssl->backend;
   size_t processed = 0UL;
   OSStatus err;
+
+  DEBUGASSERT(backend);
 
   /* The SSLWrite() function works a little differently than expected. The
      fourth argument (processed) is currently documented in Apple's
@@ -3419,6 +3440,8 @@ static ssize_t sectransp_recv(struct Curl_easy *data,
   size_t processed = 0UL;
   OSStatus err;
 
+  DEBUGASSERT(backend);
+
   again:
   err = SSLRead(backend->ssl_ctx, buf, buffersize, &processed);
 
@@ -3468,6 +3491,7 @@ static void *sectransp_get_internals(struct ssl_connect_data *connssl,
 {
   struct ssl_backend_data *backend = connssl->backend;
   (void)info;
+  DEBUGASSERT(backend);
   return backend->ssl_ctx;
 }
 

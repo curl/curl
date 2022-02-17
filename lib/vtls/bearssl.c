@@ -373,6 +373,8 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
   struct in_addr addr;
 #endif
 
+  DEBUGASSERT(backend);
+
   switch(SSL_CONN_CONFIG(version)) {
   case CURL_SSLVERSION_SSLv2:
     failf(data, "BearSSL does not support SSLv2");
@@ -530,6 +532,8 @@ static CURLcode bearssl_run_until(struct Curl_easy *data,
   ssize_t ret;
   int err;
 
+  DEBUGASSERT(backend);
+
   for(;;) {
     state = br_ssl_engine_current_state(&backend->ctx.eng);
     if(state & BR_SSL_CLOSED) {
@@ -602,6 +606,8 @@ static CURLcode bearssl_connect_step2(struct Curl_easy *data,
   struct ssl_backend_data *backend = connssl->backend;
   CURLcode ret;
 
+  DEBUGASSERT(backend);
+
   ret = bearssl_run_until(data, conn, sockindex,
                           BR_SSL_SENDAPP | BR_SSL_RECVAPP);
   if(ret == CURLE_AGAIN)
@@ -624,6 +630,7 @@ static CURLcode bearssl_connect_step3(struct Curl_easy *data,
   CURLcode ret;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
+  DEBUGASSERT(backend);
 
   if(conn->bits.tls_enable_alpn) {
     const char *protocol;
@@ -689,6 +696,8 @@ static ssize_t bearssl_send(struct Curl_easy *data, int sockindex,
   unsigned char *app;
   size_t applen;
 
+  DEBUGASSERT(backend);
+
   for(;;) {
     *err = bearssl_run_until(data, conn, sockindex, BR_SSL_SENDAPP);
     if (*err != CURLE_OK)
@@ -721,6 +730,8 @@ static ssize_t bearssl_recv(struct Curl_easy *data, int sockindex,
   struct ssl_backend_data *backend = connssl->backend;
   unsigned char *app;
   size_t applen;
+
+  DEBUGASSERT(backend);
 
   *err = bearssl_run_until(data, conn, sockindex, BR_SSL_RECVAPP);
   if(*err != CURLE_OK)
@@ -847,6 +858,7 @@ static bool bearssl_data_pending(const struct connectdata *conn,
 {
   const struct ssl_connect_data *connssl = &conn->ssl[connindex];
   struct ssl_backend_data *backend = connssl->backend;
+  DEBUGASSERT(backend);
   return br_ssl_engine_current_state(&backend->ctx.eng) & BR_SSL_RECVAPP;
 }
 
@@ -896,6 +908,7 @@ static void *bearssl_get_internals(struct ssl_connect_data *connssl,
                                    CURLINFO info UNUSED_PARAM)
 {
   struct ssl_backend_data *backend = connssl->backend;
+  DEBUGASSERT(backend);
   return &backend->ctx;
 }
 
@@ -905,6 +918,8 @@ static void bearssl_close(struct Curl_easy *data,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   size_t i;
+
+  DEBUGASSERT(backend);
 
   if(backend->active) {
     br_ssl_engine_close(&backend->ctx.eng);

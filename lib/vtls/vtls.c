@@ -300,6 +300,8 @@ ssl_connect_init_proxy(struct connectdata *conn, int sockindex)
     pbdata = conn->proxy_ssl[sockindex].backend;
     conn->proxy_ssl[sockindex] = conn->ssl[sockindex];
 
+    DEBUGASSERT(pbdata != NULL);
+
     memset(&conn->ssl[sockindex], 0, sizeof(conn->ssl[sockindex]));
     memset(pbdata, 0, Curl_ssl->sizeof_ssl_backend_data);
 
