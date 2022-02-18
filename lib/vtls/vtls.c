@@ -421,8 +421,6 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
     return TRUE;
 #endif
 
-  DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
-
   if(!SSL_SET_OPTION(primary.sessionid) || !data->state.session)
     /* session ID re-use is disabled or the session cache has not been
        setup */
