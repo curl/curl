@@ -510,6 +510,18 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
     hostname = snihost;
   }
 
+  /* give application a chance to interfere with SSL set up. */
+  if(data->set.ssl.fsslctx) {
+    Curl_set_in_callback(data, true);
+    ret = (*data->set.ssl.fsslctx)(data, &backend->ctx,
+                                   data->set.ssl.fsslctxp);
+    Curl_set_in_callback(data, false);
+    if(ret) {
+      failf(data, "BearSSL: error signaled by ssl ctx callback");
+      return ret;
+    }
+  }
+
   if(!br_ssl_client_reset(&backend->ctx, hostname, 1))
     return CURLE_FAILED_INIT;
   backend->active = TRUE;
@@ -950,7 +962,7 @@ static CURLcode bearssl_sha256sum(const unsigned char *input,
 
 const struct Curl_ssl Curl_ssl_bearssl = {
   { CURLSSLBACKEND_BEARSSL, "bearssl" }, /* info */
-  SSLSUPP_CAINFO_BLOB,
+  SSLSUPP_CAINFO_BLOB | SSLSUPP_SSL_CTX,
   sizeof(struct ssl_backend_data),
 
   Curl_none_init,                  /* init */
