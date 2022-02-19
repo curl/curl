@@ -169,7 +169,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
     ssl_backends=
      curl_h1_msg="enabled (internal)"
      curl_h2_msg="no      (--with-nghttp2, --with-hyper)"
-     curl_h3_msg="no      (--with-ngtcp2, --with-quiche)"
+     curl_h3_msg="no      (--with-ngtcp2, --with-quiche --with-msh3)"
 
 enable_altsvc="yes"
 hsts="yes"
@@ -3002,6 +3002,104 @@ AC_INCLUDES_DEFAULT
       dnl To avoid link errors, we do not allow --with-quiche without
       dnl a pkgconfig file
       AC_MSG_ERROR([--with-quiche was specified but could not find quiche pkg-config file.])
+    fi
+  fi
+fi
+
+dnl **********************************************************************
+dnl Check for msh3 (QUIC)
+dnl **********************************************************************
+
+OPT_MSH3="no"
+
+if test "x$disable_http" = "xyes" -o "x$USE_NGTCP" = "x1"; then
+  # without HTTP or with ngtcp2, msh3 is no use
+  OPT_MSH3="no"
+fi
+
+AC_ARG_WITH(msh3,
+AS_HELP_STRING([--with-msh3=PATH],[Enable msh3 usage])
+AS_HELP_STRING([--without-msh3],[Disable msh3 usage]),
+  [OPT_MSH3=$withval])
+case "$OPT_MSH3" in
+  no)
+    dnl --without-msh3 option used
+    want_msh3="no"
+    ;;
+  yes)
+    dnl --with-msh3 option used without path
+    want_msh3="default"
+    want_msh3_path=""
+    ;;
+  *)
+    dnl --with-msh3 option used with path
+    want_msh3="yes"
+    want_msh3_path="$withval"
+    ;;
+esac
+
+if test X"$want_msh3" != Xno; then
+
+  if test "$NGHTTP3_ENABLED" = 1; then
+    AC_MSG_ERROR([--with-msh3 and --with-ngtcp2 are mutually exclusive])
+  fi
+
+  dnl backup the pre-msh3 variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  CURL_CHECK_PKGCONFIG(msh3, $want_msh3_path)
+
+  if test "$PKGCONFIG" != "no" ; then
+    LIB_MSH3=`CURL_EXPORT_PCDIR([$want_msh3_path])
+      $PKGCONFIG --libs-only-l msh3`
+    AC_MSG_NOTICE([-l is $LIB_MSH3])
+
+    CPP_MSH3=`CURL_EXPORT_PCDIR([$want_msh3_path]) dnl
+      $PKGCONFIG --cflags-only-I msh3`
+    AC_MSG_NOTICE([-I is $CPP_MSH3])
+
+    LD_MSH3=`CURL_EXPORT_PCDIR([$want_msh3_path])
+      $PKGCONFIG --libs-only-L msh3`
+    AC_MSG_NOTICE([-L is $LD_MSH3])
+
+    LDFLAGS="$LDFLAGS $LD_MSH3"
+    CPPFLAGS="$CPPFLAGS $CPP_MSH3"
+    LIBS="$LIB_MSH3 $LIBS"
+
+    if test "x$cross_compiling" != "xyes"; then
+      DIR_MSH3=`echo $LD_MSH3 | $SED -e 's/^-L//'`
+    fi
+    AC_CHECK_LIB(msh3, msh3_connect,
+      [
+       AC_CHECK_HEADERS(msh3.h,
+          experimental="$experimental HTTP3"
+          AC_MSG_NOTICE([HTTP3 support is experimental])
+          curl_h3_msg="enabled (msh3)"
+          MSH3_ENABLED=1
+          AC_DEFINE(USE_MSH3, 1, [if msh3 is in use])
+          AC_SUBST(USE_MSH3, [1])
+          AC_CHECK_FUNCS([msh3_conn_set_qlog_fd])
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_MSH3"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_MSH3 to CURL_LIBRARY_PATH]),
+          [],
+          [
+AC_INCLUDES_DEFAULT
+#include <sys/socket.h>
+          ]
+       )
+      ],
+        dnl not found, revert back to clean variables
+        AC_MSG_ERROR([couldn't use msh3])
+    )
+  else
+    dnl no msh3 pkg-config found, deal with it
+    if test X"$want_msh3" != Xdefault; then
+      dnl To avoid link errors, we do not allow --with-msh3 without
+      dnl a pkgconfig file
+      AC_MSG_ERROR([--with-msh3 was specified but could not find msh3 pkg-config file.])
     fi
   fi
 fi

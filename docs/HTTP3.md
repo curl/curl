@@ -19,6 +19,8 @@ QUIC libraries we are experimenting with:
 
 [quiche](https://github.com/cloudflare/quiche)
 
+[msquic](https://github.com/microsoft/msquic)
+
 ## Experimental
 
 HTTP/3 and QUIC support in curl is considered **EXPERIMENTAL** until further
@@ -151,6 +153,28 @@ See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
 ## Known Bugs
 
 Check out the [list of known HTTP3 bugs](https://curl.se/docs/knownbugs.html#HTTP3).
+
+# msh3 (msquic) version
+
+## build
+
+Build msh3:
+
+     % git clone --recursive https://github.com/nibanks/msh3
+     % cd msh3
+     % mkdir build && cd build
+     % cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+     % cmake --build .
+
+Build curl:
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % autoreconf -fi
+     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../msh3" --with-openssl=$PWD/../msh3/msquic/submodules/openssl --with-msh3=$PWD/../msh3
+     % make
+     % make install
 
 # HTTP/3 Test server
 

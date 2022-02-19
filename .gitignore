@@ -18,6 +18,7 @@
 .project
 .settings
 /.vs
+/bld/
 /build/
 /builds/
 /stats/
