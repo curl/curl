@@ -509,13 +509,14 @@ static CURLcode bearssl_set_selected_ciphers(struct Curl_easy *data,
     }
 
     /* No duplicates allowed */
-    for(j = 0; j < selected_count; j++) {
-      if(selected_ciphers[j] == ciphertable[i].num) {
-        failf(data, "BearSSL: duplicate cipher in list: %s", cipher_name);
-        return CURLE_SSL_CIPHER;
-      }
+    for(j = 0; j < selected_count &&
+               selected_ciphers[j] != ciphertable[i].num; j++);
+    if(j < selected_count) {
+      infof(data, "BearSSL: duplicate cipher in list: %s", cipher_name);
+      continue;
     }
 
+    DEBUGASSERT(selected_count < NUM_OF_CIPHERS);
     selected_ciphers[selected_count] = ciphertable[i].num;
     ++selected_count;
   }
