@@ -415,7 +415,8 @@ static const struct st_cipher ciphertable[] = {
              "ECDH-RSA-AES256-GCM-SHA384"),
 #ifdef BR_TLS_RSA_WITH_AES_128_CCM
 
-    /* RFC 6655 TLS 1.2 CCM */
+  /* RFC 6655 TLS 1.2 CCM
+     Supported since BearSSL 0.6 */
   CIPHER_DEF(TLS_RSA_WITH_AES_128_CCM,                             /* 0xC09C */
              "AES128-CCM"),
   CIPHER_DEF(TLS_RSA_WITH_AES_256_CCM,                             /* 0xC09D */
@@ -425,7 +426,8 @@ static const struct st_cipher ciphertable[] = {
   CIPHER_DEF(TLS_RSA_WITH_AES_256_CCM_8,                           /* 0xC0A1 */
              "AES256-CCM8"),
 
-  /* RFC 7251 TLS 1.2 ECC CCM */
+  /* RFC 7251 TLS 1.2 ECC CCM
+     Supported since BearSSL 0.6 */
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_AES_128_CCM,                     /* 0xC0AC */
              "ECDHE-ECDSA-AES128-CCM"),
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_AES_256_CCM,                     /* 0xC0AD */
@@ -435,14 +437,13 @@ static const struct st_cipher ciphertable[] = {
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8,                   /* 0xC0AF */
              "ECDHE-ECDSA-AES256-CCM8"),
 #endif
-#ifdef BR_TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
 
-  /* RFC 7905 TLS 1.2 ChaCha20-Poly1305 */
+  /* RFC 7905 TLS 1.2 ChaCha20-Poly1305
+     Supported since BearSSL 0.2 */
   CIPHER_DEF(TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,          /* 0xCCA8 */
              "ECDHE-RSA-CHACHA20-POLY1305"),
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,        /* 0xCCA9 */
              "ECDHE-ECDSA-CHACHA20-POLY1305"),
-#endif
 };
 
 #define NUM_OF_CIPHERS (sizeof(ciphertable) / sizeof(ciphertable[0]))
@@ -480,7 +481,7 @@ static CURLcode bearssl_set_selected_ciphers(struct Curl_easy *data,
     /* Extract the next cipher name from the ciphers string */
     while(is_separator(*cipher_start))
       ++cipher_start;
-    if (*cipher_start == '\0')
+    if(*cipher_start == '\0')
       break;
     cipher_end = cipher_start;
     while(*cipher_end != '\0' && !is_separator(*cipher_end))
