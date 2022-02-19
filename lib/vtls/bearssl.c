@@ -239,6 +239,8 @@ static CURLcode load_cafile(struct cafile_source *source,
   } while(source->type != CAFILE_SOURCE_BLOB);
   if(fp && ferror(fp))
     ca.err = CURLE_READ_ERROR;
+  else if(ca.in_cert)
+    ca.err = CURLE_SSL_CACERT_BADFILE;
 
 fail:
   if(fp)
