@@ -603,7 +603,7 @@ const static struct st_cipher ciphertable[] = {
              CIPHER_WEAK_RC_ENCRYPTION),
   CIPHER_DEF(TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,                 /* 0xC003 */
              "ECDH-ECDSA-DES-CBC3-SHA",
-             CIPHER_STRONG_ENOUGH),
+             CIPHER_WEAK_3DES_ENCRYPTION),
   CIPHER_DEF(TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,                  /* 0xC004 */
              "ECDH-ECDSA-AES128-SHA",
              CIPHER_STRONG_ENOUGH),
