@@ -29,13 +29,13 @@ Funny-head: yesyes
 # Client-side
 <client>
 <server>
-http
+ipfs
 </server>
  <name>
 HTTP GET
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+ipfs://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

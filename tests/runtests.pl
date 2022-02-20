@@ -4929,7 +4929,8 @@ sub startservers {
                 $run{'http/2'}="$pid $pid2";
             }
         }
-        elsif($what eq "http") {
+        elsif(($what eq "http") ||
+           ($what eq "ipfs")) {
             if($torture && $run{'http'} &&
                !responsive_http_server("http", $verbose, 0, $HTTPPORT)) {
                 if(stopserver('http')) {
