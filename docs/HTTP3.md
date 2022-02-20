@@ -19,7 +19,7 @@ QUIC libraries we are experimenting with:
 
 [quiche](https://github.com/cloudflare/quiche)
 
-[msquic](https://github.com/microsoft/msquic)
+[msquic](https://github.com/microsoft/msquic) & [msh3](https://github.com/nibanks/msh3)
 
 ## Experimental
 
