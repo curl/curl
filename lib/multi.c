@@ -3571,9 +3571,6 @@ CURLMcode curl_multi_assign(struct Curl_multi *multi, curl_socket_t s,
 {
   struct Curl_sh_entry *there = NULL;
 
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
-
   there = sh_getentry(&multi->sockhash, s);
 
   if(!there)
