@@ -93,9 +93,7 @@
  * Forward declarations.
  */
 
-static int http_getsock_do(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           curl_socket_t *socks);
+
 static bool http_should_fail(struct Curl_easy *data);
 
 #ifndef CURL_DISABLE_PROXY
@@ -104,21 +102,18 @@ static CURLcode add_haproxy_protocol_header(struct Curl_easy *data);
 
 #ifdef USE_SSL
 static CURLcode https_connecting(struct Curl_easy *data, bool *done);
-static int https_getsock(struct Curl_easy *data,
-                         struct connectdata *conn,
-                         curl_socket_t *socks);
 #else
+/* do we need to hoist this to .h file for IPFS? */
 #define https_connecting(x,y) CURLE_COULDNT_CONNECT
 #endif
-static CURLcode http_setup_conn(struct Curl_easy *data,
-                                struct connectdata *conn);
+
 
 /*
  * HTTP handler interface.
  */
 const struct Curl_handler Curl_handler_http = {
   "HTTP",                               /* scheme */
-  http_setup_conn,                      /* setup_connection */
+  Curl_http_setup_conn,                      /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -126,7 +121,7 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
-  http_getsock_do,                      /* doing_getsock */
+  Curl_http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
@@ -146,15 +141,15 @@ const struct Curl_handler Curl_handler_http = {
  */
 const struct Curl_handler Curl_handler_https = {
   "HTTPS",                              /* scheme */
-  http_setup_conn,                      /* setup_connection */
+  Curl_http_setup_conn,                      /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
   Curl_http_connect,                    /* connect_it */
   https_connecting,                     /* connecting */
   ZERO_NULL,                            /* doing */
-  https_getsock,                        /* proto_getsock */
-  http_getsock_do,                      /* doing_getsock */
+  Curl_https_getsock,                        /* proto_getsock */
+  Curl_http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
@@ -169,7 +164,7 @@ const struct Curl_handler Curl_handler_https = {
 };
 #endif
 
-static CURLcode http_setup_conn(struct Curl_easy *data,
+CURLcode Curl_http_setup_conn(struct Curl_easy *data,
                                 struct connectdata *conn)
 {
   /* allocate the HTTP-specific struct for the Curl_easy, only to survive
@@ -1518,7 +1513,7 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we're always _sending_ a request and thus we wait for
    the single socket to become writable only */
-static int http_getsock_do(struct Curl_easy *data,
+int Curl_http_getsock_do(struct Curl_easy *data,
                            struct connectdata *conn,
                            curl_socket_t *socks)
 {
@@ -1586,7 +1581,7 @@ static CURLcode https_connecting(struct Curl_easy *data, bool *done)
   return result;
 }
 
-static int https_getsock(struct Curl_easy *data,
+int Curl_https_getsock(struct Curl_easy *data,
                          struct connectdata *conn,
                          curl_socket_t *socks)
 {

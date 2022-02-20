@@ -122,9 +122,20 @@ CURLcode Curl_http_done(struct Curl_easy *data, CURLcode, bool premature);
 CURLcode Curl_http_connect(struct Curl_easy *data, bool *done);
 
 /* These functions are in http.c */
+CURLcode Curl_http_setup_conn(struct Curl_easy *data,
+                                struct connectdata *conn);
 CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                               const char *auth);
 CURLcode Curl_http_auth_act(struct Curl_easy *data);
+int Curl_http_getsock_do(struct Curl_easy *data,
+                           struct connectdata *conn,
+                           curl_socket_t *socks);
+
+#ifdef USE_SSL
+int Curl_https_getsock(struct Curl_easy *data,
+                         struct connectdata *conn,
+                         curl_socket_t *socks);
+#endif
 
 /* If only the PICKNONE bit is set, there has been a round-trip and we
    selected to use no auth at all. Ie, we actively select no auth, as opposed
