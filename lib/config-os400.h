@@ -371,7 +371,8 @@
 /* Define if you can safely include both <sys/time.h> and <time.h>. */
 #define TIME_WITH_SYS_TIME
 
-/* Define to enable HTTP3 support (experimental, requires NGTCP2 or QUICHE) */
+/* Define to enable HTTP3 support (experimental, requires NGTCP2, QUICHE or
+   MSH3) */
 #undef ENABLE_QUIC
 
 /* Version number of package */

@@ -31,8 +31,8 @@
 #ifdef USE_QUICHE
 #include "vquic/quiche.h"
 #endif
-#ifdef USE_MSQUIC
-#include "vquic/msquic_h3.h"
+#ifdef USE_MSH3
+#include "vquic/msh3.h"
 #endif
 
 #include "urldata.h"
