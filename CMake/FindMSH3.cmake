@@ -38,7 +38,7 @@ Result Variables
 #]=======================================================================]
 if(UNIX)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_MSH3 msh3)
+  pkg_search_module(PC_MSH3 libmsh3)
 endif()
 
 find_path(MSH3_INCLUDE_DIR msh3.h

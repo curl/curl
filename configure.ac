@@ -3049,19 +3049,19 @@ if test X"$want_msh3" != Xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(msh3, $want_msh3_path)
+  CURL_CHECK_PKGCONFIG(libmsh3, $want_msh3_path)
 
   if test "$PKGCONFIG" != "no" ; then
     LIB_MSH3=`CURL_EXPORT_PCDIR([$want_msh3_path])
-      $PKGCONFIG --libs-only-l msh3`
+      $PKGCONFIG --libs-only-l libmsh3`
     AC_MSG_NOTICE([-l is $LIB_MSH3])
 
     CPP_MSH3=`CURL_EXPORT_PCDIR([$want_msh3_path]) dnl
-      $PKGCONFIG --cflags-only-I msh3`
+      $PKGCONFIG --cflags-only-I libmsh3`
     AC_MSG_NOTICE([-I is $CPP_MSH3])
 
     LD_MSH3=`CURL_EXPORT_PCDIR([$want_msh3_path])
-      $PKGCONFIG --libs-only-L msh3`
+      $PKGCONFIG --libs-only-L libmsh3`
     AC_MSG_NOTICE([-L is $LD_MSH3])
 
     LDFLAGS="$LDFLAGS $LD_MSH3"
@@ -3074,21 +3074,14 @@ if test X"$want_msh3" != Xno; then
     AC_CHECK_LIB(msh3, msh3_connect,
       [
        AC_CHECK_HEADERS(msh3.h,
-          experimental="$experimental HTTP3"
-          AC_MSG_NOTICE([HTTP3 support is experimental])
           curl_h3_msg="enabled (msh3)"
           MSH3_ENABLED=1
           AC_DEFINE(USE_MSH3, 1, [if msh3 is in use])
           AC_SUBST(USE_MSH3, [1])
-          AC_CHECK_FUNCS([msh3_conn_set_qlog_fd])
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_MSH3"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_MSH3 to CURL_LIBRARY_PATH]),
-          [],
-          [
-AC_INCLUDES_DEFAULT
-#include <sys/socket.h>
-          ]
+          experimental="$experimental HTTP3"
        )
       ],
         dnl not found, revert back to clean variables
