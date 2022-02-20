@@ -63,7 +63,7 @@ if [ "$NGTCP2" = yes ]; then
   cd ngtcp2
   autoreconf -i
   if test -n "$GNUTLS"; then
-      WITHGNUTLS="--with-gnutls"
+      WITHGNUTLS="--with-gnutls --without-openssl"
   fi
   ./configure PKG_CONFIG_PATH=$HOME/ngbuild/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --prefix=$HOME/ngbuild --enable-lib-only $WITHGNUTLS
   make
