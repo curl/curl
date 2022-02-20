@@ -3239,21 +3239,23 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  Curl_ssl_sessionid_lock(data);
-  if(!Curl_ssl_getsessionid(data, conn, SSL_IS_PROXY() ? TRUE : FALSE,
-                            &ssl_sessionid, NULL, sockindex)) {
-    /* we got a session id, use it! */
-    if(!SSL_set_session(backend->handle, ssl_sessionid)) {
-      Curl_ssl_sessionid_unlock(data);
-      failf(data, "SSL: SSL_set_session failed: %s",
-            ossl_strerror(ERR_get_error(), error_buffer,
-                          sizeof(error_buffer)));
-      return CURLE_SSL_CONNECT_ERROR;
+  if(SSL_SET_OPTION(primary.sessionid)) {
+    Curl_ssl_sessionid_lock(data);
+    if(!Curl_ssl_getsessionid(data, conn, SSL_IS_PROXY() ? TRUE : FALSE,
+                              &ssl_sessionid, NULL, sockindex)) {
+      /* we got a session id, use it! */
+      if(!SSL_set_session(backend->handle, ssl_sessionid)) {
+        Curl_ssl_sessionid_unlock(data);
+        failf(data, "SSL: SSL_set_session failed: %s",
+              ossl_strerror(ERR_get_error(), error_buffer,
+                            sizeof(error_buffer)));
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+      /* Informational message */
+      infof(data, "SSL re-using session ID");
     }
-    /* Informational message */
-    infof(data, "SSL re-using session ID");
+    Curl_ssl_sessionid_unlock(data);
   }
-  Curl_ssl_sessionid_unlock(data);
 
 #ifndef CURL_DISABLE_PROXY
   if(conn->proxy_ssl[sockindex].use) {
