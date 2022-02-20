@@ -41,8 +41,8 @@ int Curl_strncasecompare(const char *first, const char *second, size_t max);
 char Curl_raw_toupper(char in);
 
 /* checkprefix() is a shorter version of the above, used when the first
-   argument is zero-byte terminated */
-#define checkprefix(a,b)    curl_strnequal(a,b,strlen(a))
+   argument is the string literal */
+#define checkprefix(a,b)    curl_strnequal(b, STRCONST(a))
 
 void Curl_strntoupper(char *dest, const char *src, size_t n);
 void Curl_strntolower(char *dest, const char *src, size_t n);
