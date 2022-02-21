@@ -433,7 +433,7 @@ static int sshkeycallback(struct Curl_easy *easy,
  * libssh2 1.2.8 fixed the problem with 32bit ints used for sockets on win64.
  */
 #ifdef HAVE_LIBSSH2_SESSION_HANDSHAKE
-#define session_startup(x,y) libssh2_session_handshake(x, (libssh2_socket_t)y)
+#define session_startup(x,y) libssh2_session_handshake(x, y)
 #else
 #define session_startup(x,y) libssh2_session_startup(x, (int)y)
 #endif
