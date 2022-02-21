@@ -630,7 +630,8 @@ void Curl_ssl_associate_conn(struct Curl_easy *data,
 {
   if(Curl_ssl->associate_connection) {
     Curl_ssl->associate_connection(data, conn, FIRSTSOCKET);
-    if(conn->sock[SECONDARYSOCKET] && conn->bits.sock_accepted)
+    if((conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD) &&
+       conn->bits.sock_accepted)
       Curl_ssl->associate_connection(data, conn, SECONDARYSOCKET);
   }
 }
@@ -640,7 +641,8 @@ void Curl_ssl_detach_conn(struct Curl_easy *data,
 {
   if(Curl_ssl->disassociate_connection) {
     Curl_ssl->disassociate_connection(data, FIRSTSOCKET);
-    if(conn->sock[SECONDARYSOCKET] && conn->bits.sock_accepted)
+    if((conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD) &&
+       conn->bits.sock_accepted)
       Curl_ssl->disassociate_connection(data, SECONDARYSOCKET);
   }
 }
