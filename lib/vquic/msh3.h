@@ -33,6 +33,15 @@ struct quicsocket {
   MSH3_CONNECTION* conn;
 };
 
+struct msh3request {
+  MSH3_REQUEST *req;
+  uint8_t* recv_buf;
+  size_t recv_buf_alloc;
+  size_t recv_buf_len;
+  bool recv_complete;
+  CURLcode recv_error;
+};
+
 #endif /* USE_MSQUIC */
 
 #endif /* HEADER_CURL_VQUIC_MSH3_H */
