@@ -3049,52 +3049,33 @@ if test X"$want_msh3" != Xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(libmsh3, $want_msh3_path)
-
-  if test "$PKGCONFIG" != "no" ; then
-    LIB_MSH3=`CURL_EXPORT_PCDIR([$want_msh3_path])
-      $PKGCONFIG --libs-only-l libmsh3`
-    AC_MSG_NOTICE([-l is $LIB_MSH3])
-
-    CPP_MSH3=`CURL_EXPORT_PCDIR([$want_msh3_path]) dnl
-      $PKGCONFIG --cflags-only-I libmsh3`
-    AC_MSG_NOTICE([-I is $CPP_MSH3])
-
-    LD_MSH3=`CURL_EXPORT_PCDIR([$want_msh3_path])
-      $PKGCONFIG --libs-only-L libmsh3`
-    AC_MSG_NOTICE([-L is $LD_MSH3])
-
+  if test -n "$want_msh3_path"; then
+    LD_MSH3="-L$want_msh3_path/lib"
+    CPP_MSH3="-I$want_msh3_path/include"
+    DIR_MSH3="$want_msh3_path/lib"
     LDFLAGS="$LDFLAGS $LD_MSH3"
     CPPFLAGS="$CPPFLAGS $CPP_MSH3"
-    LIBS="$LIB_MSH3 $LIBS"
-
-    if test "x$cross_compiling" != "xyes"; then
-      DIR_MSH3=`echo $LD_MSH3 | $SED -e 's/^-L//'`
-    fi
-    AC_CHECK_LIB(msh3, msh3_connect,
-      [
-       AC_CHECK_HEADERS(msh3.h,
-          curl_h3_msg="enabled (msh3)"
-          MSH3_ENABLED=1
-          AC_DEFINE(USE_MSH3, 1, [if msh3 is in use])
-          AC_SUBST(USE_MSH3, [1])
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_MSH3"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_MSH3 to CURL_LIBRARY_PATH]),
-          experimental="$experimental HTTP3"
-       )
-      ],
-        dnl not found, revert back to clean variables
-        AC_MSG_ERROR([couldn't use msh3])
-    )
-  else
-    dnl no msh3 pkg-config found, deal with it
-    if test X"$want_msh3" != Xdefault; then
-      dnl To avoid link errors, we do not allow --with-msh3 without
-      dnl a pkgconfig file
-      AC_MSG_ERROR([--with-msh3 was specified but could not find msh3 pkg-config file.])
-    fi
   fi
+  LIBS="-lmsh3 $LIBS"
+
+  AC_CHECK_LIB(msh3, MsH3ApiOpen,
+    [
+    AC_CHECK_HEADERS(msh3.h,
+        curl_h3_msg="enabled (msh3)"
+        MSH3_ENABLED=1
+        AC_DEFINE(USE_MSH3, 1, [if msh3 is in use])
+        AC_SUBST(USE_MSH3, [1])
+        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_MSH3"
+        export CURL_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $DIR_MSH3 to CURL_LIBRARY_PATH]),
+        experimental="$experimental HTTP3"
+     )
+    ],
+      dnl not found, revert back to clean variables
+      LDFLAGS=$CLEANLDFLAGS
+      CPPFLAGS=$CLEANCPPFLAGS
+      LIBS=$CLEANLIBS
+  )
 fi
 
 dnl **********************************************************************

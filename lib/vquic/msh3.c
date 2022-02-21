@@ -24,6 +24,8 @@
 
 #ifdef USE_MSH3
 
+#include "urldata.h"
+
 static CURLcode msh3_do_it(struct Curl_easy *data, bool *done);
 static int msh3_getsock(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks);

@@ -173,7 +173,7 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../msh3" --with-openssl=$PWD/../msh3/msquic/submodules/openssl --with-msh3=$PWD/../msh3/build/lib
+     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../msh3" --with-openssl=$PWD/../msh3/msquic/submodules/openssl --with-msh3=/usr/local
      % make
      % make install
 
