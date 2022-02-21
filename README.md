@@ -73,7 +73,7 @@ Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com
 
 Support this project by becoming a sponsor. Your logo will show up here with a
 link to your website. [[Become a sponsor](https://opencollective.com/curl#sponsor)]
-
+<!-- markdown-link-check-disable -->
 [![Open Collective Sponsor 0](https://opencollective.com/curl/sponsor/0/avatar.svg)](https://opencollective.com/curl/sponsor/0/website)
 [![Open Collective Sponsor 1](https://opencollective.com/curl/sponsor/1/avatar.svg)](https://opencollective.com/curl/sponsor/1/website)
 [![Open Collective Sponsor 2](https://opencollective.com/curl/sponsor/2/avatar.svg)](https://opencollective.com/curl/sponsor/2/website)
