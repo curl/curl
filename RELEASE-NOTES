@@ -4,7 +4,7 @@ curl and libcurl 7.82.0
  Command line options:         245
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2588
+ Contributors:                 2592
 
 This release includes the following changes:
 
@@ -15,9 +15,13 @@ This release includes the following bugfixes:
 
  o appveyor: update images from VS 2019 to 2022
  o appveyor: use VS 2017 image for the autotools builds
+ o bearssl: fix connect error on expired cert and no verify [132]
+ o bearssl: fix EXC_BAD_ACCESS on incomplete CA cert [131]
+ o bearssl: fix session resumption (session id) [133]
  o build: enable -Warith-conversion
  o build: fix -Wenum-conversion handling
  o build: fix ngtcp2 crypto library detection [63]
+ o checkprefix: remove strlen calls [128]
  o checksrc: fix typo in comment [34]
  o CI: move 'distcheck' job from zuul to azure pipelines [60]
  o CI: move scan-build job from Zuul to Azure Pipelines [59]
@@ -32,6 +36,7 @@ This release includes the following bugfixes:
  o cmake: fix iOS CMake project generation error [13]
  o cmdline-opts/gen.pl: fix option matching to improve references [50]
  o config.d: Clarify _curlrc filename is still valid on Windows [95]
+ o configure.ac: use user-specified gssapi dir when using pkg-config [136]
  o configure: fix '--enable-code-coverage' typo [110]
  o configure: remove support for "embedded ares" [82]
  o configure: requires --with-nss-deprecated to build with NSS [114]
@@ -43,13 +48,16 @@ This release includes the following bugfixes:
  o curl-functions.m4: revert DYLD_LIBRARY_PATH tricks in CURL_RUN_IFELSE [9]
  o curl-openssl: fix SRP check for OpenSSL 3.0 [86]
  o curl-openssl: remove the OpenSSL headers and library versions check [35]
+ o curl.h: fix typo [129]
  o curl: remove "separators" (when using globbed URLs) [32]
  o curl_getdate.3: remove pointless .PP line [68]
  o curl_multi_socket.3: remove callback and typical usage descriptions [7]
  o curl_url_set.3: mention when CURLU_ALLOW_SPACE was added
  o CURLMOPT_TIMERFUNCTION/DATA.3: fix the examples [27]
  o CURLOPT_RESOLVE.3: change example port to 443
+ o CURLOPT_XFERINFOFUNCTION.3: fix typo in example [81]
  o CURLSHOPT_LOCKFUNC.3: fix typo "relased" -> "released" [71]
+ o des: fix compile break for OpenSSL without DES [141]
  o docs/cmdline-opts: add "mutexed" options for more http versions [25]
  o docs/DEPRECATE: remove NPN support in August 2022 [64]
  o docs: capitalize the name 'Netscape' [77]
@@ -87,6 +95,7 @@ This release includes the following bugfixes:
  o misc: remove unused data when IPv6 is not supported [80]
  o mqtt: free 'sendleftovers' in disconnect [115]
  o mqtt: free any send leftover data when done [36]
+ o multi: allow user callbacks to call curl_multi_assign [126]
  o multi: grammar fix in comment [69]
  o multi: remember connection_id before returning connection to pool [76]
  o multi: set in_callback for multi interface callbacks [28]
@@ -100,10 +109,15 @@ This release includes the following bugfixes:
  o openldap: implement SASL authentication [16]
  o openldap: pass string length arguments to client_write() [116]
  o openssl.h: avoid including OpenSSL headers here [15]
+ o openssl: check if sessionid flag is enabled before retrieving session [125]
  o openssl: check SSL_get_ex_data to prevent potential NULL dereference [40]
  o openssl: check the return value of BIO_new_mem_buf() [18]
  o openssl: fix `ctx_option_t` for OpenSSL v3+
+ o openssl: fix build for version < 1.1.0 [134]
  o openssl: return error if TLS 1.3 is requested when not supported [45]
+ o os400: Add function wrapper for system command [138]
+ o os400: Add link to QADRT devkit to README.OS400 [137]
+ o os400: Default build to target current release [139]
  o projects: add support for Visual Studio 17 (2022) [124]
  o projects: fix Visual Studio wolfSSL configurations
  o projects: remove support for MSVC before VC10 (Visual Studio 2010) [123]
@@ -123,14 +137,17 @@ This release includes the following bugfixes:
  o runtests: make 'wolfssl' a testable feature [6]
  o runtests: set 'oldlibssh' for libssh versions before 0.9.6 [122]
  o rustls: add CURLOPT_CAINFO_BLOB support [26]
+ o schannel: move the algIds array out of schannel.h [135]
  o scripts/cijobs.pl: output data about all currect CI jobs [78]
  o scripts/completion.pl: improve zsh completion [46]
  o scripts/copyright.pl: support many provided file names on the cmdline
  o scripts/delta: check the file delta for current branch
+ o sectransp: mark a 3DES cipher as weak [130]
  o setopt: do bounds-check before strdup [99]
  o setopt: fix the TLSAUTH #ifdefs for proxy-disabled builds [53]
  o sha256: Fix minimum OpenSSL version [102]
  o smb: passing a socket for writing and reading data instead of FIRSTSOCKET [90]
+ o ssl: reduce allocated space for ssl backend when FTP is disabled [127]
  o test3021: disable all msys2 path transformation
  o test374: gif data without new line at the end [20]
  o tests/disable-scan.pl: properly detect multiple symbols per line [94]
@@ -160,20 +177,22 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alejandro R. Sedeño, Alessandro Ghedini, Antoine Pietri, Bernhard Walle,
-  Bjarni Ingi Gislason, Cameron Will, Charles Cazabon, Dan Fandrich,
-  Daniel Stenberg, Davide Cassioli, Eric Musser, Fabian Keil, Fabian Yamaguchi,
-  Filip Lundgren, gaoxingwang on github, Harry Sarson, Henrik Holst,
-  Ikko Ashimine, Jan Ehrhardt, Jan-Piet Mens, jhoyla on github, John H. Ayad,
-  jonny112 on github, Kantanat Wannapaka, Kevin Adler, Kushal Das,
-  Leah Neukirchen, Lucas Pardue, luminixinc on github, Manfred Schwarb,
-  Marcel Raad, Melroy van den Berg, Michał Antoniak, Neal McBurnett,
-  neutric on github, Niels Martignène, Patrick Monnerat, pheiduck on github,
-  Ray Satiro, Ryan Schmidt, Samuel Henrique, Sandro Jaeckel, Satadru Pramanik,
+  1337vt on github, Alejandro R. Sedeño, Alessandro Ghedini, Antoine Pietri,
+  Bernhard Walle, Bjarni Ingi Gislason, Cameron Will, Charles Cazabon,
+  coralw on github, Dan Fandrich, Daniel Stenberg, Davide Cassioli,
+  Eric Musser, Fabian Keil, Fabian Yamaguchi, Filip Lundgren,
+  gaoxingwang on github, Harry Sarson, Henrik Holst, Ikko Ashimine,
+  Jan Ehrhardt, Jan-Piet Mens, Jan Venekamp, jhoyla on github, Jim Beveridge,
+  Joel Depooter, John H. Ayad, jonny112 on github, Kantanat Wannapaka,
+  Kevin Adler, Kushal Das, Leah Neukirchen, Lucas Pardue, luminixinc on github,
+  Manfred Schwarb, Marcel Raad, Melroy van den Berg, Michael Kaufmann,
+  Michael Wallner, Michał Antoniak, Neal McBurnett, neutric on github,
+  Niels Martignène, Patrick Monnerat, pheiduck on github, Ray Satiro,
+  Ryan Schmidt, Samuel Henrique, Sandro Jaeckel, Satadru Pramanik,
   Sebastian Sterk, siddharthchhabrap on github, Stav Nir, Stefan Eissing,
   Stephen Boost, Stephen M. Coakley, updatede on github, Viktor Szakats,
   Xiaoke Wang,
-  (52 contributors)
+  (59 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -257,6 +276,7 @@ References to bug reports and discussions on issues:
  [78] = https://curl.se/bug/?i=8408
  [79] = https://curl.se/mail/lib-2022-02/0070.html
  [80] = https://curl.se/bug/?i=8430
+ [81] = https://curl.se/bug/?i=8487
  [82] = https://curl.se/bug/?i=8397
  [83] = https://curl.se/bug/?i=8437
  [84] = https://curl.se/bug/?i=8396
@@ -299,3 +319,19 @@ References to bug reports and discussions on issues:
  [122] = https://curl.se/bug/?i=8444
  [123] = https://curl.se/bug/?i=8442
  [124] = https://curl.se/bug/?i=8438
+ [125] = https://curl.se/bug/?i=8472
+ [126] = https://curl.se/bug/?i=8480
+ [127] = https://curl.se/bug/?i=8471
+ [128] = https://curl.se/bug/?i=8481
+ [129] = https://curl.se/bug/?i=8482
+ [130] = https://curl.se/bug/?i=8479
+ [131] = https://curl.se/bug/?i=8476
+ [132] = https://curl.se/bug/?i=8475
+ [133] = https://curl.se/bug/?i=8474
+ [134] = https://curl.se/bug/?i=8470
+ [135] = https://curl.se/bug/?i=8469
+ [136] = https://curl.se/bug/?i=8289
+ [137] = https://curl.se/bug/?i=8455
+ [138] = https://curl.se/bug/?i=8455
+ [139] = https://curl.se/bug/?i=8455
+ [141] = https://curl.se/bug/?i=8459
