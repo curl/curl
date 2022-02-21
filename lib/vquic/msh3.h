@@ -29,8 +29,8 @@
 #include <msh3.h>
 
 struct quicsocket {
-  MSH3_API* Api;
-  MSH3_CONNECTION* Connection;
+  MSH3_API* api;
+  MSH3_CONNECTION* conn;
 };
 
 #endif /* USE_MSQUIC */
