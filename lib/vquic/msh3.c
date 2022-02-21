@@ -25,6 +25,10 @@
 #ifdef USE_MSH3
 
 #include "urldata.h"
+#include "curl_printf.h"
+#include "timeval.h"
+#include "multiif.h"
+#include "sendf.h"
 
 static CURLcode msh3_do_it(struct Curl_easy *data, bool *done);
 static int msh3_getsock(struct Curl_easy *data,
@@ -107,8 +111,8 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
   }
 
   conn->quic = qs;
-  conn->recv[sockindex] = h3_stream_recv;
-  conn->send[sockindex] = h3_stream_send;
+  conn->recv[sockindex] = msh3_stream_recv;
+  conn->send[sockindex] = msh3_stream_send;
   conn->handler = &msh3_curl_handler_http3;
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->httpversion = 30;
@@ -214,7 +218,7 @@ CURLcode Curl_quic_done_sending(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   DEBUGASSERT(conn);
-  if(conn->handler == &Curl_handler_http3) {
+  if(conn->handler == &msh3_curl_handler_http3) {
     // TODO - What now?
   }
 
