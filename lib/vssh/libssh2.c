@@ -433,7 +433,9 @@ static int sshkeycallback(struct Curl_easy *easy,
  * libssh2 1.2.8 fixed the problem with 32bit ints used for sockets on win64.
  */
 #ifdef HAVE_LIBSSH2_SESSION_HANDSHAKE
-#define libssh2_session_startup(x,y) libssh2_session_handshake(x,y)
+#define session_startup(x,y) libssh2_session_handshake(x, (libssh2_socket_t)y)
+#else
+#define session_startup(x,y) libssh2_session_startup(x, (int)y)
 #endif
 
 static CURLcode ssh_knownhost(struct Curl_easy *data)
@@ -932,7 +934,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       /* FALLTHROUGH */
 
     case SSH_S_STARTUP:
-      rc = libssh2_session_startup(sshc->ssh_session, (int)sock);
+      rc = session_startup(sshc->ssh_session, sock);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
