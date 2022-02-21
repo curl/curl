@@ -30,6 +30,13 @@
 #include "multiif.h"
 #include "sendf.h"
 
+//#define DEBUG_HTTP3
+#ifdef DEBUG_HTTP3
+#define H3BUGF(x) x
+#else
+#define H3BUGF(x) do { } while(0)
+#endif
+
 static CURLcode msh3_do_it(struct Curl_easy *data, bool *done);
 static int msh3_getsock(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks);
@@ -40,6 +47,14 @@ static unsigned int msh3_conncheck(struct Curl_easy *data,
                                    unsigned int checks_to_perform);
 static Curl_recv msh3_stream_recv;
 static Curl_send msh3_stream_send;
+static void MSH3_CALL msh3_header_received(MSH3_REQUEST* Request,
+                                           void* IfContext,
+                                           const MSH3_HEADER* Header);
+static void MSH3_CALL msh3_data_received(MSH3_REQUEST* Request, void* IfContext,
+                                         uint32_t Length, const uint8_t* Data);
+static void MSH3_CALL msh3_complete(MSH3_REQUEST* Request, void* IfContext,
+                                    bool Aborted, uint64_t AbortError);
+static void MSH3_CALL msh3_shutdown(MSH3_REQUEST* Request, void* IfContext);
 
 static const struct Curl_handler msh3_curl_handler_http3 = {
   "HTTPS",                              /* scheme */
@@ -64,6 +79,13 @@ static const struct Curl_handler msh3_curl_handler_http3 = {
   PROTOPT_SSL | PROTOPT_STREAM          /* flags */
 };
 
+static const MSH3_REQUEST_IF msh3_request_if = {
+  msh3_header_received,
+  msh3_data_received,
+  msh3_complete,
+  msh3_shutdown
+};
+
 void Curl_quic_ver(char *p, size_t len)
 {
   (void)msnprintf(p, len, "msh3/%s", "0.0.1");
@@ -76,10 +98,13 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
                            const struct sockaddr *addr,
                            socklen_t addrlen)
 {
-  CURLcode result;
   struct quicsocket *qs = &conn->hequic[sockindex];
   bool unsecure = !conn->ssl_config.verifypeer;
   memset(qs, 0, sizeof(*qs));
+
+  (void)sockfd;
+  (void)addr;
+  (void)addrlen;
 
   qs->api = MsH3ApiOpen();
   if(!qs->api) {
@@ -103,8 +128,11 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
                                 bool *connected)
 {
   struct quicsocket *qs = &conn->hequic[sockindex];
+  MSH3_CONNECTION_STATE state;
 
-  MSH3_CONNECTION_STATE state = MsH3ConnectionGetState(qs->conn, false);
+  (void)data;
+
+  state = MsH3ConnectionGetState(qs->conn, false);
   *connected = state == MSH3_CONN_CONNECTED;
   if (state == MSH3_CONN_HANDSHAKE_FAILED || state == MSH3_CONN_DISCONNECTED) {
     return CURLE_COULDNT_CONNECT;
@@ -161,8 +189,8 @@ static unsigned int msh3_conncheck(struct Curl_easy *data,
 static CURLcode msh3_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn, bool dead_connection)
 {
-  (void)data;
   struct quicsocket *qs = conn->quic;
+  (void)data;
   (void)dead_connection;
   MsH3ConnectionClose(qs->conn);
   MsH3ApiClose(qs->api);
@@ -172,8 +200,12 @@ static CURLcode msh3_disconnect(struct Curl_easy *data,
 void Curl_quic_disconnect(struct Curl_easy *data, struct connectdata *conn,
                           int tempindex)
 {
-  if(conn->transport == TRNSPRT_QUIC)
-    msh3_disconnect(data, &conn->hequic[tempindex], false);
+  (void)data;
+  if(conn->transport == TRNSPRT_QUIC) {
+    struct quicsocket *qs = &conn->hequic[tempindex];
+    MsH3ConnectionClose(qs->conn);
+    MsH3ApiClose(qs->api);
+  }
 }
 
 static ssize_t msh3_stream_recv(struct Curl_easy *data,
@@ -182,6 +214,12 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
                                 size_t buffersize,
                                 CURLcode *curlcode)
 {
+  (void)data;
+  (void)sockindex;
+  (void)buf;
+  (void)buffersize;
+  *curlcode = CURLE_RECV_ERROR;
+  return -1;
 }
 
 static ssize_t msh3_stream_send(struct Curl_easy *data,
@@ -193,25 +231,59 @@ static ssize_t msh3_stream_send(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   struct HTTP *stream = data->req.p.http;
   struct quicsocket *qs = conn->quic;
+  MSH3_REQUEST* Request;
+
+  (void)sockindex;
+  (void)mem;
 
   if(!stream->h3req) {
     stream->h3req = TRUE;
-    CURLcode result = http_request(data, mem, len);
-    if(result) {
+    Request = MsH3RequestOpen(qs->conn, &msh3_request_if, NULL, NULL);
+    if(!Request) {
       *curlcode = CURLE_SEND_ERROR;
       return -1;
     }
-    sent = len;
+    return len;
   }
   else {
     H3BUGF(infof(data, "Pass on %zd body bytes to quiche", len));
-    sent = quiche_h3_send_body(qs->h3c, qs->conn, stream->stream3_id,
-                               (uint8_t *)mem, len, FALSE);
-    if(sent < 0) {
-      *curlcode = CURLE_SEND_ERROR;
-      return -1;
-    }
+    *curlcode = CURLE_SEND_ERROR;
+    return -1;
   }
+}
+
+
+static void MSH3_CALL msh3_header_received(MSH3_REQUEST* Request,
+                                           void* IfContext,
+                                           const MSH3_HEADER* Header)
+{
+  (void)Request;
+  (void)IfContext;
+  (void)Header;
+}
+
+static void MSH3_CALL msh3_data_received(MSH3_REQUEST* Request, void* IfContext,
+                                         uint32_t Length, const uint8_t* Data)
+{
+  (void)Request;
+  (void)IfContext;
+  (void)Length;
+  (void)Data;
+}
+
+static void MSH3_CALL msh3_complete(MSH3_REQUEST* Request, void* IfContext,
+                                    bool Aborted, uint64_t AbortError)
+{
+  (void)Request;
+  (void)IfContext;
+  (void)Aborted;
+  (void)AbortError;
+}
+
+static void MSH3_CALL msh3_shutdown(MSH3_REQUEST* Request, void* IfContext)
+{
+  (void)Request;
+  (void)IfContext;
 }
 
 CURLcode Curl_quic_done_sending(struct Curl_easy *data)
