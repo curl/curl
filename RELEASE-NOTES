@@ -146,7 +146,7 @@ This release includes the following bugfixes:
  o setopt: do bounds-check before strdup [99]
  o setopt: fix the TLSAUTH #ifdefs for proxy-disabled builds [53]
  o sha256: Fix minimum OpenSSL version [102]
- o smb: passing a socket for writing and reading data instead of FIRSTSOCKET [90]
+ o smb: pass socket for writing and reading data instead of FIRSTSOCKET [90]
  o ssl: reduce allocated space for ssl backend when FTP is disabled [127]
  o test3021: disable all msys2 path transformation
  o test374: gif data without new line at the end [20]
@@ -160,7 +160,7 @@ This release includes the following bugfixes:
  o url: keep trailing dot in host name [62]
  o url: make Curl_disconnect return void [48]
  o urlapi: handle "redirects" smarter [119]
- o urldata: CONN_IS_PROXIED replaces bits.close when proxy can be disabled [52]
+ o urldata: CONN_IS_PROXIED replaces bits.proxy when proxy can be disabled [52]
  o urldata: remove conn->bits.user_passwd [105]
  o version_win32: fix warning for `CURL_WINDOWS_APP` [93]
  o vtls: pass on the right SNI name [61]
