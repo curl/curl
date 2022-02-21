@@ -136,7 +136,7 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
 
   state = MsH3ConnectionGetState(qs->conn, false);
   *connected = state == MSH3_CONN_CONNECTED;
-  if (state == MSH3_CONN_HANDSHAKE_FAILED || state == MSH3_CONN_DISCONNECTED) {
+  if(state == MSH3_CONN_HANDSHAKE_FAILED || state == MSH3_CONN_DISCONNECTED) {
     return CURLE_COULDNT_CONNECT;
   }
 
@@ -248,14 +248,14 @@ static void MSH3_CALL msh3_data_received(MSH3_REQUEST* Request, void* IfContext,
   struct msh3request* req = IfContext;
   // TODO - Add locking to synchronize with curl thread
   (void)Request;
-  if (req->recv_buf_len + (size_t)Length > req->recv_buf_alloc) {
+  if(req->recv_buf_len + (size_t)Length > req->recv_buf_alloc) {
     size_t new_recv_buf_alloc_len = req->recv_buf_alloc << 1; // TODO - handle overflow
     uint8_t* new_recv_buf = malloc(new_recv_buf_alloc_len);
-    if (!new_recv_buf) {
+    if(!new_recv_buf) {
       // TODO - handle error
       return;
     }
-    if (req->recv_buf_len) {
+    if(req->recv_buf_len) {
       memcpy(new_recv_buf, req->recv_buf, req->recv_buf_len);
     }
     req->recv_buf_alloc = new_recv_buf_alloc_len;
@@ -299,12 +299,12 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
     *curlcode = req->recv_error;
     return -1;
   }
-  if (req->recv_buf_len) {
+  if(req->recv_buf_len) {
     if(req->recv_buf_len < buffersize) {
       buffersize = req->recv_buf_len;
     }
     memcpy(buf, req->recv_buf, buffersize);
-    if (buffersize < req->recv_buf_len) {
+    if(buffersize < req->recv_buf_len) {
       memmove(req->recv_buf, req->recv_buf+buffersize,
               req->recv_buf_len-buffersize);
     }
@@ -333,7 +333,7 @@ static ssize_t msh3_stream_send(struct Curl_easy *data,
   if(!stream->h3req) {
     stream->h3req = TRUE;
     req = make_msh3request();
-    if (!req) {
+    if(!req) {
       *curlcode = CURLE_OUT_OF_MEMORY;
       return -1;
     }
