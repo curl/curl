@@ -5,7 +5,7 @@
       *                            | (__| |_| |  _ <| |___
       *                             \___|\___/|_| \_\_____|
       *
-      * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+      * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
@@ -1679,7 +1679,7 @@
      d                 c                   20
       *
      d CURLMIMEOPT_FORMESCAPE...
-     d                                     X'0000000'
+     d                 c                   X'00000001'
       *
      d CURLINFO        s             10i 0 based(######ptr######)               Enum
      d  CURLINFO_EFFECTIVE_URL...                                               CURLINFO_STRING + 1
@@ -2316,7 +2316,7 @@
      d                                     qualified
      d  name                           *                                        const char *
      d  id                                 like(CURLoption)
-     d  type                               like(curl_easytyoe)
+     d  type                               like(curl_easytype)
      d  flags                        10u 0
       *
      d curl_hstsentry...
@@ -2926,7 +2926,7 @@
       *
      d curl_easy_option_by_name...
      d                 pr              *   extproc('curl_easy_option_by_name')  curl_easyoption *
-     d  name                           *   value option(*string)
+     d  name                           *   value options(*string)
       *
      d curl_easy_option_by_id...
      d                 pr              *   extproc('curl_easy_option_by_id')    curl_easyoption *
@@ -3113,7 +3113,7 @@
      d curl_easy_option_by_name_ccsid...
      d                 pr              *   extproc(                             curl_easyoption *
      d                                      'curl_easy_option_by_name_ccsid')
-     d  name                           *   value option(*string)
+     d  name                           *   value options(*string)
      d  ccsid                        10u 0 value
       *
      d curl_easy_option_get_name_ccsid...
