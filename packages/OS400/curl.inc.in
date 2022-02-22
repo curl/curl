@@ -1679,7 +1679,7 @@
      d                 c                   20
       *
      d CURLMIMEOPT_FORMESCAPE...
-     d                 c                   X'00000000'
+     d                 c                   X'00000001'
       *
      d CURLINFO        s             10i 0 based(######ptr######)               Enum
      d  CURLINFO_EFFECTIVE_URL...                                               CURLINFO_STRING + 1
