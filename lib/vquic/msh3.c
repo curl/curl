@@ -29,8 +29,9 @@
 #include "timeval.h"
 #include "multiif.h"
 #include "sendf.h"
+#include "connect.h"
 
-//#define DEBUG_HTTP3
+#define DEBUG_HTTP3
 #ifdef DEBUG_HTTP3
 #define H3BUGF(x) x
 #else
@@ -105,8 +106,10 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   memset(qs, 0, sizeof(*qs));
 
   (void)sockfd;
-  (void)addr;
+  (void)addr; // TODO - Pass address along
   (void)addrlen;
+
+  H3BUGF(infof(data, "creating new api/connection"));
 
   qs->api = MsH3ApiOpen();
   if(!qs->api) {
@@ -132,23 +135,28 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
   struct quicsocket *qs = &conn->hequic[sockindex];
   MSH3_CONNECTION_STATE state;
 
-  (void)data;
+  H3BUGF(infof(data, "polling connection state"));
 
   state = MsH3ConnectionGetState(qs->conn, false);
   *connected = state == MSH3_CONN_CONNECTED;
   if(state == MSH3_CONN_HANDSHAKE_FAILED || state == MSH3_CONN_DISCONNECTED) {
+    failf(data, "failed to connect, state=%u", (uint32_t)state);
     return CURLE_COULDNT_CONNECT;
   }
 
-  conn->quic = qs;
-  conn->recv[sockindex] = msh3_stream_recv;
-  conn->send[sockindex] = msh3_stream_send;
-  conn->handler = &msh3_curl_handler_http3;
-  conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
-  conn->httpversion = 30;
-  conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+  if (state == MSH3_CONN_CONNECTED) {
+    H3BUGF(infof(data, "connection connected"));
+    *connected = true;
+    conn->quic = qs;
+    conn->recv[sockindex] = msh3_stream_recv;
+    conn->send[sockindex] = msh3_stream_send;
+    conn->handler = &msh3_curl_handler_http3;
+    conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
+    conn->httpversion = 30;
+    conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+    // TODO - Clean up other happy-eyeballs connection(s)?
+  }
 
-  // TODO - Set up function pointers?
   return CURLE_OK;
 }
 
@@ -192,6 +200,7 @@ static CURLcode msh3_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn, bool dead_connection)
 {
   struct quicsocket *qs = conn->quic;
+  H3BUGF(infof(data, "disconnecting (msh3)"));
   (void)data;
   (void)dead_connection;
   MsH3ConnectionClose(qs->conn);
@@ -204,6 +213,7 @@ void Curl_quic_disconnect(struct Curl_easy *data, struct connectdata *conn,
 {
   (void)data;
   if(conn->transport == TRNSPRT_QUIC) {
+    H3BUGF(infof(data, "disconnecting (curl)"));
     struct quicsocket *qs = &conn->hequic[tempindex];
     MsH3ConnectionClose(qs->conn);
     MsH3ApiClose(qs->api);
@@ -295,11 +305,15 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
   struct quicsocket *qs = conn->quic;
   struct msh3request* req = (void*)stream->stream3_id;
   (void)sockindex;
+  H3BUGF(infof(data, "msh3_stream_recv %z", buffersize));
   if(req->recv_complete && req->recv_error) {
+    failf(data, "request aborted");
     *curlcode = req->recv_error;
     return -1;
   }
+  // TODO - indicate received headers
   if(req->recv_buf_len) {
+    stream->firstbody = true;
     if(req->recv_buf_len < buffersize) {
       buffersize = req->recv_buf_len;
     }
@@ -312,7 +326,9 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
   } else {
     buffersize = 0;
   }
-  // TODO - how to handle complete case?
+  if(req->recv_complete) {
+    streamclose(conn, "End of stream");
+  }
   return (ssize_t)buffersize;
 }
 
@@ -331,6 +347,7 @@ static ssize_t msh3_stream_send(struct Curl_easy *data,
   (void)mem;
 
   if(!stream->h3req) {
+    H3BUGF(infof(data, "creating new request"));
     stream->h3req = TRUE;
     req = make_msh3request();
     if(!req) {
@@ -354,9 +371,9 @@ static ssize_t msh3_stream_send(struct Curl_easy *data,
 CURLcode Curl_quic_done_sending(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
-  DEBUGASSERT(conn);
   if(conn->handler == &msh3_curl_handler_http3) {
-    // TODO - What now?
+    struct HTTP *stream = data->req.p.http;
+    stream->upload_done = TRUE;
   }
 
   return CURLE_OK;

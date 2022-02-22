@@ -165,7 +165,7 @@ Build msh3:
      % mkdir build && cd build
      % cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
      % cmake --build .
-     % sudo cmake --install .
+     % cmake --install .
 
 Build curl:
 
