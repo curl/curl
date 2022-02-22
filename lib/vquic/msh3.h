@@ -35,6 +35,9 @@ struct quicsocket {
 
 struct msh3request {
   MSH3_REQUEST *req;
+  /* Receive Headers */
+  size_t recv_header_count;
+  /* Receive Data */
   uint8_t* recv_buf;
   size_t recv_buf_alloc;
   size_t recv_buf_len;
