@@ -260,7 +260,7 @@ _ Likewise, if SCP and SFTP protocols have to be compiled in, LIBSSH2
   developent environment must be installed.
 _ Install the curl source directory in IFS. Do NOT install it in the
   installation target directory (which defaults to /curl).
-_ Enter shell (QSH)
+_ Enter Qshell (QSH, not PASE)
 _ Change current directory to the curl installation directory
 _ Change current directory to ./packages/OS400
 _ Edit file iniscript.sh. You may want to change tunable configuration
@@ -269,7 +269,7 @@ _ Edit file iniscript.sh. You may want to change tunable configuration
 _ Copy any file in the current directory to makelog (i.e.:
   cp initscript.sh makelog): this is intended to create the makelog file with
   an ASCII CCSID!
-_ Enter the command "sh makefile.sh > makelog 2>&1'
+_ Enter the command "sh makefile.sh > makelog 2>&1"
 _ Examine the makelog file to check for compilation errors.
 
   Leaving file initscript.sh unchanged, this will produce the following OS/400
