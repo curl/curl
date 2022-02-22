@@ -138,7 +138,6 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
   //H3BUGF(infof(data, "polling connection state"));
 
   state = MsH3ConnectionGetState(qs->conn, false);
-  *connected = state == MSH3_CONN_CONNECTED;
   if(state == MSH3_CONN_HANDSHAKE_FAILED || state == MSH3_CONN_DISCONNECTED) {
     failf(data, "failed to connect, state=%u", (uint32_t)state);
     return CURLE_COULDNT_CONNECT;
@@ -386,6 +385,7 @@ static ssize_t msh3_stream_send(struct Curl_easy *data,
       *curlcode = CURLE_SEND_ERROR;
       return -1;
     }
+    *curlcode = CURLE_OK;
     stream->stream3_id = (int64_t)req;
     return len;
   }
