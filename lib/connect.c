@@ -74,6 +74,7 @@
 #include "warnless.h"
 #include "conncache.h"
 #include "multihandle.h"
+#include "share.h"
 #include "version_win32.h"
 #include "quic.h"
 #include "socks.h"
@@ -1486,7 +1487,11 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
     find.id_tofind = data->state.lastconnect_id;
     find.found = NULL;
 
-    Curl_conncache_foreach(data, data->multi_easy?
+    Curl_conncache_foreach(data,
+                           data->share && (data->share->specifier
+                           & (1<< CURL_LOCK_DATA_CONNECT))?
+                           &data->share->conn_cache:
+                           data->multi_easy?
                            &data->multi_easy->conn_cache:
                            &data->multi->conn_cache, &find, conn_is_conn);
 
