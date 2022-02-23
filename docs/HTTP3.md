@@ -166,6 +166,7 @@ Build msh3:
      % cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
      % cmake --build .
      % cmake --install .
+     % export LD_LIBRARY_PATH=/usr/local/lib/
 
 Build curl:
 
@@ -176,6 +177,10 @@ Build curl:
      % ./configure LDFLAGS="-Wl,-rpath,/usr/local/lib" --with-openssl=$PWD/../msh3/msquic/submodules/openssl --with-msh3=/usr/local
      % make
      % make install
+
+Run curl:
+
+     % /usr/local/bin/curl -v --http3 https://www.google.com
 
 # HTTP/3 Test server
 
