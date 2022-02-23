@@ -32,7 +32,7 @@
 #include "connect.h"
 #include "h2h3.h"
 
-#define DEBUG_HTTP3
+//#define DEBUG_HTTP3
 #ifdef DEBUG_HTTP3
 #define H3BUGF(x) x
 #else
@@ -135,8 +135,6 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
 {
   struct quicsocket *qs = &conn->hequic[sockindex];
   MSH3_CONNECTION_STATE state;
-
-  //H3BUGF(infof(data, "polling connection state"));
 
   state = MsH3ConnectionGetState(qs->conn, false);
   if(state == MSH3_CONN_HANDSHAKE_FAILED || state == MSH3_CONN_DISCONNECTED) {
@@ -283,14 +281,14 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST* Request,
   struct msh3request* req = IfContext;
   size_t total_len;
   (void)Request;
-  /*printf("* msh3_header_received ");
-  fwrite(Header->Name, 1, Header->NameLength, stdout);
-  printf(":");
-  fwrite(Header->Value, 1, Header->ValueLength, stdout);
-  printf("\n");*/
+  H3BUGF(printf("* msh3_header_received "));
+  H3BUGF(fwrite(Header->Name, 1, Header->NameLength, stdout));
+  H3BUGF(printf(":"));
+  H3BUGF(fwrite(Header->Value, 1, Header->ValueLength, stdout));
+  H3BUGF(printf("\n"));
 
   if(req->recv_header_complete) {
-    //printf("* ignoring header after data\n");
+    H3BUGF(printf("* ignoring header after data\n"));
     return;
   }
 
@@ -326,9 +324,9 @@ static void MSH3_CALL msh3_data_received(MSH3_REQUEST* Request, void* IfContext,
   const size_t cur_recv_len = req->recv_header_len + req->recv_data_len;
   // TODO - Add locking to synchronize with curl thread
   (void)Request;
-  //printf("* msh3_data_received %u. %zu buffered, %zu allocated\n", Length, cur_recv_len, req->recv_buf_alloc);
+  H3BUGF(printf("* msh3_data_received %u. %zu buffered, %zu allocated\n", Length, cur_recv_len, req->recv_buf_alloc));
   if(!req->recv_header_complete) {
-    //printf("* Headers complete!\n");
+    H3BUGF(printf("* Headers complete!\n"));
     if(!msh3request_ensure_room(req, 2)) {
       // TODO - handle error
       return;
@@ -351,7 +349,7 @@ static void MSH3_CALL msh3_complete(MSH3_REQUEST* Request, void* IfContext,
   struct msh3request* req = IfContext;
   (void)Request;
   (void)AbortError;
-  //printf("* msh3_complete\n");
+  H3BUGF(printf("* msh3_complete\n"));
   if(Aborted) {
     req->recv_error = CURLE_RECV_ERROR;
   }
@@ -362,7 +360,7 @@ static void MSH3_CALL msh3_complete(MSH3_REQUEST* Request, void* IfContext,
 static void MSH3_CALL msh3_shutdown(MSH3_REQUEST* Request, void* IfContext)
 {
   struct msh3request* req = IfContext;
-  //printf("* msh3_shutdown\n");
+  H3BUGF(printf("* msh3_shutdown\n"));
   (void)Request;
   (void)req;
 }
