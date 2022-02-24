@@ -34,8 +34,11 @@ ipfs
  <name>
 HTTP GET
  </name>
+ <setenv>
+CURL_IPFS_GATEWAY=%HOSTIP:%HTTPPORT
+</setenv>
  <command>
-ipfs://%HOSTIP:%HTTPPORT/%TESTNUMBER
+ipfs://%TESTNUMBER
 </command>
 </client>
 
