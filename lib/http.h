@@ -228,17 +228,33 @@ struct HTTP {
 #endif
 
 #ifdef ENABLE_QUIC
+#ifndef USE_MSH3
   /*********** for HTTP/3 we store stream-local data here *************/
   int64_t stream3_id; /* stream we are interested in */
   bool firstheader;  /* FALSE until headers arrive */
   bool firstbody;  /* FALSE until body arrives */
   bool h3req;    /* FALSE until request is issued */
+#endif
   bool upload_done;
 #endif
 #ifdef USE_NGHTTP3
   size_t unacked_window;
   struct h3out *h3out; /* per-stream buffers for upload */
   struct dynbuf overflow; /* excess data received during a single Curl_read */
+#endif
+#ifdef USE_MSH3
+  struct MSH3_REQUEST *req;
+  /* Receive Buffer (Headers and Data) */
+  uint8_t* recv_buf;
+  size_t recv_buf_alloc;
+  /* Receive Headers */
+  size_t recv_header_len;
+  bool recv_header_complete;
+  /* Receive Data */
+  size_t recv_data_len;
+  bool recv_data_complete;
+  /* General Receive Error */
+  CURLcode recv_error;
 #endif
 };
 
