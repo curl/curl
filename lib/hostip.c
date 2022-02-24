@@ -1220,6 +1220,7 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
                            struct Curl_dns_entry **dns)
 {
 #if defined(CURL_DISABLE_DOH) && !defined(CURLRES_ASYNCH)
+  (void)data;
   (void)dns;
 #endif
 #ifndef CURL_DISABLE_DOH
