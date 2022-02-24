@@ -294,6 +294,8 @@ struct OperationConfig {
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */
   struct State state;             /* for create_transfer() */
+  bool rm_partial;                /* on error, remove partially written output
+                                     files */
 };
 
 struct GlobalConfig {

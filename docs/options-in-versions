@@ -191,6 +191,7 @@
 --remote-name (-O)                   4.0
 --remote-name-all                    7.19.0
 --remote-time (-R)                   7.9
+--remove-on-error                    7.83.0
 --request (-X)                       6.0
 --request-target                     7.55.0
 --resolve                            7.21.3

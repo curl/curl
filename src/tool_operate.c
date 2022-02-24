@@ -595,6 +595,10 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       if(global->showerror)
         fprintf(global->errors, "curl: (%d) Failed writing body\n", result);
     }
+    if(result && config->rm_partial) {
+      notef(global, "Removing output file: %s", per->outfile);
+      unlink(per->outfile);
+    }
   }
 
   /* File time can only be set _after_ the file has been closed */
