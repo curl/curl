@@ -170,7 +170,10 @@ static int msh3_getsock(struct Curl_easy *data,
 
   socks[0] = conn->sock[FIRSTSOCKET];
 
-  if(req->recv_header_len) {
+  if(req->recv_error) {
+    bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
+    data->state.drain = 1;
+  } else if(req->recv_header_len) {
     bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
     stream->firstheader = TRUE;
     data->state.drain = 1;
@@ -281,11 +284,11 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST* Request,
   struct msh3request* req = IfContext;
   size_t total_len;
   (void)Request;
-  H3BUGF(printf("* msh3_header_received "));
-  H3BUGF(fwrite(Header->Name, 1, Header->NameLength, stdout));
+  H3BUGF(printf("* msh3_header_received\n"));
+  /*H3BUGF(fwrite(Header->Name, 1, Header->NameLength, stdout));
   H3BUGF(printf(":"));
   H3BUGF(fwrite(Header->Value, 1, Header->ValueLength, stdout));
-  H3BUGF(printf("\n"));
+  H3BUGF(printf("\n"));*/
 
   if(req->recv_header_complete) {
     H3BUGF(printf("* ignoring header after data\n"));
@@ -349,9 +352,9 @@ static void MSH3_CALL msh3_complete(MSH3_REQUEST* Request, void* IfContext,
   struct msh3request* req = IfContext;
   (void)Request;
   (void)AbortError;
-  H3BUGF(printf("* msh3_complete\n"));
+  H3BUGF(printf("* msh3_complete, aborted=%hhu\n", Aborted));
   if(Aborted) {
-    req->recv_error = CURLE_RECV_ERROR;
+    req->recv_error = CURLE_HTTP3; // TODO - how do we pass AbortError?
   }
   req->recv_header_complete = true;
   req->recv_data_complete = true;
@@ -360,9 +363,85 @@ static void MSH3_CALL msh3_complete(MSH3_REQUEST* Request, void* IfContext,
 static void MSH3_CALL msh3_shutdown(MSH3_REQUEST* Request, void* IfContext)
 {
   struct msh3request* req = IfContext;
-  H3BUGF(printf("* msh3_shutdown\n"));
+  //H3BUGF(printf("* msh3_shutdown\n"));
   (void)Request;
   (void)req;
+}
+
+static_assert(sizeof(MSH3_HEADER) == sizeof(struct h2h3pseudo),
+              "Sizes must match for cast below to work");
+
+static ssize_t msh3_stream_send(struct Curl_easy *data,
+                                int sockindex,
+                                const void *mem,
+                                size_t len,
+                                CURLcode *curlcode)
+{
+  struct connectdata *conn = data->conn;
+  struct HTTP *stream = data->req.p.http;
+  struct quicsocket *qs = conn->quic;
+  struct msh3request* req;
+  struct h2h3req *hreq;
+
+  (void)sockindex;
+  (void)mem;
+  H3BUGF(infof(data, "msh3_stream_send %zu", len));
+
+  if(!stream->h3req) {
+    H3BUGF(infof(data, "creating new request"));
+    stream->h3req = TRUE;
+    req = make_msh3request();
+    if(!req) {
+      failf(data, "make request failed");
+      *curlcode = CURLE_OUT_OF_MEMORY;
+      return -1;
+    }
+    *curlcode = Curl_pseudo_headers(data, mem, len, &hreq);
+    if(*curlcode) {
+      failf(data, "Curl_pseudo_headers failed");
+      free_msh3request(req);
+      return -1;
+    }
+    /*for(size_t i = 0; i < hreq->entries; ++i) {
+      H3BUGF(printf("* send_header [%zu]", hreq->header[i].namelen));
+      H3BUGF(fwrite(hreq->header[i].name, 1, hreq->header[i].namelen, stdout));
+      H3BUGF(printf(": [%zu]", hreq->header[i].valuelen));
+      H3BUGF(fwrite(hreq->header[i].value, 1, hreq->header[i].valuelen, stdout));
+      H3BUGF(printf("\n"));
+      if (hreq->header[i].namelen != Headers[i].NameLength) {
+        printf("Mismatch name[%zu] length, %zu != %zu\n", i, hreq->header[i].namelen, Headers[i].NameLength);
+      }
+      for (size_t j = 0; j < hreq->header[i].namelen; ++j) {
+        if (hreq->header[i].name[j] != Headers[i].Name[j]) {
+          printf("Mismatch name[%zu][%zu] %c != %c\n", i, j, hreq->header[i].name[j], Headers[i].Name[j]);
+        }
+      }
+      if (hreq->header[i].valuelen != Headers[i].ValueLength) {
+        printf("Mismatch value[%zu] length, %zu != %zu\n", i, hreq->header[i].valuelen, Headers[i].ValueLength);
+      }
+      for (size_t j = 0; j < hreq->header[i].valuelen; ++j) {
+        if (hreq->header[i].value[j] != Headers[i].Value[j]) {
+          printf("Mismatch value[%zu][%zu] %c != %c\n", i, j, hreq->header[i].value[j], Headers[i].Value[j]);
+        }
+      }
+    }*/
+    H3BUGF(infof(data, "starting request with %zu headers", hreq->entries));
+    req->req = MsH3RequestOpen(qs->conn, &msh3_request_if, req,
+                               (MSH3_HEADER*)hreq->header, hreq->entries);
+    Curl_pseudo_free(hreq);
+    if(!req->req) {
+      failf(data, "request open failed");
+      free_msh3request(req);
+      *curlcode = CURLE_SEND_ERROR;
+      return -1;
+    }
+    *curlcode = CURLE_OK;
+    stream->stream3_id = (int64_t)req;
+    return len;
+  }
+  H3BUGF(infof(data, "send %zd body bytes on request %p", len, (void*)stream->stream3_id));
+  *curlcode = CURLE_SEND_ERROR;
+  return -1;
 }
 
 static ssize_t msh3_stream_recv(struct Curl_easy *data,
@@ -400,6 +479,7 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
     buf += outsize;
     buffersize -= outsize;
     outsize = buffersize;
+    return (ssize_t)outsize;
   }
 
   if(req->recv_data_len) {
@@ -414,6 +494,7 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
     }
     req->recv_data_len -= outsize;
     H3BUGF(infof(data, "returned %zu bytes of data", outsize));
+    return (ssize_t)outsize;
   }
 
   if(req->recv_data_complete) {
@@ -422,47 +503,6 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
   }
 
   return (ssize_t)outsize;
-}
-
-static ssize_t msh3_stream_send(struct Curl_easy *data,
-                                int sockindex,
-                                const void *mem,
-                                size_t len,
-                                CURLcode *curlcode)
-{
-  struct connectdata *conn = data->conn;
-  struct HTTP *stream = data->req.p.http;
-  struct quicsocket *qs = conn->quic;
-  struct msh3request* req;
-
-  (void)sockindex;
-  (void)mem;
-  H3BUGF(infof(data, "msh3_stream_send %zu", len));
-
-  if(!stream->h3req) {
-    H3BUGF(infof(data, "creating new request"));
-    stream->h3req = TRUE;
-    req = make_msh3request();
-    if(!req) {
-      failf(data, "make request failed");
-      *curlcode = CURLE_OUT_OF_MEMORY;
-      return -1;
-    }
-    H3BUGF(infof(data, "starting request"));
-    req->req = MsH3RequestOpen(qs->conn, &msh3_request_if, req, "/");
-    if(!req->req) {
-      failf(data, "request open failed");
-      free_msh3request(req);
-      *curlcode = CURLE_SEND_ERROR;
-      return -1;
-    }
-    *curlcode = CURLE_OK;
-    stream->stream3_id = (int64_t)req;
-    return len;
-  }
-  H3BUGF(infof(data, "send %zd body bytes on request %p", len, (void*)stream->stream3_id));
-  *curlcode = CURLE_SEND_ERROR;
-  return -1;
 }
 
 CURLcode Curl_quic_done_sending(struct Curl_easy *data)
