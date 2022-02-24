@@ -1220,6 +1220,8 @@ static size_t drain_overflow_buffer(struct HTTP *stream)
     if(ncopy != overlen)
       /* make the buffer only keep the tail */
       (void)Curl_dyn_tail(&stream->overflow, overlen - ncopy);
+    else
+      Curl_dyn_reset(&stream->overflow);
   }
   return ncopy;
 }
