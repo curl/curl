@@ -201,9 +201,9 @@ static bool http2_connisdead(struct Curl_easy *data, struct connectdata *conn)
         nread = ((Curl_recv *)httpc->recv_underlying)(
           data, FIRSTSOCKET, httpc->inbuf, H2_BUFSIZE, &result);
       if(nread != -1) {
-        infof(data,
-              "%d bytes stray data read before trying h2 connection",
-              (int)nread);
+        H2BUGF(infof(data,
+                     "%d bytes stray data read before trying h2 connection",
+                     (int)nread));
         httpc->nread_inbuf = 0;
         httpc->inbuflen = nread;
         if(h2_process_pending_input(data, httpc, &result) < 0)
@@ -1236,7 +1236,7 @@ void Curl_http2_done(struct Curl_easy *data, bool premature)
       (void)nghttp2_session_send(httpc->h2);
 
     if(http->stream_id == httpc->pause_stream_id) {
-      infof(data, "stopped the pause stream!");
+      H2BUGF(infof(data, "stopped the pause stream!"));
       httpc->pause_stream_id = 0;
     }
   }
@@ -2045,8 +2045,6 @@ CURLcode Curl_http2_setup(struct Curl_easy *data,
 
   httpc->pause_stream_id = 0;
   httpc->drain_total = 0;
-
-  infof(data, "Connection state changed (HTTP/2 confirmed)");
 
   return CURLE_OK;
 }
