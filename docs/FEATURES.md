@@ -198,7 +198,7 @@
 
 ## IPFS
 
- - Retrieve content from the IPFS network via a public HTTPS gateway.
+ - Retrieve content from the IPFS network via a customizable HTTP gateway.
 
 ## MQTT
 
