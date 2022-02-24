@@ -142,7 +142,7 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
     return CURLE_COULDNT_CONNECT;
   }
 
-  if (state == MSH3_CONN_CONNECTED) {
+  if(state == MSH3_CONN_CONNECTED) {
     H3BUGF(infof(data, "connection connected"));
     *connected = true;
     conn->quic = qs;
@@ -192,7 +192,7 @@ static CURLcode msh3_do_it(struct Curl_easy *data, bool *done)
   struct HTTP *stream = data->req.p.http;
   H3BUGF(infof(data, "msh3_do_it"));
   stream->recv_buf = malloc(MSH3_REQ_INIT_BUF_LEN);
-  if (!stream->recv_buf) {
+  if(!stream->recv_buf) {
     return CURLE_OUT_OF_MEMORY;
   }
   stream->req = ZERO_NULL;
