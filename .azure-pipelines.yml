@@ -219,6 +219,13 @@ stages:
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
           configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --with-libssh2 --with-openssl
           tests: "~571"
+        msys2_mingw64_debug_libssh:
+          name: 64-bit OpenSSL/libssh
+          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
+          container_cmd: C:\msys64\usr\bin\sh
+          prepare: pacman -S --needed --noconfirm --noprogressbar libssh-devel mingw-w64-x86_64-libssh
+          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --with-libssh --with-openssl
+          tests: "~571 ~614"
         msys1_mingw_debug:
           name: 32-bit (legacy)
           container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys1-mingw:ltsc2019
