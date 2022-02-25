@@ -3924,7 +3924,7 @@ AS_HELP_STRING([--disable-alt-svc],[Disable alt-svc support]),
   *) AC_MSG_RESULT(yes)
        ;;
   esac ],
-       AC_MSG_RESULT(no)
+       AC_MSG_RESULT(yes)
 )
 
 dnl only check for HSTS if there's SSL present
