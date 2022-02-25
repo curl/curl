@@ -33,7 +33,7 @@ jobs:
           configure: --enable-debug --with-libssh2 --without-ssl
           macosx-version-min: 10.9
         - name: libssh
-          install: nghttp2 libssh
+          install: openssl nghttp2 libssh
           configure: --enable-debug --with-libssh --with-openssl
           macosx-version-min: 10.9
         - name: c-ares
