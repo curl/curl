@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2017 - 2021 Red Hat, Inc.
+ * Copyright (C) 2017 - 2022 Red Hat, Inc.
  *
  * Authors: Nikos Mavrogiannopoulos, Tomas Mraz, Stanislav Zidek,
  *          Robert Kolcun, Andreas Schneider
@@ -31,10 +31,6 @@
 
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
-
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -81,18 +77,22 @@
 #include "multiif.h"
 #include "select.h"
 #include "warnless.h"
+#include "curl_path.h"
 
-/* for permission and open flags */
-#include <sys/types.h>
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-#include "curl_path.h"
 
 /* A recent macro provided by libssh. Or make our own. */
 #ifndef SSH_STRING_FREE_CHAR
@@ -1468,8 +1468,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
           memcpy(sshc->readdir_line, sshc->readdir_longentry,
                  sshc->readdir_currLen);
           if((sshc->readdir_attrs->flags & SSH_FILEXFER_ATTR_PERMISSIONS) &&
-             ((sshc->readdir_attrs->permissions & S_IFMT) ==
-              S_IFLNK)) {
+             ((sshc->readdir_attrs->permissions & SSH_S_IFMT) ==
+              SSH_S_IFLNK)) {
             sshc->readdir_linkPath = aprintf("%s%s", protop->path,
                                              sshc->readdir_filename);
 
