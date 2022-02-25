@@ -69,7 +69,6 @@
  4.7 STAT for LIST without data connection
 
  5. HTTP
- 5.1 Better persistency for HTTP 1.0
  5.2 Set custom client ip when using haproxy protocol
  5.3 Rearrange request header order
  5.4 Allow SAN names in HTTP/2 server push
@@ -553,11 +552,6 @@
  This is not detailed in any FTP specification.
 
 5. HTTP
-
-5.1 Better persistency for HTTP 1.0
-
- "Better" support for persistent connections over HTTP 1.0
- https://curl.se/bug/feature.cgi?id=1089001
 
 5.2 Set custom client ip when using haproxy protocol
 
