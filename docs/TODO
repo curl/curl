@@ -30,7 +30,6 @@
  1.11 minimize dependencies with dynamically loaded modules
  1.12 updated DNS server while running
  1.13 c-ares and CURLOPT_OPENSOCKETFUNCTION
- 1.14 Typesafe curl_easy_setopt()
  1.15 Monitor connections in the connection pool
  1.16 Try to URL encode given URL
  1.17 Add support for IRIs
@@ -299,23 +298,6 @@
  CURLMOPT_SOCKETFUNCTION it is not owned by the application like other sockets.
 
  See https://github.com/curl/curl/issues/2734
-
-1.14 Typesafe curl_easy_setopt()
-
- One of the most common problems in libcurl using applications is the lack of
- type checks for curl_easy_setopt() which happens because it accepts varargs
- and thus can take any type.
-
- One possible solution to this is to introduce a few different versions of the
- setopt version for the different kinds of data you can set.
-
-  curl_easy_set_num() - sets a long value
-
-  curl_easy_set_large() - sets a curl_off_t value
-
-  curl_easy_set_ptr() - sets a pointer
-
-  curl_easy_set_cb() - sets a callback PLUS its callback data
 
 1.15 Monitor connections in the connection pool
 
