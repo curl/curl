@@ -39,7 +39,6 @@
  1.21 netrc caching and sharing
  1.22 CURLINFO_PAUSE_STATE
  1.23 Offer API to flush the connection pool
- 1.24 TCP Fast Open for windows
  1.25 Expose tried IP addresses that failed
  1.27 hardcode the "localhost" addresses
  1.28 FD_CLOEXEC
@@ -196,6 +195,10 @@
 1. libcurl
 
 1.1 TFO support on Windows
+
+ libcurl supports the CURLOPT_TCP_FASTOPEN option since 7.49.0 for Linux and
+ Mac OS. Windows supports TCP Fast Open starting with Windows 10, version 1607
+ and we should add support for it.
 
  TCP Fast Open is supported on several platforms but not on Windows. Work on
  this was once started but never finished.
@@ -371,12 +374,6 @@
  Sometimes applications want to flush all the existing connections kept alive.
  An API could allow a forced flush or just a forced loop that would properly
  close all connections that have been closed by the server already.
-
-1.24 TCP Fast Open for windows
-
- libcurl supports the CURLOPT_TCP_FASTOPEN option since 7.49.0 for Linux and
- Mac OS. Windows supports TCP Fast Open starting with Windows 10, version 1607
- and we should add support for it.
 
 1.25 Expose tried IP addresses that failed
 
