@@ -3047,8 +3047,8 @@ sub checksystem {
                 $has_libssh=1;
                 if($1 =~ /(\d+)\.(\d+).(\d+)/) {
                     my $v = $1 * 100 + $2 * 10 + $3;
-                    if($v < 96) {
-                        # before 0.9.6
+                    if($v < 95) {
+                        # before 0.9.5
                         $has_oldlibssh = 1;
                     }
                 }
