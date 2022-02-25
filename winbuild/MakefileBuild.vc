@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -288,6 +288,27 @@ SSH2_CFLAGS = $(SSH2_CFLAGS) /I$(SSH2_INC_DIR)
 !ENDIF
 
 
+!IFDEF SSH_PATH
+SSH_INC_DIR= $(SSH_PATH)\include
+SSH_LIB_DIR= $(SSH_PATH)\lib
+SSH_LFLAGS = $(SSH_LFLAGS) "/LIBPATH:$(SSH_LIB_DIR)"
+!ELSE
+SSH_LIB_DIR= $(DEVEL_LIB)
+SSH_INC_DIR= $(DEVEL_INCLUDE)
+!ENDIF
+
+!IF "$(WITH_SSH)"=="dll" || "$(WITH_SSH)"=="static"
+SSH_LIBS   = ssh.lib
+USE_SSH    = true
+SSH        = $(WITH_SSH)
+!ENDIF
+
+!IFDEF USE_SSH
+SSH_CFLAGS = /DHAVE_LIBSSH /DHAVE_LIBSSH_LIBSSH_H /DLIBSSH_WIN32 /DLIBSSH_LIBRARY /DUSE_LIBSSH /DCURL_USE_LIBSSH
+SSH_CFLAGS = $(SSH_CFLAGS) /I$(SSH_INC_DIR)
+!ENDIF
+
+
 !IFNDEF USE_IDN
 USE_IDN   = true
 !ELSEIF "$(USE_IDN)"=="yes"
@@ -449,6 +470,11 @@ CFLAGS = $(CFLAGS) $(SSH2_CFLAGS)
 LFLAGS = $(LFLAGS) $(SSH2_LFLAGS) $(SSH2_LIBS)
 !ENDIF
 
+!IF "$(USE_SSH)"=="true"
+CFLAGS = $(CFLAGS) $(SSH_CFLAGS)
+LFLAGS = $(LFLAGS) $(SSH_LFLAGS) $(SSH_LIBS)
+!ENDIF
+
 !IF "$(USE_IDN)"=="true"
 CFLAGS = $(CFLAGS) $(IDN_CFLAGS)
 !ENDIF
@@ -521,6 +547,7 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DIRDIST)
 	@echo Using NGHTTP2: $(USE_NGHTTP2)
 	@echo Using c-ares: $(USE_CARES)
 	@echo Using SSH2: $(USE_SSH2)
+	@echo Using SSH: $(USE_SSH)
 	@echo Using ZLIB: $(USE_ZLIB)
 	@echo Using IDN:  $(USE_IDN)
 	@echo Using IPv6: $(USE_IPV6)

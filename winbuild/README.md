@@ -83,6 +83,7 @@ where `<options>` is one or many of:
  - `WITH_MBEDTLS=<dll/static>`   - Enable mbedTLS support, DLL or static
  - `WITH_CARES=<dll/static>`     - Enable c-ares support, DLL or static
  - `WITH_ZLIB=<dll/static>`      - Enable zlib support, DLL or static
+ - `WITH_SSH=<dll/static>`       - Enable libSSH support, DLL or static
  - `WITH_SSH2=<dll/static>`      - Enable libSSH2 support, DLL or static
  - `WITH_PREFIX=<dir>`           - Where to install the build
  - `ENABLE_SSPI=<yes/no>`        - Enable SSPI support, defaults to yes
