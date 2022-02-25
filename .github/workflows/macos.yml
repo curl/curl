@@ -32,6 +32,10 @@ jobs:
           install: nghttp2 libssh2
           configure: --enable-debug --with-libssh2 --without-ssl
           macosx-version-min: 10.9
+        - name: libssh
+          install: openssl nghttp2 libssh
+          configure: --enable-debug --with-libssh --with-openssl=/usr/local/opt/openssl
+          macosx-version-min: 10.9
         - name: c-ares
           install: nghttp2
           configure: --enable-debug --enable-ares --without-ssl
