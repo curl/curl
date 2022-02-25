@@ -604,7 +604,6 @@ static ssize_t h3_stream_recv(struct Curl_easy *data,
 
   while(recvd < 0) {
     int64_t s = quiche_h3_conn_poll(qs->h3c, qs->conn, &ev);
-    infof(data, "quiche_h3_conn_poll: %ld", s);
     if(s < 0)
       /* nothing more to do */
       break;
@@ -698,7 +697,6 @@ static ssize_t h3_stream_send(struct Curl_easy *data,
     sent = len;
   }
   else {
-    H3BUGF(infof(data, "Pass on %zd body bytes to quiche", len));
     sent = quiche_h3_send_body(qs->h3c, qs->conn, stream->stream3_id,
                                (uint8_t *)mem, len, FALSE);
     if(sent == QUICHE_H3_ERR_DONE) {
