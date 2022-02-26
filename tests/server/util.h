@@ -51,10 +51,10 @@ extern const char *cmdfile;
 void win32_perror(const char *msg);
 #endif  /* WIN32 or _WIN32 */
 
-#ifdef USE_WINSOCK
+#ifdef WIN32
 void win32_init(void);
 void win32_cleanup(void);
-#endif  /* USE_WINSOCK */
+#endif  /* WIN32 */
 
 /* fopens the test case file */
 FILE *test2fopen(long testno);
