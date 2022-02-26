@@ -277,6 +277,11 @@ int main(int argc, char *argv[])
     main_free(&global);
   }
 
+#ifdef WIN32
+  /* Flush buffers of all streams opened in write or update mode */
+  fflush(NULL);
+#endif
+
 #ifdef __NOVELL_LIBC__
   if(!getenv("_IN_NETWARE_BASH_"))
     tool_pressanykey();

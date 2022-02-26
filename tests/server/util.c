@@ -159,11 +159,10 @@ void win32_perror(const char *msg)
     fprintf(stderr, "%s: ", msg);
   fprintf(stderr, "%s\n", buf);
 }
-#endif  /* WIN32 */
 
-#ifdef USE_WINSOCK
 void win32_init(void)
 {
+#ifdef USE_WINSOCK
   WORD wVersionRequested;
   WSADATA wsaData;
   int err;
@@ -184,13 +183,19 @@ void win32_init(void)
     logmsg("No suitable winsock.dll found -- aborting");
     exit(1);
   }
+#endif  /* USE_WINSOCK */
 }
 
 void win32_cleanup(void)
 {
+#ifdef USE_WINSOCK
   WSACleanup();
-}
 #endif  /* USE_WINSOCK */
+
+  /* flush buffers of all streams regardless of their mode */
+  _flushall();
+}
+#endif  /* WIN32 */
 
 /* set by the main code to point to where the test dir is */
 const char *path = ".";
