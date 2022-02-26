@@ -166,7 +166,6 @@ Build msh3:
      % cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
      % cmake --build .
      % cmake --install .
-     % export LD_LIBRARY_PATH=/usr/local/lib/
 
 Build curl:
 
