@@ -4,7 +4,7 @@ curl and libcurl 7.82.0
  Command line options:         245
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2592
+ Contributors:                 2597
 
 This release includes the following changes:
 
@@ -37,6 +37,7 @@ This release includes the following bugfixes:
  o cmdline-opts/gen.pl: fix option matching to improve references [50]
  o config.d: Clarify _curlrc filename is still valid on Windows [95]
  o configure.ac: use user-specified gssapi dir when using pkg-config [136]
+ o configure: change output for cross-compiled alt-svc support [140]
  o configure: fix '--enable-code-coverage' typo [110]
  o configure: remove support for "embedded ares" [82]
  o configure: requires --with-nss-deprecated to build with NSS [114]
@@ -54,6 +55,7 @@ This release includes the following bugfixes:
  o curl_multi_socket.3: remove callback and typical usage descriptions [7]
  o curl_url_set.3: mention when CURLU_ALLOW_SPACE was added
  o CURLMOPT_TIMERFUNCTION/DATA.3: fix the examples [27]
+ o CURLOPT_PROGRESSFUNCTION.3: fix example struct assignment [147]
  o CURLOPT_RESOLVE.3: change example port to 443
  o CURLOPT_XFERINFOFUNCTION.3: fix typo in example [81]
  o CURLSHOPT_LOCKFUNC.3: fix typo "relased" -> "released" [71]
@@ -68,17 +70,21 @@ This release includes the following bugfixes:
  o formdata: avoid size_t => long typecast overflows [37]
  o ftp: provide error message for control bytes in path [66]
  o gen.pl: terminate "example" sections better [4]
+ o gha: add a macOS CI job with libssh [142]
  o gskit: Convert to using Curl_poll [111]
  o gskit: Fix errors from Curl_strerror refactor [113]
  o gskit: Fix initialization of Curl_ssl_gskit struct [112]
  o h2/h3: allow CURLOPT_HTTPHEADER change ":scheme" [88]
  o hostcheck: fixed to not touch used input strings [38]
  o hostcheck: reduce strlen calls on chained certificates [92]
+ o hostip: avoid unused parameter error in Curl_resolv_check [144]
+ o http2: move two infof calls to debug-h2-only [145]
  o http: make Curl_compareheader() take string length arguments too [87]
  o if2ip: make Curl_ipv6_scope a blank macro when IPv6-disabled [104]
  o KNOWN_BUGS: fix typo "libpsl"
  o ldap: return CURLE_URL_MALFORMAT for bad URL [24]
  o lib: remove support for CURL_DOES_CONVERSIONS [96]
+ o libssh2: don't typecast socket to int for libssh2_session_handshake [151]
  o Makefile.am: Generate VS 2022 projects
  o maketgz: return error if 'make dist' fails [79]
  o mbedtls: enable use of mbedtls without CRL support [57]
@@ -103,6 +109,7 @@ This release includes the following bugfixes:
  o next.d. remove .fi/.nf as they are handled by gen.pl [3]
  o ngtcp2: adapt to changed end of headers callback proto [39]
  o ngtcp2: fix declaration of ‘result’ shadows a previous local [14]
+ o ngtcp2: Reset dynbuf when it is fully drained [143]
  o nss: handshake callback during shutdown has no conn->bundle [55]
  o ntlm: remove unused feature defines [117]
  o openldap: fix compiler warning when built without SSL support [70]
@@ -118,12 +125,15 @@ This release includes the following bugfixes:
  o os400: Add function wrapper for system command [138]
  o os400: Add link to QADRT devkit to README.OS400 [137]
  o os400: Default build to target current release [139]
+ o OS400: fix typos in rpg include file [149]
  o projects: add support for Visual Studio 17 (2022) [124]
  o projects: fix Visual Studio wolfSSL configurations
  o projects: remove support for MSVC before VC10 (Visual Studio 2010) [123]
  o quiche: after leaving h3_recving state, poll again [108]
  o quiche: change qlog file extension to `.sqlog` [44]
+ o quiche: fix upload for bigger content-length [146]
  o quiche: handle stream reset [83]
+ o quiche: remove two leftover debug infof() outputs
  o quiche: verify the server cert on connect [33]
  o quiche: when *recv_body() returns data, drain it before polling again [109]
  o README.md: fix links [118]
@@ -163,8 +173,10 @@ This release includes the following bugfixes:
  o urldata: CONN_IS_PROXIED replaces bits.proxy when proxy can be disabled [52]
  o urldata: remove conn->bits.user_passwd [105]
  o version_win32: fix warning for `CURL_WINDOWS_APP` [93]
+ o vtls: fix socket check conditions [150]
  o vtls: pass on the right SNI name [61]
  o vxworks: drop support [65]
+ o winbuild: add parameter WITH_SSH [120]
  o wolfssl: return CURLE_AGAIN for the SSL_ERROR_NONE case [106]
  o wolfssl: when SSL_read() returns zero, check the error [107]
  o write-out.d: Fix num_headers formatting
@@ -180,19 +192,21 @@ advice from friends like these:
   1337vt on github, Alejandro R. Sedeño, Alessandro Ghedini, Antoine Pietri,
   Bernhard Walle, Bjarni Ingi Gislason, Cameron Will, Charles Cazabon,
   coralw on github, Dan Fandrich, Daniel Stenberg, Davide Cassioli,
-  Eric Musser, Fabian Keil, Fabian Yamaguchi, Filip Lundgren,
+  Eric Musser, Fabian Keil, Fabian Yamaguchi, Farzin on github, Filip Lundgren,
   gaoxingwang on github, Harry Sarson, Henrik Holst, Ikko Ashimine,
-  Jan Ehrhardt, Jan-Piet Mens, Jan Venekamp, jhoyla on github, Jim Beveridge,
-  Joel Depooter, John H. Ayad, jonny112 on github, Kantanat Wannapaka,
-  Kevin Adler, Kushal Das, Leah Neukirchen, Lucas Pardue, luminixinc on github,
+  illusory-dream on github, Jan Ehrhardt, Jan-Piet Mens, Jan Venekamp,
+  Jean-Philippe Menil, jhoyla on github, Jim Beveridge, Joel Depooter,
+  John H. Ayad, jonny112 on github, Kantanat Wannapaka, Kevin Adler,
+  Kushal Das, Leah Neukirchen, Lucas Pardue, luminixinc on github,
   Manfred Schwarb, Marcel Raad, Melroy van den Berg, Michael Kaufmann,
   Michael Wallner, Michał Antoniak, Neal McBurnett, neutric on github,
   Niels Martignène, Patrick Monnerat, pheiduck on github, Ray Satiro,
-  Ryan Schmidt, Samuel Henrique, Sandro Jaeckel, Satadru Pramanik,
-  Sebastian Sterk, siddharthchhabrap on github, Stav Nir, Stefan Eissing,
-  Stephen Boost, Stephen M. Coakley, updatede on github, Viktor Szakats,
+  Rob Boeckermann, Ryan Schmidt, Samuel Henrique, Sandro Jaeckel,
+  Satadru Pramanik, Sebastian Sterk, siddharthchhabrap on github, Stav Nir,
+  Stefan Eissing, Stephen Boost, Stephen M. Coakley, Stewart Gebbie,
+  Tatsuhiro Tsujikawa, updatede on github, Viktor Szakats, vl409 on github,
   Xiaoke Wang,
-  (59 contributors)
+  (66 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -315,6 +329,7 @@ References to bug reports and discussions on issues:
  [117] = https://curl.se/bug/?i=8453
  [118] = https://curl.se/bug/?i=8448
  [119] = https://curl.se/bug/?i=8450
+ [120] = https://curl.se/bug/?i=8514
  [121] = https://curl.se/bug/?i=8444
  [122] = https://curl.se/bug/?i=8444
  [123] = https://curl.se/bug/?i=8442
@@ -334,4 +349,14 @@ References to bug reports and discussions on issues:
  [137] = https://curl.se/bug/?i=8455
  [138] = https://curl.se/bug/?i=8455
  [139] = https://curl.se/bug/?i=8455
+ [140] = https://curl.se/bug/?i=8512
  [141] = https://curl.se/bug/?i=8459
+ [142] = https://curl.se/bug/?i=8513
+ [143] = https://curl.se/bug/?i=7351
+ [144] = https://curl.se/bug/?i=8505
+ [145] = https://curl.se/bug/?i=8502
+ [146] = https://curl.se/bug/?i=8421
+ [147] = https://curl.se/bug/?i=8500
+ [149] = https://curl.se/bug/?i=8494
+ [150] = https://curl.se/bug/?i=8493
+ [151] = https://curl.se/bug/?i=8492
