@@ -160,7 +160,7 @@ Check out the [list of known HTTP3 bugs](https://curl.se/docs/knownbugs.html#HTT
 
 Build msh3:
 
-     % git clone --recursive https://github.com/nibanks/msh3
+     % git clone -b v0.1.0 --single-branch --recursive https://github.com/nibanks/msh3
      % cd msh3
      % mkdir build && cd build
      % cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
