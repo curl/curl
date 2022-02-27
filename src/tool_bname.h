@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifndef HAVE_BASENAME
+#if !defined(HAVE_BASENAME) || defined(MSDOS) || defined(WIN32)
 
 char *tool_basename(char *path);
 

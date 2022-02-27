@@ -73,6 +73,7 @@ static SANITIZEcode rename_if_reserved_dos_device_name(char **const sanitized,
                                                        int flags);
 #endif /* !UNITTESTS (static declarations used if no unit tests) */
 
+static size_t get_max_sanitized_len(const char *file_name, int flags);
 
 /*
 Sanitize a file or path name.
@@ -97,7 +98,7 @@ Without this flag path separators and colons are sanitized.
 
 SANITIZE_ALLOW_RESERVED:   Allow reserved device names.
 Without this flag a reserved device name is renamed (COM1 => _COM1) unless it's
-in a UNC prefixed path.
+in a \\ prefixed path (eg: \\?\, \\.\, UNC) where the names are always allowed.
 
 SANITIZE_ALLOW_TRUNCATE:   Allow truncating a long filename.
 Without this flag if the sanitized filename or path will be too long an error
@@ -124,22 +125,9 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
   if(!file_name)
     return SANITIZE_ERR_BAD_ARGUMENT;
 
-  if((flags & SANITIZE_ALLOW_PATH)) {
-#ifndef MSDOS
-    if(file_name[0] == '\\' && file_name[1] == '\\')
-      /* UNC prefixed path \\ (eg \\?\C:\foo) */
-      max_sanitized_len = 32767-1;
-    else
-#endif
-      max_sanitized_len = PATH_MAX-1;
-  }
-  else
-    /* The maximum length of a filename.
-       FILENAME_MAX is often the same as PATH_MAX, in other words it is 260 and
-       does not discount the path information therefore we shouldn't use it. */
-    max_sanitized_len = (PATH_MAX-1 > 255) ? 255 : PATH_MAX-1;
-
   len = strlen(file_name);
+  max_sanitized_len = get_max_sanitized_len(file_name, flags);
+
   if(len > max_sanitized_len) {
     if(!(flags & SANITIZE_ALLOW_TRUNCATE) ||
        truncate_dryrun(file_name, max_sanitized_len))
@@ -232,6 +220,40 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
   return SANITIZE_ERR_OK;
 }
 
+/*
+Return the maximum sanitized length of the unsanitized 'file_name'.
+
+This is a supporting function for any function that returns a sanitized
+filename.
+*/
+static size_t get_max_sanitized_len(const char *file_name, int flags)
+{
+  size_t max_sanitized_len;
+
+  if((flags & SANITIZE_ALLOW_PATH)) {
+#ifdef MSDOS
+    max_sanitized_len = PATH_MAX-1;
+#else
+    /* Paths that start with \\ may be longer than PATH_MAX (MAX_PATH) on any
+       version of Windows. Starting in Windows 10 1607 (build 14393) any path
+       may be longer than PATH_MAX if the user has opted-in and the application
+       supports it. */
+    if((file_name[0] == '\\' && file_name[1] == '\\') ||
+       curlx_verify_windows_version(10, 0, 14393, PLATFORM_WINNT,
+                                    VERSION_GREATER_THAN_EQUAL))
+      max_sanitized_len = 32767-1;
+    else
+      max_sanitized_len = PATH_MAX-1;
+#endif
+  }
+  else
+    /* The maximum length of a filename.
+       FILENAME_MAX is often the same as PATH_MAX, in other words it is 260 and
+       does not discount the path information therefore we shouldn't use it. */
+    max_sanitized_len = (PATH_MAX-1 > 255) ? 255 : PATH_MAX-1;
+
+  return max_sanitized_len;
+}
 
 /*
 Test if truncating a path to a file will leave at least a single character in
@@ -452,6 +474,11 @@ that some path information may pass through. For example drive letter names
 (C:, D:, etc) are allowed to pass through. For sanitizing a filename use
 sanitize_file_name.
 
+This function does not rename reserved device names in special paths, which is
+'file_name' starts with \\ and 'flags' contains SANITIZE_ALLOW_PATH. For
+example C:\COM1 is surely unintended and would be renamed in any case, but
+\\.\COM1 wouldn't be renamed when paths are allowed.
+
 Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
 Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
 */
@@ -459,11 +486,8 @@ SANITIZEcode rename_if_reserved_dos_device_name(char **const sanitized,
                                                 const char *file_name,
                                                 int flags)
 {
-  /* We could have a file whose name is a device on MS-DOS.  Trying to
-   * retrieve such a file would fail at best and wedge us at worst.  We need
-   * to rename such files. */
-  char *p, *base;
-  char fname[PATH_MAX];
+  char *p, *base, *target;
+  size_t t_len, max_sanitized_len;
 #ifdef MSDOS
   struct_stat st_buf;
 #endif
@@ -476,34 +500,43 @@ SANITIZEcode rename_if_reserved_dos_device_name(char **const sanitized,
   if(!file_name)
     return SANITIZE_ERR_BAD_ARGUMENT;
 
-  /* Ignore UNC prefixed paths, they are allowed to contain a reserved name. */
 #ifndef MSDOS
   if((flags & SANITIZE_ALLOW_PATH) &&
      file_name[0] == '\\' && file_name[1] == '\\') {
-    size_t len = strlen(file_name);
-    *sanitized = malloc(len + 1);
-    if(!*sanitized)
-      return SANITIZE_ERR_OUT_OF_MEMORY;
-    strncpy(*sanitized, file_name, len + 1);
-    return SANITIZE_ERR_OK;
+    *sanitized = strdup(file_name);
+    return (*sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY);
   }
 #endif
 
-  if(strlen(file_name) > PATH_MAX-1 &&
-     (!(flags & SANITIZE_ALLOW_TRUNCATE) ||
-      truncate_dryrun(file_name, PATH_MAX-1)))
-    return SANITIZE_ERR_INVALID_PATH;
+  max_sanitized_len = get_max_sanitized_len(file_name, flags);
 
-  strncpy(fname, file_name, PATH_MAX-1);
-  fname[PATH_MAX-1] = '\0';
-  base = basename(fname);
+  t_len = strlen(file_name);
+  if(t_len > max_sanitized_len) {
+    if(!(flags & SANITIZE_ALLOW_TRUNCATE) ||
+       truncate_dryrun(file_name, max_sanitized_len))
+      return SANITIZE_ERR_INVALID_PATH;
+
+    t_len = max_sanitized_len;
+  }
+
+  target = malloc(t_len + 1);
+  if(!target)
+    return SANITIZE_ERR_OUT_OF_MEMORY;
+
+  strncpy(target, file_name, t_len);
+  target[t_len] = '\0';
+
+  base = tool_basename(target);
 
   /* Rename reserved device names that are known to be accessible without \\.\
      Examples: CON => _CON, CON.EXT => CON_EXT, CON:ADS => CON_ADS
-     https://support.microsoft.com/en-us/kb/74496
      https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247.aspx
+     https://web.archive.org/web/2014/http://support.microsoft.com/kb/74496
+
+     Windows API has some weird interpretations to find legacy names. It may
+     check the beginning of the path and/or the basename so rename both.
      */
-  for(p = fname; p; p = (p == fname && fname != base ? base : NULL)) {
+  for(p = target; p; p = (p == target && target != base ? base : NULL)) {
     size_t p_len;
     int x = (curl_strnequal(p, "CON", 3) ||
              curl_strnequal(p, "PRN", 3) ||
@@ -536,23 +569,38 @@ SANITIZEcode rename_if_reserved_dos_device_name(char **const sanitized,
     else if(p[x]) /* no match */
       continue;
 
-    /* p points to 'CON' or 'CON ' or 'CON:', etc */
+    /* p points to 'CON' or 'CON ' or 'CON:' (if colon/path allowed), etc.
+       Prepend a '_'. */
+
     p_len = strlen(p);
 
-    /* Prepend a '_' */
-    if(strlen(fname) == PATH_MAX-1) {
+    if(t_len == max_sanitized_len) {
       --p_len;
-      if(!(flags & SANITIZE_ALLOW_TRUNCATE) || truncate_dryrun(p, p_len))
+      --t_len;
+      if(!(flags & SANITIZE_ALLOW_TRUNCATE) ||
+         truncate_dryrun(target, t_len)) {
+        free(target);
         return SANITIZE_ERR_INVALID_PATH;
-      p[p_len] = '\0';
+      }
+      target[t_len] = '\0';
     }
+    else {
+      p = realloc(target, t_len + 2);
+      if(!p) {
+        free(target);
+        return SANITIZE_ERR_OUT_OF_MEMORY;
+      }
+      target = p;
+      p = target + (t_len - p_len);
+    }
+
+    /* prepend '_' to target or base (basename within target) */
     memmove(p + 1, p, p_len + 1);
     p[0] = '_';
     ++p_len;
+    ++t_len;
 
-    /* if fname was just modified then the basename pointer must be updated */
-    if(p == fname)
-      base = basename(fname);
+    base = tool_basename(target);
   }
 
   /* This is the legacy portion from rename_if_dos_device_name that checks for
@@ -566,20 +614,38 @@ SANITIZEcode rename_if_reserved_dos_device_name(char **const sanitized,
     /* Prepend a '_' */
     size_t blen = strlen(base);
     if(blen) {
-      if(strlen(fname) == PATH_MAX-1) {
+      size_t t_len = strlen(target);
+
+      if(t_len == max_sanitized_len) {
         --blen;
-        if(!(flags & SANITIZE_ALLOW_TRUNCATE) || truncate_dryrun(base, blen))
+        --t_len;
+        if(!(flags & SANITIZE_ALLOW_TRUNCATE) ||
+           truncate_dryrun(target, t_len)) {
+          free(target);
           return SANITIZE_ERR_INVALID_PATH;
-        base[blen] = '\0';
+        }
+        target[t_len] = '\0';
       }
+      else {
+        p = realloc(target, t_len + 2);
+        if(!p) {
+          free(target);
+          return SANITIZE_ERR_OUT_OF_MEMORY;
+        }
+        target = p;
+        base = target + (t_len - blen);
+      }
+
       memmove(base + 1, base, blen + 1);
       base[0] = '_';
+      ++blen;
+      ++t_len;
     }
   }
 #endif
 
-  *sanitized = strdup(fname);
-  return (*sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY);
+  *sanitized = target;
+  return SANITIZE_ERR_OK;
 }
 
 #if defined(MSDOS) && (defined(__DJGPP__) || defined(__GO32__))
@@ -599,8 +665,7 @@ char **__crt0_glob_function(char *arg)
 
 /*
  * Function to find CACert bundle on a Win32 platform using SearchPath.
- * (SearchPath is already declared via inclusions done in setup header file)
- * (Use the ASCII version instead of the unicode one!)
+ *
  * The order of the directories it searches is:
  *  1. application's directory
  *  2. current working directory
@@ -616,8 +681,6 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
                          curl_sslbackend backend,
                          const TCHAR *bundle_file)
 {
-  CURLcode result = CURLE_OK;
-
   /* Search and set cert file only if libcurl supports SSL.
    *
    * If Schannel is the selected SSL backend then these locations are
@@ -628,25 +691,34 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
      backend != CURLSSLBACKEND_SCHANNEL) {
 
     DWORD res_len;
-    TCHAR buf[PATH_MAX];
-    TCHAR *ptr = NULL;
+    TCHAR *buf;
 
-    buf[0] = TEXT('\0');
+    /* res_len result is needed TCHARs and includes null terminator */
+    res_len = SearchPath(NULL, bundle_file, NULL, 0, NULL, NULL);
+    if(!res_len)
+      return CURLE_OK;
 
-    res_len = SearchPath(NULL, bundle_file, NULL, PATH_MAX, buf, &ptr);
+    buf = malloc(res_len * sizeof(TCHAR));
+    if(!buf)
+      return CURLE_OUT_OF_MEMORY;
+
+    /* res_len result is written TCHARs but does not include the null
+       terminator, which was also written */
+    res_len = SearchPath(NULL, bundle_file, NULL, res_len, buf, NULL);
     if(res_len > 0) {
       Curl_safefree(config->cacert);
 #ifdef UNICODE
       config->cacert = curlx_convert_wchar_to_UTF8(buf);
-#else
-      config->cacert = strdup(buf);
-#endif
+      Curl_safefree(buf);
       if(!config->cacert)
-        result = CURLE_OUT_OF_MEMORY;
+        return CURLE_OUT_OF_MEMORY;
+#else
+      config->cacert = buf;
+#endif
     }
   }
 
-  return result;
+  return CURLE_OK;
 }
 
 

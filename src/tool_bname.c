@@ -25,7 +25,12 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-#ifndef HAVE_BASENAME
+#if !defined(HAVE_BASENAME) || defined(MSDOS) || defined(WIN32)
+
+/* tool_doswin.c uses tool_basename() even if basename() is available because
+   it expects for 'path' to not be modified and that a pointer will be returned
+   that actually points within 'path' to the basename (which may be empty).
+   basename() as specified by POSIX does not have the same guarantees. */
 
 char *tool_basename(char *path)
 {
