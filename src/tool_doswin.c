@@ -231,7 +231,12 @@ static size_t get_max_sanitized_len(const char *file_name, int flags)
   size_t max_sanitized_len;
 
   if((flags & SANITIZE_ALLOW_PATH)) {
-#ifdef MSDOS
+#ifdef UNITTESTS
+    if(file_name[0] == '\\' && file_name[1] == '\\')
+      max_sanitized_len = 32767-1;
+    else
+      max_sanitized_len = 259;
+#elif defined(MSDOS)
     max_sanitized_len = PATH_MAX-1;
 #else
     /* Paths that start with \\ may be longer than PATH_MAX (MAX_PATH) on any
@@ -247,10 +252,14 @@ static size_t get_max_sanitized_len(const char *file_name, int flags)
 #endif
   }
   else
+#ifdef UNITTESTS
+    max_sanitized_len = 255;
+#else
     /* The maximum length of a filename.
        FILENAME_MAX is often the same as PATH_MAX, in other words it is 260 and
        does not discount the path information therefore we shouldn't use it. */
     max_sanitized_len = (PATH_MAX-1 > 255) ? 255 : PATH_MAX-1;
+#endif
 
   return max_sanitized_len;
 }
@@ -500,14 +509,6 @@ SANITIZEcode rename_if_reserved_dos_device_name(char **const sanitized,
   if(!file_name)
     return SANITIZE_ERR_BAD_ARGUMENT;
 
-#ifndef MSDOS
-  if((flags & SANITIZE_ALLOW_PATH) &&
-     file_name[0] == '\\' && file_name[1] == '\\') {
-    *sanitized = strdup(file_name);
-    return (*sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY);
-  }
-#endif
-
   max_sanitized_len = get_max_sanitized_len(file_name, flags);
 
   t_len = strlen(file_name);
@@ -525,6 +526,14 @@ SANITIZEcode rename_if_reserved_dos_device_name(char **const sanitized,
 
   strncpy(target, file_name, t_len);
   target[t_len] = '\0';
+
+#ifndef MSDOS
+  if((flags & SANITIZE_ALLOW_PATH) &&
+     file_name[0] == '\\' && file_name[1] == '\\') {
+    *sanitized = target;
+    return SANITIZE_ERR_OK;
+  }
+#endif
 
   base = tool_basename(target);
 
@@ -690,10 +699,9 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
   if((curlinfo->features & CURL_VERSION_SSL) &&
      backend != CURLSSLBACKEND_SCHANNEL) {
 
-    DWORD res_len;
+    DWORD res_len, written;
     TCHAR *buf;
 
-    /* res_len result is needed TCHARs and includes null terminator */
     res_len = SearchPath(NULL, bundle_file, NULL, 0, NULL, NULL);
     if(!res_len)
       return CURLE_OK;
@@ -702,10 +710,8 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
     if(!buf)
       return CURLE_OUT_OF_MEMORY;
 
-    /* res_len result is written TCHARs but does not include the null
-       terminator, which was also written */
-    res_len = SearchPath(NULL, bundle_file, NULL, res_len, buf, NULL);
-    if(res_len > 0) {
+    written = SearchPath(NULL, bundle_file, NULL, res_len, buf, NULL);
+    if(written && written < res_len) {
       Curl_safefree(config->cacert);
 #ifdef UNICODE
       config->cacert = curlx_convert_wchar_to_UTF8(buf);
