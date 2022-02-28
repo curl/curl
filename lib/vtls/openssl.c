@@ -208,9 +208,18 @@
      !defined(OPENSSL_IS_BORINGSSL))
 #define HAVE_SSL_CTX_SET_CIPHERSUITES
 #define HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
-/* SET_EC_CURVES is available under the same preconditions: see
- * https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set1_groups.html
+#endif
+
+/*
+ * Whether SSL_CTX_set1_curves_list is available.
+ * OpenSSL: supported since 1.0.2, see
+ *   https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set1_groups.html
+ * BoringSSL: supported since 5fd1807d95f7 (committed 2016-09-30)
+ * LibreSSL: not tested.
  */
+#if ((OPENSSL_VERSION_NUMBER >= 0x10002000L) && \
+     !defined(LIBRESSL_VERSION_NUMBER)) || \
+    defined(OPENSSL_IS_BORINGSSL)
 #define HAVE_SSL_CTX_SET_EC_CURVES
 #endif
 
