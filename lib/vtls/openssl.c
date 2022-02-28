@@ -1167,6 +1167,22 @@ int cert_stuff(struct Curl_easy *data,
   return 1;
 }
 
+CURLcode Curl_ossl_set_client_cert(struct Curl_easy *data, SSL_CTX *ctx,
+                                   char *cert_file,
+                                   const struct curl_blob *cert_blob,
+                                   const char *cert_type, char *key_file,
+                                   const struct curl_blob *key_blob,
+                                   const char *key_type, char *key_passwd)
+{
+  int rv = cert_stuff(data, ctx, cert_file, cert_blob, cert_type, key_file,
+                      key_blob, key_type, key_passwd);
+  if(rv != 1) {
+    return CURLE_SSL_CERTPROBLEM;
+  }
+
+  return CURLE_OK;
+}
+
 /* returns non-zero on failure */
 static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
 {
