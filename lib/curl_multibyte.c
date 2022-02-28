@@ -104,7 +104,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
 #ifdef _UNICODE
   if(filename_w) {
     result = _wopen(filename_w, oflag, pmode);
-    free(filename_w);
+    curlx_unicodefree(filename_w);
   }
   else
     errno = EINVAL;
@@ -124,8 +124,8 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
     result = _wfopen(filename_w, mode_w);
   else
     errno = EINVAL;
-  free(filename_w);
-  free(mode_w);
+  curlx_unicodefree(filename_w);
+  curlx_unicodefree(mode_w);
   return result;
 #else
   return (fopen)(filename, mode);
@@ -143,7 +143,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
 #else
     result = _wstati64(path_w, buffer);
 #endif
-    free(path_w);
+    curlx_unicodefree(path_w);
   }
   else
     errno = EINVAL;
@@ -164,7 +164,7 @@ int curlx_win32_access(const char *path, int mode)
   wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
   if(path_w) {
     result = _waccess(path_w, mode);
-    free(path_w);
+    curlx_unicodefree(path_w);
   }
   else
     errno = EINVAL;
