@@ -47,6 +47,7 @@
 #include "vquic.h"
 #include "h2h3.h"
 #include "vtls/keylog.h"
+#include "vtls/vtls.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -312,6 +313,25 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
     }
   }
   return ssl_ctx;
+}
+
+static CURLcode quic_set_client_cert(struct Curl_easy *data,
+                                     struct quicsocket *qs)
+{
+  struct connectdata *conn = data->conn;
+  SSL_CTX *ssl_ctx = qs->sslctx;
+  char *const ssl_cert = SSL_SET_OPTION(primary.clientcert);
+  const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(primary.cert_blob);
+  const char *const ssl_cert_type = SSL_SET_OPTION(cert_type);
+
+  if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
+    return Curl_ossl_set_client_cert(
+        data, ssl_ctx, ssl_cert, ssl_cert_blob, ssl_cert_type,
+        SSL_SET_OPTION(key), SSL_SET_OPTION(key_blob),
+        SSL_SET_OPTION(key_type), SSL_SET_OPTION(key_passwd));
+  }
+
+  return CURLE_OK;
 }
 
 /** SSL callbacks ***/
@@ -786,6 +806,10 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   qs->sslctx = quic_ssl_ctx(data);
   if(!qs->sslctx)
     return CURLE_QUIC_CONNECT_ERROR;
+
+  result = quic_set_client_cert(data, qs);
+  if(result)
+    return result;
 #endif
 
   if(quic_init_ssl(qs))
