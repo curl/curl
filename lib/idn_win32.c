@@ -78,10 +78,10 @@ bool curl_win32_idn_to_ascii(const char *in, char **out)
     int chars = IdnToAscii(0, in_w, -1, punycode, IDN_MAX_LENGTH);
     curlx_unicodefree(in_w);
     if(chars) {
-      char *mb = curlx_convert_wchar_to_UTF8(punycode);
-      if(mb) {
-        *out = strdup(mb);
-        curlx_unicodefree(mb);
+      char *mstr = curlx_convert_wchar_to_UTF8(punycode);
+      if(mstr) {
+        *out = strdup(mstr);
+        curlx_unicodefree(mstr);
         if(*out)
           success = TRUE;
       }
@@ -103,10 +103,10 @@ bool curl_win32_ascii_to_idn(const char *in, char **out)
                              unicode, IDN_MAX_LENGTH);
     curlx_unicodefree(in_w);
     if(chars) {
-      char *mb = curlx_convert_wchar_to_UTF8(unicode);
-      if(mb) {
-        *out = strdup(mb);
-        curlx_unicodefree(mb);
+      char *mstr = curlx_convert_wchar_to_UTF8(unicode);
+      if(mstr) {
+        *out = strdup(mstr);
+        curlx_unicodefree(mstr);
         if(*out)
           success = TRUE;
       }
