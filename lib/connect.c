@@ -238,7 +238,6 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
 #ifdef HAVE_IPHLPAPI_H
 /*
 *  return the state of a given port
-*  https://docs.microsoft.com/en-us/windows/win32/api/iphlpapi/nf-iphlpapi-gettcptable2
 */
 static CURLcode portstate4(const unsigned short port, LPDWORD state)
 {
@@ -249,14 +248,14 @@ static CURLcode portstate4(const unsigned short port, LPDWORD state)
   DWORD res = 0;
   DWORD i;
 
-  if ((port < 0) || (port > 65535))
+  if((port < 0) || (port > 65535))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  if (!state)
+  if(!state)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   tcp_table = (PMIB_TCPTABLE2)malloc(size);
-  if (!tcp_table) {
+  if(!tcp_table) {
     fprintf(stderr, "portstate4() failed with errno %d: %s",
       errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     return CURLE_OUT_OF_MEMORY;
@@ -264,10 +263,10 @@ static CURLcode portstate4(const unsigned short port, LPDWORD state)
 
   /* With the first call, we get the required size */
   res = GetTcpTable2(tcp_table, &size, TRUE);
-  if (res == ERROR_INSUFFICIENT_BUFFER) {
+  if(res == ERROR_INSUFFICIENT_BUFFER) {
     free(tcp_table);
     tcp_table = (PMIB_TCPTABLE)malloc(size);
-    if (!tcp_table) {
+    if(!tcp_table) {
       fprintf(stderr, "portstate4() failed with errno %d: %s",
         errno, Curl_strerror(errno, buffer, sizeof(buffer)));
       return CURLE_OUT_OF_MEMORY;
@@ -275,10 +274,10 @@ static CURLcode portstate4(const unsigned short port, LPDWORD state)
   }
 
   res = GetTcpTable2(tcp_table, &size, TRUE);
-  if (res == NO_ERROR) {
-    for (i = 0; i < tcp_table->dwNumEntries; i++) {
+  if(res == NO_ERROR) {
+    for(i = 0; i < tcp_table->dwNumEntries; i++) {
       lport = ntohs((unsigned short)tcp_table->table[i].dwLocalPort);
-      if (lport == port) {
+      if(lport == port) {
         *state = tcp_table->table[i].dwState;
         break;
       }
@@ -513,15 +512,15 @@ static CURLcode bindlocal(struct Curl_easy *data,
     int bind_res = -1;
 
     ccode = portstate4(port, &port_st);
-    if (ccode != CURLE_OK)
+    if(ccode != CURLE_OK)
       return ccode;
 
-    if (port_st != MIB_TCP_STATE_TIME_WAIT)
+    if(port_st != MIB_TCP_STATE_TIME_WAIT)
       bind_res = bind(sockfd, sock, sizeof_sa);
 
-    if (bind_res >= 0) {
+    if(bind_res >= 0) {
 #else
-    if (bind(sockfd, sock, sizeof_sa) >= 0) {
+    if(bind(sockfd, sock, sizeof_sa) >= 0) {
 #endif
       /* we succeeded to bind */
       struct Curl_sockaddr_storage add;
