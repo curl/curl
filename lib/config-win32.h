@@ -141,6 +141,9 @@
 #define HAVE_WS2TCPIP_H 1
 #endif
 
+/* Define if you have the <iphlpapi.h> header file. */
+#define HAVE_IPHLPAPI_H 1
+
 /* ---------------------------------------------------------------- */
 /*                        OTHER HEADER INFO                         */
 /* ---------------------------------------------------------------- */

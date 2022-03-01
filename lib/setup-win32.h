@@ -47,6 +47,9 @@
 #    ifdef HAVE_WS2TCPIP_H
 #      include <ws2tcpip.h>
 #    endif
+#    ifdef HAVE_IPHLPAPI_H
+#      include <iphlpapi.h>
+#    endif
 #  endif
 #  include <tchar.h>
 #  ifdef UNICODE
