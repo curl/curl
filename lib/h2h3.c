@@ -192,7 +192,7 @@ CURLcode Curl_pseudo_headers(struct Curl_easy *data,
     while(*vptr && ISSPACE(*vptr))
       vptr++;
     nva[2].value = vptr;
-    infof(data, "set pseduo header %s to %s", H2H3_PSEUDO_SCHEME, vptr);
+    infof(data, "set pseudo header %s to %s", H2H3_PSEUDO_SCHEME, vptr);
   }
   else {
     if(conn->handler->flags & PROTOPT_SSL)
