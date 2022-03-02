@@ -138,6 +138,45 @@ Build curl:
 
  If `make install` results in `Permission denied` error, you will need to prepend it with `sudo`.
 
+# msh3 (msquic) version
+
+## Build Linux (with quictls fork of OpenSSL)
+
+Build msh3:
+
+     % git clone -b v0.1.0 --single-branch --recursive https://github.com/nibanks/msh3
+     % cd msh3 && mkdir build && cd build
+     % cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+     % cmake --build .
+     % cmake --install .
+
+Build curl:
+
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % autoreconf -fi
+     % ./configure LDFLAGS="-Wl,-rpath,/usr/local/lib" --with-msh3=/usr/local --with-openssl
+     % make
+     % make install
+
+Run from `/usr/local/bin/curl`.
+
+## Build Windows (with Schannel)
+
+Build msh3:
+
+     % git clone -b v0.1.0 --single-branch --recursive https://github.com/nibanks/msh3
+     % cd msh3 && mkdir build && cd build
+     % cmake -G 'Visual Studio 17 2022' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+     % cmake --build . --config Release
+     % cmake --install . --config Release
+
+Build curl (in [Visual Studio Command prompt](../winbuild/README.md#open-a-command-prompt)):
+
+     % git clone https://github.com/curl/curl
+     % cd curl/winbuild
+     % nmake /f Makefile.vc mode=dll WITH_MSH3=dll MSH3_PATH="C:/Program Files/msh3" MACHINE=x64
+
 # `--http3`
 
 Use HTTP/3 directly:
@@ -153,57 +192,6 @@ See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
 ## Known Bugs
 
 Check out the [list of known HTTP3 bugs](https://curl.se/docs/knownbugs.html#HTTP3).
-
-# msh3 (msquic) version
-
-## build
-
-### Linux
-
-Build msh3:
-
-     % git clone -b v0.1.0 --single-branch --recursive https://github.com/nibanks/msh3
-     % cd msh3
-     % mkdir build && cd build
-     % cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-     % cmake --build .
-     % cmake --install .
-
-Build curl:
-
-     % cd ..
-     % git clone https://github.com/curl/curl
-     % cd curl
-     % autoreconf -fi
-     % ./configure LDFLAGS="-Wl,-rpath,/usr/local/lib" --with-openssl=$PWD/../msh3/msquic/submodules/openssl --with-msh3=/usr/local
-     % make
-     % make install
-
-### Windows
-
-Build msh3:
-
-Open in [Visual Studio Command prompt](../winbuild/README.md#open-a-command-prompt).
-
-     % git clone -b v0.1.0 --single-branch --recursive https://github.com/nibanks/msh3
-     % cd msh3
-     % mkdir build && cd build
-     % cmake -G 'Visual Studio 17 2022' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-     % cmake --build . --config Release
-     % cmake --install . --config Release
-
-Build curl:
-
-     % cd ..
-     % git clone https://github.com/curl/curl
-     % cd curl/winbuild
-     % nmake /f Makefile.vc mode=dll WITH_MSH3=dll MSH3_PATH="C:/Program Files/msh3" MACHINE=x64
-
-## Run curl
-
-### Linux
-
-     % /usr/local/bin/curl -v --http3 https://www.google.com
 
 # HTTP/3 Test server
 
