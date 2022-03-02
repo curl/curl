@@ -290,7 +290,7 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
       /* TODO - handle error */
       return;
     }
-    msnprintf((char*)stream->recv_buf + stream->recv_header_len,
+    msnprintf((char *)stream->recv_buf + stream->recv_header_len,
               stream->recv_buf_alloc - stream->recv_header_len,
               "HTTP/3 %.*s\n", (int)Header->ValueLength, Header->Value);
   }
@@ -300,7 +300,7 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
       /* TODO - handle error */
       return;
     }
-    msnprintf((char*)stream->recv_buf + stream->recv_header_len,
+    msnprintf((char *)stream->recv_buf + stream->recv_header_len,
               stream->recv_buf_alloc - stream->recv_header_len,
               "%.*s: %.*s\n",
               (int)Header->NameLength, Header->Name,
