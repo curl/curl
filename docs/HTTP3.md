@@ -158,6 +158,8 @@ Check out the [list of known HTTP3 bugs](https://curl.se/docs/knownbugs.html#HTT
 
 ## build
 
+### Linux
+
 Build msh3:
 
      % git clone -b v0.1.0 --single-branch --recursive https://github.com/nibanks/msh3
@@ -177,7 +179,29 @@ Build curl:
      % make
      % make install
 
-Run curl:
+### Windows
+
+Build msh3:
+
+Open in [Visual Studio Command prompt](../winbuild/README.md#open-a-command-prompt).
+
+     % git clone -b v0.1.0 --single-branch --recursive https://github.com/nibanks/msh3
+     % cd msh3
+     % mkdir build && cd build
+     % cmake -G 'Visual Studio 17 2022' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+     % cmake --build . --config Release
+     % cmake --install . --config Release
+
+Build curl:
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl/winbuild
+     % nmake /f Makefile.vc mode=dll WITH_MSH3=dll MSH3_PATH="C:/Program Files/msh3" MACHINE=x64
+
+## Run curl
+
+### Linux
 
      % /usr/local/bin/curl -v --http3 https://www.google.com
 
