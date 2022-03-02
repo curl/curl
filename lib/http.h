@@ -38,7 +38,7 @@ typedef enum {
 #include <nghttp2/nghttp2.h>
 #endif
 
-#if _WIN32 && defined(ENABLE_QUIC)
+#if defined(_WIN32) && defined(ENABLE_QUIC)
 #include <stdint.h>
 #endif
 
