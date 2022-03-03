@@ -38,6 +38,10 @@ typedef enum {
 #include <nghttp2/nghttp2.h>
 #endif
 
+#if defined(_WIN32) && defined(ENABLE_QUIC)
+#include <stdint.h>
+#endif
+
 extern const struct Curl_handler Curl_handler_http;
 
 #ifdef USE_SSL
