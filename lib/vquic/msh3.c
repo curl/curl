@@ -229,8 +229,14 @@ static CURLcode msh3_disconnect(struct Curl_easy *data,
   H3BUGF(infof(data, "disconnecting (msh3)"));
   (void)data;
   (void)dead_connection;
-  MsH3ConnectionClose(qs->conn);
-  MsH3ApiClose(qs->api);
+  if(qs->conn) {
+    MsH3ConnectionClose(qs->conn);
+    qs->conn = ZERO_NULL;
+  }
+  if(qs->api) {
+    MsH3ApiClose(qs->api);
+    qs->api = ZERO_NULL;
+  }
   return CURLE_OK;
 }
 
@@ -241,8 +247,14 @@ void Curl_quic_disconnect(struct Curl_easy *data, struct connectdata *conn,
   (void)data;
   if(conn->transport == TRNSPRT_QUIC) {
     H3BUGF(infof(data, "disconnecting (curl)"));
-    MsH3ConnectionClose(qs->conn);
-    MsH3ApiClose(qs->api);
+    if(qs->conn) {
+      MsH3ConnectionClose(qs->conn);
+      qs->conn = ZERO_NULL;
+    }
+    if(qs->api) {
+      MsH3ApiClose(qs->api);
+      qs->api = ZERO_NULL;
+    }
   }
 }
 
