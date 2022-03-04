@@ -71,16 +71,17 @@ if test "x$OPT_OPENSSL" != xno; then
 
     dnl Try pkg-config even when cross-compiling.  Since we
     dnl specify PKG_CONFIG_LIBDIR we're only looking where
-    dnl the user told us to look
-    OPENSSL_PCDIR="$OPT_OPENSSL/lib/pkgconfig"
+    dnl the user told us to look.
+
+    dnl OpenSSL 3 may use lib64 instead of lib like older versions
+    OPENSSL_PCDIR="$OPT_OPENSSL/lib64/pkgconfig"
     if test -f "$OPENSSL_PCDIR/openssl.pc"; then
       AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
       PKGTEST="yes"
     fi
 
     if test "$PKGTEST" != "yes"; then
-      # try lib64 instead
-      OPENSSL_PCDIR="$OPT_OPENSSL/lib64/pkgconfig"
+      OPENSSL_PCDIR="$OPT_OPENSSL/lib/pkgconfig"
       if test -f "$OPENSSL_PCDIR/openssl.pc"; then
         AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
         PKGTEST="yes"
