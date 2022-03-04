@@ -36,6 +36,7 @@ struct curl_easyoption Curl_easyopts[] = {
   {"APPEND", CURLOPT_APPEND, CURLOT_LONG, 0},
   {"AUTOREFERER", CURLOPT_AUTOREFERER, CURLOT_LONG, 0},
   {"AWS_SIGV4", CURLOPT_AWS_SIGV4, CURLOT_STRING, 0},
+  {"AWS_SIGV4_NB_ENCODING", CURLOPT_AWS_SIGV4_NB_ENCODING, CURLOT_LONG, 0},
   {"BUFFERSIZE", CURLOPT_BUFFERSIZE, CURLOT_LONG, 0},
   {"CAINFO", CURLOPT_CAINFO, CURLOT_STRING, 0},
   {"CAINFO_BLOB", CURLOPT_CAINFO_BLOB, CURLOT_BLOB, 0},
@@ -360,6 +361,6 @@ struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return ((CURLOPT_LASTENTRY%10000) != (315 + 1));
+  return ((CURLOPT_LASTENTRY%10000) != (316 + 1));
 }
 #endif

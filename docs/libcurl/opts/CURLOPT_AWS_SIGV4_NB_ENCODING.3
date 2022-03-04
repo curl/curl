@@ -1,0 +1,68 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_AWS_SIGV4_NB_ENCODING 3 "03 Mars 2022" "libcurl 7.82.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_AWS_SIGV4_NB_ENCODING \- V4 signature Number of Encoding
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_AWS_SIGV4_NB_ENCODING, int param);
+.fi
+.SH DESCRIPTION
+Tell AWS V4 signature authentication the number of
+URL Encode that should be made.
+.PP
+AWS V4 signature should URL encode the URI,
+using this option tell curl to do it (or not),
+0 do not encode, and 1, do a single pass encoding.
+Double encoding is not yet supported.
+.IP Number
+0 or 1
+.SH DEFAULT
+By default, the value of this parameter is 0.
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+
+struct curl_slist *list = NULL;
+
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL,
+                  "https://service.region.example.com/uri");
+  curl_easy_setopt(c, CURLOPT_AWS_SIGV4, "provider1:provider2");
+  curl_easy_setopt(c, CURLOPT_AWS_SIGV4_NB_ENCODING, 1);
+  curl_easy_setopt(c, CURLOPT_USERPWD, "MY_ACCESS_KEY:MY_SECRET_KEY");
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.82.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH NOTES
+This option is useful only comnbined with CURLOPT_AWS_SIGV4
+.SH "SEE ALSO"
+.BR CURLOPT_AWS_SIGV4 "(3), "

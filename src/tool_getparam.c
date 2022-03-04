@@ -112,6 +112,7 @@ static const struct LongShort aliases[]= {
   {"*u", "crlf",                     ARG_BOOL},
   {"*v", "stderr",                   ARG_FILENAME},
   {"*V", "aws-sigv4",                ARG_STRING},
+  {"*W", "aws-sigv4-nb-encoding",    ARG_STRING},
   {"*w", "interface",                ARG_STRING},
   {"*x", "krb",                      ARG_STRING},
   {"*x", "krb4",                     ARG_STRING},
@@ -851,6 +852,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 'V': /* --aws-sigv4 */
         config->authtype |= CURLAUTH_AWS_SIGV4;
         GetStr(&config->aws_sigv4, nextarg);
+        break;
+
+      case 'W': /* --aws-sigv4-nb-encoding */
+        config->aws_nb_encoding = str2unum(&config->aws_nb_encoding, nextarg);
+        if(err)
+          return err;
         break;
 
       case 'v': /* --stderr */

@@ -26,6 +26,7 @@ DPAGES = \
   alt-svc.d \
   anyauth.d \
   append.d \
+  aws-sigv4-nb-encoding.d \
   aws-sigv4.d \
   basic.d \
   cacert.d \

@@ -14,6 +14,7 @@
 --alt-svc                            7.64.1
 --anyauth                            7.10.6
 --append (-a)                        4.8
+--aws-sigv4-nb-encoding              7.82.0
 --aws-sigv4                          7.75.0
 --basic                              7.10.6
 --cacert                             7.5

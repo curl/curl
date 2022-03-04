@@ -299,6 +299,7 @@ struct OperationConfig {
     CLOBBER_NEVER, /* If the file exists, always fail */
     CLOBBER_ALWAYS /* If the file exists, always overwrite it */
   } file_clobber_mode;
+  long aws_nb_encoding;
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */

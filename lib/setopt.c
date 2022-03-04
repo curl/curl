@@ -650,6 +650,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       data->set.httpauth = CURLAUTH_AWS_SIGV4;
     break;
 
+  case CURLOPT_AWS_SIGV4_NB_ENCODING:
+    data->set.aws_nb_encoding = va_arg(param, long);
+    break;
   case CURLOPT_MIMEPOST:
     /*
      * Set to make us do MIME/form POST

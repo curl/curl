@@ -114,6 +114,13 @@ static size_t encode_query_len(const char *url, bool in_query)
   return newlen;
 }
 
+/*
+ * This function do 2 things:
+ * 0: it decode the url in iptr, and put the decoded result in optr
+ * 1: it find the partameter separator(&) in query string, and return
+ *    current iptr pointer, so we can call this function multiple time
+ *    on the same query string, and always get next parameter.
+ */
 static char *decode_query_cpy(char *optr, char *iptr, bool in_query)
 {
   for(;
@@ -479,6 +486,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   Curl_http_method(data, conn, &method, &httpreq);
 
+
   canonical_path = new_encoded_url(&data->state.up.path, FALSE);
   if(!canonical_path)
     goto fail;
@@ -497,8 +505,12 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                   "%s\n" /* SignedHeaders */
                   "%s",  /* HashedRequestPayload in hex */
                   method,
-                  canonical_path,
-                  data->state.up.query ? canonical_query_str : "",
+                  data->set.aws_nb_encoding ? canonical_path :
+                  data->state.up.path,
+                  data->state.up.query ?
+                  (data->set.aws_nb_encoding ?
+                   canonical_query_str :
+                   data->state.up.query) : "",
                   canonical_headers,
                   signed_headers,
                   sha_hex);

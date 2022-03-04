@@ -1769,6 +1769,8 @@ struct UserDefined {
 
   size_t maxconnects;    /* Max idle connections in the connection cache */
 
+  long aws_nb_encoding;  /* Number of encoding in aws v4 signature */
+
   long expect_100_timeout; /* in milliseconds */
   struct Curl_easy *stream_depends_on;
   int stream_weight;

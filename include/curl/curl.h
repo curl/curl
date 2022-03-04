@@ -2122,6 +2122,9 @@ typedef enum {
   /* Set MIME option flags. */
   CURLOPT(CURLOPT_MIME_OPTIONS, CURLOPTTYPE_LONG, 315),
 
+  /* Parameters for V4 signature */
+  CURLOPT(CURLOPT_AWS_SIGV4_NB_ENCODING, CURLOPTTYPE_LONG, 316),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

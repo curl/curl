@@ -1639,6 +1639,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                         config->proxy_key_type);
           my_setopt_str(curl, CURLOPT_AWS_SIGV4,
                         config->aws_sigv4);
+          my_setopt(curl, CURLOPT_AWS_SIGV4_NB_ENCODING,
+                    config->aws_nb_encoding);
 
           if(config->insecure_ok) {
             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
