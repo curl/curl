@@ -25,12 +25,14 @@
 
 static CURLcode unit_setup(void)
 {
-  return CURLE_OK;
+  int res = CURLE_OK;
+  global_init(CURL_GLOBAL_ALL);
+  return res;
 }
 
 static void unit_stop(void)
 {
-
+  curl_global_cleanup();
 }
 
 UNITTEST_START
