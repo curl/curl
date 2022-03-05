@@ -32,8 +32,11 @@ jobs:
         git clone --depth=1 https://github.com/hyperium/hyper.git;
         curl https://sh.rustup.rs -sSf | sh -s -- -y;
         source $HOME/.cargo/env;
-        cd $HOME/hyper;
-        RUSTFLAGS="--cfg hyper_unstable_ffi" cargo build --features client,http1,http2,ffi)
+        rustup toolchain install nightly;)
+      name: install rust
+
+    - run: (cd $HOME/hyper;
+        RUSTFLAGS="--cfg hyper_unstable_ffi" cargo +nightly rustc --features client,http1,http2,ffi -Z unstable-options --crate-type cdylib)
       name: 'install hyper'
 
     - uses: actions/checkout@v2
