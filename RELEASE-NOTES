@@ -15,6 +15,7 @@ This release includes the following bugfixes:
 
  o appveyor: update images from VS 2019 to 2022
  o appveyor: use VS 2017 image for the autotools builds
+ o azure-pipelines: add a build on Windows with libssh [154]
  o bearssl: fix connect error on expired cert and no verify [132]
  o bearssl: fix EXC_BAD_ACCESS on incomplete CA cert [131]
  o bearssl: fix session resumption (session id) [133]
@@ -57,6 +58,7 @@ This release includes the following bugfixes:
  o CURLMOPT_TIMERFUNCTION/DATA.3: fix the examples [27]
  o CURLOPT_PROGRESSFUNCTION.3: fix example struct assignment [147]
  o CURLOPT_RESOLVE.3: change example port to 443
+ o CURLOPT_XFERINFOFUNCTION.3: fix example struct assignment [153]
  o CURLOPT_XFERINFOFUNCTION.3: fix typo in example [81]
  o CURLSHOPT_LOCKFUNC.3: fix typo "relased" -> "released" [71]
  o des: fix compile break for OpenSSL without DES [141]
@@ -66,6 +68,7 @@ This release includes the following bugfixes:
  o docs: document HTTP/2 not insisting on TLS 1.2 [49]
  o docs: fix mandoc -T lint formatting complaints [2]
  o docs: update IETF links to use datatracker [41]
+ o examples/curlx: support building with OpenSSL 1.1.0+ [148]
  o examples/multi-app.c: call curl_multi_remove_handle as well [19]
  o formdata: avoid size_t => long typecast overflows [37]
  o ftp: provide error message for control bytes in path [66]
@@ -85,6 +88,7 @@ This release includes the following bugfixes:
  o ldap: return CURLE_URL_MALFORMAT for bad URL [24]
  o lib: remove support for CURL_DOES_CONVERSIONS [96]
  o libssh2: don't typecast socket to int for libssh2_session_handshake [151]
+ o libssh: fix include files and defines use for Windows builds [156]
  o Makefile.am: Generate VS 2022 projects
  o maketgz: return error if 'make dist' fails [79]
  o mbedtls: enable use of mbedtls without CRL support [57]
@@ -145,7 +149,7 @@ This release includes the following bugfixes:
  o runtests: allow client/file to specify multiple directories
  o runtests: make 'rustls' a testable feature
  o runtests: make 'wolfssl' a testable feature [6]
- o runtests: set 'oldlibssh' for libssh versions before 0.9.6 [122]
+ o runtests: set 'oldlibssh' for libssh versions before 0.9.5 [122]
  o rustls: add CURLOPT_CAINFO_BLOB support [26]
  o schannel: move the algIds array out of schannel.h [135]
  o scripts/cijobs.pl: output data about all currect CI jobs [78]
@@ -165,6 +169,7 @@ This release includes the following bugfixes:
  o tool_findfile: check ~/.config/curlrc too [17]
  o tool_getparam: DNS options that need c-ares now fail without it [31]
  o TPF: drop support [97]
+ o unit1610: init SSL library before calling SHA256 functions [152]
  o url: exclude zonefrom_url when no ipv6 is available [103]
  o url: given a user in the URL, find pwd for that user in netrc [11]
  o url: keep trailing dot in host name [62]
@@ -205,8 +210,8 @@ advice from friends like these:
   Satadru Pramanik, Sebastian Sterk, siddharthchhabrap on github, Stav Nir,
   Stefan Eissing, Stephen Boost, Stephen M. Coakley, Stewart Gebbie,
   Tatsuhiro Tsujikawa, updatede on github, Viktor Szakats, vl409 on github,
-  Xiaoke Wang,
-  (66 contributors)
+  Xiaoke Wang, 梦终无痕
+  (67 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -357,6 +362,11 @@ References to bug reports and discussions on issues:
  [145] = https://curl.se/bug/?i=8502
  [146] = https://curl.se/bug/?i=8421
  [147] = https://curl.se/bug/?i=8500
+ [148] = https://curl.se/bug/?i=8529
  [149] = https://curl.se/bug/?i=8494
  [150] = https://curl.se/bug/?i=8493
  [151] = https://curl.se/bug/?i=8492
+ [152] = https://curl.se/bug/?i=8538
+ [153] = https://curl.se/bug/?i=8519
+ [154] = https://curl.se/bug/?i=8511
+ [156] = https://curl.se/mail/lib-2022-02/0131.html
