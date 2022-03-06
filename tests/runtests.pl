@@ -271,7 +271,7 @@ my $has_mingw;      # set if built with MinGW (as opposed to MinGW-w64)
 my $has_hyper = 0;  # set if built with Hyper
 my $has_libssh2;    # set if built with libssh2
 my $has_libssh;     # set if built with libssh
-my $has_oldlibssh;  # set if built with libssh < 0.9.6
+my $has_oldlibssh;  # set if built with libssh < 0.9.4
 my $has_wolfssh;    # set if built with wolfssh
 my $has_unicode;    # set if libcurl is built with Unicode support
 
@@ -3047,8 +3047,8 @@ sub checksystem {
                 $has_libssh=1;
                 if($1 =~ /(\d+)\.(\d+).(\d+)/) {
                     my $v = $1 * 100 + $2 * 10 + $3;
-                    if($v < 95) {
-                        # before 0.9.5
+                    if($v < 94) {
+                        # before 0.9.4
                         $has_oldlibssh = 1;
                     }
                 }
