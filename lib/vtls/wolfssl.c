@@ -462,9 +462,9 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     const char * const hostname = SSL_HOST_NAME();
     size_t hostname_len = strlen(hostname);
     if((hostname_len < USHRT_MAX) &&
-       (0 == Curl_inet_pton(AF_INET, hostname, &addr4)) &&
+       !Curl_inet_pton(AF_INET, hostname, &addr4)
 #ifdef ENABLE_IPV6
-       (0 == Curl_inet_pton(AF_INET6, hostname, &addr6))
+       && !Curl_inet_pton(AF_INET6, hostname, &addr6)
 #endif
       ) {
       size_t snilen;
