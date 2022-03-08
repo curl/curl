@@ -1817,7 +1817,8 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
               memcpy(peer_CN, ASN1_STRING_get0_data(tmp), peerlen);
               peer_CN[peerlen] = '\0';
             }
-            result = CURLE_OUT_OF_MEMORY;
+            else
+              result = CURLE_OUT_OF_MEMORY;
           }
         }
         else /* not a UTF8 name */
