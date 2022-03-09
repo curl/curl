@@ -858,7 +858,7 @@ static int ng_getsock(struct Curl_easy *data, struct connectdata *conn,
 
 static void qs_disconnect(struct quicsocket *qs)
 {
-  char buffer[256];
+  char buffer[NGTCP2_MAX_UDP_PAYLOAD_SIZE];
   ngtcp2_tstamp ts;
   ngtcp2_ssize rc;
   if(!qs->conn) /* already closed */
