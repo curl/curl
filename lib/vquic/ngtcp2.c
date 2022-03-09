@@ -858,8 +858,23 @@ static int ng_getsock(struct Curl_easy *data, struct connectdata *conn,
 
 static void qs_disconnect(struct quicsocket *qs)
 {
+  char buffer[NGTCP2_MAX_UDP_PAYLOAD_SIZE];
+  ngtcp2_tstamp ts;
+  ngtcp2_ssize rc;
   if(!qs->conn) /* already closed */
     return;
+  ts = timestamp();
+  rc = ngtcp2_conn_write_connection_close(qs->qconn, NULL, /* path */
+                                          NULL, /* pkt_info */
+                                          (uint8_t *)buffer, sizeof(buffer),
+                                          0, /* error_code */
+                                          NULL, 0, /* reason + len */
+                                          ts);
+  if(rc > 0) {
+    while((send(qs->conn->sock[FIRSTSOCKET], buffer, rc, 0) == -1) &&
+          SOCKERRNO == EINTR);
+  }
+
   qs->conn = NULL;
   if(qs->qlogfd != -1) {
     close(qs->qlogfd);
