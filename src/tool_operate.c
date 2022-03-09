@@ -1736,20 +1736,17 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->cookies) {
           struct curlx_dynbuf cookies;
           struct curl_slist *cl;
-          CURLcode ret;
 
           /* The maximum size needs to match MAX_NAME in cookie.h */
           curlx_dyn_init(&cookies, 4096);
           for(cl = config->cookies; cl; cl = cl->next) {
             if(cl == config->cookies)
-              ret = curlx_dyn_addf(&cookies, "%s", cl->data);
+              result = curlx_dyn_addf(&cookies, "%s", cl->data);
             else
-              ret = curlx_dyn_addf(&cookies, ";%s", cl->data);
+              result = curlx_dyn_addf(&cookies, ";%s", cl->data);
 
-            if(ret) {
-              result = CURLE_OUT_OF_MEMORY;
+            if(result)
               break;
-            }
           }
 
           my_setopt_str(curl, CURLOPT_COOKIE, curlx_dyn_ptr(&cookies));
