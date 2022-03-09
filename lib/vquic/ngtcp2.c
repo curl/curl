@@ -868,6 +868,7 @@ static void qs_disconnect(struct quicsocket *qs)
                                           NULL, /* pkt_info */
                                           (uint8_t *)buffer, sizeof(buffer),
                                           0, /* error_code */
+                                          NULL, 0, /* reason + len */
                                           ts);
   if(rc > 0) {
     while((send(qs->conn->sock[FIRSTSOCKET], buffer, rc, 0) == -1) &&
