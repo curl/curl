@@ -31,6 +31,9 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 #
 # Client-side
 <client>
+<features>
+proxy
+</features>
 <server>
 ftp
 socks5

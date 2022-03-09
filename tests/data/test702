@@ -20,6 +20,9 @@ response 91
 
 # Client-side
 <client>
+<features>
+proxy
+</features>
 <server>
 socks4
 </server>

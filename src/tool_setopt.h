@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,16 +29,9 @@
  * Macros used in operate()
  */
 
-#define SETOPT_CHECK(v,opt) do {                \
-    if(!tool_setopt_skip(opt)) {                \
-      result = (v);                             \
-      if(result)                                \
-        break;                                  \
-    }                                           \
+#define SETOPT_CHECK(v,opt) do {              \
+    result = (v);                             \
   } while(0)
-
-/* allow removed features to simulate success: */
-bool tool_setopt_skip(CURLoption tag);
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
