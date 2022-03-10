@@ -54,35 +54,46 @@ bool tool_create_output_file(struct OutStruct *outs,
 {
   struct GlobalConfig *global;
   FILE *file = NULL;
+  char *fname = outs->filename;
+  char *aname = NULL;
   DEBUGASSERT(outs);
   DEBUGASSERT(config);
   global = config->global;
-  if(!outs->filename || !*outs->filename) {
+  if(!fname || !*fname) {
     warnf(global, "Remote filename has no length!\n");
     return FALSE;
   }
-  else if(config->file_clobber_mode == CLOBBER_ALWAYS ||
-          (config->file_clobber_mode == CLOBBER_DEFAULT &&
-           !outs->is_cd_filename)) {
+
+  if(config->output_dir) {
+    aname = aprintf("%s/%s", config->output_dir, fname);
+    if(!aname) {
+      errorf(global, "out of memory\n");
+      return FALSE;
+    }
+    fname = aname;
+  }
+
+  if(config->file_clobber_mode == CLOBBER_ALWAYS ||
+     (config->file_clobber_mode == CLOBBER_DEFAULT &&
+      !outs->is_cd_filename)) {
     /* open file for writing */
-    file = fopen(outs->filename, "wb");
+    file = fopen(fname, "wb");
   }
   else {
     int fd;
     do {
-      fd = open(outs->filename,
-                O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
+      fd = open(fname, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
       /* Keep retrying in the hope that it isn't interrupted sometime */
     } while(fd == -1 && errno == EINTR);
     if(config->file_clobber_mode == CLOBBER_NEVER && fd == -1) {
       int next_num = 1;
-      size_t len = strlen(outs->filename);
+      size_t len = strlen(fname);
       char *newname = malloc(len + 13); /* nul + 1-11 digits + dot */
       if(!newname) {
         errorf(global, "out of memory\n");
         return FALSE;
       }
-      memcpy(newname, outs->filename, len);
+      memcpy(newname, fname, len);
       newname[len] = '.';
       while(fd == -1 && /* haven't sucessfully opened a file */
             (errno == EEXIST || errno == EISDIR) &&
@@ -110,10 +121,12 @@ bool tool_create_output_file(struct OutStruct *outs,
   }
 
   if(!file) {
-    warnf(global, "Failed to open the file %s: %s\n", outs->filename,
+    warnf(global, "Failed to open the file %s: %s\n", fname,
           strerror(errno));
+    free(aname);
     return FALSE;
   }
+  free(aname);
   outs->s_isreg = TRUE;
   outs->fopened = TRUE;
   outs->stream = file;
