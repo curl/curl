@@ -45,6 +45,7 @@ int test(char *URL)
 
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_POST, 1L);
+  test_setopt(curl, CURLOPT_AWS_SIGV4_NB_ENCODING, 0);
   test_setopt(curl, CURLOPT_AWS_SIGV4, "provider1:provider2:region:service");
   test_setopt(curl, CURLOPT_USERPWD, "keyId:SecretKey");
   test_setopt(curl, CURLOPT_HEADER, 0L);
