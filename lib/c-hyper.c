@@ -293,10 +293,8 @@ static CURLcode status_line(struct Curl_easy *data,
       writetype |= CLIENTWRITE_BODY;
     result = Curl_client_write(data, writetype,
                                Curl_dyn_ptr(&data->state.headerb), len);
-    if(result) {
-      data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
-      return HYPER_ITER_BREAK;
-    }
+    if(result)
+      return result;
   }
   data->info.header_size += (long)len;
   data->req.headerbytecount += (long)len;
