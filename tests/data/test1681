@@ -54,7 +54,7 @@ Content-Length: 4
 
 foo
 </file1>
-<stdout>
+<stdout mode="text">
 log/exist%TESTNUMBER.1
 </stdout>
 </verify>
