@@ -105,6 +105,13 @@
   } while(0)
 #endif
 
+#ifndef SSH_S_IFMT
+#define SSH_S_IFMT S_IFMT
+#endif
+#ifndef SSH_S_IFLNK
+#define SSH_S_IFLNK S_IFLNK
+#endif
+
 /* Local functions: */
 static CURLcode myssh_connect(struct Curl_easy *data, bool *done);
 static CURLcode myssh_multi_statemach(struct Curl_easy *data,
