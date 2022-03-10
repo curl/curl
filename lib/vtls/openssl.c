@@ -1927,6 +1927,11 @@ static CURLcode verifystatus(struct Curl_easy *data,
   }
 
   ch = SSL_get_peer_cert_chain(backend->handle);
+  if(!ch) {
+    failf(data, "Could not get peer certificate chain");
+    result CURLE_SSL_INVALIDCERTSTATUS;
+    goto end;
+  }
   st = SSL_CTX_get_cert_store(backend->ctx);
 
 #if ((OPENSSL_VERSION_NUMBER <= 0x1000201fL) /* Fixed after 1.0.2a */ || \
