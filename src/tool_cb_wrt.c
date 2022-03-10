@@ -64,7 +64,7 @@ bool tool_create_output_file(struct OutStruct *outs,
     return FALSE;
   }
 
-  if(config->output_dir) {
+  if(config->output_dir && outs->is_cd_filename) {
     aname = aprintf("%s/%s", config->output_dir, fname);
     if(!aname) {
       errorf(global, "out of memory\n");
