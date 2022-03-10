@@ -106,7 +106,8 @@ bool tool_create_output_file(struct OutStruct *outs,
           /* Keep retrying in the hope that it isn't interrupted sometime */
         } while(fd == -1 && errno == EINTR);
       }
-      free(newname);
+      outs->filename = newname; /* remember the new one */
+      outs->alloc_filename = TRUE;
     }
     /* An else statement to not overwrite existing files and not retry with
        new numbered names (which would cover

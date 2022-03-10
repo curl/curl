@@ -33,7 +33,7 @@ http
 http
 </features>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/exist%TESTNUMBER --no-clobber
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/exist%TESTNUMBER --no-clobber -w '%{filename_effective}\n'
 </command>
 <file name="log/exist%TESTNUMBER">
 to stay the same
@@ -54,5 +54,8 @@ Content-Length: 4
 
 foo
 </file1>
+<stdout>
+log/exist%TESTNUMBER.1
+</stdout>
 </verify>
 </testcase>
