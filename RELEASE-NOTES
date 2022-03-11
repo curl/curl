@@ -1,24 +1,41 @@
-curl and libcurl 7.82.1
+curl and libcurl 7.83.0
 
  Public curl releases:         207
  Command line options:         245
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2597
+ Contributors:                 2601
 
 This release includes the following changes:
 
- o
+ o curl: add --remove-on-error [11]
 
 This release includes the following bugfixes:
 
  o CI: install Python package impacket to run SMB test 1451 [5]
+ o configure.ac: move -pthread CFLAGS setting back where it used to be [14]
+ o connect: make Curl_getconnectinfo work with conn cache from share handle [22]
  o connect: use TCP_KEEPALIVE only if TCP_KEEPIDLE is not defined [6]
  o curl/system.h: update ifdef condition for MCST-LCC compiler [4]
+ o curl: error out when options need features not present in libcurl [18]
+ o CURLSHOPT_UNLOCKFUNC.3: fix the callback prototype [9]
  o docs/HYPER.md: updated to reflect current hyper build needs
  o GHA: build hyper with nightly rustc [7]
+ o hyper: fix status_line() return code [13]
  o ipv4/6.d: clarify that they are about using IP addresses [3]
+ o json.d: fix typo (overriden -> overridden) [24]
+ o libssh: fix build with old libssh versions [12]
+ o mk-ca-bundle.vbs: delete this script in favor of mk-ca-bundle.pl [8]
+ o ngtcp2: add client certificate authentication for OpenSSL [15]
+ o ngtcp2: disconnect the QUIC connection proper [19]
+ o nonblock: restore setsockopt method to curlx_nonblock [20]
+ o openssl: check SSL_get_peer_cert_chain return value [1]
+ o openssl: enable CURLOPT_SSL_EC_CURVES with BoringSSL [23]
+ o openssl: fix CN check error code [21]
  o runtests: make 'oldlibssh' be before 0.9.4 [2]
+ o test386: Fix an incorrect test markup tag
+ o tool_operate: fix a scan-build warning [16]
+ o wolfssl: fix compiler error without IPv6 [25]
 
 This release includes the following known bugs:
 
@@ -27,15 +44,35 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Marc Hörsken, Michał Antoniak, Paul Howarth,
-  r-a-sattarov on github
-  (5 contributors)
+  Alejandro R. Sedeño, Colin Leroy, Dan Fandrich, Daniel Stenberg,
+  Don J Olmstead, Francisco Olarte, Frank Meier, Jean-Philippe Menil,
+  Joseph Chen, Kristoffer Gleditsch, Marc Hörsken, mehatzri on github,
+  Michał Antoniak, Paul Howarth, r-a-sattarov on github, Ray Satiro,
+  Samuel Henrique, Tatsuhiro Tsujikawa,
+  (18 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/bug/?i=8579
  [2] = https://curl.se/bug/?i=8548
  [3] = https://curl.se/bug/?i=8543
  [4] = https://curl.se/bug/?i=8546
  [5] = https://curl.se/bug/?i=8544
  [6] = https://curl.se/bug/?i=8539
  [7] = https://curl.se/bug/?i=8545
+ [8] = https://curl.se/bug/?i=8412
+ [9] = https://curl.se/bug/?i=8573
+ [11] = https://curl.se/bug/?i=8503
+ [12] = https://curl.se/bug/?i=8574
+ [13] = https://curl.se/bug/?i=8572
+ [14] = https://curl.se/bug/?i=8541
+ [15] = https://curl.se/bug/?i=8522
+ [16] = https://curl.se/bug/?i=8565
+ [18] = https://curl.se/bug/?i=8565
+ [19] = https://curl.se/bug/?i=8534
+ [20] = https://curl.se/bug/?i=8562
+ [21] = https://curl.se/bug/?i=8559
+ [22] = https://curl.se/bug/?i=8524
+ [23] = https://curl.se/bug/?i=8553
+ [24] = https://curl.se/bug/?i=8557
+ [25] = https://curl.se/bug/?i=8550
