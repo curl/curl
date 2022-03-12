@@ -18,4 +18,9 @@ PKCS#11 URI. If a PKCS#11 URI is provided, then the --engine option will be set
 as "pkcs11" if none was provided and the --key-type option will be set as
 "ENG" if none was provided.
 
+If curl is built against Secure Transport or Schannel then this option is
+ignored for TLS protocols (HTTPS, etc). Those backends expect the private key
+to be already present in the keychain or PKCS#12 file containing the
+certificate.
+
 If this option is used several times, the last one will be used.
