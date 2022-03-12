@@ -105,11 +105,12 @@
   } while(0)
 #endif
 
+/* These stat values may not be the same as the user's S_IFMT / S_IFLNK */
 #ifndef SSH_S_IFMT
-#define SSH_S_IFMT S_IFMT
+#define SSH_S_IFMT   00170000
 #endif
 #ifndef SSH_S_IFLNK
-#define SSH_S_IFLNK S_IFLNK
+#define SSH_S_IFLNK  0120000
 #endif
 
 /* Local functions: */
