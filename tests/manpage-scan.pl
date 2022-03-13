@@ -146,7 +146,7 @@ my %opts = (
     '--no-sessionid' => 1,
     '--no-keepalive' => 1,
     '--no-progress-meter' => 1,
-    '--no-clobber' => 1,
+    'nc, --no-clobber' => 1,
 
     # pretend these options without -no exist in curl.1 and tool_listhelp.c
     '--alpn' => 6,
