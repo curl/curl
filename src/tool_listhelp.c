@@ -385,7 +385,7 @@ const struct helptxt helptext[] = {
   {"-N, --no-buffer",
    "Disable buffering of the output stream",
    CURLHELP_CURL},
-  {"-nc,    --no-clobber",
+  {"-nc, --no-clobber",
    "Do not overwrite files that already exist",
    CURLHELP_CURL | CURLHELP_OUTPUT},
   {"    --no-keepalive",
