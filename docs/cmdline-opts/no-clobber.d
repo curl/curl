@@ -1,4 +1,5 @@
 Long: no-clobber
+Short: nc
 Help: Do not overwrite files that already exist
 Category: curl output
 Added: 7.83.0
