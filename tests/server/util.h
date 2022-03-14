@@ -40,7 +40,7 @@ extern const char *serverlogfile;
 
 extern const char *cmdfile;
 
-#if defined(WIN32) || defined(_WIN32)
+#ifdef WIN32
 #include <process.h>
 #include <fcntl.h>
 
@@ -49,9 +49,7 @@ extern const char *cmdfile;
 #undef perror
 #define perror(m) win32_perror(m)
 void win32_perror(const char *msg);
-#endif  /* WIN32 or _WIN32 */
 
-#ifdef WIN32
 void win32_init(void);
 void win32_cleanup(void);
 #endif  /* WIN32 */
