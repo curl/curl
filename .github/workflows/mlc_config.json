@@ -1,0 +1,7 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^https://curl.zuul.vexxhost.dev"
+    }
+  ]
+}
