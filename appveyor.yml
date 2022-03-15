@@ -289,7 +289,7 @@ build_script:
         ..\builds\libcurl-vc15-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
       ) else (
       if %BUILD_SYSTEM%==autotools (
-        bash.exe -e -l -c "cd /c/projects/curl && ./buildconf && ./configure %CONFIG_ARGS% && make V=1 && make V=1 examples && cd tests && make V=1"
+        bash.exe -e -l -c "cd /c/projects/curl && autoreconf -fi && ./configure %CONFIG_ARGS% && make V=1 && make V=1 examples && cd tests && make V=1"
       )))))
     - if %TESTING%==ON (
         if %BUILD_SYSTEM%==CMake (
