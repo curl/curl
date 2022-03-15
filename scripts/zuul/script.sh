@@ -22,7 +22,7 @@
 ###########################################################################
 set -eo pipefail
 
-./buildconf
+autoreconf -fi
 
 if [ "$T" = "coverage" ]; then
   ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2

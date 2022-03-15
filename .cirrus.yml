@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -46,7 +46,7 @@ freebsd_task:
     - easy_install "pyOpenSSL<20.0"
     - easy_install "impacket"
   configure_script:
-    - ./buildconf
+    - autoreconf -fi
     # Building with the address sanitizer is causing unexplainable test issues due to timeouts
     #- case `uname -r` in
     #    12.2*)
@@ -120,7 +120,7 @@ windows_task:
   prepare_script: |
     %container_cmd% -l -c "cd $(echo '%cd%') && %prepare%"
   configure_script: |
-    %container_cmd% -l -c "cd $(echo '%cd%') && ./buildconf && ./configure %configure%"
+    %container_cmd% -l -c "cd $(echo '%cd%') && autoreconf -fi && ./configure %configure%"
   compile_script: |
     %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 && make V=1 examples && cd tests && make V=1"
   install_script: |

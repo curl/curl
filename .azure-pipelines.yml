@@ -80,7 +80,7 @@ stages:
     - script: sudo apt-get update && sudo apt-get install -y stunnel4 python3-impacket libzstd-dev libbrotli-dev $(install)
       displayName: 'apt install'
 
-    - script: ./buildconf && ./configure --enable-warnings --enable-werror $(configure)
+    - script: autoreconf -fi && ./configure --enable-warnings --enable-werror $(configure)
       displayName: 'configure $(name)'
 
     - script: make V=1 && make V=1 examples && cd tests && make V=1
@@ -107,7 +107,7 @@ stages:
           name: default
           install:
     steps:
-    - script: ./buildconf && ./configure --without-ssl
+    - script: autoreconf -fi && ./configure --without-ssl
       displayName: 'configure $(name)'
 
     - script: make && ./maketgz 99.98.97
@@ -169,8 +169,8 @@ stages:
     - script: sudo apt-get update && sudo apt-get install -y clang-tools-10 clang-9 libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
       displayName: 'apt install'
 
-    - script: ./buildconf
-      displayName: 'buildconf'
+    - script: autoreconf -fi
+      displayName: 'autoreconf'
 
     - script: scan-build-10 ./configure --enable-debug --enable-werror --with-openssl --with-libssh2
       displayName: 'configure'
@@ -285,7 +285,7 @@ stages:
       displayName: 'prepare'
       condition: variables.prepare
 
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && ./buildconf && ./configure $(configure)"
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && autoreconf -fi && ./configure $(configure)"
       displayName: 'configure $(name)'
 
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 && make V=1 examples && cd tests && make V=1"

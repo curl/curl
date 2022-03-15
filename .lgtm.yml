@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -26,6 +26,6 @@ extraction:
         - libssl-dev
     after_prepare: # make sure lgtm.com doesn't use CMake (which generates and runs tests)
       - rm -f CMakeLists.txt
-      - ./buildconf
+      - autoreconf -fi
     configure: # enable as many optional features as possible
       command: ./configure --enable-ares --with-libssh2 --with-gssapi --with-librtmp --with-openssl

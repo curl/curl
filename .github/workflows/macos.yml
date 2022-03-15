@@ -85,8 +85,8 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - run: ./buildconf && ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
-      name: 'configure'
+    - run: autoreconf -fi && ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      name: 'configure and build'
       env:
         # -Wvla is caused by brotli
         CFLAGS: "-Wno-vla -mmacosx-version-min=${{ matrix.build.macosx-version-min }}"

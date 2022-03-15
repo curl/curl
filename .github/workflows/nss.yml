@@ -32,8 +32,8 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - run: ./buildconf
-      name: 'buildconf'
+    - run: autoreconf -fi
+      name: 'autoreconf'
 
     - run: CC=clang-9 CPPFLAGS="-isystem /usr/include/nss" ./configure ${{ matrix.build.configure }}
       name: 'configure with clang'

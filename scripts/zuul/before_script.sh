@@ -22,7 +22,7 @@
 ###########################################################################
 set -eo pipefail
 
-./buildconf
+autoreconf -fi
 
 if [ "$NGTCP2" = yes ]; then
   if [ "$TRAVIS_OS_NAME" = linux -a "$GNUTLS" ]; then
