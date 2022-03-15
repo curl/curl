@@ -56,7 +56,7 @@ Open a Visual Studio Command prompt:
  [type] Native of Cross platform build.  This type of command prompt may not
  exist in all Visual Studio versions.
 
- See also: [Set the Path and Environment Variables for Command-Line Builds](https://msdn.microsoft.com/en-us/library/f2ccy3wt.aspx)
+ See also: [Set the Path and Environment Variables for Command-Line Builds](https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?redirectedfrom=MSDN&view=msvc-170)
 
 ## Build in the console
 
