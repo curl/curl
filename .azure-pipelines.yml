@@ -169,8 +169,8 @@ stages:
     - script: sudo apt-get update && sudo apt-get install -y clang-tools-10 clang-9 libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
       displayName: 'apt install'
 
-    - script: ./buildconf
-      displayName: 'buildconf'
+    - script: autoreconf -fi
+      displayName: 'autoreconf'
 
     - script: scan-build-10 ./configure --enable-debug --enable-werror --with-openssl --with-libssh2
       displayName: 'configure'
