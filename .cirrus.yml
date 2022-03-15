@@ -46,7 +46,7 @@ freebsd_task:
     - easy_install "pyOpenSSL<20.0"
     - easy_install "impacket"
   configure_script:
-    - ./buildconf
+    - autoreconf -fi
     # Building with the address sanitizer is causing unexplainable test issues due to timeouts
     #- case `uname -r` in
     #    12.2*)
