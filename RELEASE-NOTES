@@ -8,10 +8,13 @@ curl and libcurl 7.83.0
 
 This release includes the following changes:
 
+ o curl: add --no-clobber [28]
  o curl: add --remove-on-error [11]
 
 This release includes the following bugfixes:
 
+ o BearSSL: add CURLOPT_SSL_CIPHER_LIST support [27]
+ o BearSSL: add CURLOPT_SSL_CTX_FUNCTION support [26]
  o CI: install Python package impacket to run SMB test 1451 [5]
  o configure.ac: move -pthread CFLAGS setting back where it used to be [14]
  o connect: make Curl_getconnectinfo work with conn cache from share handle [22]
@@ -24,7 +27,9 @@ This release includes the following bugfixes:
  o hyper: fix status_line() return code [13]
  o ipv4/6.d: clarify that they are about using IP addresses [3]
  o json.d: fix typo (overriden -> overridden) [24]
+ o keepalive-time.d: It takes many probes to detect brokenness [29]
  o libssh: fix build with old libssh versions [12]
+ o libssh: Improve fix for missing SSH_S_ stat macros [10]
  o mk-ca-bundle.vbs: delete this script in favor of mk-ca-bundle.pl [8]
  o ngtcp2: add client certificate authentication for OpenSSL [15]
  o ngtcp2: disconnect the QUIC connection proper [19]
@@ -34,6 +39,8 @@ This release includes the following bugfixes:
  o openssl: fix CN check error code [21]
  o runtests: make 'oldlibssh' be before 0.9.4 [2]
  o test386: Fix an incorrect test markup tag
+ o tool and tests: force flush of all buffers at end of program [17]
+ o tool_cb_hdr: Turn the Location: into a terminal hyperlink [30]
  o tool_operate: fix a scan-build warning [16]
  o wolfssl: fix compiler error without IPv6 [25]
 
@@ -45,11 +52,11 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alejandro R. Sedeño, Colin Leroy, Dan Fandrich, Daniel Stenberg,
-  Don J Olmstead, Francisco Olarte, Frank Meier, Jean-Philippe Menil,
-  Joseph Chen, Kristoffer Gleditsch, Marc Hörsken, mehatzri on github,
-  Michał Antoniak, Paul Howarth, r-a-sattarov on github, Ray Satiro,
-  Samuel Henrique, Tatsuhiro Tsujikawa,
-  (18 contributors)
+  Don J Olmstead, Francisco Olarte, Frank Meier, Jan Venekamp,
+  Jean-Philippe Menil, Joseph Chen, Kristoffer Gleditsch, Marc Hörsken,
+  mehatzri on github, Michał Antoniak, Paul Howarth, r-a-sattarov on github,
+  Ray Satiro, Samuel Henrique, Tatsuhiro Tsujikawa, HexTheDragon
+  (20 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -62,12 +69,14 @@ References to bug reports and discussions on issues:
  [7] = https://curl.se/bug/?i=8545
  [8] = https://curl.se/bug/?i=8412
  [9] = https://curl.se/bug/?i=8573
+ [10] = https://curl.se/bug/?i=8588
  [11] = https://curl.se/bug/?i=8503
  [12] = https://curl.se/bug/?i=8574
  [13] = https://curl.se/bug/?i=8572
  [14] = https://curl.se/bug/?i=8541
  [15] = https://curl.se/bug/?i=8522
  [16] = https://curl.se/bug/?i=8565
+ [17] = https://curl.se/bug/?i=8516
  [18] = https://curl.se/bug/?i=8565
  [19] = https://curl.se/bug/?i=8534
  [20] = https://curl.se/bug/?i=8562
@@ -76,3 +85,8 @@ References to bug reports and discussions on issues:
  [23] = https://curl.se/bug/?i=8553
  [24] = https://curl.se/bug/?i=8557
  [25] = https://curl.se/bug/?i=8550
+ [26] = https://curl.se/bug/?i=8478
+ [27] = https://curl.se/bug/?i=8477
+ [28] = https://curl.se/bug/?i=7708
+ [29] = https://curl.se/bug/?i=8570
+ [30] = https://curl.se/bug/?i=7963
