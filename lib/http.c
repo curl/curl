@@ -4283,6 +4283,13 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       }
     }
 
+    end_ptr = memchr(headp, 0x00, Curl_dyn_len(&data->state.headerb));
+    if(end_ptr) {
+      /* this is bad, bail out */
+      failf(data, "Nul byte in header");
+      return CURLE_WEIRD_SERVER_REPLY;
+    }
+
     result = Curl_http_header(data, conn, headp);
     if(result)
       return result;

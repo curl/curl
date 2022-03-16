@@ -403,7 +403,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
         else if((code == HYPERE_UNEXPECTED_EOF) && !data->req.bytecount)
           result = CURLE_GOT_NOTHING;
         else if(code == HYPERE_INVALID_PEER_MESSAGE)
-          result = CURLE_UNSUPPORTED_PROTOCOL; /* maybe */
+          result = CURLE_WEIRD_SERVER_REPLY; /* maybe */
         else
           result = CURLE_RECV_ERROR;
       }
