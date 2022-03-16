@@ -23,7 +23,7 @@ Disabled proxy should make curl fail with --proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<stderr>
+<stderr mode="text">
 curl: proxy support is disabled in this libcurl
 </stderr>
 <errorcode>
