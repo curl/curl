@@ -55,6 +55,14 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+#ifdef HAVE_GNUTLS_SRP
+/* the function exists */
+#ifdef USE_TLS_SRP
+/* the functionality is not disabled */
+#define USE_GNUTLS_SRP
+#endif
+#endif
+
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
 /*#define GTLSDEBUG */
 
@@ -75,7 +83,7 @@ static bool gtls_inited = FALSE;
 struct ssl_backend_data {
   gnutls_session_t session;
   gnutls_certificate_credentials_t cred;
-#ifdef HAVE_GNUTLS_SRP
+#ifdef USE_GNUTLS_SRP
   gnutls_srp_client_credentials_t srp_client_cred;
 #endif
 };
@@ -436,7 +444,7 @@ gtls_connect_step1(struct Curl_easy *data,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-#ifdef HAVE_GNUTLS_SRP
+#ifdef USE_GNUTLS_SRP
   if(SSL_SET_OPTION(authtype) == CURL_TLSAUTH_SRP) {
     infof(data, "Using TLS-SRP username: %s", SSL_SET_OPTION(username));
 
@@ -587,7 +595,7 @@ gtls_connect_step1(struct Curl_easy *data,
   if(result)
     return result;
 
-#ifdef HAVE_GNUTLS_SRP
+#ifdef USE_GNUTLS_SRP
   /* Only add SRP to the cipher list if SRP is requested. Otherwise
    * GnuTLS will disable TLS 1.3 support. */
   if(SSL_SET_OPTION(authtype) == CURL_TLSAUTH_SRP) {
@@ -609,7 +617,7 @@ gtls_connect_step1(struct Curl_easy *data,
 #endif
     infof(data, "GnuTLS ciphers: %s", prioritylist);
     rc = gnutls_priority_set_direct(session, prioritylist, &err);
-#ifdef HAVE_GNUTLS_SRP
+#ifdef USE_GNUTLS_SRP
   }
 #endif
 
@@ -683,7 +691,7 @@ gtls_connect_step1(struct Curl_easy *data,
     }
   }
 
-#ifdef HAVE_GNUTLS_SRP
+#ifdef USE_GNUTLS_SRP
   /* put the credentials to the current session */
   if(SSL_SET_OPTION(authtype) == CURL_TLSAUTH_SRP) {
     rc = gnutls_credentials_set(session, GNUTLS_CRD_SRP,
@@ -866,7 +874,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     if(SSL_CONN_CONFIG(verifypeer) ||
        SSL_CONN_CONFIG(verifyhost) ||
        SSL_CONN_CONFIG(issuercert)) {
-#ifdef HAVE_GNUTLS_SRP
+#ifdef USE_GNUTLS_SRP
       if(SSL_SET_OPTION(authtype) == CURL_TLSAUTH_SRP
          && SSL_SET_OPTION(username) != NULL
          && !SSL_CONN_CONFIG(verifypeer)
@@ -879,7 +887,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
         failf(data, "failed to get server cert");
         *certverifyresult = GNUTLS_E_NO_CERTIFICATE_FOUND;
         return CURLE_PEER_FAILED_VERIFICATION;
-#ifdef HAVE_GNUTLS_SRP
+#ifdef USE_GNUTLS_SRP
       }
 #endif
     }
@@ -1469,7 +1477,7 @@ static void close_one(struct ssl_connect_data *connssl)
     gnutls_certificate_free_credentials(backend->cred);
     backend->cred = NULL;
   }
-#ifdef HAVE_GNUTLS_SRP
+#ifdef USE_GNUTLS_SRP
   if(backend->srp_client_cred) {
     gnutls_srp_free_client_credentials(backend->srp_client_cred);
     backend->srp_client_cred = NULL;
@@ -1555,7 +1563,7 @@ static int gtls_shutdown(struct Curl_easy *data, struct connectdata *conn,
   }
   gnutls_certificate_free_credentials(backend->cred);
 
-#ifdef HAVE_GNUTLS_SRP
+#ifdef USE_GNUTLS_SRP
   if(SSL_SET_OPTION(authtype) == CURL_TLSAUTH_SRP
      && SSL_SET_OPTION(username) != NULL)
     gnutls_srp_free_client_credentials(backend->srp_client_cred);
