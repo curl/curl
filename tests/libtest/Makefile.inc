@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -61,7 +61,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  lib1591 lib1592 lib1593 lib1594 lib1596 \
          lib1905 lib1906 lib1907 lib1908 lib1910 lib1911 lib1912 lib1913 \
          lib1915 lib1916 lib1917 lib1918 lib1933 lib1934 lib1935 lib1936 \
- lib1937 lib1938 lib1939 \
+ lib1937 lib1938 lib1939 lib1940 lib1945 lib1946 \
  lib3010 lib3025
 
 chkdecimalpoint_SOURCES = chkdecimalpoint.c ../../lib/mprintf.c \
@@ -723,6 +723,18 @@ lib1938_CPPFLAGS = $(AM_CPPFLAGS)
 lib1939_SOURCES = lib1939.c $(SUPPORTFILES)
 lib1939_LDADD = $(TESTUTIL_LIBS)
 lib1939_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib1940_SOURCES = lib1940.c $(SUPPORTFILES)
+lib1940_LDADD = $(TESTUTIL_LIBS)
+lib1940_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib1945_SOURCES = lib1945.c $(SUPPORTFILES)
+lib1945_LDADD = $(TESTUTIL_LIBS)
+lib1945_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib1946_SOURCES = lib1940.c $(SUPPORTFILES)
+lib1946_LDADD = $(TESTUTIL_LIBS)
+lib1946_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1946
 
 lib3010_SOURCES = lib3010.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib3010_LDADD = $(TESTUTIL_LIBS)

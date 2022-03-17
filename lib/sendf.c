@@ -45,6 +45,7 @@
 #include "select.h"
 #include "strdup.h"
 #include "http2.h"
+#include "headers.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -580,21 +581,33 @@ static CURLcode chop_write(struct Curl_easy *data,
     len -= chunklen;
   }
 
+  /* HTTP header, but not status-line */
+  if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
+     (type & CLIENTWRITE_HEADER) && !(type & CLIENTWRITE_STATUS) ) {
+    CURLcode result =
+      Curl_headers_push(data, optr,
+                        type & CLIENTWRITE_CONNECT ? CURLH_CONNECT :
+                        (type & CLIENTWRITE_1XX ? CURLH_1XX :
+                         (type & CLIENTWRITE_TRAILER ? CURLH_TRAILER :
+                          CURLH_HEADER)));
+    if(result)
+      return result;
+  }
+
   if(writeheader) {
     size_t wrote;
-    ptr = optr;
-    len = olen;
+
     Curl_set_in_callback(data, true);
-    wrote = writeheader(ptr, 1, len, data->set.writeheader);
+    wrote = writeheader(optr, 1, olen, data->set.writeheader);
     Curl_set_in_callback(data, false);
 
     if(CURL_WRITEFUNC_PAUSE == wrote)
       /* here we pass in the HEADER bit only since if this was body as well
          then it was passed already and clearly that didn't trigger the
          pause, so this is saved for later with the HEADER bit only */
-      return pausewrite(data, CLIENTWRITE_HEADER, ptr, len);
+      return pausewrite(data, CLIENTWRITE_HEADER, optr, olen);
 
-    if(wrote != len) {
+    if(wrote != olen) {
       failf(data, "Failed writing header");
       return CURLE_WRITE_ERROR;
     }
@@ -619,8 +632,6 @@ CURLcode Curl_client_write(struct Curl_easy *data,
                            size_t len)
 {
   struct connectdata *conn = data->conn;
-
-  DEBUGASSERT(!(type & ~CLIENTWRITE_BOTH));
 
   if(!len)
     return CURLE_OK;
