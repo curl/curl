@@ -22,10 +22,11 @@ output a newline by using \\n, a carriage return with \\r and a tab space with
 The output will be written to standard output, but this can be switched to
 standard error by using %{stderr}.
 
-Output HTTP headers from the most recent request by using \fB%header{name}\fP
-where \fBname\fP is the case insensitive name of the header (without the
-trailing colon). The header contents are exactly as sent over the network,
-with leading and trailing whitespace trimmed. Added in curl 7.83.0.
+EXPERIMENTAL feature: Output HTTP headers from the most recent request by
+using \fB%header{name}\fP where \fBname\fP is the case insensitive name of the
+header (without the trailing colon). The header contents are exactly as sent
+over the network, with leading and trailing whitespace trimmed. Added in curl
+7.83.0.
 
 .B NOTE:
 The %-symbol is a special symbol in the win32-environment, where all
@@ -54,7 +55,16 @@ The initial path curl ended up in when logging on to the remote FTP
 server. (Added in 7.15.4)
 .TP
 .B header_json
-A JSON object with all HTTP response headers from the recent transfer.
+EXPERIMENTAL feature.
+
+A JSON object with all HTTP response headers from the recent transfer. Values
+are provided as arrays, since in the case of multiple headers there can be
+multiple values.
+
+The header names are listed in order of appearance over the wire using the
+same case as was used over the network. Except for duplicated headers. They
+are grouped on the first occurance of that header, using the casing of the
+first header, and then each value is presented in the JSON array.
 .TP
 .B http_code
 The numerical response code that was found in the last retrieved HTTP(S) or
