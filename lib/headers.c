@@ -155,7 +155,8 @@ struct curl_header *curl_easy_nextheader(CURL *easy,
       hs = pick->ptr;
       if((hs->type & type) && (hs->request == request))
         break;
-    } while((pick = pick->next));
+      pick = pick->next;
+    } while(pick);
   }
 
   if(!pick)

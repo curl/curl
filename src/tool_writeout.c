@@ -75,6 +75,7 @@ static const struct writeoutvar variables[] = {
   {"exitcode", VAR_EXITCODE, 0, writeLong},
   {"filename_effective", VAR_EFFECTIVE_FILENAME, 0, writeString},
   {"ftp_entry_path", VAR_FTP_ENTRY_PATH, CURLINFO_FTP_ENTRY_PATH, writeString},
+  {"header_json", VAR_HEADER_JSON, 0, NULL},
   {"http_code", VAR_HTTP_CODE, CURLINFO_RESPONSE_CODE, writeLong},
   {"http_connect", VAR_HTTP_CODE_PROXY, CURLINFO_HTTP_CONNECTCODE, writeLong},
   {"http_version", VAR_HTTP_VERSION, CURLINFO_HTTP_VERSION, writeString},
@@ -218,9 +219,8 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
   if(valid) {
     DEBUGASSERT(strinfo);
     if(use_json) {
-      fprintf(stream, "\"%s\":\"", wovar->name);
+      fprintf(stream, "\"%s\":", wovar->name);
       jsonWriteString(stream, strinfo);
-      fputs("\"", stream);
     }
     else
       fputs(strinfo, stream);
@@ -365,6 +365,9 @@ void ourWriteOut(const char *writeinfo, struct per_transfer *per,
                 break;
               case VAR_JSON:
                 ourWriteOutJSON(stream, variables, per, per_result);
+                break;
+              case VAR_HEADER_JSON:
+                headerJSON(stream, per);
                 break;
               default:
                 (void)variables[i].writefunc(stream, &variables[i],
