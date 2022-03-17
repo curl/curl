@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -379,6 +379,20 @@ void ourWriteOut(const char *writeinfo, struct per_transfer *per,
           }
           ptr = end + 1; /* pass the end */
           *end = keepit;
+        }
+        else if(!strncmp("header{", &ptr[1], 7)) {
+          ptr += 8;
+          end = strchr(ptr, '}');
+          if(end) {
+            struct curl_header *header;
+            *end = 0;
+            if(CURLHE_OK == curl_easy_header(per->curl, ptr, 0, CURLH_HEADER,
+                                             -1, &header))
+              fputs(header->value, stream);
+            ptr = end + 1; /* pass the end */
+          }
+          else
+            fputs("%header{", stream);
         }
         else {
           /* illegal syntax, then just output the characters that are used */
