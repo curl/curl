@@ -209,6 +209,8 @@ test1630 test1631 test1632 test1633 test1634 \
 test1650 test1651 test1652 test1653 test1654 test1655 \
 test1660 test1661 \
 \
+test1670 \
+\
 test1680 test1681 test1682 test1683 \
 \
 test1700 test1701 test1702 test1703 \
