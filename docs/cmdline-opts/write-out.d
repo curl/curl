@@ -22,9 +22,10 @@ output a newline by using \\n, a carriage return with \\r and a tab space with
 The output will be written to standard output, but this can be switched to
 standard error by using %{stderr}.
 
-You can also access HTTP headers of the most recent request done, with the
-help of \fB%header{name}\fP where \fBname\fP is the case insensitive name of
-the header (without trailing colon). Added in curl 7.83.0.
+Output HTTP headers from the most recent request by using \fB%header{name}\fP
+where \fBname\fP is the case insensitive name of the header (without the
+trailing colon). The header contents are exactly as sent over the network,
+with leading and trailing whitespace trimmed. Added in curl 7.83.0.
 
 .B NOTE:
 The %-symbol is a special symbol in the win32-environment, where all
