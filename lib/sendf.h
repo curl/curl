@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -45,8 +45,12 @@ void Curl_failf(struct Curl_easy *, const char *fmt, ...);
 
 #define failf Curl_failf
 
-#define CLIENTWRITE_BODY   (1<<0)
-#define CLIENTWRITE_HEADER (1<<1)
+#define CLIENTWRITE_BODY    (1<<0)
+#define CLIENTWRITE_HEADER  (1<<1)
+#define CLIENTWRITE_STATUS  (1<<2) /* the first "header" is the status line */
+#define CLIENTWRITE_CONNECT (1<<3) /* a CONNECT response */
+#define CLIENTWRITE_1XX     (1<<4) /* a 1xx response */
+#define CLIENTWRITE_TRAILER (1<<5) /* a trailer header */
 #define CLIENTWRITE_BOTH   (CLIENTWRITE_BODY|CLIENTWRITE_HEADER)
 
 CURLcode Curl_client_write(struct Curl_easy *data, int type, char *ptr,

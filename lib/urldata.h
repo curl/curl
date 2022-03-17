@@ -1343,6 +1343,7 @@ struct UrlState {
   int os_errno;  /* filled in with errno whenever an error occurs */
   char *scratch; /* huge buffer[set.buffer_size*2] for upload CRLF replacing */
   long followlocation; /* redirect counter */
+  int requests; /* request counter: redirects + authentication retakes */
 #ifdef HAVE_SIGNAL
   /* storage for the previous bag^H^H^HSIGPIPE signal handler :-) */
   void (*prev_signal)(int sig);
@@ -1414,6 +1415,8 @@ struct UrlState {
   size_t trailers_bytes_sent;
   struct dynbuf trailers_buf; /* a buffer containing the compiled trailing
                                  headers */
+  struct Curl_llist httphdrs; /* received headers */
+  struct curl_header headerout; /* for external purposes */
 #endif
   trailers_state trailers_state; /* whether we are sending trailers
                                        and what stage are we at */

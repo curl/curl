@@ -39,6 +39,7 @@
 #include "transfer.h"
 #include "dynbuf.h"
 #include "h2h3.h"
+#include "headers.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -1078,9 +1079,14 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     /* nghttp2 guarantees :status is received first and only once, and
        value is 3 digits status code, and decode_status_code always
        succeeds. */
+    char buffer[32];
     stream->status_code = decode_status_code(value, valuelen);
     DEBUGASSERT(stream->status_code != -1);
-
+    msnprintf(buffer, sizeof(buffer), H2H3_PSEUDO_STATUS ":%u\r",
+              stream->status_code);
+    result = Curl_headers_push(data_s, buffer, CURLH_PSEUDO);
+    if(result)
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
     result = Curl_dyn_addn(&stream->header_recvbuf, STRCONST("HTTP/2 "));
     if(result)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
