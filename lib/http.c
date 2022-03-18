@@ -3775,6 +3775,29 @@ CURLcode Curl_http_size(struct Curl_easy *data)
   return CURLE_OK;
 }
 
+static CURLcode verify_header(struct Curl_easy *data)
+{
+  struct SingleRequest *k = &data->req;
+  const char *header = Curl_dyn_ptr(&data->state.headerb);
+  size_t hlen = Curl_dyn_len(&data->state.headerb);
+  char *ptr = memchr(header, 0x00, hlen);
+  if(ptr) {
+    /* this is bad, bail out */
+    failf(data, "Nul byte in header");
+    return CURLE_WEIRD_SERVER_REPLY;
+  }
+  if(k->headerline < 2)
+    /* the first "header" is the status-line and it has no colon */
+    return CURLE_OK;
+  ptr = memchr(header, ':', hlen);
+  if(!ptr) {
+    /* this is bad, bail out */
+    failf(data, "Header without semicolon");
+    return CURLE_WEIRD_SERVER_REPLY;
+  }
+  return CURLE_OK;
+}
+
 /*
  * Read any HTTP header lines from the server and pass them to the client app.
  */
@@ -4283,12 +4306,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       }
     }
 
-    end_ptr = memchr(headp, 0x00, Curl_dyn_len(&data->state.headerb));
-    if(end_ptr) {
-      /* this is bad, bail out */
-      failf(data, "Nul byte in header");
-      return CURLE_WEIRD_SERVER_REPLY;
-    }
+    result = verify_header(data);
+    if(result)
+      return result;
 
     result = Curl_http_header(data, conn, headp);
     if(result)
