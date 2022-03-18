@@ -53,6 +53,8 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 [Haskell](https://hackage.haskell.org/package/curl) Written by Galois, Inc
 
+[Hollywood](https://www.hollywood-mal.com/download.html) hURL by Andreas Falkenhahn
+
 [Java](https://github.com/pjlegato/curl-java)
 
 [Julia](https://github.com/JuliaWeb/LibCURL.jl) Written by Amit Murthy
