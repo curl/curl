@@ -416,3 +416,17 @@ April: added the cyassl backend (later renamed to WolfSSL)
  March 31: curl 7.76.0 ships with support for rustls
 
  July: HSTS is supported
+
+2022
+----
+
+ March: added --json, removed mesalink support
+
+    Public curl releases:         206
+    Command line options:         245
+    curl_easy_setopt() options:   295
+    Public functions in libcurl:  86
+    Contributors:                 2601
+
+ The curl.se website serves 16,500 GB/month over 462M requests, the
+ official docker image has been pulled 4,098,015,431 times.
