@@ -65,7 +65,7 @@ test370 test371 test372 test373 test374 test375 test376 \
 \
 test380 test381 test383 test384 test385 test386 \
 \
-test392 test393 test394 test395 test396 test397 \
+test392 test393 test394 test395 test396 test397 test398 \
 \
 test400 test401 test402 test403 test404 test405 test406 test407 test408 \
 test409 test410 \
