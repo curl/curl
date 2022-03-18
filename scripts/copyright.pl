@@ -82,6 +82,9 @@ my @skiplist=(
     # an empty control file
     "^zuul.d/playbooks/.zuul.ignore",
 
+    # markdown linkchecker config
+    "mlc_config.json",
+
     );
 
 sub scanfile {
