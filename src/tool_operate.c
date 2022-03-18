@@ -1017,7 +1017,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             Curl_safefree(storefile);
             if(result) {
               /* bad globbing */
-              warnf(global, "bad output glob!\n");
+              errorf(global, "bad output filename\n");
+              config->synthetic_error = TRUE;
               break;
             }
           }
