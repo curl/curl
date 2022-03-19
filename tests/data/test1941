@@ -33,6 +33,7 @@ Silly-thing: yes yes
 <features>
 proxy
 SSL
+headers-api
 </features>
 <server>
 http

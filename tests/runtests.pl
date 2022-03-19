@@ -2933,6 +2933,7 @@ sub setupfeatures {
     $feature{"typecheck"} = 1;
     $feature{"verbose-strings"} = 1;
     $feature{"wakeup"} = 1;
+    $feature{"headers-api"} = 1;
 
 }
 
