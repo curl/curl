@@ -32,7 +32,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HEADERS_API)
 
 /* Generate the curl_header struct for the user. This function MUST assign all
    struct fields in the output struct. */
@@ -297,23 +297,27 @@ CURLcode Curl_headers_cleanup(struct Curl_easy *data)
 CURLHcode curl_easy_header(CURL *easy,
                            const char *name,
                            size_t index,
-                           unsigned int type,
+                           unsigned int origin,
+                           int request,
                            struct curl_header **hout)
 {
   (void)easy;
   (void)name;
   (void)index;
-  (void)type;
+  (void)origin;
+  (void)request;
   (void)hout;
   return CURLHE_NOT_BUILT_IN;
 }
 
 struct curl_header *curl_easy_nextheader(CURL *easy,
                                          unsigned int type,
+                                         int request,
                                          struct curl_header *prev)
 {
   (void)easy;
   (void)type;
+  (void)request;
   (void)prev;
   return NULL;
 }
