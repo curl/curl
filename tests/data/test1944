@@ -33,6 +33,9 @@ Set-Cookie: 2cookie=data2;
 
 # Client-side
 <client>
+<features>
+headers-api
+</features>
 <server>
 http
 </server>

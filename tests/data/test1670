@@ -30,6 +30,9 @@ Funny-head: yesyes
 #
 # Client-side
 <client>
+<features>
+headers-api
+</features>
 <server>
 http
 </server>

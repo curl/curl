@@ -30,6 +30,7 @@ Location: /%TESTNUMBER0002
 <client>
 <features>
 http
+headers-api
 </features>
 <server>
 http

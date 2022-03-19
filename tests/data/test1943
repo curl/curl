@@ -33,6 +33,7 @@ Server: sent-as-trailer
 <client>
 <features>
 http
+headers-api
 </features>
 <server>
 http

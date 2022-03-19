@@ -23,6 +23,9 @@ Location: /%TESTNUMBER0002
 
 # Client-side
 <client>
+<features>
+headers-api
+</features>
 <server>
 http
 </server>
