@@ -9,7 +9,7 @@ HTTP GET
 # Server-side
 <reply>
 
-<data>
+<data nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server test-server/fake
@@ -54,7 +54,11 @@ Accept: */*
 
 </protocol>
 <errorcode>
+%if hyper
+1
+%else
 8
+%endif
 </errorcode>
 </verify>
 </testcase>
