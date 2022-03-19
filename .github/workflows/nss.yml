@@ -22,7 +22,7 @@ jobs:
         build:
         - name: NSS
           install:
-          configure: --with-nss --enable-debug --enable-werror --with-nss-deprecated
+          configure: --with-nss --enable-debug --enable-werror --with-nss-deprecated --enable-headers-api
 
     steps:
     - run: |
