@@ -24,7 +24,7 @@
 #       libcurl compilation script for the OS/400.
 #
 
-SCRIPTDIR=`dirname "${0}"`
+SCRIPTDIR=$(dirname "${0}")
 . "${SCRIPTDIR}/initscript.sh"
 cd "${TOPDIR}/lib"
 
