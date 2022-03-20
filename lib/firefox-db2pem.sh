@@ -31,7 +31,7 @@ if test -z "$out"; then
   out="ca-bundle.crt" # use a sensible default
 fi
 
-currentdate=`date`
+currentdate=$(date)
 
 cat >$out <<EOF
 ##
