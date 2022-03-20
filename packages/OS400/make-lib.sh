@@ -26,7 +26,7 @@
 
 SCRIPTDIR=$(dirname "${0}")
 . "${SCRIPTDIR}/initscript.sh"
-cd "${TOPDIR}/lib"
+cd "${TOPDIR}/lib" || exit
 
 #       Need to have IFS access to the mih/cipher header file.
 
