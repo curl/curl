@@ -50,7 +50,7 @@ stages:
       install: ''
       configure: ''
       tests: '!433'
-    timeoutInMinutes: 60
+    timeoutInMinutes: 65
     pool:
       vmImage: 'ubuntu-latest'
     strategy:
@@ -98,7 +98,7 @@ stages:
   dependsOn: []
   jobs:
   - job: ubuntu
-    timeoutInMinutes: 30
+    timeoutInMinutes: 20
     pool:
       vmImage: 'ubuntu-latest'
     strategy:
@@ -156,7 +156,7 @@ stages:
   dependsOn: []
   jobs:
   - job: ubuntu
-    timeoutInMinutes: 30
+    timeoutInMinutes: 20
     pool:
       vmImage: 'ubuntu-latest'
     strategy:
