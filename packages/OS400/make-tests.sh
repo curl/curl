@@ -35,7 +35,7 @@ cd "${TOPDIR}/tests"
 
 #       Process the libtest subdirectory.
 
-cd libtest
+cd libtest || exit
 
 #       Get definitions from the Makefile.inc file.
 #       The `sed' statement works as follows:
@@ -119,7 +119,7 @@ do      DB2PGM=`db2_name "${PGM}"`
                 for LDARG in ${PGMLDADD}
                 do      case "${LDARG}" in
                         -*)     ;;              # Ignore non-module.
-                        *)      MODULES="${MODULES} "`db2_name "${LDARG}"`
+                        *)      MODULES="${MODULES} "$(db2_name "${LDARG}")
                                 ;;
                         esac
                 done
