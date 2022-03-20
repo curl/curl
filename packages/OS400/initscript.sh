@@ -38,7 +38,7 @@ setenv()
 
 case "${SCRIPTDIR}" in
 /*)     ;;
-*)      SCRIPTDIR="`pwd`/${SCRIPTDIR}"
+*)      SCRIPTDIR="$(pwd)/${SCRIPTDIR}"
 esac
 
 while true
