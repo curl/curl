@@ -78,7 +78,7 @@ then
     echo "ERROR: Failed to build CHKSTRINGS *PGM object!"
     exit 2
   else
-    ${LIBIFSNAME}/CHKSTRINGS.PGM
+    "${LIBIFSNAME}/CHKSTRINGS.PGM"
     if [ $? -ne 0 ]
     then
       echo "ERROR: CHKSTRINGS failed!"
