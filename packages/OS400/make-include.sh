@@ -26,7 +26,7 @@
 
 SCRIPTDIR=$(dirname "${0}")
 . "${SCRIPTDIR}/initscript.sh"
-cd "${TOPDIR}/include"
+cd "${TOPDIR}/include" || exit
 
 
 #       Create the OS/400 source program file for the header files.
