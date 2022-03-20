@@ -17,11 +17,13 @@ HTTP proxy Digest auth
 <connect>
 HTTP/1.1 407 Authorization Required to proxy me swsclose
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+
 </connect>
 
 <datacheck>
 HTTP/1.1 407 Authorization Required to proxy me swsclose
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+
 </datacheck>
 </reply>
 
