@@ -31,7 +31,7 @@ setenv()
 {
         #       Define and export.
 
-        eval ${1}="${2}"
+        eval "${1}"="${2}"
         export ${1}
 }
 
