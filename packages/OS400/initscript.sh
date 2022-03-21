@@ -32,7 +32,7 @@ setenv()
         #       Define and export.
 
         eval "${1}"="${2}"
-        export {1}
+        export 1
 }
 
 
