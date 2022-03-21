@@ -24,9 +24,9 @@
 #       Installation of the header files in the OS/400 library.
 #
 
-SCRIPTDIR=$(dirname "${0}")
+SCRIPTDIR=`dirname "${0}"`
 . "${SCRIPTDIR}/initscript.sh"
-cd "${TOPDIR}/include" || exit
+cd "${TOPDIR}/include"
 
 
 #       Create the OS/400 source program file for the header files.
