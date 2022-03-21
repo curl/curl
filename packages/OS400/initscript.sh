@@ -31,14 +31,14 @@ setenv()
 {
         #       Define and export.
 
-        eval "${1}"="${2}"
-        export 1
+        eval ${1}="${2}"
+        export ${1}
 }
 
 
 case "${SCRIPTDIR}" in
 /*)     ;;
-*)      SCRIPTDIR="$(pwd)/${SCRIPTDIR}"
+*)      SCRIPTDIR="`pwd`/${SCRIPTDIR}"
 esac
 
 while true
