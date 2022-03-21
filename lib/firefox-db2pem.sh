@@ -24,7 +24,7 @@
 # It extracts all ca certs it finds in the local Firefox database and converts
 # them all into PEM format.
 #
-db="ls -1d $HOME/.mozilla/firefox/*default*"
+db=$(ls -1d $HOME/.mozilla/firefox/*default*)
 out=$1
 
 if test -z "$out"; then
