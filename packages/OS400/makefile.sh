@@ -55,7 +55,7 @@ for TEXT in "${TOPDIR}/COPYING" "${SCRIPTDIR}/README.OS400"             \
     "${TOPDIR}/docs/FEATURES" "${TOPDIR}/docs/SSLCERTS.md"              \
     "${TOPDIR}/docs/RESOURCES" "${TOPDIR}/docs/VERSIONS.md"             \
     "${TOPDIR}/docs/HISTORY.md"
-do      MEMBER=$(basename \"${TEXT}\" .OS400)
+do      MEMBER="`basename \"${TEXT}\" .OS400`"
         MEMBER=$(basename \"${MEMBER}\" .md)
         MEMBER="${LIBIFSNAME}/DOCS.FILE/`db2_name \"${MEMBER}\"`.MBR"
 
