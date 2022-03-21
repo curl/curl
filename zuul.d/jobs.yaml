@@ -293,22 +293,6 @@
         T: torture
 
 - job:
-    name: curl-events
-    parent: curl-base
-    vars:
-      curl_apt_packages:
-        - lcov
-        - libpsl-dev
-        - libssl-dev
-        - libbrotli-dev
-        - libzstd-dev
-        - libssh2-1-dev
-      curl_env:
-        CC: gcc-8
-        CXX: g++-8
-        T: events
-
-- job:
     name: curl-fuzzer
     parent: curl-base
     vars:
@@ -385,7 +369,6 @@
       - curl-cmake-boringssl-quiche
       - curl-cmake-ngtcp2
       - curl-torture
-      - curl-events
       - curl-fuzzer
       - curl-tidy
       - curl-debug-clang-with-openssl-dl-ubsan
