@@ -28,7 +28,7 @@
 
 SCRIPTDIR=`dirname "${0}"`
 . "${SCRIPTDIR}/initscript.sh"
-cd "${TOPDIR}" || exit
+cd "${TOPDIR}"
 
 
 #       Create the OS/400 library if it does not exist.
@@ -56,7 +56,7 @@ for TEXT in "${TOPDIR}/COPYING" "${SCRIPTDIR}/README.OS400"             \
     "${TOPDIR}/docs/RESOURCES" "${TOPDIR}/docs/VERSIONS.md"             \
     "${TOPDIR}/docs/HISTORY.md"
 do      MEMBER="`basename \"${TEXT}\" .OS400`"
-        MEMBER=$("basename \"${MEMBER}\" .md")
+        MEMBER="`basename \"${MEMBER}\" .md`"
         MEMBER="${LIBIFSNAME}/DOCS.FILE/`db2_name \"${MEMBER}\"`.MBR"
 
         [ -e "${TEXT}" ] || continue
