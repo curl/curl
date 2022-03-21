@@ -42,13 +42,6 @@ if [ "$T" = "torture" ]; then
   make "TFLAGS=-n --shallow=20 -t $tests" test-nonflaky
 fi
 
-if [ "$T" = "events" ]; then
-  ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --with-libssh2 --with-openssl
-  make
-  tests="!TLS-SRP"
-  make "TFLAGS=-n -e $tests" test-nonflaky
-fi
-
 if [ "$T" = "debug" ]; then
   ./configure --enable-debug --enable-werror $C
   make
