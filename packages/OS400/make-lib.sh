@@ -24,9 +24,9 @@
 #       libcurl compilation script for the OS/400.
 #
 
-SCRIPTDIR=$(dirname "${0}")
+SCRIPTDIR=`dirname "${0}"`
 . "${SCRIPTDIR}/initscript.sh"
-cd "${TOPDIR}/lib" || exit
+cd "${TOPDIR}/lib"
 
 #       Need to have IFS access to the mih/cipher header file.
 
@@ -78,7 +78,7 @@ then
     echo "ERROR: Failed to build CHKSTRINGS *PGM object!"
     exit 2
   else
-    "${LIBIFSNAME}/CHKSTRINGS.PGM"
+    ${LIBIFSNAME}/CHKSTRINGS.PGM
     if [ $? -ne 0 ]
     then
       echo "ERROR: CHKSTRINGS failed!"
