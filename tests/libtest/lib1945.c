@@ -24,6 +24,10 @@
 
 #include "memdebug.h"
 
+#ifdef _MSC_VER
+/* warning C4706: assignment within conditional expression */
+#pragma warning(disable:4706)
+#endif
 static void showem(CURL *easy, unsigned int type)
 {
   struct curl_header *header = NULL;
