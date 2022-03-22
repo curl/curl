@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2010 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2010 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -34,6 +34,9 @@ my @incs = (
     "$root/include/curl/easy.h",
     "$root/include/curl/mprintf.h",
     "$root/include/curl/multi.h",
+    "$root/include/curl/urlapi.h",
+    "$root/include/curl/options.h",
+    "$root/include/curl/header.h",
     );
 
 my $verbose=0;
@@ -47,11 +50,27 @@ my %rem;
 sub scanheader {
     my ($f)=@_;
     open H, "<$f" || die;
+    my $first = "";
     while(<H>) {
-        if (/^(CURL_EXTERN.*)/) {
+        if (/^(^CURL_EXTERN .*)\(/) {
             my $decl = $1;
             $decl =~ s/\r$//;
             print "$decl\n";
+        }
+        elsif (/^(^CURL_EXTERN .*)/) {
+            # handle two-line declarations
+            my $decl = $1;
+            $decl =~ s/\r$//;
+            $first = $decl;
+        }
+        elsif($first) {
+            if (/^(.*)\(/) {
+                my $decl = $1;
+                $decl =~ s/\r$//;
+                $first .= $decl;
+                print "$first\n";
+            }
+            $first = "";
         }
     }
     close H;
