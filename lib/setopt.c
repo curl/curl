@@ -146,11 +146,8 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 #define C_SSLVERSION_VALUE(x) (x & 0xffff)
 #define C_SSLVERSION_MAX_VALUE(x) (x & 0xffff0000)
 
-/*
- * Do not make Curl_vsetopt() static: it is called from
- * packages/OS400/ccsidcurl.c.
- */
-CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
+CURLcode curl_easy_vsetopt(struct Curl_easy *data, CURLoption option,
+                           va_list param)
 {
   char *argptr;
   CURLcode result = CURLE_OK;
@@ -159,6 +156,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   unsigned long uarg;
 #endif
   curl_off_t bigsize;
+
+  if(!data)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   switch(option) {
   case CURLOPT_DNS_CACHE_TIMEOUT:
@@ -3044,12 +3044,9 @@ CURLcode curl_easy_setopt(struct Curl_easy *data, CURLoption tag, ...)
   va_list arg;
   CURLcode result;
 
-  if(!data)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
   va_start(arg, tag);
 
-  result = Curl_vsetopt(data, tag, arg);
+  result = curl_easy_vsetopt(data, tag, arg);
 
   va_end(arg);
   return result;

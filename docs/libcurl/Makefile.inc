@@ -42,6 +42,7 @@ man_MANS = \
  curl_easy_strerror.3 \
  curl_easy_unescape.3 \
  curl_easy_upkeep.3 \
+ curl_easy_vsetopt.3 \
  curl_escape.3 \
  curl_formadd.3 \
  curl_formfree.3 \

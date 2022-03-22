@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,8 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include <stdarg.h>
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -38,6 +40,8 @@ struct curl_blob {
 
 CURL_EXTERN CURL *curl_easy_init(void);
 CURL_EXTERN CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);
+CURL_EXTERN CURLcode curl_easy_vsetopt(CURL *curl, CURLoption option,
+                                       va_list param);
 CURL_EXTERN CURLcode curl_easy_perform(CURL *curl);
 CURL_EXTERN void curl_easy_cleanup(CURL *curl);
 

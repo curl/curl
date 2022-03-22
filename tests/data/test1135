@@ -68,6 +68,7 @@ CURL_EXTERN const char *curl_share_strerror
 CURL_EXTERN CURLcode curl_easy_pause
 CURL_EXTERN CURL *curl_easy_init
 CURL_EXTERN CURLcode curl_easy_setopt
+CURL_EXTERN CURLcode curl_easy_vsetopt
 CURL_EXTERN CURLcode curl_easy_perform
 CURL_EXTERN void curl_easy_cleanup
 CURL_EXTERN CURLcode curl_easy_getinfo
