@@ -384,6 +384,7 @@ Features testable here are:
 - `getrlimit`
 - `GnuTLS`
 - `GSS-API`
+- `h2c`
 - `HSTS`
 - `HTTP-auth`
 - `http/2`

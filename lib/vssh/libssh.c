@@ -2063,6 +2063,9 @@ static int myssh_getsock(struct Curl_easy *data,
   if(conn->waitfor & KEEP_SEND)
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
 
+  if(!conn->waitfor)
+    bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
+
   return bitmap;
 }
 

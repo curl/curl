@@ -31,7 +31,7 @@ XC_OVR_ZZ60
 CURL_OVERRIDE_AUTOCONF
 
 dnl configure script copyright
-AC_COPYRIGHT([Copyright (c) 1998 - 2021 Daniel Stenberg, <daniel@haxx.se>
+AC_COPYRIGHT([Copyright (c) 1998 - 2022 Daniel Stenberg, <daniel@haxx.se>
 This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details])
 
@@ -165,6 +165,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_rtmp_msg="no      (--with-librtmp)"
     curl_psl_msg="no      (--with-libpsl)"
  curl_altsvc_msg="enabled (--disable-alt-svc)"
+ curl_headers_msg="no      (--enable-headers-api)"
    curl_hsts_msg="enabled (--disable-hsts)"
     ssl_backends=
      curl_h1_msg="enabled (internal)"
@@ -3931,6 +3932,25 @@ AS_HELP_STRING([--disable-alt-svc],[Disable alt-svc support]),
        AC_MSG_RESULT(yes)
 )
 
+dnl ************************************************************
+dnl switch on/off headers-api
+dnl
+AC_MSG_CHECKING([whether to support headers-api])
+AC_ARG_ENABLE(headers-api,
+AS_HELP_STRING([--enable-headers-api],[Enable headers-api support])
+AS_HELP_STRING([--disable-headers-api],[Disable headers-api support]),
+[ case "$enableval" in
+  yes)
+       AC_MSG_RESULT(yes)
+       AC_DEFINE(USE_HEADERS_API, 1, [enable headers-api])
+       curl_headers_msg="enabled";
+       ;;
+  *) AC_MSG_RESULT(no)
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+)
+
 dnl only check for HSTS if there's SSL present
 if test -n "$SSL_ENABLED"; then
 
@@ -4345,6 +4365,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   RTMP:             ${curl_rtmp_msg}
   PSL:              ${curl_psl_msg}
   Alt-svc:          ${curl_altsvc_msg}
+  Headers API:      ${curl_headers_msg}
   HSTS:             ${curl_hsts_msg}
   HTTP1:            ${curl_h1_msg}
   HTTP2:            ${curl_h2_msg}

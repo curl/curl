@@ -256,6 +256,7 @@ my $has_spnego;     # set if libcurl is built with SPNEGO support
 my $has_charconv;   # set if libcurl is built with CharConv support
 my $has_tls_srp;    # set if libcurl is built with TLS-SRP support
 my $has_http2;      # set if libcurl is built with HTTP2 support
+my $has_h2c;        # set if libcurl is built with h2c support
 my $has_httpsproxy; # set if libcurl is built with HTTPS-proxy support
 my $has_crypto;     # set if libcurl is built with cryptographic support
 my $has_cares;      # set if built with c-ares
@@ -2864,38 +2865,37 @@ sub compare {
 }
 
 sub setupfeatures {
-    $feature{"hyper"} = $has_hyper;
-    $feature{"c-ares"} = $has_cares;
     $feature{"alt-svc"} = $has_altsvc;
-    $feature{"HSTS"} = $has_hsts;
     $feature{"brotli"} = $has_brotli;
+    $feature{"c-ares"} = $has_cares;
     $feature{"crypto"} = $has_crypto;
     $feature{"debug"} = $debug_build;
     $feature{"getrlimit"} = $has_getrlimit;
     $feature{"GnuTLS"} = $has_gnutls;
     $feature{"GSS-API"} = $has_gssapi;
+    $feature{"h2c"} = $has_h2c;
+    $feature{"HSTS"} = $has_hsts;
     $feature{"http/2"} = $has_http2;
     $feature{"https-proxy"} = $has_httpsproxy;
+    $feature{"hyper"} = $has_hyper;
     $feature{"idn"} = $has_idn;
     $feature{"ipv6"} = $has_ipv6;
     $feature{"Kerberos"} = $has_kerberos;
     $feature{"large_file"} = $has_largefile;
     $feature{"ld_preload"} = ($has_ldpreload && !$debug_build);
-    $feature{"libz"} = $has_libz;
-    $feature{"libssh2"} = $has_libssh2;
     $feature{"libssh"} = $has_libssh;
-    $feature{"oldlibssh"} = $has_oldlibssh;
-    $feature{"rustls"} = $has_rustls;
-    $feature{"wolfssh"} = $has_wolfssh;
-    $feature{"wolfssl"} = $has_wolfssl;
+    $feature{"libssh2"} = $has_libssh2;
+    $feature{"libz"} = $has_libz;
     $feature{"manual"} = $has_manual;
     $feature{"MinGW"} = $has_mingw;
     $feature{"MultiSSL"} = $has_multissl;
     $feature{"NSS"} = $has_nss;
     $feature{"NTLM"} = $has_ntlm;
     $feature{"NTLM_WB"} = $has_ntlm_wb;
+    $feature{"oldlibssh"} = $has_oldlibssh;
     $feature{"OpenSSL"} = $has_openssl || $has_libressl || $has_boringssl;
     $feature{"PSL"} = $has_psl;
+    $feature{"rustls"} = $has_rustls;
     $feature{"Schannel"} = $has_schannel;
     $feature{"sectransp"} = $has_sectransp;
     $feature{"SPNEGO"} = $has_spnego;
@@ -2909,6 +2909,8 @@ sub setupfeatures {
     $feature{"unittest"} = $debug_build;
     $feature{"unix-sockets"} = $has_unix;
     $feature{"win32"} = $has_win32;
+    $feature{"wolfssh"} = $has_wolfssh;
+    $feature{"wolfssl"} = $has_wolfssl;
     $feature{"zstd"} = $has_zstd;
 
     # make each protocol an enabled "feature"
@@ -2931,6 +2933,7 @@ sub setupfeatures {
     $feature{"typecheck"} = 1;
     $feature{"verbose-strings"} = 1;
     $feature{"wakeup"} = 1;
+    $feature{"headers-api"} = 1;
 
 }
 
@@ -3040,6 +3043,10 @@ sub checksystem {
            if ($libcurl =~ /Hyper/i) {
                $has_hyper=1;
            }
+            if ($libcurl =~ /nghttp2/i) {
+                # nghttp2 supports h2c, hyper does not
+                $has_h2c=1;
+            }
             if ($libcurl =~ /libssh2/i) {
                 $has_libssh2=1;
             }

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -75,6 +75,7 @@ static const struct writeoutvar variables[] = {
   {"exitcode", VAR_EXITCODE, 0, writeLong},
   {"filename_effective", VAR_EFFECTIVE_FILENAME, 0, writeString},
   {"ftp_entry_path", VAR_FTP_ENTRY_PATH, CURLINFO_FTP_ENTRY_PATH, writeString},
+  {"header_json", VAR_HEADER_JSON, 0, NULL},
   {"http_code", VAR_HTTP_CODE, CURLINFO_RESPONSE_CODE, writeLong},
   {"http_connect", VAR_HTTP_CODE_PROXY, CURLINFO_HTTP_CONNECTCODE, writeLong},
   {"http_version", VAR_HTTP_VERSION, CURLINFO_HTTP_VERSION, writeString},
@@ -218,9 +219,8 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
   if(valid) {
     DEBUGASSERT(strinfo);
     if(use_json) {
-      fprintf(stream, "\"%s\":\"", wovar->name);
+      fprintf(stream, "\"%s\":", wovar->name);
       jsonWriteString(stream, strinfo);
-      fputs("\"", stream);
     }
     else
       fputs(strinfo, stream);
@@ -366,6 +366,9 @@ void ourWriteOut(const char *writeinfo, struct per_transfer *per,
               case VAR_JSON:
                 ourWriteOutJSON(stream, variables, per, per_result);
                 break;
+              case VAR_HEADER_JSON:
+                headerJSON(stream, per);
+                break;
               default:
                 (void)variables[i].writefunc(stream, &variables[i],
                                              per, per_result, false);
@@ -379,6 +382,20 @@ void ourWriteOut(const char *writeinfo, struct per_transfer *per,
           }
           ptr = end + 1; /* pass the end */
           *end = keepit;
+        }
+        else if(!strncmp("header{", &ptr[1], 7)) {
+          ptr += 8;
+          end = strchr(ptr, '}');
+          if(end) {
+            struct curl_header *header;
+            *end = 0;
+            if(CURLHE_OK == curl_easy_header(per->curl, ptr, 0, CURLH_HEADER,
+                                             -1, &header))
+              fputs(header->value, stream);
+            ptr = end + 1; /* pass the end */
+          }
+          else
+            fputs("%header{", stream);
         }
         else {
           /* illegal syntax, then just output the characters that are used */

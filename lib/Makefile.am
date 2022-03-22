@@ -56,7 +56,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-VERSIONINFO=-version-info 11:0:7
+VERSIONINFO=-version-info 12:0:8
 # This flag accepts an argument of the form current[:revision[:age]]. So,
 # passing -version-info 3:12:1 sets current to 3, revision to 12, and age to
 # 1.

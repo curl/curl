@@ -345,6 +345,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
           /* Send the connect request to the proxy */
           result = Curl_buffer_send(req, data, &data->info.request_size, 0,
                                     sockindex);
+          s->headerlines = 0;
         }
         if(result)
           failf(data, "Failed sending CONNECT to proxy");
@@ -480,6 +481,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
         if(byte != 0x0a)
           continue;
 
+        s->headerlines++;
         linep = Curl_dyn_ptr(&s->rcvbuf);
         perline = Curl_dyn_len(&s->rcvbuf); /* amount of bytes in this line */
 
@@ -488,9 +490,9 @@ static CURLcode CONNECT(struct Curl_easy *data,
 
         if(!data->set.suppress_connect_headers) {
           /* send the header to the callback */
-          int writetype = CLIENTWRITE_HEADER;
-          if(data->set.include_header)
-            writetype |= CLIENTWRITE_BODY;
+          int writetype = CLIENTWRITE_HEADER | CLIENTWRITE_CONNECT |
+            (data->set.include_header ? CLIENTWRITE_BODY : 0) |
+            (s->headerlines == 1 ? CLIENTWRITE_STATUS : 0);
 
           result = Curl_client_write(data, writetype, linep, perline);
           if(result)
