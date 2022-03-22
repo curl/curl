@@ -43,11 +43,11 @@ cat >$out <<EOF
 EOF
 
 
-certutil -L -h "Builtin Object Token" -d $db | \
+certutil -L -h 'Builtin Object Token' -d "$db" | \
 grep ' *[CcGTPpu]*,[CcGTPpu]*,[CcGTPpu]* *$' | \
 sed -e 's/ *[CcGTPpu]*,[CcGTPpu]*,[CcGTPpu]* *$//' -e 's/\(.*\)/"\1"/' | \
 sort | \
 while read -r nickname; \
- do echo $nickname | sed -e "s/Builtin Object Token://g"; \
-eval certutil -d $db -L -n "$nickname" -a ; \
+ do echo "$nickname" | sed -e "s/Builtin Object Token://g"; \
+eval certutil -d "$db" -L -n "$nickname" -a ; \
 done >> $out
