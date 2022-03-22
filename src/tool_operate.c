@@ -1020,6 +1020,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               warnf(global, "bad output glob!\n");
               break;
             }
+            if(!*per->outfile) {
+              warnf(global, "output glob produces empty string!\n");
+              result = CURLE_WRITE_ERROR;
+              break;
+            }
           }
 
           if(config->output_dir && *config->output_dir) {
