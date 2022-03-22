@@ -1,10 +1,10 @@
 curl and libcurl 7.83.0
 
  Public curl releases:         207
- Command line options:         245
+ Command line options:         247
  curl_easy_setopt() options:   295
  Public functions in libcurl:  86
- Contributors:                 2601
+ Contributors:                 2602
 
 This release includes the following changes:
 
@@ -15,8 +15,11 @@ This release includes the following bugfixes:
 
  o BearSSL: add CURLOPT_SSL_CIPHER_LIST support [27]
  o BearSSL: add CURLOPT_SSL_CTX_FUNCTION support [26]
+ o BINDINGS.md: add Hollywood binding [34]
+ o CI: Do not use buildconf. Instead, just use: autoreconf -fi [42]
  o CI: install Python package impacket to run SMB test 1451 [5]
  o configure.ac: move -pthread CFLAGS setting back where it used to be [14]
+ o configure: bump the copyright year range int the generated output
  o connect: make Curl_getconnectinfo work with conn cache from share handle [22]
  o connect: use TCP_KEEPALIVE only if TCP_KEEPIDLE is not defined [6]
  o curl/system.h: update ifdef condition for MCST-LCC compiler [4]
@@ -24,24 +27,35 @@ This release includes the following bugfixes:
  o CURLSHOPT_UNLOCKFUNC.3: fix the callback prototype [9]
  o docs/HYPER.md: updated to reflect current hyper build needs
  o GHA: build hyper with nightly rustc [7]
+ o http: reject header contents with nul bytes [41]
+ o http: return error on colon-less HTTP headers [31]
  o hyper: fix status_line() return code [13]
+ o hyper: no h2c support [33]
  o ipv4/6.d: clarify that they are about using IP addresses [3]
  o json.d: fix typo (overriden -> overridden) [24]
  o keepalive-time.d: It takes many probes to detect brokenness [29]
+ o lib: fix some misuse of curlx_convert_wchar_to_UTF8 [38]
  o libssh: fix build with old libssh versions [12]
  o libssh: Improve fix for missing SSH_S_ stat macros [10]
+ o mk-ca-bundle.pl: Use stricter logic to process the certificates [39]
  o mk-ca-bundle.vbs: delete this script in favor of mk-ca-bundle.pl [8]
+ o mlc_config.json: add file to ignore known troublesome URLs [35]
  o ngtcp2: add client certificate authentication for OpenSSL [15]
  o ngtcp2: disconnect the QUIC connection proper [19]
  o nonblock: restore setsockopt method to curlx_nonblock [20]
  o openssl: check SSL_get_peer_cert_chain return value [1]
  o openssl: enable CURLOPT_SSL_EC_CURVES with BoringSSL [23]
  o openssl: fix CN check error code [21]
+ o rtsp: don't let CSeq error override earlier errors [37]
  o runtests: make 'oldlibssh' be before 0.9.4 [2]
+ o scripts/copyright.pl: ignore the new mlc_config.json file
+ o test375: fix line endings on Windows [40]
  o test386: Fix an incorrect test markup tag
+ o test718: edited slightly to return better HTTP [32]
  o tool and tests: force flush of all buffers at end of program [17]
  o tool_cb_hdr: Turn the Location: into a terminal hyperlink [30]
  o tool_operate: fix a scan-build warning [16]
+ o winbuild/README.md: fixup dead link [36]
  o wolfssl: fix compiler error without IPv6 [25]
 
 This release includes the following known bugs:
@@ -51,12 +65,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alejandro R. Sedeño, Colin Leroy, Dan Fandrich, Daniel Stenberg,
-  Don J Olmstead, Francisco Olarte, Frank Meier, Jan Venekamp,
-  Jean-Philippe Menil, Joseph Chen, Kristoffer Gleditsch, Marc Hörsken,
-  mehatzri on github, Michał Antoniak, Paul Howarth, r-a-sattarov on github,
+  Alejandro R. Sedeño, Andreas Falkenhahn, Colin Leroy, Dan Fandrich,
+  Daniel Stenberg, Daniel Valenzuela, Don J Olmstead, Francisco Olarte,
+  Frank Meier, Jan Venekamp, Jean-Philippe Menil, Joseph Chen,
+  Kristoffer Gleditsch, Marcel Raad, Marc Hörsken, mehatzri on github,
+  Michał Antoniak, Paul Howarth, pheiduck on github, r-a-sattarov on github,
   Ray Satiro, Samuel Henrique, Tatsuhiro Tsujikawa, HexTheDragon
-  (20 contributors)
+  (24 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -90,3 +105,15 @@ References to bug reports and discussions on issues:
  [28] = https://curl.se/bug/?i=7708
  [29] = https://curl.se/bug/?i=8570
  [30] = https://curl.se/bug/?i=7963
+ [31] = https://curl.se/bug/?i=8610
+ [32] = https://github.com/hyperium/hyper/issues/2783
+ [33] = https://curl.se/bug/?i=8605
+ [34] = https://curl.se/bug/?i=8609
+ [35] = https://curl.se/bug/?i=8597
+ [36] = https://curl.se/bug/?i=8597
+ [37] = https://curl.se/bug/?i=8525
+ [38] = https://curl.se/bug/?i=8521
+ [39] = https://curl.se/bug/?i=8411
+ [40] = https://curl.se/bug/?i=8599
+ [41] = https://curl.se/bug/?i=8601
+ [42] = https://curl.se/bug/?i=8596

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,7 +26,7 @@
 
 void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
                      struct per_transfer *per, CURLcode per_result);
-
+void headerJSON(FILE *stream, struct per_transfer *per);
 void jsonWriteString(FILE *stream, const char *in);
 
 #endif /* HEADER_CURL_TOOL_WRITEOUT_H */

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -57,7 +57,7 @@ CURL_EXTERN const struct curl_easyoption *
 curl_easy_option_by_name(const char *name);
 
 CURL_EXTERN const struct curl_easyoption *
-curl_easy_option_by_id (CURLoption id);
+curl_easy_option_by_id(CURLoption id);
 
 CURL_EXTERN const struct curl_easyoption *
 curl_easy_option_next(const struct curl_easyoption *prev);

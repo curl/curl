@@ -56,8 +56,9 @@ The hyper backend does not support
 - `CURLOPT_IGNORE_CONTENT_LENGTH`
 - `--raw` and disabling `CURLOPT_HTTP_TRANSFER_DECODING`
 - RTSP
-- hyper is much stricter about what HTTP header contents it allow in requests
+- hyper is much stricter about what HTTP header contents it allows
 - HTTP/0.9
+- HTTP/2 upgrade using HTTP:// URLs. Aka 'h2c'
 
 ## Remaining issues
 

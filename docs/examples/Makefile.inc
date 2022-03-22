@@ -44,6 +44,7 @@ check_PROGRAMS = \
   getinmemory \
   getredirect \
   getreferrer \
+  headerapi \
   http-post \
   http2-download \
   http2-pushinmemory \

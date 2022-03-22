@@ -65,7 +65,7 @@ test370 test371 test372 test373 test374 test375 test376 \
 \
 test380 test381 test383 test384 test385 test386 \
 \
-test392 test393 test394 test395 test396 test397 \
+test392 test393 test394 test395 test396 test397 test398 \
 \
 test400 test401 test402 test403 test404 test405 test406 test407 test408 \
 test409 test410 \
@@ -209,6 +209,8 @@ test1630 test1631 test1632 test1633 test1634 \
 test1650 test1651 test1652 test1653 test1654 test1655 \
 test1660 test1661 \
 \
+test1670 test1671 \
+\
 test1680 test1681 test1682 test1683 \
 \
 test1700 test1701 test1702 test1703 \
@@ -219,7 +221,8 @@ test1800 test1801 \
 test1908 test1909 test1910 test1911 test1912 test1913 test1914 test1915 \
 test1916 test1917 test1918 \
 \
-test1933 test1934 test1935 test1936 test1937 test1938 test1939 \
+test1933 test1934 test1935 test1936 test1937 test1938 test1939 test1940 \
+test1941 test1942 test1943 test1944 test1945 test1946 \
 \
 test2000 test2001 test2002 test2003 test2004 \
 \

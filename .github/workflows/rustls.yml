@@ -22,7 +22,7 @@ jobs:
         build:
         - name: rustls
           install:
-          configure: --with-rustls=$HOME/rustls --enable-debug --enable-werror
+          configure: --with-rustls=$HOME/rustls --enable-debug --enable-werror --enable-headers-api
 
     steps:
     - run: |

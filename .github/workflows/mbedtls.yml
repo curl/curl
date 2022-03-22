@@ -42,7 +42,7 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - run: autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} && make V=1
+    - run: autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" ./configure --enable-warnings --enable-werror --enable-headers-api ${{ matrix.build.configure }} && make V=1
       name: 'configure and build'
 
     - run: make V=1 test-ci

@@ -43,8 +43,6 @@
 265
 266
 357
-358
-359
 565
 579
 580
@@ -54,16 +52,11 @@
 671
 672
 673
-718
 1021
 1417
 1533
 1540
 1591
-1700
-1701
-1702
-1800
 %endif
 2043
 # Tests that are disabled here for rustls are SUPPOSED to work
