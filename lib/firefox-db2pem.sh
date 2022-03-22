@@ -6,7 +6,7 @@
 # *                            | (__| |_| |  _ <| |___
 # *                             \___|\___/|_| \_\_____|
 # *
-# * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 # *
 # * This software is licensed as described in the file COPYING, which
 # * you should have received as part of this distribution. The terms
@@ -24,14 +24,14 @@
 # It extracts all ca certs it finds in the local Firefox database and converts
 # them all into PEM format.
 #
-db=`ls -1d $HOME/.mozilla/firefox/*default*`
+db=$(ls -1d $HOME/.mozilla/firefox/*default*)
 out=$1
 
 if test -z "$out"; then
   out="ca-bundle.crt" # use a sensible default
 fi
 
-currentdate=`date`
+currentdate=$(date)
 
 cat >$out <<EOF
 ##
@@ -43,11 +43,11 @@ cat >$out <<EOF
 EOF
 
 
-certutil -L -h 'Builtin Object Token' -d $db | \
+certutil -L -h 'Builtin Object Token' -d "$db" | \
 grep ' *[CcGTPpu]*,[CcGTPpu]*,[CcGTPpu]* *$' | \
 sed -e 's/ *[CcGTPpu]*,[CcGTPpu]*,[CcGTPpu]* *$//' -e 's/\(.*\)/"\1"/' | \
 sort | \
-while read nickname; \
- do echo $nickname | sed -e "s/Builtin Object Token://g"; \
-eval certutil -d $db -L -n "$nickname" -a ; \
+while read -r nickname; \
+ do echo "$nickname" | sed -e "s/Builtin Object Token://g"; \
+eval certutil -d "$db" -L -n "$nickname" -a ; \
 done >> $out
