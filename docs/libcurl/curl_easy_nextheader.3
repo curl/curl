@@ -45,7 +45,7 @@ want. See the \fIcurl_easy_header(3)\fP man page for the origin descriptions.
 
 The \fIrequest\fP argument tells libcurl from which request you want headers
 from. A single transfer might consist of a series of HTTP requests and this
-argument lets you specify which particular invidual request you want the
+argument lets you specify which particular individual request you want the
 headers from. 0 being the first request and then the number increases for
 further redirects or when multi-state authentication is used. Passing in -1 is
 a shortcut to "the last" request in the series, independently of the actual
@@ -60,7 +60,7 @@ stored within the given scope (origin + request).
 
 If \fIprev\fP is a pointer to a previously returned header struct,
 \fIcurl_easy_nextheader(3)\fP returns a pointer the next header stored within
-the given scope. This way, an application can iterate over all availble
+the given scope. This way, an application can iterate over all available
 headers.
 
 The memory for the struct this points to, is owned and managed by libcurl and
