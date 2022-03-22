@@ -27,8 +27,8 @@ jobs:
 
     steps:
     - run: |
-        sudo apt-get install libtool autoconf automake pkg-config stunnel4 python3-pip libpsl-dev libbrotli-dev libzstd-dev libssh-dev
-        sudo pip3 install impacket
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 libpsl-dev libbrotli-dev libzstd-dev libssh-dev
+        sudo python3 -m pip install impacket
       name: install prereqs and impacket
 
     - uses: actions/checkout@v2
