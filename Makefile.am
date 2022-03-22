@@ -142,11 +142,9 @@ PLAN9_DIST = plan9/include/mkfile \
  plan9/src/mkfile.inc             \
  plan9/src/mkfile
 
-EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in \
- RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework \
- scripts/updatemanpages.pl $(CMAKE_DIST) \
- $(VC_DIST) $(WINBUILD_DIST) $(PLAN9_DIST) \
- lib/libcurl.vers.in buildconf.bat scripts/coverage.sh scripts/completion.pl
+EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in            \
+ RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework $(CMAKE_DIST)        \
+ $(VC_DIST) $(WINBUILD_DIST) $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat
 
 CLEANFILES = $(VC10_LIBVCXPROJ) $(VC10_SRCVCXPROJ) $(VC11_LIBVCXPROJ)        \
  $(VC11_SRCVCXPROJ) $(VC12_LIBVCXPROJ) $(VC12_SRCVCXPROJ) $(VC14_LIBVCXPROJ) \

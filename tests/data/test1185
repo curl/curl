@@ -16,7 +16,7 @@ checksrc
 </name>
 
 <command type="perl">
-%SRCDIR/../lib/checksrc.pl log/code%TESTNUMBER.c
+%SRCDIR/../scripts/checksrc.pl log/code%TESTNUMBER.c
 </command>
 <file name="log/code%TESTNUMBER.c">
 /* test source code
