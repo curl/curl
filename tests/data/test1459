@@ -17,6 +17,7 @@ mkdir -p %PWD/log/test%TESTNUMBER.dir/.ssh
 </precheck>
 <features>
 sftp
+!oldlibssh
 </features>
  <name>
 SFTP with corrupted known_hosts
