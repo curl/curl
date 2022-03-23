@@ -33,10 +33,11 @@ file name of your pinned public key. The file format expected is "PEM" or "DER".
 The string can also be any number of base64 encoded sha256 hashes preceded by
 "sha256//" and separated by ";"
 
-When negotiating a TLS or SSL connection, the server sends a certificate
-indicating its identity. A public key is extracted from this certificate and
-if it does not exactly match the public key provided to this option, curl will
-abort the connection before sending or receiving any data.
+When negotiating a TLS or SSL connection, the server sends a chain of certificates
+indicating its identity. The public key provided in this option is compared with the keys
+of the certificate chain(root, intermediate or leaf certificate) and if it does not
+exactly match the public keys, curl will abort the connection before sending or
+receiving any data.
 
 On mismatch, \fICURLE_SSL_PINNEDPUBKEYNOTMATCH\fP is returned.
 
