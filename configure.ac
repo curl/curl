@@ -2541,7 +2541,7 @@ if test X"$want_h2" != Xno; then
     LDFLAGS="$LDFLAGS $LD_H2"
     CPPFLAGS="$CPPFLAGS $CPP_H2"
     LIBS="$LIB_H2 $LIBS"
-    LIB_H2_NAME=`echo $LIB_H2 | $SED -e 's/-l//'`
+    LIB_H2_NAME=`echo $LIB_H2 | $SED -ne 's/.*-l *\(nghttp2[^ ]*\).*/\1/p'`
 
     # use nghttp2_session_set_local_window_size to require nghttp2
     # >= 1.12.0
@@ -3204,8 +3204,6 @@ CURL_CONFIGURE_PULL_SYS_POLL
 TYPE_IN_ADDR_T
 
 TYPE_SOCKADDR_STORAGE
-
-TYPE_SIG_ATOMIC_T
 
 CURL_CHECK_FUNC_SELECT
 

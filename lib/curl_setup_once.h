@@ -323,26 +323,6 @@ struct timeval {
 
 #include "curl_ctype.h"
 
-/*
- * Typedef to 'int' if sig_atomic_t is not an available 'typedefed' type.
- */
-
-#ifndef HAVE_SIG_ATOMIC_T
-typedef int sig_atomic_t;
-#define HAVE_SIG_ATOMIC_T
-#endif
-
-
-/*
- * Convenience SIG_ATOMIC_T definition
- */
-
-#ifdef HAVE_SIG_ATOMIC_T_VOLATILE
-#define SIG_ATOMIC_T static sig_atomic_t
-#else
-#define SIG_ATOMIC_T static volatile sig_atomic_t
-#endif
-
 
 /*
  * Macro used to include code only in debug builds.

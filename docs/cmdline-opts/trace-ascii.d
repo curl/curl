@@ -12,4 +12,7 @@ This is very similar to --trace, but leaves out the hex part and only shows
 the ASCII part of the dump. It makes smaller output that might be easier to
 read for untrained humans.
 
+This option is global and does not need to be specified for each use of
+--next.
+
 If this option is used several times, the last one will be used.

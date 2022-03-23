@@ -242,7 +242,7 @@
         OPENSSL3: "yes"
         C: >-
           --with-openssl={{ ansible_user_dir }}/openssl3
-        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/openssl3/lib:/usr/local/lib"
+        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/openssl3/lib64:/usr/local/lib"
         TFLAGS: https ftps
 
 - job:

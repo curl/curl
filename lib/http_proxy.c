@@ -390,6 +390,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
         k->upload_fromhere += bytes_written;
         return result;
       }
+      http->sending = HTTPSEND_NADA;
       /* if nothing left to send, continue */
     }
     { /* READING RESPONSE PHASE */

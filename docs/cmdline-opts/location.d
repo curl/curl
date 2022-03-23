@@ -14,7 +14,7 @@ intercept the user+password. See also --location-trusted on how to change
 this. You can limit the amount of redirects to follow by using the
 --max-redirs option.
 
-When curl follows a redirect and if the request is a POST, it will do the
+When curl follows a redirect and if the request is a POST, it will send the
 following request with a GET if the HTTP response was 301, 302, or 303. If the
 response code was any other 3xx code, curl will re-send the following request
 using the same unmodified method.

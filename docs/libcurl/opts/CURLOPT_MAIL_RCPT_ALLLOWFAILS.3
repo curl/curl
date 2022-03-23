@@ -39,8 +39,9 @@ return an error.
 The default behavior can be changed by setting \fIignore\fP to 1L which will
 make curl ignore errors and proceed with the remaining valid recipients.
 
-In case when all recipients cause RCPT TO command to fail, curl will abort SMTP
-conversation and return the error received from to the last RCPT TO command.
+If all recipients trigger RCPT TO failures and this flag is specified, curl
+will still abort the SMTP conversation and return the error received from to
+the last RCPT TO command.
 .SH DEFAULT
 0
 .SH PROTOCOLS

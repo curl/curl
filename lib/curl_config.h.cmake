@@ -521,12 +521,6 @@
 /* Define to 1 if you have the sigsetjmp function or macro. */
 #cmakedefine HAVE_SIGSETJMP 1
 
-/* Define to 1 if sig_atomic_t is an available typedef. */
-#cmakedefine HAVE_SIG_ATOMIC_T 1
-
-/* Define to 1 if sig_atomic_t is already defined as volatile. */
-#cmakedefine HAVE_SIG_ATOMIC_T_VOLATILE 1
-
 /* Define to 1 if struct sockaddr_in6 has the sin6_scope_id member */
 #cmakedefine HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
 

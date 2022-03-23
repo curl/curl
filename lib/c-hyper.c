@@ -341,8 +341,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     hyper_task_free(task);
 
     if(t == HYPER_TASK_ERROR) {
-      hyper_code errnum = hyper_error_code(hypererr);
-      if(errnum == HYPERE_ABORTED_BY_CALLBACK) {
+      if(data->state.hresult) {
         /* override Hyper's view, might not even be an error */
         result = data->state.hresult;
         infof(data, "hyperstream is done (by early callback)");
@@ -352,7 +351,9 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
         size_t errlen = hyper_error_print(hypererr, errbuf, sizeof(errbuf));
         hyper_code code = hyper_error_code(hypererr);
         failf(data, "Hyper: [%d] %.*s", (int)code, (int)errlen, errbuf);
-        if((code == HYPERE_UNEXPECTED_EOF) && !data->req.bytecount)
+        if(code == HYPERE_ABORTED_BY_CALLBACK)
+          result = CURLE_OK;
+        else if((code == HYPERE_UNEXPECTED_EOF) && !data->req.bytecount)
           result = CURLE_GOT_NOTHING;
         else if(code == HYPERE_INVALID_PEER_MESSAGE)
           result = CURLE_UNSUPPORTED_PROTOCOL; /* maybe */
@@ -694,7 +695,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   hyper_request *req = NULL;
   hyper_headers *headers = NULL;
   hyper_task *handshake = NULL;
-  hyper_error *hypererr = NULL;
   CURLcode result;
   const char *p_accept; /* Accept: string */
   const char *method;
@@ -932,18 +932,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   hyper_clientconn_free(client);
 
-  do {
-    task = hyper_executor_poll(h->exec);
-    if(task) {
-      bool error = hyper_task_type(task) == HYPER_TASK_ERROR;
-      if(error)
-        hypererr = hyper_task_value(task);
-      hyper_task_free(task);
-      if(error)
-        goto error;
-    }
-  } while(task);
-
   if((httpreq == HTTPREQ_GET) || (httpreq == HTTPREQ_HEAD)) {
     /* HTTP GET/HEAD download */
     Curl_pgrsSetUploadSize(data, 0); /* nothing */
@@ -967,15 +955,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if(handshake)
     hyper_task_free(handshake);
 
-  if(hypererr) {
-    uint8_t errbuf[256];
-    size_t errlen = hyper_error_print(hypererr, errbuf, sizeof(errbuf));
-    hyper_code code = hyper_error_code(hypererr);
-    failf(data, "Hyper: [%d] %.*s", (int)code, (int)errlen, errbuf);
-    hyper_error_free(hypererr);
-    if(data->state.hresult)
-      return data->state.hresult;
-  }
   return CURLE_OUT_OF_MEMORY;
 }
 

@@ -8,3 +8,6 @@ When doing parallel transfers, this option will instruct curl that it should
 rather prefer opening up more connections in parallel at once rather than
 waiting to see if new transfers can be added as multiplexed streams on another
 connection.
+
+This option is global and does not need to be specified for each use of
+--next.

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 2018 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -44,12 +44,15 @@ will use the default name lookup function. You can bootstrap that by providing
 the address for the DoH server with \fICURLOPT_RESOLVE(3)\fP.
 
 Disable DoH use again by setting this option to NULL.
+.SH "INHERIT OPTIONS"
+DoH lookups use SSL and some SSL settings from your transfer are inherited,
+like \fICURLOPT_SSL_CTX_FUNCTION(3)\fP.
 
-\fBAdvanced:\fP The DoH lookups use SSL so some SSL settings from your transfer
-are inherited. The hostname and peer certificate verification settings are not
-inherited and can be controlled separately via
-\fICURLOPT_DOH_SSL_VERIFYHOST(3)\fP and \fICURLOPT_DOH_SSL_VERIFYPEER(3)\fP.
-Note \fICURLOPT_SSL_CTX_FUNCTION(3)\fP is inherited.
+The hostname and peer certificate verification settings are not inherited but
+can be controlled separately via \fICURLOPT_DOH_SSL_VERIFYHOST(3)\fP and
+\fICURLOPT_DOH_SSL_VERIFYPEER(3)\fP.
+
+A set \fICURLOPT_OPENSOCKETFUNCTION(3)\fP callback is not inherited.
 .SH DEFAULT
 NULL - there is no default DoH URL. If this option isn't set, libcurl will use
 the default name resolver.

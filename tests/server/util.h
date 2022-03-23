@@ -60,6 +60,7 @@ void win32_cleanup(void);
 FILE *test2fopen(long testno);
 
 int wait_ms(int timeout_ms);
+curl_off_t our_getpid(void);
 int write_pidfile(const char *filename);
 int write_portfile(const char *filename, int port);
 void set_advisor_read_lock(const char *filename);
