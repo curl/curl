@@ -31,7 +31,7 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(top_srcdir)/include/curl $(pkginclude_HEADERS)
+	$(CHECKSRC)@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(top_srcdir)/include/curl $(pkginclude_HEADERS)
 
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes

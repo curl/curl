@@ -135,7 +135,7 @@ endif
 # ignore tool_hugehelp.c since it is generated source code and it plays
 # by slightly different rules!
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(srcdir)        \
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
 	-W$(srcdir)/tool_hugehelp.c $(srcdir)/*.[ch])
 
 if CURLDEBUG

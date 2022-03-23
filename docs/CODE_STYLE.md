@@ -9,8 +9,9 @@ style is more important than individual contributors having their own personal
 tastes satisfied.
 
 Our C code has a few style rules. Most of them are verified and upheld by the
-`lib/checksrc.pl` script. Invoked with `make checksrc` or even by default by
-the build system when built after `./configure --enable-debug` has been used.
+`scripts/checksrc.pl` script. Invoked with `make checksrc` or even by default
+by the build system when built after `./configure --enable-debug` has been
+used.
 
 It is normally not a problem for anyone to follow the guidelines, as you just
 need to copy the style already used in the source code and there are no
