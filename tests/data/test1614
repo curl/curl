@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+dynbuf
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+dynbuf
+ </name>
+</client>
+</testcase>

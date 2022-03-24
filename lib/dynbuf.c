@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2020 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -222,25 +222,25 @@ CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
 }
 
 /*
- * Returns a pointer to the buffer.
+ * Returns a pointer to the buffer if it has a length.
  */
 char *Curl_dyn_ptr(const struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
-  return s->bufr;
+  return s->leng ? s->bufr : NULL;
 }
 
 /*
- * Returns an unsigned pointer to the buffer.
+ * Returns an unsigned pointer to the buffer if it has a length.
  */
 unsigned char *Curl_dyn_uptr(const struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
-  return (unsigned char *)s->bufr;
+  return s->leng ? (unsigned char *)s->bufr : NULL;
 }
 
 /*
