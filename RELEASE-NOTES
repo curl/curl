@@ -3,13 +3,16 @@ curl and libcurl 7.83.0
  Public curl releases:         207
  Command line options:         247
  curl_easy_setopt() options:   295
- Public functions in libcurl:  86
- Contributors:                 2602
+ Public functions in libcurl:  88
+ Contributors:                 2603
 
 This release includes the following changes:
 
+ o curl: add %header{name} support in -w handling
+ o curl: add %{header_json} support in -w handling
  o curl: add --no-clobber [28]
  o curl: add --remove-on-error [11]
+ o header api: add curl_easy_header and curl_easy_nextheader [56]
 
 This release includes the following bugfixes:
 
@@ -26,7 +29,11 @@ This release includes the following bugfixes:
  o curl: error out when options need features not present in libcurl [18]
  o CURLSHOPT_UNLOCKFUNC.3: fix the callback prototype [9]
  o docs/HYPER.md: updated to reflect current hyper build needs
+ o docs/opts: Mention Schannel client cert type is P12 [50]
+ o firefox-db2pem.sh: make the shell script safer [47]
  o GHA: build hyper with nightly rustc [7]
+ o gha: move the event-based test over from Zuul [59]
+ o gtls: fix build for disabled TLS-SRP [48]
  o http: reject header contents with nul bytes [41]
  o http: return error on colon-less HTTP headers [31]
  o hyper: fix status_line() return code [13]
@@ -34,9 +41,11 @@ This release includes the following bugfixes:
  o ipv4/6.d: clarify that they are about using IP addresses [3]
  o json.d: fix typo (overriden -> overridden) [24]
  o keepalive-time.d: It takes many probes to detect brokenness [29]
+ o lib/warnless.[ch]: only check for WIN32 and ignore _WIN32 [45]
  o lib: fix some misuse of curlx_convert_wchar_to_UTF8 [38]
  o libssh: fix build with old libssh versions [12]
  o libssh: Improve fix for missing SSH_S_ stat macros [10]
+ o libssh: unstick SFTP transfers when done event-based [58]
  o mk-ca-bundle.pl: Use stricter logic to process the certificates [39]
  o mk-ca-bundle.vbs: delete this script in favor of mk-ca-bundle.pl [8]
  o mlc_config.json: add file to ignore known troublesome URLs [35]
@@ -46,16 +55,22 @@ This release includes the following bugfixes:
  o openssl: check SSL_get_peer_cert_chain return value [1]
  o openssl: enable CURLOPT_SSL_EC_CURVES with BoringSSL [23]
  o openssl: fix CN check error code [21]
+ o options: remove mistaken space before paren in prototype
  o rtsp: don't let CSeq error override earlier errors [37]
  o runtests: make 'oldlibssh' be before 0.9.4 [2]
  o scripts/copyright.pl: ignore the new mlc_config.json file
+ o scripts: move three scripts from lib/ to scripts/ [44]
+ o test1135: sync with recent API updates [54]
+ o test1459: disable for oldlibssh [53]
  o test375: fix line endings on Windows [40]
  o test386: Fix an incorrect test markup tag
  o test718: edited slightly to return better HTTP [32]
+ o tests/server/util.h: align WIN32 condition with util.c [46]
  o tool and tests: force flush of all buffers at end of program [17]
  o tool_cb_hdr: Turn the Location: into a terminal hyperlink [30]
  o tool_operate: fix a scan-build warning [16]
  o winbuild/README.md: fixup dead link [36]
+ o winbuild: Add a Visual Studio example to the README [49]
  o wolfssl: fix compiler error without IPv6 [25]
 
 This release includes the following known bugs:
@@ -70,8 +85,9 @@ advice from friends like these:
   Frank Meier, Jan Venekamp, Jean-Philippe Menil, Joseph Chen,
   Kristoffer Gleditsch, Marcel Raad, Marc Hörsken, mehatzri on github,
   Michał Antoniak, Paul Howarth, pheiduck on github, r-a-sattarov on github,
-  Ray Satiro, Samuel Henrique, Tatsuhiro Tsujikawa, HexTheDragon
-  (24 contributors)
+  Ray Satiro, Robert Brose, Samuel Henrique, Tatsuhiro Tsujikawa, Timothe Litt,
+  HexTheDragon
+  (26 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -117,3 +133,15 @@ References to bug reports and discussions on issues:
  [40] = https://curl.se/bug/?i=8599
  [41] = https://curl.se/bug/?i=8601
  [42] = https://curl.se/bug/?i=8596
+ [44] = https://curl.se/bug/?i=8625
+ [45] = https://curl.se/bug/?i=8594
+ [46] = https://curl.se/bug/?i=8594
+ [47] = https://curl.se/bug/?i=8616
+ [48] = https://curl.se/mail/lib-2022-03/0046.html
+ [49] = https://curl.se/bug/?i=8592
+ [50] = https://curl.se/bug/?i=8587
+ [53] = https://curl.se/bug/?i=8622
+ [54] = https://curl.se/bug/?i=8620
+ [56] = https://curl.se/bug/?i=8593
+ [58] = https://curl.se/bug/?i=8490
+ [59] = https://curl.se/bug/?i=8490
