@@ -18,54 +18,50 @@ jobs:
     - uses: actions/checkout@main
     - uses: pguyot/arm-runner-action@main
       with:
-          commands:
-          configure:
-            steps:
-              - run:
-                  command: |
-                    autoreconf -fi
-                    ./configure --enable-warnings --enable-werror --with-openssl
+        command: |
+          autoreconf -fi
+          ./configure --enable-warnings --enable-werror --with-openssl
 
-          configure-openssl-no-verbose:
+      configure-openssl-no-verbose:
             steps:
               - run:
                   command: |
                     autoreconf -fi
                     ./configure --disable-verbose --enable-werror --with-openssl
 
-          configure-no-proxy:
+      configure-no-proxy:
             steps:
               - run:
                   command: |
                     autoreconf -fi
                     ./configure --disable-proxy --enable-werror --with-openssl
 
-          install-cares:
+    install-cares:
             steps:
               - run:
                   command: |
                     sudo apt-get update && sudo apt-get install -y libc-ares-dev
 
-          install-libssh:
+    install-libssh:
             steps:
               - run:
                   command: |
                     sudo apt-get update && sudo apt-get install -y libssh-dev
 
-          install-deps:
+    install-deps:
             steps:
               - run:
                   command: |
                     sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
 
-          configure-libssh:
+  configure-libssh:
             steps:
               - run:
                   command: |
                     autoreconf -fi
                     ./configure --enable-warnings --enable-werror --with-openssl --with-libssh
 
-          install-wolfssl:
+  install-wolfssl:
             steps:
               - run:
                   command: |
@@ -76,7 +72,7 @@ jobs:
                     ./configure --enable-tls13 --enable-all --enable-harden --prefix=$HOME/wssl
                     make && make install
 
-          install-wolfssh:
+  install-wolfssh:
             steps:
               - run:
                   command: |
@@ -87,42 +83,42 @@ jobs:
                     ./configure --with-wolfssl=$HOME/wssl --prefix=$HOME/wssh --enable-scp --enable-sftp --disable-examples
                     make && make install
 
-          configure-cares:
+  configure-cares:
             steps:
               - run:
                   command: |
                     autoreconf -fi
                     ./configure --enable-warnings --enable-werror --with-openssl --enable-ares
 
-          configure-wolfssh:
+  configure-wolfssh:
             steps:
               - run:
                   command: |
                     autoreconf -fi
                     LDFLAGS="-Wl,-rpath,$HOME/wssh/lib" ./configure --enable-warnings --enable-werror --with-wolfssl=$HOME/wssl --with-wolfssh=$HOME/wssh
 
-          configure-cares-debug:
+  configure-cares-debug:
             steps:
               - run:
                   command: |
                     autoreconf -fi
                     ./configure --enable-debug --enable-werror --with-openssl --enable-ares
 
-          build:
-            steps:
-              - run: make V=1
-              - run: make V=1 examples
+build:
+        steps:
+            - run: make V=1
+            - run: make V=1 examples
 
-          test:
+test:
             steps:
               - run: make V=1 test-ci
 
-        executors:
+executors:
           ubuntu:
             machine:
               image: ubuntu-2004:202010-01
-
-        jobs:
+              
+              jobs:
           basic:
             executor: ubuntu
             steps:
