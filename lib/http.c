@@ -3349,6 +3349,8 @@ static statusline
 checkprotoprefix(struct Curl_easy *data, struct connectdata *conn,
                  const char *s, size_t len)
 {
+  if(!len)
+    return STATUS_UNKNOWN;
 #ifndef CURL_DISABLE_RTSP
   if(conn->handler->protocol & CURLPROTO_RTSP)
     return checkrtspprefix(data, s, len);
