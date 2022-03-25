@@ -18,6 +18,9 @@ jobs:
     - uses: actions/checkout@main
     - uses: pguyot/arm-runner-action@main
       with:
+        cpu_info: cpuinfo/raspberrypi_4b
+        bind_mount_repository: true
+        cpu: cortex-a53
         image_additional_mb: 256000
         commands: |
           echo "install prereqs and impacket"
