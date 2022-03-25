@@ -29,7 +29,7 @@
 #include "tool_writeout_json.h"
 #include "tool_writeout.h"
 
-void jsonWriteString(FILE *stream, const char *in)
+void jsonWriteString(FILE *stream, const char *in, bool lowercase)
 {
   const char *i = in;
   const char *in_end = in + strlen(in);
@@ -63,7 +63,11 @@ void jsonWriteString(FILE *stream, const char *in)
         fprintf(stream, "u%04x", *i);
       }
       else {
-        fputc(*i, stream);
+        char out = *i;
+        if(lowercase && (out >= 'A' && out <= 'Z'))
+          /* do not use tolower() since that's locale specific */
+          out |= ('a' - 'A');
+        fputc(out, stream);
       }
       break;
     }
@@ -87,7 +91,7 @@ void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
   /* The variables are sorted in alphabetical order but as a special case
      curl_version (which is not actually a --write-out variable) is last. */
   fprintf(stream, "\"curl_version\":");
-  jsonWriteString(stream, curl_version());
+  jsonWriteString(stream, curl_version(), FALSE);
   fprintf(stream, "}");
 }
 
@@ -106,7 +110,7 @@ void headerJSON(FILE *stream, struct per_transfer *per)
                                        prev))) {
     if(prev)
       fputs(",\n", stream);
-    jsonWriteString(stream, header->name);
+    jsonWriteString(stream, header->name, TRUE);
     fputc(':', stream);
     prev = header;
     if(header->amount > 1) {
@@ -118,7 +122,7 @@ void headerJSON(FILE *stream, struct per_transfer *per)
         char *name = header->name;
         fputc('[', stream);
         do {
-          jsonWriteString(stream, header->value);
+          jsonWriteString(stream, header->value, FALSE);
           if(++i >= a)
             break;
           fputc(',', stream);
@@ -131,7 +135,7 @@ void headerJSON(FILE *stream, struct per_transfer *per)
     }
     else {
       fputc('[', stream);
-      jsonWriteString(stream, header->value);
+      jsonWriteString(stream, header->value, FALSE);
       fputc(']', stream);
     }
   }

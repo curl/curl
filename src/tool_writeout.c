@@ -220,7 +220,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
     DEBUGASSERT(strinfo);
     if(use_json) {
       fprintf(stream, "\"%s\":", wovar->name);
-      jsonWriteString(stream, strinfo);
+      jsonWriteString(stream, strinfo, FALSE);
     }
     else
       fputs(strinfo, stream);
