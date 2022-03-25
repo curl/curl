@@ -21,7 +21,7 @@ jobs:
         cpu_info: cpuinfo/raspberrypi_4b
         bind_mount_repository: true
         cpu: cortex-a53
-        image_additional_mb: 256000
+        image_additional_mb: 512000
         commands: |
           echo "install prereqs and impacket"
           sudo apt update
