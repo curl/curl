@@ -19,7 +19,6 @@ jobs:
     - uses: pguyot/arm-runner-action@main
       with:
         cpu_info: cpuinfo/raspberrypi_4b
-        image_additional_mb: 256000
         cpu: cortex-a53
         command: |
           echo "install prereqs and impacket"
