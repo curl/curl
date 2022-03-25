@@ -27,18 +27,18 @@ jobs:
           sudo python3 -m pip install impacket
 
           echo "install rust"
-          (cd $HOME;
-          git clone --depth=1 https://github.com/hyperium/hyper.git;
-          curl https://sh.rustup.rs -sSf | sh -s -- -y;
+          cd $HOME
+          git clone --depth=1 https://github.com/hyperium/hyper.git
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
           source $HOME/.cargo/env;
-          rustup toolchain install nightly;)
+          rustup toolchain install nightly
           
           echo "install hyper"
-          (cd $HOME/hyper;
-          RUSTFLAGS="--cfg hyper_unstable_ffi" cargo +nightly rustc --features client,http1,http2,ffi -Z unstable-options --crate-type cdylib)
+          cd $HOME/hyper
+          RUSTFLAGS="--cfg hyper_unstable_ffi" cargo +nightly rustc --features client,http1,http2,ffi -Z unstable-options --crate-type cdylib
           
           echo "configure and build"
-          autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} && make V=1
+          autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" ./configure --enable-warnings --enable-werror && make V=1
           
           echo "test"
           make V=1 test-ci
