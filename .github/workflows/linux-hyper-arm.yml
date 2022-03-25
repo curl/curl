@@ -20,7 +20,7 @@ jobs:
       with:
         commands: |
           echo "install prereqs and impacket"
-          sudo apt-get install libtool autoconf automake pkg-config
+          sudo apt-get install libtool autoconf automake pkg-config -y
           sudo python3 -m pip install impacket
           echo "install rust"
           cd $HOME
