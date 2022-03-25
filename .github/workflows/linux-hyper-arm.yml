@@ -20,8 +20,8 @@ jobs:
       with:
         commands: |
           echo "install prereqs and impacket"
-          sudo apt-get install libtool autoconf automake pkg-config -y
-          sudo python3 -m pip install impacket
+          sudo apt-get install libtool autoconf automake pkg-config python3-pip -y
+          sudo pip3 install impacket
           echo "install rust"
           cd $HOME
           git clone --depth=1 https://github.com/hyperium/hyper.git
