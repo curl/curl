@@ -18,6 +18,7 @@ jobs:
     - uses: actions/checkout@main
     - uses: pguyot/arm-runner-action@main
       with:
+        image_additional_mb: 128000
         commands: |
           echo "install prereqs and impacket"
           sudo apt update
