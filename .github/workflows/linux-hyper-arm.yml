@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@main
-    - uses: pguyot/arm-runner-action@main
+    - uses: pheiduck/arm-runner-action@main
       with:
         command: |
           echo "install prereqs and impacket"
