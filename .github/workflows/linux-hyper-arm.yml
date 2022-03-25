@@ -18,8 +18,6 @@ jobs:
     - uses: actions/checkout@main
     - uses: pguyot/arm-runner-action@main
       with:
-        cpu_info: cpuinfo/raspberrypi_4b
-        cpu: cortex-a53
         command: |
           echo "install prereqs and impacket"
           sudo apt-get install libtool autoconf automake pkg-config
