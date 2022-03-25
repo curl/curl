@@ -21,7 +21,7 @@ jobs:
         commands: |
           echo "install prereqs and impacket"
           sudo apt update
-          sudo apt install libtool autoconf automake pkg-config python3-pip -y
+          sudo apt install libtool autoconf automake pkg-config python3-pip git -y
           sudo pip3 install impacket
           echo "install rust"
           cd $HOME
