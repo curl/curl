@@ -16,8 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@main
-    - uses: pheiduck/arm-runner-action@main
+    - uses: pguyot/arm-runner-action@main
       with:
+        cpu_info: cpuinfo/raspberrypi_4b
+        image_additional_mb: 256000
+        cpu: cortex-a53
         command: |
           echo "install prereqs and impacket"
           sudo apt-get install libtool autoconf automake pkg-config
