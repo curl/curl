@@ -1,0 +1,41 @@
+name: Hyper ARM
+
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+    - master
+    - '*/ci'
+  pull_request:
+    branches:
+    - master
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@main
+    - uses: pguyot/arm-runner-action@main
+      with:
+        command: |
+          echo "install prereqs and impacket"
+          sudo apt-get install libtool autoconf automake pkg-config
+          sudo python3 -m pip install impacket
+
+          echo "install rust"
+          (cd $HOME;
+          git clone --depth=1 https://github.com/hyperium/hyper.git;
+          curl https://sh.rustup.rs -sSf | sh -s -- -y;
+          source $HOME/.cargo/env;
+          rustup toolchain install nightly;)
+          
+          echo "install hyper"
+          (cd $HOME/hyper;
+          RUSTFLAGS="--cfg hyper_unstable_ffi" cargo +nightly rustc --features client,http1,http2,ffi -Z unstable-options --crate-type cdylib)
+          
+          echo "configure and build"
+          autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} && make V=1
+          
+          echo "test"
+          make V=1 test-ci
