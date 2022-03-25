@@ -7,9 +7,6 @@ on:
     branches:
     - master
     - '*/ci'
-  pull_request:
-    branches:
-    - master
     
 jobs:
   build:
@@ -21,22 +18,25 @@ jobs:
         cpu_info: cpuinfo/raspberrypi_4b
         bind_mount_repository: true
         cpu: cortex-a53
-        image_additional_mb: 512000
+        image_additional_mb: 128000
         commands: |
-          echo "install prereqs and impacket"
+          echo "install preqs"
           sudo apt update
-          sudo apt install libtool autoconf automake pkg-config python3-pip git -y
-          sudo pip3 install impacket
-          echo "install rust"
-          cd $HOME
-          git clone --depth=1 https://github.com/hyperium/hyper.git
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
-          source $HOME/.cargo/env;
-          rustup toolchain install nightly
-          echo "install hyper"
-          cd $HOME/hyper
-          RUSTFLAGS="--cfg hyper_unstable_ffi" cargo +nightly rustc --features client,http1,http2,ffi -Z unstable-options --crate-type cdylib
-          echo "configure and build"
-          autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" ./configure --enable-warnings --enable-werror && make V=1
-          echo "test"
-          make V=1 test-ci
+          sudo apt install git -y
+          echo "clone curl"
+          git clone https://github.com/curl/curl
+          
+          echo "build with openssl"
+          ./configure --with-openssl
+          make
+          make V=1 test
+          
+          echo "build with gnutls"
+          ./configure --with-gnutls
+          make
+          make V=1 test
+          
+          echo "build with wolfssl"
+          ./configure --with-wolfssl
+          make
+          make V=1 test
