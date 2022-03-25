@@ -18,7 +18,7 @@ jobs:
     - uses: actions/checkout@main
     - uses: pguyot/arm-runner-action@main
       with:
-        command: |
+        commands: |
           echo "install prereqs and impacket"
           sudo apt-get install libtool autoconf automake pkg-config
           sudo python3 -m pip install impacket
