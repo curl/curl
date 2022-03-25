@@ -27,6 +27,6 @@
 void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
                      struct per_transfer *per, CURLcode per_result);
 void headerJSON(FILE *stream, struct per_transfer *per);
-void jsonWriteString(FILE *stream, const char *in);
+void jsonWriteString(FILE *stream, const char *in, bool lowercase);
 
 #endif /* HEADER_CURL_TOOL_WRITEOUT_H */
