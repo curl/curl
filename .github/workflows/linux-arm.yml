@@ -8,6 +8,10 @@ on:
     - master
     - '*/ci'
     
+  pull_request:
+    branches:
+    - master
+    
 jobs:
   build:
     runs-on: ubuntu-latest
