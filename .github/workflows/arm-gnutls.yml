@@ -1,4 +1,4 @@
-name: Linux ARM
+name: arm-gnutls
 
 on:
   # Trigger the workflow on push or pull requests, but only for the
@@ -22,7 +22,7 @@ jobs:
         cpu_info: cpuinfo/raspberrypi_4b
         bind_mount_repository: true
         cpu: cortex-a53
-        image_additional_mb: 128000
+        image_additional_mb: 65536 
         commands: |
           echo "install preqs"
           sudo apt update
