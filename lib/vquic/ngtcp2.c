@@ -764,7 +764,8 @@ static ngtcp2_callbacks ng_callbacks = {
   NULL, /* ack_datagram */
   NULL, /* lost_datagram */
   ngtcp2_crypto_get_path_challenge_data_cb,
-  cb_stream_stop_sending
+  cb_stream_stop_sending,
+  NULL, /* version_negotiation */
 };
 
 /*
@@ -885,15 +886,18 @@ static void qs_disconnect(struct quicsocket *qs)
   char buffer[NGTCP2_MAX_UDP_PAYLOAD_SIZE];
   ngtcp2_tstamp ts;
   ngtcp2_ssize rc;
+  ngtcp2_connection_close_error errorcode;
+
   if(!qs->conn) /* already closed */
     return;
+  ngtcp2_connection_close_error_set_application_error(&errorcode,
+                                                      NGHTTP3_H3_NO_ERROR,
+                                                      NULL, 0);
   ts = timestamp();
   rc = ngtcp2_conn_write_connection_close(qs->qconn, NULL, /* path */
                                           NULL, /* pkt_info */
                                           (uint8_t *)buffer, sizeof(buffer),
-                                          0, /* error_code */
-                                          NULL, 0, /* reason + len */
-                                          ts);
+                                          &errorcode, ts);
   if(rc > 0) {
     while((send(qs->conn->sock[FIRSTSOCKET], buffer, rc, 0) == -1) &&
           SOCKERRNO == EINTR);
