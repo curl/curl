@@ -34,13 +34,3 @@ jobs:
           ./configure --with-openssl
           make
           make V=1 test
-          
-          echo "build with gnutls"
-          ./configure --with-gnutls
-          make
-          make V=1 test
-          
-          echo "build with wolfssl"
-          ./configure --with-wolfssl
-          make
-          make V=1 test

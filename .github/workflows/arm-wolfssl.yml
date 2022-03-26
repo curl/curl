@@ -1,0 +1,36 @@
+name: Linux ARM
+
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+    - master
+    - '*/ci'
+    
+  pull_request:
+    branches:
+    - master
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@main
+    - uses: pguyot/arm-runner-action@main
+      with:
+        cpu_info: cpuinfo/raspberrypi_4b
+        bind_mount_repository: true
+        cpu: cortex-a53
+        image_additional_mb: 128000
+        commands: |
+          echo "install preqs"
+          sudo apt update
+          sudo apt install git -y
+          echo "clone curl"
+          git clone https://github.com/curl/curl
+          
+          echo "build with wolfssl"
+          ./configure --with-wolfssl
+          make
+          make V=1 test
