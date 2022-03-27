@@ -114,6 +114,7 @@ DPAGES = \
   include.d \
   insecure.d \
   interface.d \
+  ipfs-gateway.d \
   ipv4.d \
   ipv6.d \
   json.d \

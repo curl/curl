@@ -54,20 +54,21 @@ struct helptxt {
 #define CURLHELP_HTTP 1u << 7u
 #define CURLHELP_IMAP 1u << 8u
 #define CURLHELP_IMPORTANT 1u << 9u
-#define CURLHELP_MISC 1u << 10u
-#define CURLHELP_OUTPUT 1u << 11u
-#define CURLHELP_POP3 1u << 12u
-#define CURLHELP_POST 1u << 13u
-#define CURLHELP_PROXY 1u << 14u
-#define CURLHELP_SCP 1u << 15u
-#define CURLHELP_SFTP 1u << 16u
-#define CURLHELP_SMTP 1u << 17u
-#define CURLHELP_SSH 1u << 18u
-#define CURLHELP_TELNET 1u << 19u
-#define CURLHELP_TFTP 1u << 20u
-#define CURLHELP_TLS 1u << 21u
-#define CURLHELP_UPLOAD 1u << 22u
-#define CURLHELP_VERBOSE 1u << 23u
+#define CURLHELP_IPFS 1u << 10u
+#define CURLHELP_MISC 1u << 11u
+#define CURLHELP_OUTPUT 1u << 12u
+#define CURLHELP_POP3 1u << 13u
+#define CURLHELP_POST 1u << 14u
+#define CURLHELP_PROXY 1u << 15u
+#define CURLHELP_SCP 1u << 16u
+#define CURLHELP_SFTP 1u << 17u
+#define CURLHELP_SMTP 1u << 18u
+#define CURLHELP_SSH 1u << 19u
+#define CURLHELP_TELNET 1u << 20u
+#define CURLHELP_TFTP 1u << 21u
+#define CURLHELP_TLS 1u << 22u
+#define CURLHELP_UPLOAD 1u << 23u
+#define CURLHELP_VERBOSE 1u << 24u
 
 extern const struct helptxt helptext[];
 

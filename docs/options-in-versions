@@ -97,6 +97,7 @@
 --http3                              7.66.0
 --http3-only                         7.88.0
 --ignore-content-length              7.14.1
+--ipfs-gateway                       8.4.0
 --include (-i)                       4.8
 --insecure (-k)                      7.10
 --interface                          7.3

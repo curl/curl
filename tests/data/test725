@@ -1,0 +1,40 @@
+<testcase>
+<info>
+<keywords>
+IPFS
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<setenv>
+HOME=%PWD/log
+</setenv>
+ <name>
+IPFS with malformed gateway URL from gateway file
+ </name>
+ <command>
+ipfs://QmV5JejrpgUxnkZeFZYMxVCqAbKy3KdPXWXyuEDiMNZwUx
+</command>
+<file name="log/.ipfs/gateway" >
+http://nonexisting,local:8080/%TESTNUMBER
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

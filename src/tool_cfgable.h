@@ -128,6 +128,7 @@ struct OperationConfig {
   struct getout *url_get;   /* point to the node to fill in URL */
   struct getout *url_out;   /* point to the node to fill in outfile */
   struct getout *url_ul;    /* point to the node to fill in upload */
+  char *ipfs_gateway;
   char *doh_url;
   char *cipher_list;
   char *proxy_cipher_list;

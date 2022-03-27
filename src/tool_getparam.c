@@ -116,6 +116,7 @@ static const struct LongShort aliases[]= {
   {"*r", "create-dirs",              ARG_BOOL},
   {"*R", "create-file-mode",         ARG_STRING},
   {"*s", "max-redirs",               ARG_STRING},
+  {"*S", "ipfs-gateway",             ARG_STRING},
   {"*t", "proxy-ntlm",               ARG_BOOL},
   {"*u", "crlf",                     ARG_BOOL},
   {"*v", "stderr",                   ARG_FILENAME},
@@ -1135,6 +1136,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           break;
         if(config->maxredirs < -1)
           err = PARAM_BAD_NUMERIC;
+        break;
+
+      case 'S': /* ipfs gateway url */
+        GetStr(&config->ipfs_gateway, nextarg);
         break;
 
       case 't': /* --proxy-ntlm */
