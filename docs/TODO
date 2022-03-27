@@ -136,6 +136,7 @@
  17. SSH protocols
  17.1 Multiplexing
  17.2 Handle growing SFTP files
+ 17.3 Read keys from ~/.ssh/id_ecdsa, id_ed25519
  17.4 Support CURLOPT_PREQUOTE
  17.5 SSH over HTTPS proxy with more backends
 
@@ -910,6 +911,14 @@
  attempt to download more to see if there is more to get...
 
  https://github.com/curl/curl/issues/4344
+
+17.3 Read keys from ~/.ssh/id_ecdsa, id_ed25519
+
+ The libssh2 backend in curl is limited to only reading keys from id_rsa and
+ id_dsa, which makes it fail connecting to servers that use more modern key
+ types.
+
+ https://github.com/curl/curl/issues/8586
 
 17.4 Support CURLOPT_PREQUOTE
 
