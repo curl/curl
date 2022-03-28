@@ -732,8 +732,12 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
   case MQTT_FIRST:
     /* Read the initial byte only */
     result = Curl_read(data, sockfd, (char *)&mq->firstbyte, 1, &nread);
-    if(!nread)
+    if(!nread) {
+      failf(data, "Connection disconnected");
+      *done = TRUE;
+      result = CURLE_RECV_ERROR;
       break;
+    }
     Curl_debug(data, CURLINFO_HEADER_IN, (char *)&mq->firstbyte, 1);
     /* remember the first byte */
     mq->npacket = 0;
