@@ -2043,6 +2043,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       /* fill in the outfile */
       if('o' == letter) {
+        if(!*nextarg) {
+          warnf(global, "output file name has no length\n");
+          return PARAM_BAD_USE;
+        }
         GetStr(&url->outfile, nextarg);
         url->flags &= ~GETOUT_USEREMOTE; /* switch off */
       }
