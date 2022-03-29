@@ -1,0 +1,63 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH curl_easy_vsetopt 3 "29 Mar 2022" "libcurl 7.83.0" "libcurl Manual"
+.SH NAME
+curl_easy_vsetopt \- set options for a curl easy handle from a va_list
+.SH SYNOPSIS
+.nf
+#include <stdarg.h>
+#include <curl/curl.h>
+
+CURLcode curl_easy_vsetopt(CURL *handle, CURLoption option, va_list ap);
+.fi
+.SH DESCRIPTION
+\fIcurl_easy_vsetopt(3)\fP is used to set options for a curl easy handle from a
+variadic argument list specified by the ap parameter. In all other respects it
+is identical to \fIcurl_easy_setopt(3)\fP.
+.SH EXAMPLE
+.nf
+void run_url(CURL *curl, ...)
+{
+  CURL *curl;
+  CURLcode res;
+  va_list arg;
+  va_start(arg, curl);
+  curl = curl_easy_init();
+  res = curl_easy_vsetopt(curl, CURLOPT_URL, arg);
+  va_end(arg);
+  if (res != CURLE_OK) {
+    // handle error...
+  }
+  res = curl_easy_perform(curl);
+  if (res != CURLE_OK) {
+    // handle error...
+  }
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.83.0
+.SH RETURN VALUE
+See \fIcurl_easy_setopt(3)\fP.
+.SH "SEE ALSO"
+.BR curl_easy_setopt "(3)"

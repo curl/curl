@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_SETOPT_H
-#define HEADER_CURL_SETOPT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,9 +19,46 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "test.h"
+#include "memdebug.h"
 
-CURLcode Curl_setstropt(char **charp, const char *s);
-CURLcode Curl_setblobopt(struct curl_blob **blobp,
-                         const struct curl_blob *blob);
+#include <stdarg.h>
 
-#endif /* HEADER_CURL_SETOPT_H */
+CURLcode test_vsetopt(CURL *curl, CURLoption opt, ...)
+{
+  va_list ap;
+  va_start(ap, opt);
+  curl_easy_vsetopt(curl, opt, ap);
+  va_end(ap);
+}
+
+int test(char *URL)
+{
+  CURLcode res;
+  CURL *curl;
+
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  curl = curl_easy_init();
+  if(!curl) {
+    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  test_vsetopt(curl, CURLOPT_VERBOSE, 1L);
+  test_vsetopt(curl, CURLOPT_HEADER, 1L);
+  test_vsetopt(curl, CURLOPT_URL, URL);
+
+  res = curl_easy_perform(curl);
+
+test_cleanup:
+
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+
+  return (int)res;
+}
