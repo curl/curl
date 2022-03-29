@@ -4,7 +4,7 @@ curl and libcurl 7.83.0
  Command line options:         247
  curl_easy_setopt() options:   295
  Public functions in libcurl:  88
- Contributors:                 2603
+ Contributors:                 2607
 
 This release includes the following changes:
 
@@ -27,9 +27,13 @@ This release includes the following bugfixes:
  o connect: use TCP_KEEPALIVE only if TCP_KEEPIDLE is not defined [6]
  o curl/system.h: update ifdef condition for MCST-LCC compiler [4]
  o curl: error out when options need features not present in libcurl [18]
+ o curl: fix segmentation fault for empty output file names. [60]
+ o CURLOPT_DISALLOW_USERNAME_IN_URL.3: use uppercase URL
+ o CURLOPT_PROGRESSFUNCTION.3: fix typo in example [63]
  o CURLSHOPT_UNLOCKFUNC.3: fix the callback prototype [9]
  o docs/HYPER.md: updated to reflect current hyper build needs
  o docs/opts: Mention Schannel client cert type is P12 [50]
+ o docs: lots of minor language polish [51]
  o firefox-db2pem.sh: make the shell script safer [47]
  o GHA: build hyper with nightly rustc [7]
  o gha: move the event-based test over from Zuul [59]
@@ -49,13 +53,17 @@ This release includes the following bugfixes:
  o mk-ca-bundle.pl: Use stricter logic to process the certificates [39]
  o mk-ca-bundle.vbs: delete this script in favor of mk-ca-bundle.pl [8]
  o mlc_config.json: add file to ignore known troublesome URLs [35]
+ o mqtt: better handling of TCP disconnect mid-message [55]
  o ngtcp2: add client certificate authentication for OpenSSL [15]
  o ngtcp2: disconnect the QUIC connection proper [19]
+ o ngtcp2: update to work after recent ngtcp2 updates [62]
  o nonblock: restore setsockopt method to curlx_nonblock [20]
  o openssl: check SSL_get_peer_cert_chain return value [1]
  o openssl: enable CURLOPT_SSL_EC_CURVES with BoringSSL [23]
  o openssl: fix CN check error code [21]
  o options: remove mistaken space before paren in prototype
+ o pop3/smtp: return *WEIRD_SERVER_REPLY when not understood [43]
+ o projects: Update VC version names for VS2017, VS2022 [52]
  o rtsp: don't let CSeq error override earlier errors [37]
  o runtests: make 'oldlibssh' be before 0.9.4 [2]
  o scripts/copyright.pl: ignore the new mlc_config.json file
@@ -82,12 +90,13 @@ advice from friends like these:
 
   Alejandro R. Sedeño, Andreas Falkenhahn, Colin Leroy, Dan Fandrich,
   Daniel Stenberg, Daniel Valenzuela, Don J Olmstead, Francisco Olarte,
-  Frank Meier, Jan Venekamp, Jean-Philippe Menil, Joseph Chen,
-  Kristoffer Gleditsch, Marcel Raad, Marc Hörsken, mehatzri on github,
-  Michał Antoniak, Paul Howarth, pheiduck on github, r-a-sattarov on github,
-  Ray Satiro, Robert Brose, Samuel Henrique, Tatsuhiro Tsujikawa, Timothe Litt,
-  HexTheDragon
-  (26 contributors)
+  Frank Meier, Ian Blanes, Jan Venekamp, Jean-Philippe Menil, Jenny Heino,
+  Joseph Chen, jurisuk on github, Kristoffer Gleditsch, Marcel Raad,
+  Marc Hörsken, mehatzri on github, Michał Antoniak, Paul Howarth,
+  Peter Korsgaard, pheiduck on github, r-a-sattarov on github, Ray Satiro,
+  Rianov Viacheslav, Robert Brose, Samuel Henrique, Tatsuhiro Tsujikawa,
+  Timothe Litt, HexTheDragon
+  (31 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -133,6 +142,7 @@ References to bug reports and discussions on issues:
  [40] = https://curl.se/bug/?i=8599
  [41] = https://curl.se/bug/?i=8601
  [42] = https://curl.se/bug/?i=8596
+ [43] = https://curl.se/bug/?i=8506
  [44] = https://curl.se/bug/?i=8625
  [45] = https://curl.se/bug/?i=8594
  [46] = https://curl.se/bug/?i=8594
@@ -140,8 +150,14 @@ References to bug reports and discussions on issues:
  [48] = https://curl.se/mail/lib-2022-03/0046.html
  [49] = https://curl.se/bug/?i=8592
  [50] = https://curl.se/bug/?i=8587
+ [51] = https://curl.se/bug/?i=8646
+ [52] = https://curl.se/bug/?i=8447
  [53] = https://curl.se/bug/?i=8622
  [54] = https://curl.se/bug/?i=8620
+ [55] = https://hackerone.com/reports/1521610
  [56] = https://curl.se/bug/?i=8593
  [58] = https://curl.se/bug/?i=8490
  [59] = https://curl.se/bug/?i=8490
+ [60] = https://curl.se/bug/?i=8606
+ [62] = https://curl.se/bug/?i=8638
+ [63] = https://curl.se/bug/?i=8636
