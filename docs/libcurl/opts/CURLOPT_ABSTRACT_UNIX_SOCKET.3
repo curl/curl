@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -39,7 +39,7 @@ sockets, however it should be stressed that the path passed to this function
 should not contain a leading NULL).
 
 On non-supporting platforms, the abstract address will be interpreted as an
-empty string and fail gracefully, generating a run-time error.
+empty string and fail gracefully, generating a runtime error.
 
 This option shares the same semantics as \fICURLOPT_UNIX_SOCKET_PATH(3)\fP in
 which documentation more details can be found. Internally, these two options

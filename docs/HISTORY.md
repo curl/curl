@@ -411,7 +411,7 @@ April: added the cyassl backend (later renamed to WolfSSL)
 2021
 ----
 
- February 3: curl 7.75.0 ships with support for Hyper is a HTTP backend
+ February 3: curl 7.75.0 ships with support for Hyper as an HTTP backend
 
  March 31: curl 7.76.0 ships with support for rustls
 

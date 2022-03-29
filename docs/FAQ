@@ -56,7 +56,7 @@ FAQ
   4.2 Why do I get problems when I use & or % in the URL?
   4.3 How can I use {, }, [ or ] to specify multiple URLs?
   4.4 Why do I get downloaded data even though the web page does not exist?
-  4.5 Why do I get return code XXX from a HTTP server?
+  4.5 Why do I get return code XXX from an HTTP server?
    4.5.1 "400 Bad Request"
    4.5.2 "401 Unauthorized"
    4.5.3 "403 Forbidden"
@@ -434,7 +434,7 @@ FAQ
 
   3.1 curl: (1) SSL is disabled, https: not supported
 
-  If you get this output when trying to get anything from a https:// server,
+  If you get this output when trying to get anything from an https:// server,
   it means that the instance of curl/libcurl that you are using was built
   without support for this protocol.
 
@@ -564,8 +564,8 @@ FAQ
 
   3.12 Why do FTP-specific features over HTTP proxy fail?
 
-  Because when you use a HTTP proxy, the protocol spoken on the network will
-  be HTTP, even if you specify a FTP URL. This effectively means that you
+  Because when you use an HTTP proxy, the protocol spoken on the network will
+  be HTTP, even if you specify an FTP URL. This effectively means that you
   normally cannot use FTP-specific features such as FTP upload and FTP quote
   etc.
 
@@ -737,7 +737,7 @@ FAQ
   In normal circumstances, -X should hardly ever be used.
 
   By default you use curl without explicitly saying which request method to
-  use when the URL identifies a HTTP transfer. If you just pass in a URL like
+  use when the URL identifies an HTTP transfer. If you just pass in a URL like
   "curl http://example.com" it will use GET. If you use -d or -F curl will use
   POST, -I will cause a HEAD and -T will make it a PUT.
 
@@ -807,7 +807,7 @@ FAQ
   By using the --fail option you can tell curl explicitly to not get any data
   if the HTTP return code does not say success.
 
-  4.5 Why do I get return code XXX from a HTTP server?
+  4.5 Why do I get return code XXX from an HTTP server?
 
   RFC2616 clearly explains the return codes. This is a short transcript. Go
   read the RFC for exact details:
@@ -959,10 +959,10 @@ FAQ
   curl supports HTTP redirects well (see item 3.8). Browsers generally support
   at least two other ways to perform redirects that curl does not:
 
-  Meta tags. You can write a HTML tag that will cause the browser to redirect
+  Meta tags. You can write an HTML tag that will cause the browser to redirect
   to another given URL after a certain time.
 
-  Javascript. You can write a Javascript program embedded in a HTML page that
+  Javascript. You can write a Javascript program embedded in an HTML page that
   redirects the browser to another given URL.
 
   There is no way to make curl follow these redirects. You must either
@@ -978,7 +978,7 @@ FAQ
   the control connection and will therefore immediately connect and try to
   speak SSL. FTPS:// connections default to port 990.
 
-  To use explicit FTPS, you use a FTP:// URL and the --ftp-ssl option (or one
+  To use explicit FTPS, you use an FTP:// URL and the --ftp-ssl option (or one
   of its related flavors). This is the most common method, and the one
   mandated by RFC4217. This kind of connection will then of course use the
   standard FTP port 21 by default.
@@ -1212,7 +1212,7 @@ FAQ
   5.8 libcurl.so.X: open failed: No such file or directory
 
   This is an error message you might get when you try to run a program linked
-  with a shared version of libcurl and your run-time linker (ld.so) could not
+  with a shared version of libcurl and your runtime linker (ld.so) could not
   find the shared library named libcurl.so.X. (Where X is the number of the
   current libcurl ABI, typically 3 or 4).
 
@@ -1221,7 +1221,7 @@ FAQ
   They are usually:
 
   * Add an option to the linker command line that specify the hard-coded path
-    the run-time linker should check for the lib (usually -R)
+    the runtime linker should check for the lib (usually -R)
 
   * Set an environment variable (LD_LIBRARY_PATH for example) where ld.so
     should check for libs
@@ -1368,7 +1368,7 @@ FAQ
   5.17 Can I write a server with libcurl?
 
   No. libcurl offers no functions or building blocks to build any kind of
-  internet protocol server. libcurl is only a client-side library. For server
+  Internet protocol server. libcurl is only a client-side library. For server
   libraries, you need to continue your search elsewhere but there exist many
   good open source ones out there for most protocols you could want a server
   for. There are also really good stand-alone servers that have been tested
@@ -1535,5 +1535,5 @@ FAQ
  stable, we will never risk anything by rewriting a lot of things in one go.
  That said, we can certainly offer more and more optional backends written in
  other languages, as long as those backends can be plugged in at build-time.
- Back-ends can be written in any language, but should probably provide APIs
+ Backends can be written in any language, but should probably provide APIs
  usable from C to ease integration and transition.

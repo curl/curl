@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -35,7 +35,7 @@ This function sends arbitrary data over the established connection. You may
 use it together with \fIcurl_easy_recv(3)\fP to implement custom protocols
 using libcurl. This functionality can be particularly useful if you use
 proxies and/or SSL encryption: libcurl will take care of proxy negotiation and
-connection set-up.
+connection setup.
 
 \fBbuffer\fP is a pointer to the data of length \fBbuflen\fP that you want sent.
 The variable \fBn\fP points to will receive the number of sent bytes.

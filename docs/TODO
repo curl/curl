@@ -181,7 +181,7 @@
  20.5 Add support for concurrent connections
  20.6 Use the RFC6265 test suite
  20.7 Support LD_PRELOAD on macOS
- 20.8 Run web-platform-tests url tests
+ 20.8 Run web-platform-tests URL tests
 
  21. MQTT
  21.1 Support rate-limiting
@@ -307,10 +307,11 @@
  reuse purpose it is verified that it is still alive.
 
  Those connections may get closed by the server side for idleness or they may
- get a HTTP/2 ping from the peer to verify that they are still alive. By adding
- monitoring of the connections while in the pool, libcurl can detect dead
- connections (and close them) better and earlier, and it can handle HTTP/2
- pings to keep such ones alive even when not actively doing transfers on them.
+ get an HTTP/2 ping from the peer to verify that they are still alive. By
+ adding monitoring of the connections while in the pool, libcurl can detect
+ dead connections (and close them) better and earlier, and it can handle
+ HTTP/2 pings to keep such ones alive even when not actively doing transfers
+ on them.
 
 1.16 Try to URL encode given URL
 
@@ -1117,9 +1118,9 @@
 18.21 retry on the redirected-to URL
 
  When curl is told to --retry a failed transfer and follows redirects, it
- might get a HTTP 429 response from the redirected-to URL and not the original
- one, which then could make curl decide to rather retry the transfer on that
- URL only instead of the original operation to the original URL.
+ might get an HTTP 429 response from the redirected-to URL and not the
+ original one, which then could make curl decide to rather retry the transfer
+ on that URL only instead of the original operation to the original URL.
 
  Perhaps extra emphasized if the original transfer is a large POST that
  redirects to a separate GET, and that GET is what gets the 529
@@ -1261,9 +1262,9 @@
  properly. Look into making the preload support in runtests.pl portable such
  that it uses DYLD_INSERT_LIBRARIES on macOS.
 
-20.8 Run web-platform-tests url tests
+20.8 Run web-platform-tests URL tests
 
- Run web-platform-tests url tests and compare results with browsers on wpt.fyi
+ Run web-platform-tests URL tests and compare results with browsers on wpt.fyi
 
  It would help us find issues to fix and help us document where our parser
  differs from the WHATWG URL spec parsers.

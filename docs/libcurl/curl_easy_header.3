@@ -21,7 +21,7 @@
 .\" **************************************************************************
 .TH curl_easy_header 3 "13 March 2022" "libcurl 7.83.0" "libcurl Manual"
 .SH NAME
-curl_easy_header - get a HTTP header
+curl_easy_header - get an HTTP header
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -70,7 +70,7 @@ the previous calls for the same easy handle. Applications need to copy the
 data if it wants to keep it around. The memory used for the struct gets freed
 with calling \fIcurl_easy_cleanup(3)\fP of the easy handle.
 
-The first line in a HTTP response is called the status line. It is not
+The first line in an HTTP response is called the status line. It is not
 considered a header by this function. Headers are the "name: value" lines
 following the status.
 
@@ -116,12 +116,12 @@ The header arrived as a header from the server.
 The header arrived as a trailer. A header that arrives after the body.
 .IP CURLH_CONNECT
 The header arrived in a CONNECT response. A CONNECT request is being done to
-setup a transfer "through" a HTTP(S) proxy.
+setup a transfer "through" an HTTP(S) proxy.
 .IP CURLH_1XX
-The header arrived in a HTTP 1xx response. A 1xx response is an "intermediate"
+The header arrived in an HTTP 1xx response. A 1xx response is an "intermediate"
 response that might happen before the "real" response.
 .IP CURLH_PSUEDO
-The header is a HTTP/2 or HTTP/3 pseudo header
+The header is an HTTP/2 or HTTP/3 pseudo header
 .SH EXAMPLE
 .nf
 struct curl_header *type;
