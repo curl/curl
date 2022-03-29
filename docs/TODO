@@ -64,6 +64,7 @@
  4.1 HOST
  4.2 Alter passive/active on failure and retry
  4.3 Earlier bad letter detection
+ 4.4 Support CURLOPT_PREQUOTE for dir listings too
  4.5 ASCII support
  4.6 GSSAPI via Windows SSPI
  4.7 STAT for LIST without data connection
@@ -531,6 +532,13 @@
 
  Make the detection of (bad) %0d and %0a codes in FTP URL parts earlier in the
  process to avoid doing a resolve and connect in vain.
+
+4.4 Support CURLOPT_PREQUOTE for dir listings too
+
+ The lack of support is mostly an oversight and requires the FTP state machine
+ to get updated to get fixed.
+
+ https://github.com/curl/curl/issues/8602
 
 4.5 ASCII support
 
