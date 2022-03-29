@@ -14,7 +14,7 @@ We remove support for building curl with the NSS TLS library in August 2022.
 - NSS has very few users outside of curl as well (primarily Firefox)
 - NSS is harder than ever to find documentation for
 - NSS was always "best" used with Red Hat Linux when they provided additional
-  features on top of the regular NSS that isn't shipped by the vanilla library
+  features on top of the regular NSS that is not shipped by the vanilla library
 
 Starting in 7.82.0, building curl to use NSS configure requires the additional
 flag --with-nss-deprecated in an attempt to highlight these plans.

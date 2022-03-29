@@ -84,9 +84,9 @@ work:
 
     CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" ./configure
 
-If you have shared SSL libs installed in a directory where your run-time
+If you have shared SSL libs installed in a directory where your runtime
 linker does not find them (which usually causes configure failures), you can
-provide this option to gcc to set a hard-coded path to the run-time linker:
+provide this option to gcc to set a hard-coded path to the runtime linker:
 
     LDFLAGS=-Wl,-R/usr/local/ssl/lib ./configure --with-openssl
 
@@ -126,7 +126,7 @@ These options are provided to select the TLS backend to use.
 
 # Windows
 
-## Building Windows DLLs and C run-time (CRT) linkage issues
+## Building Windows DLLs and C runtime (CRT) linkage issues
 
  As a general rule, building a DLL with static CRT linkage is highly
  discouraged, and intermixing CRTs in the same app is something to avoid at

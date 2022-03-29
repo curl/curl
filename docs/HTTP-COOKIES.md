@@ -2,7 +2,7 @@
 
 ## Cookie overview
 
-  Cookies are `name=contents` pairs that a HTTP server tells the client to
+  Cookies are `name=contents` pairs that an HTTP server tells the client to
   hold and then the client sends back those to the server on subsequent
   requests to the same domains and paths for which the cookies were set.
 
@@ -111,9 +111,9 @@
   `CURLOPT_COOKIELIST`
 
   Provide detailed information about a single cookie to add to the internal
-  storage of cookies. Pass in the cookie as a HTTP header with all the details
-  set, or pass in a line from a Netscape cookie file. This option can also be
-  used to flush the cookies etc.
+  storage of cookies. Pass in the cookie as an HTTP header with all the
+  details set, or pass in a line from a Netscape cookie file. This option can
+  also be used to flush the cookies etc.
 
   `CURLINFO_COOKIELIST`
 

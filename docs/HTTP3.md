@@ -161,14 +161,14 @@ development and experimenting.
 
 An existing local HTTP/1.1 server that hosts files. Preferably also a few huge
 ones.  You can easily create huge local files like `truncate -s=8G 8GB` - they
-are huge but do not occupy that much space on disk since they're just a big
-hole.
+are huge but do not occupy that much space on disk since they are just big
+holes.
 
 In my Debian setup I just installed **apache2**. It runs on port 80 and has a
 document root in `/var/www/html`. I can get the 8GB file from it with `curl
 localhost/8GB -o dev/null`
 
-In this description we setup and run a HTTP/3 reverse-proxy in front of the
+In this description we setup and run an HTTP/3 reverse-proxy in front of the
 HTTP/1 server.
 
 ## Setup
@@ -202,7 +202,7 @@ that exists in curl's test dir.
 single binary in a separate directory if you prefer.
 
 In the same directory you put caddy, create a `Caddyfile` with the following
-content to run a HTTP/3 reverse-proxy on port 7443:
+content to run an HTTP/3 reverse-proxy on port 7443:
 ~~~
 {
     auto_https disable_redirects

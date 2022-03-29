@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2018 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 2018 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -33,7 +33,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_URL, char *URL);
 Pass in a pointer to a \fIURL\fP for the DoH server to use for name
 resolving. The parameter should be a char * to a null-terminated string which
 must be URL-encoded in the following format: "https://host:port/path". It MUST
-specify a HTTPS URL.
+specify an HTTPS URL.
 
 libcurl does not validate the syntax or use this variable until the transfer is
 issued. Even if you set a crazy value here, \fIcurl_easy_setopt(3)\fP will

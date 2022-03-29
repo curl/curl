@@ -198,7 +198,7 @@
 
 ## MQTT
 
- - Subscribe to and publish topics using url scheme `mqtt://broker/topic`
+ - Subscribe to and publish topics using URL scheme `mqtt://broker/topic`
 
 ## Footnotes
 

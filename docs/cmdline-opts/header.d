@@ -30,10 +30,10 @@ This option can take an argument in @filename style, which then adds a header
 for each line in the input file. Using @- will make curl read the header file
 from stdin. Added in 7.55.0.
 
-You need --proxy-header to send custom headers intended for a HTTP
+You need --proxy-header to send custom headers intended for an HTTP
 proxy. Added in 7.37.0.
 
-Passing on a "Transfer-Encoding: chunked" header when doing a HTTP request
+Passing on a "Transfer-Encoding: chunked" header when doing an HTTP request
 with a request body, will make curl send the data using chunked encoding.
 
 **WARNING**: headers set with this option will be set in all requests - even
