@@ -164,7 +164,7 @@ failed.
 .IP 21
 FTP quote error. A quote command returned error from the server.
 .IP 22
-HTTP page not retrieved. The requested url was not found or returned another
+HTTP page not retrieved. The requested URL was not found or returned another
 error with the HTTP error code being 400 or above. This return code only
 appears if --fail is used.
 .IP 23

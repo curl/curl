@@ -205,7 +205,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 1.7 Deflate error after all content was received
 
- There's a situation where we can get an error in a HTTP response that is
+ There's a situation where we can get an error in an HTTP response that is
  compressed, when that error is detected after all the actual body contents
  have been received and delivered to the application. This is tricky, but is
  ultimately a broken server.
@@ -224,14 +224,13 @@ problems may have been fixed or changed somewhat since this was written.
 
 1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
 
- I'm using libcurl to POST form data using a FILE* with the CURLFORM_STREAM
- option of curl_formadd(). I have noticed that if the connection drops at just
- the right time, the POST is reattempted without the data from the file. It
- seems like the file stream position is not getting reset to the beginning of
- the file. I found the CURLOPT_SEEKFUNCTION option and set that with a
- function that performs an fseek() on the FILE*. However, setting that did not
- seem to fix the issue or even get called. See
- https://github.com/curl/curl/issues/768
+ When using libcurl to POST form data using a FILE* with the CURLFORM_STREAM
+ option of curl_formadd(). I notice that if the connection drops at just the
+ right time, the POST is reattempted without the data from the file. It seems
+ like the file stream position is not getting reset to the beginning of the
+ file. I found the CURLOPT_SEEKFUNCTION option and set that with a function
+ that performs an fseek() on the FILE*. However, setting that did not seem to
+ fix the issue or even get called. See https://github.com/curl/curl/issues/768
 
 
 2. TLS
@@ -633,7 +632,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 7.1 FTP without or slow 220 response
 
- If a connection is made to a FTP server but the server then just never sends
+ If a connection is made to an FTP server but the server then just never sends
  the 220 response or otherwise is dead slow, libcurl will not acknowledge the
  connection timeout during that phase but only the "real" timeout - which may
  surprise users as it is probably considered to be the connect phase to most
