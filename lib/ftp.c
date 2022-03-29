@@ -3381,7 +3381,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
        (ftp->transfer == PPTRANSFER_BODY)) {
       failf(data, "Uploaded unaligned file size (%" CURL_FORMAT_CURL_OFF_T
             " out of %" CURL_FORMAT_CURL_OFF_T " bytes)",
-            data->req.bytecount, data->state.infilesize);
+            data->req.writebytecount, data->state.infilesize);
       result = CURLE_PARTIAL_FILE;
     }
   }
