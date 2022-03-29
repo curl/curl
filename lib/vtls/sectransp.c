@@ -938,9 +938,9 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
 {
-  /* The first ciphers in the ciphertable are continuos. Here we do small
+  /* The first ciphers in the ciphertable are continuous. Here we do small
      optimization and instead of loop directly get SSL name by cipher number.
-   */
+  */
   if(cipher <= SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA) {
     return ciphertable[cipher].name;
   }

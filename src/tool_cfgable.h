@@ -291,7 +291,7 @@ struct OperationConfig {
   bool disallow_username_in_url;  /* disallow usernames in URLs */
   char *aws_sigv4;
   enum {
-    CLOBBER_DEFAULT, /* Provides compatability with previous versions of curl,
+    CLOBBER_DEFAULT, /* Provides compatibility with previous versions of curl,
                         by using the default behavior for -o, -O, and -J.
                         If those options would have overwritten files, like
                         -o and -O would, then overwrite them. In the case of

@@ -95,7 +95,7 @@ bool tool_create_output_file(struct OutStruct *outs,
       }
       memcpy(newname, fname, len);
       newname[len] = '.';
-      while(fd == -1 && /* haven't sucessfully opened a file */
+      while(fd == -1 && /* haven't successfully opened a file */
             (errno == EEXIST || errno == EISDIR) &&
             /* because we keep having files that already exist */
             next_num < 100 /* and we haven't reached the retry limit */ ) {
