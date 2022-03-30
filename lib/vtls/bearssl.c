@@ -884,7 +884,7 @@ static CURLcode bearssl_connect_step3(struct Curl_easy *data,
                           BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
     }
     else
-      infof(data, "ALPN, server did not agree to a protocol");
+      infof(data, VTLS_INFOF_NO_ALPN);
   }
 
   if(SSL_SET_OPTION(primary.sessionid)) {
