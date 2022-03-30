@@ -114,7 +114,7 @@ static header_instruction inspect_header(const char *name, size_t namelen,
 }
 
 CURLcode Curl_pseudo_headers(struct Curl_easy *data,
-                             const char *mem, /* the requeset */
+                             const char *mem, /* the request */
                              const size_t len /* size of request */,
                              struct h2h3req **hp)
 {

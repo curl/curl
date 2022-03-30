@@ -62,7 +62,7 @@ are provided as arrays, since in the case of multiple headers there can be
 multiple values.
 
 The header names provided in lowercase, listed in order of appearance over the
-wire. Except for duplicated headers. They are grouped on the first occurance
+wire. Except for duplicated headers. They are grouped on the first occurrence
 of that header, each value is presented in the JSON array.
 .TP
 .B http_code

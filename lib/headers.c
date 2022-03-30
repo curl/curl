@@ -48,10 +48,10 @@ static void copy_header_external(struct Curl_easy *data,
   h->value = hs->value;
   h->amount = amount;
   h->index = index;
-  /* this will randomly OR a reverved bit for the sole purpose of making it
-     impossible for applications to do == comparisons, as that would
-     otherwise be very tempting and then lead the reserved bits not being
-     reserved anymore. */
+  /* this will randomly OR a reserved bit for the sole purpose of making it
+     impossible for applications to do == comparisons, as that would otherwise
+     be very tempting and then lead to the reserved bits not being reserved
+     anymore. */
   h->origin = hs->type | (1<<27);
   h->anchor = e;
 }
@@ -99,7 +99,7 @@ CURLHcode curl_easy_header(CURL *easy,
     return CURLHE_BADINDEX;
 
   if(nameindex == amount - 1)
-    /* if the last or only ocurrance is what's asked for, then we know it */
+    /* if the last or only occurrence is what's asked for, then we know it */
     hs = pick;
   else {
     for(e = data->state.httphdrs.head; e; e = e->next) {

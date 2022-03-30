@@ -1144,7 +1144,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 }
 
 /*
- * Parse the URL and, if successful, replace everyting in the Curl_URL struct.
+ * Parse the URL and, if successful, replace everything in the Curl_URL struct.
  */
 static CURLUcode parseurl_and_replace(const char *url, CURLU *u,
                                       unsigned int flags)
