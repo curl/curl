@@ -406,7 +406,7 @@ cr_set_negotiated_alpn(struct Curl_easy *data, struct connectdata *conn,
 
   rustls_connection_get_alpn_protocol(rconn, &protocol, &len);
   if(!protocol) {
-    infof(data, "ALPN, server did not agree to a protocol");
+    infof(data, VTLS_INFOF_NO_ALPN);
     return;
   }
 

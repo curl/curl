@@ -34,6 +34,9 @@ struct ssl_connect_data;
 #define SSLSUPP_TLS13_CIPHERSUITES (1<<5) /* supports TLS 1.3 ciphersuites */
 #define SSLSUPP_CAINFO_BLOB  (1<<6)
 
+#define VTLS_INFOF_NO_ALPN                                      \
+  "ALPN: server did not agree on a protocol. Uses default."
+
 struct Curl_ssl {
   /*
    * This *must* be the first entry to allow returning the list of available

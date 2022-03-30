@@ -828,7 +828,7 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
         }
     }
     else {
-      infof(data, "ALPN, server did not agree to a protocol");
+      infof(data, VTLS_INFOF_NO_ALPN);
     }
     Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
                         BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
