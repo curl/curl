@@ -91,7 +91,7 @@ VC14_30_SRCTMPL = projects/Windows/VC14.30/src/curl.tmpl
 VC14_30_SRCVCXPROJ = projects/Windows/VC14.30/src/curl.vcxproj.dist
 VC14_30_SRCVCXPROJ_DEPS = $(VC14_30_SRCTMPL) Makefile.am src/Makefile.inc
 
-VC_DIST = projects/README                              \
+VC_DIST = projects/README.md                           \
  projects/build-openssl.bat                            \
  projects/build-wolfssl.bat                            \
  projects/checksrc.bat                                 \
