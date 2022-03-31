@@ -4228,10 +4228,10 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           switch(httpversion) {
           case 10:
           case 11:
-#if defined(USE_NGHTTP2) || defined(USE_HYPER)
+#ifdef USE_HTTP2
           case 20:
 #endif
-#if defined(ENABLE_QUIC)
+#ifdef ENABLE_QUIC
           case 30:
 #endif
             conn->httpversion = (unsigned char)httpversion;

@@ -264,7 +264,7 @@ struct altsvcinfo *Curl_altsvc_init(void)
 
   /* set default behavior */
   asi->flags = CURLALTSVC_H1
-#ifdef USE_NGHTTP2
+#ifdef USE_HTTP2
     | CURLALTSVC_H2
 #endif
 #ifdef ENABLE_QUIC

@@ -620,7 +620,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->maxlifetime_conn = 0;
   set->http09_allowed = FALSE;
   set->httpwant =
-#ifdef USE_NGHTTP2
+#ifdef USE_HTTP2
     CURL_HTTP_VERSION_2TLS
 #else
     CURL_HTTP_VERSION_1_1
@@ -3281,16 +3281,16 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
     bool hit;
     struct altsvc *as;
     const int allowed_versions = ( ALPN_h1
-#ifdef USE_NGHTTP2
-      | ALPN_h2
+#ifdef USE_HTTP2
+                                   | ALPN_h2
 #endif
 #ifdef ENABLE_QUIC
-      | ALPN_h3
+                                   | ALPN_h3
 #endif
       ) & data->asi->flags;
 
     host = conn->host.rawalloc;
-#ifdef USE_NGHTTP2
+#ifdef USE_HTTP2
     /* with h2 support, check that first */
     srcalpnid = ALPN_h2;
     hit = Curl_altsvc_lookup(data->asi,
