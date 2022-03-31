@@ -34,10 +34,16 @@ struct ssl_connect_data;
 #define SSLSUPP_TLS13_CIPHERSUITES (1<<5) /* supports TLS 1.3 ciphersuites */
 #define SSLSUPP_CAINFO_BLOB  (1<<6)
 
+#define ALPN_ACCEPTED "ALPN: server accepted "
+
 #define VTLS_INFOF_NO_ALPN                                      \
   "ALPN: server did not agree on a protocol. Uses default."
 #define VTLS_INFOF_ALPN_OFFER_1STR              \
   "ALPN: offers %s"
+#define VTLS_INFOF_ALPN_ACCEPTED_1STR           \
+  ALPN_ACCEPTED "%s"
+#define VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR       \
+  ALPN_ACCEPTED "%.*s"
 
 struct Curl_ssl {
   /*

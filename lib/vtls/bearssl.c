@@ -869,7 +869,7 @@ static CURLcode bearssl_connect_step3(struct Curl_easy *data,
 
     protocol = br_ssl_engine_get_selected_protocol(&backend->ctx.eng);
     if(protocol) {
-      infof(data, "ALPN, server accepted to use %s", protocol);
+      infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, protocol);
 
 #ifdef USE_HTTP2
       if(!strcmp(protocol, ALPN_H2))
