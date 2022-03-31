@@ -908,14 +908,14 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
       alpn_buffer[cur++] = ALPN_H2_LENGTH;
       memcpy(&alpn_buffer[cur], ALPN_H2, ALPN_H2_LENGTH);
       cur += ALPN_H2_LENGTH;
-      infof(data, "schannel: ALPN, offering %s", ALPN_H2);
+      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
     }
 #endif
 
     alpn_buffer[cur++] = ALPN_HTTP_1_1_LENGTH;
     memcpy(&alpn_buffer[cur], ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH);
     cur += ALPN_HTTP_1_1_LENGTH;
-    infof(data, "schannel: ALPN, offering %s", ALPN_HTTP_1_1);
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
 
     *list_len = curlx_uitous(cur - list_start_index);
     *extension_len = *list_len + sizeof(unsigned int) + sizeof(unsigned short);

@@ -1851,12 +1851,12 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
 #endif
         ) {
         CFArrayAppendValue(alpnArr, CFSTR(ALPN_H2));
-        infof(data, "ALPN, offering %s", ALPN_H2);
+        infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
       }
 #endif
 
       CFArrayAppendValue(alpnArr, CFSTR(ALPN_HTTP_1_1));
-      infof(data, "ALPN, offering %s", ALPN_HTTP_1_1);
+      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
 
       /* expects length prefixed preference ordered list of protocols in wire
        * format

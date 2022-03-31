@@ -640,14 +640,14 @@ gtls_connect_step1(struct Curl_easy *data,
       protocols[cur].data = (unsigned char *)ALPN_H2;
       protocols[cur].size = ALPN_H2_LENGTH;
       cur++;
-      infof(data, "ALPN, offering %.*s", ALPN_H2_LENGTH, ALPN_H2);
+      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
     }
 #endif
 
     protocols[cur].data = (unsigned char *)ALPN_HTTP_1_1;
     protocols[cur].size = ALPN_HTTP_1_1_LENGTH;
     cur++;
-    infof(data, "ALPN, offering %s", ALPN_HTTP_1_1);
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
 
     if(gnutls_alpn_set_protocols(session, protocols, cur, 0)) {
       failf(data, "failed setting ALPN");

@@ -325,12 +325,12 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
 
   config_builder = rustls_client_config_builder_new();
 #ifdef USE_HTTP2
-  infof(data, "offering ALPN for HTTP/1.1 and HTTP/2");
+  infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
   rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 2);
 #else
-  infof(data, "offering ALPN for HTTP/1.1 only");
   rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 1);
 #endif
+  infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
   if(!verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none);

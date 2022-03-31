@@ -698,12 +698,12 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
 #endif
       ) {
       backend->protocols[cur++] = ALPN_H2;
-      infof(data, "ALPN, offering %s", ALPN_H2);
+      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
     }
 #endif
 
     backend->protocols[cur++] = ALPN_HTTP_1_1;
-    infof(data, "ALPN, offering %s", ALPN_HTTP_1_1);
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
 
     br_ssl_engine_set_protocol_names(&backend->ctx.eng,
                                      backend->protocols, cur);

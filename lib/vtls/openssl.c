@@ -2851,14 +2851,14 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 
       memcpy(&protocols[cur], ALPN_H2, ALPN_H2_LENGTH);
       cur += ALPN_H2_LENGTH;
-      infof(data, "ALPN, offering %s", ALPN_H2);
+      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
     }
 #endif
 
     protocols[cur++] = ALPN_HTTP_1_1_LENGTH;
     memcpy(&protocols[cur], ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH);
     cur += ALPN_HTTP_1_1_LENGTH;
-    infof(data, "ALPN, offering %s", ALPN_HTTP_1_1);
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
 
     /* expects length prefixed preference ordered list of protocols in wire
      * format
