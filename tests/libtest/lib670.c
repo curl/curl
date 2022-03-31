@@ -140,16 +140,15 @@ int test(char *URL)
   mime = curl_mime_init(pooh.easy);
   part = curl_mime_addpart(mime);
   result = curl_mime_name(part, name);
-  if(!result)
-    res = curl_mime_data_cb(part, (curl_off_t) 2, read_callback,
-                            NULL, NULL, &pooh);
-
   if(result) {
     fprintf(stderr,
             "Something went wrong when building the mime structure: %d\n",
             (int) result);
     goto test_cleanup;
   }
+
+  res = curl_mime_data_cb(part, (curl_off_t) 2, read_callback,
+                          NULL, NULL, &pooh);
 
   /* Bind mime data to its easy handle. */
   if(!res)
