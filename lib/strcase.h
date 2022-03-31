@@ -29,6 +29,8 @@
  * and only compare strings we know are safe for this.
  *
  * The function is capable of comparing a-z case insensitively.
+ *
+ * Result is 1 if text matches and 0 if not.
  */
 
 #define strcasecompare(a,b) Curl_strcasecompare(a,b)
