@@ -673,10 +673,12 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
 
       /* e.g. "UID FETCH 107 BODY.PEEK[]" */
 
-      if(imap->custom_params)
-      if(strncasecompare(imap->custom, "UID", 3) == 1)
-      if(strncasecompare(imap->custom_params, " FETCH", 6) == 1) {
-        state(data, IMAP_FETCH);
+      if(imap->custom_params) {
+        if(strncasecompare(imap->custom, "UID", 3) == 1) {
+          if(strncasecompare(imap->custom_params, " FETCH", 6) == 1) {
+            state(data, IMAP_FETCH);
+          }
+        }
       }
     }
   }
