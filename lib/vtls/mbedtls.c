@@ -813,7 +813,7 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     const char *next_protocol = mbedtls_ssl_get_alpn_protocol(&backend->ssl);
 
     if(next_protocol) {
-      infof(data, "ALPN, server accepted to use %s", next_protocol);
+      infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, next_protocol);
 #ifdef USE_NGHTTP2
       if(!strncmp(next_protocol, NGHTTP2_PROTO_VERSION_ID,
                   NGHTTP2_PROTO_VERSION_ID_LEN) &&

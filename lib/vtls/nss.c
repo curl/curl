@@ -866,7 +866,7 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
       return;
 #ifdef SSL_ENABLE_ALPN
     case SSL_NEXT_PROTO_SELECTED:
-      infof(data, "ALPN, server accepted to use %.*s", buflen, buf);
+      infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, buflen, buf);
       break;
 #endif
     case SSL_NEXT_PROTO_NEGOTIATED:

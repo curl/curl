@@ -412,14 +412,14 @@ cr_set_negotiated_alpn(struct Curl_easy *data, struct connectdata *conn,
 
 #ifdef USE_HTTP2
   if(len == ALPN_H2_LENGTH && 0 == memcmp(ALPN_H2, protocol, len)) {
-    infof(data, "ALPN, negotiated h2");
+    infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, ALPN_H2);
     conn->negnpn = CURL_HTTP_VERSION_2;
   }
   else
 #endif
   if(len == ALPN_HTTP_1_1_LENGTH &&
       0 == memcmp(ALPN_HTTP_1_1, protocol, len)) {
-    infof(data, "ALPN, negotiated http/1.1");
+    infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, ALPN_HTTP_1_1);
     conn->negnpn = CURL_HTTP_VERSION_1_1;
   }
   else {

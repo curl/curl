@@ -1263,8 +1263,8 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   if(conn->bits.tls_enable_alpn) {
     rc = gnutls_alpn_get_selected_protocol(session, &proto);
     if(rc == 0) {
-      infof(data, "ALPN, server accepted to use %.*s", proto.size,
-          proto.data);
+      infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, proto.size,
+            proto.data);
 
 #ifdef USE_HTTP2
       if(proto.size == ALPN_H2_LENGTH &&
