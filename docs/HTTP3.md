@@ -161,15 +161,17 @@ Build curl:
 
 Run from `/usr/local/bin/curl`.
 
-## Build Windows (with Schannel)
+## Build Windows
 
 Build msh3:
 
-     % git clone -b v0.1.0 --single-branch --recursive https://github.com/nibanks/msh3
+     % git clone -b v0.2.0 --single-branch --recursive https://github.com/nibanks/msh3
      % cd msh3 && mkdir build && cd build
      % cmake -G 'Visual Studio 17 2022' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
      % cmake --build . --config Release
      % cmake --install . --config Release
+
+> **Note** - On Windows, Schannel will be used for TLS support by default. If you with to use (the quictls fork of) OpenSSL, specify the `-DQUIC_TLS=openssl` option to the generate command above. Also note that OpenSSL brings with it an additional set of build dependencies not specified here.
 
 Build curl (in [Visual Studio Command prompt](../winbuild/README.md#open-a-command-prompt)):
 
