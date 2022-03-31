@@ -2948,14 +2948,16 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
        action for a HTTP/1.1 client */
 
     if(!Curl_meets_timecondition(data, k->timeofdoc)) {
+      /* Abort download */
+      k->keepon &= ~KEEP_RECV;
       *done = TRUE;
       /* We're simulating a http 304 from server so we return
          what should have been returned from the server */
       data->info.httpcode = 304;
       infof(data, "Simulate a HTTP 304 response!");
-      /* we abort the transfer before it is completed == we ruin the
-         re-use ability. Close the connection */
-      connclose(conn, "Simulated 304 handling");
+      /* Aborting the transfer before it is completed. Close the
+         stream/connection */
+      streamclose(conn, "Simulated 304 handling");
       return CURLE_OK;
     }
   } /* we have a time condition */
