@@ -874,7 +874,7 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
       break;
     }
 
-#ifdef USE_NGHTTP2
+#ifdef USE_HTTP2
     if(buflen == ALPN_H2_LENGTH &&
        !memcmp(ALPN_H2, buf, ALPN_H2_LENGTH)) {
       conn->negnpn = CURL_HTTP_VERSION_2;
