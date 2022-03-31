@@ -628,7 +628,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
       return CURLE_SSL_CONNECT_ERROR;
     }
     for(p = &backend->protocols[0]; *p; ++p)
-      infof(data, "ALPN, offering %s", *p);
+      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, *p);
   }
 #endif
 

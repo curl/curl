@@ -526,12 +526,12 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 #ifdef USE_HTTP2
     if(data->state.httpwant >= CURL_HTTP_VERSION_2) {
       strcpy(protocols + strlen(protocols), ALPN_H2 ",");
-      infof(data, "ALPN, offering %s", ALPN_H2);
+      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
     }
 #endif
 
     strcpy(protocols + strlen(protocols), ALPN_HTTP_1_1);
-    infof(data, "ALPN, offering %s", ALPN_HTTP_1_1);
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
 
     if(wolfSSL_UseALPN(backend->handle, protocols,
                        (unsigned)strlen(protocols),

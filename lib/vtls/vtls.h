@@ -36,6 +36,8 @@ struct ssl_connect_data;
 
 #define VTLS_INFOF_NO_ALPN                                      \
   "ALPN: server did not agree on a protocol. Uses default."
+#define VTLS_INFOF_ALPN_OFFER_1STR              \
+  "ALPN: offers %s"
 
 struct Curl_ssl {
   /*
