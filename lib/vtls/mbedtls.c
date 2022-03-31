@@ -144,14 +144,13 @@ static void mbed_debug(void *context, int level, const char *f_name,
 #else
 #endif
 
-/* ALPN for http2? */
-#ifdef USE_NGHTTP2
+/* ALPN for http2 */
+#ifdef USE_HTTP2
 #  undef HAS_ALPN
 #  ifdef MBEDTLS_SSL_ALPN
 #    define HAS_ALPN
 #  endif
 #endif
-
 
 /*
  *  profile
@@ -614,9 +613,9 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 #ifdef HAS_ALPN
   if(conn->bits.tls_enable_alpn) {
     const char **p = &backend->protocols[0];
-#ifdef USE_NGHTTP2
+#ifdef USE_HTTP2
     if(data->state.httpwant >= CURL_HTTP_VERSION_2)
-      *p++ = NGHTTP2_PROTO_VERSION_ID;
+      *p++ = ALPN_H2;
 #endif
     *p++ = ALPN_HTTP_1_1;
     *p = NULL;
@@ -814,10 +813,9 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
 
     if(next_protocol) {
       infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, next_protocol);
-#ifdef USE_NGHTTP2
-      if(!strncmp(next_protocol, NGHTTP2_PROTO_VERSION_ID,
-                  NGHTTP2_PROTO_VERSION_ID_LEN) &&
-         !next_protocol[NGHTTP2_PROTO_VERSION_ID_LEN]) {
+#ifdef USE_HTTP2
+      if(!strncmp(next_protocol, ALPN_H2, ALPN_H2_LEN) &&
+         !next_protocol[ALPN_H2_LEN]) {
         conn->negnpn = CURL_HTTP_VERSION_2;
       }
       else
