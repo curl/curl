@@ -70,6 +70,14 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+/* ALPN for http2 */
+#ifdef USE_HTTP2
+#  undef HAS_ALPN
+#  ifdef MBEDTLS_SSL_ALPN
+#    define HAS_ALPN
+#  endif
+#endif
+
 struct ssl_backend_data {
   mbedtls_ctr_drbg_context ctr_drbg;
   mbedtls_entropy_context entropy;
@@ -82,7 +90,9 @@ struct ssl_backend_data {
 #endif
   mbedtls_pk_context pk;
   mbedtls_ssl_config config;
+#ifdef HAS_ALPN
   const char *protocols[3];
+#endif
 };
 
 /* apply threading? */
@@ -142,14 +152,6 @@ static void mbed_debug(void *context, int level, const char *f_name,
   (void) level;
 }
 #else
-#endif
-
-/* ALPN for http2 */
-#ifdef USE_HTTP2
-#  undef HAS_ALPN
-#  ifdef MBEDTLS_SSL_ALPN
-#    define HAS_ALPN
-#  endif
 #endif
 
 /*
