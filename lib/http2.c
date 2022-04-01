@@ -825,10 +825,14 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
 
   /* get the stream from the hash based on Stream ID */
   data_s = nghttp2_session_get_stream_user_data(session, stream_id);
-  if(!data_s)
-    /* Receiving a Stream ID not in the hash should not happen, this is an
-       internal error more than anything else! */
-    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  if(!data_s) {
+    /* Receiving a Stream ID not in the hash should not happen - unless
+       we have aborted a transfer artificially and there were more data
+       in the pipeline. Silently ignore. */
+    H2BUGF(fprintf(stderr, "Data for stream %u but it doesn't exist\n",
+                   stream_id));
+    return 0;
+  }
 
   stream = data_s->req.p.http;
   if(!stream)
@@ -1234,16 +1238,18 @@ void Curl_http2_done(struct Curl_easy *data, bool premature)
      !httpc->h2) /* not HTTP/2 ? */
     return;
 
-  if(premature) {
+  /* do this before the reset handling, as that might clear ->stream_id */
+  if(http->stream_id == httpc->pause_stream_id) {
+    H2BUGF(infof(data, "DONE the pause stream (%x)", http->stream_id));
+    httpc->pause_stream_id = 0;
+  }
+  if(premature || (!http->closed && http->stream_id)) {
     /* RST_STREAM */
     set_transfer(httpc, data); /* set the transfer */
+    H2BUGF(infof(data, "RST stream %x", http->stream_id));
     if(!nghttp2_submit_rst_stream(httpc->h2, NGHTTP2_FLAG_NONE,
                                   http->stream_id, NGHTTP2_STREAM_CLOSED))
       (void)nghttp2_session_send(httpc->h2);
-  }
-  if(http->stream_id == httpc->pause_stream_id) {
-    H2BUGF(infof(data, "DONE the pause stream!"));
-    httpc->pause_stream_id = 0;
   }
 
   if(data->state.drain)
