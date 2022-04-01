@@ -3792,7 +3792,7 @@ static CURLcode verify_header(struct Curl_easy *data)
   ptr = memchr(header, ':', hlen);
   if(!ptr) {
     /* this is bad, bail out */
-    failf(data, "Header without semicolon");
+    failf(data, "Header without colon");
     return CURLE_WEIRD_SERVER_REPLY;
   }
   return CURLE_OK;
