@@ -2955,7 +2955,7 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
       infof(data, "Simulate a HTTP 304 response!");
       /* we abort the transfer before it is completed == we ruin the
          re-use ability. Close the connection */
-      connclose(conn, "Simulated 304 handling");
+      streamclose(conn, "Simulated 304 handling");
       return CURLE_OK;
     }
   } /* we have a time condition */
