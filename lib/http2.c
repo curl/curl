@@ -1240,11 +1240,10 @@ void Curl_http2_done(struct Curl_easy *data, bool premature)
     if(!nghttp2_submit_rst_stream(httpc->h2, NGHTTP2_FLAG_NONE,
                                   http->stream_id, NGHTTP2_STREAM_CLOSED))
       (void)nghttp2_session_send(httpc->h2);
-
-    if(http->stream_id == httpc->pause_stream_id) {
-      H2BUGF(infof(data, "stopped the pause stream!"));
-      httpc->pause_stream_id = 0;
-    }
+  }
+  if(http->stream_id == httpc->pause_stream_id) {
+    H2BUGF(infof(data, "DONE the pause stream!"));
+    httpc->pause_stream_id = 0;
   }
 
   if(data->state.drain)
