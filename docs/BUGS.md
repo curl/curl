@@ -128,7 +128,7 @@
 
  The list that is presented is the stack trace. If everything worked, it is
  supposed to contain the chain of functions that were called when curl
- crashed. Include the stack trace with your detailed bug report. it will help a
+ crashed. Include the stack trace with your detailed bug report, it will help a
  lot.
 
 ## Bugs in libcurl bindings
