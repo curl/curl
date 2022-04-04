@@ -3819,7 +3819,8 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
   return result;
 }
 
-static CURLcode cert_chain_pinning(struct Curl_easy* data, struct ssl_connect_data* connssl,
+static CURLcode cert_chain_pinning(struct Curl_easy *data,
+                                   struct ssl_connect_data *connssl,
                                    const char *pinnedpubkey) {
   CURLcode result;
   STACK_OF(X509) *sk;
