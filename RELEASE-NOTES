@@ -4,12 +4,12 @@ curl and libcurl 7.83.0
  Command line options:         247
  curl_easy_setopt() options:   295
  Public functions in libcurl:  88
- Contributors:                 2607
+ Contributors:                 2612
 
 This release includes the following changes:
 
- o curl: add %header{name} support in -w handling
- o curl: add %{header_json} support in -w handling
+ o curl: add %header{name} experimental support in -w handling
+ o curl: add %{header_json} experimental support in -w handling
  o curl: add --no-clobber [28]
  o curl: add --remove-on-error [11]
  o header api: add curl_easy_header and curl_easy_nextheader [56]
@@ -29,27 +29,36 @@ This release includes the following bugfixes:
  o curl: error out when options need features not present in libcurl [18]
  o curl: fix segmentation fault for empty output file names. [60]
  o CURLOPT_DISALLOW_USERNAME_IN_URL.3: use uppercase URL
+ o CURLOPT_PREQUOTE.3: only works for FTP file transfers, not dirs [79]
  o CURLOPT_PROGRESSFUNCTION.3: fix typo in example [63]
  o CURLSHOPT_UNLOCKFUNC.3: fix the callback prototype [9]
  o docs/HYPER.md: updated to reflect current hyper build needs
  o docs/opts: Mention Schannel client cert type is P12 [50]
  o docs: lots of minor language polish [51]
  o firefox-db2pem.sh: make the shell script safer [47]
+ o ftp: fix error message for partial file upload [61]
  o GHA: build hyper with nightly rustc [7]
  o gha: move the event-based test over from Zuul [59]
  o gtls: fix build for disabled TLS-SRP [48]
+ o http2: handle DONE called for the paused stream [69]
+ o http2: RST the stream if we stop it on our own will [67]
+ o http: close the stream (not connection) on time condition abort [68]
  o http: reject header contents with nul bytes [41]
  o http: return error on colon-less HTTP headers [31]
+ o http: streamclose "already downloaded" [57]
  o hyper: fix status_line() return code [13]
  o hyper: no h2c support [33]
  o ipv4/6.d: clarify that they are about using IP addresses [3]
  o json.d: fix typo (overriden -> overridden) [24]
  o keepalive-time.d: It takes many probes to detect brokenness [29]
  o lib/warnless.[ch]: only check for WIN32 and ignore _WIN32 [45]
+ o lib670: avoid double check result [71]
+ o lib: #ifdef on USE_HTTP2 better [65]
  o lib: fix some misuse of curlx_convert_wchar_to_UTF8 [38]
  o libssh: fix build with old libssh versions [12]
  o libssh: Improve fix for missing SSH_S_ stat macros [10]
  o libssh: unstick SFTP transfers when done event-based [58]
+ o mbedtls: remove 'protocols' array from backend when ALPN is not used [66]
  o mk-ca-bundle.pl: Use stricter logic to process the certificates [39]
  o mk-ca-bundle.vbs: delete this script in favor of mk-ca-bundle.pl [8]
  o mlc_config.json: add file to ignore known troublesome URLs [35]
@@ -63,6 +72,7 @@ This release includes the following bugfixes:
  o openssl: fix CN check error code [21]
  o options: remove mistaken space before paren in prototype
  o pop3/smtp: return *WEIRD_SERVER_REPLY when not understood [43]
+ o projects/README: converted to markdown [76]
  o projects: Update VC version names for VS2017, VS2022 [52]
  o rtsp: don't let CSeq error override earlier errors [37]
  o runtests: make 'oldlibssh' be before 0.9.4 [2]
@@ -74,9 +84,13 @@ This release includes the following bugfixes:
  o test386: Fix an incorrect test markup tag
  o test718: edited slightly to return better HTTP [32]
  o tests/server/util.h: align WIN32 condition with util.c [46]
+ o tls: make mbedtls and NSS check for h2, not nghttp2 [70]
  o tool and tests: force flush of all buffers at end of program [17]
  o tool_cb_hdr: Turn the Location: into a terminal hyperlink [30]
  o tool_operate: fix a scan-build warning [16]
+ o vtls: provide a unified APLN-disagree string for all backends [75]
+ o vtls: use a backend standard message for "ALPN: offers %s" [73]
+ o vtls: use a generic "ALPN, server accepted" message [72]
  o winbuild/README.md: fixup dead link [36]
  o winbuild: Add a Visual Studio example to the README [49]
  o wolfssl: fix compiler error without IPv6 [25]
@@ -88,15 +102,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alejandro R. Sedeño, Andreas Falkenhahn, Colin Leroy, Dan Fandrich,
-  Daniel Stenberg, Daniel Valenzuela, Don J Olmstead, Francisco Olarte,
-  Frank Meier, Ian Blanes, Jan Venekamp, Jean-Philippe Menil, Jenny Heino,
-  Joseph Chen, jurisuk on github, Kristoffer Gleditsch, Marcel Raad,
-  Marc Hörsken, mehatzri on github, Michał Antoniak, Paul Howarth,
-  Peter Korsgaard, pheiduck on github, r-a-sattarov on github, Ray Satiro,
-  Rianov Viacheslav, Robert Brose, Samuel Henrique, Tatsuhiro Tsujikawa,
-  Timothe Litt, HexTheDragon
-  (31 contributors)
+  Alejandro R. Sedeño, Andreas Falkenhahn, anon00000000 on github,
+  Christian Schmitz, Colin Leroy, Dan Fandrich, Daniel Stenberg,
+  Daniel Valenzuela, Don J Olmstead, Evangelos Foutras, Francisco Olarte,
+  Frank Meier, Gisle Vanem, Ian Blanes, Jan Venekamp, Jean-Philippe Menil,
+  Jenny Heino, Joseph Chen, jurisuk on github, Kristoffer Gleditsch,
+  Leandro Coutinho, Marcel Raad, Marc Hörsken, mehatzri on github,
+  Michał Antoniak, Nick Coghlan, Paul Howarth, Paweł Kowalski, Peter Korsgaard,
+  pheiduck on github, r-a-sattarov on github, Ray Satiro, Rianov Viacheslav,
+  Robert Brose, Samuel Henrique, Taras Kushnir, Tatsuhiro Tsujikawa,
+  Timothe Litt, Viktor Szakats, HexTheDragon
+  (40 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -156,8 +172,22 @@ References to bug reports and discussions on issues:
  [54] = https://curl.se/bug/?i=8620
  [55] = https://hackerone.com/reports/1521610
  [56] = https://curl.se/bug/?i=8593
+ [57] = https://curl.se/bug/?i=8665
  [58] = https://curl.se/bug/?i=8490
  [59] = https://curl.se/bug/?i=8490
  [60] = https://curl.se/bug/?i=8606
+ [61] = https://curl.se/bug/?i=8637
  [62] = https://curl.se/bug/?i=8638
  [63] = https://curl.se/bug/?i=8636
+ [65] = https://curl.se/bug/?i=8661
+ [66] = https://curl.se/bug/?i=8663
+ [67] = https://curl.se/bug/?i=8664
+ [68] = https://curl.se/bug/?i=8664
+ [69] = https://curl.se/bug/?i=8626
+ [70] = https://curl.se/bug/?i=8656
+ [71] = https://curl.se/bug/?i=8660
+ [72] = https://curl.se/bug/?i=8657
+ [73] = https://curl.se/bug/?i=8657
+ [75] = https://curl.se/bug/?i=8643
+ [76] = https://curl.se/bug/?i=8652
+ [79] = https://curl.se/bug/?i=8602
