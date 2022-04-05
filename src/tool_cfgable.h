@@ -110,7 +110,7 @@ struct OperationConfig {
   struct curl_slist *mail_rcpt;
   char *mail_auth;
   bool mail_rcpt_allowfails; /* --mail-rcpt-allowfails */
-  char *sasl_authzid;       /* Authorisation identity (identity to use) */
+  char *sasl_authzid;       /* Authorization identity (identity to use) */
   bool sasl_ir;             /* Enable/disable SASL initial response */
   bool proxytunnel;
   bool ftp_append;          /* APPE on ftp */

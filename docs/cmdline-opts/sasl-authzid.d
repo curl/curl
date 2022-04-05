@@ -6,7 +6,7 @@ Category: auth
 Example: --sasl-authzid zid imap://example.com/
 See-also: login-options
 ---
-Use this authorisation identity (authzid), during SASL PLAIN authentication,
+Use this authorization identity (authzid), during SASL PLAIN authentication,
 in addition to the authentication identity (authcid) as specified by --user.
 
 If the option is not specified, the server will derive the authzid from the

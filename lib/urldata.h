@@ -983,7 +983,7 @@ struct connectdata {
   char *user;    /* user name string, allocated */
   char *passwd;  /* password string, allocated */
   char *options; /* options string, allocated */
-  char *sasl_authzid;     /* authorisation identity string, allocated */
+  char *sasl_authzid;     /* authorization identity string, allocated */
   unsigned char httpversion; /* the HTTP version*10 reported by the server */
   struct curltime now;     /* "current" time */
   struct curltime created; /* creation time */
