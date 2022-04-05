@@ -83,7 +83,7 @@ struct h3out {
 
 #define QUIC_MAX_STREAMS (256*1024)
 #define QUIC_MAX_DATA (1*1024*1024)
-#define QUIC_IDLE_TIMEOUT 60000 /* milliseconds */
+#define QUIC_IDLE_TIMEOUT (60*NGTCP2_SECONDS)
 
 #ifdef USE_OPENSSL
 #define QUIC_CIPHERS                                                          \
