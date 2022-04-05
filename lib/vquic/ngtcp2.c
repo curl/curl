@@ -1123,8 +1123,7 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
   (void)flags;
   (void)user_data;
 
-  if(h3name.len == sizeof(H2H3_PSEUDO_STATUS) - 1 &&
-     !memcmp(H2H3_PSEUDO_STATUS, h3name.base, h3name.len)) {
+  if(token == NGHTTP3_QPACK_TOKEN__STATUS) {
     char line[14]; /* status line is always 13 characters long */
     size_t ncopy;
     int status = decode_status_code(h3val.base, h3val.len);
