@@ -204,6 +204,9 @@ libcurl was built with support for SSPI. This is only available on Windows and
 makes libcurl use Windows-provided functions for Kerberos, NTLM, SPNEGO and
 Digest authentication. It also allows libcurl to use the current user
 credentials without the app having to pass them on. (Added in 7.13.2)
+.IP CURL_VERSION_THREADSAFE_INIT
+libcurl was built with thread-safety support (Atomic or SRWLOCK) to protect
+curl initialisation. (Added in 7.84.0)
 .IP CURL_VERSION_TLSAUTH_SRP
 libcurl was built with support for TLS-SRP (in one or more of the built-in TLS
 backends). (Added in 7.21.4)
