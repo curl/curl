@@ -82,7 +82,6 @@ struct ssl_backend_data {
   mbedtls_ctr_drbg_context ctr_drbg;
   mbedtls_entropy_context entropy;
   mbedtls_ssl_context ssl;
-  int server_fd;
   mbedtls_x509_crt cacert;
   mbedtls_x509_crt clicert;
 #ifdef MBEDTLS_X509_CRL_PARSE_C
