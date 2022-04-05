@@ -264,7 +264,7 @@ _ Enter Qshell (QSH, not PASE)
 _ Change current directory to the curl installation directory
 _ Change current directory to ./packages/OS400
 _ Edit file iniscript.sh. You may want to change tunable configuration
-  parameters, like debug info generation, optimisation level, listing option,
+  parameters, like debug info generation, optimization level, listing option,
   target library, ZLIB/LIBSSH2 availability and location, etc.
 _ Copy any file in the current directory to makelog (i.e.:
   cp initscript.sh makelog): this is intended to create the makelog file with

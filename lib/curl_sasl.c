@@ -670,7 +670,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
 #endif
 
   case SASL_OAUTH2:
-    /* Create the authorisation message */
+    /* Create the authorization message */
     if(sasl->authused == SASL_MECH_OAUTHBEARER) {
       result = Curl_auth_create_oauth_bearer_message(conn->user,
                                                      hostname,

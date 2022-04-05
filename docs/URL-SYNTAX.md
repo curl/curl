@@ -317,13 +317,13 @@ Name, Attributes, Scope, Filter and Extension for a LDAP search. Each field is
 separated by a question mark and when that field is not required an empty
 string with the question mark separator should be included.
 
-Search for the DN as `My Organisation`:
+Search for the DN as `My Organization`:
 
-    ldap://ldap.example.com/o=My%20Organisation
+    ldap://ldap.example.com/o=My%20Organization
 
 the same search but will only return postalAddress attributes:
 
-    ldap://ldap.example.com/o=My%20Organisation?postalAddress
+    ldap://ldap.example.com/o=My%20Organization?postalAddress
 
 Search for an empty DN and request information about the
 `rootDomainNamingContext` attribute for an Active Directory server:

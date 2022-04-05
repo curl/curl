@@ -449,8 +449,7 @@ static CURLcode set_ciphers(struct Curl_easy *data,
 
 static int gskit_init(void)
 {
-  /* No initialisation needed. */
-
+  /* No initialization needed. */
   return 1;
 }
 
