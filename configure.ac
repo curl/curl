@@ -4257,6 +4257,23 @@ if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
   fi
 fi
 
+if test "$tst_atomic" = "yes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe-init"
+else
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      #include <windows.h>
+    ]],[[
+      #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
+      #error
+      #endif
+    ]])
+  ],[
+     SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe-init"
+  ],[
+  ])
+fi
+
 dnl replace spaces with newlines
 dnl sort the lines
 dnl replace the newlines back to spaces

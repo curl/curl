@@ -29,6 +29,7 @@
 #include "vssh/ssh.h"
 #include "quic.h"
 #include "curl_printf.h"
+#include "easy_lock.h"
 
 #ifdef USE_ARES
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
@@ -450,6 +451,9 @@ static curl_version_info_data version_info = {
 #endif
 #if defined(USE_GSASL)
   | CURL_VERSION_GSASL
+#endif
+#if defined(GLOBAL_INIT_IS_THREADSAFE)
+  | CURL_VERSION_THREADSAFE_INIT
 #endif
   ,
   NULL, /* ssl_version */
