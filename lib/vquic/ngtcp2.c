@@ -1806,7 +1806,7 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
   expiry = ngtcp2_conn_get_expiry(qs->qconn);
   if(expiry != UINT64_MAX) {
     if(expiry <= ts) {
-      timeout = NGTCP2_MILLISECONDS;
+      timeout = 0;
     }
     else {
       timeout = expiry - ts;
