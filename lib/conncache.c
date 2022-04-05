@@ -531,6 +531,7 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
 {
   struct connectdata *conn;
   char buffer[READBUFFER_MIN + 1];
+  SIGPIPE_VARIABLE(pipe_st);
   if(!connc->closure_handle)
     return;
   connc->closure_handle->state.buffer = buffer;
@@ -538,7 +539,6 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
 
   conn = conncache_find_first_connection(connc);
   while(conn) {
-    SIGPIPE_VARIABLE(pipe_st);
     sigpipe_ignore(connc->closure_handle, &pipe_st);
     /* This will remove the connection from the cache */
     connclose(conn, "kill all");
@@ -550,15 +550,12 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
   }
 
   connc->closure_handle->state.buffer = NULL;
-  if(connc->closure_handle) {
-    SIGPIPE_VARIABLE(pipe_st);
-    sigpipe_ignore(connc->closure_handle, &pipe_st);
+  sigpipe_ignore(connc->closure_handle, &pipe_st);
 
-    Curl_hostcache_clean(connc->closure_handle,
-                         connc->closure_handle->dns.hostcache);
-    Curl_close(&connc->closure_handle);
-    sigpipe_restore(&pipe_st);
-  }
+  Curl_hostcache_clean(connc->closure_handle,
+                       connc->closure_handle->dns.hostcache);
+  Curl_close(&connc->closure_handle);
+  sigpipe_restore(&pipe_st);
 }
 
 #if 0
