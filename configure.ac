@@ -118,6 +118,7 @@ AC_SUBST(libext)
 dnl figure out the libcurl version
 CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)".*/\1/p' ${srcdir}/include/curl/curlver.h`
 XC_CHECK_PROG_CC
+CURL_ATOMIC
 
 dnl for --enable-code-coverage
 CURL_COVERAGE
@@ -3444,6 +3445,7 @@ AC_CHECK_FUNCS([fnmatch \
   if_nametoindex \
   mach_absolute_time \
   pipe \
+  sched_yield \
   setlocale \
   setmode \
   setrlimit \
