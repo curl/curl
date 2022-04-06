@@ -78,3 +78,7 @@
 %if wolfssl
 313
 %endif
+# The CRL test doesn't work with BearSSL
+%if bearssl
+313
+%endif
