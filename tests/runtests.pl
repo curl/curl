@@ -284,6 +284,7 @@ my $has_openssl;    # built with a lib using an OpenSSL-like API
 my $has_gnutls;     # built with GnuTLS
 my $has_nss;        # built with NSS
 my $has_wolfssl;    # built with wolfSSL
+my $has_bearssl;    # built with BearSSL
 my $has_schannel;   # built with Schannel
 my $has_sectransp;  # built with Secure Transport
 my $has_boringssl;  # built with BoringSSL
@@ -2866,6 +2867,7 @@ sub compare {
 
 sub setupfeatures {
     $feature{"alt-svc"} = $has_altsvc;
+    $feature{"bearssl"} = $has_bearssl;
     $feature{"brotli"} = $has_brotli;
     $feature{"c-ares"} = $has_cares;
     $feature{"crypto"} = $has_crypto;
@@ -3019,6 +3021,9 @@ sub checksystem {
            elsif ($libcurl =~ /wolfssl/i) {
                $has_wolfssl=1;
                $has_sslpinning=1;
+           }
+           elsif ($libcurl =~ /bearssl/i) {
+               $has_bearssl=1;
            }
            elsif ($libcurl =~ /securetransport/i) {
                $has_sectransp=1;

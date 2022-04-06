@@ -376,6 +376,7 @@ SKIPPED.
 Features testable here are:
 
 - `alt-svc`
+- `bearssl`
 - `c-ares`
 - `cookies`
 - `crypto`
