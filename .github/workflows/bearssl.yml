@@ -36,7 +36,7 @@ jobs:
     - run: |
         curl -LO https://bearssl.org/bearssl-0.6.tar.gz
         tar -xzf bearssl-0.6.tar.gz
-        cd bearssl
+        cd bearssl-0.6
         make
         mkdir -p $HOME/bear/lib $HOME/bear/include
         cp inc/*.h $HOME/bear/include
