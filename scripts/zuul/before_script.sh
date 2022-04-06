@@ -87,15 +87,6 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
   export LIBS=-lpthread
 fi
 
-if [ "$TRAVIS_OS_NAME" = linux -a "$OPENSSL3" ]; then
-  cd $HOME
-  git clone --depth=1 https://github.com/openssl/openssl
-  cd openssl
-  ./config enable-tls1_3 --prefix=$HOME/openssl3
-  make
-  make install_sw
-fi
-
 if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
   cd $HOME
   git clone --depth=1 -b v3.1.4 https://github.com/libressl-portable/portable.git libressl-git
