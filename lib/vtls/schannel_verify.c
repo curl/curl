@@ -286,7 +286,6 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
     goto cleanup;
   }
 
-  result = CURLE_OK;
   while(total_bytes_read < ca_file_bufsize) {
     DWORD bytes_to_read = (DWORD)(ca_file_bufsize - total_bytes_read);
     DWORD bytes_read = 0;
@@ -313,9 +312,6 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
   /* Null terminate the buffer */
   ca_file_buffer[ca_file_bufsize] = '\0';
 
-  if(result != CURLE_OK) {
-    goto cleanup;
-  }
   result = add_certs_data_to_store(trust_store,
                                    ca_file_buffer, ca_file_bufsize,
                                    ca_file,
