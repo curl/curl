@@ -1,0 +1,51 @@
+name: Linux
+
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+    - master
+    - '*/ci'
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: openssl3
+          install:
+          configure: --with-openssl=$HOME/openssl3 --enable-debug --enable-werror
+        - name: clang-openssl3
+          install:
+          configure: CC=clang --with-openssl=$HOME/openssl3 --enable-debug --enable-werror
+
+    steps:
+    - run: |
+        sudo apt-get install libtool autoconf automake pkg-config clang stunnel4 libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+        sudo python3 -m pip install impacket
+      name: install prereqs and impacket
+
+    - run: |
+        git clone --depth=1 https://github.com/openssl/openssl
+        cd openssl
+        ./config enable-tls1_3 --prefix=$HOME/openssl3
+        make && make install_sw
+      name: 'build and install openssl3'
+
+    - uses: actions/checkout@v2
+
+    - run: autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" ./configure --enable-warnings --enable-werror --enable-headers-api ${{ matrix.build.configure }} && make V=1
+      name: 'configure and build'
+
+    - run: make V=1 test-ci
+      name: 'test'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"
