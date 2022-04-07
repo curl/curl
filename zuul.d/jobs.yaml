@@ -86,20 +86,6 @@
         LD_LIBRARY_PATH: "{{ ansible_user_dir }}/quiche/target/release:/usr/local/lib"
 
 - job:
-    name: curl-debug-bearssl
-    parent: curl-base
-    vars:
-      curl_apt_packages:
-        - libpsl-dev
-        - libbrotli-dev
-        - libzstd-dev
-      curl_env:
-        T: debug-bearssl
-        BEARSSL: "yes"
-        C: >-
-          --with-bearssl
-
-- job:
     name: curl-novalgrind-libressl
     parent: curl-base
     vars:
@@ -324,7 +310,6 @@
       - curl-normal-with-openssl-gssapi-libssh2-checksrc
       - curl-novalgrind-boringssl-with-openssl
       - curl-novalgrind-boringssl-with-openssl-quiche
-      - curl-debug-bearssl
       - curl-novalgrind-libressl
       - curl-novalgrind-ngtcp2-with-openssl
       - curl-novalgrind-ngtcp2-gnutls

@@ -1,0 +1,55 @@
+name: Linux
+
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+    - master
+    - '*/ci'
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: bearssl
+          install:
+          configure: --with-bearssl=$HOME/bear --enable-debug --enable-werror
+        - name: clang-bearssl
+          install:
+          configure: CC=clang --with-bearssl=$HOME/bear --enable-debug --enable-werror
+
+    steps:
+    - run: |
+        sudo apt-get install libtool autoconf automake pkg-config clang stunnel4 libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+        sudo python3 -m pip install impacket
+      name: install prereqs and impacket
+
+    - run: |
+        curl -LO https://bearssl.org/bearssl-0.6.tar.gz
+        tar -xzf bearssl-0.6.tar.gz
+        cd bearssl-0.6
+        make
+        mkdir -p $HOME/bear/lib $HOME/bear/include
+        cp inc/*.h $HOME/bear/include
+        cp build/libbearssl.* $HOME/bear/lib
+
+      name: 'get, build and install bearssl'
+
+    - uses: actions/checkout@v2
+
+    - run: autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/bear/lib" ./configure --enable-warnings --enable-werror --enable-headers-api ${{ matrix.build.configure }} && make V=1
+      name: 'configure and build'
+
+    - run: make V=1 test-ci
+      name: 'test'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"
