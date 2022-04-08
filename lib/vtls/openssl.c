@@ -3839,7 +3839,7 @@ static CURLcode cert_chain_pinning(struct Curl_easy *data,
     return result;
   }
 
-  for(size_t i = 0; i < (int)numcerts; ++i) {
+  for(int i = 0; i < (int)numcerts; ++i) {
     X509* cert = sk_X509_value(sk, i);
     result = pkp_pin_peer_pubkey(data, cert, pinnedpubkey);
     if(result == 0) {
