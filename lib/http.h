@@ -176,15 +176,15 @@ struct h3out; /* see ngtcp2 */
 #define msh3_lock_release(lock) LeaveCriticalSection(lock)
 #else /* !_WIN32 */
 struct posix_lock {
-    alignas(16) pthread_mutex_t mutex;
+  alignas(16) pthread_mutex_t mutex;
 };
 #define msh3_lock posix_lock
 #define msh3_lock_initialize(lock) { \
-    pthread_mutexattr_t attr; \
-    pthread_mutexattr_init(&attr); \
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE); \
-    pthread_mutex_init(&(lock)->mutex, &attr); \
-    pthread_mutexattr_destroy(&attr); \
+  pthread_mutexattr_t attr; \
+  pthread_mutexattr_init(&attr); \
+  pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE); \
+  pthread_mutex_init(&(lock)->mutex, &attr); \
+  pthread_mutexattr_destroy(&attr); \
 }
 #define msh3_lock_uninitialize(lock) pthread_mutex_destroy(&(lock)->mutex)
 #define msh3_lock_acquire(lock) pthread_mutex_lock(&(lock)->mutex)
