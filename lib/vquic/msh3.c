@@ -166,25 +166,21 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
 static int msh3_getsock(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks)
 {
-  struct SingleRequest *k = &data->req;
   struct HTTP *stream = data->req.p.http;
   int bitmap = GETSOCK_BLANK;
-
-  H3BUGF(infof(data, "msh3_getsock"));
 
   socks[0] = conn->sock[FIRSTSOCKET];
 
   if(stream->recv_error) {
     bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
-    data->state.drain = 1;
+    data->state.drain++;
   }
   else if(stream->recv_header_len || stream->recv_data_len) {
     bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
-    data->state.drain = 1;
+    data->state.drain++;
   }
 
-  if((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND)
-    bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
+  H3BUGF(infof(data, "msh3_getsock %u", (uint32_t)data->state.drain));
 
   return bitmap;
 }
@@ -428,7 +424,6 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   struct HTTP *stream = data->req.p.http;
   size_t outsize = 0;
-  size_t size;
   (void)sockindex;
   H3BUGF(infof(data, "msh3_stream_recv %zu", buffersize));
 
@@ -441,39 +436,36 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
   msh3_lock_acquire(&stream->recv_lock);
 
   if(stream->recv_header_len) {
-    size = buffersize;
-    if(stream->recv_header_len < size) {
-      size = stream->recv_header_len;
+    outsize = buffersize;
+    if(stream->recv_header_len < outsize) {
+      outsize = stream->recv_header_len;
     }
-    memcpy(buf, stream->recv_buf, size);
-    if(size < stream->recv_header_len + stream->recv_data_len) {
-      memmove(stream->recv_buf, stream->recv_buf + size,
-              stream->recv_header_len + stream->recv_data_len - size);
+    memcpy(buf, stream->recv_buf, outsize);
+    if(outsize < stream->recv_header_len + stream->recv_data_len) {
+      memmove(stream->recv_buf, stream->recv_buf + outsize,
+              stream->recv_header_len + stream->recv_data_len - outsize);
     }
-    stream->recv_header_len -= size;
-    H3BUGF(infof(data, "returned %zu bytes of headers", size));
-    buf += size;
-    buffersize -= size;
-    outsize += size;
+    stream->recv_header_len -= outsize;
+    H3BUGF(infof(data, "returned %zu bytes of headers", outsize));
   }
   else if(stream->recv_data_len) {
-    size = buffersize;
-    if(stream->recv_data_len < size) {
-      size = stream->recv_data_len;
+    outsize = buffersize;
+    if(stream->recv_data_len < outsize) {
+      outsize = stream->recv_data_len;
     }
-    memcpy(buf, stream->recv_buf, size);
-    if(size < stream->recv_data_len) {
-      memmove(stream->recv_buf, stream->recv_buf + size,
-              stream->recv_data_len - size);
+    memcpy(buf, stream->recv_buf, outsize);
+    if(outsize < stream->recv_data_len) {
+      memmove(stream->recv_buf, stream->recv_buf + outsize,
+              stream->recv_data_len - outsize);
     }
-    stream->recv_data_len -= size;
-    H3BUGF(infof(data, "returned %zu bytes of data", size));
-    outsize += size;
+    stream->recv_data_len -= outsize;
+    H3BUGF(infof(data, "returned %zu bytes of data", outsize));
+  }
+  else if (stream->recv_data_complete) {
+    H3BUGF(infof(data, "receive complete"));
   }
 
   msh3_lock_release(&stream->recv_lock);
-
-  H3BUGF(infof(data, "returned %zu total bytes in recv", outsize));
 
   return (ssize_t)outsize;
 }
