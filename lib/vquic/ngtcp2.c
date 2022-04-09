@@ -867,6 +867,8 @@ static int ng_getsock(struct Curl_easy *data, struct connectdata *conn,
 {
   struct SingleRequest *k = &data->req;
   int bitmap = GETSOCK_BLANK;
+  struct HTTP *stream = data->req.p.http;
+  struct quicsocket *qs = conn->quic;
 
   socks[0] = conn->sock[FIRSTSOCKET];
 
@@ -875,7 +877,10 @@ static int ng_getsock(struct Curl_easy *data, struct connectdata *conn,
   bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
 
   /* we're still uploading or the HTTP/2 layer wants to send data */
-  if((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND)
+  if((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND &&
+     (!stream->h3out || stream->h3out->used < H3_SEND_SIZE) &&
+     ngtcp2_conn_get_max_data_left(qs->qconn) &&
+     nghttp3_conn_is_stream_writable(qs->h3conn, stream->stream3_id))
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
 
   return bitmap;
@@ -1375,6 +1380,10 @@ static ssize_t cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
     return 1;
   }
 
+  if(stream->upload_len && H3_SEND_SIZE <= stream->h3out->used) {
+    return NGHTTP3_ERR_WOULDBLOCK;
+  }
+
   nread = CURLMIN(stream->upload_len, H3_SEND_SIZE - stream->h3out->used);
   if(nread > 0) {
     /* nghttp3 wants us to hold on to the data until it tells us it is okay to
@@ -1527,7 +1536,7 @@ static ssize_t ngh3_stream_send(struct Curl_easy *data,
                                 size_t len,
                                 CURLcode *curlcode)
 {
-  ssize_t sent;
+  ssize_t sent = 0;
   struct connectdata *conn = data->conn;
   struct quicsocket *qs = conn->quic;
   curl_socket_t sockfd = conn->sock[sockindex];
@@ -1539,6 +1548,9 @@ static ssize_t ngh3_stream_send(struct Curl_easy *data,
       *curlcode = CURLE_SEND_ERROR;
       return -1;
     }
+    /* Assume that mem of length len only includes HTTP/1.1 style
+       header fields.  In other words, it does not contain request
+       body. */
     sent = len;
   }
   else {
@@ -1548,7 +1560,6 @@ static ssize_t ngh3_stream_send(struct Curl_easy *data,
       stream->upload_mem = mem;
       stream->upload_len = len;
       (void)nghttp3_conn_resume_stream(qs->h3conn, stream->stream3_id);
-      sent = len;
     }
     else {
       *curlcode = CURLE_AGAIN;
@@ -1563,8 +1574,20 @@ static ssize_t ngh3_stream_send(struct Curl_easy *data,
 
   /* Reset post upload buffer after resumed. */
   if(stream->upload_mem) {
+    if(data->set.postfields) {
+      sent = len;
+    }
+    else {
+      sent = len - stream->upload_len;
+    }
+
     stream->upload_mem = NULL;
     stream->upload_len = 0;
+
+    if(sent == 0) {
+      *curlcode = CURLE_AGAIN;
+      return -1;
+    }
   }
 
   *curlcode = CURLE_OK;
