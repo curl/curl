@@ -325,8 +325,7 @@ static void MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
                                          const uint8_t *Data)
 {
   struct HTTP *stream = IfContext;
-  const size_t cur_recv_len = stream->recv_header_len + stream->recv_data_len;
-  /* TODO - Add locking to synchronize with curl thread */
+  size_t cur_recv_len = stream->recv_header_len + stream->recv_data_len;
   (void)Request;
   H3BUGF(printf("* msh3_data_received %u. %zu buffered, %zu allocated\n",
                 Length, cur_recv_len, stream->recv_buf_alloc));
@@ -340,6 +339,7 @@ static void MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
     stream->recv_buf[stream->recv_header_len++] = '\r';
     stream->recv_buf[stream->recv_header_len++] = '\n';
     stream->recv_header_complete = true;
+    cur_recv_len += 2;
   }
   if(!msh3request_ensure_room(stream, Length)) {
     /* TODO - handle error */
